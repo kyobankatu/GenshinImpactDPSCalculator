@@ -1,0 +1,16 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Columbina,NORMAL,Normal 1,9,0.7955,0
+Columbina,NORMAL,Normal 2,9,0.6226,0
+Columbina,NORMAL,Normal 3,9,0.9942,0
+Columbina,CHARGE,Charged Attack,9,1.9734,0
+Columbina,CHARGE,Moondew Cleanse,9,0.0257,0
+Columbina,PLUNGE,Plunge Drop,9,1.0441,0
+Columbina,PLUNGE,Plunge Low,9,2.0877,0
+Columbina,PLUNGE,Plunge High,9,2.607632,0
+Columbina,SKILL,Skill DMG,9,0.28424,0
+Columbina,SKILL,Gravity Ripple,9,0.15912,0
+Columbina,SKILL,Interference Charged,9,0.08,0
+Columbina,SKILL,Interference Bloom,9,0.0239,0
+Columbina,SKILL,Interference Crystallize,9,0.150,0
+Columbina,BURST,Burst Skill,9,0.5481,0
+Columbina,BURST,Lunar Domain Bonus,9,0.37,0

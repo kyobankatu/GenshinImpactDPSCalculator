@@ -1,0 +1,9 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Sucrose,STATS,Base HP,90,9244,0
+Sucrose,STATS,Base ATK,90,170,0
+Sucrose,STATS,Base DEF,90,703,0
+Sucrose,STATS,Ascension Anemo,90,0.24,0
+Sucrose,CONFIG,Character Level,90,90,0
+Sucrose,CONFIG,Normal Level,9,9,0
+Sucrose,CONFIG,Skill Level,12,12,0
+Sucrose,CONFIG,Burst Level,12,12,0

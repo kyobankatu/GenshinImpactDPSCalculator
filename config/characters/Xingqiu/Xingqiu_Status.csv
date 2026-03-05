@@ -1,0 +1,9 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Xingqiu,STATS,Base ATK,90,202,0
+Xingqiu,STATS,Ascension ATK%,90,0.24,0
+Xingqiu,STATS,Energy Cost,90,80,0
+Xingqiu,STATS,Constellation,6,6,0
+Xingqiu,CONFIG,Character Level,90,90,0
+Xingqiu,CONFIG,Normal Level,9,9,0
+Xingqiu,CONFIG,Skill Level,12,12,0
+Xingqiu,CONFIG,Burst Level,12,12,0

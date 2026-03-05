@@ -1,0 +1,2055 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='UTF-8'>
+<title>Genshin Simulation Report</title>
+<script src='https://cdn.jsdelivr.net/npm/chart.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0'></script>
+<script src='https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0'></script>
+<style>
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #202020; color: #eee; padding: 20px; }
+.container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+.row { display: flex; gap: 20px; flex-wrap: wrap; }
+.col { flex: 1; min-width: 400px; background: #333; border-radius: 8px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+.timeline { display: flex; flex-direction: column; gap: 5px; max-height: 800px; overflow-y: auto; }
+.card { background: #444; border-radius: 4px; padding: 10px; display: flex; align-items: center; gap: 10px; font-size: 0.9em; position: relative; }
+.time { font-weight: bold; color: #aaa; width: 50px; }
+.actor { font-weight: bold; width: 100px; color: #fff; }
+.action { flex: 1; color: #ddd; }
+.damage { color: #ff6b6b; font-weight: bold; width: 70px; text-align: right; }
+.reaction { font-size: 0.8em; padding: 2px 6px; border-radius: 4px; background: #555; color: #ccc; margin-left: 5px; }
+.aura-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; display: flex; }
+.aura-segment { height: 100%; }
+table.stats { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+table.stats th, table.stats td { border: 1px solid #555; padding: 8px; text-align: center; }
+table.stats th { background: #444; }
+.PYRO { color: #FF9999; } .bg-PYRO { background-color: #FF5555; }
+.HYDRO { color: #80C0FF; } .bg-HYDRO { background-color: #3388FF; }
+.ELECTRO { color: #FFACFF; } .bg-ELECTRO { background-color: #AA55FF; }
+.CRYO { color: #99FFFF; } .bg-CRYO { background-color: #55FFFF; }
+.ANEMO { color: #80FFD7; } .bg-ANEMO { background-color: #33FF99; }
+.GEO { color: #FFE699; } .bg-GEO { background-color: #FFAA00; }
+.DENDRO { color: #A5C882; } .bg-DENDRO { background-color: #77EE44; }
+.PHYSICAL { color: #CCCCCC; } .bg-PHYSICAL { background-color: #CCCCCC; }
+</style>
+</head>
+<body>
+<div class='container'>
+<h1>Simulation Report</h1>
+<div class='row'>
+<div class='col' style='background: #444; text-align: center;'>
+<h1>DPS: <span style='color: #ff6b6b;'>65,687</span></h1>
+<h3>Total Damage (DPR): <span style='color: #4db8ff;'>1,451,675</span></h3>
+<p>Duration: 22.1s</p>
+</div>
+</div>
+<div class='row'>
+<div class='col'>
+<h3>Damage Distribution</h3>
+<canvas id='dpsPie'></canvas>
+</div>
+<div class='col' style='flex: 2;'>
+<h3>Cumulative Damage Over Time</h3>
+<canvas id='dpsLine'></canvas>
+</div>
+</div>
+<div class='row'>
+<div class='col'>
+<h3>Initial Character Stats</h3>
+<table class='stats'>
+<thead><tr><th>Character</th><th>ATK</th><th>CRIT Rate</th><th>CRIT DMG</th><th>ER</th><th>EM</th><th>Elem%</th></tr></thead>
+<tbody>
+<tr><td>Bennett</td><td>1222</td><td>15.6%</td><td>63.2%</td><td>244.6%</td><td>40</td><td>0.0%</td></tr>
+<tr><td>Xingqiu</td><td>1629</td><td>70.3%</td><td>129.4%</td><td>186.1%</td><td>40</td><td>66.6%</td></tr>
+<tr><td>Raiden Shogun</td><td>1556</td><td>77.2%</td><td>129.4%</td><td>251.6%</td><td>40</td><td>107.2%</td></tr>
+<tr><td>Xiangling</td><td>1495</td><td>56.0%</td><td>116.2%</td><td>221.0%</td><td>136</td><td>46.6%</td></tr>
+</tbody></table>
+</div>
+<div class='col'>
+<h3>Artifact Substat Rolls</h3>
+<table class='stats'>
+<thead><tr><th>Stat</th><th>Bennett</th><th>Xingqiu</th><th>Raiden Shogun</th><th>Xiangling</th></tr></thead>
+<tbody>
+<tr><td>ENERGY_RECHARGE</td><td style='color:#555;'>-</td><td>10</td><td style='color:#555;'>-</td><td>8</td></tr>
+<tr><td>CRIT_RATE</td><td style='color:#555;'>-</td><td style='color:#555;'>-</td><td>8</td><td>4</td></tr>
+<tr><td>CRIT_DMG</td><td style='color:#555;'>-</td><td>10</td><td>10</td><td>8</td></tr>
+<tr><td>ELEMENTAL_MASTERY</td><td style='color:#555;'>-</td><td style='color:#555;'>-</td><td style='color:#555;'>-</td><td style='color:#555;'>-</td></tr>
+<tr><td>ATK_PERCENT</td><td style='color:#555;'>-</td><td style='color:#555;'>-</td><td>2</td><td style='color:#555;'>-</td></tr>
+<tr><td>HP_PERCENT</td><td>6</td><td style='color:#555;'>-</td><td style='color:#555;'>-</td><td style='color:#555;'>-</td></tr>
+<tr><td>DEF_PERCENT</td><td style='color:#555;'>-</td><td style='color:#555;'>-</td><td style='color:#555;'>-</td><td style='color:#555;'>-</td></tr>
+<tr><td>ATK_FLAT</td><td style='color:#555;'>-</td><td style='color:#555;'>-</td><td style='color:#555;'>-</td><td style='color:#555;'>-</td></tr>
+<tr><td>HP_FLAT</td><td>10</td><td style='color:#555;'>-</td><td style='color:#555;'>-</td><td style='color:#555;'>-</td></tr>
+<tr><td>DEF_FLAT</td><td style='color:#555;'>-</td><td style='color:#555;'>-</td><td style='color:#555;'>-</td><td style='color:#555;'>-</td></tr>
+</tbody></table>
+</div>
+</div>
+<div class='row'>
+<div class='col'>
+<h3>Combat Timeline</h3>
+<div class='timeline'>
+<div class='card'>
+<div class='time'>0.0s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden E Cast </div>
+<div class='damage'>6,717</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>0.6s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,048</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>0.6s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Cast </div>
+<div class='damage'>-</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>1.4s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Eye of Stormy Judgment </div>
+<div class='damage'>2,408</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>1.6s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 0.6U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.6U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>1.6s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Fatal Rainscreen Hit 1 </div>
+<div class='damage'>17,711</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 0.6U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>1.6s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 0.6U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>1.6s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Orbital </div>
+<div class='damage'>-</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 0.6U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>2.1s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Fatal Rainscreen Hit 2 </div>
+<div class='damage'>20,681</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 0.6U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>2.3s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 0.6U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>2.3s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Eye of Stormy Judgment </div>
+<div class='damage'>2,742</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>2.7s</div>
+<div class='actor'>Bennett</div>
+<div class='action'>Overload <span class='reaction'>Overload</span></div>
+<div class='damage'>3,888</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.6U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>2.7s</div>
+<div class='actor'>Bennett</div>
+<div class='action'>Fantastic Voyage Hit <span class='reaction'>Amp x1.61</span></div>
+<div class='damage'>7,067</div>
+</div>
+<div class='card'>
+<div class='time'>3.2s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Eye of Stormy Judgment </div>
+<div class='damage'>2,742</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>3.5s</div>
+<div class='actor'>Bennett</div>
+<div class='action'>Overload <span class='reaction'>Overload</span></div>
+<div class='damage'>3,888</div>
+</div>
+<div class='card'>
+<div class='time'>3.5s</div>
+<div class='actor'>Bennett</div>
+<div class='action'>Bennett N1 </div>
+<div class='damage'>1,325</div>
+</div>
+<div class='card'>
+<div class='time'>3.5s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,751</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>3.5s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,751</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>3.8s</div>
+<div class='actor'>Bennett</div>
+<div class='action'>Passion Overload (Tap) <span class='reaction'>Amp x1.61</span></div>
+<div class='damage'>6,119</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>3.8s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Orbital </div>
+<div class='damage'>-</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>3.9s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Pyronado Cast 1 <span class='reaction'>Amp x1.87</span></div>
+<div class='damage'>18,476</div>
+</div>
+<div class='card'>
+<div class='time'>4.1s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Eye of Stormy Judgment </div>
+<div class='damage'>3,048</div>
+</div>
+<div class='card'>
+<div class='time'>4.4s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Pyronado Cast 2 </div>
+<div class='damage'>12,087</div>
+</div>
+<div class='card'>
+<div class='time'>4.9s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Pyronado Cast 3 </div>
+<div class='damage'>15,040</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-PYRO' style='flex: 1;' title='PYRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>5.0s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Overload <span class='reaction'>Overload</span></div>
+<div class='damage'>3,888</div>
+</div>
+<div class='card'>
+<div class='time'>5.0s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Eye of Stormy Judgment </div>
+<div class='damage'>3,048</div>
+</div>
+<div class='card'>
+<div class='time'>5.4s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Xiangling N1 </div>
+<div class='damage'>1,794</div>
+</div>
+<div class='card'>
+<div class='time'>5.4s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,751</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>5.4s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,751</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>5.4s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,751</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>5.4s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Pyronado Hit <span class='reaction'>Amp x1.87</span></div>
+<div class='damage'>28,741</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>5.8s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>5.8s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Musou Shinsetsu </div>
+<div class='damage'>99,432</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 2.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>5.9s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 2.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>5.9s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Eye of Stormy Judgment </div>
+<div class='damage'>4,595</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>6.0s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>6.0s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Orbital </div>
+<div class='damage'>-</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>6.6s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Overload <span class='reaction'>Overload</span></div>
+<div class='damage'>5,980</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>6.6s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Pyronado Hit <span class='reaction'>Amp x1.87</span></div>
+<div class='damage'>28,741</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>6.8s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Eye of Stormy Judgment </div>
+<div class='damage'>4,595</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>7.3s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>7.3s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden Burst N1 </div>
+<div class='damage'>13,749</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>7.3s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>7.3s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,961</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>7.3s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,961</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>7.3s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>7.3s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,961</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>7.3s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,961</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>7.3s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,961</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>7.5s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden Burst N2 </div>
+<div class='damage'>13,629</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>7.7s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Overload <span class='reaction'>Overload</span></div>
+<div class='damage'>5,980</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>7.7s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Guoba Attack <span class='reaction'>Amp x1.87</span></div>
+<div class='damage'>15,626</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>7.7s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>7.7s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Eye of Stormy Judgment </div>
+<div class='damage'>4,595</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>7.8s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>7.8s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden Burst N3 </div>
+<div class='damage'>15,160</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>7.9s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Overload <span class='reaction'>Overload</span></div>
+<div class='damage'>5,980</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>7.9s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Pyronado Hit <span class='reaction'>Amp x1.87</span></div>
+<div class='damage'>28,741</div>
+</div>
+<div class='card'>
+<div class='time'>8.1s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden Burst N4 </div>
+<div class='damage'>16,406</div>
+</div>
+<div class='card'>
+<div class='time'>8.2s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Orbital </div>
+<div class='damage'>-</div>
+</div>
+<div class='card'>
+<div class='time'>8.5s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden Burst N5 </div>
+<div class='damage'>18,288</div>
+</div>
+<div class='card'>
+<div class='time'>8.5s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,961</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>8.5s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,961</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>8.6s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>8.6s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Eye of Stormy Judgment </div>
+<div class='damage'>4,595</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>9.0s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Overload <span class='reaction'>Overload</span></div>
+<div class='damage'>5,980</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>9.0s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Pyronado Hit <span class='reaction'>Amp x1.87</span></div>
+<div class='damage'>28,741</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>9.1s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>9.1s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden Burst N1 </div>
+<div class='damage'>13,749</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>9.2s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Guoba Attack </div>
+<div class='damage'>8,364</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>9.4s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden Burst N2 </div>
+<div class='damage'>13,629</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>9.5s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Eye of Stormy Judgment </div>
+<div class='damage'>4,595</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>9.7s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden Burst N3 </div>
+<div class='damage'>15,160</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 0.6U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.1U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>9.7s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,961</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 0.6U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.1U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>9.7s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 0.6U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.1U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>9.7s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,961</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 0.6U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>9.7s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,961</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 0.6U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>10.0s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 0.6U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>10.0s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden Burst N4 </div>
+<div class='damage'>16,406</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>10.2s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Overload <span class='reaction'>Overload</span></div>
+<div class='damage'>5,980</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>10.2s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Pyronado Hit <span class='reaction'>Amp x1.87</span></div>
+<div class='damage'>28,741</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>10.4s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden Burst N5 </div>
+<div class='damage'>18,288</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>10.4s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Orbital </div>
+<div class='damage'>-</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>10.4s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>10.4s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Eye of Stormy Judgment </div>
+<div class='damage'>4,595</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>10.7s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Overload <span class='reaction'>Overload</span></div>
+<div class='damage'>5,980</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.6U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>10.7s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Guoba Attack <span class='reaction'>Amp x1.87</span></div>
+<div class='damage'>15,626</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.1U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>11.0s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.1U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>11.0s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden Burst N1 </div>
+<div class='damage'>13,749</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.1U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>11.0s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.1U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>11.0s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,804</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>11.0s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,804</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>11.0s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>11.0s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,804</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>11.0s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,804</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>11.0s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,804</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>11.2s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden Burst N2 </div>
+<div class='damage'>13,629</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>11.3s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>11.3s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Eye of Stormy Judgment </div>
+<div class='damage'>4,595</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>11.4s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Overload <span class='reaction'>Overload</span></div>
+<div class='damage'>5,980</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>11.4s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Pyronado Hit <span class='reaction'>Amp x1.87</span></div>
+<div class='damage'>28,741</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>11.5s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden Burst N3 </div>
+<div class='damage'>15,160</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>11.8s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>11.8s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden Burst N4 </div>
+<div class='damage'>16,406</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>12.2s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Guoba Attack </div>
+<div class='damage'>8,364</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>12.2s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Eye of Stormy Judgment </div>
+<div class='damage'>4,595</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>12.2s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden Burst N5 </div>
+<div class='damage'>18,288</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>12.2s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>12.2s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,804</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>12.2s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,804</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>12.6s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Orbital </div>
+<div class='damage'>-</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>12.6s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Overload <span class='reaction'>Overload</span></div>
+<div class='damage'>5,980</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>12.6s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Pyronado Hit <span class='reaction'>Amp x1.87</span></div>
+<div class='damage'>28,741</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>12.8s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>12.8s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden Burst N1 </div>
+<div class='damage'>13,749</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>13.0s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden N2 </div>
+<div class='damage'>2,267</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 0.6U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.1U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>13.1s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 0.6U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.1U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>13.1s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Eye of Stormy Judgment </div>
+<div class='damage'>4,595</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.1U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>13.3s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden N3 </div>
+<div class='damage'>2,844</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.1U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>13.3s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,804</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.1U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>13.3s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.1U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>13.3s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,804</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>13.3s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,804</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>13.6s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden N4 </div>
+<div class='damage'>3,304</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>13.7s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Overload <span class='reaction'>Overload</span></div>
+<div class='damage'>5,980</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>13.7s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Guoba Attack <span class='reaction'>Amp x1.87</span></div>
+<div class='damage'>15,626</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>13.8s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Pyronado Hit <span class='reaction'>Amp x1.87</span></div>
+<div class='damage'>28,741</div>
+</div>
+<div class='card'>
+<div class='time'>14.0s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Eye of Stormy Judgment </div>
+<div class='damage'>4,595</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>14.0s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden N5 </div>
+<div class='damage'>3,732</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>14.6s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden N1 </div>
+<div class='damage'>2,261</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>14.6s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>14.6s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,804</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>14.6s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,804</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>14.6s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>14.6s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,804</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>14.6s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,804</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>14.6s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,804</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>14.8s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>14.8s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Orbital </div>
+<div class='damage'>-</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>14.8s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden N2 </div>
+<div class='damage'>2,267</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>14.9s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Eye of Stormy Judgment </div>
+<div class='damage'>4,595</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>15.0s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Overload <span class='reaction'>Overload</span></div>
+<div class='damage'>5,980</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>15.0s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Pyronado Hit <span class='reaction'>Amp x1.87</span></div>
+<div class='damage'>28,741</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>15.2s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden N3 </div>
+<div class='damage'>2,844</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>15.5s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden N4 </div>
+<div class='damage'>3,304</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>15.8s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>15.8s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Eye of Stormy Judgment </div>
+<div class='damage'>2,895</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>15.9s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden N5 </div>
+<div class='damage'>2,352</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>15.9s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>15.9s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,395</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>15.9s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,395</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>16.2s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Overload <span class='reaction'>Overload</span></div>
+<div class='damage'>5,980</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>16.2s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Pyronado Hit <span class='reaction'>Amp x1.87</span></div>
+<div class='damage'>28,741</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>16.5s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden N1 </div>
+<div class='damage'>1,424</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>16.7s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden N2 </div>
+<div class='damage'>1,428</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>16.7s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>16.7s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Eye of Stormy Judgment </div>
+<div class='damage'>2,895</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>17.0s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden N3 </div>
+<div class='damage'>1,792</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 0.6U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.1U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>17.0s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,395</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 0.6U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.1U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>17.0s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 0.6U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.1U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>17.0s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,395</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 0.6U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>17.0s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,395</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 0.6U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>17.0s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Orbital </div>
+<div class='damage'>-</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 0.6U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>17.3s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden N4 </div>
+<div class='damage'>2,082</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 0.6U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>17.4s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Overload <span class='reaction'>Overload</span></div>
+<div class='damage'>5,980</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>17.4s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Pyronado Hit <span class='reaction'>Amp x1.87</span></div>
+<div class='damage'>28,741</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>17.6s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Eye of Stormy Judgment </div>
+<div class='damage'>2,895</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>17.7s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden N5 </div>
+<div class='damage'>2,352</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>18.3s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden N1 </div>
+<div class='damage'>1,424</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>18.3s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,395</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>18.3s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,395</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>18.3s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,395</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>18.3s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,395</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>18.3s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,395</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>18.5s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>18.5s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Eye of Stormy Judgment </div>
+<div class='damage'>2,895</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>18.5s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden N2 </div>
+<div class='damage'>1,428</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>18.6s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Overload <span class='reaction'>Overload</span></div>
+<div class='damage'>5,980</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>18.6s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Pyronado Hit <span class='reaction'>Amp x1.87</span></div>
+<div class='damage'>28,741</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>18.8s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden N3 </div>
+<div class='damage'>1,792</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>19.1s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden N4 </div>
+<div class='damage'>2,082</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>19.2s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Orbital </div>
+<div class='damage'>-</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>19.4s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>19.4s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Eye of Stormy Judgment </div>
+<div class='damage'>2,895</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>19.5s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden N5 </div>
+<div class='damage'>2,352</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 0.6U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.6U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>19.5s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,333</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 0.6U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.6U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>19.5s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,395</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 0.6U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>19.5s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Sword </div>
+<div class='damage'>5,395</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 0.6U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>19.8s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Overload <span class='reaction'>Overload</span></div>
+<div class='damage'>5,980</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 1.0U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>19.8s</div>
+<div class='actor'>Xiangling</div>
+<div class='action'>Pyronado Hit <span class='reaction'>Amp x1.87</span></div>
+<div class='damage'>28,741</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>20.1s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden N1 </div>
+<div class='damage'>1,251</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>20.3s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Eye of Stormy Judgment </div>
+<div class='damage'>2,542</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>20.3s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden N2 </div>
+<div class='damage'>1,254</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>20.6s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden N3 </div>
+<div class='damage'>1,574</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>21.0s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden N4 </div>
+<div class='damage'>1,828</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>21.2s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,048</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>21.2s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Eye of Stormy Judgment </div>
+<div class='damage'>2,542</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>21.4s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden N5 </div>
+<div class='damage'>2,065</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>21.4s</div>
+<div class='actor'>Xingqiu</div>
+<div class='action'>Raincutter Orbital </div>
+<div class='damage'>-</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>21.9s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Raiden N1 </div>
+<div class='damage'>1,251</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>22.1s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Electro-Charged <span class='reaction'>Electro-Charged</span></div>
+<div class='damage'>2,048</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+<div class='card'>
+<div class='time'>22.1s</div>
+<div class='actor'>Raiden Shogun</div>
+<div class='action'>Eye of Stormy Judgment </div>
+<div class='damage'>2,542</div>
+<div class='aura-bar'>
+<div class='aura-segment bg-ELECTRO' style='flex: 1;' title='ELECTRO 1.0U'></div>
+<div class='aura-segment bg-HYDRO' style='flex: 1;' title='HYDRO 0.5U'></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+Chart.register(ChartDataLabels);
+const ctxPie = document.getElementById('dpsPie').getContext('2d');
+new Chart(ctxPie, {
+    type: 'pie',
+    data: {
+        labels: ['Bennett','Xingqiu','Raiden Shogun','Xiangling'],
+        datasets: [{
+            data: [22287.790871370635,317939.6955377425,543093.8493862484,568353.3192535004],
+            backgroundColor: ['#FF2222','#3388FF','#A066D3','#FFAAAA'],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        plugins: {
+             legend: { position: 'right', labels: { color: '#eee' } },
+             datalabels: {
+                 color: '#fff',
+                 formatter: (value, ctx) => {
+                     let sum = 0;
+                     let dataArr = ctx.chart.data.datasets[0].data;
+                     dataArr.map(data => { sum += data; });
+                     let percentage = (value*100 / sum).toFixed(1) + '%';
+                     return percentage;
+                 },
+                 font: { weight: 'bold', size: 12 }
+             }
+        }
+    }
+});
+const ctxLine = document.getElementById('dpsLine').getContext('2d');
+new Chart(ctxLine, {
+    type: 'line',
+    data: {
+        datasets: [
+        {
+            label: 'Bennett',
+            data: [{x: 0, y: 0},{x: 2.70, y: 3888},{x: 2.70, y: 10955},{x: 3.50, y: 14844},{x: 3.50, y: 16168},{x: 3.75, y: 22288},{x: 22.10, y: 22288}],
+            borderColor: '#FF2222',
+            backgroundColor: '#FF2222',
+            fill: false,
+            tension: 0.1
+        },
+        {
+            label: 'Xingqiu',
+            data: [{x: 0, y: 0},{x: 0.60, y: 2048},{x: 1.60, y: 4382},{x: 1.60, y: 22092},{x: 1.60, y: 24425},{x: 2.10, y: 45107},{x: 3.50, y: 50858},{x: 3.50, y: 56609},{x: 5.45, y: 62360},{x: 5.45, y: 68112},{x: 5.45, y: 73863},{x: 6.00, y: 76196},{x: 7.30, y: 78529},{x: 7.30, y: 84490},{x: 7.30, y: 90452},{x: 7.30, y: 92785},{x: 7.30, y: 98746},{x: 7.30, y: 104707},{x: 7.30, y: 110669},{x: 8.55, y: 116630},{x: 8.55, y: 122591},{x: 9.67, y: 128553},{x: 9.67, y: 130886},{x: 9.67, y: 136847},{x: 9.67, y: 142809},{x: 10.96, y: 145142},{x: 10.96, y: 150946},{x: 10.96, y: 156750},{x: 10.96, y: 159083},{x: 10.96, y: 164887},{x: 10.96, y: 170691},{x: 10.96, y: 176495},{x: 12.21, y: 178828},{x: 12.21, y: 184632},{x: 12.21, y: 190436},{x: 13.33, y: 196240},{x: 13.33, y: 198573},{x: 13.33, y: 204377},{x: 13.33, y: 210181},{x: 14.62, y: 212514},{x: 14.62, y: 218318},{x: 14.62, y: 224122},{x: 14.62, y: 226455},{x: 14.62, y: 232259},{x: 14.62, y: 238063},{x: 14.62, y: 243867},{x: 14.80, y: 246200},{x: 15.87, y: 248533},{x: 15.87, y: 253928},{x: 15.87, y: 259323},{x: 16.99, y: 264718},{x: 16.99, y: 267051},{x: 16.99, y: 272446},{x: 16.99, y: 277841},{x: 18.28, y: 283236},{x: 18.28, y: 288631},{x: 18.28, y: 294026},{x: 18.28, y: 299421},{x: 18.28, y: 304817},{x: 19.53, y: 307150},{x: 19.53, y: 312545},{x: 19.53, y: 317940},{x: 22.10, y: 317940}],
+            borderColor: '#3388FF',
+            backgroundColor: '#3388FF',
+            fill: false,
+            tension: 0.1
+        },
+        {
+            label: 'Raiden Shogun',
+            data: [{x: 0, y: 0},{x: 0.00, y: 6717},{x: 1.40, y: 9124},{x: 2.30, y: 11457},{x: 2.30, y: 14199},{x: 3.20, y: 16941},{x: 4.10, y: 19990},{x: 5.00, y: 23878},{x: 5.00, y: 26926},{x: 5.80, y: 29259},{x: 5.80, y: 128692},{x: 5.90, y: 131025},{x: 5.90, y: 135620},{x: 6.80, y: 140215},{x: 7.30, y: 142548},{x: 7.30, y: 156296},{x: 7.52, y: 169925},{x: 7.70, y: 172258},{x: 7.70, y: 176853},{x: 7.84, y: 179186},{x: 7.84, y: 194346},{x: 8.15, y: 210752},{x: 8.55, y: 229040},{x: 8.60, y: 231373},{x: 8.60, y: 235968},{x: 9.13, y: 238301},{x: 9.13, y: 252050},{x: 9.35, y: 265678},{x: 9.50, y: 270273},{x: 9.67, y: 285434},{x: 9.98, y: 287767},{x: 9.98, y: 304173},{x: 10.38, y: 322461},{x: 10.40, y: 324794},{x: 10.40, y: 329389},{x: 10.96, y: 331722},{x: 10.96, y: 345470},{x: 11.18, y: 359099},{x: 11.30, y: 361432},{x: 11.30, y: 366027},{x: 11.50, y: 381187},{x: 11.81, y: 383520},{x: 11.81, y: 399926},{x: 12.20, y: 404521},{x: 12.21, y: 422809},{x: 12.79, y: 425143},{x: 12.79, y: 438891},{x: 13.01, y: 441158},{x: 13.10, y: 443491},{x: 13.10, y: 448086},{x: 13.33, y: 450930},{x: 13.64, y: 454234},{x: 14.00, y: 458829},{x: 14.04, y: 462561},{x: 14.62, y: 464822},{x: 14.84, y: 467089},{x: 14.90, y: 471684},{x: 15.16, y: 474528},{x: 15.47, y: 477832},{x: 15.80, y: 480165},{x: 15.80, y: 483060},{x: 15.87, y: 485412},{x: 16.45, y: 486836},{x: 16.67, y: 488265},{x: 16.70, y: 490598},{x: 16.70, y: 493493},{x: 16.99, y: 495285},{x: 17.30, y: 497367},{x: 17.60, y: 500262},{x: 17.70, y: 502614},{x: 18.28, y: 504038},{x: 18.50, y: 506371},{x: 18.50, y: 509266},{x: 18.51, y: 510695},{x: 18.82, y: 512487},{x: 19.13, y: 514569},{x: 19.40, y: 516902},{x: 19.40, y: 519797},{x: 19.53, y: 522149},{x: 20.11, y: 523399},{x: 20.30, y: 525941},{x: 20.34, y: 527195},{x: 20.65, y: 528769},{x: 20.96, y: 530597},{x: 21.20, y: 532645},{x: 21.20, y: 535188},{x: 21.36, y: 537253},{x: 21.94, y: 538503},{x: 22.10, y: 540552},{x: 22.10, y: 543094},{x: 22.10, y: 543094}],
+            borderColor: '#A066D3',
+            backgroundColor: '#A066D3',
+            fill: false,
+            tension: 0.1
+        },
+        {
+            label: 'Xiangling',
+            data: [{x: 0, y: 0},{x: 3.85, y: 18476},{x: 4.35, y: 30563},{x: 4.85, y: 45603},{x: 5.45, y: 47397},{x: 5.45, y: 76138},{x: 6.65, y: 82118},{x: 6.65, y: 110858},{x: 7.70, y: 116839},{x: 7.70, y: 132464},{x: 7.85, y: 138445},{x: 7.85, y: 167185},{x: 9.05, y: 173165},{x: 9.05, y: 201906},{x: 9.20, y: 210270},{x: 10.25, y: 216250},{x: 10.25, y: 244991},{x: 10.70, y: 250971},{x: 10.70, y: 266597},{x: 11.45, y: 272577},{x: 11.45, y: 301318},{x: 12.20, y: 309681},{x: 12.65, y: 315661},{x: 12.65, y: 344402},{x: 13.70, y: 350382},{x: 13.70, y: 366008},{x: 13.85, y: 394749},{x: 15.05, y: 400729},{x: 15.05, y: 429470},{x: 16.25, y: 435450},{x: 16.25, y: 464191},{x: 17.45, y: 470171},{x: 17.45, y: 498912},{x: 18.65, y: 504892},{x: 18.65, y: 533632},{x: 19.85, y: 539613},{x: 19.85, y: 568353},{x: 22.10, y: 568353}],
+            borderColor: '#FFAAAA',
+            backgroundColor: '#FFAAAA',
+            fill: false,
+            tension: 0.1
+        },
+        ]
+    },
+    options: { 
+        scales: { 
+            x: { type: 'linear', position: 'bottom', title: {display: true, text: 'Time (s)', color: '#aaa'}, ticks: { color: '#aaa'} },
+            y: { title: {display: true, text: 'Total Damage', color: '#aaa'}, ticks: { color: '#aaa'} }
+        },
+        plugins: {
+            legend: { labels: { color: '#eee' } },
+            datalabels: { display: false } 
+        }
+    }
+});
+</script>
+</body></html>

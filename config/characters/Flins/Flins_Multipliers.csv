@@ -1,0 +1,18 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Flins,NORMAL,N1,9,0.8217,0
+Flins,NORMAL,N2,9,0.8295,0
+Flins,NORMAL,N3,9,1.0274,0
+Flins,NORMAL,N4,9,1.1772,0
+Flins,NORMAL,N5,9,1.4109,0
+Flins,NORMAL,Charge,9,1.8928,0
+Flins,NORMAL,Form N1,9,0.9902,0
+Flins,NORMAL,Form N2,9,0.9996,0
+Flins,NORMAL,Form N3,9,1.2380,0
+Flins,NORMAL,Form N4,9,1.4186,0
+Flins,NORMAL,Form N5,9,1.7002,0
+Flins,SKILL,Spearstorm DMG,9,3.0328,0
+Flins,BURST,Burst Initial,9,4.4173,0
+Flins,BURST,Burst Middle,9,0.2761,0
+Flins,BURST,Burst Final,9,1.9878,0
+Flins,BURST,Symphony DMG,9,1.2148,0
+Flins,BURST,Symphony Additional,9,1.7669,0

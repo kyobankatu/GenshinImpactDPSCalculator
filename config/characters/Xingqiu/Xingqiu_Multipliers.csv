@@ -1,0 +1,17 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Xingqiu,SKILL,Rain Screen Hit 1,12,3.36,0
+Xingqiu,SKILL,Rain Screen Hit 2,12,3.82,0
+Xingqiu,BURST,Raincutter Sword,12,1.09,0
+Xingqiu,NORMAL,N1,9,0.856,0
+Xingqiu,NORMAL,N2,9,0.875,0
+Xingqiu,NORMAL,N3_1,9,0.525,0
+Xingqiu,NORMAL,N3_2,9,0.525,0
+Xingqiu,NORMAL,N4,9,1.03,0
+Xingqiu,NORMAL,N5_1,9,0.659,0
+Xingqiu,NORMAL,N5_2,9,0.659,0
+Xingqiu,CHARGE,CA_1,9,0.869,0
+Xingqiu,CHARGE,CA_2,9,1.03,0
+Xingqiu,PLUNGE,Plunge Drop,9,1.175,0
+Xingqiu,PLUNGE,Plunge Low,9,2.35,0
+Xingqiu,PLUNGE,Plunge High,9,2.93,0
+Xingqiu,PASSIVE,Hydro Bonus,1,0.20,0

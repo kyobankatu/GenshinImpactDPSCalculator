@@ -1,0 +1,21 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Bennett,NORMAL,N1,9,0.818,0
+Bennett,NORMAL,N2,9,0.785,0
+Bennett,NORMAL,N3,9,1.00,0
+Bennett,NORMAL,N4,9,1.10,0
+Bennett,NORMAL,N5,9,1.32,0
+Bennett,CHARGE,CA_1,9,1.03,0
+Bennett,CHARGE,CA_2,9,1.12,0
+Bennett,PLUNGE,Plunge Drop,9,1.175,0
+Bennett,PLUNGE,Plunge Low,9,2.35,0
+Bennett,PLUNGE,Plunge High,9,2.93,0
+Bennett,SKILL,Passion Overload Tap,9,2.34,0
+Bennett,SKILL,Passion Overload C1-1,9,1.43,0
+Bennett,SKILL,Passion Overload C1-2,9,1.56,0
+Bennett,SKILL,Passion Overload C2-1,9,1.50,0
+Bennett,SKILL,Passion Overload C2-2,9,1.63,0
+Bennett,SKILL,Passion Overload Explosion,9,2.24,0
+Bennett,BURST,Fantastic Voyage Hit,9,3.96,0
+Bennett,BURST,Buff Ratio,9,0.95,0
+Bennett,BURST,Heal HP Ratio,9,0.102,0
+Bennett,BURST,Heal Flat,9,1174,0

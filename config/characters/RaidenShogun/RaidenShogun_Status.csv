@@ -1,0 +1,9 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Raiden Shogun,STATS,Base ATK,90,337,0
+Raiden Shogun,STATS,Ascension ER,90,0.32,0
+Raiden Shogun,STATS,Energy Cost,90,90,0
+Raiden Shogun,STATS,Constellation,0,0,0
+Raiden Shogun,CONFIG,Character Level,90,90,0
+Raiden Shogun,CONFIG,Normal Level,9,9,0
+Raiden Shogun,CONFIG,Skill Level,9,9,0
+Raiden Shogun,CONFIG,Burst Level,10,10,0

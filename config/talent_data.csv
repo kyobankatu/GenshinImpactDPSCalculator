@@ -1,0 +1,36 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Raiden Shogun,BURST,Musou Shinsetsu,9,6.81,0.0661
+Raiden Shogun,SKILL,Raiden E Cast,9,2.11,0.5
+Raiden Shogun,NORMAL,N1,9,0.798,0
+Raiden Shogun,NORMAL,N2,9,0.784,0
+Raiden Shogun,NORMAL,N3,9,0.96,0
+Raiden Shogun,NORMAL,N4,9,1.1,0
+Raiden Shogun,NORMAL,N5,9,1.32,0
+Raiden Shogun,CHARGE,CA_1,9,1.099,0
+Raiden Shogun,CHARGE,CA_2,9,1.327,0
+Xiangling,SKILL,Guoba,12,2.24,0
+Xiangling,BURST,Pyronado Cast 1,12,1.44,0
+Xiangling,BURST,Pyronado Cast 2,12,1.76,0
+Xiangling,BURST,Pyronado Cast 3,12,2.19,0
+Xiangling,BURST,Pyronado Hit,12,2.24,0
+Xingqiu,SKILL,Rain Screen Hit 1,12,3.35,0
+Xingqiu,SKILL,Rain Screen Hit 2,12,3.82,0
+Xingqiu,BURST,Raincutter Sword,12,1.15,0
+Bennett,SKILL,Passion Overload Tap,12,2.48,0
+Bennett,BURST,Fantastic Voyage Hit,12,4.70,0
+Bennett,BURST,Buff Ratio,12,1.12,0
+Raiden Shogun,STATS,Base ATK,90,337,0
+Raiden Shogun,STATS,Ascension ER,90,0.32,0
+Raiden Shogun,STATS,Energy Cost,90,90,0
+Raiden Shogun,PASSIVE,Enlightened One Threshold,1,1.0,0
+Raiden Shogun,PASSIVE,Enlightened One Electro Conv,1,0.4,0
+Raiden Shogun,PASSIVE,Enlightened One Energy Conv,1,0.6,0
+Raiden Shogun,PASSIVE,Wishes Unnumbered Gain,1,2.0,0
+Raiden Shogun,PASSIVE,Wishes Unnumbered CD,1,3.0,0
+Raiden Shogun,SKILL,Eye Burst Bonus Ratio,9,0.003,0
+Raiden Shogun,SKILL,Eye Particle Chance,9,0.5,0
+Raiden Shogun,BURST,Musou Energy Base,10,2.5,0
+Raiden Shogun,BURST,Resolve Gain Ratio,10,0.2,0
+Raiden Shogun,BURST,Resolve Max Stacks,10,60,0
+Raiden Shogun,BURST,Resolve CA Scaling,10,0.0131,0
+Raiden Shogun,BURST,Resolve Normal Scaling,10,0.0123,0

@@ -1,0 +1,9 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Xiangling,STATS,Base ATK,90,225,0
+Xiangling,STATS,Ascension EM,90,96,0
+Xiangling,STATS,Energy Cost,90,80,0
+Xiangling,STATS,Constellation,6,6,0
+Xiangling,CONFIG,Character Level,90,90,0
+Xiangling,CONFIG,Normal Level,9,9,0
+Xiangling,CONFIG,Skill Level,12,12,0
+Xiangling,CONFIG,Burst Level,12,12,0

@@ -1,0 +1,17 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Xiangling,NORMAL,N1,9,0.773,0
+Xiangling,NORMAL,N2,9,0.774,0
+Xiangling,NORMAL,N3_1,9,0.479,0
+Xiangling,NORMAL,N3_2,9,0.479,0
+Xiangling,NORMAL,N4,9,0.259,0
+Xiangling,NORMAL,N5,9,1.31,0
+Xiangling,CHARGE,CA,9,2.24,0
+Xiangling,PLUNGE,Plunge Drop,9,1.175,0
+Xiangling,PLUNGE,Plunge Low,9,2.35,0
+Xiangling,PLUNGE,Plunge High,9,2.93,0
+Xiangling,SKILL,Guoba,12,2.23,0
+Xiangling,BURST,Pyronado Cast 1,12,1.44,0
+Xiangling,BURST,Pyronado Cast 2,12,1.76,0
+Xiangling,BURST,Pyronado Cast 3,12,2.19,0
+Xiangling,BURST,Pyronado Hit,12,2.24,0
+Xiangling,PASSIVE,Attack Bonus,1,0.10,0

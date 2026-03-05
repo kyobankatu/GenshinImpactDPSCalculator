@@ -1,0 +1,10 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Ineffa,NORMAL,N1,9,0.640,0
+Ineffa,NORMAL,N2,9,0.629,0
+Ineffa,NORMAL,N3,9,0.418,0
+Ineffa,NORMAL,N4,9,1.030,0
+Ineffa,SKILL,Skill DMG,9,1.469,0
+Ineffa,SKILL,Shield Ratio,9,3.76,0
+Ineffa,SKILL,Shield Flat,9,2820,0
+Ineffa,SKILL,Birgitta DMG,9,1.632,0
+Ineffa,BURST,Burst DMG,9,11.506,0

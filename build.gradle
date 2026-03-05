@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.flins.simulation'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+// Map standard Gradle source sets to the existing project structure
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src']
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Javadoc).configureEach {
+    options.encoding = 'UTF-8'
+    options.charSet = 'UTF-8'
+    options.docEncoding = 'UTF-8'
+    
+    // Ignore Javadoc warnings to prevent build failures from missing tags
+    options.addStringOption('Xdoclint:none', '-quiet')
+    
+    // Set Japanese locale if preferred, but usually en_US prevents weird garbling
+    options.locale = 'ja_JP' 
+}
