@@ -38,3 +38,5 @@ build/
 
 # Local build output directory used manually
 bin/
+
+CLAUDE.MD
