@@ -57,9 +57,9 @@ public class IterativeSimulator {
         Map<String, Double> currentTargets = new HashMap<>();
 
         for (int i = 0; i < maxIterations; i++) {
-            System.out.println("\n[Iteration " + (i + 1) + "]");
 
             CombatSimulator sim = simFactory.apply(currentTargets);
+            sim.setLoggingEnabled(false);
             rotationRunner.accept(sim);
             Map<String, Double> nextTargets = EnergyAnalyzer.calculateERRequirements(sim);
 
@@ -68,10 +68,6 @@ public class IterativeSimulator {
                 double prev = currentTargets.getOrDefault(name, 0.0);
                 double curr = nextTargets.get(name);
                 double diff = Math.abs(curr - prev);
-
-                System.out.printf("   %s: %.1f%% -> %.1f%% (Diff: %.1f%%)%n",
-                        name, prev * 100, curr * 100, diff * 100);
-
                 if (diff > 0.01) {
                     converged = false;
                 }
@@ -80,11 +76,15 @@ public class IterativeSimulator {
             currentTargets = nextTargets;
 
             if (converged && i > 0) {
-                System.out.println(">>> Convergence Reached <<<");
                 break;
             }
         }
 
+        System.out.println(">>> ER Result: "
+                + currentTargets.entrySet().stream()
+                        .map(e -> e.getKey() + "=" + String.format("%.0f%%", e.getValue() * 100))
+                        .collect(java.util.stream.Collectors.joining(", "))
+                + " <<<");
         return currentTargets;
     }
 
@@ -125,7 +125,6 @@ public class IterativeSimulator {
 
         int maxJointIterations = 3;
         for (int i = 0; i < maxJointIterations; i++) {
-            System.out.println("\n[Joint Iteration " + (i + 1) + "]");
             boolean changed = false;
 
             for (String charName : targetCharsMap.keySet()) {
@@ -223,7 +222,6 @@ public class IterativeSimulator {
         int ROLL_CAP = 10;
 
         double currentBestDPS = evaluateDPS(simFactory, rotationRunner, currentRolls);
-        System.out.printf("      Init: %s => DPS: %.0f%n", currentRolls, currentBestDPS);
 
         while (improved && step < maxSteps) {
             improved = false;
@@ -286,6 +284,7 @@ public class IterativeSimulator {
             Map<model.type.StatType, Integer> rollsStub) {
 
         CombatSimulator sim = simFactory.apply(rollsStub);
+        sim.setLoggingEnabled(false);
         rotationRunner.accept(sim);
         return sim.getDPS();
     }

@@ -39,7 +39,7 @@ import mechanics.energy.ParticleType;
  * <p>Flins is a Lunar character ({@link #isLunarCharacter()} returns {@code true}).
  * Burst energy cost switches between 80 (standard) and 30 (Thunderous Symphony active).
  */
-public class Flins extends Character {
+public class Flins extends Character implements CombatSimulator.ReactionListener {
 
     private int normalAttackStep = 0;
 
@@ -48,6 +48,10 @@ public class Flins extends Character {
     private double thunderousSymphonyEndTime = -1;
     private double northlandSpearstormNextTime = 0;
     private double normalAttackParticleNextTime = 0; // 2s CD on Manifest Flame NA particle
+
+    // C1 state
+    private boolean registeredListener = false;
+    private double lastEnergyRestoreTime = -999.0; // CD tracker for C1 energy restore
 
     /**
      * Constructs Flins with the given weapon and artifact set.
@@ -75,8 +79,9 @@ public class Flins extends Character {
         this.artifacts = new ArtifactSet[] { artifacts };
         this.element = Element.ELECTRO;
 
-        // Defaults
-        this.constellation = 0;
+        // Constellation (read from CSV; defaults to 0)
+        this.constellation = (int) mechanics.data.TalentDataManager.getInstance()
+                .get(this.name, "Constellation", 0);
 
         this.skillCD = 16.0;
         this.burstCD = 20.0;
@@ -201,6 +206,10 @@ public class Flins extends Character {
      */
     @Override
     public void onAction(String key, CombatSimulator sim) {
+        if (!registeredListener && constellation >= 1) {
+            sim.addReactionListener(this);
+            registeredListener = true;
+        }
         switch (key) {
             case "skill":
             case "E":
@@ -330,7 +339,8 @@ public class Flins extends Character {
 
         // CD and Symphony state start from cast time, not after animation ends
         double castTime = sim.getCurrentTime();
-        this.northlandSpearstormNextTime = castTime + 6.0;
+        double spearstormCD = (constellation >= 1) ? 4.0 : 6.0; // C1: reduced to 4s
+        this.northlandSpearstormNextTime = castTime + spearstormCD;
         this.thunderousSymphonyEndTime = castTime + 6.0;
         this.thunderousSymphonyActive = true;
 
@@ -491,6 +501,35 @@ public class Flins extends Character {
     private boolean isThundercloudActive(CombatSimulator sim) {
         // Thundercloud is a 6s timed state from last Lunar-Charged trigger, tracked by sim
         return sim.isThundercloudActive();
+    }
+
+    /**
+     * C1 — Part the Veil of Snow: when any party member triggers a Lunar-Charged
+     * reaction, Flins recovers 8 Elemental Energy. Cooldown: 5.5 s.
+     *
+     * <p>Lunar-Charged corresponds to {@code "Electro-Charged"} in the reaction
+     * result when the Moonsign is active.
+     *
+     * @param result the reaction result
+     * @param source the character that triggered the reaction
+     * @param time   the simulation time of the reaction
+     * @param sim    the combat simulator context
+     */
+    @Override
+    public void onReaction(mechanics.reaction.ReactionResult result, model.entity.Character source,
+            double time, CombatSimulator sim) {
+        if (!result.getName().equals("Electro-Charged")) {
+            return;
+        }
+        if (time - lastEnergyRestoreTime < 5.5) {
+            return;
+        }
+        this.receiveFlatEnergy(8);
+        lastEnergyRestoreTime = time;
+        if (sim.isLoggingEnabled()) {
+            System.out.printf("[T=%.1f] Flins C1: Lunar-Charged energy restore +8 (total: %.0f/%.0f)%n",
+                    time, this.getCurrentEnergy(), this.getEnergyCost());
+        }
     }
 
     /**

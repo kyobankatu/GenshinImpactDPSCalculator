@@ -79,6 +79,7 @@ public class OptimizerPipeline {
                 // character.
                 Map<String, Integer> erRollsMap = new HashMap<>();
                 CombatSimulator heuristicSim = simFactory.apply(requiredER, null);
+                heuristicSim.setLoggingEnabled(false);
                 for (model.entity.Character c : heuristicSim.getPartyMembers()) {
                         int erRolls = c.getArtifactRolls().getOrDefault(StatType.ENERGY_RECHARGE, 0);
                         if (erRolls > 0) {

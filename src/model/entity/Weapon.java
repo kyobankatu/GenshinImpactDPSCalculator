@@ -105,6 +105,27 @@ public class Weapon {
      * @param owner the character who has this weapon equipped
      * @return list of team buffs, never {@code null}
      */
+    /**
+     * Called by the simulator when the equipped character switches off-field.
+     * Use this hook to snapshot or freeze time-dependent passive state at the
+     * exact moment the character leaves the field.
+     * Default implementation is a no-op.
+     *
+     * @param user the character switching out
+     * @param sim  the active combat simulator
+     */
+    public void onSwitchOut(Character user, simulation.CombatSimulator sim) {
+        // Default: No switch-out logic
+    }
+
+    /**
+     * Returns team-wide buffs provided by this weapon's passive to all party
+     * members. Called when team buffs are compiled for other characters.
+     * Default implementation returns an empty list.
+     *
+     * @param owner the character who has this weapon equipped
+     * @return list of team buffs, never {@code null}
+     */
     public java.util.List<mechanics.buff.Buff> getTeamBuffs(Character owner) {
         return new java.util.ArrayList<>();
     }

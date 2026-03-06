@@ -13,7 +13,7 @@ import mechanics.optimization.TotalOptimizationResult;
 import mechanics.optimization.ArtifactOptimizer;
 import mechanics.element.ResonanceManager;
 
-public class FlinsParty {
+public class FlinsParty2 {
     public static void main(String[] args) {
         // Run main logic in try-catch to ensure reports are generated even if runtime
         // errors occur
@@ -43,8 +43,8 @@ public class FlinsParty {
                     java.util.Arrays.asList(StatType.ELEMENTAL_MASTERY));
 
             TotalOptimizationResult optimization = OptimizerPipeline.run(
-                    FlinsParty::createSimulator,
-                    FlinsParty::executeRotation,
+                    FlinsParty2::createSimulator,
+                    FlinsParty2::executeRotation,
                     optimizationTargets);
 
             // 2. Final Execution with Optimized Stats
@@ -183,7 +183,7 @@ public class FlinsParty {
             java.util.Map<String, java.util.Map<model.type.StatType, Integer>> partyManualRolls) {
 
         // --- 1. Flins (Night of the Sky's Unveiling) ---
-        Flins flins = new Flins(new ProspectorShovel(), null);
+        Flins flins = new Flins(new PrimordialJadeWingedSpear(), null);
 
         ArtifactOptimizer.OptimizationConfig flinsConfig = new ArtifactOptimizer.OptimizationConfig();
         flinsConfig.mainStatSands = StatType.ATK_PERCENT;
@@ -207,11 +207,11 @@ public class FlinsParty {
         sim.addCharacter(flins);
 
         // --- 2. Ineffa (Aubade) ---
-        Ineffa ineffa = new Ineffa(new Deathmatch(), null);
+        Ineffa ineffa = new Ineffa(new CalamityQueller(), null);
         ArtifactOptimizer.OptimizationConfig ineffaConfig = new ArtifactOptimizer.OptimizationConfig();
         ineffaConfig.mainStatSands = StatType.ATK_PERCENT;
         ineffaConfig.mainStatGoblet = StatType.ATK_PERCENT;
-        ineffaConfig.mainStatCirclet = StatType.CRIT_DMG;
+        ineffaConfig.mainStatCirclet = StatType.CRIT_RATE;
         ineffaConfig.subStatPriority = java.util.Arrays.asList(StatType.CRIT_DMG, StatType.CRIT_RATE,
                 StatType.ATK_PERCENT, StatType.ENERGY_RECHARGE);
 

@@ -25,10 +25,15 @@ import java.util.Map;
  *       an active ripple accumulate Gravity in increments of 20 (max 60); at cap the
  *       dominant reaction type triggers an Interference attack.</li>
  *   <li><b>Verdant / Moonridge Dew</b> — Bloom reactions grant Verdant Dew stacks;
- *       Bloom inside an active Lunar Domain grants Moonridge Dew stacks (18 s CD).
+ *       Bloom inside an active Lunar Domain grants Moonridge Dew stacks (up to 3 per 18 s window).
  *       Consuming a Dew on a Charged Attack fires a special Moondew Cleanse hit sequence.</li>
  *   <li><b>Lunar Multiplier passive</b> — grants {@code LUNAR_MULTIPLIER} to the whole
  *       party as a function of Columbina's total HP (capped at +7%).</li>
+ *   <li><b>4th passive — Lunar Domain synergies</b>:
+ *       Lunar-Charged: Thundercloud strikes have a 33% chance for an extra strike;
+ *       Lunar-Bloom: Moonridge Dew gain rate increased to up to 3 per 18 s;
+ *       Lunar-Crystallize (Moondrift Harmony): each Moondrift has a 33% chance for
+ *       an extra attack.</li>
  * </ul>
  *
  * <p>Columbina is a Lunar character ({@link #isLunarCharacter()} returns {@code true}) and
@@ -51,7 +56,9 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
     // Gravity Accumulation Logic
     private Map<String, Integer> gravityByType = new HashMap<>(); // "Charged", "Bloom", "Crystallize" -> Count
     private double lastGravityTime = 0;
-    private double lastDewTime = 0;
+    // 4th Passive: Moonridge Dew window (up to 3 per 18s)
+    private double dewWindowStart = -18.0;
+    private int dewsInWindow = 0;
 
     /**
      * Constructs Columbina with the given weapon and artifact set.
@@ -292,6 +299,19 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
     public void onReaction(mechanics.reaction.ReactionResult result, model.entity.Character source, double time,
             CombatSimulator sim) {
         String type = result.getName();
+
+        // 4th Passive: Thundercloud-Strike — add expected extra 33% within Lunar Domain
+        if (type.equals("Thundercloud-Strike")) {
+            if (time <= domainEndTime) {
+                double extra = result.getTransformDamage() * 0.33;
+                sim.recordDamage("Thundercloud", extra);
+                visualization.VisualLogger.getInstance().log(time, "Thundercloud",
+                        "Lunar-Charged Reaction (Extra)", extra,
+                        "Lunar-Charged Reaction (Extra)", extra, sim.getEnemy().getAuraMap());
+            }
+            return;
+        }
+
         if (type.equals("Electro-Charged"))
             type = "Lunar-Charged";
         else if (type.equals("Bloom"))
@@ -311,10 +331,15 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
             }
 
             boolean domainActive = (time <= domainEndTime);
-            if (domainActive && type.contains("Bloom") && time - lastDewTime >= 18.0) {
-                if (moonridgeDew < MAX_DEW) {
+            if (domainActive && type.contains("Bloom")) {
+                // 4th Passive: up to 3 Moonridge Dews per 18s window
+                if (time - dewWindowStart >= 18.0) {
+                    dewWindowStart = time;
+                    dewsInWindow = 0;
+                }
+                if (dewsInWindow < 3 && moonridgeDew < MAX_DEW) {
                     moonridgeDew++;
-                    lastDewTime = time;
+                    dewsInWindow++;
                 }
             }
 
@@ -398,6 +423,19 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
                 ic.setICD(ICDType.None, ICDTag.None, 0.0); // Lunar Reaction DMG: no aura application
                 ic.setAnimationDuration(0);
                 sim.performAction("Columbina", ic);
+                // 4th Passive: 33% extra Moondrift (Moondrift Harmony) when Lunar Domain active
+                if (sim.getCurrentTime() <= domainEndTime && Math.random() < 0.33) {
+                    AttackAction icExtra = new AttackAction(
+                            "Interference (Crystallize) Extra",
+                            getMultiplier("Interference Crystallize"),
+                            Element.GEO,
+                            model.type.StatType.BASE_HP,
+                            null);
+                    icExtra.setLunarReactionType("Crystallize");
+                    icExtra.setICD(ICDType.None, ICDTag.None, 0.0);
+                    icExtra.setAnimationDuration(0);
+                    sim.performAction("Columbina", icExtra);
+                }
                 break;
         }
     }

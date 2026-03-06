@@ -691,6 +691,7 @@ public abstract class Character {
         return false;
     }
 
+
     /**
      * Returns the list of team-wide buffs that this character provides to the
      * party. These buffs are applied to teammates during stat compilation and

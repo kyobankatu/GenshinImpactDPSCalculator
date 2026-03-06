@@ -31,7 +31,6 @@ public class EnergyAnalyzer {
     public static java.util.Map<String, Double> calculateERRequirements(CombatSimulator sim) {
         java.util.Map<String, Double> erMap = new java.util.HashMap<>();
 
-        System.out.println("\n[Energy Analysis]");
         for (Character c : sim.getPartyMembers()) {
             java.util.List<double[]> windows = c.getBurstEnergyWindows();
             double requiredER;
@@ -50,10 +49,6 @@ public class EnergyAnalyzer {
                 double totalFlat = c.getTotalFlatEnergy();
                 double totalParticles = c.getTotalParticleEnergy(); // all particles over full rotation
 
-                System.out.println(String.format(
-                        "   %s: Bursts=%d, TotalCost=%.0f, Flat=%.1f, TotalParticles=%.1f",
-                        c.getName(), windows.size(), totalBurstCost, totalFlat, totalParticles));
-
                 if (totalParticles > 0) {
                     requiredER = Math.max(1.0, (totalBurstCost - totalFlat) / totalParticles);
                 } else {
@@ -62,10 +57,8 @@ public class EnergyAnalyzer {
             } else {
                 // No burst used in rotation — no ER requirement beyond base
                 requiredER = 1.0;
-                System.out.println(String.format("   %s: No burst used in rotation.", c.getName()));
             }
 
-            System.out.println(String.format("   %s: Required ER: %.1f%%", c.getName(), requiredER * 100));
             erMap.put(c.getName(), requiredER);
         }
         return erMap;

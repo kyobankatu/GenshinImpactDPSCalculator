@@ -174,6 +174,10 @@ public class CombatSimulator {
         String oldName = (oldChar != null) ? oldChar.getName() : "?";
         if (oldChar != null) {
             oldChar.onSwitchOut(this);
+            // Notify Weapon of Switch Out
+            if (oldChar.getWeapon() != null) {
+                oldChar.getWeapon().onSwitchOut(oldChar, this);
+            }
             // Notify Artifacts of Switch Out
             if (oldChar.getArtifacts() != null) {
                 for (model.entity.ArtifactSet a : oldChar.getArtifacts()) {
@@ -1191,6 +1195,13 @@ public class CombatSimulator {
                                             sim.recordDamage("Thundercloud", finalDmg);
                                             visualization.VisualLogger.getInstance().log(currentTime, "Thundercloud", label,
                                                     finalDmg, label, finalDmg, sim.getEnemy().getAuraMap());
+
+                                            // Notify listeners with the strike damage so passives can react
+                                            if (isLunar) {
+                                                sim.notifyReaction(
+                                                    mechanics.reaction.ReactionResult.transform(finalDmg, "Thundercloud-Strike"),
+                                                    sim.getActiveCharacter());
+                                            }
 
                                             sim.getEnemy().reduceAura(model.type.Element.HYDRO, 0.4);
                                             sim.getEnemy().reduceAura(model.type.Element.ELECTRO, 0.4);
