@@ -11,7 +11,7 @@ import mechanics.optimization.OptimizerPipeline;
 import mechanics.optimization.TotalOptimizationResult;
 import mechanics.energy.EnergyManager;
 
-public class RaidenNational {
+public class RaidenParty {
     public static void main(String[] args) {
         System.out.println("Genshin DPS Calculator: Raiden National Simulation (Refactored)");
 
@@ -32,8 +32,8 @@ public class RaidenNational {
                 StatType.ATK_PERCENT, StatType.ELEMENTAL_MASTERY));
 
         TotalOptimizationResult optimization = OptimizerPipeline.run(
-                RaidenNational::createSimulator,
-                RaidenNational::executeRotation,
+                RaidenParty::createSimulator,
+                RaidenParty::executeRotation,
                 optimizationTargets);
 
         // 2. Final Execution with Optimized Stats

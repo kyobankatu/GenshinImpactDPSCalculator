@@ -33,3 +33,16 @@ tasks.withType(Javadoc).configureEach {
     // Set Japanese locale if preferred, but usually en_US prevents weird garbling
     options.locale = 'ja_JP' 
 }
+
+// Add a dynamic rule that allows running 'gradlew ClassName'
+tasks.addRule("Pattern: gradlew <ClassName>") { String taskName ->
+    // We only create the task if it doesn't already exist (like 'build' or 'javadoc')
+    if (!tasks.names.contains(taskName)) {
+        tasks.register(taskName, JavaExec) {
+            group = "Execution"
+            description = "Runs sample.${taskName}.java"
+            classpath = sourceSets.main.runtimeClasspath
+            mainClass = "sample.${taskName}"
+        }
+    }
+}

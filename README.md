@@ -29,15 +29,14 @@ Compile the source code:
 ```
 
 ### 2. Run a Simulation
-After building, you can run simulations from the `src/sample/` entry points using standard Java commands (pointing to the `build/classes/java/main/` directory) or via your IDE.
+We have configured a dynamic Gradle rule that allows you to run any simulation class located in the `sample` package directly by its name.
 
-If running directly via `java` from the command line after building (assuming `bin/` or `build/classes/java/main/` as classpath):
 ```bash
-# Run standard Raiden National team simulation
-java -cp build/classes/java/main sample.RaidenNational
+# Run standard Raiden team simulation (sample.RaidenParty)
+./gradlew RaidenParty
 
-# Run custom Lunar party simulation
-java -cp build/classes/java/main sample.FlinsPartySimulation
+# Run custom Flins party simulation (sample.FlinsParty)
+./gradlew FlinsParty
 ```
 
 *(Note: If you encounter classpath issues, you can also compile manually using `javac -cp src -d bin $(find src -name "*.java")` and run from the `bin` directory)*
