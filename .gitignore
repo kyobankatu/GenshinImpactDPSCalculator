@@ -44,5 +44,5 @@ CLAUDE.MD
 # Simulation and RL outputs
 rl_report.html
 learning_curve.png
-*report*.html
+*report.html
 sim_output*.txt
