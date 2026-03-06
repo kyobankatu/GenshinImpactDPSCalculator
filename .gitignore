@@ -40,3 +40,9 @@ build/
 bin/
 
 CLAUDE.MD
+
+# Simulation and RL outputs
+rl_report.html
+learning_curve.png
+*report*.html
+sim_output*.txt
