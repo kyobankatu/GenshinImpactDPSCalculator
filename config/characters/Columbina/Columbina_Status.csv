@@ -5,8 +5,8 @@ Columbina,STATS,Base DEF,90,515,0
 Columbina,STATS,Base CR,90,0.242,0
 Columbina,STATS,Base CD,90,0.50,0
 Columbina,STATS,Energy Cost,90,60,0
-Columbina,STATS,Constellation,0,0,0
 Columbina,CONFIG,Character Level,90,90,0
 Columbina,CONFIG,Normal Level,9,9,0
 Columbina,CONFIG,Skill Level,9,9,0
 Columbina,CONFIG,Burst Level,9,9,0
+Columbina,CONFIG,Constellation,0,2,0
