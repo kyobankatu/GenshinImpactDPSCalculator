@@ -198,7 +198,8 @@ public class Flins extends Character implements CombatSimulator.ReactionListener
      *   <li>{@code "skill"} / {@code "E"} — enters Manifest Flame or casts Northland Spearstorm.</li>
      *   <li>{@code "burst"} / {@code "Q"} — casts the standard burst or Thunderous Symphony.</li>
      *   <li>{@code "attack"} — advances the normal attack combo.</li>
-     *   <li>{@code "dash"} — resets the normal attack step and advances time by 0.4 s.</li>
+     *   <li>{@code "dash"} — advances time by 0.4 s.</li>
+     *   <li>Any non-{@code "attack"} action resets the normal attack combo step to 0.</li>
      * </ul>
      *
      * @param key action identifier string
@@ -209,6 +210,10 @@ public class Flins extends Character implements CombatSimulator.ReactionListener
         if (!registeredListener && constellation >= 1) {
             sim.addReactionListener(this);
             registeredListener = true;
+        }
+        // Any non-attack action breaks the normal attack combo
+        if (!key.equals("attack")) {
+            normalAttackStep = 0;
         }
         switch (key) {
             case "skill":
@@ -233,7 +238,6 @@ public class Flins extends Character implements CombatSimulator.ReactionListener
                 normalAttack(sim);
                 break;
             case "dash":
-                normalAttackStep = 0;
                 sim.advanceTime(0.4);
                 break;
         }
@@ -266,7 +270,7 @@ public class Flins extends Character implements CombatSimulator.ReactionListener
                 dur = 0.2;
                 break;
             case 3:
-                dur = 0.6;
+                dur = 0.3;
                 break;
             case 4:
                 dur = 0.6;
@@ -335,7 +339,7 @@ public class Flins extends Character implements CombatSimulator.ReactionListener
         AttackAction hit = new AttackAction("Northland Spearstorm", mv, Element.ELECTRO, StatType.BASE_ATK,
                 StatType.SKILL_DMG_BONUS, 0.0, false, ActionType.SKILL);
         hit.setICD(ICDType.Standard, ICDTag.ElementalSkill, 1.0);
-        hit.setAnimationDuration(0.6);
+        hit.setAnimationDuration(0.3);
 
         // CD and Symphony state start from cast time, not after animation ends
         double castTime = sim.getCurrentTime();

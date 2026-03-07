@@ -117,15 +117,24 @@ public class FlinsParty2 {
             sim.performAction("Flins", "attack");
             sim.performAction("Flins", "attack");
             sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
             sim.performAction("Flins", "burst"); // SpecialBurst 1
             sim.performAction("Flins", "attack");
             sim.performAction("Flins", "attack");
             sim.performAction("Flins", "attack");
             sim.performAction("Flins", "attack");
             sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "skill"); // 2nd Spearstorm (CD now cleared)
-            sim.performAction("Flins", "burst"); // SpecialBurst 2 (Thunderous Symphony renewed)
+            sim.performAction("Flins", "skill");
+            sim.performAction("Flins", "burst"); // SpecialBurst 2
+            sim.performAction("Flins", "attack");
+            sim.performAction("Flins", "attack");
+            sim.performAction("Flins", "attack");
+            sim.performAction("Flins", "attack");
+            sim.performAction("Flins", "attack");
+            sim.performAction("Flins", "attack");
+            sim.performAction("Flins", "attack");
+            sim.performAction("Flins", "attack");
+            sim.performAction("Flins", "skill");
+            sim.performAction("Flins", "burst"); // SpecialBurst 3
             sim.performAction("Flins", "attack");
             sim.performAction("Flins", "attack");
             sim.performAction("Flins", "attack");
@@ -159,15 +168,24 @@ public class FlinsParty2 {
             sim.performAction("Flins", "attack");
             sim.performAction("Flins", "attack");
             sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
             sim.performAction("Flins", "burst"); // SpecialBurst 1
             sim.performAction("Flins", "attack");
             sim.performAction("Flins", "attack");
             sim.performAction("Flins", "attack");
             sim.performAction("Flins", "attack");
             sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "skill"); // 2nd Spearstorm (CD now cleared)
-            sim.performAction("Flins", "burst"); // SpecialBurst 2 (Thunderous Symphony renewed)
+            sim.performAction("Flins", "skill");
+            sim.performAction("Flins", "burst"); // SpecialBurst 2
+            sim.performAction("Flins", "attack");
+            sim.performAction("Flins", "attack");
+            sim.performAction("Flins", "attack");
+            sim.performAction("Flins", "attack");
+            sim.performAction("Flins", "attack");
+            sim.performAction("Flins", "attack");
+            sim.performAction("Flins", "attack");
+            sim.performAction("Flins", "attack");
+            sim.performAction("Flins", "skill");
+            sim.performAction("Flins", "burst"); // SpecialBurst 3
             sim.performAction("Flins", "attack");
             sim.performAction("Flins", "attack");
             sim.performAction("Flins", "attack");
