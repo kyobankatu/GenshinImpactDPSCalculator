@@ -46,6 +46,18 @@ import java.util.Map;
  *   <li>All party members' Lunar Reaction DMG permanently +1.5%.</li>
  * </ul>
  *
+ * <p><b>Constellation 2 — Tides of Lunar Gravity:</b>
+ * <ul>
+ *   <li>Rate of accumulating Gravity increases by 34% (cooldown reduced from 2 s to ~1.49 s).</li>
+ *   <li>On Gravity Interference, Columbina gains Lunar Brilliance (+40% Max HP) for 8 s.</li>
+ *   <li>Moonsign Ascendant Gleam: while Lunar Brilliance is already active at the next
+ *       Interference trigger, the dominant reaction type grants the active character a stat
+ *       bonus for 8 s scaled from Columbina's Max HP —
+ *       Lunar-Charged: ATK +1% HP; Lunar-Bloom: EM +0.35% HP;
+ *       Lunar-Crystallize: DEF +1% HP.</li>
+ *   <li>All nearby party members' Lunar Reaction DMG permanently +7%.</li>
+ * </ul>
+ *
  * <p>Columbina is a Lunar character ({@link #isLunarCharacter()} returns {@code true}) and
  * registers herself as a {@link CombatSimulator.ReactionListener} on first action.
  */
@@ -66,6 +78,7 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
     // Constellation
     private int constellation = 0;
     private double c1SkillCDNextTime = 0; // 15s CD for C1 on-skill interference trigger
+    private double lunarBrillianceEndTime = -1; // C2: Lunar Brilliance expiry time
 
     // Gravity Accumulation Logic
     private Map<String, Integer> gravityByType = new HashMap<>(); // "Charged", "Bloom", "Crystallize" -> Count
@@ -349,7 +362,8 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
         boolean nearRipple = (time <= rippleEndTime);
 
         if (nearRipple) {
-            if (time - lastGravityTime >= 2.0) {
+            double gravityCooldown = (constellation >= 2) ? (2.0 / 1.34) : 2.0;
+            if (time - lastGravityTime >= gravityCooldown) {
                 accumulateGravity(type, sim);
                 lastGravityTime = time;
             }
@@ -483,6 +497,23 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
                 break;
         }
 
+        // C2: Lunar Brilliance (+40% HP, 8s) and optional C2 Moonsign bonus
+        if (constellation >= 2) {
+            double t = sim.getCurrentTime();
+            boolean brillianceWasActive = (t < lunarBrillianceEndTime);
+            lunarBrillianceEndTime = t + 8.0;
+            this.removeBuff("Columbina: Lunar Brilliance");
+            this.addBuff(new mechanics.buff.Buff("Columbina: Lunar Brilliance", 8.0, t) {
+                @Override
+                protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
+                    stats.add(model.type.StatType.HP_PERCENT, 0.40);
+                }
+            });
+            if (brillianceWasActive && sim.getMoonsign() == CombatSimulator.Moonsign.ASCENDANT_GLEAM) {
+                applyC2MoonsignEffect(dominant, sim);
+            }
+        }
+
         // C1: Moonsign Ascendant Gleam — bonus effect based on dominant type
         if (constellation >= 1 && sim.getMoonsign() == CombatSimulator.Moonsign.ASCENDANT_GLEAM) {
             applyC1MoonsignEffect(dominant, sim);
@@ -542,6 +573,61 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
     }
 
     /**
+     * Applies the C2 Moonsign: Ascendant Gleam bonus triggered when Lunar Brilliance
+     * is already active at the time of a subsequent Gravity Interference.
+     *
+     * <p>Each effect lasts 8 s and scales from Columbina's Max HP at the time of trigger:
+     * <ul>
+     *   <li><b>Lunar-Charged</b>: active character ATK +1% Columbina Max HP.</li>
+     *   <li><b>Lunar-Bloom</b>: active character EM +0.35% Columbina Max HP.</li>
+     *   <li><b>Lunar-Crystallize</b>: active character DEF +1% Columbina Max HP.</li>
+     * </ul>
+     *
+     * @param dominant the dominant reaction type determining which effect fires
+     * @param sim      the combat simulator context
+     */
+    private void applyC2MoonsignEffect(String dominant, CombatSimulator sim) {
+        double t = sim.getCurrentTime();
+        Character active = sim.getActiveCharacter();
+        if (active == null) {
+            return;
+        }
+        double colHp = getStructuralStats(t).getTotalHp();
+        switch (dominant) {
+            case "Lunar-Charged":
+                double atkBonus = colHp * 0.01;
+                active.removeBuff("C2 Moonsign: ATK Bonus");
+                active.addBuff(new mechanics.buff.Buff("C2 Moonsign: ATK Bonus", 8.0, t) {
+                    @Override
+                    protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
+                        stats.add(model.type.StatType.ATK_FLAT, atkBonus);
+                    }
+                });
+                break;
+            case "Lunar-Bloom":
+                double emBonus = colHp * 0.0035;
+                active.removeBuff("C2 Moonsign: EM Bonus");
+                active.addBuff(new mechanics.buff.Buff("C2 Moonsign: EM Bonus", 8.0, t) {
+                    @Override
+                    protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
+                        stats.add(model.type.StatType.ELEMENTAL_MASTERY, emBonus);
+                    }
+                });
+                break;
+            case "Lunar-Crystallize":
+                double defBonus = colHp * 0.01;
+                active.removeBuff("C2 Moonsign: DEF Bonus");
+                active.addBuff(new mechanics.buff.Buff("C2 Moonsign: DEF Bonus", 8.0, t) {
+                    @Override
+                    protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
+                        stats.add(model.type.StatType.DEF_FLAT, defBonus);
+                    }
+                });
+                break;
+        }
+    }
+
+    /**
      * Returns the permanent team buffs provided by Columbina.
      *
      * <p>Includes a passive {@code LUNAR_BASE_BONUS} buff whose value scales with
@@ -572,6 +658,16 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
                 @Override
                 protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
                     stats.add(model.type.StatType.LUNAR_MULTIPLIER, 0.015);
+                }
+            });
+        }
+
+        // C2: All party members' Lunar Reaction DMG +7% (permanent, independent multiplier)
+        if (constellation >= 2) {
+            buffs.add(new mechanics.buff.Buff("Columbina C2: Lunar Reaction DMG +7%", Double.MAX_VALUE, 0) {
+                @Override
+                protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
+                    stats.add(model.type.StatType.LUNAR_MULTIPLIER, 0.07);
                 }
             });
         }
