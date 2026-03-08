@@ -195,8 +195,6 @@ public class RLServer {
             }
 
             int requiredActionId = -1;
-            boolean allowOptimization = false;
-            int optimizationSwapId = -1;
 
             if (onCurrentChar && !profileDone) {
                 // STRICT PHASE
@@ -208,49 +206,27 @@ public class RLServer {
                 else
                     requiredActionId = 0;
             } else {
-                // OPTIMIZATION PHASE
+                // Between phases (phase done or recovery): force swap to target char
                 String[] charOrder = { "Flins", "Ineffa", "Columbina", "Sucrose" };
-                String effectiveTargetName = currentPhaseCharName;
-
                 RotationPhase nextPhase = teacherRotation.get((nextRotationIndex + 1) % teacherRotation.size());
-                String nextCharName = nextPhase.charName;
-
-                if (onCurrentChar) { // We are done with current, need swap to next
-                    effectiveTargetName = nextCharName;
-                } else { // We are on wrong char, need swap to current (recovery)
-                    effectiveTargetName = currentPhaseCharName;
-                }
-
+                String targetCharName = onCurrentChar ? nextPhase.charName : currentPhaseCharName;
                 for (int i = 0; i < charOrder.length; i++) {
-                    if (charOrder[i].equals(effectiveTargetName)) {
-                        optimizationSwapId = 3 + i;
+                    if (charOrder[i].equals(targetCharName)) {
+                        requiredActionId = 3 + i;
                         break;
                     }
                 }
-                allowOptimization = true;
+                // allowOptimization stays false → strict forcing applies
             }
 
             // DECISION & OVERRIDE
-            if (allowOptimization) {
-                if (actionId == 0) {
-                    smartMoveBonus += 1.0;
-                } else if (actionId == optimizationSwapId) {
-                    smartMoveBonus += 5.0;
-                } else {
-                    smartMoveBonus -= 5.0;
-                    actionId = optimizationSwapId; // FORCE
-                    if (stepCount < 20 || episodeCount % 10 == 0)
-                        logToConsole("[Teacher] Correction! Forced Swap");
-                }
+            if (actionId == requiredActionId) {
+                smartMoveBonus += 10.0;
             } else {
-                if (actionId == requiredActionId) {
-                    smartMoveBonus += 10.0;
-                } else {
-                    smartMoveBonus -= 5.0;
-                    actionId = requiredActionId; // FORCE
-                    if (stepCount < 20 || episodeCount % 10 == 0)
-                        logToConsole("[Teacher] Correction! Forced Action " + requiredActionId);
-                }
+                smartMoveBonus -= 5.0;
+                actionId = requiredActionId; // FORCE
+                if (stepCount < 20 || episodeCount % 10 == 0)
+                    logToConsole("[Teacher] Correction! Forced Action " + requiredActionId);
             }
 
             // PRE-CALCULATE STATE ADVANCE IMPLICATIONS
@@ -318,6 +294,15 @@ public class RLServer {
         if (!isValid) {
             currentSim.advanceTime(0.1); // Cost of failure
             boolean done = currentSim.getCurrentTime() >= 40.0;
+            if (generatingReport && done) {
+                try {
+                    visualization.HtmlReportGenerator.generate("rl_report.html",
+                            visualization.VisualLogger.getInstance().getRecords(), currentSim);
+                    logToConsole("[RL-Report] Generated rl_report.html");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
             return getStateJson(penalty, done);
         }
 
@@ -448,7 +433,7 @@ public class RLServer {
             }
         }
 
-        boolean done = currentSim.getCurrentTime() >= 40.0;
+        boolean done = currentSim.getCurrentTime() >= 20.0;
 
         if (done) {
             logToConsole(

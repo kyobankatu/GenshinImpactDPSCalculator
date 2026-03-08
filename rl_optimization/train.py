@@ -44,7 +44,7 @@ def main():
     print("Starting Training (Press Ctrl+C to stop)...")
     try:
         # Train for longer (500k steps for convergence per user request)
-        model.learn(total_timesteps=500000)
+        model.learn(total_timesteps=100000)
     except KeyboardInterrupt:
         print("\nTraining interrupted by user.")
 
