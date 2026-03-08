@@ -176,7 +176,7 @@ public class HtmlReportGenerator {
         sb.append("<div class='row'>\n");
         sb.append("<div class='col' style='background: #444; text-align: center;'>\n");
         sb.append("<h1>DPS: <span style='color: #ff6b6b;'>" + String.format("%,.0f", dps) + "</span></h1>\n");
-        sb.append("<h3>Total Damage (DPR): <span style='color: #4db8ff;'>" + String.format("%,.0f", totalSimDmg)
+        sb.append("<h3>Total Damage : <span style='color: #4db8ff;'>" + String.format("%,.0f", totalSimDmg)
                 + "</span></h3>\n");
         sb.append("<p>Duration: " + String.format("%.1fs", rotationTime) + "</p>\n");
         sb.append("</div>\n");

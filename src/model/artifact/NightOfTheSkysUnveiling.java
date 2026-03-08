@@ -25,7 +25,7 @@ public class NightOfTheSkysUnveiling extends model.entity.ArtifactSet {
         // Trigger: "When nearby party members trigger Lunar Reactions" (implied: when
         // ANYONE triggers)
         String rType = result.getName();
-        if (rType.startsWith("Lunar-")) {
+        if (rType.startsWith("Lunar-") || rType.equals("Thundercloud-Strike")) {
             // Condition: "if the equipping character is on the field"
             boolean isOnField = (sim.getActiveCharacter() == owner);
 
