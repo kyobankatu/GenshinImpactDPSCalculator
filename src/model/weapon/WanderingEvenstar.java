@@ -4,6 +4,7 @@ import model.entity.Weapon;
 import model.entity.Character;
 import model.stats.StatsContainer;
 import model.type.StatType;
+import model.type.WeaponType;
 import mechanics.buff.Buff;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,7 @@ public class WanderingEvenstar extends Weapon {
         StatsContainer s = this.getStats();
         s.add(StatType.BASE_ATK, 510);
         s.add(StatType.ELEMENTAL_MASTERY, 165);
+        this.weaponType = WeaponType.CATALYST;
     }
 
     @Override

@@ -5,6 +5,7 @@ import model.entity.Character;
 import model.stats.StatsContainer;
 import model.type.StatType;
 import model.type.ActionType;
+import model.type.WeaponType;
 import simulation.action.AttackAction;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,7 @@ public class WolfFang extends Weapon {
         StatsContainer s = this.getStats();
         s.add(StatType.BASE_ATK, 510);
         s.add(StatType.CRIT_RATE, 0.276);
+        this.weaponType = WeaponType.SWORD;
     }
 
     private List<Double> skillStacks = new ArrayList<>();

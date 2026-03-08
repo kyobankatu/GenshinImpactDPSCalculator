@@ -3,6 +3,7 @@ package model.weapon;
 import model.entity.Weapon;
 import model.stats.StatsContainer;
 import model.type.StatType;
+import model.type.WeaponType;
 
 public class Deathmatch extends Weapon {
     private boolean singleTarget = true; // Default to single target context (Boss)
@@ -12,6 +13,7 @@ public class Deathmatch extends Weapon {
         StatsContainer s = this.getStats();
         s.add(StatType.BASE_ATK, 454);
         s.add(StatType.CRIT_RATE, 0.368);
+        this.weaponType = WeaponType.POLEARM;
     }
 
     /**

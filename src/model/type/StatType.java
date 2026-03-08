@@ -115,6 +115,13 @@ public enum StatType {
     LUNAR_MULTIPLIER, // Independent Multiplier (Columbina Passive)
     /** Unique damage bonus exclusive to Flins. */
     LUNAR_UNIQUE_BONUS, // Unique Bonus (Flins)
+    /**
+     * Additional CRIT DMG that applies only on the Lunar Reaction DMG path.
+     * Added to {@code CRIT_DMG} before the crit multiplier step in
+     * {@link mechanics.formula.DamageCalculator} when
+     * {@code action.isLunarConsidered()} is {@code true}.
+     */
+    LUNAR_REACTION_CRIT_DMG,
 
     // -----------------------------------------------------------------------
     // Transformative reaction bonus

@@ -1268,6 +1268,19 @@ public class CombatSimulator {
             c.getWeapon().onDamage(c, action, currentTime, this);
         }
 
+        // NA energy generation: Normal/Charged Attacks have a weapon-type-dependent
+        // probability of generating 1 flat Energy (not affected by Energy Recharge).
+        // Expected value is used instead of random rolls.
+        if (action.getActionType() == model.type.ActionType.NORMAL
+                || action.getActionType() == model.type.ActionType.CHARGE) {
+            if (c.getWeapon() != null) {
+                double naEnergy = c.getWeapon().getExpectedNAEnergyPerHit();
+                if (naEnergy > 0) {
+                    c.receiveFlatEnergy(naEnergy);
+                }
+            }
+        }
+
         if (enableLogging)
             System.out.println(String.format("   -> Damage: %,.0f", dmg));
         recordDamage(charName, dmg);

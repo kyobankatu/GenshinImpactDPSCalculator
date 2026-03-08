@@ -1,6 +1,7 @@
 package model.entity;
 
 import model.stats.StatsContainer;
+import model.type.WeaponType;
 
 /**
  * Represents a weapon that can be equipped on a {@link Character}.
@@ -12,10 +13,19 @@ import model.stats.StatsContainer;
  *
  * <p>The default implementations of all hook methods are no-ops. Specific weapons
  * should subclass {@code Weapon} and override only the relevant hooks.
+ *
+ * <p>Each weapon subclass must set {@link #weaponType} in its constructor so that
+ * the simulator can apply the correct NA energy generation rate.
  */
 public class Weapon {
     private String name;
     private StatsContainer stats;
+
+    /**
+     * Weapon category; set by each subclass constructor.
+     * Used to look up the expected flat energy generated per Normal/Charged Attack hit.
+     */
+    protected WeaponType weaponType;
 
     /**
      * Constructs a weapon with the given name and flat stat container.
@@ -128,5 +138,38 @@ public class Weapon {
      */
     public java.util.List<mechanics.buff.Buff> getTeamBuffs(Character owner) {
         return new java.util.ArrayList<>();
+    }
+
+    /**
+     * Returns the weapon category.
+     *
+     * @return weapon type, or {@code null} if not set by the subclass
+     */
+    public WeaponType getWeaponType() {
+        return weaponType;
+    }
+
+    /**
+     * Returns the expected flat energy generated per Normal or Charged Attack hit
+     * based on the weapon type's probability table.
+     *
+     * <p>Uses the "start full, end full" expected-value model rather than random
+     * rolls; the result is passed to {@link Character#receiveFlatEnergy} so it
+     * bypasses Energy Recharge scaling.
+     *
+     * @return expected energy per hit (e.g. 1.0 / 6.95 for Polearm)
+     */
+    public double getExpectedNAEnergyPerHit() {
+        if (weaponType == null) {
+            return 0.0;
+        }
+        switch (weaponType) {
+            case SWORD:    return 1.0 / 4.52;
+            case BOW:      return 1.0 / 6.29;
+            case CLAYMORE: return 1.0 / 4.66;
+            case POLEARM:  return 1.0 / 6.95;
+            case CATALYST: return 1.0 / 4.66;
+            default:       return 0.0;
+        }
     }
 }

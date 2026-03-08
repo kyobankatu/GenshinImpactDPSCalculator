@@ -4,6 +4,7 @@ import model.entity.Weapon;
 import model.entity.Character;
 import model.stats.StatsContainer;
 import model.type.StatType;
+import model.type.WeaponType;
 
 /**
  * Prospector's Shovel (custom weapon).
@@ -27,6 +28,7 @@ public class ProspectorShovel extends Weapon {
         StatsContainer s = this.getStats();
         s.add(StatType.BASE_ATK, 510);
         s.add(StatType.ATK_PERCENT, 0.413);
+        this.weaponType = WeaponType.POLEARM;
     }
 
     /** Caches the simulator reference on first action for Moonsign checks. */

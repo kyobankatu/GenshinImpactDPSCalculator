@@ -92,7 +92,7 @@ public class FlinsParty {
         // Sucrose Skill -> Burst
         // Flins Skill -> Skill -> SpecialBurst -> Skill -> SpecialBurst
 
-        for (int j = 0; j < 2; j++) {
+        for (int j = 0; j < 3; j++) {
 
             // 1. Ineffa
             sim.switchCharacter("Ineffa");
@@ -281,7 +281,7 @@ public class FlinsParty {
         sucrose.setArtifactRolls(resultSuc.rolls);
         sim.addCharacter(sucrose);
 
-        // --- Resilience ---
+        // --- Resonance ---
         mechanics.element.ResonanceManager.applyResonances(sim);
 
         System.out.println("\n[DEBUG] Stats check after setup:");

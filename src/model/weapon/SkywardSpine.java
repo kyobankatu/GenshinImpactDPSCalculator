@@ -5,6 +5,7 @@ import model.entity.Character;
 import model.stats.StatsContainer;
 import model.type.StatType;
 import model.type.ActionType;
+import model.type.WeaponType;
 import simulation.action.AttackAction;
 import model.type.Element;
 
@@ -14,6 +15,7 @@ public class SkywardSpine extends Weapon {
         StatsContainer s = this.getStats();
         s.add(StatType.BASE_ATK, 674); // Lv90
         s.add(StatType.ENERGY_RECHARGE, 0.368);
+        this.weaponType = WeaponType.POLEARM;
     }
 
     private double lastVacuumTime = -10.0;

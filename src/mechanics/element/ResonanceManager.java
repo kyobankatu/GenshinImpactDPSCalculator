@@ -5,6 +5,9 @@ import model.entity.Character;
 import model.type.Element;
 import model.type.StatType;
 import mechanics.buff.SimpleBuff;
+import mechanics.energy.EnergyManager;
+import mechanics.energy.ParticleType;
+import mechanics.reaction.ReactionResult;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -158,8 +161,25 @@ public class ResonanceManager {
 
             case ELECTRO:
                 System.out.println("   [Resonance] High Voltage (Electro) Applied (Particle Generation)");
-                // Logic for particle generation is complex (simulation event),
-                // skipping static stat buff as it provides none.
+                final double[] lastHVParticleTime = { Double.NEGATIVE_INFINITY };
+                sim.addReactionListener(new CombatSimulator.ReactionListener() {
+                    @Override
+                    public void onReaction(ReactionResult result, Character source, double time,
+                            CombatSimulator s) {
+                        String rName = result.getName();
+                        if (!rName.equals("Superconduct") && !rName.equals("Overloaded")
+                                && !rName.equals("Electro-Charged") && !rName.equals("Quicken")
+                                && !rName.equals("Aggravate") && !rName.equals("Hyperbloom")
+                                && !rName.startsWith("Lunar-Charged")) {
+                            return;
+                        }
+                        if (time - lastHVParticleTime[0] < 5.0) {
+                            return;
+                        }
+                        lastHVParticleTime[0] = time;
+                        EnergyManager.distributeParticles(Element.ELECTRO, 1.0, ParticleType.PARTICLE, s);
+                    }
+                });
                 break;
 
             default:

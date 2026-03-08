@@ -164,9 +164,9 @@ public class DamageCalculator {
 
             double multipler = 1.0 + reactionBonus + totalGearBonus;
 
-            // 4. Crit
+            // 4. Crit (LUNAR_REACTION_CRIT_DMG adds bonus CD only on this path)
             double cr = s.get(StatType.CRIT_RATE);
-            double cd = s.get(StatType.CRIT_DMG);
+            double cd = s.get(StatType.CRIT_DMG) + s.get(StatType.LUNAR_REACTION_CRIT_DMG);
             double critMult = 1.0 + (Math.min(cr, 1.0) * cd);
 
             // 5. Res
@@ -223,17 +223,23 @@ public class DamageCalculator {
                 e.printStackTrace();
             }
 
+            double lunarDamage = baseSection * multipler * critMult * resMult * columbinaMultiplier;
+
+            // Notify Weapon of Hit (Lunar path — mirrors standard path below)
+            if (attacker.getWeapon() != null) {
+                attacker.getWeapon().onDamage(attacker, action, currentTime, sim);
+            }
+
             // Notify Artifacts of Hit (Added for Silken Moon's Serenade)
             if (attacker.getArtifacts() != null) {
                 for (model.entity.ArtifactSet artifact : attacker.getArtifacts()) {
                     if (artifact != null) {
-                        artifact.onDamage(sim, action,
-                                baseSection * multipler * critMult * resMult * columbinaMultiplier, attacker);
+                        artifact.onDamage(sim, action, lunarDamage, attacker);
                     }
                 }
             }
 
-            return baseSection * multipler * critMult * resMult * columbinaMultiplier;
+            return lunarDamage;
         }
 
         // 1. Stats Collection

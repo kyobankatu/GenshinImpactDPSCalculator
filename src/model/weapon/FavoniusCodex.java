@@ -7,6 +7,7 @@ import model.type.StatType;
 import simulation.action.AttackAction;
 import mechanics.energy.EnergyManager;
 import mechanics.energy.ParticleType;
+import model.type.WeaponType;
 
 public class FavoniusCodex extends Weapon {
     public FavoniusCodex() {
@@ -14,6 +15,7 @@ public class FavoniusCodex extends Weapon {
         StatsContainer s = this.getStats();
         s.add(StatType.BASE_ATK, 510);
         s.add(StatType.ENERGY_RECHARGE, 0.459); // 45.9%
+        this.weaponType = WeaponType.CATALYST;
     }
 
     private double lastProcTime = -10.0; // Ready immediately

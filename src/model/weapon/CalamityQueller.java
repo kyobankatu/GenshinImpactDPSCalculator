@@ -4,6 +4,7 @@ import model.entity.Weapon;
 import model.entity.Character;
 import model.stats.StatsContainer;
 import model.type.StatType;
+import model.type.WeaponType;
 
 /**
  * Calamity Queller (5-star Polearm).
@@ -48,6 +49,7 @@ public class CalamityQueller extends Weapon {
         StatsContainer s = this.getStats();
         s.add(StatType.BASE_ATK, 741);
         s.add(StatType.ATK_PERCENT, 0.165);
+        this.weaponType = WeaponType.POLEARM;
     }
 
     /**

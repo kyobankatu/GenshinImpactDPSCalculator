@@ -92,7 +92,7 @@ public class FlinsParty2 {
         // Sucrose Skill -> Burst
         // Flins Skill -> Skill -> SpecialBurst -> Skill -> SpecialBurst
 
-        for (int j = 0; j < 2; j++) {
+        for (int j = 0; j < 3; j++) {
 
             // 1. Ineffa
             sim.switchCharacter("Ineffa");
@@ -224,7 +224,7 @@ public class FlinsParty2 {
         flins.setArtifactRolls(resultFlins.rolls);
         sim.addCharacter(flins);
 
-        // --- 2. Ineffa (Aubade) ---
+        // --- 2. Ineffa (Silken Moons) ---
         Ineffa ineffa = new Ineffa(new CalamityQueller(), null);
         ArtifactOptimizer.OptimizationConfig ineffaConfig = new ArtifactOptimizer.OptimizationConfig();
         ineffaConfig.mainStatSands = StatType.ATK_PERCENT;
@@ -243,16 +243,16 @@ public class FlinsParty2 {
                 ineffaConfig, ineffa.getBaseStats(), ineffa.getWeapon().getStats(),
                 new model.stats.StatsContainer());
 
-        ineffa.setArtifacts(new AubadeOfMorningstarAndMoon(resultIneffa.stats));
+        ineffa.setArtifacts(new SilkenMoonsSerenade(resultIneffa.stats));
         ineffa.setArtifactRolls(resultIneffa.rolls);
         sim.addCharacter(ineffa);
 
-        // --- 3. Columbina (Silken Moons) ---
-        Columbina columbina = new Columbina(new FavoniusCodex(), null);
+        // --- 3. Columbina (Aubade) ---
+        Columbina columbina = new Columbina(new NocturnesCurtainCall(), null);
         ArtifactOptimizer.OptimizationConfig colConfig = new ArtifactOptimizer.OptimizationConfig();
         colConfig.mainStatSands = StatType.ENERGY_RECHARGE;
         colConfig.mainStatGoblet = StatType.HP_PERCENT;
-        colConfig.mainStatCirclet = StatType.CRIT_DMG;
+        colConfig.mainStatCirclet = StatType.CRIT_RATE;
         colConfig.subStatPriority = java.util.Arrays.asList(StatType.CRIT_DMG, StatType.CRIT_RATE,
                 StatType.HP_PERCENT, StatType.ENERGY_RECHARGE);
 
@@ -266,12 +266,12 @@ public class FlinsParty2 {
                 colConfig, columbina.getBaseStats(), columbina.getWeapon().getStats(),
                 new model.stats.StatsContainer());
 
-        columbina.setArtifacts(new SilkenMoonsSerenade(resultCol.stats));
+        columbina.setArtifacts(new AubadeOfMorningstarAndMoon(resultCol.stats));
         columbina.setArtifactRolls(resultCol.rolls);
         sim.addCharacter(columbina);
 
         // --- 4. Sucrose (VV) ---
-        Sucrose sucrose = new Sucrose(new WanderingEvenstar(), null);
+        Sucrose sucrose = new Sucrose(new SunnyMorningSleepIn(), null);
         ArtifactOptimizer.OptimizationConfig sucConfig = new ArtifactOptimizer.OptimizationConfig();
         sucConfig.mainStatSands = StatType.ELEMENTAL_MASTERY;
         sucConfig.mainStatGoblet = StatType.ELEMENTAL_MASTERY;
@@ -293,7 +293,7 @@ public class FlinsParty2 {
         sucrose.setArtifactRolls(resultSuc.rolls);
         sim.addCharacter(sucrose);
 
-        // --- Resilience ---
+        // --- Resonance ---
         mechanics.element.ResonanceManager.applyResonances(sim);
 
         System.out.println("\n[DEBUG] Stats check after setup:");

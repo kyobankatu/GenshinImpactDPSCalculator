@@ -3,6 +3,7 @@ package model.weapon;
 import model.entity.Weapon;
 import model.stats.StatsContainer;
 import model.type.StatType;
+import model.type.WeaponType;
 
 public class SkywardBlade extends Weapon {
     public SkywardBlade() {
@@ -10,6 +11,7 @@ public class SkywardBlade extends Weapon {
         StatsContainer s = this.getStats();
         s.add(StatType.BASE_ATK, 608); // Lv90
         s.add(StatType.ENERGY_RECHARGE, 0.551);
+        this.weaponType = WeaponType.SWORD;
     }
 
     private double buffEndTime = 0.0;

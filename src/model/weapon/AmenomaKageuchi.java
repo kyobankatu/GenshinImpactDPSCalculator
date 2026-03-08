@@ -3,6 +3,7 @@ package model.weapon;
 import model.entity.Weapon;
 import model.stats.StatsContainer;
 import model.type.StatType;
+import model.type.WeaponType;
 
 public class AmenomaKageuchi extends Weapon {
     public AmenomaKageuchi() {
@@ -10,7 +11,7 @@ public class AmenomaKageuchi extends Weapon {
         StatsContainer s = this.getStats();
         s.add(StatType.BASE_ATK, 454);
         s.add(StatType.ATK_PERCENT, 0.551);
-
+        this.weaponType = WeaponType.SWORD;
     }
 
     private int seeds = 0;

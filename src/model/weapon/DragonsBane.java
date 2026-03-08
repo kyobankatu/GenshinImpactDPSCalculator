@@ -3,6 +3,7 @@ package model.weapon;
 import model.entity.Weapon;
 import model.stats.StatsContainer;
 import model.type.StatType;
+import model.type.WeaponType;
 
 public class DragonsBane extends Weapon {
     public DragonsBane() {
@@ -10,6 +11,7 @@ public class DragonsBane extends Weapon {
         // Lv90 Base ATK 454, EM 221
         getStats().set(StatType.BASE_ATK, 454);
         getStats().set(StatType.ELEMENTAL_MASTERY, 221);
+        this.weaponType = WeaponType.POLEARM;
     }
 
     @Override

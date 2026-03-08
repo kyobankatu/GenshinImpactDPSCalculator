@@ -5,6 +5,7 @@ import model.entity.Character;
 import model.stats.StatsContainer;
 import model.type.StatType;
 import simulation.action.AttackAction;
+import model.type.WeaponType;
 
 /**
  * Primordial Jade Winged-Spear (5-star Polearm).
@@ -39,6 +40,7 @@ public class PrimordialJadeWingedSpear extends Weapon {
         StatsContainer s = this.getStats();
         s.add(StatType.BASE_ATK, 674);
         s.add(StatType.CRIT_RATE, 0.221);
+        this.weaponType = WeaponType.POLEARM;
     }
 
     /**

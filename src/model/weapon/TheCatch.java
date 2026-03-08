@@ -3,6 +3,7 @@ package model.weapon;
 import model.entity.Weapon;
 import model.stats.StatsContainer;
 import model.type.StatType;
+import model.type.WeaponType;
 
 public class TheCatch extends Weapon {
     public TheCatch() {
@@ -10,6 +11,7 @@ public class TheCatch extends Weapon {
         // Lv90 Base ATK 510, ER 45.9%
         getStats().set(StatType.BASE_ATK, 510);
         getStats().set(StatType.ENERGY_RECHARGE, 0.459);
+        this.weaponType = WeaponType.POLEARM;
     }
 
     @Override
