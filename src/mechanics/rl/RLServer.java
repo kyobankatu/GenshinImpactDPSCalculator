@@ -20,21 +20,6 @@ public class RLServer {
     private Supplier<CombatSimulator> simFactory;
     private CombatSimulator currentSim;
 
-    private static class RotationPhase {
-        String charName;
-        List<String> actions;
-
-        public RotationPhase(String charName, List<String> actions) {
-            this.charName = charName;
-            this.actions = actions;
-        }
-
-        @Override
-        public String toString() {
-            return charName + actions;
-        }
-    }
-
     private List<RotationPhase> teacherRotation;
 
     // --- Dynamic Role Discovery Fields ---
@@ -78,10 +63,10 @@ public class RLServer {
     // Action Mapping: Integer ID -> Action Command
     // private List<ActionCommand> actionSpace; // Deprecated
 
-    public RLServer(int port, Supplier<CombatSimulator> simFactory) {
+    public RLServer(int port, Supplier<CombatSimulator> simFactory, List<RotationPhase> rotation) {
         this.port = port;
         this.simFactory = simFactory;
-        // this.actionSpace = generateActionSpace(); // Deprecated
+        this.teacherRotation = rotation;
     }
 
     public void start() {
@@ -126,47 +111,6 @@ public class RLServer {
             episodeCount++; // Increment episode counter
             nextRotationIndex = 0; // Reset rotation guide index
 
-            // Force User's Requested Rotation (Raiden Start)
-            // Force User's Requested Rotation (Main.java Logic: Raiden Split)
-            if (teacherRotation == null) {
-                logToConsole("--- Enforcing User's Desired Rotation (Raiden Skill -> Supports -> Raiden Burst) ---");
-                teacherRotation = new ArrayList<>();
-
-                // Phase 0: Raiden Skill
-                List<String> raidenStart = new ArrayList<>();
-                raidenStart.add("SKILL");
-                teacherRotation.add(new RotationPhase("Raiden Shogun", raidenStart));
-
-                // Phase 1: Xingqiu (Burst First)
-                List<String> xqActs = new ArrayList<>();
-                xqActs.add("BURST");
-                xqActs.add("SKILL");
-                // Removed mandatory ATTACK to allow agent to decide optimization
-                teacherRotation.add(new RotationPhase("Xingqiu", xqActs));
-
-                // Phase 2: Bennett (Burst First, Weave Fixed)
-                List<String> bennettActs = new ArrayList<>();
-                bennettActs.add("BURST");
-                bennettActs.add("ATTACK"); // Middle weave kept as structural
-                bennettActs.add("SKILL");
-                teacherRotation.add(new RotationPhase("Bennett", bennettActs));
-
-                // Phase 3: Xiangling (Burst First, Weave Fixed)
-                List<String> xlActs = new ArrayList<>();
-                xlActs.add("BURST");
-                xlActs.add("ATTACK"); // Middle weave kept
-                xlActs.add("SKILL");
-                teacherRotation.add(new RotationPhase("Xiangling", xlActs));
-
-                // Phase 4: Raiden Burst (The Carry Phase)
-                List<String> raidenEnd = new ArrayList<>();
-                raidenEnd.add("BURST");
-                raidenEnd.add("ATTACK_UNTIL_END");
-                teacherRotation.add(new RotationPhase("Raiden Shogun", raidenEnd));
-
-                logToConsole("--- Teacher Rotation Sequence Enforced: " + teacherRotation + " ---");
-            }
-
             // Smart Index Init: Align active character with Plan Start
             nextRotationIndex = 0;
             currentProfileIndex = 0; // Reset profile step
@@ -181,9 +125,6 @@ public class RLServer {
             // --- Force Full Energy for Training ---
             for (Character c : currentSim.getPartyMembers()) {
                 c.receiveFlatEnergy(c.getEnergyCost());
-                if (c.getName().equals("Raiden Shogun")) {
-                    logToConsole("[RL-Reset] Raiden Energy Forced to: " + c.getCurrentEnergy());
-                }
             }
 
             lastSwapTime = -999.0; // Fix: Reset swap timer!
@@ -268,7 +209,7 @@ public class RLServer {
                     requiredActionId = 0;
             } else {
                 // OPTIMIZATION PHASE
-                String[] charOrder = { "Raiden Shogun", "Xingqiu", "Xiangling", "Bennett" };
+                String[] charOrder = { "Flins", "Ineffa", "Columbina", "Sucrose" };
                 String effectiveTargetName = currentPhaseCharName;
 
                 RotationPhase nextPhase = teacherRotation.get((nextRotationIndex + 1) % teacherRotation.size());
@@ -338,12 +279,6 @@ public class RLServer {
                     if (!activeChar.canBurst(now)) {
                         isValid = false;
                         penalty = -50.0; // Heavy penalty for invalid Burst
-                        if (activeChar.getName().equals("Raiden Shogun")) {
-                            logToConsole(String.format(
-                                    "[RL-Debug] Raiden Burst FAILED! En=%.1f/%.1f CD=%.1f Last=%.1f Now=%.1f",
-                                    activeChar.getCurrentEnergy(), activeChar.getEnergyCost(),
-                                    activeChar.getBurstCD(), activeChar.getLastBurstTime(), now));
-                        }
                     }
                 }
                 // (Logic removed: Check moved to Reward Phase)
@@ -352,7 +287,7 @@ public class RLServer {
             // Swap Action (3-6)
             int targetIdx = actionId - 3;
             // Use HARDCODED order to match State Vector
-            String[] charOrder = { "Raiden Shogun", "Xingqiu", "Xiangling", "Bennett" };
+            String[] charOrder = { "Flins", "Ineffa", "Columbina", "Sucrose" };
 
             if (targetIdx >= charOrder.length) {
                 isValid = false;
@@ -374,12 +309,6 @@ public class RLServer {
                         if (now - lastSwapTime < 1.0) {
                             isValid = false;
                             penalty = -50.0; // Heavy penalty for swap spam
-                        } else {
-                            // Check if Raiden is swapping out early
-                            if (activeChar.getName().equals("Raiden Shogun") && activeChar.isBurstActive(now)) {
-                                penalty = -50.0; // HUGE Penalty for cancelling burst
-                                logToConsole("[RL] Penalty! Raiden swapped during Burst!");
-                            }
                         }
                     }
                 }
@@ -388,7 +317,7 @@ public class RLServer {
 
         if (!isValid) {
             currentSim.advanceTime(0.1); // Cost of failure
-            boolean done = currentSim.getCurrentTime() >= 22.0;
+            boolean done = currentSim.getCurrentTime() >= 40.0;
             return getStateJson(penalty, done);
         }
 
@@ -404,7 +333,7 @@ public class RLServer {
                 simFactoryActionRaw(activeChar, "burst");
         } else {
             int targetIdx = actionId - 3;
-            String[] charOrder = { "Raiden Shogun", "Xingqiu", "Xiangling", "Bennett" };
+            String[] charOrder = { "Flins", "Ineffa", "Columbina", "Sucrose" };
             String targetName = charOrder[targetIdx];
 
             String oldChar = currentSim.getActiveCharacter().getName();
@@ -468,7 +397,7 @@ public class RLServer {
 
             if (actionId >= 3) {
                 // Swap happened
-                String[] charOrder = { "Raiden Shogun", "Xingqiu", "Xiangling", "Bennett" };
+                String[] charOrder = { "Flins", "Ineffa", "Columbina", "Sucrose" };
                 String swappedTo = charOrder[actionId - 3];
                 RotationPhase nextPhase = teacherRotation.get((nextRotationIndex + 1) % teacherRotation.size());
 
@@ -519,13 +448,12 @@ public class RLServer {
             }
         }
 
-        boolean done = currentSim.getCurrentTime() >= 22.0;
+        boolean done = currentSim.getCurrentTime() >= 40.0;
 
         if (done) {
             logToConsole(
                     "--- Episode Done. Total DMG: " + String.format("%,.0f", currentSim.getTotalDamage()) + " ---");
-            // Log Raiden Breakdown
-            Character r = currentSim.getCharacter("Raiden Shogun");
+            Character r = currentSim.getCharacter("Flins");
             if (r != null) {
                 // ...
             }
@@ -542,7 +470,7 @@ public class RLServer {
         }
 
         // Diagnostic Log (Temporary)
-        // Log for ALL characters to debug Bennett Loop
+        // Log for ALL characters
         if (activeChar != null) {
             String diagPhase = goldenPlan != null ? goldenPlan.order.get(nextRotationIndex % goldenPlan.order.size())
                     : "?";
@@ -577,8 +505,8 @@ public class RLServer {
         // Plus 1 global feature (Global Swap Ready) = 21 features total
         List<Double> stateList = new ArrayList<>();
 
-        // Fix Order: Raiden, Xingqiu, Xiangling, Bennett
-        String[] charOrder = { "Raiden Shogun", "Xingqiu", "Xiangling", "Bennett" };
+        // Fix Order: Flins, Ineffa, Columbina, Sucrose
+        String[] charOrder = { "Flins", "Ineffa", "Columbina", "Sucrose" };
         double now = currentSim.getCurrentTime();
 
         for (String name : charOrder) {
@@ -625,7 +553,7 @@ public class RLServer {
 
         // 7. Time Remaining (Normalized 0.0 - 1.0)
         // Helps the agent know if it needs to rush
-        double maxTime = 22.0;
+        double maxTime = 40.0;
         double timeRem = Math.max(0, maxTime - now) / maxTime;
         stateList.add(timeRem);
 
@@ -720,7 +648,7 @@ public class RLServer {
 
     private List<ActionCommand> generateActionSpace() {
         List<ActionCommand> actions = new ArrayList<>();
-        String[] chars = { "Raiden Shogun", "Xingqiu", "Xiangling", "Bennett" };
+        String[] chars = { "Flins", "Ineffa", "Columbina", "Sucrose" };
 
         for (String c : chars) {
             // Swap

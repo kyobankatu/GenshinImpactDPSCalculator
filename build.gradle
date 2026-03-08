@@ -34,6 +34,28 @@ tasks.withType(Javadoc).configureEach {
     options.locale = 'ja_JP' 
 }
 
+// RL Tasks
+tasks.register("RunRL", JavaExec) {
+    group = "RL"
+    description = "Starts the Java RL server (port 5000). Run TrainRL or EnjoyRL in a separate terminal."
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = "sample.RunRL"
+}
+
+tasks.register("TrainRL", Exec) {
+    group = "RL"
+    description = "Runs the Python PPO training script against the running RL server."
+    workingDir = file("rl_optimization")
+    commandLine "python", "train.py"
+}
+
+tasks.register("EnjoyRL", Exec) {
+    group = "RL"
+    description = "Runs the trained model for one episode and generates output/rl_report.html."
+    workingDir = file("rl_optimization")
+    commandLine "python", "enjoy.py"
+}
+
 // Add a dynamic rule that allows running 'gradlew ClassName'
 tasks.addRule("Pattern: gradlew <ClassName>") { String taskName ->
     // We only create the task if it doesn't already exist (like 'build' or 'javadoc')

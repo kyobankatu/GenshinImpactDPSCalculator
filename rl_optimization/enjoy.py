@@ -9,8 +9,8 @@ def main():
     
     # 2. Load Trained Model
     try:
-        model = PPO.load("genshin_ppo_model")
-        print("Loaded genshin_ppo_model.zip")
+        model = PPO.load("output/genshin_ppo_model")
+        print("Loaded output/genshin_ppo_model.zip")
     except FileNotFoundError:
         print("Model file not found. Please train first.")
         return
@@ -23,21 +23,21 @@ def main():
     print("\n--- Optimal Rotation (AI) ---")
     
     # Action Map for readable output
-    chars = ["Raiden", "Xingqiu", "Xiangling", "Bennett"]
+    chars = ["Flins", "Ineffa", "Columbina", "Sucrose"]
     actions = ["Swap", "Attack", "Skill", "Burst"]
-    
+
     while not done:
         action, _states = model.predict(obs, deterministic=True)
-        
+
         # Decode Action for Display (New 7-Action Space)
         action_map = {
             0: "Active -> Attack",
             1: "Active -> Skill",
             2: "Active -> Burst",
-            3: "Swap -> Raiden",
-            4: "Swap -> Xingqiu",
-            5: "Swap -> Xiangling",
-            6: "Swap -> Bennett"
+            3: "Swap -> Flins",
+            4: "Swap -> Ineffa",
+            5: "Swap -> Columbina",
+            6: "Swap -> Sucrose"
         }
         
         act_desc = action_map.get(int(action), f"Unknown ({action})")

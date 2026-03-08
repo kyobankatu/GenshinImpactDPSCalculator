@@ -1,0 +1,23 @@
+package mechanics.rl;
+
+import java.util.List;
+
+/**
+ * Represents one phase of a teacher rotation: a character name and the ordered
+ * sequence of actions (SKILL, BURST, ATTACK, ATTACK_UNTIL_END) that character
+ * must execute before the phase is considered complete.
+ */
+public class RotationPhase {
+    public final String charName;
+    public final List<String> actions;
+
+    public RotationPhase(String charName, List<String> actions) {
+        this.charName = charName;
+        this.actions = actions;
+    }
+
+    @Override
+    public String toString() {
+        return charName + actions;
+    }
+}

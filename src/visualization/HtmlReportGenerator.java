@@ -544,9 +544,9 @@ public class HtmlReportGenerator {
         sb.append("</body></html>");
 
         try (
-                PrintWriter out = new PrintWriter(new FileWriter(filePath))) {
+                PrintWriter out = new PrintWriter(new FileWriter("output/" + filePath))) {
             out.write(sb.toString());
-            System.out.println("Generated HTML Report: " + filePath);
+            System.out.println("Generated HTML Report: " + "output/" + filePath);
         } catch (IOException e) {
             e.printStackTrace();
         }

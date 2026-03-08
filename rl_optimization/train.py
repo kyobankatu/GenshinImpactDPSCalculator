@@ -17,7 +17,7 @@ def main():
     env = Monitor(env, log_dir)
 
     # 2. Define Model
-    model_path = "genshin_ppo_model.zip"
+    model_path = "output/genshin_ppo_model.zip"
     
     if os.path.exists(model_path):
         print(f"Loading existing model from {model_path}...")
@@ -49,8 +49,8 @@ def main():
         print("\nTraining interrupted by user.")
 
     # 4. Save
-    model.save("genshin_ppo_model")
-    print("Model saved to genshin_ppo_model.zip")
+    model.save("output/genshin_ppo_model")
+    print("Model saved to output/genshin_ppo_model.zip")
 
     env.close()
 
@@ -61,8 +61,8 @@ def main():
         
         print("Plotting learning curve...")
         results_plotter.plot_results([log_dir], 1e5, results_plotter.X_TIMESTEPS, "Genshin RL Learning Curve")
-        plt.savefig("learning_curve.png")
-        print("Curve saved to learning_curve.png")
+        plt.savefig("output/learning_curve.png")
+        print("Curve saved to output/learning_curve.png")
     except ImportError:
         print("matplotlib not installed, skipping plot.")
     except Exception as e:
