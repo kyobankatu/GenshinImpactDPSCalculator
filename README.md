@@ -1,8 +1,18 @@
 # Genshin Impact DPS Calculator & Battle Simulator
 
-A highly detailed, time-driven combat simulator and DPS calculator for Genshin Impact, written in Java 11+. 
+A highly detailed, time-driven combat simulator and DPS calculator for Genshin Impact, written in Java 11+.
 
 This project goes beyond simple formula calculations by emulating skill animations (cast times), elemental auras, Internal Cooldowns (ICD), complex reaction mechanics, team-wide buffs, and time-based combat events. It uniquely features a multi-dimensional artifact optimization pipeline and an experimental Reinforcement Learning (RL) training module.
+
+## Live Demo
+
+**[View Simulation Report](https://kyobanaktu.github.io/GenshinImpactDPSCalculator/simulation_report.html)**
+
+The report shows a full combat simulation for a custom 4-character team (FlinsParty2), including:
+- Damage timeline with per-hit breakdowns and reaction labels
+- Damage contribution pie chart per character
+- Optimized artifact substat distributions
+- Active buff tracking per character
 
 ## Core Features
 
