@@ -6,7 +6,9 @@ This project goes beyond simple formula calculations by emulating skill animatio
 
 ## Live Demo
 
-**[View Simulation Report](https://kyobanaktu.github.io/GenshinImpactDPSCalculator/simulation_report.html)**
+**[View Simulation Report](https://kyobankatu.github.io/GenshinImpactDPSCalculator/simulation_report.html)**
+
+**[View Javadoc](https://kyobankatu.github.io/GenshinImpactDPSCalculator/index.html)**
 
 The report shows a full combat simulation for a custom 4-character team (FlinsParty2), including:
 - Damage timeline with per-hit breakdowns and reaction labels
