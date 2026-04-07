@@ -1,0 +1,24 @@
+# AGENTS.md
+
+## Scope
+- This file applies to `src/sample/`.
+
+## Directory role
+- This package contains executable entry points and concrete party scripts used for simulation, optimization, and RL startup.
+- These files are the quickest way to understand how the engine is expected to be used.
+
+## Java files in this directory
+- `FlinsParty.java`: sample simulation for a custom Lunar team using one artifact and weapon configuration set, optimizer pipeline, fixed scripted rotation, stat recording, and HTML reporting.
+- `FlinsParty2.java`: alternate custom Lunar team sample with a different gear configuration and longer Flins burst sequencing.
+- `RaidenParty.java`: Raiden National sample used as a conventional benchmark team with optimizer pipeline and scripted 21-second rotation.
+- `RunRL.java`: RL entry point that creates a fixed FlinsParty2-style simulator factory, skips optimizer variability, and starts the Java RL server.
+
+## Coupling and dependencies
+- These entry points depend on `simulation.CombatSimulator`, concrete `model.character`, `model.weapon`, and `model.artifact` classes, `mechanics.optimization`, `mechanics.analysis.StatsRecorder`, and `visualization.HtmlReportGenerator`.
+- `RunRL` additionally depends on `mechanics.rl`.
+- Rotation scripts in these files rely on stable action-string names in the character classes.
+
+## Agent guidance
+- When validating a gameplay change, run the smallest affected sample entry point first.
+- If you change action names, cooldown expectations, or team composition assumptions, update these scripts as needed.
+- Keep these files explicit and readable. They serve as integration tests and usage documentation more than reusable library code.

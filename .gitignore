@@ -39,8 +39,6 @@ build/
 # Local build output directory used manually
 bin/
 
-CLAUDE.MD
-
 # Simulation and RL outputs (exclude root/output copies; docs/ copy is kept for GitHub Pages)
 output/
 rl_report.html
