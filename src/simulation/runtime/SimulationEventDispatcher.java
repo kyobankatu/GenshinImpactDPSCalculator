@@ -1,4 +1,4 @@
-package simulation;
+package simulation.runtime;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,12 +8,16 @@ import mechanics.reaction.ReactionResult;
 import model.entity.ArtifactSet;
 import model.entity.Character;
 import model.type.Element;
+import simulation.ActionListener;
+import simulation.CombatSimulator;
+import simulation.ParticleListener;
+import simulation.SimulationEventBus;
 import simulation.action.AttackAction;
 
 /**
  * Owns listener registration and notification for simulation-side events.
  */
-class SimulationEventDispatcher implements SimulationEventBus {
+public class SimulationEventDispatcher implements SimulationEventBus {
     private final List<ActionListener> actionListeners = new ArrayList<>();
     private final List<ParticleListener> particleListeners = new ArrayList<>();
     private final List<CombatSimulator.ReactionListener> reactionListeners = new ArrayList<>();

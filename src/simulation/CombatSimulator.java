@@ -3,6 +3,12 @@ package simulation;
 import model.entity.Character;
 import model.entity.Enemy;
 import simulation.action.AttackAction;
+import simulation.runtime.BuffManager;
+import simulation.runtime.CombatActionResolver;
+import simulation.runtime.DamageReport;
+import simulation.runtime.MoonsignManager;
+import simulation.runtime.SimulationEventDispatcher;
+import simulation.runtime.VisualLoggerSink;
 import mechanics.buff.Buff;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,8 +46,9 @@ public class CombatSimulator {
     private final DamageTracker damageReport;
     private final SimulationEventBus eventDispatcher;
     private final CombatLogSink combatLogSink;
-    private List<Buff> teamBuffs = new ArrayList<>();
-    private List<Buff> fieldBuffs = new ArrayList<>();
+    private final CombatActionResolver actionResolver;
+    private final MoonsignManager moonsignManager;
+    private final BuffManager buffManager;
     private boolean isECTimerRunning = false;
     private double thundercloudEndTime = -1.0;
     private boolean enableLogging = true;
@@ -110,6 +117,9 @@ public class CombatSimulator {
         this.damageReport = Objects.requireNonNull(damageTracker, "damageTracker");
         this.eventDispatcher = Objects.requireNonNull(eventBus, "eventBus");
         this.combatLogSink = Objects.requireNonNull(combatLogSink, "combatLogSink");
+        this.buffManager = new BuffManager(this);
+        this.actionResolver = new CombatActionResolver(this);
+        this.moonsignManager = new MoonsignManager(this);
     }
 
     /**
@@ -257,7 +267,7 @@ public class CombatSimulator {
      * @param buff the {@link Buff} to add
      */
     public void applyTeamBuff(Buff buff) {
-        teamBuffs.add(buff);
+        buffManager.applyTeamBuff(buff);
     }
 
     /**
@@ -267,8 +277,7 @@ public class CombatSimulator {
      * @param buff the {@link Buff} to apply without stacking
      */
     public void applyTeamBuffNoStack(Buff buff) {
-        teamBuffs.removeIf(b -> b.getName().equals(buff.getName()));
-        teamBuffs.add(buff);
+        buffManager.applyTeamBuffNoStack(buff);
     }
 
     /**
@@ -278,7 +287,7 @@ public class CombatSimulator {
      * @param buff the {@link Buff} to restrict to the on-field character
      */
     public void applyFieldBuff(Buff buff) {
-        fieldBuffs.add(buff);
+        buffManager.applyFieldBuff(buff);
     }
 
     /**
@@ -297,30 +306,7 @@ public class CombatSimulator {
      *         callers should filter with {@code Buff#isExpired})
      */
     public List<Buff> getApplicableBuffs(Character c) {
-        List<Buff> buffs = new ArrayList<>();
-        for (Buff b : teamBuffs) {
-            if (b.appliesToCharacter(c.getName(), c.getElement()))
-                buffs.add(b);
-        }
-
-        // Collect Weapon Team Buffs and Character Team Buffs
-        for (Character member : party.getMembers()) {
-            if (member.getWeapon() != null) {
-                buffs.addAll(member.getWeapon().getTeamBuffs(member));
-            }
-            buffs.addAll(member.getTeamBuffs());
-        }
-
-        if (c == party.getActiveCharacter()) {
-            buffs.addAll(fieldBuffs);
-        }
-        // System.out.println("[DEBUG_CS] getApplicableBuffs for " + c.getName() + " ->
-        // " + buffs.size());
-        // System.out.print(" Buffs: ");
-        // for (Buff b : buffs)
-        // System.out.print(b.getName() + ", ");
-        // System.out.println();
-        return buffs;
+        return buffManager.getApplicableBuffs(c);
     }
 
     /**
@@ -371,7 +357,7 @@ public class CombatSimulator {
      * @return list of buffs for the active character
      */
     public List<Buff> getTeamBuffs() {
-        return getApplicableBuffs(party.getActiveCharacter());
+        return buffManager.getActiveCharacterBuffs();
     }
 
     private double rotationTime = 0.0;
@@ -616,57 +602,7 @@ public class CombatSimulator {
      * changed the count of active Gleaming Moon effects.
      */
     public void updateGleamingMoonSynergy() {
-        // Count Unique Effects
-        boolean hasIntent = false;
-        boolean hasDevotion = false;
-
-        for (Character m : party.getMembers()) {
-            for (mechanics.buff.Buff b : getApplicableBuffs(m)) { // Check active buffs
-                if (b.getName().equals("Gleaming Moon: Intent"))
-                    hasIntent = true;
-                if (b.getName().equals("Gleaming Moon: Devotion"))
-                    hasDevotion = true;
-            }
-        }
-
-        int count = (hasIntent ? 1 : 0) + (hasDevotion ? 1 : 0);
-
-        if (count > 0) {
-            final double bonus = 0.10 * count;
-
-            // Create Synergy Buff
-            // Duration? Text says "increased ... for each different ... effect THAT party
-            // members HAVE".
-            // So it's a dynamic state, not a fixed duration buff triggered by event.
-            // But we implement it as a maintained Buff for simplicity.
-            // When buffs expire, we need to update this.
-            // BUT we only call this on TRIGGER (Damage or Reaction).
-            // Optimization: Just ensure this buff exists and has correct value.
-            // For now, let's refresh it with a short duration (e.g. 0.5s) or matching the
-            // source duration?
-            // "Devotion" lasts 8s. "Intent" lasts 4s.
-            // Safe bet: Refresh it for 8s (max possible). If Intent drops, we won't know
-            // until next check.
-            // Ideally: The Synergy Buff itself should be dynamic check in `applyStats`.
-
-            mechanics.buff.Buff synergyBuff = new mechanics.buff.Buff("Gleaming Moon: Synergy", 8.0, currentTime) {
-                @Override
-                protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
-                    // 10% * Count
-                    // Check dynamic count again? Or allow Snapshot?
-                    // Artifact text implies constant checking.
-                    // But simpler to snapshot current count.
-                    stats.add(model.type.StatType.LUNAR_CHARGED_DMG_BONUS, bonus);
-                    stats.add(model.type.StatType.LUNAR_BLOOM_DMG_BONUS, bonus);
-                    stats.add(model.type.StatType.LUNAR_CRYSTALLIZE_DMG_BONUS, bonus);
-                }
-            };
-
-            // Apply to everyone
-            for (Character m : party.getMembers()) {
-                m.addBuff(synergyBuff);
-            }
-        }
+        moonsignManager.updateGleamingMoonSynergy();
     }
 
     /**
@@ -682,24 +618,7 @@ public class CombatSimulator {
      * Should be called after the full party is assembled via {@link #addCharacter}.
      */
     public void updateMoonsign() {
-        int lunarCount = 0;
-        for (Character c : party.getMembers()) {
-            if (c.isLunarCharacter()) {
-                lunarCount++;
-            }
-        }
-
-        if (lunarCount >= 2) {
-            setMoonsign(Moonsign.ASCENDANT_GLEAM);
-            if (enableLogging)
-                System.out.println("[System] Moonsign updated to ASCENDANT_GLEAM (Lunar Chars: " + lunarCount + ")");
-        } else if (lunarCount == 1) {
-            setMoonsign(Moonsign.NASCENT_GLEAM);
-            if (enableLogging)
-                System.out.println("[System] Moonsign updated to NASCENT_GLEAM (Lunar Chars: " + lunarCount + ")");
-        } else {
-            setMoonsign(Moonsign.NONE);
-        }
+        moonsignManager.updateMoonsign();
     }
 
     /**
@@ -728,8 +647,7 @@ public class CombatSimulator {
                 && !c.isLunarCharacter()
                 && (action.getActionType() == model.type.ActionType.SKILL
                         || action.getActionType() == model.type.ActionType.BURST)) {
-
-            applyAscendantBlessing(c);
+            moonsignManager.applyAscendantBlessing(c);
         }
 
         // Notify Listeners (Atomic Actions)
@@ -756,104 +674,6 @@ public class CombatSimulator {
         advanceTime(duration);
     }
 
-    private void applyAscendantBlessing(Character buffer) {
-        // Calculate Bonus
-        // Max 36%
-        double bonus = 0.0;
-        model.stats.StatsContainer s = buffer.getEffectiveStats(currentTime);
-        model.type.Element e = buffer.getElement();
-
-        if (e == model.type.Element.PYRO || e == model.type.Element.ELECTRO || e == model.type.Element.CRYO) {
-            // 0.9% per 100 ATK
-            double atk = s.getTotalAtk();
-            bonus = (atk / 100.0) * 0.009;
-        } else if (e == model.type.Element.HYDRO) {
-            // 0.6% per 1000 HP
-            double hp = s.getTotalHp();
-            bonus = (hp / 1000.0) * 0.006;
-        } else if (e == model.type.Element.GEO) {
-            // 1% per 100 DEF
-            double def = s.getTotalDef();
-            bonus = (def / 100.0) * 0.01;
-        } else if (e == model.type.Element.ANEMO || e == model.type.Element.DENDRO) {
-            // 2.25% per 100 EM
-            double em = s.get(model.type.StatType.ELEMENTAL_MASTERY);
-            bonus = (em / 100.0) * 0.0225;
-        }
-
-        // Cap at 36% (0.36)
-        if (bonus > 0.36)
-            bonus = 0.36;
-
-        final double finalBonus = bonus;
-
-        // Apply Team Buff
-        // "Moonsign: Ascendant Blessing"
-        // Check if existing buff is stronger?
-        // Logic: "Effects do not stack". Usually implies overwrite or keep strongest.
-        // Let's overwite for now as usually latest snapshot applies, OR we check value.
-        // Given spec: "If multiple Non-Lunar chars exist, use the most high one."
-        // We should check existing buff value.
-
-        // But Buffs are stored in a List. We can look for it.
-        boolean applied = false;
-        Buff betterBuff = null;
-
-        // We need a custom Buff class or identify by name to check value
-        // SimpleBuff doesn't store the "source value" easily accessible unless we parse
-        // name or extend.
-        // Let's extend Buff for this.
-
-        // Search current Team Buffs
-        for (Buff b : teamBuffs) {
-            if (b.getName().equals("Moonsign: Ascendant Blessing")) {
-                // How to check value?
-                // We'll trust the logic: if new bonus is higher, replace.
-                // We will implement a specialized MoonsignBuff class inside here or just use a
-                // field.
-                if (b instanceof MoonsignBuff) {
-                    if (((MoonsignBuff) b).getValue() > finalBonus) {
-                        // Existing is stronger, do not overwrite. but REFRESH duration?
-                        // "Effect will not stack".
-                        // Usually implies we keep the strongest.
-                        // If same, maybe refresh?
-                        // Let's assume we convert valid duration if new is same/stronger.
-                        // But if new is weaker, we ignore?
-                        return; // Keep existing stronger buff
-                    }
-                }
-            }
-        }
-
-        // Remove old if exists (since we are replacing with stronger/new)
-        teamBuffs.removeIf(b -> b.getName().equals("Moonsign: Ascendant Blessing"));
-
-        if (enableLogging)
-            System.out.println(
-                    String.format("   [Buff] Ascendant Blessing Triggered by %s (+%.1f%% Lunar DMG) - Duration 20s",
-                            buffer.getName(), finalBonus * 100));
-
-        applyTeamBuff(new MoonsignBuff(finalBonus, currentTime));
-    }
-
-    private static class MoonsignBuff extends Buff {
-        private double value;
-
-        public MoonsignBuff(double value, double startTime) {
-            super("Moonsign: Ascendant Blessing", 20.0, startTime);
-            this.value = value;
-        }
-
-        public double getValue() {
-            return value;
-        }
-
-        @Override
-        protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
-            stats.add(model.type.StatType.LUNAR_MOONSIGN_BONUS, value);
-        }
-    }
-
     /**
      * Resolves all damage and elemental effects of an {@link AttackAction} without
      * advancing simulation time. Used for periodic events (e.g. DoT ticks via
@@ -877,412 +697,70 @@ public class CombatSimulator {
      * @throws RuntimeException if no character with {@code charName} exists in the party
      */
     public void performActionWithoutTimeAdvance(String charName, AttackAction action) {
-        Character c = party.getMember(charName);
-        if (c == null)
-            throw new RuntimeException("Character not found: " + charName);
+        actionResolver.resolveWithoutTimeAdvance(charName, action);
+    }
 
-        if (action.getICDTag() == null) {
-            action.setICD(action.getICDType(), model.type.ICDTag.None, action.getGaugeUnits());
-        }
-        if (action.getICDType() == null) {
-            action.setICD(model.type.ICDType.Standard, action.getICDTag(), action.getGaugeUnits());
-        }
+    /**
+     * Returns the simulator's combat log sink for package-local helper collaborators.
+     *
+     * @return combat log sink
+     */
+    public CombatLogSink getCombatLogSink() {
+        return combatLogSink;
+    }
 
-        // ICD Check
-        boolean applied = icdManager.checkApplication(charName, action.getICDTag(), action.getICDType(), currentTime);
+    /**
+     * Returns the simulator's ICD manager for package-local action-resolution helpers.
+     *
+     * @return ICD manager
+     */
+    public mechanics.element.ICDManager getIcdManager() {
+        return icdManager;
+    }
 
-        // Notify Lunar Action (Inflicting Lunar DMG)
-        if (action.isLunarConsidered()) {
-            // Notify specific Lunar Reaction if noted
-            if (action.getLunarReactionType() != null) {
-                String rType = "Lunar-" + action.getLunarReactionType();
-                // Create dummy result
-                mechanics.reaction.ReactionResult dummy = mechanics.reaction.ReactionResult.transform(0.0, rType);
-                notifyReaction(dummy, c);
-            }
-        }
+    /**
+     * Returns the live team-buff list for package-local helper collaborators that manage
+     * simulator-owned buff state.
+     *
+     * @return mutable team-buff list
+     */
+    public List<Buff> getTeamBuffList() {
+        return buffManager.getTeamBuffList();
+    }
 
-        double reactionMulti = 1.0;
+    /**
+     * Removes all team buffs with the given display name.
+     *
+     * @param buffName buff name to remove
+     */
+    public void removeTeamBuffsByName(String buffName) {
+        buffManager.removeTeamBuffsByName(buffName);
+    }
 
-        if (applied && action.getGaugeUnits() > 0) {
-            model.type.Element trigger = action.getElement();
-            java.util.Set<model.type.Element> currentAuras = enemy.getActiveAuras();
-            boolean reactionTriggered = false;
+    /**
+     * Returns whether an Electro-Charged or Lunar-Charged timer is currently active.
+     *
+     * @return {@code true} if an EC-related timer is active
+     */
+    public boolean isECTimerRunning() {
+        return isECTimerRunning;
+    }
 
-            // Stats for EM
-            model.stats.StatsContainer stats;
-            if (action.isUseSnapshot()) {
-                stats = c.getSnapshot();
-            } else {
-                stats = c.getEffectiveStats(currentTime);
-                List<Buff> buffs = getApplicableBuffs(c);
-                for (Buff b : buffs) {
-                    if (!b.isExpired(currentTime))
-                        b.apply(stats, currentTime);
-                }
-            }
-            double em = stats.get(model.type.StatType.ELEMENTAL_MASTERY);
-            double swirlBonus = stats.get(model.type.StatType.SWIRL_DMG_BONUS);
+    /**
+     * Returns the absolute simulation time at which the Thundercloud state expires.
+     *
+     * @return Thundercloud expiry time in seconds
+     */
+    public double getThundercloudEndTime() {
+        return thundercloudEndTime;
+    }
 
-            for (model.type.Element aura : currentAuras) {
-                mechanics.reaction.ReactionResult result = mechanics.reaction.ReactionCalculator.calculate(trigger,
-                        aura, em, 90, swirlBonus);
-
-                if (result.getType() != mechanics.reaction.ReactionResult.Type.NONE) {
-                    reactionTriggered = true;
-
-                    // Notify Listeners (Reaction Triggered)
-                    String reactName = result.getName();
-                    if (reactName.equals("Crystallize")) {
-                        reactName += " (" + aura.toString() + ")";
-                    }
-                    notifyReaction(result, c);
-
-                    if (result.getType() == mechanics.reaction.ReactionResult.Type.AMP) {
-                        reactionMulti = result.getAmpMultiplier();
-                        if (enableLogging)
-                            System.out.println(String.format("   [Reaction] %s on %s -> %s Multi %.2f", trigger, aura,
-                                    result.getName(), reactionMulti));
-
-                        double consumption = action.getGaugeUnits(); // Base Trigger Units
-
-                        // Simplified check based on element pairs
-                        boolean isReverse = (trigger == model.type.Element.PYRO && aura == model.type.Element.HYDRO) ||
-                                (trigger == model.type.Element.CRYO && aura == model.type.Element.PYRO);
-
-                        double modifier = isReverse ? 0.5 : 2.0;
-                        double reduction = consumption * modifier;
-
-                        this.getEnemy().reduceAura(aura, reduction);
-
-                    } else if (result.getType() == mechanics.reaction.ReactionResult.Type.TRANSFORMATIVE) {
-                        model.type.Element reactionElement = model.type.Element.PYRO; // Default Overload
-                        if (result.getName().equals("Electro-Charged"))
-                            reactionElement = model.type.Element.ELECTRO;
-
-                        // Overload / Superconduct / Swirl consume gauge
-                        // Standard Transformative: 1x consumption of Aura?
-                        // Actually Overload consumes 1U of Electro and Pyro.
-                        // We need to reduce the Aura (aura) by 1.0 * TriggerGU? Or purely consumption
-                        // based on reaction?
-                        // Wiki: "Overload consumes both the Pyro and Electro gauges."
-                        // Consumption amount: 1U of Pyro consumes 1U of Electro?
-                        // Simplified: Reduce aura by trigger gauge units.
-                        if (!result.getName().equals("Electro-Charged")) {
-                            this.getEnemy().reduceAura(aura, action.getGaugeUnits());
-                            // If Overload, we also conceptually consume the Trigger, but since Trigger acts
-                            // as source for multiple, we let it persist for the loop (Simultaneous).
-                        }
-
-                        double res = enemy.getRes(reactionElement.getBonusStatType());
-                        double resShred = stats.get(model.type.StatType.RES_SHRED);
-                        switch (reactionElement) {
-                            case PYRO:
-                                resShred += stats.get(model.type.StatType.PYRO_RES_SHRED);
-                                break;
-                            case HYDRO:
-                                resShred += stats.get(model.type.StatType.HYDRO_RES_SHRED);
-                                break;
-                            case CRYO:
-                                resShred += stats.get(model.type.StatType.CRYO_RES_SHRED);
-                                break;
-                            case ELECTRO:
-                                resShred += stats.get(model.type.StatType.ELECTRO_RES_SHRED);
-                                break;
-                            case ANEMO:
-                                resShred += stats.get(model.type.StatType.ANEMO_RES_SHRED);
-                                break;
-                            case GEO:
-                                resShred += stats.get(model.type.StatType.GEO_RES_SHRED);
-                                break;
-                            case DENDRO:
-                                resShred += stats.get(model.type.StatType.DENDRO_RES_SHRED);
-                                break;
-                            case PHYSICAL:
-                                resShred += stats.get(model.type.StatType.PHYS_RES_SHRED);
-                                break;
-                        }
-                        double resFactor = mechanics.formula.DamageCalculator.calculateResMulti(res, resShred);
-
-                        double reactBonus = 0.0;
-                        if (result.getName().equals("Electro-Charged")) {
-                            reactBonus = stats.get(model.type.StatType.ELECTRO_CHARGED_DMG_BONUS);
-                        }
-                        // Add other reactions here as needed
-
-                        double transDmg = result.getTransformDamage() * (1.0 + reactBonus) * resFactor;
-
-                        // When Lunar mode converts EC, use Lunar-Charged formula for initial trigger
-                        boolean isLunar = (result.getName().equals("Electro-Charged") && currentMoonsign != Moonsign.NONE);
-                        String reactionLabel = isLunar ? "Lunar-Charged" : result.getName();
-
-                        double triggerDmg;
-                        if (isLunar) {
-                            java.util.List<Double> potDmgs = new java.util.ArrayList<>();
-                            for (model.entity.Character mem : getPartyMembers()) {
-                                model.stats.StatsContainer ms = mem.getEffectiveStats(currentTime);
-                                double baseBonus = ms.get(model.type.StatType.LUNAR_BASE_BONUS);
-                                double uBonus = ms.get(model.type.StatType.LUNAR_UNIQUE_BONUS)
-                                        + ms.get(model.type.StatType.LUNAR_CHARGED_DMG_BONUS)
-                                        + ms.get(model.type.StatType.ELECTRO_CHARGED_DMG_BONUS)
-                                        + ms.get(model.type.StatType.LUNAR_REACTION_DMG_BONUS_ALL);
-                                double colMult = 1.0 + ms.get(model.type.StatType.LUNAR_MULTIPLIER);
-                                double memEm = ms.get(model.type.StatType.ELEMENTAL_MASTERY);
-                                double emBonus = (2.78 * memEm) / (memEm + 1400.0);
-                                double cr = ms.get(model.type.StatType.CRIT_RATE);
-                                double cd = ms.get(model.type.StatType.CRIT_DMG);
-                                double critMult = 1.0 + (Math.min(cr, 1.0) * cd);
-                                double resVal = enemy.getRes(model.type.StatType.ELECTRO_DMG_BONUS);
-                                double rMult;
-                                if (resVal < 0) rMult = 1.0 - (resVal / 2.0);
-                                else if (resVal < 0.75) rMult = 1.0 - resVal;
-                                else rMult = 1.0 / (1.0 + 4.0 * resVal);
-                                potDmgs.add(1.8 * 1446.85 * (1.0 + baseBonus) * (1.0 + uBonus) * (1.0 + emBonus) * critMult * rMult * colMult);
-                            }
-                            potDmgs.sort(java.util.Collections.reverseOrder());
-                            double[] weights = { 1.0, 0.5, 1.0 / 12.0, 1.0 / 12.0 };
-                            triggerDmg = 0.0;
-                            for (int i = 0; i < potDmgs.size() && i < 4; i++) {
-                                triggerDmg += potDmgs.get(i) * weights[i];
-                            }
-                        } else {
-                            triggerDmg = transDmg;
-                        }
-
-                        if (enableLogging)
-                            System.out
-                                    .println(String.format("   [Reaction] %s on %s -> %s Damage: %,.0f", trigger, aura,
-                                            reactionLabel, triggerDmg));
-                        recordDamage(charName, triggerDmg);
-
-                        // The instruction implies this notifyReaction should be here, but the original
-                        // code had it earlier.
-                        // Keeping it here as per the instruction's provided snippet.
-                        // notifyReaction(result, c); // This line was moved from above.
-
-                        combatLogSink.log(currentTime, charName, reactionLabel, triggerDmg,
-                                reactionLabel, triggerDmg, enemy.getAuraMap());
-
-                        // Aura Management
-                        if (result.getName().equals("Electro-Charged")) {
-                            if (isLunar) {
-                                // Refresh Thundercloud state: 6s from last Lunar-Charged trigger
-                                thundercloudEndTime = currentTime + 6.0;
-                            }
-
-                            if (!isECTimerRunning) {
-                                isECTimerRunning = true;
-                                registerEvent(new simulation.event.TimerEvent() {
-                                    private double nextTick = currentTime + (isLunar ? 2.0 : 1.0); // Lunar: 2s, EC: 1s
-
-                                    @Override
-                                    public void tick(CombatSimulator sim) {
-                                        // Continuation check: Lunar uses Thundercloud timer, standard EC uses aura state
-                                        boolean shouldTick = isLunar
-                                                ? (currentTime <= thundercloudEndTime)
-                                                : (sim.getEnemy().getAuraUnits(model.type.Element.HYDRO) > 0 &&
-                                                        sim.getEnemy().getAuraUnits(model.type.Element.ELECTRO) > 0);
-                                        if (shouldTick) {
-
-                                            // Deal EC / Lunar Damage
-                                            String label = "Electro-Charged Tick";
-                                            double finalDmg = 0;
-
-                                            if (isLunar) {
-                                                label = "Lunar-Charged Reaction";
-
-                                                // 1. Base Bonus (From Team Buffs)
-                                                // Already applied to 's' via 'getEffectiveStats' because we registered
-                                                // them as Team Buffs.
-                                                // BUT we need the base bonus for *calculation* here.
-                                                // Since we iterate party members 'c', 'c' has the Team Buff.
-                                                // So 'baseBonus' is c.getEffectiveStats().get(LUNAR_BASE_BONUS).
-                                                // We don't need to calculate it manually!
-
-                                                // Logic simplified:
-                                                // Check for each member individually.
-
-                                                // 2. Calculate Damage for EACH Party Member
-                                                java.util.List<Double> potentialDamages = new java.util.ArrayList<>();
-
-                                                for (model.entity.Character c : getPartyMembers()) {
-                                                    model.stats.StatsContainer s = c.getEffectiveStats(currentTime);
-
-                                                    // Formula: 1.8 * LvMult * (1+Base) * (1+Unique) * (1+EM) * Crit *
-                                                    // Res
-                                                    double lvMult = 1446.85; // Lv 90 Fixed
-
-                                                    // Base Bonus from Stats
-                                                    double baseBonus = s.get(model.type.StatType.LUNAR_BASE_BONUS);
-
-                                                    // Unique Bonus: Flins +20% (Self Buff refactored)
-                                                    double uniqueBonus = s.get(model.type.StatType.LUNAR_UNIQUE_BONUS);
-
-                                                    // Reaction Bonuses (Weapon/Artifacts)
-                                                    uniqueBonus += s.get(model.type.StatType.LUNAR_CHARGED_DMG_BONUS);
-                                                    uniqueBonus += s.get(model.type.StatType.ELECTRO_CHARGED_DMG_BONUS);
-                                                    uniqueBonus += s
-                                                            .get(model.type.StatType.LUNAR_REACTION_DMG_BONUS_ALL); // Added
-                                                                                                                    // Columbina
-                                                                                                                    // Burst
-
-                                                    // Columbina Passive Multiplier
-                                                    double columbinaMult = 1.0
-                                                            + s.get(model.type.StatType.LUNAR_MULTIPLIER);
-
-                                                    // EM Bonus (Reaction)
-                                                    double em = s.get(model.type.StatType.ELEMENTAL_MASTERY);
-                                                    double emBonus = (2.78 * em) / (em + 1400.0);
-
-                                                    // Crit
-                                                    double cr = s.get(model.type.StatType.CRIT_RATE);
-                                                    double cd = s.get(model.type.StatType.CRIT_DMG);
-                                                    double critMult = 1.0 + (Math.min(cr, 1.0) * cd);
-
-                                                    // Res (Enemy vs Electro? Lunar is Electro?)
-                                                    // "Lunar-Charged consumes Hydro/Electro".
-                                                    // Usually EC deals Electro DMG.
-                                                    // Using Electro Res.
-                                                    double resMult = 0.9;
-                                                    double resVal = sim.getEnemy()
-                                                            .getRes(model.type.StatType.ELECTRO_DMG_BONUS);
-                                                    if (resVal < 0)
-                                                        resMult = 1.0 - (resVal / 2.0);
-                                                    if (resVal < 0)
-                                                        resMult = 1.0 - (resVal / 2.0);
-                                                    else if (resVal < 0.75)
-                                                        resMult = 1.0 - resVal;
-                                                    else
-                                                        resMult = 1.0 / (1.0 + 4.0 * resVal);
-
-                                                    double dmg = 1.8 * lvMult * (1.0 + baseBonus) * (1.0 + uniqueBonus)
-                                                            * (1.0 + emBonus) * critMult * resMult * columbinaMult;
-                                                    potentialDamages.add(dmg);
-                                                }
-
-                                                // 3. Sort Descending
-                                                potentialDamages.sort(java.util.Collections.reverseOrder());
-
-                                                // 4. Weighted Sum
-                                                // Weights: 1, 0.5, 1/12, 1/12
-                                                double[] weights = { 1.0, 0.5, 1.0 / 12.0, 1.0 / 12.0 };
-                                                for (int i = 0; i < potentialDamages.size() && i < 4; i++) {
-                                                    finalDmg += potentialDamages.get(i) * weights[i];
-                                                }
-
-                                            } else {
-                                                // Standard EC
-                                                finalDmg = transDmg;
-                                            }
-
-                                            if (enableLogging)
-                                                System.out.println(
-                                                        String.format("   [DoT] %s Damage: %,.0f", label, finalDmg));
-
-                                            sim.recordDamage("Thundercloud", finalDmg);
-                                            combatLogSink.log(currentTime, "Thundercloud", label,
-                                                    finalDmg, label, finalDmg, sim.getEnemy().getAuraMap());
-
-                                            // Notify listeners with the strike damage so passives can react
-                                            if (isLunar) {
-                                                sim.notifyReaction(
-                                                    mechanics.reaction.ReactionResult.transform(finalDmg, "Thundercloud-Strike"),
-                                                    sim.getActiveCharacter());
-                                            }
-
-                                            sim.getEnemy().reduceAura(model.type.Element.HYDRO, 0.4);
-                                            sim.getEnemy().reduceAura(model.type.Element.ELECTRO, 0.4);
-
-                                            nextTick += (isLunar ? 2.0 : 1.0);
-                                        } else {
-                                            isECTimerRunning = false;
-                                            nextTick = Double.MAX_VALUE;
-                                        }
-                                    }
-
-                                    @Override
-                                    public double getNextTickTime() {
-                                        return nextTick;
-                                    }
-
-                                    @Override
-                                    public boolean isFinished(double time) {
-                                        return nextTick == Double.MAX_VALUE || time > 1000;
-                                    }
-                                });
-                            }
-                            // Apply Trigger Gauge (Supplement)
-                            enemy.setAura(trigger, action.getGaugeUnits());
-                        } else {
-                            enemy.setAura(aura, 0);
-                        }
-                    }
-                }
-            }
-
-            if (!reactionTriggered) {
-                // Prevent Physical, Anemo, Geo from persisting as Aura
-                // (Simplified: Only Pyro, Hydro, Cryo, Electro, Dendro stick)
-                if (trigger != model.type.Element.PHYSICAL &&
-                        trigger != model.type.Element.ANEMO &&
-                        trigger != model.type.Element.GEO) {
-                    enemy.setAura(trigger, action.getGaugeUnits());
-                    if (enableLogging)
-                        System.out.println(
-                                String.format("   [Aura] Applied %s (%.1f U)", trigger, action.getGaugeUnits()));
-                }
-            }
-
-        } else {
-            if (enableLogging)
-                System.out.println(String.format("   [ICD] Applied blocked (%s)", action.getICDTag()));
-        }
-
-        if (enableLogging)
-            System.out.println(String.format("[T=%.1f] %s uses %s", currentTime, charName, action.getName()));
-
-        List<Buff> activeBuffs = getApplicableBuffs(c);
-
-        // System.out.println("[CS_PRE_CALC] Calling calculate for " + c.getName() + "
-        // with "
-        // + (activeBuffs == null ? "null" : activeBuffs.size()) + " buffs.");
-
-        // Calculate Damage
-        double dmg = mechanics.formula.DamageCalculator.calculateDamage(c, enemy, action, activeBuffs, currentTime,
-                reactionMulti, this);
-        // Trigger Weapon onDamage (e.g. Wolf-Fang, Favonius)
-        if (c.getWeapon() != null) {
-            c.getWeapon().onDamage(c, action, currentTime, this);
-        }
-
-        // NA energy generation: Normal/Charged Attacks have a weapon-type-dependent
-        // probability of generating 1 flat Energy (not affected by Energy Recharge).
-        // Expected value is used instead of random rolls.
-        if (action.getActionType() == model.type.ActionType.NORMAL
-                || action.getActionType() == model.type.ActionType.CHARGE) {
-            if (c.getWeapon() != null) {
-                double naEnergy = c.getWeapon().getExpectedNAEnergyPerHit();
-                if (naEnergy > 0) {
-                    c.receiveFlatEnergy(naEnergy);
-                }
-            }
-        }
-
-        if (enableLogging)
-            System.out.println(String.format("   -> Damage: %,.0f", dmg));
-        recordDamage(charName, dmg);
-
-        // Notify Artifacts (onDamage)
-        if (c.getArtifacts() != null) {
-            for (model.entity.ArtifactSet a : c.getArtifacts()) {
-                if (a != null) {
-                    a.onDamage(this, action, dmg, c);
-                }
-            }
-        }
-
-        combatLogSink.log(currentTime, charName, action.getName(), dmg,
-                (reactionMulti > 1.0 ? "Amp x" + String.format("%.2f", reactionMulti) : "None"), 0.0,
-                enemy.getAuraMap(), action.getDebugFormula());
+    /**
+     * Sets the absolute simulation time at which the Thundercloud state expires.
+     *
+     * @param endTime Thundercloud expiry time in seconds
+     */
+    public void setThundercloudEndTime(double endTime) {
+        this.thundercloudEndTime = endTime;
     }
 }

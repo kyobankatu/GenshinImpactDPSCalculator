@@ -1,14 +1,15 @@
-package simulation;
+package simulation.runtime;
 
 import java.util.Map;
 
 import model.type.Element;
+import simulation.CombatLogSink;
 import visualization.VisualLogger;
 
 /**
  * Default {@link CombatLogSink} implementation backed by {@link VisualLogger}.
  */
-class VisualLoggerSink implements CombatLogSink {
+public class VisualLoggerSink implements CombatLogSink {
     private final VisualLogger visualLogger;
 
     /**

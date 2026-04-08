@@ -1,12 +1,13 @@
-package simulation;
+package simulation.runtime;
 
 import java.util.HashMap;
 import java.util.Map;
+import simulation.DamageTracker;
 
 /**
  * Tracks cumulative damage dealt during a simulation run and formats summary output.
  */
-class DamageReport implements DamageTracker {
+public class DamageReport implements DamageTracker {
     private final Map<String, Double> damageBySource = new HashMap<>();
     private double totalDamage = 0.0;
 
