@@ -31,7 +31,10 @@ tasks.withType(Javadoc).configureEach {
     options.addStringOption('Xdoclint:none', '-quiet')
     
     // Set Japanese locale if preferred, but usually en_US prevents weird garbling
-    options.locale = 'ja_JP' 
+    options.locale = 'ja_JP'
+
+    // Create docmentation of non-public members
+    options.memberLevel = JavadocMemberLevel.PRIVATE
 }
 
 // RL Tasks

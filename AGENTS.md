@@ -26,7 +26,7 @@
 - Run a trained RL policy: `cd rl_optimization && python enjoy.py`
 
 ## Development workflow
-- Read `README.md` and the relevant sample entry point before changing simulation behavior. Rotation scripts in `src/sample/` show how the engine is expected to be driven.
+- Read `README.md` in each package and the relevant sample entry point before changing simulation behavior. Rotation scripts in `src/sample/` show how the engine is expected to be driven.
 - Prefer minimal, local changes. This codebase has many tightly coupled mechanics, so broad refactors are risky unless they are required.
 - When touching combat logic, inspect related systems before editing: buffs, reactions, energy, optimizer assumptions, and report generation often depend on one another.
 - Preserve the existing package structure and naming style. New classes should be placed in the closest matching package instead of creating parallel abstractions without need.

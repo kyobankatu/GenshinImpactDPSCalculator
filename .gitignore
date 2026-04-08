@@ -44,3 +44,6 @@ output/
 rl_report.html
 learning_curve.png
 stats_dump.txt
+
+# job file
+execute.sh

@@ -6,6 +6,7 @@ import simulation.action.AttackAction;
 import mechanics.buff.Buff;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * God-class that drives the entire time-based combat simulation.
@@ -36,6 +37,9 @@ public class CombatSimulator {
     private double currentTime = 0.0;
     private Party party;
     private Enemy enemy;
+    private final DamageTracker damageReport;
+    private final SimulationEventBus eventDispatcher;
+    private final CombatLogSink combatLogSink;
     private List<Buff> teamBuffs = new ArrayList<>();
     private List<Buff> fieldBuffs = new ArrayList<>();
     private boolean isECTimerRunning = false;
@@ -87,7 +91,25 @@ public class CombatSimulator {
      * Constructs a new simulator with an empty party and zeroed time.
      */
     public CombatSimulator() {
+        this(new DamageReport(), new SimulationEventDispatcher(), new VisualLoggerSink());
+    }
+
+    /**
+     * Constructs a new simulator with injected collaborators for damage tracking,
+     * event dispatch, and combat logging.
+     *
+     * <p>This constructor exists to reduce hard dependencies on concrete helper
+     * implementations and allow alternate backends in tests or tooling.
+     *
+     * @param damageTracker damage recorder and report formatter
+     * @param eventBus      action, particle, and reaction event dispatcher
+     * @param combatLogSink sink used for timeline-style simulation logs
+     */
+    public CombatSimulator(DamageTracker damageTracker, SimulationEventBus eventBus, CombatLogSink combatLogSink) {
         this.party = new Party();
+        this.damageReport = Objects.requireNonNull(damageTracker, "damageTracker");
+        this.eventDispatcher = Objects.requireNonNull(eventBus, "eventBus");
+        this.combatLogSink = Objects.requireNonNull(combatLogSink, "combatLogSink");
     }
 
     /**
@@ -191,7 +213,7 @@ public class CombatSimulator {
         // Log the swap to the combat timeline
         java.util.Map<model.type.Element, Double> auraSnap =
                 (enemy != null) ? enemy.getAuraMap() : new java.util.HashMap<>();
-        visualization.VisualLogger.getInstance().log(
+        combatLogSink.log(
                 currentTime, oldName, "Swap \u2192 " + name, 0.0, "None", 0.0, auraSnap);
 
         Character newChar = party.getActiveCharacter();
@@ -352,8 +374,6 @@ public class CombatSimulator {
         return getApplicableBuffs(party.getActiveCharacter());
     }
 
-    private java.util.Map<String, Double> damageReport = new java.util.HashMap<>();
-    private double totalDamage = 0.0;
     private double rotationTime = 0.0;
 
     /**
@@ -420,8 +440,7 @@ public class CombatSimulator {
      * @param dmg      the damage amount to record
      */
     public void recordDamage(String charName, double dmg) {
-        totalDamage += dmg;
-        damageReport.put(charName, damageReport.getOrDefault(charName, 0.0) + dmg);
+        damageReport.recordDamage(charName, dmg);
     }
 
     /**
@@ -439,16 +458,7 @@ public class CombatSimulator {
      * total damage, share percentage, and individual DPS over the rotation time.
      */
     public void printReport() {
-        System.out.println("----------------------------------------------");
-        System.out.println("DPS Breakdown:");
-        for (String name : damageReport.keySet()) {
-            double d = damageReport.get(name);
-            System.out.println(
-                    String.format("%-10s : %,8.0f (%.1f%%) - DPS: %,.0f", name, d, d / totalDamage * 100, d / rotationTime));
-        }
-        System.out.println("----------------------------------------------");
-        System.out.println("Total Rotation Damage: " + String.format("%,.0f", totalDamage));
-        System.out.println(String.format("DPS (%.1fs): %,.0f", rotationTime, totalDamage / rotationTime));
+        damageReport.printReport(rotationTime);
     }
 
     /**
@@ -458,7 +468,7 @@ public class CombatSimulator {
      * @return DPS value
      */
     public double getDPS() {
-        return rotationTime > 0 ? totalDamage / rotationTime : 0.0;
+        return damageReport.getDps(rotationTime);
     }
 
     /**
@@ -467,7 +477,7 @@ public class CombatSimulator {
      * @return total damage
      */
     public double getTotalDamage() {
-        return totalDamage;
+        return damageReport.getTotalDamage();
     }
 
     private java.util.PriorityQueue<simulation.event.TimerEvent> events = new java.util.PriorityQueue<>(
@@ -519,8 +529,6 @@ public class CombatSimulator {
         this.rotationTime = currentTime;
     }
 
-    private java.util.List<ActionListener> listeners = new ArrayList<>();
-
     /**
      * Registers an {@link ActionListener} to be notified after each
      * {@link #performAction(String, AttackAction)} call.
@@ -528,10 +536,8 @@ public class CombatSimulator {
      * @param l the listener to add
      */
     public void addListener(ActionListener l) {
-        listeners.add(l);
+        eventDispatcher.addActionListener(l);
     }
-
-    private java.util.List<ParticleListener> particleListeners = new ArrayList<>();
 
     /**
      * Registers a {@link ParticleListener} to be notified when particles are generated.
@@ -539,7 +545,7 @@ public class CombatSimulator {
      * @param l the listener to add
      */
     public void addParticleListener(ParticleListener l) {
-        particleListeners.add(l);
+        eventDispatcher.addParticleListener(l);
     }
 
     /**
@@ -550,9 +556,7 @@ public class CombatSimulator {
      * @param count the number of particles generated
      */
     public void notifyParticle(model.type.Element e, double count) {
-        for (ParticleListener l : particleListeners) {
-            l.onParticle(e, count, currentTime);
-        }
+        eventDispatcher.notifyParticle(e, count, currentTime);
     }
 
     /**
@@ -575,15 +579,13 @@ public class CombatSimulator {
                 CombatSimulator sim);
     }
 
-    private java.util.List<ReactionListener> reactionListeners = new ArrayList<>();
-
     /**
      * Registers a {@link ReactionListener} to be notified when any elemental reaction fires.
      *
      * @param l the listener to add
      */
     public void addReactionListener(ReactionListener l) {
-        reactionListeners.add(l);
+        eventDispatcher.addReactionListener(l);
     }
 
     /**
@@ -594,20 +596,7 @@ public class CombatSimulator {
      * @param trigger the character whose element triggered the reaction
      */
     public void notifyReaction(mechanics.reaction.ReactionResult result, model.entity.Character trigger) {
-        for (ReactionListener l : reactionListeners) {
-            l.onReaction(result, trigger, currentTime, this);
-        }
-
-        // Notify Artifacts of ALL party members (Global Listeners)
-        for (model.entity.Character member : party.getMembers()) {
-            if (member.getArtifacts() != null) {
-                for (model.entity.ArtifactSet a : member.getArtifacts()) {
-                    if (a != null) {
-                        a.onReaction(this, result, trigger, member);
-                    }
-                }
-            }
-        }
+        eventDispatcher.notifyReaction(result, trigger, currentTime, this, party.getMembers());
 
         if (trigger != null && trigger.getWeapon() != null) {
             // Potential future hook for weapon reaction events
@@ -744,9 +733,7 @@ public class CombatSimulator {
         }
 
         // Notify Listeners (Atomic Actions)
-        for (ActionListener l : new ArrayList<>(listeners)) { // Copy to avoid concurrent mod
-            l.onAction(charName, action, currentTime);
-        }
+        eventDispatcher.notifyAction(charName, action, currentTime);
 
         // Calculate Time Advance with ATK SPD
         double duration = action.getAnimationDuration();
@@ -1073,7 +1060,7 @@ public class CombatSimulator {
                         // Keeping it here as per the instruction's provided snippet.
                         // notifyReaction(result, c); // This line was moved from above.
 
-                        visualization.VisualLogger.getInstance().log(currentTime, charName, reactionLabel, triggerDmg,
+                        combatLogSink.log(currentTime, charName, reactionLabel, triggerDmg,
                                 reactionLabel, triggerDmg, enemy.getAuraMap());
 
                         // Aura Management
@@ -1193,7 +1180,7 @@ public class CombatSimulator {
                                                         String.format("   [DoT] %s Damage: %,.0f", label, finalDmg));
 
                                             sim.recordDamage("Thundercloud", finalDmg);
-                                            visualization.VisualLogger.getInstance().log(currentTime, "Thundercloud", label,
+                                            combatLogSink.log(currentTime, "Thundercloud", label,
                                                     finalDmg, label, finalDmg, sim.getEnemy().getAuraMap());
 
                                             // Notify listeners with the strike damage so passives can react
@@ -1294,7 +1281,7 @@ public class CombatSimulator {
             }
         }
 
-        visualization.VisualLogger.getInstance().log(currentTime, charName, action.getName(), dmg,
+        combatLogSink.log(currentTime, charName, action.getName(), dmg,
                 (reactionMulti > 1.0 ? "Amp x" + String.format("%.2f", reactionMulti) : "None"), 0.0,
                 enemy.getAuraMap(), action.getDebugFormula());
     }
