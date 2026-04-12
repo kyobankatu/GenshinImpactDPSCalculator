@@ -83,8 +83,8 @@ public class Flins extends Character implements CombatSimulator.ReactionListener
         this.constellation = (int) mechanics.data.TalentDataManager.getInstance()
                 .get(this.name, "Constellation", 0);
 
-        this.skillCD = 16.0;
-        this.burstCD = 20.0;
+        setSkillCD(16.0);
+        setBurstCD(20.0);
     }
 
     /**

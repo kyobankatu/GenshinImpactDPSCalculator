@@ -30,14 +30,14 @@ public class Xiangling extends Character {
         this.artifacts = new ArtifactSet[] { artifacts };
         this.element = Element.PYRO;
         this.constellation = (int) mechanics.data.TalentDataManager.getInstance().get(this.name, "Constellation", 6.0);
-        this.skillCD = 12.0;
-        this.burstCD = 20.0;
+        setSkillCD(12.0);
+        setBurstCD(20.0);
     }
 
     @Override
     public boolean isBurstActive(double currentTime) {
         double duration = (this.constellation >= 4) ? 14.0 : 10.0;
-        return (currentTime - lastBurstTime) < duration;
+        return (currentTime - getLastBurstTime()) < duration;
     }
 
     @Override

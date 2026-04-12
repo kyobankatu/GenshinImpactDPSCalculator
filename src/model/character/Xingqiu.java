@@ -32,8 +32,8 @@ public class Xingqiu extends Character {
         this.artifacts = new ArtifactSet[] { artifacts };
         this.element = Element.HYDRO;
         this.constellation = (int) mechanics.data.TalentDataManager.getInstance().get(this.name, "Constellation", 6.0);
-        this.skillCD = 21.0;
-        this.burstCD = 20.0;
+        setSkillCD(21.0);
+        setBurstCD(20.0);
     }
 
     @Override
@@ -43,7 +43,7 @@ public class Xingqiu extends Character {
 
     @Override
     public boolean isBurstActive(double currentTime) {
-        return (currentTime - lastBurstTime) < 18.0;
+        return (currentTime - getLastBurstTime()) < 18.0;
     }
 
     @Override

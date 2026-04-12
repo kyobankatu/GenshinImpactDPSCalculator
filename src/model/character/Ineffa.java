@@ -70,8 +70,8 @@ public class Ineffa extends Character {
         // Defaults
         this.constellation = 0;
 
-        this.skillCD = 16.0;
-        this.burstCD = 15.0;
+        setSkillCD(16.0);
+        setBurstCD(15.0);
     }
 
     /**

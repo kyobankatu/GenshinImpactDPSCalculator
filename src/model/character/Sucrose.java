@@ -72,11 +72,11 @@ public class Sucrose extends Character {
         // Defaults
         this.constellation = 6;
 
-        this.skillCD = 15.0;
-        this.burstCD = 20.0;
+        setSkillCD(15.0);
+        setBurstCD(20.0);
 
         // C1: +1 charge (max 2); each charge has its own 15s CD
-        this.skillMaxCharges = (this.constellation >= 1) ? 2 : 1;
+        setSkillMaxCharges((this.constellation >= 1) ? 2 : 1);
     }
 
     /**
@@ -97,7 +97,7 @@ public class Sucrose extends Character {
     public boolean isBurstActive(double currentTime) {
         // Approximate check: Burst lasts 6s (8s C2)
         double duration = (this.constellation >= 2) ? 8.0 : 6.0;
-        return (currentTime - lastBurstTime) < duration;
+        return (currentTime - getLastBurstTime()) < duration;
     }
 
     /**
@@ -266,7 +266,7 @@ public class Sucrose extends Character {
 
                         if (this.absorbedElement != null) {
                             if (this.constellation >= 6) {
-                                double remainingTime = duration - (s.getCurrentTime() - lastBurstTime);
+                                double remainingTime = duration - (s.getCurrentTime() - getLastBurstTime());
                                 applyC6Buff(s, this.absorbedElement, remainingTime > 0 ? remainingTime : 0.1);
                             }
                         }

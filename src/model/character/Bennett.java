@@ -30,8 +30,8 @@ public class Bennett extends Character {
         this.artifacts = new ArtifactSet[] { artifacts };
         this.element = Element.PYRO;
         this.constellation = (int) mechanics.data.TalentDataManager.getInstance().get(this.name, "Constellation", 6.0);
-        this.skillCD = 5.0; // Tap E Short CD
-        this.burstCD = 15.0;
+        setSkillCD(5.0); // Tap E Short CD
+        setBurstCD(15.0);
     }
 
     @Override
@@ -41,7 +41,7 @@ public class Bennett extends Character {
 
     @Override
     public boolean isBurstActive(double currentTime) {
-        return (currentTime - lastBurstTime) < 12.0;
+        return (currentTime - getLastBurstTime()) < 12.0;
     }
 
     @Override

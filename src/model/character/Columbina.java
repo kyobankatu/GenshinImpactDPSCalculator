@@ -109,8 +109,8 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
         baseStats.set(model.type.StatType.CRIT_DMG, 0.50);
         baseStats.set(model.type.StatType.ENERGY_RECHARGE, 1.0);
 
-        this.skillCD = 17.0;
-        this.burstCD = 15.0;
+        setSkillCD(17.0);
+        setBurstCD(15.0);
 
         // Constellation (read from CSV; defaults to 0)
         this.constellation = (int) mechanics.data.TalentDataManager.getInstance()

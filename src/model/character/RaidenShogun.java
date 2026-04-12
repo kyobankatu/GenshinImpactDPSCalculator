@@ -28,8 +28,8 @@ public class RaidenShogun extends Character {
         this.artifacts = new ArtifactSet[] { artifacts };
         this.element = Element.ELECTRO;
         this.constellation = (int) mechanics.data.TalentDataManager.getInstance().get(this.name, "Constellation", 6.0);
-        this.skillCD = 10.0;
-        this.burstCD = 18.0;
+        setSkillCD(10.0);
+        setBurstCD(18.0);
     }
 
     @Override
