@@ -2,6 +2,7 @@ package model.entity;
 
 import model.stats.StatsContainer;
 import model.type.WeaponType;
+import simulation.action.CharacterActionRequest;
 
 /**
  * Represents a weapon that can be equipped on a {@link Character}.
@@ -88,6 +89,15 @@ public class Weapon {
      * @param key  action key string
      * @param sim  the active combat simulator
      */
+    public void onAction(Character user, CharacterActionRequest request, simulation.CombatSimulator sim) {
+        onAction(user, request.getLegacyActionKey(), sim);
+    }
+
+    /**
+     * Transitional string-based action hook retained for incremental migration of
+     * weapon implementations.
+     */
+    @Deprecated
     public void onAction(Character user, String key, simulation.CombatSimulator sim) {
         // Default: No action logic
     }

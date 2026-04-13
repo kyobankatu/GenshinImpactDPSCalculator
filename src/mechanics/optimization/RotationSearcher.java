@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import simulation.CombatSimulator;
+import simulation.action.CharacterActionKey;
+import simulation.action.CharacterActionRequest;
 import model.entity.Character;
 import mechanics.optimization.ProfileLoader; // Added import
 
@@ -311,27 +313,27 @@ public class RotationSearcher {
             switch (command.toUpperCase()) {
                 case "SKILL":
                     if (active.canSkill(now))
-                        active.onAction("skill", sim);
+                        sim.performAction(active.getName(), CharacterActionRequest.of(CharacterActionKey.SKILL));
                     break;
                 case "BURST":
                     if (active.canBurst(now))
-                        active.onAction("burst", sim);
+                        sim.performAction(active.getName(), CharacterActionRequest.of(CharacterActionKey.BURST));
                     break;
                 case "ATTACK":
-                    active.onAction("attack", sim);
+                    sim.performAction(active.getName(), CharacterActionRequest.of(CharacterActionKey.NORMAL));
                     break;
                 case "ATTACK_UNTIL_END":
                     // Attack until burst ends (Smart Field Time)
                     int safety = 0;
                     while (active.isBurstActive(sim.getCurrentTime()) && sim.getCurrentTime() < maxTime
                             && safety < 100) {
-                        active.onAction("attack", sim);
+                        sim.performAction(active.getName(), CharacterActionRequest.of(CharacterActionKey.NORMAL));
                         safety++;
                     }
                     // If not active (e.g. physical Raiden?), do a few attacks anyway
                     if (!active.isBurstActive(sim.getCurrentTime())) {
                         for (int k = 0; k < 3; k++)
-                            active.onAction("attack", sim);
+                            sim.performAction(active.getName(), CharacterActionRequest.of(CharacterActionKey.NORMAL));
                     }
                     break;
             }

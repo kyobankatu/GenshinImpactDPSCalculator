@@ -8,6 +8,7 @@ import model.type.ActionType;
 import model.type.WeaponType;
 import simulation.CombatSimulator;
 import simulation.action.AttackAction;
+import simulation.action.CharacterActionRequest;
 
 /**
  * Sunny Morning Sleep-In (5-star Catalyst).
@@ -56,11 +57,11 @@ public class SunnyMorningSleepIn extends Weapon implements CombatSimulator.React
      * first action the wielder performs.
      *
      * @param user the character wielding this weapon
-     * @param key  action key string
+     * @param request typed action request
      * @param sim  the active combat simulator
      */
     @Override
-    public void onAction(Character user, String key, CombatSimulator sim) {
+    public void onAction(Character user, CharacterActionRequest request, CombatSimulator sim) {
         if (!registeredListener) {
             ownerRef = user;
             sim.addReactionListener(this);

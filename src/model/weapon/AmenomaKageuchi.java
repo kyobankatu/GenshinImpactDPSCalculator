@@ -4,6 +4,8 @@ import model.entity.Weapon;
 import model.stats.StatsContainer;
 import model.type.StatType;
 import model.type.WeaponType;
+import simulation.action.CharacterActionKey;
+import simulation.action.CharacterActionRequest;
 
 public class AmenomaKageuchi extends Weapon {
     public AmenomaKageuchi() {
@@ -18,8 +20,8 @@ public class AmenomaKageuchi extends Weapon {
     private double lastSeedTime = -10.0; // Allow immediate cast
 
     @Override
-    public void onAction(model.entity.Character user, String key, simulation.CombatSimulator sim) {
-        if (key.equalsIgnoreCase("skill") || key.equalsIgnoreCase("E")) {
+    public void onAction(model.entity.Character user, CharacterActionRequest request, simulation.CombatSimulator sim) {
+        if (request.getKey() == CharacterActionKey.SKILL) {
             if (sim.getCurrentTime() - lastSeedTime >= 5.0) {
                 if (seeds < 3) {
                     seeds++;
@@ -27,7 +29,7 @@ public class AmenomaKageuchi extends Weapon {
                 lastSeedTime = sim.getCurrentTime();
                 System.out.println("   [Amenoma] Gained Succession Seed (Total: " + seeds + ")");
             }
-        } else if (key.equalsIgnoreCase("burst") || key.equalsIgnoreCase("Q")) {
+        } else if (request.getKey() == CharacterActionKey.BURST) {
             if (seeds > 0) {
                 double refund = seeds * 12.0; // R5 Value
                 System.out.println(

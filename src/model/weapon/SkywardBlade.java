@@ -4,6 +4,8 @@ import model.entity.Weapon;
 import model.stats.StatsContainer;
 import model.type.StatType;
 import model.type.WeaponType;
+import simulation.action.CharacterActionKey;
+import simulation.action.CharacterActionRequest;
 
 public class SkywardBlade extends Weapon {
     public SkywardBlade() {
@@ -31,9 +33,9 @@ public class SkywardBlade extends Weapon {
     }
 
     @Override
-    public void onAction(model.entity.Character user, String key, simulation.CombatSimulator sim) {
+    public void onAction(model.entity.Character user, CharacterActionRequest request, simulation.CombatSimulator sim) {
         // Trigger on Burst
-        if (key.equals("burst")) {
+        if (request.getKey() == CharacterActionKey.BURST) {
             buffEndTime = sim.getCurrentTime() + 12.0;
             System.out.println(String.format("   [Weapon] Skyward Blade Buff Activated (Ends at %.1fs)", buffEndTime));
             return;
@@ -42,7 +44,7 @@ public class SkywardBlade extends Weapon {
         // Trigger on Normal/Charged hits
         // Check if buff is active and action is Normal or Charge
         if (sim.getCurrentTime() < buffEndTime) {
-            if (key.equals("attack") || key.equals("charge")) {
+            if (request.getKey() == CharacterActionKey.NORMAL || request.getKey() == CharacterActionKey.CHARGE) {
                 // Deal Additional Physical DMG
                 simulation.action.AttackAction proc = new simulation.action.AttackAction(
                         "Skyward Blade Proc",

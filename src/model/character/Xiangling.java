@@ -11,6 +11,7 @@ import model.type.ICDTag;
 import model.type.ActionType;
 import simulation.CombatSimulator;
 import simulation.action.AttackAction;
+import simulation.action.CharacterActionRequest;
 import simulation.event.PeriodicDamageEvent;
 
 public class Xiangling extends Character {
@@ -60,33 +61,31 @@ public class Xiangling extends Character {
     }
 
     @Override
-    public void onAction(String key, CombatSimulator sim) {
-        switch (key) {
-            case "skill":
-            case "E":
+    public void onAction(CharacterActionRequest request, CombatSimulator sim) {
+        switch (request.getKey()) {
+            case SKILL:
                 markSkillUsed(sim.getCurrentTime());
                 skill(sim);
                 break;
-            case "burst":
-            case "Q":
+            case BURST:
                 markBurstUsed(sim.getCurrentTime());
                 burst(sim);
                 break;
-            case "attack":
+            case NORMAL:
                 normalAttack(sim);
                 break;
-            case "charge":
+            case CHARGE:
                 chargeAttack(sim);
                 break;
-            case "plunge":
-            case "low_plunge":
-            case "high_plunge":
+            case PLUNGE:
                 plunge(sim);
                 break;
-            case "dash":
+            case DASH:
                 normalAttackStep = 0;
                 sim.advanceTime(0.4);
                 break;
+            default:
+                throw new IllegalArgumentException("Unsupported action for Xiangling: " + request.getKey());
         }
     }
 

@@ -6,6 +6,7 @@ import model.entity.state.EnergyState;
 import model.entity.state.SnapshotState;
 import model.stats.StatsContainer;
 import model.type.StatType;
+import simulation.action.CharacterActionRequest;
 
 /**
  * Abstract base class for all playable characters in the simulation.
@@ -143,10 +144,16 @@ public abstract class Character {
         return snapshotState.getSnapshot();
     }
 
+    public void onAction(CharacterActionRequest request, simulation.CombatSimulator sim) {
+        onAction(request.getLegacyActionKey(), sim);
+    }
+
+    /**
+     * Transitional string-based action hook retained for incremental migration of
+     * character implementations.
+     */
+    @Deprecated
     public void onAction(String key, simulation.CombatSimulator sim) {
-        if (weapon != null) {
-            weapon.onAction(this, key, sim);
-        }
         System.out.println(name + " does nothing specific for " + key);
     }
 

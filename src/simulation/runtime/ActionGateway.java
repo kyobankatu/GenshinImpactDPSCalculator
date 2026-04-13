@@ -2,6 +2,8 @@ package simulation.runtime;
 
 import model.entity.Character;
 import simulation.CombatSimulator;
+import simulation.action.CharacterActionKey;
+import simulation.action.CharacterActionRequest;
 
 /**
  * Owns cooldown gating and dispatch for named character actions.
@@ -25,12 +27,22 @@ public class ActionGateway {
      * @param actionKey action key such as {@code "skill"} or {@code "burst"}
      */
     public void performNamedAction(String charName, String actionKey) {
+        performAction(charName, CharacterActionRequest.fromLegacy(actionKey));
+    }
+
+    /**
+     * Executes a typed character action after applying cooldown and energy gates.
+     *
+     * @param charName acting character name
+     * @param request typed action request
+     */
+    public void performAction(String charName, CharacterActionRequest request) {
         Character character = sim.getCharacter(charName);
         if (character == null) {
             throw new RuntimeException("Character not found: " + charName);
         }
 
-        if (isSkillAction(actionKey)) {
+        if (request.getKey() == CharacterActionKey.SKILL) {
             double wait = character.getSkillCDRemaining(sim.getCurrentTime());
             if (wait > 1e-9) {
                 if (sim.isLoggingEnabled()) {
@@ -42,7 +54,7 @@ public class ActionGateway {
             }
         }
 
-        if (isBurstAction(actionKey)) {
+        if (request.getKey() == CharacterActionKey.BURST) {
             double wait = character.getBurstCDRemaining(sim.getCurrentTime());
             if (wait > 1e-9) {
                 if (sim.isLoggingEnabled()) {
@@ -61,22 +73,14 @@ public class ActionGateway {
 
         if (sim.isLoggingEnabled()) {
             System.out.println(String.format("[T=%.1f] %s triggers action: %s",
-                    sim.getCurrentTime(), charName, actionKey));
+                    sim.getCurrentTime(), charName, request.getLegacyActionKey()));
         }
 
         if (character.getWeapon() != null) {
-            character.getWeapon().onAction(character, actionKey, sim);
+            character.getWeapon().onAction(character, request, sim);
         }
 
-        character.onAction(actionKey, sim);
+        character.onAction(request, sim);
         sim.setRotationTime(sim.getCurrentTime());
-    }
-
-    private boolean isSkillAction(String actionKey) {
-        return "skill".equals(actionKey) || "E".equals(actionKey);
-    }
-
-    private boolean isBurstAction(String actionKey) {
-        return "burst".equals(actionKey) || "Q".equals(actionKey);
     }
 }

@@ -5,6 +5,7 @@ import model.entity.Character;
 import model.stats.StatsContainer;
 import model.type.StatType;
 import model.type.WeaponType;
+import simulation.action.CharacterActionRequest;
 
 /**
  * Prospector's Shovel (custom weapon).
@@ -33,7 +34,7 @@ public class ProspectorShovel extends Weapon {
 
     /** Caches the simulator reference on first action for Moonsign checks. */
     @Override
-    public void onAction(Character user, String key, simulation.CombatSimulator sim) {
+    public void onAction(Character user, CharacterActionRequest request, simulation.CombatSimulator sim) {
         if (simRef == null) {
             simRef = sim;
         }

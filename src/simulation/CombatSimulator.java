@@ -8,6 +8,7 @@ import mechanics.buff.Buff;
 import model.entity.Character;
 import model.entity.Enemy;
 import simulation.action.AttackAction;
+import simulation.action.CharacterActionRequest;
 import simulation.event.TimerEvent;
 import simulation.runtime.ActionGateway;
 import simulation.runtime.BuffManager;
@@ -251,6 +252,16 @@ public class CombatSimulator {
      */
     public void performAction(String charName, String actionKey) {
         actionGateway.performNamedAction(charName, actionKey);
+    }
+
+    /**
+     * Executes a typed action after applying cooldown and energy gates.
+     *
+     * @param charName acting character name
+     * @param request typed action request
+     */
+    public void performAction(String charName, CharacterActionRequest request) {
+        actionGateway.performAction(charName, request);
     }
 
     /**

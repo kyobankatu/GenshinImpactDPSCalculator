@@ -5,6 +5,8 @@ import model.entity.Character;
 import model.stats.StatsContainer;
 import model.type.StatType;
 import model.type.WeaponType;
+import simulation.action.CharacterActionKey;
+import simulation.action.CharacterActionRequest;
 
 /**
  * Calamity Queller (5-star Polearm).
@@ -65,12 +67,12 @@ public class CalamityQueller extends Weapon {
      * </ol>
      */
     @Override
-    public void onAction(Character user, String key, simulation.CombatSimulator sim) {
+    public void onAction(Character user, CharacterActionRequest request, simulation.CombatSimulator sim) {
         if (ownerRef == null) {
             ownerRef = user;
         }
 
-        if (key.equals("skill")) {
+        if (request.getKey() == CharacterActionKey.SKILL) {
             double t = sim.getCurrentTime();
             accumulatedStacks = 0;
             consummationId++;

@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import simulation.CombatSimulator;
+import simulation.action.CharacterActionRequest;
 import model.entity.Character;
 
 public class RLServer {
@@ -470,7 +471,7 @@ public class RLServer {
 
     // Helper to execute string actions on char
     private void simFactoryActionRaw(Character c, String type) {
-        c.onAction(type, currentSim);
+        currentSim.performAction(c.getName(), CharacterActionRequest.fromLegacy(type));
     }
 
     private int stepCount = 0; // Track steps in episode
