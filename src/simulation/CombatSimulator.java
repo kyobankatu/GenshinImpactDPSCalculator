@@ -245,16 +245,6 @@ public class CombatSimulator {
     }
 
     /**
-     * Executes a named action after applying cooldown and energy gates.
-     *
-     * @param charName acting character name
-     * @param actionKey action key string
-     */
-    public void performAction(String charName, String actionKey) {
-        actionGateway.performNamedAction(charName, actionKey);
-    }
-
-    /**
      * Executes a typed action after applying cooldown and energy gates.
      *
      * @param charName acting character name
@@ -492,13 +482,8 @@ public class CombatSimulator {
         return buffManager.getTeamBuffList();
     }
 
-    /**
-     * Removes simulator-owned team buffs by display name.
-     *
-     * @param buffName buff name
-     */
-    public void removeTeamBuffsByName(String buffName) {
-        buffManager.removeTeamBuffsByName(buffName);
+    public void removeTeamBuffsById(mechanics.buff.BuffId buffId) {
+        buffManager.removeTeamBuffsById(buffId);
     }
 
     /**

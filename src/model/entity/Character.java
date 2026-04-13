@@ -5,6 +5,7 @@ import model.entity.state.CooldownState;
 import model.entity.state.EnergyState;
 import model.entity.state.SnapshotState;
 import model.stats.StatsContainer;
+import model.type.CharacterId;
 import model.type.StatType;
 import simulation.action.CharacterActionRequest;
 
@@ -46,6 +47,7 @@ public abstract class Character {
     protected ArtifactSet[] artifacts;
     protected int constellation = 0;
     protected model.type.Element element;
+    protected CharacterId characterId = CharacterId.UNKNOWN;
     protected final java.util.List<mechanics.buff.Buff> activeBuffs = new java.util.ArrayList<>();
 
     private final StatAssembler statAssembler = new StatAssembler();
@@ -71,6 +73,10 @@ public abstract class Character {
 
     public String getName() {
         return name;
+    }
+
+    public CharacterId getCharacterId() {
+        return characterId;
     }
 
     public StatsContainer getBaseStats() {
@@ -99,13 +105,13 @@ public abstract class Character {
         activeBuffs.add(buff);
     }
 
-    public void removeBuff(String name) {
-        activeBuffs.removeIf(buff -> buff.getName().equals(name));
+    public void removeBuff(mechanics.buff.BuffId id) {
+        activeBuffs.removeIf(buff -> buff.getId() == id);
     }
 
-    public boolean hasBuff(String name) {
+    public boolean hasBuff(mechanics.buff.BuffId id) {
         for (mechanics.buff.Buff buff : activeBuffs) {
-            if (buff.getName().equals(name)) {
+            if (buff.getId() == id) {
                 return true;
             }
         }
@@ -145,16 +151,7 @@ public abstract class Character {
     }
 
     public void onAction(CharacterActionRequest request, simulation.CombatSimulator sim) {
-        onAction(request.getLegacyActionKey(), sim);
-    }
-
-    /**
-     * Transitional string-based action hook retained for incremental migration of
-     * character implementations.
-     */
-    @Deprecated
-    public void onAction(String key, simulation.CombatSimulator sim) {
-        System.out.println(name + " does nothing specific for " + key);
+        System.out.println(name + " does nothing specific for " + request.getKey());
     }
 
     public void onSwitchOut(simulation.CombatSimulator sim) {

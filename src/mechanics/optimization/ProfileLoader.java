@@ -41,13 +41,13 @@ public class ProfileLoader {
         public String name;
 
         /** Ordered list of action command strings to execute in sequence. */
-        public List<String> actions;
+        public List<ProfileAction> actions;
 
         /**
          * @param name    profile name
          * @param actions ordered action commands
          */
-        public ActionProfile(String name, List<String> actions) {
+        public ActionProfile(String name, List<ProfileAction> actions) {
             this.name = name;
             this.actions = actions;
         }
@@ -75,8 +75,8 @@ public class ProfileLoader {
 
         if (!file.exists()) {
             // Return default "Skill Only" if no file found
-            List<String> acts = new ArrayList<>();
-            acts.add("SKILL");
+            List<ProfileAction> acts = new ArrayList<>();
+            acts.add(ProfileAction.SKILL);
             profiles.add(new ActionProfile("Default(Skill)", acts));
             return profiles;
         }
@@ -84,7 +84,7 @@ public class ProfileLoader {
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             String currentName = null;
-            List<String> currentActions = new ArrayList<>();
+            List<ProfileAction> currentActions = new ArrayList<>();
 
             while ((line = br.readLine()) != null) {
                 line = line.trim();
@@ -98,7 +98,7 @@ public class ProfileLoader {
                     currentName = line.substring(8).trim();
                     currentActions.clear();
                 } else {
-                    currentActions.add(line);
+                    currentActions.add(ProfileAction.parse(line));
                 }
             }
             // Add last one
@@ -112,8 +112,8 @@ public class ProfileLoader {
 
         // Ensure at least one profile
         if (profiles.isEmpty()) {
-            List<String> acts = new ArrayList<>();
-            acts.add("SKILL");
+            List<ProfileAction> acts = new ArrayList<>();
+            acts.add(ProfileAction.SKILL);
             profiles.add(new ActionProfile("Fallback", acts));
         }
 

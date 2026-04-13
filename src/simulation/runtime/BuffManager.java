@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import mechanics.buff.Buff;
+import mechanics.buff.BuffId;
 import model.entity.Character;
 import simulation.CombatSimulator;
 
@@ -43,7 +44,11 @@ public class BuffManager {
      * @param buff buff to add without stacking duplicate names
      */
     public void applyTeamBuffNoStack(Buff buff) {
-        removeTeamBuffsByName(buff.getName());
+        if (buff.getId() == BuffId.CUSTOM) {
+            removeTeamBuffsByDisplayName(buff.getName());
+        } else {
+            removeTeamBuffsById(buff.getId());
+        }
         teamBuffs.add(buff);
     }
 
@@ -109,7 +114,11 @@ public class BuffManager {
      *
      * @param buffName buff name to remove
      */
-    public void removeTeamBuffsByName(String buffName) {
+    public void removeTeamBuffsById(BuffId buffId) {
+        teamBuffs.removeIf(buff -> buff.getId() == buffId);
+    }
+
+    private void removeTeamBuffsByDisplayName(String buffName) {
         teamBuffs.removeIf(buff -> buff.getName().equals(buffName));
     }
 }

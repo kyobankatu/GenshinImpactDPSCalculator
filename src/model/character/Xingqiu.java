@@ -3,7 +3,9 @@ package model.character;
 import model.entity.Character;
 import model.entity.Weapon;
 import model.entity.ArtifactSet;
+import mechanics.buff.BuffId;
 import model.stats.StatsContainer;
+import model.type.CharacterId;
 import model.type.Element;
 import model.type.StatType;
 import model.type.ICDType;
@@ -22,6 +24,7 @@ public class Xingqiu extends Character {
     public Xingqiu(Weapon weapon, ArtifactSet artifacts) {
         super();
         this.name = "Xingqiu";
+        this.characterId = CharacterId.XINGQIU;
 
         double baseAtk = mechanics.data.TalentDataManager.getInstance().get(this.name, "Base ATK", 202);
         double ascAtk = mechanics.data.TalentDataManager.getInstance().get(this.name, "Ascension ATK%", 0.24);
@@ -85,7 +88,7 @@ public class Xingqiu extends Character {
         double mvMulti = 1.0;
         // Check for C4 (50% DMG multiplier if Burst active)
         boolean isBurstActive = sim.getApplicableBuffs(this).stream()
-                .anyMatch(b -> b.getName().equals("Raincutter"));
+                .anyMatch(b -> b.getId() == BuffId.RAINCUTTER);
         if (isBurstActive) {
             mvMulti = 1.5; // Multiplicative increase
             System.out.println("   [Xingqiu] C4 Activation: Skill DMG x1.5");
@@ -114,7 +117,8 @@ public class Xingqiu extends Character {
         sim.performAction(this.name, cast);
 
         // Buff Logic
-        sim.applyTeamBuff(new mechanics.buff.SimpleBuff("Raincutter", 18.0, sim.getCurrentTime(), s -> {
+        sim.applyTeamBuff(new mechanics.buff.SimpleBuff("Raincutter", BuffId.RAINCUTTER, 18.0,
+                sim.getCurrentTime(), s -> {
             s.add(StatType.RES_SHRED, 0.15); // Hydro Shred (C2)
         }));
 

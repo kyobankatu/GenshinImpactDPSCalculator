@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import mechanics.optimization.ProfileAction;
+
 /**
  * Defines the teacher rotation for the FlinsParty2 team
  * (Flins / Ineffa / Columbina / Sucrose).
@@ -24,33 +26,33 @@ public class FlinsParty2Rotation {
         List<RotationPhase> rotation = new ArrayList<>();
 
         // Phase 0: Ineffa Skill -> Burst
-        rotation.add(new RotationPhase("Ineffa", Arrays.asList("SKILL", "BURST")));
+        rotation.add(new RotationPhase("Ineffa", Arrays.asList(ProfileAction.SKILL, ProfileAction.BURST)));
 
         // Phase 1: Columbina Skill -> Burst
-        rotation.add(new RotationPhase("Columbina", Arrays.asList("SKILL", "BURST")));
+        rotation.add(new RotationPhase("Columbina", Arrays.asList(ProfileAction.SKILL, ProfileAction.BURST)));
 
         // Phase 2: Sucrose Skill -> Burst
-        rotation.add(new RotationPhase("Sucrose", Arrays.asList("SKILL", "BURST")));
+        rotation.add(new RotationPhase("Sucrose", Arrays.asList(ProfileAction.SKILL, ProfileAction.BURST)));
 
         // Phase 3: Flins carry phase
-        List<String> flinsActs = new ArrayList<>();
-        flinsActs.add("SKILL");
-        flinsActs.add("SKILL");
-        for (int i = 0; i < 4; i++) { flinsActs.add("ATTACK"); }
-        flinsActs.add("BURST");
-        for (int i = 0; i < 5; i++) { flinsActs.add("ATTACK"); }
-        flinsActs.add("SKILL");
-        flinsActs.add("BURST");
-        for (int i = 0; i < 8; i++) { flinsActs.add("ATTACK"); }
-        flinsActs.add("SKILL");
-        flinsActs.add("BURST");
-        for (int i = 0; i < 3; i++) { flinsActs.add("ATTACK"); }
+        List<ProfileAction> flinsActs = new ArrayList<>();
+        flinsActs.add(ProfileAction.SKILL);
+        flinsActs.add(ProfileAction.SKILL);
+        for (int i = 0; i < 4; i++) { flinsActs.add(ProfileAction.ATTACK); }
+        flinsActs.add(ProfileAction.BURST);
+        for (int i = 0; i < 5; i++) { flinsActs.add(ProfileAction.ATTACK); }
+        flinsActs.add(ProfileAction.SKILL);
+        flinsActs.add(ProfileAction.BURST);
+        for (int i = 0; i < 8; i++) { flinsActs.add(ProfileAction.ATTACK); }
+        flinsActs.add(ProfileAction.SKILL);
+        flinsActs.add(ProfileAction.BURST);
+        for (int i = 0; i < 3; i++) { flinsActs.add(ProfileAction.ATTACK); }
         rotation.add(new RotationPhase("Flins", flinsActs));
 
         // Phase 4: Sucrose Skill -> Attack x3
-        List<String> sucroseEnd = new ArrayList<>();
-        sucroseEnd.add("SKILL");
-        for (int i = 0; i < 3; i++) { sucroseEnd.add("ATTACK"); }
+        List<ProfileAction> sucroseEnd = new ArrayList<>();
+        sucroseEnd.add(ProfileAction.SKILL);
+        for (int i = 0; i < 3; i++) { sucroseEnd.add(ProfileAction.ATTACK); }
         rotation.add(new RotationPhase("Sucrose", sucroseEnd));
 
         return rotation;

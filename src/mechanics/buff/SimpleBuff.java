@@ -30,6 +30,11 @@ public class SimpleBuff extends Buff {
         this.effect = effect;
     }
 
+    public SimpleBuff(String name, BuffId id, double duration, double currentTime, Consumer<StatsContainer> effect) {
+        super(name, id, duration, currentTime);
+        this.effect = effect;
+    }
+
     /**
      * Invokes the stored effect lambda to apply stat bonuses, if the effect is non-null.
      *

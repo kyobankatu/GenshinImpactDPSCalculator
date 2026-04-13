@@ -3,6 +3,7 @@ package model.artifact;
 import model.stats.StatsContainer;
 import model.type.StatType;
 import mechanics.buff.Buff;
+import mechanics.buff.BuffId;
 import simulation.CombatSimulator.Moonsign;
 
 public class NightOfTheSkysUnveiling extends model.entity.ArtifactSet {
@@ -24,8 +25,7 @@ public class NightOfTheSkysUnveiling extends model.entity.ArtifactSet {
         // 4-Piece Bonus Logic
         // Trigger: "When nearby party members trigger Lunar Reactions" (implied: when
         // ANYONE triggers)
-        String rType = result.getName();
-        if (rType.startsWith("Lunar-") || rType.equals("Thundercloud-Strike")) {
+        if (result.isLunarReaction() || result.isThundercloudStrike()) {
             // Condition: "if the equipping character is on the field"
             boolean isOnField = (sim.getActiveCharacter() == owner);
 
@@ -44,9 +44,10 @@ public class NightOfTheSkysUnveiling extends model.entity.ArtifactSet {
 
                 if (crBonus > 0) {
                     // Refresh (not stack) — remove any existing instance first
-                    owner.removeBuff("Gleaming Moon: Intent");
+                    owner.removeBuff(BuffId.GLEAMING_MOON_INTENT);
                     final double finalBonus = crBonus;
-                    owner.addBuff(new Buff("Gleaming Moon: Intent", 4.0, sim.getCurrentTime()) {
+                    owner.addBuff(new Buff("Gleaming Moon: Intent", BuffId.GLEAMING_MOON_INTENT, 4.0,
+                            sim.getCurrentTime()) {
                         @Override
                         protected void applyStats(StatsContainer stats, double currentTime) {
                             stats.add(StatType.CRIT_RATE, finalBonus);

@@ -21,6 +21,8 @@ import mechanics.buff.Buff;
  * </ol>
  */
 public class DamageCalculator {
+    private static final DamageStrategy STANDARD_STRATEGY = new StandardDamageStrategy();
+    private static final DamageStrategy LUNAR_STRATEGY = new LunarDamageStrategy();
 
     /**
      * Calculates the final damage dealt by {@code action}.
@@ -84,275 +86,8 @@ public class DamageCalculator {
             double currentTime,
             double reactionMultiplier,
             simulation.CombatSimulator sim) {
-
-        // System.out.println("[DC_DEBUG] Enter calculateDamage for " +
-        // action.getName());
-        // System.out.println("[DC_DEBUG] UseSnapshot: " + action.isUseSnapshot() + ",
-        // Buffs: "
-        // + (activeBuffs == null ? "null" : activeBuffs.size()));
-
-        // 1. Formula Debugger Setup
-        StringBuilder formulaDebug = new StringBuilder();
-        if (action.isLunarConsidered()) {
-            // Lunar-Charged Considered Damage Formula
-            // Val = (ATK * MV) * (1 + EM_React + Gear_React) * Crit * Res
-            // Note: MV in action should already include: 3.0 * RawMV * (1+BaseBonus) *
-            // (1+UniqueBonus)
-
-            // 1. Stats
-            // Snapshot check
-            StatsContainer s = action.isUseSnapshot() ? attacker.getSnapshot()
-                    : attacker.getEffectiveStats(currentTime);
-
-            // Apply Buffs (Missing Link!) - FIXED
-            if (!action.isUseSnapshot() && activeBuffs != null) {
-                // System.out.println("[DC_DEBUG] Applying " + activeBuffs.size() + " buffs for
-                // " + attacker.getName()
-                // + " (Lunar Path)");
-                for (mechanics.buff.Buff b : activeBuffs) {
-                    if (!b.isExpired(currentTime)) {
-                        b.apply(s, currentTime);
-                    }
-                }
-            }
-
-            // 2. Base (Stat * MV)
-            model.type.StatType scaling = action.getScalingStat();
-            if (scaling == null)
-                scaling = model.type.StatType.BASE_ATK; // Default to ATK
-
-            double statVal = 0.0;
-            switch (scaling) {
-                case BASE_ATK:
-                    statVal = s.getTotalAtk();
-                    break;
-                case BASE_HP:
-                    statVal = s.getTotalHp();
-                    break;
-                case BASE_DEF:
-                    statVal = s.getTotalDef();
-                    break;
-                default:
-                    statVal = s.get(scaling);
-                    break;
-            }
-
-            double mv = action.getDamagePercent();
-
-            // Refactored: Base Bonus now comes from Team Buffs (Ineffa/Flins)
-            double totalBaseBonus = s.get(StatType.LUNAR_BASE_BONUS);
-
-            // Refactored: Columbina Multiplier
-            double columbinaMultiplier = 1.0 + s.get(StatType.LUNAR_MULTIPLIER);
-
-            // Unique Bonus
-            double uniqueBonus = s.get(StatType.LUNAR_UNIQUE_BONUS);
-
-            double baseSection = 3.0 * (statVal * mv) * (1.0 + totalBaseBonus) * (1.0 + uniqueBonus);
-
-            // 3. Reaction Bonus (EM + Equipment + Burst Buffs)
-            double em = s.get(StatType.ELEMENTAL_MASTERY);
-            // User Correction: Lunar Reaction Coefficient is 6.0, not 16.0
-            double reactionBonus = (6.0 * em) / (em + 2000.0);
-
-            // Gear Bonuses Breakdown
-            double statGearBonus = s.get(StatType.LUNAR_CHARGED_DMG_BONUS);
-            double burstBonus = s.get(StatType.LUNAR_REACTION_DMG_BONUS_ALL);
-            double ecBonus = s.get(StatType.LUNAR_MOONSIGN_BONUS);
-
-            double totalGearBonus = statGearBonus + burstBonus + ecBonus;
-
-            double multipler = 1.0 + reactionBonus + totalGearBonus;
-
-            // 4. Crit (LUNAR_REACTION_CRIT_DMG adds bonus CD only on this path)
-            double cr = s.get(StatType.CRIT_RATE);
-            double cd = s.get(StatType.CRIT_DMG) + s.get(StatType.LUNAR_REACTION_CRIT_DMG);
-            double critMult = 1.0 + (Math.min(cr, 1.0) * cd);
-
-            // 5. Res
-            double rawRes = target.getRes(action.getElement().getBonusStatType());
-            double resShred = s.get(StatType.RES_SHRED);
-            switch (action.getElement()) {
-                case PYRO:
-                    resShred += s.get(StatType.PYRO_RES_SHRED);
-                    break;
-                case HYDRO:
-                    resShred += s.get(StatType.HYDRO_RES_SHRED);
-                    break;
-                case CRYO:
-                    resShred += s.get(StatType.CRYO_RES_SHRED);
-                    break;
-                case ELECTRO:
-                    resShred += s.get(StatType.ELECTRO_RES_SHRED);
-                    break;
-                case ANEMO:
-                    resShred += s.get(StatType.ANEMO_RES_SHRED);
-                    break;
-                case GEO:
-                    resShred += s.get(StatType.GEO_RES_SHRED);
-                    break;
-                case DENDRO:
-                    resShred += s.get(StatType.DENDRO_RES_SHRED);
-                    break;
-                case PHYSICAL:
-                    resShred += s.get(StatType.PHYS_RES_SHRED);
-                    break;
-            }
-            double resMult = calculateResMulti(rawRes, resShred);
-
-            // Debug Formula Construction
-            try {
-                // Formula updated to show Columbina Multiplier separately
-                String formula = String.format(
-                        "3.0 * (%.0f * %.2f) * (1 + %.3f + %.2f) * (1 + %.3f + (%.3f + %.3f + %.3f)) * %.3f * %.3f * %.3f (Columbina)",
-                        statVal, mv,
-                        totalBaseBonus, uniqueBonus,
-                        reactionBonus, statGearBonus, burstBonus, ecBonus,
-                        critMult, resMult, columbinaMultiplier);
-                action.setDebugFormula(formula);
-
-                if (sim.isLoggingEnabled()) {
-                    System.out.println("[FormulaDebug] " + action.getName() + ": " + formula);
-                    System.out.println(String.format(
-                            "[FormulaValues] Stat:%.0f MV:%.2f BaseI:%.3f Uniq:%.2f React:%.3f Gear:%.3f Burst:%.3f Moonsign:%.3f Crit:%.3f Res:%.3f ColMult:%.3f",
-                            statVal, mv, totalBaseBonus, uniqueBonus, reactionBonus, statGearBonus, burstBonus,
-                            ecBonus, critMult, resMult, columbinaMultiplier));
-                }
-            } catch (Exception e) {
-                System.err.println("[FormulaError] Failed to format: " + e.getMessage());
-                e.printStackTrace();
-            }
-
-            double lunarDamage = baseSection * multipler * critMult * resMult * columbinaMultiplier;
-
-            // Notify Weapon of Hit (Lunar path — mirrors standard path below)
-            if (attacker.getWeapon() != null) {
-                attacker.getWeapon().onDamage(attacker, action, currentTime, sim);
-            }
-
-            // Notify Artifacts of Hit (Added for Silken Moon's Serenade)
-            if (attacker.getArtifacts() != null) {
-                for (model.entity.ArtifactSet artifact : attacker.getArtifacts()) {
-                    if (artifact != null) {
-                        artifact.onDamage(sim, action, lunarDamage, attacker);
-                    }
-                }
-            }
-
-            return lunarDamage;
-        }
-
-        // 1. Stats Collection
-        StatsContainer stats;
-
-        if (action.isUseSnapshot()) {
-            stats = attacker.getSnapshot();
-        } else {
-            stats = attacker.getEffectiveStats(currentTime);
-            // 2. Apply Dynamic/Team Buffs
-            if (activeBuffs != null) {
-                // System.out.println("[DC_DEBUG] Applying " + activeBuffs.size() + " buffs for
-                // " + attacker.getName());
-                for (Buff b : activeBuffs) {
-                    if (!b.isExpired(currentTime)) { // Assuming isActive is equivalent to !isExpired
-                        b.apply(stats, currentTime);
-                    }
-                }
-            }
-        }
-
-        // 2. Base Damage
-        double baseStatValue = action.getScalingStatValue(stats);
-        double mv = action.getDamagePercent(); // Fixed
-        double flatDmg = stats.get(StatType.FLAT_DMG_BONUS);
-        double baseDmg = (baseStatValue * mv) + flatDmg;
-
-        // 3. Dmg Bonus
-        double dmgBonus = stats.get(StatType.DMG_BONUS_ALL)
-                + stats.get(action.getElement().getBonusStatType())
-                + (action.getBonusStat() != null ? stats.get(action.getBonusStat()) : 0.0);
-
-        // Add extra bonuses from Action
-        if (action.getExtraBonuses() != null) {
-            for (java.util.Map.Entry<StatType, Double> entry : action.getExtraBonuses().entrySet()) {
-                dmgBonus += entry.getValue();
-            }
-        }
-
-        // 4. Crit
-        // 4. Crit
-        double critRate = stats.get(StatType.CRIT_RATE);
-        if (action.getActionType() == model.type.ActionType.BURST || action.isCountsAsBurstDmg()) {
-            critRate += stats.get(StatType.BURST_CRIT_RATE);
-        } else if (action.getActionType() == model.type.ActionType.SKILL || action.isCountsAsSkillDmg()) {
-            critRate += stats.get(StatType.SKILL_CRIT_RATE);
-        }
-        critRate = Math.min(1.0, critRate);
-        double critDmg = stats.get(StatType.CRIT_DMG);
-        double critMulti = 1.0 + (critRate * critDmg);
-
-        // 5. Reaction Multiplier (Passed from Simulator)
-        double finalReactionMulti = reactionMultiplier;
-
-        // 6. Def/Res
-        int attackerLevel = 90;
-        double totalDefIgnore = stats.get(StatType.DEF_IGNORE) + action.getDefenseIgnore();
-        if (totalDefIgnore > 1.0)
-            totalDefIgnore = 1.0;
-        double defMulti = calculateDefMulti(attackerLevel, target.getLevel(), totalDefIgnore);
-
-        // Res needs Target Res - Res Shred
-        // Res needs Target Res - Res Shred
-        double targetRes = target.getRes(action.getElement().getBonusStatType());
-        double resShred = stats.get(StatType.RES_SHRED);
-
-        // Add specific element shred
-        switch (action.getElement()) {
-            case PYRO:
-                resShred += stats.get(StatType.PYRO_RES_SHRED);
-                break;
-            case HYDRO:
-                resShred += stats.get(StatType.HYDRO_RES_SHRED);
-                break;
-            case CRYO:
-                resShred += stats.get(StatType.CRYO_RES_SHRED);
-                break;
-            case ELECTRO:
-                resShred += stats.get(StatType.ELECTRO_RES_SHRED);
-                break;
-            case ANEMO:
-                resShred += stats.get(StatType.ANEMO_RES_SHRED);
-                break;
-            case GEO:
-                resShred += stats.get(StatType.GEO_RES_SHRED);
-                break;
-            case DENDRO:
-                resShred += stats.get(StatType.DENDRO_RES_SHRED);
-                break;
-            case PHYSICAL:
-                resShred += stats.get(StatType.PHYS_RES_SHRED);
-                break;
-        }
-
-        double resMulti = calculateResMulti(targetRes, resShred);
-
-        double damage = baseDmg * (1 + dmgBonus) * critMulti * finalReactionMulti * defMulti * resMulti;
-
-        // Notify Weapon of Hit (for Stacking mechanics like Wolf-Fang)
-        if (attacker.getWeapon() != null) {
-            attacker.getWeapon().onDamage(attacker, action, currentTime, sim);
-        }
-
-        // Notify Artifacts of Hit
-        if (attacker.getArtifacts() != null) {
-            for (model.entity.ArtifactSet artifact : attacker.getArtifacts()) {
-                if (artifact != null) {
-                    artifact.onDamage(sim, action, damage, attacker);
-                }
-            }
-        }
-
-        return damage;
+        DamageStrategy strategy = action.isLunarConsidered() ? LUNAR_STRATEGY : STANDARD_STRATEGY;
+        return strategy.calculate(attacker, target, action, activeBuffs, currentTime, reactionMultiplier, sim);
     }
 
     /**
@@ -368,7 +103,7 @@ public class DamageCalculator {
      * @param defIgnore     total DEF ignore ratio clamped to [0, 1]
      * @return defense multiplier in the range (0, 1]
      */
-    private static double calculateDefMulti(int attackerLevel, int enemyLevel, double defIgnore) {
+    static double calculateDefMulti(int attackerLevel, int enemyLevel, double defIgnore) {
         double charFactor = attackerLevel + 100.0;
         double enemyFactor = (enemyLevel + 100.0) * (1.0 - defIgnore);
         return charFactor / (charFactor + enemyFactor);
@@ -391,13 +126,41 @@ public class DamageCalculator {
      * @return resistance multiplier to apply to outgoing damage
      */
     public static double calculateResMulti(double baseRes, double resShred) {
-        double finalRes = baseRes - resShred;
-        if (finalRes < 0) {
-            return 1.0 - (finalRes / 2.0);
-        } else if (finalRes < 0.75) {
-            return 1.0 - finalRes;
-        } else {
-            return 1.0 / (1.0 + 4.0 * finalRes);
+        return ResistanceCalculator.calculateResMulti(baseRes, resShred);
+    }
+
+    static StatsContainer resolveStats(
+            Character attacker,
+            simulation.action.AttackAction action,
+            List<Buff> activeBuffs,
+            double currentTime) {
+        StatsContainer stats = action.isUseSnapshot() ? attacker.getSnapshot() : attacker.getEffectiveStats(currentTime);
+        if (!action.isUseSnapshot() && activeBuffs != null) {
+            for (Buff buff : activeBuffs) {
+                if (!buff.isExpired(currentTime)) {
+                    buff.apply(stats, currentTime);
+                }
+            }
+        }
+        return stats;
+    }
+
+    static void notifyDamageHooks(
+            Character attacker,
+            simulation.action.AttackAction action,
+            double currentTime,
+            simulation.CombatSimulator sim,
+            double damage) {
+        if (attacker.getWeapon() != null) {
+            attacker.getWeapon().onDamage(attacker, action, currentTime, sim);
+        }
+
+        if (attacker.getArtifacts() != null) {
+            for (model.entity.ArtifactSet artifact : attacker.getArtifacts()) {
+                if (artifact != null) {
+                    artifact.onDamage(sim, action, damage, attacker);
+                }
+            }
         }
     }
 }

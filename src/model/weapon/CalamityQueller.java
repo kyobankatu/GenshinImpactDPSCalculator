@@ -2,6 +2,7 @@ package model.weapon;
 
 import model.entity.Weapon;
 import model.entity.Character;
+import mechanics.buff.BuffId;
 import model.stats.StatsContainer;
 import model.type.StatType;
 import model.type.WeaponType;
@@ -82,8 +83,8 @@ public class CalamityQueller extends Weapon {
 
             // Register as a visible Buff on the character (shows in Active Buffs report).
             // The Buff's applyStats reads accumulatedStacks from this weapon instance.
-            user.removeBuff("Calamity Queller"); // Remove existing buff if present to reset duration
-            user.addBuff(new mechanics.buff.Buff("Calamity Queller", DURATION, t) {
+            user.removeBuff(BuffId.CALAMITY_QUELLER);
+            user.addBuff(new mechanics.buff.Buff("Calamity Queller", BuffId.CALAMITY_QUELLER, DURATION, t) {
                 @Override
                 protected void applyStats(StatsContainer stats, double currentTime) {
                     stats.add(StatType.ATK_PERCENT, accumulatedStacks * ATK_PER_STACK);

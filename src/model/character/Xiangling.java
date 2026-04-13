@@ -3,7 +3,9 @@ package model.character;
 import model.entity.Character;
 import model.entity.Weapon;
 import model.entity.ArtifactSet;
+import mechanics.buff.BuffId;
 import model.stats.StatsContainer;
+import model.type.CharacterId;
 import model.type.Element;
 import model.type.StatType;
 import model.type.ICDType;
@@ -21,6 +23,7 @@ public class Xiangling extends Character {
     public Xiangling(Weapon weapon, ArtifactSet artifacts) {
         super();
         this.name = "Xiangling";
+        this.characterId = CharacterId.XIANGLING;
 
         double baseAtk = mechanics.data.TalentDataManager.getInstance().get(this.name, "Base ATK", 225);
         double ascEm = mechanics.data.TalentDataManager.getInstance().get(this.name, "Ascension EM", 96.0);
@@ -107,7 +110,7 @@ public class Xiangling extends Character {
                     // C1 Shred
                     if (this.constellation >= 1) {
                         s.applyFieldBuff(
-                                new mechanics.buff.SimpleBuff("Guoba C1 Shred", 6.0, s.getCurrentTime(), st -> {
+                                new mechanics.buff.SimpleBuff("Guoba C1 Shred", BuffId.XIANGLING_GUOBA_C1_SHRED, 6.0, s.getCurrentTime(), st -> {
                                     st.add(StatType.PYRO_RES_SHRED, 0.15);
                                 }));
                     }
@@ -120,14 +123,15 @@ public class Xiangling extends Character {
         // Chili Pickup at end of duration (assuming auto-pickup for sim efficiency)
         // "Beware, It's Super Hot!"
         double chiliAtk = mechanics.data.TalentDataManager.getInstance().get(this.name, "Attack Bonus", 0.10);
-        sim.applyTeamBuff(new mechanics.buff.SimpleBuff("Xiangling Chili", 10.0, sim.getCurrentTime() + 7.0, s -> {
+        sim.applyTeamBuff(new mechanics.buff.SimpleBuff("Xiangling Chili", BuffId.XIANGLING_CHILI, 10.0,
+                sim.getCurrentTime() + 7.0, s -> {
             s.add(StatType.ATK_PERCENT, chiliAtk);
         }));
     }
 
     private void burst(CombatSimulator sim) {
         // Snapshot
-        sim.getPartyMembers().stream().filter(c -> c.getName().equals(this.name)).findFirst()
+        sim.getPartyMembers().stream().filter(c -> c == this).findFirst()
                 .ifPresent(c -> c.captureSnapshot(sim.getCurrentTime(), sim.getTeamBuffs()));
 
         // Lv12 Values
@@ -164,7 +168,8 @@ public class Xiangling extends Character {
         // C6: Team Pyro DMG +15%
         if (this.constellation >= 6) {
             sim.applyTeamBuff(
-                    new mechanics.buff.SimpleBuff("Xiangling C6", pyronadoDuration, sim.getCurrentTime(), s -> {
+                    new mechanics.buff.SimpleBuff("Xiangling C6", BuffId.XIANGLING_C6, pyronadoDuration,
+                            sim.getCurrentTime(), s -> {
                         s.add(StatType.PYRO_DMG_BONUS, 0.15);
                     }));
         }

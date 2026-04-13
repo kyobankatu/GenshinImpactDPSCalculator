@@ -27,6 +27,22 @@ import java.util.HashMap;
  * </ul>
  */
 public class AttackAction {
+    public enum LunarReactionType {
+        CHARGED("Charged"),
+        BLOOM("Bloom"),
+        CRYSTALLIZE("Crystallize");
+
+        private final String legacyName;
+
+        LunarReactionType(String legacyName) {
+            this.legacyName = legacyName;
+        }
+
+        public String getLegacyName() {
+            return legacyName;
+        }
+    }
+
     private String name; // "Musou no Hitotachi"
     private double damagePercent; // 7.21 (721%) // Formerly motionValue
     private Element element; // ELECTRO
@@ -53,7 +69,7 @@ public class AttackAction {
     private double gaugeUnits = 1.0; // Default 1.0 Global Units (GU)
 
     private boolean isLunarConsidered = false;
-    private String lunarReactionType = null; // "Charged", "Bloom", "Crystallize"
+    private LunarReactionType lunarReactionType = null;
 
     /**
      * Marks whether this action participates in the custom Lunar damage system.
@@ -83,7 +99,7 @@ public class AttackAction {
      *
      * @param type the Lunar reaction sub-type string, or {@code null} to clear
      */
-    public void setLunarReactionType(String type) {
+    public void setLunarReactionType(LunarReactionType type) {
         this.lunarReactionType = type;
         if (type != null)
             this.isLunarConsidered = true;
@@ -94,7 +110,7 @@ public class AttackAction {
      *
      * @return the Lunar reaction type string
      */
-    public String getLunarReactionType() {
+    public LunarReactionType getLunarReactionType() {
         return lunarReactionType;
     }
 

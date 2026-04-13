@@ -2,6 +2,7 @@ package model.weapon;
 
 import model.entity.Weapon;
 import model.entity.Character;
+import mechanics.buff.BuffId;
 import model.stats.StatsContainer;
 import model.type.StatType;
 import model.type.WeaponType;
@@ -86,8 +87,9 @@ public class NocturnesCurtainCall extends Weapon {
         energyCooldownNextTime = currentTime + ENERGY_COOLDOWN;
         user.receiveFlatEnergy((int) ENERGY_RECOVER);
 
-        user.removeBuff("Bountiful Sea's Sacred Wine");
-        user.addBuff(new mechanics.buff.Buff("Bountiful Sea's Sacred Wine", WINE_DURATION, currentTime) {
+        user.removeBuff(BuffId.BOUNTIFUL_SEA_SACRED_WINE);
+        user.addBuff(new mechanics.buff.Buff("Bountiful Sea's Sacred Wine", BuffId.BOUNTIFUL_SEA_SACRED_WINE,
+                WINE_DURATION, currentTime) {
             @Override
             protected void applyStats(StatsContainer stats, double currentTime) {
                 stats.add(StatType.HP_PERCENT, HP_WINE);

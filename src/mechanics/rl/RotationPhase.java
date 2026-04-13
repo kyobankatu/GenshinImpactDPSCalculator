@@ -2,6 +2,8 @@ package mechanics.rl;
 
 import java.util.List;
 
+import mechanics.optimization.ProfileAction;
+
 /**
  * Represents one phase of a teacher rotation: a character name and the ordered
  * sequence of actions (SKILL, BURST, ATTACK, ATTACK_UNTIL_END) that character
@@ -9,9 +11,9 @@ import java.util.List;
  */
 public class RotationPhase {
     public final String charName;
-    public final List<String> actions;
+    public final List<ProfileAction> actions;
 
-    public RotationPhase(String charName, List<String> actions) {
+    public RotationPhase(String charName, List<ProfileAction> actions) {
         this.charName = charName;
         this.actions = actions;
     }

@@ -36,6 +36,15 @@ public class ActiveCharacterBuff extends Buff {
         this.effect = effect;
     }
 
+    public ActiveCharacterBuff(String name, BuffId id, double duration, double currentTime,
+            CombatSimulator sim, Character owner,
+            java.util.function.Consumer<StatsContainer> effect) {
+        super(name, id, duration, currentTime);
+        this.sim = sim;
+        this.owner = owner;
+        this.effect = effect;
+    }
+
     /**
      * Applies the effect lambda only if {@code owner} is the currently active
      * character in the simulation.

@@ -79,7 +79,13 @@ public class ReactionCalculator {
             // triggered.
             // But caller passes `swirlBonus`. So only apply if Swirl.
 
-            return ReactionResult.amp(totalMulti, (baseMulti == 2.0 || baseMulti == 1.5) ? "Vaporize" : "Melt");
+            boolean vaporize = (trigger == Element.HYDRO && aura == Element.PYRO)
+                    || (trigger == Element.PYRO && aura == Element.HYDRO);
+            String reactionName = vaporize ? "Vaporize" : "Melt";
+            ReactionResult.Kind reactionKind = vaporize
+                    ? ReactionResult.Kind.VAPORIZE
+                    : ReactionResult.Kind.MELT;
+            return ReactionResult.amp(totalMulti, reactionName, reactionKind);
         }
 
         // Transformative Reactions
@@ -88,11 +94,7 @@ public class ReactionCalculator {
         if (trigger == Element.ANEMO
                 && (aura == Element.PYRO || aura == Element.HYDRO || aura == Element.ELECTRO || aura == Element.CRYO)) {
             double dmg = calculateTransformativeDamage(level, em, 0.6, reactionBonus);
-            String type = "Swirl-" + aura.toString(); // e.g. "Swirl-PYRO"
-            // Wait, aura.toString() might be uppercase. Enum toString is name().
-            // "Swirl-PYRO".
-            // VV Logic needs to parse this.
-            return ReactionResult.transform(dmg, convertSwirlName(type));
+            return ReactionResult.transform(dmg, convertSwirlName(aura), ReactionResult.Kind.SWIRL, aura);
         }
         // Swirl (Element + Anemo) - usually Anemo triggers, but if Anemo is aura...
         // Anemo doesn't persist as Aura usually (sim removes it).
@@ -103,7 +105,7 @@ public class ReactionCalculator {
         if ((trigger == Element.PYRO && aura == Element.ELECTRO) ||
                 (trigger == Element.ELECTRO && aura == Element.PYRO)) {
             double dmg = calculateTransformativeDamage(level, em, 2.0, 0.0); // No specific overload bonus passed yet
-            return ReactionResult.transform(dmg, "Overload");
+            return ReactionResult.transform(dmg, "Overload", ReactionResult.Kind.OVERLOAD);
         }
 
         // Electro-Charged (Electro + Hydro)
@@ -111,7 +113,7 @@ public class ReactionCalculator {
                 (trigger == Element.HYDRO && aura == Element.ELECTRO)) {
 
             double dmg = calculateTransformativeDamage(level, em, 1.2, 0.0);
-            return ReactionResult.transform(dmg, "Electro-Charged");
+            return ReactionResult.transform(dmg, "Electro-Charged", ReactionResult.Kind.ELECTRO_CHARGED);
         }
 
         return ReactionResult.none();
@@ -124,16 +126,9 @@ public class ReactionCalculator {
      * @param raw the raw reaction string
      * @return formatted reaction string
      */
-    private static String convertSwirlName(String raw) {
-        // Normalize "Swirl-PYRO" to "Swirl-Pyro" if needed, or keep uppercase.
-        // Let's keep common format: "Swirl-Pyro"
-        String[] parts = raw.split("-");
-        if (parts.length > 1) {
-            String elem = parts[1]; // PYRO
-            elem = elem.charAt(0) + elem.substring(1).toLowerCase(); // Pyro
-            return "Swirl-" + elem;
-        }
-        return raw;
+    private static String convertSwirlName(Element aura) {
+        String elem = aura.name();
+        return "Swirl-" + elem.charAt(0) + elem.substring(1).toLowerCase();
     }
 
     /**

@@ -80,25 +80,15 @@ public class Weapon {
     }
 
     /**
-     * Called by the simulator when the equipped character executes a named action
-     * (e.g. {@code "E"}, {@code "Q"}). Use this hook to implement proc-based
-     * weapon passives that trigger on specific actions.
-     * Default implementation is a no-op.
+     * Called by the simulator when the equipped character executes an action
+     * request. Use this hook to implement proc-based weapon passives that
+     * trigger on specific actions. Default implementation is a no-op.
      *
-     * @param user action key string identifying the action
-     * @param key  action key string
+     * @param user the acting character
+     * @param request typed action request
      * @param sim  the active combat simulator
      */
     public void onAction(Character user, CharacterActionRequest request, simulation.CombatSimulator sim) {
-        onAction(user, request.getLegacyActionKey(), sim);
-    }
-
-    /**
-     * Transitional string-based action hook retained for incremental migration of
-     * weapon implementations.
-     */
-    @Deprecated
-    public void onAction(Character user, String key, simulation.CombatSimulator sim) {
         // Default: No action logic
     }
 

@@ -3,6 +3,7 @@ package model.artifact;
 import model.stats.StatsContainer;
 import model.type.StatType;
 import mechanics.buff.Buff;
+import mechanics.buff.BuffId;
 import simulation.CombatSimulator;
 
 public class ViridescentVenerer extends model.entity.ArtifactSet {
@@ -30,7 +31,7 @@ public class ViridescentVenerer extends model.entity.ArtifactSet {
         // for 10s.
 
         // Trigger condition: Swirl reaction
-        if (result.getName().startsWith("Swirl-")) {
+        if (result.isSwirl()) {
             // Check if owner is on field?
             // "The effect... can be triggered by the equipping character even if they are
             // not on the field?" -> Usually NO.
@@ -40,62 +41,66 @@ public class ViridescentVenerer extends model.entity.ArtifactSet {
             // Let's implement ON FIELD requirement.
 
             if (sim.getActiveCharacter() == owner) {
-                // Parse element from "Swirl-Pyro"
-                String[] parts = result.getName().split("-");
-                if (parts.length > 1) {
-                    String elemName = parts[1];
-                    model.type.Element elem = null;
-                    try {
-                        elem = model.type.Element.valueOf(elemName.toUpperCase());
-                    } catch (IllegalArgumentException e) {
-                        return; // Unknown element
+                model.type.Element elem = result.getSwirlElement();
+                if (elem != null) {
+                    // Apply Team Buff for RES Shred against this element
+                    // (Equivalent to Enemy Debuff in single-target sim)
+
+                    StatType shredStat = null;
+                    switch (elem) {
+                        case PYRO:
+                            shredStat = StatType.PYRO_RES_SHRED;
+                            break;
+                        case HYDRO:
+                            shredStat = StatType.HYDRO_RES_SHRED;
+                            break;
+                        case CRYO:
+                            shredStat = StatType.CRYO_RES_SHRED;
+                            break;
+                        case ELECTRO:
+                            shredStat = StatType.ELECTRO_RES_SHRED;
+                            break;
+                        case ANEMO:
+                        case GEO:
+                        case DENDRO:
+                        case PHYSICAL:
+                            // Cannot swirl these
+                            break;
                     }
 
-                    if (elem != null) {
-                        // Apply Team Buff for RES Shred against this element
-                        // (Equivalent to Enemy Debuff in single-target sim)
+                    if (shredStat != null) {
+                        final StatType targetStat = shredStat;
+                        final String buffName = "VV Shred: " + elem.toString();
 
-                        StatType shredStat = null;
-                        switch (elem) {
-                            case PYRO:
-                                shredStat = StatType.PYRO_RES_SHRED;
-                                break;
-                            case HYDRO:
-                                shredStat = StatType.HYDRO_RES_SHRED;
-                                break;
-                            case CRYO:
-                                shredStat = StatType.CRYO_RES_SHRED;
-                                break;
-                            case ELECTRO:
-                                shredStat = StatType.ELECTRO_RES_SHRED;
-                                break;
-                            case ANEMO:
-                            case GEO:
-                            case DENDRO:
-                            case PHYSICAL:
-                                // Cannot swirl these
-                                break;
-                        }
-
-                        if (shredStat != null) {
-                            final StatType targetStat = shredStat;
-                            final String buffName = "VV Shred: " + elem.toString();
-
-                            Buff vvBuff = new Buff(buffName, 10.0, sim.getCurrentTime()) {
-                                @Override
-                                protected void applyStats(StatsContainer stats, double currentTime) {
-                                    stats.add(targetStat, 0.40);
-                                }
-                            };
-
-                            // Apply to ALL party members
-                            for (model.entity.Character m : sim.getPartyMembers()) {
-                                m.addBuff(vvBuff);
+                        Buff vvBuff = new Buff(buffName, getVvBuffId(elem), 10.0, sim.getCurrentTime()) {
+                            @Override
+                            protected void applyStats(StatsContainer stats, double currentTime) {
+                                stats.add(targetStat, 0.40);
                             }
+                        };
+
+                        // Apply to ALL party members
+                        for (model.entity.Character m : sim.getPartyMembers()) {
+                            m.addBuff(vvBuff);
                         }
                     }
                 }
             }
+        }
+    }
+
+    private BuffId getVvBuffId(model.type.Element elem) {
+        switch (elem) {
+            case PYRO:
+                return BuffId.VV_SHRED_PYRO;
+            case HYDRO:
+                return BuffId.VV_SHRED_HYDRO;
+            case ELECTRO:
+                return BuffId.VV_SHRED_ELECTRO;
+            case CRYO:
+                return BuffId.VV_SHRED_CRYO;
+            default:
+                throw new IllegalArgumentException("Unsupported VV element: " + elem);
         }
     }
 }

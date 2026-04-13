@@ -3,7 +3,9 @@ package model.character;
 import model.entity.Character;
 import model.entity.Weapon;
 import model.entity.ArtifactSet;
+import mechanics.buff.BuffId;
 import model.stats.StatsContainer;
+import model.type.CharacterId;
 import model.type.Element;
 import model.type.StatType;
 import model.type.ICDType;
@@ -11,6 +13,8 @@ import model.type.ICDTag;
 import model.type.ActionType;
 import simulation.CombatSimulator;
 import simulation.action.AttackAction;
+import simulation.action.CharacterActionKey;
+import simulation.action.CharacterActionRequest;
 import simulation.event.PeriodicDamageEvent;
 import mechanics.buff.SimpleBuff;
 import mechanics.energy.EnergyManager;
@@ -64,6 +68,7 @@ public class Flins extends Character implements CombatSimulator.ReactionListener
     public Flins(Weapon weapon, ArtifactSet artifacts) {
         super();
         this.name = "Flins";
+        this.characterId = CharacterId.FLINS;
 
         // Stats (Lv 90)
         baseStats.set(StatType.BASE_HP,
@@ -191,33 +196,32 @@ public class Flins extends Character implements CombatSimulator.ReactionListener
     }
 
     /**
-     * Handles action keys dispatched by the combat simulator.
+     * Handles typed action requests dispatched by the combat simulator.
      *
-     * <p>Supported keys:
+     * <p>Supported actions:
      * <ul>
-     *   <li>{@code "skill"} / {@code "E"} — enters Manifest Flame or casts Northland Spearstorm.</li>
-     *   <li>{@code "burst"} / {@code "Q"} — casts the standard burst or Thunderous Symphony.</li>
-     *   <li>{@code "attack"} — advances the normal attack combo.</li>
-     *   <li>{@code "dash"} — advances time by 0.4 s.</li>
-     *   <li>Any non-{@code "attack"} action resets the normal attack combo step to 0.</li>
+     *   <li>{@link CharacterActionKey#SKILL} — enters Manifest Flame or casts Northland Spearstorm.</li>
+     *   <li>{@link CharacterActionKey#BURST} — casts the standard burst or Thunderous Symphony.</li>
+     *   <li>{@link CharacterActionKey#NORMAL} — advances the normal attack combo.</li>
+     *   <li>{@link CharacterActionKey#DASH} — advances time by 0.4 s.</li>
+     *   <li>Any non-{@code NORMAL} action resets the normal attack combo step to 0.</li>
      * </ul>
      *
-     * @param key action identifier string
+     * @param request typed action request
      * @param sim the combat simulator context
      */
     @Override
-    public void onAction(String key, CombatSimulator sim) {
+    public void onAction(CharacterActionRequest request, CombatSimulator sim) {
         if (!registeredListener && constellation >= 1) {
             sim.addReactionListener(this);
             registeredListener = true;
         }
         // Any non-attack action breaks the normal attack combo
-        if (!key.equals("attack")) {
+        if (request.getKey() != CharacterActionKey.NORMAL) {
             normalAttackStep = 0;
         }
-        switch (key) {
-            case "skill":
-            case "E":
+        switch (request.getKey()) {
+            case SKILL:
                 if (!isManifestFlameActive(sim.getCurrentTime())) {
                     markSkillUsed(sim.getCurrentTime());
                     skill_enterForm(sim);
@@ -225,8 +229,7 @@ public class Flins extends Character implements CombatSimulator.ReactionListener
                     skill_spearstorm(sim); // CD enforced by CombatSimulator
                 }
                 break;
-            case "burst":
-            case "Q":
+            case BURST:
                 markBurstUsed(sim.getCurrentTime());
                 if (isThunderousSymphonyActive(sim.getCurrentTime())) {
                     burst_symphony(sim);
@@ -234,11 +237,13 @@ public class Flins extends Character implements CombatSimulator.ReactionListener
                     burst_standard(sim);
                 }
                 break;
-            case "attack":
+            case NORMAL:
                 normalAttack(sim);
                 break;
-            case "dash":
+            case DASH:
                 sim.advanceTime(0.4);
+                break;
+            default:
                 break;
         }
     }
@@ -511,9 +516,6 @@ public class Flins extends Character implements CombatSimulator.ReactionListener
      * C1 — Part the Veil of Snow: when any party member triggers a Lunar-Charged
      * reaction, Flins recovers 8 Elemental Energy. Cooldown: 5.5 s.
      *
-     * <p>Lunar-Charged corresponds to {@code "Electro-Charged"} in the reaction
-     * result when the Moonsign is active.
-     *
      * @param result the reaction result
      * @param source the character that triggered the reaction
      * @param time   the simulation time of the reaction
@@ -522,7 +524,7 @@ public class Flins extends Character implements CombatSimulator.ReactionListener
     @Override
     public void onReaction(mechanics.reaction.ReactionResult result, model.entity.Character source,
             double time, CombatSimulator sim) {
-        if (!result.getName().equals("Electro-Charged")) {
+        if (!result.isElectroCharged() || sim.getMoonsign() == CombatSimulator.Moonsign.NONE) {
             return;
         }
         if (time - lastEnergyRestoreTime < 5.5) {
@@ -547,7 +549,7 @@ public class Flins extends Character implements CombatSimulator.ReactionListener
     @Override
     public java.util.List<mechanics.buff.Buff> getTeamBuffs() {
         java.util.List<mechanics.buff.Buff> buffs = new java.util.ArrayList<>();
-        buffs.add(new mechanics.buff.Buff("Flins: Lunar Base Bonus", Double.MAX_VALUE, 0) {
+        buffs.add(new mechanics.buff.Buff("Flins: Lunar Base Bonus", BuffId.FLINS_LUNAR_BASE_BONUS, Double.MAX_VALUE, 0) {
             @Override
             protected void applyStats(StatsContainer stats, double currentTime) {
                 double atk = Flins.this.getStructuralStats(currentTime).getTotalAtk();

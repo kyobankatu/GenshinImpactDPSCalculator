@@ -3,6 +3,7 @@ package model.artifact;
 import model.stats.StatsContainer;
 import model.type.StatType;
 import mechanics.buff.Buff;
+import mechanics.buff.BuffId;
 import simulation.CombatSimulator;
 import simulation.CombatSimulator.Moonsign;
 
@@ -37,7 +38,8 @@ public class SilkenMoonsSerenade extends model.entity.ArtifactSet {
 
             if (emBonus > 0) {
                 final double finalBonus = emBonus;
-                Buff devotionBuff = new Buff("Gleaming Moon: Devotion", 8.0, sim.getCurrentTime()) {
+                Buff devotionBuff = new Buff("Gleaming Moon: Devotion", BuffId.GLEAMING_MOON_DEVOTION, 8.0,
+                        sim.getCurrentTime()) {
                     @Override
                     protected void applyStats(StatsContainer stats, double currentTime) {
                         stats.add(StatType.ELEMENTAL_MASTERY, finalBonus);
@@ -49,8 +51,8 @@ public class SilkenMoonsSerenade extends model.entity.ArtifactSet {
                 // It acts as a Team Buff.
                 for (model.entity.Character m : sim.getPartyMembers()) {
                     // Start of Fix: Ensure uniqueness
-                    if (m.hasBuff("Gleaming Moon: Devotion")) {
-                        m.removeBuff("Gleaming Moon: Devotion");
+                    if (m.hasBuff(BuffId.GLEAMING_MOON_DEVOTION)) {
+                        m.removeBuff(BuffId.GLEAMING_MOON_DEVOTION);
                     }
                     m.addBuff(devotionBuff);
                 }

@@ -3,7 +3,9 @@ package model.character;
 import model.entity.Character;
 import model.entity.Weapon;
 import model.entity.ArtifactSet;
+import mechanics.buff.BuffId;
 import model.stats.StatsContainer;
+import model.type.CharacterId;
 import model.type.Element;
 import model.type.StatType;
 import model.type.ICDType;
@@ -23,6 +25,7 @@ public class RaidenShogun extends Character {
     public RaidenShogun(Weapon weapon, ArtifactSet artifacts) {
         super(); // Init base stats
         this.name = "Raiden Shogun";
+        this.characterId = CharacterId.RAIDEN_SHOGUN;
         baseStats.set(StatType.BASE_ATK, 337);
         baseStats.add(StatType.ENERGY_RECHARGE, 0.32); // Ascension Lv90
         this.weapon = weapon;
@@ -97,7 +100,8 @@ public class RaidenShogun extends Character {
         if (!listenerRegistered) {
             // Burst Listener (Chakra Desiderata)
             sim.addListener((actor, action, time) -> {
-                if (action.getActionType() == ActionType.BURST && !actor.equals(this.name)) {
+                if (action.getActionType() == ActionType.BURST
+                        && model.type.CharacterId.fromName(actor) != this.characterId) {
                     Character c = sim.getCharacter(actor);
                     if (c != null) {
                         double cost = c.getEnergyCost();
@@ -145,7 +149,8 @@ public class RaidenShogun extends Character {
         for (Character c : sim.getPartyMembers()) {
             double cost = c.getEnergyCost();
             double burstBonus = cost * 0.003;
-            c.addBuff(new mechanics.buff.SimpleBuff("Eye of Stormy Judgment", 25.0, sim.getCurrentTime(), s -> {
+            c.addBuff(new mechanics.buff.SimpleBuff("Eye of Stormy Judgment", BuffId.RAIDEN_EYE_OF_STORMY_JUDGMENT,
+                    25.0, sim.getCurrentTime(), s -> {
                 s.add(StatType.BURST_DMG_BONUS, burstBonus);
             }));
         }

@@ -2,6 +2,7 @@ package model.weapon;
 
 import model.entity.Weapon;
 import model.entity.Character;
+import mechanics.buff.BuffId;
 import model.stats.StatsContainer;
 import model.type.StatType;
 import simulation.action.AttackAction;
@@ -81,8 +82,9 @@ public class PrimordialJadeWingedSpear extends Weapon {
 
         // Re-register the visible buff with a refreshed 6 s window.
         // applyStats reads stacks from the outer weapon instance at calc time.
-        user.removeBuff("Eagle Spear of Justice");
-        user.addBuff(new mechanics.buff.Buff("Eagle Spear of Justice", STACK_DURATION, currentTime) {
+        user.removeBuff(BuffId.EAGLE_SPEAR_OF_JUSTICE);
+        user.addBuff(new mechanics.buff.Buff("Eagle Spear of Justice", BuffId.EAGLE_SPEAR_OF_JUSTICE,
+                STACK_DURATION, currentTime) {
             @Override
             protected void applyStats(StatsContainer stats, double time) {
                 stats.add(StatType.ATK_PERCENT, stacks * ATK_PER_STACK);

@@ -1,5 +1,6 @@
 package model.artifact;
 
+import mechanics.buff.BuffId;
 import model.stats.StatsContainer;
 import model.type.StatType;
 import mechanics.buff.Buff;
@@ -133,7 +134,7 @@ public class AubadeOfMorningstarAndMoon extends model.entity.ArtifactSet {
         private CombatSimulator sim;
 
         public AubadeBuff(String name, CombatSimulator sim) {
-            super(name); // Infinite by default, but we control via setExpiration
+            super(name, BuffId.AUBADE_BONUS); // Infinite by default, but we control via setExpiration
             this.sim = sim;
         }
 

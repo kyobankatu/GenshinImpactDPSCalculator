@@ -1,5 +1,6 @@
 package model.artifact;
 
+import mechanics.buff.BuffId;
 import model.entity.ArtifactSet;
 import model.stats.StatsContainer;
 import model.type.StatType;
@@ -18,7 +19,8 @@ public class NoblesseOblige extends ArtifactSet {
         // implying full set usually.
         // Assuming this object represents the active set bonus.
 
-        sim.applyTeamBuff(new mechanics.buff.SimpleBuff("Noblesse Oblige (4pc)", 12.0, sim.getCurrentTime(), s -> {
+        sim.applyTeamBuff(new mechanics.buff.SimpleBuff("Noblesse Oblige (4pc)", BuffId.NOBLESSE_OBLIGE_4PC,
+                12.0, sim.getCurrentTime(), s -> {
             s.add(StatType.ATK_PERCENT, 0.20);
         }));
         System.out.println("   [Artifact] Noblesse Oblige 4pc triggered!");

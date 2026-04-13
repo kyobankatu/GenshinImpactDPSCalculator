@@ -1,6 +1,7 @@
 package simulation.runtime;
 
 import mechanics.buff.Buff;
+import mechanics.buff.BuffId;
 import model.entity.Character;
 import model.stats.StatsContainer;
 import model.type.Element;
@@ -35,10 +36,10 @@ public class MoonsignManager {
 
         for (Character member : sim.getPartyMembers()) {
             for (Buff buff : sim.getApplicableBuffs(member)) {
-                if (buff.getName().equals("Gleaming Moon: Intent")) {
+                if (buff.getId() == BuffId.GLEAMING_MOON_INTENT) {
                     hasIntent = true;
                 }
-                if (buff.getName().equals("Gleaming Moon: Devotion")) {
+                if (buff.getId() == BuffId.GLEAMING_MOON_DEVOTION) {
                     hasDevotion = true;
                 }
             }
@@ -50,7 +51,8 @@ public class MoonsignManager {
         }
 
         final double bonus = 0.10 * count;
-        Buff synergyBuff = new Buff("Gleaming Moon: Synergy", 8.0, sim.getCurrentTime()) {
+        Buff synergyBuff = new Buff("Gleaming Moon: Synergy", BuffId.GLEAMING_MOON_SYNERGY, 8.0,
+                sim.getCurrentTime()) {
             @Override
             protected void applyStats(StatsContainer stats, double currentTime) {
                 stats.add(StatType.LUNAR_CHARGED_DMG_BONUS, bonus);
@@ -100,14 +102,14 @@ public class MoonsignManager {
     public void applyAscendantBlessing(Character buffer) {
         double bonus = calculateAscendantBlessingValue(buffer);
         for (Buff buff : sim.getTeamBuffList()) {
-            if (buff.getName().equals("Moonsign: Ascendant Blessing")
+            if (buff.getId() == BuffId.MOONSIGN_ASCENDANT_BLESSING
                     && buff instanceof MoonsignBuff
                     && ((MoonsignBuff) buff).getValue() > bonus) {
                 return;
             }
         }
 
-        sim.removeTeamBuffsByName("Moonsign: Ascendant Blessing");
+        sim.removeTeamBuffsById(BuffId.MOONSIGN_ASCENDANT_BLESSING);
         if (sim.isLoggingEnabled()) {
             System.out.println(String.format(
                     "   [Buff] Ascendant Blessing Triggered by %s (+%.1f%% Lunar DMG) - Duration 20s",
@@ -147,7 +149,7 @@ public class MoonsignManager {
          * @param startTime simulation time at which the buff starts
          */
         public MoonsignBuff(double value, double startTime) {
-            super("Moonsign: Ascendant Blessing", 20.0, startTime);
+            super("Moonsign: Ascendant Blessing", BuffId.MOONSIGN_ASCENDANT_BLESSING, 20.0, startTime);
             this.value = value;
         }
 

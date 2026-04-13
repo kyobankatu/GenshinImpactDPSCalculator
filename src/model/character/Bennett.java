@@ -3,7 +3,9 @@ package model.character;
 import model.entity.Character;
 import model.entity.Weapon;
 import model.entity.ArtifactSet;
+import mechanics.buff.BuffId;
 import model.stats.StatsContainer;
+import model.type.CharacterId;
 import model.type.Element;
 import model.type.StatType;
 import model.type.ICDType;
@@ -20,6 +22,7 @@ public class Bennett extends Character {
     public Bennett(Weapon weapon, ArtifactSet artifacts) {
         super();
         this.name = "Bennett";
+        this.characterId = CharacterId.BENNETT;
 
         double baseAtk = mechanics.data.TalentDataManager.getInstance().get(this.name, "Base ATK", 191);
         double ascEr = mechanics.data.TalentDataManager.getInstance().get(this.name, "Ascension ER", 0.267);
@@ -114,7 +117,8 @@ public class Bennett extends Character {
 
         double atkBonus = (baseStats.get(StatType.BASE_ATK) + weapon.getBaseAtk()) * totalRatio;
 
-        sim.applyFieldBuff(new mechanics.buff.SimpleBuff("Fantastic Voyage", 12.0, sim.getCurrentTime(), s -> {
+        sim.applyFieldBuff(new mechanics.buff.SimpleBuff("Fantastic Voyage", BuffId.FANTASTIC_VOYAGE, 12.0,
+                sim.getCurrentTime(), s -> {
             s.add(StatType.ATK_FLAT, atkBonus);
 
             // C6: Pyro Bonus
@@ -134,7 +138,7 @@ public class Bennett extends Character {
     private void normalAttack(CombatSimulator sim) {
         // C6 Infusion Logic
         boolean hasInfusion = sim.getApplicableBuffs(this).stream()
-                .anyMatch(b -> b.getName().equals("Fantastic Voyage"));
+                .anyMatch(b -> b.getId() == BuffId.FANTASTIC_VOYAGE);
         Element dmgElement = hasInfusion ? Element.PYRO : Element.PHYSICAL;
 
         String key = "N" + (normalAttackStep + 1);
@@ -199,7 +203,7 @@ public class Bennett extends Character {
 
     private void chargeAttack(CombatSimulator sim) {
         boolean hasInfusion = sim.getApplicableBuffs(this).stream()
-                .anyMatch(b -> b.getName().equals("Fantastic Voyage"));
+                .anyMatch(b -> b.getId() == BuffId.FANTASTIC_VOYAGE);
         Element dmgElement = hasInfusion ? Element.PYRO : Element.PHYSICAL;
 
         double mv1 = mechanics.data.TalentDataManager.getInstance().get(this.name, "CA_1", 1.03);
@@ -220,7 +224,7 @@ public class Bennett extends Character {
 
     private void plunge(CombatSimulator sim) {
         boolean hasInfusion = sim.getApplicableBuffs(this).stream()
-                .anyMatch(b -> b.getName().equals("Fantastic Voyage"));
+                .anyMatch(b -> b.getId() == BuffId.FANTASTIC_VOYAGE);
         Element dmgElement = hasInfusion ? Element.PYRO : Element.PHYSICAL;
 
         double mv = mechanics.data.TalentDataManager.getInstance().get(this.name, "Plunge High", 2.93);

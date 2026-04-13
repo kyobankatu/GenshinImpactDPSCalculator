@@ -1,13 +1,14 @@
 package simulation.runtime;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import mechanics.buff.Buff;
 import mechanics.formula.DamageCalculator;
+import mechanics.formula.ResistanceCalculator;
 import mechanics.reaction.ReactionCalculator;
+import mechanics.reaction.ReactionEffectScheduler;
 import mechanics.reaction.ReactionResult;
 import model.entity.ArtifactSet;
 import model.entity.Character;
@@ -31,6 +32,7 @@ import simulation.event.TimerEvent;
  */
 public class CombatActionResolver {
     private final CombatSimulator sim;
+    private final ReactionEffectScheduler reactionEffectScheduler;
 
     /**
      * Creates a resolver bound to the given simulator instance.
@@ -39,6 +41,7 @@ public class CombatActionResolver {
      */
     public CombatActionResolver(CombatSimulator sim) {
         this.sim = sim;
+        this.reactionEffectScheduler = new ReactionEffectScheduler(sim);
     }
 
     /**
@@ -88,8 +91,17 @@ public class CombatActionResolver {
         if (!action.isLunarConsidered() || action.getLunarReactionType() == null) {
             return;
         }
-        String reactionType = "Lunar-" + action.getLunarReactionType();
-        sim.notifyReaction(ReactionResult.transform(0.0, reactionType), character);
+        switch (action.getLunarReactionType()) {
+            case CHARGED:
+                sim.notifyReaction(ReactionResult.lunar(0.0, ReactionResult.LunarType.CHARGED), character);
+                break;
+            case BLOOM:
+                sim.notifyReaction(ReactionResult.lunar(0.0, ReactionResult.LunarType.BLOOM), character);
+                break;
+            case CRYSTALLIZE:
+                sim.notifyReaction(ReactionResult.lunar(0.0, ReactionResult.LunarType.CRYSTALLIZE), character);
+                break;
+        }
     }
 
     private double resolveGaugeAndReactions(Character attacker, String charName, AttackAction action) {
@@ -170,21 +182,22 @@ public class CombatActionResolver {
             StatsContainer stats) {
         Element reactionElement = getTransformativeReactionElement(result);
 
-        if (!result.getName().equals("Electro-Charged")) {
+        if (!result.isElectroCharged()) {
             sim.getEnemy().reduceAura(aura, action.getGaugeUnits());
         }
 
         double res = sim.getEnemy().getRes(reactionElement.getBonusStatType());
-        double resFactor = DamageCalculator.calculateResMulti(res, getResShred(stats, reactionElement));
-        double reactBonus = result.getName().equals("Electro-Charged")
+        double resFactor = DamageCalculator.calculateResMulti(
+                res, ResistanceCalculator.getTotalResShred(stats, reactionElement));
+        double reactBonus = result.isElectroCharged()
                 ? stats.get(StatType.ELECTRO_CHARGED_DMG_BONUS)
                 : 0.0;
         double transDmg = result.getTransformDamage() * (1.0 + reactBonus) * resFactor;
 
-        boolean isLunar = result.getName().equals("Electro-Charged")
+        boolean isLunar = result.isElectroCharged()
                 && sim.getMoonsign() != CombatSimulator.Moonsign.NONE;
         String reactionLabel = isLunar ? "Lunar-Charged" : result.getName();
-        double triggerDmg = isLunar ? computeInitialLunarChargedDamage() : transDmg;
+        double triggerDmg = isLunar ? reactionEffectScheduler.computeInitialLunarChargedDamage() : transDmg;
 
         if (sim.isLoggingEnabled()) {
             System.out.println(String.format(
@@ -197,189 +210,18 @@ public class CombatActionResolver {
                 sim.getCurrentTime(), charName, reactionLabel, triggerDmg,
                 reactionLabel, triggerDmg, sim.getEnemy().getAuraMap());
 
-        if (result.getName().equals("Electro-Charged")) {
-            handleElectroChargedState(trigger, action.getGaugeUnits(), transDmg, isLunar);
+        if (result.isElectroCharged()) {
+            reactionEffectScheduler.scheduleElectroCharged(trigger, action.getGaugeUnits(), transDmg, isLunar);
         } else {
             sim.getEnemy().setAura(aura, 0);
         }
     }
 
     private Element getTransformativeReactionElement(ReactionResult result) {
-        if (result.getName().equals("Electro-Charged")) {
+        if (result.isElectroCharged()) {
             return Element.ELECTRO;
         }
         return Element.PYRO;
-    }
-
-    private double getResShred(StatsContainer stats, Element reactionElement) {
-        double resShred = stats.get(StatType.RES_SHRED);
-        switch (reactionElement) {
-            case PYRO:
-                return resShred + stats.get(StatType.PYRO_RES_SHRED);
-            case HYDRO:
-                return resShred + stats.get(StatType.HYDRO_RES_SHRED);
-            case CRYO:
-                return resShred + stats.get(StatType.CRYO_RES_SHRED);
-            case ELECTRO:
-                return resShred + stats.get(StatType.ELECTRO_RES_SHRED);
-            case ANEMO:
-                return resShred + stats.get(StatType.ANEMO_RES_SHRED);
-            case GEO:
-                return resShred + stats.get(StatType.GEO_RES_SHRED);
-            case DENDRO:
-                return resShred + stats.get(StatType.DENDRO_RES_SHRED);
-            case PHYSICAL:
-                return resShred + stats.get(StatType.PHYS_RES_SHRED);
-            default:
-                return resShred;
-        }
-    }
-
-    private double computeInitialLunarChargedDamage() {
-        List<Double> potentialDamages = new ArrayList<>();
-        for (Character member : sim.getPartyMembers()) {
-            StatsContainer stats = member.getEffectiveStats(sim.getCurrentTime());
-            double baseBonus = stats.get(StatType.LUNAR_BASE_BONUS);
-            double uniqueBonus = stats.get(StatType.LUNAR_UNIQUE_BONUS)
-                    + stats.get(StatType.LUNAR_CHARGED_DMG_BONUS)
-                    + stats.get(StatType.ELECTRO_CHARGED_DMG_BONUS)
-                    + stats.get(StatType.LUNAR_REACTION_DMG_BONUS_ALL);
-            double columbinaMult = 1.0 + stats.get(StatType.LUNAR_MULTIPLIER);
-            double em = stats.get(StatType.ELEMENTAL_MASTERY);
-            double emBonus = (2.78 * em) / (em + 1400.0);
-            double cr = stats.get(StatType.CRIT_RATE);
-            double cd = stats.get(StatType.CRIT_DMG);
-            double critMult = 1.0 + (Math.min(cr, 1.0) * cd);
-            double resVal = sim.getEnemy().getRes(StatType.ELECTRO_DMG_BONUS);
-            double resMult;
-            if (resVal < 0) {
-                resMult = 1.0 - (resVal / 2.0);
-            } else if (resVal < 0.75) {
-                resMult = 1.0 - resVal;
-            } else {
-                resMult = 1.0 / (1.0 + 4.0 * resVal);
-            }
-
-            double damage = 1.8 * 1446.85 * (1.0 + baseBonus) * (1.0 + uniqueBonus)
-                    * (1.0 + emBonus) * critMult * resMult * columbinaMult;
-            potentialDamages.add(damage);
-        }
-
-        potentialDamages.sort(Collections.reverseOrder());
-        double[] weights = { 1.0, 0.5, 1.0 / 12.0, 1.0 / 12.0 };
-        double total = 0.0;
-        for (int i = 0; i < potentialDamages.size() && i < 4; i++) {
-            total += potentialDamages.get(i) * weights[i];
-        }
-        return total;
-    }
-
-    private void handleElectroChargedState(Element trigger, double gaugeUnits, double transDmg, boolean isLunar) {
-        if (isLunar) {
-            sim.setThundercloudEndTime(sim.getCurrentTime() + 6.0);
-        }
-
-        if (!sim.isECTimerRunning()) {
-            sim.setECTimerRunning(true);
-            sim.registerEvent(createElectroChargedTickEvent(transDmg, isLunar));
-        }
-
-        sim.getEnemy().setAura(trigger, gaugeUnits);
-    }
-
-    private TimerEvent createElectroChargedTickEvent(double transDmg, boolean isLunar) {
-        return new TimerEvent() {
-            private double nextTick = sim.getCurrentTime() + (isLunar ? 2.0 : 1.0);
-
-            @Override
-            public void tick(CombatSimulator simContext) {
-                boolean shouldTick = isLunar
-                        ? (simContext.getCurrentTime() <= simContext.getThundercloudEndTime())
-                        : (simContext.getEnemy().getAuraUnits(Element.HYDRO) > 0
-                                && simContext.getEnemy().getAuraUnits(Element.ELECTRO) > 0);
-                if (!shouldTick) {
-                    simContext.setECTimerRunning(false);
-                    nextTick = Double.MAX_VALUE;
-                    return;
-                }
-
-                String label = "Electro-Charged Tick";
-                double finalDamage = transDmg;
-                if (isLunar) {
-                    label = "Lunar-Charged Reaction";
-                    finalDamage = computeTickLunarChargedDamage(simContext);
-                }
-
-                if (simContext.isLoggingEnabled()) {
-                    System.out.println(String.format("   [DoT] %s Damage: %,.0f", label, finalDamage));
-                }
-
-                simContext.recordDamage("Thundercloud", finalDamage);
-                simContext.getCombatLogSink().log(
-                        simContext.getCurrentTime(), "Thundercloud", label, finalDamage,
-                        label, finalDamage, simContext.getEnemy().getAuraMap());
-
-                if (isLunar) {
-                    simContext.notifyReaction(
-                            ReactionResult.transform(finalDamage, "Thundercloud-Strike"),
-                            simContext.getActiveCharacter());
-                }
-
-                simContext.getEnemy().reduceAura(Element.HYDRO, 0.4);
-                simContext.getEnemy().reduceAura(Element.ELECTRO, 0.4);
-                nextTick += (isLunar ? 2.0 : 1.0);
-            }
-
-            @Override
-            public double getNextTickTime() {
-                return nextTick;
-            }
-
-            @Override
-            public boolean isFinished(double time) {
-                return nextTick == Double.MAX_VALUE || time > 1000;
-            }
-        };
-    }
-
-    private double computeTickLunarChargedDamage(CombatSimulator simContext) {
-        List<Double> potentialDamages = new ArrayList<>();
-        for (Character member : simContext.getPartyMembers()) {
-            StatsContainer stats = member.getEffectiveStats(simContext.getCurrentTime());
-            double baseBonus = stats.get(StatType.LUNAR_BASE_BONUS);
-            double uniqueBonus = stats.get(StatType.LUNAR_UNIQUE_BONUS)
-                    + stats.get(StatType.LUNAR_CHARGED_DMG_BONUS)
-                    + stats.get(StatType.ELECTRO_CHARGED_DMG_BONUS)
-                    + stats.get(StatType.LUNAR_REACTION_DMG_BONUS_ALL);
-            double columbinaMult = 1.0 + stats.get(StatType.LUNAR_MULTIPLIER);
-            double em = stats.get(StatType.ELEMENTAL_MASTERY);
-            double emBonus = (2.78 * em) / (em + 1400.0);
-            double cr = stats.get(StatType.CRIT_RATE);
-            double cd = stats.get(StatType.CRIT_DMG);
-            double critMult = 1.0 + (Math.min(cr, 1.0) * cd);
-
-            double resVal = simContext.getEnemy().getRes(StatType.ELECTRO_DMG_BONUS);
-            double resMult;
-            if (resVal < 0) {
-                resMult = 1.0 - (resVal / 2.0);
-            } else if (resVal < 0.75) {
-                resMult = 1.0 - resVal;
-            } else {
-                resMult = 1.0 / (1.0 + 4.0 * resVal);
-            }
-
-            double damage = 1.8 * 1446.85 * (1.0 + baseBonus) * (1.0 + uniqueBonus)
-                    * (1.0 + emBonus) * critMult * resMult * columbinaMult;
-            potentialDamages.add(damage);
-        }
-
-        potentialDamages.sort(Collections.reverseOrder());
-        double[] weights = { 1.0, 0.5, 1.0 / 12.0, 1.0 / 12.0 };
-        double total = 0.0;
-        for (int i = 0; i < potentialDamages.size() && i < 4; i++) {
-            total += potentialDamages.get(i) * weights[i];
-        }
-        return total;
     }
 
     private void applyTriggerAuraIfPersistent(Element trigger, double gaugeUnits) {

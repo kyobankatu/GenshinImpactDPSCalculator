@@ -6,7 +6,7 @@ import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
 
 /**
- * Owns cooldown gating and dispatch for named character actions.
+ * Owns cooldown gating and dispatch for typed character actions.
  */
 public class ActionGateway {
     private final CombatSimulator sim;
@@ -18,16 +18,6 @@ public class ActionGateway {
      */
     public ActionGateway(CombatSimulator sim) {
         this.sim = sim;
-    }
-
-    /**
-     * Executes a named character action after applying cooldown and energy gates.
-     *
-     * @param charName acting character name
-     * @param actionKey action key such as {@code "skill"} or {@code "burst"}
-     */
-    public void performNamedAction(String charName, String actionKey) {
-        performAction(charName, CharacterActionRequest.fromLegacy(actionKey));
     }
 
     /**
@@ -73,7 +63,7 @@ public class ActionGateway {
 
         if (sim.isLoggingEnabled()) {
             System.out.println(String.format("[T=%.1f] %s triggers action: %s",
-                    sim.getCurrentTime(), charName, request.getLegacyActionKey()));
+                    sim.getCurrentTime(), charName, request.getLogLabel()));
         }
 
         if (character.getWeapon() != null) {

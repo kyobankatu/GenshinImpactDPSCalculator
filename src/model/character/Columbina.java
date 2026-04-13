@@ -1,12 +1,16 @@
 package model.character;
 
+import mechanics.buff.BuffId;
 import mechanics.formula.DamageCalculator;
 import model.entity.Character;
+import model.type.CharacterId;
 import model.type.Element;
 import model.type.ICDType;
 import model.type.ICDTag;
 import simulation.CombatSimulator;
 import simulation.action.AttackAction;
+import simulation.action.CharacterActionKey;
+import simulation.action.CharacterActionRequest;
 import simulation.event.TimerEvent;
 
 import java.util.HashMap;
@@ -81,7 +85,7 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
     private double lunarBrillianceEndTime = -1; // C2: Lunar Brilliance expiry time
 
     // Gravity Accumulation Logic
-    private Map<String, Integer> gravityByType = new HashMap<>(); // "Charged", "Bloom", "Crystallize" -> Count
+    private Map<AttackAction.LunarReactionType, Integer> gravityByType = new HashMap<>();
     private double lastGravityTime = 0;
     // 4th Passive: Moonridge Dew window (up to 3 per 18s)
     private double dewWindowStart = -18.0;
@@ -97,6 +101,7 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
     public Columbina(model.entity.Weapon weapon, model.entity.ArtifactSet artifacts) {
         super();
         this.name = "Columbina";
+        this.characterId = CharacterId.COLUMBINA;
         this.weapon = weapon;
         this.artifacts = new model.entity.ArtifactSet[] { artifacts };
         this.element = Element.HYDRO;
@@ -156,25 +161,25 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
     }
 
     /**
-     * Handles action keys dispatched by the combat simulator.
+     * Handles typed action requests dispatched by the combat simulator.
      * Registers the reaction listener on first use.
      *
-     * <p>Supported keys:
+     * <p>Supported actions:
      * <ul>
-     *   <li>{@code "attack_charged"} — performs a Moondew Cleanse if Dew is available,
+     *   <li>{@link CharacterActionKey#CHARGE} — performs a Moondew Cleanse if Dew is available,
      *       otherwise a standard Charged Attack.</li>
-     *   <li>{@code "skill"} — casts Eternal Tides, starts the Gravity Ripple periodic
+     *   <li>{@link CharacterActionKey#SKILL} — casts Eternal Tides, starts the Gravity Ripple periodic
      *       event, and generates 4 Hydro particles.</li>
-     *   <li>{@code "burst"} — casts Moonlit Melancholy and applies the 20 s Lunar Domain
+     *   <li>{@link CharacterActionKey#BURST} — casts Moonlit Melancholy and applies the 20 s Lunar Domain
      *       reaction bonus team buff.</li>
-     *   <li>{@code "attack_normal_*"} — fires a normal attack hit.</li>
+     *   <li>{@link CharacterActionKey#NORMAL} — fires Columbina's current normal attack.</li>
      * </ul>
      *
-     * @param actionKey the action identifier string
+     * @param request typed action request
      * @param sim       the combat simulator context
      */
     @Override
-    public void onAction(String actionKey, CombatSimulator sim) {
+    public void onAction(CharacterActionRequest request, CombatSimulator sim) {
         if (!registeredListener) {
             sim.addReactionListener(this);
             registeredListener = true;
@@ -182,8 +187,8 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
 
         double currentTime = sim.getCurrentTime();
 
-        switch (actionKey) {
-            case "attack_charged":
+        switch (request.getKey()) {
+            case CHARGE:
                 if (moonridgeDew > 0) {
                     performSpecialCA(sim, true);
                     moonridgeDew--;
@@ -202,7 +207,7 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
                     sim.performAction("Columbina", ca);
                 }
                 break;
-            case "skill":
+            case SKILL:
                 markSkillUsed(currentTime);
                 // Summon Gravity Ripple
                 AttackAction skill = new AttackAction(
@@ -249,7 +254,7 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
                     triggerInterference(getDominantReactionType(), sim);
                 }
                 break;
-            case "burst":
+            case BURST:
                 markBurstUsed(currentTime);
                 // Lunar Domain
                 AttackAction burst = new AttackAction(
@@ -266,20 +271,20 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
 
                 // Lunar Domain burst bonus: active for the domain duration (20s)
                 sim.applyTeamBuffNoStack(new mechanics.buff.SimpleBuff(
-                        "Columbina: Lunar Burst Bonus", 20.0, sim.getCurrentTime(),
+                        "Columbina: Lunar Burst Bonus", BuffId.COLUMBINA_LUNAR_BURST_BONUS, 20.0, sim.getCurrentTime(),
                         st -> st.add(model.type.StatType.LUNAR_REACTION_DMG_BONUS_ALL, getMultiplier("Lunar Domain Bonus"))));
                 break;
+            case NORMAL:
+                AttackAction na = new AttackAction(
+                        "Columbina Normal",
+                        getMultiplier("Normal 1"),
+                        Element.HYDRO,
+                        model.type.StatType.BASE_ATK,
+                        null);
+                na.setAnimationDuration(0.5);
+                sim.performAction("Columbina", na);
+                break;
             default:
-                if (actionKey.startsWith("attack_normal_")) {
-                    AttackAction na = new AttackAction(
-                            actionKey,
-                            getMultiplier(mapNormalKey(actionKey)),
-                            Element.HYDRO,
-                            model.type.StatType.BASE_ATK,
-                            null);
-                    na.setAnimationDuration(0.5);
-                    sim.performAction("Columbina", na);
-                }
                 break;
         }
     }
@@ -302,21 +307,11 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
                     Element.DENDRO,
                     model.type.StatType.BASE_HP,
                     null);
-            special.setLunarReactionType("Bloom");
+            special.setLunarReactionType(AttackAction.LunarReactionType.BLOOM);
             special.setICD(ICDType.None, ICDTag.None, 0.0); // Lunar Reaction DMG: no aura application
             special.setAnimationDuration(0.5 + (i * 0.1));
             sim.performAction("Columbina", special);
         }
-    }
-
-    /**
-     * Maps a normal-attack action key to the talent data lookup key.
-     *
-     * @param key action key such as {@code "attack_normal_1"}
-     * @return talent data key (currently simplified to {@code "Normal 1"})
-     */
-    private String mapNormalKey(String key) {
-        return "Normal 1"; // Simplified
     }
 
     /**
@@ -335,10 +330,8 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
     @Override
     public void onReaction(mechanics.reaction.ReactionResult result, model.entity.Character source, double time,
             CombatSimulator sim) {
-        String type = result.getName();
-
         // 4th Passive: Thundercloud-Strike — add expected extra 33% within Lunar Domain
-        if (type.equals("Thundercloud-Strike")) {
+        if (result.isThundercloudStrike()) {
             if (time <= domainEndTime) {
                 double extra = result.getTransformDamage() * 0.33;
                 sim.recordDamage("Thundercloud", extra);
@@ -349,14 +342,8 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
             return;
         }
 
-        if (type.equals("Electro-Charged"))
-            type = "Lunar-Charged";
-        else if (type.equals("Bloom"))
-            type = "Lunar-Bloom";
-        else if (type.startsWith("Crystallize") && type.contains("HYDRO"))
-            type = "Lunar-Crystallize";
-
-        if (!type.startsWith("Lunar"))
+        AttackAction.LunarReactionType type = toLunarReactionType(result);
+        if (type == null)
             return;
 
         boolean nearRipple = (time <= rippleEndTime);
@@ -369,7 +356,7 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
             }
 
             boolean domainActive = (time <= domainEndTime);
-            if (domainActive && type.contains("Bloom")) {
+            if (domainActive && type == AttackAction.LunarReactionType.BLOOM) {
                 // 4th Passive: up to 3 Moonridge Dews per 18s window
                 if (time - dewWindowStart >= 18.0) {
                     dewWindowStart = time;
@@ -381,7 +368,7 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
                 }
             }
 
-            if (type.contains("Bloom")) {
+            if (type == AttackAction.LunarReactionType.BLOOM) {
                 if (verdantDew < MAX_DEW)
                     verdantDew++;
             }
@@ -395,12 +382,12 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
      * @param type the Lunar reaction type string (e.g. {@code "Lunar-Bloom"})
      * @param sim  the combat simulator context
      */
-    private void accumulateGravity(String type, CombatSimulator sim) {
+    private void accumulateGravity(AttackAction.LunarReactionType type, CombatSimulator sim) {
         gravity += 20;
         gravityByType.put(type, gravityByType.getOrDefault(type, 0) + 20);
 
         if (gravity >= MAX_GRAVITY) {
-            String dominant = type;
+            AttackAction.LunarReactionType dominant = type;
             int max = -1;
             for (var entry : gravityByType.entrySet()) {
                 if (entry.getValue() > max) {
@@ -421,10 +408,10 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
      *
      * @return dominant reaction type string
      */
-    private String getDominantReactionType() {
-        String dominant = "Lunar-Charged";
+    private AttackAction.LunarReactionType getDominantReactionType() {
+        AttackAction.LunarReactionType dominant = AttackAction.LunarReactionType.CHARGED;
         int max = -1;
-        for (Map.Entry<String, Integer> entry : gravityByType.entrySet()) {
+        for (Map.Entry<AttackAction.LunarReactionType, Integer> entry : gravityByType.entrySet()) {
             if (entry.getValue() > max) {
                 max = entry.getValue();
                 dominant = entry.getKey();
@@ -442,21 +429,21 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
      * @param dominant the dominant Lunar reaction type that triggered the cap
      * @param sim      the combat simulator context
      */
-    private void triggerInterference(String dominant, CombatSimulator sim) {
+    private void triggerInterference(AttackAction.LunarReactionType dominant, CombatSimulator sim) {
         switch (dominant) {
-            case "Lunar-Charged":
+            case CHARGED:
                 AttackAction ie = new AttackAction(
                         "Interference (Charged)",
                         getMultiplier("Interference Charged"),
                         Element.ELECTRO,
                         model.type.StatType.BASE_HP,
                         null);
-                ie.setLunarReactionType("Charged");
+                ie.setLunarReactionType(AttackAction.LunarReactionType.CHARGED);
                 ie.setICD(ICDType.None, ICDTag.None, 0.0); // Lunar Reaction DMG: no aura application
                 ie.setAnimationDuration(0);
                 sim.performAction("Columbina", ie);
                 break;
-            case "Lunar-Bloom":
+            case BLOOM:
                 for (int i = 0; i < 5; i++) {
                     AttackAction ib = new AttackAction(
                             "Interference (Bloom)",
@@ -464,20 +451,20 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
                             Element.DENDRO,
                             model.type.StatType.BASE_HP,
                             null);
-                    ib.setLunarReactionType("Bloom");
+                    ib.setLunarReactionType(AttackAction.LunarReactionType.BLOOM);
                     ib.setICD(ICDType.None, ICDTag.None, 0.0); // Lunar Reaction DMG: no aura application
                     ib.setAnimationDuration(0);
                     sim.performAction("Columbina", ib);
                 }
                 break;
-            case "Lunar-Crystallize":
+            case CRYSTALLIZE:
                 AttackAction ic = new AttackAction(
                         "Interference (Crystallize)",
                         getMultiplier("Interference Crystallize"),
                         Element.GEO,
                         model.type.StatType.BASE_HP,
                         null);
-                ic.setLunarReactionType("Crystallize");
+                ic.setLunarReactionType(AttackAction.LunarReactionType.CRYSTALLIZE);
                 ic.setICD(ICDType.None, ICDTag.None, 0.0); // Lunar Reaction DMG: no aura application
                 ic.setAnimationDuration(0);
                 sim.performAction("Columbina", ic);
@@ -489,7 +476,7 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
                             Element.GEO,
                             model.type.StatType.BASE_HP,
                             null);
-                    icExtra.setLunarReactionType("Crystallize");
+                    icExtra.setLunarReactionType(AttackAction.LunarReactionType.CRYSTALLIZE);
                     icExtra.setICD(ICDType.None, ICDTag.None, 0.0);
                     icExtra.setAnimationDuration(0);
                     sim.performAction("Columbina", icExtra);
@@ -502,8 +489,9 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
             double t = sim.getCurrentTime();
             boolean brillianceWasActive = (t < lunarBrillianceEndTime);
             lunarBrillianceEndTime = t + 8.0;
-            this.removeBuff("Columbina: Lunar Brilliance");
-            this.addBuff(new mechanics.buff.Buff("Columbina: Lunar Brilliance", 8.0, t) {
+            this.removeBuff(BuffId.COLUMBINA_LUNAR_BRILLIANCE);
+            this.addBuff(new mechanics.buff.Buff("Columbina: Lunar Brilliance", BuffId.COLUMBINA_LUNAR_BRILLIANCE,
+                    8.0, t) {
                 @Override
                 protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
                     stats.add(model.type.StatType.HP_PERCENT, 0.40);
@@ -533,21 +521,22 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
      * @param dominant the dominant reaction type determining which effect fires
      * @param sim      the combat simulator context
      */
-    private void applyC1MoonsignEffect(String dominant, CombatSimulator sim) {
+    private void applyC1MoonsignEffect(AttackAction.LunarReactionType dominant, CombatSimulator sim) {
         double t = sim.getCurrentTime();
         Character active = sim.getActiveCharacter();
         switch (dominant) {
-            case "Lunar-Charged":
+            case CHARGED:
                 // Active character recovers 6 Energy
                 if (active != null) {
                     active.receiveFlatEnergy(6);
                 }
                 break;
-            case "Lunar-Bloom":
+            case BLOOM:
                 // Active character gains interruption resistance for 8s (defensive, no DPS stat)
                 if (active != null) {
-                    active.removeBuff("Rainsea: Interruption Resistance");
-                    active.addBuff(new mechanics.buff.Buff("Rainsea: Interruption Resistance", 8.0, t) {
+                    active.removeBuff(BuffId.RAINSEA_INTERRUPTION_RESISTANCE);
+                    active.addBuff(new mechanics.buff.Buff("Rainsea: Interruption Resistance",
+                            BuffId.RAINSEA_INTERRUPTION_RESISTANCE, 8.0, t) {
                         @Override
                         protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
                             // Interruption resistance has no direct DPS impact
@@ -555,13 +544,13 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
                     });
                 }
                 break;
-            case "Lunar-Crystallize":
+            case CRYSTALLIZE:
                 // Rainsea Shield: 12% Columbina Max HP, Hydro 250% effectiveness, 8s
                 if (active != null) {
                     double shieldHp = getStructuralStats(t).getTotalHp() * 0.12;
                     String shieldName = String.format("Rainsea Shield (%.0f HP)", shieldHp);
-                    active.removeBuff("Rainsea Shield");
-                    active.addBuff(new mechanics.buff.Buff(shieldName, 8.0, t) {
+                    active.removeBuff(BuffId.RAINSEA_SHIELD);
+                    active.addBuff(new mechanics.buff.Buff(shieldName, BuffId.RAINSEA_SHIELD, 8.0, t) {
                         @Override
                         protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
                             // Shield absorption is defensive, no DPS stat impact
@@ -586,7 +575,7 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
      * @param dominant the dominant reaction type determining which effect fires
      * @param sim      the combat simulator context
      */
-    private void applyC2MoonsignEffect(String dominant, CombatSimulator sim) {
+    private void applyC2MoonsignEffect(AttackAction.LunarReactionType dominant, CombatSimulator sim) {
         double t = sim.getCurrentTime();
         Character active = sim.getActiveCharacter();
         if (active == null) {
@@ -594,36 +583,55 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
         }
         double colHp = getStructuralStats(t).getTotalHp();
         switch (dominant) {
-            case "Lunar-Charged":
+            case CHARGED:
                 double atkBonus = colHp * 0.01;
-                active.removeBuff("C2 Moonsign: ATK Bonus");
-                active.addBuff(new mechanics.buff.Buff("C2 Moonsign: ATK Bonus", 8.0, t) {
+                active.removeBuff(BuffId.C2_MOONSIGN_ATK_BONUS);
+                active.addBuff(new mechanics.buff.Buff("C2 Moonsign: ATK Bonus", BuffId.C2_MOONSIGN_ATK_BONUS,
+                        8.0, t) {
                     @Override
                     protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
                         stats.add(model.type.StatType.ATK_FLAT, atkBonus);
                     }
                 });
                 break;
-            case "Lunar-Bloom":
+            case BLOOM:
                 double emBonus = colHp * 0.0035;
-                active.removeBuff("C2 Moonsign: EM Bonus");
-                active.addBuff(new mechanics.buff.Buff("C2 Moonsign: EM Bonus", 8.0, t) {
+                active.removeBuff(BuffId.C2_MOONSIGN_EM_BONUS);
+                active.addBuff(new mechanics.buff.Buff("C2 Moonsign: EM Bonus", BuffId.C2_MOONSIGN_EM_BONUS,
+                        8.0, t) {
                     @Override
                     protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
                         stats.add(model.type.StatType.ELEMENTAL_MASTERY, emBonus);
                     }
                 });
                 break;
-            case "Lunar-Crystallize":
+            case CRYSTALLIZE:
                 double defBonus = colHp * 0.01;
-                active.removeBuff("C2 Moonsign: DEF Bonus");
-                active.addBuff(new mechanics.buff.Buff("C2 Moonsign: DEF Bonus", 8.0, t) {
+                active.removeBuff(BuffId.C2_MOONSIGN_DEF_BONUS);
+                active.addBuff(new mechanics.buff.Buff("C2 Moonsign: DEF Bonus", BuffId.C2_MOONSIGN_DEF_BONUS,
+                        8.0, t) {
                     @Override
                     protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
                         stats.add(model.type.StatType.DEF_FLAT, defBonus);
                     }
                 });
                 break;
+        }
+    }
+
+    private AttackAction.LunarReactionType toLunarReactionType(mechanics.reaction.ReactionResult result) {
+        switch (result.getLunarType()) {
+            case CHARGED:
+                return AttackAction.LunarReactionType.CHARGED;
+            case BLOOM:
+                return AttackAction.LunarReactionType.BLOOM;
+            case CRYSTALLIZE:
+                return AttackAction.LunarReactionType.CRYSTALLIZE;
+            default:
+                if (result.isElectroCharged()) {
+                    return AttackAction.LunarReactionType.CHARGED;
+                }
+                return null;
         }
     }
 
@@ -640,7 +648,8 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
         java.util.List<mechanics.buff.Buff> buffs = new java.util.ArrayList<>();
 
         // Passive: HP -> Multiplier
-        buffs.add(new mechanics.buff.Buff("Columbina: Lunar Base Bonus", Double.MAX_VALUE, 0) {
+        buffs.add(new mechanics.buff.Buff("Columbina: Lunar Base Bonus", BuffId.COLUMBINA_LUNAR_BASE_BONUS,
+                Double.MAX_VALUE, 0) {
             @Override
             protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
                 double hp = Columbina.this.getStructuralStats(currentTime).getTotalHp();
@@ -654,7 +663,8 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
 
         // C1: All party members' Lunar Reaction DMG +1.5% (permanent, independent multiplier)
         if (constellation >= 1) {
-            buffs.add(new mechanics.buff.Buff("Columbina C1: Lunar Reaction DMG +1.5%", Double.MAX_VALUE, 0) {
+            buffs.add(new mechanics.buff.Buff("Columbina C1: Lunar Reaction DMG +1.5%",
+                    BuffId.COLUMBINA_C1_LUNAR_REACTION_BONUS, Double.MAX_VALUE, 0) {
                 @Override
                 protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
                     stats.add(model.type.StatType.LUNAR_MULTIPLIER, 0.015);
@@ -664,7 +674,8 @@ public class Columbina extends Character implements CombatSimulator.ReactionList
 
         // C2: All party members' Lunar Reaction DMG +7% (permanent, independent multiplier)
         if (constellation >= 2) {
-            buffs.add(new mechanics.buff.Buff("Columbina C2: Lunar Reaction DMG +7%", Double.MAX_VALUE, 0) {
+            buffs.add(new mechanics.buff.Buff("Columbina C2: Lunar Reaction DMG +7%",
+                    BuffId.COLUMBINA_C2_LUNAR_REACTION_BONUS, Double.MAX_VALUE, 0) {
                 @Override
                 protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
                     stats.add(model.type.StatType.LUNAR_MULTIPLIER, 0.07);

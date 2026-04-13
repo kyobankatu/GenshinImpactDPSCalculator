@@ -3,7 +3,9 @@ package model.character;
 import model.entity.Character;
 import model.entity.Weapon;
 import model.entity.ArtifactSet;
+import mechanics.buff.BuffId;
 import model.stats.StatsContainer;
+import model.type.CharacterId;
 import model.type.Element;
 import model.type.StatType;
 import model.type.ICDType;
@@ -11,6 +13,8 @@ import model.type.ICDTag;
 import model.type.ActionType;
 import simulation.CombatSimulator;
 import simulation.action.AttackAction;
+import simulation.action.CharacterActionKey;
+import simulation.action.CharacterActionRequest;
 import simulation.event.PeriodicDamageEvent;
 import mechanics.buff.SimpleBuff;
 import mechanics.energy.EnergyManager;
@@ -55,6 +59,7 @@ public class Sucrose extends Character {
     public Sucrose(Weapon weapon, ArtifactSet artifacts) {
         super();
         this.name = "Sucrose";
+        this.characterId = CharacterId.SUCROSE;
 
         // Level 90 Base Stats
         baseStats.set(StatType.BASE_HP, mechanics.data.TalentDataManager.getInstance().get(this.name, "Base HP", 9244));
@@ -109,33 +114,33 @@ public class Sucrose extends Character {
     }
 
     /**
-     * Handles action keys dispatched by the combat simulator.
+     * Handles typed action requests dispatched by the combat simulator.
      *
-     * <p>Supported keys:
+     * <p>Supported actions:
      * <ul>
-     *   <li>{@code "skill"} / {@code "E"} — casts the Skill.</li>
-     *   <li>{@code "burst"} / {@code "Q"} — casts the Burst.</li>
-     *   <li>{@code "attack"} — advances the normal attack combo.</li>
+     *   <li>{@link CharacterActionKey#SKILL} — casts the Skill.</li>
+     *   <li>{@link CharacterActionKey#BURST} — casts the Burst.</li>
+     *   <li>{@link CharacterActionKey#NORMAL} — advances the normal attack combo.</li>
      * </ul>
      *
-     * @param key action identifier string
+     * @param request typed action request
      * @param sim the combat simulator context
      */
     @Override
-    public void onAction(String key, CombatSimulator sim) {
-        switch (key) {
-            case "skill":
-            case "E":
+    public void onAction(CharacterActionRequest request, CombatSimulator sim) {
+        switch (request.getKey()) {
+            case SKILL:
                 markSkillUsed(sim.getCurrentTime());
                 skill(sim);
                 break;
-            case "burst":
-            case "Q":
+            case BURST:
                 markBurstUsed(sim.getCurrentTime());
                 burst(sim);
                 break;
-            case "attack":
+            case NORMAL:
                 normalAttack(sim);
+                break;
+            default:
                 break;
         }
     }
@@ -296,7 +301,7 @@ public class Sucrose extends Character {
         double buffVal = myEm * 0.20;
 
         sim.applyTeamBuffNoStack(
-                new SimpleBuff("Mollis Favonius (A4)", 8.0, sim.getCurrentTime(), st -> {
+                new SimpleBuff("Mollis Favonius (A4)", BuffId.SUCROSE_MOLLIS_FAVONIUS_A4, 8.0, sim.getCurrentTime(), st -> {
                     st.add(StatType.ELEMENTAL_MASTERY, buffVal);
                 }).exclude(this.name));
     }
@@ -325,11 +330,27 @@ public class Sucrose extends Character {
 
         if (swirled != null) {
             final Element swirledElem = swirled;
+            final BuffId buffId = getCatalystConversionBuffId(swirledElem);
             sim.applyTeamBuffNoStack(
-                    new SimpleBuff("Catalyst Conversion (A1) [" + swirled.name() + "]", 8.0, sim.getCurrentTime(),
+                    new SimpleBuff("Catalyst Conversion (A1) [" + swirled.name() + "]", buffId, 8.0, sim.getCurrentTime(),
                             st -> {
                                 st.add(StatType.ELEMENTAL_MASTERY, 50.0);
                             }).forElement(swirledElem));
+        }
+    }
+
+    private BuffId getCatalystConversionBuffId(Element element) {
+        switch (element) {
+            case PYRO:
+                return BuffId.SUCROSE_CATALYST_CONVERSION_A1_PYRO;
+            case HYDRO:
+                return BuffId.SUCROSE_CATALYST_CONVERSION_A1_HYDRO;
+            case ELECTRO:
+                return BuffId.SUCROSE_CATALYST_CONVERSION_A1_ELECTRO;
+            case CRYO:
+                return BuffId.SUCROSE_CATALYST_CONVERSION_A1_CRYO;
+            default:
+                throw new IllegalArgumentException("Unsupported catalyst conversion element: " + element);
         }
     }
 
@@ -342,7 +363,7 @@ public class Sucrose extends Character {
      * @param duration remaining burst duration in seconds
      */
     private void applyC6Buff(CombatSimulator sim, Element elem, double duration) {
-        sim.applyTeamBuff(new SimpleBuff("Sucrose C6 Bonus", duration, sim.getCurrentTime(), st -> {
+        sim.applyTeamBuff(new SimpleBuff("Sucrose C6 Bonus", BuffId.SUCROSE_C6_BONUS, duration, sim.getCurrentTime(), st -> {
             switch (elem) {
                 case PYRO:
                     st.add(StatType.PYRO_DMG_BONUS, 0.20);

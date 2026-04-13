@@ -12,6 +12,8 @@ import mechanics.optimization.OptimizerPipeline;
 import mechanics.optimization.TotalOptimizationResult;
 import mechanics.optimization.ArtifactOptimizer;
 import mechanics.element.ResonanceManager;
+import simulation.action.CharacterActionKey;
+import simulation.action.CharacterActionRequest;
 
 public class FlinsParty {
     public static void main(String[] args) {
@@ -96,93 +98,105 @@ public class FlinsParty {
 
             // 1. Ineffa
             sim.switchCharacter("Ineffa");
-            sim.performAction("Ineffa", "skill");
-            sim.performAction("Ineffa", "burst");
+            skill(sim, "Ineffa");
+            burst(sim, "Ineffa");
 
             // 2. Columbina
             sim.switchCharacter("Columbina");
-            sim.performAction("Columbina", "skill");
-            sim.performAction("Columbina", "burst");
+            skill(sim, "Columbina");
+            burst(sim, "Columbina");
 
             // 3. Sucrose
             sim.switchCharacter("Sucrose");
-            sim.performAction("Sucrose", "skill");
-            sim.performAction("Sucrose", "burst");
+            skill(sim, "Sucrose");
+            burst(sim, "Sucrose");
 
             // 4. Flins
             sim.switchCharacter("Flins");
-            sim.performAction("Flins", "skill");
-            sim.performAction("Flins", "skill");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "burst"); // SpecialBurst 1
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "skill"); // 2nd Spearstorm (CD now cleared)
-            sim.performAction("Flins", "burst"); // SpecialBurst 2 (Thunderous Symphony renewed)
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
+            skill(sim, "Flins");
+            skill(sim, "Flins");
+            normal(sim, "Flins");
+            normal(sim, "Flins");
+            normal(sim, "Flins");
+            normal(sim, "Flins");
+            normal(sim, "Flins");
+            burst(sim, "Flins"); // SpecialBurst 1
+            normal(sim, "Flins");
+            normal(sim, "Flins");
+            normal(sim, "Flins");
+            normal(sim, "Flins");
+            normal(sim, "Flins");
+            normal(sim, "Flins");
+            normal(sim, "Flins");
+            normal(sim, "Flins");
+            skill(sim, "Flins"); // 2nd Spearstorm (CD now cleared)
+            burst(sim, "Flins"); // SpecialBurst 2 (Thunderous Symphony renewed)
+            normal(sim, "Flins");
+            normal(sim, "Flins");
+            normal(sim, "Flins");
 
             // 5. Sucrose
             sim.switchCharacter("Sucrose");
-            sim.performAction("Sucrose", "skill");
-            sim.performAction("Sucrose", "attack");
-            sim.performAction("Sucrose", "attack");
-            sim.performAction("Sucrose", "attack");
+            skill(sim, "Sucrose");
+            normal(sim, "Sucrose");
+            normal(sim, "Sucrose");
+            normal(sim, "Sucrose");
 
             // 1. Ineffa
             sim.switchCharacter("Ineffa");
-            sim.performAction("Ineffa", "skill");
+            skill(sim, "Ineffa");
 
             // 2. Columbina
             sim.switchCharacter("Columbina");
-            sim.performAction("Columbina", "skill");
-            sim.performAction("Columbina", "burst");
+            skill(sim, "Columbina");
+            burst(sim, "Columbina");
 
             // 3. Sucrose
             sim.switchCharacter("Sucrose");
-            sim.performAction("Sucrose", "skill");
-            sim.performAction("Sucrose", "burst");
+            skill(sim, "Sucrose");
+            burst(sim, "Sucrose");
 
             // 4. Flins
             sim.switchCharacter("Flins");
-            sim.performAction("Flins", "skill");
-            sim.performAction("Flins", "skill");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "burst"); // SpecialBurst 1
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "skill"); // 2nd Spearstorm (CD now cleared)
-            sim.performAction("Flins", "burst"); // SpecialBurst 2 (Thunderous Symphony renewed)
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
-            sim.performAction("Flins", "attack");
+            skill(sim, "Flins");
+            skill(sim, "Flins");
+            normal(sim, "Flins");
+            normal(sim, "Flins");
+            normal(sim, "Flins");
+            normal(sim, "Flins");
+            normal(sim, "Flins");
+            burst(sim, "Flins"); // SpecialBurst 1
+            normal(sim, "Flins");
+            normal(sim, "Flins");
+            normal(sim, "Flins");
+            normal(sim, "Flins");
+            normal(sim, "Flins");
+            normal(sim, "Flins");
+            normal(sim, "Flins");
+            normal(sim, "Flins");
+            skill(sim, "Flins"); // 2nd Spearstorm (CD now cleared)
+            burst(sim, "Flins"); // SpecialBurst 2 (Thunderous Symphony renewed)
+            normal(sim, "Flins");
+            normal(sim, "Flins");
+            normal(sim, "Flins");
 
             sim.switchCharacter("Sucrose");
-            sim.performAction("Sucrose", "attack");
-            sim.performAction("Sucrose", "attack");
+            normal(sim, "Sucrose");
+            normal(sim, "Sucrose");
 
         }
+    }
+
+    private static void normal(CombatSimulator sim, String characterName) {
+        sim.performAction(characterName, CharacterActionRequest.of(CharacterActionKey.NORMAL));
+    }
+
+    private static void skill(CombatSimulator sim, String characterName) {
+        sim.performAction(characterName, CharacterActionRequest.of(CharacterActionKey.SKILL));
+    }
+
+    private static void burst(CombatSimulator sim, String characterName) {
+        sim.performAction(characterName, CharacterActionRequest.of(CharacterActionKey.BURST));
     }
 
     private static void setupParty(CombatSimulator sim, java.util.Map<String, Double> erTargets,

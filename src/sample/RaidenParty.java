@@ -10,6 +10,8 @@ import model.weapon.*;
 import mechanics.optimization.OptimizerPipeline;
 import mechanics.optimization.TotalOptimizationResult;
 import mechanics.energy.EnergyManager;
+import simulation.action.CharacterActionKey;
+import simulation.action.CharacterActionRequest;
 
 public class RaidenParty {
     public static void main(String[] args) {
@@ -76,71 +78,87 @@ public class RaidenParty {
         // 1. Raiden E
         sim.switchCharacter("Raiden Shogun");
         EnergyManager.scheduleKQMSEnemyParticles(sim); // Add Enemy Particles (Delegated)
-        sim.performAction("Raiden Shogun", "skill");
+        skill(sim, "Raiden Shogun");
 
         // 2. Xingqiu: Q E E
         sim.switchCharacter("Xingqiu");
-        sim.performAction("Xingqiu", "burst"); // Q
-        sim.performAction("Xingqiu", "skill"); // E
-        sim.performAction("Xingqiu", "attack"); // N0 (Drive Raincutter)
+        burst(sim, "Xingqiu"); // Q
+        skill(sim, "Xingqiu"); // E
+        normal(sim, "Xingqiu"); // N0 (Drive Raincutter)
 
         // 3. Bennett: Q N0 E
         sim.switchCharacter("Bennett");
-        sim.performAction("Bennett", "burst"); // Q
-        sim.performAction("Bennett", "attack"); // N0
-        sim.performAction("Bennett", "skill"); // E
+        burst(sim, "Bennett"); // Q
+        normal(sim, "Bennett"); // N0
+        skill(sim, "Bennett"); // E
 
         // 4. Xiangling: Q N0 E N0 (Optimized to Q E N0)
         sim.switchCharacter("Xiangling");
-        sim.performAction("Xiangling", "burst"); // Q
-        sim.performAction("Xiangling", "attack"); // N0
-        sim.performAction("Xiangling", "skill"); // E
-        sim.performAction("Xiangling", "attack"); // N0
+        burst(sim, "Xiangling"); // Q
+        normal(sim, "Xiangling"); // N0
+        skill(sim, "Xiangling"); // E
+        normal(sim, "Xiangling"); // N0
 
         // 5. Raiden: Q N3Cx3 N1C N0 E
         sim.switchCharacter("Raiden Shogun");
-        sim.performAction("Raiden Shogun", "burst"); // Q
+        burst(sim, "Raiden Shogun"); // Q
 
         // N3Cx3
         for (int i = 0; i < 3; i++) {
-            sim.performAction("Raiden Shogun", "attack");
-            sim.performAction("Raiden Shogun", "attack");
-            sim.performAction("Raiden Shogun", "attack");
-            sim.performAction("Raiden Shogun", "charge");
+            normal(sim, "Raiden Shogun");
+            normal(sim, "Raiden Shogun");
+            normal(sim, "Raiden Shogun");
+            charge(sim, "Raiden Shogun");
         }
 
         // N1C
-        sim.performAction("Raiden Shogun", "attack");
-        sim.performAction("Raiden Shogun", "charge");
+        normal(sim, "Raiden Shogun");
+        charge(sim, "Raiden Shogun");
 
         // N0 E (End)
         sim.advanceTime(0.1);
-        sim.performAction("Raiden Shogun", "attack");
-        sim.performAction("Raiden Shogun", "skill"); // E Refresh
+        normal(sim, "Raiden Shogun");
+        skill(sim, "Raiden Shogun"); // E Refresh
 
         // 6. Bennett E
         sim.switchCharacter("Bennett");
-        sim.performAction("Bennett", "skill"); // E
-        sim.performAction("Bennett", "attack"); // N
+        skill(sim, "Bennett"); // E
+        normal(sim, "Bennett"); // N
 
         // 7. Xiangling Funnel
         sim.switchCharacter("Xiangling");
-        sim.performAction("Xiangling", "attack"); // N
+        normal(sim, "Xiangling"); // N
 
         // 8. Bennet E
         sim.switchCharacter("Bennett");
-        sim.performAction("Bennett", "skill"); // E
-        sim.performAction("Bennett", "attack"); // N
+        skill(sim, "Bennett"); // E
+        normal(sim, "Bennett"); // N
 
         // 9. Xiangling Funnel
         sim.switchCharacter("Xiangling");
-        sim.performAction("Xiangling", "attack"); // N
+        normal(sim, "Xiangling"); // N
 
         // Pad to full 21s rotation
         double remaining = 21.0 - sim.getCurrentTime();
         if (remaining > 0) {
             sim.advanceTime(remaining);
         }
+    }
+
+    private static void normal(CombatSimulator sim, String characterName) {
+        sim.performAction(characterName, CharacterActionRequest.of(CharacterActionKey.NORMAL));
+    }
+
+    private static void charge(CombatSimulator sim, String characterName) {
+        sim.performAction(characterName, CharacterActionRequest.of(CharacterActionKey.CHARGE));
+    }
+
+    private static void skill(CombatSimulator sim, String characterName) {
+        sim.performAction(characterName, CharacterActionRequest.of(CharacterActionKey.SKILL));
+    }
+
+    private static void burst(CombatSimulator sim, String characterName) {
+        sim.performAction(characterName, CharacterActionRequest.of(CharacterActionKey.BURST));
     }
 
     private static void setupParty(CombatSimulator sim, java.util.Map<String, Double> erTargets,

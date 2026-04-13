@@ -15,6 +15,7 @@ import simulation.CombatSimulator;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
 import model.entity.Character;
+import model.type.CharacterId;
 import mechanics.optimization.ProfileLoader; // Added import
 
 /**
@@ -262,9 +263,10 @@ public class RotationSearcher {
             while (sim.getCurrentTime() < maxTime) {
                 // 1. Swap
                 String targetName = order.get(orderIndex % order.size());
+                CharacterId targetId = CharacterId.fromName(targetName);
 
                 // If not active, swap
-                if (sim.getActiveCharacter() == null || !sim.getActiveCharacter().getName().equals(targetName)) {
+                if (sim.getActiveCharacter() == null || sim.getActiveCharacter().getCharacterId() != targetId) {
                     sim.switchCharacter(targetName);
                 }
 
@@ -272,7 +274,7 @@ public class RotationSearcher {
                 ProfileLoader.ActionProfile profile = profiles.get(targetName);
 
                 // 2. Execute Action Profile Sequence
-                for (String action : profile.actions) {
+                for (ProfileAction action : profile.actions) {
                     processAction(active, action, sim, maxTime);
                     if (sim.getCurrentTime() >= maxTime)
                         break;
@@ -308,21 +310,21 @@ public class RotationSearcher {
          * @param sim     the running simulator
          * @param maxTime simulation end time; used to abort {@code ATTACK_UNTIL_END}
          */
-        private void processAction(Character active, String command, CombatSimulator sim, double maxTime) {
+        private void processAction(Character active, ProfileAction command, CombatSimulator sim, double maxTime) {
             double now = sim.getCurrentTime();
-            switch (command.toUpperCase()) {
-                case "SKILL":
+            switch (command) {
+                case SKILL:
                     if (active.canSkill(now))
                         sim.performAction(active.getName(), CharacterActionRequest.of(CharacterActionKey.SKILL));
                     break;
-                case "BURST":
+                case BURST:
                     if (active.canBurst(now))
                         sim.performAction(active.getName(), CharacterActionRequest.of(CharacterActionKey.BURST));
                     break;
-                case "ATTACK":
+                case ATTACK:
                     sim.performAction(active.getName(), CharacterActionRequest.of(CharacterActionKey.NORMAL));
                     break;
-                case "ATTACK_UNTIL_END":
+                case ATTACK_UNTIL_END:
                     // Attack until burst ends (Smart Field Time)
                     int safety = 0;
                     while (active.isBurstActive(sim.getCurrentTime()) && sim.getCurrentTime() < maxTime

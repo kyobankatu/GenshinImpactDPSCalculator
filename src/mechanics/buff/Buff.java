@@ -17,6 +17,7 @@ import java.util.Set;
  */
 public abstract class Buff {
     protected String name;
+    protected BuffId id;
     protected double expirationTime; // Sim time when this buff expires
     protected double startTime; // Sim time when this buff starts
 
@@ -32,7 +33,12 @@ public abstract class Buff {
      * @param currentTime simulation time at which the buff starts
      */
     public Buff(String name, double duration, double currentTime) {
+        this(name, BuffId.CUSTOM, duration, currentTime);
+    }
+
+    public Buff(String name, BuffId id, double duration, double currentTime) {
         this.name = name;
+        this.id = id;
         this.startTime = currentTime;
         this.expirationTime = currentTime + duration;
     }
@@ -44,7 +50,12 @@ public abstract class Buff {
      * @param name display name of the buff
      */
     public Buff(String name) {
+        this(name, BuffId.CUSTOM);
+    }
+
+    public Buff(String name, BuffId id) {
         this.name = name;
+        this.id = id;
         this.startTime = 0.0;
         this.expirationTime = Double.MAX_VALUE;
     }
@@ -56,6 +67,10 @@ public abstract class Buff {
      */
     public String getName() {
         return name;
+    }
+
+    public BuffId getId() {
+        return id;
     }
 
     /** Exclude specific characters from receiving this buff. Returns this for chaining. */
@@ -90,11 +105,6 @@ public abstract class Buff {
         // Enforce active window: [startTime, expirationTime)
         if (currentTime >= startTime && currentTime < expirationTime) {
             applyStats(stats, currentTime);
-        } else {
-            if (name.contains("Ineffa") || name.contains("Columbina")) {
-                System.out.println("Buff " + name + " inactive. T=" + currentTime + " [" + startTime + ", "
-                        + expirationTime + "]");
-            }
         }
     }
 

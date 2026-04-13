@@ -4,6 +4,7 @@ import model.entity.Character;
 import model.entity.Weapon;
 import model.entity.ArtifactSet;
 import model.stats.StatsContainer;
+import model.type.CharacterId;
 import model.type.Element;
 import model.type.StatType;
 import model.type.ICDType;
@@ -11,10 +12,13 @@ import model.type.ICDTag;
 import model.type.ActionType;
 import simulation.CombatSimulator;
 import simulation.action.AttackAction;
+import simulation.action.CharacterActionKey;
+import simulation.action.CharacterActionRequest;
 import simulation.event.PeriodicDamageEvent;
 import mechanics.buff.SimpleBuff;
 import mechanics.buff.Buff;
 import mechanics.buff.ActiveCharacterBuff;
+import mechanics.buff.BuffId;
 import mechanics.energy.EnergyManager;
 import mechanics.energy.ParticleType;
 
@@ -52,6 +56,7 @@ public class Ineffa extends Character {
     public Ineffa(Weapon weapon, ArtifactSet artifacts) {
         super();
         this.name = "Ineffa";
+        this.characterId = CharacterId.INEFFA;
 
         // Stats to be filled by User via CSV
         baseStats.set(StatType.BASE_HP,
@@ -110,33 +115,33 @@ public class Ineffa extends Character {
     }
 
     /**
-     * Handles action keys dispatched by the combat simulator.
+     * Handles typed action requests dispatched by the combat simulator.
      *
-     * <p>Supported keys:
+     * <p>Supported actions:
      * <ul>
-     *   <li>{@code "skill"} / {@code "E"} — casts the Enhanced Cleaning Module.</li>
-     *   <li>{@code "burst"} / {@code "Q"} — casts Supreme Instruction.</li>
-     *   <li>{@code "attack"} — advances the normal attack combo.</li>
+     *   <li>{@link CharacterActionKey#SKILL} — casts the Enhanced Cleaning Module.</li>
+     *   <li>{@link CharacterActionKey#BURST} — casts Supreme Instruction.</li>
+     *   <li>{@link CharacterActionKey#NORMAL} — advances the normal attack combo.</li>
      * </ul>
      *
-     * @param key action identifier string
+     * @param request typed action request
      * @param sim the combat simulator context
      */
     @Override
-    public void onAction(String key, CombatSimulator sim) {
-        switch (key) {
-            case "skill":
-            case "E":
+    public void onAction(CharacterActionRequest request, CombatSimulator sim) {
+        switch (request.getKey()) {
+            case SKILL:
                 markSkillUsed(sim.getCurrentTime());
                 skill(sim);
                 break;
-            case "burst":
-            case "Q":
+            case BURST:
                 markBurstUsed(sim.getCurrentTime());
                 burst(sim);
                 break;
-            case "attack":
+            case NORMAL:
                 normalAttack(sim);
+                break;
+            default:
                 break;
         }
     }
@@ -230,7 +235,7 @@ public class Ineffa extends Character {
                                 StatType.BASE_ATK, StatType.SKILL_DMG_BONUS, 0.0, false, ActionType.SKILL);
 
                         // Critical: Mark as Lunar-Charged
-                        oc.setLunarReactionType("Charged");
+                        oc.setLunarReactionType(AttackAction.LunarReactionType.CHARGED);
 
                         s.performAction(this.name, oc);
                     }
@@ -263,19 +268,21 @@ public class Ineffa extends Character {
         double buffVal = myAtk * 0.06;
 
         for (model.entity.Character m : sim.getPartyMembers()) {
-            if (m.hasBuff("Reconstruction Protocol (P2)")) {
-                m.removeBuff("Reconstruction Protocol (P2)");
+            if (m.hasBuff(BuffId.RECONSTRUCTION_PROTOCOL_P2)) {
+                m.removeBuff(BuffId.RECONSTRUCTION_PROTOCOL_P2);
             }
 
             Buff buffToApply;
             // Ineffa (the wearer) always gets it.
             // Others only get it while they are the active character.
             if (m == this) {
-                buffToApply = new SimpleBuff("Reconstruction Protocol (P2)", 20.0, sim.getCurrentTime(), st -> {
+                buffToApply = new SimpleBuff("Reconstruction Protocol (P2)", BuffId.RECONSTRUCTION_PROTOCOL_P2,
+                        20.0, sim.getCurrentTime(), st -> {
                     st.add(StatType.ELEMENTAL_MASTERY, buffVal);
                 });
             } else {
-                buffToApply = new ActiveCharacterBuff("Reconstruction Protocol (P2)", 20.0, sim.getCurrentTime(),
+                buffToApply = new ActiveCharacterBuff("Reconstruction Protocol (P2)",
+                        BuffId.RECONSTRUCTION_PROTOCOL_P2, 20.0, sim.getCurrentTime(),
                         sim, m, st -> {
                             st.add(StatType.ELEMENTAL_MASTERY, buffVal);
                         });
@@ -295,7 +302,8 @@ public class Ineffa extends Character {
     @Override
     public java.util.List<mechanics.buff.Buff> getTeamBuffs() {
         java.util.List<mechanics.buff.Buff> buffs = new java.util.ArrayList<>();
-        buffs.add(new mechanics.buff.Buff("Ineffa: Lunar Base Bonus", Double.MAX_VALUE, 0) {
+        buffs.add(new mechanics.buff.Buff("Ineffa: Lunar Base Bonus", BuffId.INEFFA_LUNAR_BASE_BONUS,
+                Double.MAX_VALUE, 0) {
             @Override
             protected void applyStats(StatsContainer stats, double currentTime) {
                 // Use structural stats to avoid recursion

@@ -3,6 +3,7 @@ package mechanics.analysis;
 import simulation.CombatSimulator;
 import simulation.event.TimerEvent;
 import model.entity.Character;
+import model.type.CharacterId;
 import model.stats.StatsContainer;
 import model.type.StatType;
 
@@ -84,7 +85,7 @@ public class StatsRecorder {
 
             // Apply Dynamic Team Buffs (to match damage calculation logic)
             List<Buff> applicableBuffs = s.getApplicableBuffs(c);
-            if (c.getName().equals("Ineffa") && s.getCurrentTime() > 1.9 && s.getCurrentTime() < 2.2) {
+            if (c.getCharacterId() == CharacterId.INEFFA && s.getCurrentTime() > 1.9 && s.getCurrentTime() < 2.2) {
                 System.out.println("[StatsRecorder] Buffs on Ineffa at " + s.getCurrentTime() + ":");
                 if (applicableBuffs != null) {
                     for (Buff b : applicableBuffs) {

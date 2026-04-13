@@ -1,5 +1,6 @@
 package mechanics.element;
 
+import mechanics.buff.BuffId;
 import simulation.CombatSimulator;
 import model.entity.Character;
 import model.type.Element;
@@ -67,7 +68,7 @@ public class ResonanceManager {
         // 1. Protective Canopy (4 Unique Elements)
         if (uniqueElements >= 4) {
             System.out.println("   [Resonance] Protective Canopy Applied (+15% RES)");
-            sim.applyTeamBuff(new SimpleBuff("Protective Canopy", 99999, 0, stats -> {
+            sim.applyTeamBuff(new SimpleBuff("Protective Canopy", BuffId.PROTECTIVE_CANOPY, 99999, 0, stats -> {
                 // Assuming RES usually means Elemental/Physical RES against incoming DMG.
                 // In this DPS sim, "RES" stats usually refer to Enemy RES Shred or similar.
                 // Standard StatType doesn't seem to have "Incoming RES".
@@ -98,21 +99,21 @@ public class ResonanceManager {
         switch (e) {
             case PYRO:
                 System.out.println("   [Resonance] Fervent Flames (Pyro) Applied (+25% ATK)");
-                sim.applyTeamBuff(new SimpleBuff("Fervent Flames", 99999, 0, stats -> {
+                sim.applyTeamBuff(new SimpleBuff("Fervent Flames", BuffId.FERVENT_FLAMES, 99999, 0, stats -> {
                     stats.add(StatType.ATK_PERCENT, 0.25);
                 }));
                 break;
 
             case HYDRO:
                 System.out.println("   [Resonance] Soothing Water (Hydro) Applied (+25% HP)");
-                sim.applyTeamBuff(new SimpleBuff("Soothing Water", 99999, 0, stats -> {
+                sim.applyTeamBuff(new SimpleBuff("Soothing Water", BuffId.SOOTHING_WATER, 99999, 0, stats -> {
                     stats.add(StatType.HP_PERCENT, 0.25);
                 }));
                 break;
 
             case CRYO:
                 System.out.println("   [Resonance] Shattering Ice (Cryo) Applied (+15% CR vs Cryo/Frozen)");
-                sim.applyTeamBuff(new SimpleBuff("Shattering Ice", 99999, 0, stats -> {
+                sim.applyTeamBuff(new SimpleBuff("Shattering Ice", BuffId.SHATTERING_ICE, 99999, 0, stats -> {
                     // Conditional CR not directly supported by SimpleBuff static application
                     // We need a conditional buff logic or assume uptime.
                     // For Simplicity: We will assume modest uptime or assume active if enemy has
@@ -137,7 +138,7 @@ public class ResonanceManager {
 
             case GEO:
                 System.out.println("   [Resonance] Enduring Rock (Geo) Applied (+15% DMG, -20% Geo Res)");
-                sim.applyTeamBuff(new SimpleBuff("Enduring Rock", 99999, 0, stats -> {
+                sim.applyTeamBuff(new SimpleBuff("Enduring Rock", BuffId.ENDURING_ROCK, 99999, 0, stats -> {
                     stats.add(StatType.DMG_BONUS_ALL, 0.15);
                     stats.add(StatType.GEO_RES_SHRED, 0.20);
                 }));
@@ -145,7 +146,7 @@ public class ResonanceManager {
 
             case DENDRO:
                 System.out.println("   [Resonance] Sprawling Greenery (Dendro) Applied (+50 EM)");
-                sim.applyTeamBuff(new SimpleBuff("Sprawling Greenery", 99999, 0, stats -> {
+                sim.applyTeamBuff(new SimpleBuff("Sprawling Greenery", BuffId.SPRAWLING_GREENERY, 99999, 0, stats -> {
                     stats.add(StatType.ELEMENTAL_MASTERY, 50.0);
                     // Note: Specific reactions give more EM (30/20). Ignoring for base
                     // implementation.
@@ -154,7 +155,7 @@ public class ResonanceManager {
 
             case ANEMO:
                 System.out.println("   [Resonance] Impetuous Winds (Anemo) Applied (-5% CD)");
-                sim.applyTeamBuff(new SimpleBuff("Impetuous Winds", 99999, 0, stats -> {
+                sim.applyTeamBuff(new SimpleBuff("Impetuous Winds", BuffId.IMPETUOUS_WINDS, 99999, 0, stats -> {
                     stats.add(StatType.CD_REDUCTION, 0.05);
                 }));
                 break;
@@ -166,11 +167,7 @@ public class ResonanceManager {
                     @Override
                     public void onReaction(ReactionResult result, Character source, double time,
                             CombatSimulator s) {
-                        String rName = result.getName();
-                        if (!rName.equals("Superconduct") && !rName.equals("Overloaded")
-                                && !rName.equals("Electro-Charged") && !rName.equals("Quicken")
-                                && !rName.equals("Aggravate") && !rName.equals("Hyperbloom")
-                                && !rName.startsWith("Lunar-Charged")) {
+                        if (!result.triggersElectroResonance()) {
                             return;
                         }
                         if (time - lastHVParticleTime[0] < 5.0) {

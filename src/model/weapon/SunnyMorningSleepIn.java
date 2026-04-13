@@ -2,6 +2,7 @@ package model.weapon;
 
 import model.entity.Weapon;
 import model.entity.Character;
+import mechanics.buff.BuffId;
 import model.stats.StatsContainer;
 import model.type.StatType;
 import model.type.ActionType;
@@ -83,16 +84,18 @@ public class SunnyMorningSleepIn extends Weapon implements CombatSimulator.React
     public void onDamage(Character user, AttackAction action, double currentTime,
             CombatSimulator sim) {
         if (action.getActionType() == ActionType.SKILL) {
-            user.removeBuff("SunnyMorningSleepIn: Skill EM");
-            user.addBuff(new mechanics.buff.Buff("SunnyMorningSleepIn: Skill EM", DURATION_SKILL, currentTime) {
+            user.removeBuff(BuffId.SUNNY_MORNING_SKILL_EM);
+            user.addBuff(new mechanics.buff.Buff("SunnyMorningSleepIn: Skill EM", BuffId.SUNNY_MORNING_SKILL_EM,
+                    DURATION_SKILL, currentTime) {
                 @Override
                 protected void applyStats(StatsContainer stats, double currentTime) {
                     stats.add(StatType.ELEMENTAL_MASTERY, EM_SKILL);
                 }
             });
         } else if (action.getActionType() == ActionType.BURST) {
-            user.removeBuff("SunnyMorningSleepIn: Burst EM");
-            user.addBuff(new mechanics.buff.Buff("SunnyMorningSleepIn: Burst EM", DURATION_BURST, currentTime) {
+            user.removeBuff(BuffId.SUNNY_MORNING_BURST_EM);
+            user.addBuff(new mechanics.buff.Buff("SunnyMorningSleepIn: Burst EM", BuffId.SUNNY_MORNING_BURST_EM,
+                    DURATION_BURST, currentTime) {
                 @Override
                 protected void applyStats(StatsContainer stats, double currentTime) {
                     stats.add(StatType.ELEMENTAL_MASTERY, EM_BURST);
@@ -103,8 +106,7 @@ public class SunnyMorningSleepIn extends Weapon implements CombatSimulator.React
 
     /**
      * Applies the Swirl EM +120 buff for 6 s when the wielder triggers a Swirl
-     * reaction. Filters events to only the weapon owner and only Swirl reactions
-     * (reaction names beginning with {@code "Swirl-"}).
+     * reaction. Filters events to only the weapon owner and only Swirl reactions.
      *
      * @param result the reaction result
      * @param source the character who triggered the reaction
@@ -117,11 +119,12 @@ public class SunnyMorningSleepIn extends Weapon implements CombatSimulator.React
         if (source != ownerRef || ownerRef == null) {
             return;
         }
-        if (!result.getName().startsWith("Swirl-")) {
+        if (!result.isSwirl()) {
             return;
         }
-        ownerRef.removeBuff("SunnyMorningSleepIn: Swirl EM");
-        ownerRef.addBuff(new mechanics.buff.Buff("SunnyMorningSleepIn: Swirl EM", DURATION_SWIRL, time) {
+        ownerRef.removeBuff(BuffId.SUNNY_MORNING_SWIRL_EM);
+        ownerRef.addBuff(new mechanics.buff.Buff("SunnyMorningSleepIn: Swirl EM", BuffId.SUNNY_MORNING_SWIRL_EM,
+                DURATION_SWIRL, time) {
             @Override
             protected void applyStats(StatsContainer stats, double currentTime) {
                 stats.add(StatType.ELEMENTAL_MASTERY, EM_SWIRL);

@@ -12,11 +12,39 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import mechanics.optimization.ProfileAction;
 import simulation.CombatSimulator;
+import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
 import model.entity.Character;
+import model.type.CharacterId;
 
 public class RLServer {
+    private enum SocketCommandType {
+        QUIT,
+        RESET,
+        RESET_WITH_REPORT,
+        ACTION_ID,
+        INVALID
+    }
+
+    private static class ParsedSocketCommand {
+        private final SocketCommandType type;
+        private final int actionId;
+
+        private ParsedSocketCommand(SocketCommandType type, int actionId) {
+            this.type = type;
+            this.actionId = actionId;
+        }
+    }
+
+    private static final CharacterId[] RL_PARTY_ORDER = {
+            CharacterId.FLINS,
+            CharacterId.INEFFA,
+            CharacterId.COLUMBINA,
+            CharacterId.SUCROSE
+    };
+
     private int port;
     private Supplier<CombatSimulator> simFactory;
     private CombatSimulator currentSim;
@@ -97,7 +125,7 @@ public class RLServer {
         while ((line = in.readLine()) != null) {
             String response = processCommand(line);
             out.println(response);
-            if (line.equals("QUIT"))
+            if (parseSocketCommand(line).type == SocketCommandType.QUIT)
                 break;
         }
     }
@@ -106,7 +134,8 @@ public class RLServer {
     private long reportStartTime = 0;
 
     private String processCommand(String command) {
-        if (command.startsWith("RESET")) {
+        ParsedSocketCommand parsed = parseSocketCommand(command);
+        if (parsed.type == SocketCommandType.RESET || parsed.type == SocketCommandType.RESET_WITH_REPORT) {
             currentSim = simFactory.get();
             stepCount = 0; // Reset step counter
             episodeCount++; // Increment episode counter
@@ -130,7 +159,7 @@ public class RLServer {
 
             lastSwapTime = -999.0; // Fix: Reset swap timer!
 
-            if (command.equals("RESET_WITH_REPORT")) {
+            if (parsed.type == SocketCommandType.RESET_WITH_REPORT) {
                 generatingReport = true;
                 currentSim.setLoggingEnabled(true);
                 visualization.VisualLogger.getInstance().clear();
@@ -149,12 +178,13 @@ public class RLServer {
             return "{\"error\": \"No active simulation. Send RESET first.\"}";
         }
 
-        try {
-            int actionId = Integer.parseInt(command);
-            return executeAction(actionId);
-        } catch (NumberFormatException e) {
+        if (parsed.type == SocketCommandType.ACTION_ID) {
+            return executeAction(parsed.actionId);
+        }
+        if (parsed.type == SocketCommandType.INVALID) {
             return "{\"error\": \"Invalid command format\"}";
         }
+        return "{\"error\": \"Unsupported command\"}";
     }
 
     private double lastSwapTime = -999.0; // Track swap CD
@@ -176,18 +206,18 @@ public class RLServer {
 
         if (teacherRotation != null && !teacherRotation.isEmpty()) {
             RotationPhase expectedPhase = teacherRotation.get(nextRotationIndex % teacherRotation.size());
-            String currentPhaseCharName = expectedPhase.charName;
-            boolean onCurrentChar = activeChar != null && activeChar.getName().equals(currentPhaseCharName);
+            CharacterId currentPhaseCharId = CharacterId.fromName(expectedPhase.charName);
+            boolean onCurrentChar = activeChar != null && activeChar.getCharacterId() == currentPhaseCharId;
 
             // Check Profile Done Status (for Optimization phase)
             Boolean profileDone = false;
             if (onCurrentChar) {
-                List<String> actions = expectedPhase.actions;
+                List<ProfileAction> actions = expectedPhase.actions;
                 if (currentProfileIndex >= actions.size()) {
                     profileDone = true;
                 } else {
-                    String req = actions.get(currentProfileIndex);
-                    if (req.equals("ATTACK_UNTIL_END")) {
+                    ProfileAction req = actions.get(currentProfileIndex);
+                    if (req == ProfileAction.ATTACK_UNTIL_END) {
                         if (!currentSim.getActiveCharacter().isBurstActive(currentSim.getCurrentTime())) {
                             profileDone = true;
                         }
@@ -199,20 +229,21 @@ public class RLServer {
 
             if (onCurrentChar && !profileDone) {
                 // STRICT PHASE
-                String exp = expectedPhase.actions.get(currentProfileIndex);
-                if (exp.equals("SKILL"))
+                ProfileAction exp = expectedPhase.actions.get(currentProfileIndex);
+                if (exp == ProfileAction.SKILL)
                     requiredActionId = 1;
-                else if (exp.equals("BURST"))
+                else if (exp == ProfileAction.BURST)
                     requiredActionId = 2;
                 else
                     requiredActionId = 0;
             } else {
                 // Between phases (phase done or recovery): force swap to target char
-                String[] charOrder = { "Flins", "Ineffa", "Columbina", "Sucrose" };
                 RotationPhase nextPhase = teacherRotation.get((nextRotationIndex + 1) % teacherRotation.size());
-                String targetCharName = onCurrentChar ? nextPhase.charName : currentPhaseCharName;
-                for (int i = 0; i < charOrder.length; i++) {
-                    if (charOrder[i].equals(targetCharName)) {
+                CharacterId targetCharId = onCurrentChar
+                        ? CharacterId.fromName(nextPhase.charName)
+                        : currentPhaseCharId;
+                for (int i = 0; i < RL_PARTY_ORDER.length; i++) {
+                    if (RL_PARTY_ORDER[i] == targetCharId) {
                         requiredActionId = 3 + i;
                         break;
                     }
@@ -264,21 +295,19 @@ public class RLServer {
             // Swap Action (3-6)
             int targetIdx = actionId - 3;
             // Use HARDCODED order to match State Vector
-            String[] charOrder = { "Flins", "Ineffa", "Columbina", "Sucrose" };
-
-            if (targetIdx >= charOrder.length) {
+            if (targetIdx >= RL_PARTY_ORDER.length) {
                 isValid = false;
                 penalty = -10.0;
             } else {
-                String targetName = charOrder[targetIdx];
-                Character targetChar = currentSim.getCharacter(targetName);
+                CharacterId targetId = RL_PARTY_ORDER[targetIdx];
+                Character targetChar = findCharacter(targetId);
 
                 if (targetChar == null) {
                     isValid = false;
                     penalty = -10.0; // Char not found
                 } else {
                     // Self-Swap Check
-                    if (activeChar != null && activeChar.getName().equals(targetChar.getName())) {
+                    if (activeChar != null && activeChar.getCharacterId() == targetChar.getCharacterId()) {
                         isValid = false;
                         penalty = -50.0; // Heavy penalty for swapping to self
                     } else {
@@ -312,22 +341,22 @@ public class RLServer {
 
         if (actionId <= 2) {
             if (actionId == 0)
-                simFactoryActionRaw(activeChar, "attack");
+                simFactoryAction(activeChar, CharacterActionKey.NORMAL);
             else if (actionId == 1)
-                simFactoryActionRaw(activeChar, "skill");
+                simFactoryAction(activeChar, CharacterActionKey.SKILL);
             else if (actionId == 2)
-                simFactoryActionRaw(activeChar, "burst");
+                simFactoryAction(activeChar, CharacterActionKey.BURST);
         } else {
             int targetIdx = actionId - 3;
-            String[] charOrder = { "Flins", "Ineffa", "Columbina", "Sucrose" };
-            String targetName = charOrder[targetIdx];
+            Character targetChar = findCharacter(RL_PARTY_ORDER[targetIdx]);
+            String targetName = targetChar.getName();
 
-            String oldChar = currentSim.getActiveCharacter().getName();
+            CharacterId oldChar = currentSim.getActiveCharacter().getCharacterId();
             currentSim.switchCharacter(targetName);
             lastSwapTime = currentSim.getCurrentTime();
-            String newChar = currentSim.getActiveCharacter().getName();
+            CharacterId newChar = currentSim.getActiveCharacter().getCharacterId();
 
-            if (oldChar.equals(newChar)) {
+            if (oldChar == newChar) {
                 // logToConsole("[RL-Error] CRITICAL: Swap Failed! Tried to swap to " +
                 // targetName + " but stayed on " + oldChar);
             } else {
@@ -379,16 +408,15 @@ public class RLServer {
 
             // Advance State Indices based on the Action that WAS executed
             RotationPhase expectedPhase = teacherRotation.get(nextRotationIndex % teacherRotation.size());
-            String currentPhaseCharName = expectedPhase.charName;
+            CharacterId currentPhaseCharId = CharacterId.fromName(expectedPhase.charName);
 
             if (actionId >= 3) {
                 // Swap happened
-                String[] charOrder = { "Flins", "Ineffa", "Columbina", "Sucrose" };
-                String swappedTo = charOrder[actionId - 3];
                 RotationPhase nextPhase = teacherRotation.get((nextRotationIndex + 1) % teacherRotation.size());
+                CharacterId swappedTo = RL_PARTY_ORDER[actionId - 3];
 
                 // If we swapped to the NEXT phase character
-                if (swappedTo.equals(nextPhase.charName)) {
+                if (swappedTo == CharacterId.fromName(nextPhase.charName)) {
                     nextRotationIndex++;
                     currentProfileIndex = 0;
                     if (stepCount < 20 || episodeCount % 10 == 0)
@@ -396,14 +424,14 @@ public class RLServer {
                 }
             } else {
                 // Action happened
-                boolean onCurrentChar = activeChar != null && activeChar.getName().equals(currentPhaseCharName);
+                boolean onCurrentChar = activeChar != null && activeChar.getCharacterId() == currentPhaseCharId;
                 if (onCurrentChar) {
                     boolean profileDone = false;
                     if (currentProfileIndex >= expectedPhase.actions.size()) {
                         profileDone = true;
                     } else {
-                        String req = expectedPhase.actions.get(currentProfileIndex);
-                        if (req.equals("ATTACK_UNTIL_END")) {
+                        ProfileAction req = expectedPhase.actions.get(currentProfileIndex);
+                        if (req == ProfileAction.ATTACK_UNTIL_END) {
                             if (!currentSim.getActiveCharacter().isBurstActive(currentSim.getCurrentTime())) {
                                 profileDone = true;
                             }
@@ -411,8 +439,8 @@ public class RLServer {
                     }
 
                     if (!profileDone) {
-                        String exp = expectedPhase.actions.get(currentProfileIndex);
-                        if (!exp.equals("ATTACK_UNTIL_END")) {
+                        ProfileAction exp = expectedPhase.actions.get(currentProfileIndex);
+                        if (exp != ProfileAction.ATTACK_UNTIL_END) {
                             currentProfileIndex++;
                         }
                     }
@@ -469,9 +497,8 @@ public class RLServer {
         getStateJson(reward, done);
     }
 
-    // Helper to execute string actions on char
-    private void simFactoryActionRaw(Character c, String type) {
-        currentSim.performAction(c.getName(), CharacterActionRequest.fromLegacy(type));
+    private void simFactoryAction(Character c, CharacterActionKey key) {
+        currentSim.performAction(c.getName(), CharacterActionRequest.of(key));
     }
 
     private int stepCount = 0; // Track steps in episode
@@ -492,11 +519,10 @@ public class RLServer {
         List<Double> stateList = new ArrayList<>();
 
         // Fix Order: Flins, Ineffa, Columbina, Sucrose
-        String[] charOrder = { "Flins", "Ineffa", "Columbina", "Sucrose" };
         double now = currentSim.getCurrentTime();
 
-        for (String name : charOrder) {
-            Character c = currentSim.getCharacter(name);
+        for (CharacterId id : RL_PARTY_ORDER) {
+            Character c = findCharacter(id);
             if (c != null) {
                 // 1. Energy (Normalized)
                 double energy = c.getCurrentEnergy() / c.getEnergyCost();
@@ -506,7 +532,7 @@ public class RLServer {
 
                 // 2. Is Active
                 boolean isActive = currentSim.getActiveCharacter() != null &&
-                        currentSim.getActiveCharacter().getName().equals(name);
+                        currentSim.getActiveCharacter().getCharacterId() == id;
                 stateList.add(isActive ? 1.0 : 0.0);
 
                 // 3. Can Skill (Ready & CD)
@@ -550,20 +576,20 @@ public class RLServer {
         double suggestBurst = 0.0;
 
         if (goldenPlan != null && currentSim.getActiveCharacter() != null) {
-            String currentPhaseCharName = goldenPlan.order.get(nextRotationIndex % goldenPlan.order.size());
-            boolean onCurrentChar = currentSim.getActiveCharacter().getName().equals(currentPhaseCharName);
+            CharacterId currentPhaseCharId = CharacterId.fromName(goldenPlan.order.get(nextRotationIndex % goldenPlan.order.size()));
+            boolean onCurrentChar = currentSim.getActiveCharacter().getCharacterId() == currentPhaseCharId;
             boolean profileDone = false;
 
             // Handle ATTACK_UNTIL_END completion logic
             if (onCurrentChar) {
                 mechanics.optimization.ProfileLoader.ActionProfile profile = goldenPlan.profiles
-                        .get(currentPhaseCharName);
+                        .get(currentPhaseCharId.getDisplayName());
                 if (profile != null) {
                     if (currentProfileIndex >= profile.actions.size()) {
                         profileDone = true;
                     } else {
-                        String req = profile.actions.get(currentProfileIndex);
-                        if (req.equals("ATTACK_UNTIL_END")) {
+                        ProfileAction req = profile.actions.get(currentProfileIndex);
+                        if (req == ProfileAction.ATTACK_UNTIL_END) {
                             // If Burst is NO LONGER active, consider this satisfied
                             if (!currentSim.getActiveCharacter().isBurstActive(currentSim.getCurrentTime())) {
                                 profileDone = true;
@@ -573,14 +599,14 @@ public class RLServer {
                 }
             }
 
-            String effectiveTargetName = currentPhaseCharName;
+            CharacterId effectiveTargetId = currentPhaseCharId;
             if (onCurrentChar && profileDone) {
-                effectiveTargetName = goldenPlan.order.get((nextRotationIndex + 1) % goldenPlan.order.size());
+                effectiveTargetId = CharacterId.fromName(goldenPlan.order.get((nextRotationIndex + 1) % goldenPlan.order.size()));
             }
 
             // Calc One-Hot Target
-            for (int i = 0; i < charOrder.length; i++) {
-                if (charOrder[i].equals(effectiveTargetName)) {
+            for (int i = 0; i < RL_PARTY_ORDER.length; i++) {
+                if (RL_PARTY_ORDER[i] == effectiveTargetId) {
                     targetIndex = i;
                     break;
                 }
@@ -594,13 +620,13 @@ public class RLServer {
             // Calc Suggest Action
             if (onCurrentChar && !profileDone) {
                 mechanics.optimization.ProfileLoader.ActionProfile profile = goldenPlan.profiles
-                        .get(currentPhaseCharName);
-                String req = profile.actions.get(currentProfileIndex);
-                if (req.equals("ATTACK") || req.equals("ATTACK_UNTIL_END"))
+                        .get(currentPhaseCharId.getDisplayName());
+                ProfileAction req = profile.actions.get(currentProfileIndex);
+                if (req == ProfileAction.ATTACK || req == ProfileAction.ATTACK_UNTIL_END)
                     suggestAttack = 1.0;
-                if (req.equals("SKILL"))
+                if (req == ProfileAction.SKILL)
                     suggestSkill = 1.0;
-                if (req.equals("BURST"))
+                if (req == ProfileAction.BURST)
                     suggestBurst = 1.0;
             }
         }
@@ -632,6 +658,32 @@ public class RLServer {
         return json.toString();
     }
 
+    private ParsedSocketCommand parseSocketCommand(String raw) {
+        if ("QUIT".equals(raw)) {
+            return new ParsedSocketCommand(SocketCommandType.QUIT, -1);
+        }
+        if ("RESET".equals(raw)) {
+            return new ParsedSocketCommand(SocketCommandType.RESET, -1);
+        }
+        if ("RESET_WITH_REPORT".equals(raw)) {
+            return new ParsedSocketCommand(SocketCommandType.RESET_WITH_REPORT, -1);
+        }
+        try {
+            return new ParsedSocketCommand(SocketCommandType.ACTION_ID, Integer.parseInt(raw));
+        } catch (NumberFormatException e) {
+            return new ParsedSocketCommand(SocketCommandType.INVALID, -1);
+        }
+    }
+
+    private Character findCharacter(CharacterId id) {
+        for (Character character : currentSim.getPartyMembers()) {
+            if (character.getCharacterId() == id) {
+                return character;
+            }
+        }
+        return null;
+    }
+
     private List<ActionCommand> generateActionSpace() {
         List<ActionCommand> actions = new ArrayList<>();
         String[] chars = { "Flins", "Ineffa", "Columbina", "Sucrose" };
@@ -645,19 +697,19 @@ public class RLServer {
 
             // Attack (N1)
             actions.add(s -> {
-                s.performAction(c, "attack");
+                s.performAction(c, CharacterActionRequest.of(CharacterActionKey.NORMAL));
                 return true;
             });
 
             // Skill
             actions.add(s -> {
-                s.performAction(c, "skill");
+                s.performAction(c, CharacterActionRequest.of(CharacterActionKey.SKILL));
                 return true;
             });
 
             // Burst
             actions.add(s -> {
-                s.performAction(c, "burst");
+                s.performAction(c, CharacterActionRequest.of(CharacterActionKey.BURST));
                 return true;
             });
         }

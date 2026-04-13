@@ -2,6 +2,7 @@ package model.weapon;
 
 import model.entity.Weapon;
 import model.entity.Character;
+import mechanics.buff.BuffId;
 import model.stats.StatsContainer;
 import model.type.StatType;
 import model.type.WeaponType;
@@ -25,7 +26,7 @@ public class WanderingEvenstar extends Weapon {
         // Wildling Nightstar Buff
         // R5: Gain 48% of EM as ATK. Team gains 30% of this bonus.
         // Duration 12s, CD 10s (effectively permanent uptime).
-        buffs.add(new Buff("Wildling Nightstar") {
+        buffs.add(new Buff("Wildling Nightstar", BuffId.WANDERING_EVENSTAR_WILDLING_NIGHTSTAR) {
             @Override
             protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
                 // Calculate Owner's EM safely to avoid recursion
