@@ -1,6 +1,8 @@
 package model.character;
 
+import model.entity.BurstStateProvider;
 import model.entity.Character;
+import model.entity.SwitchAwareCharacter;
 import model.entity.Weapon;
 import model.entity.ArtifactSet;
 import mechanics.buff.BuffId;
@@ -15,7 +17,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionRequest;
 
-public class RaidenShogun extends Character {
+public class RaidenShogun extends Character implements BurstStateProvider, SwitchAwareCharacter {
 
     private int normalAttackStep = 0;
     private double resolveStacks = 0;

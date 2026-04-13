@@ -1,6 +1,9 @@
 package model.character;
 
+import model.entity.BurstStateProvider;
 import model.entity.Character;
+import model.entity.CharacterTeamBuffProvider;
+import model.entity.ReactionAwareCharacter;
 import model.entity.Weapon;
 import model.entity.ArtifactSet;
 import mechanics.buff.BuffId;
@@ -43,7 +46,8 @@ import mechanics.energy.ParticleType;
  * <p>Flins is a Lunar character ({@link #isLunarCharacter()} returns {@code true}).
  * Burst energy cost switches between 80 (standard) and 30 (Thunderous Symphony active).
  */
-public class Flins extends Character implements CombatSimulator.ReactionListener {
+public class Flins extends Character
+        implements BurstStateProvider, CharacterTeamBuffProvider, ReactionAwareCharacter {
 
     private int normalAttackStep = 0;
 

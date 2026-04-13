@@ -2,19 +2,15 @@ package model.entity;
 
 import model.stats.StatsContainer;
 import model.type.WeaponType;
-import simulation.action.CharacterActionRequest;
 
 /**
  * Represents a weapon that can be equipped on a {@link Character}.
  *
  * <p>A weapon contributes flat stats (base ATK, substat) via {@link #getStats()},
- * and may additionally modify stats through {@link #applyPassive} and react to
- * simulation events via {@link #onAction}, {@link #onDamage}, and
- * {@link #getTeamBuffs}.
- *
- * <p>The default implementations of all hook methods are no-ops. Specific weapons
- * should subclass {@code Weapon} and override only the relevant hooks.
- *
+ * and may additionally modify stats through {@link #applyPassive}. Optional runtime
+ * behaviors are modeled through focused capability interfaces such as
+ * {@link ActionTriggeredWeaponEffect}, {@link DamageTriggeredWeaponEffect},
+ * {@link SwitchAwareWeaponEffect}, and {@link WeaponTeamBuffProvider}.
  * <p>Each weapon subclass must set {@link #weaponType} in its constructor so that
  * the simulator can apply the correct NA energy generation rate.
  */
@@ -77,67 +73,6 @@ public class Weapon {
      */
     public void applyPassive(StatsContainer stats, double currentTime) {
         // Default: No passive
-    }
-
-    /**
-     * Called by the simulator when the equipped character executes an action
-     * request. Use this hook to implement proc-based weapon passives that
-     * trigger on specific actions. Default implementation is a no-op.
-     *
-     * @param user the acting character
-     * @param request typed action request
-     * @param sim  the active combat simulator
-     */
-    public void onAction(Character user, CharacterActionRequest request, simulation.CombatSimulator sim) {
-        // Default: No action logic
-    }
-
-    /**
-     * Called by the simulator when the equipped character deals damage.
-     * Use this hook to implement on-hit weapon passives.
-     * Default implementation is a no-op.
-     *
-     * @param user        the character who dealt the damage
-     * @param action      the attack action that triggered the damage event
-     * @param currentTime simulation time in seconds at the damage event
-     * @param sim         the active combat simulator
-     */
-    public void onDamage(Character user, simulation.action.AttackAction action, double currentTime,
-            simulation.CombatSimulator sim) {
-        // Default: No damage logic
-    }
-
-    /**
-     * Returns team-wide buffs provided by this weapon's passive to all party
-     * members. Called when team buffs are compiled for other characters.
-     * Default implementation returns an empty list.
-     *
-     * @param owner the character who has this weapon equipped
-     * @return list of team buffs, never {@code null}
-     */
-    /**
-     * Called by the simulator when the equipped character switches off-field.
-     * Use this hook to snapshot or freeze time-dependent passive state at the
-     * exact moment the character leaves the field.
-     * Default implementation is a no-op.
-     *
-     * @param user the character switching out
-     * @param sim  the active combat simulator
-     */
-    public void onSwitchOut(Character user, simulation.CombatSimulator sim) {
-        // Default: No switch-out logic
-    }
-
-    /**
-     * Returns team-wide buffs provided by this weapon's passive to all party
-     * members. Called when team buffs are compiled for other characters.
-     * Default implementation returns an empty list.
-     *
-     * @param owner the character who has this weapon equipped
-     * @return list of team buffs, never {@code null}
-     */
-    public java.util.List<mechanics.buff.Buff> getTeamBuffs(Character owner) {
-        return new java.util.ArrayList<>();
     }
 
     /**

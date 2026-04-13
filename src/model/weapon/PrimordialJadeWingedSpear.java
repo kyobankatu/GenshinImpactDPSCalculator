@@ -1,5 +1,6 @@
 package model.weapon;
 
+import model.entity.DamageTriggeredWeaponEffect;
 import model.entity.Weapon;
 import model.entity.Character;
 import mechanics.buff.BuffId;
@@ -24,7 +25,7 @@ import model.type.WeaponType;
  * <li>At max 7 stacks: additionally gain +12% All DMG Bonus.</li>
  * </ul>
  */
-public class PrimordialJadeWingedSpear extends Weapon {
+public class PrimordialJadeWingedSpear extends Weapon implements DamageTriggeredWeaponEffect {
 
     private int stacks = 0;
     private double lastHitTime = -999.0; // time of the most recent hit

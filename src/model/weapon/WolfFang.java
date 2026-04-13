@@ -1,5 +1,6 @@
 package model.weapon;
 
+import model.entity.DamageTriggeredWeaponEffect;
 import model.entity.Weapon;
 import model.entity.Character;
 import model.stats.StatsContainer;
@@ -11,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Iterator;
 
-public class WolfFang extends Weapon {
+public class WolfFang extends Weapon implements DamageTriggeredWeaponEffect {
     public WolfFang() {
         super("Wolf-Fang", new StatsContainer());
         StatsContainer s = this.getStats();

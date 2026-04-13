@@ -2,6 +2,7 @@ package model.weapon;
 
 import model.entity.Weapon;
 import model.entity.Character;
+import model.entity.WeaponTeamBuffProvider;
 import mechanics.buff.BuffId;
 import model.stats.StatsContainer;
 import model.type.StatType;
@@ -10,7 +11,7 @@ import mechanics.buff.Buff;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WanderingEvenstar extends Weapon {
+public class WanderingEvenstar extends Weapon implements WeaponTeamBuffProvider {
     public WanderingEvenstar() {
         super("Wandering Evenstar", new StatsContainer());
         StatsContainer s = this.getStats();

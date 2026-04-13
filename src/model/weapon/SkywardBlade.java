@@ -1,5 +1,6 @@
 package model.weapon;
 
+import model.entity.ActionTriggeredWeaponEffect;
 import model.entity.Weapon;
 import model.stats.StatsContainer;
 import model.type.StatType;
@@ -7,7 +8,7 @@ import model.type.WeaponType;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
 
-public class SkywardBlade extends Weapon {
+public class SkywardBlade extends Weapon implements ActionTriggeredWeaponEffect {
     public SkywardBlade() {
         super("Skyward Blade", new StatsContainer());
         StatsContainer s = this.getStats();

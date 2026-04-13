@@ -1,5 +1,6 @@
 package model.weapon;
 
+import model.entity.DamageTriggeredWeaponEffect;
 import model.entity.Weapon;
 import model.entity.Character;
 import model.stats.StatsContainer;
@@ -9,7 +10,7 @@ import mechanics.energy.EnergyManager;
 import mechanics.energy.ParticleType;
 import model.type.WeaponType;
 
-public class FavoniusCodex extends Weapon {
+public class FavoniusCodex extends Weapon implements DamageTriggeredWeaponEffect {
     public FavoniusCodex() {
         super("Favonius Codex", new StatsContainer());
         StatsContainer s = this.getStats();

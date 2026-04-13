@@ -2,6 +2,7 @@ package model.weapon;
 
 import model.entity.Weapon;
 import model.entity.Character;
+import model.entity.DamageTriggeredWeaponEffect;
 import mechanics.buff.BuffId;
 import model.stats.StatsContainer;
 import model.type.StatType;
@@ -28,7 +29,7 @@ import simulation.action.AttackAction;
  * which is added to {@code CRIT_DMG} exclusively on the Lunar path in
  * {@link mechanics.formula.DamageCalculator}.
  */
-public class NocturnesCurtainCall extends Weapon {
+public class NocturnesCurtainCall extends Weapon implements DamageTriggeredWeaponEffect {
 
     private static final double HP_BASE = 0.10;
     private static final double HP_WINE = 0.14;

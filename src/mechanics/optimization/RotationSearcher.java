@@ -14,6 +14,7 @@ import java.util.stream.IntStream;
 import simulation.CombatSimulator;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import model.entity.BurstStateProvider;
 import model.entity.Character;
 import model.type.CharacterId;
 import mechanics.optimization.ProfileLoader; // Added import
@@ -327,18 +328,23 @@ public class RotationSearcher {
                 case ATTACK_UNTIL_END:
                     // Attack until burst ends (Smart Field Time)
                     int safety = 0;
-                    while (active.isBurstActive(sim.getCurrentTime()) && sim.getCurrentTime() < maxTime
+                    while (isBurstActive(active, sim.getCurrentTime()) && sim.getCurrentTime() < maxTime
                             && safety < 100) {
                         sim.performAction(active.getName(), CharacterActionRequest.of(CharacterActionKey.NORMAL));
                         safety++;
                     }
                     // If not active (e.g. physical Raiden?), do a few attacks anyway
-                    if (!active.isBurstActive(sim.getCurrentTime())) {
+                    if (!isBurstActive(active, sim.getCurrentTime())) {
                         for (int k = 0; k < 3; k++)
                             sim.performAction(active.getName(), CharacterActionRequest.of(CharacterActionKey.NORMAL));
                     }
                     break;
             }
+        }
+
+        private boolean isBurstActive(Character character, double currentTime) {
+            return character instanceof BurstStateProvider
+                    && ((BurstStateProvider) character).isBurstActive(currentTime);
         }
     }
 }

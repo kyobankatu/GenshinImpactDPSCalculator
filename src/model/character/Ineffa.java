@@ -1,6 +1,8 @@
 package model.character;
 
+import model.entity.BurstStateProvider;
 import model.entity.Character;
+import model.entity.CharacterTeamBuffProvider;
 import model.entity.Weapon;
 import model.entity.ArtifactSet;
 import model.stats.StatsContainer;
@@ -40,7 +42,7 @@ import mechanics.energy.ParticleType;
  *
  * <p>Ineffa is a Lunar character ({@link #isLunarCharacter()} returns {@code true}).
  */
-public class Ineffa extends Character {
+public class Ineffa extends Character implements BurstStateProvider, CharacterTeamBuffProvider {
 
     private int normalAttackStep = 0;
     private double shieldHealth = 0;

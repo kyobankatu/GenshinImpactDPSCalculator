@@ -1,7 +1,9 @@
 package model.weapon;
 
+import model.entity.ActionTriggeredWeaponEffect;
 import model.entity.Weapon;
 import model.entity.Character;
+import model.entity.DamageTriggeredWeaponEffect;
 import mechanics.buff.BuffId;
 import model.stats.StatsContainer;
 import model.type.StatType;
@@ -30,7 +32,8 @@ import simulation.action.CharacterActionRequest;
  * {@link #onDamage}. Skill and Burst buffs are applied through
  * {@link #onDamage} by checking the action's {@link ActionType}.
  */
-public class SunnyMorningSleepIn extends Weapon implements CombatSimulator.ReactionListener {
+public class SunnyMorningSleepIn extends Weapon
+        implements ActionTriggeredWeaponEffect, DamageTriggeredWeaponEffect, CombatSimulator.ReactionListener {
 
     private static final double EM_SWIRL = 120.0;
     private static final double DURATION_SWIRL = 6.0;

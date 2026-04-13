@@ -1,5 +1,6 @@
 package model.weapon;
 
+import model.entity.ActionTriggeredWeaponEffect;
 import model.entity.Weapon;
 import model.entity.Character;
 import model.stats.StatsContainer;
@@ -19,7 +20,7 @@ import simulation.action.CharacterActionRequest;
  *       {@link simulation.CombatSimulator.Moonsign#ASCENDANT_GLEAM}.</li>
  * </ul>
  */
-public class ProspectorShovel extends Weapon {
+public class ProspectorShovel extends Weapon implements ActionTriggeredWeaponEffect {
 
     /** Cached simulator reference used to check the current Moonsign state. */
     private simulation.CombatSimulator simRef = null;

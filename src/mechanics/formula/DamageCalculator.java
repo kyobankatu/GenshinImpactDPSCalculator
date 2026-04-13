@@ -3,6 +3,7 @@ package mechanics.formula;
 import model.stats.StatsContainer;
 import model.type.StatType;
 import model.entity.Character;
+import model.entity.DamageTriggeredWeaponEffect;
 import model.entity.Enemy;
 import java.util.List;
 import mechanics.buff.Buff;
@@ -151,8 +152,8 @@ public class DamageCalculator {
             double currentTime,
             simulation.CombatSimulator sim,
             double damage) {
-        if (attacker.getWeapon() != null) {
-            attacker.getWeapon().onDamage(attacker, action, currentTime, sim);
+        if (attacker.getWeapon() instanceof DamageTriggeredWeaponEffect) {
+            ((DamageTriggeredWeaponEffect) attacker.getWeapon()).onDamage(attacker, action, currentTime, sim);
         }
 
         if (attacker.getArtifacts() != null) {

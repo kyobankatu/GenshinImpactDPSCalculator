@@ -12,6 +12,7 @@ import mechanics.reaction.ReactionEffectScheduler;
 import mechanics.reaction.ReactionResult;
 import model.entity.ArtifactSet;
 import model.entity.Character;
+import model.entity.DamageTriggeredWeaponEffect;
 import model.stats.StatsContainer;
 import model.type.ActionType;
 import model.type.Element;
@@ -244,8 +245,9 @@ public class CombatActionResolver {
         double damage = DamageCalculator.calculateDamage(
                 attacker, sim.getEnemy(), action, activeBuffs, sim.getCurrentTime(), reactionMulti, sim);
 
-        if (attacker.getWeapon() != null) {
-            attacker.getWeapon().onDamage(attacker, action, sim.getCurrentTime(), sim);
+        if (attacker.getWeapon() instanceof DamageTriggeredWeaponEffect) {
+            ((DamageTriggeredWeaponEffect) attacker.getWeapon()).onDamage(
+                    attacker, action, sim.getCurrentTime(), sim);
         }
 
         if (action.getActionType() == ActionType.NORMAL || action.getActionType() == ActionType.CHARGE) {

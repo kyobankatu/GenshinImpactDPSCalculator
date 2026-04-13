@@ -5,6 +5,8 @@ import java.util.Map;
 
 import model.entity.ArtifactSet;
 import model.entity.Character;
+import model.entity.SwitchAwareCharacter;
+import model.entity.SwitchAwareWeaponEffect;
 import model.type.Element;
 import simulation.CombatLogSink;
 import simulation.CombatSimulator;
@@ -51,9 +53,11 @@ public class SwitchManager {
         Character oldChar = party.getActiveCharacter();
         String oldName = oldChar != null ? oldChar.getName() : "?";
         if (oldChar != null) {
-            oldChar.onSwitchOut(sim);
-            if (oldChar.getWeapon() != null) {
-                oldChar.getWeapon().onSwitchOut(oldChar, sim);
+            if (oldChar instanceof SwitchAwareCharacter) {
+                ((SwitchAwareCharacter) oldChar).onSwitchOut(sim);
+            }
+            if (oldChar.getWeapon() instanceof SwitchAwareWeaponEffect) {
+                ((SwitchAwareWeaponEffect) oldChar.getWeapon()).onSwitchOut(oldChar, sim);
             }
             notifyArtifactsSwitchOut(oldChar);
         }

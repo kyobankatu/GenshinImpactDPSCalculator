@@ -1,5 +1,6 @@
 package model.weapon;
 
+import model.entity.ActionTriggeredWeaponEffect;
 import model.entity.Weapon;
 import model.stats.StatsContainer;
 import model.type.StatType;
@@ -7,7 +8,7 @@ import model.type.WeaponType;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
 
-public class AmenomaKageuchi extends Weapon {
+public class AmenomaKageuchi extends Weapon implements ActionTriggeredWeaponEffect {
     public AmenomaKageuchi() {
         super("Amenoma Kageuchi", new StatsContainer());
         StatsContainer s = this.getStats();

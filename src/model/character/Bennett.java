@@ -1,5 +1,6 @@
 package model.character;
 
+import model.entity.BurstStateProvider;
 import model.entity.Character;
 import model.entity.Weapon;
 import model.entity.ArtifactSet;
@@ -15,7 +16,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionRequest;
 
-public class Bennett extends Character {
+public class Bennett extends Character implements BurstStateProvider {
 
     private int normalAttackStep = 0;
 

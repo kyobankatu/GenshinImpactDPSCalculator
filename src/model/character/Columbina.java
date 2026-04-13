@@ -2,7 +2,9 @@ package model.character;
 
 import mechanics.buff.BuffId;
 import mechanics.formula.DamageCalculator;
+import model.entity.CharacterTeamBuffProvider;
 import model.entity.Character;
+import model.entity.ReactionAwareCharacter;
 import model.type.CharacterId;
 import model.type.Element;
 import model.type.ICDType;
@@ -65,7 +67,7 @@ import java.util.Map;
  * <p>Columbina is a Lunar character ({@link #isLunarCharacter()} returns {@code true}) and
  * registers herself as a {@link CombatSimulator.ReactionListener} on first action.
  */
-public class Columbina extends Character implements CombatSimulator.ReactionListener {
+public class Columbina extends Character implements CharacterTeamBuffProvider, ReactionAwareCharacter {
     // Resources
     private int gravity = 0;
     private static final int MAX_GRAVITY = 60;

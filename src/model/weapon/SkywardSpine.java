@@ -1,5 +1,6 @@
 package model.weapon;
 
+import model.entity.DamageTriggeredWeaponEffect;
 import model.entity.Weapon;
 import model.entity.Character;
 import model.stats.StatsContainer;
@@ -9,7 +10,7 @@ import model.type.WeaponType;
 import simulation.action.AttackAction;
 import model.type.Element;
 
-public class SkywardSpine extends Weapon {
+public class SkywardSpine extends Weapon implements DamageTriggeredWeaponEffect {
     public SkywardSpine() {
         super("Skyward Spine", new StatsContainer());
         StatsContainer s = this.getStats();

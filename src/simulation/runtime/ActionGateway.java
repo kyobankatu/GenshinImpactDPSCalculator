@@ -1,6 +1,7 @@
 package simulation.runtime;
 
 import model.entity.Character;
+import model.entity.ActionTriggeredWeaponEffect;
 import simulation.CombatSimulator;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
@@ -66,8 +67,8 @@ public class ActionGateway {
                     sim.getCurrentTime(), charName, request.getLogLabel()));
         }
 
-        if (character.getWeapon() != null) {
-            character.getWeapon().onAction(character, request, sim);
+        if (character.getWeapon() instanceof ActionTriggeredWeaponEffect) {
+            ((ActionTriggeredWeaponEffect) character.getWeapon()).onAction(character, request, sim);
         }
 
         character.onAction(request, sim);

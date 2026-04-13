@@ -1,5 +1,6 @@
 package model.character;
 
+import model.entity.BurstStateProvider;
 import model.entity.Character;
 import model.entity.Weapon;
 import model.entity.ArtifactSet;
@@ -41,7 +42,7 @@ import mechanics.energy.ParticleType;
  *
  * <p>C1 grants a second Skill charge (max 2); C2 extends burst duration to 8 s.
  */
-public class Sucrose extends Character {
+public class Sucrose extends Character implements BurstStateProvider {
 
     private int normalAttackStep = 0;
 

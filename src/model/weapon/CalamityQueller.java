@@ -1,5 +1,6 @@
 package model.weapon;
 
+import model.entity.ActionTriggeredWeaponEffect;
 import model.entity.Weapon;
 import model.entity.Character;
 import mechanics.buff.BuffId;
@@ -33,7 +34,7 @@ import simulation.action.CharacterActionRequest;
  * A {@link #consummationId} generation counter ensures stale timer events
  * self-terminate on re-cast.
  */
-public class CalamityQueller extends Weapon {
+public class CalamityQueller extends Weapon implements ActionTriggeredWeaponEffect {
 
     private int accumulatedStacks = 0;
     /** Incremented on each skill cast; captured by the timer to detect re-casts. */

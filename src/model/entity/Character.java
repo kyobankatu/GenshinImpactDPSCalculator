@@ -154,10 +154,6 @@ public abstract class Character {
         System.out.println(name + " does nothing specific for " + request.getKey());
     }
 
-    public void onSwitchOut(simulation.CombatSimulator sim) {
-        // Default: do nothing
-    }
-
     public model.type.Element getElement() {
         return element;
     }
@@ -223,10 +219,6 @@ public abstract class Character {
         return cooldownState.canBurst(currentTime, getCurrentEnergy(), getEnergyCost());
     }
 
-    public boolean isBurstActive(double currentTime) {
-        return false;
-    }
-
     public double getSkillCDRemaining(double currentTime) {
         return cooldownState.getSkillCDRemaining(currentTime);
     }
@@ -268,9 +260,5 @@ public abstract class Character {
 
     public boolean isLunarCharacter() {
         return false;
-    }
-
-    public java.util.List<mechanics.buff.Buff> getTeamBuffs() {
-        return new java.util.ArrayList<>();
     }
 }

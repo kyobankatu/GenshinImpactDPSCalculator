@@ -16,6 +16,7 @@ import mechanics.optimization.ProfileAction;
 import simulation.CombatSimulator;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import model.entity.BurstStateProvider;
 import model.entity.Character;
 import model.type.CharacterId;
 
@@ -218,7 +219,7 @@ public class RLServer {
                 } else {
                     ProfileAction req = actions.get(currentProfileIndex);
                     if (req == ProfileAction.ATTACK_UNTIL_END) {
-                        if (!currentSim.getActiveCharacter().isBurstActive(currentSim.getCurrentTime())) {
+                        if (!isBurstActive(currentSim.getActiveCharacter(), currentSim.getCurrentTime())) {
                             profileDone = true;
                         }
                     }
@@ -432,7 +433,7 @@ public class RLServer {
                     } else {
                         ProfileAction req = expectedPhase.actions.get(currentProfileIndex);
                         if (req == ProfileAction.ATTACK_UNTIL_END) {
-                            if (!currentSim.getActiveCharacter().isBurstActive(currentSim.getCurrentTime())) {
+                            if (!isBurstActive(currentSim.getActiveCharacter(), currentSim.getCurrentTime())) {
                                 profileDone = true;
                             }
                         }
@@ -542,7 +543,7 @@ public class RLServer {
                 stateList.add(c.canBurst(now) ? 1.0 : 0.0);
 
                 // 5. Is Burst Active?
-                stateList.add(c.isBurstActive(now) ? 1.0 : 0.0);
+                stateList.add(isBurstActive(c, now) ? 1.0 : 0.0);
 
                 if (stepCount < 10) {
                     // logToConsole(String.format("[StateDetail] %s: En=%.2f Act=%b Skill=%b
@@ -591,7 +592,7 @@ public class RLServer {
                         ProfileAction req = profile.actions.get(currentProfileIndex);
                         if (req == ProfileAction.ATTACK_UNTIL_END) {
                             // If Burst is NO LONGER active, consider this satisfied
-                            if (!currentSim.getActiveCharacter().isBurstActive(currentSim.getCurrentTime())) {
+                            if (!isBurstActive(currentSim.getActiveCharacter(), currentSim.getCurrentTime())) {
                                 profileDone = true;
                             }
                         }
@@ -682,6 +683,11 @@ public class RLServer {
             }
         }
         return null;
+    }
+
+    private boolean isBurstActive(Character character, double currentTime) {
+        return character instanceof BurstStateProvider
+                && ((BurstStateProvider) character).isBurstActive(currentTime);
     }
 
     private List<ActionCommand> generateActionSpace() {

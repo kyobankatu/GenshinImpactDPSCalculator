@@ -6,6 +6,8 @@ import java.util.List;
 import mechanics.buff.Buff;
 import mechanics.buff.BuffId;
 import model.entity.Character;
+import model.entity.CharacterTeamBuffProvider;
+import model.entity.WeaponTeamBuffProvider;
 import simulation.CombatSimulator;
 
 /**
@@ -79,10 +81,12 @@ public class BuffManager {
         }
 
         for (Character member : sim.getPartyMembers()) {
-            if (member.getWeapon() != null) {
-                buffs.addAll(member.getWeapon().getTeamBuffs(member));
+            if (member.getWeapon() instanceof WeaponTeamBuffProvider) {
+                buffs.addAll(((WeaponTeamBuffProvider) member.getWeapon()).getTeamBuffs(member));
             }
-            buffs.addAll(member.getTeamBuffs());
+            if (member instanceof CharacterTeamBuffProvider) {
+                buffs.addAll(((CharacterTeamBuffProvider) member).getTeamBuffs());
+            }
         }
 
         if (character == sim.getActiveCharacter()) {
