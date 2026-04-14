@@ -1,5 +1,7 @@
 package model.character;
 
+import mechanics.data.TalentDataManager;
+import mechanics.data.TalentDataSource;
 import model.entity.BurstStateProvider;
 import model.entity.Character;
 import model.entity.Weapon;
@@ -58,18 +60,19 @@ public class Sucrose extends Character implements BurstStateProvider {
      * @param artifacts equipped artifact set
      */
     public Sucrose(Weapon weapon, ArtifactSet artifacts) {
-        super();
+        this(weapon, artifacts, TalentDataManager.getInstance());
+    }
+
+    public Sucrose(Weapon weapon, ArtifactSet artifacts, TalentDataSource talentData) {
+        super(talentData);
         this.name = "Sucrose";
         this.characterId = CharacterId.SUCROSE;
 
         // Level 90 Base Stats
-        baseStats.set(StatType.BASE_HP, mechanics.data.TalentDataManager.getInstance().get(this.name, "Base HP", 9244));
-        baseStats.set(StatType.BASE_ATK,
-                mechanics.data.TalentDataManager.getInstance().get(this.name, "Base ATK", 170));
-        baseStats.set(StatType.BASE_DEF,
-                mechanics.data.TalentDataManager.getInstance().get(this.name, "Base DEF", 703));
-        baseStats.set(StatType.ANEMO_DMG_BONUS,
-                mechanics.data.TalentDataManager.getInstance().get(this.name, "Ascension Anemo", 0.24));
+        baseStats.set(StatType.BASE_HP, getTalentValue("Base HP", 9244));
+        baseStats.set(StatType.BASE_ATK, getTalentValue("Base ATK", 170));
+        baseStats.set(StatType.BASE_DEF, getTalentValue("Base DEF", 703));
+        baseStats.set(StatType.ANEMO_DMG_BONUS, getTalentValue("Ascension Anemo", 0.24));
 
         this.weapon = weapon;
         this.artifacts = new ArtifactSet[] { artifacts };
@@ -172,7 +175,7 @@ public class Sucrose extends Character implements BurstStateProvider {
                 break;
         }
 
-        double mv = mechanics.data.TalentDataManager.getInstance().get(this.name, key, defaultMv);
+        double mv = getTalentValue(key, defaultMv);
         double dur = 0;
 
         switch(normalAttackStep) {
@@ -211,7 +214,7 @@ public class Sucrose extends Character implements BurstStateProvider {
      */
     private void skill(CombatSimulator sim) {
         // Talent Lv 12 (Base 9 + 3): 4.22
-        double mv = mechanics.data.TalentDataManager.getInstance().get(this.name, "Skill DMG", 4.22);
+        double mv = getTalentValue("Skill DMG", 4.22);
 
         AttackAction hit = new AttackAction("Astable Anemohypostasis Creation - 6308", mv, Element.ANEMO,
                 StatType.BASE_ATK,
@@ -220,7 +223,7 @@ public class Sucrose extends Character implements BurstStateProvider {
         hit.setAnimationDuration(0.5);
         sim.performAction(this.name, hit);
 
-        EnergyManager.distributeParticles(Element.ANEMO, 4.0, ParticleType.PARTICLE, sim);
+        sim.getEnergyDistributor().distributeParticles(Element.ANEMO, 4.0, ParticleType.PARTICLE);
 
         applyA4Passive(sim);
         applyA1PassiveIfSwirled(sim);
@@ -237,8 +240,8 @@ public class Sucrose extends Character implements BurstStateProvider {
     private void burst(CombatSimulator sim) {
         this.absorbedElement = null;
 
-        double dotMv = mechanics.data.TalentDataManager.getInstance().get(this.name, "Burst DoT", 2.96);
-        double absorbMv = mechanics.data.TalentDataManager.getInstance().get(this.name, "Burst Absorb", 0.88);
+        double dotMv = getTalentValue("Burst DoT", 2.96);
+        double absorbMv = getTalentValue("Burst Absorb", 0.88);
 
         // Create dummy action for initial cast time
         AttackAction cast = new AttackAction("Forbidden Creation - Isomer 75 (Cast)", 0.0, Element.ANEMO,

@@ -6,10 +6,18 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TalentDataManager {
+public class TalentDataManager implements TalentDataSource {
     private static TalentDataManager instance;
     private Map<String, Double> values = new HashMap<>();
 
+    /**
+     * Returns the process-wide talent-data cache.
+     *
+     * <p>This remains a singleton intentionally for now because character setup reads
+     * from the same static CSV dataset across many simulator instances. Phase 6 keeps
+     * this as a shared cache and narrows the more behavior-heavy static utility
+     * coupling first.
+     */
     public static TalentDataManager getInstance() {
         if (instance == null) {
             instance = new TalentDataManager();

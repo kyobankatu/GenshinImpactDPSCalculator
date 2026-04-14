@@ -1,5 +1,7 @@
 package model.character;
 
+import mechanics.data.TalentDataManager;
+import mechanics.data.TalentDataSource;
 import model.entity.BurstStateProvider;
 import model.entity.Character;
 import model.entity.Weapon;
@@ -21,26 +23,30 @@ public class Bennett extends Character implements BurstStateProvider {
     private int normalAttackStep = 0;
 
     public Bennett(Weapon weapon, ArtifactSet artifacts) {
-        super();
+        this(weapon, artifacts, TalentDataManager.getInstance());
+    }
+
+    public Bennett(Weapon weapon, ArtifactSet artifacts, TalentDataSource talentData) {
+        super(talentData);
         this.name = "Bennett";
         this.characterId = CharacterId.BENNETT;
 
-        double baseAtk = mechanics.data.TalentDataManager.getInstance().get(this.name, "Base ATK", 191);
-        double ascEr = mechanics.data.TalentDataManager.getInstance().get(this.name, "Ascension ER", 0.267);
+        double baseAtk = getTalentValue("Base ATK", 191);
+        double ascEr = getTalentValue("Ascension ER", 0.267);
 
         baseStats.set(StatType.BASE_ATK, baseAtk);
         baseStats.add(StatType.ENERGY_RECHARGE, ascEr);
         this.weapon = weapon;
         this.artifacts = new ArtifactSet[] { artifacts };
         this.element = Element.PYRO;
-        this.constellation = (int) mechanics.data.TalentDataManager.getInstance().get(this.name, "Constellation", 6.0);
+        this.constellation = (int) getTalentValue("Constellation", 6.0);
         setSkillCD(5.0); // Tap E Short CD
         setBurstCD(15.0);
     }
 
     @Override
     public double getEnergyCost() {
-        return mechanics.data.TalentDataManager.getInstance().get(this.name, "Energy Cost", 60);
+        return getTalentValue("Energy Cost", 60);
     }
 
     @Override
@@ -83,19 +89,18 @@ public class Bennett extends Character implements BurstStateProvider {
     }
 
     private void skill(CombatSimulator sim) {
-        double mv = mechanics.data.TalentDataManager.getInstance().get(this.name, "Passion Overload Tap", 2.34);
+        double mv = getTalentValue("Passion Overload Tap", 2.34);
         AttackAction hit = new AttackAction("Passion Overload (Tap)", mv, Element.PYRO, StatType.BASE_ATK,
                 StatType.SKILL_DMG_BONUS, 0.0, false, ActionType.SKILL);
         hit.setICD(ICDType.Standard, ICDTag.ElementalSkill, 1.0);
         sim.performAction(this.name, hit);
 
         // Generate 2 Pyro Particles (Tap)
-        mechanics.energy.EnergyManager.distributeParticles(Element.PYRO, 2.0, mechanics.energy.ParticleType.PARTICLE,
-                sim);
+        sim.getEnergyDistributor().distributeParticles(Element.PYRO, 2.0, mechanics.energy.ParticleType.PARTICLE);
     }
 
     private void burst(CombatSimulator sim) {
-        double mv = mechanics.data.TalentDataManager.getInstance().get(this.name, "Fantastic Voyage Hit", 3.96);
+        double mv = getTalentValue("Fantastic Voyage Hit", 3.96);
         AttackAction q = new AttackAction("Fantastic Voyage Hit", mv, Element.PYRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 0.8, ActionType.BURST);
         q.setICD(ICDType.Standard, ICDTag.ElementalBurst, 2.0); // 2U application
@@ -108,7 +113,7 @@ public class Bennett extends Character implements BurstStateProvider {
 
         // Apply Field Buff
         // Apply Field Buff
-        double baseRatio = mechanics.data.TalentDataManager.getInstance().get(this.name, "Buff Ratio", 0.95);
+        double baseRatio = getTalentValue("Buff Ratio", 0.95);
         double totalRatio = baseRatio;
 
         // C1: Base ATK +20%
@@ -129,8 +134,8 @@ public class Bennett extends Character implements BurstStateProvider {
         }));
 
         // Healing (Not fully implemented in sim, but we can log it)
-        double hpRatio = mechanics.data.TalentDataManager.getInstance().get(this.name, "Heal HP Ratio", 0.102);
-        double flatHeal = mechanics.data.TalentDataManager.getInstance().get(this.name, "Heal Flat", 1174);
+        double hpRatio = getTalentValue("Heal HP Ratio", 0.102);
+        double flatHeal = getTalentValue("Heal Flat", 1174);
         System.out.println(
                 String.format("   [Bennett] Fantastic Voyage Field Active. ATK Buff: +%.0f, Heal/sec: %.2f%% HP + %.0f",
                         atkBonus, hpRatio * 100, flatHeal));
@@ -145,7 +150,7 @@ public class Bennett extends Character implements BurstStateProvider {
         String key = "N" + (normalAttackStep + 1);
         String name = "Bennett " + key;
 
-        double mv = mechanics.data.TalentDataManager.getInstance().get(this.name, key, 0.5);
+        double mv = getTalentValue(key, 0.5);
         double dur = 0.3; // Approx
 
         switch (normalAttackStep) {
@@ -207,8 +212,8 @@ public class Bennett extends Character implements BurstStateProvider {
                 .anyMatch(b -> b.getId() == BuffId.FANTASTIC_VOYAGE);
         Element dmgElement = hasInfusion ? Element.PYRO : Element.PHYSICAL;
 
-        double mv1 = mechanics.data.TalentDataManager.getInstance().get(this.name, "CA_1", 1.03);
-        double mv2 = mechanics.data.TalentDataManager.getInstance().get(this.name, "CA_2", 1.12);
+        double mv1 = getTalentValue("CA_1", 1.03);
+        double mv2 = getTalentValue("CA_2", 1.12);
 
         AttackAction hit1 = new AttackAction("Bennett CA_1", mv1, dmgElement, StatType.BASE_ATK,
                 StatType.PHYSICAL_DMG_BONUS, 0.2, ActionType.CHARGE);
@@ -228,7 +233,7 @@ public class Bennett extends Character implements BurstStateProvider {
                 .anyMatch(b -> b.getId() == BuffId.FANTASTIC_VOYAGE);
         Element dmgElement = hasInfusion ? Element.PYRO : Element.PHYSICAL;
 
-        double mv = mechanics.data.TalentDataManager.getInstance().get(this.name, "Plunge High", 2.93);
+        double mv = getTalentValue("Plunge High", 2.93);
         AttackAction p = new AttackAction("Bennett Plunge", mv, dmgElement, StatType.BASE_ATK,
                 StatType.PHYSICAL_DMG_BONUS, 1.0, ActionType.PLUNGE);
         p.setICD(ICDType.Standard, ICDTag.None, 1.0);

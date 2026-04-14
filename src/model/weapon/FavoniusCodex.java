@@ -56,7 +56,7 @@ public class FavoniusCodex extends Weapon implements DamageTriggeredWeaponEffect
             // Usually this means it generates particles. And particles regenerate energy.
             // In-game: It generates 3 Clear Orbs/Particles.
             // We use standard particle distribution.
-            EnergyManager.distributeParticles(model.type.Element.PHYSICAL, 3.0, ParticleType.PARTICLE, sim);
+            sim.getEnergyDistributor().distributeParticles(model.type.Element.PHYSICAL, 3.0, ParticleType.PARTICLE);
 
             lastProcTime = currentTime;
         }

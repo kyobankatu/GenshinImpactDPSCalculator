@@ -1,5 +1,7 @@
 package model.character;
 
+import mechanics.data.TalentDataManager;
+import mechanics.data.TalentDataSource;
 import model.entity.BurstStateProvider;
 import model.entity.Character;
 import model.entity.SwitchAwareCharacter;
@@ -25,7 +27,11 @@ public class RaidenShogun extends Character implements BurstStateProvider, Switc
     private boolean listenerRegistered = false;
 
     public RaidenShogun(Weapon weapon, ArtifactSet artifacts) {
-        super(); // Init base stats
+        this(weapon, artifacts, TalentDataManager.getInstance());
+    }
+
+    public RaidenShogun(Weapon weapon, ArtifactSet artifacts, TalentDataSource talentData) {
+        super(talentData); // Init base stats
         this.name = "Raiden Shogun";
         this.characterId = CharacterId.RAIDEN_SHOGUN;
         baseStats.set(StatType.BASE_ATK, 337);
@@ -33,7 +39,7 @@ public class RaidenShogun extends Character implements BurstStateProvider, Switc
         this.weapon = weapon;
         this.artifacts = new ArtifactSet[] { artifacts };
         this.element = Element.ELECTRO;
-        this.constellation = (int) mechanics.data.TalentDataManager.getInstance().get(this.name, "Constellation", 6.0);
+        this.constellation = (int) getTalentValue("Constellation", 6.0);
         setSkillCD(10.0);
         setBurstCD(18.0);
     }
@@ -140,7 +146,7 @@ public class RaidenShogun extends Character implements BurstStateProvider, Switc
 
     private void skill(CombatSimulator sim) {
         registerResolveListener(sim);
-        double mv = mechanics.data.TalentDataManager.getInstance().get(this.name, "Raiden E Cast", 2.11);
+        double mv = getTalentValue("Raiden E Cast", 2.11);
 
         AttackAction e = new AttackAction("Raiden E Cast", mv, Element.ELECTRO, StatType.BASE_ATK,
                 StatType.SKILL_DMG_BONUS, 0.5, false, ActionType.SKILL); // Dynamic
@@ -159,7 +165,7 @@ public class RaidenShogun extends Character implements BurstStateProvider, Switc
 
         // Particle Generation & Coordinated Attack
         // MV: 75.6% (Lv10)
-        double coordMv = mechanics.data.TalentDataManager.getInstance().get(this.name, "Raiden E Coordinated", 0.756);
+        double coordMv = getTalentValue("Raiden E Coordinated", 0.756);
         AttackAction coordAttack = new AttackAction("Eye of Stormy Judgment", coordMv, Element.ELECTRO,
                 StatType.BASE_ATK, StatType.SKILL_DMG_BONUS, 0.0, false, ActionType.SKILL); // Dynamic
         coordAttack.setICD(ICDType.Standard, ICDTag.ElementalSkill, 1.0); // 1U
@@ -168,8 +174,8 @@ public class RaidenShogun extends Character implements BurstStateProvider, Switc
                 this.name, coordAttack, sim.getCurrentTime() + 0.9, 0.9, 25.0,
                 s -> {
                     // 50% chance to generate 1 particle -> Average 0.5
-                    mechanics.energy.EnergyManager.distributeParticles(Element.ELECTRO, 0.5,
-                            mechanics.energy.ParticleType.PARTICLE, s);
+                    s.getEnergyDistributor().distributeParticles(Element.ELECTRO, 0.5,
+                            mechanics.energy.ParticleType.PARTICLE);
                 }));
     }
 
@@ -208,8 +214,8 @@ public class RaidenShogun extends Character implements BurstStateProvider, Switc
             }
         });
 
-        double baseMv = mechanics.data.TalentDataManager.getInstance().get(this.name, "Musou Shinsetsu", 6.81);
-        double stackScale = mechanics.data.TalentDataManager.getInstance().get(this.name, "Musou Shinsetsu.2", 0.0661);
+        double baseMv = getTalentValue("Musou Shinsetsu", 6.81);
+        double stackScale = getTalentValue("Musou Shinsetsu.2", 0.0661);
 
         double mv = baseMv + (activeResolveBonus * stackScale);
 
@@ -227,13 +233,11 @@ public class RaidenShogun extends Character implements BurstStateProvider, Switc
         if (musouActive && musouEnergyCount < 5 && sim.getCurrentTime() >= nextEnergyRestoreTime) {
             // Restore Energy
             // Base: 2.5 (Lv10/Lv9 matches 2.5 usually, Lv1 is 1.6)
-            double base = mechanics.data.TalentDataManager.getInstance().get(this.name, "Musou Energy Base", 2.5);
+            double base = getTalentValue("Musou Energy Base", 2.5);
 
             // Passive: Each 1% above 100% ER -> +0.6% Restoration
-            double threshold = mechanics.data.TalentDataManager.getInstance().get(this.name,
-                    "Enlightened One Threshold", 1.0);
-            double energyConv = mechanics.data.TalentDataManager.getInstance().get(this.name,
-                    "Enlightened One Energy Conv", 0.6);
+            double threshold = getTalentValue("Enlightened One Threshold", 1.0);
+            double energyConv = getTalentValue("Enlightened One Energy Conv", 0.6);
 
             double er = getEffectiveStats(sim.getCurrentTime()).get(StatType.ENERGY_RECHARGE);
             double multiplier = 1.0;
@@ -242,7 +246,7 @@ public class RaidenShogun extends Character implements BurstStateProvider, Switc
             }
             double amount = base * multiplier;
 
-            mechanics.energy.EnergyManager.distributeFlatEnergy(amount, sim);
+            sim.getEnergyDistributor().distributeFlatEnergy(amount);
 
             System.out.println(String.format("   [Raiden] Musou Energy: +%.1f (ER %.0f%%)", amount, er * 100));
 
@@ -285,9 +289,8 @@ public class RaidenShogun extends Character implements BurstStateProvider, Switc
         if (musouActive) {
             // Burst Mode (Electro)
             key = "Burst " + stepName;
-            double baseMv = mechanics.data.TalentDataManager.getInstance().get(this.name, key, 0.5);
-            double scaling = mechanics.data.TalentDataManager.getInstance().get(this.name, "Resolve Normal Scaling",
-                    0.0123);
+            double baseMv = getTalentValue(key, 0.5);
+            double scaling = getTalentValue("Resolve Normal Scaling", 0.0123);
             mv = baseMv + (activeResolveBonus * scaling);
 
             type = ActionType.NORMAL; // Still normal attack type for triggers
@@ -297,7 +300,7 @@ public class RaidenShogun extends Character implements BurstStateProvider, Switc
         } else {
             // Physical Mode
             key = stepName;
-            mv = mechanics.data.TalentDataManager.getInstance().get(this.name, key, 0.5);
+            mv = getTalentValue(key, 0.5);
 
             type = ActionType.NORMAL;
             countsAsBurst = false;
@@ -341,10 +344,9 @@ public class RaidenShogun extends Character implements BurstStateProvider, Switc
 
         if (musouActive) {
             // Burst CA (2 Hits)
-            double base1 = mechanics.data.TalentDataManager.getInstance().get(this.name, "Burst CA_1", 1.036);
-            double base2 = mechanics.data.TalentDataManager.getInstance().get(this.name, "Burst CA_2", 1.251);
-            double scaling = mechanics.data.TalentDataManager.getInstance().get(this.name, "Resolve CA Scaling",
-                    0.0123);
+            double base1 = getTalentValue("Burst CA_1", 1.036);
+            double base2 = getTalentValue("Burst CA_2", 1.251);
+            double scaling = getTalentValue("Resolve CA Scaling", 0.0123);
 
             double bonus = activeResolveBonus * scaling;
             mv = (base1 + bonus) + (base2 + bonus);
@@ -354,7 +356,7 @@ public class RaidenShogun extends Character implements BurstStateProvider, Switc
             actionName = "Raiden Burst CA";
         } else {
             // Physical CA (1 Hit)
-            mv = mechanics.data.TalentDataManager.getInstance().get(this.name, "CA", 1.83);
+            mv = getTalentValue("CA", 1.83);
 
             countsAsBurst = false;
             dmgElement = Element.PHYSICAL;
@@ -386,9 +388,8 @@ public class RaidenShogun extends Character implements BurstStateProvider, Switc
         Element dmgElement;
 
         if (musouActive) {
-            mv = mechanics.data.TalentDataManager.getInstance().get(this.name, "Burst " + keySuffix, 2.93);
-            double scaling = mechanics.data.TalentDataManager.getInstance().get(this.name, "Resolve Normal Scaling",
-                    0.0123); // Use normal scaling?
+            mv = getTalentValue("Burst " + keySuffix, 2.93);
+            double scaling = getTalentValue("Resolve Normal Scaling", 0.0123); // Use normal scaling?
             // User didn't specify plunge scaling, assuming same as Normal/CA for Musou
             // Isshin
             mv += (activeResolveBonus * scaling);
@@ -397,7 +398,7 @@ public class RaidenShogun extends Character implements BurstStateProvider, Switc
             dmgElement = Element.ELECTRO;
             actionName = "Raiden Burst Plunge";
         } else {
-            mv = mechanics.data.TalentDataManager.getInstance().get(this.name, keySuffix, 2.93);
+            mv = getTalentValue(keySuffix, 2.93);
             countsAsBurst = false;
             dmgElement = Element.PHYSICAL;
         }

@@ -77,7 +77,7 @@ public class RaidenParty {
 
         // 1. Raiden E
         sim.switchCharacter("Raiden Shogun");
-        EnergyManager.scheduleKQMSEnemyParticles(sim); // Add Enemy Particles (Delegated)
+        sim.getEnergyDistributor().scheduleKQMSEnemyParticles(); // Add Enemy Particles (Delegated)
         skill(sim, "Raiden Shogun");
 
         // 2. Xingqiu: Q E E

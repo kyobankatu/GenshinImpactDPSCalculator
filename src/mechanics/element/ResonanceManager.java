@@ -174,7 +174,7 @@ public class ResonanceManager {
                             return;
                         }
                         lastHVParticleTime[0] = time;
-                        EnergyManager.distributeParticles(Element.ELECTRO, 1.0, ParticleType.PARTICLE, s);
+                        s.getEnergyDistributor().distributeParticles(Element.ELECTRO, 1.0, ParticleType.PARTICLE);
                     }
                 });
                 break;

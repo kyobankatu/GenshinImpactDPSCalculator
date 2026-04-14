@@ -1,5 +1,7 @@
 package model.entity;
 
+import mechanics.data.TalentDataManager;
+import mechanics.data.TalentDataSource;
 import model.entity.state.ArtifactRollProfile;
 import model.entity.state.CooldownState;
 import model.entity.state.EnergyState;
@@ -49,6 +51,7 @@ public abstract class Character {
     protected model.type.Element element;
     protected CharacterId characterId = CharacterId.UNKNOWN;
     protected final java.util.List<mechanics.buff.Buff> activeBuffs = new java.util.ArrayList<>();
+    protected final TalentDataSource talentData;
 
     private final StatAssembler statAssembler = new StatAssembler();
     private final SnapshotState snapshotState = new SnapshotState();
@@ -61,6 +64,11 @@ public abstract class Character {
      * 5 % crit rate, 50 % crit DMG, 100 % energy recharge.
      */
     public Character() {
+        this(TalentDataManager.getInstance());
+    }
+
+    protected Character(TalentDataSource talentData) {
+        this.talentData = talentData;
         this.baseStats = new StatsContainer();
         this.baseStats.set(StatType.CRIT_RATE, 0.05);
         this.baseStats.set(StatType.CRIT_DMG, 0.50);
@@ -156,6 +164,10 @@ public abstract class Character {
 
     public model.type.Element getElement() {
         return element;
+    }
+
+    protected double getTalentValue(String key, double defaultValue) {
+        return talentData.get(this.name, key, defaultValue);
     }
 
     public void receiveEnergy(double amount) {

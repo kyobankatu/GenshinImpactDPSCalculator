@@ -20,6 +20,8 @@ import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
 import simulation.event.PeriodicDamageEvent;
 import mechanics.buff.SimpleBuff;
+import mechanics.data.TalentDataManager;
+import mechanics.data.TalentDataSource;
 import mechanics.energy.EnergyManager;
 import mechanics.energy.ParticleType;
 
@@ -70,27 +72,26 @@ public class Flins extends Character
      * @param artifacts equipped artifact set
      */
     public Flins(Weapon weapon, ArtifactSet artifacts) {
-        super();
+        this(weapon, artifacts, TalentDataManager.getInstance());
+    }
+
+    public Flins(Weapon weapon, ArtifactSet artifacts, TalentDataSource talentData) {
+        super(talentData);
         this.name = "Flins";
         this.characterId = CharacterId.FLINS;
 
         // Stats (Lv 90)
-        baseStats.set(StatType.BASE_HP,
-                mechanics.data.TalentDataManager.getInstance().get(this.name, "Base HP", 12491));
-        baseStats.set(StatType.BASE_ATK,
-                mechanics.data.TalentDataManager.getInstance().get(this.name, "Base ATK", 352));
-        baseStats.set(StatType.BASE_DEF,
-                mechanics.data.TalentDataManager.getInstance().get(this.name, "Base DEF", 809));
-        baseStats.set(StatType.CRIT_DMG,
-                mechanics.data.TalentDataManager.getInstance().get(this.name, "Base CD", 0.384)); // 38.4%
+        baseStats.set(StatType.BASE_HP, getTalentValue("Base HP", 12491));
+        baseStats.set(StatType.BASE_ATK, getTalentValue("Base ATK", 352));
+        baseStats.set(StatType.BASE_DEF, getTalentValue("Base DEF", 809));
+        baseStats.set(StatType.CRIT_DMG, getTalentValue("Base CD", 0.384)); // 38.4%
 
         this.weapon = weapon;
         this.artifacts = new ArtifactSet[] { artifacts };
         this.element = Element.ELECTRO;
 
         // Constellation (read from CSV; defaults to 0)
-        this.constellation = (int) mechanics.data.TalentDataManager.getInstance()
-                .get(this.name, "Constellation", 0);
+        this.constellation = (int) getTalentValue("Constellation", 0);
 
         setSkillCD(16.0);
         setBurstCD(20.0);
@@ -265,7 +266,7 @@ public class Flins extends Character
         String name = "Flins " + key + (inForm ? " (Manifest)" : "");
         String lookupKey = inForm ? "Form " + key : key;
 
-        double mv = mechanics.data.TalentDataManager.getInstance().get(this.name, lookupKey, 0.8); // Default fallback
+        double mv = getTalentValue(lookupKey, 0.8); // Default fallback
         double dur = 0.3;
 
         switch (normalAttackStep) {
@@ -309,7 +310,7 @@ public class Flins extends Character
 
         // Manifest Flame NA: generate 1 Electro particle with 2s CD
         if (inForm && attackTime >= normalAttackParticleNextTime) {
-            EnergyManager.distributeParticles(Element.ELECTRO, 1.0, ParticleType.PARTICLE, sim);
+            sim.getEnergyDistributor().distributeParticles(Element.ELECTRO, 1.0, ParticleType.PARTICLE);
             normalAttackParticleNextTime = attackTime + 2.0;
         }
 
@@ -343,7 +344,7 @@ public class Flins extends Character
      */
     private void skill_spearstorm(CombatSimulator sim) {
         // Northland Spearstorm
-        double mv = mechanics.data.TalentDataManager.getInstance().get(this.name, "Spearstorm DMG", 3.0328);
+        double mv = getTalentValue("Spearstorm DMG", 3.0328);
 
         AttackAction hit = new AttackAction("Northland Spearstorm", mv, Element.ELECTRO, StatType.BASE_ATK,
                 StatType.SKILL_DMG_BONUS, 0.0, false, ActionType.SKILL);
@@ -385,9 +386,9 @@ public class Flins extends Character
      */
     private void burst_standard(CombatSimulator sim) {
         // Ancient Ritual: Cometh the Night (Cost 80)
-        double initialMv = mechanics.data.TalentDataManager.getInstance().get(this.name, "Burst Initial", 4.417);
-        double middleMv = mechanics.data.TalentDataManager.getInstance().get(this.name, "Burst Middle", 0.276);
-        double finalMv = mechanics.data.TalentDataManager.getInstance().get(this.name, "Burst Final", 1.988);
+        double initialMv = getTalentValue("Burst Initial", 4.417);
+        double middleMv = getTalentValue("Burst Middle", 0.276);
+        double finalMv = getTalentValue("Burst Final", 1.988);
 
         // Initial
         AttackAction hit = new AttackAction("Cometh the Night (Initial)", initialMv, Element.ELECTRO,
@@ -463,8 +464,8 @@ public class Flins extends Character
      */
     private void burst_symphony(CombatSimulator sim) {
         // Thunderous Symphony (Cost 30)
-        double mainMv = mechanics.data.TalentDataManager.getInstance().get(this.name, "Symphony DMG", 1.215);
-        double addMv = mechanics.data.TalentDataManager.getInstance().get(this.name, "Symphony Additional", 1.767);
+        double mainMv = getTalentValue("Symphony DMG", 1.215);
+        double addMv = getTalentValue("Symphony Additional", 1.767);
 
         AttackAction hit = new AttackAction("Thunderous Symphony", mainMv, Element.ELECTRO,
                 StatType.BASE_ATK,

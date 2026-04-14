@@ -21,6 +21,8 @@ import mechanics.buff.SimpleBuff;
 import mechanics.buff.Buff;
 import mechanics.buff.ActiveCharacterBuff;
 import mechanics.buff.BuffId;
+import mechanics.data.TalentDataManager;
+import mechanics.data.TalentDataSource;
 import mechanics.energy.EnergyManager;
 import mechanics.energy.ParticleType;
 
@@ -56,19 +58,19 @@ public class Ineffa extends Character implements BurstStateProvider, CharacterTe
      * @param artifacts equipped artifact set
      */
     public Ineffa(Weapon weapon, ArtifactSet artifacts) {
-        super();
+        this(weapon, artifacts, TalentDataManager.getInstance());
+    }
+
+    public Ineffa(Weapon weapon, ArtifactSet artifacts, TalentDataSource talentData) {
+        super(talentData);
         this.name = "Ineffa";
         this.characterId = CharacterId.INEFFA;
 
         // Stats to be filled by User via CSV
-        baseStats.set(StatType.BASE_HP,
-                mechanics.data.TalentDataManager.getInstance().get(this.name, "Base HP", 12613));
-        baseStats.set(StatType.BASE_ATK,
-                mechanics.data.TalentDataManager.getInstance().get(this.name, "Base ATK", 330));
-        baseStats.set(StatType.BASE_DEF,
-                mechanics.data.TalentDataManager.getInstance().get(this.name, "Base DEF", 828));
-        baseStats.set(StatType.CRIT_RATE,
-                mechanics.data.TalentDataManager.getInstance().get(this.name, "Base CR", 0.192));
+        baseStats.set(StatType.BASE_HP, getTalentValue("Base HP", 12613));
+        baseStats.set(StatType.BASE_ATK, getTalentValue("Base ATK", 330));
+        baseStats.set(StatType.BASE_DEF, getTalentValue("Base DEF", 828));
+        baseStats.set(StatType.CRIT_RATE, getTalentValue("Base CR", 0.192));
 
         this.weapon = weapon;
         this.artifacts = new ArtifactSet[] { artifacts };
@@ -173,7 +175,7 @@ public class Ineffa extends Character implements BurstStateProvider, CharacterTe
                 break; // N4
         }
 
-        double mv = mechanics.data.TalentDataManager.getInstance().get(this.name, key, defaultMv);
+        double mv = getTalentValue(key, defaultMv);
 
         AttackAction hit = new AttackAction(name, mv, Element.PHYSICAL, StatType.BASE_ATK,
                 StatType.NORMAL_ATTACK_DMG_BONUS, 0.0, ActionType.NORMAL);
@@ -198,7 +200,7 @@ public class Ineffa extends Character implements BurstStateProvider, CharacterTe
     private void skill(CombatSimulator sim) {
         // Reduced Cleaning Module
         // Skill DMG: 146.88% (Lv9)
-        double mv = mechanics.data.TalentDataManager.getInstance().get(this.name, "Skill DMG", 1.4688);
+        double mv = getTalentValue("Skill DMG", 1.4688);
 
         AttackAction hit = new AttackAction("Enhanced Cleaning Module", mv, Element.ELECTRO, StatType.BASE_ATK,
                 StatType.SKILL_DMG_BONUS, 0.0, false, ActionType.SKILL);
@@ -208,8 +210,8 @@ public class Ineffa extends Character implements BurstStateProvider, CharacterTe
 
         // Shield Logic
         double atk = this.getEffectiveStats(sim.getCurrentTime()).getTotalAtk();
-        double shieldRatio = mechanics.data.TalentDataManager.getInstance().get(this.name, "Shield Ratio", 3.76);
-        double shieldFlat = mechanics.data.TalentDataManager.getInstance().get(this.name, "Shield Flat", 2820);
+        double shieldRatio = getTalentValue("Shield Ratio", 3.76);
+        double shieldFlat = getTalentValue("Shield Flat", 2820);
         this.shieldHealth = atk * shieldRatio + shieldFlat;
         if (sim.isLoggingEnabled()) {
             System.out.println("Ineffa Shield Generated: " + (int) this.shieldHealth + " HP");
@@ -217,7 +219,7 @@ public class Ineffa extends Character implements BurstStateProvider, CharacterTe
 
         // Summon Birgitta (20s, tick 2s)
         // Birgitta Discharge DMG: 163.2%
-        double birgittaMv = mechanics.data.TalentDataManager.getInstance().get(this.name, "Birgitta DMG", 1.632);
+        double birgittaMv = getTalentValue("Birgitta DMG", 1.632);
 
         sim.registerEvent(new PeriodicDamageEvent(
                 this.name, // Source must be a registered character
@@ -243,7 +245,7 @@ public class Ineffa extends Character implements BurstStateProvider, CharacterTe
                     }
 
                     // Generate Particles (1 per hit)
-                    EnergyManager.distributeParticles(Element.ELECTRO, 0.667, ParticleType.PARTICLE, s);
+                    s.getEnergyDistributor().distributeParticles(Element.ELECTRO, 0.667, ParticleType.PARTICLE);
                 }));
     }
 
@@ -257,7 +259,7 @@ public class Ineffa extends Character implements BurstStateProvider, CharacterTe
      */
     private void burst(CombatSimulator sim) {
         // Supreme Instruction
-        double mv = mechanics.data.TalentDataManager.getInstance().get(this.name, "Burst DMG", 11.506); // Lv9
+        double mv = getTalentValue("Burst DMG", 11.506); // Lv9
 
         AttackAction hit = new AttackAction("Supreme Instruction", mv, Element.ELECTRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 0.0, false, ActionType.BURST);

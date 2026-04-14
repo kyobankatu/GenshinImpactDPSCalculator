@@ -1,5 +1,7 @@
 package model.character;
 
+import mechanics.data.TalentDataManager;
+import mechanics.data.TalentDataSource;
 import model.entity.BurstStateProvider;
 import model.entity.Character;
 import model.entity.Weapon;
@@ -23,26 +25,30 @@ public class Xingqiu extends Character implements BurstStateProvider {
     private int raincutterWaveCount = 0;
 
     public Xingqiu(Weapon weapon, ArtifactSet artifacts) {
-        super();
+        this(weapon, artifacts, TalentDataManager.getInstance());
+    }
+
+    public Xingqiu(Weapon weapon, ArtifactSet artifacts, TalentDataSource talentData) {
+        super(talentData);
         this.name = "Xingqiu";
         this.characterId = CharacterId.XINGQIU;
 
-        double baseAtk = mechanics.data.TalentDataManager.getInstance().get(this.name, "Base ATK", 202);
-        double ascAtk = mechanics.data.TalentDataManager.getInstance().get(this.name, "Ascension ATK%", 0.24);
+        double baseAtk = getTalentValue("Base ATK", 202);
+        double ascAtk = getTalentValue("Ascension ATK%", 0.24);
 
         baseStats.set(StatType.BASE_ATK, baseAtk);
         baseStats.add(StatType.ATK_PERCENT, ascAtk);
         this.weapon = weapon;
         this.artifacts = new ArtifactSet[] { artifacts };
         this.element = Element.HYDRO;
-        this.constellation = (int) mechanics.data.TalentDataManager.getInstance().get(this.name, "Constellation", 6.0);
+        this.constellation = (int) getTalentValue("Constellation", 6.0);
         setSkillCD(21.0);
         setBurstCD(20.0);
     }
 
     @Override
     public double getEnergyCost() {
-        return mechanics.data.TalentDataManager.getInstance().get(this.name, "Energy Cost", 80);
+        return getTalentValue("Energy Cost", 80);
     }
 
     @Override
@@ -52,7 +58,7 @@ public class Xingqiu extends Character implements BurstStateProvider {
 
     @Override
     public void applyPassive(StatsContainer stats) {
-        double hydroBonus = mechanics.data.TalentDataManager.getInstance().get(this.name, "Hydro Bonus", 0.20);
+        double hydroBonus = getTalentValue("Hydro Bonus", 0.20);
         stats.add(StatType.HYDRO_DMG_BONUS, hydroBonus);
     }
 
@@ -95,21 +101,20 @@ public class Xingqiu extends Character implements BurstStateProvider {
             System.out.println("   [Xingqiu] C4 Activation: Skill DMG x1.5");
         }
 
-        double mv1 = mechanics.data.TalentDataManager.getInstance().get(this.name, "Rain Screen Hit 1", 2.86);
+        double mv1 = getTalentValue("Rain Screen Hit 1", 2.86);
         AttackAction hit1 = new AttackAction("Fatal Rainscreen Hit 1", mv1 * mvMulti, Element.HYDRO, StatType.BASE_ATK,
                 StatType.SKILL_DMG_BONUS, 0.5, ActionType.SKILL);
         hit1.setICD(ICDType.Standard, ICDTag.ElementalSkill, 1.0);
         sim.performAction(this.name, hit1);
 
-        double mv2 = mechanics.data.TalentDataManager.getInstance().get(this.name, "Rain Screen Hit 2", 3.25);
+        double mv2 = getTalentValue("Rain Screen Hit 2", 3.25);
         AttackAction hit2 = new AttackAction("Fatal Rainscreen Hit 2", mv2 * mvMulti, Element.HYDRO, StatType.BASE_ATK,
                 StatType.SKILL_DMG_BONUS, 0.5, ActionType.SKILL);
         hit2.setICD(ICDType.Standard, ICDTag.ElementalSkill, 1.0);
         sim.performAction(this.name, hit2);
 
         // Generate 5 Hydro Particles
-        mechanics.energy.EnergyManager.distributeParticles(Element.HYDRO, 5.0, mechanics.energy.ParticleType.PARTICLE,
-                sim);
+        sim.getEnergyDistributor().distributeParticles(Element.HYDRO, 5.0, mechanics.energy.ParticleType.PARTICLE);
     }
 
     private void burst(CombatSimulator sim) {
@@ -148,7 +153,7 @@ public class Xingqiu extends Character implements BurstStateProvider {
 
                     if (rainSwords.size() == 5) {
                         // C6 Energy Restore
-                        mechanics.energy.EnergyManager.distributeFlatEnergy(3.0, sim);
+                        sim.getEnergyDistributor().distributeFlatEnergy(3.0);
                         System.out.println("   [Energy] Xingqiu C6 restored 3 Energy");
                     }
 
@@ -177,7 +182,7 @@ public class Xingqiu extends Character implements BurstStateProvider {
             swords = (waveCount % 2 == 0) ? 2 : 3;
         }
 
-        double mvPerSword = mechanics.data.TalentDataManager.getInstance().get(this.name, "Raincutter Sword", 0.923);
+        double mvPerSword = getTalentValue("Raincutter Sword", 0.923);
 
         java.util.List<AttackAction> actions = new java.util.ArrayList<>();
         for (int i = 0; i < swords; i++) {
@@ -214,8 +219,8 @@ public class Xingqiu extends Character implements BurstStateProvider {
 
         // Handle multi-hits for N3 and N5
         if (normalAttackStep == 2) { // N3
-            double mv1 = mechanics.data.TalentDataManager.getInstance().get(this.name, "N3_1", 0.525);
-            double mv2 = mechanics.data.TalentDataManager.getInstance().get(this.name, "N3_2", 0.525);
+            double mv1 = getTalentValue("N3_1", 0.525);
+            double mv2 = getTalentValue("N3_2", 0.525);
 
             AttackAction hit1 = new AttackAction(name + "_1", mv1, Element.PHYSICAL, StatType.BASE_ATK,
                     StatType.NORMAL_ATTACK_DMG_BONUS, 0.15, ActionType.NORMAL);
@@ -228,8 +233,8 @@ public class Xingqiu extends Character implements BurstStateProvider {
             sim.performAction(this.name, hit2);
 
         } else if (normalAttackStep == 4) { // N5
-            double mv1 = mechanics.data.TalentDataManager.getInstance().get(this.name, "N5_1", 0.659);
-            double mv2 = mechanics.data.TalentDataManager.getInstance().get(this.name, "N5_2", 0.659);
+            double mv1 = getTalentValue("N5_1", 0.659);
+            double mv2 = getTalentValue("N5_2", 0.659);
 
             AttackAction hit1 = new AttackAction(name + "_1", mv1, Element.PHYSICAL, StatType.BASE_ATK,
                     StatType.NORMAL_ATTACK_DMG_BONUS, 0.2, ActionType.NORMAL);
@@ -243,7 +248,7 @@ public class Xingqiu extends Character implements BurstStateProvider {
 
         } else {
             // Single Hit
-            double mv = mechanics.data.TalentDataManager.getInstance().get(this.name, baseKey, 0.5);
+            double mv = getTalentValue(baseKey, 0.5);
             AttackAction hit = new AttackAction(name, mv, Element.PHYSICAL, StatType.BASE_ATK,
                     StatType.NORMAL_ATTACK_DMG_BONUS, dur, ActionType.NORMAL);
             hit.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
@@ -256,8 +261,8 @@ public class Xingqiu extends Character implements BurstStateProvider {
     }
 
     private void chargeAttack(CombatSimulator sim) {
-        double mv1 = mechanics.data.TalentDataManager.getInstance().get(this.name, "CA_1", 0.869);
-        double mv2 = mechanics.data.TalentDataManager.getInstance().get(this.name, "CA_2", 1.03);
+        double mv1 = getTalentValue("CA_1", 0.869);
+        double mv2 = getTalentValue("CA_2", 1.03);
 
         AttackAction hit1 = new AttackAction("Xingqiu CA_1", mv1, Element.PHYSICAL, StatType.BASE_ATK,
                 StatType.PHYSICAL_DMG_BONUS, 0.2, ActionType.CHARGE);
@@ -273,7 +278,7 @@ public class Xingqiu extends Character implements BurstStateProvider {
     }
 
     private void plunge(CombatSimulator sim) {
-        double mv = mechanics.data.TalentDataManager.getInstance().get(this.name, "Plunge High", 2.93);
+        double mv = getTalentValue("Plunge High", 2.93);
         AttackAction p = new AttackAction("Xingqiu Plunge", mv, Element.PHYSICAL, StatType.BASE_ATK,
                 StatType.PHYSICAL_DMG_BONUS, 1.0, ActionType.PLUNGE);
         p.setICD(ICDType.Standard, ICDTag.None, 1.0);

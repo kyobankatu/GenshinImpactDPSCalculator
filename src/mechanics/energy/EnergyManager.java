@@ -1,9 +1,7 @@
 package mechanics.energy;
 
 import simulation.CombatSimulator;
-import model.entity.Character;
 import model.type.Element;
-import model.type.StatType;
 
 /**
  * Handles particle/orb energy distribution and scheduled enemy particle drops
@@ -22,11 +20,6 @@ import model.type.StatType;
  * </ul>
  */
 public class EnergyManager {
-
-    // Standard Genshin constants
-    private static final double NEUTRAL_SAME = 2.0;
-    private static final double NEUTRAL_DIFF = 2.0;
-    private static final double OFF_FIELD_PENALTY = 0.6; // For 4-char party
 
     /**
      * Distributes elemental particles or orbs to every party member.
@@ -50,47 +43,7 @@ public class EnergyManager {
      */
     public static void distributeParticles(Element particleElement, double count, ParticleType type,
             CombatSimulator sim) {
-        try {
-            System.out.println("   [Energy] Distributing " + count + " " + particleElement + " particles...");
-            Character activeChar = sim.getPartyMembers().stream()
-                    .filter(c -> c == sim.getActiveCharacter()) // Assuming sim exposes active directly or we filter
-                    .findFirst().orElse(null);
-
-            if (activeChar == null) {
-                System.out.println("   [Energy] No active character found!");
-                return;
-            }
-
-            for (Character c : sim.getPartyMembers()) {
-                boolean isActive = (c == activeChar);
-                boolean isSameElement = (c.getElement() == particleElement);
-
-                double baseValue = 0.0;
-
-                if (particleElement == null || particleElement == Element.PHYSICAL) {
-                    // Neutral Logic
-                    double neutralBase = 2.0;
-                    double sizeMult = (type == ParticleType.ORB) ? 3.0 : 1.0;
-                    baseValue = neutralBase * sizeMult;
-                } else {
-                    // Elemental Particle
-                    baseValue = type.getValue(isSameElement);
-                }
-
-                double rangeMuliplier = isActive ? 1.0 : OFF_FIELD_PENALTY;
-
-                // Final Energy = Count * Base * Range * ER%
-                double er = c.getEffectiveStats(sim.getCurrentTime()).get(StatType.ENERGY_RECHARGE);
-                double particleBase = count * baseValue * rangeMuliplier;
-
-                c.receiveParticleEnergy(particleBase, er);
-            }
-            // Notify Simulator listeners (e.g. Raiden Passive)
-            sim.notifyParticle(particleElement, count);
-        } catch (Exception e) {
-            System.out.println("[ERROR] Crash in EnergyManager:");
-            e.printStackTrace();
-        }
+        sim.getEnergyDistributor().distributeParticles(particleElement, count, type);
     }
 
     /**
@@ -103,9 +56,7 @@ public class EnergyManager {
      * @param sim    the running combat simulator
      */
     public static void distributeFlatEnergy(double amount, CombatSimulator sim) {
-        for (Character c : sim.getPartyMembers()) {
-            c.receiveFlatEnergy(amount);
-        }
+        sim.getEnergyDistributor().distributeFlatEnergy(amount);
     }
 
     /**
@@ -120,25 +71,6 @@ public class EnergyManager {
      * @param sim the simulator on which the event is registered
      */
     public static void scheduleKQMSEnemyParticles(CombatSimulator sim) {
-        sim.registerEvent(new simulation.event.TimerEvent() {
-            double[] dropTimes = { 10.0 };
-            int idx = 0;
-
-            @Override
-            public void tick(CombatSimulator s) {
-                distributeParticles(model.type.Element.PHYSICAL, 2.0, ParticleType.PARTICLE, s);
-                idx++;
-            }
-
-            @Override
-            public boolean isFinished(double t) {
-                return idx >= dropTimes.length;
-            }
-
-            @Override
-            public double getNextTickTime() {
-                return idx < dropTimes.length ? dropTimes[idx] : -1;
-            }
-        });
+        sim.getEnergyDistributor().scheduleKQMSEnemyParticles();
     }
 }

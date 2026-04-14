@@ -1,6 +1,8 @@
 package model.character;
 
 import mechanics.buff.BuffId;
+import mechanics.data.TalentDataManager;
+import mechanics.data.TalentDataSource;
 import mechanics.formula.DamageCalculator;
 import model.entity.CharacterTeamBuffProvider;
 import model.entity.Character;
@@ -101,7 +103,14 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
      * @param artifacts equipped artifact set
      */
     public Columbina(model.entity.Weapon weapon, model.entity.ArtifactSet artifacts) {
-        super();
+        this(weapon, artifacts, TalentDataManager.getInstance());
+    }
+
+    public Columbina(
+            model.entity.Weapon weapon,
+            model.entity.ArtifactSet artifacts,
+            TalentDataSource talentData) {
+        super(talentData);
         this.name = "Columbina";
         this.characterId = CharacterId.COLUMBINA;
         this.weapon = weapon;
@@ -120,8 +129,7 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
         setBurstCD(15.0);
 
         // Constellation (read from CSV; defaults to 0)
-        this.constellation = (int) mechanics.data.TalentDataManager.getInstance()
-                .get(this.name, "Constellation", 0);
+        this.constellation = (int) getTalentValue("Constellation", 0);
     }
 
     /**
@@ -159,7 +167,7 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
      * @return the multiplier value, or {@code 0.0} if not found
      */
     private double getMultiplier(String key) {
-        return mechanics.data.TalentDataManager.getInstance().get(this.name, key, 0.0);
+        return getTalentValue(key, 0.0);
     }
 
     /**
@@ -247,8 +255,8 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                 });
 
                 // Generate Particles
-                mechanics.energy.EnergyManager.distributeParticles(model.type.Element.HYDRO, 4.0,
-                        mechanics.energy.ParticleType.PARTICLE, sim);
+                sim.getEnergyDistributor().distributeParticles(model.type.Element.HYDRO, 4.0,
+                        mechanics.energy.ParticleType.PARTICLE);
 
                 // C1: Immediately trigger Gravity Interference (15s CD)
                 if (constellation >= 1 && currentTime >= c1SkillCDNextTime) {

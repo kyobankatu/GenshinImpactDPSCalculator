@@ -1,5 +1,7 @@
 package model.character;
 
+import mechanics.data.TalentDataManager;
+import mechanics.data.TalentDataSource;
 import model.entity.BurstStateProvider;
 import model.entity.Character;
 import model.entity.Weapon;
@@ -22,19 +24,23 @@ public class Xiangling extends Character implements BurstStateProvider {
     private int normalAttackStep = 0;
 
     public Xiangling(Weapon weapon, ArtifactSet artifacts) {
-        super();
+        this(weapon, artifacts, TalentDataManager.getInstance());
+    }
+
+    public Xiangling(Weapon weapon, ArtifactSet artifacts, TalentDataSource talentData) {
+        super(talentData);
         this.name = "Xiangling";
         this.characterId = CharacterId.XIANGLING;
 
-        double baseAtk = mechanics.data.TalentDataManager.getInstance().get(this.name, "Base ATK", 225);
-        double ascEm = mechanics.data.TalentDataManager.getInstance().get(this.name, "Ascension EM", 96.0);
+        double baseAtk = getTalentValue("Base ATK", 225);
+        double ascEm = getTalentValue("Ascension EM", 96.0);
 
         baseStats.set(StatType.BASE_ATK, baseAtk);
         baseStats.add(StatType.ELEMENTAL_MASTERY, ascEm);
         this.weapon = weapon;
         this.artifacts = new ArtifactSet[] { artifacts };
         this.element = Element.PYRO;
-        this.constellation = (int) mechanics.data.TalentDataManager.getInstance().get(this.name, "Constellation", 6.0);
+        this.constellation = (int) getTalentValue("Constellation", 6.0);
         setSkillCD(12.0);
         setBurstCD(20.0);
     }
@@ -61,7 +67,7 @@ public class Xiangling extends Character implements BurstStateProvider {
 
     @Override
     public double getEnergyCost() {
-        return mechanics.data.TalentDataManager.getInstance().get(this.name, "Energy Cost", 80);
+        return getTalentValue("Energy Cost", 80);
     }
 
     @Override
@@ -94,7 +100,7 @@ public class Xiangling extends Character implements BurstStateProvider {
     }
 
     private void skill(CombatSimulator sim) {
-        double mv = mechanics.data.TalentDataManager.getInstance().get(this.name, "Guoba", 2.23);
+        double mv = getTalentValue("Guoba", 2.23);
 
         // Guoba Setup
         AttackAction guobaHit = new AttackAction("Guoba Attack", mv, Element.PYRO, StatType.BASE_ATK,
@@ -117,13 +123,13 @@ public class Xiangling extends Character implements BurstStateProvider {
                     }
 
                     // Particles
-                    mechanics.energy.EnergyManager.distributeParticles(Element.PYRO, 1.0,
-                            mechanics.energy.ParticleType.PARTICLE, s);
+                    s.getEnergyDistributor().distributeParticles(Element.PYRO, 1.0,
+                            mechanics.energy.ParticleType.PARTICLE);
                 }));
 
         // Chili Pickup at end of duration (assuming auto-pickup for sim efficiency)
         // "Beware, It's Super Hot!"
-        double chiliAtk = mechanics.data.TalentDataManager.getInstance().get(this.name, "Attack Bonus", 0.10);
+        double chiliAtk = getTalentValue("Attack Bonus", 0.10);
         sim.applyTeamBuff(new mechanics.buff.SimpleBuff("Xiangling Chili", BuffId.XIANGLING_CHILI, 10.0,
                 sim.getCurrentTime() + 7.0, s -> {
             s.add(StatType.ATK_PERCENT, chiliAtk);
@@ -136,25 +142,25 @@ public class Xiangling extends Character implements BurstStateProvider {
                 .ifPresent(c -> c.captureSnapshot(sim.getCurrentTime(), sim.getTeamBuffs()));
 
         // Lv12 Values
-        double castMv1 = mechanics.data.TalentDataManager.getInstance().get(this.name, "Pyronado Cast 1", 1.44);
+        double castMv1 = getTalentValue("Pyronado Cast 1", 1.44);
         AttackAction cast1 = new AttackAction("Pyronado Cast 1", castMv1, Element.PYRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 0.5, true, ActionType.BURST);
         cast1.setICD(ICDType.Standard, ICDTag.ElementalBurst, 1.0);
         sim.performAction(this.name, cast1);
 
-        double castMv2 = mechanics.data.TalentDataManager.getInstance().get(this.name, "Pyronado Cast 2", 1.76);
+        double castMv2 = getTalentValue("Pyronado Cast 2", 1.76);
         AttackAction cast2 = new AttackAction("Pyronado Cast 2", castMv2, Element.PYRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 0.5, true, ActionType.BURST);
         cast2.setICD(ICDType.Standard, ICDTag.ElementalBurst, 1.0);
         sim.performAction(this.name, cast2);
 
-        double castMv3 = mechanics.data.TalentDataManager.getInstance().get(this.name, "Pyronado Cast 3", 2.19);
+        double castMv3 = getTalentValue("Pyronado Cast 3", 2.19);
         AttackAction cast3 = new AttackAction("Pyronado Cast 3", castMv3, Element.PYRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 0.6, true, ActionType.BURST);
         cast3.setICD(ICDType.Standard, ICDTag.ElementalBurst, 1.0);
         sim.performAction(this.name, cast3);
 
-        double hitMv = mechanics.data.TalentDataManager.getInstance().get(this.name, "Pyronado Hit", 2.24);
+        double hitMv = getTalentValue("Pyronado Hit", 2.24);
         AttackAction hit = new AttackAction("Pyronado Hit", hitMv, Element.PYRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 0.0, true, ActionType.BURST);
         hit.setICD(ICDType.None, ICDTag.Xiangling_Pyronado, 1.0);
@@ -200,8 +206,8 @@ public class Xiangling extends Character implements BurstStateProvider {
         }
 
         if (normalAttackStep == 2) { // N3 (2 Hits)
-            double mv1 = mechanics.data.TalentDataManager.getInstance().get(this.name, "N3_1", 0.479);
-            double mv2 = mechanics.data.TalentDataManager.getInstance().get(this.name, "N3_2", 0.479);
+            double mv1 = getTalentValue("N3_1", 0.479);
+            double mv2 = getTalentValue("N3_2", 0.479);
 
             AttackAction hit1 = new AttackAction(name + "_1", mv1, Element.PHYSICAL, StatType.BASE_ATK,
                     StatType.NORMAL_ATTACK_DMG_BONUS, 0.1, ActionType.NORMAL);
@@ -214,7 +220,7 @@ public class Xiangling extends Character implements BurstStateProvider {
             sim.performAction(this.name, hit2);
 
         } else if (normalAttackStep == 3) { // N4 (4 Hits)
-            double mv = mechanics.data.TalentDataManager.getInstance().get(this.name, "N4", 0.259);
+            double mv = getTalentValue("N4", 0.259);
             for (int i = 1; i <= 4; i++) {
                 AttackAction hit = new AttackAction(name + "_" + i, mv, Element.PHYSICAL, StatType.BASE_ATK,
                         StatType.NORMAL_ATTACK_DMG_BONUS, (i == 4) ? dur : 0.1, ActionType.NORMAL);
@@ -227,7 +233,7 @@ public class Xiangling extends Character implements BurstStateProvider {
 
         } else {
             // N1, N2, N5
-            double mv = mechanics.data.TalentDataManager.getInstance().get(this.name, baseKey, 0.5);
+            double mv = getTalentValue(baseKey, 0.5);
             AttackAction hit = new AttackAction(name, mv, Element.PHYSICAL, StatType.BASE_ATK,
                     StatType.NORMAL_ATTACK_DMG_BONUS, dur, ActionType.NORMAL);
             hit.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
@@ -240,7 +246,7 @@ public class Xiangling extends Character implements BurstStateProvider {
     }
 
     private void chargeAttack(CombatSimulator sim) {
-        double mv = mechanics.data.TalentDataManager.getInstance().get(this.name, "CA", 2.24);
+        double mv = getTalentValue("CA", 2.24);
         AttackAction hit = new AttackAction("Xiangling CA", mv, Element.PHYSICAL, StatType.BASE_ATK,
                 StatType.PHYSICAL_DMG_BONUS, 0.8, ActionType.CHARGE);
         hit.setICD(ICDType.Standard, ICDTag.ChargedAttack, 1.0);
@@ -250,7 +256,7 @@ public class Xiangling extends Character implements BurstStateProvider {
     }
 
     private void plunge(CombatSimulator sim) {
-        double mv = mechanics.data.TalentDataManager.getInstance().get(this.name, "Plunge High", 2.93);
+        double mv = getTalentValue("Plunge High", 2.93);
         AttackAction p = new AttackAction("Xiangling Plunge", mv, Element.PHYSICAL, StatType.BASE_ATK,
                 StatType.PHYSICAL_DMG_BONUS, 1.0, ActionType.PLUNGE);
         p.setICD(ICDType.Standard, ICDTag.None, 1.0);

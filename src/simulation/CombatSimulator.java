@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 import mechanics.buff.Buff;
+import mechanics.energy.EnergyDistributor;
 import model.entity.Character;
 import model.entity.Enemy;
 import simulation.action.AttackAction;
@@ -38,6 +39,7 @@ public class CombatSimulator {
     private final SwitchManager switchManager;
     private final ActionGateway actionGateway;
     private final ReactionState reactionState;
+    private final EnergyDistributor energyDistributor;
     private final mechanics.element.ICDManager icdManager;
     private boolean enableLogging = true;
 
@@ -76,6 +78,7 @@ public class CombatSimulator {
         this.moonsignManager = new MoonsignManager(this);
         this.switchManager = new SwitchManager(this, party, combatLogSink);
         this.actionGateway = new ActionGateway(this);
+        this.energyDistributor = new EnergyDistributor(this);
         this.icdManager = new mechanics.element.ICDManager();
     }
 
@@ -242,6 +245,10 @@ public class CombatSimulator {
      */
     public List<Buff> getTeamBuffs() {
         return buffManager.getActiveCharacterBuffs();
+    }
+
+    public EnergyDistributor getEnergyDistributor() {
+        return energyDistributor;
     }
 
     /**
