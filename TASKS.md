@@ -2,25 +2,41 @@
 
 ## Goal
 
-This document outlines a staged refactoring plan for improving the project based on SOLID principles while preserving current simulator behavior.
+This document resets the refactoring plan based on the current codebase state.
 
-The priorities are:
+Completed work such as:
 
-1. Reduce the responsibility concentration in `CombatSimulator`
-2. Split the oversized `Character` base class into focused state holders
-3. Replace string-based action dispatch with typed actions
-4. Remove duplicated combat math and reaction branching
-5. Narrow extension contracts for characters and weapons
+- runtime collaborator extraction
+- typed action dispatch
+- reaction metadata typing
+- damage strategy split
+- weapon / character capability narrowing
+- energy distribution refactoring
+- talent-data dependency injection
+
+is treated as done and is no longer listed here.
+
+The new priorities are:
+
+1. Remove remaining broad hook surfaces that still violate interface segregation
+2. Replace display-name based identity in runtime decisions with typed identifiers
+3. Continue slimming orchestration logic inside `CombatSimulator`
+4. Eliminate remaining fallback design paths that rely on display strings
 
 ## Constraints
 
 - Keep changes local and incremental
 - Preserve current package boundaries unless there is a clear benefit
-- Avoid broad mechanic rewrites during structural refactoring
+- Avoid mechanic rewrites during structural cleanup
 - Validate each stage with the smallest relevant sample simulation
 - Do not edit generated files under `docs/`
+- RL-related cleanup is explicitly out of scope for now
 
-## Phase 0: Safety Net
+## Phase 0: Baseline Refresh
+
+### Objective
+
+Record the current post-refactor baseline before changing the next structural layer.
 
 ### Task 0.1
 
@@ -29,349 +45,258 @@ Document the current execution baseline for:
 - `./gradlew build`
 - `./gradlew RaidenParty`
 - `./gradlew FlinsParty`
+- `./gradlew FlinsParty2`
 
-Record any current warnings, known logging noise, and generated report outputs so regressions are easier to spot later.
+Record:
+
+- total rotation damage
+- DPS
+- known warning logs
+- whether HTML report generation succeeds
 
 ### Task 0.2
 
-Identify the smallest smoke scenarios for each subsystem:
+Write down which scenario is the primary smoke test for each remaining subsystem:
 
-- swap timing
-- reaction handling
-- buff application
-- energy distribution
-- RL entry path
+- artifact-triggered behavior
+- party identity / switching
+- buff replacement and no-stack handling
+- combat sequencing
 
-These can remain sample-driven for now, but they should be written down before refactoring starts.
-
-## Phase 1: Slim Down `CombatSimulator`
+## Phase 1: Narrow `ArtifactSet`
 
 ### Objective
 
-Move orchestration details out of `CombatSimulator` so it becomes a coordinator instead of a god class.
+Remove the broad no-op hook surface from `ArtifactSet` just as was already done for `Weapon` and parts of `Character`.
 
 ### Task 1.1
 
-Extract swap logic from `CombatSimulator.switchCharacter(...)` into a dedicated runtime collaborator.
+Identify all artifact behaviors currently using optional hooks:
 
-Candidate: `simulation.runtime.SwitchManager`
-
-Responsibilities:
-
-- swap cooldown enforcement
-- switch-out callbacks
-- switch-in callbacks
-- swap delay handling
-- swap timeline logging
+- reaction-triggered
+- damage-triggered
+- switch-in
+- switch-out
+- burst-triggered
 
 ### Task 1.2
 
-Extract action gating from `CombatSimulator.performAction(String, String)`.
+Introduce focused artifact capability interfaces.
 
-Candidate: `simulation.runtime.ActionGateway`
+Candidate interfaces:
 
-Responsibilities:
-
-- normalize action keys
-- enforce skill cooldown
-- enforce burst cooldown
-- warn on insufficient energy
-- invoke character and weapon action hooks
+- `ReactionAwareArtifact`
+- `DamageTriggeredArtifactEffect`
+- `SwitchAwareArtifact`
+- `BurstTriggeredArtifactEffect`
 
 ### Task 1.3
 
-Extract event queue ownership from `CombatSimulator`.
+Update runtime code to depend on these interfaces instead of invoking broad hooks on every artifact.
 
-Candidate: `simulation.runtime.SimulationClock` or `EventTimeline`
+Likely touchpoints:
 
-Responsibilities:
-
-- own the timer priority queue
-- register events
-- advance time
-- tick due events in chronological order
+- reaction dispatch
+- damage resolution
+- switch management
+- burst execution path
 
 ### Task 1.4
 
-Move Moonsign and Thundercloud-related transient state behind a narrower subsystem boundary.
+Reduce `ArtifactSet` to:
 
-Candidate split:
+- static stats
+- passive stat contribution
+- display metadata
 
-- keep party-wide Moonsign derivation in `MoonsignManager`
-- move EC and Thundercloud state into a dedicated reaction state holder
+Target outcome: no more no-op inheritance for artifact behaviors.
 
-### Task 1.5
-
-After the above extractions, reduce `CombatSimulator` to:
-
-- party access
-- enemy access
-- top-level simulation coordination
-- public extension hooks
-
-Target outcome: easier reasoning about sequencing and lower risk when adding mechanics.
-
-## Phase 2: Break Up `Character`
+## Phase 2: Replace Name-Based Runtime Identity
 
 ### Objective
 
-Stop using `Character` as a catch-all holder for stats, buffs, energy, cooldowns, snapshots, and optimizer metadata.
+Stop using display names as the internal identity key in simulation logic.
 
 ### Task 2.1
 
-Extract energy accounting into a focused component.
+Audit places where `Character.getName()` is used for lookup, routing, or aggregation rather than display.
 
-Candidate: `model.entity.state.EnergyState`
+Priority areas:
 
-Responsibilities:
-
-- current energy
-- total energy gained
-- particle vs flat energy tracking
-- burst-window accounting
-- reset behavior
+- `Party`
+- `CombatSimulator`
+- optimizer pipeline
+- damage recording
+- event routing
 
 ### Task 2.2
 
-Extract cooldown and charge tracking.
+Promote `CharacterId` to the primary internal identifier for runtime-owned party state.
 
-Candidate: `model.entity.state.CooldownState`
+Possible changes:
 
-Responsibilities:
-
-- last skill use
-- last burst use
-- skill cooldown
-- burst cooldown
-- charge restoration schedule
+- `Party` stores members by `CharacterId`
+- simulator APIs accept `CharacterId` internally
+- display names remain only for logs and reports
 
 ### Task 2.3
 
-Extract snapshot storage and snapshot creation policy.
+Add adapters only at human-facing boundaries.
 
-Candidate: `model.entity.state.SnapshotState` or `SnapshotManager`
+Examples:
 
-Responsibilities:
-
-- store latest snapshot
-- build snapshot from structural/effective stats
-- apply extra snapshot buffs
+- sample scripts
+- profile loading
+- report generation
 
 ### Task 2.4
 
-Extract optimizer-only artifact roll metadata away from runtime character behavior.
+Update damage and buff bookkeeping to use typed identity where the value is used for logic rather than presentation.
 
-Candidate: `mechanics.optimization.ArtifactRollProfile` or similar
+Target outcome: internal control flow no longer depends on mutable display strings.
 
-This data does not belong in the combat entity abstraction.
-
-### Task 2.5
-
-Review `getEffectiveStats(...)` and `getStructuralStats(...)` and move stat assembly into a dedicated collaborator.
-
-Candidate: `mechanics.formula.StatAssembler`
-
-Responsibilities:
-
-- merge base stats
-- merge equipment stats
-- apply passives
-- apply self buffs
-- keep recursion-safe structural stat path
-
-Target outcome: `Character` becomes a domain object with explicit capabilities instead of a state dump.
-
-## Phase 3: Replace String-Based Actions
+## Phase 3: Slim `CombatSimulator` Further
 
 ### Objective
 
-Eliminate fragile string dispatch such as `"skill"`, `"E"`, `"burst"`, and `"Q"`.
+Reduce remaining policy logic in `CombatSimulator` so it becomes a coordinator again.
 
 ### Task 3.1
 
-Introduce a typed action request model.
+Extract attack sequencing policy from `CombatSimulator.performAction(AttackAction)`.
 
-Candidate:
+Candidate collaborator:
 
-- `enum CharacterActionKey`
-- `CharacterActionRequest`
-
-Minimum set:
-
-- NORMAL
-- CHARGE
-- SKILL
-- BURST
-- DASH
-- PLUNGE
-
-### Task 3.2
-
-Change `Character.onAction(...)` and `Weapon.onAction(...)` to use the typed action model.
-
-### Task 3.3
-
-Add a compatibility adapter so sample scripts can be migrated incrementally.
-
-Example:
-
-- keep a temporary parser from legacy strings to `CharacterActionKey`
-- mark string overloads as transitional
-
-### Task 3.4
-
-Migrate representative characters first:
-
-- Bennett
-- Xingqiu
-- Xiangling
-- RaidenShogun
-
-These cover common action patterns and burst/skill timing.
-
-Target outcome: safer extension and fewer cross-file edits when adding new action semantics.
-
-## Phase 4: Centralize Combat Math and Reaction Policies
-
-### Objective
-
-Remove duplicated element-switch logic and special-case combat math from multiple classes.
-
-### Task 4.1
-
-Centralize resistance shred accumulation.
-
-Candidate: `mechanics.formula.ResistanceCalculator`
-
-Current duplication exists across:
-
-- `DamageCalculator`
-- `CombatActionResolver`
-
-### Task 4.2
-
-Separate standard and lunar damage paths behind strategy classes.
-
-Candidate:
-
-- `DamageStrategy`
-- `StandardDamageStrategy`
-- `LunarDamageStrategy`
-
-### Task 4.3
-
-Move Electro-Charged and Lunar-Charged tick creation out of `CombatActionResolver`.
-
-Candidate: `mechanics.reaction.ReactionEffectScheduler`
+- `simulation.runtime.ActionTimelineExecutor`
 
 Responsibilities:
 
-- create reaction follow-up events
-- manage EC/Lunar-Charged scheduling policy
-- isolate reaction state transitions
+- post-hit event dispatch ordering
+- animation-duration handling
+- attack-speed duration scaling
+- moonsign follow-up blessing timing
 
-### Task 4.4
+### Task 3.2
 
-Reduce string matching on reaction names where possible.
-
-Examples to replace:
-
-- `"Electro-Charged"`
-- `"Lunar-Charged"`
-- `"Swirl-..."`
-
-Prefer typed reaction identifiers or richer `ReactionResult` metadata.
-
-Target outcome: adding a new reaction variant or damage path should not require updating multiple unrelated classes.
-
-## Phase 5: Narrow Extension Interfaces
-
-### Objective
-
-Replace broad base-class hook surfaces with focused capabilities.
-
-### Task 5.1
-
-Split weapon extension points into narrower interfaces.
-
-Candidate interfaces:
-
-- `ActionTriggeredWeaponEffect`
-- `DamageTriggeredWeaponEffect`
-- `SwitchAwareWeaponEffect`
-- `TeamBuffProvider`
-
-### Task 5.2
-
-Do the same for character-side optional behaviors where it improves clarity.
-
-Candidate interfaces:
-
-- `ReactionAwareCharacter`
-- `BurstStateProvider`
-- `TeamBuffProvider`
-
-### Task 5.3
-
-Update simulator/runtime code to depend on those interfaces instead of probing every object for every hook.
-
-Target outcome: less no-op inheritance and cleaner dependency direction.
-
-## Phase 6: Reduce Static Utility Coupling
-
-### Objective
-
-Improve dependency inversion in utility-heavy systems.
-
-### Task 6.1
-
-Refactor `EnergyManager` away from purely static orchestration.
+Move remaining reaction-state convenience access behind a dedicated subsystem boundary.
 
 Candidate:
 
-- instance-based `EnergyDistributor`
-- injected access to active character and current stats
+- `simulation.runtime.ReactionStateController`
 
-### Task 6.2
+### Task 3.3
 
-Review singleton/global access patterns such as `TalentDataManager`.
+Review public methods on `CombatSimulator` and separate:
 
-Clarify whether they should remain process-wide caches or move behind explicit dependencies for testability.
+- true simulator API
+- collaborator accessors
+- temporary convenience wrappers
+
+Target outcome: fewer reasons to edit `CombatSimulator` when adding a mechanic.
+
+## Phase 4: Remove Remaining String-Based Fallback Paths
+
+### Objective
+
+Eliminate the remaining logic branches that still special-case strings even after the main typed refactors.
+
+### Task 4.1
+
+Reduce or eliminate `BuffId.CUSTOM` in logic-bearing code paths.
+
+Priority:
+
+- no-stack replacement
+- buff existence checks
+- buff removal policies
+
+### Task 4.2
+
+Distinguish clearly between:
+
+- logic identity
+- display label
+
+for buffs and other runtime objects.
+
+Candidate additions:
+
+- stronger `BuffId` coverage
+- separate display-name field usage rules
+
+### Task 4.3
+
+Audit reaction and combat logging paths to ensure string labels are presentation-only.
+
+Target outcome: string values remain for UI/reporting only, not for control flow.
+
+## Phase 5: Clarify Boundary Adapters
+
+### Objective
+
+Make boundary translation explicit so typed internals are not gradually polluted by external formats.
+
+### Task 5.1
+
+Identify boundary inputs that still translate external formats directly inside core classes.
+
+Examples:
+
+- profile loading
+- sample action wiring
+- report labels
+
+### Task 5.2
+
+Move parsing / translation into adapter classes where appropriate.
+
+Candidate areas:
+
+- profile-to-action translation
+- report DTO generation
+- simulator bootstrap wiring
+
+### Task 5.3
+
+Document which packages are allowed to depend on:
+
+- display names
+- file-format strings
+- report labels
+
+Target outcome: clearer dependency direction and less leakage of boundary concerns into combat logic.
 
 ## Recommended Execution Order
 
 1. Phase 0
 2. Phase 1
-3. Phase 4.1
+3. Phase 4
 4. Phase 2
 5. Phase 3
-6. Phase 4.2 to 4.4
-7. Phase 5
-8. Phase 6
+6. Phase 5
 
-This order reduces risk by first stabilizing the simulator boundary, then tackling shared models and extension contracts.
+This order removes the broadest interface problems first, then cleans up identity and orchestration.
 
 ## Verification Per Phase
 
 - Run `./gradlew build`
 - Run at least one affected sample simulation
-- If action sequencing changed, verify swap timing and report generation
-- If energy changed, verify burst availability and energy analyzer output
-- If reaction code changed, verify aura consumption and periodic reaction ticks
-- If RL-facing state changed, verify `./gradlew RunRL`
+- If artifact behavior changed, verify the most relevant party sample
+- If simulator sequencing changed, verify timing-sensitive samples
+- If identity routing changed, verify switching, buff targeting, and report output
 
-## Out of Scope for Initial Refactor
+## Out of Scope for This Plan
 
-- rewriting sample rotations for style only
-- balance changes to multipliers or reaction formulas
-- migration of generated documentation
-- introducing a full new test framework before structural cleanup
+- RL server cleanup
+- RL reward refactoring
+- network protocol redesign
+- generated documentation updates
+- pure balance tuning
 
 ## Deliverables
 
-- smaller runtime collaborators under `src/simulation/runtime/`
-- slimmer domain entities under `src/model/entity/`
-- typed action dispatch
-- centralized combat math utilities
-- narrower extension interfaces
-- updated verification notes after each phase
+- narrower artifact extension contracts
+- typed runtime identity for party members
+- slimmer `CombatSimulator`
+- reduced string fallback logic
+- explicit boundary adapters
