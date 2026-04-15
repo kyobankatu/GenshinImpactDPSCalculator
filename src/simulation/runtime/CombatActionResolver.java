@@ -16,6 +16,7 @@ import model.entity.DamageTriggeredArtifactEffect;
 import model.entity.DamageTriggeredWeaponEffect;
 import model.stats.StatsContainer;
 import model.type.ActionType;
+import model.type.CharacterId;
 import model.type.Element;
 import model.type.ICDTag;
 import model.type.ICDType;
@@ -53,26 +54,27 @@ public class CombatActionResolver {
      * <p>This is used by the simulator for immediate action execution and by periodic
      * timer events whose timing is managed elsewhere.
      *
-     * @param charName the name of the character performing the action
+     * @param characterId the character performing the action
      * @param action   the {@link AttackAction} to resolve
-     * @throws RuntimeException if no character with {@code charName} exists in the party
+     * @throws RuntimeException if no character with {@code characterId} exists in the party
      */
-    public void resolveWithoutTimeAdvance(String charName, AttackAction action) {
-        Character c = sim.getCharacter(charName);
+    public void resolveWithoutTimeAdvance(CharacterId characterId, AttackAction action) {
+        Character c = sim.getCharacter(characterId);
         if (c == null) {
-            throw new RuntimeException("Character not found: " + charName);
+            throw new RuntimeException("Character not found: " + characterId);
         }
+        String charName = c.getName();
 
         normalizeIcd(action);
 
         boolean applied = sim.getIcdManager().checkApplication(
-                charName, action.getICDTag(), action.getICDType(), sim.getCurrentTime());
+                characterId.name(), action.getICDTag(), action.getICDType(), sim.getCurrentTime());
 
         notifyLunarAction(action, c);
 
         double reactionMulti = 1.0;
         if (applied && action.getGaugeUnits() > 0) {
-            reactionMulti = resolveGaugeAndReactions(c, charName, action);
+            reactionMulti = resolveGaugeAndReactions(c, characterId, action);
         } else if (sim.isLoggingEnabled()) {
             System.out.println(String.format("   [ICD] Applied blocked (%s)", action.getICDTag()));
         }
@@ -106,7 +108,7 @@ public class CombatActionResolver {
         }
     }
 
-    private double resolveGaugeAndReactions(Character attacker, String charName, AttackAction action) {
+    private double resolveGaugeAndReactions(Character attacker, CharacterId characterId, AttackAction action) {
         Element trigger = action.getElement();
         Set<Element> currentAuras = sim.getEnemy().getActiveAuras();
         boolean reactionTriggered = false;
@@ -128,7 +130,7 @@ public class CombatActionResolver {
             if (result.getType() == ReactionResult.Type.AMP) {
                 reactionMulti = handleAmplifyingReaction(trigger, aura, action, result);
             } else if (result.getType() == ReactionResult.Type.TRANSFORMATIVE) {
-                handleTransformativeReaction(attacker, charName, action, trigger, aura, result, stats);
+                handleTransformativeReaction(attacker, characterId, action, trigger, aura, result, stats);
             }
         }
 
@@ -176,7 +178,7 @@ public class CombatActionResolver {
 
     private void handleTransformativeReaction(
             Character attacker,
-            String charName,
+            CharacterId characterId,
             AttackAction action,
             Element trigger,
             Element aura,
@@ -207,9 +209,9 @@ public class CombatActionResolver {
                     trigger, aura, reactionLabel, triggerDmg));
         }
 
-        sim.recordDamage(charName, triggerDmg);
+        sim.recordDamage(characterId, triggerDmg);
         sim.getCombatLogSink().log(
-                sim.getCurrentTime(), charName, reactionLabel, triggerDmg,
+                sim.getCurrentTime(), attacker.getName(), reactionLabel, triggerDmg,
                 reactionLabel, triggerDmg, sim.getEnemy().getAuraMap());
 
         if (result.isElectroCharged()) {
@@ -258,7 +260,7 @@ public class CombatActionResolver {
         if (sim.isLoggingEnabled()) {
             System.out.println(String.format("   -> Damage: %,.0f", damage));
         }
-        sim.recordDamage(charName, damage);
+        sim.recordDamage(attacker.getCharacterId(), damage);
 
         if (attacker.getArtifacts() != null) {
             for (ArtifactSet artifact : attacker.getArtifacts()) {

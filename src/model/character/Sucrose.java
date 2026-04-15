@@ -307,7 +307,7 @@ public class Sucrose extends Character implements BurstStateProvider {
         sim.applyTeamBuffNoStack(
                 new SimpleBuff("Mollis Favonius (A4)", BuffId.SUCROSE_MOLLIS_FAVONIUS_A4, 8.0, sim.getCurrentTime(), st -> {
                     st.add(StatType.ELEMENTAL_MASTERY, buffVal);
-                }).exclude(this.name));
+                }).exclude(this.characterId));
     }
 
     /**

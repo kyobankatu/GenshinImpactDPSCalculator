@@ -75,7 +75,7 @@ public class BuffManager {
     public List<Buff> getApplicableBuffs(Character character) {
         List<Buff> buffs = new ArrayList<>();
         for (Buff buff : teamBuffs) {
-            if (buff.appliesToCharacter(character.getName(), character.getElement())) {
+            if (buff.appliesToCharacter(character)) {
                 buffs.add(buff);
             }
         }

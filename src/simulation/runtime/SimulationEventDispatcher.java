@@ -56,14 +56,14 @@ public class SimulationEventDispatcher implements SimulationEventBus {
     /**
      * Notifies all registered action listeners of an executed attack action.
      *
-     * @param actorName the name of the acting character
+     * @param actor the acting character
      * @param action    the executed attack action
      * @param time      simulation time in seconds
      */
     @Override
-    public void notifyAction(String actorName, AttackAction action, double time) {
+    public void notifyAction(Character actor, AttackAction action, double time) {
         for (ActionListener listener : new ArrayList<>(actionListeners)) {
-            listener.onAction(actorName, action, time);
+            listener.onAction(actor, action, time);
         }
     }
 

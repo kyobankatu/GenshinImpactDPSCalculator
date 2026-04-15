@@ -1,6 +1,8 @@
 package mechanics.buff;
 
 import model.stats.StatsContainer;
+import model.entity.Character;
+import model.type.CharacterId;
 import model.type.Element;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -22,7 +24,7 @@ public abstract class Buff {
     protected double startTime; // Sim time when this buff starts
 
     // Targeting: null means "no restriction"
-    protected Set<String> excludeChars = null;
+    protected Set<CharacterId> excludeChars = null;
     protected Element targetElement = null;
 
     /**
@@ -75,7 +77,16 @@ public abstract class Buff {
 
     /** Exclude specific characters from receiving this buff. Returns this for chaining. */
     public Buff exclude(String... names) {
-        this.excludeChars = new HashSet<>(Arrays.asList(names));
+        this.excludeChars = new HashSet<>();
+        for (String name : names) {
+            this.excludeChars.add(CharacterId.fromName(name));
+        }
+        return this;
+    }
+
+    /** Exclude specific characters from receiving this buff. Returns this for chaining. */
+    public Buff exclude(CharacterId... ids) {
+        this.excludeChars = new HashSet<>(Arrays.asList(ids));
         return this;
     }
 
@@ -86,9 +97,9 @@ public abstract class Buff {
     }
 
     /** Returns true if this buff applies to a character with the given name and element. */
-    public boolean appliesToCharacter(String charName, Element charElement) {
-        if (excludeChars != null && excludeChars.contains(charName)) return false;
-        if (targetElement != null && targetElement != charElement) return false;
+    public boolean appliesToCharacter(Character character) {
+        if (excludeChars != null && excludeChars.contains(character.getCharacterId())) return false;
+        if (targetElement != null && targetElement != character.getElement()) return false;
         return true;
     }
 

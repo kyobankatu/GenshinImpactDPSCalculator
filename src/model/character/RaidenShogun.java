@@ -109,17 +109,14 @@ public class RaidenShogun extends Character implements BurstStateProvider, Switc
             // Burst Listener (Chakra Desiderata)
             sim.addListener((actor, action, time) -> {
                 if (action.getActionType() == ActionType.BURST
-                        && model.type.CharacterId.fromName(actor) != this.characterId) {
-                    Character c = sim.getCharacter(actor);
-                    if (c != null) {
-                        double cost = c.getEnergyCost();
-                        double gain = cost * 0.2;
-                        resolveStacks += gain;
-                        if (resolveStacks > 60)
-                            resolveStacks = 60;
-                        System.out.println(String.format("   [Raiden] Gained Resolve: %.1f from %s (Total: %.1f)", gain,
-                                actor, resolveStacks));
-                    }
+                        && actor.getCharacterId() != this.characterId) {
+                    double cost = actor.getEnergyCost();
+                    double gain = cost * 0.2;
+                    resolveStacks += gain;
+                    if (resolveStacks > 60)
+                        resolveStacks = 60;
+                    System.out.println(String.format("   [Raiden] Gained Resolve: %.1f from %s (Total: %.1f)", gain,
+                            actor.getName(), resolveStacks));
                 }
             });
 

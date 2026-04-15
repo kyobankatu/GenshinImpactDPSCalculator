@@ -209,6 +209,33 @@ Update damage and buff bookkeeping to use typed identity where the value is used
 
 Target outcome: internal control flow no longer depends on mutable display strings.
 
+### Phase 2 Notes (completed 2026-04-15 JST)
+
+- Task 2.1: audited remaining runtime name-based identity usage
+  - primary runtime hot spots were `simulation/Party.java`, `simulation/CombatSimulator.java`, `simulation/runtime/ActionGateway.java`, `simulation/runtime/SwitchManager.java`, and `simulation/runtime/CombatActionResolver.java`
+  - action listener routing also still passed actor display names into runtime decision logic
+- Task 2.2: promoted `CharacterId` to the primary runtime-owned identifier for party state
+  - `Party` now stores members by `CharacterId`
+  - `Party` keeps a name-to-id adapter map only for string entry points
+  - `CombatSimulator` gained `CharacterId` overloads for `getCharacter`, `switchCharacter`, `setActiveCharacter`, `performAction`, `performActionWithoutTimeAdvance`, and `recordDamage`
+  - runtime collaborators now use those typed overloads internally
+- Task 2.3: kept adapters only at human-facing boundaries
+  - existing string-based sample and profile calls still work through `CombatSimulator` adapter methods
+  - action event dispatch now routes the full `Character` object instead of display-name strings
+- Task 2.4: updated logic-bearing bookkeeping to use typed identity
+  - runtime damage attribution uses `CharacterId` before converting to display names at the report boundary
+  - buff target exclusion and applicability checks now use `CharacterId` instead of character-name strings
+  - display names remain in logs, reports, and string-facing APIs only
+
+Verification:
+
+- `./gradlew build`
+- `./gradlew RaidenParty`
+- `./gradlew FlinsParty`
+- `RaidenParty` baseline remained `1,693,561` total damage / `80,646` DPS
+- `FlinsParty` baseline remained `22,463,116` total damage / `196,356` DPS
+- both runs still generated `output/simulation_report.html`
+
 ## Phase 3: Slim `CombatSimulator` Further
 
 ### Objective

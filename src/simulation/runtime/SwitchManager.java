@@ -8,6 +8,7 @@ import model.entity.Character;
 import model.entity.SwitchAwareArtifact;
 import model.entity.SwitchAwareCharacter;
 import model.entity.SwitchAwareWeaponEffect;
+import model.type.CharacterId;
 import model.type.Element;
 import simulation.CombatLogSink;
 import simulation.CombatSimulator;
@@ -43,7 +44,7 @@ public class SwitchManager {
      *
      * @param name target character name
      */
-    public void switchCharacter(String name) {
+    public void switchCharacter(CharacterId id) {
         double currentTime = sim.getCurrentTime();
         double cooldownEnd = lastSwapTime + SWAP_COOLDOWN;
         if (currentTime < cooldownEnd) {
@@ -53,6 +54,10 @@ public class SwitchManager {
 
         Character oldChar = party.getActiveCharacter();
         String oldName = oldChar != null ? oldChar.getName() : "?";
+        Character target = party.getMember(id);
+        if (target == null) {
+            return;
+        }
         if (oldChar != null) {
             if (oldChar instanceof SwitchAwareCharacter) {
                 ((SwitchAwareCharacter) oldChar).onSwitchOut(sim);
@@ -63,10 +68,10 @@ public class SwitchManager {
             notifyArtifactsSwitchOut(oldChar);
         }
 
-        party.switchCharacter(name);
+        party.switchCharacter(id);
 
         Map<Element, Double> auraSnap = sim.getEnemy() != null ? sim.getEnemy().getAuraMap() : new HashMap<>();
-        combatLogSink.log(sim.getCurrentTime(), oldName, "Swap -> " + name, 0.0, "None", 0.0, auraSnap);
+        combatLogSink.log(sim.getCurrentTime(), oldName, "Swap -> " + target.getName(), 0.0, "None", 0.0, auraSnap);
 
         Character newChar = party.getActiveCharacter();
         if (newChar != null) {
@@ -81,8 +86,8 @@ public class SwitchManager {
      *
      * @param name target character name
      */
-    public void setActiveCharacter(String name) {
-        party.switchCharacter(name);
+    public void setActiveCharacter(CharacterId id) {
+        party.switchCharacter(id);
     }
 
     private void notifyArtifactsSwitchOut(Character character) {

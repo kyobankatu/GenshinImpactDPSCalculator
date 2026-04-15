@@ -8,6 +8,7 @@ import mechanics.buff.Buff;
 import mechanics.energy.EnergyDistributor;
 import model.entity.Character;
 import model.entity.Enemy;
+import model.type.CharacterId;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionRequest;
 import simulation.event.TimerEvent;
@@ -138,6 +139,10 @@ public class CombatSimulator {
         return party.getMember(name);
     }
 
+    public Character getCharacter(CharacterId id) {
+        return party.getMember(id);
+    }
+
     /**
      * Returns all party members.
      *
@@ -162,7 +167,12 @@ public class CombatSimulator {
      * @param name target character name
      */
     public void switchCharacter(String name) {
-        switchManager.switchCharacter(name);
+        CharacterId id = party.resolveCharacterId(name);
+        switchCharacter(id);
+    }
+
+    public void switchCharacter(CharacterId id) {
+        switchManager.switchCharacter(id);
     }
 
     /**
@@ -171,7 +181,12 @@ public class CombatSimulator {
      * @param name target character name
      */
     public void setActiveCharacter(String name) {
-        switchManager.setActiveCharacter(name);
+        CharacterId id = party.resolveCharacterId(name);
+        setActiveCharacter(id);
+    }
+
+    public void setActiveCharacter(CharacterId id) {
+        switchManager.setActiveCharacter(id);
     }
 
     /**
@@ -258,7 +273,12 @@ public class CombatSimulator {
      * @param request typed action request
      */
     public void performAction(String charName, CharacterActionRequest request) {
-        actionGateway.performAction(charName, request);
+        CharacterId id = party.resolveCharacterId(charName);
+        performAction(id, request);
+    }
+
+    public void performAction(CharacterId characterId, CharacterActionRequest request) {
+        actionGateway.performAction(characterId, request);
     }
 
     /**
@@ -269,6 +289,10 @@ public class CombatSimulator {
      */
     public void recordDamage(String charName, double dmg) {
         damageReport.recordDamage(charName, dmg);
+    }
+
+    public void recordDamage(CharacterId characterId, double dmg) {
+        damageReport.recordDamage(characterId.getDisplayName(), dmg);
     }
 
     /**
@@ -416,8 +440,16 @@ public class CombatSimulator {
      * @param action action to execute
      */
     public void performAction(String charName, AttackAction action) {
-        Character character = party.getMember(charName);
-        performActionWithoutTimeAdvance(charName, action);
+        CharacterId characterId = party.resolveCharacterId(charName);
+        performAction(characterId, action);
+    }
+
+    public void performAction(CharacterId characterId, AttackAction action) {
+        Character character = party.getMember(characterId);
+        if (character == null) {
+            throw new RuntimeException("Character not found: " + characterId);
+        }
+        performActionWithoutTimeAdvance(characterId, action);
 
         if (currentMoonsign == Moonsign.ASCENDANT_GLEAM
                 && !character.isLunarCharacter()
@@ -426,7 +458,7 @@ public class CombatSimulator {
             moonsignManager.applyAscendantBlessing(character);
         }
 
-        eventDispatcher.notifyAction(charName, action, getCurrentTime());
+        eventDispatcher.notifyAction(character, action, getCurrentTime());
 
         double duration = action.getAnimationDuration();
         if (action.getActionType() == model.type.ActionType.NORMAL
@@ -459,7 +491,12 @@ public class CombatSimulator {
      * @param action action to resolve
      */
     public void performActionWithoutTimeAdvance(String charName, AttackAction action) {
-        actionResolver.resolveWithoutTimeAdvance(charName, action);
+        CharacterId characterId = party.resolveCharacterId(charName);
+        performActionWithoutTimeAdvance(characterId, action);
+    }
+
+    public void performActionWithoutTimeAdvance(CharacterId characterId, AttackAction action) {
+        actionResolver.resolveWithoutTimeAdvance(characterId, action);
     }
 
     /**

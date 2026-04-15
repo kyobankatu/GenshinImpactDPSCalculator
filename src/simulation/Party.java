@@ -1,7 +1,8 @@
 package simulation;
 
 import model.entity.Character;
-import java.util.HashMap;
+import model.type.CharacterId;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -12,7 +13,8 @@ import java.util.Map;
  * supply the necessary combat context.
  */
 public class Party {
-    private Map<String, Character> members = new HashMap<>();
+    private final Map<CharacterId, Character> members = new LinkedHashMap<>();
+    private final Map<String, CharacterId> idsByName = new LinkedHashMap<>();
     private Character activeCharacter;
 
     /**
@@ -22,10 +24,15 @@ public class Party {
      * @param character the character to add
      */
     public void addMember(Character character) {
-        members.put(character.getName(), character);
+        members.put(character.getCharacterId(), character);
+        idsByName.put(character.getName(), character.getCharacterId());
         if (activeCharacter == null) {
             activeCharacter = character;
         }
+    }
+
+    public Character getMember(CharacterId id) {
+        return members.get(id);
     }
 
     /**
@@ -35,7 +42,13 @@ public class Party {
      * @return the matching {@link Character}, or {@code null}
      */
     public Character getMember(String name) {
-        return members.get(name);
+        CharacterId id = idsByName.get(name);
+        return id != null ? members.get(id) : null;
+    }
+
+    public CharacterId resolveCharacterId(String name) {
+        CharacterId id = idsByName.get(name);
+        return id != null ? id : CharacterId.fromName(name);
     }
 
     /**
@@ -47,6 +60,14 @@ public class Party {
         return activeCharacter;
     }
 
+    public void switchCharacter(CharacterId id) {
+        Character target = members.get(id);
+        if (target != null) {
+            // Note: onSwitchOut logic is handled in CombatSimulator to provide context
+            activeCharacter = target;
+        }
+    }
+
     /**
      * Switches the active character to the party member with the given name.
      * Does nothing if the name is not in the party.
@@ -56,10 +77,7 @@ public class Party {
      * @param name the name of the character to switch to
      */
     public void switchCharacter(String name) {
-        if (members.containsKey(name)) {
-            // Note: onSwitchOut logic is handled in CombatSimulator to provide context
-            activeCharacter = members.get(name);
-        }
+        switchCharacter(resolveCharacterId(name));
     }
 
     /**

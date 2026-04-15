@@ -38,11 +38,11 @@ public interface SimulationEventBus {
     /**
      * Dispatches an executed action event.
      *
-     * @param actorName acting character name
+     * @param actor acting character
      * @param action    executed attack action
      * @param time      simulation time in seconds
      */
-    void notifyAction(String actorName, AttackAction action, double time);
+    void notifyAction(Character actor, AttackAction action, double time);
 
     /**
      * Dispatches a particle-generation event.

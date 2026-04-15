@@ -2,6 +2,7 @@ package simulation.runtime;
 
 import model.entity.Character;
 import model.entity.ActionTriggeredWeaponEffect;
+import model.type.CharacterId;
 import simulation.CombatSimulator;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
@@ -27,11 +28,12 @@ public class ActionGateway {
      * @param charName acting character name
      * @param request typed action request
      */
-    public void performAction(String charName, CharacterActionRequest request) {
-        Character character = sim.getCharacter(charName);
+    public void performAction(CharacterId characterId, CharacterActionRequest request) {
+        Character character = sim.getCharacter(characterId);
         if (character == null) {
-            throw new RuntimeException("Character not found: " + charName);
+            throw new RuntimeException("Character not found: " + characterId);
         }
+        String charName = character.getName();
 
         if (request.getKey() == CharacterActionKey.SKILL) {
             double wait = character.getSkillCDRemaining(sim.getCurrentTime());
