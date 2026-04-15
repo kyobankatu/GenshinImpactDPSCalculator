@@ -338,6 +338,27 @@ Audit reaction and combat logging paths to ensure string labels are presentation
 
 Target outcome: string values remain for UI/reporting only, not for control flow.
 
+### Phase 4 Notes (completed 2026-04-15 JST)
+
+- Task 4.1: removed the remaining `BuffId.CUSTOM` fallback from logic-bearing no-stack handling
+  - `simulation/runtime/BuffManager.java` no longer removes buffs by display name when `applyTeamBuffNoStack(...)` is used
+  - no-stack replacement now requires a typed `BuffId`; passing a custom buff into that path fails fast instead of silently depending on `name`
+- Task 4.2: clarified logic identity versus presentation label for buffs
+  - `mechanics/buff/Buff.java` now exposes:
+    - `getId()` for logic identity
+    - `getDisplayName()` for logs and reports
+    - `getLogicKey()` for de-duplication/bookkeeping helpers
+  - `getName()` remains as a compatibility alias for presentation-oriented callers
+- Task 4.3: audited remaining buff/logging string usage and kept strings on presentation paths only
+  - stats snapshot recording now de-duplicates buffs by logical key rather than display label while still rendering display names in the report data
+  - combat and reaction labels remain string-based only at report/log boundaries
+
+Verification:
+
+- `./gradlew build`
+- `./gradlew RaidenParty`
+- `./gradlew FlinsParty`
+
 ## Phase 5: Clarify Boundary Adapters
 
 ### Objective

@@ -13,9 +13,12 @@ import java.util.Set;
  *
  * <p>A buff is active for the time window {@code [startTime, expirationTime)}.
  * Subclasses implement {@link #applyStats} to write their concrete bonuses into
- * a {@link StatsContainer}.  Optional targeting filters allow a buff to be
+ * a {@link StatsContainer}. Optional targeting filters allow a buff to be
  * restricted to certain characters ({@link #exclude}) or elements
  * ({@link #forElement}).
+ *
+ * <p>Buff identity used in simulator logic should come from {@link BuffId};
+ * {@code name} remains a display label for logs and reports.
  */
 public abstract class Buff {
     protected String name;
@@ -63,16 +66,44 @@ public abstract class Buff {
     }
 
     /**
-     * Returns the display name of this buff.
+     * Returns the display label of this buff.
+     *
+     * @return buff name string
+     */
+    public String getDisplayName() {
+        return name;
+    }
+
+    /**
+     * Returns the display label of this buff.
+     *
+     * <p>Prefer {@link #getDisplayName()} for presentation and {@link #getId()}
+     * for simulator logic.
      *
      * @return buff name string
      */
     public String getName() {
-        return name;
+        return getDisplayName();
     }
 
     public BuffId getId() {
         return id;
+    }
+
+    /**
+     * Returns a stable logical key for de-duplication and bookkeeping.
+     *
+     * <p>Typed buffs use their {@link BuffId}. Custom buffs fall back to a
+     * best-effort key so presentation helpers can still collapse duplicate
+     * instances without depending on display labels alone.
+     *
+     * @return stable logical key for this buff instance kind
+     */
+    public String getLogicKey() {
+        if (id != BuffId.CUSTOM) {
+            return id.name();
+        }
+        return getClass().getName() + ":" + name;
     }
 
     /** Exclude specific characters from receiving this buff. Returns this for chaining. */
@@ -96,7 +127,7 @@ public abstract class Buff {
         return this;
     }
 
-    /** Returns true if this buff applies to a character with the given name and element. */
+    /** Returns true if this buff applies to the given character. */
     public boolean appliesToCharacter(Character character) {
         if (excludeChars != null && excludeChars.contains(character.getCharacterId())) return false;
         if (targetElement != null && targetElement != character.getElement()) return false;

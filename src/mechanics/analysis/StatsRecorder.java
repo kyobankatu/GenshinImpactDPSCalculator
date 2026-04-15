@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import mechanics.buff.Buff;
 
@@ -96,18 +98,21 @@ public class StatsRecorder {
             }
 
             List<String> buffNames = new ArrayList<>();
+            Set<String> seenBuffKeys = new HashSet<>();
             if (applicableBuffs != null) {
                 for (Buff b : applicableBuffs) {
                     if (!b.isExpired(s.getCurrentTime())) {
                         b.apply(effStats, s.getCurrentTime());
-                        buffNames.add(b.getName());
+                        if (seenBuffKeys.add(b.getLogicKey())) {
+                            buffNames.add(b.getDisplayName());
+                        }
                     }
                 }
             }
             // Also collect character's own activeBuffs (artifact/weapon buffs added via addBuff)
             for (Buff b : c.getActiveBuffs()) {
-                if (!b.isExpired(s.getCurrentTime()) && !buffNames.contains(b.getName())) {
-                    buffNames.add(b.getName());
+                if (!b.isExpired(s.getCurrentTime()) && seenBuffKeys.add(b.getLogicKey())) {
+                    buffNames.add(b.getDisplayName());
                 }
             }
             charBuffs.put(c.getName(), buffNames);

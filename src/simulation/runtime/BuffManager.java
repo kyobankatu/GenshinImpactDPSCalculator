@@ -41,16 +41,19 @@ public class BuffManager {
     }
 
     /**
-     * Adds a team-wide buff after removing any existing team buff with the same name.
+     * Adds a team-wide buff after removing any existing team buff with the same logical id.
      *
-     * @param buff buff to add without stacking duplicate names
+     * <p>This path is reserved for typed simulator buffs. Display labels are not used
+     * for no-stack replacement.
+     *
+     * @param buff buff to add without stacking duplicate ids
      */
     public void applyTeamBuffNoStack(Buff buff) {
         if (buff.getId() == BuffId.CUSTOM) {
-            removeTeamBuffsByDisplayName(buff.getName());
-        } else {
-            removeTeamBuffsById(buff.getId());
+            throw new IllegalArgumentException(
+                    "applyTeamBuffNoStack requires a typed BuffId; custom display-name fallback is not supported");
         }
+        removeTeamBuffsById(buff.getId());
         teamBuffs.add(buff);
     }
 
@@ -114,15 +117,11 @@ public class BuffManager {
     }
 
     /**
-     * Removes all simulator-owned team buffs with the given name.
+     * Removes all simulator-owned team buffs with the given logical id.
      *
-     * @param buffName buff name to remove
+     * @param buffId buff id to remove
      */
     public void removeTeamBuffsById(BuffId buffId) {
         teamBuffs.removeIf(buff -> buff.getId() == buffId);
-    }
-
-    private void removeTeamBuffsByDisplayName(String buffName) {
-        teamBuffs.removeIf(buff -> buff.getName().equals(buffName));
     }
 }
