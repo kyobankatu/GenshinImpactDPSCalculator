@@ -2,10 +2,11 @@ package model.artifact;
 
 import mechanics.buff.BuffId;
 import model.entity.ArtifactSet;
+import model.entity.BurstTriggeredArtifactEffect;
 import model.stats.StatsContainer;
 import model.type.StatType;
 
-public class NoblesseOblige extends ArtifactSet {
+public class NoblesseOblige extends ArtifactSet implements BurstTriggeredArtifactEffect {
     public NoblesseOblige(StatsContainer mainSubStats) {
         super("Noblesse Oblige", mainSubStats);
         // 2pc: +20% Burst Dmg

@@ -5,8 +5,9 @@ import model.type.StatType;
 import mechanics.buff.Buff;
 import mechanics.buff.BuffId;
 import simulation.CombatSimulator;
+import model.entity.ReactionAwareArtifact;
 
-public class ViridescentVenerer extends model.entity.ArtifactSet {
+public class ViridescentVenerer extends model.entity.ArtifactSet implements ReactionAwareArtifact {
 
     public ViridescentVenerer() {
         super("Viridescent Venerer", new StatsContainer());

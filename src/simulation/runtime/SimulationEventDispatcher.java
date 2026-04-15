@@ -7,6 +7,7 @@ import java.util.List;
 import mechanics.reaction.ReactionResult;
 import model.entity.ArtifactSet;
 import model.entity.Character;
+import model.entity.ReactionAwareArtifact;
 import model.type.Element;
 import simulation.ActionListener;
 import simulation.CombatSimulator;
@@ -106,8 +107,8 @@ public class SimulationEventDispatcher implements SimulationEventBus {
                 continue;
             }
             for (ArtifactSet artifact : member.getArtifacts()) {
-                if (artifact != null) {
-                    artifact.onReaction(sim, result, trigger, member);
+                if (artifact instanceof ReactionAwareArtifact) {
+                    ((ReactionAwareArtifact) artifact).onReaction(sim, result, trigger, member);
                 }
             }
         }

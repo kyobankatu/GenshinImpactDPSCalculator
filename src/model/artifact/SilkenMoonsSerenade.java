@@ -6,8 +6,9 @@ import mechanics.buff.Buff;
 import mechanics.buff.BuffId;
 import simulation.CombatSimulator;
 import simulation.CombatSimulator.Moonsign;
+import model.entity.DamageTriggeredArtifactEffect;
 
-public class SilkenMoonsSerenade extends model.entity.ArtifactSet {
+public class SilkenMoonsSerenade extends model.entity.ArtifactSet implements DamageTriggeredArtifactEffect {
 
     public SilkenMoonsSerenade() {
         super("Silken Moon's Serenade", new StatsContainer());

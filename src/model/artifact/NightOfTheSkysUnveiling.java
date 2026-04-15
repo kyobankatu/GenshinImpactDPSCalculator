@@ -5,8 +5,9 @@ import model.type.StatType;
 import mechanics.buff.Buff;
 import mechanics.buff.BuffId;
 import simulation.CombatSimulator.Moonsign;
+import model.entity.ReactionAwareArtifact;
 
-public class NightOfTheSkysUnveiling extends model.entity.ArtifactSet {
+public class NightOfTheSkysUnveiling extends model.entity.ArtifactSet implements ReactionAwareArtifact {
 
     public NightOfTheSkysUnveiling() {
         super("Night of the Sky's Unveiling", new StatsContainer());

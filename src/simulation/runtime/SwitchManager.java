@@ -5,6 +5,7 @@ import java.util.Map;
 
 import model.entity.ArtifactSet;
 import model.entity.Character;
+import model.entity.SwitchAwareArtifact;
 import model.entity.SwitchAwareCharacter;
 import model.entity.SwitchAwareWeaponEffect;
 import model.type.Element;
@@ -89,8 +90,8 @@ public class SwitchManager {
             return;
         }
         for (ArtifactSet artifact : character.getArtifacts()) {
-            if (artifact != null) {
-                artifact.onSwitchOut(sim, character);
+            if (artifact instanceof SwitchAwareArtifact) {
+                ((SwitchAwareArtifact) artifact).onSwitchOut(sim, character);
             }
         }
     }
@@ -100,8 +101,8 @@ public class SwitchManager {
             return;
         }
         for (ArtifactSet artifact : character.getArtifacts()) {
-            if (artifact != null) {
-                artifact.onSwitchIn(sim, character);
+            if (artifact instanceof SwitchAwareArtifact) {
+                ((SwitchAwareArtifact) artifact).onSwitchIn(sim, character);
             }
         }
     }

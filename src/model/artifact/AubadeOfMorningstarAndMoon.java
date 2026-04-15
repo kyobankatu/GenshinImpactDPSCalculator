@@ -6,8 +6,9 @@ import model.type.StatType;
 import mechanics.buff.Buff;
 import simulation.CombatSimulator;
 import simulation.CombatSimulator.Moonsign;
+import model.entity.SwitchAwareArtifact;
 
-public class AubadeOfMorningstarAndMoon extends model.entity.ArtifactSet {
+public class AubadeOfMorningstarAndMoon extends model.entity.ArtifactSet implements SwitchAwareArtifact {
 
     public AubadeOfMorningstarAndMoon() {
         super("Aubade of Morningstar and Moon", new StatsContainer());

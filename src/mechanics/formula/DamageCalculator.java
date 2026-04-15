@@ -3,6 +3,7 @@ package mechanics.formula;
 import model.stats.StatsContainer;
 import model.type.StatType;
 import model.entity.Character;
+import model.entity.DamageTriggeredArtifactEffect;
 import model.entity.DamageTriggeredWeaponEffect;
 import model.entity.Enemy;
 import java.util.List;
@@ -61,9 +62,8 @@ public class DamageCalculator {
      * </ol>
      *
      * <p>
-     * After computing damage on either path, weapon and artifact {@code onDamage}
-     * hooks are
-     * fired so stacking/proc mechanics can update their internal state.
+     * After computing damage on either path, weapon and artifact damage-trigger
+     * hooks are fired so stacking/proc mechanics can update their internal state.
      *
      * @param attacker           the attacking character
      * @param target             the enemy being hit
@@ -158,8 +158,8 @@ public class DamageCalculator {
 
         if (attacker.getArtifacts() != null) {
             for (model.entity.ArtifactSet artifact : attacker.getArtifacts()) {
-                if (artifact != null) {
-                    artifact.onDamage(sim, action, damage, attacker);
+                if (artifact instanceof DamageTriggeredArtifactEffect) {
+                    ((DamageTriggeredArtifactEffect) artifact).onDamage(sim, action, damage, attacker);
                 }
             }
         }

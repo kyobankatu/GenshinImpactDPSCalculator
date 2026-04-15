@@ -12,6 +12,7 @@ import mechanics.reaction.ReactionEffectScheduler;
 import mechanics.reaction.ReactionResult;
 import model.entity.ArtifactSet;
 import model.entity.Character;
+import model.entity.DamageTriggeredArtifactEffect;
 import model.entity.DamageTriggeredWeaponEffect;
 import model.stats.StatsContainer;
 import model.type.ActionType;
@@ -261,8 +262,8 @@ public class CombatActionResolver {
 
         if (attacker.getArtifacts() != null) {
             for (ArtifactSet artifact : attacker.getArtifacts()) {
-                if (artifact != null) {
-                    artifact.onDamage(sim, action, damage, attacker);
+                if (artifact instanceof DamageTriggeredArtifactEffect) {
+                    ((DamageTriggeredArtifactEffect) artifact).onDamage(sim, action, damage, attacker);
                 }
             }
         }

@@ -63,6 +63,33 @@ Write down which scenario is the primary smoke test for each remaining subsystem
 - buff replacement and no-stack handling
 - combat sequencing
 
+### Phase 0 Notes (captured 2026-04-15 JST)
+
+#### Task 0.1 Baseline Results
+
+| Command | Result | Total Rotation Damage | DPS | Known warning logs | HTML report |
+| --- | --- | ---: | ---: | --- | --- |
+| `./gradlew build` | Success | N/A | N/A | None observed | N/A |
+| `./gradlew RaidenParty` | Success | 1,693,561 | 80,646 | No `WARNING:` lines observed in the final run | Generated: `output/simulation_report.html` |
+| `./gradlew FlinsParty` | Success | 22,463,116 | 196,356 | Repeated insufficient-energy warnings for `Flins` and `Sucrose` during calibration/final execution, including `Flins burst fired with insufficient energy (30/30)` | Generated: `output/simulation_report.html` |
+| `./gradlew FlinsParty2` | Success | 27,063,409 | 230,916 | Repeated insufficient-energy warnings for `Flins`, `Sucrose`, and `Columbina`, including `Flins burst fired with insufficient energy (30/30)` | Generated: `output/simulation_report.html` |
+
+Notes:
+
+- The first `build` run downloaded Gradle `9.3.1`; subsequent runs completed against the cached distribution.
+- The latest generated HTML report file exists at `output/simulation_report.html` after the baseline run set.
+
+#### Task 0.2 Primary Smoke Tests
+
+- artifact-triggered behavior: `./gradlew FlinsParty`
+  - This scenario exercises the broadest remaining artifact hook surface in one run: reaction-triggered (`NightOfTheSkysUnveiling`), damage-triggered (`SilkenMoonsSerenade`), and switch-aware (`AubadeOfMorningstarAndMoon`) behavior.
+- party identity / switching: `./gradlew FlinsParty`
+  - It repeatedly cycles `Ineffa -> Columbina -> Sucrose -> Flins` and back, so name-based routing and switch state are stressed more than in the shorter Raiden sample.
+- buff replacement and no-stack handling: `./gradlew FlinsParty`
+  - It repeatedly refreshes/replaces stateful buffs tied to switch and Moonsign flow, which makes it the best regression check for buff replacement semantics.
+- combat sequencing: `./gradlew RaidenParty`
+  - It is the smallest deterministic sample that still covers burst entry, normal/charged sequencing, overlapping triggered attacks, and timing-sensitive follow-up ordering.
+
 ## Phase 1: Narrow `ArtifactSet`
 
 ### Objective
@@ -110,6 +137,33 @@ Reduce `ArtifactSet` to:
 - display metadata
 
 Target outcome: no more no-op inheritance for artifact behaviors.
+
+### Phase 1 Notes (completed 2026-04-15 JST)
+
+- Task 1.1: identified current optional-hook artifact behaviors
+  - reaction-triggered: `NightOfTheSkysUnveiling`, `ViridescentVenerer`
+  - damage-triggered: `SilkenMoonsSerenade`
+  - switch-triggered: `AubadeOfMorningstarAndMoon`
+  - burst-triggered: `NoblesseOblige`
+- Task 1.2: introduced focused artifact capability interfaces in `src/model/entity/`
+  - `ReactionAwareArtifact`
+  - `DamageTriggeredArtifactEffect`
+  - `SwitchAwareArtifact`
+  - `BurstTriggeredArtifactEffect`
+- Task 1.3: updated runtime call sites to depend on focused interfaces instead of broad `ArtifactSet` hooks
+  - reaction dispatch: `simulation/runtime/SimulationEventDispatcher.java`
+  - damage resolution: `simulation/runtime/CombatActionResolver.java`, `mechanics/formula/DamageCalculator.java`
+  - switch management: `simulation/runtime/SwitchManager.java`
+  - burst execution path: `model/character/Bennett.java`
+- Task 1.4: reduced `ArtifactSet` to fixed stats, passive stat application, and display metadata only
+  - removed no-op event hook methods from the base class
+  - concrete artifact sets now opt into behavior explicitly via capability interfaces
+
+Verification:
+
+- `./gradlew build`
+- `./gradlew FlinsParty`
+- `FlinsParty` baseline remained `22,463,116` total damage / `196,356` DPS and still generated `output/simulation_report.html`
 
 ## Phase 2: Replace Name-Based Runtime Identity
 

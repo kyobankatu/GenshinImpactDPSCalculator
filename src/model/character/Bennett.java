@@ -6,6 +6,7 @@ import model.entity.BurstStateProvider;
 import model.entity.Character;
 import model.entity.Weapon;
 import model.entity.ArtifactSet;
+import model.entity.BurstTriggeredArtifactEffect;
 import mechanics.buff.BuffId;
 import model.stats.StatsContainer;
 import model.type.CharacterId;
@@ -108,7 +109,9 @@ public class Bennett extends Character implements BurstStateProvider {
 
         // Trigger Artifact Buffs
         for (ArtifactSet a : artifacts) {
-            a.onBurst(sim);
+            if (a instanceof BurstTriggeredArtifactEffect) {
+                ((BurstTriggeredArtifactEffect) a).onBurst(sim);
+            }
         }
 
         // Apply Field Buff
