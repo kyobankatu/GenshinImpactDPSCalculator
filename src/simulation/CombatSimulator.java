@@ -13,11 +13,13 @@ import simulation.action.AttackAction;
 import simulation.action.CharacterActionRequest;
 import simulation.event.TimerEvent;
 import simulation.runtime.ActionGateway;
+import simulation.runtime.ActionTimelineExecutor;
 import simulation.runtime.BuffManager;
 import simulation.runtime.CombatActionResolver;
 import simulation.runtime.DamageReport;
 import simulation.runtime.MoonsignManager;
 import simulation.runtime.ReactionState;
+import simulation.runtime.ReactionStateController;
 import simulation.runtime.SimulationClock;
 import simulation.runtime.SimulationEventDispatcher;
 import simulation.runtime.SwitchManager;
@@ -39,7 +41,9 @@ public class CombatSimulator {
     private final SimulationClock simulationClock;
     private final SwitchManager switchManager;
     private final ActionGateway actionGateway;
+    private final ActionTimelineExecutor actionTimelineExecutor;
     private final ReactionState reactionState;
+    private final ReactionStateController reactionStateController;
     private final EnergyDistributor energyDistributor;
     private final mechanics.element.ICDManager icdManager;
     private boolean enableLogging = true;
@@ -79,6 +83,8 @@ public class CombatSimulator {
         this.moonsignManager = new MoonsignManager(this);
         this.switchManager = new SwitchManager(this, party, combatLogSink);
         this.actionGateway = new ActionGateway(this);
+        this.actionTimelineExecutor = new ActionTimelineExecutor(this, eventBus);
+        this.reactionStateController = new ReactionStateController(this, reactionState);
         this.energyDistributor = new EnergyDistributor(this);
         this.icdManager = new mechanics.element.ICDManager();
     }
@@ -445,43 +451,7 @@ public class CombatSimulator {
     }
 
     public void performAction(CharacterId characterId, AttackAction action) {
-        Character character = party.getMember(characterId);
-        if (character == null) {
-            throw new RuntimeException("Character not found: " + characterId);
-        }
-        performActionWithoutTimeAdvance(characterId, action);
-
-        if (currentMoonsign == Moonsign.ASCENDANT_GLEAM
-                && !character.isLunarCharacter()
-                && (action.getActionType() == model.type.ActionType.SKILL
-                        || action.getActionType() == model.type.ActionType.BURST)) {
-            moonsignManager.applyAscendantBlessing(character);
-        }
-
-        eventDispatcher.notifyAction(character, action, getCurrentTime());
-
-        double duration = action.getAnimationDuration();
-        if (action.getActionType() == model.type.ActionType.NORMAL
-                || action.getActionType() == model.type.ActionType.CHARGE) {
-            model.stats.StatsContainer stats = character.getEffectiveStats(getCurrentTime());
-            List<Buff> buffs = getApplicableBuffs(character);
-            for (Buff buff : buffs) {
-                if (!buff.isExpired(getCurrentTime())) {
-                    buff.apply(stats, getCurrentTime());
-                }
-            }
-            double spd = stats.get(model.type.StatType.ATK_SPD);
-            if (spd > 0) {
-                duration /= (1.0 + spd);
-                if (enableLogging) {
-                    System.out.println(String.format(
-                            "   [Speed] Duration %.2fs -> %.2fs (SPD +%.0f%%)",
-                            action.getAnimationDuration(), duration, spd * 100));
-                }
-            }
-        }
-
-        advanceTime(duration);
+        actionTimelineExecutor.execute(characterId, action);
     }
 
     /**
@@ -518,6 +488,15 @@ public class CombatSimulator {
     }
 
     /**
+     * Collaborator-facing helper for Moonsign-specific follow-up policy.
+     *
+     * @param buffer the character whose stats determine the granted Lunar bonus
+     */
+    public void applyAscendantBlessing(Character buffer) {
+        moonsignManager.applyAscendantBlessing(buffer);
+    }
+
+    /**
      * Returns the live simulator-owned team buff list.
      *
      * @return mutable team buff list
@@ -531,47 +510,57 @@ public class CombatSimulator {
     }
 
     /**
+     * Compatibility wrapper retained for existing reaction helpers.
+     *
      * Sets the EC timer running flag.
      *
      * @param running new EC timer state
      */
     public void setECTimerRunning(boolean running) {
-        reactionState.setEcTimerRunning(running);
+        reactionStateController.setEcTimerRunning(running);
     }
 
     /**
+     * Compatibility wrapper retained for existing reaction helpers.
+     *
      * Returns whether an EC-related timer is active.
      *
      * @return {@code true} if active
      */
     public boolean isECTimerRunning() {
-        return reactionState.isEcTimerRunning();
+        return reactionStateController.isEcTimerRunning();
     }
 
     /**
+     * Compatibility wrapper retained for existing reaction helpers.
+     *
      * Returns whether Thundercloud is active at the current time.
      *
      * @return {@code true} if active
      */
     public boolean isThundercloudActive() {
-        return getCurrentTime() < reactionState.getThundercloudEndTime();
+        return reactionStateController.isThundercloudActive();
     }
 
     /**
+     * Compatibility wrapper retained for existing reaction helpers.
+     *
      * Returns the Thundercloud expiry time.
      *
      * @return expiry time in seconds
      */
     public double getThundercloudEndTime() {
-        return reactionState.getThundercloudEndTime();
+        return reactionStateController.getThundercloudEndTime();
     }
 
     /**
+     * Compatibility wrapper retained for existing reaction helpers.
+     *
      * Sets the Thundercloud expiry time.
      *
      * @param endTime expiry time in seconds
      */
     public void setThundercloudEndTime(double endTime) {
-        reactionState.setThundercloudEndTime(endTime);
+        reactionStateController.setThundercloudEndTime(endTime);
     }
 }

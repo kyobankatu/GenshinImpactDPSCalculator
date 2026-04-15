@@ -275,6 +275,33 @@ Review public methods on `CombatSimulator` and separate:
 
 Target outcome: fewer reasons to edit `CombatSimulator` when adding a mechanic.
 
+### Phase 3 Notes (completed 2026-04-15 JST)
+
+- Task 3.1: extracted attack sequencing policy from `simulation/CombatSimulator.java`
+  - added `simulation/runtime/ActionTimelineExecutor.java`
+  - moved post-resolution action sequencing out of `CombatSimulator.performAction(CharacterId, AttackAction)`
+  - extracted ordering for:
+    - Moonsign Ascendant Blessing follow-up application
+    - action event dispatch timing
+    - normal / charged animation duration scaling from ATK SPD
+    - timeline advancement after duration resolution
+- Task 3.2: moved remaining reaction-state convenience access behind a dedicated controller
+  - added `simulation/runtime/ReactionStateController.java`
+  - `CombatSimulator` now delegates EC-timer and Thundercloud convenience methods through the controller instead of touching `ReactionState` directly
+- Task 3.3: clarified which `CombatSimulator` methods are thin wrappers versus collaborator helpers
+  - `performAction(CharacterId, AttackAction)` is now a thin coordinator entry point that delegates to `ActionTimelineExecutor`
+  - Moonsign follow-up behavior is exposed through a focused collaborator helper `applyAscendantBlessing(Character)`
+  - remaining reaction-state methods are explicitly documented as compatibility wrappers for existing callers
+
+Verification:
+
+- `./gradlew build`
+- `./gradlew RaidenParty`
+- `./gradlew FlinsParty`
+- `RaidenParty` baseline remained `1,693,561` total damage / `80,646` DPS
+- `FlinsParty` baseline remained `22,463,116` total damage / `196,356` DPS
+- both runs still generated `output/simulation_report.html`
+
 ## Phase 4: Remove Remaining String-Based Fallback Paths
 
 ### Objective
