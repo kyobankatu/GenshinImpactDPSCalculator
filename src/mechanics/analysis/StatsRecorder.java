@@ -79,8 +79,8 @@ public class StatsRecorder {
      * @param s the combat simulator at the moment of capture
      */
     private void recordSnapshot(CombatSimulator s) {
-        Map<String, Map<StatType, Double>> charStats = new HashMap<>();
-        Map<String, List<String>> charBuffs = new HashMap<>();
+        Map<CharacterId, Map<StatType, Double>> charStats = new HashMap<>();
+        Map<CharacterId, List<String>> charBuffs = new HashMap<>();
 
         for (Character c : s.getPartyMembers()) {
             StatsContainer effStats = c.getEffectiveStats(s.getCurrentTime());
@@ -115,7 +115,7 @@ public class StatsRecorder {
                     buffNames.add(b.getDisplayName());
                 }
             }
-            charBuffs.put(c.getName(), buffNames);
+            charBuffs.put(c.getCharacterId(), buffNames);
 
             Map<StatType, Double> statMap = new HashMap<>();
 
@@ -145,7 +145,7 @@ public class StatsRecorder {
             statMap.put(StatType.GEO_DMG_BONUS, effStats.get(StatType.GEO_DMG_BONUS));
             statMap.put(StatType.DENDRO_DMG_BONUS, effStats.get(StatType.DENDRO_DMG_BONUS));
 
-            charStats.put(c.getName(), statMap);
+            charStats.put(c.getCharacterId(), statMap);
         }
 
         snapshots.add(new StatsSnapshot(s.getCurrentTime(), charStats, charBuffs));

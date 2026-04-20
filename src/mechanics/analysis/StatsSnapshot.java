@@ -1,5 +1,6 @@
 package mechanics.analysis;
 
+import model.type.CharacterId;
 import model.type.StatType;
 import java.util.List;
 import java.util.Map;
@@ -16,22 +17,20 @@ import java.util.Map;
 public class StatsSnapshot {
     /** Simulation time (in seconds) at which this snapshot was taken. */
     public double time;
-    // Map<CharacterName, Map<StatType, Double>>
-    /** Effective stat values per character at {@link #time}, keyed by character name. */
-    public Map<String, Map<StatType, Double>> characterStats;
-    // Map<CharacterName, List<BuffName>>
-    /** Names of active buffs per character at {@link #time}, keyed by character name. */
-    public Map<String, List<String>> characterBuffs;
+    /** Effective stat values per character at {@link #time}, keyed by typed identity. */
+    public Map<CharacterId, Map<StatType, Double>> characterStats;
+    /** Display labels of active buffs per character at {@link #time}, keyed by typed identity. */
+    public Map<CharacterId, List<String>> characterBuffs;
 
     /**
      * Constructs a new snapshot.
      *
      * @param time           simulation time in seconds
-     * @param characterStats map from character name to their effective stat values
-     * @param characterBuffs map from character name to their active buff name list
+     * @param characterStats map from character id to their effective stat values
+     * @param characterBuffs map from character id to their active buff display labels
      */
-    public StatsSnapshot(double time, Map<String, Map<StatType, Double>> characterStats,
-            Map<String, List<String>> characterBuffs) {
+    public StatsSnapshot(double time, Map<CharacterId, Map<StatType, Double>> characterStats,
+            Map<CharacterId, List<String>> characterBuffs) {
         this.time = time;
         this.characterStats = characterStats;
         this.characterBuffs = characterBuffs;

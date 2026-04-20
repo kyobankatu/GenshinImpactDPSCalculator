@@ -48,6 +48,8 @@ public class HtmlReportGenerator {
     public static void generate(String filePath, List<SimulationRecord> records, CombatSimulator sim,
             List<mechanics.analysis.StatsSnapshot> statsHistory) {
         StringBuilder sb = new StringBuilder();
+        List<ReportViewAdapter.ReportCharacterView> reportCharacters = ReportViewAdapter.partyCharacters(sim);
+        List<ReportViewAdapter.ReportStatsSnapshot> reportStatsHistory = ReportViewAdapter.statsHistory(statsHistory);
 
         // --- Data Processing for Charts ---
         // 1. Total Damage per Character (Pie)
@@ -218,11 +220,10 @@ public class HtmlReportGenerator {
         sb.append("<tbody>\n");
 
         if (sim != null) {
-            for (model.entity.Character c : sim.getPartyMembers()) {
-                String safeName = c.getName().replaceAll("[^a-zA-Z0-9]", "");
+            for (ReportViewAdapter.ReportCharacterView character : reportCharacters) {
                 sb.append(String.format(
                         "<tr id='row-%s'><td>%s</td><td class='val-atk'>-</td><td class='val-hp'>-</td><td class='val-def'>-</td><td class='val-cr'>-</td><td class='val-cd'>-</td><td class='val-er'>-</td><td class='val-em'>-</td><td class='val-dmg'>-</td></tr>\n",
-                        safeName, c.getName()));
+                        character.domKey, character.displayName));
             }
         }
         sb.append("</tbody></table>\n");
@@ -233,11 +234,10 @@ public class HtmlReportGenerator {
             sb.append("<div class='buff-panel'>\n");
             sb.append("<h4 style='margin-bottom:6px; color:#ccc;'>Active Buffs</h4>\n");
             sb.append("<div id='buffRows'>\n");
-            for (model.entity.Character c : sim.getPartyMembers()) {
-                String safeName = c.getName().replaceAll("[^a-zA-Z0-9]", "");
+            for (ReportViewAdapter.ReportCharacterView character : reportCharacters) {
                 sb.append(String.format(
                         "<div class='buff-row'><span class='buff-char'>%s</span><span class='buff-list' id='bl-%s'></span></div>\n",
-                        c.getName(), safeName));
+                        character.displayName, character.domKey));
             }
             sb.append("</div>\n");
             sb.append("</div>\n");
@@ -357,41 +357,18 @@ public class HtmlReportGenerator {
         // --- 1. Serialize Stats History to JSON ---
         sb.append("const statsHistory = [\n");
         if (statsHistory != null) {
-            for (mechanics.analysis.StatsSnapshot snap : statsHistory) {
-                sb.append(String.format("{ t: %.2f, chars: {\n", snap.time));
+            for (ReportViewAdapter.ReportStatsSnapshot snapshot : reportStatsHistory) {
+                sb.append(String.format("{ t: %.2f, chars: {\n", snapshot.time));
 
-                for (Map.Entry<String, Map<StatType, Double>> entry : snap.characterStats.entrySet()) {
-                    String cName = entry.getKey().replaceAll("[^a-zA-Z0-9]", "");
-                    Map<StatType, Double> s = entry.getValue();
-
-                    double atk = s.getOrDefault(StatType.BASE_ATK, 0.0)
-                            * (1 + s.getOrDefault(StatType.ATK_PERCENT, 0.0)) + s.getOrDefault(StatType.ATK_FLAT, 0.0);
-                    double hp = s.getOrDefault(StatType.BASE_HP, 0.0) * (1 + s.getOrDefault(StatType.HP_PERCENT, 0.0))
-                            + s.getOrDefault(StatType.HP_FLAT, 0.0);
-                    double def = s.getOrDefault(StatType.BASE_DEF, 0.0)
-                            * (1 + s.getOrDefault(StatType.DEF_PERCENT, 0.0)) + s.getOrDefault(StatType.DEF_FLAT, 0.0);
-                    double cr = s.getOrDefault(StatType.CRIT_RATE, 0.0) * 100;
-                    double cd = s.getOrDefault(StatType.CRIT_DMG, 0.0) * 100;
-                    double er = s.getOrDefault(StatType.ENERGY_RECHARGE, 0.0) * 100;
-                    double em = s.getOrDefault(StatType.ELEMENTAL_MASTERY, 0.0);
-                    double dmgBonus = Math.max(s.getOrDefault(StatType.PYRO_DMG_BONUS, 0.0),
-                            Math.max(s.getOrDefault(StatType.HYDRO_DMG_BONUS, 0.0),
-                                    Math.max(s.getOrDefault(StatType.ELECTRO_DMG_BONUS, 0.0),
-                                            Math.max(s.getOrDefault(StatType.CRYO_DMG_BONUS, 0.0),
-                                                    Math.max(s.getOrDefault(StatType.ANEMO_DMG_BONUS, 0.0),
-                                                            Math.max(s.getOrDefault(StatType.GEO_DMG_BONUS, 0.0),
-                                                                    s.getOrDefault(StatType.DENDRO_DMG_BONUS, 0.0)))))))
-                            * 100;
-
-                    List<String> buffNames = (snap.characterBuffs != null)
-                            ? snap.characterBuffs.getOrDefault(entry.getKey(), Collections.emptyList())
-                            : Collections.emptyList();
-                    String buffsJs = buffNames.stream()
+                for (Map.Entry<String, ReportViewAdapter.ReportCharacterStats> entry : snapshot.characters.entrySet()) {
+                    ReportViewAdapter.ReportCharacterStats stats = entry.getValue();
+                    String buffsJs = stats.buffs.stream()
                             .map(b -> "'" + b.replace("\\", "\\\\").replace("'", "\\'") + "'")
                             .collect(Collectors.joining(","));
                     sb.append(String.format(
                             "'%s': { atk: %.0f, hp: %.0f, def: %.0f, cr: %.1f, cd: %.1f, er: %.1f, em: %.0f, dmg: %.1f, buffs: [%s] },\n",
-                            cName, atk, hp, def, cr, cd, er, em, dmgBonus, buffsJs));
+                            entry.getKey(), stats.atk, stats.hp, stats.def, stats.cr, stats.cd, stats.er, stats.em,
+                            stats.dmg, buffsJs));
                 }
                 sb.append("}},\n");
             }

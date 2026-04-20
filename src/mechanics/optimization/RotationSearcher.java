@@ -1,15 +1,11 @@
 package mechanics.optimization;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import simulation.CombatSimulator;
 import simulation.action.CharacterActionKey;
@@ -17,8 +13,6 @@ import simulation.action.CharacterActionRequest;
 import model.entity.BurstStateProvider;
 import model.entity.Character;
 import model.type.CharacterId;
-import mechanics.optimization.ProfileLoader; // Added import
-
 /**
  * Finds the highest-damage rotation by exhaustively evaluating all combinations
  * of character order permutations and named action profiles.
@@ -41,23 +35,34 @@ public class RotationSearcher {
      * the action profile chosen for each character, and the total damage dealt.
      */
     public static class RotationPlan {
+        /** Typed order used by runtime-facing callers. */
+        public List<CharacterId> characterOrder;
+
         /** Ordered list of character names defining the macro rotation sequence. */
         public List<String> order;
 
+        /** Typed profile selection used by runtime-facing callers. */
+        public Map<CharacterId, ProfileLoader.ActionProfile> characterProfiles;
+
         /** The action profile selected for each character in this plan. */
-        public Map<String, ProfileLoader.ActionProfile> profiles; // Changed map value
+        public Map<String, ProfileLoader.ActionProfile> profiles;
 
         /** Total damage accumulated during the evaluation window. */
         public double totalDamage;
 
         /**
-         * @param order       cast order (character names in sequence)
-         * @param profiles    per-character action profile selection
+         * @param characterOrder typed cast order
+         * @param characterProfiles typed per-character action profile selection
          * @param totalDamage total damage produced during the simulation window
          */
-        public RotationPlan(List<String> order, Map<String, ProfileLoader.ActionProfile> profiles, double totalDamage) {
-            this.order = order;
-            this.profiles = profiles;
+        public RotationPlan(List<CharacterId> characterOrder,
+                Map<CharacterId, ProfileLoader.ActionProfile> characterProfiles,
+                double totalDamage) {
+            this.characterOrder = characterOrder;
+            this.characterProfiles = characterProfiles;
+            this.order = characterOrder.stream().map(CharacterId::getDisplayName).collect(Collectors.toList());
+            this.profiles = characterProfiles.entrySet().stream()
+                    .collect(Collectors.toMap(e -> e.getKey().getDisplayName(), Map.Entry::getValue));
             this.totalDamage = totalDamage;
         }
 
@@ -66,8 +71,9 @@ public class RotationSearcher {
             StringBuilder sb = new StringBuilder();
             sb.append(String.format("Macro[Dmg:%,.0f | Order:%s]", totalDamage, order));
             sb.append("\n    Profiles:");
-            for (Map.Entry<String, ProfileLoader.ActionProfile> entry : profiles.entrySet()) {
-                sb.append("\n      - ").append(entry.getKey()).append(": ").append(entry.getValue().name);
+            for (CharacterId id : characterOrder) {
+                ProfileLoader.ActionProfile profile = characterProfiles.get(id);
+                sb.append("\n      - ").append(id.getDisplayName()).append(": ").append(profile.name);
             }
             return sb.toString();
         }
@@ -95,29 +101,29 @@ public class RotationSearcher {
      * @throws RuntimeException if no rotation can be evaluated
      */
     public RotationPlan findBestRotation(Supplier<CombatSimulator> simFactory) {
-        // 1. Get Character Names & Load Profiles
+        // 1. Get typed party order & load profiles through the file-format adapter.
         CombatSimulator tempSim = simFactory.get();
-        List<String> charNames = tempSim.getPartyMembers().stream()
-                .map(Character::getName)
+        List<CharacterId> characterIds = tempSim.getPartyMembers().stream()
+                .map(Character::getCharacterId)
                 .collect(Collectors.toList());
 
-        Map<String, List<ProfileLoader.ActionProfile>> charProfiles = new HashMap<>();
-        for (String name : charNames) {
-            charProfiles.put(name, ProfileLoader.loadProfiles(name));
-            System.out.println("Loaded Profiles for " + name + ": " + charProfiles.get(name));
+        Map<CharacterId, List<ProfileLoader.ActionProfile>> charProfiles = new HashMap<>();
+        for (CharacterId characterId : characterIds) {
+            charProfiles.put(characterId, ProfileFileAdapter.loadProfiles(characterId));
+            System.out.println("Loaded Profiles for " + characterId.getDisplayName() + ": " + charProfiles.get(characterId));
         }
 
         // 2. Generate Order Permutations (24)
-        List<List<String>> orderPermutations = generatePermutations(charNames);
+        List<List<CharacterId>> orderPermutations = generatePermutations(characterIds);
 
         // 3. Generate Profile Combinations (Cartesian Product)
-        List<Map<String, ProfileLoader.ActionProfile>> profileCombinations = generateProfileCombinations(charNames,
+        List<Map<CharacterId, ProfileLoader.ActionProfile>> profileCombinations = generateProfileCombinations(characterIds,
                 charProfiles);
 
         // 4. Create Evaluation Tasks
         List<RunnableEvaluation> tasks = new ArrayList<>();
-        for (List<String> order : orderPermutations) {
-            for (Map<String, ProfileLoader.ActionProfile> combination : profileCombinations) {
+        for (List<CharacterId> order : orderPermutations) {
+            for (Map<CharacterId, ProfileLoader.ActionProfile> combination : profileCombinations) {
                 tasks.add(new RunnableEvaluation(simFactory, order, combination));
             }
         }
@@ -146,18 +152,18 @@ public class RotationSearcher {
      * @param original list of strings to permute
      * @return all N! orderings of the input list
      */
-    private List<List<String>> generatePermutations(List<String> original) {
+    private List<List<CharacterId>> generatePermutations(List<CharacterId> original) {
         if (original.isEmpty()) {
-            List<List<String>> result = new ArrayList<>();
+            List<List<CharacterId>> result = new ArrayList<>();
             result.add(new ArrayList<>());
             return result;
         }
-        String first = original.get(0);
-        List<List<String>> remainingPerms = generatePermutations(original.subList(1, original.size()));
-        List<List<String>> allPerms = new ArrayList<>();
-        for (List<String> perm : remainingPerms) {
+        CharacterId first = original.get(0);
+        List<List<CharacterId>> remainingPerms = generatePermutations(original.subList(1, original.size()));
+        List<List<CharacterId>> allPerms = new ArrayList<>();
+        for (List<CharacterId> perm : remainingPerms) {
             for (int i = 0; i <= perm.size(); i++) {
-                List<String> temp = new ArrayList<>(perm);
+                List<CharacterId> temp = new ArrayList<>(perm);
                 temp.add(i, first);
                 allPerms.add(temp);
             }
@@ -172,11 +178,11 @@ public class RotationSearcher {
      * @param availableProfiles map of character name to their loaded profiles
      * @return all combinations where each character has exactly one profile selected
      */
-    private List<Map<String, ProfileLoader.ActionProfile>> generateProfileCombinations(
-            List<String> names,
-            Map<String, List<ProfileLoader.ActionProfile>> availableProfiles) {
+    private List<Map<CharacterId, ProfileLoader.ActionProfile>> generateProfileCombinations(
+            List<CharacterId> names,
+            Map<CharacterId, List<ProfileLoader.ActionProfile>> availableProfiles) {
 
-        List<Map<String, ProfileLoader.ActionProfile>> result = new ArrayList<>();
+        List<Map<CharacterId, ProfileLoader.ActionProfile>> result = new ArrayList<>();
         generateRecursive(result, new HashMap<>(), names, 0, availableProfiles);
         return result;
     }
@@ -192,23 +198,23 @@ public class RotationSearcher {
      * @param available all available profiles per character
      */
     private void generateRecursive(
-            List<Map<String, ProfileLoader.ActionProfile>> result,
-            Map<String, ProfileLoader.ActionProfile> current,
-            List<String> names,
+            List<Map<CharacterId, ProfileLoader.ActionProfile>> result,
+            Map<CharacterId, ProfileLoader.ActionProfile> current,
+            List<CharacterId> names,
             int index,
-            Map<String, List<ProfileLoader.ActionProfile>> available) {
+            Map<CharacterId, List<ProfileLoader.ActionProfile>> available) {
 
         if (index == names.size()) {
             result.add(new HashMap<>(current));
             return;
         }
 
-        String name = names.get(index);
-        List<ProfileLoader.ActionProfile> options = available.get(name);
+        CharacterId characterId = names.get(index);
+        List<ProfileLoader.ActionProfile> options = available.get(characterId);
         for (ProfileLoader.ActionProfile option : options) {
-            current.put(name, option);
+            current.put(characterId, option);
             generateRecursive(result, current, names, index + 1, available);
-            current.remove(name);
+            current.remove(characterId);
         }
     }
 
@@ -220,16 +226,16 @@ public class RotationSearcher {
      */
     private static class RunnableEvaluation {
         private Supplier<CombatSimulator> factory;
-        private List<String> order;
-        private Map<String, ProfileLoader.ActionProfile> profiles;
+        private List<CharacterId> order;
+        private Map<CharacterId, ProfileLoader.ActionProfile> profiles;
 
         /**
          * @param factory  supplier for a fresh simulator
          * @param order    cast order for this evaluation
          * @param profiles per-character profile selection for this evaluation
          */
-        public RunnableEvaluation(Supplier<CombatSimulator> factory, List<String> order,
-                Map<String, ProfileLoader.ActionProfile> profiles) {
+        public RunnableEvaluation(Supplier<CombatSimulator> factory, List<CharacterId> order,
+                Map<CharacterId, ProfileLoader.ActionProfile> profiles) {
             this.factory = factory;
             this.order = order;
             this.profiles = profiles;
@@ -263,16 +269,15 @@ public class RotationSearcher {
 
             while (sim.getCurrentTime() < maxTime) {
                 // 1. Swap
-                String targetName = order.get(orderIndex % order.size());
-                CharacterId targetId = CharacterId.fromName(targetName);
+                CharacterId targetId = order.get(orderIndex % order.size());
 
                 // If not active, swap
                 if (sim.getActiveCharacter() == null || sim.getActiveCharacter().getCharacterId() != targetId) {
-                    sim.switchCharacter(targetName);
+                    sim.switchCharacter(targetId);
                 }
 
                 Character active = sim.getActiveCharacter();
-                ProfileLoader.ActionProfile profile = profiles.get(targetName);
+                ProfileLoader.ActionProfile profile = profiles.get(targetId);
 
                 // 2. Execute Action Profile Sequence
                 for (ProfileAction action : profile.actions) {
@@ -316,27 +321,27 @@ public class RotationSearcher {
             switch (command) {
                 case SKILL:
                     if (active.canSkill(now))
-                        sim.performAction(active.getName(), CharacterActionRequest.of(CharacterActionKey.SKILL));
+                        sim.performAction(active.getCharacterId(), CharacterActionRequest.of(CharacterActionKey.SKILL));
                     break;
                 case BURST:
                     if (active.canBurst(now))
-                        sim.performAction(active.getName(), CharacterActionRequest.of(CharacterActionKey.BURST));
+                        sim.performAction(active.getCharacterId(), CharacterActionRequest.of(CharacterActionKey.BURST));
                     break;
                 case ATTACK:
-                    sim.performAction(active.getName(), CharacterActionRequest.of(CharacterActionKey.NORMAL));
+                    sim.performAction(active.getCharacterId(), CharacterActionRequest.of(CharacterActionKey.NORMAL));
                     break;
                 case ATTACK_UNTIL_END:
                     // Attack until burst ends (Smart Field Time)
                     int safety = 0;
                     while (isBurstActive(active, sim.getCurrentTime()) && sim.getCurrentTime() < maxTime
                             && safety < 100) {
-                        sim.performAction(active.getName(), CharacterActionRequest.of(CharacterActionKey.NORMAL));
+                        sim.performAction(active.getCharacterId(), CharacterActionRequest.of(CharacterActionKey.NORMAL));
                         safety++;
                     }
                     // If not active (e.g. physical Raiden?), do a few attacks anyway
                     if (!isBurstActive(active, sim.getCurrentTime())) {
                         for (int k = 0; k < 3; k++)
-                            sim.performAction(active.getName(), CharacterActionRequest.of(CharacterActionKey.NORMAL));
+                            sim.performAction(active.getCharacterId(), CharacterActionRequest.of(CharacterActionKey.NORMAL));
                     }
                     break;
             }

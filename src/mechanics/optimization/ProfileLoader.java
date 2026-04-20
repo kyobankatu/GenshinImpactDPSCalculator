@@ -1,17 +1,15 @@
 package mechanics.optimization;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Loads named action profiles for a character from a plain-text profile file.
+ * Parses named action profiles from a plain-text profile source.
  *
- * <p>Profile files are located at {@code profiles/<CharacterName>.txt}.  Each
- * file may contain one or more named profiles in the following format:
+ * <p>The source may contain one or more named profiles in the following format:
  * <pre>
  * PROFILE: BurstCombo
  * SKILL
@@ -23,11 +21,12 @@ import java.util.List;
  * ATTACK
  * </pre>
  *
- * <p>If no profile file exists for a character, or if the file is empty,
- * {@link #loadProfiles} returns a single default {@code "Default(Skill)"}
- * profile containing only the {@code SKILL} action.
+ * <p>File resolution is intentionally kept outside this parser so runtime code
+ * can stay independent from external profile-file naming conventions.
  */
 public class ProfileLoader {
+    public static final String DEFAULT_PROFILE_NAME = "Default(Skill)";
+    public static final String FALLBACK_PROFILE_NAME = "Fallback";
 
     /**
      * A named sequence of action commands for one character.
@@ -59,29 +58,19 @@ public class ProfileLoader {
     }
 
     /**
-     * Loads all {@link ActionProfile}s defined for {@code charName}.
+     * Parses all {@link ActionProfile}s from the provided character profile text.
      *
-     * <p>Reads {@code profiles/<charName>.txt}, parsing blocks delimited by
-     * {@code PROFILE: <name>} headers.  Lines that are blank or contain only
-     * whitespace are ignored.  If the file does not exist or contains no valid
-     * profiles, a single fallback profile is returned.
+     * <p>Blocks are delimited by {@code PROFILE: <name>} headers. Lines that are
+     * blank or contain only whitespace are ignored. If the source contains no
+     * valid profiles, a single fallback profile is returned.
      *
-     * @param charName the character name used to locate the profile file
+     * @param reader source containing profile definitions
      * @return a non-empty list of {@link ActionProfile}s; never {@code null}
      */
-    public static List<ActionProfile> loadProfiles(String charName) {
+    public static List<ActionProfile> loadProfiles(Reader reader) {
         List<ActionProfile> profiles = new ArrayList<>();
-        File file = new File("profiles/" + charName + ".txt");
 
-        if (!file.exists()) {
-            // Return default "Skill Only" if no file found
-            List<ProfileAction> acts = new ArrayList<>();
-            acts.add(ProfileAction.SKILL);
-            profiles.add(new ActionProfile("Default(Skill)", acts));
-            return profiles;
-        }
-
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader br = new BufferedReader(reader)) {
             String line;
             String currentName = null;
             List<ProfileAction> currentActions = new ArrayList<>();
@@ -112,11 +101,17 @@ public class ProfileLoader {
 
         // Ensure at least one profile
         if (profiles.isEmpty()) {
-            List<ProfileAction> acts = new ArrayList<>();
-            acts.add(ProfileAction.SKILL);
-            profiles.add(new ActionProfile("Fallback", acts));
+            return defaultSkillFallback(FALLBACK_PROFILE_NAME);
         }
 
+        return profiles;
+    }
+
+    public static List<ActionProfile> defaultSkillFallback(String profileName) {
+        List<ActionProfile> profiles = new ArrayList<>();
+        List<ProfileAction> acts = new ArrayList<>();
+        acts.add(ProfileAction.SKILL);
+        profiles.add(new ActionProfile(profileName, acts));
         return profiles;
     }
 }
