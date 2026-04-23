@@ -14,9 +14,10 @@
 ## Coupling and dependencies
 - `RLServer` depends on `simulation.CombatSimulator`, `model.entity.Character`, `visualization.HtmlReportGenerator`, `visualization.VisualLogger`, and optimization classes such as `RotationSearcher` and `ProfileLoader.ActionProfile`.
 - `sample.RunRL` is the main entry point that creates the simulator factory and passes `FlinsParty2Rotation.build()` into `RLServer`.
-- State vector layout and action ID mapping are effectively part of the Python-side contract in `rl_optimization/`.
+- State vector layout, action ID mapping, and profile action mapping are effectively part of the Python-side contract in `rl_optimization/`.
 
 ## Agent guidance
 - Treat state vector order, action IDs, and teacher-forcing assumptions as protocol-level behavior. Changing them requires coordinated Python-side updates.
 - Keep RL-only shortcuts such as zero-cost initial alignment isolated from normal simulator flow.
 - If you change reward or action validation logic, verify both training mode and `RESET_WITH_REPORT` behavior.
+- Keep RL boundary translation explicit. Do not leak Python action IDs or profile-file labels into core simulator control flow.

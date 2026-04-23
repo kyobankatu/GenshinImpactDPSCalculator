@@ -5,7 +5,7 @@
 
 ## Directory role
 - This package implements concrete artifact set behavior on top of `model.entity.ArtifactSet`.
-- These classes combine static stats with event-driven set effects.
+- These classes combine static stats with explicitly opted-in event-driven set effects.
 
 ## Java files in this directory
 - `AubadeOfMorningstarAndMoon.java`: custom Lunar set that changes off-field and switch-in Lunar reaction bonuses based on Moonsign state.
@@ -17,11 +17,13 @@
 
 ## Coupling and dependencies
 - All classes extend `model.entity.ArtifactSet`.
+- Event-driven behavior is exposed through focused capability interfaces such as `ReactionAwareArtifact`, `DamageTriggeredArtifactEffect`, `SwitchAwareArtifact`, and `BurstTriggeredArtifactEffect`.
 - Most set effects depend on `simulation.CombatSimulator`, `mechanics.buff.Buff` or `SimpleBuff`, and `model.type.StatType`.
 - Lunar sets depend on `simulation.CombatSimulator.Moonsign` and custom Lunar reaction naming.
-- `ViridescentVenerer` depends on `mechanics.reaction.ReactionResult` naming conventions for swirl elements.
+- `ViridescentVenerer` should use typed `mechanics.reaction.ReactionResult` metadata for swirl behavior rather than parsing display labels.
 
 ## Agent guidance
-- Before changing a set bonus, verify which hook it uses: passive stat application, burst hook, reaction hook, switch hook, or damage hook.
-- Pay attention to refresh versus stacking semantics. Several sets manage uniqueness manually through buff names.
-- If you add a new set, prefer fitting it into existing `ArtifactSet` hooks instead of expanding the base API unless required.
+- Before changing a set bonus, verify which capability it uses: passive stat application, burst-triggered, reaction-aware, switch-aware, or damage-triggered.
+- Pay attention to refresh versus stacking semantics. Logic-bearing artifact buffs should use typed `BuffId` values for replacement and lookup.
+- If you add a new event-driven set, implement the narrowest existing artifact capability interface instead of expanding `ArtifactSet`.
+- If a set needs no runtime hook, keep it as plain `ArtifactSet` stats plus `applyPassive`.

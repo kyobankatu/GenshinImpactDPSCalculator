@@ -11,12 +11,13 @@
 - None. Read the relevant child package for actual implementations.
 
 ## Coupling and dependencies
-- `model.entity` provides the main abstract bases used by nearly every package.
+- `model.entity` provides the main abstract bases plus focused capability interfaces used by runtime dispatch.
 - `model.character`, `model.weapon`, and `model.artifact` are the concrete game-content layers built on those bases.
-- `model.stats.StatsContainer` and `model.type.StatType` are foundational and widely referenced across the entire repo.
+- `model.stats.StatsContainer`, `model.type.StatType`, and `model.type.CharacterId` are foundational and widely referenced across the entire repo.
 - `mechanics.formula`, `simulation.CombatSimulator`, and the sample entry points all consume these models directly.
 
 ## Agent guidance
 - When changing a shared model class, audit downstream packages before editing.
 - Do not add content-specific logic to `model.type` or `model.stats`.
-- Prefer keeping reusable hooks on abstract base classes in `model.entity` and character- or item-specific behavior in the concrete subpackages.
+- Prefer focused capability interfaces in `model.entity` over adding optional no-op hooks to abstract base classes.
+- Keep display names for presentation and adapters; runtime-owned identity should use typed identifiers.

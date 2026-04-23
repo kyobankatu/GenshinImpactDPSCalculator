@@ -27,11 +27,12 @@
 
 ## Coupling and dependencies
 - All classes extend `model.entity.Weapon`.
-- Stateful passives depend on `simulation.CombatSimulator`, `simulation.action.AttackAction`, `mechanics.buff.Buff`, `mechanics.energy.EnergyManager`, or reaction-listener interfaces.
-- Weapon passives are applied during `Character` stat assembly and triggered via `Character.onAction` or `DamageCalculator` hit hooks.
+- Stateful passives depend on `simulation.CombatSimulator`, `simulation.action.AttackAction`, `mechanics.buff.Buff`, `mechanics.energy.EnergyManager`, or focused capability interfaces such as action-triggered, damage-triggered, switch-aware, team-buff, or reaction-listener behavior.
+- Weapon passives are applied during `Character` stat assembly and triggered via typed action dispatch or `DamageCalculator` hit hooks only when the weapon implements the relevant capability.
 - Several weapons depend on custom Lunar state or on names and timing established elsewhere in the simulator.
 
 ## Agent guidance
 - Before editing a weapon, confirm whether its passive is stat-only, action-triggered, damage-triggered, reaction-triggered, or switch-stateful.
 - Be cautious with randomness. Random procs can destabilize optimizer or RL behavior if introduced into heavily reused paths.
-- If a weapon grants team buffs, audit both `Weapon.getTeamBuffs` and `Character.getEffectiveStats` behavior to avoid recursive stat loops.
+- If a weapon grants team buffs, implement `WeaponTeamBuffProvider` and audit `Character.getEffectiveStats` behavior to avoid recursive stat loops.
+- Prefer implementing the narrowest capability interface instead of adding optional methods to `Weapon`.

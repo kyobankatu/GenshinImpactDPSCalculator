@@ -16,9 +16,10 @@
 ## Coupling and dependencies
 - These entry points depend on `simulation.CombatSimulator`, concrete `model.character`, `model.weapon`, and `model.artifact` classes, `mechanics.optimization`, `mechanics.analysis.StatsRecorder`, and `visualization.HtmlReportGenerator`.
 - `RunRL` additionally depends on `mechanics.rl`.
-- Rotation scripts in these files rely on stable action-string names in the character classes.
+- Rotation scripts in these files are boundary adapters: they may use display names or action labels, but simulator internals should resolve them to typed character IDs and action keys.
 
 ## Agent guidance
 - When validating a gameplay change, run the smallest affected sample entry point first.
-- If you change action names, cooldown expectations, or team composition assumptions, update these scripts as needed.
+- If you change action keys, boundary labels, cooldown expectations, or team composition assumptions, update these scripts as needed.
 - Keep these files explicit and readable. They serve as integration tests and usage documentation more than reusable library code.
+- Do not push sample display-name conventions deeper into runtime logic; adapt them at the sample or profile boundary.

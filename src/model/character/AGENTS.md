@@ -19,12 +19,14 @@
 
 ## Coupling and dependencies
 - All classes extend `model.entity.Character`.
-- Most characters depend on `mechanics.data.TalentDataManager`, `simulation.CombatSimulator`, `simulation.action.AttackAction`, `mechanics.energy.EnergyManager`, and `model.type` enums.
+- Most characters depend on inherited `mechanics.data.TalentDataSource` access, `simulation.CombatSimulator`, `simulation.action.AttackAction`, `simulation.action.CharacterActionRequest`, `mechanics.energy.EnergyManager`, and `model.type` enums.
 - Summon or periodic-damage characters depend on `simulation.event.PeriodicDamageEvent` or `SimpleTimerEvent`.
 - Custom Lunar characters depend on `simulation.CombatSimulator` Lunar state, `mechanics.buff`, `mechanics.reaction`, and Lunar-specific stats in `model.type.StatType`.
-- Several characters trigger artifact hooks implicitly by using simulator action flow rather than calling artifact logic themselves.
+- Several characters trigger artifact and weapon capability hooks implicitly by using simulator action flow rather than calling item logic themselves.
+- Characters have typed `CharacterId` identity; `name` is still used as a display label and as a CSV lookup key.
 
 ## Agent guidance
 - Character behavior often spans constructor data loading, `applyPassive`, `onAction`, cooldown helpers, periodic events, and listener registration. Audit the whole file before editing.
-- Keep simulator-facing action strings stable unless you also update sample rotations, RL code, or profile files that call them.
+- Keep simulator-facing action keys and boundary labels stable unless you also update sample rotations, RL code, or profile files that call them.
 - If you touch energy generation, burst activity windows, or snapshot behavior, re-check optimizer and report outputs.
+- Use typed action requests and character IDs for new runtime logic; only adapt strings at sample/profile/report boundaries.
