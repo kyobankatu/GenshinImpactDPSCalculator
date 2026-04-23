@@ -395,6 +395,39 @@ Document which packages are allowed to depend on:
 
 Target outcome: clearer dependency direction and less leakage of boundary concerns into combat logic.
 
+### Phase 5 Notes (completed 2026-04-15 JST)
+
+- Task 5.1: identified remaining boundary translation points
+  - profile file loading still needed to translate character identity into `profiles/<CharacterName>.txt`
+  - optimizer and RL profile commands still needed to translate file-format action strings into simulator action dispatch
+  - HTML report generation still needed to translate typed runtime state into display labels and DOM-safe keys
+  - sample scripts remain human-facing wiring and are allowed to use display names as adapter inputs
+- Task 5.2: moved parsing and translation into explicit boundary adapters or typed command objects
+  - added `mechanics/optimization/ProfileFileAdapter.java`
+    - owns the `CharacterId` to profile-file-name mapping
+    - keeps plain-text profile file conventions out of rotation search control flow
+  - added `mechanics/optimization/ProfileAction.java`
+    - parses profile action tokens once and maps them to typed `CharacterActionKey` values
+    - shared by optimizer profile loading and RL teacher rotations
+  - added `visualization/ReportViewAdapter.java`
+    - adapts `CharacterId`, stats snapshots, display names, and DOM keys for report rendering
+    - keeps report-facing labels out of core simulation logic
+  - introduced typed action dispatch payloads in `simulation/action/`
+    - `CharacterActionKey`
+    - `CharacterActionRequest`
+    - sample scripts and compatibility APIs can still adapt from human-facing labels, but runtime dispatch uses typed requests
+- Task 5.3: documented allowed boundary dependencies
+  - package-level and agent guidance now distinguish logic identity from display labels
+  - `sample` is allowed to use display names for explicit scripts
+  - `mechanics.optimization` owns profile file-format parsing through adapter/loader classes
+  - `visualization` owns report labels, display names, and DOM keys
+  - `simulation`, `mechanics`, and `model` guidance now directs new logic toward `CharacterId`, `CharacterActionKey`, `BuffId`, and typed reaction metadata instead of raw strings
+
+Verification:
+
+- Phase 5 was a boundary-structure and documentation cleanup, with no intended combat mechanic changes.
+- The Phase 5 completion note was backfilled after confirming the current code contains the expected adapter/typed-command artifacts.
+
 ## Recommended Execution Order
 
 1. Phase 0
