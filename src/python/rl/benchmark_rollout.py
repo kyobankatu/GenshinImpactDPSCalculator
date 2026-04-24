@@ -1,14 +1,15 @@
-import sys
+import argparse
 import time
 
 from rollout_service_client import RolloutServiceClient
 
 
 def main():
-    envs = int(sys.argv[1]) if len(sys.argv) > 1 else 4
-    steps = int(sys.argv[2]) if len(sys.argv) > 2 else 128
-    host = sys.argv[3] if len(sys.argv) > 3 else "127.0.0.1"
-    port = int(sys.argv[4]) if len(sys.argv) > 4 else 5005
+    args = parse_args()
+    envs = args.envs
+    steps = args.steps
+    host = args.host
+    port = args.port
 
     client = RolloutServiceClient(host, port)
     runner_id = client.create_runner(envs)
@@ -25,6 +26,15 @@ def main():
     print(f"Python benchmark: envs={envs} steps={envs * steps} duration={duration:.3f}s envSteps/s={(envs * steps) / duration:.1f}")
     client.close_runner(runner_id)
     client.close()
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Benchmark Python-side rollout throughput against the Java rollout service.")
+    parser.add_argument("--envs", type=int, default=4, help="number of vectorized environments")
+    parser.add_argument("--steps", type=int, default=128, help="number of batched steps to execute")
+    parser.add_argument("--host", default="127.0.0.1", help="rollout service host")
+    parser.add_argument("--port", type=int, default=5005, help="rollout service port")
+    return parser.parse_args()
 
 
 if __name__ == "__main__":

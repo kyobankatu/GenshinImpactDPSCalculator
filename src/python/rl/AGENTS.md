@@ -9,9 +9,9 @@
 - Python owns the recurrent PPO policy, optimizer, checkpointing, and evaluation control.
 
 ## Python files in this directory
-- `train_recurrent_ppo.py`: PyTorch-based recurrent PPO training entry point against the local Java rollout service.
-- `evaluate_policy.py`: deterministic evaluation entry point that loads a saved checkpoint and requests a Java HTML report.
-- `benchmark_rollout.py`: Python-side rollout throughput benchmark against the local Java rollout service.
+- `train_recurrent_ppo.py`: PyTorch-based recurrent PPO training entry point against the local Java rollout service. Use `--preset`, `--seed`, `--host`, and `--port`.
+- `evaluate_policy.py`: deterministic evaluation entry point that loads a saved checkpoint and requests a Java HTML report. Use `--checkpoint`, `--host`, and `--port`.
+- `benchmark_rollout.py`: Python-side rollout throughput benchmark against the local Java rollout service. Use `--envs`, `--steps`, `--host`, and `--port`.
 - `rollout_service_client.py`: local client for the Java rollout service and batched environment protocol.
 - `binary_protocol.py`: binary framing constants and read/write helpers shared by Python transport code.
 - `recurrent_ppo.py`: recurrent PPO model definition and GAE helper logic.

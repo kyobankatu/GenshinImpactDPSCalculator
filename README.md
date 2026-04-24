@@ -65,9 +65,9 @@ Start the local Java rollout service, then run Python training, evaluation, and 
 ```bash
 ./gradlew ServeRLJava
 ./gradlew BenchmarkRLJava
-python3 src/python/rl/train_recurrent_ppo.py debug
+python3 src/python/rl/train_recurrent_ppo.py --preset debug
 python3 src/python/rl/evaluate_policy.py
-python3 src/python/rl/benchmark_rollout.py
+python3 src/python/rl/benchmark_rollout.py --envs 4 --steps 128
 ```
 
 Training writes `output/recurrent_ppo_py/latest-model.pt` and `output/recurrent_ppo_py/training_log.csv`.

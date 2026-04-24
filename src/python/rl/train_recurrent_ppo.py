@@ -1,7 +1,7 @@
+import argparse
 import csv
 import os
 import random
-import sys
 import time
 
 import numpy as np
@@ -38,10 +38,11 @@ PRESETS = {
 
 
 def main():
-    preset = sys.argv[1] if len(sys.argv) > 1 else "debug"
-    seed = int(sys.argv[2]) if len(sys.argv) > 2 else 1234
-    host = sys.argv[3] if len(sys.argv) > 3 else "127.0.0.1"
-    port = int(sys.argv[4]) if len(sys.argv) > 4 else 5005
+    args = parse_args()
+    preset = args.preset
+    seed = args.seed
+    host = args.host
+    port = args.port
 
     config = PRESETS[preset]
     os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -159,6 +160,15 @@ def main():
 
     print(f"Saved checkpoint to {MODEL_PATH}")
     print(f"Saved training log to {TRAIN_LOG_PATH}")
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Train the PyTorch recurrent PPO learner against the Java rollout service.")
+    parser.add_argument("--preset", choices=sorted(PRESETS.keys()), default="debug", help="training preset to use")
+    parser.add_argument("--seed", type=int, default=1234, help="random seed")
+    parser.add_argument("--host", default="127.0.0.1", help="rollout service host")
+    parser.add_argument("--port", type=int, default=5005, help="rollout service port")
+    return parser.parse_args()
 
 
 def train_epoch(policy, optimizer, samples, config, device):

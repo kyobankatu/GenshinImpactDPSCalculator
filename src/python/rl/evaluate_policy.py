@@ -1,5 +1,5 @@
+import argparse
 import os
-import sys
 
 import torch
 
@@ -11,9 +11,10 @@ MODEL_PATH = "output/recurrent_ppo_py/latest-model.pt"
 
 
 def main():
-    checkpoint = sys.argv[1] if len(sys.argv) > 1 else MODEL_PATH
-    host = sys.argv[2] if len(sys.argv) > 2 else "127.0.0.1"
-    port = int(sys.argv[3]) if len(sys.argv) > 3 else 5005
+    args = parse_args()
+    checkpoint = args.checkpoint
+    host = args.host
+    port = args.port
 
     if not os.path.exists(checkpoint):
         raise SystemExit(f"Checkpoint not found: {checkpoint}")
@@ -49,6 +50,14 @@ def main():
     finally:
         client.close_runner(runner_id)
         client.close()
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Evaluate a saved PyTorch recurrent PPO checkpoint against the Java rollout service.")
+    parser.add_argument("--checkpoint", default=MODEL_PATH, help="path to the saved .pt checkpoint")
+    parser.add_argument("--host", default="127.0.0.1", help="rollout service host")
+    parser.add_argument("--port", type=int, default=5005, help="rollout service port")
+    return parser.parse_args()
 
 
 if __name__ == "__main__":

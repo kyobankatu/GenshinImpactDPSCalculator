@@ -23,7 +23,7 @@
 - Run another sample simulation: `./gradlew FlinsParty`
 - Start the local Java rollout service: `./gradlew ServeRLJava`
 - Benchmark vectorized Java rollout throughput: `./gradlew BenchmarkRLJava`
-- Run Python training from the repo root: `python3 src/python/rl/train_recurrent_ppo.py`
+- Run Python training from the repo root: `python3 src/python/rl/train_recurrent_ppo.py --preset debug`
 - Run Python evaluation from the repo root: `python3 src/python/rl/evaluate_policy.py`
 
 ## Development workflow
