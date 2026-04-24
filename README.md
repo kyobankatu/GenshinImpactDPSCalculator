@@ -23,7 +23,7 @@ The report shows a full combat simulation for a custom 4-character team (FlinsPa
 - **Artifact Optimization Pipeline**: Contains a two-phase optimizer (Energy Recharge calibration followed by DPS substat hill-climbing) to automatically find the optimal artifact stat distribution based on KQM standards.
 - **Custom Mechanics**: Includes an extensible framework for custom, non-canonical characters with completely original buffs and synergy mechanics.
 - **Interactive HTML Reports**: Automatically generates visual timeline records, pie charts for damage contribution, and character stat snapshots via Chart.js.
-- **Java-Native RL Integration**: Experimental in-process reinforcement learning utilities for optimizing combat rotations without Python/Java socket overhead.
+- **Hybrid RL Stack**: Experimental Java rollout service plus Python recurrent PPO learner for optimizing combat rotations without per-step Python/Java overhead.
 
 ## Requirements
 
@@ -59,15 +59,18 @@ Generate the technical documentation for the core classes:
 ```
 The documentation will be generated in the `build/docs/javadoc/` folder. Open `index.html` in your browser.
 
-### 4. Run Java-Native RL
-Train and evaluate the experimental Java-native RL policy:
+### 4. Run The Hybrid RL Stack
+Start the local Java rollout service, then run Python training, evaluation, and optional benchmarking:
 
 ```bash
-./gradlew TrainRLJava
-./gradlew EnjoyRLJava
+./gradlew ServeRLJava
+./gradlew BenchmarkRLJava
+python3 src/python/rl/train_recurrent_ppo.py debug
+python3 src/python/rl/evaluate_policy.py
+python3 src/python/rl/benchmark_rollout.py
 ```
 
-Training writes `output/java_rl_policy.csv` and `output/java_rl_training_log.csv`.
+Training writes `output/recurrent_ppo_py/latest-model.pt` and `output/recurrent_ppo_py/training_log.csv`.
 Evaluation generates `output/rl_report.html`.
 
 ## Architecture
@@ -77,4 +80,4 @@ Evaluation generates `output/rl_report.html`.
 3. **CombatSimulator**: The core driver. Tracks time, manages the event queue (attacks, swaps, periodic ticks), ICD counters, and active buffs.
 4. **DamageCalculator**: Pure mathematical functions utilizing `StatsContainer` snapshots to resolve exactly how much damage a hit deals, including special non-canonical branches.
 5. **VisualLogger / HtmlReportGenerator**: Records all events for debugging and spits out a graphical HTML report upon simulation completion.
-6. **Java-Native RL**: Runs an in-process RL environment directly against `CombatSimulator`, with fixed action/state contracts and inspectable policy artifacts.
+6. **Hybrid RL Stack**: Keeps environment stepping in Java near `CombatSimulator` while a Python recurrent PPO learner communicates through a local binary batch protocol.

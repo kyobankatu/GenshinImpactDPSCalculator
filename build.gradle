@@ -13,7 +13,7 @@ repositories {
 sourceSets {
     main {
         java {
-            srcDirs = ['src']
+            srcDirs = ['src/java']
         }
     }
 }
@@ -37,19 +37,19 @@ tasks.withType(Javadoc).configureEach {
     options.memberLevel = JavadocMemberLevel.PRIVATE
 }
 
-// Java-native RL tasks
-tasks.register("TrainRLJava", JavaExec) {
+// Java rollout service / benchmark tasks
+tasks.register("ServeRLJava", JavaExec) {
     group = "RL"
-    description = "Runs Java-native RL training in-process."
+    description = "Starts the local Java rollout service for the Python learner."
     classpath = sourceSets.main.runtimeClasspath
-    mainClass = "sample.TrainRLJava"
+    mainClass = "sample.ServeRLJava"
 }
 
-tasks.register("EnjoyRLJava", JavaExec) {
+tasks.register("BenchmarkRLJava", JavaExec) {
     group = "RL"
-    description = "Runs the saved Java-native RL policy for one episode and generates output/rl_report.html."
+    description = "Benchmarks vectorized Java rollout throughput."
     classpath = sourceSets.main.runtimeClasspath
-    mainClass = "sample.EnjoyRLJava"
+    mainClass = "sample.BenchmarkRLJava"
 }
 
 // Add a dynamic rule that allows running 'gradlew ClassName'
