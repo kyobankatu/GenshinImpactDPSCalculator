@@ -17,6 +17,11 @@ public class ObservationEncoder {
 
     public double[] encode(CombatSimulator sim, EpisodeConfig config, double lastSwapTime) {
         double[] observation = new double[OBSERVATION_SIZE];
+        fillObservation(sim, config, lastSwapTime, observation);
+        return observation;
+    }
+
+    public void fillObservation(CombatSimulator sim, EpisodeConfig config, double lastSwapTime, double[] observation) {
         double now = sim.getCurrentTime();
         int index = 0;
 
@@ -44,8 +49,6 @@ public class ObservationEncoder {
         observation[index++] = normalizedAura(enemy, Element.ELECTRO);
         observation[index++] = normalizedAura(enemy, Element.ANEMO);
         observation[index] = sim.getThundercloudEndTime() > now ? 1.0 : 0.0;
-
-        return observation;
     }
 
     private boolean isBurstActive(Character character, double currentTime) {

@@ -13,7 +13,7 @@ except ImportError:
     wandb = None
 
 from recurrent_ppo import RecurrentPolicy, compute_advantages
-from rollout_service_client import RolloutServiceClient
+from rollout_service_client import build_rollout_client
 
 
 OUTPUT_DIR = "output/recurrent_ppo_py"
@@ -49,6 +49,7 @@ def main():
     seed = args.seed
     host = args.host
     port = args.port
+    ports = args.ports
 
     config = resolve_config(args)
     os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -57,7 +58,7 @@ def main():
     torch.manual_seed(seed)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    client = RolloutServiceClient(host, port)
+    client = build_rollout_client(host=host, port=port, ports=ports)
     runner_id = client.create_runner(config["envs"])
     observations, action_masks = client.reset_runner(runner_id, False)
 
@@ -265,6 +266,7 @@ def parse_args():
     parser.add_argument("--seed", type=int, default=1234, help="random seed")
     parser.add_argument("--host", default="127.0.0.1", help="rollout service host")
     parser.add_argument("--port", type=int, default=5005, help="rollout service port")
+    parser.add_argument("--ports", default=None, help="comma-separated rollout service ports for multi-service fan-out")
     parser.add_argument("--updates", type=int, help="number of PPO updates")
     parser.add_argument("--rollout-length", type=int, help="steps collected per environment before each PPO update")
     parser.add_argument("--envs", type=int, help="number of vectorized environments")

@@ -1,5 +1,6 @@
 package sample;
 
+import mechanics.rl.BattleEnvironment;
 import mechanics.rl.EpisodeConfig;
 import mechanics.rl.bridge.VectorizedEnvironment;
 import mechanics.rl.FlinsParty2RLSimulatorFactory;
@@ -29,5 +30,7 @@ public class BenchmarkRLJava {
         System.out.printf("Java rollout benchmark: envs=%d steps=%d duration=%dms envSteps/s=%.1f%n",
                 environments, environments * steps, durationMillis, envStepsPerSecond);
         System.out.println("Java rollout metrics: " + environment.metricsSnapshot().toSummaryString());
+        System.out.println("Battle environment metrics: " + BattleEnvironment.timingSnapshot().toSummaryString());
+        environment.close();
     }
 }

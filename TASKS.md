@@ -1,107 +1,92 @@
-# RL Deterministic Improvement Tasks
+# Rollout Throughput Improvement Tasks
 
 ## Goal
 
-Raise final policy quality with emphasis on deterministic evaluation.
+Increase Java-side rollout throughput without breaking training quality.
 
-The current system already trains successfully, but the main failure mode is now clear:
+The current learner is already fast enough relative to rollout collection.
+The next major improvement target is the Java environment execution path.
 
-- stochastic evaluation can reach strong damage
-- deterministic evaluation collapses to a weaker fixed action pattern
-- the learned policy underuses important swap actions when evaluated with argmax
+## Current Situation
 
-So the next work is focused on converting "good stochastic behavior" into
-"good deterministic behavior".
+- Python optimization is much cheaper than rollout collection
+- rollout timing is stable but still dominates update wall time
+- deterministic policy quality has improved enough that throughput work is now worth prioritizing
+- the main remaining systems question is how to make Java rollout significantly faster
 
-## Current Diagnosis
+## Work Plan
 
-Based on the latest runs:
+### Phase 1: Verify Whether `VectorizedEnvironment.step()` Is Effectively Sequential
 
-- deterministic evaluation overuses `ATTACK`
-- deterministic evaluation almost never swaps to `INEFFA` or `SUCROSE`
-- stochastic evaluation uses those swaps and reaches much higher damage
-- rollout throughput is stable enough for experimentation
-- the immediate bottleneck for quality is not basic system functionality
-- the immediate bottleneck for quality is policy collapse toward a weak deterministic branch
+- Inspect the current implementation of:
+  - `VectorizedEnvironment.step()`
+  - `VectorizedEnvironment.reset()`
+- Confirm whether multiple environments are:
+  - executed sequentially in one thread
+  - or actually parallelized across worker threads
+- If execution is sequential, document that as the first confirmed bottleneck.
+- Deliverable:
+  - a clear statement of whether vectorization is only batching or true parallelism
 
-## Phase 1: Preserve The Diagnosis Tooling
+### Phase 2: Profile `BattleEnvironment.step()` Hot Paths
 
-- Keep deterministic and stochastic evaluation separated.
-- Keep action-fraction metrics in `wandb` for:
-  - deterministic evaluation
-  - stochastic evaluation
-- Keep Java-side rollout timing visible.
-- Keep all major training knobs controllable from `execute.sh`.
+- Use Java profiling and timing to identify the dominant cost inside rollout steps.
+- Focus profiling on:
+  - `BattleEnvironment.step()`
+  - action execution
+  - observation encoding
+  - action-mask generation
+  - combat simulator stepping
+- Preferred tools:
+  - existing lightweight timing already in the repo
+  - JFR if available in the runtime environment
+  - async-profiler if available later
+- Deliverable:
+  - a ranked list of the hottest methods in step execution
 
-## Phase 2: Add Exploration-To-Exploitation Scheduling
+### Phase 3: Reduce Allocation Pressure In Hot Loops
 
-- Add explicit entropy scheduling to training.
-- Early training should keep exploration strong enough to discover support rotations.
-- Later training should reduce exploration so the policy sharpens into a stronger deterministic path.
-- The schedule must be controllable from CLI and therefore from `execute.sh`.
-- Minimum support:
-  - entropy start coefficient
-  - entropy final coefficient
-  - schedule progress tracked by update index
+- Audit per-step allocation in:
+  - observation creation
+  - action mask creation
+  - action result creation
+  - intermediate collections or temporary objects
+- Prioritize removing:
+  - repeated `List` creation
+  - repeated `Map` creation
+  - avoidable array allocation
+  - avoidable boxing/unboxing
+- Prefer:
+  - reusable primitive buffers
+  - worker-local reusable arrays
+  - fewer temporary wrapper objects in the hot path
+- Deliverable:
+  - lower allocation rate and lower GC pressure during rollout
 
-## Phase 3: Expose The Active Training Schedule In Metrics
+### Phase 4: Add Multi-Service Rollout Scaling If Needed
 
-- Log the currently applied entropy coefficient every update.
-- Make it visible in:
-  - stdout
-  - CSV training log
-  - `wandb`
-- Goal:
-  - correlate deterministic improvement or collapse with schedule progress
-
-## Phase 4: Make Batch Profiles Match The New Strategy
-
-- Keep at least two batch profiles:
-  - `diagnosis`
-  - `full`
-- Both profiles should use:
-  - smaller rollout chunks than the original long-rollout setting
-  - more updates overall
-  - stronger early exploration than before
-  - lower effective exploitation noise later in training
-- The profile must not require Python source edits.
-
-## Phase 5: Validate That Deterministic Policy Actually Improves
-
-- Success is not:
-  - train damage going up alone
-  - stochastic evaluation going up alone
-- Success is:
-  - deterministic damage rising materially
-  - deterministic action fractions becoming less attack-dominated
-  - deterministic swaps to key support characters appearing when beneficial
-
-## Key Metrics To Watch
-
-- `eval_det/damage`
-- `eval_det/steps`
-- `eval_det/action_fraction_0`
-- `eval_det/action_fraction_4`
-- `eval_det/action_fraction_6`
-- `eval_stochastic/damage`
-- `train/entropy`
-- `train/entropy_coefficient`
-- `train/approx_kl`
-- `train/clip_fraction`
+- Only after Phases 1 to 3 are measured and partially optimized, evaluate process-level scaling.
+- Candidate design:
+  - multiple Java rollout service processes
+  - separate ports per service
+  - Python-side fan-out across services
+- Use this only if:
+  - a single service process remains CPU-bound
+  - in-process optimizations are not enough
+- Deliverable:
+  - a scaling design that can exceed single-process rollout throughput
 
 ## Acceptance Criteria
 
-This improvement pass is complete only when all of the following are true:
+This rollout-speed pass is complete only when:
 
-- entropy scheduling is implemented
-- entropy schedule is configurable from CLI
-- `execute.sh` controls the schedule without Python edits
-- `wandb` shows the active entropy coefficient over time
-- deterministic action fractions are still logged
-- at least one run shows deterministic damage improving beyond the current weak fixed branch
+- we know whether vectorization is sequential or parallel
+- we have profiling evidence for the hottest rollout methods
+- at least one meaningful allocation reduction has been implemented
+- we have a decision on whether multi-service rollout is necessary
 
 ## Notes
 
-- The main current problem is not lack of stochastic competence.
-- The main current problem is failure to consolidate good behavior into deterministic action selection.
-- Do not remove the existing diagnostic metrics while iterating on the schedule.
+- Do not optimize Python first; rollout is the dominant cost.
+- Do not jump to multi-process rollout before measuring the single-process bottleneck properly.
+- Keep deterministic/stochastic evaluation and current training diagnostics intact while optimizing throughput.

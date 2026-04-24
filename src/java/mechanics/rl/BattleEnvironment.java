@@ -1,5 +1,6 @@
 package mechanics.rl;
 
+import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Supplier;
 
 import model.entity.Character;
@@ -23,6 +24,17 @@ public class BattleEnvironment {
     private int previousActionId = -1;
     private int stepCount;
     private boolean generateReportOnDone;
+    private final double[] observationBuffer = new double[ObservationEncoder.OBSERVATION_SIZE];
+    private final double[] actionMaskBuffer = new double[ActionSpace.SIZE];
+    private final double[] preActionMaskBuffer = new double[ActionSpace.SIZE];
+
+    private static final LongAdder STEP_CALLS = new LongAdder();
+    private static final LongAdder STEP_NANOS = new LongAdder();
+    private static final LongAdder EXECUTE_NANOS = new LongAdder();
+    private static final LongAdder ENCODE_NANOS = new LongAdder();
+    private static final LongAdder MASK_NANOS = new LongAdder();
+    private static final LongAdder RESET_CALLS = new LongAdder();
+    private static final LongAdder RESET_NANOS = new LongAdder();
 
     public BattleEnvironment(Supplier<CombatSimulator> simulatorFactory, EpisodeConfig config) {
         this(simulatorFactory, config, new ActionSpace(), new ObservationEncoder(), new RewardFunction());
@@ -42,6 +54,7 @@ public class BattleEnvironment {
     }
 
     public ResetResult reset(boolean generateReport) {
+        long start = System.nanoTime();
         simulator = simulatorFactory.get();
         simulator.setLoggingEnabled(generateReport);
         if (generateReport) {
@@ -57,21 +70,26 @@ public class BattleEnvironment {
         stepCount = 0;
         generateReportOnDone = generateReport;
 
-        double[] observation = observationEncoder.encode(simulator, config, lastSwapTime);
-        double[] actionMask = actionSpace.createMask(simulator, lastSwapTime, config);
-        return new ResetResult(observation, actionMask);
+        fillObservationBuffer();
+        fillActionMaskBuffer();
+        RESET_CALLS.increment();
+        RESET_NANOS.add(System.nanoTime() - start);
+        return new ResetResult(observationBuffer, actionMaskBuffer);
     }
 
     public ActionResult step(int actionId) {
         ensureReset();
-        double[] preMask = actionSpace.createMask(simulator, lastSwapTime, config);
-        boolean validAction = actionSpace.isValid(actionId, preMask);
+        long stepStart = System.nanoTime();
+        fillPreActionMaskBuffer();
+        boolean validAction = actionSpace.isValid(actionId, preActionMaskBuffer);
 
         double timeBefore = simulator.getCurrentTime();
         double damageBefore = simulator.getTotalDamage();
 
         if (validAction) {
+            long executeStart = System.nanoTime();
             execute(actionId);
+            EXECUTE_NANOS.add(System.nanoTime() - executeStart);
         } else {
             simulator.advanceTime(config.failedActionTimeCost);
         }
@@ -98,9 +116,11 @@ public class BattleEnvironment {
             generateReportOnDone = false;
         }
 
-        double[] observation = observationEncoder.encode(simulator, config, lastSwapTime);
-        double[] actionMask = actionSpace.createMask(simulator, lastSwapTime, config);
-        return new ActionResult(observation, actionMask, reward, done, validAction, damageDelta,
+        fillObservationBuffer();
+        fillActionMaskBuffer();
+        STEP_CALLS.increment();
+        STEP_NANOS.add(System.nanoTime() - stepStart);
+        return new ActionResult(observationBuffer, actionMaskBuffer, reward, done, validAction, damageDelta,
                 simulator.getTotalDamage(), timeDelta, actionId, stepCount);
     }
 
@@ -141,6 +161,35 @@ public class BattleEnvironment {
         }
     }
 
+    private void fillObservationBuffer() {
+        long start = System.nanoTime();
+        observationEncoder.fillObservation(simulator, config, lastSwapTime, observationBuffer);
+        ENCODE_NANOS.add(System.nanoTime() - start);
+    }
+
+    private void fillActionMaskBuffer() {
+        long start = System.nanoTime();
+        actionSpace.fillMask(simulator, lastSwapTime, config, actionMaskBuffer);
+        MASK_NANOS.add(System.nanoTime() - start);
+    }
+
+    private void fillPreActionMaskBuffer() {
+        long start = System.nanoTime();
+        actionSpace.fillMask(simulator, lastSwapTime, config, preActionMaskBuffer);
+        MASK_NANOS.add(System.nanoTime() - start);
+    }
+
+    public static TimingSnapshot timingSnapshot() {
+        return new TimingSnapshot(
+                STEP_CALLS.sum(),
+                STEP_NANOS.sum(),
+                EXECUTE_NANOS.sum(),
+                ENCODE_NANOS.sum(),
+                MASK_NANOS.sum(),
+                RESET_CALLS.sum(),
+                RESET_NANOS.sum());
+    }
+
     /**
      * Reset return values.
      */
@@ -151,6 +200,42 @@ public class BattleEnvironment {
         public ResetResult(double[] observation, double[] actionMask) {
             this.observation = observation;
             this.actionMask = actionMask;
+        }
+    }
+
+    public static class TimingSnapshot {
+        public final long stepCalls;
+        public final long stepNanos;
+        public final long executeNanos;
+        public final long encodeNanos;
+        public final long maskNanos;
+        public final long resetCalls;
+        public final long resetNanos;
+
+        public TimingSnapshot(long stepCalls, long stepNanos, long executeNanos, long encodeNanos, long maskNanos,
+                long resetCalls, long resetNanos) {
+            this.stepCalls = stepCalls;
+            this.stepNanos = stepNanos;
+            this.executeNanos = executeNanos;
+            this.encodeNanos = encodeNanos;
+            this.maskNanos = maskNanos;
+            this.resetCalls = resetCalls;
+            this.resetNanos = resetNanos;
+        }
+
+        private double millis(long nanos) {
+            return nanos / 1_000_000.0;
+        }
+
+        public String toSummaryString() {
+            double meanStepMs = stepCalls == 0 ? 0.0 : millis(stepNanos) / stepCalls;
+            double meanResetMs = resetCalls == 0 ? 0.0 : millis(resetNanos) / resetCalls;
+            double executeShare = stepNanos == 0 ? 0.0 : executeNanos * 100.0 / stepNanos;
+            double encodeShare = stepNanos == 0 ? 0.0 : encodeNanos * 100.0 / stepNanos;
+            double maskShare = stepNanos == 0 ? 0.0 : maskNanos * 100.0 / stepNanos;
+            return String.format(
+                    "resetCalls=%d meanResetMs=%.3f stepCalls=%d meanStepMs=%.3f executeShare=%.1f%% encodeShare=%.1f%% maskShare=%.1f%%",
+                    resetCalls, meanResetMs, stepCalls, meanStepMs, executeShare, encodeShare, maskShare);
         }
     }
 }

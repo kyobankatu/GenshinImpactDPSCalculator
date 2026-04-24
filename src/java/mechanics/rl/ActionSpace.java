@@ -11,6 +11,11 @@ public class ActionSpace {
 
     public double[] createMask(CombatSimulator sim, double lastSwapTime, EpisodeConfig config) {
         double[] mask = new double[SIZE];
+        fillMask(sim, lastSwapTime, config, mask);
+        return mask;
+    }
+
+    public void fillMask(CombatSimulator sim, double lastSwapTime, EpisodeConfig config, double[] mask) {
         Character active = sim.getActiveCharacter();
         double now = sim.getCurrentTime();
 
@@ -29,7 +34,6 @@ public class ActionSpace {
                     && swapReady;
             mask[action.getId()] = valid ? 1.0 : 0.0;
         }
-        return mask;
     }
 
     public boolean isValid(int actionId, double[] mask) {

@@ -1,7 +1,7 @@
 import argparse
 import time
 
-from rollout_service_client import RolloutServiceClient
+from rollout_service_client import build_rollout_client
 
 
 def main():
@@ -10,8 +10,9 @@ def main():
     steps = args.steps
     host = args.host
     port = args.port
+    ports = args.ports
 
-    client = RolloutServiceClient(host, port)
+    client = build_rollout_client(host=host, port=port, ports=ports)
     runner_id = client.create_runner(envs)
     observations, masks = client.reset_runner(runner_id, False)
     del observations, masks
@@ -34,6 +35,7 @@ def parse_args():
     parser.add_argument("--steps", type=int, default=128, help="number of batched steps to execute")
     parser.add_argument("--host", default="127.0.0.1", help="rollout service host")
     parser.add_argument("--port", type=int, default=5005, help="rollout service port")
+    parser.add_argument("--ports", default=None, help="comma-separated rollout service ports for multi-service fan-out")
     return parser.parse_args()
 
 

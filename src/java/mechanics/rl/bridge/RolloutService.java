@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import mechanics.rl.ActionSpace;
+import mechanics.rl.BattleEnvironment;
 import mechanics.rl.EpisodeConfig;
 import mechanics.rl.FlinsParty2RLSimulatorFactory;
 import mechanics.rl.ObservationEncoder;
@@ -109,12 +110,17 @@ public class RolloutService {
                     if (closed != null) {
                         System.out.printf("Closed runner %d: %s%n", closeRunnerId,
                                 closed.metricsSnapshot().toSummaryString());
+                        closed.close();
                     }
                     out.writeBoolean(true);
                     out.flush();
                     break;
                 case BatchProtocol.CMD_SHUTDOWN:
+                    for (VectorizedEnvironment vectorizedEnvironment : runners.values()) {
+                        vectorizedEnvironment.close();
+                    }
                     printServiceMetrics();
+                    System.out.println("Battle environment metrics: " + BattleEnvironment.timingSnapshot().toSummaryString());
                     out.writeBoolean(true);
                     out.flush();
                     return false;

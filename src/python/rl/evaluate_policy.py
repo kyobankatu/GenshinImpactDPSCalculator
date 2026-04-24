@@ -4,7 +4,7 @@ import os
 import torch
 
 from recurrent_ppo import RecurrentPolicy
-from rollout_service_client import RolloutServiceClient
+from rollout_service_client import build_rollout_client
 
 
 MODEL_PATH = "output/recurrent_ppo_py/latest-model.pt"
@@ -15,12 +15,13 @@ def main():
     checkpoint = args.checkpoint
     host = args.host
     port = args.port
+    ports = args.ports
     mode = args.mode
 
     if not os.path.exists(checkpoint):
         raise SystemExit(f"Checkpoint not found: {checkpoint}")
 
-    client = RolloutServiceClient(host, port)
+    client = build_rollout_client(host=host, port=port, ports=ports)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     policy, _ = RecurrentPolicy.load(checkpoint, map_location=device)
     policy = policy.to(device)
@@ -45,6 +46,7 @@ def parse_args():
     parser.add_argument("--checkpoint", default=MODEL_PATH, help="path to the saved .pt checkpoint")
     parser.add_argument("--host", default="127.0.0.1", help="rollout service host")
     parser.add_argument("--port", type=int, default=5005, help="rollout service port")
+    parser.add_argument("--ports", default=None, help="comma-separated rollout service ports for multi-service fan-out")
     parser.add_argument("--mode", choices=("deterministic", "stochastic", "both"), default="both", help="evaluation mode")
     return parser.parse_args()
 
