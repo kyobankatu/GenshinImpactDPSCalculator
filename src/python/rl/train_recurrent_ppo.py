@@ -49,7 +49,7 @@ def main():
     host = args.host
     port = args.port
 
-    config = PRESETS[preset]
+    config = resolve_config(args)
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     random.seed(seed)
     np.random.seed(seed)
@@ -201,12 +201,52 @@ def parse_args():
     parser.add_argument("--seed", type=int, default=1234, help="random seed")
     parser.add_argument("--host", default="127.0.0.1", help="rollout service host")
     parser.add_argument("--port", type=int, default=5005, help="rollout service port")
+    parser.add_argument("--updates", type=int, help="number of PPO updates")
+    parser.add_argument("--rollout-length", type=int, help="steps collected per environment before each PPO update")
+    parser.add_argument("--envs", type=int, help="number of vectorized environments")
+    parser.add_argument("--hidden-size", type=int, help="recurrent hidden size")
+    parser.add_argument("--ppo-epochs", type=int, help="number of PPO epochs per update")
+    parser.add_argument("--minibatch-size", type=int, help="minibatch size for PPO optimization")
+    parser.add_argument("--gamma", type=float, help="discount factor")
+    parser.add_argument("--gae-lambda", type=float, help="GAE lambda")
+    parser.add_argument("--clip-range", type=float, help="PPO clipping range")
+    parser.add_argument("--learning-rate", type=float, help="Adam learning rate")
+    parser.add_argument("--value-coefficient", type=float, help="value loss coefficient")
+    parser.add_argument("--entropy-coefficient", type=float, help="entropy bonus coefficient")
+    parser.add_argument("--max-grad-norm", type=float, help="gradient clipping max norm")
+    parser.add_argument("--checkpoint-interval", type=int, help="checkpoint save interval in updates")
+    parser.add_argument("--evaluation-interval", type=int, help="evaluation interval in updates")
     parser.add_argument("--wandb", action="store_true", help="enable Weights & Biases logging")
     parser.add_argument("--wandb-project", default="genshin-recurrent-ppo", help="Weights & Biases project name")
     parser.add_argument("--wandb-entity", default=None, help="Weights & Biases entity/team name")
     parser.add_argument("--wandb-run-name", default=None, help="Weights & Biases run name override")
     parser.add_argument("--wandb-mode", choices=("online", "offline", "disabled"), default="online", help="Weights & Biases mode")
     return parser.parse_args()
+
+
+def resolve_config(args):
+    config = dict(PRESETS[args.preset])
+    overrides = {
+        "updates": args.updates,
+        "rollout_length": args.rollout_length,
+        "envs": args.envs,
+        "hidden_size": args.hidden_size,
+        "ppo_epochs": args.ppo_epochs,
+        "minibatch_size": args.minibatch_size,
+        "gamma": args.gamma,
+        "gae_lambda": args.gae_lambda,
+        "clip_range": args.clip_range,
+        "learning_rate": args.learning_rate,
+        "value_coefficient": args.value_coefficient,
+        "entropy_coefficient": args.entropy_coefficient,
+        "max_grad_norm": args.max_grad_norm,
+        "checkpoint_interval": args.checkpoint_interval,
+        "evaluation_interval": args.evaluation_interval,
+    }
+    for key, value in overrides.items():
+        if value is not None:
+            config[key] = value
+    return config
 
 
 def init_wandb(args, config, client, device):
