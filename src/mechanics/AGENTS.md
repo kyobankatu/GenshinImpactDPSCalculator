@@ -15,7 +15,7 @@
 - `mechanics.*` depends heavily on `simulation.CombatSimulator`, `simulation.action.AttackAction`, and `model.*`.
 - `mechanics.formula.DamageCalculator` delegates standard and Lunar math to focused `DamageStrategy` implementations and notifies damage-trigger capability interfaces after damage is computed.
 - `mechanics.optimization` repeatedly creates simulators and runs full rotations, so small behavior changes in `simulation` or `model.character` can change optimizer output.
-- `mechanics.rl` is coupled to `sample.RunRL`, `simulation.CombatSimulator`, and `mechanics.optimization.ProfileLoader` and `RotationSearcher`.
+- `mechanics.rl` is coupled to `sample.TrainRLJava`, `sample.EnjoyRLJava`, `simulation.CombatSimulator`, and typed profile actions.
 - Logic-bearing identity should remain typed (`CharacterId`, `BuffId`, `ReactionResult.Kind` or `LunarType`) inside mechanics; strings should be treated as file-format or display-boundary data.
 
 ## Agent guidance

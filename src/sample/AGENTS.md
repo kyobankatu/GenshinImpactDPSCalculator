@@ -11,11 +11,12 @@
 - `FlinsParty.java`: sample simulation for a custom Lunar team using one artifact and weapon configuration set, optimizer pipeline, fixed scripted rotation, stat recording, and HTML reporting.
 - `FlinsParty2.java`: alternate custom Lunar team sample with a different gear configuration and longer Flins burst sequencing.
 - `RaidenParty.java`: Raiden National sample used as a conventional benchmark team with optimizer pipeline and scripted 21-second rotation.
-- `RunRL.java`: RL entry point that creates a fixed FlinsParty2-style simulator factory, skips optimizer variability, and starts the Java RL server.
+- `EnjoyRLJava.java`: Java-native RL evaluation entry point that loads a saved policy or falls back to the teacher policy and generates an RL report.
+- `TrainRLJava.java`: Java-native RL training entry point for the fixed FlinsParty2-style simulator.
 
 ## Coupling and dependencies
 - These entry points depend on `simulation.CombatSimulator`, concrete `model.character`, `model.weapon`, and `model.artifact` classes, `mechanics.optimization`, `mechanics.analysis.StatsRecorder`, and `visualization.HtmlReportGenerator`.
-- `RunRL` additionally depends on `mechanics.rl`.
+- `TrainRLJava` and `EnjoyRLJava` additionally depend on `mechanics.rl`.
 - Rotation scripts in these files are boundary adapters: they may use display names or action labels, but simulator internals should resolve them to typed character IDs and action keys.
 
 ## Agent guidance

@@ -3,23 +3,26 @@ package mechanics.rl;
 import java.util.List;
 
 import mechanics.optimization.ProfileAction;
+import model.type.CharacterId;
 
 /**
- * Represents one phase of a teacher rotation: a character name and the ordered
- * sequence of actions (SKILL, BURST, ATTACK, ATTACK_UNTIL_END) that character
- * must execute before the phase is considered complete.
+ * Represents one phase of a teacher rotation.
  */
 public class RotationPhase {
-    public final String charName;
+    public final CharacterId characterId;
     public final List<ProfileAction> actions;
 
-    public RotationPhase(String charName, List<ProfileAction> actions) {
-        this.charName = charName;
+    public RotationPhase(CharacterId characterId, List<ProfileAction> actions) {
+        this.characterId = characterId;
         this.actions = actions;
+    }
+
+    public RotationPhase(String charName, List<ProfileAction> actions) {
+        this(CharacterId.fromName(charName), actions);
     }
 
     @Override
     public String toString() {
-        return charName + actions;
+        return characterId.getDisplayName() + actions;
     }
 }

@@ -23,12 +23,11 @@ The report shows a full combat simulation for a custom 4-character team (FlinsPa
 - **Artifact Optimization Pipeline**: Contains a two-phase optimizer (Energy Recharge calibration followed by DPS substat hill-climbing) to automatically find the optimal artifact stat distribution based on KQM standards.
 - **Custom Mechanics**: Includes an extensible framework for custom, non-canonical characters with completely original buffs and synergy mechanics.
 - **Interactive HTML Reports**: Automatically generates visual timeline records, pie charts for damage contribution, and character stat snapshots via Chart.js.
-- **RL Integration**: Hooks for a Python-based Reinforcement Learning agent to optimize combat rotations via TCP.
+- **Java-Native RL Integration**: Experimental in-process reinforcement learning utilities for optimizing combat rotations without Python/Java socket overhead.
 
 ## Requirements
 
 - **Java 11 or higher**
-- *(Optional)* Python 3.x if running the experimental RL optimization module.
 
 ## Build and Run
 
@@ -60,6 +59,17 @@ Generate the technical documentation for the core classes:
 ```
 The documentation will be generated in the `build/docs/javadoc/` folder. Open `index.html` in your browser.
 
+### 4. Run Java-Native RL
+Train and evaluate the experimental Java-native RL policy:
+
+```bash
+./gradlew TrainRLJava
+./gradlew EnjoyRLJava
+```
+
+Training writes `output/java_rl_policy.csv` and `output/java_rl_training_log.csv`.
+Evaluation generates `output/rl_report.html`.
+
 ## Architecture
 
 1. **Party & Characters**: Defined in `/model/entity/` and `/model/character/`. Base stats, weapons, and artifact sets are assembled into a `Party`.
@@ -67,3 +77,4 @@ The documentation will be generated in the `build/docs/javadoc/` folder. Open `i
 3. **CombatSimulator**: The core driver. Tracks time, manages the event queue (attacks, swaps, periodic ticks), ICD counters, and active buffs.
 4. **DamageCalculator**: Pure mathematical functions utilizing `StatsContainer` snapshots to resolve exactly how much damage a hit deals, including special non-canonical branches.
 5. **VisualLogger / HtmlReportGenerator**: Records all events for debugging and spits out a graphical HTML report upon simulation completion.
+6. **Java-Native RL**: Runs an in-process RL environment directly against `CombatSimulator`, with fixed action/state contracts and inspectable policy artifacts.

@@ -21,7 +21,7 @@
 - `ArtifactOptimizer` depends on `model.stats.StatsContainer`, `model.type.StatType`, and `model.standards.KQMSConstants`.
 - `IterativeSimulator` depends on `simulation.CombatSimulator` factories and `mechanics.analysis.EnergyAnalyzer`.
 - `OptimizerPipeline` depends on `IterativeSimulator` and inspects `model.entity.Character` artifact roll state from a generated simulator.
-- `ProfileFileAdapter` owns file-format and display-name translation; `ProfileLoader` is consumed by `RotationSearcher` and `mechanics.rl.RLServer`.
+- `ProfileFileAdapter` owns file-format and display-name translation; `ProfileLoader` is consumed by `RotationSearcher`.
 - `RotationSearcher` depends on `simulation.CombatSimulator`, `model.entity.Character`, and `ProfileLoader.ActionProfile`.
 
 ## Agent guidance

@@ -37,26 +37,19 @@ tasks.withType(Javadoc).configureEach {
     options.memberLevel = JavadocMemberLevel.PRIVATE
 }
 
-// RL Tasks
-tasks.register("RunRL", JavaExec) {
+// Java-native RL tasks
+tasks.register("TrainRLJava", JavaExec) {
     group = "RL"
-    description = "Starts the Java RL server (port 5000). Run TrainRL or EnjoyRL in a separate terminal."
+    description = "Runs Java-native RL training in-process."
     classpath = sourceSets.main.runtimeClasspath
-    mainClass = "sample.RunRL"
+    mainClass = "sample.TrainRLJava"
 }
 
-tasks.register("TrainRL", Exec) {
+tasks.register("EnjoyRLJava", JavaExec) {
     group = "RL"
-    description = "Runs the Python PPO training script against the running RL server."
-    workingDir = file("rl_optimization")
-    commandLine "python", "train.py"
-}
-
-tasks.register("EnjoyRL", Exec) {
-    group = "RL"
-    description = "Runs the trained model for one episode and generates output/rl_report.html."
-    workingDir = file("rl_optimization")
-    commandLine "python", "enjoy.py"
+    description = "Runs the saved Java-native RL policy for one episode and generates output/rl_report.html."
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = "sample.EnjoyRLJava"
 }
 
 // Add a dynamic rule that allows running 'gradlew ClassName'
