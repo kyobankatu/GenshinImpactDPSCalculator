@@ -35,6 +35,7 @@ PRESETS = {
         "learning_rate": 3e-4,
         "value_coefficient": 0.5,
         "entropy_coefficient": 0.01,
+        "entropy_final_coefficient": 0.01,
         "max_grad_norm": 0.5,
         "checkpoint_interval": 2,
         "evaluation_interval": 2,
@@ -71,6 +72,7 @@ def main():
 
     try:
         for update in range(1, config["updates"] + 1):
+            entropy_coefficient = scheduled_entropy_coefficient(config, update)
             rollout_start = time.time()
             segments = [{"steps": [], "bootstrap_value": 0.0} for _ in range(config["envs"])]
             episode_rewards = []
@@ -130,7 +132,7 @@ def main():
             samples = compute_advantages(segments, config["gamma"], config["gae_lambda"])
             optimization_start = time.time()
             policy_loss, value_loss, entropy, approx_kl, clip_fraction, value_mean, log_prob_mean = train_epoch(
-                policy, optimizer, samples, config, device
+                policy, optimizer, samples, config, device, entropy_coefficient
             )
             optimization_duration = max(1e-6, time.time() - optimization_start)
 
@@ -172,13 +174,14 @@ def main():
                 "clip_fraction": clip_fraction,
                 "value_mean": value_mean,
                 "log_prob_mean": log_prob_mean,
+                "entropy_coefficient": entropy_coefficient,
                 "env_steps_per_second": env_steps_per_second,
                 "samples_per_second": samples_per_second,
                 "rollout_duration_sec": rollout_duration,
                 "optimization_duration_sec": optimization_duration,
             }
             print(
-                f"Update {update}: reward={mean_reward:.3f} damage={mean_damage:,.0f} steps={mean_episode_steps:.1f} invalid={invalid_rate:.3f} kl={approx_kl:.5f} clip={clip_fraction:.3f} policy={policy_loss:.5f} value={value_loss:.5f} envSteps/s={env_steps_per_second:.1f}"
+                f"Update {update}: reward={mean_reward:.3f} damage={mean_damage:,.0f} steps={mean_episode_steps:.1f} invalid={invalid_rate:.3f} kl={approx_kl:.5f} clip={clip_fraction:.3f} entropyCoef={entropy_coefficient:.5f} policy={policy_loss:.5f} value={value_loss:.5f} envSteps/s={env_steps_per_second:.1f}"
             )
             log_wandb(
                 run,
@@ -203,6 +206,7 @@ def main():
                     "train/clip_fraction": clip_fraction,
                     "train/value_mean": value_mean,
                     "train/log_prob_mean": log_prob_mean,
+                    "train/entropy_coefficient": entropy_coefficient,
                     "perf/env_steps_per_second": env_steps_per_second,
                     "perf/samples_per_second": samples_per_second,
                     "perf/rollout_duration_sec": rollout_duration,
@@ -272,7 +276,8 @@ def parse_args():
     parser.add_argument("--clip-range", type=float, help="PPO clipping range")
     parser.add_argument("--learning-rate", type=float, help="Adam learning rate")
     parser.add_argument("--value-coefficient", type=float, help="value loss coefficient")
-    parser.add_argument("--entropy-coefficient", type=float, help="entropy bonus coefficient")
+    parser.add_argument("--entropy-coefficient", type=float, help="starting entropy bonus coefficient")
+    parser.add_argument("--entropy-final-coefficient", type=float, help="final entropy bonus coefficient")
     parser.add_argument("--max-grad-norm", type=float, help="gradient clipping max norm")
     parser.add_argument("--checkpoint-interval", type=int, help="checkpoint save interval in updates")
     parser.add_argument("--evaluation-interval", type=int, help="evaluation interval in updates")
@@ -299,6 +304,7 @@ def resolve_config(args):
         "learning_rate": args.learning_rate,
         "value_coefficient": args.value_coefficient,
         "entropy_coefficient": args.entropy_coefficient,
+        "entropy_final_coefficient": args.entropy_final_coefficient,
         "max_grad_norm": args.max_grad_norm,
         "checkpoint_interval": args.checkpoint_interval,
         "evaluation_interval": args.evaluation_interval,
@@ -307,6 +313,14 @@ def resolve_config(args):
         if value is not None:
             config[key] = value
     return config
+
+
+def scheduled_entropy_coefficient(config, update):
+    start = config["entropy_coefficient"]
+    end = config.get("entropy_final_coefficient", start)
+    total_updates = max(1, config["updates"])
+    progress = 0.0 if total_updates <= 1 else (update - 1) / (total_updates - 1)
+    return start + (end - start) * progress
 
 
 def init_wandb(args, config, client, device):
@@ -343,7 +357,7 @@ def finish_wandb(run):
         wandb.finish()
 
 
-def train_epoch(policy, optimizer, samples, config, device):
+def train_epoch(policy, optimizer, samples, config, device, entropy_coefficient):
     if not samples:
         return 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 
@@ -382,7 +396,7 @@ def train_epoch(policy, optimizer, samples, config, device):
             clipped_surrogate = clipped_ratio * advantage
             policy_loss = -torch.minimum(surrogate, clipped_surrogate).mean()
             value_loss = 0.5 * (return_target - value).pow(2).mean()
-            total_loss = policy_loss + config["value_coefficient"] * value_loss - config["entropy_coefficient"] * entropy
+            total_loss = policy_loss + config["value_coefficient"] * value_loss - entropy_coefficient * entropy
             clip_fraction = (torch.abs(ratio - 1.0) > config["clip_range"]).float().mean()
             value_mean = value.mean()
             log_prob_mean = new_log_probability.mean()
@@ -494,6 +508,7 @@ def append_log(row):
                 "clip_fraction",
                 "value_mean",
                 "log_prob_mean",
+                "entropy_coefficient",
                 "env_steps_per_second",
                 "samples_per_second",
                 "rollout_duration_sec",
