@@ -48,7 +48,8 @@ stats_dump.txt
 # job file
 execute.sh
 
-# python virtual environment
+# python
+__pycache__/
 .venv/
 
 # bash file

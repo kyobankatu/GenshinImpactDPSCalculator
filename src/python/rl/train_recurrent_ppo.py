@@ -7,6 +7,11 @@ import time
 import numpy as np
 import torch
 
+try:
+    import wandb
+except ImportError:
+    wandb = None
+
 from recurrent_ppo import RecurrentPolicy, compute_advantages
 from rollout_service_client import RolloutServiceClient
 
@@ -58,6 +63,7 @@ def main():
     policy = RecurrentPolicy(client.observation_size, config["hidden_size"], client.action_size).to(device)
     optimizer = torch.optim.Adam(policy.parameters(), lr=config["learning_rate"])
     hidden_states = torch.zeros(config["envs"], config["hidden_size"], dtype=torch.float32, device=device)
+    run = init_wandb(args, config, client, device)
 
     print(
         f"Starting Python Recurrent PPO training: preset={preset} updates={config['updates']} envs={config['envs']} rollout={config['rollout_length']} device={device.type}"
@@ -145,11 +151,37 @@ def main():
             print(
                 f"Update {update}: reward={mean_reward:.3f} damage={mean_damage:,.0f} invalid={invalid_rate:.3f} policy={policy_loss:.5f} value={value_loss:.5f} envSteps/s={env_steps_per_second:.1f}"
             )
+            log_wandb(
+                run,
+                {
+                    "train/update": update,
+                    "train/samples": len(samples),
+                    "train/policy_loss": policy_loss,
+                    "train/value_loss": value_loss,
+                    "train/entropy": entropy,
+                    "train/mean_reward": mean_reward,
+                    "train/mean_damage": mean_damage,
+                    "train/invalid_action_rate": invalid_rate,
+                    "perf/env_steps_per_second": env_steps_per_second,
+                    "perf/samples_per_second": samples_per_second,
+                },
+                step=update,
+            )
 
             if update % config["evaluation_interval"] == 0 or update == config["updates"]:
                 summary = evaluate(policy, client, device)
                 print(
                     f"  Eval: reward={summary['reward']:.3f} damage={summary['damage']:,.0f} steps={summary['steps']} invalid={summary['invalid_actions']}"
+                )
+                log_wandb(
+                    run,
+                    {
+                        "eval/reward": summary["reward"],
+                        "eval/damage": summary["damage"],
+                        "eval/steps": summary["steps"],
+                        "eval/invalid_actions": summary["invalid_actions"],
+                    },
+                    step=update,
                 )
 
             if update % config["checkpoint_interval"] == 0 or update == config["updates"]:
@@ -157,6 +189,7 @@ def main():
     finally:
         client.close_runner(runner_id)
         client.close()
+        finish_wandb(run)
 
     print(f"Saved checkpoint to {MODEL_PATH}")
     print(f"Saved training log to {TRAIN_LOG_PATH}")
@@ -168,7 +201,46 @@ def parse_args():
     parser.add_argument("--seed", type=int, default=1234, help="random seed")
     parser.add_argument("--host", default="127.0.0.1", help="rollout service host")
     parser.add_argument("--port", type=int, default=5005, help="rollout service port")
+    parser.add_argument("--wandb", action="store_true", help="enable Weights & Biases logging")
+    parser.add_argument("--wandb-project", default="genshin-recurrent-ppo", help="Weights & Biases project name")
+    parser.add_argument("--wandb-entity", default=None, help="Weights & Biases entity/team name")
+    parser.add_argument("--wandb-run-name", default=None, help="Weights & Biases run name override")
+    parser.add_argument("--wandb-mode", choices=("online", "offline", "disabled"), default="online", help="Weights & Biases mode")
     return parser.parse_args()
+
+
+def init_wandb(args, config, client, device):
+    if not args.wandb:
+        return None
+    if wandb is None:
+        raise RuntimeError("wandb logging was requested, but the wandb package is not installed in the active Python environment.")
+    run_config = {
+        "preset": args.preset,
+        "seed": args.seed,
+        "host": args.host,
+        "port": args.port,
+        "device": device.type,
+        "observation_size": client.observation_size,
+        "action_size": client.action_size,
+    }
+    run_config.update(config)
+    return wandb.init(
+        project=args.wandb_project,
+        entity=args.wandb_entity,
+        name=args.wandb_run_name,
+        mode=args.wandb_mode,
+        config=run_config,
+    )
+
+
+def log_wandb(run, metrics, step):
+    if run is not None:
+        wandb.log(metrics, step=step)
+
+
+def finish_wandb(run):
+    if run is not None:
+        wandb.finish()
 
 
 def train_epoch(policy, optimizer, samples, config, device):

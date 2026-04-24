@@ -9,7 +9,7 @@
 - Python owns the recurrent PPO policy, optimizer, checkpointing, and evaluation control.
 
 ## Python files in this directory
-- `train_recurrent_ppo.py`: PyTorch-based recurrent PPO training entry point against the local Java rollout service. Use `--preset`, `--seed`, `--host`, and `--port`.
+- `train_recurrent_ppo.py`: PyTorch-based recurrent PPO training entry point against the local Java rollout service. Use `--preset`, `--seed`, `--host`, `--port`, and optional `--wandb*` flags for Weights & Biases logging.
 - `evaluate_policy.py`: deterministic evaluation entry point that loads a saved checkpoint and requests a Java HTML report. Use `--checkpoint`, `--host`, and `--port`.
 - `benchmark_rollout.py`: Python-side rollout throughput benchmark against the local Java rollout service. Use `--envs`, `--steps`, `--host`, and `--port`.
 - `rollout_service_client.py`: local client for the Java rollout service and batched environment protocol.
@@ -20,6 +20,7 @@
 - These scripts depend on the Java rollout service started by `sample.ServeRLJava`.
 - `rollout_service_client.py` must stay consistent with `src/java/mechanics/rl/bridge/`.
 - `recurrent_ppo.py` depends on `.venv` providing `torch` and `numpy`.
+- `train_recurrent_ppo.py --wandb` additionally depends on `.venv` providing `wandb`.
 - Output artifacts are written under `output/recurrent_ppo_py/` and `output/rl_report.html`.
 
 ## Agent guidance
