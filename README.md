@@ -63,6 +63,7 @@ The documentation will be generated in the `build/docs/javadoc/` folder. Open `i
 Start the local Java rollout service, then run Python training, evaluation, and optional benchmarking:
 
 ```bash
+python3 -m pip install -r requirements.txt
 ./gradlew ServeRLJava
 ./gradlew BenchmarkRLJava
 python3 src/python/rl/train_recurrent_ppo.py --preset debug
