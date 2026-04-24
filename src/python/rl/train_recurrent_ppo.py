@@ -75,7 +75,9 @@ def main():
             segments = [{"steps": [], "bootstrap_value": 0.0} for _ in range(config["envs"])]
             episode_rewards = []
             episode_damages = []
+            episode_steps = []
             invalid_actions = 0
+            damage_delta_sum = 0.0
 
             for _ in range(config["rollout_length"]):
                 obs_tensor = torch.tensor(observations, dtype=torch.float32, device=device)
@@ -104,9 +106,11 @@ def main():
                     )
                     if not batch["valid_actions"][env_index]:
                         invalid_actions += 1
+                    damage_delta_sum += batch["damage_deltas"][env_index]
                     if batch["dones"][env_index]:
                         episode_rewards.append(batch["episode_rewards"][env_index])
                         episode_damages.append(batch["episode_damages"][env_index])
+                        episode_steps.append(batch["episode_steps"][env_index])
                         hidden_states[env_index].zero_()
                     else:
                         hidden_states[env_index] = action_output["hidden"][env_index]
@@ -124,15 +128,28 @@ def main():
                 segments[env_index]["bootstrap_value"] = bootstrap_values[env_index]
 
             samples = compute_advantages(segments, config["gamma"], config["gae_lambda"])
-            policy_loss, value_loss, entropy = train_epoch(policy, optimizer, samples, config, device)
+            optimization_start = time.time()
+            policy_loss, value_loss, entropy, approx_kl, clip_fraction, value_mean, log_prob_mean = train_epoch(
+                policy, optimizer, samples, config, device
+            )
+            optimization_duration = max(1e-6, time.time() - optimization_start)
 
             duration = max(1e-6, time.time() - rollout_start)
+            rollout_duration = max(1e-6, duration - optimization_duration)
             steps = config["envs"] * config["rollout_length"]
             env_steps_per_second = steps / duration
             samples_per_second = len(samples) / duration
             mean_reward = sum(episode_rewards) / len(episode_rewards) if episode_rewards else 0.0
             mean_damage = sum(episode_damages) / len(episode_damages) if episode_damages else 0.0
+            mean_episode_steps = sum(episode_steps) / len(episode_steps) if episode_steps else 0.0
             invalid_rate = invalid_actions / max(1, steps)
+            mean_damage_delta = damage_delta_sum / max(1, steps)
+            completed_episodes = len(episode_rewards)
+            max_damage = max(episode_damages) if episode_damages else 0.0
+            min_damage = min(episode_damages) if episode_damages else 0.0
+            max_episode_steps = max(episode_steps) if episode_steps else 0
+            min_episode_steps = min(episode_steps) if episode_steps else 0
+            valid_action_rate = 1.0 - invalid_rate
 
             append_log(
                 {
@@ -143,13 +160,27 @@ def main():
                     "entropy": entropy,
                     "mean_reward": mean_reward,
                     "mean_damage": mean_damage,
+                    "mean_episode_steps": mean_episode_steps,
+                    "mean_damage_delta": mean_damage_delta,
+                    "completed_episodes": completed_episodes,
+                    "max_damage": max_damage,
+                    "min_damage": min_damage,
+                    "max_episode_steps": max_episode_steps,
+                    "min_episode_steps": min_episode_steps,
                     "invalid_action_rate": invalid_rate,
+                    "valid_action_rate": valid_action_rate,
+                    "approx_kl": approx_kl,
+                    "clip_fraction": clip_fraction,
+                    "value_mean": value_mean,
+                    "log_prob_mean": log_prob_mean,
                     "env_steps_per_second": env_steps_per_second,
                     "samples_per_second": samples_per_second,
+                    "rollout_duration_sec": rollout_duration,
+                    "optimization_duration_sec": optimization_duration,
                 }
             )
             print(
-                f"Update {update}: reward={mean_reward:.3f} damage={mean_damage:,.0f} invalid={invalid_rate:.3f} policy={policy_loss:.5f} value={value_loss:.5f} envSteps/s={env_steps_per_second:.1f}"
+                f"Update {update}: reward={mean_reward:.3f} damage={mean_damage:,.0f} steps={mean_episode_steps:.1f} invalid={invalid_rate:.3f} kl={approx_kl:.5f} clip={clip_fraction:.3f} policy={policy_loss:.5f} value={value_loss:.5f} envSteps/s={env_steps_per_second:.1f}"
             )
             log_wandb(
                 run,
@@ -161,9 +192,23 @@ def main():
                     "train/entropy": entropy,
                     "train/mean_reward": mean_reward,
                     "train/mean_damage": mean_damage,
+                    "train/mean_episode_steps": mean_episode_steps,
+                    "train/mean_damage_delta": mean_damage_delta,
+                    "train/completed_episodes": completed_episodes,
+                    "train/max_damage": max_damage,
+                    "train/min_damage": min_damage,
+                    "train/max_episode_steps": max_episode_steps,
+                    "train/min_episode_steps": min_episode_steps,
                     "train/invalid_action_rate": invalid_rate,
+                    "train/valid_action_rate": valid_action_rate,
+                    "train/approx_kl": approx_kl,
+                    "train/clip_fraction": clip_fraction,
+                    "train/value_mean": value_mean,
+                    "train/log_prob_mean": log_prob_mean,
                     "perf/env_steps_per_second": env_steps_per_second,
                     "perf/samples_per_second": samples_per_second,
+                    "perf/rollout_duration_sec": rollout_duration,
+                    "perf/optimization_duration_sec": optimization_duration,
                 },
                 step=update,
             )
@@ -285,11 +330,15 @@ def finish_wandb(run):
 
 def train_epoch(policy, optimizer, samples, config, device):
     if not samples:
-        return 0.0, 0.0, 0.0
+        return 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 
     total_policy_loss = 0.0
     total_value_loss = 0.0
     total_entropy = 0.0
+    total_approx_kl = 0.0
+    total_clip_fraction = 0.0
+    total_value_mean = 0.0
+    total_log_prob_mean = 0.0
     updates = 0
 
     for _ in range(config["ppo_epochs"]):
@@ -310,6 +359,7 @@ def train_epoch(policy, optimizer, samples, config, device):
             distribution = torch.distributions.Categorical(logits=logits)
             new_log_probability = distribution.log_prob(action)
             entropy = distribution.entropy().mean()
+            approx_kl = (old_log_probability - new_log_probability).mean()
 
             ratio = torch.exp(new_log_probability - old_log_probability)
             clipped_ratio = torch.clamp(ratio, 1.0 - config["clip_range"], 1.0 + config["clip_range"])
@@ -318,6 +368,9 @@ def train_epoch(policy, optimizer, samples, config, device):
             policy_loss = -torch.minimum(surrogate, clipped_surrogate).mean()
             value_loss = 0.5 * (return_target - value).pow(2).mean()
             total_loss = policy_loss + config["value_coefficient"] * value_loss - config["entropy_coefficient"] * entropy
+            clip_fraction = (torch.abs(ratio - 1.0) > config["clip_range"]).float().mean()
+            value_mean = value.mean()
+            log_prob_mean = new_log_probability.mean()
 
             optimizer.zero_grad()
             total_loss.backward()
@@ -327,9 +380,21 @@ def train_epoch(policy, optimizer, samples, config, device):
             total_policy_loss += policy_loss.item()
             total_value_loss += value_loss.item()
             total_entropy += entropy.item()
+            total_approx_kl += approx_kl.item()
+            total_clip_fraction += clip_fraction.item()
+            total_value_mean += value_mean.item()
+            total_log_prob_mean += log_prob_mean.item()
             updates += 1
 
-    return total_policy_loss / updates, total_value_loss / updates, total_entropy / updates
+    return (
+        total_policy_loss / updates,
+        total_value_loss / updates,
+        total_entropy / updates,
+        total_approx_kl / updates,
+        total_clip_fraction / updates,
+        total_value_mean / updates,
+        total_log_prob_mean / updates,
+    )
 
 
 def evaluate(policy, client, device):
@@ -376,9 +441,23 @@ def append_log(row):
                 "entropy",
                 "mean_reward",
                 "mean_damage",
+                "mean_episode_steps",
+                "mean_damage_delta",
+                "completed_episodes",
+                "max_damage",
+                "min_damage",
+                "max_episode_steps",
+                "min_episode_steps",
                 "invalid_action_rate",
+                "valid_action_rate",
+                "approx_kl",
+                "clip_fraction",
+                "value_mean",
+                "log_prob_mean",
                 "env_steps_per_second",
                 "samples_per_second",
+                "rollout_duration_sec",
+                "optimization_duration_sec",
             ],
         )
         if not file_exists:
