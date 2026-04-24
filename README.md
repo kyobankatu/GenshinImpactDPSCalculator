@@ -66,15 +66,15 @@ Start the local Java rollout service, then run Python training, evaluation, and 
 python3 -m pip install -r requirements.txt
 ./gradlew ServeRLJava
 ./gradlew BenchmarkRLJava
-python3 src/python/rl/train_recurrent_ppo.py --preset debug
+python3 src/python/rl/train_recurrent_ppo.py --preset debug --updates 20 --envs 4 --rollout-length 32
 python3 src/python/rl/train_recurrent_ppo.py --preset debug --wandb --wandb-project genshin-recurrent-ppo --wandb-run-name local-debug
-python3 src/python/rl/evaluate_policy.py
+python3 src/python/rl/evaluate_policy.py --mode both
 python3 src/python/rl/benchmark_rollout.py --envs 4 --steps 128
 ```
 
 Training writes `output/recurrent_ppo_py/latest-model.pt` and `output/recurrent_ppo_py/training_log.csv`.
 If `.venv` includes `wandb`, training can also stream metrics to Weights & Biases with `--wandb`.
-Evaluation generates `output/rl_report.html`.
+Evaluation supports `--mode deterministic|stochastic|both` and deterministic evaluation generates `output/rl_report.html`.
 
 ## Architecture
 

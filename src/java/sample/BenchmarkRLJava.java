@@ -28,5 +28,6 @@ public class BenchmarkRLJava {
         double envStepsPerSecond = (environments * (double) steps) / (durationMillis / 1000.0);
         System.out.printf("Java rollout benchmark: envs=%d steps=%d duration=%dms envSteps/s=%.1f%n",
                 environments, environments * steps, durationMillis, envStepsPerSecond);
+        System.out.println("Java rollout metrics: " + environment.metricsSnapshot().toSummaryString());
     }
 }

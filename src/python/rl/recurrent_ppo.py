@@ -28,6 +28,7 @@ class RecurrentPolicy(nn.Module):
     def act(self, observation, recurrent_state, action_mask, deterministic=False):
         logits, value, hidden = self.forward_step(observation, recurrent_state, action_mask)
         distribution = torch.distributions.Categorical(logits=logits)
+        probabilities = torch.softmax(logits, dim=-1)
         action = torch.argmax(logits, dim=-1) if deterministic else distribution.sample()
         log_probability = distribution.log_prob(action)
         entropy = distribution.entropy()
@@ -37,6 +38,8 @@ class RecurrentPolicy(nn.Module):
             "value": value,
             "hidden": hidden,
             "entropy": entropy,
+            "probabilities": probabilities,
+            "top_probability": probabilities.max(dim=-1).values,
         }
 
     def save(self, path, optimizer=None):

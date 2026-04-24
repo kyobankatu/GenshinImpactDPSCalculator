@@ -17,6 +17,12 @@ public class VectorizedEnvironment {
     private final List<BattleEnvironment> environments = new ArrayList<>();
     private final double[] episodeRewards;
     private final double[] episodeDamages;
+    private long resetCalls;
+    private long resetNanos;
+    private long stepCalls;
+    private long stepNanos;
+    private long envSteps;
+    private long completedEpisodes;
 
     public VectorizedEnvironment(int count, Supplier<CombatSimulator> simulatorFactory, EpisodeConfig config) {
         this.episodeRewards = new double[count];
@@ -38,6 +44,7 @@ public class VectorizedEnvironment {
     }
 
     private RunnerResetResult resetInternal(boolean generateReport) {
+        long start = System.nanoTime();
         double[][] observations = new double[size()][];
         double[][] actionMasks = new double[size()][];
         for (int i = 0; i < size(); i++) {
@@ -47,6 +54,8 @@ public class VectorizedEnvironment {
             observations[i] = reset.observation;
             actionMasks[i] = reset.actionMask;
         }
+        resetCalls++;
+        resetNanos += System.nanoTime() - start;
         return new RunnerResetResult(observations, actionMasks);
     }
 
@@ -55,6 +64,7 @@ public class VectorizedEnvironment {
     }
 
     private RunnerStepResult stepInternal(int[] actions) {
+        long start = System.nanoTime();
         double[][] observations = new double[size()][];
         double[][] actionMasks = new double[size()][];
         double[] rewards = new double[size()];
@@ -80,6 +90,7 @@ public class VectorizedEnvironment {
             liveSteps[i] = result.stepCount;
 
             if (result.done) {
+                completedEpisodes++;
                 finishedEpisodeRewards[i] = episodeRewards[i];
                 finishedEpisodeDamages[i] = episodeDamages[i];
                 finishedEpisodeSteps[i] = result.stepCount;
@@ -93,6 +104,9 @@ public class VectorizedEnvironment {
                 actionMasks[i] = result.actionMask;
             }
         }
+        stepCalls++;
+        envSteps += size();
+        stepNanos += System.nanoTime() - start;
 
         return new RunnerStepResult(
                 observations,
@@ -108,6 +122,10 @@ public class VectorizedEnvironment {
                 liveSteps);
     }
 
+    public MetricsSnapshot metricsSnapshot() {
+        return new MetricsSnapshot(resetCalls, resetNanos, stepCalls, stepNanos, envSteps, completedEpisodes);
+    }
+
     /**
      * Reset response.
      */
@@ -118,6 +136,44 @@ public class VectorizedEnvironment {
         public RunnerResetResult(double[][] observations, double[][] actionMasks) {
             this.observations = observations;
             this.actionMasks = actionMasks;
+        }
+    }
+
+    public static class MetricsSnapshot {
+        public final long resetCalls;
+        public final long resetNanos;
+        public final long stepCalls;
+        public final long stepNanos;
+        public final long envSteps;
+        public final long completedEpisodes;
+
+        public MetricsSnapshot(long resetCalls, long resetNanos, long stepCalls, long stepNanos, long envSteps,
+                long completedEpisodes) {
+            this.resetCalls = resetCalls;
+            this.resetNanos = resetNanos;
+            this.stepCalls = stepCalls;
+            this.stepNanos = stepNanos;
+            this.envSteps = envSteps;
+            this.completedEpisodes = completedEpisodes;
+        }
+
+        public double meanResetMillis() {
+            return resetCalls == 0 ? 0.0 : (resetNanos / 1_000_000.0) / resetCalls;
+        }
+
+        public double meanStepMillis() {
+            return stepCalls == 0 ? 0.0 : (stepNanos / 1_000_000.0) / stepCalls;
+        }
+
+        public double envStepsPerSecond() {
+            return stepNanos == 0 ? 0.0 : envSteps / (stepNanos / 1_000_000_000.0);
+        }
+
+        public String toSummaryString() {
+            return String.format(
+                    "resetCalls=%d meanResetMs=%.3f stepCalls=%d meanStepMs=%.3f envSteps=%d envSteps/s=%.1f completedEpisodes=%d",
+                    resetCalls, meanResetMillis(), stepCalls, meanStepMillis(), envSteps, envStepsPerSecond(),
+                    completedEpisodes);
         }
     }
 }

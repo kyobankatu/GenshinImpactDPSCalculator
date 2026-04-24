@@ -151,34 +151,32 @@ def main():
             min_episode_steps = min(episode_steps) if episode_steps else 0
             valid_action_rate = 1.0 - invalid_rate
 
-            append_log(
-                {
-                    "update": update,
-                    "samples": len(samples),
-                    "policy_loss": policy_loss,
-                    "value_loss": value_loss,
-                    "entropy": entropy,
-                    "mean_reward": mean_reward,
-                    "mean_damage": mean_damage,
-                    "mean_episode_steps": mean_episode_steps,
-                    "mean_damage_delta": mean_damage_delta,
-                    "completed_episodes": completed_episodes,
-                    "max_damage": max_damage,
-                    "min_damage": min_damage,
-                    "max_episode_steps": max_episode_steps,
-                    "min_episode_steps": min_episode_steps,
-                    "invalid_action_rate": invalid_rate,
-                    "valid_action_rate": valid_action_rate,
-                    "approx_kl": approx_kl,
-                    "clip_fraction": clip_fraction,
-                    "value_mean": value_mean,
-                    "log_prob_mean": log_prob_mean,
-                    "env_steps_per_second": env_steps_per_second,
-                    "samples_per_second": samples_per_second,
-                    "rollout_duration_sec": rollout_duration,
-                    "optimization_duration_sec": optimization_duration,
-                }
-            )
+            log_row = {
+                "update": update,
+                "samples": len(samples),
+                "policy_loss": policy_loss,
+                "value_loss": value_loss,
+                "entropy": entropy,
+                "mean_reward": mean_reward,
+                "mean_damage": mean_damage,
+                "mean_episode_steps": mean_episode_steps,
+                "mean_damage_delta": mean_damage_delta,
+                "completed_episodes": completed_episodes,
+                "max_damage": max_damage,
+                "min_damage": min_damage,
+                "max_episode_steps": max_episode_steps,
+                "min_episode_steps": min_episode_steps,
+                "invalid_action_rate": invalid_rate,
+                "valid_action_rate": valid_action_rate,
+                "approx_kl": approx_kl,
+                "clip_fraction": clip_fraction,
+                "value_mean": value_mean,
+                "log_prob_mean": log_prob_mean,
+                "env_steps_per_second": env_steps_per_second,
+                "samples_per_second": samples_per_second,
+                "rollout_duration_sec": rollout_duration,
+                "optimization_duration_sec": optimization_duration,
+            }
             print(
                 f"Update {update}: reward={mean_reward:.3f} damage={mean_damage:,.0f} steps={mean_episode_steps:.1f} invalid={invalid_rate:.3f} kl={approx_kl:.5f} clip={clip_fraction:.3f} policy={policy_loss:.5f} value={value_loss:.5f} envSteps/s={env_steps_per_second:.1f}"
             )
@@ -214,23 +212,40 @@ def main():
             )
 
             if update % config["evaluation_interval"] == 0 or update == config["updates"]:
-                summary = evaluate(policy, client, device)
+                deterministic_summary = evaluate(policy, client, device, deterministic=True)
+                stochastic_summary = evaluate(policy, client, device, deterministic=False)
                 print(
-                    f"  Eval: reward={summary['reward']:.3f} damage={summary['damage']:,.0f} steps={summary['steps']} invalid={summary['invalid_actions']}"
+                    f"  Eval det: reward={deterministic_summary['reward']:.3f} damage={deterministic_summary['damage']:,.0f} steps={deterministic_summary['steps']} invalid={deterministic_summary['invalid_actions']}"
+                )
+                print(
+                    f"  Eval stoch: reward={stochastic_summary['reward']:.3f} damage={stochastic_summary['damage']:,.0f} steps={stochastic_summary['steps']} invalid={stochastic_summary['invalid_actions']}"
+                )
+                log_row.update(
+                    {
+                        "eval_det_reward": deterministic_summary["reward"],
+                        "eval_det_damage": deterministic_summary["damage"],
+                        "eval_det_steps": deterministic_summary["steps"],
+                        "eval_det_invalid_actions": deterministic_summary["invalid_actions"],
+                        "eval_stochastic_reward": stochastic_summary["reward"],
+                        "eval_stochastic_damage": stochastic_summary["damage"],
+                        "eval_stochastic_steps": stochastic_summary["steps"],
+                        "eval_stochastic_invalid_actions": stochastic_summary["invalid_actions"],
+                    }
                 )
                 log_wandb(
                     run,
-                    {
-                        "eval/reward": summary["reward"],
-                        "eval/damage": summary["damage"],
-                        "eval/steps": summary["steps"],
-                        "eval/invalid_actions": summary["invalid_actions"],
-                    },
+                    flatten_eval_metrics("eval_det", deterministic_summary),
+                    step=update,
+                )
+                log_wandb(
+                    run,
+                    flatten_eval_metrics("eval_stochastic", stochastic_summary),
                     step=update,
                 )
 
             if update % config["checkpoint_interval"] == 0 or update == config["updates"]:
                 policy.save(MODEL_PATH, optimizer)
+            append_log(log_row)
     finally:
         client.close_runner(runner_id)
         client.close()
@@ -397,7 +412,20 @@ def train_epoch(policy, optimizer, samples, config, device):
     )
 
 
-def evaluate(policy, client, device):
+def flatten_eval_metrics(prefix, summary):
+    metrics = {
+        f"{prefix}/reward": summary["reward"],
+        f"{prefix}/damage": summary["damage"],
+        f"{prefix}/steps": summary["steps"],
+        f"{prefix}/invalid_actions": summary["invalid_actions"],
+        f"{prefix}/mean_top_probability": summary["mean_top_probability"],
+    }
+    for action_index, fraction in enumerate(summary["action_fractions"]):
+        metrics[f"{prefix}/action_fraction_{action_index}"] = fraction
+    return metrics
+
+
+def evaluate(policy, client, device, deterministic):
     runner_id = client.create_runner(1)
     observations, masks = client.reset_runner(runner_id, False)
     hidden = torch.zeros(1, policy.hidden_size, dtype=torch.float32, device=device)
@@ -405,13 +433,17 @@ def evaluate(policy, client, device):
     invalid_actions = 0
     steps = 0
     damage = 0.0
+    top_probability_sum = 0.0
+    action_counts = [0 for _ in range(policy.action_size)]
     try:
         while True:
             obs_tensor = torch.tensor(observations, dtype=torch.float32, device=device)
             mask_tensor = torch.tensor(masks, dtype=torch.float32, device=device)
             with torch.no_grad():
-                action_output = policy.act(obs_tensor, hidden, mask_tensor, deterministic=True)
+                action_output = policy.act(obs_tensor, hidden, mask_tensor, deterministic=deterministic)
             action = [int(action_output["action"][0].item())]
+            action_counts[action[0]] += 1
+            top_probability_sum += action_output["top_probability"][0].item()
             batch = client.step_runner(runner_id, action)
             total_reward += batch["rewards"][0]
             if not batch["valid_actions"][0]:
@@ -425,7 +457,15 @@ def evaluate(policy, client, device):
             hidden = action_output["hidden"]
     finally:
         client.close_runner(runner_id)
-    return {"reward": total_reward, "damage": damage, "steps": steps, "invalid_actions": invalid_actions}
+    total_actions = max(1, sum(action_counts))
+    return {
+        "reward": total_reward,
+        "damage": damage,
+        "steps": steps,
+        "invalid_actions": invalid_actions,
+        "mean_top_probability": top_probability_sum / max(1, steps),
+        "action_fractions": [count / total_actions for count in action_counts],
+    }
 
 
 def append_log(row):
@@ -458,6 +498,14 @@ def append_log(row):
                 "samples_per_second",
                 "rollout_duration_sec",
                 "optimization_duration_sec",
+                "eval_det_reward",
+                "eval_det_damage",
+                "eval_det_steps",
+                "eval_det_invalid_actions",
+                "eval_stochastic_reward",
+                "eval_stochastic_damage",
+                "eval_stochastic_steps",
+                "eval_stochastic_invalid_actions",
             ],
         )
         if not file_exists:

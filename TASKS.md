@@ -1,327 +1,238 @@
-# Python Learner Migration Tasks
+# RL Improvement Tasks
 
 ## Goal
 
-Move the RL training stack to a hybrid architecture:
+Improve the current hybrid RL stack so that:
 
-- Java owns the combat simulator and environment execution
-- Python owns the `Recurrent PPO` learner, experiment control, and GPU training
+- rollout throughput is high enough for long training runs
+- training metrics and evaluation metrics are consistent
+- deterministic evaluation quality actually improves
+- experiment settings can be changed from batch scripts without editing Python code
+- training behavior is observable enough to diagnose failure modes quickly
 
-The target is higher policy quality and faster iteration by using the stronger Python RL ecosystem without falling back to slow per-step socket communication.
+The current system already runs end-to-end, but the latest runs show an important gap:
 
-## Strategic Decision
+- training damage improves substantially
+- deterministic evaluation stays flat
+- PPO update signals shrink over time
+- rollout collection is still the dominant wall-clock cost
 
-We will not continue investing in a Java-native learner as the main training path.
+So the next work is not a migration anymore.
+It is focused RL debugging, profiling, and iteration.
 
-The long-term architecture is:
+## Current Findings
 
-- `CombatSimulator` remains in Java
-- rollout generation remains close to `CombatSimulator`
-- `Recurrent PPO` training moves to Python
-- communication must happen at rollout or batch granularity, not one step at a time
+These findings should be treated as the working assumptions until disproven:
 
-## Why This Direction
+1. Java rollout is the main time bottleneck.
+   - rollout wall time is much larger than optimization wall time
+   - learner-side GPU optimization is not the primary bottleneck right now
 
-This project needs:
+2. Heavy Java initialization does not appear to run every episode.
+   - `Loaded Talent Data` and `Artifact Optimizer` logs appear at service startup
+   - they do not currently appear to repeat inside every training episode
 
-- long-horizon credit assignment
-- recurrent policies
-- GPU training
-- fast algorithm iteration
-- robust logging, checkpointing, and experiment management
+3. The major quality problem is train/eval mismatch.
+   - train damage rises
+   - deterministic eval damage stays flat
+   - eval step count stays flat
+   - this suggests policy collapse, argmax-path weakness, or evaluation mismatch
 
-Python is significantly better than Java for:
+4. PPO is likely converging too early to a narrow policy region.
+   - entropy declines
+   - `approx_kl` declines
+   - `clip_fraction` declines
+   - eval stays unchanged
 
-- RL library availability
-- recurrent PPO implementations
-- distributed rollout/training tooling
-- hyperparameter tuning
-- experiment analysis
+## Phase 1: Fix Evaluation Visibility
 
-Java is significantly better than Python for:
-
-- reusing the existing battle simulator directly
-- avoiding a costly rewrite of combat mechanics
-- keeping the authoritative environment close to existing simulation code
-
-So the right split is not "all Java" or "all Python".
-It is:
-
-- Java environment
-- Python learner
-
-## Non-Negotiable Requirements
-
-- No return to the old per-step Python-Java socket protocol
-- No JSON per step in the hot path
-- No blocking request/response loop for every action
-- No teacher forcing
-- No scripted next-action hints in observations
-- No Q-table learner
-- No Q-table persistence
-
-## Target Architecture
-
-### Java Side
-
-- owns `CombatSimulator`
-- owns environment reset and step logic
-- owns observation encoding and reward computation
-- owns action masking
-- owns rollout collection close to the simulator
-- exposes a transport layer that can send and receive rollout-sized or batch-sized data efficiently
-
-### Python Side
-
-- owns `Recurrent PPO`
-- owns neural network policy/value model
-- owns optimization loop
-- owns checkpointing
-- owns evaluation orchestration
-- owns experiment tracking and tuning
-
-### Data Exchange Boundary
-
-The boundary between Java and Python must exchange one of these units:
-
-- full rollout segments
-- fixed-length trajectory batches
-- batched policy inference requests for many environment slots at once
-
-The boundary must not exchange:
-
-- one action request per environment step
-- one observation packet per environment step
-
-## Preferred Communication Model
-
-The default design should be:
-
-- Java runs many environment slots in parallel
-- Python owns the learner process
-- Java sends batched observations for many env slots at once
-- Python returns batched action logits, values, and recurrent states
-- Java continues stepping locally until the next inference boundary
-- Java returns rollout segments back to Python for PPO updates
-
-This keeps the simulator authoritative while avoiding the old worst-case communication pattern.
-
-## Transport Priorities
-
-The communication layer should be chosen in this priority order:
-
-1. shared-memory or zero-copy friendly IPC if feasible
-2. binary framed local IPC
-3. local TCP only if batching is large enough and overhead is proven acceptable
-
-Avoid:
-
-- text protocols
-- JSON in the hot path
-- ad hoc string parsing for observations or actions
-
-## Rebuild Scope
-
-### Phase 1: Remove Java-Native Learner As The Main Path
-
-- Stop treating the current Java-native learner as the target architecture.
-- Deprecate or remove components that only exist to train PPO fully inside Java.
-- Keep only the parts that remain valid in the hybrid design:
-  - environment logic
-  - action space
-  - observation encoding
-  - reward function
-  - simulator factory
-  - evaluation report generation
-
-### Phase 2: Stabilize The Java Environment Contract
-
-- Define a clean Java-side RL environment contract:
-  - `reset`
-  - `step`
-  - `done`
-  - `observation`
-  - `action_mask`
-  - `reward`
-  - `episode_summary`
-- Freeze the discrete action space:
-  - normal attack
-  - skill
-  - burst
-  - swap to each party member
-- Freeze the observation schema and version it explicitly.
-- Freeze action-mask semantics and version them explicitly.
-
-### Phase 3: Redesign The Hot Path Around Batches
-
-- Replace any residual step-by-step learner coupling with batch-oriented interfaces.
-- Add Java-side components such as:
-  - `InferenceRequestBatch`
-  - `InferenceResponseBatch`
-  - `RolloutSegment`
-  - `RolloutBatch`
-  - `EpisodeSummary`
-- Batch dimensions must support:
-  - many environments per request
-  - recurrent hidden states per environment slot
-  - action masks per environment slot
-
-### Phase 4: Build Parallel Java Rollout Collection
-
-- Keep rollout execution on the Java side.
-- Add or harden:
-  - `RolloutWorker`
-  - `VectorizedEnvironment`
-  - `RolloutManager`
-- Required properties:
-  - multiple workers
-  - multiple environments per worker
-  - reusable simulator instances where practical
-  - minimal allocation pressure in hot loops
-  - no file output during training rollouts
-
-### Phase 5: Add A Production-Quality Local IPC Layer
-
-- Build a local-only binary IPC transport between Java and Python.
-- The transport must support:
-  - batched inference calls
-  - rollout segment transfer
-  - checkpoint/eval commands if needed
-  - schema version checking
-- Evaluate framing and serialization options such as:
-  - FlatBuffers
-  - Protocol Buffers
-  - Arrow IPC
-  - custom binary framing if measurably simpler and faster
-
-### Phase 6: Create The Python Training Workspace
-
-- Reintroduce a Python training workspace as a first-class part of the repo.
-- The Python side should include:
-  - environment connector client
-  - recurrent PPO trainer
-  - config management
-  - checkpoint handling
-  - evaluation scripts
-  - throughput and training diagnostics
-- Candidate frameworks:
-  - `sb3-contrib` if the connector shape fits cleanly
-  - `CleanRL` if we want maximum control with moderate implementation effort
-  - `RLlib` if distributed training is worth the added complexity
-
-The initial recommendation is:
-
-- use `CleanRL` or a similarly explicit codebase first
-
-because the Java boundary and batching constraints will likely require custom integration.
-
-### Phase 7: Implement Python Recurrent PPO
-
-- Python learner must support:
-  - recurrent policy
-  - recurrent value head
-  - PPO clipping
-  - entropy bonus
-  - value loss
-  - GAE
-  - minibatch SGD
-  - checkpoint save/load
-  - deterministic evaluation mode
-- Hidden-state handling must align exactly with Java environment slot boundaries.
-
-### Phase 8: Optimize The Java-Python Boundary
-
-- Measure:
-  - inference round-trip time
-  - rollout transfer time
-  - effective environment steps per second
-  - GPU utilization
-  - CPU worker utilization
-- Optimize until the bottleneck is no longer obviously IPC overhead.
-- Specific goals:
-  - inference is batched
-  - rollout collection is parallel
-  - learner is mostly GPU-bound or rollout-bound, not protocol-bound
-
-### Phase 9: Add Evaluation And Report Flow
-
-- Evaluation should run saved Python checkpoints against the Java simulator.
-- Java remains responsible for combat report generation.
-- Python should be able to request:
+- Add explicit side-by-side evaluation modes:
   - deterministic evaluation
   - stochastic evaluation
-  - HTML report generation for selected episodes only
+- Ensure training logs and `wandb` clearly distinguish:
+  - `eval_det/*`
+  - `eval_stochastic/*`
+- Required metrics for both modes:
+  - reward
+  - damage
+  - steps
+  - invalid actions
+- Goal:
+  - determine whether the policy is only good when sampled stochastically
+  - determine whether argmax evaluation is the real failure mode
 
-### Phase 10: Update Commands And Tooling
+## Phase 2: Make Rollout Cost Measurable On The Java Side
 
-- Replace the current Java-only RL commands with hybrid commands.
-- Example target command groups:
-  - start Java rollout service
-  - run Python training
-  - run Python evaluation
-  - run throughput benchmark
-- Ensure local development and cluster execution both have documented paths.
+- Add Java-side timing around:
+  - runner creation
+  - reset
+  - step
+  - observation encoding
+  - action mask generation
+  - protocol serialization
+- Expose or log:
+  - mean reset time
+  - mean step time
+  - episode completions per minute
+  - Java-only env steps per second
+- Keep these measurements lightweight enough to use during batch runs.
+- Goal:
+  - stop guessing where rollout time goes
+  - identify whether reset, step, or transport is dominant
 
-### Phase 11: Throughput-Oriented Design Constraints
+## Phase 3: Audit The Java Rollout Hot Path
 
-- Java side must support:
-  - many environment slots in parallel
-  - batched inference requests
-  - minimal per-step allocation
-  - muted logging during training
-- Python side must support:
-  - large learner minibatches
-  - GPU-friendly tensor packing
-  - recurrent sequence batching
-  - efficient checkpointing
+- Verify that training rollouts never trigger:
+  - HTML generation
+  - `VisualLogger` writes
+  - verbose string assembly
+  - file output
+- Audit `reset` and simulator setup:
+  - reuse static character data
+  - reuse simulator templates where possible
+  - avoid rebuilding immutable configuration every episode
+- Audit allocation pressure:
+  - repeated `List` or `Map` creation
+  - unnecessary copying of observations or masks
+  - frequent temporary object allocation in hot loops
+- Confirm whether `VectorizedEnvironment` is:
+  - truly parallel
+  - or just batched but sequential
+- Goal:
+  - remove obvious Java-side inefficiencies before changing PPO again
 
-### Phase 12: Documentation Refresh
+## Phase 4: Resolve Train/Eval Divergence
 
-- Update:
-  - root `AGENTS.md`
-  - `README.md`
-  - `src/java/mechanics/rl/AGENTS.md`
-  - `src/java/sample/AGENTS.md`
-- Add documentation for the new Python training workspace:
-  - environment connector design
-  - how to start Java-side services
-  - how to run Python training
-  - where checkpoints and logs are stored
+- Compare the current learned policy under:
+  - deterministic eval
+  - stochastic eval
+- If stochastic eval is much better than deterministic eval:
+  - inspect action probability distributions
+  - inspect whether argmax consistently chooses a weak action branch
+- Add diagnostics for action selection quality:
+  - top action probability
+  - action distribution histogram during eval
+  - per-action frequency for deterministic and stochastic runs
+- Goal:
+  - determine whether the problem is policy quality itself
+  - or just how evaluation selects actions
+
+## Phase 5: Improve PPO Stability And Exploration
+
+- Continue using CLI-overridable training parameters from `execute.sh`.
+- Run controlled experiments on:
+  - `entropy_coefficient`
+  - `ppo_epochs`
+  - `rollout_length`
+  - `envs`
+  - `minibatch_size`
+- Primary hypothesis to test:
+  - current settings cause early narrowing of the policy distribution
+- First recommended experiment family:
+  - lower `envs`
+  - lower `rollout_length`
+  - increase total `updates`
+  - increase entropy bonus moderately
+  - reduce PPO epochs if the same rollout is being overfit
+- Goal:
+  - keep the policy changing longer
+  - improve deterministic eval rather than only train averages
+
+## Phase 6: Strengthen RL Diagnostics
+
+- Keep the current metrics and add missing ones when useful.
+- Required ongoing metrics:
+  - train reward
+  - train damage
+  - train episode steps
+  - train completed episodes
+  - train max/min damage
+  - train max/min episode steps
+  - invalid/valid action rate
+  - PPO `approx_kl`
+  - PPO `clip_fraction`
+  - value mean
+  - log-prob mean
+  - rollout duration
+  - optimization duration
+- Add evaluation comparison panels in `wandb` for:
+  - deterministic damage vs stochastic damage
+  - deterministic steps vs stochastic steps
+  - train mean damage vs eval damage
+- Goal:
+  - make failure modes immediately visible from charts
+
+## Phase 7: Tune Batch Job Defaults For Real Training
+
+- Keep all important training settings in `execute.sh`.
+- Do not require Python source edits to change:
+  - update count
+  - rollout size
+  - environment count
+  - PPO epochs
+  - entropy coefficient
+  - checkpoint interval
+  - evaluation interval
+- Maintain at least two useful job profiles:
+  - quick diagnosis run
+  - full training run
+- Goal:
+  - make cluster experimentation cheap and repeatable
+
+## Phase 8: Revisit Parallel Rollout Architecture If Needed
+
+- If Java-side profiling shows the rollout service itself is saturated:
+  - consider multiple rollout workers inside one process
+  - consider multiple rollout service processes on separate ports
+  - consider Python-side fan-out to multiple Java actors
+- Only do this after Phase 2 and Phase 3 confirm that simpler fixes are not enough.
+- Goal:
+  - scale rollout throughput without redesigning the whole system prematurely
+
+## Phase 9: Validate Real Progress With Acceptance Criteria
+
+- A run should count as meaningful progress only if:
+  - deterministic eval damage improves materially over baseline
+  - deterministic eval does not stay flat while train damage rises
+  - entropy does not collapse immediately
+  - PPO `approx_kl` and `clip_fraction` remain non-trivial for a useful period
+  - rollout throughput stays acceptable for long runs
+- Track and compare runs by:
+  - job settings
+  - final deterministic eval damage
+  - best deterministic eval damage
+  - stochastic eval damage
+  - total wall time
+  - env steps per second
 
 ## Deliverables
 
-The migration is complete only when all of the following are true:
+This improvement pass is complete only when all of the following are true:
 
-- Java is the authoritative combat environment
-- Python is the authoritative learner
-- the old per-step socket protocol is gone
-- communication is rollout-sized or batch-sized
-- recurrent PPO training runs end-to-end with the Java simulator
-- saved Python checkpoints can be evaluated against Java combat episodes
-- HTML combat report generation still works in evaluation mode
-- documentation matches the hybrid architecture
+- deterministic and stochastic evaluation are both available
+- train/eval divergence is understood well enough to explain current runs
+- Java-side rollout cost is measured rather than guessed
+- `execute.sh` fully controls training settings needed for experiments
+- `wandb` shows enough metrics to diagnose PPO collapse and rollout bottlenecks
+- at least one revised training configuration improves deterministic evaluation
 
 ## Verification
 
-Minimum required checks before handoff:
+Minimum checks before calling a change complete:
 
 - `./gradlew build`
-- Java-side rollout service or batch environment starts successfully
-- Python trainer can connect and complete at least one training iteration
-- Python evaluation can load a checkpoint and run one episode
-- throughput benchmark reports batch-oriented collection numbers
-- HTML report generation works in evaluation mode
-
-## Non-Goals
-
-- preserving the old per-step Python-Java communication path
-- keeping the Java-native learner as the primary training method
-- preserving Q-table artifacts
-- preserving teacher-guided state design
+- Java rollout service starts successfully
+- Python training runs with CLI-specified overrides
+- deterministic evaluation runs
+- stochastic evaluation runs
+- `wandb` receives both training and evaluation metrics
+- batch job log clearly shows selected training parameters
 
 ## Notes
 
-- The key mistake to avoid is moving back to a step-by-step RPC design.
-- If batching is done correctly, the hybrid design should be easier to improve than the all-Java learner.
-- The first success criterion is architectural correctness and acceptable throughput.
-- The next success criterion is policy quality.
+- The central current problem is not “make Python faster”.
+- The central current problems are:
+  - rollout cost
+  - train/eval mismatch
+  - premature policy narrowing
+- Do not add new architectural complexity until the current failure mode is measured clearly.

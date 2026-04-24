@@ -24,6 +24,14 @@ public class RolloutService {
     private final EpisodeConfig config;
     private final Map<Integer, VectorizedEnvironment> runners = new HashMap<>();
     private int nextRunnerId = 1;
+    private long runnerCreateCalls;
+    private long runnerCreateNanos;
+    private long resetCalls;
+    private long resetNanos;
+    private long stepCalls;
+    private long stepNanos;
+    private long resetWriteNanos;
+    private long stepWriteNanos;
 
     public RolloutService(int port, EpisodeConfig config) {
         this.port = port;
@@ -63,13 +71,22 @@ public class RolloutService {
                 case BatchProtocol.CMD_CREATE_RUNNER:
                     int count = in.readInt();
                     int runnerId = nextRunnerId++;
+                    long createStart = System.nanoTime();
                     runners.put(runnerId, new VectorizedEnvironment(
                             count, FlinsParty2RLSimulatorFactory.supplier(), config));
+                    runnerCreateCalls++;
+                    runnerCreateNanos += System.nanoTime() - createStart;
                     out.writeInt(runnerId);
                     out.flush();
                     break;
                 case BatchProtocol.CMD_RESET_RUNNER:
-                    writeReset(out, handleReset(in.readInt(), in.readBoolean()));
+                    long resetStart = System.nanoTime();
+                    VectorizedEnvironment.RunnerResetResult resetResult = handleReset(in.readInt(), in.readBoolean());
+                    resetCalls++;
+                    resetNanos += System.nanoTime() - resetStart;
+                    long resetWriteStart = System.nanoTime();
+                    writeReset(out, resetResult);
+                    resetWriteNanos += System.nanoTime() - resetWriteStart;
                     break;
                 case BatchProtocol.CMD_STEP_RUNNER:
                     int runner = in.readInt();
@@ -78,14 +95,26 @@ public class RolloutService {
                     for (int i = 0; i < actions.length; i++) {
                         actions[i] = in.readInt();
                     }
-                    writeStep(out, environment.step(actions));
+                    long stepStart = System.nanoTime();
+                    RunnerStepResult stepResult = environment.step(actions);
+                    stepCalls++;
+                    stepNanos += System.nanoTime() - stepStart;
+                    long stepWriteStart = System.nanoTime();
+                    writeStep(out, stepResult);
+                    stepWriteNanos += System.nanoTime() - stepWriteStart;
                     break;
                 case BatchProtocol.CMD_CLOSE_RUNNER:
-                    runners.remove(in.readInt());
+                    int closeRunnerId = in.readInt();
+                    VectorizedEnvironment closed = runners.remove(closeRunnerId);
+                    if (closed != null) {
+                        System.out.printf("Closed runner %d: %s%n", closeRunnerId,
+                                closed.metricsSnapshot().toSummaryString());
+                    }
                     out.writeBoolean(true);
                     out.flush();
                     break;
                 case BatchProtocol.CMD_SHUTDOWN:
+                    printServiceMetrics();
                     out.writeBoolean(true);
                     out.flush();
                     return false;
@@ -155,5 +184,22 @@ public class RolloutService {
         for (int value : values) {
             out.writeInt(value);
         }
+    }
+
+    private void printServiceMetrics() {
+        System.out.printf(
+                "Rollout service metrics: createCalls=%d meanCreateMs=%.3f resetCalls=%d meanResetMs=%.3f stepCalls=%d meanStepMs=%.3f meanResetWriteMs=%.3f meanStepWriteMs=%.3f%n",
+                runnerCreateCalls,
+                averageMillis(runnerCreateNanos, runnerCreateCalls),
+                resetCalls,
+                averageMillis(resetNanos, resetCalls),
+                stepCalls,
+                averageMillis(stepNanos, stepCalls),
+                averageMillis(resetWriteNanos, resetCalls),
+                averageMillis(stepWriteNanos, stepCalls));
+    }
+
+    private double averageMillis(long nanos, long calls) {
+        return calls == 0 ? 0.0 : (nanos / 1_000_000.0) / calls;
     }
 }
