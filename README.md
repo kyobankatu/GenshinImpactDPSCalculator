@@ -76,19 +76,21 @@ Training writes `output/recurrent_ppo_py/latest-model.pt` and `output/recurrent_
 If `.venv` includes `wandb`, training can also stream metrics to Weights & Biases with `--wandb`.
 Evaluation supports `--mode deterministic|stochastic|both` and deterministic evaluation generates `output/rl_report.html`.
 
-For split-node training on a cluster:
+For cluster training, the default recommendation is the simpler single-node setup:
 
 ```bash
-sbatch execute_rollout.sh
-sbatch execute_rollout.sh
-sbatch execute_learner.sh
+ybatch execute.sh
 ```
 
-- `execute_rollout.sh` runs one Java rollout worker on a CPU-oriented node
-- read the published `host:port` from each rollout job log
-- set `ROLLOUT_ENDPOINTS="host1:port,host2:port,...` in `execute_learner.sh`
-- `execute_learner.sh` runs the Python learner on a GPU-oriented node with `--endpoints ...`
-- `execute.sh` is kept as a local convenience mirror of `execute_learner.sh` for environments where that ignored filename is already part of the operator workflow
+- `execute.sh` starts a local Java rollout service and the Python learner in the same batch job
+- this is currently the preferred production path because split-node rollout did not improve throughput enough to justify the added orchestration cost
+
+The split-node scripts are still available for later experiments:
+
+```bash
+ybatch execute_rollout.sh
+ybatch execute_learner.sh
+```
 
 You can also target remote rollout services manually:
 
