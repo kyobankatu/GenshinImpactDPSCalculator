@@ -12,9 +12,10 @@ public class BenchmarkRLJava {
     public static void main(String[] args) {
         int environments = args.length > 0 ? Integer.parseInt(args[0]) : 4;
         int steps = args.length > 1 ? Integer.parseInt(args[1]) : 128;
+        int workers = args.length > 2 ? Integer.parseInt(args[2]) : 0;
 
         VectorizedEnvironment environment = new VectorizedEnvironment(
-                environments, FlinsParty2RLSimulatorFactory.supplier(), new EpisodeConfig());
+                environments, FlinsParty2RLSimulatorFactory.supplier(), new EpisodeConfig(), workers);
         environment.reset(false);
         int[] actions = new int[environments];
 
@@ -27,8 +28,9 @@ public class BenchmarkRLJava {
         }
         long durationMillis = Math.max(1, System.currentTimeMillis() - start);
         double envStepsPerSecond = (environments * (double) steps) / (durationMillis / 1000.0);
-        System.out.printf("Java rollout benchmark: envs=%d steps=%d duration=%dms envSteps/s=%.1f%n",
-                environments, environments * steps, durationMillis, envStepsPerSecond);
+        System.out.printf("Java rollout benchmark: envs=%d steps=%d workers=%s duration=%dms envSteps/s=%.1f%n",
+                environments, environments * steps, workers > 0 ? Integer.toString(workers) : "auto",
+                durationMillis, envStepsPerSecond);
         System.out.println("Java rollout metrics: " + environment.metricsSnapshot().toSummaryString());
         System.out.println("Battle environment metrics: " + BattleEnvironment.timingSnapshot().toSummaryString());
         environment.close();

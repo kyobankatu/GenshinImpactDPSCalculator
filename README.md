@@ -85,6 +85,18 @@ ybatch execute.sh
 - `execute.sh` starts a local Java rollout service and the Python learner in the same batch job
 - this is currently the preferred production path because split-node rollout did not improve throughput enough to justify the added orchestration cost
 
+For short rollout-parallelism diagnosis runs, `execute.sh` also accepts environment overrides:
+
+```bash
+TRAIN_PROFILE=diagnosis TRAIN_ENVS=12 JAVA_ROLLOUT_WORKERS=4 WANDB_GROUP=rollout-grid ybatch execute.sh
+TRAIN_PROFILE=diagnosis TRAIN_ENVS=16 JAVA_ROLLOUT_WORKERS=8 WANDB_GROUP=rollout-grid ybatch execute.sh
+```
+
+- `TRAIN_PROFILE=diagnosis` shortens the run for throughput comparison
+- `TRAIN_ENVS` controls the vectorized environment count
+- `JAVA_ROLLOUT_WORKERS` overrides the Java-side worker pool size
+- `WANDB_GROUP` helps compare the resulting runs together in Weights & Biases
+
 The split-node scripts are still available for later experiments:
 
 ```bash

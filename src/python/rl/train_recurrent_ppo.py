@@ -285,10 +285,12 @@ def parse_args():
     parser.add_argument("--max-grad-norm", type=float, help="gradient clipping max norm")
     parser.add_argument("--checkpoint-interval", type=int, help="checkpoint save interval in updates")
     parser.add_argument("--evaluation-interval", type=int, help="evaluation interval in updates")
+    parser.add_argument("--rollout-workers", type=int, default=None, help="Java rollout worker override used for this run")
     parser.add_argument("--wandb", action="store_true", help="enable Weights & Biases logging")
     parser.add_argument("--wandb-project", default="genshin-recurrent-ppo", help="Weights & Biases project name")
     parser.add_argument("--wandb-entity", default=None, help="Weights & Biases entity/team name")
     parser.add_argument("--wandb-run-name", default=None, help="Weights & Biases run name override")
+    parser.add_argument("--wandb-group", default=None, help="Weights & Biases run group")
     parser.add_argument("--wandb-mode", choices=("online", "offline", "disabled"), default="online", help="Weights & Biases mode")
     return parser.parse_args()
 
@@ -339,6 +341,7 @@ def init_wandb(args, config, client, device):
         "port": args.port,
         "ports": args.ports,
         "endpoints": args.endpoints,
+        "rollout_workers": args.rollout_workers,
         "device": device.type,
         "observation_size": client.observation_size,
         "action_size": client.action_size,
@@ -348,6 +351,7 @@ def init_wandb(args, config, client, device):
         project=args.wandb_project,
         entity=args.wandb_entity,
         name=args.wandb_run_name,
+        group=args.wandb_group,
         mode=args.wandb_mode,
         config=run_config,
     )

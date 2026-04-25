@@ -22,7 +22,8 @@
 - `recurrent_ppo.py` depends on `.venv` providing `torch` and `numpy`.
 - `train_recurrent_ppo.py --wandb` additionally depends on `.venv` providing `wandb`.
 - Output artifacts are written under `output/recurrent_ppo_py/` and `output/rl_report.html`.
-- Split-node cluster runs use `execute_rollout.sh` to publish endpoint files and `execute.sh` to consume them from the learner side.
+- Single-node cluster runs use `execute.sh`, which can also be parameterized with `TRAIN_ENVS`, `JAVA_ROLLOUT_WORKERS`, and `WANDB_GROUP` for short diagnosis sweeps.
+- Split-node cluster runs remain experimental and use `execute_rollout.sh` / `execute_learner.sh`.
 
 ## Agent guidance
 - Treat observation layout, action-mask semantics, batch protocol framing, and endpoint parsing as contract-level behavior shared with Java.

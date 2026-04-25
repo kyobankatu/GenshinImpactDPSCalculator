@@ -24,6 +24,7 @@ public class RolloutService {
     private final int port;
     private final String bindHost;
     private final EpisodeConfig config;
+    private final int rolloutWorkers;
     private final Map<Integer, VectorizedEnvironment> runners = new HashMap<>();
     private int nextRunnerId = 1;
     private long runnerCreateCalls;
@@ -36,18 +37,24 @@ public class RolloutService {
     private long stepWriteNanos;
 
     public RolloutService(int port, EpisodeConfig config) {
-        this(port, "127.0.0.1", config);
+        this(port, "127.0.0.1", config, 0);
     }
 
     public RolloutService(int port, String bindHost, EpisodeConfig config) {
+        this(port, bindHost, config, 0);
+    }
+
+    public RolloutService(int port, String bindHost, EpisodeConfig config, int rolloutWorkers) {
         this.port = port;
         this.bindHost = bindHost;
         this.config = config;
+        this.rolloutWorkers = rolloutWorkers;
     }
 
     public void serveForever() throws IOException {
         try (ServerSocket serverSocket = new ServerSocket(port, 1, InetAddress.getByName(bindHost))) {
-            System.out.printf("RL rollout service listening on %s:%d%n", bindHost, port);
+            String workerLabel = rolloutWorkers > 0 ? Integer.toString(rolloutWorkers) : "auto";
+            System.out.printf("RL rollout service listening on %s:%d (workers=%s)%n", bindHost, port, workerLabel);
             while (true) {
                 try (Socket socket = serverSocket.accept();
                         DataInputStream in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
@@ -80,7 +87,7 @@ public class RolloutService {
                     int runnerId = nextRunnerId++;
                     long createStart = System.nanoTime();
                     runners.put(runnerId, new VectorizedEnvironment(
-                            count, FlinsParty2RLSimulatorFactory.supplier(), config));
+                            count, FlinsParty2RLSimulatorFactory.supplier(), config, rolloutWorkers));
                     runnerCreateCalls++;
                     runnerCreateNanos += System.nanoTime() - createStart;
                     out.writeInt(runnerId);
