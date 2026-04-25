@@ -69,6 +69,34 @@ def run_training(args, run=None):
 
     policy = RecurrentPolicy(client.observation_size, config["hidden_size"], client.action_size).to(device)
     optimizer = torch.optim.Adam(policy.parameters(), lr=config["learning_rate"])
+    start_update = 0
+    if args.resume_from:
+        if not os.path.exists(args.resume_from):
+            raise FileNotFoundError(f"Resume checkpoint not found: {args.resume_from}")
+        checkpoint_payload = RecurrentPolicy.load_payload(args.resume_from, map_location=device)
+        checkpoint_hidden_size = checkpoint_payload["hidden_size"]
+        checkpoint_observation_size = checkpoint_payload["observation_size"]
+        checkpoint_action_size = checkpoint_payload["action_size"]
+        if checkpoint_hidden_size != config["hidden_size"]:
+            raise ValueError(
+                f"Resume checkpoint hidden_size mismatch: checkpoint={checkpoint_hidden_size} config={config['hidden_size']}"
+            )
+        if checkpoint_observation_size != client.observation_size:
+            raise ValueError(
+                "Resume checkpoint observation size mismatch: "
+                f"checkpoint={checkpoint_observation_size} service={client.observation_size}"
+            )
+        if checkpoint_action_size != client.action_size:
+            raise ValueError(
+                "Resume checkpoint action size mismatch: "
+                f"checkpoint={checkpoint_action_size} service={client.action_size}"
+            )
+        policy.load_state_dict(checkpoint_payload["state_dict"])
+        optimizer_state_dict = checkpoint_payload.get("optimizer_state_dict")
+        if optimizer_state_dict is not None:
+            optimizer.load_state_dict(optimizer_state_dict)
+        start_update = int(checkpoint_payload.get("update", 0))
+        print(f"Resuming training from {args.resume_from} at update {start_update}")
     hidden_states = torch.zeros(config["envs"], config["hidden_size"], dtype=torch.float32, device=device)
     owns_run = run is None
     run = init_wandb(args, config, client, device, existing_run=run)
@@ -76,9 +104,11 @@ def run_training(args, run=None):
     print(
         f"Starting Python Recurrent PPO training: preset={preset} updates={config['updates']} envs={config['envs']} rollout={config['rollout_length']} device={device.type}"
     )
+    if start_update >= config["updates"]:
+        print(f"Checkpoint is already at update {start_update}; requested updates={config['updates']}, so no training will run.")
 
     try:
-        for update in range(1, config["updates"] + 1):
+        for update in range(start_update + 1, config["updates"] + 1):
             entropy_coefficient = scheduled_entropy_coefficient(config, update)
             rollout_start = time.time()
             segments = [{"steps": [], "bootstrap_value": 0.0} for _ in range(config["envs"])]
@@ -255,7 +285,7 @@ def run_training(args, run=None):
                 )
 
             if update % config["checkpoint_interval"] == 0 or update == config["updates"]:
-                policy.save(MODEL_PATH, optimizer)
+                policy.save(MODEL_PATH, optimizer, extra_state={"update": update})
             append_log(log_row)
     finally:
         client.close_runner(runner_id)
@@ -292,6 +322,7 @@ def parse_args():
     parser.add_argument("--checkpoint-interval", type=int, help="checkpoint save interval in updates")
     parser.add_argument("--evaluation-interval", type=int, help="evaluation interval in updates")
     parser.add_argument("--rollout-workers", type=int, default=None, help="Java rollout worker override used for this run")
+    parser.add_argument("--resume-from", default=None, help="path to a saved .pt checkpoint to resume from")
     parser.add_argument("--wandb", action="store_true", help="enable Weights & Biases logging")
     parser.add_argument("--wandb-project", default="genshin-recurrent-ppo", help="Weights & Biases project name")
     parser.add_argument("--wandb-entity", default=None, help="Weights & Biases entity/team name")

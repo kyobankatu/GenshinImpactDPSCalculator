@@ -42,7 +42,7 @@ class RecurrentPolicy(nn.Module):
             "top_probability": probabilities.max(dim=-1).values,
         }
 
-    def save(self, path, optimizer=None):
+    def save(self, path, optimizer=None, extra_state=None):
         payload = {
             "observation_size": self.observation_size,
             "hidden_size": self.hidden_size,
@@ -51,14 +51,20 @@ class RecurrentPolicy(nn.Module):
         }
         if optimizer is not None:
             payload["optimizer_state_dict"] = optimizer.state_dict()
+        if extra_state:
+            payload.update(extra_state)
         torch.save(payload, path)
 
     @classmethod
     def load(cls, path, map_location="cpu"):
-        payload = torch.load(path, map_location=map_location)
+        payload = cls.load_payload(path, map_location=map_location)
         model = cls(payload["observation_size"], payload["hidden_size"], payload["action_size"])
         model.load_state_dict(payload["state_dict"])
         return model, payload.get("optimizer_state_dict")
+
+    @staticmethod
+    def load_payload(path, map_location="cpu"):
+        return torch.load(path, map_location=map_location)
 
 
 def compute_advantages(segments, gamma, gae_lambda):
