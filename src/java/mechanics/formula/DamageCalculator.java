@@ -92,6 +92,24 @@ public class DamageCalculator {
     }
 
     /**
+     * Hot-path overload used when action resolution already assembled current stats
+     * for the same non-snapshot action.
+     */
+    public static double calculateDamage(
+            model.entity.Character attacker,
+            model.entity.Enemy target,
+            simulation.action.AttackAction action,
+            java.util.List<mechanics.buff.Buff> activeBuffs,
+            model.stats.StatsContainer preResolvedStats,
+            double currentTime,
+            double reactionMultiplier,
+            simulation.CombatSimulator sim) {
+        DamageStrategy strategy = action.isLunarConsidered() ? LUNAR_STRATEGY : STANDARD_STRATEGY;
+        return strategy.calculate(attacker, target, action, activeBuffs, preResolvedStats, currentTime,
+                reactionMultiplier, sim);
+    }
+
+    /**
      * Computes the enemy defense damage multiplier using the standard Genshin
      * formula.
      *
@@ -130,7 +148,7 @@ public class DamageCalculator {
         return ResistanceCalculator.calculateResMulti(baseRes, resShred);
     }
 
-    static StatsContainer resolveStats(
+    public static StatsContainer resolveStats(
             Character attacker,
             simulation.action.AttackAction action,
             List<Buff> activeBuffs,
@@ -144,6 +162,18 @@ public class DamageCalculator {
             }
         }
         return stats;
+    }
+
+    public static StatsContainer resolveStats(
+            Character attacker,
+            simulation.action.AttackAction action,
+            List<Buff> activeBuffs,
+            StatsContainer preResolvedStats,
+            double currentTime) {
+        if (action.isUseSnapshot()) {
+            return attacker.getSnapshot();
+        }
+        return preResolvedStats != null ? preResolvedStats : resolveStats(attacker, action, activeBuffs, currentTime);
     }
 
     static void notifyDamageHooks(

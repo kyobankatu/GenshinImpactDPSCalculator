@@ -1,73 +1,74 @@
-# Split Rollout And Learner Tasks
+# RL Hot Path Optimization Tasks
 
 ## Goal
 
-Run Java rollout collection on CPU-oriented nodes and PyTorch PPO learning on a separate GPU-oriented node.
+Improve rollout throughput without turning the combat engine into unreadable low-level code.
 
-The current single-node setup is simple, but rollout collection still dominates wall time.
-The next architecture step is to decouple the rollout service from the learner so that:
+The optimization target is the RL hot path only. General simulation readability and maintainability still matter.
 
-- rollout can scale on CPU-heavy nodes
-- learner can stay on a GPU-heavy node
-- the two sides communicate over explicit rollout endpoints instead of `127.0.0.1`
+## Design Constraints
 
-## Current Situation
+- Keep optimizations local to the confirmed hot path.
+- Prefer explicit helper types and overloads over hidden mutable global state.
+- Do not spread buffer reuse and cache plumbing across unrelated subsystems.
+- Keep existing public APIs usable unless the hot-path-specific alternative is clearly better.
+- Add a short explanation when a change exists primarily for performance.
 
-- learner optimization is already much cheaper than rollout collection
-- single-node multi-port fan-out was slower than single service local execution
-- rollout and learner are still coupled to one batch job by default
-- the rollout service still needs a clean remote-endpoint contract for multi-node deployment
+## Profiling Summary
+
+Current measurements show:
+
+- `BattleEnvironment.execute(...)` dominates step cost
+- `encode` and `mask` are secondary
+- JFR points to:
+  - `CombatActionResolver.resolveWithoutTimeAdvance(...)`
+  - `DamageCalculator.calculateDamage(...)`
+  - `DamageCalculator.resolveStats(...)`
+  - `Character.getEffectiveStats(...)`
+  - `StatAssembler.assembleEffectiveStats(...)`
+  - buff assembly and map-heavy stat work
 
 ## Work Plan
 
-### Phase 1: Make Rollout Endpoints First-Class
+### Phase 1: Remove Redundant Per-Action Buff Assembly
 
-- Allow the Java rollout service to bind to a configurable host instead of only `127.0.0.1`
-- Allow Python train/evaluate/benchmark entry points to accept explicit `host:port` endpoint lists
-- Keep the old single-host local mode working for local debugging
-- Deliverable:
-  - rollout service can listen on a node-visible address
-  - learner can consume remote endpoints without local-only assumptions
+- Resolve applicable buffs once per action inside the action-resolution hot path
+- Reuse that resolved buff list for:
+  - reaction stat lookup
+  - final damage calculation
+- Avoid recomputing the same applicable buff set multiple times within one action
+- Keep the optimization scoped to action resolution rather than changing the entire simulator API
 
-### Phase 2: Split Batch Entry Points
+### Phase 2: Remove Redundant Per-Action Stat Assembly
 
-- Convert the current learner batch script into a learner-only job
-- Add a rollout-only batch script for CPU nodes
-- Use a shared endpoint-discovery directory so rollout jobs can publish their reachable `host:port`
-- Make the learner wait for the expected number of rollout workers before starting PPO
-- Deliverable:
-  - rollout and learner can be submitted as separate jobs
+- Resolve live stats once per action when snapshot is not required
+- Reuse the same resolved stats for:
+  - reaction calculations
+  - damage calculations
+- Add optimized overloads where needed instead of forcing all callers through a new contract
 
-### Phase 3: Update Docs And Operator Contract
+### Phase 3: Re-measure Before Going Broader
 
-- Document:
-  - which script is submitted to rollout nodes
-  - which script is submitted to the learner node
-  - how rollout workers discover the same cluster tag
-  - how to test the remote endpoint path manually
-- Deliverable:
-  - repo docs match the split-node deployment model
-
-### Phase 4: Validate The Split Architecture
-
-- Verify local syntax and build after the contract change
-- Keep the old local path usable for development
-- Confirm that the learner scripts can still talk to a single endpoint and to explicit endpoint lists
-- Deliverable:
-  - split-node support exists without breaking local debugging
+- Re-run the local benchmark and compare:
+  - `meanStepMs`
+  - `executeShare`
+  - `envSteps/s`
+- Only if the gain is real, consider the next layer:
+  - `BuffManager` internal reusable buffers
+  - `StatsContainer` / `StatAssembler` allocation reduction
+  - event-queue specialization
 
 ## Acceptance Criteria
 
-This node-splitting pass is complete only when:
+This pass is complete only when:
 
-- Java rollout can bind to a non-localhost address
-- Python train/evaluate/benchmark can connect via explicit `host:port` endpoints
-- there is a rollout batch script and a learner batch script
-- learner startup no longer depends on starting local rollout inside the same job
-- docs explain how to launch the two-job setup
+- one-action repeated buff assembly is removed in the hot path
+- one-action repeated stat assembly is reduced in the hot path
+- code structure remains local and understandable
+- benchmark results are re-collected after the change
 
 ## Notes
 
-- Keep the single-endpoint local debugging path intact.
-- Do not assume multi-node rollout is automatically faster; measure after the split is in place.
-- Use CPU-heavy nodes for rollout first, then revisit process-level and node-level scaling after measurement.
+- Do not optimize everything at once.
+- Do not trade away broad code clarity for tiny wins outside the measured hot path.
+- Prefer “one optimized path for RL execution” over “global low-level rewrite.”

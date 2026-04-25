@@ -36,6 +36,7 @@ import simulation.event.TimerEvent;
 public class CombatActionResolver {
     private final CombatSimulator sim;
     private final ReactionEffectScheduler reactionEffectScheduler;
+    private final List<Buff> applicableBuffBuffer = new ArrayList<>();
 
     /**
      * Creates a resolver bound to the given simulator instance.
@@ -64,6 +65,7 @@ public class CombatActionResolver {
             throw new RuntimeException("Character not found: " + characterId);
         }
         String charName = c.getName();
+        ActionResolutionContext context = createContext(c, action);
 
         normalizeIcd(action);
 
@@ -74,12 +76,21 @@ public class CombatActionResolver {
 
         double reactionMulti = 1.0;
         if (applied && action.getGaugeUnits() > 0) {
-            reactionMulti = resolveGaugeAndReactions(c, characterId, action);
+            reactionMulti = resolveGaugeAndReactions(c, characterId, action, context);
         } else if (sim.isLoggingEnabled()) {
             System.out.println(String.format("   [ICD] Applied blocked (%s)", action.getICDTag()));
         }
 
-        finalizeActionDamage(c, charName, action, reactionMulti);
+        finalizeActionDamage(c, charName, action, reactionMulti, context);
+    }
+
+    private ActionResolutionContext createContext(Character attacker, AttackAction action) {
+        applicableBuffBuffer.clear();
+        applicableBuffBuffer.addAll(sim.getApplicableBuffs(attacker));
+        StatsContainer resolvedStats = action.isUseSnapshot()
+                ? null
+                : DamageCalculator.resolveStats(attacker, action, applicableBuffBuffer, sim.getCurrentTime());
+        return new ActionResolutionContext(new ArrayList<>(applicableBuffBuffer), resolvedStats);
     }
 
     private void normalizeIcd(AttackAction action) {
@@ -108,13 +119,17 @@ public class CombatActionResolver {
         }
     }
 
-    private double resolveGaugeAndReactions(Character attacker, CharacterId characterId, AttackAction action) {
+    private double resolveGaugeAndReactions(
+            Character attacker,
+            CharacterId characterId,
+            AttackAction action,
+            ActionResolutionContext context) {
         Element trigger = action.getElement();
         Set<Element> currentAuras = sim.getEnemy().getActiveAuras();
         boolean reactionTriggered = false;
         double reactionMulti = 1.0;
 
-        StatsContainer stats = getReactionStats(attacker, action);
+        StatsContainer stats = getReactionStats(attacker, action, context);
         double em = stats.get(StatType.ELEMENTAL_MASTERY);
         double swirlBonus = stats.get(StatType.SWIRL_DMG_BONUS);
 
@@ -141,19 +156,11 @@ public class CombatActionResolver {
         return reactionMulti;
     }
 
-    private StatsContainer getReactionStats(Character attacker, AttackAction action) {
+    private StatsContainer getReactionStats(Character attacker, AttackAction action, ActionResolutionContext context) {
         if (action.isUseSnapshot()) {
             return attacker.getSnapshot();
         }
-
-        StatsContainer stats = attacker.getEffectiveStats(sim.getCurrentTime());
-        List<Buff> buffs = sim.getApplicableBuffs(attacker);
-        for (Buff buff : buffs) {
-            if (!buff.isExpired(sim.getCurrentTime())) {
-                buff.apply(stats, sim.getCurrentTime());
-            }
-        }
-        return stats;
+        return context.resolvedStats;
     }
 
     private double handleAmplifyingReaction(
@@ -238,15 +245,20 @@ public class CombatActionResolver {
         }
     }
 
-    private void finalizeActionDamage(Character attacker, String charName, AttackAction action, double reactionMulti) {
+    private void finalizeActionDamage(
+            Character attacker,
+            String charName,
+            AttackAction action,
+            double reactionMulti,
+            ActionResolutionContext context) {
         if (sim.isLoggingEnabled()) {
             System.out.println(String.format("[T=%.1f] %s uses %s",
                     sim.getCurrentTime(), charName, action.getName()));
         }
 
-        List<Buff> activeBuffs = sim.getApplicableBuffs(attacker);
         double damage = DamageCalculator.calculateDamage(
-                attacker, sim.getEnemy(), action, activeBuffs, sim.getCurrentTime(), reactionMulti, sim);
+                attacker, sim.getEnemy(), action, context.applicableBuffs, context.resolvedStats,
+                sim.getCurrentTime(), reactionMulti, sim);
 
         if (attacker.getWeapon() instanceof DamageTriggeredWeaponEffect) {
             ((DamageTriggeredWeaponEffect) attacker.getWeapon()).onDamage(
@@ -283,6 +295,16 @@ public class CombatActionResolver {
         double naEnergy = attacker.getWeapon().getExpectedNAEnergyPerHit();
         if (naEnergy > 0) {
             attacker.receiveFlatEnergy(naEnergy);
+        }
+    }
+
+    private static final class ActionResolutionContext {
+        private final List<Buff> applicableBuffs;
+        private final StatsContainer resolvedStats;
+
+        private ActionResolutionContext(List<Buff> applicableBuffs, StatsContainer resolvedStats) {
+            this.applicableBuffs = applicableBuffs;
+            this.resolvedStats = resolvedStats;
         }
     }
 }

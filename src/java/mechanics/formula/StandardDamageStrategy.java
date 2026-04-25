@@ -25,8 +25,21 @@ final class StandardDamageStrategy implements DamageStrategy {
             double currentTime,
             double reactionMultiplier,
             CombatSimulator sim) {
+        return calculate(attacker, target, action, activeBuffs, null, currentTime, reactionMultiplier, sim);
+    }
 
-        StatsContainer stats = DamageCalculator.resolveStats(attacker, action, activeBuffs, currentTime);
+    @Override
+    public double calculate(
+            Character attacker,
+            Enemy target,
+            AttackAction action,
+            List<Buff> activeBuffs,
+            StatsContainer preResolvedStats,
+            double currentTime,
+            double reactionMultiplier,
+            CombatSimulator sim) {
+
+        StatsContainer stats = DamageCalculator.resolveStats(attacker, action, activeBuffs, preResolvedStats, currentTime);
 
         double baseStatValue = action.getScalingStatValue(stats);
         double mv = action.getDamagePercent();

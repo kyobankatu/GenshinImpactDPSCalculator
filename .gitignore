@@ -54,3 +54,6 @@ __pycache__/
 
 # bash file
 *.sh
+
+# profile data
+*.jfr
