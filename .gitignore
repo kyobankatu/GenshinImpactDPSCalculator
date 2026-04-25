@@ -52,6 +52,9 @@ execute.sh
 __pycache__/
 .venv/
 
+# wandb
+sweeps/
+
 # bash file
 *.sh
 

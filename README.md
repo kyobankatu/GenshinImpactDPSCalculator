@@ -97,6 +97,17 @@ TRAIN_PROFILE=diagnosis TRAIN_ENVS=16 JAVA_ROLLOUT_WORKERS=8 WANDB_GROUP=rollout
 - `JAVA_ROLLOUT_WORKERS` overrides the Java-side worker pool size
 - `WANDB_GROUP` helps compare the resulting runs together in Weights & Biases
 
+If you want to use native W&B sweep configuration instead of manual batch overrides:
+
+```bash
+wandb sweep sweeps/rollout_parallelism.yaml
+SWEEP_ID=katumon/genshin-recurrent-ppo/<sweep-id> ybatch execute_sweep_agent.sh
+```
+
+- `sweeps/rollout_parallelism.yaml` defines a grid over `envs` and `rollout_workers`
+- `execute_sweep_agent.sh` runs `wandb agent` on a compute node and each trial launches a local Java rollout service plus the Python learner
+- each trial writes its rollout log under `logs/sweep_rollout_<wandb-run-id>_5005.log`
+
 The split-node scripts are still available for later experiments:
 
 ```bash

@@ -45,6 +45,10 @@ PRESETS = {
 
 def main():
     args = parse_args()
+    run_training(args)
+
+
+def run_training(args, run=None):
     preset = args.preset
     seed = args.seed
     host = args.host
@@ -66,7 +70,8 @@ def main():
     policy = RecurrentPolicy(client.observation_size, config["hidden_size"], client.action_size).to(device)
     optimizer = torch.optim.Adam(policy.parameters(), lr=config["learning_rate"])
     hidden_states = torch.zeros(config["envs"], config["hidden_size"], dtype=torch.float32, device=device)
-    run = init_wandb(args, config, client, device)
+    owns_run = run is None
+    run = init_wandb(args, config, client, device, existing_run=run)
 
     print(
         f"Starting Python Recurrent PPO training: preset={preset} updates={config['updates']} envs={config['envs']} rollout={config['rollout_length']} device={device.type}"
@@ -255,7 +260,8 @@ def main():
     finally:
         client.close_runner(runner_id)
         client.close()
-        finish_wandb(run)
+        if owns_run:
+            finish_wandb(run)
 
     print(f"Saved checkpoint to {MODEL_PATH}")
     print(f"Saved training log to {TRAIN_LOG_PATH}")
@@ -329,8 +335,8 @@ def scheduled_entropy_coefficient(config, update):
     return start + (end - start) * progress
 
 
-def init_wandb(args, config, client, device):
-    if not args.wandb:
+def init_wandb(args, config, client, device, existing_run=None):
+    if not args.wandb and existing_run is None:
         return None
     if wandb is None:
         raise RuntimeError("wandb logging was requested, but the wandb package is not installed in the active Python environment.")
@@ -347,6 +353,9 @@ def init_wandb(args, config, client, device):
         "action_size": client.action_size,
     }
     run_config.update(config)
+    if existing_run is not None:
+        existing_run.config.update(run_config, allow_val_change=True)
+        return existing_run
     return wandb.init(
         project=args.wandb_project,
         entity=args.wandb_entity,

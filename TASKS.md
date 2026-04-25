@@ -42,7 +42,10 @@ Find a better `envs x workers` operating point for rollout throughput without ma
 
 ### Phase 4: Compare `envs x workers` in W&B
 
-- Use short diagnosis runs to compare:
+- Use native W&B sweep configuration for short diagnosis runs:
+  - `sweeps/rollout_parallelism.yaml`
+  - `execute_sweep_agent.sh`
+- Compare:
   - `perf/rollout_duration_sec`
   - `perf/env_steps_per_second`
   - `perf/optimization_duration_sec`
