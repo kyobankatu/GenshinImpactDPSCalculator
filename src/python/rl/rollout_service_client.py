@@ -1,4 +1,5 @@
 import socket
+from concurrent.futures import ThreadPoolExecutor
 
 from binary_protocol import (
     CMD_CLOSE_RUNNER,
@@ -106,6 +107,7 @@ class MultiRolloutServiceClient:
     def __init__(self, endpoints=None):
         endpoints = endpoints or [("127.0.0.1", 5005)]
         self.clients = [RolloutServiceClient(host, port) for host, port in endpoints]
+        self.executor = ThreadPoolExecutor(max_workers=len(self.clients))
         self.version = self.clients[0].version
         self.observation_size = self.clients[0].observation_size
         self.action_size = self.clients[0].action_size
@@ -127,8 +129,13 @@ class MultiRolloutServiceClient:
     def reset_runner(self, runner_handle, generate_report: bool = False):
         observations = []
         masks = []
+        futures = []
         for shard_index, (client, runner_id, _shard_envs) in enumerate(runner_handle):
-            shard_observations, shard_masks = client.reset_runner(runner_id, generate_report and shard_index == 0)
+            futures.append(
+                self.executor.submit(client.reset_runner, runner_id, generate_report and shard_index == 0)
+            )
+        for future in futures:
+            shard_observations, shard_masks = future.result()
             observations.extend(shard_observations)
             masks.extend(shard_masks)
         return observations, masks
@@ -146,10 +153,13 @@ class MultiRolloutServiceClient:
         episode_steps = []
         live_steps = []
         offset = 0
+        futures = []
         for client, runner_id, shard_envs in runner_handle:
             shard_actions = actions[offset:offset + shard_envs]
             offset += shard_envs
-            batch = client.step_runner(runner_id, shard_actions)
+            futures.append(self.executor.submit(client.step_runner, runner_id, shard_actions))
+        for future in futures:
+            batch = future.result()
             observations.extend(batch["observations"])
             masks.extend(batch["action_masks"])
             rewards.extend(batch["rewards"])
@@ -186,6 +196,7 @@ class MultiRolloutServiceClient:
         return True
 
     def close(self):
+        self.executor.shutdown(wait=True)
         for client in self.clients:
             client.close()
 

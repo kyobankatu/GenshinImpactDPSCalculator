@@ -84,10 +84,11 @@ sbatch execute_rollout.sh
 sbatch execute_learner.sh
 ```
 
-- `execute_rollout.sh` runs one Java rollout worker on a CPU-oriented node and publishes its `host:port` under `output/rl_endpoints/<cluster-tag>/`
-- `execute_learner.sh` runs the Python learner on a GPU-oriented node, waits for the configured number of rollout workers, and then starts PPO with `--endpoints host1:port,host2:port,...`
+- `execute_rollout.sh` runs one Java rollout worker on a CPU-oriented node
+- read the published `host:port` from each rollout job log
+- set `ROLLOUT_ENDPOINTS="host1:port,host2:port,...` in `execute_learner.sh`
+- `execute_learner.sh` runs the Python learner on a GPU-oriented node with `--endpoints ...`
 - `execute.sh` is kept as a local convenience mirror of `execute_learner.sh` for environments where that ignored filename is already part of the operator workflow
-- Keep `ROLLOUT_CLUSTER_TAG` consistent across both scripts and set `ROLLOUT_EXPECTED_WORKERS` in the learner script to match the number of submitted rollout jobs
 
 You can also target remote rollout services manually:
 
