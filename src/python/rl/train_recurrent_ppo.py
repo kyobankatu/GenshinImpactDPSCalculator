@@ -50,6 +50,7 @@ def main():
     host = args.host
     port = args.port
     ports = args.ports
+    endpoints = args.endpoints
 
     config = resolve_config(args)
     os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -58,7 +59,7 @@ def main():
     torch.manual_seed(seed)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    client = build_rollout_client(host=host, port=port, ports=ports)
+    client = build_rollout_client(host=host, port=port, ports=ports, endpoints=endpoints)
     runner_id = client.create_runner(config["envs"])
     observations, action_masks = client.reset_runner(runner_id, False)
 
@@ -267,6 +268,7 @@ def parse_args():
     parser.add_argument("--host", default="127.0.0.1", help="rollout service host")
     parser.add_argument("--port", type=int, default=5005, help="rollout service port")
     parser.add_argument("--ports", default=None, help="comma-separated rollout service ports for multi-service fan-out")
+    parser.add_argument("--endpoints", default=None, help="comma-separated rollout service host:port endpoints for multi-node fan-out")
     parser.add_argument("--updates", type=int, help="number of PPO updates")
     parser.add_argument("--rollout-length", type=int, help="steps collected per environment before each PPO update")
     parser.add_argument("--envs", type=int, help="number of vectorized environments")
@@ -335,6 +337,8 @@ def init_wandb(args, config, client, device):
         "seed": args.seed,
         "host": args.host,
         "port": args.port,
+        "ports": args.ports,
+        "endpoints": args.endpoints,
         "device": device.type,
         "observation_size": client.observation_size,
         "action_size": client.action_size,

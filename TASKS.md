@@ -1,92 +1,73 @@
-# Rollout Throughput Improvement Tasks
+# Split Rollout And Learner Tasks
 
 ## Goal
 
-Increase Java-side rollout throughput without breaking training quality.
+Run Java rollout collection on CPU-oriented nodes and PyTorch PPO learning on a separate GPU-oriented node.
 
-The current learner is already fast enough relative to rollout collection.
-The next major improvement target is the Java environment execution path.
+The current single-node setup is simple, but rollout collection still dominates wall time.
+The next architecture step is to decouple the rollout service from the learner so that:
+
+- rollout can scale on CPU-heavy nodes
+- learner can stay on a GPU-heavy node
+- the two sides communicate over explicit rollout endpoints instead of `127.0.0.1`
 
 ## Current Situation
 
-- Python optimization is much cheaper than rollout collection
-- rollout timing is stable but still dominates update wall time
-- deterministic policy quality has improved enough that throughput work is now worth prioritizing
-- the main remaining systems question is how to make Java rollout significantly faster
+- learner optimization is already much cheaper than rollout collection
+- single-node multi-port fan-out was slower than single service local execution
+- rollout and learner are still coupled to one batch job by default
+- the rollout service still needs a clean remote-endpoint contract for multi-node deployment
 
 ## Work Plan
 
-### Phase 1: Verify Whether `VectorizedEnvironment.step()` Is Effectively Sequential
+### Phase 1: Make Rollout Endpoints First-Class
 
-- Inspect the current implementation of:
-  - `VectorizedEnvironment.step()`
-  - `VectorizedEnvironment.reset()`
-- Confirm whether multiple environments are:
-  - executed sequentially in one thread
-  - or actually parallelized across worker threads
-- If execution is sequential, document that as the first confirmed bottleneck.
+- Allow the Java rollout service to bind to a configurable host instead of only `127.0.0.1`
+- Allow Python train/evaluate/benchmark entry points to accept explicit `host:port` endpoint lists
+- Keep the old single-host local mode working for local debugging
 - Deliverable:
-  - a clear statement of whether vectorization is only batching or true parallelism
+  - rollout service can listen on a node-visible address
+  - learner can consume remote endpoints without local-only assumptions
 
-### Phase 2: Profile `BattleEnvironment.step()` Hot Paths
+### Phase 2: Split Batch Entry Points
 
-- Use Java profiling and timing to identify the dominant cost inside rollout steps.
-- Focus profiling on:
-  - `BattleEnvironment.step()`
-  - action execution
-  - observation encoding
-  - action-mask generation
-  - combat simulator stepping
-- Preferred tools:
-  - existing lightweight timing already in the repo
-  - JFR if available in the runtime environment
-  - async-profiler if available later
+- Convert the current learner batch script into a learner-only job
+- Add a rollout-only batch script for CPU nodes
+- Use a shared endpoint-discovery directory so rollout jobs can publish their reachable `host:port`
+- Make the learner wait for the expected number of rollout workers before starting PPO
 - Deliverable:
-  - a ranked list of the hottest methods in step execution
+  - rollout and learner can be submitted as separate jobs
 
-### Phase 3: Reduce Allocation Pressure In Hot Loops
+### Phase 3: Update Docs And Operator Contract
 
-- Audit per-step allocation in:
-  - observation creation
-  - action mask creation
-  - action result creation
-  - intermediate collections or temporary objects
-- Prioritize removing:
-  - repeated `List` creation
-  - repeated `Map` creation
-  - avoidable array allocation
-  - avoidable boxing/unboxing
-- Prefer:
-  - reusable primitive buffers
-  - worker-local reusable arrays
-  - fewer temporary wrapper objects in the hot path
+- Document:
+  - which script is submitted to rollout nodes
+  - which script is submitted to the learner node
+  - how rollout workers discover the same cluster tag
+  - how to test the remote endpoint path manually
 - Deliverable:
-  - lower allocation rate and lower GC pressure during rollout
+  - repo docs match the split-node deployment model
 
-### Phase 4: Add Multi-Service Rollout Scaling If Needed
+### Phase 4: Validate The Split Architecture
 
-- Only after Phases 1 to 3 are measured and partially optimized, evaluate process-level scaling.
-- Candidate design:
-  - multiple Java rollout service processes
-  - separate ports per service
-  - Python-side fan-out across services
-- Use this only if:
-  - a single service process remains CPU-bound
-  - in-process optimizations are not enough
+- Verify local syntax and build after the contract change
+- Keep the old local path usable for development
+- Confirm that the learner scripts can still talk to a single endpoint and to explicit endpoint lists
 - Deliverable:
-  - a scaling design that can exceed single-process rollout throughput
+  - split-node support exists without breaking local debugging
 
 ## Acceptance Criteria
 
-This rollout-speed pass is complete only when:
+This node-splitting pass is complete only when:
 
-- we know whether vectorization is sequential or parallel
-- we have profiling evidence for the hottest rollout methods
-- at least one meaningful allocation reduction has been implemented
-- we have a decision on whether multi-service rollout is necessary
+- Java rollout can bind to a non-localhost address
+- Python train/evaluate/benchmark can connect via explicit `host:port` endpoints
+- there is a rollout batch script and a learner batch script
+- learner startup no longer depends on starting local rollout inside the same job
+- docs explain how to launch the two-job setup
 
 ## Notes
 
-- Do not optimize Python first; rollout is the dominant cost.
-- Do not jump to multi-process rollout before measuring the single-process bottleneck properly.
-- Keep deterministic/stochastic evaluation and current training diagnostics intact while optimizing throughput.
+- Keep the single-endpoint local debugging path intact.
+- Do not assume multi-node rollout is automatically faster; measure after the split is in place.
+- Use CPU-heavy nodes for rollout first, then revisit process-level and node-level scaling after measurement.

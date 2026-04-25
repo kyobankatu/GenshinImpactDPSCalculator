@@ -60,7 +60,7 @@ Generate the technical documentation for the core classes:
 The documentation will be generated in the `build/docs/javadoc/` folder. Open `index.html` in your browser.
 
 ### 4. Run The Hybrid RL Stack
-Start the local Java rollout service, then run Python training, evaluation, and optional benchmarking:
+For local debugging, start a local Java rollout service and then run Python training, evaluation, and optional benchmarking:
 
 ```bash
 python3 -m pip install -r requirements.txt
@@ -76,6 +76,27 @@ Training writes `output/recurrent_ppo_py/latest-model.pt` and `output/recurrent_
 If `.venv` includes `wandb`, training can also stream metrics to Weights & Biases with `--wandb`.
 Evaluation supports `--mode deterministic|stochastic|both` and deterministic evaluation generates `output/rl_report.html`.
 
+For split-node training on a cluster:
+
+```bash
+sbatch execute_rollout.sh
+sbatch execute_rollout.sh
+sbatch execute_learner.sh
+```
+
+- `execute_rollout.sh` runs one Java rollout worker on a CPU-oriented node and publishes its `host:port` under `output/rl_endpoints/<cluster-tag>/`
+- `execute_learner.sh` runs the Python learner on a GPU-oriented node, waits for the configured number of rollout workers, and then starts PPO with `--endpoints host1:port,host2:port,...`
+- `execute.sh` is kept as a local convenience mirror of `execute_learner.sh` for environments where that ignored filename is already part of the operator workflow
+- Keep `ROLLOUT_CLUSTER_TAG` consistent across both scripts and set `ROLLOUT_EXPECTED_WORKERS` in the learner script to match the number of submitted rollout jobs
+
+You can also target remote rollout services manually:
+
+```bash
+python3 src/python/rl/train_recurrent_ppo.py --preset debug --endpoints cpu-node-a:5005,cpu-node-b:5005
+python3 src/python/rl/evaluate_policy.py --mode both --endpoints cpu-node-a:5005
+python3 src/python/rl/benchmark_rollout.py --envs 8 --steps 128 --endpoints cpu-node-a:5005,cpu-node-b:5005
+```
+
 ## Architecture
 
 1. **Party & Characters**: Defined in `/model/entity/` and `/model/character/`. Base stats, weapons, and artifact sets are assembled into a `Party`.
@@ -83,4 +104,4 @@ Evaluation supports `--mode deterministic|stochastic|both` and deterministic eva
 3. **CombatSimulator**: The core driver. Tracks time, manages the event queue (attacks, swaps, periodic ticks), ICD counters, and active buffs.
 4. **DamageCalculator**: Pure mathematical functions utilizing `StatsContainer` snapshots to resolve exactly how much damage a hit deals, including special non-canonical branches.
 5. **VisualLogger / HtmlReportGenerator**: Records all events for debugging and spits out a graphical HTML report upon simulation completion.
-6. **Hybrid RL Stack**: Keeps environment stepping in Java near `CombatSimulator` while a Python recurrent PPO learner communicates through a local binary batch protocol.
+6. **Hybrid RL Stack**: Keeps environment stepping in Java near `CombatSimulator` while a Python recurrent PPO learner communicates through a binary batch protocol that supports both local and split-node rollout endpoints.

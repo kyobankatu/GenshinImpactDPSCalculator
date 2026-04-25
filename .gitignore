@@ -53,4 +53,4 @@ __pycache__/
 .venv/
 
 # bash file
-execute.sh
+*.sh

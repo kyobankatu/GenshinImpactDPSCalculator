@@ -103,9 +103,9 @@ class RolloutServiceClient:
 
 
 class MultiRolloutServiceClient:
-    def __init__(self, host="127.0.0.1", ports=None):
-        ports = ports or [5005]
-        self.clients = [RolloutServiceClient(host, port) for port in ports]
+    def __init__(self, endpoints=None):
+        endpoints = endpoints or [("127.0.0.1", 5005)]
+        self.clients = [RolloutServiceClient(host, port) for host, port in endpoints]
         self.version = self.clients[0].version
         self.observation_size = self.clients[0].observation_size
         self.action_size = self.clients[0].action_size
@@ -196,12 +196,33 @@ def split_evenly(total, buckets):
     return [base + (1 if index < remainder else 0) for index in range(buckets)]
 
 
-def build_rollout_client(host="127.0.0.1", port=5005, ports=None):
+def parse_endpoints(endpoints):
+    parsed = []
+    for raw_value in endpoints.split(","):
+        value = raw_value.strip()
+        if not value:
+            continue
+        host, separator, port = value.rpartition(":")
+        if not separator or not host or not port:
+            raise ValueError(f"invalid endpoint '{value}', expected host:port")
+        parsed.append((host, int(port)))
+    if not parsed:
+        raise ValueError("endpoints argument did not contain any valid host:port values")
+    return parsed
+
+
+def build_rollout_client(host="127.0.0.1", port=5005, ports=None, endpoints=None):
+    if endpoints:
+        parsed_endpoints = parse_endpoints(endpoints)
+        if len(parsed_endpoints) == 1:
+            endpoint_host, endpoint_port = parsed_endpoints[0]
+            return RolloutServiceClient(endpoint_host, endpoint_port)
+        return MultiRolloutServiceClient(parsed_endpoints)
     if ports:
         parsed_ports = [int(value.strip()) for value in ports.split(",") if value.strip()]
         if not parsed_ports:
             raise ValueError("ports argument did not contain any valid port numbers")
         if len(parsed_ports) == 1:
             return RolloutServiceClient(host, parsed_ports[0])
-        return MultiRolloutServiceClient(host, parsed_ports)
+        return MultiRolloutServiceClient([(host, parsed_port) for parsed_port in parsed_ports])
     return RolloutServiceClient(host, port)

@@ -16,12 +16,13 @@ def main():
     host = args.host
     port = args.port
     ports = args.ports
+    endpoints = args.endpoints
     mode = args.mode
 
     if not os.path.exists(checkpoint):
         raise SystemExit(f"Checkpoint not found: {checkpoint}")
 
-    client = build_rollout_client(host=host, port=port, ports=ports)
+    client = build_rollout_client(host=host, port=port, ports=ports, endpoints=endpoints)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     policy, _ = RecurrentPolicy.load(checkpoint, map_location=device)
     policy = policy.to(device)
@@ -47,6 +48,7 @@ def parse_args():
     parser.add_argument("--host", default="127.0.0.1", help="rollout service host")
     parser.add_argument("--port", type=int, default=5005, help="rollout service port")
     parser.add_argument("--ports", default=None, help="comma-separated rollout service ports for multi-service fan-out")
+    parser.add_argument("--endpoints", default=None, help="comma-separated rollout service host:port endpoints for multi-node fan-out")
     parser.add_argument("--mode", choices=("deterministic", "stochastic", "both"), default="both", help="evaluation mode")
     return parser.parse_args()
 

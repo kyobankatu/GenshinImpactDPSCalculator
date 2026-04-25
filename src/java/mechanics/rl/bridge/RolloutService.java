@@ -22,6 +22,7 @@ import mechanics.rl.ObservationEncoder;
  */
 public class RolloutService {
     private final int port;
+    private final String bindHost;
     private final EpisodeConfig config;
     private final Map<Integer, VectorizedEnvironment> runners = new HashMap<>();
     private int nextRunnerId = 1;
@@ -35,13 +36,18 @@ public class RolloutService {
     private long stepWriteNanos;
 
     public RolloutService(int port, EpisodeConfig config) {
+        this(port, "127.0.0.1", config);
+    }
+
+    public RolloutService(int port, String bindHost, EpisodeConfig config) {
         this.port = port;
+        this.bindHost = bindHost;
         this.config = config;
     }
 
     public void serveForever() throws IOException {
-        try (ServerSocket serverSocket = new ServerSocket(port, 1, InetAddress.getByName("127.0.0.1"))) {
-            System.out.printf("RL rollout service listening on 127.0.0.1:%d%n", port);
+        try (ServerSocket serverSocket = new ServerSocket(port, 1, InetAddress.getByName(bindHost))) {
+            System.out.printf("RL rollout service listening on %s:%d%n", bindHost, port);
             while (true) {
                 try (Socket socket = serverSocket.accept();
                         DataInputStream in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
