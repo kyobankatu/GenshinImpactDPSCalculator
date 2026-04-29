@@ -13,13 +13,15 @@ import visualization.VisualLogger;
  * Teacher-free RL environment backed by {@link CombatSimulator}.
  */
 public class BattleEnvironment {
-    private final Supplier<CombatSimulator> simulatorFactory;
-    private final EpisodeConfig config;
+    private final RLEpisodeFactory episodeFactory;
     private final ActionSpace actionSpace;
     private final ObservationEncoder observationEncoder;
     private final RewardFunction rewardFunction;
 
     private CombatSimulator simulator;
+    private EpisodeConfig config;
+    private int currentPartyId;
+    private String currentPartyName;
     private double lastSwapTime = -999.0;
     private int previousActionId = -1;
     private int stepCount;
@@ -40,22 +42,42 @@ public class BattleEnvironment {
         this(simulatorFactory, config, new ActionSpace(), new ObservationEncoder(), new RewardFunction());
     }
 
+    public BattleEnvironment(RLEpisodeFactory episodeFactory) {
+        this(episodeFactory, new ActionSpace(), new ObservationEncoder(), new RewardFunction());
+    }
+
     public BattleEnvironment(
             Supplier<CombatSimulator> simulatorFactory,
             EpisodeConfig config,
             ActionSpace actionSpace,
             ObservationEncoder observationEncoder,
             RewardFunction rewardFunction) {
-        this.simulatorFactory = simulatorFactory;
-        this.config = config;
+        this(new SinglePartyRLEpisodeFactory("SingleParty", config.partyOrder, simulatorFactory, config),
+                actionSpace, observationEncoder, rewardFunction);
+    }
+
+    public BattleEnvironment(
+            RLEpisodeFactory episodeFactory,
+            ActionSpace actionSpace,
+            ObservationEncoder observationEncoder,
+            RewardFunction rewardFunction) {
+        this.episodeFactory = episodeFactory;
         this.actionSpace = actionSpace;
         this.observationEncoder = observationEncoder;
         this.rewardFunction = rewardFunction;
     }
 
     public ResetResult reset(boolean generateReport) {
+        return reset(generateReport, -1);
+    }
+
+    public ResetResult reset(boolean generateReport, int preferredPartyId) {
         long start = System.nanoTime();
-        simulator = simulatorFactory.get();
+        RLEpisodeFactory.EpisodeContext episode = episodeFactory.createEpisode(preferredPartyId);
+        simulator = episode.simulator;
+        config = episode.config;
+        currentPartyId = episode.partyId;
+        currentPartyName = episode.partyName;
         simulator.setLoggingEnabled(generateReport);
         if (generateReport) {
             VisualLogger.getInstance().clear();
@@ -74,7 +96,7 @@ public class BattleEnvironment {
         fillActionMaskBuffer();
         RESET_CALLS.increment();
         RESET_NANOS.add(System.nanoTime() - start);
-        return new ResetResult(observationBuffer, actionMaskBuffer);
+        return new ResetResult(observationBuffer, actionMaskBuffer, currentPartyId);
     }
 
     public ActionResult step(int actionId) {
@@ -140,10 +162,20 @@ public class BattleEnvironment {
         return config;
     }
 
+    public int getCurrentPartyId() {
+        return currentPartyId;
+    }
+
+    public String getCurrentPartyName() {
+        return currentPartyName;
+    }
+
     private void execute(int actionId) {
         RLAction action = RLAction.fromId(actionId);
         if (action.isSwap()) {
-            simulator.switchCharacter(action.getTargetCharacterId());
+            int slot = action.getTargetSlot();
+            model.type.CharacterId targetId = config.partyOrder[slot];
+            simulator.switchCharacter(targetId);
             lastSwapTime = simulator.getCurrentTime();
             return;
         }
@@ -196,10 +228,12 @@ public class BattleEnvironment {
     public static class ResetResult {
         public final double[] observation;
         public final double[] actionMask;
+        public final int partyId;
 
-        public ResetResult(double[] observation, double[] actionMask) {
+        public ResetResult(double[] observation, double[] actionMask, int partyId) {
             this.observation = observation;
             this.actionMask = actionMask;
+            this.partyId = partyId;
         }
     }
 

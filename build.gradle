@@ -52,6 +52,13 @@ tasks.register("BenchmarkRLJava", JavaExec) {
     mainClass = "sample.BenchmarkRLJava"
 }
 
+tasks.register("ProfileCapabilities", JavaExec) {
+    group = "RL"
+    description = "Runs capability profiling experiments and writes config/capability_profiles/profiles.json."
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = "sample.ProfileCharacterCapabilities"
+}
+
 // Add a dynamic rule that allows running 'gradlew ClassName'
 tasks.addRule("Pattern: gradlew <ClassName>") { String taskName ->
     // We only create the task if it doesn't already exist (like 'build' or 'javadoc')

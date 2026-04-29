@@ -3,6 +3,7 @@ import csv
 import os
 import random
 import time
+from collections import defaultdict
 
 import numpy as np
 import torch
@@ -65,7 +66,7 @@ def run_training(args, run=None):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     client = build_rollout_client(host=host, port=port, ports=ports, endpoints=endpoints)
     runner_id = client.create_runner(config["envs"])
-    observations, action_masks = client.reset_runner(runner_id, False)
+    observations, action_masks, party_ids = client.reset_runner(runner_id, False)
 
     policy = RecurrentPolicy(client.observation_size, config["hidden_size"], client.action_size).to(device)
     optimizer = torch.optim.Adam(policy.parameters(), lr=config["learning_rate"])
@@ -77,6 +78,9 @@ def run_training(args, run=None):
         checkpoint_hidden_size = checkpoint_payload["hidden_size"]
         checkpoint_observation_size = checkpoint_payload["observation_size"]
         checkpoint_action_size = checkpoint_payload["action_size"]
+        checkpoint_char_feature_size = checkpoint_payload.get("char_feature_size")
+        checkpoint_global_feature_size = checkpoint_payload.get("global_feature_size")
+        checkpoint_num_chars = checkpoint_payload.get("num_chars")
         if checkpoint_hidden_size != config["hidden_size"]:
             raise ValueError(
                 f"Resume checkpoint hidden_size mismatch: checkpoint={checkpoint_hidden_size} config={config['hidden_size']}"
@@ -90,6 +94,20 @@ def run_training(args, run=None):
             raise ValueError(
                 "Resume checkpoint action size mismatch: "
                 f"checkpoint={checkpoint_action_size} service={client.action_size}"
+            )
+        if checkpoint_char_feature_size is not None and checkpoint_char_feature_size != policy.char_feature_size:
+            raise ValueError(
+                "Resume checkpoint char_feature_size mismatch: "
+                f"checkpoint={checkpoint_char_feature_size} policy={policy.char_feature_size}"
+            )
+        if checkpoint_global_feature_size is not None and checkpoint_global_feature_size != policy.global_feature_size:
+            raise ValueError(
+                "Resume checkpoint global_feature_size mismatch: "
+                f"checkpoint={checkpoint_global_feature_size} policy={policy.global_feature_size}"
+            )
+        if checkpoint_num_chars is not None and checkpoint_num_chars != policy.num_chars:
+            raise ValueError(
+                f"Resume checkpoint num_chars mismatch: checkpoint={checkpoint_num_chars} policy={policy.num_chars}"
             )
         policy.load_state_dict(checkpoint_payload["state_dict"])
         optimizer_state_dict = checkpoint_payload.get("optimizer_state_dict")
@@ -115,8 +133,11 @@ def run_training(args, run=None):
             episode_rewards = []
             episode_damages = []
             episode_steps = []
+            episode_party_ids = []
             invalid_actions = 0
             damage_delta_sum = 0.0
+            attention_score_sum = torch.zeros(policy.num_chars, dtype=torch.float64)
+            attention_score_count = 0
 
             for _ in range(config["rollout_length"]):
                 obs_tensor = torch.tensor(observations, dtype=torch.float32, device=device)
@@ -124,11 +145,14 @@ def run_training(args, run=None):
 
                 with torch.no_grad():
                     action_output = policy.act(obs_tensor, hidden_states, mask_tensor, deterministic=False)
+                attention_score_sum += action_output["attention_scores"].detach().cpu().sum(dim=0).to(torch.float64)
+                attention_score_count += action_output["attention_scores"].shape[0]
 
                 actions = action_output["action"].cpu().tolist()
                 batch = client.step_runner(runner_id, actions)
                 next_observations = batch["observations"]
                 next_action_masks = batch["action_masks"]
+                next_party_ids = batch["party_ids"]
 
                 for env_index in range(config["envs"]):
                     segments[env_index]["steps"].append(
@@ -150,17 +174,19 @@ def run_training(args, run=None):
                         episode_rewards.append(batch["episode_rewards"][env_index])
                         episode_damages.append(batch["episode_damages"][env_index])
                         episode_steps.append(batch["episode_steps"][env_index])
+                        episode_party_ids.append(batch["episode_party_ids"][env_index])
                         hidden_states[env_index].zero_()
                     else:
                         hidden_states[env_index] = action_output["hidden"][env_index]
 
                 observations = next_observations
                 action_masks = next_action_masks
+                party_ids = next_party_ids
 
             with torch.no_grad():
                 obs_tensor = torch.tensor(observations, dtype=torch.float32, device=device)
                 mask_tensor = torch.tensor(action_masks, dtype=torch.float32, device=device)
-                logits, values, _ = policy.forward_step(obs_tensor, hidden_states, mask_tensor)
+                logits, values, _, _ = policy.forward_step(obs_tensor, hidden_states, mask_tensor)
                 del logits
                 bootstrap_values = values.detach().cpu().tolist()
             for env_index in range(config["envs"]):
@@ -189,6 +215,11 @@ def run_training(args, run=None):
             max_episode_steps = max(episode_steps) if episode_steps else 0
             min_episode_steps = min(episode_steps) if episode_steps else 0
             valid_action_rate = 1.0 - invalid_rate
+            mean_attention_scores = (
+                (attention_score_sum / max(1, attention_score_count)).tolist()
+                if attention_score_count > 0
+                else [0.0 for _ in range(policy.num_chars)]
+            )
 
             log_row = {
                 "update": update,
@@ -248,6 +279,10 @@ def run_training(args, run=None):
                     "perf/samples_per_second": samples_per_second,
                     "perf/rollout_duration_sec": rollout_duration,
                     "perf/optimization_duration_sec": optimization_duration,
+                    **{
+                        f"train/attention_slot_{index}": score
+                        for index, score in enumerate(mean_attention_scores)
+                    },
                 },
                 step=update,
             )
@@ -434,7 +469,7 @@ def train_epoch(policy, optimizer, samples, config, device, entropy_coefficient)
             advantage = torch.tensor([sample["advantage"] for sample in minibatch], dtype=torch.float32, device=device)
             return_target = torch.tensor([sample["return_target"] for sample in minibatch], dtype=torch.float32, device=device)
 
-            logits, value, _ = policy.forward_step(observation, recurrent_input, action_mask)
+            logits, value, _, _ = policy.forward_step(observation, recurrent_input, action_mask)
             distribution = torch.distributions.Categorical(logits=logits)
             new_log_probability = distribution.log_prob(action)
             entropy = distribution.entropy().mean()
@@ -486,12 +521,63 @@ def flatten_eval_metrics(prefix, summary):
     }
     for action_index, fraction in enumerate(summary["action_fractions"]):
         metrics[f"{prefix}/action_fraction_{action_index}"] = fraction
+    for slot_index, score in enumerate(summary.get("mean_attention_scores", [])):
+        metrics[f"{prefix}/attention_slot_{slot_index}"] = score
+    for party_name, party_summary in summary.get("per_party", {}).items():
+        party_prefix = f"{prefix}/party_{slugify(party_name)}"
+        metrics[f"{party_prefix}/reward"] = party_summary["reward"]
+        metrics[f"{party_prefix}/damage"] = party_summary["damage"]
+        metrics[f"{party_prefix}/steps"] = party_summary["steps"]
+        metrics[f"{party_prefix}/invalid_actions"] = party_summary["invalid_actions"]
+        metrics[f"{party_prefix}/mean_top_probability"] = party_summary["mean_top_probability"]
+        for action_index, fraction in enumerate(party_summary["action_fractions"]):
+            metrics[f"{party_prefix}/action_fraction_{action_index}"] = fraction
+        for slot_index, score in enumerate(party_summary.get("mean_attention_scores", [])):
+            metrics[f"{party_prefix}/attention_slot_{slot_index}"] = score
     return metrics
 
 
 def evaluate(policy, client, device, deterministic):
+    if len(client.party_names) > 1:
+        per_party = {}
+        aggregate_reward = 0.0
+        aggregate_damage = 0.0
+        aggregate_steps = 0.0
+        aggregate_invalid_actions = 0.0
+        aggregate_top_probability = 0.0
+        aggregate_action_fractions = [0.0 for _ in range(policy.action_size)]
+        aggregate_attention_scores = [0.0 for _ in range(policy.num_chars)]
+        for party_id, party_name in enumerate(client.party_names):
+            summary = evaluate_single_episode(
+                policy, client, device, deterministic, generate_report=False, forced_party_id=party_id
+            )
+            per_party[party_name] = summary
+            aggregate_reward += summary["reward"]
+            aggregate_damage += summary["damage"]
+            aggregate_steps += summary["steps"]
+            aggregate_invalid_actions += summary["invalid_actions"]
+            aggregate_top_probability += summary["mean_top_probability"]
+            for index, fraction in enumerate(summary["action_fractions"]):
+                aggregate_action_fractions[index] += fraction
+            for index, score in enumerate(summary["mean_attention_scores"]):
+                aggregate_attention_scores[index] += score
+        party_count = len(client.party_names)
+        return {
+            "reward": aggregate_reward / party_count,
+            "damage": aggregate_damage / party_count,
+            "steps": aggregate_steps / party_count,
+            "invalid_actions": aggregate_invalid_actions / party_count,
+            "mean_top_probability": aggregate_top_probability / party_count,
+            "action_fractions": [value / party_count for value in aggregate_action_fractions],
+            "mean_attention_scores": [value / party_count for value in aggregate_attention_scores],
+            "per_party": per_party,
+        }
+    return evaluate_single_episode(policy, client, device, deterministic, generate_report=False, forced_party_id=-1)
+
+
+def evaluate_single_episode(policy, client, device, deterministic, generate_report, forced_party_id):
     runner_id = client.create_runner(1)
-    observations, masks = client.reset_runner(runner_id, False)
+    observations, masks, party_ids = client.reset_runner(runner_id, generate_report, forced_party_id=forced_party_id)
     hidden = torch.zeros(1, policy.hidden_size, dtype=torch.float32, device=device)
     total_reward = 0.0
     invalid_actions = 0
@@ -499,12 +585,14 @@ def evaluate(policy, client, device, deterministic):
     damage = 0.0
     top_probability_sum = 0.0
     action_counts = [0 for _ in range(policy.action_size)]
+    attention_score_sum = torch.zeros(policy.num_chars, dtype=torch.float64)
     try:
         while True:
             obs_tensor = torch.tensor(observations, dtype=torch.float32, device=device)
             mask_tensor = torch.tensor(masks, dtype=torch.float32, device=device)
             with torch.no_grad():
                 action_output = policy.act(obs_tensor, hidden, mask_tensor, deterministic=deterministic)
+            attention_score_sum += action_output["attention_scores"].detach().cpu().sum(dim=0).to(torch.float64)
             action = [int(action_output["action"][0].item())]
             action_counts[action[0]] += 1
             top_probability_sum += action_output["top_probability"][0].item()
@@ -522,6 +610,7 @@ def evaluate(policy, client, device, deterministic):
     finally:
         client.close_runner(runner_id)
     total_actions = max(1, sum(action_counts))
+    mean_attention_scores = (attention_score_sum / max(1, steps)).tolist()
     return {
         "reward": total_reward,
         "damage": damage,
@@ -529,7 +618,14 @@ def evaluate(policy, client, device, deterministic):
         "invalid_actions": invalid_actions,
         "mean_top_probability": top_probability_sum / max(1, steps),
         "action_fractions": [count / total_actions for count in action_counts],
+        "mean_attention_scores": mean_attention_scores,
+        "party_id": party_ids[0] if party_ids else forced_party_id,
+        "party_name": client.party_names[party_ids[0]] if party_ids else client.party_names[forced_party_id],
     }
+
+
+def slugify(value):
+    return value.lower().replace(" ", "_")
 
 
 def append_log(row):

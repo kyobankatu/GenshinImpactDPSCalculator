@@ -15,8 +15,8 @@ def main():
 
     client = build_rollout_client(host=host, port=port, ports=ports, endpoints=endpoints)
     runner_id = client.create_runner(envs)
-    observations, masks = client.reset_runner(runner_id, False)
-    del observations, masks
+    observations, masks, party_ids = client.reset_runner(runner_id, False)
+    del observations, masks, party_ids
 
     actions = [0 for _ in range(envs)]
     start = time.time()

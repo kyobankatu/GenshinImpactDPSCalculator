@@ -45,6 +45,17 @@ public class DamageReport implements DamageTracker {
     }
 
     /**
+     * Returns the accumulated damage attributed to a specific source name.
+     *
+     * @param sourceName the source name used in {@link #recordDamage}
+     * @return damage total for that source, or {@code 0.0} if not found
+     */
+    @Override
+    public double getDamageBySource(String sourceName) {
+        return damageBySource.getOrDefault(sourceName, 0.0);
+    }
+
+    /**
      * Prints a formatted console summary showing per-source damage share and overall DPS.
      *
      * @param rotationTime total simulated rotation duration in seconds

@@ -2,6 +2,7 @@ package sample;
 
 import mechanics.rl.BattleEnvironment;
 import mechanics.rl.EpisodeConfig;
+import mechanics.rl.MultiPartyRLSimulatorFactory;
 import mechanics.rl.bridge.VectorizedEnvironment;
 import mechanics.rl.FlinsParty2RLSimulatorFactory;
 
@@ -13,9 +14,17 @@ public class BenchmarkRLJava {
         int environments = args.length > 0 ? Integer.parseInt(args[0]) : 4;
         int steps = args.length > 1 ? Integer.parseInt(args[1]) : 128;
         int workers = args.length > 2 ? Integer.parseInt(args[2]) : 0;
+        boolean useMultiParty = args.length > 3 && Boolean.parseBoolean(args[3]);
 
-        VectorizedEnvironment environment = new VectorizedEnvironment(
-                environments, FlinsParty2RLSimulatorFactory.supplier(), new EpisodeConfig(), workers);
+        EpisodeConfig config = new EpisodeConfig();
+        VectorizedEnvironment environment = useMultiParty
+                ? new VectorizedEnvironment(
+                        environments,
+                        MultiPartyRLSimulatorFactory.defaultFactory(config),
+                        workers,
+                        new mechanics.rl.ObservationEncoder())
+                : new VectorizedEnvironment(
+                        environments, FlinsParty2RLSimulatorFactory.supplier(), config, workers);
         environment.reset(false);
         int[] actions = new int[environments];
 
@@ -28,9 +37,9 @@ public class BenchmarkRLJava {
         }
         long durationMillis = Math.max(1, System.currentTimeMillis() - start);
         double envStepsPerSecond = (environments * (double) steps) / (durationMillis / 1000.0);
-        System.out.printf("Java rollout benchmark: envs=%d steps=%d workers=%s duration=%dms envSteps/s=%.1f%n",
+        System.out.printf("Java rollout benchmark: envs=%d steps=%d workers=%s multiParty=%s duration=%dms envSteps/s=%.1f%n",
                 environments, environments * steps, workers > 0 ? Integer.toString(workers) : "auto",
-                durationMillis, envStepsPerSecond);
+                Boolean.toString(useMultiParty), durationMillis, envStepsPerSecond);
         System.out.println("Java rollout metrics: " + environment.metricsSnapshot().toSummaryString());
         System.out.println("Battle environment metrics: " + BattleEnvironment.timingSnapshot().toSummaryString());
         environment.close();

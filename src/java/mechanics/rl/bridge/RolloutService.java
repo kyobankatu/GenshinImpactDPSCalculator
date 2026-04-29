@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +16,7 @@ import mechanics.rl.ActionSpace;
 import mechanics.rl.BattleEnvironment;
 import mechanics.rl.EpisodeConfig;
 import mechanics.rl.FlinsParty2RLSimulatorFactory;
+import mechanics.rl.RLEpisodeFactory;
 import mechanics.rl.ObservationEncoder;
 
 /**
@@ -23,8 +25,10 @@ import mechanics.rl.ObservationEncoder;
 public class RolloutService {
     private final int port;
     private final String bindHost;
-    private final EpisodeConfig config;
     private final int rolloutWorkers;
+    private final ObservationEncoder observationEncoder;
+    private final RLEpisodeFactory episodeFactory;
+    private final String[] partyNames;
     private final Map<Integer, VectorizedEnvironment> runners = new HashMap<>();
     private int nextRunnerId = 1;
     private long runnerCreateCalls;
@@ -37,18 +41,24 @@ public class RolloutService {
     private long stepWriteNanos;
 
     public RolloutService(int port, EpisodeConfig config) {
-        this(port, "127.0.0.1", config, 0);
+        this(port, "127.0.0.1", FlinsParty2RLSimulatorFactory.episodeFactory(config), 0);
     }
 
     public RolloutService(int port, String bindHost, EpisodeConfig config) {
-        this(port, bindHost, config, 0);
+        this(port, bindHost, FlinsParty2RLSimulatorFactory.episodeFactory(config), 0);
     }
 
     public RolloutService(int port, String bindHost, EpisodeConfig config, int rolloutWorkers) {
+        this(port, bindHost, FlinsParty2RLSimulatorFactory.episodeFactory(config), rolloutWorkers);
+    }
+
+    public RolloutService(int port, String bindHost, RLEpisodeFactory episodeFactory, int rolloutWorkers) {
         this.port = port;
         this.bindHost = bindHost;
-        this.config = config;
         this.rolloutWorkers = rolloutWorkers;
+        this.episodeFactory = episodeFactory;
+        this.partyNames = episodeFactory.getPartyNames();
+        this.observationEncoder = new ObservationEncoder();
     }
 
     public void serveForever() throws IOException {
@@ -80,6 +90,10 @@ public class RolloutService {
                     out.writeInt(BatchProtocol.VERSION);
                     out.writeInt(ObservationEncoder.OBSERVATION_SIZE);
                     out.writeInt(ActionSpace.SIZE);
+                    out.writeInt(partyNames.length);
+                    for (String partyName : partyNames) {
+                        writeString(out, partyName);
+                    }
                     out.flush();
                     break;
                 case BatchProtocol.CMD_CREATE_RUNNER:
@@ -87,7 +101,8 @@ public class RolloutService {
                     int runnerId = nextRunnerId++;
                     long createStart = System.nanoTime();
                     runners.put(runnerId, new VectorizedEnvironment(
-                            count, FlinsParty2RLSimulatorFactory.supplier(), config, rolloutWorkers));
+                            count, episodeFactory, rolloutWorkers,
+                            observationEncoder));
                     runnerCreateCalls++;
                     runnerCreateNanos += System.nanoTime() - createStart;
                     out.writeInt(runnerId);
@@ -95,7 +110,8 @@ public class RolloutService {
                     break;
                 case BatchProtocol.CMD_RESET_RUNNER:
                     long resetStart = System.nanoTime();
-                    VectorizedEnvironment.RunnerResetResult resetResult = handleReset(in.readInt(), in.readBoolean());
+                    VectorizedEnvironment.RunnerResetResult resetResult = handleReset(
+                            in.readInt(), in.readBoolean(), in.readInt());
                     resetCalls++;
                     resetNanos += System.nanoTime() - resetStart;
                     long resetWriteStart = System.nanoTime();
@@ -143,8 +159,9 @@ public class RolloutService {
         }
     }
 
-    private VectorizedEnvironment.RunnerResetResult handleReset(int runnerId, boolean generateReport) {
-        return getRunner(runnerId).reset(generateReport);
+    private VectorizedEnvironment.RunnerResetResult handleReset(int runnerId, boolean generateReport,
+            int preferredPartyId) {
+        return getRunner(runnerId).reset(generateReport, preferredPartyId);
     }
 
     private VectorizedEnvironment getRunner(int runnerId) {
@@ -159,6 +176,7 @@ public class RolloutService {
         out.writeInt(result.observations.length);
         writeMatrix(out, result.observations);
         writeMatrix(out, result.actionMasks);
+        writeIntVector(out, result.partyIds);
         out.flush();
     }
 
@@ -175,7 +193,15 @@ public class RolloutService {
         writeVector(out, result.episodeDamages);
         writeIntVector(out, result.episodeSteps);
         writeIntVector(out, result.liveSteps);
+        writeIntVector(out, result.partyIds);
+        writeIntVector(out, result.episodePartyIds);
         out.flush();
+    }
+
+    private void writeString(DataOutputStream out, String value) throws IOException {
+        byte[] encoded = value.getBytes(StandardCharsets.UTF_8);
+        out.writeInt(encoded.length);
+        out.write(encoded);
     }
 
     private void writeMatrix(DataOutputStream out, double[][] values) throws IOException {

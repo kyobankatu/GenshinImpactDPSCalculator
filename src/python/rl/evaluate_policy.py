@@ -32,12 +32,14 @@ def main():
             print(
                 f"Python PPO deterministic evaluation: reward={summary['reward']:.3f} damage={summary['damage']:,.0f} steps={summary['steps']} invalid={summary['invalid_actions']} topProb={summary['mean_top_probability']:.3f}"
             )
+            print_party_breakdown("deterministic", summary)
             print("Generated output/rl_report.html")
         if mode in ("stochastic", "both"):
             summary = run_evaluation(policy, client, device, deterministic=False, generate_report=False)
             print(
                 f"Python PPO stochastic evaluation: reward={summary['reward']:.3f} damage={summary['damage']:,.0f} steps={summary['steps']} invalid={summary['invalid_actions']} topProb={summary['mean_top_probability']:.3f}"
             )
+            print_party_breakdown("stochastic", summary)
     finally:
         client.close()
 
@@ -54,8 +56,52 @@ def parse_args():
 
 
 def run_evaluation(policy, client, device, deterministic, generate_report):
+    if len(client.party_names) > 1:
+        per_party = {}
+        aggregate = {
+            "reward": 0.0,
+            "damage": 0.0,
+            "steps": 0.0,
+            "invalid_actions": 0.0,
+            "mean_top_probability": 0.0,
+            "action_fractions": [0.0 for _ in range(policy.action_size)],
+        }
+        for party_id, party_name in enumerate(client.party_names):
+            summary = run_single_episode(
+                policy,
+                client,
+                device,
+                deterministic=deterministic,
+                generate_report=generate_report and party_id == 0,
+                forced_party_id=party_id,
+            )
+            per_party[party_name] = summary
+            aggregate["reward"] += summary["reward"]
+            aggregate["damage"] += summary["damage"]
+            aggregate["steps"] += summary["steps"]
+            aggregate["invalid_actions"] += summary["invalid_actions"]
+            aggregate["mean_top_probability"] += summary["mean_top_probability"]
+            for index, fraction in enumerate(summary["action_fractions"]):
+                aggregate["action_fractions"][index] += fraction
+        party_count = len(client.party_names)
+        aggregate["reward"] /= party_count
+        aggregate["damage"] /= party_count
+        aggregate["steps"] /= party_count
+        aggregate["invalid_actions"] /= party_count
+        aggregate["mean_top_probability"] /= party_count
+        aggregate["action_fractions"] = [
+            value / party_count for value in aggregate["action_fractions"]
+        ]
+        aggregate["per_party"] = per_party
+        return aggregate
+    return run_single_episode(policy, client, device, deterministic, generate_report, forced_party_id=-1)
+
+
+def run_single_episode(policy, client, device, deterministic, generate_report, forced_party_id):
     runner_id = client.create_runner(1)
-    observations, masks = client.reset_runner(runner_id, generate_report)
+    observations, masks, party_ids = client.reset_runner(
+        runner_id, generate_report, forced_party_id=forced_party_id
+    )
     hidden = torch.zeros(1, policy.hidden_size, dtype=torch.float32, device=device)
     total_reward = 0.0
     invalid_actions = 0
@@ -83,12 +129,25 @@ def run_evaluation(policy, client, device, deterministic, generate_report):
                     "invalid_actions": invalid_actions,
                     "mean_top_probability": top_probability_sum / max(1, steps),
                     "action_fractions": [count / max(1, sum(action_counts)) for count in action_counts],
+                    "party_id": party_ids[0] if party_ids else forced_party_id,
+                    "party_name": client.party_names[party_ids[0]] if party_ids else client.party_names[forced_party_id],
                 }
             observations = batch["observations"]
             masks = batch["action_masks"]
             hidden = inference["hidden"]
     finally:
         client.close_runner(runner_id)
+
+
+def print_party_breakdown(label, summary):
+    if "per_party" not in summary:
+        return
+    for party_name, party_summary in summary["per_party"].items():
+        print(
+            f"  {label} party={party_name}: reward={party_summary['reward']:.3f} "
+            f"damage={party_summary['damage']:,.0f} steps={party_summary['steps']} "
+            f"invalid={party_summary['invalid_actions']}"
+        )
 
 
 if __name__ == "__main__":

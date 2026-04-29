@@ -9,9 +9,13 @@ import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
 import mechanics.rl.ActionResult;
+import mechanics.rl.ActionSpace;
 import mechanics.rl.BattleEnvironment;
 import mechanics.rl.EpisodeConfig;
+import mechanics.rl.ObservationEncoder;
 import mechanics.rl.QuietExecution;
+import mechanics.rl.RLEpisodeFactory;
+import mechanics.rl.RewardFunction;
 import simulation.CombatSimulator;
 
 /**
@@ -39,13 +43,42 @@ public class VectorizedEnvironment {
     }
 
     public VectorizedEnvironment(int count, Supplier<CombatSimulator> simulatorFactory, EpisodeConfig config, int requestedWorkers) {
+        this(count, simulatorFactory, config, requestedWorkers, new ObservationEncoder());
+    }
+
+    public VectorizedEnvironment(int count, RLEpisodeFactory episodeFactory, int requestedWorkers,
+            ObservationEncoder observationEncoder) {
         this.episodeRewards = new double[count];
         this.episodeDamages = new double[count];
         int autoWorkers = Math.max(1, Math.min(count, Runtime.getRuntime().availableProcessors()));
         this.workerCount = requestedWorkers > 0 ? Math.max(1, Math.min(count, requestedWorkers)) : autoWorkers;
         this.executor = workerCount > 1 ? Executors.newFixedThreadPool(workerCount) : null;
         for (int i = 0; i < count; i++) {
-            environments.add(new BattleEnvironment(simulatorFactory, config));
+            environments.add(new BattleEnvironment(
+                    episodeFactory, new ActionSpace(), observationEncoder, new RewardFunction()));
+        }
+    }
+
+    /**
+     * Constructs a vectorized environment with a shared {@link ObservationEncoder}.
+     * Use this overload to avoid reloading capability profiles for each environment instance.
+     *
+     * @param count              number of parallel environments
+     * @param simulatorFactory   factory for creating combat simulators
+     * @param config             episode configuration
+     * @param requestedWorkers   number of parallel worker threads (0 = auto)
+     * @param observationEncoder shared observation encoder to use for all environments
+     */
+    public VectorizedEnvironment(int count, Supplier<CombatSimulator> simulatorFactory, EpisodeConfig config,
+            int requestedWorkers, ObservationEncoder observationEncoder) {
+        this.episodeRewards = new double[count];
+        this.episodeDamages = new double[count];
+        int autoWorkers = Math.max(1, Math.min(count, Runtime.getRuntime().availableProcessors()));
+        this.workerCount = requestedWorkers > 0 ? Math.max(1, Math.min(count, requestedWorkers)) : autoWorkers;
+        this.executor = workerCount > 1 ? Executors.newFixedThreadPool(workerCount) : null;
+        for (int i = 0; i < count; i++) {
+            environments.add(new BattleEnvironment(simulatorFactory, config,
+                    new ActionSpace(), observationEncoder, new RewardFunction()));
         }
     }
 
@@ -54,28 +87,34 @@ public class VectorizedEnvironment {
     }
 
     public RunnerResetResult reset(boolean generateReport) {
-        if (!generateReport) {
-            return QuietExecution.call(() -> resetInternal(false));
-        }
-        return resetInternal(true);
+        return reset(generateReport, -1);
     }
 
-    private RunnerResetResult resetInternal(boolean generateReport) {
+    public RunnerResetResult reset(boolean generateReport, int preferredPartyId) {
+        if (!generateReport) {
+            return QuietExecution.call(() -> resetInternal(false, preferredPartyId));
+        }
+        return resetInternal(true, preferredPartyId);
+    }
+
+    private RunnerResetResult resetInternal(boolean generateReport, int preferredPartyId) {
         long start = System.nanoTime();
         double[][] observations = new double[size()][];
         double[][] actionMasks = new double[size()][];
+        int[] partyIds = new int[size()];
         ParallelTiming timing = parallelForEach(index -> {
             episodeRewards[index] = 0.0;
             episodeDamages[index] = 0.0;
-            BattleEnvironment.ResetResult reset = environments.get(index).reset(generateReport && index == 0);
+            BattleEnvironment.ResetResult reset = environments.get(index).reset(generateReport && index == 0, preferredPartyId);
             observations[index] = reset.observation;
             actionMasks[index] = reset.actionMask;
+            partyIds[index] = reset.partyId;
         });
         resetCalls++;
         resetDispatchNanos += timing.dispatchNanos;
         resetWaitNanos += timing.waitNanos;
         resetNanos += System.nanoTime() - start;
-        return new RunnerResetResult(observations, actionMasks);
+        return new RunnerResetResult(observations, actionMasks, partyIds);
     }
 
     public RunnerStepResult step(int[] actions) {
@@ -95,6 +134,8 @@ public class VectorizedEnvironment {
         double[] finishedEpisodeDamages = new double[size()];
         int[] finishedEpisodeSteps = new int[size()];
         int[] liveSteps = new int[size()];
+        int[] partyIds = new int[size()];
+        int[] finishedEpisodePartyIds = new int[size()];
 
         ParallelTiming timing = parallelForEach(index -> {
             ActionResult result = environments.get(index).step(actions[index]);
@@ -115,14 +156,17 @@ public class VectorizedEnvironment {
                 finishedEpisodeRewards[index] = episodeRewards[index];
                 finishedEpisodeDamages[index] = episodeDamages[index];
                 finishedEpisodeSteps[index] = result.stepCount;
+                finishedEpisodePartyIds[index] = environments.get(index).getCurrentPartyId();
                 BattleEnvironment.ResetResult reset = environments.get(index).reset(false);
                 observations[index] = reset.observation;
                 actionMasks[index] = reset.actionMask;
+                partyIds[index] = reset.partyId;
                 episodeRewards[index] = 0.0;
                 episodeDamages[index] = 0.0;
             } else {
                 observations[index] = result.observation;
                 actionMasks[index] = result.actionMask;
+                partyIds[index] = environments.get(index).getCurrentPartyId();
             }
         });
         stepCalls++;
@@ -142,7 +186,9 @@ public class VectorizedEnvironment {
                 finishedEpisodeRewards,
                 finishedEpisodeDamages,
                 finishedEpisodeSteps,
-                liveSteps);
+                liveSteps,
+                partyIds,
+                finishedEpisodePartyIds);
     }
 
     public void close() {
@@ -214,10 +260,12 @@ public class VectorizedEnvironment {
     public static class RunnerResetResult {
         public final double[][] observations;
         public final double[][] actionMasks;
+        public final int[] partyIds;
 
-        public RunnerResetResult(double[][] observations, double[][] actionMasks) {
+        public RunnerResetResult(double[][] observations, double[][] actionMasks, int[] partyIds) {
             this.observations = observations;
             this.actionMasks = actionMasks;
+            this.partyIds = partyIds;
         }
     }
 

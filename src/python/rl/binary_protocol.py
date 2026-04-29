@@ -2,7 +2,7 @@ import socket
 import struct
 
 
-VERSION = 1
+VERSION = 4
 
 CMD_HELLO = 1
 CMD_CREATE_RUNNER = 2
@@ -36,6 +36,11 @@ def send_ints(sock: socket.socket, values) -> None:
 
 def recv_int(sock: socket.socket) -> int:
     return struct.unpack(">i", recv_exact(sock, 4))[0]
+
+
+def recv_string(sock: socket.socket) -> str:
+    size = recv_int(sock)
+    return recv_exact(sock, size).decode("utf-8")
 
 
 def recv_bool(sock: socket.socket) -> bool:

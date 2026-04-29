@@ -16,6 +16,13 @@ import simulation.CombatSimulator;
  * Creates the fixed FlinsParty2 simulator used by Java-native RL.
  */
 public final class FlinsParty2RLSimulatorFactory {
+    public static final model.type.CharacterId[] PARTY_ORDER = {
+            model.type.CharacterId.FLINS,
+            model.type.CharacterId.INEFFA,
+            model.type.CharacterId.COLUMBINA,
+            model.type.CharacterId.SUCROSE
+    };
+
     private static final CachedBuild FLINS_BUILD = createFlinsBuild();
     private static final CachedBuild INEFFA_BUILD = createIneffaBuild();
     private static final CachedBuild COLUMBINA_BUILD = createColumbinaBuild();
@@ -26,6 +33,10 @@ public final class FlinsParty2RLSimulatorFactory {
 
     public static Supplier<CombatSimulator> supplier() {
         return FlinsParty2RLSimulatorFactory::create;
+    }
+
+    public static RLEpisodeFactory episodeFactory(EpisodeConfig baseConfig) {
+        return new SinglePartyRLEpisodeFactory("FlinsParty2", PARTY_ORDER, supplier(), baseConfig);
     }
 
     public static CombatSimulator create() {

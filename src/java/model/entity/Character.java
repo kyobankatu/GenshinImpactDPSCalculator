@@ -190,6 +190,16 @@ public abstract class Character {
         return energyState.getTotalParticleEnergy();
     }
 
+    /**
+     * Returns total particle energy received after ER scaling.
+     * Used by the capability profiler to measure a character's energy generation score.
+     *
+     * @return ER-scaled particle energy total
+     */
+    public double getTotalScaledParticleEnergy() {
+        return energyState.getTotalScaledParticleEnergy();
+    }
+
     public double getTotalFlatEnergy() {
         return energyState.getTotalFlatEnergy();
     }

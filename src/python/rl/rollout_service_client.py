@@ -14,6 +14,7 @@ from binary_protocol import (
     recv_doubles,
     recv_int,
     recv_ints,
+    recv_string,
     send_bool,
     send_int,
     send_ints,
@@ -26,6 +27,7 @@ class RolloutServiceClient:
         self.version = None
         self.observation_size = None
         self.action_size = None
+        self.party_names = None
         self._hello()
 
     def _hello(self):
@@ -33,6 +35,8 @@ class RolloutServiceClient:
         self.version = recv_int(self.sock)
         self.observation_size = recv_int(self.sock)
         self.action_size = recv_int(self.sock)
+        party_count = recv_int(self.sock)
+        self.party_names = [recv_string(self.sock) for _ in range(party_count)]
         if self.version != VERSION:
             raise RuntimeError(f"Protocol version mismatch: java={self.version} python={VERSION}")
 
@@ -41,16 +45,18 @@ class RolloutServiceClient:
         send_int(self.sock, env_count)
         return recv_int(self.sock)
 
-    def reset_runner(self, runner_id: int, generate_report: bool = False):
+    def reset_runner(self, runner_id: int, generate_report: bool = False, forced_party_id: int = -1):
         send_int(self.sock, CMD_RESET_RUNNER)
         send_int(self.sock, runner_id)
         send_bool(self.sock, generate_report)
+        send_int(self.sock, forced_party_id)
         env_count = recv_int(self.sock)
         obs_width = recv_int(self.sock)
         observations = self._recv_matrix(env_count, obs_width)
         mask_width = recv_int(self.sock)
         masks = self._recv_matrix(env_count, mask_width)
-        return observations, masks
+        party_ids = recv_ints(self.sock, env_count)
+        return observations, masks, party_ids
 
     def step_runner(self, runner_id: int, actions):
         send_int(self.sock, CMD_STEP_RUNNER)
@@ -71,6 +77,8 @@ class RolloutServiceClient:
         episode_damages = recv_doubles(self.sock, env_count)
         episode_steps = recv_ints(self.sock, env_count)
         live_steps = recv_ints(self.sock, env_count)
+        party_ids = recv_ints(self.sock, env_count)
+        episode_party_ids = recv_ints(self.sock, env_count)
 
         return {
             "observations": observations,
@@ -84,6 +92,8 @@ class RolloutServiceClient:
             "episode_damages": episode_damages,
             "episode_steps": episode_steps,
             "live_steps": live_steps,
+            "party_ids": party_ids,
+            "episode_party_ids": episode_party_ids,
         }
 
     def close_runner(self, runner_id: int):
@@ -111,11 +121,14 @@ class MultiRolloutServiceClient:
         self.version = self.clients[0].version
         self.observation_size = self.clients[0].observation_size
         self.action_size = self.clients[0].action_size
+        self.party_names = list(self.clients[0].party_names)
         for client in self.clients[1:]:
             if client.version != self.version:
                 raise RuntimeError("Protocol version mismatch across rollout services")
             if client.observation_size != self.observation_size or client.action_size != self.action_size:
                 raise RuntimeError("Observation/action space mismatch across rollout services")
+            if client.party_names != self.party_names:
+                raise RuntimeError("Party catalog mismatch across rollout services")
 
     def create_runner(self, env_count: int):
         shard_counts = split_evenly(env_count, len(self.clients))
@@ -126,19 +139,21 @@ class MultiRolloutServiceClient:
             shards.append((client, client.create_runner(shard_envs), shard_envs))
         return shards
 
-    def reset_runner(self, runner_handle, generate_report: bool = False):
+    def reset_runner(self, runner_handle, generate_report: bool = False, forced_party_id: int = -1):
         observations = []
         masks = []
+        party_ids = []
         futures = []
         for shard_index, (client, runner_id, _shard_envs) in enumerate(runner_handle):
             futures.append(
-                self.executor.submit(client.reset_runner, runner_id, generate_report and shard_index == 0)
+                self.executor.submit(client.reset_runner, runner_id, generate_report and shard_index == 0, forced_party_id)
             )
         for future in futures:
-            shard_observations, shard_masks = future.result()
+            shard_observations, shard_masks, shard_party_ids = future.result()
             observations.extend(shard_observations)
             masks.extend(shard_masks)
-        return observations, masks
+            party_ids.extend(shard_party_ids)
+        return observations, masks, party_ids
 
     def step_runner(self, runner_handle, actions):
         observations = []
@@ -152,6 +167,8 @@ class MultiRolloutServiceClient:
         episode_damages = []
         episode_steps = []
         live_steps = []
+        party_ids = []
+        episode_party_ids = []
         offset = 0
         futures = []
         for client, runner_id, shard_envs in runner_handle:
@@ -171,6 +188,8 @@ class MultiRolloutServiceClient:
             episode_damages.extend(batch["episode_damages"])
             episode_steps.extend(batch["episode_steps"])
             live_steps.extend(batch["live_steps"])
+            party_ids.extend(batch["party_ids"])
+            episode_party_ids.extend(batch["episode_party_ids"])
         return {
             "observations": observations,
             "action_masks": masks,
@@ -183,6 +202,8 @@ class MultiRolloutServiceClient:
             "episode_damages": episode_damages,
             "episode_steps": episode_steps,
             "live_steps": live_steps,
+            "party_ids": party_ids,
+            "episode_party_ids": episode_party_ids,
         }
 
     def close_runner(self, runner_handle):

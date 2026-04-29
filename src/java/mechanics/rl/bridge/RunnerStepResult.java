@@ -15,6 +15,8 @@ public class RunnerStepResult {
     public final double[] episodeDamages;
     public final int[] episodeSteps;
     public final int[] liveSteps;
+    public final int[] partyIds;
+    public final int[] episodePartyIds;
 
     public RunnerStepResult(
             double[][] observations,
@@ -27,7 +29,9 @@ public class RunnerStepResult {
             double[] episodeRewards,
             double[] episodeDamages,
             int[] episodeSteps,
-            int[] liveSteps) {
+            int[] liveSteps,
+            int[] partyIds,
+            int[] episodePartyIds) {
         this.observations = observations;
         this.actionMasks = actionMasks;
         this.rewards = rewards;
@@ -39,5 +43,7 @@ public class RunnerStepResult {
         this.episodeDamages = episodeDamages;
         this.episodeSteps = episodeSteps;
         this.liveSteps = liveSteps;
+        this.partyIds = partyIds;
+        this.episodePartyIds = episodePartyIds;
     }
 }

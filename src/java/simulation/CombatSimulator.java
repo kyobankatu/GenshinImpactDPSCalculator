@@ -345,6 +345,16 @@ public class CombatSimulator {
     }
 
     /**
+     * Returns the accumulated damage attributed to a specific character.
+     *
+     * @param id character whose damage to query
+     * @return damage total for that character, or {@code 0.0} if not found
+     */
+    public double getDamageByCharacter(CharacterId id) {
+        return damageReport.getDamageBySource(id.getDisplayName());
+    }
+
+    /**
      * Registers a timer event.
      *
      * @param event event to register

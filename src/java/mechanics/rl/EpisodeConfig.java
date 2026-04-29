@@ -50,4 +50,18 @@ public class EpisodeConfig {
         this.terminalDamageScale = terminalDamageScale;
         this.fillEnergyOnReset = fillEnergyOnReset;
     }
+
+    public EpisodeConfig withPartyOrder(CharacterId[] nextPartyOrder) {
+        return new EpisodeConfig(
+                nextPartyOrder,
+                maxEpisodeTime,
+                failedActionTimeCost,
+                swapCooldown,
+                damageRewardScale,
+                invalidActionPenalty,
+                repeatedSwapPenalty,
+                idleTimePenaltyPerSecond,
+                terminalDamageScale,
+                fillEnergyOnReset);
+    }
 }

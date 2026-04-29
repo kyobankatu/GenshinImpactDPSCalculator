@@ -20,6 +20,16 @@ public interface DamageTracker {
     double getTotalDamage();
 
     /**
+     * Returns the accumulated damage attributed to a specific source name.
+     *
+     * @param sourceName the source name as passed to {@link #recordDamage}
+     * @return damage total for that source, or {@code 0.0} if not found
+     */
+    default double getDamageBySource(String sourceName) {
+        return 0.0;
+    }
+
+    /**
      * Computes DPS using the currently accumulated total and the given rotation time.
      *
      * @param rotationTime simulated rotation duration in seconds

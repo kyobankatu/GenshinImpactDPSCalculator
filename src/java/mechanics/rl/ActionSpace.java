@@ -1,6 +1,7 @@
 package mechanics.rl;
 
 import model.entity.Character;
+import model.type.CharacterId;
 import simulation.CombatSimulator;
 
 /**
@@ -27,7 +28,9 @@ public class ActionSpace {
             if (!action.isSwap()) {
                 continue;
             }
-            Character target = sim.getCharacter(action.getTargetCharacterId());
+            int slot = action.getTargetSlot();
+            CharacterId targetId = slot < config.partyOrder.length ? config.partyOrder[slot] : null;
+            Character target = targetId != null ? sim.getCharacter(targetId) : null;
             boolean swapReady = now - lastSwapTime >= config.swapCooldown;
             boolean valid = target != null && active != null
                     && active.getCharacterId() != target.getCharacterId()

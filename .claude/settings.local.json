@@ -1,7 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(java:*)"
+      "Bash(java:*)",
+      "mcp__ide__executeCode",
+      "Bash(python3:*)",
+      "Bash(pip3 show:*)",
+      "Bash(/Users/kota/Documents/develop/Java/GenshinDPSCalculator/.venv/bin/python -m pip show wandb)",
+      "Bash(./gradlew classes:*)",
+      "Bash(./gradlew ProfileCapabilities)",
+      "Bash(./gradlew build:*)"
     ]
   }
 }

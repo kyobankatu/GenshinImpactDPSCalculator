@@ -1,0 +1,50 @@
+{
+  "COLUMBINA": {
+    "off_field_dps_ratio": 0.299616,
+    "team_buff_score": 0.000000,
+    "self_enhancement_score": 0.000000,
+    "energy_generation_score": 0.264583
+  },
+  "SUCROSE": {
+    "off_field_dps_ratio": 0.166208,
+    "team_buff_score": 0.011847,
+    "self_enhancement_score": 0.040098,
+    "energy_generation_score": 0.216120
+  },
+  "FLINS": {
+    "off_field_dps_ratio": 0.000000,
+    "team_buff_score": 0.000000,
+    "self_enhancement_score": 0.650130,
+    "energy_generation_score": 0.000000
+  },
+  "INEFFA": {
+    "off_field_dps_ratio": 0.251114,
+    "team_buff_score": 0.000000,
+    "self_enhancement_score": 0.000000,
+    "energy_generation_score": 0.071056
+  },
+  "XINGQIU": {
+    "off_field_dps_ratio": 0.591266,
+    "team_buff_score": 0.125970,
+    "self_enhancement_score": 1.000000,
+    "energy_generation_score": 0.291833
+  },
+  "BENNETT": {
+    "off_field_dps_ratio": 0.000000,
+    "team_buff_score": 0.403994,
+    "self_enhancement_score": 0.690762,
+    "energy_generation_score": 0.163080
+  },
+  "RAIDEN_SHOGUN": {
+    "off_field_dps_ratio": 0.201296,
+    "team_buff_score": 0.000146,
+    "self_enhancement_score": 0.000000,
+    "energy_generation_score": 0.228050
+  },
+  "XIANGLING": {
+    "off_field_dps_ratio": 0.485245,
+    "team_buff_score": 0.030639,
+    "self_enhancement_score": 1.000000,
+    "energy_generation_score": 0.182430
+  }
+}

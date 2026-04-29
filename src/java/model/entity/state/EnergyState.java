@@ -11,6 +11,7 @@ public class EnergyState {
     private double totalEnergyGained = 0.0;
     private double totalFlatEnergyGained = 0.0;
     private double totalParticleEnergyGained = 0.0;
+    private double totalScaledParticleEnergyGained = 0.0;
     private double particleEnergyThisWindow = 0.0;
     private double flatEnergyThisWindow = 0.0;
     private final List<double[]> burstEnergyWindows = new ArrayList<>();
@@ -22,6 +23,7 @@ public class EnergyState {
 
     public void receiveParticleEnergy(double baseAmount, double er, double maxEnergy) {
         totalParticleEnergyGained += baseAmount;
+        totalScaledParticleEnergyGained += baseAmount * er;
         particleEnergyThisWindow += baseAmount;
         receiveEnergy(baseAmount * er, maxEnergy);
     }
@@ -37,6 +39,7 @@ public class EnergyState {
         currentEnergy = initialEnergy;
         totalFlatEnergyGained = 0.0;
         totalParticleEnergyGained = 0.0;
+        totalScaledParticleEnergyGained = 0.0;
         particleEnergyThisWindow = 0.0;
         flatEnergyThisWindow = 0.0;
         burstEnergyWindows.clear();
@@ -63,6 +66,16 @@ public class EnergyState {
 
     public double getTotalParticleEnergy() {
         return totalParticleEnergyGained;
+    }
+
+    /**
+     * Returns total particle energy received after ER scaling (i.e. what was actually
+     * added to the energy bar from particles, excluding flat energy and burst reset).
+     *
+     * @return ER-scaled particle energy total
+     */
+    public double getTotalScaledParticleEnergy() {
+        return totalScaledParticleEnergyGained;
     }
 
     public List<double[]> getBurstEnergyWindows() {
