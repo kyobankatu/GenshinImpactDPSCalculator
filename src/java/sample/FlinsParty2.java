@@ -94,109 +94,57 @@ public class FlinsParty2 {
         // Sucrose Skill -> Burst
         // Flins Skill -> Skill -> SpecialBurst -> Skill -> SpecialBurst
 
-        for (int j = 0; j < 3; j++) {
+        // 1. Ineffa
+        sim.switchCharacter("Ineffa");
+        skill(sim, "Ineffa");
+        burst(sim, "Ineffa");
 
-            // 1. Ineffa
-            sim.switchCharacter("Ineffa");
-            skill(sim, "Ineffa");
-            burst(sim, "Ineffa");
+        // 2. Columbina
+        sim.switchCharacter("Columbina");
+        skill(sim, "Columbina");
+        burst(sim, "Columbina");
 
-            // 2. Columbina
-            sim.switchCharacter("Columbina");
-            skill(sim, "Columbina");
-            burst(sim, "Columbina");
+        // 3. Sucrose
+        sim.switchCharacter("Sucrose");
+        skill(sim, "Sucrose");
+        burst(sim, "Sucrose");
 
-            // 3. Sucrose
-            sim.switchCharacter("Sucrose");
-            skill(sim, "Sucrose");
-            burst(sim, "Sucrose");
+        // 4. Flins
+        sim.switchCharacter("Flins");
+        skill(sim, "Flins");
+        skill(sim, "Flins");
+        normal(sim, "Flins");
+        normal(sim, "Flins");
+        normal(sim, "Flins");
+        normal(sim, "Flins");
+        burst(sim, "Flins"); // SpecialBurst 1
+        normal(sim, "Flins");
+        normal(sim, "Flins");
+        normal(sim, "Flins");
+        normal(sim, "Flins");
+        normal(sim, "Flins");
+        skill(sim, "Flins");
+        burst(sim, "Flins"); // SpecialBurst 2
+        normal(sim, "Flins");
+        normal(sim, "Flins");
+        normal(sim, "Flins");
+        normal(sim, "Flins");
+        normal(sim, "Flins");
+        normal(sim, "Flins");
+        normal(sim, "Flins");
+        normal(sim, "Flins");
+        skill(sim, "Flins");
+        burst(sim, "Flins"); // SpecialBurst 3
+        normal(sim, "Flins");
+        normal(sim, "Flins");
+        normal(sim, "Flins");
 
-            // 4. Flins
-            sim.switchCharacter("Flins");
-            skill(sim, "Flins");
-            skill(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            burst(sim, "Flins"); // SpecialBurst 1
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            skill(sim, "Flins");
-            burst(sim, "Flins"); // SpecialBurst 2
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            skill(sim, "Flins");
-            burst(sim, "Flins"); // SpecialBurst 3
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-
-            // 5. Sucrose
-            sim.switchCharacter("Sucrose");
-            skill(sim, "Sucrose");
-            normal(sim, "Sucrose");
-            normal(sim, "Sucrose");
-            normal(sim, "Sucrose");
-
-            // 1. Ineffa
-            sim.switchCharacter("Ineffa");
-            skill(sim, "Ineffa");
-
-            // 2. Columbina
-            sim.switchCharacter("Columbina");
-            skill(sim, "Columbina");
-            burst(sim, "Columbina");
-
-            // 3. Sucrose
-            sim.switchCharacter("Sucrose");
-            skill(sim, "Sucrose");
-            burst(sim, "Sucrose");
-
-            // 4. Flins
-            sim.switchCharacter("Flins");
-            skill(sim, "Flins");
-            skill(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            burst(sim, "Flins"); // SpecialBurst 1
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            skill(sim, "Flins");
-            burst(sim, "Flins"); // SpecialBurst 2
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            skill(sim, "Flins");
-            burst(sim, "Flins"); // SpecialBurst 3
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-
-            sim.switchCharacter("Sucrose");
-            normal(sim, "Sucrose");
-            normal(sim, "Sucrose");
-
-        }
+        // 5. Sucrose
+        sim.switchCharacter("Sucrose");
+        skill(sim, "Sucrose");
+        normal(sim, "Sucrose");
+        normal(sim, "Sucrose");
+        normal(sim, "Sucrose");
     }
 
     private static void normal(CombatSimulator sim, String characterName) {

@@ -133,8 +133,11 @@ public class BattleEnvironment {
         stepCount++;
 
         if (done && generateReportOnDone) {
-            HtmlReportGenerator.generate("rl_report.html",
-                    VisualLogger.getInstance().getRecords(), simulator);
+            String reportFile = buildPartyReportFileName(currentPartyName);
+            HtmlReportGenerator.generate(reportFile, VisualLogger.getInstance().getRecords(), simulator);
+            if (!"rl_report.html".equals(reportFile)) {
+                HtmlReportGenerator.generate("rl_report.html", VisualLogger.getInstance().getRecords(), simulator);
+            }
             generateReportOnDone = false;
         }
 
@@ -191,6 +194,18 @@ public class BattleEnvironment {
         if (simulator == null) {
             reset(false);
         }
+    }
+
+    private String buildPartyReportFileName(String partyName) {
+        if (partyName == null || partyName.isBlank()) {
+            return "rl_report.html";
+        }
+        String slug = partyName
+                .trim()
+                .toLowerCase(java.util.Locale.ROOT)
+                .replaceAll("[^a-z0-9]+", "_")
+                .replaceAll("^_+|_+$", "");
+        return slug.isEmpty() ? "rl_report.html" : "rl_report_" + slug + ".html";
     }
 
     private void fillObservationBuffer() {

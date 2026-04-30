@@ -36,6 +36,10 @@ public final class RaidenPartyRLSimulatorFactory {
         return RaidenPartyRLSimulatorFactory::create;
     }
 
+    public static RLPartySpec spec() {
+        return new RLPartySpec("RaidenParty", PARTY_ORDER, supplier());
+    }
+
     public static CombatSimulator create() {
         CombatSimulator sim = new CombatSimulator();
         sim.setEnemy(new Enemy(90));
@@ -45,7 +49,7 @@ public final class RaidenPartyRLSimulatorFactory {
     }
 
     public static RLEpisodeFactory episodeFactory(EpisodeConfig baseConfig) {
-        return new SinglePartyRLEpisodeFactory("RaidenParty", PARTY_ORDER, supplier(), baseConfig);
+        return new SinglePartyRLEpisodeFactory(spec(), baseConfig);
     }
 
     private static void setupParty(CombatSimulator sim) {

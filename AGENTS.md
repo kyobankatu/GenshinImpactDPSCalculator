@@ -4,7 +4,7 @@
 - This repository is a Java 11+ Genshin Impact DPS calculator and battle simulator.
 - The project simulates combat over time rather than evaluating isolated formulas. Rotation order, animation time, buffs, elemental aura state, ICD, reactions, energy flow, and periodic effects all matter.
 - Main Java source code lives under `src/java/` and Python RL code lives under `src/python/`. `build.gradle` is configured to compile from `src/java`.
-- Representative runnable entry points are in `src/java/sample/` such as `RaidenParty`, `FlinsParty`, `FlinsParty2`, `ServeRLJava`, and `BenchmarkRLJava`.
+- Representative runnable entry points are in `src/java/sample/` such as `RaidenParty`, `FlinsParty`, `FlinsParty2`, `ServeRLJava`, `BenchmarkRLJava`, and `ProfileCharacterCapabilities`.
 - Static character multiplier and status data live under `config/characters/`.
 - Generated or published artifacts may appear under `docs/` and simulation HTML reports may be written to the repository root.
 
@@ -14,6 +14,7 @@
 - `src/java/model/`: characters, weapons, artifacts, entity definitions, stats, enums.
 - `src/java/visualization/`: visual logging and HTML report generation.
 - `src/java/sample/`: executable sample rotations and party setups.
+- `src/java/mechanics/rl/`: RL environment, party registry, reward/observation logic, and rollout bridge.
 - `src/python/rl/`: Python learner, local rollout client, protocol helpers, and evaluation scripts.
 
 ## Build and run commands
@@ -23,6 +24,7 @@
 - Run another sample simulation: `./gradlew FlinsParty`
 - Start the local Java rollout service: `./gradlew ServeRLJava`
 - Benchmark vectorized Java rollout throughput: `./gradlew BenchmarkRLJava`
+- Refresh capability profiles for registered RL parties: `./gradlew ProfileCapabilities`
 - Run Python training from the repo root: `python3 src/python/rl/train_recurrent_ppo.py --preset debug`
 - Run Python training with Weights & Biases logging: `python3 src/python/rl/train_recurrent_ppo.py --preset debug --wandb --wandb-project genshin-recurrent-ppo`
 - Run Python evaluation from the repo root: `python3 src/python/rl/evaluate_policy.py`
@@ -32,6 +34,7 @@
 - Prefer minimal, local changes. This codebase has many tightly coupled mechanics, so broad refactors are risky unless they are required.
 - When touching combat logic, inspect related systems before editing: buffs, reactions, energy, optimizer assumptions, and report generation often depend on one another.
 - Preserve the existing package structure and naming style. New classes should be placed in the closest matching package instead of creating parallel abstractions without need.
+- For new RL-trainable parties, prefer extending the shared RL party registry and registry-driven launch paths instead of adding more one-off script conditionals.
 
 ## Code style guidelines
 - Match the existing Java style in the file you are editing. The codebase mixes concise implementations with heavy Javadoc in core systems; follow local context.

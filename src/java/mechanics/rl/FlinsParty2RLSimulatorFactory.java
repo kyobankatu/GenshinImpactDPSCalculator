@@ -35,8 +35,12 @@ public final class FlinsParty2RLSimulatorFactory {
         return FlinsParty2RLSimulatorFactory::create;
     }
 
+    public static RLPartySpec spec() {
+        return new RLPartySpec("FlinsParty2", PARTY_ORDER, supplier());
+    }
+
     public static RLEpisodeFactory episodeFactory(EpisodeConfig baseConfig) {
-        return new SinglePartyRLEpisodeFactory("FlinsParty2", PARTY_ORDER, supplier(), baseConfig);
+        return new SinglePartyRLEpisodeFactory(spec(), baseConfig);
     }
 
     public static CombatSimulator create() {

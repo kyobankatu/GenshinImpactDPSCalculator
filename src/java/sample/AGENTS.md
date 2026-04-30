@@ -13,14 +13,16 @@
 - `RaidenParty.java`: Raiden National sample used as a conventional benchmark team with optimizer pipeline and scripted 21-second rotation.
 - `ServeRLJava.java`: local Java rollout service used by the Python learner.
 - `BenchmarkRLJava.java`: vectorized Java rollout throughput benchmark.
+- `ProfileCharacterCapabilities.java`: regenerates RL capability profiles for one or more registered RL parties.
 
 ## Coupling and dependencies
 - These entry points depend on `simulation.CombatSimulator`, concrete `model.character`, `model.weapon`, and `model.artifact` classes, `mechanics.optimization`, `mechanics.analysis.StatsRecorder`, and `visualization.HtmlReportGenerator`.
-- `ServeRLJava` and `BenchmarkRLJava` additionally depend on `mechanics.rl`.
+- `ServeRLJava`, `BenchmarkRLJava`, and `ProfileCharacterCapabilities` additionally depend on `mechanics.rl` and should stay aligned with the RL party registry.
 - Rotation scripts in these files are boundary adapters: they may use display names or action labels, but simulator internals should resolve them to typed character IDs and action keys.
 
 ## Agent guidance
 - When validating a gameplay change, run the smallest affected sample entry point first.
 - If you change action keys, boundary labels, cooldown expectations, or team composition assumptions, update these scripts as needed.
 - Keep these files explicit and readable. They serve as integration tests and usage documentation more than reusable library code.
+- When adding a new RL party, prefer exposing it through a simulator factory plus registry entry before adding more launch flags or special-case tasks.
 - Do not push sample display-name conventions deeper into runtime logic; adapt them at the sample or profile boundary.

@@ -15,9 +15,9 @@ import java.util.Map;
 import mechanics.rl.ActionSpace;
 import mechanics.rl.BattleEnvironment;
 import mechanics.rl.EpisodeConfig;
-import mechanics.rl.FlinsParty2RLSimulatorFactory;
 import mechanics.rl.RLEpisodeFactory;
 import mechanics.rl.ObservationEncoder;
+import mechanics.rl.RLPartyRegistry;
 
 /**
  * Local-only binary rollout service used by the Python learner.
@@ -41,15 +41,15 @@ public class RolloutService {
     private long stepWriteNanos;
 
     public RolloutService(int port, EpisodeConfig config) {
-        this(port, "127.0.0.1", FlinsParty2RLSimulatorFactory.episodeFactory(config), 0);
+        this(port, "127.0.0.1", RLPartyRegistry.createEpisodeFactory(config, RLPartyRegistry.DEFAULT_SINGLE_PARTY), 0);
     }
 
     public RolloutService(int port, String bindHost, EpisodeConfig config) {
-        this(port, bindHost, FlinsParty2RLSimulatorFactory.episodeFactory(config), 0);
+        this(port, bindHost, RLPartyRegistry.createEpisodeFactory(config, RLPartyRegistry.DEFAULT_SINGLE_PARTY), 0);
     }
 
     public RolloutService(int port, String bindHost, EpisodeConfig config, int rolloutWorkers) {
-        this(port, bindHost, FlinsParty2RLSimulatorFactory.episodeFactory(config), rolloutWorkers);
+        this(port, bindHost, RLPartyRegistry.createEpisodeFactory(config, RLPartyRegistry.DEFAULT_SINGLE_PARTY), rolloutWorkers);
     }
 
     public RolloutService(int port, String bindHost, RLEpisodeFactory episodeFactory, int rolloutWorkers) {

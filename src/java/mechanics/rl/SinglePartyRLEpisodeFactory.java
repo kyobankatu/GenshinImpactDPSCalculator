@@ -9,9 +9,7 @@ import simulation.CombatSimulator;
  * Adapts one fixed simulator supplier into an {@link RLEpisodeFactory}.
  */
 public class SinglePartyRLEpisodeFactory implements RLEpisodeFactory {
-    private final String partyName;
-    private final CharacterId[] partyOrder;
-    private final Supplier<CombatSimulator> simulatorSupplier;
+    private final RLPartySpec partySpec;
     private final EpisodeConfig baseConfig;
 
     public SinglePartyRLEpisodeFactory(
@@ -19,23 +17,25 @@ public class SinglePartyRLEpisodeFactory implements RLEpisodeFactory {
             CharacterId[] partyOrder,
             Supplier<CombatSimulator> simulatorSupplier,
             EpisodeConfig baseConfig) {
-        this.partyName = partyName;
-        this.partyOrder = partyOrder.clone();
-        this.simulatorSupplier = simulatorSupplier;
+        this(new RLPartySpec(partyName, partyOrder, simulatorSupplier), baseConfig);
+    }
+
+    public SinglePartyRLEpisodeFactory(RLPartySpec partySpec, EpisodeConfig baseConfig) {
+        this.partySpec = partySpec;
         this.baseConfig = baseConfig;
     }
 
     @Override
     public EpisodeContext createEpisode(int preferredPartyId) {
         return new EpisodeContext(
-                simulatorSupplier.get(),
-                baseConfig.withPartyOrder(partyOrder),
+                partySpec.getSimulatorSupplier().get(),
+                baseConfig.withPartyOrder(partySpec.getPartyOrder()),
                 0,
-                partyName);
+                partySpec.getPartyName());
     }
 
     @Override
     public String[] getPartyNames() {
-        return new String[]{partyName};
+        return new String[]{partySpec.getPartyName()};
     }
 }

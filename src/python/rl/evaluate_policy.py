@@ -35,7 +35,7 @@ def main():
             print_action_breakdown("deterministic", summary)
             print_attention_breakdown("deterministic", summary)
             print_party_breakdown("deterministic", summary)
-            print("Generated output/rl_report.html")
+            print_report_paths(summary)
         if mode in ("stochastic", "both"):
             summary = run_evaluation(policy, client, device, deterministic=False, generate_report=False)
             print(
@@ -77,7 +77,7 @@ def run_evaluation(policy, client, device, deterministic, generate_report):
                 client,
                 device,
                 deterministic=deterministic,
-                generate_report=generate_report and party_id == 0,
+                generate_report=generate_report,
                 forced_party_id=party_id,
             )
             per_party[party_name] = summary
@@ -184,6 +184,24 @@ def print_party_breakdown(label, summary):
         )
         print_action_breakdown(f"{label} {party_name}", party_summary)
         print_attention_breakdown(f"{label} {party_name}", party_summary)
+
+
+def print_report_paths(summary):
+    if "per_party" in summary:
+        for party_name in summary["per_party"]:
+            print(f"Generated output/{build_report_file_name(party_name)}")
+        print("Generated output/rl_report.html")
+        return
+    print(f"Generated output/{build_report_file_name(summary.get('party_name'))}")
+
+
+def build_report_file_name(party_name):
+    if not party_name:
+        return "rl_report.html"
+    slug = "".join(char.lower() if char.isalnum() else "_" for char in party_name).strip("_")
+    while "__" in slug:
+        slug = slug.replace("__", "_")
+    return f"rl_report_{slug}.html" if slug else "rl_report.html"
 
 
 if __name__ == "__main__":
