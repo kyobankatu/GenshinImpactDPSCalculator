@@ -150,6 +150,7 @@ def build_training_args(args, config):
         checkpoint_interval=config["checkpoint_interval"],
         evaluation_interval=config["evaluation_interval"],
         rollout_workers=config["rollout_workers"],
+        resume_from=None,
         wandb=True,
         wandb_project=args.project,
         wandb_entity=args.entity,
