@@ -42,6 +42,7 @@ public final class RaidenPartyRLSimulatorFactory {
 
     public static CombatSimulator create() {
         CombatSimulator sim = new CombatSimulator();
+        sim.setLoggingEnabled(false);
         sim.setEnemy(new Enemy(90));
         setupParty(sim);
         sim.updateMoonsign();

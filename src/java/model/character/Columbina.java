@@ -345,9 +345,11 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
             if (time <= domainEndTime) {
                 double extra = result.getTransformDamage() * 0.33;
                 sim.recordDamage("Thundercloud", extra);
-                visualization.VisualLogger.getInstance().log(time, "Thundercloud",
-                        "Lunar-Charged Reaction (Extra)", extra,
-                        "Lunar-Charged Reaction (Extra)", extra, sim.getEnemy().getAuraMap());
+                if (sim.isLoggingEnabled()) {
+                    visualization.VisualLogger.getInstance().log(time, "Thundercloud",
+                            "Lunar-Charged Reaction (Extra)", extra,
+                            "Lunar-Charged Reaction (Extra)", extra, sim.getEnemy().getAuraMap());
+                }
             }
             return;
         }

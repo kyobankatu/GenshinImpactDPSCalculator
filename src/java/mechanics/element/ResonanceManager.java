@@ -49,7 +49,9 @@ public class ResonanceManager {
      *            registered on this same simulator
      */
     public static void applyResonances(CombatSimulator sim) {
-        System.out.println("\n--- Checking Elemental Resonance ---");
+        if (sim.isLoggingEnabled()) {
+            System.out.println("\n--- Checking Elemental Resonance ---");
+        }
         Collection<Character> party = sim.getPartyMembers();
         Map<Element, Integer> elementCounts = new HashMap<>();
         int uniqueElements = 0;
@@ -67,7 +69,9 @@ public class ResonanceManager {
 
         // 1. Protective Canopy (4 Unique Elements)
         if (uniqueElements >= 4) {
-            System.out.println("   [Resonance] Protective Canopy Applied (+15% RES)");
+            if (sim.isLoggingEnabled()) {
+                System.out.println("   [Resonance] Protective Canopy Applied (+15% RES)");
+            }
             sim.applyTeamBuff(new SimpleBuff("Protective Canopy", BuffId.PROTECTIVE_CANOPY, 99999, 0, stats -> {
                 // Assuming RES usually means Elemental/Physical RES against incoming DMG.
                 // In this DPS sim, "RES" stats usually refer to Enemy RES Shred or similar.
@@ -98,21 +102,27 @@ public class ResonanceManager {
     private static void applySpecificResonance(CombatSimulator sim, Element e) {
         switch (e) {
             case PYRO:
-                System.out.println("   [Resonance] Fervent Flames (Pyro) Applied (+25% ATK)");
+                if (sim.isLoggingEnabled()) {
+                    System.out.println("   [Resonance] Fervent Flames (Pyro) Applied (+25% ATK)");
+                }
                 sim.applyTeamBuff(new SimpleBuff("Fervent Flames", BuffId.FERVENT_FLAMES, 99999, 0, stats -> {
                     stats.add(StatType.ATK_PERCENT, 0.25);
                 }));
                 break;
 
             case HYDRO:
-                System.out.println("   [Resonance] Soothing Water (Hydro) Applied (+25% HP)");
+                if (sim.isLoggingEnabled()) {
+                    System.out.println("   [Resonance] Soothing Water (Hydro) Applied (+25% HP)");
+                }
                 sim.applyTeamBuff(new SimpleBuff("Soothing Water", BuffId.SOOTHING_WATER, 99999, 0, stats -> {
                     stats.add(StatType.HP_PERCENT, 0.25);
                 }));
                 break;
 
             case CRYO:
-                System.out.println("   [Resonance] Shattering Ice (Cryo) Applied (+15% CR vs Cryo/Frozen)");
+                if (sim.isLoggingEnabled()) {
+                    System.out.println("   [Resonance] Shattering Ice (Cryo) Applied (+15% CR vs Cryo/Frozen)");
+                }
                 sim.applyTeamBuff(new SimpleBuff("Shattering Ice", BuffId.SHATTERING_ICE, 99999, 0, stats -> {
                     // Conditional CR not directly supported by SimpleBuff static application
                     // We need a conditional buff logic or assume uptime.
@@ -137,7 +147,9 @@ public class ResonanceManager {
                 break;
 
             case GEO:
-                System.out.println("   [Resonance] Enduring Rock (Geo) Applied (+15% DMG, -20% Geo Res)");
+                if (sim.isLoggingEnabled()) {
+                    System.out.println("   [Resonance] Enduring Rock (Geo) Applied (+15% DMG, -20% Geo Res)");
+                }
                 sim.applyTeamBuff(new SimpleBuff("Enduring Rock", BuffId.ENDURING_ROCK, 99999, 0, stats -> {
                     stats.add(StatType.DMG_BONUS_ALL, 0.15);
                     stats.add(StatType.GEO_RES_SHRED, 0.20);
@@ -145,7 +157,9 @@ public class ResonanceManager {
                 break;
 
             case DENDRO:
-                System.out.println("   [Resonance] Sprawling Greenery (Dendro) Applied (+50 EM)");
+                if (sim.isLoggingEnabled()) {
+                    System.out.println("   [Resonance] Sprawling Greenery (Dendro) Applied (+50 EM)");
+                }
                 sim.applyTeamBuff(new SimpleBuff("Sprawling Greenery", BuffId.SPRAWLING_GREENERY, 99999, 0, stats -> {
                     stats.add(StatType.ELEMENTAL_MASTERY, 50.0);
                     // Note: Specific reactions give more EM (30/20). Ignoring for base
@@ -154,14 +168,18 @@ public class ResonanceManager {
                 break;
 
             case ANEMO:
-                System.out.println("   [Resonance] Impetuous Winds (Anemo) Applied (-5% CD)");
+                if (sim.isLoggingEnabled()) {
+                    System.out.println("   [Resonance] Impetuous Winds (Anemo) Applied (-5% CD)");
+                }
                 sim.applyTeamBuff(new SimpleBuff("Impetuous Winds", BuffId.IMPETUOUS_WINDS, 99999, 0, stats -> {
                     stats.add(StatType.CD_REDUCTION, 0.05);
                 }));
                 break;
 
             case ELECTRO:
-                System.out.println("   [Resonance] High Voltage (Electro) Applied (Particle Generation)");
+                if (sim.isLoggingEnabled()) {
+                    System.out.println("   [Resonance] High Voltage (Electro) Applied (Particle Generation)");
+                }
                 final double[] lastHVParticleTime = { Double.NEGATIVE_INFINITY };
                 sim.addReactionListener(new CombatSimulator.ReactionListener() {
                     @Override

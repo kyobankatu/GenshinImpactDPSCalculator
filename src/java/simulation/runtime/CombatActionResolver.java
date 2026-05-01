@@ -217,9 +217,11 @@ public class CombatActionResolver {
         }
 
         sim.recordDamage(characterId, triggerDmg);
-        sim.getCombatLogSink().log(
-                sim.getCurrentTime(), attacker.getName(), reactionLabel, triggerDmg,
-                reactionLabel, triggerDmg, sim.getEnemy().getAuraMap());
+        if (sim.isLoggingEnabled()) {
+            sim.getCombatLogSink().log(
+                    sim.getCurrentTime(), attacker.getName(), reactionLabel, triggerDmg,
+                    reactionLabel, triggerDmg, sim.getEnemy().getAuraMap());
+        }
 
         if (result.isElectroCharged()) {
             reactionEffectScheduler.scheduleElectroCharged(trigger, action.getGaugeUnits(), transDmg, isLunar);
@@ -282,10 +284,12 @@ public class CombatActionResolver {
             }
         }
 
-        sim.getCombatLogSink().log(
-                sim.getCurrentTime(), charName, action.getName(), damage,
-                (reactionMulti > 1.0 ? "Amp x" + String.format("%.2f", reactionMulti) : "None"),
-                0.0, sim.getEnemy().getAuraMap(), action.getDebugFormula());
+        if (sim.isLoggingEnabled()) {
+            sim.getCombatLogSink().log(
+                    sim.getCurrentTime(), charName, action.getName(), damage,
+                    (reactionMulti > 1.0 ? "Amp x" + String.format("%.2f", reactionMulti) : "None"),
+                    0.0, sim.getEnemy().getAuraMap(), action.getDebugFormula());
+        }
     }
 
     private void applyExpectedNormalAttackEnergy(Character attacker) {

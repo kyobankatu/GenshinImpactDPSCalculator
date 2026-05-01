@@ -58,9 +58,11 @@ public class ActionGateway {
                 sim.advanceTime(wait);
             }
             if (character.getCurrentEnergy() < character.getEnergyCost()) {
-                System.out.println(String.format(
-                        "[T=%.1f] WARNING: %s burst fired with insufficient energy (%.0f/%.0f)",
-                        sim.getCurrentTime(), charName, character.getCurrentEnergy(), character.getEnergyCost()));
+                if (sim.isLoggingEnabled()) {
+                    System.out.println(String.format(
+                            "[T=%.1f] WARNING: %s burst fired with insufficient energy (%.0f/%.0f)",
+                            sim.getCurrentTime(), charName, character.getCurrentEnergy(), character.getEnergyCost()));
+                }
             }
         }
 

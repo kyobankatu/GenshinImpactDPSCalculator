@@ -7,25 +7,43 @@ import java.io.PrintStream;
  * Small helper to mute stdout during high-throughput rollout execution.
  */
 public final class QuietExecution {
+    private static final PrintStream ORIGINAL_STDOUT = System.out;
+    private static final PrintStream MUTED_STDOUT = new PrintStream(new OutputStream() {
+        @Override
+        public void write(int b) {
+            // discard rollout chatter
+        }
+    });
+    private static final Object STDOUT_LOCK = new Object();
+    private static int muteDepth = 0;
+
     private QuietExecution() {
     }
 
     public static <T> T call(java.util.concurrent.Callable<T> callable) {
-        PrintStream original = System.out;
-        PrintStream muted = new PrintStream(new OutputStream() {
-            @Override
-            public void write(int b) {
-                // discard rollout chatter
-            }
-        });
-        System.setOut(muted);
+        muteStdout();
         try {
             return callable.call();
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
-            System.setOut(original);
-            muted.close();
+            restoreStdout();
+        }
+    }
+
+    private static void muteStdout() {
+        synchronized (STDOUT_LOCK) {
+            if (muteDepth++ == 0) {
+                System.setOut(MUTED_STDOUT);
+            }
+        }
+    }
+
+    private static void restoreStdout() {
+        synchronized (STDOUT_LOCK) {
+            if (--muteDepth == 0) {
+                System.setOut(ORIGINAL_STDOUT);
+            }
         }
     }
 }

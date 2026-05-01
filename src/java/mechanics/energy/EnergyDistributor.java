@@ -20,10 +20,14 @@ public class EnergyDistributor {
 
     public void distributeParticles(Element particleElement, double count, ParticleType type) {
         try {
-            System.out.println("   [Energy] Distributing " + count + " " + particleElement + " particles...");
+            if (sim.isLoggingEnabled()) {
+                System.out.println("   [Energy] Distributing " + count + " " + particleElement + " particles...");
+            }
             Character activeChar = sim.getActiveCharacter();
             if (activeChar == null) {
-                System.out.println("   [Energy] No active character found!");
+                if (sim.isLoggingEnabled()) {
+                    System.out.println("   [Energy] No active character found!");
+                }
                 return;
             }
 
@@ -48,8 +52,11 @@ public class EnergyDistributor {
 
             sim.notifyParticle(particleElement, count);
         } catch (Exception e) {
-            System.out.println("[ERROR] Crash in EnergyDistributor:");
-            e.printStackTrace();
+            if (sim.isLoggingEnabled()) {
+                System.out.println("[ERROR] Crash in EnergyDistributor:");
+                e.printStackTrace();
+            }
+            throw e;
         }
     }
 
