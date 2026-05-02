@@ -80,6 +80,40 @@ class RecurrentPolicy(nn.Module):
         value = self.value_head(hidden).squeeze(-1)
         return masked_logits, value, hidden, attention_scores
 
+    def forward_sequence(
+        self,
+        observations,
+        initial_hidden,
+        action_masks,
+        sequence_mask=None,
+    ):
+        hidden = initial_hidden
+        logits_steps = []
+        value_steps = []
+        attention_steps = []
+
+        for step_index in range(observations.shape[1]):
+            logits, value, next_hidden, attention_scores = self.forward_step(
+                observations[:, step_index],
+                hidden,
+                action_masks[:, step_index],
+            )
+            if sequence_mask is not None:
+                valid = (sequence_mask[:, step_index] > 0.5).unsqueeze(-1)
+                hidden = torch.where(valid, next_hidden, hidden)
+            else:
+                hidden = next_hidden
+            logits_steps.append(logits)
+            value_steps.append(value)
+            attention_steps.append(attention_scores)
+
+        return (
+            torch.stack(logits_steps, dim=1),
+            torch.stack(value_steps, dim=1),
+            hidden,
+            torch.stack(attention_steps, dim=1),
+        )
+
     def act(self, observation, recurrent_state, action_mask, deterministic=False):
         logits, value, hidden, attention_scores = self.forward_step(
             observation, recurrent_state, action_mask
@@ -136,36 +170,24 @@ class RecurrentPolicy(nn.Module):
 
 
 def compute_advantages(segments, gamma, gae_lambda):
-    samples = []
+    steps = []
     for segment in segments:
         next_value = segment["bootstrap_value"]
         gae = 0.0
-        local = []
         for step in reversed(segment["steps"]):
             non_terminal = 0.0 if step["done"] else 1.0
             delta = step["reward"] + gamma * next_value * non_terminal - step["value"]
             gae = delta + gamma * gae_lambda * non_terminal * gae
-            local.append(
-                {
-                    "observation": step["observation"],
-                    "recurrent_input": step["recurrent_input"],
-                    "action_mask": step["action_mask"],
-                    "action": step["action"],
-                    "old_log_probability": step["old_log_probability"],
-                    "old_value": step["value"],
-                    "advantage": gae,
-                    "return_target": gae + step["value"],
-                }
-            )
+            step["advantage"] = gae
+            step["return_target"] = gae + step["value"]
+            steps.append(step)
             next_value = step["value"]
-        local.reverse()
-        samples.extend(local)
 
-    if not samples:
-        return samples
+    if not steps:
+        return segments
 
-    advantages = torch.tensor([sample["advantage"] for sample in samples], dtype=torch.float32)
-    normalized = (advantages - advantages.mean()) / advantages.std().clamp_min(1e-8)
-    for sample, advantage in zip(samples, normalized.tolist()):
-        sample["advantage"] = advantage
-    return samples
+    advantages = torch.tensor([step["advantage"] for step in steps], dtype=torch.float32)
+    normalized = (advantages - advantages.mean()) / advantages.std(unbiased=False).clamp_min(1e-8)
+    for step, advantage in zip(steps, normalized.tolist()):
+        step["advantage"] = advantage
+    return segments

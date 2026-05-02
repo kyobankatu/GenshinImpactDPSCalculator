@@ -13,7 +13,8 @@ public class ServeRLJava {
         String bindHost = args.length > 1 ? args[1] : "127.0.0.1";
         int rolloutWorkers = args.length > 2 ? Integer.parseInt(args[2]) : 0;
         String selection = args.length > 3 ? normalizeSelectionArg(args[3]) : RLPartyRegistry.DEFAULT_SINGLE_PARTY;
-        EpisodeConfig config = new EpisodeConfig();
+        double episodeSeconds = args.length > 4 ? Double.parseDouble(args[4]) : 20.0;
+        EpisodeConfig config = new EpisodeConfig().withMaxEpisodeTime(episodeSeconds);
         RolloutService service = new RolloutService(
                 port,
                 bindHost,

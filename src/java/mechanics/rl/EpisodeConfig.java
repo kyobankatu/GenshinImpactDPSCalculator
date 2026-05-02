@@ -64,4 +64,18 @@ public class EpisodeConfig {
                 terminalDamageScale,
                 fillEnergyOnReset);
     }
+
+    public EpisodeConfig withMaxEpisodeTime(double nextMaxEpisodeTime) {
+        return new EpisodeConfig(
+                partyOrder,
+                nextMaxEpisodeTime,
+                failedActionTimeCost,
+                swapCooldown,
+                damageRewardScale,
+                invalidActionPenalty,
+                repeatedSwapPenalty,
+                idleTimePenaltyPerSecond,
+                terminalDamageScale,
+                fillEnergyOnReset);
+    }
 }

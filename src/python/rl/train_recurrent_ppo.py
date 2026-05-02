@@ -29,7 +29,8 @@ PRESETS = {
         "envs": 4,
         "hidden_size": 64,
         "ppo_epochs": 4,
-        "minibatch_size": 32,
+        "sequence_length": 16,
+        "sequence_minibatch_size": 8,
         "gamma": 0.99,
         "gae_lambda": 0.95,
         "clip_range": 0.20,
@@ -129,7 +130,8 @@ def run_training(args, run=None):
         for update in range(start_update + 1, config["updates"] + 1):
             entropy_coefficient = scheduled_entropy_coefficient(config, update)
             rollout_start = time.time()
-            segments = [{"steps": [], "bootstrap_value": 0.0} for _ in range(config["envs"])]
+            completed_segments = []
+            active_segments = [[] for _ in range(config["envs"])]
             episode_rewards = []
             episode_damages = []
             episode_steps = []
@@ -155,17 +157,17 @@ def run_training(args, run=None):
                 next_party_ids = batch["party_ids"]
 
                 for env_index in range(config["envs"]):
-                    segments[env_index]["steps"].append(
-                        {
-                            "observation": observations[env_index],
-                            "recurrent_input": hidden_states[env_index].detach().cpu().tolist(),
-                            "action_mask": action_masks[env_index],
-                            "action": actions[env_index],
-                            "old_log_probability": action_output["log_probability"][env_index].item(),
-                            "value": action_output["value"][env_index].item(),
-                            "reward": batch["rewards"][env_index],
-                            "done": batch["dones"][env_index],
-                        }
+                    active_segments[env_index].append(
+                        build_step_record(
+                            observations[env_index],
+                            hidden_states[env_index],
+                            action_masks[env_index],
+                            actions[env_index],
+                            action_output["log_probability"][env_index].item(),
+                            action_output["value"][env_index].item(),
+                            batch["rewards"][env_index],
+                            batch["dones"][env_index],
+                        )
                     )
                     if not batch["valid_actions"][env_index]:
                         invalid_actions += 1
@@ -175,6 +177,13 @@ def run_training(args, run=None):
                         episode_damages.append(batch["episode_damages"][env_index])
                         episode_steps.append(batch["episode_steps"][env_index])
                         episode_party_ids.append(batch["episode_party_ids"][env_index])
+                        completed_segments.append(
+                            {
+                                "steps": active_segments[env_index],
+                                "bootstrap_value": 0.0,
+                            }
+                        )
+                        active_segments[env_index] = []
                         hidden_states[env_index].zero_()
                     else:
                         hidden_states[env_index] = action_output["hidden"][env_index]
@@ -190,12 +199,24 @@ def run_training(args, run=None):
                 del logits
                 bootstrap_values = values.detach().cpu().tolist()
             for env_index in range(config["envs"]):
-                segments[env_index]["bootstrap_value"] = bootstrap_values[env_index]
+                if active_segments[env_index]:
+                    completed_segments.append(
+                        {
+                            "steps": active_segments[env_index],
+                            "bootstrap_value": bootstrap_values[env_index],
+                        }
+                    )
 
-            samples = compute_advantages(segments, config["gamma"], config["gae_lambda"])
+            segments = compute_advantages(completed_segments, config["gamma"], config["gae_lambda"])
+            sequence_chunks = build_sequence_chunks(segments, config["sequence_length"])
             optimization_start = time.time()
-            policy_loss, value_loss, entropy, approx_kl, clip_fraction, value_mean, log_prob_mean = train_epoch(
-                policy, optimizer, samples, config, device, entropy_coefficient
+            optimization_metrics = train_epoch(
+                policy,
+                optimizer,
+                sequence_chunks,
+                config,
+                device,
+                entropy_coefficient,
             )
             optimization_duration = max(1e-6, time.time() - optimization_start)
 
@@ -203,7 +224,8 @@ def run_training(args, run=None):
             rollout_duration = max(1e-6, duration - optimization_duration)
             steps = config["envs"] * config["rollout_length"]
             env_steps_per_second = steps / duration
-            samples_per_second = len(samples) / duration
+            valid_timesteps = sum(len(chunk["steps"]) for chunk in sequence_chunks)
+            samples_per_second = valid_timesteps / duration
             mean_reward = sum(episode_rewards) / len(episode_rewards) if episode_rewards else 0.0
             mean_damage = sum(episode_damages) / len(episode_damages) if episode_damages else 0.0
             mean_episode_steps = sum(episode_steps) / len(episode_steps) if episode_steps else 0.0
@@ -220,13 +242,23 @@ def run_training(args, run=None):
                 if attention_score_count > 0
                 else [0.0 for _ in range(policy.num_chars)]
             )
+            mean_sequence_length = (
+                valid_timesteps / len(sequence_chunks) if sequence_chunks else 0.0
+            )
+            max_sequence_length = (
+                max(len(chunk["steps"]) for chunk in sequence_chunks) if sequence_chunks else 0
+            )
 
             log_row = {
                 "update": update,
-                "samples": len(samples),
-                "policy_loss": policy_loss,
-                "value_loss": value_loss,
-                "entropy": entropy,
+                "samples": valid_timesteps,
+                "sequence_chunks": len(sequence_chunks),
+                "mean_sequence_length": mean_sequence_length,
+                "max_sequence_length": max_sequence_length,
+                "padding_fraction": optimization_metrics["padding_fraction"],
+                "policy_loss": optimization_metrics["policy_loss"],
+                "value_loss": optimization_metrics["value_loss"],
+                "entropy": optimization_metrics["entropy"],
                 "mean_reward": mean_reward,
                 "mean_damage": mean_damage,
                 "mean_episode_steps": mean_episode_steps,
@@ -238,10 +270,10 @@ def run_training(args, run=None):
                 "min_episode_steps": min_episode_steps,
                 "invalid_action_rate": invalid_rate,
                 "valid_action_rate": valid_action_rate,
-                "approx_kl": approx_kl,
-                "clip_fraction": clip_fraction,
-                "value_mean": value_mean,
-                "log_prob_mean": log_prob_mean,
+                "approx_kl": optimization_metrics["approx_kl"],
+                "clip_fraction": optimization_metrics["clip_fraction"],
+                "value_mean": optimization_metrics["value_mean"],
+                "log_prob_mean": optimization_metrics["log_prob_mean"],
                 "entropy_coefficient": entropy_coefficient,
                 "env_steps_per_second": env_steps_per_second,
                 "samples_per_second": samples_per_second,
@@ -249,16 +281,20 @@ def run_training(args, run=None):
                 "optimization_duration_sec": optimization_duration,
             }
             print(
-                f"Update {update}: reward={mean_reward:.3f} damage={mean_damage:,.0f} steps={mean_episode_steps:.1f} invalid={invalid_rate:.3f} kl={approx_kl:.5f} clip={clip_fraction:.3f} entropyCoef={entropy_coefficient:.5f} policy={policy_loss:.5f} value={value_loss:.5f} envSteps/s={env_steps_per_second:.1f}"
+                f"Update {update}: reward={mean_reward:.3f} damage={mean_damage:,.0f} steps={mean_episode_steps:.1f} invalid={invalid_rate:.3f} kl={optimization_metrics['approx_kl']:.5f} clip={optimization_metrics['clip_fraction']:.3f} entropyCoef={entropy_coefficient:.5f} policy={optimization_metrics['policy_loss']:.5f} value={optimization_metrics['value_loss']:.5f} seqs={len(sequence_chunks)} meanSeq={mean_sequence_length:.1f} envSteps/s={env_steps_per_second:.1f}"
             )
             log_wandb(
                 run,
                 {
                     "train/update": update,
-                    "train/samples": len(samples),
-                    "train/policy_loss": policy_loss,
-                    "train/value_loss": value_loss,
-                    "train/entropy": entropy,
+                    "train/samples": valid_timesteps,
+                    "train/sequence_chunks": len(sequence_chunks),
+                    "train/mean_sequence_length": mean_sequence_length,
+                    "train/max_sequence_length": max_sequence_length,
+                    "train/padding_fraction": optimization_metrics["padding_fraction"],
+                    "train/policy_loss": optimization_metrics["policy_loss"],
+                    "train/value_loss": optimization_metrics["value_loss"],
+                    "train/entropy": optimization_metrics["entropy"],
                     "train/mean_reward": mean_reward,
                     "train/mean_damage": mean_damage,
                     "train/mean_episode_steps": mean_episode_steps,
@@ -270,10 +306,10 @@ def run_training(args, run=None):
                     "train/min_episode_steps": min_episode_steps,
                     "train/invalid_action_rate": invalid_rate,
                     "train/valid_action_rate": valid_action_rate,
-                    "train/approx_kl": approx_kl,
-                    "train/clip_fraction": clip_fraction,
-                    "train/value_mean": value_mean,
-                    "train/log_prob_mean": log_prob_mean,
+                    "train/approx_kl": optimization_metrics["approx_kl"],
+                    "train/clip_fraction": optimization_metrics["clip_fraction"],
+                    "train/value_mean": optimization_metrics["value_mean"],
+                    "train/log_prob_mean": optimization_metrics["log_prob_mean"],
                     "train/entropy_coefficient": entropy_coefficient,
                     "perf/env_steps_per_second": env_steps_per_second,
                     "perf/samples_per_second": samples_per_second,
@@ -345,7 +381,17 @@ def parse_args():
     parser.add_argument("--envs", type=int, help="number of vectorized environments")
     parser.add_argument("--hidden-size", type=int, help="recurrent hidden size")
     parser.add_argument("--ppo-epochs", type=int, help="number of PPO epochs per update")
-    parser.add_argument("--minibatch-size", type=int, help="minibatch size for PPO optimization")
+    parser.add_argument("--sequence-length", type=int, help="sequence length used for truncated BPTT PPO updates")
+    parser.add_argument(
+        "--sequence-minibatch-size",
+        type=int,
+        help="number of sequence chunks per PPO minibatch",
+    )
+    parser.add_argument(
+        "--minibatch-size",
+        type=int,
+        help="legacy alias for --sequence-minibatch-size",
+    )
     parser.add_argument("--gamma", type=float, help="discount factor")
     parser.add_argument("--gae-lambda", type=float, help="GAE lambda")
     parser.add_argument("--clip-range", type=float, help="PPO clipping range")
@@ -375,7 +421,8 @@ def resolve_config(args):
         "envs": args.envs,
         "hidden_size": args.hidden_size,
         "ppo_epochs": args.ppo_epochs,
-        "minibatch_size": args.minibatch_size,
+        "sequence_length": args.sequence_length,
+        "sequence_minibatch_size": args.sequence_minibatch_size,
         "gamma": args.gamma,
         "gae_lambda": args.gae_lambda,
         "clip_range": args.clip_range,
@@ -390,6 +437,15 @@ def resolve_config(args):
     for key, value in overrides.items():
         if value is not None:
             config[key] = value
+    if args.minibatch_size is not None and args.sequence_minibatch_size is None:
+        config["sequence_minibatch_size"] = args.minibatch_size
+    if config["sequence_length"] <= 0:
+        raise ValueError(f"sequence_length must be positive, got {config['sequence_length']}")
+    if config["sequence_minibatch_size"] <= 0:
+        raise ValueError(
+            "sequence_minibatch_size must be positive, "
+            f"got {config['sequence_minibatch_size']}"
+        )
     return config
 
 
@@ -442,9 +498,106 @@ def finish_wandb(run):
         wandb.finish()
 
 
-def train_epoch(policy, optimizer, samples, config, device, entropy_coefficient):
-    if not samples:
-        return 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+def build_step_record(
+    observation,
+    recurrent_input,
+    action_mask,
+    action,
+    old_log_probability,
+    value,
+    reward,
+    done,
+):
+    return {
+        "observation": list(observation),
+        "recurrent_input": recurrent_input.detach().cpu().tolist(),
+        "action_mask": list(action_mask),
+        "action": action,
+        "old_log_probability": old_log_probability,
+        "value": value,
+        "reward": reward,
+        "done": done,
+    }
+
+
+def build_sequence_chunks(segments, sequence_length):
+    chunks = []
+    for segment in segments:
+        steps = segment["steps"]
+        for start in range(0, len(steps), sequence_length):
+            chunk_steps = steps[start:start + sequence_length]
+            if not chunk_steps:
+                continue
+            chunks.append(
+                {
+                    "initial_hidden": chunk_steps[0]["recurrent_input"],
+                    "steps": chunk_steps,
+                }
+            )
+    return chunks
+
+
+def build_sequence_minibatch(chunks, policy, device):
+    batch_size = len(chunks)
+    max_seq_len = max(len(chunk["steps"]) for chunk in chunks)
+    observations = torch.zeros(
+        batch_size, max_seq_len, policy.observation_size, dtype=torch.float32, device=device
+    )
+    initial_hidden = torch.zeros(
+        batch_size, policy.hidden_size, dtype=torch.float32, device=device
+    )
+    action_masks = torch.ones(
+        batch_size, max_seq_len, policy.action_size, dtype=torch.float32, device=device
+    )
+    actions = torch.zeros(batch_size, max_seq_len, dtype=torch.long, device=device)
+    old_log_probabilities = torch.zeros(
+        batch_size, max_seq_len, dtype=torch.float32, device=device
+    )
+    advantages = torch.zeros(batch_size, max_seq_len, dtype=torch.float32, device=device)
+    return_targets = torch.zeros(batch_size, max_seq_len, dtype=torch.float32, device=device)
+    loss_mask = torch.zeros(batch_size, max_seq_len, dtype=torch.float32, device=device)
+
+    for batch_index, chunk in enumerate(chunks):
+        initial_hidden[batch_index] = torch.tensor(
+            chunk["initial_hidden"], dtype=torch.float32, device=device
+        )
+        for step_index, step in enumerate(chunk["steps"]):
+            observations[batch_index, step_index] = torch.tensor(
+                step["observation"], dtype=torch.float32, device=device
+            )
+            action_masks[batch_index, step_index] = torch.tensor(
+                step["action_mask"], dtype=torch.float32, device=device
+            )
+            actions[batch_index, step_index] = step["action"]
+            old_log_probabilities[batch_index, step_index] = step["old_log_probability"]
+            advantages[batch_index, step_index] = step["advantage"]
+            return_targets[batch_index, step_index] = step["return_target"]
+            loss_mask[batch_index, step_index] = 1.0
+
+    return {
+        "observations": observations,
+        "initial_hidden": initial_hidden,
+        "action_masks": action_masks,
+        "actions": actions,
+        "old_log_probabilities": old_log_probabilities,
+        "advantages": advantages,
+        "return_targets": return_targets,
+        "loss_mask": loss_mask,
+    }
+
+
+def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coefficient):
+    if not sequence_chunks:
+        return {
+            "policy_loss": 0.0,
+            "value_loss": 0.0,
+            "entropy": 0.0,
+            "approx_kl": 0.0,
+            "clip_fraction": 0.0,
+            "value_mean": 0.0,
+            "log_prob_mean": 0.0,
+            "padding_fraction": 0.0,
+        }
 
     total_policy_loss = 0.0
     total_value_loss = 0.0
@@ -453,38 +606,49 @@ def train_epoch(policy, optimizer, samples, config, device, entropy_coefficient)
     total_clip_fraction = 0.0
     total_value_mean = 0.0
     total_log_prob_mean = 0.0
+    total_valid_steps = 0.0
+    total_padded_steps = 0.0
     updates = 0
 
     for _ in range(config["ppo_epochs"]):
-        random.shuffle(samples)
-        for start in range(0, len(samples), config["minibatch_size"]):
-            minibatch = samples[start:start + config["minibatch_size"]]
-            observation = torch.tensor([sample["observation"] for sample in minibatch], dtype=torch.float32, device=device)
-            recurrent_input = torch.tensor([sample["recurrent_input"] for sample in minibatch], dtype=torch.float32, device=device)
-            action_mask = torch.tensor([sample["action_mask"] for sample in minibatch], dtype=torch.float32, device=device)
-            action = torch.tensor([sample["action"] for sample in minibatch], dtype=torch.long, device=device)
-            old_log_probability = torch.tensor(
-                [sample["old_log_probability"] for sample in minibatch], dtype=torch.float32, device=device
+        chunk_indices = list(range(len(sequence_chunks)))
+        random.shuffle(chunk_indices)
+        for start in range(0, len(chunk_indices), config["sequence_minibatch_size"]):
+            minibatch_indices = chunk_indices[start:start + config["sequence_minibatch_size"]]
+            minibatch_chunks = [sequence_chunks[index] for index in minibatch_indices]
+            minibatch = build_sequence_minibatch(minibatch_chunks, policy, device)
+
+            logits, value, _, _ = policy.forward_sequence(
+                minibatch["observations"],
+                minibatch["initial_hidden"],
+                minibatch["action_masks"],
+                sequence_mask=minibatch["loss_mask"],
             )
-            advantage = torch.tensor([sample["advantage"] for sample in minibatch], dtype=torch.float32, device=device)
-            return_target = torch.tensor([sample["return_target"] for sample in minibatch], dtype=torch.float32, device=device)
-
-            logits, value, _, _ = policy.forward_step(observation, recurrent_input, action_mask)
             distribution = torch.distributions.Categorical(logits=logits)
-            new_log_probability = distribution.log_prob(action)
-            entropy = distribution.entropy().mean()
-            approx_kl = (old_log_probability - new_log_probability).mean()
+            new_log_probability = distribution.log_prob(minibatch["actions"])
+            valid_mask = minibatch["loss_mask"]
+            valid_count = valid_mask.sum().clamp_min(1.0)
+            entropy = (distribution.entropy() * valid_mask).sum() / valid_count
+            approx_kl = (
+                (minibatch["old_log_probabilities"] - new_log_probability) * valid_mask
+            ).sum() / valid_count
 
-            ratio = torch.exp(new_log_probability - old_log_probability)
+            ratio = torch.exp(new_log_probability - minibatch["old_log_probabilities"])
             clipped_ratio = torch.clamp(ratio, 1.0 - config["clip_range"], 1.0 + config["clip_range"])
-            surrogate = ratio * advantage
-            clipped_surrogate = clipped_ratio * advantage
-            policy_loss = -torch.minimum(surrogate, clipped_surrogate).mean()
-            value_loss = 0.5 * (return_target - value).pow(2).mean()
+            surrogate = ratio * minibatch["advantages"]
+            clipped_surrogate = clipped_ratio * minibatch["advantages"]
+            policy_loss = -(
+                torch.minimum(surrogate, clipped_surrogate) * valid_mask
+            ).sum() / valid_count
+            value_loss = (
+                0.5 * (minibatch["return_targets"] - value).pow(2) * valid_mask
+            ).sum() / valid_count
             total_loss = policy_loss + config["value_coefficient"] * value_loss - entropy_coefficient * entropy
-            clip_fraction = (torch.abs(ratio - 1.0) > config["clip_range"]).float().mean()
-            value_mean = value.mean()
-            log_prob_mean = new_log_probability.mean()
+            clip_fraction = (
+                ((torch.abs(ratio - 1.0) > config["clip_range"]).float() * valid_mask).sum() / valid_count
+            )
+            value_mean = (value * valid_mask).sum() / valid_count
+            log_prob_mean = (new_log_probability * valid_mask).sum() / valid_count
 
             optimizer.zero_grad()
             total_loss.backward()
@@ -498,17 +662,21 @@ def train_epoch(policy, optimizer, samples, config, device, entropy_coefficient)
             total_clip_fraction += clip_fraction.item()
             total_value_mean += value_mean.item()
             total_log_prob_mean += log_prob_mean.item()
+            total_valid_steps += valid_count.item()
+            total_padded_steps += valid_mask.numel() - valid_count.item()
             updates += 1
 
-    return (
-        total_policy_loss / updates,
-        total_value_loss / updates,
-        total_entropy / updates,
-        total_approx_kl / updates,
-        total_clip_fraction / updates,
-        total_value_mean / updates,
-        total_log_prob_mean / updates,
-    )
+    total_positions = total_valid_steps + total_padded_steps
+    return {
+        "policy_loss": total_policy_loss / updates,
+        "value_loss": total_value_loss / updates,
+        "entropy": total_entropy / updates,
+        "approx_kl": total_approx_kl / updates,
+        "clip_fraction": total_clip_fraction / updates,
+        "value_mean": total_value_mean / updates,
+        "log_prob_mean": total_log_prob_mean / updates,
+        "padding_fraction": 0.0 if total_positions == 0 else total_padded_steps / total_positions,
+    }
 
 
 def flatten_eval_metrics(prefix, summary):
@@ -636,6 +804,10 @@ def append_log(row):
             fieldnames=[
                 "update",
                 "samples",
+                "sequence_chunks",
+                "mean_sequence_length",
+                "max_sequence_length",
+                "padding_fraction",
                 "policy_loss",
                 "value_loss",
                 "entropy",

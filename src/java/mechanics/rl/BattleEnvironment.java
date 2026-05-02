@@ -3,6 +3,7 @@ package mechanics.rl;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Supplier;
 
+import mechanics.analysis.StatsRecorder;
 import model.entity.Character;
 import simulation.CombatSimulator;
 import simulation.action.CharacterActionRequest;
@@ -26,6 +27,7 @@ public class BattleEnvironment {
     private int previousActionId = -1;
     private int stepCount;
     private boolean generateReportOnDone;
+    private StatsRecorder statsRecorder;
     private final double[] observationBuffer = new double[ObservationEncoder.OBSERVATION_SIZE];
     private final double[] actionMaskBuffer = new double[ActionSpace.SIZE];
     private final double[] preActionMaskBuffer = new double[ActionSpace.SIZE];
@@ -81,6 +83,10 @@ public class BattleEnvironment {
         simulator.setLoggingEnabled(generateReport);
         if (generateReport) {
             VisualLogger.getInstance().clear();
+            statsRecorder = new StatsRecorder(simulator, 0.5);
+            statsRecorder.startRecording();
+        } else {
+            statsRecorder = null;
         }
         if (config.fillEnergyOnReset) {
             for (Character character : simulator.getPartyMembers()) {
@@ -134,9 +140,17 @@ public class BattleEnvironment {
 
         if (done && generateReportOnDone) {
             String reportFile = buildPartyReportFileName(currentPartyName);
-            HtmlReportGenerator.generate(reportFile, VisualLogger.getInstance().getRecords(), simulator);
+            HtmlReportGenerator.generate(
+                    reportFile,
+                    VisualLogger.getInstance().getRecords(),
+                    simulator,
+                    statsRecorder != null ? statsRecorder.getSnapshots() : null);
             if (!"rl_report.html".equals(reportFile)) {
-                HtmlReportGenerator.generate("rl_report.html", VisualLogger.getInstance().getRecords(), simulator);
+                HtmlReportGenerator.generate(
+                        "rl_report.html",
+                        VisualLogger.getInstance().getRecords(),
+                        simulator,
+                        statsRecorder != null ? statsRecorder.getSnapshots() : null);
             }
             generateReportOnDone = false;
         }
