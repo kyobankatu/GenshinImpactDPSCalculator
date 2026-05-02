@@ -25,13 +25,20 @@ def main():
     )
     try:
         config = build_config(args, run.config)
-        service, service_log = launch_rollout_service(args, config["rollout_workers"], run.id)
+        service, service_log = launch_rollout_service(args, config, run.id)
         try:
             time.sleep(args.startup_delay_sec)
             if service.poll() is not None:
                 raise RuntimeError("Java rollout service exited before training started.")
             training_args = build_training_args(args, config)
-            run.name = f"sweep_e{config['envs']}_w{config['rollout_workers']}_{run.id}"
+            run.name = (
+                f"sweep_ep{int(config['episode_seconds'])}"
+                f"_e{config['envs']}"
+                f"_r{config['rollout_length']}"
+                f"_s{config['sequence_length']}"
+                f"_mb{config['sequence_minibatch_size']}"
+                f"_w{config['rollout_workers']}_{run.id}"
+            )
             run_training(training_args, run=run)
         finally:
             stop_rollout_service(service, service_log)
@@ -49,6 +56,8 @@ def parse_args():
     parser.add_argument("--host", default="127.0.0.1", help="Java rollout host")
     parser.add_argument("--port", type=int, default=5005, help="Java rollout port")
     parser.add_argument("--bind-host", default="127.0.0.1", help="Java rollout bind host")
+    parser.add_argument("--rl-parties", default=os.environ.get("RL_PARTIES", "FlinsParty2"), help="registered RL party selection to expose through the Java rollout service")
+    parser.add_argument("--episode-seconds", type=float, default=float(os.environ.get("EPISODE_SECONDS", "70")), help="episode length in seconds for the Java rollout service")
     parser.add_argument("--java-rollout-workers", type=int, default=None, help="fallback Java worker override when the sweep config does not set one")
     parser.add_argument("--gradle-user-home", default=os.environ.get("GRADLE_USER_HOME", DEFAULT_GRADLE_USER_HOME), help="Gradle user home for the build step")
     parser.add_argument("--java-home", default=os.environ.get("JAVA_HOME"), help="JAVA_HOME for launching the rollout service")
@@ -61,10 +70,11 @@ def build_config(args, sweep_config):
         "seed": int(sweep_config.get("seed", 1234)),
         "updates": int(sweep_config.get("updates", 200)),
         "rollout_length": int(sweep_config.get("rollout_length", 128)),
+        "sequence_length": int(sweep_config.get("sequence_length", 32)),
         "envs": int(sweep_config.get("envs", 16)),
         "hidden_size": int(sweep_config.get("hidden_size", 256)),
         "ppo_epochs": int(sweep_config.get("ppo_epochs", 4)),
-        "minibatch_size": int(sweep_config.get("minibatch_size", 512)),
+        "sequence_minibatch_size": int(sweep_config.get("sequence_minibatch_size", 64)),
         "gamma": float(sweep_config.get("gamma", 0.99)),
         "gae_lambda": float(sweep_config.get("gae_lambda", 0.95)),
         "clip_range": float(sweep_config.get("clip_range", 0.20)),
@@ -76,11 +86,13 @@ def build_config(args, sweep_config):
         "checkpoint_interval": int(sweep_config.get("checkpoint_interval", 10)),
         "evaluation_interval": int(sweep_config.get("evaluation_interval", 10)),
         "rollout_workers": int(sweep_config.get("rollout_workers", args.java_rollout_workers or 8)),
+        "episode_seconds": float(sweep_config.get("episode_seconds", args.episode_seconds)),
+        "rl_parties": str(sweep_config.get("rl_parties", args.rl_parties)),
     }
     return config
 
 
-def launch_rollout_service(args, rollout_workers, run_id):
+def launch_rollout_service(args, config, run_id):
     env = os.environ.copy()
     env["GRADLE_USER_HOME"] = args.gradle_user_home
     if args.java_home:
@@ -104,7 +116,9 @@ def launch_rollout_service(args, rollout_workers, run_id):
             "sample.ServeRLJava",
             str(args.port),
             args.bind_host,
-            str(rollout_workers),
+            str(config["rollout_workers"]),
+            config["rl_parties"],
+            str(config["episode_seconds"]),
         ],
         cwd=REPO_ROOT,
         env=env,
@@ -135,10 +149,12 @@ def build_training_args(args, config):
         endpoints=None,
         updates=config["updates"],
         rollout_length=config["rollout_length"],
+        sequence_length=config["sequence_length"],
         envs=config["envs"],
         hidden_size=config["hidden_size"],
         ppo_epochs=config["ppo_epochs"],
-        minibatch_size=config["minibatch_size"],
+        sequence_minibatch_size=config["sequence_minibatch_size"],
+        minibatch_size=None,
         gamma=config["gamma"],
         gae_lambda=config["gae_lambda"],
         clip_range=config["clip_range"],
