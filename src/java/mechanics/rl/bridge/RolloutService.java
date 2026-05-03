@@ -17,6 +17,7 @@ import mechanics.rl.BattleEnvironment;
 import mechanics.rl.EpisodeConfig;
 import mechanics.rl.RLEpisodeFactory;
 import mechanics.rl.ObservationEncoder;
+import mechanics.rl.PrivilegedStateEncoder;
 import mechanics.rl.RLPartyRegistry;
 
 /**
@@ -27,6 +28,7 @@ public class RolloutService {
     private final String bindHost;
     private final int rolloutWorkers;
     private final ObservationEncoder observationEncoder;
+    private final PrivilegedStateEncoder privilegedStateEncoder;
     private final RLEpisodeFactory episodeFactory;
     private final String[] partyNames;
     private final Map<Integer, VectorizedEnvironment> runners = new HashMap<>();
@@ -59,6 +61,7 @@ public class RolloutService {
         this.episodeFactory = episodeFactory;
         this.partyNames = episodeFactory.getPartyNames();
         this.observationEncoder = new ObservationEncoder();
+        this.privilegedStateEncoder = new PrivilegedStateEncoder();
     }
 
     public void serveForever() throws IOException {
@@ -90,6 +93,10 @@ public class RolloutService {
                     out.writeInt(BatchProtocol.VERSION);
                     out.writeInt(ObservationEncoder.OBSERVATION_SIZE);
                     out.writeInt(ActionSpace.SIZE);
+                    out.writeInt(PrivilegedStateEncoder.STATE_SIZE);
+                    out.writeInt(ObservationEncoder.FEATURES_PER_CHARACTER);
+                    out.writeInt(ObservationEncoder.GLOBAL_FEATURES);
+                    out.writeInt(ObservationEncoder.NUM_CHARS);
                     out.writeInt(partyNames.length);
                     for (String partyName : partyNames) {
                         writeString(out, partyName);
@@ -102,7 +109,7 @@ public class RolloutService {
                     long createStart = System.nanoTime();
                     runners.put(runnerId, new VectorizedEnvironment(
                             count, episodeFactory, rolloutWorkers,
-                            observationEncoder));
+                            observationEncoder, privilegedStateEncoder));
                     runnerCreateCalls++;
                     runnerCreateNanos += System.nanoTime() - createStart;
                     out.writeInt(runnerId);
@@ -175,6 +182,7 @@ public class RolloutService {
     private void writeReset(DataOutputStream out, VectorizedEnvironment.RunnerResetResult result) throws IOException {
         out.writeInt(result.observations.length);
         writeMatrix(out, result.observations);
+        writeMatrix(out, result.privilegedObservations);
         writeMatrix(out, result.actionMasks);
         writeIntVector(out, result.partyIds);
         out.flush();
@@ -183,6 +191,7 @@ public class RolloutService {
     private void writeStep(DataOutputStream out, RunnerStepResult result) throws IOException {
         out.writeInt(result.observations.length);
         writeMatrix(out, result.observations);
+        writeMatrix(out, result.privilegedObservations);
         writeMatrix(out, result.actionMasks);
         writeVector(out, result.rewards);
         writeBooleanVector(out, result.dones);

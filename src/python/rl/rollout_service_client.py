@@ -27,6 +27,10 @@ class RolloutServiceClient:
         self.version = None
         self.observation_size = None
         self.action_size = None
+        self.privileged_observation_size = None
+        self.char_feature_size = None
+        self.global_feature_size = None
+        self.num_chars = None
         self.party_names = None
         self._hello()
 
@@ -35,6 +39,10 @@ class RolloutServiceClient:
         self.version = recv_int(self.sock)
         self.observation_size = recv_int(self.sock)
         self.action_size = recv_int(self.sock)
+        self.privileged_observation_size = recv_int(self.sock)
+        self.char_feature_size = recv_int(self.sock)
+        self.global_feature_size = recv_int(self.sock)
+        self.num_chars = recv_int(self.sock)
         party_count = recv_int(self.sock)
         self.party_names = [recv_string(self.sock) for _ in range(party_count)]
         if self.version != VERSION:
@@ -53,10 +61,12 @@ class RolloutServiceClient:
         env_count = recv_int(self.sock)
         obs_width = recv_int(self.sock)
         observations = self._recv_matrix(env_count, obs_width)
+        privileged_obs_width = recv_int(self.sock)
+        privileged_observations = self._recv_matrix(env_count, privileged_obs_width)
         mask_width = recv_int(self.sock)
         masks = self._recv_matrix(env_count, mask_width)
         party_ids = recv_ints(self.sock, env_count)
-        return observations, masks, party_ids
+        return observations, privileged_observations, masks, party_ids
 
     def step_runner(self, runner_id: int, actions):
         send_int(self.sock, CMD_STEP_RUNNER)
@@ -66,6 +76,8 @@ class RolloutServiceClient:
         env_count = recv_int(self.sock)
         obs_width = recv_int(self.sock)
         observations = self._recv_matrix(env_count, obs_width)
+        privileged_obs_width = recv_int(self.sock)
+        privileged_observations = self._recv_matrix(env_count, privileged_obs_width)
         mask_width = recv_int(self.sock)
         masks = self._recv_matrix(env_count, mask_width)
         rewards = recv_doubles(self.sock, env_count)
@@ -82,6 +94,7 @@ class RolloutServiceClient:
 
         return {
             "observations": observations,
+            "privileged_observations": privileged_observations,
             "action_masks": masks,
             "rewards": rewards,
             "dones": dones,
@@ -121,12 +134,20 @@ class MultiRolloutServiceClient:
         self.version = self.clients[0].version
         self.observation_size = self.clients[0].observation_size
         self.action_size = self.clients[0].action_size
+        self.privileged_observation_size = self.clients[0].privileged_observation_size
+        self.char_feature_size = self.clients[0].char_feature_size
+        self.global_feature_size = self.clients[0].global_feature_size
+        self.num_chars = self.clients[0].num_chars
         self.party_names = list(self.clients[0].party_names)
         for client in self.clients[1:]:
             if client.version != self.version:
                 raise RuntimeError("Protocol version mismatch across rollout services")
             if client.observation_size != self.observation_size or client.action_size != self.action_size:
                 raise RuntimeError("Observation/action space mismatch across rollout services")
+            if client.privileged_observation_size != self.privileged_observation_size:
+                raise RuntimeError("Privileged observation size mismatch across rollout services")
+            if client.char_feature_size != self.char_feature_size or client.global_feature_size != self.global_feature_size or client.num_chars != self.num_chars:
+                raise RuntimeError("Observation metadata mismatch across rollout services")
             if client.party_names != self.party_names:
                 raise RuntimeError("Party catalog mismatch across rollout services")
 
@@ -141,6 +162,7 @@ class MultiRolloutServiceClient:
 
     def reset_runner(self, runner_handle, generate_report: bool = False, forced_party_id: int = -1):
         observations = []
+        privileged_observations = []
         masks = []
         party_ids = []
         futures = []
@@ -149,14 +171,16 @@ class MultiRolloutServiceClient:
                 self.executor.submit(client.reset_runner, runner_id, generate_report and shard_index == 0, forced_party_id)
             )
         for future in futures:
-            shard_observations, shard_masks, shard_party_ids = future.result()
+            shard_observations, shard_privileged_observations, shard_masks, shard_party_ids = future.result()
             observations.extend(shard_observations)
+            privileged_observations.extend(shard_privileged_observations)
             masks.extend(shard_masks)
             party_ids.extend(shard_party_ids)
-        return observations, masks, party_ids
+        return observations, privileged_observations, masks, party_ids
 
     def step_runner(self, runner_handle, actions):
         observations = []
+        privileged_observations = []
         masks = []
         rewards = []
         dones = []
@@ -178,6 +202,7 @@ class MultiRolloutServiceClient:
         for future in futures:
             batch = future.result()
             observations.extend(batch["observations"])
+            privileged_observations.extend(batch["privileged_observations"])
             masks.extend(batch["action_masks"])
             rewards.extend(batch["rewards"])
             dones.extend(batch["dones"])
@@ -192,6 +217,7 @@ class MultiRolloutServiceClient:
             episode_party_ids.extend(batch["episode_party_ids"])
         return {
             "observations": observations,
+            "privileged_observations": privileged_observations,
             "action_masks": masks,
             "rewards": rewards,
             "dones": dones,

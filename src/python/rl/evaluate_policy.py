@@ -109,7 +109,7 @@ def run_evaluation(policy, client, device, deterministic, generate_report):
 
 def run_single_episode(policy, client, device, deterministic, generate_report, forced_party_id):
     runner_id = client.create_runner(1)
-    observations, masks, party_ids = client.reset_runner(
+    observations, _privileged_observations, masks, party_ids = client.reset_runner(
         runner_id, generate_report, forced_party_id=forced_party_id
     )
     hidden = torch.zeros(1, policy.hidden_size, dtype=torch.float32, device=device)

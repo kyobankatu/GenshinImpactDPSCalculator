@@ -24,29 +24,29 @@ import simulation.CombatSimulator;
  * <p>Layout: {@code NUM_CHARS} blocks of {@link #FEATURES_PER_CHARACTER} features
  * followed by {@link #GLOBAL_FEATURES} global features.
  *
- * <p>Per-character block (18 dims):
+ * <p>Per-character block (23 dims):
  * <ul>
  *   <li>[0–5] dynamic: energy ratio, isActive, skill readiness, burst readiness,
  *       isBurstActive, active-buff ratio</li>
  *   <li>[6–13] static: element one-hot (8 dims, {@link Element#values()} order)</li>
- *   <li>[14–17] static: off-field DPS ratio, team-buff score,
- *       self-enhancement score, energy-generation score</li>
+ *   <li>[14–22] static: capability and value-curve profile scores</li>
  * </ul>
  *
  * <p>Global block (7 dims): swap readiness, time remaining, PYRO/HYDRO/ELECTRO/ANEMO
  * aura, thundercloud active.
  */
 public class ObservationEncoder {
+    public static final int NUM_CHARS = 4;
     /** Number of dynamic features per character slot. */
     public static final int CHAR_DYNAMIC_FEATURES = 6;
-    /** Number of static features per character slot (8 element one-hot + 4 capability scores). */
-    public static final int CHAR_STATIC_FEATURES = 12;
+    /** Number of static features per character slot (8 element one-hot + capability scores). */
+    public static final int CHAR_STATIC_FEATURES = 8 + CapabilityProfile.SIZE;
     /** Total features per character slot. */
     public static final int FEATURES_PER_CHARACTER = CHAR_DYNAMIC_FEATURES + CHAR_STATIC_FEATURES;
     /** Number of global features appended after all character blocks. */
     public static final int GLOBAL_FEATURES = 7;
     /** Total observation vector length. */
-    public static final int OBSERVATION_SIZE = FEATURES_PER_CHARACTER * 4 + GLOBAL_FEATURES;
+    public static final int OBSERVATION_SIZE = FEATURES_PER_CHARACTER * NUM_CHARS + GLOBAL_FEATURES;
 
     private static final String DEFAULT_PROFILES_PATH = "config/capability_profiles/profiles.json";
 
@@ -120,12 +120,11 @@ public class ObservationEncoder {
                 observation[index++] = (charElement == el) ? 1.0 : 0.0;
             }
 
-            // --- Static features: capability scores (4) ---
+            // --- Static features: capability scores ---
             double[] profile = profileStore.getProfile(id);
-            observation[index++] = profile[0];
-            observation[index++] = profile[1];
-            observation[index++] = profile[2];
-            observation[index++] = profile[3];
+            for (int profileIndex = 0; profileIndex < CapabilityProfile.SIZE; profileIndex++) {
+                observation[index++] = profile[profileIndex];
+            }
         }
 
         Enemy enemy = sim.getEnemy();
@@ -168,11 +167,11 @@ public class ObservationEncoder {
      * Loads and caches character capability profiles from a JSON file.
      *
      * <p>Profiles are read once at construction time and never reloaded.
-     * If a character ID is not found, all four scores default to {@code [0,0,0,0]}
+     * If a character ID is not found, all scores default to zero
      * and a warning is printed at most once per missing ID per JVM process.
      */
     public static class CapabilityProfileStore {
-        private static final double[] ZERO_PROFILE = new double[]{0.0, 0.0, 0.0, 0.0};
+        private static final double[] ZERO_PROFILE = CapabilityProfile.zeros();
         private static final Set<String> WARNED_IDS = Collections.synchronizedSet(new java.util.HashSet<>());
 
         private final Map<String, double[]> profiles = new LinkedHashMap<>();
@@ -196,11 +195,10 @@ public class ObservationEncoder {
 
         /**
          * Returns the capability profile for the given character ID.
-         * If no profile is found, returns {@code [0.0, 0.0, 0.0, 0.0]} and logs a one-time warning.
+         * If no profile is found, returns zeros and logs a one-time warning.
          *
          * @param id character ID
-         * @return double array of length 4: [off_field_ratio, team_buff_score,
-         *         self_enhancement_score, energy_gen_score]
+         * @return capability profile values in {@link CapabilityProfile} order
          */
         public double[] getProfile(CharacterId id) {
             double[] profile = profiles.get(id.name());
@@ -222,11 +220,16 @@ public class ObservationEncoder {
                 while (matcher.find()) {
                     String charName = matcher.group(1);
                     String block = matcher.group(2);
-                    double[] profile = new double[4];
-                    profile[0] = extractDouble(block, "off_field_dps_ratio");
-                    profile[1] = extractDouble(block, "team_buff_score");
-                    profile[2] = extractDouble(block, "self_enhancement_score");
-                    profile[3] = extractDouble(block, "energy_generation_score");
+                    double[] profile = CapabilityProfile.zeros();
+                    profile[CapabilityProfile.OFF_FIELD_DPS_RATIO] = extractDouble(block, "off_field_dps_ratio");
+                    profile[CapabilityProfile.TEAM_BUFF_SCORE] = extractDouble(block, "team_buff_score");
+                    profile[CapabilityProfile.SELF_ENHANCEMENT_SCORE] = extractDouble(block, "self_enhancement_score");
+                    profile[CapabilityProfile.ENERGY_GENERATION_SCORE] = extractDouble(block, "energy_generation_score");
+                    profile[CapabilityProfile.ENTRY_VALUE_SCORE] = extractDouble(block, "entry_value_score");
+                    profile[CapabilityProfile.SUSTAIN_VALUE_3_ACTIONS] = extractDouble(block, "sustain_value_3_actions");
+                    profile[CapabilityProfile.SUSTAIN_VALUE_6_ACTIONS] = extractDouble(block, "sustain_value_6_actions");
+                    profile[CapabilityProfile.EXIT_COST_SCORE] = extractDouble(block, "exit_cost_score");
+                    profile[CapabilityProfile.REENTRY_COST_SCORE] = extractDouble(block, "reentry_cost_score");
                     profiles.put(charName, profile);
                 }
                 System.out.println("[ObservationEncoder] Loaded capability profiles for: " + profiles.keySet());

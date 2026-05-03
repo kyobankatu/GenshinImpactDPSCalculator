@@ -90,7 +90,12 @@ public class CapabilityProfiler {
             sb.append("    \"off_field_dps_ratio\": ").append(format(s[0])).append(",\n");
             sb.append("    \"team_buff_score\": ").append(format(s[1])).append(",\n");
             sb.append("    \"self_enhancement_score\": ").append(format(s[2])).append(",\n");
-            sb.append("    \"energy_generation_score\": ").append(format(s[3])).append("\n");
+            sb.append("    \"energy_generation_score\": ").append(format(s[3])).append(",\n");
+            sb.append("    \"entry_value_score\": ").append(format(s[4])).append(",\n");
+            sb.append("    \"sustain_value_3_actions\": ").append(format(s[5])).append(",\n");
+            sb.append("    \"sustain_value_6_actions\": ").append(format(s[6])).append(",\n");
+            sb.append("    \"exit_cost_score\": ").append(format(s[7])).append(",\n");
+            sb.append("    \"reentry_cost_score\": ").append(format(s[8])).append("\n");
             sb.append("  }");
             outerCount++;
             if (outerCount < sourceResults.size()) {
@@ -118,6 +123,11 @@ public class CapabilityProfiler {
         double[] eVals = new double[N_RUNS];
         double[] fVals = new double[N_RUNS];
         double[] gVals = new double[N_RUNS];
+        double[] hVals = new double[N_RUNS];
+        double[] iVals = new double[N_RUNS];
+        double[] jVals = new double[N_RUNS];
+        double[] kVals = new double[N_RUNS];
+        double[] lVals = new double[N_RUNS];
 
         for (int i = 0; i < N_RUNS; i++) {
             aVals[i] = runQuietly(() -> runTemplateA(subjectId));
@@ -127,6 +137,11 @@ public class CapabilityProfiler {
             eVals[i] = runQuietly(() -> runTemplateE(subjectId));
             fVals[i] = runQuietly(() -> runTemplateF(subjectId));
             gVals[i] = runQuietly(() -> runTemplateG(subjectId));
+            hVals[i] = runQuietly(() -> runEntryValueTemplate(subjectId));
+            iVals[i] = runQuietly(() -> runSustainValueTemplate(subjectId, 3));
+            jVals[i] = runQuietly(() -> runSustainValueTemplate(subjectId, 6));
+            kVals[i] = runQuietly(() -> runExitCostTemplate(subjectId));
+            lVals[i] = runQuietly(() -> runReentryCostTemplate(subjectId));
         }
 
         double A = mean(aVals);
@@ -136,12 +151,22 @@ public class CapabilityProfiler {
         double E = mean(eVals);
         double F = mean(fVals);
         double G = mean(gVals);
+        double H = mean(hVals);
+        double I = mean(iVals);
+        double J = mean(jVals);
+        double K = mean(kVals);
+        double L = mean(lVals);
         double maxEnergyCost = getMaxEnergyCost();
 
         double offField = clamp01(B / Math.max(A, 1.0));
         double teamBuff = clamp01((C - D) / Math.max(D, 1.0));
         double selfEnhance = clamp01((E - F) / Math.max(F, 1.0));
         double energyGen = clamp01(G / Math.max(maxEnergyCost, 1.0));
+        double entryValue = clamp01(H / Math.max(A, 1.0));
+        double sustain3 = clamp01(I / Math.max(A, 1.0));
+        double sustain6 = clamp01(J / Math.max(A, 1.0));
+        double exitCost = clamp01(K);
+        double reentryCost = clamp01(L);
 
         System.out.printf(
                 "  A=%,.0f(±%.0f) B=%,.0f(±%.0f) C=%,.0f(±%.0f) D=%,.0f(±%.0f) "
@@ -150,10 +175,10 @@ public class CapabilityProfiler {
                 D, stddev(dVals), E, stddev(eVals), F, stddev(fVals),
                 G, stddev(gVals));
         System.out.printf(
-                "  offField=%.4f  teamBuff=%.4f  selfEnhance=%.4f  energyGen=%.4f%n",
-                offField, teamBuff, selfEnhance, energyGen);
+                "  offField=%.4f  teamBuff=%.4f  selfEnhance=%.4f  energyGen=%.4f  entry=%.4f  sustain3=%.4f  sustain6=%.4f  exit=%.4f  reentry=%.4f%n",
+                offField, teamBuff, selfEnhance, energyGen, entryValue, sustain3, sustain6, exitCost, reentryCost);
 
-        return new double[]{offField, teamBuff, selfEnhance, energyGen};
+        return new double[]{offField, teamBuff, selfEnhance, energyGen, entryValue, sustain3, sustain6, exitCost, reentryCost};
     }
 
     // -------------------------------------------------------------------------
@@ -265,6 +290,66 @@ public class CapabilityProfiler {
         return subject.getTotalScaledParticleEnergy() - energyBefore;
     }
 
+    private double runEntryValueTemplate(CharacterId subjectId) {
+        CombatSimulator sim = createFilledSim();
+        sim.setActiveCharacter(subjectId);
+        CharacterActionRequest action = chooseBestAction(sim, subjectId, true, true);
+        double before = sim.getDamageByCharacter(subjectId);
+        sim.performAction(subjectId, action);
+        return sim.getDamageByCharacter(subjectId) - before;
+    }
+
+    private double runSustainValueTemplate(CharacterId subjectId, int actionCount) {
+        CombatSimulator sim = createFilledSim();
+        sim.setActiveCharacter(subjectId);
+        double before = sim.getDamageByCharacter(subjectId);
+        performBestActions(sim, subjectId, actionCount, true, true);
+        double totalDamage = sim.getDamageByCharacter(subjectId) - before;
+        return totalDamage / Math.max(1, actionCount);
+    }
+
+    private double runExitCostTemplate(CharacterId subjectId) {
+        CharacterId dummyId = getDummyAttacker(subjectId);
+        CombatSimulator staySim = createFilledSim();
+        staySim.setActiveCharacter(subjectId);
+        double stayBefore = staySim.getDamageByCharacter(subjectId);
+        performBestActions(staySim, subjectId, 6, true, true);
+        double stayDamage = staySim.getDamageByCharacter(subjectId) - stayBefore;
+
+        CombatSimulator swapSim = createFilledSim();
+        swapSim.setActiveCharacter(subjectId);
+        double swapBefore = swapSim.getDamageByCharacter(subjectId);
+        performBestActions(swapSim, subjectId, 3, true, true);
+        if (!subjectId.equals(dummyId)) {
+            swapSim.switchCharacter(dummyId);
+            performBestActions(swapSim, dummyId, 3, true, true);
+        }
+        double earlyDamage = swapSim.getDamageByCharacter(subjectId) - swapBefore;
+        return clamp01((stayDamage - earlyDamage) / Math.max(1.0, stayDamage));
+    }
+
+    private double runReentryCostTemplate(CharacterId subjectId) {
+        CharacterId dummyId = getDummyAttacker(subjectId);
+        CombatSimulator staySim = createFilledSim();
+        staySim.setActiveCharacter(subjectId);
+        double stayBefore = staySim.getDamageByCharacter(subjectId);
+        performBestActions(staySim, subjectId, 6, true, true);
+        double stayDamage = staySim.getDamageByCharacter(subjectId) - stayBefore;
+
+        CombatSimulator reentrySim = createFilledSim();
+        reentrySim.setActiveCharacter(subjectId);
+        double reentryBefore = reentrySim.getDamageByCharacter(subjectId);
+        performBestActions(reentrySim, subjectId, 3, true, true);
+        if (!subjectId.equals(dummyId)) {
+            reentrySim.switchCharacter(dummyId);
+            performBestActions(reentrySim, dummyId, 2, true, true);
+            reentrySim.switchCharacter(subjectId);
+        }
+        performBestActions(reentrySim, subjectId, 3, true, true);
+        double reentryDamage = reentrySim.getDamageByCharacter(subjectId) - reentryBefore;
+        return clamp01((stayDamage - reentryDamage) / Math.max(1.0, stayDamage));
+    }
+
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
@@ -332,6 +417,13 @@ public class CapabilityProfiler {
         Character c = sim.getCharacter(id);
         if (c != null && c.canBurst(sim.getCurrentTime())) {
             sim.performAction(id, CharacterActionRequest.of(CharacterActionKey.BURST));
+        }
+    }
+
+    private void performBestActions(CombatSimulator sim, CharacterId id, int actionCount,
+            boolean allowBurst, boolean allowSkill) {
+        for (int index = 0; index < actionCount; index++) {
+            sim.performAction(id, chooseBestAction(sim, id, allowBurst, allowSkill));
         }
     }
 

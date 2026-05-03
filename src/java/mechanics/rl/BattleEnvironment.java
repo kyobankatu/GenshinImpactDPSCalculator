@@ -17,6 +17,7 @@ public class BattleEnvironment {
     private final RLEpisodeFactory episodeFactory;
     private final ActionSpace actionSpace;
     private final ObservationEncoder observationEncoder;
+    private final PrivilegedStateEncoder privilegedStateEncoder;
     private final RewardFunction rewardFunction;
 
     private CombatSimulator simulator;
@@ -29,6 +30,7 @@ public class BattleEnvironment {
     private boolean generateReportOnDone;
     private StatsRecorder statsRecorder;
     private final double[] observationBuffer = new double[ObservationEncoder.OBSERVATION_SIZE];
+    private final double[] privilegedObservationBuffer = new double[PrivilegedStateEncoder.STATE_SIZE];
     private final double[] actionMaskBuffer = new double[ActionSpace.SIZE];
     private final double[] preActionMaskBuffer = new double[ActionSpace.SIZE];
 
@@ -36,16 +38,19 @@ public class BattleEnvironment {
     private static final LongAdder STEP_NANOS = new LongAdder();
     private static final LongAdder EXECUTE_NANOS = new LongAdder();
     private static final LongAdder ENCODE_NANOS = new LongAdder();
+    private static final LongAdder PRIVILEGED_ENCODE_NANOS = new LongAdder();
     private static final LongAdder MASK_NANOS = new LongAdder();
     private static final LongAdder RESET_CALLS = new LongAdder();
     private static final LongAdder RESET_NANOS = new LongAdder();
 
     public BattleEnvironment(Supplier<CombatSimulator> simulatorFactory, EpisodeConfig config) {
-        this(simulatorFactory, config, new ActionSpace(), new ObservationEncoder(), new RewardFunction());
+        this(simulatorFactory, config, new ActionSpace(), new ObservationEncoder(), new PrivilegedStateEncoder(),
+                new RewardFunction());
     }
 
     public BattleEnvironment(RLEpisodeFactory episodeFactory) {
-        this(episodeFactory, new ActionSpace(), new ObservationEncoder(), new RewardFunction());
+        this(episodeFactory, new ActionSpace(), new ObservationEncoder(), new PrivilegedStateEncoder(),
+                new RewardFunction());
     }
 
     public BattleEnvironment(
@@ -53,19 +58,22 @@ public class BattleEnvironment {
             EpisodeConfig config,
             ActionSpace actionSpace,
             ObservationEncoder observationEncoder,
+            PrivilegedStateEncoder privilegedStateEncoder,
             RewardFunction rewardFunction) {
         this(new SinglePartyRLEpisodeFactory("SingleParty", config.partyOrder, simulatorFactory, config),
-                actionSpace, observationEncoder, rewardFunction);
+                actionSpace, observationEncoder, privilegedStateEncoder, rewardFunction);
     }
 
     public BattleEnvironment(
             RLEpisodeFactory episodeFactory,
             ActionSpace actionSpace,
             ObservationEncoder observationEncoder,
+            PrivilegedStateEncoder privilegedStateEncoder,
             RewardFunction rewardFunction) {
         this.episodeFactory = episodeFactory;
         this.actionSpace = actionSpace;
         this.observationEncoder = observationEncoder;
+        this.privilegedStateEncoder = privilegedStateEncoder;
         this.rewardFunction = rewardFunction;
     }
 
@@ -99,10 +107,11 @@ public class BattleEnvironment {
         generateReportOnDone = generateReport;
 
         fillObservationBuffer();
+        fillPrivilegedObservationBuffer();
         fillActionMaskBuffer();
         RESET_CALLS.increment();
         RESET_NANOS.add(System.nanoTime() - start);
-        return new ResetResult(observationBuffer, actionMaskBuffer, currentPartyId);
+        return new ResetResult(observationBuffer, privilegedObservationBuffer, actionMaskBuffer, currentPartyId);
     }
 
     public ActionResult step(int actionId) {
@@ -156,10 +165,12 @@ public class BattleEnvironment {
         }
 
         fillObservationBuffer();
+        fillPrivilegedObservationBuffer();
         fillActionMaskBuffer();
         STEP_CALLS.increment();
         STEP_NANOS.add(System.nanoTime() - stepStart);
-        return new ActionResult(observationBuffer, actionMaskBuffer, reward, done, validAction, damageDelta,
+        return new ActionResult(observationBuffer, privilegedObservationBuffer, actionMaskBuffer, reward, done,
+                validAction, damageDelta,
                 simulator.getTotalDamage(), timeDelta, actionId, stepCount);
     }
 
@@ -228,6 +239,12 @@ public class BattleEnvironment {
         ENCODE_NANOS.add(System.nanoTime() - start);
     }
 
+    private void fillPrivilegedObservationBuffer() {
+        long start = System.nanoTime();
+        privilegedStateEncoder.fillState(simulator, config, privilegedObservationBuffer);
+        PRIVILEGED_ENCODE_NANOS.add(System.nanoTime() - start);
+    }
+
     private void fillActionMaskBuffer() {
         long start = System.nanoTime();
         actionSpace.fillMask(simulator, lastSwapTime, config, actionMaskBuffer);
@@ -246,6 +263,7 @@ public class BattleEnvironment {
                 STEP_NANOS.sum(),
                 EXECUTE_NANOS.sum(),
                 ENCODE_NANOS.sum(),
+                PRIVILEGED_ENCODE_NANOS.sum(),
                 MASK_NANOS.sum(),
                 RESET_CALLS.sum(),
                 RESET_NANOS.sum());
@@ -256,11 +274,13 @@ public class BattleEnvironment {
      */
     public static class ResetResult {
         public final double[] observation;
+        public final double[] privilegedObservation;
         public final double[] actionMask;
         public final int partyId;
 
-        public ResetResult(double[] observation, double[] actionMask, int partyId) {
+        public ResetResult(double[] observation, double[] privilegedObservation, double[] actionMask, int partyId) {
             this.observation = observation;
+            this.privilegedObservation = privilegedObservation;
             this.actionMask = actionMask;
             this.partyId = partyId;
         }
@@ -271,16 +291,18 @@ public class BattleEnvironment {
         public final long stepNanos;
         public final long executeNanos;
         public final long encodeNanos;
+        public final long privilegedEncodeNanos;
         public final long maskNanos;
         public final long resetCalls;
         public final long resetNanos;
 
-        public TimingSnapshot(long stepCalls, long stepNanos, long executeNanos, long encodeNanos, long maskNanos,
-                long resetCalls, long resetNanos) {
+        public TimingSnapshot(long stepCalls, long stepNanos, long executeNanos, long encodeNanos,
+                long privilegedEncodeNanos, long maskNanos, long resetCalls, long resetNanos) {
             this.stepCalls = stepCalls;
             this.stepNanos = stepNanos;
             this.executeNanos = executeNanos;
             this.encodeNanos = encodeNanos;
+            this.privilegedEncodeNanos = privilegedEncodeNanos;
             this.maskNanos = maskNanos;
             this.resetCalls = resetCalls;
             this.resetNanos = resetNanos;
@@ -295,10 +317,12 @@ public class BattleEnvironment {
             double meanResetMs = resetCalls == 0 ? 0.0 : millis(resetNanos) / resetCalls;
             double executeShare = stepNanos == 0 ? 0.0 : executeNanos * 100.0 / stepNanos;
             double encodeShare = stepNanos == 0 ? 0.0 : encodeNanos * 100.0 / stepNanos;
+            double privilegedEncodeShare = stepNanos == 0 ? 0.0 : privilegedEncodeNanos * 100.0 / stepNanos;
             double maskShare = stepNanos == 0 ? 0.0 : maskNanos * 100.0 / stepNanos;
             return String.format(
-                    "resetCalls=%d meanResetMs=%.3f stepCalls=%d meanStepMs=%.3f executeShare=%.1f%% encodeShare=%.1f%% maskShare=%.1f%%",
-                    resetCalls, meanResetMs, stepCalls, meanStepMs, executeShare, encodeShare, maskShare);
+                    "resetCalls=%d meanResetMs=%.3f stepCalls=%d meanStepMs=%.3f executeShare=%.1f%% encodeShare=%.1f%% privilegedEncodeShare=%.1f%% maskShare=%.1f%%",
+                    resetCalls, meanResetMs, stepCalls, meanStepMs, executeShare, encodeShare,
+                    privilegedEncodeShare, maskShare);
         }
     }
 }

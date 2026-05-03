@@ -2,9 +2,10 @@ import torch
 from torch import nn
 
 
-CHAR_FEATURE_SIZE = 18
+CHAR_FEATURE_SIZE = 23
 GLOBAL_FEATURE_SIZE = 7
 NUM_CHARS = 4
+PRIVILEGED_OBSERVATION_SIZE = 23
 
 
 class RecurrentPolicy(nn.Module):
@@ -16,6 +17,7 @@ class RecurrentPolicy(nn.Module):
         char_feature_size=CHAR_FEATURE_SIZE,
         global_feature_size=GLOBAL_FEATURE_SIZE,
         num_chars=NUM_CHARS,
+        privileged_observation_size=PRIVILEGED_OBSERVATION_SIZE,
     ):
         super().__init__()
         self.observation_size = observation_size
@@ -24,6 +26,7 @@ class RecurrentPolicy(nn.Module):
         self.char_feature_size = char_feature_size
         self.global_feature_size = global_feature_size
         self.num_chars = num_chars
+        self.privileged_observation_size = privileged_observation_size
 
         expected_observation_size = char_feature_size * num_chars + global_feature_size
         if observation_size != expected_observation_size:
@@ -46,7 +49,18 @@ class RecurrentPolicy(nn.Module):
         self.attention_scale = hidden_size ** -0.5
         self.recurrent = nn.GRUCell(hidden_size * 2, hidden_size)
         self.policy_head = nn.Linear(hidden_size, action_size)
-        self.value_head = nn.Linear(hidden_size, 1)
+        self.critic_privileged_encoder = nn.Sequential(
+            nn.Linear(privileged_observation_size, hidden_size),
+            nn.Tanh(),
+            nn.Linear(hidden_size, hidden_size),
+            nn.Tanh(),
+        )
+        self.value_head = nn.Linear(hidden_size * 2, 1)
+        self.auxiliary_head = nn.Sequential(
+            nn.Linear(hidden_size, hidden_size),
+            nn.Tanh(),
+            nn.Linear(hidden_size, privileged_observation_size),
+        )
 
     def _split_obs(self, observation):
         char_flat = observation[:, : self.num_chars * self.char_feature_size]
@@ -71,32 +85,60 @@ class RecurrentPolicy(nn.Module):
         context = torch.bmm(attention_scores, char_encodings).squeeze(1)
         return context, global_encoding, attention_scores.squeeze(1)
 
-    def forward_step(self, observation, recurrent_state, action_mask):
+    def _encode_privileged(self, privileged_observation, batch_size, device):
+        if privileged_observation is None:
+            privileged_observation = torch.zeros(
+                batch_size,
+                self.privileged_observation_size,
+                dtype=torch.float32,
+                device=device,
+            )
+        return self.critic_privileged_encoder(privileged_observation)
+
+    def forward_step(
+        self,
+        observation,
+        recurrent_state,
+        action_mask,
+        privileged_observation=None,
+    ):
         context, global_encoding, attention_scores = self._encode(observation)
         gru_input = torch.cat([context, global_encoding], dim=-1)
         hidden = self.recurrent(gru_input, recurrent_state)
         logits = self.policy_head(hidden)
         masked_logits = logits.masked_fill(action_mask < 0.5, -1.0e9)
-        value = self.value_head(hidden).squeeze(-1)
-        return masked_logits, value, hidden, attention_scores
+        privileged_encoding = self._encode_privileged(
+            privileged_observation,
+            observation.shape[0],
+            observation.device,
+        )
+        value = self.value_head(torch.cat([hidden, privileged_encoding], dim=-1)).squeeze(-1)
+        auxiliary_prediction = self.auxiliary_head(hidden)
+        return masked_logits, value, hidden, attention_scores, auxiliary_prediction
 
     def forward_sequence(
         self,
         observations,
         initial_hidden,
         action_masks,
+        privileged_observations=None,
         sequence_mask=None,
     ):
         hidden = initial_hidden
         logits_steps = []
         value_steps = []
         attention_steps = []
+        auxiliary_steps = []
 
         for step_index in range(observations.shape[1]):
-            logits, value, next_hidden, attention_scores = self.forward_step(
+            privileged_step = (
+                None if privileged_observations is None else privileged_observations[:, step_index]
+            )
+            logits, value, next_hidden, attention_scores, auxiliary_prediction = self.forward_step(
                 observations[:, step_index],
                 hidden,
                 action_masks[:, step_index],
+                privileged_observation=privileged_step,
             )
             if sequence_mask is not None:
                 valid = (sequence_mask[:, step_index] > 0.5).unsqueeze(-1)
@@ -106,16 +148,18 @@ class RecurrentPolicy(nn.Module):
             logits_steps.append(logits)
             value_steps.append(value)
             attention_steps.append(attention_scores)
+            auxiliary_steps.append(auxiliary_prediction)
 
         return (
             torch.stack(logits_steps, dim=1),
             torch.stack(value_steps, dim=1),
             hidden,
             torch.stack(attention_steps, dim=1),
+            torch.stack(auxiliary_steps, dim=1),
         )
 
     def act(self, observation, recurrent_state, action_mask, deterministic=False):
-        logits, value, hidden, attention_scores = self.forward_step(
+        logits, value, hidden, attention_scores, _ = self.forward_step(
             observation, recurrent_state, action_mask
         )
         distribution = torch.distributions.Categorical(logits=logits)
@@ -142,6 +186,7 @@ class RecurrentPolicy(nn.Module):
             "char_feature_size": self.char_feature_size,
             "global_feature_size": self.global_feature_size,
             "num_chars": self.num_chars,
+            "privileged_observation_size": self.privileged_observation_size,
             "state_dict": self.state_dict(),
         }
         if optimizer is not None:
@@ -160,6 +205,7 @@ class RecurrentPolicy(nn.Module):
             char_feature_size=payload.get("char_feature_size", CHAR_FEATURE_SIZE),
             global_feature_size=payload.get("global_feature_size", GLOBAL_FEATURE_SIZE),
             num_chars=payload.get("num_chars", NUM_CHARS),
+            privileged_observation_size=payload.get("privileged_observation_size", PRIVILEGED_OBSERVATION_SIZE),
         )
         model.load_state_dict(payload["state_dict"])
         return model, payload.get("optimizer_state_dict")

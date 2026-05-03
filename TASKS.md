@@ -1,17 +1,23 @@
-# Recurrent PPO Alignment Plan
+# General Rotation RL Upgrade Plan
 
 ## Goal
 
-Bring the current RL learner closer to a standard recurrent PPO implementation.
+Build a more general rotation-optimization RL stack that can learn when to stay
+on field, when to swap, and when to consume setup value, without relying on
+character-specific reward shaping.
 
-The main gap today is not the presence of a recurrent policy itself. The policy
-already carries hidden state across rollout steps. The gap is in the PPO update
-path: training treats collected samples mostly as independent one-step examples
-with cached recurrent input, instead of replaying contiguous sequences and
-backpropagating through time across those sequences.
+The core problem today is not only exploration. The larger issue is that the
+policy must infer long-horizon combat value from a partially observed state,
+while many decisive simulator facts remain implicit:
 
-This plan focuses on fixing that gap with minimal protocol churn and minimal
-risk to the Java rollout service.
+- active carry windows
+- deployed off-field payloads
+- follow-up opportunities
+- swap timing value
+- future payoff of current setup
+
+This plan upgrades the learner in stages so that it remains a generic rotation
+optimizer instead of turning into a hand-scripted character policy engine.
 
 ---
 
@@ -19,211 +25,376 @@ risk to the Java rollout service.
 
 ### What already exists
 
-- Policy inference is recurrent.
-- Rollout collection carries `hidden_states` forward per environment.
-- Hidden state is reset on `done`.
-- PPO uses action masking and a value head correctly at the step level.
+- Java owns the combat simulation and rollout execution.
+- Python owns recurrent PPO training and evaluation.
+- The policy already receives recurrent history.
+- Capability profiles already provide static role hints such as:
+  - off-field DPS ratio
+  - team buff score
+  - self-enhancement score
+  - energy generation score
 
-### What is missing compared with standard recurrent PPO
+### What is missing for robust generic rotation learning
 
-- Collected data is flattened into per-step samples before optimization.
-- PPO minibatches are shuffled as independent samples, not as sequences.
-- Training reuses cached `recurrent_input` instead of replaying sequence steps
-  through the recurrent core.
-- No explicit sequence padding or sequence mask exists for PPO updates.
-- No truncated BPTT style training window exists.
+- The actor cannot directly infer many temporally extended combat states.
+- Critic training does not exploit simulator-internal privileged state.
+- Static capability profiles do not capture current live payoff.
+- The action space is still mostly one-step primitive control.
+- The learner has no abstract notion of:
+  - on-field commitment value
+  - off-field payload remaining
+  - swap opportunity value
 
 ---
 
 ## Non-Goals
 
-- Do not change the Java observation layout.
-- Do not change action IDs or action-mask semantics.
-- Do not change the rollout binary protocol unless a later phase proves it is
-  necessary.
-- Do not introduce Transformer-specific architecture changes in this task.
+- Do not add character-specific reward bonuses.
+- Do not hardcode role rules such as "character X must drive".
+- Do not replace the simulator with scripted rotation logic.
+- Do not require inference-time access to character-specific hidden flags.
+- Do not introduce long fixed macro-actions that lock the agent for too long.
 
 ---
 
 ## Target End State
 
-After this work, PPO updates should operate on contiguous sequence chunks.
+After this work, the system should train a policy that:
 
-Each training minibatch should contain:
+- executes from generic observation and recurrent history alone
+- benefits during training from simulator-internal privileged state
+- reasons about generic combat abstractions rather than character names
+- can optionally choose short temporally extended actions
+- generalizes across party archetypes without reward redesign
 
-- `observations`: shape `(batch, seq, obs_dim)`
-- `action_masks`: shape `(batch, seq, action_dim)`
-- `actions`: shape `(batch, seq)`
-- `old_log_probs`: shape `(batch, seq)`
-- `advantages`: shape `(batch, seq)`
-- `returns`: shape `(batch, seq)`
-- `initial_hidden`: shape `(batch, hidden_dim)`
-- `loss_mask`: shape `(batch, seq)`
+The intended abstraction boundary is:
 
-The recurrent model should be unrolled over the sequence during optimization,
-with hidden state advanced internally step by step. Loss terms should only be
-applied where `loss_mask == 1`.
+- `actor`: generic public observation only
+- `critic`: public observation plus privileged simulator state during training
+- `auxiliary heads`: predict generic latent combat-value signals
+- `options / short skills`: reusable sequence abstractions with learned stopping
+
+---
+
+## Execution Strategy
+
+Implementation and evaluation should proceed incrementally.
+
+The default rollout plan is:
+
+1. implement Phase 1 through Phase 3
+2. run training and compare against the current flat PPO baseline
+3. implement Phase 4 and repeat training/evaluation
+4. implement Phase 5 and repeat training/evaluation
+5. defer Phase 6 unless Phase 1 through Phase 5 still leave a clear flat-policy
+   limitation
+
+Phase 6 is intentionally not part of the first implementation wave.
+
+Reasons:
+
+- Phase 3 through Phase 5 improve learning signal and state representation
+  without changing the control abstraction too aggressively.
+- Phase 6 changes the action hierarchy and is the most invasive phase.
+- If Phase 1 through Phase 5 already fix the main stay-vs-swap failures, then
+  Phase 6 can remain optional.
+
+The first concrete milestone is therefore:
+
+- complete Phase 1 through Phase 5
+- verify the learner runs end to end
+- compare behavior before deciding whether options are still needed
 
 ---
 
 ## Implementation Plan
 
-### Phase 1: Restructure rollout storage around sequences
+### Phase 1: Define generic privileged combat state
 
 **Files**
-- `src/python/rl/train_recurrent_ppo.py`
+- `src/java/mechanics/rl/`
+- `src/python/rl/`
+
+**Changes**
+
+- Define a privileged state interface for training-time use only.
+- Keep all features generic and slot-based rather than character-based.
+- Start with compact abstract features such as:
+  - `on_field_window_remaining[slot]`
+  - `off_field_payload_remaining[slot]`
+  - `followup_opportunity_score[slot]`
+  - `major_action_ready_score[slot]`
+  - `swap_in_value_score[slot]`
+  - `reaction_potential_score`
+  - `team_setup_value_score`
+
+**Examples**
+
+- A self-buff form with 8 s remaining contributes to
+  `on_field_window_remaining` for that slot.
+- A summoned turret or field with 12 s remaining contributes to
+  `off_field_payload_remaining`.
+- A temporary enhanced burst state contributes to
+  `followup_opportunity_score`.
+
+**Acceptance criteria**
+
+- The feature list contains no character names.
+- Every feature can be computed for any party member slot.
+- The representation is meaningful for both time-limited and non-time-limited
+  carries.
+
+---
+
+### Phase 2: Add a Java-side privileged state encoder
+
+**Files**
+- `src/java/mechanics/rl/PrivilegedStateEncoder.java` (new)
+- `src/java/mechanics/rl/BattleEnvironment.java`
+- related simulator/model classes as needed
+
+**Changes**
+
+- Implement a separate encoder for critic-only privileged state.
+- Do not merge this into the actor observation path.
+- Expose the privileged vector through reset/step results for training.
+- Keep the encoder generic:
+  - no `if character == Flins`
+  - use interfaces, timers, deployed effects, and action-state metadata
+
+**Examples**
+
+- Characters with active on-field-enhancing states implement a shared capability
+  that reports a remaining-value proxy.
+- Persistent off-field effects register a generic remaining-duration or
+  remaining-uses value.
+
+**Acceptance criteria**
+
+- The rollout environment can emit both:
+  - public actor observation
+  - privileged critic observation
+- Existing evaluation can still run without privileged input if needed.
+
+---
+
+### Phase 3: Convert PPO to asymmetric actor-critic
+
+**Files**
 - `src/python/rl/recurrent_ppo.py`
+- `src/python/rl/train_recurrent_ppo.py`
+- `src/python/rl/rollout_service_client.py`
 
 **Changes**
 
-- Replace the current flattened `samples` representation with a sequence-aware
-  representation.
-- Preserve per-environment temporal order throughout rollout collection.
-- Store the initial hidden state for each contiguous training segment.
-- Split segments on episode boundaries.
-- Add a configurable sequence length for truncated BPTT, for example
-  `seq_len` or `bptt_steps`.
-- Chunk long per-environment segments into fixed-length windows while keeping
-  order intact.
+- Keep the actor input unchanged: public observation only.
+- Extend the critic to consume public observation plus privileged state.
+- Store privileged observations in rollout buffers.
+- Ensure checkpoint loading and evaluation paths remain backward-compatible
+  where practical.
 
 **Notes**
 
-- This phase should not yet change model architecture.
-- Keep GAE computation on full rollout segments before chunking into sequence
-  windows.
+- This is the lowest-risk way to use simulator truth without leaking it into the
+  deployed policy.
+- This is the first major change likely to improve stay-vs-swap judgment.
 
 **Acceptance criteria**
 
-- Rollout collection still runs end to end.
-- Sequence chunks are produced with stable shapes.
-- Episode boundaries do not leak hidden state into the next episode.
+- Training runs end to end with asymmetric inputs.
+- The actor still functions from public observation only.
+- The critic loss remains numerically stable.
 
 ---
 
-### Phase 2: Add sequence forward pass to the policy
+### Phase 4: Add auxiliary latent-value prediction tasks
 
 **Files**
 - `src/python/rl/recurrent_ppo.py`
-
-**Changes**
-
-- Keep `forward_step()` for inference and evaluation.
-- Add a sequence-oriented method such as `forward_sequence()`:
-  - input: `(batch, seq, obs_dim)`, `(batch, hidden_dim)`,
-    `(batch, seq, action_dim)`, optional reset mask
-  - output: logits `(batch, seq, action_dim)`, values `(batch, seq)`,
-    final hidden `(batch, hidden_dim)`, optional attention summaries
-- Internally unroll the GRU step by step across the sequence dimension.
-- Support per-step reset masking so that padded positions or explicit reset
-  boundaries do not contaminate following states.
-
-**Notes**
-
-- The current character attention encoder can remain unchanged.
-- `forward_step()` should be implemented in terms of the same core logic where
-  practical to avoid divergence.
-
-**Acceptance criteria**
-
-- `forward_step()` behavior remains unchanged for inference use.
-- `forward_sequence()` reproduces the same stepwise outputs when run on a known
-  short sequence without shuffling.
-
----
-
-### Phase 3: Change PPO optimization from step minibatches to sequence minibatches
-
-**Files**
 - `src/python/rl/train_recurrent_ppo.py`
 
 **Changes**
 
-- Replace `random.shuffle(samples)` with shuffling at the sequence-chunk level.
-- Build minibatches from whole sequence chunks, not individual timesteps.
-- Pad variable-length chunks within a minibatch to the local max sequence length.
-- Add `loss_mask` so PPO loss, value loss, entropy, KL, and metrics ignore padded
-  timesteps.
-- Recompute logits and values by calling `policy.forward_sequence(...)`.
-- Compute action log-probabilities over `(batch, seq)`.
-- Reduce masked losses by valid timestep count, not by padded tensor size.
+- Add auxiliary heads on top of the recurrent trunk.
+- Train them to predict selected privileged targets from history alone.
+- Initial targets should remain generic:
+  - `pred_on_field_commitment_score`
+  - `pred_off_field_payload_remaining`
+  - `pred_swap_out_opportunity_score`
+  - `pred_team_setup_value_score`
 
-**Notes**
+**Examples**
 
-- This is the core phase that makes the training path actually recurrent.
-- PPO clipping logic stays the same conceptually; only tensor layout changes.
+- Given public history only, the model learns that the active slot likely still
+  has 3-4 high-value actions left.
+- Given prior setup actions, the model predicts that a different slot now has
+  high swap-in value.
 
 **Acceptance criteria**
 
-- Training completes with sequence minibatches and no shape mismatches.
-- Loss values remain finite.
-- Masked padding does not contribute to the objective.
+- Auxiliary losses decrease during training.
+- PPO reward definition remains unchanged.
+- Actor behavior becomes less dependent on lucky recurrent memorization.
 
 ---
 
-### Phase 4: Make recurrent boundaries explicit
+### Phase 5: Refresh capability profiling around value curves
 
 **Files**
-- `src/python/rl/train_recurrent_ppo.py`
+- `src/java/mechanics/rl/CapabilityProfiler.java`
+- `config/capability_profiles/`
+- `src/java/mechanics/rl/ObservationEncoder.java`
+
+**Changes**
+
+- Keep existing role-style profile data if still useful.
+- Add new generic profile dimensions that describe value over time rather than
+  only coarse role identity.
+- Candidate additions:
+  - `entry_value_score`
+  - `sustain_value_3_actions`
+  - `sustain_value_6_actions`
+  - `exit_cost_score`
+  - `reentry_cost_score`
+
+**Examples**
+
+- A time-limited carry may have high entry value and high short-horizon sustain.
+- A frontloaded support may have high entry value and low sustain.
+- A setup-heavy carry may have high reentry cost, encouraging longer commitment.
+
+**Acceptance criteria**
+
+- New profile fields remain character-agnostic in meaning.
+- Profiles can describe both:
+  - time-window carries
+  - resource/sequence-limited carries
+
+---
+
+### Phase 6: Introduce short generic options above primitive actions
+
+**Files**
+- `src/java/mechanics/rl/ActionSpace.java`
+- `src/java/mechanics/rl/RLAction.java`
 - `src/python/rl/recurrent_ppo.py`
-
-**Changes**
-
-- Define exactly when hidden state is reset:
-  - on environment `done`
-  - at explicit sequence starts
-  - optionally via a `sequence_reset_mask`
-- Ensure bootstrap value computation uses the correct terminal handling.
-- Audit evaluation code so deterministic and stochastic evaluation still reset
-  hidden state correctly.
-
-**Notes**
-
-- This phase is mainly correctness and maintainability.
-- It should remove ambiguity around whether a cached hidden state belongs to the
-  current episode or an already-terminated one.
-
-**Acceptance criteria**
-
-- No hidden-state carryover across episodes.
-- Evaluation path remains behaviorally consistent.
-
----
-
-### Phase 5: Add observability for recurrent training quality
-
-**Files**
 - `src/python/rl/train_recurrent_ppo.py`
 
 **Changes**
 
-- Log sequence-specific metrics:
-  - mean sequence length
-  - max sequence length
-  - valid timestep count
-  - padding fraction
-- Keep existing PPO metrics.
-- Keep existing attention summaries if inexpensive.
-- Optionally log gradient norm before clipping for diagnosis.
+- Keep primitive actions available.
+- Add a small set of generic short options with learned termination.
+- Start with short horizon options only, roughly 2-6 primitive actions.
+- Candidate generic options:
+  - `SETUP_OPTION`
+  - `DRIVE_OPTION`
+  - `CASHOUT_OPTION`
+  - `REFRESH_OPTION`
+
+**Examples**
+
+- `SETUP_OPTION` tends to prioritize available skill/burst setup actions.
+- `DRIVE_OPTION` tends to continue high-value on-field action chains.
+- `REFRESH_OPTION` tends to rotate into slots with high swap-in value.
+
+**Notes**
+
+- Do not introduce long fixed macro-actions.
+- Do not remove primitive control during the first rollout.
 
 **Acceptance criteria**
 
-- Training logs make it obvious whether sequence batching is working as intended.
+- The policy can still fall back to primitive actions.
+- Learned options terminate adaptively.
+- Option usage improves credit assignment without locking the agent into bad
+  long commitments.
+
+**Execution note**
+
+- Do not start this phase until Phase 1 through Phase 5 have been implemented
+  and evaluated.
+- Treat this as a follow-up phase, not part of the initial rollout.
+
+---
+
+### Phase 7: Seed option discovery from scripted rotations
+
+**Files**
+- `src/java/sample/`
+- `src/python/rl/`
+- optional tooling under `scripts/` or `src/python/rl/`
+
+**Changes**
+
+- Parse existing scripted sample rotations into short action subsequences.
+- Use frequent subsequences as initialization candidates for options or sequence
+  tokens.
+- Use demonstrations only as prior structure, not as mandatory imitation target.
+
+**Examples**
+
+- `swap -> skill -> swap`
+- `skill -> burst`
+- `normal x3 -> burst`
+
+**Notes**
+
+- This phase should improve sample efficiency without hardwiring any one party's
+  rotation.
+- Token extraction should remain generic across parties.
+
+**Acceptance criteria**
+
+- Option seeds come from reusable local motifs, not full-party scripts.
+- The learner can deviate from seeded sequences when reward supports it.
+
+---
+
+### Phase 8: Evaluate generalization across party archetypes
+
+**Files**
+- `src/java/mechanics/rl/RLPartyRegistry.java`
+- `src/python/rl/train_recurrent_ppo.py`
+- evaluation/report tooling
+
+**Changes**
+
+- Test on multiple archetypes, not just one carry pattern.
+- Compare:
+  - flat PPO baseline
+  - asymmetric critic only
+  - asymmetric critic plus auxiliary heads
+  - asymmetric critic plus auxiliary heads plus options
+
+**Party archetypes to cover**
+
+- time-limited self-buff carries
+- frontloaded setup carries
+- sustain carries with low explicit timers
+- off-field driver teams
+
+**Acceptance criteria**
+
+- Improvements are not limited to one named character or one party.
+- The final design does not require per-party reward changes.
 
 ---
 
 ## Proposed Config Additions
 
-Add the following learner config fields:
-
-- `sequence_length`
-- `sequence_minibatch_size`
-- `carry_bootstrap_across_rollout` if needed for clarity
+- `use_privileged_critic`
+- `privileged_obs_dim`
+- `auxiliary_prediction_weight`
+- `use_value_curve_profiles`
+- `use_options`
+- `option_max_length`
+- `option_termination_enabled`
+- `option_seed_from_scripts`
 
 Notes:
 
-- `minibatch_size` currently means step count. After this change it should either
-  be redefined clearly or replaced with a sequence-based name to avoid confusion.
-- Keep defaults conservative for the debug preset.
+- Keep defaults conservative.
+- Feature flags should allow ablations per phase.
 
 ---
 
@@ -232,43 +403,63 @@ Notes:
 ### Minimum verification
 
 1. Run `./gradlew build`
-2. Run the Java rollout service through the existing local path.
-3. Run a short learner smoke test with the debug preset and small update count.
-4. Run `src/python/rl/evaluate_policy.py` against the produced checkpoint.
+2. Run `./gradlew ProfileCapabilities`
+3. Run a short single-party learner smoke test
+4. Run `src/python/rl/evaluate_policy.py` on the produced checkpoint
+5. Compare HTML report behavior before and after each phase
 
-### Suggested smoke test shape
+### Suggested experimental ladder
 
-- small `envs`
-- small `updates`
-- short `sequence_length`
-- CPU is acceptable
+1. Baseline flat PPO
+2. Add privileged critic only
+3. Add auxiliary prediction heads
+4. Add refreshed capability profiles
+5. Add short options
+6. Add script-seeded option initialization
+
+### Recommended first rollout boundary
+
+The first implementation wave should stop after:
+
+1. Phase 1 through Phase 3, or
+2. preferably Phase 1 through Phase 5
+
+Then evaluate whether the remaining errors are truly due to lack of temporal
+abstraction before starting Phase 6.
 
 ### What to watch
 
-- no NaNs in policy/value loss
-- no tensor shape errors
-- invalid-action rate comparable to current baseline
-- evaluation completes without hidden-state shape/reset issues
+- reward and damage stability
+- invalid-action rate
+- swap frequency
+- average on-field commitment length by slot
+- entropy collapse after adding options
+- whether improvements hold across multiple parties
 
 ---
 
 ## Risks
 
-- The biggest implementation risk is silent shape correctness with wrong masking.
-- A second risk is making PPO numerically noisier if sequence batching becomes
-  too small.
-- Another risk is changing checkpoint compatibility if model or config metadata
-  is renamed without a migration path.
+- Privileged features may accidentally leak character-specific logic if encoded
+  carelessly.
+- Too many abstract features may make critic training noisy rather than helpful.
+- Poorly designed options may collapse into trivial action repetition.
+- Script-seeded skills may overfit to existing samples if the seed vocabulary is
+  too rigid.
+- Backward compatibility for checkpoints and rollout protocol may need a
+  migration path.
 
 ---
 
 ## Follow-Up After This Plan
 
-Only after the recurrent PPO update path is sequence-correct should we evaluate:
+Only after asymmetric training and short option support are working should we
+evaluate:
 
-1. richer observation state
-2. GRU vs LSTM comparison
-3. lightweight causal Transformer or GTrXL style replacement
+1. stronger recurrent cores such as LSTM or GTrXL
+2. learned termination regularization
+3. more advanced skill discovery or tokenization pipelines
+4. broader multi-party curriculum design
 
-Without this groundwork, a Transformer comparison would be noisy and hard to
-interpret because the training pipeline itself would still be underpowered.
+Without this groundwork, architecture upgrades alone will be difficult to
+interpret because the learner will still be missing the right abstraction layer.

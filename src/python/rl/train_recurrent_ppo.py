@@ -41,6 +41,7 @@ PRESETS = {
         "max_grad_norm": 0.5,
         "checkpoint_interval": 2,
         "evaluation_interval": 2,
+        "auxiliary_prediction_weight": 0.05,
     },
 }
 
@@ -67,9 +68,17 @@ def run_training(args, run=None):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     client = build_rollout_client(host=host, port=port, ports=ports, endpoints=endpoints)
     runner_id = client.create_runner(config["envs"])
-    observations, action_masks, party_ids = client.reset_runner(runner_id, False)
+    observations, privileged_observations, action_masks, party_ids = client.reset_runner(runner_id, False)
 
-    policy = RecurrentPolicy(client.observation_size, config["hidden_size"], client.action_size).to(device)
+    policy = RecurrentPolicy(
+        client.observation_size,
+        config["hidden_size"],
+        client.action_size,
+        char_feature_size=client.char_feature_size,
+        global_feature_size=client.global_feature_size,
+        num_chars=client.num_chars,
+        privileged_observation_size=client.privileged_observation_size,
+    ).to(device)
     optimizer = torch.optim.Adam(policy.parameters(), lr=config["learning_rate"])
     start_update = 0
     if args.resume_from:
@@ -82,6 +91,7 @@ def run_training(args, run=None):
         checkpoint_char_feature_size = checkpoint_payload.get("char_feature_size")
         checkpoint_global_feature_size = checkpoint_payload.get("global_feature_size")
         checkpoint_num_chars = checkpoint_payload.get("num_chars")
+        checkpoint_privileged_observation_size = checkpoint_payload.get("privileged_observation_size")
         if checkpoint_hidden_size != config["hidden_size"]:
             raise ValueError(
                 f"Resume checkpoint hidden_size mismatch: checkpoint={checkpoint_hidden_size} config={config['hidden_size']}"
@@ -109,6 +119,11 @@ def run_training(args, run=None):
         if checkpoint_num_chars is not None and checkpoint_num_chars != policy.num_chars:
             raise ValueError(
                 f"Resume checkpoint num_chars mismatch: checkpoint={checkpoint_num_chars} policy={policy.num_chars}"
+            )
+        if checkpoint_privileged_observation_size is not None and checkpoint_privileged_observation_size != policy.privileged_observation_size:
+            raise ValueError(
+                "Resume checkpoint privileged_observation_size mismatch: "
+                f"checkpoint={checkpoint_privileged_observation_size} policy={policy.privileged_observation_size}"
             )
         policy.load_state_dict(checkpoint_payload["state_dict"])
         optimizer_state_dict = checkpoint_payload.get("optimizer_state_dict")
@@ -153,6 +168,7 @@ def run_training(args, run=None):
                 actions = action_output["action"].cpu().tolist()
                 batch = client.step_runner(runner_id, actions)
                 next_observations = batch["observations"]
+                next_privileged_observations = batch["privileged_observations"]
                 next_action_masks = batch["action_masks"]
                 next_party_ids = batch["party_ids"]
 
@@ -160,6 +176,7 @@ def run_training(args, run=None):
                     active_segments[env_index].append(
                         build_step_record(
                             observations[env_index],
+                            privileged_observations[env_index],
                             hidden_states[env_index],
                             action_masks[env_index],
                             actions[env_index],
@@ -189,13 +206,14 @@ def run_training(args, run=None):
                         hidden_states[env_index] = action_output["hidden"][env_index]
 
                 observations = next_observations
+                privileged_observations = next_privileged_observations
                 action_masks = next_action_masks
                 party_ids = next_party_ids
 
             with torch.no_grad():
                 obs_tensor = torch.tensor(observations, dtype=torch.float32, device=device)
                 mask_tensor = torch.tensor(action_masks, dtype=torch.float32, device=device)
-                logits, values, _, _ = policy.forward_step(obs_tensor, hidden_states, mask_tensor)
+                logits, values, _, _, _ = policy.forward_step(obs_tensor, hidden_states, mask_tensor)
                 del logits
                 bootstrap_values = values.detach().cpu().tolist()
             for env_index in range(config["envs"]):
@@ -256,6 +274,7 @@ def run_training(args, run=None):
                 "mean_sequence_length": mean_sequence_length,
                 "max_sequence_length": max_sequence_length,
                 "padding_fraction": optimization_metrics["padding_fraction"],
+                "auxiliary_loss": optimization_metrics["auxiliary_loss"],
                 "policy_loss": optimization_metrics["policy_loss"],
                 "value_loss": optimization_metrics["value_loss"],
                 "entropy": optimization_metrics["entropy"],
@@ -281,7 +300,7 @@ def run_training(args, run=None):
                 "optimization_duration_sec": optimization_duration,
             }
             print(
-                f"Update {update}: reward={mean_reward:.3f} damage={mean_damage:,.0f} steps={mean_episode_steps:.1f} invalid={invalid_rate:.3f} kl={optimization_metrics['approx_kl']:.5f} clip={optimization_metrics['clip_fraction']:.3f} entropyCoef={entropy_coefficient:.5f} policy={optimization_metrics['policy_loss']:.5f} value={optimization_metrics['value_loss']:.5f} seqs={len(sequence_chunks)} meanSeq={mean_sequence_length:.1f} envSteps/s={env_steps_per_second:.1f}"
+                f"Update {update}: reward={mean_reward:.3f} damage={mean_damage:,.0f} steps={mean_episode_steps:.1f} invalid={invalid_rate:.3f} kl={optimization_metrics['approx_kl']:.5f} clip={optimization_metrics['clip_fraction']:.3f} entropyCoef={entropy_coefficient:.5f} policy={optimization_metrics['policy_loss']:.5f} value={optimization_metrics['value_loss']:.5f} aux={optimization_metrics['auxiliary_loss']:.5f} seqs={len(sequence_chunks)} meanSeq={mean_sequence_length:.1f} envSteps/s={env_steps_per_second:.1f}"
             )
             log_wandb(
                 run,
@@ -292,6 +311,7 @@ def run_training(args, run=None):
                     "train/mean_sequence_length": mean_sequence_length,
                     "train/max_sequence_length": max_sequence_length,
                     "train/padding_fraction": optimization_metrics["padding_fraction"],
+                    "train/auxiliary_loss": optimization_metrics["auxiliary_loss"],
                     "train/policy_loss": optimization_metrics["policy_loss"],
                     "train/value_loss": optimization_metrics["value_loss"],
                     "train/entropy": optimization_metrics["entropy"],
@@ -402,6 +422,7 @@ def parse_args():
     parser.add_argument("--max-grad-norm", type=float, help="gradient clipping max norm")
     parser.add_argument("--checkpoint-interval", type=int, help="checkpoint save interval in updates")
     parser.add_argument("--evaluation-interval", type=int, help="evaluation interval in updates")
+    parser.add_argument("--auxiliary-prediction-weight", type=float, help="weight for auxiliary privileged-state prediction loss")
     parser.add_argument("--rollout-workers", type=int, default=None, help="Java rollout worker override used for this run")
     parser.add_argument("--resume-from", default=None, help="path to a saved .pt checkpoint to resume from")
     parser.add_argument("--wandb", action="store_true", help="enable Weights & Biases logging")
@@ -433,6 +454,7 @@ def resolve_config(args):
         "max_grad_norm": args.max_grad_norm,
         "checkpoint_interval": args.checkpoint_interval,
         "evaluation_interval": args.evaluation_interval,
+        "auxiliary_prediction_weight": args.auxiliary_prediction_weight,
     }
     for key, value in overrides.items():
         if value is not None:
@@ -473,6 +495,7 @@ def init_wandb(args, config, client, device, existing_run=None):
         "device": device.type,
         "observation_size": client.observation_size,
         "action_size": client.action_size,
+        "privileged_observation_size": client.privileged_observation_size,
     }
     run_config.update(config)
     if existing_run is not None:
@@ -500,6 +523,7 @@ def finish_wandb(run):
 
 def build_step_record(
     observation,
+    privileged_observation,
     recurrent_input,
     action_mask,
     action,
@@ -510,6 +534,7 @@ def build_step_record(
 ):
     return {
         "observation": list(observation),
+        "privileged_observation": list(privileged_observation),
         "recurrent_input": recurrent_input.detach().cpu().tolist(),
         "action_mask": list(action_mask),
         "action": action,
@@ -543,6 +568,9 @@ def build_sequence_minibatch(chunks, policy, device):
     observations = torch.zeros(
         batch_size, max_seq_len, policy.observation_size, dtype=torch.float32, device=device
     )
+    privileged_observations = torch.zeros(
+        batch_size, max_seq_len, policy.privileged_observation_size, dtype=torch.float32, device=device
+    )
     initial_hidden = torch.zeros(
         batch_size, policy.hidden_size, dtype=torch.float32, device=device
     )
@@ -565,6 +593,9 @@ def build_sequence_minibatch(chunks, policy, device):
             observations[batch_index, step_index] = torch.tensor(
                 step["observation"], dtype=torch.float32, device=device
             )
+            privileged_observations[batch_index, step_index] = torch.tensor(
+                step["privileged_observation"], dtype=torch.float32, device=device
+            )
             action_masks[batch_index, step_index] = torch.tensor(
                 step["action_mask"], dtype=torch.float32, device=device
             )
@@ -576,6 +607,7 @@ def build_sequence_minibatch(chunks, policy, device):
 
     return {
         "observations": observations,
+        "privileged_observations": privileged_observations,
         "initial_hidden": initial_hidden,
         "action_masks": action_masks,
         "actions": actions,
@@ -597,6 +629,7 @@ def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coef
             "value_mean": 0.0,
             "log_prob_mean": 0.0,
             "padding_fraction": 0.0,
+            "auxiliary_loss": 0.0,
         }
 
     total_policy_loss = 0.0
@@ -608,6 +641,7 @@ def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coef
     total_log_prob_mean = 0.0
     total_valid_steps = 0.0
     total_padded_steps = 0.0
+    total_auxiliary_loss = 0.0
     updates = 0
 
     for _ in range(config["ppo_epochs"]):
@@ -618,10 +652,11 @@ def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coef
             minibatch_chunks = [sequence_chunks[index] for index in minibatch_indices]
             minibatch = build_sequence_minibatch(minibatch_chunks, policy, device)
 
-            logits, value, _, _ = policy.forward_sequence(
+            logits, value, _, _, auxiliary_prediction = policy.forward_sequence(
                 minibatch["observations"],
                 minibatch["initial_hidden"],
                 minibatch["action_masks"],
+                privileged_observations=minibatch["privileged_observations"],
                 sequence_mask=minibatch["loss_mask"],
             )
             distribution = torch.distributions.Categorical(logits=logits)
@@ -643,7 +678,16 @@ def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coef
             value_loss = (
                 0.5 * (minibatch["return_targets"] - value).pow(2) * valid_mask
             ).sum() / valid_count
-            total_loss = policy_loss + config["value_coefficient"] * value_loss - entropy_coefficient * entropy
+            auxiliary_loss = (
+                (auxiliary_prediction - minibatch["privileged_observations"]).pow(2)
+                * valid_mask.unsqueeze(-1)
+            ).sum() / (valid_count * policy.privileged_observation_size)
+            total_loss = (
+                policy_loss
+                + config["value_coefficient"] * value_loss
+                - entropy_coefficient * entropy
+                + config["auxiliary_prediction_weight"] * auxiliary_loss
+            )
             clip_fraction = (
                 ((torch.abs(ratio - 1.0) > config["clip_range"]).float() * valid_mask).sum() / valid_count
             )
@@ -664,6 +708,7 @@ def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coef
             total_log_prob_mean += log_prob_mean.item()
             total_valid_steps += valid_count.item()
             total_padded_steps += valid_mask.numel() - valid_count.item()
+            total_auxiliary_loss += auxiliary_loss.item()
             updates += 1
 
     total_positions = total_valid_steps + total_padded_steps
@@ -676,6 +721,7 @@ def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coef
         "value_mean": total_value_mean / updates,
         "log_prob_mean": total_log_prob_mean / updates,
         "padding_fraction": 0.0 if total_positions == 0 else total_padded_steps / total_positions,
+        "auxiliary_loss": total_auxiliary_loss / updates,
     }
 
 
@@ -745,7 +791,9 @@ def evaluate(policy, client, device, deterministic):
 
 def evaluate_single_episode(policy, client, device, deterministic, generate_report, forced_party_id):
     runner_id = client.create_runner(1)
-    observations, masks, party_ids = client.reset_runner(runner_id, generate_report, forced_party_id=forced_party_id)
+    observations, _privileged_observations, masks, party_ids = client.reset_runner(
+        runner_id, generate_report, forced_party_id=forced_party_id
+    )
     hidden = torch.zeros(1, policy.hidden_size, dtype=torch.float32, device=device)
     total_reward = 0.0
     invalid_actions = 0
@@ -808,6 +856,7 @@ def append_log(row):
                 "mean_sequence_length",
                 "max_sequence_length",
                 "padding_fraction",
+                "auxiliary_loss",
                 "policy_loss",
                 "value_loss",
                 "entropy",

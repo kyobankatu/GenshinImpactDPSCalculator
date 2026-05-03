@@ -5,6 +5,7 @@ package mechanics.rl;
  */
 public class ActionResult {
     public final double[] observation;
+    public final double[] privilegedObservation;
     public final double[] actionMask;
     public final double reward;
     public final boolean done;
@@ -17,6 +18,7 @@ public class ActionResult {
 
     public ActionResult(
             double[] observation,
+            double[] privilegedObservation,
             double[] actionMask,
             double reward,
             boolean done,
@@ -27,6 +29,7 @@ public class ActionResult {
             int executedActionId,
             int stepCount) {
         this.observation = observation;
+        this.privilegedObservation = privilegedObservation;
         this.actionMask = actionMask;
         this.reward = reward;
         this.done = done;

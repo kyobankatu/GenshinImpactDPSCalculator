@@ -5,6 +5,7 @@ package mechanics.rl.bridge;
  */
 public class RunnerStepResult {
     public final double[][] observations;
+    public final double[][] privilegedObservations;
     public final double[][] actionMasks;
     public final double[] rewards;
     public final boolean[] dones;
@@ -20,6 +21,7 @@ public class RunnerStepResult {
 
     public RunnerStepResult(
             double[][] observations,
+            double[][] privilegedObservations,
             double[][] actionMasks,
             double[] rewards,
             boolean[] dones,
@@ -33,6 +35,7 @@ public class RunnerStepResult {
             int[] partyIds,
             int[] episodePartyIds) {
         this.observations = observations;
+        this.privilegedObservations = privilegedObservations;
         this.actionMasks = actionMasks;
         this.rewards = rewards;
         this.dones = dones;

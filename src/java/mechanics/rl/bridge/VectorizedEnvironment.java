@@ -13,6 +13,7 @@ import mechanics.rl.ActionSpace;
 import mechanics.rl.BattleEnvironment;
 import mechanics.rl.EpisodeConfig;
 import mechanics.rl.ObservationEncoder;
+import mechanics.rl.PrivilegedStateEncoder;
 import mechanics.rl.QuietExecution;
 import mechanics.rl.RLEpisodeFactory;
 import mechanics.rl.RewardFunction;
@@ -43,11 +44,16 @@ public class VectorizedEnvironment {
     }
 
     public VectorizedEnvironment(int count, Supplier<CombatSimulator> simulatorFactory, EpisodeConfig config, int requestedWorkers) {
-        this(count, simulatorFactory, config, requestedWorkers, new ObservationEncoder());
+        this(count, simulatorFactory, config, requestedWorkers, new ObservationEncoder(), new PrivilegedStateEncoder());
     }
 
     public VectorizedEnvironment(int count, RLEpisodeFactory episodeFactory, int requestedWorkers,
             ObservationEncoder observationEncoder) {
+        this(count, episodeFactory, requestedWorkers, observationEncoder, new PrivilegedStateEncoder());
+    }
+
+    public VectorizedEnvironment(int count, RLEpisodeFactory episodeFactory, int requestedWorkers,
+            ObservationEncoder observationEncoder, PrivilegedStateEncoder privilegedStateEncoder) {
         this.episodeRewards = new double[count];
         this.episodeDamages = new double[count];
         int autoWorkers = Math.max(1, Math.min(count, Runtime.getRuntime().availableProcessors()));
@@ -55,7 +61,7 @@ public class VectorizedEnvironment {
         this.executor = workerCount > 1 ? Executors.newFixedThreadPool(workerCount) : null;
         for (int i = 0; i < count; i++) {
             environments.add(new BattleEnvironment(
-                    episodeFactory, new ActionSpace(), observationEncoder, new RewardFunction()));
+                    episodeFactory, new ActionSpace(), observationEncoder, privilegedStateEncoder, new RewardFunction()));
         }
     }
 
@@ -71,6 +77,11 @@ public class VectorizedEnvironment {
      */
     public VectorizedEnvironment(int count, Supplier<CombatSimulator> simulatorFactory, EpisodeConfig config,
             int requestedWorkers, ObservationEncoder observationEncoder) {
+        this(count, simulatorFactory, config, requestedWorkers, observationEncoder, new PrivilegedStateEncoder());
+    }
+
+    public VectorizedEnvironment(int count, Supplier<CombatSimulator> simulatorFactory, EpisodeConfig config,
+            int requestedWorkers, ObservationEncoder observationEncoder, PrivilegedStateEncoder privilegedStateEncoder) {
         this.episodeRewards = new double[count];
         this.episodeDamages = new double[count];
         int autoWorkers = Math.max(1, Math.min(count, Runtime.getRuntime().availableProcessors()));
@@ -78,7 +89,7 @@ public class VectorizedEnvironment {
         this.executor = workerCount > 1 ? Executors.newFixedThreadPool(workerCount) : null;
         for (int i = 0; i < count; i++) {
             environments.add(new BattleEnvironment(simulatorFactory, config,
-                    new ActionSpace(), observationEncoder, new RewardFunction()));
+                    new ActionSpace(), observationEncoder, privilegedStateEncoder, new RewardFunction()));
         }
     }
 
@@ -100,6 +111,7 @@ public class VectorizedEnvironment {
     private RunnerResetResult resetInternal(boolean generateReport, int preferredPartyId) {
         long start = System.nanoTime();
         double[][] observations = new double[size()][];
+        double[][] privilegedObservations = new double[size()][];
         double[][] actionMasks = new double[size()][];
         int[] partyIds = new int[size()];
         ParallelTiming timing = parallelForEach(index -> {
@@ -107,6 +119,7 @@ public class VectorizedEnvironment {
             episodeDamages[index] = 0.0;
             BattleEnvironment.ResetResult reset = environments.get(index).reset(generateReport && index == 0, preferredPartyId);
             observations[index] = reset.observation;
+            privilegedObservations[index] = reset.privilegedObservation;
             actionMasks[index] = reset.actionMask;
             partyIds[index] = reset.partyId;
         });
@@ -114,7 +127,7 @@ public class VectorizedEnvironment {
         resetDispatchNanos += timing.dispatchNanos;
         resetWaitNanos += timing.waitNanos;
         resetNanos += System.nanoTime() - start;
-        return new RunnerResetResult(observations, actionMasks, partyIds);
+        return new RunnerResetResult(observations, privilegedObservations, actionMasks, partyIds);
     }
 
     public RunnerStepResult step(int[] actions) {
@@ -124,6 +137,7 @@ public class VectorizedEnvironment {
     private RunnerStepResult stepInternal(int[] actions) {
         long start = System.nanoTime();
         double[][] observations = new double[size()][];
+        double[][] privilegedObservations = new double[size()][];
         double[][] actionMasks = new double[size()][];
         double[] rewards = new double[size()];
         boolean[] dones = new boolean[size()];
@@ -159,12 +173,14 @@ public class VectorizedEnvironment {
                 finishedEpisodePartyIds[index] = environments.get(index).getCurrentPartyId();
                 BattleEnvironment.ResetResult reset = environments.get(index).reset(false);
                 observations[index] = reset.observation;
+                privilegedObservations[index] = reset.privilegedObservation;
                 actionMasks[index] = reset.actionMask;
                 partyIds[index] = reset.partyId;
                 episodeRewards[index] = 0.0;
                 episodeDamages[index] = 0.0;
             } else {
                 observations[index] = result.observation;
+                privilegedObservations[index] = result.privilegedObservation;
                 actionMasks[index] = result.actionMask;
                 partyIds[index] = environments.get(index).getCurrentPartyId();
             }
@@ -177,6 +193,7 @@ public class VectorizedEnvironment {
 
         return new RunnerStepResult(
                 observations,
+                privilegedObservations,
                 actionMasks,
                 rewards,
                 dones,
@@ -259,11 +276,14 @@ public class VectorizedEnvironment {
      */
     public static class RunnerResetResult {
         public final double[][] observations;
+        public final double[][] privilegedObservations;
         public final double[][] actionMasks;
         public final int[] partyIds;
 
-        public RunnerResetResult(double[][] observations, double[][] actionMasks, int[] partyIds) {
+        public RunnerResetResult(double[][] observations, double[][] privilegedObservations,
+                double[][] actionMasks, int[] partyIds) {
             this.observations = observations;
+            this.privilegedObservations = privilegedObservations;
             this.actionMasks = actionMasks;
             this.partyIds = partyIds;
         }
