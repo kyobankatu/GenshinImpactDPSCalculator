@@ -8,7 +8,8 @@
       "Bash(/Users/kota/Documents/develop/Java/GenshinDPSCalculator/.venv/bin/python -m pip show wandb)",
       "Bash(./gradlew classes:*)",
       "Bash(./gradlew ProfileCapabilities)",
-      "Bash(./gradlew build:*)"
+      "Bash(./gradlew build:*)",
+      "WebSearch"
     ]
   }
 }

@@ -33,6 +33,8 @@ public class BattleEnvironment {
     private final double[] privilegedObservationBuffer = new double[PrivilegedStateEncoder.STATE_SIZE];
     private final double[] actionMaskBuffer = new double[ActionSpace.SIZE];
     private final double[] preActionMaskBuffer = new double[ActionSpace.SIZE];
+    private final double[] slotLastActiveTime = new double[ObservationEncoder.NUM_CHARS];
+    private final double[] slotOnFieldTime = new double[ObservationEncoder.NUM_CHARS];
 
     private static final LongAdder STEP_CALLS = new LongAdder();
     private static final LongAdder STEP_NANOS = new LongAdder();
@@ -105,6 +107,8 @@ public class BattleEnvironment {
         previousActionId = -1;
         stepCount = 0;
         generateReportOnDone = generateReport;
+        java.util.Arrays.fill(slotLastActiveTime, -config.maxEpisodeTime);
+        java.util.Arrays.fill(slotOnFieldTime, 0.0);
 
         fillObservationBuffer();
         fillPrivilegedObservationBuffer();
@@ -120,6 +124,7 @@ public class BattleEnvironment {
         fillPreActionMaskBuffer();
         boolean validAction = actionSpace.isValid(actionId, preActionMaskBuffer);
 
+        int activeSlotBefore = findActiveSlot();
         double timeBefore = simulator.getCurrentTime();
         double damageBefore = simulator.getTotalDamage();
 
@@ -144,6 +149,10 @@ public class BattleEnvironment {
                 timeDelta,
                 done);
 
+        if (activeSlotBefore >= 0) {
+            slotLastActiveTime[activeSlotBefore] = simulator.getCurrentTime();
+            slotOnFieldTime[activeSlotBefore] += timeDelta;
+        }
         previousActionId = actionId;
         stepCount++;
 
@@ -154,13 +163,6 @@ public class BattleEnvironment {
                     VisualLogger.getInstance().getRecords(),
                     simulator,
                     statsRecorder != null ? statsRecorder.getSnapshots() : null);
-            if (!"rl_report.html".equals(reportFile)) {
-                HtmlReportGenerator.generate(
-                        "rl_report.html",
-                        VisualLogger.getInstance().getRecords(),
-                        simulator,
-                        statsRecorder != null ? statsRecorder.getSnapshots() : null);
-            }
             generateReportOnDone = false;
         }
 
@@ -235,8 +237,21 @@ public class BattleEnvironment {
 
     private void fillObservationBuffer() {
         long start = System.nanoTime();
-        observationEncoder.fillObservation(simulator, config, lastSwapTime, observationBuffer);
+        observationEncoder.fillObservation(simulator, config, lastSwapTime, slotLastActiveTime, slotOnFieldTime, observationBuffer);
         ENCODE_NANOS.add(System.nanoTime() - start);
+    }
+
+    private int findActiveSlot() {
+        Character active = simulator.getActiveCharacter();
+        if (active == null || config == null) {
+            return -1;
+        }
+        for (int i = 0; i < config.partyOrder.length; i++) {
+            if (config.partyOrder[i] == active.getCharacterId()) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private void fillPrivilegedObservationBuffer() {

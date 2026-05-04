@@ -161,6 +161,16 @@ public abstract class Buff {
     }
 
     /**
+     * Returns the remaining active duration in seconds, or 0 if already expired.
+     *
+     * @param currentTime current simulation time
+     * @return non-negative remaining seconds
+     */
+    public double getRemainingDuration(double currentTime) {
+        return Math.max(0.0, expirationTime - currentTime);
+    }
+
+    /**
      * Applies this buff's concrete stat modifications.  Called only when the
      * buff is within its active time window.
      *

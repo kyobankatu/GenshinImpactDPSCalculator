@@ -1,400 +1,412 @@
-# General Rotation RL Upgrade Plan
+# General Rotation RL Upgrade Plan v2
 
 ## Goal
 
-Build a more general rotation-optimization RL stack that can learn when to stay
-on field, when to swap, and when to consume setup value, without relying on
-character-specific reward shaping.
+Build a fully generic rotation-optimization RL stack that can learn an optimal
+rotation from scratch for any party composition, without character-specific
+reward shaping, observation features, or imitation targets.
 
-The core problem today is not only exploration. The larger issue is that the
-policy must infer long-horizon combat value from a partially observed state,
-while many decisive simulator facts remain implicit:
+The previous plan delivered a strong representational backbone:
 
-- active carry windows
-- deployed off-field payloads
-- follow-up opportunities
-- swap timing value
-- future payoff of current setup
+- asymmetric actor-critic with privileged critic-only state
+- auxiliary latent-value prediction heads
+- value-curve based capability profiles
+- recurrent (GRU) policy with cross-character attention
 
-This plan upgrades the learner in stages so that it remains a generic rotation
-optimizer instead of turning into a hand-scripted character policy engine.
+Despite this, the trained policy on the FlinsParty2 fixed configuration still
+fails to discover the obvious "main carry stays on field" pattern, instead
+collapsing into an off-field driver local optimum. Diagnosis points to three
+remaining root causes that are *all* generic in nature:
+
+1. The training distribution is a single fixed party, so the policy has no
+   pressure to actually exploit the generic capability profile abstraction.
+2. Step-wise damage attribution fails to credit "stay on field for several
+   seconds, harvest payoff later" actions, especially under off-field DoT and
+   delayed-trigger payloads.
+3. Exploration is weak: fixed entropy 0.01, no curiosity, no self-imitation.
+   The policy collapses early into the easiest-to-find local optimum.
+
+This plan adds the missing generic mechanisms so that the learner becomes a
+true multi-party rotation discoverer, building on top of (not replacing) the
+existing asymmetric / auxiliary / capability-profile machinery.
 
 ---
 
 ## Current State
 
-### What already exists
+### What already exists (from previous plan, now merged)
 
-- Java owns the combat simulation and rollout execution.
-- Python owns recurrent PPO training and evaluation.
-- The policy already receives recurrent history.
-- Capability profiles already provide static role hints such as:
-  - off-field DPS ratio
-  - team buff score
-  - self-enhancement score
-  - energy generation score
+- Asymmetric actor-critic with privileged critic-only state.
+- Auxiliary latent-value prediction heads predicting privileged targets from
+  public history alone.
+- Value-curve capability profiles (entry value, sustain windows, exit/reentry
+  costs).
+- Cross-character attention over 4 party slots.
+- Public observation includes per-character static profile, energy/CD readiness,
+  is-active flag, burst-active flag, and global aura state.
 
-### What is missing for robust generic rotation learning
+### What is still missing for true generic rotation learning
 
-- The actor cannot directly infer many temporally extended combat states.
-- Critic training does not exploit simulator-internal privileged state.
-- Static capability profiles do not capture current live payoff.
-- The action space is still mostly one-step primitive control.
-- The learner has no abstract notion of:
-  - on-field commitment value
-  - off-field payload remaining
-  - swap opportunity value
+- The training environment uses a single fixed party
+  (`FlinsParty2` in `evaluate.sh`, fixed `partyOrder` in `EpisodeConfig`).
+- Reward attribution remains step-local: damage that originates from a past
+  setup action is credited to whichever step it lands in.
+- No self-imitation, no curiosity, no entropy schedule. Exploration collapses.
+- Public observation lacks generic temporal features such as buff-timer
+  distributions and recent on-field history.
+- The policy network has not been verified for slot permutation invariance.
+- No evaluation harness compares behavior across multiple party archetypes.
+
+### Symptom motivating this plan
+
+- On `FlinsParty2`, the trained policy keeps the main carry off-field most of
+  the time, while a hand-designed reference rotation
+  (`output/simulation_report.html`) keeps the main carry on-field as expected.
+- Further per-architecture tweaks alone are unlikely to escape this local
+  optimum; the gap is in training distribution, credit assignment, and
+  exploration, not in network capacity.
 
 ---
 
 ## Non-Goals
 
-- Do not add character-specific reward bonuses.
-- Do not hardcode role rules such as "character X must drive".
-- Do not replace the simulator with scripted rotation logic.
-- Do not require inference-time access to character-specific hidden flags.
-- Do not introduce long fixed macro-actions that lock the agent for too long.
+- Do not add character-specific reward bonuses or observations.
+- Do not hardcode role rules such as "slot 0 must be the on-field carry".
+- Do not imitate character-specific human-designed rotations as supervised
+  targets.
+- Do not introduce long fixed macro-actions that lock the agent for many
+  seconds.
+- Do not abandon the existing asymmetric / auxiliary / capability-profile
+  machinery.
 
 ---
 
 ## Target End State
 
-After this work, the system should train a policy that:
+After this work, the system should train a single policy that:
 
-- executes from generic observation and recurrent history alone
-- benefits during training from simulator-internal privileged state
-- reasons about generic combat abstractions rather than character names
-- can optionally choose short temporally extended actions
-- generalizes across party archetypes without reward redesign
+- learns party-specific optimal rotations from scratch for arbitrary
+  4-character compositions
+- exploits generic capability-profile features and learns to attend to the
+  right slot for each composition
+- properly credits delayed payoffs from off-field DoT, setup-then-cashout, and
+  on-field commitment windows
+- escapes the off-field local optimum via active exploration and self-imitation
+- evaluates on a battery of party archetypes without any reward redesign
 
-The intended abstraction boundary is:
+The intended abstraction boundary remains:
 
-- `actor`: generic public observation only
-- `critic`: public observation plus privileged simulator state during training
+- `actor`: generic public observation only, slot-permutation invariant
+- `critic`: public plus privileged simulator state during training
 - `auxiliary heads`: predict generic latent combat-value signals
-- `options / short skills`: reusable sequence abstractions with learned stopping
+- `credit assignment`: uses simulator-resettable Monte Carlo lookahead for
+  accurate per-action advantage
+- `imitation`: self-only, drawn from the agent's own top-K trajectories per
+  party archetype
 
 ---
 
 ## Execution Strategy
 
-Implementation and evaluation should proceed incrementally.
+Implementation proceeds in the following order, each phase being independently
+testable:
 
-The default rollout plan is:
-
-1. implement Phase 1 through Phase 3
-2. run training and compare against the current flat PPO baseline
-3. implement Phase 4 and repeat training/evaluation
-4. implement Phase 5 and repeat training/evaluation
-5. defer Phase 6 unless Phase 1 through Phase 5 still leave a clear flat-policy
-   limitation
-
-Phase 6 is intentionally not part of the first implementation wave.
-
-Reasons:
-
-- Phase 3 through Phase 5 improve learning signal and state representation
-  without changing the control abstraction too aggressively.
-- Phase 6 changes the action hierarchy and is the most invasive phase.
-- If Phase 1 through Phase 5 already fix the main stay-vs-swap failures, then
-  Phase 6 can remain optional.
+1. Phase 1 (multi-party DR) is the foundation. Without it, all later phases
+   overfit to a single party.
+2. Phase 2 (MC credit assignment) is the core algorithmic improvement.
+3. Phase 3 (self-imitation) is a low-cost local-optima breaker.
+4. Phase 4 (generic observation enrichment) and Phase 5 (exploration) are
+   independent and can run in parallel.
+5. Phase 6 (architecture audit) is verification, not new functionality.
+6. Phase 7 (cross-archetype evaluation) closes the loop and answers
+   "did we generalize".
 
 The first concrete milestone is therefore:
 
-- complete Phase 1 through Phase 5
-- verify the learner runs end to end
-- compare behavior before deciding whether options are still needed
+- complete Phase 1 through Phase 3
+- verify behavior on `FlinsParty2` (does the main carry stay on field?) and on
+  at least 2 other parties
+- continue with Phase 4 through Phase 7 only after the first milestone shows
+  clear progress
+
+Phase 2 is the most invasive phase and may be deferred until after Phases 1, 3,
+4, 5 if implementation cost dominates schedule.
 
 ---
 
 ## Implementation Plan
 
-### Phase 1: Define generic privileged combat state
+### Phase 1: Multi-party domain randomization
 
 **Files**
-- `src/java/mechanics/rl/`
-- `src/python/rl/`
-
-**Changes**
-
-- Define a privileged state interface for training-time use only.
-- Keep all features generic and slot-based rather than character-based.
-- Start with compact abstract features such as:
-  - `on_field_window_remaining[slot]`
-  - `off_field_payload_remaining[slot]`
-  - `followup_opportunity_score[slot]`
-  - `major_action_ready_score[slot]`
-  - `swap_in_value_score[slot]`
-  - `reaction_potential_score`
-  - `team_setup_value_score`
-
-**Examples**
-
-- A self-buff form with 8 s remaining contributes to
-  `on_field_window_remaining` for that slot.
-- A summoned turret or field with 12 s remaining contributes to
-  `off_field_payload_remaining`.
-- A temporary enhanced burst state contributes to
-  `followup_opportunity_score`.
-
-**Acceptance criteria**
-
-- The feature list contains no character names.
-- Every feature can be computed for any party member slot.
-- The representation is meaningful for both time-limited and non-time-limited
-  carries.
-
----
-
-### Phase 2: Add a Java-side privileged state encoder
-
-**Files**
-- `src/java/mechanics/rl/PrivilegedStateEncoder.java` (new)
+- `src/java/mechanics/rl/EpisodeConfig.java`
 - `src/java/mechanics/rl/BattleEnvironment.java`
-- related simulator/model classes as needed
-
-**Changes**
-
-- Implement a separate encoder for critic-only privileged state.
-- Do not merge this into the actor observation path.
-- Expose the privileged vector through reset/step results for training.
-- Keep the encoder generic:
-  - no `if character == Flins`
-  - use interfaces, timers, deployed effects, and action-state metadata
-
-**Examples**
-
-- Characters with active on-field-enhancing states implement a shared capability
-  that reports a remaining-value proxy.
-- Persistent off-field effects register a generic remaining-duration or
-  remaining-uses value.
-
-**Acceptance criteria**
-
-- The rollout environment can emit both:
-  - public actor observation
-  - privileged critic observation
-- Existing evaluation can still run without privileged input if needed.
-
----
-
-### Phase 3: Convert PPO to asymmetric actor-critic
-
-**Files**
-- `src/python/rl/recurrent_ppo.py`
-- `src/python/rl/train_recurrent_ppo.py`
-- `src/python/rl/rollout_service_client.py`
-
-**Changes**
-
-- Keep the actor input unchanged: public observation only.
-- Extend the critic to consume public observation plus privileged state.
-- Store privileged observations in rollout buffers.
-- Ensure checkpoint loading and evaluation paths remain backward-compatible
-  where practical.
-
-**Notes**
-
-- This is the lowest-risk way to use simulator truth without leaking it into the
-  deployed policy.
-- This is the first major change likely to improve stay-vs-swap judgment.
-
-**Acceptance criteria**
-
-- Training runs end to end with asymmetric inputs.
-- The actor still functions from public observation only.
-- The critic loss remains numerically stable.
-
----
-
-### Phase 4: Add auxiliary latent-value prediction tasks
-
-**Files**
-- `src/python/rl/recurrent_ppo.py`
-- `src/python/rl/train_recurrent_ppo.py`
-
-**Changes**
-
-- Add auxiliary heads on top of the recurrent trunk.
-- Train them to predict selected privileged targets from history alone.
-- Initial targets should remain generic:
-  - `pred_on_field_commitment_score`
-  - `pred_off_field_payload_remaining`
-  - `pred_swap_out_opportunity_score`
-  - `pred_team_setup_value_score`
-
-**Examples**
-
-- Given public history only, the model learns that the active slot likely still
-  has 3-4 high-value actions left.
-- Given prior setup actions, the model predicts that a different slot now has
-  high swap-in value.
-
-**Acceptance criteria**
-
-- Auxiliary losses decrease during training.
-- PPO reward definition remains unchanged.
-- Actor behavior becomes less dependent on lucky recurrent memorization.
-
----
-
-### Phase 5: Refresh capability profiling around value curves
-
-**Files**
-- `src/java/mechanics/rl/CapabilityProfiler.java`
-- `config/capability_profiles/`
-- `src/java/mechanics/rl/ObservationEncoder.java`
-
-**Changes**
-
-- Keep existing role-style profile data if still useful.
-- Add new generic profile dimensions that describe value over time rather than
-  only coarse role identity.
-- Candidate additions:
-  - `entry_value_score`
-  - `sustain_value_3_actions`
-  - `sustain_value_6_actions`
-  - `exit_cost_score`
-  - `reentry_cost_score`
-
-**Examples**
-
-- A time-limited carry may have high entry value and high short-horizon sustain.
-- A frontloaded support may have high entry value and low sustain.
-- A setup-heavy carry may have high reentry cost, encouraging longer commitment.
-
-**Acceptance criteria**
-
-- New profile fields remain character-agnostic in meaning.
-- Profiles can describe both:
-  - time-window carries
-  - resource/sequence-limited carries
-
----
-
-### Phase 6: Introduce short generic options above primitive actions
-
-**Files**
-- `src/java/mechanics/rl/ActionSpace.java`
-- `src/java/mechanics/rl/RLAction.java`
-- `src/python/rl/recurrent_ppo.py`
-- `src/python/rl/train_recurrent_ppo.py`
-
-**Changes**
-
-- Keep primitive actions available.
-- Add a small set of generic short options with learned termination.
-- Start with short horizon options only, roughly 2-6 primitive actions.
-- Candidate generic options:
-  - `SETUP_OPTION`
-  - `DRIVE_OPTION`
-  - `CASHOUT_OPTION`
-  - `REFRESH_OPTION`
-
-**Examples**
-
-- `SETUP_OPTION` tends to prioritize available skill/burst setup actions.
-- `DRIVE_OPTION` tends to continue high-value on-field action chains.
-- `REFRESH_OPTION` tends to rotate into slots with high swap-in value.
-
-**Notes**
-
-- Do not introduce long fixed macro-actions.
-- Do not remove primitive control during the first rollout.
-
-**Acceptance criteria**
-
-- The policy can still fall back to primitive actions.
-- Learned options terminate adaptively.
-- Option usage improves credit assignment without locking the agent into bad
-  long commitments.
-
-**Execution note**
-
-- Do not start this phase until Phase 1 through Phase 5 have been implemented
-  and evaluated.
-- Treat this as a follow-up phase, not part of the initial rollout.
-
----
-
-### Phase 7: Seed option discovery from scripted rotations
-
-**Files**
-- `src/java/sample/`
-- `src/python/rl/`
-- optional tooling under `scripts/` or `src/python/rl/`
-
-**Changes**
-
-- Parse existing scripted sample rotations into short action subsequences.
-- Use frequent subsequences as initialization candidates for options or sequence
-  tokens.
-- Use demonstrations only as prior structure, not as mandatory imitation target.
-
-**Examples**
-
-- `swap -> skill -> swap`
-- `skill -> burst`
-- `normal x3 -> burst`
-
-**Notes**
-
-- This phase should improve sample efficiency without hardwiring any one party's
-  rotation.
-- Token extraction should remain generic across parties.
-
-**Acceptance criteria**
-
-- Option seeds come from reusable local motifs, not full-party scripts.
-- The learner can deviate from seeded sequences when reward supports it.
-
----
-
-### Phase 8: Evaluate generalization across party archetypes
-
-**Files**
+- `src/java/mechanics/rl/PartySampler.java` (new)
 - `src/java/mechanics/rl/RLPartyRegistry.java`
-- `src/python/rl/train_recurrent_ppo.py`
-- evaluation/report tooling
+- `src/java/sample/ServeRLJava.java`
 
 **Changes**
 
-- Test on multiple archetypes, not just one carry pattern.
-- Compare:
-  - flat PPO baseline
-  - asymmetric critic only
-  - asymmetric critic plus auxiliary heads
-  - asymmetric critic plus auxiliary heads plus options
+- Introduce a `PartySampler` interface returning a 4-character composition per
+  `reset()`.
+- Default sampler: uniform random over a curated pool of registered parties
+  spanning multiple archetypes.
+- `EpisodeConfig` receives the sampler instead of a fixed `partyOrder`.
+- `forced_party_id` continues to work for evaluation by selecting a fixed
+  sampler index.
+- Optional curriculum: start with a smaller party pool, expand as training
+  progresses.
 
-**Party archetypes to cover**
+**Examples**
 
-- time-limited self-buff carries
-- frontloaded setup carries
-- sustain carries with low explicit timers
-- off-field driver teams
+- A pool of 6-8 registered parties spanning archetypes such as time-limited
+  self-buff carry, frontloaded support, off-field driver, sustain carry.
+- Each `reset()` picks one party uniformly, populates `EpisodeConfig.partyOrder`,
+  and reinitializes the simulator with capability profiles loaded for the
+  sampled composition.
 
 **Acceptance criteria**
 
-- Improvements are not limited to one named character or one party.
-- The final design does not require per-party reward changes.
+- A single training run sees at least 4 distinct party compositions.
+- Evaluation can still target a specific party via `forced_party_id`.
+- Capability profile lookup is correct for every sampled composition.
+
+---
+
+### Phase 2: Monte-Carlo credit assignment via simulator rollback
+
+**Files**
+- `src/java/simulation/CombatSimulator.java`
+- `src/java/mechanics/rl/SimulatorSnapshot.java` (new)
+- `src/java/mechanics/rl/BattleEnvironment.java`
+- `src/java/mechanics/rl/RolloutService.java`
+- `src/python/rl/recurrent_ppo.py`
+- `src/python/rl/train_recurrent_ppo.py`
+
+**Changes**
+
+- Implement deep snapshot/restore of the simulator state
+  (`SimulatorSnapshot.save(simulator) / restore(simulator)`).
+- Add a Java-side rollout endpoint `branchRollout(state, action, K, horizon)`
+  that:
+  1. restores state
+  2. takes a candidate action
+  3. continues with the current policy for `horizon` steps
+  4. returns the discounted return
+- Python-side advantage estimation:
+  - At selected training steps, sample K candidate actions from the current
+    policy.
+  - For each, request a branched MC return.
+  - Use empirical baseline `mean(MC returns)` and per-action MC return as the
+    advantage signal (VinePPO-style, ICML 2025).
+- Keep GAE as the default; MC advantage is opt-in via config flag.
+
+**Notes**
+
+- This is the most invasive change, but the simulator is deterministic and
+  resettable, which makes VinePPO-style estimation natural.
+- Branch budget K should be small (4-8) per sampled step, applied only to a
+  fraction of steps to keep wall-clock cost manageable.
+
+**Acceptance criteria**
+
+- `branchRollout` produces deterministic results when called twice from the
+  same snapshot.
+- PPO advantages computed from MC returns reduce variance vs GAE on a held-out
+  check.
+- Off-field-DoT-heavy scenarios show better attribution to the action that
+  placed the DoT.
+
+---
+
+### Phase 3: Self-imitation learning with per-archetype top-K buffer
+
+**Files**
+- `src/python/rl/recurrent_ppo.py`
+- `src/python/rl/train_recurrent_ppo.py`
+- `src/python/rl/sil_buffer.py` (new)
+
+**Changes**
+
+- Maintain a per-party-id top-K trajectory buffer ranked by terminal return.
+- During each PPO update, mix in mini-batches sampled from the SIL buffer at a
+  small ratio (for example 10-20 percent).
+- Apply a SIL loss on these samples: weighted policy gradient on actions from
+  high-advantage states, optionally combined with value regression
+  (Oh et al., ICML 2018; ICLR 2025 RPI for stability tweaks).
+- Buffer K = 8-16 per party, refreshed when a new episode beats the worst
+  stored return.
+
+**Notes**
+
+- No human demonstrations involved; the imitation source is always the agent's
+  own past best.
+- Buffer is partitioned by party id to avoid mixing optimal rotations across
+  compositions.
+
+**Acceptance criteria**
+
+- SIL buffers fill within the first epoch.
+- After integration, the policy improvement curve shows fewer plateaus.
+- Best return per party is non-decreasing across training.
+
+---
+
+### Phase 4: Generic public observation enrichment
+
+**Files**
+- `src/java/mechanics/rl/ObservationEncoder.java`
+- `src/java/model/character/Character.java` accessors
+- `src/java/model/StatType.java` (only if a new generic stat key is needed)
+
+**Changes**
+
+Add character-agnostic temporal features to the public observation, exposed
+via uniform interfaces on `Character`:
+
+- `self_buff_max_remaining[slot]`: longest active self-buff remaining time,
+  normalized.
+- `self_buff_count[slot]`: number of active self-buffs, normalized.
+- `team_buff_max_remaining`: longest active team-wide buff.
+- `time_since_last_active[slot]`: seconds since the slot was last on-field,
+  normalized.
+- `recent_on_field_fraction[slot]`: fraction of the last N seconds spent
+  on-field.
+- `recent_damage_share[slot]`: fraction of the last N seconds' damage
+  attributed to the slot.
+
+**Notes**
+
+- All features are computed from existing simulator state via uniform
+  interfaces; no per-character branches.
+- Publishing these in the public actor observation (not privileged) is
+  intentional: they help all parties symmetrically and preserve the
+  inference-time abstraction boundary.
+
+**Acceptance criteria**
+
+- New observation dimensions are populated for every character regardless of
+  party.
+- No `if character instanceof X` style branching is introduced.
+- Observation size remains stable across compositions.
+
+---
+
+### Phase 5: Exploration enhancement
+
+**Files**
+- `src/python/rl/recurrent_ppo.py`
+- `src/python/rl/train_recurrent_ppo.py`
+
+**Changes**
+
+- Entropy schedule: linear decay from 0.05 to 0.005 over training (currently
+  fixed 0.01).
+- Optional Random Network Distillation (RND) intrinsic reward:
+  - Frozen target network maps observation to embedding.
+  - Trained predictor network learns to match.
+  - Prediction error as small intrinsic bonus, discounted separately from
+    extrinsic reward.
+- Optional Active PPO style adaptive clipping (clip range scaled by per-state
+  advantage variance).
+- Configuration flags: `entropy_initial`, `entropy_final`, `use_rnd`,
+  `rnd_intrinsic_weight`, `use_active_clip`.
+
+**Notes**
+
+- Keep all flags off by default initially; turn them on one at a time during
+  ablation.
+- RND is character-agnostic — it rewards observation novelty, not character
+  identity.
+
+**Acceptance criteria**
+
+- Entropy schedule produces measurably more action diversity early in
+  training.
+- RND with `rnd_intrinsic_weight = 0.01` does not destabilize PPO updates.
+- Local-optimum collapse on `FlinsParty2` is reduced (verifiable via on-field
+  fraction of the carry slot).
+
+---
+
+### Phase 6: Permutation-invariance audit
+
+**Files**
+- `src/python/rl/recurrent_ppo.py`
+- `src/python/rl/tests/test_permutation_invariance.py` (new)
+
+**Changes**
+
+- Verify that `RecurrentPolicy.act()` is invariant to permutations of the 4
+  character slots.
+  - Unit test: shuffle slot order, remap actions accordingly, assert policy
+    output equality within float tolerance.
+- If non-invariance is found, replace any per-slot positional bias with Set
+  Transformer / Deep Sets style aggregation.
+- Ensure attention output is symmetric under slot relabeling.
+
+**Notes**
+
+- Permutation invariance is essential for true multi-party generalization. The
+  existing attention layer is a good base, but slot-wise weights or positional
+  encodings can quietly break invariance.
+
+**Acceptance criteria**
+
+- Permutation test passes within float tolerance.
+- Attention scores reorder symmetrically when slot order is shuffled.
+
+---
+
+### Phase 7: Cross-archetype evaluation harness
+
+**Files**
+- `src/python/rl/evaluate_policy.py`
+- `src/java/mechanics/rl/RLPartyRegistry.java`
+- `evaluate.sh`
+
+**Changes**
+
+- Define an evaluation suite of 6-8 parties spanning archetypes:
+  - time-limited self-buff carry
+  - frontloaded burst support
+  - off-field driver-heavy team
+  - sustain carry
+  - hybrid setup-and-cashout team
+- Run deterministic evaluation on each party with the same checkpoint.
+- Report per-party damage, on-field fractions, action distributions, and HTML
+  reports (one report per party as already implemented).
+- Summarize whether the policy generalizes (similar relative damage across
+  all archetypes).
+
+**Acceptance criteria**
+
+- Evaluation produces one HTML report per party plus a comparison summary.
+- The same checkpoint is evaluated across all parties without retraining.
+- A reproducible script runs the full suite.
 
 ---
 
 ## Proposed Config Additions
 
-- `use_privileged_critic`
-- `privileged_obs_dim`
-- `auxiliary_prediction_weight`
-- `use_value_curve_profiles`
-- `use_options`
-- `option_max_length`
-- `option_termination_enabled`
-- `option_seed_from_scripts`
+- `party_sampler` (`fixed`, `uniform`, `curriculum`)
+- `party_pool`
+- `use_mc_credit_assignment`
+- `mc_branch_count`
+- `mc_branch_horizon`
+- `use_self_imitation`
+- `sil_buffer_size_per_party`
+- `sil_loss_weight`
+- `entropy_initial` / `entropy_final`
+- `use_rnd`
+- `rnd_intrinsic_weight`
+- `use_active_clip`
 
 Notes:
 
-- Keep defaults conservative.
-- Feature flags should allow ablations per phase.
+- Defaults should leave Phases 2, 3, 5 disabled until validated.
+- Phase 1 should be enabled by default once the registered party pool
+  stabilizes.
 
 ---
 
@@ -403,63 +415,57 @@ Notes:
 ### Minimum verification
 
 1. Run `./gradlew build`
-2. Run `./gradlew ProfileCapabilities`
-3. Run a short single-party learner smoke test
-4. Run `src/python/rl/evaluate_policy.py` on the produced checkpoint
-5. Compare HTML report behavior before and after each phase
+2. Run a multi-party smoke training (≥ 2 parties, ≥ 10 updates).
+3. Run `src/python/rl/evaluate_policy.py` across the evaluation suite.
+4. Check that resulting HTML reports show non-trivial main-carry on-field time
+   on `FlinsParty2`.
+5. Compare against the previous fixed-party baseline.
 
 ### Suggested experimental ladder
 
-1. Baseline flat PPO
-2. Add privileged critic only
-3. Add auxiliary prediction heads
-4. Add refreshed capability profiles
-5. Add short options
-6. Add script-seeded option initialization
-
-### Recommended first rollout boundary
-
-The first implementation wave should stop after:
-
-1. Phase 1 through Phase 3, or
-2. preferably Phase 1 through Phase 5
-
-Then evaluate whether the remaining errors are truly due to lack of temporal
-abstraction before starting Phase 6.
+1. Phase 1 only (multi-party DR baseline).
+2. + Phase 3 (self-imitation).
+3. + Phase 4 (enriched observations).
+4. + Phase 5 (entropy schedule and RND).
+5. + Phase 2 (MC credit assignment) — most expensive, last.
+6. + Phase 6 / Phase 7 (audit and evaluation harness).
 
 ### What to watch
 
-- reward and damage stability
-- invalid-action rate
-- swap frequency
-- average on-field commitment length by slot
-- entropy collapse after adding options
-- whether improvements hold across multiple parties
+- per-archetype damage and on-field share
+- main-carry on-field fraction (slot with highest `self_enhancement` profile
+  score)
+- training-time SIL buffer turnover rate
+- MC vs GAE advantage variance ratio
+- entropy across training
+- whether improvements transfer to held-out parties
 
 ---
 
 ## Risks
 
-- Privileged features may accidentally leak character-specific logic if encoded
-  carelessly.
-- Too many abstract features may make critic training noisy rather than helpful.
-- Poorly designed options may collapse into trivial action repetition.
-- Script-seeded skills may overfit to existing samples if the seed vocabulary is
-  too rigid.
-- Backward compatibility for checkpoints and rollout protocol may need a
+- Multi-party DR may slow per-party convergence; needs more total samples.
+- MC credit assignment requires deep simulator snapshots; subtle bugs could
+  leak state across episodes.
+- Self-imitation on early-suboptimal trajectories can lock in bad behavior.
+  Mitigate by gating SIL until base PPO surpasses a return threshold.
+- RND intrinsic reward can hijack the agent into pure novelty seeking. Keep
+  weight low.
+- Permutation invariance changes may break checkpoint compatibility. Provide a
   migration path.
+- Evaluation across many parties multiplies wall-clock cost.
 
 ---
 
 ## Follow-Up After This Plan
 
-Only after asymmetric training and short option support are working should we
-evaluate:
+Only after multi-party generalization is verified should we revisit:
 
-1. stronger recurrent cores such as LSTM or GTrXL
-2. learned termination regularization
-3. more advanced skill discovery or tokenization pipelines
-4. broader multi-party curriculum design
+1. Population-Based Training or league-style training for further robustness.
+2. Transformer-based recurrent core (GTrXL, Decision Transformer) replacing GRU.
+3. Hierarchical / option-based control (deferred from prior plan).
+4. Automatic party-pool generation (random valid 4-character draws over the
+   full character registry).
 
-Without this groundwork, architecture upgrades alone will be difficult to
-interpret because the learner will still be missing the right abstraction layer.
+These are powerful but expensive. They will be much easier to evaluate cleanly
+once the foundations in this plan are in place.

@@ -190,7 +190,6 @@ def print_report_paths(summary):
     if "per_party" in summary:
         for party_name in summary["per_party"]:
             print(f"Generated output/{build_report_file_name(party_name)}")
-        print("Generated output/rl_report.html")
         return
     print(f"Generated output/{build_report_file_name(summary.get('party_name'))}")
 

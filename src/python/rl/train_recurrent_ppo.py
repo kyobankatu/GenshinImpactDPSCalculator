@@ -15,6 +15,7 @@ except ImportError:
 
 from recurrent_ppo import RecurrentPolicy, compute_advantages
 from rollout_service_client import build_rollout_client
+from sil_buffer import SILBuffer
 
 
 OUTPUT_DIR = "output/recurrent_ppo_py"
@@ -42,6 +43,9 @@ PRESETS = {
         "checkpoint_interval": 2,
         "evaluation_interval": 2,
         "auxiliary_prediction_weight": 0.05,
+        "sil_loss_weight": 0.1,
+        "sil_buffer_size_per_party": 16,
+        "sil_min_episodes_before_ready": 8,
     },
 }
 
@@ -132,6 +136,10 @@ def run_training(args, run=None):
         start_update = int(checkpoint_payload.get("update", 0))
         print(f"Resuming training from {args.resume_from} at update {start_update}")
     hidden_states = torch.zeros(config["envs"], config["hidden_size"], dtype=torch.float32, device=device)
+    sil_buffer = SILBuffer(
+        max_per_party=config.get("sil_buffer_size_per_party", 16),
+        min_episodes_before_ready=config.get("sil_min_episodes_before_ready", 50),
+    )
     owns_run = run is None
     run = init_wandb(args, config, client, device, existing_run=run)
 
@@ -198,6 +206,9 @@ def run_training(args, run=None):
                             {
                                 "steps": active_segments[env_index],
                                 "bootstrap_value": 0.0,
+                                "episode_return": batch["episode_rewards"][env_index],
+                                "party_id": batch["episode_party_ids"][env_index],
+                                "is_complete_episode": True,
                             }
                         )
                         active_segments[env_index] = []
@@ -226,6 +237,10 @@ def run_training(args, run=None):
                     )
 
             segments = compute_advantages(completed_segments, config["gamma"], config["gae_lambda"])
+            for seg in segments:
+                if seg.get("is_complete_episode"):
+                    sil_chunks = build_sequence_chunks([seg], config["sequence_length"])
+                    sil_buffer.try_insert(seg["party_id"], seg["episode_return"], sil_chunks)
             sequence_chunks = build_sequence_chunks(segments, config["sequence_length"])
             optimization_start = time.time()
             optimization_metrics = train_epoch(
@@ -235,6 +250,7 @@ def run_training(args, run=None):
                 config,
                 device,
                 entropy_coefficient,
+                sil_buffer=sil_buffer,
             )
             optimization_duration = max(1e-6, time.time() - optimization_start)
 
@@ -275,6 +291,8 @@ def run_training(args, run=None):
                 "max_sequence_length": max_sequence_length,
                 "padding_fraction": optimization_metrics["padding_fraction"],
                 "auxiliary_loss": optimization_metrics["auxiliary_loss"],
+                "sil_loss": optimization_metrics["sil_loss"],
+                "sil_buffer_size": sil_buffer.size(),
                 "policy_loss": optimization_metrics["policy_loss"],
                 "value_loss": optimization_metrics["value_loss"],
                 "entropy": optimization_metrics["entropy"],
@@ -300,7 +318,7 @@ def run_training(args, run=None):
                 "optimization_duration_sec": optimization_duration,
             }
             print(
-                f"Update {update}: reward={mean_reward:.3f} damage={mean_damage:,.0f} steps={mean_episode_steps:.1f} invalid={invalid_rate:.3f} kl={optimization_metrics['approx_kl']:.5f} clip={optimization_metrics['clip_fraction']:.3f} entropyCoef={entropy_coefficient:.5f} policy={optimization_metrics['policy_loss']:.5f} value={optimization_metrics['value_loss']:.5f} aux={optimization_metrics['auxiliary_loss']:.5f} seqs={len(sequence_chunks)} meanSeq={mean_sequence_length:.1f} envSteps/s={env_steps_per_second:.1f}"
+                f"Update {update}: reward={mean_reward:.3f} damage={mean_damage:,.0f} steps={mean_episode_steps:.1f} invalid={invalid_rate:.3f} kl={optimization_metrics['approx_kl']:.5f} clip={optimization_metrics['clip_fraction']:.3f} entropyCoef={entropy_coefficient:.5f} policy={optimization_metrics['policy_loss']:.5f} value={optimization_metrics['value_loss']:.5f} aux={optimization_metrics['auxiliary_loss']:.5f} sil={optimization_metrics['sil_loss']:.5f} silBuf={sil_buffer.size()} seqs={len(sequence_chunks)} meanSeq={mean_sequence_length:.1f} envSteps/s={env_steps_per_second:.1f}"
             )
             log_wandb(
                 run,
@@ -312,6 +330,8 @@ def run_training(args, run=None):
                     "train/max_sequence_length": max_sequence_length,
                     "train/padding_fraction": optimization_metrics["padding_fraction"],
                     "train/auxiliary_loss": optimization_metrics["auxiliary_loss"],
+                    "train/sil_loss": optimization_metrics["sil_loss"],
+                    "train/sil_buffer_size": sil_buffer.size(),
                     "train/policy_loss": optimization_metrics["policy_loss"],
                     "train/value_loss": optimization_metrics["value_loss"],
                     "train/entropy": optimization_metrics["entropy"],
@@ -423,6 +443,9 @@ def parse_args():
     parser.add_argument("--checkpoint-interval", type=int, help="checkpoint save interval in updates")
     parser.add_argument("--evaluation-interval", type=int, help="evaluation interval in updates")
     parser.add_argument("--auxiliary-prediction-weight", type=float, help="weight for auxiliary privileged-state prediction loss")
+    parser.add_argument("--sil-loss-weight", type=float, default=None, help="weight for self-imitation learning loss")
+    parser.add_argument("--sil-buffer-size-per-party", type=int, default=None, help="top-K episodes to keep per party in SIL buffer")
+    parser.add_argument("--sil-min-episodes-before-ready", type=int, default=None, help="minimum episode inserts before SIL activates")
     parser.add_argument("--rollout-workers", type=int, default=None, help="Java rollout worker override used for this run")
     parser.add_argument("--resume-from", default=None, help="path to a saved .pt checkpoint to resume from")
     parser.add_argument("--wandb", action="store_true", help="enable Weights & Biases logging")
@@ -455,6 +478,9 @@ def resolve_config(args):
         "checkpoint_interval": args.checkpoint_interval,
         "evaluation_interval": args.evaluation_interval,
         "auxiliary_prediction_weight": args.auxiliary_prediction_weight,
+        "sil_loss_weight": args.sil_loss_weight,
+        "sil_buffer_size_per_party": args.sil_buffer_size_per_party,
+        "sil_min_episodes_before_ready": args.sil_min_episodes_before_ready,
     }
     for key, value in overrides.items():
         if value is not None:
@@ -618,7 +644,30 @@ def build_sequence_minibatch(chunks, policy, device):
     }
 
 
-def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coefficient):
+def compute_sil_loss(policy, sil_chunks, device):
+    """SIL policy gradient on steps where return exceeds current value estimate."""
+    if not sil_chunks:
+        return torch.tensor(0.0, device=device)
+    minibatch = build_sequence_minibatch(sil_chunks, policy, device)
+    logits, value, _, _, _ = policy.forward_sequence(
+        minibatch["observations"],
+        minibatch["initial_hidden"],
+        minibatch["action_masks"],
+        privileged_observations=minibatch["privileged_observations"],
+        sequence_mask=minibatch["loss_mask"],
+    )
+    dist = torch.distributions.Categorical(logits=logits)
+    log_probs = dist.log_prob(minibatch["actions"])
+    valid_mask = minibatch["loss_mask"]
+    with torch.no_grad():
+        clipped_advantages = (minibatch["return_targets"] - value).clamp(min=0.0)
+    pos_count = (clipped_advantages > 0).float().sum().clamp_min(1.0)
+    pg_loss = -(log_probs * clipped_advantages * valid_mask).sum() / pos_count
+    v_loss = 0.5 * (clipped_advantages.pow(2) * valid_mask).sum() / pos_count
+    return pg_loss + 0.5 * v_loss
+
+
+def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coefficient, sil_buffer=None):
     if not sequence_chunks:
         return {
             "policy_loss": 0.0,
@@ -630,6 +679,7 @@ def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coef
             "log_prob_mean": 0.0,
             "padding_fraction": 0.0,
             "auxiliary_loss": 0.0,
+            "sil_loss": 0.0,
         }
 
     total_policy_loss = 0.0
@@ -642,7 +692,10 @@ def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coef
     total_valid_steps = 0.0
     total_padded_steps = 0.0
     total_auxiliary_loss = 0.0
+    total_sil_loss = 0.0
     updates = 0
+    sil_weight = config.get("sil_loss_weight", 0.1)
+    use_sil = sil_buffer is not None and sil_buffer.is_ready()
 
     for _ in range(config["ppo_epochs"]):
         chunk_indices = list(range(len(sequence_chunks)))
@@ -682,11 +735,16 @@ def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coef
                 (auxiliary_prediction - minibatch["privileged_observations"]).pow(2)
                 * valid_mask.unsqueeze(-1)
             ).sum() / (valid_count * policy.privileged_observation_size)
+            sil_loss = torch.tensor(0.0, device=device)
+            if use_sil:
+                sil_chunks = sil_buffer.sample_sequence_chunks(config["sequence_minibatch_size"])
+                sil_loss = compute_sil_loss(policy, sil_chunks, device)
             total_loss = (
                 policy_loss
                 + config["value_coefficient"] * value_loss
                 - entropy_coefficient * entropy
                 + config["auxiliary_prediction_weight"] * auxiliary_loss
+                + sil_weight * sil_loss
             )
             clip_fraction = (
                 ((torch.abs(ratio - 1.0) > config["clip_range"]).float() * valid_mask).sum() / valid_count
@@ -709,6 +767,7 @@ def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coef
             total_valid_steps += valid_count.item()
             total_padded_steps += valid_mask.numel() - valid_count.item()
             total_auxiliary_loss += auxiliary_loss.item()
+            total_sil_loss += sil_loss.item()
             updates += 1
 
     total_positions = total_valid_steps + total_padded_steps
@@ -722,6 +781,7 @@ def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coef
         "log_prob_mean": total_log_prob_mean / updates,
         "padding_fraction": 0.0 if total_positions == 0 else total_padded_steps / total_positions,
         "auxiliary_loss": total_auxiliary_loss / updates,
+        "sil_loss": total_sil_loss / updates,
     }
 
 

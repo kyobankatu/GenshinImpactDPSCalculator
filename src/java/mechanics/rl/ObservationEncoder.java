@@ -24,12 +24,13 @@ import simulation.CombatSimulator;
  * <p>Layout: {@code NUM_CHARS} blocks of {@link #FEATURES_PER_CHARACTER} features
  * followed by {@link #GLOBAL_FEATURES} global features.
  *
- * <p>Per-character block (23 dims):
+ * <p>Per-character block (27 dims):
  * <ul>
- *   <li>[0–5] dynamic: energy ratio, isActive, skill readiness, burst readiness,
- *       isBurstActive, active-buff ratio</li>
- *   <li>[6–13] static: element one-hot (8 dims, {@link Element#values()} order)</li>
- *   <li>[14–22] static: capability and value-curve profile scores</li>
+ *   <li>[0–9] dynamic: energy ratio, isActive, skill readiness, burst readiness,
+ *       isBurstActive, active-buff ratio, max-buff-remaining, time-since-last-active,
+ *       on-field fraction, cumulative damage share</li>
+ *   <li>[10–17] static: element one-hot (8 dims, {@link Element#values()} order)</li>
+ *   <li>[18–26] static: capability and value-curve profile scores</li>
  * </ul>
  *
  * <p>Global block (7 dims): swap readiness, time remaining, PYRO/HYDRO/ELECTRO/ANEMO
@@ -38,7 +39,7 @@ import simulation.CombatSimulator;
 public class ObservationEncoder {
     public static final int NUM_CHARS = 4;
     /** Number of dynamic features per character slot. */
-    public static final int CHAR_DYNAMIC_FEATURES = 6;
+    public static final int CHAR_DYNAMIC_FEATURES = 10;
     /** Number of static features per character slot (8 element one-hot + capability scores). */
     public static final int CHAR_STATIC_FEATURES = 8 + CapabilityProfile.SIZE;
     /** Total features per character slot. */
@@ -92,17 +93,34 @@ public class ObservationEncoder {
      * @param observation  target array; must have length {@link #OBSERVATION_SIZE}
      */
     public void fillObservation(CombatSimulator sim, EpisodeConfig config, double lastSwapTime, double[] observation) {
+        fillObservation(sim, config, lastSwapTime, null, null, observation);
+    }
+
+    /**
+     * Fills an existing observation array in-place with per-slot history features.
+     *
+     * @param sim                current combat simulator
+     * @param config             episode configuration
+     * @param lastSwapTime       simulation time of the most recent swap action
+     * @param slotLastActiveTime last sim time each slot was on-field; null falls back to zeros
+     * @param slotOnFieldTime    cumulative on-field seconds per slot; null falls back to zeros
+     * @param observation        target array; must have length {@link #OBSERVATION_SIZE}
+     */
+    public void fillObservation(CombatSimulator sim, EpisodeConfig config, double lastSwapTime,
+            double[] slotLastActiveTime, double[] slotOnFieldTime, double[] observation) {
         double now = sim.getCurrentTime();
+        double totalDamage = sim.getTotalDamage();
         int index = 0;
 
-        for (CharacterId id : config.partyOrder) {
+        for (int slot = 0; slot < config.partyOrder.length; slot++) {
+            CharacterId id = config.partyOrder[slot];
             Character character = sim.getCharacter(id);
             if (character == null) {
                 index += FEATURES_PER_CHARACTER;
                 continue;
             }
 
-            // --- Dynamic features (6) ---
+            // --- Dynamic features (10) ---
             double energyCost = Math.max(1.0, character.getEnergyCost());
             observation[index++] = clamp01(character.getCurrentEnergy() / energyCost);
             observation[index++] = sim.getActiveCharacter() != null
@@ -113,6 +131,15 @@ public class ObservationEncoder {
             observation[index++] = 1.0 - clamp01(character.getBurstCDRemaining(now) / burstCD);
             observation[index++] = isBurstActive(character, now) ? 1.0 : 0.0;
             observation[index++] = clamp01(countActiveBuffs(character, now) / 6.0);
+            // history-derived dynamic features
+            observation[index++] = maxBuffRemaining(character, now);
+            double lastActive = slotLastActiveTime != null ? slotLastActiveTime[slot] : -config.maxEpisodeTime;
+            observation[index++] = clamp01((now - lastActive) / Math.max(1.0, config.maxEpisodeTime));
+            double onField = slotOnFieldTime != null ? slotOnFieldTime[slot] : 0.0;
+            observation[index++] = clamp01(onField / Math.max(1.0, now));
+            observation[index++] = totalDamage > 0.0
+                    ? clamp01(sim.getDamageByCharacter(id) / totalDamage)
+                    : 0.25;
 
             // --- Static features: element one-hot (8) ---
             Element charElement = character.getElement();
@@ -150,6 +177,16 @@ public class ObservationEncoder {
             }
         }
         return count;
+    }
+
+    private double maxBuffRemaining(Character character, double currentTime) {
+        double maxRemaining = 0.0;
+        for (mechanics.buff.Buff buff : character.getActiveBuffs()) {
+            if (!buff.isExpired(currentTime)) {
+                maxRemaining = Math.max(maxRemaining, buff.getRemainingDuration(currentTime));
+            }
+        }
+        return clamp01(maxRemaining / 15.0);
     }
 
     private double normalizedAura(Enemy enemy, Element element) {
