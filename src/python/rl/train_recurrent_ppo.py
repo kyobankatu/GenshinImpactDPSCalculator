@@ -7,6 +7,7 @@ from collections import defaultdict
 
 import numpy as np
 import torch
+import torch.nn as nn
 
 try:
     import wandb
@@ -16,6 +17,43 @@ except ImportError:
 from recurrent_ppo import RecurrentPolicy, compute_advantages
 from rollout_service_client import build_rollout_client
 from sil_buffer import SILBuffer
+
+
+class RNDModule(nn.Module):
+    """Random Network Distillation for intrinsic exploration bonus.
+
+    A frozen target network and a trained predictor both map observations
+    to a small embedding. Prediction error is used as intrinsic reward.
+    """
+
+    def __init__(self, observation_size, embedding_size):
+        super().__init__()
+        self.target = nn.Sequential(
+            nn.Linear(observation_size, embedding_size),
+            nn.Tanh(),
+            nn.Linear(embedding_size, embedding_size),
+        )
+        self.predictor = nn.Sequential(
+            nn.Linear(observation_size, embedding_size),
+            nn.Tanh(),
+            nn.Linear(embedding_size, embedding_size),
+            nn.Tanh(),
+            nn.Linear(embedding_size, embedding_size),
+        )
+        for param in self.target.parameters():
+            param.requires_grad = False
+
+    def forward(self, observation):
+        with torch.no_grad():
+            target_embedding = self.target(observation)
+        predicted_embedding = self.predictor(observation)
+        return (predicted_embedding - target_embedding).pow(2).mean(dim=-1)
+
+    def loss(self, observation):
+        with torch.no_grad():
+            target_embedding = self.target(observation)
+        predicted_embedding = self.predictor(observation)
+        return (predicted_embedding - target_embedding).pow(2).mean()
 
 
 OUTPUT_DIR = "output/recurrent_ppo_py"
@@ -46,6 +84,8 @@ PRESETS = {
         "sil_loss_weight": 0.1,
         "sil_buffer_size_per_party": 16,
         "sil_min_episodes_before_ready": 8,
+        "rnd_intrinsic_weight": 0.0,
+        "rnd_embedding_size": 64,
     },
 }
 
@@ -84,6 +124,21 @@ def run_training(args, run=None):
         privileged_observation_size=client.privileged_observation_size,
     ).to(device)
     optimizer = torch.optim.Adam(policy.parameters(), lr=config["learning_rate"])
+    rnd_module = None
+    rnd_optimizer = None
+    rnd_intrinsic_weight = config.get("rnd_intrinsic_weight", 0.0)
+    if rnd_intrinsic_weight > 0.0:
+        rnd_module = RNDModule(
+            client.observation_size,
+            config.get("rnd_embedding_size", 64),
+        ).to(device)
+        rnd_optimizer = torch.optim.Adam(
+            rnd_module.predictor.parameters(),
+            lr=config["learning_rate"],
+        )
+    rnd_running_mean = 0.0
+    rnd_running_var = 1.0
+    rnd_running_count = 0
     start_update = 0
     if args.resume_from:
         if not os.path.exists(args.resume_from):
@@ -161,6 +216,7 @@ def run_training(args, run=None):
             episode_party_ids = []
             invalid_actions = 0
             damage_delta_sum = 0.0
+            intrinsic_reward_sum = 0.0
             attention_score_sum = torch.zeros(policy.num_chars, dtype=torch.float64)
             attention_score_count = 0
 
@@ -180,7 +236,25 @@ def run_training(args, run=None):
                 next_action_masks = batch["action_masks"]
                 next_party_ids = batch["party_ids"]
 
+                intrinsic_rewards = [0.0] * config["envs"]
+                if rnd_module is not None:
+                    with torch.no_grad():
+                        rnd_errors = rnd_module(obs_tensor).detach().cpu().tolist()
+                    batch_mean = float(np.mean(rnd_errors))
+                    batch_var = float(np.var(rnd_errors)) + 1e-8
+                    rnd_running_count += 1
+                    alpha = 1.0 / rnd_running_count
+                    rnd_running_mean = rnd_running_mean * (1.0 - alpha) + batch_mean * alpha
+                    rnd_running_var = rnd_running_var * (1.0 - alpha) + batch_var * alpha
+                    rnd_std = max(float(rnd_running_var) ** 0.5, 1e-8)
+                    intrinsic_rewards = [
+                        rnd_intrinsic_weight * (rnd_errors[e] - rnd_running_mean) / rnd_std
+                        for e in range(config["envs"])
+                    ]
+
+                intrinsic_reward_sum += sum(intrinsic_rewards)
                 for env_index in range(config["envs"]):
+                    augmented_reward = batch["rewards"][env_index] + intrinsic_rewards[env_index]
                     active_segments[env_index].append(
                         build_step_record(
                             observations[env_index],
@@ -190,7 +264,7 @@ def run_training(args, run=None):
                             actions[env_index],
                             action_output["log_probability"][env_index].item(),
                             action_output["value"][env_index].item(),
-                            batch["rewards"][env_index],
+                            augmented_reward,
                             batch["dones"][env_index],
                         )
                     )
@@ -251,6 +325,8 @@ def run_training(args, run=None):
                 device,
                 entropy_coefficient,
                 sil_buffer=sil_buffer,
+                rnd_module=rnd_module,
+                rnd_optimizer=rnd_optimizer,
             )
             optimization_duration = max(1e-6, time.time() - optimization_start)
 
@@ -282,6 +358,7 @@ def run_training(args, run=None):
             max_sequence_length = (
                 max(len(chunk["steps"]) for chunk in sequence_chunks) if sequence_chunks else 0
             )
+            rnd_intrinsic_reward_mean = intrinsic_reward_sum / max(1, steps)
 
             log_row = {
                 "update": update,
@@ -312,6 +389,7 @@ def run_training(args, run=None):
                 "value_mean": optimization_metrics["value_mean"],
                 "log_prob_mean": optimization_metrics["log_prob_mean"],
                 "entropy_coefficient": entropy_coefficient,
+                "rnd_intrinsic_reward_mean": rnd_intrinsic_reward_mean,
                 "env_steps_per_second": env_steps_per_second,
                 "samples_per_second": samples_per_second,
                 "rollout_duration_sec": rollout_duration,
@@ -351,6 +429,7 @@ def run_training(args, run=None):
                     "train/value_mean": optimization_metrics["value_mean"],
                     "train/log_prob_mean": optimization_metrics["log_prob_mean"],
                     "train/entropy_coefficient": entropy_coefficient,
+                    "train/rnd_intrinsic_reward_mean": rnd_intrinsic_reward_mean,
                     "perf/env_steps_per_second": env_steps_per_second,
                     "perf/samples_per_second": samples_per_second,
                     "perf/rollout_duration_sec": rollout_duration,
@@ -446,6 +525,8 @@ def parse_args():
     parser.add_argument("--sil-loss-weight", type=float, default=None, help="weight for self-imitation learning loss")
     parser.add_argument("--sil-buffer-size-per-party", type=int, default=None, help="top-K episodes to keep per party in SIL buffer")
     parser.add_argument("--sil-min-episodes-before-ready", type=int, default=None, help="minimum episode inserts before SIL activates")
+    parser.add_argument("--rnd-intrinsic-weight", type=float, default=None, help="weight for RND intrinsic reward (0.0 disables RND)")
+    parser.add_argument("--rnd-embedding-size", type=int, default=None, help="embedding size for RND target/predictor networks")
     parser.add_argument("--rollout-workers", type=int, default=None, help="Java rollout worker override used for this run")
     parser.add_argument("--resume-from", default=None, help="path to a saved .pt checkpoint to resume from")
     parser.add_argument("--wandb", action="store_true", help="enable Weights & Biases logging")
@@ -481,6 +562,8 @@ def resolve_config(args):
         "sil_loss_weight": args.sil_loss_weight,
         "sil_buffer_size_per_party": args.sil_buffer_size_per_party,
         "sil_min_episodes_before_ready": args.sil_min_episodes_before_ready,
+        "rnd_intrinsic_weight": args.rnd_intrinsic_weight,
+        "rnd_embedding_size": args.rnd_embedding_size,
     }
     for key, value in overrides.items():
         if value is not None:
@@ -667,7 +750,7 @@ def compute_sil_loss(policy, sil_chunks, device):
     return pg_loss + 0.5 * v_loss
 
 
-def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coefficient, sil_buffer=None):
+def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coefficient, sil_buffer=None, rnd_module=None, rnd_optimizer=None):
     if not sequence_chunks:
         return {
             "policy_loss": 0.0,
@@ -769,6 +852,17 @@ def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coef
             total_auxiliary_loss += auxiliary_loss.item()
             total_sil_loss += sil_loss.item()
             updates += 1
+
+    if rnd_module is not None and rnd_optimizer is not None and sequence_chunks:
+        all_obs = []
+        for chunk in sequence_chunks:
+            for step in chunk["steps"]:
+                all_obs.append(step["observation"])
+        obs_tensor = torch.tensor(all_obs, dtype=torch.float32, device=device)
+        rnd_loss = rnd_module.loss(obs_tensor)
+        rnd_optimizer.zero_grad()
+        rnd_loss.backward()
+        rnd_optimizer.step()
 
     total_positions = total_valid_steps + total_padded_steps
     return {
@@ -917,6 +1011,8 @@ def append_log(row):
                 "max_sequence_length",
                 "padding_fraction",
                 "auxiliary_loss",
+                "sil_loss",
+                "sil_buffer_size",
                 "policy_loss",
                 "value_loss",
                 "entropy",
@@ -936,6 +1032,7 @@ def append_log(row):
                 "value_mean",
                 "log_prob_mean",
                 "entropy_coefficient",
+                "rnd_intrinsic_reward_mean",
                 "env_steps_per_second",
                 "samples_per_second",
                 "rollout_duration_sec",
@@ -949,6 +1046,7 @@ def append_log(row):
                 "eval_stochastic_steps",
                 "eval_stochastic_invalid_actions",
             ],
+            extrasaction="ignore",
         )
         if not file_exists:
             writer.writeheader()
