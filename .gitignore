@@ -40,6 +40,7 @@ build/
 bin/
 
 # Simulation and RL outputs (exclude root/output copies; docs/ copy is kept for GitHub Pages)
+logs/
 output/
 rl_report.html
 learning_curve.png
@@ -54,6 +55,7 @@ __pycache__/
 
 # wandb
 sweeps/
+wandb/
 
 # bash file
 *.sh

@@ -1,4 +1,15 @@
 {
+  "INEFFA": {
+    "off_field_dps_ratio": 0.251114,
+    "team_buff_score": 0.000000,
+    "self_enhancement_score": 0.000000,
+    "energy_generation_score": 0.071056,
+    "entry_value_score": 0.166462,
+    "sustain_value_3_actions": 0.065658,
+    "sustain_value_6_actions": 0.037881,
+    "exit_cost_score": 0.024215,
+    "reentry_cost_score": 0.000000
+  },
   "COLUMBINA": {
     "off_field_dps_ratio": 0.299616,
     "team_buff_score": 0.000000,
@@ -32,20 +43,20 @@
     "exit_cost_score": 0.000000,
     "reentry_cost_score": 0.000000
   },
-  "INEFFA": {
-    "off_field_dps_ratio": 0.251114,
-    "team_buff_score": 0.000000,
-    "self_enhancement_score": 0.000000,
-    "energy_generation_score": 0.071056,
-    "entry_value_score": 0.166462,
-    "sustain_value_3_actions": 0.065658,
-    "sustain_value_6_actions": 0.037881,
-    "exit_cost_score": 0.024215,
+  "XINGQIU": {
+    "off_field_dps_ratio": 0.591266,
+    "team_buff_score": 0.126424,
+    "self_enhancement_score": 1.000000,
+    "energy_generation_score": 0.291833,
+    "entry_value_score": 0.000000,
+    "sustain_value_3_actions": 0.041286,
+    "sustain_value_6_actions": 0.022819,
+    "exit_cost_score": 0.000000,
     "reentry_cost_score": 0.000000
   },
   "XIANGLING": {
     "off_field_dps_ratio": 0.485245,
-    "team_buff_score": 0.029798,
+    "team_buff_score": 0.028751,
     "self_enhancement_score": 1.000000,
     "energy_generation_score": 0.182430,
     "entry_value_score": 0.077799,
@@ -55,36 +66,25 @@
     "reentry_cost_score": 0.000000
   },
   "RAIDEN_SHOGUN": {
-    "off_field_dps_ratio": 0.201342,
-    "team_buff_score": 0.000000,
+    "off_field_dps_ratio": 0.201305,
+    "team_buff_score": 0.000732,
     "self_enhancement_score": 0.000000,
     "energy_generation_score": 0.228050,
-    "entry_value_score": 0.109932,
-    "sustain_value_3_actions": 0.049881,
-    "sustain_value_6_actions": 0.034352,
-    "exit_cost_score": 0.141649,
+    "entry_value_score": 0.109912,
+    "sustain_value_3_actions": 0.049706,
+    "sustain_value_6_actions": 0.034345,
+    "exit_cost_score": 0.141429,
     "reentry_cost_score": 0.000000
   },
   "BENNETT": {
     "off_field_dps_ratio": 0.000000,
-    "team_buff_score": 0.403753,
+    "team_buff_score": 0.403922,
     "self_enhancement_score": 0.690762,
     "energy_generation_score": 0.163080,
     "entry_value_score": 0.037481,
     "sustain_value_3_actions": 0.030209,
     "sustain_value_6_actions": 0.024161,
     "exit_cost_score": 0.374841,
-    "reentry_cost_score": 0.000000
-  },
-  "XINGQIU": {
-    "off_field_dps_ratio": 0.591266,
-    "team_buff_score": 0.127256,
-    "self_enhancement_score": 1.000000,
-    "energy_generation_score": 0.291833,
-    "entry_value_score": 0.000000,
-    "sustain_value_3_actions": 0.041286,
-    "sustain_value_6_actions": 0.022819,
-    "exit_cost_score": 0.000000,
     "reentry_cost_score": 0.000000
   }
 }
