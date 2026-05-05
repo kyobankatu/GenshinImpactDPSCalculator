@@ -120,6 +120,7 @@ public class VectorizedEnvironment {
     }
 
     private RunnerResetResult resetInternal(boolean generateReport, int preferredPartyId) {
+        snapshotStore.clear();
         long start = System.nanoTime();
         double[][] observations = new double[size()][];
         double[][] privilegedObservations = new double[size()][];
