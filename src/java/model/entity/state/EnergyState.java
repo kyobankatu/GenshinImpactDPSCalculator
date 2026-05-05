@@ -56,6 +56,16 @@ public class EnergyState {
         return currentEnergy;
     }
 
+    /**
+     * Directly sets the current energy level without updating totals.
+     * Used only for snapshot restore.
+     *
+     * @param energy energy value to set
+     */
+    public void setCurrentEnergy(double energy) {
+        this.currentEnergy = energy;
+    }
+
     public double getTotalEnergyGained() {
         return totalEnergyGained;
     }

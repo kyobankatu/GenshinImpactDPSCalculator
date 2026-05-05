@@ -40,6 +40,24 @@ public class SwitchManager {
     }
 
     /**
+     * Returns the simulation time of the most recent swap.
+     *
+     * @return last swap time in seconds
+     */
+    public double getLastSwapTime() {
+        return lastSwapTime;
+    }
+
+    /**
+     * Restores the last-swap-time to a previously captured value.
+     *
+     * @param time saved swap time in seconds
+     */
+    public void setLastSwapTime(double time) {
+        this.lastSwapTime = time;
+    }
+
+    /**
      * Performs a standard character swap with cooldown, callbacks, and delay.
      *
      * @param name target character name

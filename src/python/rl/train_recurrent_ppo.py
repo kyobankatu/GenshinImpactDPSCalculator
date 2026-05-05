@@ -16,7 +16,6 @@ except ImportError:
 
 from recurrent_ppo import RecurrentPolicy, compute_advantages
 from rollout_service_client import build_rollout_client
-from sil_buffer import SILBuffer
 
 
 class RNDModule(nn.Module):
@@ -81,11 +80,16 @@ PRESETS = {
         "checkpoint_interval": 2,
         "evaluation_interval": 2,
         "auxiliary_prediction_weight": 0.05,
-        "sil_loss_weight": 0.1,
+        "sil_loss_weight": 0.0,
         "sil_buffer_size_per_party": 16,
         "sil_min_episodes_before_ready": 8,
         "rnd_intrinsic_weight": 0.0,
         "rnd_embedding_size": 64,
+        "use_vine_ppo": False,
+        "vine_branch_count": 4,
+        "vine_horizon": 16,
+        "vine_sample_actions": ["SKILL", "BURST", "SWAP"],
+        "vine_max_points_per_update": 64,
     },
 }
 
@@ -191,10 +195,6 @@ def run_training(args, run=None):
         start_update = int(checkpoint_payload.get("update", 0))
         print(f"Resuming training from {args.resume_from} at update {start_update}")
     hidden_states = torch.zeros(config["envs"], config["hidden_size"], dtype=torch.float32, device=device)
-    sil_buffer = SILBuffer(
-        max_per_party=config.get("sil_buffer_size_per_party", 16),
-        min_episodes_before_ready=config.get("sil_min_episodes_before_ready", 50),
-    )
     owns_run = run is None
     run = init_wandb(args, config, client, device, existing_run=run)
 
@@ -235,6 +235,7 @@ def run_training(args, run=None):
                 next_privileged_observations = batch["privileged_observations"]
                 next_action_masks = batch["action_masks"]
                 next_party_ids = batch["party_ids"]
+                vine_snapshot_ids_step = batch.get("vine_snapshot_ids", [-1] * config["envs"])
 
                 intrinsic_rewards = [0.0] * config["envs"]
                 if rnd_module is not None:
@@ -255,19 +256,19 @@ def run_training(args, run=None):
                 intrinsic_reward_sum += sum(intrinsic_rewards)
                 for env_index in range(config["envs"]):
                     augmented_reward = batch["rewards"][env_index] + intrinsic_rewards[env_index]
-                    active_segments[env_index].append(
-                        build_step_record(
-                            observations[env_index],
-                            privileged_observations[env_index],
-                            hidden_states[env_index],
-                            action_masks[env_index],
-                            actions[env_index],
-                            action_output["log_probability"][env_index].item(),
-                            action_output["value"][env_index].item(),
-                            augmented_reward,
-                            batch["dones"][env_index],
-                        )
+                    step_rec = build_step_record(
+                        observations[env_index],
+                        privileged_observations[env_index],
+                        hidden_states[env_index],
+                        action_masks[env_index],
+                        actions[env_index],
+                        action_output["log_probability"][env_index].item(),
+                        action_output["value"][env_index].item(),
+                        augmented_reward,
+                        batch["dones"][env_index],
                     )
+                    step_rec["vine_snapshot_id"] = vine_snapshot_ids_step[env_index]
+                    active_segments[env_index].append(step_rec)
                     if not batch["valid_actions"][env_index]:
                         invalid_actions += 1
                     damage_delta_sum += batch["damage_deltas"][env_index]
@@ -311,10 +312,7 @@ def run_training(args, run=None):
                     )
 
             segments = compute_advantages(completed_segments, config["gamma"], config["gae_lambda"])
-            for seg in segments:
-                if seg.get("is_complete_episode"):
-                    sil_chunks = build_sequence_chunks([seg], config["sequence_length"])
-                    sil_buffer.try_insert(seg["party_id"], seg["episode_return"], sil_chunks)
+            vine_metrics = apply_vine_ppo_advantages(segments, config, client, runner_id)
             sequence_chunks = build_sequence_chunks(segments, config["sequence_length"])
             optimization_start = time.time()
             optimization_metrics = train_epoch(
@@ -324,7 +322,6 @@ def run_training(args, run=None):
                 config,
                 device,
                 entropy_coefficient,
-                sil_buffer=sil_buffer,
                 rnd_module=rnd_module,
                 rnd_optimizer=rnd_optimizer,
             )
@@ -362,6 +359,9 @@ def run_training(args, run=None):
 
             log_row = {
                 "update": update,
+                "vine_points": vine_metrics["vine_points"],
+                "vine_setup_adv_mean": vine_metrics["setup_adv_mean"],
+                "vine_advantage_bias": vine_metrics["advantage_bias"],
                 "samples": valid_timesteps,
                 "sequence_chunks": len(sequence_chunks),
                 "mean_sequence_length": mean_sequence_length,
@@ -369,7 +369,6 @@ def run_training(args, run=None):
                 "padding_fraction": optimization_metrics["padding_fraction"],
                 "auxiliary_loss": optimization_metrics["auxiliary_loss"],
                 "sil_loss": optimization_metrics["sil_loss"],
-                "sil_buffer_size": sil_buffer.size(),
                 "policy_loss": optimization_metrics["policy_loss"],
                 "value_loss": optimization_metrics["value_loss"],
                 "entropy": optimization_metrics["entropy"],
@@ -396,12 +395,15 @@ def run_training(args, run=None):
                 "optimization_duration_sec": optimization_duration,
             }
             print(
-                f"Update {update}: reward={mean_reward:.3f} damage={mean_damage:,.0f} steps={mean_episode_steps:.1f} invalid={invalid_rate:.3f} kl={optimization_metrics['approx_kl']:.5f} clip={optimization_metrics['clip_fraction']:.3f} entropyCoef={entropy_coefficient:.5f} policy={optimization_metrics['policy_loss']:.5f} value={optimization_metrics['value_loss']:.5f} aux={optimization_metrics['auxiliary_loss']:.5f} sil={optimization_metrics['sil_loss']:.5f} silBuf={sil_buffer.size()} seqs={len(sequence_chunks)} meanSeq={mean_sequence_length:.1f} envSteps/s={env_steps_per_second:.1f}"
+                f"Update {update}: reward={mean_reward:.3f} damage={mean_damage:,.0f} steps={mean_episode_steps:.1f} invalid={invalid_rate:.3f} kl={optimization_metrics['approx_kl']:.5f} clip={optimization_metrics['clip_fraction']:.3f} entropyCoef={entropy_coefficient:.5f} policy={optimization_metrics['policy_loss']:.5f} value={optimization_metrics['value_loss']:.5f} aux={optimization_metrics['auxiliary_loss']:.5f} seqs={len(sequence_chunks)} meanSeq={mean_sequence_length:.1f} envSteps/s={env_steps_per_second:.1f}"
             )
             log_wandb(
                 run,
                 {
                     "train/update": update,
+                    "vine/points": vine_metrics["vine_points"],
+                    "vine/setup_action_advantage_mean": vine_metrics["setup_adv_mean"],
+                    "vine/advantage_bias": vine_metrics["advantage_bias"],
                     "train/samples": valid_timesteps,
                     "train/sequence_chunks": len(sequence_chunks),
                     "train/mean_sequence_length": mean_sequence_length,
@@ -409,7 +411,6 @@ def run_training(args, run=None):
                     "train/padding_fraction": optimization_metrics["padding_fraction"],
                     "train/auxiliary_loss": optimization_metrics["auxiliary_loss"],
                     "train/sil_loss": optimization_metrics["sil_loss"],
-                    "train/sil_buffer_size": sil_buffer.size(),
                     "train/policy_loss": optimization_metrics["policy_loss"],
                     "train/value_loss": optimization_metrics["value_loss"],
                     "train/entropy": optimization_metrics["entropy"],
@@ -527,6 +528,10 @@ def parse_args():
     parser.add_argument("--sil-min-episodes-before-ready", type=int, default=None, help="minimum episode inserts before SIL activates")
     parser.add_argument("--rnd-intrinsic-weight", type=float, default=None, help="weight for RND intrinsic reward (0.0 disables RND)")
     parser.add_argument("--rnd-embedding-size", type=int, default=None, help="embedding size for RND target/predictor networks")
+    parser.add_argument("--use-vine-ppo", action="store_true", default=False, help="enable VinePPO Monte Carlo credit assignment")
+    parser.add_argument("--vine-branch-count", type=int, default=None, help="number of MC branches per vine sample point K")
+    parser.add_argument("--vine-horizon", type=int, default=None, help="horizon steps per vine branch H")
+    parser.add_argument("--vine-max-points", type=int, default=None, help="max vine sample points per update (sub-sampling limit)")
     parser.add_argument("--rollout-workers", type=int, default=None, help="Java rollout worker override used for this run")
     parser.add_argument("--resume-from", default=None, help="path to a saved .pt checkpoint to resume from")
     parser.add_argument("--wandb", action="store_true", help="enable Weights & Biases logging")
@@ -564,7 +569,12 @@ def resolve_config(args):
         "sil_min_episodes_before_ready": args.sil_min_episodes_before_ready,
         "rnd_intrinsic_weight": args.rnd_intrinsic_weight,
         "rnd_embedding_size": args.rnd_embedding_size,
+        "vine_branch_count": args.vine_branch_count,
+        "vine_horizon": args.vine_horizon,
+        "vine_max_points_per_update": args.vine_max_points,
     }
+    if getattr(args, "use_vine_ppo", False):
+        overrides["use_vine_ppo"] = True
     for key, value in overrides.items():
         if value is not None:
             config[key] = value
@@ -727,30 +737,60 @@ def build_sequence_minibatch(chunks, policy, device):
     }
 
 
-def compute_sil_loss(policy, sil_chunks, device):
-    """SIL policy gradient on steps where return exceeds current value estimate."""
-    if not sil_chunks:
-        return torch.tensor(0.0, device=device)
-    minibatch = build_sequence_minibatch(sil_chunks, policy, device)
-    logits, value, _, _, _ = policy.forward_sequence(
-        minibatch["observations"],
-        minibatch["initial_hidden"],
-        minibatch["action_masks"],
-        privileged_observations=minibatch["privileged_observations"],
-        sequence_mask=minibatch["loss_mask"],
-    )
-    dist = torch.distributions.Categorical(logits=logits)
-    log_probs = dist.log_prob(minibatch["actions"])
-    valid_mask = minibatch["loss_mask"]
-    with torch.no_grad():
-        clipped_advantages = (minibatch["return_targets"] - value).clamp(min=0.0)
-    pos_count = (clipped_advantages > 0).float().sum().clamp_min(1.0)
-    pg_loss = -(log_probs * clipped_advantages * valid_mask).sum() / pos_count
-    v_loss = 0.5 * (clipped_advantages.pow(2) * valid_mask).sum() / pos_count
-    return pg_loss + 0.5 * v_loss
+def apply_vine_ppo_advantages(segments, config, client, runner_id):
+    """Replace GAE advantages at SKILL/BURST/SWAP steps with VinePPO MC estimates.
+
+    Uses A_VinePPO = Q_MC(s,a) - V_learned(s) where Q_MC is obtained by running
+    K random rollouts after executing action a from snapshot state s.
+    V_learned is the value estimate already in the step record from the policy network.
+
+    Returns a dict of vine metrics: vine_points, setup_adv_mean, advantage_bias.
+    """
+    metrics = {"vine_points": 0, "setup_adv_mean": 0.0, "advantage_bias": 0.0}
+    if not config.get("use_vine_ppo", False):
+        return metrics
+
+    K = config.get("vine_branch_count", 4)
+    H = config.get("vine_horizon", 16)
+    gamma = config["gamma"]
+    max_points = config.get("vine_max_points_per_update", 64)
+
+    vine_candidates = []
+    for seg_idx, seg in enumerate(segments):
+        for step_idx, step in enumerate(seg["steps"]):
+            snap_id = step.get("vine_snapshot_id", -1)
+            if snap_id >= 0:
+                vine_candidates.append((seg_idx, step_idx, snap_id, step["action"]))
+
+    if not vine_candidates:
+        return metrics
+
+    if len(vine_candidates) > max_points:
+        vine_candidates = random.sample(vine_candidates, max_points)
+
+    adv_list = []
+    bias_list = []
+    for seg_idx, step_idx, snap_id, action in vine_candidates:
+        try:
+            q_mc = client.branch_rollout(runner_id, snap_id, action, K, H, gamma)
+        except Exception:
+            continue
+        step = segments[seg_idx]["steps"][step_idx]
+        v_learned = step["value"]
+        vine_adv = q_mc - v_learned
+        gae_adv = step["advantage"]
+        step["advantage"] = vine_adv
+        adv_list.append(vine_adv)
+        bias_list.append(abs(vine_adv - gae_adv))
+
+    if adv_list:
+        metrics["vine_points"] = len(adv_list)
+        metrics["setup_adv_mean"] = float(np.mean(adv_list))
+        metrics["advantage_bias"] = float(np.mean(bias_list))
+    return metrics
 
 
-def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coefficient, sil_buffer=None, rnd_module=None, rnd_optimizer=None):
+def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coefficient, rnd_module=None, rnd_optimizer=None):
     if not sequence_chunks:
         return {
             "policy_loss": 0.0,
@@ -775,10 +815,7 @@ def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coef
     total_valid_steps = 0.0
     total_padded_steps = 0.0
     total_auxiliary_loss = 0.0
-    total_sil_loss = 0.0
     updates = 0
-    sil_weight = config.get("sil_loss_weight", 0.1)
-    use_sil = sil_buffer is not None and sil_buffer.is_ready()
 
     for _ in range(config["ppo_epochs"]):
         chunk_indices = list(range(len(sequence_chunks)))
@@ -818,16 +855,11 @@ def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coef
                 (auxiliary_prediction - minibatch["privileged_observations"]).pow(2)
                 * valid_mask.unsqueeze(-1)
             ).sum() / (valid_count * policy.privileged_observation_size)
-            sil_loss = torch.tensor(0.0, device=device)
-            if use_sil:
-                sil_chunks = sil_buffer.sample_sequence_chunks(config["sequence_minibatch_size"])
-                sil_loss = compute_sil_loss(policy, sil_chunks, device)
             total_loss = (
                 policy_loss
                 + config["value_coefficient"] * value_loss
                 - entropy_coefficient * entropy
                 + config["auxiliary_prediction_weight"] * auxiliary_loss
-                + sil_weight * sil_loss
             )
             clip_fraction = (
                 ((torch.abs(ratio - 1.0) > config["clip_range"]).float() * valid_mask).sum() / valid_count
@@ -850,7 +882,6 @@ def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coef
             total_valid_steps += valid_count.item()
             total_padded_steps += valid_mask.numel() - valid_count.item()
             total_auxiliary_loss += auxiliary_loss.item()
-            total_sil_loss += sil_loss.item()
             updates += 1
 
     if rnd_module is not None and rnd_optimizer is not None and sequence_chunks:
@@ -875,7 +906,7 @@ def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coef
         "log_prob_mean": total_log_prob_mean / updates,
         "padding_fraction": 0.0 if total_positions == 0 else total_padded_steps / total_positions,
         "auxiliary_loss": total_auxiliary_loss / updates,
-        "sil_loss": total_sil_loss / updates,
+        "sil_loss": 0.0,
     }
 
 

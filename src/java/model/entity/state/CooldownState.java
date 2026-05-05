@@ -83,4 +83,27 @@ public class CooldownState {
     public double getLastBurstTime() {
         return lastBurstTime;
     }
+
+    /**
+     * Returns a copy of the current charge restore times list.
+     *
+     * @return copy of charge restore times
+     */
+    public List<Double> getChargeRestoreTimes() {
+        return new ArrayList<>(chargeRestoreTimes);
+    }
+
+    /**
+     * Restores cooldown state from previously captured values.
+     *
+     * @param savedLastSkillTime      last skill use time
+     * @param savedLastBurstTime      last burst use time
+     * @param savedChargeRestoreTimes charge restore schedule
+     */
+    public void restore(double savedLastSkillTime, double savedLastBurstTime, List<Double> savedChargeRestoreTimes) {
+        this.lastSkillTime = savedLastSkillTime;
+        this.lastBurstTime = savedLastBurstTime;
+        this.chargeRestoreTimes.clear();
+        this.chargeRestoreTimes.addAll(savedChargeRestoreTimes);
+    }
 }

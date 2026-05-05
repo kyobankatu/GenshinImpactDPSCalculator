@@ -2,7 +2,7 @@ import socket
 import struct
 
 
-VERSION = 5
+VERSION = 6
 
 CMD_HELLO = 1
 CMD_CREATE_RUNNER = 2
@@ -10,6 +10,7 @@ CMD_RESET_RUNNER = 3
 CMD_STEP_RUNNER = 4
 CMD_CLOSE_RUNNER = 5
 CMD_SHUTDOWN = 6
+CMD_BRANCH_ROLLOUT = 7
 
 
 def recv_exact(sock: socket.socket, size: int) -> bytes:
@@ -32,6 +33,10 @@ def send_bool(sock: socket.socket, value: bool) -> None:
 
 def send_ints(sock: socket.socket, values) -> None:
     sock.sendall(struct.pack(">" + "i" * len(values), *values))
+
+
+def send_double(sock: socket.socket, value: float) -> None:
+    sock.sendall(struct.pack(">d", value))
 
 
 def recv_int(sock: socket.socket) -> int:

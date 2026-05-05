@@ -65,6 +65,18 @@ public class SimulationClock {
     }
 
     /**
+     * Restores the clock to a previously captured time pair and drops all pending events.
+     *
+     * @param currentTime  time to restore
+     * @param rotationTime rotation time to restore
+     */
+    public void restoreTime(double currentTime, double rotationTime) {
+        this.currentTime = currentTime;
+        this.rotationTime = rotationTime;
+        events.clear();
+    }
+
+    /**
      * Advances time and executes all due timer events in order.
      *
      * @param duration duration to advance in seconds

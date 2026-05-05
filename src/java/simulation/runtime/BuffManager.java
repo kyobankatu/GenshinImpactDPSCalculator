@@ -117,6 +117,15 @@ public class BuffManager {
     }
 
     /**
+     * Returns the live simulator-owned field-buff list for package-local collaborators.
+     *
+     * @return mutable field-buff list
+     */
+    public List<Buff> getFieldBuffList() {
+        return fieldBuffs;
+    }
+
+    /**
      * Removes all simulator-owned team buffs with the given logical id.
      *
      * @param buffId buff id to remove

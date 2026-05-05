@@ -151,6 +151,18 @@ public class RolloutService {
                     out.writeBoolean(true);
                     out.flush();
                     break;
+                case BatchProtocol.CMD_BRANCH_ROLLOUT:
+                    int branchRunnerId = in.readInt();
+                    int snapshotId = in.readInt();
+                    int branchFirstAction = in.readInt();
+                    int branchK = in.readInt();
+                    int branchH = in.readInt();
+                    double branchGamma = in.readDouble();
+                    double meanReturn = getRunner(branchRunnerId).branchRollout(
+                            snapshotId, branchFirstAction, branchK, branchH, branchGamma);
+                    out.writeDouble(meanReturn);
+                    out.flush();
+                    break;
                 case BatchProtocol.CMD_SHUTDOWN:
                     for (VectorizedEnvironment vectorizedEnvironment : runners.values()) {
                         vectorizedEnvironment.close();
@@ -204,6 +216,7 @@ public class RolloutService {
         writeIntVector(out, result.liveSteps);
         writeIntVector(out, result.partyIds);
         writeIntVector(out, result.episodePartyIds);
+        writeIntVector(out, result.vineSnapshotIds);
         out.flush();
     }
 

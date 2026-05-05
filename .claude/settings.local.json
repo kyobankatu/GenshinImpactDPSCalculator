@@ -9,7 +9,10 @@
       "Bash(./gradlew classes:*)",
       "Bash(./gradlew ProfileCapabilities)",
       "Bash(./gradlew build:*)",
-      "WebSearch"
+      "WebSearch",
+      "WebFetch(domain:arxiv.org)",
+      "Bash(xargs ls)",
+      "Bash(./gradlew compileJava)"
     ]
   }
 }

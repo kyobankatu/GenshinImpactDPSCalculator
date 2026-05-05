@@ -3,9 +3,11 @@ package mechanics.rl.bridge;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import mechanics.rl.ActionResult;
@@ -15,9 +17,11 @@ import mechanics.rl.EpisodeConfig;
 import mechanics.rl.ObservationEncoder;
 import mechanics.rl.PrivilegedStateEncoder;
 import mechanics.rl.QuietExecution;
+import mechanics.rl.RLAction;
 import mechanics.rl.RLEpisodeFactory;
 import mechanics.rl.RewardFunction;
 import simulation.CombatSimulator;
+import simulation.SimulatorSnapshot;
 
 /**
  * Manages many independent battle environments behind one runner id.
@@ -28,6 +32,9 @@ public class VectorizedEnvironment {
     private final double[] episodeDamages;
     private final ExecutorService executor;
     private final int workerCount;
+    private final ConcurrentHashMap<Integer, SnapshotEntry> snapshotStore = new ConcurrentHashMap<>();
+    private final AtomicInteger nextSnapshotId = new AtomicInteger(1);
+    private BattleEnvironment branchEnv;
     private long resetCalls;
     private long resetNanos;
     private long stepCalls;
@@ -63,6 +70,8 @@ public class VectorizedEnvironment {
             environments.add(new BattleEnvironment(
                     episodeFactory, new ActionSpace(), observationEncoder, privilegedStateEncoder, new RewardFunction()));
         }
+        this.branchEnv = new BattleEnvironment(
+                episodeFactory, new ActionSpace(), observationEncoder, privilegedStateEncoder, new RewardFunction());
     }
 
     /**
@@ -91,6 +100,8 @@ public class VectorizedEnvironment {
             environments.add(new BattleEnvironment(simulatorFactory, config,
                     new ActionSpace(), observationEncoder, privilegedStateEncoder, new RewardFunction()));
         }
+        this.branchEnv = new BattleEnvironment(simulatorFactory, config,
+                new ActionSpace(), observationEncoder, privilegedStateEncoder, new RewardFunction());
     }
 
     public int size() {
@@ -150,8 +161,18 @@ public class VectorizedEnvironment {
         int[] liveSteps = new int[size()];
         int[] partyIds = new int[size()];
         int[] finishedEpisodePartyIds = new int[size()];
+        int[] vineSnapshotIds = new int[size()];
+        java.util.Arrays.fill(vineSnapshotIds, -1);
 
         ParallelTiming timing = parallelForEach(index -> {
+            if (isVineSampleAction(actions[index])) {
+                BattleEnvironment env = environments.get(index);
+                SimulatorSnapshot snap = env.saveSnapshot();
+                double snapLastSwapTime = env.getLastSwapTime();
+                int snapId = nextSnapshotId.getAndIncrement();
+                snapshotStore.put(snapId, new SnapshotEntry(snap, snapLastSwapTime));
+                vineSnapshotIds[index] = snapId;
+            }
             ActionResult result = environments.get(index).step(actions[index]);
             episodeRewards[index] += result.reward;
             episodeDamages[index] = result.totalDamage;
@@ -205,7 +226,31 @@ public class VectorizedEnvironment {
                 finishedEpisodeSteps,
                 liveSteps,
                 partyIds,
-                finishedEpisodePartyIds);
+                finishedEpisodePartyIds,
+                vineSnapshotIds);
+    }
+
+    /**
+     * Runs a VinePPO branch rollout from a previously saved snapshot.
+     *
+     * @param snapshotId  ID returned by a prior step call in vineSnapshotIds
+     * @param firstAction action to execute first in each branch (-1 for random)
+     * @param K           number of independent branches
+     * @param H           horizon steps per branch
+     * @param gamma       discount factor
+     * @return mean discounted return across K branches
+     */
+    public double branchRollout(int snapshotId, int firstAction, int K, int H, double gamma) {
+        SnapshotEntry entry = snapshotStore.remove(snapshotId);
+        if (entry == null) {
+            throw new IllegalArgumentException("Unknown snapshot id: " + snapshotId);
+        }
+        return branchEnv.branchRolloutMean(entry.snapshot, entry.lastSwapTime, firstAction, K, H, gamma);
+    }
+
+    private static boolean isVineSampleAction(int actionId) {
+        RLAction action = RLAction.fromId(actionId);
+        return action == RLAction.SKILL || action == RLAction.BURST || action.isSwap();
     }
 
     public void close() {
@@ -352,6 +397,16 @@ public class VectorizedEnvironment {
                     workerCount, resetCalls, meanResetMillis(), meanResetDispatchMillis(), meanResetWaitMillis(),
                     stepCalls, meanStepMillis(), meanStepDispatchMillis(), meanStepWaitMillis(), envSteps,
                     envStepsPerSecond(), completedEpisodes);
+        }
+    }
+
+    private static final class SnapshotEntry {
+        final SimulatorSnapshot snapshot;
+        final double lastSwapTime;
+
+        SnapshotEntry(SimulatorSnapshot snapshot, double lastSwapTime) {
+            this.snapshot = snapshot;
+            this.lastSwapTime = lastSwapTime;
         }
     }
 

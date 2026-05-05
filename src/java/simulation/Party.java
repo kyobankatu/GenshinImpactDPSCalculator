@@ -60,6 +60,15 @@ public class Party {
         return activeCharacter;
     }
 
+    /**
+     * Returns the CharacterId of the currently active character, or {@code null} if none.
+     *
+     * @return active character id, or {@code null}
+     */
+    public CharacterId getActiveCharacterId() {
+        return activeCharacter != null ? activeCharacter.getCharacterId() : null;
+    }
+
     public void switchCharacter(CharacterId id) {
         Character target = members.get(id);
         if (target != null) {

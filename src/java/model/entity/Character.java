@@ -283,4 +283,33 @@ public abstract class Character {
     public boolean isLunarCharacter() {
         return false;
     }
+
+    /**
+     * Returns a copy of the charge restore schedule for snapshot purposes.
+     *
+     * @return copy of charge restore times
+     */
+    public java.util.List<Double> getChargeRestoreTimes() {
+        return cooldownState.getChargeRestoreTimes();
+    }
+
+    /**
+     * Restores cooldown state from snapshot values.
+     *
+     * @param lastSkillTime      last skill use time
+     * @param lastBurstTime      last burst use time
+     * @param chargeRestoreTimes charge restore schedule
+     */
+    public void restoreCooldowns(double lastSkillTime, double lastBurstTime, java.util.List<Double> chargeRestoreTimes) {
+        cooldownState.restore(lastSkillTime, lastBurstTime, chargeRestoreTimes);
+    }
+
+    /**
+     * Directly sets current energy without updating totals. Used only for snapshot restore.
+     *
+     * @param energy energy value to set
+     */
+    public void restoreCurrentEnergy(double energy) {
+        energyState.setCurrentEnergy(energy);
+    }
 }

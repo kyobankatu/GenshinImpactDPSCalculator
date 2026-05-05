@@ -1,7 +1,10 @@
 package simulation;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import mechanics.buff.Buff;
@@ -517,6 +520,156 @@ public class CombatSimulator {
 
     public void removeTeamBuffsById(mechanics.buff.BuffId buffId) {
         buffManager.removeTeamBuffsById(buffId);
+    }
+
+    /**
+     * Captures a deep-enough snapshot of all mutable simulator state for VinePPO branch rollouts.
+     *
+     * <p>The pending timer-event queue is intentionally excluded; see {@link SimulatorSnapshot}.
+     *
+     * @return snapshot of current state
+     */
+    public SimulatorSnapshot saveSnapshot() {
+        // Clock
+        double currentTime = simulationClock.getCurrentTime();
+        double rotationTime = simulationClock.getRotationTime();
+
+        // Damage
+        simulation.runtime.DamageReport dr = (simulation.runtime.DamageReport) damageReport;
+        double totalDamage = dr.getTotalDamage();
+        Map<String, Double> damageBySource = dr.getDamageBySourceMap();
+
+        // Switch
+        double lastSwapTime = switchManager.getLastSwapTime();
+
+        // Active character
+        CharacterId activeCharacterId = party.getActiveCharacterId();
+
+        // Reaction state
+        boolean ecTimerRunning = reactionState.isEcTimerRunning();
+        double thundercloudEndTime = reactionState.getThundercloudEndTime();
+
+        // Enemy aura
+        Map<model.type.Element, Double> enemyAura = (enemy != null) ? enemy.getAuraMap() : new HashMap<>();
+
+        // ICD
+        Map<String, double[]> icdStates = icdManager.saveStates();
+
+        // Per-character state
+        Map<CharacterId, SimulatorSnapshot.CharacterSnapshot> characters = new HashMap<>();
+        for (Character character : party.getMembers()) {
+            List<mechanics.buff.Buff> buffRefs = new ArrayList<>(character.getActiveBuffs());
+            List<double[]> buffTimes = new ArrayList<>();
+            for (mechanics.buff.Buff buff : buffRefs) {
+                buffTimes.add(new double[] { buff.getStartTime(), buff.getExpirationTime() });
+            }
+            characters.put(character.getCharacterId(), new SimulatorSnapshot.CharacterSnapshot(
+                    character.getCurrentEnergy(),
+                    character.getLastSkillTime(),
+                    character.getLastBurstTime(),
+                    character.getChargeRestoreTimes(),
+                    buffRefs,
+                    buffTimes));
+        }
+
+        // Team and field buffs
+        List<mechanics.buff.Buff> teamBuffRefs = new ArrayList<>(buffManager.getTeamBuffList());
+        List<double[]> teamBuffTimes = new ArrayList<>();
+        for (mechanics.buff.Buff buff : teamBuffRefs) {
+            teamBuffTimes.add(new double[] { buff.getStartTime(), buff.getExpirationTime() });
+        }
+        List<mechanics.buff.Buff> fieldBuffRefs = new ArrayList<>(buffManager.getFieldBuffList());
+        List<double[]> fieldBuffTimes = new ArrayList<>();
+        for (mechanics.buff.Buff buff : fieldBuffRefs) {
+            fieldBuffTimes.add(new double[] { buff.getStartTime(), buff.getExpirationTime() });
+        }
+
+        return new SimulatorSnapshot(
+                currentTime, rotationTime,
+                totalDamage, damageBySource,
+                lastSwapTime, activeCharacterId, currentMoonsign,
+                icdStates, ecTimerRunning, thundercloudEndTime, enemyAura,
+                characters,
+                teamBuffRefs, teamBuffTimes,
+                fieldBuffRefs, fieldBuffTimes);
+    }
+
+    /**
+     * Restores simulator state from a previously captured snapshot.
+     *
+     * <p>The pending timer-event queue is cleared; see {@link SimulatorSnapshot}.
+     *
+     * @param snap snapshot to restore
+     */
+    public void restoreSnapshot(SimulatorSnapshot snap) {
+        // Clock (also clears event queue)
+        simulationClock.restoreTime(snap.currentTime, snap.rotationTime);
+
+        // Damage
+        ((simulation.runtime.DamageReport) damageReport).restore(snap.totalDamage, snap.damageBySource);
+
+        // Switch
+        switchManager.setLastSwapTime(snap.lastSwapTime);
+
+        // Active character
+        if (snap.activeCharacterId != null) {
+            party.switchCharacter(snap.activeCharacterId);
+        }
+
+        // Moonsign
+        currentMoonsign = snap.moonsign;
+
+        // Reaction state
+        reactionState.setEcTimerRunning(snap.ecTimerRunning);
+        reactionState.setThundercloudEndTime(snap.thundercloudEndTime);
+
+        // Enemy aura
+        if (enemy != null) {
+            for (model.type.Element el : model.type.Element.values()) {
+                enemy.setAura(el, 0.0);
+            }
+            for (Map.Entry<model.type.Element, Double> entry : snap.enemyAura.entrySet()) {
+                enemy.setAura(entry.getKey(), entry.getValue());
+            }
+        }
+
+        // ICD
+        icdManager.restoreStates(snap.icdStates);
+
+        // Per-character state
+        for (Character character : party.getMembers()) {
+            SimulatorSnapshot.CharacterSnapshot cs = snap.characters.get(character.getCharacterId());
+            if (cs == null) {
+                continue;
+            }
+            character.restoreCurrentEnergy(cs.currentEnergy);
+            character.restoreCooldowns(cs.lastSkillTime, cs.lastBurstTime, cs.chargeRestoreTimes);
+            character.clearBuffs();
+            for (int i = 0; i < cs.activeBuffRefs.size(); i++) {
+                mechanics.buff.Buff buff = cs.activeBuffRefs.get(i);
+                double[] times = cs.activeBuffTimes.get(i);
+                buff.restoreTimes(times[0], times[1]);
+                character.addBuff(buff);
+            }
+        }
+
+        // Team and field buffs
+        List<mechanics.buff.Buff> teamBuffList = buffManager.getTeamBuffList();
+        teamBuffList.clear();
+        for (int i = 0; i < snap.teamBuffRefs.size(); i++) {
+            mechanics.buff.Buff buff = snap.teamBuffRefs.get(i);
+            double[] times = snap.teamBuffTimes.get(i);
+            buff.restoreTimes(times[0], times[1]);
+            teamBuffList.add(buff);
+        }
+        List<mechanics.buff.Buff> fieldBuffList = buffManager.getFieldBuffList();
+        fieldBuffList.clear();
+        for (int i = 0; i < snap.fieldBuffRefs.size(); i++) {
+            mechanics.buff.Buff buff = snap.fieldBuffRefs.get(i);
+            double[] times = snap.fieldBuffTimes.get(i);
+            buff.restoreTimes(times[0], times[1]);
+            fieldBuffList.add(buff);
+        }
     }
 
     /**

@@ -176,6 +176,97 @@ public class BattleEnvironment {
                 simulator.getTotalDamage(), timeDelta, actionId, stepCount);
     }
 
+    /**
+     * Returns the BattleEnvironment-tracked last swap time used for action masking.
+     *
+     * @return last swap time in seconds
+     */
+    public double getLastSwapTime() {
+        return lastSwapTime;
+    }
+
+    /**
+     * Saves a snapshot of the current simulator state for VinePPO branch rollouts.
+     *
+     * @return simulator snapshot
+     */
+    public simulation.SimulatorSnapshot saveSnapshot() {
+        return simulator.saveSnapshot();
+    }
+
+    /**
+     * Runs K independent Monte Carlo rollouts from a snapshot and returns their mean discounted return.
+     *
+     * <p>State is restored from {@code snap} before each branch. After the method returns the
+     * environment state is undefined; the caller must reset or restore before using it again.
+     *
+     * @param snap        simulator state to branch from
+     * @param snapLastSwapTime lastSwapTime captured at snapshot time
+     * @param firstAction action ID to execute as the first step of each branch (-1 → random)
+     * @param K           number of branches
+     * @param H           horizon (max steps per branch, including firstAction)
+     * @param gamma       discount factor
+     * @return mean discounted return across K branches
+     */
+    public double branchRolloutMean(simulation.SimulatorSnapshot snap, double snapLastSwapTime,
+            int firstAction, int K, int H, double gamma) {
+        double totalReturn = 0.0;
+        for (int k = 0; k < K; k++) {
+            simulator.restoreSnapshot(snap);
+            lastSwapTime = snapLastSwapTime;
+            stepCount = 0;
+            previousActionId = -1;
+            generateReportOnDone = false;
+            java.util.Arrays.fill(slotLastActiveTime, -config.maxEpisodeTime);
+            java.util.Arrays.fill(slotOnFieldTime, 0.0);
+            fillObservationBuffer();
+            fillPrivilegedObservationBuffer();
+            fillActionMaskBuffer();
+
+            double discountedReturn = 0.0;
+            double discount = 1.0;
+            boolean done = false;
+
+            int action = firstAction >= 0 ? firstAction : sampleRandomValidAction(actionMaskBuffer);
+            ActionResult result = step(action);
+            discountedReturn += discount * result.reward;
+            discount *= gamma;
+            done = result.done;
+
+            for (int h = 1; h < H && !done; h++) {
+                action = sampleRandomValidAction(actionMaskBuffer);
+                result = step(action);
+                discountedReturn += discount * result.reward;
+                discount *= gamma;
+                done = result.done;
+            }
+            totalReturn += discountedReturn;
+        }
+        return totalReturn / K;
+    }
+
+    private int sampleRandomValidAction(double[] mask) {
+        int count = 0;
+        for (double m : mask) {
+            if (m > 0.5) {
+                count++;
+            }
+        }
+        if (count == 0) {
+            return 0;
+        }
+        int pick = (int) (Math.random() * count);
+        for (int i = 0; i < mask.length; i++) {
+            if (mask[i] > 0.5) {
+                if (pick == 0) {
+                    return i;
+                }
+                pick--;
+            }
+        }
+        return 0;
+    }
+
     public CombatSimulator getSimulator() {
         return simulator;
     }

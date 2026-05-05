@@ -106,6 +106,36 @@ public abstract class Buff {
         return getClass().getName() + ":" + name;
     }
 
+    /**
+     * Returns the simulation time when this buff started.
+     *
+     * @return start time in seconds
+     */
+    public double getStartTime() {
+        return startTime;
+    }
+
+    /**
+     * Returns the simulation time when this buff expires.
+     *
+     * @return expiration time in seconds
+     */
+    public double getExpirationTime() {
+        return expirationTime;
+    }
+
+    /**
+     * Restores the timing window of this buff to previously captured values.
+     * Used only for snapshot restore.
+     *
+     * @param savedStartTime      saved start time
+     * @param savedExpirationTime saved expiration time
+     */
+    public void restoreTimes(double savedStartTime, double savedExpirationTime) {
+        this.startTime = savedStartTime;
+        this.expirationTime = savedExpirationTime;
+    }
+
     /** Exclude specific characters from receiving this buff. Returns this for chaining. */
     public Buff exclude(String... names) {
         this.excludeChars = new HashSet<>();

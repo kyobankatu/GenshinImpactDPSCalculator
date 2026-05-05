@@ -56,6 +56,27 @@ public class DamageReport implements DamageTracker {
     }
 
     /**
+     * Restores damage totals from a previously captured snapshot.
+     *
+     * @param savedTotal      total damage at snapshot time
+     * @param savedBySource   per-source damage map at snapshot time
+     */
+    public void restore(double savedTotal, java.util.Map<String, Double> savedBySource) {
+        totalDamage = savedTotal;
+        damageBySource.clear();
+        damageBySource.putAll(savedBySource);
+    }
+
+    /**
+     * Returns a copy of the current per-source damage map.
+     *
+     * @return per-source damage map copy
+     */
+    public java.util.Map<String, Double> getDamageBySourceMap() {
+        return new java.util.HashMap<>(damageBySource);
+    }
+
+    /**
      * Prints a formatted console summary showing per-source damage share and overall DPS.
      *
      * @param rotationTime total simulated rotation duration in seconds

@@ -18,6 +18,11 @@ public class RunnerStepResult {
     public final int[] liveSteps;
     public final int[] partyIds;
     public final int[] episodePartyIds;
+    /**
+     * Vine snapshot IDs saved before SKILL/BURST/SWAP actions, one per env.
+     * Value is -1 when no vine snapshot was saved for that env in this step.
+     */
+    public final int[] vineSnapshotIds;
 
     public RunnerStepResult(
             double[][] observations,
@@ -33,7 +38,8 @@ public class RunnerStepResult {
             int[] episodeSteps,
             int[] liveSteps,
             int[] partyIds,
-            int[] episodePartyIds) {
+            int[] episodePartyIds,
+            int[] vineSnapshotIds) {
         this.observations = observations;
         this.privilegedObservations = privilegedObservations;
         this.actionMasks = actionMasks;
@@ -48,5 +54,6 @@ public class RunnerStepResult {
         this.liveSteps = liveSteps;
         this.partyIds = partyIds;
         this.episodePartyIds = episodePartyIds;
+        this.vineSnapshotIds = vineSnapshotIds;
     }
 }

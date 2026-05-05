@@ -39,6 +39,35 @@ public class ICDManager {
     private Map<String, ICDState> states = new HashMap<>();
 
     /**
+     * Returns a snapshot of all current ICD states.
+     * Each entry maps the group key to a two-element array: {@code [lastAppTime, hitCount]}.
+     *
+     * @return copy of ICD state map
+     */
+    public Map<String, double[]> saveStates() {
+        Map<String, double[]> copy = new HashMap<>();
+        for (Map.Entry<String, ICDState> entry : states.entrySet()) {
+            copy.put(entry.getKey(), new double[] { entry.getValue().lastAppTime, entry.getValue().hitCount });
+        }
+        return copy;
+    }
+
+    /**
+     * Restores ICD states from a previously captured snapshot.
+     *
+     * @param saved snapshot produced by {@link #saveStates()}
+     */
+    public void restoreStates(Map<String, double[]> saved) {
+        states.clear();
+        for (Map.Entry<String, double[]> entry : saved.entrySet()) {
+            ICDState state = new ICDState();
+            state.lastAppTime = entry.getValue()[0];
+            state.hitCount = (int) entry.getValue()[1];
+            states.put(entry.getKey(), state);
+        }
+    }
+
+    /**
      * Checks whether an elemental hit in the given ICD group should apply the
      * element, and updates the group's state accordingly.
      *

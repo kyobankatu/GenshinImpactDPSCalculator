@@ -2,6 +2,7 @@ import socket
 from concurrent.futures import ThreadPoolExecutor
 
 from binary_protocol import (
+    CMD_BRANCH_ROLLOUT,
     CMD_CLOSE_RUNNER,
     CMD_CREATE_RUNNER,
     CMD_HELLO,
@@ -16,6 +17,7 @@ from binary_protocol import (
     recv_ints,
     recv_string,
     send_bool,
+    send_double,
     send_int,
     send_ints,
 )
@@ -91,6 +93,7 @@ class RolloutServiceClient:
         live_steps = recv_ints(self.sock, env_count)
         party_ids = recv_ints(self.sock, env_count)
         episode_party_ids = recv_ints(self.sock, env_count)
+        vine_snapshot_ids = recv_ints(self.sock, env_count)
 
         return {
             "observations": observations,
@@ -107,7 +110,32 @@ class RolloutServiceClient:
             "live_steps": live_steps,
             "party_ids": party_ids,
             "episode_party_ids": episode_party_ids,
+            "vine_snapshot_ids": vine_snapshot_ids,
         }
+
+    def branch_rollout(self, runner_id: int, snapshot_id: int, first_action: int,
+                       K: int, H: int, gamma: float) -> float:
+        """Run K Monte Carlo branches from snapshot and return mean discounted return.
+
+        Args:
+            runner_id: runner created by create_runner
+            snapshot_id: vine snapshot ID received from a step_runner result
+            first_action: action to execute first in each branch (-1 for random)
+            K: number of independent branches
+            H: horizon steps per branch
+            gamma: discount factor
+
+        Returns:
+            mean discounted return across K branches
+        """
+        send_int(self.sock, CMD_BRANCH_ROLLOUT)
+        send_int(self.sock, runner_id)
+        send_int(self.sock, snapshot_id)
+        send_int(self.sock, first_action)
+        send_int(self.sock, K)
+        send_int(self.sock, H)
+        send_double(self.sock, gamma)
+        return recv_doubles(self.sock, 1)[0]
 
     def close_runner(self, runner_id: int):
         send_int(self.sock, CMD_CLOSE_RUNNER)
@@ -139,6 +167,7 @@ class MultiRolloutServiceClient:
         self.global_feature_size = self.clients[0].global_feature_size
         self.num_chars = self.clients[0].num_chars
         self.party_names = list(self.clients[0].party_names)
+        self._snapshot_owners = {}
         for client in self.clients[1:]:
             if client.version != self.version:
                 raise RuntimeError("Protocol version mismatch across rollout services")
@@ -193,13 +222,16 @@ class MultiRolloutServiceClient:
         live_steps = []
         party_ids = []
         episode_party_ids = []
+        vine_snapshot_ids = []
         offset = 0
         futures = []
+        shard_meta = []
         for client, runner_id, shard_envs in runner_handle:
             shard_actions = actions[offset:offset + shard_envs]
             offset += shard_envs
             futures.append(self.executor.submit(client.step_runner, runner_id, shard_actions))
-        for future in futures:
+            shard_meta.append((client, runner_id))
+        for (client, runner_id), future in zip(shard_meta, futures):
             batch = future.result()
             observations.extend(batch["observations"])
             privileged_observations.extend(batch["privileged_observations"])
@@ -215,6 +247,10 @@ class MultiRolloutServiceClient:
             live_steps.extend(batch["live_steps"])
             party_ids.extend(batch["party_ids"])
             episode_party_ids.extend(batch["episode_party_ids"])
+            for snap_id in batch.get("vine_snapshot_ids", []):
+                if snap_id >= 0:
+                    self._snapshot_owners[snap_id] = (client, runner_id)
+            vine_snapshot_ids.extend(batch.get("vine_snapshot_ids", [-1] * len(batch["rewards"])))
         return {
             "observations": observations,
             "privileged_observations": privileged_observations,
@@ -230,7 +266,16 @@ class MultiRolloutServiceClient:
             "live_steps": live_steps,
             "party_ids": party_ids,
             "episode_party_ids": episode_party_ids,
+            "vine_snapshot_ids": vine_snapshot_ids,
         }
+
+    def branch_rollout(self, _runner_handle, snapshot_id: int, first_action: int,
+                       K: int, H: int, gamma: float) -> float:
+        owner = self._snapshot_owners.pop(snapshot_id, None)
+        if owner is None:
+            raise KeyError(f"No owner found for snapshot_id {snapshot_id}")
+        client, runner_id = owner
+        return client.branch_rollout(runner_id, snapshot_id, first_action, K, H, gamma)
 
     def close_runner(self, runner_handle):
         for client, runner_id, _shard_envs in runner_handle:
