@@ -27,6 +27,7 @@ public class RolloutService {
     private final int port;
     private final String bindHost;
     private final int rolloutWorkers;
+    private final boolean vineEnabled;
     private final ObservationEncoder observationEncoder;
     private final PrivilegedStateEncoder privilegedStateEncoder;
     private final RLEpisodeFactory episodeFactory;
@@ -55,9 +56,15 @@ public class RolloutService {
     }
 
     public RolloutService(int port, String bindHost, RLEpisodeFactory episodeFactory, int rolloutWorkers) {
+        this(port, bindHost, episodeFactory, rolloutWorkers, false);
+    }
+
+    public RolloutService(int port, String bindHost, RLEpisodeFactory episodeFactory, int rolloutWorkers,
+            boolean vineEnabled) {
         this.port = port;
         this.bindHost = bindHost;
         this.rolloutWorkers = rolloutWorkers;
+        this.vineEnabled = vineEnabled;
         this.episodeFactory = episodeFactory;
         this.partyNames = episodeFactory.getPartyNames();
         this.observationEncoder = new ObservationEncoder();
@@ -109,7 +116,7 @@ public class RolloutService {
                     long createStart = System.nanoTime();
                     runners.put(runnerId, new VectorizedEnvironment(
                             count, episodeFactory, rolloutWorkers,
-                            observationEncoder, privilegedStateEncoder));
+                            observationEncoder, privilegedStateEncoder, vineEnabled));
                     runnerCreateCalls++;
                     runnerCreateNanos += System.nanoTime() - createStart;
                     out.writeInt(runnerId);

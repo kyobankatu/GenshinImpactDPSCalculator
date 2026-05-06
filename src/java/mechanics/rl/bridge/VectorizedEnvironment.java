@@ -34,6 +34,7 @@ public class VectorizedEnvironment {
     private final int workerCount;
     private final ConcurrentHashMap<Integer, SnapshotEntry> snapshotStore = new ConcurrentHashMap<>();
     private final AtomicInteger nextSnapshotId = new AtomicInteger(1);
+    private final boolean vineEnabled;
     private BattleEnvironment branchEnv;
     private long resetCalls;
     private long resetNanos;
@@ -51,18 +52,27 @@ public class VectorizedEnvironment {
     }
 
     public VectorizedEnvironment(int count, Supplier<CombatSimulator> simulatorFactory, EpisodeConfig config, int requestedWorkers) {
-        this(count, simulatorFactory, config, requestedWorkers, new ObservationEncoder(), new PrivilegedStateEncoder());
+        this(count, simulatorFactory, config, requestedWorkers, new ObservationEncoder(), new PrivilegedStateEncoder(), false);
     }
 
     public VectorizedEnvironment(int count, RLEpisodeFactory episodeFactory, int requestedWorkers,
             ObservationEncoder observationEncoder) {
-        this(count, episodeFactory, requestedWorkers, observationEncoder, new PrivilegedStateEncoder());
+        this(count, episodeFactory, requestedWorkers, observationEncoder, new PrivilegedStateEncoder(), false);
     }
 
     public VectorizedEnvironment(int count, RLEpisodeFactory episodeFactory, int requestedWorkers,
             ObservationEncoder observationEncoder, PrivilegedStateEncoder privilegedStateEncoder) {
+        this(count, episodeFactory, requestedWorkers, observationEncoder, privilegedStateEncoder, false);
+    }
+
+    /**
+     * @param vineEnabled if true, simulator snapshots are saved during step for VinePPO branch rollouts
+     */
+    public VectorizedEnvironment(int count, RLEpisodeFactory episodeFactory, int requestedWorkers,
+            ObservationEncoder observationEncoder, PrivilegedStateEncoder privilegedStateEncoder, boolean vineEnabled) {
         this.episodeRewards = new double[count];
         this.episodeDamages = new double[count];
+        this.vineEnabled = vineEnabled;
         int autoWorkers = Math.max(1, Math.min(count, Runtime.getRuntime().availableProcessors()));
         this.workerCount = requestedWorkers > 0 ? Math.max(1, Math.min(count, requestedWorkers)) : autoWorkers;
         this.executor = workerCount > 1 ? Executors.newFixedThreadPool(workerCount) : null;
@@ -86,13 +96,20 @@ public class VectorizedEnvironment {
      */
     public VectorizedEnvironment(int count, Supplier<CombatSimulator> simulatorFactory, EpisodeConfig config,
             int requestedWorkers, ObservationEncoder observationEncoder) {
-        this(count, simulatorFactory, config, requestedWorkers, observationEncoder, new PrivilegedStateEncoder());
+        this(count, simulatorFactory, config, requestedWorkers, observationEncoder, new PrivilegedStateEncoder(), false);
     }
 
     public VectorizedEnvironment(int count, Supplier<CombatSimulator> simulatorFactory, EpisodeConfig config,
             int requestedWorkers, ObservationEncoder observationEncoder, PrivilegedStateEncoder privilegedStateEncoder) {
+        this(count, simulatorFactory, config, requestedWorkers, observationEncoder, privilegedStateEncoder, false);
+    }
+
+    public VectorizedEnvironment(int count, Supplier<CombatSimulator> simulatorFactory, EpisodeConfig config,
+            int requestedWorkers, ObservationEncoder observationEncoder, PrivilegedStateEncoder privilegedStateEncoder,
+            boolean vineEnabled) {
         this.episodeRewards = new double[count];
         this.episodeDamages = new double[count];
+        this.vineEnabled = vineEnabled;
         int autoWorkers = Math.max(1, Math.min(count, Runtime.getRuntime().availableProcessors()));
         this.workerCount = requestedWorkers > 0 ? Math.max(1, Math.min(count, requestedWorkers)) : autoWorkers;
         this.executor = workerCount > 1 ? Executors.newFixedThreadPool(workerCount) : null;
@@ -166,7 +183,7 @@ public class VectorizedEnvironment {
         java.util.Arrays.fill(vineSnapshotIds, -1);
 
         ParallelTiming timing = parallelForEach(index -> {
-            if (isVineSampleAction(actions[index])) {
+            if (vineEnabled && isVineSampleAction(actions[index])) {
                 BattleEnvironment env = environments.get(index);
                 SimulatorSnapshot snap = env.saveSnapshot();
                 double snapLastSwapTime = env.getLastSwapTime();

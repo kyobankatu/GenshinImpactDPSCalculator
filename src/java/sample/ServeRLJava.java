@@ -14,12 +14,14 @@ public class ServeRLJava {
         int rolloutWorkers = args.length > 2 ? Integer.parseInt(args[2]) : 0;
         String selection = args.length > 3 ? normalizeSelectionArg(args[3]) : RLPartyRegistry.DEFAULT_SINGLE_PARTY;
         double episodeSeconds = args.length > 4 ? Double.parseDouble(args[4]) : 20.0;
+        boolean vineEnabled = args.length > 5 && Boolean.parseBoolean(args[5]);
         EpisodeConfig config = new EpisodeConfig().withMaxEpisodeTime(episodeSeconds);
         RolloutService service = new RolloutService(
                 port,
                 bindHost,
                 RLPartyRegistry.createEpisodeFactory(config, selection),
-                rolloutWorkers);
+                rolloutWorkers,
+                vineEnabled);
         service.serveForever();
     }
 
