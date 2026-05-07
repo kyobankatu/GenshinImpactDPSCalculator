@@ -763,6 +763,7 @@ def apply_vine_ppo_advantages(segments, config, client, runner_id):
                 vine_candidates.append((seg_idx, step_idx, snap_id, step["action"]))
 
     if not vine_candidates:
+        print("[VinePPO] vine_candidates empty (all snap_ids were -1)", flush=True)
         return metrics
 
     if len(vine_candidates) > max_points:
@@ -773,7 +774,8 @@ def apply_vine_ppo_advantages(segments, config, client, runner_id):
     for seg_idx, step_idx, snap_id, action in vine_candidates:
         try:
             q_mc = client.branch_rollout(runner_id, snap_id, action, K, H, gamma)
-        except Exception:
+        except Exception as e:
+            print(f"[VinePPO] branch_rollout failed: snap_id={snap_id} action={action} error={e}", flush=True)
             continue
         step = segments[seg_idx]["steps"][step_idx]
         v_learned = step["value"]
