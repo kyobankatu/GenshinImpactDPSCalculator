@@ -135,7 +135,10 @@ class RolloutServiceClient:
         send_int(self.sock, K)
         send_int(self.sock, H)
         send_double(self.sock, gamma)
-        return recv_doubles(self.sock, 1)[0]
+        value = recv_doubles(self.sock, 1)[0]
+        if value != value:  # NaN check
+            raise RuntimeError(f"branch_rollout returned NaN (Java-side error for snap_id={snapshot_id})")
+        return value
 
     def close_runner(self, runner_id: int):
         send_int(self.sock, CMD_CLOSE_RUNNER)
