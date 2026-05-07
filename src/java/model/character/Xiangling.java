@@ -2,7 +2,7 @@ package model.character;
 
 import mechanics.data.TalentDataManager;
 import mechanics.data.TalentDataSource;
-import model.entity.BurstStateProvider;
+import model.entity.FormStateProvider;
 import model.entity.Character;
 import model.entity.Weapon;
 import model.entity.ArtifactSet;
@@ -19,7 +19,7 @@ import simulation.action.AttackAction;
 import simulation.action.CharacterActionRequest;
 import simulation.event.PeriodicDamageEvent;
 
-public class Xiangling extends Character implements BurstStateProvider {
+public class Xiangling extends Character implements FormStateProvider {
 
     private int normalAttackStep = 0;
 
@@ -46,7 +46,7 @@ public class Xiangling extends Character implements BurstStateProvider {
     }
 
     @Override
-    public boolean isBurstActive(double currentTime) {
+    public boolean isFormActive(double currentTime) {
         double duration = (this.constellation >= 4) ? 14.0 : 10.0;
         return (currentTime - getLastBurstTime()) < duration;
     }

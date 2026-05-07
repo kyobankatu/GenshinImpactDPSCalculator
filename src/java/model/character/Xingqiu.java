@@ -2,7 +2,7 @@ package model.character;
 
 import mechanics.data.TalentDataManager;
 import mechanics.data.TalentDataSource;
-import model.entity.BurstStateProvider;
+import model.entity.FormStateProvider;
 import model.entity.Character;
 import model.entity.Weapon;
 import model.entity.ArtifactSet;
@@ -18,7 +18,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionRequest;
 
-public class Xingqiu extends Character implements BurstStateProvider {
+public class Xingqiu extends Character implements FormStateProvider {
 
     private int normalAttackStep = 0;
     private java.util.Map<String, Double> triggerCooldowns = new java.util.HashMap<>();
@@ -52,7 +52,7 @@ public class Xingqiu extends Character implements BurstStateProvider {
     }
 
     @Override
-    public boolean isBurstActive(double currentTime) {
+    public boolean isFormActive(double currentTime) {
         return (currentTime - getLastBurstTime()) < 18.0;
     }
 

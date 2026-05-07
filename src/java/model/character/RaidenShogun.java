@@ -2,7 +2,7 @@ package model.character;
 
 import mechanics.data.TalentDataManager;
 import mechanics.data.TalentDataSource;
-import model.entity.BurstStateProvider;
+import model.entity.FormStateProvider;
 import model.entity.Character;
 import model.entity.SwitchAwareCharacter;
 import model.entity.Weapon;
@@ -19,7 +19,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionRequest;
 
-public class RaidenShogun extends Character implements BurstStateProvider, SwitchAwareCharacter {
+public class RaidenShogun extends Character implements FormStateProvider, SwitchAwareCharacter {
 
     private int normalAttackStep = 0;
     private double resolveStacks = 0;
@@ -50,7 +50,7 @@ public class RaidenShogun extends Character implements BurstStateProvider, Switc
     }
 
     @Override
-    public boolean isBurstActive(double currentTime) {
+    public boolean isFormActive(double currentTime) {
         return musouActive;
     }
 

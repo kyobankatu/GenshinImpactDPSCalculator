@@ -1,6 +1,6 @@
 package model.character;
 
-import model.entity.BurstStateProvider;
+import model.entity.FormStateProvider;
 import model.entity.Character;
 import model.entity.CharacterTeamBuffProvider;
 import model.entity.ReactionAwareCharacter;
@@ -49,7 +49,7 @@ import mechanics.energy.ParticleType;
  * Burst energy cost switches between 80 (standard) and 30 (Thunderous Symphony active).
  */
 public class Flins extends Character
-        implements BurstStateProvider, CharacterTeamBuffProvider, ReactionAwareCharacter {
+        implements FormStateProvider, CharacterTeamBuffProvider, ReactionAwareCharacter {
 
     private int normalAttackStep = 0;
 
@@ -166,12 +166,13 @@ public class Flins extends Character
     }
 
     /**
-     * Returns {@code false}; Flins has no persistent burst state tracked by
-     * the base class.
+     * Returns {@code true} while Manifest Flame form is active (Skill-triggered,
+     * lasts 10 s).  During this window Flins' normal attacks deal Electro damage
+     * and she should remain on-field.
      */
     @Override
-    public boolean isBurstActive(double currentTime) {
-        return false;
+    public boolean isFormActive(double currentTime) {
+        return isManifestFlameActive(currentTime);
     }
 
     /**

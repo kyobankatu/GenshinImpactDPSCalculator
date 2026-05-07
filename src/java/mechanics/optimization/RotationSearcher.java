@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import simulation.CombatSimulator;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
-import model.entity.BurstStateProvider;
+import model.entity.FormStateProvider;
 import model.entity.Character;
 import model.type.CharacterId;
 /**
@@ -348,8 +348,8 @@ public class RotationSearcher {
         }
 
         private boolean isBurstActive(Character character, double currentTime) {
-            return character instanceof BurstStateProvider
-                    && ((BurstStateProvider) character).isBurstActive(currentTime);
+            return character instanceof FormStateProvider
+                    && ((FormStateProvider) character).isFormActive(currentTime);
         }
     }
 }

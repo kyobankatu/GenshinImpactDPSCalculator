@@ -1,6 +1,6 @@
 package model.character;
 
-import model.entity.BurstStateProvider;
+import model.entity.FormStateProvider;
 import model.entity.Character;
 import model.entity.CharacterTeamBuffProvider;
 import model.entity.Weapon;
@@ -44,7 +44,7 @@ import mechanics.energy.ParticleType;
  *
  * <p>Ineffa is a Lunar character ({@link #isLunarCharacter()} returns {@code true}).
  */
-public class Ineffa extends Character implements BurstStateProvider, CharacterTeamBuffProvider {
+public class Ineffa extends Character implements FormStateProvider, CharacterTeamBuffProvider {
 
     private int normalAttackStep = 0;
     private double shieldHealth = 0;
@@ -96,7 +96,7 @@ public class Ineffa extends Character implements BurstStateProvider, CharacterTe
      * persistent active state.
      */
     @Override
-    public boolean isBurstActive(double currentTime) {
+    public boolean isFormActive(double currentTime) {
         return false; // Burst is instant/summon based
     }
 

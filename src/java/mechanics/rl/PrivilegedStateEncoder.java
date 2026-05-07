@@ -1,7 +1,7 @@
 package mechanics.rl;
 
 import mechanics.rl.ObservationEncoder.CapabilityProfileStore;
-import model.entity.BurstStateProvider;
+import model.entity.FormStateProvider;
 import model.entity.Character;
 import model.entity.Enemy;
 import model.type.CharacterId;
@@ -57,7 +57,7 @@ public class PrivilegedStateEncoder {
             double energyRatio = clamp01(character.getCurrentEnergy() / Math.max(1.0, character.getEnergyCost()));
             double skillReady = character.canSkill(now) ? 1.0 : 0.0;
             double burstReady = character.canBurst(now) ? 1.0 : 0.0;
-            double burstActive = isBurstActive(character, now) ? 1.0 : 0.0;
+            double burstActive = isFormActive(character, now) ? 1.0 : 0.0;
             double buffActivity = clamp01(countActiveBuffs(character, now) / 6.0);
             double recentActionMomentum = Math.max(
                     decay(now - character.getLastSkillTime(), 8.0),
@@ -137,9 +137,9 @@ public class PrivilegedStateEncoder {
         return -1;
     }
 
-    private boolean isBurstActive(Character character, double currentTime) {
-        return character instanceof BurstStateProvider
-                && ((BurstStateProvider) character).isBurstActive(currentTime);
+    private boolean isFormActive(Character character, double currentTime) {
+        return character instanceof FormStateProvider
+                && ((FormStateProvider) character).isFormActive(currentTime);
     }
 
     private double countActiveBuffs(Character character, double currentTime) {

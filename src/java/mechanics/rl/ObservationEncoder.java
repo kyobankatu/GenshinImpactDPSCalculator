@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import model.entity.BurstStateProvider;
+import model.entity.FormStateProvider;
 import model.entity.Character;
 import model.entity.Enemy;
 import model.type.CharacterId;
@@ -27,7 +27,7 @@ import simulation.CombatSimulator;
  * <p>Per-character block (27 dims):
  * <ul>
  *   <li>[0–9] dynamic: energy ratio, isActive, skill readiness, burst readiness,
- *       isBurstActive, active-buff ratio, max-buff-remaining, time-since-last-active,
+ *       isFormActive, active-buff ratio, max-buff-remaining, time-since-last-active,
  *       on-field fraction, cumulative damage share</li>
  *   <li>[10–17] static: element one-hot (8 dims, {@link Element#values()} order)</li>
  *   <li>[18–26] static: capability and value-curve profile scores</li>
@@ -129,7 +129,7 @@ public class ObservationEncoder {
             observation[index++] = 1.0 - clamp01(character.getSkillCDRemaining(now) / skillCD);
             double burstCD = Math.max(1.0, character.getBurstCD());
             observation[index++] = 1.0 - clamp01(character.getBurstCDRemaining(now) / burstCD);
-            observation[index++] = isBurstActive(character, now) ? 1.0 : 0.0;
+            observation[index++] = isFormActive(character, now) ? 1.0 : 0.0;
             observation[index++] = clamp01(countActiveBuffs(character, now) / 6.0);
             // history-derived dynamic features
             observation[index++] = maxBuffRemaining(character, now);
@@ -164,9 +164,9 @@ public class ObservationEncoder {
         observation[index] = sim.getThundercloudEndTime() > now ? 1.0 : 0.0;
     }
 
-    private boolean isBurstActive(Character character, double currentTime) {
-        return character instanceof BurstStateProvider
-                && ((BurstStateProvider) character).isBurstActive(currentTime);
+    private boolean isFormActive(Character character, double currentTime) {
+        return character instanceof FormStateProvider
+                && ((FormStateProvider) character).isFormActive(currentTime);
     }
 
     private double countActiveBuffs(Character character, double currentTime) {

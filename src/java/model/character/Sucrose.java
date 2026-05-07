@@ -2,7 +2,7 @@ package model.character;
 
 import mechanics.data.TalentDataManager;
 import mechanics.data.TalentDataSource;
-import model.entity.BurstStateProvider;
+import model.entity.FormStateProvider;
 import model.entity.Character;
 import model.entity.Weapon;
 import model.entity.ArtifactSet;
@@ -44,7 +44,7 @@ import mechanics.energy.ParticleType;
  *
  * <p>C1 grants a second Skill charge (max 2); C2 extends burst duration to 8 s.
  */
-public class Sucrose extends Character implements BurstStateProvider {
+public class Sucrose extends Character implements FormStateProvider {
 
     private int normalAttackStep = 0;
 
@@ -103,7 +103,7 @@ public class Sucrose extends Character implements BurstStateProvider {
      * @param currentTime current simulation time in seconds
      */
     @Override
-    public boolean isBurstActive(double currentTime) {
+    public boolean isFormActive(double currentTime) {
         // Approximate check: Burst lasts 6s (8s C2)
         double duration = (this.constellation >= 2) ? 8.0 : 6.0;
         return (currentTime - getLastBurstTime()) < duration;
