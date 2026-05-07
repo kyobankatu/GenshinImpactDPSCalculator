@@ -210,6 +210,7 @@ public class BattleEnvironment {
      */
     public double branchRolloutMean(simulation.SimulatorSnapshot snap, double snapLastSwapTime,
             int firstAction, int K, int H, double gamma) {
+        ensureReset();
         double totalReturn = 0.0;
         for (int k = 0; k < K; k++) {
             simulator.restoreSnapshot(snap);
