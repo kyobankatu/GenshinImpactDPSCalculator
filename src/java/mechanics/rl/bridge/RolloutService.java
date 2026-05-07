@@ -34,6 +34,7 @@ public class RolloutService {
     private final String[] partyNames;
     private final Map<Integer, VectorizedEnvironment> runners = new HashMap<>();
     private int nextRunnerId = 1;
+    private volatile boolean vineSnapshotLogged = false;
     private long runnerCreateCalls;
     private long runnerCreateNanos;
     private long resetCalls;
@@ -74,7 +75,7 @@ public class RolloutService {
     public void serveForever() throws IOException {
         try (ServerSocket serverSocket = new ServerSocket(port, 1, InetAddress.getByName(bindHost))) {
             String workerLabel = rolloutWorkers > 0 ? Integer.toString(rolloutWorkers) : "auto";
-            System.out.printf("RL rollout service listening on %s:%d (workers=%s)%n", bindHost, port, workerLabel);
+            System.out.printf("RL rollout service listening on %s:%d (workers=%s, vineEnabled=%b)%n", bindHost, port, workerLabel, vineEnabled);
             while (true) {
                 try (Socket socket = serverSocket.accept();
                         DataInputStream in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
@@ -143,6 +144,15 @@ public class RolloutService {
                     RunnerStepResult stepResult = environment.step(actions);
                     stepCalls++;
                     stepNanos += System.nanoTime() - stepStart;
+                    if (!vineSnapshotLogged && stepResult.vineSnapshotIds != null) {
+                        for (int snapId : stepResult.vineSnapshotIds) {
+                            if (snapId >= 0) {
+                                System.out.printf("[RolloutService] First vine snapshot saved: snapId=%d%n", snapId);
+                                vineSnapshotLogged = true;
+                                break;
+                            }
+                        }
+                    }
                     long stepWriteStart = System.nanoTime();
                     writeStep(out, stepResult);
                     stepWriteNanos += System.nanoTime() - stepWriteStart;
