@@ -799,6 +799,16 @@ def apply_vine_ppo_advantages(segments, config, client, runner_id):
         metrics["vine_points"] = len(adv_list)
         metrics["setup_adv_mean"] = float(np.mean(adv_list))
         metrics["advantage_bias"] = float(np.mean(bias_list))
+        # Re-normalize all advantages so vine-overridden steps share the same scale
+        # as the GAE-normalized non-vine steps. Without this, the raw H-step Q_MC
+        # difference (~10^2-10^3) dwarfs the standardized GAE values (~10^0).
+        all_advs = [step["advantage"] for seg in segments for step in seg["steps"]]
+        arr = np.asarray(all_advs, dtype=np.float32)
+        mean = float(arr.mean())
+        std = float(arr.std()) + 1e-8
+        for seg in segments:
+            for step in seg["steps"]:
+                step["advantage"] = (step["advantage"] - mean) / std
     return metrics
 
 
