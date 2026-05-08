@@ -172,13 +172,14 @@ public class RolloutService {
                     int branchRunnerId = in.readInt();
                     int snapshotId = in.readInt();
                     int branchFirstAction = in.readInt();
+                    int branchBaselineAction = in.readInt();
                     int branchK = in.readInt();
                     int branchH = in.readInt();
                     double branchGamma = in.readDouble();
                     double meanReturn;
                     try {
                         meanReturn = getRunner(branchRunnerId).branchRollout(
-                                snapshotId, branchFirstAction, branchK, branchH, branchGamma);
+                                snapshotId, branchFirstAction, branchBaselineAction, branchK, branchH, branchGamma);
                     } catch (Exception e) {
                         System.err.printf("[RolloutService] branch_rollout error snap=%d action=%d: %s%n",
                                 snapshotId, branchFirstAction, e);

@@ -773,13 +773,15 @@ def apply_vine_ppo_advantages(segments, config, client, runner_id):
     bias_list = []
     for seg_idx, step_idx, snap_id, action in vine_candidates:
         try:
-            q_mc = client.branch_rollout(runner_id, snap_id, action, K, H, gamma)
+            # Returns Q_MC(s, action) - Q_MC(s, baseline=-1/random).
+            # Both terms use the same random policy after the first step, so
+            # the truncation bias cancels and the sign reflects whether action
+            # beats a random baseline over the H-step horizon.
+            vine_adv = client.branch_rollout(runner_id, snap_id, action, K, H, gamma, baseline_action=-1)
         except Exception as e:
             print(f"[VinePPO] branch_rollout failed: snap_id={snap_id} action={action} error={e}", flush=True)
             continue
         step = segments[seg_idx]["steps"][step_idx]
-        v_learned = step["value"]
-        vine_adv = q_mc - v_learned
         gae_adv = step["advantage"]
         step["advantage"] = vine_adv
         adv_list.append(vine_adv)

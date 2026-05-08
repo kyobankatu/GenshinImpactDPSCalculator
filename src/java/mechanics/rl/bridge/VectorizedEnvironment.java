@@ -258,12 +258,24 @@ public class VectorizedEnvironment {
      * @param gamma       discount factor
      * @return mean discounted return across K branches
      */
-    public double branchRollout(int snapshotId, int firstAction, int K, int H, double gamma) {
+    /**
+     * Runs VinePPO branch rollouts and returns the advantage of {@code firstAction}
+     * relative to {@code baselineAction} (both evaluated under the same random policy).
+     *
+     * <p>Using a shared random-policy baseline cancels the truncation bias that arises
+     * when comparing an H-step MC return to the full-horizon critic value.
+     *
+     * @param baselineAction action used as baseline; -1 for uniform random
+     * @return Q_MC(s, firstAction) - Q_MC(s, baselineAction)
+     */
+    public double branchRollout(int snapshotId, int firstAction, int baselineAction, int K, int H, double gamma) {
         SnapshotEntry entry = snapshotStore.remove(snapshotId);
         if (entry == null) {
             throw new IllegalArgumentException("Unknown snapshot id: " + snapshotId);
         }
-        return branchEnv.branchRolloutMean(entry.snapshot, entry.lastSwapTime, firstAction, K, H, gamma);
+        double qAction = branchEnv.branchRolloutMean(entry.snapshot, entry.lastSwapTime, firstAction, K, H, gamma);
+        double qBaseline = branchEnv.branchRolloutMean(entry.snapshot, entry.lastSwapTime, baselineAction, K, H, gamma);
+        return qAction - qBaseline;
     }
 
     private static boolean isVineSampleAction(int actionId) {

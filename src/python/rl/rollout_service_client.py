@@ -114,24 +114,26 @@ class RolloutServiceClient:
         }
 
     def branch_rollout(self, runner_id: int, snapshot_id: int, first_action: int,
-                       K: int, H: int, gamma: float) -> float:
-        """Run K Monte Carlo branches from snapshot and return mean discounted return.
+                       K: int, H: int, gamma: float, baseline_action: int = -1) -> float:
+        """Run K Monte Carlo branches for first_action and baseline_action, return their difference.
 
         Args:
             runner_id: runner created by create_runner
             snapshot_id: vine snapshot ID received from a step_runner result
-            first_action: action to execute first in each branch (-1 for random)
-            K: number of independent branches
+            first_action: action to evaluate (-1 for random)
+            K: number of independent branches per action
             H: horizon steps per branch
             gamma: discount factor
+            baseline_action: reference action for advantage baseline (-1 for random)
 
         Returns:
-            mean discounted return across K branches
+            Q_MC(s, first_action) - Q_MC(s, baseline_action)
         """
         send_int(self.sock, CMD_BRANCH_ROLLOUT)
         send_int(self.sock, runner_id)
         send_int(self.sock, snapshot_id)
         send_int(self.sock, first_action)
+        send_int(self.sock, baseline_action)
         send_int(self.sock, K)
         send_int(self.sock, H)
         send_double(self.sock, gamma)
@@ -273,12 +275,12 @@ class MultiRolloutServiceClient:
         }
 
     def branch_rollout(self, _runner_handle, snapshot_id: int, first_action: int,
-                       K: int, H: int, gamma: float) -> float:
+                       K: int, H: int, gamma: float, baseline_action: int = -1) -> float:
         owner = self._snapshot_owners.pop(snapshot_id, None)
         if owner is None:
             raise KeyError(f"No owner found for snapshot_id {snapshot_id}")
         client, runner_id = owner
-        return client.branch_rollout(runner_id, snapshot_id, first_action, K, H, gamma)
+        return client.branch_rollout(runner_id, snapshot_id, first_action, K, H, gamma, baseline_action)
 
     def close_runner(self, runner_handle):
         for client, runner_id, _shard_envs in runner_handle:
