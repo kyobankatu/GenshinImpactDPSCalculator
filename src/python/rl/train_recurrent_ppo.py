@@ -773,14 +773,22 @@ def apply_vine_ppo_advantages(segments, config, client, runner_id):
     bias_list = []
     for seg_idx, step_idx, snap_id, action in vine_candidates:
         try:
-            # Returns Q_MC(s, action) - Q_MC(s, baseline=-1/random).
-            # Both terms use the same random policy after the first step, so
-            # the truncation bias cancels and the sign reflects whether action
-            # beats a random baseline over the H-step horizon.
-            vine_adv = client.branch_rollout(runner_id, snap_id, action, K, H, gamma, baseline_action=-1)
+            # Returns Q_MC for every action (NaN where invalid).
+            q_values = client.branch_rollout_multi(runner_id, snap_id, K, H, gamma)
         except Exception as e:
-            print(f"[VinePPO] branch_rollout failed: snap_id={snap_id} action={action} error={e}", flush=True)
+            print(f"[VinePPO] branch_rollout_multi failed: snap_id={snap_id} error={e}", flush=True)
             continue
+        valid_q = [q for q in q_values if q == q]  # filter out NaN
+        if not valid_q or action >= len(q_values):
+            continue
+        chosen_q = q_values[action]
+        if chosen_q != chosen_q:  # chosen action invalid (shouldn't happen)
+            continue
+        # Counterfactual advantage: chosen vs mean over valid actions.
+        # The mean baseline is on the same H-step random-policy scale as chosen_q,
+        # so the comparison is unbiased and handles party-agnostic credit assignment.
+        baseline = sum(valid_q) / len(valid_q)
+        vine_adv = chosen_q - baseline
         step = segments[seg_idx]["steps"][step_idx]
         gae_adv = step["advantage"]
         step["advantage"] = vine_adv

@@ -246,6 +246,53 @@ public class BattleEnvironment {
         return totalReturn / K;
     }
 
+    /**
+     * Evaluates Q_MC(s, a) for every action in the action space starting from
+     * the given snapshot. Returns one entry per action (NaN for actions that
+     * are invalid at the snapshot state).
+     *
+     * <p>Used by the counterfactual VinePPO advantage estimator: by averaging
+     * the per-action Q estimates we obtain a baseline on the same scale as
+     * each Q estimate, which removes the truncation bias that would arise
+     * from comparing against the full-horizon critic value.
+     *
+     * @param snap            snapshot of the simulator state to branch from
+     * @param snapLastSwapTime last-swap time captured with the snapshot
+     * @param K               number of independent branches per action
+     * @param H               horizon steps per branch
+     * @param gamma           discount factor
+     * @return double array of length {@link mechanics.rl.RLAction#SIZE} with Q_MC per action
+     */
+    public double[] branchRolloutMultiAction(simulation.SimulatorSnapshot snap, double snapLastSwapTime,
+            int K, int H, double gamma) {
+        ensureReset();
+        int actionCount = mechanics.rl.RLAction.SIZE;
+        double[] qValues = new double[actionCount];
+
+        // Determine valid actions at the snapshot state (single restore + mask fill).
+        simulator.restoreSnapshot(snap);
+        lastSwapTime = snapLastSwapTime;
+        stepCount = 0;
+        previousActionId = -1;
+        generateReportOnDone = false;
+        java.util.Arrays.fill(slotLastActiveTime, -config.maxEpisodeTime);
+        java.util.Arrays.fill(slotOnFieldTime, 0.0);
+        fillActionMaskBuffer();
+        boolean[] valid = new boolean[actionCount];
+        for (int i = 0; i < actionCount; i++) {
+            valid[i] = actionMaskBuffer[i] > 0.5;
+        }
+
+        for (int a = 0; a < actionCount; a++) {
+            if (!valid[a]) {
+                qValues[a] = Double.NaN;
+                continue;
+            }
+            qValues[a] = branchRolloutMean(snap, snapLastSwapTime, a, K, H, gamma);
+        }
+        return qValues;
+    }
+
     private int sampleRandomValidAction(double[] mask) {
         int count = 0;
         for (double m : mask) {

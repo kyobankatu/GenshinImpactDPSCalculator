@@ -2,7 +2,7 @@ import socket
 import struct
 
 
-VERSION = 7
+VERSION = 8
 
 CMD_HELLO = 1
 CMD_CREATE_RUNNER = 2

@@ -171,22 +171,24 @@ public class RolloutService {
                 case BatchProtocol.CMD_BRANCH_ROLLOUT:
                     int branchRunnerId = in.readInt();
                     int snapshotId = in.readInt();
-                    int branchFirstAction = in.readInt();
-                    int branchBaselineAction = in.readInt();
                     int branchK = in.readInt();
                     int branchH = in.readInt();
                     double branchGamma = in.readDouble();
-                    double meanReturn;
+                    double[] qValues;
                     try {
-                        meanReturn = getRunner(branchRunnerId).branchRollout(
-                                snapshotId, branchFirstAction, branchBaselineAction, branchK, branchH, branchGamma);
+                        qValues = getRunner(branchRunnerId).branchRolloutMulti(
+                                snapshotId, branchK, branchH, branchGamma);
                     } catch (Exception e) {
-                        System.err.printf("[RolloutService] branch_rollout error snap=%d action=%d: %s%n",
-                                snapshotId, branchFirstAction, e);
+                        System.err.printf("[RolloutService] branch_rollout error snap=%d: %s%n",
+                                snapshotId, e);
                         e.printStackTrace(System.err);
-                        meanReturn = Double.NaN;
+                        qValues = new double[mechanics.rl.RLAction.SIZE];
+                        java.util.Arrays.fill(qValues, Double.NaN);
                     }
-                    out.writeDouble(meanReturn);
+                    out.writeInt(qValues.length);
+                    for (double q : qValues) {
+                        out.writeDouble(q);
+                    }
                     out.flush();
                     break;
                 case BatchProtocol.CMD_SHUTDOWN:

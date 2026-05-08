@@ -113,34 +113,28 @@ class RolloutServiceClient:
             "vine_snapshot_ids": vine_snapshot_ids,
         }
 
-    def branch_rollout(self, runner_id: int, snapshot_id: int, first_action: int,
-                       K: int, H: int, gamma: float, baseline_action: int = -1) -> float:
-        """Run K Monte Carlo branches for first_action and baseline_action, return their difference.
+    def branch_rollout_multi(self, runner_id: int, snapshot_id: int,
+                             K: int, H: int, gamma: float) -> list:
+        """Run K Monte Carlo branches per valid action and return Q_MC for each action.
 
         Args:
             runner_id: runner created by create_runner
             snapshot_id: vine snapshot ID received from a step_runner result
-            first_action: action to evaluate (-1 for random)
             K: number of independent branches per action
             H: horizon steps per branch
             gamma: discount factor
-            baseline_action: reference action for advantage baseline (-1 for random)
 
         Returns:
-            Q_MC(s, first_action) - Q_MC(s, baseline_action)
+            list of Q_MC values, one per action ID. Invalid actions are NaN.
         """
         send_int(self.sock, CMD_BRANCH_ROLLOUT)
         send_int(self.sock, runner_id)
         send_int(self.sock, snapshot_id)
-        send_int(self.sock, first_action)
-        send_int(self.sock, baseline_action)
         send_int(self.sock, K)
         send_int(self.sock, H)
         send_double(self.sock, gamma)
-        value = recv_doubles(self.sock, 1)[0]
-        if value != value:  # NaN check
-            raise RuntimeError(f"branch_rollout returned NaN (Java-side error for snap_id={snapshot_id})")
-        return value
+        action_count = recv_int(self.sock)
+        return recv_doubles(self.sock, action_count)
 
     def close_runner(self, runner_id: int):
         send_int(self.sock, CMD_CLOSE_RUNNER)
@@ -274,13 +268,13 @@ class MultiRolloutServiceClient:
             "vine_snapshot_ids": vine_snapshot_ids,
         }
 
-    def branch_rollout(self, _runner_handle, snapshot_id: int, first_action: int,
-                       K: int, H: int, gamma: float, baseline_action: int = -1) -> float:
+    def branch_rollout_multi(self, _runner_handle, snapshot_id: int,
+                             K: int, H: int, gamma: float) -> list:
         owner = self._snapshot_owners.pop(snapshot_id, None)
         if owner is None:
             raise KeyError(f"No owner found for snapshot_id {snapshot_id}")
         client, runner_id = owner
-        return client.branch_rollout(runner_id, snapshot_id, first_action, K, H, gamma, baseline_action)
+        return client.branch_rollout_multi(runner_id, snapshot_id, K, H, gamma)
 
     def close_runner(self, runner_handle):
         for client, runner_id, _shard_envs in runner_handle:

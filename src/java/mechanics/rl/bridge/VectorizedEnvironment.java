@@ -259,23 +259,20 @@ public class VectorizedEnvironment {
      * @return mean discounted return across K branches
      */
     /**
-     * Runs VinePPO branch rollouts and returns the advantage of {@code firstAction}
-     * relative to {@code baselineAction} (both evaluated under the same random policy).
+     * Runs VinePPO branch rollouts for every valid action at the snapshot state and
+     * returns Q_MC for each action (NaN for invalid actions).
      *
-     * <p>Using a shared random-policy baseline cancels the truncation bias that arises
-     * when comparing an H-step MC return to the full-horizon critic value.
+     * <p>The Python learner combines these into a counterfactual advantage:
+     * {@code A(s, chosen) = Q_MC(s, chosen) - mean_{a valid} Q_MC(s, a)}.
      *
-     * @param baselineAction action used as baseline; -1 for uniform random
-     * @return Q_MC(s, firstAction) - Q_MC(s, baselineAction)
+     * @return double array of length {@link mechanics.rl.RLAction#SIZE}
      */
-    public double branchRollout(int snapshotId, int firstAction, int baselineAction, int K, int H, double gamma) {
+    public double[] branchRolloutMulti(int snapshotId, int K, int H, double gamma) {
         SnapshotEntry entry = snapshotStore.remove(snapshotId);
         if (entry == null) {
             throw new IllegalArgumentException("Unknown snapshot id: " + snapshotId);
         }
-        double qAction = branchEnv.branchRolloutMean(entry.snapshot, entry.lastSwapTime, firstAction, K, H, gamma);
-        double qBaseline = branchEnv.branchRolloutMean(entry.snapshot, entry.lastSwapTime, baselineAction, K, H, gamma);
-        return qAction - qBaseline;
+        return branchEnv.branchRolloutMultiAction(entry.snapshot, entry.lastSwapTime, K, H, gamma);
     }
 
     private static boolean isVineSampleAction(int actionId) {
