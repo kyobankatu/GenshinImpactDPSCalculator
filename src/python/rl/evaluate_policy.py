@@ -4,7 +4,7 @@ import os
 
 import torch
 
-from recurrent_ppo import RecurrentPolicy
+from recurrent_ppo import RecurrentPolicy, load_policy
 from rollout_service_client import build_rollout_client
 
 
@@ -27,7 +27,7 @@ def main():
 
     client = build_rollout_client(host=host, port=port, ports=ports, endpoints=endpoints)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    policy, _ = RecurrentPolicy.load(checkpoint, map_location=device)
+    policy, _ = load_policy(checkpoint, map_location=device)
     policy = policy.to(device)
     try:
         if mode in ("deterministic", "both"):

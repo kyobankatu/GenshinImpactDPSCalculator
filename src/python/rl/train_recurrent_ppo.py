@@ -14,7 +14,7 @@ try:
 except ImportError:
     wandb = None
 
-from recurrent_ppo import RecurrentPolicy, compute_advantages
+from recurrent_ppo import RecurrentPolicy, TransformerPolicy, build_policy, compute_advantages
 from rollout_service_client import build_rollout_client
 
 
@@ -90,6 +90,8 @@ PRESETS = {
         "vine_horizon": 16,
         "vine_sample_actions": ["SKILL", "BURST", "SWAP"],
         "vine_max_points_per_update": 64,
+        "value_quantile": 0.5,
+        "policy_type": "transformer",
     },
 }
 
@@ -118,7 +120,8 @@ def run_training(args, run=None):
     runner_id = client.create_runner(config["envs"])
     observations, privileged_observations, action_masks, party_ids = client.reset_runner(runner_id, False)
 
-    policy = RecurrentPolicy(
+    policy = build_policy(
+        config.get("policy_type", "transformer"),
         client.observation_size,
         config["hidden_size"],
         client.action_size,
@@ -147,7 +150,13 @@ def run_training(args, run=None):
     if args.resume_from:
         if not os.path.exists(args.resume_from):
             raise FileNotFoundError(f"Resume checkpoint not found: {args.resume_from}")
-        checkpoint_payload = RecurrentPolicy.load_payload(args.resume_from, map_location=device)
+        checkpoint_payload = torch.load(args.resume_from, map_location=device)
+        checkpoint_policy_type = checkpoint_payload.get("policy_type", "gru")
+        if checkpoint_policy_type != config.get("policy_type", "transformer"):
+            raise ValueError(
+                f"Resume checkpoint policy_type mismatch: "
+                f"checkpoint={checkpoint_policy_type} config={config.get('policy_type')}"
+            )
         checkpoint_hidden_size = checkpoint_payload["hidden_size"]
         checkpoint_observation_size = checkpoint_payload["observation_size"]
         checkpoint_action_size = checkpoint_payload["action_size"]
@@ -539,6 +548,8 @@ def parse_args():
     parser.add_argument("--vine-branch-count", type=int, default=None, help="number of MC branches per vine sample point K")
     parser.add_argument("--vine-horizon", type=int, default=None, help="horizon steps per vine branch H")
     parser.add_argument("--vine-max-points", type=int, default=None, help="max vine sample points per update (sub-sampling limit)")
+    parser.add_argument("--value-quantile", type=float, default=None, help="expectile quantile for value loss (0.5=MSE, 0.9=risk-seeking upper tail)")
+    parser.add_argument("--policy-type", type=str, default=None, choices=["gru", "transformer"], help="policy architecture: gru (recurrent) or transformer")
     parser.add_argument("--rollout-workers", type=int, default=None, help="Java rollout worker override used for this run")
     parser.add_argument("--resume-from", default=None, help="path to a saved .pt checkpoint to resume from")
     parser.add_argument("--wandb", action="store_true", help="enable Weights & Biases logging")
@@ -579,6 +590,8 @@ def resolve_config(args):
         "vine_branch_count": args.vine_branch_count,
         "vine_horizon": args.vine_horizon,
         "vine_max_points_per_update": args.vine_max_points,
+        "value_quantile": args.value_quantile,
+        "policy_type": args.policy_type,
     }
     if getattr(args, "use_vine_ppo", False):
         overrides["use_vine_ppo"] = True
@@ -877,8 +890,18 @@ def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coef
             policy_loss = -(
                 torch.minimum(surrogate, clipped_surrogate) * valid_mask
             ).sum() / valid_count
+            # Expectile (asymmetric L2) regression for risk-seeking critic.
+            # q=0.5 → standard MSE. q=0.9 → V predicts the upper expectile of returns,
+            # so advantage = G - V is positive only for shots that beat the upper tail.
+            quantile = float(config.get("value_quantile", 0.5))
+            value_diff = minibatch["return_targets"] - value
+            value_weight = torch.where(
+                value_diff > 0,
+                torch.full_like(value_diff, quantile),
+                torch.full_like(value_diff, 1.0 - quantile),
+            )
             value_loss = (
-                0.5 * (minibatch["return_targets"] - value).pow(2) * valid_mask
+                value_weight * value_diff.pow(2) * valid_mask
             ).sum() / valid_count
             auxiliary_loss = (
                 (auxiliary_prediction - minibatch["privileged_observations"]).pow(2)
