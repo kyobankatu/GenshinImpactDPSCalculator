@@ -2,7 +2,7 @@ import torch
 from torch import nn
 
 
-CHAR_FEATURE_SIZE = 23
+CHAR_FEATURE_SIZE = 27
 GLOBAL_FEATURE_SIZE = 7
 NUM_CHARS = 4
 PRIVILEGED_OBSERVATION_SIZE = 23
@@ -199,10 +199,10 @@ class RecurrentPolicy(nn.Module):
     @classmethod
     def load(cls, path, map_location="cpu"):
         payload = cls.load_payload(path, map_location=map_location)
-        if payload.get("policy_type", "gru") != "gru":
+        if payload["policy_type"] != "gru":
             raise ValueError(
                 "Checkpoint is not a RecurrentPolicy "
-                f"(got policy_type={payload.get('policy_type')})"
+                f"(got policy_type={payload['policy_type']})"
             )
         model = cls(
             payload["observation_size"],
@@ -218,7 +218,9 @@ class RecurrentPolicy(nn.Module):
 
     @staticmethod
     def load_payload(path, map_location="cpu"):
-        return torch.load(path, map_location=map_location)
+        payload = torch.load(path, map_location=map_location)
+        validate_checkpoint_payload(payload, path)
+        return payload
 
 
 class TransformerPolicy(nn.Module):
@@ -469,10 +471,10 @@ class TransformerPolicy(nn.Module):
     @classmethod
     def load(cls, path, map_location="cpu"):
         payload = cls.load_payload(path, map_location=map_location)
-        if payload.get("policy_type", "gru") != "transformer":
+        if payload["policy_type"] != "transformer":
             raise ValueError(
                 "Checkpoint is not a TransformerPolicy "
-                f"(got policy_type={payload.get('policy_type')})"
+                f"(got policy_type={payload['policy_type']})"
             )
         model = cls(
             payload["observation_size"],
@@ -490,7 +492,29 @@ class TransformerPolicy(nn.Module):
 
     @staticmethod
     def load_payload(path, map_location="cpu"):
-        return torch.load(path, map_location=map_location)
+        payload = torch.load(path, map_location=map_location)
+        validate_checkpoint_payload(payload, path)
+        return payload
+
+
+def validate_checkpoint_payload(payload, path=None):
+    required_fields = [
+        "policy_type",
+        "observation_size",
+        "hidden_size",
+        "action_size",
+        "char_feature_size",
+        "global_feature_size",
+        "num_chars",
+        "privileged_observation_size",
+        "state_dict",
+    ]
+    missing = [field for field in required_fields if field not in payload]
+    if missing:
+        location = f" checkpoint {path}" if path else " checkpoint"
+        raise ValueError(f"Missing required metadata in{location}: {missing}")
+    if payload["policy_type"] not in ("gru", "transformer"):
+        raise ValueError(f"Unsupported policy_type in checkpoint: {payload['policy_type']!r}")
 
 
 def build_policy(policy_type, *args, **kwargs):
@@ -503,7 +527,8 @@ def build_policy(policy_type, *args, **kwargs):
 
 def load_policy(path, map_location="cpu"):
     payload = torch.load(path, map_location=map_location)
-    policy_type = payload.get("policy_type", "gru")
+    validate_checkpoint_payload(payload, path)
+    policy_type = payload["policy_type"]
     if policy_type == "transformer":
         return TransformerPolicy.load(path, map_location=map_location)
     return RecurrentPolicy.load(path, map_location=map_location)

@@ -14,7 +14,8 @@ try:
 except ImportError:
     wandb = None
 
-from recurrent_ppo import RecurrentPolicy, TransformerPolicy, build_policy, compute_advantages
+from evaluation import assert_policy_client_compatible, evaluate_policy
+from recurrent_ppo import build_policy, compute_advantages, validate_checkpoint_payload
 from rollout_service_client import build_rollout_client
 
 
@@ -130,6 +131,7 @@ def run_training(args, run=None):
         num_chars=client.num_chars,
         privileged_observation_size=client.privileged_observation_size,
     ).to(device)
+    assert_policy_client_compatible(policy, client, "Training")
     optimizer = torch.optim.Adam(policy.parameters(), lr=config["learning_rate"])
     rnd_module = None
     rnd_optimizer = None
@@ -151,7 +153,8 @@ def run_training(args, run=None):
         if not os.path.exists(args.resume_from):
             raise FileNotFoundError(f"Resume checkpoint not found: {args.resume_from}")
         checkpoint_payload = torch.load(args.resume_from, map_location=device)
-        checkpoint_policy_type = checkpoint_payload.get("policy_type", "gru")
+        validate_checkpoint_payload(checkpoint_payload, args.resume_from)
+        checkpoint_policy_type = checkpoint_payload["policy_type"]
         if checkpoint_policy_type != config.get("policy_type", "transformer"):
             raise ValueError(
                 f"Resume checkpoint policy_type mismatch: "
@@ -349,8 +352,8 @@ def run_training(args, run=None):
             env_steps_per_second = steps / duration
             valid_timesteps = sum(len(chunk["steps"]) for chunk in sequence_chunks)
             samples_per_second = valid_timesteps / duration
-            mean_reward = sum(episode_rewards) / len(episode_rewards) if episode_rewards else 0.0
-            mean_damage = sum(episode_damages) / len(episode_damages) if episode_damages else 0.0
+            completed_episode_mean_reward = sum(episode_rewards) / len(episode_rewards) if episode_rewards else 0.0
+            completed_episode_mean_damage = sum(episode_damages) / len(episode_damages) if episode_damages else 0.0
             mean_episode_steps = sum(episode_steps) / len(episode_steps) if episode_steps else 0.0
             invalid_rate = invalid_actions / max(1, steps)
             mean_damage_delta = damage_delta_sum / max(1, steps)
@@ -388,8 +391,10 @@ def run_training(args, run=None):
                 "policy_loss": optimization_metrics["policy_loss"],
                 "value_loss": optimization_metrics["value_loss"],
                 "entropy": optimization_metrics["entropy"],
-                "mean_reward": mean_reward,
-                "mean_damage": mean_damage,
+                "mean_reward": completed_episode_mean_reward,
+                "mean_damage": completed_episode_mean_damage,
+                "completed_episode_mean_reward": completed_episode_mean_reward,
+                "completed_episode_mean_damage": completed_episode_mean_damage,
                 "mean_episode_steps": mean_episode_steps,
                 "mean_damage_delta": mean_damage_delta,
                 "completed_episodes": completed_episodes,
@@ -411,7 +416,7 @@ def run_training(args, run=None):
                 "optimization_duration_sec": optimization_duration,
             }
             print(
-                f"Update {update}: reward={mean_reward:.3f} damage={mean_damage:,.0f} steps={mean_episode_steps:.1f} invalid={invalid_rate:.3f} kl={optimization_metrics['approx_kl']:.5f} clip={optimization_metrics['clip_fraction']:.3f} entropyCoef={entropy_coefficient:.5f} policy={optimization_metrics['policy_loss']:.5f} value={optimization_metrics['value_loss']:.5f} aux={optimization_metrics['auxiliary_loss']:.5f} seqs={len(sequence_chunks)} meanSeq={mean_sequence_length:.1f} envSteps/s={env_steps_per_second:.1f}"
+                f"Update {update}: completedEpReward={completed_episode_mean_reward:.3f} completedEpDamage={completed_episode_mean_damage:,.0f} steps={mean_episode_steps:.1f} invalid={invalid_rate:.3f} kl={optimization_metrics['approx_kl']:.5f} clip={optimization_metrics['clip_fraction']:.3f} entropyCoef={entropy_coefficient:.5f} policy={optimization_metrics['policy_loss']:.5f} value={optimization_metrics['value_loss']:.5f} aux={optimization_metrics['auxiliary_loss']:.5f} seqs={len(sequence_chunks)} meanSeq={mean_sequence_length:.1f} envSteps/s={env_steps_per_second:.1f}"
             )
             log_wandb(
                 run,
@@ -430,8 +435,10 @@ def run_training(args, run=None):
                     "train/policy_loss": optimization_metrics["policy_loss"],
                     "train/value_loss": optimization_metrics["value_loss"],
                     "train/entropy": optimization_metrics["entropy"],
-                    "train/mean_reward": mean_reward,
-                    "train/mean_damage": mean_damage,
+                    "train/mean_reward": completed_episode_mean_reward,
+                    "train/mean_damage": completed_episode_mean_damage,
+                    "train/completed_episode_mean_reward": completed_episode_mean_reward,
+                    "train/completed_episode_mean_damage": completed_episode_mean_damage,
                     "train/mean_episode_steps": mean_episode_steps,
                     "train/mean_damage_delta": mean_damage_delta,
                     "train/completed_episodes": completed_episodes,
@@ -460,13 +467,13 @@ def run_training(args, run=None):
             )
 
             if update % config["evaluation_interval"] == 0 or update == config["updates"]:
-                deterministic_summary = evaluate(policy, client, device, deterministic=True)
-                stochastic_summary = evaluate(policy, client, device, deterministic=False)
+                deterministic_summary = evaluate_policy(policy, client, device, deterministic=True)
+                stochastic_summary = evaluate_policy(policy, client, device, deterministic=False)
                 print(
-                    f"  Eval det: reward={deterministic_summary['reward']:.3f} damage={deterministic_summary['damage']:,.0f} steps={deterministic_summary['steps']} invalid={deterministic_summary['invalid_actions']}"
+                    f"  Eval det ({deterministic_summary.get('aggregate_type', 'single_episode')}): reward={deterministic_summary['reward']:.3f} damage={deterministic_summary['damage']:,.0f} steps={deterministic_summary['steps']} invalid={deterministic_summary['invalid_actions']}"
                 )
                 print(
-                    f"  Eval stoch: reward={stochastic_summary['reward']:.3f} damage={stochastic_summary['damage']:,.0f} steps={stochastic_summary['steps']} invalid={stochastic_summary['invalid_actions']}"
+                    f"  Eval stoch ({stochastic_summary.get('aggregate_type', 'single_episode')}): reward={stochastic_summary['reward']:.3f} damage={stochastic_summary['damage']:,.0f} steps={stochastic_summary['steps']} invalid={stochastic_summary['invalid_actions']}"
                 )
                 log_row.update(
                     {
@@ -758,11 +765,17 @@ def build_sequence_minibatch(chunks, policy, device):
 
 
 def apply_vine_ppo_advantages(segments, config, client, runner_id):
-    """Replace GAE advantages at SKILL/BURST/SWAP steps with VinePPO MC estimates.
+    """Replace GAE advantages at setup steps with counterfactual MC advantages.
 
-    Uses A_VinePPO = Q_MC(s,a) - V_learned(s) where Q_MC is obtained by running
-    K random rollouts after executing action a from snapshot state s.
-    V_learned is the value estimate already in the step record from the policy network.
+    For each saved vine snapshot, Java returns Q_MC(s, a) for every valid action.
+    The chosen action advantage is defined as:
+
+        A_vine(s, a_chosen) = Q_MC(s, a_chosen) - mean_a_valid Q_MC(s, a)
+
+    This is a counterfactual baseline on the same truncated Monte Carlo scale as
+    the chosen-action estimate. Critic return targets remain the rollout-based
+    targets already attached to the steps; only the actor-side advantage is
+    replaced here.
 
     Returns a dict of vine metrics: vine_points, setup_adv_mean, advantage_bias.
     """
@@ -988,95 +1001,6 @@ def flatten_eval_metrics(prefix, summary):
     return metrics
 
 
-def evaluate(policy, client, device, deterministic):
-    if len(client.party_names) > 1:
-        per_party = {}
-        aggregate_reward = 0.0
-        aggregate_damage = 0.0
-        aggregate_steps = 0.0
-        aggregate_invalid_actions = 0.0
-        aggregate_top_probability = 0.0
-        aggregate_action_fractions = [0.0 for _ in range(policy.action_size)]
-        aggregate_attention_scores = [0.0 for _ in range(policy.num_chars)]
-        for party_id, party_name in enumerate(client.party_names):
-            summary = evaluate_single_episode(
-                policy, client, device, deterministic, generate_report=False, forced_party_id=party_id
-            )
-            per_party[party_name] = summary
-            aggregate_reward += summary["reward"]
-            aggregate_damage += summary["damage"]
-            aggregate_steps += summary["steps"]
-            aggregate_invalid_actions += summary["invalid_actions"]
-            aggregate_top_probability += summary["mean_top_probability"]
-            for index, fraction in enumerate(summary["action_fractions"]):
-                aggregate_action_fractions[index] += fraction
-            for index, score in enumerate(summary["mean_attention_scores"]):
-                aggregate_attention_scores[index] += score
-        party_count = len(client.party_names)
-        return {
-            "reward": aggregate_reward / party_count,
-            "damage": aggregate_damage / party_count,
-            "steps": aggregate_steps / party_count,
-            "invalid_actions": aggregate_invalid_actions / party_count,
-            "mean_top_probability": aggregate_top_probability / party_count,
-            "action_fractions": [value / party_count for value in aggregate_action_fractions],
-            "mean_attention_scores": [value / party_count for value in aggregate_attention_scores],
-            "per_party": per_party,
-        }
-    return evaluate_single_episode(policy, client, device, deterministic, generate_report=False, forced_party_id=-1)
-
-
-def evaluate_single_episode(policy, client, device, deterministic, generate_report, forced_party_id):
-    runner_id = client.create_runner(1)
-    observations, _privileged_observations, masks, party_ids = client.reset_runner(
-        runner_id, generate_report, forced_party_id=forced_party_id
-    )
-    hidden = torch.zeros(1, policy.hidden_size, dtype=torch.float32, device=device)
-    total_reward = 0.0
-    invalid_actions = 0
-    steps = 0
-    damage = 0.0
-    top_probability_sum = 0.0
-    action_counts = [0 for _ in range(policy.action_size)]
-    attention_score_sum = torch.zeros(policy.num_chars, dtype=torch.float64)
-    try:
-        while True:
-            obs_tensor = torch.tensor(observations, dtype=torch.float32, device=device)
-            mask_tensor = torch.tensor(masks, dtype=torch.float32, device=device)
-            with torch.no_grad():
-                action_output = policy.act(obs_tensor, hidden, mask_tensor, deterministic=deterministic)
-            attention_score_sum += action_output["attention_scores"].detach().cpu().sum(dim=0).to(torch.float64)
-            action = [int(action_output["action"][0].item())]
-            action_counts[action[0]] += 1
-            top_probability_sum += action_output["top_probability"][0].item()
-            batch = client.step_runner(runner_id, action)
-            total_reward += batch["rewards"][0]
-            if not batch["valid_actions"][0]:
-                invalid_actions += 1
-            steps = batch["episode_steps"][0] if batch["dones"][0] else batch["live_steps"][0]
-            damage = batch["episode_damages"][0] if batch["dones"][0] else batch["total_damages"][0]
-            if batch["dones"][0]:
-                break
-            observations = batch["observations"]
-            masks = batch["action_masks"]
-            hidden = action_output["hidden"]
-    finally:
-        client.close_runner(runner_id)
-    total_actions = max(1, sum(action_counts))
-    mean_attention_scores = (attention_score_sum / max(1, steps)).tolist()
-    return {
-        "reward": total_reward,
-        "damage": damage,
-        "steps": steps,
-        "invalid_actions": invalid_actions,
-        "mean_top_probability": top_probability_sum / max(1, steps),
-        "action_fractions": [count / total_actions for count in action_counts],
-        "mean_attention_scores": mean_attention_scores,
-        "party_id": party_ids[0] if party_ids else forced_party_id,
-        "party_name": client.party_names[party_ids[0]] if party_ids else client.party_names[forced_party_id],
-    }
-
-
 def slugify(value):
     return value.lower().replace(" ", "_")
 
@@ -1101,6 +1025,8 @@ def append_log(row):
                 "entropy",
                 "mean_reward",
                 "mean_damage",
+                "completed_episode_mean_reward",
+                "completed_episode_mean_damage",
                 "mean_episode_steps",
                 "mean_damage_delta",
                 "completed_episodes",

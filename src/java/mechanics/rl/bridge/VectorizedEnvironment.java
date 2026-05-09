@@ -186,9 +186,11 @@ public class VectorizedEnvironment {
             if (vineEnabled && isVineSampleAction(actions[index])) {
                 BattleEnvironment env = environments.get(index);
                 SimulatorSnapshot snap = env.saveSnapshot();
-                double snapLastSwapTime = env.getLastSwapTime();
                 int snapId = nextSnapshotId.getAndIncrement();
-                snapshotStore.put(snapId, new SnapshotEntry(snap, snapLastSwapTime));
+                snapshotStore.put(snapId, new SnapshotEntry(
+                        snap,
+                        env.saveBranchState(),
+                        env.getCurrentPartyId()));
                 vineSnapshotIds[index] = snapId;
             }
             ActionResult result = environments.get(index).step(actions[index]);
@@ -283,7 +285,8 @@ public class VectorizedEnvironment {
         if (entry == null) {
             throw new IllegalArgumentException("Unknown snapshot id: " + snapshotId);
         }
-        return branchEnv.branchRolloutMultiAction(entry.snapshot, entry.lastSwapTime, K, H, gamma);
+        branchEnv.reset(false, entry.partyId);
+        return branchEnv.branchRolloutMultiAction(entry.snapshot, entry.branchState, K, H, gamma);
     }
 
     private static boolean isVineSampleAction(int actionId) {
@@ -440,11 +443,13 @@ public class VectorizedEnvironment {
 
     private static final class SnapshotEntry {
         final SimulatorSnapshot snapshot;
-        final double lastSwapTime;
+        final BattleEnvironment.BranchStateSnapshot branchState;
+        final int partyId;
 
-        SnapshotEntry(SimulatorSnapshot snapshot, double lastSwapTime) {
+        SnapshotEntry(SimulatorSnapshot snapshot, BattleEnvironment.BranchStateSnapshot branchState, int partyId) {
             this.snapshot = snapshot;
-            this.lastSwapTime = lastSwapTime;
+            this.branchState = branchState;
+            this.partyId = partyId;
         }
     }
 

@@ -195,6 +195,20 @@ public class BattleEnvironment {
     }
 
     /**
+     * Saves RL-side state that is not included in {@link simulation.SimulatorSnapshot}.
+     *
+     * @return RL state snapshot used for VinePPO branch restoration
+     */
+    public BranchStateSnapshot saveBranchState() {
+        return new BranchStateSnapshot(
+                lastSwapTime,
+                previousActionId,
+                stepCount,
+                slotLastActiveTime.clone(),
+                slotOnFieldTime.clone());
+    }
+
+    /**
      * Runs K independent Monte Carlo rollouts from a snapshot and returns their mean discounted return.
      *
      * <p>State is restored from {@code snap} before each branch. After the method returns the
@@ -208,21 +222,13 @@ public class BattleEnvironment {
      * @param gamma       discount factor
      * @return mean discounted return across K branches
      */
-    public double branchRolloutMean(simulation.SimulatorSnapshot snap, double snapLastSwapTime,
+    public double branchRolloutMean(simulation.SimulatorSnapshot snap, BranchStateSnapshot branchState,
             int firstAction, int K, int H, double gamma) {
         ensureReset();
         double totalReturn = 0.0;
         for (int k = 0; k < K; k++) {
             simulator.restoreSnapshot(snap);
-            lastSwapTime = snapLastSwapTime;
-            stepCount = 0;
-            previousActionId = -1;
-            generateReportOnDone = false;
-            java.util.Arrays.fill(slotLastActiveTime, -config.maxEpisodeTime);
-            java.util.Arrays.fill(slotOnFieldTime, 0.0);
-            fillObservationBuffer();
-            fillPrivilegedObservationBuffer();
-            fillActionMaskBuffer();
+            restoreBranchState(branchState);
 
             double discountedReturn = 0.0;
             double discount = 1.0;
@@ -263,7 +269,7 @@ public class BattleEnvironment {
      * @param gamma           discount factor
      * @return double array of length {@link mechanics.rl.RLAction#SIZE} with Q_MC per action
      */
-    public double[] branchRolloutMultiAction(simulation.SimulatorSnapshot snap, double snapLastSwapTime,
+    public double[] branchRolloutMultiAction(simulation.SimulatorSnapshot snap, BranchStateSnapshot branchState,
             int K, int H, double gamma) {
         ensureReset();
         int actionCount = mechanics.rl.RLAction.SIZE;
@@ -271,13 +277,7 @@ public class BattleEnvironment {
 
         // Determine valid actions at the snapshot state (single restore + mask fill).
         simulator.restoreSnapshot(snap);
-        lastSwapTime = snapLastSwapTime;
-        stepCount = 0;
-        previousActionId = -1;
-        generateReportOnDone = false;
-        java.util.Arrays.fill(slotLastActiveTime, -config.maxEpisodeTime);
-        java.util.Arrays.fill(slotOnFieldTime, 0.0);
-        fillActionMaskBuffer();
+        restoreBranchState(branchState);
         boolean[] valid = new boolean[actionCount];
         for (int i = 0; i < actionCount; i++) {
             valid[i] = actionMaskBuffer[i] > 0.5;
@@ -288,9 +288,25 @@ public class BattleEnvironment {
                 qValues[a] = Double.NaN;
                 continue;
             }
-            qValues[a] = branchRolloutMean(snap, snapLastSwapTime, a, K, H, gamma);
+            qValues[a] = branchRolloutMean(snap, branchState, a, K, H, gamma);
         }
         return qValues;
+    }
+
+    public void restoreBranchState(BranchStateSnapshot branchState) {
+        if (branchState == null) {
+            throw new IllegalArgumentException("branchState must not be null");
+        }
+        lastSwapTime = branchState.lastSwapTime;
+        previousActionId = branchState.previousActionId;
+        stepCount = branchState.stepCount;
+        generateReportOnDone = false;
+        statsRecorder = null;
+        System.arraycopy(branchState.slotLastActiveTime, 0, slotLastActiveTime, 0, slotLastActiveTime.length);
+        System.arraycopy(branchState.slotOnFieldTime, 0, slotOnFieldTime, 0, slotOnFieldTime.length);
+        fillObservationBuffer();
+        fillPrivilegedObservationBuffer();
+        fillActionMaskBuffer();
     }
 
     private int sampleRandomValidAction(double[] mask) {
@@ -437,6 +453,27 @@ public class BattleEnvironment {
             this.privilegedObservation = privilegedObservation;
             this.actionMask = actionMask;
             this.partyId = partyId;
+        }
+    }
+
+    public static class BranchStateSnapshot {
+        public final double lastSwapTime;
+        public final int previousActionId;
+        public final int stepCount;
+        public final double[] slotLastActiveTime;
+        public final double[] slotOnFieldTime;
+
+        public BranchStateSnapshot(
+                double lastSwapTime,
+                int previousActionId,
+                int stepCount,
+                double[] slotLastActiveTime,
+                double[] slotOnFieldTime) {
+            this.lastSwapTime = lastSwapTime;
+            this.previousActionId = previousActionId;
+            this.stepCount = stepCount;
+            this.slotLastActiveTime = slotLastActiveTime;
+            this.slotOnFieldTime = slotOnFieldTime;
         }
     }
 

@@ -8,8 +8,11 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 
 import model.entity.FormStateProvider;
 import model.entity.Character;
@@ -212,12 +215,14 @@ public class ObservationEncoder {
         private static final Set<String> WARNED_IDS = Collections.synchronizedSet(new java.util.HashSet<>());
 
         private final Map<String, double[]> profiles = new LinkedHashMap<>();
+        private final boolean strict;
 
         public static CapabilityProfileStore empty() {
-            return new CapabilityProfileStore();
+            return new CapabilityProfileStore(false);
         }
 
-        private CapabilityProfileStore() {
+        private CapabilityProfileStore(boolean strict) {
+            this.strict = strict;
         }
 
         /**
@@ -227,6 +232,7 @@ public class ObservationEncoder {
          * @param path path to the capability profiles JSON file
          */
         public CapabilityProfileStore(String path) {
+            this.strict = true;
             loadFromFile(path);
         }
 
@@ -240,6 +246,9 @@ public class ObservationEncoder {
         public double[] getProfile(CharacterId id) {
             double[] profile = profiles.get(id.name());
             if (profile == null) {
+                if (strict) {
+                    throw new IllegalStateException("Missing capability profile for " + id.name());
+                }
                 if (WARNED_IDS.add(id.name())) {
                     System.out.println("[ObservationEncoder] WARNING: no capability profile for "
                             + id.name() + "; using zeros");
@@ -252,12 +261,13 @@ public class ObservationEncoder {
         private void loadFromFile(String path) {
             try {
                 String content = new String(Files.readAllBytes(Paths.get(path)), StandardCharsets.UTF_8);
-                Pattern charBlock = Pattern.compile("\"(\\w+)\"\\s*:\\s*\\{([^}]*)\\}", Pattern.DOTALL);
-                Matcher matcher = charBlock.matcher(content);
-                while (matcher.find()) {
-                    String charName = matcher.group(1);
-                    String block = matcher.group(2);
+                JsonObject root = JsonParser.parseString(content).getAsJsonObject();
+                for (Map.Entry<String, JsonElement> entry : root.entrySet()) {
+                    if (!entry.getValue().isJsonObject()) {
+                        throw new IllegalStateException("Capability profile entry must be an object: " + entry.getKey());
+                    }
                     double[] profile = CapabilityProfile.zeros();
+                    JsonObject block = entry.getValue().getAsJsonObject();
                     profile[CapabilityProfile.OFF_FIELD_DPS_RATIO] = extractDouble(block, "off_field_dps_ratio");
                     profile[CapabilityProfile.TEAM_BUFF_SCORE] = extractDouble(block, "team_buff_score");
                     profile[CapabilityProfile.SELF_ENHANCEMENT_SCORE] = extractDouble(block, "self_enhancement_score");
@@ -267,20 +277,22 @@ public class ObservationEncoder {
                     profile[CapabilityProfile.SUSTAIN_VALUE_6_ACTIONS] = extractDouble(block, "sustain_value_6_actions");
                     profile[CapabilityProfile.EXIT_COST_SCORE] = extractDouble(block, "exit_cost_score");
                     profile[CapabilityProfile.REENTRY_COST_SCORE] = extractDouble(block, "reentry_cost_score");
-                    profiles.put(charName, profile);
+                    profiles.put(entry.getKey(), profile);
                 }
                 System.out.println("[ObservationEncoder] Loaded capability profiles for: " + profiles.keySet());
-            } catch (IOException e) {
+            } catch (IOException | IllegalStateException | JsonParseException e) {
+                if (strict) {
+                    throw new IllegalStateException("Could not load capability profiles from " + path, e);
+                }
                 System.out.println("[ObservationEncoder] WARNING: could not load profiles from "
                         + path + ": " + e.getMessage());
             }
         }
 
-        private static double extractDouble(String block, String key) {
-            Pattern p = Pattern.compile("\"" + key + "\"\\s*:\\s*([0-9.eE+\\-]+)");
-            Matcher m = p.matcher(block);
-            if (m.find()) {
-                return Double.parseDouble(m.group(1));
+        private static double extractDouble(JsonObject block, String key) {
+            JsonElement value = block.get(key);
+            if (value != null && value.isJsonPrimitive() && value.getAsJsonPrimitive().isNumber()) {
+                return value.getAsDouble();
             }
             return 0.0;
         }
