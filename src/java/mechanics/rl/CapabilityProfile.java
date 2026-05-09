@@ -14,7 +14,9 @@ public final class CapabilityProfile {
     public static final int SUSTAIN_VALUE_6_ACTIONS = 6;
     public static final int EXIT_COST_SCORE = 7;
     public static final int REENTRY_COST_SCORE = 8;
-    public static final int SIZE = 9;
+    public static final int ON_FIELD_DPS_SCORE = 9;
+    public static final int BURST_WINDOW_SCORE = 10;
+    public static final int SIZE = 11;
 
     private CapabilityProfile() {
     }

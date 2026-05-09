@@ -37,6 +37,7 @@ def main():
             print(
                 f"Python PPO deterministic evaluation ({summary.get('aggregate_type', 'single_episode')}): reward={summary['reward']:.3f} damage={summary['damage']:,.0f} steps={summary['steps']} invalid={summary['invalid_actions']} topProb={summary['mean_top_probability']:.3f}"
             )
+            print_role_breakdown("deterministic", summary)
             print_action_breakdown("deterministic", summary)
             print_attention_breakdown("deterministic", summary)
             print_party_breakdown("deterministic", summary)
@@ -49,6 +50,7 @@ def main():
             print(
                 f"Python PPO stochastic evaluation ({summary.get('aggregate_type', 'single_episode')}): reward={summary['reward']:.3f} damage={summary['damage']:,.0f} steps={summary['steps']} invalid={summary['invalid_actions']} topProb={summary['mean_top_probability']:.3f}"
             )
+            print_role_breakdown("stochastic", summary)
             print_action_breakdown("stochastic", summary)
             print_attention_breakdown("stochastic", summary)
             print_party_breakdown("stochastic", summary)
@@ -87,6 +89,17 @@ def print_attention_breakdown(label, summary):
     print(f"  {label} attention: {formatted}")
 
 
+def print_role_breakdown(label, summary):
+    if "role_alignment_score" in summary:
+        print(
+            f"  {label} role: align={summary['role_alignment_score']:.3f} "
+            f"carry={summary.get('carry_alignment_score', 0.0):.3f} "
+            f"offField={summary.get('off_field_alignment_score', 0.0):.3f} "
+            f"entry={summary.get('entry_alignment_score', 0.0):.3f} "
+            f"stay={summary.get('stay_alignment_score', 0.0):.3f}"
+        )
+
+
 def print_party_breakdown(label, summary):
     if "per_party" not in summary:
         return
@@ -96,6 +109,7 @@ def print_party_breakdown(label, summary):
             f"damage={party_summary['damage']:,.0f} steps={party_summary['steps']} "
             f"invalid={party_summary['invalid_actions']}"
         )
+        print_role_breakdown(f"{label} {party_name}", party_summary)
         print_action_breakdown(f"{label} {party_name}", party_summary)
         print_attention_breakdown(f"{label} {party_name}", party_summary)
 
@@ -175,6 +189,13 @@ def save_eval_summary(label, summary):
                 "action_fractions": party_summary.get("action_fractions", []),
                 "mean_attention_scores": party_summary.get("mean_attention_scores", []),
                 "mean_top_probability": party_summary.get("mean_top_probability", 0.0),
+                "role_alignment_score": party_summary.get("role_alignment_score", 0.0),
+                "carry_alignment_score": party_summary.get("carry_alignment_score", 0.0),
+                "off_field_alignment_score": party_summary.get("off_field_alignment_score", 0.0),
+                "entry_alignment_score": party_summary.get("entry_alignment_score", 0.0),
+                "stay_alignment_score": party_summary.get("stay_alignment_score", 0.0),
+                "expected_on_field_shares": party_summary.get("expected_on_field_shares", []),
+                "realized_on_field_shares": party_summary.get("realized_on_field_shares", []),
             }
         )
     existing = []

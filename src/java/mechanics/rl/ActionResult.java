@@ -15,6 +15,7 @@ public class ActionResult {
     public final double timeDelta;
     public final int executedActionId;
     public final int stepCount;
+    public final EpisodeRoleSummary episodeRoleSummary;
 
     public ActionResult(
             double[] observation,
@@ -27,7 +28,8 @@ public class ActionResult {
             double totalDamage,
             double timeDelta,
             int executedActionId,
-            int stepCount) {
+            int stepCount,
+            EpisodeRoleSummary episodeRoleSummary) {
         this.observation = observation;
         this.privilegedObservation = privilegedObservation;
         this.actionMask = actionMask;
@@ -39,5 +41,6 @@ public class ActionResult {
         this.timeDelta = timeDelta;
         this.executedActionId = executedActionId;
         this.stepCount = stepCount;
+        this.episodeRoleSummary = episodeRoleSummary;
     }
 }

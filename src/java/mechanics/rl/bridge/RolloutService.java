@@ -253,6 +253,13 @@ public class RolloutService {
         writeIntVector(out, result.liveSteps);
         writeIntVector(out, result.partyIds);
         writeIntVector(out, result.episodePartyIds);
+        writeVector(out, result.episodeRoleAlignmentScores);
+        writeVector(out, result.episodeCarryAlignmentScores);
+        writeVector(out, result.episodeOffFieldAlignmentScores);
+        writeVector(out, result.episodeEntryAlignmentScores);
+        writeVector(out, result.episodeStayAlignmentScores);
+        writeMatrix(out, result.episodeExpectedRoleVectors);
+        writeMatrix(out, result.episodeRealizedRoleVectors);
         writeIntVector(out, result.vineSnapshotIds);
         out.flush();
     }

@@ -95,7 +95,9 @@ public class CapabilityProfiler {
             sb.append("    \"sustain_value_3_actions\": ").append(format(s[5])).append(",\n");
             sb.append("    \"sustain_value_6_actions\": ").append(format(s[6])).append(",\n");
             sb.append("    \"exit_cost_score\": ").append(format(s[7])).append(",\n");
-            sb.append("    \"reentry_cost_score\": ").append(format(s[8])).append("\n");
+            sb.append("    \"reentry_cost_score\": ").append(format(s[8])).append(",\n");
+            sb.append("    \"on_field_dps_score\": ").append(format(s[9])).append(",\n");
+            sb.append("    \"burst_window_score\": ").append(format(s[10])).append("\n");
             sb.append("  }");
             outerCount++;
             if (outerCount < sourceResults.size()) {
@@ -167,6 +169,8 @@ public class CapabilityProfiler {
         double sustain6 = clamp01(J / Math.max(A, 1.0));
         double exitCost = clamp01(K);
         double reentryCost = clamp01(L);
+        double onFieldDpsScore = clamp01(A / 500000.0);
+        double burstWindowScore = clamp01(E / 500000.0);
 
         System.out.printf(
                 "  A=%,.0f(±%.0f) B=%,.0f(±%.0f) C=%,.0f(±%.0f) D=%,.0f(±%.0f) "
@@ -175,10 +179,13 @@ public class CapabilityProfiler {
                 D, stddev(dVals), E, stddev(eVals), F, stddev(fVals),
                 G, stddev(gVals));
         System.out.printf(
-                "  offField=%.4f  teamBuff=%.4f  selfEnhance=%.4f  energyGen=%.4f  entry=%.4f  sustain3=%.4f  sustain6=%.4f  exit=%.4f  reentry=%.4f%n",
-                offField, teamBuff, selfEnhance, energyGen, entryValue, sustain3, sustain6, exitCost, reentryCost);
+                "  offField=%.4f  teamBuff=%.4f  selfEnhance=%.4f  energyGen=%.4f  entry=%.4f  sustain3=%.4f  sustain6=%.4f  exit=%.4f  reentry=%.4f  onField=%.4f  burstWindow=%.4f%n",
+                offField, teamBuff, selfEnhance, energyGen, entryValue, sustain3, sustain6, exitCost, reentryCost,
+                onFieldDpsScore, burstWindowScore);
 
-        return new double[]{offField, teamBuff, selfEnhance, energyGen, entryValue, sustain3, sustain6, exitCost, reentryCost};
+        return new double[]{
+                offField, teamBuff, selfEnhance, energyGen, entryValue, sustain3, sustain6, exitCost, reentryCost,
+                onFieldDpsScore, burstWindowScore};
     }
 
     // -------------------------------------------------------------------------

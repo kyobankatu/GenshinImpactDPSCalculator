@@ -1,5 +1,12 @@
 import torch
 
+ROLE_FEATURES_PER_SLOT = 5
+ROLE_ON_FIELD_SHARE = 0
+ROLE_DAMAGE_SHARE = 1
+ROLE_OFF_FIELD_SHARE = 2
+ROLE_ENTRY_SHARE = 3
+ROLE_STAY_SHARE = 4
+
 
 def assert_policy_client_compatible(policy, client, context):
     mismatches = []
@@ -32,6 +39,16 @@ def assert_policy_client_compatible(policy, client, context):
         raise ValueError(f"{context} mismatch between policy and rollout service: " + ", ".join(mismatches))
 
 
+def extract_role_feature(role_vector, num_chars, feature_index):
+    if not role_vector:
+        return [0.0 for _ in range(num_chars)]
+    values = []
+    for slot in range(num_chars):
+        offset = slot * ROLE_FEATURES_PER_SLOT + feature_index
+        values.append(role_vector[offset] if offset < len(role_vector) else 0.0)
+    return values
+
+
 def evaluate_policy(policy, client, device, deterministic, generate_report=False):
     if len(client.party_names) > 1:
         per_party = {}
@@ -44,6 +61,13 @@ def evaluate_policy(policy, client, device, deterministic, generate_report=False
             "mean_top_probability": 0.0,
             "action_fractions": [0.0 for _ in range(policy.action_size)],
             "mean_attention_scores": [0.0 for _ in range(policy.num_chars)],
+            "role_alignment_score": 0.0,
+            "carry_alignment_score": 0.0,
+            "off_field_alignment_score": 0.0,
+            "entry_alignment_score": 0.0,
+            "stay_alignment_score": 0.0,
+            "expected_on_field_shares": [0.0 for _ in range(policy.num_chars)],
+            "realized_on_field_shares": [0.0 for _ in range(policy.num_chars)],
         }
         for party_id, party_name in enumerate(client.party_names):
             summary = evaluate_single_episode(
@@ -60,21 +84,41 @@ def evaluate_policy(policy, client, device, deterministic, generate_report=False
             aggregate["steps"] += summary["steps"]
             aggregate["invalid_actions"] += summary["invalid_actions"]
             aggregate["mean_top_probability"] += summary["mean_top_probability"]
+            aggregate["role_alignment_score"] += summary.get("role_alignment_score", 0.0)
+            aggregate["carry_alignment_score"] += summary.get("carry_alignment_score", 0.0)
+            aggregate["off_field_alignment_score"] += summary.get("off_field_alignment_score", 0.0)
+            aggregate["entry_alignment_score"] += summary.get("entry_alignment_score", 0.0)
+            aggregate["stay_alignment_score"] += summary.get("stay_alignment_score", 0.0)
             for index, fraction in enumerate(summary["action_fractions"]):
                 aggregate["action_fractions"][index] += fraction
             for index, score in enumerate(summary["mean_attention_scores"]):
                 aggregate["mean_attention_scores"][index] += score
+            for index, value in enumerate(summary.get("expected_on_field_shares", [])):
+                aggregate["expected_on_field_shares"][index] += value
+            for index, value in enumerate(summary.get("realized_on_field_shares", [])):
+                aggregate["realized_on_field_shares"][index] += value
         party_count = len(client.party_names)
         aggregate["reward"] /= party_count
         aggregate["damage"] /= party_count
         aggregate["steps"] /= party_count
         aggregate["invalid_actions"] /= party_count
         aggregate["mean_top_probability"] /= party_count
+        aggregate["role_alignment_score"] /= party_count
+        aggregate["carry_alignment_score"] /= party_count
+        aggregate["off_field_alignment_score"] /= party_count
+        aggregate["entry_alignment_score"] /= party_count
+        aggregate["stay_alignment_score"] /= party_count
         aggregate["action_fractions"] = [
             value / party_count for value in aggregate["action_fractions"]
         ]
         aggregate["mean_attention_scores"] = [
             value / party_count for value in aggregate["mean_attention_scores"]
+        ]
+        aggregate["expected_on_field_shares"] = [
+            value / party_count for value in aggregate["expected_on_field_shares"]
+        ]
+        aggregate["realized_on_field_shares"] = [
+            value / party_count for value in aggregate["realized_on_field_shares"]
         ]
         aggregate["per_party"] = per_party
         return aggregate
@@ -122,6 +166,8 @@ def evaluate_single_episode(policy, client, device, deterministic, generate_repo
                 episode_party_ids = batch.get("episode_party_ids")
                 if episode_party_ids:
                     resolved_party_id = episode_party_ids[0]
+                expected_roles = batch.get("episode_expected_role_vectors", [[]])[0]
+                realized_roles = batch.get("episode_realized_role_vectors", [[]])[0]
                 break
             observations = batch["observations"]
             masks = batch["action_masks"]
@@ -137,6 +183,17 @@ def evaluate_single_episode(policy, client, device, deterministic, generate_repo
         "mean_top_probability": top_probability_sum / max(1, steps),
         "action_fractions": [count / total_actions for count in action_counts],
         "mean_attention_scores": (attention_score_sum / max(1, steps)).tolist(),
+        "role_alignment_score": batch.get("episode_role_alignment_scores", [0.0])[0],
+        "carry_alignment_score": batch.get("episode_carry_alignment_scores", [0.0])[0],
+        "off_field_alignment_score": batch.get("episode_off_field_alignment_scores", [0.0])[0],
+        "entry_alignment_score": batch.get("episode_entry_alignment_scores", [0.0])[0],
+        "stay_alignment_score": batch.get("episode_stay_alignment_scores", [0.0])[0],
+        "expected_role_vector": expected_roles,
+        "realized_role_vector": realized_roles,
+        "expected_on_field_shares": extract_role_feature(expected_roles, policy.num_chars, ROLE_ON_FIELD_SHARE),
+        "realized_on_field_shares": extract_role_feature(realized_roles, policy.num_chars, ROLE_ON_FIELD_SHARE),
+        "expected_damage_shares": extract_role_feature(expected_roles, policy.num_chars, ROLE_DAMAGE_SHARE),
+        "realized_damage_shares": extract_role_feature(realized_roles, policy.num_chars, ROLE_DAMAGE_SHARE),
         "party_id": resolved_party_id,
         "party_name": client.party_names[resolved_party_id],
     }

@@ -19,6 +19,7 @@ public class BattleEnvironment {
     private final ObservationEncoder observationEncoder;
     private final PrivilegedStateEncoder privilegedStateEncoder;
     private final RewardFunction rewardFunction;
+    private final RoleAlignmentCalculator roleAlignmentCalculator;
 
     private CombatSimulator simulator;
     private EpisodeConfig config;
@@ -35,6 +36,13 @@ public class BattleEnvironment {
     private final double[] preActionMaskBuffer = new double[ActionSpace.SIZE];
     private final double[] slotLastActiveTime = new double[ObservationEncoder.NUM_CHARS];
     private final double[] slotOnFieldTime = new double[ObservationEncoder.NUM_CHARS];
+    private final double[] slotOffFieldDamage = new double[ObservationEncoder.NUM_CHARS];
+    private final double[] slotDamageSnapshots = new double[ObservationEncoder.NUM_CHARS];
+    private final double[] slotStintTotalSeconds = new double[ObservationEncoder.NUM_CHARS];
+    private final int[] slotStintCounts = new int[ObservationEncoder.NUM_CHARS];
+    private final int[] slotSwapInCounts = new int[ObservationEncoder.NUM_CHARS];
+    private int currentStintSlot = -1;
+    private double currentStintStartTime = 0.0;
 
     private static final LongAdder STEP_CALLS = new LongAdder();
     private static final LongAdder STEP_NANOS = new LongAdder();
@@ -77,6 +85,7 @@ public class BattleEnvironment {
         this.observationEncoder = observationEncoder;
         this.privilegedStateEncoder = privilegedStateEncoder;
         this.rewardFunction = rewardFunction;
+        this.roleAlignmentCalculator = new RoleAlignmentCalculator();
     }
 
     public ResetResult reset(boolean generateReport) {
@@ -109,6 +118,16 @@ public class BattleEnvironment {
         generateReportOnDone = generateReport;
         java.util.Arrays.fill(slotLastActiveTime, -config.maxEpisodeTime);
         java.util.Arrays.fill(slotOnFieldTime, 0.0);
+        java.util.Arrays.fill(slotOffFieldDamage, 0.0);
+        java.util.Arrays.fill(slotDamageSnapshots, 0.0);
+        java.util.Arrays.fill(slotStintTotalSeconds, 0.0);
+        java.util.Arrays.fill(slotStintCounts, 0);
+        java.util.Arrays.fill(slotSwapInCounts, 0);
+        for (int slot = 0; slot < config.partyOrder.length; slot++) {
+            slotDamageSnapshots[slot] = simulator.getDamageByCharacter(config.partyOrder[slot]);
+        }
+        currentStintSlot = findActiveSlot();
+        currentStintStartTime = simulator.getCurrentTime();
 
         fillObservationBuffer();
         fillPrivilegedObservationBuffer();
@@ -139,6 +158,26 @@ public class BattleEnvironment {
         double timeDelta = simulator.getCurrentTime() - timeBefore;
         double damageDelta = simulator.getTotalDamage() - damageBefore;
         boolean done = simulator.getCurrentTime() >= config.maxEpisodeTime;
+
+        if (activeSlotBefore >= 0) {
+            slotLastActiveTime[activeSlotBefore] = simulator.getCurrentTime();
+            slotOnFieldTime[activeSlotBefore] += timeDelta;
+        }
+        updateDamageRoleMetrics(activeSlotBefore);
+        updateStintTracking(activeSlotBefore);
+        if (validAction && actionId >= 0 && actionId < RLAction.SIZE) {
+            RLAction action = RLAction.fromId(actionId);
+            if (action.isSwap()) {
+                slotSwapInCounts[action.getTargetSlot()]++;
+            }
+        }
+
+        EpisodeRoleSummary episodeRoleSummary = null;
+        if (done) {
+            finalizeCurrentStint();
+            episodeRoleSummary = buildEpisodeRoleSummary();
+        }
+
         double reward = rewardFunction.compute(
                 config,
                 actionId,
@@ -148,10 +187,8 @@ public class BattleEnvironment {
                 simulator.getTotalDamage(),
                 timeDelta,
                 done);
-
-        if (activeSlotBefore >= 0) {
-            slotLastActiveTime[activeSlotBefore] = simulator.getCurrentTime();
-            slotOnFieldTime[activeSlotBefore] += timeDelta;
+        if (done && config.enableRoleAlignmentBonus && episodeRoleSummary != null) {
+            reward += config.roleAlignmentBonusWeight * episodeRoleSummary.roleAlignmentScore;
         }
         previousActionId = actionId;
         stepCount++;
@@ -173,7 +210,7 @@ public class BattleEnvironment {
         STEP_NANOS.add(System.nanoTime() - stepStart);
         return new ActionResult(observationBuffer, privilegedObservationBuffer, actionMaskBuffer, reward, done,
                 validAction, damageDelta,
-                simulator.getTotalDamage(), timeDelta, actionId, stepCount);
+                simulator.getTotalDamage(), timeDelta, actionId, stepCount, episodeRoleSummary);
     }
 
     /**
@@ -205,7 +242,14 @@ public class BattleEnvironment {
                 previousActionId,
                 stepCount,
                 slotLastActiveTime.clone(),
-                slotOnFieldTime.clone());
+                slotOnFieldTime.clone(),
+                slotOffFieldDamage.clone(),
+                slotDamageSnapshots.clone(),
+                slotStintTotalSeconds.clone(),
+                slotStintCounts.clone(),
+                slotSwapInCounts.clone(),
+                currentStintSlot,
+                currentStintStartTime);
     }
 
     /**
@@ -304,9 +348,68 @@ public class BattleEnvironment {
         statsRecorder = null;
         System.arraycopy(branchState.slotLastActiveTime, 0, slotLastActiveTime, 0, slotLastActiveTime.length);
         System.arraycopy(branchState.slotOnFieldTime, 0, slotOnFieldTime, 0, slotOnFieldTime.length);
+        System.arraycopy(branchState.slotOffFieldDamage, 0, slotOffFieldDamage, 0, slotOffFieldDamage.length);
+        System.arraycopy(branchState.slotDamageSnapshots, 0, slotDamageSnapshots, 0, slotDamageSnapshots.length);
+        System.arraycopy(branchState.slotStintTotalSeconds, 0, slotStintTotalSeconds, 0, slotStintTotalSeconds.length);
+        System.arraycopy(branchState.slotStintCounts, 0, slotStintCounts, 0, slotStintCounts.length);
+        System.arraycopy(branchState.slotSwapInCounts, 0, slotSwapInCounts, 0, slotSwapInCounts.length);
+        currentStintSlot = branchState.currentStintSlot;
+        currentStintStartTime = branchState.currentStintStartTime;
         fillObservationBuffer();
         fillPrivilegedObservationBuffer();
         fillActionMaskBuffer();
+    }
+
+    private void updateDamageRoleMetrics(int activeSlotBefore) {
+        if (config == null) {
+            return;
+        }
+        for (int slot = 0; slot < config.partyOrder.length; slot++) {
+            double currentDamage = simulator.getDamageByCharacter(config.partyOrder[slot]);
+            double delta = Math.max(0.0, currentDamage - slotDamageSnapshots[slot]);
+            slotDamageSnapshots[slot] = currentDamage;
+            if (delta <= 0.0) {
+                continue;
+            }
+            if (slot != activeSlotBefore) {
+                slotOffFieldDamage[slot] += delta;
+            }
+        }
+    }
+
+    private void updateStintTracking(int activeSlotBefore) {
+        int activeSlotAfter = findActiveSlot();
+        if (activeSlotAfter != currentStintSlot) {
+            finalizeCurrentStint();
+            currentStintSlot = activeSlotAfter;
+            currentStintStartTime = simulator.getCurrentTime();
+        } else if (currentStintSlot < 0 && activeSlotBefore < 0 && activeSlotAfter >= 0) {
+            currentStintSlot = activeSlotAfter;
+            currentStintStartTime = simulator.getCurrentTime();
+        }
+    }
+
+    private void finalizeCurrentStint() {
+        if (currentStintSlot < 0) {
+            return;
+        }
+        double duration = Math.max(0.0, simulator.getCurrentTime() - currentStintStartTime);
+        slotStintTotalSeconds[currentStintSlot] += duration;
+        slotStintCounts[currentStintSlot] += 1;
+        currentStintSlot = -1;
+        currentStintStartTime = simulator.getCurrentTime();
+    }
+
+    private EpisodeRoleSummary buildEpisodeRoleSummary() {
+        return roleAlignmentCalculator.summarize(
+                config.partyOrder,
+                simulator,
+                slotOnFieldTime,
+                slotOffFieldDamage,
+                slotSwapInCounts,
+                slotStintTotalSeconds,
+                slotStintCounts,
+                Math.max(1.0, simulator.getCurrentTime()));
     }
 
     private int sampleRandomValidAction(double[] mask) {
@@ -462,18 +565,39 @@ public class BattleEnvironment {
         public final int stepCount;
         public final double[] slotLastActiveTime;
         public final double[] slotOnFieldTime;
+        public final double[] slotOffFieldDamage;
+        public final double[] slotDamageSnapshots;
+        public final double[] slotStintTotalSeconds;
+        public final int[] slotStintCounts;
+        public final int[] slotSwapInCounts;
+        public final int currentStintSlot;
+        public final double currentStintStartTime;
 
         public BranchStateSnapshot(
                 double lastSwapTime,
                 int previousActionId,
                 int stepCount,
                 double[] slotLastActiveTime,
-                double[] slotOnFieldTime) {
+                double[] slotOnFieldTime,
+                double[] slotOffFieldDamage,
+                double[] slotDamageSnapshots,
+                double[] slotStintTotalSeconds,
+                int[] slotStintCounts,
+                int[] slotSwapInCounts,
+                int currentStintSlot,
+                double currentStintStartTime) {
             this.lastSwapTime = lastSwapTime;
             this.previousActionId = previousActionId;
             this.stepCount = stepCount;
             this.slotLastActiveTime = slotLastActiveTime;
             this.slotOnFieldTime = slotOnFieldTime;
+            this.slotOffFieldDamage = slotOffFieldDamage;
+            this.slotDamageSnapshots = slotDamageSnapshots;
+            this.slotStintTotalSeconds = slotStintTotalSeconds;
+            this.slotStintCounts = slotStintCounts;
+            this.slotSwapInCounts = slotSwapInCounts;
+            this.currentStintSlot = currentStintSlot;
+            this.currentStintStartTime = currentStintStartTime;
         }
     }
 

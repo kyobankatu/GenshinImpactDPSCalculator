@@ -18,6 +18,13 @@ public class RunnerStepResult {
     public final int[] liveSteps;
     public final int[] partyIds;
     public final int[] episodePartyIds;
+    public final double[] episodeRoleAlignmentScores;
+    public final double[] episodeCarryAlignmentScores;
+    public final double[] episodeOffFieldAlignmentScores;
+    public final double[] episodeEntryAlignmentScores;
+    public final double[] episodeStayAlignmentScores;
+    public final double[][] episodeExpectedRoleVectors;
+    public final double[][] episodeRealizedRoleVectors;
     /**
      * Vine snapshot IDs saved before SKILL/BURST/SWAP actions, one per env.
      * Value is -1 when no vine snapshot was saved for that env in this step.
@@ -39,6 +46,13 @@ public class RunnerStepResult {
             int[] liveSteps,
             int[] partyIds,
             int[] episodePartyIds,
+            double[] episodeRoleAlignmentScores,
+            double[] episodeCarryAlignmentScores,
+            double[] episodeOffFieldAlignmentScores,
+            double[] episodeEntryAlignmentScores,
+            double[] episodeStayAlignmentScores,
+            double[][] episodeExpectedRoleVectors,
+            double[][] episodeRealizedRoleVectors,
             int[] vineSnapshotIds) {
         this.observations = observations;
         this.privilegedObservations = privilegedObservations;
@@ -54,6 +68,13 @@ public class RunnerStepResult {
         this.liveSteps = liveSteps;
         this.partyIds = partyIds;
         this.episodePartyIds = episodePartyIds;
+        this.episodeRoleAlignmentScores = episodeRoleAlignmentScores;
+        this.episodeCarryAlignmentScores = episodeCarryAlignmentScores;
+        this.episodeOffFieldAlignmentScores = episodeOffFieldAlignmentScores;
+        this.episodeEntryAlignmentScores = episodeEntryAlignmentScores;
+        this.episodeStayAlignmentScores = episodeStayAlignmentScores;
+        this.episodeExpectedRoleVectors = episodeExpectedRoleVectors;
+        this.episodeRealizedRoleVectors = episodeRealizedRoleVectors;
         this.vineSnapshotIds = vineSnapshotIds;
     }
 }

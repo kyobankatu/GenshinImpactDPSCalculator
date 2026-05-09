@@ -27,13 +27,13 @@ import simulation.CombatSimulator;
  * <p>Layout: {@code NUM_CHARS} blocks of {@link #FEATURES_PER_CHARACTER} features
  * followed by {@link #GLOBAL_FEATURES} global features.
  *
- * <p>Per-character block (27 dims):
+ * <p>Per-character block (29 dims):
  * <ul>
  *   <li>[0–9] dynamic: energy ratio, isActive, skill readiness, burst readiness,
  *       isFormActive, active-buff ratio, max-buff-remaining, time-since-last-active,
  *       on-field fraction, cumulative damage share</li>
  *   <li>[10–17] static: element one-hot (8 dims, {@link Element#values()} order)</li>
- *   <li>[18–26] static: capability and value-curve profile scores</li>
+ *   <li>[18–28] static: capability and value-curve profile scores</li>
  * </ul>
  *
  * <p>Global block (7 dims): swap readiness, time remaining, PYRO/HYDRO/ELECTRO/ANEMO
@@ -277,6 +277,8 @@ public class ObservationEncoder {
                     profile[CapabilityProfile.SUSTAIN_VALUE_6_ACTIONS] = extractDouble(block, "sustain_value_6_actions");
                     profile[CapabilityProfile.EXIT_COST_SCORE] = extractDouble(block, "exit_cost_score");
                     profile[CapabilityProfile.REENTRY_COST_SCORE] = extractDouble(block, "reentry_cost_score");
+                    profile[CapabilityProfile.ON_FIELD_DPS_SCORE] = extractDouble(block, "on_field_dps_score");
+                    profile[CapabilityProfile.BURST_WINDOW_SCORE] = extractDouble(block, "burst_window_score");
                     profiles.put(entry.getKey(), profile);
                 }
                 System.out.println("[ObservationEncoder] Loaded capability profiles for: " + profiles.keySet());

@@ -94,6 +94,15 @@ class RolloutServiceClient:
         live_steps = recv_ints(self.sock, env_count)
         party_ids = recv_ints(self.sock, env_count)
         episode_party_ids = recv_ints(self.sock, env_count)
+        episode_role_alignment_scores = recv_doubles(self.sock, env_count)
+        episode_carry_alignment_scores = recv_doubles(self.sock, env_count)
+        episode_off_field_alignment_scores = recv_doubles(self.sock, env_count)
+        episode_entry_alignment_scores = recv_doubles(self.sock, env_count)
+        episode_stay_alignment_scores = recv_doubles(self.sock, env_count)
+        expected_role_width = recv_int(self.sock)
+        episode_expected_role_vectors = self._recv_matrix(env_count, expected_role_width)
+        realized_role_width = recv_int(self.sock)
+        episode_realized_role_vectors = self._recv_matrix(env_count, realized_role_width)
         vine_snapshot_ids = recv_ints(self.sock, env_count)
 
         return {
@@ -111,6 +120,13 @@ class RolloutServiceClient:
             "live_steps": live_steps,
             "party_ids": party_ids,
             "episode_party_ids": episode_party_ids,
+            "episode_role_alignment_scores": episode_role_alignment_scores,
+            "episode_carry_alignment_scores": episode_carry_alignment_scores,
+            "episode_off_field_alignment_scores": episode_off_field_alignment_scores,
+            "episode_entry_alignment_scores": episode_entry_alignment_scores,
+            "episode_stay_alignment_scores": episode_stay_alignment_scores,
+            "episode_expected_role_vectors": episode_expected_role_vectors,
+            "episode_realized_role_vectors": episode_realized_role_vectors,
             "vine_snapshot_ids": vine_snapshot_ids,
         }
 
@@ -232,6 +248,13 @@ class MultiRolloutServiceClient:
         live_steps = []
         party_ids = []
         episode_party_ids = []
+        episode_role_alignment_scores = []
+        episode_carry_alignment_scores = []
+        episode_off_field_alignment_scores = []
+        episode_entry_alignment_scores = []
+        episode_stay_alignment_scores = []
+        episode_expected_role_vectors = []
+        episode_realized_role_vectors = []
         vine_snapshot_ids = []
         offset = 0
         futures = []
@@ -257,6 +280,13 @@ class MultiRolloutServiceClient:
             live_steps.extend(batch["live_steps"])
             party_ids.extend(batch["party_ids"])
             episode_party_ids.extend(batch["episode_party_ids"])
+            episode_role_alignment_scores.extend(batch["episode_role_alignment_scores"])
+            episode_carry_alignment_scores.extend(batch["episode_carry_alignment_scores"])
+            episode_off_field_alignment_scores.extend(batch["episode_off_field_alignment_scores"])
+            episode_entry_alignment_scores.extend(batch["episode_entry_alignment_scores"])
+            episode_stay_alignment_scores.extend(batch["episode_stay_alignment_scores"])
+            episode_expected_role_vectors.extend(batch["episode_expected_role_vectors"])
+            episode_realized_role_vectors.extend(batch["episode_realized_role_vectors"])
             for snap_id in batch.get("vine_snapshot_ids", []):
                 if snap_id >= 0:
                     self._snapshot_owners[snap_id] = (client, runner_id)
@@ -276,6 +306,13 @@ class MultiRolloutServiceClient:
             "live_steps": live_steps,
             "party_ids": party_ids,
             "episode_party_ids": episode_party_ids,
+            "episode_role_alignment_scores": episode_role_alignment_scores,
+            "episode_carry_alignment_scores": episode_carry_alignment_scores,
+            "episode_off_field_alignment_scores": episode_off_field_alignment_scores,
+            "episode_entry_alignment_scores": episode_entry_alignment_scores,
+            "episode_stay_alignment_scores": episode_stay_alignment_scores,
+            "episode_expected_role_vectors": episode_expected_role_vectors,
+            "episode_realized_role_vectors": episode_realized_role_vectors,
             "vine_snapshot_ids": vine_snapshot_ids,
         }
 

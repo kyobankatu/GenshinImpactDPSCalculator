@@ -302,6 +302,302 @@
 
 - Java server と Python learner の組み合わせミスを即座に検知する
 
+## Phase 6: CapabilityProfileを使った汎用ローテーション探索
+
+### 目的
+
+特定 party の手組みローテーションをなぞらせるのではなく、
+各 party に含まれるキャラ群の「静的な役割適性」をもとに、
+その party に合った自然な最適ローテーションを探索できるようにする。
+
+ここでは `CapabilityProfile` を直接の正解ラベルにはしない。
+代わりに、以下の 2 つを分離して扱う。
+
+- `expected_role_vector`
+  static capability から導く「この party では誰がどの役割を担いやすいか」の prior
+- `realized_role_vector`
+  1 episode の rollout から観測される「実際に誰がどの役割を担ったか」の実績
+
+この 2 つの距離を、まずは診断指標として導入し、
+その後に小さな終端補助報酬または auxiliary task として学習に使う。
+
+### 方針
+
+- まず role prior / realized role の定義を明確にする
+- 次に episode 集計として rollout から測れる量を増やす
+- その後に W&B へ診断ログとして流す
+- 診断が効いていることを確認してから補助報酬化する
+- いきなり dense reward には入れない
+
+### Task 6-1: CapabilityProfileをrole prior向けに拡張
+
+対象:
+
+- `src/java/mechanics/rl/CapabilityProfile.java`
+- `src/java/mechanics/rl/CapabilityProfiler.java`
+- `src/java/mechanics/rl/ObservationEncoder.java`
+- `src/java/mechanics/rl/PrivilegedStateEncoder.java`
+
+内容:
+
+- 既存の
+  - `off_field_dps_ratio`
+  - `team_buff_score`
+  - `self_enhancement_score`
+  - `energy_generation_score`
+  - `entry_value_score`
+  - `sustain_value_3_actions`
+  - `sustain_value_6_actions`
+  - `exit_cost_score`
+  - `reentry_cost_score`
+
+  に加えて、role prior として直接使える静的指標を追加する。
+
+候補:
+
+- `on_field_dps_score`
+  Template A ベースの絶対的表火力の正規化値
+- `burst_window_score`
+  Template E ベースの burst/focused window での主力適性
+- `frontload_score`
+  初動数手の damage concentration
+- `driver_score`
+  通常/継続行動で反応・追撃を駆動しやすい適性
+- `setup_dependency_score`
+  本領発揮までに setup を要する度合い
+
+目的:
+
+- `selfEnhancement` 単独では表キャリー適性を取り切れない問題を解消する
+- static capability から汎用 role prior を構成しやすくする
+
+### Task 6-2: party単位のexpected_role_vectorを定義
+
+対象:
+
+- `src/java/mechanics/rl/CapabilityProfile.java`
+- `src/java/mechanics/rl/ObservationEncoder.java`
+- 必要なら新規 Java helper class
+
+内容:
+
+- party に含まれる各キャラの static profile をもとに、
+  role prior を party 内相対値として再正規化した `expected_role_vector` を作る
+
+最初の構成案:
+
+- `expected_on_field_share`
+- `expected_off_field_share`
+- `expected_entry_frequency`
+- `expected_mean_stay_length`
+- `expected_burst_driver_share`
+- `expected_battery_share`
+
+各次元は「誰が主に担うべきか」の分布にする。
+必要なら party 全体 summary と char-wise summary を分ける。
+
+目的:
+
+- profile をそのまま比較するのではなく、party 文脈に落とした prior に変換する
+
+### Task 6-3: rolloutからrealized_role_vectorを集計
+
+対象:
+
+- `src/java/mechanics/rl/BattleEnvironment.java`
+- `src/java/mechanics/rl/ActionResult.java`
+- `src/java/mechanics/rl/bridge/RunnerStepResult.java`
+- 必要なら新規 Java helper class
+
+内容:
+
+- 1 episode 中に以下を集計できるようにする
+
+char-wise:
+
+- on-field time share
+- damage share
+- off-field damage share
+- swap-in count / swap-out count
+- burst cast count
+- skill cast count
+- burst後N秒の on-field 占有率
+- 連続滞在長の平均
+
+party-wise:
+
+- action entropy by slot
+- setup完了後に誰が driver になったか
+- high-capability carry が active だった割合
+
+必要なら episode 終了時にだけ返す診断構造体を追加する。
+
+目的:
+
+- 「実際にそのキャラをどう使ったか」を static profile と比較可能な形にする
+
+### Task 6-4: role alignment distanceを定義
+
+対象:
+
+- 新規 Java helper class または Python helper
+
+内容:
+
+- `expected_role_vector` と `realized_role_vector` の距離を定義する
+- まずは weighted L1 / L2 のどちらか単純なものから始める
+- ただし役割によって重要度が違うので、重み付きにする
+
+例:
+
+- carry 系ズレは重め
+- battery 系ズレは中程度
+- minor buffer 系ズレは軽め
+
+返す指標候補:
+
+- `role_alignment_score`
+- `carry_alignment_score`
+- `off_field_alignment_score`
+- `entry_alignment_score`
+- `stay_length_alignment_score`
+
+目的:
+
+- good rotation / bad rotation を role consistency の観点で定量化する
+
+### Task 6-5: まずは診断ログとしてW&Bへ流す
+
+対象:
+
+- `src/python/rl/train_recurrent_ppo.py`
+- `src/python/rl/evaluate_policy.py`
+- `src/python/rl/evaluation.py`
+
+内容:
+
+- role alignment 系指標を episode 単位および eval 単位で記録する
+- 少なくとも以下を W&B へ送る
+  - `role_alignment_score`
+  - `carry_alignment_score`
+  - `off_field_alignment_score`
+  - `entry_alignment_score`
+  - `expected_vs_realized_on_field_share_*`
+
+目的:
+
+- まず「悪い run は本当に role alignment が悪いか」を観察で検証する
+- いきなり reward に入れて過学習させない
+
+### Task 6-6: 補助報酬はepisode終端で小さく追加
+
+対象:
+
+- `src/java/mechanics/rl/RewardFunction.java`
+- `src/java/mechanics/rl/BattleEnvironment.java`
+- `src/python/rl/train_recurrent_ppo.py`
+
+内容:
+
+- dense shaping ではなく、episode 終了時にだけ
+  `role_alignment_bonus`
+  を加える仕組みを導入する
+- 係数は小さくし、damage reward を主目標のまま維持する
+- ON/OFF と強さを config で切替可能にする
+
+候補:
+
+- `role_alignment_bonus_weight`
+- `enable_role_alignment_bonus`
+
+目的:
+
+- 一時的な setup 行動を罰せず、episode 全体として役割に沿った回し方を促す
+
+### Task 6-7: auxiliary taskとしても使える形にする
+
+対象:
+
+- `src/python/rl/recurrent_ppo.py`
+- `src/python/rl/train_recurrent_ppo.py`
+
+内容:
+
+- critic または shared trunk から
+  `realized_role_vector` あるいはその summary を予測する auxiliary head を追加する案を整理する
+- 実装は段階的に行う
+  - まずログ
+  - 次に終端補助報酬
+  - 必要なら最後に auxiliary head
+
+目的:
+
+- reward shaping だけに頼らず、方策表現そのものに「役割整合」の概念を学ばせる
+
+### Task 6-8: party非依存性を保つ制約を明文化
+
+対象:
+
+- `TASKS.md`
+- `README.md`
+- RL 関連コメント
+
+内容:
+
+- キャラ名依存ルールを入れない
+- `Flinsを表に出せ` のような reward は禁止
+- 使うのは static capability から導いた role prior のみ
+- 新キャラ追加時も profile 再生成だけで動くことを目標にする
+
+目的:
+
+- 特定 party のハードコードへ劣化するのを防ぐ
+
+### Task 6-9: 可視化とレポートを整備
+
+対象:
+
+- `output/rl_report*.html` の生成ロジック
+- 必要なら visualization 系
+
+内容:
+
+- eval report に
+  - expected role
+  - realized role
+  - alignment score
+  - on-field share
+  - damage share
+
+を追加できるようにする。
+
+目的:
+
+- HTML レポートだけ見ても「なぜこのローテが悪いのか」が分かるようにする
+
+### Task 6-10: 段階的な検証順序を固定
+
+対象:
+
+- `TASKS.md`
+- 実験メモ
+
+内容:
+
+- 実装順の実験を固定する
+
+順序:
+
+1. role metrics をログだけ出す
+2. bad run / good run で alignment score が分離するか確認
+3. 終端補助報酬を弱く入れる
+4. score が改善するか確認
+5. 必要なら auxiliary task を追加
+
+目的:
+
+- 何が効いたか分からないまま reward を複雑化しない
+
 ## 検証計画
 
 ### Java側
@@ -324,6 +620,9 @@
 - checkpoint 再開時に metadata mismatch を正しく弾く
 - Java/Python の observation size が一致しない場合に即エラーになる
 - evaluation の per-party 表示と aggregate 表示が意味的に整合する
+- role alignment 指標が good / bad rotation を実際に分離できる
+- role alignment bonus を入れても特定キャラ名依存の hardcode になっていない
+- 新 party を追加しても profile 再生成だけで同じ仕組みが動く
 
 ## 完了条件
 
@@ -333,4 +632,8 @@
 - checkpoint metadata が厳格化され、曖昧な読込が消えている
 - 評価系の重複実装が整理され、multi-party aggregate の意味が明示されている
 - capability profile 読込が正規の parse 方式になっている
+- CapabilityProfile から expected role prior を生成できる
+- rollout から realized role metrics を安定して集計できる
+- role alignment が診断ログとして可視化される
+- role alignment bonus を小さく有効化したとき、party 非依存な改善が確認できる
 - `./gradlew build` と Python 側の最低限の動作確認が通る

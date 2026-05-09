@@ -226,6 +226,11 @@ def run_training(args, run=None):
             episode_damages = []
             episode_steps = []
             episode_party_ids = []
+            episode_role_alignment_scores = []
+            episode_carry_alignment_scores = []
+            episode_off_field_alignment_scores = []
+            episode_entry_alignment_scores = []
+            episode_stay_alignment_scores = []
             invalid_actions = 0
             damage_delta_sum = 0.0
             intrinsic_reward_sum = 0.0
@@ -289,6 +294,11 @@ def run_training(args, run=None):
                         episode_damages.append(batch["episode_damages"][env_index])
                         episode_steps.append(batch["episode_steps"][env_index])
                         episode_party_ids.append(batch["episode_party_ids"][env_index])
+                        episode_role_alignment_scores.append(batch["episode_role_alignment_scores"][env_index])
+                        episode_carry_alignment_scores.append(batch["episode_carry_alignment_scores"][env_index])
+                        episode_off_field_alignment_scores.append(batch["episode_off_field_alignment_scores"][env_index])
+                        episode_entry_alignment_scores.append(batch["episode_entry_alignment_scores"][env_index])
+                        episode_stay_alignment_scores.append(batch["episode_stay_alignment_scores"][env_index])
                         completed_segments.append(
                             {
                                 "steps": active_segments[env_index],
@@ -355,6 +365,11 @@ def run_training(args, run=None):
             completed_episode_mean_reward = sum(episode_rewards) / len(episode_rewards) if episode_rewards else 0.0
             completed_episode_mean_damage = sum(episode_damages) / len(episode_damages) if episode_damages else 0.0
             mean_episode_steps = sum(episode_steps) / len(episode_steps) if episode_steps else 0.0
+            mean_role_alignment = sum(episode_role_alignment_scores) / len(episode_role_alignment_scores) if episode_role_alignment_scores else 0.0
+            mean_carry_alignment = sum(episode_carry_alignment_scores) / len(episode_carry_alignment_scores) if episode_carry_alignment_scores else 0.0
+            mean_off_field_alignment = sum(episode_off_field_alignment_scores) / len(episode_off_field_alignment_scores) if episode_off_field_alignment_scores else 0.0
+            mean_entry_alignment = sum(episode_entry_alignment_scores) / len(episode_entry_alignment_scores) if episode_entry_alignment_scores else 0.0
+            mean_stay_alignment = sum(episode_stay_alignment_scores) / len(episode_stay_alignment_scores) if episode_stay_alignment_scores else 0.0
             invalid_rate = invalid_actions / max(1, steps)
             mean_damage_delta = damage_delta_sum / max(1, steps)
             completed_episodes = len(episode_rewards)
@@ -397,6 +412,11 @@ def run_training(args, run=None):
                 "completed_episode_mean_damage": completed_episode_mean_damage,
                 "mean_episode_steps": mean_episode_steps,
                 "mean_damage_delta": mean_damage_delta,
+                "mean_role_alignment": mean_role_alignment,
+                "mean_carry_alignment": mean_carry_alignment,
+                "mean_off_field_alignment": mean_off_field_alignment,
+                "mean_entry_alignment": mean_entry_alignment,
+                "mean_stay_alignment": mean_stay_alignment,
                 "completed_episodes": completed_episodes,
                 "max_damage": max_damage,
                 "min_damage": min_damage,
@@ -416,7 +436,7 @@ def run_training(args, run=None):
                 "optimization_duration_sec": optimization_duration,
             }
             print(
-                f"Update {update}: completedEpReward={completed_episode_mean_reward:.3f} completedEpDamage={completed_episode_mean_damage:,.0f} steps={mean_episode_steps:.1f} invalid={invalid_rate:.3f} kl={optimization_metrics['approx_kl']:.5f} clip={optimization_metrics['clip_fraction']:.3f} entropyCoef={entropy_coefficient:.5f} policy={optimization_metrics['policy_loss']:.5f} value={optimization_metrics['value_loss']:.5f} aux={optimization_metrics['auxiliary_loss']:.5f} seqs={len(sequence_chunks)} meanSeq={mean_sequence_length:.1f} envSteps/s={env_steps_per_second:.1f}"
+                f"Update {update}: completedEpReward={completed_episode_mean_reward:.3f} completedEpDamage={completed_episode_mean_damage:,.0f} roleAlign={mean_role_alignment:.3f} steps={mean_episode_steps:.1f} invalid={invalid_rate:.3f} kl={optimization_metrics['approx_kl']:.5f} clip={optimization_metrics['clip_fraction']:.3f} entropyCoef={entropy_coefficient:.5f} policy={optimization_metrics['policy_loss']:.5f} value={optimization_metrics['value_loss']:.5f} aux={optimization_metrics['auxiliary_loss']:.5f} seqs={len(sequence_chunks)} meanSeq={mean_sequence_length:.1f} envSteps/s={env_steps_per_second:.1f}"
             )
             log_wandb(
                 run,
@@ -441,6 +461,11 @@ def run_training(args, run=None):
                     "train/completed_episode_mean_damage": completed_episode_mean_damage,
                     "train/mean_episode_steps": mean_episode_steps,
                     "train/mean_damage_delta": mean_damage_delta,
+                    "train/mean_role_alignment": mean_role_alignment,
+                    "train/mean_carry_alignment": mean_carry_alignment,
+                    "train/mean_off_field_alignment": mean_off_field_alignment,
+                    "train/mean_entry_alignment": mean_entry_alignment,
+                    "train/mean_stay_alignment": mean_stay_alignment,
                     "train/completed_episodes": completed_episodes,
                     "train/max_damage": max_damage,
                     "train/min_damage": min_damage,
@@ -987,6 +1012,16 @@ def flatten_eval_metrics(prefix, summary):
         metrics[f"{prefix}/action_fraction_{action_index}"] = fraction
     for slot_index, score in enumerate(summary.get("mean_attention_scores", [])):
         metrics[f"{prefix}/attention_slot_{slot_index}"] = score
+    if "role_alignment_score" in summary:
+        metrics[f"{prefix}/role_alignment_score"] = summary["role_alignment_score"]
+        metrics[f"{prefix}/carry_alignment_score"] = summary.get("carry_alignment_score", 0.0)
+        metrics[f"{prefix}/off_field_alignment_score"] = summary.get("off_field_alignment_score", 0.0)
+        metrics[f"{prefix}/entry_alignment_score"] = summary.get("entry_alignment_score", 0.0)
+        metrics[f"{prefix}/stay_alignment_score"] = summary.get("stay_alignment_score", 0.0)
+        for slot_index, value in enumerate(summary.get("expected_on_field_shares", [])):
+            metrics[f"{prefix}/expected_on_field_share_{slot_index}"] = value
+        for slot_index, value in enumerate(summary.get("realized_on_field_shares", [])):
+            metrics[f"{prefix}/realized_on_field_share_{slot_index}"] = value
     for party_name, party_summary in summary.get("per_party", {}).items():
         party_prefix = f"{prefix}/party_{slugify(party_name)}"
         metrics[f"{party_prefix}/reward"] = party_summary["reward"]
@@ -994,10 +1029,19 @@ def flatten_eval_metrics(prefix, summary):
         metrics[f"{party_prefix}/steps"] = party_summary["steps"]
         metrics[f"{party_prefix}/invalid_actions"] = party_summary["invalid_actions"]
         metrics[f"{party_prefix}/mean_top_probability"] = party_summary["mean_top_probability"]
+        metrics[f"{party_prefix}/role_alignment_score"] = party_summary.get("role_alignment_score", 0.0)
+        metrics[f"{party_prefix}/carry_alignment_score"] = party_summary.get("carry_alignment_score", 0.0)
+        metrics[f"{party_prefix}/off_field_alignment_score"] = party_summary.get("off_field_alignment_score", 0.0)
+        metrics[f"{party_prefix}/entry_alignment_score"] = party_summary.get("entry_alignment_score", 0.0)
+        metrics[f"{party_prefix}/stay_alignment_score"] = party_summary.get("stay_alignment_score", 0.0)
         for action_index, fraction in enumerate(party_summary["action_fractions"]):
             metrics[f"{party_prefix}/action_fraction_{action_index}"] = fraction
         for slot_index, score in enumerate(party_summary.get("mean_attention_scores", [])):
             metrics[f"{party_prefix}/attention_slot_{slot_index}"] = score
+        for slot_index, value in enumerate(party_summary.get("expected_on_field_shares", [])):
+            metrics[f"{party_prefix}/expected_on_field_share_{slot_index}"] = value
+        for slot_index, value in enumerate(party_summary.get("realized_on_field_shares", [])):
+            metrics[f"{party_prefix}/realized_on_field_share_{slot_index}"] = value
     return metrics
 
 
@@ -1029,6 +1073,11 @@ def append_log(row):
                 "completed_episode_mean_damage",
                 "mean_episode_steps",
                 "mean_damage_delta",
+                "mean_role_alignment",
+                "mean_carry_alignment",
+                "mean_off_field_alignment",
+                "mean_entry_alignment",
+                "mean_stay_alignment",
                 "completed_episodes",
                 "max_damage",
                 "min_damage",

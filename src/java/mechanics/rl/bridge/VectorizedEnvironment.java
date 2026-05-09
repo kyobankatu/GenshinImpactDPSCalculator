@@ -20,6 +20,7 @@ import mechanics.rl.QuietExecution;
 import mechanics.rl.RLAction;
 import mechanics.rl.RLEpisodeFactory;
 import mechanics.rl.RewardFunction;
+import mechanics.rl.EpisodeRoleSummary;
 import simulation.CombatSimulator;
 import simulation.SimulatorSnapshot;
 
@@ -179,6 +180,13 @@ public class VectorizedEnvironment {
         int[] liveSteps = new int[size()];
         int[] partyIds = new int[size()];
         int[] finishedEpisodePartyIds = new int[size()];
+        double[] finishedEpisodeRoleAlignmentScores = new double[size()];
+        double[] finishedEpisodeCarryAlignmentScores = new double[size()];
+        double[] finishedEpisodeOffFieldAlignmentScores = new double[size()];
+        double[] finishedEpisodeEntryAlignmentScores = new double[size()];
+        double[] finishedEpisodeStayAlignmentScores = new double[size()];
+        double[][] finishedEpisodeExpectedRoleVectors = new double[size()][EpisodeRoleSummary.VECTOR_SIZE];
+        double[][] finishedEpisodeRealizedRoleVectors = new double[size()][EpisodeRoleSummary.VECTOR_SIZE];
         int[] vineSnapshotIds = new int[size()];
         java.util.Arrays.fill(vineSnapshotIds, -1);
 
@@ -212,6 +220,15 @@ public class VectorizedEnvironment {
                 finishedEpisodeDamages[index] = episodeDamages[index];
                 finishedEpisodeSteps[index] = result.stepCount;
                 finishedEpisodePartyIds[index] = environments.get(index).getCurrentPartyId();
+                if (result.episodeRoleSummary != null) {
+                    finishedEpisodeRoleAlignmentScores[index] = result.episodeRoleSummary.roleAlignmentScore;
+                    finishedEpisodeCarryAlignmentScores[index] = result.episodeRoleSummary.carryAlignmentScore;
+                    finishedEpisodeOffFieldAlignmentScores[index] = result.episodeRoleSummary.offFieldAlignmentScore;
+                    finishedEpisodeEntryAlignmentScores[index] = result.episodeRoleSummary.entryAlignmentScore;
+                    finishedEpisodeStayAlignmentScores[index] = result.episodeRoleSummary.stayAlignmentScore;
+                    finishedEpisodeExpectedRoleVectors[index] = result.episodeRoleSummary.expectedRoleVector.clone();
+                    finishedEpisodeRealizedRoleVectors[index] = result.episodeRoleSummary.realizedRoleVector.clone();
+                }
                 BattleEnvironment.ResetResult reset = environments.get(index).reset(false);
                 observations[index] = reset.observation;
                 privilegedObservations[index] = reset.privilegedObservation;
@@ -247,6 +264,13 @@ public class VectorizedEnvironment {
                 liveSteps,
                 partyIds,
                 finishedEpisodePartyIds,
+                finishedEpisodeRoleAlignmentScores,
+                finishedEpisodeCarryAlignmentScores,
+                finishedEpisodeOffFieldAlignmentScores,
+                finishedEpisodeEntryAlignmentScores,
+                finishedEpisodeStayAlignmentScores,
+                finishedEpisodeExpectedRoleVectors,
+                finishedEpisodeRealizedRoleVectors,
                 vineSnapshotIds);
     }
 
