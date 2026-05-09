@@ -313,6 +313,13 @@ def run_training(args, run=None):
 
             segments = compute_advantages(completed_segments, config["gamma"], config["gae_lambda"])
             vine_metrics = apply_vine_ppo_advantages(segments, config, client, runner_id)
+            # Release any vine snapshots that were saved during the rollout but
+            # not consumed by branch_rollout_multi (avoids unbounded heap growth
+            # on the Java side, since only vine_max_points snapshots are sampled).
+            try:
+                client.release_snapshots(runner_id)
+            except Exception as e:
+                print(f"[VinePPO] release_snapshots failed: {e}", flush=True)
             sequence_chunks = build_sequence_chunks(segments, config["sequence_length"])
             optimization_start = time.time()
             optimization_metrics = train_epoch(

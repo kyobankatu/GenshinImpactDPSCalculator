@@ -191,6 +191,15 @@ public class RolloutService {
                     }
                     out.flush();
                     break;
+                case BatchProtocol.CMD_RELEASE_SNAPSHOTS:
+                    int releaseRunnerId = in.readInt();
+                    VectorizedEnvironment releaseRunner = runners.get(releaseRunnerId);
+                    if (releaseRunner != null) {
+                        releaseRunner.releaseSnapshots();
+                    }
+                    out.writeBoolean(true);
+                    out.flush();
+                    break;
                 case BatchProtocol.CMD_SHUTDOWN:
                     for (VectorizedEnvironment vectorizedEnvironment : runners.values()) {
                         vectorizedEnvironment.close();

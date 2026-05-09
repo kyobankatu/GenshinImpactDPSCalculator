@@ -6,6 +6,7 @@ from binary_protocol import (
     CMD_CLOSE_RUNNER,
     CMD_CREATE_RUNNER,
     CMD_HELLO,
+    CMD_RELEASE_SNAPSHOTS,
     CMD_RESET_RUNNER,
     CMD_SHUTDOWN,
     CMD_STEP_RUNNER,
@@ -112,6 +113,16 @@ class RolloutServiceClient:
             "episode_party_ids": episode_party_ids,
             "vine_snapshot_ids": vine_snapshot_ids,
         }
+
+    def release_snapshots(self, runner_id: int) -> bool:
+        """Release all unconsumed vine snapshots held by the runner.
+
+        Should be called once per update cycle (after apply_vine_ppo_advantages)
+        to prevent unbounded heap growth on the Java side.
+        """
+        send_int(self.sock, CMD_RELEASE_SNAPSHOTS)
+        send_int(self.sock, runner_id)
+        return recv_bool(self.sock)
 
     def branch_rollout_multi(self, runner_id: int, snapshot_id: int,
                              K: int, H: int, gamma: float) -> list:
@@ -275,6 +286,13 @@ class MultiRolloutServiceClient:
             raise KeyError(f"No owner found for snapshot_id {snapshot_id}")
         client, runner_id = owner
         return client.branch_rollout_multi(runner_id, snapshot_id, K, H, gamma)
+
+    def release_snapshots(self, runner_handle) -> bool:
+        # Drop the local owner map and ask each shard to clear its snapshot store.
+        self._snapshot_owners.clear()
+        for client, runner_id, _shard_envs in runner_handle:
+            client.release_snapshots(runner_id)
+        return True
 
     def close_runner(self, runner_handle):
         for client, runner_id, _shard_envs in runner_handle:

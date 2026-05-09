@@ -2,7 +2,7 @@ import socket
 import struct
 
 
-VERSION = 8
+VERSION = 9
 
 CMD_HELLO = 1
 CMD_CREATE_RUNNER = 2
@@ -11,6 +11,7 @@ CMD_STEP_RUNNER = 4
 CMD_CLOSE_RUNNER = 5
 CMD_SHUTDOWN = 6
 CMD_BRANCH_ROLLOUT = 7
+CMD_RELEASE_SNAPSHOTS = 8
 
 
 def recv_exact(sock: socket.socket, size: int) -> bytes:

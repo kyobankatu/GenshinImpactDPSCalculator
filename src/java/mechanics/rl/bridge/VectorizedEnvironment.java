@@ -267,6 +267,17 @@ public class VectorizedEnvironment {
      *
      * @return double array of length {@link mechanics.rl.RLAction#SIZE}
      */
+    /**
+     * Discards all snapshots currently held in the vine snapshot store.
+     * Called by the Python learner at the end of each update cycle to prevent
+     * unbounded memory growth from snapshots that are saved but never consumed
+     * (only {@code vine_max_points_per_update} of the saved snapshots are
+     * actually evaluated each update).
+     */
+    public void releaseSnapshots() {
+        snapshotStore.clear();
+    }
+
     public double[] branchRolloutMulti(int snapshotId, int K, int H, double gamma) {
         SnapshotEntry entry = snapshotStore.remove(snapshotId);
         if (entry == null) {
