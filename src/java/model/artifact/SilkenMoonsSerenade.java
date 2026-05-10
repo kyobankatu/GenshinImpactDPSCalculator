@@ -45,7 +45,7 @@ public class SilkenMoonsSerenade extends model.entity.ArtifactSet implements Dam
                     protected void applyStats(StatsContainer stats, double currentTime) {
                         stats.add(StatType.ELEMENTAL_MASTERY, finalBonus);
                     }
-                };
+                }.sourcedBy(owner.getCharacterId());
 
                 // Apply to ALL party members (Description: "Increases all party members' EM")
                 // The *effect* is called "Gleaming Moon: Devotion".

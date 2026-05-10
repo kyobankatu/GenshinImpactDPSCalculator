@@ -157,7 +157,7 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
             c.addBuff(new mechanics.buff.SimpleBuff("Eye of Stormy Judgment", BuffId.RAIDEN_EYE_OF_STORMY_JUDGMENT,
                     25.0, sim.getCurrentTime(), s -> {
                 s.add(StatType.BURST_DMG_BONUS, burstBonus);
-            }));
+            }).sourcedBy(this.getCharacterId()));
         }
 
         // Particle Generation & Coordinated Attack

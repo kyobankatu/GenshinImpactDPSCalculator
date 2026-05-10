@@ -282,7 +282,8 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                 // Lunar Domain burst bonus: active for the domain duration (20s)
                 sim.applyTeamBuffNoStack(new mechanics.buff.SimpleBuff(
                         "Columbina: Lunar Burst Bonus", BuffId.COLUMBINA_LUNAR_BURST_BONUS, 20.0, sim.getCurrentTime(),
-                        st -> st.add(model.type.StatType.LUNAR_REACTION_DMG_BONUS_ALL, getMultiplier("Lunar Domain Bonus"))));
+                        st -> st.add(model.type.StatType.LUNAR_REACTION_DMG_BONUS_ALL, getMultiplier("Lunar Domain Bonus")))
+                                .sourcedBy(this.getCharacterId()));
                 break;
             case NORMAL:
                 AttackAction na = new AttackAction(
@@ -508,7 +509,7 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                 protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
                     stats.add(model.type.StatType.HP_PERCENT, 0.40);
                 }
-            });
+            }.sourcedBy(this.getCharacterId()));
             if (brillianceWasActive && sim.getMoonsign() == CombatSimulator.Moonsign.ASCENDANT_GLEAM) {
                 applyC2MoonsignEffect(dominant, sim);
             }
@@ -553,7 +554,7 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                         protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
                             // Interruption resistance has no direct DPS impact
                         }
-                    });
+                    }.sourcedBy(this.getCharacterId()));
                 }
                 break;
             case CRYSTALLIZE:
@@ -567,7 +568,7 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                         protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
                             // Shield absorption is defensive, no DPS stat impact
                         }
-                    });
+                    }.sourcedBy(this.getCharacterId()));
                 }
                 break;
         }
@@ -604,7 +605,7 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                     protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
                         stats.add(model.type.StatType.ATK_FLAT, atkBonus);
                     }
-                });
+                }.sourcedBy(this.getCharacterId()));
                 break;
             case BLOOM:
                 double emBonus = colHp * 0.0035;
@@ -615,7 +616,7 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                     protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
                         stats.add(model.type.StatType.ELEMENTAL_MASTERY, emBonus);
                     }
-                });
+                }.sourcedBy(this.getCharacterId()));
                 break;
             case CRYSTALLIZE:
                 double defBonus = colHp * 0.01;
@@ -626,7 +627,7 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                     protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
                         stats.add(model.type.StatType.DEF_FLAT, defBonus);
                     }
-                });
+                }.sourcedBy(this.getCharacterId()));
                 break;
         }
     }

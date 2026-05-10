@@ -90,7 +90,7 @@ public class CalamityQueller extends Weapon implements ActionTriggeredWeaponEffe
                 protected void applyStats(StatsContainer stats, double currentTime) {
                     stats.add(StatType.ATK_PERCENT, accumulatedStacks * ATK_PER_STACK);
                 }
-            });
+            }.sourcedBy(user.getCharacterId()));
 
             // Timer: fires every 1 s to add stacks based on current field state
             sim.registerEvent(new simulation.event.SimpleTimerEvent(t + 1.0, 1.0) {

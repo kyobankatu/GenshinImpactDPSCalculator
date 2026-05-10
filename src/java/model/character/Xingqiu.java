@@ -125,7 +125,7 @@ public class Xingqiu extends Character implements FormStateProvider {
         // Buff Logic
         sim.applyTeamBuff(new mechanics.buff.SimpleBuff("Raincutter", BuffId.RAINCUTTER, 18.0,
                 sim.getCurrentTime(), s -> {
-            s.add(StatType.RES_SHRED, 0.15); // Hydro Shred (C2)
+            s.add(StatType.HYDRO_RES_SHRED, 0.15); // Hydro RES shred (C2)
         }));
 
         AttackAction orbital = new AttackAction("Raincutter Orbital", 0.0, Element.HYDRO, StatType.BASE_ATK,

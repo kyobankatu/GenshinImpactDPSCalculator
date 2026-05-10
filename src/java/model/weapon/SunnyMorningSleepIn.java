@@ -94,7 +94,7 @@ public class SunnyMorningSleepIn extends Weapon
                 protected void applyStats(StatsContainer stats, double currentTime) {
                     stats.add(StatType.ELEMENTAL_MASTERY, EM_SKILL);
                 }
-            });
+            }.sourcedBy(user.getCharacterId()));
         } else if (action.getActionType() == ActionType.BURST) {
             user.removeBuff(BuffId.SUNNY_MORNING_BURST_EM);
             user.addBuff(new mechanics.buff.Buff("SunnyMorningSleepIn: Burst EM", BuffId.SUNNY_MORNING_BURST_EM,
@@ -103,7 +103,7 @@ public class SunnyMorningSleepIn extends Weapon
                 protected void applyStats(StatsContainer stats, double currentTime) {
                     stats.add(StatType.ELEMENTAL_MASTERY, EM_BURST);
                 }
-            });
+            }.sourcedBy(user.getCharacterId()));
         }
     }
 
@@ -132,6 +132,6 @@ public class SunnyMorningSleepIn extends Weapon
             protected void applyStats(StatsContainer stats, double currentTime) {
                 stats.add(StatType.ELEMENTAL_MASTERY, EM_SWIRL);
             }
-        });
+        }.sourcedBy(ownerRef.getCharacterId()));
     }
 }

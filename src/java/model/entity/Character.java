@@ -110,6 +110,9 @@ public abstract class Character {
     public abstract void applyPassive(StatsContainer currentStats);
 
     public void addBuff(mechanics.buff.Buff buff) {
+        if (buff.getSourceCharacterId() == model.type.CharacterId.UNKNOWN) {
+            buff.sourcedBy(this.characterId);
+        }
         activeBuffs.add(buff);
     }
 

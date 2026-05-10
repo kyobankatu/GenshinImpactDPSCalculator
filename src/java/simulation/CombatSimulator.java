@@ -2,7 +2,9 @@ package simulation;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -50,6 +52,11 @@ public class CombatSimulator {
     private final EnergyDistributor energyDistributor;
     private final mechanics.element.ICDManager icdManager;
     private boolean enableLogging = true;
+    private boolean captureActionDirectDamage = false;
+    private double currentActionDirectDamageCapture = 0.0;
+    private double lastActionDirectDamageCapture = 0.0;
+    private CharacterId capturedActionDirectDamageActorId = null;
+    private final Deque<CharacterId> buffSourceStack = new LinkedList<>();
 
     /**
      * Represents the global Moonsign state of the party.
@@ -234,6 +241,22 @@ public class CombatSimulator {
         buffManager.applyFieldBuff(buff);
     }
 
+    public void pushBuffSource(CharacterId sourceCharacterId) {
+        if (sourceCharacterId != null) {
+            buffSourceStack.push(sourceCharacterId);
+        }
+    }
+
+    public void popBuffSource() {
+        if (!buffSourceStack.isEmpty()) {
+            buffSourceStack.pop();
+        }
+    }
+
+    public CharacterId getCurrentBuffSourceCharacterId() {
+        return buffSourceStack.isEmpty() ? CharacterId.UNKNOWN : buffSourceStack.peek();
+    }
+
     /**
      * Returns buffs applicable to the given character.
      *
@@ -302,6 +325,29 @@ public class CombatSimulator {
 
     public void recordDamage(CharacterId characterId, double dmg) {
         damageReport.recordDamage(characterId.getDisplayName(), dmg);
+    }
+
+    public void beginActionDirectDamageCapture(CharacterId actorId) {
+        captureActionDirectDamage = true;
+        capturedActionDirectDamageActorId = actorId;
+        currentActionDirectDamageCapture = 0.0;
+    }
+
+    public void captureResolvedActionDamage(CharacterId actorId, double damage) {
+        if (captureActionDirectDamage && actorId == capturedActionDirectDamageActorId) {
+            currentActionDirectDamageCapture += damage;
+        }
+    }
+
+    public void endActionDirectDamageCapture() {
+        lastActionDirectDamageCapture = currentActionDirectDamageCapture;
+        currentActionDirectDamageCapture = 0.0;
+        captureActionDirectDamage = false;
+        capturedActionDirectDamageActorId = null;
+    }
+
+    public double getLastActionDirectDamageCapture() {
+        return lastActionDirectDamageCapture;
     }
 
     /**
@@ -435,7 +481,12 @@ public class CombatSimulator {
      * @param trigger triggering character
      */
     public void notifyReaction(mechanics.reaction.ReactionResult result, model.entity.Character trigger) {
-        eventDispatcher.notifyReaction(result, trigger, getCurrentTime(), this, party.getMembers());
+        pushBuffSource(trigger != null ? trigger.getCharacterId() : CharacterId.UNKNOWN);
+        try {
+            eventDispatcher.notifyReaction(result, trigger, getCurrentTime(), this, party.getMembers());
+        } finally {
+            popBuffSource();
+        }
     }
 
     /**
@@ -516,6 +567,10 @@ public class CombatSimulator {
      */
     public List<Buff> getTeamBuffList() {
         return buffManager.getTeamBuffList();
+    }
+
+    public List<Buff> getFieldBuffList() {
+        return buffManager.getFieldBuffList();
     }
 
     public void removeTeamBuffsById(mechanics.buff.BuffId buffId) {

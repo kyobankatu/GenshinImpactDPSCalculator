@@ -53,7 +53,7 @@ public class NightOfTheSkysUnveiling extends model.entity.ArtifactSet implements
                         protected void applyStats(StatsContainer stats, double currentTime) {
                             stats.add(StatType.CRIT_RATE, finalBonus);
                         }
-                    });
+                    }.sourcedBy(owner.getCharacterId()));
 
                 }
             }

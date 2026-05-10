@@ -78,7 +78,7 @@ public class ViridescentVenerer extends model.entity.ArtifactSet implements Reac
                             protected void applyStats(StatsContainer stats, double currentTime) {
                                 stats.add(targetStat, 0.40);
                             }
-                        };
+                        }.sourcedBy(owner.getCharacterId());
 
                         // Apply to ALL party members
                         for (model.entity.Character m : sim.getPartyMembers()) {

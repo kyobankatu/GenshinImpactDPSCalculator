@@ -64,24 +64,29 @@ public class CombatActionResolver {
         if (c == null) {
             throw new RuntimeException("Character not found: " + characterId);
         }
-        String charName = c.getName();
-        ActionResolutionContext context = createContext(c, action);
+        sim.pushBuffSource(characterId);
+        try {
+            String charName = c.getName();
+            ActionResolutionContext context = createContext(c, action);
 
-        normalizeIcd(action);
+            normalizeIcd(action);
 
-        boolean applied = sim.getIcdManager().checkApplication(
-                characterId.name(), action.getICDTag(), action.getICDType(), sim.getCurrentTime());
+            boolean applied = sim.getIcdManager().checkApplication(
+                    characterId.name(), action.getICDTag(), action.getICDType(), sim.getCurrentTime());
 
-        notifyLunarAction(action, c);
+            notifyLunarAction(action, c);
 
-        double reactionMulti = 1.0;
-        if (applied && action.getGaugeUnits() > 0) {
-            reactionMulti = resolveGaugeAndReactions(c, characterId, action, context);
-        } else if (sim.isLoggingEnabled()) {
-            System.out.println(String.format("   [ICD] Applied blocked (%s)", action.getICDTag()));
+            double reactionMulti = 1.0;
+            if (applied && action.getGaugeUnits() > 0) {
+                reactionMulti = resolveGaugeAndReactions(c, characterId, action, context);
+            } else if (sim.isLoggingEnabled()) {
+                System.out.println(String.format("   [ICD] Applied blocked (%s)", action.getICDTag()));
+            }
+
+            finalizeActionDamage(c, charName, action, reactionMulti, context);
+        } finally {
+            sim.popBuffSource();
         }
-
-        finalizeActionDamage(c, charName, action, reactionMulti, context);
     }
 
     private ActionResolutionContext createContext(Character attacker, AttackAction action) {
@@ -275,6 +280,7 @@ public class CombatActionResolver {
             System.out.println(String.format("   -> Damage: %,.0f", damage));
         }
         sim.recordDamage(attacker.getCharacterId(), damage);
+        sim.captureResolvedActionDamage(attacker.getCharacterId(), damage);
 
         if (attacker.getArtifacts() != null) {
             for (ArtifactSet artifact : attacker.getArtifacts()) {

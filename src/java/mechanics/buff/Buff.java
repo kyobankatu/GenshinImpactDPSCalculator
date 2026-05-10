@@ -29,6 +29,7 @@ public abstract class Buff {
     // Targeting: null means "no restriction"
     protected Set<CharacterId> excludeChars = null;
     protected Element targetElement = null;
+    protected CharacterId sourceCharacterId = CharacterId.UNKNOWN;
 
     /**
      * Creates a time-limited buff active from {@code currentTime} for {@code duration} seconds.
@@ -88,6 +89,15 @@ public abstract class Buff {
 
     public BuffId getId() {
         return id;
+    }
+
+    public CharacterId getSourceCharacterId() {
+        return sourceCharacterId;
+    }
+
+    public Buff sourcedBy(CharacterId sourceCharacterId) {
+        this.sourceCharacterId = sourceCharacterId;
+        return this;
     }
 
     /**

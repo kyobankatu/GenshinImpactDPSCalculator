@@ -93,7 +93,7 @@ public class PrimordialJadeWingedSpear extends Weapon implements DamageTriggered
                     stats.add(StatType.DMG_BONUS_ALL, MAX_STACK_DMG_BONUS);
                 }
             }
-        });
+        }.sourcedBy(user.getCharacterId()));
     }
 
     /**

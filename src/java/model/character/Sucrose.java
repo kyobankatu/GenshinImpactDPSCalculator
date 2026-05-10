@@ -307,7 +307,7 @@ public class Sucrose extends Character implements FormStateProvider {
         sim.applyTeamBuffNoStack(
                 new SimpleBuff("Mollis Favonius (A4)", BuffId.SUCROSE_MOLLIS_FAVONIUS_A4, 8.0, sim.getCurrentTime(), st -> {
                     st.add(StatType.ELEMENTAL_MASTERY, buffVal);
-                }).exclude(this.characterId));
+                }).exclude(this.characterId).sourcedBy(this.getCharacterId()));
     }
 
     /**
@@ -339,7 +339,7 @@ public class Sucrose extends Character implements FormStateProvider {
                     new SimpleBuff("Catalyst Conversion (A1) [" + swirled.name() + "]", buffId, 8.0, sim.getCurrentTime(),
                             st -> {
                                 st.add(StatType.ELEMENTAL_MASTERY, 50.0);
-                            }).forElement(swirledElem));
+                            }).forElement(swirledElem).sourcedBy(this.getCharacterId()));
         }
     }
 
@@ -388,7 +388,7 @@ public class Sucrose extends Character implements FormStateProvider {
                     // C6 only buffs absorbed element (Pyro/Hydro/Electro/Cryo)
                     break;
             }
-        }));
+        }).sourcedBy(this.getCharacterId()));
     }
 
 }

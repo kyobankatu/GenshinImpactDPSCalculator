@@ -283,13 +283,13 @@ public class Ineffa extends Character implements FormStateProvider, CharacterTea
                 buffToApply = new SimpleBuff("Reconstruction Protocol (P2)", BuffId.RECONSTRUCTION_PROTOCOL_P2,
                         20.0, sim.getCurrentTime(), st -> {
                     st.add(StatType.ELEMENTAL_MASTERY, buffVal);
-                });
+                }).sourcedBy(this.getCharacterId());
             } else {
                 buffToApply = new ActiveCharacterBuff("Reconstruction Protocol (P2)",
                         BuffId.RECONSTRUCTION_PROTOCOL_P2, 20.0, sim.getCurrentTime(),
                         sim, m, st -> {
                             st.add(StatType.ELEMENTAL_MASTERY, buffVal);
-                        });
+                        }).sourcedBy(this.getCharacterId());
             }
             m.addBuff(buffToApply);
         }
@@ -316,7 +316,7 @@ public class Ineffa extends Character implements FormStateProvider, CharacterTea
                 // System.out.println("[INEFFA_DEBUG] ATK:" + atk + " Bonus:" + bonus);
                 stats.add(StatType.LUNAR_BASE_BONUS, bonus);
             }
-        });
+        }.sourcedBy(this.getCharacterId()));
         return buffs;
     }
 }

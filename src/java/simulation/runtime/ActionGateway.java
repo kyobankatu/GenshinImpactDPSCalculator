@@ -71,11 +71,21 @@ public class ActionGateway {
                     sim.getCurrentTime(), charName, request.getLogLabel()));
         }
 
-        if (character.getWeapon() instanceof ActionTriggeredWeaponEffect) {
-            ((ActionTriggeredWeaponEffect) character.getWeapon()).onAction(character, request, sim);
-        }
+        sim.pushBuffSource(characterId);
+        try {
+            if (character.getWeapon() instanceof ActionTriggeredWeaponEffect) {
+                ((ActionTriggeredWeaponEffect) character.getWeapon()).onAction(character, request, sim);
+            }
 
-        character.onAction(request, sim);
+            sim.beginActionDirectDamageCapture(characterId);
+            try {
+                character.onAction(request, sim);
+            } finally {
+                sim.endActionDirectDamageCapture();
+            }
+        } finally {
+            sim.popBuffSource();
+        }
         sim.setRotationTime(sim.getCurrentTime());
     }
 }

@@ -37,6 +37,9 @@ public class BuffManager {
      * @param buff buff to add
      */
     public void applyTeamBuff(Buff buff) {
+        if (buff.getSourceCharacterId() == model.type.CharacterId.UNKNOWN) {
+            buff.sourcedBy(sim.getCurrentBuffSourceCharacterId());
+        }
         teamBuffs.add(buff);
     }
 
@@ -53,6 +56,9 @@ public class BuffManager {
             throw new IllegalArgumentException(
                     "applyTeamBuffNoStack requires a typed BuffId; custom display-name fallback is not supported");
         }
+        if (buff.getSourceCharacterId() == model.type.CharacterId.UNKNOWN) {
+            buff.sourcedBy(sim.getCurrentBuffSourceCharacterId());
+        }
         removeTeamBuffsById(buff.getId());
         teamBuffs.add(buff);
     }
@@ -63,6 +69,9 @@ public class BuffManager {
      * @param buff field buff to add
      */
     public void applyFieldBuff(Buff buff) {
+        if (buff.getSourceCharacterId() == model.type.CharacterId.UNKNOWN) {
+            buff.sourcedBy(sim.getCurrentBuffSourceCharacterId());
+        }
         fieldBuffs.add(buff);
     }
 
@@ -85,10 +94,22 @@ public class BuffManager {
 
         for (Character member : sim.getPartyMembers()) {
             if (member.getWeapon() instanceof WeaponTeamBuffProvider) {
-                buffs.addAll(((WeaponTeamBuffProvider) member.getWeapon()).getTeamBuffs(member));
+                List<Buff> weaponBuffs = ((WeaponTeamBuffProvider) member.getWeapon()).getTeamBuffs(member);
+                for (Buff buff : weaponBuffs) {
+                    if (buff.getSourceCharacterId() == model.type.CharacterId.UNKNOWN) {
+                        buff.sourcedBy(member.getCharacterId());
+                    }
+                    buffs.add(buff);
+                }
             }
             if (member instanceof CharacterTeamBuffProvider) {
-                buffs.addAll(((CharacterTeamBuffProvider) member).getTeamBuffs());
+                List<Buff> characterBuffs = ((CharacterTeamBuffProvider) member).getTeamBuffs();
+                for (Buff buff : characterBuffs) {
+                    if (buff.getSourceCharacterId() == model.type.CharacterId.UNKNOWN) {
+                        buff.sourcedBy(member.getCharacterId());
+                    }
+                    buffs.add(buff);
+                }
             }
         }
 

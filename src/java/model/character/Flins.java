@@ -562,7 +562,7 @@ public class Flins extends Character
                 double bonus = Math.min(0.14, (atk / 100.0) * 0.007);
                 stats.add(StatType.LUNAR_BASE_BONUS, bonus);
             }
-        });
+        }.sourcedBy(this.getCharacterId()));
         return buffs;
     }
 
