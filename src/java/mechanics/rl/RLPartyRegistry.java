@@ -27,10 +27,16 @@ public final class RLPartyRegistry {
     private RLPartyRegistry() {
     }
 
+    /**
+     * Registers one RL party spec by its declared party name.
+     */
     public static void register(RLPartySpec spec) {
         SPECS.put(spec.getPartyName(), spec);
     }
 
+    /**
+     * Returns the registered spec for one party name.
+     */
     public static RLPartySpec require(String partyName) {
         RLPartySpec spec = SPECS.get(partyName);
         if (spec == null) {
@@ -39,6 +45,9 @@ public final class RLPartyRegistry {
         return spec;
     }
 
+    /**
+     * Resolves a selection string into concrete registered party specs.
+     */
     public static List<RLPartySpec> resolveSelection(String selection) {
         String normalized = selection == null || selection.isBlank()
                 ? DEFAULT_SINGLE_PARTY
@@ -64,22 +73,37 @@ public final class RLPartyRegistry {
         return resolveNamedList(names);
     }
 
+    /**
+     * Returns the specs used by the default multi-party training selection.
+     */
     public static List<RLPartySpec> defaultTrainingSpecs() {
         return resolveNamedList(DEFAULT_TRAINING_PARTIES);
     }
 
+    /**
+     * Returns all registered party specs in registry order.
+     */
     public static List<RLPartySpec> allSpecs() {
         return new ArrayList<>(SPECS.values());
     }
 
+    /**
+     * Returns a comma-separated list of registered party names.
+     */
     public static String availablePartyNames() {
         return String.join(", ", SPECS.keySet());
     }
 
+    /**
+     * Creates an episode factory from a named party selection.
+     */
     public static RLEpisodeFactory createEpisodeFactory(EpisodeConfig baseConfig, String selection) {
         return createEpisodeFactory(baseConfig, resolveSelection(selection));
     }
 
+    /**
+     * Creates an episode factory for the provided party specs.
+     */
     public static RLEpisodeFactory createEpisodeFactory(EpisodeConfig baseConfig, List<RLPartySpec> specs) {
         if (specs.size() == 1) {
             return new SinglePartyRLEpisodeFactory(specs.get(0), baseConfig);

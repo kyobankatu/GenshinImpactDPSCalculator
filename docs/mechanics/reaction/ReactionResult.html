@@ -122,6 +122,15 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">ReactionResult</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Object</a></span></div>
+<div class="block">反応計算の結果を表す値オブジェクト。
+
+<p><a href="ReactionCalculator.html" title="mechanics.reaction内のクラス"><code>ReactionCalculator</code></a> の計算結果を、
+増幅反応 (Amp) の倍率、変化反応 (Transformative) のダメージ値、表示名、
+反応種別 (<a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス"><code>ReactionResult.Kind</code></a>)、関連元素、Lunar 反応種別 (<a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス"><code>ReactionResult.LunarType</code></a>) としてまとめて保持する。</p>
+
+<p>本クラスは不変ではないがフィールドは生成時に確定し、外部からは getter 経由でのみ参照される。
+インスタンスは <a href="#none()"><code>none()</code></a> / <a href="#amp(double,java.lang.String)"><code>amp(double, String)</code></a> / <a href="#transform(double,java.lang.String)"><code>transform(double, String)</code></a>
+等の static ファクトリ経由で生成することを推奨する。</p></div>
 </div>
 </section>
 <section class="summary">
@@ -137,13 +146,19 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color"><code>static enum&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="ReactionResult.Kind.html" class="type-name-link" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">反応の具体種別を表す列挙。</div>
+</div>
 <div class="col-first odd-row-color"><code>static enum&nbsp;</code></div>
 <div class="col-second odd-row-color"><code><a href="ReactionResult.LunarType.html" class="type-name-link" title="mechanics.reactionの列挙クラス">ReactionResult.LunarType</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Lunar 系反応の細分種別。</div>
+</div>
 <div class="col-first even-row-color"><code>static enum&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="ReactionResult.Type.html" class="type-name-link" title="mechanics.reactionの列挙クラス">ReactionResult.Type</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">反応の大分類を表す列挙。</div>
+</div>
 </div>
 </section>
 </li>
@@ -158,25 +173,39 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color"><code>private double</code></div>
 <div class="col-second even-row-color"><code><a href="#ampMultiplier" class="member-name-link">ampMultiplier</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">増幅反応倍率。</div>
+</div>
 <div class="col-first odd-row-color"><code>private <a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#kind" class="member-name-link">kind</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">反応の具体種別。</div>
+</div>
 <div class="col-first even-row-color"><code>private <a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス">ReactionResult.LunarType</a></code></div>
 <div class="col-second even-row-color"><code><a href="#lunarType" class="member-name-link">lunarType</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Lunar 反応細分。</div>
+</div>
 <div class="col-first odd-row-color"><code>private <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#name" class="member-name-link">name</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">表示用反応名。</div>
+</div>
 <div class="col-first even-row-color"><code>private <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a></code></div>
 <div class="col-second even-row-color"><code><a href="#relatedElement" class="member-name-link">relatedElement</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">関連元素 (Swirl の拡散元素、Crystallize の付着元素など)。</div>
+</div>
 <div class="col-first odd-row-color"><code>private double</code></div>
 <div class="col-second odd-row-color"><code><a href="#transformDamage" class="member-name-link">transformDamage</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">変化反応ダメージ。</div>
+</div>
 <div class="col-first even-row-color"><code>private <a href="ReactionResult.Type.html" title="mechanics.reactionの列挙クラス">ReactionResult.Type</a></code></div>
 <div class="col-second even-row-color"><code><a href="#type" class="member-name-link">type</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">反応の大分類。</div>
+</div>
 </div>
 </section>
 </li>
@@ -192,13 +221,17 @@ loadScripts(document, 'script');</script>
  double&nbsp;ampMultiplier,
  double&nbsp;transformDamage,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">反応種別と倍率/ダメージ、名称から <code>ReactionResult</code> を構築する。</div>
+</div>
 <div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(mechanics.reaction.ReactionResult.Type,double,double,java.lang.String,mechanics.reaction.ReactionResult.Kind)" class="member-name-link">ReactionResult</a><wbr>(<a href="ReactionResult.Type.html" title="mechanics.reactionの列挙クラス">ReactionResult.Type</a>&nbsp;type,
  double&nbsp;ampMultiplier,
  double&nbsp;transformDamage,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name,
  <a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a>&nbsp;kind)</code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Kind を明示して <code>ReactionResult</code> を構築する。</div>
+</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(mechanics.reaction.ReactionResult.Type,double,double,java.lang.String,mechanics.reaction.ReactionResult.Kind,mechanics.reaction.ReactionResult.LunarType,model.type.Element)" class="member-name-link">ReactionResult</a><wbr>(<a href="ReactionResult.Type.html" title="mechanics.reactionの列挙クラス">ReactionResult.Type</a>&nbsp;type,
  double&nbsp;ampMultiplier,
  double&nbsp;transformDamage,
@@ -206,14 +239,18 @@ loadScripts(document, 'script');</script>
  <a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a>&nbsp;kind,
  <a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス">ReactionResult.LunarType</a>&nbsp;lunarType,
  <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;relatedElement)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">すべてのフィールドを明示して <code>ReactionResult</code> を構築する。</div>
+</div>
 <div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(mechanics.reaction.ReactionResult.Type,double,double,java.lang.String,mechanics.reaction.ReactionResult.Kind,model.type.Element)" class="member-name-link">ReactionResult</a><wbr>(<a href="ReactionResult.Type.html" title="mechanics.reactionの列挙クラス">ReactionResult.Type</a>&nbsp;type,
  double&nbsp;ampMultiplier,
  double&nbsp;transformDamage,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name,
  <a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a>&nbsp;kind,
  <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;relatedElement)</code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Kind と関連元素を明示して <code>ReactionResult</code> を構築する。</div>
+</div>
 </div>
 </section>
 </li>
@@ -231,18 +268,26 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#amp(double,java.lang.String)" class="member-name-link">amp</a><wbr>(double&nbsp;multiplier,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">増幅反応 (Vaporize / Melt) の結果を生成する。</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#amp(double,java.lang.String,mechanics.reaction.ReactionResult.Kind)" class="member-name-link">amp</a><wbr>(double&nbsp;multiplier,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name,
  <a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a>&nbsp;kind)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Kind を明示した増幅反応の結果を生成する。</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#canonicalLunarName(mechanics.reaction.ReactionResult.LunarType)" class="member-name-link">canonicalLunarName</a><wbr>(<a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス">ReactionResult.LunarType</a>&nbsp;lunarType)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block"><a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス"><code>ReactionResult.LunarType</code></a> に対する正規 (canonical) 表示名を返す。</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAmpMultiplier()" class="member-name-link">getAmpMultiplier</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">増幅反応倍率を返す。</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCanonicalLunarReactionName()" class="member-name-link">getCanonicalLunarReactionName</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -251,16 +296,24 @@ still need the legacy Lunar naming bridge.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getKind()" class="member-name-link">getKind</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">反応の具体種別を返す。</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス">ReactionResult.LunarType</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLunarType()" class="member-name-link">getLunarType</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Lunar 反応細分を返す。</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getName()" class="member-name-link">getName</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">表示用反応名を返す。</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRelatedElement()" class="member-name-link">getRelatedElement</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">関連元素を返す。</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSwirlElement()" class="member-name-link">getSwirlElement</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -268,56 +321,86 @@ still need the legacy Lunar naming bridge.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTransformDamage()" class="member-name-link">getTransformDamage</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">変化反応ダメージを返す。</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ReactionResult.Type.html" title="mechanics.reactionの列挙クラス">ReactionResult.Type</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getType()" class="member-name-link">getType</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">反応の大分類を返す。</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#inferKind(java.lang.String)" class="member-name-link">inferKind</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">反応名から <a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス"><code>ReactionResult.Kind</code></a> を推定する。</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス">ReactionResult.LunarType</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#inferLunarType(java.lang.String)" class="member-name-link">inferLunarType</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">反応名から <a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス"><code>ReactionResult.LunarType</code></a> を推定する。</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス">ReactionResult.LunarType</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#inferLunarType(mechanics.reaction.ReactionResult.Kind)" class="member-name-link">inferLunarType</a><wbr>(<a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a>&nbsp;kind)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block"><a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス"><code>ReactionResult.Kind</code></a> から <a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス"><code>ReactionResult.LunarType</code></a> を導出する。</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isElectroCharged()" class="member-name-link">isElectroCharged</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">感電または Lunar-Charged 反応かを判定する。</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isLunarReaction()" class="member-name-link">isLunarReaction</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Lunar 反応 (Lunar-Charged / Lunar-Bloom / Lunar-Crystallize のいずれか) かを判定する。</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isSwirl()" class="member-name-link">isSwirl</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">拡散反応かを判定する。</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isThundercloudStrike()" class="member-name-link">isThundercloudStrike</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">雷霆万鈞反応かを判定する。</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#kindFromLunarType(mechanics.reaction.ReactionResult.LunarType)" class="member-name-link">kindFromLunarType</a><wbr>(<a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス">ReactionResult.LunarType</a>&nbsp;lunarType)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block"><a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス"><code>ReactionResult.LunarType</code></a> から対応する <a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス"><code>ReactionResult.Kind</code></a> を導出する。</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#lunar(double,mechanics.reaction.ReactionResult.LunarType)" class="member-name-link">lunar</a><wbr>(double&nbsp;damage,
  <a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス">ReactionResult.LunarType</a>&nbsp;lunarType)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Lunar 反応の結果を生成する。</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#none()" class="member-name-link">none</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">反応が発生しなかったことを表す空の結果を生成する。</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#transform(double,java.lang.String)" class="member-name-link">transform</a><wbr>(double&nbsp;damage,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">変化反応の結果を生成する。</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#transform(double,java.lang.String,mechanics.reaction.ReactionResult.Kind)" class="member-name-link">transform</a><wbr>(double&nbsp;damage,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name,
  <a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a>&nbsp;kind)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Kind を明示した変化反応の結果を生成する。</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#transform(double,java.lang.String,mechanics.reaction.ReactionResult.Kind,model.type.Element)" class="member-name-link">transform</a><wbr>(double&nbsp;damage,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name,
  <a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a>&nbsp;kind,
  <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;relatedElement)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Kind と関連元素を明示した変化反応の結果を生成する。</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#triggersElectroResonance()" class="member-name-link">triggersElectroResonance</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -346,6 +429,7 @@ generation.</div>
 <h3>type</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="ReactionResult.Type.html" title="mechanics.reactionの列挙クラス">ReactionResult.Type</a></span>&nbsp;<span class="element-name">type</span></div>
+<div class="block">反応の大分類。</div>
 </div>
 </section>
 </li>
@@ -354,6 +438,7 @@ generation.</div>
 <h3>ampMultiplier</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">ampMultiplier</span></div>
+<div class="block">増幅反応倍率。<a href="ReactionResult.Type.html#AMP"><code>ReactionResult.Type.AMP</code></a> 以外では 1.0。</div>
 </div>
 </section>
 </li>
@@ -362,6 +447,7 @@ generation.</div>
 <h3>transformDamage</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">transformDamage</span></div>
+<div class="block">変化反応ダメージ。<a href="ReactionResult.Type.html#TRANSFORMATIVE"><code>ReactionResult.Type.TRANSFORMATIVE</code></a> 以外では 0.0。</div>
 </div>
 </section>
 </li>
@@ -370,6 +456,7 @@ generation.</div>
 <h3>name</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">name</span></div>
+<div class="block">表示用反応名。</div>
 </div>
 </section>
 </li>
@@ -378,6 +465,7 @@ generation.</div>
 <h3>kind</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a></span>&nbsp;<span class="element-name">kind</span></div>
+<div class="block">反応の具体種別。</div>
 </div>
 </section>
 </li>
@@ -386,6 +474,7 @@ generation.</div>
 <h3>relatedElement</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a></span>&nbsp;<span class="element-name">relatedElement</span></div>
+<div class="block">関連元素 (Swirl の拡散元素、Crystallize の付着元素など)。</div>
 </div>
 </section>
 </li>
@@ -394,6 +483,7 @@ generation.</div>
 <h3>lunarType</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス">ReactionResult.LunarType</a></span>&nbsp;<span class="element-name">lunarType</span></div>
+<div class="block">Lunar 反応細分。</div>
 </div>
 </section>
 </li>
@@ -413,6 +503,15 @@ generation.</div>
  double&nbsp;ampMultiplier,
  double&nbsp;transformDamage,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</span></div>
+<div class="block">反応種別と倍率/ダメージ、名称から <code>ReactionResult</code> を構築する。
+<a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス"><code>ReactionResult.Kind</code></a> と <a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス"><code>ReactionResult.LunarType</code></a> は名称から推定される。</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>type</code> - 反応の大分類</dd>
+<dd><code>ampMultiplier</code> - 増幅反応倍率 (AMP 以外では 1.0)</dd>
+<dd><code>transformDamage</code> - 変化反応ダメージ (TRANSFORMATIVE 以外では 0.0)</dd>
+<dd><code>name</code> - 表示用反応名</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -425,6 +524,15 @@ generation.</div>
  double&nbsp;transformDamage,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name,
  <a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a>&nbsp;kind)</span></div>
+<div class="block">Kind を明示して <code>ReactionResult</code> を構築する。</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>type</code> - 反応の大分類</dd>
+<dd><code>ampMultiplier</code> - 増幅反応倍率</dd>
+<dd><code>transformDamage</code> - 変化反応ダメージ</dd>
+<dd><code>name</code> - 表示用反応名</dd>
+<dd><code>kind</code> - 反応の具体種別</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -438,6 +546,16 @@ generation.</div>
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name,
  <a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a>&nbsp;kind,
  <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;relatedElement)</span></div>
+<div class="block">Kind と関連元素を明示して <code>ReactionResult</code> を構築する。</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>type</code> - 反応の大分類</dd>
+<dd><code>ampMultiplier</code> - 増幅反応倍率</dd>
+<dd><code>transformDamage</code> - 変化反応ダメージ</dd>
+<dd><code>name</code> - 表示用反応名</dd>
+<dd><code>kind</code> - 反応の具体種別</dd>
+<dd><code>relatedElement</code> - 関連元素 (Swirl 拡散元素など)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -452,6 +570,17 @@ generation.</div>
  <a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a>&nbsp;kind,
  <a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス">ReactionResult.LunarType</a>&nbsp;lunarType,
  <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;relatedElement)</span></div>
+<div class="block">すべてのフィールドを明示して <code>ReactionResult</code> を構築する。</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>type</code> - 反応の大分類</dd>
+<dd><code>ampMultiplier</code> - 増幅反応倍率</dd>
+<dd><code>transformDamage</code> - 変化反応ダメージ</dd>
+<dd><code>name</code> - 表示用反応名</dd>
+<dd><code>kind</code> - 反応の具体種別</dd>
+<dd><code>lunarType</code> - Lunar 反応細分</dd>
+<dd><code>relatedElement</code> - 関連元素</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -468,6 +597,11 @@ generation.</div>
 <h3>none</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a></span>&nbsp;<span class="element-name">none</span>()</div>
+<div class="block">反応が発生しなかったことを表す空の結果を生成する。</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>反応なしを表す <code>ReactionResult</code></dd>
+</dl>
 </div>
 </section>
 </li>
@@ -477,6 +611,14 @@ generation.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a></span>&nbsp;<span class="element-name">amp</span><wbr><span class="parameters">(double&nbsp;multiplier,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</span></div>
+<div class="block">増幅反応 (Vaporize / Melt) の結果を生成する。</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>multiplier</code> - 増幅倍率</dd>
+<dd><code>name</code> - 表示用反応名</dd>
+<dt>戻り値:</dt>
+<dd>増幅反応の <code>ReactionResult</code></dd>
+</dl>
 </div>
 </section>
 </li>
@@ -487,6 +629,15 @@ generation.</div>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a></span>&nbsp;<span class="element-name">amp</span><wbr><span class="parameters">(double&nbsp;multiplier,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name,
  <a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a>&nbsp;kind)</span></div>
+<div class="block">Kind を明示した増幅反応の結果を生成する。</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>multiplier</code> - 増幅倍率</dd>
+<dd><code>name</code> - 表示用反応名</dd>
+<dd><code>kind</code> - 反応の具体種別</dd>
+<dt>戻り値:</dt>
+<dd>増幅反応の <code>ReactionResult</code></dd>
+</dl>
 </div>
 </section>
 </li>
@@ -496,6 +647,14 @@ generation.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a></span>&nbsp;<span class="element-name">transform</span><wbr><span class="parameters">(double&nbsp;damage,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</span></div>
+<div class="block">変化反応の結果を生成する。</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>damage</code> - 変化反応ダメージ</dd>
+<dd><code>name</code> - 表示用反応名</dd>
+<dt>戻り値:</dt>
+<dd>変化反応の <code>ReactionResult</code></dd>
+</dl>
 </div>
 </section>
 </li>
@@ -506,6 +665,15 @@ generation.</div>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a></span>&nbsp;<span class="element-name">transform</span><wbr><span class="parameters">(double&nbsp;damage,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name,
  <a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a>&nbsp;kind)</span></div>
+<div class="block">Kind を明示した変化反応の結果を生成する。</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>damage</code> - 変化反応ダメージ</dd>
+<dd><code>name</code> - 表示用反応名</dd>
+<dd><code>kind</code> - 反応の具体種別</dd>
+<dt>戻り値:</dt>
+<dd>変化反応の <code>ReactionResult</code></dd>
+</dl>
 </div>
 </section>
 </li>
@@ -517,6 +685,16 @@ generation.</div>
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name,
  <a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a>&nbsp;kind,
  <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;relatedElement)</span></div>
+<div class="block">Kind と関連元素を明示した変化反応の結果を生成する。</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>damage</code> - 変化反応ダメージ</dd>
+<dd><code>name</code> - 表示用反応名</dd>
+<dd><code>kind</code> - 反応の具体種別</dd>
+<dd><code>relatedElement</code> - 関連元素</dd>
+<dt>戻り値:</dt>
+<dd>変化反応の <code>ReactionResult</code></dd>
+</dl>
 </div>
 </section>
 </li>
@@ -526,6 +704,14 @@ generation.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a></span>&nbsp;<span class="element-name">lunar</span><wbr><span class="parameters">(double&nbsp;damage,
  <a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス">ReactionResult.LunarType</a>&nbsp;lunarType)</span></div>
+<div class="block">Lunar 反応の結果を生成する。</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>damage</code> - Lunar 反応ダメージ</dd>
+<dd><code>lunarType</code> - Lunar 反応細分</dd>
+<dt>戻り値:</dt>
+<dd>Lunar 反応の <code>ReactionResult</code></dd>
+</dl>
 </div>
 </section>
 </li>
@@ -534,6 +720,11 @@ generation.</div>
 <h3>getType</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ReactionResult.Type.html" title="mechanics.reactionの列挙クラス">ReactionResult.Type</a></span>&nbsp;<span class="element-name">getType</span>()</div>
+<div class="block">反応の大分類を返す。</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>反応の <a href="ReactionResult.Type.html" title="mechanics.reactionの列挙クラス"><code>ReactionResult.Type</code></a></dd>
+</dl>
 </div>
 </section>
 </li>
@@ -542,6 +733,11 @@ generation.</div>
 <h3>getAmpMultiplier</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getAmpMultiplier</span>()</div>
+<div class="block">増幅反応倍率を返す。</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>増幅反応倍率 (AMP 以外では 1.0)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -550,6 +746,11 @@ generation.</div>
 <h3>getTransformDamage</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getTransformDamage</span>()</div>
+<div class="block">変化反応ダメージを返す。</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>変化反応ダメージ (TRANSFORMATIVE 以外では 0.0)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -558,6 +759,11 @@ generation.</div>
 <h3>getName</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">getName</span>()</div>
+<div class="block">表示用反応名を返す。</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>反応名</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -566,6 +772,11 @@ generation.</div>
 <h3>getKind</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a></span>&nbsp;<span class="element-name">getKind</span>()</div>
+<div class="block">反応の具体種別を返す。</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>反応の <a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス"><code>ReactionResult.Kind</code></a></dd>
+</dl>
 </div>
 </section>
 </li>
@@ -574,6 +785,11 @@ generation.</div>
 <h3>getRelatedElement</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a></span>&nbsp;<span class="element-name">getRelatedElement</span>()</div>
+<div class="block">関連元素を返す。</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>Swirl の拡散元素や Crystallize の付着元素など、関連する <a href="../../model/type/Element.html" title="model.typeの列挙クラス"><code>Element</code></a>。なければ <code>null</code>。</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -582,6 +798,11 @@ generation.</div>
 <h3>getLunarType</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス">ReactionResult.LunarType</a></span>&nbsp;<span class="element-name">getLunarType</span>()</div>
+<div class="block">Lunar 反応細分を返す。</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd><a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス"><code>ReactionResult.LunarType</code></a></dd>
+</dl>
 </div>
 </section>
 </li>
@@ -590,6 +811,11 @@ generation.</div>
 <h3>isElectroCharged</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isElectroCharged</span>()</div>
+<div class="block">感電または Lunar-Charged 反応かを判定する。</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>感電系反応であれば <code>true</code></dd>
+</dl>
 </div>
 </section>
 </li>
@@ -598,6 +824,11 @@ generation.</div>
 <h3>isSwirl</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isSwirl</span>()</div>
+<div class="block">拡散反応かを判定する。</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>拡散反応であれば <code>true</code></dd>
+</dl>
 </div>
 </section>
 </li>
@@ -606,6 +837,11 @@ generation.</div>
 <h3>isThundercloudStrike</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isThundercloudStrike</span>()</div>
+<div class="block">雷霆万鈞反応かを判定する。</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>雷霆万鈞反応であれば <code>true</code></dd>
+</dl>
 </div>
 </section>
 </li>
@@ -614,6 +850,11 @@ generation.</div>
 <h3>isLunarReaction</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isLunarReaction</span>()</div>
+<div class="block">Lunar 反応 (Lunar-Charged / Lunar-Bloom / Lunar-Crystallize のいずれか) かを判定する。</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>Lunar 反応であれば <code>true</code></dd>
+</dl>
 </div>
 </section>
 </li>
@@ -664,6 +905,15 @@ generation.</div>
 <h3>inferKind</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a></span>&nbsp;<span class="element-name">inferKind</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</span></div>
+<div class="block">反応名から <a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス"><code>ReactionResult.Kind</code></a> を推定する。
+現在の実装では具体名マッピングは行わず、<code>null</code> の場合に <a href="ReactionResult.Kind.html#NONE"><code>ReactionResult.Kind.NONE</code></a> を、
+それ以外で <a href="ReactionResult.Kind.html#OTHER"><code>ReactionResult.Kind.OTHER</code></a> を返す。</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>name</code> - 表示用反応名</dd>
+<dt>戻り値:</dt>
+<dd>推定された <a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス"><code>ReactionResult.Kind</code></a></dd>
+</dl>
 </div>
 </section>
 </li>
@@ -672,6 +922,13 @@ generation.</div>
 <h3>inferLunarType</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス">ReactionResult.LunarType</a></span>&nbsp;<span class="element-name">inferLunarType</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</span></div>
+<div class="block">反応名から <a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス"><code>ReactionResult.LunarType</code></a> を推定する。</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>name</code> - 表示用反応名</dd>
+<dt>戻り値:</dt>
+<dd>推定された <a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス"><code>ReactionResult.LunarType</code></a></dd>
+</dl>
 </div>
 </section>
 </li>
@@ -680,6 +937,13 @@ generation.</div>
 <h3>inferLunarType</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス">ReactionResult.LunarType</a></span>&nbsp;<span class="element-name">inferLunarType</span><wbr><span class="parameters">(<a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a>&nbsp;kind)</span></div>
+<div class="block"><a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス"><code>ReactionResult.Kind</code></a> から <a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス"><code>ReactionResult.LunarType</code></a> を導出する。</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>kind</code> - 反応の具体種別</dd>
+<dt>戻り値:</dt>
+<dd>対応する <a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス"><code>ReactionResult.LunarType</code></a> (非 Lunar 反応は <a href="ReactionResult.LunarType.html#NONE"><code>ReactionResult.LunarType.NONE</code></a>)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -688,6 +952,13 @@ generation.</div>
 <h3>kindFromLunarType</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a></span>&nbsp;<span class="element-name">kindFromLunarType</span><wbr><span class="parameters">(<a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス">ReactionResult.LunarType</a>&nbsp;lunarType)</span></div>
+<div class="block"><a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス"><code>ReactionResult.LunarType</code></a> から対応する <a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス"><code>ReactionResult.Kind</code></a> を導出する。</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>lunarType</code> - Lunar 反応細分</dd>
+<dt>戻り値:</dt>
+<dd>対応する <a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス"><code>ReactionResult.Kind</code></a></dd>
+</dl>
 </div>
 </section>
 </li>
@@ -696,6 +967,13 @@ generation.</div>
 <h3>canonicalLunarName</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">canonicalLunarName</span><wbr><span class="parameters">(<a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス">ReactionResult.LunarType</a>&nbsp;lunarType)</span></div>
+<div class="block"><a href="ReactionResult.LunarType.html" title="mechanics.reactionの列挙クラス"><code>ReactionResult.LunarType</code></a> に対する正規 (canonical) 表示名を返す。</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>lunarType</code> - Lunar 反応細分</dd>
+<dt>戻り値:</dt>
+<dd>Lunar 反応の正規表示名。非 Lunar の場合は <code>null</code></dd>
+</dl>
 </div>
 </section>
 </li>

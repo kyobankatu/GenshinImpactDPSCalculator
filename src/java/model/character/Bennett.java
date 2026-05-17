@@ -19,14 +19,30 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionRequest;
 
+/**
+ * Bennett character implementation with Fantastic Voyage field buff handling.
+ */
 public class Bennett extends Character implements FormStateProvider {
 
     private int normalAttackStep = 0;
 
+    /**
+     * Constructs Bennett with the shared talent data source.
+     *
+     * @param weapon equipped weapon
+     * @param artifacts equipped artifact set
+     */
     public Bennett(Weapon weapon, ArtifactSet artifacts) {
         this(weapon, artifacts, TalentDataManager.getInstance());
     }
 
+    /**
+     * Constructs Bennett with an explicit talent data source.
+     *
+     * @param weapon equipped weapon
+     * @param artifacts equipped artifact set
+     * @param talentData talent values backing this character
+     */
     public Bennett(Weapon weapon, ArtifactSet artifacts, TalentDataSource talentData) {
         super(talentData);
         this.name = "Bennett";
@@ -45,21 +61,43 @@ public class Bennett extends Character implements FormStateProvider {
         setBurstCD(15.0);
     }
 
+    /**
+     * Returns Bennett's burst energy cost.
+     *
+     * @return burst cost in energy
+     */
     @Override
     public double getEnergyCost() {
         return getTalentValue("Energy Cost", 60);
     }
 
+    /**
+     * Returns whether Fantastic Voyage is currently active.
+     *
+     * @param currentTime current simulation time in seconds
+     * @return {@code true} while Bennett's burst field persists
+     */
     @Override
     public boolean isFormActive(double currentTime) {
         return (currentTime - getLastBurstTime()) < 12.0;
     }
 
+    /**
+     * Applies Bennett's passive stat effects.
+     *
+     * @param stats stats container to modify
+     */
     @Override
     public void applyPassive(StatsContainer stats) {
         // No static passives affecting stats
     }
 
+    /**
+     * Executes the requested combat action for Bennett.
+     *
+     * @param request requested player action
+     * @param sim active combat simulator
+     */
     @Override
     public void onAction(CharacterActionRequest request, CombatSimulator sim) {
         switch (request.getKey()) {

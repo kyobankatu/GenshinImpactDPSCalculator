@@ -94,6 +94,23 @@ public class DamageCalculator {
     /**
      * Hot-path overload used when action resolution already assembled current stats
      * for the same non-snapshot action.
+     *
+     * <p>Skips redundant stat re-resolution by reusing {@code preResolvedStats}
+     * (effective stats plus active buffs at {@code currentTime}). Behaviorally
+     * equivalent to the public seven-argument {@link #calculateDamage} when the
+     * passed stats correspond to {@code attacker} at {@code currentTime}.</p>
+     *
+     * @param attacker           the attacking character
+     * @param target             the enemy being hit
+     * @param action             the attack action containing MV, element, scaling stat, etc.
+     * @param activeBuffs        team and self buffs currently active (may be {@code null})
+     * @param preResolvedStats   pre-resolved stats for {@code attacker}; ignored when
+     *                           {@code action.isUseSnapshot()} is {@code true}
+     * @param currentTime        simulation time in seconds at the moment of the hit
+     * @param reactionMultiplier amplifying reaction multiplier pre-computed by the
+     *                           simulator (1.0 if no amplifying reaction)
+     * @param sim                the running {@link simulation.CombatSimulator} instance
+     * @return final damage value after all multipliers
      */
     public static double calculateDamage(
             model.entity.Character attacker,
@@ -148,6 +165,20 @@ public class DamageCalculator {
         return ResistanceCalculator.calculateResMulti(baseRes, resShred);
     }
 
+    /**
+     * Resolves the effective stats used for a damage calculation.
+     *
+     * <p>If the action snapshots its caster's stats ({@code action.isUseSnapshot()}),
+     * the attacker's stored snapshot is returned. Otherwise the attacker's
+     * current effective stats are taken and all non-expired buffs in
+     * {@code activeBuffs} are applied on top.</p>
+     *
+     * @param attacker    attacking character
+     * @param action      attack action whose snapshot policy is honored
+     * @param activeBuffs currently active buffs (may be {@code null})
+     * @param currentTime current simulation time in seconds
+     * @return resolved {@link StatsContainer} suitable for damage formula input
+     */
     public static StatsContainer resolveStats(
             Character attacker,
             simulation.action.AttackAction action,
@@ -164,6 +195,18 @@ public class DamageCalculator {
         return stats;
     }
 
+    /**
+     * Resolves the effective stats reusing a pre-resolved {@link StatsContainer}
+     * when possible.
+     *
+     * @param attacker         attacking character
+     * @param action           attack action whose snapshot policy is honored
+     * @param activeBuffs      currently active buffs (used only when fallback is needed)
+     * @param preResolvedStats previously resolved stats; returned directly when non-null
+     *                         and the action is not snapshot-based
+     * @param currentTime      current simulation time in seconds
+     * @return resolved {@link StatsContainer}
+     */
     public static StatsContainer resolveStats(
             Character attacker,
             simulation.action.AttackAction action,
@@ -176,6 +219,16 @@ public class DamageCalculator {
         return preResolvedStats != null ? preResolvedStats : resolveStats(attacker, action, activeBuffs, currentTime);
     }
 
+    /**
+     * Fires post-damage hooks for the attacker's weapon and artifact sets so
+     * stack/proc-style effects can update their internal state.
+     *
+     * @param attacker    attacking character
+     * @param action      attack action that produced the hit
+     * @param currentTime current simulation time in seconds
+     * @param sim         running combat simulator
+     * @param damage      final outgoing damage value
+     */
     static void notifyDamageHooks(
             Character attacker,
             simulation.action.AttackAction action,

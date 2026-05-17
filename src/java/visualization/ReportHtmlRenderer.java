@@ -27,6 +27,12 @@ final class ReportHtmlRenderer {
     private ReportHtmlRenderer() {
     }
 
+    /**
+     * Renders a self-contained HTML document for the given report data.
+     *
+     * @param data fully populated report data
+     * @return the complete HTML document as a string
+     */
     static String render(ReportData data) {
         StringBuilder sb = new StringBuilder();
         appendDocumentStart(sb);
@@ -39,6 +45,11 @@ final class ReportHtmlRenderer {
         return sb.toString();
     }
 
+    /**
+     * Appends the opening HTML markup, head tag, and report title.
+     *
+     * @param sb buffer to append to
+     */
     private static void appendDocumentStart(StringBuilder sb) {
         sb.append("<!DOCTYPE html>\n");
         sb.append("<html lang='en'>\n");
@@ -54,6 +65,11 @@ final class ReportHtmlRenderer {
         sb.append("<h1>Simulation Report</h1>\n");
     }
 
+    /**
+     * Appends the inline CSS style block used by the report.
+     *
+     * @param sb buffer to append to
+     */
     private static void appendStyles(StringBuilder sb) {
         sb.append("<style>\n");
         sb.append("body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #202020; color: #eee; padding: 20px; }\n");
@@ -90,6 +106,12 @@ final class ReportHtmlRenderer {
         sb.append("</style>\n");
     }
 
+    /**
+     * Appends the headline summary block (DPS, total damage, duration).
+     *
+     * @param sb   buffer to append to
+     * @param data report data
+     */
     private static void appendSummary(StringBuilder sb, ReportData data) {
         sb.append("<div class='row'>\n");
         sb.append("<div class='col' style='background: #444; text-align: center;'>\n");
@@ -102,6 +124,11 @@ final class ReportHtmlRenderer {
         sb.append("</div>\n");
     }
 
+    /**
+     * Appends the canvas placeholders for the pie and line charts.
+     *
+     * @param sb buffer to append to
+     */
     private static void appendCharts(StringBuilder sb) {
         sb.append("<div class='row'>\n");
         sb.append("<div class='col'>\n");
@@ -115,6 +142,12 @@ final class ReportHtmlRenderer {
         sb.append("</div>\n");
     }
 
+    /**
+     * Appends the stats snapshot and artifact roll sections side by side.
+     *
+     * @param sb   buffer to append to
+     * @param data report data
+     */
     private static void appendStatsAndArtifacts(StringBuilder sb, ReportData data) {
         sb.append("<div class='row'>\n");
         appendStatsSection(sb, data);
@@ -122,6 +155,12 @@ final class ReportHtmlRenderer {
         sb.append("</div>\n");
     }
 
+    /**
+     * Appends the character stat table and (optionally) the active buff panel.
+     *
+     * @param sb   buffer to append to
+     * @param data report data
+     */
     private static void appendStatsSection(StringBuilder sb, ReportData data) {
         sb.append("<div class='col'>\n");
         sb.append("<div style='display:flex; justify-content:space-between; align-items:center;'>\n");
@@ -158,6 +197,12 @@ final class ReportHtmlRenderer {
         sb.append("</div>\n");
     }
 
+    /**
+     * Appends the artifact substat roll table.
+     *
+     * @param sb   buffer to append to
+     * @param data report data
+     */
     private static void appendArtifactSection(StringBuilder sb, ReportData data) {
         sb.append("<div class='col'>\n");
         sb.append("<h3>Artifact Substat Rolls</h3>\n");
@@ -185,6 +230,12 @@ final class ReportHtmlRenderer {
         sb.append("</div>\n");
     }
 
+    /**
+     * Appends the combat timeline composed of per-event cards.
+     *
+     * @param sb   buffer to append to
+     * @param data report data
+     */
     private static void appendTimeline(StringBuilder sb, ReportData data) {
         sb.append("<div class='row'>\n");
         sb.append("<div class='col'>\n");
@@ -198,6 +249,12 @@ final class ReportHtmlRenderer {
         sb.append("</div>\n");
     }
 
+    /**
+     * Appends a single timeline card for one simulation record.
+     *
+     * @param sb     buffer to append to
+     * @param record record to render
+     */
     private static void appendTimelineCard(StringBuilder sb, SimulationRecord record) {
         boolean isSwap = record.action != null && record.action.startsWith("Swap \u2192");
         sb.append(isSwap ? "<div class='card swap'>\n" : "<div class='card'>\n");
@@ -223,6 +280,12 @@ final class ReportHtmlRenderer {
         sb.append("</div>\n");
     }
 
+    /**
+     * Appends the colored aura bar showing enemy aura snapshot at the record time.
+     *
+     * @param sb     buffer to append to
+     * @param record record carrying the enemy aura snapshot
+     */
     private static void appendAuraBar(StringBuilder sb, SimulationRecord record) {
         if (record.enemyAura.isEmpty()) {
             return;
@@ -239,6 +302,13 @@ final class ReportHtmlRenderer {
         sb.append("</div>\n");
     }
 
+    /**
+     * Appends the bottom-of-document {@code <script>} block driving Chart.js and
+     * the stat slider.
+     *
+     * @param sb   buffer to append to
+     * @param data report data
+     */
     private static void appendScript(StringBuilder sb, ReportData data) {
         sb.append("<script>\n");
         appendStatsHistoryScript(sb, data);
@@ -246,6 +316,12 @@ final class ReportHtmlRenderer {
         sb.append("</script>\n");
     }
 
+    /**
+     * Emits the JS stats history array and slider wiring.
+     *
+     * @param sb   buffer to append to
+     * @param data report data
+     */
     private static void appendStatsHistoryScript(StringBuilder sb, ReportData data) {
         sb.append("const statsHistory = [\n");
         if (data.hasStatsHistory) {
@@ -303,6 +379,12 @@ final class ReportHtmlRenderer {
         sb.append("updateStatsTable(0);\n");
     }
 
+    /**
+     * Emits Chart.js initialization for the pie and cumulative damage charts.
+     *
+     * @param sb   buffer to append to
+     * @param data report data
+     */
     private static void appendChartScript(StringBuilder sb, ReportData data) {
         String labelsJs = data.chartNames.stream().map(name -> "'" + name + "'").collect(Collectors.joining(","));
         String pieDataJs = data.chartNames.stream()
@@ -335,6 +417,11 @@ final class ReportHtmlRenderer {
         sb.append("});\n");
     }
 
+    /**
+     * Appends the closing container, body, and html tags.
+     *
+     * @param sb buffer to append to
+     */
     private static void appendDocumentEnd(StringBuilder sb) {
         sb.append("</div>\n");
         sb.append("</body></html>");

@@ -88,6 +88,8 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="type-signature"><span class="modifiers">public static final class </span><span class="element-name type-name-label">ReportViewAdapter.ReportStatsSnapshot</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Object</a></span></div>
+<div class="block">Adapted snapshot of party stats at a single point in simulation time, keyed
+by DOM identifier.</div>
 </div>
 </section>
 <section class="summary">
@@ -103,10 +105,14 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>, <a href="ReportViewAdapter.ReportCharacterStats.html" title="visualization内のクラス">ReportViewAdapter.ReportCharacterStats</a>&gt;</code></div>
 <div class="col-second even-row-color"><code><a href="#characters" class="member-name-link">characters</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Per-character stats, keyed by DOM identifier.</div>
+</div>
 <div class="col-first odd-row-color"><code>final double</code></div>
 <div class="col-second odd-row-color"><code><a href="#time" class="member-name-link">time</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Simulation time (seconds) the snapshot was taken at.</div>
+</div>
 </div>
 </section>
 </li>
@@ -120,7 +126,9 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">説明</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(double,java.util.Map)" class="member-name-link">ReportStatsSnapshot</a><wbr>(double&nbsp;time,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>, <a href="ReportViewAdapter.ReportCharacterStats.html" title="visualization内のクラス">ReportViewAdapter.ReportCharacterStats</a>&gt;&nbsp;characters)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Creates a new adapted stats snapshot.</div>
+</div>
 </div>
 </section>
 </li>
@@ -147,6 +155,7 @@ loadScripts(document, 'script');</script>
 <h3>time</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">time</span></div>
+<div class="block">Simulation time (seconds) the snapshot was taken at.</div>
 </div>
 </section>
 </li>
@@ -155,6 +164,7 @@ loadScripts(document, 'script');</script>
 <h3>characters</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>, <a href="ReportViewAdapter.ReportCharacterStats.html" title="visualization内のクラス">ReportViewAdapter.ReportCharacterStats</a>&gt;</span>&nbsp;<span class="element-name">characters</span></div>
+<div class="block">Per-character stats, keyed by DOM identifier.</div>
 </div>
 </section>
 </li>
@@ -172,6 +182,12 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ReportStatsSnapshot</span><wbr><span class="parameters">(double&nbsp;time,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>, <a href="ReportViewAdapter.ReportCharacterStats.html" title="visualization内のクラス">ReportViewAdapter.ReportCharacterStats</a>&gt;&nbsp;characters)</span></div>
+<div class="block">Creates a new adapted stats snapshot.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>time</code> - simulation time in seconds</dd>
+<dd><code>characters</code> - per-character stats keyed by DOM identifier</dd>
+</dl>
 </div>
 </section>
 </li>

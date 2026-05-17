@@ -95,6 +95,8 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">SkywardSpine</span>
 <span class="extends-implements">extends <a href="../entity/Weapon.html" title="model.entity内のクラス">Weapon</a>
 implements <a href="../entity/DamageTriggeredWeaponEffect.html" title="model.entity内のインタフェース">DamageTriggeredWeaponEffect</a></span></div>
+<div class="block">Skyward Spine polearm with a passive CRIT/attack-speed bonus and Vacuum
+Blade proc.</div>
 </div>
 </section>
 <section class="summary">
@@ -126,7 +128,9 @@ implements <a href="../entity/DamageTriggeredWeaponEffect.html" title="model.ent
 <div class="table-header col-first">コンストラクタ</div>
 <div class="table-header col-last">説明</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E()" class="member-name-link">SkywardSpine</a>()</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Constructs Skyward Spine with Lv 90 base stats.</div>
+</div>
 </div>
 </section>
 </li>
@@ -145,14 +149,16 @@ implements <a href="../entity/DamageTriggeredWeaponEffect.html" title="model.ent
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyPassive(model.stats.StatsContainer,double)" class="member-name-link">applyPassive</a><wbr>(<a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;stats,
  double&nbsp;currentTime)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Applies the weapon's passive effect to the provided stats container.</div>
+<div class="block">Applies the weapon's constant CRIT Rate and attack speed bonuses.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onDamage(model.entity.Character,simulation.action.AttackAction,double,simulation.CombatSimulator)" class="member-name-link">onDamage</a><wbr>(<a href="../entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;user,
  <a href="../../simulation/action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  double&nbsp;currentTime,
  <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Attempts to trigger Vacuum Blade after normal or charged attack damage.</div>
+</div>
 </div>
 </div>
 </div>
@@ -194,6 +200,7 @@ implements <a href="../entity/DamageTriggeredWeaponEffect.html" title="model.ent
 <h3>SkywardSpine</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">SkywardSpine</span>()</div>
+<div class="block">Constructs Skyward Spine with Lv 90 base stats.</div>
 </div>
 </section>
 </li>
@@ -211,17 +218,13 @@ implements <a href="../entity/DamageTriggeredWeaponEffect.html" title="model.ent
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">applyPassive</span><wbr><span class="parameters">(<a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;stats,
  double&nbsp;currentTime)</span></div>
-<div class="block"><span class="description-from-type-label">クラスからコピーされた説明:&nbsp;<code><a href="../entity/Weapon.html#applyPassive(model.stats.StatsContainer,double)">Weapon</a></code></span></div>
-<div class="block">Applies the weapon's passive effect to the provided stats container.
-Called during stat compilation by <a href="../entity/Character.html#getEffectiveStats(double)"><code>Character.getEffectiveStats(double)</code></a>
-and <a href="../entity/Character.html#getStructuralStats(double)"><code>Character.getStructuralStats(double)</code></a>.
-Default implementation is a no-op.</div>
+<div class="block">Applies the weapon's constant CRIT Rate and attack speed bonuses.</div>
 <dl class="notes">
 <dt>オーバーライド:</dt>
 <dd><code><a href="../entity/Weapon.html#applyPassive(model.stats.StatsContainer,double)">applyPassive</a></code>&nbsp;クラス内&nbsp;<code><a href="../entity/Weapon.html" title="model.entity内のクラス">Weapon</a></code></dd>
 <dt>パラメータ:</dt>
 <dd><code>stats</code> - the stats container to mutate in-place</dd>
-<dd><code>currentTime</code> - simulation time in seconds (for time-gated passives)</dd>
+<dd><code>currentTime</code> - simulation time in seconds</dd>
 </dl>
 </div>
 </section>
@@ -234,9 +237,15 @@ Default implementation is a no-op.</div>
  <a href="../../simulation/action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  double&nbsp;currentTime,
  <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</span></div>
+<div class="block">Attempts to trigger Vacuum Blade after normal or charged attack damage.</div>
 <dl class="notes">
 <dt>定義:</dt>
 <dd><code><a href="../entity/DamageTriggeredWeaponEffect.html#onDamage(model.entity.Character,simulation.action.AttackAction,double,simulation.CombatSimulator)">onDamage</a></code>&nbsp;インタフェース内&nbsp;<code><a href="../entity/DamageTriggeredWeaponEffect.html" title="model.entity内のインタフェース">DamageTriggeredWeaponEffect</a></code></dd>
+<dt>パラメータ:</dt>
+<dd><code>user</code> - the character who dealt the damage</dd>
+<dd><code>action</code> - the triggering attack action</dd>
+<dd><code>currentTime</code> - simulation time in seconds at the damage event</dd>
+<dd><code>sim</code> - the active combat simulator</dd>
 </dl>
 </div>
 </section>

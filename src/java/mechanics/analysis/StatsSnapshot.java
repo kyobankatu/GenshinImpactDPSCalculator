@@ -13,7 +13,6 @@ import java.util.Map;
  * {@link visualization.HtmlReportGenerator} to populate the interactive stats
  * table slider in the HTML report.
  */
-// Record to hold stats at a specific point in time
 public class StatsSnapshot {
     /** Simulation time (in seconds) at which this snapshot was taken. */
     public double time;

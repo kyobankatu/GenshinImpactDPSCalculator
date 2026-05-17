@@ -66,6 +66,8 @@ loadScripts(document, 'script');</script>
 <li><a href="#CMD_STEP_RUNNER" tabindex="0">CMD_STEP_RUNNER</a></li>
 <li><a href="#CMD_CLOSE_RUNNER" tabindex="0">CMD_CLOSE_RUNNER</a></li>
 <li><a href="#CMD_SHUTDOWN" tabindex="0">CMD_SHUTDOWN</a></li>
+<li><a href="#CMD_BRANCH_ROLLOUT" tabindex="0">CMD_BRANCH_ROLLOUT</a></li>
+<li><a href="#CMD_RELEASE_SNAPSHOTS" tabindex="0">CMD_RELEASE_SNAPSHOTS</a></li>
 </ol>
 </li>
 <li><a href="#constructor-detail" tabindex="0">コンストラクタの詳細</a>
@@ -103,14 +105,24 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-second">フィールド</div>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color"><code>static final int</code></div>
-<div class="col-second even-row-color"><code><a href="#CMD_CLOSE_RUNNER" class="member-name-link">CMD_CLOSE_RUNNER</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-second even-row-color"><code><a href="#CMD_BRANCH_ROLLOUT" class="member-name-link">CMD_BRANCH_ROLLOUT</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Branch rollout: runner_id, snapshot_id, K, H, gamma → Q_MC per action (NaN if invalid).</div>
+</div>
 <div class="col-first odd-row-color"><code>static final int</code></div>
-<div class="col-second odd-row-color"><code><a href="#CMD_CREATE_RUNNER" class="member-name-link">CMD_CREATE_RUNNER</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#CMD_CLOSE_RUNNER" class="member-name-link">CMD_CLOSE_RUNNER</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code>static final int</code></div>
-<div class="col-second even-row-color"><code><a href="#CMD_HELLO" class="member-name-link">CMD_HELLO</a></code></div>
+<div class="col-second even-row-color"><code><a href="#CMD_CREATE_RUNNER" class="member-name-link">CMD_CREATE_RUNNER</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>static final int</code></div>
+<div class="col-second odd-row-color"><code><a href="#CMD_HELLO" class="member-name-link">CMD_HELLO</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>static final int</code></div>
+<div class="col-second even-row-color"><code><a href="#CMD_RELEASE_SNAPSHOTS" class="member-name-link">CMD_RELEASE_SNAPSHOTS</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Release all unconsumed vine snapshots for the runner; bool ack returned.</div>
+</div>
 <div class="col-first odd-row-color"><code>static final int</code></div>
 <div class="col-second odd-row-color"><code><a href="#CMD_RESET_RUNNER" class="member-name-link">CMD_RESET_RUNNER</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
@@ -265,6 +277,40 @@ loadScripts(document, 'script');</script>
 <dd>
 <ul class="tag-list">
 <li><a href="../../../constant-values.html#mechanics.rl.bridge.BatchProtocol.CMD_SHUTDOWN">定数フィールド値</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="CMD_BRANCH_ROLLOUT">
+<h3>CMD_BRANCH_ROLLOUT</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">CMD_BRANCH_ROLLOUT</span></div>
+<div class="block">Branch rollout: runner_id, snapshot_id, K, H, gamma → Q_MC per action (NaN if invalid).</div>
+<dl class="notes">
+<dt>関連項目:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#mechanics.rl.bridge.BatchProtocol.CMD_BRANCH_ROLLOUT">定数フィールド値</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="CMD_RELEASE_SNAPSHOTS">
+<h3>CMD_RELEASE_SNAPSHOTS</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">CMD_RELEASE_SNAPSHOTS</span></div>
+<div class="block">Release all unconsumed vine snapshots for the runner; bool ack returned.</div>
+<dl class="notes">
+<dt>関連項目:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../../constant-values.html#mechanics.rl.bridge.BatchProtocol.CMD_RELEASE_SNAPSHOTS">定数フィールド値</a></li>
 </ul>
 </dd>
 </dl>

@@ -90,6 +90,7 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">ViridescentVenerer</span>
 <span class="extends-implements">extends <a href="../entity/ArtifactSet.html" title="model.entity内のクラス">ArtifactSet</a>
 implements <a href="../entity/ReactionAwareArtifact.html" title="model.entity内のインタフェース">ReactionAwareArtifact</a></span></div>
+<div class="block">Viridescent Venerer artifact set with Swirl damage and elemental RES shred.</div>
 </div>
 </section>
 <section class="summary">
@@ -103,9 +104,14 @@ implements <a href="../entity/ReactionAwareArtifact.html" title="model.entity内
 <div class="table-header col-first">コンストラクタ</div>
 <div class="table-header col-last">説明</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E()" class="member-name-link">ViridescentVenerer</a>()</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Constructs Viridescent Venerer with its 2-piece and 4-piece stat bonuses.</div>
+</div>
 <div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(model.stats.StatsContainer)" class="member-name-link">ViridescentVenerer</a><wbr>(<a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;stats)</code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Constructs Viridescent Venerer with the supplied main/sub stats plus its
+2-piece and 4-piece stat bonuses.</div>
+</div>
 </div>
 </section>
 </li>
@@ -128,7 +134,10 @@ implements <a href="../entity/ReactionAwareArtifact.html" title="model.entity内
  <a href="../../mechanics/reaction/ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a>&nbsp;result,
  <a href="../entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;triggerCh,
  <a href="../entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;owner)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Applies the 4-piece elemental resistance shred after an on-field Swirl
+reaction.</div>
+</div>
 </div>
 </div>
 </div>
@@ -154,6 +163,7 @@ implements <a href="../entity/ReactionAwareArtifact.html" title="model.entity内
 <h3>ViridescentVenerer</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ViridescentVenerer</span>()</div>
+<div class="block">Constructs Viridescent Venerer with its 2-piece and 4-piece stat bonuses.</div>
 </div>
 </section>
 </li>
@@ -162,6 +172,12 @@ implements <a href="../entity/ReactionAwareArtifact.html" title="model.entity内
 <h3>ViridescentVenerer</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ViridescentVenerer</span><wbr><span class="parameters">(<a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;stats)</span></div>
+<div class="block">Constructs Viridescent Venerer with the supplied main/sub stats plus its
+2-piece and 4-piece stat bonuses.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>stats</code> - artifact main and sub stats</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -181,9 +197,16 @@ implements <a href="../entity/ReactionAwareArtifact.html" title="model.entity内
  <a href="../../mechanics/reaction/ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a>&nbsp;result,
  <a href="../entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;triggerCh,
  <a href="../entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;owner)</span></div>
+<div class="block">Applies the 4-piece elemental resistance shred after an on-field Swirl
+reaction.</div>
 <dl class="notes">
 <dt>定義:</dt>
 <dd><code><a href="../entity/ReactionAwareArtifact.html#onReaction(simulation.CombatSimulator,mechanics.reaction.ReactionResult,model.entity.Character,model.entity.Character)">onReaction</a></code>&nbsp;インタフェース内&nbsp;<code><a href="../entity/ReactionAwareArtifact.html" title="model.entity内のインタフェース">ReactionAwareArtifact</a></code></dd>
+<dt>パラメータ:</dt>
+<dd><code>sim</code> - the active combat simulator</dd>
+<dd><code>result</code> - the reaction result that was produced</dd>
+<dd><code>triggerCh</code> - the character who triggered the reaction</dd>
+<dd><code>owner</code> - the character equipping the set</dd>
 </dl>
 </div>
 </section>

@@ -89,6 +89,7 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="type-signature"><span class="modifiers">public static final class </span><span class="element-name type-name-label">ReportViewAdapter.ReportCharacterView</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Object</a></span></div>
+<div class="block">View object describing a single party member for report rendering.</div>
 </div>
 </section>
 <section class="summary">
@@ -104,13 +105,19 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
 <div class="col-second even-row-color"><code><a href="#displayName" class="member-name-link">displayName</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Human-readable name used in tables and legends.</div>
+</div>
 <div class="col-first odd-row-color"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#domKey" class="member-name-link">domKey</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">DOM-safe key derived from <a href="#id"><code>id</code></a>.</div>
+</div>
 <div class="col-first even-row-color"><code>final <a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></code></div>
 <div class="col-second even-row-color"><code><a href="#id" class="member-name-link">id</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Underlying character identifier.</div>
+</div>
 </div>
 </section>
 </li>
@@ -125,7 +132,9 @@ loadScripts(document, 'script');</script>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(model.type.CharacterId,java.lang.String,java.lang.String)" class="member-name-link">ReportCharacterView</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;domKey,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;displayName)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Creates a new character view.</div>
+</div>
 </div>
 </section>
 </li>
@@ -152,6 +161,7 @@ loadScripts(document, 'script');</script>
 <h3>id</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type"><a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></span>&nbsp;<span class="element-name">id</span></div>
+<div class="block">Underlying character identifier.</div>
 </div>
 </section>
 </li>
@@ -160,6 +170,7 @@ loadScripts(document, 'script');</script>
 <h3>domKey</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">domKey</span></div>
+<div class="block">DOM-safe key derived from <a href="#id"><code>id</code></a>.</div>
 </div>
 </section>
 </li>
@@ -168,6 +179,7 @@ loadScripts(document, 'script');</script>
 <h3>displayName</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">displayName</span></div>
+<div class="block">Human-readable name used in tables and legends.</div>
 </div>
 </section>
 </li>
@@ -186,6 +198,13 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ReportCharacterView</span><wbr><span class="parameters">(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;domKey,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;displayName)</span></div>
+<div class="block">Creates a new character view.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>id</code> - underlying character identifier</dd>
+<dd><code>domKey</code> - DOM-safe key (typically <a href="ReportViewAdapter.html#domKey(model.type.CharacterId)"><code>ReportViewAdapter.domKey(CharacterId)</code></a>)</dd>
+<dd><code>displayName</code> - human-readable display name</dd>
+</dl>
 </div>
 </section>
 </li>

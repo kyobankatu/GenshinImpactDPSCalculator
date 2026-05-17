@@ -8,19 +8,40 @@ import simulation.CombatSimulator;
 import simulation.CombatSimulator.Moonsign;
 import model.entity.DamageTriggeredArtifactEffect;
 
+/**
+ * Silken Moon's Serenade artifact set with Moonsign-dependent team EM support.
+ */
 public class SilkenMoonsSerenade extends model.entity.ArtifactSet implements DamageTriggeredArtifactEffect {
 
+    /**
+     * Constructs Silken Moon's Serenade with the 2-piece Energy Recharge bonus.
+     */
     public SilkenMoonsSerenade() {
         super("Silken Moon's Serenade", new StatsContainer());
         // 2-Piece Bonus: ER +20%
         this.getStats().add(StatType.ENERGY_RECHARGE, 0.20);
     }
 
+    /**
+     * Constructs Silken Moon's Serenade with the supplied main/sub stats plus
+     * the 2-piece Energy Recharge bonus.
+     *
+     * @param stats artifact main and sub stats
+     */
     public SilkenMoonsSerenade(StatsContainer stats) {
         super("Silken Moon's Serenade", stats);
         this.getStats().add(StatType.ENERGY_RECHARGE, 0.20);
     }
 
+    /**
+     * Grants the 4-piece team Elemental Mastery buff after elemental damage,
+     * based on the current Moonsign state.
+     *
+     * @param sim the active combat simulator
+     * @param action the attack action that dealt damage
+     * @param damage the damage amount dealt
+     * @param owner the character equipping the set
+     */
     @Override
     public void onDamage(CombatSimulator sim, simulation.action.AttackAction action, double damage,
             model.entity.Character owner) {

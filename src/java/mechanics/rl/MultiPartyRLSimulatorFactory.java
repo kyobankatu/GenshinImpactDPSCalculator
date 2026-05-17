@@ -11,6 +11,9 @@ public class MultiPartyRLSimulatorFactory implements RLEpisodeFactory {
     private final EpisodeConfig baseConfig;
     private final List<RLPartySpec> variants;
 
+    /**
+     * Creates a factory that samples uniformly from the provided party variants.
+     */
     public MultiPartyRLSimulatorFactory(EpisodeConfig baseConfig, List<RLPartySpec> variants) {
         if (variants == null || variants.isEmpty()) {
             throw new IllegalArgumentException("variants must not be empty");
@@ -19,10 +22,16 @@ public class MultiPartyRLSimulatorFactory implements RLEpisodeFactory {
         this.variants = new ArrayList<>(variants);
     }
 
+    /**
+     * Creates the default multi-party training factory from the registry defaults.
+     */
     public static MultiPartyRLSimulatorFactory defaultFactory(EpisodeConfig baseConfig) {
         return new MultiPartyRLSimulatorFactory(baseConfig, RLPartyRegistry.defaultTrainingSpecs());
     }
 
+    /**
+     * Creates one episode, using the preferred id when it is in range.
+     */
     @Override
     public EpisodeContext createEpisode(int preferredPartyId) {
         int partyId = preferredPartyId >= 0 && preferredPartyId < variants.size()
@@ -36,6 +45,9 @@ public class MultiPartyRLSimulatorFactory implements RLEpisodeFactory {
                 variant.getPartyName());
     }
 
+    /**
+     * Returns the names of all selectable party variants.
+     */
     @Override
     public String[] getPartyNames() {
         String[] names = new String[variants.size()];

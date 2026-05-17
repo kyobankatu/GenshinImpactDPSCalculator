@@ -12,6 +12,9 @@ public class PolicyInference {
     public final double value;
     public final double entropy;
 
+    /**
+     * Creates one policy output bundle for an environment slot.
+     */
     public PolicyInference(double[] nextHidden, double[] probabilities, double[] logits, double value, double entropy) {
         this.nextHidden = nextHidden;
         this.probabilities = probabilities;
@@ -20,6 +23,9 @@ public class PolicyInference {
         this.entropy = entropy;
     }
 
+    /**
+     * Samples an action from {@link #probabilities}.
+     */
     public int sampleAction(SplittableRandom random) {
         double draw = random.nextDouble();
         double cumulative = 0.0;
@@ -32,6 +38,9 @@ public class PolicyInference {
         return probabilities.length - 1;
     }
 
+    /**
+     * Returns the highest-probability action.
+     */
     public int greedyAction() {
         int best = 0;
         for (int i = 1; i < probabilities.length; i++) {
@@ -42,6 +51,9 @@ public class PolicyInference {
         return best;
     }
 
+    /**
+     * Returns the log-probability of one action with a small numeric floor.
+     */
     public double logProbability(int action) {
         double probability = Math.max(1e-9, probabilities[action]);
         return Math.log(probability);

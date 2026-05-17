@@ -15,6 +15,15 @@ final class ReportDataBuilder {
     private ReportDataBuilder() {
     }
 
+    /**
+     * Builds the {@link ReportData} bundle that drives HTML rendering.
+     *
+     * @param records      raw simulation records (may be {@code null})
+     * @param sim          combat simulator that produced the records (may be {@code null})
+     * @param statsHistory optional analysis stat snapshots; {@code null} disables
+     *                     the timeline slider in the report
+     * @return populated report data
+     */
     static ReportData build(
             List<SimulationRecord> records,
             CombatSimulator sim,
@@ -47,6 +56,12 @@ final class ReportDataBuilder {
                 statsHistory != null);
     }
 
+    /**
+     * Aggregates total damage per actor across all records.
+     *
+     * @param records simulation records
+     * @return total damage keyed by actor display name
+     */
     private static Map<String, Double> totalDamageByActor(List<SimulationRecord> records) {
         Map<String, Double> totals = new HashMap<>();
         for (SimulationRecord record : records) {
@@ -55,6 +70,14 @@ final class ReportDataBuilder {
         return totals;
     }
 
+    /**
+     * Builds per-actor cumulative damage series as JS object literal strings.
+     *
+     * @param records            simulation records ordered by time
+     * @param totalDamageByActor totals keyed by actor name (defines the series set)
+     * @param endTime            timestamp appended as the final point of every series
+     * @return series points keyed by actor display name
+     */
     private static Map<String, List<String>> cumulativeDamageSeries(
             List<SimulationRecord> records,
             Map<String, Double> totalDamageByActor,
@@ -82,6 +105,12 @@ final class ReportDataBuilder {
         return series;
     }
 
+    /**
+     * Collects artifact substat roll views for every party member.
+     *
+     * @param sim combat simulator; may be {@code null}
+     * @return per-character roll views, or an empty list when {@code sim} is null
+     */
     private static List<ReportData.ReportArtifactRollView> artifactRolls(CombatSimulator sim) {
         List<ReportData.ReportArtifactRollView> artifactRolls = new ArrayList<>();
         if (sim == null) {

@@ -95,6 +95,7 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">AmenomaKageuchi</span>
 <span class="extends-implements">extends <a href="../entity/Weapon.html" title="model.entity内のクラス">Weapon</a>
 implements <a href="../entity/ActionTriggeredWeaponEffect.html" title="model.entity内のインタフェース">ActionTriggeredWeaponEffect</a></span></div>
+<div class="block">Amenoma Kageuchi sword with Succession Seed energy refund handling.</div>
 </div>
 </section>
 <section class="summary">
@@ -129,7 +130,9 @@ implements <a href="../entity/ActionTriggeredWeaponEffect.html" title="model.ent
 <div class="table-header col-first">コンストラクタ</div>
 <div class="table-header col-last">説明</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E()" class="member-name-link">AmenomaKageuchi</a>()</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Constructs Amenoma Kageuchi with Lv 90 base stats.</div>
+</div>
 </div>
 </section>
 </li>
@@ -148,7 +151,10 @@ implements <a href="../entity/ActionTriggeredWeaponEffect.html" title="model.ent
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onAction(model.entity.Character,simulation.action.CharacterActionRequest,simulation.CombatSimulator)" class="member-name-link">onAction</a><wbr>(<a href="../entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;user,
  <a href="../../simulation/action/CharacterActionRequest.html" title="simulation.action内のクラス">CharacterActionRequest</a>&nbsp;request,
  <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Tracks skill casts for Succession Seeds and schedules the burst energy
+refund when seeds are consumed.</div>
+</div>
 </div>
 </div>
 </div>
@@ -198,6 +204,7 @@ implements <a href="../entity/ActionTriggeredWeaponEffect.html" title="model.ent
 <h3>AmenomaKageuchi</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">AmenomaKageuchi</span>()</div>
+<div class="block">Constructs Amenoma Kageuchi with Lv 90 base stats.</div>
 </div>
 </section>
 </li>
@@ -216,9 +223,15 @@ implements <a href="../entity/ActionTriggeredWeaponEffect.html" title="model.ent
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">onAction</span><wbr><span class="parameters">(<a href="../entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;user,
  <a href="../../simulation/action/CharacterActionRequest.html" title="simulation.action内のクラス">CharacterActionRequest</a>&nbsp;request,
  <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</span></div>
+<div class="block">Tracks skill casts for Succession Seeds and schedules the burst energy
+refund when seeds are consumed.</div>
 <dl class="notes">
 <dt>定義:</dt>
 <dd><code><a href="../entity/ActionTriggeredWeaponEffect.html#onAction(model.entity.Character,simulation.action.CharacterActionRequest,simulation.CombatSimulator)">onAction</a></code>&nbsp;インタフェース内&nbsp;<code><a href="../entity/ActionTriggeredWeaponEffect.html" title="model.entity内のインタフェース">ActionTriggeredWeaponEffect</a></code></dd>
+<dt>パラメータ:</dt>
+<dd><code>user</code> - the character performing the action</dd>
+<dd><code>request</code> - the requested character action</dd>
+<dd><code>sim</code> - the active combat simulator</dd>
 </dl>
 </div>
 </section>

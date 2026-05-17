@@ -48,25 +48,64 @@ public class VectorizedEnvironment {
     private long stepDispatchNanos;
     private long stepWaitNanos;
 
+    /**
+     * Creates a vectorized environment backed by simulator factories and default encoders.
+     *
+     * @param count number of parallel environments
+     * @param simulatorFactory factory for combat simulators
+     * @param config episode configuration
+     */
     public VectorizedEnvironment(int count, Supplier<CombatSimulator> simulatorFactory, EpisodeConfig config) {
         this(count, simulatorFactory, config, 0);
     }
 
+    /**
+     * Creates a vectorized environment backed by simulator factories and default encoders.
+     *
+     * @param count number of parallel environments
+     * @param simulatorFactory factory for combat simulators
+     * @param config episode configuration
+     * @param requestedWorkers number of worker threads to use, or {@code 0} for auto
+     */
     public VectorizedEnvironment(int count, Supplier<CombatSimulator> simulatorFactory, EpisodeConfig config, int requestedWorkers) {
         this(count, simulatorFactory, config, requestedWorkers, new ObservationEncoder(), new PrivilegedStateEncoder(), false);
     }
 
+    /**
+     * Creates a vectorized environment backed by an episode factory.
+     *
+     * @param count number of parallel environments
+     * @param episodeFactory factory for per-episode battle setups
+     * @param requestedWorkers number of worker threads to use, or {@code 0} for auto
+     * @param observationEncoder encoder shared by all environments
+     */
     public VectorizedEnvironment(int count, RLEpisodeFactory episodeFactory, int requestedWorkers,
             ObservationEncoder observationEncoder) {
         this(count, episodeFactory, requestedWorkers, observationEncoder, new PrivilegedStateEncoder(), false);
     }
 
+    /**
+     * Creates a vectorized environment backed by an episode factory.
+     *
+     * @param count number of parallel environments
+     * @param episodeFactory factory for per-episode battle setups
+     * @param requestedWorkers number of worker threads to use, or {@code 0} for auto
+     * @param observationEncoder encoder shared by all environments
+     * @param privilegedStateEncoder privileged-state encoder shared by all environments
+     */
     public VectorizedEnvironment(int count, RLEpisodeFactory episodeFactory, int requestedWorkers,
             ObservationEncoder observationEncoder, PrivilegedStateEncoder privilegedStateEncoder) {
         this(count, episodeFactory, requestedWorkers, observationEncoder, privilegedStateEncoder, false);
     }
 
     /**
+     * Creates a vectorized environment backed by an episode factory.
+     *
+     * @param count number of parallel environments
+     * @param episodeFactory factory for per-episode battle setups
+     * @param requestedWorkers number of worker threads to use, or {@code 0} for auto
+     * @param observationEncoder encoder shared by all environments
+     * @param privilegedStateEncoder privileged-state encoder shared by all environments
      * @param vineEnabled if true, simulator snapshots are saved during step for VinePPO branch rollouts
      */
     public VectorizedEnvironment(int count, RLEpisodeFactory episodeFactory, int requestedWorkers,
@@ -100,11 +139,32 @@ public class VectorizedEnvironment {
         this(count, simulatorFactory, config, requestedWorkers, observationEncoder, new PrivilegedStateEncoder(), false);
     }
 
+    /**
+     * Creates a vectorized environment with shared encoders.
+     *
+     * @param count number of parallel environments
+     * @param simulatorFactory factory for combat simulators
+     * @param config episode configuration
+     * @param requestedWorkers number of worker threads to use, or {@code 0} for auto
+     * @param observationEncoder shared observation encoder to use for all environments
+     * @param privilegedStateEncoder shared privileged-state encoder to use for all environments
+     */
     public VectorizedEnvironment(int count, Supplier<CombatSimulator> simulatorFactory, EpisodeConfig config,
             int requestedWorkers, ObservationEncoder observationEncoder, PrivilegedStateEncoder privilegedStateEncoder) {
         this(count, simulatorFactory, config, requestedWorkers, observationEncoder, privilegedStateEncoder, false);
     }
 
+    /**
+     * Creates a vectorized environment with shared encoders.
+     *
+     * @param count number of parallel environments
+     * @param simulatorFactory factory for combat simulators
+     * @param config episode configuration
+     * @param requestedWorkers number of worker threads to use, or {@code 0} for auto
+     * @param observationEncoder shared observation encoder to use for all environments
+     * @param privilegedStateEncoder shared privileged-state encoder to use for all environments
+     * @param vineEnabled if true, simulator snapshots are saved during step for VinePPO branch rollouts
+     */
     public VectorizedEnvironment(int count, Supplier<CombatSimulator> simulatorFactory, EpisodeConfig config,
             int requestedWorkers, ObservationEncoder observationEncoder, PrivilegedStateEncoder privilegedStateEncoder,
             boolean vineEnabled) {
@@ -122,14 +182,32 @@ public class VectorizedEnvironment {
                 new ActionSpace(), observationEncoder, privilegedStateEncoder, new RewardFunction());
     }
 
+    /**
+     * Returns the number of managed environments.
+     *
+     * @return environment count
+     */
     public int size() {
         return environments.size();
     }
 
+    /**
+     * Resets all environments.
+     *
+     * @param generateReport whether the first environment should emit a report
+     * @return batched reset observations and masks
+     */
     public RunnerResetResult reset(boolean generateReport) {
         return reset(generateReport, -1);
     }
 
+    /**
+     * Resets all environments, optionally preferring a specific party.
+     *
+     * @param generateReport whether the first environment should emit a report
+     * @param preferredPartyId preferred party id, or {@code -1} for no preference
+     * @return batched reset observations and masks
+     */
     public RunnerResetResult reset(boolean generateReport, int preferredPartyId) {
         if (!generateReport) {
             return QuietExecution.call(() -> resetInternal(false, preferredPartyId));
@@ -160,6 +238,12 @@ public class VectorizedEnvironment {
         return new RunnerResetResult(observations, privilegedObservations, actionMasks, partyIds);
     }
 
+    /**
+     * Steps every environment once with the provided action ids.
+     *
+     * @param actions one action id per environment
+     * @return batched transition results
+     */
     public RunnerStepResult step(int[] actions) {
         return QuietExecution.call(() -> stepInternal(actions));
     }
@@ -275,25 +359,6 @@ public class VectorizedEnvironment {
     }
 
     /**
-     * Runs a VinePPO branch rollout from a previously saved snapshot.
-     *
-     * @param snapshotId  ID returned by a prior step call in vineSnapshotIds
-     * @param firstAction action to execute first in each branch (-1 for random)
-     * @param K           number of independent branches
-     * @param H           horizon steps per branch
-     * @param gamma       discount factor
-     * @return mean discounted return across K branches
-     */
-    /**
-     * Runs VinePPO branch rollouts for every valid action at the snapshot state and
-     * returns Q_MC for each action (NaN for invalid actions).
-     *
-     * <p>The Python learner combines these into a counterfactual advantage:
-     * {@code A(s, chosen) = Q_MC(s, chosen) - mean_{a valid} Q_MC(s, a)}.
-     *
-     * @return double array of length {@link mechanics.rl.RLAction#SIZE}
-     */
-    /**
      * Discards all snapshots currently held in the vine snapshot store.
      * Called by the Python learner at the end of each update cycle to prevent
      * unbounded memory growth from snapshots that are saved but never consumed
@@ -304,6 +369,15 @@ public class VectorizedEnvironment {
         snapshotStore.clear();
     }
 
+    /**
+     * Runs VinePPO branch rollouts for every valid action at a saved snapshot state.
+     *
+     * @param snapshotId ID returned by a prior step call in {@code vineSnapshotIds}
+     * @param K number of independent branches per action
+     * @param H horizon steps per branch
+     * @param gamma discount factor
+     * @return Monte Carlo Q estimates for each action, with {@code NaN} for invalid actions
+     */
     public double[] branchRolloutMulti(int snapshotId, int K, int H, double gamma) {
         SnapshotEntry entry = snapshotStore.remove(snapshotId);
         if (entry == null) {
@@ -318,12 +392,20 @@ public class VectorizedEnvironment {
         return action == RLAction.SKILL || action == RLAction.BURST || action.isSwap();
     }
 
+    /**
+     * Shuts down worker threads owned by this vectorized environment.
+     */
     public void close() {
         if (executor != null) {
             executor.shutdown();
         }
     }
 
+    /**
+     * Returns accumulated timing and throughput metrics for this runner.
+     *
+     * @return current metrics snapshot
+     */
     public MetricsSnapshot metricsSnapshot() {
         return new MetricsSnapshot(
                 resetCalls,
@@ -390,6 +472,14 @@ public class VectorizedEnvironment {
         public final double[][] actionMasks;
         public final int[] partyIds;
 
+        /**
+         * Creates a batched reset result.
+         *
+         * @param observations encoded observations for each environment
+         * @param privilegedObservations privileged observations for each environment
+         * @param actionMasks valid-action masks for each environment
+         * @param partyIds selected party ids for each environment
+         */
         public RunnerResetResult(double[][] observations, double[][] privilegedObservations,
                 double[][] actionMasks, int[] partyIds) {
             this.observations = observations;
@@ -399,6 +489,9 @@ public class VectorizedEnvironment {
         }
     }
 
+    /**
+     * Immutable timing snapshot for a vectorized runner.
+     */
     public static class MetricsSnapshot {
         public final long resetCalls;
         public final long resetNanos;
@@ -412,6 +505,9 @@ public class VectorizedEnvironment {
         public final long completedEpisodes;
         public final int workerCount;
 
+        /**
+         * Creates a metrics snapshot from accumulated counters.
+         */
         public MetricsSnapshot(long resetCalls, long resetNanos, long resetDispatchNanos, long resetWaitNanos,
                 long stepCalls, long stepNanos, long stepDispatchNanos, long stepWaitNanos, long envSteps,
                 long completedEpisodes, int workerCount) {
@@ -428,34 +524,74 @@ public class VectorizedEnvironment {
             this.workerCount = workerCount;
         }
 
+        /**
+         * Returns the mean reset latency in milliseconds.
+         *
+         * @return average reset time
+         */
         public double meanResetMillis() {
             return resetCalls == 0 ? 0.0 : (resetNanos / 1_000_000.0) / resetCalls;
         }
 
+        /**
+         * Returns the mean step latency in milliseconds.
+         *
+         * @return average step time
+         */
         public double meanStepMillis() {
             return stepCalls == 0 ? 0.0 : (stepNanos / 1_000_000.0) / stepCalls;
         }
 
+        /**
+         * Returns the mean reset task submission time in milliseconds.
+         *
+         * @return average reset dispatch time
+         */
         public double meanResetDispatchMillis() {
             return resetCalls == 0 ? 0.0 : (resetDispatchNanos / 1_000_000.0) / resetCalls;
         }
 
+        /**
+         * Returns the mean reset wait time in milliseconds.
+         *
+         * @return average reset wait time
+         */
         public double meanResetWaitMillis() {
             return resetCalls == 0 ? 0.0 : (resetWaitNanos / 1_000_000.0) / resetCalls;
         }
 
+        /**
+         * Returns the mean step task submission time in milliseconds.
+         *
+         * @return average step dispatch time
+         */
         public double meanStepDispatchMillis() {
             return stepCalls == 0 ? 0.0 : (stepDispatchNanos / 1_000_000.0) / stepCalls;
         }
 
+        /**
+         * Returns the mean step wait time in milliseconds.
+         *
+         * @return average step wait time
+         */
         public double meanStepWaitMillis() {
             return stepCalls == 0 ? 0.0 : (stepWaitNanos / 1_000_000.0) / stepCalls;
         }
 
+        /**
+         * Returns aggregate environment steps per second.
+         *
+         * @return throughput in environment steps per second
+         */
         public double envStepsPerSecond() {
             return stepNanos == 0 ? 0.0 : envSteps / (stepNanos / 1_000_000_000.0);
         }
 
+        /**
+         * Formats the metrics snapshot as a single-line summary.
+         *
+         * @return summary string
+         */
         public String toSummaryString() {
             return String.format(
                     "workers=%d resetCalls=%d meanResetMs=%.3f meanResetDispatchMs=%.3f meanResetWaitMs=%.3f stepCalls=%d meanStepMs=%.3f meanStepDispatchMs=%.3f meanStepWaitMs=%.3f envSteps=%d envSteps/s=%.1f completedEpisodes=%d",

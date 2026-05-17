@@ -65,6 +65,10 @@ loadScripts(document, 'script');</script>
 <li><a href="#episodeDamages" tabindex="0">episodeDamages</a></li>
 <li><a href="#executor" tabindex="0">executor</a></li>
 <li><a href="#workerCount" tabindex="0">workerCount</a></li>
+<li><a href="#snapshotStore" tabindex="0">snapshotStore</a></li>
+<li><a href="#nextSnapshotId" tabindex="0">nextSnapshotId</a></li>
+<li><a href="#vineEnabled" tabindex="0">vineEnabled</a></li>
+<li><a href="#branchEnv" tabindex="0">branchEnv</a></li>
 <li><a href="#resetCalls" tabindex="0">resetCalls</a></li>
 <li><a href="#resetNanos" tabindex="0">resetNanos</a></li>
 <li><a href="#stepCalls" tabindex="0">stepCalls</a></li>
@@ -82,7 +86,11 @@ loadScripts(document, 'script');</script>
 <li><a href="#%3Cinit%3E(int,java.util.function.Supplier,mechanics.rl.EpisodeConfig)" tabindex="0">VectorizedEnvironment(int, Supplier, EpisodeConfig)</a></li>
 <li><a href="#%3Cinit%3E(int,java.util.function.Supplier,mechanics.rl.EpisodeConfig,int)" tabindex="0">VectorizedEnvironment(int, Supplier, EpisodeConfig, int)</a></li>
 <li><a href="#%3Cinit%3E(int,mechanics.rl.RLEpisodeFactory,int,mechanics.rl.ObservationEncoder)" tabindex="0">VectorizedEnvironment(int, RLEpisodeFactory, int, ObservationEncoder)</a></li>
+<li><a href="#%3Cinit%3E(int,mechanics.rl.RLEpisodeFactory,int,mechanics.rl.ObservationEncoder,mechanics.rl.PrivilegedStateEncoder)" tabindex="0">VectorizedEnvironment(int, RLEpisodeFactory, int, ObservationEncoder, PrivilegedStateEncoder)</a></li>
+<li><a href="#%3Cinit%3E(int,mechanics.rl.RLEpisodeFactory,int,mechanics.rl.ObservationEncoder,mechanics.rl.PrivilegedStateEncoder,boolean)" tabindex="0">VectorizedEnvironment(int, RLEpisodeFactory, int, ObservationEncoder, PrivilegedStateEncoder, boolean)</a></li>
 <li><a href="#%3Cinit%3E(int,java.util.function.Supplier,mechanics.rl.EpisodeConfig,int,mechanics.rl.ObservationEncoder)" tabindex="0">VectorizedEnvironment(int, Supplier, EpisodeConfig, int, ObservationEncoder)</a></li>
+<li><a href="#%3Cinit%3E(int,java.util.function.Supplier,mechanics.rl.EpisodeConfig,int,mechanics.rl.ObservationEncoder,mechanics.rl.PrivilegedStateEncoder)" tabindex="0">VectorizedEnvironment(int, Supplier, EpisodeConfig, int, ObservationEncoder, PrivilegedStateEncoder)</a></li>
+<li><a href="#%3Cinit%3E(int,java.util.function.Supplier,mechanics.rl.EpisodeConfig,int,mechanics.rl.ObservationEncoder,mechanics.rl.PrivilegedStateEncoder,boolean)" tabindex="0">VectorizedEnvironment(int, Supplier, EpisodeConfig, int, ObservationEncoder, PrivilegedStateEncoder, boolean)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">メソッドの詳細</a>
@@ -93,6 +101,9 @@ loadScripts(document, 'script');</script>
 <li><a href="#resetInternal(boolean,int)" tabindex="0">resetInternal(boolean, int)</a></li>
 <li><a href="#step(int%5B%5D)" tabindex="0">step(int[])</a></li>
 <li><a href="#stepInternal(int%5B%5D)" tabindex="0">stepInternal(int[])</a></li>
+<li><a href="#releaseSnapshots()" tabindex="0">releaseSnapshots()</a></li>
+<li><a href="#branchRolloutMulti(int,int,int,double)" tabindex="0">branchRolloutMulti(int, int, int, double)</a></li>
+<li><a href="#isVineSampleAction(int)" tabindex="0">isVineSampleAction(int)</a></li>
 <li><a href="#close()" tabindex="0">close()</a></li>
 <li><a href="#metricsSnapshot()" tabindex="0">metricsSnapshot()</a></li>
 <li><a href="#parallelForEach(mechanics.rl.bridge.VectorizedEnvironment.IndexConsumer)" tabindex="0">parallelForEach(VectorizedEnvironment.IndexConsumer)</a></li>
@@ -132,7 +143,9 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code>static class&nbsp;</code></div>
 <div class="col-second odd-row-color"><code><a href="VectorizedEnvironment.MetricsSnapshot.html" class="type-name-link" title="mechanics.rl.bridge内のクラス">VectorizedEnvironment.MetricsSnapshot</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Immutable timing snapshot for a vectorized runner.</div>
+</div>
 <div class="col-first even-row-color"><code>private static final class&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="VectorizedEnvironment.ParallelTiming.html" class="type-name-link" title="mechanics.rl.bridge内のクラス">VectorizedEnvironment.ParallelTiming</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
@@ -141,6 +154,9 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color">
 <div class="block">Reset response.</div>
 </div>
+<div class="col-first even-row-color"><code>private static final class&nbsp;</code></div>
+<div class="col-second even-row-color"><code><a href="VectorizedEnvironment.SnapshotEntry.html" class="type-name-link" title="mechanics.rl.bridge内のクラス">VectorizedEnvironment.SnapshotEntry</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -153,23 +169,29 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">修飾子とタイプ</div>
 <div class="table-header col-second">フィールド</div>
 <div class="table-header col-last">説明</div>
-<div class="col-first even-row-color"><code>private long</code></div>
-<div class="col-second even-row-color"><code><a href="#completedEpisodes" class="member-name-link">completedEpisodes</a></code></div>
+<div class="col-first even-row-color"><code>private <a href="../BattleEnvironment.html" title="mechanics.rl内のクラス">BattleEnvironment</a></code></div>
+<div class="col-second even-row-color"><code><a href="#branchEnv" class="member-name-link">branchEnv</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>private final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="../BattleEnvironment.html" title="mechanics.rl内のクラス">BattleEnvironment</a>&gt;</code></div>
-<div class="col-second odd-row-color"><code><a href="#environments" class="member-name-link">environments</a></code></div>
+<div class="col-first odd-row-color"><code>private long</code></div>
+<div class="col-second odd-row-color"><code><a href="#completedEpisodes" class="member-name-link">completedEpisodes</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>private long</code></div>
-<div class="col-second even-row-color"><code><a href="#envSteps" class="member-name-link">envSteps</a></code></div>
+<div class="col-first even-row-color"><code>private final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="../BattleEnvironment.html" title="mechanics.rl内のクラス">BattleEnvironment</a>&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#environments" class="member-name-link">environments</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>private final double[]</code></div>
-<div class="col-second odd-row-color"><code><a href="#episodeDamages" class="member-name-link">episodeDamages</a></code></div>
+<div class="col-first odd-row-color"><code>private long</code></div>
+<div class="col-second odd-row-color"><code><a href="#envSteps" class="member-name-link">envSteps</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code>private final double[]</code></div>
-<div class="col-second even-row-color"><code><a href="#episodeRewards" class="member-name-link">episodeRewards</a></code></div>
+<div class="col-second even-row-color"><code><a href="#episodeDamages" class="member-name-link">episodeDamages</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>private final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/ExecutorService.html" title="java.util.concurrent内のクラスまたはインタフェース" class="external-link">ExecutorService</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#executor" class="member-name-link">executor</a></code></div>
+<div class="col-first odd-row-color"><code>private final double[]</code></div>
+<div class="col-second odd-row-color"><code><a href="#episodeRewards" class="member-name-link">episodeRewards</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/ExecutorService.html" title="java.util.concurrent内のクラスまたはインタフェース" class="external-link">ExecutorService</a></code></div>
+<div class="col-second even-row-color"><code><a href="#executor" class="member-name-link">executor</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/atomic/AtomicInteger.html" title="java.util.concurrent.atomic内のクラスまたはインタフェース" class="external-link">AtomicInteger</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#nextSnapshotId" class="member-name-link">nextSnapshotId</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code>private long</code></div>
 <div class="col-second even-row-color"><code><a href="#resetCalls" class="member-name-link">resetCalls</a></code></div>
@@ -183,17 +205,23 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color"><code>private long</code></div>
 <div class="col-second odd-row-color"><code><a href="#resetWaitNanos" class="member-name-link">resetWaitNanos</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>private long</code></div>
-<div class="col-second even-row-color"><code><a href="#stepCalls" class="member-name-link">stepCalls</a></code></div>
+<div class="col-first even-row-color"><code>private final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/ConcurrentHashMap.html" title="java.util.concurrent内のクラスまたはインタフェース" class="external-link">ConcurrentHashMap</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Integer</a>, <a href="VectorizedEnvironment.SnapshotEntry.html" title="mechanics.rl.bridge内のクラス">VectorizedEnvironment.SnapshotEntry</a>&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#snapshotStore" class="member-name-link">snapshotStore</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code>private long</code></div>
-<div class="col-second odd-row-color"><code><a href="#stepDispatchNanos" class="member-name-link">stepDispatchNanos</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#stepCalls" class="member-name-link">stepCalls</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code>private long</code></div>
-<div class="col-second even-row-color"><code><a href="#stepNanos" class="member-name-link">stepNanos</a></code></div>
+<div class="col-second even-row-color"><code><a href="#stepDispatchNanos" class="member-name-link">stepDispatchNanos</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code>private long</code></div>
-<div class="col-second odd-row-color"><code><a href="#stepWaitNanos" class="member-name-link">stepWaitNanos</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#stepNanos" class="member-name-link">stepNanos</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private long</code></div>
+<div class="col-second even-row-color"><code><a href="#stepWaitNanos" class="member-name-link">stepWaitNanos</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private final boolean</code></div>
+<div class="col-second odd-row-color"><code><a href="#vineEnabled" class="member-name-link">vineEnabled</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code>private final int</code></div>
 <div class="col-second even-row-color"><code><a href="#workerCount" class="member-name-link">workerCount</a></code></div>
@@ -212,12 +240,16 @@ loadScripts(document, 'script');</script>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(int,java.util.function.Supplier,mechanics.rl.EpisodeConfig)" class="member-name-link">VectorizedEnvironment</a><wbr>(int&nbsp;count,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="java.util.function内のクラスまたはインタフェース" class="external-link">Supplier</a>&lt;<a href="../../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&gt;&nbsp;simulatorFactory,
  <a href="../EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Creates a vectorized environment backed by simulator factories and default encoders.</div>
+</div>
 <div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(int,java.util.function.Supplier,mechanics.rl.EpisodeConfig,int)" class="member-name-link">VectorizedEnvironment</a><wbr>(int&nbsp;count,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="java.util.function内のクラスまたはインタフェース" class="external-link">Supplier</a>&lt;<a href="../../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&gt;&nbsp;simulatorFactory,
  <a href="../EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config,
  int&nbsp;requestedWorkers)</code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Creates a vectorized environment backed by simulator factories and default encoders.</div>
+</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(int,java.util.function.Supplier,mechanics.rl.EpisodeConfig,int,mechanics.rl.ObservationEncoder)" class="member-name-link">VectorizedEnvironment</a><wbr>(int&nbsp;count,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="java.util.function内のクラスまたはインタフェース" class="external-link">Supplier</a>&lt;<a href="../../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&gt;&nbsp;simulatorFactory,
  <a href="../EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config,
@@ -226,11 +258,49 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color">
 <div class="block">Constructs a vectorized environment with a shared <a href="../ObservationEncoder.html" title="mechanics.rl内のクラス"><code>ObservationEncoder</code></a>.</div>
 </div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(int,java.util.function.Supplier,mechanics.rl.EpisodeConfig,int,mechanics.rl.ObservationEncoder,mechanics.rl.PrivilegedStateEncoder)" class="member-name-link">VectorizedEnvironment</a><wbr>(int&nbsp;count,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="java.util.function内のクラスまたはインタフェース" class="external-link">Supplier</a>&lt;<a href="../../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&gt;&nbsp;simulatorFactory,
+ <a href="../EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config,
+ int&nbsp;requestedWorkers,
+ <a href="../ObservationEncoder.html" title="mechanics.rl内のクラス">ObservationEncoder</a>&nbsp;observationEncoder,
+ <a href="../PrivilegedStateEncoder.html" title="mechanics.rl内のクラス">PrivilegedStateEncoder</a>&nbsp;privilegedStateEncoder)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Creates a vectorized environment with shared encoders.</div>
+</div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(int,java.util.function.Supplier,mechanics.rl.EpisodeConfig,int,mechanics.rl.ObservationEncoder,mechanics.rl.PrivilegedStateEncoder,boolean)" class="member-name-link">VectorizedEnvironment</a><wbr>(int&nbsp;count,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="java.util.function内のクラスまたはインタフェース" class="external-link">Supplier</a>&lt;<a href="../../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&gt;&nbsp;simulatorFactory,
+ <a href="../EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config,
+ int&nbsp;requestedWorkers,
+ <a href="../ObservationEncoder.html" title="mechanics.rl内のクラス">ObservationEncoder</a>&nbsp;observationEncoder,
+ <a href="../PrivilegedStateEncoder.html" title="mechanics.rl内のクラス">PrivilegedStateEncoder</a>&nbsp;privilegedStateEncoder,
+ boolean&nbsp;vineEnabled)</code></div>
+<div class="col-last even-row-color">
+<div class="block">Creates a vectorized environment with shared encoders.</div>
+</div>
 <div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(int,mechanics.rl.RLEpisodeFactory,int,mechanics.rl.ObservationEncoder)" class="member-name-link">VectorizedEnvironment</a><wbr>(int&nbsp;count,
  <a href="../RLEpisodeFactory.html" title="mechanics.rl内のインタフェース">RLEpisodeFactory</a>&nbsp;episodeFactory,
  int&nbsp;requestedWorkers,
  <a href="../ObservationEncoder.html" title="mechanics.rl内のクラス">ObservationEncoder</a>&nbsp;observationEncoder)</code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Creates a vectorized environment backed by an episode factory.</div>
+</div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(int,mechanics.rl.RLEpisodeFactory,int,mechanics.rl.ObservationEncoder,mechanics.rl.PrivilegedStateEncoder)" class="member-name-link">VectorizedEnvironment</a><wbr>(int&nbsp;count,
+ <a href="../RLEpisodeFactory.html" title="mechanics.rl内のインタフェース">RLEpisodeFactory</a>&nbsp;episodeFactory,
+ int&nbsp;requestedWorkers,
+ <a href="../ObservationEncoder.html" title="mechanics.rl内のクラス">ObservationEncoder</a>&nbsp;observationEncoder,
+ <a href="../PrivilegedStateEncoder.html" title="mechanics.rl内のクラス">PrivilegedStateEncoder</a>&nbsp;privilegedStateEncoder)</code></div>
+<div class="col-last even-row-color">
+<div class="block">Creates a vectorized environment backed by an episode factory.</div>
+</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(int,mechanics.rl.RLEpisodeFactory,int,mechanics.rl.ObservationEncoder,mechanics.rl.PrivilegedStateEncoder,boolean)" class="member-name-link">VectorizedEnvironment</a><wbr>(int&nbsp;count,
+ <a href="../RLEpisodeFactory.html" title="mechanics.rl内のインタフェース">RLEpisodeFactory</a>&nbsp;episodeFactory,
+ int&nbsp;requestedWorkers,
+ <a href="../ObservationEncoder.html" title="mechanics.rl内のクラス">ObservationEncoder</a>&nbsp;observationEncoder,
+ <a href="../PrivilegedStateEncoder.html" title="mechanics.rl内のクラス">PrivilegedStateEncoder</a>&nbsp;privilegedStateEncoder,
+ boolean&nbsp;vineEnabled)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Creates a vectorized environment backed by an episode factory.</div>
+</div>
 </div>
 </section>
 </li>
@@ -239,41 +309,69 @@ loadScripts(document, 'script');</script>
 <section class="method-summary" id="method-summary">
 <h2>メソッドの概要</h2>
 <div id="method-summary-table">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">すべてのメソッド</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">インスタンス・メソッド</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">concreteメソッド</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">すべてのメソッド</button><button id="method-summary-table-tab1" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab1', 3)" class="table-tab">staticメソッド</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">インスタンス・メソッド</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">concreteメソッド</button></div>
 <div id="method-summary-table.tabpanel" role="tabpanel" aria-labelledby="method-summary-table-tab0">
 <div class="summary-table three-column-summary">
 <div class="table-header col-first">修飾子とタイプ</div>
 <div class="table-header col-second">メソッド</div>
 <div class="table-header col-last">説明</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#close()" class="member-name-link">close</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double[]</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#branchRolloutMulti(int,int,int,double)" class="member-name-link">branchRolloutMulti</a><wbr>(int&nbsp;snapshotId,
+ int&nbsp;K,
+ int&nbsp;H,
+ double&nbsp;gamma)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Runs VinePPO branch rollouts for every valid action at a saved snapshot state.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#close()" class="member-name-link">close</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Shuts down worker threads owned by this vectorized environment.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#isVineSampleAction(int)" class="member-name-link">isVineSampleAction</a><wbr>(int&nbsp;actionId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="VectorizedEnvironment.MetricsSnapshot.html" title="mechanics.rl.bridge内のクラス">VectorizedEnvironment.MetricsSnapshot</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#metricsSnapshot()" class="member-name-link">metricsSnapshot</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns accumulated timing and throughput metrics for this runner.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="VectorizedEnvironment.ParallelTiming.html" title="mechanics.rl.bridge内のクラス">VectorizedEnvironment.ParallelTiming</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#parallelForEach(mechanics.rl.bridge.VectorizedEnvironment.IndexConsumer)" class="member-name-link">parallelForEach</a><wbr>(<a href="VectorizedEnvironment.IndexConsumer.html" title="mechanics.rl.bridge内のインタフェース">VectorizedEnvironment.IndexConsumer</a>&nbsp;consumer)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="VectorizedEnvironment.RunnerResetResult.html" title="mechanics.rl.bridge内のクラス">VectorizedEnvironment.RunnerResetResult</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reset(boolean)" class="member-name-link">reset</a><wbr>(boolean&nbsp;generateReport)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#releaseSnapshots()" class="member-name-link">releaseSnapshots</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Discards all snapshots currently held in the vine snapshot store.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="VectorizedEnvironment.RunnerResetResult.html" title="mechanics.rl.bridge内のクラス">VectorizedEnvironment.RunnerResetResult</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reset(boolean,int)" class="member-name-link">reset</a><wbr>(boolean&nbsp;generateReport,
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reset(boolean)" class="member-name-link">reset</a><wbr>(boolean&nbsp;generateReport)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Resets all environments.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="VectorizedEnvironment.RunnerResetResult.html" title="mechanics.rl.bridge内のクラス">VectorizedEnvironment.RunnerResetResult</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reset(boolean,int)" class="member-name-link">reset</a><wbr>(boolean&nbsp;generateReport,
+ int&nbsp;preferredPartyId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Resets all environments, optionally preferring a specific party.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="VectorizedEnvironment.RunnerResetResult.html" title="mechanics.rl.bridge内のクラス">VectorizedEnvironment.RunnerResetResult</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resetInternal(boolean,int)" class="member-name-link">resetInternal</a><wbr>(boolean&nbsp;generateReport,
  int&nbsp;preferredPartyId)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="VectorizedEnvironment.RunnerResetResult.html" title="mechanics.rl.bridge内のクラス">VectorizedEnvironment.RunnerResetResult</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resetInternal(boolean,int)" class="member-name-link">resetInternal</a><wbr>(boolean&nbsp;generateReport,
- int&nbsp;preferredPartyId)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#size()" class="member-name-link">size</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the number of managed environments.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="RunnerStepResult.html" title="mechanics.rl.bridge内のクラス">RunnerStepResult</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#step(int%5B%5D)" class="member-name-link">step</a><wbr>(int[]&nbsp;actions)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Steps every environment once with the provided action ids.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="RunnerStepResult.html" title="mechanics.rl.bridge内のクラス">RunnerStepResult</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#stepInternal(int%5B%5D)" class="member-name-link">stepInternal</a><wbr>(int[]&nbsp;actions)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#size()" class="member-name-link">size</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="RunnerStepResult.html" title="mechanics.rl.bridge内のクラス">RunnerStepResult</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#step(int%5B%5D)" class="member-name-link">step</a><wbr>(int[]&nbsp;actions)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="RunnerStepResult.html" title="mechanics.rl.bridge内のクラス">RunnerStepResult</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#stepInternal(int%5B%5D)" class="member-name-link">stepInternal</a><wbr>(int[]&nbsp;actions)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -328,6 +426,38 @@ loadScripts(document, 'script');</script>
 <h3>workerCount</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">workerCount</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="snapshotStore">
+<h3>snapshotStore</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/ConcurrentHashMap.html" title="java.util.concurrent内のクラスまたはインタフェース" class="external-link">ConcurrentHashMap</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Integer</a>, <a href="VectorizedEnvironment.SnapshotEntry.html" title="mechanics.rl.bridge内のクラス">VectorizedEnvironment.SnapshotEntry</a>&gt;</span>&nbsp;<span class="element-name">snapshotStore</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="nextSnapshotId">
+<h3>nextSnapshotId</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/atomic/AtomicInteger.html" title="java.util.concurrent.atomic内のクラスまたはインタフェース" class="external-link">AtomicInteger</a></span>&nbsp;<span class="element-name">nextSnapshotId</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="vineEnabled">
+<h3>vineEnabled</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">vineEnabled</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="branchEnv">
+<h3>branchEnv</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="../BattleEnvironment.html" title="mechanics.rl内のクラス">BattleEnvironment</a></span>&nbsp;<span class="element-name">branchEnv</span></div>
 </div>
 </section>
 </li>
@@ -426,6 +556,13 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">VectorizedEnvironment</span><wbr><span class="parameters">(int&nbsp;count,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="java.util.function内のクラスまたはインタフェース" class="external-link">Supplier</a>&lt;<a href="../../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&gt;&nbsp;simulatorFactory,
  <a href="../EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config)</span></div>
+<div class="block">Creates a vectorized environment backed by simulator factories and default encoders.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>count</code> - number of parallel environments</dd>
+<dd><code>simulatorFactory</code> - factory for combat simulators</dd>
+<dd><code>config</code> - episode configuration</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -437,6 +574,14 @@ loadScripts(document, 'script');</script>
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="java.util.function内のクラスまたはインタフェース" class="external-link">Supplier</a>&lt;<a href="../../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&gt;&nbsp;simulatorFactory,
  <a href="../EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config,
  int&nbsp;requestedWorkers)</span></div>
+<div class="block">Creates a vectorized environment backed by simulator factories and default encoders.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>count</code> - number of parallel environments</dd>
+<dd><code>simulatorFactory</code> - factory for combat simulators</dd>
+<dd><code>config</code> - episode configuration</dd>
+<dd><code>requestedWorkers</code> - number of worker threads to use, or <code>0</code> for auto</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -448,6 +593,58 @@ loadScripts(document, 'script');</script>
  <a href="../RLEpisodeFactory.html" title="mechanics.rl内のインタフェース">RLEpisodeFactory</a>&nbsp;episodeFactory,
  int&nbsp;requestedWorkers,
  <a href="../ObservationEncoder.html" title="mechanics.rl内のクラス">ObservationEncoder</a>&nbsp;observationEncoder)</span></div>
+<div class="block">Creates a vectorized environment backed by an episode factory.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>count</code> - number of parallel environments</dd>
+<dd><code>episodeFactory</code> - factory for per-episode battle setups</dd>
+<dd><code>requestedWorkers</code> - number of worker threads to use, or <code>0</code> for auto</dd>
+<dd><code>observationEncoder</code> - encoder shared by all environments</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(int,mechanics.rl.RLEpisodeFactory,int,mechanics.rl.ObservationEncoder,mechanics.rl.PrivilegedStateEncoder)">
+<h3>VectorizedEnvironment</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">VectorizedEnvironment</span><wbr><span class="parameters">(int&nbsp;count,
+ <a href="../RLEpisodeFactory.html" title="mechanics.rl内のインタフェース">RLEpisodeFactory</a>&nbsp;episodeFactory,
+ int&nbsp;requestedWorkers,
+ <a href="../ObservationEncoder.html" title="mechanics.rl内のクラス">ObservationEncoder</a>&nbsp;observationEncoder,
+ <a href="../PrivilegedStateEncoder.html" title="mechanics.rl内のクラス">PrivilegedStateEncoder</a>&nbsp;privilegedStateEncoder)</span></div>
+<div class="block">Creates a vectorized environment backed by an episode factory.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>count</code> - number of parallel environments</dd>
+<dd><code>episodeFactory</code> - factory for per-episode battle setups</dd>
+<dd><code>requestedWorkers</code> - number of worker threads to use, or <code>0</code> for auto</dd>
+<dd><code>observationEncoder</code> - encoder shared by all environments</dd>
+<dd><code>privilegedStateEncoder</code> - privileged-state encoder shared by all environments</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(int,mechanics.rl.RLEpisodeFactory,int,mechanics.rl.ObservationEncoder,mechanics.rl.PrivilegedStateEncoder,boolean)">
+<h3>VectorizedEnvironment</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">VectorizedEnvironment</span><wbr><span class="parameters">(int&nbsp;count,
+ <a href="../RLEpisodeFactory.html" title="mechanics.rl内のインタフェース">RLEpisodeFactory</a>&nbsp;episodeFactory,
+ int&nbsp;requestedWorkers,
+ <a href="../ObservationEncoder.html" title="mechanics.rl内のクラス">ObservationEncoder</a>&nbsp;observationEncoder,
+ <a href="../PrivilegedStateEncoder.html" title="mechanics.rl内のクラス">PrivilegedStateEncoder</a>&nbsp;privilegedStateEncoder,
+ boolean&nbsp;vineEnabled)</span></div>
+<div class="block">Creates a vectorized environment backed by an episode factory.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>count</code> - number of parallel environments</dd>
+<dd><code>episodeFactory</code> - factory for per-episode battle setups</dd>
+<dd><code>requestedWorkers</code> - number of worker threads to use, or <code>0</code> for auto</dd>
+<dd><code>observationEncoder</code> - encoder shared by all environments</dd>
+<dd><code>privilegedStateEncoder</code> - privileged-state encoder shared by all environments</dd>
+<dd><code>vineEnabled</code> - if true, simulator snapshots are saved during step for VinePPO branch rollouts</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -473,6 +670,54 @@ Use this overload to avoid reloading capability profiles for each environment in
 </div>
 </section>
 </li>
+<li>
+<section class="detail" id="&lt;init&gt;(int,java.util.function.Supplier,mechanics.rl.EpisodeConfig,int,mechanics.rl.ObservationEncoder,mechanics.rl.PrivilegedStateEncoder)">
+<h3>VectorizedEnvironment</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">VectorizedEnvironment</span><wbr><span class="parameters">(int&nbsp;count,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="java.util.function内のクラスまたはインタフェース" class="external-link">Supplier</a>&lt;<a href="../../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&gt;&nbsp;simulatorFactory,
+ <a href="../EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config,
+ int&nbsp;requestedWorkers,
+ <a href="../ObservationEncoder.html" title="mechanics.rl内のクラス">ObservationEncoder</a>&nbsp;observationEncoder,
+ <a href="../PrivilegedStateEncoder.html" title="mechanics.rl内のクラス">PrivilegedStateEncoder</a>&nbsp;privilegedStateEncoder)</span></div>
+<div class="block">Creates a vectorized environment with shared encoders.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>count</code> - number of parallel environments</dd>
+<dd><code>simulatorFactory</code> - factory for combat simulators</dd>
+<dd><code>config</code> - episode configuration</dd>
+<dd><code>requestedWorkers</code> - number of worker threads to use, or <code>0</code> for auto</dd>
+<dd><code>observationEncoder</code> - shared observation encoder to use for all environments</dd>
+<dd><code>privilegedStateEncoder</code> - shared privileged-state encoder to use for all environments</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(int,java.util.function.Supplier,mechanics.rl.EpisodeConfig,int,mechanics.rl.ObservationEncoder,mechanics.rl.PrivilegedStateEncoder,boolean)">
+<h3>VectorizedEnvironment</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">VectorizedEnvironment</span><wbr><span class="parameters">(int&nbsp;count,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="java.util.function内のクラスまたはインタフェース" class="external-link">Supplier</a>&lt;<a href="../../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&gt;&nbsp;simulatorFactory,
+ <a href="../EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config,
+ int&nbsp;requestedWorkers,
+ <a href="../ObservationEncoder.html" title="mechanics.rl内のクラス">ObservationEncoder</a>&nbsp;observationEncoder,
+ <a href="../PrivilegedStateEncoder.html" title="mechanics.rl内のクラス">PrivilegedStateEncoder</a>&nbsp;privilegedStateEncoder,
+ boolean&nbsp;vineEnabled)</span></div>
+<div class="block">Creates a vectorized environment with shared encoders.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>count</code> - number of parallel environments</dd>
+<dd><code>simulatorFactory</code> - factory for combat simulators</dd>
+<dd><code>config</code> - episode configuration</dd>
+<dd><code>requestedWorkers</code> - number of worker threads to use, or <code>0</code> for auto</dd>
+<dd><code>observationEncoder</code> - shared observation encoder to use for all environments</dd>
+<dd><code>privilegedStateEncoder</code> - shared privileged-state encoder to use for all environments</dd>
+<dd><code>vineEnabled</code> - if true, simulator snapshots are saved during step for VinePPO branch rollouts</dd>
+</dl>
+</div>
+</section>
+</li>
 </ul>
 </section>
 </li>
@@ -486,6 +731,11 @@ Use this overload to avoid reloading capability profiles for each environment in
 <h3>size</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">size</span>()</div>
+<div class="block">Returns the number of managed environments.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>environment count</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -494,6 +744,13 @@ Use this overload to avoid reloading capability profiles for each environment in
 <h3>reset</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="VectorizedEnvironment.RunnerResetResult.html" title="mechanics.rl.bridge内のクラス">VectorizedEnvironment.RunnerResetResult</a></span>&nbsp;<span class="element-name">reset</span><wbr><span class="parameters">(boolean&nbsp;generateReport)</span></div>
+<div class="block">Resets all environments.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>generateReport</code> - whether the first environment should emit a report</dd>
+<dt>戻り値:</dt>
+<dd>batched reset observations and masks</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -503,6 +760,14 @@ Use this overload to avoid reloading capability profiles for each environment in
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="VectorizedEnvironment.RunnerResetResult.html" title="mechanics.rl.bridge内のクラス">VectorizedEnvironment.RunnerResetResult</a></span>&nbsp;<span class="element-name">reset</span><wbr><span class="parameters">(boolean&nbsp;generateReport,
  int&nbsp;preferredPartyId)</span></div>
+<div class="block">Resets all environments, optionally preferring a specific party.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>generateReport</code> - whether the first environment should emit a report</dd>
+<dd><code>preferredPartyId</code> - preferred party id, or <code>-1</code> for no preference</dd>
+<dt>戻り値:</dt>
+<dd>batched reset observations and masks</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -520,6 +785,13 @@ Use this overload to avoid reloading capability profiles for each environment in
 <h3>step</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="RunnerStepResult.html" title="mechanics.rl.bridge内のクラス">RunnerStepResult</a></span>&nbsp;<span class="element-name">step</span><wbr><span class="parameters">(int[]&nbsp;actions)</span></div>
+<div class="block">Steps every environment once with the provided action ids.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>actions</code> - one action id per environment</dd>
+<dt>戻り値:</dt>
+<dd>batched transition results</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -532,10 +804,53 @@ Use this overload to avoid reloading capability profiles for each environment in
 </section>
 </li>
 <li>
+<section class="detail" id="releaseSnapshots()">
+<h3>releaseSnapshots</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">releaseSnapshots</span>()</div>
+<div class="block">Discards all snapshots currently held in the vine snapshot store.
+Called by the Python learner at the end of each update cycle to prevent
+unbounded memory growth from snapshots that are saved but never consumed
+(only <code>vine_max_points_per_update</code> of the saved snapshots are
+actually evaluated each update).</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="branchRolloutMulti(int,int,int,double)">
+<h3>branchRolloutMulti</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">branchRolloutMulti</span><wbr><span class="parameters">(int&nbsp;snapshotId,
+ int&nbsp;K,
+ int&nbsp;H,
+ double&nbsp;gamma)</span></div>
+<div class="block">Runs VinePPO branch rollouts for every valid action at a saved snapshot state.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>snapshotId</code> - ID returned by a prior step call in <code>vineSnapshotIds</code></dd>
+<dd><code>K</code> - number of independent branches per action</dd>
+<dd><code>H</code> - horizon steps per branch</dd>
+<dd><code>gamma</code> - discount factor</dd>
+<dt>戻り値:</dt>
+<dd>Monte Carlo Q estimates for each action, with <code>NaN</code> for invalid actions</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="isVineSampleAction(int)">
+<h3>isVineSampleAction</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isVineSampleAction</span><wbr><span class="parameters">(int&nbsp;actionId)</span></div>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="close()">
 <h3>close</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">close</span>()</div>
+<div class="block">Shuts down worker threads owned by this vectorized environment.</div>
 </div>
 </section>
 </li>
@@ -544,6 +859,11 @@ Use this overload to avoid reloading capability profiles for each environment in
 <h3>metricsSnapshot</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="VectorizedEnvironment.MetricsSnapshot.html" title="mechanics.rl.bridge内のクラス">VectorizedEnvironment.MetricsSnapshot</a></span>&nbsp;<span class="element-name">metricsSnapshot</span>()</div>
+<div class="block">Returns accumulated timing and throughput metrics for this runner.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>current metrics snapshot</dd>
+</dl>
 </div>
 </section>
 </li>

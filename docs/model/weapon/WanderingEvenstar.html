@@ -90,6 +90,8 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">WanderingEvenstar</span>
 <span class="extends-implements">extends <a href="../entity/Weapon.html" title="model.entity内のクラス">Weapon</a>
 implements <a href="../entity/WeaponTeamBuffProvider.html" title="model.entity内のインタフェース">WeaponTeamBuffProvider</a></span></div>
+<div class="block">Wandering Evenstar catalyst with an Elemental Mastery to ATK conversion
+passive.</div>
 </div>
 </section>
 <section class="summary">
@@ -112,7 +114,9 @@ implements <a href="../entity/WeaponTeamBuffProvider.html" title="model.entity�
 <div class="table-header col-first">コンストラクタ</div>
 <div class="table-header col-last">説明</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E()" class="member-name-link">WanderingEvenstar</a>()</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Constructs Wandering Evenstar with Lv 90 base stats.</div>
+</div>
 </div>
 </section>
 </li>
@@ -131,11 +135,15 @@ implements <a href="../entity/WeaponTeamBuffProvider.html" title="model.entity�
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyPassive(model.stats.StatsContainer,double)" class="member-name-link">applyPassive</a><wbr>(<a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;stats,
  double&nbsp;currentTime)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Applies the weapon's passive effect to the provided stats container.</div>
+<div class="block">Applies the owner's self-only portion of the Elemental Mastery to ATK
+conversion.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="../../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTeamBuffs(model.entity.Character)" class="member-name-link">getTeamBuffs</a><wbr>(<a href="../entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;owner)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the team-share portion of Wildling Nightstar as a buff applied to
+all party members.</div>
+</div>
 </div>
 </div>
 </div>
@@ -161,6 +169,7 @@ implements <a href="../entity/WeaponTeamBuffProvider.html" title="model.entity�
 <h3>WanderingEvenstar</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">WanderingEvenstar</span>()</div>
+<div class="block">Constructs Wandering Evenstar with Lv 90 base stats.</div>
 </div>
 </section>
 </li>
@@ -177,9 +186,15 @@ implements <a href="../entity/WeaponTeamBuffProvider.html" title="model.entity�
 <h3>getTeamBuffs</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;</span>&nbsp;<span class="element-name">getTeamBuffs</span><wbr><span class="parameters">(<a href="../entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;owner)</span></div>
+<div class="block">Returns the team-share portion of Wildling Nightstar as a buff applied to
+all party members.</div>
 <dl class="notes">
 <dt>定義:</dt>
 <dd><code><a href="../entity/WeaponTeamBuffProvider.html#getTeamBuffs(model.entity.Character)">getTeamBuffs</a></code>&nbsp;インタフェース内&nbsp;<code><a href="../entity/WeaponTeamBuffProvider.html" title="model.entity内のインタフェース">WeaponTeamBuffProvider</a></code></dd>
+<dt>パラメータ:</dt>
+<dd><code>owner</code> - the character equipping the weapon</dd>
+<dt>戻り値:</dt>
+<dd>the team buffs granted by the weapon</dd>
 </dl>
 </div>
 </section>
@@ -190,17 +205,14 @@ implements <a href="../entity/WeaponTeamBuffProvider.html" title="model.entity�
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">applyPassive</span><wbr><span class="parameters">(<a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;stats,
  double&nbsp;currentTime)</span></div>
-<div class="block"><span class="description-from-type-label">クラスからコピーされた説明:&nbsp;<code><a href="../entity/Weapon.html#applyPassive(model.stats.StatsContainer,double)">Weapon</a></code></span></div>
-<div class="block">Applies the weapon's passive effect to the provided stats container.
-Called during stat compilation by <a href="../entity/Character.html#getEffectiveStats(double)"><code>Character.getEffectiveStats(double)</code></a>
-and <a href="../entity/Character.html#getStructuralStats(double)"><code>Character.getStructuralStats(double)</code></a>.
-Default implementation is a no-op.</div>
+<div class="block">Applies the owner's self-only portion of the Elemental Mastery to ATK
+conversion.</div>
 <dl class="notes">
 <dt>オーバーライド:</dt>
 <dd><code><a href="../entity/Weapon.html#applyPassive(model.stats.StatsContainer,double)">applyPassive</a></code>&nbsp;クラス内&nbsp;<code><a href="../entity/Weapon.html" title="model.entity内のクラス">Weapon</a></code></dd>
 <dt>パラメータ:</dt>
 <dd><code>stats</code> - the stats container to mutate in-place</dd>
-<dd><code>currentTime</code> - simulation time in seconds (for time-gated passives)</dd>
+<dd><code>currentTime</code> - simulation time in seconds</dd>
 </dl>
 </div>
 </section>

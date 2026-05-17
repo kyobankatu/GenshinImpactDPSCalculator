@@ -138,7 +138,9 @@ implements <a href="RLEpisodeFactory.html" title="mechanics.rl内のインタフ
 <div class="table-header col-last">説明</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(mechanics.rl.EpisodeConfig,java.util.List)" class="member-name-link">MultiPartyRLSimulatorFactory</a><wbr>(<a href="EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;baseConfig,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="RLPartySpec.html" title="mechanics.rl内のクラス">RLPartySpec</a>&gt;&nbsp;variants)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Creates a factory that samples uniformly from the provided party variants.</div>
+</div>
 </div>
 </section>
 </li>
@@ -155,13 +157,19 @@ implements <a href="RLEpisodeFactory.html" title="mechanics.rl内のインタフ
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="RLEpisodeFactory.EpisodeContext.html" title="mechanics.rl内のクラス">RLEpisodeFactory.EpisodeContext</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#createEpisode(int)" class="member-name-link">createEpisode</a><wbr>(int&nbsp;preferredPartyId)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Creates one episode, using the preferred id when it is in range.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="MultiPartyRLSimulatorFactory.html" title="mechanics.rl内のクラス">MultiPartyRLSimulatorFactory</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#defaultFactory(mechanics.rl.EpisodeConfig)" class="member-name-link">defaultFactory</a><wbr>(<a href="EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;baseConfig)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Creates the default multi-party training factory from the registry defaults.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>[]</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPartyNames()" class="member-name-link">getPartyNames</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the names of all selectable party variants.</div>
+</div>
 </div>
 </div>
 </div>
@@ -209,6 +217,7 @@ implements <a href="RLEpisodeFactory.html" title="mechanics.rl内のインタフ
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">MultiPartyRLSimulatorFactory</span><wbr><span class="parameters">(<a href="EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;baseConfig,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="RLPartySpec.html" title="mechanics.rl内のクラス">RLPartySpec</a>&gt;&nbsp;variants)</span></div>
+<div class="block">Creates a factory that samples uniformly from the provided party variants.</div>
 </div>
 </section>
 </li>
@@ -225,6 +234,7 @@ implements <a href="RLEpisodeFactory.html" title="mechanics.rl内のインタフ
 <h3>defaultFactory</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="MultiPartyRLSimulatorFactory.html" title="mechanics.rl内のクラス">MultiPartyRLSimulatorFactory</a></span>&nbsp;<span class="element-name">defaultFactory</span><wbr><span class="parameters">(<a href="EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;baseConfig)</span></div>
+<div class="block">Creates the default multi-party training factory from the registry defaults.</div>
 </div>
 </section>
 </li>
@@ -233,6 +243,7 @@ implements <a href="RLEpisodeFactory.html" title="mechanics.rl内のインタフ
 <h3>createEpisode</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="RLEpisodeFactory.EpisodeContext.html" title="mechanics.rl内のクラス">RLEpisodeFactory.EpisodeContext</a></span>&nbsp;<span class="element-name">createEpisode</span><wbr><span class="parameters">(int&nbsp;preferredPartyId)</span></div>
+<div class="block">Creates one episode, using the preferred id when it is in range.</div>
 <dl class="notes">
 <dt>定義:</dt>
 <dd><code><a href="RLEpisodeFactory.html#createEpisode(int)">createEpisode</a></code>&nbsp;インタフェース内&nbsp;<code><a href="RLEpisodeFactory.html" title="mechanics.rl内のインタフェース">RLEpisodeFactory</a></code></dd>
@@ -245,6 +256,7 @@ implements <a href="RLEpisodeFactory.html" title="mechanics.rl内のインタフ
 <h3>getPartyNames</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>[]</span>&nbsp;<span class="element-name">getPartyNames</span>()</div>
+<div class="block">Returns the names of all selectable party variants.</div>
 <dl class="notes">
 <dt>定義:</dt>
 <dd><code><a href="RLEpisodeFactory.html#getPartyNames()">getPartyNames</a></code>&nbsp;インタフェース内&nbsp;<code><a href="RLEpisodeFactory.html" title="mechanics.rl内のインタフェース">RLEpisodeFactory</a></code></dd>

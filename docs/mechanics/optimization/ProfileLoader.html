@@ -138,10 +138,14 @@ can stay independent from external profile-file naming conventions.</div>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
 <div class="col-second even-row-color"><code><a href="#DEFAULT_PROFILE_NAME" class="member-name-link">DEFAULT_PROFILE_NAME</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Default profile name used when a character has no explicit profile defined.</div>
+</div>
 <div class="col-first odd-row-color"><code>static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#FALLBACK_PROFILE_NAME" class="member-name-link">FALLBACK_PROFILE_NAME</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Fallback profile name used when no profile could be parsed from the source.</div>
+</div>
 </div>
 </section>
 </li>
@@ -171,7 +175,10 @@ can stay independent from external profile-file naming conventions.</div>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="ProfileLoader.ActionProfile.html" title="mechanics.optimization内のクラス">ProfileLoader.ActionProfile</a>&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#defaultSkillFallback(java.lang.String)" class="member-name-link">defaultSkillFallback</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;profileName)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Builds a minimal fallback profile list containing a single <a href="ProfileAction.html#SKILL"><code>ProfileAction.SKILL</code></a>
+action under the given profile name.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="ProfileLoader.ActionProfile.html" title="mechanics.optimization内のクラス">ProfileLoader.ActionProfile</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#loadProfiles(java.io.Reader)" class="member-name-link">loadProfiles</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/Reader.html" title="java.io内のクラスまたはインタフェース" class="external-link">Reader</a>&nbsp;reader)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
@@ -199,6 +206,7 @@ can stay independent from external profile-file naming conventions.</div>
 <h3>DEFAULT_PROFILE_NAME</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">DEFAULT_PROFILE_NAME</span></div>
+<div class="block">Default profile name used when a character has no explicit profile defined.</div>
 <dl class="notes">
 <dt>関連項目:</dt>
 <dd>
@@ -215,6 +223,7 @@ can stay independent from external profile-file naming conventions.</div>
 <h3>FALLBACK_PROFILE_NAME</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">FALLBACK_PROFILE_NAME</span></div>
+<div class="block">Fallback profile name used when no profile could be parsed from the source.</div>
 <dl class="notes">
 <dt>関連項目:</dt>
 <dd>
@@ -274,6 +283,14 @@ valid profiles, a single fallback profile is returned.</div>
 <h3>defaultSkillFallback</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ProfileLoader.ActionProfile.html" title="mechanics.optimization内のクラス">ProfileLoader.ActionProfile</a>&gt;</span>&nbsp;<span class="element-name">defaultSkillFallback</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;profileName)</span></div>
+<div class="block">Builds a minimal fallback profile list containing a single <a href="ProfileAction.html#SKILL"><code>ProfileAction.SKILL</code></a>
+action under the given profile name.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>profileName</code> - profile name to assign to the fallback profile</dd>
+<dt>戻り値:</dt>
+<dd>list with a single fallback profile</dd>
+</dl>
 </div>
 </section>
 </li>

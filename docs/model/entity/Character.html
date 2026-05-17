@@ -131,6 +131,9 @@ loadScripts(document, 'script');</script>
 <li><a href="#getLastSkillTime()" tabindex="0">getLastSkillTime()</a></li>
 <li><a href="#getLastBurstTime()" tabindex="0">getLastBurstTime()</a></li>
 <li><a href="#isLunarCharacter()" tabindex="0">isLunarCharacter()</a></li>
+<li><a href="#getChargeRestoreTimes()" tabindex="0">getChargeRestoreTimes()</a></li>
+<li><a href="#restoreCooldowns(double,double,java.util.List)" tabindex="0">restoreCooldowns(double, double, List)</a></li>
+<li><a href="#restoreCurrentEnergy(double)" tabindex="0">restoreCurrentEnergy(double)</a></li>
 </ol>
 </li>
 </ol>
@@ -257,7 +260,10 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 </div>
 <div class="col-first odd-row-color"><code>protected </code></div>
 <div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(mechanics.data.TalentDataSource)" class="member-name-link">Character</a><wbr>(<a href="../../mechanics/data/TalentDataSource.html" title="mechanics.data内のインタフェース">TalentDataSource</a>&nbsp;talentData)</code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Internal constructor that allows injecting a <a href="../../mechanics/data/TalentDataSource.html" title="mechanics.data内のインタフェース"><code>TalentDataSource</code></a>
+(useful for tests).</div>
+</div>
 </div>
 </section>
 </li>
@@ -274,10 +280,14 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addBuff(mechanics.buff.Buff)" class="member-name-link">addBuff</a><wbr>(<a href="../../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&nbsp;buff)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Adds a buff to this character.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#applyPassive(model.stats.StatsContainer)" class="member-name-link">applyPassive</a><wbr>(<a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;currentStats)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Applies this character's talent-driven passive stat modifications.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#canBurst(double)" class="member-name-link">canBurst</a><wbr>(double&nbsp;currentTime)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
@@ -287,13 +297,19 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#captureSnapshot(double,java.util.List)" class="member-name-link">captureSnapshot</a><wbr>(double&nbsp;currentTime,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;&nbsp;extraBuffs)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Captures and stores a stats snapshot for delayed damage resolution.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#clearBuffs()" class="member-name-link">clearBuffs</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Removes every active buff from this character.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="../../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getActiveBuffs()" class="member-name-link">getActiveBuffs</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the live list of currently active buffs (not a copy).</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="../type/StatType.html" title="model.typeの列挙クラス">StatType</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Integer</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getArtifactRolls()" class="member-name-link">getArtifactRolls</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
@@ -315,113 +331,173 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCharacterId()" class="member-name-link">getCharacterId</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getConstellation()" class="member-name-link">getConstellation</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentEnergy()" class="member-name-link">getCurrentEnergy</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getEffectiveStats(double)" class="member-name-link">getEffectiveStats</a><wbr>(double&nbsp;currentTime)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../type/Element.html" title="model.typeの列挙クラス">Element</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getElement()" class="member-name-link">getElement</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getEnergyCost()" class="member-name-link">getEnergyCost</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLastBurstTime()" class="member-name-link">getLastBurstTime</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getChargeRestoreTimes()" class="member-name-link">getChargeRestoreTimes</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns a copy of the charge restore schedule for snapshot purposes.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getConstellation()" class="member-name-link">getConstellation</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLastSkillTime()" class="member-name-link">getLastSkillTime</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getName()" class="member-name-link">getName</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSkillCD()" class="member-name-link">getSkillCD</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSkillCDRemaining(double)" class="member-name-link">getSkillCDRemaining</a><wbr>(double&nbsp;currentTime)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSnapshot()" class="member-name-link">getSnapshot</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentEnergy()" class="member-name-link">getCurrentEnergy</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getStructuralStats(double)" class="member-name-link">getStructuralStats</a><wbr>(double&nbsp;currentTime)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTalentValue(java.lang.String,double)" class="member-name-link">getTalentValue</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;key,
- double&nbsp;defaultValue)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getEffectiveStats(double)" class="member-name-link">getEffectiveStats</a><wbr>(double&nbsp;currentTime)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the full effective stats including base, weapon, artifacts,
+passives, and all currently active buffs (self and team).</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../type/Element.html" title="model.typeの列挙クラス">Element</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getElement()" class="member-name-link">getElement</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getEnergyCost()" class="member-name-link">getEnergyCost</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLastBurstTime()" class="member-name-link">getLastBurstTime</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTotalEnergyGained()" class="member-name-link">getTotalEnergyGained</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLastSkillTime()" class="member-name-link">getLastSkillTime</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTotalFlatEnergy()" class="member-name-link">getTotalFlatEnergy</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getName()" class="member-name-link">getName</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTotalParticleEnergy()" class="member-name-link">getTotalParticleEnergy</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSkillCD()" class="member-name-link">getSkillCD</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTotalScaledParticleEnergy()" class="member-name-link">getTotalScaledParticleEnergy</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSkillCDRemaining(double)" class="member-name-link">getSkillCDRemaining</a><wbr>(double&nbsp;currentTime)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSnapshot()" class="member-name-link">getSnapshot</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getStructuralStats(double)" class="member-name-link">getStructuralStats</a><wbr>(double&nbsp;currentTime)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns structural stats only: base + weapon + artifacts + self-passive.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTalentValue(java.lang.String,double)" class="member-name-link">getTalentValue</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;key,
+ double&nbsp;defaultValue)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Looks up a talent-table value by key, returning a default when no row
+is configured for this character.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTotalEnergyGained()" class="member-name-link">getTotalEnergyGained</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTotalFlatEnergy()" class="member-name-link">getTotalFlatEnergy</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTotalParticleEnergy()" class="member-name-link">getTotalParticleEnergy</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTotalScaledParticleEnergy()" class="member-name-link">getTotalScaledParticleEnergy</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns total particle energy received after ER scaling.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Weapon.html" title="model.entity内のクラス">Weapon</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getWeapon()" class="member-name-link">getWeapon</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hasBuff(mechanics.buff.BuffId)" class="member-name-link">hasBuff</a><wbr>(<a href="../../mechanics/buff/BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a>&nbsp;id)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Weapon.html" title="model.entity内のクラス">Weapon</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getWeapon()" class="member-name-link">getWeapon</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isLunarCharacter()" class="member-name-link">isLunarCharacter</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#markBurstUsed(double)" class="member-name-link">markBurstUsed</a><wbr>(double&nbsp;currentTime)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hasBuff(mechanics.buff.BuffId)" class="member-name-link">hasBuff</a><wbr>(<a href="../../mechanics/buff/BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a>&nbsp;id)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Tests whether a buff with the given id is currently active.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isLunarCharacter()" class="member-name-link">isLunarCharacter</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Marks whether this character belongs to the custom Lunar archetype
+(Ineffa / Flins / Columbina).</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#markSkillUsed(double)" class="member-name-link">markSkillUsed</a><wbr>(double&nbsp;currentTime)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#markBurstUsed(double)" class="member-name-link">markBurstUsed</a><wbr>(double&nbsp;currentTime)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Records that the burst was just used: zeroes current energy, snapshots
+the per-window energy subtotals, and starts the burst cooldown.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onAction(simulation.action.CharacterActionRequest,simulation.CombatSimulator)" class="member-name-link">onAction</a><wbr>(<a href="../../simulation/action/CharacterActionRequest.html" title="simulation.action内のクラス">CharacterActionRequest</a>&nbsp;request,
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#markSkillUsed(double)" class="member-name-link">markSkillUsed</a><wbr>(double&nbsp;currentTime)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Records that the skill was just used at the given time.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onAction(simulation.action.CharacterActionRequest,simulation.CombatSimulator)" class="member-name-link">onAction</a><wbr>(<a href="../../simulation/action/CharacterActionRequest.html" title="simulation.action内のクラス">CharacterActionRequest</a>&nbsp;request,
  <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#receiveEnergy(double)" class="member-name-link">receiveEnergy</a><wbr>(double&nbsp;amount)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Reacts to an action request issued against this character.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#receiveFlatEnergy(double)" class="member-name-link">receiveFlatEnergy</a><wbr>(double&nbsp;amount)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#receiveEnergy(double)" class="member-name-link">receiveEnergy</a><wbr>(double&nbsp;amount)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Adds a generic energy amount (already ER-scaled if applicable).</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#receiveParticleEnergy(double,double)" class="member-name-link">receiveParticleEnergy</a><wbr>(double&nbsp;baseAmount,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#receiveFlatEnergy(double)" class="member-name-link">receiveFlatEnergy</a><wbr>(double&nbsp;amount)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Adds flat energy (bypasses ER scaling).</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#receiveParticleEnergy(double,double)" class="member-name-link">receiveParticleEnergy</a><wbr>(double&nbsp;baseAmount,
  double&nbsp;er)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#removeBuff(mechanics.buff.BuffId)" class="member-name-link">removeBuff</a><wbr>(<a href="../../mechanics/buff/BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a>&nbsp;id)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Adds particle-based energy, applying the supplied ER multiplier.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resetEnergyStats()" class="member-name-link">resetEnergyStats</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#removeBuff(mechanics.buff.BuffId)" class="member-name-link">removeBuff</a><wbr>(<a href="../../mechanics/buff/BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a>&nbsp;id)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Removes every active buff matching the given identifier.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setArtifactRolls(java.util.Map)" class="member-name-link">setArtifactRolls</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../type/StatType.html" title="model.typeの列挙クラス">StatType</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Integer</a>&gt;&nbsp;rolls)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resetEnergyStats()" class="member-name-link">resetEnergyStats</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Resets all energy accumulators and clears any pending skill charge
+restore timestamps.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setArtifacts(model.entity.ArtifactSet)" class="member-name-link">setArtifacts</a><wbr>(<a href="ArtifactSet.html" title="model.entity内のクラス">ArtifactSet</a>&nbsp;artifact)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#restoreCooldowns(double,double,java.util.List)" class="member-name-link">restoreCooldowns</a><wbr>(double&nbsp;lastSkillTime,
+ double&nbsp;lastBurstTime,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;chargeRestoreTimes)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Restores cooldown state from snapshot values.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setBurstCD(double)" class="member-name-link">setBurstCD</a><wbr>(double&nbsp;cd)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#restoreCurrentEnergy(double)" class="member-name-link">restoreCurrentEnergy</a><wbr>(double&nbsp;energy)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Directly sets current energy without updating totals.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSkillCD(double)" class="member-name-link">setSkillCD</a><wbr>(double&nbsp;cd)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setArtifactRolls(java.util.Map)" class="member-name-link">setArtifactRolls</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../type/StatType.html" title="model.typeの列挙クラス">StatType</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Integer</a>&gt;&nbsp;rolls)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets the optimizer-produced artifact substat roll allocation.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSkillMaxCharges(int)" class="member-name-link">setSkillMaxCharges</a><wbr>(int&nbsp;maxCharges)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setArtifacts(model.entity.ArtifactSet)" class="member-name-link">setArtifacts</a><wbr>(<a href="ArtifactSet.html" title="model.entity内のクラス">ArtifactSet</a>&nbsp;artifact)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Equips a single 4-piece artifact set.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setWeapon(model.entity.Weapon)" class="member-name-link">setWeapon</a><wbr>(<a href="Weapon.html" title="model.entity内のクラス">Weapon</a>&nbsp;weapon)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setBurstCD(double)" class="member-name-link">setBurstCD</a><wbr>(double&nbsp;cd)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets the burst cooldown length.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSkillCD(double)" class="member-name-link">setSkillCD</a><wbr>(double&nbsp;cd)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets the skill cooldown length.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSkillMaxCharges(int)" class="member-name-link">setSkillMaxCharges</a><wbr>(int&nbsp;maxCharges)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets the maximum number of simultaneous skill charges.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setWeapon(model.entity.Weapon)" class="member-name-link">setWeapon</a><wbr>(<a href="Weapon.html" title="model.entity内のクラス">Weapon</a>&nbsp;weapon)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Equips the supplied weapon on this character.</div>
+</div>
 </div>
 </div>
 </div>
@@ -575,6 +651,12 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <h3>Character</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="element-name">Character</span><wbr><span class="parameters">(<a href="../../mechanics/data/TalentDataSource.html" title="mechanics.data内のインタフェース">TalentDataSource</a>&nbsp;talentData)</span></div>
+<div class="block">Internal constructor that allows injecting a <a href="../../mechanics/data/TalentDataSource.html" title="mechanics.data内のインタフェース"><code>TalentDataSource</code></a>
+(useful for tests). Initialises base stats with the KQM defaults.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>talentData</code> - talent value lookup source</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -591,6 +673,10 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <h3>getConstellation</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getConstellation</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>constellation level (0-6)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -599,6 +685,10 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <h3>getName</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">getName</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>character name string used for CSV / log identification</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -607,6 +697,10 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <h3>getCharacterId</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></span>&nbsp;<span class="element-name">getCharacterId</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd><a href="../type/CharacterId.html" title="model.typeの列挙クラス"><code>CharacterId</code></a> of this character</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -615,6 +709,10 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <h3>getBaseStats</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a></span>&nbsp;<span class="element-name">getBaseStats</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>container of base (level-90 + KQM default) stats</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -623,6 +721,10 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <h3>getWeapon</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="Weapon.html" title="model.entity内のクラス">Weapon</a></span>&nbsp;<span class="element-name">getWeapon</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>equipped weapon, or <code>null</code> if none</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -631,6 +733,11 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <h3>setWeapon</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setWeapon</span><wbr><span class="parameters">(<a href="Weapon.html" title="model.entity内のクラス">Weapon</a>&nbsp;weapon)</span></div>
+<div class="block">Equips the supplied weapon on this character.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>weapon</code> - weapon to equip</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -639,6 +746,11 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <h3>setArtifacts</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setArtifacts</span><wbr><span class="parameters">(<a href="ArtifactSet.html" title="model.entity内のクラス">ArtifactSet</a>&nbsp;artifact)</span></div>
+<div class="block">Equips a single 4-piece artifact set.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>artifact</code> - artifact set to equip</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -647,6 +759,10 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <h3>getArtifacts</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ArtifactSet.html" title="model.entity内のクラス">ArtifactSet</a>[]</span>&nbsp;<span class="element-name">getArtifacts</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>currently equipped artifact sets</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -655,6 +771,13 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <h3>applyPassive</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">applyPassive</span><wbr><span class="parameters">(<a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;currentStats)</span></div>
+<div class="block">Applies this character's talent-driven passive stat modifications.
+<p>Called by <a href="StatAssembler.html" title="model.entity内のクラス"><code>StatAssembler</code></a> after base + weapon + artifact stats
+have been merged. Subclasses mutate <code>currentStats</code> in place.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>currentStats</code> - accumulated stats container to mutate</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -663,6 +786,13 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <h3>addBuff</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">addBuff</span><wbr><span class="parameters">(<a href="../../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&nbsp;buff)</span></div>
+<div class="block">Adds a buff to this character. If the buff has no source character set,
+the source is filled in with this character's id (so team-buff lookups
+can resolve correctly).</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>buff</code> - buff to add</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -671,6 +801,11 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <h3>removeBuff</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">removeBuff</span><wbr><span class="parameters">(<a href="../../mechanics/buff/BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a>&nbsp;id)</span></div>
+<div class="block">Removes every active buff matching the given identifier.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>id</code> - buff id to remove</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -679,6 +814,13 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <h3>hasBuff</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">hasBuff</span><wbr><span class="parameters">(<a href="../../mechanics/buff/BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a>&nbsp;id)</span></div>
+<div class="block">Tests whether a buff with the given id is currently active.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>id</code> - buff id to query</dd>
+<dt>戻り値:</dt>
+<dd><code>true</code> if at least one matching buff is active</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -687,6 +829,12 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <h3>getActiveBuffs</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;</span>&nbsp;<span class="element-name">getActiveBuffs</span>()</div>
+<div class="block">Returns the live list of currently active buffs (not a copy).
+Callers must not modify it concurrently with simulation advancement.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>live list of active buffs</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -695,6 +843,7 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <h3>clearBuffs</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">clearBuffs</span>()</div>
+<div class="block">Removes every active buff from this character.</div>
 </div>
 </section>
 </li>
@@ -703,6 +852,15 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <h3>getEffectiveStats</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a></span>&nbsp;<span class="element-name">getEffectiveStats</span><wbr><span class="parameters">(double&nbsp;currentTime)</span></div>
+<div class="block">Returns the full effective stats including base, weapon, artifacts,
+passives, and all currently active buffs (self and team).
+Used for damage calculations.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>currentTime</code> - current simulation time</dd>
+<dt>戻り値:</dt>
+<dd>stats container with all bonuses merged in</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -711,6 +869,15 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <h3>getStructuralStats</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a></span>&nbsp;<span class="element-name">getStructuralStats</span><wbr><span class="parameters">(double&nbsp;currentTime)</span></div>
+<div class="block">Returns structural stats only: base + weapon + artifacts + self-passive.
+Excludes active buffs and team buffs so that team-buff providers can
+query their own stats without producing recursive evaluation cycles.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>currentTime</code> - current simulation time</dd>
+<dt>戻り値:</dt>
+<dd>stats container without active/team buffs</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -720,6 +887,16 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">captureSnapshot</span><wbr><span class="parameters">(double&nbsp;currentTime,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;&nbsp;extraBuffs)</span></div>
+<div class="block">Captures and stores a stats snapshot for delayed damage resolution.
+<p>The captured value is the effective stats at <code>currentTime</code>,
+merged with any not-yet-expired <code>extraBuffs</code> (typically the
+cast-time team buffs the off-field hit should inherit).</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>currentTime</code> - current simulation time</dd>
+<dd><code>extraBuffs</code> - additional buffs to merge into the snapshot;
+                   may be <code>null</code></dd>
+</dl>
 </div>
 </section>
 </li>
@@ -728,6 +905,10 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <h3>getSnapshot</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a></span>&nbsp;<span class="element-name">getSnapshot</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>last captured stats snapshot (empty container if none)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -737,6 +918,15 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">onAction</span><wbr><span class="parameters">(<a href="../../simulation/action/CharacterActionRequest.html" title="simulation.action内のクラス">CharacterActionRequest</a>&nbsp;request,
  <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</span></div>
+<div class="block">Reacts to an action request issued against this character.
+Default implementation merely logs the unhandled request; subclasses
+override to implement character-specific responses (e.g. Xingqiu
+spawning Rain Sword orbits on switch-in).</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>request</code> - the incoming action request</dd>
+<dd><code>sim</code> - active combat simulator</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -745,6 +935,10 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <h3>getElement</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../type/Element.html" title="model.typeの列挙クラス">Element</a></span>&nbsp;<span class="element-name">getElement</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>primary elemental type of this character</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -754,6 +948,15 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getTalentValue</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;key,
  double&nbsp;defaultValue)</span></div>
+<div class="block">Looks up a talent-table value by key, returning a default when no row
+is configured for this character.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>key</code> - talent key (e.g. <code>"SKILL_DMG_RATIO"</code>)</dd>
+<dd><code>defaultValue</code> - value to return when missing</dd>
+<dt>戻り値:</dt>
+<dd>looked-up value or <code>defaultValue</code></dd>
+</dl>
 </div>
 </section>
 </li>
@@ -762,6 +965,11 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <h3>receiveEnergy</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">receiveEnergy</span><wbr><span class="parameters">(double&nbsp;amount)</span></div>
+<div class="block">Adds a generic energy amount (already ER-scaled if applicable).</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>amount</code> - energy to add</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -770,6 +978,10 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <h3>getCurrentEnergy</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getCurrentEnergy</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>current energy on this character</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -779,6 +991,12 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">receiveParticleEnergy</span><wbr><span class="parameters">(double&nbsp;baseAmount,
  double&nbsp;er)</span></div>
+<div class="block">Adds particle-based energy, applying the supplied ER multiplier.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>baseAmount</code> - unscaled particle value</dd>
+<dd><code>er</code> - Energy Recharge multiplier</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -787,6 +1005,11 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <h3>receiveFlatEnergy</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">receiveFlatEnergy</span><wbr><span class="parameters">(double&nbsp;amount)</span></div>
+<div class="block">Adds flat energy (bypasses ER scaling).</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>amount</code> - flat energy amount</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -795,6 +1018,10 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <h3>getTotalParticleEnergy</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getTotalParticleEnergy</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>cumulative particle energy received before ER scaling</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -817,6 +1044,10 @@ Used by the capability profiler to measure a character's energy generation score
 <h3>getTotalFlatEnergy</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getTotalFlatEnergy</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>cumulative flat energy received</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -825,6 +1056,10 @@ Used by the capability profiler to measure a character's energy generation score
 <h3>getTotalEnergyGained</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getTotalEnergyGained</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>cumulative energy actually added to the energy bar</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -833,6 +1068,8 @@ Used by the capability profiler to measure a character's energy generation score
 <h3>resetEnergyStats</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">resetEnergyStats</span>()</div>
+<div class="block">Resets all energy accumulators and clears any pending skill charge
+restore timestamps. Called between simulation episodes.</div>
 </div>
 </section>
 </li>
@@ -841,6 +1078,11 @@ Used by the capability profiler to measure a character's energy generation score
 <h3>setArtifactRolls</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setArtifactRolls</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../type/StatType.html" title="model.typeの列挙クラス">StatType</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Integer</a>&gt;&nbsp;rolls)</span></div>
+<div class="block">Sets the optimizer-produced artifact substat roll allocation.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>rolls</code> - substat -&gt; roll count map</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -849,6 +1091,10 @@ Used by the capability profiler to measure a character's energy generation score
 <h3>getArtifactRolls</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../type/StatType.html" title="model.typeの列挙クラス">StatType</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Integer</a>&gt;</span>&nbsp;<span class="element-name">getArtifactRolls</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>substat-to-roll-count map for this character</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -857,6 +1103,11 @@ Used by the capability profiler to measure a character's energy generation score
 <h3>setSkillCD</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setSkillCD</span><wbr><span class="parameters">(double&nbsp;cd)</span></div>
+<div class="block">Sets the skill cooldown length.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>cd</code> - cooldown in seconds</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -865,6 +1116,11 @@ Used by the capability profiler to measure a character's energy generation score
 <h3>setBurstCD</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setBurstCD</span><wbr><span class="parameters">(double&nbsp;cd)</span></div>
+<div class="block">Sets the burst cooldown length.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>cd</code> - cooldown in seconds</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -873,6 +1129,11 @@ Used by the capability profiler to measure a character's energy generation score
 <h3>setSkillMaxCharges</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setSkillMaxCharges</span><wbr><span class="parameters">(int&nbsp;maxCharges)</span></div>
+<div class="block">Sets the maximum number of simultaneous skill charges.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>maxCharges</code> - maximum stored skill charges</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -881,6 +1142,12 @@ Used by the capability profiler to measure a character's energy generation score
 <h3>canSkill</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">canSkill</span><wbr><span class="parameters">(double&nbsp;currentTime)</span></div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>currentTime</code> - current simulation time</dd>
+<dt>戻り値:</dt>
+<dd><code>true</code> if a skill charge is available</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -889,6 +1156,12 @@ Used by the capability profiler to measure a character's energy generation score
 <h3>canBurst</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">canBurst</span><wbr><span class="parameters">(double&nbsp;currentTime)</span></div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>currentTime</code> - current simulation time</dd>
+<dt>戻り値:</dt>
+<dd><code>true</code> if burst CD has elapsed and energy is sufficient</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -897,6 +1170,12 @@ Used by the capability profiler to measure a character's energy generation score
 <h3>getSkillCDRemaining</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getSkillCDRemaining</span><wbr><span class="parameters">(double&nbsp;currentTime)</span></div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>currentTime</code> - current simulation time</dd>
+<dt>戻り値:</dt>
+<dd>remaining skill cooldown in seconds (0 if ready)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -905,6 +1184,12 @@ Used by the capability profiler to measure a character's energy generation score
 <h3>getBurstCDRemaining</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getBurstCDRemaining</span><wbr><span class="parameters">(double&nbsp;currentTime)</span></div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>currentTime</code> - current simulation time</dd>
+<dt>戻り値:</dt>
+<dd>remaining burst cooldown in seconds (0 if ready)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -913,6 +1198,11 @@ Used by the capability profiler to measure a character's energy generation score
 <h3>markSkillUsed</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">markSkillUsed</span><wbr><span class="parameters">(double&nbsp;currentTime)</span></div>
+<div class="block">Records that the skill was just used at the given time.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>currentTime</code> - current simulation time</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -921,6 +1211,12 @@ Used by the capability profiler to measure a character's energy generation score
 <h3>markBurstUsed</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">markBurstUsed</span><wbr><span class="parameters">(double&nbsp;currentTime)</span></div>
+<div class="block">Records that the burst was just used: zeroes current energy, snapshots
+the per-window energy subtotals, and starts the burst cooldown.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>currentTime</code> - current simulation time</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -929,6 +1225,11 @@ Used by the capability profiler to measure a character's energy generation score
 <h3>getBurstEnergyWindows</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;double[]&gt;</span>&nbsp;<span class="element-name">getBurstEnergyWindows</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>list of per-burst-window energy subtotals
+        (<code>[particle, flat, burstCost]</code> per entry)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -937,6 +1238,10 @@ Used by the capability profiler to measure a character's energy generation score
 <h3>getEnergyCost</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public abstract</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getEnergyCost</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>burst energy cost (the value the bar fills toward)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -945,6 +1250,10 @@ Used by the capability profiler to measure a character's energy generation score
 <h3>getSkillCD</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getSkillCD</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>configured skill cooldown length</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -953,6 +1262,10 @@ Used by the capability profiler to measure a character's energy generation score
 <h3>getBurstCD</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getBurstCD</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>configured burst cooldown length</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -961,6 +1274,10 @@ Used by the capability profiler to measure a character's energy generation score
 <h3>getLastSkillTime</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getLastSkillTime</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>last skill use timestamp (large negative if never used)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -969,6 +1286,10 @@ Used by the capability profiler to measure a character's energy generation score
 <h3>getLastBurstTime</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getLastBurstTime</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>last burst use timestamp (large negative if never used)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -977,6 +1298,58 @@ Used by the capability profiler to measure a character's energy generation score
 <h3>isLunarCharacter</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isLunarCharacter</span>()</div>
+<div class="block">Marks whether this character belongs to the custom Lunar archetype
+(Ineffa / Flins / Columbina). Lunar characters receive synergy buffs
+from non-Lunar teammates and are subject to the special-case branches
+in <code>DamageCalculator</code>.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd><code>true</code> if this character is a Lunar character;
+        default implementation returns <code>false</code></dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getChargeRestoreTimes()">
+<h3>getChargeRestoreTimes</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</span>&nbsp;<span class="element-name">getChargeRestoreTimes</span>()</div>
+<div class="block">Returns a copy of the charge restore schedule for snapshot purposes.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>copy of charge restore times</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="restoreCooldowns(double,double,java.util.List)">
+<h3>restoreCooldowns</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">restoreCooldowns</span><wbr><span class="parameters">(double&nbsp;lastSkillTime,
+ double&nbsp;lastBurstTime,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;chargeRestoreTimes)</span></div>
+<div class="block">Restores cooldown state from snapshot values.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>lastSkillTime</code> - last skill use time</dd>
+<dd><code>lastBurstTime</code> - last burst use time</dd>
+<dd><code>chargeRestoreTimes</code> - charge restore schedule</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="restoreCurrentEnergy(double)">
+<h3>restoreCurrentEnergy</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">restoreCurrentEnergy</span><wbr><span class="parameters">(double&nbsp;energy)</span></div>
+<div class="block">Directly sets current energy without updating totals. Used only for snapshot restore.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>energy</code> - energy value to set</dd>
+</dl>
 </div>
 </section>
 </li>

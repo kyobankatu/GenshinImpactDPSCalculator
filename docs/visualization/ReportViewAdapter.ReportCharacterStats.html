@@ -100,6 +100,8 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="type-signature"><span class="modifiers">public static final class </span><span class="element-name type-name-label">ReportViewAdapter.ReportCharacterStats</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Object</a></span></div>
+<div class="block">Pre-computed display-ready stat values (e.g. ATK with bonuses, crit
+percentages) for a single character at one snapshot.</div>
 </div>
 </section>
 <section class="summary">
@@ -115,31 +117,49 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color"><code>final double</code></div>
 <div class="col-second even-row-color"><code><a href="#atk" class="member-name-link">atk</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Effective ATK after percent and flat bonuses.</div>
+</div>
 <div class="col-first odd-row-color"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;</code></div>
 <div class="col-second odd-row-color"><code><a href="#buffs" class="member-name-link">buffs</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Active buff display names at the snapshot time.</div>
+</div>
 <div class="col-first even-row-color"><code>final double</code></div>
 <div class="col-second even-row-color"><code><a href="#cd" class="member-name-link">cd</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Crit DMG expressed as a percentage value (e.g. 180.0).</div>
+</div>
 <div class="col-first odd-row-color"><code>final double</code></div>
 <div class="col-second odd-row-color"><code><a href="#cr" class="member-name-link">cr</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Crit Rate expressed as a percentage value (e.g. 65.0).</div>
+</div>
 <div class="col-first even-row-color"><code>final double</code></div>
 <div class="col-second even-row-color"><code><a href="#def" class="member-name-link">def</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Effective DEF after percent and flat bonuses.</div>
+</div>
 <div class="col-first odd-row-color"><code>final double</code></div>
 <div class="col-second odd-row-color"><code><a href="#dmg" class="member-name-link">dmg</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Strongest elemental DMG% bonus across all elements, as a percent.</div>
+</div>
 <div class="col-first even-row-color"><code>final double</code></div>
 <div class="col-second even-row-color"><code><a href="#em" class="member-name-link">em</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Elemental Mastery as a raw value.</div>
+</div>
 <div class="col-first odd-row-color"><code>final double</code></div>
 <div class="col-second odd-row-color"><code><a href="#er" class="member-name-link">er</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Energy Recharge expressed as a percentage value (e.g. 150.0).</div>
+</div>
 <div class="col-first even-row-color"><code>final double</code></div>
 <div class="col-second even-row-color"><code><a href="#hp" class="member-name-link">hp</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Effective HP after percent and flat bonuses.</div>
+</div>
 </div>
 </section>
 </li>
@@ -153,7 +173,9 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">説明</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.util.Map,java.util.List)" class="member-name-link">ReportCharacterStats</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/StatType.html" title="model.typeの列挙クラス">StatType</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;stats,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&nbsp;buffs)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Reduces a raw stat map and buff list into report-ready values.</div>
+</div>
 </div>
 </section>
 </li>
@@ -193,6 +215,7 @@ loadScripts(document, 'script');</script>
 <h3>atk</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">atk</span></div>
+<div class="block">Effective ATK after percent and flat bonuses.</div>
 </div>
 </section>
 </li>
@@ -201,6 +224,7 @@ loadScripts(document, 'script');</script>
 <h3>hp</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">hp</span></div>
+<div class="block">Effective HP after percent and flat bonuses.</div>
 </div>
 </section>
 </li>
@@ -209,6 +233,7 @@ loadScripts(document, 'script');</script>
 <h3>def</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">def</span></div>
+<div class="block">Effective DEF after percent and flat bonuses.</div>
 </div>
 </section>
 </li>
@@ -217,6 +242,7 @@ loadScripts(document, 'script');</script>
 <h3>cr</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">cr</span></div>
+<div class="block">Crit Rate expressed as a percentage value (e.g. 65.0).</div>
 </div>
 </section>
 </li>
@@ -225,6 +251,7 @@ loadScripts(document, 'script');</script>
 <h3>cd</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">cd</span></div>
+<div class="block">Crit DMG expressed as a percentage value (e.g. 180.0).</div>
 </div>
 </section>
 </li>
@@ -233,6 +260,7 @@ loadScripts(document, 'script');</script>
 <h3>er</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">er</span></div>
+<div class="block">Energy Recharge expressed as a percentage value (e.g. 150.0).</div>
 </div>
 </section>
 </li>
@@ -241,6 +269,7 @@ loadScripts(document, 'script');</script>
 <h3>em</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">em</span></div>
+<div class="block">Elemental Mastery as a raw value.</div>
 </div>
 </section>
 </li>
@@ -249,6 +278,7 @@ loadScripts(document, 'script');</script>
 <h3>dmg</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">dmg</span></div>
+<div class="block">Strongest elemental DMG% bonus across all elements, as a percent.</div>
 </div>
 </section>
 </li>
@@ -257,6 +287,7 @@ loadScripts(document, 'script');</script>
 <h3>buffs</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;</span>&nbsp;<span class="element-name">buffs</span></div>
+<div class="block">Active buff display names at the snapshot time.</div>
 </div>
 </section>
 </li>
@@ -274,6 +305,12 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ReportCharacterStats</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/StatType.html" title="model.typeの列挙クラス">StatType</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;stats,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&nbsp;buffs)</span></div>
+<div class="block">Reduces a raw stat map and buff list into report-ready values.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>stats</code> - raw stat map keyed by <a href="../model/type/StatType.html" title="model.typeの列挙クラス"><code>StatType</code></a>; may be <code>null</code></dd>
+<dd><code>buffs</code> - active buff display names for the same snapshot</dd>
+</dl>
 </div>
 </section>
 </li>

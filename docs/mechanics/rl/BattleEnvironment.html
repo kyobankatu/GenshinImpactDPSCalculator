@@ -63,7 +63,9 @@ loadScripts(document, 'script');</script>
 <li><a href="#episodeFactory" tabindex="0">episodeFactory</a></li>
 <li><a href="#actionSpace" tabindex="0">actionSpace</a></li>
 <li><a href="#observationEncoder" tabindex="0">observationEncoder</a></li>
+<li><a href="#privilegedStateEncoder" tabindex="0">privilegedStateEncoder</a></li>
 <li><a href="#rewardFunction" tabindex="0">rewardFunction</a></li>
+<li><a href="#roleAlignmentCalculator" tabindex="0">roleAlignmentCalculator</a></li>
 <li><a href="#simulator" tabindex="0">simulator</a></li>
 <li><a href="#config" tabindex="0">config</a></li>
 <li><a href="#currentPartyId" tabindex="0">currentPartyId</a></li>
@@ -72,13 +74,25 @@ loadScripts(document, 'script');</script>
 <li><a href="#previousActionId" tabindex="0">previousActionId</a></li>
 <li><a href="#stepCount" tabindex="0">stepCount</a></li>
 <li><a href="#generateReportOnDone" tabindex="0">generateReportOnDone</a></li>
+<li><a href="#statsRecorder" tabindex="0">statsRecorder</a></li>
 <li><a href="#observationBuffer" tabindex="0">observationBuffer</a></li>
+<li><a href="#privilegedObservationBuffer" tabindex="0">privilegedObservationBuffer</a></li>
 <li><a href="#actionMaskBuffer" tabindex="0">actionMaskBuffer</a></li>
 <li><a href="#preActionMaskBuffer" tabindex="0">preActionMaskBuffer</a></li>
+<li><a href="#slotLastActiveTime" tabindex="0">slotLastActiveTime</a></li>
+<li><a href="#slotOnFieldTime" tabindex="0">slotOnFieldTime</a></li>
+<li><a href="#slotOffFieldDamage" tabindex="0">slotOffFieldDamage</a></li>
+<li><a href="#slotDamageSnapshots" tabindex="0">slotDamageSnapshots</a></li>
+<li><a href="#slotStintTotalSeconds" tabindex="0">slotStintTotalSeconds</a></li>
+<li><a href="#slotStintCounts" tabindex="0">slotStintCounts</a></li>
+<li><a href="#slotSwapInCounts" tabindex="0">slotSwapInCounts</a></li>
+<li><a href="#currentStintSlot" tabindex="0">currentStintSlot</a></li>
+<li><a href="#currentStintStartTime" tabindex="0">currentStintStartTime</a></li>
 <li><a href="#STEP_CALLS" tabindex="0">STEP_CALLS</a></li>
 <li><a href="#STEP_NANOS" tabindex="0">STEP_NANOS</a></li>
 <li><a href="#EXECUTE_NANOS" tabindex="0">EXECUTE_NANOS</a></li>
 <li><a href="#ENCODE_NANOS" tabindex="0">ENCODE_NANOS</a></li>
+<li><a href="#PRIVILEGED_ENCODE_NANOS" tabindex="0">PRIVILEGED_ENCODE_NANOS</a></li>
 <li><a href="#MASK_NANOS" tabindex="0">MASK_NANOS</a></li>
 <li><a href="#RESET_CALLS" tabindex="0">RESET_CALLS</a></li>
 <li><a href="#RESET_NANOS" tabindex="0">RESET_NANOS</a></li>
@@ -88,8 +102,8 @@ loadScripts(document, 'script');</script>
 <ol class="toc-list">
 <li><a href="#%3Cinit%3E(java.util.function.Supplier,mechanics.rl.EpisodeConfig)" tabindex="0">BattleEnvironment(Supplier, EpisodeConfig)</a></li>
 <li><a href="#%3Cinit%3E(mechanics.rl.RLEpisodeFactory)" tabindex="0">BattleEnvironment(RLEpisodeFactory)</a></li>
-<li><a href="#%3Cinit%3E(java.util.function.Supplier,mechanics.rl.EpisodeConfig,mechanics.rl.ActionSpace,mechanics.rl.ObservationEncoder,mechanics.rl.RewardFunction)" tabindex="0">BattleEnvironment(Supplier, EpisodeConfig, ActionSpace, ObservationEncoder, RewardFunction)</a></li>
-<li><a href="#%3Cinit%3E(mechanics.rl.RLEpisodeFactory,mechanics.rl.ActionSpace,mechanics.rl.ObservationEncoder,mechanics.rl.RewardFunction)" tabindex="0">BattleEnvironment(RLEpisodeFactory, ActionSpace, ObservationEncoder, RewardFunction)</a></li>
+<li><a href="#%3Cinit%3E(java.util.function.Supplier,mechanics.rl.EpisodeConfig,mechanics.rl.ActionSpace,mechanics.rl.ObservationEncoder,mechanics.rl.PrivilegedStateEncoder,mechanics.rl.RewardFunction)" tabindex="0">BattleEnvironment(Supplier, EpisodeConfig, ActionSpace, ObservationEncoder, PrivilegedStateEncoder, RewardFunction)</a></li>
+<li><a href="#%3Cinit%3E(mechanics.rl.RLEpisodeFactory,mechanics.rl.ActionSpace,mechanics.rl.ObservationEncoder,mechanics.rl.PrivilegedStateEncoder,mechanics.rl.RewardFunction)" tabindex="0">BattleEnvironment(RLEpisodeFactory, ActionSpace, ObservationEncoder, PrivilegedStateEncoder, RewardFunction)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">メソッドの詳細</a>
@@ -97,6 +111,17 @@ loadScripts(document, 'script');</script>
 <li><a href="#reset(boolean)" tabindex="0">reset(boolean)</a></li>
 <li><a href="#reset(boolean,int)" tabindex="0">reset(boolean, int)</a></li>
 <li><a href="#step(int)" tabindex="0">step(int)</a></li>
+<li><a href="#getLastSwapTime()" tabindex="0">getLastSwapTime()</a></li>
+<li><a href="#saveSnapshot()" tabindex="0">saveSnapshot()</a></li>
+<li><a href="#saveBranchState()" tabindex="0">saveBranchState()</a></li>
+<li><a href="#branchRolloutMean(simulation.SimulatorSnapshot,mechanics.rl.BattleEnvironment.BranchStateSnapshot,int,int,int,double)" tabindex="0">branchRolloutMean(SimulatorSnapshot, BattleEnvironment.BranchStateSnapshot, int, int, int, double)</a></li>
+<li><a href="#branchRolloutMultiAction(simulation.SimulatorSnapshot,mechanics.rl.BattleEnvironment.BranchStateSnapshot,int,int,double)" tabindex="0">branchRolloutMultiAction(SimulatorSnapshot, BattleEnvironment.BranchStateSnapshot, int, int, double)</a></li>
+<li><a href="#restoreBranchState(mechanics.rl.BattleEnvironment.BranchStateSnapshot)" tabindex="0">restoreBranchState(BattleEnvironment.BranchStateSnapshot)</a></li>
+<li><a href="#updateDamageRoleMetrics(int)" tabindex="0">updateDamageRoleMetrics(int)</a></li>
+<li><a href="#updateStintTracking(int)" tabindex="0">updateStintTracking(int)</a></li>
+<li><a href="#finalizeCurrentStint()" tabindex="0">finalizeCurrentStint()</a></li>
+<li><a href="#buildEpisodeRoleSummary()" tabindex="0">buildEpisodeRoleSummary()</a></li>
+<li><a href="#sampleRandomValidAction(double%5B%5D)" tabindex="0">sampleRandomValidAction(double[])</a></li>
 <li><a href="#getSimulator()" tabindex="0">getSimulator()</a></li>
 <li><a href="#getStepCount()" tabindex="0">getStepCount()</a></li>
 <li><a href="#getActionSpace()" tabindex="0">getActionSpace()</a></li>
@@ -107,6 +132,8 @@ loadScripts(document, 'script');</script>
 <li><a href="#ensureReset()" tabindex="0">ensureReset()</a></li>
 <li><a href="#buildPartyReportFileName(java.lang.String)" tabindex="0">buildPartyReportFileName(String)</a></li>
 <li><a href="#fillObservationBuffer()" tabindex="0">fillObservationBuffer()</a></li>
+<li><a href="#findActiveSlot()" tabindex="0">findActiveSlot()</a></li>
+<li><a href="#fillPrivilegedObservationBuffer()" tabindex="0">fillPrivilegedObservationBuffer()</a></li>
 <li><a href="#fillActionMaskBuffer()" tabindex="0">fillActionMaskBuffer()</a></li>
 <li><a href="#fillPreActionMaskBuffer()" tabindex="0">fillPreActionMaskBuffer()</a></li>
 <li><a href="#timingSnapshot()" tabindex="0">timingSnapshot()</a></li>
@@ -142,13 +169,16 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-second">クラス</div>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color"><code>static class&nbsp;</code></div>
-<div class="col-second even-row-color"><code><a href="BattleEnvironment.ResetResult.html" class="type-name-link" title="mechanics.rl内のクラス">BattleEnvironment.ResetResult</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-second even-row-color"><code><a href="BattleEnvironment.BranchStateSnapshot.html" class="type-name-link" title="mechanics.rl内のクラス">BattleEnvironment.BranchStateSnapshot</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>static class&nbsp;</code></div>
+<div class="col-second odd-row-color"><code><a href="BattleEnvironment.ResetResult.html" class="type-name-link" title="mechanics.rl内のクラス">BattleEnvironment.ResetResult</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Reset return values.</div>
 </div>
-<div class="col-first odd-row-color"><code>static class&nbsp;</code></div>
-<div class="col-second odd-row-color"><code><a href="BattleEnvironment.TimingSnapshot.html" class="type-name-link" title="mechanics.rl内のクラス">BattleEnvironment.TimingSnapshot</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>static class&nbsp;</code></div>
+<div class="col-second even-row-color"><code><a href="BattleEnvironment.TimingSnapshot.html" class="type-name-link" title="mechanics.rl内のクラス">BattleEnvironment.TimingSnapshot</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -175,6 +205,12 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code>private <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
 <div class="col-second even-row-color"><code><a href="#currentPartyName" class="member-name-link">currentPartyName</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private int</code></div>
+<div class="col-second odd-row-color"><code><a href="#currentStintSlot" class="member-name-link">currentStintSlot</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private double</code></div>
+<div class="col-second even-row-color"><code><a href="#currentStintStartTime" class="member-name-link">currentStintStartTime</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code>private static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/atomic/LongAdder.html" title="java.util.concurrent.atomic内のクラスまたはインタフェース" class="external-link">LongAdder</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#ENCODE_NANOS" class="member-name-link">ENCODE_NANOS</a></code></div>
@@ -207,16 +243,52 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color"><code><a href="#previousActionId" class="member-name-link">previousActionId</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code>private static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/atomic/LongAdder.html" title="java.util.concurrent.atomic内のクラスまたはインタフェース" class="external-link">LongAdder</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#RESET_CALLS" class="member-name-link">RESET_CALLS</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#PRIVILEGED_ENCODE_NANOS" class="member-name-link">PRIVILEGED_ENCODE_NANOS</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private final double[]</code></div>
+<div class="col-second even-row-color"><code><a href="#privilegedObservationBuffer" class="member-name-link">privilegedObservationBuffer</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private final <a href="PrivilegedStateEncoder.html" title="mechanics.rl内のクラス">PrivilegedStateEncoder</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#privilegedStateEncoder" class="member-name-link">privilegedStateEncoder</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code>private static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/atomic/LongAdder.html" title="java.util.concurrent.atomic内のクラスまたはインタフェース" class="external-link">LongAdder</a></code></div>
-<div class="col-second even-row-color"><code><a href="#RESET_NANOS" class="member-name-link">RESET_NANOS</a></code></div>
+<div class="col-second even-row-color"><code><a href="#RESET_CALLS" class="member-name-link">RESET_CALLS</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>private final <a href="RewardFunction.html" title="mechanics.rl内のクラス">RewardFunction</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#rewardFunction" class="member-name-link">rewardFunction</a></code></div>
+<div class="col-first odd-row-color"><code>private static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/atomic/LongAdder.html" title="java.util.concurrent.atomic内のクラスまたはインタフェース" class="external-link">LongAdder</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#RESET_NANOS" class="member-name-link">RESET_NANOS</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private final <a href="RewardFunction.html" title="mechanics.rl内のクラス">RewardFunction</a></code></div>
+<div class="col-second even-row-color"><code><a href="#rewardFunction" class="member-name-link">rewardFunction</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private final <a href="RoleAlignmentCalculator.html" title="mechanics.rl内のクラス">RoleAlignmentCalculator</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#roleAlignmentCalculator" class="member-name-link">roleAlignmentCalculator</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code>private <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a></code></div>
 <div class="col-second even-row-color"><code><a href="#simulator" class="member-name-link">simulator</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private final double[]</code></div>
+<div class="col-second odd-row-color"><code><a href="#slotDamageSnapshots" class="member-name-link">slotDamageSnapshots</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private final double[]</code></div>
+<div class="col-second even-row-color"><code><a href="#slotLastActiveTime" class="member-name-link">slotLastActiveTime</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private final double[]</code></div>
+<div class="col-second odd-row-color"><code><a href="#slotOffFieldDamage" class="member-name-link">slotOffFieldDamage</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private final double[]</code></div>
+<div class="col-second even-row-color"><code><a href="#slotOnFieldTime" class="member-name-link">slotOnFieldTime</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private final int[]</code></div>
+<div class="col-second odd-row-color"><code><a href="#slotStintCounts" class="member-name-link">slotStintCounts</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private final double[]</code></div>
+<div class="col-second even-row-color"><code><a href="#slotStintTotalSeconds" class="member-name-link">slotStintTotalSeconds</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private final int[]</code></div>
+<div class="col-second odd-row-color"><code><a href="#slotSwapInCounts" class="member-name-link">slotSwapInCounts</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private <a href="../analysis/StatsRecorder.html" title="mechanics.analysis内のクラス">StatsRecorder</a></code></div>
+<div class="col-second even-row-color"><code><a href="#statsRecorder" class="member-name-link">statsRecorder</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code>private static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/atomic/LongAdder.html" title="java.util.concurrent.atomic内のクラスまたはインタフェース" class="external-link">LongAdder</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#STEP_CALLS" class="member-name-link">STEP_CALLS</a></code></div>
@@ -240,20 +312,30 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">説明</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.util.function.Supplier,mechanics.rl.EpisodeConfig)" class="member-name-link">BattleEnvironment</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="java.util.function内のクラスまたはインタフェース" class="external-link">Supplier</a>&lt;<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&gt;&nbsp;simulatorFactory,
  <a href="EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
-<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(java.util.function.Supplier,mechanics.rl.EpisodeConfig,mechanics.rl.ActionSpace,mechanics.rl.ObservationEncoder,mechanics.rl.RewardFunction)" class="member-name-link">BattleEnvironment</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="java.util.function内のクラスまたはインタフェース" class="external-link">Supplier</a>&lt;<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&gt;&nbsp;simulatorFactory,
+<div class="col-last even-row-color">
+<div class="block">Constructs a single-party environment with default helper components.</div>
+</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(java.util.function.Supplier,mechanics.rl.EpisodeConfig,mechanics.rl.ActionSpace,mechanics.rl.ObservationEncoder,mechanics.rl.PrivilegedStateEncoder,mechanics.rl.RewardFunction)" class="member-name-link">BattleEnvironment</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="java.util.function内のクラスまたはインタフェース" class="external-link">Supplier</a>&lt;<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&gt;&nbsp;simulatorFactory,
  <a href="EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config,
  <a href="ActionSpace.html" title="mechanics.rl内のクラス">ActionSpace</a>&nbsp;actionSpace,
  <a href="ObservationEncoder.html" title="mechanics.rl内のクラス">ObservationEncoder</a>&nbsp;observationEncoder,
+ <a href="PrivilegedStateEncoder.html" title="mechanics.rl内のクラス">PrivilegedStateEncoder</a>&nbsp;privilegedStateEncoder,
  <a href="RewardFunction.html" title="mechanics.rl内のクラス">RewardFunction</a>&nbsp;rewardFunction)</code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Constructs a single-party environment with caller-supplied helpers.</div>
+</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(mechanics.rl.RLEpisodeFactory)" class="member-name-link">BattleEnvironment</a><wbr>(<a href="RLEpisodeFactory.html" title="mechanics.rl内のインタフェース">RLEpisodeFactory</a>&nbsp;episodeFactory)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
-<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(mechanics.rl.RLEpisodeFactory,mechanics.rl.ActionSpace,mechanics.rl.ObservationEncoder,mechanics.rl.RewardFunction)" class="member-name-link">BattleEnvironment</a><wbr>(<a href="RLEpisodeFactory.html" title="mechanics.rl内のインタフェース">RLEpisodeFactory</a>&nbsp;episodeFactory,
+<div class="col-last even-row-color">
+<div class="block">Constructs an environment driven by the supplied episode factory with default helpers.</div>
+</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(mechanics.rl.RLEpisodeFactory,mechanics.rl.ActionSpace,mechanics.rl.ObservationEncoder,mechanics.rl.PrivilegedStateEncoder,mechanics.rl.RewardFunction)" class="member-name-link">BattleEnvironment</a><wbr>(<a href="RLEpisodeFactory.html" title="mechanics.rl内のインタフェース">RLEpisodeFactory</a>&nbsp;episodeFactory,
  <a href="ActionSpace.html" title="mechanics.rl内のクラス">ActionSpace</a>&nbsp;actionSpace,
  <a href="ObservationEncoder.html" title="mechanics.rl内のクラス">ObservationEncoder</a>&nbsp;observationEncoder,
+ <a href="PrivilegedStateEncoder.html" title="mechanics.rl内のクラス">PrivilegedStateEncoder</a>&nbsp;privilegedStateEncoder,
  <a href="RewardFunction.html" title="mechanics.rl内のクラス">RewardFunction</a>&nbsp;rewardFunction)</code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Constructs an environment with explicit factory and helper components.</div>
+</div>
 </div>
 </section>
 </li>
@@ -268,23 +350,55 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">修飾子とタイプ</div>
 <div class="table-header col-second">メソッド</div>
 <div class="table-header col-last">説明</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#buildPartyReportFileName(java.lang.String)" class="member-name-link">buildPartyReportFileName</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;partyName)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#branchRolloutMean(simulation.SimulatorSnapshot,mechanics.rl.BattleEnvironment.BranchStateSnapshot,int,int,int,double)" class="member-name-link">branchRolloutMean</a><wbr>(<a href="../../simulation/SimulatorSnapshot.html" title="simulation内のクラス">SimulatorSnapshot</a>&nbsp;snap,
+ <a href="BattleEnvironment.BranchStateSnapshot.html" title="mechanics.rl内のクラス">BattleEnvironment.BranchStateSnapshot</a>&nbsp;branchState,
+ int&nbsp;firstAction,
+ int&nbsp;K,
+ int&nbsp;H,
+ double&nbsp;gamma)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Runs K independent Monte Carlo rollouts from a snapshot and returns their mean discounted return.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double[]</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#branchRolloutMultiAction(simulation.SimulatorSnapshot,mechanics.rl.BattleEnvironment.BranchStateSnapshot,int,int,double)" class="member-name-link">branchRolloutMultiAction</a><wbr>(<a href="../../simulation/SimulatorSnapshot.html" title="simulation内のクラス">SimulatorSnapshot</a>&nbsp;snap,
+ <a href="BattleEnvironment.BranchStateSnapshot.html" title="mechanics.rl内のクラス">BattleEnvironment.BranchStateSnapshot</a>&nbsp;branchState,
+ int&nbsp;K,
+ int&nbsp;H,
+ double&nbsp;gamma)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Evaluates Q_MC(s, a) for every action in the action space starting from
+the given snapshot.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="EpisodeRoleSummary.html" title="mechanics.rl内のクラス">EpisodeRoleSummary</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#buildEpisodeRoleSummary()" class="member-name-link">buildEpisodeRoleSummary</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#ensureReset()" class="member-name-link">ensureReset</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#buildPartyReportFileName(java.lang.String)" class="member-name-link">buildPartyReportFileName</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;partyName)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#execute(int)" class="member-name-link">execute</a><wbr>(int&nbsp;actionId)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#ensureReset()" class="member-name-link">ensureReset</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#fillActionMaskBuffer()" class="member-name-link">fillActionMaskBuffer</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#execute(int)" class="member-name-link">execute</a><wbr>(int&nbsp;actionId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#fillObservationBuffer()" class="member-name-link">fillObservationBuffer</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#fillActionMaskBuffer()" class="member-name-link">fillActionMaskBuffer</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#fillPreActionMaskBuffer()" class="member-name-link">fillPreActionMaskBuffer</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#fillObservationBuffer()" class="member-name-link">fillObservationBuffer</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#fillPreActionMaskBuffer()" class="member-name-link">fillPreActionMaskBuffer</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#fillPrivilegedObservationBuffer()" class="member-name-link">fillPrivilegedObservationBuffer</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#finalizeCurrentStint()" class="member-name-link">finalizeCurrentStint</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#findActiveSlot()" class="member-name-link">findActiveSlot</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ActionSpace.html" title="mechanics.rl内のクラス">ActionSpace</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getActionSpace()" class="member-name-link">getActionSpace</a>()</code></div>
@@ -298,25 +412,60 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentPartyName()" class="member-name-link">getCurrentPartyName</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSimulator()" class="member-name-link">getSimulator</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getStepCount()" class="member-name-link">getStepCount</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLastSwapTime()" class="member-name-link">getLastSwapTime</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the BattleEnvironment-tracked last swap time used for action masking.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSimulator()" class="member-name-link">getSimulator</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="BattleEnvironment.ResetResult.html" title="mechanics.rl内のクラス">BattleEnvironment.ResetResult</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reset(boolean)" class="member-name-link">reset</a><wbr>(boolean&nbsp;generateReport)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getStepCount()" class="member-name-link">getStepCount</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="BattleEnvironment.ResetResult.html" title="mechanics.rl内のクラス">BattleEnvironment.ResetResult</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reset(boolean,int)" class="member-name-link">reset</a><wbr>(boolean&nbsp;generateReport,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reset(boolean)" class="member-name-link">reset</a><wbr>(boolean&nbsp;generateReport)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Resets the environment and starts a new episode.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="BattleEnvironment.ResetResult.html" title="mechanics.rl内のクラス">BattleEnvironment.ResetResult</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reset(boolean,int)" class="member-name-link">reset</a><wbr>(boolean&nbsp;generateReport,
  int&nbsp;preferredPartyId)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ActionResult.html" title="mechanics.rl内のクラス">ActionResult</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#step(int)" class="member-name-link">step</a><wbr>(int&nbsp;actionId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Resets the environment, optionally requesting a specific party id from the factory.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#restoreBranchState(mechanics.rl.BattleEnvironment.BranchStateSnapshot)" class="member-name-link">restoreBranchState</a><wbr>(<a href="BattleEnvironment.BranchStateSnapshot.html" title="mechanics.rl内のクラス">BattleEnvironment.BranchStateSnapshot</a>&nbsp;branchState)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Restores RL-side state previously captured by <code>saveBranchState</code>.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#sampleRandomValidAction(double%5B%5D)" class="member-name-link">sampleRandomValidAction</a><wbr>(double[]&nbsp;mask)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="BattleEnvironment.TimingSnapshot.html" title="mechanics.rl内のクラス">BattleEnvironment.TimingSnapshot</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#timingSnapshot()" class="member-name-link">timingSnapshot</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="BattleEnvironment.BranchStateSnapshot.html" title="mechanics.rl内のクラス">BattleEnvironment.BranchStateSnapshot</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#saveBranchState()" class="member-name-link">saveBranchState</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Saves RL-side state that is not included in <a href="../../simulation/SimulatorSnapshot.html" title="simulation内のクラス"><code>SimulatorSnapshot</code></a>.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../simulation/SimulatorSnapshot.html" title="simulation内のクラス">SimulatorSnapshot</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#saveSnapshot()" class="member-name-link">saveSnapshot</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Saves a snapshot of the current simulator state for VinePPO branch rollouts.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ActionResult.html" title="mechanics.rl内のクラス">ActionResult</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#step(int)" class="member-name-link">step</a><wbr>(int&nbsp;actionId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Executes one environment step with the chosen action id.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="BattleEnvironment.TimingSnapshot.html" title="mechanics.rl内のクラス">BattleEnvironment.TimingSnapshot</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#timingSnapshot()" class="member-name-link">timingSnapshot</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateDamageRoleMetrics(int)" class="member-name-link">updateDamageRoleMetrics</a><wbr>(int&nbsp;activeSlotBefore)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateStintTracking(int)" class="member-name-link">updateStintTracking</a><wbr>(int&nbsp;activeSlotBefore)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -359,10 +508,26 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="privilegedStateEncoder">
+<h3>privilegedStateEncoder</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="PrivilegedStateEncoder.html" title="mechanics.rl内のクラス">PrivilegedStateEncoder</a></span>&nbsp;<span class="element-name">privilegedStateEncoder</span></div>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="rewardFunction">
 <h3>rewardFunction</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="RewardFunction.html" title="mechanics.rl内のクラス">RewardFunction</a></span>&nbsp;<span class="element-name">rewardFunction</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="roleAlignmentCalculator">
+<h3>roleAlignmentCalculator</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="RoleAlignmentCalculator.html" title="mechanics.rl内のクラス">RoleAlignmentCalculator</a></span>&nbsp;<span class="element-name">roleAlignmentCalculator</span></div>
 </div>
 </section>
 </li>
@@ -431,10 +596,26 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="statsRecorder">
+<h3>statsRecorder</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="../analysis/StatsRecorder.html" title="mechanics.analysis内のクラス">StatsRecorder</a></span>&nbsp;<span class="element-name">statsRecorder</span></div>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="observationBuffer">
 <h3>observationBuffer</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">observationBuffer</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="privilegedObservationBuffer">
+<h3>privilegedObservationBuffer</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">privilegedObservationBuffer</span></div>
 </div>
 </section>
 </li>
@@ -451,6 +632,78 @@ loadScripts(document, 'script');</script>
 <h3>preActionMaskBuffer</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">preActionMaskBuffer</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="slotLastActiveTime">
+<h3>slotLastActiveTime</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">slotLastActiveTime</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="slotOnFieldTime">
+<h3>slotOnFieldTime</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">slotOnFieldTime</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="slotOffFieldDamage">
+<h3>slotOffFieldDamage</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">slotOffFieldDamage</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="slotDamageSnapshots">
+<h3>slotDamageSnapshots</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">slotDamageSnapshots</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="slotStintTotalSeconds">
+<h3>slotStintTotalSeconds</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">slotStintTotalSeconds</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="slotStintCounts">
+<h3>slotStintCounts</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type">int[]</span>&nbsp;<span class="element-name">slotStintCounts</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="slotSwapInCounts">
+<h3>slotSwapInCounts</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type">int[]</span>&nbsp;<span class="element-name">slotSwapInCounts</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="currentStintSlot">
+<h3>currentStintSlot</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">currentStintSlot</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="currentStintStartTime">
+<h3>currentStintStartTime</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">currentStintStartTime</span></div>
 </div>
 </section>
 </li>
@@ -483,6 +736,14 @@ loadScripts(document, 'script');</script>
 <h3>ENCODE_NANOS</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/atomic/LongAdder.html" title="java.util.concurrent.atomic内のクラスまたはインタフェース" class="external-link">LongAdder</a></span>&nbsp;<span class="element-name">ENCODE_NANOS</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="PRIVILEGED_ENCODE_NANOS">
+<h3>PRIVILEGED_ENCODE_NANOS</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/atomic/LongAdder.html" title="java.util.concurrent.atomic内のクラスまたはインタフェース" class="external-link">LongAdder</a></span>&nbsp;<span class="element-name">PRIVILEGED_ENCODE_NANOS</span></div>
 </div>
 </section>
 </li>
@@ -524,6 +785,12 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">BattleEnvironment</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="java.util.function内のクラスまたはインタフェース" class="external-link">Supplier</a>&lt;<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&gt;&nbsp;simulatorFactory,
  <a href="EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config)</span></div>
+<div class="block">Constructs a single-party environment with default helper components.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>simulatorFactory</code> - factory supplying fresh combat simulators</dd>
+<dd><code>config</code> - episode configuration</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -532,29 +799,55 @@ loadScripts(document, 'script');</script>
 <h3>BattleEnvironment</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">BattleEnvironment</span><wbr><span class="parameters">(<a href="RLEpisodeFactory.html" title="mechanics.rl内のインタフェース">RLEpisodeFactory</a>&nbsp;episodeFactory)</span></div>
+<div class="block">Constructs an environment driven by the supplied episode factory with default helpers.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>episodeFactory</code> - factory producing per-episode simulator and config</dd>
+</dl>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="&lt;init&gt;(java.util.function.Supplier,mechanics.rl.EpisodeConfig,mechanics.rl.ActionSpace,mechanics.rl.ObservationEncoder,mechanics.rl.RewardFunction)">
+<section class="detail" id="&lt;init&gt;(java.util.function.Supplier,mechanics.rl.EpisodeConfig,mechanics.rl.ActionSpace,mechanics.rl.ObservationEncoder,mechanics.rl.PrivilegedStateEncoder,mechanics.rl.RewardFunction)">
 <h3>BattleEnvironment</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">BattleEnvironment</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="java.util.function内のクラスまたはインタフェース" class="external-link">Supplier</a>&lt;<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&gt;&nbsp;simulatorFactory,
  <a href="EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config,
  <a href="ActionSpace.html" title="mechanics.rl内のクラス">ActionSpace</a>&nbsp;actionSpace,
  <a href="ObservationEncoder.html" title="mechanics.rl内のクラス">ObservationEncoder</a>&nbsp;observationEncoder,
+ <a href="PrivilegedStateEncoder.html" title="mechanics.rl内のクラス">PrivilegedStateEncoder</a>&nbsp;privilegedStateEncoder,
  <a href="RewardFunction.html" title="mechanics.rl内のクラス">RewardFunction</a>&nbsp;rewardFunction)</span></div>
+<div class="block">Constructs a single-party environment with caller-supplied helpers.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>simulatorFactory</code> - factory supplying fresh combat simulators</dd>
+<dd><code>config</code> - episode configuration</dd>
+<dd><code>actionSpace</code> - action space implementation</dd>
+<dd><code>observationEncoder</code> - observation encoder</dd>
+<dd><code>privilegedStateEncoder</code> - privileged-state encoder</dd>
+<dd><code>rewardFunction</code> - reward function</dd>
+</dl>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="&lt;init&gt;(mechanics.rl.RLEpisodeFactory,mechanics.rl.ActionSpace,mechanics.rl.ObservationEncoder,mechanics.rl.RewardFunction)">
+<section class="detail" id="&lt;init&gt;(mechanics.rl.RLEpisodeFactory,mechanics.rl.ActionSpace,mechanics.rl.ObservationEncoder,mechanics.rl.PrivilegedStateEncoder,mechanics.rl.RewardFunction)">
 <h3>BattleEnvironment</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">BattleEnvironment</span><wbr><span class="parameters">(<a href="RLEpisodeFactory.html" title="mechanics.rl内のインタフェース">RLEpisodeFactory</a>&nbsp;episodeFactory,
  <a href="ActionSpace.html" title="mechanics.rl内のクラス">ActionSpace</a>&nbsp;actionSpace,
  <a href="ObservationEncoder.html" title="mechanics.rl内のクラス">ObservationEncoder</a>&nbsp;observationEncoder,
+ <a href="PrivilegedStateEncoder.html" title="mechanics.rl内のクラス">PrivilegedStateEncoder</a>&nbsp;privilegedStateEncoder,
  <a href="RewardFunction.html" title="mechanics.rl内のクラス">RewardFunction</a>&nbsp;rewardFunction)</span></div>
+<div class="block">Constructs an environment with explicit factory and helper components.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>episodeFactory</code> - factory producing per-episode simulator and config</dd>
+<dd><code>actionSpace</code> - action space implementation</dd>
+<dd><code>observationEncoder</code> - observation encoder</dd>
+<dd><code>privilegedStateEncoder</code> - privileged-state encoder</dd>
+<dd><code>rewardFunction</code> - reward function</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -571,6 +864,13 @@ loadScripts(document, 'script');</script>
 <h3>reset</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="BattleEnvironment.ResetResult.html" title="mechanics.rl内のクラス">BattleEnvironment.ResetResult</a></span>&nbsp;<span class="element-name">reset</span><wbr><span class="parameters">(boolean&nbsp;generateReport)</span></div>
+<div class="block">Resets the environment and starts a new episode.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>generateReport</code> - when true, enables logging and writes an HTML report on termination</dd>
+<dt>戻り値:</dt>
+<dd>reset result containing initial observation, privileged observation, mask and party id</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -580,6 +880,14 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="BattleEnvironment.ResetResult.html" title="mechanics.rl内のクラス">BattleEnvironment.ResetResult</a></span>&nbsp;<span class="element-name">reset</span><wbr><span class="parameters">(boolean&nbsp;generateReport,
  int&nbsp;preferredPartyId)</span></div>
+<div class="block">Resets the environment, optionally requesting a specific party id from the factory.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>generateReport</code> - when true, enables logging and writes an HTML report on termination</dd>
+<dd><code>preferredPartyId</code> - desired party id, or -1 to let the factory choose</dd>
+<dt>戻り値:</dt>
+<dd>reset result containing initial observation, privileged observation, mask and party id</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -588,6 +896,165 @@ loadScripts(document, 'script');</script>
 <h3>step</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ActionResult.html" title="mechanics.rl内のクラス">ActionResult</a></span>&nbsp;<span class="element-name">step</span><wbr><span class="parameters">(int&nbsp;actionId)</span></div>
+<div class="block">Executes one environment step with the chosen action id.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>actionId</code> - discrete action id selected by the policy</dd>
+<dt>戻り値:</dt>
+<dd>action result with next observation, reward, done flag and bookkeeping</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getLastSwapTime()">
+<h3>getLastSwapTime</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getLastSwapTime</span>()</div>
+<div class="block">Returns the BattleEnvironment-tracked last swap time used for action masking.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>last swap time in seconds</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="saveSnapshot()">
+<h3>saveSnapshot</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../../simulation/SimulatorSnapshot.html" title="simulation内のクラス">SimulatorSnapshot</a></span>&nbsp;<span class="element-name">saveSnapshot</span>()</div>
+<div class="block">Saves a snapshot of the current simulator state for VinePPO branch rollouts.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>simulator snapshot</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="saveBranchState()">
+<h3>saveBranchState</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="BattleEnvironment.BranchStateSnapshot.html" title="mechanics.rl内のクラス">BattleEnvironment.BranchStateSnapshot</a></span>&nbsp;<span class="element-name">saveBranchState</span>()</div>
+<div class="block">Saves RL-side state that is not included in <a href="../../simulation/SimulatorSnapshot.html" title="simulation内のクラス"><code>SimulatorSnapshot</code></a>.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>RL state snapshot used for VinePPO branch restoration</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="branchRolloutMean(simulation.SimulatorSnapshot,mechanics.rl.BattleEnvironment.BranchStateSnapshot,int,int,int,double)">
+<h3>branchRolloutMean</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">branchRolloutMean</span><wbr><span class="parameters">(<a href="../../simulation/SimulatorSnapshot.html" title="simulation内のクラス">SimulatorSnapshot</a>&nbsp;snap,
+ <a href="BattleEnvironment.BranchStateSnapshot.html" title="mechanics.rl内のクラス">BattleEnvironment.BranchStateSnapshot</a>&nbsp;branchState,
+ int&nbsp;firstAction,
+ int&nbsp;K,
+ int&nbsp;H,
+ double&nbsp;gamma)</span></div>
+<div class="block">Runs K independent Monte Carlo rollouts from a snapshot and returns their mean discounted return.
+
+<p>State is restored from <code>snap</code> before each branch. After the method returns the
+environment state is undefined; the caller must reset or restore before using it again.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>snap</code> - simulator state to branch from</dd>
+<dd><code>branchState</code> - RL-side state snapshot captured at branch time</dd>
+<dd><code>firstAction</code> - action ID to execute as the first step of each branch (-1 → random)</dd>
+<dd><code>K</code> - number of branches</dd>
+<dd><code>H</code> - horizon (max steps per branch, including firstAction)</dd>
+<dd><code>gamma</code> - discount factor</dd>
+<dt>戻り値:</dt>
+<dd>mean discounted return across K branches</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="branchRolloutMultiAction(simulation.SimulatorSnapshot,mechanics.rl.BattleEnvironment.BranchStateSnapshot,int,int,double)">
+<h3>branchRolloutMultiAction</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">branchRolloutMultiAction</span><wbr><span class="parameters">(<a href="../../simulation/SimulatorSnapshot.html" title="simulation内のクラス">SimulatorSnapshot</a>&nbsp;snap,
+ <a href="BattleEnvironment.BranchStateSnapshot.html" title="mechanics.rl内のクラス">BattleEnvironment.BranchStateSnapshot</a>&nbsp;branchState,
+ int&nbsp;K,
+ int&nbsp;H,
+ double&nbsp;gamma)</span></div>
+<div class="block">Evaluates Q_MC(s, a) for every action in the action space starting from
+the given snapshot. Returns one entry per action (NaN for actions that
+are invalid at the snapshot state).
+
+<p>Used by the counterfactual VinePPO advantage estimator: by averaging
+the per-action Q estimates we obtain a baseline on the same scale as
+each Q estimate, which removes the truncation bias that would arise
+from comparing against the full-horizon critic value.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>snap</code> - snapshot of the simulator state to branch from</dd>
+<dd><code>branchState</code> - RL-side state snapshot captured with the simulator snapshot</dd>
+<dd><code>K</code> - number of independent branches per action</dd>
+<dd><code>H</code> - horizon steps per branch</dd>
+<dd><code>gamma</code> - discount factor</dd>
+<dt>戻り値:</dt>
+<dd>double array of length <a href="RLAction.html#SIZE"><code>RLAction.SIZE</code></a> with Q_MC per action</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="restoreBranchState(mechanics.rl.BattleEnvironment.BranchStateSnapshot)">
+<h3>restoreBranchState</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">restoreBranchState</span><wbr><span class="parameters">(<a href="BattleEnvironment.BranchStateSnapshot.html" title="mechanics.rl内のクラス">BattleEnvironment.BranchStateSnapshot</a>&nbsp;branchState)</span></div>
+<div class="block">Restores RL-side state previously captured by <code>saveBranchState</code>.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>branchState</code> - branch state snapshot; must not be null</dd>
+<dt>例外:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/IllegalArgumentException.html" title="java.lang内のクラスまたはインタフェース" class="external-link">IllegalArgumentException</a></code> - if branchState is null</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="updateDamageRoleMetrics(int)">
+<h3>updateDamageRoleMetrics</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">updateDamageRoleMetrics</span><wbr><span class="parameters">(int&nbsp;activeSlotBefore)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="updateStintTracking(int)">
+<h3>updateStintTracking</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">updateStintTracking</span><wbr><span class="parameters">(int&nbsp;activeSlotBefore)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="finalizeCurrentStint()">
+<h3>finalizeCurrentStint</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">finalizeCurrentStint</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="buildEpisodeRoleSummary()">
+<h3>buildEpisodeRoleSummary</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="EpisodeRoleSummary.html" title="mechanics.rl内のクラス">EpisodeRoleSummary</a></span>&nbsp;<span class="element-name">buildEpisodeRoleSummary</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="sampleRandomValidAction(double[])">
+<h3>sampleRandomValidAction</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">sampleRandomValidAction</span><wbr><span class="parameters">(double[]&nbsp;mask)</span></div>
 </div>
 </section>
 </li>
@@ -668,6 +1135,22 @@ loadScripts(document, 'script');</script>
 <h3>fillObservationBuffer</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">fillObservationBuffer</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="findActiveSlot()">
+<h3>findActiveSlot</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">findActiveSlot</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="fillPrivilegedObservationBuffer()">
+<h3>fillPrivilegedObservationBuffer</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">fillPrivilegedObservationBuffer</span>()</div>
 </div>
 </section>
 </li>

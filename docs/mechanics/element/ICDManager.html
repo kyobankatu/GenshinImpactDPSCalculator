@@ -70,6 +70,8 @@ loadScripts(document, 'script');</script>
 </li>
 <li><a href="#method-detail" tabindex="0">メソッドの詳細</a>
 <ol class="toc-list">
+<li><a href="#saveStates()" tabindex="0">saveStates()</a></li>
+<li><a href="#restoreStates(java.util.Map)" tabindex="0">restoreStates(Map)</a></li>
 <li><a href="#checkApplication(java.lang.String,model.type.ICDTag,model.type.ICDType,double)" tabindex="0">checkApplication(String, ICDTag, ICDType, double)</a></li>
 </ol>
 </li>
@@ -172,6 +174,16 @@ skills on the same character maintain independent cooldowns.</div>
 <div class="block">Checks whether an elemental hit in the given ICD group should apply the
 element, and updates the group's state accordingly.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#restoreStates(java.util.Map)" class="member-name-link">restoreStates</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>,<wbr>double[]&gt;&nbsp;saved)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Restores ICD states from a previously captured snapshot.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>,<wbr>double[]&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#saveStates()" class="member-name-link">saveStates</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns a snapshot of all current ICD states.</div>
+</div>
 </div>
 </div>
 </div>
@@ -221,6 +233,33 @@ element, and updates the group's state accordingly.</div>
 <section class="method-details" id="method-detail">
 <h2>メソッドの詳細</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="saveStates()">
+<h3>saveStates</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>,<wbr>double[]&gt;</span>&nbsp;<span class="element-name">saveStates</span>()</div>
+<div class="block">Returns a snapshot of all current ICD states.
+Each entry maps the group key to a two-element array: <code>[lastAppTime, hitCount]</code>.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>copy of ICD state map</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="restoreStates(java.util.Map)">
+<h3>restoreStates</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">restoreStates</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>,<wbr>double[]&gt;&nbsp;saved)</span></div>
+<div class="block">Restores ICD states from a previously captured snapshot.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>saved</code> - snapshot produced by <a href="#saveStates()"><code>saveStates()</code></a></dd>
+</dl>
+</div>
+</section>
+</li>
 <li>
 <section class="detail" id="checkApplication(java.lang.String,model.type.ICDTag,model.type.ICDType,double)">
 <h3>checkApplication</h3>

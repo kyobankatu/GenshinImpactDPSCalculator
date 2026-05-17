@@ -6,7 +6,16 @@ import model.entity.BurstTriggeredArtifactEffect;
 import model.stats.StatsContainer;
 import model.type.StatType;
 
+/**
+ * Noblesse Oblige artifact set with a burst damage bonus and party ATK buff.
+ */
 public class NoblesseOblige extends ArtifactSet implements BurstTriggeredArtifactEffect {
+    /**
+     * Constructs Noblesse Oblige with the supplied main/sub stats plus the
+     * 2-piece burst damage bonus.
+     *
+     * @param mainSubStats artifact main and sub stats
+     */
     public NoblesseOblige(StatsContainer mainSubStats) {
         super("Noblesse Oblige", mainSubStats);
         // 2pc: +20% Burst Dmg
@@ -14,6 +23,12 @@ public class NoblesseOblige extends ArtifactSet implements BurstTriggeredArtifac
     }
 
     // 4pc: Using Elemental Burst increases all party members' ATK by 20% for 12s.
+    /**
+     * Applies the 4-piece party-wide ATK buff when the wearer uses an elemental
+     * burst.
+     *
+     * @param sim the active combat simulator
+     */
     @Override
     public void onBurst(simulation.CombatSimulator sim) {
         // Check if 4pc? The simulation simplified sets to just "Noblesse Oblige" class

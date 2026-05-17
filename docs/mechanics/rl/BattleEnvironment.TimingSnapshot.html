@@ -64,6 +64,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#stepNanos" tabindex="0">stepNanos</a></li>
 <li><a href="#executeNanos" tabindex="0">executeNanos</a></li>
 <li><a href="#encodeNanos" tabindex="0">encodeNanos</a></li>
+<li><a href="#privilegedEncodeNanos" tabindex="0">privilegedEncodeNanos</a></li>
 <li><a href="#maskNanos" tabindex="0">maskNanos</a></li>
 <li><a href="#resetCalls" tabindex="0">resetCalls</a></li>
 <li><a href="#resetNanos" tabindex="0">resetNanos</a></li>
@@ -71,7 +72,7 @@ loadScripts(document, 'script');</script>
 </li>
 <li><a href="#constructor-detail" tabindex="0">コンストラクタの詳細</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(long,long,long,long,long,long,long)" tabindex="0">TimingSnapshot(long, long, long, long, long, long, long)</a></li>
+<li><a href="#%3Cinit%3E(long,long,long,long,long,long,long,long)" tabindex="0">TimingSnapshot(long, long, long, long, long, long, long, long)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">メソッドの詳細</a>
@@ -122,17 +123,20 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color"><code><a href="#maskNanos" class="member-name-link">maskNanos</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code>final long</code></div>
-<div class="col-second odd-row-color"><code><a href="#resetCalls" class="member-name-link">resetCalls</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#privilegedEncodeNanos" class="member-name-link">privilegedEncodeNanos</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code>final long</code></div>
-<div class="col-second even-row-color"><code><a href="#resetNanos" class="member-name-link">resetNanos</a></code></div>
+<div class="col-second even-row-color"><code><a href="#resetCalls" class="member-name-link">resetCalls</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code>final long</code></div>
-<div class="col-second odd-row-color"><code><a href="#stepCalls" class="member-name-link">stepCalls</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#resetNanos" class="member-name-link">resetNanos</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code>final long</code></div>
-<div class="col-second even-row-color"><code><a href="#stepNanos" class="member-name-link">stepNanos</a></code></div>
+<div class="col-second even-row-color"><code><a href="#stepCalls" class="member-name-link">stepCalls</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>final long</code></div>
+<div class="col-second odd-row-color"><code><a href="#stepNanos" class="member-name-link">stepNanos</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -144,10 +148,11 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">コンストラクタ</div>
 <div class="table-header col-last">説明</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(long,long,long,long,long,long,long)" class="member-name-link">TimingSnapshot</a><wbr>(long&nbsp;stepCalls,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(long,long,long,long,long,long,long,long)" class="member-name-link">TimingSnapshot</a><wbr>(long&nbsp;stepCalls,
  long&nbsp;stepNanos,
  long&nbsp;executeNanos,
  long&nbsp;encodeNanos,
+ long&nbsp;privilegedEncodeNanos,
  long&nbsp;maskNanos,
  long&nbsp;resetCalls,
  long&nbsp;resetNanos)</code></div>
@@ -222,6 +227,14 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="privilegedEncodeNanos">
+<h3>privilegedEncodeNanos</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">long</span>&nbsp;<span class="element-name">privilegedEncodeNanos</span></div>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="maskNanos">
 <h3>maskNanos</h3>
 <div class="horizontal-scroll">
@@ -254,13 +267,14 @@ loadScripts(document, 'script');</script>
 <h2>コンストラクタの詳細</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(long,long,long,long,long,long,long)">
+<section class="detail" id="&lt;init&gt;(long,long,long,long,long,long,long,long)">
 <h3>TimingSnapshot</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">TimingSnapshot</span><wbr><span class="parameters">(long&nbsp;stepCalls,
  long&nbsp;stepNanos,
  long&nbsp;executeNanos,
  long&nbsp;encodeNanos,
+ long&nbsp;privilegedEncodeNanos,
  long&nbsp;maskNanos,
  long&nbsp;resetCalls,
  long&nbsp;resetNanos)</span></div>

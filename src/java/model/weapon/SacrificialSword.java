@@ -5,7 +5,13 @@ import model.stats.StatsContainer;
 import model.type.StatType;
 import model.type.WeaponType;
 
+/**
+ * Sacrificial Sword with its Lv 90 base stats.
+ */
 public class SacrificialSword extends Weapon {
+    /**
+     * Constructs Sacrificial Sword with Lv 90 base stats.
+     */
     public SacrificialSword() {
         super("Sacrificial Sword", new StatsContainer());
         StatsContainer s = this.getStats();

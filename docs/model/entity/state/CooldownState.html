@@ -88,6 +88,8 @@ loadScripts(document, 'script');</script>
 <li><a href="#getBurstCD()" tabindex="0">getBurstCD()</a></li>
 <li><a href="#getLastSkillTime()" tabindex="0">getLastSkillTime()</a></li>
 <li><a href="#getLastBurstTime()" tabindex="0">getLastBurstTime()</a></li>
+<li><a href="#getChargeRestoreTimes()" tabindex="0">getChargeRestoreTimes()</a></li>
+<li><a href="#restore(double,double,java.util.List)" tabindex="0">restore(double, double, List)</a></li>
 </ol>
 </li>
 </ol>
@@ -105,7 +107,11 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">CooldownState</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Object</a></span></div>
-<div class="block">Holds skill and burst cooldown state, including charge restoration.</div>
+<div class="block">Holds skill and burst cooldown state, including charge restoration.
+
+<p>The state tracks the most recent skill/burst timestamps and, for skills
+with multiple stored charges, an ordered list of pending charge-restore
+times. All time values are simulation seconds.</div>
 </div>
 </section>
 <section class="summary">
@@ -168,46 +174,79 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#canBurst(double,double,double)" class="member-name-link">canBurst</a><wbr>(double&nbsp;currentTime,
  double&nbsp;currentEnergy,
  double&nbsp;energyCost)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Tests whether the burst can be cast at the given time and energy level.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#canSkill(double)" class="member-name-link">canSkill</a><wbr>(double&nbsp;currentTime)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Tests whether the skill can be cast at the given time.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getBurstCD()" class="member-name-link">getBurstCD</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getBurstCDRemaining(double)" class="member-name-link">getBurstCDRemaining</a><wbr>(double&nbsp;currentTime)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the remaining burst cooldown.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getChargeRestoreTimes()" class="member-name-link">getChargeRestoreTimes</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns a copy of the current charge restore times list.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLastBurstTime()" class="member-name-link">getLastBurstTime</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLastBurstTime()" class="member-name-link">getLastBurstTime</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLastSkillTime()" class="member-name-link">getLastSkillTime</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLastSkillTime()" class="member-name-link">getLastSkillTime</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSkillCD()" class="member-name-link">getSkillCD</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSkillCD()" class="member-name-link">getSkillCD</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSkillCDRemaining(double)" class="member-name-link">getSkillCDRemaining</a><wbr>(double&nbsp;currentTime)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#markBurstUsed(double)" class="member-name-link">markBurstUsed</a><wbr>(double&nbsp;currentTime)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSkillCDRemaining(double)" class="member-name-link">getSkillCDRemaining</a><wbr>(double&nbsp;currentTime)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the remaining skill cooldown.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#markSkillUsed(double)" class="member-name-link">markSkillUsed</a><wbr>(double&nbsp;currentTime)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#markBurstUsed(double)" class="member-name-link">markBurstUsed</a><wbr>(double&nbsp;currentTime)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Records that the burst has just been used at the given time.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resetChargeState()" class="member-name-link">resetChargeState</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#markSkillUsed(double)" class="member-name-link">markSkillUsed</a><wbr>(double&nbsp;currentTime)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Records that the skill has just been used at the given time, updating
+either the last-skill timestamp or the charge restore queue.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resetChargeState()" class="member-name-link">resetChargeState</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Clears all pending skill charge restore timestamps.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#restore(double,double,java.util.List)" class="member-name-link">restore</a><wbr>(double&nbsp;savedLastSkillTime,
+ double&nbsp;savedLastBurstTime,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;savedChargeRestoreTimes)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Restores cooldown state from previously captured values.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setBurstCD(double)" class="member-name-link">setBurstCD</a><wbr>(double&nbsp;burstCD)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets the elemental burst cooldown length.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSkillCD(double)" class="member-name-link">setSkillCD</a><wbr>(double&nbsp;skillCD)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets the elemental skill cooldown length.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSkillMaxCharges(int)" class="member-name-link">setSkillMaxCharges</a><wbr>(int&nbsp;skillMaxCharges)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets how many simultaneous skill charges this character can store.</div>
+</div>
 </div>
 </div>
 </div>
@@ -302,6 +341,11 @@ loadScripts(document, 'script');</script>
 <h3>setSkillCD</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setSkillCD</span><wbr><span class="parameters">(double&nbsp;skillCD)</span></div>
+<div class="block">Sets the elemental skill cooldown length.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>skillCD</code> - cooldown in seconds</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -310,6 +354,11 @@ loadScripts(document, 'script');</script>
 <h3>setBurstCD</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setBurstCD</span><wbr><span class="parameters">(double&nbsp;burstCD)</span></div>
+<div class="block">Sets the elemental burst cooldown length.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>burstCD</code> - cooldown in seconds</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -318,6 +367,11 @@ loadScripts(document, 'script');</script>
 <h3>setSkillMaxCharges</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setSkillMaxCharges</span><wbr><span class="parameters">(int&nbsp;skillMaxCharges)</span></div>
+<div class="block">Sets how many simultaneous skill charges this character can store.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>skillMaxCharges</code> - maximum number of skill charges (1 for single-charge skills)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -326,6 +380,13 @@ loadScripts(document, 'script');</script>
 <h3>canSkill</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">canSkill</span><wbr><span class="parameters">(double&nbsp;currentTime)</span></div>
+<div class="block">Tests whether the skill can be cast at the given time.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>currentTime</code> - current simulation time in seconds</dd>
+<dt>戻り値:</dt>
+<dd><code>true</code> if at least one skill charge is available</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -336,6 +397,15 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">canBurst</span><wbr><span class="parameters">(double&nbsp;currentTime,
  double&nbsp;currentEnergy,
  double&nbsp;energyCost)</span></div>
+<div class="block">Tests whether the burst can be cast at the given time and energy level.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>currentTime</code> - current simulation time in seconds</dd>
+<dd><code>currentEnergy</code> - current energy on the character</dd>
+<dd><code>energyCost</code> - burst energy cost</dd>
+<dt>戻り値:</dt>
+<dd><code>true</code> if both cooldown has elapsed and energy is sufficient</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -344,6 +414,16 @@ loadScripts(document, 'script');</script>
 <h3>getSkillCDRemaining</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getSkillCDRemaining</span><wbr><span class="parameters">(double&nbsp;currentTime)</span></div>
+<div class="block">Returns the remaining skill cooldown.
+
+<p>For multi-charge skills, returns the time until the next charge is
+restored (or 0 if a charge is already available).</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>currentTime</code> - current simulation time in seconds</dd>
+<dt>戻り値:</dt>
+<dd>remaining cooldown in seconds (0 if ready)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -352,6 +432,13 @@ loadScripts(document, 'script');</script>
 <h3>getBurstCDRemaining</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getBurstCDRemaining</span><wbr><span class="parameters">(double&nbsp;currentTime)</span></div>
+<div class="block">Returns the remaining burst cooldown.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>currentTime</code> - current simulation time in seconds</dd>
+<dt>戻り値:</dt>
+<dd>remaining cooldown in seconds (0 if ready)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -360,6 +447,12 @@ loadScripts(document, 'script');</script>
 <h3>markSkillUsed</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">markSkillUsed</span><wbr><span class="parameters">(double&nbsp;currentTime)</span></div>
+<div class="block">Records that the skill has just been used at the given time, updating
+either the last-skill timestamp or the charge restore queue.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>currentTime</code> - current simulation time in seconds</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -368,6 +461,11 @@ loadScripts(document, 'script');</script>
 <h3>markBurstUsed</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">markBurstUsed</span><wbr><span class="parameters">(double&nbsp;currentTime)</span></div>
+<div class="block">Records that the burst has just been used at the given time.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>currentTime</code> - current simulation time in seconds</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -376,6 +474,8 @@ loadScripts(document, 'script');</script>
 <h3>resetChargeState</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">resetChargeState</span>()</div>
+<div class="block">Clears all pending skill charge restore timestamps. Used when resetting
+the simulation state.</div>
 </div>
 </section>
 </li>
@@ -384,6 +484,10 @@ loadScripts(document, 'script');</script>
 <h3>getSkillCD</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getSkillCD</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>configured skill cooldown length in seconds</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -392,6 +496,10 @@ loadScripts(document, 'script');</script>
 <h3>getBurstCD</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getBurstCD</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>configured burst cooldown length in seconds</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -400,6 +508,10 @@ loadScripts(document, 'script');</script>
 <h3>getLastSkillTime</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getLastSkillTime</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>timestamp at which the skill was last used (large negative if never)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -408,6 +520,40 @@ loadScripts(document, 'script');</script>
 <h3>getLastBurstTime</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getLastBurstTime</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>timestamp at which the burst was last used (large negative if never)</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getChargeRestoreTimes()">
+<h3>getChargeRestoreTimes</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</span>&nbsp;<span class="element-name">getChargeRestoreTimes</span>()</div>
+<div class="block">Returns a copy of the current charge restore times list.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>copy of charge restore times</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="restore(double,double,java.util.List)">
+<h3>restore</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">restore</span><wbr><span class="parameters">(double&nbsp;savedLastSkillTime,
+ double&nbsp;savedLastBurstTime,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;savedChargeRestoreTimes)</span></div>
+<div class="block">Restores cooldown state from previously captured values.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>savedLastSkillTime</code> - last skill use time</dd>
+<dd><code>savedLastBurstTime</code> - last burst use time</dd>
+<dd><code>savedChargeRestoreTimes</code> - charge restore schedule</dd>
+</dl>
 </div>
 </section>
 </li>

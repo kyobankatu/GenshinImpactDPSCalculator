@@ -145,9 +145,19 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="type-signature"><span class="modifiers">public enum </span><span class="element-name type-name-label">BuffId</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Enum.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Enum</a>&lt;<a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a>&gt;</span></div>
-<div class="block">Typed identifiers for buffs whose presence is queried by simulator logic.
+<div class="block">シミュレータロジックから存在判定や参照に用いる、型付きバフ識別子。
 
-<p>Display names remain separate so logs and reports can stay human-readable.</div>
+<p>表示名は別途 <a href="Buff.html#getName()"><code>Buff.getName()</code></a> 等で管理されるため、ログやレポートで
+人間可読な名称を保ちつつ、コード上は本 enum でバフを厳密に同定できる。</p>
+
+<p>各定数の分類:</p>
+<ul>
+  <li>キャラクター固有バフ (例: <a href="#RAIDEN_EYE_OF_STORMY_JUDGMENT"><code>RAIDEN_EYE_OF_STORMY_JUDGMENT</code></a>, <a href="#XIANGLING_CHILI"><code>XIANGLING_CHILI</code></a>)</li>
+  <li>武器固有バフ (例: <a href="#CALAMITY_QUELLER"><code>CALAMITY_QUELLER</code></a>, <a href="#AUBADE_BONUS"><code>AUBADE_BONUS</code></a>)</li>
+  <li>聖遺物セット効果 (例: <a href="#NOBLESSE_OBLIGE_4PC"><code>NOBLESSE_OBLIGE_4PC</code></a>, <a href="#VV_SHRED_PYRO"><code>VV_SHRED_PYRO</code></a>)</li>
+  <li>元素共鳴 (例: <a href="#FERVENT_FLAMES"><code>FERVENT_FLAMES</code></a>, <a href="#SOOTHING_WATER"><code>SOOTHING_WATER</code></a>)</li>
+  <li>非公式 Lunar 機構 (例: <a href="#FLINS_LUNAR_BASE_BONUS"><code>FLINS_LUNAR_BASE_BONUS</code></a>, <a href="#COLUMBINA_LUNAR_BRILLIANCE"><code>COLUMBINA_LUNAR_BRILLIANCE</code></a>)</li>
+</ul></div>
 </div>
 </section>
 <section class="summary">
@@ -170,107 +180,209 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">列挙型定数</div>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color"><code><a href="#AUBADE_BONUS" class="member-name-link">AUBADE_BONUS</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Aubade 系武器ボーナス。</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#BOUNTIFUL_SEA_SACRED_WINE" class="member-name-link">BOUNTIFUL_SEA_SACRED_WINE</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">武器「豊穣の海・聖酒」(Bountiful Sea, Sacred Wine) 効果。</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#C2_MOONSIGN_ATK_BONUS" class="member-name-link">C2_MOONSIGN_ATK_BONUS</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Lunar 拡張: 月相 C2 攻撃力ボーナス。</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#C2_MOONSIGN_DEF_BONUS" class="member-name-link">C2_MOONSIGN_DEF_BONUS</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Lunar 拡張: 月相 C2 防御力ボーナス。</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#C2_MOONSIGN_EM_BONUS" class="member-name-link">C2_MOONSIGN_EM_BONUS</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Lunar 拡張: 月相 C2 元素熟知ボーナス。</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#CALAMITY_QUELLER" class="member-name-link">CALAMITY_QUELLER</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">武器「降臨之剣」(Calamity Queller) のスタック効果。</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#COLUMBINA_C1_LUNAR_REACTION_BONUS" class="member-name-link">COLUMBINA_C1_LUNAR_REACTION_BONUS</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Lunar 拡張: コロンビーナ C1 による Lunar 反応ボーナス。</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#COLUMBINA_C2_LUNAR_REACTION_BONUS" class="member-name-link">COLUMBINA_C2_LUNAR_REACTION_BONUS</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Lunar 拡張: コロンビーナ C2 による Lunar 反応ボーナス。</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#COLUMBINA_LUNAR_BASE_BONUS" class="member-name-link">COLUMBINA_LUNAR_BASE_BONUS</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Lunar 拡張: コロンビーナの Lunar 加算ダメージボーナス。</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#COLUMBINA_LUNAR_BRILLIANCE" class="member-name-link">COLUMBINA_LUNAR_BRILLIANCE</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Lunar 拡張: コロンビーナ「月華の輝き」(Lunar Brilliance)。</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#COLUMBINA_LUNAR_BURST_BONUS" class="member-name-link">COLUMBINA_LUNAR_BURST_BONUS</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Lunar 拡張: コロンビーナ元素爆発ボーナス。</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#CUSTOM" class="member-name-link">CUSTOM</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">上記カテゴリに属さない、その場限りの汎用バフ。</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#EAGLE_SPEAR_OF_JUSTICE" class="member-name-link">EAGLE_SPEAR_OF_JUSTICE</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">武器「裁断」(Eagle Spear of Justice) 系のダメージバフ。</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#ENDURING_ROCK" class="member-name-link">ENDURING_ROCK</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">元素共鳴「不動の岩」(岩岩): シールド強化、岩ダメージ +15%。</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#FANTASTIC_VOYAGE" class="member-name-link">FANTASTIC_VOYAGE</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">雷電将軍 命ノ星座 4 凸「神威・天日の眼」など、特定範囲の万能ダメージ強化。</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#FERVENT_FLAMES" class="member-name-link">FERVENT_FLAMES</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">元素共鳴「熱誠の炎」(炎炎): 攻撃力 +25%。</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#FLINS_LUNAR_BASE_BONUS" class="member-name-link">FLINS_LUNAR_BASE_BONUS</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Lunar 拡張: フリンスの Lunar 加算ダメージボーナス。</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#GLEAMING_MOON_DEVOTION" class="member-name-link">GLEAMING_MOON_DEVOTION</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Lunar 拡張: コロンビーナの「皓月の献身」。</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#GLEAMING_MOON_INTENT" class="member-name-link">GLEAMING_MOON_INTENT</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Lunar 拡張: コロンビーナの「皓月の意志」。</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#GLEAMING_MOON_SYNERGY" class="member-name-link">GLEAMING_MOON_SYNERGY</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Lunar 拡張: 月相シナジー (Lunar / 非 Lunar の相互強化)。</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#IMPETUOUS_WINDS" class="member-name-link">IMPETUOUS_WINDS</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">元素共鳴「迅速の風」(風風): 移動速度+, スタミナ消費 -15%, クールタイム短縮。</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#INEFFA_LUNAR_BASE_BONUS" class="member-name-link">INEFFA_LUNAR_BASE_BONUS</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Lunar 拡張: イネファの Lunar 加算ダメージボーナス。</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#MOONSIGN_ASCENDANT_BLESSING" class="member-name-link">MOONSIGN_ASCENDANT_BLESSING</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Lunar 拡張: 非 Lunar キャラから Lunar キャラに付与される「月相・昇格祝福」。</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#NOBLESSE_OBLIGE_4PC" class="member-name-link">NOBLESSE_OBLIGE_4PC</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">聖遺物 4 セット「旧貴族のしつけ」効果。</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#NONE" class="member-name-link">NONE</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">未指定 / バフなしを表すプレースホルダ。</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#PROTECTIVE_CANOPY" class="member-name-link">PROTECTIVE_CANOPY</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Lunar 拡張: 庇護の天蓋 (Protective Canopy)。</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#RAIDEN_EYE_OF_STORMY_JUDGMENT" class="member-name-link">RAIDEN_EYE_OF_STORMY_JUDGMENT</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">雷電将軍「諸願百日の儀」: 諸願スタックによる元素爆発 DMG ボーナス。</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#RAINCUTTER" class="member-name-link">RAINCUTTER</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">雷電将軍 元素爆発「奥義・夢想真説」状態の万能効果。</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#RAINSEA_INTERRUPTION_RESISTANCE" class="member-name-link">RAINSEA_INTERRUPTION_RESISTANCE</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Lunar 拡張: 雨海による中断耐性 (Rainsea Interruption Resistance)。</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#RAINSEA_SHIELD" class="member-name-link">RAINSEA_SHIELD</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Lunar 拡張: 雨海によるシールド (Rainsea Shield)。</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#RECONSTRUCTION_PROTOCOL_P2" class="member-name-link">RECONSTRUCTION_PROTOCOL_P2</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">リコンストラクション・プロトコル 2 段目バフ。</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#SHATTERING_ICE" class="member-name-link">SHATTERING_ICE</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">元素共鳴「破砕の氷」(氷氷): 凍結時間+, 会心率 +15%。</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#SOOTHING_WATER" class="member-name-link">SOOTHING_WATER</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">元素共鳴「容彩の水」(水水): HP +25%。</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#SPRAWLING_GREENERY" class="member-name-link">SPRAWLING_GREENERY</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">元素共鳴「繁茂の草」(草草): 元素熟知 +50 ほか。</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#SUCROSE_C6_BONUS" class="member-name-link">SUCROSE_C6_BONUS</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">スクロース命ノ星座 6 のボーナス。</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#SUCROSE_CATALYST_CONVERSION_A1_CRYO" class="member-name-link">SUCROSE_CATALYST_CONVERSION_A1_CRYO</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">スクロース固有素質 1: 氷元素 DMG 増加。</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#SUCROSE_CATALYST_CONVERSION_A1_ELECTRO" class="member-name-link">SUCROSE_CATALYST_CONVERSION_A1_ELECTRO</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">スクロース固有素質 1: 雷元素 DMG 増加。</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#SUCROSE_CATALYST_CONVERSION_A1_HYDRO" class="member-name-link">SUCROSE_CATALYST_CONVERSION_A1_HYDRO</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">スクロース固有素質 1: 水元素 DMG 増加。</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#SUCROSE_CATALYST_CONVERSION_A1_PYRO" class="member-name-link">SUCROSE_CATALYST_CONVERSION_A1_PYRO</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">スクロース固有素質 1: 炎元素 DMG 増加 (拡散反応経由)。</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#SUCROSE_MOLLIS_FAVONIUS_A4" class="member-name-link">SUCROSE_MOLLIS_FAVONIUS_A4</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">スクロース固有素質 4 (Mollis Favonius A4) による元素熟知共有。</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#SUNNY_MORNING_BURST_EM" class="member-name-link">SUNNY_MORNING_BURST_EM</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">武器「晴れた日の麦わら帽子」爆発系の元素熟知バフ。</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#SUNNY_MORNING_SKILL_EM" class="member-name-link">SUNNY_MORNING_SKILL_EM</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">武器「晴れた日の麦わら帽子」スキル系の元素熟知バフ。</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#SUNNY_MORNING_SWIRL_EM" class="member-name-link">SUNNY_MORNING_SWIRL_EM</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">武器「晴れた日の麦わら帽子」拡散系の元素熟知バフ。</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#VV_SHRED_CRYO" class="member-name-link">VV_SHRED_CRYO</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">翠緑の影: 拡散後の氷元素耐性ダウン。</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#VV_SHRED_ELECTRO" class="member-name-link">VV_SHRED_ELECTRO</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">翠緑の影: 拡散後の雷元素耐性ダウン。</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#VV_SHRED_HYDRO" class="member-name-link">VV_SHRED_HYDRO</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">翠緑の影: 拡散後の水元素耐性ダウン。</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#VV_SHRED_PYRO" class="member-name-link">VV_SHRED_PYRO</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">聖遺物 4 セット「翠緑の影」: 拡散後の炎元素耐性ダウン。</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#WANDERING_EVENSTAR_WILDLING_NIGHTSTAR" class="member-name-link">WANDERING_EVENSTAR_WILDLING_NIGHTSTAR</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">武器「漂泊の宵星」効果。</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#XIANGLING_C6" class="member-name-link">XIANGLING_C6</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">香菱 命ノ星座 6 効果。</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#XIANGLING_CHILI" class="member-name-link">XIANGLING_CHILI</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">香菱 元素爆発「ピリ辛」状態 (Chili)。</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#XIANGLING_GUOBA_C1_SHRED" class="member-name-link">XIANGLING_GUOBA_C1_SHRED</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">香菱 グゥオパァー C1: 防御力減少効果。</div>
+</div>
 </div>
 </section>
 </li>
@@ -336,6 +448,7 @@ loadScripts(document, 'script');</script>
 <h3>NONE</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">NONE</span></div>
+<div class="block">未指定 / バフなしを表すプレースホルダ。</div>
 </div>
 </section>
 </li>
@@ -344,6 +457,7 @@ loadScripts(document, 'script');</script>
 <h3>CUSTOM</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">CUSTOM</span></div>
+<div class="block">上記カテゴリに属さない、その場限りの汎用バフ。</div>
 </div>
 </section>
 </li>
@@ -352,6 +466,7 @@ loadScripts(document, 'script');</script>
 <h3>FANTASTIC_VOYAGE</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">FANTASTIC_VOYAGE</span></div>
+<div class="block">雷電将軍 命ノ星座 4 凸「神威・天日の眼」など、特定範囲の万能ダメージ強化。</div>
 </div>
 </section>
 </li>
@@ -360,6 +475,7 @@ loadScripts(document, 'script');</script>
 <h3>RAINCUTTER</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">RAINCUTTER</span></div>
+<div class="block">雷電将軍 元素爆発「奥義・夢想真説」状態の万能効果。</div>
 </div>
 </section>
 </li>
@@ -368,6 +484,7 @@ loadScripts(document, 'script');</script>
 <h3>GLEAMING_MOON_INTENT</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">GLEAMING_MOON_INTENT</span></div>
+<div class="block">Lunar 拡張: コロンビーナの「皓月の意志」。</div>
 </div>
 </section>
 </li>
@@ -376,6 +493,7 @@ loadScripts(document, 'script');</script>
 <h3>GLEAMING_MOON_DEVOTION</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">GLEAMING_MOON_DEVOTION</span></div>
+<div class="block">Lunar 拡張: コロンビーナの「皓月の献身」。</div>
 </div>
 </section>
 </li>
@@ -384,6 +502,7 @@ loadScripts(document, 'script');</script>
 <h3>GLEAMING_MOON_SYNERGY</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">GLEAMING_MOON_SYNERGY</span></div>
+<div class="block">Lunar 拡張: 月相シナジー (Lunar / 非 Lunar の相互強化)。</div>
 </div>
 </section>
 </li>
@@ -392,6 +511,7 @@ loadScripts(document, 'script');</script>
 <h3>MOONSIGN_ASCENDANT_BLESSING</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">MOONSIGN_ASCENDANT_BLESSING</span></div>
+<div class="block">Lunar 拡張: 非 Lunar キャラから Lunar キャラに付与される「月相・昇格祝福」。</div>
 </div>
 </section>
 </li>
@@ -400,6 +520,7 @@ loadScripts(document, 'script');</script>
 <h3>RECONSTRUCTION_PROTOCOL_P2</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">RECONSTRUCTION_PROTOCOL_P2</span></div>
+<div class="block">リコンストラクション・プロトコル 2 段目バフ。</div>
 </div>
 </section>
 </li>
@@ -408,6 +529,7 @@ loadScripts(document, 'script');</script>
 <h3>CALAMITY_QUELLER</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">CALAMITY_QUELLER</span></div>
+<div class="block">武器「降臨之剣」(Calamity Queller) のスタック効果。</div>
 </div>
 </section>
 </li>
@@ -416,6 +538,7 @@ loadScripts(document, 'script');</script>
 <h3>EAGLE_SPEAR_OF_JUSTICE</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">EAGLE_SPEAR_OF_JUSTICE</span></div>
+<div class="block">武器「裁断」(Eagle Spear of Justice) 系のダメージバフ。</div>
 </div>
 </section>
 </li>
@@ -424,6 +547,7 @@ loadScripts(document, 'script');</script>
 <h3>SUNNY_MORNING_SKILL_EM</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">SUNNY_MORNING_SKILL_EM</span></div>
+<div class="block">武器「晴れた日の麦わら帽子」スキル系の元素熟知バフ。</div>
 </div>
 </section>
 </li>
@@ -432,6 +556,7 @@ loadScripts(document, 'script');</script>
 <h3>SUNNY_MORNING_BURST_EM</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">SUNNY_MORNING_BURST_EM</span></div>
+<div class="block">武器「晴れた日の麦わら帽子」爆発系の元素熟知バフ。</div>
 </div>
 </section>
 </li>
@@ -440,6 +565,7 @@ loadScripts(document, 'script');</script>
 <h3>SUNNY_MORNING_SWIRL_EM</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">SUNNY_MORNING_SWIRL_EM</span></div>
+<div class="block">武器「晴れた日の麦わら帽子」拡散系の元素熟知バフ。</div>
 </div>
 </section>
 </li>
@@ -448,6 +574,7 @@ loadScripts(document, 'script');</script>
 <h3>BOUNTIFUL_SEA_SACRED_WINE</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">BOUNTIFUL_SEA_SACRED_WINE</span></div>
+<div class="block">武器「豊穣の海・聖酒」(Bountiful Sea, Sacred Wine) 効果。</div>
 </div>
 </section>
 </li>
@@ -456,6 +583,7 @@ loadScripts(document, 'script');</script>
 <h3>COLUMBINA_LUNAR_BRILLIANCE</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">COLUMBINA_LUNAR_BRILLIANCE</span></div>
+<div class="block">Lunar 拡張: コロンビーナ「月華の輝き」(Lunar Brilliance)。</div>
 </div>
 </section>
 </li>
@@ -464,6 +592,7 @@ loadScripts(document, 'script');</script>
 <h3>RAINSEA_INTERRUPTION_RESISTANCE</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">RAINSEA_INTERRUPTION_RESISTANCE</span></div>
+<div class="block">Lunar 拡張: 雨海による中断耐性 (Rainsea Interruption Resistance)。</div>
 </div>
 </section>
 </li>
@@ -472,6 +601,7 @@ loadScripts(document, 'script');</script>
 <h3>RAINSEA_SHIELD</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">RAINSEA_SHIELD</span></div>
+<div class="block">Lunar 拡張: 雨海によるシールド (Rainsea Shield)。</div>
 </div>
 </section>
 </li>
@@ -480,6 +610,7 @@ loadScripts(document, 'script');</script>
 <h3>C2_MOONSIGN_ATK_BONUS</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">C2_MOONSIGN_ATK_BONUS</span></div>
+<div class="block">Lunar 拡張: 月相 C2 攻撃力ボーナス。</div>
 </div>
 </section>
 </li>
@@ -488,6 +619,7 @@ loadScripts(document, 'script');</script>
 <h3>C2_MOONSIGN_EM_BONUS</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">C2_MOONSIGN_EM_BONUS</span></div>
+<div class="block">Lunar 拡張: 月相 C2 元素熟知ボーナス。</div>
 </div>
 </section>
 </li>
@@ -496,6 +628,7 @@ loadScripts(document, 'script');</script>
 <h3>C2_MOONSIGN_DEF_BONUS</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">C2_MOONSIGN_DEF_BONUS</span></div>
+<div class="block">Lunar 拡張: 月相 C2 防御力ボーナス。</div>
 </div>
 </section>
 </li>
@@ -504,6 +637,7 @@ loadScripts(document, 'script');</script>
 <h3>COLUMBINA_LUNAR_BURST_BONUS</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">COLUMBINA_LUNAR_BURST_BONUS</span></div>
+<div class="block">Lunar 拡張: コロンビーナ元素爆発ボーナス。</div>
 </div>
 </section>
 </li>
@@ -512,6 +646,7 @@ loadScripts(document, 'script');</script>
 <h3>SUCROSE_MOLLIS_FAVONIUS_A4</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">SUCROSE_MOLLIS_FAVONIUS_A4</span></div>
+<div class="block">スクロース固有素質 4 (Mollis Favonius A4) による元素熟知共有。</div>
 </div>
 </section>
 </li>
@@ -520,6 +655,7 @@ loadScripts(document, 'script');</script>
 <h3>SUCROSE_CATALYST_CONVERSION_A1_PYRO</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">SUCROSE_CATALYST_CONVERSION_A1_PYRO</span></div>
+<div class="block">スクロース固有素質 1: 炎元素 DMG 増加 (拡散反応経由)。</div>
 </div>
 </section>
 </li>
@@ -528,6 +664,7 @@ loadScripts(document, 'script');</script>
 <h3>SUCROSE_CATALYST_CONVERSION_A1_HYDRO</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">SUCROSE_CATALYST_CONVERSION_A1_HYDRO</span></div>
+<div class="block">スクロース固有素質 1: 水元素 DMG 増加。</div>
 </div>
 </section>
 </li>
@@ -536,6 +673,7 @@ loadScripts(document, 'script');</script>
 <h3>SUCROSE_CATALYST_CONVERSION_A1_ELECTRO</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">SUCROSE_CATALYST_CONVERSION_A1_ELECTRO</span></div>
+<div class="block">スクロース固有素質 1: 雷元素 DMG 増加。</div>
 </div>
 </section>
 </li>
@@ -544,6 +682,7 @@ loadScripts(document, 'script');</script>
 <h3>SUCROSE_CATALYST_CONVERSION_A1_CRYO</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">SUCROSE_CATALYST_CONVERSION_A1_CRYO</span></div>
+<div class="block">スクロース固有素質 1: 氷元素 DMG 増加。</div>
 </div>
 </section>
 </li>
@@ -552,6 +691,7 @@ loadScripts(document, 'script');</script>
 <h3>SUCROSE_C6_BONUS</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">SUCROSE_C6_BONUS</span></div>
+<div class="block">スクロース命ノ星座 6 のボーナス。</div>
 </div>
 </section>
 </li>
@@ -560,6 +700,7 @@ loadScripts(document, 'script');</script>
 <h3>FLINS_LUNAR_BASE_BONUS</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">FLINS_LUNAR_BASE_BONUS</span></div>
+<div class="block">Lunar 拡張: フリンスの Lunar 加算ダメージボーナス。</div>
 </div>
 </section>
 </li>
@@ -568,6 +709,7 @@ loadScripts(document, 'script');</script>
 <h3>COLUMBINA_LUNAR_BASE_BONUS</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">COLUMBINA_LUNAR_BASE_BONUS</span></div>
+<div class="block">Lunar 拡張: コロンビーナの Lunar 加算ダメージボーナス。</div>
 </div>
 </section>
 </li>
@@ -576,6 +718,7 @@ loadScripts(document, 'script');</script>
 <h3>COLUMBINA_C1_LUNAR_REACTION_BONUS</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">COLUMBINA_C1_LUNAR_REACTION_BONUS</span></div>
+<div class="block">Lunar 拡張: コロンビーナ C1 による Lunar 反応ボーナス。</div>
 </div>
 </section>
 </li>
@@ -584,6 +727,7 @@ loadScripts(document, 'script');</script>
 <h3>COLUMBINA_C2_LUNAR_REACTION_BONUS</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">COLUMBINA_C2_LUNAR_REACTION_BONUS</span></div>
+<div class="block">Lunar 拡張: コロンビーナ C2 による Lunar 反応ボーナス。</div>
 </div>
 </section>
 </li>
@@ -592,6 +736,7 @@ loadScripts(document, 'script');</script>
 <h3>INEFFA_LUNAR_BASE_BONUS</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">INEFFA_LUNAR_BASE_BONUS</span></div>
+<div class="block">Lunar 拡張: イネファの Lunar 加算ダメージボーナス。</div>
 </div>
 </section>
 </li>
@@ -600,6 +745,7 @@ loadScripts(document, 'script');</script>
 <h3>RAIDEN_EYE_OF_STORMY_JUDGMENT</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">RAIDEN_EYE_OF_STORMY_JUDGMENT</span></div>
+<div class="block">雷電将軍「諸願百日の儀」: 諸願スタックによる元素爆発 DMG ボーナス。</div>
 </div>
 </section>
 </li>
@@ -608,6 +754,7 @@ loadScripts(document, 'script');</script>
 <h3>XIANGLING_GUOBA_C1_SHRED</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">XIANGLING_GUOBA_C1_SHRED</span></div>
+<div class="block">香菱 グゥオパァー C1: 防御力減少効果。</div>
 </div>
 </section>
 </li>
@@ -616,6 +763,7 @@ loadScripts(document, 'script');</script>
 <h3>XIANGLING_CHILI</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">XIANGLING_CHILI</span></div>
+<div class="block">香菱 元素爆発「ピリ辛」状態 (Chili)。</div>
 </div>
 </section>
 </li>
@@ -624,6 +772,7 @@ loadScripts(document, 'script');</script>
 <h3>XIANGLING_C6</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">XIANGLING_C6</span></div>
+<div class="block">香菱 命ノ星座 6 効果。</div>
 </div>
 </section>
 </li>
@@ -632,6 +781,7 @@ loadScripts(document, 'script');</script>
 <h3>NOBLESSE_OBLIGE_4PC</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">NOBLESSE_OBLIGE_4PC</span></div>
+<div class="block">聖遺物 4 セット「旧貴族のしつけ」効果。</div>
 </div>
 </section>
 </li>
@@ -640,6 +790,7 @@ loadScripts(document, 'script');</script>
 <h3>WANDERING_EVENSTAR_WILDLING_NIGHTSTAR</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">WANDERING_EVENSTAR_WILDLING_NIGHTSTAR</span></div>
+<div class="block">武器「漂泊の宵星」効果。</div>
 </div>
 </section>
 </li>
@@ -648,6 +799,7 @@ loadScripts(document, 'script');</script>
 <h3>AUBADE_BONUS</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">AUBADE_BONUS</span></div>
+<div class="block">Aubade 系武器ボーナス。</div>
 </div>
 </section>
 </li>
@@ -656,6 +808,7 @@ loadScripts(document, 'script');</script>
 <h3>VV_SHRED_PYRO</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">VV_SHRED_PYRO</span></div>
+<div class="block">聖遺物 4 セット「翠緑の影」: 拡散後の炎元素耐性ダウン。</div>
 </div>
 </section>
 </li>
@@ -664,6 +817,7 @@ loadScripts(document, 'script');</script>
 <h3>VV_SHRED_HYDRO</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">VV_SHRED_HYDRO</span></div>
+<div class="block">翠緑の影: 拡散後の水元素耐性ダウン。</div>
 </div>
 </section>
 </li>
@@ -672,6 +826,7 @@ loadScripts(document, 'script');</script>
 <h3>VV_SHRED_ELECTRO</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">VV_SHRED_ELECTRO</span></div>
+<div class="block">翠緑の影: 拡散後の雷元素耐性ダウン。</div>
 </div>
 </section>
 </li>
@@ -680,6 +835,7 @@ loadScripts(document, 'script');</script>
 <h3>VV_SHRED_CRYO</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">VV_SHRED_CRYO</span></div>
+<div class="block">翠緑の影: 拡散後の氷元素耐性ダウン。</div>
 </div>
 </section>
 </li>
@@ -688,6 +844,7 @@ loadScripts(document, 'script');</script>
 <h3>PROTECTIVE_CANOPY</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">PROTECTIVE_CANOPY</span></div>
+<div class="block">Lunar 拡張: 庇護の天蓋 (Protective Canopy)。</div>
 </div>
 </section>
 </li>
@@ -696,6 +853,7 @@ loadScripts(document, 'script');</script>
 <h3>FERVENT_FLAMES</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">FERVENT_FLAMES</span></div>
+<div class="block">元素共鳴「熱誠の炎」(炎炎): 攻撃力 +25%。</div>
 </div>
 </section>
 </li>
@@ -704,6 +862,7 @@ loadScripts(document, 'script');</script>
 <h3>SOOTHING_WATER</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">SOOTHING_WATER</span></div>
+<div class="block">元素共鳴「容彩の水」(水水): HP +25%。</div>
 </div>
 </section>
 </li>
@@ -712,6 +871,7 @@ loadScripts(document, 'script');</script>
 <h3>SHATTERING_ICE</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">SHATTERING_ICE</span></div>
+<div class="block">元素共鳴「破砕の氷」(氷氷): 凍結時間+, 会心率 +15%。</div>
 </div>
 </section>
 </li>
@@ -720,6 +880,7 @@ loadScripts(document, 'script');</script>
 <h3>ENDURING_ROCK</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">ENDURING_ROCK</span></div>
+<div class="block">元素共鳴「不動の岩」(岩岩): シールド強化、岩ダメージ +15%。</div>
 </div>
 </section>
 </li>
@@ -728,6 +889,7 @@ loadScripts(document, 'script');</script>
 <h3>SPRAWLING_GREENERY</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">SPRAWLING_GREENERY</span></div>
+<div class="block">元素共鳴「繁茂の草」(草草): 元素熟知 +50 ほか。</div>
 </div>
 </section>
 </li>
@@ -736,6 +898,7 @@ loadScripts(document, 'script');</script>
 <h3>IMPETUOUS_WINDS</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">IMPETUOUS_WINDS</span></div>
+<div class="block">元素共鳴「迅速の風」(風風): 移動速度+, スタミナ消費 -15%, クールタイム短縮。</div>
 </div>
 </section>
 </li>

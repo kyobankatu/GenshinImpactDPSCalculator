@@ -89,6 +89,7 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">SilkenMoonsSerenade</span>
 <span class="extends-implements">extends <a href="../entity/ArtifactSet.html" title="model.entity内のクラス">ArtifactSet</a>
 implements <a href="../entity/DamageTriggeredArtifactEffect.html" title="model.entity内のインタフェース">DamageTriggeredArtifactEffect</a></span></div>
+<div class="block">Silken Moon's Serenade artifact set with Moonsign-dependent team EM support.</div>
 </div>
 </section>
 <section class="summary">
@@ -102,9 +103,14 @@ implements <a href="../entity/DamageTriggeredArtifactEffect.html" title="model.e
 <div class="table-header col-first">コンストラクタ</div>
 <div class="table-header col-last">説明</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E()" class="member-name-link">SilkenMoonsSerenade</a>()</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Constructs Silken Moon's Serenade with the 2-piece Energy Recharge bonus.</div>
+</div>
 <div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(model.stats.StatsContainer)" class="member-name-link">SilkenMoonsSerenade</a><wbr>(<a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;stats)</code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Constructs Silken Moon's Serenade with the supplied main/sub stats plus
+the 2-piece Energy Recharge bonus.</div>
+</div>
 </div>
 </section>
 </li>
@@ -124,7 +130,10 @@ implements <a href="../entity/DamageTriggeredArtifactEffect.html" title="model.e
  <a href="../../simulation/action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  double&nbsp;damage,
  <a href="../entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;owner)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Grants the 4-piece team Elemental Mastery buff after elemental damage,
+based on the current Moonsign state.</div>
+</div>
 </div>
 </div>
 </div>
@@ -150,6 +159,7 @@ implements <a href="../entity/DamageTriggeredArtifactEffect.html" title="model.e
 <h3>SilkenMoonsSerenade</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">SilkenMoonsSerenade</span>()</div>
+<div class="block">Constructs Silken Moon's Serenade with the 2-piece Energy Recharge bonus.</div>
 </div>
 </section>
 </li>
@@ -158,6 +168,12 @@ implements <a href="../entity/DamageTriggeredArtifactEffect.html" title="model.e
 <h3>SilkenMoonsSerenade</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">SilkenMoonsSerenade</span><wbr><span class="parameters">(<a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;stats)</span></div>
+<div class="block">Constructs Silken Moon's Serenade with the supplied main/sub stats plus
+the 2-piece Energy Recharge bonus.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>stats</code> - artifact main and sub stats</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -177,9 +193,16 @@ implements <a href="../entity/DamageTriggeredArtifactEffect.html" title="model.e
  <a href="../../simulation/action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  double&nbsp;damage,
  <a href="../entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;owner)</span></div>
+<div class="block">Grants the 4-piece team Elemental Mastery buff after elemental damage,
+based on the current Moonsign state.</div>
 <dl class="notes">
 <dt>定義:</dt>
 <dd><code><a href="../entity/DamageTriggeredArtifactEffect.html#onDamage(simulation.CombatSimulator,simulation.action.AttackAction,double,model.entity.Character)">onDamage</a></code>&nbsp;インタフェース内&nbsp;<code><a href="../entity/DamageTriggeredArtifactEffect.html" title="model.entity内のインタフェース">DamageTriggeredArtifactEffect</a></code></dd>
+<dt>パラメータ:</dt>
+<dd><code>sim</code> - the active combat simulator</dd>
+<dd><code>action</code> - the attack action that dealt damage</dd>
+<dd><code>damage</code> - the damage amount dealt</dd>
+<dd><code>owner</code> - the character equipping the set</dd>
 </dl>
 </div>
 </section>

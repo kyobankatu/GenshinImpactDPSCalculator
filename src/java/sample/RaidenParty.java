@@ -13,7 +13,19 @@ import mechanics.energy.EnergyManager;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
 
+/**
+ * Sample entry point that runs the classic Raiden National team rotation.
+ *
+ * <p>Optimizes artifacts with {@link OptimizerPipeline}, executes a fixed
+ * 21-second rotation, then writes a text report plus an interactive HTML
+ * report under {@code output/}.
+ */
 public class RaidenParty {
+    /**
+     * Application entry point.
+     *
+     * @param args command-line arguments (unused)
+     */
     public static void main(String[] args) {
         System.out.println("Genshin DPS Calculator: Raiden National Simulation (Refactored)");
 
@@ -60,6 +72,15 @@ public class RaidenParty {
 
     // --- Helper Methods ---
 
+    /**
+     * Creates and configures a fresh {@link CombatSimulator} for one optimization
+     * or final-execution pass.
+     *
+     * @param erTargets         per-character ER targets (may be {@code null})
+     * @param partyManualRolls  per-character manual artifact roll overrides
+     *                          (may be {@code null})
+     * @return a configured simulator with party and enemy set up
+     */
     private static CombatSimulator createSimulator(
             java.util.Map<String, Double> erTargets,
             java.util.Map<String, java.util.Map<model.type.StatType, Integer>> partyManualRolls) {
@@ -70,6 +91,11 @@ public class RaidenParty {
         return s;
     }
 
+    /**
+     * Runs the scripted Raiden National rotation against the given simulator.
+     *
+     * @param sim simulator to act upon
+     */
     private static void executeRotation(CombatSimulator sim) {
         // Rotation: (Raiden E) > Xingqiu E Q N0 > Bennett Q N0 E > Xiangling Q E N0
         // > Raiden Q N3Cx3 N1C N0 E > Bennett E > Xiangling funnel
@@ -145,22 +171,54 @@ public class RaidenParty {
         }
     }
 
+    /**
+     * Issues a normal attack action for the named character.
+     *
+     * @param sim           simulator
+     * @param characterName character display name
+     */
     private static void normal(CombatSimulator sim, String characterName) {
         sim.performAction(characterName, CharacterActionRequest.of(CharacterActionKey.NORMAL));
     }
 
+    /**
+     * Issues a charged attack action for the named character.
+     *
+     * @param sim           simulator
+     * @param characterName character display name
+     */
     private static void charge(CombatSimulator sim, String characterName) {
         sim.performAction(characterName, CharacterActionRequest.of(CharacterActionKey.CHARGE));
     }
 
+    /**
+     * Issues an elemental skill action for the named character.
+     *
+     * @param sim           simulator
+     * @param characterName character display name
+     */
     private static void skill(CombatSimulator sim, String characterName) {
         sim.performAction(characterName, CharacterActionRequest.of(CharacterActionKey.SKILL));
     }
 
+    /**
+     * Issues an elemental burst action for the named character.
+     *
+     * @param sim           simulator
+     * @param characterName character display name
+     */
     private static void burst(CombatSimulator sim, String characterName) {
         sim.performAction(characterName, CharacterActionRequest.of(CharacterActionKey.BURST));
     }
 
+    /**
+     * Builds and registers all four party members, applying ER and roll
+     * overrides and elemental resonances.
+     *
+     * @param sim              simulator to populate
+     * @param erTargets        per-character minimum ER targets
+     * @param partyManualRolls per-character manual artifact substat roll overrides
+     */
     private static void setupParty(CombatSimulator sim, java.util.Map<String, Double> erTargets,
             java.util.Map<String, java.util.Map<model.type.StatType, Integer>> partyManualRolls) {
         // --- KQMS Optimization ---

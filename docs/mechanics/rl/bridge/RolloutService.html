@@ -62,11 +62,14 @@ loadScripts(document, 'script');</script>
 <li><a href="#port" tabindex="0">port</a></li>
 <li><a href="#bindHost" tabindex="0">bindHost</a></li>
 <li><a href="#rolloutWorkers" tabindex="0">rolloutWorkers</a></li>
+<li><a href="#vineEnabled" tabindex="0">vineEnabled</a></li>
 <li><a href="#observationEncoder" tabindex="0">observationEncoder</a></li>
+<li><a href="#privilegedStateEncoder" tabindex="0">privilegedStateEncoder</a></li>
 <li><a href="#episodeFactory" tabindex="0">episodeFactory</a></li>
 <li><a href="#partyNames" tabindex="0">partyNames</a></li>
 <li><a href="#runners" tabindex="0">runners</a></li>
 <li><a href="#nextRunnerId" tabindex="0">nextRunnerId</a></li>
+<li><a href="#vineSnapshotLogged" tabindex="0">vineSnapshotLogged</a></li>
 <li><a href="#runnerCreateCalls" tabindex="0">runnerCreateCalls</a></li>
 <li><a href="#runnerCreateNanos" tabindex="0">runnerCreateNanos</a></li>
 <li><a href="#resetCalls" tabindex="0">resetCalls</a></li>
@@ -83,6 +86,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#%3Cinit%3E(int,java.lang.String,mechanics.rl.EpisodeConfig)" tabindex="0">RolloutService(int, String, EpisodeConfig)</a></li>
 <li><a href="#%3Cinit%3E(int,java.lang.String,mechanics.rl.EpisodeConfig,int)" tabindex="0">RolloutService(int, String, EpisodeConfig, int)</a></li>
 <li><a href="#%3Cinit%3E(int,java.lang.String,mechanics.rl.RLEpisodeFactory,int)" tabindex="0">RolloutService(int, String, RLEpisodeFactory, int)</a></li>
+<li><a href="#%3Cinit%3E(int,java.lang.String,mechanics.rl.RLEpisodeFactory,int,boolean)" tabindex="0">RolloutService(int, String, RLEpisodeFactory, int, boolean)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">メソッドの詳細</a>
@@ -149,36 +153,45 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color"><code>private final int</code></div>
 <div class="col-second odd-row-color"><code><a href="#port" class="member-name-link">port</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>private long</code></div>
-<div class="col-second even-row-color"><code><a href="#resetCalls" class="member-name-link">resetCalls</a></code></div>
+<div class="col-first even-row-color"><code>private final <a href="../PrivilegedStateEncoder.html" title="mechanics.rl内のクラス">PrivilegedStateEncoder</a></code></div>
+<div class="col-second even-row-color"><code><a href="#privilegedStateEncoder" class="member-name-link">privilegedStateEncoder</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code>private long</code></div>
-<div class="col-second odd-row-color"><code><a href="#resetNanos" class="member-name-link">resetNanos</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#resetCalls" class="member-name-link">resetCalls</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code>private long</code></div>
-<div class="col-second even-row-color"><code><a href="#resetWriteNanos" class="member-name-link">resetWriteNanos</a></code></div>
+<div class="col-second even-row-color"><code><a href="#resetNanos" class="member-name-link">resetNanos</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>private final int</code></div>
-<div class="col-second odd-row-color"><code><a href="#rolloutWorkers" class="member-name-link">rolloutWorkers</a></code></div>
+<div class="col-first odd-row-color"><code>private long</code></div>
+<div class="col-second odd-row-color"><code><a href="#resetWriteNanos" class="member-name-link">resetWriteNanos</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private final int</code></div>
+<div class="col-second even-row-color"><code><a href="#rolloutWorkers" class="member-name-link">rolloutWorkers</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private long</code></div>
+<div class="col-second odd-row-color"><code><a href="#runnerCreateCalls" class="member-name-link">runnerCreateCalls</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code>private long</code></div>
-<div class="col-second even-row-color"><code><a href="#runnerCreateCalls" class="member-name-link">runnerCreateCalls</a></code></div>
+<div class="col-second even-row-color"><code><a href="#runnerCreateNanos" class="member-name-link">runnerCreateNanos</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>private long</code></div>
-<div class="col-second odd-row-color"><code><a href="#runnerCreateNanos" class="member-name-link">runnerCreateNanos</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>private final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Integer</a>, <a href="VectorizedEnvironment.html" title="mechanics.rl.bridge内のクラス">VectorizedEnvironment</a>&gt;</code></div>
-<div class="col-second even-row-color"><code><a href="#runners" class="member-name-link">runners</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>private long</code></div>
-<div class="col-second odd-row-color"><code><a href="#stepCalls" class="member-name-link">stepCalls</a></code></div>
+<div class="col-first odd-row-color"><code>private final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Integer</a>, <a href="VectorizedEnvironment.html" title="mechanics.rl.bridge内のクラス">VectorizedEnvironment</a>&gt;</code></div>
+<div class="col-second odd-row-color"><code><a href="#runners" class="member-name-link">runners</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code>private long</code></div>
-<div class="col-second even-row-color"><code><a href="#stepNanos" class="member-name-link">stepNanos</a></code></div>
+<div class="col-second even-row-color"><code><a href="#stepCalls" class="member-name-link">stepCalls</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code>private long</code></div>
-<div class="col-second odd-row-color"><code><a href="#stepWriteNanos" class="member-name-link">stepWriteNanos</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#stepNanos" class="member-name-link">stepNanos</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private long</code></div>
+<div class="col-second even-row-color"><code><a href="#stepWriteNanos" class="member-name-link">stepWriteNanos</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private final boolean</code></div>
+<div class="col-second odd-row-color"><code><a href="#vineEnabled" class="member-name-link">vineEnabled</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private boolean</code></div>
+<div class="col-second even-row-color"><code><a href="#vineSnapshotLogged" class="member-name-link">vineSnapshotLogged</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -193,20 +206,36 @@ loadScripts(document, 'script');</script>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(int,java.lang.String,mechanics.rl.EpisodeConfig)" class="member-name-link">RolloutService</a><wbr>(int&nbsp;port,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;bindHost,
  <a href="../EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Creates a rollout service with the default single-party registry.</div>
+</div>
 <div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(int,java.lang.String,mechanics.rl.EpisodeConfig,int)" class="member-name-link">RolloutService</a><wbr>(int&nbsp;port,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;bindHost,
  <a href="../EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config,
  int&nbsp;rolloutWorkers)</code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Creates a rollout service with the default single-party registry.</div>
+</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(int,java.lang.String,mechanics.rl.RLEpisodeFactory,int)" class="member-name-link">RolloutService</a><wbr>(int&nbsp;port,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;bindHost,
  <a href="../RLEpisodeFactory.html" title="mechanics.rl内のインタフェース">RLEpisodeFactory</a>&nbsp;episodeFactory,
  int&nbsp;rolloutWorkers)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
-<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(int,mechanics.rl.EpisodeConfig)" class="member-name-link">RolloutService</a><wbr>(int&nbsp;port,
+<div class="col-last even-row-color">
+<div class="block">Creates a rollout service backed by a custom episode factory.</div>
+</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(int,java.lang.String,mechanics.rl.RLEpisodeFactory,int,boolean)" class="member-name-link">RolloutService</a><wbr>(int&nbsp;port,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;bindHost,
+ <a href="../RLEpisodeFactory.html" title="mechanics.rl内のインタフェース">RLEpisodeFactory</a>&nbsp;episodeFactory,
+ int&nbsp;rolloutWorkers,
+ boolean&nbsp;vineEnabled)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Creates a rollout service backed by a custom episode factory.</div>
+</div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(int,mechanics.rl.EpisodeConfig)" class="member-name-link">RolloutService</a><wbr>(int&nbsp;port,
  <a href="../EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config)</code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Creates a rollout service bound to localhost with the default single-party registry.</div>
+</div>
 </div>
 </section>
 </li>
@@ -242,7 +271,9 @@ loadScripts(document, 'script');</script>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#serveForever()" class="member-name-link">serveForever</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Starts the blocking server loop and serves clients until shutdown is requested.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#writeBooleanVector(java.io.DataOutputStream,boolean%5B%5D)" class="member-name-link">writeBooleanVector</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/DataOutputStream.html" title="java.io内のクラスまたはインタフェース" class="external-link">DataOutputStream</a>&nbsp;out,
  boolean[]&nbsp;values)</code></div>
@@ -313,10 +344,26 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="vineEnabled">
+<h3>vineEnabled</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">vineEnabled</span></div>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="observationEncoder">
 <h3>observationEncoder</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="../ObservationEncoder.html" title="mechanics.rl内のクラス">ObservationEncoder</a></span>&nbsp;<span class="element-name">observationEncoder</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="privilegedStateEncoder">
+<h3>privilegedStateEncoder</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="../PrivilegedStateEncoder.html" title="mechanics.rl内のクラス">PrivilegedStateEncoder</a></span>&nbsp;<span class="element-name">privilegedStateEncoder</span></div>
 </div>
 </section>
 </li>
@@ -349,6 +396,14 @@ loadScripts(document, 'script');</script>
 <h3>nextRunnerId</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">nextRunnerId</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="vineSnapshotLogged">
+<h3>vineSnapshotLogged</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private volatile</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">vineSnapshotLogged</span></div>
 </div>
 </section>
 </li>
@@ -430,6 +485,12 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">RolloutService</span><wbr><span class="parameters">(int&nbsp;port,
  <a href="../EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config)</span></div>
+<div class="block">Creates a rollout service bound to localhost with the default single-party registry.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>port</code> - TCP port to listen on</dd>
+<dd><code>config</code> - episode configuration</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -440,6 +501,13 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">RolloutService</span><wbr><span class="parameters">(int&nbsp;port,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;bindHost,
  <a href="../EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config)</span></div>
+<div class="block">Creates a rollout service with the default single-party registry.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>port</code> - TCP port to listen on</dd>
+<dd><code>bindHost</code> - interface address to bind</dd>
+<dd><code>config</code> - episode configuration</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -451,6 +519,14 @@ loadScripts(document, 'script');</script>
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;bindHost,
  <a href="../EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config,
  int&nbsp;rolloutWorkers)</span></div>
+<div class="block">Creates a rollout service with the default single-party registry.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>port</code> - TCP port to listen on</dd>
+<dd><code>bindHost</code> - interface address to bind</dd>
+<dd><code>config</code> - episode configuration</dd>
+<dd><code>rolloutWorkers</code> - number of rollout worker threads, or <code>0</code> for auto</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -462,6 +538,35 @@ loadScripts(document, 'script');</script>
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;bindHost,
  <a href="../RLEpisodeFactory.html" title="mechanics.rl内のインタフェース">RLEpisodeFactory</a>&nbsp;episodeFactory,
  int&nbsp;rolloutWorkers)</span></div>
+<div class="block">Creates a rollout service backed by a custom episode factory.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>port</code> - TCP port to listen on</dd>
+<dd><code>bindHost</code> - interface address to bind</dd>
+<dd><code>episodeFactory</code> - factory used to create rollout episodes</dd>
+<dd><code>rolloutWorkers</code> - number of rollout worker threads, or <code>0</code> for auto</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(int,java.lang.String,mechanics.rl.RLEpisodeFactory,int,boolean)">
+<h3>RolloutService</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">RolloutService</span><wbr><span class="parameters">(int&nbsp;port,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;bindHost,
+ <a href="../RLEpisodeFactory.html" title="mechanics.rl内のインタフェース">RLEpisodeFactory</a>&nbsp;episodeFactory,
+ int&nbsp;rolloutWorkers,
+ boolean&nbsp;vineEnabled)</span></div>
+<div class="block">Creates a rollout service backed by a custom episode factory.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>port</code> - TCP port to listen on</dd>
+<dd><code>bindHost</code> - interface address to bind</dd>
+<dd><code>episodeFactory</code> - factory used to create rollout episodes</dd>
+<dd><code>rolloutWorkers</code> - number of rollout worker threads, or <code>0</code> for auto</dd>
+<dd><code>vineEnabled</code> - whether VinePPO snapshot support is enabled</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -479,9 +584,10 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">serveForever</span>()
                   throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="java.io内のクラスまたはインタフェース" class="external-link">IOException</a></span></div>
+<div class="block">Starts the blocking server loop and serves clients until shutdown is requested.</div>
 <dl class="notes">
 <dt>例外:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="java.io内のクラスまたはインタフェース" class="external-link">IOException</a></code></dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="java.io内のクラスまたはインタフェース" class="external-link">IOException</a></code> - if the socket cannot be created or the client stream fails</dd>
 </dl>
 </div>
 </section>

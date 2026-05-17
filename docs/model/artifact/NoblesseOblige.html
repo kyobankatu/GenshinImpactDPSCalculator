@@ -88,6 +88,7 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">NoblesseOblige</span>
 <span class="extends-implements">extends <a href="../entity/ArtifactSet.html" title="model.entity内のクラス">ArtifactSet</a>
 implements <a href="../entity/BurstTriggeredArtifactEffect.html" title="model.entity内のインタフェース">BurstTriggeredArtifactEffect</a></span></div>
+<div class="block">Noblesse Oblige artifact set with a burst damage bonus and party ATK buff.</div>
 </div>
 </section>
 <section class="summary">
@@ -101,7 +102,10 @@ implements <a href="../entity/BurstTriggeredArtifactEffect.html" title="model.en
 <div class="table-header col-first">コンストラクタ</div>
 <div class="table-header col-last">説明</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(model.stats.StatsContainer)" class="member-name-link">NoblesseOblige</a><wbr>(<a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;mainSubStats)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Constructs Noblesse Oblige with the supplied main/sub stats plus the
+2-piece burst damage bonus.</div>
+</div>
 </div>
 </section>
 </li>
@@ -118,7 +122,10 @@ implements <a href="../entity/BurstTriggeredArtifactEffect.html" title="model.en
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onBurst(simulation.CombatSimulator)" class="member-name-link">onBurst</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Applies the 4-piece party-wide ATK buff when the wearer uses an elemental
+burst.</div>
+</div>
 </div>
 </div>
 </div>
@@ -144,6 +151,12 @@ implements <a href="../entity/BurstTriggeredArtifactEffect.html" title="model.en
 <h3>NoblesseOblige</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">NoblesseOblige</span><wbr><span class="parameters">(<a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;mainSubStats)</span></div>
+<div class="block">Constructs Noblesse Oblige with the supplied main/sub stats plus the
+2-piece burst damage bonus.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>mainSubStats</code> - artifact main and sub stats</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -160,9 +173,13 @@ implements <a href="../entity/BurstTriggeredArtifactEffect.html" title="model.en
 <h3>onBurst</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">onBurst</span><wbr><span class="parameters">(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</span></div>
+<div class="block">Applies the 4-piece party-wide ATK buff when the wearer uses an elemental
+burst.</div>
 <dl class="notes">
 <dt>定義:</dt>
 <dd><code><a href="../entity/BurstTriggeredArtifactEffect.html#onBurst(simulation.CombatSimulator)">onBurst</a></code>&nbsp;インタフェース内&nbsp;<code><a href="../entity/BurstTriggeredArtifactEffect.html" title="model.entity内のインタフェース">BurstTriggeredArtifactEffect</a></code></dd>
+<dt>パラメータ:</dt>
+<dd><code>sim</code> - the active combat simulator</dd>
 </dl>
 </div>
 </section>

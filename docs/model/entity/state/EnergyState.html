@@ -82,6 +82,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#reset(double)" tabindex="0">reset(double)</a></li>
 <li><a href="#markBurstUsed(double)" tabindex="0">markBurstUsed(double)</a></li>
 <li><a href="#getCurrentEnergy()" tabindex="0">getCurrentEnergy()</a></li>
+<li><a href="#setCurrentEnergy(double)" tabindex="0">setCurrentEnergy(double)</a></li>
 <li><a href="#getTotalEnergyGained()" tabindex="0">getTotalEnergyGained()</a></li>
 <li><a href="#getTotalFlatEnergy()" tabindex="0">getTotalFlatEnergy()</a></li>
 <li><a href="#getTotalParticleEnergy()" tabindex="0">getTotalParticleEnergy()</a></li>
@@ -104,7 +105,16 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">EnergyState</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Object</a></span></div>
-<div class="block">Holds runtime energy totals and burst-window accounting for a character.</div>
+<div class="block">Holds runtime energy totals and burst-window accounting for a character.
+
+<p>Energy gains are split into two channels:
+<ul>
+  <li><b>Particle energy</b> – scaled by the character's Energy Recharge (ER)</li>
+  <li><b>Flat energy</b> – fixed amounts (e.g. from Bennett's Burst restoration)
+      that bypass ER scaling</li>
+</ul>
+Per-burst-window subtotals are recorded so the <code>EnergyManager</code> can
+evaluate ER tuning quality after each burst usage.</div>
 </div>
 </section>
 <section class="summary">
@@ -171,7 +181,9 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;double[]&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getBurstEnergyWindows()" class="member-name-link">getBurstEnergyWindows</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns per-burst window subtotals.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentEnergy()" class="member-name-link">getCurrentEnergy</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
@@ -192,23 +204,39 @@ added to the energy bar from particles, excluding flat energy and burst reset).<
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#markBurstUsed(double)" class="member-name-link">markBurstUsed</a><wbr>(double&nbsp;burstCost)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Records that the burst has been used: snapshots the per-window subtotals,
+resets them, and drains current energy to zero.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#receiveEnergy(double,double)" class="member-name-link">receiveEnergy</a><wbr>(double&nbsp;amount,
  double&nbsp;maxEnergy)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Adds a generic energy amount, clamped to the maximum.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#receiveFlatEnergy(double,double)" class="member-name-link">receiveFlatEnergy</a><wbr>(double&nbsp;amount,
  double&nbsp;maxEnergy)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Records flat energy generation (not affected by ER).</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#receiveParticleEnergy(double,double,double)" class="member-name-link">receiveParticleEnergy</a><wbr>(double&nbsp;baseAmount,
  double&nbsp;er,
  double&nbsp;maxEnergy)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Records particle-based energy generation, applying ER scaling.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reset(double)" class="member-name-link">reset</a><wbr>(double&nbsp;initialEnergy)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Resets all energy accumulators and clears window history.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setCurrentEnergy(double)" class="member-name-link">setCurrentEnergy</a><wbr>(double&nbsp;energy)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Directly sets the current energy level without updating totals.</div>
+</div>
 </div>
 </div>
 </div>
@@ -320,6 +348,12 @@ added to the energy bar from particles, excluding flat energy and burst reset).<
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">receiveEnergy</span><wbr><span class="parameters">(double&nbsp;amount,
  double&nbsp;maxEnergy)</span></div>
+<div class="block">Adds a generic energy amount, clamped to the maximum.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>amount</code> - energy to add (post-ER if applicable)</dd>
+<dd><code>maxEnergy</code> - energy cap (burst cost)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -330,6 +364,13 @@ added to the energy bar from particles, excluding flat energy and burst reset).<
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">receiveParticleEnergy</span><wbr><span class="parameters">(double&nbsp;baseAmount,
  double&nbsp;er,
  double&nbsp;maxEnergy)</span></div>
+<div class="block">Records particle-based energy generation, applying ER scaling.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>baseAmount</code> - unscaled particle value</dd>
+<dd><code>er</code> - character's Energy Recharge multiplier (e.g. 1.5)</dd>
+<dd><code>maxEnergy</code> - energy cap (burst cost)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -339,6 +380,12 @@ added to the energy bar from particles, excluding flat energy and burst reset).<
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">receiveFlatEnergy</span><wbr><span class="parameters">(double&nbsp;amount,
  double&nbsp;maxEnergy)</span></div>
+<div class="block">Records flat energy generation (not affected by ER).</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>amount</code> - flat energy amount</dd>
+<dd><code>maxEnergy</code> - energy cap (burst cost)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -347,6 +394,11 @@ added to the energy bar from particles, excluding flat energy and burst reset).<
 <h3>reset</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">reset</span><wbr><span class="parameters">(double&nbsp;initialEnergy)</span></div>
+<div class="block">Resets all energy accumulators and clears window history.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>initialEnergy</code> - starting energy after reset</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -355,6 +407,12 @@ added to the energy bar from particles, excluding flat energy and burst reset).<
 <h3>markBurstUsed</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">markBurstUsed</span><wbr><span class="parameters">(double&nbsp;burstCost)</span></div>
+<div class="block">Records that the burst has been used: snapshots the per-window subtotals,
+resets them, and drains current energy to zero.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>burstCost</code> - burst energy cost (recorded in the window entry)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -363,6 +421,24 @@ added to the energy bar from particles, excluding flat energy and burst reset).<
 <h3>getCurrentEnergy</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getCurrentEnergy</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>current energy on the character</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setCurrentEnergy(double)">
+<h3>setCurrentEnergy</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setCurrentEnergy</span><wbr><span class="parameters">(double&nbsp;energy)</span></div>
+<div class="block">Directly sets the current energy level without updating totals.
+Used only for snapshot restore.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>energy</code> - energy value to set</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -371,6 +447,10 @@ added to the energy bar from particles, excluding flat energy and burst reset).<
 <h3>getTotalEnergyGained</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getTotalEnergyGained</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>cumulative energy added to the bar since last reset</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -379,6 +459,10 @@ added to the energy bar from particles, excluding flat energy and burst reset).<
 <h3>getTotalFlatEnergy</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getTotalFlatEnergy</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>cumulative flat energy received (pre-cap)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -387,6 +471,10 @@ added to the energy bar from particles, excluding flat energy and burst reset).<
 <h3>getTotalParticleEnergy</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getTotalParticleEnergy</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>cumulative particle energy received before ER scaling</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -409,6 +497,12 @@ added to the energy bar from particles, excluding flat energy and burst reset).<
 <h3>getBurstEnergyWindows</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;double[]&gt;</span>&nbsp;<span class="element-name">getBurstEnergyWindows</span>()</div>
+<div class="block">Returns per-burst window subtotals.
+<p>Each entry is <code>[particleEnergy, flatEnergy, burstCost]</code>.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>list of burst window subtotal arrays</dd>
+</dl>
 </div>
 </section>
 </li>

@@ -123,7 +123,7 @@ member only while they are active.</div>
 </div>
 <div class="inherited-list">
 <h3 id="fields-inherited-from-class-mechanics.buff.Buff">クラスから継承されたフィールド&nbsp;<a href="Buff.html#field-summary" title="mechanics.buff内のクラス">Buff</a></h3>
-<code><a href="Buff.html#excludeChars">excludeChars</a>, <a href="Buff.html#expirationTime">expirationTime</a>, <a href="Buff.html#id">id</a>, <a href="Buff.html#name">name</a>, <a href="Buff.html#startTime">startTime</a>, <a href="Buff.html#targetElement">targetElement</a></code></div>
+<code><a href="Buff.html#excludeChars">excludeChars</a>, <a href="Buff.html#expirationTime">expirationTime</a>, <a href="Buff.html#id">id</a>, <a href="Buff.html#name">name</a>, <a href="Buff.html#sourceCharacterId">sourceCharacterId</a>, <a href="Buff.html#startTime">startTime</a>, <a href="Buff.html#targetElement">targetElement</a></code></div>
 </section>
 </li>
 <!-- ======== CONSTRUCTOR SUMMARY ======== -->
@@ -150,7 +150,10 @@ member only while they are active.</div>
  <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
  <a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;owner,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Consumer.html" title="java.util.function内のクラスまたはインタフェース" class="external-link">Consumer</a>&lt;<a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&gt;&nbsp;effect)</code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Creates a time-limited buff conditional on the owner being active, with an
+explicit <a href="BuffId.html" title="mechanics.buffの列挙クラス"><code>BuffId</code></a> for typed identity.</div>
+</div>
 </div>
 </section>
 </li>
@@ -177,7 +180,7 @@ character in the simulation.</div>
 </div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-mechanics.buff.Buff">クラスから継承されたメソッド&nbsp;<a href="Buff.html#method-summary" title="mechanics.buff内のクラス">Buff</a></h3>
-<code><a href="Buff.html#appliesToCharacter(model.entity.Character)" title="appliesToCharacter(Character)">appliesToCharacter</a>, <a href="Buff.html#apply(model.stats.StatsContainer,double)" title="apply(StatsContainer, double)">apply</a>, <a href="Buff.html#exclude(java.lang.String...)" title="exclude(String...)">exclude</a>, <a href="Buff.html#exclude(model.type.CharacterId...)" title="exclude(CharacterId...)">exclude</a>, <a href="Buff.html#forElement(model.type.Element)" title="forElement(Element)">forElement</a>, <a href="Buff.html#getDisplayName()" title="getDisplayName()">getDisplayName</a>, <a href="Buff.html#getId()" title="getId()">getId</a>, <a href="Buff.html#getLogicKey()" title="getLogicKey()">getLogicKey</a>, <a href="Buff.html#getName()" title="getName()">getName</a>, <a href="Buff.html#isExpired(double)" title="isExpired(double)">isExpired</a></code></div>
+<code><a href="Buff.html#appliesToCharacter(model.entity.Character)" title="appliesToCharacter(Character)">appliesToCharacter</a>, <a href="Buff.html#apply(model.stats.StatsContainer,double)" title="apply(StatsContainer, double)">apply</a>, <a href="Buff.html#exclude(java.lang.String...)" title="exclude(String...)">exclude</a>, <a href="Buff.html#exclude(model.type.CharacterId...)" title="exclude(CharacterId...)">exclude</a>, <a href="Buff.html#forElement(model.type.Element)" title="forElement(Element)">forElement</a>, <a href="Buff.html#getDisplayName()" title="getDisplayName()">getDisplayName</a>, <a href="Buff.html#getExpirationTime()" title="getExpirationTime()">getExpirationTime</a>, <a href="Buff.html#getId()" title="getId()">getId</a>, <a href="Buff.html#getLogicKey()" title="getLogicKey()">getLogicKey</a>, <a href="Buff.html#getName()" title="getName()">getName</a>, <a href="Buff.html#getRemainingDuration(double)" title="getRemainingDuration(double)">getRemainingDuration</a>, <a href="Buff.html#getSourceCharacterId()" title="getSourceCharacterId()">getSourceCharacterId</a>, <a href="Buff.html#getStartTime()" title="getStartTime()">getStartTime</a>, <a href="Buff.html#isExpired(double)" title="isExpired(double)">isExpired</a>, <a href="Buff.html#restoreTimes(double,double)" title="restoreTimes(double, double)">restoreTimes</a>, <a href="Buff.html#sourcedBy(model.type.CharacterId)" title="sourcedBy(CharacterId)">sourcedBy</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-java.lang.Object">クラスから継承されたメソッド&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#method-summary" title="java.lang内のクラスまたはインタフェース" class="external-link">Object</a></h3>
 <code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#clone()" title="java.lang内のクラスまたはインタフェース" class="external-link">clone</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" title="java.lang内のクラスまたはインタフェース" class="external-link">equals</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#finalize()" title="java.lang内のクラスまたはインタフェース" class="external-link">finalize</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#getClass()" title="java.lang内のクラスまたはインタフェース" class="external-link">getClass</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#hashCode()" title="java.lang内のクラスまたはインタフェース" class="external-link">hashCode</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#notify()" title="java.lang内のクラスまたはインタフェース" class="external-link">notify</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#notifyAll()" title="java.lang内のクラスまたはインタフェース" class="external-link">notifyAll</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#toString()" title="java.lang内のクラスまたはインタフェース" class="external-link">toString</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#wait()" title="java.lang内のクラスまたはインタフェース" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#wait(long)" title="java.lang内のクラスまたはインタフェース" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#wait(long,int)" title="java.lang内のクラスまたはインタフェース" class="external-link">wait</a></code></div>
@@ -258,6 +261,18 @@ character in the simulation.</div>
  <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
  <a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;owner,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Consumer.html" title="java.util.function内のクラスまたはインタフェース" class="external-link">Consumer</a>&lt;<a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&gt;&nbsp;effect)</span></div>
+<div class="block">Creates a time-limited buff conditional on the owner being active, with an
+explicit <a href="BuffId.html" title="mechanics.buffの列挙クラス"><code>BuffId</code></a> for typed identity.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>name</code> - display name used for logging and de-duplication</dd>
+<dd><code>id</code> - typed buff identifier</dd>
+<dd><code>duration</code> - how long the buff lasts in simulation seconds</dd>
+<dd><code>currentTime</code> - simulation time at which the buff starts</dd>
+<dd><code>sim</code> - the combat simulator used to query the active character</dd>
+<dd><code>owner</code> - the character who must be on-field for the buff to apply</dd>
+<dd><code>effect</code> - lambda that writes stat bonuses into the provided container</dd>
+</dl>
 </div>
 </section>
 </li>

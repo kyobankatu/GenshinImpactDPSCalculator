@@ -32,14 +32,23 @@ public final class RaidenPartyRLSimulatorFactory {
     private RaidenPartyRLSimulatorFactory() {
     }
 
+    /**
+     * Returns a supplier that builds fresh Raiden party simulators.
+     */
     public static Supplier<CombatSimulator> supplier() {
         return RaidenPartyRLSimulatorFactory::create;
     }
 
+    /**
+     * Returns the registry spec for the Raiden RL party.
+     */
     public static RLPartySpec spec() {
         return new RLPartySpec("RaidenParty", PARTY_ORDER, supplier());
     }
 
+    /**
+     * Creates the fixed Raiden/Xingqiu/Xiangling/Bennett simulator.
+     */
     public static CombatSimulator create() {
         CombatSimulator sim = new CombatSimulator();
         sim.setLoggingEnabled(false);
@@ -49,6 +58,9 @@ public final class RaidenPartyRLSimulatorFactory {
         return sim;
     }
 
+    /**
+     * Creates an episode factory for the Raiden RL party.
+     */
     public static RLEpisodeFactory episodeFactory(EpisodeConfig baseConfig) {
         return new SinglePartyRLEpisodeFactory(spec(), baseConfig);
     }

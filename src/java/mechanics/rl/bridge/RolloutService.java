@@ -44,22 +44,60 @@ public class RolloutService {
     private long resetWriteNanos;
     private long stepWriteNanos;
 
+    /**
+     * Creates a rollout service bound to localhost with the default single-party registry.
+     *
+     * @param port TCP port to listen on
+     * @param config episode configuration
+     */
     public RolloutService(int port, EpisodeConfig config) {
         this(port, "127.0.0.1", RLPartyRegistry.createEpisodeFactory(config, RLPartyRegistry.DEFAULT_SINGLE_PARTY), 0);
     }
 
+    /**
+     * Creates a rollout service with the default single-party registry.
+     *
+     * @param port TCP port to listen on
+     * @param bindHost interface address to bind
+     * @param config episode configuration
+     */
     public RolloutService(int port, String bindHost, EpisodeConfig config) {
         this(port, bindHost, RLPartyRegistry.createEpisodeFactory(config, RLPartyRegistry.DEFAULT_SINGLE_PARTY), 0);
     }
 
+    /**
+     * Creates a rollout service with the default single-party registry.
+     *
+     * @param port TCP port to listen on
+     * @param bindHost interface address to bind
+     * @param config episode configuration
+     * @param rolloutWorkers number of rollout worker threads, or {@code 0} for auto
+     */
     public RolloutService(int port, String bindHost, EpisodeConfig config, int rolloutWorkers) {
         this(port, bindHost, RLPartyRegistry.createEpisodeFactory(config, RLPartyRegistry.DEFAULT_SINGLE_PARTY), rolloutWorkers);
     }
 
+    /**
+     * Creates a rollout service backed by a custom episode factory.
+     *
+     * @param port TCP port to listen on
+     * @param bindHost interface address to bind
+     * @param episodeFactory factory used to create rollout episodes
+     * @param rolloutWorkers number of rollout worker threads, or {@code 0} for auto
+     */
     public RolloutService(int port, String bindHost, RLEpisodeFactory episodeFactory, int rolloutWorkers) {
         this(port, bindHost, episodeFactory, rolloutWorkers, false);
     }
 
+    /**
+     * Creates a rollout service backed by a custom episode factory.
+     *
+     * @param port TCP port to listen on
+     * @param bindHost interface address to bind
+     * @param episodeFactory factory used to create rollout episodes
+     * @param rolloutWorkers number of rollout worker threads, or {@code 0} for auto
+     * @param vineEnabled whether VinePPO snapshot support is enabled
+     */
     public RolloutService(int port, String bindHost, RLEpisodeFactory episodeFactory, int rolloutWorkers,
             boolean vineEnabled) {
         this.port = port;
@@ -72,6 +110,11 @@ public class RolloutService {
         this.privilegedStateEncoder = new PrivilegedStateEncoder();
     }
 
+    /**
+     * Starts the blocking server loop and serves clients until shutdown is requested.
+     *
+     * @throws IOException if the socket cannot be created or the client stream fails
+     */
     public void serveForever() throws IOException {
         try (ServerSocket serverSocket = new ServerSocket(port, 1, InetAddress.getByName(bindHost))) {
             String workerLabel = rolloutWorkers > 0 ? Integer.toString(rolloutWorkers) : "auto";

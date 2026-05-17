@@ -63,11 +63,12 @@ loadScripts(document, 'script');</script>
 <li><a href="#ZERO_PROFILE" tabindex="0">ZERO_PROFILE</a></li>
 <li><a href="#WARNED_IDS" tabindex="0">WARNED_IDS</a></li>
 <li><a href="#profiles" tabindex="0">profiles</a></li>
+<li><a href="#strict" tabindex="0">strict</a></li>
 </ol>
 </li>
 <li><a href="#constructor-detail" tabindex="0">コンストラクタの詳細</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E()" tabindex="0">CapabilityProfileStore()</a></li>
+<li><a href="#%3Cinit%3E(boolean)" tabindex="0">CapabilityProfileStore(boolean)</a></li>
 <li><a href="#%3Cinit%3E(java.lang.String)" tabindex="0">CapabilityProfileStore(String)</a></li>
 </ol>
 </li>
@@ -76,7 +77,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#empty()" tabindex="0">empty()</a></li>
 <li><a href="#getProfile(model.type.CharacterId)" tabindex="0">getProfile(CharacterId)</a></li>
 <li><a href="#loadFromFile(java.lang.String)" tabindex="0">loadFromFile(String)</a></li>
-<li><a href="#extractDouble(java.lang.String,java.lang.String)" tabindex="0">extractDouble(String, String)</a></li>
+<li><a href="#extractDouble(com.google.gson.JsonObject,java.lang.String)" tabindex="0">extractDouble(JsonObject, String)</a></li>
 </ol>
 </li>
 </ol>
@@ -101,7 +102,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Loads and caches character capability profiles from a JSON file.
 
 <p>Profiles are read once at construction time and never reloaded.
-If a character ID is not found, all four scores default to <code>[0,0,0,0]</code>
+If a character ID is not found, all scores default to zero
 and a warning is printed at most once per missing ID per JVM process.</div>
 </div>
 </section>
@@ -119,12 +120,15 @@ and a warning is printed at most once per missing ID per JVM process.</div>
 <div class="col-first even-row-color"><code>private final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>,<wbr>double[]&gt;</code></div>
 <div class="col-second even-row-color"><code><a href="#profiles" class="member-name-link">profiles</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>private static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="java.util内のクラスまたはインタフェース" class="external-link">Set</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;</code></div>
-<div class="col-second odd-row-color"><code><a href="#WARNED_IDS" class="member-name-link">WARNED_IDS</a></code></div>
+<div class="col-first odd-row-color"><code>private final boolean</code></div>
+<div class="col-second odd-row-color"><code><a href="#strict" class="member-name-link">strict</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>private static final double[]</code></div>
-<div class="col-second even-row-color"><code><a href="#ZERO_PROFILE" class="member-name-link">ZERO_PROFILE</a></code></div>
+<div class="col-first even-row-color"><code>private static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="java.util内のクラスまたはインタフェース" class="external-link">Set</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#WARNED_IDS" class="member-name-link">WARNED_IDS</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private static final double[]</code></div>
+<div class="col-second odd-row-color"><code><a href="#ZERO_PROFILE" class="member-name-link">ZERO_PROFILE</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -138,7 +142,7 @@ and a warning is printed at most once per missing ID per JVM process.</div>
 <div class="table-header col-second">コンストラクタ</div>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color"><code>private </code></div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E()" class="member-name-link">CapabilityProfileStore</a>()</code></div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(boolean)" class="member-name-link">CapabilityProfileStore</a><wbr>(boolean&nbsp;strict)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code>&nbsp;</code></div>
 <div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(java.lang.String)" class="member-name-link">CapabilityProfileStore</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;path)</code></div>
@@ -163,7 +167,7 @@ and a warning is printed at most once per missing ID per JVM process.</div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#empty()" class="member-name-link">empty</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#extractDouble(java.lang.String,java.lang.String)" class="member-name-link">extractDouble</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;block,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#extractDouble(com.google.gson.JsonObject,java.lang.String)" class="member-name-link">extractDouble</a><wbr>(com.google.gson.JsonObject&nbsp;block,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;key)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double[]</code></div>
@@ -215,6 +219,14 @@ and a warning is printed at most once per missing ID per JVM process.</div>
 </div>
 </section>
 </li>
+<li>
+<section class="detail" id="strict">
+<h3>strict</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">strict</span></div>
+</div>
+</section>
+</li>
 </ul>
 </section>
 </li>
@@ -224,10 +236,10 @@ and a warning is printed at most once per missing ID per JVM process.</div>
 <h2>コンストラクタの詳細</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;()">
+<section class="detail" id="&lt;init&gt;(boolean)">
 <h3>CapabilityProfileStore</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="element-name">CapabilityProfileStore</span>()</div>
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="element-name">CapabilityProfileStore</span><wbr><span class="parameters">(boolean&nbsp;strict)</span></div>
 </div>
 </section>
 </li>
@@ -267,13 +279,12 @@ If the file cannot be read, an empty store is used and a warning is printed.</di
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">getProfile</span><wbr><span class="parameters">(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id)</span></div>
 <div class="block">Returns the capability profile for the given character ID.
-If no profile is found, returns <code>[0.0, 0.0, 0.0, 0.0]</code> and logs a one-time warning.</div>
+If no profile is found, returns zeros and logs a one-time warning.</div>
 <dl class="notes">
 <dt>パラメータ:</dt>
 <dd><code>id</code> - character ID</dd>
 <dt>戻り値:</dt>
-<dd>double array of length 4: [off_field_ratio, team_buff_score,
-        self_enhancement_score, energy_gen_score]</dd>
+<dd>capability profile values in <a href="CapabilityProfile.html" title="mechanics.rl内のクラス"><code>CapabilityProfile</code></a> order</dd>
 </dl>
 </div>
 </section>
@@ -287,10 +298,10 @@ If no profile is found, returns <code>[0.0, 0.0, 0.0, 0.0]</code> and logs a one
 </section>
 </li>
 <li>
-<section class="detail" id="extractDouble(java.lang.String,java.lang.String)">
+<section class="detail" id="extractDouble(com.google.gson.JsonObject,java.lang.String)">
 <h3>extractDouble</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">extractDouble</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;block,
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">extractDouble</span><wbr><span class="parameters">(com.google.gson.JsonObject&nbsp;block,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;key)</span></div>
 </div>
 </section>

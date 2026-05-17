@@ -65,6 +65,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#startTime" tabindex="0">startTime</a></li>
 <li><a href="#excludeChars" tabindex="0">excludeChars</a></li>
 <li><a href="#targetElement" tabindex="0">targetElement</a></li>
+<li><a href="#sourceCharacterId" tabindex="0">sourceCharacterId</a></li>
 </ol>
 </li>
 <li><a href="#constructor-detail" tabindex="0">コンストラクタの詳細</a>
@@ -80,13 +81,19 @@ loadScripts(document, 'script');</script>
 <li><a href="#getDisplayName()" tabindex="0">getDisplayName()</a></li>
 <li><a href="#getName()" tabindex="0">getName()</a></li>
 <li><a href="#getId()" tabindex="0">getId()</a></li>
+<li><a href="#getSourceCharacterId()" tabindex="0">getSourceCharacterId()</a></li>
+<li><a href="#sourcedBy(model.type.CharacterId)" tabindex="0">sourcedBy(CharacterId)</a></li>
 <li><a href="#getLogicKey()" tabindex="0">getLogicKey()</a></li>
+<li><a href="#getStartTime()" tabindex="0">getStartTime()</a></li>
+<li><a href="#getExpirationTime()" tabindex="0">getExpirationTime()</a></li>
+<li><a href="#restoreTimes(double,double)" tabindex="0">restoreTimes(double, double)</a></li>
 <li><a href="#exclude(java.lang.String...)" tabindex="0">exclude(String...)</a></li>
 <li><a href="#exclude(model.type.CharacterId...)" tabindex="0">exclude(CharacterId...)</a></li>
 <li><a href="#forElement(model.type.Element)" tabindex="0">forElement(Element)</a></li>
 <li><a href="#appliesToCharacter(model.entity.Character)" tabindex="0">appliesToCharacter(Character)</a></li>
 <li><a href="#apply(model.stats.StatsContainer,double)" tabindex="0">apply(StatsContainer, double)</a></li>
 <li><a href="#isExpired(double)" tabindex="0">isExpired(double)</a></li>
+<li><a href="#getRemainingDuration(double)" tabindex="0">getRemainingDuration(double)</a></li>
 <li><a href="#applyStats(model.stats.StatsContainer,double)" tabindex="0">applyStats(StatsContainer, double)</a></li>
 </ol>
 </li>
@@ -144,12 +151,15 @@ restricted to certain characters (<a href="#exclude(java.lang.String...)"><code>
 <div class="col-first odd-row-color"><code>protected <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#name" class="member-name-link">name</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>protected double</code></div>
-<div class="col-second even-row-color"><code><a href="#startTime" class="member-name-link">startTime</a></code></div>
+<div class="col-first even-row-color"><code>protected <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></code></div>
+<div class="col-second even-row-color"><code><a href="#sourceCharacterId" class="member-name-link">sourceCharacterId</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>protected <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#targetElement" class="member-name-link">targetElement</a></code></div>
+<div class="col-first odd-row-color"><code>protected double</code></div>
+<div class="col-second odd-row-color"><code><a href="#startTime" class="member-name-link">startTime</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>protected <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a></code></div>
+<div class="col-second even-row-color"><code><a href="#targetElement" class="member-name-link">targetElement</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -174,12 +184,17 @@ restricted to certain characters (<a href="#exclude(java.lang.String...)"><code>
 </div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.lang.String,mechanics.buff.BuffId)" class="member-name-link">Buff</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name,
  <a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a>&nbsp;id)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Creates a permanent buff with an explicit <a href="BuffId.html" title="mechanics.buffの列挙クラス"><code>BuffId</code></a>.</div>
+</div>
 <div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(java.lang.String,mechanics.buff.BuffId,double,double)" class="member-name-link">Buff</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name,
  <a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a>&nbsp;id,
  double&nbsp;duration,
  double&nbsp;currentTime)</code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Creates a time-limited buff active from <code>currentTime</code> for <code>duration</code> seconds,
+with an explicit <a href="BuffId.html" title="mechanics.buffの列挙クラス"><code>BuffId</code></a> for typed identity.</div>
+</div>
 </div>
 </section>
 </li>
@@ -197,7 +212,8 @@ restricted to certain characters (<a href="#exclude(java.lang.String...)"><code>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#appliesToCharacter(model.entity.Character)" class="member-name-link">appliesToCharacter</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns true if this buff applies to the given character.</div>
+<div class="block">Returns <code>true</code> if this buff applies to the given character, taking
+exclusion list and element restriction into account.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#apply(model.stats.StatsContainer,double)" class="member-name-link">apply</a><wbr>(<a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;stats,
@@ -232,23 +248,56 @@ falls within the active window <code>[startTime, expirationTime)</code>.</div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the display label of this buff.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getId()" class="member-name-link">getId</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLogicKey()" class="member-name-link">getLogicKey</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getExpirationTime()" class="member-name-link">getExpirationTime</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the simulation time when this buff expires.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getId()" class="member-name-link">getId</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns a stable logical key for de-duplication and bookkeeping.</div>
+<div class="block">Returns the typed buff identifier.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getName()" class="member-name-link">getName</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLogicKey()" class="member-name-link">getLogicKey</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns a stable logical key for de-duplication and bookkeeping.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getName()" class="member-name-link">getName</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the display label of this buff.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRemainingDuration(double)" class="member-name-link">getRemainingDuration</a><wbr>(double&nbsp;currentTime)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the remaining active duration in seconds, or 0 if already expired.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSourceCharacterId()" class="member-name-link">getSourceCharacterId</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the character identifier of the buff source.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getStartTime()" class="member-name-link">getStartTime</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the simulation time when this buff started.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isExpired(double)" class="member-name-link">isExpired</a><wbr>(double&nbsp;currentTime)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns <code>true</code> if this buff has expired at the given simulation time.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#restoreTimes(double,double)" class="member-name-link">restoreTimes</a><wbr>(double&nbsp;savedStartTime,
+ double&nbsp;savedExpirationTime)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Restores the timing window of this buff to previously captured values.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Buff.html" title="mechanics.buff内のクラス">Buff</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#sourcedBy(model.type.CharacterId)" class="member-name-link">sourcedBy</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;sourceCharacterId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets the source character that emitted this buff.</div>
 </div>
 </div>
 </div>
@@ -315,6 +364,14 @@ falls within the active window <code>[startTime, expirationTime)</code>.</div>
 </div>
 </section>
 </li>
+<li>
+<section class="detail" id="sourceCharacterId">
+<h3>sourceCharacterId</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">protected</span>&nbsp;<span class="return-type"><a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></span>&nbsp;<span class="element-name">sourceCharacterId</span></div>
+</div>
+</section>
+</li>
 </ul>
 </section>
 </li>
@@ -348,6 +405,15 @@ falls within the active window <code>[startTime, expirationTime)</code>.</div>
  <a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a>&nbsp;id,
  double&nbsp;duration,
  double&nbsp;currentTime)</span></div>
+<div class="block">Creates a time-limited buff active from <code>currentTime</code> for <code>duration</code> seconds,
+with an explicit <a href="BuffId.html" title="mechanics.buffの列挙クラス"><code>BuffId</code></a> for typed identity.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>name</code> - display name used for logging and de-duplication</dd>
+<dd><code>id</code> - typed buff identifier referenced by simulator logic</dd>
+<dd><code>duration</code> - how long the buff lasts in simulation seconds</dd>
+<dd><code>currentTime</code> - simulation time at which the buff starts</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -371,6 +437,12 @@ falls within the active window <code>[startTime, expirationTime)</code>.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">Buff</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name,
  <a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a>&nbsp;id)</span></div>
+<div class="block">Creates a permanent buff with an explicit <a href="BuffId.html" title="mechanics.buffの列挙クラス"><code>BuffId</code></a>.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>name</code> - display name of the buff</dd>
+<dd><code>id</code> - typed buff identifier referenced by simulator logic</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -416,6 +488,39 @@ for simulator logic.</div>
 <h3>getId</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a></span>&nbsp;<span class="element-name">getId</span>()</div>
+<div class="block">Returns the typed buff identifier.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd><a href="BuffId.html" title="mechanics.buffの列挙クラス"><code>BuffId</code></a> for this buff</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getSourceCharacterId()">
+<h3>getSourceCharacterId</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></span>&nbsp;<span class="element-name">getSourceCharacterId</span>()</div>
+<div class="block">Returns the character identifier of the buff source.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>source <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス"><code>CharacterId</code></a> (or <a href="../../model/type/CharacterId.html#UNKNOWN"><code>CharacterId.UNKNOWN</code></a> if not set)</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="sourcedBy(model.type.CharacterId)">
+<h3>sourcedBy</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="Buff.html" title="mechanics.buff内のクラス">Buff</a></span>&nbsp;<span class="element-name">sourcedBy</span><wbr><span class="parameters">(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;sourceCharacterId)</span></div>
+<div class="block">Sets the source character that emitted this buff. Returns <code>this</code> for chaining.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>sourceCharacterId</code> - character that is the origin of this buff</dd>
+<dt>戻り値:</dt>
+<dd><code>this</code> for fluent chaining</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -437,11 +542,59 @@ instances without depending on display labels alone.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="getStartTime()">
+<h3>getStartTime</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getStartTime</span>()</div>
+<div class="block">Returns the simulation time when this buff started.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>start time in seconds</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getExpirationTime()">
+<h3>getExpirationTime</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getExpirationTime</span>()</div>
+<div class="block">Returns the simulation time when this buff expires.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>expiration time in seconds</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="restoreTimes(double,double)">
+<h3>restoreTimes</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">restoreTimes</span><wbr><span class="parameters">(double&nbsp;savedStartTime,
+ double&nbsp;savedExpirationTime)</span></div>
+<div class="block">Restores the timing window of this buff to previously captured values.
+Used only for snapshot restore.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>savedStartTime</code> - saved start time</dd>
+<dd><code>savedExpirationTime</code> - saved expiration time</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="exclude(java.lang.String...)">
 <h3>exclude</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="Buff.html" title="mechanics.buff内のクラス">Buff</a></span>&nbsp;<span class="element-name">exclude</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>...&nbsp;names)</span></div>
-<div class="block">Exclude specific characters from receiving this buff. Returns this for chaining.</div>
+<div class="block">Exclude specific characters from receiving this buff. Returns <code>this</code> for chaining.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>names</code> - display names of characters to exclude</dd>
+<dt>戻り値:</dt>
+<dd><code>this</code> for fluent chaining</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -450,7 +603,13 @@ instances without depending on display labels alone.</div>
 <h3>exclude</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="Buff.html" title="mechanics.buff内のクラス">Buff</a></span>&nbsp;<span class="element-name">exclude</span><wbr><span class="parameters">(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>...&nbsp;ids)</span></div>
-<div class="block">Exclude specific characters from receiving this buff. Returns this for chaining.</div>
+<div class="block">Exclude specific characters from receiving this buff. Returns <code>this</code> for chaining.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>ids</code> - character identifiers to exclude</dd>
+<dt>戻り値:</dt>
+<dd><code>this</code> for fluent chaining</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -459,7 +618,13 @@ instances without depending on display labels alone.</div>
 <h3>forElement</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="Buff.html" title="mechanics.buff内のクラス">Buff</a></span>&nbsp;<span class="element-name">forElement</span><wbr><span class="parameters">(<a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element)</span></div>
-<div class="block">Restrict this buff to characters with the given element. Returns this for chaining.</div>
+<div class="block">Restrict this buff to characters with the given element. Returns <code>this</code> for chaining.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>element</code> - element to which the buff is restricted</dd>
+<dt>戻り値:</dt>
+<dd><code>this</code> for fluent chaining</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -468,7 +633,14 @@ instances without depending on display labels alone.</div>
 <h3>appliesToCharacter</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">appliesToCharacter</span><wbr><span class="parameters">(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character)</span></div>
-<div class="block">Returns true if this buff applies to the given character.</div>
+<div class="block">Returns <code>true</code> if this buff applies to the given character, taking
+exclusion list and element restriction into account.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>character</code> - candidate character to receive the buff</dd>
+<dt>戻り値:</dt>
+<dd><code>true</code> if the buff should apply to the character</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -500,6 +672,21 @@ Logs an informational message for Ineffa/Columbina when the buff is inactive.</d
 <dd><code>currentTime</code> - current simulation time in seconds</dd>
 <dt>戻り値:</dt>
 <dd><code>true</code> when the buff window has closed</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getRemainingDuration(double)">
+<h3>getRemainingDuration</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getRemainingDuration</span><wbr><span class="parameters">(double&nbsp;currentTime)</span></div>
+<div class="block">Returns the remaining active duration in seconds, or 0 if already expired.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>currentTime</code> - current simulation time</dd>
+<dt>戻り値:</dt>
+<dd>non-negative remaining seconds</dd>
 </dl>
 </div>
 </section>

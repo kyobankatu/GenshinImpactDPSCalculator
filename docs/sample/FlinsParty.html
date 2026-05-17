@@ -87,6 +87,11 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">FlinsParty</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Object</a></span></div>
+<div class="block">Sample entry point for the custom Flins / Ineffa / Columbina / Sucrose party.
+
+<p>Optimizes artifacts via <a href="../mechanics/optimization/OptimizerPipeline.html" title="mechanics.optimization内のクラス"><code>OptimizerPipeline</code></a>, executes a scripted
+three-cycle rotation, and writes both a text report and an interactive HTML
+report under <code>output/</code>.</div>
 </div>
 </section>
 <section class="summary">
@@ -118,30 +123,46 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#burst(simulation.CombatSimulator,java.lang.String)" class="member-name-link">burst</a><wbr>(<a href="../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;characterName)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Issues an elemental burst action for the named character.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#createSimulator(java.util.Map,java.util.Map)" class="member-name-link">createSimulator</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;erTargets,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/StatType.html" title="model.typeの列挙クラス">StatType</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Integer</a>&gt;&gt;&nbsp;partyManualRolls)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Creates and configures a fresh <a href="../simulation/CombatSimulator.html" title="simulation内のクラス"><code>CombatSimulator</code></a> for one optimization
+or final-execution pass.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#executeRotation(simulation.CombatSimulator)" class="member-name-link">executeRotation</a><wbr>(<a href="../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Runs the scripted Flins-party rotation against the given simulator.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#main(java.lang.String%5B%5D)" class="member-name-link">main</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>[]&nbsp;args)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Application entry point.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#normal(simulation.CombatSimulator,java.lang.String)" class="member-name-link">normal</a><wbr>(<a href="../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;characterName)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Issues a normal attack action for the named character.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#setupParty(simulation.CombatSimulator,java.util.Map,java.util.Map)" class="member-name-link">setupParty</a><wbr>(<a href="../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;erTargets,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/StatType.html" title="model.typeの列挙クラス">StatType</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Integer</a>&gt;&gt;&nbsp;partyManualRolls)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Builds and registers all four party members, applying ER and roll
+overrides and elemental resonances.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#skill(simulation.CombatSimulator,java.lang.String)" class="member-name-link">skill</a><wbr>(<a href="../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;characterName)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Issues an elemental skill action for the named character.</div>
+</div>
 </div>
 </div>
 </div>
@@ -180,6 +201,11 @@ loadScripts(document, 'script');</script>
 <h3>main</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">main</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>[]&nbsp;args)</span></div>
+<div class="block">Application entry point.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>args</code> - command-line arguments (unused)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -189,6 +215,16 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a></span>&nbsp;<span class="element-name">createSimulator</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;erTargets,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/StatType.html" title="model.typeの列挙クラス">StatType</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Integer</a>&gt;&gt;&nbsp;partyManualRolls)</span></div>
+<div class="block">Creates and configures a fresh <a href="../simulation/CombatSimulator.html" title="simulation内のクラス"><code>CombatSimulator</code></a> for one optimization
+or final-execution pass.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>erTargets</code> - per-character ER targets (may be <code>null</code>)</dd>
+<dd><code>partyManualRolls</code> - per-character manual artifact roll overrides
+                        (may be <code>null</code>)</dd>
+<dt>戻り値:</dt>
+<dd>a configured simulator with party, enemy, and moonsign set up</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -197,6 +233,11 @@ loadScripts(document, 'script');</script>
 <h3>executeRotation</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">executeRotation</span><wbr><span class="parameters">(<a href="../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</span></div>
+<div class="block">Runs the scripted Flins-party rotation against the given simulator.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>sim</code> - simulator to act upon</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -206,6 +247,12 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">normal</span><wbr><span class="parameters">(<a href="../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;characterName)</span></div>
+<div class="block">Issues a normal attack action for the named character.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>sim</code> - simulator</dd>
+<dd><code>characterName</code> - character display name</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -215,6 +262,12 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">skill</span><wbr><span class="parameters">(<a href="../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;characterName)</span></div>
+<div class="block">Issues an elemental skill action for the named character.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>sim</code> - simulator</dd>
+<dd><code>characterName</code> - character display name</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -224,6 +277,12 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">burst</span><wbr><span class="parameters">(<a href="../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;characterName)</span></div>
+<div class="block">Issues an elemental burst action for the named character.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>sim</code> - simulator</dd>
+<dd><code>characterName</code> - character display name</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -234,6 +293,14 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setupParty</span><wbr><span class="parameters">(<a href="../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;erTargets,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/StatType.html" title="model.typeの列挙クラス">StatType</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Integer.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Integer</a>&gt;&gt;&nbsp;partyManualRolls)</span></div>
+<div class="block">Builds and registers all four party members, applying ER and roll
+overrides and elemental resonances.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>sim</code> - simulator to populate</dd>
+<dd><code>erTargets</code> - per-character minimum ER targets</dd>
+<dd><code>partyManualRolls</code> - per-character manual artifact substat roll overrides</dd>
+</dl>
 </div>
 </section>
 </li>

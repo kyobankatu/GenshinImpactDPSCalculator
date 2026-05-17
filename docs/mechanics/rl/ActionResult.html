@@ -60,6 +60,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#field-detail" tabindex="0">フィールド詳細</a>
 <ol class="toc-list">
 <li><a href="#observation" tabindex="0">observation</a></li>
+<li><a href="#privilegedObservation" tabindex="0">privilegedObservation</a></li>
 <li><a href="#actionMask" tabindex="0">actionMask</a></li>
 <li><a href="#reward" tabindex="0">reward</a></li>
 <li><a href="#done" tabindex="0">done</a></li>
@@ -69,11 +70,12 @@ loadScripts(document, 'script');</script>
 <li><a href="#timeDelta" tabindex="0">timeDelta</a></li>
 <li><a href="#executedActionId" tabindex="0">executedActionId</a></li>
 <li><a href="#stepCount" tabindex="0">stepCount</a></li>
+<li><a href="#episodeRoleSummary" tabindex="0">episodeRoleSummary</a></li>
 </ol>
 </li>
 <li><a href="#constructor-detail" tabindex="0">コンストラクタの詳細</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(double%5B%5D,double%5B%5D,double,boolean,boolean,double,double,double,int,int)" tabindex="0">ActionResult(double[], double[], double, boolean, boolean, double, double, double, int, int)</a></li>
+<li><a href="#%3Cinit%3E(double%5B%5D,double%5B%5D,double%5B%5D,double,boolean,boolean,double,double,double,int,int,mechanics.rl.EpisodeRoleSummary)" tabindex="0">ActionResult(double[], double[], double[], double, boolean, boolean, double, double, double, int, int, EpisodeRoleSummary)</a></li>
 </ol>
 </li>
 </ol>
@@ -107,34 +109,64 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color"><code>final double[]</code></div>
 <div class="col-second even-row-color"><code><a href="#actionMask" class="member-name-link">actionMask</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Action mask (1.0 = legal, 0.0 = illegal) for the next step.</div>
+</div>
 <div class="col-first odd-row-color"><code>final double</code></div>
 <div class="col-second odd-row-color"><code><a href="#damageDelta" class="member-name-link">damageDelta</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Damage dealt during this step.</div>
+</div>
 <div class="col-first even-row-color"><code>final boolean</code></div>
 <div class="col-second even-row-color"><code><a href="#done" class="member-name-link">done</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>final int</code></div>
-<div class="col-second odd-row-color"><code><a href="#executedActionId" class="member-name-link">executedActionId</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Whether the episode terminated after this step.</div>
+</div>
+<div class="col-first odd-row-color"><code>final <a href="EpisodeRoleSummary.html" title="mechanics.rl内のクラス">EpisodeRoleSummary</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#episodeRoleSummary" class="member-name-link">episodeRoleSummary</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Per-role episode-level summary, populated when <code>done == true</code>.</div>
+</div>
+<div class="col-first even-row-color"><code>final int</code></div>
+<div class="col-second even-row-color"><code><a href="#executedActionId" class="member-name-link">executedActionId</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Action id that was actually executed (may differ on no-op).</div>
+</div>
+<div class="col-first odd-row-color"><code>final double[]</code></div>
+<div class="col-second odd-row-color"><code><a href="#observation" class="member-name-link">observation</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Next observation vector exposed to the policy.</div>
+</div>
 <div class="col-first even-row-color"><code>final double[]</code></div>
-<div class="col-second even-row-color"><code><a href="#observation" class="member-name-link">observation</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-second even-row-color"><code><a href="#privilegedObservation" class="member-name-link">privilegedObservation</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Privileged (critic-only) observation vector, may be null when not used.</div>
+</div>
 <div class="col-first odd-row-color"><code>final double</code></div>
 <div class="col-second odd-row-color"><code><a href="#reward" class="member-name-link">reward</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Shaped reward emitted for this step.</div>
+</div>
 <div class="col-first even-row-color"><code>final int</code></div>
 <div class="col-second even-row-color"><code><a href="#stepCount" class="member-name-link">stepCount</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Number of completed steps in the episode so far.</div>
+</div>
 <div class="col-first odd-row-color"><code>final double</code></div>
 <div class="col-second odd-row-color"><code><a href="#timeDelta" class="member-name-link">timeDelta</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Simulator time elapsed during this step (seconds).</div>
+</div>
 <div class="col-first even-row-color"><code>final double</code></div>
 <div class="col-second even-row-color"><code><a href="#totalDamage" class="member-name-link">totalDamage</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Cumulative damage dealt within the current episode after this step.</div>
+</div>
 <div class="col-first odd-row-color"><code>final boolean</code></div>
 <div class="col-second odd-row-color"><code><a href="#validAction" class="member-name-link">validAction</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Whether the requested action was legal under the action mask.</div>
+</div>
 </div>
 </section>
 </li>
@@ -146,7 +178,8 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">コンストラクタ</div>
 <div class="table-header col-last">説明</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(double%5B%5D,double%5B%5D,double,boolean,boolean,double,double,double,int,int)" class="member-name-link">ActionResult</a><wbr>(double[]&nbsp;observation,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(double%5B%5D,double%5B%5D,double%5B%5D,double,boolean,boolean,double,double,double,int,int,mechanics.rl.EpisodeRoleSummary)" class="member-name-link">ActionResult</a><wbr>(double[]&nbsp;observation,
+ double[]&nbsp;privilegedObservation,
  double[]&nbsp;actionMask,
  double&nbsp;reward,
  boolean&nbsp;done,
@@ -155,8 +188,11 @@ loadScripts(document, 'script');</script>
  double&nbsp;totalDamage,
  double&nbsp;timeDelta,
  int&nbsp;executedActionId,
- int&nbsp;stepCount)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+ int&nbsp;stepCount,
+ <a href="EpisodeRoleSummary.html" title="mechanics.rl内のクラス">EpisodeRoleSummary</a>&nbsp;episodeRoleSummary)</code></div>
+<div class="col-last even-row-color">
+<div class="block">Constructs a snapshot of one environment step result.</div>
+</div>
 </div>
 </section>
 </li>
@@ -183,6 +219,16 @@ loadScripts(document, 'script');</script>
 <h3>observation</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">observation</span></div>
+<div class="block">Next observation vector exposed to the policy.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="privilegedObservation">
+<h3>privilegedObservation</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">privilegedObservation</span></div>
+<div class="block">Privileged (critic-only) observation vector, may be null when not used.</div>
 </div>
 </section>
 </li>
@@ -191,6 +237,7 @@ loadScripts(document, 'script');</script>
 <h3>actionMask</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">actionMask</span></div>
+<div class="block">Action mask (1.0 = legal, 0.0 = illegal) for the next step.</div>
 </div>
 </section>
 </li>
@@ -199,6 +246,7 @@ loadScripts(document, 'script');</script>
 <h3>reward</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">reward</span></div>
+<div class="block">Shaped reward emitted for this step.</div>
 </div>
 </section>
 </li>
@@ -207,6 +255,7 @@ loadScripts(document, 'script');</script>
 <h3>done</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">done</span></div>
+<div class="block">Whether the episode terminated after this step.</div>
 </div>
 </section>
 </li>
@@ -215,6 +264,7 @@ loadScripts(document, 'script');</script>
 <h3>validAction</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">validAction</span></div>
+<div class="block">Whether the requested action was legal under the action mask.</div>
 </div>
 </section>
 </li>
@@ -223,6 +273,7 @@ loadScripts(document, 'script');</script>
 <h3>damageDelta</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">damageDelta</span></div>
+<div class="block">Damage dealt during this step.</div>
 </div>
 </section>
 </li>
@@ -231,6 +282,7 @@ loadScripts(document, 'script');</script>
 <h3>totalDamage</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">totalDamage</span></div>
+<div class="block">Cumulative damage dealt within the current episode after this step.</div>
 </div>
 </section>
 </li>
@@ -239,6 +291,7 @@ loadScripts(document, 'script');</script>
 <h3>timeDelta</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">timeDelta</span></div>
+<div class="block">Simulator time elapsed during this step (seconds).</div>
 </div>
 </section>
 </li>
@@ -247,6 +300,7 @@ loadScripts(document, 'script');</script>
 <h3>executedActionId</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">executedActionId</span></div>
+<div class="block">Action id that was actually executed (may differ on no-op).</div>
 </div>
 </section>
 </li>
@@ -255,6 +309,16 @@ loadScripts(document, 'script');</script>
 <h3>stepCount</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">stepCount</span></div>
+<div class="block">Number of completed steps in the episode so far.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="episodeRoleSummary">
+<h3>episodeRoleSummary</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type"><a href="EpisodeRoleSummary.html" title="mechanics.rl内のクラス">EpisodeRoleSummary</a></span>&nbsp;<span class="element-name">episodeRoleSummary</span></div>
+<div class="block">Per-role episode-level summary, populated when <code>done == true</code>.</div>
 </div>
 </section>
 </li>
@@ -267,10 +331,11 @@ loadScripts(document, 'script');</script>
 <h2>コンストラクタの詳細</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(double[],double[],double,boolean,boolean,double,double,double,int,int)">
+<section class="detail" id="&lt;init&gt;(double[],double[],double[],double,boolean,boolean,double,double,double,int,int,mechanics.rl.EpisodeRoleSummary)">
 <h3>ActionResult</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ActionResult</span><wbr><span class="parameters">(double[]&nbsp;observation,
+ double[]&nbsp;privilegedObservation,
  double[]&nbsp;actionMask,
  double&nbsp;reward,
  boolean&nbsp;done,
@@ -279,7 +344,24 @@ loadScripts(document, 'script');</script>
  double&nbsp;totalDamage,
  double&nbsp;timeDelta,
  int&nbsp;executedActionId,
- int&nbsp;stepCount)</span></div>
+ int&nbsp;stepCount,
+ <a href="EpisodeRoleSummary.html" title="mechanics.rl内のクラス">EpisodeRoleSummary</a>&nbsp;episodeRoleSummary)</span></div>
+<div class="block">Constructs a snapshot of one environment step result.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>observation</code> - next observation vector</dd>
+<dd><code>privilegedObservation</code> - privileged critic observation (nullable)</dd>
+<dd><code>actionMask</code> - legal-action mask for the next step</dd>
+<dd><code>reward</code> - shaped reward for this step</dd>
+<dd><code>done</code> - true if the episode terminated</dd>
+<dd><code>validAction</code> - true if the requested action was legal</dd>
+<dd><code>damageDelta</code> - damage dealt during this step</dd>
+<dd><code>totalDamage</code> - cumulative episode damage after this step</dd>
+<dd><code>timeDelta</code> - simulator time advanced this step (seconds)</dd>
+<dd><code>executedActionId</code> - action id actually executed</dd>
+<dd><code>stepCount</code> - completed step count after this step</dd>
+<dd><code>episodeRoleSummary</code> - terminal role summary, or null if not done</dd>
+</dl>
 </div>
 </section>
 </li>

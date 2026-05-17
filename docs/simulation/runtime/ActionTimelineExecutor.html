@@ -108,10 +108,14 @@ dispatch, animation-duration scaling, and timeline advancement.</div>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color"><code>private final <a href="../SimulationEventBus.html" title="simulation内のインタフェース">SimulationEventBus</a></code></div>
 <div class="col-second even-row-color"><code><a href="#eventBus" class="member-name-link">eventBus</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Event bus used to dispatch the post-resolution action event.</div>
+</div>
 <div class="col-first odd-row-color"><code>private final <a href="../CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#sim" class="member-name-link">sim</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Owning simulator.</div>
+</div>
 </div>
 </section>
 </li>
@@ -145,7 +149,10 @@ dispatch, animation-duration scaling, and timeline advancement.</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyAscendantBlessingIfNeeded(model.entity.Character,simulation.action.AttackAction)" class="member-name-link">applyAscendantBlessingIfNeeded</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character,
  <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Applies the Ascendant Blessing follow-up when a non-Lunar character uses a skill or burst
+while the party is in <code>ASCENDANT_GLEAM</code> Moonsign state.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#execute(model.type.CharacterId,simulation.action.AttackAction)" class="member-name-link">execute</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
  <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action)</code></div>
@@ -154,11 +161,16 @@ dispatch, animation-duration scaling, and timeline advancement.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#requireCharacter(model.type.CharacterId)" class="member-name-link">requireCharacter</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Looks up a party member by id, throwing if not found.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resolveAnimationDuration(model.entity.Character,simulation.action.AttackAction)" class="member-name-link">resolveAnimationDuration</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character,
  <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Computes the effective animation duration of the action, applying ATK_SPD scaling
+to normal and charged attacks.</div>
+</div>
 </div>
 </div>
 </div>
@@ -181,6 +193,7 @@ dispatch, animation-duration scaling, and timeline advancement.</div>
 <h3>sim</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="../CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a></span>&nbsp;<span class="element-name">sim</span></div>
+<div class="block">Owning simulator.</div>
 </div>
 </section>
 </li>
@@ -189,6 +202,7 @@ dispatch, animation-duration scaling, and timeline advancement.</div>
 <h3>eventBus</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="../SimulationEventBus.html" title="simulation内のインタフェース">SimulationEventBus</a></span>&nbsp;<span class="element-name">eventBus</span></div>
+<div class="block">Event bus used to dispatch the post-resolution action event.</div>
 </div>
 </section>
 </li>
@@ -243,6 +257,13 @@ dispatch, animation-duration scaling, and timeline advancement.</div>
 <h3>requireCharacter</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a></span>&nbsp;<span class="element-name">requireCharacter</span><wbr><span class="parameters">(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId)</span></div>
+<div class="block">Looks up a party member by id, throwing if not found.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>characterId</code> - character to find</dd>
+<dt>戻り値:</dt>
+<dd>resolved character</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -252,6 +273,13 @@ dispatch, animation-duration scaling, and timeline advancement.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">applyAscendantBlessingIfNeeded</span><wbr><span class="parameters">(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character,
  <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action)</span></div>
+<div class="block">Applies the Ascendant Blessing follow-up when a non-Lunar character uses a skill or burst
+while the party is in <code>ASCENDANT_GLEAM</code> Moonsign state.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>character</code> - acting character</dd>
+<dd><code>action</code> - executed action</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -261,6 +289,15 @@ dispatch, animation-duration scaling, and timeline advancement.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">resolveAnimationDuration</span><wbr><span class="parameters">(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character,
  <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action)</span></div>
+<div class="block">Computes the effective animation duration of the action, applying ATK_SPD scaling
+to normal and charged attacks.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>character</code> - acting character</dd>
+<dd><code>action</code> - executed action</dd>
+<dt>戻り値:</dt>
+<dd>effective animation duration in seconds</dd>
+</dl>
 </div>
 </section>
 </li>

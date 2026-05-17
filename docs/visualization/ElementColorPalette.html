@@ -116,11 +116,16 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#colorFor(model.type.Element,int)" class="member-name-link">colorFor</a><wbr>(<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element,
  int&nbsp;variant)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Picks a JS-literal color string for the given element and variant index.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>(package private) static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>[]</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#colorsFor(java.util.List,simulation.CombatSimulator)" class="member-name-link">colorsFor</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&nbsp;names,
  <a href="../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Returns chart colors for the given actor names, picking a variant per
+element so that multiple characters of the same element are distinguishable.</div>
+</div>
 </div>
 </div>
 </div>
@@ -160,6 +165,17 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>[]</span>&nbsp;<span class="element-name">colorsFor</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&nbsp;names,
  <a href="../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</span></div>
+<div class="block">Returns chart colors for the given actor names, picking a variant per
+element so that multiple characters of the same element are distinguishable.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>names</code> - actor display names to color</dd>
+<dd><code>sim</code> - combat simulator used to resolve each actor's element; may be
+             <code>null</code></dd>
+<dt>戻り値:</dt>
+<dd>JS-literal color strings (e.g. <code>"'#FF2222'"</code>) aligned with
+        <code>names</code></dd>
+</dl>
 </div>
 </section>
 </li>
@@ -169,6 +185,14 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">colorFor</span><wbr><span class="parameters">(<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element,
  int&nbsp;variant)</span></div>
+<div class="block">Picks a JS-literal color string for the given element and variant index.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>element</code> - element to color</dd>
+<dd><code>variant</code> - 0-based variant index used to disambiguate same-element actors</dd>
+<dt>戻り値:</dt>
+<dd>JS-literal hex color string</dd>
+</dl>
 </div>
 </section>
 </li>

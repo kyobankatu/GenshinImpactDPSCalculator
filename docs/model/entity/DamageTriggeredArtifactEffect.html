@@ -75,6 +75,8 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="horizontal-scroll">
 <div class="type-signature"><span class="modifiers">public interface </span><span class="element-name type-name-label">DamageTriggeredArtifactEffect</span></div>
+<div class="block">Capability for artifact sets whose 4pc bonus triggers when the wearer deals
+damage (e.g. damage-based stack counters).</div>
 </div>
 </section>
 <section class="summary">
@@ -95,7 +97,9 @@ loadScripts(document, 'script');</script>
  <a href="../../simulation/action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  double&nbsp;damage,
  <a href="Character.html" title="model.entity内のクラス">Character</a>&nbsp;owner)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Invoked after a damage instance from the wearer has been resolved.</div>
+</div>
 </div>
 </div>
 </div>
@@ -118,6 +122,14 @@ loadScripts(document, 'script');</script>
  <a href="../../simulation/action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  double&nbsp;damage,
  <a href="Character.html" title="model.entity内のクラス">Character</a>&nbsp;owner)</span></div>
+<div class="block">Invoked after a damage instance from the wearer has been resolved.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>sim</code> - active combat simulator</dd>
+<dd><code>action</code> - attack action that produced the damage</dd>
+<dd><code>damage</code> - final post-mitigation damage value</dd>
+<dd><code>owner</code> - artifact wearer</dd>
+</dl>
 </div>
 </section>
 </li>

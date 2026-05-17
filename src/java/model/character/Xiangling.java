@@ -19,14 +19,30 @@ import simulation.action.AttackAction;
 import simulation.action.CharacterActionRequest;
 import simulation.event.PeriodicDamageEvent;
 
+/**
+ * Xiangling character implementation with Guoba and Pyronado scheduling.
+ */
 public class Xiangling extends Character implements FormStateProvider {
 
     private int normalAttackStep = 0;
 
+    /**
+     * Constructs Xiangling with the shared talent data source.
+     *
+     * @param weapon equipped weapon
+     * @param artifacts equipped artifact set
+     */
     public Xiangling(Weapon weapon, ArtifactSet artifacts) {
         this(weapon, artifacts, TalentDataManager.getInstance());
     }
 
+    /**
+     * Constructs Xiangling with an explicit talent data source.
+     *
+     * @param weapon equipped weapon
+     * @param artifacts equipped artifact set
+     * @param talentData talent values backing this character
+     */
     public Xiangling(Weapon weapon, ArtifactSet artifacts, TalentDataSource talentData) {
         super(talentData);
         this.name = "Xiangling";
@@ -45,12 +61,23 @@ public class Xiangling extends Character implements FormStateProvider {
         setBurstCD(20.0);
     }
 
+    /**
+     * Returns whether Pyronado is currently active.
+     *
+     * @param currentTime current simulation time in seconds
+     * @return {@code true} while Xiangling's burst duration remains
+     */
     @Override
     public boolean isFormActive(double currentTime) {
         double duration = (this.constellation >= 4) ? 14.0 : 10.0;
         return (currentTime - getLastBurstTime()) < duration;
     }
 
+    /**
+     * Applies Xiangling's passive stat effects.
+     *
+     * @param stats stats container to modify
+     */
     @Override
     public void applyPassive(StatsContainer stats) {
         // "Crossfire" (Range +20%) -> Not stats
@@ -65,11 +92,22 @@ public class Xiangling extends Character implements FormStateProvider {
         // For simplicity in rotation, we can assume pickup.
     }
 
+    /**
+     * Returns Xiangling's burst energy cost.
+     *
+     * @return burst cost in energy
+     */
     @Override
     public double getEnergyCost() {
         return getTalentValue("Energy Cost", 80);
     }
 
+    /**
+     * Executes the requested combat action for Xiangling.
+     *
+     * @param request requested player action
+     * @param sim active combat simulator
+     */
     @Override
     public void onAction(CharacterActionRequest request, CombatSimulator sim) {
         switch (request.getKey()) {

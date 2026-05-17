@@ -76,6 +76,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#getRotationTime()" tabindex="0">getRotationTime()</a></li>
 <li><a href="#setRotationTime(double)" tabindex="0">setRotationTime(double)</a></li>
 <li><a href="#registerEvent(simulation.event.TimerEvent)" tabindex="0">registerEvent(TimerEvent)</a></li>
+<li><a href="#restoreTime(double,double)" tabindex="0">restoreTime(double, double)</a></li>
 <li><a href="#advanceTime(double)" tabindex="0">advanceTime(double)</a></li>
 </ol>
 </li>
@@ -173,8 +174,14 @@ loadScripts(document, 'script');</script>
 <div class="block">Registers a timer event in chronological order.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setRotationTime(double)" class="member-name-link">setRotationTime</a><wbr>(double&nbsp;rotationTime)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#restoreTime(double,double)" class="member-name-link">restoreTime</a><wbr>(double&nbsp;currentTime,
+ double&nbsp;rotationTime)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Restores the clock to a previously captured time pair and drops all pending events.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setRotationTime(double)" class="member-name-link">setRotationTime</a><wbr>(double&nbsp;rotationTime)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Explicitly records the latest rotation time marker.</div>
 </div>
 </div>
@@ -303,6 +310,21 @@ loadScripts(document, 'script');</script>
 <dl class="notes">
 <dt>パラメータ:</dt>
 <dd><code>event</code> - event to add</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="restoreTime(double,double)">
+<h3>restoreTime</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">restoreTime</span><wbr><span class="parameters">(double&nbsp;currentTime,
+ double&nbsp;rotationTime)</span></div>
+<div class="block">Restores the clock to a previously captured time pair and drops all pending events.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>currentTime</code> - time to restore</dd>
+<dd><code>rotationTime</code> - rotation time to restore</dd>
 </dl>
 </div>
 </section>

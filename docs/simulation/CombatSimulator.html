@@ -77,6 +77,11 @@ loadScripts(document, 'script');</script>
 <li><a href="#energyDistributor" tabindex="0">energyDistributor</a></li>
 <li><a href="#icdManager" tabindex="0">icdManager</a></li>
 <li><a href="#enableLogging" tabindex="0">enableLogging</a></li>
+<li><a href="#captureActionDirectDamage" tabindex="0">captureActionDirectDamage</a></li>
+<li><a href="#currentActionDirectDamageCapture" tabindex="0">currentActionDirectDamageCapture</a></li>
+<li><a href="#lastActionDirectDamageCapture" tabindex="0">lastActionDirectDamageCapture</a></li>
+<li><a href="#capturedActionDirectDamageActorId" tabindex="0">capturedActionDirectDamageActorId</a></li>
+<li><a href="#buffSourceStack" tabindex="0">buffSourceStack</a></li>
 <li><a href="#currentMoonsign" tabindex="0">currentMoonsign</a></li>
 </ol>
 </li>
@@ -105,6 +110,9 @@ loadScripts(document, 'script');</script>
 <li><a href="#applyTeamBuff(mechanics.buff.Buff)" tabindex="0">applyTeamBuff(Buff)</a></li>
 <li><a href="#applyTeamBuffNoStack(mechanics.buff.Buff)" tabindex="0">applyTeamBuffNoStack(Buff)</a></li>
 <li><a href="#applyFieldBuff(mechanics.buff.Buff)" tabindex="0">applyFieldBuff(Buff)</a></li>
+<li><a href="#pushBuffSource(model.type.CharacterId)" tabindex="0">pushBuffSource(CharacterId)</a></li>
+<li><a href="#popBuffSource()" tabindex="0">popBuffSource()</a></li>
+<li><a href="#getCurrentBuffSourceCharacterId()" tabindex="0">getCurrentBuffSourceCharacterId()</a></li>
 <li><a href="#getApplicableBuffs(model.entity.Character)" tabindex="0">getApplicableBuffs(Character)</a></li>
 <li><a href="#setMoonsign(simulation.CombatSimulator.Moonsign)" tabindex="0">setMoonsign(CombatSimulator.Moonsign)</a></li>
 <li><a href="#getMoonsign()" tabindex="0">getMoonsign()</a></li>
@@ -114,6 +122,10 @@ loadScripts(document, 'script');</script>
 <li><a href="#performAction(model.type.CharacterId,simulation.action.CharacterActionRequest)" tabindex="0">performAction(CharacterId, CharacterActionRequest)</a></li>
 <li><a href="#recordDamage(java.lang.String,double)" tabindex="0">recordDamage(String, double)</a></li>
 <li><a href="#recordDamage(model.type.CharacterId,double)" tabindex="0">recordDamage(CharacterId, double)</a></li>
+<li><a href="#beginActionDirectDamageCapture(model.type.CharacterId)" tabindex="0">beginActionDirectDamageCapture(CharacterId)</a></li>
+<li><a href="#captureResolvedActionDamage(model.type.CharacterId,double)" tabindex="0">captureResolvedActionDamage(CharacterId, double)</a></li>
+<li><a href="#endActionDirectDamageCapture()" tabindex="0">endActionDirectDamageCapture()</a></li>
+<li><a href="#getLastActionDirectDamageCapture()" tabindex="0">getLastActionDirectDamageCapture()</a></li>
 <li><a href="#getRotationTime()" tabindex="0">getRotationTime()</a></li>
 <li><a href="#setRotationTime(double)" tabindex="0">setRotationTime(double)</a></li>
 <li><a href="#printReport()" tabindex="0">printReport()</a></li>
@@ -137,7 +149,10 @@ loadScripts(document, 'script');</script>
 <li><a href="#getIcdManager()" tabindex="0">getIcdManager()</a></li>
 <li><a href="#applyAscendantBlessing(model.entity.Character)" tabindex="0">applyAscendantBlessing(Character)</a></li>
 <li><a href="#getTeamBuffList()" tabindex="0">getTeamBuffList()</a></li>
+<li><a href="#getFieldBuffList()" tabindex="0">getFieldBuffList()</a></li>
 <li><a href="#removeTeamBuffsById(mechanics.buff.BuffId)" tabindex="0">removeTeamBuffsById(BuffId)</a></li>
+<li><a href="#saveSnapshot()" tabindex="0">saveSnapshot()</a></li>
+<li><a href="#restoreSnapshot(simulation.SimulatorSnapshot)" tabindex="0">restoreSnapshot(SimulatorSnapshot)</a></li>
 <li><a href="#setECTimerRunning(boolean)" tabindex="0">setECTimerRunning(boolean)</a></li>
 <li><a href="#isECTimerRunning()" tabindex="0">isECTimerRunning()</a></li>
 <li><a href="#isThundercloudActive()" tabindex="0">isThundercloudActive()</a></li>
@@ -199,58 +214,119 @@ to helper collaborators.</div>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color"><code>private final <a href="runtime/ActionGateway.html" title="simulation.runtime内のクラス">ActionGateway</a></code></div>
 <div class="col-second even-row-color"><code><a href="#actionGateway" class="member-name-link">actionGateway</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Entry point that gates <a href="action/CharacterActionRequest.html" title="simulation.action内のクラス"><code>CharacterActionRequest</code></a> execution.</div>
+</div>
 <div class="col-first odd-row-color"><code>private final <a href="runtime/CombatActionResolver.html" title="simulation.runtime内のクラス">CombatActionResolver</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#actionResolver" class="member-name-link">actionResolver</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Resolves an attack action's damage without advancing time.</div>
+</div>
 <div class="col-first even-row-color"><code>private final <a href="runtime/ActionTimelineExecutor.html" title="simulation.runtime内のクラス">ActionTimelineExecutor</a></code></div>
 <div class="col-second even-row-color"><code><a href="#actionTimelineExecutor" class="member-name-link">actionTimelineExecutor</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Executes attack actions including animation-time advancement.</div>
+</div>
 <div class="col-first odd-row-color"><code>private final <a href="runtime/BuffManager.html" title="simulation.runtime内のクラス">BuffManager</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#buffManager" class="member-name-link">buffManager</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>private final <a href="CombatLogSink.html" title="simulation内のインタフェース">CombatLogSink</a></code></div>
-<div class="col-second even-row-color"><code><a href="#combatLogSink" class="member-name-link">combatLogSink</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Manages party / field buff lifetimes.</div>
+</div>
+<div class="col-first even-row-color"><code>private final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Deque.html" title="java.util内のクラスまたはインタフェース" class="external-link">Deque</a><wbr>&lt;<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#buffSourceStack" class="member-name-link">buffSourceStack</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Stack of buff sources used for attribution during nested triggers.</div>
+</div>
+<div class="col-first odd-row-color"><code>private boolean</code></div>
+<div class="col-second odd-row-color"><code><a href="#captureActionDirectDamage" class="member-name-link">captureActionDirectDamage</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Whether direct-damage capture is active for the in-progress action.</div>
+</div>
+<div class="col-first even-row-color"><code>private <a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></code></div>
+<div class="col-second even-row-color"><code><a href="#capturedActionDirectDamageActorId" class="member-name-link">capturedActionDirectDamageActorId</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Actor whose direct damage is being captured in the in-progress action.</div>
+</div>
+<div class="col-first odd-row-color"><code>private final <a href="CombatLogSink.html" title="simulation内のインタフェース">CombatLogSink</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#combatLogSink" class="member-name-link">combatLogSink</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Timeline log sink (text/HTML).</div>
+</div>
+<div class="col-first even-row-color"><code>private double</code></div>
+<div class="col-second even-row-color"><code><a href="#currentActionDirectDamageCapture" class="member-name-link">currentActionDirectDamageCapture</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Accumulator for direct damage of the in-progress action.</div>
+</div>
 <div class="col-first odd-row-color"><code>private <a href="CombatSimulator.Moonsign.html" title="simulationの列挙クラス">CombatSimulator.Moonsign</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#currentMoonsign" class="member-name-link">currentMoonsign</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Currently active Moonsign state for the party.</div>
+</div>
 <div class="col-first even-row-color"><code>private final <a href="DamageTracker.html" title="simulation内のインタフェース">DamageTracker</a></code></div>
 <div class="col-second even-row-color"><code><a href="#damageReport" class="member-name-link">damageReport</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Damage recorder and DPS reporter.</div>
+</div>
 <div class="col-first odd-row-color"><code>private boolean</code></div>
 <div class="col-second odd-row-color"><code><a href="#enableLogging" class="member-name-link">enableLogging</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Toggle for per-action console logging.</div>
+</div>
 <div class="col-first even-row-color"><code>private <a href="../model/entity/Enemy.html" title="model.entity内のクラス">Enemy</a></code></div>
 <div class="col-second even-row-color"><code><a href="#enemy" class="member-name-link">enemy</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Current enemy target, or <code>null</code> when none is set.</div>
+</div>
 <div class="col-first odd-row-color"><code>private final <a href="../mechanics/energy/EnergyDistributor.html" title="mechanics.energy内のクラス">EnergyDistributor</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#energyDistributor" class="member-name-link">energyDistributor</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Particle-to-energy distribution helper.</div>
+</div>
 <div class="col-first even-row-color"><code>private final <a href="SimulationEventBus.html" title="simulation内のインタフェース">SimulationEventBus</a></code></div>
 <div class="col-second even-row-color"><code><a href="#eventDispatcher" class="member-name-link">eventDispatcher</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Event subscription and dispatch bus.</div>
+</div>
 <div class="col-first odd-row-color"><code>private final <a href="../mechanics/element/ICDManager.html" title="mechanics.element内のクラス">ICDManager</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#icdManager" class="member-name-link">icdManager</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>private final <a href="runtime/MoonsignManager.html" title="simulation.runtime内のクラス">MoonsignManager</a></code></div>
-<div class="col-second even-row-color"><code><a href="#moonsignManager" class="member-name-link">moonsignManager</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>private final <a href="Party.html" title="simulation内のクラス">Party</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#party" class="member-name-link">party</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>private final <a href="runtime/ReactionState.html" title="simulation.runtime内のクラス">ReactionState</a></code></div>
-<div class="col-second even-row-color"><code><a href="#reactionState" class="member-name-link">reactionState</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>private final <a href="runtime/ReactionStateController.html" title="simulation.runtime内のクラス">ReactionStateController</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#reactionStateController" class="member-name-link">reactionStateController</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>private final <a href="runtime/SimulationClock.html" title="simulation.runtime内のクラス">SimulationClock</a></code></div>
-<div class="col-second even-row-color"><code><a href="#simulationClock" class="member-name-link">simulationClock</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>private final <a href="runtime/SwitchManager.html" title="simulation.runtime内のクラス">SwitchManager</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#switchManager" class="member-name-link">switchManager</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Internal Cooldown manager for element application.</div>
+</div>
+<div class="col-first even-row-color"><code>private double</code></div>
+<div class="col-second even-row-color"><code><a href="#lastActionDirectDamageCapture" class="member-name-link">lastActionDirectDamageCapture</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Cached direct damage value of the most recently completed action.</div>
+</div>
+<div class="col-first odd-row-color"><code>private final <a href="runtime/MoonsignManager.html" title="simulation.runtime内のクラス">MoonsignManager</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#moonsignManager" class="member-name-link">moonsignManager</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Manages Moonsign-related synergy bookkeeping.</div>
+</div>
+<div class="col-first even-row-color"><code>private final <a href="Party.html" title="simulation内のクラス">Party</a></code></div>
+<div class="col-second even-row-color"><code><a href="#party" class="member-name-link">party</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Party composition and active-character state.</div>
+</div>
+<div class="col-first odd-row-color"><code>private final <a href="runtime/ReactionState.html" title="simulation.runtime内のクラス">ReactionState</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#reactionState" class="member-name-link">reactionState</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Mutable elemental-reaction state (EC, Thundercloud).</div>
+</div>
+<div class="col-first even-row-color"><code>private final <a href="runtime/ReactionStateController.html" title="simulation.runtime内のクラス">ReactionStateController</a></code></div>
+<div class="col-second even-row-color"><code><a href="#reactionStateController" class="member-name-link">reactionStateController</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Controller exposing <a href="#reactionState"><code>reactionState</code></a> via legacy APIs.</div>
+</div>
+<div class="col-first odd-row-color"><code>private final <a href="runtime/SimulationClock.html" title="simulation.runtime内のクラス">SimulationClock</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#simulationClock" class="member-name-link">simulationClock</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Tracks simulated time and timer-event queue.</div>
+</div>
+<div class="col-first even-row-color"><code>private final <a href="runtime/SwitchManager.html" title="simulation.runtime内のクラス">SwitchManager</a></code></div>
+<div class="col-second even-row-color"><code><a href="#switchManager" class="member-name-link">switchManager</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Manages character swap policy and history.</div>
+</div>
 </div>
 </section>
 </li>
@@ -331,28 +407,51 @@ to helper collaborators.</div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Adds a non-stacking team buff.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getActiveCharacter()" class="member-name-link">getActiveCharacter</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#beginActionDirectDamageCapture(model.type.CharacterId)" class="member-name-link">beginActionDirectDamageCapture</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the active character.</div>
+<div class="block">Starts capturing the direct-damage portion (excluding reactions) of the next action.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getApplicableBuffs(model.entity.Character)" class="member-name-link">getApplicableBuffs</a><wbr>(<a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#captureResolvedActionDamage(model.type.CharacterId,double)" class="member-name-link">captureResolvedActionDamage</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId,
+ double&nbsp;damage)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns buffs applicable to the given character.</div>
+<div class="block">Accumulates resolved direct damage when capture is active for the matching actor.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCharacter(java.lang.String)" class="member-name-link">getCharacter</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#endActionDirectDamageCapture()" class="member-name-link">endActionDirectDamageCapture</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns a party member by name.</div>
+<div class="block">Ends the direct-damage capture session, freezing the result for <a href="#getLastActionDirectDamageCapture()"><code>getLastActionDirectDamageCapture()</code></a>.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCharacter(model.type.CharacterId)" class="member-name-link">getCharacter</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="CombatLogSink.html" title="simulation内のインタフェース">CombatLogSink</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCombatLogSink()" class="member-name-link">getCombatLogSink</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getActiveCharacter()" class="member-name-link">getActiveCharacter</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the active character.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getApplicableBuffs(model.entity.Character)" class="member-name-link">getApplicableBuffs</a><wbr>(<a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns buffs applicable to the given character.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCharacter(java.lang.String)" class="member-name-link">getCharacter</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns a party member by name.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCharacter(model.type.CharacterId)" class="member-name-link">getCharacter</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns a party member by character id.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="CombatLogSink.html" title="simulation内のインタフェース">CombatLogSink</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCombatLogSink()" class="member-name-link">getCombatLogSink</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the configured combat log sink.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentBuffSourceCharacterId()" class="member-name-link">getCurrentBuffSourceCharacterId</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the current buff-source attribution on top of the stack.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentTime()" class="member-name-link">getCurrentTime</a>()</code></div>
@@ -376,11 +475,23 @@ to helper collaborators.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../mechanics/energy/EnergyDistributor.html" title="mechanics.energy内のクラス">EnergyDistributor</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getEnergyDistributor()" class="member-name-link">getEnergyDistributor</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../mechanics/element/ICDManager.html" title="mechanics.element内のクラス">ICDManager</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getIcdManager()" class="member-name-link">getIcdManager</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the particle-to-energy distributor.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getFieldBuffList()" class="member-name-link">getFieldBuffList</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the live simulator-owned field buff list.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../mechanics/element/ICDManager.html" title="mechanics.element内のクラス">ICDManager</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getIcdManager()" class="member-name-link">getIcdManager</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the simulator ICD manager.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLastActionDirectDamageCapture()" class="member-name-link">getLastActionDirectDamageCapture</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the captured direct-damage value of the most recently completed action.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="CombatSimulator.Moonsign.html" title="simulationの列挙クラス">CombatSimulator.Moonsign</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMoonsign()" class="member-name-link">getMoonsign</a>()</code></div>
@@ -459,11 +570,15 @@ to helper collaborators.</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#performAction(model.type.CharacterId,simulation.action.AttackAction)" class="member-name-link">performAction</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
  <a href="action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Executes an attack action and advances time by its animation duration.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#performAction(model.type.CharacterId,simulation.action.CharacterActionRequest)" class="member-name-link">performAction</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
  <a href="action/CharacterActionRequest.html" title="simulation.action内のクラス">CharacterActionRequest</a>&nbsp;request)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Executes a typed action after applying cooldown and energy gates.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#performActionWithoutTimeAdvance(java.lang.String,simulation.action.AttackAction)" class="member-name-link">performActionWithoutTimeAdvance</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;charName,
  <a href="action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action)</code></div>
@@ -473,11 +588,23 @@ to helper collaborators.</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#performActionWithoutTimeAdvance(model.type.CharacterId,simulation.action.AttackAction)" class="member-name-link">performActionWithoutTimeAdvance</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
  <a href="action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Resolves an attack action without advancing simulation time.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#printReport()" class="member-name-link">printReport</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#popBuffSource()" class="member-name-link">popBuffSource</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Pops the most recent entry from the buff-source attribution stack.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#printReport()" class="member-name-link">printReport</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Prints a DPS summary report.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#pushBuffSource(model.type.CharacterId)" class="member-name-link">pushBuffSource</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;sourceCharacterId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Pushes a buff-source attribution onto the nested-source stack.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#recordDamage(java.lang.String,double)" class="member-name-link">recordDamage</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;charName,
@@ -488,7 +615,9 @@ to helper collaborators.</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#recordDamage(model.type.CharacterId,double)" class="member-name-link">recordDamage</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
  double&nbsp;dmg)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Records dealt damage under the given character id.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#registerEvent(simulation.event.TimerEvent)" class="member-name-link">registerEvent</a><wbr>(<a href="event/TimerEvent.html" title="simulation.event内のインタフェース">TimerEvent</a>&nbsp;event)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -496,7 +625,19 @@ to helper collaborators.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#removeTeamBuffsById(mechanics.buff.BuffId)" class="member-name-link">removeTeamBuffsById</a><wbr>(<a href="../mechanics/buff/BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a>&nbsp;buffId)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Removes all team buffs whose <a href="../mechanics/buff/BuffId.html" title="mechanics.buffの列挙クラス"><code>BuffId</code></a> matches the given id.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#restoreSnapshot(simulation.SimulatorSnapshot)" class="member-name-link">restoreSnapshot</a><wbr>(<a href="SimulatorSnapshot.html" title="simulation内のクラス">SimulatorSnapshot</a>&nbsp;snap)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Restores simulator state from a previously captured snapshot.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="SimulatorSnapshot.html" title="simulation内のクラス">SimulatorSnapshot</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#saveSnapshot()" class="member-name-link">saveSnapshot</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Captures a deep-enough snapshot of all mutable simulator state for VinePPO branch rollouts.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setActiveCharacter(java.lang.String)" class="member-name-link">setActiveCharacter</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -504,7 +645,9 @@ to helper collaborators.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setActiveCharacter(model.type.CharacterId)" class="member-name-link">setActiveCharacter</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Directly sets the active character without swap side effects.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setECTimerRunning(boolean)" class="member-name-link">setECTimerRunning</a><wbr>(boolean&nbsp;running)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -542,7 +685,9 @@ to helper collaborators.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#switchCharacter(model.type.CharacterId)" class="member-name-link">switchCharacter</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Executes a standard character swap with cooldown and callbacks.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateGleamingMoonSynergy()" class="member-name-link">updateGleamingMoonSynergy</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -575,6 +720,7 @@ to helper collaborators.</div>
 <h3>party</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="Party.html" title="simulation内のクラス">Party</a></span>&nbsp;<span class="element-name">party</span></div>
+<div class="block">Party composition and active-character state.</div>
 </div>
 </section>
 </li>
@@ -583,6 +729,7 @@ to helper collaborators.</div>
 <h3>enemy</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="../model/entity/Enemy.html" title="model.entity内のクラス">Enemy</a></span>&nbsp;<span class="element-name">enemy</span></div>
+<div class="block">Current enemy target, or <code>null</code> when none is set.</div>
 </div>
 </section>
 </li>
@@ -591,6 +738,7 @@ to helper collaborators.</div>
 <h3>damageReport</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="DamageTracker.html" title="simulation内のインタフェース">DamageTracker</a></span>&nbsp;<span class="element-name">damageReport</span></div>
+<div class="block">Damage recorder and DPS reporter.</div>
 </div>
 </section>
 </li>
@@ -599,6 +747,7 @@ to helper collaborators.</div>
 <h3>eventDispatcher</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="SimulationEventBus.html" title="simulation内のインタフェース">SimulationEventBus</a></span>&nbsp;<span class="element-name">eventDispatcher</span></div>
+<div class="block">Event subscription and dispatch bus.</div>
 </div>
 </section>
 </li>
@@ -607,6 +756,7 @@ to helper collaborators.</div>
 <h3>combatLogSink</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="CombatLogSink.html" title="simulation内のインタフェース">CombatLogSink</a></span>&nbsp;<span class="element-name">combatLogSink</span></div>
+<div class="block">Timeline log sink (text/HTML).</div>
 </div>
 </section>
 </li>
@@ -615,6 +765,7 @@ to helper collaborators.</div>
 <h3>actionResolver</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="runtime/CombatActionResolver.html" title="simulation.runtime内のクラス">CombatActionResolver</a></span>&nbsp;<span class="element-name">actionResolver</span></div>
+<div class="block">Resolves an attack action's damage without advancing time.</div>
 </div>
 </section>
 </li>
@@ -623,6 +774,7 @@ to helper collaborators.</div>
 <h3>moonsignManager</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="runtime/MoonsignManager.html" title="simulation.runtime内のクラス">MoonsignManager</a></span>&nbsp;<span class="element-name">moonsignManager</span></div>
+<div class="block">Manages Moonsign-related synergy bookkeeping.</div>
 </div>
 </section>
 </li>
@@ -631,6 +783,7 @@ to helper collaborators.</div>
 <h3>buffManager</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="runtime/BuffManager.html" title="simulation.runtime内のクラス">BuffManager</a></span>&nbsp;<span class="element-name">buffManager</span></div>
+<div class="block">Manages party / field buff lifetimes.</div>
 </div>
 </section>
 </li>
@@ -639,6 +792,7 @@ to helper collaborators.</div>
 <h3>simulationClock</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="runtime/SimulationClock.html" title="simulation.runtime内のクラス">SimulationClock</a></span>&nbsp;<span class="element-name">simulationClock</span></div>
+<div class="block">Tracks simulated time and timer-event queue.</div>
 </div>
 </section>
 </li>
@@ -647,6 +801,7 @@ to helper collaborators.</div>
 <h3>switchManager</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="runtime/SwitchManager.html" title="simulation.runtime内のクラス">SwitchManager</a></span>&nbsp;<span class="element-name">switchManager</span></div>
+<div class="block">Manages character swap policy and history.</div>
 </div>
 </section>
 </li>
@@ -655,6 +810,7 @@ to helper collaborators.</div>
 <h3>actionGateway</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="runtime/ActionGateway.html" title="simulation.runtime内のクラス">ActionGateway</a></span>&nbsp;<span class="element-name">actionGateway</span></div>
+<div class="block">Entry point that gates <a href="action/CharacterActionRequest.html" title="simulation.action内のクラス"><code>CharacterActionRequest</code></a> execution.</div>
 </div>
 </section>
 </li>
@@ -663,6 +819,7 @@ to helper collaborators.</div>
 <h3>actionTimelineExecutor</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="runtime/ActionTimelineExecutor.html" title="simulation.runtime内のクラス">ActionTimelineExecutor</a></span>&nbsp;<span class="element-name">actionTimelineExecutor</span></div>
+<div class="block">Executes attack actions including animation-time advancement.</div>
 </div>
 </section>
 </li>
@@ -671,6 +828,7 @@ to helper collaborators.</div>
 <h3>reactionState</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="runtime/ReactionState.html" title="simulation.runtime内のクラス">ReactionState</a></span>&nbsp;<span class="element-name">reactionState</span></div>
+<div class="block">Mutable elemental-reaction state (EC, Thundercloud).</div>
 </div>
 </section>
 </li>
@@ -679,6 +837,7 @@ to helper collaborators.</div>
 <h3>reactionStateController</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="runtime/ReactionStateController.html" title="simulation.runtime内のクラス">ReactionStateController</a></span>&nbsp;<span class="element-name">reactionStateController</span></div>
+<div class="block">Controller exposing <a href="#reactionState"><code>reactionState</code></a> via legacy APIs.</div>
 </div>
 </section>
 </li>
@@ -687,6 +846,7 @@ to helper collaborators.</div>
 <h3>energyDistributor</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="../mechanics/energy/EnergyDistributor.html" title="mechanics.energy内のクラス">EnergyDistributor</a></span>&nbsp;<span class="element-name">energyDistributor</span></div>
+<div class="block">Particle-to-energy distribution helper.</div>
 </div>
 </section>
 </li>
@@ -695,6 +855,7 @@ to helper collaborators.</div>
 <h3>icdManager</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="../mechanics/element/ICDManager.html" title="mechanics.element内のクラス">ICDManager</a></span>&nbsp;<span class="element-name">icdManager</span></div>
+<div class="block">Internal Cooldown manager for element application.</div>
 </div>
 </section>
 </li>
@@ -703,6 +864,52 @@ to helper collaborators.</div>
 <h3>enableLogging</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">enableLogging</span></div>
+<div class="block">Toggle for per-action console logging.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="captureActionDirectDamage">
+<h3>captureActionDirectDamage</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">captureActionDirectDamage</span></div>
+<div class="block">Whether direct-damage capture is active for the in-progress action.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="currentActionDirectDamageCapture">
+<h3>currentActionDirectDamageCapture</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">currentActionDirectDamageCapture</span></div>
+<div class="block">Accumulator for direct damage of the in-progress action.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="lastActionDirectDamageCapture">
+<h3>lastActionDirectDamageCapture</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">lastActionDirectDamageCapture</span></div>
+<div class="block">Cached direct damage value of the most recently completed action.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="capturedActionDirectDamageActorId">
+<h3>capturedActionDirectDamageActorId</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></span>&nbsp;<span class="element-name">capturedActionDirectDamageActorId</span></div>
+<div class="block">Actor whose direct damage is being captured in the in-progress action.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="buffSourceStack">
+<h3>buffSourceStack</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Deque.html" title="java.util内のクラスまたはインタフェース" class="external-link">Deque</a>&lt;<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&gt;</span>&nbsp;<span class="element-name">buffSourceStack</span></div>
+<div class="block">Stack of buff sources used for attribution during nested triggers.</div>
 </div>
 </section>
 </li>
@@ -711,6 +918,7 @@ to helper collaborators.</div>
 <h3>currentMoonsign</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="CombatSimulator.Moonsign.html" title="simulationの列挙クラス">CombatSimulator.Moonsign</a></span>&nbsp;<span class="element-name">currentMoonsign</span></div>
+<div class="block">Currently active Moonsign state for the party.</div>
 </div>
 </section>
 </li>
@@ -841,6 +1049,13 @@ to helper collaborators.</div>
 <h3>getCharacter</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a></span>&nbsp;<span class="element-name">getCharacter</span><wbr><span class="parameters">(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id)</span></div>
+<div class="block">Returns a party member by character id.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>id</code> - character id</dd>
+<dt>戻り値:</dt>
+<dd>matching character, or <code>null</code></dd>
+</dl>
 </div>
 </section>
 </li>
@@ -888,6 +1103,11 @@ to helper collaborators.</div>
 <h3>switchCharacter</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">switchCharacter</span><wbr><span class="parameters">(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id)</span></div>
+<div class="block">Executes a standard character swap with cooldown and callbacks.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>id</code> - target character id</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -909,6 +1129,11 @@ to helper collaborators.</div>
 <h3>setActiveCharacter</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setActiveCharacter</span><wbr><span class="parameters">(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id)</span></div>
+<div class="block">Directly sets the active character without swap side effects.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>id</code> - target character id</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -960,6 +1185,41 @@ to helper collaborators.</div>
 <dl class="notes">
 <dt>パラメータ:</dt>
 <dd><code>buff</code> - buff to add</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="pushBuffSource(model.type.CharacterId)">
+<h3>pushBuffSource</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">pushBuffSource</span><wbr><span class="parameters">(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;sourceCharacterId)</span></div>
+<div class="block">Pushes a buff-source attribution onto the nested-source stack.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>sourceCharacterId</code> - attributed source, ignored when <code>null</code></dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="popBuffSource()">
+<h3>popBuffSource</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">popBuffSource</span>()</div>
+<div class="block">Pops the most recent entry from the buff-source attribution stack.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getCurrentBuffSourceCharacterId()">
+<h3>getCurrentBuffSourceCharacterId</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></span>&nbsp;<span class="element-name">getCurrentBuffSourceCharacterId</span>()</div>
+<div class="block">Returns the current buff-source attribution on top of the stack.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>current source, or <a href="../model/type/CharacterId.html#UNKNOWN"><code>CharacterId.UNKNOWN</code></a> if the stack is empty</dd>
 </dl>
 </div>
 </section>
@@ -1023,6 +1283,11 @@ to helper collaborators.</div>
 <h3>getEnergyDistributor</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../mechanics/energy/EnergyDistributor.html" title="mechanics.energy内のクラス">EnergyDistributor</a></span>&nbsp;<span class="element-name">getEnergyDistributor</span>()</div>
+<div class="block">Returns the particle-to-energy distributor.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>energy distributor</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -1047,6 +1312,12 @@ to helper collaborators.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">performAction</span><wbr><span class="parameters">(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
  <a href="action/CharacterActionRequest.html" title="simulation.action内のクラス">CharacterActionRequest</a>&nbsp;request)</span></div>
+<div class="block">Executes a typed action after applying cooldown and energy gates.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>characterId</code> - acting character id</dd>
+<dd><code>request</code> - typed action request</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -1071,6 +1342,62 @@ to helper collaborators.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">recordDamage</span><wbr><span class="parameters">(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
  double&nbsp;dmg)</span></div>
+<div class="block">Records dealt damage under the given character id.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>characterId</code> - source character id</dd>
+<dd><code>dmg</code> - damage amount</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="beginActionDirectDamageCapture(model.type.CharacterId)">
+<h3>beginActionDirectDamageCapture</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">beginActionDirectDamageCapture</span><wbr><span class="parameters">(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId)</span></div>
+<div class="block">Starts capturing the direct-damage portion (excluding reactions) of the next action.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>actorId</code> - actor whose direct damage should be captured</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="captureResolvedActionDamage(model.type.CharacterId,double)">
+<h3>captureResolvedActionDamage</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">captureResolvedActionDamage</span><wbr><span class="parameters">(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId,
+ double&nbsp;damage)</span></div>
+<div class="block">Accumulates resolved direct damage when capture is active for the matching actor.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>actorId</code> - actor of the resolved damage</dd>
+<dd><code>damage</code> - resolved damage amount</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="endActionDirectDamageCapture()">
+<h3>endActionDirectDamageCapture</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">endActionDirectDamageCapture</span>()</div>
+<div class="block">Ends the direct-damage capture session, freezing the result for <a href="#getLastActionDirectDamageCapture()"><code>getLastActionDirectDamageCapture()</code></a>.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getLastActionDirectDamageCapture()">
+<h3>getLastActionDirectDamageCapture</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getLastActionDirectDamageCapture</span>()</div>
+<div class="block">Returns the captured direct-damage value of the most recently completed action.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>last captured direct-damage value</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -1284,6 +1611,12 @@ to helper collaborators.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">performAction</span><wbr><span class="parameters">(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
  <a href="action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action)</span></div>
+<div class="block">Executes an attack action and advances time by its animation duration.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>characterId</code> - acting character id</dd>
+<dd><code>action</code> - action to execute</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -1308,6 +1641,12 @@ to helper collaborators.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">performActionWithoutTimeAdvance</span><wbr><span class="parameters">(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
  <a href="action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action)</span></div>
+<div class="block">Resolves an attack action without advancing simulation time.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>characterId</code> - acting character id</dd>
+<dd><code>action</code> - action to resolve</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -1364,10 +1703,58 @@ to helper collaborators.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="getFieldBuffList()">
+<h3>getFieldBuffList</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;</span>&nbsp;<span class="element-name">getFieldBuffList</span>()</div>
+<div class="block">Returns the live simulator-owned field buff list.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>mutable field buff list</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="removeTeamBuffsById(mechanics.buff.BuffId)">
 <h3>removeTeamBuffsById</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">removeTeamBuffsById</span><wbr><span class="parameters">(<a href="../mechanics/buff/BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a>&nbsp;buffId)</span></div>
+<div class="block">Removes all team buffs whose <a href="../mechanics/buff/BuffId.html" title="mechanics.buffの列挙クラス"><code>BuffId</code></a> matches the given id.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>buffId</code> - buff identifier to match</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="saveSnapshot()">
+<h3>saveSnapshot</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="SimulatorSnapshot.html" title="simulation内のクラス">SimulatorSnapshot</a></span>&nbsp;<span class="element-name">saveSnapshot</span>()</div>
+<div class="block">Captures a deep-enough snapshot of all mutable simulator state for VinePPO branch rollouts.
+
+<p>The pending timer-event queue is intentionally excluded; see <a href="SimulatorSnapshot.html" title="simulation内のクラス"><code>SimulatorSnapshot</code></a>.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>snapshot of current state</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="restoreSnapshot(simulation.SimulatorSnapshot)">
+<h3>restoreSnapshot</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">restoreSnapshot</span><wbr><span class="parameters">(<a href="SimulatorSnapshot.html" title="simulation内のクラス">SimulatorSnapshot</a>&nbsp;snap)</span></div>
+<div class="block">Restores simulator state from a previously captured snapshot.
+
+<p>The pending timer-event queue is cleared; see <a href="SimulatorSnapshot.html" title="simulation内のクラス"><code>SimulatorSnapshot</code></a>.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>snap</code> - snapshot to restore</dd>
+</dl>
 </div>
 </section>
 </li>

@@ -109,6 +109,7 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="type-signature"><span class="modifiers">public static class </span><span class="element-name type-name-label">VectorizedEnvironment.MetricsSnapshot</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Object</a></span></div>
+<div class="block">Immutable timing snapshot for a vectorized runner.</div>
 </div>
 </section>
 <section class="summary">
@@ -177,7 +178,9 @@ loadScripts(document, 'script');</script>
  long&nbsp;envSteps,
  long&nbsp;completedEpisodes,
  int&nbsp;workerCount)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Creates a metrics snapshot from accumulated counters.</div>
+</div>
 </div>
 </section>
 </li>
@@ -194,28 +197,44 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#envStepsPerSecond()" class="member-name-link">envStepsPerSecond</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns aggregate environment steps per second.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#meanResetDispatchMillis()" class="member-name-link">meanResetDispatchMillis</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the mean reset task submission time in milliseconds.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#meanResetMillis()" class="member-name-link">meanResetMillis</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the mean reset latency in milliseconds.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#meanResetWaitMillis()" class="member-name-link">meanResetWaitMillis</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the mean reset wait time in milliseconds.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#meanStepDispatchMillis()" class="member-name-link">meanStepDispatchMillis</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the mean step task submission time in milliseconds.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#meanStepMillis()" class="member-name-link">meanStepMillis</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the mean step latency in milliseconds.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#meanStepWaitMillis()" class="member-name-link">meanStepWaitMillis</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the mean step wait time in milliseconds.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toSummaryString()" class="member-name-link">toSummaryString</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Formats the metrics snapshot as a single-line summary.</div>
+</div>
 </div>
 </div>
 </div>
@@ -344,6 +363,7 @@ loadScripts(document, 'script');</script>
  long&nbsp;envSteps,
  long&nbsp;completedEpisodes,
  int&nbsp;workerCount)</span></div>
+<div class="block">Creates a metrics snapshot from accumulated counters.</div>
 </div>
 </section>
 </li>
@@ -360,6 +380,11 @@ loadScripts(document, 'script');</script>
 <h3>meanResetMillis</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">meanResetMillis</span>()</div>
+<div class="block">Returns the mean reset latency in milliseconds.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>average reset time</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -368,6 +393,11 @@ loadScripts(document, 'script');</script>
 <h3>meanStepMillis</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">meanStepMillis</span>()</div>
+<div class="block">Returns the mean step latency in milliseconds.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>average step time</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -376,6 +406,11 @@ loadScripts(document, 'script');</script>
 <h3>meanResetDispatchMillis</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">meanResetDispatchMillis</span>()</div>
+<div class="block">Returns the mean reset task submission time in milliseconds.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>average reset dispatch time</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -384,6 +419,11 @@ loadScripts(document, 'script');</script>
 <h3>meanResetWaitMillis</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">meanResetWaitMillis</span>()</div>
+<div class="block">Returns the mean reset wait time in milliseconds.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>average reset wait time</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -392,6 +432,11 @@ loadScripts(document, 'script');</script>
 <h3>meanStepDispatchMillis</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">meanStepDispatchMillis</span>()</div>
+<div class="block">Returns the mean step task submission time in milliseconds.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>average step dispatch time</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -400,6 +445,11 @@ loadScripts(document, 'script');</script>
 <h3>meanStepWaitMillis</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">meanStepWaitMillis</span>()</div>
+<div class="block">Returns the mean step wait time in milliseconds.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>average step wait time</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -408,6 +458,11 @@ loadScripts(document, 'script');</script>
 <h3>envStepsPerSecond</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">envStepsPerSecond</span>()</div>
+<div class="block">Returns aggregate environment steps per second.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>throughput in environment steps per second</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -416,6 +471,11 @@ loadScripts(document, 'script');</script>
 <h3>toSummaryString</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">toSummaryString</span>()</div>
+<div class="block">Formats the metrics snapshot as a single-line summary.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>summary string</dd>
+</dl>
 </div>
 </section>
 </li>

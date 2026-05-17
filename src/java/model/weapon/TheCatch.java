@@ -5,7 +5,13 @@ import model.stats.StatsContainer;
 import model.type.StatType;
 import model.type.WeaponType;
 
+/**
+ * The Catch polearm with its Lv 90 stats and burst-focused passive.
+ */
 public class TheCatch extends Weapon {
+    /**
+     * Constructs The Catch with Lv 90 base stats.
+     */
     public TheCatch() {
         super("The Catch", new StatsContainer());
         // Lv90 Base ATK 510, ER 45.9%
@@ -14,6 +20,12 @@ public class TheCatch extends Weapon {
         this.weaponType = WeaponType.POLEARM;
     }
 
+    /**
+     * Applies the weapon's burst damage and burst CRIT Rate bonuses.
+     *
+     * @param stats the stats container to mutate in-place
+     * @param currentTime simulation time in seconds
+     */
     @Override
     public void applyPassive(StatsContainer stats, double currentTime) {
         // R5: Burst DMG +32%, Burst CR +12%

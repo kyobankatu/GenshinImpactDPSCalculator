@@ -8,18 +8,38 @@ import simulation.CombatSimulator;
 import simulation.CombatSimulator.Moonsign;
 import model.entity.SwitchAwareArtifact;
 
+/**
+ * Aubade of Morningstar and Moon artifact set with switch-state Lunar reaction
+ * buffs.
+ */
 public class AubadeOfMorningstarAndMoon extends model.entity.ArtifactSet implements SwitchAwareArtifact {
 
+    /**
+     * Constructs Aubade of Morningstar and Moon with the 2-piece ATK bonus.
+     */
     public AubadeOfMorningstarAndMoon() {
         super("Aubade of Morningstar and Moon", new StatsContainer());
         this.getStats().add(StatType.ATK_PERCENT, 0.18);
     }
 
+    /**
+     * Constructs Aubade of Morningstar and Moon with the supplied main/sub
+     * stats plus the 2-piece ATK bonus.
+     *
+     * @param stats artifact main and sub stats
+     */
     public AubadeOfMorningstarAndMoon(StatsContainer stats) {
         super("Aubade of Morningstar and Moon", stats);
         this.getStats().add(StatType.ATK_PERCENT, 0.18);
     }
 
+    /**
+     * Switches the set into its off-field state, keeping the Lunar reaction buff
+     * active until the owner returns on-field.
+     *
+     * @param sim the active combat simulator
+     * @param owner the character equipping the set
+     */
     @Override
     public void onSwitchOut(CombatSimulator sim, model.entity.Character owner) {
         // When off-field:
@@ -105,6 +125,12 @@ public class AubadeOfMorningstarAndMoon extends model.entity.ArtifactSet impleme
         updateBuffState(sim, owner, false);
     }
 
+    /**
+     * Switches the set into its lingering on-field-return state for 3 seconds.
+     *
+     * @param sim the active combat simulator
+     * @param owner the character equipping the set
+     */
     @Override
     public void onSwitchIn(CombatSimulator sim, model.entity.Character owner) {
         // When switching in:

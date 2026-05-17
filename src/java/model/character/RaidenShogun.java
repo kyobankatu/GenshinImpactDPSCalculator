@@ -19,6 +19,9 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionRequest;
 
+/**
+ * Raiden Shogun character implementation with Resolve stacking and Musou Isshin form logic.
+ */
 public class RaidenShogun extends Character implements FormStateProvider, SwitchAwareCharacter {
 
     private int normalAttackStep = 0;
@@ -26,10 +29,23 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
     private double activeResolveBonus = 0; // Stacks captured at Burst cast
     private boolean listenerRegistered = false;
 
+    /**
+     * Constructs Raiden Shogun with the shared talent data source.
+     *
+     * @param weapon equipped weapon
+     * @param artifacts equipped artifact set
+     */
     public RaidenShogun(Weapon weapon, ArtifactSet artifacts) {
         this(weapon, artifacts, TalentDataManager.getInstance());
     }
 
+    /**
+     * Constructs Raiden Shogun with an explicit talent data source.
+     *
+     * @param weapon equipped weapon
+     * @param artifacts equipped artifact set
+     * @param talentData talent values backing this character
+     */
     public RaidenShogun(Weapon weapon, ArtifactSet artifacts, TalentDataSource talentData) {
         super(talentData); // Init base stats
         this.name = "Raiden Shogun";
@@ -44,16 +60,32 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
         setBurstCD(18.0);
     }
 
+    /**
+     * Returns Raiden Shogun's burst energy cost.
+     *
+     * @return burst cost in energy
+     */
     @Override
     public double getEnergyCost() {
         return 90;
     }
 
+    /**
+     * Returns whether Musou Isshin is currently active.
+     *
+     * @param currentTime current simulation time in seconds
+     * @return {@code true} while the burst form is active
+     */
     @Override
     public boolean isFormActive(double currentTime) {
         return musouActive;
     }
 
+    /**
+     * Ends Musou Isshin early when Raiden leaves the field.
+     *
+     * @param sim active combat simulator
+     */
     @Override
     public void onSwitchOut(CombatSimulator sim) {
         if (musouActive) {
@@ -64,6 +96,11 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
         }
     }
 
+    /**
+     * Applies Raiden Shogun's Electro damage bonus from excess Energy Recharge.
+     *
+     * @param stats stats container to modify
+     */
     @Override
     public void applyPassive(StatsContainer stats) {
         double er = stats.get(StatType.ENERGY_RECHARGE);
@@ -73,6 +110,12 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
         }
     }
 
+    /**
+     * Executes the requested combat action for Raiden Shogun.
+     *
+     * @param request requested player action
+     * @param sim active combat simulator
+     */
     @Override
     public void onAction(CharacterActionRequest request, CombatSimulator sim) {
         switch (request.getKey()) {

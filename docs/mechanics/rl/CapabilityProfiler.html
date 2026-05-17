@@ -63,8 +63,12 @@ loadScripts(document, 'script');</script>
 <li><a href="#N_RUNS" tabindex="0">N_RUNS</a></li>
 <li><a href="#EPISODE_DURATION" tabindex="0">EPISODE_DURATION</a></li>
 <li><a href="#PARTICLE_WAIT" tabindex="0">PARTICLE_WAIT</a></li>
+<li><a href="#MIN_DAMAGE_FOR_RATIO" tabindex="0">MIN_DAMAGE_FOR_RATIO</a></li>
+<li><a href="#DAMAGE_PROBE_ACTIONS" tabindex="0">DAMAGE_PROBE_ACTIONS</a></li>
 <li><a href="#simulatorSupplier" tabindex="0">simulatorSupplier</a></li>
 <li><a href="#config" tabindex="0">config</a></li>
+<li><a href="#partyPermutations" tabindex="0">partyPermutations</a></li>
+<li><a href="#actionSequenceLibrary" tabindex="0">actionSequenceLibrary</a></li>
 <li><a href="#results" tabindex="0">results</a></li>
 </ol>
 </li>
@@ -82,23 +86,61 @@ loadScripts(document, 'script');</script>
 <li><a href="#profileCharacter(model.type.CharacterId)" tabindex="0">profileCharacter(CharacterId)</a></li>
 <li><a href="#runTemplateA(model.type.CharacterId)" tabindex="0">runTemplateA(CharacterId)</a></li>
 <li><a href="#runTemplateB(model.type.CharacterId,model.type.CharacterId)" tabindex="0">runTemplateB(CharacterId, CharacterId)</a></li>
-<li><a href="#runTemplateC(model.type.CharacterId,model.type.CharacterId)" tabindex="0">runTemplateC(CharacterId, CharacterId)</a></li>
-<li><a href="#runTemplateD(model.type.CharacterId)" tabindex="0">runTemplateD(CharacterId)</a></li>
+<li><a href="#runPermutationTeamBuffProfile(model.type.CharacterId)" tabindex="0">runPermutationTeamBuffProfile(CharacterId)</a></li>
+<li><a href="#searchPermutationMaxUplift(model.type.CharacterId%5B%5D,model.type.CharacterId,java.util.List,int)" tabindex="0">searchPermutationMaxUplift(CharacterId[], CharacterId, List, int)</a></li>
+<li><a href="#runPermutationScenarioMaxUplift(model.type.CharacterId%5B%5D,model.type.CharacterId,java.util.List)" tabindex="0">runPermutationScenarioMaxUplift(CharacterId[], CharacterId, List)</a></li>
 <li><a href="#runTemplateE(model.type.CharacterId)" tabindex="0">runTemplateE(CharacterId)</a></li>
 <li><a href="#runTemplateF(model.type.CharacterId)" tabindex="0">runTemplateF(CharacterId)</a></li>
 <li><a href="#runTemplateG(model.type.CharacterId)" tabindex="0">runTemplateG(CharacterId)</a></li>
+<li><a href="#runEntryValueTemplate(model.type.CharacterId)" tabindex="0">runEntryValueTemplate(CharacterId)</a></li>
+<li><a href="#runSustainValueTemplate(model.type.CharacterId,int)" tabindex="0">runSustainValueTemplate(CharacterId, int)</a></li>
+<li><a href="#runExitCostTemplate(model.type.CharacterId)" tabindex="0">runExitCostTemplate(CharacterId)</a></li>
+<li><a href="#runReentryCostTemplate(model.type.CharacterId)" tabindex="0">runReentryCostTemplate(CharacterId)</a></li>
 <li><a href="#createFilledSim()" tabindex="0">createFilledSim()</a></li>
-<li><a href="#getFixedPrimaryAttacker()" tabindex="0">getFixedPrimaryAttacker()</a></li>
 <li><a href="#getDummyAttacker(model.type.CharacterId)" tabindex="0">getDummyAttacker(CharacterId)</a></li>
 <li><a href="#runQuietly(mechanics.rl.CapabilityProfiler.TemplateRun)" tabindex="0">runQuietly(CapabilityProfiler.TemplateRun)</a></li>
 <li><a href="#chooseBestAction(simulation.CombatSimulator,model.type.CharacterId,boolean,boolean)" tabindex="0">chooseBestAction(CombatSimulator, CharacterId, boolean, boolean)</a></li>
 <li><a href="#useSkillIfReady(simulation.CombatSimulator,model.type.CharacterId)" tabindex="0">useSkillIfReady(CombatSimulator, CharacterId)</a></li>
 <li><a href="#useBurstIfReady(simulation.CombatSimulator,model.type.CharacterId)" tabindex="0">useBurstIfReady(CombatSimulator, CharacterId)</a></li>
+<li><a href="#performBestActions(simulation.CombatSimulator,model.type.CharacterId,int,boolean,boolean)" tabindex="0">performBestActions(CombatSimulator, CharacterId, int, boolean, boolean)</a></li>
+<li><a href="#performNormals(simulation.CombatSimulator,model.type.CharacterId,int)" tabindex="0">performNormals(CombatSimulator, CharacterId, int)</a></li>
+<li><a href="#performBestUntil(simulation.CombatSimulator,model.type.CharacterId,double,boolean,boolean)" tabindex="0">performBestUntil(CombatSimulator, CharacterId, double, boolean, boolean)</a></li>
 <li><a href="#fillWithNormals(simulation.CombatSimulator,model.type.CharacterId,double)" tabindex="0">fillWithNormals(CombatSimulator, CharacterId, double)</a></li>
 <li><a href="#getMaxEnergyCost()" tabindex="0">getMaxEnergyCost()</a></li>
+<li><a href="#applyActionSequencePair(simulation.CombatSimulator,simulation.CombatSimulator,model.type.CharacterId,java.util.List,boolean,model.type.CharacterId,java.util.List)" tabindex="0">applyActionSequencePair(CombatSimulator, CombatSimulator, CharacterId, List, boolean, CharacterId, List)</a></li>
+<li><a href="#replaySequencePair(simulation.CombatSimulator,simulation.CombatSimulator,model.type.CharacterId,java.util.List,boolean)" tabindex="0">replaySequencePair(CombatSimulator, CombatSimulator, CharacterId, List, boolean)</a></li>
+<li><a href="#executeSubjectSequenceAndSync(simulation.CombatSimulator,simulation.CombatSimulator,model.type.CharacterId,java.util.List)" tabindex="0">executeSubjectSequenceAndSync(CombatSimulator, CombatSimulator, CharacterId, List)</a></li>
+<li><a href="#evaluatePostSubjectActionProbes(simulation.CombatSimulator,simulation.CombatSimulator,model.type.CharacterId,model.type.CharacterId%5B%5D,int,double,java.util.List)" tabindex="0">evaluatePostSubjectActionProbes(CombatSimulator, CombatSimulator, CharacterId, CharacterId[], int, double, List)</a></li>
+<li><a href="#isolateSubjectBuffEffects(simulation.CombatSimulator,model.type.CharacterId,double,java.lang.String)" tabindex="0">isolateSubjectBuffEffects(CombatSimulator, CharacterId, double, String)</a></li>
+<li><a href="#shouldDropForBuffOnlyProbe(mechanics.buff.Buff,model.type.CharacterId,double)" tabindex="0">shouldDropForBuffOnlyProbe(Buff, CharacterId, double)</a></li>
+<li><a href="#dumpAllBuffs(simulation.CombatSimulator)" tabindex="0">dumpAllBuffs(CombatSimulator)</a></li>
+<li><a href="#describeBuff(mechanics.buff.Buff)" tabindex="0">describeBuff(Buff)</a></li>
+<li><a href="#clearNonBuffReactionState(simulation.CombatSimulator)" tabindex="0">clearNonBuffReactionState(CombatSimulator)</a></li>
+<li><a href="#probeDirectActionComparison(simulation.CombatSimulator,simulation.CombatSimulator,model.type.CharacterId,simulation.action.CharacterActionRequest,model.type.CharacterId)" tabindex="0">probeDirectActionComparison(CombatSimulator, CombatSimulator, CharacterId, CharacterActionRequest, CharacterId)</a></li>
+<li><a href="#formatProbeState(simulation.CombatSimulator,model.type.CharacterId,simulation.action.CharacterActionKey)" tabindex="0">formatProbeState(CombatSimulator, CharacterId, CharacterActionKey)</a></li>
+<li><a href="#formatApplicableBuffs(simulation.CombatSimulator,model.type.CharacterId)" tabindex="0">formatApplicableBuffs(CombatSimulator, CharacterId)</a></li>
+<li><a href="#formatEnemyAura(simulation.CombatSimulator)" tabindex="0">formatEnemyAura(CombatSimulator)</a></li>
+<li><a href="#neutralizeProbeActorSelfBuffs(simulation.CombatSimulator,model.type.CharacterId)" tabindex="0">neutralizeProbeActorSelfBuffs(CombatSimulator, CharacterId)</a></li>
+<li><a href="#executeActionPair(simulation.CombatSimulator,simulation.CombatSimulator,model.type.CharacterId,simulation.action.CharacterActionRequest,boolean,model.type.CharacterId)" tabindex="0">executeActionPair(CombatSimulator, CombatSimulator, CharacterId, CharacterActionRequest, boolean, CharacterId)</a></li>
+<li><a href="#buildPostSubjectAlignedSnapshot(simulation.SimulatorSnapshot,simulation.SimulatorSnapshot)" tabindex="0">buildPostSubjectAlignedSnapshot(SimulatorSnapshot, SimulatorSnapshot)</a></li>
+<li><a href="#getTeamDamageExcluding(simulation.CombatSimulator,model.type.CharacterId)" tabindex="0">getTeamDamageExcluding(CombatSimulator, CharacterId)</a></li>
+<li><a href="#getPerCharacterDamageExcluding(simulation.CombatSimulator,model.type.CharacterId)" tabindex="0">getPerCharacterDamageExcluding(CombatSimulator, CharacterId)</a></li>
+<li><a href="#getCharacterIdsExcluding(model.type.CharacterId)" tabindex="0">getCharacterIdsExcluding(CharacterId)</a></li>
+<li><a href="#actionStepUplift(simulation.CombatSimulator,simulation.CombatSimulator,model.type.CharacterId,simulation.action.CharacterActionKey,model.type.CharacterId,double,double,double%5B%5D,double%5B%5D)" tabindex="0">actionStepUplift(CombatSimulator, CombatSimulator, CharacterId, CharacterActionKey, CharacterId, double, double, double[], double[])</a></li>
+<li><a href="#ratioUplift(double,double)" tabindex="0">ratioUplift(double, double)</a></li>
+<li><a href="#buildPermutations(model.type.CharacterId%5B%5D)" tabindex="0">buildPermutations(CharacterId[])</a></li>
+<li><a href="#buildActionSequenceLibrary()" tabindex="0">buildActionSequenceLibrary()</a></li>
+<li><a href="#printBestTeamBuffTrace(mechanics.rl.CapabilityProfiler.TeamBuffProfileResult)" tabindex="0">printBestTeamBuffTrace(CapabilityProfiler.TeamBuffProfileResult)</a></li>
+<li><a href="#formatOrder(model.type.CharacterId%5B%5D)" tabindex="0">formatOrder(CharacterId[])</a></li>
+<li><a href="#formatSequence(java.util.List)" tabindex="0">formatSequence(List)</a></li>
+<li><a href="#permute(model.type.CharacterId%5B%5D,int,java.util.List)" tabindex="0">permute(CharacterId[], int, List)</a></li>
+<li><a href="#swap(model.type.CharacterId%5B%5D,int,int)" tabindex="0">swap(CharacterId[], int, int)</a></li>
 <li><a href="#mean(double%5B%5D)" tabindex="0">mean(double[])</a></li>
 <li><a href="#stddev(double%5B%5D)" tabindex="0">stddev(double[])</a></li>
 <li><a href="#clamp01(double)" tabindex="0">clamp01(double)</a></li>
+<li><a href="#meanList(java.util.List)" tabindex="0">meanList(List)</a></li>
+<li><a href="#normalizeTeamBuffScores()" tabindex="0">normalizeTeamBuffScores()</a></li>
+<li><a href="#percentile(java.util.List,double)" tabindex="0">percentile(List, double)</a></li>
 <li><a href="#format(double)" tabindex="0">format(double)</a></li>
 </ol>
 </li>
@@ -120,16 +162,19 @@ loadScripts(document, 'script');</script>
 <div class="block">Derives capability scores for each character in a party by running
 controlled simulation experiments.
 
-<p>Seven experiment templates are run per character:
+<p>Seven core experiment templates are run per character:
 <ul>
   <li>A — full on-field presence: measures raw on-field DPS</li>
   <li>B — passive presence: measures off-field damage after skill+burst</li>
-  <li>C — team with subject buffing: measures buff contribution</li>
-  <li>D — team without subject buffing: baseline for buff measurement</li>
+  <li>C/D — team support under a simple normal-attack carry script</li>
   <li>E — self with burst: measures self-enhanced DPS</li>
   <li>F — self without burst: baseline for self-enhancement measurement</li>
   <li>G — energy counting: measures ER-scaled particles per skill use</li>
 </ul>
+
+<p>The exported <code>team_buff_score</code> is intentionally kept as a single
+support-ness scalar for RL consumption, but it is now derived from
+permutation-wide support profiling instead of a single fixed-carry script.
 
 <p>Results are written to a JSON file loadable by <a href="ObservationEncoder.html" title="mechanics.rl内のクラス"><code>ObservationEncoder</code></a>.</div>
 </div>
@@ -145,9 +190,12 @@ controlled simulation experiments.
 <div class="table-header col-first">修飾子とタイプ</div>
 <div class="table-header col-second">クラス</div>
 <div class="table-header col-last">説明</div>
-<div class="col-first even-row-color"><code>private static interface&nbsp;</code></div>
-<div class="col-second even-row-color"><code><a href="CapabilityProfiler.TemplateRun.html" class="type-name-link" title="mechanics.rl内のインタフェース">CapabilityProfiler.TemplateRun</a></code></div>
+<div class="col-first even-row-color"><code>private static final class&nbsp;</code></div>
+<div class="col-second even-row-color"><code><a href="CapabilityProfiler.TeamBuffProfileResult.html" class="type-name-link" title="mechanics.rl内のクラス">CapabilityProfiler.TeamBuffProfileResult</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private static interface&nbsp;</code></div>
+<div class="col-second odd-row-color"><code><a href="CapabilityProfiler.TemplateRun.html" class="type-name-link" title="mechanics.rl内のインタフェース">CapabilityProfiler.TemplateRun</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -160,17 +208,29 @@ controlled simulation experiments.
 <div class="table-header col-first">修飾子とタイプ</div>
 <div class="table-header col-second">フィールド</div>
 <div class="table-header col-last">説明</div>
-<div class="col-first even-row-color"><code>private final <a href="EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a></code></div>
-<div class="col-second even-row-color"><code><a href="#config" class="member-name-link">config</a></code></div>
+<div class="col-first even-row-color"><code>private final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../simulation/action/CharacterActionKey.html" title="simulation.actionの列挙クラス">CharacterActionKey</a>&gt;&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#actionSequenceLibrary" class="member-name-link">actionSequenceLibrary</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private final <a href="EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#config" class="member-name-link">config</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="../../simulation/action/CharacterActionKey.html" title="simulation.actionの列挙クラス">CharacterActionKey</a>&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#DAMAGE_PROBE_ACTIONS" class="member-name-link">DAMAGE_PROBE_ACTIONS</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code>private static final double</code></div>
 <div class="col-second odd-row-color"><code><a href="#EPISODE_DURATION" class="member-name-link">EPISODE_DURATION</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>private static final int</code></div>
-<div class="col-second even-row-color"><code><a href="#N_RUNS" class="member-name-link">N_RUNS</a></code></div>
+<div class="col-first even-row-color"><code>private static final double</code></div>
+<div class="col-second even-row-color"><code><a href="#MIN_DAMAGE_FOR_RATIO" class="member-name-link">MIN_DAMAGE_FOR_RATIO</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>private static final double</code></div>
-<div class="col-second odd-row-color"><code><a href="#PARTICLE_WAIT" class="member-name-link">PARTICLE_WAIT</a></code></div>
+<div class="col-first odd-row-color"><code>private static final int</code></div>
+<div class="col-second odd-row-color"><code><a href="#N_RUNS" class="member-name-link">N_RUNS</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private static final double</code></div>
+<div class="col-second even-row-color"><code><a href="#PARTICLE_WAIT" class="member-name-link">PARTICLE_WAIT</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&gt;</code></div>
+<div class="col-second odd-row-color"><code><a href="#partyPermutations" class="member-name-link">partyPermutations</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code>private final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, double[]&gt;</code></div>
 <div class="col-second even-row-color"><code><a href="#results" class="member-name-link">results</a></code></div>
@@ -193,7 +253,10 @@ controlled simulation experiments.
 <div class="table-header col-last">説明</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.util.function.Supplier,mechanics.rl.EpisodeConfig)" class="member-name-link">CapabilityProfiler</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="java.util.function内のクラスまたはインタフェース" class="external-link">Supplier</a>&lt;<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&gt;&nbsp;simulatorSupplier,
  <a href="EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Constructs a profiler that uses the supplied factory to instantiate fresh simulators
+for each experiment.</div>
+</div>
 </div>
 </section>
 </li>
@@ -208,102 +271,281 @@ controlled simulation experiments.
 <div class="table-header col-first">修飾子とタイプ</div>
 <div class="table-header col-second">メソッド</div>
 <div class="table-header col-last">説明</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="../../simulation/action/CharacterActionRequest.html" title="simulation.action内のクラス">CharacterActionRequest</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#chooseBestAction(simulation.CombatSimulator,model.type.CharacterId,boolean,boolean)" class="member-name-link">chooseBestAction</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="CapabilityProfiler.TeamBuffProfileResult.html" title="mechanics.rl内のクラス">CapabilityProfiler.TeamBuffProfileResult</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#actionStepUplift(simulation.CombatSimulator,simulation.CombatSimulator,model.type.CharacterId,simulation.action.CharacterActionKey,model.type.CharacterId,double,double,double%5B%5D,double%5B%5D)" class="member-name-link">actionStepUplift</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;activeSim,
+ <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;idleSim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId,
+ <a href="../../simulation/action/CharacterActionKey.html" title="simulation.actionの列挙クラス">CharacterActionKey</a>&nbsp;actionKey,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;excludedId,
+ double&nbsp;teamBeforeActive,
+ double&nbsp;teamBeforeIdle,
+ double[]&nbsp;charBeforeActive,
+ double[]&nbsp;charBeforeIdle)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="CapabilityProfiler.TeamBuffProfileResult.html" title="mechanics.rl内のクラス">CapabilityProfiler.TeamBuffProfileResult</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyActionSequencePair(simulation.CombatSimulator,simulation.CombatSimulator,model.type.CharacterId,java.util.List,boolean,model.type.CharacterId,java.util.List)" class="member-name-link">applyActionSequencePair</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;activeSim,
+ <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;idleSim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../simulation/action/CharacterActionKey.html" title="simulation.actionの列挙クラス">CharacterActionKey</a>&gt;&nbsp;sequence,
+ boolean&nbsp;idleActor,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;excludedId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&nbsp;traceLines)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../simulation/action/CharacterActionKey.html" title="simulation.actionの列挙クラス">CharacterActionKey</a>&gt;&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#buildActionSequenceLibrary()" class="member-name-link">buildActionSequenceLibrary</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#buildPermutations(model.type.CharacterId%5B%5D)" class="member-name-link">buildPermutations</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&nbsp;source)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="../../simulation/SimulatorSnapshot.html" title="simulation内のクラス">SimulatorSnapshot</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#buildPostSubjectAlignedSnapshot(simulation.SimulatorSnapshot,simulation.SimulatorSnapshot)" class="member-name-link">buildPostSubjectAlignedSnapshot</a><wbr>(<a href="../../simulation/SimulatorSnapshot.html" title="simulation内のクラス">SimulatorSnapshot</a>&nbsp;activePostSubject,
+ <a href="../../simulation/SimulatorSnapshot.html" title="simulation内のクラス">SimulatorSnapshot</a>&nbsp;idlePreSubject)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="../../simulation/action/CharacterActionRequest.html" title="simulation.action内のクラス">CharacterActionRequest</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#chooseBestAction(simulation.CombatSimulator,model.type.CharacterId,boolean,boolean)" class="member-name-link">chooseBestAction</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
  <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId,
  boolean&nbsp;allowBurst,
  boolean&nbsp;allowSkill)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Chooses the best action for the subject: burst (if allowed and ready),
 then skill (if allowed and ready), then normal attack.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#clamp01(double)" class="member-name-link">clamp01</a><wbr>(double&nbsp;v)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#clamp01(double)" class="member-name-link">clamp01</a><wbr>(double&nbsp;v)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#clearNonBuffReactionState(simulation.CombatSimulator)" class="member-name-link">clearNonBuffReactionState</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#createFilledSim()" class="member-name-link">createFilledSim</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Creates a fresh simulator with all characters' energy filled to burst cost.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#fillWithNormals(simulation.CombatSimulator,model.type.CharacterId,double)" class="member-name-link">fillWithNormals</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#describeBuff(mechanics.buff.Buff)" class="member-name-link">describeBuff</a><wbr>(<a href="../buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&nbsp;buff)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#dumpAllBuffs(simulation.CombatSimulator)" class="member-name-link">dumpAllBuffs</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="CapabilityProfiler.TeamBuffProfileResult.html" title="mechanics.rl内のクラス">CapabilityProfiler.TeamBuffProfileResult</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#evaluatePostSubjectActionProbes(simulation.CombatSimulator,simulation.CombatSimulator,model.type.CharacterId,model.type.CharacterId%5B%5D,int,double,java.util.List)" class="member-name-link">evaluatePostSubjectActionProbes</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;activeSim,
+ <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;idleSim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&nbsp;order,
+ int&nbsp;subjectIndex,
+ double&nbsp;subjectSyncTime,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&nbsp;traceLines)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="CapabilityProfiler.TeamBuffProfileResult.html" title="mechanics.rl内のクラス">CapabilityProfiler.TeamBuffProfileResult</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#executeActionPair(simulation.CombatSimulator,simulation.CombatSimulator,model.type.CharacterId,simulation.action.CharacterActionRequest,boolean,model.type.CharacterId)" class="member-name-link">executeActionPair</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;activeSim,
+ <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;idleSim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId,
+ <a href="../../simulation/action/CharacterActionRequest.html" title="simulation.action内のクラス">CharacterActionRequest</a>&nbsp;request,
+ boolean&nbsp;idleActor,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;excludedId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#executeSubjectSequenceAndSync(simulation.CombatSimulator,simulation.CombatSimulator,model.type.CharacterId,java.util.List)" class="member-name-link">executeSubjectSequenceAndSync</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;activeSim,
+ <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;idleSim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../simulation/action/CharacterActionKey.html" title="simulation.actionの列挙クラス">CharacterActionKey</a>&gt;&nbsp;sequence)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#fillWithNormals(simulation.CombatSimulator,model.type.CharacterId,double)" class="member-name-link">fillWithNormals</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
  <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id,
  double&nbsp;limit)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Has the given character perform normal attacks until the episode limit is reached.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#format(double)" class="member-name-link">format</a><wbr>(double&nbsp;v)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#formatApplicableBuffs(simulation.CombatSimulator,model.type.CharacterId)" class="member-name-link">formatApplicableBuffs</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#formatEnemyAura(simulation.CombatSimulator)" class="member-name-link">formatEnemyAura</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#format(double)" class="member-name-link">format</a><wbr>(double&nbsp;v)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#formatOrder(model.type.CharacterId%5B%5D)" class="member-name-link">formatOrder</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&nbsp;order)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDummyAttacker(model.type.CharacterId)" class="member-name-link">getDummyAttacker</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the fixed dummy attacker for Template B, preferring partyOrder[0] when possible.</div>
-</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#formatProbeState(simulation.CombatSimulator,model.type.CharacterId,simulation.action.CharacterActionKey)" class="member-name-link">formatProbeState</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId,
+ <a href="../../simulation/action/CharacterActionKey.html" title="simulation.actionの列挙クラス">CharacterActionKey</a>&nbsp;actionKey)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#formatSequence(java.util.List)" class="member-name-link">formatSequence</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../simulation/action/CharacterActionKey.html" title="simulation.actionの列挙クラス">CharacterActionKey</a>&gt;&nbsp;sequence)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCharacterIdsExcluding(model.type.CharacterId)" class="member-name-link">getCharacterIdsExcluding</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;excludedId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getFixedPrimaryAttacker()" class="member-name-link">getFixedPrimaryAttacker</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDummyAttacker(model.type.CharacterId)" class="member-name-link">getDummyAttacker</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the fixed primary attacker for templates C/D: partyOrder[0].</div>
+<div class="block">Returns the fixed dummy attacker for Template B, preferring partyOrder[0] when possible.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMaxEnergyCost()" class="member-name-link">getMaxEnergyCost</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, double[]&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getResults()" class="member-name-link">getResults</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#mean(double%5B%5D)" class="member-name-link">mean</a><wbr>(double[]&nbsp;values)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double[]</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#profileCharacter(model.type.CharacterId)" class="member-name-link">profileCharacter</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPerCharacterDamageExcluding(simulation.CombatSimulator,model.type.CharacterId)" class="member-name-link">getPerCharacterDamageExcluding</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;excludedId)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#runAll()" class="member-name-link">runAll</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, double[]&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getResults()" class="member-name-link">getResults</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns a deep copy of the per-character profiling results.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTeamDamageExcluding(simulation.CombatSimulator,model.type.CharacterId)" class="member-name-link">getTeamDamageExcluding</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;excludedId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isolateSubjectBuffEffects(simulation.CombatSimulator,model.type.CharacterId,double,java.lang.String)" class="member-name-link">isolateSubjectBuffEffects</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId,
+ double&nbsp;subjectSyncTime,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;label)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#mean(double%5B%5D)" class="member-name-link">mean</a><wbr>(double[]&nbsp;values)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#meanList(java.util.List)" class="member-name-link">meanList</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;values)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#neutralizeProbeActorSelfBuffs(simulation.CombatSimulator,model.type.CharacterId)" class="member-name-link">neutralizeProbeActorSelfBuffs</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#normalizeTeamBuffScores()" class="member-name-link">normalizeTeamBuffScores</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#percentile(java.util.List,double)" class="member-name-link">percentile</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;values,
+ double&nbsp;q)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#performBestActions(simulation.CombatSimulator,model.type.CharacterId,int,boolean,boolean)" class="member-name-link">performBestActions</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id,
+ int&nbsp;actionCount,
+ boolean&nbsp;allowBurst,
+ boolean&nbsp;allowSkill)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#performBestUntil(simulation.CombatSimulator,model.type.CharacterId,double,boolean,boolean)" class="member-name-link">performBestUntil</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id,
+ double&nbsp;limit,
+ boolean&nbsp;allowBurst,
+ boolean&nbsp;allowSkill)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#performNormals(simulation.CombatSimulator,model.type.CharacterId,int)" class="member-name-link">performNormals</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id,
+ int&nbsp;actionCount)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#permute(model.type.CharacterId%5B%5D,int,java.util.List)" class="member-name-link">permute</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&nbsp;values,
+ int&nbsp;index,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&gt;&nbsp;out)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#printBestTeamBuffTrace(mechanics.rl.CapabilityProfiler.TeamBuffProfileResult)" class="member-name-link">printBestTeamBuffTrace</a><wbr>(<a href="CapabilityProfiler.TeamBuffProfileResult.html" title="mechanics.rl内のクラス">CapabilityProfiler.TeamBuffProfileResult</a>&nbsp;result)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="CapabilityProfiler.TeamBuffProfileResult.html" title="mechanics.rl内のクラス">CapabilityProfiler.TeamBuffProfileResult</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#probeDirectActionComparison(simulation.CombatSimulator,simulation.CombatSimulator,model.type.CharacterId,simulation.action.CharacterActionRequest,model.type.CharacterId)" class="member-name-link">probeDirectActionComparison</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;activeSim,
+ <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;idleSim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId,
+ <a href="../../simulation/action/CharacterActionRequest.html" title="simulation.action内のクラス">CharacterActionRequest</a>&nbsp;request,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double[]</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#profileCharacter(model.type.CharacterId)" class="member-name-link">profileCharacter</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#ratioUplift(double,double)" class="member-name-link">ratioUplift</a><wbr>(double&nbsp;activeDamageDelta,
+ double&nbsp;idleDamageDelta)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#replaySequencePair(simulation.CombatSimulator,simulation.CombatSimulator,model.type.CharacterId,java.util.List,boolean)" class="member-name-link">replaySequencePair</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;activeSim,
+ <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;idleSim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../simulation/action/CharacterActionKey.html" title="simulation.actionの列挙クラス">CharacterActionKey</a>&gt;&nbsp;sequence,
+ boolean&nbsp;idleActor)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#runAll()" class="member-name-link">runAll</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Runs all templates for every character in <a href="EpisodeConfig.html#partyOrder"><code>EpisodeConfig.partyOrder</code></a>.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#runEntryValueTemplate(model.type.CharacterId)" class="member-name-link">runEntryValueTemplate</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#runQuietly(mechanics.rl.CapabilityProfiler.TemplateRun)" class="member-name-link">runQuietly</a><wbr>(<a href="CapabilityProfiler.TemplateRun.html" title="mechanics.rl内のインタフェース">CapabilityProfiler.TemplateRun</a>&nbsp;run)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#runExitCostTemplate(model.type.CharacterId)" class="member-name-link">runExitCostTemplate</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="CapabilityProfiler.TeamBuffProfileResult.html" title="mechanics.rl内のクラス">CapabilityProfiler.TeamBuffProfileResult</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#runPermutationScenarioMaxUplift(model.type.CharacterId%5B%5D,model.type.CharacterId,java.util.List)" class="member-name-link">runPermutationScenarioMaxUplift</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&nbsp;order,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../simulation/action/CharacterActionKey.html" title="simulation.actionの列挙クラス">CharacterActionKey</a>&gt;&gt;&nbsp;assignedSequences)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="CapabilityProfiler.TeamBuffProfileResult.html" title="mechanics.rl内のクラス">CapabilityProfiler.TeamBuffProfileResult</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#runPermutationTeamBuffProfile(model.type.CharacterId)" class="member-name-link">runPermutationTeamBuffProfile</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#runTemplateA(model.type.CharacterId)" class="member-name-link">runTemplateA</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#runQuietly(mechanics.rl.CapabilityProfiler.TemplateRun)" class="member-name-link">runQuietly</a><wbr>(<a href="CapabilityProfiler.TemplateRun.html" title="mechanics.rl内のインタフェース">CapabilityProfiler.TemplateRun</a>&nbsp;run)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#runReentryCostTemplate(model.type.CharacterId)" class="member-name-link">runReentryCostTemplate</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#runSustainValueTemplate(model.type.CharacterId,int)" class="member-name-link">runSustainValueTemplate</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId,
+ int&nbsp;actionCount)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#runTemplateA(model.type.CharacterId)" class="member-name-link">runTemplateA</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Template A: subject on field for full episode, uses skill/burst whenever available.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#runTemplateB(model.type.CharacterId,model.type.CharacterId)" class="member-name-link">runTemplateB</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#runTemplateB(model.type.CharacterId,model.type.CharacterId)" class="member-name-link">runTemplateB</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId,
  <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;dummyId)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Template B: subject uses skill+burst at t=0, swaps off.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#runTemplateC(model.type.CharacterId,model.type.CharacterId)" class="member-name-link">runTemplateC</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId,
- <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;primaryId)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Template C: subject uses skill+burst at t=0, then primary attacks for a full 20-second window.</div>
-</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#runTemplateD(model.type.CharacterId)" class="member-name-link">runTemplateD</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;primaryId)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#runTemplateE(model.type.CharacterId)" class="member-name-link">runTemplateE</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Template D: same as C but subject does nothing.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#runTemplateE(model.type.CharacterId)" class="member-name-link">runTemplateE</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Template E: subject on field for full episode, uses burst at t=0, then ATTACKs only.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#runTemplateF(model.type.CharacterId)" class="member-name-link">runTemplateF</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#runTemplateF(model.type.CharacterId)" class="member-name-link">runTemplateF</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Template F: subject on field for full episode, never uses burst, only skill+attack.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#runTemplateG(model.type.CharacterId)" class="member-name-link">runTemplateG</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#runTemplateG(model.type.CharacterId)" class="member-name-link">runTemplateG</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Template G: subject uses skill once (from fresh sim with 0 energy), then idles 5s.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#stddev(double%5B%5D)" class="member-name-link">stddev</a><wbr>(double[]&nbsp;values)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="CapabilityProfiler.TeamBuffProfileResult.html" title="mechanics.rl内のクラス">CapabilityProfiler.TeamBuffProfileResult</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#searchPermutationMaxUplift(model.type.CharacterId%5B%5D,model.type.CharacterId,java.util.List,int)" class="member-name-link">searchPermutationMaxUplift</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&nbsp;permutation,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../simulation/action/CharacterActionKey.html" title="simulation.actionの列挙クラス">CharacterActionKey</a>&gt;&gt;&nbsp;assignedSequences,
+ int&nbsp;index)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#shouldDropForBuffOnlyProbe(mechanics.buff.Buff,model.type.CharacterId,double)" class="member-name-link">shouldDropForBuffOnlyProbe</a><wbr>(<a href="../buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&nbsp;buff,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId,
+ double&nbsp;subjectSyncTime)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#stddev(double%5B%5D)" class="member-name-link">stddev</a><wbr>(double[]&nbsp;values)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#swap(model.type.CharacterId%5B%5D,int,int)" class="member-name-link">swap</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&nbsp;values,
+ int&nbsp;left,
+ int&nbsp;right)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#useBurstIfReady(simulation.CombatSimulator,model.type.CharacterId)" class="member-name-link">useBurstIfReady</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
@@ -321,7 +563,9 @@ then skill (if allowed and ready), then normal attack.</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#writeJson(java.lang.String,java.util.Map)" class="member-name-link">writeJson</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;path,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, double[]&gt;&nbsp;sourceResults)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Writes the supplied results map to a JSON file at the given path.</div>
+</div>
 </div>
 </div>
 </div>
@@ -388,6 +632,30 @@ then skill (if allowed and ready), then normal attack.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="MIN_DAMAGE_FOR_RATIO">
+<h3>MIN_DAMAGE_FOR_RATIO</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">MIN_DAMAGE_FOR_RATIO</span></div>
+<dl class="notes">
+<dt>関連項目:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../constant-values.html#mechanics.rl.CapabilityProfiler.MIN_DAMAGE_FOR_RATIO">定数フィールド値</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="DAMAGE_PROBE_ACTIONS">
+<h3>DAMAGE_PROBE_ACTIONS</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../simulation/action/CharacterActionKey.html" title="simulation.actionの列挙クラス">CharacterActionKey</a>&gt;</span>&nbsp;<span class="element-name">DAMAGE_PROBE_ACTIONS</span></div>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="simulatorSupplier">
 <h3>simulatorSupplier</h3>
 <div class="horizontal-scroll">
@@ -400,6 +668,22 @@ then skill (if allowed and ready), then normal attack.</div>
 <h3>config</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a></span>&nbsp;<span class="element-name">config</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="partyPermutations">
+<h3>partyPermutations</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&gt;</span>&nbsp;<span class="element-name">partyPermutations</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="actionSequenceLibrary">
+<h3>actionSequenceLibrary</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../simulation/action/CharacterActionKey.html" title="simulation.actionの列挙クラス">CharacterActionKey</a>&gt;&gt;</span>&nbsp;<span class="element-name">actionSequenceLibrary</span></div>
 </div>
 </section>
 </li>
@@ -426,6 +710,13 @@ then skill (if allowed and ready), then normal attack.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">CapabilityProfiler</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/function/Supplier.html" title="java.util.function内のクラスまたはインタフェース" class="external-link">Supplier</a>&lt;<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&gt;&nbsp;simulatorSupplier,
  <a href="EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config)</span></div>
+<div class="block">Constructs a profiler that uses the supplied factory to instantiate fresh simulators
+for each experiment.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>simulatorSupplier</code> - factory producing a fresh combat simulator</dd>
+<dd><code>config</code> - episode configuration providing the party order to profile</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -468,6 +759,11 @@ Results are stored internally and can be written via <a href="#writeJson(java.la
 <h3>getResults</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, double[]&gt;</span>&nbsp;<span class="element-name">getResults</span>()</div>
+<div class="block">Returns a deep copy of the per-character profiling results.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>map keyed by character id, with cloned score arrays as values</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -478,9 +774,13 @@ Results are stored internally and can be written via <a href="#writeJson(java.la
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">writeJson</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;path,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, double[]&gt;&nbsp;sourceResults)</span>
                       throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="java.io内のクラスまたはインタフェース" class="external-link">IOException</a></span></div>
+<div class="block">Writes the supplied results map to a JSON file at the given path.</div>
 <dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>path</code> - destination JSON file path (parent directories will be created)</dd>
+<dd><code>sourceResults</code> - map of character id to capability score array</dd>
 <dt>例外:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="java.io内のクラスまたはインタフェース" class="external-link">IOException</a></code></dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/IOException.html" title="java.io内のクラスまたはインタフェース" class="external-link">IOException</a></code> - if the file cannot be written</dd>
 </dl>
 </div>
 </section>
@@ -515,23 +815,31 @@ Records only the subject's off-field damage after the swap.</div>
 </section>
 </li>
 <li>
-<section class="detail" id="runTemplateC(model.type.CharacterId,model.type.CharacterId)">
-<h3>runTemplateC</h3>
+<section class="detail" id="runPermutationTeamBuffProfile(model.type.CharacterId)">
+<h3>runPermutationTeamBuffProfile</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">runTemplateC</span><wbr><span class="parameters">(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId,
- <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;primaryId)</span></div>
-<div class="block">Template C: subject uses skill+burst at t=0, then primary attacks for a full 20-second window.
-Records only the primary's damage during that post-setup window.</div>
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="CapabilityProfiler.TeamBuffProfileResult.html" title="mechanics.rl内のクラス">CapabilityProfiler.TeamBuffProfileResult</a></span>&nbsp;<span class="element-name">runPermutationTeamBuffProfile</span><wbr><span class="parameters">(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId)</span></div>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="runTemplateD(model.type.CharacterId)">
-<h3>runTemplateD</h3>
+<section class="detail" id="searchPermutationMaxUplift(model.type.CharacterId[],model.type.CharacterId,java.util.List,int)">
+<h3>searchPermutationMaxUplift</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">runTemplateD</span><wbr><span class="parameters">(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;primaryId)</span></div>
-<div class="block">Template D: same as C but subject does nothing.
-Records only the primary's damage during its 20-second attack window.</div>
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="CapabilityProfiler.TeamBuffProfileResult.html" title="mechanics.rl内のクラス">CapabilityProfiler.TeamBuffProfileResult</a></span>&nbsp;<span class="element-name">searchPermutationMaxUplift</span><wbr><span class="parameters">(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&nbsp;permutation,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../simulation/action/CharacterActionKey.html" title="simulation.actionの列挙クラス">CharacterActionKey</a>&gt;&gt;&nbsp;assignedSequences,
+ int&nbsp;index)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="runPermutationScenarioMaxUplift(model.type.CharacterId[],model.type.CharacterId,java.util.List)">
+<h3>runPermutationScenarioMaxUplift</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="CapabilityProfiler.TeamBuffProfileResult.html" title="mechanics.rl内のクラス">CapabilityProfiler.TeamBuffProfileResult</a></span>&nbsp;<span class="element-name">runPermutationScenarioMaxUplift</span><wbr><span class="parameters">(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&nbsp;order,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../simulation/action/CharacterActionKey.html" title="simulation.actionの列挙クラス">CharacterActionKey</a>&gt;&gt;&nbsp;assignedSequences)</span></div>
 </div>
 </section>
 </li>
@@ -564,20 +872,44 @@ Records ER-scaled particle energy received.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="runEntryValueTemplate(model.type.CharacterId)">
+<h3>runEntryValueTemplate</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">runEntryValueTemplate</span><wbr><span class="parameters">(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="runSustainValueTemplate(model.type.CharacterId,int)">
+<h3>runSustainValueTemplate</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">runSustainValueTemplate</span><wbr><span class="parameters">(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId,
+ int&nbsp;actionCount)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="runExitCostTemplate(model.type.CharacterId)">
+<h3>runExitCostTemplate</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">runExitCostTemplate</span><wbr><span class="parameters">(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="runReentryCostTemplate(model.type.CharacterId)">
+<h3>runReentryCostTemplate</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">runReentryCostTemplate</span><wbr><span class="parameters">(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId)</span></div>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="createFilledSim()">
 <h3>createFilledSim</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a></span>&nbsp;<span class="element-name">createFilledSim</span>()</div>
 <div class="block">Creates a fresh simulator with all characters' energy filled to burst cost.</div>
-</div>
-</section>
-</li>
-<li>
-<section class="detail" id="getFixedPrimaryAttacker()">
-<h3>getFixedPrimaryAttacker</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></span>&nbsp;<span class="element-name">getFixedPrimaryAttacker</span>()</div>
-<div class="block">Returns the fixed primary attacker for templates C/D: partyOrder[0].</div>
 </div>
 </section>
 </li>
@@ -630,6 +962,40 @@ then skill (if allowed and ready), then normal attack.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="performBestActions(simulation.CombatSimulator,model.type.CharacterId,int,boolean,boolean)">
+<h3>performBestActions</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">performBestActions</span><wbr><span class="parameters">(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id,
+ int&nbsp;actionCount,
+ boolean&nbsp;allowBurst,
+ boolean&nbsp;allowSkill)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="performNormals(simulation.CombatSimulator,model.type.CharacterId,int)">
+<h3>performNormals</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">performNormals</span><wbr><span class="parameters">(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id,
+ int&nbsp;actionCount)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="performBestUntil(simulation.CombatSimulator,model.type.CharacterId,double,boolean,boolean)">
+<h3>performBestUntil</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">performBestUntil</span><wbr><span class="parameters">(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id,
+ double&nbsp;limit,
+ boolean&nbsp;allowBurst,
+ boolean&nbsp;allowSkill)</span></div>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="fillWithNormals(simulation.CombatSimulator,model.type.CharacterId,double)">
 <h3>fillWithNormals</h3>
 <div class="horizontal-scroll">
@@ -645,6 +1011,283 @@ then skill (if allowed and ready), then normal attack.</div>
 <h3>getMaxEnergyCost</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getMaxEnergyCost</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="applyActionSequencePair(simulation.CombatSimulator,simulation.CombatSimulator,model.type.CharacterId,java.util.List,boolean,model.type.CharacterId,java.util.List)">
+<h3>applyActionSequencePair</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="CapabilityProfiler.TeamBuffProfileResult.html" title="mechanics.rl内のクラス">CapabilityProfiler.TeamBuffProfileResult</a></span>&nbsp;<span class="element-name">applyActionSequencePair</span><wbr><span class="parameters">(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;activeSim,
+ <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;idleSim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../simulation/action/CharacterActionKey.html" title="simulation.actionの列挙クラス">CharacterActionKey</a>&gt;&nbsp;sequence,
+ boolean&nbsp;idleActor,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;excludedId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&nbsp;traceLines)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="replaySequencePair(simulation.CombatSimulator,simulation.CombatSimulator,model.type.CharacterId,java.util.List,boolean)">
+<h3>replaySequencePair</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">replaySequencePair</span><wbr><span class="parameters">(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;activeSim,
+ <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;idleSim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../simulation/action/CharacterActionKey.html" title="simulation.actionの列挙クラス">CharacterActionKey</a>&gt;&nbsp;sequence,
+ boolean&nbsp;idleActor)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="executeSubjectSequenceAndSync(simulation.CombatSimulator,simulation.CombatSimulator,model.type.CharacterId,java.util.List)">
+<h3>executeSubjectSequenceAndSync</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">executeSubjectSequenceAndSync</span><wbr><span class="parameters">(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;activeSim,
+ <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;idleSim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../simulation/action/CharacterActionKey.html" title="simulation.actionの列挙クラス">CharacterActionKey</a>&gt;&nbsp;sequence)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="evaluatePostSubjectActionProbes(simulation.CombatSimulator,simulation.CombatSimulator,model.type.CharacterId,model.type.CharacterId[],int,double,java.util.List)">
+<h3>evaluatePostSubjectActionProbes</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="CapabilityProfiler.TeamBuffProfileResult.html" title="mechanics.rl内のクラス">CapabilityProfiler.TeamBuffProfileResult</a></span>&nbsp;<span class="element-name">evaluatePostSubjectActionProbes</span><wbr><span class="parameters">(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;activeSim,
+ <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;idleSim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&nbsp;order,
+ int&nbsp;subjectIndex,
+ double&nbsp;subjectSyncTime,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&nbsp;traceLines)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="isolateSubjectBuffEffects(simulation.CombatSimulator,model.type.CharacterId,double,java.lang.String)">
+<h3>isolateSubjectBuffEffects</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">isolateSubjectBuffEffects</span><wbr><span class="parameters">(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId,
+ double&nbsp;subjectSyncTime,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;label)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="shouldDropForBuffOnlyProbe(mechanics.buff.Buff,model.type.CharacterId,double)">
+<h3>shouldDropForBuffOnlyProbe</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">shouldDropForBuffOnlyProbe</span><wbr><span class="parameters">(<a href="../buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&nbsp;buff,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId,
+ double&nbsp;subjectSyncTime)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="dumpAllBuffs(simulation.CombatSimulator)">
+<h3>dumpAllBuffs</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">dumpAllBuffs</span><wbr><span class="parameters">(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="describeBuff(mechanics.buff.Buff)">
+<h3>describeBuff</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">describeBuff</span><wbr><span class="parameters">(<a href="../buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&nbsp;buff)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="clearNonBuffReactionState(simulation.CombatSimulator)">
+<h3>clearNonBuffReactionState</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">clearNonBuffReactionState</span><wbr><span class="parameters">(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="probeDirectActionComparison(simulation.CombatSimulator,simulation.CombatSimulator,model.type.CharacterId,simulation.action.CharacterActionRequest,model.type.CharacterId)">
+<h3>probeDirectActionComparison</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="CapabilityProfiler.TeamBuffProfileResult.html" title="mechanics.rl内のクラス">CapabilityProfiler.TeamBuffProfileResult</a></span>&nbsp;<span class="element-name">probeDirectActionComparison</span><wbr><span class="parameters">(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;activeSim,
+ <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;idleSim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId,
+ <a href="../../simulation/action/CharacterActionRequest.html" title="simulation.action内のクラス">CharacterActionRequest</a>&nbsp;request,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;subjectId)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="formatProbeState(simulation.CombatSimulator,model.type.CharacterId,simulation.action.CharacterActionKey)">
+<h3>formatProbeState</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">formatProbeState</span><wbr><span class="parameters">(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId,
+ <a href="../../simulation/action/CharacterActionKey.html" title="simulation.actionの列挙クラス">CharacterActionKey</a>&nbsp;actionKey)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="formatApplicableBuffs(simulation.CombatSimulator,model.type.CharacterId)">
+<h3>formatApplicableBuffs</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">formatApplicableBuffs</span><wbr><span class="parameters">(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="formatEnemyAura(simulation.CombatSimulator)">
+<h3>formatEnemyAura</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">formatEnemyAura</span><wbr><span class="parameters">(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="neutralizeProbeActorSelfBuffs(simulation.CombatSimulator,model.type.CharacterId)">
+<h3>neutralizeProbeActorSelfBuffs</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">neutralizeProbeActorSelfBuffs</span><wbr><span class="parameters">(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="executeActionPair(simulation.CombatSimulator,simulation.CombatSimulator,model.type.CharacterId,simulation.action.CharacterActionRequest,boolean,model.type.CharacterId)">
+<h3>executeActionPair</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="CapabilityProfiler.TeamBuffProfileResult.html" title="mechanics.rl内のクラス">CapabilityProfiler.TeamBuffProfileResult</a></span>&nbsp;<span class="element-name">executeActionPair</span><wbr><span class="parameters">(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;activeSim,
+ <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;idleSim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId,
+ <a href="../../simulation/action/CharacterActionRequest.html" title="simulation.action内のクラス">CharacterActionRequest</a>&nbsp;request,
+ boolean&nbsp;idleActor,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;excludedId)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="buildPostSubjectAlignedSnapshot(simulation.SimulatorSnapshot,simulation.SimulatorSnapshot)">
+<h3>buildPostSubjectAlignedSnapshot</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="../../simulation/SimulatorSnapshot.html" title="simulation内のクラス">SimulatorSnapshot</a></span>&nbsp;<span class="element-name">buildPostSubjectAlignedSnapshot</span><wbr><span class="parameters">(<a href="../../simulation/SimulatorSnapshot.html" title="simulation内のクラス">SimulatorSnapshot</a>&nbsp;activePostSubject,
+ <a href="../../simulation/SimulatorSnapshot.html" title="simulation内のクラス">SimulatorSnapshot</a>&nbsp;idlePreSubject)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getTeamDamageExcluding(simulation.CombatSimulator,model.type.CharacterId)">
+<h3>getTeamDamageExcluding</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getTeamDamageExcluding</span><wbr><span class="parameters">(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;excludedId)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getPerCharacterDamageExcluding(simulation.CombatSimulator,model.type.CharacterId)">
+<h3>getPerCharacterDamageExcluding</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">getPerCharacterDamageExcluding</span><wbr><span class="parameters">(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;excludedId)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getCharacterIdsExcluding(model.type.CharacterId)">
+<h3>getCharacterIdsExcluding</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&gt;</span>&nbsp;<span class="element-name">getCharacterIdsExcluding</span><wbr><span class="parameters">(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;excludedId)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="actionStepUplift(simulation.CombatSimulator,simulation.CombatSimulator,model.type.CharacterId,simulation.action.CharacterActionKey,model.type.CharacterId,double,double,double[],double[])">
+<h3>actionStepUplift</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="CapabilityProfiler.TeamBuffProfileResult.html" title="mechanics.rl内のクラス">CapabilityProfiler.TeamBuffProfileResult</a></span>&nbsp;<span class="element-name">actionStepUplift</span><wbr><span class="parameters">(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;activeSim,
+ <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;idleSim,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId,
+ <a href="../../simulation/action/CharacterActionKey.html" title="simulation.actionの列挙クラス">CharacterActionKey</a>&nbsp;actionKey,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;excludedId,
+ double&nbsp;teamBeforeActive,
+ double&nbsp;teamBeforeIdle,
+ double[]&nbsp;charBeforeActive,
+ double[]&nbsp;charBeforeIdle)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="ratioUplift(double,double)">
+<h3>ratioUplift</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">ratioUplift</span><wbr><span class="parameters">(double&nbsp;activeDamageDelta,
+ double&nbsp;idleDamageDelta)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="buildPermutations(model.type.CharacterId[])">
+<h3>buildPermutations</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&gt;</span>&nbsp;<span class="element-name">buildPermutations</span><wbr><span class="parameters">(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&nbsp;source)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="buildActionSequenceLibrary()">
+<h3>buildActionSequenceLibrary</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../simulation/action/CharacterActionKey.html" title="simulation.actionの列挙クラス">CharacterActionKey</a>&gt;&gt;</span>&nbsp;<span class="element-name">buildActionSequenceLibrary</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="printBestTeamBuffTrace(mechanics.rl.CapabilityProfiler.TeamBuffProfileResult)">
+<h3>printBestTeamBuffTrace</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">printBestTeamBuffTrace</span><wbr><span class="parameters">(<a href="CapabilityProfiler.TeamBuffProfileResult.html" title="mechanics.rl内のクラス">CapabilityProfiler.TeamBuffProfileResult</a>&nbsp;result)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="formatOrder(model.type.CharacterId[])">
+<h3>formatOrder</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">formatOrder</span><wbr><span class="parameters">(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&nbsp;order)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="formatSequence(java.util.List)">
+<h3>formatSequence</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">formatSequence</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../simulation/action/CharacterActionKey.html" title="simulation.actionの列挙クラス">CharacterActionKey</a>&gt;&nbsp;sequence)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="permute(model.type.CharacterId[],int,java.util.List)">
+<h3>permute</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">permute</span><wbr><span class="parameters">(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&nbsp;values,
+ int&nbsp;index,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&gt;&nbsp;out)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="swap(model.type.CharacterId[],int,int)">
+<h3>swap</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">swap</span><wbr><span class="parameters">(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&nbsp;values,
+ int&nbsp;left,
+ int&nbsp;right)</span></div>
 </div>
 </section>
 </li>
@@ -669,6 +1312,31 @@ then skill (if allowed and ready), then normal attack.</div>
 <h3>clamp01</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">clamp01</span><wbr><span class="parameters">(double&nbsp;v)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="meanList(java.util.List)">
+<h3>meanList</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">meanList</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;values)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="normalizeTeamBuffScores()">
+<h3>normalizeTeamBuffScores</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">normalizeTeamBuffScores</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="percentile(java.util.List,double)">
+<h3>percentile</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">percentile</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;values,
+ double&nbsp;q)</span></div>
 </div>
 </section>
 </li>

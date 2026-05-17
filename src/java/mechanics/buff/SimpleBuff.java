@@ -30,6 +30,15 @@ public class SimpleBuff extends Buff {
         this.effect = effect;
     }
 
+    /**
+     * Creates a time-limited buff with an explicit {@link BuffId} and a lambda effect.
+     *
+     * @param name        display name used for logging and de-duplication
+     * @param id          typed buff identifier
+     * @param duration    how long the buff lasts in simulation seconds
+     * @param currentTime simulation time at which the buff starts
+     * @param effect      lambda that writes stat bonuses into the provided container
+     */
     public SimpleBuff(String name, BuffId id, double duration, double currentTime, Consumer<StatsContainer> effect) {
         super(name, id, duration, currentTime);
         this.effect = effect;

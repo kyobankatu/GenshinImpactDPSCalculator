@@ -105,7 +105,9 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color"><code>static final int</code></div>
 <div class="col-second even-row-color"><code><a href="#SIZE" class="member-name-link">SIZE</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Total number of discrete actions exposed to the policy.</div>
+</div>
 </div>
 </section>
 </li>
@@ -137,17 +139,23 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#createMask(simulation.CombatSimulator,double,mechanics.rl.EpisodeConfig)" class="member-name-link">createMask</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
  double&nbsp;lastSwapTime,
  <a href="EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Allocates and returns a freshly built action mask for the current simulator state.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#fillMask(simulation.CombatSimulator,double,mechanics.rl.EpisodeConfig,double%5B%5D)" class="member-name-link">fillMask</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
  double&nbsp;lastSwapTime,
  <a href="EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config,
  double[]&nbsp;mask)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Fills the provided array with legality flags for each action id.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isValid(int,double%5B%5D)" class="member-name-link">isValid</a><wbr>(int&nbsp;actionId,
  double[]&nbsp;mask)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Tests whether the given action id is legal under the supplied mask.</div>
+</div>
 </div>
 </div>
 </div>
@@ -170,6 +178,7 @@ loadScripts(document, 'script');</script>
 <h3>SIZE</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">SIZE</span></div>
+<div class="block">Total number of discrete actions exposed to the policy.</div>
 </div>
 </section>
 </li>
@@ -204,6 +213,15 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">createMask</span><wbr><span class="parameters">(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
  double&nbsp;lastSwapTime,
  <a href="EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config)</span></div>
+<div class="block">Allocates and returns a freshly built action mask for the current simulator state.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>sim</code> - active combat simulator</dd>
+<dd><code>lastSwapTime</code> - simulator time of the last successful swap</dd>
+<dd><code>config</code> - episode configuration providing party order and swap cooldown</dd>
+<dt>戻り値:</dt>
+<dd>new double array of length <code>SIZE</code> where 1.0 marks a legal action</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -215,6 +233,14 @@ loadScripts(document, 'script');</script>
  double&nbsp;lastSwapTime,
  <a href="EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config,
  double[]&nbsp;mask)</span></div>
+<div class="block">Fills the provided array with legality flags for each action id.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>sim</code> - active combat simulator</dd>
+<dd><code>lastSwapTime</code> - simulator time of the last successful swap</dd>
+<dd><code>config</code> - episode configuration</dd>
+<dd><code>mask</code> - output buffer of length <code>SIZE</code>; entries set to 1.0 (legal) or 0.0 (illegal)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -224,6 +250,14 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isValid</span><wbr><span class="parameters">(int&nbsp;actionId,
  double[]&nbsp;mask)</span></div>
+<div class="block">Tests whether the given action id is legal under the supplied mask.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>actionId</code> - candidate action id</dd>
+<dd><code>mask</code> - legality mask from <a href="#createMask(simulation.CombatSimulator,double,mechanics.rl.EpisodeConfig)"><code>createMask(CombatSimulator, double, EpisodeConfig)</code></a></dd>
+<dt>戻り値:</dt>
+<dd>true when the id is in range and the mask entry exceeds 0.5</dd>
+</dl>
 </div>
 </section>
 </li>

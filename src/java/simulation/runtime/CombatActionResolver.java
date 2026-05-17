@@ -34,8 +34,11 @@ import simulation.event.TimerEvent;
  * timeline progression, and party-level state management.
  */
 public class CombatActionResolver {
+    /** Owning simulator. */
     private final CombatSimulator sim;
+    /** Scheduler for follow-up effects of transformative reactions. */
     private final ReactionEffectScheduler reactionEffectScheduler;
+    /** Reusable buffer for the list of buffs applicable to the resolving action. */
     private final List<Buff> applicableBuffBuffer = new ArrayList<>();
 
     /**
@@ -89,6 +92,13 @@ public class CombatActionResolver {
         }
     }
 
+    /**
+     * Builds the per-action resolution context (snapshot buffs + resolved stats).
+     *
+     * @param attacker attacking character
+     * @param action   action being resolved
+     * @return immutable context snapshot
+     */
     private ActionResolutionContext createContext(Character attacker, AttackAction action) {
         applicableBuffBuffer.clear();
         applicableBuffBuffer.addAll(sim.getApplicableBuffs(attacker));
@@ -98,6 +108,11 @@ public class CombatActionResolver {
         return new ActionResolutionContext(new ArrayList<>(applicableBuffBuffer), resolvedStats);
     }
 
+    /**
+     * Fills in defaults for {@link ICDTag}/{@link ICDType} when an action omits them.
+     *
+     * @param action action whose ICD settings should be normalized
+     */
     private void normalizeIcd(AttackAction action) {
         if (action.getICDTag() == null) {
             action.setICD(action.getICDType(), ICDTag.None, action.getGaugeUnits());
@@ -107,6 +122,12 @@ public class CombatActionResolver {
         }
     }
 
+    /**
+     * Emits the appropriate Lunar reaction notification for actions flagged as Lunar.
+     *
+     * @param action    action being resolved
+     * @param character actor that triggered the action
+     */
     private void notifyLunarAction(AttackAction action, Character character) {
         if (!action.isLunarConsidered() || action.getLunarReactionType() == null) {
             return;
@@ -124,6 +145,15 @@ public class CombatActionResolver {
         }
     }
 
+    /**
+     * Drives gauge consumption and reaction resolution across currently active enemy auras.
+     *
+     * @param attacker    acting character
+     * @param characterId acting character id
+     * @param action      action being resolved
+     * @param context     resolved per-action context
+     * @return amplifying-reaction multiplier (1.0 when no amp reaction triggered)
+     */
     private double resolveGaugeAndReactions(
             Character attacker,
             CharacterId characterId,
@@ -161,6 +191,14 @@ public class CombatActionResolver {
         return reactionMulti;
     }
 
+    /**
+     * Returns the stats used for reaction computation, honoring snapshot semantics.
+     *
+     * @param attacker acting character
+     * @param action   action being resolved
+     * @param context  resolved per-action context
+     * @return stats container to read EM / reaction bonuses from
+     */
     private StatsContainer getReactionStats(Character attacker, AttackAction action, ActionResolutionContext context) {
         if (action.isUseSnapshot()) {
             return attacker.getSnapshot();
@@ -168,6 +206,15 @@ public class CombatActionResolver {
         return context.resolvedStats;
     }
 
+    /**
+     * Applies Melt/Vaporize aura consumption and returns the amplifying multiplier.
+     *
+     * @param trigger trigger element
+     * @param aura    consumed aura element
+     * @param action  source action
+     * @param result  resolved reaction result
+     * @return amplifying damage multiplier
+     */
     private double handleAmplifyingReaction(
             Element trigger,
             Element aura,
@@ -188,6 +235,18 @@ public class CombatActionResolver {
         return reactionMulti;
     }
 
+    /**
+     * Applies transformative-reaction damage (Swirl, Overload, Electro-Charged, etc.),
+     * records the damage, and schedules follow-up effects when applicable.
+     *
+     * @param attacker    acting character
+     * @param characterId acting character id
+     * @param action      source action
+     * @param trigger     trigger element
+     * @param aura        consumed aura element
+     * @param result      resolved reaction result
+     * @param stats       stats used for reaction bonuses
+     */
     private void handleTransformativeReaction(
             Character attacker,
             CharacterId characterId,
@@ -235,6 +294,12 @@ public class CombatActionResolver {
         }
     }
 
+    /**
+     * Returns the element used for transformative-reaction RES lookup.
+     *
+     * @param result reaction result
+     * @return Electro for Electro-Charged, Pyro otherwise (current scope)
+     */
     private Element getTransformativeReactionElement(ReactionResult result) {
         if (result.isElectroCharged()) {
             return Element.ELECTRO;
@@ -242,6 +307,13 @@ public class CombatActionResolver {
         return Element.PYRO;
     }
 
+    /**
+     * Applies the trigger element as a new aura when it is one of the persistent elements
+     * (i.e., not Physical/Anemo/Geo).
+     *
+     * @param trigger    trigger element
+     * @param gaugeUnits gauge units to apply
+     */
     private void applyTriggerAuraIfPersistent(Element trigger, double gaugeUnits) {
         if (trigger == Element.PHYSICAL || trigger == Element.ANEMO || trigger == Element.GEO) {
             return;
@@ -252,6 +324,16 @@ public class CombatActionResolver {
         }
     }
 
+    /**
+     * Computes final damage via {@link DamageCalculator}, records it, and triggers all
+     * weapon/artifact on-damage hooks plus optional combat logging.
+     *
+     * @param attacker      acting character
+     * @param charName      acting character display name
+     * @param action        action being resolved
+     * @param reactionMulti amplifying-reaction multiplier
+     * @param context       resolved per-action context
+     */
     private void finalizeActionDamage(
             Character attacker,
             String charName,
@@ -298,6 +380,11 @@ public class CombatActionResolver {
         }
     }
 
+    /**
+     * Adds the weapon's expected normal-attack energy generation to the attacker.
+     *
+     * @param attacker acting character
+     */
     private void applyExpectedNormalAttackEnergy(Character attacker) {
         if (attacker.getWeapon() == null) {
             return;
@@ -308,10 +395,22 @@ public class CombatActionResolver {
         }
     }
 
+    /**
+     * Immutable per-action context capturing the snapshot of applicable buffs and
+     * resolved stats used during resolution.
+     */
     private static final class ActionResolutionContext {
+        /** Buffs that were applicable to the action when resolution started. */
         private final List<Buff> applicableBuffs;
+        /** Resolved stats container, or {@code null} when the action uses snapshot semantics. */
         private final StatsContainer resolvedStats;
 
+        /**
+         * Creates a resolution context.
+         *
+         * @param applicableBuffs snapshot of applicable buffs
+         * @param resolvedStats   resolved stats, or {@code null} for snapshot actions
+         */
         private ActionResolutionContext(List<Buff> applicableBuffs, StatsContainer resolvedStats) {
             this.applicableBuffs = applicableBuffs;
             this.resolvedStats = resolvedStats;

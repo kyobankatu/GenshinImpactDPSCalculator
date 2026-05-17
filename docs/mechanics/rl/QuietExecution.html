@@ -54,8 +54,17 @@ loadScripts(document, 'script');</script>
 <div class="toc-header">コンテンツ&nbsp;<input type="text" class="filter-input" disabled placeholder="コンテンツのフィルタ(.と入力)" aria-label="目次のフィルタ" autocomplete="off" spellcheck="false"><input type="reset" class="reset-filter" disabled tabindex="-1" value="リセット"></div>
 <ol class="toc-list" tabindex="-1">
 <li><a href="#" tabindex="0">説明</a></li>
+<li><a href="#field-summary" tabindex="0">フィールドの概要</a></li>
 <li><a href="#constructor-summary" tabindex="0">コンストラクタの概要</a></li>
 <li><a href="#method-summary" tabindex="0">メソッドの概要</a></li>
+<li><a href="#field-detail" tabindex="0">フィールド詳細</a>
+<ol class="toc-list">
+<li><a href="#ORIGINAL_STDOUT" tabindex="0">ORIGINAL_STDOUT</a></li>
+<li><a href="#MUTED_STDOUT" tabindex="0">MUTED_STDOUT</a></li>
+<li><a href="#STDOUT_LOCK" tabindex="0">STDOUT_LOCK</a></li>
+<li><a href="#muteDepth" tabindex="0">muteDepth</a></li>
+</ol>
+</li>
 <li><a href="#constructor-detail" tabindex="0">コンストラクタの詳細</a>
 <ol class="toc-list">
 <li><a href="#%3Cinit%3E()" tabindex="0">QuietExecution()</a></li>
@@ -64,6 +73,8 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">メソッドの詳細</a>
 <ol class="toc-list">
 <li><a href="#call(java.util.concurrent.Callable)" tabindex="0">call(Callable)</a></li>
+<li><a href="#muteStdout()" tabindex="0">muteStdout()</a></li>
+<li><a href="#restoreStdout()" tabindex="0">restoreStdout()</a></li>
 </ol>
 </li>
 </ol>
@@ -86,6 +97,30 @@ loadScripts(document, 'script');</script>
 </section>
 <section class="summary">
 <ul class="summary-list">
+<!-- =========== FIELD SUMMARY =========== -->
+<li>
+<section class="field-summary" id="field-summary">
+<h2>フィールドの概要</h2>
+<div class="caption"><span>フィールド</span></div>
+<div class="summary-table three-column-summary">
+<div class="table-header col-first">修飾子とタイプ</div>
+<div class="table-header col-second">フィールド</div>
+<div class="table-header col-last">説明</div>
+<div class="col-first even-row-color"><code>private static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/PrintStream.html" title="java.io内のクラスまたはインタフェース" class="external-link">PrintStream</a></code></div>
+<div class="col-second even-row-color"><code><a href="#MUTED_STDOUT" class="member-name-link">MUTED_STDOUT</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private static int</code></div>
+<div class="col-second odd-row-color"><code><a href="#muteDepth" class="member-name-link">muteDepth</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/PrintStream.html" title="java.io内のクラスまたはインタフェース" class="external-link">PrintStream</a></code></div>
+<div class="col-second even-row-color"><code><a href="#ORIGINAL_STDOUT" class="member-name-link">ORIGINAL_STDOUT</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Object</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#STDOUT_LOCK" class="member-name-link">STDOUT_LOCK</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+</div>
+</section>
+</li>
 <!-- ======== CONSTRUCTOR SUMMARY ======== -->
 <li>
 <section class="constructor-summary" id="constructor-summary">
@@ -115,6 +150,12 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static &lt;T&gt;&nbsp;T</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#call(java.util.concurrent.Callable)" class="member-name-link">call</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/Callable.html" title="java.util.concurrent内のクラスまたはインタフェース" class="external-link">Callable</a>&lt;T&gt;&nbsp;callable)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#muteStdout()" class="member-name-link">muteStdout</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#restoreStdout()" class="member-name-link">restoreStdout</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -127,6 +168,46 @@ loadScripts(document, 'script');</script>
 </section>
 <section class="details">
 <ul class="details-list">
+<!-- ============ FIELD DETAIL =========== -->
+<li>
+<section class="field-details" id="field-detail">
+<h2>フィールド詳細</h2>
+<ul class="member-list">
+<li>
+<section class="detail" id="ORIGINAL_STDOUT">
+<h3>ORIGINAL_STDOUT</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/PrintStream.html" title="java.io内のクラスまたはインタフェース" class="external-link">PrintStream</a></span>&nbsp;<span class="element-name">ORIGINAL_STDOUT</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="MUTED_STDOUT">
+<h3>MUTED_STDOUT</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/PrintStream.html" title="java.io内のクラスまたはインタフェース" class="external-link">PrintStream</a></span>&nbsp;<span class="element-name">MUTED_STDOUT</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="STDOUT_LOCK">
+<h3>STDOUT_LOCK</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Object</a></span>&nbsp;<span class="element-name">STDOUT_LOCK</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="muteDepth">
+<h3>muteDepth</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">muteDepth</span></div>
+</div>
+</section>
+</li>
+</ul>
+</section>
+</li>
 <!-- ========= CONSTRUCTOR DETAIL ======== -->
 <li>
 <section class="constructor-details" id="constructor-detail">
@@ -153,6 +234,22 @@ loadScripts(document, 'script');</script>
 <h3>call</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="type-parameters">&lt;T&gt;</span>&nbsp;<span class="return-type">T</span>&nbsp;<span class="element-name">call</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/Callable.html" title="java.util.concurrent内のクラスまたはインタフェース" class="external-link">Callable</a>&lt;T&gt;&nbsp;callable)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="muteStdout()">
+<h3>muteStdout</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">muteStdout</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="restoreStdout()">
+<h3>restoreStdout</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">restoreStdout</span>()</div>
 </div>
 </section>
 </li>

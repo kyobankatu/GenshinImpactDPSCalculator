@@ -122,7 +122,10 @@ timeline progression, and party-level state management.</div>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color"><code>private static final class&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="CombatActionResolver.ActionResolutionContext.html" class="type-name-link" title="simulation.runtime内のクラス">CombatActionResolver.ActionResolutionContext</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Immutable per-action context capturing the snapshot of applicable buffs and
+resolved stats used during resolution.</div>
+</div>
 </div>
 </section>
 </li>
@@ -137,13 +140,19 @@ timeline progression, and party-level state management.</div>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color"><code>private final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="../../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;</code></div>
 <div class="col-second even-row-color"><code><a href="#applicableBuffBuffer" class="member-name-link">applicableBuffBuffer</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Reusable buffer for the list of buffs applicable to the resolving action.</div>
+</div>
 <div class="col-first odd-row-color"><code>private final <a href="../../mechanics/reaction/ReactionEffectScheduler.html" title="mechanics.reaction内のクラス">ReactionEffectScheduler</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#reactionEffectScheduler" class="member-name-link">reactionEffectScheduler</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Scheduler for follow-up effects of transformative reactions.</div>
+</div>
 <div class="col-first even-row-color"><code>private final <a href="../CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a></code></div>
 <div class="col-second even-row-color"><code><a href="#sim" class="member-name-link">sim</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Owning simulator.</div>
+</div>
 </div>
 </section>
 </li>
@@ -175,36 +184,52 @@ timeline progression, and party-level state management.</div>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyExpectedNormalAttackEnergy(model.entity.Character)" class="member-name-link">applyExpectedNormalAttackEnergy</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Adds the weapon's expected normal-attack energy generation to the attacker.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyTriggerAuraIfPersistent(model.type.Element,double)" class="member-name-link">applyTriggerAuraIfPersistent</a><wbr>(<a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;trigger,
  double&nbsp;gaugeUnits)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Applies the trigger element as a new aura when it is one of the persistent elements
+(i.e., not Physical/Anemo/Geo).</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="CombatActionResolver.ActionResolutionContext.html" title="simulation.runtime内のクラス">CombatActionResolver.ActionResolutionContext</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#createContext(model.entity.Character,simulation.action.AttackAction)" class="member-name-link">createContext</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
  <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Builds the per-action resolution context (snapshot buffs + resolved stats).</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#finalizeActionDamage(model.entity.Character,java.lang.String,simulation.action.AttackAction,double,simulation.runtime.CombatActionResolver.ActionResolutionContext)" class="member-name-link">finalizeActionDamage</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;charName,
  <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  double&nbsp;reactionMulti,
  <a href="CombatActionResolver.ActionResolutionContext.html" title="simulation.runtime内のクラス">CombatActionResolver.ActionResolutionContext</a>&nbsp;context)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Computes final damage via <a href="../../mechanics/formula/DamageCalculator.html" title="mechanics.formula内のクラス"><code>DamageCalculator</code></a>, records it, and triggers all
+weapon/artifact on-damage hooks plus optional combat logging.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getReactionStats(model.entity.Character,simulation.action.AttackAction,simulation.runtime.CombatActionResolver.ActionResolutionContext)" class="member-name-link">getReactionStats</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
  <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  <a href="CombatActionResolver.ActionResolutionContext.html" title="simulation.runtime内のクラス">CombatActionResolver.ActionResolutionContext</a>&nbsp;context)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the stats used for reaction computation, honoring snapshot semantics.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTransformativeReactionElement(mechanics.reaction.ReactionResult)" class="member-name-link">getTransformativeReactionElement</a><wbr>(<a href="../../mechanics/reaction/ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a>&nbsp;result)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the element used for transformative-reaction RES lookup.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#handleAmplifyingReaction(model.type.Element,model.type.Element,simulation.action.AttackAction,mechanics.reaction.ReactionResult)" class="member-name-link">handleAmplifyingReaction</a><wbr>(<a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;trigger,
  <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;aura,
  <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  <a href="../../mechanics/reaction/ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a>&nbsp;result)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Applies Melt/Vaporize aura consumption and returns the amplifying multiplier.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#handleTransformativeReaction(model.entity.Character,model.type.CharacterId,simulation.action.AttackAction,model.type.Element,model.type.Element,mechanics.reaction.ReactionResult,model.stats.StatsContainer)" class="member-name-link">handleTransformativeReaction</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
  <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
@@ -213,20 +238,29 @@ timeline progression, and party-level state management.</div>
  <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;aura,
  <a href="../../mechanics/reaction/ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a>&nbsp;result,
  <a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;stats)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Applies transformative-reaction damage (Swirl, Overload, Electro-Charged, etc.),
+records the damage, and schedules follow-up effects when applicable.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#normalizeIcd(simulation.action.AttackAction)" class="member-name-link">normalizeIcd</a><wbr>(<a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Fills in defaults for <a href="../../model/type/ICDTag.html" title="model.typeの列挙クラス"><code>ICDTag</code></a>/<a href="../../model/type/ICDType.html" title="model.typeの列挙クラス"><code>ICDType</code></a> when an action omits them.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#notifyLunarAction(simulation.action.AttackAction,model.entity.Character)" class="member-name-link">notifyLunarAction</a><wbr>(<a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  <a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Emits the appropriate Lunar reaction notification for actions flagged as Lunar.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resolveGaugeAndReactions(model.entity.Character,model.type.CharacterId,simulation.action.AttackAction,simulation.runtime.CombatActionResolver.ActionResolutionContext)" class="member-name-link">resolveGaugeAndReactions</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
  <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
  <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  <a href="CombatActionResolver.ActionResolutionContext.html" title="simulation.runtime内のクラス">CombatActionResolver.ActionResolutionContext</a>&nbsp;context)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Drives gauge consumption and reaction resolution across currently active enemy auras.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resolveWithoutTimeAdvance(model.type.CharacterId,simulation.action.AttackAction)" class="member-name-link">resolveWithoutTimeAdvance</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
  <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action)</code></div>
@@ -256,6 +290,7 @@ advancing simulation time.</div>
 <h3>sim</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="../CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a></span>&nbsp;<span class="element-name">sim</span></div>
+<div class="block">Owning simulator.</div>
 </div>
 </section>
 </li>
@@ -264,6 +299,7 @@ advancing simulation time.</div>
 <h3>reactionEffectScheduler</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="../../mechanics/reaction/ReactionEffectScheduler.html" title="mechanics.reaction内のクラス">ReactionEffectScheduler</a></span>&nbsp;<span class="element-name">reactionEffectScheduler</span></div>
+<div class="block">Scheduler for follow-up effects of transformative reactions.</div>
 </div>
 </section>
 </li>
@@ -272,6 +308,7 @@ advancing simulation time.</div>
 <h3>applicableBuffBuffer</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;</span>&nbsp;<span class="element-name">applicableBuffBuffer</span></div>
+<div class="block">Reusable buffer for the list of buffs applicable to the resolving action.</div>
 </div>
 </section>
 </li>
@@ -331,6 +368,14 @@ timer events whose timing is managed elsewhere.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="CombatActionResolver.ActionResolutionContext.html" title="simulation.runtime内のクラス">CombatActionResolver.ActionResolutionContext</a></span>&nbsp;<span class="element-name">createContext</span><wbr><span class="parameters">(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
  <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action)</span></div>
+<div class="block">Builds the per-action resolution context (snapshot buffs + resolved stats).</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>attacker</code> - attacking character</dd>
+<dd><code>action</code> - action being resolved</dd>
+<dt>戻り値:</dt>
+<dd>immutable context snapshot</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -339,6 +384,11 @@ timer events whose timing is managed elsewhere.</div>
 <h3>normalizeIcd</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">normalizeIcd</span><wbr><span class="parameters">(<a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action)</span></div>
+<div class="block">Fills in defaults for <a href="../../model/type/ICDTag.html" title="model.typeの列挙クラス"><code>ICDTag</code></a>/<a href="../../model/type/ICDType.html" title="model.typeの列挙クラス"><code>ICDType</code></a> when an action omits them.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>action</code> - action whose ICD settings should be normalized</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -348,6 +398,12 @@ timer events whose timing is managed elsewhere.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">notifyLunarAction</span><wbr><span class="parameters">(<a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  <a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character)</span></div>
+<div class="block">Emits the appropriate Lunar reaction notification for actions flagged as Lunar.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>action</code> - action being resolved</dd>
+<dd><code>character</code> - actor that triggered the action</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -359,6 +415,16 @@ timer events whose timing is managed elsewhere.</div>
  <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
  <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  <a href="CombatActionResolver.ActionResolutionContext.html" title="simulation.runtime内のクラス">CombatActionResolver.ActionResolutionContext</a>&nbsp;context)</span></div>
+<div class="block">Drives gauge consumption and reaction resolution across currently active enemy auras.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>attacker</code> - acting character</dd>
+<dd><code>characterId</code> - acting character id</dd>
+<dd><code>action</code> - action being resolved</dd>
+<dd><code>context</code> - resolved per-action context</dd>
+<dt>戻り値:</dt>
+<dd>amplifying-reaction multiplier (1.0 when no amp reaction triggered)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -369,6 +435,15 @@ timer events whose timing is managed elsewhere.</div>
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a></span>&nbsp;<span class="element-name">getReactionStats</span><wbr><span class="parameters">(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
  <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  <a href="CombatActionResolver.ActionResolutionContext.html" title="simulation.runtime内のクラス">CombatActionResolver.ActionResolutionContext</a>&nbsp;context)</span></div>
+<div class="block">Returns the stats used for reaction computation, honoring snapshot semantics.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>attacker</code> - acting character</dd>
+<dd><code>action</code> - action being resolved</dd>
+<dd><code>context</code> - resolved per-action context</dd>
+<dt>戻り値:</dt>
+<dd>stats container to read EM / reaction bonuses from</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -380,6 +455,16 @@ timer events whose timing is managed elsewhere.</div>
  <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;aura,
  <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  <a href="../../mechanics/reaction/ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a>&nbsp;result)</span></div>
+<div class="block">Applies Melt/Vaporize aura consumption and returns the amplifying multiplier.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>trigger</code> - trigger element</dd>
+<dd><code>aura</code> - consumed aura element</dd>
+<dd><code>action</code> - source action</dd>
+<dd><code>result</code> - resolved reaction result</dd>
+<dt>戻り値:</dt>
+<dd>amplifying damage multiplier</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -394,6 +479,18 @@ timer events whose timing is managed elsewhere.</div>
  <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;aura,
  <a href="../../mechanics/reaction/ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a>&nbsp;result,
  <a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;stats)</span></div>
+<div class="block">Applies transformative-reaction damage (Swirl, Overload, Electro-Charged, etc.),
+records the damage, and schedules follow-up effects when applicable.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>attacker</code> - acting character</dd>
+<dd><code>characterId</code> - acting character id</dd>
+<dd><code>action</code> - source action</dd>
+<dd><code>trigger</code> - trigger element</dd>
+<dd><code>aura</code> - consumed aura element</dd>
+<dd><code>result</code> - resolved reaction result</dd>
+<dd><code>stats</code> - stats used for reaction bonuses</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -402,6 +499,13 @@ timer events whose timing is managed elsewhere.</div>
 <h3>getTransformativeReactionElement</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a></span>&nbsp;<span class="element-name">getTransformativeReactionElement</span><wbr><span class="parameters">(<a href="../../mechanics/reaction/ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a>&nbsp;result)</span></div>
+<div class="block">Returns the element used for transformative-reaction RES lookup.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>result</code> - reaction result</dd>
+<dt>戻り値:</dt>
+<dd>Electro for Electro-Charged, Pyro otherwise (current scope)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -411,6 +515,13 @@ timer events whose timing is managed elsewhere.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">applyTriggerAuraIfPersistent</span><wbr><span class="parameters">(<a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;trigger,
  double&nbsp;gaugeUnits)</span></div>
+<div class="block">Applies the trigger element as a new aura when it is one of the persistent elements
+(i.e., not Physical/Anemo/Geo).</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>trigger</code> - trigger element</dd>
+<dd><code>gaugeUnits</code> - gauge units to apply</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -423,6 +534,16 @@ timer events whose timing is managed elsewhere.</div>
  <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  double&nbsp;reactionMulti,
  <a href="CombatActionResolver.ActionResolutionContext.html" title="simulation.runtime内のクラス">CombatActionResolver.ActionResolutionContext</a>&nbsp;context)</span></div>
+<div class="block">Computes final damage via <a href="../../mechanics/formula/DamageCalculator.html" title="mechanics.formula内のクラス"><code>DamageCalculator</code></a>, records it, and triggers all
+weapon/artifact on-damage hooks plus optional combat logging.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>attacker</code> - acting character</dd>
+<dd><code>charName</code> - acting character display name</dd>
+<dd><code>action</code> - action being resolved</dd>
+<dd><code>reactionMulti</code> - amplifying-reaction multiplier</dd>
+<dd><code>context</code> - resolved per-action context</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -431,6 +552,11 @@ timer events whose timing is managed elsewhere.</div>
 <h3>applyExpectedNormalAttackEnergy</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">applyExpectedNormalAttackEnergy</span><wbr><span class="parameters">(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker)</span></div>
+<div class="block">Adds the weapon's expected normal-attack energy generation to the attacker.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>attacker</code> - acting character</dd>
+</dl>
 </div>
 </section>
 </li>

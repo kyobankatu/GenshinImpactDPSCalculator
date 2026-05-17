@@ -92,6 +92,8 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">VisualLogger</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Object</a></span></div>
+<div class="block">Singleton sink that buffers <a href="SimulationRecord.html" title="visualization内のクラス"><code>SimulationRecord</code></a> entries produced during
+a simulation run for later rendering by <a href="HtmlReportGenerator.html" title="visualization内のクラス"><code>HtmlReportGenerator</code></a>.</div>
 </div>
 </section>
 <section class="summary">
@@ -142,13 +144,19 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#clear()" class="member-name-link">clear</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Discards all buffered records.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="VisualLogger.html" title="visualization内のクラス">VisualLogger</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#getInstance()" class="member-name-link">getInstance</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Returns the process-wide singleton instance, creating it on first call.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="SimulationRecord.html" title="visualization内のクラス">SimulationRecord</a>&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRecords()" class="member-name-link">getRecords</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the live list of buffered records.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#log(double,java.lang.String,java.lang.String,double,java.lang.String,double,java.util.Map)" class="member-name-link">log</a><wbr>(double&nbsp;time,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;actor,
@@ -157,7 +165,9 @@ loadScripts(document, 'script');</script>
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;reactionType,
  double&nbsp;reactionDamage,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;enemyAura)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Logs a simulation event without a formula debug string.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#log(double,java.lang.String,java.lang.String,double,java.lang.String,double,java.util.Map,java.lang.String)" class="member-name-link">log</a><wbr>(double&nbsp;time,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;actor,
@@ -167,7 +177,9 @@ loadScripts(document, 'script');</script>
  double&nbsp;reactionDamage,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;enemyAura,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;formula)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Logs a simulation event, including a formula debug tooltip.</div>
+</div>
 </div>
 </div>
 </div>
@@ -230,6 +242,11 @@ loadScripts(document, 'script');</script>
 <h3>getInstance</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="VisualLogger.html" title="visualization内のクラス">VisualLogger</a></span>&nbsp;<span class="element-name">getInstance</span>()</div>
+<div class="block">Returns the process-wide singleton instance, creating it on first call.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>the shared logger instance</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -238,6 +255,7 @@ loadScripts(document, 'script');</script>
 <h3>clear</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">clear</span>()</div>
+<div class="block">Discards all buffered records. Call at the start of a fresh simulation run.</div>
 </div>
 </section>
 </li>
@@ -252,6 +270,17 @@ loadScripts(document, 'script');</script>
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;reactionType,
  double&nbsp;reactionDamage,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;enemyAura)</span></div>
+<div class="block">Logs a simulation event without a formula debug string.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>time</code> - simulation time in seconds</dd>
+<dd><code>actor</code> - actor display name</dd>
+<dd><code>action</code> - action label</dd>
+<dd><code>damage</code> - outgoing damage (0 if none)</dd>
+<dd><code>reactionType</code> - reaction name or <code>"None"</code></dd>
+<dd><code>reactionDamage</code> - separate transformative reaction damage</dd>
+<dd><code>enemyAura</code> - enemy aura snapshot after the action</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -267,6 +296,18 @@ loadScripts(document, 'script');</script>
  double&nbsp;reactionDamage,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;enemyAura,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;formula)</span></div>
+<div class="block">Logs a simulation event, including a formula debug tooltip.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>time</code> - simulation time in seconds</dd>
+<dd><code>actor</code> - actor display name</dd>
+<dd><code>action</code> - action label</dd>
+<dd><code>damage</code> - outgoing damage (0 if none)</dd>
+<dd><code>reactionType</code> - reaction name or <code>"None"</code></dd>
+<dd><code>reactionDamage</code> - separate transformative reaction damage</dd>
+<dd><code>enemyAura</code> - enemy aura snapshot after the action; defensively copied</dd>
+<dd><code>formula</code> - optional formula debug string</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -275,6 +316,11 @@ loadScripts(document, 'script');</script>
 <h3>getRecords</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="SimulationRecord.html" title="visualization内のクラス">SimulationRecord</a>&gt;</span>&nbsp;<span class="element-name">getRecords</span>()</div>
+<div class="block">Returns the live list of buffered records.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>mutable backing list of records (do not modify externally)</dd>
+</dl>
 </div>
 </section>
 </li>

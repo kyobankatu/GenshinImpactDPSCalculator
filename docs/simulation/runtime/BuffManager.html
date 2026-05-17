@@ -77,6 +77,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#getApplicableBuffs(model.entity.Character)" tabindex="0">getApplicableBuffs(Character)</a></li>
 <li><a href="#getActiveCharacterBuffs()" tabindex="0">getActiveCharacterBuffs()</a></li>
 <li><a href="#getTeamBuffList()" tabindex="0">getTeamBuffList()</a></li>
+<li><a href="#getFieldBuffList()" tabindex="0">getFieldBuffList()</a></li>
 <li><a href="#removeTeamBuffsById(mechanics.buff.BuffId)" tabindex="0">removeTeamBuffsById(BuffId)</a></li>
 </ol>
 </li>
@@ -177,13 +178,18 @@ embedding it directly.</div>
 <div class="block">Collects all buffs currently applicable to the given character.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="../../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTeamBuffList()" class="member-name-link">getTeamBuffList</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getFieldBuffList()" class="member-name-link">getFieldBuffList</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the live simulator-owned field-buff list for package-local collaborators.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="../../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTeamBuffList()" class="member-name-link">getTeamBuffList</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the live simulator-owned team-buff list for package-local collaborators.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#removeTeamBuffsById(mechanics.buff.BuffId)" class="member-name-link">removeTeamBuffsById</a><wbr>(<a href="../../mechanics/buff/BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a>&nbsp;buffId)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#removeTeamBuffsById(mechanics.buff.BuffId)" class="member-name-link">removeTeamBuffsById</a><wbr>(<a href="../../mechanics/buff/BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a>&nbsp;buffId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Removes all simulator-owned team buffs with the given logical id.</div>
 </div>
 </div>
@@ -338,6 +344,19 @@ character-provided team buffs, and active-character-only field buffs.</div>
 <dl class="notes">
 <dt>戻り値:</dt>
 <dd>mutable team-buff list</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getFieldBuffList()">
+<h3>getFieldBuffList</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;</span>&nbsp;<span class="element-name">getFieldBuffList</span>()</div>
+<div class="block">Returns the live simulator-owned field-buff list for package-local collaborators.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>mutable field-buff list</dd>
 </dl>
 </div>
 </section>

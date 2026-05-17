@@ -35,36 +35,64 @@ import simulation.runtime.VisualLoggerSink;
  * to helper collaborators.
  */
 public class CombatSimulator {
+    /** Party composition and active-character state. */
     private final Party party;
+    /** Current enemy target, or {@code null} when none is set. */
     private Enemy enemy;
+    /** Damage recorder and DPS reporter. */
     private final DamageTracker damageReport;
+    /** Event subscription and dispatch bus. */
     private final SimulationEventBus eventDispatcher;
+    /** Timeline log sink (text/HTML). */
     private final CombatLogSink combatLogSink;
+    /** Resolves an attack action's damage without advancing time. */
     private final CombatActionResolver actionResolver;
+    /** Manages Moonsign-related synergy bookkeeping. */
     private final MoonsignManager moonsignManager;
+    /** Manages party / field buff lifetimes. */
     private final BuffManager buffManager;
+    /** Tracks simulated time and timer-event queue. */
     private final SimulationClock simulationClock;
+    /** Manages character swap policy and history. */
     private final SwitchManager switchManager;
+    /** Entry point that gates {@link CharacterActionRequest} execution. */
     private final ActionGateway actionGateway;
+    /** Executes attack actions including animation-time advancement. */
     private final ActionTimelineExecutor actionTimelineExecutor;
+    /** Mutable elemental-reaction state (EC, Thundercloud). */
     private final ReactionState reactionState;
+    /** Controller exposing {@link #reactionState} via legacy APIs. */
     private final ReactionStateController reactionStateController;
+    /** Particle-to-energy distribution helper. */
     private final EnergyDistributor energyDistributor;
+    /** Internal Cooldown manager for element application. */
     private final mechanics.element.ICDManager icdManager;
+    /** Toggle for per-action console logging. */
     private boolean enableLogging = true;
+    /** Whether direct-damage capture is active for the in-progress action. */
     private boolean captureActionDirectDamage = false;
+    /** Accumulator for direct damage of the in-progress action. */
     private double currentActionDirectDamageCapture = 0.0;
+    /** Cached direct damage value of the most recently completed action. */
     private double lastActionDirectDamageCapture = 0.0;
+    /** Actor whose direct damage is being captured in the in-progress action. */
     private CharacterId capturedActionDirectDamageActorId = null;
+    /** Stack of buff sources used for attribution during nested triggers. */
     private final Deque<CharacterId> buffSourceStack = new LinkedList<>();
 
     /**
      * Represents the global Moonsign state of the party.
      */
     public enum Moonsign {
-        NONE, NASCENT_GLEAM, ASCENDANT_GLEAM
+        /** No active Moonsign. */
+        NONE,
+        /** First-tier Moonsign granted by a single Lunar character. */
+        NASCENT_GLEAM,
+        /** Second-tier Moonsign requiring multiple Lunar characters. */
+        ASCENDANT_GLEAM
     }
 
+    /** Currently active Moonsign state for the party. */
     private Moonsign currentMoonsign = Moonsign.NASCENT_GLEAM;
 
     /**
@@ -155,6 +183,12 @@ public class CombatSimulator {
         return party.getMember(name);
     }
 
+    /**
+     * Returns a party member by character id.
+     *
+     * @param id character id
+     * @return matching character, or {@code null}
+     */
     public Character getCharacter(CharacterId id) {
         return party.getMember(id);
     }
@@ -187,6 +221,11 @@ public class CombatSimulator {
         switchCharacter(id);
     }
 
+    /**
+     * Executes a standard character swap with cooldown and callbacks.
+     *
+     * @param id target character id
+     */
     public void switchCharacter(CharacterId id) {
         switchManager.switchCharacter(id);
     }
@@ -201,6 +240,11 @@ public class CombatSimulator {
         setActiveCharacter(id);
     }
 
+    /**
+     * Directly sets the active character without swap side effects.
+     *
+     * @param id target character id
+     */
     public void setActiveCharacter(CharacterId id) {
         switchManager.setActiveCharacter(id);
     }
@@ -241,18 +285,31 @@ public class CombatSimulator {
         buffManager.applyFieldBuff(buff);
     }
 
+    /**
+     * Pushes a buff-source attribution onto the nested-source stack.
+     *
+     * @param sourceCharacterId attributed source, ignored when {@code null}
+     */
     public void pushBuffSource(CharacterId sourceCharacterId) {
         if (sourceCharacterId != null) {
             buffSourceStack.push(sourceCharacterId);
         }
     }
 
+    /**
+     * Pops the most recent entry from the buff-source attribution stack.
+     */
     public void popBuffSource() {
         if (!buffSourceStack.isEmpty()) {
             buffSourceStack.pop();
         }
     }
 
+    /**
+     * Returns the current buff-source attribution on top of the stack.
+     *
+     * @return current source, or {@link CharacterId#UNKNOWN} if the stack is empty
+     */
     public CharacterId getCurrentBuffSourceCharacterId() {
         return buffSourceStack.isEmpty() ? CharacterId.UNKNOWN : buffSourceStack.peek();
     }
@@ -294,6 +351,11 @@ public class CombatSimulator {
         return buffManager.getActiveCharacterBuffs();
     }
 
+    /**
+     * Returns the particle-to-energy distributor.
+     *
+     * @return energy distributor
+     */
     public EnergyDistributor getEnergyDistributor() {
         return energyDistributor;
     }
@@ -309,6 +371,12 @@ public class CombatSimulator {
         performAction(id, request);
     }
 
+    /**
+     * Executes a typed action after applying cooldown and energy gates.
+     *
+     * @param characterId acting character id
+     * @param request     typed action request
+     */
     public void performAction(CharacterId characterId, CharacterActionRequest request) {
         actionGateway.performAction(characterId, request);
     }
@@ -323,22 +391,42 @@ public class CombatSimulator {
         damageReport.recordDamage(charName, dmg);
     }
 
+    /**
+     * Records dealt damage under the given character id.
+     *
+     * @param characterId source character id
+     * @param dmg         damage amount
+     */
     public void recordDamage(CharacterId characterId, double dmg) {
         damageReport.recordDamage(characterId.getDisplayName(), dmg);
     }
 
+    /**
+     * Starts capturing the direct-damage portion (excluding reactions) of the next action.
+     *
+     * @param actorId actor whose direct damage should be captured
+     */
     public void beginActionDirectDamageCapture(CharacterId actorId) {
         captureActionDirectDamage = true;
         capturedActionDirectDamageActorId = actorId;
         currentActionDirectDamageCapture = 0.0;
     }
 
+    /**
+     * Accumulates resolved direct damage when capture is active for the matching actor.
+     *
+     * @param actorId actor of the resolved damage
+     * @param damage  resolved damage amount
+     */
     public void captureResolvedActionDamage(CharacterId actorId, double damage) {
         if (captureActionDirectDamage && actorId == capturedActionDirectDamageActorId) {
             currentActionDirectDamageCapture += damage;
         }
     }
 
+    /**
+     * Ends the direct-damage capture session, freezing the result for {@link #getLastActionDirectDamageCapture()}.
+     */
     public void endActionDirectDamageCapture() {
         lastActionDirectDamageCapture = currentActionDirectDamageCapture;
         currentActionDirectDamageCapture = 0.0;
@@ -346,6 +434,11 @@ public class CombatSimulator {
         capturedActionDirectDamageActorId = null;
     }
 
+    /**
+     * Returns the captured direct-damage value of the most recently completed action.
+     *
+     * @return last captured direct-damage value
+     */
     public double getLastActionDirectDamageCapture() {
         return lastActionDirectDamageCapture;
     }
@@ -514,6 +607,12 @@ public class CombatSimulator {
         performAction(characterId, action);
     }
 
+    /**
+     * Executes an attack action and advances time by its animation duration.
+     *
+     * @param characterId acting character id
+     * @param action      action to execute
+     */
     public void performAction(CharacterId characterId, AttackAction action) {
         actionTimelineExecutor.execute(characterId, action);
     }
@@ -529,6 +628,12 @@ public class CombatSimulator {
         performActionWithoutTimeAdvance(characterId, action);
     }
 
+    /**
+     * Resolves an attack action without advancing simulation time.
+     *
+     * @param characterId acting character id
+     * @param action      action to resolve
+     */
     public void performActionWithoutTimeAdvance(CharacterId characterId, AttackAction action) {
         actionResolver.resolveWithoutTimeAdvance(characterId, action);
     }
@@ -569,10 +674,20 @@ public class CombatSimulator {
         return buffManager.getTeamBuffList();
     }
 
+    /**
+     * Returns the live simulator-owned field buff list.
+     *
+     * @return mutable field buff list
+     */
     public List<Buff> getFieldBuffList() {
         return buffManager.getFieldBuffList();
     }
 
+    /**
+     * Removes all team buffs whose {@link mechanics.buff.BuffId} matches the given id.
+     *
+     * @param buffId buff identifier to match
+     */
     public void removeTeamBuffsById(mechanics.buff.BuffId buffId) {
         buffManager.removeTeamBuffsById(buffId);
     }

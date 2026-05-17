@@ -10,7 +10,14 @@ import model.type.WeaponType;
 import simulation.action.AttackAction;
 import model.type.Element;
 
+/**
+ * Skyward Spine polearm with a passive CRIT/attack-speed bonus and Vacuum
+ * Blade proc.
+ */
 public class SkywardSpine extends Weapon implements DamageTriggeredWeaponEffect {
+    /**
+     * Constructs Skyward Spine with Lv 90 base stats.
+     */
     public SkywardSpine() {
         super("Skyward Spine", new StatsContainer());
         StatsContainer s = this.getStats();
@@ -21,6 +28,12 @@ public class SkywardSpine extends Weapon implements DamageTriggeredWeaponEffect 
 
     private double lastVacuumTime = -10.0;
 
+    /**
+     * Applies the weapon's constant CRIT Rate and attack speed bonuses.
+     *
+     * @param stats the stats container to mutate in-place
+     * @param currentTime simulation time in seconds
+     */
     @Override
     public void applyPassive(StatsContainer stats, double currentTime) {
         // Blackwing R1
@@ -28,6 +41,14 @@ public class SkywardSpine extends Weapon implements DamageTriggeredWeaponEffect 
         stats.add(StatType.ATK_SPD, 0.12);
     }
 
+    /**
+     * Attempts to trigger Vacuum Blade after normal or charged attack damage.
+     *
+     * @param user the character who dealt the damage
+     * @param action the triggering attack action
+     * @param currentTime simulation time in seconds at the damage event
+     * @param sim the active combat simulator
+     */
     @Override
     public void onDamage(Character user, AttackAction action, double currentTime, simulation.CombatSimulator sim) {
         if (action.getActionType() == ActionType.NORMAL || action.getActionType() == ActionType.CHARGE) {

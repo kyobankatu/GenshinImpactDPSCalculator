@@ -36,6 +36,18 @@ public class ActiveCharacterBuff extends Buff {
         this.effect = effect;
     }
 
+    /**
+     * Creates a time-limited buff conditional on the owner being active, with an
+     * explicit {@link BuffId} for typed identity.
+     *
+     * @param name        display name used for logging and de-duplication
+     * @param id          typed buff identifier
+     * @param duration    how long the buff lasts in simulation seconds
+     * @param currentTime simulation time at which the buff starts
+     * @param sim         the combat simulator used to query the active character
+     * @param owner       the character who must be on-field for the buff to apply
+     * @param effect      lambda that writes stat bonuses into the provided container
+     */
     public ActiveCharacterBuff(String name, BuffId id, double duration, double currentTime,
             CombatSimulator sim, Character owner,
             java.util.function.Consumer<StatsContainer> effect) {

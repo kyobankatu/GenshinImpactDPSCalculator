@@ -11,6 +11,7 @@ import simulation.action.CharacterActionRequest;
  * Owns cooldown gating and dispatch for typed character actions.
  */
 public class ActionGateway {
+    /** Owning simulator. */
     private final CombatSimulator sim;
 
     /**
@@ -25,7 +26,7 @@ public class ActionGateway {
     /**
      * Executes a typed character action after applying cooldown and energy gates.
      *
-     * @param charName acting character name
+     * @param characterId acting character id
      * @param request typed action request
      */
     public void performAction(CharacterId characterId, CharacterActionRequest request) {

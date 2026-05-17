@@ -18,16 +18,32 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionRequest;
 
+/**
+ * Xingqiu character implementation with Raincutter sword-wave scheduling.
+ */
 public class Xingqiu extends Character implements FormStateProvider {
 
     private int normalAttackStep = 0;
     private java.util.Map<String, Double> triggerCooldowns = new java.util.HashMap<>();
     private int raincutterWaveCount = 0;
 
+    /**
+     * Constructs Xingqiu with the shared talent data source.
+     *
+     * @param weapon equipped weapon
+     * @param artifacts equipped artifact set
+     */
     public Xingqiu(Weapon weapon, ArtifactSet artifacts) {
         this(weapon, artifacts, TalentDataManager.getInstance());
     }
 
+    /**
+     * Constructs Xingqiu with an explicit talent data source.
+     *
+     * @param weapon equipped weapon
+     * @param artifacts equipped artifact set
+     * @param talentData talent values backing this character
+     */
     public Xingqiu(Weapon weapon, ArtifactSet artifacts, TalentDataSource talentData) {
         super(talentData);
         this.name = "Xingqiu";
@@ -46,22 +62,44 @@ public class Xingqiu extends Character implements FormStateProvider {
         setBurstCD(20.0);
     }
 
+    /**
+     * Returns Xingqiu's burst energy cost.
+     *
+     * @return burst cost in energy
+     */
     @Override
     public double getEnergyCost() {
         return getTalentValue("Energy Cost", 80);
     }
 
+    /**
+     * Returns whether Raincutter is currently active.
+     *
+     * @param currentTime current simulation time in seconds
+     * @return {@code true} while Xingqiu's burst duration remains
+     */
     @Override
     public boolean isFormActive(double currentTime) {
         return (currentTime - getLastBurstTime()) < 18.0;
     }
 
+    /**
+     * Applies Xingqiu's passive Hydro damage bonus.
+     *
+     * @param stats stats container to modify
+     */
     @Override
     public void applyPassive(StatsContainer stats) {
         double hydroBonus = getTalentValue("Hydro Bonus", 0.20);
         stats.add(StatType.HYDRO_DMG_BONUS, hydroBonus);
     }
 
+    /**
+     * Executes the requested combat action for Xingqiu.
+     *
+     * @param request requested player action
+     * @param sim active combat simulator
+     */
     @Override
     public void onAction(CharacterActionRequest request, CombatSimulator sim) {
         switch (request.getKey()) {
@@ -170,6 +208,12 @@ public class Xingqiu extends Character implements FormStateProvider {
         });
     }
 
+    /**
+     * Builds the next Raincutter sword wave for the given burst trigger count.
+     *
+     * @param waveCount zero-based Raincutter trigger count
+     * @return attack actions to fire for that wave
+     */
     public java.util.List<AttackAction> getRaincutterAttack(int waveCount) {
         // C6 pattern: 2 - 3 - 5 swords.
         // Non-C6: 2 - 3 ...

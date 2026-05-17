@@ -17,7 +17,9 @@ import simulation.action.AttackAction;
  * dispatch, animation-duration scaling, and timeline advancement.
  */
 public class ActionTimelineExecutor {
+    /** Owning simulator. */
     private final CombatSimulator sim;
+    /** Event bus used to dispatch the post-resolution action event. */
     private final SimulationEventBus eventBus;
 
     /**
@@ -47,6 +49,12 @@ public class ActionTimelineExecutor {
         sim.advanceTime(resolveAnimationDuration(character, action));
     }
 
+    /**
+     * Looks up a party member by id, throwing if not found.
+     *
+     * @param characterId character to find
+     * @return resolved character
+     */
     private Character requireCharacter(CharacterId characterId) {
         Character character = sim.getCharacter(characterId);
         if (character == null) {
@@ -55,6 +63,13 @@ public class ActionTimelineExecutor {
         return character;
     }
 
+    /**
+     * Applies the Ascendant Blessing follow-up when a non-Lunar character uses a skill or burst
+     * while the party is in {@code ASCENDANT_GLEAM} Moonsign state.
+     *
+     * @param character acting character
+     * @param action executed action
+     */
     private void applyAscendantBlessingIfNeeded(Character character, AttackAction action) {
         if (sim.getMoonsign() != CombatSimulator.Moonsign.ASCENDANT_GLEAM) {
             return;
@@ -68,6 +83,14 @@ public class ActionTimelineExecutor {
         }
     }
 
+    /**
+     * Computes the effective animation duration of the action, applying ATK_SPD scaling
+     * to normal and charged attacks.
+     *
+     * @param character acting character
+     * @param action executed action
+     * @return effective animation duration in seconds
+     */
     private double resolveAnimationDuration(Character character, AttackAction action) {
         double duration = action.getAnimationDuration();
         ActionType actionType = action.getActionType();

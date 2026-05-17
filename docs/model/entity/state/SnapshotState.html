@@ -88,7 +88,12 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">SnapshotState</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Object</a></span></div>
-<div class="block">Holds the latest captured stat snapshot for delayed damage resolution.</div>
+<div class="block">Holds the latest captured stat snapshot for delayed damage resolution.
+
+<p>Genshin's snapshot mechanic freezes a character's stats at skill cast
+time so that later off-field hits (e.g. Xingqiu's Rain Swords, Xiangling's
+Pyronado) use those stored stats rather than the current ones. This class
+is a thin holder that backs that behaviour at the <code>Character</code> level.</div>
 </div>
 </section>
 <section class="summary">
@@ -134,10 +139,15 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSnapshot()" class="member-name-link">getSnapshot</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the stored snapshot, or an empty <a href="../../stats/StatsContainer.html" title="model.stats内のクラス"><code>StatsContainer</code></a> if no
+snapshot has been captured yet (avoids <code>null</code> dereferences).</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setSnapshot(model.stats.StatsContainer)" class="member-name-link">setSnapshot</a><wbr>(<a href="../../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;snapshotStats)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Stores the supplied stat snapshot, overwriting any previous one.</div>
+</div>
 </div>
 </div>
 </div>
@@ -192,6 +202,11 @@ loadScripts(document, 'script');</script>
 <h3>setSnapshot</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setSnapshot</span><wbr><span class="parameters">(<a href="../../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;snapshotStats)</span></div>
+<div class="block">Stores the supplied stat snapshot, overwriting any previous one.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>snapshotStats</code> - stats container captured at cast time</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -200,6 +215,12 @@ loadScripts(document, 'script');</script>
 <h3>getSnapshot</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a></span>&nbsp;<span class="element-name">getSnapshot</span>()</div>
+<div class="block">Returns the stored snapshot, or an empty <a href="../../stats/StatsContainer.html" title="model.stats内のクラス"><code>StatsContainer</code></a> if no
+snapshot has been captured yet (avoids <code>null</code> dereferences).</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>stored snapshot or an empty container</dd>
+</dl>
 </div>
 </section>
 </li>

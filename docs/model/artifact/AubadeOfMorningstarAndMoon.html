@@ -98,6 +98,8 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">AubadeOfMorningstarAndMoon</span>
 <span class="extends-implements">extends <a href="../entity/ArtifactSet.html" title="model.entity内のクラス">ArtifactSet</a>
 implements <a href="../entity/SwitchAwareArtifact.html" title="model.entity内のインタフェース">SwitchAwareArtifact</a></span></div>
+<div class="block">Aubade of Morningstar and Moon artifact set with switch-state Lunar reaction
+buffs.</div>
 </div>
 </section>
 <section class="summary">
@@ -141,9 +143,14 @@ implements <a href="../entity/SwitchAwareArtifact.html" title="model.entity内�
 <div class="table-header col-first">コンストラクタ</div>
 <div class="table-header col-last">説明</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E()" class="member-name-link">AubadeOfMorningstarAndMoon</a>()</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Constructs Aubade of Morningstar and Moon with the 2-piece ATK bonus.</div>
+</div>
 <div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(model.stats.StatsContainer)" class="member-name-link">AubadeOfMorningstarAndMoon</a><wbr>(<a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;stats)</code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Constructs Aubade of Morningstar and Moon with the supplied main/sub
+stats plus the 2-piece ATK bonus.</div>
+</div>
 </div>
 </section>
 </li>
@@ -161,11 +168,16 @@ implements <a href="../entity/SwitchAwareArtifact.html" title="model.entity内�
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onSwitchIn(simulation.CombatSimulator,model.entity.Character)" class="member-name-link">onSwitchIn</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
  <a href="../entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;owner)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Switches the set into its lingering on-field-return state for 3 seconds.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onSwitchOut(simulation.CombatSimulator,model.entity.Character)" class="member-name-link">onSwitchOut</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
  <a href="../entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;owner)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Switches the set into its off-field state, keeping the Lunar reaction buff
+active until the owner returns on-field.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateBuffState(simulation.CombatSimulator,model.entity.Character,boolean)" class="member-name-link">updateBuffState</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
  <a href="../entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;owner,
@@ -212,6 +224,7 @@ implements <a href="../entity/SwitchAwareArtifact.html" title="model.entity内�
 <h3>AubadeOfMorningstarAndMoon</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">AubadeOfMorningstarAndMoon</span>()</div>
+<div class="block">Constructs Aubade of Morningstar and Moon with the 2-piece ATK bonus.</div>
 </div>
 </section>
 </li>
@@ -220,6 +233,12 @@ implements <a href="../entity/SwitchAwareArtifact.html" title="model.entity内�
 <h3>AubadeOfMorningstarAndMoon</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">AubadeOfMorningstarAndMoon</span><wbr><span class="parameters">(<a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;stats)</span></div>
+<div class="block">Constructs Aubade of Morningstar and Moon with the supplied main/sub
+stats plus the 2-piece ATK bonus.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>stats</code> - artifact main and sub stats</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -237,9 +256,14 @@ implements <a href="../entity/SwitchAwareArtifact.html" title="model.entity内�
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">onSwitchOut</span><wbr><span class="parameters">(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
  <a href="../entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;owner)</span></div>
+<div class="block">Switches the set into its off-field state, keeping the Lunar reaction buff
+active until the owner returns on-field.</div>
 <dl class="notes">
 <dt>定義:</dt>
 <dd><code><a href="../entity/SwitchAwareArtifact.html#onSwitchOut(simulation.CombatSimulator,model.entity.Character)">onSwitchOut</a></code>&nbsp;インタフェース内&nbsp;<code><a href="../entity/SwitchAwareArtifact.html" title="model.entity内のインタフェース">SwitchAwareArtifact</a></code></dd>
+<dt>パラメータ:</dt>
+<dd><code>sim</code> - the active combat simulator</dd>
+<dd><code>owner</code> - the character equipping the set</dd>
 </dl>
 </div>
 </section>
@@ -250,9 +274,13 @@ implements <a href="../entity/SwitchAwareArtifact.html" title="model.entity内�
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">onSwitchIn</span><wbr><span class="parameters">(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
  <a href="../entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;owner)</span></div>
+<div class="block">Switches the set into its lingering on-field-return state for 3 seconds.</div>
 <dl class="notes">
 <dt>定義:</dt>
 <dd><code><a href="../entity/SwitchAwareArtifact.html#onSwitchIn(simulation.CombatSimulator,model.entity.Character)">onSwitchIn</a></code>&nbsp;インタフェース内&nbsp;<code><a href="../entity/SwitchAwareArtifact.html" title="model.entity内のインタフェース">SwitchAwareArtifact</a></code></dd>
+<dt>パラメータ:</dt>
+<dd><code>sim</code> - the active combat simulator</dd>
+<dd><code>owner</code> - the character equipping the set</dd>
 </dl>
 </div>
 </section>

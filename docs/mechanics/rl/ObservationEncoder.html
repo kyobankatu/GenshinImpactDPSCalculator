@@ -60,6 +60,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-summary" tabindex="0">メソッドの概要</a></li>
 <li><a href="#field-detail" tabindex="0">フィールド詳細</a>
 <ol class="toc-list">
+<li><a href="#NUM_CHARS" tabindex="0">NUM_CHARS</a></li>
 <li><a href="#CHAR_DYNAMIC_FEATURES" tabindex="0">CHAR_DYNAMIC_FEATURES</a></li>
 <li><a href="#CHAR_STATIC_FEATURES" tabindex="0">CHAR_STATIC_FEATURES</a></li>
 <li><a href="#FEATURES_PER_CHARACTER" tabindex="0">FEATURES_PER_CHARACTER</a></li>
@@ -79,8 +80,10 @@ loadScripts(document, 'script');</script>
 <ol class="toc-list">
 <li><a href="#encode(simulation.CombatSimulator,mechanics.rl.EpisodeConfig,double)" tabindex="0">encode(CombatSimulator, EpisodeConfig, double)</a></li>
 <li><a href="#fillObservation(simulation.CombatSimulator,mechanics.rl.EpisodeConfig,double,double%5B%5D)" tabindex="0">fillObservation(CombatSimulator, EpisodeConfig, double, double[])</a></li>
-<li><a href="#isBurstActive(model.entity.Character,double)" tabindex="0">isBurstActive(Character, double)</a></li>
+<li><a href="#fillObservation(simulation.CombatSimulator,mechanics.rl.EpisodeConfig,double,double%5B%5D,double%5B%5D,double%5B%5D)" tabindex="0">fillObservation(CombatSimulator, EpisodeConfig, double, double[], double[], double[])</a></li>
+<li><a href="#isFormActive(model.entity.Character,double)" tabindex="0">isFormActive(Character, double)</a></li>
 <li><a href="#countActiveBuffs(model.entity.Character,double)" tabindex="0">countActiveBuffs(Character, double)</a></li>
+<li><a href="#maxBuffRemaining(model.entity.Character,double)" tabindex="0">maxBuffRemaining(Character, double)</a></li>
 <li><a href="#normalizedAura(model.entity.Enemy,model.type.Element)" tabindex="0">normalizedAura(Enemy, Element)</a></li>
 <li><a href="#clamp01(double)" tabindex="0">clamp01(double)</a></li>
 </ol>
@@ -105,13 +108,13 @@ loadScripts(document, 'script');</script>
 <p>Layout: <code>NUM_CHARS</code> blocks of <a href="#FEATURES_PER_CHARACTER"><code>FEATURES_PER_CHARACTER</code></a> features
 followed by <a href="#GLOBAL_FEATURES"><code>GLOBAL_FEATURES</code></a> global features.
 
-<p>Per-character block (18 dims):
+<p>Per-character block (29 dims):
 <ul>
-  <li>[0–5] dynamic: energy ratio, isActive, skill readiness, burst readiness,
-      isBurstActive, active-buff ratio</li>
-  <li>[6–13] static: element one-hot (8 dims, <a href="../../model/type/Element.html#values()"><code>Element.values()</code></a> order)</li>
-  <li>[14–17] static: off-field DPS ratio, team-buff score,
-      self-enhancement score, energy-generation score</li>
+  <li>[0–9] dynamic: energy ratio, isActive, skill readiness, burst readiness,
+      isFormActive, active-buff ratio, max-buff-remaining, time-since-last-active,
+      on-field fraction, cumulative damage share</li>
+  <li>[10–17] static: element one-hot (8 dims, <a href="../../model/type/Element.html#values()"><code>Element.values()</code></a> order)</li>
+  <li>[18–28] static: capability and value-curve profile scores</li>
 </ul>
 
 <p>Global block (7 dims): swap readiness, time remaining, PYRO/HYDRO/ELECTRO/ANEMO
@@ -154,7 +157,7 @@ aura, thundercloud active.</div>
 <div class="col-first odd-row-color"><code>static final int</code></div>
 <div class="col-second odd-row-color"><code><a href="#CHAR_STATIC_FEATURES" class="member-name-link">CHAR_STATIC_FEATURES</a></code></div>
 <div class="col-last odd-row-color">
-<div class="block">Number of static features per character slot (8 element one-hot + 4 capability scores).</div>
+<div class="block">Number of static features per character slot (8 element one-hot + capability scores).</div>
 </div>
 <div class="col-first even-row-color"><code>private static final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
 <div class="col-second even-row-color"><code><a href="#DEFAULT_PROFILES_PATH" class="member-name-link">DEFAULT_PROFILES_PATH</a></code></div>
@@ -170,13 +173,16 @@ aura, thundercloud active.</div>
 <div class="block">Number of global features appended after all character blocks.</div>
 </div>
 <div class="col-first odd-row-color"><code>static final int</code></div>
-<div class="col-second odd-row-color"><code><a href="#OBSERVATION_SIZE" class="member-name-link">OBSERVATION_SIZE</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-second odd-row-color"><code><a href="#NUM_CHARS" class="member-name-link">NUM_CHARS</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>static final int</code></div>
+<div class="col-second even-row-color"><code><a href="#OBSERVATION_SIZE" class="member-name-link">OBSERVATION_SIZE</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Total observation vector length.</div>
 </div>
-<div class="col-first even-row-color"><code>private final <a href="ObservationEncoder.CapabilityProfileStore.html" title="mechanics.rl内のクラス">ObservationEncoder.CapabilityProfileStore</a></code></div>
-<div class="col-second even-row-color"><code><a href="#profileStore" class="member-name-link">profileStore</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private final <a href="ObservationEncoder.CapabilityProfileStore.html" title="mechanics.rl内のクラス">ObservationEncoder.CapabilityProfileStore</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#profileStore" class="member-name-link">profileStore</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -233,8 +239,22 @@ aura, thundercloud active.</div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Fills an existing observation array in-place.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isBurstActive(model.entity.Character,double)" class="member-name-link">isBurstActive</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#fillObservation(simulation.CombatSimulator,mechanics.rl.EpisodeConfig,double,double%5B%5D,double%5B%5D,double%5B%5D)" class="member-name-link">fillObservation</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
+ <a href="EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config,
+ double&nbsp;lastSwapTime,
+ double[]&nbsp;slotLastActiveTime,
+ double[]&nbsp;slotOnFieldTime,
+ double[]&nbsp;observation)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Fills an existing observation array in-place with per-slot history features.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isFormActive(model.entity.Character,double)" class="member-name-link">isFormActive</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character,
+ double&nbsp;currentTime)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#maxBuffRemaining(model.entity.Character,double)" class="member-name-link">maxBuffRemaining</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character,
  double&nbsp;currentTime)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
@@ -259,6 +279,22 @@ aura, thundercloud active.</div>
 <h2>フィールド詳細</h2>
 <ul class="member-list">
 <li>
+<section class="detail" id="NUM_CHARS">
+<h3>NUM_CHARS</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">NUM_CHARS</span></div>
+<dl class="notes">
+<dt>関連項目:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../constant-values.html#mechanics.rl.ObservationEncoder.NUM_CHARS">定数フィールド値</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="CHAR_DYNAMIC_FEATURES">
 <h3>CHAR_DYNAMIC_FEATURES</h3>
 <div class="horizontal-scroll">
@@ -280,7 +316,7 @@ aura, thundercloud active.</div>
 <h3>CHAR_STATIC_FEATURES</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">CHAR_STATIC_FEATURES</span></div>
-<div class="block">Number of static features per character slot (8 element one-hot + 4 capability scores).</div>
+<div class="block">Number of static features per character slot (8 element one-hot + capability scores).</div>
 <dl class="notes">
 <dt>関連項目:</dt>
 <dd>
@@ -445,10 +481,33 @@ aura, thundercloud active.</div>
 </section>
 </li>
 <li>
-<section class="detail" id="isBurstActive(model.entity.Character,double)">
-<h3>isBurstActive</h3>
+<section class="detail" id="fillObservation(simulation.CombatSimulator,mechanics.rl.EpisodeConfig,double,double[],double[],double[])">
+<h3>fillObservation</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isBurstActive</span><wbr><span class="parameters">(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character,
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">fillObservation</span><wbr><span class="parameters">(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
+ <a href="EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a>&nbsp;config,
+ double&nbsp;lastSwapTime,
+ double[]&nbsp;slotLastActiveTime,
+ double[]&nbsp;slotOnFieldTime,
+ double[]&nbsp;observation)</span></div>
+<div class="block">Fills an existing observation array in-place with per-slot history features.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>sim</code> - current combat simulator</dd>
+<dd><code>config</code> - episode configuration</dd>
+<dd><code>lastSwapTime</code> - simulation time of the most recent swap action</dd>
+<dd><code>slotLastActiveTime</code> - last sim time each slot was on-field; null falls back to zeros</dd>
+<dd><code>slotOnFieldTime</code> - cumulative on-field seconds per slot; null falls back to zeros</dd>
+<dd><code>observation</code> - target array; must have length <a href="#OBSERVATION_SIZE"><code>OBSERVATION_SIZE</code></a></dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="isFormActive(model.entity.Character,double)">
+<h3>isFormActive</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isFormActive</span><wbr><span class="parameters">(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character,
  double&nbsp;currentTime)</span></div>
 </div>
 </section>
@@ -458,6 +517,15 @@ aura, thundercloud active.</div>
 <h3>countActiveBuffs</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">countActiveBuffs</span><wbr><span class="parameters">(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character,
+ double&nbsp;currentTime)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="maxBuffRemaining(model.entity.Character,double)">
+<h3>maxBuffRemaining</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">maxBuffRemaining</span><wbr><span class="parameters">(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character,
  double&nbsp;currentTime)</span></div>
 </div>
 </section>

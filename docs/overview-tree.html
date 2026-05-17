@@ -103,6 +103,7 @@ loadScripts(document, 'script');</script>
 <li class="circle">simulation.action.<a href="simulation/action/AttackAction.html" class="type-name-link" title="simulation.action内のクラス">AttackAction</a></li>
 <li class="circle">mechanics.rl.bridge.<a href="mechanics/rl/bridge/BatchProtocol.html" class="type-name-link" title="mechanics.rl.bridge内のクラス">BatchProtocol</a></li>
 <li class="circle">mechanics.rl.<a href="mechanics/rl/BattleEnvironment.html" class="type-name-link" title="mechanics.rl内のクラス">BattleEnvironment</a></li>
+<li class="circle">mechanics.rl.<a href="mechanics/rl/BattleEnvironment.BranchStateSnapshot.html" class="type-name-link" title="mechanics.rl内のクラス">BattleEnvironment.BranchStateSnapshot</a></li>
 <li class="circle">mechanics.rl.<a href="mechanics/rl/BattleEnvironment.ResetResult.html" class="type-name-link" title="mechanics.rl内のクラス">BattleEnvironment.ResetResult</a></li>
 <li class="circle">mechanics.rl.<a href="mechanics/rl/BattleEnvironment.TimingSnapshot.html" class="type-name-link" title="mechanics.rl内のクラス">BattleEnvironment.TimingSnapshot</a></li>
 <li class="circle">sample.<a href="sample/BenchmarkRLJava.html" class="type-name-link" title="sample内のクラス">BenchmarkRLJava</a></li>
@@ -115,17 +116,19 @@ loadScripts(document, 'script');</script>
 </ul>
 </li>
 <li class="circle">simulation.runtime.<a href="simulation/runtime/BuffManager.html" class="type-name-link" title="simulation.runtime内のクラス">BuffManager</a></li>
+<li class="circle">mechanics.rl.<a href="mechanics/rl/CapabilityProfile.html" class="type-name-link" title="mechanics.rl内のクラス">CapabilityProfile</a></li>
 <li class="circle">mechanics.rl.<a href="mechanics/rl/CapabilityProfiler.html" class="type-name-link" title="mechanics.rl内のクラス">CapabilityProfiler</a></li>
+<li class="circle">mechanics.rl.<a href="mechanics/rl/CapabilityProfiler.TeamBuffProfileResult.html" class="type-name-link" title="mechanics.rl内のクラス">CapabilityProfiler.TeamBuffProfileResult</a></li>
 <li class="circle">model.entity.<a href="model/entity/Character.html" class="type-name-link" title="model.entity内のクラス">Character</a>
 <ul>
-<li class="circle">model.character.<a href="model/character/Bennett.html" class="type-name-link" title="model.character内のクラス">Bennett</a> (implements model.entity.<a href="model/entity/BurstStateProvider.html" title="model.entity内のインタフェース">BurstStateProvider</a>)</li>
+<li class="circle">model.character.<a href="model/character/Bennett.html" class="type-name-link" title="model.character内のクラス">Bennett</a> (implements model.entity.<a href="model/entity/FormStateProvider.html" title="model.entity内のインタフェース">FormStateProvider</a>)</li>
 <li class="circle">model.character.<a href="model/character/Columbina.html" class="type-name-link" title="model.character内のクラス">Columbina</a> (implements model.entity.<a href="model/entity/CharacterTeamBuffProvider.html" title="model.entity内のインタフェース">CharacterTeamBuffProvider</a>, model.entity.<a href="model/entity/ReactionAwareCharacter.html" title="model.entity内のインタフェース">ReactionAwareCharacter</a>)</li>
-<li class="circle">model.character.<a href="model/character/Flins.html" class="type-name-link" title="model.character内のクラス">Flins</a> (implements model.entity.<a href="model/entity/BurstStateProvider.html" title="model.entity内のインタフェース">BurstStateProvider</a>, model.entity.<a href="model/entity/CharacterTeamBuffProvider.html" title="model.entity内のインタフェース">CharacterTeamBuffProvider</a>, model.entity.<a href="model/entity/ReactionAwareCharacter.html" title="model.entity内のインタフェース">ReactionAwareCharacter</a>)</li>
-<li class="circle">model.character.<a href="model/character/Ineffa.html" class="type-name-link" title="model.character内のクラス">Ineffa</a> (implements model.entity.<a href="model/entity/BurstStateProvider.html" title="model.entity内のインタフェース">BurstStateProvider</a>, model.entity.<a href="model/entity/CharacterTeamBuffProvider.html" title="model.entity内のインタフェース">CharacterTeamBuffProvider</a>)</li>
-<li class="circle">model.character.<a href="model/character/RaidenShogun.html" class="type-name-link" title="model.character内のクラス">RaidenShogun</a> (implements model.entity.<a href="model/entity/BurstStateProvider.html" title="model.entity内のインタフェース">BurstStateProvider</a>, model.entity.<a href="model/entity/SwitchAwareCharacter.html" title="model.entity内のインタフェース">SwitchAwareCharacter</a>)</li>
-<li class="circle">model.character.<a href="model/character/Sucrose.html" class="type-name-link" title="model.character内のクラス">Sucrose</a> (implements model.entity.<a href="model/entity/BurstStateProvider.html" title="model.entity内のインタフェース">BurstStateProvider</a>)</li>
-<li class="circle">model.character.<a href="model/character/Xiangling.html" class="type-name-link" title="model.character内のクラス">Xiangling</a> (implements model.entity.<a href="model/entity/BurstStateProvider.html" title="model.entity内のインタフェース">BurstStateProvider</a>)</li>
-<li class="circle">model.character.<a href="model/character/Xingqiu.html" class="type-name-link" title="model.character内のクラス">Xingqiu</a> (implements model.entity.<a href="model/entity/BurstStateProvider.html" title="model.entity内のインタフェース">BurstStateProvider</a>)</li>
+<li class="circle">model.character.<a href="model/character/Flins.html" class="type-name-link" title="model.character内のクラス">Flins</a> (implements model.entity.<a href="model/entity/CharacterTeamBuffProvider.html" title="model.entity内のインタフェース">CharacterTeamBuffProvider</a>, model.entity.<a href="model/entity/FormStateProvider.html" title="model.entity内のインタフェース">FormStateProvider</a>, model.entity.<a href="model/entity/ReactionAwareCharacter.html" title="model.entity内のインタフェース">ReactionAwareCharacter</a>)</li>
+<li class="circle">model.character.<a href="model/character/Ineffa.html" class="type-name-link" title="model.character内のクラス">Ineffa</a> (implements model.entity.<a href="model/entity/CharacterTeamBuffProvider.html" title="model.entity内のインタフェース">CharacterTeamBuffProvider</a>, model.entity.<a href="model/entity/FormStateProvider.html" title="model.entity内のインタフェース">FormStateProvider</a>)</li>
+<li class="circle">model.character.<a href="model/character/RaidenShogun.html" class="type-name-link" title="model.character内のクラス">RaidenShogun</a> (implements model.entity.<a href="model/entity/FormStateProvider.html" title="model.entity内のインタフェース">FormStateProvider</a>, model.entity.<a href="model/entity/SwitchAwareCharacter.html" title="model.entity内のインタフェース">SwitchAwareCharacter</a>)</li>
+<li class="circle">model.character.<a href="model/character/Sucrose.html" class="type-name-link" title="model.character内のクラス">Sucrose</a> (implements model.entity.<a href="model/entity/FormStateProvider.html" title="model.entity内のインタフェース">FormStateProvider</a>)</li>
+<li class="circle">model.character.<a href="model/character/Xiangling.html" class="type-name-link" title="model.character内のクラス">Xiangling</a> (implements model.entity.<a href="model/entity/FormStateProvider.html" title="model.entity内のインタフェース">FormStateProvider</a>)</li>
+<li class="circle">model.character.<a href="model/character/Xingqiu.html" class="type-name-link" title="model.character内のクラス">Xingqiu</a> (implements model.entity.<a href="model/entity/FormStateProvider.html" title="model.entity内のインタフェース">FormStateProvider</a>)</li>
 </ul>
 </li>
 <li class="circle">simulation.action.<a href="simulation/action/CharacterActionRequest.html" class="type-name-link" title="simulation.action内のクラス">CharacterActionRequest</a></li>
@@ -142,6 +145,7 @@ loadScripts(document, 'script');</script>
 <li class="circle">mechanics.energy.<a href="mechanics/energy/EnergyManager.html" class="type-name-link" title="mechanics.energy内のクラス">EnergyManager</a></li>
 <li class="circle">model.entity.state.<a href="model/entity/state/EnergyState.html" class="type-name-link" title="model.entity.state内のクラス">EnergyState</a></li>
 <li class="circle">mechanics.rl.<a href="mechanics/rl/EpisodeConfig.html" class="type-name-link" title="mechanics.rl内のクラス">EpisodeConfig</a></li>
+<li class="circle">mechanics.rl.<a href="mechanics/rl/EpisodeRoleSummary.html" class="type-name-link" title="mechanics.rl内のクラス">EpisodeRoleSummary</a></li>
 <li class="circle">sample.<a href="sample/FlinsParty.html" class="type-name-link" title="sample内のクラス">FlinsParty</a></li>
 <li class="circle">sample.<a href="sample/FlinsParty2.html" class="type-name-link" title="sample内のクラス">FlinsParty2</a></li>
 <li class="circle">mechanics.rl.<a href="mechanics/rl/FlinsParty2RLSimulatorFactory.html" class="type-name-link" title="mechanics.rl内のクラス">FlinsParty2RLSimulatorFactory</a></li>
@@ -160,6 +164,7 @@ loadScripts(document, 'script');</script>
 <li class="circle">simulation.<a href="simulation/Party.html" class="type-name-link" title="simulation内のクラス">Party</a></li>
 <li class="circle">simulation.event.<a href="simulation/event/PeriodicDamageEvent.html" class="type-name-link" title="simulation.event内のクラス">PeriodicDamageEvent</a> (implements simulation.event.<a href="simulation/event/TimerEvent.html" title="simulation.event内のインタフェース">TimerEvent</a>)</li>
 <li class="circle">mechanics.rl.<a href="mechanics/rl/PolicyInference.html" class="type-name-link" title="mechanics.rl内のクラス">PolicyInference</a></li>
+<li class="circle">mechanics.rl.<a href="mechanics/rl/PrivilegedStateEncoder.html" class="type-name-link" title="mechanics.rl内のクラス">PrivilegedStateEncoder</a></li>
 <li class="circle">sample.<a href="sample/ProfileCharacterCapabilities.html" class="type-name-link" title="sample内のクラス">ProfileCharacterCapabilities</a></li>
 <li class="circle">mechanics.optimization.<a href="mechanics/optimization/ProfileFileAdapter.html" class="type-name-link" title="mechanics.optimization内のクラス">ProfileFileAdapter</a></li>
 <li class="circle">mechanics.optimization.<a href="mechanics/optimization/ProfileLoader.html" class="type-name-link" title="mechanics.optimization内のクラス">ProfileLoader</a></li>
@@ -189,6 +194,7 @@ loadScripts(document, 'script');</script>
 <li class="circle">mechanics.rl.<a href="mechanics/rl/RLEpisodeFactory.EpisodeContext.html" class="type-name-link" title="mechanics.rl内のクラス">RLEpisodeFactory.EpisodeContext</a></li>
 <li class="circle">mechanics.rl.<a href="mechanics/rl/RLPartyRegistry.html" class="type-name-link" title="mechanics.rl内のクラス">RLPartyRegistry</a></li>
 <li class="circle">mechanics.rl.<a href="mechanics/rl/RLPartySpec.html" class="type-name-link" title="mechanics.rl内のクラス">RLPartySpec</a></li>
+<li class="circle">mechanics.rl.<a href="mechanics/rl/RoleAlignmentCalculator.html" class="type-name-link" title="mechanics.rl内のクラス">RoleAlignmentCalculator</a></li>
 <li class="circle">mechanics.rl.bridge.<a href="mechanics/rl/bridge/RolloutService.html" class="type-name-link" title="mechanics.rl.bridge内のクラス">RolloutService</a></li>
 <li class="circle">mechanics.optimization.<a href="mechanics/optimization/RotationSearcher.html" class="type-name-link" title="mechanics.optimization内のクラス">RotationSearcher</a></li>
 <li class="circle">mechanics.optimization.<a href="mechanics/optimization/RotationSearcher.RotationPlan.html" class="type-name-link" title="mechanics.optimization内のクラス">RotationSearcher.RotationPlan</a></li>
@@ -199,6 +205,8 @@ loadScripts(document, 'script');</script>
 <li class="circle">simulation.runtime.<a href="simulation/runtime/SimulationClock.html" class="type-name-link" title="simulation.runtime内のクラス">SimulationClock</a></li>
 <li class="circle">simulation.runtime.<a href="simulation/runtime/SimulationEventDispatcher.html" class="type-name-link" title="simulation.runtime内のクラス">SimulationEventDispatcher</a> (implements simulation.<a href="simulation/SimulationEventBus.html" title="simulation内のインタフェース">SimulationEventBus</a>)</li>
 <li class="circle">visualization.<a href="visualization/SimulationRecord.html" class="type-name-link" title="visualization内のクラス">SimulationRecord</a></li>
+<li class="circle">simulation.<a href="simulation/SimulatorSnapshot.html" class="type-name-link" title="simulation内のクラス">SimulatorSnapshot</a></li>
+<li class="circle">simulation.<a href="simulation/SimulatorSnapshot.CharacterSnapshot.html" class="type-name-link" title="simulation内のクラス">SimulatorSnapshot.CharacterSnapshot</a></li>
 <li class="circle">mechanics.rl.<a href="mechanics/rl/SinglePartyRLEpisodeFactory.html" class="type-name-link" title="mechanics.rl内のクラス">SinglePartyRLEpisodeFactory</a> (implements mechanics.rl.<a href="mechanics/rl/RLEpisodeFactory.html" title="mechanics.rl内のインタフェース">RLEpisodeFactory</a>)</li>
 <li class="circle">model.entity.state.<a href="model/entity/state/SnapshotState.html" class="type-name-link" title="model.entity.state内のクラス">SnapshotState</a></li>
 <li class="circle">mechanics.formula.<a href="mechanics/formula/StandardDamageStrategy.html" class="type-name-link" title="mechanics.formula内のクラス">StandardDamageStrategy</a> (implements mechanics.formula.<a href="mechanics/formula/DamageStrategy.html" title="mechanics.formula内のインタフェース">DamageStrategy</a>)</li>
@@ -213,6 +221,7 @@ loadScripts(document, 'script');</script>
 <li class="circle">mechanics.rl.bridge.<a href="mechanics/rl/bridge/VectorizedEnvironment.MetricsSnapshot.html" class="type-name-link" title="mechanics.rl.bridge内のクラス">VectorizedEnvironment.MetricsSnapshot</a></li>
 <li class="circle">mechanics.rl.bridge.<a href="mechanics/rl/bridge/VectorizedEnvironment.ParallelTiming.html" class="type-name-link" title="mechanics.rl.bridge内のクラス">VectorizedEnvironment.ParallelTiming</a></li>
 <li class="circle">mechanics.rl.bridge.<a href="mechanics/rl/bridge/VectorizedEnvironment.RunnerResetResult.html" class="type-name-link" title="mechanics.rl.bridge内のクラス">VectorizedEnvironment.RunnerResetResult</a></li>
+<li class="circle">mechanics.rl.bridge.<a href="mechanics/rl/bridge/VectorizedEnvironment.SnapshotEntry.html" class="type-name-link" title="mechanics.rl.bridge内のクラス">VectorizedEnvironment.SnapshotEntry</a></li>
 <li class="circle">visualization.<a href="visualization/VisualLogger.html" class="type-name-link" title="visualization内のクラス">VisualLogger</a></li>
 <li class="circle">simulation.runtime.<a href="simulation/runtime/VisualLoggerSink.html" class="type-name-link" title="simulation.runtime内のクラス">VisualLoggerSink</a> (implements simulation.<a href="simulation/CombatLogSink.html" title="simulation内のインタフェース">CombatLogSink</a>)</li>
 <li class="circle">model.entity.<a href="model/entity/Weapon.html" class="type-name-link" title="model.entity内のクラス">Weapon</a>
@@ -244,7 +253,6 @@ loadScripts(document, 'script');</script>
 <ul>
 <li class="circle">simulation.<a href="simulation/ActionListener.html" class="type-name-link" title="simulation内のインタフェース">ActionListener</a></li>
 <li class="circle">model.entity.<a href="model/entity/ActionTriggeredWeaponEffect.html" class="type-name-link" title="model.entity内のインタフェース">ActionTriggeredWeaponEffect</a></li>
-<li class="circle">model.entity.<a href="model/entity/BurstStateProvider.html" class="type-name-link" title="model.entity内のインタフェース">BurstStateProvider</a></li>
 <li class="circle">model.entity.<a href="model/entity/BurstTriggeredArtifactEffect.html" class="type-name-link" title="model.entity内のインタフェース">BurstTriggeredArtifactEffect</a></li>
 <li class="circle">mechanics.rl.<a href="mechanics/rl/CapabilityProfiler.TemplateRun.html" class="type-name-link" title="mechanics.rl内のインタフェース">CapabilityProfiler.TemplateRun</a></li>
 <li class="circle">model.entity.<a href="model/entity/CharacterTeamBuffProvider.html" class="type-name-link" title="model.entity内のインタフェース">CharacterTeamBuffProvider</a></li>
@@ -258,6 +266,7 @@ loadScripts(document, 'script');</script>
 <li class="circle">simulation.<a href="simulation/DamageTracker.html" class="type-name-link" title="simulation内のインタフェース">DamageTracker</a></li>
 <li class="circle">model.entity.<a href="model/entity/DamageTriggeredArtifactEffect.html" class="type-name-link" title="model.entity内のインタフェース">DamageTriggeredArtifactEffect</a></li>
 <li class="circle">model.entity.<a href="model/entity/DamageTriggeredWeaponEffect.html" class="type-name-link" title="model.entity内のインタフェース">DamageTriggeredWeaponEffect</a></li>
+<li class="circle">model.entity.<a href="model/entity/FormStateProvider.html" class="type-name-link" title="model.entity内のインタフェース">FormStateProvider</a></li>
 <li class="circle">simulation.<a href="simulation/ParticleListener.html" class="type-name-link" title="simulation内のインタフェース">ParticleListener</a></li>
 <li class="circle">model.entity.<a href="model/entity/ReactionAwareArtifact.html" class="type-name-link" title="model.entity内のインタフェース">ReactionAwareArtifact</a></li>
 <li class="circle">mechanics.rl.<a href="mechanics/rl/RLEpisodeFactory.html" class="type-name-link" title="mechanics.rl内のインタフェース">RLEpisodeFactory</a></li>

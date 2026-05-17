@@ -18,12 +18,18 @@ import simulation.Party;
  * Owns character switching policy, callbacks, and timeline logging.
  */
 public class SwitchManager {
+    /** Minimum time between consecutive swaps (seconds). */
     private static final double SWAP_COOLDOWN = 1.0;
+    /** Animation delay applied to each swap (seconds). */
     private static final double SWAP_DELAY = 0.1;
 
+    /** Owning simulator. */
     private final CombatSimulator sim;
+    /** Active party container. */
     private final Party party;
+    /** Sink used for swap timeline logging. */
     private final CombatLogSink combatLogSink;
+    /** Simulation time of the most recent swap. */
     private double lastSwapTime = -999.0;
 
     /**
@@ -60,7 +66,7 @@ public class SwitchManager {
     /**
      * Performs a standard character swap with cooldown, callbacks, and delay.
      *
-     * @param name target character name
+     * @param id target character id
      */
     public void switchCharacter(CharacterId id) {
         double currentTime = sim.getCurrentTime();
@@ -105,12 +111,17 @@ public class SwitchManager {
     /**
      * Directly swaps the active character without callbacks or timeline cost.
      *
-     * @param name target character name
+     * @param id target character id
      */
     public void setActiveCharacter(CharacterId id) {
         party.switchCharacter(id);
     }
 
+    /**
+     * Notifies switch-aware artifacts that the given character is leaving the field.
+     *
+     * @param character outgoing active character
+     */
     private void notifyArtifactsSwitchOut(Character character) {
         if (character.getArtifacts() == null) {
             return;
@@ -122,6 +133,11 @@ public class SwitchManager {
         }
     }
 
+    /**
+     * Notifies switch-aware artifacts that the given character is entering the field.
+     *
+     * @param character incoming active character
+     */
     private void notifyArtifactsSwitchIn(Character character) {
         if (character.getArtifacts() == null) {
             return;

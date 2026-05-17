@@ -71,7 +71,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">メソッドの詳細</a>
 <ol class="toc-list">
 <li><a href="#getEnergyCost()" tabindex="0">getEnergyCost()</a></li>
-<li><a href="#isBurstActive(double)" tabindex="0">isBurstActive(double)</a></li>
+<li><a href="#isFormActive(double)" tabindex="0">isFormActive(double)</a></li>
 <li><a href="#applyPassive(model.stats.StatsContainer)" tabindex="0">applyPassive(StatsContainer)</a></li>
 <li><a href="#onAction(simulation.action.CharacterActionRequest,simulation.CombatSimulator)" tabindex="0">onAction(CharacterActionRequest, CombatSimulator)</a></li>
 <li><a href="#skill(simulation.CombatSimulator)" tabindex="0">skill(CombatSimulator)</a></li>
@@ -96,13 +96,14 @@ loadScripts(document, 'script');</script>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>すべての実装されたインタフェース:</dt>
-<dd><code><a href="../entity/BurstStateProvider.html" title="model.entity内のインタフェース">BurstStateProvider</a></code></dd>
+<dd><code><a href="../entity/FormStateProvider.html" title="model.entity内のインタフェース">FormStateProvider</a></code></dd>
 </dl>
 <hr>
 <div class="horizontal-scroll">
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">Bennett</span>
 <span class="extends-implements">extends <a href="../entity/Character.html" title="model.entity内のクラス">Character</a>
-implements <a href="../entity/BurstStateProvider.html" title="model.entity内のインタフェース">BurstStateProvider</a></span></div>
+implements <a href="../entity/FormStateProvider.html" title="model.entity内のインタフェース">FormStateProvider</a></span></div>
+<div class="block">Bennett character implementation with Fantastic Voyage field buff handling.</div>
 </div>
 </section>
 <section class="summary">
@@ -135,11 +136,15 @@ implements <a href="../entity/BurstStateProvider.html" title="model.entity内の
 <div class="table-header col-last">説明</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(model.entity.Weapon,model.entity.ArtifactSet)" class="member-name-link">Bennett</a><wbr>(<a href="../entity/Weapon.html" title="model.entity内のクラス">Weapon</a>&nbsp;weapon,
  <a href="../entity/ArtifactSet.html" title="model.entity内のクラス">ArtifactSet</a>&nbsp;artifacts)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Constructs Bennett with the shared talent data source.</div>
+</div>
 <div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(model.entity.Weapon,model.entity.ArtifactSet,mechanics.data.TalentDataSource)" class="member-name-link">Bennett</a><wbr>(<a href="../entity/Weapon.html" title="model.entity内のクラス">Weapon</a>&nbsp;weapon,
  <a href="../entity/ArtifactSet.html" title="model.entity内のクラス">ArtifactSet</a>&nbsp;artifacts,
  <a href="../../mechanics/data/TalentDataSource.html" title="mechanics.data内のインタフェース">TalentDataSource</a>&nbsp;talentData)</code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Constructs Bennett with an explicit talent data source.</div>
+</div>
 </div>
 </section>
 </li>
@@ -156,7 +161,9 @@ implements <a href="../entity/BurstStateProvider.html" title="model.entity内の
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyPassive(model.stats.StatsContainer)" class="member-name-link">applyPassive</a><wbr>(<a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;stats)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Applies Bennett's passive stat effects.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#burst(simulation.CombatSimulator)" class="member-name-link">burst</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
@@ -165,17 +172,23 @@ implements <a href="../entity/BurstStateProvider.html" title="model.entity内の
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getEnergyCost()" class="member-name-link">getEnergyCost</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns Bennett's burst energy cost.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isBurstActive(double)" class="member-name-link">isBurstActive</a><wbr>(double&nbsp;currentTime)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isFormActive(double)" class="member-name-link">isFormActive</a><wbr>(double&nbsp;currentTime)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns whether Fantastic Voyage is currently active.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#normalAttack(simulation.CombatSimulator)" class="member-name-link">normalAttack</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onAction(simulation.action.CharacterActionRequest,simulation.CombatSimulator)" class="member-name-link">onAction</a><wbr>(<a href="../../simulation/action/CharacterActionRequest.html" title="simulation.action内のクラス">CharacterActionRequest</a>&nbsp;request,
  <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Executes the requested combat action for Bennett.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#plunge(simulation.CombatSimulator)" class="member-name-link">plunge</a><wbr>(<a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
@@ -187,7 +200,7 @@ implements <a href="../entity/BurstStateProvider.html" title="model.entity内の
 </div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-model.entity.Character">クラスから継承されたメソッド&nbsp;<a href="../entity/Character.html#method-summary" title="model.entity内のクラス">Character</a></h3>
-<code><a href="../entity/Character.html#addBuff(mechanics.buff.Buff)" title="addBuff(Buff)">addBuff</a>, <a href="../entity/Character.html#canBurst(double)" title="canBurst(double)">canBurst</a>, <a href="../entity/Character.html#canSkill(double)" title="canSkill(double)">canSkill</a>, <a href="../entity/Character.html#captureSnapshot(double,java.util.List)" title="captureSnapshot(double, List)">captureSnapshot</a>, <a href="../entity/Character.html#clearBuffs()" title="clearBuffs()">clearBuffs</a>, <a href="../entity/Character.html#getActiveBuffs()" title="getActiveBuffs()">getActiveBuffs</a>, <a href="../entity/Character.html#getArtifactRolls()" title="getArtifactRolls()">getArtifactRolls</a>, <a href="../entity/Character.html#getArtifacts()" title="getArtifacts()">getArtifacts</a>, <a href="../entity/Character.html#getBaseStats()" title="getBaseStats()">getBaseStats</a>, <a href="../entity/Character.html#getBurstCD()" title="getBurstCD()">getBurstCD</a>, <a href="../entity/Character.html#getBurstCDRemaining(double)" title="getBurstCDRemaining(double)">getBurstCDRemaining</a>, <a href="../entity/Character.html#getBurstEnergyWindows()" title="getBurstEnergyWindows()">getBurstEnergyWindows</a>, <a href="../entity/Character.html#getCharacterId()" title="getCharacterId()">getCharacterId</a>, <a href="../entity/Character.html#getConstellation()" title="getConstellation()">getConstellation</a>, <a href="../entity/Character.html#getCurrentEnergy()" title="getCurrentEnergy()">getCurrentEnergy</a>, <a href="../entity/Character.html#getEffectiveStats(double)" title="getEffectiveStats(double)">getEffectiveStats</a>, <a href="../entity/Character.html#getElement()" title="getElement()">getElement</a>, <a href="../entity/Character.html#getLastBurstTime()" title="getLastBurstTime()">getLastBurstTime</a>, <a href="../entity/Character.html#getLastSkillTime()" title="getLastSkillTime()">getLastSkillTime</a>, <a href="../entity/Character.html#getName()" title="getName()">getName</a>, <a href="../entity/Character.html#getSkillCD()" title="getSkillCD()">getSkillCD</a>, <a href="../entity/Character.html#getSkillCDRemaining(double)" title="getSkillCDRemaining(double)">getSkillCDRemaining</a>, <a href="../entity/Character.html#getSnapshot()" title="getSnapshot()">getSnapshot</a>, <a href="../entity/Character.html#getStructuralStats(double)" title="getStructuralStats(double)">getStructuralStats</a>, <a href="../entity/Character.html#getTalentValue(java.lang.String,double)" title="getTalentValue(String, double)">getTalentValue</a>, <a href="../entity/Character.html#getTotalEnergyGained()" title="getTotalEnergyGained()">getTotalEnergyGained</a>, <a href="../entity/Character.html#getTotalFlatEnergy()" title="getTotalFlatEnergy()">getTotalFlatEnergy</a>, <a href="../entity/Character.html#getTotalParticleEnergy()" title="getTotalParticleEnergy()">getTotalParticleEnergy</a>, <a href="../entity/Character.html#getTotalScaledParticleEnergy()" title="getTotalScaledParticleEnergy()">getTotalScaledParticleEnergy</a>, <a href="../entity/Character.html#getWeapon()" title="getWeapon()">getWeapon</a>, <a href="../entity/Character.html#hasBuff(mechanics.buff.BuffId)" title="hasBuff(BuffId)">hasBuff</a>, <a href="../entity/Character.html#isLunarCharacter()" title="isLunarCharacter()">isLunarCharacter</a>, <a href="../entity/Character.html#markBurstUsed(double)" title="markBurstUsed(double)">markBurstUsed</a>, <a href="../entity/Character.html#markSkillUsed(double)" title="markSkillUsed(double)">markSkillUsed</a>, <a href="../entity/Character.html#receiveEnergy(double)" title="receiveEnergy(double)">receiveEnergy</a>, <a href="../entity/Character.html#receiveFlatEnergy(double)" title="receiveFlatEnergy(double)">receiveFlatEnergy</a>, <a href="../entity/Character.html#receiveParticleEnergy(double,double)" title="receiveParticleEnergy(double, double)">receiveParticleEnergy</a>, <a href="../entity/Character.html#removeBuff(mechanics.buff.BuffId)" title="removeBuff(BuffId)">removeBuff</a>, <a href="../entity/Character.html#resetEnergyStats()" title="resetEnergyStats()">resetEnergyStats</a>, <a href="../entity/Character.html#setArtifactRolls(java.util.Map)" title="setArtifactRolls(Map)">setArtifactRolls</a>, <a href="../entity/Character.html#setArtifacts(model.entity.ArtifactSet)" title="setArtifacts(ArtifactSet)">setArtifacts</a>, <a href="../entity/Character.html#setBurstCD(double)" title="setBurstCD(double)">setBurstCD</a>, <a href="../entity/Character.html#setSkillCD(double)" title="setSkillCD(double)">setSkillCD</a>, <a href="../entity/Character.html#setSkillMaxCharges(int)" title="setSkillMaxCharges(int)">setSkillMaxCharges</a>, <a href="../entity/Character.html#setWeapon(model.entity.Weapon)" title="setWeapon(Weapon)">setWeapon</a></code></div>
+<code><a href="../entity/Character.html#addBuff(mechanics.buff.Buff)" title="addBuff(Buff)">addBuff</a>, <a href="../entity/Character.html#canBurst(double)" title="canBurst(double)">canBurst</a>, <a href="../entity/Character.html#canSkill(double)" title="canSkill(double)">canSkill</a>, <a href="../entity/Character.html#captureSnapshot(double,java.util.List)" title="captureSnapshot(double, List)">captureSnapshot</a>, <a href="../entity/Character.html#clearBuffs()" title="clearBuffs()">clearBuffs</a>, <a href="../entity/Character.html#getActiveBuffs()" title="getActiveBuffs()">getActiveBuffs</a>, <a href="../entity/Character.html#getArtifactRolls()" title="getArtifactRolls()">getArtifactRolls</a>, <a href="../entity/Character.html#getArtifacts()" title="getArtifacts()">getArtifacts</a>, <a href="../entity/Character.html#getBaseStats()" title="getBaseStats()">getBaseStats</a>, <a href="../entity/Character.html#getBurstCD()" title="getBurstCD()">getBurstCD</a>, <a href="../entity/Character.html#getBurstCDRemaining(double)" title="getBurstCDRemaining(double)">getBurstCDRemaining</a>, <a href="../entity/Character.html#getBurstEnergyWindows()" title="getBurstEnergyWindows()">getBurstEnergyWindows</a>, <a href="../entity/Character.html#getCharacterId()" title="getCharacterId()">getCharacterId</a>, <a href="../entity/Character.html#getChargeRestoreTimes()" title="getChargeRestoreTimes()">getChargeRestoreTimes</a>, <a href="../entity/Character.html#getConstellation()" title="getConstellation()">getConstellation</a>, <a href="../entity/Character.html#getCurrentEnergy()" title="getCurrentEnergy()">getCurrentEnergy</a>, <a href="../entity/Character.html#getEffectiveStats(double)" title="getEffectiveStats(double)">getEffectiveStats</a>, <a href="../entity/Character.html#getElement()" title="getElement()">getElement</a>, <a href="../entity/Character.html#getLastBurstTime()" title="getLastBurstTime()">getLastBurstTime</a>, <a href="../entity/Character.html#getLastSkillTime()" title="getLastSkillTime()">getLastSkillTime</a>, <a href="../entity/Character.html#getName()" title="getName()">getName</a>, <a href="../entity/Character.html#getSkillCD()" title="getSkillCD()">getSkillCD</a>, <a href="../entity/Character.html#getSkillCDRemaining(double)" title="getSkillCDRemaining(double)">getSkillCDRemaining</a>, <a href="../entity/Character.html#getSnapshot()" title="getSnapshot()">getSnapshot</a>, <a href="../entity/Character.html#getStructuralStats(double)" title="getStructuralStats(double)">getStructuralStats</a>, <a href="../entity/Character.html#getTalentValue(java.lang.String,double)" title="getTalentValue(String, double)">getTalentValue</a>, <a href="../entity/Character.html#getTotalEnergyGained()" title="getTotalEnergyGained()">getTotalEnergyGained</a>, <a href="../entity/Character.html#getTotalFlatEnergy()" title="getTotalFlatEnergy()">getTotalFlatEnergy</a>, <a href="../entity/Character.html#getTotalParticleEnergy()" title="getTotalParticleEnergy()">getTotalParticleEnergy</a>, <a href="../entity/Character.html#getTotalScaledParticleEnergy()" title="getTotalScaledParticleEnergy()">getTotalScaledParticleEnergy</a>, <a href="../entity/Character.html#getWeapon()" title="getWeapon()">getWeapon</a>, <a href="../entity/Character.html#hasBuff(mechanics.buff.BuffId)" title="hasBuff(BuffId)">hasBuff</a>, <a href="../entity/Character.html#isLunarCharacter()" title="isLunarCharacter()">isLunarCharacter</a>, <a href="../entity/Character.html#markBurstUsed(double)" title="markBurstUsed(double)">markBurstUsed</a>, <a href="../entity/Character.html#markSkillUsed(double)" title="markSkillUsed(double)">markSkillUsed</a>, <a href="../entity/Character.html#receiveEnergy(double)" title="receiveEnergy(double)">receiveEnergy</a>, <a href="../entity/Character.html#receiveFlatEnergy(double)" title="receiveFlatEnergy(double)">receiveFlatEnergy</a>, <a href="../entity/Character.html#receiveParticleEnergy(double,double)" title="receiveParticleEnergy(double, double)">receiveParticleEnergy</a>, <a href="../entity/Character.html#removeBuff(mechanics.buff.BuffId)" title="removeBuff(BuffId)">removeBuff</a>, <a href="../entity/Character.html#resetEnergyStats()" title="resetEnergyStats()">resetEnergyStats</a>, <a href="../entity/Character.html#restoreCooldowns(double,double,java.util.List)" title="restoreCooldowns(double, double, List)">restoreCooldowns</a>, <a href="../entity/Character.html#restoreCurrentEnergy(double)" title="restoreCurrentEnergy(double)">restoreCurrentEnergy</a>, <a href="../entity/Character.html#setArtifactRolls(java.util.Map)" title="setArtifactRolls(Map)">setArtifactRolls</a>, <a href="../entity/Character.html#setArtifacts(model.entity.ArtifactSet)" title="setArtifacts(ArtifactSet)">setArtifacts</a>, <a href="../entity/Character.html#setBurstCD(double)" title="setBurstCD(double)">setBurstCD</a>, <a href="../entity/Character.html#setSkillCD(double)" title="setSkillCD(double)">setSkillCD</a>, <a href="../entity/Character.html#setSkillMaxCharges(int)" title="setSkillMaxCharges(int)">setSkillMaxCharges</a>, <a href="../entity/Character.html#setWeapon(model.entity.Weapon)" title="setWeapon(Weapon)">setWeapon</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-java.lang.Object">クラスから継承されたメソッド&nbsp;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#method-summary" title="java.lang内のクラスまたはインタフェース" class="external-link">Object</a></h3>
 <code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#clone()" title="java.lang内のクラスまたはインタフェース" class="external-link">clone</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)" title="java.lang内のクラスまたはインタフェース" class="external-link">equals</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#finalize()" title="java.lang内のクラスまたはインタフェース" class="external-link">finalize</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#getClass()" title="java.lang内のクラスまたはインタフェース" class="external-link">getClass</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#hashCode()" title="java.lang内のクラスまたはインタフェース" class="external-link">hashCode</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#notify()" title="java.lang内のクラスまたはインタフェース" class="external-link">notify</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#notifyAll()" title="java.lang内のクラスまたはインタフェース" class="external-link">notifyAll</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#toString()" title="java.lang内のクラスまたはインタフェース" class="external-link">toString</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#wait()" title="java.lang内のクラスまたはインタフェース" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#wait(long)" title="java.lang内のクラスまたはインタフェース" class="external-link">wait</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html#wait(long,int)" title="java.lang内のクラスまたはインタフェース" class="external-link">wait</a></code></div>
@@ -224,6 +237,12 @@ implements <a href="../entity/BurstStateProvider.html" title="model.entity内の
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">Bennett</span><wbr><span class="parameters">(<a href="../entity/Weapon.html" title="model.entity内のクラス">Weapon</a>&nbsp;weapon,
  <a href="../entity/ArtifactSet.html" title="model.entity内のクラス">ArtifactSet</a>&nbsp;artifacts)</span></div>
+<div class="block">Constructs Bennett with the shared talent data source.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>weapon</code> - equipped weapon</dd>
+<dd><code>artifacts</code> - equipped artifact set</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -234,6 +253,13 @@ implements <a href="../entity/BurstStateProvider.html" title="model.entity内の
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">Bennett</span><wbr><span class="parameters">(<a href="../entity/Weapon.html" title="model.entity内のクラス">Weapon</a>&nbsp;weapon,
  <a href="../entity/ArtifactSet.html" title="model.entity内のクラス">ArtifactSet</a>&nbsp;artifacts,
  <a href="../../mechanics/data/TalentDataSource.html" title="mechanics.data内のインタフェース">TalentDataSource</a>&nbsp;talentData)</span></div>
+<div class="block">Constructs Bennett with an explicit talent data source.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>weapon</code> - equipped weapon</dd>
+<dd><code>artifacts</code> - equipped artifact set</dd>
+<dd><code>talentData</code> - talent values backing this character</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -250,21 +276,29 @@ implements <a href="../entity/BurstStateProvider.html" title="model.entity内の
 <h3>getEnergyCost</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getEnergyCost</span>()</div>
+<div class="block">Returns Bennett's burst energy cost.</div>
 <dl class="notes">
 <dt>定義:</dt>
 <dd><code><a href="../entity/Character.html#getEnergyCost()">getEnergyCost</a></code>&nbsp;クラス内&nbsp;<code><a href="../entity/Character.html" title="model.entity内のクラス">Character</a></code></dd>
+<dt>戻り値:</dt>
+<dd>burst cost in energy</dd>
 </dl>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="isBurstActive(double)">
-<h3>isBurstActive</h3>
+<section class="detail" id="isFormActive(double)">
+<h3>isFormActive</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isBurstActive</span><wbr><span class="parameters">(double&nbsp;currentTime)</span></div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isFormActive</span><wbr><span class="parameters">(double&nbsp;currentTime)</span></div>
+<div class="block">Returns whether Fantastic Voyage is currently active.</div>
 <dl class="notes">
 <dt>定義:</dt>
-<dd><code><a href="../entity/BurstStateProvider.html#isBurstActive(double)">isBurstActive</a></code>&nbsp;インタフェース内&nbsp;<code><a href="../entity/BurstStateProvider.html" title="model.entity内のインタフェース">BurstStateProvider</a></code></dd>
+<dd><code><a href="../entity/FormStateProvider.html#isFormActive(double)">isFormActive</a></code>&nbsp;インタフェース内&nbsp;<code><a href="../entity/FormStateProvider.html" title="model.entity内のインタフェース">FormStateProvider</a></code></dd>
+<dt>パラメータ:</dt>
+<dd><code>currentTime</code> - current simulation time in seconds</dd>
+<dt>戻り値:</dt>
+<dd><code>true</code> while Bennett's burst field persists</dd>
 </dl>
 </div>
 </section>
@@ -274,9 +308,12 @@ implements <a href="../entity/BurstStateProvider.html" title="model.entity内の
 <h3>applyPassive</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">applyPassive</span><wbr><span class="parameters">(<a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;stats)</span></div>
+<div class="block">Applies Bennett's passive stat effects.</div>
 <dl class="notes">
 <dt>定義:</dt>
 <dd><code><a href="../entity/Character.html#applyPassive(model.stats.StatsContainer)">applyPassive</a></code>&nbsp;クラス内&nbsp;<code><a href="../entity/Character.html" title="model.entity内のクラス">Character</a></code></dd>
+<dt>パラメータ:</dt>
+<dd><code>stats</code> - stats container to modify</dd>
 </dl>
 </div>
 </section>
@@ -287,9 +324,13 @@ implements <a href="../entity/BurstStateProvider.html" title="model.entity内の
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">onAction</span><wbr><span class="parameters">(<a href="../../simulation/action/CharacterActionRequest.html" title="simulation.action内のクラス">CharacterActionRequest</a>&nbsp;request,
  <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</span></div>
+<div class="block">Executes the requested combat action for Bennett.</div>
 <dl class="notes">
 <dt>オーバーライド:</dt>
 <dd><code><a href="../entity/Character.html#onAction(simulation.action.CharacterActionRequest,simulation.CombatSimulator)">onAction</a></code>&nbsp;クラス内&nbsp;<code><a href="../entity/Character.html" title="model.entity内のクラス">Character</a></code></dd>
+<dt>パラメータ:</dt>
+<dd><code>request</code> - requested player action</dd>
+<dd><code>sim</code> - active combat simulator</dd>
 </dl>
 </div>
 </section>

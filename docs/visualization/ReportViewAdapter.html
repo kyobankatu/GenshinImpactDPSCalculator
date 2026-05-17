@@ -103,13 +103,20 @@ boundary concerns owned by the visualization layer, not by combat logic.</div>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color"><code>static final class&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="ReportViewAdapter.ReportCharacterStats.html" class="type-name-link" title="visualization内のクラス">ReportViewAdapter.ReportCharacterStats</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Pre-computed display-ready stat values (e.g.</div>
+</div>
 <div class="col-first odd-row-color"><code>static final class&nbsp;</code></div>
 <div class="col-second odd-row-color"><code><a href="ReportViewAdapter.ReportCharacterView.html" class="type-name-link" title="visualization内のクラス">ReportViewAdapter.ReportCharacterView</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">View object describing a single party member for report rendering.</div>
+</div>
 <div class="col-first even-row-color"><code>static final class&nbsp;</code></div>
 <div class="col-second even-row-color"><code><a href="ReportViewAdapter.ReportStatsSnapshot.html" class="type-name-link" title="visualization内のクラス">ReportViewAdapter.ReportStatsSnapshot</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Adapted snapshot of party stats at a single point in simulation time, keyed
+by DOM identifier.</div>
+</div>
 </div>
 </section>
 </li>
@@ -141,13 +148,21 @@ boundary concerns owned by the visualization layer, not by combat logic.</div>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#domKey(model.type.CharacterId)" class="member-name-link">domKey</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Converts a <a href="../model/type/CharacterId.html" title="model.typeの列挙クラス"><code>CharacterId</code></a> into the HTML-safe key used as the DOM row
+identifier in the report.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="ReportViewAdapter.ReportCharacterView.html" title="visualization内のクラス">ReportViewAdapter.ReportCharacterView</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#partyCharacters(simulation.CombatSimulator)" class="member-name-link">partyCharacters</a><wbr>(<a href="../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Builds report-facing views for every active party member.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="ReportViewAdapter.ReportStatsSnapshot.html" title="visualization内のクラス">ReportViewAdapter.ReportStatsSnapshot</a>&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#statsHistory(java.util.List)" class="member-name-link">statsHistory</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../mechanics/analysis/StatsSnapshot.html" title="mechanics.analysis内のクラス">StatsSnapshot</a>&gt;&nbsp;statsHistory)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Adapts analysis stat snapshots into report-friendly snapshots keyed by DOM
+identifier.</div>
+</div>
 </div>
 </div>
 </div>
@@ -186,6 +201,14 @@ boundary concerns owned by the visualization layer, not by combat logic.</div>
 <h3>partyCharacters</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportViewAdapter.ReportCharacterView.html" title="visualization内のクラス">ReportViewAdapter.ReportCharacterView</a>&gt;</span>&nbsp;<span class="element-name">partyCharacters</span><wbr><span class="parameters">(<a href="../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</span></div>
+<div class="block">Builds report-facing views for every active party member.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>sim</code> - source combat simulator; may be <code>null</code></dd>
+<dt>戻り値:</dt>
+<dd>an ordered list of <a href="ReportViewAdapter.ReportCharacterView.html" title="visualization内のクラス"><code>ReportViewAdapter.ReportCharacterView</code></a> entries, or an empty
+        list when <code>sim</code> is <code>null</code></dd>
+</dl>
 </div>
 </section>
 </li>
@@ -194,6 +217,16 @@ boundary concerns owned by the visualization layer, not by combat logic.</div>
 <h3>statsHistory</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportViewAdapter.ReportStatsSnapshot.html" title="visualization内のクラス">ReportViewAdapter.ReportStatsSnapshot</a>&gt;</span>&nbsp;<span class="element-name">statsHistory</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../mechanics/analysis/StatsSnapshot.html" title="mechanics.analysis内のクラス">StatsSnapshot</a>&gt;&nbsp;statsHistory)</span></div>
+<div class="block">Adapts analysis stat snapshots into report-friendly snapshots keyed by DOM
+identifier.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>statsHistory</code> - raw stat snapshots from the analysis layer; may be
+                    <code>null</code></dd>
+<dt>戻り値:</dt>
+<dd>a list of adapted snapshots, or an empty list when no history is
+        provided</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -202,6 +235,14 @@ boundary concerns owned by the visualization layer, not by combat logic.</div>
 <h3>domKey</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">domKey</span><wbr><span class="parameters">(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId)</span></div>
+<div class="block">Converts a <a href="../model/type/CharacterId.html" title="model.typeの列挙クラス"><code>CharacterId</code></a> into the HTML-safe key used as the DOM row
+identifier in the report.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>characterId</code> - character identifier (must be non-null)</dd>
+<dt>戻り値:</dt>
+<dd>the lowercased enum name suitable for use as a DOM id suffix</dd>
+</dl>
 </div>
 </section>
 </li>

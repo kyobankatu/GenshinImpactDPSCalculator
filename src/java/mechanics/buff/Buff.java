@@ -42,6 +42,15 @@ public abstract class Buff {
         this(name, BuffId.CUSTOM, duration, currentTime);
     }
 
+    /**
+     * Creates a time-limited buff active from {@code currentTime} for {@code duration} seconds,
+     * with an explicit {@link BuffId} for typed identity.
+     *
+     * @param name        display name used for logging and de-duplication
+     * @param id          typed buff identifier referenced by simulator logic
+     * @param duration    how long the buff lasts in simulation seconds
+     * @param currentTime simulation time at which the buff starts
+     */
     public Buff(String name, BuffId id, double duration, double currentTime) {
         this.name = name;
         this.id = id;
@@ -59,6 +68,12 @@ public abstract class Buff {
         this(name, BuffId.CUSTOM);
     }
 
+    /**
+     * Creates a permanent buff with an explicit {@link BuffId}.
+     *
+     * @param name display name of the buff
+     * @param id   typed buff identifier referenced by simulator logic
+     */
     public Buff(String name, BuffId id) {
         this.name = name;
         this.id = id;
@@ -87,14 +102,30 @@ public abstract class Buff {
         return getDisplayName();
     }
 
+    /**
+     * Returns the typed buff identifier.
+     *
+     * @return {@link BuffId} for this buff
+     */
     public BuffId getId() {
         return id;
     }
 
+    /**
+     * Returns the character identifier of the buff source.
+     *
+     * @return source {@link CharacterId} (or {@link CharacterId#UNKNOWN} if not set)
+     */
     public CharacterId getSourceCharacterId() {
         return sourceCharacterId;
     }
 
+    /**
+     * Sets the source character that emitted this buff. Returns {@code this} for chaining.
+     *
+     * @param sourceCharacterId character that is the origin of this buff
+     * @return {@code this} for fluent chaining
+     */
     public Buff sourcedBy(CharacterId sourceCharacterId) {
         this.sourceCharacterId = sourceCharacterId;
         return this;
@@ -146,7 +177,12 @@ public abstract class Buff {
         this.expirationTime = savedExpirationTime;
     }
 
-    /** Exclude specific characters from receiving this buff. Returns this for chaining. */
+    /**
+     * Exclude specific characters from receiving this buff. Returns {@code this} for chaining.
+     *
+     * @param names display names of characters to exclude
+     * @return {@code this} for fluent chaining
+     */
     public Buff exclude(String... names) {
         this.excludeChars = new HashSet<>();
         for (String name : names) {
@@ -155,19 +191,35 @@ public abstract class Buff {
         return this;
     }
 
-    /** Exclude specific characters from receiving this buff. Returns this for chaining. */
+    /**
+     * Exclude specific characters from receiving this buff. Returns {@code this} for chaining.
+     *
+     * @param ids character identifiers to exclude
+     * @return {@code this} for fluent chaining
+     */
     public Buff exclude(CharacterId... ids) {
         this.excludeChars = new HashSet<>(Arrays.asList(ids));
         return this;
     }
 
-    /** Restrict this buff to characters with the given element. Returns this for chaining. */
+    /**
+     * Restrict this buff to characters with the given element. Returns {@code this} for chaining.
+     *
+     * @param element element to which the buff is restricted
+     * @return {@code this} for fluent chaining
+     */
     public Buff forElement(Element element) {
         this.targetElement = element;
         return this;
     }
 
-    /** Returns true if this buff applies to the given character. */
+    /**
+     * Returns {@code true} if this buff applies to the given character, taking
+     * exclusion list and element restriction into account.
+     *
+     * @param character candidate character to receive the buff
+     * @return {@code true} if the buff should apply to the character
+     */
     public boolean appliesToCharacter(Character character) {
         if (excludeChars != null && excludeChars.contains(character.getCharacterId())) return false;
         if (targetElement != null && targetElement != character.getElement()) return false;

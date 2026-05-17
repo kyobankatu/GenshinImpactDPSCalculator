@@ -195,20 +195,28 @@ formula.</div>
  double&nbsp;currentTime,
  <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
  double&nbsp;damage)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Fires post-damage hooks for the attacker's weapon and artifact sets so
+stack/proc-style effects can update their internal state.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#resolveStats(model.entity.Character,simulation.action.AttackAction,java.util.List,double)" class="member-name-link">resolveStats</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
  <a href="../../simulation/action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;&nbsp;activeBuffs,
  double&nbsp;currentTime)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Resolves the effective stats used for a damage calculation.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#resolveStats(model.entity.Character,simulation.action.AttackAction,java.util.List,model.stats.StatsContainer,double)" class="member-name-link">resolveStats</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
  <a href="../../simulation/action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;&nbsp;activeBuffs,
  <a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;preResolvedStats,
  double&nbsp;currentTime)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Resolves the effective stats reusing a pre-resolved <a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス"><code>StatsContainer</code></a>
+when possible.</div>
+</div>
 </div>
 </div>
 </div>
@@ -347,7 +355,27 @@ hooks are fired so stacking/proc mechanics can update their internal state.</div
  double&nbsp;reactionMultiplier,
  <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</span></div>
 <div class="block">Hot-path overload used when action resolution already assembled current stats
-for the same non-snapshot action.</div>
+for the same non-snapshot action.
+
+<p>Skips redundant stat re-resolution by reusing <code>preResolvedStats</code>
+(effective stats plus active buffs at <code>currentTime</code>). Behaviorally
+equivalent to the public seven-argument <a href="#calculateDamage(model.entity.Character,model.entity.Enemy,simulation.action.AttackAction,java.util.List,double,double,simulation.CombatSimulator)"><code>calculateDamage(Character, Enemy, AttackAction, List, double, double, CombatSimulator)</code></a> when the
+passed stats correspond to <code>attacker</code> at <code>currentTime</code>.</p></div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>attacker</code> - the attacking character</dd>
+<dd><code>target</code> - the enemy being hit</dd>
+<dd><code>action</code> - the attack action containing MV, element, scaling stat, etc.</dd>
+<dd><code>activeBuffs</code> - team and self buffs currently active (may be <code>null</code>)</dd>
+<dd><code>preResolvedStats</code> - pre-resolved stats for <code>attacker</code>; ignored when
+                          <code>action.isUseSnapshot()</code> is <code>true</code></dd>
+<dd><code>currentTime</code> - simulation time in seconds at the moment of the hit</dd>
+<dd><code>reactionMultiplier</code> - amplifying reaction multiplier pre-computed by the
+                          simulator (1.0 if no amplifying reaction)</dd>
+<dd><code>sim</code> - the running <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス"><code>CombatSimulator</code></a> instance</dd>
+<dt>戻り値:</dt>
+<dd>final damage value after all multipliers</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -409,6 +437,21 @@ The three-region piecewise function mirrors the official game:
  <a href="../../simulation/action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;&nbsp;activeBuffs,
  double&nbsp;currentTime)</span></div>
+<div class="block">Resolves the effective stats used for a damage calculation.
+
+<p>If the action snapshots its caster's stats (<code>action.isUseSnapshot()</code>),
+the attacker's stored snapshot is returned. Otherwise the attacker's
+current effective stats are taken and all non-expired buffs in
+<code>activeBuffs</code> are applied on top.</p></div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>attacker</code> - attacking character</dd>
+<dd><code>action</code> - attack action whose snapshot policy is honored</dd>
+<dd><code>activeBuffs</code> - currently active buffs (may be <code>null</code>)</dd>
+<dd><code>currentTime</code> - current simulation time in seconds</dd>
+<dt>戻り値:</dt>
+<dd>resolved <a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス"><code>StatsContainer</code></a> suitable for damage formula input</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -421,6 +464,19 @@ The three-region piecewise function mirrors the official game:
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;&nbsp;activeBuffs,
  <a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;preResolvedStats,
  double&nbsp;currentTime)</span></div>
+<div class="block">Resolves the effective stats reusing a pre-resolved <a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス"><code>StatsContainer</code></a>
+when possible.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>attacker</code> - attacking character</dd>
+<dd><code>action</code> - attack action whose snapshot policy is honored</dd>
+<dd><code>activeBuffs</code> - currently active buffs (used only when fallback is needed)</dd>
+<dd><code>preResolvedStats</code> - previously resolved stats; returned directly when non-null
+                        and the action is not snapshot-based</dd>
+<dd><code>currentTime</code> - current simulation time in seconds</dd>
+<dt>戻り値:</dt>
+<dd>resolved <a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス"><code>StatsContainer</code></a></dd>
+</dl>
 </div>
 </section>
 </li>
@@ -433,6 +489,16 @@ The three-region piecewise function mirrors the official game:
  double&nbsp;currentTime,
  <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim,
  double&nbsp;damage)</span></div>
+<div class="block">Fires post-damage hooks for the attacker's weapon and artifact sets so
+stack/proc-style effects can update their internal state.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>attacker</code> - attacking character</dd>
+<dd><code>action</code> - attack action that produced the hit</dd>
+<dd><code>currentTime</code> - current simulation time in seconds</dd>
+<dd><code>sim</code> - running combat simulator</dd>
+<dd><code>damage</code> - final outgoing damage value</dd>
+</dl>
 </div>
 </section>
 </li>

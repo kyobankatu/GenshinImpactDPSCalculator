@@ -31,18 +31,30 @@ public final class FlinsParty2RLSimulatorFactory {
     private FlinsParty2RLSimulatorFactory() {
     }
 
+    /**
+     * Returns a supplier that builds fresh FlinsParty2 simulators.
+     */
     public static Supplier<CombatSimulator> supplier() {
         return FlinsParty2RLSimulatorFactory::create;
     }
 
+    /**
+     * Returns the registry spec for the FlinsParty2 RL party.
+     */
     public static RLPartySpec spec() {
         return new RLPartySpec("FlinsParty2", PARTY_ORDER, supplier());
     }
 
+    /**
+     * Creates an episode factory for the FlinsParty2 RL party.
+     */
     public static RLEpisodeFactory episodeFactory(EpisodeConfig baseConfig) {
         return new SinglePartyRLEpisodeFactory(spec(), baseConfig);
     }
 
+    /**
+     * Creates the fixed Flins/Ineffa/Columbina/Sucrose simulator.
+     */
     public static CombatSimulator create() {
         CombatSimulator sim = new CombatSimulator();
         sim.setLoggingEnabled(false);

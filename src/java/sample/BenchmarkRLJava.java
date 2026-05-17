@@ -9,6 +9,12 @@ import mechanics.rl.bridge.VectorizedEnvironment;
  * Local benchmark for vectorized Java environment stepping.
  */
 public class BenchmarkRLJava {
+    /**
+     * Runs a simple throughput benchmark for the local vectorized RL environment.
+     *
+     * @param args command-line arguments in the order environment count, step count,
+     *             worker count, and party selection
+     */
     public static void main(String[] args) {
         int environments = args.length > 0 ? Integer.parseInt(args[0]) : 4;
         int steps = args.length > 1 ? Integer.parseInt(args[1]) : 128;

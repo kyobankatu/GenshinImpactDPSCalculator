@@ -94,6 +94,7 @@ loadScripts(document, 'script');</script>
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">FavoniusCodex</span>
 <span class="extends-implements">extends <a href="../entity/Weapon.html" title="model.entity内のクラス">Weapon</a>
 implements <a href="../entity/DamageTriggeredWeaponEffect.html" title="model.entity内のインタフェース">DamageTriggeredWeaponEffect</a></span></div>
+<div class="block">Favonius Codex catalyst with a CRIT-triggered particle generation passive.</div>
 </div>
 </section>
 <section class="summary">
@@ -125,7 +126,9 @@ implements <a href="../entity/DamageTriggeredWeaponEffect.html" title="model.ent
 <div class="table-header col-first">コンストラクタ</div>
 <div class="table-header col-last">説明</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E()" class="member-name-link">FavoniusCodex</a>()</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Constructs Favonius Codex with Lv 90 base stats.</div>
+</div>
 </div>
 </section>
 </li>
@@ -145,7 +148,10 @@ implements <a href="../entity/DamageTriggeredWeaponEffect.html" title="model.ent
  <a href="../../simulation/action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  double&nbsp;currentTime,
  <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Attempts to trigger Windfall on a damage event and generate neutral
+particles when the proc succeeds.</div>
+</div>
 </div>
 </div>
 </div>
@@ -187,6 +193,7 @@ implements <a href="../entity/DamageTriggeredWeaponEffect.html" title="model.ent
 <h3>FavoniusCodex</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">FavoniusCodex</span>()</div>
+<div class="block">Constructs Favonius Codex with Lv 90 base stats.</div>
 </div>
 </section>
 </li>
@@ -206,9 +213,16 @@ implements <a href="../entity/DamageTriggeredWeaponEffect.html" title="model.ent
  <a href="../../simulation/action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  double&nbsp;currentTime,
  <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</span></div>
+<div class="block">Attempts to trigger Windfall on a damage event and generate neutral
+particles when the proc succeeds.</div>
 <dl class="notes">
 <dt>定義:</dt>
 <dd><code><a href="../entity/DamageTriggeredWeaponEffect.html#onDamage(model.entity.Character,simulation.action.AttackAction,double,simulation.CombatSimulator)">onDamage</a></code>&nbsp;インタフェース内&nbsp;<code><a href="../entity/DamageTriggeredWeaponEffect.html" title="model.entity内のインタフェース">DamageTriggeredWeaponEffect</a></code></dd>
+<dt>パラメータ:</dt>
+<dd><code>user</code> - the character who dealt the damage</dd>
+<dd><code>action</code> - the triggering attack action</dd>
+<dd><code>currentTime</code> - simulation time in seconds at the damage event</dd>
+<dd><code>sim</code> - the active combat simulator</dd>
 </dl>
 </div>
 </section>

@@ -5,9 +5,15 @@ import model.stats.StatsContainer;
 import model.type.StatType;
 import model.type.WeaponType;
 
+/**
+ * Deathmatch polearm with passives that depend on enemy count.
+ */
 public class Deathmatch extends Weapon {
     private boolean singleTarget = true; // Default to single target context (Boss)
 
+    /**
+     * Constructs Deathmatch with Lv 90 base stats.
+     */
     public Deathmatch() {
         super("Deathmatch", new StatsContainer());
         StatsContainer s = this.getStats();
@@ -26,6 +32,13 @@ public class Deathmatch extends Weapon {
         this.singleTarget = isSingleTarget;
     }
 
+    /**
+     * Applies the weapon's conditional ATK and DEF bonuses for the current
+     * enemy-count context.
+     *
+     * @param stats the stats container to mutate in-place
+     * @param currentTime simulation time in seconds
+     */
     @Override
     public void applyPassive(StatsContainer stats, double currentTime) {
         // Refinement 1

@@ -111,6 +111,16 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="type-signature"><span class="modifiers">public enum </span><span class="element-name type-name-label">CharacterId</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Enum.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Enum</a>&lt;<a href="CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&gt;</span></div>
+<div class="block">Identifier for each playable character supported by the simulator.
+
+<p>Each constant carries a human-readable display name, used both for
+console/HTML report output and for matching against the <code>Character</code>
+column of the per-character CSV configuration files in
+<code>config/characters/</code>.
+
+<p><a href="#UNKNOWN"><code>UNKNOWN</code></a> acts as a safe fallback returned by
+<a href="#fromName(java.lang.String)"><code>fromName(String)</code></a> when the supplied display name does not match any
+registered character, avoiding <code>null</code> return values at call sites.</div>
 </div>
 </section>
 <section class="summary">
@@ -133,23 +143,41 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">列挙型定数</div>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color"><code><a href="#BENNETT" class="member-name-link">BENNETT</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Bennett (Pyro sword support).</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#COLUMBINA" class="member-name-link">COLUMBINA</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Columbina (custom Lunar character; carries <code>LUNAR_MULTIPLIER</code>).</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#FLINS" class="member-name-link">FLINS</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Flins (custom Lunar character).</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#INEFFA" class="member-name-link">INEFFA</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Ineffa (custom Lunar character; carries <code>LUNAR_BASE_BONUS</code>).</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#RAIDEN_SHOGUN" class="member-name-link">RAIDEN_SHOGUN</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Raiden Shogun (Electro polearm DPS / battery).</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#SUCROSE" class="member-name-link">SUCROSE</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Sucrose (Anemo catalyst Moonsign / Ascendant Blessing source).</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#UNKNOWN" class="member-name-link">UNKNOWN</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Fallback value returned by <a href="#fromName(java.lang.String)"><code>fromName(String)</code></a> for unmatched names.</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="#XIANGLING" class="member-name-link">XIANGLING</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Xiangling (Pyro polearm sub-DPS).</div>
+</div>
 <div class="col-first even-row-color"><code><a href="#XINGQIU" class="member-name-link">XINGQIU</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Xingqiu (Hydro sword off-field reaction enabler).</div>
+</div>
 </div>
 </section>
 </li>
@@ -196,10 +224,14 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#fromName(java.lang.String)" class="member-name-link">fromName</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Resolves a display name back to its <a href="CharacterId.html" title="model.typeの列挙クラス"><code>CharacterId</code></a> constant.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDisplayName()" class="member-name-link">getDisplayName</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the human-readable display name associated with this identifier.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#valueOf(java.lang.String)" class="member-name-link">valueOf</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
@@ -236,6 +268,7 @@ loadScripts(document, 'script');</script>
 <h3>BENNETT</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></span>&nbsp;<span class="element-name">BENNETT</span></div>
+<div class="block">Bennett (Pyro sword support).</div>
 </div>
 </section>
 </li>
@@ -244,6 +277,7 @@ loadScripts(document, 'script');</script>
 <h3>COLUMBINA</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></span>&nbsp;<span class="element-name">COLUMBINA</span></div>
+<div class="block">Columbina (custom Lunar character; carries <code>LUNAR_MULTIPLIER</code>).</div>
 </div>
 </section>
 </li>
@@ -252,6 +286,7 @@ loadScripts(document, 'script');</script>
 <h3>FLINS</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></span>&nbsp;<span class="element-name">FLINS</span></div>
+<div class="block">Flins (custom Lunar character).</div>
 </div>
 </section>
 </li>
@@ -260,6 +295,7 @@ loadScripts(document, 'script');</script>
 <h3>INEFFA</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></span>&nbsp;<span class="element-name">INEFFA</span></div>
+<div class="block">Ineffa (custom Lunar character; carries <code>LUNAR_BASE_BONUS</code>).</div>
 </div>
 </section>
 </li>
@@ -268,6 +304,7 @@ loadScripts(document, 'script');</script>
 <h3>RAIDEN_SHOGUN</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></span>&nbsp;<span class="element-name">RAIDEN_SHOGUN</span></div>
+<div class="block">Raiden Shogun (Electro polearm DPS / battery).</div>
 </div>
 </section>
 </li>
@@ -276,6 +313,7 @@ loadScripts(document, 'script');</script>
 <h3>SUCROSE</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></span>&nbsp;<span class="element-name">SUCROSE</span></div>
+<div class="block">Sucrose (Anemo catalyst Moonsign / Ascendant Blessing source).</div>
 </div>
 </section>
 </li>
@@ -284,6 +322,7 @@ loadScripts(document, 'script');</script>
 <h3>XIANGLING</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></span>&nbsp;<span class="element-name">XIANGLING</span></div>
+<div class="block">Xiangling (Pyro polearm sub-DPS).</div>
 </div>
 </section>
 </li>
@@ -292,6 +331,7 @@ loadScripts(document, 'script');</script>
 <h3>XINGQIU</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></span>&nbsp;<span class="element-name">XINGQIU</span></div>
+<div class="block">Xingqiu (Hydro sword off-field reaction enabler).</div>
 </div>
 </section>
 </li>
@@ -300,6 +340,7 @@ loadScripts(document, 'script');</script>
 <h3>UNKNOWN</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></span>&nbsp;<span class="element-name">UNKNOWN</span></div>
+<div class="block">Fallback value returned by <a href="#fromName(java.lang.String)"><code>fromName(String)</code></a> for unmatched names.</div>
 </div>
 </section>
 </li>
@@ -383,6 +424,13 @@ loadScripts(document, 'script');</script>
 <h3>getDisplayName</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">getDisplayName</span>()</div>
+<div class="block">Returns the human-readable display name associated with this identifier.
+The same string is used as the <code>Character</code> column value in CSV
+configuration files.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>display name (never <code>null</code>)</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -391,6 +439,15 @@ loadScripts(document, 'script');</script>
 <h3>fromName</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></span>&nbsp;<span class="element-name">fromName</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</span></div>
+<div class="block">Resolves a display name back to its <a href="CharacterId.html" title="model.typeの列挙クラス"><code>CharacterId</code></a> constant.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>name</code> - human-readable display name as written in CSV files
+            (case-sensitive); may be <code>null</code></dd>
+<dt>戻り値:</dt>
+<dd>the matching <a href="CharacterId.html" title="model.typeの列挙クラス"><code>CharacterId</code></a>, or <a href="#UNKNOWN"><code>UNKNOWN</code></a> if
+        <code>name</code> is <code>null</code> or no constant matches</dd>
+</dl>
 </div>
 </section>
 </li>

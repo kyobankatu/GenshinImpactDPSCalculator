@@ -76,6 +76,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#getMember(java.lang.String)" tabindex="0">getMember(String)</a></li>
 <li><a href="#resolveCharacterId(java.lang.String)" tabindex="0">resolveCharacterId(String)</a></li>
 <li><a href="#getActiveCharacter()" tabindex="0">getActiveCharacter()</a></li>
+<li><a href="#getActiveCharacterId()" tabindex="0">getActiveCharacterId()</a></li>
 <li><a href="#switchCharacter(model.type.CharacterId)" tabindex="0">switchCharacter(CharacterId)</a></li>
 <li><a href="#switchCharacter(java.lang.String)" tabindex="0">switchCharacter(String)</a></li>
 <li><a href="#applyTeamBuff(mechanics.buff.Buff)" tabindex="0">applyTeamBuff(Buff)</a></li>
@@ -166,30 +167,35 @@ supply the necessary combat context.</div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the character currently on-field.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMember(java.lang.String)" class="member-name-link">getMember</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getActiveCharacterId()" class="member-name-link">getActiveCharacterId</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the party member with the given name, or <code>null</code> if not found.</div>
+<div class="block">Returns the CharacterId of the currently active character, or <code>null</code> if none.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMember(model.type.CharacterId)" class="member-name-link">getMember</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Collection.html" title="java.util内のクラスまたはインタフェース" class="external-link">Collection</a><wbr>&lt;<a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMembers()" class="member-name-link">getMembers</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMember(java.lang.String)" class="member-name-link">getMember</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the party member with the given name, or <code>null</code> if not found.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMember(model.type.CharacterId)" class="member-name-link">getMember</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Collection.html" title="java.util内のクラスまたはインタフェース" class="external-link">Collection</a><wbr>&lt;<a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMembers()" class="member-name-link">getMembers</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns a view of all party members.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resolveCharacterId(java.lang.String)" class="member-name-link">resolveCharacterId</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#switchCharacter(java.lang.String)" class="member-name-link">switchCharacter</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resolveCharacterId(java.lang.String)" class="member-name-link">resolveCharacterId</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#switchCharacter(java.lang.String)" class="member-name-link">switchCharacter</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Switches the active character to the party member with the given name.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#switchCharacter(model.type.CharacterId)" class="member-name-link">switchCharacter</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#switchCharacter(model.type.CharacterId)" class="member-name-link">switchCharacter</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -309,6 +315,19 @@ If this is the first character added, they become the active character.</div>
 <dl class="notes">
 <dt>戻り値:</dt>
 <dd>the active <a href="../model/entity/Character.html" title="model.entity内のクラス"><code>Character</code></a></dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getActiveCharacterId()">
+<h3>getActiveCharacterId</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></span>&nbsp;<span class="element-name">getActiveCharacterId</span>()</div>
+<div class="block">Returns the CharacterId of the currently active character, or <code>null</code> if none.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>active character id, or <code>null</code></dd>
 </dl>
 </div>
 </section>

@@ -70,17 +70,21 @@ loadScripts(document, 'script');</script>
 <li><a href="#idleTimePenaltyPerSecond" tabindex="0">idleTimePenaltyPerSecond</a></li>
 <li><a href="#terminalDamageScale" tabindex="0">terminalDamageScale</a></li>
 <li><a href="#fillEnergyOnReset" tabindex="0">fillEnergyOnReset</a></li>
+<li><a href="#enableRoleAlignmentBonus" tabindex="0">enableRoleAlignmentBonus</a></li>
+<li><a href="#roleAlignmentBonusWeight" tabindex="0">roleAlignmentBonusWeight</a></li>
 </ol>
 </li>
 <li><a href="#constructor-detail" tabindex="0">コンストラクタの詳細</a>
 <ol class="toc-list">
 <li><a href="#%3Cinit%3E()" tabindex="0">EpisodeConfig()</a></li>
-<li><a href="#%3Cinit%3E(model.type.CharacterId%5B%5D,double,double,double,double,double,double,double,double,boolean)" tabindex="0">EpisodeConfig(CharacterId[], double, double, double, double, double, double, double, double, boolean)</a></li>
+<li><a href="#%3Cinit%3E(model.type.CharacterId%5B%5D,double,double,double,double,double,double,double,double,boolean,boolean,double)" tabindex="0">EpisodeConfig(CharacterId[], double, double, double, double, double, double, double, double, boolean, boolean, double)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">メソッドの詳細</a>
 <ol class="toc-list">
 <li><a href="#withPartyOrder(model.type.CharacterId%5B%5D)" tabindex="0">withPartyOrder(CharacterId[])</a></li>
+<li><a href="#withMaxEpisodeTime(double)" tabindex="0">withMaxEpisodeTime(double)</a></li>
+<li><a href="#withRoleAlignmentBonus(boolean,double)" tabindex="0">withRoleAlignmentBonus(boolean, double)</a></li>
 </ol>
 </li>
 </ol>
@@ -114,37 +118,69 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color"><code>final double</code></div>
 <div class="col-second even-row-color"><code><a href="#damageRewardScale" class="member-name-link">damageRewardScale</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Reward scale applied to per-step damage.</div>
+</div>
 <div class="col-first odd-row-color"><code>static final <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]</code></div>
 <div class="col-second odd-row-color"><code><a href="#DEFAULT_PARTY" class="member-name-link">DEFAULT_PARTY</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>final double</code></div>
-<div class="col-second even-row-color"><code><a href="#failedActionTimeCost" class="member-name-link">failedActionTimeCost</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>final boolean</code></div>
-<div class="col-second odd-row-color"><code><a href="#fillEnergyOnReset" class="member-name-link">fillEnergyOnReset</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>final double</code></div>
-<div class="col-second even-row-color"><code><a href="#idleTimePenaltyPerSecond" class="member-name-link">idleTimePenaltyPerSecond</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Default party composition (Flins / Ineffa / Columbina / Sucrose).</div>
+</div>
+<div class="col-first even-row-color"><code>final boolean</code></div>
+<div class="col-second even-row-color"><code><a href="#enableRoleAlignmentBonus" class="member-name-link">enableRoleAlignmentBonus</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Whether to add role-alignment shaping bonus.</div>
+</div>
 <div class="col-first odd-row-color"><code>final double</code></div>
-<div class="col-second odd-row-color"><code><a href="#invalidActionPenalty" class="member-name-link">invalidActionPenalty</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-second odd-row-color"><code><a href="#failedActionTimeCost" class="member-name-link">failedActionTimeCost</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Simulator time advanced when an illegal action is selected.</div>
+</div>
+<div class="col-first even-row-color"><code>final boolean</code></div>
+<div class="col-second even-row-color"><code><a href="#fillEnergyOnReset" class="member-name-link">fillEnergyOnReset</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Whether all bursts start with full energy on reset.</div>
+</div>
+<div class="col-first odd-row-color"><code>final double</code></div>
+<div class="col-second odd-row-color"><code><a href="#idleTimePenaltyPerSecond" class="member-name-link">idleTimePenaltyPerSecond</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Penalty per second of simulator idle time.</div>
+</div>
 <div class="col-first even-row-color"><code>final double</code></div>
-<div class="col-second even-row-color"><code><a href="#maxEpisodeTime" class="member-name-link">maxEpisodeTime</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>final <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]</code></div>
-<div class="col-second odd-row-color"><code><a href="#partyOrder" class="member-name-link">partyOrder</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-second even-row-color"><code><a href="#invalidActionPenalty" class="member-name-link">invalidActionPenalty</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Penalty applied when the agent selects an illegal action.</div>
+</div>
+<div class="col-first odd-row-color"><code>final double</code></div>
+<div class="col-second odd-row-color"><code><a href="#maxEpisodeTime" class="member-name-link">maxEpisodeTime</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Maximum episode duration in simulator seconds.</div>
+</div>
+<div class="col-first even-row-color"><code>final <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]</code></div>
+<div class="col-second even-row-color"><code><a href="#partyOrder" class="member-name-link">partyOrder</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Ordered party slots (length 4).</div>
+</div>
+<div class="col-first odd-row-color"><code>final double</code></div>
+<div class="col-second odd-row-color"><code><a href="#repeatedSwapPenalty" class="member-name-link">repeatedSwapPenalty</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Penalty applied when swapping back to a recently active character.</div>
+</div>
 <div class="col-first even-row-color"><code>final double</code></div>
-<div class="col-second even-row-color"><code><a href="#repeatedSwapPenalty" class="member-name-link">repeatedSwapPenalty</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-second even-row-color"><code><a href="#roleAlignmentBonusWeight" class="member-name-link">roleAlignmentBonusWeight</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Weight of the role-alignment shaping bonus.</div>
+</div>
 <div class="col-first odd-row-color"><code>final double</code></div>
 <div class="col-second odd-row-color"><code><a href="#swapCooldown" class="member-name-link">swapCooldown</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Minimum interval (seconds) between consecutive swaps.</div>
+</div>
 <div class="col-first even-row-color"><code>final double</code></div>
 <div class="col-second even-row-color"><code><a href="#terminalDamageScale" class="member-name-link">terminalDamageScale</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Reward scale applied to cumulative damage at terminal step.</div>
+</div>
 </div>
 </section>
 </li>
@@ -157,8 +193,10 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">コンストラクタ</div>
 <div class="table-header col-last">説明</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E()" class="member-name-link">EpisodeConfig</a>()</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
-<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(model.type.CharacterId%5B%5D,double,double,double,double,double,double,double,double,boolean)" class="member-name-link">EpisodeConfig</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&nbsp;partyOrder,
+<div class="col-last even-row-color">
+<div class="block">Constructs the default episode configuration with the default party.</div>
+</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(model.type.CharacterId%5B%5D,double,double,double,double,double,double,double,double,boolean,boolean,double)" class="member-name-link">EpisodeConfig</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&nbsp;partyOrder,
  double&nbsp;maxEpisodeTime,
  double&nbsp;failedActionTimeCost,
  double&nbsp;swapCooldown,
@@ -167,8 +205,12 @@ loadScripts(document, 'script');</script>
  double&nbsp;repeatedSwapPenalty,
  double&nbsp;idleTimePenaltyPerSecond,
  double&nbsp;terminalDamageScale,
- boolean&nbsp;fillEnergyOnReset)</code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+ boolean&nbsp;fillEnergyOnReset,
+ boolean&nbsp;enableRoleAlignmentBonus,
+ double&nbsp;roleAlignmentBonusWeight)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Constructs an episode configuration with explicit values.</div>
+</div>
 </div>
 </section>
 </li>
@@ -184,8 +226,21 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-second">メソッド</div>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withPartyOrder(model.type.CharacterId%5B%5D)" class="member-name-link">withPartyOrder</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&nbsp;nextPartyOrder)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withMaxEpisodeTime(double)" class="member-name-link">withMaxEpisodeTime</a><wbr>(double&nbsp;nextMaxEpisodeTime)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns a copy with the maximum episode time replaced.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withPartyOrder(model.type.CharacterId%5B%5D)" class="member-name-link">withPartyOrder</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&nbsp;nextPartyOrder)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns a copy with the party order replaced.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#withRoleAlignmentBonus(boolean,double)" class="member-name-link">withRoleAlignmentBonus</a><wbr>(boolean&nbsp;nextEnableRoleAlignmentBonus,
+ double&nbsp;nextRoleAlignmentBonusWeight)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns a copy with role-alignment shaping reconfigured.</div>
+</div>
 </div>
 </div>
 </div>
@@ -208,6 +263,7 @@ loadScripts(document, 'script');</script>
 <h3>DEFAULT_PARTY</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]</span>&nbsp;<span class="element-name">DEFAULT_PARTY</span></div>
+<div class="block">Default party composition (Flins / Ineffa / Columbina / Sucrose).</div>
 </div>
 </section>
 </li>
@@ -216,6 +272,7 @@ loadScripts(document, 'script');</script>
 <h3>partyOrder</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type"><a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]</span>&nbsp;<span class="element-name">partyOrder</span></div>
+<div class="block">Ordered party slots (length 4).</div>
 </div>
 </section>
 </li>
@@ -224,6 +281,7 @@ loadScripts(document, 'script');</script>
 <h3>maxEpisodeTime</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">maxEpisodeTime</span></div>
+<div class="block">Maximum episode duration in simulator seconds.</div>
 </div>
 </section>
 </li>
@@ -232,6 +290,7 @@ loadScripts(document, 'script');</script>
 <h3>failedActionTimeCost</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">failedActionTimeCost</span></div>
+<div class="block">Simulator time advanced when an illegal action is selected.</div>
 </div>
 </section>
 </li>
@@ -240,6 +299,7 @@ loadScripts(document, 'script');</script>
 <h3>swapCooldown</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">swapCooldown</span></div>
+<div class="block">Minimum interval (seconds) between consecutive swaps.</div>
 </div>
 </section>
 </li>
@@ -248,6 +308,7 @@ loadScripts(document, 'script');</script>
 <h3>damageRewardScale</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">damageRewardScale</span></div>
+<div class="block">Reward scale applied to per-step damage.</div>
 </div>
 </section>
 </li>
@@ -256,6 +317,7 @@ loadScripts(document, 'script');</script>
 <h3>invalidActionPenalty</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">invalidActionPenalty</span></div>
+<div class="block">Penalty applied when the agent selects an illegal action.</div>
 </div>
 </section>
 </li>
@@ -264,6 +326,7 @@ loadScripts(document, 'script');</script>
 <h3>repeatedSwapPenalty</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">repeatedSwapPenalty</span></div>
+<div class="block">Penalty applied when swapping back to a recently active character.</div>
 </div>
 </section>
 </li>
@@ -272,6 +335,7 @@ loadScripts(document, 'script');</script>
 <h3>idleTimePenaltyPerSecond</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">idleTimePenaltyPerSecond</span></div>
+<div class="block">Penalty per second of simulator idle time.</div>
 </div>
 </section>
 </li>
@@ -280,6 +344,7 @@ loadScripts(document, 'script');</script>
 <h3>terminalDamageScale</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">terminalDamageScale</span></div>
+<div class="block">Reward scale applied to cumulative damage at terminal step.</div>
 </div>
 </section>
 </li>
@@ -288,6 +353,25 @@ loadScripts(document, 'script');</script>
 <h3>fillEnergyOnReset</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">fillEnergyOnReset</span></div>
+<div class="block">Whether all bursts start with full energy on reset.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="enableRoleAlignmentBonus">
+<h3>enableRoleAlignmentBonus</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">enableRoleAlignmentBonus</span></div>
+<div class="block">Whether to add role-alignment shaping bonus.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="roleAlignmentBonusWeight">
+<h3>roleAlignmentBonusWeight</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">roleAlignmentBonusWeight</span></div>
+<div class="block">Weight of the role-alignment shaping bonus.</div>
 </div>
 </section>
 </li>
@@ -304,11 +388,12 @@ loadScripts(document, 'script');</script>
 <h3>EpisodeConfig</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">EpisodeConfig</span>()</div>
+<div class="block">Constructs the default episode configuration with the default party.</div>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="&lt;init&gt;(model.type.CharacterId[],double,double,double,double,double,double,double,double,boolean)">
+<section class="detail" id="&lt;init&gt;(model.type.CharacterId[],double,double,double,double,double,double,double,double,boolean,boolean,double)">
 <h3>EpisodeConfig</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">EpisodeConfig</span><wbr><span class="parameters">(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&nbsp;partyOrder,
@@ -320,7 +405,25 @@ loadScripts(document, 'script');</script>
  double&nbsp;repeatedSwapPenalty,
  double&nbsp;idleTimePenaltyPerSecond,
  double&nbsp;terminalDamageScale,
- boolean&nbsp;fillEnergyOnReset)</span></div>
+ boolean&nbsp;fillEnergyOnReset,
+ boolean&nbsp;enableRoleAlignmentBonus,
+ double&nbsp;roleAlignmentBonusWeight)</span></div>
+<div class="block">Constructs an episode configuration with explicit values.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>partyOrder</code> - ordered party slots</dd>
+<dd><code>maxEpisodeTime</code> - maximum episode duration (seconds)</dd>
+<dd><code>failedActionTimeCost</code> - time advanced on invalid action</dd>
+<dd><code>swapCooldown</code> - minimum swap interval (seconds)</dd>
+<dd><code>damageRewardScale</code> - per-step damage reward scale</dd>
+<dd><code>invalidActionPenalty</code> - penalty for invalid actions</dd>
+<dd><code>repeatedSwapPenalty</code> - penalty for repeated swaps</dd>
+<dd><code>idleTimePenaltyPerSecond</code> - penalty per idle second</dd>
+<dd><code>terminalDamageScale</code> - terminal damage reward scale</dd>
+<dd><code>fillEnergyOnReset</code> - whether to fill energy on reset</dd>
+<dd><code>enableRoleAlignmentBonus</code> - whether to apply role alignment shaping</dd>
+<dd><code>roleAlignmentBonusWeight</code> - weight of role alignment shaping</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -337,6 +440,45 @@ loadScripts(document, 'script');</script>
 <h3>withPartyOrder</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a></span>&nbsp;<span class="element-name">withPartyOrder</span><wbr><span class="parameters">(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>[]&nbsp;nextPartyOrder)</span></div>
+<div class="block">Returns a copy with the party order replaced.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>nextPartyOrder</code> - replacement party order</dd>
+<dt>戻り値:</dt>
+<dd>new EpisodeConfig identical to this one but with the supplied party order</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="withMaxEpisodeTime(double)">
+<h3>withMaxEpisodeTime</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a></span>&nbsp;<span class="element-name">withMaxEpisodeTime</span><wbr><span class="parameters">(double&nbsp;nextMaxEpisodeTime)</span></div>
+<div class="block">Returns a copy with the maximum episode time replaced.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>nextMaxEpisodeTime</code> - replacement maximum episode time in seconds</dd>
+<dt>戻り値:</dt>
+<dd>new EpisodeConfig with the updated value</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="withRoleAlignmentBonus(boolean,double)">
+<h3>withRoleAlignmentBonus</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="EpisodeConfig.html" title="mechanics.rl内のクラス">EpisodeConfig</a></span>&nbsp;<span class="element-name">withRoleAlignmentBonus</span><wbr><span class="parameters">(boolean&nbsp;nextEnableRoleAlignmentBonus,
+ double&nbsp;nextRoleAlignmentBonusWeight)</span></div>
+<div class="block">Returns a copy with role-alignment shaping reconfigured.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>nextEnableRoleAlignmentBonus</code> - enable flag</dd>
+<dd><code>nextRoleAlignmentBonusWeight</code> - weight value</dd>
+<dt>戻り値:</dt>
+<dd>new EpisodeConfig with the supplied role-alignment configuration</dd>
+</dl>
 </div>
 </section>
 </li>

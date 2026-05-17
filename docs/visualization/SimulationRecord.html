@@ -90,6 +90,10 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">SimulationRecord</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Object</a></span></div>
+<div class="block">Single combat event captured for the timeline view of the HTML report.
+
+<p>Records are produced by <a href="VisualLogger.html" title="visualization内のクラス"><code>VisualLogger</code></a> during simulation and consumed
+by <a href="ReportHtmlRenderer.html" title="visualization内のクラス"><code>ReportHtmlRenderer</code></a> when rendering the timeline cards.</div>
 </div>
 </section>
 <section class="summary">
@@ -105,28 +109,44 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
 <div class="col-second even-row-color"><code><a href="#action" class="member-name-link">action</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Action label such as the skill or normal attack name.</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#actor" class="member-name-link">actor</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Display name of the acting character (or "Swap"-style label).</div>
+</div>
 <div class="col-first even-row-color"><code>double</code></div>
 <div class="col-second even-row-color"><code><a href="#damage" class="member-name-link">damage</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Outgoing damage for the event; zero if the event is not a hit.</div>
+</div>
 <div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</code></div>
 <div class="col-second odd-row-color"><code><a href="#enemyAura" class="member-name-link">enemyAura</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Snapshot of enemy aura values keyed by <a href="../model/type/Element.html" title="model.typeの列挙クラス"><code>Element</code></a> after the action.</div>
+</div>
 <div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
 <div class="col-second even-row-color"><code><a href="#formula" class="member-name-link">formula</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Optional formula debug string used as a tooltip in the report.</div>
+</div>
 <div class="col-first odd-row-color"><code>double</code></div>
 <div class="col-second odd-row-color"><code><a href="#reactionDamage" class="member-name-link">reactionDamage</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Separately tracked reaction damage (e.g. transformative reactions).</div>
+</div>
 <div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
 <div class="col-second even-row-color"><code><a href="#reactionType" class="member-name-link">reactionType</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Reaction type name (e.g.</div>
+</div>
 <div class="col-first odd-row-color"><code>double</code></div>
 <div class="col-second odd-row-color"><code><a href="#time" class="member-name-link">time</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Simulation time of the event in seconds.</div>
+</div>
 </div>
 </section>
 </li>
@@ -145,7 +165,9 @@ loadScripts(document, 'script');</script>
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;reactionType,
  double&nbsp;reactionDamage,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;enemyAura)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Creates a record without a formula debug string.</div>
+</div>
 <div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(double,java.lang.String,java.lang.String,double,java.lang.String,double,java.util.Map,java.lang.String)" class="member-name-link">SimulationRecord</a><wbr>(double&nbsp;time,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;actor,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;action,
@@ -154,7 +176,9 @@ loadScripts(document, 'script');</script>
  double&nbsp;reactionDamage,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;enemyAura,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;formula)</code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Creates a fully populated record.</div>
+</div>
 </div>
 </section>
 </li>
@@ -181,6 +205,7 @@ loadScripts(document, 'script');</script>
 <h3>time</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">time</span></div>
+<div class="block">Simulation time of the event in seconds.</div>
 </div>
 </section>
 </li>
@@ -189,6 +214,7 @@ loadScripts(document, 'script');</script>
 <h3>actor</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">actor</span></div>
+<div class="block">Display name of the acting character (or "Swap"-style label).</div>
 </div>
 </section>
 </li>
@@ -197,6 +223,7 @@ loadScripts(document, 'script');</script>
 <h3>action</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">action</span></div>
+<div class="block">Action label such as the skill or normal attack name.</div>
 </div>
 </section>
 </li>
@@ -205,6 +232,7 @@ loadScripts(document, 'script');</script>
 <h3>damage</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">damage</span></div>
+<div class="block">Outgoing damage for the event; zero if the event is not a hit.</div>
 </div>
 </section>
 </li>
@@ -213,6 +241,7 @@ loadScripts(document, 'script');</script>
 <h3>reactionType</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">reactionType</span></div>
+<div class="block">Reaction type name (e.g. <code>"Vaporize"</code>, <code>"Overload"</code>), or <code>"None"</code>.</div>
 </div>
 </section>
 </li>
@@ -221,6 +250,7 @@ loadScripts(document, 'script');</script>
 <h3>reactionDamage</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">reactionDamage</span></div>
+<div class="block">Separately tracked reaction damage (e.g. transformative reactions).</div>
 </div>
 </section>
 </li>
@@ -229,6 +259,7 @@ loadScripts(document, 'script');</script>
 <h3>enemyAura</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</span>&nbsp;<span class="element-name">enemyAura</span></div>
+<div class="block">Snapshot of enemy aura values keyed by <a href="../model/type/Element.html" title="model.typeの列挙クラス"><code>Element</code></a> after the action.</div>
 </div>
 </section>
 </li>
@@ -237,6 +268,7 @@ loadScripts(document, 'script');</script>
 <h3>formula</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">formula</span></div>
+<div class="block">Optional formula debug string used as a tooltip in the report.</div>
 </div>
 </section>
 </li>
@@ -259,6 +291,17 @@ loadScripts(document, 'script');</script>
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;reactionType,
  double&nbsp;reactionDamage,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;enemyAura)</span></div>
+<div class="block">Creates a record without a formula debug string.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>time</code> - simulation time in seconds</dd>
+<dd><code>actor</code> - actor display name</dd>
+<dd><code>action</code> - action label</dd>
+<dd><code>damage</code> - outgoing damage (0 if none)</dd>
+<dd><code>reactionType</code> - reaction name or <code>"None"</code></dd>
+<dd><code>reactionDamage</code> - separate transformative reaction damage</dd>
+<dd><code>enemyAura</code> - enemy aura snapshot after the action</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -274,6 +317,18 @@ loadScripts(document, 'script');</script>
  double&nbsp;reactionDamage,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;enemyAura,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;formula)</span></div>
+<div class="block">Creates a fully populated record.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>time</code> - simulation time in seconds</dd>
+<dd><code>actor</code> - actor display name</dd>
+<dd><code>action</code> - action label</dd>
+<dd><code>damage</code> - outgoing damage (0 if none)</dd>
+<dd><code>reactionType</code> - reaction name or <code>"None"</code></dd>
+<dd><code>reactionDamage</code> - separate transformative reaction damage</dd>
+<dd><code>enemyAura</code> - enemy aura snapshot after the action</dd>
+<dd><code>formula</code> - optional formula debug string</dd>
+</dl>
 </div>
 </section>
 </li>

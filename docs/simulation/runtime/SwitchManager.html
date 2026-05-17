@@ -74,6 +74,8 @@ loadScripts(document, 'script');</script>
 </li>
 <li><a href="#method-detail" tabindex="0">メソッドの詳細</a>
 <ol class="toc-list">
+<li><a href="#getLastSwapTime()" tabindex="0">getLastSwapTime()</a></li>
+<li><a href="#setLastSwapTime(double)" tabindex="0">setLastSwapTime(double)</a></li>
 <li><a href="#switchCharacter(model.type.CharacterId)" tabindex="0">switchCharacter(CharacterId)</a></li>
 <li><a href="#setActiveCharacter(model.type.CharacterId)" tabindex="0">setActiveCharacter(CharacterId)</a></li>
 <li><a href="#notifyArtifactsSwitchOut(model.entity.Character)" tabindex="0">notifyArtifactsSwitchOut(Character)</a></li>
@@ -111,22 +113,34 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color"><code>private final <a href="../CombatLogSink.html" title="simulation内のインタフェース">CombatLogSink</a></code></div>
 <div class="col-second even-row-color"><code><a href="#combatLogSink" class="member-name-link">combatLogSink</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Sink used for swap timeline logging.</div>
+</div>
 <div class="col-first odd-row-color"><code>private double</code></div>
 <div class="col-second odd-row-color"><code><a href="#lastSwapTime" class="member-name-link">lastSwapTime</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Simulation time of the most recent swap.</div>
+</div>
 <div class="col-first even-row-color"><code>private final <a href="../Party.html" title="simulation内のクラス">Party</a></code></div>
 <div class="col-second even-row-color"><code><a href="#party" class="member-name-link">party</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Active party container.</div>
+</div>
 <div class="col-first odd-row-color"><code>private final <a href="../CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#sim" class="member-name-link">sim</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Owning simulator.</div>
+</div>
 <div class="col-first even-row-color"><code>private static final double</code></div>
 <div class="col-second even-row-color"><code><a href="#SWAP_COOLDOWN" class="member-name-link">SWAP_COOLDOWN</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Minimum time between consecutive swaps (seconds).</div>
+</div>
 <div class="col-first odd-row-color"><code>private static final double</code></div>
 <div class="col-second odd-row-color"><code><a href="#SWAP_DELAY" class="member-name-link">SWAP_DELAY</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Animation delay applied to each swap (seconds).</div>
+</div>
 </div>
 </section>
 </li>
@@ -158,16 +172,30 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">修飾子とタイプ</div>
 <div class="table-header col-second">メソッド</div>
 <div class="table-header col-last">説明</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#notifyArtifactsSwitchIn(model.entity.Character)" class="member-name-link">notifyArtifactsSwitchIn</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#notifyArtifactsSwitchOut(model.entity.Character)" class="member-name-link">notifyArtifactsSwitchOut</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setActiveCharacter(model.type.CharacterId)" class="member-name-link">setActiveCharacter</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLastSwapTime()" class="member-name-link">getLastSwapTime</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the simulation time of the most recent swap.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#notifyArtifactsSwitchIn(model.entity.Character)" class="member-name-link">notifyArtifactsSwitchIn</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Notifies switch-aware artifacts that the given character is entering the field.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#notifyArtifactsSwitchOut(model.entity.Character)" class="member-name-link">notifyArtifactsSwitchOut</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Notifies switch-aware artifacts that the given character is leaving the field.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setActiveCharacter(model.type.CharacterId)" class="member-name-link">setActiveCharacter</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Directly swaps the active character without callbacks or timeline cost.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setLastSwapTime(double)" class="member-name-link">setLastSwapTime</a><wbr>(double&nbsp;time)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Restores the last-swap-time to a previously captured value.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#switchCharacter(model.type.CharacterId)" class="member-name-link">switchCharacter</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id)</code></div>
@@ -196,6 +224,7 @@ loadScripts(document, 'script');</script>
 <h3>SWAP_COOLDOWN</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">SWAP_COOLDOWN</span></div>
+<div class="block">Minimum time between consecutive swaps (seconds).</div>
 <dl class="notes">
 <dt>関連項目:</dt>
 <dd>
@@ -212,6 +241,7 @@ loadScripts(document, 'script');</script>
 <h3>SWAP_DELAY</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">SWAP_DELAY</span></div>
+<div class="block">Animation delay applied to each swap (seconds).</div>
 <dl class="notes">
 <dt>関連項目:</dt>
 <dd>
@@ -228,6 +258,7 @@ loadScripts(document, 'script');</script>
 <h3>sim</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="../CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a></span>&nbsp;<span class="element-name">sim</span></div>
+<div class="block">Owning simulator.</div>
 </div>
 </section>
 </li>
@@ -236,6 +267,7 @@ loadScripts(document, 'script');</script>
 <h3>party</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="../Party.html" title="simulation内のクラス">Party</a></span>&nbsp;<span class="element-name">party</span></div>
+<div class="block">Active party container.</div>
 </div>
 </section>
 </li>
@@ -244,6 +276,7 @@ loadScripts(document, 'script');</script>
 <h3>combatLogSink</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="../CombatLogSink.html" title="simulation内のインタフェース">CombatLogSink</a></span>&nbsp;<span class="element-name">combatLogSink</span></div>
+<div class="block">Sink used for swap timeline logging.</div>
 </div>
 </section>
 </li>
@@ -252,6 +285,7 @@ loadScripts(document, 'script');</script>
 <h3>lastSwapTime</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">lastSwapTime</span></div>
+<div class="block">Simulation time of the most recent swap.</div>
 </div>
 </section>
 </li>
@@ -289,6 +323,32 @@ loadScripts(document, 'script');</script>
 <h2>メソッドの詳細</h2>
 <ul class="member-list">
 <li>
+<section class="detail" id="getLastSwapTime()">
+<h3>getLastSwapTime</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getLastSwapTime</span>()</div>
+<div class="block">Returns the simulation time of the most recent swap.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>last swap time in seconds</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setLastSwapTime(double)">
+<h3>setLastSwapTime</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setLastSwapTime</span><wbr><span class="parameters">(double&nbsp;time)</span></div>
+<div class="block">Restores the last-swap-time to a previously captured value.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>time</code> - saved swap time in seconds</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="switchCharacter(model.type.CharacterId)">
 <h3>switchCharacter</h3>
 <div class="horizontal-scroll">
@@ -296,7 +356,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Performs a standard character swap with cooldown, callbacks, and delay.</div>
 <dl class="notes">
 <dt>パラメータ:</dt>
-<dd><code>name</code> - target character name</dd>
+<dd><code>id</code> - target character id</dd>
 </dl>
 </div>
 </section>
@@ -309,7 +369,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Directly swaps the active character without callbacks or timeline cost.</div>
 <dl class="notes">
 <dt>パラメータ:</dt>
-<dd><code>name</code> - target character name</dd>
+<dd><code>id</code> - target character id</dd>
 </dl>
 </div>
 </section>
@@ -319,6 +379,11 @@ loadScripts(document, 'script');</script>
 <h3>notifyArtifactsSwitchOut</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">notifyArtifactsSwitchOut</span><wbr><span class="parameters">(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character)</span></div>
+<div class="block">Notifies switch-aware artifacts that the given character is leaving the field.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>character</code> - outgoing active character</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -327,6 +392,11 @@ loadScripts(document, 'script');</script>
 <h3>notifyArtifactsSwitchIn</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">notifyArtifactsSwitchIn</span><wbr><span class="parameters">(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character)</span></div>
+<div class="block">Notifies switch-aware artifacts that the given character is entering the field.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>character</code> - incoming active character</dd>
+</dl>
 </div>
 </section>
 </li>

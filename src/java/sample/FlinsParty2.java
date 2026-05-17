@@ -15,7 +15,16 @@ import mechanics.element.ResonanceManager;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
 
+/**
+ * Variant of {@link FlinsParty} using a different weapon set and a slightly
+ * different scripted rotation (two cycles, three burst windows each).
+ */
 public class FlinsParty2 {
+    /**
+     * Application entry point.
+     *
+     * @param args command-line arguments (unused)
+     */
     public static void main(String[] args) {
         // Run main logic in try-catch to ensure reports are generated even if runtime
         // errors occur

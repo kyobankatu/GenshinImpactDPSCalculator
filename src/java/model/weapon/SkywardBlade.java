@@ -8,7 +8,13 @@ import model.type.WeaponType;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
 
+/**
+ * Skyward Blade sword with a burst-triggered attack-speed buff and proc damage.
+ */
 public class SkywardBlade extends Weapon implements ActionTriggeredWeaponEffect {
+    /**
+     * Constructs Skyward Blade with Lv 90 base stats.
+     */
     public SkywardBlade() {
         super("Skyward Blade", new StatsContainer());
         StatsContainer s = this.getStats();
@@ -21,6 +27,13 @@ public class SkywardBlade extends Weapon implements ActionTriggeredWeaponEffect 
     // 20% ATK DMG at R1
     private double procMotionValue = 0.20;
 
+    /**
+     * Applies the weapon's constant CRIT Rate bonus and its temporary
+     * post-burst attack speed buff when active.
+     *
+     * @param stats the stats container to mutate in-place
+     * @param currentTime simulation time in seconds
+     */
     @Override
     public void applyPassive(StatsContainer stats, double currentTime) {
         // Sky-Piercing Fang
@@ -33,6 +46,14 @@ public class SkywardBlade extends Weapon implements ActionTriggeredWeaponEffect 
         }
     }
 
+    /**
+     * Activates the post-burst buff window and triggers the additional physical
+     * hit on normal or charged actions during that window.
+     *
+     * @param user the character performing the action
+     * @param request the requested character action
+     * @param sim the active combat simulator
+     */
     @Override
     public void onAction(model.entity.Character user, CharacterActionRequest request, simulation.CombatSimulator sim) {
         // Trigger on Burst

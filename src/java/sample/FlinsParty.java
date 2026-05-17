@@ -15,7 +15,19 @@ import mechanics.element.ResonanceManager;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
 
+/**
+ * Sample entry point for the custom Flins / Ineffa / Columbina / Sucrose party.
+ *
+ * <p>Optimizes artifacts via {@link OptimizerPipeline}, executes a scripted
+ * three-cycle rotation, and writes both a text report and an interactive HTML
+ * report under {@code output/}.
+ */
 public class FlinsParty {
+    /**
+     * Application entry point.
+     *
+     * @param args command-line arguments (unused)
+     */
     public static void main(String[] args) {
         // Run main logic in try-catch to ensure reports are generated even if runtime
         // errors occur
@@ -74,6 +86,15 @@ public class FlinsParty {
 
     // --- Helper Methods ---
 
+    /**
+     * Creates and configures a fresh {@link CombatSimulator} for one optimization
+     * or final-execution pass.
+     *
+     * @param erTargets        per-character ER targets (may be {@code null})
+     * @param partyManualRolls per-character manual artifact roll overrides
+     *                         (may be {@code null})
+     * @return a configured simulator with party, enemy, and moonsign set up
+     */
     private static CombatSimulator createSimulator(
             java.util.Map<String, Double> erTargets,
             java.util.Map<String, java.util.Map<model.type.StatType, Integer>> partyManualRolls) {
@@ -87,6 +108,11 @@ public class FlinsParty {
         return s;
     }
 
+    /**
+     * Runs the scripted Flins-party rotation against the given simulator.
+     *
+     * @param sim simulator to act upon
+     */
     private static void executeRotation(CombatSimulator sim) {
         // Rotation:
         // Ineffa Skill -> Burst
@@ -187,18 +213,44 @@ public class FlinsParty {
         }
     }
 
+    /**
+     * Issues a normal attack action for the named character.
+     *
+     * @param sim           simulator
+     * @param characterName character display name
+     */
     private static void normal(CombatSimulator sim, String characterName) {
         sim.performAction(characterName, CharacterActionRequest.of(CharacterActionKey.NORMAL));
     }
 
+    /**
+     * Issues an elemental skill action for the named character.
+     *
+     * @param sim           simulator
+     * @param characterName character display name
+     */
     private static void skill(CombatSimulator sim, String characterName) {
         sim.performAction(characterName, CharacterActionRequest.of(CharacterActionKey.SKILL));
     }
 
+    /**
+     * Issues an elemental burst action for the named character.
+     *
+     * @param sim           simulator
+     * @param characterName character display name
+     */
     private static void burst(CombatSimulator sim, String characterName) {
         sim.performAction(characterName, CharacterActionRequest.of(CharacterActionKey.BURST));
     }
 
+    /**
+     * Builds and registers all four party members, applying ER and roll
+     * overrides and elemental resonances.
+     *
+     * @param sim              simulator to populate
+     * @param erTargets        per-character minimum ER targets
+     * @param partyManualRolls per-character manual artifact substat roll overrides
+     */
     private static void setupParty(CombatSimulator sim, java.util.Map<String, Double> erTargets,
             java.util.Map<String, java.util.Map<model.type.StatType, Integer>> partyManualRolls) {
 

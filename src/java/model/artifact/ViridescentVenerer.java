@@ -7,8 +7,14 @@ import mechanics.buff.BuffId;
 import simulation.CombatSimulator;
 import model.entity.ReactionAwareArtifact;
 
+/**
+ * Viridescent Venerer artifact set with Swirl damage and elemental RES shred.
+ */
 public class ViridescentVenerer extends model.entity.ArtifactSet implements ReactionAwareArtifact {
 
+    /**
+     * Constructs Viridescent Venerer with its 2-piece and 4-piece stat bonuses.
+     */
     public ViridescentVenerer() {
         super("Viridescent Venerer", new StatsContainer());
         // 2-Piece Bonus: Anemo DMG +15%
@@ -17,6 +23,12 @@ public class ViridescentVenerer extends model.entity.ArtifactSet implements Reac
         this.getStats().add(StatType.SWIRL_DMG_BONUS, 0.60);
     }
 
+    /**
+     * Constructs Viridescent Venerer with the supplied main/sub stats plus its
+     * 2-piece and 4-piece stat bonuses.
+     *
+     * @param stats artifact main and sub stats
+     */
     public ViridescentVenerer(StatsContainer stats) {
         super("Viridescent Venerer", stats);
         this.getStats().add(StatType.ANEMO_DMG_BONUS, 0.15);
@@ -24,6 +36,15 @@ public class ViridescentVenerer extends model.entity.ArtifactSet implements Reac
         this.getStats().add(StatType.SWIRL_DMG_BONUS, 0.60);
     }
 
+    /**
+     * Applies the 4-piece elemental resistance shred after an on-field Swirl
+     * reaction.
+     *
+     * @param sim the active combat simulator
+     * @param result the reaction result that was produced
+     * @param triggerCh the character who triggered the reaction
+     * @param owner the character equipping the set
+     */
     @Override
     public void onReaction(CombatSimulator sim, mechanics.reaction.ReactionResult result,
             model.entity.Character triggerCh, model.entity.Character owner) {

@@ -61,13 +61,14 @@ loadScripts(document, 'script');</script>
 <li><a href="#field-detail" tabindex="0">フィールド詳細</a>
 <ol class="toc-list">
 <li><a href="#observations" tabindex="0">observations</a></li>
+<li><a href="#privilegedObservations" tabindex="0">privilegedObservations</a></li>
 <li><a href="#actionMasks" tabindex="0">actionMasks</a></li>
 <li><a href="#partyIds" tabindex="0">partyIds</a></li>
 </ol>
 </li>
 <li><a href="#constructor-detail" tabindex="0">コンストラクタの詳細</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(double%5B%5D%5B%5D,double%5B%5D%5B%5D,int%5B%5D)" tabindex="0">RunnerResetResult(double[][], double[][], int[])</a></li>
+<li><a href="#%3Cinit%3E(double%5B%5D%5B%5D,double%5B%5D%5B%5D,double%5B%5D%5B%5D,int%5B%5D)" tabindex="0">RunnerResetResult(double[][], double[][], double[][], int[])</a></li>
 </ol>
 </li>
 </ol>
@@ -112,6 +113,9 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color"><code>final int[]</code></div>
 <div class="col-second even-row-color"><code><a href="#partyIds" class="member-name-link">partyIds</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>final double[][]</code></div>
+<div class="col-second odd-row-color"><code><a href="#privilegedObservations" class="member-name-link">privilegedObservations</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -123,10 +127,13 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">コンストラクタ</div>
 <div class="table-header col-last">説明</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(double%5B%5D%5B%5D,double%5B%5D%5B%5D,int%5B%5D)" class="member-name-link">RunnerResetResult</a><wbr>(double[][]&nbsp;observations,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(double%5B%5D%5B%5D,double%5B%5D%5B%5D,double%5B%5D%5B%5D,int%5B%5D)" class="member-name-link">RunnerResetResult</a><wbr>(double[][]&nbsp;observations,
+ double[][]&nbsp;privilegedObservations,
  double[][]&nbsp;actionMasks,
  int[]&nbsp;partyIds)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Creates a batched reset result.</div>
+</div>
 </div>
 </section>
 </li>
@@ -157,6 +164,14 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="privilegedObservations">
+<h3>privilegedObservations</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double[][]</span>&nbsp;<span class="element-name">privilegedObservations</span></div>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="actionMasks">
 <h3>actionMasks</h3>
 <div class="horizontal-scroll">
@@ -181,12 +196,21 @@ loadScripts(document, 'script');</script>
 <h2>コンストラクタの詳細</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(double[][],double[][],int[])">
+<section class="detail" id="&lt;init&gt;(double[][],double[][],double[][],int[])">
 <h3>RunnerResetResult</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">RunnerResetResult</span><wbr><span class="parameters">(double[][]&nbsp;observations,
+ double[][]&nbsp;privilegedObservations,
  double[][]&nbsp;actionMasks,
  int[]&nbsp;partyIds)</span></div>
+<div class="block">Creates a batched reset result.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>observations</code> - encoded observations for each environment</dd>
+<dd><code>privilegedObservations</code> - privileged observations for each environment</dd>
+<dd><code>actionMasks</code> - valid-action masks for each environment</dd>
+<dd><code>partyIds</code> - selected party ids for each environment</dd>
+</dl>
 </div>
 </section>
 </li>

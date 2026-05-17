@@ -53,16 +53,37 @@ public class BattleEnvironment {
     private static final LongAdder RESET_CALLS = new LongAdder();
     private static final LongAdder RESET_NANOS = new LongAdder();
 
+    /**
+     * Constructs a single-party environment with default helper components.
+     *
+     * @param simulatorFactory factory supplying fresh combat simulators
+     * @param config episode configuration
+     */
     public BattleEnvironment(Supplier<CombatSimulator> simulatorFactory, EpisodeConfig config) {
         this(simulatorFactory, config, new ActionSpace(), new ObservationEncoder(), new PrivilegedStateEncoder(),
                 new RewardFunction());
     }
 
+    /**
+     * Constructs an environment driven by the supplied episode factory with default helpers.
+     *
+     * @param episodeFactory factory producing per-episode simulator and config
+     */
     public BattleEnvironment(RLEpisodeFactory episodeFactory) {
         this(episodeFactory, new ActionSpace(), new ObservationEncoder(), new PrivilegedStateEncoder(),
                 new RewardFunction());
     }
 
+    /**
+     * Constructs a single-party environment with caller-supplied helpers.
+     *
+     * @param simulatorFactory factory supplying fresh combat simulators
+     * @param config episode configuration
+     * @param actionSpace action space implementation
+     * @param observationEncoder observation encoder
+     * @param privilegedStateEncoder privileged-state encoder
+     * @param rewardFunction reward function
+     */
     public BattleEnvironment(
             Supplier<CombatSimulator> simulatorFactory,
             EpisodeConfig config,
@@ -74,6 +95,15 @@ public class BattleEnvironment {
                 actionSpace, observationEncoder, privilegedStateEncoder, rewardFunction);
     }
 
+    /**
+     * Constructs an environment with explicit factory and helper components.
+     *
+     * @param episodeFactory factory producing per-episode simulator and config
+     * @param actionSpace action space implementation
+     * @param observationEncoder observation encoder
+     * @param privilegedStateEncoder privileged-state encoder
+     * @param rewardFunction reward function
+     */
     public BattleEnvironment(
             RLEpisodeFactory episodeFactory,
             ActionSpace actionSpace,
@@ -88,10 +118,23 @@ public class BattleEnvironment {
         this.roleAlignmentCalculator = new RoleAlignmentCalculator();
     }
 
+    /**
+     * Resets the environment and starts a new episode.
+     *
+     * @param generateReport when true, enables logging and writes an HTML report on termination
+     * @return reset result containing initial observation, privileged observation, mask and party id
+     */
     public ResetResult reset(boolean generateReport) {
         return reset(generateReport, -1);
     }
 
+    /**
+     * Resets the environment, optionally requesting a specific party id from the factory.
+     *
+     * @param generateReport when true, enables logging and writes an HTML report on termination
+     * @param preferredPartyId desired party id, or -1 to let the factory choose
+     * @return reset result containing initial observation, privileged observation, mask and party id
+     */
     public ResetResult reset(boolean generateReport, int preferredPartyId) {
         long start = System.nanoTime();
         RLEpisodeFactory.EpisodeContext episode = episodeFactory.createEpisode(preferredPartyId);
@@ -137,6 +180,12 @@ public class BattleEnvironment {
         return new ResetResult(observationBuffer, privilegedObservationBuffer, actionMaskBuffer, currentPartyId);
     }
 
+    /**
+     * Executes one environment step with the chosen action id.
+     *
+     * @param actionId discrete action id selected by the policy
+     * @return action result with next observation, reward, done flag and bookkeeping
+     */
     public ActionResult step(int actionId) {
         ensureReset();
         long stepStart = System.nanoTime();
@@ -259,7 +308,7 @@ public class BattleEnvironment {
      * environment state is undefined; the caller must reset or restore before using it again.
      *
      * @param snap        simulator state to branch from
-     * @param snapLastSwapTime lastSwapTime captured at snapshot time
+     * @param branchState RL-side state snapshot captured at branch time
      * @param firstAction action ID to execute as the first step of each branch (-1 → random)
      * @param K           number of branches
      * @param H           horizon (max steps per branch, including firstAction)
@@ -307,7 +356,7 @@ public class BattleEnvironment {
      * from comparing against the full-horizon critic value.
      *
      * @param snap            snapshot of the simulator state to branch from
-     * @param snapLastSwapTime last-swap time captured with the snapshot
+     * @param branchState     RL-side state snapshot captured with the simulator snapshot
      * @param K               number of independent branches per action
      * @param H               horizon steps per branch
      * @param gamma           discount factor
@@ -337,6 +386,12 @@ public class BattleEnvironment {
         return qValues;
     }
 
+    /**
+     * Restores RL-side state previously captured by {@code saveBranchState}.
+     *
+     * @param branchState branch state snapshot; must not be null
+     * @throws IllegalArgumentException if branchState is null
+     */
     public void restoreBranchState(BranchStateSnapshot branchState) {
         if (branchState == null) {
             throw new IllegalArgumentException("branchState must not be null");

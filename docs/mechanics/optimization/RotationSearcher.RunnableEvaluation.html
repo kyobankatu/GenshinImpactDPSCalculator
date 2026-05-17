@@ -158,7 +158,9 @@ damage accumulated.</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isBurstActive(model.entity.Character,double)" class="member-name-link">isBurstActive</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character,
  double&nbsp;currentTime)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns whether the character's burst form (e.g.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#processAction(model.entity.Character,mechanics.optimization.ProfileAction,simulation.CombatSimulator,double)" class="member-name-link">processAction</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;active,
  <a href="ProfileAction.html" title="mechanics.optimizationの列挙クラス">ProfileAction</a>&nbsp;command,
@@ -295,6 +297,16 @@ action advances the clock.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isBurstActive</span><wbr><span class="parameters">(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character,
  double&nbsp;currentTime)</span></div>
+<div class="block">Returns whether the character's burst form (e.g. Raiden Musou Isshin) is
+still active at the given simulation time.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>character</code> - character to test</dd>
+<dd><code>currentTime</code> - current simulation time in seconds</dd>
+<dt>戻り値:</dt>
+<dd><code>true</code> if the character implements <a href="../../model/entity/FormStateProvider.html" title="model.entity内のインタフェース"><code>FormStateProvider</code></a>
+        and reports its form as active</dd>
+</dl>
 </div>
 </section>
 </li>

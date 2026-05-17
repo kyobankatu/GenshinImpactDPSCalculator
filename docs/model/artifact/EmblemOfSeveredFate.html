@@ -83,6 +83,8 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="type-signature"><span class="modifiers">public class </span><span class="element-name type-name-label">EmblemOfSeveredFate</span>
 <span class="extends-implements">extends <a href="../entity/ArtifactSet.html" title="model.entity内のクラス">ArtifactSet</a></span></div>
+<div class="block">Emblem of Severed Fate artifact set with Energy Recharge scaling burst
+damage.</div>
 </div>
 </section>
 <section class="summary">
@@ -96,7 +98,10 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">コンストラクタ</div>
 <div class="table-header col-last">説明</div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(model.stats.StatsContainer)" class="member-name-link">EmblemOfSeveredFate</a><wbr>(<a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;mainSubStats)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Constructs Emblem of Severed Fate with the supplied main/sub stats plus
+the 2-piece Energy Recharge bonus.</div>
+</div>
 </div>
 </section>
 </li>
@@ -114,8 +119,8 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyPassive(model.stats.StatsContainer)" class="member-name-link">applyPassive</a><wbr>(<a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;totalStats)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Applies the artifact set's dynamic passive bonus to the provided stats
-container.</div>
+<div class="block">Applies the 4-piece burst damage bonus based on total Energy Recharge,
+capped at 75%.</div>
 </div>
 </div>
 </div>
@@ -142,6 +147,12 @@ container.</div>
 <h3>EmblemOfSeveredFate</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">EmblemOfSeveredFate</span><wbr><span class="parameters">(<a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;mainSubStats)</span></div>
+<div class="block">Constructs Emblem of Severed Fate with the supplied main/sub stats plus
+the 2-piece Energy Recharge bonus.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>mainSubStats</code> - artifact main and sub stats</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -158,16 +169,13 @@ container.</div>
 <h3>applyPassive</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">applyPassive</span><wbr><span class="parameters">(<a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;totalStats)</span></div>
-<div class="block"><span class="description-from-type-label">クラスからコピーされた説明:&nbsp;<code><a href="../entity/ArtifactSet.html#applyPassive(model.stats.StatsContainer)">ArtifactSet</a></code></span></div>
-<div class="block">Applies the artifact set's dynamic passive bonus to the provided stats
-container. Called during stat compilation after flat stats have been
-merged. Example: Emblem 4pc converts ER% into Burst DMG%.
-Default implementation is a no-op.</div>
+<div class="block">Applies the 4-piece burst damage bonus based on total Energy Recharge,
+capped at 75%.</div>
 <dl class="notes">
 <dt>オーバーライド:</dt>
 <dd><code><a href="../entity/ArtifactSet.html#applyPassive(model.stats.StatsContainer)">applyPassive</a></code>&nbsp;クラス内&nbsp;<code><a href="../entity/ArtifactSet.html" title="model.entity内のクラス">ArtifactSet</a></code></dd>
 <dt>パラメータ:</dt>
-<dd><code>totalStats</code> - the aggregated stats container to mutate in-place</dd>
+<dd><code>totalStats</code> - the stats container to mutate in-place</dd>
 </dl>
 </div>
 </section>

@@ -60,6 +60,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#field-detail" tabindex="0">フィールド詳細</a>
 <ol class="toc-list">
 <li><a href="#observations" tabindex="0">observations</a></li>
+<li><a href="#privilegedObservations" tabindex="0">privilegedObservations</a></li>
 <li><a href="#actionMasks" tabindex="0">actionMasks</a></li>
 <li><a href="#rewards" tabindex="0">rewards</a></li>
 <li><a href="#dones" tabindex="0">dones</a></li>
@@ -72,11 +73,19 @@ loadScripts(document, 'script');</script>
 <li><a href="#liveSteps" tabindex="0">liveSteps</a></li>
 <li><a href="#partyIds" tabindex="0">partyIds</a></li>
 <li><a href="#episodePartyIds" tabindex="0">episodePartyIds</a></li>
+<li><a href="#episodeRoleAlignmentScores" tabindex="0">episodeRoleAlignmentScores</a></li>
+<li><a href="#episodeCarryAlignmentScores" tabindex="0">episodeCarryAlignmentScores</a></li>
+<li><a href="#episodeOffFieldAlignmentScores" tabindex="0">episodeOffFieldAlignmentScores</a></li>
+<li><a href="#episodeEntryAlignmentScores" tabindex="0">episodeEntryAlignmentScores</a></li>
+<li><a href="#episodeStayAlignmentScores" tabindex="0">episodeStayAlignmentScores</a></li>
+<li><a href="#episodeExpectedRoleVectors" tabindex="0">episodeExpectedRoleVectors</a></li>
+<li><a href="#episodeRealizedRoleVectors" tabindex="0">episodeRealizedRoleVectors</a></li>
+<li><a href="#vineSnapshotIds" tabindex="0">vineSnapshotIds</a></li>
 </ol>
 </li>
 <li><a href="#constructor-detail" tabindex="0">コンストラクタの詳細</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(double%5B%5D%5B%5D,double%5B%5D%5B%5D,double%5B%5D,boolean%5B%5D,boolean%5B%5D,double%5B%5D,double%5B%5D,double%5B%5D,double%5B%5D,int%5B%5D,int%5B%5D,int%5B%5D,int%5B%5D)" tabindex="0">RunnerStepResult(double[][], double[][], double[], boolean[], boolean[], double[], double[], double[], double[], int[], int[], int[], int[])</a></li>
+<li><a href="#%3Cinit%3E(double%5B%5D%5B%5D,double%5B%5D%5B%5D,double%5B%5D%5B%5D,double%5B%5D,boolean%5B%5D,boolean%5B%5D,double%5B%5D,double%5B%5D,double%5B%5D,double%5B%5D,int%5B%5D,int%5B%5D,int%5B%5D,int%5B%5D,double%5B%5D,double%5B%5D,double%5B%5D,double%5B%5D,double%5B%5D,double%5B%5D%5B%5D,double%5B%5D%5B%5D,int%5B%5D)" tabindex="0">RunnerStepResult(double[][], double[][], double[][], double[], boolean[], boolean[], double[], double[], double[], double[], int[], int[], int[], int[], double[], double[], double[], double[], double[], double[][], double[][], int[])</a></li>
 </ol>
 </li>
 </ol>
@@ -118,25 +127,49 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color"><code><a href="#dones" class="member-name-link">dones</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code>final double[]</code></div>
-<div class="col-second odd-row-color"><code><a href="#episodeDamages" class="member-name-link">episodeDamages</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#episodeCarryAlignmentScores" class="member-name-link">episodeCarryAlignmentScores</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>final double[]</code></div>
+<div class="col-second even-row-color"><code><a href="#episodeDamages" class="member-name-link">episodeDamages</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>final double[]</code></div>
+<div class="col-second odd-row-color"><code><a href="#episodeEntryAlignmentScores" class="member-name-link">episodeEntryAlignmentScores</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>final double[][]</code></div>
+<div class="col-second even-row-color"><code><a href="#episodeExpectedRoleVectors" class="member-name-link">episodeExpectedRoleVectors</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>final double[]</code></div>
+<div class="col-second odd-row-color"><code><a href="#episodeOffFieldAlignmentScores" class="member-name-link">episodeOffFieldAlignmentScores</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code>final int[]</code></div>
 <div class="col-second even-row-color"><code><a href="#episodePartyIds" class="member-name-link">episodePartyIds</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>final double[][]</code></div>
+<div class="col-second odd-row-color"><code><a href="#episodeRealizedRoleVectors" class="member-name-link">episodeRealizedRoleVectors</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>final double[]</code></div>
+<div class="col-second even-row-color"><code><a href="#episodeRewards" class="member-name-link">episodeRewards</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code>final double[]</code></div>
-<div class="col-second odd-row-color"><code><a href="#episodeRewards" class="member-name-link">episodeRewards</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#episodeRoleAlignmentScores" class="member-name-link">episodeRoleAlignmentScores</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>final double[]</code></div>
+<div class="col-second even-row-color"><code><a href="#episodeStayAlignmentScores" class="member-name-link">episodeStayAlignmentScores</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>final int[]</code></div>
+<div class="col-second odd-row-color"><code><a href="#episodeSteps" class="member-name-link">episodeSteps</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code>final int[]</code></div>
-<div class="col-second even-row-color"><code><a href="#episodeSteps" class="member-name-link">episodeSteps</a></code></div>
+<div class="col-second even-row-color"><code><a href="#liveSteps" class="member-name-link">liveSteps</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>final int[]</code></div>
-<div class="col-second odd-row-color"><code><a href="#liveSteps" class="member-name-link">liveSteps</a></code></div>
+<div class="col-first odd-row-color"><code>final double[][]</code></div>
+<div class="col-second odd-row-color"><code><a href="#observations" class="member-name-link">observations</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>final double[][]</code></div>
-<div class="col-second even-row-color"><code><a href="#observations" class="member-name-link">observations</a></code></div>
+<div class="col-first even-row-color"><code>final int[]</code></div>
+<div class="col-second even-row-color"><code><a href="#partyIds" class="member-name-link">partyIds</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>final int[]</code></div>
-<div class="col-second odd-row-color"><code><a href="#partyIds" class="member-name-link">partyIds</a></code></div>
+<div class="col-first odd-row-color"><code>final double[][]</code></div>
+<div class="col-second odd-row-color"><code><a href="#privilegedObservations" class="member-name-link">privilegedObservations</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code>final double[]</code></div>
 <div class="col-second even-row-color"><code><a href="#rewards" class="member-name-link">rewards</a></code></div>
@@ -147,6 +180,11 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color"><code>final boolean[]</code></div>
 <div class="col-second even-row-color"><code><a href="#validActions" class="member-name-link">validActions</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>final int[]</code></div>
+<div class="col-second odd-row-color"><code><a href="#vineSnapshotIds" class="member-name-link">vineSnapshotIds</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Vine snapshot IDs saved before SKILL/BURST/SWAP actions, one per env.</div>
+</div>
 </div>
 </section>
 </li>
@@ -158,7 +196,8 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">コンストラクタ</div>
 <div class="table-header col-last">説明</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(double%5B%5D%5B%5D,double%5B%5D%5B%5D,double%5B%5D,boolean%5B%5D,boolean%5B%5D,double%5B%5D,double%5B%5D,double%5B%5D,double%5B%5D,int%5B%5D,int%5B%5D,int%5B%5D,int%5B%5D)" class="member-name-link">RunnerStepResult</a><wbr>(double[][]&nbsp;observations,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(double%5B%5D%5B%5D,double%5B%5D%5B%5D,double%5B%5D%5B%5D,double%5B%5D,boolean%5B%5D,boolean%5B%5D,double%5B%5D,double%5B%5D,double%5B%5D,double%5B%5D,int%5B%5D,int%5B%5D,int%5B%5D,int%5B%5D,double%5B%5D,double%5B%5D,double%5B%5D,double%5B%5D,double%5B%5D,double%5B%5D%5B%5D,double%5B%5D%5B%5D,int%5B%5D)" class="member-name-link">RunnerStepResult</a><wbr>(double[][]&nbsp;observations,
+ double[][]&nbsp;privilegedObservations,
  double[][]&nbsp;actionMasks,
  double[]&nbsp;rewards,
  boolean[]&nbsp;dones,
@@ -170,7 +209,15 @@ loadScripts(document, 'script');</script>
  int[]&nbsp;episodeSteps,
  int[]&nbsp;liveSteps,
  int[]&nbsp;partyIds,
- int[]&nbsp;episodePartyIds)</code></div>
+ int[]&nbsp;episodePartyIds,
+ double[]&nbsp;episodeRoleAlignmentScores,
+ double[]&nbsp;episodeCarryAlignmentScores,
+ double[]&nbsp;episodeOffFieldAlignmentScores,
+ double[]&nbsp;episodeEntryAlignmentScores,
+ double[]&nbsp;episodeStayAlignmentScores,
+ double[][]&nbsp;episodeExpectedRoleVectors,
+ double[][]&nbsp;episodeRealizedRoleVectors,
+ int[]&nbsp;vineSnapshotIds)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
@@ -198,6 +245,14 @@ loadScripts(document, 'script');</script>
 <h3>observations</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double[][]</span>&nbsp;<span class="element-name">observations</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="privilegedObservations">
+<h3>privilegedObservations</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double[][]</span>&nbsp;<span class="element-name">privilegedObservations</span></div>
 </div>
 </section>
 </li>
@@ -297,6 +352,72 @@ loadScripts(document, 'script');</script>
 </div>
 </section>
 </li>
+<li>
+<section class="detail" id="episodeRoleAlignmentScores">
+<h3>episodeRoleAlignmentScores</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">episodeRoleAlignmentScores</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="episodeCarryAlignmentScores">
+<h3>episodeCarryAlignmentScores</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">episodeCarryAlignmentScores</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="episodeOffFieldAlignmentScores">
+<h3>episodeOffFieldAlignmentScores</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">episodeOffFieldAlignmentScores</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="episodeEntryAlignmentScores">
+<h3>episodeEntryAlignmentScores</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">episodeEntryAlignmentScores</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="episodeStayAlignmentScores">
+<h3>episodeStayAlignmentScores</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double[]</span>&nbsp;<span class="element-name">episodeStayAlignmentScores</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="episodeExpectedRoleVectors">
+<h3>episodeExpectedRoleVectors</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double[][]</span>&nbsp;<span class="element-name">episodeExpectedRoleVectors</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="episodeRealizedRoleVectors">
+<h3>episodeRealizedRoleVectors</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double[][]</span>&nbsp;<span class="element-name">episodeRealizedRoleVectors</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="vineSnapshotIds">
+<h3>vineSnapshotIds</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">int[]</span>&nbsp;<span class="element-name">vineSnapshotIds</span></div>
+<div class="block">Vine snapshot IDs saved before SKILL/BURST/SWAP actions, one per env.
+Value is -1 when no vine snapshot was saved for that env in this step.</div>
+</div>
+</section>
+</li>
 </ul>
 </section>
 </li>
@@ -306,10 +427,11 @@ loadScripts(document, 'script');</script>
 <h2>コンストラクタの詳細</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(double[][],double[][],double[],boolean[],boolean[],double[],double[],double[],double[],int[],int[],int[],int[])">
+<section class="detail" id="&lt;init&gt;(double[][],double[][],double[][],double[],boolean[],boolean[],double[],double[],double[],double[],int[],int[],int[],int[],double[],double[],double[],double[],double[],double[][],double[][],int[])">
 <h3>RunnerStepResult</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">RunnerStepResult</span><wbr><span class="parameters">(double[][]&nbsp;observations,
+ double[][]&nbsp;privilegedObservations,
  double[][]&nbsp;actionMasks,
  double[]&nbsp;rewards,
  boolean[]&nbsp;dones,
@@ -321,7 +443,15 @@ loadScripts(document, 'script');</script>
  int[]&nbsp;episodeSteps,
  int[]&nbsp;liveSteps,
  int[]&nbsp;partyIds,
- int[]&nbsp;episodePartyIds)</span></div>
+ int[]&nbsp;episodePartyIds,
+ double[]&nbsp;episodeRoleAlignmentScores,
+ double[]&nbsp;episodeCarryAlignmentScores,
+ double[]&nbsp;episodeOffFieldAlignmentScores,
+ double[]&nbsp;episodeEntryAlignmentScores,
+ double[]&nbsp;episodeStayAlignmentScores,
+ double[][]&nbsp;episodeExpectedRoleVectors,
+ double[][]&nbsp;episodeRealizedRoleVectors,
+ int[]&nbsp;vineSnapshotIds)</span></div>
 </div>
 </section>
 </li>

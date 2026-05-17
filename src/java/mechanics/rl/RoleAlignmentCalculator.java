@@ -13,14 +13,26 @@ public class RoleAlignmentCalculator {
 
     private final CapabilityProfileStore profileStore;
 
+    /** Constructs a calculator backed by the default JSON profile store. */
     public RoleAlignmentCalculator() {
         this(new CapabilityProfileStore(DEFAULT_PROFILES_PATH));
     }
 
+    /**
+     * Constructs a calculator backed by the given profile store.
+     *
+     * @param profileStore capability profile store (null falls back to an empty store)
+     */
     public RoleAlignmentCalculator(CapabilityProfileStore profileStore) {
         this.profileStore = profileStore != null ? profileStore : CapabilityProfileStore.empty();
     }
 
+    /**
+     * Builds the expected (prior) role share vector for the given party.
+     *
+     * @param partyOrder ordered party slots
+     * @return flattened expected role vector of length {@code EpisodeRoleSummary.VECTOR_SIZE}
+     */
     public double[] buildExpectedRoleVector(CharacterId[] partyOrder) {
         double[] onFieldBase = new double[ObservationEncoder.NUM_CHARS];
         double[] damageBase = new double[ObservationEncoder.NUM_CHARS];
@@ -74,6 +86,19 @@ public class RoleAlignmentCalculator {
         return expected;
     }
 
+    /**
+     * Produces an episode role summary comparing realized usage against the prior vector.
+     *
+     * @param partyOrder ordered party slots
+     * @param simulator simulator at episode end (used for damage totals)
+     * @param slotOnFieldTime cumulative on-field time per slot
+     * @param offFieldDamageBySlot off-field damage attributed to each slot
+     * @param swapInCounts number of swap-in events per slot
+     * @param stintTotalSecondsBySlot total stint seconds per slot
+     * @param stintCountsBySlot number of stints per slot
+     * @param episodeDurationSeconds total episode duration
+     * @return populated EpisodeRoleSummary
+     */
     public EpisodeRoleSummary summarize(
             CharacterId[] partyOrder,
             CombatSimulator simulator,

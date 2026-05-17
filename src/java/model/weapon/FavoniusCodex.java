@@ -10,7 +10,13 @@ import mechanics.energy.EnergyManager;
 import mechanics.energy.ParticleType;
 import model.type.WeaponType;
 
+/**
+ * Favonius Codex catalyst with a CRIT-triggered particle generation passive.
+ */
 public class FavoniusCodex extends Weapon implements DamageTriggeredWeaponEffect {
+    /**
+     * Constructs Favonius Codex with Lv 90 base stats.
+     */
     public FavoniusCodex() {
         super("Favonius Codex", new StatsContainer());
         StatsContainer s = this.getStats();
@@ -21,6 +27,15 @@ public class FavoniusCodex extends Weapon implements DamageTriggeredWeaponEffect
 
     private double lastProcTime = -10.0; // Ready immediately
 
+    /**
+     * Attempts to trigger Windfall on a damage event and generate neutral
+     * particles when the proc succeeds.
+     *
+     * @param user the character who dealt the damage
+     * @param action the triggering attack action
+     * @param currentTime simulation time in seconds at the damage event
+     * @param sim the active combat simulator
+     */
     @Override
     public void onDamage(Character user, AttackAction action, double currentTime, simulation.CombatSimulator sim) {
         // Windfall Passive: R5

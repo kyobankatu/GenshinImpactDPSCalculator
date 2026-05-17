@@ -20,6 +20,12 @@ import java.util.Map;
  * <p>Run via: {@code ./gradlew ProfileCapabilities}
  */
 public class ProfileCharacterCapabilities {
+    /**
+     * Profiles one or more registered RL parties and writes the merged capability JSON.
+     *
+     * @param args command-line arguments in the order output path and party selection
+     * @throws Exception if profile generation or writing fails
+     */
     public static void main(String[] args) throws Exception {
         String outputPath = args.length > 0 ? args[0] : "config/capability_profiles/profiles.json";
         String selection = args.length > 1 ? args[1] : RLPartyRegistry.ALL_PARTIES_SELECTION;

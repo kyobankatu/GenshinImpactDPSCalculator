@@ -11,7 +11,14 @@ import mechanics.buff.Buff;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Wandering Evenstar catalyst with an Elemental Mastery to ATK conversion
+ * passive.
+ */
 public class WanderingEvenstar extends Weapon implements WeaponTeamBuffProvider {
+    /**
+     * Constructs Wandering Evenstar with Lv 90 base stats.
+     */
     public WanderingEvenstar() {
         super("Wandering Evenstar", new StatsContainer());
         StatsContainer s = this.getStats();
@@ -20,6 +27,13 @@ public class WanderingEvenstar extends Weapon implements WeaponTeamBuffProvider 
         this.weaponType = WeaponType.CATALYST;
     }
 
+    /**
+     * Returns the team-share portion of Wildling Nightstar as a buff applied to
+     * all party members.
+     *
+     * @param owner the character equipping the weapon
+     * @return the team buffs granted by the weapon
+     */
     @Override
     public List<Buff> getTeamBuffs(Character owner) {
         List<Buff> buffs = new ArrayList<>();
@@ -61,6 +75,13 @@ public class WanderingEvenstar extends Weapon implements WeaponTeamBuffProvider 
         return buffs;
     }
 
+    /**
+     * Applies the owner's self-only portion of the Elemental Mastery to ATK
+     * conversion.
+     *
+     * @param stats the stats container to mutate in-place
+     * @param currentTime simulation time in seconds
+     */
     @Override
     public void applyPassive(StatsContainer stats, double currentTime) {
         // Self Bonus (The remaining 70%)

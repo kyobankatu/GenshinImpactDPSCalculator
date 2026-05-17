@@ -347,6 +347,15 @@ public class RotationSearcher {
             }
         }
 
+        /**
+         * Returns whether the character's burst form (e.g. Raiden Musou Isshin) is
+         * still active at the given simulation time.
+         *
+         * @param character   character to test
+         * @param currentTime current simulation time in seconds
+         * @return {@code true} if the character implements {@link FormStateProvider}
+         *         and reports its form as active
+         */
         private boolean isBurstActive(Character character, double currentTime) {
             return character instanceof FormStateProvider
                     && ((FormStateProvider) character).isFormActive(currentTime);

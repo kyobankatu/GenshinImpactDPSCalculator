@@ -8,6 +8,14 @@ import mechanics.rl.bridge.RolloutService;
  * Starts the local Java rollout service used by the Python learner.
  */
 public class ServeRLJava {
+    /**
+     * Launches the rollout service with optional command-line overrides for binding,
+     * worker count, party selection, episode length, and Vine snapshot support.
+     *
+     * @param args command-line arguments in the order port, bind host, worker count,
+     *             party selection, episode seconds, Vine enable flag, and role-alignment weight
+     * @throws Exception if service startup fails
+     */
     public static void main(String[] args) throws Exception {
         int port = args.length > 0 ? Integer.parseInt(args[0]) : 5005;
         String bindHost = args.length > 1 ? args[1] : "127.0.0.1";

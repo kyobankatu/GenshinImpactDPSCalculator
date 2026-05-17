@@ -8,7 +8,13 @@ import model.type.WeaponType;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
 
+/**
+ * Amenoma Kageuchi sword with Succession Seed energy refund handling.
+ */
 public class AmenomaKageuchi extends Weapon implements ActionTriggeredWeaponEffect {
+    /**
+     * Constructs Amenoma Kageuchi with Lv 90 base stats.
+     */
     public AmenomaKageuchi() {
         super("Amenoma Kageuchi", new StatsContainer());
         StatsContainer s = this.getStats();
@@ -20,6 +26,14 @@ public class AmenomaKageuchi extends Weapon implements ActionTriggeredWeaponEffe
     private int seeds = 0;
     private double lastSeedTime = -10.0; // Allow immediate cast
 
+    /**
+     * Tracks skill casts for Succession Seeds and schedules the burst energy
+     * refund when seeds are consumed.
+     *
+     * @param user the character performing the action
+     * @param request the requested character action
+     * @param sim the active combat simulator
+     */
     @Override
     public void onAction(model.entity.Character user, CharacterActionRequest request, simulation.CombatSimulator sim) {
         if (request.getKey() == CharacterActionKey.SKILL) {

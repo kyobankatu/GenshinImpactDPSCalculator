@@ -7,19 +7,42 @@ import mechanics.buff.BuffId;
 import simulation.CombatSimulator.Moonsign;
 import model.entity.ReactionAwareArtifact;
 
+/**
+ * Night of the Sky's Unveiling artifact set with Lunar reaction-triggered
+ * self CRIT buffs.
+ */
 public class NightOfTheSkysUnveiling extends model.entity.ArtifactSet implements ReactionAwareArtifact {
 
+    /**
+     * Constructs Night of the Sky's Unveiling with the 2-piece Elemental
+     * Mastery bonus.
+     */
     public NightOfTheSkysUnveiling() {
         super("Night of the Sky's Unveiling", new StatsContainer());
         // 2-Piece Bonus: Increases Elemental Mastery by 80.
         this.getStats().add(StatType.ELEMENTAL_MASTERY, 80.0);
     }
 
+    /**
+     * Constructs Night of the Sky's Unveiling with the supplied main/sub stats
+     * plus the 2-piece Elemental Mastery bonus.
+     *
+     * @param stats artifact main and sub stats
+     */
     public NightOfTheSkysUnveiling(StatsContainer stats) {
         super("Night of the Sky's Unveiling", stats);
         this.getStats().add(StatType.ELEMENTAL_MASTERY, 80.0);
     }
 
+    /**
+     * Applies the 4-piece self CRIT Rate buff when a Lunar reaction is
+     * triggered while the wearer is on-field.
+     *
+     * @param sim the active combat simulator
+     * @param result the reaction result that was produced
+     * @param triggerCh the character who triggered the reaction
+     * @param owner the character equipping the set
+     */
     @Override
     public void onReaction(simulation.CombatSimulator sim, mechanics.reaction.ReactionResult result,
             model.entity.Character triggerCh, model.entity.Character owner) {

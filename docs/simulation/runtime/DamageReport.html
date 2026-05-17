@@ -74,6 +74,8 @@ loadScripts(document, 'script');</script>
 <li><a href="#getTotalDamage()" tabindex="0">getTotalDamage()</a></li>
 <li><a href="#getDps(double)" tabindex="0">getDps(double)</a></li>
 <li><a href="#getDamageBySource(java.lang.String)" tabindex="0">getDamageBySource(String)</a></li>
+<li><a href="#restore(double,java.util.Map)" tabindex="0">restore(double, Map)</a></li>
+<li><a href="#getDamageBySourceMap()" tabindex="0">getDamageBySourceMap()</a></li>
 <li><a href="#printReport(double)" tabindex="0">printReport(double)</a></li>
 </ol>
 </li>
@@ -149,26 +151,37 @@ implements <a href="../DamageTracker.html" title="simulation内のインタフ�
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the accumulated damage attributed to a specific source name.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDps(double)" class="member-name-link">getDps</a><wbr>(double&nbsp;rotationTime)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDamageBySourceMap()" class="member-name-link">getDamageBySourceMap</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Computes DPS from the currently accumulated total and the provided rotation time.</div>
+<div class="block">Returns a copy of the current per-source damage map.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTotalDamage()" class="member-name-link">getTotalDamage</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDps(double)" class="member-name-link">getDps</a><wbr>(double&nbsp;rotationTime)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Computes DPS from the currently accumulated total and the provided rotation time.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTotalDamage()" class="member-name-link">getTotalDamage</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the cumulative total damage recorded so far.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#printReport(double)" class="member-name-link">printReport</a><wbr>(double&nbsp;rotationTime)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#printReport(double)" class="member-name-link">printReport</a><wbr>(double&nbsp;rotationTime)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Prints a formatted console summary showing per-source damage share and overall DPS.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#recordDamage(java.lang.String,double)" class="member-name-link">recordDamage</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;sourceName,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#recordDamage(java.lang.String,double)" class="member-name-link">recordDamage</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;sourceName,
  double&nbsp;damage)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Records a damage instance under the given source name and updates the total.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#restore(double,java.util.Map)" class="member-name-link">restore</a><wbr>(double&nbsp;savedTotal,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;savedBySource)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Restores damage totals from a previously captured snapshot.</div>
 </div>
 </div>
 </div>
@@ -289,6 +302,34 @@ implements <a href="../DamageTracker.html" title="simulation内のインタフ�
 <dd><code>sourceName</code> - the source name used in <a href="#recordDamage(java.lang.String,double)"><code>recordDamage(String, double)</code></a></dd>
 <dt>戻り値:</dt>
 <dd>damage total for that source, or <code>0.0</code> if not found</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="restore(double,java.util.Map)">
+<h3>restore</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">restore</span><wbr><span class="parameters">(double&nbsp;savedTotal,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;savedBySource)</span></div>
+<div class="block">Restores damage totals from a previously captured snapshot.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>savedTotal</code> - total damage at snapshot time</dd>
+<dd><code>savedBySource</code> - per-source damage map at snapshot time</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getDamageBySourceMap()">
+<h3>getDamageBySourceMap</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</span>&nbsp;<span class="element-name">getDamageBySourceMap</span>()</div>
+<div class="block">Returns a copy of the current per-source damage map.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>per-source damage map copy</dd>
 </dl>
 </div>
 </section>

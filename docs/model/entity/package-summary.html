@@ -93,32 +93,40 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">Represents an artifact set (e.g.</div>
 </div>
-<div class="col-first even-row-color class-summary class-summary-tab1"><a href="BurstStateProvider.html" title="model.entity内のインタフェース">BurstStateProvider</a></div>
+<div class="col-first even-row-color class-summary class-summary-tab1"><a href="BurstTriggeredArtifactEffect.html" title="model.entity内のインタフェース">BurstTriggeredArtifactEffect</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab1">
-<div class="block">Capability for characters that expose a meaningful burst-active window.</div>
+<div class="block">Capability for artifact sets whose 4pc bonus triggers on Elemental Burst use
+(e.g.</div>
 </div>
-<div class="col-first odd-row-color class-summary class-summary-tab1"><a href="BurstTriggeredArtifactEffect.html" title="model.entity内のインタフェース">BurstTriggeredArtifactEffect</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab1">&nbsp;</div>
-<div class="col-first even-row-color class-summary class-summary-tab2"><a href="Character.html" title="model.entity内のクラス">Character</a></div>
-<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="Character.html" title="model.entity内のクラス">Character</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">Abstract base class for all playable characters in the simulation.</div>
 </div>
-<div class="col-first odd-row-color class-summary class-summary-tab1"><a href="CharacterTeamBuffProvider.html" title="model.entity内のインタフェース">CharacterTeamBuffProvider</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab1">
+<div class="col-first even-row-color class-summary class-summary-tab1"><a href="CharacterTeamBuffProvider.html" title="model.entity内のインタフェース">CharacterTeamBuffProvider</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab1">
 <div class="block">Capability for characters that contribute team-wide buffs outside their own stats.</div>
 </div>
-<div class="col-first even-row-color class-summary class-summary-tab1"><a href="DamageTriggeredArtifactEffect.html" title="model.entity内のインタフェース">DamageTriggeredArtifactEffect</a></div>
-<div class="col-last even-row-color class-summary class-summary-tab1">&nbsp;</div>
-<div class="col-first odd-row-color class-summary class-summary-tab1"><a href="DamageTriggeredWeaponEffect.html" title="model.entity内のインタフェース">DamageTriggeredWeaponEffect</a></div>
+<div class="col-first odd-row-color class-summary class-summary-tab1"><a href="DamageTriggeredArtifactEffect.html" title="model.entity内のインタフェース">DamageTriggeredArtifactEffect</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab1">
+<div class="block">Capability for artifact sets whose 4pc bonus triggers when the wearer deals
+damage (e.g. damage-based stack counters).</div>
+</div>
+<div class="col-first even-row-color class-summary class-summary-tab1"><a href="DamageTriggeredWeaponEffect.html" title="model.entity内のインタフェース">DamageTriggeredWeaponEffect</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab1">
 <div class="block">Capability for weapons with passives that trigger when the owner deals damage.</div>
 </div>
-<div class="col-first even-row-color class-summary class-summary-tab2"><a href="Enemy.html" title="model.entity内のクラス">Enemy</a></div>
-<div class="col-last even-row-color class-summary class-summary-tab2">
+<div class="col-first odd-row-color class-summary class-summary-tab2"><a href="Enemy.html" title="model.entity内のクラス">Enemy</a></div>
+<div class="col-last odd-row-color class-summary class-summary-tab2">
 <div class="block">Represents an enemy target in the combat simulation.</div>
 </div>
+<div class="col-first even-row-color class-summary class-summary-tab1"><a href="FormStateProvider.html" title="model.entity内のインタフェース">FormStateProvider</a></div>
+<div class="col-last even-row-color class-summary class-summary-tab1">
+<div class="block">Capability for characters that have a meaningful time-limited active form.</div>
+</div>
 <div class="col-first odd-row-color class-summary class-summary-tab1"><a href="ReactionAwareArtifact.html" title="model.entity内のインタフェース">ReactionAwareArtifact</a></div>
-<div class="col-last odd-row-color class-summary class-summary-tab1">&nbsp;</div>
+<div class="col-last odd-row-color class-summary class-summary-tab1">
+<div class="block">Artifact behavior hook for elemental reaction events.</div>
+</div>
 <div class="col-first even-row-color class-summary class-summary-tab1"><a href="ReactionAwareCharacter.html" title="model.entity内のインタフェース">ReactionAwareCharacter</a></div>
 <div class="col-last even-row-color class-summary class-summary-tab1">
 <div class="block">Marker interface for characters with reaction-listener behavior.</div>
@@ -128,7 +136,9 @@ loadScripts(document, 'script');</script>
 <div class="block">Assembles character stat views from base stats, equipment, passives, and buffs.</div>
 </div>
 <div class="col-first even-row-color class-summary class-summary-tab1"><a href="SwitchAwareArtifact.html" title="model.entity内のインタフェース">SwitchAwareArtifact</a></div>
-<div class="col-last even-row-color class-summary class-summary-tab1">&nbsp;</div>
+<div class="col-last even-row-color class-summary class-summary-tab1">
+<div class="block">Artifact behavior hook for character switch events.</div>
+</div>
 <div class="col-first odd-row-color class-summary class-summary-tab1"><a href="SwitchAwareCharacter.html" title="model.entity内のインタフェース">SwitchAwareCharacter</a></div>
 <div class="col-last odd-row-color class-summary class-summary-tab1">
 <div class="block">Capability for characters with explicit switch-out behavior.</div>

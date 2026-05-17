@@ -120,7 +120,9 @@ loadScripts(document, 'script');</script>
  double&nbsp;totalDamage,
  double&nbsp;timeDelta,
  boolean&nbsp;done)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Computes the shaped reward for one environment step.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isRepeatedSwap(int,int)" class="member-name-link">isRepeatedSwap</a><wbr>(int&nbsp;actionId,
  int&nbsp;previousActionId)</code></div>
@@ -170,6 +172,20 @@ loadScripts(document, 'script');</script>
  double&nbsp;totalDamage,
  double&nbsp;timeDelta,
  boolean&nbsp;done)</span></div>
+<div class="block">Computes the shaped reward for one environment step.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>config</code> - episode configuration providing reward scales and penalties</dd>
+<dd><code>actionId</code> - action id chosen this step</dd>
+<dd><code>previousActionId</code> - previous step's action id (or negative if none)</dd>
+<dd><code>validAction</code> - true when the chosen action was legal</dd>
+<dd><code>damageDelta</code> - damage dealt this step</dd>
+<dd><code>totalDamage</code> - cumulative episode damage after this step</dd>
+<dd><code>timeDelta</code> - simulator time advanced this step</dd>
+<dd><code>done</code> - true when this step terminates the episode</dd>
+<dt>戻り値:</dt>
+<dd>shaped reward value</dd>
+</dl>
 </div>
 </section>
 </li>

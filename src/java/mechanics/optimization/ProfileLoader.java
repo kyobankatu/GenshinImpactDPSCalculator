@@ -25,7 +25,9 @@ import java.util.List;
  * can stay independent from external profile-file naming conventions.
  */
 public class ProfileLoader {
+    /** Default profile name used when a character has no explicit profile defined. */
     public static final String DEFAULT_PROFILE_NAME = "Default(Skill)";
+    /** Fallback profile name used when no profile could be parsed from the source. */
     public static final String FALLBACK_PROFILE_NAME = "Fallback";
 
     /**
@@ -107,6 +109,13 @@ public class ProfileLoader {
         return profiles;
     }
 
+    /**
+     * Builds a minimal fallback profile list containing a single {@link ProfileAction#SKILL}
+     * action under the given profile name.
+     *
+     * @param profileName profile name to assign to the fallback profile
+     * @return list with a single fallback profile
+     */
     public static List<ActionProfile> defaultSkillFallback(String profileName) {
         List<ActionProfile> profiles = new ArrayList<>();
         List<ProfileAction> acts = new ArrayList<>();

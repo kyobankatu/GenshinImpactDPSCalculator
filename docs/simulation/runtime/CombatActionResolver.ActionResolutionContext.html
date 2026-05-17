@@ -88,6 +88,8 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="type-signature"><span class="modifiers">private static final class </span><span class="element-name type-name-label">CombatActionResolver.ActionResolutionContext</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Object.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Object</a></span></div>
+<div class="block">Immutable per-action context capturing the snapshot of applicable buffs and
+resolved stats used during resolution.</div>
 </div>
 </section>
 <section class="summary">
@@ -103,10 +105,14 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color"><code>private final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="../../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;</code></div>
 <div class="col-second even-row-color"><code><a href="#applicableBuffs" class="member-name-link">applicableBuffs</a></code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Buffs that were applicable to the action when resolution started.</div>
+</div>
 <div class="col-first odd-row-color"><code>private final <a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a></code></div>
 <div class="col-second odd-row-color"><code><a href="#resolvedStats" class="member-name-link">resolvedStats</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-last odd-row-color">
+<div class="block">Resolved stats container, or <code>null</code> when the action uses snapshot semantics.</div>
+</div>
 </div>
 </section>
 </li>
@@ -122,7 +128,9 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color"><code>private </code></div>
 <div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.util.List,model.stats.StatsContainer)" class="member-name-link">ActionResolutionContext</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;&nbsp;applicableBuffs,
  <a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;resolvedStats)</code></div>
-<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-last even-row-color">
+<div class="block">Creates a resolution context.</div>
+</div>
 </div>
 </section>
 </li>
@@ -149,6 +157,7 @@ loadScripts(document, 'script');</script>
 <h3>applicableBuffs</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;</span>&nbsp;<span class="element-name">applicableBuffs</span></div>
+<div class="block">Buffs that were applicable to the action when resolution started.</div>
 </div>
 </section>
 </li>
@@ -157,6 +166,7 @@ loadScripts(document, 'script');</script>
 <h3>resolvedStats</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a></span>&nbsp;<span class="element-name">resolvedStats</span></div>
+<div class="block">Resolved stats container, or <code>null</code> when the action uses snapshot semantics.</div>
 </div>
 </section>
 </li>
@@ -174,6 +184,12 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="element-name">ActionResolutionContext</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;&nbsp;applicableBuffs,
  <a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;resolvedStats)</span></div>
+<div class="block">Creates a resolution context.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>applicableBuffs</code> - snapshot of applicable buffs</dd>
+<dd><code>resolvedStats</code> - resolved stats, or <code>null</code> for snapshot actions</dd>
+</dl>
 </div>
 </section>
 </li>

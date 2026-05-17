@@ -12,7 +12,17 @@
       "WebSearch",
       "WebFetch(domain:arxiv.org)",
       "Bash(xargs ls)",
-      "Bash(./gradlew compileJava)"
+      "Bash(./gradlew compileJava)",
+      "Bash(./gradlew javadoc *)",
+      "Edit",
+      "Write",
+      "Bash(find:*)",
+      "Bash(javadoc:*)",
+      "Bash(grep:*)",
+      "Bash(wc:*)",
+      "Bash(sort:*)",
+      "Bash(uniq:*)",
+      "Bash(sed:*)"
     ]
   }
 }

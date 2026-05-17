@@ -59,6 +59,13 @@ public class CapabilityProfiler {
     /** Holds per-character profiling results for later JSON output. */
     private final Map<CharacterId, double[]> results = new LinkedHashMap<>();
 
+    /**
+     * Constructs a profiler that uses the supplied factory to instantiate fresh simulators
+     * for each experiment.
+     *
+     * @param simulatorSupplier factory producing a fresh combat simulator
+     * @param config episode configuration providing the party order to profile
+     */
     public CapabilityProfiler(Supplier<CombatSimulator> simulatorSupplier, EpisodeConfig config) {
         this.simulatorSupplier = simulatorSupplier;
         this.config = config;
@@ -91,6 +98,11 @@ public class CapabilityProfiler {
         writeJson(path, results);
     }
 
+    /**
+     * Returns a deep copy of the per-character profiling results.
+     *
+     * @return map keyed by character id, with cloned score arrays as values
+     */
     public Map<CharacterId, double[]> getResults() {
         Map<CharacterId, double[]> copy = new HashMap<>();
         for (Map.Entry<CharacterId, double[]> entry : results.entrySet()) {
@@ -99,6 +111,13 @@ public class CapabilityProfiler {
         return copy;
     }
 
+    /**
+     * Writes the supplied results map to a JSON file at the given path.
+     *
+     * @param path destination JSON file path (parent directories will be created)
+     * @param sourceResults map of character id to capability score array
+     * @throws IOException if the file cannot be written
+     */
     public static void writeJson(String path, Map<CharacterId, double[]> sourceResults) throws IOException {
         Files.createDirectories(Paths.get(path).getParent());
         StringBuilder sb = new StringBuilder();

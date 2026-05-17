@@ -14,6 +14,16 @@ final class ElementColorPalette {
     private ElementColorPalette() {
     }
 
+    /**
+     * Returns chart colors for the given actor names, picking a variant per
+     * element so that multiple characters of the same element are distinguishable.
+     *
+     * @param names actor display names to color
+     * @param sim   combat simulator used to resolve each actor's element; may be
+     *              {@code null}
+     * @return JS-literal color strings (e.g. {@code "'#FF2222'"}) aligned with
+     *         {@code names}
+     */
     static String[] colorsFor(List<String> names, CombatSimulator sim) {
         Map<String, String> colorMap = new HashMap<>();
         Map<Element, Integer> elementCounts = new HashMap<>();
@@ -37,6 +47,13 @@ final class ElementColorPalette {
                 .toArray(String[]::new);
     }
 
+    /**
+     * Picks a JS-literal color string for the given element and variant index.
+     *
+     * @param element element to color
+     * @param variant 0-based variant index used to disambiguate same-element actors
+     * @return JS-literal hex color string
+     */
     private static String colorFor(Element element, int variant) {
         int v = variant % 4;
         switch (element) {

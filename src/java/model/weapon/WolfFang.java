@@ -12,7 +12,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Iterator;
 
+/**
+ * Wolf-Fang sword with stacking skill and burst CRIT bonuses.
+ */
 public class WolfFang extends Weapon implements DamageTriggeredWeaponEffect {
+    /**
+     * Constructs Wolf-Fang with Lv 90 base stats.
+     */
     public WolfFang() {
         super("Wolf-Fang", new StatsContainer());
         StatsContainer s = this.getStats();
@@ -27,6 +33,13 @@ public class WolfFang extends Weapon implements DamageTriggeredWeaponEffect {
     private double lastSkillStackTime = -1.0;
     private double lastBurstStackTime = -1.0;
 
+    /**
+     * Applies the weapon's constant skill and burst damage bonuses and any
+     * active CRIT Rate stacks.
+     *
+     * @param stats the stats container to mutate in-place
+     * @param currentTime simulation time in seconds
+     */
     @Override
     public void applyPassive(StatsContainer stats, double currentTime) {
         // R5: +32% Skill/Burst DMG
@@ -49,6 +62,15 @@ public class WolfFang extends Weapon implements DamageTriggeredWeaponEffect {
             stats.add(StatType.BURST_CRIT_RATE, bCount * 0.04);
     }
 
+    /**
+     * Adds or refreshes Wolf-Fang stacks when on-field skill or burst damage is
+     * dealt.
+     *
+     * @param user the character who dealt the damage
+     * @param action the triggering attack action
+     * @param currentTime simulation time in seconds at the damage event
+     * @param sim the active combat simulator
+     */
     @Override
     public void onDamage(Character user, AttackAction action, double currentTime, simulation.CombatSimulator sim) {
         // Wolf-Fang Requirement: Character must be on-field to gain stacks.

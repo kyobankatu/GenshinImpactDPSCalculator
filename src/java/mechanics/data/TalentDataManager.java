@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Singleton-backed CSV loader for talent and related character data.
+ */
 public class TalentDataManager implements TalentDataSource {
     private static TalentDataManager instance;
     private Map<String, Double> values = new HashMap<>();
@@ -26,6 +29,9 @@ public class TalentDataManager implements TalentDataSource {
         return instance;
     }
 
+    /**
+     * Loads every CSV file found under the given configuration directory.
+     */
     public void loadAllFromDirectory(String dirPath) {
         java.nio.file.Path startPath = java.nio.file.Paths.get(dirPath);
         if (!java.nio.file.Files.exists(startPath) || !java.nio.file.Files.isDirectory(startPath)) {
@@ -42,6 +48,9 @@ public class TalentDataManager implements TalentDataSource {
         }
     }
 
+    /**
+     * Loads talent values from a single CSV file into the shared cache.
+     */
     public void loadData(String filePath) {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
@@ -77,6 +86,9 @@ public class TalentDataManager implements TalentDataSource {
         }
     }
 
+    /**
+     * Returns a cached talent value, or the supplied default when absent.
+     */
     public double get(String charName, String key, double defaultValue) {
         String lookup = charName + "." + key;
         return values.getOrDefault(lookup, defaultValue);
