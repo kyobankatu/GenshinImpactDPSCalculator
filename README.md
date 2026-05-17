@@ -126,63 +126,14 @@ Training writes `output/recurrent_ppo_py/latest-model.pt` and `output/recurrent_
 If `.venv` includes `wandb`, training can also stream metrics to Weights & Biases with `--wandb`.
 Evaluation supports `--mode deterministic|stochastic|both`. Deterministic evaluation generates `output/rl_report.html` plus party-specific files such as `output/rl_report_flinsparty2.html` when party names are available.
 
-#### Single-node batch training
+#### Manual multi-process or remote rollout setups
 
-For cluster training, the default recommendation is the simpler single-node setup:
+Shell scripts and sweep definitions are intentionally not documented here because
+this repository ignores `*.sh` and `sweeps/`, so batch-job wrappers are not part
+of the tracked project surface.
 
-```bash
-ybatch execute.sh
-```
-
-- `execute.sh` starts a local Java rollout service and the Python learner in the same batch job
-- this is currently the preferred production path because split-node rollout did not improve throughput enough to justify the added orchestration cost
-- it selects parties through the `RL_PARTIES` environment variable and refreshes capability profiles before training by default
-
-Common overrides:
-
-```bash
-# Full multi-party training using the registry default catalog
-TRAIN_PROFILE=full RL_PARTIES=default ybatch execute.sh
-
-# Single-party scratch training
-TRAIN_PROFILE=full USE_MULTI_PARTY=false RL_PARTIES=FlinsParty2 RESUME_TRAINING=false ybatch execute.sh
-
-# Short diagnosis run
-TRAIN_PROFILE=diagnosis RL_PARTIES=FlinsParty2 TRAIN_UPDATES=400 ybatch execute.sh
-```
-
-For short rollout-parallelism diagnosis runs, `execute.sh` also accepts environment overrides:
-
-```bash
-TRAIN_PROFILE=diagnosis TRAIN_ENVS=12 JAVA_ROLLOUT_WORKERS=4 WANDB_GROUP=rollout-grid ybatch execute.sh
-TRAIN_PROFILE=diagnosis TRAIN_ENVS=16 JAVA_ROLLOUT_WORKERS=8 WANDB_GROUP=rollout-grid ybatch execute.sh
-```
-
-- `TRAIN_PROFILE=diagnosis` shortens the run for throughput comparison
-- `TRAIN_ENVS` controls the vectorized environment count
-- `JAVA_ROLLOUT_WORKERS` overrides the Java-side worker pool size
-- `RL_PARTIES` selects the registered RL party catalog used by Java rollout and capability profiling
-- `WANDB_GROUP` helps compare the resulting runs together in Weights & Biases
-
-If you want to use native W&B sweep configuration instead of manual batch overrides:
-
-```bash
-wandb sweep sweeps/rollout_parallelism.yaml
-SWEEP_ID=katumon/genshin-recurrent-ppo/<sweep-id> ybatch execute_sweep_agent.sh
-```
-
-- `sweeps/rollout_parallelism.yaml` defines a grid over `envs` and `rollout_workers`
-- `execute_sweep_agent.sh` runs `wandb agent` on a compute node and each trial launches a local Java rollout service plus the Python learner
-- each trial writes its rollout log under `logs/sweep_rollout_<wandb-run-id>_5005.log`
-
-The split-node scripts are still available for later experiments:
-
-```bash
-ybatch execute_rollout.sh
-ybatch execute_learner.sh
-```
-
-You can also target remote rollout services manually:
+If you want to run the learner against one or more already-running rollout
+services, use the Python entry points directly:
 
 ```bash
 python3 src/python/rl/train_recurrent_ppo.py --preset debug --endpoints cpu-node-a:5005,cpu-node-b:5005
@@ -190,15 +141,11 @@ python3 src/python/rl/evaluate_policy.py --mode both --endpoints cpu-node-a:5005
 python3 src/python/rl/benchmark_rollout.py --envs 8 --steps 128 --endpoints cpu-node-a:5005,cpu-node-b:5005
 ```
 
-#### Batch evaluation
-
-`evaluate.sh` starts a local Java rollout service and then runs `evaluate_policy.py` against a checkpoint:
+For single-node evaluation without any wrapper scripts, start
+`sample.ServeRLJava` separately and then run:
 
 ```bash
-ybatch evaluate.sh
-
-# Evaluate a specific checkpoint and party catalog
-EVAL_CHECKPOINT=output/recurrent_ppo_py/latest-model.pt EVAL_MODE=both RL_PARTIES=FlinsParty2 ybatch evaluate.sh
+python3 src/python/rl/evaluate_policy.py --mode both --checkpoint output/recurrent_ppo_py/latest-model.pt
 ```
 
 ## Architecture
