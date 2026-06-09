@@ -44,7 +44,7 @@ final class StandardDamageStrategy implements DamageStrategy {
         double baseStatValue = action.getScalingStatValue(stats);
         double mv = action.getDamagePercent();
         double flatDmg = stats.get(StatType.FLAT_DMG_BONUS);
-        double baseDmg = (baseStatValue * mv) + flatDmg;
+        double baseDmg = (baseStatValue * mv) + flatDmg + action.getAdditiveBaseDmgBonus();
 
         double dmgBonus = stats.get(StatType.DMG_BONUS_ALL)
                 + stats.get(action.getElement().getBonusStatType())

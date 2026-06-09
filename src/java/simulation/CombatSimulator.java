@@ -718,6 +718,13 @@ public class CombatSimulator {
         // Reaction state
         boolean ecTimerRunning = reactionState.isEcTimerRunning();
         double thundercloudEndTime = reactionState.getThundercloudEndTime();
+        boolean burningTimerRunning = reactionState.isBurningTimerRunning();
+        double burningEndTime = reactionState.getBurningEndTime();
+        double quickenEndTime = reactionState.getQuickenEndTime();
+        int moondriftCount = reactionState.getMoondriftCount();
+        int lunarCrystallizeTriggerCount = reactionState.getLunarCrystallizeTriggerCount();
+        List<simulation.runtime.ReactionState.DendroCoreState> dendroCores = reactionStateController.copyDendroCores();
+        int nextDendroCoreId = reactionStateController.getNextDendroCoreId();
 
         // Enemy aura
         Map<model.type.Element, Double> enemyAura = (enemy != null) ? enemy.getAuraMap() : new HashMap<>();
@@ -758,7 +765,9 @@ public class CombatSimulator {
                 currentTime, rotationTime,
                 totalDamage, damageBySource,
                 lastSwapTime, activeCharacterId, currentMoonsign,
-                icdStates, ecTimerRunning, thundercloudEndTime, enemyAura,
+                icdStates, ecTimerRunning, thundercloudEndTime, burningTimerRunning, burningEndTime,
+                quickenEndTime, moondriftCount, lunarCrystallizeTriggerCount,
+                dendroCores, nextDendroCoreId, enemyAura,
                 characters,
                 teamBuffRefs, teamBuffTimes,
                 fieldBuffRefs, fieldBuffTimes);
@@ -792,6 +801,12 @@ public class CombatSimulator {
         // Reaction state
         reactionState.setEcTimerRunning(snap.ecTimerRunning);
         reactionState.setThundercloudEndTime(snap.thundercloudEndTime);
+        reactionState.setBurningTimerRunning(snap.burningTimerRunning);
+        reactionState.setBurningEndTime(snap.burningEndTime);
+        reactionState.setQuickenEndTime(snap.quickenEndTime);
+        reactionState.setMoondriftCount(snap.moondriftCount);
+        reactionState.setLunarCrystallizeTriggerCount(snap.lunarCrystallizeTriggerCount);
+        reactionStateController.restoreDendroCores(snap.dendroCores, snap.nextDendroCoreId);
 
         // Enemy aura
         if (enemy != null) {
@@ -895,5 +910,85 @@ public class CombatSimulator {
      */
     public void setThundercloudEndTime(double endTime) {
         reactionStateController.setThundercloudEndTime(endTime);
+    }
+
+    public void setBurningTimerRunning(boolean running) {
+        reactionStateController.setBurningTimerRunning(running);
+    }
+
+    public boolean isBurningTimerRunning() {
+        return reactionStateController.isBurningTimerRunning();
+    }
+
+    public boolean isBurningActive() {
+        return reactionStateController.isBurningActive();
+    }
+
+    public double getBurningEndTime() {
+        return reactionStateController.getBurningEndTime();
+    }
+
+    public void setBurningEndTime(double endTime) {
+        reactionStateController.setBurningEndTime(endTime);
+    }
+
+    public boolean isQuickenActive() {
+        return reactionStateController.isQuickenActive();
+    }
+
+    public double getQuickenEndTime() {
+        return reactionStateController.getQuickenEndTime();
+    }
+
+    public void setQuickenEndTime(double endTime) {
+        reactionStateController.setQuickenEndTime(endTime);
+    }
+
+    public boolean hasLunarReactionConversion() {
+        if (currentMoonsign == Moonsign.NONE) {
+            return false;
+        }
+        for (Character character : party.getMembers()) {
+            if (character.isLunarCharacter()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public int getMoondriftCount() {
+        return reactionStateController.getMoondriftCount();
+    }
+
+    public void setMoondriftCount(int count) {
+        reactionStateController.setMoondriftCount(count);
+    }
+
+    public int getLunarCrystallizeTriggerCount() {
+        return reactionStateController.getLunarCrystallizeTriggerCount();
+    }
+
+    public int incrementLunarCrystallizeTriggerCount() {
+        return reactionStateController.incrementLunarCrystallizeTriggerCount();
+    }
+
+    public simulation.runtime.ReactionState.DendroCoreState addDendroCore(CharacterId ownerId, double damage) {
+        return reactionStateController.addDendroCore(ownerId, damage);
+    }
+
+    public java.util.List<simulation.runtime.ReactionState.DendroCoreState> getDendroCores() {
+        return reactionStateController.getDendroCores();
+    }
+
+    public simulation.runtime.ReactionState.DendroCoreState removeOldestDendroCore() {
+        return reactionStateController.removeOldestDendroCore();
+    }
+
+    public boolean removeDendroCore(int coreId) {
+        return reactionStateController.removeDendroCore(coreId);
+    }
+
+    public void clearDendroCores() {
+        reactionStateController.clearDendroCores();
     }
 }

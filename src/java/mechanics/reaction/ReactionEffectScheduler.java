@@ -7,9 +7,11 @@ import java.util.List;
 import mechanics.formula.ResistanceCalculator;
 import model.entity.Character;
 import model.stats.StatsContainer;
+import model.type.CharacterId;
 import model.type.Element;
 import model.type.StatType;
 import simulation.CombatSimulator;
+import simulation.runtime.ReactionState;
 import simulation.event.TimerEvent;
 
 /**
@@ -51,7 +53,62 @@ public class ReactionEffectScheduler {
      * @return weighted Lunar-Charged damage
      */
     public double computeInitialLunarChargedDamage() {
-        return computeWeightedLunarChargedDamage(sim);
+        return computeWeightedLunarReactionDamage(sim, Element.ELECTRO, StatType.LUNAR_CHARGED_DMG_BONUS);
+    }
+
+    public double computeLunarCrystallizeHarmonyDamage() {
+        return computeWeightedLunarReactionDamage(sim, Element.GEO, StatType.LUNAR_CRYSTALLIZE_DMG_BONUS);
+    }
+
+    /**
+     * Starts or refreshes simplified Burning ticks for a single non-attacking target.
+     *
+     * @param ownerId    character credited with Burning damage
+     * @param tickDamage post-RES damage per 0.25 s Burning tick
+     */
+    public void scheduleBurning(CharacterId ownerId, double tickDamage) {
+        sim.setBurningEndTime(sim.getCurrentTime() + 2.0);
+        sim.getEnemy().setAura(Element.PYRO, Math.max(1.0, sim.getEnemy().getAuraUnits(Element.PYRO)));
+        if (!sim.isBurningTimerRunning()) {
+            sim.setBurningTimerRunning(true);
+            sim.registerEvent(createBurningTickEvent(ownerId, tickDamage));
+        }
+    }
+
+    /**
+     * Creates a Dendro Core and schedules its delayed Bloom explosion.
+     *
+     * @param ownerId character credited with the Bloom core explosion
+     * @param damage  final Dendro damage dealt by the core
+     */
+    public void createDendroCore(CharacterId ownerId, double damage) {
+        if (sim.getDendroCores().size() >= 5) {
+            ReactionState.DendroCoreState oldest = sim.removeOldestDendroCore();
+            if (oldest != null) {
+                explodeDendroCore(oldest, "Bloom");
+            }
+        }
+        ReactionState.DendroCoreState core = sim.addDendroCore(ownerId, damage);
+        sim.registerEvent(createDendroCoreExpiryEvent(core.id));
+    }
+
+    /**
+     * Consumes Dendro Cores for Hyperbloom/Burgeon in the single-target abstraction.
+     *
+     * @param ownerId       character credited with the reaction
+     * @param damage        final Dendro damage for each consumed core
+     * @param reactionLabel display label
+     * @param maxCores      maximum cores consumed by this hit
+     * @return number of consumed cores
+     */
+    public int consumeDendroCores(CharacterId ownerId, double damage, String reactionLabel, int maxCores) {
+        int consumed = 0;
+        while (consumed < maxCores && !sim.getDendroCores().isEmpty()) {
+            sim.removeOldestDendroCore();
+            recordDendroCoreDamage(ownerId, reactionLabel, damage);
+            consumed++;
+        }
+        return consumed;
     }
 
     private TimerEvent createElectroChargedTickEvent(double transDmg, boolean isLunar) {
@@ -74,7 +131,8 @@ public class ReactionEffectScheduler {
                 double finalDamage = transDmg;
                 if (isLunar) {
                     label = "Lunar-Charged Reaction";
-                    finalDamage = computeWeightedLunarChargedDamage(simContext);
+                    finalDamage = computeWeightedLunarReactionDamage(
+                            simContext, Element.ELECTRO, StatType.LUNAR_CHARGED_DMG_BONUS);
                 }
 
                 if (simContext.isLoggingEnabled()) {
@@ -112,15 +170,109 @@ public class ReactionEffectScheduler {
         };
     }
 
-    private double computeWeightedLunarChargedDamage(CombatSimulator simContext) {
+    private TimerEvent createBurningTickEvent(CharacterId ownerId, double tickDamage) {
+        return new TimerEvent() {
+            private double nextTick = sim.getCurrentTime() + 0.25;
+
+            @Override
+            public void tick(CombatSimulator simContext) {
+                if (simContext.getCurrentTime() > simContext.getBurningEndTime()) {
+                    simContext.setBurningTimerRunning(false);
+                    nextTick = Double.MAX_VALUE;
+                    return;
+                }
+
+                if (simContext.isLoggingEnabled()) {
+                    System.out.println(String.format("   [DoT] Burning Damage: %,.0f", tickDamage));
+                }
+                simContext.recordDamage(ownerId, tickDamage);
+                simContext.getCombatLogSink().log(
+                        simContext.getCurrentTime(), ownerId.getDisplayName(), "Burning", tickDamage,
+                        "Burning", tickDamage, simContext.getEnemy().getAuraMap());
+
+                nextTick += 0.25;
+            }
+
+            @Override
+            public double getNextTickTime() {
+                return nextTick;
+            }
+
+            @Override
+            public boolean isFinished(double time) {
+                return nextTick == Double.MAX_VALUE || time > sim.getBurningEndTime() + 1.0;
+            }
+        };
+    }
+
+    private TimerEvent createDendroCoreExpiryEvent(int coreId) {
+        return new TimerEvent() {
+            private double nextTick = findExpiryTime(coreId);
+            private boolean finished = false;
+
+            @Override
+            public void tick(CombatSimulator simContext) {
+                ReactionState.DendroCoreState core = findCore(coreId);
+                if (core != null) {
+                    simContext.removeDendroCore(coreId);
+                    explodeDendroCore(core, "Bloom");
+                }
+                finished = true;
+                nextTick = Double.MAX_VALUE;
+            }
+
+            @Override
+            public double getNextTickTime() {
+                return nextTick;
+            }
+
+            @Override
+            public boolean isFinished(double time) {
+                return finished;
+            }
+        };
+    }
+
+    private double findExpiryTime(int coreId) {
+        ReactionState.DendroCoreState core = findCore(coreId);
+        return core != null ? core.expiryTime : Double.MAX_VALUE;
+    }
+
+    private ReactionState.DendroCoreState findCore(int coreId) {
+        for (ReactionState.DendroCoreState core : sim.getDendroCores()) {
+            if (core.id == coreId) {
+                return core;
+            }
+        }
+        return null;
+    }
+
+    private void explodeDendroCore(ReactionState.DendroCoreState core, String label) {
+        recordDendroCoreDamage(core.ownerId, label, core.damage);
+    }
+
+    private void recordDendroCoreDamage(CharacterId ownerId, String label, double damage) {
+        if (sim.isLoggingEnabled()) {
+            System.out.println(String.format("   [Reaction] %s Damage: %,.0f", label, damage));
+        }
+        sim.recordDamage(ownerId, damage);
+        sim.getCombatLogSink().log(
+                sim.getCurrentTime(), ownerId.getDisplayName(), label, damage,
+                label, damage, sim.getEnemy().getAuraMap());
+    }
+
+    private double computeWeightedLunarReactionDamage(
+            CombatSimulator simContext, Element damageElement, StatType reactionBonusStat) {
         List<Double> potentialDamages = new ArrayList<>();
         for (Character member : simContext.getPartyMembers()) {
             StatsContainer stats = member.getEffectiveStats(simContext.getCurrentTime());
             double baseBonus = stats.get(StatType.LUNAR_BASE_BONUS);
             double uniqueBonus = stats.get(StatType.LUNAR_UNIQUE_BONUS)
-                    + stats.get(StatType.LUNAR_CHARGED_DMG_BONUS)
-                    + stats.get(StatType.ELECTRO_CHARGED_DMG_BONUS)
+                    + stats.get(reactionBonusStat)
                     + stats.get(StatType.LUNAR_REACTION_DMG_BONUS_ALL);
+            if (reactionBonusStat == StatType.LUNAR_CHARGED_DMG_BONUS) {
+                uniqueBonus += stats.get(StatType.ELECTRO_CHARGED_DMG_BONUS);
+            }
             double columbinaMult = 1.0 + stats.get(StatType.LUNAR_MULTIPLIER);
             double em = stats.get(StatType.ELEMENTAL_MASTERY);
             double emBonus = (2.78 * em) / (em + 1400.0);
@@ -128,7 +280,7 @@ public class ReactionEffectScheduler {
             double cd = stats.get(StatType.CRIT_DMG);
             double critMult = 1.0 + (Math.min(cr, 1.0) * cd);
             double resMult = ResistanceCalculator.calculateResMulti(
-                    simContext.getEnemy().getRes(StatType.ELECTRO_DMG_BONUS), 0.0);
+                    simContext.getEnemy().getRes(damageElement.getBonusStatType()), 0.0);
 
             double damage = 1.8 * 1446.85 * (1.0 + baseBonus) * (1.0 + uniqueBonus)
                     * (1.0 + emBonus) * critMult * resMult * columbinaMult;

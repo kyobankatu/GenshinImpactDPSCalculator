@@ -68,7 +68,7 @@ final class LunarDamageStrategy implements DamageStrategy {
 
         double em = stats.get(StatType.ELEMENTAL_MASTERY);
         double reactionBonus = (6.0 * em) / (em + 2000.0);
-        double statGearBonus = stats.get(StatType.LUNAR_CHARGED_DMG_BONUS);
+        double statGearBonus = getLunarReactionSpecificBonus(stats, action);
         double burstBonus = stats.get(StatType.LUNAR_REACTION_DMG_BONUS_ALL);
         double ecBonus = stats.get(StatType.LUNAR_MOONSIGN_BONUS);
         double totalGearBonus = statGearBonus + burstBonus + ecBonus;
@@ -103,5 +103,20 @@ final class LunarDamageStrategy implements DamageStrategy {
         double lunarDamage = baseSection * multiplier * critMult * resMult * columbinaMultiplier;
         DamageCalculator.notifyDamageHooks(attacker, action, currentTime, sim, lunarDamage);
         return lunarDamage;
+    }
+
+    private double getLunarReactionSpecificBonus(StatsContainer stats, AttackAction action) {
+        if (action.getLunarReactionType() == null) {
+            return stats.get(StatType.LUNAR_CHARGED_DMG_BONUS);
+        }
+        switch (action.getLunarReactionType()) {
+            case BLOOM:
+                return stats.get(StatType.LUNAR_BLOOM_DMG_BONUS);
+            case CRYSTALLIZE:
+                return stats.get(StatType.LUNAR_CRYSTALLIZE_DMG_BONUS);
+            case CHARGED:
+            default:
+                return stats.get(StatType.LUNAR_CHARGED_DMG_BONUS);
+        }
     }
 }

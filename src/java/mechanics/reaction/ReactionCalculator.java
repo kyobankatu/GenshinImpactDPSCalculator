@@ -11,6 +11,19 @@ import model.type.Element;
  * Transformative reactions (Swirl, Overload, Electro-Charged).
  */
 public class ReactionCalculator {
+    private static final double LEVEL_80_MULTIPLIER = 1077.44;
+    private static final double LEVEL_90_MULTIPLIER = 1446.85;
+    private static final double BURNING_MULTIPLIER = 0.25;
+    private static final double SWIRL_MULTIPLIER = 0.6;
+    private static final double SUPERCONDUCT_MULTIPLIER = 1.5;
+    private static final double ELECTRO_CHARGED_MULTIPLIER = 2.0;
+    private static final double BLOOM_MULTIPLIER = 2.0;
+    private static final double OVERLOADED_MULTIPLIER = 2.75;
+    private static final double HYPERBLOOM_MULTIPLIER = 3.0;
+    private static final double BURGEON_MULTIPLIER = 3.0;
+    private static final double SHATTER_MULTIPLIER = 3.0;
+    private static final double AGGRAVATE_MULTIPLIER = 1.15;
+    private static final double SPREAD_MULTIPLIER = 1.25;
 
     /**
      * Calculates the reaction result given a trigger element, an aura element,
@@ -90,11 +103,48 @@ public class ReactionCalculator {
 
         // Transformative Reactions
 
+        // Quicken (Dendro + Electro). This creates a persistent aura; Aggravate
+        // and Spread are handled by the simulator while the aura is active.
+        if ((trigger == Element.DENDRO && aura == Element.ELECTRO) ||
+                (trigger == Element.ELECTRO && aura == Element.DENDRO)) {
+            return ReactionResult.state("Quicken", ReactionResult.Kind.QUICKEN, null);
+        }
+
+        // Frozen (Hydro + Cryo). The simulator treats immobilization as non-offensive
+        // state; Shatter consumes this state later.
+        if ((trigger == Element.HYDRO && aura == Element.CRYO) ||
+                (trigger == Element.CRYO && aura == Element.HYDRO)) {
+            return ReactionResult.state("Frozen", ReactionResult.Kind.FROZEN, null);
+        }
+
+        // Burning (Pyro + Dendro). This creates a persistent Burning state whose
+        // Pyro ticks are scheduled by the simulator.
+        if ((trigger == Element.PYRO && aura == Element.DENDRO) ||
+                (trigger == Element.DENDRO && aura == Element.PYRO)) {
+            double dmg = calculateTransformativeDamage(level, em, BURNING_MULTIPLIER, 0.0);
+            return ReactionResult.stateDamage(dmg, "Burning", ReactionResult.Kind.BURNING, null, Element.PYRO);
+        }
+
+        // Bloom (Hydro + Dendro). The reaction creates a Dendro Core; the damage
+        // value here is stored for the delayed core explosion.
+        if ((trigger == Element.HYDRO && aura == Element.DENDRO) ||
+                (trigger == Element.DENDRO && aura == Element.HYDRO)) {
+            double dmg = calculateTransformativeDamage(level, em, BLOOM_MULTIPLIER, reactionBonus);
+            return ReactionResult.stateDamage(dmg, "Bloom", ReactionResult.Kind.BLOOM, null, Element.DENDRO);
+        }
+
+        // Crystallize (Geo + Pyro/Hydro/Electro/Cryo). Shield pickup is defensive
+        // and omitted by this single-target maximum-DPS simulator.
+        if (trigger == Element.GEO
+                && (aura == Element.PYRO || aura == Element.HYDRO || aura == Element.ELECTRO || aura == Element.CRYO)) {
+            return ReactionResult.state("Crystallize-" + formatElement(aura), ReactionResult.Kind.CRYSTALLIZE, aura);
+        }
+
         // Swirl (Anemo + Element)
         if (trigger == Element.ANEMO
                 && (aura == Element.PYRO || aura == Element.HYDRO || aura == Element.ELECTRO || aura == Element.CRYO)) {
-            double dmg = calculateTransformativeDamage(level, em, 0.6, reactionBonus);
-            return ReactionResult.transform(dmg, convertSwirlName(aura), ReactionResult.Kind.SWIRL, aura);
+            double dmg = calculateTransformativeDamage(level, em, SWIRL_MULTIPLIER, reactionBonus);
+            return ReactionResult.transform(dmg, convertSwirlName(aura), ReactionResult.Kind.SWIRL, aura, aura);
         }
         // Swirl (Element + Anemo) - usually Anemo triggers, but if Anemo is aura...
         // Anemo doesn't persist as Aura usually (sim removes it).
@@ -104,16 +154,25 @@ public class ReactionCalculator {
         // Overload (Pyro + Electro)
         if ((trigger == Element.PYRO && aura == Element.ELECTRO) ||
                 (trigger == Element.ELECTRO && aura == Element.PYRO)) {
-            double dmg = calculateTransformativeDamage(level, em, 2.0, 0.0); // No specific overload bonus passed yet
-            return ReactionResult.transform(dmg, "Overload", ReactionResult.Kind.OVERLOAD);
+            double dmg = calculateTransformativeDamage(level, em, OVERLOADED_MULTIPLIER, 0.0);
+            return ReactionResult.transform(dmg, "Overloaded", ReactionResult.Kind.OVERLOAD, null, Element.PYRO);
+        }
+
+        // Superconduct (Cryo + Electro)
+        if ((trigger == Element.CRYO && aura == Element.ELECTRO) ||
+                (trigger == Element.ELECTRO && aura == Element.CRYO)) {
+            double dmg = calculateTransformativeDamage(level, em, SUPERCONDUCT_MULTIPLIER, 0.0);
+            return ReactionResult.transform(dmg, "Superconduct", ReactionResult.Kind.SUPERCONDUCT,
+                    null, Element.CRYO);
         }
 
         // Electro-Charged (Electro + Hydro)
         if ((trigger == Element.ELECTRO && aura == Element.HYDRO) ||
                 (trigger == Element.HYDRO && aura == Element.ELECTRO)) {
 
-            double dmg = calculateTransformativeDamage(level, em, 1.2, 0.0);
-            return ReactionResult.transform(dmg, "Electro-Charged", ReactionResult.Kind.ELECTRO_CHARGED);
+            double dmg = calculateTransformativeDamage(level, em, ELECTRO_CHARGED_MULTIPLIER, 0.0);
+            return ReactionResult.transform(dmg, "Electro-Charged", ReactionResult.Kind.ELECTRO_CHARGED,
+                    null, Element.ELECTRO);
         }
 
         return ReactionResult.none();
@@ -127,8 +186,12 @@ public class ReactionCalculator {
      * @return formatted reaction string
      */
     private static String convertSwirlName(Element aura) {
-        String elem = aura.name();
-        return "Swirl-" + elem.charAt(0) + elem.substring(1).toLowerCase();
+        return "Swirl-" + formatElement(aura);
+    }
+
+    private static String formatElement(Element element) {
+        String elem = element.name();
+        return elem.charAt(0) + elem.substring(1).toLowerCase();
     }
 
     /**
@@ -144,19 +207,54 @@ public class ReactionCalculator {
      * @param bonusPct      additional percentage bonus for the reaction
      * @return total computed transformative damage
      */
-    private static double calculateTransformativeDamage(int level, double em, double reactionMulti, double bonusPct) {
-        // Level 90 Base ~ 1447. Let's use 1446.85
-        double levelBase = 1446.85;
-        if (level < 90) {
-            // Approximate or simplified.
-            if (level == 80)
-                levelBase = 1077.44;
-        }
+    public static ReactionResult calculateShatter(double em, int level, double reactionBonus) {
+        double dmg = calculateTransformativeDamage(level, em, SHATTER_MULTIPLIER, reactionBonus);
+        return ReactionResult.transform(dmg, "Shatter", ReactionResult.Kind.SHATTER, null, Element.PHYSICAL);
+    }
+
+    public static ReactionResult calculateHyperbloom(double em, int level, double reactionBonus) {
+        double dmg = calculateTransformativeDamage(level, em, HYPERBLOOM_MULTIPLIER, reactionBonus);
+        return ReactionResult.transform(dmg, "Hyperbloom", ReactionResult.Kind.HYPERBLOOM, null, Element.DENDRO);
+    }
+
+    public static ReactionResult calculateBurgeon(double em, int level, double reactionBonus) {
+        double dmg = calculateTransformativeDamage(level, em, BURGEON_MULTIPLIER, reactionBonus);
+        return ReactionResult.transform(dmg, "Burgeon", ReactionResult.Kind.BURGEON, null, Element.DENDRO);
+    }
+
+    public static ReactionResult calculateAggravate(double em, int level, double reactionBonus) {
+        double dmg = calculateAdditiveReactionDamage(level, em, AGGRAVATE_MULTIPLIER, reactionBonus);
+        return ReactionResult.additive(dmg, "Aggravate", ReactionResult.Kind.AGGRAVATE, Element.ELECTRO);
+    }
+
+    public static ReactionResult calculateSpread(double em, int level, double reactionBonus) {
+        double dmg = calculateAdditiveReactionDamage(level, em, SPREAD_MULTIPLIER, reactionBonus);
+        return ReactionResult.additive(dmg, "Spread", ReactionResult.Kind.SPREAD, Element.DENDRO);
+    }
+
+    public static double calculateTransformativeDamage(int level, double em, double reactionMulti, double bonusPct) {
+        double levelBase = levelMultiplier(level);
 
         double emBonus = (16.0 * em) / (em + 2000.0);
         double dmg = levelBase * reactionMulti * (1.0 + emBonus + bonusPct);
 
         return dmg;
+    }
+
+    public static double calculateAdditiveReactionDamage(int level, double em, double reactionMulti, double bonusPct) {
+        double levelBase = levelMultiplier(level);
+        double emBonus = (5.0 * em) / (em + 1200.0);
+        return levelBase * reactionMulti * (1.0 + emBonus + bonusPct);
+    }
+
+    private static double levelMultiplier(int level) {
+        if (level >= 90) {
+            return LEVEL_90_MULTIPLIER;
+        }
+        if (level >= 80) {
+            return LEVEL_80_MULTIPLIER;
+        }
+        return LEVEL_90_MULTIPLIER;
     }
 
     /**

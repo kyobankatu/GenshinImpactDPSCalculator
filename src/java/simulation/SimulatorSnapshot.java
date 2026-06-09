@@ -8,6 +8,7 @@ import java.util.Map;
 import mechanics.buff.Buff;
 import model.type.CharacterId;
 import model.type.Element;
+import simulation.runtime.ReactionState;
 
 /**
  * Immutable capture of all mutable {@link CombatSimulator} state at a point in time.
@@ -61,6 +62,13 @@ public class SimulatorSnapshot {
     public final Map<String, double[]> icdStates;
     public final boolean ecTimerRunning;
     public final double thundercloudEndTime;
+    public final boolean burningTimerRunning;
+    public final double burningEndTime;
+    public final double quickenEndTime;
+    public final int moondriftCount;
+    public final int lunarCrystallizeTriggerCount;
+    public final List<ReactionState.DendroCoreState> dendroCores;
+    public final int nextDendroCoreId;
     public final Map<Element, Double> enemyAura;
 
     /** Per-character snapshots keyed by CharacterId. */
@@ -105,6 +113,13 @@ public class SimulatorSnapshot {
             Map<String, double[]> icdStates,
             boolean ecTimerRunning,
             double thundercloudEndTime,
+            boolean burningTimerRunning,
+            double burningEndTime,
+            double quickenEndTime,
+            int moondriftCount,
+            int lunarCrystallizeTriggerCount,
+            List<ReactionState.DendroCoreState> dendroCores,
+            int nextDendroCoreId,
             Map<Element, Double> enemyAura,
             Map<CharacterId, CharacterSnapshot> characters,
             List<Buff> teamBuffRefs,
@@ -121,6 +136,13 @@ public class SimulatorSnapshot {
         this.icdStates = icdStates;
         this.ecTimerRunning = ecTimerRunning;
         this.thundercloudEndTime = thundercloudEndTime;
+        this.burningTimerRunning = burningTimerRunning;
+        this.burningEndTime = burningEndTime;
+        this.quickenEndTime = quickenEndTime;
+        this.moondriftCount = moondriftCount;
+        this.lunarCrystallizeTriggerCount = lunarCrystallizeTriggerCount;
+        this.dendroCores = new ArrayList<>(dendroCores);
+        this.nextDendroCoreId = nextDendroCoreId;
         this.enemyAura = new HashMap<>(enemyAura);
         this.characters = characters;
         this.teamBuffRefs = new ArrayList<>(teamBuffRefs);

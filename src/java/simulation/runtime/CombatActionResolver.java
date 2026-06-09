@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Set;
 
 import mechanics.buff.Buff;
+import mechanics.buff.BuffId;
+import mechanics.buff.SimpleBuff;
 import mechanics.formula.DamageCalculator;
 import mechanics.formula.ResistanceCalculator;
 import mechanics.reaction.ReactionCalculator;
@@ -71,6 +73,8 @@ public class CombatActionResolver {
         try {
             String charName = c.getName();
             ActionResolutionContext context = createContext(c, action);
+            action.setAdditiveBaseDmgBonus(0.0);
+            action.setAdditiveReactionName(null);
 
             normalizeIcd(action);
 
@@ -80,6 +84,11 @@ public class CombatActionResolver {
             notifyLunarAction(action, c);
 
             double reactionMulti = 1.0;
+            if (applied) {
+                tryTriggerShatter(c, characterId, action, context);
+                tryTriggerDendroCoreReaction(c, characterId, action, context);
+                tryApplyCatalyzeAdditiveReaction(c, action, context);
+            }
             if (applied && action.getGaugeUnits() > 0) {
                 reactionMulti = resolveGaugeAndReactions(c, characterId, action, context);
             } else if (sim.isLoggingEnabled()) {
@@ -166,19 +175,22 @@ public class CombatActionResolver {
 
         StatsContainer stats = getReactionStats(attacker, action, context);
         double em = stats.get(StatType.ELEMENTAL_MASTERY);
-        double swirlBonus = stats.get(StatType.SWIRL_DMG_BONUS);
 
         for (Element aura : currentAuras) {
-            ReactionResult result = ReactionCalculator.calculate(trigger, aura, em, 90, swirlBonus);
+            ReactionResult result = ReactionCalculator.calculate(
+                    trigger, aura, em, 90, getReactionBonus(trigger, aura, stats));
             if (result.getType() == ReactionResult.Type.NONE) {
                 continue;
             }
+            result = convertToLunarIfEligible(result);
 
             reactionTriggered = true;
             sim.notifyReaction(result, attacker);
 
             if (result.getType() == ReactionResult.Type.AMP) {
                 reactionMulti = handleAmplifyingReaction(trigger, aura, action, result);
+            } else if (result.isStateful()) {
+                handleStatefulReaction(attacker, characterId, trigger, aura, action, result, stats);
             } else if (result.getType() == ReactionResult.Type.TRANSFORMATIVE) {
                 handleTransformativeReaction(attacker, characterId, action, trigger, aura, result, stats);
             }
@@ -189,6 +201,114 @@ public class CombatActionResolver {
         }
 
         return reactionMulti;
+    }
+
+    private ReactionResult convertToLunarIfEligible(ReactionResult result) {
+        if (!sim.hasLunarReactionConversion()) {
+            return result;
+        }
+        if (result.getKind() == ReactionResult.Kind.ELECTRO_CHARGED) {
+            return ReactionResult.lunar(
+                    result.getTransformDamage(),
+                    ReactionResult.LunarType.CHARGED,
+                    result.getRelatedElement(),
+                    Element.ELECTRO,
+                    false,
+                    false);
+        }
+        if (result.getKind() == ReactionResult.Kind.BLOOM) {
+            return ReactionResult.lunar(
+                    result.getTransformDamage(),
+                    ReactionResult.LunarType.BLOOM,
+                    result.getRelatedElement(),
+                    Element.DENDRO,
+                    true,
+                    false);
+        }
+        if (result.getKind() == ReactionResult.Kind.CRYSTALLIZE && result.getRelatedElement() == Element.HYDRO) {
+            return ReactionResult.lunar(
+                    result.getTransformDamage(),
+                    ReactionResult.LunarType.CRYSTALLIZE,
+                    result.getRelatedElement(),
+                    Element.GEO,
+                    true,
+                    false);
+        }
+        return result;
+    }
+
+    private void tryTriggerShatter(
+            Character attacker,
+            CharacterId characterId,
+            AttackAction action,
+            ActionResolutionContext context) {
+        boolean canShatter = sim.getEnemy().isFrozen()
+                && (action.getElement() == Element.GEO || action.isShatterTrigger());
+        if (!canShatter) {
+            return;
+        }
+        StatsContainer stats = getReactionStats(attacker, action, context);
+        ReactionResult result = ReactionCalculator.calculateShatter(
+                stats.get(StatType.ELEMENTAL_MASTERY), 90, 0.0);
+        sim.notifyReaction(result, attacker);
+        double resFactor = DamageCalculator.calculateResMulti(
+                sim.getEnemy().getRes(StatType.PHYSICAL_DMG_BONUS),
+                ResistanceCalculator.getTotalResShred(stats, Element.PHYSICAL));
+        double damage = result.getTransformDamage() * resFactor;
+        if (sim.isLoggingEnabled()) {
+            System.out.println(String.format("   [Reaction] Frozen target -> Shatter Damage: %,.0f", damage));
+        }
+        sim.recordDamage(characterId, damage);
+        if (sim.isLoggingEnabled()) {
+            sim.getCombatLogSink().log(
+                    sim.getCurrentTime(), attacker.getName(), "Shatter", damage,
+                    "Shatter", damage, sim.getEnemy().getAuraMap());
+        }
+        sim.getEnemy().clearFreezeAura();
+    }
+
+    private double getReactionBonus(Element trigger, Element aura, StatsContainer stats) {
+        if (trigger == Element.ANEMO
+                && (aura == Element.PYRO || aura == Element.HYDRO || aura == Element.ELECTRO || aura == Element.CRYO)) {
+            return stats.get(StatType.SWIRL_DMG_BONUS);
+        }
+        if ((trigger == Element.HYDRO && aura == Element.DENDRO)
+                || (trigger == Element.DENDRO && aura == Element.HYDRO)) {
+            return stats.get(StatType.BLOOM_DMG_BONUS);
+        }
+        return 0.0;
+    }
+
+    private void tryTriggerDendroCoreReaction(
+            Character attacker,
+            CharacterId characterId,
+            AttackAction action,
+            ActionResolutionContext context) {
+        if (sim.getDendroCores().isEmpty()
+                || (action.getElement() != Element.ELECTRO && action.getElement() != Element.PYRO)) {
+            return;
+        }
+
+        StatsContainer stats = getReactionStats(attacker, action, context);
+        ReactionResult result = action.getElement() == Element.ELECTRO
+                ? ReactionCalculator.calculateHyperbloom(
+                        stats.get(StatType.ELEMENTAL_MASTERY), 90, stats.get(StatType.HYPERBLOOM_DMG_BONUS))
+                : ReactionCalculator.calculateBurgeon(
+                        stats.get(StatType.ELEMENTAL_MASTERY), 90, stats.get(StatType.BURGEON_DMG_BONUS));
+        double resFactor = DamageCalculator.calculateResMulti(
+                sim.getEnemy().getRes(StatType.DENDRO_DMG_BONUS),
+                ResistanceCalculator.getTotalResShred(stats, Element.DENDRO));
+        double damage = result.getTransformDamage() * resFactor;
+        int consumed = reactionEffectScheduler.consumeDendroCores(
+                characterId, damage, result.getName(), Integer.MAX_VALUE);
+        if (consumed > 0) {
+            sim.notifyReaction(result, attacker);
+            if (sim.isLoggingEnabled()) {
+                System.out.println(String.format(
+                        "   [Reaction] %s consumed %d Dendro Core(s) -> %s Damage: %,.0f each",
+                        action.getElement(), consumed, result.getName(), damage));
+            }
+        }
     }
 
     /**
@@ -290,8 +410,139 @@ public class CombatActionResolver {
         if (result.isElectroCharged()) {
             reactionEffectScheduler.scheduleElectroCharged(trigger, action.getGaugeUnits(), transDmg, isLunar);
         } else {
+            if (result.getKind() == ReactionResult.Kind.SUPERCONDUCT) {
+                applySuperconductPhysicalResShred();
+            }
             sim.getEnemy().setAura(aura, 0);
         }
+    }
+
+    private void handleStatefulReaction(Character attacker, CharacterId characterId, Element trigger, Element aura,
+            AttackAction action, ReactionResult result, StatsContainer stats) {
+        if (result.getKind() == ReactionResult.Kind.FROZEN) {
+            double freezeUnits = Math.min(action.getGaugeUnits(), Math.max(0.5, sim.getEnemy().getAuraUnits(aura)));
+            sim.getEnemy().setFreezeAura(freezeUnits);
+            sim.getEnemy().reduceAura(aura, action.getGaugeUnits());
+            if (sim.isLoggingEnabled()) {
+                System.out.println(String.format(
+                        "   [Reaction] %s on %s -> Frozen (%.1f U)",
+                        trigger, aura, freezeUnits));
+            }
+        } else if (result.getKind() == ReactionResult.Kind.CRYSTALLIZE) {
+            sim.getEnemy().reduceAura(aura, action.getGaugeUnits());
+            if (sim.isLoggingEnabled()) {
+                System.out.println(String.format(
+                        "   [Reaction] %s on %s -> %s",
+                        trigger, aura, result.getName()));
+            }
+        } else if (result.getKind() == ReactionResult.Kind.LUNAR_CRYSTALLIZE) {
+            sim.getEnemy().reduceAura(aura, action.getGaugeUnits());
+            handleLunarCrystallize(attacker, characterId, trigger, aura, result);
+        } else if (result.getKind() == ReactionResult.Kind.BURNING) {
+            double resFactor = DamageCalculator.calculateResMulti(
+                    sim.getEnemy().getRes(StatType.PYRO_DMG_BONUS),
+                    ResistanceCalculator.getTotalResShred(stats, Element.PYRO));
+            double tickDamage = result.getTransformDamage() * resFactor;
+            sim.getEnemy().reduceAura(aura, action.getGaugeUnits());
+            reactionEffectScheduler.scheduleBurning(characterId, tickDamage);
+            if (sim.isLoggingEnabled()) {
+                System.out.println(String.format(
+                        "   [Reaction] %s on %s -> Burning Tick Damage: %,.0f",
+                        trigger, aura, tickDamage));
+            }
+        } else if (result.getKind() == ReactionResult.Kind.BLOOM
+                || result.getKind() == ReactionResult.Kind.LUNAR_BLOOM) {
+            double resFactor = DamageCalculator.calculateResMulti(
+                    sim.getEnemy().getRes(StatType.DENDRO_DMG_BONUS),
+                    ResistanceCalculator.getTotalResShred(stats, Element.DENDRO));
+            double coreDamage = result.getTransformDamage() * resFactor;
+            sim.getEnemy().reduceAura(aura, action.getGaugeUnits());
+            reactionEffectScheduler.createDendroCore(characterId, coreDamage);
+            if (sim.isLoggingEnabled()) {
+                System.out.println(String.format(
+                        "   [Reaction] %s on %s -> %s Core Damage: %,.0f",
+                        trigger, aura, result.getName(), coreDamage));
+            }
+        } else if (result.getKind() == ReactionResult.Kind.QUICKEN) {
+            double quickenGauge = Math.min(sim.getEnemy().getAuraUnits(aura), action.getGaugeUnits());
+            double duration = Math.max(0.0, quickenGauge) * 5.0 + 6.0;
+            sim.setQuickenEndTime(sim.getCurrentTime() + duration);
+            sim.getEnemy().reduceAura(aura, action.getGaugeUnits());
+            if (sim.isLoggingEnabled()) {
+                System.out.println(String.format(
+                        "   [Reaction] %s on %s -> Quicken (%.1fs)",
+                        trigger, aura, duration));
+            }
+        }
+    }
+
+    private void handleLunarCrystallize(
+            Character attacker,
+            CharacterId characterId,
+            Element trigger,
+            Element aura,
+            ReactionResult result) {
+        if (sim.getMoondriftCount() == 0) {
+            sim.setMoondriftCount(3);
+        }
+        int triggerCount = sim.incrementLunarCrystallizeTriggerCount();
+        if (sim.isLoggingEnabled()) {
+            System.out.println(String.format(
+                    "   [Reaction] %s on %s -> Lunar-Crystallize (Moondrifts: %d, Count: %d)",
+                    trigger, aura, sim.getMoondriftCount(), triggerCount));
+        }
+        if (triggerCount % 3 != 0) {
+            return;
+        }
+        double damage = reactionEffectScheduler.computeLunarCrystallizeHarmonyDamage();
+        sim.recordDamage(characterId, damage);
+        sim.getCombatLogSink().log(
+                sim.getCurrentTime(), attacker.getName(), "Moondrift Harmony", damage,
+                result.getName(), damage, sim.getEnemy().getAuraMap());
+        sim.notifyReaction(
+                ReactionResult.lunar(
+                        damage,
+                        ReactionResult.LunarType.CRYSTALLIZE,
+                        Element.HYDRO,
+                        Element.GEO,
+                        false,
+                        true),
+                attacker);
+    }
+
+    private void tryApplyCatalyzeAdditiveReaction(
+            Character attacker,
+            AttackAction action,
+            ActionResolutionContext context) {
+        if (!sim.isQuickenActive() || (action.getElement() != Element.ELECTRO && action.getElement() != Element.DENDRO)) {
+            action.setAdditiveBaseDmgBonus(0.0);
+            action.setAdditiveReactionName(null);
+            return;
+        }
+
+        StatsContainer stats = getReactionStats(attacker, action, context);
+        ReactionResult result = action.getElement() == Element.ELECTRO
+                ? ReactionCalculator.calculateAggravate(
+                        stats.get(StatType.ELEMENTAL_MASTERY), 90, stats.get(StatType.AGGRAVATE_DMG_BONUS))
+                : ReactionCalculator.calculateSpread(
+                        stats.get(StatType.ELEMENTAL_MASTERY), 90, stats.get(StatType.SPREAD_DMG_BONUS));
+        action.setAdditiveBaseDmgBonus(result.getTransformDamage());
+        action.setAdditiveReactionName(result.getName());
+        sim.notifyReaction(result, attacker);
+        if (sim.isLoggingEnabled()) {
+            System.out.println(String.format(
+                    "   [Reaction] Quickened target -> %s Additive Base Damage: %,.0f",
+                    result.getName(), result.getTransformDamage()));
+        }
+    }
+
+    private void applySuperconductPhysicalResShred() {
+        sim.applyTeamBuffNoStack(new SimpleBuff(
+                "Superconduct Physical RES Shred",
+                BuffId.SUPERCONDUCT_PHYS_RES_SHRED,
+                12.0,
+                sim.getCurrentTime(),
+                stats -> stats.add(StatType.PHYS_RES_SHRED, 0.40)));
     }
 
     /**
@@ -301,8 +552,8 @@ public class CombatActionResolver {
      * @return Electro for Electro-Charged, Pyro otherwise (current scope)
      */
     private Element getTransformativeReactionElement(ReactionResult result) {
-        if (result.isElectroCharged()) {
-            return Element.ELECTRO;
+        if (result.getDamageElement() != null) {
+            return result.getDamageElement();
         }
         return Element.PYRO;
     }
@@ -373,10 +624,15 @@ public class CombatActionResolver {
         }
 
         if (sim.isLoggingEnabled()) {
+            String reactionLabel = action.getAdditiveReactionName() != null
+                    ? action.getAdditiveReactionName()
+                    : (reactionMulti > 1.0 ? "Amp x" + String.format("%.2f", reactionMulti) : "None");
+            double reactionValue = action.getAdditiveReactionName() != null
+                    ? action.getAdditiveBaseDmgBonus()
+                    : 0.0;
             sim.getCombatLogSink().log(
                     sim.getCurrentTime(), charName, action.getName(), damage,
-                    (reactionMulti > 1.0 ? "Amp x" + String.format("%.2f", reactionMulti) : "None"),
-                    0.0, sim.getEnemy().getAuraMap(), action.getDebugFormula());
+                    reactionLabel, reactionValue, sim.getEnemy().getAuraMap(), action.getDebugFormula());
         }
     }
 

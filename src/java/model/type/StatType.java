@@ -88,6 +88,16 @@ public enum StatType {
 
     /** DMG bonus that applies specifically to Electro-Charged hits. */
     ELECTRO_CHARGED_DMG_BONUS,
+    /** DMG bonus that applies specifically to Bloom core explosions. */
+    BLOOM_DMG_BONUS,
+    /** DMG bonus that applies specifically to Hyperbloom hits. */
+    HYPERBLOOM_DMG_BONUS,
+    /** DMG bonus that applies specifically to Burgeon hits. */
+    BURGEON_DMG_BONUS,
+    /** DMG bonus that applies specifically to Aggravate additive damage. */
+    AGGRAVATE_DMG_BONUS,
+    /** DMG bonus that applies specifically to Spread additive damage. */
+    SPREAD_DMG_BONUS,
 
     // -----------------------------------------------------------------------
     // Custom "Lunar" mechanics (non-canonical / original content)

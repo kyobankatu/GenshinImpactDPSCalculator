@@ -48,14 +48,19 @@ public class ReactionResult {
         QUICKEN,
         /** 超激化反応。 */
         AGGRAVATE,
+        SPREAD,
         /** 超開花反応。 */
         HYPERBLOOM,
+        BURGEON,
         /** 開花反応。 */
         BLOOM,
+        BURNING,
         /** 結晶反応。 */
         CRYSTALLIZE,
         /** 感電反応。 */
         ELECTRO_CHARGED,
+        FROZEN,
+        SHATTER,
         /** Lunar 拡張: 感電に対応する非公式反応。 */
         LUNAR_CHARGED,
         /** Lunar 拡張: 開花に対応する非公式反応。 */
@@ -96,6 +101,9 @@ public class ReactionResult {
     private Element relatedElement;
     /** Lunar 反応細分。 */
     private LunarType lunarType;
+    private Element damageElement;
+    private boolean stateful;
+    private boolean canCrit;
 
     /**
      * 反応種別と倍率/ダメージ、名称から {@code ReactionResult} を構築する。
@@ -151,6 +159,11 @@ public class ReactionResult {
      */
     public ReactionResult(Type type, double ampMultiplier, double transformDamage, String name, Kind kind,
             LunarType lunarType, Element relatedElement) {
+        this(type, ampMultiplier, transformDamage, name, kind, lunarType, relatedElement, null, false, false);
+    }
+
+    public ReactionResult(Type type, double ampMultiplier, double transformDamage, String name, Kind kind,
+            LunarType lunarType, Element relatedElement, Element damageElement, boolean stateful, boolean canCrit) {
         this.type = type;
         this.ampMultiplier = ampMultiplier;
         this.transformDamage = transformDamage;
@@ -158,6 +171,9 @@ public class ReactionResult {
         this.kind = kind;
         this.lunarType = lunarType;
         this.relatedElement = relatedElement;
+        this.damageElement = damageElement;
+        this.stateful = stateful;
+        this.canCrit = canCrit;
     }
 
     /**
@@ -228,6 +244,28 @@ public class ReactionResult {
         return new ReactionResult(Type.TRANSFORMATIVE, 1.0, damage, name, kind, relatedElement);
     }
 
+    public static ReactionResult transform(double damage, String name, Kind kind, Element relatedElement,
+            Element damageElement) {
+        return new ReactionResult(Type.TRANSFORMATIVE, 1.0, damage, name, kind,
+                inferLunarType(kind), relatedElement, damageElement, false, false);
+    }
+
+    public static ReactionResult state(String name, Kind kind, Element relatedElement) {
+        return new ReactionResult(Type.TRANSFORMATIVE, 1.0, 0.0, name, kind,
+                inferLunarType(kind), relatedElement, null, true, false);
+    }
+
+    public static ReactionResult stateDamage(double damage, String name, Kind kind, Element relatedElement,
+            Element damageElement) {
+        return new ReactionResult(Type.TRANSFORMATIVE, 1.0, damage, name, kind,
+                inferLunarType(kind), relatedElement, damageElement, true, false);
+    }
+
+    public static ReactionResult additive(double damage, String name, Kind kind, Element damageElement) {
+        return new ReactionResult(Type.TRANSFORMATIVE, 1.0, damage, name, kind,
+                inferLunarType(kind), null, damageElement, false, true);
+    }
+
     /**
      * Lunar 反応の結果を生成する。
      *
@@ -238,6 +276,17 @@ public class ReactionResult {
     public static ReactionResult lunar(double damage, LunarType lunarType) {
         return new ReactionResult(Type.TRANSFORMATIVE, 1.0, damage, canonicalLunarName(lunarType),
                 kindFromLunarType(lunarType), lunarType, null);
+    }
+
+    public static ReactionResult lunar(
+            double damage,
+            LunarType lunarType,
+            Element relatedElement,
+            Element damageElement,
+            boolean stateful,
+            boolean canCrit) {
+        return new ReactionResult(Type.TRANSFORMATIVE, 1.0, damage, canonicalLunarName(lunarType),
+                kindFromLunarType(lunarType), lunarType, relatedElement, damageElement, stateful, canCrit);
     }
 
     /**
@@ -292,6 +341,18 @@ public class ReactionResult {
      */
     public Element getRelatedElement() {
         return relatedElement;
+    }
+
+    public Element getDamageElement() {
+        return damageElement;
+    }
+
+    public boolean isStateful() {
+        return stateful;
+    }
+
+    public boolean canCrit() {
+        return canCrit;
     }
 
     /**

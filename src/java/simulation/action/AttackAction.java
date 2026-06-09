@@ -117,7 +117,10 @@ public class AttackAction {
     private ActionType actionType;
     private boolean countsAsBurstDmg; // New flag for The Catch interaction
     private boolean countsAsSkillDmg; // New flag for Wolf-Fang interaction
+    private boolean shatterTrigger;
     private double defenseIgnore = 0.0; // Defense Ignore 0.0 - 1.0 (e.g. Raiden C2)
+    private double additiveBaseDmgBonus = 0.0;
+    private String additiveReactionName;
 
     // Constructors
 
@@ -283,6 +286,24 @@ public class AttackAction {
      */
     public boolean isCountsAsSkillDmg() {
         return countsAsSkillDmg;
+    }
+
+    /**
+     * Marks whether this hit can trigger Shatter against Frozen enemies.
+     *
+     * @param shatterTrigger {@code true} for blunt attacks
+     */
+    public void setShatterTrigger(boolean shatterTrigger) {
+        this.shatterTrigger = shatterTrigger;
+    }
+
+    /**
+     * Returns whether this hit can trigger Shatter against Frozen enemies.
+     *
+     * @return {@code true} if this hit is blunt for Shatter purposes
+     */
+    public boolean isShatterTrigger() {
+        return shatterTrigger;
     }
 
     /**
@@ -460,6 +481,33 @@ public class AttackAction {
      */
     public double getDefenseIgnore() {
         return defenseIgnore;
+    }
+
+    /**
+     * Sets flat additive base damage that is inserted before DMG Bonus, Crit, DEF,
+     * and RES. Used for Aggravate and Spread.
+     *
+     * @param value additive base damage
+     */
+    public void setAdditiveBaseDmgBonus(double value) {
+        this.additiveBaseDmgBonus = value;
+    }
+
+    /**
+     * Returns flat additive base damage for the standard damage formula.
+     *
+     * @return additive base damage
+     */
+    public double getAdditiveBaseDmgBonus() {
+        return additiveBaseDmgBonus;
+    }
+
+    public void setAdditiveReactionName(String additiveReactionName) {
+        this.additiveReactionName = additiveReactionName;
+    }
+
+    public String getAdditiveReactionName() {
+        return additiveReactionName;
     }
 
     private String debugFormula;

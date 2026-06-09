@@ -92,6 +92,7 @@ public enum BuffId {
     XIANGLING_C6,
     /** 聖遺物 4 セット「旧貴族のしつけ」効果。 */
     NOBLESSE_OBLIGE_4PC,
+    SUPERCONDUCT_PHYS_RES_SHRED,
     /** 武器「漂泊の宵星」効果。 */
     WANDERING_EVENSTAR_WILDLING_NIGHTSTAR,
     /** Aubade 系武器ボーナス。 */

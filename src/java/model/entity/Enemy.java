@@ -18,6 +18,7 @@ public class Enemy {
     private int level;
     private Map<StatType, Double> resistances; // RES for each element
     private java.util.Map<model.type.Element, Double> auraGauge = new HashMap<>();
+    private double freezeAuraUnits = 0.0;
 
     /**
      * Creates an enemy at the given level with KQM-standard 10 % resistance
@@ -122,6 +123,49 @@ public class Enemy {
      */
     public java.util.Map<model.type.Element, Double> getAuraMap() {
         return new java.util.HashMap<>(auraGauge);
+    }
+
+    /**
+     * Sets the simplified Freeze Aura gauge used by single-target reaction logic.
+     *
+     * @param units Freeze Aura units; non-positive values clear the state
+     */
+    public void setFreezeAura(double units) {
+        freezeAuraUnits = Math.max(0.0, units);
+    }
+
+    /**
+     * Reduces the simplified Freeze Aura gauge.
+     *
+     * @param units amount to remove
+     */
+    public void reduceFreezeAura(double units) {
+        freezeAuraUnits = Math.max(0.0, freezeAuraUnits - units);
+    }
+
+    /**
+     * Clears the simplified Freeze Aura state.
+     */
+    public void clearFreezeAura() {
+        freezeAuraUnits = 0.0;
+    }
+
+    /**
+     * Returns whether the enemy currently has Freeze Aura.
+     *
+     * @return {@code true} if Frozen
+     */
+    public boolean isFrozen() {
+        return freezeAuraUnits > 0.0;
+    }
+
+    /**
+     * Returns the current simplified Freeze Aura units.
+     *
+     * @return Freeze Aura units
+     */
+    public double getFreezeAuraUnits() {
+        return freezeAuraUnits;
     }
 
     /**
