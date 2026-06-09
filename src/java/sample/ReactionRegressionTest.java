@@ -11,13 +11,17 @@ import model.entity.Character;
 import model.entity.Enemy;
 import model.entity.Weapon;
 import model.stats.StatsContainer;
+import model.type.ActionType;
 import model.type.CharacterId;
 import model.type.Element;
 import model.type.ICDTag;
 import model.type.ICDType;
 import model.type.StatType;
 import simulation.CombatSimulator;
+import simulation.SimulatorSnapshot;
 import simulation.action.AttackAction;
+import simulation.action.CharacterActionKey;
+import simulation.action.CharacterActionRequest;
 
 /**
  * Lightweight regression checks for elemental reaction behavior.
@@ -38,6 +42,35 @@ public class ReactionRegressionTest {
         testPhase10LunarChargedThundercloud();
         testPhase11LunarBloom();
         testPhase12LunarCrystallize();
+        testAccuracyPhaseA_AuraDecayOneUnit();
+        testAccuracyPhaseA_AuraDecayTwoUnitLongerThanOneUnit();
+        testAccuracyPhaseA_VaporizeConsumesExpectedAura();
+        testAccuracyPhaseA_ElectroChargedCoexistence();
+        testAccuracyPhaseA_QuickenCoexistsWithDendroFollowup();
+        testAccuracyPhaseB_StandardIcdThreeHitRule();
+        testAccuracyPhaseB_StandardIcdTimeRule();
+        testAccuracyPhaseB_NoIcdAppliesEveryHit();
+        testAccuracyPhaseB_SharedIcdBlocksRelatedHits();
+        testAccuracyPhaseB_DamageStillOccursWhenApplicationBlocked();
+        testAccuracyPhaseC_CoreOverflowExplodesOldest();
+        testAccuracyPhaseC_HyperbloomConsumesOneCoreForSingleProjectile();
+        testAccuracyPhaseC_BurgeonConsumesAoECores();
+        testAccuracyPhaseC_CoreExplosionHitCap();
+        testAccuracyPhaseC_LunarBloomUsesSameCorePolicy();
+        testAccuracyPhaseD_QuickenRefreshesDuration();
+        testAccuracyPhaseD_AggravateUsesTriggerEm();
+        testAccuracyPhaseD_SpreadUsesTriggerReactionBonus();
+        testAccuracyPhaseD_AdditivePassesThroughCritAndDmgBonus();
+        testAccuracyPhaseD_NoCatalyzeAfterQuickenExpiry();
+        testAccuracyPhaseE_LunarConversionRequiresBenedictionSource();
+        testAccuracyPhaseE_LunarChargedTickOwnershipAndCrit();
+        testAccuracyPhaseE_LunarBloomDewState();
+        testAccuracyPhaseE_LunarCrystallizeHarmonyCadence();
+        testAccuracyPhaseF_RaidenResolveAndEnergyRegression();
+        testAccuracyPhaseF_FlinsThundercloudConditionalHits();
+        testAccuracyPhaseF_ColumbinaGravityAndDewRegression();
+        testAccuracyPhaseF_ArtifactLunarReactionBuffRegression();
+        testAccuracyPhaseF_WeaponReactionBonusRegression();
         System.out.println("ReactionRegressionTest passed");
     }
 
@@ -370,6 +403,467 @@ public class ReactionRegressionTest {
                 "Every third Lunar-Crystallize should trigger Moondrift Harmony damage");
     }
 
+    private static void testAccuracyPhaseA_AuraDecayOneUnit() {
+        CombatSimulator sim = simulatorWith(testCharacter(Element.PYRO));
+        sim.getEnemy().setAura(Element.PYRO, 1.0, sim.getCurrentTime());
+        sim.advanceTime(10.99);
+        assertClose(1.0, sim.getEnemy().getAuraUnits(Element.PYRO), EPS,
+                "1U aura should remain just before simplified expiry");
+        sim.advanceTime(0.02);
+        assertClose(0.0, sim.getEnemy().getAuraUnits(Element.PYRO), EPS,
+                "1U aura should expire naturally after its duration");
+    }
+
+    private static void testAccuracyPhaseA_AuraDecayTwoUnitLongerThanOneUnit() {
+        CombatSimulator oneUnit = simulatorWith(testCharacter(Element.PYRO));
+        CombatSimulator twoUnit = simulatorWith(testCharacter(Element.PYRO));
+        oneUnit.getEnemy().setAura(Element.PYRO, 1.0, oneUnit.getCurrentTime());
+        twoUnit.getEnemy().setAura(Element.PYRO, 2.0, twoUnit.getCurrentTime());
+
+        oneUnit.advanceTime(11.1);
+        twoUnit.advanceTime(11.1);
+        assertClose(0.0, oneUnit.getEnemy().getAuraUnits(Element.PYRO), EPS,
+                "1U aura should be expired after 11.1s");
+        assertClose(2.0, twoUnit.getEnemy().getAuraUnits(Element.PYRO), EPS,
+                "2U aura should survive longer than 1U");
+    }
+
+    private static void testAccuracyPhaseA_VaporizeConsumesExpectedAura() {
+        CombatSimulator sim = simulatorWith(testCharacter(Element.PYRO));
+        sim.getEnemy().setAura(Element.HYDRO, 2.0, sim.getCurrentTime());
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                reactionHit("Pyro reverse vaporize trigger", Element.PYRO));
+        assertClose(1.5, sim.getEnemy().getAuraUnits(Element.HYDRO), EPS,
+                "Reverse Vaporize should consume 0.5U Hydro for a 1U Pyro trigger");
+    }
+
+    private static void testAccuracyPhaseA_ElectroChargedCoexistence() {
+        CombatSimulator sim = simulatorWith(testCharacter(Element.ELECTRO));
+        sim.setMoonsign(CombatSimulator.Moonsign.NONE);
+        sim.getEnemy().setAura(Element.HYDRO, 1.0, sim.getCurrentTime());
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                reactionHit("Electro charged coexistence trigger", Element.ELECTRO));
+        assertClose(1.0, sim.getEnemy().getAuraUnits(Element.HYDRO), EPS,
+                "Electro-Charged should keep Hydro aura before tick consumption");
+        assertClose(1.0, sim.getEnemy().getAuraUnits(Element.ELECTRO), EPS,
+                "Electro-Charged should keep Electro aura before tick consumption");
+
+        sim.advanceTime(1.01);
+        assertClose(0.6, sim.getEnemy().getAuraUnits(Element.HYDRO), 0.01,
+                "Standard Electro-Charged tick should consume 0.4U Hydro");
+        assertClose(0.6, sim.getEnemy().getAuraUnits(Element.ELECTRO), 0.01,
+                "Standard Electro-Charged tick should consume 0.4U Electro");
+    }
+
+    private static void testAccuracyPhaseA_QuickenCoexistsWithDendroFollowup() {
+        TestCharacter dendroCharacter = testCharacter(Element.DENDRO)
+                .withStat(StatType.CRIT_RATE, 1.0)
+                .withStat(StatType.CRIT_DMG, 1.0)
+                .withStat(StatType.DENDRO_DMG_BONUS, 0.50);
+        CombatSimulator sim = simulatorWith(dendroCharacter);
+        sim.getEnemy().setAura(Element.ELECTRO, 1.0, sim.getCurrentTime());
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                reactionHit("Dendro quicken coexistence trigger", Element.DENDRO));
+        assertTrue(sim.isQuickenActive(), "Quicken should be active after Dendro on Electro");
+
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                catalyzeDamageHit("Dendro spread coexistence hit", Element.DENDRO));
+        assertTrue(sim.isQuickenActive(), "Spread follow-up should not immediately delete Quicken");
+        assertClose(expectedStandardCatalyzeDamage(1.25, 0.50, 1.0, 1.0), sim.getTotalDamage(), 0.5,
+                "Dendro follow-up during Quicken should trigger Spread");
+    }
+
+    private static void testAccuracyPhaseB_StandardIcdThreeHitRule() {
+        CombatSimulator sim = simulatorWith(testCharacter(Element.PYRO));
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                standardIcdHit("Standard ICD hit 1", Element.PYRO, ICDTag.ElementalSkill, 0.0));
+        assertClose(1.0, sim.getEnemy().getAuraUnits(Element.PYRO), EPS,
+                "First standard ICD hit should apply aura");
+
+        sim.getEnemy().setAura(Element.PYRO, 0.0);
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                standardIcdHit("Standard ICD hit 2", Element.PYRO, ICDTag.ElementalSkill, 0.0));
+        assertClose(0.0, sim.getEnemy().getAuraUnits(Element.PYRO), EPS,
+                "Second quick same-group hit should be ICD-blocked");
+
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                standardIcdHit("Standard ICD hit 3", Element.PYRO, ICDTag.ElementalSkill, 0.0));
+        assertClose(1.0, sim.getEnemy().getAuraUnits(Element.PYRO), EPS,
+                "Third quick same-group hit should apply by the 3-hit ICD rule");
+    }
+
+    private static void testAccuracyPhaseB_StandardIcdTimeRule() {
+        CombatSimulator sim = simulatorWith(testCharacter(Element.PYRO));
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                standardIcdHit("Standard ICD time hit 1", Element.PYRO, ICDTag.ElementalBurst, 0.0));
+        sim.getEnemy().setAura(Element.PYRO, 0.0);
+        sim.advanceTime(2.51);
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                standardIcdHit("Standard ICD time hit 2", Element.PYRO, ICDTag.ElementalBurst, 0.0));
+        assertClose(1.0, sim.getEnemy().getAuraUnits(Element.PYRO), EPS,
+                "Same-group hit after 2.5s should apply aura");
+    }
+
+    private static void testAccuracyPhaseB_NoIcdAppliesEveryHit() {
+        CombatSimulator sim = simulatorWith(testCharacter(Element.PYRO));
+        List<ReactionResult.Kind> kinds = captureReactionKinds(sim);
+        sim.getEnemy().setAura(Element.HYDRO, 1.0);
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                reactionHit("No ICD vaporize 1", Element.PYRO));
+        sim.getEnemy().setAura(Element.HYDRO, 1.0);
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                reactionHit("No ICD vaporize 2", Element.PYRO));
+
+        int vaporizeCount = 0;
+        for (ReactionResult.Kind kind : kinds) {
+            if (kind == ReactionResult.Kind.VAPORIZE) {
+                vaporizeCount++;
+            }
+        }
+        assertEquals(2, vaporizeCount, "No-ICD hits should apply and react every hit");
+    }
+
+    private static void testAccuracyPhaseB_SharedIcdBlocksRelatedHits() {
+        CombatSimulator sim = simulatorWith(testCharacter(Element.PYRO));
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                standardIcdHit("Shared ICD skill hit A", Element.PYRO, ICDTag.ElementalSkill, 1.0));
+        sim.getEnemy().setAura(Element.PYRO, 0.0);
+        double afterFirst = sim.getTotalDamage();
+
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                standardIcdHit("Shared ICD skill hit B", Element.PYRO, ICDTag.ElementalSkill, 1.0));
+        assertClose(0.0, sim.getEnemy().getAuraUnits(Element.PYRO), EPS,
+                "Different action names in the same ICD group should share the block");
+        assertTrue(sim.getTotalDamage() > afterFirst,
+                "ICD-blocked related action should still deal direct damage");
+    }
+
+    private static void testAccuracyPhaseB_DamageStillOccursWhenApplicationBlocked() {
+        CombatSimulator sim = simulatorWith(testCharacter(Element.PYRO));
+        AttackAction first = standardIcdHit("Damage ICD hit 1", Element.PYRO, ICDTag.NormalAttack, 1.0);
+        AttackAction second = standardIcdHit("Damage ICD hit 2", Element.PYRO, ICDTag.NormalAttack, 1.0);
+
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE, first);
+        sim.getEnemy().setAura(Element.PYRO, 0.0);
+        double firstDamage = sim.getTotalDamage();
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE, second);
+
+        assertClose(0.0, sim.getEnemy().getAuraUnits(Element.PYRO), EPS,
+                "Second same-group hit should not apply aura while ICD-blocked");
+        assertClose(firstDamage * 2.0, sim.getTotalDamage(), 0.5,
+                "ICD-blocked elemental application should not suppress direct damage");
+    }
+
+    private static void testAccuracyPhaseC_CoreOverflowExplodesOldest() {
+        CombatSimulator sim = simulatorWith(testCharacter(Element.HYDRO));
+        for (int i = 0; i < 6; i++) {
+            sim.getEnemy().setAura(Element.DENDRO, 1.0);
+            sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                    reactionHit("Accuracy Bloom overflow " + i, Element.HYDRO));
+        }
+        assertEquals(5, sim.getDendroCores().size(), "Core overflow should leave five active cores");
+        assertClose(expectedTransformative(2.0, Element.DENDRO, 0.0), sim.getTotalDamage(), 0.5,
+                "Core overflow should explode the oldest core deterministically");
+    }
+
+    private static void testAccuracyPhaseC_HyperbloomConsumesOneCoreForSingleProjectile() {
+        CombatSimulator sim = simulatorWith(testCharacter(Element.ELECTRO));
+        addDendroCores(sim, 3);
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                reactionHit("Single projectile Hyperbloom", Element.ELECTRO));
+        assertEquals(2, sim.getDendroCores().size(),
+                "Default Electro Hyperbloom policy should consume one core");
+        assertClose(expectedTransformative(3.0, Element.DENDRO, 0.0), sim.getTotalDamage(), 0.5,
+                "Single Hyperbloom projectile should deal one core of damage");
+    }
+
+    private static void testAccuracyPhaseC_BurgeonConsumesAoECores() {
+        CombatSimulator sim = simulatorWith(testCharacter(Element.PYRO));
+        addDendroCores(sim, 4);
+        AttackAction aoeBurgeon = reactionHit("Limited AoE Burgeon", Element.PYRO);
+        aoeBurgeon.setDendroCoreConsumptionLimit(2);
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE, aoeBurgeon);
+        assertEquals(2, sim.getDendroCores().size(),
+                "Configured AoE Burgeon should consume the requested core count");
+        assertClose(expectedTransformative(3.0, Element.DENDRO, 0.0) * 2.0, sim.getTotalDamage(), 1.0,
+                "Two consumed Burgeon cores should both deal damage inside the hit cap");
+    }
+
+    private static void testAccuracyPhaseC_CoreExplosionHitCap() {
+        CombatSimulator sim = simulatorWith(testCharacter(Element.PYRO));
+        addDendroCores(sim, 3);
+        AttackAction cappedBurgeon = reactionHit("Capped AoE Burgeon", Element.PYRO);
+        cappedBurgeon.setDendroCoreConsumptionLimit(3);
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE, cappedBurgeon);
+        assertEquals(0, sim.getDendroCores().size(), "All configured cores should be consumed");
+        assertClose(expectedTransformative(3.0, Element.DENDRO, 0.0) * 2.0, sim.getTotalDamage(), 1.0,
+                "Only two core explosions should damage the same target inside the 0.5s cap window");
+    }
+
+    private static void testAccuracyPhaseC_LunarBloomUsesSameCorePolicy() {
+        CombatSimulator sim = simulatorWith(testCharacter(Element.HYDRO).asLunar());
+        sim.getEnemy().setAura(Element.DENDRO, 1.0);
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                reactionHit("Accuracy Lunar-Bloom core", Element.HYDRO));
+        addDendroCores(sim, 2);
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                reactionHit("Lunar-Bloom Hyperbloom policy", Element.ELECTRO));
+        assertEquals(2, sim.getDendroCores().size(),
+                "Lunar-Bloom-created cores should share the one-core Hyperbloom policy");
+        assertTrue(sim.getTotalDamage() > 0.0,
+                "Lunar-Bloom core consumed by Hyperbloom should use normal core damage handling");
+    }
+
+    private static void testAccuracyPhaseD_QuickenRefreshesDuration() {
+        CombatSimulator sim = simulatorWith(testCharacter(Element.ELECTRO));
+        sim.getEnemy().setAura(Element.DENDRO, 1.0);
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                reactionHit("Quicken refresh trigger 1", Element.ELECTRO));
+        double firstEnd = sim.getQuickenEndTime();
+
+        sim.advanceTime(5.0);
+        sim.getEnemy().setAura(Element.DENDRO, 1.0);
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                reactionHit("Quicken refresh trigger 2", Element.ELECTRO));
+        assertTrue(sim.getQuickenEndTime() > firstEnd,
+                "Re-triggering Quicken before expiry should extend the expiry time");
+    }
+
+    private static void testAccuracyPhaseD_AggravateUsesTriggerEm() {
+        double em = 300.0;
+        TestCharacter electroCharacter = testCharacter(Element.ELECTRO)
+                .withStat(StatType.ELEMENTAL_MASTERY, em)
+                .withStat(StatType.CRIT_RATE, 0.0)
+                .withStat(StatType.CRIT_DMG, 0.0);
+        CombatSimulator sim = simulatorWith(electroCharacter);
+        sim.setQuickenEndTime(20.0);
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                catalyzeDamageHit("EM Aggravate hit", Element.ELECTRO));
+        assertClose(expectedStandardCatalyzeDamageWithEm(1.15, 0.0, 0.0, 0.0, em, 0.0),
+                sim.getTotalDamage(), 0.5,
+                "Aggravate additive value should use the trigger character EM");
+    }
+
+    private static void testAccuracyPhaseD_SpreadUsesTriggerReactionBonus() {
+        double spreadBonus = 0.50;
+        TestCharacter dendroCharacter = testCharacter(Element.DENDRO)
+                .withStat(StatType.SPREAD_DMG_BONUS, spreadBonus)
+                .withStat(StatType.CRIT_RATE, 0.0)
+                .withStat(StatType.CRIT_DMG, 0.0);
+        CombatSimulator sim = simulatorWith(dendroCharacter);
+        sim.setQuickenEndTime(20.0);
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                catalyzeDamageHit("Bonus Spread hit", Element.DENDRO));
+        assertClose(expectedStandardCatalyzeDamageWithEm(1.25, 0.0, 0.0, 0.0, 0.0, spreadBonus),
+                sim.getTotalDamage(), 0.5,
+                "Spread additive value should include trigger reaction bonus");
+    }
+
+    private static void testAccuracyPhaseD_AdditivePassesThroughCritAndDmgBonus() {
+        TestCharacter electroCharacter = testCharacter(Element.ELECTRO)
+                .withStat(StatType.CRIT_RATE, 1.0)
+                .withStat(StatType.CRIT_DMG, 1.0)
+                .withStat(StatType.ELECTRO_DMG_BONUS, 0.50);
+        CombatSimulator sim = simulatorWith(electroCharacter);
+        sim.setQuickenEndTime(20.0);
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                catalyzeDamageHit("Crit Aggravate hit", Element.ELECTRO));
+        assertClose(expectedStandardCatalyzeDamage(1.15, 0.50, 1.0, 1.0), sim.getTotalDamage(), 0.5,
+                "Aggravate additive base should pass through DMG Bonus, Crit, DEF, and RES");
+    }
+
+    private static void testAccuracyPhaseD_NoCatalyzeAfterQuickenExpiry() {
+        CombatSimulator sim = simulatorWith(testCharacter(Element.ELECTRO)
+                .withStat(StatType.CRIT_RATE, 0.0)
+                .withStat(StatType.CRIT_DMG, 0.0));
+        sim.setQuickenEndTime(1.0);
+        sim.advanceTime(1.01);
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                catalyzeDamageHit("Expired Aggravate hit", Element.ELECTRO));
+        assertClose(expectedStandardDamage(0.0, 0.0, 0.0), sim.getTotalDamage(), 0.5,
+                "Expired Quicken should not allow Aggravate");
+    }
+
+    private static void testAccuracyPhaseE_LunarConversionRequiresBenedictionSource() {
+        CombatSimulator noConverter = simulatorWith(testCharacter(Element.ELECTRO));
+        List<ReactionResult.Kind> standardKinds = captureReactionKinds(noConverter);
+        noConverter.getEnemy().setAura(Element.HYDRO, 1.0);
+        noConverter.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                reactionHit("No converter EC", Element.ELECTRO));
+        assertTrue(!standardKinds.contains(ReactionResult.Kind.LUNAR_CHARGED),
+                "Moonsign without a Lunar converter should not convert Electro-Charged");
+        assertTrue(standardKinds.contains(ReactionResult.Kind.ELECTRO_CHARGED),
+                "No-converter Electro-Charged should remain standard");
+
+        CombatSimulator withConverter = simulatorWith(testCharacter(Element.ELECTRO).asLunar());
+        List<ReactionResult.Kind> lunarKinds = captureReactionKinds(withConverter);
+        withConverter.getEnemy().setAura(Element.HYDRO, 1.0);
+        withConverter.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                reactionHit("Converter EC", Element.ELECTRO));
+        assertTrue(lunarKinds.contains(ReactionResult.Kind.LUNAR_CHARGED),
+                "Lunar converter plus Moonsign should convert Electro-Charged");
+    }
+
+    private static void testAccuracyPhaseE_LunarChargedTickOwnershipAndCrit() {
+        CombatSimulator noCrit = simulatorWith(testCharacter(Element.ELECTRO).asLunar()
+                .withStat(StatType.CRIT_RATE, 0.0)
+                .withStat(StatType.CRIT_DMG, 0.0));
+        noCrit.getEnemy().setAura(Element.HYDRO, 1.0);
+        noCrit.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                reactionHit("No crit Lunar-Charged", Element.ELECTRO));
+        noCrit.advanceTime(2.1);
+        double noCritDamage = noCrit.getTotalDamage();
+
+        CombatSimulator crit = simulatorWith(testCharacter(Element.ELECTRO).asLunar()
+                .withStat(StatType.CRIT_RATE, 1.0)
+                .withStat(StatType.CRIT_DMG, 1.0));
+        crit.getEnemy().setAura(Element.HYDRO, 1.0);
+        crit.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                reactionHit("Crit Lunar-Charged", Element.ELECTRO));
+        crit.advanceTime(2.1);
+        assertTrue(crit.getTotalDamage() > noCritDamage * 1.9,
+                "Lunar-Charged immediate/tick damage should use Lunar crit scaling");
+    }
+
+    private static void testAccuracyPhaseE_LunarBloomDewState() {
+        CombatSimulator sim = simulatorWith(testCharacter(Element.HYDRO).asLunar());
+        sim.getEnemy().setAura(Element.DENDRO, 1.0);
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                reactionHit("Dew Lunar-Bloom", Element.HYDRO));
+        assertEquals(1, sim.getVerdantDewCount(), "Lunar-Bloom should increment Verdant Dew state");
+        assertEquals(1, sim.getMoonridgeDewCount(), "Lunar-Bloom should increment Moonridge Dew state");
+        SimulatorSnapshot snapshot = sim.saveSnapshot();
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                reactionHit("Second Dew Lunar-Bloom", Element.HYDRO));
+        sim.restoreSnapshot(snapshot);
+        assertEquals(1, sim.getVerdantDewCount(), "Verdant Dew state should be snapshot-safe");
+        assertEquals(1, sim.getMoonridgeDewCount(), "Moonridge Dew state should be snapshot-safe");
+    }
+
+    private static void testAccuracyPhaseE_LunarCrystallizeHarmonyCadence() {
+        CombatSimulator sim = simulatorWith(testCharacter(Element.GEO).asLunar());
+        double before = sim.getTotalDamage();
+        for (int i = 0; i < 3; i++) {
+            sim.getEnemy().setAura(Element.HYDRO, 1.0);
+            sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                    reactionHit("Accuracy Lunar-Crystallize cadence " + i, Element.GEO));
+        }
+        assertEquals(3, sim.getLunarCrystallizeTriggerCount(),
+                "Lunar-Crystallize should count three triggers");
+        assertTrue(sim.getTotalDamage() > before,
+                "Third Lunar-Crystallize trigger should fire Harmony damage");
+    }
+
+    private static void testAccuracyPhaseF_RaidenResolveAndEnergyRegression() {
+        model.character.RaidenShogun baselineRaiden = new model.character.RaidenShogun(
+                new model.weapon.TheCatch(), blankArtifact());
+        CombatSimulator baseline = simulatorWithExistingCharacter(baselineRaiden);
+        baseline.performAction(CharacterId.RAIDEN_SHOGUN,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        baseline.performAction(CharacterId.RAIDEN_SHOGUN,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        double baselineBurst = baseline.getLastActionDirectDamageCapture();
+
+        model.character.RaidenShogun stackedRaiden = new model.character.RaidenShogun(
+                new model.weapon.TheCatch(), blankArtifact());
+        CombatSimulator stacked = simulatorWithExistingCharacter(stackedRaiden);
+        TestCharacter burstSource = testCharacter(Element.HYDRO);
+        stacked.addCharacter(burstSource);
+        stacked.performAction(CharacterId.RAIDEN_SHOGUN,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        stacked.performAction(CharacterId.SUCROSE,
+                new AttackAction("Resolve source burst", 0.0, Element.HYDRO, StatType.BASE_ATK,
+                        null, 0.0, false, ActionType.BURST));
+        stacked.performAction(CharacterId.RAIDEN_SHOGUN,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        double stackedBurst = stacked.getLastActionDirectDamageCapture();
+
+        assertTrue(stackedBurst > baselineBurst,
+                "Raiden burst should gain damage from Resolve generated by another burst action");
+    }
+
+    private static void testAccuracyPhaseF_FlinsThundercloudConditionalHits() {
+        model.character.Flins noCloudFlins = new model.character.Flins(new TestWeapon(), blankArtifact());
+        CombatSimulator noCloud = simulatorWithExistingCharacter(noCloudFlins);
+        int[] noCloudMiddleHits = { 0 };
+        noCloud.addListener((actor, action, time) -> {
+            if ("Cometh the Night (Middle)".equals(action.getName())) {
+                noCloudMiddleHits[0]++;
+            }
+        });
+        noCloudFlins.onAction(CharacterActionRequest.of(CharacterActionKey.BURST), noCloud);
+        noCloud.advanceTime(10.0);
+
+        model.character.Flins cloudFlins = new model.character.Flins(new TestWeapon(), blankArtifact());
+        CombatSimulator cloud = simulatorWithExistingCharacter(cloudFlins);
+        int[] cloudMiddleHits = { 0 };
+        cloud.addListener((actor, action, time) -> {
+            if ("Cometh the Night (Middle)".equals(action.getName())) {
+                cloudMiddleHits[0]++;
+            }
+        });
+        cloud.setThundercloudEndTime(cloud.getCurrentTime() + 30.0);
+        assertTrue(cloud.isThundercloudActive(), "Test setup should activate simulator Thundercloud state");
+        cloudFlins.onAction(CharacterActionRequest.of(CharacterActionKey.BURST), cloud);
+        cloud.advanceTime(10.0);
+        assertTrue(cloudMiddleHits[0] == noCloudMiddleHits[0] + 2,
+                "Flins standard burst should add conditional middle hits while Thundercloud is active"
+                        + " (noCloud=" + noCloudMiddleHits[0] + ", cloud=" + cloudMiddleHits[0] + ")");
+    }
+
+    private static void testAccuracyPhaseF_ColumbinaGravityAndDewRegression() {
+        model.character.Columbina columbina = new model.character.Columbina(new TestWeapon(), blankArtifact());
+        CombatSimulator sim = simulatorWithExistingCharacter(columbina);
+        int[] cleanseHits = { 0 };
+        sim.addListener((actor, action, time) -> {
+            if (action.getName().startsWith("Moondew Cleanse Hit")) {
+                cleanseHits[0]++;
+            }
+        });
+
+        columbina.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), sim);
+        sim.notifyReaction(
+                ReactionResult.lunar(
+                        0.0,
+                        ReactionResult.LunarType.BLOOM,
+                        Element.DENDRO,
+                        Element.DENDRO,
+                        true,
+                        false),
+                columbina);
+        columbina.onAction(CharacterActionRequest.of(CharacterActionKey.CHARGE), sim);
+
+        assertEquals(3, cleanseHits[0],
+                "Columbina should gain Verdant Dew from Lunar-Bloom near Ripple and consume it for Moondew Cleanse");
+    }
+
+    private static void testAccuracyPhaseF_ArtifactLunarReactionBuffRegression() {
+        TestCharacter owner = testCharacter(Element.ELECTRO).asLunar();
+        owner.setArtifacts(new model.artifact.NightOfTheSkysUnveiling());
+        CombatSimulator sim = simulatorWith(owner);
+        double beforeCrit = owner.getEffectiveStats(sim.getCurrentTime()).get(StatType.CRIT_RATE);
+        sim.getEnemy().setAura(Element.HYDRO, 1.0);
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                reactionHit("Artifact Lunar-Charged trigger", Element.ELECTRO));
+        double afterCrit = owner.getEffectiveStats(sim.getCurrentTime()).get(StatType.CRIT_RATE);
+        assertClose(beforeCrit + 0.15, afterCrit, EPS,
+                "Night of the Sky's Unveiling should grant on-field Lunar reaction CRIT Rate");
+    }
+
+    private static void testAccuracyPhaseF_WeaponReactionBonusRegression() {
+        TestCharacter owner = testCharacter(Element.ANEMO);
+        owner.setWeapon(new model.weapon.SunnyMorningSleepIn());
+        CombatSimulator sim = simulatorWith(owner);
+        sim.performAction(CharacterId.SUCROSE, CharacterActionRequest.of(CharacterActionKey.SKILL));
+        double beforeEm = owner.getEffectiveStats(sim.getCurrentTime()).get(StatType.ELEMENTAL_MASTERY);
+        sim.getEnemy().setAura(Element.PYRO, 1.0);
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                reactionHit("Sunny swirl trigger", Element.ANEMO));
+        double afterEm = owner.getEffectiveStats(sim.getCurrentTime()).get(StatType.ELEMENTAL_MASTERY);
+        assertClose(beforeEm + 120.0, afterEm, EPS,
+                "Sunny Morning Sleep-In should grant EM only after owner-triggered Swirl");
+    }
+
     private static List<ReactionResult.Kind> captureReactionKinds(CombatSimulator sim) {
         List<ReactionResult.Kind> kinds = new ArrayList<>();
         sim.addReactionListener((result, source, time, simulator) -> kinds.add(result.getKind()));
@@ -394,6 +888,18 @@ public class ReactionRegressionTest {
         return action;
     }
 
+    private static AttackAction standardIcdHit(String name, Element element, ICDTag tag, double multiplier) {
+        AttackAction action = new AttackAction(name, multiplier, element, StatType.BASE_ATK);
+        action.setICD(ICDType.Standard, tag, 1.0);
+        return action;
+    }
+
+    private static void addDendroCores(CombatSimulator sim, int count) {
+        for (int i = 0; i < count; i++) {
+            sim.addDendroCore(CharacterId.SUCROSE, expectedTransformative(2.0, Element.DENDRO, 0.0));
+        }
+    }
+
     private static TestCharacter testCharacter(Element element) {
         return new TestCharacter(element);
     }
@@ -404,6 +910,18 @@ public class ReactionRegressionTest {
         sim.setEnemy(new Enemy(90));
         sim.addCharacter(character);
         return sim;
+    }
+
+    private static CombatSimulator simulatorWithExistingCharacter(model.entity.Character character) {
+        CombatSimulator sim = new CombatSimulator();
+        sim.setLoggingEnabled(false);
+        sim.setEnemy(new Enemy(90));
+        sim.addCharacter(character);
+        return sim;
+    }
+
+    private static ArtifactSet blankArtifact() {
+        return new ArtifactSet("Blank", new StatsContainer());
     }
 
     private static double expectedTransformative(double reactionMultiplier, Element damageElement, double em) {
@@ -419,7 +937,12 @@ public class ReactionRegressionTest {
 
     private static double expectedStandardCatalyzeDamage(
             double additiveMultiplier, double dmgBonus, double critRate, double critDmg) {
-        double additive = ReactionCalculator.calculateAdditiveReactionDamage(90, 0.0, additiveMultiplier, 0.0);
+        return expectedStandardCatalyzeDamageWithEm(additiveMultiplier, dmgBonus, critRate, critDmg, 0.0, 0.0);
+    }
+
+    private static double expectedStandardCatalyzeDamageWithEm(
+            double additiveMultiplier, double dmgBonus, double critRate, double critDmg, double em, double reactionBonus) {
+        double additive = ReactionCalculator.calculateAdditiveReactionDamage(90, em, additiveMultiplier, reactionBonus);
         double base = 1000.0 + additive;
         return base * (1.0 + dmgBonus) * (1.0 + Math.min(critRate, 1.0) * critDmg) * 0.5 * 0.9;
     }

@@ -19,8 +19,11 @@ import simulation.event.TimerEvent;
  */
 public class ReactionEffectScheduler {
     private static final double[] LUNAR_CHARGED_WEIGHTS = { 1.0, 0.5, 1.0 / 12.0, 1.0 / 12.0 };
+    private static final int DENDRO_CORE_DAMAGE_HIT_CAP = 2;
+    private static final double DENDRO_CORE_DAMAGE_WINDOW = 0.5;
 
     private final CombatSimulator sim;
+    private final List<Double> recentDendroCoreDamageTimes = new ArrayList<>();
 
     public ReactionEffectScheduler(CombatSimulator sim) {
         this.sim = sim;
@@ -44,7 +47,7 @@ public class ReactionEffectScheduler {
             sim.registerEvent(createElectroChargedTickEvent(transDmg, isLunar));
         }
 
-        sim.getEnemy().setAura(trigger, gaugeUnits);
+        sim.getEnemy().setAura(trigger, gaugeUnits, sim.getCurrentTime());
     }
 
     /**
@@ -68,7 +71,10 @@ public class ReactionEffectScheduler {
      */
     public void scheduleBurning(CharacterId ownerId, double tickDamage) {
         sim.setBurningEndTime(sim.getCurrentTime() + 2.0);
-        sim.getEnemy().setAura(Element.PYRO, Math.max(1.0, sim.getEnemy().getAuraUnits(Element.PYRO)));
+        sim.getEnemy().setAura(
+                Element.PYRO,
+                Math.max(1.0, sim.getEnemy().getAuraUnits(Element.PYRO)),
+                sim.getCurrentTime());
         if (!sim.isBurningTimerRunning()) {
             sim.setBurningTimerRunning(true);
             sim.registerEvent(createBurningTickEvent(ownerId, tickDamage));
@@ -252,6 +258,12 @@ public class ReactionEffectScheduler {
     }
 
     private void recordDendroCoreDamage(CharacterId ownerId, String label, double damage) {
+        if (!canRecordDendroCoreDamage()) {
+            if (sim.isLoggingEnabled()) {
+                System.out.println(String.format("   [Reaction] %s Damage capped by same-target core limit", label));
+            }
+            return;
+        }
         if (sim.isLoggingEnabled()) {
             System.out.println(String.format("   [Reaction] %s Damage: %,.0f", label, damage));
         }
@@ -259,6 +271,16 @@ public class ReactionEffectScheduler {
         sim.getCombatLogSink().log(
                 sim.getCurrentTime(), ownerId.getDisplayName(), label, damage,
                 label, damage, sim.getEnemy().getAuraMap());
+    }
+
+    private boolean canRecordDendroCoreDamage() {
+        double now = sim.getCurrentTime();
+        recentDendroCoreDamageTimes.removeIf(time -> now - time >= DENDRO_CORE_DAMAGE_WINDOW);
+        if (recentDendroCoreDamageTimes.size() >= DENDRO_CORE_DAMAGE_HIT_CAP) {
+            return false;
+        }
+        recentDendroCoreDamageTimes.add(now);
+        return true;
     }
 
     private double computeWeightedLunarReactionDamage(

@@ -92,6 +92,9 @@ public class SimulationClock {
                 currentTime += delta;
             }
 
+            if (sim.getEnemy() != null) {
+                sim.getEnemy().updateAuras(currentTime);
+            }
             event.tick(sim);
 
             if (!event.isFinished(currentTime)) {

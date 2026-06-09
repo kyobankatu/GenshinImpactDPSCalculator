@@ -390,6 +390,7 @@ public class Flins extends Character
         double initialMv = getTalentValue("Burst Initial", 4.417);
         double middleMv = getTalentValue("Burst Middle", 0.276);
         double finalMv = getTalentValue("Burst Final", 1.988);
+        boolean thundercloudActiveAtCast = isThundercloudActive(sim);
 
         // Initial
         AttackAction hit = new AttackAction("Cometh the Night (Initial)", initialMv, Element.ELECTRO,
@@ -400,7 +401,7 @@ public class Flins extends Character
         sim.performAction(this.name, hit);
 
         // Delayed Hits
-        int middleCount = 2 + (isThundercloudActive(sim) ? 2 : 0);
+        int middleCount = 2 + (thundercloudActiveAtCast ? 2 : 0);
 
         double midMv = middleMv;
         double finMv = finalMv;

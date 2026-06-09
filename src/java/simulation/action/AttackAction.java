@@ -121,6 +121,7 @@ public class AttackAction {
     private double defenseIgnore = 0.0; // Defense Ignore 0.0 - 1.0 (e.g. Raiden C2)
     private double additiveBaseDmgBonus = 0.0;
     private String additiveReactionName;
+    private int dendroCoreConsumptionLimit = -1;
 
     // Constructors
 
@@ -304,6 +305,27 @@ public class AttackAction {
      */
     public boolean isShatterTrigger() {
         return shatterTrigger;
+    }
+
+    /**
+     * Sets how many Dendro Cores this hit can consume for Hyperbloom/Burgeon.
+     * A value less than 1 keeps the default policy: Electro consumes one core,
+     * while Pyro consumes all available cores in the single-target AoE abstraction.
+     *
+     * @param limit maximum cores consumed by this hit
+     */
+    public void setDendroCoreConsumptionLimit(int limit) {
+        this.dendroCoreConsumptionLimit = limit;
+    }
+
+    /**
+     * Returns the configured Dendro Core consumption limit, or a non-positive
+     * value when the resolver should use the element default.
+     *
+     * @return maximum consumed cores, or non-positive for default policy
+     */
+    public int getDendroCoreConsumptionLimit() {
+        return dendroCoreConsumptionLimit;
     }
 
     /**

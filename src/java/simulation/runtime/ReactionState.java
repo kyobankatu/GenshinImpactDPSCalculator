@@ -32,6 +32,8 @@ public class ReactionState {
     private double quickenEndTime = -1.0;
     private int moondriftCount = 0;
     private int lunarCrystallizeTriggerCount = 0;
+    private int verdantDewCount = 0;
+    private int moonridgeDewCount = 0;
     private final List<DendroCoreState> dendroCores = new ArrayList<>();
     private int nextDendroCoreId = 1;
 
@@ -114,6 +116,32 @@ public class ReactionState {
     public int incrementLunarCrystallizeTriggerCount() {
         lunarCrystallizeTriggerCount++;
         return lunarCrystallizeTriggerCount;
+    }
+
+    public int getVerdantDewCount() {
+        return verdantDewCount;
+    }
+
+    public void setVerdantDewCount(int verdantDewCount) {
+        this.verdantDewCount = verdantDewCount;
+    }
+
+    public int incrementVerdantDewCount() {
+        verdantDewCount++;
+        return verdantDewCount;
+    }
+
+    public int getMoonridgeDewCount() {
+        return moonridgeDewCount;
+    }
+
+    public void setMoonridgeDewCount(int moonridgeDewCount) {
+        this.moonridgeDewCount = moonridgeDewCount;
+    }
+
+    public int incrementMoonridgeDewCount() {
+        moonridgeDewCount++;
+        return moonridgeDewCount;
     }
 
     public DendroCoreState addDendroCore(CharacterId ownerId, double currentTime, double damage) {

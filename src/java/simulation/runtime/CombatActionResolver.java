@@ -84,6 +84,7 @@ public class CombatActionResolver {
             notifyLunarAction(action, c);
 
             double reactionMulti = 1.0;
+            sim.getEnemy().updateAuras(sim.getCurrentTime());
             if (applied) {
                 tryTriggerShatter(c, characterId, action, context);
                 tryTriggerDendroCoreReaction(c, characterId, action, context);
@@ -299,8 +300,12 @@ public class CombatActionResolver {
                 sim.getEnemy().getRes(StatType.DENDRO_DMG_BONUS),
                 ResistanceCalculator.getTotalResShred(stats, Element.DENDRO));
         double damage = result.getTransformDamage() * resFactor;
+        int maxCores = action.getDendroCoreConsumptionLimit();
+        if (maxCores <= 0) {
+            maxCores = action.getElement() == Element.ELECTRO ? 1 : Integer.MAX_VALUE;
+        }
         int consumed = reactionEffectScheduler.consumeDendroCores(
-                characterId, damage, result.getName(), Integer.MAX_VALUE);
+                characterId, damage, result.getName(), maxCores);
         if (consumed > 0) {
             sim.notifyReaction(result, attacker);
             if (sim.isLoggingEnabled()) {
@@ -389,8 +394,7 @@ public class CombatActionResolver {
                 : 0.0;
         double transDmg = result.getTransformDamage() * (1.0 + reactBonus) * resFactor;
 
-        boolean isLunar = result.isElectroCharged()
-                && sim.getMoonsign() != CombatSimulator.Moonsign.NONE;
+        boolean isLunar = result.getKind() == ReactionResult.Kind.LUNAR_CHARGED;
         String reactionLabel = isLunar ? "Lunar-Charged" : result.getName();
         double triggerDmg = isLunar ? reactionEffectScheduler.computeInitialLunarChargedDamage() : transDmg;
 
@@ -458,6 +462,10 @@ public class CombatActionResolver {
             double coreDamage = result.getTransformDamage() * resFactor;
             sim.getEnemy().reduceAura(aura, action.getGaugeUnits());
             reactionEffectScheduler.createDendroCore(characterId, coreDamage);
+            if (result.getKind() == ReactionResult.Kind.LUNAR_BLOOM) {
+                sim.incrementVerdantDewCount();
+                sim.incrementMoonridgeDewCount();
+            }
             if (sim.isLoggingEnabled()) {
                 System.out.println(String.format(
                         "   [Reaction] %s on %s -> %s Core Damage: %,.0f",
@@ -569,7 +577,7 @@ public class CombatActionResolver {
         if (trigger == Element.PHYSICAL || trigger == Element.ANEMO || trigger == Element.GEO) {
             return;
         }
-        sim.getEnemy().setAura(trigger, gaugeUnits);
+        sim.getEnemy().setAura(trigger, gaugeUnits, sim.getCurrentTime());
         if (sim.isLoggingEnabled()) {
             System.out.println(String.format("   [Aura] Applied %s (%.1f U)", trigger, gaugeUnits));
         }

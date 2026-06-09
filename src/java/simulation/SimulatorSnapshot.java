@@ -67,6 +67,8 @@ public class SimulatorSnapshot {
     public final double quickenEndTime;
     public final int moondriftCount;
     public final int lunarCrystallizeTriggerCount;
+    public final int verdantDewCount;
+    public final int moonridgeDewCount;
     public final List<ReactionState.DendroCoreState> dendroCores;
     public final int nextDendroCoreId;
     public final Map<Element, Double> enemyAura;
@@ -118,6 +120,8 @@ public class SimulatorSnapshot {
             double quickenEndTime,
             int moondriftCount,
             int lunarCrystallizeTriggerCount,
+            int verdantDewCount,
+            int moonridgeDewCount,
             List<ReactionState.DendroCoreState> dendroCores,
             int nextDendroCoreId,
             Map<Element, Double> enemyAura,
@@ -141,6 +145,8 @@ public class SimulatorSnapshot {
         this.quickenEndTime = quickenEndTime;
         this.moondriftCount = moondriftCount;
         this.lunarCrystallizeTriggerCount = lunarCrystallizeTriggerCount;
+        this.verdantDewCount = verdantDewCount;
+        this.moonridgeDewCount = moonridgeDewCount;
         this.dendroCores = new ArrayList<>(dendroCores);
         this.nextDendroCoreId = nextDendroCoreId;
         this.enemyAura = new HashMap<>(enemyAura);

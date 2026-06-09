@@ -937,6 +937,8 @@ public class CapabilityProfiler {
                 activePostSubject.quickenEndTime,
                 activePostSubject.moondriftCount,
                 activePostSubject.lunarCrystallizeTriggerCount,
+                activePostSubject.verdantDewCount,
+                activePostSubject.moonridgeDewCount,
                 activePostSubject.dendroCores,
                 activePostSubject.nextDendroCoreId,
                 activePostSubject.enemyAura,

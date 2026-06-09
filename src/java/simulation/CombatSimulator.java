@@ -511,7 +511,13 @@ public class CombatSimulator {
      * @param duration duration to advance in seconds
      */
     public void advanceTime(double duration) {
+        if (enemy != null) {
+            enemy.updateAuras(getCurrentTime());
+        }
         simulationClock.advanceTime(duration);
+        if (enemy != null) {
+            enemy.updateAuras(getCurrentTime());
+        }
     }
 
     /**
@@ -723,6 +729,8 @@ public class CombatSimulator {
         double quickenEndTime = reactionState.getQuickenEndTime();
         int moondriftCount = reactionState.getMoondriftCount();
         int lunarCrystallizeTriggerCount = reactionState.getLunarCrystallizeTriggerCount();
+        int verdantDewCount = reactionState.getVerdantDewCount();
+        int moonridgeDewCount = reactionState.getMoonridgeDewCount();
         List<simulation.runtime.ReactionState.DendroCoreState> dendroCores = reactionStateController.copyDendroCores();
         int nextDendroCoreId = reactionStateController.getNextDendroCoreId();
 
@@ -767,6 +775,7 @@ public class CombatSimulator {
                 lastSwapTime, activeCharacterId, currentMoonsign,
                 icdStates, ecTimerRunning, thundercloudEndTime, burningTimerRunning, burningEndTime,
                 quickenEndTime, moondriftCount, lunarCrystallizeTriggerCount,
+                verdantDewCount, moonridgeDewCount,
                 dendroCores, nextDendroCoreId, enemyAura,
                 characters,
                 teamBuffRefs, teamBuffTimes,
@@ -806,6 +815,8 @@ public class CombatSimulator {
         reactionState.setQuickenEndTime(snap.quickenEndTime);
         reactionState.setMoondriftCount(snap.moondriftCount);
         reactionState.setLunarCrystallizeTriggerCount(snap.lunarCrystallizeTriggerCount);
+        reactionState.setVerdantDewCount(snap.verdantDewCount);
+        reactionState.setMoonridgeDewCount(snap.moonridgeDewCount);
         reactionStateController.restoreDendroCores(snap.dendroCores, snap.nextDendroCoreId);
 
         // Enemy aura
@@ -970,6 +981,22 @@ public class CombatSimulator {
 
     public int incrementLunarCrystallizeTriggerCount() {
         return reactionStateController.incrementLunarCrystallizeTriggerCount();
+    }
+
+    public int getVerdantDewCount() {
+        return reactionState.getVerdantDewCount();
+    }
+
+    public int incrementVerdantDewCount() {
+        return reactionState.incrementVerdantDewCount();
+    }
+
+    public int getMoonridgeDewCount() {
+        return reactionState.getMoonridgeDewCount();
+    }
+
+    public int incrementMoonridgeDewCount() {
+        return reactionState.incrementMoonridgeDewCount();
     }
 
     public simulation.runtime.ReactionState.DendroCoreState addDendroCore(CharacterId ownerId, double damage) {

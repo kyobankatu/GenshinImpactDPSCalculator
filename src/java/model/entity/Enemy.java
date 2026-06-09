@@ -17,8 +17,31 @@ import java.util.Map;
 public class Enemy {
     private int level;
     private Map<StatType, Double> resistances; // RES for each element
-    private java.util.Map<model.type.Element, Double> auraGauge = new HashMap<>();
+    private java.util.Map<model.type.Element, AuraState> auraGauge = new HashMap<>();
     private double freezeAuraUnits = 0.0;
+
+    private static final double INFINITE_EXPIRY = Double.POSITIVE_INFINITY;
+
+    /**
+     * Time-aware elemental aura state. The simulator still uses a simplified
+     * gauge model, but runtime-applied auras now carry an expiry based on their
+     * gauge strength so stale auras do not persist forever.
+     */
+    private static final class AuraState {
+        private final model.type.Element element;
+        private double units;
+        private final double applicationTime;
+        private final double duration;
+        private final double expiryTime;
+
+        private AuraState(model.type.Element element, double units, double applicationTime, double duration) {
+            this.element = element;
+            this.units = units;
+            this.applicationTime = applicationTime;
+            this.duration = duration;
+            this.expiryTime = Double.isInfinite(duration) ? INFINITE_EXPIRY : applicationTime + duration;
+        }
+    }
 
     /**
      * Creates an enemy at the given level with KQM-standard 10 % resistance
@@ -52,7 +75,26 @@ public class Enemy {
         if (units <= 0) {
             auraGauge.remove(element);
         } else {
-            auraGauge.put(element, units);
+            auraGauge.put(element, new AuraState(element, units, 0.0, INFINITE_EXPIRY));
+        }
+    }
+
+    /**
+     * Sets a runtime elemental aura with natural expiry derived from gauge units.
+     *
+     * <p>Current combat logic uses common 1U/2U/4U durations in a simplified
+     * form: {@code 6 + gauge * 5} seconds. This gives 1U=11s, 2U=16s, and
+     * 4U=26s, matching the broad relative behavior needed by rotation tests.
+     *
+     * @param element     element whose aura gauge to set
+     * @param units       gauge units to assign
+     * @param currentTime current simulator time in seconds
+     */
+    public void setAura(model.type.Element element, double units, double currentTime) {
+        if (units <= 0) {
+            auraGauge.remove(element);
+        } else {
+            auraGauge.put(element, new AuraState(element, units, currentTime, auraDuration(units)));
         }
     }
 
@@ -65,12 +107,13 @@ public class Enemy {
      */
     public void reduceAura(model.type.Element element, double decay) {
         if (auraGauge.containsKey(element)) {
-            double current = auraGauge.get(element);
+            AuraState state = auraGauge.get(element);
+            double current = state.units;
             double next = current - decay;
             if (next <= 0) {
                 auraGauge.remove(element);
             } else {
-                auraGauge.put(element, next);
+                state.units = next;
             }
         }
     }
@@ -83,7 +126,17 @@ public class Enemy {
      * @return remaining aura gauge units
      */
     public double getAuraUnits(model.type.Element element) {
-        return auraGauge.getOrDefault(element, 0.0);
+        AuraState state = auraGauge.get(element);
+        return state != null ? state.units : 0.0;
+    }
+
+    /**
+     * Removes runtime auras that have expired by the given simulator time.
+     *
+     * @param currentTime current simulator time in seconds
+     */
+    public void updateAuras(double currentTime) {
+        auraGauge.entrySet().removeIf(entry -> entry.getValue().expiryTime <= currentTime);
     }
 
     /**
@@ -122,7 +175,16 @@ public class Enemy {
      * @return copy of the aura gauge map
      */
     public java.util.Map<model.type.Element, Double> getAuraMap() {
-        return new java.util.HashMap<>(auraGauge);
+        java.util.Map<model.type.Element, Double> snapshot = new java.util.HashMap<>();
+        for (Map.Entry<model.type.Element, AuraState> entry : auraGauge.entrySet()) {
+            snapshot.put(entry.getKey(), entry.getValue().units);
+        }
+        return snapshot;
+    }
+
+    private double auraDuration(double units) {
+        double normalized = Math.max(0.0, units);
+        return 6.0 + normalized * 5.0;
     }
 
     /**
