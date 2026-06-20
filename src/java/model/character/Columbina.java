@@ -214,7 +214,7 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                             model.type.StatType.BASE_ATK,
                             null);
                     ca.setAnimationDuration(1.5); // Estimate
-                    sim.performAction("Columbina", ca);
+                    sim.performAction(this.characterId, ca);
                 }
                 break;
             case SKILL:
@@ -228,7 +228,7 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                         null);
                 skill.setICD(ICDType.Standard, ICDTag.Columbina_Cast, 1.0);
                 skill.setAnimationDuration(0.8);
-                sim.performAction("Columbina", skill);
+                sim.performAction(this.characterId, skill);
 
                 // Set Ripple Duration (25s)
                 final double thisRippleEndTime = currentTime + 25.0;
@@ -250,7 +250,7 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                                 0.0,
                                 model.type.ActionType.SKILL);
                         ripple.setICD(ICDType.Standard, ICDTag.Columbina_Moonreel, 1.0);
-                        s.performAction("Columbina", ripple);
+                        s.performAction(characterId, ripple);
                     }
                 });
 
@@ -275,7 +275,7 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                         null);
                 burst.setICD(ICDType.None, ICDTag.ElementalBurst, 2.0);
                 burst.setAnimationDuration(2.0);
-                sim.performAction("Columbina", burst);
+                sim.performAction(this.characterId, burst);
 
                 domainEndTime = currentTime + 20.0;
 
@@ -293,7 +293,7 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                         model.type.StatType.BASE_ATK,
                         null);
                 na.setAnimationDuration(0.5);
-                sim.performAction("Columbina", na);
+                sim.performAction(this.characterId, na);
                 break;
             default:
                 break;
@@ -321,7 +321,7 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
             special.setLunarReactionType(AttackAction.LunarReactionType.BLOOM);
             special.setICD(ICDType.None, ICDTag.None, 0.0); // Lunar Reaction DMG: no aura application
             special.setAnimationDuration(0.5 + (i * 0.1));
-            sim.performAction("Columbina", special);
+            sim.performAction(this.characterId, special);
         }
     }
 
@@ -454,7 +454,7 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                 ie.setLunarReactionType(AttackAction.LunarReactionType.CHARGED);
                 ie.setICD(ICDType.None, ICDTag.None, 0.0); // Lunar Reaction DMG: no aura application
                 ie.setAnimationDuration(0);
-                sim.performAction("Columbina", ie);
+                sim.performAction(this.characterId, ie);
                 break;
             case BLOOM:
                 for (int i = 0; i < 5; i++) {
@@ -467,7 +467,7 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                     ib.setLunarReactionType(AttackAction.LunarReactionType.BLOOM);
                     ib.setICD(ICDType.None, ICDTag.None, 0.0); // Lunar Reaction DMG: no aura application
                     ib.setAnimationDuration(0);
-                    sim.performAction("Columbina", ib);
+                    sim.performAction(this.characterId, ib);
                 }
                 break;
             case CRYSTALLIZE:
@@ -480,7 +480,7 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                 ic.setLunarReactionType(AttackAction.LunarReactionType.CRYSTALLIZE);
                 ic.setICD(ICDType.None, ICDTag.None, 0.0); // Lunar Reaction DMG: no aura application
                 ic.setAnimationDuration(0);
-                sim.performAction("Columbina", ic);
+                sim.performAction(this.characterId, ic);
                 // 4th Passive: 33% extra Moondrift (Moondrift Harmony) when Lunar Domain active
                 if (sim.getCurrentTime() <= domainEndTime && Math.random() < 0.33) {
                     AttackAction icExtra = new AttackAction(
@@ -492,7 +492,7 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                     icExtra.setLunarReactionType(AttackAction.LunarReactionType.CRYSTALLIZE);
                     icExtra.setICD(ICDType.None, ICDTag.None, 0.0);
                     icExtra.setAnimationDuration(0);
-                    sim.performAction("Columbina", icExtra);
+                    sim.performAction(this.characterId, icExtra);
                 }
                 break;
         }

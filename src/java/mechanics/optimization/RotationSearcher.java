@@ -38,7 +38,7 @@ public class RotationSearcher {
         /** Typed order used by runtime-facing callers. */
         public List<CharacterId> characterOrder;
 
-        /** Ordered list of character names defining the macro rotation sequence. */
+        /** Display-name order kept for logs and compatibility output. */
         public List<String> order;
 
         /** Typed profile selection used by runtime-facing callers. */
@@ -149,7 +149,7 @@ public class RotationSearcher {
     /**
      * Recursively generates all permutations of the given list.
      *
-     * @param original list of strings to permute
+     * @param original list of character ids to permute
      * @return all N! orderings of the input list
      */
     private List<List<CharacterId>> generatePermutations(List<CharacterId> original) {
@@ -174,16 +174,16 @@ public class RotationSearcher {
     /**
      * Generates the Cartesian product of each character's available profiles.
      *
-     * @param names             ordered list of character names
-     * @param availableProfiles map of character name to their loaded profiles
+     * @param characterIds      ordered list of character ids
+     * @param availableProfiles map of character id to loaded profiles
      * @return all combinations where each character has exactly one profile selected
      */
     private List<Map<CharacterId, ProfileLoader.ActionProfile>> generateProfileCombinations(
-            List<CharacterId> names,
+            List<CharacterId> characterIds,
             Map<CharacterId, List<ProfileLoader.ActionProfile>> availableProfiles) {
 
         List<Map<CharacterId, ProfileLoader.ActionProfile>> result = new ArrayList<>();
-        generateRecursive(result, new HashMap<>(), names, 0, availableProfiles);
+        generateRecursive(result, new HashMap<>(), characterIds, 0, availableProfiles);
         return result;
     }
 
@@ -193,27 +193,27 @@ public class RotationSearcher {
      *
      * @param result    accumulator for completed combinations
      * @param current   partially built combination for the current recursion frame
-     * @param names     ordered list of all character names
+     * @param characterIds ordered list of all character ids
      * @param index     current character index being assigned
      * @param available all available profiles per character
      */
     private void generateRecursive(
             List<Map<CharacterId, ProfileLoader.ActionProfile>> result,
             Map<CharacterId, ProfileLoader.ActionProfile> current,
-            List<CharacterId> names,
+            List<CharacterId> characterIds,
             int index,
             Map<CharacterId, List<ProfileLoader.ActionProfile>> available) {
 
-        if (index == names.size()) {
+        if (index == characterIds.size()) {
             result.add(new HashMap<>(current));
             return;
         }
 
-        CharacterId characterId = names.get(index);
+        CharacterId characterId = characterIds.get(index);
         List<ProfileLoader.ActionProfile> options = available.get(characterId);
         for (ProfileLoader.ActionProfile option : options) {
             current.put(characterId, option);
-            generateRecursive(result, current, names, index + 1, available);
+            generateRecursive(result, current, characterIds, index + 1, available);
             current.remove(characterId);
         }
     }

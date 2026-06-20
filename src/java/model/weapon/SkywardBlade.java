@@ -75,7 +75,7 @@ public class SkywardBlade extends Weapon implements ActionTriggeredWeaponEffect 
                         StatType.ATK_PERCENT // Scales with ATK
                 );
                 // Procs usually don't have animation time themselves, they just happen
-                sim.performActionWithoutTimeAdvance(user.getName(), proc);
+                sim.performActionWithoutTimeAdvance(user.getCharacterId(), proc);
             }
         }
     }

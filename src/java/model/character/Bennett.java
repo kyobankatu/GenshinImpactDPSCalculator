@@ -132,7 +132,7 @@ public class Bennett extends Character implements FormStateProvider {
         AttackAction hit = new AttackAction("Passion Overload (Tap)", mv, Element.PYRO, StatType.BASE_ATK,
                 StatType.SKILL_DMG_BONUS, 0.0, false, ActionType.SKILL);
         hit.setICD(ICDType.Standard, ICDTag.ElementalSkill, 1.0);
-        sim.performAction(this.name, hit);
+        sim.performAction(this.characterId, hit);
 
         // Generate 2 Pyro Particles (Tap)
         sim.getEnergyDistributor().distributeParticles(Element.PYRO, 2.0, mechanics.energy.ParticleType.PARTICLE);
@@ -143,7 +143,7 @@ public class Bennett extends Character implements FormStateProvider {
         AttackAction q = new AttackAction("Fantastic Voyage Hit", mv, Element.PYRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 0.8, ActionType.BURST);
         q.setICD(ICDType.Standard, ICDTag.ElementalBurst, 2.0); // 2U application
-        sim.performAction(this.name, q);
+        sim.performAction(this.characterId, q);
 
         // Trigger Artifact Buffs
         for (ArtifactSet a : artifacts) {
@@ -241,7 +241,7 @@ public class Bennett extends Character implements FormStateProvider {
         // So this is correct.
 
         hit.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
-        sim.performAction(this.name, hit);
+        sim.performAction(this.characterId, hit);
 
         normalAttackStep++;
         if (normalAttackStep >= 5)
@@ -264,7 +264,7 @@ public class Bennett extends Character implements FormStateProvider {
         AttackAction hit2 = new AttackAction("Bennett CA_2", mv2, dmgElement, StatType.BASE_ATK,
                 StatType.PHYSICAL_DMG_BONUS, 0.6, ActionType.CHARGE);
         hit2.setICD(ICDType.Standard, ICDTag.ChargedAttack, 1.0);
-        sim.performAction(this.name, hit2);
+        sim.performAction(this.characterId, hit2);
 
         normalAttackStep = 0;
     }
@@ -278,6 +278,6 @@ public class Bennett extends Character implements FormStateProvider {
         AttackAction p = new AttackAction("Bennett Plunge", mv, dmgElement, StatType.BASE_ATK,
                 StatType.PHYSICAL_DMG_BONUS, 1.0, ActionType.PLUNGE);
         p.setICD(ICDType.Standard, ICDTag.None, 1.0);
-        sim.performAction(this.name, p);
+        sim.performAction(this.characterId, p);
     }
 }

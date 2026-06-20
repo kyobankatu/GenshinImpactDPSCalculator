@@ -199,7 +199,7 @@ public class Sucrose extends Character implements FormStateProvider {
 
         hit.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
         hit.setAnimationDuration(dur);
-        sim.performAction(this.name, hit);
+        sim.performAction(this.characterId, hit);
 
         normalAttackStep++;
         if (normalAttackStep >= 4)
@@ -221,7 +221,7 @@ public class Sucrose extends Character implements FormStateProvider {
                 StatType.SKILL_DMG_BONUS, 0.0, false, ActionType.SKILL);
         hit.setICD(ICDType.Standard, ICDTag.ElementalSkill, 1.0);
         hit.setAnimationDuration(0.5);
-        sim.performAction(this.name, hit);
+        sim.performAction(this.characterId, hit);
 
         sim.getEnergyDistributor().distributeParticles(Element.ANEMO, 4.0, ParticleType.PARTICLE);
 
@@ -248,7 +248,7 @@ public class Sucrose extends Character implements FormStateProvider {
                 StatType.BASE_ATK,
                 null, 1.5, ActionType.BURST);
         cast.setAnimationDuration(0.3);
-        sim.performAction(this.name, cast);
+        sim.performAction(this.characterId, cast);
 
         double duration = (this.constellation >= 2) ? 8.0 : 6.0;
 
@@ -286,7 +286,7 @@ public class Sucrose extends Character implements FormStateProvider {
                                 this.absorbedElement, StatType.BASE_ATK, StatType.BURST_DMG_BONUS, 0.0, false,
                                 ActionType.BURST);
                         extra.setICD(ICDType.Standard, ICDTag.ElementalBurst, 1.0);
-                        s.performAction(this.name, extra);
+                        s.performAction(this.characterId, extra);
                     }
 
                     applyA4Passive(s);

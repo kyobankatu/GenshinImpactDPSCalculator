@@ -2,6 +2,7 @@ package mechanics.optimization;
 
 import simulation.CombatSimulator;
 import model.type.StatType;
+import model.type.CharacterId;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -55,7 +56,7 @@ public class OptimizerPipeline {
          *                         argument may be {@code null} during calibration
          * @param rotationRunner   consumer that drives a complete rotation on the
          *                         simulator
-         * @param dpsCharsAndStats map of {@code charName -> substats to optimize}
+         * @param dpsCharsAndStats map of {@code CharacterId -> substats to optimize}
          *                         defining
          *                         which characters participate in Phase 2 and which
          *                         substats the hill-climber may vary
@@ -63,27 +64,27 @@ public class OptimizerPipeline {
          *         and the final merged party roll map
          */
         public static TotalOptimizationResult run(
-                        BiFunction<Map<String, Double>, Map<String, Map<StatType, Integer>>, CombatSimulator> simFactory,
+                        BiFunction<Map<CharacterId, Double>, Map<CharacterId, Map<StatType, Integer>>, CombatSimulator> simFactory,
                         Consumer<CombatSimulator> rotationRunner,
-                        Map<String, List<StatType>> dpsCharsAndStats) {
+                        Map<CharacterId, List<StatType>> dpsCharsAndStats) {
 
                 // Phase 1: ER Calibration
                 System.out.println("\n--- Starting Energy Calibration ---");
-                Function<Map<String, Double>, CombatSimulator> erSimFactory = (targets) -> simFactory.apply(targets,
+                Function<Map<CharacterId, Double>, CombatSimulator> erSimFactory = (targets) -> simFactory.apply(targets,
                                 null);
-                Map<String, Double> requiredER = IterativeSimulator.optimizeER(erSimFactory, rotationRunner, 3);
+                Map<CharacterId, Double> requiredER = IterativeSimulator.optimizeER(erSimFactory, rotationRunner, 3);
 
                 // Extract the liquid ER roll counts from the heuristic artifacts Phase 1
                 // produced.
                 // This tells us how many of the 20-roll budget are reserved for ER per
                 // character.
-                Map<String, Integer> erRollsMap = new HashMap<>();
+                Map<CharacterId, Integer> erRollsMap = new HashMap<>();
                 CombatSimulator heuristicSim = simFactory.apply(requiredER, null);
                 heuristicSim.setLoggingEnabled(false);
                 for (model.entity.Character c : heuristicSim.getPartyMembers()) {
                         int erRolls = c.getArtifactRolls().getOrDefault(StatType.ENERGY_RECHARGE, 0);
                         if (erRolls > 0) {
-                                erRollsMap.put(c.getName(), erRolls);
+                                erRollsMap.put(c.getCharacterId(), erRolls);
                         }
                 }
                 System.out.println("[Pipeline] Reserved ER rolls: " + erRollsMap);
@@ -91,19 +92,19 @@ public class OptimizerPipeline {
                 // Phase 2: DPS Optimization
                 // The manualSimFactory merges the hill-climbing's DPS rolls with the ER rolls.
                 System.out.println("\n--- Re-Optimizing Party Artifacts (Joint Crit Optimization) ---");
-                Function<Map<String, Map<StatType, Integer>>, CombatSimulator> manualSimFactory = (dpsRolls) -> {
-                        Map<String, Map<StatType, Integer>> mergedRolls = mergeDPSAndER(dpsRolls, erRollsMap);
+                Function<Map<CharacterId, Map<StatType, Integer>>, CombatSimulator> manualSimFactory = (dpsRolls) -> {
+                        Map<CharacterId, Map<StatType, Integer>> mergedRolls = mergeDPSAndER(dpsRolls, erRollsMap);
                         return simFactory.apply(requiredER, mergedRolls);
                 };
 
-                Map<String, Map<StatType, Integer>> bestDPSRolls = IterativeSimulator.optimizeJointPartyCrit(
+                Map<CharacterId, Map<StatType, Integer>> bestDPSRolls = IterativeSimulator.optimizeJointPartyCrit(
                                 manualSimFactory,
                                 rotationRunner,
                                 dpsCharsAndStats,
                                 erRollsMap);
 
                 // Merge ER rolls into the final party rolls for the final simulation
-                Map<String, Map<StatType, Integer>> finalPartyRolls = mergeDPSAndER(bestDPSRolls, erRollsMap);
+                Map<CharacterId, Map<StatType, Integer>> finalPartyRolls = mergeDPSAndER(bestDPSRolls, erRollsMap);
 
                 return new TotalOptimizationResult(requiredER, finalPartyRolls);
         }
@@ -119,14 +120,14 @@ public class OptimizerPipeline {
          * artifact stat block is correct when passed to a simulator factory.
          *
          * @param dpsRolls   the DPS-optimized roll map produced by the hill-climber
-         * @param erRollsMap the pre-reserved ER roll counts per character name
+         * @param erRollsMap the pre-reserved ER roll counts per character id
          * @return a new map with ER rolls merged into the DPS rolls for each character
          */
-        private static Map<String, Map<StatType, Integer>> mergeDPSAndER(
-                        Map<String, Map<StatType, Integer>> dpsRolls,
-                        Map<String, Integer> erRollsMap) {
-                Map<String, Map<StatType, Integer>> result = new HashMap<>(dpsRolls);
-                for (Map.Entry<String, Integer> entry : erRollsMap.entrySet()) {
+        private static Map<CharacterId, Map<StatType, Integer>> mergeDPSAndER(
+                        Map<CharacterId, Map<StatType, Integer>> dpsRolls,
+                        Map<CharacterId, Integer> erRollsMap) {
+                Map<CharacterId, Map<StatType, Integer>> result = new HashMap<>(dpsRolls);
+                for (Map.Entry<CharacterId, Integer> entry : erRollsMap.entrySet()) {
                         if (entry.getValue() <= 0)
                                 continue;
                         Map<StatType, Integer> charRolls = new HashMap<>(

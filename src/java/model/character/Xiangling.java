@@ -184,19 +184,19 @@ public class Xiangling extends Character implements FormStateProvider {
         AttackAction cast1 = new AttackAction("Pyronado Cast 1", castMv1, Element.PYRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 0.5, true, ActionType.BURST);
         cast1.setICD(ICDType.Standard, ICDTag.ElementalBurst, 1.0);
-        sim.performAction(this.name, cast1);
+        sim.performAction(this.characterId, cast1);
 
         double castMv2 = getTalentValue("Pyronado Cast 2", 1.76);
         AttackAction cast2 = new AttackAction("Pyronado Cast 2", castMv2, Element.PYRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 0.5, true, ActionType.BURST);
         cast2.setICD(ICDType.Standard, ICDTag.ElementalBurst, 1.0);
-        sim.performAction(this.name, cast2);
+        sim.performAction(this.characterId, cast2);
 
         double castMv3 = getTalentValue("Pyronado Cast 3", 2.19);
         AttackAction cast3 = new AttackAction("Pyronado Cast 3", castMv3, Element.PYRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 0.6, true, ActionType.BURST);
         cast3.setICD(ICDType.Standard, ICDTag.ElementalBurst, 1.0);
-        sim.performAction(this.name, cast3);
+        sim.performAction(this.characterId, cast3);
 
         double hitMv = getTalentValue("Pyronado Hit", 2.24);
         AttackAction hit = new AttackAction("Pyronado Hit", hitMv, Element.PYRO, StatType.BASE_ATK,
@@ -255,7 +255,7 @@ public class Xiangling extends Character implements FormStateProvider {
             AttackAction hit2 = new AttackAction(name + "_2", mv2, Element.PHYSICAL, StatType.BASE_ATK,
                     StatType.NORMAL_ATTACK_DMG_BONUS, 0.2, ActionType.NORMAL);
             hit2.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
-            sim.performAction(this.name, hit2);
+            sim.performAction(this.characterId, hit2);
 
         } else if (normalAttackStep == 3) { // N4 (4 Hits)
             double mv = getTalentValue("N4", 0.259);
@@ -266,7 +266,7 @@ public class Xiangling extends Character implements FormStateProvider {
                 if (i < 4)
                     sim.performActionWithoutTimeAdvance(this.name, hit);
                 else
-                    sim.performAction(this.name, hit);
+                    sim.performAction(this.characterId, hit);
             }
 
         } else {
@@ -275,7 +275,7 @@ public class Xiangling extends Character implements FormStateProvider {
             AttackAction hit = new AttackAction(name, mv, Element.PHYSICAL, StatType.BASE_ATK,
                     StatType.NORMAL_ATTACK_DMG_BONUS, dur, ActionType.NORMAL);
             hit.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
-            sim.performAction(this.name, hit);
+            sim.performAction(this.characterId, hit);
         }
 
         normalAttackStep++;
@@ -288,7 +288,7 @@ public class Xiangling extends Character implements FormStateProvider {
         AttackAction hit = new AttackAction("Xiangling CA", mv, Element.PHYSICAL, StatType.BASE_ATK,
                 StatType.PHYSICAL_DMG_BONUS, 0.8, ActionType.CHARGE);
         hit.setICD(ICDType.Standard, ICDTag.ChargedAttack, 1.0);
-        sim.performAction(this.name, hit);
+        sim.performAction(this.characterId, hit);
 
         normalAttackStep = 0;
     }
@@ -298,6 +298,6 @@ public class Xiangling extends Character implements FormStateProvider {
         AttackAction p = new AttackAction("Xiangling Plunge", mv, Element.PHYSICAL, StatType.BASE_ATK,
                 StatType.PHYSICAL_DMG_BONUS, 1.0, ActionType.PLUNGE);
         p.setICD(ICDType.Standard, ICDTag.None, 1.0);
-        sim.performAction(this.name, p);
+        sim.performAction(this.characterId, p);
     }
 }

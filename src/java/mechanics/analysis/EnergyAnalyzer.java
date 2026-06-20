@@ -2,6 +2,7 @@ package mechanics.analysis;
 
 import simulation.CombatSimulator;
 import model.entity.Character;
+import model.type.CharacterId;
 
 /**
  * Post-simulation utility that calculates the minimum Energy Recharge (ER)
@@ -26,10 +27,10 @@ public class EnergyAnalyzer {
      * required ER of {@code 1.0} (base).
      *
      * @param sim the completed combat simulator whose characters hold energy tracking data
-     * @return map from character name to the minimum ER multiplier (e.g. {@code 1.30} for 130%)
+     * @return map from character id to the minimum ER multiplier (e.g. {@code 1.30} for 130%)
      */
-    public static java.util.Map<String, Double> calculateERRequirements(CombatSimulator sim) {
-        java.util.Map<String, Double> erMap = new java.util.HashMap<>();
+    public static java.util.Map<CharacterId, Double> calculateERRequirements(CombatSimulator sim) {
+        java.util.Map<CharacterId, Double> erMap = new java.util.HashMap<>();
 
         for (Character c : sim.getPartyMembers()) {
             java.util.List<double[]> windows = c.getBurstEnergyWindows();
@@ -59,7 +60,7 @@ public class EnergyAnalyzer {
                 requiredER = 1.0;
             }
 
-            erMap.put(c.getName(), requiredER);
+            erMap.put(c.getCharacterId(), requiredER);
         }
         return erMap;
     }

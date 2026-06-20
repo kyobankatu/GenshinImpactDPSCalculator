@@ -2,6 +2,7 @@ package mechanics.optimization;
 
 import simulation.CombatSimulator;
 import mechanics.analysis.EnergyAnalyzer;
+import model.type.CharacterId;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -41,32 +42,32 @@ public class IterativeSimulator {
      *       (absolute) between two consecutive iterations.</li>
      * </ol>
      *
-     * @param simFactory      factory that accepts a map of {@code charName -> minER}
+     * @param simFactory      factory that accepts a map of {@code CharacterId -> minER}
      *                        and returns a configured simulator
      * @param rotationRunner  consumer that drives a complete rotation on the simulator
      * @param maxIterations   upper bound on iterations before returning unconverged
-     * @return converged (or best-so-far) map of {@code charName -> required ER}
+     * @return converged (or best-so-far) map of {@code CharacterId -> required ER}
      */
-    public static Map<String, Double> optimizeER(
-            Function<Map<String, Double>, CombatSimulator> simFactory,
+    public static Map<CharacterId, Double> optimizeER(
+            Function<Map<CharacterId, Double>, CombatSimulator> simFactory,
             Consumer<CombatSimulator> rotationRunner,
             int maxIterations) {
 
         System.out.println("--- Starting Iterative ER Optimization (Max " + maxIterations + ") ---");
 
-        Map<String, Double> currentTargets = new HashMap<>();
+        Map<CharacterId, Double> currentTargets = new HashMap<>();
 
         for (int i = 0; i < maxIterations; i++) {
 
             CombatSimulator sim = simFactory.apply(currentTargets);
             sim.setLoggingEnabled(false);
             rotationRunner.accept(sim);
-            Map<String, Double> nextTargets = EnergyAnalyzer.calculateERRequirements(sim);
+            Map<CharacterId, Double> nextTargets = EnergyAnalyzer.calculateERRequirements(sim);
 
             boolean converged = true;
-            for (String name : nextTargets.keySet()) {
-                double prev = currentTargets.getOrDefault(name, 0.0);
-                double curr = nextTargets.get(name);
+            for (CharacterId characterId : nextTargets.keySet()) {
+                double prev = currentTargets.getOrDefault(characterId, 0.0);
+                double curr = nextTargets.get(characterId);
                 double diff = Math.abs(curr - prev);
                 if (diff > 0.01) {
                     converged = false;
@@ -82,7 +83,7 @@ public class IterativeSimulator {
 
         System.out.println(">>> ER Result: "
                 + currentTargets.entrySet().stream()
-                        .map(e -> e.getKey() + "=" + String.format("%.0f%%", e.getValue() * 100))
+                        .map(e -> e.getKey().getDisplayName() + "=" + String.format("%.0f%%", e.getValue() * 100))
                         .collect(java.util.stream.Collectors.joining(", "))
                 + " <<<");
         return currentTargets;
@@ -92,7 +93,7 @@ public class IterativeSimulator {
      * Optimizes DPS substat distribution for multiple characters simultaneously.
      *
      * <p><b>ER pre-reservation:</b> The liquid roll budget for each character is
-     * {@code 20 - erRollsPerChar[charName]}.  ER rolls are merged back into the
+     * {@code 20 - erRollsPerChar[CharacterId]}.  ER rolls are merged back into the
      * full roll map before every simulation call so the resulting artifact stats
      * are always correct, but the hill-climber never considers ER as a swap
      * candidate.  Characters absent from {@code erRollsPerChar} retain the full
@@ -106,58 +107,58 @@ public class IterativeSimulator {
      * @param simFactory       factory that accepts the full party roll map and returns
      *                         a configured simulator
      * @param rotationRunner   consumer that drives a complete rotation on the simulator
-     * @param targetCharsMap   map of {@code charName -> stats to optimize} defining
+     * @param targetCharsMap   map of {@code CharacterId -> stats to optimize} defining
      *                         which characters participate and which substats to vary
      * @param erRollsPerChar   pre-computed liquid ER roll counts per character;
      *                         characters absent from this map receive the full 20-roll
      *                         budget; may be {@code null}
-     * @return map of {@code charName -> optimal liquid roll distribution} (ER rolls
+     * @return map of {@code CharacterId -> optimal liquid roll distribution} (ER rolls
      *         are NOT included here; merge them separately for the final simulation)
      */
-    public static Map<String, Map<model.type.StatType, Integer>> optimizeJointPartyCrit(
-            Function<Map<String, Map<model.type.StatType, Integer>>, CombatSimulator> simFactory,
+    public static Map<CharacterId, Map<model.type.StatType, Integer>> optimizeJointPartyCrit(
+            Function<Map<CharacterId, Map<model.type.StatType, Integer>>, CombatSimulator> simFactory,
             Consumer<CombatSimulator> rotationRunner,
-            Map<String, java.util.List<model.type.StatType>> targetCharsMap,
-            Map<String, Integer> erRollsPerChar) {
+            Map<CharacterId, java.util.List<model.type.StatType>> targetCharsMap,
+            Map<CharacterId, Integer> erRollsPerChar) {
 
         System.out.println("\n--- Starting Joint Party Substat Optimization (N-Dimensional) ---");
-        Map<String, Map<model.type.StatType, Integer>> masterMap = new HashMap<>();
+        Map<CharacterId, Map<model.type.StatType, Integer>> masterMap = new HashMap<>();
 
         int maxJointIterations = 3;
         for (int i = 0; i < maxJointIterations; i++) {
             boolean changed = false;
 
-            for (String charName : targetCharsMap.keySet()) {
-                java.util.List<model.type.StatType> optimizeStats = targetCharsMap.get(charName);
-                Map<model.type.StatType, Integer> prevBest = masterMap.getOrDefault(charName, new HashMap<>());
+            for (CharacterId characterId : targetCharsMap.keySet()) {
+                java.util.List<model.type.StatType> optimizeStats = targetCharsMap.get(characterId);
+                Map<model.type.StatType, Integer> prevBest = masterMap.getOrDefault(characterId, new HashMap<>());
 
                 // ER rolls reserved for this character (excluded from hill-climbing budget)
-                int erRolls = (erRollsPerChar != null) ? erRollsPerChar.getOrDefault(charName, 0) : 0;
+                int erRolls = (erRollsPerChar != null) ? erRollsPerChar.getOrDefault(characterId, 0) : 0;
                 int dpsRollBudget = 20 - erRolls;
 
                 // The factory receives dpsRolls merged with ER rolls so the artifact stats are complete
-                final Map<String, Map<model.type.StatType, Integer>> currentGlobalState = new HashMap<>(masterMap);
+                final Map<CharacterId, Map<model.type.StatType, Integer>> currentGlobalState = new HashMap<>(masterMap);
                 final int charERRolls = erRolls;
 
                 Function<Map<model.type.StatType, Integer>, CombatSimulator> charSpecificFactory = (dpsRolls) -> {
-                    Map<String, Map<model.type.StatType, Integer>> tempState = new HashMap<>(currentGlobalState);
+                    Map<CharacterId, Map<model.type.StatType, Integer>> tempState = new HashMap<>(currentGlobalState);
                     // Merge DPS rolls with the pre-computed ER rolls
                     Map<model.type.StatType, Integer> fullRolls = new HashMap<>(dpsRolls);
                     if (charERRolls > 0) {
                         fullRolls.put(model.type.StatType.ENERGY_RECHARGE, charERRolls);
                     }
-                    tempState.put(charName, fullRolls);
+                    tempState.put(characterId, fullRolls);
                     return simFactory.apply(tempState);
                 };
 
                 Map<model.type.StatType, Integer> newBest = optimizeSubstatsNDim(
                         charSpecificFactory,
                         rotationRunner,
-                        charName,
+                        characterId,
                         optimizeStats,
                         dpsRollBudget);
 
-                masterMap.put(charName, newBest);
+                masterMap.put(characterId, newBest);
 
                 if (!prevBest.equals(newBest)) {
                     changed = true;
@@ -190,7 +191,7 @@ public class IterativeSimulator {
      * @param simFactory       factory that accepts a roll map and returns a configured
      *                         simulator; receives only the DPS rolls (ER excluded)
      * @param rotationRunner   consumer that drives a complete rotation on the simulator
-     * @param charName         name of the character being optimized (for logging)
+     * @param characterId      character being optimized
      * @param statsToOptimize  the substats the hill-climber is allowed to vary
      * @param totalRolls       liquid roll budget available (20 minus pre-reserved ER rolls)
      * @return optimal roll distribution across {@code statsToOptimize}
@@ -198,11 +199,11 @@ public class IterativeSimulator {
     public static Map<model.type.StatType, Integer> optimizeSubstatsNDim(
             Function<Map<model.type.StatType, Integer>, CombatSimulator> simFactory,
             Consumer<CombatSimulator> rotationRunner,
-            String charName,
+            CharacterId characterId,
             java.util.List<model.type.StatType> statsToOptimize,
             int totalRolls) {
 
-        System.out.println("   [Opt] Optimizing " + charName + " across " + statsToOptimize
+        System.out.println("   [Opt] Optimizing " + characterId.getDisplayName() + " across " + statsToOptimize
                 + " (budget: " + totalRolls + " rolls)");
 
         // 1. Balanced initialization

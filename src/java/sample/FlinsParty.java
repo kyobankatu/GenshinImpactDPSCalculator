@@ -4,6 +4,7 @@ import simulation.CombatSimulator;
 import model.entity.Enemy;
 
 import model.type.StatType;
+import model.type.CharacterId;
 import model.character.*;
 import model.weapon.*;
 import model.artifact.*;
@@ -35,25 +36,25 @@ public class FlinsParty {
             System.out.println("Genshin DPS Calculator: Flins Party Simulation (Refactored)");
 
             // 1. Run Optimization Phase (ER Calibration + Joint Crit Optimization)
-            java.util.Map<String, java.util.List<StatType>> optimizationTargets = new java.util.HashMap<>();
+            java.util.Map<CharacterId, java.util.List<StatType>> optimizationTargets = new java.util.HashMap<>();
 
             // Flins: Crit, ATK (ER is pre-reserved separately via computeMinERRolls)
-            optimizationTargets.put("Flins",
+            optimizationTargets.put(CharacterId.FLINS,
                     java.util.Arrays.asList(StatType.CRIT_RATE, StatType.CRIT_DMG,
                             StatType.ATK_PERCENT));
 
             // Ineffa: Crit, ATK
-            optimizationTargets.put("Ineffa",
+            optimizationTargets.put(CharacterId.INEFFA,
                     java.util.Arrays.asList(StatType.CRIT_RATE, StatType.CRIT_DMG,
                             StatType.ATK_PERCENT));
 
             // Columbina: Crit, HP
-            optimizationTargets.put("Columbina",
+            optimizationTargets.put(CharacterId.COLUMBINA,
                     java.util.Arrays.asList(StatType.CRIT_RATE, StatType.CRIT_DMG,
                             StatType.HP_PERCENT));
 
             // Sucrose: EM (Swirl)
-            optimizationTargets.put("Sucrose",
+            optimizationTargets.put(CharacterId.SUCROSE,
                     java.util.Arrays.asList(StatType.ELEMENTAL_MASTERY));
 
             TotalOptimizationResult optimization = OptimizerPipeline.run(
@@ -96,8 +97,8 @@ public class FlinsParty {
      * @return a configured simulator with party, enemy, and moonsign set up
      */
     private static CombatSimulator createSimulator(
-            java.util.Map<String, Double> erTargets,
-            java.util.Map<String, java.util.Map<model.type.StatType, Integer>> partyManualRolls) {
+            java.util.Map<CharacterId, Double> erTargets,
+            java.util.Map<CharacterId, java.util.Map<model.type.StatType, Integer>> partyManualRolls) {
         CombatSimulator s = new CombatSimulator();
         s.setEnemy(new Enemy(100)); // Enemy Lv 100
         // s.setMoonsign(CombatSimulator.Moonsign.ASCENDANT_GLEAM); // Removed manual
@@ -123,92 +124,92 @@ public class FlinsParty {
         for (int j = 0; j < 3; j++) {
 
             // 1. Ineffa
-            sim.switchCharacter("Ineffa");
-            skill(sim, "Ineffa");
-            burst(sim, "Ineffa");
+            sim.switchCharacter(CharacterId.INEFFA);
+            skill(sim, CharacterId.INEFFA);
+            burst(sim, CharacterId.INEFFA);
 
             // 2. Columbina
-            sim.switchCharacter("Columbina");
-            skill(sim, "Columbina");
-            burst(sim, "Columbina");
+            sim.switchCharacter(CharacterId.COLUMBINA);
+            skill(sim, CharacterId.COLUMBINA);
+            burst(sim, CharacterId.COLUMBINA);
 
             // 3. Sucrose
-            sim.switchCharacter("Sucrose");
-            skill(sim, "Sucrose");
-            burst(sim, "Sucrose");
+            sim.switchCharacter(CharacterId.SUCROSE);
+            skill(sim, CharacterId.SUCROSE);
+            burst(sim, CharacterId.SUCROSE);
 
             // 4. Flins
-            sim.switchCharacter("Flins");
-            skill(sim, "Flins");
-            skill(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            burst(sim, "Flins"); // SpecialBurst 1
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            skill(sim, "Flins"); // 2nd Spearstorm (CD now cleared)
-            burst(sim, "Flins"); // SpecialBurst 2 (Thunderous Symphony renewed)
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
+            sim.switchCharacter(CharacterId.FLINS);
+            skill(sim, CharacterId.FLINS);
+            skill(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            burst(sim, CharacterId.FLINS); // SpecialBurst 1
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            skill(sim, CharacterId.FLINS); // 2nd Spearstorm (CD now cleared)
+            burst(sim, CharacterId.FLINS); // SpecialBurst 2 (Thunderous Symphony renewed)
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
 
             // 5. Sucrose
-            sim.switchCharacter("Sucrose");
-            skill(sim, "Sucrose");
-            normal(sim, "Sucrose");
-            normal(sim, "Sucrose");
-            normal(sim, "Sucrose");
+            sim.switchCharacter(CharacterId.SUCROSE);
+            skill(sim, CharacterId.SUCROSE);
+            normal(sim, CharacterId.SUCROSE);
+            normal(sim, CharacterId.SUCROSE);
+            normal(sim, CharacterId.SUCROSE);
 
             // 1. Ineffa
-            sim.switchCharacter("Ineffa");
-            skill(sim, "Ineffa");
+            sim.switchCharacter(CharacterId.INEFFA);
+            skill(sim, CharacterId.INEFFA);
 
             // 2. Columbina
-            sim.switchCharacter("Columbina");
-            skill(sim, "Columbina");
-            burst(sim, "Columbina");
+            sim.switchCharacter(CharacterId.COLUMBINA);
+            skill(sim, CharacterId.COLUMBINA);
+            burst(sim, CharacterId.COLUMBINA);
 
             // 3. Sucrose
-            sim.switchCharacter("Sucrose");
-            skill(sim, "Sucrose");
-            burst(sim, "Sucrose");
+            sim.switchCharacter(CharacterId.SUCROSE);
+            skill(sim, CharacterId.SUCROSE);
+            burst(sim, CharacterId.SUCROSE);
 
             // 4. Flins
-            sim.switchCharacter("Flins");
-            skill(sim, "Flins");
-            skill(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            burst(sim, "Flins"); // SpecialBurst 1
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            skill(sim, "Flins"); // 2nd Spearstorm (CD now cleared)
-            burst(sim, "Flins"); // SpecialBurst 2 (Thunderous Symphony renewed)
-            normal(sim, "Flins");
-            normal(sim, "Flins");
-            normal(sim, "Flins");
+            sim.switchCharacter(CharacterId.FLINS);
+            skill(sim, CharacterId.FLINS);
+            skill(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            burst(sim, CharacterId.FLINS); // SpecialBurst 1
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            skill(sim, CharacterId.FLINS); // 2nd Spearstorm (CD now cleared)
+            burst(sim, CharacterId.FLINS); // SpecialBurst 2 (Thunderous Symphony renewed)
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
+            normal(sim, CharacterId.FLINS);
 
-            sim.switchCharacter("Sucrose");
-            normal(sim, "Sucrose");
-            normal(sim, "Sucrose");
+            sim.switchCharacter(CharacterId.SUCROSE);
+            normal(sim, CharacterId.SUCROSE);
+            normal(sim, CharacterId.SUCROSE);
 
         }
     }
@@ -219,8 +220,8 @@ public class FlinsParty {
      * @param sim           simulator
      * @param characterName character display name
      */
-    private static void normal(CombatSimulator sim, String characterName) {
-        sim.performAction(characterName, CharacterActionRequest.of(CharacterActionKey.NORMAL));
+    private static void normal(CombatSimulator sim, CharacterId characterId) {
+        sim.performAction(characterId, CharacterActionRequest.of(CharacterActionKey.NORMAL));
     }
 
     /**
@@ -229,8 +230,8 @@ public class FlinsParty {
      * @param sim           simulator
      * @param characterName character display name
      */
-    private static void skill(CombatSimulator sim, String characterName) {
-        sim.performAction(characterName, CharacterActionRequest.of(CharacterActionKey.SKILL));
+    private static void skill(CombatSimulator sim, CharacterId characterId) {
+        sim.performAction(characterId, CharacterActionRequest.of(CharacterActionKey.SKILL));
     }
 
     /**
@@ -239,8 +240,8 @@ public class FlinsParty {
      * @param sim           simulator
      * @param characterName character display name
      */
-    private static void burst(CombatSimulator sim, String characterName) {
-        sim.performAction(characterName, CharacterActionRequest.of(CharacterActionKey.BURST));
+    private static void burst(CombatSimulator sim, CharacterId characterId) {
+        sim.performAction(characterId, CharacterActionRequest.of(CharacterActionKey.BURST));
     }
 
     /**
@@ -251,8 +252,8 @@ public class FlinsParty {
      * @param erTargets        per-character minimum ER targets
      * @param partyManualRolls per-character manual artifact substat roll overrides
      */
-    private static void setupParty(CombatSimulator sim, java.util.Map<String, Double> erTargets,
-            java.util.Map<String, java.util.Map<model.type.StatType, Integer>> partyManualRolls) {
+    private static void setupParty(CombatSimulator sim, java.util.Map<CharacterId, Double> erTargets,
+            java.util.Map<CharacterId, java.util.Map<model.type.StatType, Integer>> partyManualRolls) {
 
         // --- 1. Flins (Night of the Sky's Unveiling) ---
         Flins flins = new Flins(new ProspectorShovel(), null);
@@ -264,10 +265,10 @@ public class FlinsParty {
         flinsConfig.subStatPriority = java.util.Arrays.asList(StatType.CRIT_DMG, StatType.CRIT_RATE,
                 StatType.ATK_PERCENT, StatType.ENERGY_RECHARGE);
 
-        flinsConfig.minER = erTargets.getOrDefault("Flins", 1.0);
+        flinsConfig.minER = erTargets.getOrDefault(CharacterId.FLINS, 1.0);
 
-        if (partyManualRolls.containsKey("Flins")) {
-            flinsConfig.manualRolls = partyManualRolls.get("Flins");
+        if (partyManualRolls.containsKey(CharacterId.FLINS)) {
+            flinsConfig.manualRolls = partyManualRolls.get(CharacterId.FLINS);
         }
 
         ArtifactOptimizer.OptimizationResult resultFlins = ArtifactOptimizer.generate(
@@ -287,10 +288,10 @@ public class FlinsParty {
         ineffaConfig.subStatPriority = java.util.Arrays.asList(StatType.CRIT_DMG, StatType.CRIT_RATE,
                 StatType.ATK_PERCENT, StatType.ENERGY_RECHARGE);
 
-        ineffaConfig.minER = erTargets.getOrDefault("Ineffa", 1.0);
+        ineffaConfig.minER = erTargets.getOrDefault(CharacterId.INEFFA, 1.0);
 
-        if (partyManualRolls.containsKey("Ineffa")) {
-            ineffaConfig.manualRolls = partyManualRolls.get("Ineffa");
+        if (partyManualRolls.containsKey(CharacterId.INEFFA)) {
+            ineffaConfig.manualRolls = partyManualRolls.get(CharacterId.INEFFA);
         }
 
         ArtifactOptimizer.OptimizationResult resultIneffa = ArtifactOptimizer.generate(
@@ -310,10 +311,10 @@ public class FlinsParty {
         colConfig.subStatPriority = java.util.Arrays.asList(StatType.CRIT_DMG, StatType.CRIT_RATE,
                 StatType.HP_PERCENT, StatType.ENERGY_RECHARGE);
 
-        colConfig.minER = erTargets.getOrDefault("Columbina", 1.0);
+        colConfig.minER = erTargets.getOrDefault(CharacterId.COLUMBINA, 1.0);
 
-        if (partyManualRolls.containsKey("Columbina")) {
-            colConfig.manualRolls = partyManualRolls.get("Columbina");
+        if (partyManualRolls.containsKey(CharacterId.COLUMBINA)) {
+            colConfig.manualRolls = partyManualRolls.get(CharacterId.COLUMBINA);
         }
 
         ArtifactOptimizer.OptimizationResult resultCol = ArtifactOptimizer.generate(
@@ -333,10 +334,10 @@ public class FlinsParty {
         sucConfig.subStatPriority = java.util.Arrays.asList(StatType.ELEMENTAL_MASTERY,
                 StatType.ENERGY_RECHARGE);
 
-        sucConfig.minER = erTargets.getOrDefault("Sucrose", 1.0);
+        sucConfig.minER = erTargets.getOrDefault(CharacterId.SUCROSE, 1.0);
 
-        if (partyManualRolls.containsKey("Sucrose")) {
-            sucConfig.manualRolls = partyManualRolls.get("Sucrose");
+        if (partyManualRolls.containsKey(CharacterId.SUCROSE)) {
+            sucConfig.manualRolls = partyManualRolls.get(CharacterId.SUCROSE);
         }
 
         ArtifactOptimizer.OptimizationResult resultSuc = ArtifactOptimizer.generate(

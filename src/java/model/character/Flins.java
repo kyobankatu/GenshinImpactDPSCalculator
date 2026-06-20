@@ -302,11 +302,11 @@ public class Flins extends Character
         double attackTime = sim.getCurrentTime();
         if (isMultiHit) {
             // First Hit
-            sim.performAction(this.name, hit);
+            sim.performAction(this.characterId, hit);
             // Second Hit (Same MV)
-            sim.performAction(this.name, hit);
+            sim.performAction(this.characterId, hit);
         } else {
-            sim.performAction(this.name, hit);
+            sim.performAction(this.characterId, hit);
         }
 
         // Manifest Flame NA: generate 1 Electro particle with 2s CD
@@ -333,7 +333,7 @@ public class Flins extends Character
         if (sim.isLoggingEnabled())
             System.out.println("Flins entering Manifest Flame form.");
 
-        sim.performAction(this.name, new AttackAction("Enter Form", 0, Element.PHYSICAL, StatType.BASE_ATK, null, 0.3));
+        sim.performAction(this.characterId, new AttackAction("Enter Form", 0, Element.PHYSICAL, StatType.BASE_ATK, null, 0.3));
 
     }
 
@@ -359,7 +359,7 @@ public class Flins extends Character
         this.thunderousSymphonyEndTime = castTime + 6.0;
         this.thunderousSymphonyActive = true;
 
-        sim.performAction(this.name, hit);
+        sim.performAction(this.characterId, hit);
         if (sim.isLoggingEnabled())
             System.out.println("Flins enters Thunderous Symphony state.");
     }
@@ -398,7 +398,7 @@ public class Flins extends Character
                 StatType.BURST_DMG_BONUS, 0.0, false, ActionType.BURST);
         hit.setLunarConsidered(true);
         hit.setAnimationDuration(1.5);
-        sim.performAction(this.name, hit);
+        sim.performAction(this.characterId, hit);
 
         // Delayed Hits
         int middleCount = 2 + (thundercloudActiveAtCast ? 2 : 0);
@@ -424,7 +424,7 @@ public class Flins extends Character
 
                 @Override
                 public void tick(CombatSimulator s) {
-                    s.performAction(name, mid);
+                    s.performAction(characterId, mid);
                     done = true;
                 }
 
@@ -450,7 +450,7 @@ public class Flins extends Character
 
             @Override
             public void tick(CombatSimulator s) {
-                s.performAction(name, fin);
+                s.performAction(characterId, fin);
                 done = true;
             }
 
@@ -485,7 +485,6 @@ public class Flins extends Character
                     StatType.BURST_DMG_BONUS, 0.0, false, ActionType.BURST);
             extra.setLunarConsidered(true);
             final double additionalTime = sim.getCurrentTime() + 0.1;
-            final String charName = this.name;
             sim.registerEvent(new simulation.event.TimerEvent() {
                 boolean done = false;
 
@@ -496,7 +495,7 @@ public class Flins extends Character
 
                 @Override
                 public void tick(CombatSimulator s) {
-                    s.performAction(charName, extra);
+                    s.performAction(characterId, extra);
                     done = true;
                 }
 
@@ -507,7 +506,7 @@ public class Flins extends Character
             });
         }
 
-        sim.performAction(this.name, hit);
+        sim.performAction(this.characterId, hit);
     }
 
     /**

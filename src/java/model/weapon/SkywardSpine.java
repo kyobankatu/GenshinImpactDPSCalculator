@@ -69,7 +69,7 @@ public class SkywardSpine extends Weapon implements DamageTriggeredWeaponEffect 
 
                     System.out.println(String.format("   [Weapon] Skyward Spine Vacuum Blade triggered!"));
                     System.out.println(String.format("   -> Damage: %,.0f", dmg));
-                    sim.recordDamage(user.getName(), dmg);
+                    sim.recordDamage(user.getCharacterId(), dmg);
                 }
             }
         }

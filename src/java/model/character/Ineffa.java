@@ -182,7 +182,7 @@ public class Ineffa extends Character implements FormStateProvider, CharacterTea
 
         hit.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
         hit.setAnimationDuration(0.3);
-        sim.performAction(this.name, hit);
+        sim.performAction(this.characterId, hit);
 
         normalAttackStep++;
         if (normalAttackStep >= 4)
@@ -206,7 +206,7 @@ public class Ineffa extends Character implements FormStateProvider, CharacterTea
                 StatType.SKILL_DMG_BONUS, 0.0, false, ActionType.SKILL);
         hit.setICD(ICDType.Standard, ICDTag.ElementalSkill, 1.0);
         hit.setAnimationDuration(0.6); // Cast Time
-        sim.performAction(this.name, hit);
+        sim.performAction(this.characterId, hit);
 
         // Shield Logic
         double atk = this.getEffectiveStats(sim.getCurrentTime()).getTotalAtk();
@@ -241,7 +241,7 @@ public class Ineffa extends Character implements FormStateProvider, CharacterTea
                         // Critical: Mark as Lunar-Charged
                         oc.setLunarReactionType(AttackAction.LunarReactionType.CHARGED);
 
-                        s.performAction(this.name, oc);
+                        s.performAction(this.characterId, oc);
                     }
 
                     // Generate Particles (1 per hit)
@@ -265,7 +265,7 @@ public class Ineffa extends Character implements FormStateProvider, CharacterTea
                 StatType.BURST_DMG_BONUS, 0.0, false, ActionType.BURST);
         hit.setICD(ICDType.None, ICDTag.ElementalBurst, 2.0); // 2U usually
         hit.setAnimationDuration(1.7);
-        sim.performAction(this.name, hit);
+        sim.performAction(this.characterId, hit);
 
         // Passive 2: Reconstruction Protocol (Team EM Buff)
         double myAtk = this.getEffectiveStats(sim.getCurrentTime()).getTotalAtk();

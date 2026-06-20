@@ -14,28 +14,40 @@ package model.type;
  */
 public enum CharacterId {
     /** Bennett (Pyro sword support). */
-    BENNETT("Bennett"),
+    BENNETT(1, "Bennett"),
     /** Columbina (custom Lunar character; carries {@code LUNAR_MULTIPLIER}). */
-    COLUMBINA("Columbina"),
+    COLUMBINA(2, "Columbina"),
     /** Flins (custom Lunar character). */
-    FLINS("Flins"),
+    FLINS(3, "Flins"),
     /** Ineffa (custom Lunar character; carries {@code LUNAR_BASE_BONUS}). */
-    INEFFA("Ineffa"),
+    INEFFA(4, "Ineffa"),
     /** Raiden Shogun (Electro polearm DPS / battery). */
-    RAIDEN_SHOGUN("Raiden Shogun"),
+    RAIDEN_SHOGUN(5, "Raiden Shogun"),
     /** Sucrose (Anemo catalyst Moonsign / Ascendant Blessing source). */
-    SUCROSE("Sucrose"),
+    SUCROSE(6, "Sucrose"),
     /** Xiangling (Pyro polearm sub-DPS). */
-    XIANGLING("Xiangling"),
+    XIANGLING(7, "Xiangling"),
     /** Xingqiu (Hydro sword off-field reaction enabler). */
-    XINGQIU("Xingqiu"),
+    XINGQIU(8, "Xingqiu"),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
-    UNKNOWN("Unknown");
+    UNKNOWN(0, "Unknown");
 
+    private final int numericId;
     private final String displayName;
 
-    CharacterId(String displayName) {
+    CharacterId(int numericId, String displayName) {
+        this.numericId = numericId;
         this.displayName = displayName;
+    }
+
+    /**
+     * Returns the stable numeric identifier for serialization, arrays, and
+     * non-display bookkeeping. Do not derive persisted values from enum ordinal.
+     *
+     * @return stable numeric id
+     */
+    public int getNumericId() {
+        return numericId;
     }
 
     /**
@@ -63,6 +75,21 @@ public enum CharacterId {
         }
         for (CharacterId id : values()) {
             if (id.displayName.equals(name)) {
+                return id;
+            }
+        }
+        return UNKNOWN;
+    }
+
+    /**
+     * Resolves a stable numeric id back to a {@link CharacterId}.
+     *
+     * @param numericId stable numeric id
+     * @return matching id, or {@link #UNKNOWN} if no id matches
+     */
+    public static CharacterId fromNumericId(int numericId) {
+        for (CharacterId id : values()) {
+            if (id.numericId == numericId) {
                 return id;
             }
         }

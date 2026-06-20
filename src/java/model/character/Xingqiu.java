@@ -143,13 +143,13 @@ public class Xingqiu extends Character implements FormStateProvider {
         AttackAction hit1 = new AttackAction("Fatal Rainscreen Hit 1", mv1 * mvMulti, Element.HYDRO, StatType.BASE_ATK,
                 StatType.SKILL_DMG_BONUS, 0.5, ActionType.SKILL);
         hit1.setICD(ICDType.Standard, ICDTag.ElementalSkill, 1.0);
-        sim.performAction(this.name, hit1);
+        sim.performAction(this.characterId, hit1);
 
         double mv2 = getTalentValue("Rain Screen Hit 2", 3.25);
         AttackAction hit2 = new AttackAction("Fatal Rainscreen Hit 2", mv2 * mvMulti, Element.HYDRO, StatType.BASE_ATK,
                 StatType.SKILL_DMG_BONUS, 0.5, ActionType.SKILL);
         hit2.setICD(ICDType.Standard, ICDTag.ElementalSkill, 1.0);
-        sim.performAction(this.name, hit2);
+        sim.performAction(this.characterId, hit2);
 
         // Generate 5 Hydro Particles
         sim.getEnergyDistributor().distributeParticles(Element.HYDRO, 5.0, mechanics.energy.ParticleType.PARTICLE);
@@ -158,7 +158,7 @@ public class Xingqiu extends Character implements FormStateProvider {
     private void burst(CombatSimulator sim) {
         AttackAction cast = new AttackAction("Raincutter Cast", 0.0, Element.HYDRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 1.0, ActionType.BURST);
-        sim.performAction(this.name, cast);
+        sim.performAction(this.characterId, cast);
 
         // Buff Logic
         sim.applyTeamBuff(new mechanics.buff.SimpleBuff("Raincutter", BuffId.RAINCUTTER, 18.0,
@@ -200,7 +200,7 @@ public class Xingqiu extends Character implements FormStateProvider {
 
                     // Fire swords
                     for (AttackAction sword : rainSwords) {
-                        sim.performActionWithoutTimeAdvance(self.getName(), sword);
+                        sim.performActionWithoutTimeAdvance(self.getCharacterId(), sword);
                     }
                     self.triggerCooldowns.put("Raincutter", time);
                 }
@@ -274,7 +274,7 @@ public class Xingqiu extends Character implements FormStateProvider {
             AttackAction hit2 = new AttackAction(name + "_2", mv2, Element.PHYSICAL, StatType.BASE_ATK,
                     StatType.NORMAL_ATTACK_DMG_BONUS, 0.2, ActionType.NORMAL);
             hit2.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
-            sim.performAction(this.name, hit2);
+            sim.performAction(this.characterId, hit2);
 
         } else if (normalAttackStep == 4) { // N5
             double mv1 = getTalentValue("N5_1", 0.659);
@@ -288,7 +288,7 @@ public class Xingqiu extends Character implements FormStateProvider {
             AttackAction hit2 = new AttackAction(name + "_2", mv2, Element.PHYSICAL, StatType.BASE_ATK,
                     StatType.NORMAL_ATTACK_DMG_BONUS, 0.3, ActionType.NORMAL);
             hit2.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
-            sim.performAction(this.name, hit2);
+            sim.performAction(this.characterId, hit2);
 
         } else {
             // Single Hit
@@ -296,7 +296,7 @@ public class Xingqiu extends Character implements FormStateProvider {
             AttackAction hit = new AttackAction(name, mv, Element.PHYSICAL, StatType.BASE_ATK,
                     StatType.NORMAL_ATTACK_DMG_BONUS, dur, ActionType.NORMAL);
             hit.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
-            sim.performAction(this.name, hit);
+            sim.performAction(this.characterId, hit);
         }
 
         normalAttackStep++;
@@ -316,7 +316,7 @@ public class Xingqiu extends Character implements FormStateProvider {
         AttackAction hit2 = new AttackAction("Xingqiu CA_2", mv2, Element.PHYSICAL, StatType.BASE_ATK,
                 StatType.PHYSICAL_DMG_BONUS, 0.6, ActionType.CHARGE);
         hit2.setICD(ICDType.Standard, ICDTag.ChargedAttack, 1.0);
-        sim.performAction(this.name, hit2);
+        sim.performAction(this.characterId, hit2);
 
         normalAttackStep = 0;
     }
@@ -326,6 +326,6 @@ public class Xingqiu extends Character implements FormStateProvider {
         AttackAction p = new AttackAction("Xingqiu Plunge", mv, Element.PHYSICAL, StatType.BASE_ATK,
                 StatType.PHYSICAL_DMG_BONUS, 1.0, ActionType.PLUNGE);
         p.setICD(ICDType.Standard, ICDTag.None, 1.0);
-        sim.performAction(this.name, p);
+        sim.performAction(this.characterId, p);
     }
 }

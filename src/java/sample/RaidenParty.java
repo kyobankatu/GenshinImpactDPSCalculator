@@ -4,6 +4,7 @@ import simulation.CombatSimulator;
 import model.entity.Enemy;
 
 import model.type.StatType;
+import model.type.CharacterId;
 import model.character.*;
 import model.weapon.*;
 
@@ -31,18 +32,18 @@ public class RaidenParty {
 
         // 1. Run Optimization Phase (ER Calibration + Joint Crit Optimization)
         // 1. Run Optimization Phase (ER Calibration + Joint Crit Optimization)
-        java.util.Map<String, java.util.List<StatType>> optimizationTargets = new java.util.HashMap<>();
+        java.util.Map<CharacterId, java.util.List<StatType>> optimizationTargets = new java.util.HashMap<>();
 
         // Raiden: Crit & ATK
-        optimizationTargets.put("Raiden Shogun",
+        optimizationTargets.put(CharacterId.RAIDEN_SHOGUN,
                 java.util.Arrays.asList(StatType.CRIT_RATE, StatType.CRIT_DMG, StatType.ATK_PERCENT));
 
         // Xingqiu: Crit & ATK
-        optimizationTargets.put("Xingqiu",
+        optimizationTargets.put(CharacterId.XINGQIU,
                 java.util.Arrays.asList(StatType.CRIT_RATE, StatType.CRIT_DMG, StatType.ATK_PERCENT));
 
         // Xiangling: Crit, ATK, EM
-        optimizationTargets.put("Xiangling", java.util.Arrays.asList(StatType.CRIT_RATE, StatType.CRIT_DMG,
+        optimizationTargets.put(CharacterId.XIANGLING, java.util.Arrays.asList(StatType.CRIT_RATE, StatType.CRIT_DMG,
                 StatType.ATK_PERCENT, StatType.ELEMENTAL_MASTERY));
 
         TotalOptimizationResult optimization = OptimizerPipeline.run(
@@ -82,8 +83,8 @@ public class RaidenParty {
      * @return a configured simulator with party and enemy set up
      */
     private static CombatSimulator createSimulator(
-            java.util.Map<String, Double> erTargets,
-            java.util.Map<String, java.util.Map<model.type.StatType, Integer>> partyManualRolls) {
+            java.util.Map<CharacterId, Double> erTargets,
+            java.util.Map<CharacterId, java.util.Map<model.type.StatType, Integer>> partyManualRolls) {
         CombatSimulator s = new CombatSimulator();
         s.setEnemy(new Enemy(90));
         setupParty(s, erTargets != null ? erTargets : new java.util.HashMap<>(),
@@ -102,67 +103,67 @@ public class RaidenParty {
         // (Using previous fixed rotation logic)
 
         // 1. Raiden E
-        sim.switchCharacter("Raiden Shogun");
+        sim.switchCharacter(CharacterId.RAIDEN_SHOGUN);
         sim.getEnergyDistributor().scheduleKQMSEnemyParticles(); // Add Enemy Particles (Delegated)
-        skill(sim, "Raiden Shogun");
+        skill(sim, CharacterId.RAIDEN_SHOGUN);
 
         // 2. Xingqiu: Q E E
-        sim.switchCharacter("Xingqiu");
-        burst(sim, "Xingqiu"); // Q
-        skill(sim, "Xingqiu"); // E
-        normal(sim, "Xingqiu"); // N0 (Drive Raincutter)
+        sim.switchCharacter(CharacterId.XINGQIU);
+        burst(sim, CharacterId.XINGQIU); // Q
+        skill(sim, CharacterId.XINGQIU); // E
+        normal(sim, CharacterId.XINGQIU); // N0 (Drive Raincutter)
 
         // 3. Bennett: Q N0 E
-        sim.switchCharacter("Bennett");
-        burst(sim, "Bennett"); // Q
-        normal(sim, "Bennett"); // N0
-        skill(sim, "Bennett"); // E
+        sim.switchCharacter(CharacterId.BENNETT);
+        burst(sim, CharacterId.BENNETT); // Q
+        normal(sim, CharacterId.BENNETT); // N0
+        skill(sim, CharacterId.BENNETT); // E
 
         // 4. Xiangling: Q N0 E N0 (Optimized to Q E N0)
-        sim.switchCharacter("Xiangling");
-        burst(sim, "Xiangling"); // Q
-        normal(sim, "Xiangling"); // N0
-        skill(sim, "Xiangling"); // E
-        normal(sim, "Xiangling"); // N0
+        sim.switchCharacter(CharacterId.XIANGLING);
+        burst(sim, CharacterId.XIANGLING); // Q
+        normal(sim, CharacterId.XIANGLING); // N0
+        skill(sim, CharacterId.XIANGLING); // E
+        normal(sim, CharacterId.XIANGLING); // N0
 
         // 5. Raiden: Q N3Cx3 N1C N0 E
-        sim.switchCharacter("Raiden Shogun");
-        burst(sim, "Raiden Shogun"); // Q
+        sim.switchCharacter(CharacterId.RAIDEN_SHOGUN);
+        burst(sim, CharacterId.RAIDEN_SHOGUN); // Q
 
         // N3Cx3
         for (int i = 0; i < 3; i++) {
-            normal(sim, "Raiden Shogun");
-            normal(sim, "Raiden Shogun");
-            normal(sim, "Raiden Shogun");
-            charge(sim, "Raiden Shogun");
+            normal(sim, CharacterId.RAIDEN_SHOGUN);
+            normal(sim, CharacterId.RAIDEN_SHOGUN);
+            normal(sim, CharacterId.RAIDEN_SHOGUN);
+            charge(sim, CharacterId.RAIDEN_SHOGUN);
         }
 
         // N1C
-        normal(sim, "Raiden Shogun");
-        charge(sim, "Raiden Shogun");
+        normal(sim, CharacterId.RAIDEN_SHOGUN);
+        charge(sim, CharacterId.RAIDEN_SHOGUN);
 
         // N0 E (End)
         sim.advanceTime(0.1);
-        normal(sim, "Raiden Shogun");
-        skill(sim, "Raiden Shogun"); // E Refresh
+        normal(sim, CharacterId.RAIDEN_SHOGUN);
+        skill(sim, CharacterId.RAIDEN_SHOGUN); // E Refresh
 
         // 6. Bennett E
-        sim.switchCharacter("Bennett");
-        skill(sim, "Bennett"); // E
-        normal(sim, "Bennett"); // N
+        sim.switchCharacter(CharacterId.BENNETT);
+        skill(sim, CharacterId.BENNETT); // E
+        normal(sim, CharacterId.BENNETT); // N
 
         // 7. Xiangling Funnel
-        sim.switchCharacter("Xiangling");
-        normal(sim, "Xiangling"); // N
+        sim.switchCharacter(CharacterId.XIANGLING);
+        normal(sim, CharacterId.XIANGLING); // N
 
         // 8. Bennet E
-        sim.switchCharacter("Bennett");
-        skill(sim, "Bennett"); // E
-        normal(sim, "Bennett"); // N
+        sim.switchCharacter(CharacterId.BENNETT);
+        skill(sim, CharacterId.BENNETT); // E
+        normal(sim, CharacterId.BENNETT); // N
 
         // 9. Xiangling Funnel
-        sim.switchCharacter("Xiangling");
-        normal(sim, "Xiangling"); // N
+        sim.switchCharacter(CharacterId.XIANGLING);
+        normal(sim, CharacterId.XIANGLING); // N
 
         // Pad to full 21s rotation
         double remaining = 21.0 - sim.getCurrentTime();
@@ -172,43 +173,43 @@ public class RaidenParty {
     }
 
     /**
-     * Issues a normal attack action for the named character.
+     * Issues a normal attack action for the given character.
      *
      * @param sim           simulator
-     * @param characterName character display name
+     * @param characterId character id
      */
-    private static void normal(CombatSimulator sim, String characterName) {
-        sim.performAction(characterName, CharacterActionRequest.of(CharacterActionKey.NORMAL));
+    private static void normal(CombatSimulator sim, CharacterId characterId) {
+        sim.performAction(characterId, CharacterActionRequest.of(CharacterActionKey.NORMAL));
     }
 
     /**
-     * Issues a charged attack action for the named character.
+     * Issues a charged attack action for the given character.
      *
      * @param sim           simulator
-     * @param characterName character display name
+     * @param characterId character id
      */
-    private static void charge(CombatSimulator sim, String characterName) {
-        sim.performAction(characterName, CharacterActionRequest.of(CharacterActionKey.CHARGE));
+    private static void charge(CombatSimulator sim, CharacterId characterId) {
+        sim.performAction(characterId, CharacterActionRequest.of(CharacterActionKey.CHARGE));
     }
 
     /**
-     * Issues an elemental skill action for the named character.
+     * Issues an elemental skill action for the given character.
      *
      * @param sim           simulator
-     * @param characterName character display name
+     * @param characterId character id
      */
-    private static void skill(CombatSimulator sim, String characterName) {
-        sim.performAction(characterName, CharacterActionRequest.of(CharacterActionKey.SKILL));
+    private static void skill(CombatSimulator sim, CharacterId characterId) {
+        sim.performAction(characterId, CharacterActionRequest.of(CharacterActionKey.SKILL));
     }
 
     /**
-     * Issues an elemental burst action for the named character.
+     * Issues an elemental burst action for the given character.
      *
      * @param sim           simulator
-     * @param characterName character display name
+     * @param characterId character id
      */
-    private static void burst(CombatSimulator sim, String characterName) {
-        sim.performAction(characterName, CharacterActionRequest.of(CharacterActionKey.BURST));
+    private static void burst(CombatSimulator sim, CharacterId characterId) {
+        sim.performAction(characterId, CharacterActionRequest.of(CharacterActionKey.BURST));
     }
 
     /**
@@ -219,8 +220,8 @@ public class RaidenParty {
      * @param erTargets        per-character minimum ER targets
      * @param partyManualRolls per-character manual artifact substat roll overrides
      */
-    private static void setupParty(CombatSimulator sim, java.util.Map<String, Double> erTargets,
-            java.util.Map<String, java.util.Map<model.type.StatType, Integer>> partyManualRolls) {
+    private static void setupParty(CombatSimulator sim, java.util.Map<CharacterId, Double> erTargets,
+            java.util.Map<CharacterId, java.util.Map<model.type.StatType, Integer>> partyManualRolls) {
         // --- KQMS Optimization ---
 
         // 1. Raiden Shogun (Emblem)
@@ -233,15 +234,15 @@ public class RaidenParty {
                 StatType.CRIT_DMG, StatType.ATK_PERCENT);
 
         // Dynamic ER Target
-        Double calcER = erTargets.getOrDefault("Raiden Shogun", 1.0);
+        Double calcER = erTargets.getOrDefault(CharacterId.RAIDEN_SHOGUN, 1.0);
         System.out.println(
                 "   [Setup] Raiden Shogun Calculated ER: " + String.format("%.1f", calcER * 100) + "%");
         // Force minimum 250% for Emblem/DPS
         raidenConfig.minER = Math.max(calcER, 2.50);
 
         // Manual Rolls Injection
-        if (partyManualRolls.containsKey("Raiden Shogun")) {
-            raidenConfig.manualRolls = partyManualRolls.get("Raiden Shogun");
+        if (partyManualRolls.containsKey(CharacterId.RAIDEN_SHOGUN)) {
+            raidenConfig.manualRolls = partyManualRolls.get(CharacterId.RAIDEN_SHOGUN);
         }
 
         mechanics.optimization.ArtifactOptimizer.OptimizationResult resultRaiden = mechanics.optimization.ArtifactOptimizer
@@ -264,10 +265,10 @@ public class RaidenParty {
         xqConfig.subStatPriority = java.util.Arrays.asList(StatType.ENERGY_RECHARGE, StatType.CRIT_RATE,
                 StatType.CRIT_DMG, StatType.ATK_PERCENT);
 
-        xqConfig.minER = erTargets.getOrDefault("Xingqiu", 1.0);
+        xqConfig.minER = erTargets.getOrDefault(CharacterId.XINGQIU, 1.0);
 
-        if (partyManualRolls.containsKey("Xingqiu")) {
-            xqConfig.manualRolls = partyManualRolls.get("Xingqiu");
+        if (partyManualRolls.containsKey(CharacterId.XINGQIU)) {
+            xqConfig.manualRolls = partyManualRolls.get(CharacterId.XINGQIU);
         }
 
         mechanics.optimization.ArtifactOptimizer.OptimizationResult resultXq = mechanics.optimization.ArtifactOptimizer
@@ -286,10 +287,10 @@ public class RaidenParty {
         xlConfig.mainStatCirclet = StatType.CRIT_RATE;
         xlConfig.subStatPriority = java.util.Arrays.asList(StatType.ENERGY_RECHARGE, StatType.CRIT_RATE,
                 StatType.CRIT_DMG, StatType.ATK_PERCENT, StatType.ELEMENTAL_MASTERY);
-        xlConfig.minER = erTargets.getOrDefault("Xiangling", 1.0);
+        xlConfig.minER = erTargets.getOrDefault(CharacterId.XIANGLING, 1.0);
 
-        if (partyManualRolls.containsKey("Xiangling")) {
-            xlConfig.manualRolls = partyManualRolls.get("Xiangling");
+        if (partyManualRolls.containsKey(CharacterId.XIANGLING)) {
+            xlConfig.manualRolls = partyManualRolls.get(CharacterId.XIANGLING);
         }
 
         mechanics.optimization.ArtifactOptimizer.OptimizationResult resultXl = mechanics.optimization.ArtifactOptimizer
@@ -310,10 +311,10 @@ public class RaidenParty {
         bennyConfig.subStatPriority = java.util.Arrays.asList(StatType.ENERGY_RECHARGE, StatType.HP_PERCENT,
                 StatType.HP_FLAT);
 
-        bennyConfig.minER = erTargets.getOrDefault("Bennett", 1.0);
+        bennyConfig.minER = erTargets.getOrDefault(CharacterId.BENNETT, 1.0);
 
-        if (partyManualRolls.containsKey("Bennett")) {
-            bennyConfig.manualRolls = partyManualRolls.get("Bennett");
+        if (partyManualRolls.containsKey(CharacterId.BENNETT)) {
+            bennyConfig.manualRolls = partyManualRolls.get(CharacterId.BENNETT);
         }
 
         mechanics.optimization.ArtifactOptimizer.OptimizationResult resultBenny = mechanics.optimization.ArtifactOptimizer

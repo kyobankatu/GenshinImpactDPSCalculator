@@ -175,10 +175,12 @@ public class CombatSimulator {
 
     /**
      * Returns a party member by name.
+     * Prefer {@link #getCharacter(CharacterId)} for runtime logic.
      *
      * @param name character name
      * @return matching character, or {@code null}
      */
+    @Deprecated
     public Character getCharacter(String name) {
         return party.getMember(name);
     }
@@ -213,9 +215,11 @@ public class CombatSimulator {
 
     /**
      * Executes a standard character swap with cooldown and callbacks.
+     * Prefer {@link #switchCharacter(CharacterId)} for runtime logic.
      *
      * @param name target character name
      */
+    @Deprecated
     public void switchCharacter(String name) {
         CharacterId id = party.resolveCharacterId(name);
         switchCharacter(id);
@@ -232,9 +236,11 @@ public class CombatSimulator {
 
     /**
      * Directly sets the active character without swap side effects.
+     * Prefer {@link #setActiveCharacter(CharacterId)} for runtime logic.
      *
      * @param name target character name
      */
+    @Deprecated
     public void setActiveCharacter(String name) {
         CharacterId id = party.resolveCharacterId(name);
         setActiveCharacter(id);
@@ -362,10 +368,13 @@ public class CombatSimulator {
 
     /**
      * Executes a typed action after applying cooldown and energy gates.
+     * Prefer {@link #performAction(CharacterId, CharacterActionRequest)} for
+     * runtime logic.
      *
      * @param charName acting character name
      * @param request typed action request
      */
+    @Deprecated
     public void performAction(String charName, CharacterActionRequest request) {
         CharacterId id = party.resolveCharacterId(charName);
         performAction(id, request);
@@ -604,10 +613,12 @@ public class CombatSimulator {
 
     /**
      * Executes an attack action and advances time by its animation duration.
+     * Prefer {@link #performAction(CharacterId, AttackAction)} for runtime logic.
      *
      * @param charName acting character name
      * @param action action to execute
      */
+    @Deprecated
     public void performAction(String charName, AttackAction action) {
         CharacterId characterId = party.resolveCharacterId(charName);
         performAction(characterId, action);
@@ -625,10 +636,13 @@ public class CombatSimulator {
 
     /**
      * Resolves an attack action without time advancement.
+     * Prefer {@link #performActionWithoutTimeAdvance(CharacterId, AttackAction)}
+     * for runtime logic.
      *
      * @param charName acting character name
      * @param action action to resolve
      */
+    @Deprecated
     public void performActionWithoutTimeAdvance(String charName, AttackAction action) {
         CharacterId characterId = party.resolveCharacterId(charName);
         performActionWithoutTimeAdvance(characterId, action);

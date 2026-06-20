@@ -7,7 +7,7 @@ import java.util.Map;
 
 /**
  * Represents the active four-character party in a simulation run.
- * Tracks all party members by name and maintains a reference to the currently
+ * Tracks all party members by {@link CharacterId} and maintains a reference to the currently
  * on-field (active) character. Character switch-out callbacks are intentionally
  * delegated to {@link CombatSimulator#switchCharacter} so that the simulator can
  * supply the necessary combat context.
@@ -37,10 +37,12 @@ public class Party {
 
     /**
      * Returns the party member with the given name, or {@code null} if not found.
+     * Prefer {@link #getMember(CharacterId)} for runtime logic.
      *
      * @param name the character's name as registered via {@link #addMember}
      * @return the matching {@link Character}, or {@code null}
      */
+    @Deprecated
     public Character getMember(String name) {
         CharacterId id = idsByName.get(name);
         return id != null ? members.get(id) : null;
@@ -79,12 +81,14 @@ public class Party {
 
     /**
      * Switches the active character to the party member with the given name.
+     * Prefer {@link #switchCharacter(CharacterId)} for runtime logic.
      * Does nothing if the name is not in the party.
      * Note: switch-out side effects (e.g. {@code onSwitchOut}) are handled by
      * {@link CombatSimulator#switchCharacter} to preserve combat context.
      *
      * @param name the name of the character to switch to
      */
+    @Deprecated
     public void switchCharacter(String name) {
         switchCharacter(resolveCharacterId(name));
     }
