@@ -5,6 +5,7 @@
 - The project simulates combat over time rather than evaluating isolated formulas. Rotation order, animation time, buffs, elemental aura state, ICD, reactions, energy flow, and periodic effects all matter.
 - Main Java source code lives under `src/java/` and Python RL code lives under `src/python/`. `build.gradle` is configured to compile from `src/java`.
 - Representative runnable entry points are in `src/java/sample/` such as `RaidenParty`, `FlinsParty`, `FlinsParty2`, `ServeRLJava`, `BenchmarkRLJava`, and `ProfileCharacterCapabilities`.
+- `src/java/sample/ReactionRegressionTest` is the lightweight regression executable for reaction, aura, ICD, Lunar, and selected character/item accuracy checks.
 - Static character multiplier and status data live under `config/characters/`.
 - Generated or published artifacts may appear under `docs/` and simulation HTML reports may be written to the repository root.
 
@@ -22,6 +23,7 @@
 - Generate Javadoc: `./gradlew javadoc`
 - Run a sample simulation through the dynamic Gradle rule: `./gradlew RaidenParty`
 - Run another sample simulation: `./gradlew FlinsParty`
+- Run reaction and accuracy regressions: `./gradlew ReactionRegressionTest`
 - Start the local Java rollout service: `./gradlew ServeRLJava`
 - Benchmark vectorized Java rollout throughput: `./gradlew BenchmarkRLJava`
 - Refresh capability profiles for registered RL parties: `./gradlew ProfileCapabilities`
@@ -45,8 +47,9 @@
 - Preserve UTF-8 handling in Gradle and generated documentation.
 
 ## Testing and verification
-- There is no established JUnit test suite in this repository at the moment.
+- There is no established JUnit test suite in this repository at the moment; regression checks are executable sample classes.
 - For Java changes, at minimum run `./gradlew build`.
+- For reaction, aura, ICD, Lunar, character/item trigger, or formula changes, run `./gradlew ReactionRegressionTest`.
 - For simulation or optimization changes, also run the most relevant sample entry point, usually `./gradlew RaidenParty` or another affected `src/java/sample/` class.
 - If your change affects HTML output, verify that report generation still succeeds and that the resulting file opens with expected sections populated.
 - If your change affects RL integration, verify the Java rollout service or Python training/evaluation path you touched.

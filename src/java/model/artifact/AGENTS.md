@@ -19,7 +19,7 @@
 - All classes extend `model.entity.ArtifactSet`.
 - Event-driven behavior is exposed through focused capability interfaces such as `ReactionAwareArtifact`, `DamageTriggeredArtifactEffect`, `SwitchAwareArtifact`, and `BurstTriggeredArtifactEffect`.
 - Most set effects depend on `simulation.CombatSimulator`, `mechanics.buff.Buff` or `SimpleBuff`, and `model.type.StatType`.
-- Lunar sets depend on `simulation.CombatSimulator.Moonsign` and custom Lunar reaction naming.
+- Lunar sets depend on `simulation.CombatSimulator.Moonsign` and typed Lunar reaction metadata from `mechanics.reaction.ReactionResult`.
 - `ViridescentVenerer` should use typed `mechanics.reaction.ReactionResult` metadata for swirl behavior rather than parsing display labels.
 
 ## Agent guidance

@@ -156,3 +156,26 @@ python3 src/python/rl/evaluate_policy.py --mode both --checkpoint output/recurre
 4. **Visualization**: `VisualLogger` and `HtmlReportGenerator` turn one simulation into an inspectable HTML report.
 5. **Java RL Layer**: `mechanics.rl` provides action masking, observation encoding, reward logic, party registry, vectorized rollout, and the local rollout service.
 6. **Python RL Layer**: `src/python/rl/` provides recurrent PPO training, checkpoint loading, deterministic/stochastic evaluation, rollout benchmarking, and W&B metric logging.
+
+## Accuracy Notes
+
+`TASKS.md` tracks the current implementation plan and latest audit notes. The
+current audited benchmark parties are `RaidenParty` and `FlinsParty2`.
+
+Known simplifications:
+
+- `RaidenParty`: Xingqiu orbital rain swords are modeled as zero-damage Hydro
+  aura ticks, Xiangling Chili pickup is assumed, and Skyward Spine random Vacuum
+  Blade procs can make optimizer/sample output nondeterministic.
+- `FlinsParty2`: defensive shield HP is logged but not consumed by enemy attacks,
+  some custom effects use deterministic stand-ins for random or field-position
+  behavior, and the scripted sample can warn when it fires Flins burst below full
+  energy.
+
+Latest validation baseline from the accuracy pass:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew RaidenParty`: 1,362,938 total damage / 64,902 DPS
+- `./gradlew FlinsParty2`: 17,044,468 total damage / 246,664 DPS
+- `./gradlew BenchmarkRLJava`
+- `./gradlew ProfileCapabilities`

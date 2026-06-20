@@ -15,12 +15,14 @@
 - `ParticleListener.java`: observer interface for particle-generation events.
 - `Party.java`: current-party container that tracks members by `CharacterId`, preserves a name-to-id adapter for boundary calls, and maintains the active character.
 - `SimulationEventBus.java`: event-dispatch abstraction for action, particle, and reaction listener registration.
+- `SimulatorSnapshot.java`: immutable-ish snapshot of simulator runtime state used for rollback/restore flows, including reaction-state counters and core state.
 - Subpackages `action`, `event`, and `runtime` hold action payloads, timer-event implementations, and extracted runtime collaborators.
 
 ## Coupling and dependencies
 - `CombatSimulator` depends on nearly every major subsystem through a façade role: `model.entity`, `mechanics.buff`, `mechanics.formula`, `mechanics.reaction`, `mechanics.element`, `mechanics.energy`, `visualization`, runtime collaborators, and event classes.
 - Character, weapon, artifact, optimizer, RL, and visualization code all depend back on `CombatSimulator`.
 - The observer interfaces are implemented or consumed by reaction systems, weapon passives, RL code, and character logic.
+- `SimulatorSnapshot` must stay aligned with `CombatSimulator`, `Party`, `Enemy`, and `simulation.runtime.ReactionState` whenever new runtime state becomes rollback-relevant.
 - Logic-bearing party lookup and damage attribution should use `CharacterId`; string overloads are compatibility or boundary adapters.
 
 ## Agent guidance
@@ -28,3 +30,4 @@
 - If you touch simulator sequencing, verify swaps, event timing, reactions, buffs, and logging together.
 - Keep observer interfaces stable when possible. Multiple subsystems use them as extension points.
 - Preserve typed internal routes for character identity and action dispatch; keep display names for logs, reports, and compatibility wrappers.
+- When adding simulator state that can change during action trialing or RL rollout, verify snapshot/restore coverage.

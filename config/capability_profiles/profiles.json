@@ -1,29 +1,16 @@
 {
-  "COLUMBINA": {
-    "off_field_dps_ratio": 0.299616,
-    "team_buff_score": 0.433132,
-    "self_enhancement_score": 0.000000,
-    "energy_generation_score": 0.264583,
-    "entry_value_score": 0.094732,
-    "sustain_value_3_actions": 0.121033,
-    "sustain_value_6_actions": 0.063071,
-    "exit_cost_score": 0.000000,
-    "reentry_cost_score": 0.000000,
-    "on_field_dps_score": 0.475280,
-    "burst_window_score": 0.132460
-  },
   "FLINS": {
-    "off_field_dps_ratio": 0.000000,
+    "off_field_dps_ratio": 0.220631,
     "team_buff_score": 0.000000,
-    "self_enhancement_score": 0.650130,
+    "self_enhancement_score": 1.000000,
     "energy_generation_score": 0.000000,
-    "entry_value_score": 0.477934,
-    "sustain_value_3_actions": 0.161324,
-    "sustain_value_6_actions": 0.085921,
+    "entry_value_score": 0.369821,
+    "sustain_value_3_actions": 0.124831,
+    "sustain_value_6_actions": 0.074640,
     "exit_cost_score": 0.000000,
     "reentry_cost_score": 0.000000,
-    "on_field_dps_score": 0.810133,
-    "burst_window_score": 0.772483
+    "on_field_dps_score": 1.000000,
+    "burst_window_score": 1.000000
   },
   "SUCROSE": {
     "off_field_dps_ratio": 0.166208,
@@ -37,6 +24,19 @@
     "reentry_cost_score": 0.000000,
     "on_field_dps_score": 0.134733,
     "burst_window_score": 0.119156
+  },
+  "COLUMBINA": {
+    "off_field_dps_ratio": 0.299616,
+    "team_buff_score": 0.433132,
+    "self_enhancement_score": 0.000000,
+    "energy_generation_score": 0.264583,
+    "entry_value_score": 0.094732,
+    "sustain_value_3_actions": 0.121033,
+    "sustain_value_6_actions": 0.063071,
+    "exit_cost_score": 0.000000,
+    "reentry_cost_score": 0.000000,
+    "on_field_dps_score": 0.475280,
+    "burst_window_score": 0.132460
   },
   "INEFFA": {
     "off_field_dps_ratio": 0.251114,
@@ -64,6 +64,19 @@
     "on_field_dps_score": 0.178300,
     "burst_window_score": 0.135935
   },
+  "RAIDEN_SHOGUN": {
+    "off_field_dps_ratio": 0.200913,
+    "team_buff_score": 0.326284,
+    "self_enhancement_score": 0.000000,
+    "energy_generation_score": 0.228050,
+    "entry_value_score": 0.109698,
+    "sustain_value_3_actions": 0.049866,
+    "sustain_value_6_actions": 0.034278,
+    "exit_cost_score": 0.123788,
+    "reentry_cost_score": 0.000000,
+    "on_field_dps_score": 0.519528,
+    "burst_window_score": 0.285744
+  },
   "XIANGLING": {
     "off_field_dps_ratio": 0.485245,
     "team_buff_score": 0.500000,
@@ -76,19 +89,6 @@
     "reentry_cost_score": 0.000000,
     "on_field_dps_score": 0.491672,
     "burst_window_score": 0.411379
-  },
-  "RAIDEN_SHOGUN": {
-    "off_field_dps_ratio": 0.201828,
-    "team_buff_score": 0.326284,
-    "self_enhancement_score": 0.000000,
-    "energy_generation_score": 0.228050,
-    "entry_value_score": 0.110197,
-    "sustain_value_3_actions": 0.049334,
-    "sustain_value_6_actions": 0.034434,
-    "exit_cost_score": 0.149350,
-    "reentry_cost_score": 0.000000,
-    "on_field_dps_score": 0.517175,
-    "burst_window_score": 0.285744
   },
   "XINGQIU": {
     "off_field_dps_ratio": 0.614611,

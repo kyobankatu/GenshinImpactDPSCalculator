@@ -405,6 +405,7 @@ public class Flins extends Character
 
         double midMv = middleMv;
         double finMv = finalMv;
+        final double delayedHitBaseTime = sim.getCurrentTime();
 
         for (int i = 0; i < middleCount; i++) {
             AttackAction mid = new AttackAction("Cometh the Night (Middle)", midMv, Element.ELECTRO, StatType.BASE_ATK,
@@ -412,12 +413,13 @@ public class Flins extends Character
             mid.setLunarConsidered(true);
 
             final int idx = i;
+            final double scheduledTime = delayedHitBaseTime + 1.0 + (idx * 0.3);
             sim.registerEvent(new simulation.event.TimerEvent() {
                 boolean done = false;
 
                 @Override
                 public double getNextTickTime() {
-                    return done ? Double.MAX_VALUE : sim.getCurrentTime() + 1.0 + (idx * 0.3);
+                    return done ? Double.MAX_VALUE : scheduledTime;
                 }
 
                 @Override
@@ -437,12 +439,13 @@ public class Flins extends Character
         AttackAction fin = new AttackAction("Cometh the Night (Final)", finMv, Element.ELECTRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 0.0, false, ActionType.BURST);
         fin.setLunarConsidered(true);
+        final double finalHitTime = delayedHitBaseTime + 1.0 + (middleCount * 0.3) + 0.5;
         sim.registerEvent(new simulation.event.TimerEvent() {
             boolean done = false;
 
             @Override
             public double getNextTickTime() {
-                return done ? Double.MAX_VALUE : sim.getCurrentTime() + 1.0 + (middleCount * 0.3) + 0.5;
+                return done ? Double.MAX_VALUE : finalHitTime;
             }
 
             @Override

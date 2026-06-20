@@ -15,11 +15,13 @@
 - `mechanics.*` depends heavily on `simulation.CombatSimulator`, `simulation.action.AttackAction`, and `model.*`.
 - `mechanics.formula.DamageCalculator` delegates standard and Lunar math to focused `DamageStrategy` implementations and notifies damage-trigger capability interfaces after damage is computed.
 - `mechanics.optimization` repeatedly creates simulators and runs full rotations, so small behavior changes in `simulation` or `model.character` can change optimizer output.
-- `mechanics.rl` is coupled to `sample.ServeRLJava`, `sample.BenchmarkRLJava`, `simulation.CombatSimulator`, and the Python learner workspace under `src/python/rl/`.
+- `mechanics.rl` is coupled to `sample.ServeRLJava`, `sample.BenchmarkRLJava`, `sample.ProfileCharacterCapabilities`, `simulation.CombatSimulator`, and the Python learner workspace under `src/python/rl/`.
+- Reaction, aura, ICD, Lunar conversion, and selected character/item regressions are covered by `sample.ReactionRegressionTest`.
 - Logic-bearing identity should remain typed (`CharacterId`, `BuffId`, `ReactionResult.Kind` or `LunarType`) inside mechanics; strings should be treated as file-format or display-boundary data.
 
 ## Agent guidance
 - When changing a mechanic, check whether it affects damage, reactions, energy, buffs, optimizer assumptions, and report output.
 - Prefer editing the narrowest mechanic package instead of introducing new cross-cutting utilities here.
 - If a change touches Lunar behavior, inspect `mechanics.formula`, `mechanics.reaction`, `simulation.CombatSimulator`, and the custom Lunar characters together.
+- If a change touches reaction state, aura consumption, or ICD application, inspect `mechanics.reaction`, `mechanics.element.ICDManager`, `model.entity.Enemy`, and `simulation.runtime.CombatActionResolver` together.
 - Keep boundary translation explicit. Profile text, sample action labels, and report labels should not become new control-flow keys inside core mechanics.

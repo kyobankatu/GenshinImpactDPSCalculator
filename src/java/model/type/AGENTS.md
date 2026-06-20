@@ -7,11 +7,11 @@
 - This package contains the enums that define shared identifiers and categories across the simulator.
 
 ## Java files in this directory
-- `ActionType.java`: categorizes hits and abilities for damage bonuses, triggers, and CSV ability typing.
+- `ActionType.java`: categorizes hits and abilities for damage bonuses, triggers, ICD/application policy, and CSV ability typing.
 - `CharacterId.java`: stable typed identifiers for playable characters used by runtime party state and logic routing.
 - `Element.java`: enumerates elements and maps each one to its associated damage-bonus stat key.
-- `ICDTag.java`: identifies independent elemental application groups.
-- `ICDType.java`: defines ICD rule families.
+- `ICDTag.java`: identifies independent or shared elemental application groups.
+- `ICDType.java`: defines ICD rule families such as standard hit/time rules and no-ICD application.
 - `StatType.java`: master enumeration for every stat key used by the simulator, including custom Lunar stats.
 - `WeaponType.java`: categorizes weapons for expected NA energy generation behavior.
 

@@ -8,10 +8,11 @@
 
 ## Java files in this directory
 - `EnergyManager.java`: distributes particles and flat energy to party members and schedules standard enemy particle drops for benchmark rotations.
+- `EnergyDistributor.java`: focused helper used by `EnergyManager` for particle and flat-energy distribution details.
 - `ParticleType.java`: enumerates particle and orb base values for same-element and off-element energy gain.
 
 ## Coupling and dependencies
-- `EnergyManager` depends on `simulation.CombatSimulator`, `model.entity.Character`, `model.type.Element`, `model.type.StatType`, and `simulation.event.TimerEvent`.
+- `EnergyManager` depends on `simulation.CombatSimulator`, `model.entity.Character`, `model.type.Element`, `model.type.StatType`, `simulation.event.TimerEvent`, and `EnergyDistributor`.
 - `model.character` classes call `EnergyManager` directly when skills, bursts, and summons generate particles.
 - `simulation.CombatSimulator` exposes particle listeners that `EnergyManager` notifies after distribution.
 - `mechanics.analysis.EnergyAnalyzer` relies on energy-tracking side effects caused by this package.

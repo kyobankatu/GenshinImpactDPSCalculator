@@ -1,5 +1,8 @@
 package model.character;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 import mechanics.data.TalentDataManager;
 import mechanics.data.TalentDataSource;
 import model.entity.FormStateProvider;
@@ -28,6 +31,7 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
     private double resolveStacks = 0;
     private double activeResolveBonus = 0; // Stacks captured at Burst cast
     private boolean listenerRegistered = false;
+    private final Map<CharacterId, Double> creditedBurstCastTimes = new EnumMap<>(CharacterId.class);
 
     /**
      * Constructs Raiden Shogun with the shared talent data source.
@@ -79,6 +83,15 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
     @Override
     public boolean isFormActive(double currentTime) {
         return musouActive;
+    }
+
+    /**
+     * Returns current Chakra Desiderata Resolve stacks.
+     *
+     * @return current Resolve stack count
+     */
+    public double getResolveStacks() {
+        return resolveStacks;
     }
 
     /**
@@ -149,10 +162,18 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
 
     private void registerResolveListener(CombatSimulator sim) {
         if (!listenerRegistered) {
-            // Burst Listener (Chakra Desiderata)
+            // Burst Listener (Chakra Desiderata). Action listeners see every
+            // Burst-damage hit, so credit each character once per actual burst cast.
             sim.addListener((actor, action, time) -> {
                 if (action.getActionType() == ActionType.BURST
                         && actor.getCharacterId() != this.characterId) {
+                    double burstCastTime = actor.getLastBurstTime();
+                    Double creditedTime = creditedBurstCastTimes.get(actor.getCharacterId());
+                    if (creditedTime != null && Math.abs(creditedTime - burstCastTime) < 1e-9) {
+                        return;
+                    }
+                    creditedBurstCastTimes.put(actor.getCharacterId(), burstCastTime);
+
                     double cost = actor.getEnergyCost();
                     double gain = cost * 0.2;
                     resolveStacks += gain;

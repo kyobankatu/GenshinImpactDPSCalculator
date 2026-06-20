@@ -318,17 +318,6 @@ public class FlinsParty2 {
         // --- Resonance ---
         mechanics.element.ResonanceManager.applyResonances(sim);
 
-        System.out.println("\n[DEBUG] Stats check after setup:");
-        try (java.io.PrintWriter out = new java.io.PrintWriter("stats_dump.txt")) {
-            for (model.entity.Character c : sim.getPartyMembers()) {
-                model.stats.StatsContainer s = c.getEffectiveStats(0.0);
-                out.println(c.getName() + " EM: " + s.get(StatType.ELEMENTAL_MASTERY));
-                out.println("     Artifact Rolls: " + c.getArtifactRolls());
-                System.out.println("  " + c.getName() + " EM: " + s.get(StatType.ELEMENTAL_MASTERY));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
 }

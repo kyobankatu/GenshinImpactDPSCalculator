@@ -10,7 +10,7 @@
 ## Java files in this directory
 - `DamageCalculator.java`: strategy-selecting facade that resolves final damage for a single `AttackAction` and fires damage-trigger hooks after calculation.
 - `DamageStrategy.java`: internal interface for damage formula implementations.
-- `StandardDamageStrategy.java`: standard Genshin damage formula path.
+- `StandardDamageStrategy.java`: standard Genshin damage formula path, including additive reaction contributions such as Aggravate and Spread before DMG bonus, crit, DEF, and RES.
 - `LunarDamageStrategy.java`: custom Lunar damage formula path.
 - `ResistanceCalculator.java`: shared resistance multiplier helper.
 
@@ -22,6 +22,6 @@
 
 ## Agent guidance
 - Treat this file as high-risk. Small formula changes can affect every simulation, optimizer result, and RL reward.
-- When editing, verify which path you are touching: standard damage, Lunar damage, defense, resistance, or debug formula output.
+- When editing, verify which path you are touching: standard damage, additive reaction bonus, Lunar damage, defense, resistance, reaction crit exceptions, or debug formula output.
 - Do not move effect-trigger hooks casually. Weapon and artifact stacking behavior depends on their current placement after final damage computation.
 - Keep formula selection in the facade and formula details in the strategy classes unless there is a clear reason to change that split.

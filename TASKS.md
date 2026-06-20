@@ -1,811 +1,503 @@
-# Elemental Reaction Implementation Plan
+# Accuracy Implementation Plan
 
 ## Scope
 
-This simulator targets a single enemy that does not attack back. The goal is to measure a party's maximum offensive output over time, not to fully emulate open-world combat, enemy AI, exploration, or survival pressure.
+The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
+behavior, Lunar reaction handling, and current regression coverage are treated as
+the baseline implementation.
 
-Therefore reaction work should prioritize:
+The next work should improve simulator accuracy by auditing and filling gaps in
+the currently used parties, weapons, artifacts, and RL party metadata. The goal is
+to improve offensive-output accuracy while preserving the current single-target,
+non-attacking enemy scope.
 
-- damage-affecting reactions and buffs
-- aura state, gauge consumption, ICD interaction, and timing
-- reaction ownership and stat snapshot rules
-- report and RL compatibility
+Out of scope for this pass:
 
-Lower priority:
+- enemy attacks, survival pressure, healing prevention, and defensive shield HP
+- multi-target positioning, AoE geometry, and enemy movement
+- exploration systems such as Arkhe, Nightsoul, or Phlogiston unless an offensive
+  kit explicitly depends on them
+- new party additions before the existing benchmark parties are audited
 
-- enemy immobilization value, unless it changes damage through Shatter or aura state
-- player damage taken, healing prevention, or defensive shield durability
-- exploration systems such as Phlogiston movement
-- multi-target geometry and target positioning
+## Current Baseline
 
-## Current Implementation Summary
+Implemented and covered by `sample.ReactionRegressionTest`:
 
-Implemented or partially implemented:
+- reaction metadata and transformative multipliers
+- Superconduct, Freeze, Shatter, Crystallize, and Burning
+- Bloom, Hyperbloom, and Burgeon core behavior
+- Quicken, Aggravate, and Spread additive damage
+- Lunar-Charged, Lunar-Bloom, and Lunar-Crystallize behavior
+- aura decay and basic gauge consumption
+- ICD hit/time rules, no-ICD behavior, and shared ICD blocking
+- selected character, weapon, and artifact trigger regressions
 
-- Vaporize and Melt amplifying multipliers
-- Swirl damage in a simplified form
-- Overload in a simplified form
-- Electro-Charged in a simplified form
-- Lunar-Charged Thundercloud in a custom simplified form
-- Lunar reaction labels and custom Lunar damage stats
+Primary validation command:
 
-Known gaps:
+- `./gradlew ReactionRegressionTest`
 
-- Dendro reaction family is mostly absent.
-- Freeze, Shatter, Superconduct, and Crystallize are absent or enum-only.
-- Transformative reaction base multipliers are outdated or incomplete.
-- Aura state is too simple for Quicken, Burning, Freeze, Dendro Cores, and Lunar variants.
-- Reaction damage ownership and reaction-specific bonuses need a consistent model before expanding RL parties.
+Broader sample validation:
+
+- `./gradlew RaidenParty`
+- `./gradlew FlinsParty2`
 
 ## Implementation Order
 
-### Phase 1: Reaction Core Cleanup
-
-Target files:
-
-- `src/java/mechanics/reaction/ReactionCalculator.java`
-- `src/java/mechanics/reaction/ReactionResult.java`
-- `src/java/simulation/runtime/CombatActionResolver.java`
-- `src/java/model/entity/Enemy.java`
-
-Tasks:
-
-- Define the supported reaction list explicitly.
-- Remove ambiguity between enum-only reactions and actually computed reactions.
-- Add reaction metadata needed by the resolver:
-  - reaction element
-  - aura consumption element(s)
-  - whether damage is immediate, periodic, delayed, or state-only
-  - whether the reaction can crit
-  - whether the reaction uses transformative, additive, amplifying, or Lunar formula rules
-- Centralize transformative reaction base multipliers and update existing values.
-- Make `CombatActionResolver#getTransformativeReactionElement` reaction-specific instead of returning Pyro for most non-EC reactions.
-
-Acceptance criteria:
-
-- Existing `RaidenParty` and `FlinsParty2` still run.
-- `ReactionResult.Kind` only implies behavior when the calculator or scheduler supports it.
-- No string reaction names are used as control-flow keys.
-
-Verification:
-
-- `./gradlew build`
-- `./gradlew RaidenParty`
-- `./gradlew FlinsParty2`
-
-### Phase 2: Superconduct
-
-Why second:
-
-Superconduct is simple and damage-relevant for Physical teams. It also exercises Cryo/Electro reaction support without requiring new persistent reaction objects.
-
-Tasks:
-
-- Add Cryo + Electro detection.
-- Add transformative Cryo reaction damage.
-- Apply Physical RES shred debuff with correct duration and stacking behavior.
-- Add aura consumption rules.
-- Add report labeling.
-
-Acceptance criteria:
-
-- Superconduct deals reaction damage.
-- Enemy Physical RES is reduced for subsequent Physical damage.
-- Re-triggering refreshes duration without stacking incorrectly.
-
-### Phase 3: Freeze and Shatter
-
-Why here:
-
-Freeze itself does not directly increase damage, but it changes aura state and enables Shatter. It should be added before Dendro because it requires explicit non-element aura state handling.
-
-Tasks:
-
-- Add Freeze Aura state to enemy or runtime reaction state.
-- Add Hydro + Cryo reaction handling.
-- Model Freeze duration from applied gauge in a simplified but documented way.
-- Add Shatter trigger support for Geo and blunt attacks.
-- Add Shatter Physical transformative damage.
-- Remove Freeze Aura on Shatter.
-
-Simplification allowed:
-
-- Since the enemy does not attack, Freeze immobilization has no tactical effect. Only aura state and Shatter matter.
-
-Acceptance criteria:
-
-- Hydro/Cryo creates Freeze state.
-- Geo or blunt-tagged attacks can trigger Shatter.
-- Freeze state appears in reports/debug output where useful.
-
-### Phase 4: Standard Crystallize
-
-Why here:
-
-Crystallize is low offensive priority for this simulator, but it is a prerequisite for Lunar-Crystallize and Geo/Hydro Lunar teams.
-
-Tasks:
-
-- Add Geo + Pyro/Hydro/Electro/Cryo reaction handling.
-- Add related element metadata for generated shard type.
-- Model shard generation as a reaction event.
-- Do not prioritize shield HP unless a future offensive mechanic depends on active Crystallize shields.
-- Add same-target Crystallize cooldown if it affects repeated reaction triggers.
-
-Simplification allowed:
-
-- For maximum DPS on a non-attacking enemy, Crystallize shield absorption can be omitted initially.
-
-Acceptance criteria:
-
-- Standard Crystallize triggers and logs correctly.
-- Hydro Crystallize can be distinguished for Lunar-Crystallize conversion later.
-
-### Phase 5: Burning
-
-Why before Bloom/Quicken:
-
-Burning introduces persistent aura-like reaction state and periodic damage. It is the simplest Dendro persistent reaction.
-
-Tasks:
-
-- Add Dendro + Pyro detection.
-- Add Burning Aura state.
-- Schedule Pyro periodic damage.
-- Consume and refresh Dendro/Pyro aura according to a simplified documented rule.
-- Assign damage ownership to the trigger character.
-
-Acceptance criteria:
-
-- Burning starts, ticks, refreshes, and expires.
-- It coexists predictably with later Dendro reactions.
-
-### Phase 6: Bloom Core System - Done
-
-Why before Hyperbloom/Burgeon/Lunar-Bloom:
-
-Bloom creates Dendro Cores, and both Hyperbloom and Burgeon depend on those cores. Lunar-Bloom also starts from this path.
-
-Tasks:
-
-- Add Hydro + Dendro detection.
-- Create Dendro Core entities with:
-  - owner
-  - creation time
-  - expiry time
-  - max active core count policy
-- Schedule delayed Bloom explosions.
-- Add Bloom transformative Dendro damage.
-- Add core replacement/explosion behavior when the core limit is exceeded.
-
-Simplification allowed:
-
-- Single enemy means core position can be abstracted away.
-
-Acceptance criteria:
-
-- Bloom creates delayed damage.
-- Damage ownership and EM scaling use the trigger character.
-- Reports show Bloom core explosions separately from direct hits.
-
-Implementation status:
-
-- Implemented Dendro Core runtime state, snapshot/restore support, 6 s expiry, and 5-core cap with oldest-core explosion.
-- Added Bloom Dendro transformative damage and regression coverage.
-
-### Phase 7: Hyperbloom and Burgeon - Done
-
-Tasks:
-
-- Add Electro interaction with existing Dendro Cores.
-- Add Hyperbloom single-target Dendro damage.
-- Add Pyro interaction with existing Dendro Cores.
-- Add Burgeon AoE Dendro damage.
-- Remove consumed cores.
-- Add reaction-specific bonuses.
-
-Simplification allowed:
-
-- For a single enemy, Hyperbloom projectile travel and Burgeon AoE radius can be treated as immediate damage to the enemy.
-
-Acceptance criteria:
-
-- Electro and Pyro can consume cores before normal expiry.
-- Hyperbloom and Burgeon damage use the consuming trigger character's level/EM/bonuses.
-
-Implementation status:
-
-- Implemented Electro/Pyro Dendro Core consumption as immediate Hyperbloom/Burgeon Dendro transformative damage in the single-target abstraction.
-- Added regression coverage for both reactions.
-
-### Phase 8: Quicken, Aggravate, and Spread - Done
-
-Why after Bloom:
-
-Quicken is a persistent target state with additive damage follow-ups. It needs more careful aura handling than immediate reactions.
-
-Tasks:
-
-- Add Quicken Aura state from Dendro + Electro.
-- Add Quicken duration/decay.
-- Add Aggravate for Electro hits against Quickened enemies.
-- Add Spread for Dendro hits against Quickened enemies.
-- Implement additive reaction damage bonus that enters the normal damage formula before DMG Bonus/Crit/RES.
-- Ensure Aggravate/Spread can crit and benefit from DMG bonuses.
-
-Acceptance criteria:
-
-- Quicken itself does no direct damage.
-- Aggravate and Spread increase the triggering hit's damage, not a separate transformative tick.
-- Existing direct hit logging can show the additive reaction contribution.
-
-Implementation status:
-
-- Implemented Quicken as persistent target state using `min(origin gauge, trigger gauge) * 5 + 6` duration.
-- Implemented Aggravate and Spread as additive base damage inserted before DMG Bonus/Crit/DEF/RES.
-- Added direct-hit log reaction labels and regression coverage for Quicken creation, additive scaling, and expiry.
-
-### Phase 9: Lunar Reaction Generalization - Done
-
-Why after standard reactions:
-
-Lunar reactions are conversions or overlays on standard reaction families. They should use the same base state model rather than separate ad hoc paths.
-
-Tasks:
-
-- Generalize Moonsign Benediction checks.
-- Convert eligible reactions:
-  - Electro-Charged -> Lunar-Charged
-  - Bloom -> Lunar-Bloom
-  - Hydro Crystallize -> Lunar-Crystallize
-- Move Lunar conversion logic out of character-specific shortcuts where possible.
-- Revisit custom stats:
-  - `LUNAR_CHARGED_DMG_BONUS`
-  - `LUNAR_BLOOM_DMG_BONUS`
-  - `LUNAR_CRYSTALLIZE_DMG_BONUS`
-  - `LUNAR_REACTION_DMG_BONUS_ALL`
-  - `LUNAR_BASE_BONUS`
-  - `LUNAR_MULTIPLIER`
-  - `LUNAR_REACTION_CRIT_DMG`
-
-Acceptance criteria:
-
-- Lunar conversion follows party state, not hard-coded character scripts.
-- Current `FlinsParty2` behavior is preserved or intentionally updated with documented damage changes.
-
-Implementation status:
-
-- Added simulator-level Lunar conversion gating based on party Lunar characters and non-`NONE` Moonsign.
-- Converted Electro-Charged, Bloom, and Hydro Crystallize into Lunar-Charged, Lunar-Bloom, and Lunar-Crystallize events.
-- Revisited Lunar damage stat routing so direct Lunar actions use their matching reaction bonus stat.
-
-### Phase 10: Lunar-Charged Accuracy Pass - Done
-
-Tasks:
-
-- Recheck Thundercloud creation and refresh duration.
-- Ensure 2s tick cadence.
-- Consume 0.4 GU Hydro and Electro on tick.
-- Model immediate Thundercloud damage when the other aura is applied after one aura is already present, if relevant to single-target rotations.
-- Improve damage formula to reflect all contributing element appliers where practical.
-- Keep only one Thundercloud active.
-
-Acceptance criteria:
-
-- `FlinsParty2` remains the primary regression sample.
-- Damage changes are explained in final notes when implemented.
-
-Implementation status:
-
-- Preserved the existing single Thundercloud timer with 6 s refresh, 2 s tick cadence, and 0.4 GU Hydro/Electro consumption.
-- Kept immediate Lunar-Charged setup damage and weighted party contribution formula.
-- Added regression coverage for immediate damage, tick timing, aura consumption, and active Thundercloud state.
-
-### Phase 11: Lunar-Bloom - Done
-
-Tasks:
-
-- Convert eligible Bloom triggers to Lunar-Bloom when party conditions are met.
-- Add Verdant Dew state if current or future characters consume it.
-- Preserve Dendro Core / Bountiful Core behavior where applicable.
-- Add direct Lunar-Bloom damage hooks for characters that explicitly deal it.
-
-Simplification allowed:
-
-- Lunar-Bloom itself does no damage unless a talent/constellation/weapon effect converts it into damage.
-
-Acceptance criteria:
-
-- Lunar-Bloom can trigger as an event.
-- Columbina or future Lunar-Bloom characters can listen to and consume the event/state.
-
-Implementation status:
-
-- Lunar-Bloom now triggers as a Lunar event while preserving Dendro Core creation and expiry behavior.
-- The reaction itself remains non-damaging unless character hooks/direct Lunar actions consume the event.
-
-### Phase 12: Lunar-Crystallize - Done
-
-Tasks:
-
-- Convert Hydro Crystallize to Lunar-Crystallize when party conditions are met.
-- Add Moondrift state.
-- Count Lunar-Crystallize triggers.
-- Trigger Moondrift Harmony every third trigger.
-- Model Moondrift Harmony as immediate Geo damage in the single-target abstraction.
-
-Simplification allowed:
-
-- Geo construct placement and projectile tracking can be abstracted for this simulator.
-
-Acceptance criteria:
-
-- Lunar-Crystallize has separate event logging and damage accounting.
-- Standard Crystallize remains available when Lunar conditions are not met.
-
-Implementation status:
-
-- Added Moondrift state and Lunar-Crystallize trigger counting.
-- Every third Lunar-Crystallize trigger fires immediate Geo Moondrift Harmony damage in the single-target abstraction.
-- Standard Crystallize remains unchanged when Lunar conversion conditions are not met.
-
-## Cross-Cutting Work
-
-### Aura State Model
-
-Current enemy aura storage is not sufficient for all planned reactions. Before or during Phases 5-8, add explicit state for:
-
-- Freeze Aura
-- Burning Aura
-- Quicken Aura
-- Dendro Cores
-- Lunar Thundercloud
-- Lunar Moondrifts
-
-Prefer a small reaction-state holder over widening `Enemy` with too many unrelated fields.
-
-### Damage Formula Support
-
-Add or verify formula paths for:
-
-- amplifying multiplier
-- transformative damage
-- additive reaction damage
-- Lunar reaction damage
-- reaction crit exceptions
-- reaction-specific DMG bonuses
-
-### Reporting
-
-Each new reaction should appear clearly in HTML/debug logs:
-
-- direct hit damage
-- reaction damage
-- reaction name
-- trigger character
-- relevant aura state
-- delayed tick/core/Harmony ownership
-
-### RL Compatibility
-
-Reaction changes alter training distribution and rewards. For every major reaction phase:
-
-- run Java build
-- run the relevant scripted sample
-- refresh capability profiles only if character role behavior changes materially
-- treat existing checkpoints as potentially incompatible in behavior even if tensor shapes match
-
-## Deferred Systems
-
-These are real Genshin systems but are not immediate priorities for this simulator's stated purpose:
-
-- Bond of Life
-- Arkhe Pneuma/Ousia enemy interactions
-- Nightsoul and Phlogiston exploration mechanics
-- player damage intake and healing prevention
-- enemy attacks and defensive play
-- multi-target positioning and AoE geometry
-- full shield absorption model
-
-They should be added only when a target party's offensive kit depends on them.
-
-## Validation Checklist
-
-Minimum validation after each phase:
-
-- `./gradlew build`
-- most relevant sample:
-  - `./gradlew RaidenParty` for standard reaction regressions
-  - `./gradlew FlinsParty2` for Lunar regressions
-- inspect generated report for reaction labels and damage attribution
-
-Additional validation for RL-impacting phases:
-
-- `./gradlew ProfileCapabilities` when role profiles are affected
-- start `ServeRLJava` with the affected party
-- run `python3 src/python/rl/evaluate_policy.py --mode both --summary` against a current checkpoint, if one exists
-
-## Initial Recommended Milestones
-
-1. Core cleanup + current multiplier update.
-2. Superconduct.
-3. Freeze/Shatter.
-4. Standard Crystallize.
-5. Burning.
-6. Bloom core system.
-7. Hyperbloom/Burgeon.
-8. Quicken/Aggravate/Spread.
-9. Lunar conversion generalization.
-10. Lunar-Charged, Lunar-Bloom, Lunar-Crystallize accuracy passes.
-
-## Next High-Priority Accuracy Plan
-
-The Phase 1-12 work establishes the reaction surface needed by the simulator. The next work should improve accuracy for the highest-impact combat systems while preserving the current single-target, non-attacking enemy scope.
-
-These phases are ordered so each phase can be tested independently before later phases depend on it.
-
-### Accuracy Phase A: Elemental Gauge and Aura Decay
+### Phase 1: RaidenParty Accuracy Audit - Done
 
 Why first:
 
-Most remaining reaction inaccuracies come from aura behavior. Bloom, Quicken, Electro-Charged, Swirl, Crystallize, Freeze, and Burning all depend on reliable aura quantity, decay, and consumption.
+`RaidenParty` is the conventional non-Lunar benchmark team. It is the best place
+to find remaining ordinary combat accuracy gaps before touching custom Lunar
+logic again.
 
 Target files:
 
-- `src/java/model/entity/Enemy.java`
-- `src/java/simulation/runtime/ReactionState.java`
-- `src/java/simulation/runtime/ReactionStateController.java`
-- `src/java/simulation/runtime/CombatActionResolver.java`
-- `src/java/mechanics/reaction/ReactionCalculator.java`
-
-Tasks:
-
-- Replace simple aura storage with aura instances that can track:
-  - element
-  - gauge units
-  - application time
-  - decay duration
-  - expiry time
-  - source character
-- Add standard aura decay for common gauges:
-  - 1U
-  - 2U
-  - 4U
-- Add explicit coexistence support for special states:
-  - Electro-Charged Hydro/Electro coexistence
-  - Quicken plus Dendro/Electro interaction
-  - Freeze state plus Hydro/Cryo aura interaction
-  - Burning state plus Pyro/Dendro handling
-- Move reaction aura consumption into a small helper so every reaction uses the same gauge math.
-- Preserve current simplified single-enemy behavior behind tests while improving aura correctness.
-
-Acceptance criteria:
-
-- Aura naturally expires when time advances.
-- Reaction consumption removes the correct amount of aura.
-- Electro-Charged can maintain Hydro/Electro coexistence until tick consumption or decay.
-- Quicken can coexist predictably with Dendro/Electro follow-up hits.
-- Freeze and Burning state transitions do not erase unrelated persistent state.
-
-Test cases to add:
-
-- `testAccuracyPhaseA_AuraDecayOneUnit`
-  - Apply 1U Pyro aura.
-  - Advance to just before expiry and assert aura remains.
-  - Advance past expiry and assert aura is gone.
-- `testAccuracyPhaseA_AuraDecayTwoUnitLongerThanOneUnit`
-  - Apply 1U and 2U auras in separate simulators.
-  - Assert 2U survives longer than 1U.
-- `testAccuracyPhaseA_VaporizeConsumesExpectedAura`
-  - Apply Hydro aura.
-  - Trigger Pyro reverse Vaporize.
-  - Assert consumed Hydro amount follows reaction gauge policy.
-- `testAccuracyPhaseA_ElectroChargedCoexistence`
-  - Apply Hydro then Electro.
-  - Assert both auras coexist before tick.
-  - Advance to tick and assert both reduce by expected amount.
-- `testAccuracyPhaseA_QuickenCoexistsWithDendroFollowup`
-  - Trigger Quicken.
-  - Apply Dendro hit during Quicken.
-  - Assert Spread can occur without deleting Quicken immediately.
-
-Suggested command:
-
-- `./gradlew ReactionRegressionTest`
-
-### Accuracy Phase B: Full ICD and Elemental Application Model
-
-Why after aura:
-
-ICD only matters if elemental application and aura state are accurate. This phase makes reaction frequency realistic across multi-hit actions.
-
-Target files:
-
-- `src/java/mechanics/element/ICDManager.java`
-- `src/java/simulation/action/AttackAction.java`
-- `src/java/simulation/runtime/CombatActionResolver.java`
-- character action definitions under `src/java/model/character/`
-
-Tasks:
-
-- Represent ICD groups explicitly:
-  - standard 3-hit / 2.5s rule
-  - no ICD
-  - ability-specific ICD
-  - shared ICD groups
-- Separate damage hit from elemental application hit.
-- Allow multi-hit actions to specify per-hit application policy.
-- Add action metadata for:
-  - application sequence index
-  - source ICD group
-  - elemental application strength
-  - whether the hit can trigger reactions
-- Audit existing sample parties for obvious ICD metadata gaps.
-
-Acceptance criteria:
-
-- Repeated hits in the same ICD group do not apply aura every hit.
-- No-ICD actions still apply every hit.
-- Shared ICD groups block application across related action instances.
-- Damage can still occur even when elemental application is blocked.
-
-Test cases to add:
-
-- `testAccuracyPhaseB_StandardIcdThreeHitRule`
-  - Perform three same-group elemental hits quickly.
-  - Assert only the first and third apply aura if using 3-hit rule.
-- `testAccuracyPhaseB_StandardIcdTimeRule`
-  - Perform one elemental hit.
-  - Advance past 2.5s.
-  - Assert next same-group hit applies aura.
-- `testAccuracyPhaseB_NoIcdAppliesEveryHit`
-  - Perform repeated no-ICD hits.
-  - Assert each can trigger a reaction.
-- `testAccuracyPhaseB_SharedIcdBlocksRelatedHits`
-  - Perform two different actions using the same ICD group.
-  - Assert second action deals damage but does not apply aura.
-- `testAccuracyPhaseB_DamageStillOccursWhenApplicationBlocked`
-  - Trigger ICD block on an attack with motion value.
-  - Assert damage is recorded even though no reaction occurs.
-
-Suggested command:
-
-- `./gradlew ReactionRegressionTest`
-- `./gradlew RaidenParty`
-
-### Accuracy Phase C: Bloom Family Detail Pass
-
-Why after aura and ICD:
-
-Bloom, Hyperbloom, and Burgeon are highly sensitive to core creation rate, application frequency, and core ownership.
-
-Target files:
-
-- `src/java/simulation/runtime/ReactionState.java`
-- `src/java/simulation/runtime/ReactionStateController.java`
-- `src/java/mechanics/reaction/ReactionEffectScheduler.java`
-- `src/java/simulation/runtime/CombatActionResolver.java`
-- `src/java/mechanics/reaction/ReactionCalculator.java`
-
-Tasks:
-
-- Add per-core hit/ownership metadata:
-  - owner
-  - trigger element
-  - creation reaction
-  - expiry event id if needed
-- Add Bloom self-limiting behavior:
-  - max active cores
-  - oldest-core explosion on overflow
-  - optional same-target damage interval cap for repeated core explosions
-- Add Hyperbloom/Burgeon core selection policy:
-  - single-core consumption for narrow hits
-  - multi-core consumption for explicit AoE hits
-  - single-target abstraction remains deterministic
-- Add Nilou-style Bountiful Core extension point without implementing Nilou-specific logic unless a party needs it.
-- Ensure Lunar-Bloom conversion still preserves core behavior.
-
-Acceptance criteria:
-
-- Core overflow behavior is deterministic.
-- Hyperbloom and Burgeon consume the intended number of cores.
-- Repeated core explosions respect any configured same-target cap.
-- Lunar-Bloom and standard Bloom share the same core infrastructure.
-
-Test cases to add:
-
-- `testAccuracyPhaseC_CoreOverflowExplodesOldest`
-  - Create six Bloom cores.
-  - Assert five remain and oldest dealt damage.
-- `testAccuracyPhaseC_HyperbloomConsumesOneCoreForSingleProjectile`
-  - Create multiple cores.
-  - Trigger Electro single-projectile action.
-  - Assert one core is consumed.
-- `testAccuracyPhaseC_BurgeonConsumesAoECores`
-  - Create multiple cores.
-  - Trigger Pyro AoE action.
-  - Assert configured AoE core count is consumed.
-- `testAccuracyPhaseC_CoreExplosionHitCap`
-  - Trigger multiple core explosions inside the configured hit window.
-  - Assert damage count follows the cap.
-- `testAccuracyPhaseC_LunarBloomUsesSameCorePolicy`
-  - Trigger Lunar-Bloom.
-  - Assert core metadata and expiry behavior match standard Bloom.
-
-Suggested command:
-
-- `./gradlew ReactionRegressionTest`
-
-### Accuracy Phase D: Quicken Family Detail Pass
-
-Why after aura:
-
-Quicken accuracy depends on proper aura coexistence and decay. This phase should refine the simplified Phase8 implementation.
-
-Target files:
-
-- `src/java/simulation/runtime/ReactionState.java`
-- `src/java/simulation/runtime/ReactionStateController.java`
-- `src/java/simulation/runtime/CombatActionResolver.java`
-- `src/java/mechanics/reaction/ReactionCalculator.java`
-- `src/java/mechanics/formula/StandardDamageStrategy.java`
-
-Tasks:
-
-- Model Quicken Aura as a true aura-like state with duration and refresh policy.
-- Define how Dendro/Electro applications interact with Quicken and remaining Dendro/Electro aura.
-- Ensure Aggravate/Spread:
-  - use trigger character EM
-  - use trigger character reaction bonus
-  - enter additive damage before DMG Bonus/Crit/DEF/RES
-  - do not create separate reaction damage instances
-- Add debug formula detail for additive reaction contribution.
-
-Acceptance criteria:
-
-- Quicken itself deals no damage.
-- Quicken refreshes according to gauge policy.
-- Aggravate/Spread only occur on eligible Electro/Dendro damage while Quicken is active.
-- Additive contribution appears in report/debug output.
-
-Test cases to add:
-
-- `testAccuracyPhaseD_QuickenRefreshesDuration`
-  - Trigger Quicken.
-  - Re-trigger before expiry.
-  - Assert expiry extends according to gauge policy.
-- `testAccuracyPhaseD_AggravateUsesTriggerEm`
-  - Create Quicken.
-  - Hit with Electro trigger at known EM.
-  - Assert additive value matches formula.
-- `testAccuracyPhaseD_SpreadUsesTriggerReactionBonus`
-  - Create Quicken.
-  - Hit with Dendro trigger with `SPREAD_DMG_BONUS`.
-  - Assert additive value includes bonus.
-- `testAccuracyPhaseD_AdditivePassesThroughCritAndDmgBonus`
-  - Use 100% crit and known Dendro/Electro DMG bonus.
-  - Assert final direct hit includes additive contribution after multipliers.
-- `testAccuracyPhaseD_NoCatalyzeAfterQuickenExpiry`
-  - Let Quicken expire.
-  - Assert Electro/Dendro hit does not Aggravate/Spread.
-
-Suggested command:
-
-- `./gradlew ReactionRegressionTest`
-
-### Accuracy Phase E: Lunar Reaction Detail Pass
-
-Why after standard reaction detail:
-
-Lunar reactions are conversions or overlays on standard Hydro-related reactions. They should inherit the corrected aura, ICD, and core behavior.
-
-Target files:
-
-- `src/java/simulation/runtime/CombatActionResolver.java`
-- `src/java/mechanics/reaction/ReactionEffectScheduler.java`
-- `src/java/simulation/runtime/ReactionState.java`
-- `src/java/simulation/runtime/ReactionStateController.java`
-- `src/java/mechanics/formula/LunarDamageStrategy.java`
-- relevant Lunar character files under `src/java/model/character/`
-
-Tasks:
-
-- Make Moonsign Benediction conversion source explicit:
-  - which party member enables conversion
-  - which reaction families are converted
-  - whether multiple converters stack or select one policy
-- Refine Lunar-Charged:
-  - Thundercloud creation/refresh
-  - tick ownership
-  - tick crit rules
-  - contributing applier selection
-- Refine Lunar-Bloom:
-  - Verdant Dew state
-  - Moonridge Dew state
-  - conversion hooks for characters that turn Lunar-Bloom into direct damage
-  - preserve Dendro Core compatibility when no direct conversion exists
-- Refine Lunar-Crystallize:
-  - Moondrift count/state
-  - Harmony trigger cadence
-  - crit rules
-  - interaction with standard Crystallize shard-related effects
-- Preserve current `FlinsParty2` behavior unless a documented formula correction intentionally changes it.
-
-Acceptance criteria:
-
-- Lunar conversion is party-state-driven and character-source-aware.
-- Lunar reaction events are visible to Columbina, artifacts, and future characters.
-- Thundercloud, Verdant Dew, Moonridge Dew, and Moondrift states are snapshot-safe.
-- `FlinsParty2` continues to run and any DPS delta is explained.
-
-Test cases to add:
-
-- `testAccuracyPhaseE_LunarConversionRequiresBenedictionSource`
-  - Use Moonsign without a converter and assert no conversion.
-  - Add converter and assert conversion occurs.
-- `testAccuracyPhaseE_LunarChargedTickOwnershipAndCrit`
-  - Trigger Lunar-Charged with known stats.
-  - Assert tick owner and expected crit scaling path.
-- `testAccuracyPhaseE_LunarBloomDewState`
-  - Trigger Lunar-Bloom near an active Lunar hook.
-  - Assert Verdant/Moonridge Dew state increments.
-- `testAccuracyPhaseE_LunarCrystallizeHarmonyCadence`
-  - Trigger Lunar-Crystallize three times.
-  - Assert one Harmony event and correct Geo damage attribution.
-- `testAccuracyPhaseE_FlinsParty2Regression`
-  - Run `FlinsParty2`.
-  - Record total damage and DPS delta in final notes.
-
-Suggested command:
-
-- `./gradlew ReactionRegressionTest`
-- `./gradlew FlinsParty2`
-
-### Accuracy Phase F: Character, Weapon, and Artifact Coverage
-
-Why after core mechanics:
-
-Once reaction and formula paths are stable, missing character-specific effects become the main source of simulator error.
-
-Target files:
-
-- `src/java/model/character/`
-- `src/java/model/weapon/`
-- `src/java/model/artifact/`
+- `src/java/sample/RaidenParty.java`
+- `src/java/model/character/RaidenShogun.java`
+- `src/java/model/character/Xiangling.java`
+- `src/java/model/character/Xingqiu.java`
+- `src/java/model/character/Bennett.java`
+- relevant files under `src/java/model/weapon/`
+- relevant files under `src/java/model/artifact/`
 - `config/characters/`
-- `src/java/sample/`
+- `src/java/sample/ReactionRegressionTest.java`
 
 Tasks:
 
-- Audit currently used parties first:
-  - `RaidenParty`
-  - `FlinsParty2`
-  - any registered RL parties
-- Add missing passives, constellations, weapon effects, artifact effects, and talent data only when they affect offensive output.
-- Prefer capability/profile-driven metadata for RL parties.
-- Add focused regression tests for every newly modeled kit mechanic.
+- Inventory which Raiden National mechanics are currently exact, simplified, or
+  missing.
+- Check action timings, cooldown assumptions, burst windows, summon durations,
+  snapshot behavior, and particle generation.
+- Check Resolve generation and consumption for Raiden.
+- Check Xiangling Pyronado and Guoba snapshot/tick behavior.
+- Check Xingqiu Raincutter trigger cadence, wave pattern, and Hydro application.
+- Check Bennett burst ATK buff timing, field behavior, and interaction with
+  snapshotting.
+- Check currently equipped weapons and artifacts for missing offensive passives.
+- Record high-impact gaps directly in this file before implementing broad
+  changes.
 
 Acceptance criteria:
 
-- Current sample parties document which character mechanics are exact and which are approximated.
-- Missing offensive mechanics are tracked explicitly instead of hidden in code comments.
-- New character mechanics have deterministic regression tests.
+- `RaidenParty` has an explicit accuracy inventory.
+- High-impact missing mechanics are listed as implementation tasks.
+- Existing reaction regressions still pass.
 
-Test cases to add:
+Implementation status:
 
-- `testAccuracyPhaseF_RaidenResolveAndEnergyRegression`
-  - Check Resolve generation and burst damage contribution for a fixed script.
-- `testAccuracyPhaseF_FlinsThundercloudConditionalHits`
-  - Check extra hits appear only while Thundercloud is active.
-- `testAccuracyPhaseF_ColumbinaGravityAndDewRegression`
-  - Check Gravity accumulation and Dew consumption with deterministic timing.
-- `testAccuracyPhaseF_ArtifactLunarReactionBuffRegression`
-  - Check Lunar-reaction-aware artifact buffs trigger on Lunar events only.
-- `testAccuracyPhaseF_WeaponReactionBonusRegression`
-  - Check reaction-gated weapon bonuses apply only under their documented condition.
+- Audited `RaidenParty`, Raiden, Xiangling, Xingqiu, Bennett, and the equipped
+  weapons/artifacts.
+- Confirmed implemented baseline coverage for Raiden Resolve and Musou energy,
+  Xiangling Pyronado snapshot and Guoba/Chili approximation, Xingqiu Raincutter
+  C6 wave pattern and C4 skill multiplier, Bennett burst field/Noblesse trigger,
+  Emblem, The Catch, Wolf-Fang, Skyward Spine, and Skyward Blade.
+- Found one high-impact Resolve issue: Raiden's action listener credited every
+  `ActionType.BURST` hit, so Xiangling's multi-hit burst cast granted Resolve
+  more than once.
+- Remaining simplifications to track later: Xingqiu orbital rain swords are
+  modeled as zero-damage Hydro aura ticks; Xiangling Chili pickup is assumed;
+  Skyward Spine uses random Vacuum Blade procs, which can make optimizer/sample
+  output nondeterministic.
 
-Suggested command:
+Test cases to add or update:
+
+- Add tests only when the audit identifies an untested behavior or a likely
+  regression point.
+- Normal path: fixed-script checks for Resolve gain/consumption, burst window
+  uptime, snapshot creation, and expected follow-up trigger counts.
+- Error/invalid path: action attempts during cooldown, burst attempts without
+  enough energy, and reaction/listener hooks that should not fire outside their
+  documented window.
+- Boundary values: buff expiry at the exact hit time, summon final tick timing,
+  Resolve at zero and cap, and energy values just below and just above burst
+  cost.
+- Unit-level logic: helper methods or character state transitions that can be
+  checked without a full sample rotation.
+- Integration path: a representative shortened Raiden National rotation that
+  verifies damage attribution, reaction labels, energy flow, and report logging.
+
+Verification:
 
 - `./gradlew ReactionRegressionTest`
 - `./gradlew RaidenParty`
+
+### Phase 2: RaidenParty High-Impact Fixes - Done
+
+Why second:
+
+The audit should determine the exact order, but fixes should prioritize mechanics
+that materially affect DPS, rotation timing, energy, or snapshot behavior.
+
+Candidate tasks:
+
+- Fix Resolve generation or burst damage contribution if the audit finds drift.
+- Fix Xingqiu burst follow-up timing or application behavior if it changes
+  Vaporize/Electro-Charged frequency.
+- Fix Xiangling snapshot behavior if active buffs are not captured correctly.
+- Fix Bennett burst buff lifecycle if it affects Pyronado or Raiden burst
+  snapshots.
+- Add or update focused regression tests for each fixed mechanic.
+
+Acceptance criteria:
+
+- Each implemented fix has a focused regression in `ReactionRegressionTest` or a
+  similarly lightweight executable sample.
+- `RaidenParty` still runs and any DPS delta is explained in final notes.
+
+Implementation status:
+
+- Fixed Raiden Resolve crediting so each teammate contributes once per actual
+  burst cast, even when that burst has multiple `ActionType.BURST` damage hits.
+- Added a regression that verifies Xiangling's multi-hit burst cast grants one
+  Resolve contribution plus the expected Wishes Unnumbered particle trigger.
+- `RaidenParty` still runs. The final sample changed from 1,389,957 total damage
+  / 66,188 DPS to 1,362,938 total damage / 64,902 DPS because Raiden now consumes
+  48 Resolve instead of the incorrect capped 60 Resolve in the benchmark script.
+
+Test cases to add or update:
+
+- Add at least one deterministic regression for every implemented fix.
+- Normal path: the corrected mechanic triggers under expected rotation
+  conditions and produces the expected state, damage, or energy delta.
+- Error/invalid path: the same mechanic does not trigger for the wrong action
+  type, wrong active character, missing buff, missing energy, cooldown lockout, or
+  expired state.
+- Boundary values: just-before and just-after timing around buff expiry, summon
+  tick cadence, ICD windows, and burst/state end times.
+- Unit-level logic: isolate core calculations such as Resolve contribution,
+  snapshot stat capture, Raincutter wave counting, or Pyronado tick scheduling
+  when possible.
+- Integration path: run a compact RaidenParty script that exercises the changed
+  mechanic together with reactions, buffs, energy, and logging.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew RaidenParty`
+
+### Phase 3: FlinsParty2 Lunar Accuracy Audit - Done
+
+Why third:
+
+Lunar reaction infrastructure is implemented, but `FlinsParty2` depends on many
+custom character hooks, Lunar-specific stats, reaction listeners, and item
+effects. These should be audited after the conventional team is stable.
+
+Target files:
+
+- `src/java/sample/FlinsParty2.java`
+- `src/java/model/character/Flins.java`
+- `src/java/model/character/Ineffa.java`
+- `src/java/model/character/Columbina.java`
+- `src/java/model/character/Sucrose.java`
+- relevant Lunar weapons under `src/java/model/weapon/`
+- relevant Lunar artifacts under `src/java/model/artifact/`
+- `src/java/mechanics/reaction/`
+- `src/java/mechanics/formula/LunarDamageStrategy.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Tasks:
+
+- Inventory implemented, simplified, and missing Lunar character mechanics.
+- Check Lunar-Charged Thundercloud ownership, tick cadence, crit rules, and
+  conditional follow-up behavior.
+- Check Lunar-Bloom Dew state creation, consumption hooks, and direct damage
+  conversion hooks.
+- Check Lunar-Crystallize Moondrift counters and Harmony cadence.
+- Check Columbina Gravity accumulation, Interference triggers, Dew resources, and
+  Lunar Domain conditions.
+- Check Flins form state, Thundercloud-dependent hits, energy behavior, and
+  constellation-triggered reaction hooks.
+- Check Ineffa summon behavior, EM sharing, Lunar base-bonus support, and shielded
+  skill assumptions.
+- Check Lunar-aware weapons and artifacts for trigger conditions and stat routing.
+
+Acceptance criteria:
+
+- `FlinsParty2` has an explicit accuracy inventory.
+- Lunar-specific high-impact gaps are listed as implementation tasks.
+- Existing Lunar regressions still pass.
+
+Implementation status:
+
+- Audited `FlinsParty2`, Flins, Ineffa, Columbina, Sucrose, Lunar reaction
+  routing, Lunar damage strategy, and the equipped Lunar weapons/artifacts.
+- Confirmed implemented baseline coverage for auto-detected
+  `ASCENDANT_GLEAM`, Lunar-Charged Thundercloud ownership/ticks/crit routing,
+  Lunar-Bloom Dew conversion hooks, Lunar-Crystallize Moondrift/Harmony cadence,
+  Columbina Gravity/Interference/Dew consumption, Ineffa Overclock/Birgitta
+  hooks, and Flins Thunderous Symphony state.
+- Found one high-impact timing issue: Flins standard burst delayed hits returned
+  `currentTime + delay` from each timer poll, so their scheduled time could drift
+  forward as combat time advanced.
+- Remaining simplifications to track later: defensive shield HP is logged but
+  not consumed by enemy attacks, some custom character effects use deterministic
+  stand-ins for random or field-position behavior, and the sample can still fire
+  Flins burst with insufficient energy in the scripted rotation while warning.
+
+Test cases to add or update:
+
+- Add tests only when the audit identifies missing coverage or ambiguous Lunar
+  behavior.
+- Normal path: Lunar-Charged, Lunar-Bloom, and Lunar-Crystallize trigger under
+  valid Moonsign and party conditions with expected counters or state changes.
+- Error/invalid path: Lunar conversion does not occur without the required
+  party-state source, wrong aura pair, expired domain, missing Thundercloud, or
+  non-Lunar trigger condition.
+- Boundary values: Thundercloud refresh at expiry edge, Dew cooldown/cap edges,
+  Moondrift every-third-trigger cadence, Gravity threshold crossing, and domain
+  start/end timing.
+- Unit-level logic: direct checks for Lunar damage stat routing, state counters,
+  Dew/Gravity accumulation, and conversion eligibility helpers.
+- Integration path: a representative shortened FlinsParty2 rotation that verifies
+  Lunar reaction events, custom character hooks, item triggers, and report
+  logging together.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
 - `./gradlew FlinsParty2`
+
+### Phase 4: FlinsParty2 High-Impact Fixes - Done
+
+Why fourth:
+
+Lunar mechanics affect custom team behavior and RL training distribution. Fixes
+should be isolated and measured against `FlinsParty2`.
+
+Candidate tasks:
+
+- Fix Thundercloud conditional hit logic if character hooks do not match runtime
+  Lunar state.
+- Fix Columbina Gravity or Dew behavior if counters, cooldowns, or domain
+  conditions are incomplete.
+- Fix Lunar item trigger conditions if they still depend on display labels rather
+  than typed reaction metadata.
+- Fix Lunar damage stat routing if a direct Lunar action or reaction uses the
+  wrong bonus bucket.
+- Add focused regression coverage for each fixed custom mechanic.
+
+Acceptance criteria:
+
+- Each implemented fix has deterministic regression coverage.
+- `FlinsParty2` still runs and any DPS delta is explained in final notes.
+- Standard reaction behavior remains unchanged unless intentionally corrected.
+
+Implementation status:
+
+- Fixed Flins standard burst delayed hit scheduling by capturing absolute target
+  times when the timer events are created.
+- Added a boundary regression that verifies the no-Thundercloud standard burst
+  delayed hits occur at 2.5s, 2.8s, and 3.6s instead of drifting with current
+  simulator time.
+- Removed leftover `FlinsParty2` debug stat dumping from party setup so sample
+  validation no longer writes `stats_dump.txt`.
+- `FlinsParty2` still runs at 17,044,468 total damage / 246,664 DPS after the
+  fix and debug-output cleanup.
+
+Test cases to add or update:
+
+- Add at least one deterministic regression for every implemented Lunar fix.
+- Normal path: corrected Lunar hooks trigger with the expected owner, stat bucket,
+  counter change, and damage or resource result.
+- Error/invalid path: hooks do not trigger for standard reactions, wrong Lunar
+  subtype, off-window domain state, missing Moonsign condition, or display-label
+  mismatches.
+- Boundary values: exact Thundercloud tick/expiry times, Dew caps, Gravity caps,
+  Moondrift third-trigger boundary, and Lunar buff expiry on the hit frame.
+- Unit-level logic: isolate conversion eligibility, Lunar stat selection, state
+  increment/reset behavior, and reaction-listener filters.
+- Integration path: a compact FlinsParty2 script that exercises the changed
+  Lunar mechanic with reactions, character hooks, item hooks, damage attribution,
+  and logging.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew FlinsParty2`
+
+### Phase 5: RL Party and Capability Profile Audit - Done
+
+Why fifth:
+
+RL parties consume the same simulator but add observation, action-mask, reward,
+role-profile, and report-generation contracts. Accuracy changes can silently
+shift training behavior even when tensor shapes do not change.
+
+Target files:
+
+- `src/java/mechanics/rl/`
+- `src/java/mechanics/rl/bridge/`
+- `src/java/sample/ServeRLJava.java`
+- `src/java/sample/BenchmarkRLJava.java`
+- `src/java/sample/ProfileCharacterCapabilities.java`
+- `src/python/rl/`
+- `config/capability_profiles/`
+
+Tasks:
+
+- Verify registered RL parties match the audited simulator parties.
+- Check capability profiles for stale role expectations after character or item
+  fixes.
+- Check action masks for newly adjusted cooldown, burst, or form-state behavior.
+- Check observation and privileged-observation fields that expose reaction or
+  role state.
+- Check report generation paths for deterministic evaluation.
+- Regenerate capability profiles only when role behavior changes materially.
+
+Acceptance criteria:
+
+- RL registry entries remain the single source of party selection.
+- Capability profiles are either confirmed current or regenerated with a clear
+  reason.
+- Python evaluation still derives party names and summaries from service
+  metadata.
+
+Implementation status:
+
+- Audited `RLPartyRegistry`, `RLPartySpec`, the FlinsParty2 and RaidenParty RL
+  factories, multi-party episode selection, action masks, observation encoding,
+  privileged-state encoding, Java benchmark entry point, and Python evaluation
+  metadata usage.
+- Confirmed registered RL parties still match the audited simulator parties:
+  `FlinsParty2` and `RaidenParty`.
+- No observation layout, privileged observation layout, action ID, action-mask,
+  reward, or binary protocol change was required.
+- Regenerated `config/capability_profiles/profiles.json` because Phase 2 and
+  Phase 4 changed simulator behavior used by role profiling. Flins role values
+  changed materially after fixed burst scheduling, and Raiden values changed
+  slightly after Resolve crediting was corrected.
+- Confirmed Java rollout benchmark succeeds with the regenerated profile file.
+  Python checkpoint evaluation was not run because no usable checkpoint was
+  required or validated as part of this pass.
+
+Test cases to add or update:
+
+- Add or update tests only when RL-facing behavior or metadata changes.
+- Normal path: registered parties can be selected by name, default, and all; the
+  service exposes consistent observation/action/role metadata; valid actions step
+  successfully.
+- Error/invalid path: unknown party selections, invalid action IDs, masked
+  actions, unavailable checkpoints, and service/client shape mismatches fail
+  clearly.
+- Boundary values: one-party versus multi-party catalogs, one environment versus
+  vectorized environments, episode termination at the configured time limit, and
+  action-mask behavior around cooldown or energy thresholds.
+- Unit-level logic: action mask generation, reward calculation, role-alignment
+  scoring, capability profile parsing, and protocol encode/decode helpers.
+- Integration path: Java rollout benchmark plus Python evaluation against a
+  running service when a usable checkpoint exists.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew BenchmarkRLJava`
+- `./gradlew ProfileCapabilities` when role profiles change
+- `python3 src/python/rl/evaluate_policy.py --mode both --summary` when a usable
+  checkpoint exists
+
+### Phase 6: Documentation and Accuracy Notes - Done
+
+Why last:
+
+After the benchmark parties are audited and fixed, the project should clearly
+state which mechanics are exact, simplified, or intentionally deferred.
+
+Target files:
+
+- `README.md`
+- `TASKS.md`
+- relevant package `AGENTS.md`
+- optional docs or generated reports only when explicitly requested
+
+Tasks:
+
+- Update this plan with completed items and remaining gaps.
+- Document known simplifications for RaidenParty and FlinsParty2.
+- Keep validation commands and expected sample outputs current.
+- Avoid editing generated `docs/` unless the task is specifically about
+  published documentation.
+
+Acceptance criteria:
+
+- Future implementation work can start from a current gap list instead of
+  re-auditing the whole project.
+- Handoff notes clearly state which commands were run and which were skipped.
+
+Implementation status:
+
+- Updated this plan with completed phase notes, known simplifications, validation
+  commands, and sample DPS baselines.
+- Updated `README.md` with current accuracy notes for the audited benchmark
+  parties and the latest validation baseline.
+- Did not edit generated `docs/` output.
+
+Test cases to add or update:
+
+- Documentation-only changes do not require new tests unless they document a new
+  expected behavior that is not covered.
+- When docs record a newly fixed mechanic, make sure the corresponding phase
+  added or updated normal, invalid, boundary, unit-level, or integration coverage
+  as appropriate.
+- If validation commands, report paths, or RL workflows are changed, run the
+  smallest command that proves the documented workflow still works.
+
+## Cross-Cutting Rules
+
+### Testing
+
+- Use `./gradlew ReactionRegressionTest` for reaction, aura, ICD, Lunar,
+  character-hook, weapon-hook, artifact-hook, and formula regressions.
+- Use `./gradlew RaidenParty` for conventional sample regressions.
+- Use `./gradlew FlinsParty2` for Lunar sample regressions.
+- Use RL commands only when RL-facing behavior, profile data, or protocol
+  contracts change.
+- For each implementation phase, decide whether new tests are required before
+  editing. At minimum, cover the normal path and an invalid/no-trigger path for a
+  changed mechanic.
+- Add boundary-value tests when timing, counters, caps, cooldowns, energy
+  thresholds, ICD windows, or buff expiry are part of the behavior.
+- Add unit-level tests for major helper logic when it can be isolated without a
+  full simulator run.
+- Add representative integration tests or executable sample checks when multiple
+  systems interact, such as character hooks plus reactions plus item passives.
+- If a phase intentionally skips new tests, record why in the final handoff.
+
+### Implementation Style
+
+- Prefer minimal local changes in the affected character, item, runtime, or
+  mechanic package.
+- Add helper methods only when they remove real duplication or clarify a
+  mechanic.
+- Keep runtime logic typed: use `CharacterId`, `CharacterActionKey`, `BuffId`,
+  `ReactionResult.Kind`, and `ReactionResult.LunarType` instead of display
+  labels.
+- Preserve current single-target assumptions unless a target party needs a more
+  detailed offensive abstraction.
+
+### Reporting
+
+- New or corrected mechanics should appear clearly in logs or HTML reports when
+  they affect damage attribution, reaction labels, aura state, or timed effects.
+- Presentation labels belong in sample, log, report, and data-boundary code; they
+  should not become control-flow keys in simulator internals.
+
+### RL Compatibility
+
+- Treat damage, timing, action masks, observation layout, privileged observation
+  layout, party ordering, and role profiles as RL-relevant contracts.
+- Existing checkpoints may become behaviorally incompatible after simulator
+  accuracy fixes even when tensor shapes remain unchanged.
+
+## Deferred Systems
+
+These systems remain deferred unless a current benchmark party's offensive kit
+depends on them:
+
+- defensive shield absorption and player damage intake
+- enemy attacks, stagger, movement, and survival pressure
+- multi-target geometry and positioning
+- exploration-specific systems
+- full open-world status interactions that do not affect offensive output in the
+  current single-target simulator
