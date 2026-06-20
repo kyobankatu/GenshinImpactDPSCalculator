@@ -81,6 +81,7 @@ public class StatsRecorder {
     private void recordSnapshot(CombatSimulator s) {
         Map<CharacterId, Map<StatType, Double>> charStats = new HashMap<>();
         Map<CharacterId, List<String>> charBuffs = new HashMap<>();
+        Map<CharacterId, Double> charEnergyPercent = new HashMap<>();
 
         for (Character c : s.getPartyMembers()) {
             StatsContainer effStats = c.getEffectiveStats(s.getCurrentTime());
@@ -116,6 +117,8 @@ public class StatsRecorder {
                 }
             }
             charBuffs.put(c.getCharacterId(), buffNames);
+            charEnergyPercent.put(c.getCharacterId(),
+                    100.0 * c.getCurrentEnergy() / Math.max(1.0, c.getEnergyCost()));
 
             Map<StatType, Double> statMap = new HashMap<>();
 
@@ -148,7 +151,7 @@ public class StatsRecorder {
             charStats.put(c.getCharacterId(), statMap);
         }
 
-        snapshots.add(new StatsSnapshot(s.getCurrentTime(), charStats, charBuffs));
+        snapshots.add(new StatsSnapshot(s.getCurrentTime(), charStats, charBuffs, charEnergyPercent));
     }
 
     /**

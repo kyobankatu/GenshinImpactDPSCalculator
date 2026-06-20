@@ -11,8 +11,11 @@ This project goes beyond simple formula calculations by emulating skill animatio
 **[View Javadoc](https://kyobankatu.github.io/GenshinImpactDPSCalculator/index.html)**
 
 The report shows a full combat simulation for a custom 4-character team, including:
-- Damage timeline with per-hit breakdowns and reaction labels
-- Damage contribution pie chart per character
+- Filterable damage timeline with per-hit breakdowns, reaction labels, aura
+  state, and expandable formula details
+- Damage contribution and cumulative damage charts per character
+- Reaction damage, reaction-labeled direct damage, action damage, rolling DPS,
+  aura timeline, energy timeline, and buff uptime charts
 - Optimized artifact substat distributions
 - Active buff tracking per character
 
@@ -22,7 +25,7 @@ The report shows a full combat simulation for a custom 4-character team, includi
 - **Accurate Damage Mechanics**: Implements the official game damage formulas including base multipliers, additive flat damage, defense & resistance shredding, and elemental gauges for Amplifying, Additive, and Transformative reactions.
 - **Artifact Optimization Pipeline**: Contains a two-phase optimizer (Energy Recharge calibration followed by DPS substat hill-climbing) to automatically find the optimal artifact stat distribution based on KQM standards.
 - **Custom Mechanics**: Includes an extensible framework for custom, non-canonical characters with completely original buffs and synergy mechanics.
-- **Interactive HTML Reports**: Automatically generates visual timeline records, pie charts for damage contribution, and character stat snapshots via Chart.js.
+- **Interactive HTML Reports**: Automatically generates dashboard-style reports with damage contribution, cumulative damage, reaction/action damage, rolling DPS, aura, energy, buff uptime, stat snapshots, and filterable event timelines via Chart.js.
 - **Hybrid RL Stack**: Experimental Java rollout service plus Python recurrent PPO learner for optimizing combat rotations without per-step Python/Java overhead.
 - **Registry-Driven RL Parties**: RL training, evaluation, capability profiling, and benchmarking all share one Java-side party registry, so adding a new RL party no longer requires editing multiple launch paths.
 

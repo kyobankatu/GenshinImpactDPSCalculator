@@ -20,6 +20,8 @@ public class StatsSnapshot {
     public Map<CharacterId, Map<StatType, Double>> characterStats;
     /** Display labels of active buffs per character at {@link #time}, keyed by typed identity. */
     public Map<CharacterId, List<String>> characterBuffs;
+    /** Current energy percentage per character at {@link #time}, keyed by typed identity. */
+    public Map<CharacterId, Double> characterEnergyPercent;
 
     /**
      * Constructs a new snapshot.
@@ -30,8 +32,23 @@ public class StatsSnapshot {
      */
     public StatsSnapshot(double time, Map<CharacterId, Map<StatType, Double>> characterStats,
             Map<CharacterId, List<String>> characterBuffs) {
+        this(time, characterStats, characterBuffs, new java.util.HashMap<>());
+    }
+
+    /**
+     * Constructs a new snapshot.
+     *
+     * @param time                   simulation time in seconds
+     * @param characterStats         map from character id to their effective stat values
+     * @param characterBuffs         map from character id to their active buff display labels
+     * @param characterEnergyPercent map from character id to current energy percentage
+     */
+    public StatsSnapshot(double time, Map<CharacterId, Map<StatType, Double>> characterStats,
+            Map<CharacterId, List<String>> characterBuffs,
+            Map<CharacterId, Double> characterEnergyPercent) {
         this.time = time;
         this.characterStats = characterStats;
         this.characterBuffs = characterBuffs;
+        this.characterEnergyPercent = characterEnergyPercent;
     }
 }

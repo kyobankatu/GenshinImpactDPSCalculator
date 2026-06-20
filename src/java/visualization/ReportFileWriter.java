@@ -3,6 +3,8 @@ package visualization;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * Writes rendered reports to the output directory.
@@ -19,6 +21,12 @@ final class ReportFileWriter {
      * @param html     rendered HTML document
      */
     static void write(String filePath, String html) {
+        try {
+            Files.createDirectories(Paths.get("output"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
         try (PrintWriter out = new PrintWriter(new FileWriter("output/" + filePath))) {
             out.write(html);
             System.out.println("Generated HTML Report: output/" + filePath);

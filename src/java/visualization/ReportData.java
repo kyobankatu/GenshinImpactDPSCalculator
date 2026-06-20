@@ -3,6 +3,7 @@ package visualization;
 import java.util.List;
 import java.util.Map;
 
+import model.type.Element;
 import model.type.StatType;
 
 /**
@@ -21,6 +22,22 @@ final class ReportData {
     final Map<String, Double> totalDamageByActor;
     /** Cumulative damage series points (as JS object literals) per actor. */
     final Map<String, List<String>> cumulativeDamageSeries;
+    /** Damage totals grouped by action display label. */
+    final List<ReportMetricView> actionDamageTotals;
+    /** Damage totals grouped by actor, then action display label. */
+    final Map<String, List<ReportMetricView>> actionDamageTotalsByActor;
+    /** Transformative reaction damage totals grouped by reaction display label. */
+    final List<ReportMetricView> reactionDamageTotals;
+    /** Direct-hit damage totals grouped by reaction labels when true reaction bonus is not separable. */
+    final List<ReportMetricView> reactionLabeledDamageTotals;
+    /** Rolling team DPS series as JS object literals. */
+    final List<String> rollingDpsSeries;
+    /** Enemy aura unit series per element as JS object literals. */
+    final Map<Element, List<String>> auraSeries;
+    /** Character energy percentage series as JS object literals, keyed by display name. */
+    final Map<String, List<String>> energySeries;
+    /** Buff uptime summaries grouped by character and buff display label. */
+    final List<ReportBuffUptimeView> buffUptime;
     /** Ordered list of actor display names used for charts. */
     final List<String> chartNames;
     /** Chart colors aligned by index with {@link #chartNames}. */
@@ -60,6 +77,14 @@ final class ReportData {
             List<ReportArtifactRollView> artifactRolls,
             Map<String, Double> totalDamageByActor,
             Map<String, List<String>> cumulativeDamageSeries,
+            List<ReportMetricView> actionDamageTotals,
+            Map<String, List<ReportMetricView>> actionDamageTotalsByActor,
+            List<ReportMetricView> reactionDamageTotals,
+            List<ReportMetricView> reactionLabeledDamageTotals,
+            List<String> rollingDpsSeries,
+            Map<Element, List<String>> auraSeries,
+            Map<String, List<String>> energySeries,
+            List<ReportBuffUptimeView> buffUptime,
             List<String> chartNames,
             String[] chartColors,
             double totalDamage,
@@ -73,6 +98,14 @@ final class ReportData {
         this.artifactRolls = artifactRolls;
         this.totalDamageByActor = totalDamageByActor;
         this.cumulativeDamageSeries = cumulativeDamageSeries;
+        this.actionDamageTotals = actionDamageTotals;
+        this.actionDamageTotalsByActor = actionDamageTotalsByActor;
+        this.reactionDamageTotals = reactionDamageTotals;
+        this.reactionLabeledDamageTotals = reactionLabeledDamageTotals;
+        this.rollingDpsSeries = rollingDpsSeries;
+        this.auraSeries = auraSeries;
+        this.energySeries = energySeries;
+        this.buffUptime = buffUptime;
         this.chartNames = chartNames;
         this.chartColors = chartColors;
         this.totalDamage = totalDamage;
@@ -80,6 +113,39 @@ final class ReportData {
         this.dps = dps;
         this.endTime = endTime;
         this.hasStatsHistory = hasStatsHistory;
+    }
+
+    /**
+     * Named numeric metric used by summary charts and tables.
+     */
+    static final class ReportMetricView {
+        /** Display label. */
+        final String label;
+        /** Numeric value. */
+        final double value;
+
+        ReportMetricView(String label, double value) {
+            this.label = label;
+            this.value = value;
+        }
+    }
+
+    /**
+     * Report row describing one buff's observed uptime.
+     */
+    static final class ReportBuffUptimeView {
+        /** Character display name. */
+        final String characterName;
+        /** Buff display label. */
+        final String buffName;
+        /** Uptime as percent of observed rotation duration. */
+        final double uptimePercent;
+
+        ReportBuffUptimeView(String characterName, String buffName, double uptimePercent) {
+            this.characterName = characterName;
+            this.buffName = buffName;
+            this.uptimePercent = uptimePercent;
+        }
     }
 
     /**

@@ -66,7 +66,10 @@ public final class ReportViewAdapter {
                 List<String> buffs = snapshot.characterBuffs != null
                         ? snapshot.characterBuffs.getOrDefault(characterId, Collections.emptyList())
                         : Collections.emptyList();
-                reportCharacters.put(domKey(characterId), new ReportCharacterStats(stats, buffs));
+                double energyPercent = snapshot.characterEnergyPercent != null
+                        ? snapshot.characterEnergyPercent.getOrDefault(characterId, 0.0)
+                        : 0.0;
+                reportCharacters.put(domKey(characterId), new ReportCharacterStats(stats, buffs, energyPercent));
             }
             adapted.add(new ReportStatsSnapshot(snapshot.time, reportCharacters));
         }
@@ -152,6 +155,8 @@ public final class ReportViewAdapter {
         public final double em;
         /** Strongest elemental DMG% bonus across all elements, as a percent. */
         public final double dmg;
+        /** Current energy as a percentage of burst cost. */
+        public final double energy;
         /** Active buff display names at the snapshot time. */
         public final List<String> buffs;
 
@@ -162,6 +167,17 @@ public final class ReportViewAdapter {
          * @param buffs active buff display names for the same snapshot
          */
         public ReportCharacterStats(Map<StatType, Double> stats, List<String> buffs) {
+            this(stats, buffs, 0.0);
+        }
+
+        /**
+         * Reduces a raw stat map, buff list, and energy value into report-ready values.
+         *
+         * @param stats         raw stat map keyed by {@link StatType}; may be {@code null}
+         * @param buffs         active buff display names for the same snapshot
+         * @param energyPercent current energy as a percentage of burst cost
+         */
+        public ReportCharacterStats(Map<StatType, Double> stats, List<String> buffs, double energyPercent) {
             Map<StatType, Double> safeStats = stats != null ? stats : new EnumMap<>(StatType.class);
             this.atk = safeStats.getOrDefault(StatType.BASE_ATK, 0.0)
                     * (1 + safeStats.getOrDefault(StatType.ATK_PERCENT, 0.0))
@@ -177,6 +193,7 @@ public final class ReportViewAdapter {
             this.er = safeStats.getOrDefault(StatType.ENERGY_RECHARGE, 0.0) * 100;
             this.em = safeStats.getOrDefault(StatType.ELEMENTAL_MASTERY, 0.0);
             this.dmg = strongestElementalBonusPercent(safeStats);
+            this.energy = energyPercent;
             this.buffs = buffs;
         }
 

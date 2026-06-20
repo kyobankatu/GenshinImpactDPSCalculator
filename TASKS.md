@@ -1,5 +1,14 @@
 # Accuracy Implementation Plan
 
+## Current Status
+
+The simulator accuracy audit and high-impact fixes for `RaidenParty`,
+`FlinsParty2`, and RL-facing metadata are complete.
+
+The HTML report detail and UI upgrade has been approved and implemented through
+Report Phase 7. Remaining report work should start from the deferred items and
+known limitations recorded in that section.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -442,6 +451,512 @@ Test cases to add or update:
   as appropriate.
 - If validation commands, report paths, or RL workflows are changed, run the
   smallest command that proves the documented workflow still works.
+
+## Next Implementation Order: HTML Report Detail and UI Upgrade
+
+Status:
+
+- Implemented through Report Phase 7 after explicit user approval.
+- Generated reports now include the requested charts, denser dashboard layout,
+  timeline filters, formula detail panels, and renderer escaping coverage.
+
+Scope:
+
+- Improve the generated HTML simulation report under `output/`.
+- Add richer combat-analysis charts:
+  - character cumulative damage
+  - reaction damage pie chart
+  - action damage horizontal bar chart
+  - rolling DPS over time
+  - aura timeline
+  - energy timeline
+  - buff uptime chart
+- Improve report readability, visual hierarchy, table density, timeline scanning,
+  tooltip/detail readability, and responsive layout.
+- Keep the simulator and model layers downstream-clean: report presentation must
+  not become runtime control flow.
+
+Out of scope for this pass:
+
+- Changing combat mechanics, damage formulas, or optimizer behavior.
+- Rewriting the report as a separate frontend build pipeline.
+- Adding external network dependencies beyond the existing CDN-loaded Chart.js
+  unless explicitly approved.
+- Editing generated `docs/` or committed report output unless explicitly
+  requested.
+- Persisting report data as a separate JSON artifact unless explicitly requested.
+- Introducing a frontend framework or build step.
+- Adding server-side report viewing.
+- Treating report chart output as simulator correctness assertions.
+
+Chart data source plan:
+
+| Chart | Existing data coverage | Additional implementation |
+| --- | --- | --- |
+| character cumulative damage | Existing `SimulationRecord` actor/damage data is enough | Small aggregation cleanup |
+| reaction-labeled damage pie | Existing reaction labels and `reactionDamage` are partly enough | Medium, because additive/direct reaction labels need clear semantics |
+| action damage horizontal bar | Existing action labels and damage data are enough | Small aggregation cleanup plus label truncation |
+| rolling DPS | Existing time/damage records are enough | Small aggregation with fixed sampling rules |
+| aura timeline | Existing per-record enemy aura snapshots are enough when records are dense enough | Medium, because sparse records need step-style rendering semantics |
+| energy timeline | Current stat snapshots do not expose current energy | Medium, likely requires report-facing `StatsSnapshot` extension |
+| buff uptime chart | Current stat snapshots expose active buff labels | Medium to large, because uptime must integrate sampled intervals and handle duplicate labels |
+
+Reaction chart semantics:
+
+- Transformative reaction damage uses explicit `reactionDamage` values.
+- Additive or direct reaction-labeled hits, such as Aggravate and Spread, must
+  not be mixed into a chart called "Reaction Damage" unless the additive bonus is
+  separately available.
+- If true additive bonus damage is not separately available, expose those values
+  under a clearly named "Reaction-labeled Damage" chart or table and document the
+  limitation in the report.
+- The chart title and tooltip must make the chosen definition explicit.
+
+Rolling DPS definition:
+
+- Compute rolling DPS every 0.5 seconds.
+- Use damage in the previous 5.0 second window.
+- For timestamps earlier than 5.0 seconds, divide by the actual elapsed window
+  length instead of the full 5.0 seconds.
+- Include points even in quiet intervals so the chart can show DPS falling when
+  no damage occurs.
+- Do not extend beyond the effective rotation duration.
+
+Large-report performance rules:
+
+- Downsample dense time-series for chart rendering when record count exceeds a
+  configurable threshold.
+- Preserve full timeline data for filtering when practical, but cap initial
+  visible rows or render rows lazily if the generated report becomes heavy.
+- Keep action and buff charts to a readable Top N, with the limit documented in
+  chart labels or captions.
+- Track generated HTML size and browser responsiveness during `FlinsParty2`
+  validation.
+
+Color rules:
+
+- The same character should use the same color across all character-based
+  charts.
+- Aura timeline series should use element colors, even if those colors differ
+  from character chart colors.
+- Reaction categories should use stable colors when feasible; otherwise they
+  should use a neutral palette distinct from element aura colors.
+- The report remains a dark, analysis-focused dashboard unless a separate theme
+  request is made.
+
+### Report Phase 1: Report Data Inventory and Contract Design - Done
+
+Why first:
+
+The requested charts need both existing event records and additional sampled
+state. Before changing rendering, define which values come from existing
+`SimulationRecord` data and which require report-only snapshot extensions.
+
+Target files:
+
+- `src/java/visualization/SimulationRecord.java`
+- `src/java/visualization/VisualLogger.java`
+- `src/java/visualization/ReportData.java`
+- `src/java/visualization/ReportDataBuilder.java`
+- `src/java/visualization/ReportViewAdapter.java`
+- `src/java/mechanics/analysis/StatsSnapshot.java`
+- `src/java/mechanics/analysis/StatsRecorder.java`
+
+Tasks:
+
+- Inventory existing report data:
+  - per-event time, actor, action, direct damage, reaction label, reaction
+    damage, enemy aura snapshot, and formula text
+  - stat snapshots and active buff labels from `StatsRecorder`
+  - party member names, artifact rolls, and chart colors
+- Define report-only aggregate data structures for:
+  - action damage totals
+  - reaction damage totals
+  - rolling DPS series
+  - aura timeline series
+  - energy timeline series
+  - buff uptime summaries
+- Decide whether energy timeline can be added through `StatsSnapshot` without
+  breaking existing consumers.
+- Keep data additions backward-compatible where practical.
+
+Acceptance criteria:
+
+- Each requested chart has a clear data source.
+- Existing-data versus additional-measurement requirements are listed for each
+  chart before implementation starts.
+- Any new field added to a shared data carrier is documented as report-facing.
+- No simulator control path depends on display labels added for reporting.
+
+Test cases to add or update:
+
+- Unit-level or lightweight executable checks only if new aggregation helpers are
+  non-trivial.
+- Normal path: a small record list produces expected action/reaction totals and
+  cumulative/rolling series.
+- Boundary values: empty records, zero-damage records, missing stats history, and
+  final timestamp with no further snapshot.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+
+Implementation status:
+
+- Done. Data sources were mapped to existing `SimulationRecord` fields and
+  stat snapshot history. Energy percentage was added as a report-facing
+  `StatsSnapshot` value.
+
+### Report Phase 2: Aggregate Chart Data Implementation - Done
+
+Why second:
+
+Once contracts are defined, implement chart inputs before touching the UI. This
+keeps rendering changes small and testable.
+
+Target files:
+
+- `src/java/visualization/ReportData.java`
+- `src/java/visualization/ReportDataBuilder.java`
+- `src/java/visualization/ReportViewAdapter.java`
+- `src/java/mechanics/analysis/StatsSnapshot.java`
+- `src/java/mechanics/analysis/StatsRecorder.java`
+
+Tasks:
+
+- Build character cumulative damage series from existing records.
+- Build transformative reaction damage totals from explicit `reactionDamage`
+  values.
+- Build additive/direct reaction-labeled summaries separately unless true
+  additive bonus damage is made available as a distinct value.
+- Build top action damage totals from action labels.
+- Build rolling DPS using the documented 0.5 second sample interval and 5.0
+  second lookback window.
+- Build aura timeline series from each record's enemy aura snapshot.
+- Extend stat snapshots for current energy percentage if needed, then build
+  energy timeline series per character.
+- Build buff uptime by integrating active buff labels over snapshot intervals.
+- Limit long action/buff lists to a readable Top N and keep full data available
+  only if the renderer can display it cleanly.
+- Add chart downsampling for dense time-series before rendering if generated
+  data arrays become too large.
+
+Acceptance criteria:
+
+- All requested chart datasets are present in `ReportData`.
+- Missing optional history data disables only dependent charts, not the whole
+  report.
+- Existing pie and cumulative damage charts still render.
+
+Test cases to add or update:
+
+- Normal path: deterministic aggregate values from a small synthetic record list.
+- Error/invalid path: null or empty records/stats history produce empty datasets
+  without exceptions.
+- Boundary values: one record, repeated timestamps, zero rotation duration, and
+  buff active at the final snapshot.
+- Renderer-facing data labels containing quotes, angle brackets, ampersands, and
+  script-like substrings must be covered before being embedded in HTML/JS.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew RaidenParty`
+
+Implementation status:
+
+- Done. `ReportDataBuilder` now prepares action totals, strict transformative
+  reaction totals, separate reaction-labeled direct damage totals, rolling DPS,
+  aura series, energy series, and buff uptime summaries.
+- Dense chart series are capped with a 600-point downsampling limit. Long action,
+  reaction, and buff summaries are capped to Top 16.
+
+### Report Phase 3: Renderer Escaping and HTML Skeleton Tests - Done
+
+Why third:
+
+The report embeds action labels, buff labels, formula text, and chart data into a
+self-contained HTML/JavaScript document. Escaping must be reliable before adding
+more charts and controls.
+
+Target files:
+
+- `src/java/visualization/ReportHtmlRenderer.java`
+- `src/java/visualization/ReportDataBuilder.java`
+- `src/java/sample/ReactionRegressionTest.java` or a similarly lightweight
+  executable regression harness
+
+Tasks:
+
+- Add renderer helper methods for HTML text, HTML attributes, and JavaScript
+  string/data escaping where needed.
+- Add a lightweight regression that renders labels containing:
+  - quotes
+  - angle brackets
+  - ampersands
+  - newlines
+  - script-like substrings
+- Verify generated HTML contains expected chart containers and does not break the
+  `<script>` block.
+- Verify empty records and missing stats history still render a complete HTML
+  document.
+
+Acceptance criteria:
+
+- User-facing labels cannot break HTML structure or JavaScript arrays.
+- Renderer tests cover action labels, buff labels, and formula text.
+- Empty reports render without exceptions.
+
+Test cases to add or update:
+
+- Normal path: a minimal report renders with expected section IDs and chart
+  container IDs.
+- Error/invalid path: null/empty data renders empty states instead of throwing.
+- Boundary values: labels with HTML/JS-sensitive characters remain escaped.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+
+Implementation status:
+
+- Done. `sample.ReportRegressionTest` covers special-character labels,
+  script-like substrings, expected chart containers, and empty-report rendering.
+
+### Report Phase 4: Chart Rendering - Done
+
+Why fourth:
+
+After datasets exist, add the requested charts in the HTML renderer without
+changing simulation behavior.
+
+Target files:
+
+- `src/java/visualization/ReportHtmlRenderer.java`
+- `src/java/visualization/ElementColorPalette.java` if additional stable colors
+  are needed
+
+Tasks:
+
+- Render character cumulative damage as the primary time-series chart.
+- Add reaction damage pie chart.
+- Add action damage horizontal bar chart.
+- Add rolling DPS time-series chart.
+- Add aura timeline chart with one series per active element.
+- Add energy timeline chart with one series per party member.
+- Add buff uptime horizontal bar chart.
+- Use stable colors for characters and element colors for aura series.
+- Keep chart labels short enough to avoid overlap; truncate or wrap long action
+  and buff labels if needed.
+
+Acceptance criteria:
+
+- The generated report contains every requested chart.
+- Charts render when datasets are present and show an empty-state message or
+  omit gracefully when optional data is missing.
+- Existing stats table, artifact table, and timeline still render.
+
+Test cases to add or update:
+
+- No Java unit test is required for Chart.js rendering unless a renderer helper
+  becomes complex.
+- Integration path: generate a report from `RaidenParty` and `FlinsParty2` and
+  verify that the HTML includes the expected chart containers and data arrays.
+
+Verification:
+
+- `./gradlew RaidenParty`
+- `./gradlew FlinsParty2`
+
+Implementation status:
+
+- Done. The report renders character cumulative damage, transformative reaction
+  damage, reaction-labeled direct damage where present, action damage, rolling
+  DPS, aura timeline, energy timeline, and buff uptime charts.
+
+### Report Phase 5: UI Readability and Layout Upgrade - Done
+
+Why fifth:
+
+The report will contain more information after the new charts are added. The
+layout needs to become easier to scan before adding more timeline interactions.
+
+Target files:
+
+- `src/java/visualization/ReportHtmlRenderer.java`
+
+Tasks:
+
+- Convert the top summary into compact KPI cards:
+  - DPS
+  - total damage
+  - duration
+  - top damage dealer
+  - top reaction
+  - max hit
+- Rework the layout into dashboard-style sections with clearer visual hierarchy.
+- Improve table readability:
+  - numeric columns right-aligned
+  - sticky headers where useful
+  - denser spacing without cramping labels
+- Improve timeline readability:
+  - tighter rows
+  - stable columns for time, actor, action, damage
+  - clearer reaction badges
+  - formula detail shown in an expandable or otherwise readable panel rather
+    than only a single-line tooltip where feasible
+- Improve responsive behavior for narrower screens without optimizing primarily
+  for mobile.
+- Avoid decorative gradients/orbs and keep the UI quiet and analysis-focused.
+
+Acceptance criteria:
+
+- The first viewport shows high-level result and chart context clearly.
+- Long labels do not overflow incoherently.
+- Timeline rows remain scannable in long reports.
+- Existing report generation remains a single self-contained HTML file.
+
+Test cases to add or update:
+
+- Integration path: generate at least one report and visually inspect desktop
+  layout.
+- If browser automation is available, capture screenshots for desktop and narrow
+  viewport and check for JavaScript console errors.
+- Manual inspection checklist:
+  - charts render without JavaScript console errors
+  - top KPI cards match known sample totals
+  - long formulas are readable
+  - tables and chart containers do not overflow at a narrow viewport
+  - timeline rows remain scannable after adding chart sections
+
+Verification:
+
+- `./gradlew FlinsParty2`
+- Manual browser inspection of `output/simulation_report.html`
+
+Implementation status:
+
+- Done. The report uses KPI cards, dashboard-style sections, denser tables,
+  responsive chart grids, clearer timeline rows, and expandable formula details.
+- Manual browser inspection is still recommended before publishing generated
+  report output.
+
+### Report Phase 6: Timeline Filters and Detail Panels - Done
+
+Why sixth:
+
+Once chart and layout density increase, timeline navigation becomes the next
+largest usability bottleneck.
+
+Target files:
+
+- `src/java/visualization/ReportHtmlRenderer.java`
+
+Tasks:
+
+- Add client-side filters:
+  - actor
+  - reaction
+  - damage-only
+  - minimum damage
+  - text search over action labels
+- Add event count summary for filtered results.
+- Ensure formula detail panels remain readable after filters are applied.
+- Preserve aura bar and reaction labels on each event.
+- Keep all filtering client-side inside the generated HTML.
+
+Acceptance criteria:
+
+- Users can quickly find high-impact events, reaction events, and specific
+  actions.
+- Filters do not require regenerating the report.
+- Timeline remains usable when filters match no rows.
+
+Test cases to add or update:
+
+- Integration path: generated HTML includes filter controls and timeline records
+  carry data attributes needed by the filters.
+- Manual browser check that each filter changes visible rows correctly.
+- Manual inspection checklist:
+  - actor filter works
+  - reaction filter works
+  - damage-only filter works
+  - minimum damage filter works
+  - text search works
+  - no-match state is clear
+
+Verification:
+
+- `./gradlew RaidenParty`
+- Manual browser inspection of `output/simulation_report.html`
+
+Implementation status:
+
+- Done. Timeline rows expose filter data attributes and the report includes
+  actor, reaction, damage-only, minimum-damage, and text-search filters plus a
+  filtered event count.
+
+### Report Phase 7: Report Validation and Documentation - Done
+
+Why last:
+
+The report is user-facing HTML. Final validation should cover sample generation,
+visual inspection, and documentation of the new report features.
+
+Target files:
+
+- `README.md`
+- `TASKS.md`
+- `src/java/visualization/AGENTS.md` if report ownership guidance changes
+
+Tasks:
+
+- Update README report feature list to mention the new charts and filters.
+- Record final implementation status and any deferred report features in this
+  file.
+- Run representative samples and inspect generated reports.
+- Do not commit generated report output unless explicitly requested.
+- Record any chart downsampling threshold, Top N limits, and known semantic
+  limitations such as additive reaction bonus separation.
+
+Acceptance criteria:
+
+- Future work can distinguish implemented report features from deferred UI
+  polish.
+- Handoff notes list exact commands run and any manual browser checks.
+
+Test cases to add or update:
+
+- Documentation-only changes require no new tests.
+- If documented commands change, run the smallest relevant command.
+- Manual inspection checklist:
+  - charts render without JavaScript console errors
+  - KPI cards match sample console totals
+  - timeline filtering works for actor, reaction, damage-only, minimum damage,
+    and text search
+  - long formulas are readable
+  - narrow viewport does not break tables or chart containers
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew RaidenParty`
+- `./gradlew FlinsParty2`
+
+Implementation status:
+
+- Done. README and visualization ownership guidance have been updated for the
+  richer report. Generated report artifacts remain uncommitted output.
+
+Known limitations and deferred work:
+
+- Additive reaction bonus damage is not separated from full hit damage, so those
+  entries are shown as "Reaction-labeled Direct Damage" rather than strict
+  "Reaction Damage".
+- Browser-based manual inspection remains the final publication check for
+  console errors, filter interaction, and narrow viewport behavior.
+- The report is still a self-contained HTML file with CDN-loaded Chart.js; no
+  frontend framework, server view, or separate JSON artifact has been added.
 
 ## Cross-Cutting Rules
 
