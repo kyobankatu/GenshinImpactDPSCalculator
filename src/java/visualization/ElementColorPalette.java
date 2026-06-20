@@ -34,7 +34,7 @@ final class ElementColorPalette {
                 if (character != null && character.getElement() != null) {
                     Element element = character.getElement();
                     int count = elementCounts.getOrDefault(element, 0);
-                    colorMap.put(name, colorFor(element, count));
+                    colorMap.put(name, colorForElement(element, count));
                     elementCounts.put(element, count + 1);
                 } else {
                     colorMap.put(name, "'#AAAAAA'");
@@ -54,7 +54,7 @@ final class ElementColorPalette {
      * @param variant 0-based variant index used to disambiguate same-element actors
      * @return JS-literal hex color string
      */
-    private static String colorFor(Element element, int variant) {
+    static String colorForElement(Element element, int variant) {
         int v = variant % 4;
         switch (element) {
             case PYRO:

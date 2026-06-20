@@ -14,6 +14,8 @@ final class ReportData {
     final List<SimulationRecord> records;
     /** Party member views (display name and DOM key). */
     final List<ReportViewAdapter.ReportCharacterView> characters;
+    /** Per-character detail entries intended for the face-icon tab UI. */
+    final List<CharacterReportView> characterDetails;
     /** Optional history of party stat snapshots for the timeline slider. */
     final List<ReportViewAdapter.ReportStatsSnapshot> statsHistory;
     /** Artifact substat roll counts per character. */
@@ -73,6 +75,7 @@ final class ReportData {
     ReportData(
             List<SimulationRecord> records,
             List<ReportViewAdapter.ReportCharacterView> characters,
+            List<CharacterReportView> characterDetails,
             List<ReportViewAdapter.ReportStatsSnapshot> statsHistory,
             List<ReportArtifactRollView> artifactRolls,
             Map<String, Double> totalDamageByActor,
@@ -94,6 +97,7 @@ final class ReportData {
             boolean hasStatsHistory) {
         this.records = records;
         this.characters = characters;
+        this.characterDetails = characterDetails;
         this.statsHistory = statsHistory;
         this.artifactRolls = artifactRolls;
         this.totalDamageByActor = totalDamageByActor;
@@ -113,6 +117,67 @@ final class ReportData {
         this.dps = dps;
         this.endTime = endTime;
         this.hasStatsHistory = hasStatsHistory;
+    }
+
+    /**
+     * Per-character report view consumed by the planned character detail tab UI.
+     */
+    static final class CharacterReportView {
+        /** Character identity and display metadata. */
+        final ReportViewAdapter.ReportCharacterView character;
+        /** Total recorded damage attributed to this character. */
+        final double totalDamage;
+        /** DPS contribution using the report rotation duration. */
+        final double dpsContribution;
+        /** Share of total report damage, expressed as a percentage. */
+        final double damageSharePercent;
+        /** Largest single direct damage record attributed to this character. */
+        final double maxHit;
+        /** Highest-damage action label for this character, or {@code "-"} if none. */
+        final String topActionLabel;
+        /** Damage total for {@link #topActionLabel}. */
+        final double topActionDamage;
+        /** Action damage totals for this character. */
+        final List<ReportMetricView> actionDamageTotals;
+        /** Energy percentage series for this character as JS object literals. */
+        final List<String> energySeries;
+        /** Sampled active-buff uptime rows currently attributable to this character. */
+        final List<ReportBuffUptimeView> buffUptime;
+        /** Artifact substat roll view for this character, or {@code null}. */
+        final ReportArtifactRollView artifactRolls;
+        /** Highest direct-damage events attributed to this character. */
+        final List<SimulationRecord> topDamageEvents;
+        /** Recent timeline events where this character is the actor. */
+        final List<SimulationRecord> recentEvents;
+
+        CharacterReportView(
+                ReportViewAdapter.ReportCharacterView character,
+                double totalDamage,
+                double dpsContribution,
+                double damageSharePercent,
+                double maxHit,
+                String topActionLabel,
+                double topActionDamage,
+                List<ReportMetricView> actionDamageTotals,
+                List<String> energySeries,
+                List<ReportBuffUptimeView> buffUptime,
+                ReportArtifactRollView artifactRolls,
+                List<SimulationRecord> topDamageEvents,
+                List<SimulationRecord> recentEvents) {
+            this.character = character;
+            this.totalDamage = totalDamage;
+            this.dpsContribution = dpsContribution;
+            this.damageSharePercent = damageSharePercent;
+            this.maxHit = maxHit;
+            this.topActionLabel = topActionLabel;
+            this.topActionDamage = topActionDamage;
+            this.actionDamageTotals = actionDamageTotals;
+            this.energySeries = energySeries;
+            this.buffUptime = buffUptime;
+            this.artifactRolls = artifactRolls;
+            this.topDamageEvents = topDamageEvents;
+            this.recentEvents = recentEvents;
+        }
     }
 
     /**

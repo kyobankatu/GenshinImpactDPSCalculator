@@ -1,5 +1,9 @@
 package visualization;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -36,9 +40,16 @@ public final class ReportViewAdapter {
             return characters;
         }
         for (Character character : sim.getPartyMembers()) {
-            characters.add(new ReportCharacterView(character.getCharacterId(),
-                    domKey(character.getCharacterId()),
-                    character.getName()));
+            CharacterId characterId = character.getCharacterId();
+            String displayName = character.getName();
+            Path localFacePath = localFacePath(displayName);
+            characters.add(new ReportCharacterView(characterId,
+                    domKey(characterId),
+                    displayName,
+                    character.getElement(),
+                    reportFacePath(displayName),
+                    Files.isRegularFile(localFacePath),
+                    fallbackText(displayName)));
         }
         return characters;
     }
@@ -87,6 +98,38 @@ public final class ReportViewAdapter {
         return characterId.name().toLowerCase();
     }
 
+    private static Path localFacePath(String displayName) {
+        return Path.of("config", "characters", displayName, "face.png");
+    }
+
+    private static String reportFacePath(String displayName) {
+        return "../config/characters/" + urlPathSegment(displayName) + "/face.png";
+    }
+
+    private static String urlPathSegment(String value) {
+        try {
+            return URLEncoder.encode(value, "UTF-8").replace("+", "%20");
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalStateException("UTF-8 should always be available", e);
+        }
+    }
+
+    private static String fallbackText(String displayName) {
+        if (displayName == null || displayName.trim().isEmpty()) {
+            return "?";
+        }
+        StringBuilder fallback = new StringBuilder();
+        for (String part : displayName.trim().split("\\s+")) {
+            if (!part.isEmpty()) {
+                fallback.append(java.lang.Character.toUpperCase(part.charAt(0)));
+            }
+            if (fallback.length() >= 2) {
+                break;
+            }
+        }
+        return fallback.length() > 0 ? fallback.toString() : "?";
+    }
+
     /**
      * View object describing a single party member for report rendering.
      */
@@ -97,18 +140,35 @@ public final class ReportViewAdapter {
         public final String domKey;
         /** Human-readable name used in tables and legends. */
         public final String displayName;
+        /** Primary element used for report color selection. */
+        public final model.type.Element element;
+        /** Relative face image path from generated reports under {@code output/}. */
+        public final String faceImagePath;
+        /** Whether the expected local face image exists. */
+        public final boolean hasFaceIcon;
+        /** Deterministic text fallback used when no face image is available. */
+        public final String faceFallbackText;
 
         /**
          * Creates a new character view.
          *
-         * @param id          underlying character identifier
-         * @param domKey      DOM-safe key (typically {@link #domKey(CharacterId)})
-         * @param displayName human-readable display name
+         * @param id               underlying character identifier
+         * @param domKey           DOM-safe key (typically {@link #domKey(CharacterId)})
+         * @param displayName      human-readable display name
+         * @param element          primary element used for report color selection
+         * @param faceImagePath    relative face image path for generated reports
+         * @param hasFaceIcon      whether the face image exists locally
+         * @param faceFallbackText deterministic fallback text
          */
-        public ReportCharacterView(CharacterId id, String domKey, String displayName) {
+        public ReportCharacterView(CharacterId id, String domKey, String displayName, model.type.Element element,
+                String faceImagePath, boolean hasFaceIcon, String faceFallbackText) {
             this.id = id;
             this.domKey = domKey;
             this.displayName = displayName;
+            this.element = element;
+            this.faceImagePath = faceImagePath;
+            this.hasFaceIcon = hasFaceIcon;
+            this.faceFallbackText = faceFallbackText;
         }
     }
 

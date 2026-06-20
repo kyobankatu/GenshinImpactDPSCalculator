@@ -10,9 +10,13 @@ import java.util.List;
 import java.util.Map;
 
 import mechanics.analysis.StatsSnapshot;
+import model.entity.ArtifactSet;
+import model.entity.Weapon;
+import model.stats.StatsContainer;
 import model.type.CharacterId;
 import model.type.Element;
 import model.type.StatType;
+import simulation.CombatSimulator;
 import visualization.HtmlReportGenerator;
 import visualization.SimulationRecord;
 
@@ -22,6 +26,7 @@ import visualization.SimulationRecord;
 public class ReportRegressionTest {
     public static void main(String[] args) throws Exception {
         testReportChartsAndEscaping();
+        testCharacterFaceAssetsAndFallbackEscaping();
         testEmptyReportRenders();
         System.out.println("ReportRegressionTest passed");
     }
@@ -81,6 +86,71 @@ public class ReportRegressionTest {
         assertNotContains(html, "formula <tag>", "raw formula text");
     }
 
+    private static void testCharacterFaceAssetsAndFallbackEscaping() throws Exception {
+        String unsafeName = "Tester <Icon> '</script>'";
+        CombatSimulator sim = new CombatSimulator();
+        sim.addCharacter(new ReportTestCharacter(CharacterId.SUCROSE, "Sucrose"));
+        sim.addCharacter(new ReportTestCharacter(CharacterId.UNKNOWN, unsafeName));
+
+        List<SimulationRecord> records = List.of(
+                new SimulationRecord(0.1, "Sucrose", "Safe Action", 100.0, "None", 0.0,
+                        new EnumMap<>(Element.class), null),
+                new SimulationRecord(0.2, unsafeName, "Unsafe Action </script>", 200.0, "None", 0.0,
+                        new EnumMap<>(Element.class), null));
+
+        Map<CharacterId, Map<StatType, Double>> statMap = new HashMap<>();
+        Map<StatType, Double> sucroseStats = new EnumMap<>(StatType.class);
+        sucroseStats.put(StatType.BASE_ATK, 800.0);
+        sucroseStats.put(StatType.BASE_HP, 10000.0);
+        sucroseStats.put(StatType.BASE_DEF, 700.0);
+        sucroseStats.put(StatType.ENERGY_RECHARGE, 1.5);
+        statMap.put(CharacterId.SUCROSE, sucroseStats);
+        Map<CharacterId, List<String>> buffMap = new HashMap<>();
+        buffMap.put(CharacterId.SUCROSE, List.of("Character Buff <safe>"));
+        Map<CharacterId, Double> energyMap = new HashMap<>();
+        energyMap.put(CharacterId.SUCROSE, 42.0);
+
+        HtmlReportGenerator.generate("report_face_asset_regression.html", records, sim,
+                List.of(new StatsSnapshot(0.0, statMap, buffMap, energyMap),
+                        new StatsSnapshot(1.0, statMap, buffMap, energyMap)));
+
+        String html = Files.readString(Paths.get("output/report_face_asset_regression.html"),
+                StandardCharsets.UTF_8);
+        assertContains(html, "id='characterAssetTemplate'", "character asset template");
+        assertContains(html, "const characterAssets", "character asset script data");
+        assertContains(html, "../config/characters/Sucrose/face.png", "known character face path");
+        assertContains(html, "alt='Sucrose face icon'", "known character face alt text");
+        assertContains(html, "data-character-key='sucrose'", "known character data key");
+        assertContains(html, "hasIcon: true", "known character icon availability");
+        assertContains(html, "id='characterDetails'", "character details section");
+        assertContains(html, "role='tablist'", "character tablist");
+        assertContains(html, "data-character-tab='sucrose'", "known character tab button");
+        assertContains(html, "data-character-panel='sucrose'", "known character tab panel");
+        assertContains(html, "aria-selected='true'", "default selected character tab");
+        assertContains(html, "id='character-panel-unknown' aria-labelledby='character-tab-unknown' data-character-panel='unknown' style='--char-color:#AAAAAA' hidden",
+                "inactive character panel hidden by default");
+        assertContains(html, "class='character-widget character-action-damage'", "character action damage widget");
+        assertContains(html, "Safe Action", "per-character action damage label");
+        assertContains(html, "class='character-widget character-artifact-rolls'", "character artifact rolls widget");
+        assertContains(html, "No artifact roll data.", "empty artifact rolls state");
+        assertContains(html, "class='character-widget character-energy'", "character energy widget");
+        assertContains(html, "Latest energy 42.0%", "character latest energy");
+        assertContains(html, "label: 'Sucrose', data: [{x: 0.00, y: 42.0},{x: 1.00, y: 42.0}], borderColor: '#33FF99'",
+                "character energy chart uses element color");
+        assertContains(html, "class='character-widget character-buff-uptime'", "character buff uptime widget");
+        assertContains(html, "Character Buff &lt;safe&gt;", "character buff label escaping");
+        assertContains(html, "class='character-widget character-top-events'", "character top events widget");
+        assertContains(html, "class='character-widget character-recent-events'", "character recent events widget");
+        assertContains(html, "No sampled active buffs.", "empty character buff state");
+        assertContains(html, "function activateCharacterTab", "character tab switching script");
+        assertContains(html, "class='face-fallback'", "missing icon fallback markup");
+        assertContains(html, "Tester &lt;Icon&gt;", "HTML-escaped unsafe character name");
+        assertContains(html, "\\u003CIcon\\u003E", "JS-escaped unsafe character name");
+        assertContains(html, "Tester%20%3CIcon%3E%20%27%3C%2Fscript%3E%27/face.png",
+                "URL-encoded missing face path");
+        assertNotContains(html, "Unsafe Action </script>", "raw unsafe action label");
+    }
+
     private static void testEmptyReportRenders() throws Exception {
         HtmlReportGenerator.generate("report_empty_regression.html", List.of(), null, null);
         String html = Files.readString(Paths.get("output/report_empty_regression.html"), StandardCharsets.UTF_8);
@@ -98,6 +168,28 @@ public class ReportRegressionTest {
     private static void assertNotContains(String text, String unexpected, String message) {
         if (text.contains(unexpected)) {
             throw new AssertionError("Expected " + message + " not to contain: " + unexpected);
+        }
+    }
+
+    private static final class ReportTestCharacter extends model.entity.Character {
+        private ReportTestCharacter(CharacterId id, String displayName) {
+            this.characterId = id;
+            this.name = displayName;
+            this.element = id == CharacterId.SUCROSE ? Element.ANEMO : null;
+            this.weapon = new Weapon("Report Test Weapon", new StatsContainer());
+            this.artifacts = new ArtifactSet[0];
+            this.baseStats.set(StatType.BASE_HP, 10000.0);
+            this.baseStats.set(StatType.BASE_ATK, 1000.0);
+            this.baseStats.set(StatType.BASE_DEF, 700.0);
+        }
+
+        @Override
+        public void applyPassive(StatsContainer currentStats) {
+        }
+
+        @Override
+        public double getEnergyCost() {
+            return 60.0;
         }
     }
 }

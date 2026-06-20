@@ -37,7 +37,9 @@ final class ReportHtmlRenderer {
         StringBuilder sb = new StringBuilder();
         appendDocumentStart(sb);
         appendSummary(sb, data);
+        appendCharacterAssetMetadata(sb, data);
         appendCharts(sb, data);
+        appendCharacterDetails(sb, data);
         appendStatsAndArtifacts(sb, data);
         appendTimeline(sb, data);
         appendScript(sb, data);
@@ -85,6 +87,54 @@ final class ReportHtmlRenderer {
         sb.append(".chart-box canvas { display: block; width: 100% !important; height: 260px !important; max-height: 260px; }\n");
         sb.append(".chart-box.tall canvas { height: 360px !important; max-height: 360px; }\n");
         sb.append(".chart-note { color: var(--muted); font-size: 0.82rem; margin: 0 0 8px; }\n");
+        sb.append(".character-details { display: flex; flex-direction: column; gap: 14px; }\n");
+        sb.append(".character-tabs { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; }\n");
+        sb.append(".character-tab { min-width: 210px; flex: 0 0 auto; display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: 10px; align-items: center; text-align: left; background: #1d2228; color: var(--text); border: 1px solid var(--line); border-left: 4px solid var(--char-color, var(--accent)); border-radius: 8px; padding: 9px; cursor: pointer; }\n");
+        sb.append(".character-tab:hover, .character-tab:focus-visible { background: #303741; outline: none; border-color: var(--char-color, var(--accent)); }\n");
+        sb.append(".character-tab[aria-selected='true'] { background: #343b45; border-color: var(--char-color, var(--accent)); box-shadow: inset 0 0 0 1px var(--char-color, var(--accent)); }\n");
+        sb.append(".character-face { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; background: #11161b; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; color: var(--text); font-weight: 800; font-size: 0.9rem; }\n");
+        sb.append(".character-tab-name { font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }\n");
+        sb.append(".character-tab-meta { color: var(--muted); font-size: 0.78rem; margin-top: 3px; font-variant-numeric: tabular-nums; }\n");
+        sb.append(".character-panel { border-top: 1px solid var(--line); padding-top: 14px; }\n");
+        sb.append(".character-panel[hidden] { display: none; }\n");
+        sb.append(".character-panel-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; min-width: 0; }\n");
+        sb.append(".character-panel-title { min-width: 0; }\n");
+        sb.append(".character-panel-title h3 { margin-bottom: 2px; overflow-wrap: anywhere; }\n");
+        sb.append(".character-panel-title .chart-note { margin: 0; }\n");
+        sb.append(".character-panel-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }\n");
+        sb.append(".character-panel-metric { background: #1d2228; border: 1px solid var(--line); border-radius: 6px; padding: 10px; min-width: 0; }\n");
+        sb.append(".character-panel-metric .metric-value { font-size: 1.05rem; }\n");
+        sb.append(".character-widget-grid { display: grid; grid-template-columns: minmax(280px, 1.5fr) minmax(260px, 1fr); gap: 14px; margin-top: 14px; }\n");
+        sb.append(".character-widget { background: #1d2228; border: 1px solid var(--line); border-radius: 8px; padding: 12px; min-width: 0; }\n");
+        sb.append(".character-widget h4 { margin-bottom: 8px; }\n");
+        sb.append(".action-damage-list { display: flex; flex-direction: column; gap: 7px; }\n");
+        sb.append(".action-damage-row { display: grid; grid-template-columns: minmax(0, 1fr) 84px; gap: 10px; align-items: center; }\n");
+        sb.append(".action-damage-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #dbe1e8; font-size: 0.86rem; }\n");
+        sb.append(".action-damage-value { text-align: right; font-variant-numeric: tabular-nums; color: var(--text); font-size: 0.84rem; }\n");
+        sb.append(".action-damage-track { grid-column: 1 / 3; height: 7px; background: #14191f; border-radius: 999px; overflow: hidden; }\n");
+        sb.append(".action-damage-fill { height: 100%; background: var(--char-color, var(--accent)); border-radius: inherit; }\n");
+        sb.append(".character-rolls { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 0.84rem; }\n");
+        sb.append(".character-rolls th, .character-rolls td { border-bottom: 1px solid var(--line); padding: 6px 8px; }\n");
+        sb.append(".character-rolls th:first-child, .character-rolls td:first-child { text-align: left; overflow-wrap: anywhere; }\n");
+        sb.append(".character-rolls th:last-child, .character-rolls td:last-child { width: 72px; text-align: right; font-variant-numeric: tabular-nums; }\n");
+        sb.append(".character-energy-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px; }\n");
+        sb.append(".energy-stat { background: #14191f; border: 1px solid var(--line); border-radius: 6px; padding: 8px; min-width: 0; }\n");
+        sb.append(".energy-stat-label { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; }\n");
+        sb.append(".energy-stat-value { margin-top: 2px; font-size: 1rem; font-weight: 800; font-variant-numeric: tabular-nums; }\n");
+        sb.append(".energy-track { height: 10px; background: #14191f; border-radius: 999px; overflow: hidden; border: 1px solid var(--line); }\n");
+        sb.append(".energy-fill { height: 100%; width: 0%; background: var(--char-color, var(--accent)); border-radius: inherit; }\n");
+        sb.append(".buff-uptime-list { display: flex; flex-direction: column; gap: 7px; }\n");
+        sb.append(".buff-uptime-row { display: grid; grid-template-columns: minmax(0, 1fr) 58px; gap: 8px; align-items: center; }\n");
+        sb.append(".buff-uptime-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #dbe1e8; font-size: 0.84rem; }\n");
+        sb.append(".buff-uptime-value { text-align: right; font-variant-numeric: tabular-nums; color: var(--text); font-size: 0.82rem; }\n");
+        sb.append(".character-event-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 0.82rem; }\n");
+        sb.append(".character-event-table th, .character-event-table td { border-bottom: 1px solid var(--line); padding: 6px 7px; vertical-align: top; }\n");
+        sb.append(".character-event-table th { color: var(--muted); text-align: left; }\n");
+        sb.append(".character-event-table th:first-child, .character-event-table td:first-child { width: 56px; font-variant-numeric: tabular-nums; color: var(--muted); }\n");
+        sb.append(".character-event-table th:last-child, .character-event-table td:last-child { width: 86px; text-align: right; font-variant-numeric: tabular-nums; }\n");
+        sb.append(".character-event-action { overflow-wrap: anywhere; }\n");
+        sb.append(".character-event-reaction { color: #d8e7f7; font-size: 0.75rem; }\n");
+        sb.append(".empty-state { color: var(--muted); font-size: 0.86rem; margin: 0; }\n");
         sb.append(".timeline-toolbar { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 12px; align-items: end; }\n");
         sb.append(".control label { display: block; color: var(--muted); font-size: 0.78rem; margin-bottom: 4px; }\n");
         sb.append(".control input, .control select { width: 100%; background: #1d2228; border: 1px solid var(--line); color: var(--text); border-radius: 6px; padding: 7px 8px; }\n");
@@ -110,7 +160,8 @@ final class ReportHtmlRenderer {
         sb.append("table.stats { width: 100%; border-collapse: collapse; font-size: 0.86em; }\n");
         sb.append("table.stats th, table.stats td { border-bottom: 1px solid var(--line); padding: 8px; text-align: right; font-variant-numeric: tabular-nums; }\n");
         sb.append("table.stats th:first-child, table.stats td:first-child { text-align: left; }\n");
-        sb.append("table.artifact-rolls th, table.artifact-rolls td { text-align: center; }\n");
+        sb.append("table.artifact-rolls { table-layout: fixed; }\n");
+        sb.append("table.artifact-rolls th, table.artifact-rolls td { text-align: center; width: 72px; }\n");
         sb.append("table.artifact-rolls th:first-child, table.artifact-rolls td:first-child { text-align: left; }\n");
         sb.append("table.stats th { color: var(--muted); font-weight: 700; background: #29303a; position: sticky; top: 0; }\n");
         sb.append(".buff-panel { margin-top: 12px; }\n");
@@ -125,7 +176,7 @@ final class ReportHtmlRenderer {
         sb.append(".GEO { color: #FFE699; } .bg-GEO { background-color: #FFAA00; }\n");
         sb.append(".DENDRO { color: #A5C882; } .bg-DENDRO { background-color: #77EE44; }\n");
         sb.append(".PHYSICAL { color: #CCCCCC; } .bg-PHYSICAL { background-color: #CCCCCC; }\n");
-        sb.append("@media (max-width: 760px) { body { padding: 12px; } .row.wide, .row { grid-template-columns: 1fr; } .card { grid-template-columns: 52px 92px 1fr; } .damage { grid-column: 3; } .formula-details { grid-column: 1 / 4; } }\n");
+        sb.append("@media (max-width: 760px) { body { padding: 12px; } .row.wide, .row { grid-template-columns: 1fr; } .character-tab { min-width: 178px; } .character-panel-header { align-items: flex-start; } .character-widget-grid { grid-template-columns: 1fr; } .character-energy-summary { grid-template-columns: 1fr; } .card { grid-template-columns: 52px 92px 1fr; } .damage { grid-column: 3; } .formula-details { grid-column: 1 / 4; } }\n");
         sb.append("</style>\n");
     }
 
@@ -162,6 +213,32 @@ final class ReportHtmlRenderer {
         sb.append("</div>\n");
     }
 
+    private static void appendCharacterAssetMetadata(StringBuilder sb, ReportData data) {
+        sb.append("<template id='characterAssetTemplate'>\n");
+        for (ReportViewAdapter.ReportCharacterView character : data.characters) {
+            sb.append("<div class='character-asset' data-character-key='")
+                    .append(escapeAttr(character.domKey))
+                    .append("' data-character-name='")
+                    .append(escapeAttr(character.displayName))
+                    .append("'>");
+            if (character.hasFaceIcon) {
+                sb.append("<img src='")
+                        .append(escapeAttr(character.faceImagePath))
+                        .append("' alt='")
+                        .append(escapeAttr(character.displayName + " face icon"))
+                        .append("'>");
+            } else {
+                sb.append("<span class='face-fallback' role='img' aria-label='")
+                        .append(escapeAttr(character.displayName + " face icon fallback"))
+                        .append("'>")
+                        .append(escapeHtml(character.faceFallbackText))
+                        .append("</span>");
+            }
+            sb.append("</div>\n");
+        }
+        sb.append("</template>\n");
+    }
+
     private static void appendCharts(StringBuilder sb, ReportData data) {
         sb.append("<div class='row wide'>\n");
         appendChartPanel(sb, "Damage Distribution", "dpsPie", null, false);
@@ -193,6 +270,331 @@ final class ReportHtmlRenderer {
                     "Full hit damage for reaction-labeled events where the additive bonus is not separately available.",
                     false);
             sb.append("</div>\n");
+        }
+    }
+
+    private static void appendCharacterDetails(StringBuilder sb, ReportData data) {
+        sb.append("<section id='characterDetails' class='col character-details'>\n");
+        sb.append("<h2>Character Details</h2>\n");
+        if (data.characterDetails.isEmpty()) {
+            sb.append("<p class='chart-note'>No character data.</p>\n");
+            sb.append("</section>\n");
+            return;
+        }
+
+        sb.append("<div class='character-tabs' role='tablist' aria-label='Character details'>\n");
+        for (int i = 0; i < data.characterDetails.size(); i++) {
+            ReportData.CharacterReportView detail = data.characterDetails.get(i);
+            String color = characterColor(data, detail.character.displayName);
+            String tabId = "character-tab-" + detail.character.domKey;
+            String panelId = "character-panel-" + detail.character.domKey;
+            sb.append("<button type='button' class='character-tab' role='tab' id='")
+                    .append(escapeAttr(tabId))
+                    .append("' aria-controls='")
+                    .append(escapeAttr(panelId))
+                    .append("' aria-selected='")
+                    .append(i == 0 ? "true" : "false")
+                    .append("' tabindex='")
+                    .append(i == 0 ? "0" : "-1")
+                    .append("' data-character-tab='")
+                    .append(escapeAttr(detail.character.domKey))
+                    .append("' style='--char-color:")
+                    .append(escapeAttr(color))
+                    .append(";'>\n");
+            appendCharacterFace(sb, detail.character);
+            sb.append("<span class='character-tab-text'><span class='character-tab-name'>")
+                    .append(escapeHtml(detail.character.displayName))
+                    .append("</span><span class='character-tab-meta'>")
+                    .append(escapeHtml(String.format("%,.0f dmg / %.1f%%", detail.totalDamage,
+                            detail.damageSharePercent)))
+                    .append("</span></span>\n");
+            sb.append("</button>\n");
+        }
+        sb.append("</div>\n");
+
+        for (int i = 0; i < data.characterDetails.size(); i++) {
+            ReportData.CharacterReportView detail = data.characterDetails.get(i);
+            String color = characterColor(data, detail.character.displayName);
+            String tabId = "character-tab-" + detail.character.domKey;
+            String panelId = "character-panel-" + detail.character.domKey;
+            sb.append("<section class='character-panel' role='tabpanel' id='")
+                    .append(escapeAttr(panelId))
+                    .append("' aria-labelledby='")
+                    .append(escapeAttr(tabId))
+                    .append("' data-character-panel='")
+                    .append(escapeAttr(detail.character.domKey))
+                    .append("' style='--char-color:")
+                    .append(escapeAttr(color))
+                    .append("'");
+            if (i != 0) {
+                sb.append(" hidden");
+            }
+            sb.append(">\n");
+            sb.append("<div class='character-panel-header'>\n");
+            appendCharacterFace(sb, detail.character);
+            sb.append("<div class='character-panel-title'><h3>")
+                    .append(escapeHtml(detail.character.displayName))
+                    .append("</h3><p class='chart-note'>")
+                    .append(escapeHtml(String.format("%,.0f total damage", detail.totalDamage)))
+                    .append("</p></div>\n");
+            sb.append("</div>\n");
+            sb.append("<div class='character-panel-metrics'>\n");
+            appendCharacterPanelMetric(sb, "Damage", String.format("%,.0f", detail.totalDamage), "accent");
+            appendCharacterPanelMetric(sb, "DPS", String.format("%,.0f", detail.dpsContribution), "danger");
+            appendCharacterPanelMetric(sb, "Share", String.format("%.1f%%", detail.damageSharePercent), "");
+            appendCharacterPanelMetric(sb, "Max Hit", String.format("%,.0f", detail.maxHit), "");
+            appendCharacterPanelMetric(sb, "Top Action", detail.topActionLabel, "");
+            sb.append("</div>\n");
+            sb.append("<div class='character-widget-grid'>\n");
+            appendCharacterActionDamageWidget(sb, detail);
+            appendCharacterArtifactWidget(sb, detail);
+            appendCharacterEnergyWidget(sb, detail);
+            appendCharacterBuffWidget(sb, detail);
+            appendCharacterTopEventsWidget(sb, detail);
+            appendCharacterRecentEventsWidget(sb, detail);
+            sb.append("</div>\n");
+            sb.append("</section>\n");
+        }
+        sb.append("</section>\n");
+    }
+
+    private static void appendCharacterPanelMetric(StringBuilder sb, String label, String value, String valueClass) {
+        sb.append("<div class='character-panel-metric'>\n");
+        sb.append("<div class='metric-label'>").append(escapeHtml(label)).append("</div>\n");
+        sb.append("<div class='metric-value");
+        if (valueClass != null && !valueClass.isEmpty()) {
+            sb.append(" ").append(valueClass);
+        }
+        sb.append("'>").append(escapeHtml(value)).append("</div>\n");
+        sb.append("</div>\n");
+    }
+
+    private static void appendCharacterActionDamageWidget(StringBuilder sb, ReportData.CharacterReportView detail) {
+        sb.append("<div class='character-widget character-action-damage'>\n");
+        sb.append("<h4>Action Damage</h4>\n");
+        if (detail.actionDamageTotals.isEmpty()) {
+            sb.append("<p class='empty-state'>No action damage recorded.</p>\n");
+            sb.append("</div>\n");
+            return;
+        }
+
+        double maxValue = detail.actionDamageTotals.stream()
+                .mapToDouble(metric -> metric.value)
+                .max()
+                .orElse(0.0);
+        sb.append("<div class='action-damage-list'>\n");
+        for (ReportData.ReportMetricView metric : detail.actionDamageTotals) {
+            double percent = maxValue > 0.0 ? Math.max(2.0, metric.value * 100.0 / maxValue) : 0.0;
+            sb.append("<div class='action-damage-row'>\n");
+            sb.append("<div class='action-damage-label' title='")
+                    .append(escapeAttr(metric.label))
+                    .append("'>")
+                    .append(escapeHtml(metric.label))
+                    .append("</div>\n");
+            sb.append("<div class='action-damage-value'>")
+                    .append(escapeHtml(String.format("%,.0f", metric.value)))
+                    .append("</div>\n");
+            sb.append("<div class='action-damage-track'><div class='action-damage-fill' style='width:")
+                    .append(escapeAttr(String.format("%.1f%%", percent)))
+                    .append("'></div></div>\n");
+            sb.append("</div>\n");
+        }
+        sb.append("</div>\n");
+        sb.append("</div>\n");
+    }
+
+    private static void appendCharacterArtifactWidget(StringBuilder sb, ReportData.CharacterReportView detail) {
+        sb.append("<div class='character-widget character-artifact-rolls'>\n");
+        sb.append("<h4>Artifact Substat Rolls</h4>\n");
+        if (detail.artifactRolls == null || detail.artifactRolls.rolls.isEmpty()) {
+            sb.append("<p class='empty-state'>No artifact roll data.</p>\n");
+            sb.append("</div>\n");
+            return;
+        }
+
+        sb.append("<table class='character-rolls'>\n");
+        sb.append("<thead><tr><th>Stat</th><th>Rolls</th></tr></thead>\n");
+        sb.append("<tbody>\n");
+        boolean hasAnyRoll = false;
+        for (StatType type : ARTIFACT_STAT_ORDER) {
+            int rolls = detail.artifactRolls.rolls.getOrDefault(type, 0);
+            if (rolls <= 0) {
+                continue;
+            }
+            hasAnyRoll = true;
+            sb.append("<tr><td>")
+                    .append(escapeHtml(type.name()))
+                    .append("</td><td>")
+                    .append(rolls)
+                    .append("</td></tr>\n");
+        }
+        if (!hasAnyRoll) {
+            sb.append("<tr><td colspan='2' class='empty-state'>No non-zero rolls.</td></tr>\n");
+        }
+        sb.append("</tbody></table>\n");
+        sb.append("</div>\n");
+    }
+
+    private static void appendCharacterEnergyWidget(StringBuilder sb, ReportData.CharacterReportView detail) {
+        sb.append("<div class='character-widget character-energy'>\n");
+        sb.append("<h4>Energy Timeline</h4>\n");
+        if (detail.energySeries.isEmpty()) {
+            sb.append("<p class='empty-state'>No energy samples.</p>\n");
+            sb.append("</div>\n");
+            return;
+        }
+
+        double min = Double.POSITIVE_INFINITY;
+        double max = Double.NEGATIVE_INFINITY;
+        double latest = 0.0;
+        for (String point : detail.energySeries) {
+            double value = extractSeriesY(point);
+            min = Math.min(min, value);
+            max = Math.max(max, value);
+            latest = value;
+        }
+        if (!Double.isFinite(min) || !Double.isFinite(max)) {
+            min = 0.0;
+            max = 0.0;
+        }
+        double fill = Math.max(0.0, Math.min(100.0, latest));
+
+        sb.append("<p class='chart-note'>Current energy as percent of burst cost from sampled stat history.</p>\n");
+        sb.append("<div class='character-energy-summary'>\n");
+        appendEnergyStat(sb, "Latest", latest);
+        appendEnergyStat(sb, "Min", min);
+        appendEnergyStat(sb, "Max", max);
+        sb.append("</div>\n");
+        sb.append("<div class='energy-track' title='")
+                .append(escapeAttr(String.format("Latest energy %.1f%%", latest)))
+                .append("'><div class='energy-fill' style='width:")
+                .append(escapeAttr(String.format("%.1f%%", fill)))
+                .append("'></div></div>\n");
+        sb.append("</div>\n");
+    }
+
+    private static void appendEnergyStat(StringBuilder sb, String label, double value) {
+        sb.append("<div class='energy-stat'><div class='energy-stat-label'>")
+                .append(escapeHtml(label))
+                .append("</div><div class='energy-stat-value'>")
+                .append(escapeHtml(String.format("%.1f%%", value)))
+                .append("</div></div>\n");
+    }
+
+    private static void appendCharacterBuffWidget(StringBuilder sb, ReportData.CharacterReportView detail) {
+        sb.append("<div class='character-widget character-buff-uptime'>\n");
+        sb.append("<h4>Buff Uptime</h4>\n");
+        sb.append("<p class='chart-note'>Sampled active-buff labels for this character. Variable labels are prioritized when available.</p>\n");
+        if (detail.buffUptime.isEmpty()) {
+            sb.append("<p class='empty-state'>No sampled active buffs.</p>\n");
+            sb.append("</div>\n");
+            return;
+        }
+
+        sb.append("<div class='buff-uptime-list'>\n");
+        for (ReportData.ReportBuffUptimeView buff : detail.buffUptime) {
+            sb.append("<div class='buff-uptime-row'>\n");
+            sb.append("<div class='buff-uptime-label' title='")
+                    .append(escapeAttr(buff.buffName))
+                    .append("'>")
+                    .append(escapeHtml(buff.buffName))
+                    .append("</div>\n");
+            sb.append("<div class='buff-uptime-value'>")
+                    .append(escapeHtml(String.format("%.1f%%", buff.uptimePercent)))
+                    .append("</div>\n");
+            sb.append("</div>\n");
+        }
+        sb.append("</div>\n");
+        sb.append("</div>\n");
+    }
+
+    private static void appendCharacterTopEventsWidget(StringBuilder sb, ReportData.CharacterReportView detail) {
+        sb.append("<div class='character-widget character-top-events'>\n");
+        sb.append("<h4>Top Damage Events</h4>\n");
+        appendCharacterEventTable(sb, detail.topDamageEvents, "No damage events recorded.");
+        sb.append("</div>\n");
+    }
+
+    private static void appendCharacterRecentEventsWidget(StringBuilder sb, ReportData.CharacterReportView detail) {
+        sb.append("<div class='character-widget character-recent-events'>\n");
+        sb.append("<h4>Recent Events</h4>\n");
+        appendCharacterEventTable(sb, detail.recentEvents, "No actor-matched timeline events.");
+        sb.append("</div>\n");
+    }
+
+    private static void appendCharacterEventTable(StringBuilder sb, List<SimulationRecord> events, String emptyMessage) {
+        if (events.isEmpty()) {
+            sb.append("<p class='empty-state'>").append(escapeHtml(emptyMessage)).append("</p>\n");
+            return;
+        }
+
+        sb.append("<table class='character-event-table'>\n");
+        sb.append("<thead><tr><th>Time</th><th>Action</th><th>Damage</th></tr></thead>\n");
+        sb.append("<tbody>\n");
+        for (SimulationRecord record : events) {
+            String reaction = record.reactionType != null && !"None".equals(record.reactionType)
+                    ? record.reactionType
+                    : "";
+            sb.append("<tr><td>")
+                    .append(escapeHtml(String.format("%.1fs", record.time)))
+                    .append("</td><td><div class='character-event-action'>")
+                    .append(escapeHtml(record.action != null ? record.action : ""));
+            if (!reaction.isEmpty()) {
+                sb.append("<div class='character-event-reaction'>")
+                        .append(escapeHtml(reaction))
+                        .append("</div>");
+            }
+            sb.append("</div></td><td>")
+                    .append(record.damage > 0.0 ? escapeHtml(String.format("%,.0f", record.damage)) : "-")
+                    .append("</td></tr>\n");
+        }
+        sb.append("</tbody></table>\n");
+    }
+
+    private static double extractSeriesY(String point) {
+        if (point == null) {
+            return 0.0;
+        }
+        int yIndex = point.indexOf("y:");
+        if (yIndex < 0) {
+            return 0.0;
+        }
+        int start = yIndex + 2;
+        while (start < point.length() && Character.isWhitespace(point.charAt(start))) {
+            start++;
+        }
+        int end = start;
+        while (end < point.length()) {
+            char ch = point.charAt(end);
+            if ((ch >= '0' && ch <= '9') || ch == '-' || ch == '+' || ch == '.') {
+                end++;
+            } else {
+                break;
+            }
+        }
+        if (end <= start) {
+            return 0.0;
+        }
+        try {
+            return Double.parseDouble(point.substring(start, end));
+        } catch (NumberFormatException ex) {
+            return 0.0;
+        }
+    }
+
+    private static void appendCharacterFace(StringBuilder sb, ReportViewAdapter.ReportCharacterView character) {
+        if (character.hasFaceIcon) {
+            sb.append("<img class='character-face' src='")
+                    .append(escapeAttr(character.faceImagePath))
+                    .append("' alt='")
+                    .append(escapeAttr(character.displayName + " face icon"))
+                    .append("'>\n");
+        } else {
+            sb.append("<span class='character-face face-fallback' role='img' aria-label='")
+                    .append(escapeAttr(character.displayName + " face icon fallback"))
+                    .append("'>")
+                    .append(escapeHtml(character.faceFallbackText))
+                    .append("</span>\n");
         }
     }
 
@@ -376,10 +778,37 @@ final class ReportHtmlRenderer {
 
     private static void appendScript(StringBuilder sb, ReportData data) {
         sb.append("<script>\n");
+        appendCharacterAssetsScript(sb, data);
         appendStatsHistoryScript(sb, data);
         appendChartScript(sb, data);
+        appendCharacterTabsScript(sb);
         appendTimelineFilterScript(sb);
         sb.append("</script>\n");
+    }
+
+    private static void appendCharacterAssetsScript(StringBuilder sb, ReportData data) {
+        sb.append("const characterAssets = [\n");
+        for (ReportViewAdapter.ReportCharacterView character : data.characters) {
+            sb.append("{ key: ").append(jsString(character.domKey))
+                    .append(", name: ").append(jsString(character.displayName))
+                    .append(", face: ").append(jsString(character.faceImagePath))
+                    .append(", hasIcon: ").append(character.hasFaceIcon)
+                    .append(", fallback: ").append(jsString(character.faceFallbackText))
+                    .append(" },\n");
+        }
+        sb.append("];\n");
+    }
+
+    private static void appendCharacterTabsScript(StringBuilder sb) {
+        sb.append("function activateCharacterTab(key) {\n");
+        sb.append("  document.querySelectorAll('[data-character-tab]').forEach(tab => { const active = tab.dataset.characterTab === key; tab.setAttribute('aria-selected', active ? 'true' : 'false'); tab.tabIndex = active ? 0 : -1; });\n");
+        sb.append("  document.querySelectorAll('[data-character-panel]').forEach(panel => { panel.hidden = panel.dataset.characterPanel !== key; });\n");
+        sb.append("}\n");
+        sb.append("const characterTabButtons = Array.from(document.querySelectorAll('[data-character-tab]'));\n");
+        sb.append("characterTabButtons.forEach((tab, index) => {\n");
+        sb.append("  tab.addEventListener('click', () => activateCharacterTab(tab.dataset.characterTab));\n");
+        sb.append("  tab.addEventListener('keydown', (event) => { const delta = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0; if (!delta || characterTabButtons.length === 0) return; event.preventDefault(); const next = characterTabButtons[(index + delta + characterTabButtons.length) % characterTabButtons.length]; next.focus(); activateCharacterTab(next.dataset.characterTab); });\n");
+        sb.append("});\n");
     }
 
     private static void appendStatsHistoryScript(StringBuilder sb, ReportData data) {
@@ -542,13 +971,19 @@ final class ReportHtmlRenderer {
 
     private static List<String> energyDatasets(ReportData data) {
         java.util.ArrayList<String> datasets = new java.util.ArrayList<>();
-        int index = 0;
-        for (Map.Entry<String, List<String>> entry : data.energySeries.entrySet()) {
-            String color = data.chartColors.length > 0 ? data.chartColors[index % data.chartColors.length] : "'#AAAAAA'";
-            datasets.add("{ label: " + jsString(entry.getKey()) + ", data: ["
-                    + String.join(",", entry.getValue()) + "], borderColor: " + color
+        Map<Element, Integer> elementCounts = new java.util.EnumMap<>(Element.class);
+        for (ReportViewAdapter.ReportCharacterView character : data.characters) {
+            int variant = elementCounts.getOrDefault(character.element, 0);
+            String color = character.element != null
+                    ? ElementColorPalette.colorForElement(character.element, variant)
+                    : "'#AAAAAA'";
+            if (character.element != null) {
+                elementCounts.put(character.element, variant + 1);
+            }
+            datasets.add("{ label: " + jsString(character.displayName) + ", data: ["
+                    + String.join(",", data.energySeries.getOrDefault(character.displayName, List.of()))
+                    + "], borderColor: " + color
                     + ", backgroundColor: " + color + ", fill: false, tension: 0.1 }");
-            index++;
         }
         return datasets;
     }
@@ -589,6 +1024,25 @@ final class ReportHtmlRenderer {
             colors.add(palette.get(i % palette.size()));
         }
         return colors;
+    }
+
+    private static String characterColor(ReportData data, String displayName) {
+        int index = data.chartNames.indexOf(displayName);
+        if (index < 0 || data.chartColors.length == 0) {
+            return "#64b5f6";
+        }
+        return cssColor(data.chartColors[index % data.chartColors.length]);
+    }
+
+    private static String cssColor(String jsLiteralColor) {
+        if (jsLiteralColor == null) {
+            return "#64b5f6";
+        }
+        String value = jsLiteralColor.trim();
+        if (value.length() >= 2 && value.startsWith("'") && value.endsWith("'")) {
+            value = value.substring(1, value.length() - 1);
+        }
+        return value.matches("#[0-9A-Fa-f]{6}") ? value : "#64b5f6";
     }
 
     private static String elementColor(Element element) {

@@ -44,22 +44,37 @@ final class ReportDataBuilder {
         double dps = rotationTime > 0 ? totalDamage / rotationTime : 0;
         List<String> chartNames = new ArrayList<>(totalDamageByActor.keySet());
         double chartEndTime = Math.max(rotationTime, endTime);
+        List<ReportData.ReportArtifactRollView> artifactRolls = artifactRolls(sim);
+        Map<String, List<ReportData.ReportMetricView>> actionDamageTotalsByActor = metricTotalsByActorAction(
+                safeRecords);
+        Map<String, List<String>> energySeries = energySeries(reportStatsHistory, characters);
+        List<ReportData.ReportBuffUptimeView> buffUptime = buffUptime(reportStatsHistory, characters, chartEndTime);
 
         return new ReportData(
                 safeRecords,
                 characters,
+                characterDetails(
+                        characters,
+                        safeRecords,
+                        totalDamageByActor,
+                        actionDamageTotalsByActor,
+                        energySeries,
+                        buffUptime,
+                        artifactRolls,
+                        totalDamage,
+                        rotationTime),
                 reportStatsHistory,
-                artifactRolls(sim),
+                artifactRolls,
                 totalDamageByActor,
                 cumulativeDamageSeries,
                 metricTotalsByAction(safeRecords),
-                metricTotalsByActorAction(safeRecords),
+                actionDamageTotalsByActor,
                 transformativeReactionTotals(safeRecords),
                 reactionLabeledDamageTotals(safeRecords),
                 rollingDpsSeries(safeRecords, chartEndTime, 5.0, 0.5),
                 auraSeries(safeRecords, chartEndTime),
-                energySeries(reportStatsHistory, characters),
-                buffUptime(reportStatsHistory, characters, chartEndTime),
+                energySeries,
+                buffUptime,
                 chartNames,
                 ElementColorPalette.colorsFor(chartNames, sim),
                 totalDamage,
@@ -275,6 +290,90 @@ final class ReportDataBuilder {
         }
         List<ReportData.ReportBuffUptimeView> displayViews = variableViews.isEmpty() ? views : variableViews;
         return displayViews.size() > 16 ? new ArrayList<>(displayViews.subList(0, 16)) : displayViews;
+    }
+
+    private static List<ReportData.CharacterReportView> characterDetails(
+            List<ReportViewAdapter.ReportCharacterView> characters,
+            List<SimulationRecord> records,
+            Map<String, Double> totalDamageByActor,
+            Map<String, List<ReportData.ReportMetricView>> actionDamageTotalsByActor,
+            Map<String, List<String>> energySeries,
+            List<ReportData.ReportBuffUptimeView> buffUptime,
+            List<ReportData.ReportArtifactRollView> artifactRolls,
+            double totalDamage,
+            double rotationTime) {
+        List<ReportData.CharacterReportView> views = new ArrayList<>();
+        Map<String, ReportData.ReportArtifactRollView> artifactRollsByCharacter = new HashMap<>();
+        for (ReportData.ReportArtifactRollView rolls : artifactRolls) {
+            artifactRollsByCharacter.put(rolls.displayName, rolls);
+        }
+
+        Map<String, List<ReportData.ReportBuffUptimeView>> buffUptimeByCharacter = new HashMap<>();
+        for (ReportData.ReportBuffUptimeView uptime : buffUptime) {
+            buffUptimeByCharacter.computeIfAbsent(uptime.characterName, ignored -> new ArrayList<>()).add(uptime);
+        }
+
+        for (ReportViewAdapter.ReportCharacterView character : characters) {
+            String name = character.displayName;
+            double characterTotal = totalDamageByActor.getOrDefault(name, 0.0);
+            double dpsContribution = rotationTime > 0.0 ? characterTotal / rotationTime : 0.0;
+            double share = totalDamage > 0.0 ? characterTotal * 100.0 / totalDamage : 0.0;
+            List<ReportData.ReportMetricView> actions = actionDamageTotalsByActor.getOrDefault(name,
+                    new ArrayList<>());
+            ReportData.ReportMetricView topAction = actions.isEmpty() ? null : actions.get(0);
+
+            views.add(new ReportData.CharacterReportView(
+                    character,
+                    characterTotal,
+                    dpsContribution,
+                    share,
+                    maxHitForActor(records, name),
+                    topAction != null ? topAction.label : "-",
+                    topAction != null ? topAction.value : 0.0,
+                    actions,
+                    energySeries.getOrDefault(name, new ArrayList<>()),
+                    buffUptimeByCharacter.getOrDefault(name, new ArrayList<>()),
+                    artifactRollsByCharacter.get(name),
+                    topDamageEventsForActor(records, name, 8),
+                    recentEventsForActor(records, name, 12)));
+        }
+        return views;
+    }
+
+    private static double maxHitForActor(List<SimulationRecord> records, String actor) {
+        double maxHit = 0.0;
+        for (SimulationRecord record : records) {
+            if (actor.equals(record.actor) && record.damage > maxHit) {
+                maxHit = record.damage;
+            }
+        }
+        return maxHit;
+    }
+
+    private static List<SimulationRecord> topDamageEventsForActor(List<SimulationRecord> records, String actor,
+            int limit) {
+        List<SimulationRecord> matches = new ArrayList<>();
+        for (SimulationRecord record : records) {
+            if (actor.equals(record.actor) && record.damage > 0.0) {
+                matches.add(record);
+            }
+        }
+        matches.sort(Comparator.comparingDouble((SimulationRecord record) -> record.damage).reversed());
+        return matches.size() > limit ? new ArrayList<>(matches.subList(0, limit)) : matches;
+    }
+
+    private static List<SimulationRecord> recentEventsForActor(List<SimulationRecord> records, String actor,
+            int limit) {
+        List<SimulationRecord> matches = new ArrayList<>();
+        for (SimulationRecord record : records) {
+            if (actor.equals(record.actor)) {
+                matches.add(record);
+            }
+        }
+        if (matches.size() <= limit) {
+            return matches;
+        }
+        return new ArrayList<>(matches.subList(matches.size() - limit, matches.size()));
     }
 
     private static List<ReportData.ReportMetricView> sortedMetrics(Map<String, Double> totals, int limit) {
