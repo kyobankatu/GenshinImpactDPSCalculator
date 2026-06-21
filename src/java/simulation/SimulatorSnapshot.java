@@ -71,7 +71,12 @@ public class SimulatorSnapshot {
     public final int moonridgeDewCount;
     public final List<ReactionState.DendroCoreState> dendroCores;
     public final int nextDendroCoreId;
-    public final Map<Element, Double> enemyAura;
+    /**
+     * Full enemy aura state keyed by element, each value holding
+     * {@code {units, applicationTime, duration}} so continuous natural decay is
+     * preserved across snapshot restore.
+     */
+    public final Map<Element, double[]> enemyAura;
 
     /** Per-character snapshots keyed by CharacterId. */
     public final Map<CharacterId, CharacterSnapshot> characters;
@@ -97,7 +102,7 @@ public class SimulatorSnapshot {
      * @param icdStates          ICD group states
      * @param ecTimerRunning     EC timer flag
      * @param thundercloudEndTime thundercloud expiry time
-     * @param enemyAura          enemy aura gauge map
+     * @param enemyAura          enemy aura state map ({units, applicationTime, duration} per element)
      * @param characters         per-character snapshots
      * @param teamBuffRefs       team buff object references
      * @param teamBuffTimes      team buff timing pairs [startTime, expirationTime]
@@ -124,7 +129,7 @@ public class SimulatorSnapshot {
             int moonridgeDewCount,
             List<ReactionState.DendroCoreState> dendroCores,
             int nextDendroCoreId,
-            Map<Element, Double> enemyAura,
+            Map<Element, double[]> enemyAura,
             Map<CharacterId, CharacterSnapshot> characters,
             List<Buff> teamBuffRefs,
             List<double[]> teamBuffTimes,

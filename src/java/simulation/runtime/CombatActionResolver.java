@@ -170,7 +170,7 @@ public class CombatActionResolver {
             AttackAction action,
             ActionResolutionContext context) {
         Element trigger = action.getElement();
-        Set<Element> currentAuras = sim.getEnemy().getActiveAuras();
+        Set<Element> currentAuras = sim.getEnemy().getActiveAuras(sim.getCurrentTime());
         boolean reactionTriggered = false;
         double reactionMulti = 1.0;
 
@@ -263,7 +263,7 @@ public class CombatActionResolver {
         if (sim.isLoggingEnabled()) {
             sim.getCombatLogSink().log(
                     sim.getCurrentTime(), attacker.getName(), "Shatter", damage,
-                    "Shatter", damage, sim.getEnemy().getAuraMap());
+                    "Shatter", damage, sim.getEnemy().getAuraMap(sim.getCurrentTime()));
         }
         sim.getEnemy().clearFreezeAura();
     }
@@ -356,7 +356,7 @@ public class CombatActionResolver {
         boolean isReverse = (trigger == Element.PYRO && aura == Element.HYDRO)
                 || (trigger == Element.CRYO && aura == Element.PYRO);
         double modifier = isReverse ? 0.5 : 2.0;
-        sim.getEnemy().reduceAura(aura, consumption * modifier);
+        sim.getEnemy().reduceAura(aura, consumption * modifier, sim.getCurrentTime());
         return reactionMulti;
     }
 
@@ -383,7 +383,7 @@ public class CombatActionResolver {
         Element reactionElement = getTransformativeReactionElement(result);
 
         if (!result.isElectroCharged()) {
-            sim.getEnemy().reduceAura(aura, action.getGaugeUnits());
+            sim.getEnemy().reduceAura(aura, action.getGaugeUnits(), sim.getCurrentTime());
         }
 
         double res = sim.getEnemy().getRes(reactionElement.getBonusStatType());
@@ -408,7 +408,7 @@ public class CombatActionResolver {
         if (sim.isLoggingEnabled()) {
             sim.getCombatLogSink().log(
                     sim.getCurrentTime(), attacker.getName(), reactionLabel, triggerDmg,
-                    reactionLabel, triggerDmg, sim.getEnemy().getAuraMap());
+                    reactionLabel, triggerDmg, sim.getEnemy().getAuraMap(sim.getCurrentTime()));
         }
 
         if (result.isElectroCharged()) {
@@ -424,30 +424,31 @@ public class CombatActionResolver {
     private void handleStatefulReaction(Character attacker, CharacterId characterId, Element trigger, Element aura,
             AttackAction action, ReactionResult result, StatsContainer stats) {
         if (result.getKind() == ReactionResult.Kind.FROZEN) {
-            double freezeUnits = Math.min(action.getGaugeUnits(), Math.max(0.5, sim.getEnemy().getAuraUnits(aura)));
+            double freezeUnits = Math.min(action.getGaugeUnits(),
+                    Math.max(0.5, sim.getEnemy().getAuraUnits(aura, sim.getCurrentTime())));
             sim.getEnemy().setFreezeAura(freezeUnits);
-            sim.getEnemy().reduceAura(aura, action.getGaugeUnits());
+            sim.getEnemy().reduceAura(aura, action.getGaugeUnits(), sim.getCurrentTime());
             if (sim.isLoggingEnabled()) {
                 System.out.println(String.format(
                         "   [Reaction] %s on %s -> Frozen (%.1f U)",
                         trigger, aura, freezeUnits));
             }
         } else if (result.getKind() == ReactionResult.Kind.CRYSTALLIZE) {
-            sim.getEnemy().reduceAura(aura, action.getGaugeUnits());
+            sim.getEnemy().reduceAura(aura, action.getGaugeUnits(), sim.getCurrentTime());
             if (sim.isLoggingEnabled()) {
                 System.out.println(String.format(
                         "   [Reaction] %s on %s -> %s",
                         trigger, aura, result.getName()));
             }
         } else if (result.getKind() == ReactionResult.Kind.LUNAR_CRYSTALLIZE) {
-            sim.getEnemy().reduceAura(aura, action.getGaugeUnits());
+            sim.getEnemy().reduceAura(aura, action.getGaugeUnits(), sim.getCurrentTime());
             handleLunarCrystallize(attacker, characterId, trigger, aura, result);
         } else if (result.getKind() == ReactionResult.Kind.BURNING) {
             double resFactor = DamageCalculator.calculateResMulti(
                     sim.getEnemy().getRes(StatType.PYRO_DMG_BONUS),
                     ResistanceCalculator.getTotalResShred(stats, Element.PYRO));
             double tickDamage = result.getTransformDamage() * resFactor;
-            sim.getEnemy().reduceAura(aura, action.getGaugeUnits());
+            sim.getEnemy().reduceAura(aura, action.getGaugeUnits(), sim.getCurrentTime());
             reactionEffectScheduler.scheduleBurning(characterId, tickDamage);
             if (sim.isLoggingEnabled()) {
                 System.out.println(String.format(
@@ -460,7 +461,7 @@ public class CombatActionResolver {
                     sim.getEnemy().getRes(StatType.DENDRO_DMG_BONUS),
                     ResistanceCalculator.getTotalResShred(stats, Element.DENDRO));
             double coreDamage = result.getTransformDamage() * resFactor;
-            sim.getEnemy().reduceAura(aura, action.getGaugeUnits());
+            sim.getEnemy().reduceAura(aura, action.getGaugeUnits(), sim.getCurrentTime());
             reactionEffectScheduler.createDendroCore(characterId, coreDamage);
             if (result.getKind() == ReactionResult.Kind.LUNAR_BLOOM) {
                 sim.incrementVerdantDewCount();
@@ -472,10 +473,11 @@ public class CombatActionResolver {
                         trigger, aura, result.getName(), coreDamage));
             }
         } else if (result.getKind() == ReactionResult.Kind.QUICKEN) {
-            double quickenGauge = Math.min(sim.getEnemy().getAuraUnits(aura), action.getGaugeUnits());
+            double quickenGauge = Math.min(
+                    sim.getEnemy().getAuraUnits(aura, sim.getCurrentTime()), action.getGaugeUnits());
             double duration = Math.max(0.0, quickenGauge) * 5.0 + 6.0;
             sim.setQuickenEndTime(sim.getCurrentTime() + duration);
-            sim.getEnemy().reduceAura(aura, action.getGaugeUnits());
+            sim.getEnemy().reduceAura(aura, action.getGaugeUnits(), sim.getCurrentTime());
             if (sim.isLoggingEnabled()) {
                 System.out.println(String.format(
                         "   [Reaction] %s on %s -> Quicken (%.1fs)",
@@ -506,7 +508,7 @@ public class CombatActionResolver {
         sim.recordDamage(characterId, damage);
         sim.getCombatLogSink().log(
                 sim.getCurrentTime(), attacker.getName(), "Moondrift Harmony", damage,
-                result.getName(), damage, sim.getEnemy().getAuraMap());
+                result.getName(), damage, sim.getEnemy().getAuraMap(sim.getCurrentTime()));
         sim.notifyReaction(
                 ReactionResult.lunar(
                         damage,
@@ -640,7 +642,7 @@ public class CombatActionResolver {
                     : 0.0;
             sim.getCombatLogSink().log(
                     sim.getCurrentTime(), charName, action.getName(), damage,
-                    reactionLabel, reactionValue, sim.getEnemy().getAuraMap(), action.getDebugFormula());
+                    reactionLabel, reactionValue, sim.getEnemy().getAuraMap(sim.getCurrentTime()), action.getDebugFormula());
         }
     }
 

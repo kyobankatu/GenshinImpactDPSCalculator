@@ -73,7 +73,7 @@ public class ReactionEffectScheduler {
         sim.setBurningEndTime(sim.getCurrentTime() + 2.0);
         sim.getEnemy().setAura(
                 Element.PYRO,
-                Math.max(1.0, sim.getEnemy().getAuraUnits(Element.PYRO)),
+                Math.max(1.0, sim.getEnemy().getAuraUnits(Element.PYRO, sim.getCurrentTime())),
                 sim.getCurrentTime());
         if (!sim.isBurningTimerRunning()) {
             sim.setBurningTimerRunning(true);
@@ -125,8 +125,8 @@ public class ReactionEffectScheduler {
             public void tick(CombatSimulator simContext) {
                 boolean shouldTick = isLunar
                         ? (simContext.getCurrentTime() <= simContext.getThundercloudEndTime())
-                        : (simContext.getEnemy().getAuraUnits(Element.HYDRO) > 0
-                                && simContext.getEnemy().getAuraUnits(Element.ELECTRO) > 0);
+                        : (simContext.getEnemy().getAuraUnits(Element.HYDRO, simContext.getCurrentTime()) > 0
+                                && simContext.getEnemy().getAuraUnits(Element.ELECTRO, simContext.getCurrentTime()) > 0);
                 if (!shouldTick) {
                     simContext.setECTimerRunning(false);
                     nextTick = Double.MAX_VALUE;
@@ -148,7 +148,7 @@ public class ReactionEffectScheduler {
                 simContext.recordDamage("Thundercloud", finalDamage);
                 simContext.getCombatLogSink().log(
                         simContext.getCurrentTime(), "Thundercloud", label, finalDamage,
-                        label, finalDamage, simContext.getEnemy().getAuraMap());
+                        label, finalDamage, simContext.getEnemy().getAuraMap(simContext.getCurrentTime()));
 
                 if (isLunar) {
                     simContext.notifyReaction(
@@ -159,8 +159,8 @@ public class ReactionEffectScheduler {
                             simContext.getActiveCharacter());
                 }
 
-                simContext.getEnemy().reduceAura(Element.HYDRO, 0.4);
-                simContext.getEnemy().reduceAura(Element.ELECTRO, 0.4);
+                simContext.getEnemy().reduceAura(Element.HYDRO, 0.4, simContext.getCurrentTime());
+                simContext.getEnemy().reduceAura(Element.ELECTRO, 0.4, simContext.getCurrentTime());
                 nextTick += (isLunar ? 2.0 : 1.0);
             }
 
@@ -194,7 +194,7 @@ public class ReactionEffectScheduler {
                 simContext.recordDamage(ownerId, tickDamage);
                 simContext.getCombatLogSink().log(
                         simContext.getCurrentTime(), ownerId.getDisplayName(), "Burning", tickDamage,
-                        "Burning", tickDamage, simContext.getEnemy().getAuraMap());
+                        "Burning", tickDamage, simContext.getEnemy().getAuraMap(simContext.getCurrentTime()));
 
                 nextTick += 0.25;
             }
@@ -270,7 +270,7 @@ public class ReactionEffectScheduler {
         sim.recordDamage(ownerId, damage);
         sim.getCombatLogSink().log(
                 sim.getCurrentTime(), ownerId.getDisplayName(), label, damage,
-                label, damage, sim.getEnemy().getAuraMap());
+                label, damage, sim.getEnemy().getAuraMap(sim.getCurrentTime()));
     }
 
     private boolean canRecordDendroCoreDamage() {

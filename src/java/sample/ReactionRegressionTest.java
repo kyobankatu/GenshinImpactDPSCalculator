@@ -74,6 +74,13 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ColumbinaGravityAndDewRegression();
         testAccuracyPhaseF_ArtifactLunarReactionBuffRegression();
         testAccuracyPhaseF_WeaponReactionBonusRegression();
+        testAccuracyPhase2_TimeAwareLinearDecay();
+        testAccuracyPhase2_QueryBeforeAndAtApplication();
+        testAccuracyPhase2_ExpiryBoundaries();
+        testAccuracyPhase2_ReduceAuraAfterPartialDecay();
+        testAccuracyPhase2_ZeroOrNegativeNeverNegative();
+        testAccuracyPhase2_MapAndActiveAurasDecayAware();
+        testAccuracyPhase4_SnapshotPreservesDecay();
         System.out.println("ReactionRegressionTest passed");
     }
 
@@ -364,10 +371,14 @@ public class ReactionRegressionTest {
         assertClose(immediate, sim.getTotalDamage(), 0.5, "Thundercloud should not tick before 2 seconds");
         sim.advanceTime(0.2);
         assertTrue(sim.getTotalDamage() > immediate, "Thundercloud should tick at the 2 second cadence");
+        // Hydro was applied with the legacy infinite-expiry aura, so it only loses
+        // the 0.4 GU tick consumption. Electro was applied with a finite duration
+        // by the Electro-Charged scheduler, so it also reflects natural decay over
+        // the 2 second Thundercloud cadence (1U over the 11s simplified duration).
         assertClose(0.6, sim.getEnemy().getAuraUnits(Element.HYDRO), 0.01,
                 "Thundercloud tick should consume 0.4 GU Hydro");
-        assertClose(0.6, sim.getEnemy().getAuraUnits(Element.ELECTRO), 0.01,
-                "Thundercloud tick should consume 0.4 GU Electro");
+        assertClose(0.6 - 2.0 / 11.0, sim.getEnemy().getAuraUnits(Element.ELECTRO), 0.01,
+                "Thundercloud tick should consume 0.4 GU Electro on top of natural decay");
     }
 
     private static void testPhase11LunarBloom() {
@@ -431,6 +442,108 @@ public class ReactionRegressionTest {
                 "2U aura should survive longer than 1U");
     }
 
+    private static void testAccuracyPhase2_TimeAwareLinearDecay() {
+        // 1U aura uses simplified duration 6 + 1*5 = 11s, so decay rate is 1/11 units/s.
+        Enemy enemy = new Enemy(90);
+        enemy.setAura(Element.PYRO, 1.0, 0.0);
+        assertClose(1.0, enemy.getAuraUnits(Element.PYRO, 0.0), EPS,
+                "Time-aware read at application time should equal applied units");
+        assertClose(0.5, enemy.getAuraUnits(Element.PYRO, 5.5), EPS,
+                "1U aura should linearly decay to half at the duration midpoint");
+        assertClose(0.0, enemy.getAuraUnits(Element.PYRO, 11.0), EPS,
+                "1U aura should reach zero at its configured expiry");
+        assertClose(0.0, enemy.getAuraUnits(Element.PYRO, 20.0), EPS,
+                "Decayed aura should never read below zero after expiry");
+    }
+
+    private static void testAccuracyPhase2_QueryBeforeAndAtApplication() {
+        Enemy enemy = new Enemy(90);
+        enemy.setAura(Element.PYRO, 1.0, 5.0);
+        assertClose(1.0, enemy.getAuraUnits(Element.PYRO, 3.0), EPS,
+                "Query before application time should return full units (no decay yet)");
+        assertClose(1.0, enemy.getAuraUnits(Element.PYRO, 5.0), EPS,
+                "Query exactly at application time should return full units");
+    }
+
+    private static void testAccuracyPhase2_ExpiryBoundaries() {
+        Enemy enemy = new Enemy(90);
+        enemy.setAura(Element.ELECTRO, 1.0, 0.0);
+        assertClose(0.0, enemy.getAuraUnits(Element.ELECTRO, 11.0), EPS,
+                "Decayed value should be zero exactly at expiry");
+        assertClose(0.0, enemy.getAuraUnits(Element.ELECTRO, 11.01), EPS,
+                "Decayed value should remain zero just after expiry");
+        enemy.updateAuras(11.0);
+        assertTrue(enemy.getActiveAuras(11.0).isEmpty(),
+                "updateAuras at expiry should remove the naturally decayed aura");
+        assertClose(0.0, enemy.getAuraUnits(Element.ELECTRO), EPS,
+                "Removed aura should read zero through the legacy accessor as well");
+    }
+
+    private static void testAccuracyPhase2_ReduceAuraAfterPartialDecay() {
+        // 2U aura uses duration 6 + 2*5 = 16s, so decay rate is 2/16 = 0.125 units/s.
+        Enemy enemy = new Enemy(90);
+        enemy.setAura(Element.HYDRO, 2.0, 0.0);
+        assertClose(1.5, enemy.getAuraUnits(Element.HYDRO, 4.0), EPS,
+                "2U aura should decay to 1.5U after 4s");
+        enemy.reduceAura(Element.HYDRO, 0.5, 4.0);
+        assertClose(1.0, enemy.getAuraUnits(Element.HYDRO, 4.0), EPS,
+                "Discrete consumption should use the decayed current value");
+        assertClose(0.5, enemy.getAuraUnits(Element.HYDRO, 8.0), EPS,
+                "Decay should continue from the remaining value at the original rate");
+        assertClose(0.0, enemy.getAuraUnits(Element.HYDRO, 12.0), EPS,
+                "Re-based aura should expire 8s after consumption (1.0U / 0.125)");
+    }
+
+    private static void testAccuracyPhase2_ZeroOrNegativeNeverNegative() {
+        Enemy enemy = new Enemy(90);
+        enemy.setAura(Element.PYRO, 1.0, 0.0);
+        enemy.setAura(Element.PYRO, 0.0, 0.0);
+        assertClose(0.0, enemy.getAuraUnits(Element.PYRO, 0.0), EPS,
+                "Applying zero units should remove the aura");
+
+        enemy.setAura(Element.PYRO, 1.0, 0.0);
+        enemy.reduceAura(Element.PYRO, 5.0, 0.0);
+        assertClose(0.0, enemy.getAuraUnits(Element.PYRO, 0.0), EPS,
+                "Over-consumption should remove the aura and never report negative units");
+    }
+
+    private static void testAccuracyPhase2_MapAndActiveAurasDecayAware() {
+        Enemy enemy = new Enemy(90);
+        enemy.setAura(Element.ELECTRO, 1.0, 0.0);
+        assertEquals(Element.ELECTRO, enemy.getPrimaryAura(5.5),
+                "Primary aura should still be reported while partially decayed");
+        assertClose(0.5, enemy.getAuraMap(5.5).getOrDefault(Element.ELECTRO, 0.0), EPS,
+                "Time-aware aura map should report the decayed current value");
+        assertTrue(enemy.getActiveAuras(5.5).contains(Element.ELECTRO),
+                "Active auras should include a partially decayed aura");
+
+        assertTrue(enemy.getAuraMap(11.0).isEmpty(),
+                "Time-aware aura map should omit fully decayed auras at expiry");
+        assertTrue(enemy.getPrimaryAura(11.0) == null,
+                "Primary aura should be null once the aura has decayed to zero");
+    }
+
+    private static void testAccuracyPhase4_SnapshotPreservesDecay() {
+        CombatSimulator sim = simulatorWith(testCharacter(Element.PYRO));
+        // 1U Pyro applied at t=0 with finite duration (11s), decay rate 1/11 units/s.
+        sim.getEnemy().setAura(Element.PYRO, 1.0, sim.getCurrentTime());
+        SimulatorSnapshot snap = sim.saveSnapshot();
+
+        // Advance and mutate the live state past the snapshot point.
+        sim.advanceTime(8.0);
+        assertClose(1.0 - 8.0 / 11.0, sim.getEnemy().getAuraUnits(Element.PYRO, sim.getCurrentTime()), EPS,
+                "Live aura should have decayed before restore");
+
+        sim.restoreSnapshot(snap);
+        assertClose(1.0, sim.getEnemy().getAuraUnits(Element.PYRO, sim.getCurrentTime()), EPS,
+                "Restore should bring the aura back to its saved units");
+
+        // Future natural decay must resume from the restored state, not be flattened.
+        sim.advanceTime(5.5);
+        assertClose(1.0 - 5.5 / 11.0, sim.getEnemy().getAuraUnits(Element.PYRO, sim.getCurrentTime()), EPS,
+                "Restored aura should continue to decay with the original rate");
+    }
+
     private static void testAccuracyPhaseA_VaporizeConsumesExpectedAura() {
         CombatSimulator sim = simulatorWith(testCharacter(Element.PYRO));
         sim.getEnemy().setAura(Element.HYDRO, 2.0, sim.getCurrentTime());
@@ -452,10 +565,13 @@ public class ReactionRegressionTest {
                 "Electro-Charged should keep Electro aura before tick consumption");
 
         sim.advanceTime(1.01);
-        assertClose(0.6, sim.getEnemy().getAuraUnits(Element.HYDRO), 0.01,
-                "Standard Electro-Charged tick should consume 0.4U Hydro");
-        assertClose(0.6, sim.getEnemy().getAuraUnits(Element.ELECTRO), 0.01,
-                "Standard Electro-Charged tick should consume 0.4U Electro");
+        // Both auras were applied with a finite duration, so each tick consumes
+        // 0.4U on top of natural decay (1U over the 11s simplified duration) at the
+        // 1 second standard Electro-Charged cadence.
+        assertClose(0.6 - 1.0 / 11.0, sim.getEnemy().getAuraUnits(Element.HYDRO), 0.01,
+                "Standard Electro-Charged tick should consume 0.4U Hydro on top of natural decay");
+        assertClose(0.6 - 1.0 / 11.0, sim.getEnemy().getAuraUnits(Element.ELECTRO), 0.01,
+                "Standard Electro-Charged tick should consume 0.4U Electro on top of natural decay");
     }
 
     private static void testAccuracyPhaseA_QuickenCoexistsWithDendroFollowup() {

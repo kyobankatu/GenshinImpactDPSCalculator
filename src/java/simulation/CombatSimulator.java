@@ -748,8 +748,8 @@ public class CombatSimulator {
         List<simulation.runtime.ReactionState.DendroCoreState> dendroCores = reactionStateController.copyDendroCores();
         int nextDendroCoreId = reactionStateController.getNextDendroCoreId();
 
-        // Enemy aura
-        Map<model.type.Element, Double> enemyAura = (enemy != null) ? enemy.getAuraMap() : new HashMap<>();
+        // Enemy aura (full state so continuous decay survives restore)
+        Map<model.type.Element, double[]> enemyAura = (enemy != null) ? enemy.captureAuraState() : new HashMap<>();
 
         // ICD
         Map<String, double[]> icdStates = icdManager.saveStates();
@@ -833,14 +833,9 @@ public class CombatSimulator {
         reactionState.setMoonridgeDewCount(snap.moonridgeDewCount);
         reactionStateController.restoreDendroCores(snap.dendroCores, snap.nextDendroCoreId);
 
-        // Enemy aura
+        // Enemy aura (restore full state so continuous decay resumes correctly)
         if (enemy != null) {
-            for (model.type.Element el : model.type.Element.values()) {
-                enemy.setAura(el, 0.0);
-            }
-            for (Map.Entry<model.type.Element, Double> entry : snap.enemyAura.entrySet()) {
-                enemy.setAura(entry.getKey(), entry.getValue());
-            }
+            enemy.restoreAuraState(snap.enemyAura);
         }
 
         // ICD

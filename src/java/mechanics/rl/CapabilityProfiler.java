@@ -844,7 +844,7 @@ public class CapabilityProfiler {
             return "-";
         }
         List<String> entries = new ArrayList<>();
-        for (Map.Entry<model.type.Element, Double> entry : sim.getEnemy().getAuraMap().entrySet()) {
+        for (Map.Entry<model.type.Element, Double> entry : sim.getEnemy().getAuraMap(sim.getCurrentTime()).entrySet()) {
             if (entry.getValue() > 1e-9) {
                 entries.add(entry.getKey().name() + "=" + format(entry.getValue()));
             }

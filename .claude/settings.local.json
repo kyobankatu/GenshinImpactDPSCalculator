@@ -22,7 +22,11 @@
       "Bash(wc:*)",
       "Bash(sort:*)",
       "Bash(uniq:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(./gradlew RaidenParty)",
+      "Bash(./gradlew FlinsParty2)",
+      "Bash(./gradlew ReactionRegressionTest)",
+      "Bash(./gradlew ReportRegressionTest)"
     ]
   }
 }

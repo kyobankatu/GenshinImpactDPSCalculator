@@ -160,10 +160,10 @@ public class ObservationEncoder {
         Enemy enemy = sim.getEnemy();
         observation[index++] = clamp01((now - lastSwapTime) / Math.max(1.0, config.swapCooldown));
         observation[index++] = clamp01((config.maxEpisodeTime - now) / config.maxEpisodeTime);
-        observation[index++] = normalizedAura(enemy, Element.PYRO);
-        observation[index++] = normalizedAura(enemy, Element.HYDRO);
-        observation[index++] = normalizedAura(enemy, Element.ELECTRO);
-        observation[index++] = normalizedAura(enemy, Element.ANEMO);
+        observation[index++] = normalizedAura(enemy, Element.PYRO, now);
+        observation[index++] = normalizedAura(enemy, Element.HYDRO, now);
+        observation[index++] = normalizedAura(enemy, Element.ELECTRO, now);
+        observation[index++] = normalizedAura(enemy, Element.ANEMO, now);
         observation[index] = sim.getThundercloudEndTime() > now ? 1.0 : 0.0;
     }
 
@@ -192,11 +192,11 @@ public class ObservationEncoder {
         return clamp01(maxRemaining / 15.0);
     }
 
-    private double normalizedAura(Enemy enemy, Element element) {
+    private double normalizedAura(Enemy enemy, Element element, double currentTime) {
         if (enemy == null) {
             return 0.0;
         }
-        return clamp01(enemy.getAuraUnits(element) / 2.0);
+        return clamp01(enemy.getAuraUnits(element, currentTime) / 2.0);
     }
 
     private double clamp01(double value) {

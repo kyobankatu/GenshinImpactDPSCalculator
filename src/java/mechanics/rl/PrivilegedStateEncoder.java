@@ -115,7 +115,7 @@ public class PrivilegedStateEncoder {
         }
         teamSetupValue = clamp01(teamSetupValue / Math.max(1.0, config.partyOrder.length));
 
-        double reactionPotential = reactionPotential(sim.getEnemy());
+        double reactionPotential = reactionPotential(sim.getEnemy(), now);
         double activeSwapOpportunity = 0.0;
         if (active != null) {
             int activeSlot = findSlot(config.partyOrder, active.getCharacterId());
@@ -159,15 +159,15 @@ public class PrivilegedStateEncoder {
         return clamp01(remaining / baseCooldown);
     }
 
-    private double reactionPotential(Enemy enemy) {
+    private double reactionPotential(Enemy enemy, double currentTime) {
         if (enemy == null) {
             return 0.0;
         }
         double auraSum = 0.0;
-        auraSum += enemy.getAuraUnits(Element.PYRO);
-        auraSum += enemy.getAuraUnits(Element.HYDRO);
-        auraSum += enemy.getAuraUnits(Element.ELECTRO);
-        auraSum += enemy.getAuraUnits(Element.ANEMO);
+        auraSum += enemy.getAuraUnits(Element.PYRO, currentTime);
+        auraSum += enemy.getAuraUnits(Element.HYDRO, currentTime);
+        auraSum += enemy.getAuraUnits(Element.ELECTRO, currentTime);
+        auraSum += enemy.getAuraUnits(Element.ANEMO, currentTime);
         return clamp01(auraSum / 4.0);
     }
 

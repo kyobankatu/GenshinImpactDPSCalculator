@@ -348,7 +348,7 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                 if (sim.isLoggingEnabled()) {
                     visualization.VisualLogger.getInstance().log(time, "Thundercloud",
                             "Lunar-Charged Reaction (Extra)", extra,
-                            "Lunar-Charged Reaction (Extra)", extra, sim.getEnemy().getAuraMap());
+                            "Lunar-Charged Reaction (Extra)", extra, sim.getEnemy().getAuraMap(time));
                 }
             }
             return;

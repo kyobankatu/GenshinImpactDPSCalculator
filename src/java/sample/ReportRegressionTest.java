@@ -28,6 +28,7 @@ public class ReportRegressionTest {
         testReportChartsAndEscaping();
         testCharacterFaceAssetsAndFallbackEscaping();
         testEmptyReportRenders();
+        testAuraTimelineContinuousDecay();
         System.out.println("ReportRegressionTest passed");
     }
 
@@ -175,6 +176,32 @@ public class ReportRegressionTest {
         assertContains(html, "Simulation Report", "empty report title");
         assertContains(html, "id='dpsPie'", "empty report chart container");
         assertContains(html, "const statsHistory", "empty report script");
+    }
+
+    private static void testAuraTimelineContinuousDecay() throws Exception {
+        // Records carry the decayed current aura units at each event time. A 1U Pyro
+        // aura decays from 1.0 at t=0 to 0.5 at the midpoint and to 0.0 at expiry.
+        List<SimulationRecord> records = new ArrayList<>();
+        Map<Element, Double> full = new EnumMap<>(Element.class);
+        full.put(Element.PYRO, 1.0);
+        Map<Element, Double> mid = new EnumMap<>(Element.class);
+        mid.put(Element.PYRO, 0.5);
+        Map<Element, Double> expired = new EnumMap<>(Element.class);
+
+        records.add(new SimulationRecord(0.0, "Tester", "Pyro Application", 100.0, "None", 0.0, full, null));
+        records.add(new SimulationRecord(5.5, "Tester", "Idle Tick", 100.0, "None", 0.0, mid, null));
+        records.add(new SimulationRecord(11.0, "Tester", "Idle Tick", 100.0, "None", 0.0, expired, null));
+
+        HtmlReportGenerator.generate("report_aura_decay_regression.html", records, null, null);
+        String html = Files.readString(Paths.get("output/report_aura_decay_regression.html"), StandardCharsets.UTF_8);
+
+        // Renderer test: Aura Timeline uses continuous (non-stepped) rendering.
+        assertContains(html, "Continuous enemy aura units", "continuous aura timeline description");
+        assertContains(html, "stepped: false, tension: 0", "non-stepped aura dataset rendering");
+        // Normal path: a midpoint aura value below the initial units is present.
+        assertContains(html, "{x: 5.50, y: 0.50}", "midpoint decayed aura value below initial units");
+        // Boundary value: aura reaches zero at expiry.
+        assertContains(html, "{x: 11.00, y: 0.00}", "zero aura value at expiry");
     }
 
     private static void assertContains(String text, String expected, String message) {

@@ -24,22 +24,77 @@ public class Enemy {
 
     /**
      * Time-aware elemental aura state. The simulator still uses a simplified
-     * gauge model, but runtime-applied auras now carry an expiry based on their
-     * gauge strength so stale auras do not persist forever.
+     * gauge model, but runtime-applied auras now decay continuously between
+     * application and expiry.
+     *
+     * <p>The aura value at any time is derived by linear decay from
+     * {@link #units} at {@link #applicationTime} down to zero at
+     * {@link #expiryTime}, using a fixed {@link #decayRate} (units per second).
+     * Auras created without a finite duration (legacy {@code setAura(element,
+     * units)}) use a zero decay rate and an infinite expiry, so they keep their
+     * stored units until they are explicitly cleared or consumed. This preserves
+     * compatibility for test fixtures and snapshot restore paths.
      */
     private static final class AuraState {
         private final model.type.Element element;
         private double units;
-        private final double applicationTime;
-        private final double duration;
-        private final double expiryTime;
+        private double applicationTime;
+        private double duration;
+        private double expiryTime;
+        private final double decayRate;
 
         private AuraState(model.type.Element element, double units, double applicationTime, double duration) {
             this.element = element;
             this.units = units;
             this.applicationTime = applicationTime;
             this.duration = duration;
-            this.expiryTime = Double.isInfinite(duration) ? INFINITE_EXPIRY : applicationTime + duration;
+            if (Double.isInfinite(duration) || duration <= 0.0) {
+                this.decayRate = 0.0;
+                this.expiryTime = INFINITE_EXPIRY;
+            } else {
+                this.decayRate = units / duration;
+                this.expiryTime = applicationTime + duration;
+            }
+        }
+
+        /**
+         * Returns the remaining aura units at the given simulator time after
+         * continuous natural decay. Infinite-expiry auras return their stored
+         * units unchanged. Queries at or before the application time return the
+         * full stored units (no decay has occurred yet).
+         *
+         * @param currentTime simulator time in seconds to evaluate
+         * @return remaining units, never negative
+         */
+        private double currentUnitsAt(double currentTime) {
+            if (Double.isInfinite(expiryTime) || decayRate <= 0.0) {
+                return units;
+            }
+            if (currentTime <= applicationTime) {
+                return units;
+            }
+            double decayed = units - decayRate * (currentTime - applicationTime);
+            return decayed > 0.0 ? decayed : 0.0;
+        }
+
+        /**
+         * Re-bases the aura so that {@code newUnits} are present at
+         * {@code currentTime}, and natural decay continues from there at the
+         * original decay rate. Infinite-expiry auras keep their infinite expiry.
+         *
+         * @param newUnits    remaining units after a discrete consumption event
+         * @param currentTime simulator time of the consumption event
+         */
+        private void rebase(double newUnits, double currentTime) {
+            this.units = newUnits;
+            this.applicationTime = currentTime;
+            if (decayRate <= 0.0) {
+                this.duration = INFINITE_EXPIRY;
+                this.expiryTime = INFINITE_EXPIRY;
+            } else {
+                this.duration = newUnits / decayRate;
+                this.expiryTime = currentTime + this.duration;
+            }
         }
     }
 
@@ -99,8 +154,14 @@ public class Enemy {
     }
 
     /**
-     * Reduces the gauge of the given element by {@code decay} units.
-     * If the gauge drops to zero or below the element's aura is removed.
+     * Reduces the gauge of the given element by {@code decay} units, ignoring
+     * natural decay.
+     *
+     * <p>This no-argument form is a compatibility wrapper that subtracts from
+     * the stored units at the aura's last application time. Mechanic decisions
+     * that depend on simulation time should call
+     * {@link #reduceAura(model.type.Element, double, double)} so the decayed
+     * current value is consumed instead.
      *
      * @param element element whose gauge to reduce
      * @param decay   amount to subtract from the current gauge
@@ -119,11 +180,43 @@ public class Enemy {
     }
 
     /**
-     * Returns the remaining gauge units for the given element, or {@code 0.0}
-     * if no aura of that element is currently applied.
+     * Reduces the gauge of the given element by {@code decay} units, consuming
+     * the value remaining after continuous natural decay up to
+     * {@code currentTime}.
+     *
+     * <p>If the remaining value after consumption drops to zero or below, the
+     * aura is removed. Otherwise natural decay continues from the new remaining
+     * value at the aura's original decay rate.
+     *
+     * @param element     element whose gauge to reduce
+     * @param decay       amount to subtract from the decayed current gauge
+     * @param currentTime current simulator time in seconds
+     */
+    public void reduceAura(model.type.Element element, double decay, double currentTime) {
+        AuraState state = auraGauge.get(element);
+        if (state == null) {
+            return;
+        }
+        double current = state.currentUnitsAt(currentTime);
+        double next = current - decay;
+        if (next <= 0.0) {
+            auraGauge.remove(element);
+        } else {
+            state.rebase(next, currentTime);
+        }
+    }
+
+    /**
+     * Returns the stored gauge units for the given element without applying
+     * natural decay, or {@code 0.0} if no aura of that element is applied.
+     *
+     * <p>This no-argument form is a compatibility wrapper. Mechanic decisions
+     * that depend on simulation time should call
+     * {@link #getAuraUnits(model.type.Element, double)} to read the decayed
+     * current value.
      *
      * @param element element to query
-     * @return remaining aura gauge units
+     * @return stored aura gauge units at the last application time
      */
     public double getAuraUnits(model.type.Element element) {
         AuraState state = auraGauge.get(element);
@@ -131,12 +224,31 @@ public class Enemy {
     }
 
     /**
-     * Removes runtime auras that have expired by the given simulator time.
+     * Returns the remaining gauge units for the given element at
+     * {@code currentTime} after continuous natural decay, or {@code 0.0} if no
+     * aura of that element is applied.
+     *
+     * @param element     element to query
+     * @param currentTime current simulator time in seconds
+     * @return decayed remaining aura gauge units, never negative
+     */
+    public double getAuraUnits(model.type.Element element, double currentTime) {
+        AuraState state = auraGauge.get(element);
+        return state != null ? state.currentUnitsAt(currentTime) : 0.0;
+    }
+
+    /**
+     * Removes runtime auras that have expired by the given simulator time,
+     * either because their expiry has passed or their decayed value has reached
+     * zero.
      *
      * @param currentTime current simulator time in seconds
      */
     public void updateAuras(double currentTime) {
-        auraGauge.entrySet().removeIf(entry -> entry.getValue().expiryTime <= currentTime);
+        auraGauge.entrySet().removeIf(entry -> {
+            AuraState state = entry.getValue();
+            return state.expiryTime <= currentTime || state.currentUnitsAt(currentTime) <= 0.0;
+        });
     }
 
     /**
@@ -161,7 +273,36 @@ public class Enemy {
     }
 
     /**
-     * Returns the set of all elements currently applied as an aura on this enemy.
+     * Returns the primary active aura element using decayed current units at the
+     * given simulator time. Auras that have naturally decayed to zero are
+     * ignored. As with {@link #getPrimaryAura()}, a simultaneous
+     * {@link model.type.Element#HYDRO}/{@link model.type.Element#ELECTRO}
+     * (Electro-Charged) state returns {@code HYDRO} as the nominal primary.
+     *
+     * @param currentTime current simulator time in seconds
+     * @return primary aura element, or {@code null} if no aura remains
+     */
+    public model.type.Element getPrimaryAura(double currentTime) {
+        boolean hydro = getAuraUnits(model.type.Element.HYDRO, currentTime) > 0.0;
+        boolean electro = getAuraUnits(model.type.Element.ELECTRO, currentTime) > 0.0;
+        if (hydro && electro) {
+            return model.type.Element.HYDRO;
+        }
+        for (model.type.Element element : auraGauge.keySet()) {
+            if (getAuraUnits(element, currentTime) > 0.0) {
+                return element;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the set of all elements currently applied as an aura on this enemy
+     * without applying natural decay.
+     *
+     * <p>This no-argument form is a compatibility wrapper. Mechanic decisions
+     * that depend on simulation time should call
+     * {@link #getActiveAuras(double)} so naturally decayed auras are excluded.
      *
      * @return snapshot set of active aura elements
      */
@@ -170,7 +311,29 @@ public class Enemy {
     }
 
     /**
-     * Returns a snapshot copy of the full aura gauge map (element -> units).
+     * Returns the set of elements whose decayed gauge is still positive at the
+     * given simulator time.
+     *
+     * @param currentTime current simulator time in seconds
+     * @return snapshot set of active aura elements after natural decay
+     */
+    public java.util.Set<model.type.Element> getActiveAuras(double currentTime) {
+        java.util.Set<model.type.Element> active = new java.util.HashSet<>();
+        for (model.type.Element element : auraGauge.keySet()) {
+            if (getAuraUnits(element, currentTime) > 0.0) {
+                active.add(element);
+            }
+        }
+        return active;
+    }
+
+    /**
+     * Returns a snapshot copy of the full aura gauge map (element -&gt; units)
+     * using stored units without applying natural decay.
+     *
+     * <p>This no-argument form is a compatibility wrapper. Snapshot consumers
+     * that depend on simulation time should call {@link #getAuraMap(double)} to
+     * read decayed current values.
      *
      * @return copy of the aura gauge map
      */
@@ -180,6 +343,66 @@ public class Enemy {
             snapshot.put(entry.getKey(), entry.getValue().units);
         }
         return snapshot;
+    }
+
+    /**
+     * Returns a snapshot copy of the aura gauge map (element -&gt; units) using
+     * decayed current units at the given simulator time. Elements whose decayed
+     * value has reached zero are omitted.
+     *
+     * @param currentTime current simulator time in seconds
+     * @return copy of the aura gauge map after natural decay
+     */
+    public java.util.Map<model.type.Element, Double> getAuraMap(double currentTime) {
+        java.util.Map<model.type.Element, Double> snapshot = new java.util.HashMap<>();
+        for (Map.Entry<model.type.Element, AuraState> entry : auraGauge.entrySet()) {
+            double current = entry.getValue().currentUnitsAt(currentTime);
+            if (current > 0.0) {
+                snapshot.put(entry.getKey(), current);
+            }
+        }
+        return snapshot;
+    }
+
+    /**
+     * Captures the full per-element aura state for simulator snapshot/rollback.
+     *
+     * <p>Each entry holds {@code {units, applicationTime, duration}} so that
+     * continuous natural decay can be resumed exactly after a restore, rather
+     * than being flattened to a non-decaying value.
+     *
+     * @return a copy of the aura state keyed by element
+     */
+    public java.util.Map<model.type.Element, double[]> captureAuraState() {
+        java.util.Map<model.type.Element, double[]> snapshot = new java.util.HashMap<>();
+        for (Map.Entry<model.type.Element, AuraState> entry : auraGauge.entrySet()) {
+            AuraState state = entry.getValue();
+            snapshot.put(entry.getKey(),
+                    new double[] { state.units, state.applicationTime, state.duration });
+        }
+        return snapshot;
+    }
+
+    /**
+     * Restores aura state previously captured by {@link #captureAuraState()},
+     * replacing any current auras. Future natural decay resumes from the restored
+     * values, preserving the original decay behavior across rollback.
+     *
+     * @param state captured aura state keyed by element; {@code null} clears all auras
+     */
+    public void restoreAuraState(java.util.Map<model.type.Element, double[]> state) {
+        auraGauge.clear();
+        if (state == null) {
+            return;
+        }
+        for (Map.Entry<model.type.Element, double[]> entry : state.entrySet()) {
+            double[] values = entry.getValue();
+            if (values == null || values.length < 3 || values[0] <= 0.0) {
+                continue;
+            }
+            auraGauge.put(entry.getKey(),
+                    new AuraState(entry.getKey(), values[0], values[1], values[2]));
+        }
     }
 
     private double auraDuration(double units) {

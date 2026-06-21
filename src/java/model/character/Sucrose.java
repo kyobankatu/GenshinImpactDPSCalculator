@@ -263,13 +263,13 @@ public class Sucrose extends Character implements FormStateProvider {
                     if (this.absorbedElement == null) {
                         model.entity.Enemy enemy = s.getEnemy();
                         if (enemy != null) {
-                            if (enemy.getAuraUnits(Element.PYRO) > 0)
+                            if (enemy.getAuraUnits(Element.PYRO, s.getCurrentTime()) > 0)
                                 this.absorbedElement = Element.PYRO;
-                            else if (enemy.getAuraUnits(Element.HYDRO) > 0)
+                            else if (enemy.getAuraUnits(Element.HYDRO, s.getCurrentTime()) > 0)
                                 this.absorbedElement = Element.HYDRO;
-                            else if (enemy.getAuraUnits(Element.ELECTRO) > 0)
+                            else if (enemy.getAuraUnits(Element.ELECTRO, s.getCurrentTime()) > 0)
                                 this.absorbedElement = Element.ELECTRO;
-                            else if (enemy.getAuraUnits(Element.CRYO) > 0)
+                            else if (enemy.getAuraUnits(Element.CRYO, s.getCurrentTime()) > 0)
                                 this.absorbedElement = Element.CRYO;
                         }
 
@@ -323,13 +323,13 @@ public class Sucrose extends Character implements FormStateProvider {
             return;
 
         Element swirled = null;
-        if (enemy.getAuraUnits(Element.PYRO) > 0)
+        if (enemy.getAuraUnits(Element.PYRO, sim.getCurrentTime()) > 0)
             swirled = Element.PYRO;
-        else if (enemy.getAuraUnits(Element.HYDRO) > 0)
+        else if (enemy.getAuraUnits(Element.HYDRO, sim.getCurrentTime()) > 0)
             swirled = Element.HYDRO;
-        else if (enemy.getAuraUnits(Element.ELECTRO) > 0)
+        else if (enemy.getAuraUnits(Element.ELECTRO, sim.getCurrentTime()) > 0)
             swirled = Element.ELECTRO;
-        else if (enemy.getAuraUnits(Element.CRYO) > 0)
+        else if (enemy.getAuraUnits(Element.CRYO, sim.getCurrentTime()) > 0)
             swirled = Element.CRYO;
 
         if (swirled != null) {

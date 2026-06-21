@@ -14,25 +14,31 @@ uses one `Elemental Reaction Damage` view backed by separately recorded elementa
 reaction damage, while reaction-labeled direct hits remain in Timeline and
 Action Damage only.
 
+Continuous aura decay in simulator mechanics and aura visualization has been
+implemented across Phases 1-5 below. Enemy auras now decay continuously over
+time, and reaction checks, aura consumption, logs, RL observations, snapshot
+restore, and the HTML Aura Timeline all read the same current-time-aware value.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
 behavior, Lunar reaction handling, and current regression coverage are treated as
 the baseline implementation.
 
-This pass makes reaction damage reporting precise and consistent.
-`Reaction Damage` and `Reaction-labeled Direct Damage` currently describe
-related concepts with separate UI treatments. The report should instead expose a
-single, clearly defined reaction damage view limited to elemental reaction damage
-as defined by Genshin Impact mechanics.
+This pass upgrades enemy aura from an expiry-only state to a time-aware remaining
+gauge model. Aura units should decay continuously over time, and reaction checks,
+aura consumption, logs, RL observations, and HTML visualization should all read
+the same current-time-aware value.
 
 Out of scope for this pass:
 
-- simulator mechanics, damage formulas, optimizer behavior, and RL behavior
 - new report asset downloads or changes to the existing `face.png` files
 - introducing a frontend framework, build step, or server-side report viewer
 - editing generated `docs/` or committed report output unless explicitly
   requested
+- changing elemental reaction formulas beyond the aura amount available at each
+  timestamp
+- adding multi-target aura behavior or enemy-specific aura rules
 
 ## Current Baseline
 
@@ -56,209 +62,268 @@ Broader sample validation:
 - `./gradlew RaidenParty`
 - `./gradlew FlinsParty2`
 
-## Implementation Order: Unified Elemental Reaction Damage Reporting
+## Implementation Order: Continuous Aura Decay
 
 Status:
 
-- Done.
-- The split `Reaction Damage` and `Reaction-labeled Direct Damage` presentation has been replaced with one consistent report view for actual elemental reaction damage.
+- Implemented (Phases 1-5 complete).
+- Validation: `./gradlew ReactionRegressionTest` and `./gradlew ReportRegressionTest`
+  pass with added continuous-decay, snapshot, and Aura Timeline coverage.
+  `RaidenParty` (1,362,938) and `FlinsParty2` (15,892,535) sample totals are
+  unchanged from before the change, as these tight rotations refresh auras before
+  natural decay removes them.
 
 Scope:
 
-- Improve generated HTML report semantics and readability under `output/`.
-- Unify the chart/table presentation for reaction damage.
-- Restrict reaction-damage aggregation to Genshin-defined elemental reaction damage.
-- Keep `Timeline`, `Action Damage`, and total actor damage behavior intact unless a phase explicitly touches only the labels needed to avoid confusion.
+- Make runtime aura units depend on current simulator time.
+- Use decayed aura units for reaction eligibility, reaction consumption, aura
+  snapshots, RL observations, and visual reports.
+- Keep the existing simplified aura duration formula initially unless a phase
+  explicitly changes only its representation.
+- Update Aura Timeline so it displays continuous decay instead of event-only
+  staircase state.
 
 Out of scope for this pass:
 
-- Changing simulator damage formulas or reaction mechanics.
-- Changing total damage, DPS, cumulative damage, rolling DPS, or action damage definitions.
-- Treating reaction-labeled direct hits as reaction damage.
+- Reworking elemental reaction damage formulas.
+- Reworking ICD rules.
+- Implementing multi-target aura gauges.
+- Modeling game-specific hidden gauge tax beyond the current simplified duration
+  and consumption rules.
 - Adding a frontend framework, build step, or server-side report viewer.
-- Persisting report data as a separate JSON artifact unless explicitly requested.
 - Editing generated `docs/` or committed report output unless explicitly requested.
 
 Definitions:
 
-- Elemental reaction damage:
-  Damage produced by a Genshin-defined elemental reaction itself. Examples include Vaporize bonus-attributed damage if separately measurable, Melt bonus-attributed damage if separately measurable, Swirl, Electro-Charged, Overloaded, Superconduct, Shatter, Burning, Bloom, Hyperbloom, Burgeon, Aggravate bonus damage if separately measurable, Spread bonus damage if separately measurable, Lunar-Charged, Lunar-Bloom, and Lunar-Crystallize.
-- Direct hit damage:
-  Damage produced by an action hit, even if the hit has a reaction label in the timeline.
-- Reaction-labeled direct damage:
-  Full hit damage from direct attacks where the event label mentions a reaction but the report cannot separate the reaction component. This must not be included in reaction damage totals.
-- Known limitation:
-  If additive or amplifying reaction bonus damage is not separately recorded, do not fold the full direct hit into reaction damage. Show it only in timeline/action damage, or expose a clear limitation note.
+- Applied aura units:
+  The gauge units at application time, after any immediate reaction consumption.
+- Current aura units:
+  The remaining units at a queried simulator time after continuous natural decay
+  and discrete reaction consumption are both applied.
+- Aura expiry:
+  The time at which current aura units reach zero through natural decay.
+- Discrete consumption:
+  Aura reduction caused by reaction handling, such as Vaporize, Swirl,
+  Electro-Charged ticks, Burning maintenance, or other existing simulator
+  mechanics.
+- Snapshot time:
+  The exact simulator time used when recording logs, reports, stats, or RL
+  observations. A snapshot must use current aura units at that time.
 
 Design direction:
 
-- Remove the separate `Reaction-labeled Direct Damage` section from the main chart area.
-- Rename or clarify the remaining reaction section as `Elemental Reaction Damage`.
-- Use one presentation style for all included reaction damage:
-  - one primary chart
-  - one optional detail table/list using the same data
-  - consistent colors and labels
-- Include a short report note explaining that direct hits with reaction labels are excluded unless the reaction component is separately recorded.
-- Keep timeline rows free to show reaction labels for diagnostics, but do not let those labels define reaction damage totals.
+- Keep `Enemy` as the owner of target aura state.
+- Avoid passing display labels into mechanic decisions.
+- Prefer an explicit current-time parameter for aura reads where correctness
+  depends on simulation time.
+- Preserve no-argument compatibility only where a caller is known to operate
+  immediately after `updateAuras(currentTime)`, or replace it during migration.
+- Make report Aura Timeline derive from the same mechanics-facing aura model,
+  not an unrelated display-only approximation.
 
-### Phase 1: Audit Current Reaction Report Data Sources - Done
+### Phase 1: Audit Aura Read/Write Call Sites
 
 Why first:
 
-The current report appears to build both `reactionDamageTotals` and `reactionLabeledDamageTotals`. Before changing rendering, identify exactly which `SimulationRecord` fields and builder branches populate each dataset.
+The current implementation mixes time-aware expiry with non-time-aware aura unit
+reads. Before changing `Enemy`, identify every call site that reads, writes, or
+serializes aura state so the behavior change is intentional.
 
 Target files:
 
-- `src/java/visualization/ReportData.java`
-- `src/java/visualization/ReportDataBuilder.java`
-- `src/java/visualization/ReportHtmlRenderer.java`
-- `src/java/visualization/SimulationRecord.java`
-- `src/java/sample/ReportRegressionTest.java`
+- `src/java/model/entity/Enemy.java`
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/mechanics/reaction/ReactionEffectScheduler.java`
+- `src/java/simulation/CombatSimulator.java`
+- `src/java/simulation/runtime/SimulationClock.java`
+- `src/java/simulation/runtime/SwitchManager.java`
+- `src/java/mechanics/rl/ObservationEncoder.java`
+- `src/java/mechanics/rl/PrivilegedStateEncoder.java`
+- `src/java/visualization/*`
 
 Tasks:
 
-- Trace current aggregation for:
-  - `Reaction Damage`
-  - `Reaction-labeled Direct Damage`
-  - timeline reaction labels
-  - action damage totals
-- Identify which fields represent separately recorded reaction damage, such as `reactionDamage`.
-- Identify which fields represent full direct hit damage, such as `damage`.
-- List every reaction label currently emitted by sample parties and whether it should be included in elemental reaction damage.
-- Decide whether a typed helper is needed to classify report reaction labels instead of relying on display-label branching in multiple places.
+- List all uses of `setAura`, `reduceAura`, `getAuraUnits`, `getAuraMap`,
+  `getActiveAuras`, `getPrimaryAura`, and `updateAuras`.
+- Classify each use as:
+  - mechanic decision
+  - reaction aftermath or scheduled tick
+  - report/log snapshot
+  - RL observation
+  - persistence/snapshot restore
+  - sample/debug display
+- Identify callers that currently rely on `getAuraUnits(element)` returning the
+  originally stored units instead of a decayed value.
+- Decide the minimum API surface for current-time-aware reads.
 
 Acceptance criteria:
 
-- The plan has a concrete source of truth for included reaction damage.
-- Every existing reaction report dataset is classified as keep, remove, or rename.
-- Ambiguous labels are documented before implementation.
+- All aura read/write call sites are accounted for.
+- The implementation phases know which call sites must be migrated and which can
+  remain compatibility wrappers.
+- Risky call sites in RL and report generation are explicitly listed.
 
 Test cases to add or update:
 
-- No code changes required in this phase unless a small helper test is added for discovered classification logic.
+- No code changes required unless a call-site inventory test is useful.
 
 Verification:
 
 - `./gradlew classes`
-- Optional: `./gradlew ReportRegressionTest` if exploratory assertions are added
 
-### Phase 2: Define a Single Reaction Damage Contract - Done
+### Phase 2: Implement Time-Aware Aura State
 
 Why second:
 
-The renderer should consume one well-defined dataset rather than deciding semantics from multiple partially overlapping lists.
+All downstream mechanics should consume one source of truth for current aura
+units. This phase changes the model while keeping the public behavior as close as
+possible except for natural continuous decay.
 
 Target files:
 
-- `src/java/visualization/ReportData.java`
-- `src/java/visualization/ReportDataBuilder.java`
-- `src/java/visualization/ReportViewAdapter.java` if display adaptation is needed
-- `src/java/sample/ReportRegressionTest.java`
+- `src/java/model/entity/Enemy.java`
+- `src/java/sample/ReactionRegressionTest.java`
 
 Tasks:
 
-- Introduce or standardize one report field for elemental reaction damage totals.
-- Keep the dataset limited to separately recorded reaction damage values.
-- Exclude full direct-hit damage from reaction totals, even when the timeline event has a reaction label.
-- Preserve direct-hit reaction labels only in timeline and action damage views.
-- Add a centralized classification helper if needed:
-  - included: Genshin-defined reaction damage records with explicit reaction damage values
-  - excluded: direct hits, reaction-labeled action damage, labels with zero or missing reaction damage
-  - ignored: `None`, empty labels, non-reaction diagnostic labels
+- Store enough data in each aura state to compute remaining units at any time:
+  application time, initial units, current units after discrete reductions, and
+  expiry behavior.
+- Add current-time-aware APIs such as:
+  - `getAuraUnits(element, currentTime)`
+  - `getAuraMap(currentTime)`
+  - `getActiveAuras(currentTime)`
+  - `getPrimaryAura(currentTime)`
+- Make `updateAuras(currentTime)` remove naturally expired auras after computing
+  current units.
+- Make `reduceAura(element, amount, currentTime)` consume the decayed current
+  value, then continue natural decay from the remaining value.
+- Keep no-argument methods only as compatibility wrappers, and document their
+  intended use or migrate them away in later phases.
+- Preserve snapshot restore behavior for simulator rollback.
 
 Acceptance criteria:
 
-- The report builder exposes exactly one reaction damage aggregate for the chart.
-- `reactionLabeledDamageTotals` is removed, deprecated, or no longer rendered.
-- No full direct-hit `damage` value is mixed into reaction damage totals.
+- A 1U aura naturally reaches zero at its configured expiry instead of staying at
+  1U until deletion.
+- Discrete aura consumption after partial natural decay uses the decayed value.
+- Snapshot restore can still round-trip active aura state.
+- Existing callers compile after API migration stubs are in place.
 
 Test cases to add or update:
 
-- Normal path: explicit reaction damage contributes to the unified reaction total.
-- Error path: reaction-labeled direct hit with `reactionDamage == 0` does not contribute.
-- Boundary values: empty reaction label, `None`, zero damage, and duplicate reaction labels aggregate predictably.
-- Major logic unit test: classification helper includes/excludes labels and values as defined.
+- Normal path: applying 1U at `t=0` returns a positive lower value at mid-duration
+  and `0` at expiry.
+- Error path: zero or negative aura application removes the aura and never
+  returns a negative current value.
+- Boundary values: query before application time, exactly at application time,
+  exactly at expiry, and just after expiry.
+- Major logic unit test: reduce a partially decayed aura and verify the new
+  remaining units and subsequent expiry.
 
 Verification:
 
-- `./gradlew ReportRegressionTest`
+- `./gradlew ReactionRegressionTest`
 - `./gradlew classes`
 
-### Phase 3: Renderer Unification and Label Cleanup - Done
+### Phase 3: Migrate Reaction Mechanics to Current-Time Aura Reads
 
 Why third:
 
-Once the data contract is clean, update the HTML so users see one reaction damage concept instead of two competing sections.
+Once `Enemy` can answer current aura values, reaction decisions and aura
+consumption must use those values. This is the behavioral core of the change.
 
 Target files:
 
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/mechanics/reaction/ReactionEffectScheduler.java`
+- `src/java/model/character/Sucrose.java`
+- other character, weapon, or artifact hooks discovered in Phase 1
+- `src/java/sample/ReactionRegressionTest.java`
+
+Tasks:
+
+- Replace mechanic-facing no-argument aura reads with current-time-aware reads.
+- Update reaction loops so active aura sets are based on decayed current units.
+- Update all `reduceAura` calls to pass the current simulator time.
+- Ensure scheduled reaction ticks such as Electro-Charged, Burning, Lunar
+  reactions, and related aftermath consume or inspect decayed aura values.
+- Update aura-dependent passives or absorption checks to use current-time aura.
+- Preserve existing ICD behavior.
+
+Acceptance criteria:
+
+- Reactions no longer trigger from an aura that has naturally decayed to zero.
+- Reactions still trigger correctly while a partially decayed aura remains above
+  zero.
+- Reaction consumption never drives stored aura below zero.
+- Existing sample rotations still complete.
+
+Test cases to add or update:
+
+- Normal integration: apply aura, wait within duration, then trigger a reaction.
+- Error integration: apply aura, wait past expiry, then verify no reaction occurs.
+- Boundary integration: trigger just before and exactly at expiry.
+- Major logic unit test: discrete consumption after partial decay removes or
+  preserves aura according to remaining units.
+- Representative integration: verify Sucrose absorption/passive checks use
+  decayed aura state.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew FlinsParty2`
+- `./gradlew RaidenParty`
+
+### Phase 4: Migrate Logging, Snapshots, Reports, and RL Observations
+
+Why fourth:
+
+After mechanic decisions use decayed aura, every observer must report the same
+state. Otherwise the simulator may be correct while HTML or RL observations show
+stale aura values.
+
+Target files:
+
+- `src/java/simulation/CombatSimulator.java`
+- `src/java/simulation/SimulatorSnapshot.java`
+- `src/java/simulation/runtime/VisualLoggerSink.java`
+- `src/java/simulation/runtime/SwitchManager.java`
+- `src/java/mechanics/rl/ObservationEncoder.java`
+- `src/java/mechanics/rl/PrivilegedStateEncoder.java`
+- `src/java/visualization/ReportDataBuilder.java`
 - `src/java/visualization/ReportHtmlRenderer.java`
 - `src/java/sample/ReportRegressionTest.java`
 
 Tasks:
 
-- Replace `Reaction Damage` and `Reaction-labeled Direct Damage` display with one `Elemental Reaction Damage` section.
-- Use the same chart style and color strategy for all included reaction damage.
-- Remove the separate `Reaction-labeled Direct Damage` chart and any related explanatory copy.
-- Add a concise note near the chart:
-  - only separately recorded elemental reaction damage is included
-  - direct hits with reaction labels remain in timeline/action damage and are excluded from this chart
-- Keep empty-state behavior clear when no reaction damage is present.
+- Make combat logs and timeline records snapshot `enemyAura` using current-time
+  aura values.
+- Make simulator snapshots and restores preserve enough aura state for rollback
+  without flattening natural decay incorrectly.
+- Make RL observations use decayed aura units at the observation time.
+- Update Aura Timeline data generation to include sampled/interpolated current
+  aura units, not only event-time values.
+- Change Aura Timeline line rendering away from staircase mode when displaying
+  continuous decay.
+- Keep report downsampling safe for dense aura series.
 
 Acceptance criteria:
 
-- The generated report has one reaction damage section.
-- There is no visible `Reaction-labeled Direct Damage` section.
-- The chart title and note accurately describe the data.
-- Existing global charts still render.
+- Timeline aura bars and Aura Timeline agree at the same timestamps.
+- Aura Timeline visibly slopes down over time for naturally decaying aura.
+- RL observation values decrease over time for an untouched aura.
+- Snapshot restore preserves future decay behavior.
 
 Test cases to add or update:
 
-- Renderer test: `Elemental Reaction Damage` appears.
-- Renderer test: `Reaction-labeled Direct Damage` does not appear.
-- Renderer test: empty reaction data renders a non-crashing empty chart or empty state.
-- Escaping test: reaction labels containing special characters remain HTML/JS safe.
-
-Verification:
-
-- `./gradlew ReportRegressionTest`
-- `./gradlew RaidenParty`
-- `./gradlew FlinsParty2`
-
-### Phase 4: Sample Validation Against Timeline and Action Damage - Done
-
-Why fourth:
-
-This change is semantic. The key risk is accidentally changing totals or hiding useful direct-hit data from timeline/action views.
-
-Target files:
-
-- `src/java/sample/ReportRegressionTest.java`
-- `src/java/sample/ReactionRegressionTest.java` only if reaction recording semantics need new coverage
-- `src/java/visualization/ReportDataBuilder.java`
-
-Tasks:
-
-- Validate that unified reaction totals are independent from action damage totals.
-- Validate that timeline still shows reaction labels for diagnostic rows.
-- Validate that direct-hit reaction labels do not increase the elemental reaction chart.
-- Compare sample report behavior for:
-  - `RaidenParty` conventional reactions such as Vaporize, Overloaded, Electro-Charged
-  - `FlinsParty2` Lunar-Charged and related Lunar damage
-- Add regression assertions for at least one explicit reaction damage record and one excluded reaction-labeled direct hit.
-
-Acceptance criteria:
-
-- Total DPS and action damage charts are unchanged except for any intentional label cleanup.
-- Timeline still exposes reaction labels where useful.
-- Unified reaction chart contains only included elemental reaction damage.
-- Lunar reaction damage appears in the unified reaction chart when separately recorded as reaction damage.
-
-Test cases to add or update:
-
-- Normal integration: generated sample report contains expected included reaction labels.
-- Error integration: direct-hit records with reaction labels are excluded from reaction totals.
-- Boundary integration: sample with no reaction damage still produces a valid report.
+- Normal path: report data includes a midpoint aura value below initial units.
+- Error path: empty/no-aura simulations still generate valid HTML.
+- Boundary values: report includes `0` at or after aura expiry.
+- Major logic unit test: RL observation aura value decreases between two sampled
+  times without reactions.
+- Renderer test: Aura Timeline no longer uses stepped display for continuous
+  aura data.
 
 Verification:
 
@@ -267,52 +332,68 @@ Verification:
 - `./gradlew RaidenParty`
 - `./gradlew FlinsParty2`
 
-### Phase 5: Documentation and Manual Browser Validation - Implemented, Manual Check Pending
+### Phase 5: Sample Regression and Balance Review
 
 Why last:
 
-After the data and UI are unified, record the exact semantics so future report work does not reintroduce mixed reaction/direct-hit totals.
+Continuous aura decay changes reaction availability, so sample totals and
+optimizer behavior may shift. This phase validates that shifts are explainable
+and not caused by stale call sites.
 
 Target files:
 
-- `README.md` if report semantics are documented there
 - `TASKS.md`
-- `src/java/visualization/ReportHtmlRenderer.java` for inline report copy only
+- `src/java/sample/RaidenParty.java`
+- `src/java/sample/FlinsParty2.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `src/java/sample/ReportRegressionTest.java`
+- `README.md` if aura semantics are documented there
 
 Tasks:
 
-- Document the unified reaction damage definition in the report-facing docs or report note.
-- Record known limitations for amplifying/additive reactions when bonus damage is not separately available.
-- Manually inspect generated reports for readability and chart consistency.
+- Run conventional and Lunar sample parties and compare major changes in total
+  damage, reaction counts, and aura timeline shape.
+- Update tests only where the old expectation depended on expiry-only aura
+  behavior.
+- Add documentation for the simplified continuous aura model:
+  - current duration formula
+  - linear decay assumption
+  - discrete reaction consumption
+  - known differences from exact game internals if any remain
+- Manually inspect generated reports for aura readability and chart consistency.
 - Confirm browser console has no JavaScript errors.
 
 Acceptance criteria:
 
-- Future readers can tell why reaction-labeled direct hits are excluded.
-- The report no longer presents two competing reaction-damage concepts.
-- Manual inspection confirms the chart and detail text are understandable.
+- Sample output changes are understood and documented in handoff notes.
+- Regression tests cover continuous decay, expiry boundaries, consumption, and
+  report rendering.
+- Aura Timeline communicates continuous decay clearly without misleading
+  staircase presentation.
+- Existing energy, buff, damage, and reaction report sections still render.
 
 Manual inspection checklist:
 
-- Only one reaction damage section is visible.
-- Chart labels match known reaction names.
-- Timeline still shows reaction labels for relevant events.
-- Action Damage still contains direct action hits.
-- Direct-hit reaction labels do not appear as separate reaction damage totals.
-- Lunar reaction damage appears when explicitly recorded.
-- Empty/no-reaction reports remain readable.
+- Aura Timeline slopes down between application and expiry.
+- Aura Timeline reaches zero at expiry.
+- Timeline aura bars match nearby chart values.
+- Reaction events do not appear after aura expiry unless a new aura was applied.
+- Energy, rolling DPS, action damage, buff uptime, and reaction damage charts
+  still render.
+- Narrow viewport does not break chart containers.
 
 Verification:
 
 - `./gradlew ReportRegressionTest`
+- `./gradlew ReactionRegressionTest`
 - `./gradlew RaidenParty`
 - `./gradlew FlinsParty2`
 - Manual browser inspection of `output/simulation_report.html`
 
 Status note:
 
-- Report copy and automated validation are complete.
-- Manual browser console inspection remains pending in a local browser session.
+- Implemented. Continuous aura decay is live across mechanics, logging,
+  snapshots, RL observations, and the HTML Aura Timeline.
 
 ## Cross-Cutting Rules
 

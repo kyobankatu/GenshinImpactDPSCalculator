@@ -175,6 +175,29 @@ Known simplifications:
   behavior, and the scripted sample can warn when it fires Flins burst below full
   energy.
 
+### Continuous Aura Decay Model
+
+Enemy elemental auras decay continuously over time rather than persisting at full
+strength until a fixed expiry. The model is intentionally simplified:
+
+- **Duration formula**: a runtime-applied aura lasts `6 + units * 5` seconds
+  (1U = 11 s, 2U = 16 s, 4U = 26 s).
+- **Linear decay**: units fall linearly from the applied value to zero across that
+  duration at a fixed per-aura rate (`units / duration` units per second).
+- **Discrete consumption**: reactions (Vaporize, Swirl, Electro-Charged ticks,
+  Burning maintenance, Quicken, etc.) consume the decayed *current* value at the
+  reaction time, then natural decay resumes from the remaining units.
+- **Single source of truth**: reaction eligibility/consumption, combat logs, the
+  HTML Aura Timeline, RL observations, and snapshot save/restore all read the same
+  current-time-aware aura value. Snapshots preserve application time and duration
+  so decay resumes correctly after rollback.
+- **Aura Timeline**: rendered as continuous (non-stepped) lines that slope down to
+  zero at expiry, matching the per-event aura bars in the Timeline view.
+
+Known differences from exact game internals: the real game uses non-linear gauge
+decay and hidden reaction "tax" rules; this simulator uses the linear duration
+model above and does not model multi-target or per-enemy aura gauges.
+
 Latest validation baseline from the accuracy pass:
 
 - `./gradlew ReactionRegressionTest`

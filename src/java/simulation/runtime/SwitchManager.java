@@ -95,7 +95,9 @@ public class SwitchManager {
         party.switchCharacter(id);
 
         if (sim.isLoggingEnabled()) {
-            Map<Element, Double> auraSnap = sim.getEnemy() != null ? sim.getEnemy().getAuraMap() : new HashMap<>();
+            Map<Element, Double> auraSnap = sim.getEnemy() != null
+                    ? sim.getEnemy().getAuraMap(sim.getCurrentTime())
+                    : new HashMap<>();
             combatLogSink.log(sim.getCurrentTime(), oldName, "Swap -> " + target.getName(), 0.0, "None", 0.0,
                     auraSnap);
         }

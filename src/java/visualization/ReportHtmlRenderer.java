@@ -264,7 +264,8 @@ final class ReportHtmlRenderer {
 
         sb.append("<div class='row'>\n");
         appendChartPanel(sb, "Rolling DPS", "rollingDps", "0.5s rolling samples over the previous 5.0s window.", false);
-        appendChartPanel(sb, "Aura Timeline", "auraTimeline", "Step-style enemy aura units by element.", false);
+        appendChartPanel(sb, "Aura Timeline", "auraTimeline",
+                "Continuous enemy aura units by element, decaying over time.", false);
         sb.append("</div>\n");
 
         sb.append("<div class='row'>\n");
@@ -935,7 +936,7 @@ final class ReportHtmlRenderer {
                 + String.join(",", data.rollingDpsSeries)
                 + "], borderColor: '#ff7b7b', backgroundColor: '#ff7b7b', fill: false, tension: 0.15 }"),
                 "DPS", false);
-        appendLineChart(sb, "auraTimeline", auraDatasets(data), "Aura Units", true);
+        appendLineChart(sb, "auraTimeline", auraDatasets(data), "Aura Units", false);
         appendLineChart(sb, "energyTimeline", energyDatasets(data), "Energy %", false);
         appendBarChart(sb, "buffUptime", buffLabels(data), buffValues(data), fallbackColors(data.buffUptime.size()),
                 "Uptime %");
@@ -1022,7 +1023,7 @@ final class ReportHtmlRenderer {
             String color = elementColor(entry.getKey());
             datasets.add("{ label: " + jsString(entry.getKey().name()) + ", data: ["
                     + String.join(",", entry.getValue()) + "], borderColor: " + color
-                    + ", backgroundColor: " + color + ", fill: false, stepped: true }");
+                    + ", backgroundColor: " + color + ", fill: false, stepped: false, tension: 0 }");
         }
         return datasets;
     }
