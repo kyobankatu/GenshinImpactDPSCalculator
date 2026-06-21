@@ -77,9 +77,17 @@ loadScripts(document, 'script');</script>
 <li><a href="#normalizeIcd(simulation.action.AttackAction)" tabindex="0">normalizeIcd(AttackAction)</a></li>
 <li><a href="#notifyLunarAction(simulation.action.AttackAction,model.entity.Character)" tabindex="0">notifyLunarAction(AttackAction, Character)</a></li>
 <li><a href="#resolveGaugeAndReactions(model.entity.Character,model.type.CharacterId,simulation.action.AttackAction,simulation.runtime.CombatActionResolver.ActionResolutionContext)" tabindex="0">resolveGaugeAndReactions(Character, CharacterId, AttackAction, CombatActionResolver.ActionResolutionContext)</a></li>
+<li><a href="#convertToLunarIfEligible(mechanics.reaction.ReactionResult)" tabindex="0">convertToLunarIfEligible(ReactionResult)</a></li>
+<li><a href="#tryTriggerShatter(model.entity.Character,model.type.CharacterId,simulation.action.AttackAction,simulation.runtime.CombatActionResolver.ActionResolutionContext)" tabindex="0">tryTriggerShatter(Character, CharacterId, AttackAction, CombatActionResolver.ActionResolutionContext)</a></li>
+<li><a href="#getReactionBonus(model.type.Element,model.type.Element,model.stats.StatsContainer)" tabindex="0">getReactionBonus(Element, Element, StatsContainer)</a></li>
+<li><a href="#tryTriggerDendroCoreReaction(model.entity.Character,model.type.CharacterId,simulation.action.AttackAction,simulation.runtime.CombatActionResolver.ActionResolutionContext)" tabindex="0">tryTriggerDendroCoreReaction(Character, CharacterId, AttackAction, CombatActionResolver.ActionResolutionContext)</a></li>
 <li><a href="#getReactionStats(model.entity.Character,simulation.action.AttackAction,simulation.runtime.CombatActionResolver.ActionResolutionContext)" tabindex="0">getReactionStats(Character, AttackAction, CombatActionResolver.ActionResolutionContext)</a></li>
 <li><a href="#handleAmplifyingReaction(model.type.Element,model.type.Element,simulation.action.AttackAction,mechanics.reaction.ReactionResult)" tabindex="0">handleAmplifyingReaction(Element, Element, AttackAction, ReactionResult)</a></li>
 <li><a href="#handleTransformativeReaction(model.entity.Character,model.type.CharacterId,simulation.action.AttackAction,model.type.Element,model.type.Element,mechanics.reaction.ReactionResult,model.stats.StatsContainer)" tabindex="0">handleTransformativeReaction(Character, CharacterId, AttackAction, Element, Element, ReactionResult, StatsContainer)</a></li>
+<li><a href="#handleStatefulReaction(model.entity.Character,model.type.CharacterId,model.type.Element,model.type.Element,simulation.action.AttackAction,mechanics.reaction.ReactionResult,model.stats.StatsContainer)" tabindex="0">handleStatefulReaction(Character, CharacterId, Element, Element, AttackAction, ReactionResult, StatsContainer)</a></li>
+<li><a href="#handleLunarCrystallize(model.entity.Character,model.type.CharacterId,model.type.Element,model.type.Element,mechanics.reaction.ReactionResult)" tabindex="0">handleLunarCrystallize(Character, CharacterId, Element, Element, ReactionResult)</a></li>
+<li><a href="#tryApplyCatalyzeAdditiveReaction(model.entity.Character,simulation.action.AttackAction,simulation.runtime.CombatActionResolver.ActionResolutionContext)" tabindex="0">tryApplyCatalyzeAdditiveReaction(Character, AttackAction, CombatActionResolver.ActionResolutionContext)</a></li>
+<li><a href="#applySuperconductPhysicalResShred()" tabindex="0">applySuperconductPhysicalResShred()</a></li>
 <li><a href="#getTransformativeReactionElement(mechanics.reaction.ReactionResult)" tabindex="0">getTransformativeReactionElement(ReactionResult)</a></li>
 <li><a href="#applyTriggerAuraIfPersistent(model.type.Element,double)" tabindex="0">applyTriggerAuraIfPersistent(Element, double)</a></li>
 <li><a href="#finalizeActionDamage(model.entity.Character,java.lang.String,simulation.action.AttackAction,double,simulation.runtime.CombatActionResolver.ActionResolutionContext)" tabindex="0">finalizeActionDamage(Character, String, AttackAction, double, CombatActionResolver.ActionResolutionContext)</a></li>
@@ -188,12 +196,18 @@ resolved stats used during resolution.</div>
 <div class="block">Adds the weapon's expected normal-attack energy generation to the attacker.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyTriggerAuraIfPersistent(model.type.Element,double)" class="member-name-link">applyTriggerAuraIfPersistent</a><wbr>(<a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;trigger,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applySuperconductPhysicalResShred()" class="member-name-link">applySuperconductPhysicalResShred</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyTriggerAuraIfPersistent(model.type.Element,double)" class="member-name-link">applyTriggerAuraIfPersistent</a><wbr>(<a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;trigger,
  double&nbsp;gaugeUnits)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Applies the trigger element as a new aura when it is one of the persistent elements
 (i.e., not Physical/Anemo/Geo).</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="../../mechanics/reaction/ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#convertToLunarIfEligible(mechanics.reaction.ReactionResult)" class="member-name-link">convertToLunarIfEligible</a><wbr>(<a href="../../mechanics/reaction/ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a>&nbsp;result)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="CombatActionResolver.ActionResolutionContext.html" title="simulation.runtime内のクラス">CombatActionResolver.ActionResolutionContext</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#createContext(model.entity.Character,simulation.action.AttackAction)" class="member-name-link">createContext</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
  <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action)</code></div>
@@ -210,64 +224,102 @@ resolved stats used during resolution.</div>
 <div class="block">Computes final damage via <a href="../../mechanics/formula/DamageCalculator.html" title="mechanics.formula内のクラス"><code>DamageCalculator</code></a>, records it, and triggers all
 weapon/artifact on-damage hooks plus optional combat logging.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getReactionStats(model.entity.Character,simulation.action.AttackAction,simulation.runtime.CombatActionResolver.ActionResolutionContext)" class="member-name-link">getReactionStats</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getReactionBonus(model.type.Element,model.type.Element,model.stats.StatsContainer)" class="member-name-link">getReactionBonus</a><wbr>(<a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;trigger,
+ <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;aura,
+ <a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;stats)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getReactionStats(model.entity.Character,simulation.action.AttackAction,simulation.runtime.CombatActionResolver.ActionResolutionContext)" class="member-name-link">getReactionStats</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
  <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  <a href="CombatActionResolver.ActionResolutionContext.html" title="simulation.runtime内のクラス">CombatActionResolver.ActionResolutionContext</a>&nbsp;context)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the stats used for reaction computation, honoring snapshot semantics.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTransformativeReactionElement(mechanics.reaction.ReactionResult)" class="member-name-link">getTransformativeReactionElement</a><wbr>(<a href="../../mechanics/reaction/ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a>&nbsp;result)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTransformativeReactionElement(mechanics.reaction.ReactionResult)" class="member-name-link">getTransformativeReactionElement</a><wbr>(<a href="../../mechanics/reaction/ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a>&nbsp;result)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the element used for transformative-reaction RES lookup.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#handleAmplifyingReaction(model.type.Element,model.type.Element,simulation.action.AttackAction,mechanics.reaction.ReactionResult)" class="member-name-link">handleAmplifyingReaction</a><wbr>(<a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;trigger,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#handleAmplifyingReaction(model.type.Element,model.type.Element,simulation.action.AttackAction,mechanics.reaction.ReactionResult)" class="member-name-link">handleAmplifyingReaction</a><wbr>(<a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;trigger,
  <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;aura,
  <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  <a href="../../mechanics/reaction/ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a>&nbsp;result)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Applies Melt/Vaporize aura consumption and returns the amplifying multiplier.</div>
 </div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#handleLunarCrystallize(model.entity.Character,model.type.CharacterId,model.type.Element,model.type.Element,mechanics.reaction.ReactionResult)" class="member-name-link">handleLunarCrystallize</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
+ <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;trigger,
+ <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;aura,
+ <a href="../../mechanics/reaction/ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a>&nbsp;result)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#handleTransformativeReaction(model.entity.Character,model.type.CharacterId,simulation.action.AttackAction,model.type.Element,model.type.Element,mechanics.reaction.ReactionResult,model.stats.StatsContainer)" class="member-name-link">handleTransformativeReaction</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#handleStatefulReaction(model.entity.Character,model.type.CharacterId,model.type.Element,model.type.Element,simulation.action.AttackAction,mechanics.reaction.ReactionResult,model.stats.StatsContainer)" class="member-name-link">handleStatefulReaction</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
+ <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;trigger,
+ <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;aura,
+ <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
+ <a href="../../mechanics/reaction/ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a>&nbsp;result,
+ <a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;stats)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#handleTransformativeReaction(model.entity.Character,model.type.CharacterId,simulation.action.AttackAction,model.type.Element,model.type.Element,mechanics.reaction.ReactionResult,model.stats.StatsContainer)" class="member-name-link">handleTransformativeReaction</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
  <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
  <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;trigger,
  <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;aura,
  <a href="../../mechanics/reaction/ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a>&nbsp;result,
  <a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;stats)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Applies transformative-reaction damage (Swirl, Overload, Electro-Charged, etc.),
 records the damage, and schedules follow-up effects when applicable.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#normalizeIcd(simulation.action.AttackAction)" class="member-name-link">normalizeIcd</a><wbr>(<a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#normalizeIcd(simulation.action.AttackAction)" class="member-name-link">normalizeIcd</a><wbr>(<a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Fills in defaults for <a href="../../model/type/ICDTag.html" title="model.typeの列挙クラス"><code>ICDTag</code></a>/<a href="../../model/type/ICDType.html" title="model.typeの列挙クラス"><code>ICDType</code></a> when an action omits them.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#notifyLunarAction(simulation.action.AttackAction,model.entity.Character)" class="member-name-link">notifyLunarAction</a><wbr>(<a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#notifyLunarAction(simulation.action.AttackAction,model.entity.Character)" class="member-name-link">notifyLunarAction</a><wbr>(<a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  <a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Emits the appropriate Lunar reaction notification for actions flagged as Lunar.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resolveGaugeAndReactions(model.entity.Character,model.type.CharacterId,simulation.action.AttackAction,simulation.runtime.CombatActionResolver.ActionResolutionContext)" class="member-name-link">resolveGaugeAndReactions</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resolveGaugeAndReactions(model.entity.Character,model.type.CharacterId,simulation.action.AttackAction,simulation.runtime.CombatActionResolver.ActionResolutionContext)" class="member-name-link">resolveGaugeAndReactions</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
  <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
  <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
  <a href="CombatActionResolver.ActionResolutionContext.html" title="simulation.runtime内のクラス">CombatActionResolver.ActionResolutionContext</a>&nbsp;context)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Drives gauge consumption and reaction resolution across currently active enemy auras.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resolveWithoutTimeAdvance(model.type.CharacterId,simulation.action.AttackAction)" class="member-name-link">resolveWithoutTimeAdvance</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#resolveWithoutTimeAdvance(model.type.CharacterId,simulation.action.AttackAction)" class="member-name-link">resolveWithoutTimeAdvance</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
  <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Resolves all damage and elemental effects of an <a href="../action/AttackAction.html" title="simulation.action内のクラス"><code>AttackAction</code></a> without
 advancing simulation time.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#tryApplyCatalyzeAdditiveReaction(model.entity.Character,simulation.action.AttackAction,simulation.runtime.CombatActionResolver.ActionResolutionContext)" class="member-name-link">tryApplyCatalyzeAdditiveReaction</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
+ <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
+ <a href="CombatActionResolver.ActionResolutionContext.html" title="simulation.runtime内のクラス">CombatActionResolver.ActionResolutionContext</a>&nbsp;context)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#tryTriggerDendroCoreReaction(model.entity.Character,model.type.CharacterId,simulation.action.AttackAction,simulation.runtime.CombatActionResolver.ActionResolutionContext)" class="member-name-link">tryTriggerDendroCoreReaction</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
+ <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
+ <a href="CombatActionResolver.ActionResolutionContext.html" title="simulation.runtime内のクラス">CombatActionResolver.ActionResolutionContext</a>&nbsp;context)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#tryTriggerShatter(model.entity.Character,model.type.CharacterId,simulation.action.AttackAction,simulation.runtime.CombatActionResolver.ActionResolutionContext)" class="member-name-link">tryTriggerShatter</a><wbr>(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
+ <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
+ <a href="CombatActionResolver.ActionResolutionContext.html" title="simulation.runtime内のクラス">CombatActionResolver.ActionResolutionContext</a>&nbsp;context)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -429,6 +481,46 @@ timer events whose timing is managed elsewhere.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="convertToLunarIfEligible(mechanics.reaction.ReactionResult)">
+<h3>convertToLunarIfEligible</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="../../mechanics/reaction/ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a></span>&nbsp;<span class="element-name">convertToLunarIfEligible</span><wbr><span class="parameters">(<a href="../../mechanics/reaction/ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a>&nbsp;result)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="tryTriggerShatter(model.entity.Character,model.type.CharacterId,simulation.action.AttackAction,simulation.runtime.CombatActionResolver.ActionResolutionContext)">
+<h3>tryTriggerShatter</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">tryTriggerShatter</span><wbr><span class="parameters">(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
+ <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
+ <a href="CombatActionResolver.ActionResolutionContext.html" title="simulation.runtime内のクラス">CombatActionResolver.ActionResolutionContext</a>&nbsp;context)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getReactionBonus(model.type.Element,model.type.Element,model.stats.StatsContainer)">
+<h3>getReactionBonus</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getReactionBonus</span><wbr><span class="parameters">(<a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;trigger,
+ <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;aura,
+ <a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;stats)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="tryTriggerDendroCoreReaction(model.entity.Character,model.type.CharacterId,simulation.action.AttackAction,simulation.runtime.CombatActionResolver.ActionResolutionContext)">
+<h3>tryTriggerDendroCoreReaction</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">tryTriggerDendroCoreReaction</span><wbr><span class="parameters">(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
+ <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
+ <a href="CombatActionResolver.ActionResolutionContext.html" title="simulation.runtime内のクラス">CombatActionResolver.ActionResolutionContext</a>&nbsp;context)</span></div>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="getReactionStats(model.entity.Character,simulation.action.AttackAction,simulation.runtime.CombatActionResolver.ActionResolutionContext)">
 <h3>getReactionStats</h3>
 <div class="horizontal-scroll">
@@ -491,6 +583,50 @@ records the damage, and schedules follow-up effects when applicable.</div>
 <dd><code>result</code> - resolved reaction result</dd>
 <dd><code>stats</code> - stats used for reaction bonuses</dd>
 </dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="handleStatefulReaction(model.entity.Character,model.type.CharacterId,model.type.Element,model.type.Element,simulation.action.AttackAction,mechanics.reaction.ReactionResult,model.stats.StatsContainer)">
+<h3>handleStatefulReaction</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">handleStatefulReaction</span><wbr><span class="parameters">(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
+ <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;trigger,
+ <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;aura,
+ <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
+ <a href="../../mechanics/reaction/ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a>&nbsp;result,
+ <a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;stats)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="handleLunarCrystallize(model.entity.Character,model.type.CharacterId,model.type.Element,model.type.Element,mechanics.reaction.ReactionResult)">
+<h3>handleLunarCrystallize</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">handleLunarCrystallize</span><wbr><span class="parameters">(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
+ <a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
+ <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;trigger,
+ <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;aura,
+ <a href="../../mechanics/reaction/ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a>&nbsp;result)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="tryApplyCatalyzeAdditiveReaction(model.entity.Character,simulation.action.AttackAction,simulation.runtime.CombatActionResolver.ActionResolutionContext)">
+<h3>tryApplyCatalyzeAdditiveReaction</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">tryApplyCatalyzeAdditiveReaction</span><wbr><span class="parameters">(<a href="../../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;attacker,
+ <a href="../action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action,
+ <a href="CombatActionResolver.ActionResolutionContext.html" title="simulation.runtime内のクラス">CombatActionResolver.ActionResolutionContext</a>&nbsp;context)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="applySuperconductPhysicalResShred()">
+<h3>applySuperconductPhysicalResShred</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">applySuperconductPhysicalResShred</span>()</div>
 </div>
 </section>
 </li>

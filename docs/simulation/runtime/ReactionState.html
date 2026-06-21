@@ -54,6 +54,7 @@ loadScripts(document, 'script');</script>
 <div class="toc-header">コンテンツ&nbsp;<input type="text" class="filter-input" disabled placeholder="コンテンツのフィルタ(.と入力)" aria-label="目次のフィルタ" autocomplete="off" spellcheck="false"><input type="reset" class="reset-filter" disabled tabindex="-1" value="リセット"></div>
 <ol class="toc-list" tabindex="-1">
 <li><a href="#" tabindex="0">説明</a></li>
+<li><a href="#nested-class-summary" tabindex="0">ネストされたクラスの概要</a></li>
 <li><a href="#field-summary" tabindex="0">フィールドの概要</a></li>
 <li><a href="#constructor-summary" tabindex="0">コンストラクタの概要</a></li>
 <li><a href="#method-summary" tabindex="0">メソッドの概要</a></li>
@@ -61,6 +62,15 @@ loadScripts(document, 'script');</script>
 <ol class="toc-list">
 <li><a href="#ecTimerRunning" tabindex="0">ecTimerRunning</a></li>
 <li><a href="#thundercloudEndTime" tabindex="0">thundercloudEndTime</a></li>
+<li><a href="#burningTimerRunning" tabindex="0">burningTimerRunning</a></li>
+<li><a href="#burningEndTime" tabindex="0">burningEndTime</a></li>
+<li><a href="#quickenEndTime" tabindex="0">quickenEndTime</a></li>
+<li><a href="#moondriftCount" tabindex="0">moondriftCount</a></li>
+<li><a href="#lunarCrystallizeTriggerCount" tabindex="0">lunarCrystallizeTriggerCount</a></li>
+<li><a href="#verdantDewCount" tabindex="0">verdantDewCount</a></li>
+<li><a href="#moonridgeDewCount" tabindex="0">moonridgeDewCount</a></li>
+<li><a href="#dendroCores" tabindex="0">dendroCores</a></li>
+<li><a href="#nextDendroCoreId" tabindex="0">nextDendroCoreId</a></li>
 </ol>
 </li>
 <li><a href="#constructor-detail" tabindex="0">コンストラクタの詳細</a>
@@ -74,6 +84,30 @@ loadScripts(document, 'script');</script>
 <li><a href="#setEcTimerRunning(boolean)" tabindex="0">setEcTimerRunning(boolean)</a></li>
 <li><a href="#getThundercloudEndTime()" tabindex="0">getThundercloudEndTime()</a></li>
 <li><a href="#setThundercloudEndTime(double)" tabindex="0">setThundercloudEndTime(double)</a></li>
+<li><a href="#isBurningTimerRunning()" tabindex="0">isBurningTimerRunning()</a></li>
+<li><a href="#setBurningTimerRunning(boolean)" tabindex="0">setBurningTimerRunning(boolean)</a></li>
+<li><a href="#getBurningEndTime()" tabindex="0">getBurningEndTime()</a></li>
+<li><a href="#setBurningEndTime(double)" tabindex="0">setBurningEndTime(double)</a></li>
+<li><a href="#getQuickenEndTime()" tabindex="0">getQuickenEndTime()</a></li>
+<li><a href="#setQuickenEndTime(double)" tabindex="0">setQuickenEndTime(double)</a></li>
+<li><a href="#getMoondriftCount()" tabindex="0">getMoondriftCount()</a></li>
+<li><a href="#setMoondriftCount(int)" tabindex="0">setMoondriftCount(int)</a></li>
+<li><a href="#getLunarCrystallizeTriggerCount()" tabindex="0">getLunarCrystallizeTriggerCount()</a></li>
+<li><a href="#setLunarCrystallizeTriggerCount(int)" tabindex="0">setLunarCrystallizeTriggerCount(int)</a></li>
+<li><a href="#incrementLunarCrystallizeTriggerCount()" tabindex="0">incrementLunarCrystallizeTriggerCount()</a></li>
+<li><a href="#getVerdantDewCount()" tabindex="0">getVerdantDewCount()</a></li>
+<li><a href="#setVerdantDewCount(int)" tabindex="0">setVerdantDewCount(int)</a></li>
+<li><a href="#incrementVerdantDewCount()" tabindex="0">incrementVerdantDewCount()</a></li>
+<li><a href="#getMoonridgeDewCount()" tabindex="0">getMoonridgeDewCount()</a></li>
+<li><a href="#setMoonridgeDewCount(int)" tabindex="0">setMoonridgeDewCount(int)</a></li>
+<li><a href="#incrementMoonridgeDewCount()" tabindex="0">incrementMoonridgeDewCount()</a></li>
+<li><a href="#addDendroCore(model.type.CharacterId,double,double)" tabindex="0">addDendroCore(CharacterId, double, double)</a></li>
+<li><a href="#getDendroCores()" tabindex="0">getDendroCores()</a></li>
+<li><a href="#removeOldestDendroCore()" tabindex="0">removeOldestDendroCore()</a></li>
+<li><a href="#removeDendroCore(int)" tabindex="0">removeDendroCore(int)</a></li>
+<li><a href="#clearDendroCores()" tabindex="0">clearDendroCores()</a></li>
+<li><a href="#restoreDendroCores(java.util.List,int)" tabindex="0">restoreDendroCores(List, int)</a></li>
+<li><a href="#getNextDendroCoreId()" tabindex="0">getNextDendroCoreId()</a></li>
 </ol>
 </li>
 </ol>
@@ -96,6 +130,21 @@ loadScripts(document, 'script');</script>
 </section>
 <section class="summary">
 <ul class="summary-list">
+<!-- ======== NESTED CLASS SUMMARY ======== -->
+<li>
+<section class="nested-class-summary" id="nested-class-summary">
+<h2>ネストされたクラスの概要</h2>
+<div class="caption"><span>ネストされたクラス</span></div>
+<div class="summary-table three-column-summary">
+<div class="table-header col-first">修飾子とタイプ</div>
+<div class="table-header col-second">クラス</div>
+<div class="table-header col-last">説明</div>
+<div class="col-first even-row-color"><code>static final class&nbsp;</code></div>
+<div class="col-second even-row-color"><code><a href="ReactionState.DendroCoreState.html" class="type-name-link" title="simulation.runtime内のクラス">ReactionState.DendroCoreState</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+</div>
+</section>
+</li>
 <!-- =========== FIELD SUMMARY =========== -->
 <li>
 <section class="field-summary" id="field-summary">
@@ -105,12 +154,39 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">修飾子とタイプ</div>
 <div class="table-header col-second">フィールド</div>
 <div class="table-header col-last">説明</div>
-<div class="col-first even-row-color"><code>private boolean</code></div>
-<div class="col-second even-row-color"><code><a href="#ecTimerRunning" class="member-name-link">ecTimerRunning</a></code></div>
+<div class="col-first even-row-color"><code>private double</code></div>
+<div class="col-second even-row-color"><code><a href="#burningEndTime" class="member-name-link">burningEndTime</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private boolean</code></div>
+<div class="col-second odd-row-color"><code><a href="#burningTimerRunning" class="member-name-link">burningTimerRunning</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="ReactionState.DendroCoreState.html" title="simulation.runtime内のクラス">ReactionState.DendroCoreState</a>&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#dendroCores" class="member-name-link">dendroCores</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private boolean</code></div>
+<div class="col-second odd-row-color"><code><a href="#ecTimerRunning" class="member-name-link">ecTimerRunning</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private int</code></div>
+<div class="col-second even-row-color"><code><a href="#lunarCrystallizeTriggerCount" class="member-name-link">lunarCrystallizeTriggerCount</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private int</code></div>
+<div class="col-second odd-row-color"><code><a href="#moondriftCount" class="member-name-link">moondriftCount</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private int</code></div>
+<div class="col-second even-row-color"><code><a href="#moonridgeDewCount" class="member-name-link">moonridgeDewCount</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private int</code></div>
+<div class="col-second odd-row-color"><code><a href="#nextDendroCoreId" class="member-name-link">nextDendroCoreId</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private double</code></div>
+<div class="col-second even-row-color"><code><a href="#quickenEndTime" class="member-name-link">quickenEndTime</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code>private double</code></div>
 <div class="col-second odd-row-color"><code><a href="#thundercloudEndTime" class="member-name-link">thundercloudEndTime</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private int</code></div>
+<div class="col-second even-row-color"><code><a href="#verdantDewCount" class="member-name-link">verdantDewCount</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -138,26 +214,101 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">修飾子とタイプ</div>
 <div class="table-header col-second">メソッド</div>
 <div class="table-header col-last">説明</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ReactionState.DendroCoreState.html" title="simulation.runtime内のクラス">ReactionState.DendroCoreState</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addDendroCore(model.type.CharacterId,double,double)" class="member-name-link">addDendroCore</a><wbr>(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;ownerId,
+ double&nbsp;currentTime,
+ double&nbsp;damage)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#clearDendroCores()" class="member-name-link">clearDendroCores</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getThundercloudEndTime()" class="member-name-link">getThundercloudEndTime</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getBurningEndTime()" class="member-name-link">getBurningEndTime</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="ReactionState.DendroCoreState.html" title="simulation.runtime内のクラス">ReactionState.DendroCoreState</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDendroCores()" class="member-name-link">getDendroCores</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLunarCrystallizeTriggerCount()" class="member-name-link">getLunarCrystallizeTriggerCount</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMoondriftCount()" class="member-name-link">getMoondriftCount</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMoonridgeDewCount()" class="member-name-link">getMoonridgeDewCount</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getNextDendroCoreId()" class="member-name-link">getNextDendroCoreId</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getQuickenEndTime()" class="member-name-link">getQuickenEndTime</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getThundercloudEndTime()" class="member-name-link">getThundercloudEndTime</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the Thundercloud expiry time.</div>
 </div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getVerdantDewCount()" class="member-name-link">getVerdantDewCount</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#incrementLunarCrystallizeTriggerCount()" class="member-name-link">incrementLunarCrystallizeTriggerCount</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#incrementMoonridgeDewCount()" class="member-name-link">incrementMoonridgeDewCount</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#incrementVerdantDewCount()" class="member-name-link">incrementVerdantDewCount</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isBurningTimerRunning()" class="member-name-link">isBurningTimerRunning</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isEcTimerRunning()" class="member-name-link">isEcTimerRunning</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns whether an EC-related timer is active.</div>
 </div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#removeDendroCore(int)" class="member-name-link">removeDendroCore</a><wbr>(int&nbsp;coreId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="ReactionState.DendroCoreState.html" title="simulation.runtime内のクラス">ReactionState.DendroCoreState</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#removeOldestDendroCore()" class="member-name-link">removeOldestDendroCore</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setEcTimerRunning(boolean)" class="member-name-link">setEcTimerRunning</a><wbr>(boolean&nbsp;running)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#restoreDendroCores(java.util.List,int)" class="member-name-link">restoreDendroCores</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReactionState.DendroCoreState.html" title="simulation.runtime内のクラス">ReactionState.DendroCoreState</a>&gt;&nbsp;cores,
+ int&nbsp;nextCoreId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setBurningEndTime(double)" class="member-name-link">setBurningEndTime</a><wbr>(double&nbsp;burningEndTime)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setBurningTimerRunning(boolean)" class="member-name-link">setBurningTimerRunning</a><wbr>(boolean&nbsp;burningTimerRunning)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setEcTimerRunning(boolean)" class="member-name-link">setEcTimerRunning</a><wbr>(boolean&nbsp;running)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Sets whether an EC-related timer is active.</div>
 </div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setLunarCrystallizeTriggerCount(int)" class="member-name-link">setLunarCrystallizeTriggerCount</a><wbr>(int&nbsp;lunarCrystallizeTriggerCount)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setThundercloudEndTime(double)" class="member-name-link">setThundercloudEndTime</a><wbr>(double&nbsp;thundercloudEndTime)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setMoondriftCount(int)" class="member-name-link">setMoondriftCount</a><wbr>(int&nbsp;moondriftCount)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setMoonridgeDewCount(int)" class="member-name-link">setMoonridgeDewCount</a><wbr>(int&nbsp;moonridgeDewCount)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setQuickenEndTime(double)" class="member-name-link">setQuickenEndTime</a><wbr>(double&nbsp;quickenEndTime)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setThundercloudEndTime(double)" class="member-name-link">setThundercloudEndTime</a><wbr>(double&nbsp;thundercloudEndTime)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Sets the Thundercloud expiry time.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setVerdantDewCount(int)" class="member-name-link">setVerdantDewCount</a><wbr>(int&nbsp;verdantDewCount)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -188,6 +339,78 @@ loadScripts(document, 'script');</script>
 <h3>thundercloudEndTime</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">thundercloudEndTime</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="burningTimerRunning">
+<h3>burningTimerRunning</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">burningTimerRunning</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="burningEndTime">
+<h3>burningEndTime</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">burningEndTime</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="quickenEndTime">
+<h3>quickenEndTime</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">quickenEndTime</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="moondriftCount">
+<h3>moondriftCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">moondriftCount</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="lunarCrystallizeTriggerCount">
+<h3>lunarCrystallizeTriggerCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">lunarCrystallizeTriggerCount</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="verdantDewCount">
+<h3>verdantDewCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">verdantDewCount</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="moonridgeDewCount">
+<h3>moonridgeDewCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">moonridgeDewCount</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="dendroCores">
+<h3>dendroCores</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReactionState.DendroCoreState.html" title="simulation.runtime内のクラス">ReactionState.DendroCoreState</a>&gt;</span>&nbsp;<span class="element-name">dendroCores</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="nextDendroCoreId">
+<h3>nextDendroCoreId</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">nextDendroCoreId</span></div>
 </div>
 </section>
 </li>
@@ -264,6 +487,201 @@ loadScripts(document, 'script');</script>
 <dt>パラメータ:</dt>
 <dd><code>thundercloudEndTime</code> - absolute simulation time in seconds</dd>
 </dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="isBurningTimerRunning()">
+<h3>isBurningTimerRunning</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isBurningTimerRunning</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setBurningTimerRunning(boolean)">
+<h3>setBurningTimerRunning</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setBurningTimerRunning</span><wbr><span class="parameters">(boolean&nbsp;burningTimerRunning)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getBurningEndTime()">
+<h3>getBurningEndTime</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getBurningEndTime</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setBurningEndTime(double)">
+<h3>setBurningEndTime</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setBurningEndTime</span><wbr><span class="parameters">(double&nbsp;burningEndTime)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getQuickenEndTime()">
+<h3>getQuickenEndTime</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getQuickenEndTime</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setQuickenEndTime(double)">
+<h3>setQuickenEndTime</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setQuickenEndTime</span><wbr><span class="parameters">(double&nbsp;quickenEndTime)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getMoondriftCount()">
+<h3>getMoondriftCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getMoondriftCount</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setMoondriftCount(int)">
+<h3>setMoondriftCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setMoondriftCount</span><wbr><span class="parameters">(int&nbsp;moondriftCount)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getLunarCrystallizeTriggerCount()">
+<h3>getLunarCrystallizeTriggerCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getLunarCrystallizeTriggerCount</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setLunarCrystallizeTriggerCount(int)">
+<h3>setLunarCrystallizeTriggerCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setLunarCrystallizeTriggerCount</span><wbr><span class="parameters">(int&nbsp;lunarCrystallizeTriggerCount)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="incrementLunarCrystallizeTriggerCount()">
+<h3>incrementLunarCrystallizeTriggerCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">incrementLunarCrystallizeTriggerCount</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getVerdantDewCount()">
+<h3>getVerdantDewCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getVerdantDewCount</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setVerdantDewCount(int)">
+<h3>setVerdantDewCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setVerdantDewCount</span><wbr><span class="parameters">(int&nbsp;verdantDewCount)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="incrementVerdantDewCount()">
+<h3>incrementVerdantDewCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">incrementVerdantDewCount</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getMoonridgeDewCount()">
+<h3>getMoonridgeDewCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getMoonridgeDewCount</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setMoonridgeDewCount(int)">
+<h3>setMoonridgeDewCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setMoonridgeDewCount</span><wbr><span class="parameters">(int&nbsp;moonridgeDewCount)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="incrementMoonridgeDewCount()">
+<h3>incrementMoonridgeDewCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">incrementMoonridgeDewCount</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="addDendroCore(model.type.CharacterId,double,double)">
+<h3>addDendroCore</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ReactionState.DendroCoreState.html" title="simulation.runtime内のクラス">ReactionState.DendroCoreState</a></span>&nbsp;<span class="element-name">addDendroCore</span><wbr><span class="parameters">(<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;ownerId,
+ double&nbsp;currentTime,
+ double&nbsp;damage)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getDendroCores()">
+<h3>getDendroCores</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReactionState.DendroCoreState.html" title="simulation.runtime内のクラス">ReactionState.DendroCoreState</a>&gt;</span>&nbsp;<span class="element-name">getDendroCores</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="removeOldestDendroCore()">
+<h3>removeOldestDendroCore</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="ReactionState.DendroCoreState.html" title="simulation.runtime内のクラス">ReactionState.DendroCoreState</a></span>&nbsp;<span class="element-name">removeOldestDendroCore</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="removeDendroCore(int)">
+<h3>removeDendroCore</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">removeDendroCore</span><wbr><span class="parameters">(int&nbsp;coreId)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="clearDendroCores()">
+<h3>clearDendroCores</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">clearDendroCores</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="restoreDendroCores(java.util.List,int)">
+<h3>restoreDendroCores</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">restoreDendroCores</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReactionState.DendroCoreState.html" title="simulation.runtime内のクラス">ReactionState.DendroCoreState</a>&gt;&nbsp;cores,
+ int&nbsp;nextCoreId)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getNextDendroCoreId()">
+<h3>getNextDendroCoreId</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getNextDendroCoreId</span>()</div>
 </div>
 </section>
 </li>

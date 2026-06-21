@@ -158,6 +158,28 @@ loadScripts(document, 'script');</script>
 <li><a href="#isThundercloudActive()" tabindex="0">isThundercloudActive()</a></li>
 <li><a href="#getThundercloudEndTime()" tabindex="0">getThundercloudEndTime()</a></li>
 <li><a href="#setThundercloudEndTime(double)" tabindex="0">setThundercloudEndTime(double)</a></li>
+<li><a href="#setBurningTimerRunning(boolean)" tabindex="0">setBurningTimerRunning(boolean)</a></li>
+<li><a href="#isBurningTimerRunning()" tabindex="0">isBurningTimerRunning()</a></li>
+<li><a href="#isBurningActive()" tabindex="0">isBurningActive()</a></li>
+<li><a href="#getBurningEndTime()" tabindex="0">getBurningEndTime()</a></li>
+<li><a href="#setBurningEndTime(double)" tabindex="0">setBurningEndTime(double)</a></li>
+<li><a href="#isQuickenActive()" tabindex="0">isQuickenActive()</a></li>
+<li><a href="#getQuickenEndTime()" tabindex="0">getQuickenEndTime()</a></li>
+<li><a href="#setQuickenEndTime(double)" tabindex="0">setQuickenEndTime(double)</a></li>
+<li><a href="#hasLunarReactionConversion()" tabindex="0">hasLunarReactionConversion()</a></li>
+<li><a href="#getMoondriftCount()" tabindex="0">getMoondriftCount()</a></li>
+<li><a href="#setMoondriftCount(int)" tabindex="0">setMoondriftCount(int)</a></li>
+<li><a href="#getLunarCrystallizeTriggerCount()" tabindex="0">getLunarCrystallizeTriggerCount()</a></li>
+<li><a href="#incrementLunarCrystallizeTriggerCount()" tabindex="0">incrementLunarCrystallizeTriggerCount()</a></li>
+<li><a href="#getVerdantDewCount()" tabindex="0">getVerdantDewCount()</a></li>
+<li><a href="#incrementVerdantDewCount()" tabindex="0">incrementVerdantDewCount()</a></li>
+<li><a href="#getMoonridgeDewCount()" tabindex="0">getMoonridgeDewCount()</a></li>
+<li><a href="#incrementMoonridgeDewCount()" tabindex="0">incrementMoonridgeDewCount()</a></li>
+<li><a href="#addDendroCore(model.type.CharacterId,double)" tabindex="0">addDendroCore(CharacterId, double)</a></li>
+<li><a href="#getDendroCores()" tabindex="0">getDendroCores()</a></li>
+<li><a href="#removeOldestDendroCore()" tabindex="0">removeOldestDendroCore()</a></li>
+<li><a href="#removeDendroCore(int)" tabindex="0">removeDendroCore(int)</a></li>
+<li><a href="#clearDendroCores()" tabindex="0">clearDendroCores()</a></li>
 </ol>
 </li>
 </ol>
@@ -356,7 +378,7 @@ to helper collaborators.</div>
 <section class="method-summary" id="method-summary">
 <h2>メソッドの概要</h2>
 <div id="method-summary-table">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">すべてのメソッド</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">インスタンス・メソッド</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">concreteメソッド</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">すべてのメソッド</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">インスタンス・メソッド</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">concreteメソッド</button><button id="method-summary-table-tab6" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab6', 3)" class="table-tab">推奨されていないメソッド</button></div>
 <div id="method-summary-table.tabpanel" role="tabpanel" aria-labelledby="method-summary-table-tab0">
 <div class="summary-table three-column-summary">
 <div class="table-header col-first">修飾子とタイプ</div>
@@ -367,57 +389,64 @@ to helper collaborators.</div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Adds a character to the party and initializes rotation energy state.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addListener(simulation.ActionListener)" class="member-name-link">addListener</a><wbr>(<a href="ActionListener.html" title="simulation内のインタフェース">ActionListener</a>&nbsp;listener)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="runtime/ReactionState.DendroCoreState.html" title="simulation.runtime内のクラス">ReactionState.DendroCoreState</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addDendroCore(model.type.CharacterId,double)" class="member-name-link">addDendroCore</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;ownerId,
+ double&nbsp;damage)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addListener(simulation.ActionListener)" class="member-name-link">addListener</a><wbr>(<a href="ActionListener.html" title="simulation内のインタフェース">ActionListener</a>&nbsp;listener)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Adds an action listener.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addParticleListener(simulation.ParticleListener)" class="member-name-link">addParticleListener</a><wbr>(<a href="ParticleListener.html" title="simulation内のインタフェース">ParticleListener</a>&nbsp;listener)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addParticleListener(simulation.ParticleListener)" class="member-name-link">addParticleListener</a><wbr>(<a href="ParticleListener.html" title="simulation内のインタフェース">ParticleListener</a>&nbsp;listener)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Adds a particle listener.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addReactionListener(simulation.CombatSimulator.ReactionListener)" class="member-name-link">addReactionListener</a><wbr>(<a href="CombatSimulator.ReactionListener.html" title="simulation内のインタフェース">CombatSimulator.ReactionListener</a>&nbsp;listener)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#addReactionListener(simulation.CombatSimulator.ReactionListener)" class="member-name-link">addReactionListener</a><wbr>(<a href="CombatSimulator.ReactionListener.html" title="simulation内のインタフェース">CombatSimulator.ReactionListener</a>&nbsp;listener)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Adds a reaction listener.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#advanceTime(double)" class="member-name-link">advanceTime</a><wbr>(double&nbsp;duration)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#advanceTime(double)" class="member-name-link">advanceTime</a><wbr>(double&nbsp;duration)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Advances simulation time and ticks due events.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyAscendantBlessing(model.entity.Character)" class="member-name-link">applyAscendantBlessing</a><wbr>(<a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;buffer)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyAscendantBlessing(model.entity.Character)" class="member-name-link">applyAscendantBlessing</a><wbr>(<a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;buffer)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Collaborator-facing helper for Moonsign-specific follow-up policy.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyFieldBuff(mechanics.buff.Buff)" class="member-name-link">applyFieldBuff</a><wbr>(<a href="../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&nbsp;buff)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyFieldBuff(mechanics.buff.Buff)" class="member-name-link">applyFieldBuff</a><wbr>(<a href="../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&nbsp;buff)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Adds an active-character-only field buff.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyTeamBuff(mechanics.buff.Buff)" class="member-name-link">applyTeamBuff</a><wbr>(<a href="../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&nbsp;buff)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyTeamBuff(mechanics.buff.Buff)" class="member-name-link">applyTeamBuff</a><wbr>(<a href="../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&nbsp;buff)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Adds a team buff.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyTeamBuffNoStack(mechanics.buff.Buff)" class="member-name-link">applyTeamBuffNoStack</a><wbr>(<a href="../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&nbsp;buff)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#applyTeamBuffNoStack(mechanics.buff.Buff)" class="member-name-link">applyTeamBuffNoStack</a><wbr>(<a href="../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&nbsp;buff)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Adds a non-stacking team buff.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#beginActionDirectDamageCapture(model.type.CharacterId)" class="member-name-link">beginActionDirectDamageCapture</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#beginActionDirectDamageCapture(model.type.CharacterId)" class="member-name-link">beginActionDirectDamageCapture</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Starts capturing the direct-damage portion (excluding reactions) of the next action.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#captureResolvedActionDamage(model.type.CharacterId,double)" class="member-name-link">captureResolvedActionDamage</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#captureResolvedActionDamage(model.type.CharacterId,double)" class="member-name-link">captureResolvedActionDamage</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;actorId,
  double&nbsp;damage)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Accumulates resolved direct damage when capture is active for the matching actor.</div>
 </div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#clearDendroCores()" class="member-name-link">clearDendroCores</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#endActionDirectDamageCapture()" class="member-name-link">endActionDirectDamageCapture</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -433,36 +462,42 @@ to helper collaborators.</div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns buffs applicable to the given character.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCharacter(java.lang.String)" class="member-name-link">getCharacter</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns a party member by name.</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getBurningEndTime()" class="member-name-link">getBurningEndTime</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code><a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code><a href="#getCharacter(java.lang.String)" class="member-name-link">getCharacter</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6">
+<div class="block"><span class="deprecated-label">推奨されていません。</span></div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCharacter(model.type.CharacterId)" class="member-name-link">getCharacter</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCharacter(model.type.CharacterId)" class="member-name-link">getCharacter</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns a party member by character id.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="CombatLogSink.html" title="simulation内のインタフェース">CombatLogSink</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCombatLogSink()" class="member-name-link">getCombatLogSink</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="CombatLogSink.html" title="simulation内のインタフェース">CombatLogSink</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCombatLogSink()" class="member-name-link">getCombatLogSink</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the configured combat log sink.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentBuffSourceCharacterId()" class="member-name-link">getCurrentBuffSourceCharacterId</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentBuffSourceCharacterId()" class="member-name-link">getCurrentBuffSourceCharacterId</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the current buff-source attribution on top of the stack.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentTime()" class="member-name-link">getCurrentTime</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentTime()" class="member-name-link">getCurrentTime</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the current simulation time.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDamageByCharacter(model.type.CharacterId)" class="member-name-link">getDamageByCharacter</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDamageByCharacter(model.type.CharacterId)" class="member-name-link">getDamageByCharacter</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the accumulated damage attributed to a specific character.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="runtime/ReactionState.DendroCoreState.html" title="simulation.runtime内のクラス">ReactionState.DendroCoreState</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDendroCores()" class="member-name-link">getDendroCores</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDPS()" class="member-name-link">getDPS</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -493,16 +528,28 @@ to helper collaborators.</div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the captured direct-damage value of the most recently completed action.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="CombatSimulator.Moonsign.html" title="simulationの列挙クラス">CombatSimulator.Moonsign</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMoonsign()" class="member-name-link">getMoonsign</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLunarCrystallizeTriggerCount()" class="member-name-link">getLunarCrystallizeTriggerCount</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMoondriftCount()" class="member-name-link">getMoondriftCount</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMoonridgeDewCount()" class="member-name-link">getMoonridgeDewCount</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="CombatSimulator.Moonsign.html" title="simulationの列挙クラス">CombatSimulator.Moonsign</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMoonsign()" class="member-name-link">getMoonsign</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the current Moonsign state.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Collection.html" title="java.util内のクラスまたはインタフェース" class="external-link">Collection</a><wbr>&lt;<a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPartyMembers()" class="member-name-link">getPartyMembers</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Collection.html" title="java.util内のクラスまたはインタフェース" class="external-link">Collection</a><wbr>&lt;<a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPartyMembers()" class="member-name-link">getPartyMembers</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns all party members.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getQuickenEndTime()" class="member-name-link">getQuickenEndTime</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRotationTime()" class="member-name-link">getRotationTime</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -528,16 +575,40 @@ to helper collaborators.</div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns total accumulated damage.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getVerdantDewCount()" class="member-name-link">getVerdantDewCount</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hasLunarReactionConversion()" class="member-name-link">hasLunarReactionConversion</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#incrementLunarCrystallizeTriggerCount()" class="member-name-link">incrementLunarCrystallizeTriggerCount</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#incrementMoonridgeDewCount()" class="member-name-link">incrementMoonridgeDewCount</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#incrementVerdantDewCount()" class="member-name-link">incrementVerdantDewCount</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isBurningActive()" class="member-name-link">isBurningActive</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isECTimerRunning()" class="member-name-link">isECTimerRunning</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isBurningTimerRunning()" class="member-name-link">isBurningTimerRunning</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isECTimerRunning()" class="member-name-link">isECTimerRunning</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Compatibility wrapper retained for existing reaction helpers.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isLoggingEnabled()" class="member-name-link">isLoggingEnabled</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isLoggingEnabled()" class="member-name-link">isLoggingEnabled</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns whether console logging is enabled.</div>
 </div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isQuickenActive()" class="member-name-link">isQuickenActive</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isThundercloudActive()" class="member-name-link">isThundercloudActive</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -555,17 +626,17 @@ to helper collaborators.</div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Dispatches a reaction event and artifact reaction hooks.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#performAction(java.lang.String,simulation.action.AttackAction)" class="member-name-link">performAction</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;charName,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code><a href="#performAction(java.lang.String,simulation.action.AttackAction)" class="member-name-link">performAction</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;charName,
  <a href="action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Executes an attack action and advances time by its animation duration.</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6">
+<div class="block"><span class="deprecated-label">推奨されていません。</span></div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#performAction(java.lang.String,simulation.action.CharacterActionRequest)" class="member-name-link">performAction</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;charName,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code><a href="#performAction(java.lang.String,simulation.action.CharacterActionRequest)" class="member-name-link">performAction</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;charName,
  <a href="action/CharacterActionRequest.html" title="simulation.action内のクラス">CharacterActionRequest</a>&nbsp;request)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Executes a typed action after applying cooldown and energy gates.</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6">
+<div class="block"><span class="deprecated-label">推奨されていません。</span></div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#performAction(model.type.CharacterId,simulation.action.AttackAction)" class="member-name-link">performAction</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
@@ -579,11 +650,11 @@ to helper collaborators.</div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Executes a typed action after applying cooldown and energy gates.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#performActionWithoutTimeAdvance(java.lang.String,simulation.action.AttackAction)" class="member-name-link">performActionWithoutTimeAdvance</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;charName,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code><a href="#performActionWithoutTimeAdvance(java.lang.String,simulation.action.AttackAction)" class="member-name-link">performActionWithoutTimeAdvance</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;charName,
  <a href="action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Resolves an attack action without time advancement.</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6">
+<div class="block"><span class="deprecated-label">推奨されていません。</span></div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#performActionWithoutTimeAdvance(model.type.CharacterId,simulation.action.AttackAction)" class="member-name-link">performActionWithoutTimeAdvance</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId,
@@ -623,6 +694,12 @@ to helper collaborators.</div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Registers a timer event.</div>
 </div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#removeDendroCore(int)" class="member-name-link">removeDendroCore</a><wbr>(int&nbsp;coreId)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="runtime/ReactionState.DendroCoreState.html" title="simulation.runtime内のクラス">ReactionState.DendroCoreState</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#removeOldestDendroCore()" class="member-name-link">removeOldestDendroCore</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#removeTeamBuffsById(mechanics.buff.BuffId)" class="member-name-link">removeTeamBuffsById</a><wbr>(<a href="../mechanics/buff/BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a>&nbsp;buffId)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -638,16 +715,22 @@ to helper collaborators.</div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Captures a deep-enough snapshot of all mutable simulator state for VinePPO branch rollouts.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setActiveCharacter(java.lang.String)" class="member-name-link">setActiveCharacter</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Directly sets the active character without swap side effects.</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code><a href="#setActiveCharacter(java.lang.String)" class="member-name-link">setActiveCharacter</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6">
+<div class="block"><span class="deprecated-label">推奨されていません。</span></div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setActiveCharacter(model.type.CharacterId)" class="member-name-link">setActiveCharacter</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Directly sets the active character without swap side effects.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setBurningEndTime(double)" class="member-name-link">setBurningEndTime</a><wbr>(double&nbsp;endTime)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setBurningTimerRunning(boolean)" class="member-name-link">setBurningTimerRunning</a><wbr>(boolean&nbsp;running)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setECTimerRunning(boolean)" class="member-name-link">setECTimerRunning</a><wbr>(boolean&nbsp;running)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -664,10 +747,16 @@ to helper collaborators.</div>
 <div class="block">Enables or disables per-action console logging.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setMoonsign(simulation.CombatSimulator.Moonsign)" class="member-name-link">setMoonsign</a><wbr>(<a href="CombatSimulator.Moonsign.html" title="simulationの列挙クラス">CombatSimulator.Moonsign</a>&nbsp;sign)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setMoondriftCount(int)" class="member-name-link">setMoondriftCount</a><wbr>(int&nbsp;count)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setMoonsign(simulation.CombatSimulator.Moonsign)" class="member-name-link">setMoonsign</a><wbr>(<a href="CombatSimulator.Moonsign.html" title="simulationの列挙クラス">CombatSimulator.Moonsign</a>&nbsp;sign)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Directly sets the Moonsign state.</div>
 </div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setQuickenEndTime(double)" class="member-name-link">setQuickenEndTime</a><wbr>(double&nbsp;endTime)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setRotationTime(double)" class="member-name-link">setRotationTime</a><wbr>(double&nbsp;rotationTime)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -678,10 +767,10 @@ to helper collaborators.</div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Compatibility wrapper retained for existing reaction helpers.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#switchCharacter(java.lang.String)" class="member-name-link">switchCharacter</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Executes a standard character swap with cooldown and callbacks.</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code><a href="#switchCharacter(java.lang.String)" class="member-name-link">switchCharacter</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6">
+<div class="block"><span class="deprecated-label">推奨されていません。</span></div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#switchCharacter(model.type.CharacterId)" class="member-name-link">switchCharacter</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id)</code></div>
@@ -1033,8 +1122,11 @@ to helper collaborators.</div>
 <section class="detail" id="getCharacter(java.lang.String)">
 <h3>getCharacter</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a></span>&nbsp;<span class="element-name">getCharacter</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</span></div>
-<div class="block">Returns a party member by name.</div>
+<div class="member-signature"><span class="annotations"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Deprecated.html" title="java.lang内のクラスまたはインタフェース" class="external-link">@Deprecated</a>
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a></span>&nbsp;<span class="element-name">getCharacter</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</span></div>
+<div class="deprecation-block"><span class="deprecated-label">推奨されていません。</span></div>
+<div class="block">Returns a party member by name.
+Prefer <a href="#getCharacter(model.type.CharacterId)"><code>getCharacter(CharacterId)</code></a> for runtime logic.</div>
 <dl class="notes">
 <dt>パラメータ:</dt>
 <dd><code>name</code> - character name</dd>
@@ -1089,8 +1181,11 @@ to helper collaborators.</div>
 <section class="detail" id="switchCharacter(java.lang.String)">
 <h3>switchCharacter</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">switchCharacter</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</span></div>
-<div class="block">Executes a standard character swap with cooldown and callbacks.</div>
+<div class="member-signature"><span class="annotations"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Deprecated.html" title="java.lang内のクラスまたはインタフェース" class="external-link">@Deprecated</a>
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">switchCharacter</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</span></div>
+<div class="deprecation-block"><span class="deprecated-label">推奨されていません。</span></div>
+<div class="block">Executes a standard character swap with cooldown and callbacks.
+Prefer <a href="#switchCharacter(model.type.CharacterId)"><code>switchCharacter(CharacterId)</code></a> for runtime logic.</div>
 <dl class="notes">
 <dt>パラメータ:</dt>
 <dd><code>name</code> - target character name</dd>
@@ -1115,8 +1210,11 @@ to helper collaborators.</div>
 <section class="detail" id="setActiveCharacter(java.lang.String)">
 <h3>setActiveCharacter</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setActiveCharacter</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</span></div>
-<div class="block">Directly sets the active character without swap side effects.</div>
+<div class="member-signature"><span class="annotations"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Deprecated.html" title="java.lang内のクラスまたはインタフェース" class="external-link">@Deprecated</a>
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setActiveCharacter</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</span></div>
+<div class="deprecation-block"><span class="deprecated-label">推奨されていません。</span></div>
+<div class="block">Directly sets the active character without swap side effects.
+Prefer <a href="#setActiveCharacter(model.type.CharacterId)"><code>setActiveCharacter(CharacterId)</code></a> for runtime logic.</div>
 <dl class="notes">
 <dt>パラメータ:</dt>
 <dd><code>name</code> - target character name</dd>
@@ -1295,9 +1393,13 @@ to helper collaborators.</div>
 <section class="detail" id="performAction(java.lang.String,simulation.action.CharacterActionRequest)">
 <h3>performAction</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">performAction</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;charName,
+<div class="member-signature"><span class="annotations"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Deprecated.html" title="java.lang内のクラスまたはインタフェース" class="external-link">@Deprecated</a>
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">performAction</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;charName,
  <a href="action/CharacterActionRequest.html" title="simulation.action内のクラス">CharacterActionRequest</a>&nbsp;request)</span></div>
-<div class="block">Executes a typed action after applying cooldown and energy gates.</div>
+<div class="deprecation-block"><span class="deprecated-label">推奨されていません。</span></div>
+<div class="block">Executes a typed action after applying cooldown and energy gates.
+Prefer <a href="#performAction(model.type.CharacterId,simulation.action.CharacterActionRequest)"><code>performAction(CharacterId, CharacterActionRequest)</code></a> for
+runtime logic.</div>
 <dl class="notes">
 <dt>パラメータ:</dt>
 <dd><code>charName</code> - acting character name</dd>
@@ -1594,9 +1696,12 @@ to helper collaborators.</div>
 <section class="detail" id="performAction(java.lang.String,simulation.action.AttackAction)">
 <h3>performAction</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">performAction</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;charName,
+<div class="member-signature"><span class="annotations"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Deprecated.html" title="java.lang内のクラスまたはインタフェース" class="external-link">@Deprecated</a>
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">performAction</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;charName,
  <a href="action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action)</span></div>
-<div class="block">Executes an attack action and advances time by its animation duration.</div>
+<div class="deprecation-block"><span class="deprecated-label">推奨されていません。</span></div>
+<div class="block">Executes an attack action and advances time by its animation duration.
+Prefer <a href="#performAction(model.type.CharacterId,simulation.action.AttackAction)"><code>performAction(CharacterId, AttackAction)</code></a> for runtime logic.</div>
 <dl class="notes">
 <dt>パラメータ:</dt>
 <dd><code>charName</code> - acting character name</dd>
@@ -1624,9 +1729,13 @@ to helper collaborators.</div>
 <section class="detail" id="performActionWithoutTimeAdvance(java.lang.String,simulation.action.AttackAction)">
 <h3>performActionWithoutTimeAdvance</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">performActionWithoutTimeAdvance</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;charName,
+<div class="member-signature"><span class="annotations"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Deprecated.html" title="java.lang内のクラスまたはインタフェース" class="external-link">@Deprecated</a>
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">performActionWithoutTimeAdvance</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;charName,
  <a href="action/AttackAction.html" title="simulation.action内のクラス">AttackAction</a>&nbsp;action)</span></div>
-<div class="block">Resolves an attack action without time advancement.</div>
+<div class="deprecation-block"><span class="deprecated-label">推奨されていません。</span></div>
+<div class="block">Resolves an attack action without time advancement.
+Prefer <a href="#performActionWithoutTimeAdvance(model.type.CharacterId,simulation.action.AttackAction)"><code>performActionWithoutTimeAdvance(CharacterId, AttackAction)</code></a>
+for runtime logic.</div>
 <dl class="notes">
 <dt>パラメータ:</dt>
 <dd><code>charName</code> - acting character name</dd>
@@ -1830,6 +1939,183 @@ Sets the Thundercloud expiry time.</div>
 <dt>パラメータ:</dt>
 <dd><code>endTime</code> - expiry time in seconds</dd>
 </dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setBurningTimerRunning(boolean)">
+<h3>setBurningTimerRunning</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setBurningTimerRunning</span><wbr><span class="parameters">(boolean&nbsp;running)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="isBurningTimerRunning()">
+<h3>isBurningTimerRunning</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isBurningTimerRunning</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="isBurningActive()">
+<h3>isBurningActive</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isBurningActive</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getBurningEndTime()">
+<h3>getBurningEndTime</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getBurningEndTime</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setBurningEndTime(double)">
+<h3>setBurningEndTime</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setBurningEndTime</span><wbr><span class="parameters">(double&nbsp;endTime)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="isQuickenActive()">
+<h3>isQuickenActive</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isQuickenActive</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getQuickenEndTime()">
+<h3>getQuickenEndTime</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getQuickenEndTime</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setQuickenEndTime(double)">
+<h3>setQuickenEndTime</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setQuickenEndTime</span><wbr><span class="parameters">(double&nbsp;endTime)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="hasLunarReactionConversion()">
+<h3>hasLunarReactionConversion</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">hasLunarReactionConversion</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getMoondriftCount()">
+<h3>getMoondriftCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getMoondriftCount</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setMoondriftCount(int)">
+<h3>setMoondriftCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setMoondriftCount</span><wbr><span class="parameters">(int&nbsp;count)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getLunarCrystallizeTriggerCount()">
+<h3>getLunarCrystallizeTriggerCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getLunarCrystallizeTriggerCount</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="incrementLunarCrystallizeTriggerCount()">
+<h3>incrementLunarCrystallizeTriggerCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">incrementLunarCrystallizeTriggerCount</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getVerdantDewCount()">
+<h3>getVerdantDewCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getVerdantDewCount</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="incrementVerdantDewCount()">
+<h3>incrementVerdantDewCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">incrementVerdantDewCount</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getMoonridgeDewCount()">
+<h3>getMoonridgeDewCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getMoonridgeDewCount</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="incrementMoonridgeDewCount()">
+<h3>incrementMoonridgeDewCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">incrementMoonridgeDewCount</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="addDendroCore(model.type.CharacterId,double)">
+<h3>addDendroCore</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="runtime/ReactionState.DendroCoreState.html" title="simulation.runtime内のクラス">ReactionState.DendroCoreState</a></span>&nbsp;<span class="element-name">addDendroCore</span><wbr><span class="parameters">(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;ownerId,
+ double&nbsp;damage)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getDendroCores()">
+<h3>getDendroCores</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="runtime/ReactionState.DendroCoreState.html" title="simulation.runtime内のクラス">ReactionState.DendroCoreState</a>&gt;</span>&nbsp;<span class="element-name">getDendroCores</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="removeOldestDendroCore()">
+<h3>removeOldestDendroCore</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="runtime/ReactionState.DendroCoreState.html" title="simulation.runtime内のクラス">ReactionState.DendroCoreState</a></span>&nbsp;<span class="element-name">removeOldestDendroCore</span>()</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="removeDendroCore(int)">
+<h3>removeDendroCore</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">removeDendroCore</span><wbr><span class="parameters">(int&nbsp;coreId)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="clearDendroCores()">
+<h3>clearDendroCores</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">clearDendroCores</span>()</div>
 </div>
 </section>
 </li>

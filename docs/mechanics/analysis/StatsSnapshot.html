@@ -62,11 +62,13 @@ loadScripts(document, 'script');</script>
 <li><a href="#time" tabindex="0">time</a></li>
 <li><a href="#characterStats" tabindex="0">characterStats</a></li>
 <li><a href="#characterBuffs" tabindex="0">characterBuffs</a></li>
+<li><a href="#characterEnergyPercent" tabindex="0">characterEnergyPercent</a></li>
 </ol>
 </li>
 <li><a href="#constructor-detail" tabindex="0">コンストラクタの詳細</a>
 <ol class="toc-list">
 <li><a href="#%3Cinit%3E(double,java.util.Map,java.util.Map)" tabindex="0">StatsSnapshot(double, Map, Map)</a></li>
+<li><a href="#%3Cinit%3E(double,java.util.Map,java.util.Map,java.util.Map)" tabindex="0">StatsSnapshot(double, Map, Map, Map)</a></li>
 </ol>
 </li>
 </ol>
@@ -108,14 +110,19 @@ table slider in the HTML report.</div>
 <div class="col-last even-row-color">
 <div class="block">Display labels of active buffs per character at <a href="#time"><code>time</code></a>, keyed by typed identity.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/StatType.html" title="model.typeの列挙クラス">StatType</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&gt;</code></div>
-<div class="col-second odd-row-color"><code><a href="#characterStats" class="member-name-link">characterStats</a></code></div>
+<div class="col-first odd-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</code></div>
+<div class="col-second odd-row-color"><code><a href="#characterEnergyPercent" class="member-name-link">characterEnergyPercent</a></code></div>
 <div class="col-last odd-row-color">
+<div class="block">Current energy percentage per character at <a href="#time"><code>time</code></a>, keyed by typed identity.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/StatType.html" title="model.typeの列挙クラス">StatType</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#characterStats" class="member-name-link">characterStats</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Effective stat values per character at <a href="#time"><code>time</code></a>, keyed by typed identity.</div>
 </div>
-<div class="col-first even-row-color"><code>double</code></div>
-<div class="col-second even-row-color"><code><a href="#time" class="member-name-link">time</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>double</code></div>
+<div class="col-second odd-row-color"><code><a href="#time" class="member-name-link">time</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Simulation time (in seconds) at which this snapshot was taken.</div>
 </div>
 </div>
@@ -133,6 +140,13 @@ table slider in the HTML report.</div>
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/StatType.html" title="model.typeの列挙クラス">StatType</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&gt;&nbsp;characterStats,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&gt;&nbsp;characterBuffs)</code></div>
 <div class="col-last even-row-color">
+<div class="block">Constructs a new snapshot.</div>
+</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(double,java.util.Map,java.util.Map,java.util.Map)" class="member-name-link">StatsSnapshot</a><wbr>(double&nbsp;time,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/StatType.html" title="model.typeの列挙クラス">StatType</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&gt;&nbsp;characterStats,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&gt;&nbsp;characterBuffs,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;characterEnergyPercent)</code></div>
+<div class="col-last odd-row-color">
 <div class="block">Constructs a new snapshot.</div>
 </div>
 </div>
@@ -183,6 +197,15 @@ table slider in the HTML report.</div>
 </div>
 </section>
 </li>
+<li>
+<section class="detail" id="characterEnergyPercent">
+<h3>characterEnergyPercent</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</span>&nbsp;<span class="element-name">characterEnergyPercent</span></div>
+<div class="block">Current energy percentage per character at <a href="#time"><code>time</code></a>, keyed by typed identity.</div>
+</div>
+</section>
+</li>
 </ul>
 </section>
 </li>
@@ -204,6 +227,25 @@ table slider in the HTML report.</div>
 <dd><code>time</code> - simulation time in seconds</dd>
 <dd><code>characterStats</code> - map from character id to their effective stat values</dd>
 <dd><code>characterBuffs</code> - map from character id to their active buff display labels</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(double,java.util.Map,java.util.Map,java.util.Map)">
+<h3>StatsSnapshot</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">StatsSnapshot</span><wbr><span class="parameters">(double&nbsp;time,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/StatType.html" title="model.typeの列挙クラス">StatType</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&gt;&nbsp;characterStats,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&gt;&nbsp;characterBuffs,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;characterEnergyPercent)</span></div>
+<div class="block">Constructs a new snapshot.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>time</code> - simulation time in seconds</dd>
+<dd><code>characterStats</code> - map from character id to their effective stat values</dd>
+<dd><code>characterBuffs</code> - map from character id to their active buff display labels</dd>
+<dd><code>characterEnergyPercent</code> - map from character id to current energy percentage</dd>
 </dl>
 </div>
 </section>

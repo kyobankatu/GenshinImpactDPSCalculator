@@ -62,10 +62,18 @@ loadScripts(document, 'script');</script>
 <ol class="toc-list">
 <li><a href="#records" tabindex="0">records</a></li>
 <li><a href="#characters" tabindex="0">characters</a></li>
+<li><a href="#characterDetails" tabindex="0">characterDetails</a></li>
 <li><a href="#statsHistory" tabindex="0">statsHistory</a></li>
 <li><a href="#artifactRolls" tabindex="0">artifactRolls</a></li>
 <li><a href="#totalDamageByActor" tabindex="0">totalDamageByActor</a></li>
 <li><a href="#cumulativeDamageSeries" tabindex="0">cumulativeDamageSeries</a></li>
+<li><a href="#actionDamageTotals" tabindex="0">actionDamageTotals</a></li>
+<li><a href="#actionDamageTotalsByActor" tabindex="0">actionDamageTotalsByActor</a></li>
+<li><a href="#reactionDamageTotals" tabindex="0">reactionDamageTotals</a></li>
+<li><a href="#rollingDpsSeries" tabindex="0">rollingDpsSeries</a></li>
+<li><a href="#auraSeries" tabindex="0">auraSeries</a></li>
+<li><a href="#energySeries" tabindex="0">energySeries</a></li>
+<li><a href="#buffUptime" tabindex="0">buffUptime</a></li>
 <li><a href="#chartNames" tabindex="0">chartNames</a></li>
 <li><a href="#chartColors" tabindex="0">chartColors</a></li>
 <li><a href="#totalDamage" tabindex="0">totalDamage</a></li>
@@ -77,7 +85,7 @@ loadScripts(document, 'script');</script>
 </li>
 <li><a href="#constructor-detail" tabindex="0">コンストラクタの詳細</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(java.util.List,java.util.List,java.util.List,java.util.List,java.util.Map,java.util.Map,java.util.List,java.lang.String%5B%5D,double,double,double,double,boolean)" tabindex="0">ReportData(List, List, List, List, Map, Map, List, String[], double, double, double, double, boolean)</a></li>
+<li><a href="#%3Cinit%3E(java.util.List,java.util.List,java.util.List,java.util.List,java.util.List,java.util.Map,java.util.Map,java.util.List,java.util.Map,java.util.List,java.util.List,java.util.Map,java.util.Map,java.util.List,java.util.List,java.lang.String%5B%5D,double,double,double,double,boolean)" tabindex="0">ReportData(List, List, List, List, List, Map, Map, List, Map, List, List, Map, Map, List, List, String[], double, double, double, double, boolean)</a></li>
 </ol>
 </li>
 </ol>
@@ -110,9 +118,24 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-second">クラス</div>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color"><code>(package private) static final class&nbsp;</code></div>
-<div class="col-second even-row-color"><code><a href="ReportData.ReportArtifactRollView.html" class="type-name-link" title="visualization内のクラス">ReportData.ReportArtifactRollView</a></code></div>
+<div class="col-second even-row-color"><code><a href="ReportData.CharacterReportView.html" class="type-name-link" title="visualization内のクラス">ReportData.CharacterReportView</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">Per-character report view consumed by the planned character detail tab UI.</div>
+</div>
+<div class="col-first odd-row-color"><code>(package private) static final class&nbsp;</code></div>
+<div class="col-second odd-row-color"><code><a href="ReportData.ReportArtifactRollView.html" class="type-name-link" title="visualization内のクラス">ReportData.ReportArtifactRollView</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Report row describing a single character's artifact substat roll counts.</div>
+</div>
+<div class="col-first even-row-color"><code>(package private) static final class&nbsp;</code></div>
+<div class="col-second even-row-color"><code><a href="ReportData.ReportBuffUptimeView.html" class="type-name-link" title="visualization内のクラス">ReportData.ReportBuffUptimeView</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Report row describing one buff's observed uptime.</div>
+</div>
+<div class="col-first odd-row-color"><code>(package private) static final class&nbsp;</code></div>
+<div class="col-second odd-row-color"><code><a href="ReportData.ReportMetricView.html" class="type-name-link" title="visualization内のクラス">ReportData.ReportMetricView</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Named numeric metric used by summary charts and tables.</div>
 </div>
 </div>
 </section>
@@ -126,50 +149,90 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">修飾子とタイプ</div>
 <div class="table-header col-second">フィールド</div>
 <div class="table-header col-last">説明</div>
+<div class="col-first even-row-color"><code>(package private) final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="ReportData.ReportMetricView.html" title="visualization内のクラス">ReportData.ReportMetricView</a>&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#actionDamageTotals" class="member-name-link">actionDamageTotals</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Damage totals grouped by action display label.</div>
+</div>
+<div class="col-first odd-row-color"><code>(package private) final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportData.ReportMetricView.html" title="visualization内のクラス">ReportData.ReportMetricView</a>&gt;&gt;</code></div>
+<div class="col-second odd-row-color"><code><a href="#actionDamageTotalsByActor" class="member-name-link">actionDamageTotalsByActor</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Damage totals grouped by actor, then action display label.</div>
+</div>
 <div class="col-first even-row-color"><code>(package private) final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="ReportData.ReportArtifactRollView.html" title="visualization内のクラス">ReportData.ReportArtifactRollView</a>&gt;</code></div>
 <div class="col-second even-row-color"><code><a href="#artifactRolls" class="member-name-link">artifactRolls</a></code></div>
 <div class="col-last even-row-color">
 <div class="block">Artifact substat roll counts per character.</div>
 </div>
-<div class="col-first odd-row-color"><code>(package private) final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="ReportViewAdapter.ReportCharacterView.html" title="visualization内のクラス">ReportViewAdapter.ReportCharacterView</a>&gt;</code></div>
-<div class="col-second odd-row-color"><code><a href="#characters" class="member-name-link">characters</a></code></div>
+<div class="col-first odd-row-color"><code>(package private) final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&gt;</code></div>
+<div class="col-second odd-row-color"><code><a href="#auraSeries" class="member-name-link">auraSeries</a></code></div>
 <div class="col-last odd-row-color">
+<div class="block">Enemy aura unit series per element as JS object literals.</div>
+</div>
+<div class="col-first even-row-color"><code>(package private) final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="ReportData.ReportBuffUptimeView.html" title="visualization内のクラス">ReportData.ReportBuffUptimeView</a>&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#buffUptime" class="member-name-link">buffUptime</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Buff uptime summaries grouped by character and buff display label.</div>
+</div>
+<div class="col-first odd-row-color"><code>(package private) final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="ReportData.CharacterReportView.html" title="visualization内のクラス">ReportData.CharacterReportView</a>&gt;</code></div>
+<div class="col-second odd-row-color"><code><a href="#characterDetails" class="member-name-link">characterDetails</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Per-character detail entries intended for the face-icon tab UI.</div>
+</div>
+<div class="col-first even-row-color"><code>(package private) final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="ReportViewAdapter.ReportCharacterView.html" title="visualization内のクラス">ReportViewAdapter.ReportCharacterView</a>&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#characters" class="member-name-link">characters</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Party member views (display name and DOM key).</div>
 </div>
-<div class="col-first even-row-color"><code>(package private) final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>[]</code></div>
-<div class="col-second even-row-color"><code><a href="#chartColors" class="member-name-link">chartColors</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>(package private) final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>[]</code></div>
+<div class="col-second odd-row-color"><code><a href="#chartColors" class="member-name-link">chartColors</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Chart colors aligned by index with <a href="#chartNames"><code>chartNames</code></a>.</div>
 </div>
-<div class="col-first odd-row-color"><code>(package private) final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;</code></div>
-<div class="col-second odd-row-color"><code><a href="#chartNames" class="member-name-link">chartNames</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>(package private) final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#chartNames" class="member-name-link">chartNames</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Ordered list of actor display names used for charts.</div>
 </div>
-<div class="col-first even-row-color"><code>(package private) final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&gt;</code></div>
-<div class="col-second even-row-color"><code><a href="#cumulativeDamageSeries" class="member-name-link">cumulativeDamageSeries</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>(package private) final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&gt;</code></div>
+<div class="col-second odd-row-color"><code><a href="#cumulativeDamageSeries" class="member-name-link">cumulativeDamageSeries</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Cumulative damage series points (as JS object literals) per actor.</div>
 </div>
-<div class="col-first odd-row-color"><code>(package private) final double</code></div>
-<div class="col-second odd-row-color"><code><a href="#dps" class="member-name-link">dps</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code>(package private) final double</code></div>
+<div class="col-second even-row-color"><code><a href="#dps" class="member-name-link">dps</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Damage-per-second derived from <a href="#totalDamage"><code>totalDamage</code></a> and <a href="#rotationTime"><code>rotationTime</code></a>.</div>
 </div>
-<div class="col-first even-row-color"><code>(package private) final double</code></div>
-<div class="col-second even-row-color"><code><a href="#endTime" class="member-name-link">endTime</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code>(package private) final double</code></div>
+<div class="col-second odd-row-color"><code><a href="#endTime" class="member-name-link">endTime</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Timestamp of the final record in the rotation.</div>
+</div>
+<div class="col-first even-row-color"><code>(package private) final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#energySeries" class="member-name-link">energySeries</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Character energy percentage series as JS object literals, keyed by display name.</div>
 </div>
 <div class="col-first odd-row-color"><code>(package private) final boolean</code></div>
 <div class="col-second odd-row-color"><code><a href="#hasStatsHistory" class="member-name-link">hasStatsHistory</a></code></div>
 <div class="col-last odd-row-color">
 <div class="block">Whether <a href="#statsHistory"><code>statsHistory</code></a> contains usable data.</div>
 </div>
-<div class="col-first even-row-color"><code>(package private) final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="SimulationRecord.html" title="visualization内のクラス">SimulationRecord</a>&gt;</code></div>
-<div class="col-second even-row-color"><code><a href="#records" class="member-name-link">records</a></code></div>
+<div class="col-first even-row-color"><code>(package private) final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="ReportData.ReportMetricView.html" title="visualization内のクラス">ReportData.ReportMetricView</a>&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#reactionDamageTotals" class="member-name-link">reactionDamageTotals</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">Elemental reaction damage totals grouped by reaction display label.</div>
+</div>
+<div class="col-first odd-row-color"><code>(package private) final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="SimulationRecord.html" title="visualization内のクラス">SimulationRecord</a>&gt;</code></div>
+<div class="col-second odd-row-color"><code><a href="#records" class="member-name-link">records</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Raw simulation events used to render the timeline.</div>
+</div>
+<div class="col-first even-row-color"><code>(package private) final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#rollingDpsSeries" class="member-name-link">rollingDpsSeries</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Rolling team DPS series as JS object literals.</div>
 </div>
 <div class="col-first odd-row-color"><code>(package private) final double</code></div>
 <div class="col-second odd-row-color"><code><a href="#rotationTime" class="member-name-link">rotationTime</a></code></div>
@@ -202,12 +265,20 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">コンストラクタ</div>
 <div class="table-header col-last">説明</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.util.List,java.util.List,java.util.List,java.util.List,java.util.Map,java.util.Map,java.util.List,java.lang.String%5B%5D,double,double,double,double,boolean)" class="member-name-link">ReportData</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="SimulationRecord.html" title="visualization内のクラス">SimulationRecord</a>&gt;&nbsp;records,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.util.List,java.util.List,java.util.List,java.util.List,java.util.List,java.util.Map,java.util.Map,java.util.List,java.util.Map,java.util.List,java.util.List,java.util.Map,java.util.Map,java.util.List,java.util.List,java.lang.String%5B%5D,double,double,double,double,boolean)" class="member-name-link">ReportData</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="SimulationRecord.html" title="visualization内のクラス">SimulationRecord</a>&gt;&nbsp;records,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportViewAdapter.ReportCharacterView.html" title="visualization内のクラス">ReportViewAdapter.ReportCharacterView</a>&gt;&nbsp;characters,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportData.CharacterReportView.html" title="visualization内のクラス">ReportData.CharacterReportView</a>&gt;&nbsp;characterDetails,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportViewAdapter.ReportStatsSnapshot.html" title="visualization内のクラス">ReportViewAdapter.ReportStatsSnapshot</a>&gt;&nbsp;statsHistory,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportData.ReportArtifactRollView.html" title="visualization内のクラス">ReportData.ReportArtifactRollView</a>&gt;&nbsp;artifactRolls,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;totalDamageByActor,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&gt;&nbsp;cumulativeDamageSeries,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportData.ReportMetricView.html" title="visualization内のクラス">ReportData.ReportMetricView</a>&gt;&nbsp;actionDamageTotals,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportData.ReportMetricView.html" title="visualization内のクラス">ReportData.ReportMetricView</a>&gt;&gt;&nbsp;actionDamageTotalsByActor,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportData.ReportMetricView.html" title="visualization内のクラス">ReportData.ReportMetricView</a>&gt;&nbsp;reactionDamageTotals,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&nbsp;rollingDpsSeries,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&gt;&nbsp;auraSeries,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&gt;&nbsp;energySeries,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportData.ReportBuffUptimeView.html" title="visualization内のクラス">ReportData.ReportBuffUptimeView</a>&gt;&nbsp;buffUptime,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&nbsp;chartNames,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>[]&nbsp;chartColors,
  double&nbsp;totalDamage,
@@ -258,6 +329,15 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="characterDetails">
+<h3>characterDetails</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportData.CharacterReportView.html" title="visualization内のクラス">ReportData.CharacterReportView</a>&gt;</span>&nbsp;<span class="element-name">characterDetails</span></div>
+<div class="block">Per-character detail entries intended for the face-icon tab UI.</div>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="statsHistory">
 <h3>statsHistory</h3>
 <div class="horizontal-scroll">
@@ -290,6 +370,69 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&gt;</span>&nbsp;<span class="element-name">cumulativeDamageSeries</span></div>
 <div class="block">Cumulative damage series points (as JS object literals) per actor.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="actionDamageTotals">
+<h3>actionDamageTotals</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportData.ReportMetricView.html" title="visualization内のクラス">ReportData.ReportMetricView</a>&gt;</span>&nbsp;<span class="element-name">actionDamageTotals</span></div>
+<div class="block">Damage totals grouped by action display label.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="actionDamageTotalsByActor">
+<h3>actionDamageTotalsByActor</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportData.ReportMetricView.html" title="visualization内のクラス">ReportData.ReportMetricView</a>&gt;&gt;</span>&nbsp;<span class="element-name">actionDamageTotalsByActor</span></div>
+<div class="block">Damage totals grouped by actor, then action display label.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="reactionDamageTotals">
+<h3>reactionDamageTotals</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportData.ReportMetricView.html" title="visualization内のクラス">ReportData.ReportMetricView</a>&gt;</span>&nbsp;<span class="element-name">reactionDamageTotals</span></div>
+<div class="block">Elemental reaction damage totals grouped by reaction display label.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="rollingDpsSeries">
+<h3>rollingDpsSeries</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;</span>&nbsp;<span class="element-name">rollingDpsSeries</span></div>
+<div class="block">Rolling team DPS series as JS object literals.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="auraSeries">
+<h3>auraSeries</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&gt;</span>&nbsp;<span class="element-name">auraSeries</span></div>
+<div class="block">Enemy aura unit series per element as JS object literals.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="energySeries">
+<h3>energySeries</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&gt;</span>&nbsp;<span class="element-name">energySeries</span></div>
+<div class="block">Character energy percentage series as JS object literals, keyed by display name.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="buffUptime">
+<h3>buffUptime</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportData.ReportBuffUptimeView.html" title="visualization内のクラス">ReportData.ReportBuffUptimeView</a>&gt;</span>&nbsp;<span class="element-name">buffUptime</span></div>
+<div class="block">Buff uptime summaries grouped by character and buff display label.</div>
 </div>
 </section>
 </li>
@@ -365,15 +508,23 @@ loadScripts(document, 'script');</script>
 <h2>コンストラクタの詳細</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(java.util.List,java.util.List,java.util.List,java.util.List,java.util.Map,java.util.Map,java.util.List,java.lang.String[],double,double,double,double,boolean)">
+<section class="detail" id="&lt;init&gt;(java.util.List,java.util.List,java.util.List,java.util.List,java.util.List,java.util.Map,java.util.Map,java.util.List,java.util.Map,java.util.List,java.util.List,java.util.Map,java.util.Map,java.util.List,java.util.List,java.lang.String[],double,double,double,double,boolean)">
 <h3>ReportData</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="element-name">ReportData</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="SimulationRecord.html" title="visualization内のクラス">SimulationRecord</a>&gt;&nbsp;records,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportViewAdapter.ReportCharacterView.html" title="visualization内のクラス">ReportViewAdapter.ReportCharacterView</a>&gt;&nbsp;characters,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportData.CharacterReportView.html" title="visualization内のクラス">ReportData.CharacterReportView</a>&gt;&nbsp;characterDetails,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportViewAdapter.ReportStatsSnapshot.html" title="visualization内のクラス">ReportViewAdapter.ReportStatsSnapshot</a>&gt;&nbsp;statsHistory,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportData.ReportArtifactRollView.html" title="visualization内のクラス">ReportData.ReportArtifactRollView</a>&gt;&nbsp;artifactRolls,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;totalDamageByActor,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&gt;&nbsp;cumulativeDamageSeries,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportData.ReportMetricView.html" title="visualization内のクラス">ReportData.ReportMetricView</a>&gt;&nbsp;actionDamageTotals,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportData.ReportMetricView.html" title="visualization内のクラス">ReportData.ReportMetricView</a>&gt;&gt;&nbsp;actionDamageTotalsByActor,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportData.ReportMetricView.html" title="visualization内のクラス">ReportData.ReportMetricView</a>&gt;&nbsp;reactionDamageTotals,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&nbsp;rollingDpsSeries,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&gt;&nbsp;auraSeries,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&gt;&nbsp;energySeries,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportData.ReportBuffUptimeView.html" title="visualization内のクラス">ReportData.ReportBuffUptimeView</a>&gt;&nbsp;buffUptime,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&nbsp;chartNames,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>[]&nbsp;chartColors,
  double&nbsp;totalDamage,

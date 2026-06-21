@@ -64,7 +64,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">メソッドの詳細</a>
 <ol class="toc-list">
 <li><a href="#colorsFor(java.util.List,simulation.CombatSimulator)" tabindex="0">colorsFor(List, CombatSimulator)</a></li>
-<li><a href="#colorFor(model.type.Element,int)" tabindex="0">colorFor(Element, int)</a></li>
+<li><a href="#colorForElement(model.type.Element,int)" tabindex="0">colorForElement(Element, int)</a></li>
 </ol>
 </li>
 </ol>
@@ -113,8 +113,8 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">修飾子とタイプ</div>
 <div class="table-header col-second">メソッド</div>
 <div class="table-header col-last">説明</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#colorFor(model.type.Element,int)" class="member-name-link">colorFor</a><wbr>(<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>(package private) static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#colorForElement(model.type.Element,int)" class="member-name-link">colorForElement</a><wbr>(<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element,
  int&nbsp;variant)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Picks a JS-literal color string for the given element and variant index.</div>
@@ -180,10 +180,10 @@ element so that multiple characters of the same element are distinguishable.</di
 </section>
 </li>
 <li>
-<section class="detail" id="colorFor(model.type.Element,int)">
-<h3>colorFor</h3>
+<section class="detail" id="colorForElement(model.type.Element,int)">
+<h3>colorForElement</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">colorFor</span><wbr><span class="parameters">(<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element,
+<div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">colorForElement</span><wbr><span class="parameters">(<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element,
  int&nbsp;variant)</span></div>
 <div class="block">Picks a JS-literal color string for the given element and variant index.</div>
 <dl class="notes">

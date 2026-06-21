@@ -68,12 +68,14 @@ loadScripts(document, 'script');</script>
 <li><a href="#er" tabindex="0">er</a></li>
 <li><a href="#em" tabindex="0">em</a></li>
 <li><a href="#dmg" tabindex="0">dmg</a></li>
+<li><a href="#energy" tabindex="0">energy</a></li>
 <li><a href="#buffs" tabindex="0">buffs</a></li>
 </ol>
 </li>
 <li><a href="#constructor-detail" tabindex="0">コンストラクタの詳細</a>
 <ol class="toc-list">
 <li><a href="#%3Cinit%3E(java.util.Map,java.util.List)" tabindex="0">ReportCharacterStats(Map, List)</a></li>
+<li><a href="#%3Cinit%3E(java.util.Map,java.util.List,double)" tabindex="0">ReportCharacterStats(Map, List, double)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">メソッドの詳細</a>
@@ -151,13 +153,18 @@ percentages) for a single character at one snapshot.</div>
 <div class="block">Elemental Mastery as a raw value.</div>
 </div>
 <div class="col-first odd-row-color"><code>final double</code></div>
-<div class="col-second odd-row-color"><code><a href="#er" class="member-name-link">er</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#energy" class="member-name-link">energy</a></code></div>
 <div class="col-last odd-row-color">
-<div class="block">Energy Recharge expressed as a percentage value (e.g. 150.0).</div>
+<div class="block">Current energy as a percentage of burst cost.</div>
 </div>
 <div class="col-first even-row-color"><code>final double</code></div>
-<div class="col-second even-row-color"><code><a href="#hp" class="member-name-link">hp</a></code></div>
+<div class="col-second even-row-color"><code><a href="#er" class="member-name-link">er</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">Energy Recharge expressed as a percentage value (e.g. 150.0).</div>
+</div>
+<div class="col-first odd-row-color"><code>final double</code></div>
+<div class="col-second odd-row-color"><code><a href="#hp" class="member-name-link">hp</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Effective HP after percent and flat bonuses.</div>
 </div>
 </div>
@@ -175,6 +182,12 @@ percentages) for a single character at one snapshot.</div>
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&nbsp;buffs)</code></div>
 <div class="col-last even-row-color">
 <div class="block">Reduces a raw stat map and buff list into report-ready values.</div>
+</div>
+<div class="col-constructor-name odd-row-color"><code><a href="#%3Cinit%3E(java.util.Map,java.util.List,double)" class="member-name-link">ReportCharacterStats</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/StatType.html" title="model.typeの列挙クラス">StatType</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;stats,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&nbsp;buffs,
+ double&nbsp;energyPercent)</code></div>
+<div class="col-last odd-row-color">
+<div class="block">Reduces a raw stat map, buff list, and energy value into report-ready values.</div>
 </div>
 </div>
 </section>
@@ -283,6 +296,15 @@ percentages) for a single character at one snapshot.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="energy">
+<h3>energy</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">energy</span></div>
+<div class="block">Current energy as a percentage of burst cost.</div>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="buffs">
 <h3>buffs</h3>
 <div class="horizontal-scroll">
@@ -310,6 +332,23 @@ percentages) for a single character at one snapshot.</div>
 <dt>パラメータ:</dt>
 <dd><code>stats</code> - raw stat map keyed by <a href="../model/type/StatType.html" title="model.typeの列挙クラス"><code>StatType</code></a>; may be <code>null</code></dd>
 <dd><code>buffs</code> - active buff display names for the same snapshot</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="&lt;init&gt;(java.util.Map,java.util.List,double)">
+<h3>ReportCharacterStats</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ReportCharacterStats</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/StatType.html" title="model.typeの列挙クラス">StatType</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;stats,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&nbsp;buffs,
+ double&nbsp;energyPercent)</span></div>
+<div class="block">Reduces a raw stat map, buff list, and energy value into report-ready values.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>stats</code> - raw stat map keyed by <a href="../model/type/StatType.html" title="model.typeの列挙クラス"><code>StatType</code></a>; may be <code>null</code></dd>
+<dd><code>buffs</code> - active buff display names for the same snapshot</dd>
+<dd><code>energyPercent</code> - current energy as a percentage of burst cost</dd>
 </dl>
 </div>
 </section>

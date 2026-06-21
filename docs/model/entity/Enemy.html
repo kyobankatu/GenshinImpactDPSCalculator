@@ -54,6 +54,7 @@ loadScripts(document, 'script');</script>
 <div class="toc-header">コンテンツ&nbsp;<input type="text" class="filter-input" disabled placeholder="コンテンツのフィルタ(.と入力)" aria-label="目次のフィルタ" autocomplete="off" spellcheck="false"><input type="reset" class="reset-filter" disabled tabindex="-1" value="リセット"></div>
 <ol class="toc-list" tabindex="-1">
 <li><a href="#" tabindex="0">説明</a></li>
+<li><a href="#nested-class-summary" tabindex="0">ネストされたクラスの概要</a></li>
 <li><a href="#field-summary" tabindex="0">フィールドの概要</a></li>
 <li><a href="#constructor-summary" tabindex="0">コンストラクタの概要</a></li>
 <li><a href="#method-summary" tabindex="0">メソッドの概要</a></li>
@@ -62,6 +63,8 @@ loadScripts(document, 'script');</script>
 <li><a href="#level" tabindex="0">level</a></li>
 <li><a href="#resistances" tabindex="0">resistances</a></li>
 <li><a href="#auraGauge" tabindex="0">auraGauge</a></li>
+<li><a href="#freezeAuraUnits" tabindex="0">freezeAuraUnits</a></li>
+<li><a href="#INFINITE_EXPIRY" tabindex="0">INFINITE_EXPIRY</a></li>
 </ol>
 </li>
 <li><a href="#constructor-detail" tabindex="0">コンストラクタの詳細</a>
@@ -72,11 +75,26 @@ loadScripts(document, 'script');</script>
 <li><a href="#method-detail" tabindex="0">メソッドの詳細</a>
 <ol class="toc-list">
 <li><a href="#setAura(model.type.Element,double)" tabindex="0">setAura(Element, double)</a></li>
+<li><a href="#setAura(model.type.Element,double,double)" tabindex="0">setAura(Element, double, double)</a></li>
 <li><a href="#reduceAura(model.type.Element,double)" tabindex="0">reduceAura(Element, double)</a></li>
+<li><a href="#reduceAura(model.type.Element,double,double)" tabindex="0">reduceAura(Element, double, double)</a></li>
 <li><a href="#getAuraUnits(model.type.Element)" tabindex="0">getAuraUnits(Element)</a></li>
+<li><a href="#getAuraUnits(model.type.Element,double)" tabindex="0">getAuraUnits(Element, double)</a></li>
+<li><a href="#updateAuras(double)" tabindex="0">updateAuras(double)</a></li>
 <li><a href="#getPrimaryAura()" tabindex="0">getPrimaryAura()</a></li>
+<li><a href="#getPrimaryAura(double)" tabindex="0">getPrimaryAura(double)</a></li>
 <li><a href="#getActiveAuras()" tabindex="0">getActiveAuras()</a></li>
+<li><a href="#getActiveAuras(double)" tabindex="0">getActiveAuras(double)</a></li>
 <li><a href="#getAuraMap()" tabindex="0">getAuraMap()</a></li>
+<li><a href="#getAuraMap(double)" tabindex="0">getAuraMap(double)</a></li>
+<li><a href="#captureAuraState()" tabindex="0">captureAuraState()</a></li>
+<li><a href="#restoreAuraState(java.util.Map)" tabindex="0">restoreAuraState(Map)</a></li>
+<li><a href="#auraDuration(double)" tabindex="0">auraDuration(double)</a></li>
+<li><a href="#setFreezeAura(double)" tabindex="0">setFreezeAura(double)</a></li>
+<li><a href="#reduceFreezeAura(double)" tabindex="0">reduceFreezeAura(double)</a></li>
+<li><a href="#clearFreezeAura()" tabindex="0">clearFreezeAura()</a></li>
+<li><a href="#isFrozen()" tabindex="0">isFrozen()</a></li>
+<li><a href="#getFreezeAuraUnits()" tabindex="0">getFreezeAuraUnits()</a></li>
 <li><a href="#setRes(model.type.StatType,double)" tabindex="0">setRes(StatType, double)</a></li>
 <li><a href="#getRes(model.type.StatType)" tabindex="0">getRes(StatType)</a></li>
 <li><a href="#getLevel()" tabindex="0">getLevel()</a></li>
@@ -109,6 +127,23 @@ reproducible benchmark comparisons.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
+<!-- ======== NESTED CLASS SUMMARY ======== -->
+<li>
+<section class="nested-class-summary" id="nested-class-summary">
+<h2>ネストされたクラスの概要</h2>
+<div class="caption"><span>ネストされたクラス</span></div>
+<div class="summary-table three-column-summary">
+<div class="table-header col-first">修飾子とタイプ</div>
+<div class="table-header col-second">クラス</div>
+<div class="table-header col-last">説明</div>
+<div class="col-first even-row-color"><code>private static final class&nbsp;</code></div>
+<div class="col-second even-row-color"><code><a href="Enemy.AuraState.html" class="type-name-link" title="model.entity内のクラス">Enemy.AuraState</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Time-aware elemental aura state.</div>
+</div>
+</div>
+</section>
+</li>
 <!-- =========== FIELD SUMMARY =========== -->
 <li>
 <section class="field-summary" id="field-summary">
@@ -118,8 +153,14 @@ reproducible benchmark comparisons.</div>
 <div class="table-header col-first">修飾子とタイプ</div>
 <div class="table-header col-second">フィールド</div>
 <div class="table-header col-last">説明</div>
-<div class="col-first even-row-color"><code>private <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</code></div>
+<div class="col-first even-row-color"><code>private <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>, <a href="Enemy.AuraState.html" title="model.entity内のクラス">Enemy.AuraState</a>&gt;</code></div>
 <div class="col-second even-row-color"><code><a href="#auraGauge" class="member-name-link">auraGauge</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private double</code></div>
+<div class="col-second odd-row-color"><code><a href="#freezeAuraUnits" class="member-name-link">freezeAuraUnits</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private static final double</code></div>
+<div class="col-second even-row-color"><code><a href="#INFINITE_EXPIRY" class="member-name-link">INFINITE_EXPIRY</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code>private int</code></div>
 <div class="col-second odd-row-color"><code><a href="#level" class="member-name-link">level</a></code></div>
@@ -157,42 +198,114 @@ applied to all eight elements.</div>
 <div class="table-header col-first">修飾子とタイプ</div>
 <div class="table-header col-second">メソッド</div>
 <div class="table-header col-last">説明</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="java.util内のクラスまたはインタフェース" class="external-link">Set</a><wbr>&lt;<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getActiveAuras()" class="member-name-link">getActiveAuras</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#auraDuration(double)" class="member-name-link">auraDuration</a><wbr>(double&nbsp;units)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr>double[]&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#captureAuraState()" class="member-name-link">captureAuraState</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Captures the full per-element aura state for simulator snapshot/rollback.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#clearFreezeAura()" class="member-name-link">clearFreezeAura</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the set of all elements currently applied as an aura on this enemy.</div>
+<div class="block">Clears the simplified Freeze Aura state.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="java.util内のクラスまたはインタフェース" class="external-link">Set</a><wbr>&lt;<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getActiveAuras()" class="member-name-link">getActiveAuras</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the set of all elements currently applied as an aura on this enemy
+without applying natural decay.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="java.util内のクラスまたはインタフェース" class="external-link">Set</a><wbr>&lt;<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getActiveAuras(double)" class="member-name-link">getActiveAuras</a><wbr>(double&nbsp;currentTime)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the set of elements whose decayed gauge is still positive at the
+given simulator time.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAuraMap()" class="member-name-link">getAuraMap</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns a snapshot copy of the full aura gauge map (element -&gt; units).</div>
+<div class="block">Returns a snapshot copy of the full aura gauge map (element -&gt; units)
+using stored units without applying natural decay.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAuraMap(double)" class="member-name-link">getAuraMap</a><wbr>(double&nbsp;currentTime)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns a snapshot copy of the aura gauge map (element -&gt; units) using
+decayed current units at the given simulator time.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAuraUnits(model.type.Element)" class="member-name-link">getAuraUnits</a><wbr>(<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the stored gauge units for the given element without applying
+natural decay, or <code>0.0</code> if no aura of that element is applied.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAuraUnits(model.type.Element)" class="member-name-link">getAuraUnits</a><wbr>(<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAuraUnits(model.type.Element,double)" class="member-name-link">getAuraUnits</a><wbr>(<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element,
+ double&nbsp;currentTime)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the remaining gauge units for the given element, or <code>0.0</code>
-if no aura of that element is currently applied.</div>
+<div class="block">Returns the remaining gauge units for the given element at
+<code>currentTime</code> after continuous natural decay, or <code>0.0</code> if no
+aura of that element is applied.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLevel()" class="member-name-link">getLevel</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getFreezeAuraUnits()" class="member-name-link">getFreezeAuraUnits</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the current simplified Freeze Aura units.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLevel()" class="member-name-link">getLevel</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the enemy's level, used in the DEF multiplier formula.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../type/Element.html" title="model.typeの列挙クラス">Element</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPrimaryAura()" class="member-name-link">getPrimaryAura</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../type/Element.html" title="model.typeの列挙クラス">Element</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPrimaryAura()" class="member-name-link">getPrimaryAura</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the primary active aura element.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../type/Element.html" title="model.typeの列挙クラス">Element</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPrimaryAura(double)" class="member-name-link">getPrimaryAura</a><wbr>(double&nbsp;currentTime)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the primary active aura element using decayed current units at the
+given simulator time.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getRes(model.type.StatType)" class="member-name-link">getRes</a><wbr>(<a href="../type/StatType.html" title="model.typeの列挙クラス">StatType</a>&nbsp;elementType)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the resistance value for the given element type.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reduceAura(model.type.Element,double)" class="member-name-link">reduceAura</a><wbr>(<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element,
- double&nbsp;decay)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isFrozen()" class="member-name-link">isFrozen</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Reduces the gauge of the given element by <code>decay</code> units.</div>
+<div class="block">Returns whether the enemy currently has Freeze Aura.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reduceAura(model.type.Element,double)" class="member-name-link">reduceAura</a><wbr>(<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element,
+ double&nbsp;decay)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Reduces the gauge of the given element by <code>decay</code> units, ignoring
+natural decay.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reduceAura(model.type.Element,double,double)" class="member-name-link">reduceAura</a><wbr>(<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element,
+ double&nbsp;decay,
+ double&nbsp;currentTime)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Reduces the gauge of the given element by <code>decay</code> units, consuming
+the value remaining after continuous natural decay up to
+<code>currentTime</code>.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reduceFreezeAura(double)" class="member-name-link">reduceFreezeAura</a><wbr>(double&nbsp;units)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Reduces the simplified Freeze Aura gauge.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#restoreAuraState(java.util.Map)" class="member-name-link">restoreAuraState</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr>double[]&gt;&nbsp;state)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Restores aura state previously captured by <a href="#captureAuraState()"><code>captureAuraState()</code></a>,
+replacing any current auras.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAura(model.type.Element,double)" class="member-name-link">setAura</a><wbr>(<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element,
@@ -201,10 +314,29 @@ if no aura of that element is currently applied.</div>
 <div class="block">Sets the elemental aura gauge for the given element to <code>units</code>.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAura(model.type.Element,double,double)" class="member-name-link">setAura</a><wbr>(<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element,
+ double&nbsp;units,
+ double&nbsp;currentTime)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets a runtime elemental aura with natural expiry derived from gauge units.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setFreezeAura(double)" class="member-name-link">setFreezeAura</a><wbr>(double&nbsp;units)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets the simplified Freeze Aura gauge used by single-target reaction logic.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setRes(model.type.StatType,double)" class="member-name-link">setRes</a><wbr>(<a href="../type/StatType.html" title="model.typeの列挙クラス">StatType</a>&nbsp;elementType,
  double&nbsp;value)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Sets the resistance value for the given element type.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#updateAuras(double)" class="member-name-link">updateAuras</a><wbr>(double&nbsp;currentTime)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Removes runtime auras that have expired by the given simulator time,
+either because their expiry has passed or their decayed value has reached
+zero.</div>
 </div>
 </div>
 </div>
@@ -243,7 +375,31 @@ if no aura of that element is currently applied.</div>
 <section class="detail" id="auraGauge">
 <h3>auraGauge</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</span>&nbsp;<span class="element-name">auraGauge</span></div>
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>, <a href="Enemy.AuraState.html" title="model.entity内のクラス">Enemy.AuraState</a>&gt;</span>&nbsp;<span class="element-name">auraGauge</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="freezeAuraUnits">
+<h3>freezeAuraUnits</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">freezeAuraUnits</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="INFINITE_EXPIRY">
+<h3>INFINITE_EXPIRY</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">INFINITE_EXPIRY</span></div>
+<dl class="notes">
+<dt>関連項目:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../constant-values.html#model.entity.Enemy.INFINITE_EXPIRY">定数フィールド値</a></li>
+</ul>
+</dd>
+</dl>
 </div>
 </section>
 </li>
@@ -294,13 +450,40 @@ If <code>units</code> is zero or negative the aura is removed entirely.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="setAura(model.type.Element,double,double)">
+<h3>setAura</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setAura</span><wbr><span class="parameters">(<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element,
+ double&nbsp;units,
+ double&nbsp;currentTime)</span></div>
+<div class="block">Sets a runtime elemental aura with natural expiry derived from gauge units.
+
+<p>Current combat logic uses common 1U/2U/4U durations in a simplified
+form: <code>6 + gauge * 5</code> seconds. This gives 1U=11s, 2U=16s, and
+4U=26s, matching the broad relative behavior needed by rotation tests.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>element</code> - element whose aura gauge to set</dd>
+<dd><code>units</code> - gauge units to assign</dd>
+<dd><code>currentTime</code> - current simulator time in seconds</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="reduceAura(model.type.Element,double)">
 <h3>reduceAura</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">reduceAura</span><wbr><span class="parameters">(<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element,
  double&nbsp;decay)</span></div>
-<div class="block">Reduces the gauge of the given element by <code>decay</code> units.
-If the gauge drops to zero or below the element's aura is removed.</div>
+<div class="block">Reduces the gauge of the given element by <code>decay</code> units, ignoring
+natural decay.
+
+<p>This no-argument form is a compatibility wrapper that subtracts from
+the stored units at the aura's last application time. Mechanic decisions
+that depend on simulation time should call
+<a href="#reduceAura(model.type.Element,double,double)"><code>reduceAura(model.type.Element, double, double)</code></a> so the decayed
+current value is consumed instead.</div>
 <dl class="notes">
 <dt>パラメータ:</dt>
 <dd><code>element</code> - element whose gauge to reduce</dd>
@@ -310,17 +493,79 @@ If the gauge drops to zero or below the element's aura is removed.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="reduceAura(model.type.Element,double,double)">
+<h3>reduceAura</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">reduceAura</span><wbr><span class="parameters">(<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element,
+ double&nbsp;decay,
+ double&nbsp;currentTime)</span></div>
+<div class="block">Reduces the gauge of the given element by <code>decay</code> units, consuming
+the value remaining after continuous natural decay up to
+<code>currentTime</code>.
+
+<p>If the remaining value after consumption drops to zero or below, the
+aura is removed. Otherwise natural decay continues from the new remaining
+value at the aura's original decay rate.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>element</code> - element whose gauge to reduce</dd>
+<dd><code>decay</code> - amount to subtract from the decayed current gauge</dd>
+<dd><code>currentTime</code> - current simulator time in seconds</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="getAuraUnits(model.type.Element)">
 <h3>getAuraUnits</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getAuraUnits</span><wbr><span class="parameters">(<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element)</span></div>
-<div class="block">Returns the remaining gauge units for the given element, or <code>0.0</code>
-if no aura of that element is currently applied.</div>
+<div class="block">Returns the stored gauge units for the given element without applying
+natural decay, or <code>0.0</code> if no aura of that element is applied.
+
+<p>This no-argument form is a compatibility wrapper. Mechanic decisions
+that depend on simulation time should call
+<a href="#getAuraUnits(model.type.Element,double)"><code>getAuraUnits(model.type.Element, double)</code></a> to read the decayed
+current value.</div>
 <dl class="notes">
 <dt>パラメータ:</dt>
 <dd><code>element</code> - element to query</dd>
 <dt>戻り値:</dt>
-<dd>remaining aura gauge units</dd>
+<dd>stored aura gauge units at the last application time</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getAuraUnits(model.type.Element,double)">
+<h3>getAuraUnits</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getAuraUnits</span><wbr><span class="parameters">(<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element,
+ double&nbsp;currentTime)</span></div>
+<div class="block">Returns the remaining gauge units for the given element at
+<code>currentTime</code> after continuous natural decay, or <code>0.0</code> if no
+aura of that element is applied.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>element</code> - element to query</dd>
+<dd><code>currentTime</code> - current simulator time in seconds</dd>
+<dt>戻り値:</dt>
+<dd>decayed remaining aura gauge units, never negative</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="updateAuras(double)">
+<h3>updateAuras</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">updateAuras</span><wbr><span class="parameters">(double&nbsp;currentTime)</span></div>
+<div class="block">Removes runtime auras that have expired by the given simulator time,
+either because their expiry has passed or their decayed value has reached
+zero.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>currentTime</code> - current simulator time in seconds</dd>
 </dl>
 </div>
 </section>
@@ -343,14 +588,54 @@ primary. Returns <code>null</code> when no aura is active.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="getPrimaryAura(double)">
+<h3>getPrimaryAura</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../type/Element.html" title="model.typeの列挙クラス">Element</a></span>&nbsp;<span class="element-name">getPrimaryAura</span><wbr><span class="parameters">(double&nbsp;currentTime)</span></div>
+<div class="block">Returns the primary active aura element using decayed current units at the
+given simulator time. Auras that have naturally decayed to zero are
+ignored. As with <a href="#getPrimaryAura()"><code>getPrimaryAura()</code></a>, a simultaneous
+<a href="../type/Element.html#HYDRO"><code>Element.HYDRO</code></a>/<a href="../type/Element.html#ELECTRO"><code>Element.ELECTRO</code></a>
+(Electro-Charged) state returns <code>HYDRO</code> as the nominal primary.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>currentTime</code> - current simulator time in seconds</dd>
+<dt>戻り値:</dt>
+<dd>primary aura element, or <code>null</code> if no aura remains</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="getActiveAuras()">
 <h3>getActiveAuras</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="java.util内のクラスまたはインタフェース" class="external-link">Set</a>&lt;<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>&gt;</span>&nbsp;<span class="element-name">getActiveAuras</span>()</div>
-<div class="block">Returns the set of all elements currently applied as an aura on this enemy.</div>
+<div class="block">Returns the set of all elements currently applied as an aura on this enemy
+without applying natural decay.
+
+<p>This no-argument form is a compatibility wrapper. Mechanic decisions
+that depend on simulation time should call
+<a href="#getActiveAuras(double)"><code>getActiveAuras(double)</code></a> so naturally decayed auras are excluded.</div>
 <dl class="notes">
 <dt>戻り値:</dt>
 <dd>snapshot set of active aura elements</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getActiveAuras(double)">
+<h3>getActiveAuras</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Set.html" title="java.util内のクラスまたはインタフェース" class="external-link">Set</a>&lt;<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>&gt;</span>&nbsp;<span class="element-name">getActiveAuras</span><wbr><span class="parameters">(double&nbsp;currentTime)</span></div>
+<div class="block">Returns the set of elements whose decayed gauge is still positive at the
+given simulator time.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>currentTime</code> - current simulator time in seconds</dd>
+<dt>戻り値:</dt>
+<dd>snapshot set of active aura elements after natural decay</dd>
 </dl>
 </div>
 </section>
@@ -360,10 +645,133 @@ primary. Returns <code>null</code> when no aura is active.</div>
 <h3>getAuraMap</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</span>&nbsp;<span class="element-name">getAuraMap</span>()</div>
-<div class="block">Returns a snapshot copy of the full aura gauge map (element -&gt; units).</div>
+<div class="block">Returns a snapshot copy of the full aura gauge map (element -&gt; units)
+using stored units without applying natural decay.
+
+<p>This no-argument form is a compatibility wrapper. Snapshot consumers
+that depend on simulation time should call <a href="#getAuraMap(double)"><code>getAuraMap(double)</code></a> to
+read decayed current values.</div>
 <dl class="notes">
 <dt>戻り値:</dt>
 <dd>copy of the aura gauge map</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getAuraMap(double)">
+<h3>getAuraMap</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</span>&nbsp;<span class="element-name">getAuraMap</span><wbr><span class="parameters">(double&nbsp;currentTime)</span></div>
+<div class="block">Returns a snapshot copy of the aura gauge map (element -&gt; units) using
+decayed current units at the given simulator time. Elements whose decayed
+value has reached zero are omitted.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>currentTime</code> - current simulator time in seconds</dd>
+<dt>戻り値:</dt>
+<dd>copy of the aura gauge map after natural decay</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="captureAuraState()">
+<h3>captureAuraState</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr>double[]&gt;</span>&nbsp;<span class="element-name">captureAuraState</span>()</div>
+<div class="block">Captures the full per-element aura state for simulator snapshot/rollback.
+
+<p>Each entry holds <code>{units, applicationTime, duration}</code> so that
+continuous natural decay can be resumed exactly after a restore, rather
+than being flattened to a non-decaying value.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>a copy of the aura state keyed by element</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="restoreAuraState(java.util.Map)">
+<h3>restoreAuraState</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">restoreAuraState</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr>double[]&gt;&nbsp;state)</span></div>
+<div class="block">Restores aura state previously captured by <a href="#captureAuraState()"><code>captureAuraState()</code></a>,
+replacing any current auras. Future natural decay resumes from the restored
+values, preserving the original decay behavior across rollback.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>state</code> - captured aura state keyed by element; <code>null</code> clears all auras</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="auraDuration(double)">
+<h3>auraDuration</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">auraDuration</span><wbr><span class="parameters">(double&nbsp;units)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setFreezeAura(double)">
+<h3>setFreezeAura</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setFreezeAura</span><wbr><span class="parameters">(double&nbsp;units)</span></div>
+<div class="block">Sets the simplified Freeze Aura gauge used by single-target reaction logic.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>units</code> - Freeze Aura units; non-positive values clear the state</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="reduceFreezeAura(double)">
+<h3>reduceFreezeAura</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">reduceFreezeAura</span><wbr><span class="parameters">(double&nbsp;units)</span></div>
+<div class="block">Reduces the simplified Freeze Aura gauge.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>units</code> - amount to remove</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="clearFreezeAura()">
+<h3>clearFreezeAura</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">clearFreezeAura</span>()</div>
+<div class="block">Clears the simplified Freeze Aura state.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="isFrozen()">
+<h3>isFrozen</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isFrozen</span>()</div>
+<div class="block">Returns whether the enemy currently has Freeze Aura.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd><code>true</code> if Frozen</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getFreezeAuraUnits()">
+<h3>getFreezeAuraUnits</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getFreezeAuraUnits</span>()</div>
+<div class="block">Returns the current simplified Freeze Aura units.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>Freeze Aura units</dd>
 </dl>
 </div>
 </section>

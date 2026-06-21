@@ -75,7 +75,11 @@ loadScripts(document, 'script');</script>
 <li><a href="#actionType" tabindex="0">actionType</a></li>
 <li><a href="#countsAsBurstDmg" tabindex="0">countsAsBurstDmg</a></li>
 <li><a href="#countsAsSkillDmg" tabindex="0">countsAsSkillDmg</a></li>
+<li><a href="#shatterTrigger" tabindex="0">shatterTrigger</a></li>
 <li><a href="#defenseIgnore" tabindex="0">defenseIgnore</a></li>
+<li><a href="#additiveBaseDmgBonus" tabindex="0">additiveBaseDmgBonus</a></li>
+<li><a href="#additiveReactionName" tabindex="0">additiveReactionName</a></li>
+<li><a href="#dendroCoreConsumptionLimit" tabindex="0">dendroCoreConsumptionLimit</a></li>
 <li><a href="#extraBonuses" tabindex="0">extraBonuses</a></li>
 <li><a href="#debugFormula" tabindex="0">debugFormula</a></li>
 </ol>
@@ -103,6 +107,10 @@ loadScripts(document, 'script');</script>
 <li><a href="#isCountsAsBurstDmg()" tabindex="0">isCountsAsBurstDmg()</a></li>
 <li><a href="#setCountsAsSkillDmg(boolean)" tabindex="0">setCountsAsSkillDmg(boolean)</a></li>
 <li><a href="#isCountsAsSkillDmg()" tabindex="0">isCountsAsSkillDmg()</a></li>
+<li><a href="#setShatterTrigger(boolean)" tabindex="0">setShatterTrigger(boolean)</a></li>
+<li><a href="#isShatterTrigger()" tabindex="0">isShatterTrigger()</a></li>
+<li><a href="#setDendroCoreConsumptionLimit(int)" tabindex="0">setDendroCoreConsumptionLimit(int)</a></li>
+<li><a href="#getDendroCoreConsumptionLimit()" tabindex="0">getDendroCoreConsumptionLimit()</a></li>
 <li><a href="#setICD(model.type.ICDType,model.type.ICDTag,double)" tabindex="0">setICD(ICDType, ICDTag, double)</a></li>
 <li><a href="#getICDType()" tabindex="0">getICDType()</a></li>
 <li><a href="#getICDTag()" tabindex="0">getICDTag()</a></li>
@@ -120,6 +128,10 @@ loadScripts(document, 'script');</script>
 <li><a href="#getScalingStatValue(model.stats.StatsContainer)" tabindex="0">getScalingStatValue(StatsContainer)</a></li>
 <li><a href="#setDefenseIgnore(double)" tabindex="0">setDefenseIgnore(double)</a></li>
 <li><a href="#getDefenseIgnore()" tabindex="0">getDefenseIgnore()</a></li>
+<li><a href="#setAdditiveBaseDmgBonus(double)" tabindex="0">setAdditiveBaseDmgBonus(double)</a></li>
+<li><a href="#getAdditiveBaseDmgBonus()" tabindex="0">getAdditiveBaseDmgBonus()</a></li>
+<li><a href="#setAdditiveReactionName(java.lang.String)" tabindex="0">setAdditiveReactionName(String)</a></li>
+<li><a href="#getAdditiveReactionName()" tabindex="0">getAdditiveReactionName()</a></li>
 <li><a href="#setDebugFormula(java.lang.String)" tabindex="0">setDebugFormula(String)</a></li>
 <li><a href="#getDebugFormula()" tabindex="0">getDebugFormula()</a></li>
 </ol>
@@ -185,6 +197,12 @@ and consumed by <code>DamageCalculator</code> to produce a final damage value.
 <div class="col-second even-row-color"><code><a href="#actionType" class="member-name-link">actionType</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code>private double</code></div>
+<div class="col-second odd-row-color"><code><a href="#additiveBaseDmgBonus" class="member-name-link">additiveBaseDmgBonus</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#additiveReactionName" class="member-name-link">additiveReactionName</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private double</code></div>
 <div class="col-second odd-row-color"><code><a href="#animationDuration" class="member-name-link">animationDuration</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code>private <a href="../../model/type/StatType.html" title="model.typeの列挙クラス">StatType</a></code></div>
@@ -205,32 +223,38 @@ and consumed by <code>DamageCalculator</code> to produce a final damage value.
 <div class="col-first odd-row-color"><code>private double</code></div>
 <div class="col-second odd-row-color"><code><a href="#defenseIgnore" class="member-name-link">defenseIgnore</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>private <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a></code></div>
-<div class="col-second even-row-color"><code><a href="#element" class="member-name-link">element</a></code></div>
+<div class="col-first even-row-color"><code>private int</code></div>
+<div class="col-second even-row-color"><code><a href="#dendroCoreConsumptionLimit" class="member-name-link">dendroCoreConsumptionLimit</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>private <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="../../model/type/StatType.html" title="model.typeの列挙クラス">StatType</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</code></div>
-<div class="col-second odd-row-color"><code><a href="#extraBonuses" class="member-name-link">extraBonuses</a></code></div>
+<div class="col-first odd-row-color"><code>private <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#element" class="member-name-link">element</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>private double</code></div>
-<div class="col-second even-row-color"><code><a href="#gaugeUnits" class="member-name-link">gaugeUnits</a></code></div>
+<div class="col-first even-row-color"><code>private <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="../../model/type/StatType.html" title="model.typeの列挙クラス">StatType</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#extraBonuses" class="member-name-link">extraBonuses</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>private <a href="../../model/type/ICDTag.html" title="model.typeの列挙クラス">ICDTag</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#icdTag" class="member-name-link">icdTag</a></code></div>
+<div class="col-first odd-row-color"><code>private double</code></div>
+<div class="col-second odd-row-color"><code><a href="#gaugeUnits" class="member-name-link">gaugeUnits</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>private <a href="../../model/type/ICDType.html" title="model.typeの列挙クラス">ICDType</a></code></div>
-<div class="col-second even-row-color"><code><a href="#icdType" class="member-name-link">icdType</a></code></div>
+<div class="col-first even-row-color"><code>private <a href="../../model/type/ICDTag.html" title="model.typeの列挙クラス">ICDTag</a></code></div>
+<div class="col-second even-row-color"><code><a href="#icdTag" class="member-name-link">icdTag</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>private boolean</code></div>
-<div class="col-second odd-row-color"><code><a href="#isLunarConsidered" class="member-name-link">isLunarConsidered</a></code></div>
+<div class="col-first odd-row-color"><code>private <a href="../../model/type/ICDType.html" title="model.typeの列挙クラス">ICDType</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#icdType" class="member-name-link">icdType</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>private <a href="AttackAction.LunarReactionType.html" title="simulation.actionの列挙クラス">AttackAction.LunarReactionType</a></code></div>
-<div class="col-second even-row-color"><code><a href="#lunarReactionType" class="member-name-link">lunarReactionType</a></code></div>
+<div class="col-first even-row-color"><code>private boolean</code></div>
+<div class="col-second even-row-color"><code><a href="#isLunarConsidered" class="member-name-link">isLunarConsidered</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>private <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color"><code><a href="#name" class="member-name-link">name</a></code></div>
+<div class="col-first odd-row-color"><code>private <a href="AttackAction.LunarReactionType.html" title="simulation.actionの列挙クラス">AttackAction.LunarReactionType</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#lunarReactionType" class="member-name-link">lunarReactionType</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>private <a href="../../model/type/StatType.html" title="model.typeの列挙クラス">StatType</a></code></div>
-<div class="col-second even-row-color"><code><a href="#scalingStat" class="member-name-link">scalingStat</a></code></div>
+<div class="col-first even-row-color"><code>private <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#name" class="member-name-link">name</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private <a href="../../model/type/StatType.html" title="model.typeの列挙クラス">StatType</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#scalingStat" class="member-name-link">scalingStat</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private boolean</code></div>
+<div class="col-second even-row-color"><code><a href="#shatterTrigger" class="member-name-link">shatterTrigger</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code>private boolean</code></div>
 <div class="col-second odd-row-color"><code><a href="#useSnapshot" class="member-name-link">useSnapshot</a></code></div>
@@ -327,6 +351,14 @@ and consumed by <code>DamageCalculator</code> to produce a final damage value.
 <div class="block">Returns the ability category of this action (NORMAL, SKILL, BURST, etc.).</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAdditiveBaseDmgBonus()" class="member-name-link">getAdditiveBaseDmgBonus</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns flat additive base damage for the standard damage formula.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAdditiveReactionName()" class="member-name-link">getAdditiveReactionName</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAnimationDuration()" class="member-name-link">getAnimationDuration</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the animation duration used to advance simulation time after the action.</div>
@@ -352,85 +384,105 @@ and consumed by <code>DamageCalculator</code> to produce a final damage value.
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the defense ignore fraction applied during damage calculation.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getElement()" class="member-name-link">getElement</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDendroCoreConsumptionLimit()" class="member-name-link">getDendroCoreConsumptionLimit</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the configured Dendro Core consumption limit, or a non-positive
+value when the resolver should use the element default.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getElement()" class="member-name-link">getElement</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the element of this hit, used for aura application and reaction checks.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code><a href="../../model/type/StatType.html" title="model.typeの列挙クラス">StatType</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code><a href="#getElementType()" class="member-name-link">getElementType</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code><a href="../../model/type/StatType.html" title="model.typeの列挙クラス">StatType</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code><a href="#getElementType()" class="member-name-link">getElementType</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6">
 <div class="block"><span class="deprecated-label">推奨されていません。</span>
 <div class="deprecation-comment">Use <a href="#getElement()"><code>getElement()</code></a> instead.</div>
 </div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="../../model/type/StatType.html" title="model.typeの列挙クラス">StatType</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getExtraBonuses()" class="member-name-link">getExtraBonuses</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="../../model/type/StatType.html" title="model.typeの列挙クラス">StatType</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getExtraBonuses()" class="member-name-link">getExtraBonuses</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the map of per-action extra stat bonuses set via <a href="#addBonusStat(model.type.StatType,double)"><code>addBonusStat(StatType, double)</code></a>.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getGaugeUnits()" class="member-name-link">getGaugeUnits</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getGaugeUnits()" class="member-name-link">getGaugeUnits</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the elemental gauge units applied by this hit when ICD permits.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../model/type/ICDTag.html" title="model.typeの列挙クラス">ICDTag</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getICDTag()" class="member-name-link">getICDTag</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../model/type/ICDTag.html" title="model.typeの列挙クラス">ICDTag</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getICDTag()" class="member-name-link">getICDTag</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the ICD tag used to group hits into independent ICD sequences.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../model/type/ICDType.html" title="model.typeの列挙クラス">ICDType</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getICDType()" class="member-name-link">getICDType</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../model/type/ICDType.html" title="model.typeの列挙クラス">ICDType</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getICDType()" class="member-name-link">getICDType</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the ICD type used to evaluate element application eligibility.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="AttackAction.LunarReactionType.html" title="simulation.actionの列挙クラス">AttackAction.LunarReactionType</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLunarReactionType()" class="member-name-link">getLunarReactionType</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="AttackAction.LunarReactionType.html" title="simulation.actionの列挙クラス">AttackAction.LunarReactionType</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLunarReactionType()" class="member-name-link">getLunarReactionType</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the Lunar reaction sub-type for this action, or <code>null</code> if none.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code>double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code><a href="#getMotionValue()" class="member-name-link">getMotionValue</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code>double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6"><code><a href="#getMotionValue()" class="member-name-link">getMotionValue</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4 method-summary-table-tab6">
 <div class="block"><span class="deprecated-label">推奨されていません。</span>
 <div class="deprecation-comment">Use <a href="#getDamagePercent()"><code>getDamagePercent()</code></a> instead.</div>
 </div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getName()" class="member-name-link">getName</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getName()" class="member-name-link">getName</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the display name of this action (e.g.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../model/type/StatType.html" title="model.typeの列挙クラス">StatType</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getScalingStat()" class="member-name-link">getScalingStat</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../model/type/StatType.html" title="model.typeの列挙クラス">StatType</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getScalingStat()" class="member-name-link">getScalingStat</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the primary stat this action scales from (e.g.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getScalingStatValue(model.stats.StatsContainer)" class="member-name-link">getScalingStatValue</a><wbr>(<a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;stats)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getScalingStatValue(model.stats.StatsContainer)" class="member-name-link">getScalingStatValue</a><wbr>(<a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a>&nbsp;stats)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Resolves the numeric value of the scaling stat from the provided <a href="../../model/stats/StatsContainer.html" title="model.stats内のクラス"><code>StatsContainer</code></a>.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isCountsAsBurstDmg()" class="member-name-link">isCountsAsBurstDmg</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isCountsAsBurstDmg()" class="member-name-link">isCountsAsBurstDmg</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns whether this action is classified as Burst damage for bonus interactions.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isCountsAsSkillDmg()" class="member-name-link">isCountsAsSkillDmg</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isCountsAsSkillDmg()" class="member-name-link">isCountsAsSkillDmg</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns whether this action is classified as Skill damage for bonus interactions.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isLunarConsidered()" class="member-name-link">isLunarConsidered</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isLunarConsidered()" class="member-name-link">isLunarConsidered</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns whether this action is considered part of the Lunar damage system.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isShatterTrigger()" class="member-name-link">isShatterTrigger</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns whether this hit can trigger Shatter against Frozen enemies.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isUseSnapshot()" class="member-name-link">isUseSnapshot</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns whether this action uses snapshotted stats from cast time.</div>
 </div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAdditiveBaseDmgBonus(double)" class="member-name-link">setAdditiveBaseDmgBonus</a><wbr>(double&nbsp;value)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Sets flat additive base damage that is inserted before DMG Bonus, Crit, DEF,
+and RES.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAdditiveReactionName(java.lang.String)" class="member-name-link">setAdditiveReactionName</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;additiveReactionName)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setAnimationDuration(double)" class="member-name-link">setAnimationDuration</a><wbr>(double&nbsp;duration)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -459,21 +511,31 @@ that specifically trigger on Skill hits (e.g.</div>
 <div class="block">Sets the defense ignore fraction for this action (range 0.0–1.0).</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setICD(model.type.ICDType,model.type.ICDTag,double)" class="member-name-link">setICD</a><wbr>(<a href="../../model/type/ICDType.html" title="model.typeの列挙クラス">ICDType</a>&nbsp;type,
- <a href="../../model/type/ICDTag.html" title="model.typeの列挙クラス">ICDTag</a>&nbsp;tag,
- double&nbsp;gauge)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setDendroCoreConsumptionLimit(int)" class="member-name-link">setDendroCoreConsumptionLimit</a><wbr>(int&nbsp;limit)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Sets the ICD parameters for elemental application tracking.</div>
+<div class="block">Sets how many Dendro Cores this hit can consume for Hyperbloom/Burgeon.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setLunarConsidered(boolean)" class="member-name-link">setLunarConsidered</a><wbr>(boolean&nbsp;b)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setICD(model.type.ICDType,model.type.ICDTag,double)" class="member-name-link">setICD</a><wbr>(<a href="../../model/type/ICDType.html" title="model.typeの列挙クラス">ICDType</a>&nbsp;type,
+ <a href="../../model/type/ICDTag.html" title="model.typeの列挙クラス">ICDTag</a>&nbsp;tag,
+ double&nbsp;gauge)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Marks whether this action participates in the custom Lunar damage system.</div>
+<div class="block">Sets the ICD parameters for elemental application tracking.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setLunarReactionType(simulation.action.AttackAction.LunarReactionType)" class="member-name-link">setLunarReactionType</a><wbr>(<a href="AttackAction.LunarReactionType.html" title="simulation.actionの列挙クラス">AttackAction.LunarReactionType</a>&nbsp;type)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setLunarConsidered(boolean)" class="member-name-link">setLunarConsidered</a><wbr>(boolean&nbsp;b)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Marks whether this action participates in the custom Lunar damage system.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setLunarReactionType(simulation.action.AttackAction.LunarReactionType)" class="member-name-link">setLunarReactionType</a><wbr>(<a href="AttackAction.LunarReactionType.html" title="simulation.actionの列挙クラス">AttackAction.LunarReactionType</a>&nbsp;type)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Sets the Lunar reaction sub-type (e.g.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#setShatterTrigger(boolean)" class="member-name-link">setShatterTrigger</a><wbr>(boolean&nbsp;shatterTrigger)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Marks whether this hit can trigger Shatter against Frozen enemies.</div>
 </div>
 </div>
 </div>
@@ -613,10 +675,42 @@ that specifically trigger on Skill hits (e.g.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="shatterTrigger">
+<h3>shatterTrigger</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">shatterTrigger</span></div>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="defenseIgnore">
 <h3>defenseIgnore</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">defenseIgnore</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="additiveBaseDmgBonus">
+<h3>additiveBaseDmgBonus</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">additiveBaseDmgBonus</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="additiveReactionName">
+<h3>additiveReactionName</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">additiveReactionName</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="dendroCoreConsumptionLimit">
+<h3>dendroCoreConsumptionLimit</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">dendroCoreConsumptionLimit</span></div>
 </div>
 </section>
 </li>
@@ -951,6 +1045,61 @@ that specifically trigger on Skill hits (e.g. Wolf-Fang).</div>
 </section>
 </li>
 <li>
+<section class="detail" id="setShatterTrigger(boolean)">
+<h3>setShatterTrigger</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setShatterTrigger</span><wbr><span class="parameters">(boolean&nbsp;shatterTrigger)</span></div>
+<div class="block">Marks whether this hit can trigger Shatter against Frozen enemies.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>shatterTrigger</code> - <code>true</code> for blunt attacks</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="isShatterTrigger()">
+<h3>isShatterTrigger</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isShatterTrigger</span>()</div>
+<div class="block">Returns whether this hit can trigger Shatter against Frozen enemies.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd><code>true</code> if this hit is blunt for Shatter purposes</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setDendroCoreConsumptionLimit(int)">
+<h3>setDendroCoreConsumptionLimit</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setDendroCoreConsumptionLimit</span><wbr><span class="parameters">(int&nbsp;limit)</span></div>
+<div class="block">Sets how many Dendro Cores this hit can consume for Hyperbloom/Burgeon.
+A value less than 1 keeps the default policy: Electro consumes one core,
+while Pyro consumes all available cores in the single-target AoE abstraction.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>limit</code> - maximum cores consumed by this hit</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getDendroCoreConsumptionLimit()">
+<h3>getDendroCoreConsumptionLimit</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getDendroCoreConsumptionLimit</span>()</div>
+<div class="block">Returns the configured Dendro Core consumption limit, or a non-positive
+value when the resolver should use the element default.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>maximum consumed cores, or non-positive for default policy</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="setICD(model.type.ICDType,model.type.ICDTag,double)">
 <h3>setICD</h3>
 <div class="horizontal-scroll">
@@ -1186,6 +1335,49 @@ Used for constellation effects such as Raiden C2.</div>
 <dt>戻り値:</dt>
 <dd>defense ignore value (0.0–1.0)</dd>
 </dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setAdditiveBaseDmgBonus(double)">
+<h3>setAdditiveBaseDmgBonus</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setAdditiveBaseDmgBonus</span><wbr><span class="parameters">(double&nbsp;value)</span></div>
+<div class="block">Sets flat additive base damage that is inserted before DMG Bonus, Crit, DEF,
+and RES. Used for Aggravate and Spread.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>value</code> - additive base damage</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getAdditiveBaseDmgBonus()">
+<h3>getAdditiveBaseDmgBonus</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getAdditiveBaseDmgBonus</span>()</div>
+<div class="block">Returns flat additive base damage for the standard damage formula.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>additive base damage</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="setAdditiveReactionName(java.lang.String)">
+<h3>setAdditiveReactionName</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">setAdditiveReactionName</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;additiveReactionName)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getAdditiveReactionName()">
+<h3>getAdditiveReactionName</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">getAdditiveReactionName</span>()</div>
 </div>
 </section>
 </li>

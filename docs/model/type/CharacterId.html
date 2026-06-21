@@ -74,20 +74,23 @@ loadScripts(document, 'script');</script>
 </li>
 <li><a href="#field-detail" tabindex="0">フィールド詳細</a>
 <ol class="toc-list">
+<li><a href="#numericId" tabindex="0">numericId</a></li>
 <li><a href="#displayName" tabindex="0">displayName</a></li>
 </ol>
 </li>
 <li><a href="#constructor-detail" tabindex="0">コンストラクタの詳細</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(java.lang.String)" tabindex="0">CharacterId(String)</a></li>
+<li><a href="#%3Cinit%3E(int,java.lang.String)" tabindex="0">CharacterId(int, String)</a></li>
 </ol>
 </li>
 <li><a href="#method-detail" tabindex="0">メソッドの詳細</a>
 <ol class="toc-list">
 <li><a href="#values()" tabindex="0">values()</a></li>
 <li><a href="#valueOf(java.lang.String)" tabindex="0">valueOf(String)</a></li>
+<li><a href="#getNumericId()" tabindex="0">getNumericId()</a></li>
 <li><a href="#getDisplayName()" tabindex="0">getDisplayName()</a></li>
 <li><a href="#fromName(java.lang.String)" tabindex="0">fromName(String)</a></li>
+<li><a href="#fromNumericId(int)" tabindex="0">fromNumericId(int)</a></li>
 </ol>
 </li>
 </ol>
@@ -193,6 +196,9 @@ registered character, avoiding <code>null</code> return values at call sites.</d
 <div class="col-first even-row-color"><code>private final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
 <div class="col-second even-row-color"><code><a href="#displayName" class="member-name-link">displayName</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private final int</code></div>
+<div class="col-second odd-row-color"><code><a href="#numericId" class="member-name-link">numericId</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -206,7 +212,8 @@ registered character, avoiding <code>null</code> return values at call sites.</d
 <div class="table-header col-second">コンストラクタ</div>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color"><code>private </code></div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.lang.String)" class="member-name-link">CharacterId</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;displayName)</code></div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(int,java.lang.String)" class="member-name-link">CharacterId</a><wbr>(int&nbsp;numericId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;displayName)</code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
@@ -227,10 +234,21 @@ registered character, avoiding <code>null</code> return values at call sites.</d
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Resolves a display name back to its <a href="CharacterId.html" title="model.typeの列挙クラス"><code>CharacterId</code></a> constant.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDisplayName()" class="member-name-link">getDisplayName</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#fromNumericId(int)" class="member-name-link">fromNumericId</a><wbr>(int&nbsp;numericId)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Resolves a stable numeric id back to a <a href="CharacterId.html" title="model.typeの列挙クラス"><code>CharacterId</code></a>.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getDisplayName()" class="member-name-link">getDisplayName</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the human-readable display name associated with this identifier.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getNumericId()" class="member-name-link">getNumericId</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the stable numeric identifier for serialization, arrays, and
+non-display bookkeeping.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#valueOf(java.lang.String)" class="member-name-link">valueOf</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;name)</code></div>
@@ -353,6 +371,14 @@ registered character, avoiding <code>null</code> return values at call sites.</d
 <h2>フィールド詳細</h2>
 <ul class="member-list">
 <li>
+<section class="detail" id="numericId">
+<h3>numericId</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">numericId</span></div>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="displayName">
 <h3>displayName</h3>
 <div class="horizontal-scroll">
@@ -369,10 +395,11 @@ registered character, avoiding <code>null</code> return values at call sites.</d
 <h2>コンストラクタの詳細</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(java.lang.String)">
+<section class="detail" id="&lt;init&gt;(int,java.lang.String)">
 <h3>CharacterId</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="element-name">CharacterId</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;displayName)</span></div>
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="element-name">CharacterId</span><wbr><span class="parameters">(int&nbsp;numericId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;displayName)</span></div>
 </div>
 </section>
 </li>
@@ -420,6 +447,20 @@ registered character, avoiding <code>null</code> return values at call sites.</d
 </section>
 </li>
 <li>
+<section class="detail" id="getNumericId()">
+<h3>getNumericId</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getNumericId</span>()</div>
+<div class="block">Returns the stable numeric identifier for serialization, arrays, and
+non-display bookkeeping. Do not derive persisted values from enum ordinal.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>stable numeric id</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="getDisplayName()">
 <h3>getDisplayName</h3>
 <div class="horizontal-scroll">
@@ -447,6 +488,21 @@ configuration files.</div>
 <dt>戻り値:</dt>
 <dd>the matching <a href="CharacterId.html" title="model.typeの列挙クラス"><code>CharacterId</code></a>, or <a href="#UNKNOWN"><code>UNKNOWN</code></a> if
         <code>name</code> is <code>null</code> or no constant matches</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="fromNumericId(int)">
+<h3>fromNumericId</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></span>&nbsp;<span class="element-name">fromNumericId</span><wbr><span class="parameters">(int&nbsp;numericId)</span></div>
+<div class="block">Resolves a stable numeric id back to a <a href="CharacterId.html" title="model.typeの列挙クラス"><code>CharacterId</code></a>.</div>
+<dl class="notes">
+<dt>パラメータ:</dt>
+<dd><code>numericId</code> - stable numeric id</dd>
+<dt>戻り値:</dt>
+<dd>matching id, or <a href="#UNKNOWN"><code>UNKNOWN</code></a> if no id matches</dd>
 </dl>
 </div>
 </section>

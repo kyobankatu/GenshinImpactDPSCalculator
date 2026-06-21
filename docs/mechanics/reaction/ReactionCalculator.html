@@ -54,8 +54,26 @@ loadScripts(document, 'script');</script>
 <div class="toc-header">コンテンツ&nbsp;<input type="text" class="filter-input" disabled placeholder="コンテンツのフィルタ(.と入力)" aria-label="目次のフィルタ" autocomplete="off" spellcheck="false"><input type="reset" class="reset-filter" disabled tabindex="-1" value="リセット"></div>
 <ol class="toc-list" tabindex="-1">
 <li><a href="#" tabindex="0">説明</a></li>
+<li><a href="#field-summary" tabindex="0">フィールドの概要</a></li>
 <li><a href="#constructor-summary" tabindex="0">コンストラクタの概要</a></li>
 <li><a href="#method-summary" tabindex="0">メソッドの概要</a></li>
+<li><a href="#field-detail" tabindex="0">フィールド詳細</a>
+<ol class="toc-list">
+<li><a href="#LEVEL_80_MULTIPLIER" tabindex="0">LEVEL_80_MULTIPLIER</a></li>
+<li><a href="#LEVEL_90_MULTIPLIER" tabindex="0">LEVEL_90_MULTIPLIER</a></li>
+<li><a href="#BURNING_MULTIPLIER" tabindex="0">BURNING_MULTIPLIER</a></li>
+<li><a href="#SWIRL_MULTIPLIER" tabindex="0">SWIRL_MULTIPLIER</a></li>
+<li><a href="#SUPERCONDUCT_MULTIPLIER" tabindex="0">SUPERCONDUCT_MULTIPLIER</a></li>
+<li><a href="#ELECTRO_CHARGED_MULTIPLIER" tabindex="0">ELECTRO_CHARGED_MULTIPLIER</a></li>
+<li><a href="#BLOOM_MULTIPLIER" tabindex="0">BLOOM_MULTIPLIER</a></li>
+<li><a href="#OVERLOADED_MULTIPLIER" tabindex="0">OVERLOADED_MULTIPLIER</a></li>
+<li><a href="#HYPERBLOOM_MULTIPLIER" tabindex="0">HYPERBLOOM_MULTIPLIER</a></li>
+<li><a href="#BURGEON_MULTIPLIER" tabindex="0">BURGEON_MULTIPLIER</a></li>
+<li><a href="#SHATTER_MULTIPLIER" tabindex="0">SHATTER_MULTIPLIER</a></li>
+<li><a href="#AGGRAVATE_MULTIPLIER" tabindex="0">AGGRAVATE_MULTIPLIER</a></li>
+<li><a href="#SPREAD_MULTIPLIER" tabindex="0">SPREAD_MULTIPLIER</a></li>
+</ol>
+</li>
 <li><a href="#constructor-detail" tabindex="0">コンストラクタの詳細</a>
 <ol class="toc-list">
 <li><a href="#%3Cinit%3E()" tabindex="0">ReactionCalculator()</a></li>
@@ -66,7 +84,15 @@ loadScripts(document, 'script');</script>
 <li><a href="#calculate(model.type.Element,model.type.Element,double,int)" tabindex="0">calculate(Element, Element, double, int)</a></li>
 <li><a href="#calculate(model.type.Element,model.type.Element,double,int,double)" tabindex="0">calculate(Element, Element, double, int, double)</a></li>
 <li><a href="#convertSwirlName(model.type.Element)" tabindex="0">convertSwirlName(Element)</a></li>
+<li><a href="#formatElement(model.type.Element)" tabindex="0">formatElement(Element)</a></li>
+<li><a href="#calculateShatter(double,int,double)" tabindex="0">calculateShatter(double, int, double)</a></li>
+<li><a href="#calculateHyperbloom(double,int,double)" tabindex="0">calculateHyperbloom(double, int, double)</a></li>
+<li><a href="#calculateBurgeon(double,int,double)" tabindex="0">calculateBurgeon(double, int, double)</a></li>
+<li><a href="#calculateAggravate(double,int,double)" tabindex="0">calculateAggravate(double, int, double)</a></li>
+<li><a href="#calculateSpread(double,int,double)" tabindex="0">calculateSpread(double, int, double)</a></li>
 <li><a href="#calculateTransformativeDamage(int,double,double,double)" tabindex="0">calculateTransformativeDamage(int, double, double, double)</a></li>
+<li><a href="#calculateAdditiveReactionDamage(int,double,double,double)" tabindex="0">calculateAdditiveReactionDamage(int, double, double, double)</a></li>
+<li><a href="#levelMultiplier(int)" tabindex="0">levelMultiplier(int)</a></li>
 <li><a href="#getMultiplier(model.type.Element,model.type.Element,double)" tabindex="0">getMultiplier(Element, Element, double)</a></li>
 </ol>
 </li>
@@ -95,6 +121,57 @@ Transformative reactions (Swirl, Overload, Electro-Charged).</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
+<!-- =========== FIELD SUMMARY =========== -->
+<li>
+<section class="field-summary" id="field-summary">
+<h2>フィールドの概要</h2>
+<div class="caption"><span>フィールド</span></div>
+<div class="summary-table three-column-summary">
+<div class="table-header col-first">修飾子とタイプ</div>
+<div class="table-header col-second">フィールド</div>
+<div class="table-header col-last">説明</div>
+<div class="col-first even-row-color"><code>private static final double</code></div>
+<div class="col-second even-row-color"><code><a href="#AGGRAVATE_MULTIPLIER" class="member-name-link">AGGRAVATE_MULTIPLIER</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private static final double</code></div>
+<div class="col-second odd-row-color"><code><a href="#BLOOM_MULTIPLIER" class="member-name-link">BLOOM_MULTIPLIER</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private static final double</code></div>
+<div class="col-second even-row-color"><code><a href="#BURGEON_MULTIPLIER" class="member-name-link">BURGEON_MULTIPLIER</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private static final double</code></div>
+<div class="col-second odd-row-color"><code><a href="#BURNING_MULTIPLIER" class="member-name-link">BURNING_MULTIPLIER</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private static final double</code></div>
+<div class="col-second even-row-color"><code><a href="#ELECTRO_CHARGED_MULTIPLIER" class="member-name-link">ELECTRO_CHARGED_MULTIPLIER</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private static final double</code></div>
+<div class="col-second odd-row-color"><code><a href="#HYPERBLOOM_MULTIPLIER" class="member-name-link">HYPERBLOOM_MULTIPLIER</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private static final double</code></div>
+<div class="col-second even-row-color"><code><a href="#LEVEL_80_MULTIPLIER" class="member-name-link">LEVEL_80_MULTIPLIER</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private static final double</code></div>
+<div class="col-second odd-row-color"><code><a href="#LEVEL_90_MULTIPLIER" class="member-name-link">LEVEL_90_MULTIPLIER</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private static final double</code></div>
+<div class="col-second even-row-color"><code><a href="#OVERLOADED_MULTIPLIER" class="member-name-link">OVERLOADED_MULTIPLIER</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private static final double</code></div>
+<div class="col-second odd-row-color"><code><a href="#SHATTER_MULTIPLIER" class="member-name-link">SHATTER_MULTIPLIER</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private static final double</code></div>
+<div class="col-second even-row-color"><code><a href="#SPREAD_MULTIPLIER" class="member-name-link">SPREAD_MULTIPLIER</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private static final double</code></div>
+<div class="col-second odd-row-color"><code><a href="#SUPERCONDUCT_MULTIPLIER" class="member-name-link">SUPERCONDUCT_MULTIPLIER</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>private static final double</code></div>
+<div class="col-second even-row-color"><code><a href="#SWIRL_MULTIPLIER" class="member-name-link">SWIRL_MULTIPLIER</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+</div>
+</section>
+</li>
 <!-- ======== CONSTRUCTOR SUMMARY ======== -->
 <li>
 <section class="constructor-summary" id="constructor-summary">
@@ -138,29 +215,66 @@ the attacker's Elemental Mastery, and the attacker's level.</div>
 <div class="block">Calculates the reaction result including any specific reaction damage
 bonuses.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#calculateTransformativeDamage(int,double,double,double)" class="member-name-link">calculateTransformativeDamage</a><wbr>(int&nbsp;level,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#calculateAdditiveReactionDamage(int,double,double,double)" class="member-name-link">calculateAdditiveReactionDamage</a><wbr>(int&nbsp;level,
  double&nbsp;em,
  double&nbsp;reactionMulti,
  double&nbsp;bonusPct)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#calculateAggravate(double,int,double)" class="member-name-link">calculateAggravate</a><wbr>(double&nbsp;em,
+ int&nbsp;level,
+ double&nbsp;reactionBonus)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#calculateBurgeon(double,int,double)" class="member-name-link">calculateBurgeon</a><wbr>(double&nbsp;em,
+ int&nbsp;level,
+ double&nbsp;reactionBonus)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#calculateHyperbloom(double,int,double)" class="member-name-link">calculateHyperbloom</a><wbr>(double&nbsp;em,
+ int&nbsp;level,
+ double&nbsp;reactionBonus)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#calculateShatter(double,int,double)" class="member-name-link">calculateShatter</a><wbr>(double&nbsp;em,
+ int&nbsp;level,
+ double&nbsp;reactionBonus)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Computes the base damage for transformative reactions based on character
 level,
 Elemental Mastery, the specific reaction's multiplier, and any external
 bonuses.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#calculateSpread(double,int,double)" class="member-name-link">calculateSpread</a><wbr>(double&nbsp;em,
+ int&nbsp;level,
+ double&nbsp;reactionBonus)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#calculateTransformativeDamage(int,double,double,double)" class="member-name-link">calculateTransformativeDamage</a><wbr>(int&nbsp;level,
+ double&nbsp;em,
+ double&nbsp;reactionMulti,
+ double&nbsp;bonusPct)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#convertSwirlName(model.type.Element)" class="member-name-link">convertSwirlName</a><wbr>(<a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;aura)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Normalizes the Swirl reaction name format.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#getMultiplier(model.type.Element,model.type.Element,double)" class="member-name-link">getMultiplier</a><wbr>(<a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;trigger,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#formatElement(model.type.Element)" class="member-name-link">formatElement</a><wbr>(<a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#getMultiplier(model.type.Element,model.type.Element,double)" class="member-name-link">getMultiplier</a><wbr>(<a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;trigger,
  <a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;aura,
  double&nbsp;em)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Legacy support method to retrieve just the amplifying reaction multiplier.</div>
 </div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#levelMultiplier(int)" class="member-name-link">levelMultiplier</a><wbr>(int&nbsp;level)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -173,6 +287,222 @@ bonuses.</div>
 </section>
 <section class="details">
 <ul class="details-list">
+<!-- ============ FIELD DETAIL =========== -->
+<li>
+<section class="field-details" id="field-detail">
+<h2>フィールド詳細</h2>
+<ul class="member-list">
+<li>
+<section class="detail" id="LEVEL_80_MULTIPLIER">
+<h3>LEVEL_80_MULTIPLIER</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">LEVEL_80_MULTIPLIER</span></div>
+<dl class="notes">
+<dt>関連項目:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../constant-values.html#mechanics.reaction.ReactionCalculator.LEVEL_80_MULTIPLIER">定数フィールド値</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="LEVEL_90_MULTIPLIER">
+<h3>LEVEL_90_MULTIPLIER</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">LEVEL_90_MULTIPLIER</span></div>
+<dl class="notes">
+<dt>関連項目:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../constant-values.html#mechanics.reaction.ReactionCalculator.LEVEL_90_MULTIPLIER">定数フィールド値</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="BURNING_MULTIPLIER">
+<h3>BURNING_MULTIPLIER</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">BURNING_MULTIPLIER</span></div>
+<dl class="notes">
+<dt>関連項目:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../constant-values.html#mechanics.reaction.ReactionCalculator.BURNING_MULTIPLIER">定数フィールド値</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="SWIRL_MULTIPLIER">
+<h3>SWIRL_MULTIPLIER</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">SWIRL_MULTIPLIER</span></div>
+<dl class="notes">
+<dt>関連項目:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../constant-values.html#mechanics.reaction.ReactionCalculator.SWIRL_MULTIPLIER">定数フィールド値</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="SUPERCONDUCT_MULTIPLIER">
+<h3>SUPERCONDUCT_MULTIPLIER</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">SUPERCONDUCT_MULTIPLIER</span></div>
+<dl class="notes">
+<dt>関連項目:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../constant-values.html#mechanics.reaction.ReactionCalculator.SUPERCONDUCT_MULTIPLIER">定数フィールド値</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="ELECTRO_CHARGED_MULTIPLIER">
+<h3>ELECTRO_CHARGED_MULTIPLIER</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">ELECTRO_CHARGED_MULTIPLIER</span></div>
+<dl class="notes">
+<dt>関連項目:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../constant-values.html#mechanics.reaction.ReactionCalculator.ELECTRO_CHARGED_MULTIPLIER">定数フィールド値</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="BLOOM_MULTIPLIER">
+<h3>BLOOM_MULTIPLIER</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">BLOOM_MULTIPLIER</span></div>
+<dl class="notes">
+<dt>関連項目:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../constant-values.html#mechanics.reaction.ReactionCalculator.BLOOM_MULTIPLIER">定数フィールド値</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="OVERLOADED_MULTIPLIER">
+<h3>OVERLOADED_MULTIPLIER</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">OVERLOADED_MULTIPLIER</span></div>
+<dl class="notes">
+<dt>関連項目:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../constant-values.html#mechanics.reaction.ReactionCalculator.OVERLOADED_MULTIPLIER">定数フィールド値</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="HYPERBLOOM_MULTIPLIER">
+<h3>HYPERBLOOM_MULTIPLIER</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">HYPERBLOOM_MULTIPLIER</span></div>
+<dl class="notes">
+<dt>関連項目:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../constant-values.html#mechanics.reaction.ReactionCalculator.HYPERBLOOM_MULTIPLIER">定数フィールド値</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="BURGEON_MULTIPLIER">
+<h3>BURGEON_MULTIPLIER</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">BURGEON_MULTIPLIER</span></div>
+<dl class="notes">
+<dt>関連項目:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../constant-values.html#mechanics.reaction.ReactionCalculator.BURGEON_MULTIPLIER">定数フィールド値</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="SHATTER_MULTIPLIER">
+<h3>SHATTER_MULTIPLIER</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">SHATTER_MULTIPLIER</span></div>
+<dl class="notes">
+<dt>関連項目:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../constant-values.html#mechanics.reaction.ReactionCalculator.SHATTER_MULTIPLIER">定数フィールド値</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="AGGRAVATE_MULTIPLIER">
+<h3>AGGRAVATE_MULTIPLIER</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">AGGRAVATE_MULTIPLIER</span></div>
+<dl class="notes">
+<dt>関連項目:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../constant-values.html#mechanics.reaction.ReactionCalculator.AGGRAVATE_MULTIPLIER">定数フィールド値</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="SPREAD_MULTIPLIER">
+<h3>SPREAD_MULTIPLIER</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">SPREAD_MULTIPLIER</span></div>
+<dl class="notes">
+<dt>関連項目:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="../../constant-values.html#mechanics.reaction.ReactionCalculator.SPREAD_MULTIPLIER">定数フィールド値</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+</ul>
+</section>
+</li>
 <!-- ========= CONSTRUCTOR DETAIL ======== -->
 <li>
 <section class="constructor-details" id="constructor-detail">
@@ -261,27 +591,104 @@ For example, converts <code>"Swirl-PYRO"</code> to <code>"Swirl-Pyro"</code>.</d
 </section>
 </li>
 <li>
-<section class="detail" id="calculateTransformativeDamage(int,double,double,double)">
-<h3>calculateTransformativeDamage</h3>
+<section class="detail" id="formatElement(model.type.Element)">
+<h3>formatElement</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">calculateTransformativeDamage</span><wbr><span class="parameters">(int&nbsp;level,
- double&nbsp;em,
- double&nbsp;reactionMulti,
- double&nbsp;bonusPct)</span></div>
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">formatElement</span><wbr><span class="parameters">(<a href="../../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="calculateShatter(double,int,double)">
+<h3>calculateShatter</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a></span>&nbsp;<span class="element-name">calculateShatter</span><wbr><span class="parameters">(double&nbsp;em,
+ int&nbsp;level,
+ double&nbsp;reactionBonus)</span></div>
 <div class="block">Computes the base damage for transformative reactions based on character
 level,
 Elemental Mastery, the specific reaction's multiplier, and any external
 bonuses.</div>
 <dl class="notes">
 <dt>パラメータ:</dt>
-<dd><code>level</code> - character level</dd>
 <dd><code>em</code> - character Elemental Mastery</dd>
+<dd><code>level</code> - character level</dd>
 <dd><code>reactionMulti</code> - base multiplier for the reaction type (e.g. Overload =
                      2.0)</dd>
 <dd><code>bonusPct</code> - additional percentage bonus for the reaction</dd>
 <dt>戻り値:</dt>
 <dd>total computed transformative damage</dd>
 </dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="calculateHyperbloom(double,int,double)">
+<h3>calculateHyperbloom</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a></span>&nbsp;<span class="element-name">calculateHyperbloom</span><wbr><span class="parameters">(double&nbsp;em,
+ int&nbsp;level,
+ double&nbsp;reactionBonus)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="calculateBurgeon(double,int,double)">
+<h3>calculateBurgeon</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a></span>&nbsp;<span class="element-name">calculateBurgeon</span><wbr><span class="parameters">(double&nbsp;em,
+ int&nbsp;level,
+ double&nbsp;reactionBonus)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="calculateAggravate(double,int,double)">
+<h3>calculateAggravate</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a></span>&nbsp;<span class="element-name">calculateAggravate</span><wbr><span class="parameters">(double&nbsp;em,
+ int&nbsp;level,
+ double&nbsp;reactionBonus)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="calculateSpread(double,int,double)">
+<h3>calculateSpread</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="ReactionResult.html" title="mechanics.reaction内のクラス">ReactionResult</a></span>&nbsp;<span class="element-name">calculateSpread</span><wbr><span class="parameters">(double&nbsp;em,
+ int&nbsp;level,
+ double&nbsp;reactionBonus)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="calculateTransformativeDamage(int,double,double,double)">
+<h3>calculateTransformativeDamage</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">calculateTransformativeDamage</span><wbr><span class="parameters">(int&nbsp;level,
+ double&nbsp;em,
+ double&nbsp;reactionMulti,
+ double&nbsp;bonusPct)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="calculateAdditiveReactionDamage(int,double,double,double)">
+<h3>calculateAdditiveReactionDamage</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">calculateAdditiveReactionDamage</span><wbr><span class="parameters">(int&nbsp;level,
+ double&nbsp;em,
+ double&nbsp;reactionMulti,
+ double&nbsp;bonusPct)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="levelMultiplier(int)">
+<h3>levelMultiplier</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">levelMultiplier</span><wbr><span class="parameters">(int&nbsp;level)</span></div>
 </div>
 </section>
 </li>

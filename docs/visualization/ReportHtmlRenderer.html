@@ -73,16 +73,56 @@ loadScripts(document, 'script');</script>
 <li><a href="#appendDocumentStart(java.lang.StringBuilder)" tabindex="0">appendDocumentStart(StringBuilder)</a></li>
 <li><a href="#appendStyles(java.lang.StringBuilder)" tabindex="0">appendStyles(StringBuilder)</a></li>
 <li><a href="#appendSummary(java.lang.StringBuilder,visualization.ReportData)" tabindex="0">appendSummary(StringBuilder, ReportData)</a></li>
-<li><a href="#appendCharts(java.lang.StringBuilder)" tabindex="0">appendCharts(StringBuilder)</a></li>
+<li><a href="#appendMetricCard(java.lang.StringBuilder,java.lang.String,java.lang.String,java.lang.String)" tabindex="0">appendMetricCard(StringBuilder, String, String, String)</a></li>
+<li><a href="#appendCharacterAssetMetadata(java.lang.StringBuilder,visualization.ReportData)" tabindex="0">appendCharacterAssetMetadata(StringBuilder, ReportData)</a></li>
+<li><a href="#appendCharts(java.lang.StringBuilder,visualization.ReportData)" tabindex="0">appendCharts(StringBuilder, ReportData)</a></li>
+<li><a href="#appendCharacterDetails(java.lang.StringBuilder,visualization.ReportData)" tabindex="0">appendCharacterDetails(StringBuilder, ReportData)</a></li>
+<li><a href="#appendCharacterLoadout(java.lang.StringBuilder,visualization.ReportViewAdapter.ReportCharacterView)" tabindex="0">appendCharacterLoadout(StringBuilder, ReportViewAdapter.ReportCharacterView)</a></li>
+<li><a href="#appendWeaponLoadoutCard(java.lang.StringBuilder,visualization.ReportViewAdapter.ReportCharacterView)" tabindex="0">appendWeaponLoadoutCard(StringBuilder, ReportViewAdapter.ReportCharacterView)</a></li>
+<li><a href="#appendLoadoutCard(java.lang.StringBuilder,java.lang.String,java.lang.String)" tabindex="0">appendLoadoutCard(StringBuilder, String, String)</a></li>
+<li><a href="#appendCharacterPanelMetric(java.lang.StringBuilder,java.lang.String,java.lang.String,java.lang.String)" tabindex="0">appendCharacterPanelMetric(StringBuilder, String, String, String)</a></li>
+<li><a href="#appendCharacterActionDamageWidget(java.lang.StringBuilder,visualization.ReportData.CharacterReportView)" tabindex="0">appendCharacterActionDamageWidget(StringBuilder, ReportData.CharacterReportView)</a></li>
+<li><a href="#appendCharacterArtifactWidget(java.lang.StringBuilder,visualization.ReportData.CharacterReportView)" tabindex="0">appendCharacterArtifactWidget(StringBuilder, ReportData.CharacterReportView)</a></li>
+<li><a href="#appendCharacterEnergyWidget(java.lang.StringBuilder,visualization.ReportData.CharacterReportView)" tabindex="0">appendCharacterEnergyWidget(StringBuilder, ReportData.CharacterReportView)</a></li>
+<li><a href="#appendEnergyStat(java.lang.StringBuilder,java.lang.String,double)" tabindex="0">appendEnergyStat(StringBuilder, String, double)</a></li>
+<li><a href="#appendCharacterBuffWidget(java.lang.StringBuilder,visualization.ReportData.CharacterReportView)" tabindex="0">appendCharacterBuffWidget(StringBuilder, ReportData.CharacterReportView)</a></li>
+<li><a href="#appendCharacterTopEventsWidget(java.lang.StringBuilder,visualization.ReportData.CharacterReportView)" tabindex="0">appendCharacterTopEventsWidget(StringBuilder, ReportData.CharacterReportView)</a></li>
+<li><a href="#appendCharacterRecentEventsWidget(java.lang.StringBuilder,visualization.ReportData.CharacterReportView)" tabindex="0">appendCharacterRecentEventsWidget(StringBuilder, ReportData.CharacterReportView)</a></li>
+<li><a href="#appendCharacterEventTable(java.lang.StringBuilder,java.util.List,java.lang.String)" tabindex="0">appendCharacterEventTable(StringBuilder, List, String)</a></li>
+<li><a href="#extractSeriesY(java.lang.String)" tabindex="0">extractSeriesY(String)</a></li>
+<li><a href="#appendCharacterFace(java.lang.StringBuilder,visualization.ReportViewAdapter.ReportCharacterView)" tabindex="0">appendCharacterFace(StringBuilder, ReportViewAdapter.ReportCharacterView)</a></li>
+<li><a href="#appendChartPanel(java.lang.StringBuilder,java.lang.String,java.lang.String,java.lang.String,boolean)" tabindex="0">appendChartPanel(StringBuilder, String, String, String, boolean)</a></li>
 <li><a href="#appendStatsAndArtifacts(java.lang.StringBuilder,visualization.ReportData)" tabindex="0">appendStatsAndArtifacts(StringBuilder, ReportData)</a></li>
 <li><a href="#appendStatsSection(java.lang.StringBuilder,visualization.ReportData)" tabindex="0">appendStatsSection(StringBuilder, ReportData)</a></li>
 <li><a href="#appendArtifactSection(java.lang.StringBuilder,visualization.ReportData)" tabindex="0">appendArtifactSection(StringBuilder, ReportData)</a></li>
 <li><a href="#appendTimeline(java.lang.StringBuilder,visualization.ReportData)" tabindex="0">appendTimeline(StringBuilder, ReportData)</a></li>
+<li><a href="#appendTimelineFilters(java.lang.StringBuilder,visualization.ReportData)" tabindex="0">appendTimelineFilters(StringBuilder, ReportData)</a></li>
 <li><a href="#appendTimelineCard(java.lang.StringBuilder,visualization.SimulationRecord)" tabindex="0">appendTimelineCard(StringBuilder, SimulationRecord)</a></li>
 <li><a href="#appendAuraBar(java.lang.StringBuilder,visualization.SimulationRecord)" tabindex="0">appendAuraBar(StringBuilder, SimulationRecord)</a></li>
 <li><a href="#appendScript(java.lang.StringBuilder,visualization.ReportData)" tabindex="0">appendScript(StringBuilder, ReportData)</a></li>
+<li><a href="#appendCharacterAssetsScript(java.lang.StringBuilder,visualization.ReportData)" tabindex="0">appendCharacterAssetsScript(StringBuilder, ReportData)</a></li>
+<li><a href="#appendCharacterTabsScript(java.lang.StringBuilder)" tabindex="0">appendCharacterTabsScript(StringBuilder)</a></li>
 <li><a href="#appendStatsHistoryScript(java.lang.StringBuilder,visualization.ReportData)" tabindex="0">appendStatsHistoryScript(StringBuilder, ReportData)</a></li>
 <li><a href="#appendChartScript(java.lang.StringBuilder,visualization.ReportData)" tabindex="0">appendChartScript(StringBuilder, ReportData)</a></li>
+<li><a href="#appendPieChart(java.lang.StringBuilder,java.lang.String,java.util.List,java.util.List,java.util.List,boolean)" tabindex="0">appendPieChart(StringBuilder, String, List, List, List, boolean)</a></li>
+<li><a href="#appendBarChart(java.lang.StringBuilder,java.lang.String,java.util.List,java.util.List,java.util.List,java.lang.String)" tabindex="0">appendBarChart(StringBuilder, String, List, List, List, String)</a></li>
+<li><a href="#appendActionDamageFilterScript(java.lang.StringBuilder,visualization.ReportData)" tabindex="0">appendActionDamageFilterScript(StringBuilder, ReportData)</a></li>
+<li><a href="#appendLineChart(java.lang.StringBuilder,java.lang.String,java.util.List,java.lang.String,boolean)" tabindex="0">appendLineChart(StringBuilder, String, List, String, boolean)</a></li>
+<li><a href="#characterDatasets(visualization.ReportData)" tabindex="0">characterDatasets(ReportData)</a></li>
+<li><a href="#auraDatasets(visualization.ReportData)" tabindex="0">auraDatasets(ReportData)</a></li>
+<li><a href="#energyDatasets(visualization.ReportData)" tabindex="0">energyDatasets(ReportData)</a></li>
+<li><a href="#appendTimelineFilterScript(java.lang.StringBuilder)" tabindex="0">appendTimelineFilterScript(StringBuilder)</a></li>
+<li><a href="#metricLabels(java.util.List)" tabindex="0">metricLabels(List)</a></li>
+<li><a href="#metricValues(java.util.List)" tabindex="0">metricValues(List)</a></li>
+<li><a href="#buffLabels(visualization.ReportData)" tabindex="0">buffLabels(ReportData)</a></li>
+<li><a href="#buffValues(visualization.ReportData)" tabindex="0">buffValues(ReportData)</a></li>
+<li><a href="#fallbackColors(int)" tabindex="0">fallbackColors(int)</a></li>
+<li><a href="#characterColor(visualization.ReportData,java.lang.String)" tabindex="0">characterColor(ReportData, String)</a></li>
+<li><a href="#cssColor(java.lang.String)" tabindex="0">cssColor(String)</a></li>
+<li><a href="#elementColor(model.type.Element)" tabindex="0">elementColor(Element)</a></li>
+<li><a href="#escapeHtml(java.lang.String)" tabindex="0">escapeHtml(String)</a></li>
+<li><a href="#escapeAttr(java.lang.String)" tabindex="0">escapeAttr(String)</a></li>
+<li><a href="#jsString(java.lang.String)" tabindex="0">jsString(String)</a></li>
 <li><a href="#appendDocumentEnd(java.lang.StringBuilder)" tabindex="0">appendDocumentEnd(StringBuilder)</a></li>
 </ol>
 </li>
@@ -148,86 +188,223 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-second">メソッド</div>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendArtifactSection(java.lang.StringBuilder,visualization.ReportData)" class="member-name-link">appendArtifactSection</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendActionDamageFilterScript(java.lang.StringBuilder,visualization.ReportData)" class="member-name-link">appendActionDamageFilterScript</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
  <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Appends the artifact substat roll table.</div>
-</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendAuraBar(java.lang.StringBuilder,visualization.SimulationRecord)" class="member-name-link">appendAuraBar</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendArtifactSection(java.lang.StringBuilder,visualization.ReportData)" class="member-name-link">appendArtifactSection</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendAuraBar(java.lang.StringBuilder,visualization.SimulationRecord)" class="member-name-link">appendAuraBar</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
  <a href="SimulationRecord.html" title="visualization内のクラス">SimulationRecord</a>&nbsp;record)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Appends the colored aura bar showing enemy aura snapshot at the record time.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendCharts(java.lang.StringBuilder)" class="member-name-link">appendCharts</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Appends the canvas placeholders for the pie and line charts.</div>
-</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendChartScript(java.lang.StringBuilder,visualization.ReportData)" class="member-name-link">appendChartScript</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendBarChart(java.lang.StringBuilder,java.lang.String,java.util.List,java.util.List,java.util.List,java.lang.String)" class="member-name-link">appendBarChart</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;canvasId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&nbsp;labels,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;values,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&nbsp;colors,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;xTitle)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendCharacterActionDamageWidget(java.lang.StringBuilder,visualization.ReportData.CharacterReportView)" class="member-name-link">appendCharacterActionDamageWidget</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportData.CharacterReportView.html" title="visualization内のクラス">ReportData.CharacterReportView</a>&nbsp;detail)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendCharacterArtifactWidget(java.lang.StringBuilder,visualization.ReportData.CharacterReportView)" class="member-name-link">appendCharacterArtifactWidget</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportData.CharacterReportView.html" title="visualization内のクラス">ReportData.CharacterReportView</a>&nbsp;detail)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendCharacterAssetMetadata(java.lang.StringBuilder,visualization.ReportData)" class="member-name-link">appendCharacterAssetMetadata</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
  <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Emits Chart.js initialization for the pie and cumulative damage charts.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendDocumentEnd(java.lang.StringBuilder)" class="member-name-link">appendDocumentEnd</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Appends the closing container, body, and html tags.</div>
-</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendDocumentStart(java.lang.StringBuilder)" class="member-name-link">appendDocumentStart</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Appends the opening HTML markup, head tag, and report title.</div>
-</div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendCharacterAssetsScript(java.lang.StringBuilder,visualization.ReportData)" class="member-name-link">appendCharacterAssetsScript</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendCharacterBuffWidget(java.lang.StringBuilder,visualization.ReportData.CharacterReportView)" class="member-name-link">appendCharacterBuffWidget</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportData.CharacterReportView.html" title="visualization内のクラス">ReportData.CharacterReportView</a>&nbsp;detail)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendCharacterDetails(java.lang.StringBuilder,visualization.ReportData)" class="member-name-link">appendCharacterDetails</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendCharacterEnergyWidget(java.lang.StringBuilder,visualization.ReportData.CharacterReportView)" class="member-name-link">appendCharacterEnergyWidget</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportData.CharacterReportView.html" title="visualization内のクラス">ReportData.CharacterReportView</a>&nbsp;detail)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendCharacterEventTable(java.lang.StringBuilder,java.util.List,java.lang.String)" class="member-name-link">appendCharacterEventTable</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="SimulationRecord.html" title="visualization内のクラス">SimulationRecord</a>&gt;&nbsp;events,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;emptyMessage)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendCharacterFace(java.lang.StringBuilder,visualization.ReportViewAdapter.ReportCharacterView)" class="member-name-link">appendCharacterFace</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportViewAdapter.ReportCharacterView.html" title="visualization内のクラス">ReportViewAdapter.ReportCharacterView</a>&nbsp;character)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendCharacterLoadout(java.lang.StringBuilder,visualization.ReportViewAdapter.ReportCharacterView)" class="member-name-link">appendCharacterLoadout</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportViewAdapter.ReportCharacterView.html" title="visualization内のクラス">ReportViewAdapter.ReportCharacterView</a>&nbsp;character)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendCharacterPanelMetric(java.lang.StringBuilder,java.lang.String,java.lang.String,java.lang.String)" class="member-name-link">appendCharacterPanelMetric</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;label,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;value,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;valueClass)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendCharacterRecentEventsWidget(java.lang.StringBuilder,visualization.ReportData.CharacterReportView)" class="member-name-link">appendCharacterRecentEventsWidget</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportData.CharacterReportView.html" title="visualization内のクラス">ReportData.CharacterReportView</a>&nbsp;detail)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendCharacterTabsScript(java.lang.StringBuilder)" class="member-name-link">appendCharacterTabsScript</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendCharacterTopEventsWidget(java.lang.StringBuilder,visualization.ReportData.CharacterReportView)" class="member-name-link">appendCharacterTopEventsWidget</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportData.CharacterReportView.html" title="visualization内のクラス">ReportData.CharacterReportView</a>&nbsp;detail)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendChartPanel(java.lang.StringBuilder,java.lang.String,java.lang.String,java.lang.String,boolean)" class="member-name-link">appendChartPanel</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;title,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;canvasId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;note,
+ boolean&nbsp;tall)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendCharts(java.lang.StringBuilder,visualization.ReportData)" class="member-name-link">appendCharts</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendChartScript(java.lang.StringBuilder,visualization.ReportData)" class="member-name-link">appendChartScript</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendDocumentEnd(java.lang.StringBuilder)" class="member-name-link">appendDocumentEnd</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendDocumentStart(java.lang.StringBuilder)" class="member-name-link">appendDocumentStart</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendEnergyStat(java.lang.StringBuilder,java.lang.String,double)" class="member-name-link">appendEnergyStat</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;label,
+ double&nbsp;value)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendLineChart(java.lang.StringBuilder,java.lang.String,java.util.List,java.lang.String,boolean)" class="member-name-link">appendLineChart</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;canvasId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&nbsp;datasets,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;yTitle,
+ boolean&nbsp;stepped)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendLoadoutCard(java.lang.StringBuilder,java.lang.String,java.lang.String)" class="member-name-link">appendLoadoutCard</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;label,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;value)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendMetricCard(java.lang.StringBuilder,java.lang.String,java.lang.String,java.lang.String)" class="member-name-link">appendMetricCard</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;label,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;value,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;valueClass)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendPieChart(java.lang.StringBuilder,java.lang.String,java.util.List,java.util.List,java.util.List,boolean)" class="member-name-link">appendPieChart</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;canvasId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&nbsp;labels,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;values,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&nbsp;colors,
+ boolean&nbsp;showPercent)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendScript(java.lang.StringBuilder,visualization.ReportData)" class="member-name-link">appendScript</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
  <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Appends the bottom-of-document <code>&lt;script&gt;</code> block driving Chart.js and
-the stat slider.</div>
-</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendStatsAndArtifacts(java.lang.StringBuilder,visualization.ReportData)" class="member-name-link">appendStatsAndArtifacts</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
  <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Appends the stats snapshot and artifact roll sections side by side.</div>
-</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendStatsHistoryScript(java.lang.StringBuilder,visualization.ReportData)" class="member-name-link">appendStatsHistoryScript</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
  <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Emits the JS stats history array and slider wiring.</div>
-</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendStatsSection(java.lang.StringBuilder,visualization.ReportData)" class="member-name-link">appendStatsSection</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
  <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Appends the character stat table and (optionally) the active buff panel.</div>
-</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendStyles(java.lang.StringBuilder)" class="member-name-link">appendStyles</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Appends the inline CSS style block used by the report.</div>
-</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendSummary(java.lang.StringBuilder,visualization.ReportData)" class="member-name-link">appendSummary</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
  <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Appends the headline summary block (DPS, total damage, duration).</div>
-</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendTimeline(java.lang.StringBuilder,visualization.ReportData)" class="member-name-link">appendTimeline</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
  <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Appends the combat timeline composed of per-event cards.</div>
-</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendTimelineCard(java.lang.StringBuilder,visualization.SimulationRecord)" class="member-name-link">appendTimelineCard</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
  <a href="SimulationRecord.html" title="visualization内のクラス">SimulationRecord</a>&nbsp;record)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Appends a single timeline card for one simulation record.</div>
-</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendTimelineFilters(java.lang.StringBuilder,visualization.ReportData)" class="member-name-link">appendTimelineFilters</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendTimelineFilterScript(java.lang.StringBuilder)" class="member-name-link">appendTimelineFilterScript</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#appendWeaponLoadoutCard(java.lang.StringBuilder,visualization.ReportViewAdapter.ReportCharacterView)" class="member-name-link">appendWeaponLoadoutCard</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportViewAdapter.ReportCharacterView.html" title="visualization内のクラス">ReportViewAdapter.ReportCharacterView</a>&nbsp;character)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#auraDatasets(visualization.ReportData)" class="member-name-link">auraDatasets</a><wbr>(<a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#buffLabels(visualization.ReportData)" class="member-name-link">buffLabels</a><wbr>(<a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#buffValues(visualization.ReportData)" class="member-name-link">buffValues</a><wbr>(<a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#characterColor(visualization.ReportData,java.lang.String)" class="member-name-link">characterColor</a><wbr>(<a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;displayName)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#characterDatasets(visualization.ReportData)" class="member-name-link">characterDatasets</a><wbr>(<a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#cssColor(java.lang.String)" class="member-name-link">cssColor</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;jsLiteralColor)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#elementColor(model.type.Element)" class="member-name-link">elementColor</a><wbr>(<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#energyDatasets(visualization.ReportData)" class="member-name-link">energyDatasets</a><wbr>(<a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>(package private) static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#escapeAttr(java.lang.String)" class="member-name-link">escapeAttr</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;value)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>(package private) static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#escapeHtml(java.lang.String)" class="member-name-link">escapeHtml</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;value)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#extractSeriesY(java.lang.String)" class="member-name-link">extractSeriesY</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;point)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#fallbackColors(int)" class="member-name-link">fallbackColors</a><wbr>(int&nbsp;size)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>(package private) static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#jsString(java.lang.String)" class="member-name-link">jsString</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;value)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#metricLabels(java.util.List)" class="member-name-link">metricLabels</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportData.ReportMetricView.html" title="visualization内のクラス">ReportData.ReportMetricView</a>&gt;&nbsp;metrics)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#metricValues(java.util.List)" class="member-name-link">metricValues</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportData.ReportMetricView.html" title="visualization内のクラス">ReportData.ReportMetricView</a>&gt;&nbsp;metrics)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>(package private) static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#render(visualization.ReportData)" class="member-name-link">render</a><wbr>(<a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
@@ -302,11 +479,6 @@ the stat slider.</div>
 <h3>appendDocumentStart</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendDocumentStart</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb)</span></div>
-<div class="block">Appends the opening HTML markup, head tag, and report title.</div>
-<dl class="notes">
-<dt>パラメータ:</dt>
-<dd><code>sb</code> - buffer to append to</dd>
-</dl>
 </div>
 </section>
 </li>
@@ -315,11 +487,6 @@ the stat slider.</div>
 <h3>appendStyles</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendStyles</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb)</span></div>
-<div class="block">Appends the inline CSS style block used by the report.</div>
-<dl class="notes">
-<dt>パラメータ:</dt>
-<dd><code>sb</code> - buffer to append to</dd>
-</dl>
 </div>
 </section>
 </li>
@@ -329,25 +496,186 @@ the stat slider.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendSummary</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
  <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</span></div>
-<div class="block">Appends the headline summary block (DPS, total damage, duration).</div>
-<dl class="notes">
-<dt>パラメータ:</dt>
-<dd><code>sb</code> - buffer to append to</dd>
-<dd><code>data</code> - report data</dd>
-</dl>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="appendCharts(java.lang.StringBuilder)">
+<section class="detail" id="appendMetricCard(java.lang.StringBuilder,java.lang.String,java.lang.String,java.lang.String)">
+<h3>appendMetricCard</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendMetricCard</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;label,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;value,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;valueClass)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="appendCharacterAssetMetadata(java.lang.StringBuilder,visualization.ReportData)">
+<h3>appendCharacterAssetMetadata</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendCharacterAssetMetadata</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="appendCharts(java.lang.StringBuilder,visualization.ReportData)">
 <h3>appendCharts</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendCharts</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb)</span></div>
-<div class="block">Appends the canvas placeholders for the pie and line charts.</div>
-<dl class="notes">
-<dt>パラメータ:</dt>
-<dd><code>sb</code> - buffer to append to</dd>
-</dl>
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendCharts</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="appendCharacterDetails(java.lang.StringBuilder,visualization.ReportData)">
+<h3>appendCharacterDetails</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendCharacterDetails</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="appendCharacterLoadout(java.lang.StringBuilder,visualization.ReportViewAdapter.ReportCharacterView)">
+<h3>appendCharacterLoadout</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendCharacterLoadout</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportViewAdapter.ReportCharacterView.html" title="visualization内のクラス">ReportViewAdapter.ReportCharacterView</a>&nbsp;character)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="appendWeaponLoadoutCard(java.lang.StringBuilder,visualization.ReportViewAdapter.ReportCharacterView)">
+<h3>appendWeaponLoadoutCard</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendWeaponLoadoutCard</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportViewAdapter.ReportCharacterView.html" title="visualization内のクラス">ReportViewAdapter.ReportCharacterView</a>&nbsp;character)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="appendLoadoutCard(java.lang.StringBuilder,java.lang.String,java.lang.String)">
+<h3>appendLoadoutCard</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendLoadoutCard</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;label,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;value)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="appendCharacterPanelMetric(java.lang.StringBuilder,java.lang.String,java.lang.String,java.lang.String)">
+<h3>appendCharacterPanelMetric</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendCharacterPanelMetric</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;label,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;value,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;valueClass)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="appendCharacterActionDamageWidget(java.lang.StringBuilder,visualization.ReportData.CharacterReportView)">
+<h3>appendCharacterActionDamageWidget</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendCharacterActionDamageWidget</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportData.CharacterReportView.html" title="visualization内のクラス">ReportData.CharacterReportView</a>&nbsp;detail)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="appendCharacterArtifactWidget(java.lang.StringBuilder,visualization.ReportData.CharacterReportView)">
+<h3>appendCharacterArtifactWidget</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendCharacterArtifactWidget</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportData.CharacterReportView.html" title="visualization内のクラス">ReportData.CharacterReportView</a>&nbsp;detail)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="appendCharacterEnergyWidget(java.lang.StringBuilder,visualization.ReportData.CharacterReportView)">
+<h3>appendCharacterEnergyWidget</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendCharacterEnergyWidget</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportData.CharacterReportView.html" title="visualization内のクラス">ReportData.CharacterReportView</a>&nbsp;detail)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="appendEnergyStat(java.lang.StringBuilder,java.lang.String,double)">
+<h3>appendEnergyStat</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendEnergyStat</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;label,
+ double&nbsp;value)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="appendCharacterBuffWidget(java.lang.StringBuilder,visualization.ReportData.CharacterReportView)">
+<h3>appendCharacterBuffWidget</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendCharacterBuffWidget</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportData.CharacterReportView.html" title="visualization内のクラス">ReportData.CharacterReportView</a>&nbsp;detail)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="appendCharacterTopEventsWidget(java.lang.StringBuilder,visualization.ReportData.CharacterReportView)">
+<h3>appendCharacterTopEventsWidget</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendCharacterTopEventsWidget</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportData.CharacterReportView.html" title="visualization内のクラス">ReportData.CharacterReportView</a>&nbsp;detail)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="appendCharacterRecentEventsWidget(java.lang.StringBuilder,visualization.ReportData.CharacterReportView)">
+<h3>appendCharacterRecentEventsWidget</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendCharacterRecentEventsWidget</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportData.CharacterReportView.html" title="visualization内のクラス">ReportData.CharacterReportView</a>&nbsp;detail)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="appendCharacterEventTable(java.lang.StringBuilder,java.util.List,java.lang.String)">
+<h3>appendCharacterEventTable</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendCharacterEventTable</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="SimulationRecord.html" title="visualization内のクラス">SimulationRecord</a>&gt;&nbsp;events,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;emptyMessage)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="extractSeriesY(java.lang.String)">
+<h3>extractSeriesY</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">extractSeriesY</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;point)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="appendCharacterFace(java.lang.StringBuilder,visualization.ReportViewAdapter.ReportCharacterView)">
+<h3>appendCharacterFace</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendCharacterFace</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportViewAdapter.ReportCharacterView.html" title="visualization内のクラス">ReportViewAdapter.ReportCharacterView</a>&nbsp;character)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="appendChartPanel(java.lang.StringBuilder,java.lang.String,java.lang.String,java.lang.String,boolean)">
+<h3>appendChartPanel</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendChartPanel</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;title,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;canvasId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;note,
+ boolean&nbsp;tall)</span></div>
 </div>
 </section>
 </li>
@@ -357,12 +685,6 @@ the stat slider.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendStatsAndArtifacts</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
  <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</span></div>
-<div class="block">Appends the stats snapshot and artifact roll sections side by side.</div>
-<dl class="notes">
-<dt>パラメータ:</dt>
-<dd><code>sb</code> - buffer to append to</dd>
-<dd><code>data</code> - report data</dd>
-</dl>
 </div>
 </section>
 </li>
@@ -372,12 +694,6 @@ the stat slider.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendStatsSection</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
  <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</span></div>
-<div class="block">Appends the character stat table and (optionally) the active buff panel.</div>
-<dl class="notes">
-<dt>パラメータ:</dt>
-<dd><code>sb</code> - buffer to append to</dd>
-<dd><code>data</code> - report data</dd>
-</dl>
 </div>
 </section>
 </li>
@@ -387,12 +703,6 @@ the stat slider.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendArtifactSection</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
  <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</span></div>
-<div class="block">Appends the artifact substat roll table.</div>
-<dl class="notes">
-<dt>パラメータ:</dt>
-<dd><code>sb</code> - buffer to append to</dd>
-<dd><code>data</code> - report data</dd>
-</dl>
 </div>
 </section>
 </li>
@@ -402,12 +712,15 @@ the stat slider.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendTimeline</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
  <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</span></div>
-<div class="block">Appends the combat timeline composed of per-event cards.</div>
-<dl class="notes">
-<dt>パラメータ:</dt>
-<dd><code>sb</code> - buffer to append to</dd>
-<dd><code>data</code> - report data</dd>
-</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="appendTimelineFilters(java.lang.StringBuilder,visualization.ReportData)">
+<h3>appendTimelineFilters</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendTimelineFilters</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</span></div>
 </div>
 </section>
 </li>
@@ -417,12 +730,6 @@ the stat slider.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendTimelineCard</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
  <a href="SimulationRecord.html" title="visualization内のクラス">SimulationRecord</a>&nbsp;record)</span></div>
-<div class="block">Appends a single timeline card for one simulation record.</div>
-<dl class="notes">
-<dt>パラメータ:</dt>
-<dd><code>sb</code> - buffer to append to</dd>
-<dd><code>record</code> - record to render</dd>
-</dl>
 </div>
 </section>
 </li>
@@ -432,12 +739,6 @@ the stat slider.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendAuraBar</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
  <a href="SimulationRecord.html" title="visualization内のクラス">SimulationRecord</a>&nbsp;record)</span></div>
-<div class="block">Appends the colored aura bar showing enemy aura snapshot at the record time.</div>
-<dl class="notes">
-<dt>パラメータ:</dt>
-<dd><code>sb</code> - buffer to append to</dd>
-<dd><code>record</code> - record carrying the enemy aura snapshot</dd>
-</dl>
 </div>
 </section>
 </li>
@@ -447,13 +748,23 @@ the stat slider.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendScript</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
  <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</span></div>
-<div class="block">Appends the bottom-of-document <code>&lt;script&gt;</code> block driving Chart.js and
-the stat slider.</div>
-<dl class="notes">
-<dt>パラメータ:</dt>
-<dd><code>sb</code> - buffer to append to</dd>
-<dd><code>data</code> - report data</dd>
-</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="appendCharacterAssetsScript(java.lang.StringBuilder,visualization.ReportData)">
+<h3>appendCharacterAssetsScript</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendCharacterAssetsScript</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="appendCharacterTabsScript(java.lang.StringBuilder)">
+<h3>appendCharacterTabsScript</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendCharacterTabsScript</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb)</span></div>
 </div>
 </section>
 </li>
@@ -463,12 +774,6 @@ the stat slider.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendStatsHistoryScript</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
  <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</span></div>
-<div class="block">Emits the JS stats history array and slider wiring.</div>
-<dl class="notes">
-<dt>パラメータ:</dt>
-<dd><code>sb</code> - buffer to append to</dd>
-<dd><code>data</code> - report data</dd>
-</dl>
 </div>
 </section>
 </li>
@@ -478,12 +783,174 @@ the stat slider.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendChartScript</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
  <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</span></div>
-<div class="block">Emits Chart.js initialization for the pie and cumulative damage charts.</div>
-<dl class="notes">
-<dt>パラメータ:</dt>
-<dd><code>sb</code> - buffer to append to</dd>
-<dd><code>data</code> - report data</dd>
-</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="appendPieChart(java.lang.StringBuilder,java.lang.String,java.util.List,java.util.List,java.util.List,boolean)">
+<h3>appendPieChart</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendPieChart</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;canvasId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&nbsp;labels,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;values,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&nbsp;colors,
+ boolean&nbsp;showPercent)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="appendBarChart(java.lang.StringBuilder,java.lang.String,java.util.List,java.util.List,java.util.List,java.lang.String)">
+<h3>appendBarChart</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendBarChart</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;canvasId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&nbsp;labels,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;values,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&nbsp;colors,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;xTitle)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="appendActionDamageFilterScript(java.lang.StringBuilder,visualization.ReportData)">
+<h3>appendActionDamageFilterScript</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendActionDamageFilterScript</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="appendLineChart(java.lang.StringBuilder,java.lang.String,java.util.List,java.lang.String,boolean)">
+<h3>appendLineChart</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendLineChart</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;canvasId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;&nbsp;datasets,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;yTitle,
+ boolean&nbsp;stepped)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="characterDatasets(visualization.ReportData)">
+<h3>characterDatasets</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;</span>&nbsp;<span class="element-name">characterDatasets</span><wbr><span class="parameters">(<a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="auraDatasets(visualization.ReportData)">
+<h3>auraDatasets</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;</span>&nbsp;<span class="element-name">auraDatasets</span><wbr><span class="parameters">(<a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="energyDatasets(visualization.ReportData)">
+<h3>energyDatasets</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;</span>&nbsp;<span class="element-name">energyDatasets</span><wbr><span class="parameters">(<a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="appendTimelineFilterScript(java.lang.StringBuilder)">
+<h3>appendTimelineFilterScript</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendTimelineFilterScript</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="metricLabels(java.util.List)">
+<h3>metricLabels</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;</span>&nbsp;<span class="element-name">metricLabels</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportData.ReportMetricView.html" title="visualization内のクラス">ReportData.ReportMetricView</a>&gt;&nbsp;metrics)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="metricValues(java.util.List)">
+<h3>metricValues</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</span>&nbsp;<span class="element-name">metricValues</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportData.ReportMetricView.html" title="visualization内のクラス">ReportData.ReportMetricView</a>&gt;&nbsp;metrics)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="buffLabels(visualization.ReportData)">
+<h3>buffLabels</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;</span>&nbsp;<span class="element-name">buffLabels</span><wbr><span class="parameters">(<a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="buffValues(visualization.ReportData)">
+<h3>buffValues</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</span>&nbsp;<span class="element-name">buffValues</span><wbr><span class="parameters">(<a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="fallbackColors(int)">
+<h3>fallbackColors</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&gt;</span>&nbsp;<span class="element-name">fallbackColors</span><wbr><span class="parameters">(int&nbsp;size)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="characterColor(visualization.ReportData,java.lang.String)">
+<h3>characterColor</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">characterColor</span><wbr><span class="parameters">(<a href="ReportData.html" title="visualization内のクラス">ReportData</a>&nbsp;data,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;displayName)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="cssColor(java.lang.String)">
+<h3>cssColor</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">cssColor</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;jsLiteralColor)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="elementColor(model.type.Element)">
+<h3>elementColor</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">elementColor</span><wbr><span class="parameters">(<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="escapeHtml(java.lang.String)">
+<h3>escapeHtml</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">escapeHtml</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;value)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="escapeAttr(java.lang.String)">
+<h3>escapeAttr</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">escapeAttr</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;value)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="jsString(java.lang.String)">
+<h3>jsString</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">jsString</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;value)</span></div>
 </div>
 </section>
 </li>
@@ -492,11 +959,6 @@ the stat slider.</div>
 <h3>appendDocumentEnd</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendDocumentEnd</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/StringBuilder.html" title="java.lang内のクラスまたはインタフェース" class="external-link">StringBuilder</a>&nbsp;sb)</span></div>
-<div class="block">Appends the closing container, body, and html tags.</div>
-<dl class="notes">
-<dt>パラメータ:</dt>
-<dd><code>sb</code> - buffer to append to</dd>
-</dl>
 </div>
 </section>
 </li>

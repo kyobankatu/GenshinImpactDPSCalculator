@@ -70,6 +70,15 @@ loadScripts(document, 'script');</script>
 <li><a href="#icdStates" tabindex="0">icdStates</a></li>
 <li><a href="#ecTimerRunning" tabindex="0">ecTimerRunning</a></li>
 <li><a href="#thundercloudEndTime" tabindex="0">thundercloudEndTime</a></li>
+<li><a href="#burningTimerRunning" tabindex="0">burningTimerRunning</a></li>
+<li><a href="#burningEndTime" tabindex="0">burningEndTime</a></li>
+<li><a href="#quickenEndTime" tabindex="0">quickenEndTime</a></li>
+<li><a href="#moondriftCount" tabindex="0">moondriftCount</a></li>
+<li><a href="#lunarCrystallizeTriggerCount" tabindex="0">lunarCrystallizeTriggerCount</a></li>
+<li><a href="#verdantDewCount" tabindex="0">verdantDewCount</a></li>
+<li><a href="#moonridgeDewCount" tabindex="0">moonridgeDewCount</a></li>
+<li><a href="#dendroCores" tabindex="0">dendroCores</a></li>
+<li><a href="#nextDendroCoreId" tabindex="0">nextDendroCoreId</a></li>
 <li><a href="#enemyAura" tabindex="0">enemyAura</a></li>
 <li><a href="#characters" tabindex="0">characters</a></li>
 <li><a href="#teamBuffRefs" tabindex="0">teamBuffRefs</a></li>
@@ -80,7 +89,7 @@ loadScripts(document, 'script');</script>
 </li>
 <li><a href="#constructor-detail" tabindex="0">コンストラクタの詳細</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(double,double,double,java.util.Map,double,model.type.CharacterId,simulation.CombatSimulator.Moonsign,java.util.Map,boolean,double,java.util.Map,java.util.Map,java.util.List,java.util.List,java.util.List,java.util.List)" tabindex="0">SimulatorSnapshot(double, double, double, Map, double, CharacterId, CombatSimulator.Moonsign, Map, boolean, double, Map, Map, List, List, List, List)</a></li>
+<li><a href="#%3Cinit%3E(double,double,double,java.util.Map,double,model.type.CharacterId,simulation.CombatSimulator.Moonsign,java.util.Map,boolean,double,boolean,double,double,int,int,int,int,java.util.List,int,java.util.Map,java.util.Map,java.util.List,java.util.List,java.util.List,java.util.List)" tabindex="0">SimulatorSnapshot(double, double, double, Map, double, CharacterId, CombatSimulator.Moonsign, Map, boolean, double, boolean, double, double, int, int, int, int, List, int, Map, Map, List, List, List, List)</a></li>
 </ol>
 </li>
 </ol>
@@ -143,6 +152,12 @@ The resulting estimation bias approximately cancels in the VinePPO
 <div class="col-first even-row-color"><code>final <a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></code></div>
 <div class="col-second even-row-color"><code><a href="#activeCharacterId" class="member-name-link">activeCharacterId</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>final double</code></div>
+<div class="col-second odd-row-color"><code><a href="#burningEndTime" class="member-name-link">burningEndTime</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>final boolean</code></div>
+<div class="col-second even-row-color"><code><a href="#burningTimerRunning" class="member-name-link">burningTimerRunning</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="SimulatorSnapshot.CharacterSnapshot.html" title="simulation内のクラス">SimulatorSnapshot.CharacterSnapshot</a>&gt;</code></div>
 <div class="col-second odd-row-color"><code><a href="#characters" class="member-name-link">characters</a></code></div>
 <div class="col-last odd-row-color">
@@ -154,28 +169,50 @@ The resulting estimation bias approximately cancels in the VinePPO
 <div class="col-first odd-row-color"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</code></div>
 <div class="col-second odd-row-color"><code><a href="#damageBySource" class="member-name-link">damageBySource</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>final boolean</code></div>
-<div class="col-second even-row-color"><code><a href="#ecTimerRunning" class="member-name-link">ecTimerRunning</a></code></div>
+<div class="col-first even-row-color"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="runtime/ReactionState.DendroCoreState.html" title="simulation.runtime内のクラス">ReactionState.DendroCoreState</a>&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#dendroCores" class="member-name-link">dendroCores</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</code></div>
-<div class="col-second odd-row-color"><code><a href="#enemyAura" class="member-name-link">enemyAura</a></code></div>
+<div class="col-first odd-row-color"><code>final boolean</code></div>
+<div class="col-second odd-row-color"><code><a href="#ecTimerRunning" class="member-name-link">ecTimerRunning</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;</code></div>
-<div class="col-second even-row-color"><code><a href="#fieldBuffRefs" class="member-name-link">fieldBuffRefs</a></code></div>
+<div class="col-first even-row-color"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr>double[]&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#enemyAura" class="member-name-link">enemyAura</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">Full enemy aura state keyed by element, each value holding
+<code>{units, applicationTime, duration}</code> so continuous natural decay is
+preserved across snapshot restore.</div>
+</div>
+<div class="col-first odd-row-color"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;</code></div>
+<div class="col-second odd-row-color"><code><a href="#fieldBuffRefs" class="member-name-link">fieldBuffRefs</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Simulator-managed field buff references and their timing at save time.</div>
 </div>
-<div class="col-first odd-row-color"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;double[]&gt;</code></div>
-<div class="col-second odd-row-color"><code><a href="#fieldBuffTimes" class="member-name-link">fieldBuffTimes</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>,<wbr>double[]&gt;</code></div>
-<div class="col-second even-row-color"><code><a href="#icdStates" class="member-name-link">icdStates</a></code></div>
+<div class="col-first even-row-color"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;double[]&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#fieldBuffTimes" class="member-name-link">fieldBuffTimes</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>final double</code></div>
-<div class="col-second odd-row-color"><code><a href="#lastSwapTime" class="member-name-link">lastSwapTime</a></code></div>
+<div class="col-first odd-row-color"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>,<wbr>double[]&gt;</code></div>
+<div class="col-second odd-row-color"><code><a href="#icdStates" class="member-name-link">icdStates</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>final double</code></div>
+<div class="col-second even-row-color"><code><a href="#lastSwapTime" class="member-name-link">lastSwapTime</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>final int</code></div>
+<div class="col-second odd-row-color"><code><a href="#lunarCrystallizeTriggerCount" class="member-name-link">lunarCrystallizeTriggerCount</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>final int</code></div>
+<div class="col-second even-row-color"><code><a href="#moondriftCount" class="member-name-link">moondriftCount</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>final int</code></div>
+<div class="col-second odd-row-color"><code><a href="#moonridgeDewCount" class="member-name-link">moonridgeDewCount</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code>final <a href="CombatSimulator.Moonsign.html" title="simulationの列挙クラス">CombatSimulator.Moonsign</a></code></div>
 <div class="col-second even-row-color"><code><a href="#moonsign" class="member-name-link">moonsign</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>final int</code></div>
+<div class="col-second odd-row-color"><code><a href="#nextDendroCoreId" class="member-name-link">nextDendroCoreId</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>final double</code></div>
+<div class="col-second even-row-color"><code><a href="#quickenEndTime" class="member-name-link">quickenEndTime</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
 <div class="col-first odd-row-color"><code>final double</code></div>
 <div class="col-second odd-row-color"><code><a href="#rotationTime" class="member-name-link">rotationTime</a></code></div>
@@ -194,6 +231,9 @@ The resulting estimation bias approximately cancels in the VinePPO
 <div class="col-first odd-row-color"><code>final double</code></div>
 <div class="col-second odd-row-color"><code><a href="#totalDamage" class="member-name-link">totalDamage</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>final int</code></div>
+<div class="col-second even-row-color"><code><a href="#verdantDewCount" class="member-name-link">verdantDewCount</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -205,7 +245,7 @@ The resulting estimation bias approximately cancels in the VinePPO
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">コンストラクタ</div>
 <div class="table-header col-last">説明</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(double,double,double,java.util.Map,double,model.type.CharacterId,simulation.CombatSimulator.Moonsign,java.util.Map,boolean,double,java.util.Map,java.util.Map,java.util.List,java.util.List,java.util.List,java.util.List)" class="member-name-link">SimulatorSnapshot</a><wbr>(double&nbsp;currentTime,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(double,double,double,java.util.Map,double,model.type.CharacterId,simulation.CombatSimulator.Moonsign,java.util.Map,boolean,double,boolean,double,double,int,int,int,int,java.util.List,int,java.util.Map,java.util.Map,java.util.List,java.util.List,java.util.List,java.util.List)" class="member-name-link">SimulatorSnapshot</a><wbr>(double&nbsp;currentTime,
  double&nbsp;rotationTime,
  double&nbsp;totalDamage,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;damageBySource,
@@ -215,7 +255,16 @@ The resulting estimation bias approximately cancels in the VinePPO
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>,<wbr>double[]&gt;&nbsp;icdStates,
  boolean&nbsp;ecTimerRunning,
  double&nbsp;thundercloudEndTime,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;enemyAura,
+ boolean&nbsp;burningTimerRunning,
+ double&nbsp;burningEndTime,
+ double&nbsp;quickenEndTime,
+ int&nbsp;moondriftCount,
+ int&nbsp;lunarCrystallizeTriggerCount,
+ int&nbsp;verdantDewCount,
+ int&nbsp;moonridgeDewCount,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="runtime/ReactionState.DendroCoreState.html" title="simulation.runtime内のクラス">ReactionState.DendroCoreState</a>&gt;&nbsp;dendroCores,
+ int&nbsp;nextDendroCoreId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr>double[]&gt;&nbsp;enemyAura,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="SimulatorSnapshot.CharacterSnapshot.html" title="simulation内のクラス">SimulatorSnapshot.CharacterSnapshot</a>&gt;&nbsp;characters,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;&nbsp;teamBuffRefs,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;double[]&gt;&nbsp;teamBuffTimes,
@@ -326,10 +375,85 @@ The resulting estimation bias approximately cancels in the VinePPO
 </section>
 </li>
 <li>
+<section class="detail" id="burningTimerRunning">
+<h3>burningTimerRunning</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">burningTimerRunning</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="burningEndTime">
+<h3>burningEndTime</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">burningEndTime</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="quickenEndTime">
+<h3>quickenEndTime</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">quickenEndTime</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="moondriftCount">
+<h3>moondriftCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">moondriftCount</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="lunarCrystallizeTriggerCount">
+<h3>lunarCrystallizeTriggerCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">lunarCrystallizeTriggerCount</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="verdantDewCount">
+<h3>verdantDewCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">verdantDewCount</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="moonridgeDewCount">
+<h3>moonridgeDewCount</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">moonridgeDewCount</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="dendroCores">
+<h3>dendroCores</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="runtime/ReactionState.DendroCoreState.html" title="simulation.runtime内のクラス">ReactionState.DendroCoreState</a>&gt;</span>&nbsp;<span class="element-name">dendroCores</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="nextDendroCoreId">
+<h3>nextDendroCoreId</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">nextDendroCoreId</span></div>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="enemyAura">
 <h3>enemyAura</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</span>&nbsp;<span class="element-name">enemyAura</span></div>
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr>double[]&gt;</span>&nbsp;<span class="element-name">enemyAura</span></div>
+<div class="block">Full enemy aura state keyed by element, each value holding
+<code>{units, applicationTime, duration}</code> so continuous natural decay is
+preserved across snapshot restore.</div>
 </div>
 </section>
 </li>
@@ -385,7 +509,7 @@ The resulting estimation bias approximately cancels in the VinePPO
 <h2>コンストラクタの詳細</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(double,double,double,java.util.Map,double,model.type.CharacterId,simulation.CombatSimulator.Moonsign,java.util.Map,boolean,double,java.util.Map,java.util.Map,java.util.List,java.util.List,java.util.List,java.util.List)">
+<section class="detail" id="&lt;init&gt;(double,double,double,java.util.Map,double,model.type.CharacterId,simulation.CombatSimulator.Moonsign,java.util.Map,boolean,double,boolean,double,double,int,int,int,int,java.util.List,int,java.util.Map,java.util.Map,java.util.List,java.util.List,java.util.List,java.util.List)">
 <h3>SimulatorSnapshot</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">SimulatorSnapshot</span><wbr><span class="parameters">(double&nbsp;currentTime,
@@ -398,7 +522,16 @@ The resulting estimation bias approximately cancels in the VinePPO
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>,<wbr>double[]&gt;&nbsp;icdStates,
  boolean&nbsp;ecTimerRunning,
  double&nbsp;thundercloudEndTime,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;&nbsp;enemyAura,
+ boolean&nbsp;burningTimerRunning,
+ double&nbsp;burningEndTime,
+ double&nbsp;quickenEndTime,
+ int&nbsp;moondriftCount,
+ int&nbsp;lunarCrystallizeTriggerCount,
+ int&nbsp;verdantDewCount,
+ int&nbsp;moonridgeDewCount,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="runtime/ReactionState.DendroCoreState.html" title="simulation.runtime内のクラス">ReactionState.DendroCoreState</a>&gt;&nbsp;dendroCores,
+ int&nbsp;nextDendroCoreId,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>,<wbr>double[]&gt;&nbsp;enemyAura,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="SimulatorSnapshot.CharacterSnapshot.html" title="simulation内のクラス">SimulatorSnapshot.CharacterSnapshot</a>&gt;&nbsp;characters,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../mechanics/buff/Buff.html" title="mechanics.buff内のクラス">Buff</a>&gt;&nbsp;teamBuffRefs,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;double[]&gt;&nbsp;teamBuffTimes,
@@ -417,7 +550,7 @@ The resulting estimation bias approximately cancels in the VinePPO
 <dd><code>icdStates</code> - ICD group states</dd>
 <dd><code>ecTimerRunning</code> - EC timer flag</dd>
 <dd><code>thundercloudEndTime</code> - thundercloud expiry time</dd>
-<dd><code>enemyAura</code> - enemy aura gauge map</dd>
+<dd><code>enemyAura</code> - enemy aura state map ({units, applicationTime, duration} per element)</dd>
 <dd><code>characters</code> - per-character snapshots</dd>
 <dd><code>teamBuffRefs</code> - team buff object references</dd>
 <dd><code>teamBuffTimes</code> - team buff timing pairs [startTime, expirationTime]</dd>

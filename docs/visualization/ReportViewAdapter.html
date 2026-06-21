@@ -67,6 +67,16 @@ loadScripts(document, 'script');</script>
 <li><a href="#partyCharacters(simulation.CombatSimulator)" tabindex="0">partyCharacters(CombatSimulator)</a></li>
 <li><a href="#statsHistory(java.util.List)" tabindex="0">statsHistory(List)</a></li>
 <li><a href="#domKey(model.type.CharacterId)" tabindex="0">domKey(CharacterId)</a></li>
+<li><a href="#localFacePath(java.lang.String)" tabindex="0">localFacePath(String)</a></li>
+<li><a href="#reportFacePath(java.lang.String)" tabindex="0">reportFacePath(String)</a></li>
+<li><a href="#normalizedConstellation(int)" tabindex="0">normalizedConstellation(int)</a></li>
+<li><a href="#weaponName(model.entity.Character)" tabindex="0">weaponName(Character)</a></li>
+<li><a href="#weaponIconPath(model.entity.Character)" tabindex="0">weaponIconPath(Character)</a></li>
+<li><a href="#hasWeaponIcon(model.entity.Character)" tabindex="0">hasWeaponIcon(Character)</a></li>
+<li><a href="#artifactSetViews(model.entity.Character)" tabindex="0">artifactSetViews(Character)</a></li>
+<li><a href="#assetKey(java.lang.String)" tabindex="0">assetKey(String)</a></li>
+<li><a href="#urlPathSegment(java.lang.String)" tabindex="0">urlPathSegment(String)</a></li>
+<li><a href="#fallbackText(java.lang.String)" tabindex="0">fallbackText(String)</a></li>
 </ol>
 </li>
 </ol>
@@ -102,18 +112,23 @@ boundary concerns owned by the visualization layer, not by combat logic.</div>
 <div class="table-header col-second">クラス</div>
 <div class="table-header col-last">説明</div>
 <div class="col-first even-row-color"><code>static final class&nbsp;</code></div>
-<div class="col-second even-row-color"><code><a href="ReportViewAdapter.ReportCharacterStats.html" class="type-name-link" title="visualization内のクラス">ReportViewAdapter.ReportCharacterStats</a></code></div>
+<div class="col-second even-row-color"><code><a href="ReportViewAdapter.ReportAssetView.html" class="type-name-link" title="visualization内のクラス">ReportViewAdapter.ReportAssetView</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">Pre-computed display-ready stat values (e.g.</div>
+<div class="block">View object for a report asset with an optional local icon.</div>
 </div>
 <div class="col-first odd-row-color"><code>static final class&nbsp;</code></div>
-<div class="col-second odd-row-color"><code><a href="ReportViewAdapter.ReportCharacterView.html" class="type-name-link" title="visualization内のクラス">ReportViewAdapter.ReportCharacterView</a></code></div>
+<div class="col-second odd-row-color"><code><a href="ReportViewAdapter.ReportCharacterStats.html" class="type-name-link" title="visualization内のクラス">ReportViewAdapter.ReportCharacterStats</a></code></div>
 <div class="col-last odd-row-color">
-<div class="block">View object describing a single party member for report rendering.</div>
+<div class="block">Pre-computed display-ready stat values (e.g.</div>
 </div>
 <div class="col-first even-row-color"><code>static final class&nbsp;</code></div>
-<div class="col-second even-row-color"><code><a href="ReportViewAdapter.ReportStatsSnapshot.html" class="type-name-link" title="visualization内のクラス">ReportViewAdapter.ReportStatsSnapshot</a></code></div>
+<div class="col-second even-row-color"><code><a href="ReportViewAdapter.ReportCharacterView.html" class="type-name-link" title="visualization内のクラス">ReportViewAdapter.ReportCharacterView</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">View object describing a single party member for report rendering.</div>
+</div>
+<div class="col-first odd-row-color"><code>static final class&nbsp;</code></div>
+<div class="col-second odd-row-color"><code><a href="ReportViewAdapter.ReportStatsSnapshot.html" class="type-name-link" title="visualization内のクラス">ReportViewAdapter.ReportStatsSnapshot</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Adapted snapshot of party stats at a single point in simulation time, keyed
 by DOM identifier.</div>
 </div>
@@ -146,23 +161,53 @@ by DOM identifier.</div>
 <div class="table-header col-first">修飾子とタイプ</div>
 <div class="table-header col-second">メソッド</div>
 <div class="table-header col-last">説明</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="ReportViewAdapter.ReportAssetView.html" title="visualization内のクラス">ReportViewAdapter.ReportAssetView</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#artifactSetViews(model.entity.Character)" class="member-name-link">artifactSetViews</a><wbr>(<a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#assetKey(java.lang.String)" class="member-name-link">assetKey</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;displayName)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#domKey(model.type.CharacterId)" class="member-name-link">domKey</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;characterId)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Converts a <a href="../model/type/CharacterId.html" title="model.typeの列挙クラス"><code>CharacterId</code></a> into the HTML-safe key used as the DOM row
 identifier in the report.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#fallbackText(java.lang.String)" class="member-name-link">fallbackText</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;displayName)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#hasWeaponIcon(model.entity.Character)" class="member-name-link">hasWeaponIcon</a><wbr>(<a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/nio/file/Path.html" title="java.nio.file内のクラスまたはインタフェース" class="external-link">Path</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#localFacePath(java.lang.String)" class="member-name-link">localFacePath</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;displayName)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#normalizedConstellation(int)" class="member-name-link">normalizedConstellation</a><wbr>(int&nbsp;constellation)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="ReportViewAdapter.ReportCharacterView.html" title="visualization内のクラス">ReportViewAdapter.ReportCharacterView</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#partyCharacters(simulation.CombatSimulator)" class="member-name-link">partyCharacters</a><wbr>(<a href="../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Builds report-facing views for every active party member.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="ReportViewAdapter.ReportStatsSnapshot.html" title="visualization内のクラス">ReportViewAdapter.ReportStatsSnapshot</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#statsHistory(java.util.List)" class="member-name-link">statsHistory</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../mechanics/analysis/StatsSnapshot.html" title="mechanics.analysis内のクラス">StatsSnapshot</a>&gt;&nbsp;statsHistory)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#reportFacePath(java.lang.String)" class="member-name-link">reportFacePath</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;displayName)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="ReportViewAdapter.ReportStatsSnapshot.html" title="visualization内のクラス">ReportViewAdapter.ReportStatsSnapshot</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#statsHistory(java.util.List)" class="member-name-link">statsHistory</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../mechanics/analysis/StatsSnapshot.html" title="mechanics.analysis内のクラス">StatsSnapshot</a>&gt;&nbsp;statsHistory)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Adapts analysis stat snapshots into report-friendly snapshots keyed by DOM
 identifier.</div>
 </div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#urlPathSegment(java.lang.String)" class="member-name-link">urlPathSegment</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;value)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#weaponIconPath(model.entity.Character)" class="member-name-link">weaponIconPath</a><wbr>(<a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#weaponName(model.entity.Character)" class="member-name-link">weaponName</a><wbr>(<a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -243,6 +288,86 @@ identifier in the report.</div>
 <dt>戻り値:</dt>
 <dd>the lowercased enum name suitable for use as a DOM id suffix</dd>
 </dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="localFacePath(java.lang.String)">
+<h3>localFacePath</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/nio/file/Path.html" title="java.nio.file内のクラスまたはインタフェース" class="external-link">Path</a></span>&nbsp;<span class="element-name">localFacePath</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;displayName)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="reportFacePath(java.lang.String)">
+<h3>reportFacePath</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">reportFacePath</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;displayName)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="normalizedConstellation(int)">
+<h3>normalizedConstellation</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">normalizedConstellation</span><wbr><span class="parameters">(int&nbsp;constellation)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="weaponName(model.entity.Character)">
+<h3>weaponName</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">weaponName</span><wbr><span class="parameters">(<a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="weaponIconPath(model.entity.Character)">
+<h3>weaponIconPath</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">weaponIconPath</span><wbr><span class="parameters">(<a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="hasWeaponIcon(model.entity.Character)">
+<h3>hasWeaponIcon</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">hasWeaponIcon</span><wbr><span class="parameters">(<a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="artifactSetViews(model.entity.Character)">
+<h3>artifactSetViews</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportViewAdapter.ReportAssetView.html" title="visualization内のクラス">ReportViewAdapter.ReportAssetView</a>&gt;</span>&nbsp;<span class="element-name">artifactSetViews</span><wbr><span class="parameters">(<a href="../model/entity/Character.html" title="model.entity内のクラス">Character</a>&nbsp;character)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="assetKey(java.lang.String)">
+<h3>assetKey</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">assetKey</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;displayName)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="urlPathSegment(java.lang.String)">
+<h3>urlPathSegment</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">urlPathSegment</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;value)</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="fallbackText(java.lang.String)">
+<h3>fallbackText</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">private static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">fallbackText</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;displayName)</span></div>
 </div>
 </section>
 </li>

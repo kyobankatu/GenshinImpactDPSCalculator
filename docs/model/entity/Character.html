@@ -124,8 +124,12 @@ loadScripts(document, 'script');</script>
 <li><a href="#getBurstCDRemaining(double)" tabindex="0">getBurstCDRemaining(double)</a></li>
 <li><a href="#markSkillUsed(double)" tabindex="0">markSkillUsed(double)</a></li>
 <li><a href="#markBurstUsed(double)" tabindex="0">markBurstUsed(double)</a></li>
+<li><a href="#recordMissedBurst()" tabindex="0">recordMissedBurst()</a></li>
 <li><a href="#getBurstEnergyWindows()" tabindex="0">getBurstEnergyWindows()</a></li>
+<li><a href="#getBurstEnergyMarkers()" tabindex="0">getBurstEnergyMarkers()</a></li>
+<li><a href="#getMissedBurstCost()" tabindex="0">getMissedBurstCost()</a></li>
 <li><a href="#getEnergyCost()" tabindex="0">getEnergyCost()</a></li>
+<li><a href="#getMaxEnergy()" tabindex="0">getMaxEnergy()</a></li>
 <li><a href="#getSkillCD()" tabindex="0">getSkillCD()</a></li>
 <li><a href="#getBurstCD()" tabindex="0">getBurstCD()</a></li>
 <li><a href="#getLastSkillTime()" tabindex="0">getLastSkillTime()</a></li>
@@ -149,7 +153,7 @@ loadScripts(document, 'script');</script>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>直系の既知のサブクラス:</dt>
-<dd><code><a href="../character/Bennett.html" title="model.character内のクラス">Bennett</a>, <a href="../character/Columbina.html" title="model.character内のクラス">Columbina</a>, <a href="../character/Flins.html" title="model.character内のクラス">Flins</a>, <a href="../character/Ineffa.html" title="model.character内のクラス">Ineffa</a>, <a href="../character/RaidenShogun.html" title="model.character内のクラス">RaidenShogun</a>, <a href="../character/Sucrose.html" title="model.character内のクラス">Sucrose</a>, <a href="../character/Xiangling.html" title="model.character内のクラス">Xiangling</a>, <a href="../character/Xingqiu.html" title="model.character内のクラス">Xingqiu</a></code></dd>
+<dd><code><a href="../character/Bennett.html" title="model.character内のクラス">Bennett</a>, <a href="../character/Columbina.html" title="model.character内のクラス">Columbina</a>, <a href="../character/Flins.html" title="model.character内のクラス">Flins</a>, <a href="../character/Ineffa.html" title="model.character内のクラス">Ineffa</a>, <a href="../character/RaidenShogun.html" title="model.character内のクラス">RaidenShogun</a>, <a href="../../sample/ReactionRegressionTest.TestBurstCharacter.html" title="sample内のクラス">ReactionRegressionTest.TestBurstCharacter</a>, <a href="../../sample/ReactionRegressionTest.TestCharacter.html" title="sample内のクラス">ReactionRegressionTest.TestCharacter</a>, <a href="../../sample/ReportRegressionTest.ReportTestCharacter.html" title="sample内のクラス">ReportRegressionTest.ReportTestCharacter</a>, <a href="../character/Sucrose.html" title="model.character内のクラス">Sucrose</a>, <a href="../character/Xiangling.html" title="model.character内のクラス">Xiangling</a>, <a href="../character/Xingqiu.html" title="model.character内のクラス">Xingqiu</a></code></dd>
 </dl>
 <hr>
 <div class="horizontal-scroll">
@@ -326,124 +330,141 @@ Initialised with KQM standard base stats: 5 % crit rate, 50 % crit DMG,
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getBurstCDRemaining(double)" class="member-name-link">getBurstCDRemaining</a><wbr>(double&nbsp;currentTime)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;double[]&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getBurstEnergyWindows()" class="member-name-link">getBurstEnergyWindows</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getBurstEnergyMarkers()" class="member-name-link">getBurstEnergyMarkers</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCharacterId()" class="member-name-link">getCharacterId</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;double[]&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getBurstEnergyWindows()" class="member-name-link">getBurstEnergyWindows</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getChargeRestoreTimes()" class="member-name-link">getChargeRestoreTimes</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCharacterId()" class="member-name-link">getCharacterId</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Double.html" title="java.lang内のクラスまたはインタフェース" class="external-link">Double</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getChargeRestoreTimes()" class="member-name-link">getChargeRestoreTimes</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns a copy of the charge restore schedule for snapshot purposes.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getConstellation()" class="member-name-link">getConstellation</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentEnergy()" class="member-name-link">getCurrentEnergy</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getConstellation()" class="member-name-link">getConstellation</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getEffectiveStats(double)" class="member-name-link">getEffectiveStats</a><wbr>(double&nbsp;currentTime)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getCurrentEnergy()" class="member-name-link">getCurrentEnergy</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getEffectiveStats(double)" class="member-name-link">getEffectiveStats</a><wbr>(double&nbsp;currentTime)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the full effective stats including base, weapon, artifacts,
 passives, and all currently active buffs (self and team).</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../type/Element.html" title="model.typeの列挙クラス">Element</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getElement()" class="member-name-link">getElement</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getEnergyCost()" class="member-name-link">getEnergyCost</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLastBurstTime()" class="member-name-link">getLastBurstTime</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLastSkillTime()" class="member-name-link">getLastSkillTime</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../type/Element.html" title="model.typeの列挙クラス">Element</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getElement()" class="member-name-link">getElement</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getName()" class="member-name-link">getName</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>abstract double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getEnergyCost()" class="member-name-link">getEnergyCost</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSkillCD()" class="member-name-link">getSkillCD</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLastBurstTime()" class="member-name-link">getLastBurstTime</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSkillCDRemaining(double)" class="member-name-link">getSkillCDRemaining</a><wbr>(double&nbsp;currentTime)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getLastSkillTime()" class="member-name-link">getLastSkillTime</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSnapshot()" class="member-name-link">getSnapshot</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMaxEnergy()" class="member-name-link">getMaxEnergy</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the maximum energy bar value.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMissedBurstCost()" class="member-name-link">getMissedBurstCost</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getName()" class="member-name-link">getName</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSkillCD()" class="member-name-link">getSkillCD</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSkillCDRemaining(double)" class="member-name-link">getSkillCDRemaining</a><wbr>(double&nbsp;currentTime)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getStructuralStats(double)" class="member-name-link">getStructuralStats</a><wbr>(double&nbsp;currentTime)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getSnapshot()" class="member-name-link">getSnapshot</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../stats/StatsContainer.html" title="model.stats内のクラス">StatsContainer</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getStructuralStats(double)" class="member-name-link">getStructuralStats</a><wbr>(double&nbsp;currentTime)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns structural stats only: base + weapon + artifacts + self-passive.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTalentValue(java.lang.String,double)" class="member-name-link">getTalentValue</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;key,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTalentValue(java.lang.String,double)" class="member-name-link">getTalentValue</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;key,
  double&nbsp;defaultValue)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Looks up a talent-table value by key, returning a default when no row
 is configured for this character.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTotalEnergyGained()" class="member-name-link">getTotalEnergyGained</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTotalFlatEnergy()" class="member-name-link">getTotalFlatEnergy</a>()</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTotalEnergyGained()" class="member-name-link">getTotalEnergyGained</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTotalParticleEnergy()" class="member-name-link">getTotalParticleEnergy</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTotalFlatEnergy()" class="member-name-link">getTotalFlatEnergy</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTotalScaledParticleEnergy()" class="member-name-link">getTotalScaledParticleEnergy</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTotalParticleEnergy()" class="member-name-link">getTotalParticleEnergy</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>double</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getTotalScaledParticleEnergy()" class="member-name-link">getTotalScaledParticleEnergy</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns total particle energy received after ER scaling.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Weapon.html" title="model.entity内のクラス">Weapon</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getWeapon()" class="member-name-link">getWeapon</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hasBuff(mechanics.buff.BuffId)" class="member-name-link">hasBuff</a><wbr>(<a href="../../mechanics/buff/BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a>&nbsp;id)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="Weapon.html" title="model.entity内のクラス">Weapon</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getWeapon()" class="member-name-link">getWeapon</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hasBuff(mechanics.buff.BuffId)" class="member-name-link">hasBuff</a><wbr>(<a href="../../mechanics/buff/BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a>&nbsp;id)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Tests whether a buff with the given id is currently active.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isLunarCharacter()" class="member-name-link">isLunarCharacter</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isLunarCharacter()" class="member-name-link">isLunarCharacter</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Marks whether this character belongs to the custom Lunar archetype
 (Ineffa / Flins / Columbina).</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#markBurstUsed(double)" class="member-name-link">markBurstUsed</a><wbr>(double&nbsp;currentTime)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Records that the burst was just used: zeroes current energy, snapshots
-the per-window energy subtotals, and starts the burst cooldown.</div>
-</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#markSkillUsed(double)" class="member-name-link">markSkillUsed</a><wbr>(double&nbsp;currentTime)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#markBurstUsed(double)" class="member-name-link">markBurstUsed</a><wbr>(double&nbsp;currentTime)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Records that the burst was just used: spends the current burst cost,
+snapshots the per-window energy subtotals, and starts the burst cooldown.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#markSkillUsed(double)" class="member-name-link">markSkillUsed</a><wbr>(double&nbsp;currentTime)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Records that the skill was just used at the given time.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onAction(simulation.action.CharacterActionRequest,simulation.CombatSimulator)" class="member-name-link">onAction</a><wbr>(<a href="../../simulation/action/CharacterActionRequest.html" title="simulation.action内のクラス">CharacterActionRequest</a>&nbsp;request,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#onAction(simulation.action.CharacterActionRequest,simulation.CombatSimulator)" class="member-name-link">onAction</a><wbr>(<a href="../../simulation/action/CharacterActionRequest.html" title="simulation.action内のクラス">CharacterActionRequest</a>&nbsp;request,
  <a href="../../simulation/CombatSimulator.html" title="simulation内のクラス">CombatSimulator</a>&nbsp;sim)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Reacts to an action request issued against this character.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#receiveEnergy(double)" class="member-name-link">receiveEnergy</a><wbr>(double&nbsp;amount)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#receiveEnergy(double)" class="member-name-link">receiveEnergy</a><wbr>(double&nbsp;amount)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Adds a generic energy amount (already ER-scaled if applicable).</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#receiveFlatEnergy(double)" class="member-name-link">receiveFlatEnergy</a><wbr>(double&nbsp;amount)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#receiveFlatEnergy(double)" class="member-name-link">receiveFlatEnergy</a><wbr>(double&nbsp;amount)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Adds flat energy (bypasses ER scaling).</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#receiveParticleEnergy(double,double)" class="member-name-link">receiveParticleEnergy</a><wbr>(double&nbsp;baseAmount,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#receiveParticleEnergy(double,double)" class="member-name-link">receiveParticleEnergy</a><wbr>(double&nbsp;baseAmount,
  double&nbsp;er)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Adds particle-based energy, applying the supplied ER multiplier.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#recordMissedBurst()" class="member-name-link">recordMissedBurst</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Records that the rotation requested a burst but current energy was
+insufficient.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#removeBuff(mechanics.buff.BuffId)" class="member-name-link">removeBuff</a><wbr>(<a href="../../mechanics/buff/BuffId.html" title="mechanics.buffの列挙クラス">BuffId</a>&nbsp;id)</code></div>
@@ -1211,12 +1232,22 @@ restore timestamps. Called between simulation episodes.</div>
 <h3>markBurstUsed</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">markBurstUsed</span><wbr><span class="parameters">(double&nbsp;currentTime)</span></div>
-<div class="block">Records that the burst was just used: zeroes current energy, snapshots
-the per-window energy subtotals, and starts the burst cooldown.</div>
+<div class="block">Records that the burst was just used: spends the current burst cost,
+snapshots the per-window energy subtotals, and starts the burst cooldown.</div>
 <dl class="notes">
 <dt>パラメータ:</dt>
 <dd><code>currentTime</code> - current simulation time</dd>
 </dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="recordMissedBurst()">
+<h3>recordMissedBurst</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">recordMissedBurst</span>()</div>
+<div class="block">Records that the rotation requested a burst but current energy was
+insufficient. This feeds ER calibration without executing the action.</div>
 </div>
 </section>
 </li>
@@ -1234,6 +1265,30 @@ the per-window energy subtotals, and starts the burst cooldown.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="getBurstEnergyMarkers()">
+<h3>getBurstEnergyMarkers</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;double[]&gt;</span>&nbsp;<span class="element-name">getBurstEnergyMarkers</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>report markers for successful burst uses</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getMissedBurstCost()">
+<h3>getMissedBurstCost</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getMissedBurstCost</span>()</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>total skipped burst cost recorded during this rotation</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="getEnergyCost()">
 <h3>getEnergyCost</h3>
 <div class="horizontal-scroll">
@@ -1241,6 +1296,21 @@ the per-window energy subtotals, and starts the burst cooldown.</div>
 <dl class="notes">
 <dt>戻り値:</dt>
 <dd>burst energy cost (the value the bar fills toward)</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="getMaxEnergy()">
+<h3>getMaxEnergy</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">double</span>&nbsp;<span class="element-name">getMaxEnergy</span>()</div>
+<div class="block">Returns the maximum energy bar value. Most characters use the same value
+for max energy and burst cost; characters with alternate burst costs can
+override this while keeping <a href="#getEnergyCost()"><code>getEnergyCost()</code></a> as the current cost.</div>
+<dl class="notes">
+<dt>戻り値:</dt>
+<dd>maximum energy stored on this character</dd>
 </dl>
 </div>
 </section>

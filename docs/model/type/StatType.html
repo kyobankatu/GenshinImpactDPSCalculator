@@ -83,6 +83,11 @@ loadScripts(document, 'script');</script>
 <li><a href="#PHYSICAL_DMG_BONUS" tabindex="0">PHYSICAL_DMG_BONUS</a></li>
 <li><a href="#HEALING_BONUS" tabindex="0">HEALING_BONUS</a></li>
 <li><a href="#ELECTRO_CHARGED_DMG_BONUS" tabindex="0">ELECTRO_CHARGED_DMG_BONUS</a></li>
+<li><a href="#BLOOM_DMG_BONUS" tabindex="0">BLOOM_DMG_BONUS</a></li>
+<li><a href="#HYPERBLOOM_DMG_BONUS" tabindex="0">HYPERBLOOM_DMG_BONUS</a></li>
+<li><a href="#BURGEON_DMG_BONUS" tabindex="0">BURGEON_DMG_BONUS</a></li>
+<li><a href="#AGGRAVATE_DMG_BONUS" tabindex="0">AGGRAVATE_DMG_BONUS</a></li>
+<li><a href="#SPREAD_DMG_BONUS" tabindex="0">SPREAD_DMG_BONUS</a></li>
 <li><a href="#LUNAR_CHARGED_DMG_BONUS" tabindex="0">LUNAR_CHARGED_DMG_BONUS</a></li>
 <li><a href="#LUNAR_BLOOM_DMG_BONUS" tabindex="0">LUNAR_BLOOM_DMG_BONUS</a></li>
 <li><a href="#LUNAR_CRYSTALLIZE_DMG_BONUS" tabindex="0">LUNAR_CRYSTALLIZE_DMG_BONUS</a></li>
@@ -177,146 +182,162 @@ mechanic) it must be added here first, then referenced from
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">列挙型定数</div>
 <div class="table-header col-last">説明</div>
-<div class="col-first even-row-color"><code><a href="#ANEMO_DMG_BONUS" class="member-name-link">ANEMO_DMG_BONUS</a></code></div>
+<div class="col-first even-row-color"><code><a href="#AGGRAVATE_DMG_BONUS" class="member-name-link">AGGRAVATE_DMG_BONUS</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">DMG bonus that applies specifically to Aggravate additive damage.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="#ANEMO_DMG_BONUS" class="member-name-link">ANEMO_DMG_BONUS</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Anemo DMG Bonus%, also the resistance map key for Anemo RES.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#ANEMO_RES_SHRED" class="member-name-link">ANEMO_RES_SHRED</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#ANEMO_RES_SHRED" class="member-name-link">ANEMO_RES_SHRED</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Anemo-specific RES Shred%.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#ATK_FLAT" class="member-name-link">ATK_FLAT</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#ATK_FLAT" class="member-name-link">ATK_FLAT</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Flat ATK bonus added after percent scaling.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#ATK_PERCENT" class="member-name-link">ATK_PERCENT</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#ATK_PERCENT" class="member-name-link">ATK_PERCENT</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Additive ATK percent bonus.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#ATK_SPD" class="member-name-link">ATK_SPD</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#ATK_SPD" class="member-name-link">ATK_SPD</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Attack speed bonus (multiplicative on animation duration).</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#BASE_ATK" class="member-name-link">BASE_ATK</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#BASE_ATK" class="member-name-link">BASE_ATK</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Character's base ATK (character base + weapon base).</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#BASE_DEF" class="member-name-link">BASE_DEF</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#BASE_DEF" class="member-name-link">BASE_DEF</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Character's base DEF from level/ascension.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#BASE_HP" class="member-name-link">BASE_HP</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#BASE_HP" class="member-name-link">BASE_HP</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Character's base HP from level/ascension.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#BURST_CRIT_RATE" class="member-name-link">BURST_CRIT_RATE</a></code></div>
+<div class="col-first odd-row-color"><code><a href="#BLOOM_DMG_BONUS" class="member-name-link">BLOOM_DMG_BONUS</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">DMG bonus that applies specifically to Bloom core explosions.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="#BURGEON_DMG_BONUS" class="member-name-link">BURGEON_DMG_BONUS</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">DMG bonus that applies specifically to Burgeon hits.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="#BURST_CRIT_RATE" class="member-name-link">BURST_CRIT_RATE</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Crit rate bonus that applies specifically to Elemental Burst hits.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#BURST_DMG_BONUS" class="member-name-link">BURST_DMG_BONUS</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#BURST_DMG_BONUS" class="member-name-link">BURST_DMG_BONUS</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">DMG bonus that applies to Elemental Burst hits.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#CD_REDUCTION" class="member-name-link">CD_REDUCTION</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#CD_REDUCTION" class="member-name-link">CD_REDUCTION</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Cooldown reduction% for character skills and bursts.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#CHARGED_ATTACK_DMG_BONUS" class="member-name-link">CHARGED_ATTACK_DMG_BONUS</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#CHARGED_ATTACK_DMG_BONUS" class="member-name-link">CHARGED_ATTACK_DMG_BONUS</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">DMG bonus that applies to Charged Attack hits.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#CRIT_DMG" class="member-name-link">CRIT_DMG</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#CRIT_DMG" class="member-name-link">CRIT_DMG</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Crit DMG as a decimal (e.g. 0.50 = 50 %).</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#CRIT_RATE" class="member-name-link">CRIT_RATE</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#CRIT_RATE" class="member-name-link">CRIT_RATE</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Crit rate as a decimal (e.g. 0.05 = 5 %).</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#CRYO_DMG_BONUS" class="member-name-link">CRYO_DMG_BONUS</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#CRYO_DMG_BONUS" class="member-name-link">CRYO_DMG_BONUS</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Cryo DMG Bonus%, also the resistance map key for Cryo RES.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#CRYO_RES_SHRED" class="member-name-link">CRYO_RES_SHRED</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#CRYO_RES_SHRED" class="member-name-link">CRYO_RES_SHRED</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Cryo-specific RES Shred%.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#DEF_FLAT" class="member-name-link">DEF_FLAT</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#DEF_FLAT" class="member-name-link">DEF_FLAT</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Flat DEF bonus added after percent scaling.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#DEF_IGNORE" class="member-name-link">DEF_IGNORE</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#DEF_IGNORE" class="member-name-link">DEF_IGNORE</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">DEF Ignore%; removes a portion of the enemy's effective DEF
 independently of DEF Shred (see DamageCalculator DEF formula).</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#DEF_PERCENT" class="member-name-link">DEF_PERCENT</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#DEF_PERCENT" class="member-name-link">DEF_PERCENT</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Additive DEF percent bonus.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#DENDRO_DMG_BONUS" class="member-name-link">DENDRO_DMG_BONUS</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#DENDRO_DMG_BONUS" class="member-name-link">DENDRO_DMG_BONUS</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Dendro DMG Bonus%, also the resistance map key for Dendro RES.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#DENDRO_RES_SHRED" class="member-name-link">DENDRO_RES_SHRED</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#DENDRO_RES_SHRED" class="member-name-link">DENDRO_RES_SHRED</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Dendro-specific RES Shred%.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#DMG_BONUS_ALL" class="member-name-link">DMG_BONUS_ALL</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#DMG_BONUS_ALL" class="member-name-link">DMG_BONUS_ALL</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Generic all-damage DMG bonus% applied to every damage instance.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#ELECTRO_CHARGED_DMG_BONUS" class="member-name-link">ELECTRO_CHARGED_DMG_BONUS</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#ELECTRO_CHARGED_DMG_BONUS" class="member-name-link">ELECTRO_CHARGED_DMG_BONUS</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">DMG bonus that applies specifically to Electro-Charged hits.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#ELECTRO_DMG_BONUS" class="member-name-link">ELECTRO_DMG_BONUS</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#ELECTRO_DMG_BONUS" class="member-name-link">ELECTRO_DMG_BONUS</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Electro DMG Bonus%, also the resistance map key for Electro RES.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#ELECTRO_RES_SHRED" class="member-name-link">ELECTRO_RES_SHRED</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#ELECTRO_RES_SHRED" class="member-name-link">ELECTRO_RES_SHRED</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Electro-specific RES Shred%.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#ELEMENTAL_MASTERY" class="member-name-link">ELEMENTAL_MASTERY</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#ELEMENTAL_MASTERY" class="member-name-link">ELEMENTAL_MASTERY</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Elemental Mastery flat value; amplifies reactions.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#ENERGY_RECHARGE" class="member-name-link">ENERGY_RECHARGE</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#ENERGY_RECHARGE" class="member-name-link">ENERGY_RECHARGE</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Energy Recharge as a decimal (e.g. 1.0 = 100 %).</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#FLAT_DMG_BONUS" class="member-name-link">FLAT_DMG_BONUS</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#FLAT_DMG_BONUS" class="member-name-link">FLAT_DMG_BONUS</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Flat damage added to the Additive Bonus step of the damage formula.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#GEO_DMG_BONUS" class="member-name-link">GEO_DMG_BONUS</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#GEO_DMG_BONUS" class="member-name-link">GEO_DMG_BONUS</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Geo DMG Bonus%, also the resistance map key for Geo RES.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#GEO_RES_SHRED" class="member-name-link">GEO_RES_SHRED</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#GEO_RES_SHRED" class="member-name-link">GEO_RES_SHRED</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Geo-specific RES Shred%.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#HEALING_BONUS" class="member-name-link">HEALING_BONUS</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#HEALING_BONUS" class="member-name-link">HEALING_BONUS</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Outgoing healing bonus%.</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#HP_FLAT" class="member-name-link">HP_FLAT</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#HP_FLAT" class="member-name-link">HP_FLAT</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Flat HP bonus added after percent scaling.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#HP_PERCENT" class="member-name-link">HP_PERCENT</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#HP_PERCENT" class="member-name-link">HP_PERCENT</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Additive HP percent bonus (e.g. from HP% sands).</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#HYDRO_DMG_BONUS" class="member-name-link">HYDRO_DMG_BONUS</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#HYDRO_DMG_BONUS" class="member-name-link">HYDRO_DMG_BONUS</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Hydro DMG Bonus%, also the resistance map key for Hydro RES.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#HYDRO_RES_SHRED" class="member-name-link">HYDRO_RES_SHRED</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#HYDRO_RES_SHRED" class="member-name-link">HYDRO_RES_SHRED</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Hydro-specific RES Shred%.</div>
+</div>
+<div class="col-first even-row-color"><code><a href="#HYPERBLOOM_DMG_BONUS" class="member-name-link">HYPERBLOOM_DMG_BONUS</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">DMG bonus that applies specifically to Hyperbloom hits.</div>
 </div>
 <div class="col-first odd-row-color"><code><a href="#LUNAR_BASE_BONUS" class="member-name-link">LUNAR_BASE_BONUS</a></code></div>
 <div class="col-last odd-row-color">
@@ -386,8 +407,12 @@ independently of DEF Shred (see DamageCalculator DEF formula).</div>
 <div class="col-last odd-row-color">
 <div class="block">DMG bonus that applies to Elemental Skill hits.</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#SWIRL_DMG_BONUS" class="member-name-link">SWIRL_DMG_BONUS</a></code></div>
+<div class="col-first even-row-color"><code><a href="#SPREAD_DMG_BONUS" class="member-name-link">SPREAD_DMG_BONUS</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">DMG bonus that applies specifically to Spread additive damage.</div>
+</div>
+<div class="col-first odd-row-color"><code><a href="#SWIRL_DMG_BONUS" class="member-name-link">SWIRL_DMG_BONUS</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">DMG bonus that applies to Swirl damage instances.</div>
 </div>
 </div>
@@ -654,6 +679,51 @@ independently of DEF Shred (see DamageCalculator DEF formula).</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="StatType.html" title="model.typeの列挙クラス">StatType</a></span>&nbsp;<span class="element-name">ELECTRO_CHARGED_DMG_BONUS</span></div>
 <div class="block">DMG bonus that applies specifically to Electro-Charged hits.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="BLOOM_DMG_BONUS">
+<h3>BLOOM_DMG_BONUS</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="StatType.html" title="model.typeの列挙クラス">StatType</a></span>&nbsp;<span class="element-name">BLOOM_DMG_BONUS</span></div>
+<div class="block">DMG bonus that applies specifically to Bloom core explosions.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="HYPERBLOOM_DMG_BONUS">
+<h3>HYPERBLOOM_DMG_BONUS</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="StatType.html" title="model.typeの列挙クラス">StatType</a></span>&nbsp;<span class="element-name">HYPERBLOOM_DMG_BONUS</span></div>
+<div class="block">DMG bonus that applies specifically to Hyperbloom hits.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="BURGEON_DMG_BONUS">
+<h3>BURGEON_DMG_BONUS</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="StatType.html" title="model.typeの列挙クラス">StatType</a></span>&nbsp;<span class="element-name">BURGEON_DMG_BONUS</span></div>
+<div class="block">DMG bonus that applies specifically to Burgeon hits.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="AGGRAVATE_DMG_BONUS">
+<h3>AGGRAVATE_DMG_BONUS</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="StatType.html" title="model.typeの列挙クラス">StatType</a></span>&nbsp;<span class="element-name">AGGRAVATE_DMG_BONUS</span></div>
+<div class="block">DMG bonus that applies specifically to Aggravate additive damage.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="SPREAD_DMG_BONUS">
+<h3>SPREAD_DMG_BONUS</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="StatType.html" title="model.typeの列挙クラス">StatType</a></span>&nbsp;<span class="element-name">SPREAD_DMG_BONUS</span></div>
+<div class="block">DMG bonus that applies specifically to Spread additive damage.</div>
 </div>
 </section>
 </li>

@@ -70,10 +70,15 @@ loadScripts(document, 'script');</script>
 <li><a href="#OVERLOADED" tabindex="0">OVERLOADED</a></li>
 <li><a href="#QUICKEN" tabindex="0">QUICKEN</a></li>
 <li><a href="#AGGRAVATE" tabindex="0">AGGRAVATE</a></li>
+<li><a href="#SPREAD" tabindex="0">SPREAD</a></li>
 <li><a href="#HYPERBLOOM" tabindex="0">HYPERBLOOM</a></li>
+<li><a href="#BURGEON" tabindex="0">BURGEON</a></li>
 <li><a href="#BLOOM" tabindex="0">BLOOM</a></li>
+<li><a href="#BURNING" tabindex="0">BURNING</a></li>
 <li><a href="#CRYSTALLIZE" tabindex="0">CRYSTALLIZE</a></li>
 <li><a href="#ELECTRO_CHARGED" tabindex="0">ELECTRO_CHARGED</a></li>
+<li><a href="#FROZEN" tabindex="0">FROZEN</a></li>
+<li><a href="#SHATTER" tabindex="0">SHATTER</a></li>
 <li><a href="#LUNAR_CHARGED" tabindex="0">LUNAR_CHARGED</a></li>
 <li><a href="#LUNAR_BLOOM" tabindex="0">LUNAR_BLOOM</a></li>
 <li><a href="#LUNAR_CRYSTALLIZE" tabindex="0">LUNAR_CRYSTALLIZE</a></li>
@@ -147,6 +152,10 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color">
 <div class="block">開花反応。</div>
 </div>
+<div class="col-first even-row-color"><code><a href="#BURGEON" class="member-name-link">BURGEON</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code><a href="#BURNING" class="member-name-link">BURNING</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code><a href="#CRYSTALLIZE" class="member-name-link">CRYSTALLIZE</a></code></div>
 <div class="col-last even-row-color">
 <div class="block">結晶反応。</div>
@@ -155,60 +164,66 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color">
 <div class="block">感電反応。</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#HYPERBLOOM" class="member-name-link">HYPERBLOOM</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first even-row-color"><code><a href="#FROZEN" class="member-name-link">FROZEN</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code><a href="#HYPERBLOOM" class="member-name-link">HYPERBLOOM</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">超開花反応。</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#LUNAR_BLOOM" class="member-name-link">LUNAR_BLOOM</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#LUNAR_BLOOM" class="member-name-link">LUNAR_BLOOM</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Lunar 拡張: 開花に対応する非公式反応。</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#LUNAR_CHARGED" class="member-name-link">LUNAR_CHARGED</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#LUNAR_CHARGED" class="member-name-link">LUNAR_CHARGED</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Lunar 拡張: 感電に対応する非公式反応。</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#LUNAR_CRYSTALLIZE" class="member-name-link">LUNAR_CRYSTALLIZE</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#LUNAR_CRYSTALLIZE" class="member-name-link">LUNAR_CRYSTALLIZE</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">Lunar 拡張: 結晶に対応する非公式反応。</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#MELT" class="member-name-link">MELT</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#MELT" class="member-name-link">MELT</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">溶解反応。</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#NONE" class="member-name-link">NONE</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#NONE" class="member-name-link">NONE</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">反応なし。</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#OTHER" class="member-name-link">OTHER</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#OTHER" class="member-name-link">OTHER</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">その他、未分類の反応。</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#OVERLOAD" class="member-name-link">OVERLOAD</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#OVERLOAD" class="member-name-link">OVERLOAD</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">過負荷反応 (新表記)。</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#OVERLOADED" class="member-name-link">OVERLOADED</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#OVERLOADED" class="member-name-link">OVERLOADED</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">過負荷反応 (旧表記)。</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#QUICKEN" class="member-name-link">QUICKEN</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#QUICKEN" class="member-name-link">QUICKEN</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">草元素付着 (原激化) 状態。</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#SUPERCONDUCT" class="member-name-link">SUPERCONDUCT</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#SHATTER" class="member-name-link">SHATTER</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code><a href="#SPREAD" class="member-name-link">SPREAD</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code><a href="#SUPERCONDUCT" class="member-name-link">SUPERCONDUCT</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">超電導反応。</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#SWIRL" class="member-name-link">SWIRL</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#SWIRL" class="member-name-link">SWIRL</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">拡散反応。</div>
 </div>
-<div class="col-first even-row-color"><code><a href="#THUNDERCLOUD_STRIKE" class="member-name-link">THUNDERCLOUD_STRIKE</a></code></div>
-<div class="col-last even-row-color">
+<div class="col-first odd-row-color"><code><a href="#THUNDERCLOUD_STRIKE" class="member-name-link">THUNDERCLOUD_STRIKE</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">雷霆万鈞 (Thundercloud Strike) による特殊変化反応。</div>
 </div>
-<div class="col-first odd-row-color"><code><a href="#VAPORIZE" class="member-name-link">VAPORIZE</a></code></div>
-<div class="col-last odd-row-color">
+<div class="col-first even-row-color"><code><a href="#VAPORIZE" class="member-name-link">VAPORIZE</a></code></div>
+<div class="col-last even-row-color">
 <div class="block">蒸発反応。</div>
 </div>
 </div>
@@ -353,6 +368,14 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="SPREAD">
+<h3>SPREAD</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a></span>&nbsp;<span class="element-name">SPREAD</span></div>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="HYPERBLOOM">
 <h3>HYPERBLOOM</h3>
 <div class="horizontal-scroll">
@@ -362,11 +385,27 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="BURGEON">
+<h3>BURGEON</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a></span>&nbsp;<span class="element-name">BURGEON</span></div>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="BLOOM">
 <h3>BLOOM</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a></span>&nbsp;<span class="element-name">BLOOM</span></div>
 <div class="block">開花反応。</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="BURNING">
+<h3>BURNING</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a></span>&nbsp;<span class="element-name">BURNING</span></div>
 </div>
 </section>
 </li>
@@ -385,6 +424,22 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a></span>&nbsp;<span class="element-name">ELECTRO_CHARGED</span></div>
 <div class="block">感電反応。</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="FROZEN">
+<h3>FROZEN</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a></span>&nbsp;<span class="element-name">FROZEN</span></div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="SHATTER">
+<h3>SHATTER</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type"><a href="ReactionResult.Kind.html" title="mechanics.reactionの列挙クラス">ReactionResult.Kind</a></span>&nbsp;<span class="element-name">SHATTER</span></div>
 </div>
 </section>
 </li>

@@ -63,11 +63,21 @@ loadScripts(document, 'script');</script>
 <li><a href="#id" tabindex="0">id</a></li>
 <li><a href="#domKey" tabindex="0">domKey</a></li>
 <li><a href="#displayName" tabindex="0">displayName</a></li>
+<li><a href="#element" tabindex="0">element</a></li>
+<li><a href="#level" tabindex="0">level</a></li>
+<li><a href="#constellation" tabindex="0">constellation</a></li>
+<li><a href="#weaponName" tabindex="0">weaponName</a></li>
+<li><a href="#weaponIconPath" tabindex="0">weaponIconPath</a></li>
+<li><a href="#hasWeaponIcon" tabindex="0">hasWeaponIcon</a></li>
+<li><a href="#artifactSets" tabindex="0">artifactSets</a></li>
+<li><a href="#faceImagePath" tabindex="0">faceImagePath</a></li>
+<li><a href="#hasFaceIcon" tabindex="0">hasFaceIcon</a></li>
+<li><a href="#faceFallbackText" tabindex="0">faceFallbackText</a></li>
 </ol>
 </li>
 <li><a href="#constructor-detail" tabindex="0">コンストラクタの詳細</a>
 <ol class="toc-list">
-<li><a href="#%3Cinit%3E(model.type.CharacterId,java.lang.String,java.lang.String)" tabindex="0">ReportCharacterView(CharacterId, String, String)</a></li>
+<li><a href="#%3Cinit%3E(model.type.CharacterId,java.lang.String,java.lang.String,model.type.Element,int,int,java.lang.String,java.lang.String,boolean,java.util.List,java.lang.String,boolean,java.lang.String)" tabindex="0">ReportCharacterView(CharacterId, String, String, Element, int, int, String, String, boolean, List, String, boolean, String)</a></li>
 </ol>
 </li>
 </ol>
@@ -103,6 +113,16 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">修飾子とタイプ</div>
 <div class="table-header col-second">フィールド</div>
 <div class="table-header col-last">説明</div>
+<div class="col-first even-row-color"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="ReportViewAdapter.ReportAssetView.html" title="visualization内のクラス">ReportViewAdapter.ReportAssetView</a>&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#artifactSets" class="member-name-link">artifactSets</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Equipped artifact set display data.</div>
+</div>
+<div class="col-first odd-row-color"><code>final int</code></div>
+<div class="col-second odd-row-color"><code><a href="#constellation" class="member-name-link">constellation</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Character constellation level, clamped to the valid 0-6 display range.</div>
+</div>
 <div class="col-first even-row-color"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
 <div class="col-second even-row-color"><code><a href="#displayName" class="member-name-link">displayName</a></code></div>
 <div class="col-last even-row-color">
@@ -113,10 +133,50 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color">
 <div class="block">DOM-safe key derived from <a href="#id"><code>id</code></a>.</div>
 </div>
-<div class="col-first even-row-color"><code>final <a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></code></div>
-<div class="col-second even-row-color"><code><a href="#id" class="member-name-link">id</a></code></div>
+<div class="col-first even-row-color"><code>final <a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a></code></div>
+<div class="col-second even-row-color"><code><a href="#element" class="member-name-link">element</a></code></div>
 <div class="col-last even-row-color">
+<div class="block">Primary element used for report color selection.</div>
+</div>
+<div class="col-first odd-row-color"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#faceFallbackText" class="member-name-link">faceFallbackText</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Deterministic text fallback used when no face image is available.</div>
+</div>
+<div class="col-first even-row-color"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#faceImagePath" class="member-name-link">faceImagePath</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Relative face image path from generated reports under <code>output/</code>.</div>
+</div>
+<div class="col-first odd-row-color"><code>final boolean</code></div>
+<div class="col-second odd-row-color"><code><a href="#hasFaceIcon" class="member-name-link">hasFaceIcon</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Whether the expected local face image exists.</div>
+</div>
+<div class="col-first even-row-color"><code>final boolean</code></div>
+<div class="col-second even-row-color"><code><a href="#hasWeaponIcon" class="member-name-link">hasWeaponIcon</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Whether the expected local weapon icon exists.</div>
+</div>
+<div class="col-first odd-row-color"><code>final <a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#id" class="member-name-link">id</a></code></div>
+<div class="col-last odd-row-color">
 <div class="block">Underlying character identifier.</div>
+</div>
+<div class="col-first even-row-color"><code>final int</code></div>
+<div class="col-second even-row-color"><code><a href="#level" class="member-name-link">level</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Standard character level used by the simulator's report assumptions.</div>
+</div>
+<div class="col-first odd-row-color"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#weaponIconPath" class="member-name-link">weaponIconPath</a></code></div>
+<div class="col-last odd-row-color">
+<div class="block">Relative equipped weapon icon path from generated reports under <code>output/</code>.</div>
+</div>
+<div class="col-first even-row-color"><code>final <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></code></div>
+<div class="col-second even-row-color"><code><a href="#weaponName" class="member-name-link">weaponName</a></code></div>
+<div class="col-last even-row-color">
+<div class="block">Equipped weapon display name.</div>
 </div>
 </div>
 </section>
@@ -129,9 +189,19 @@ loadScripts(document, 'script');</script>
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">コンストラクタ</div>
 <div class="table-header col-last">説明</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(model.type.CharacterId,java.lang.String,java.lang.String)" class="member-name-link">ReportCharacterView</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id,
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(model.type.CharacterId,java.lang.String,java.lang.String,model.type.Element,int,int,java.lang.String,java.lang.String,boolean,java.util.List,java.lang.String,boolean,java.lang.String)" class="member-name-link">ReportCharacterView</a><wbr>(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;domKey,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;displayName)</code></div>
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;displayName,
+ <a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element,
+ int&nbsp;level,
+ int&nbsp;constellation,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;weaponName,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;weaponIconPath,
+ boolean&nbsp;hasWeaponIcon,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportViewAdapter.ReportAssetView.html" title="visualization内のクラス">ReportViewAdapter.ReportAssetView</a>&gt;&nbsp;artifactSets,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;faceImagePath,
+ boolean&nbsp;hasFaceIcon,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;faceFallbackText)</code></div>
 <div class="col-last even-row-color">
 <div class="block">Creates a new character view.</div>
 </div>
@@ -183,6 +253,96 @@ loadScripts(document, 'script');</script>
 </div>
 </section>
 </li>
+<li>
+<section class="detail" id="element">
+<h3>element</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type"><a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a></span>&nbsp;<span class="element-name">element</span></div>
+<div class="block">Primary element used for report color selection.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="level">
+<h3>level</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">level</span></div>
+<div class="block">Standard character level used by the simulator's report assumptions.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="constellation">
+<h3>constellation</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">constellation</span></div>
+<div class="block">Character constellation level, clamped to the valid 0-6 display range.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="weaponName">
+<h3>weaponName</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">weaponName</span></div>
+<div class="block">Equipped weapon display name.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="weaponIconPath">
+<h3>weaponIconPath</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">weaponIconPath</span></div>
+<div class="block">Relative equipped weapon icon path from generated reports under <code>output/</code>.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="hasWeaponIcon">
+<h3>hasWeaponIcon</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">hasWeaponIcon</span></div>
+<div class="block">Whether the expected local weapon icon exists.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="artifactSets">
+<h3>artifactSets</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportViewAdapter.ReportAssetView.html" title="visualization内のクラス">ReportViewAdapter.ReportAssetView</a>&gt;</span>&nbsp;<span class="element-name">artifactSets</span></div>
+<div class="block">Equipped artifact set display data.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="faceImagePath">
+<h3>faceImagePath</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">faceImagePath</span></div>
+<div class="block">Relative face image path from generated reports under <code>output/</code>.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="hasFaceIcon">
+<h3>hasFaceIcon</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">hasFaceIcon</span></div>
+<div class="block">Whether the expected local face image exists.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="faceFallbackText">
+<h3>faceFallbackText</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a></span>&nbsp;<span class="element-name">faceFallbackText</span></div>
+<div class="block">Deterministic text fallback used when no face image is available.</div>
+</div>
+</section>
+</li>
 </ul>
 </section>
 </li>
@@ -192,18 +352,38 @@ loadScripts(document, 'script');</script>
 <h2>コンストラクタの詳細</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(model.type.CharacterId,java.lang.String,java.lang.String)">
+<section class="detail" id="&lt;init&gt;(model.type.CharacterId,java.lang.String,java.lang.String,model.type.Element,int,int,java.lang.String,java.lang.String,boolean,java.util.List,java.lang.String,boolean,java.lang.String)">
 <h3>ReportCharacterView</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">ReportCharacterView</span><wbr><span class="parameters">(<a href="../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&nbsp;id,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;domKey,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;displayName)</span></div>
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;displayName,
+ <a href="../model/type/Element.html" title="model.typeの列挙クラス">Element</a>&nbsp;element,
+ int&nbsp;level,
+ int&nbsp;constellation,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;weaponName,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;weaponIconPath,
+ boolean&nbsp;hasWeaponIcon,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ReportViewAdapter.ReportAssetView.html" title="visualization内のクラス">ReportViewAdapter.ReportAssetView</a>&gt;&nbsp;artifactSets,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;faceImagePath,
+ boolean&nbsp;hasFaceIcon,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/String.html" title="java.lang内のクラスまたはインタフェース" class="external-link">String</a>&nbsp;faceFallbackText)</span></div>
 <div class="block">Creates a new character view.</div>
 <dl class="notes">
 <dt>パラメータ:</dt>
 <dd><code>id</code> - underlying character identifier</dd>
 <dd><code>domKey</code> - DOM-safe key (typically <a href="ReportViewAdapter.html#domKey(model.type.CharacterId)"><code>ReportViewAdapter.domKey(CharacterId)</code></a>)</dd>
 <dd><code>displayName</code> - human-readable display name</dd>
+<dd><code>element</code> - primary element used for report color selection</dd>
+<dd><code>level</code> - standard character level used in the simulation</dd>
+<dd><code>constellation</code> - constellation level</dd>
+<dd><code>weaponName</code> - equipped weapon display name</dd>
+<dd><code>weaponIconPath</code> - relative weapon icon path for generated reports</dd>
+<dd><code>hasWeaponIcon</code> - whether the weapon icon exists locally</dd>
+<dd><code>artifactSets</code> - equipped artifact set display data</dd>
+<dd><code>faceImagePath</code> - relative face image path for generated reports</dd>
+<dd><code>hasFaceIcon</code> - whether the face image exists locally</dd>
+<dd><code>faceFallbackText</code> - deterministic fallback text</dd>
 </dl>
 </div>
 </section>

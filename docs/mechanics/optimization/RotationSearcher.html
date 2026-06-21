@@ -162,7 +162,7 @@ highest-damage rotation.</div>
 <div class="block">Recursively generates all permutations of the given list.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="ProfileLoader.ActionProfile.html" title="mechanics.optimization内のクラス">ProfileLoader.ActionProfile</a>&gt;&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#generateProfileCombinations(java.util.List,java.util.Map)" class="member-name-link">generateProfileCombinations</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&gt;&nbsp;names,
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#generateProfileCombinations(java.util.List,java.util.Map)" class="member-name-link">generateProfileCombinations</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&gt;&nbsp;characterIds,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ProfileLoader.ActionProfile.html" title="mechanics.optimization内のクラス">ProfileLoader.ActionProfile</a>&gt;&gt;&nbsp;availableProfiles)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Generates the Cartesian product of each character's available profiles.</div>
@@ -170,7 +170,7 @@ highest-damage rotation.</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#generateRecursive(java.util.List,java.util.Map,java.util.List,int,java.util.Map)" class="member-name-link">generateRecursive</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="ProfileLoader.ActionProfile.html" title="mechanics.optimization内のクラス">ProfileLoader.ActionProfile</a>&gt;&gt;&nbsp;result,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="ProfileLoader.ActionProfile.html" title="mechanics.optimization内のクラス">ProfileLoader.ActionProfile</a>&gt;&nbsp;current,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&gt;&nbsp;names,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&gt;&nbsp;characterIds,
  int&nbsp;index,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ProfileLoader.ActionProfile.html" title="mechanics.optimization内のクラス">ProfileLoader.ActionProfile</a>&gt;&gt;&nbsp;available)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -249,7 +249,7 @@ highest-damage rotation.
 <div class="block">Recursively generates all permutations of the given list.</div>
 <dl class="notes">
 <dt>パラメータ:</dt>
-<dd><code>original</code> - list of strings to permute</dd>
+<dd><code>original</code> - list of character ids to permute</dd>
 <dt>戻り値:</dt>
 <dd>all N! orderings of the input list</dd>
 </dl>
@@ -260,13 +260,13 @@ highest-damage rotation.
 <section class="detail" id="generateProfileCombinations(java.util.List,java.util.Map)">
 <h3>generateProfileCombinations</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="ProfileLoader.ActionProfile.html" title="mechanics.optimization内のクラス">ProfileLoader.ActionProfile</a>&gt;&gt;</span>&nbsp;<span class="element-name">generateProfileCombinations</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&gt;&nbsp;names,
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="ProfileLoader.ActionProfile.html" title="mechanics.optimization内のクラス">ProfileLoader.ActionProfile</a>&gt;&gt;</span>&nbsp;<span class="element-name">generateProfileCombinations</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&gt;&nbsp;characterIds,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ProfileLoader.ActionProfile.html" title="mechanics.optimization内のクラス">ProfileLoader.ActionProfile</a>&gt;&gt;&nbsp;availableProfiles)</span></div>
 <div class="block">Generates the Cartesian product of each character's available profiles.</div>
 <dl class="notes">
 <dt>パラメータ:</dt>
-<dd><code>names</code> - ordered list of character names</dd>
-<dd><code>availableProfiles</code> - map of character name to their loaded profiles</dd>
+<dd><code>characterIds</code> - ordered list of character ids</dd>
+<dd><code>availableProfiles</code> - map of character id to loaded profiles</dd>
 <dt>戻り値:</dt>
 <dd>all combinations where each character has exactly one profile selected</dd>
 </dl>
@@ -279,7 +279,7 @@ highest-damage rotation.
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">generateRecursive</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="ProfileLoader.ActionProfile.html" title="mechanics.optimization内のクラス">ProfileLoader.ActionProfile</a>&gt;&gt;&nbsp;result,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="ProfileLoader.ActionProfile.html" title="mechanics.optimization内のクラス">ProfileLoader.ActionProfile</a>&gt;&nbsp;current,
- <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&gt;&nbsp;names,
+ <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>&gt;&nbsp;characterIds,
  int&nbsp;index,
  <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html" title="java.util内のクラスまたはインタフェース" class="external-link">Map</a>&lt;<a href="../../model/type/CharacterId.html" title="model.typeの列挙クラス">CharacterId</a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html" title="java.util内のクラスまたはインタフェース" class="external-link">List</a>&lt;<a href="ProfileLoader.ActionProfile.html" title="mechanics.optimization内のクラス">ProfileLoader.ActionProfile</a>&gt;&gt;&nbsp;available)</span></div>
 <div class="block">Recursive helper that builds profile combinations by stepping through
@@ -288,7 +288,7 @@ characters in <code>names</code> one index at a time.</div>
 <dt>パラメータ:</dt>
 <dd><code>result</code> - accumulator for completed combinations</dd>
 <dd><code>current</code> - partially built combination for the current recursion frame</dd>
-<dd><code>names</code> - ordered list of all character names</dd>
+<dd><code>characterIds</code> - ordered list of all character ids</dd>
 <dd><code>index</code> - current character index being assigned</dd>
 <dd><code>available</code> - all available profiles per character</dd>
 </dl>
