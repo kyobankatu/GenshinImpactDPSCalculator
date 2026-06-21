@@ -36,7 +36,8 @@ public class EnergyAnalyzer {
             java.util.List<double[]> windows = c.getBurstEnergyWindows();
             double requiredER;
 
-            if (!windows.isEmpty()) {
+            double missedBurstCost = c.getMissedBurstCost();
+            if (!windows.isEmpty() || missedBurstCost > 0.0) {
                 // Global "start full, end full" model:
                 //   Characters pre-load one burst worth of energy, so the first burst is free.
                 //   Particles must cover all remaining burst costs (N-1 bursts) plus the final refill.
@@ -46,6 +47,7 @@ public class EnergyAnalyzer {
                 double totalBurstCost = 0;
                 for (double[] w : windows)
                     totalBurstCost += w[2];
+                totalBurstCost += missedBurstCost;
 
                 double totalFlat = c.getTotalFlatEnergy();
                 double totalParticles = c.getTotalParticleEnergy(); // all particles over full rotation

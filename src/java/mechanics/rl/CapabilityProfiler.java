@@ -465,7 +465,7 @@ public class CapabilityProfiler {
         CombatSimulator sim = simulatorSupplier.get();
         sim.setLoggingEnabled(false);
         for (Character character : sim.getPartyMembers()) {
-            character.receiveFlatEnergy(character.getEnergyCost());
+            character.receiveFlatEnergy(character.getMaxEnergy());
         }
         return sim;
     }
@@ -554,7 +554,7 @@ public class CapabilityProfiler {
         for (CharacterId id : config.partyOrder) {
             Character c = sim.getCharacter(id);
             if (c != null) {
-                max = Math.max(max, c.getEnergyCost());
+                max = Math.max(max, c.getMaxEnergy());
             }
         }
         return max;

@@ -61,9 +61,11 @@ public class ActionGateway {
             if (character.getCurrentEnergy() < character.getEnergyCost()) {
                 if (sim.isLoggingEnabled()) {
                     System.out.println(String.format(
-                            "[T=%.1f] WARNING: %s burst fired with insufficient energy (%.0f/%.0f)",
+                            "[T=%.1f] WARNING: %s burst skipped due to insufficient energy (%.0f/%.0f)",
                             sim.getCurrentTime(), charName, character.getCurrentEnergy(), character.getEnergyCost()));
                 }
+                character.recordMissedBurst();
+                return;
             }
         }
 

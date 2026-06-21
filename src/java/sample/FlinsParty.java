@@ -70,7 +70,7 @@ public class FlinsParty {
             CombatSimulator sim = createSimulator(optimization.erTargets, optimization.partyRolls);
 
             // Setup Stats Recorder
-            mechanics.analysis.StatsRecorder recorder = new mechanics.analysis.StatsRecorder(sim, 0.5);
+            mechanics.analysis.StatsRecorder recorder = new mechanics.analysis.StatsRecorder(sim, 0.1);
             recorder.startRecording();
 
             executeRotation(sim);

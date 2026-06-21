@@ -106,6 +106,15 @@ public class Flins extends Character
         return thunderousSymphonyActive ? 30 : 80;
     }
 
+    /**
+     * Flins' energy bar remains 80 even when Thunderous Symphony changes the
+     * current burst cost to 30.
+     */
+    @Override
+    public double getMaxEnergy() {
+        return 80;
+    }
+
     private boolean thunderousSymphonyActive = false;
 
     /**
@@ -163,6 +172,12 @@ public class Flins extends Character
             return 0.0;
         }
         return super.getBurstCDRemaining(currentTime);
+    }
+
+    @Override
+    public boolean canBurst(double currentTime) {
+        return getBurstCDRemaining(currentTime) <= 0.0
+                && getCurrentEnergy() >= getEnergyCost();
     }
 
     /**

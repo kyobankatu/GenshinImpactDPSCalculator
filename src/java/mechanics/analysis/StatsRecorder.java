@@ -118,7 +118,7 @@ public class StatsRecorder {
             }
             charBuffs.put(c.getCharacterId(), buffNames);
             charEnergyPercent.put(c.getCharacterId(),
-                    100.0 * c.getCurrentEnergy() / Math.max(1.0, c.getEnergyCost()));
+                    100.0 * c.getCurrentEnergy() / Math.max(1.0, c.getMaxEnergy()));
 
             Map<StatType, Double> statMap = new HashMap<>();
 

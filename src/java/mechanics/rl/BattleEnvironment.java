@@ -152,7 +152,7 @@ public class BattleEnvironment {
         }
         if (config.fillEnergyOnReset) {
             for (Character character : simulator.getPartyMembers()) {
-                character.receiveFlatEnergy(character.getEnergyCost());
+                character.receiveFlatEnergy(character.getMaxEnergy());
             }
         }
         lastSwapTime = -999.0;

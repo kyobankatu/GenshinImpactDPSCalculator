@@ -2,7 +2,9 @@ package sample;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import mechanics.analysis.EnergyAnalyzer;
 import mechanics.formula.ResistanceCalculator;
 import mechanics.reaction.ReactionCalculator;
 import mechanics.reaction.ReactionResult;
@@ -68,6 +70,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseE_LunarCrystallizeHarmonyCadence();
         testAccuracyPhaseF_RaidenResolveAndEnergyRegression();
         testAccuracyPhaseF_FlinsThundercloudConditionalHits();
+        testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost();
         testAccuracyPhaseF_ColumbinaGravityAndDewRegression();
         testAccuracyPhaseF_ArtifactLunarReactionBuffRegression();
         testAccuracyPhaseF_WeaponReactionBonusRegression();
@@ -837,6 +840,44 @@ public class ReactionRegressionTest {
                         + " (noCloud=" + noCloudMiddleHits[0] + ", cloud=" + cloudMiddleHits[0] + ")");
     }
 
+    private static void testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost() {
+        TestBurstCharacter gated = new TestBurstCharacter(60.0);
+        CombatSimulator gateSim = simulatorWithExistingCharacter(gated);
+        gated.restoreCurrentEnergy(59.0);
+
+        gateSim.performAction(CharacterId.SUCROSE, CharacterActionRequest.of(CharacterActionKey.BURST));
+
+        assertEquals(0, gated.burstCasts, "Burst should not execute below current energy cost");
+        assertClose(59.0, gated.getCurrentEnergy(), EPS, "Skipped burst should not consume energy");
+        assertClose(60.0, gated.getMissedBurstCost(), EPS, "Skipped burst cost should feed ER calibration");
+        Map<CharacterId, Double> missedBurstER = EnergyAnalyzer.calculateERRequirements(gateSim);
+        assertTrue(missedBurstER.get(CharacterId.SUCROSE) > 1.0,
+                "Missed burst should raise required ER above base when particle energy is absent");
+
+        gated.restoreCurrentEnergy(60.0);
+        gateSim.performAction(CharacterId.SUCROSE, CharacterActionRequest.of(CharacterActionKey.BURST));
+
+        assertEquals(1, gated.burstCasts, "Burst should execute at current energy cost");
+        assertClose(0.0, gated.getCurrentEnergy(), EPS, "Standard burst should spend its full cost");
+
+        model.character.Flins flins = new model.character.Flins(new TestWeapon(), blankArtifact());
+        CombatSimulator flinsSim = simulatorWithExistingCharacter(flins);
+        flins.restoreCurrentEnergy(80.0);
+
+        flinsSim.performAction(CharacterId.FLINS, CharacterActionRequest.of(CharacterActionKey.SKILL));
+        flinsSim.performAction(CharacterId.FLINS, CharacterActionRequest.of(CharacterActionKey.SKILL));
+        assertClose(80.0, flins.getMaxEnergy(), EPS, "Flins energy bar should remain 80 during special burst state");
+        assertClose(30.0, flins.getEnergyCost(), EPS, "Flins Thunderous Symphony burst should cost 30");
+
+        flinsSim.performAction(CharacterId.FLINS, CharacterActionRequest.of(CharacterActionKey.BURST));
+
+        assertClose(50.0, flins.getCurrentEnergy(), EPS,
+                "Flins special burst should spend 30 energy instead of draining the full bar");
+        flins.receiveFlatEnergy(40.0);
+        assertClose(80.0, flins.getCurrentEnergy(), EPS,
+                "Flins energy gain should still cap at the 80-energy bar");
+    }
+
     private static void testAccuracyPhaseF_ColumbinaGravityAndDewRegression() {
         model.character.Columbina columbina = new model.character.Columbina(new TestWeapon(), blankArtifact());
         CombatSimulator sim = simulatorWithExistingCharacter(columbina);
@@ -1031,6 +1072,41 @@ public class ReactionRegressionTest {
         @Override
         public boolean isLunarCharacter() {
             return lunar;
+        }
+    }
+
+    private static final class TestBurstCharacter extends Character {
+        private int burstCasts = 0;
+        private final double energyCost;
+
+        private TestBurstCharacter(double energyCost) {
+            this.name = "Burst Gate Tester";
+            this.characterId = CharacterId.SUCROSE;
+            this.element = Element.ANEMO;
+            this.weapon = new TestWeapon();
+            this.artifacts = new ArtifactSet[0];
+            this.energyCost = energyCost;
+            this.baseStats.set(StatType.BASE_HP, 10000.0);
+            this.baseStats.set(StatType.BASE_ATK, 1000.0);
+            this.baseStats.set(StatType.BASE_DEF, 700.0);
+            setBurstCD(0.0);
+        }
+
+        @Override
+        public void applyPassive(StatsContainer currentStats) {
+        }
+
+        @Override
+        public double getEnergyCost() {
+            return energyCost;
+        }
+
+        @Override
+        public void onAction(CharacterActionRequest request, CombatSimulator sim) {
+            if (request.getKey() == CharacterActionKey.BURST) {
+                burstCasts++;
+                markBurstUsed(sim.getCurrentTime());
+            }
         }
     }
 

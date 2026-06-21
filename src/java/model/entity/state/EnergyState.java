@@ -23,7 +23,9 @@ public class EnergyState {
     private double totalScaledParticleEnergyGained = 0.0;
     private double particleEnergyThisWindow = 0.0;
     private double flatEnergyThisWindow = 0.0;
+    private double missedBurstCost = 0.0;
     private final List<double[]> burstEnergyWindows = new ArrayList<>();
+    private final List<double[]> burstEnergyMarkers = new ArrayList<>();
 
     /**
      * Adds a generic energy amount, clamped to the maximum.
@@ -75,20 +77,36 @@ public class EnergyState {
         totalScaledParticleEnergyGained = 0.0;
         particleEnergyThisWindow = 0.0;
         flatEnergyThisWindow = 0.0;
+        missedBurstCost = 0.0;
         burstEnergyWindows.clear();
+        burstEnergyMarkers.clear();
     }
 
     /**
      * Records that the burst has been used: snapshots the per-window subtotals,
-     * resets them, and drains current energy to zero.
+     * resets them, and spends the supplied burst cost.
      *
-     * @param burstCost burst energy cost (recorded in the window entry)
+     * @param burstCost   burst energy cost (recorded in the window entry)
+     * @param maxEnergy   maximum energy bar value
+     * @param currentTime simulation time of the burst use
      */
-    public void markBurstUsed(double burstCost) {
+    public void markBurstUsed(double burstCost, double maxEnergy, double currentTime) {
         burstEnergyWindows.add(new double[] { particleEnergyThisWindow, flatEnergyThisWindow, burstCost });
+        double preBurstPercent = maxEnergy > 0.0 ? Math.min(100.0, currentEnergy / maxEnergy * 100.0) : 0.0;
+        burstEnergyMarkers.add(new double[] { currentTime, preBurstPercent });
         particleEnergyThisWindow = 0.0;
         flatEnergyThisWindow = 0.0;
-        currentEnergy = 0.0;
+        currentEnergy = Math.max(0.0, Math.min(maxEnergy, currentEnergy - burstCost));
+    }
+
+    /**
+     * Records a scripted burst request that could not be executed because the
+     * current energy was below the requested cost.
+     *
+     * @param burstCost burst cost that the rotation attempted to spend
+     */
+    public void recordMissedBurst(double burstCost) {
+        missedBurstCost += burstCost;
     }
 
     /**
@@ -147,5 +165,21 @@ public class EnergyState {
      */
     public List<double[]> getBurstEnergyWindows() {
         return burstEnergyWindows;
+    }
+
+    /**
+     * Returns report markers for successfully used bursts.
+     *
+     * @return list of {@code [time, preBurstEnergyPercent]} entries
+     */
+    public List<double[]> getBurstEnergyMarkers() {
+        return burstEnergyMarkers;
+    }
+
+    /**
+     * @return total burst cost requested by the rotation but skipped for energy
+     */
+    public double getMissedBurstCost() {
+        return missedBurstCost;
     }
 }

@@ -70,7 +70,7 @@ final class ReportDataBuilder {
         List<ReportData.ReportArtifactRollView> artifactRolls = artifactRolls(sim);
         Map<String, List<ReportData.ReportMetricView>> actionDamageTotalsByActor = metricTotalsByActorAction(
                 safeRecords);
-        Map<String, List<String>> energySeries = energySeries(reportStatsHistory, characters);
+        Map<String, List<String>> energySeries = energySeries(reportStatsHistory, characters, sim);
         List<ReportData.ReportBuffUptimeView> buffUptime = buffUptime(reportStatsHistory, characters, chartEndTime);
 
         return new ReportData(
@@ -267,7 +267,8 @@ final class ReportDataBuilder {
 
     private static Map<String, List<String>> energySeries(
             List<ReportViewAdapter.ReportStatsSnapshot> statsHistory,
-            List<ReportViewAdapter.ReportCharacterView> characters) {
+            List<ReportViewAdapter.ReportCharacterView> characters,
+            CombatSimulator sim) {
         Map<String, List<String>> series = new LinkedHashMap<>();
         for (ReportViewAdapter.ReportCharacterView character : characters) {
             List<String> points = new ArrayList<>();
@@ -276,9 +277,35 @@ final class ReportDataBuilder {
                 double value = stats != null ? stats.energy : 0.0;
                 points.add(String.format("{x: %.2f, y: %.1f}", snapshot.time, value));
             }
-            series.put(character.displayName, downsample(points, 600));
+            Character runtimeCharacter = sim != null ? sim.getCharacter(character.id) : null;
+            if (runtimeCharacter != null) {
+                for (double[] marker : runtimeCharacter.getBurstEnergyMarkers()) {
+                    points.add(String.format("{x: %.2f, y: %.1f}", Math.max(0.0, marker[0] - 0.01), marker[1]));
+                }
+            }
+            points.sort(Comparator.comparingDouble(ReportDataBuilder::pointTime));
+            series.put(character.displayName, downsample(points, 1200));
         }
         return series;
+    }
+
+    private static double pointTime(String point) {
+        int start = point.indexOf("x: ");
+        if (start < 0) {
+            return 0.0;
+        }
+        int end = point.indexOf(',', start);
+        if (end < 0) {
+            end = point.indexOf('}', start);
+        }
+        if (end < 0) {
+            return 0.0;
+        }
+        try {
+            return Double.parseDouble(point.substring(start + 3, end).trim());
+        } catch (NumberFormatException ex) {
+            return 0.0;
+        }
     }
 
     private static List<ReportData.ReportBuffUptimeView> buffUptime(

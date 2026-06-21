@@ -278,7 +278,7 @@ public abstract class Character {
      * @param amount energy to add
      */
     public void receiveEnergy(double amount) {
-        energyState.receiveEnergy(amount, getEnergyCost());
+        energyState.receiveEnergy(amount, getMaxEnergy());
     }
 
     /** @return current energy on this character */
@@ -293,7 +293,7 @@ public abstract class Character {
      * @param er         Energy Recharge multiplier
      */
     public void receiveParticleEnergy(double baseAmount, double er) {
-        energyState.receiveParticleEnergy(baseAmount, er, getEnergyCost());
+        energyState.receiveParticleEnergy(baseAmount, er, getMaxEnergy());
     }
 
     /**
@@ -302,7 +302,7 @@ public abstract class Character {
      * @param amount flat energy amount
      */
     public void receiveFlatEnergy(double amount) {
-        energyState.receiveFlatEnergy(amount, getEnergyCost());
+        energyState.receiveFlatEnergy(amount, getMaxEnergy());
     }
 
     /** @return cumulative particle energy received before ER scaling */
@@ -335,7 +335,7 @@ public abstract class Character {
      * restore timestamps. Called between simulation episodes.
      */
     public void resetEnergyStats() {
-        energyState.reset(getEnergyCost());
+        energyState.reset(getMaxEnergy());
         cooldownState.resetChargeState();
     }
 
@@ -422,14 +422,22 @@ public abstract class Character {
     }
 
     /**
-     * Records that the burst was just used: zeroes current energy, snapshots
-     * the per-window energy subtotals, and starts the burst cooldown.
+     * Records that the burst was just used: spends the current burst cost,
+     * snapshots the per-window energy subtotals, and starts the burst cooldown.
      *
      * @param currentTime current simulation time
      */
     public void markBurstUsed(double currentTime) {
-        energyState.markBurstUsed(getEnergyCost());
+        energyState.markBurstUsed(getEnergyCost(), getMaxEnergy(), currentTime);
         cooldownState.markBurstUsed(currentTime);
+    }
+
+    /**
+     * Records that the rotation requested a burst but current energy was
+     * insufficient. This feeds ER calibration without executing the action.
+     */
+    public void recordMissedBurst() {
+        energyState.recordMissedBurst(getEnergyCost());
     }
 
     /**
@@ -440,8 +448,29 @@ public abstract class Character {
         return energyState.getBurstEnergyWindows();
     }
 
+    /** @return report markers for successful burst uses */
+    public java.util.List<double[]> getBurstEnergyMarkers() {
+        return energyState.getBurstEnergyMarkers();
+    }
+
+    /** @return total skipped burst cost recorded during this rotation */
+    public double getMissedBurstCost() {
+        return energyState.getMissedBurstCost();
+    }
+
     /** @return burst energy cost (the value the bar fills toward) */
     public abstract double getEnergyCost();
+
+    /**
+     * Returns the maximum energy bar value. Most characters use the same value
+     * for max energy and burst cost; characters with alternate burst costs can
+     * override this while keeping {@link #getEnergyCost()} as the current cost.
+     *
+     * @return maximum energy stored on this character
+     */
+    public double getMaxEnergy() {
+        return getEnergyCost();
+    }
 
     /** @return configured skill cooldown length */
     public double getSkillCD() {

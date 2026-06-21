@@ -265,7 +265,7 @@ public class RotationSearcher {
 
             // Force Energy Full
             for (Character c : sim.getPartyMembers())
-                c.receiveFlatEnergy(c.getEnergyCost());
+                c.receiveFlatEnergy(c.getMaxEnergy());
 
             while (sim.getCurrentTime() < maxTime) {
                 // 1. Swap
