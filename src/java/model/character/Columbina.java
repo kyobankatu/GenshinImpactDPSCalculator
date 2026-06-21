@@ -83,8 +83,7 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
     private double rippleEndTime = 0;
     private double domainEndTime = 0;
 
-    // Constellation
-    private int constellation = 0;
+    // Constellation state
     private double c1SkillCDNextTime = 0; // 15s CD for C1 on-skill interference trigger
     private double lunarBrillianceEndTime = -1; // C2: Lunar Brilliance expiry time
 

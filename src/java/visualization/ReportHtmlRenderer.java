@@ -101,6 +101,16 @@ final class ReportHtmlRenderer {
         sb.append(".character-panel-title { min-width: 0; }\n");
         sb.append(".character-panel-title h3 { margin-bottom: 2px; overflow-wrap: anywhere; }\n");
         sb.append(".character-panel-title .chart-note { margin: 0; }\n");
+        sb.append(".character-loadout { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 0 0 12px; }\n");
+        sb.append(".loadout-card { background: #15191f; border: 1px solid var(--line); border-radius: 6px; padding: 9px 10px; min-width: 0; }\n");
+        sb.append(".loadout-label { color: var(--muted); font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0; margin-bottom: 4px; }\n");
+        sb.append(".loadout-value { color: var(--text); font-weight: 700; overflow-wrap: anywhere; }\n");
+        sb.append(".loadout-with-icon { display: grid; grid-template-columns: 42px minmax(0, 1fr); align-items: center; gap: 9px; }\n");
+        sb.append(".loadout-icon { width: 42px; height: 42px; object-fit: contain; border-radius: 6px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); }\n");
+        sb.append(".artifact-chip-list { display: flex; flex-wrap: wrap; gap: 6px; }\n");
+        sb.append(".artifact-chip { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; border: 1px solid rgba(255,255,255,0.13); border-radius: 999px; padding: 3px 8px 3px 4px; background: rgba(255,255,255,0.05); color: var(--text); font-size: 0.82rem; overflow-wrap: anywhere; }\n");
+        sb.append(".artifact-chip.no-icon { padding-left: 8px; }\n");
+        sb.append(".artifact-icon { width: 24px; height: 24px; object-fit: contain; border-radius: 50%; background: rgba(255,255,255,0.06); flex: 0 0 auto; }\n");
         sb.append(".character-panel-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }\n");
         sb.append(".character-panel-metric { background: #1d2228; border: 1px solid var(--line); border-radius: 6px; padding: 10px; min-width: 0; }\n");
         sb.append(".character-panel-metric .metric-value { font-size: 1.05rem; }\n");
@@ -189,7 +199,7 @@ final class ReportHtmlRenderer {
                         .orElse("-");
         String topReaction = !data.reactionDamageTotals.isEmpty()
                 ? data.reactionDamageTotals.get(0).label
-                : (!data.reactionLabeledDamageTotals.isEmpty() ? data.reactionLabeledDamageTotals.get(0).label : "-");
+                : "-";
         double maxHit = data.records.stream().mapToDouble(record -> record.damage).max().orElse(0.0);
 
         sb.append("<section class='summary-grid'>\n");
@@ -246,8 +256,8 @@ final class ReportHtmlRenderer {
         sb.append("</div>\n");
 
         sb.append("<div class='row'>\n");
-        appendChartPanel(sb, "Reaction Damage", "reactionPie",
-                "Transformative reaction damage only. Additive/direct labels are separated below when exact bonus damage is unavailable.",
+        appendChartPanel(sb, "Elemental Reaction Damage", "reactionPie",
+                "Only separately recorded elemental reaction damage is included. Direct hits with reaction labels remain in Timeline and Action Damage.",
                 false);
         appendChartPanel(sb, "Action Damage", "actionBar", "Top action labels by recorded damage.", false);
         sb.append("</div>\n");
@@ -263,14 +273,6 @@ final class ReportHtmlRenderer {
                 "Variable sampled active-buff labels are prioritized; always-on labels are hidden when variable entries exist.",
                 true);
         sb.append("</div>\n");
-
-        if (!data.reactionLabeledDamageTotals.isEmpty()) {
-            sb.append("<div class='row'>\n");
-            appendChartPanel(sb, "Reaction-labeled Direct Damage", "reactionLabeledBar",
-                    "Full hit damage for reaction-labeled events where the additive bonus is not separately available.",
-                    false);
-            sb.append("</div>\n");
-        }
     }
 
     private static void appendCharacterDetails(StringBuilder sb, ReportData data) {
@@ -305,7 +307,7 @@ final class ReportHtmlRenderer {
             sb.append("<span class='character-tab-text'><span class='character-tab-name'>")
                     .append(escapeHtml(detail.character.displayName))
                     .append("</span><span class='character-tab-meta'>")
-                    .append(escapeHtml(String.format("%,.0f dmg / %.1f%%", detail.totalDamage,
+                    .append(escapeHtml(String.format(" %,.0f dmg / %.1f%%", detail.totalDamage,
                             detail.damageSharePercent)))
                     .append("</span></span>\n");
             sb.append("</button>\n");
@@ -338,6 +340,7 @@ final class ReportHtmlRenderer {
                     .append(escapeHtml(String.format("%,.0f total damage", detail.totalDamage)))
                     .append("</p></div>\n");
             sb.append("</div>\n");
+            appendCharacterLoadout(sb, detail.character);
             sb.append("<div class='character-panel-metrics'>\n");
             appendCharacterPanelMetric(sb, "Damage", String.format("%,.0f", detail.totalDamage), "accent");
             appendCharacterPanelMetric(sb, "DPS", String.format("%,.0f", detail.dpsContribution), "danger");
@@ -356,6 +359,66 @@ final class ReportHtmlRenderer {
             sb.append("</section>\n");
         }
         sb.append("</section>\n");
+    }
+
+    private static void appendCharacterLoadout(StringBuilder sb, ReportViewAdapter.ReportCharacterView character) {
+        sb.append("<div class='character-loadout'>\n");
+        appendLoadoutCard(sb, "Level", "Lv. " + character.level);
+        appendLoadoutCard(sb, "Constellation", "C" + character.constellation);
+        appendWeaponLoadoutCard(sb, character);
+        sb.append("<div class='loadout-card'>\n");
+        sb.append("<div class='loadout-label'>Artifacts</div>\n");
+        if (character.artifactSets.isEmpty()) {
+            sb.append("<div class='loadout-value'>-</div>\n");
+        } else {
+            sb.append("<div class='artifact-chip-list'>\n");
+            for (ReportViewAdapter.ReportAssetView artifactSet : character.artifactSets) {
+                sb.append("<span class='artifact-chip");
+                if (!artifactSet.hasIcon) {
+                    sb.append(" no-icon");
+                }
+                sb.append("'>");
+                if (artifactSet.hasIcon) {
+                    sb.append("<img class='artifact-icon' src='")
+                            .append(escapeAttr(artifactSet.imagePath))
+                            .append("' alt='")
+                            .append(escapeAttr(artifactSet.displayName + " flower icon"))
+                            .append("'>");
+                }
+                sb.append("<span>")
+                        .append(escapeHtml(artifactSet.displayName))
+                        .append("</span>")
+                        .append("</span>\n");
+            }
+            sb.append("</div>\n");
+        }
+        sb.append("</div>\n");
+        sb.append("</div>\n");
+    }
+
+    private static void appendWeaponLoadoutCard(StringBuilder sb, ReportViewAdapter.ReportCharacterView character) {
+        sb.append("<div class='loadout-card'>\n");
+        sb.append("<div class='loadout-label'>Weapon</div>\n");
+        if (character.hasWeaponIcon) {
+            sb.append("<div class='loadout-with-icon'>\n");
+            sb.append("<img class='loadout-icon weapon-icon' src='")
+                    .append(escapeAttr(character.weaponIconPath))
+                    .append("' alt='")
+                    .append(escapeAttr(character.weaponName + " icon"))
+                    .append("'>\n");
+            sb.append("<div class='loadout-value'>").append(escapeHtml(character.weaponName)).append("</div>\n");
+            sb.append("</div>\n");
+        } else {
+            sb.append("<div class='loadout-value'>").append(escapeHtml(character.weaponName)).append("</div>\n");
+        }
+        sb.append("</div>\n");
+    }
+
+    private static void appendLoadoutCard(StringBuilder sb, String label, String value) {
+        sb.append("<div class='loadout-card'>\n");
+        sb.append("<div class='loadout-label'>").append(escapeHtml(label)).append("</div>\n");
+        sb.append("<div class='loadout-value'>").append(escapeHtml(value)).append("</div>\n");
+        sb.append("</div>\n");
     }
 
     private static void appendCharacterPanelMetric(StringBuilder sb, String label, String value, String valueClass) {
@@ -876,11 +939,6 @@ final class ReportHtmlRenderer {
         appendLineChart(sb, "energyTimeline", energyDatasets(data), "Energy %", false);
         appendBarChart(sb, "buffUptime", buffLabels(data), buffValues(data), fallbackColors(data.buffUptime.size()),
                 "Uptime %");
-        if (!data.reactionLabeledDamageTotals.isEmpty()) {
-            appendBarChart(sb, "reactionLabeledBar", metricLabels(data.reactionLabeledDamageTotals),
-                    metricValues(data.reactionLabeledDamageTotals),
-                    fallbackColors(data.reactionLabeledDamageTotals.size()), "Reaction-labeled Damage");
-        }
     }
 
     private static void appendPieChart(

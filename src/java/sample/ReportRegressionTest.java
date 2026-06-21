@@ -41,6 +41,8 @@ public class ReportRegressionTest {
                 1234.0, "None", 0.0, aura, "formula <tag> & '</script>'"));
         records.add(new SimulationRecord(1.0, "Tester <Actor>", "Reaction Hit", 2500.0,
                 "Aggravate", 0.0, aura, null));
+        records.add(new SimulationRecord(1.2, "Tester <Actor>", "Electro-Charged Tick", 999.0,
+                "Electro-Charged Tick", 999.0, aura, null));
         records.add(new SimulationRecord(1.5, "Thundercloud", "Lunar-Charged Tick", 3000.0,
                 "Lunar-Charged", 3000.0, aura, null));
 
@@ -69,6 +71,7 @@ public class ReportRegressionTest {
                         new StatsSnapshot(1.0, statMap, laterBuffMap, energy)));
 
         String html = Files.readString(Paths.get("output/report_regression.html"), StandardCharsets.UTF_8);
+        assertContains(html, "Elemental Reaction Damage", "unified reaction chart title");
         assertContains(html, "id='reactionPie'", "reaction chart container");
         assertContains(html, "id='actionBar'", "action chart container");
         assertContains(html, "id='actionActorFilter'", "action actor filter");
@@ -79,7 +82,15 @@ public class ReportRegressionTest {
         assertContains(html, "id='buffUptime'", "buff uptime chart container");
         assertContains(html, "artifact-rolls", "artifact rolls table class");
         assertContains(html, "Dynamic Buff", "variable buff uptime label");
-        assertContains(html, "Reaction-labeled Direct Damage", "reaction-labeled direct damage section");
+        assertContains(html, "Only separately recorded elemental reaction damage is included",
+                "reaction chart scope note");
+        assertContains(html, "Lunar-Charged", "explicit reaction damage label");
+        assertContains(html, "createPieChart('reactionPie', ['Lunar-Charged','Electro-Charged']",
+                "unified reaction chart labels");
+        assertNotContains(html, "Reaction-labeled Direct Damage", "removed reaction-labeled direct damage section");
+        assertNotContains(html, "Reaction-labeled Damage", "removed reaction-labeled direct damage chart script");
+        assertNotContains(html, "createPieChart('reactionPie', ['Lunar-Charged','Electro-Charged','Aggravate'",
+                "reaction-labeled direct hit excluded from reaction chart");
         assertContains(html, "&lt;Actor&gt;", "HTML-escaped actor label");
         assertContains(html, "\\u003C/script\\u003E", "JS-escaped script close tag");
         assertNotContains(html, "Attack '</script><script>", "raw script-breaking action label");
@@ -129,6 +140,13 @@ public class ReportRegressionTest {
         assertContains(html, "aria-selected='true'", "default selected character tab");
         assertContains(html, "id='character-panel-unknown' aria-labelledby='character-tab-unknown' data-character-panel='unknown' style='--char-color:#AAAAAA' hidden",
                 "inactive character panel hidden by default");
+        assertContains(html, "class='character-loadout'", "character loadout block");
+        assertContains(html, "Lv. 90", "character level display");
+        assertContains(html, "C0", "character constellation display");
+        assertContains(html, "../config/weapons/PrimordialJadeWingedSpear/icon.png", "character weapon icon path");
+        assertContains(html, "Primordial Jade Winged-Spear", "character weapon display");
+        assertContains(html, "../config/artifacts/ViridescentVenerer/flower.png", "character artifact icon path");
+        assertContains(html, "Viridescent Venerer", "character artifact set display");
         assertContains(html, "class='character-widget character-action-damage'", "character action damage widget");
         assertContains(html, "Safe Action", "per-character action damage label");
         assertContains(html, "class='character-widget character-artifact-rolls'", "character artifact rolls widget");
@@ -146,8 +164,8 @@ public class ReportRegressionTest {
         assertContains(html, "class='face-fallback'", "missing icon fallback markup");
         assertContains(html, "Tester &lt;Icon&gt;", "HTML-escaped unsafe character name");
         assertContains(html, "\\u003CIcon\\u003E", "JS-escaped unsafe character name");
-        assertContains(html, "Tester%20%3CIcon%3E%20%27%3C%2Fscript%3E%27/face.png",
-                "URL-encoded missing face path");
+        assertContains(html, "../config/characters/TesterIconScript/face.png",
+                "normalized missing face path");
         assertNotContains(html, "Unsafe Action </script>", "raw unsafe action label");
     }
 
@@ -176,8 +194,8 @@ public class ReportRegressionTest {
             this.characterId = id;
             this.name = displayName;
             this.element = id == CharacterId.SUCROSE ? Element.ANEMO : null;
-            this.weapon = new Weapon("Report Test Weapon", new StatsContainer());
-            this.artifacts = new ArtifactSet[0];
+            this.weapon = new Weapon("Primordial Jade Winged-Spear", new StatsContainer());
+            this.artifacts = new ArtifactSet[] { new ArtifactSet("Viridescent Venerer", new StatsContainer()) };
             this.baseStats.set(StatType.BASE_HP, 10000.0);
             this.baseStats.set(StatType.BASE_ATK, 1000.0);
             this.baseStats.set(StatType.BASE_DEF, 700.0);

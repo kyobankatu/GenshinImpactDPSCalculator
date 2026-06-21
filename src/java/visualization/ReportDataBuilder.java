@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import model.entity.Character;
 import model.type.Element;
@@ -16,6 +17,28 @@ import simulation.CombatSimulator;
  * Converts simulation records and runtime state into report-ready aggregates.
  */
 final class ReportDataBuilder {
+    private static final Set<String> ELEMENTAL_REACTION_LABELS = Set.of(
+            "Vaporize",
+            "Melt",
+            "Swirl",
+            "Swirl-Pyro",
+            "Swirl-Hydro",
+            "Swirl-Electro",
+            "Swirl-Cryo",
+            "Electro-Charged",
+            "Overloaded",
+            "Superconduct",
+            "Shatter",
+            "Burning",
+            "Bloom",
+            "Hyperbloom",
+            "Burgeon",
+            "Aggravate",
+            "Spread",
+            "Lunar-Charged",
+            "Lunar-Bloom",
+            "Lunar-Crystallize");
+
     private ReportDataBuilder() {
     }
 
@@ -69,8 +92,7 @@ final class ReportDataBuilder {
                 cumulativeDamageSeries,
                 metricTotalsByAction(safeRecords),
                 actionDamageTotalsByActor,
-                transformativeReactionTotals(safeRecords),
-                reactionLabeledDamageTotals(safeRecords),
+                elementalReactionDamageTotals(safeRecords),
                 rollingDpsSeries(safeRecords, chartEndTime, 5.0, 0.5),
                 auraSeries(safeRecords, chartEndTime),
                 energySeries,
@@ -130,30 +152,47 @@ final class ReportDataBuilder {
         return views;
     }
 
-    private static List<ReportData.ReportMetricView> transformativeReactionTotals(List<SimulationRecord> records) {
+    private static List<ReportData.ReportMetricView> elementalReactionDamageTotals(List<SimulationRecord> records) {
         Map<String, Double> totals = new HashMap<>();
         for (SimulationRecord record : records) {
-            if (!hasReactionLabel(record) || record.reactionDamage <= 0.0) {
+            if (!hasElementalReactionDamage(record)) {
                 continue;
             }
-            totals.put(record.reactionType, totals.getOrDefault(record.reactionType, 0.0) + record.reactionDamage);
+            String reactionLabel = normalizedElementalReactionLabel(record.reactionType);
+            totals.put(reactionLabel, totals.getOrDefault(reactionLabel, 0.0) + record.reactionDamage);
         }
         return sortedMetrics(totals, 16);
     }
 
-    private static List<ReportData.ReportMetricView> reactionLabeledDamageTotals(List<SimulationRecord> records) {
-        Map<String, Double> totals = new HashMap<>();
-        for (SimulationRecord record : records) {
-            if (!hasReactionLabel(record) || record.reactionDamage > 0.0 || record.damage <= 0.0) {
-                continue;
-            }
-            totals.put(record.reactionType, totals.getOrDefault(record.reactionType, 0.0) + record.damage);
-        }
-        return sortedMetrics(totals, 16);
+    static boolean hasElementalReactionDamage(SimulationRecord record) {
+        return record != null
+                && record.reactionDamage > 0.0
+                && normalizedElementalReactionLabel(record.reactionType) != null;
     }
 
-    private static boolean hasReactionLabel(SimulationRecord record) {
-        return record.reactionType != null && !"None".equals(record.reactionType);
+    static boolean isElementalReactionLabel(String reactionType) {
+        return normalizedElementalReactionLabel(reactionType) != null;
+    }
+
+    static String normalizedElementalReactionLabel(String reactionType) {
+        if (reactionType == null) {
+            return null;
+        }
+        String normalized = reactionType.trim();
+        if (normalized.isEmpty() || "None".equals(normalized)) {
+            return null;
+        }
+        if ("Electro-Charged Tick".equals(normalized)) {
+            return "Electro-Charged";
+        }
+        if ("Lunar-Charged Reaction".equals(normalized)
+                || "Lunar-Charged Reaction (Extra)".equals(normalized)) {
+            return "Lunar-Charged";
+        }
+        if (ELEMENTAL_REACTION_LABELS.contains(normalized)) {
+            return normalized;
+        }
+        return normalized.startsWith("Swirl-") ? normalized : null;
     }
 
     private static List<String> rollingDpsSeries(

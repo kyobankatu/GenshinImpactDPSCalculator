@@ -12,7 +12,9 @@ import java.util.List;
 import java.util.Map;
 
 import mechanics.analysis.StatsSnapshot;
+import model.entity.ArtifactSet;
 import model.entity.Character;
+import model.standards.KQMSConstants;
 import model.type.CharacterId;
 import model.type.StatType;
 import simulation.CombatSimulator;
@@ -47,6 +49,12 @@ public final class ReportViewAdapter {
                     domKey(characterId),
                     displayName,
                     character.getElement(),
+                    KQMSConstants.CHAR_LEVEL,
+                    normalizedConstellation(character.getConstellation()),
+                    weaponName(character),
+                    weaponIconPath(character),
+                    hasWeaponIcon(character),
+                    artifactSetViews(character),
                     reportFacePath(displayName),
                     Files.isRegularFile(localFacePath),
                     fallbackText(displayName)));
@@ -99,11 +107,69 @@ public final class ReportViewAdapter {
     }
 
     private static Path localFacePath(String displayName) {
-        return Path.of("config", "characters", displayName, "face.png");
+        return Path.of("config", "characters", assetKey(displayName), "face.png");
     }
 
     private static String reportFacePath(String displayName) {
-        return "../config/characters/" + urlPathSegment(displayName) + "/face.png";
+        return "../config/characters/" + urlPathSegment(assetKey(displayName)) + "/face.png";
+    }
+
+    private static int normalizedConstellation(int constellation) {
+        return Math.max(0, Math.min(6, constellation));
+    }
+
+    private static String weaponName(Character character) {
+        if (character.getWeapon() == null || character.getWeapon().getName() == null
+                || character.getWeapon().getName().isBlank()) {
+            return "-";
+        }
+        return character.getWeapon().getName();
+    }
+
+    private static String weaponIconPath(Character character) {
+        return "../config/weapons/" + assetKey(weaponName(character)) + "/icon.png";
+    }
+
+    private static boolean hasWeaponIcon(Character character) {
+        String name = weaponName(character);
+        return !"-".equals(name) && Files.isRegularFile(Path.of("config", "weapons", assetKey(name), "icon.png"));
+    }
+
+    private static List<ReportAssetView> artifactSetViews(Character character) {
+        if (character.getArtifacts() == null) {
+            return Collections.emptyList();
+        }
+        List<ReportAssetView> artifacts = new ArrayList<>();
+        for (ArtifactSet artifact : character.getArtifacts()) {
+            if (artifact == null || artifact.getName() == null || artifact.getName().isBlank()) {
+                continue;
+            }
+            String name = artifact.getName();
+            String key = assetKey(name);
+            artifacts.add(new ReportAssetView(
+                    name,
+                    "../config/artifacts/" + key + "/flower.png",
+                    Files.isRegularFile(Path.of("config", "artifacts", key, "flower.png"))));
+        }
+        return artifacts;
+    }
+
+    private static String assetKey(String displayName) {
+        if (displayName == null || displayName.isBlank() || "-".equals(displayName)) {
+            return "";
+        }
+        StringBuilder key = new StringBuilder();
+        boolean wordStart = true;
+        for (int i = 0; i < displayName.length(); i++) {
+            char ch = displayName.charAt(i);
+            if (java.lang.Character.isLetterOrDigit(ch)) {
+                key.append(wordStart ? java.lang.Character.toUpperCase(ch) : ch);
+                wordStart = false;
+            } else {
+                wordStart = true;
+            }
+        }
+        return key.toString();
     }
 
     private static String urlPathSegment(String value) {
@@ -142,6 +208,18 @@ public final class ReportViewAdapter {
         public final String displayName;
         /** Primary element used for report color selection. */
         public final model.type.Element element;
+        /** Standard character level used by the simulator's report assumptions. */
+        public final int level;
+        /** Character constellation level, clamped to the valid 0-6 display range. */
+        public final int constellation;
+        /** Equipped weapon display name. */
+        public final String weaponName;
+        /** Relative equipped weapon icon path from generated reports under {@code output/}. */
+        public final String weaponIconPath;
+        /** Whether the expected local weapon icon exists. */
+        public final boolean hasWeaponIcon;
+        /** Equipped artifact set display data. */
+        public final List<ReportAssetView> artifactSets;
         /** Relative face image path from generated reports under {@code output/}. */
         public final String faceImagePath;
         /** Whether the expected local face image exists. */
@@ -156,19 +234,58 @@ public final class ReportViewAdapter {
          * @param domKey           DOM-safe key (typically {@link #domKey(CharacterId)})
          * @param displayName      human-readable display name
          * @param element          primary element used for report color selection
+         * @param level            standard character level used in the simulation
+         * @param constellation    constellation level
+         * @param weaponName       equipped weapon display name
+         * @param weaponIconPath   relative weapon icon path for generated reports
+         * @param hasWeaponIcon    whether the weapon icon exists locally
+         * @param artifactSets     equipped artifact set display data
          * @param faceImagePath    relative face image path for generated reports
          * @param hasFaceIcon      whether the face image exists locally
          * @param faceFallbackText deterministic fallback text
          */
         public ReportCharacterView(CharacterId id, String domKey, String displayName, model.type.Element element,
+                int level, int constellation, String weaponName, String weaponIconPath, boolean hasWeaponIcon,
+                List<ReportAssetView> artifactSets,
                 String faceImagePath, boolean hasFaceIcon, String faceFallbackText) {
             this.id = id;
             this.domKey = domKey;
             this.displayName = displayName;
             this.element = element;
+            this.level = level;
+            this.constellation = constellation;
+            this.weaponName = weaponName;
+            this.weaponIconPath = weaponIconPath;
+            this.hasWeaponIcon = hasWeaponIcon;
+            this.artifactSets = Collections.unmodifiableList(new ArrayList<>(artifactSets));
             this.faceImagePath = faceImagePath;
             this.hasFaceIcon = hasFaceIcon;
             this.faceFallbackText = faceFallbackText;
+        }
+    }
+
+    /**
+     * View object for a report asset with an optional local icon.
+     */
+    public static final class ReportAssetView {
+        /** Human-readable asset name. */
+        public final String displayName;
+        /** Relative image path from generated reports under {@code output/}. */
+        public final String imagePath;
+        /** Whether the expected image exists locally. */
+        public final boolean hasIcon;
+
+        /**
+         * Creates a new asset view.
+         *
+         * @param displayName human-readable asset name
+         * @param imagePath   relative image path for generated reports
+         * @param hasIcon     whether the image exists locally
+         */
+        public ReportAssetView(String displayName, String imagePath, boolean hasIcon) {
+            this.displayName = displayName;
+            this.imagePath = imagePath;
+            this.hasIcon = hasIcon;
         }
     }
 

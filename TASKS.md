@@ -5,9 +5,14 @@
 The simulator accuracy audit and high-impact fixes for `RaidenParty`,
 `FlinsParty2`, and RL-facing metadata are complete.
 
-The previous HTML report detail and UI upgrade is complete. The character detail
-tab UI using the downloaded `face.png` assets is implemented through the final
-planned phase.
+The previous HTML report detail and UI upgrade is complete. Character, weapon,
+and artifact local image assets are now used in the generated report where
+available.
+
+The HTML report's reaction damage presentation has been unified. The report now
+uses one `Elemental Reaction Damage` view backed by separately recorded elemental
+reaction damage, while reaction-labeled direct hits remain in Timeline and
+Action Damage only.
 
 ## Scope
 
@@ -15,11 +20,11 @@ The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
 behavior, Lunar reaction handling, and current regression coverage are treated as
 the baseline implementation.
 
-The next work should improve generated HTML report readability by grouping
-character-specific details into face-icon tabs. The goal is to make damage,
-action, energy, buff, artifact, and event details easier to inspect per
-character while preserving the existing simulator behavior and global report
-sections.
+This pass makes reaction damage reporting precise and consistent.
+`Reaction Damage` and `Reaction-labeled Direct Damage` currently describe
+related concepts with separate UI treatments. The report should instead expose a
+single, clearly defined reaction damage view limited to elemental reaction damage
+as defined by Genshin Impact mechanics.
 
 Out of scope for this pass:
 
@@ -51,354 +56,251 @@ Broader sample validation:
 - `./gradlew RaidenParty`
 - `./gradlew FlinsParty2`
 
-## Implementation Order: Character Detail Tabs with Face Icons
+## Implementation Order: Unified Elemental Reaction Damage Reporting
 
 Status:
 
 - Done.
-- This replaces the previous completed phase list as the next report-focused work.
-- The generated HTML report is easier to scan by grouping per-character details behind face-icon tabs.
+- The split `Reaction Damage` and `Reaction-labeled Direct Damage` presentation has been replaced with one consistent report view for actual elemental reaction damage.
 
 Scope:
 
-- Improve the generated HTML report under `output/`.
-- Use `config/characters/<CharacterName>/face.png` assets for character-level navigation and section identity.
-- Introduce a character detail section with face-icon tabs.
-- Move or mirror character-specific report content into each character tab:
-  - damage summary
-  - action damage breakdown
-  - energy timeline
-  - buff uptime relevant to that character
-  - artifact substat rolls
-  - representative event rows for that character
-- Preserve existing global charts and timeline filters unless a later phase explicitly replaces them.
+- Improve generated HTML report semantics and readability under `output/`.
+- Unify the chart/table presentation for reaction damage.
+- Restrict reaction-damage aggregation to Genshin-defined elemental reaction damage.
+- Keep `Timeline`, `Action Damage`, and total actor damage behavior intact unless a phase explicitly touches only the labels needed to avoid confusion.
 
 Out of scope for this pass:
 
-- Changing simulator mechanics, damage formulas, reactions, optimizer behavior, or RL behavior.
-- Introducing a frontend framework, bundler, or server-side report viewer.
+- Changing simulator damage formulas or reaction mechanics.
+- Changing total damage, DPS, cumulative damage, rolling DPS, or action damage definitions.
+- Treating reaction-labeled direct hits as reaction damage.
+- Adding a frontend framework, build step, or server-side report viewer.
 - Persisting report data as a separate JSON artifact unless explicitly requested.
-- Downloading new images or changing the existing `face.png` asset set.
-- Making face icons required for report generation. Missing icons must fall back gracefully.
-- Reworking every chart into a character-specific version in the first implementation.
+- Editing generated `docs/` or committed report output unless explicitly requested.
+
+Definitions:
+
+- Elemental reaction damage:
+  Damage produced by a Genshin-defined elemental reaction itself. Examples include Vaporize bonus-attributed damage if separately measurable, Melt bonus-attributed damage if separately measurable, Swirl, Electro-Charged, Overloaded, Superconduct, Shatter, Burning, Bloom, Hyperbloom, Burgeon, Aggravate bonus damage if separately measurable, Spread bonus damage if separately measurable, Lunar-Charged, Lunar-Bloom, and Lunar-Crystallize.
+- Direct hit damage:
+  Damage produced by an action hit, even if the hit has a reaction label in the timeline.
+- Reaction-labeled direct damage:
+  Full hit damage from direct attacks where the event label mentions a reaction but the report cannot separate the reaction component. This must not be included in reaction damage totals.
+- Known limitation:
+  If additive or amplifying reaction bonus damage is not separately recorded, do not fold the full direct hit into reaction damage. Show it only in timeline/action damage, or expose a clear limitation note.
 
 Design direction:
 
-- Add a `Character Details` section after the top KPI/global chart area.
-- Render tabs as compact buttons with face icon, display name, damage total, and damage share.
-- The active tab shows a dense per-character panel rather than forcing users to scroll through every character section.
-- Keep the UI analysis-focused: dark dashboard style, stable spacing, readable tables, and no decorative image treatment.
-- Use the same character color across charts, badges, and tab accents.
-- Face icons should help recognition, not dominate the report.
+- Remove the separate `Reaction-labeled Direct Damage` section from the main chart area.
+- Rename or clarify the remaining reaction section as `Elemental Reaction Damage`.
+- Use one presentation style for all included reaction damage:
+  - one primary chart
+  - one optional detail table/list using the same data
+  - consistent colors and labels
+- Include a short report note explaining that direct hits with reaction labels are excluded unless the reaction component is separately recorded.
+- Keep timeline rows free to show reaction labels for diagnostics, but do not let those labels define reaction damage totals.
 
-Data and path rules:
-
-- Character identity should come from typed report data where possible, preferably `CharacterId` or canonical display name.
-- Face path resolution should be centralized in a report helper, not duplicated across rendering snippets.
-- Expected path format: `config/characters/<CharacterName>/face.png`.
-- Character names containing spaces or special characters must be HTML-attribute escaped and URL/path safe for generated HTML references.
-- Missing or unreadable face icons should render a deterministic initials/avatar fallback and should not break report generation.
-
-### Phase 1: Data Inventory and Character View Contract - Done
+### Phase 1: Audit Current Reaction Report Data Sources - Done
 
 Why first:
 
-The report already has global datasets, but the tab UI needs a clean per-character view model. Define exactly which existing values can be reused before editing the renderer heavily.
+The current report appears to build both `reactionDamageTotals` and `reactionLabeledDamageTotals`. Before changing rendering, identify exactly which `SimulationRecord` fields and builder branches populate each dataset.
 
 Target files:
 
 - `src/java/visualization/ReportData.java`
 - `src/java/visualization/ReportDataBuilder.java`
-- `src/java/visualization/ReportViewAdapter.java`
 - `src/java/visualization/ReportHtmlRenderer.java`
-- `src/java/model/type/CharacterId.java` if display/id mapping is needed
-
-Tasks:
-
-- Inventory current report data for character-level content:
-  - total damage and DPS contribution
-  - cumulative damage series
-  - action damage totals
-  - energy timeline series
-  - buff uptime summaries
-  - artifact roll data
-  - timeline events by actor
-- Define a per-character report view contract, for example `CharacterReportView` or equivalent nested data.
-- Decide whether buff uptime should show buffs owned by the character, buffs affecting the character, or both if the data supports it.
-- Decide which event rows appear inside a tab initially, such as top damage events and recent actor-matched events.
-- Keep global chart data intact so existing report behavior remains available.
-
-Acceptance criteria:
-
-- Each planned tab field has a known source or an explicit limitation.
-- Missing optional data only hides that widget inside the tab, not the entire report.
-- The contract avoids using display labels as internal control-flow keys.
-
-Test cases to add or update:
-
-- Normal path: a report with four party members builds four character detail entries.
-- Error path: empty records or missing stats history still build an empty-but-renderable detail list.
-- Boundary values: zero-damage characters, characters with no action damage, and missing face icons.
-
-Verification:
-
-- `./gradlew classes`
-- `./gradlew ReactionRegressionTest` if report data builder behavior changes non-trivially
-
-Implementation status:
-
-- Added a `ReportData.CharacterReportView` contract for the planned face-icon tab UI.
-- The builder now creates one character detail entry per party member from existing report data.
-- Each entry currently includes damage total, DPS contribution, damage share, max hit, top action, per-character action totals, energy series, sampled buff uptime rows, artifact rolls, top damage events, and recent actor events.
-- Buff uptime remains based on the existing sampled active-buff labels; owner-versus-affected-character semantics are not expanded in this phase.
-
-### Phase 2: Face Icon Resolution and Renderer Safety - Done
-
-Why second:
-
-Image paths and character labels are user-visible HTML inputs. Escaping and fallback behavior should be reliable before adding the visible tab UI.
-
-Target files:
-
-- `src/java/visualization/ReportHtmlRenderer.java`
-- `src/java/visualization/ReportDataBuilder.java`
+- `src/java/visualization/SimulationRecord.java`
 - `src/java/sample/ReportRegressionTest.java`
 
 Tasks:
 
-- Add a centralized helper for resolving face image paths from character identity.
-- Add an initials/avatar fallback for missing `face.png`.
-- Ensure image paths, alt text, tab labels, and data attributes are escaped correctly.
-- Add renderer regression coverage for names and labels containing quotes, angle brackets, ampersands, and script-like substrings.
-- Keep generated HTML self-contained except for local image references and existing Chart.js CDN usage.
+- Trace current aggregation for:
+  - `Reaction Damage`
+  - `Reaction-labeled Direct Damage`
+  - timeline reaction labels
+  - action damage totals
+- Identify which fields represent separately recorded reaction damage, such as `reactionDamage`.
+- Identify which fields represent full direct hit damage, such as `damage`.
+- List every reaction label currently emitted by sample parties and whether it should be included in elemental reaction damage.
+- Decide whether a typed helper is needed to classify report reaction labels instead of relying on display-label branching in multiple places.
 
 Acceptance criteria:
 
-- Reports render when all icons exist.
-- Reports render when one or more icons are missing.
-- Labels and paths cannot break HTML attributes or JavaScript blocks.
+- The plan has a concrete source of truth for included reaction damage.
+- Every existing reaction report dataset is classified as keep, remove, or rename.
+- Ambiguous labels are documented before implementation.
 
 Test cases to add or update:
 
-- Normal path: known character face path appears in generated HTML.
-- Error path: missing icon uses fallback markup.
-- Boundary values: special-character labels remain escaped in tab labels, alt text, and data attributes.
+- No code changes required in this phase unless a small helper test is added for discovered classification logic.
+
+Verification:
+
+- `./gradlew classes`
+- Optional: `./gradlew ReportRegressionTest` if exploratory assertions are added
+
+### Phase 2: Define a Single Reaction Damage Contract - Done
+
+Why second:
+
+The renderer should consume one well-defined dataset rather than deciding semantics from multiple partially overlapping lists.
+
+Target files:
+
+- `src/java/visualization/ReportData.java`
+- `src/java/visualization/ReportDataBuilder.java`
+- `src/java/visualization/ReportViewAdapter.java` if display adaptation is needed
+- `src/java/sample/ReportRegressionTest.java`
+
+Tasks:
+
+- Introduce or standardize one report field for elemental reaction damage totals.
+- Keep the dataset limited to separately recorded reaction damage values.
+- Exclude full direct-hit damage from reaction totals, even when the timeline event has a reaction label.
+- Preserve direct-hit reaction labels only in timeline and action damage views.
+- Add a centralized classification helper if needed:
+  - included: Genshin-defined reaction damage records with explicit reaction damage values
+  - excluded: direct hits, reaction-labeled action damage, labels with zero or missing reaction damage
+  - ignored: `None`, empty labels, non-reaction diagnostic labels
+
+Acceptance criteria:
+
+- The report builder exposes exactly one reaction damage aggregate for the chart.
+- `reactionLabeledDamageTotals` is removed, deprecated, or no longer rendered.
+- No full direct-hit `damage` value is mixed into reaction damage totals.
+
+Test cases to add or update:
+
+- Normal path: explicit reaction damage contributes to the unified reaction total.
+- Error path: reaction-labeled direct hit with `reactionDamage == 0` does not contribute.
+- Boundary values: empty reaction label, `None`, zero damage, and duplicate reaction labels aggregate predictably.
+- Major logic unit test: classification helper includes/excludes labels and values as defined.
 
 Verification:
 
 - `./gradlew ReportRegressionTest`
 - `./gradlew classes`
 
-Implementation status:
-
-- Added centralized face image path resolution to `ReportViewAdapter.ReportCharacterView`.
-- Report-facing image paths are generated relative to HTML files under `output/`, while existence checks use repository-local `config/characters/<CharacterName>/face.png`.
-- Added deterministic fallback text for characters without a local `face.png`.
-- Added hidden character asset metadata and JavaScript data in the renderer so Phase 3 can build the tab UI without duplicating path logic.
-- Extended `ReportRegressionTest` to cover known icon paths, missing-icon fallback markup, HTML attribute escaping, JavaScript string escaping, and URL-encoded face paths.
-
-### Phase 3: Character Tab Shell UI - Done
+### Phase 3: Renderer Unification and Label Cleanup - Done
 
 Why third:
 
-Build the interaction shell before moving detailed widgets into it. This keeps layout and JavaScript behavior isolated.
+Once the data contract is clean, update the HTML so users see one reaction damage concept instead of two competing sections.
 
 Target files:
 
 - `src/java/visualization/ReportHtmlRenderer.java`
+- `src/java/sample/ReportRegressionTest.java`
 
 Tasks:
 
-- Add a `Character Details` section with face-icon tab buttons.
-- Render one panel per character and show only the active panel.
-- Include tab metadata:
-  - face icon or fallback
-  - character display name
-  - total damage
-  - damage share
-- Add lightweight client-side tab switching without external dependencies.
-- Ensure keyboard and accessibility basics:
-  - buttons are real `<button>` elements
-  - selected state is represented with `aria-selected` or equivalent
-  - panels are hidden without removing their content from the document
-- Keep layout stable at desktop and narrow widths.
+- Replace `Reaction Damage` and `Reaction-labeled Direct Damage` display with one `Elemental Reaction Damage` section.
+- Use the same chart style and color strategy for all included reaction damage.
+- Remove the separate `Reaction-labeled Direct Damage` chart and any related explanatory copy.
+- Add a concise note near the chart:
+  - only separately recorded elemental reaction damage is included
+  - direct hits with reaction labels remain in timeline/action damage and are excluded from this chart
+- Keep empty-state behavior clear when no reaction damage is present.
 
 Acceptance criteria:
 
-- The generated report has one tab per party member.
-- Clicking a tab changes the visible character panel.
-- The first tab is selected by default.
-- Existing global charts and timeline still render.
+- The generated report has one reaction damage section.
+- There is no visible `Reaction-labeled Direct Damage` section.
+- The chart title and note accurately describe the data.
+- Existing global charts still render.
 
 Test cases to add or update:
 
-- Renderer skeleton test checks tab container, tab buttons, and panels exist.
-- Empty/partial character data renders a clear empty state.
-- Manual check that tab switching works in the browser.
+- Renderer test: `Elemental Reaction Damage` appears.
+- Renderer test: `Reaction-labeled Direct Damage` does not appear.
+- Renderer test: empty reaction data renders a non-crashing empty chart or empty state.
+- Escaping test: reaction labels containing special characters remain HTML/JS safe.
 
 Verification:
 
 - `./gradlew ReportRegressionTest`
 - `./gradlew RaidenParty`
-- Manual browser inspection of `output/simulation_report.html`
+- `./gradlew FlinsParty2`
 
-Implementation status:
-
-- Added a `Character Details` section after the global charts.
-- Rendered one face-icon tab and one detail panel per party member.
-- The first character tab is selected by default; inactive panels use the `hidden` attribute.
-- Added click and left/right arrow-key tab switching with synchronized `aria-selected`, `tabindex`, and panel visibility.
-- The shell currently shows character identity and summary metrics only; detailed action, artifact, energy, buff, and event widgets are deferred to later phases.
-- Added renderer regression checks for tablist, tab buttons, panels, default selected state, hidden inactive panel, and tab switching script.
-
-### Phase 4: Per-Character Damage and Artifact Widgets - Done
+### Phase 4: Sample Validation Against Timeline and Action Damage - Done
 
 Why fourth:
 
-Damage and artifact information are the most immediately useful tab contents and are mostly available from existing report data.
+This change is semantic. The key risk is accidentally changing totals or hiding useful direct-hit data from timeline/action views.
 
 Target files:
 
-- `src/java/visualization/ReportData.java`
+- `src/java/sample/ReportRegressionTest.java`
+- `src/java/sample/ReactionRegressionTest.java` only if reaction recording semantics need new coverage
 - `src/java/visualization/ReportDataBuilder.java`
-- `src/java/visualization/ReportHtmlRenderer.java`
 
 Tasks:
 
-- Add a compact damage summary inside each tab:
-  - total damage
-  - DPS contribution
-  - damage share
-  - top action
-  - max hit if available
-- Move or mirror action damage into a per-character horizontal bar/table.
-- Show artifact substat rolls inside the character tab with readable alignment.
-- Fix numeric alignment so artifact substat values do not visually drift to the far right in cramped layouts.
-- Preserve the existing global action damage chart unless explicitly removed later.
+- Validate that unified reaction totals are independent from action damage totals.
+- Validate that timeline still shows reaction labels for diagnostic rows.
+- Validate that direct-hit reaction labels do not increase the elemental reaction chart.
+- Compare sample report behavior for:
+  - `RaidenParty` conventional reactions such as Vaporize, Overloaded, Electro-Charged
+  - `FlinsParty2` Lunar-Charged and related Lunar damage
+- Add regression assertions for at least one explicit reaction damage record and one excluded reaction-labeled direct hit.
 
 Acceptance criteria:
 
-- Action damage can be viewed per character from the tab UI.
-- Artifact rolls are visually tied to the selected character.
-- Long action labels and stat labels do not overflow incoherently.
+- Total DPS and action damage charts are unchanged except for any intentional label cleanup.
+- Timeline still exposes reaction labels where useful.
+- Unified reaction chart contains only included elemental reaction damage.
+- Lunar reaction damage appears in the unified reaction chart when separately recorded as reaction damage.
 
 Test cases to add or update:
 
-- Normal path: per-character action totals match the global actor/action source data.
-- Error path: character with no action damage shows an empty state.
-- Boundary values: long action labels, zero values, and many artifact stats.
+- Normal integration: generated sample report contains expected included reaction labels.
+- Error integration: direct-hit records with reaction labels are excluded from reaction totals.
+- Boundary integration: sample with no reaction damage still produces a valid report.
 
 Verification:
 
 - `./gradlew ReportRegressionTest`
+- `./gradlew ReactionRegressionTest`
 - `./gradlew RaidenParty`
 - `./gradlew FlinsParty2`
 
-Implementation status:
-
-- Added per-character summary metrics for top action in each character panel.
-- Added a per-character action damage widget with compact horizontal bars and fixed numeric columns.
-- Added a per-character artifact substat rolls table scoped to the selected character.
-- Added empty states for characters without action damage or artifact roll data.
-- Tightened artifact roll table layout so roll counts stay near their stat labels instead of drifting to the far right.
-- Extended renderer regression coverage for per-character action and artifact widgets.
-
-### Phase 5: Per-Character Energy, Buff, and Event Detail - Done
-
-Why fifth:
-
-Energy timelines, buff uptime, and representative events give each tab diagnostic depth, but they depend on correctly interpreting existing sampled/report data.
-
-Target files:
-
-- `src/java/visualization/ReportData.java`
-- `src/java/visualization/ReportDataBuilder.java`
-- `src/java/visualization/ReportHtmlRenderer.java`
-
-Tasks:
-
-- Add a per-character energy timeline view or compact sparkline if the current chart infrastructure supports it cleanly.
-- Add a buff uptime list/table filtered to relevant character data.
-- Clearly label the current buff uptime semantics:
-  - sampled active labels
-  - owner-only, affected-character, or global visibility depending on available data
-- Add representative event rows for the selected character:
-  - highest damage events
-  - reaction-labeled events caused by the character
-  - recent actor-matched timeline entries if useful
-- Avoid duplicating the full global timeline inside every tab.
-
-Acceptance criteria:
-
-- Energy and buff information is understandable from inside the selected character tab.
-- Buff uptime labels do not imply precision beyond the available sampled data.
-- Event details help explain the selected character's contribution without making the page excessively long.
-
-Test cases to add or update:
-
-- Normal path: energy series is filtered to the selected character.
-- Error path: missing energy or buff history hides only that widget.
-- Boundary values: buffs active at final snapshot, duplicate buff labels, and character with no matching events.
-
-Verification:
-
-- `./gradlew ReportRegressionTest`
-- `./gradlew FlinsParty2`
-- Manual browser inspection of `output/simulation_report.html`
-
-Implementation status:
-
-- Added a per-character energy widget to each tab using sampled stat-history energy percent.
-- Added a per-character buff uptime widget with an explicit note that values are sampled active-buff labels.
-- Added top damage event and recent actor-matched event widgets for each character.
-- Kept event rows capped to representative data instead of duplicating the full global timeline in every tab.
-- Added empty states for missing energy samples, sampled buffs, damage events, and actor-matched timeline rows.
-- Extended renderer regression coverage for energy, buff, and event widgets, including escaped buff labels.
-
-### Phase 6: Layout Polish, Responsiveness, and Validation - Done
+### Phase 5: Documentation and Manual Browser Validation - Implemented, Manual Check Pending
 
 Why last:
 
-The tab UI combines images, charts, tables, and event rows. Final validation should focus on readability, layout stability, and regressions in existing report features.
+After the data and UI are unified, record the exact semantics so future report work does not reintroduce mixed reaction/direct-hit totals.
 
 Target files:
 
-- `src/java/visualization/ReportHtmlRenderer.java`
-- `README.md` if report feature documentation is updated
+- `README.md` if report semantics are documented there
 - `TASKS.md`
+- `src/java/visualization/ReportHtmlRenderer.java` for inline report copy only
 
 Tasks:
 
-- Tune tab sizing, image dimensions, table density, and chart heights.
-- Ensure text does not overlap icons, chart containers, or table cells.
-- Keep chart containers bounded so the report does not grow vertically because of chart canvas feedback loops.
-- Verify narrow viewport behavior:
-  - tabs wrap or scroll cleanly
-  - panels remain readable
-  - artifact/action tables do not break layout
-- Update documentation only after implementation is approved and complete.
-- Record any known limitations or deferred improvements.
+- Document the unified reaction damage definition in the report-facing docs or report note.
+- Record known limitations for amplifying/additive reactions when bonus damage is not separately available.
+- Manually inspect generated reports for readability and chart consistency.
+- Confirm browser console has no JavaScript errors.
 
 Acceptance criteria:
 
-- Character detail tabs are visually useful with `face.png` assets.
-- Existing global report charts, filters, and formula details still work.
-- The report remains a single generated HTML file.
-- Manual browser inspection finds no obvious vertical stretching, overlap, or unusable narrow layout.
+- Future readers can tell why reaction-labeled direct hits are excluded.
+- The report no longer presents two competing reaction-damage concepts.
+- Manual inspection confirms the chart and detail text are understandable.
 
-Test cases to add or update:
+Manual inspection checklist:
 
-- Renderer regression for expected tab markup and fallback icon behavior.
-- Integration report generation for `RaidenParty` and `FlinsParty2`.
-- Manual inspection checklist:
-  - face-icon tabs render for every party member
-  - tab switching works
-  - per-character action damage is readable
-  - artifact rolls are aligned and tied to the selected character
-  - energy and buff widgets show useful empty states when data is missing
-  - existing timeline filters still work
-  - browser console has no JavaScript errors
-  - chart canvases do not stretch the page vertically
+- Only one reaction damage section is visible.
+- Chart labels match known reaction names.
+- Timeline still shows reaction labels for relevant events.
+- Action Damage still contains direct action hits.
+- Direct-hit reaction labels do not appear as separate reaction damage totals.
+- Lunar reaction damage appears when explicitly recorded.
+- Empty/no-reaction reports remain readable.
 
 Verification:
 
@@ -407,13 +309,10 @@ Verification:
 - `./gradlew FlinsParty2`
 - Manual browser inspection of `output/simulation_report.html`
 
-Implementation status:
+Status note:
 
-- Kept global chart canvases bounded with fixed report CSS heights so Chart.js does not stretch the page vertically.
-- Added responsive rules for the expanded character-tab widget grid and energy summary.
-- Added fixed-layout compact tables for per-character artifact rolls and event rows to avoid label/value drift.
-- Preserved the existing single-file HTML report behavior with local `face.png` references and existing Chart.js CDN usage.
-- Known limitation: browser manual inspection is still required for final visual acceptance after generated sample reports are opened locally.
+- Report copy and automated validation are complete.
+- Manual browser console inspection remains pending in a local browser session.
 
 ## Cross-Cutting Rules
 

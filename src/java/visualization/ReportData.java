@@ -28,10 +28,8 @@ final class ReportData {
     final List<ReportMetricView> actionDamageTotals;
     /** Damage totals grouped by actor, then action display label. */
     final Map<String, List<ReportMetricView>> actionDamageTotalsByActor;
-    /** Transformative reaction damage totals grouped by reaction display label. */
+    /** Elemental reaction damage totals grouped by reaction display label. */
     final List<ReportMetricView> reactionDamageTotals;
-    /** Direct-hit damage totals grouped by reaction labels when true reaction bonus is not separable. */
-    final List<ReportMetricView> reactionLabeledDamageTotals;
     /** Rolling team DPS series as JS object literals. */
     final List<String> rollingDpsSeries;
     /** Enemy aura unit series per element as JS object literals. */
@@ -83,7 +81,6 @@ final class ReportData {
             List<ReportMetricView> actionDamageTotals,
             Map<String, List<ReportMetricView>> actionDamageTotalsByActor,
             List<ReportMetricView> reactionDamageTotals,
-            List<ReportMetricView> reactionLabeledDamageTotals,
             List<String> rollingDpsSeries,
             Map<Element, List<String>> auraSeries,
             Map<String, List<String>> energySeries,
@@ -105,7 +102,6 @@ final class ReportData {
         this.actionDamageTotals = actionDamageTotals;
         this.actionDamageTotalsByActor = actionDamageTotalsByActor;
         this.reactionDamageTotals = reactionDamageTotals;
-        this.reactionLabeledDamageTotals = reactionLabeledDamageTotals;
         this.rollingDpsSeries = rollingDpsSeries;
         this.auraSeries = auraSeries;
         this.energySeries = energySeries;
