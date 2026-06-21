@@ -55,8 +55,16 @@ final class ReportDataBuilder {
             List<SimulationRecord> records,
             CombatSimulator sim,
             List<mechanics.analysis.StatsSnapshot> statsHistory) {
+        return build(records, sim, statsHistory, ReportViewAdapter.ReportAssetMode.OUTPUT);
+    }
+
+    static ReportData build(
+            List<SimulationRecord> records,
+            CombatSimulator sim,
+            List<mechanics.analysis.StatsSnapshot> statsHistory,
+            ReportViewAdapter.ReportAssetMode assetMode) {
         List<SimulationRecord> safeRecords = records != null ? records : new ArrayList<>();
-        List<ReportViewAdapter.ReportCharacterView> characters = ReportViewAdapter.partyCharacters(sim);
+        List<ReportViewAdapter.ReportCharacterView> characters = ReportViewAdapter.partyCharacters(sim, assetMode);
         List<ReportViewAdapter.ReportStatsSnapshot> reportStatsHistory = ReportViewAdapter.statsHistory(statsHistory);
         Map<String, Double> totalDamageByActor = totalDamageByActor(safeRecords);
         double endTime = safeRecords.isEmpty() ? 0 : safeRecords.get(safeRecords.size() - 1).time;

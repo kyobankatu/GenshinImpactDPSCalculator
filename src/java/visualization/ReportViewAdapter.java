@@ -37,10 +37,24 @@ public final class ReportViewAdapter {
      *         list when {@code sim} is {@code null}
      */
     public static List<ReportCharacterView> partyCharacters(CombatSimulator sim) {
+        return partyCharacters(sim, ReportAssetMode.OUTPUT);
+    }
+
+    /**
+     * Builds report-facing views for every active party member using paths for the
+     * requested report destination.
+     *
+     * @param sim       source combat simulator; may be {@code null}
+     * @param assetMode output asset path mode
+     * @return an ordered list of {@link ReportCharacterView} entries, or an empty
+     *         list when {@code sim} is {@code null}
+     */
+    public static List<ReportCharacterView> partyCharacters(CombatSimulator sim, ReportAssetMode assetMode) {
         List<ReportCharacterView> characters = new ArrayList<>();
         if (sim == null) {
             return characters;
         }
+        ReportAssetMode mode = assetMode != null ? assetMode : ReportAssetMode.OUTPUT;
         for (Character character : sim.getPartyMembers()) {
             CharacterId characterId = character.getCharacterId();
             String displayName = character.getName();
@@ -52,10 +66,10 @@ public final class ReportViewAdapter {
                     KQMSConstants.CHAR_LEVEL,
                     normalizedConstellation(character.getConstellation()),
                     weaponName(character),
-                    weaponIconPath(character),
+                    weaponIconPath(character, mode),
                     hasWeaponIcon(character),
-                    artifactSetViews(character),
-                    reportFacePath(displayName),
+                    artifactSetViews(character, mode),
+                    reportFacePath(displayName, mode),
                     Files.isRegularFile(localFacePath),
                     fallbackText(displayName)));
         }
@@ -110,8 +124,12 @@ public final class ReportViewAdapter {
         return Path.of("config", "characters", assetKey(displayName), "face.png");
     }
 
-    private static String reportFacePath(String displayName) {
-        return "../config/characters/" + urlPathSegment(assetKey(displayName)) + "/face.png";
+    private static String reportFacePath(String displayName, ReportAssetMode mode) {
+        String key = urlPathSegment(assetKey(displayName));
+        if (mode == ReportAssetMode.DOCS) {
+            return "assets/report/characters/" + key + "/face.png";
+        }
+        return "../config/characters/" + key + "/face.png";
     }
 
     private static int normalizedConstellation(int constellation) {
@@ -126,8 +144,12 @@ public final class ReportViewAdapter {
         return character.getWeapon().getName();
     }
 
-    private static String weaponIconPath(Character character) {
-        return "../config/weapons/" + assetKey(weaponName(character)) + "/icon.png";
+    private static String weaponIconPath(Character character, ReportAssetMode mode) {
+        String key = urlPathSegment(assetKey(weaponName(character)));
+        if (mode == ReportAssetMode.DOCS) {
+            return "assets/report/weapons/" + key + "/icon.png";
+        }
+        return "../config/weapons/" + key + "/icon.png";
     }
 
     private static boolean hasWeaponIcon(Character character) {
@@ -135,7 +157,7 @@ public final class ReportViewAdapter {
         return !"-".equals(name) && Files.isRegularFile(Path.of("config", "weapons", assetKey(name), "icon.png"));
     }
 
-    private static List<ReportAssetView> artifactSetViews(Character character) {
+    private static List<ReportAssetView> artifactSetViews(Character character, ReportAssetMode mode) {
         if (character.getArtifacts() == null) {
             return Collections.emptyList();
         }
@@ -146,15 +168,18 @@ public final class ReportViewAdapter {
             }
             String name = artifact.getName();
             String key = assetKey(name);
+            String imagePath = mode == ReportAssetMode.DOCS
+                    ? "assets/report/artifacts/" + urlPathSegment(key) + "/flower.png"
+                    : "../config/artifacts/" + key + "/flower.png";
             artifacts.add(new ReportAssetView(
                     name,
-                    "../config/artifacts/" + key + "/flower.png",
+                    imagePath,
                     Files.isRegularFile(Path.of("config", "artifacts", key, "flower.png"))));
         }
         return artifacts;
     }
 
-    private static String assetKey(String displayName) {
+    static String assetKey(String displayName) {
         if (displayName == null || displayName.isBlank() || "-".equals(displayName)) {
             return "";
         }
@@ -170,6 +195,11 @@ public final class ReportViewAdapter {
             }
         }
         return key.toString();
+    }
+
+    enum ReportAssetMode {
+        OUTPUT,
+        DOCS
     }
 
     private static String urlPathSegment(String value) {
@@ -214,13 +244,13 @@ public final class ReportViewAdapter {
         public final int constellation;
         /** Equipped weapon display name. */
         public final String weaponName;
-        /** Relative equipped weapon icon path from generated reports under {@code output/}. */
+        /** Relative equipped weapon icon path from the generated report. */
         public final String weaponIconPath;
         /** Whether the expected local weapon icon exists. */
         public final boolean hasWeaponIcon;
         /** Equipped artifact set display data. */
         public final List<ReportAssetView> artifactSets;
-        /** Relative face image path from generated reports under {@code output/}. */
+        /** Relative face image path from the generated report. */
         public final String faceImagePath;
         /** Whether the expected local face image exists. */
         public final boolean hasFaceIcon;
@@ -270,7 +300,7 @@ public final class ReportViewAdapter {
     public static final class ReportAssetView {
         /** Human-readable asset name. */
         public final String displayName;
-        /** Relative image path from generated reports under {@code output/}. */
+        /** Relative image path from the generated report. */
         public final String imagePath;
         /** Whether the expected image exists locally. */
         public final boolean hasIcon;

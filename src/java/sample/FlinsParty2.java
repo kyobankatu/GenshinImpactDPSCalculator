@@ -74,9 +74,11 @@ public class FlinsParty2 {
 
             // 3. Print & Generate Reports
             sim.printReport();
-            visualization.HtmlReportGenerator.generate("simulation_report.html",
-                    visualization.VisualLogger.getInstance().getRecords(), sim,
-                    recorder.getSnapshots());
+            java.util.List<visualization.SimulationRecord> records = visualization.VisualLogger.getInstance()
+                    .getRecords();
+            java.util.List<mechanics.analysis.StatsSnapshot> snapshots = recorder.getSnapshots();
+            visualization.HtmlReportGenerator.generate("simulation_report.html", records, sim, snapshots);
+            visualization.HtmlReportGenerator.generateForDocs("simulation_report.html", records, sim, snapshots);
         } catch (Throwable e) {
             e.printStackTrace();
         }
