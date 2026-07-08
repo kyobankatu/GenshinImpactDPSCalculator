@@ -63,15 +63,16 @@ tasks.register("ProfileCapabilities", JavaExec) {
     mainClass = "sample.ProfileCharacterCapabilities"
 }
 
-// Add a dynamic rule that allows running 'gradlew ClassName'
-tasks.addRule("Pattern: gradlew <ClassName>") { String taskName ->
-    // We only create the task if it doesn't already exist (like 'build' or 'javadoc')
+// Add a dynamic rule that allows running 'gradlew <PartyName>' through the
+// catalog-backed launcher, with legacy sample-class fallback handled in Java.
+tasks.addRule("Pattern: gradlew <PartyNameOrSampleName>") { String taskName ->
     if (!tasks.names.contains(taskName)) {
         tasks.register(taskName, JavaExec) {
             group = "Execution"
-            description = "Runs sample.${taskName}.java"
+            description = "Runs a catalog party or legacy sample named ${taskName}"
             classpath = sourceSets.main.runtimeClasspath
-            mainClass = "sample.${taskName}"
+            mainClass = "sample.SampleLauncher"
+            args taskName
         }
     }
 }

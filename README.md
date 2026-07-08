@@ -27,7 +27,7 @@ The report shows a full combat simulation for a custom 4-character team, includi
 - **Custom Mechanics**: Includes an extensible framework for custom, non-canonical characters with completely original buffs and synergy mechanics.
 - **Interactive HTML Reports**: Automatically generates dashboard-style reports with damage contribution, cumulative damage, reaction/action damage, rolling DPS, aura, energy, buff uptime, stat snapshots, and filterable event timelines via Chart.js.
 - **Hybrid RL Stack**: Experimental Java rollout service plus Python recurrent PPO learner for optimizing combat rotations without per-step Python/Java overhead.
-- **Registry-Driven RL Parties**: RL training, evaluation, capability profiling, and benchmarking all share one Java-side party registry, so adding a new RL party no longer requires editing multiple launch paths.
+- **Catalog-Driven Parties**: Sample simulations and RL use the same Java-side `PartyDefinition` catalog, so adding a party does not require separate simulation and RL entry points.
 
 ## Requirements
 
@@ -45,16 +45,16 @@ Compile the source code:
 ```
 
 ### 2. Run a Simulation
-We have configured a dynamic Gradle rule that allows you to run any simulation class located in the `sample` package directly by its name.
+We have configured a dynamic Gradle rule that resolves party names through the shared party catalog.
 
 ```bash
-# Run standard Raiden team simulation (sample.RaidenParty)
+# Run standard Raiden team simulation
 ./gradlew RaidenParty
 
-# Run custom Flins party simulation (sample.FlinsParty)
+# Run custom Flins party simulation
 ./gradlew FlinsParty
 
-# Run alternate Flins party simulation used by RL (sample.FlinsParty2)
+# Run alternate Flins party simulation used by RL
 ./gradlew FlinsParty2
 ```
 
@@ -71,7 +71,7 @@ The RL system keeps rollout execution in Java and PPO training/evaluation in Pyt
 
 - Java owns simulation, action masking, reward calculation, observation encoding, and report generation.
 - Python owns recurrent PPO, checkpointing, evaluation control, and optional W&B logging.
-- RL-available parties are selected by name through the Java party registry.
+- RL-available parties are selected by name through the same Java party catalog used by sample simulations.
 
 #### Install Python dependencies
 
@@ -153,11 +153,11 @@ python3 src/python/rl/evaluate_policy.py --mode both --checkpoint output/recurre
 
 ## Architecture
 
-1. **Party & Characters**: Defined under `src/java/model/`. Base stats, weapons, and artifact sets are assembled into a `CombatSimulator`.
+1. **Party & Characters**: Character/item models live under `src/java/model/`; runnable party setups and rotations live under `src/java/simulation/party/` as cataloged `PartyDefinition`s.
 2. **OptimizerPipeline**: Runs before the final scripted simulation and computes ER requirements plus substat allocations.
 3. **CombatSimulator**: The core time-driven engine. Tracks time, event ordering, ICD counters, auras, swaps, buffs, and periodic effects.
 4. **Visualization**: `VisualLogger` and `HtmlReportGenerator` turn one simulation into an inspectable HTML report.
-5. **Java RL Layer**: `mechanics.rl` provides action masking, observation encoding, reward logic, party registry, vectorized rollout, and the local rollout service.
+5. **Java RL Layer**: `mechanics.rl` provides action masking, observation encoding, reward logic, generic party-backed RL factories, vectorized rollout, and the local rollout service.
 6. **Python RL Layer**: `src/python/rl/` provides recurrent PPO training, checkpoint loading, deterministic/stochastic evaluation, rollout benchmarking, and W&B metric logging.
 
 ## Accuracy Notes

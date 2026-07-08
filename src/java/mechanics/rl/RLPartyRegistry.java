@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import simulation.party.PartyCatalog;
+import simulation.party.PartyDefinition;
+
 /**
  * Central registry for RL-available party variants.
  */
@@ -20,8 +23,9 @@ public final class RLPartyRegistry {
             "RaidenParty");
 
     static {
-        register(FlinsParty2RLSimulatorFactory.spec());
-        register(RaidenPartyRLSimulatorFactory.spec());
+        for (PartyDefinition definition : PartyCatalog.rlEnabled()) {
+            register(GenericRLSimulatorFactory.spec(definition));
+        }
     }
 
     private RLPartyRegistry() {

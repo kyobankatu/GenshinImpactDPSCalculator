@@ -19,16 +19,21 @@ implemented across Phases 1-5 below. Enemy auras now decay continuously over
 time, and reaction checks, aura consumption, logs, RL observations, snapshot
 restore, and the HTML Aura Timeline all read the same current-time-aware value.
 
+Generic simulation and RL launch paths backed by shared party definitions are
+now implemented. Party-specific sample wrappers and party-specific RL simulator
+factories have been removed for the migrated parties.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
 behavior, Lunar reaction handling, and current regression coverage are treated as
 the baseline implementation.
 
-This pass upgrades enemy aura from an expiry-only state to a time-aware remaining
-gauge model. Aura units should decay continuously over time, and reaction checks,
-aura consumption, logs, RL observations, and HTML visualization should all read
-the same current-time-aware value.
+This pass removes party-specific simulation and RL entry-point duplication. A new
+party should require only one party-specific definition containing its mechanical
+setup and rotation. Generic simulation and RL launchers should handle optimizer
+execution, reports, Gradle task dispatch, RL registry/spec wiring, and episode
+factory creation.
 
 Out of scope for this pass:
 
@@ -36,9 +41,11 @@ Out of scope for this pass:
 - introducing a frontend framework, build step, or server-side report viewer
 - editing generated `docs/` or committed report output unless explicitly
   requested
-- changing elemental reaction formulas beyond the aura amount available at each
-  timestamp
-- adding multi-target aura behavior or enemy-specific aura rules
+- changing simulator combat mechanics, damage formulas, or rotation timing
+- changing RL observation/action tensor shapes unless a validation test proves it
+  is already required
+- adding new party variants beyond the existing sample/RL parties
+- requiring party-specific wrapper classes for `./gradlew <PartyName>`
 
 ## Current Baseline
 
@@ -62,325 +69,423 @@ Broader sample validation:
 - `./gradlew RaidenParty`
 - `./gradlew FlinsParty2`
 
-## Implementation Order: Continuous Aura Decay
+## Implementation Order: Generic Party Definitions and Launchers
 
 Status:
 
-- Implemented (Phases 1-5 complete).
-- Validation: `./gradlew ReactionRegressionTest` and `./gradlew ReportRegressionTest`
-  pass with added continuous-decay, snapshot, and Aura Timeline coverage.
-  `RaidenParty` (1,362,938) and `FlinsParty2` (15,892,535) sample totals are
-  unchanged from before the change, as these tight rotations refresh auras before
-  natural decay removes them.
+- Implemented.
+- Phase 1-5 are complete.
+- Requirement: adding a party should require one party-specific definition, not
+  separate simulation and RL entry-point classes.
 
 Scope:
 
-- Make runtime aura units depend on current simulator time.
-- Use decayed aura units for reaction eligibility, reaction consumption, aura
-  snapshots, RL observations, and visual reports.
-- Keep the existing simplified aura duration formula initially unless a phase
-  explicitly changes only its representation.
-- Update Aura Timeline so it displays continuous decay instead of event-only
-  staircase state.
+- Remove duplicated party setup and party-specific runner code from `sample` and
+  `mechanics.rl`.
+- Create one shared source of truth per party for:
+  - party order
+  - enemy level
+  - character constructors
+  - weapon choices
+  - artifact sets
+  - artifact main stats
+  - substat priorities
+  - default ER targets
+  - resonance and moonsign application
+  - scripted rotation
+- Move sample execution concerns to a generic simulation runner:
+  - optimization
+  - final simulation
+  - stats recording
+  - report generation
+  - docs report generation
+- Move RL concerns to generic RL catalog/factory code:
+  - party spec construction
+  - episode factory wiring
+  - logging disabled
+  - party selection for training/evaluation/benchmark/profile flows
+- Update Gradle dynamic execution so `./gradlew <PartyName>` launches the generic
+  runner with `<PartyName>` instead of requiring `sample.<PartyName>` wrapper
+  classes.
 
 Out of scope for this pass:
 
-- Reworking elemental reaction damage formulas.
-- Reworking ICD rules.
-- Implementing multi-target aura gauges.
-- Modeling game-specific hidden gauge tax beyond the current simplified duration
-  and consumption rules.
+- Changing sample rotation scripts.
+- Changing optimizer algorithms.
+- Changing RL reward, action mask, observation, privileged observation, or
+  rollout protocol layout.
 - Adding a frontend framework, build step, or server-side report viewer.
 - Editing generated `docs/` or committed report output unless explicitly requested.
 
 Definitions:
 
-- Applied aura units:
-  The gauge units at application time, after any immediate reaction consumption.
-- Current aura units:
-  The remaining units at a queried simulator time after continuous natural decay
-  and discrete reaction consumption are both applied.
-- Aura expiry:
-  The time at which current aura units reach zero through natural decay.
-- Discrete consumption:
-  Aura reduction caused by reaction handling, such as Vaporize, Swirl,
-  Electro-Charged ticks, Burning maintenance, or other existing simulator
-  mechanics.
-- Snapshot time:
-  The exact simulator time used when recording logs, reports, stats, or RL
-  observations. A snapshot must use current aura units at that time.
+- Party definition:
+  The only party-specific Java class required for a party. It owns party name,
+  party order, enemy level, equipment, artifact configuration, ER/default build
+  assumptions, optimizer targets, simulator construction, and scripted rotation.
+- Party catalog:
+  A shared registry of party definitions used by both generic sample execution
+  and RL party specs.
+- Generic simulation runner:
+  A single runnable entry point that accepts a party name, looks up the
+  definition, runs optimization and the scripted rotation, then emits reports.
+- Generic sample launcher:
+  The Java main class used by Gradle's dynamic rule. It resolves `./gradlew
+  <PartyName>` through the party catalog first, then optionally falls back to
+  legacy sample classes for non-party utilities.
+- Generic RL factory:
+  A party-name-driven RL factory that creates `RLPartySpec` and fresh
+  `CombatSimulator` instances from the same party definitions.
 
 Design direction:
 
-- Keep `Enemy` as the owner of target aura state.
-- Avoid passing display labels into mechanic decisions.
-- Prefer an explicit current-time parameter for aura reads where correctness
-  depends on simulation time.
-- Preserve no-argument compatibility only where a caller is known to operate
-  immediately after `updateAuras(currentTime)`, or replace it during migration.
-- Make report Aura Timeline derive from the same mechanics-facing aura model,
-  not an unrelated display-only approximation.
+- Introduce shared party definition/catalog classes outside `mechanics.rl`.
+- Replace party-specific sample and RL factory responsibilities with generic
+  launchers backed by the catalog.
+- Prefer typed `CharacterId`, `StatType`, `Weapon`, and `ArtifactSet`
+  construction over display-name branching.
+- Keep existing `./gradlew FlinsParty2` and `./gradlew RaidenParty` commands
+  working without party-specific wrapper classes.
+- Keep legacy non-party sample execution available through the generic launcher
+  where practical.
 
-### Phase 1: Audit Aura Read/Write Call Sites
+Implementation summary:
+
+- Added `simulation.party.PartyDefinition`, `AbstractPartyDefinition`, and
+  `PartyCatalog`.
+- Added concrete party definitions for `RaidenParty`, `FlinsParty`, and
+  `FlinsParty2`.
+- Added `sample.RunPartySimulation` and `sample.SampleLauncher` so dynamic
+  Gradle party tasks run through one generic entry point.
+- Added `mechanics.rl.GenericRLSimulatorFactory` and changed
+  `RLPartyRegistry` to register RL-enabled catalog parties.
+- Removed party-specific sample wrappers and party-specific RL simulator
+  factories for the migrated parties.
+- Added `sample.PartyCatalogRegressionTest` to cover catalog lookup, fixed setup
+  parity, RL registry membership, and fresh simulator creation.
+
+### Phase 1: Audit Party-Specific Responsibilities - Done
 
 Why first:
 
-The current implementation mixes time-aware expiry with non-time-aware aura unit
-reads. Before changing `Enemy`, identify every call site that reads, writes, or
-serializes aura state so the behavior change is intentional.
+Before introducing generic launchers, identify which responsibilities are truly
+party-specific and which can be moved into shared runtime code.
 
 Target files:
 
-- `src/java/model/entity/Enemy.java`
-- `src/java/simulation/runtime/CombatActionResolver.java`
-- `src/java/mechanics/reaction/ReactionEffectScheduler.java`
-- `src/java/simulation/CombatSimulator.java`
-- `src/java/simulation/runtime/SimulationClock.java`
-- `src/java/simulation/runtime/SwitchManager.java`
-- `src/java/mechanics/rl/ObservationEncoder.java`
-- `src/java/mechanics/rl/PrivilegedStateEncoder.java`
-- `src/java/visualization/*`
+- `src/java/sample/RaidenParty.java`
+- `src/java/sample/FlinsParty.java`
+- `src/java/sample/FlinsParty2.java`
+- `src/java/mechanics/rl/RaidenPartyRLSimulatorFactory.java`
+- `src/java/mechanics/rl/FlinsParty2RLSimulatorFactory.java`
+- `src/java/mechanics/rl/RLPartyRegistry.java`
+- `src/java/mechanics/rl/RLPartySpec.java`
+- `src/java/mechanics/rl/SinglePartyRLEpisodeFactory.java`
+- `src/java/mechanics/rl/MultiPartyRLSimulatorFactory.java`
+- `build.gradle`
+- `src/java/sample/BenchmarkRLJava.java`
+- `src/java/sample/ProfileCharacterCapabilities.java`
+- `src/java/sample/ServeRLJava.java`
 
 Tasks:
 
-- List all uses of `setAura`, `reduceAura`, `getAuraUnits`, `getAuraMap`,
-  `getActiveAuras`, `getPrimaryAura`, and `updateAuras`.
-- Classify each use as:
-  - mechanic decision
-  - reaction aftermath or scheduled tick
-  - report/log snapshot
-  - RL observation
-  - persistence/snapshot restore
-  - sample/debug display
-- Identify callers that currently rely on `getAuraUnits(element)` returning the
-  originally stored units instead of a decayed value.
-- Decide the minimum API surface for current-time-aware reads.
+- Identify all parties with sample entry points and/or RL registrations.
+- For each party, classify code as:
+  - party-specific mechanics/setup
+  - party-specific rotation
+  - generic simulation orchestration
+  - generic reporting
+  - generic RL wiring
+  - legacy CLI compatibility
+- Compare sample and RL setup for registered parties:
+  - enemy level
+  - party order
+  - character constructors
+  - weapons
+  - artifact sets
+  - artifact main stats
+  - substat priorities
+  - minimum ER targets
+  - manual roll behavior
+  - resonance and moonsign calls
+  - logging defaults
+- Decide which value wins when there is a mismatch. The normal sample is the
+  source of truth unless the mismatch is explicitly identified as a sample bug.
+- Identify non-party sample utilities that must keep class-name execution.
+- Define the Gradle dispatch behavior:
+  - party name -> generic simulation runner
+  - legacy sample class -> reflective fallback or explicit task
+  - unknown name -> error with available party/sample names
 
 Acceptance criteria:
 
-- All aura read/write call sites are accounted for.
-- The implementation phases know which call sites must be migrated and which can
-  remain compatibility wrappers.
-- Risky call sites in RL and report generation are explicitly listed.
+- Every party-specific setup/rotation concern has a planned home in a party
+  definition.
+- Every generic sample/RL concern has a planned shared class.
+- Gradle dynamic dispatch behavior is explicit before implementation.
+- Mismatches between existing sample and RL setup have a planned resolution per
+  party.
 
 Test cases to add or update:
 
-- No code changes required unless a call-site inventory test is useful.
+- No production test changes required in this phase.
+- Optional: add a temporary local comparison helper only if it clarifies expected
+  parity values.
 
 Verification:
 
 - `./gradlew classes`
 
-### Phase 2: Implement Time-Aware Aura State
+### Phase 2: Introduce PartyDefinition and PartyCatalog - Done
 
 Why second:
 
-All downstream mechanics should consume one source of truth for current aura
-units. This phase changes the model while keeping the public behavior as close as
-possible except for natural continuous decay.
+The party definition API and catalog must exist before generic simulation or RL
+launchers can use them.
 
 Target files:
 
-- `src/java/model/entity/Enemy.java`
-- `src/java/sample/ReactionRegressionTest.java`
+- new shared package, likely `src/java/simulation/party/` or
+  `src/java/sample/party/`
+- shared party definition interfaces/classes, for example:
+  - `PartyDefinition`
+  - `PartyBuildConfig`
+  - `PartyCatalog`
+  - one concrete definition per party such as `FlinsParty2Definition`
+- sample files only if package visibility requires small access adjustments
 
 Tasks:
 
-- Store enough data in each aura state to compute remaining units at any time:
-  application time, initial units, current units after discrete reductions, and
-  expiry behavior.
-- Add current-time-aware APIs such as:
-  - `getAuraUnits(element, currentTime)`
-  - `getAuraMap(currentTime)`
-  - `getActiveAuras(currentTime)`
-  - `getPrimaryAura(currentTime)`
-- Make `updateAuras(currentTime)` remove naturally expired auras after computing
-  current units.
-- Make `reduceAura(element, amount, currentTime)` consume the decayed current
-  value, then continue natural decay from the remaining value.
-- Keep no-argument methods only as compatibility wrappers, and document their
-  intended use or migrate them away in later phases.
-- Preserve snapshot restore behavior for simulator rollback.
+- Define a small typed API for party definitions:
+  - party name
+  - party order
+  - enemy level
+  - optimization targets
+  - default ER targets for fixed builds
+  - simulator creation from ER targets and roll maps
+  - scripted rotation execution
+- Add concrete definitions for all parties that currently have both sample and
+  RL paths.
+- Add definitions for sample-only parties when they should also be executable by
+  the generic runner.
+- Add simulator creation methods per definition:
+  - optimized/manual-roll setup used by sample optimization
+  - fixed/default setup used by RL and parity tests
+- Keep report generation, CLI behavior, and RL registry types out of party
+  definitions.
+- Keep RL registry types out of shared definitions.
 
 Acceptance criteria:
 
-- A 1U aura naturally reaches zero at its configured expiry instead of staying at
-  1U until deletion.
-- Discrete aura consumption after partial natural decay uses the decayed value.
-- Snapshot restore can still round-trip active aura state.
-- Existing callers compile after API migration stubs are in place.
+- The catalog resolves party definitions by name.
+- Each definition can construct a simulator and execute its rotation.
+- Definitions have no dependency on RL registry classes or Gradle/task concepts.
+- Definitions expose enough data for both generic sample execution and generic
+  RL creation without duplicating artifact configuration.
+- Existing behavior is unchanged because callers are not migrated yet, or
+  migrated only through equivalent wrappers.
 
 Test cases to add or update:
 
-- Normal path: applying 1U at `t=0` returns a positive lower value at mid-duration
-  and `0` at expiry.
-- Error path: zero or negative aura application removes the aura and never
-  returns a negative current value.
-- Boundary values: query before application time, exactly at application time,
-  exactly at expiry, and just after expiry.
-- Major logic unit test: reduce a partially decayed aura and verify the new
-  remaining units and subsequent expiry.
+- Unit-level parity helper: every shared party definition returns a stable party
+  order.
+- Normal path: every shared party definition creates the expected number of party
+  members with expected enemy level and initial moonsign state.
+- Boundary path: null ER target and null roll maps produce valid default setup
+  for every shared definition.
+- Major logic unit test: catalog lookup succeeds for registered party names and
+  fails with a useful message for unknown names.
 
 Verification:
 
-- `./gradlew ReactionRegressionTest`
 - `./gradlew classes`
 
-### Phase 3: Migrate Reaction Mechanics to Current-Time Aura Reads
+### Phase 3: Add Generic Simulation Runner and Gradle Dispatch - Done
 
 Why third:
 
-Once `Enemy` can answer current aura values, reaction decisions and aura
-consumption must use those values. This is the behavioral core of the change.
+Once party definitions exist, sample execution can become generic. Gradle should
+dispatch party names to this generic runner without creating party-specific
+wrapper classes.
 
 Target files:
 
-- `src/java/simulation/runtime/CombatActionResolver.java`
-- `src/java/mechanics/reaction/ReactionEffectScheduler.java`
-- `src/java/model/character/Sucrose.java`
-- other character, weapon, or artifact hooks discovered in Phase 1
-- `src/java/sample/ReactionRegressionTest.java`
+- new generic runner, for example `src/java/sample/RunPartySimulation.java`
+- new launcher, for example `src/java/sample/SampleLauncher.java`
+- `build.gradle`
+- `src/java/sample/RaidenParty.java`
+- `src/java/sample/FlinsParty.java` if it should share a definition now
+- `src/java/sample/FlinsParty2.java`
+- shared party definition classes
+- `src/java/sample/ReportRegressionTest.java` only if report assumptions need
+  adjustment
 
 Tasks:
 
-- Replace mechanic-facing no-argument aura reads with current-time-aware reads.
-- Update reaction loops so active aura sets are based on decayed current units.
-- Update all `reduceAura` calls to pass the current simulator time.
-- Ensure scheduled reaction ticks such as Electro-Charged, Burning, Lunar
-  reactions, and related aftermath consume or inspect decayed aura values.
-- Update aura-dependent passives or absorption checks to use current-time aura.
-- Preserve existing ICD behavior.
+- Add a generic simulation runner that:
+  - accepts a party name
+  - resolves `PartyDefinition`
+  - runs optimizer with `definition.optimizationTargets()`
+  - creates final simulator with optimized ER targets and rolls
+  - starts `StatsRecorder`
+  - calls `definition.executeRotation(sim)`
+  - prints report
+  - generates `output/simulation_report.html`
+  - generates docs report when appropriate
+- Add a generic launcher used by Gradle dynamic tasks:
+  - first resolve task name as a party
+  - otherwise fall back to legacy `sample.<TaskName>` if needed
+  - otherwise print available party names and fail
+- Update `build.gradle` dynamic rule so unknown task names run
+  `sample.SampleLauncher` with the task name as an argument.
+- Remove or stop relying on party-specific sample wrappers after generic runner
+  parity is proven.
 
 Acceptance criteria:
 
-- Reactions no longer trigger from an aura that has naturally decayed to zero.
-- Reactions still trigger correctly while a partially decayed aura remains above
-  zero.
-- Reaction consumption never drives stored aura below zero.
-- Existing sample rotations still complete.
+- `./gradlew FlinsParty2` and `./gradlew RaidenParty` run through the generic
+  launcher without requiring party-specific wrapper classes.
+- Generic runner preserves existing output/report behavior.
+- Legacy non-party sample tasks still run or have explicit replacement tasks.
+- Party-specific sample files no longer own mechanical setup once migrated.
 
 Test cases to add or update:
 
-- Normal integration: apply aura, wait within duration, then trigger a reaction.
-- Error integration: apply aura, wait past expiry, then verify no reaction occurs.
-- Boundary integration: trigger just before and exactly at expiry.
-- Major logic unit test: discrete consumption after partial decay removes or
-  preserves aura according to remaining units.
-- Representative integration: verify Sucrose absorption/passive checks use
-  decayed aura state.
+- Normal integration: `RunPartySimulation` generates the same party character,
+  weapon, and artifact details as the previous party-specific sample.
+- Error path: unknown party name fails with available party names.
+- Boundary path: legacy sample fallback still works for non-party sample classes
+  that remain.
+- Representative integration: generated HTML still contains character, weapon,
+  and artifact details for report-generating parties.
 
 Verification:
 
-- `./gradlew ReactionRegressionTest`
-- `./gradlew FlinsParty2`
 - `./gradlew RaidenParty`
+- `./gradlew FlinsParty2`
+- `./gradlew ReportRegressionTest`
+- `./gradlew classes`
 
-### Phase 4: Migrate Logging, Snapshots, Reports, and RL Observations
+### Phase 4: Replace Party-Specific RL Factories with Generic RL Factory - Done
 
 Why fourth:
 
-After mechanic decisions use decayed aura, every observer must report the same
-state. Otherwise the simulator may be correct while HTML or RL observations show
-stale aura values.
+After generic simulation uses party definitions, RL can use the same catalog
+instead of party-specific RL factory classes.
 
 Target files:
 
-- `src/java/simulation/CombatSimulator.java`
-- `src/java/simulation/SimulatorSnapshot.java`
-- `src/java/simulation/runtime/VisualLoggerSink.java`
-- `src/java/simulation/runtime/SwitchManager.java`
-- `src/java/mechanics/rl/ObservationEncoder.java`
-- `src/java/mechanics/rl/PrivilegedStateEncoder.java`
-- `src/java/visualization/ReportDataBuilder.java`
-- `src/java/visualization/ReportHtmlRenderer.java`
-- `src/java/sample/ReportRegressionTest.java`
+- new generic RL factory, for example `src/java/mechanics/rl/GenericRLSimulatorFactory.java`
+- `src/java/mechanics/rl/RaidenPartyRLSimulatorFactory.java`
+- `src/java/mechanics/rl/FlinsParty2RLSimulatorFactory.java`
+- shared party definition classes
+- `src/java/mechanics/rl/RLPartyRegistry.java`
+- `src/java/mechanics/rl/RLPartySpec.java`
+- `src/java/mechanics/rl/SinglePartyRLEpisodeFactory.java`
+- `src/java/mechanics/rl/MultiPartyRLSimulatorFactory.java`
+- `src/java/sample/ReactionRegressionTest.java` or a new regression entry point
+  if parity checks fit better there
 
 Tasks:
 
-- Make combat logs and timeline records snapshot `enemyAura` using current-time
-  aura values.
-- Make simulator snapshots and restores preserve enough aura state for rollback
-  without flattening natural decay incorrectly.
-- Make RL observations use decayed aura units at the observation time.
-- Update Aura Timeline data generation to include sampled/interpolated current
-  aura units, not only event-time values.
-- Change Aura Timeline line rendering away from staircase mode when displaying
-  continuous decay.
-- Keep report downsampling safe for dense aura series.
+- Add generic RL simulator creation from `PartyDefinition`.
+- Make `RLPartyRegistry` derive registered `RLPartySpec`s from `PartyCatalog`
+  instead of hardcoding party-specific factories.
+- Keep `sim.setLoggingEnabled(false)` as generic RL-only setup.
+- Remove or deprecate party-specific RL simulator factories after parity is
+  covered.
+- Ensure party selection strings used by training/evaluation/benchmark/profile
+  still resolve to the same party names.
 
 Acceptance criteria:
 
-- Timeline aura bars and Aura Timeline agree at the same timestamps.
-- Aura Timeline visibly slopes down over time for naturally decaying aura.
-- RL observation values decrease over time for an untouched aura.
-- Snapshot restore preserves future decay behavior.
+- RL simulator setup is created from the same `PartyDefinition` used by generic
+  sample execution.
+- Party-specific RL simulator factories are no longer needed for registered
+  parties.
+- RL logging remains disabled.
+- RL registry still exposes the same party names and default selection.
 
 Test cases to add or update:
 
-- Normal path: report data includes a midpoint aura value below initial units.
-- Error path: empty/no-aura simulations still generate valid HTML.
-- Boundary values: report includes `0` at or after aura expiry.
-- Major logic unit test: RL observation aura value decreases between two sampled
-  times without reactions.
-- Renderer test: Aura Timeline no longer uses stepped display for continuous
-  aura data.
+- Normal path: generic simulation setup and generic RL setup produce the same
+  enemy level, party order, character names, weapon names, artifact set names,
+  and artifact roll maps when using the same fixed setup.
+- Error path: generic RL factory creates a valid simulator with logging disabled.
+- Boundary path: repeated generic RL factory calls create fresh simulator
+  instances and do not share mutable character state.
+- Major logic unit test: all RL registry specs come from party catalog
+  definitions.
 
 Verification:
 
-- `./gradlew ReportRegressionTest`
-- `./gradlew ReactionRegressionTest`
+- `./gradlew BenchmarkRLJava`
+- `./gradlew ProfileCapabilities` when capability profile regeneration is needed
 - `./gradlew RaidenParty`
 - `./gradlew FlinsParty2`
+- `./gradlew classes`
 
-### Phase 5: Sample Regression and Balance Review
+### Phase 5: Remove Duplication and Document Party Addition Workflow - Done
 
 Why last:
 
-Continuous aura decay changes reaction availability, so sample totals and
-optimizer behavior may shift. This phase validates that shifts are explainable
-and not caused by stale call sites.
+The refactor changes ownership boundaries, so the final phase must make future
+divergence hard to reintroduce and document how to add a party with only a
+definition file/class.
 
 Target files:
 
 - `TASKS.md`
+- `build.gradle`
+- generic launcher/runner classes
+- generic RL factory/registry classes
 - `src/java/sample/RaidenParty.java`
+- `src/java/mechanics/rl/RaidenPartyRLSimulatorFactory.java`
 - `src/java/sample/FlinsParty2.java`
-- `src/java/sample/ReactionRegressionTest.java`
-- `src/java/sample/ReportRegressionTest.java`
-- `README.md` if aura semantics are documented there
+- `src/java/mechanics/rl/FlinsParty2RLSimulatorFactory.java`
+- shared party definition classes
+- `src/java/sample/AGENTS.md`
+- `src/java/mechanics/rl/AGENTS.md`
+- `README.md`
 
 Tasks:
 
-- Run conventional and Lunar sample parties and compare major changes in total
-  damage, reaction counts, and aura timeline shape.
-- Update tests only where the old expectation depended on expiry-only aura
-  behavior.
-- Add documentation for the simplified continuous aura model:
-  - current duration formula
-  - linear decay assumption
-  - discrete reaction consumption
-  - known differences from exact game internals if any remain
-- Manually inspect generated reports for aura readability and chart consistency.
-- Confirm browser console has no JavaScript errors.
+- Remove or reduce party-specific sample/RL classes once generic launch paths are
+  proven.
+- Add or update documentation stating that adding a party requires only a party
+  definition and catalog registration.
+- Document the dynamic Gradle behavior:
+  - `./gradlew <PartyName>` runs the generic simulation runner
+  - non-party sample classes use fallback or explicit tasks
+- Document which differences are allowed:
+  - generic simulation may enable logging/reporting
+  - generic RL may disable logging
+  - both must share mechanical setup and rotation source
+- Run parity checks and relevant sample/RL commands for all registered parties.
+- Record any intentional sample-vs-RL differences in the final handoff.
 
 Acceptance criteria:
 
-- Sample output changes are understood and documented in handoff notes.
-- Regression tests cover continuous decay, expiry boundaries, consumption, and
-  report rendering.
-- Aura Timeline communicates continuous decay clearly without misleading
-  staircase presentation.
-- Existing energy, buff, damage, and reaction report sections still render.
+- New party addition does not require a new simulation entry point or a new RL
+  simulator factory.
+- Future edits to mechanical party setup have one obvious definition to change
+  per party.
+- Sample entry points and RL factories no longer duplicate party setup details.
+- Automated parity coverage protects enemy level, party order, equipment,
+  artifacts, and roll maps for all registered parties.
+- Existing `./gradlew RaidenParty` and `./gradlew FlinsParty2` commands still
+  work.
+- Report generation and RL registry still work.
 
 Manual inspection checklist:
 
-- Aura Timeline slopes down between application and expiry.
-- Aura Timeline reaches zero at expiry.
-- Timeline aura bars match nearby chart values.
-- Reaction events do not appear after aura expiry unless a new aura was applied.
-- Energy, rolling DPS, action damage, buff uptime, and reaction damage charts
-  still render.
-- Narrow viewport does not break chart containers.
+- `build.gradle` dynamic rule points to the generic sample launcher.
+- Generic simulation runner contains orchestration only: optimize, run, report.
+- Generic RL factory contains RL wiring only: spec, supplier, episode factory,
+  logging disabled.
+- Party definitions contain the only party-specific mechanical setup and
+  rotation.
+- HTML report still shows the expected characters, weapons, and artifact sets.
 
 Verification:
 
@@ -388,12 +493,15 @@ Verification:
 - `./gradlew ReactionRegressionTest`
 - `./gradlew RaidenParty`
 - `./gradlew FlinsParty2`
+- `./gradlew BenchmarkRLJava`
+- `./gradlew ProfileCapabilities` when capability profile regeneration is needed
 - Manual browser inspection of `output/simulation_report.html`
 
 Status note:
 
-- Implemented. Continuous aura decay is live across mechanics, logging,
-  snapshots, RL observations, and the HTML Aura Timeline.
+- Implemented. `ProfileCapabilities` is intentionally not required for routine
+  verification because it is expensive on local machines and rewrites capability
+  profile data.
 
 ## Cross-Cutting Rules
 

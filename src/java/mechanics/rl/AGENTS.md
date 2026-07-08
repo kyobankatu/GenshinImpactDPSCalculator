@@ -9,8 +9,7 @@
 ## Java files in this directory
 - `RLPartyRegistry.java`: central registry for RL-available parties and selection parsing used by training, evaluation, profiling, and benchmarks.
 - `RLPartySpec.java`: declarative metadata for one RL-usable party.
-- `FlinsParty2RLSimulatorFactory.java`: creates the fixed Flins/Ineffa/Columbina/Sucrose simulator and exposes a registry-ready party spec.
-- `RaidenPartyRLSimulatorFactory.java`: creates the registered Raiden National RL simulator.
+- `GenericRLSimulatorFactory.java`: creates RL simulators and registry specs from shared `simulation.party.PartyDefinition` instances.
 - `MultiPartyRLSimulatorFactory.java`: selects registered party specs and creates episodes across one or more party catalogs.
 - `RLEpisodeFactory.java`: common factory interface for creating RL episodes.
 - `SinglePartyRLEpisodeFactory.java`: factory wrapper for fixed single-party episode creation.
@@ -39,7 +38,7 @@
 
 ## Agent guidance
 - Treat observation layout, action IDs, and action-mask semantics as protocol-level behavior. Changing them requires coordinated rollout and learner updates.
-- Treat the party registry as the primary extension point for new RL teams. Adding a new RL party should mean adding a factory/spec and registering it once.
+- Treat `simulation.party.PartyCatalog` as the primary extension point for new teams. Adding a new RL-capable party should mean adding one party definition and enabling it for RL, not adding a party-specific RL factory.
 - Keep RL boundary translation explicit. Do not leak RL action IDs into core simulator control flow.
 - If you change reward, observation, privileged observation, action validation, role summaries, or protocol framing, verify `ServeRLJava`, the Python learner scripts, and `BenchmarkRLJava`.
 - If you change party selection or report naming semantics, verify `evaluate_policy.py`, `train_recurrent_ppo.py`, and the local shell wrappers still match the Java-side behavior.
