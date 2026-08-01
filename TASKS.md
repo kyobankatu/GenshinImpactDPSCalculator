@@ -56,8 +56,8 @@ his Burst retains 2U without entering a Burst ICD group.
 The B-023 correction is complete. Raiden's Skill and Burst cast metadata and
 Musou Isshin Normal/Charged shared ICD group now match their sourced contracts.
 
-The active queue is B-024: recasting Raiden's Skill must cancel the previous
-Eye periodic event so one refreshed Eye, not two overlapping streams, remains.
+The B-024 correction is complete. Recasting Raiden's Skill now cancels the
+previous Eye periodic event, leaving one refreshed stream.
 
 ## Scope
 
@@ -2970,7 +2970,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phases 1-2 are complete and Phase 3 remains.
+- Implemented and verified; Phases 1-3 are complete.
 - Requirement: recasting Transcendence: Baleful Omen replaces the previous Eye
   periodic stream and refreshes its duration without overlapping attacks.
 
@@ -3070,7 +3070,7 @@ Verification:
 - `./gradlew build`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Accept the RaidenParty Eye-Refresh Delta
+### Phase 3: Accept the RaidenParty Eye-Refresh Delta - Done
 
 Why last:
 
@@ -3106,6 +3106,16 @@ Verification:
 - two fresh `./gradlew RaidenParty` runs
 - `python scripts/validate_agent_assets.py` when baseline gate changes
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Regression covers non-cancelled cadence, idempotent pre-due cancellation, no
+  cancelled callback, and actual Raiden replacement timestamps.
+- Both post-fix `RaidenParty` payloads report 1,361,340 damage / 64,826 DPS and
+  match after excluding Gradle's elapsed-time line, with SHA-256
+  `df040feaf6c35da05783cca75d2992824d3246c654fc917e050888588b9586f4`.
+- After the 14.2-second recast, only replacement hits at 15.6, 16.5, 17.4,
+  18.3, 19.2, 20.1, and 21.0 seconds remain; all stale old-stream hits are gone.
 
 ## Cross-Cutting Rules
 

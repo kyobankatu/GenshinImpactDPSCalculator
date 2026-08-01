@@ -550,7 +550,7 @@ experiment record.
 
 ### B-024 — Raiden Skill recast leaves two Eye event streams active
 
-- Status: `planned`
+- Status: `done`
 - Source: 2 (observable audited-sample duplicate output)
 - Symptom: the 14.2-second Skill recast registers a second 0.9-second periodic
   Eye event without ending the first; the final trace contains old-stream hits
@@ -570,4 +570,10 @@ experiment record.
   idempotent `PeriodicDamageEvent` cancellation and let Raiden retain only the
   current event handle. Pre-fix audited `RaidenParty` baseline is 1,402,417
   damage / 66,782 DPS. See `TASKS.md` implementation block
-  `Raiden Eye Refresh Lifecycle`.
+  `Raiden Eye Refresh Lifecycle`. Completed 2026-08-02. Timer and actual-Raiden
+  regression cover idempotent cancellation and replacement cadence. Both
+  post-fix `RaidenParty` payloads report 1,361,340 damage / 64,826 DPS with
+  normalized SHA-256
+  `df040feaf6c35da05783cca75d2992824d3246c654fc917e050888588b9586f4`.
+  The final trace contains only the seven replacement-stream hits from 15.6
+  through 21.0 seconds after the 14.2-second recast.
