@@ -39,7 +39,7 @@ Checks the router does not select but that a change may still require:
 
 `README.md` records the current audited totals:
 
-- `./gradlew RaidenParty`: 1,362,938 total damage / 64,902 DPS
+- `./gradlew RaidenParty`: 1,440,416 total damage / 68,591 DPS
 - `./gradlew FlinsParty2`: 15,892,535 total damage / 233,028 DPS
 
 A change to either number is a reportable result. If the change is intended, update `README.md` in the same

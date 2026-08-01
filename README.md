@@ -214,11 +214,13 @@ current audited benchmark parties are `RaidenParty` and `FlinsParty2`.
 
 Known simplifications:
 
-- `RaidenParty`: Xingqiu orbital rain swords are modeled as zero-damage Hydro
-  aura ticks, the party definition explicitly opts into Xiangling Chili pickup,
-  and Skyward Spine random Vacuum Blade procs can make optimizer/sample output
-  nondeterministic. Generic Xiangling simulations do not pick up the chili
-  unless their party definition enables that assumption.
+- `RaidenParty`: Xingqiu's contact-based orbital Rain Swords are modeled as
+  zero-damage 1U Hydro pulses every 2.25 seconds, while his separate Raincutter
+  sword waves deal Burst damage. Continuous enemy contact is assumed. The party
+  definition explicitly opts into Xiangling Chili pickup, and Skyward Spine
+  random Vacuum Blade procs can make optimizer/sample output nondeterministic.
+  Generic Xiangling simulations do not pick up the chili unless their party
+  definition enables that assumption.
 - `FlinsParty2`: defensive shield HP is logged but not consumed by enemy attacks,
   Columbina treats every Lunar reaction during Gravity Ripple as nearby because
   field position is not simulated, and her Thundercloud extra strikes use 33%
@@ -252,7 +254,7 @@ model above and does not model multi-target or per-enemy aura gauges.
 Latest validation baseline from the accuracy pass:
 
 - `./gradlew ReactionRegressionTest`
-- `./gradlew RaidenParty`: 1,362,938 total damage / 64,902 DPS
+- `./gradlew RaidenParty`: 1,440,416 total damage / 68,591 DPS
 - `./gradlew FlinsParty2`: 15,892,535 total damage / 233,028 DPS
 - `./gradlew BenchmarkRLJava`
 - `./gradlew ProfileCapabilities`

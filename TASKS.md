@@ -27,9 +27,9 @@ The current autonomous session is simulator-only. Python RL training and the
 Java RL bridge are excluded; the retained NCCL/DDP plan below is paused until a
 future explicit user request.
 
-The Xingqiu orbital Hydro application correction is now active. Its sourced
-contract and current `RaidenParty` baseline are complete; implementation and
-integration validation remain.
+The Xingqiu orbital Hydro application correction is complete. Orbital Rain
+Swords now use their sourced 2.25-second application cadence independently from
+the damaging Raincutter sword-wave ICD.
 
 ## Scope
 
@@ -515,8 +515,8 @@ Status note:
 
 Status:
 
-- In progress.
-- Phases 1-2 are complete; Phase 3 remains.
+- Implemented.
+- Phases 1-3 are complete.
 - Requirement: Xingqiu's non-damaging orbital Rain Swords must apply Hydro on
   their sourced 2.25-second contact cadence without inheriting the separate
   Raincutter sword-wave three-hit ICD rule.
@@ -637,7 +637,7 @@ Verification:
 - `./gradlew build`
 - `./gradlew ReactionRegressionTest`
 
-### Phase 3: Validate the Party Delta and Close the Accuracy Note
+### Phase 3: Validate the Party Delta and Close the Accuracy Note - Done
 
 Why last:
 

@@ -34,7 +34,7 @@ experiment record.
 
 ### B-001 — Xingqiu orbital rain swords deal no damage
 
-- Status: `planned`
+- Status: `done`
 - Source: 1 (README known simplifications)
 - Symptom: the premise conflated zero-damage orbital contact pulses with the
   separate damaging Raincutter sword waves. Direct damage already exists, but
@@ -50,7 +50,11 @@ experiment record.
   https://library.keqingmains.com/characters/hydro/xingqiu and
   https://library.keqingmains.com/evidence/characters/hydro/xingqiu.
   Pre-fix `RaidenParty`: 1,362,938 damage / 64,902 DPS; Xingqiu contributed
-  269,959 damage (19.8%). Implementation is planned in `TASKS.md`.
+  269,959 damage (19.8%). Completed 2026-08-01 by making the 2.25-second event
+  cadence own orbital application while preserving zero damage, 1U Hydro, and
+  the separate damaging Raincutter path. Three post-fix runs all produced
+  1,440,416 damage / 68,591 DPS with Xingqiu at 283,683 damage (19.7%). The
+  single-target simulator still assumes continuous enemy contact.
 
 ### B-002 — Xiangling Chili pickup is assumed
 
