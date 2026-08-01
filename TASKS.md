@@ -160,10 +160,10 @@ The B-056 through B-063 reaction-state passes are complete. The current B-064
 pass adds Overload's target-wide 0.1-second and owner-specific 0.5-second damage
 limits while preserving every reaction notification and gauge transition.
 
-The B-064 Overload, B-066 standard Crystallize, B-067 Superconduct, and B-068
-Shatter sequence passes are complete. The current B-069 pass corrects active
-standard Electro-Charged reapplications so they refresh the next tick's owner
-and damage snapshot without dealing another immediate damage instance.
+The B-064 Overload, B-066 standard Crystallize, B-067 Superconduct, B-068
+Shatter, and B-069 standard Electro-Charged refresh passes are complete. Active
+standard reapplications now refresh the next tick's typed owner and damage
+snapshot without dealing another immediate damage instance.
 
 ## Scope
 
@@ -11415,8 +11415,8 @@ Completion evidence:
 
 ## Implementation Order: Standard Electro-Charged Refresh Ownership
 
-Status: Phases 1-2 are complete. Snapshot-safe standard Electro-Charged refresh
-ownership is implemented; Phase 3 will accept deterministic catalog baselines.
+Status: Phases 1-3 are complete. Snapshot-safe standard Electro-Charged refresh
+ownership and deterministic catalog baselines are accepted.
 
 Scope:
 
@@ -11566,7 +11566,7 @@ Completion evidence:
   pass. Routed validation reports no leaks; RL-routed catalog/rollout checks were
   not run under this session's explicit simulator-only boundary.
 
-### Phase 3: Accept Electro-Charged Catalog Baselines - Pending
+### Phase 3: Accept Electro-Charged Catalog Baselines - Done
 
 Why third:
 
@@ -11604,6 +11604,28 @@ Verification:
 - two fresh `./gradlew --no-daemon FlinsParty` runs
 - two fresh `./gradlew --no-daemon FlinsParty2` runs
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Two fresh no-daemon runs per party are pairwise exact after removing only the
+  Gradle elapsed-success line. Normalized SHA-256 is
+  `dc46bf544a8c07c2db8177bf1f9f4b8114bd7bd6e4f29fdd35230823694b2ac0`
+  for Raiden; Flins and Flins2 exactly retain B-068 hashes
+  `9b0b3556ca8f4eb799e6965156aab3bc70e512c7056cdf7e0202572c3996e464`
+  and `23dc585acc02d3bd7bca7fe3f5b65db62b3e1489fcedb12a02b9725b774b7dd4`.
+- Raiden changes from 1,352,375/64,399 to 1,307,990/62,285. Its 21 standard
+  immediate/reapplication damage lines become eight new-sequence immediate hits
+  plus thirteen deferred active refreshes; all eleven periodic ticks remain.
+  Removing untyped `Thundercloud` attribution and crediting those ticks to the
+  latest owner fully explains the per-character breakdown. ER remains
+  Bennett/Raiden/Xingqiu/Xiangling 100/175/179/174%.
+- Flins and Flins2 remain 22,675,823/227,898 and 15,817,125/228,902. Their
+  ER/cadence and Lunar breakdowns are byte-identical to B-068.
+- Action/reaction/DoT/ordinary-ICD counts remain 152/55/11/38,
+  613/230/48/88, and 468/140/33/71. All six logs contain zero
+  warning/error/failed-action/insufficient-energy matches.
+- README documents standard refresh ownership and accepted baselines. The
+  tracked generated report was restored and no generated output is staged.
 
 ## Implementation Order: Shatter Damage Sequence
 

@@ -1880,7 +1880,7 @@ experiment record.
 
 ### B-069 — Active standard Electro-Charged refreshes retain stale tick ownership
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 3 (README simplification audit plus KQM/gcsim evidence)
 - Symptom: every standard Electro-Charged reapplication deals another immediate
   damage instance, while its active timer closure retains the first trigger's
@@ -1904,3 +1904,13 @@ experiment record.
   https://library.keqingmains.com/evidence/combat-mechanics/elemental-effects/transformative-reactions#electro-charged-snapshots-em-until-reapplying,
   https://library.keqingmains.com/evidence/combat-mechanics/elemental-effects/transformative-reactions#electro-charged-icd,
   and https://github.com/genshinsim/gcsim/blob/main/pkg/reactable/electrocharged.go.
+  Completed with immutable latest-owner/pre-resistance state, typed periodic
+  attribution, and snapshot forwarding. Focused regression covers low/high-EM
+  owner replacement, active refreshes at 0.2/0.6 seconds, continued notification
+  and Aura application, owner-specific damage, live RES, B-056 timing, Lunar
+  no-change, and payload restore. Raiden's 13 formerly immediate active refreshes
+  are now deferred while all 11 periodic ticks remain and move from
+  `Thundercloud` to their typed owner. Its accepted result is 1,307,990 damage /
+  62,285 DPS with normalized hash
+  `dc46bf544a8c07c2db8177bf1f9f4b8114bd7bd6e4f29fdd35230823694b2ac0`.
+  Flins/Flins2 retain B-068 hashes, totals, and event counts exactly.

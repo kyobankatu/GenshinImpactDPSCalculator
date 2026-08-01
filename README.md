@@ -230,9 +230,10 @@ Known simplifications:
   plus source-class decay. Overload and Superconduct preserve any positive aura
   remaining after their sourced full-gauge consumption. Standard Electro-Charged
   wakes at premature Aura expiry and suppresses terminal damage within 0.5
-  seconds of the prior tick. Overload damage follows its target and owner damage
-  sequence limits. The accepted set-aware result is 1,352,375 damage / 64,399
-  DPS over 21.0 seconds.
+  seconds of the prior tick. Active reapplications update the next periodic
+  tick's typed owner and EM snapshot without dealing another immediate reaction
+  hit. Overload damage follows its target and owner damage sequence limits. The
+  accepted set-aware result is 1,307,990 damage / 62,285 DPS over 21.0 seconds.
 - `FlinsParty2`: defensive shield HP is logged but not consumed by enemy attacks,
   Columbina treats every Lunar reaction during Gravity Ripple as nearby because
   field position is not simulated, and her Thundercloud extra strikes use 33%
@@ -279,6 +280,11 @@ Elemental Gauge Theory contract:
 - **Discrete consumption**: reactions (Vaporize, Swirl, Electro-Charged ticks,
   Quicken, etc.) consume the decayed *current* value at the reaction time, then
   natural decay resumes from the remaining units.
+- **Standard Electro-Charged refresh**: a new sequence deals its immediate
+  reaction hit, while active reapplications only notify, reapply their source
+  Aura, and replace the next tick's typed owner/pre-resistance damage snapshot.
+  Periodic damage is credited to that `CharacterId` and resolves Electro RES at
+  impact. Snapshot rollback preserves the latest payload.
 - **Simultaneous priority**: ordinary coexisting Auras use an explicit
   trigger-specific reaction order rather than target-map iteration. For example,
   Pyro attempts Overload before Vaporize and Anemo attempts Electro Swirl before
@@ -328,14 +334,14 @@ Known differences from exact game internals: Frozen interactions for Electro,
 Anemo, and Geo plus unrelated coexisting-Aura priority, trigger residuals,
 resistance, hitlag, and poise; a separately reactable 2U
 Burning Aura and Burning's 1U Pyro reapplication ICD; Swirl spread;
-Electro-Charged ownership/damage-ICD/hitlag interactions; and some reaction
+Electro-Charged multi-target damage-ICD/hitlag interactions; and some reaction
 gauge modifiers remain simplified. The simulator also does not model
 multi-target or per-enemy aura gauges.
 
 Latest validation baseline from the accuracy pass:
 
 - `./gradlew ReactionRegressionTest`
-- `./gradlew RaidenParty`: 1,352,375 total damage / 64,399 DPS
+- `./gradlew RaidenParty`: 1,307,990 total damage / 62,285 DPS
 - `./gradlew FlinsParty`: 22,675,823 total damage / 227,898 DPS
 - `./gradlew FlinsParty2`: 15,817,125 total damage / 228,902 DPS
 - `./gradlew BenchmarkRLJava`
