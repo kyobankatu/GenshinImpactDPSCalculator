@@ -1583,8 +1583,8 @@ Completion evidence:
 
 Status:
 
-- In progress.
-- Phases 1-2 are complete; Phase 3 remains.
+- Implemented and verified.
+- Phases 1-3 are complete.
 - Requirement: the standard Burst initial hit must apply 1U without ICD while
   every delayed middle and final hit retains direct Lunar damage at 0U/no-ICD.
 
@@ -1692,7 +1692,7 @@ Verification:
 - `./gradlew build`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Confirm the Unchanged FlinsParty2 Baseline
+### Phase 3: Confirm the Unchanged FlinsParty2 Baseline - Done
 
 Why last:
 
@@ -1725,6 +1725,15 @@ Verification:
 
 - two fresh `./gradlew FlinsParty2` runs
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Both simulator payloads matched with SHA-256
+  `a9cdfbf0d3a0a01356d9d113afdd7f0afe8ef8510494f4b193107d533c8dbb6e`
+  after excluding Gradle's elapsed-time status line.
+- Both logs contained zero standard-Burst hits, as expected for this rotation.
+- The accepted result remains 15,434,039 damage / 226,306 DPS, so README and
+  the verification gate require no numeric update.
 
 ## Cross-Cutting Rules
 

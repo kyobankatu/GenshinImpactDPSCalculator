@@ -308,7 +308,7 @@ experiment record.
 
 ### B-015 — Flins standard Burst delayed hits incorrectly apply Electro
 
-- Status: `planned`
+- Status: `done`
 - Source: 1 (source audit of adjacent Flins Burst metadata)
 - Symptom: the standard Burst initial, middle, and final actions omit explicit
   ICD metadata and therefore normalize to 1U/Standard under the neutral tag.
@@ -328,4 +328,9 @@ experiment record.
   https://library.keqingmains.com/characters/electro/flins. The current
   `FlinsParty2` rotation does not execute the standard Burst, so its pre-fix
   baseline remains 15,434,039 damage / 226,306 DPS. See `TASKS.md`
-  implementation block `Flins Standard Burst Elemental Application`.
+  implementation block `Flins Standard Burst Elemental Application`. Completed
+  2026-08-02. Two post-fix simulator payloads matched after excluding Gradle's
+  elapsed-time line, with SHA-256
+  `a9cdfbf0d3a0a01356d9d113afdd7f0afe8ef8510494f4b193107d533c8dbb6e`.
+  Both logs contained zero standard-Burst hits and retained the accepted
+  15,434,039 damage / 226,306 DPS baseline.
