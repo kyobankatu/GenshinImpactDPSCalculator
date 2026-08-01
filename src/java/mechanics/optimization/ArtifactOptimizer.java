@@ -6,6 +6,7 @@ import model.standards.KQMSConstants;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * Generates a simulated artifact stat block following the KQM Standard (KQMS)
@@ -40,6 +41,7 @@ import java.util.HashMap;
  * main-stat piece that uses that stat type (KQMS rule).
  */
 public class ArtifactOptimizer {
+    private static final double MIN_ER_TOLERANCE = 1e-9;
 
     /**
      * Configuration passed to {@link ArtifactOptimizer#generate} to control which
@@ -277,12 +279,50 @@ public class ArtifactOptimizer {
             remainingRolls--;
         }
 
+        validateMinimumEnergyRecharge(
+                config, charBaseStats, weaponStats, setBonusStats, artifactStats);
+
         // Print Breakdown
         System.out.println(
                 String.format("   [Artifact Optimizer] Generated for Config (MinER: %.1f%%):", config.minER * 100));
         // ... (Keep existing logs simplified or assume they are there)
 
         return new OptimizationResult(artifactStats, usedLiquidRolls);
+    }
+
+    /**
+     * Verifies that generated static stats satisfy the configured ER minimum.
+     *
+     * <p>An infeasible target is a configuration error, not a best-effort
+     * result. Returning an underfilled build would let later optimizer phases
+     * silently reserve too few ER rolls and execute an invalid rotation.</p>
+     *
+     * @param config        artifact generation configuration
+     * @param charBaseStats character base stats
+     * @param weaponStats   equipped weapon stats
+     * @param setBonusStats static artifact set bonus stats
+     * @param artifactStats generated main and substat block
+     * @throws IllegalStateException if achieved ER is below {@code config.minER}
+     */
+    private static void validateMinimumEnergyRecharge(
+            OptimizationConfig config,
+            StatsContainer charBaseStats,
+            StatsContainer weaponStats,
+            StatsContainer setBonusStats,
+            StatsContainer artifactStats) {
+        double achievedER = getTotal(
+                StatType.ENERGY_RECHARGE,
+                charBaseStats,
+                weaponStats,
+                setBonusStats,
+                artifactStats);
+        if (achievedER + MIN_ER_TOLERANCE < config.minER) {
+            throw new IllegalStateException(String.format(
+                    Locale.ROOT,
+                    "ENERGY_RECHARGE target unreachable: requested %.3f%% but achieved %.3f%% under KQMS roll constraints",
+                    config.minER * 100.0,
+                    achievedER * 100.0));
+        }
     }
 
     /**

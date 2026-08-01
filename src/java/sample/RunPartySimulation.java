@@ -26,32 +26,28 @@ public final class RunPartySimulation {
 
     public static void run(String partyName) {
         PartyDefinition definition = PartyCatalog.require(partyName);
-        try {
-            System.out.println(definition.displayName());
+        System.out.println(definition.displayName());
 
-            TotalOptimizationResult optimization = OptimizerPipeline.run(
-                    definition::createSimulator,
-                    definition::executeRotation,
-                    definition.optimizationTargets());
+        TotalOptimizationResult optimization = OptimizerPipeline.run(
+                definition::createSimulator,
+                definition::executeRotation,
+                definition.optimizationTargets());
 
-            System.out.println("\n--- Starting Final Simulation ---");
-            VisualLogger.getInstance().clear();
+        System.out.println("\n--- Starting Final Simulation ---");
+        VisualLogger.getInstance().clear();
 
-            CombatSimulator sim = definition.createSimulator(optimization.erTargets, optimization.partyRolls);
-            StatsRecorder recorder = new StatsRecorder(sim, 0.1);
-            recorder.startRecording();
+        CombatSimulator sim = definition.createSimulator(optimization.erTargets, optimization.partyRolls);
+        StatsRecorder recorder = new StatsRecorder(sim, 0.1);
+        recorder.startRecording();
 
-            definition.executeRotation(sim);
+        definition.executeRotation(sim);
 
-            sim.printReport();
-            List<SimulationRecord> records = VisualLogger.getInstance().getRecords();
-            List<mechanics.analysis.StatsSnapshot> snapshots = recorder.getSnapshots();
-            HtmlReportGenerator.generate("simulation_report.html", records, sim, snapshots);
-            if (definition.publishDocsReport()) {
-                HtmlReportGenerator.generateForDocs("simulation_report.html", records, sim, snapshots);
-            }
-        } catch (Throwable e) {
-            e.printStackTrace();
+        sim.printReport();
+        List<SimulationRecord> records = VisualLogger.getInstance().getRecords();
+        List<mechanics.analysis.StatsSnapshot> snapshots = recorder.getSnapshots();
+        HtmlReportGenerator.generate("simulation_report.html", records, sim, snapshots);
+        if (definition.publishDocsReport()) {
+            HtmlReportGenerator.generateForDocs("simulation_report.html", records, sim, snapshots);
         }
     }
 }

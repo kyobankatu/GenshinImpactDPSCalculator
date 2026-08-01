@@ -83,8 +83,10 @@ the same stochastic scenario without changing generic randomness. The stable
 trace exposed a separate ER-feasibility defect recorded as B-033.
 
 The B-033 ER-feasibility correction is in progress. Artifact generation will
-reject unmet `minER` contracts, and `FlinsParty` will request only the three
-Sucrose Bursts its fixed loadout and rotation energy can legally sustain.
+reject unmet `minER` contracts, `FlinsParty` will request only the three
+Sucrose Bursts its fixed loadout and rotation energy can legally sustain, and
+catalog parties will include equipped artifact-set static stats in allocation.
+Fatal sample configuration errors will propagate to the Gradle caller.
 
 ## Scope
 
@@ -4206,7 +4208,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phase 1 is complete and Phases 2-3 remain.
+- In progress; Phases 1-2 are complete and Phase 3 remains.
 - Requirement: artifact generation must never return a build below its declared
   `minER`, and `FlinsParty` must use a deterministic Burst cadence that is
   feasible under its KQMS loadout instead of relying on an impossible target.
@@ -4220,13 +4222,22 @@ Scope:
 - Remove the second Sucrose Burst request from each `FlinsParty` loop while
   retaining its Skill and the first Burst, yielding three evenly repeated
   Burst casts across the full sample.
+- Include equipped artifact-set static stats for every catalog-party allocation.
+  This corrects Emblem and Silken ER reservation without special-casing either
+  set in the optimizer.
+- Emblem of Severed Fate's static 20% ER makes RaidenParty Xingqiu's target legal.
+  The new invariant initially exposed Xingqiu's 178.829% cyclic target as above
+  an incorrectly calculated 166.120% cap; the real set-aware cap is 186.120%.
+- Propagate fatal generic sample failures instead of printing them and returning
+  a successful process status.
 - Cover exact feasible and just-over-cap ER boundaries plus repeated full-party
   acceptance.
 
 Out of scope for this pass:
 
-- Raising or bypassing KQMS per-stat/liquid-roll caps, auto-changing main stats,
-  weapons, artifacts, or party members, or clamping an ER requirement.
+- Raising or bypassing KQMS per-stat/liquid-roll caps, changing main stats,
+  automatically substituting weapons, artifacts, or party members, or clamping
+  an ER requirement.
 - Changing `EnergyAnalyzer` replay math, optimizer DPS hill-climbing, character
   energy generation, action cooldowns, RL contracts, or generated reports.
 - Claiming the revised sample rotation is globally DPS-optimal; it is a legal,
@@ -4288,7 +4299,7 @@ Verification:
   both Sucrose Burst sites in `FlinsPartyDefinition`
 - `python scripts/preflight.py --run`
 
-### Phase 2: Reject Underfilled ER and Use a Legal Burst Cadence
+### Phase 2: Reject Underfilled ER and Use a Legal Burst Cadence - Done
 
 Why second:
 
@@ -4300,6 +4311,9 @@ Target files:
 
 - `src/java/mechanics/optimization/ArtifactOptimizer.java`
 - `src/java/simulation/party/FlinsPartyDefinition.java`
+- `src/java/simulation/party/FlinsParty2Definition.java`
+- `src/java/simulation/party/RaidenPartyDefinition.java`
+- `src/java/sample/RunPartySimulation.java`
 - `src/java/sample/ReactionRegressionTest.java`
 - `src/java/mechanics/optimization/AGENTS.md`
 - `TASKS.md`
@@ -4312,7 +4326,12 @@ Tasks:
   caps or priorities.
 - Remove only the later Sucrose Burst in each outer loop; retain the associated
   Skill for damage, particles, and buff behavior.
-- Verify unaffected audited parties retain their accepted baselines.
+- Pass actual static set stats for each catalog-party character so allocation
+  and feasibility validation match the subsequently equipped artifact object.
+- Let fatal optimizer and simulator failures escape the generic runner so Gradle
+  reports a failed task.
+- Verify FlinsParty2 retains its accepted baseline and re-accept RaidenParty if
+  correcting its set-aware ER reservation changes the optimized roll result.
 
 Acceptance criteria:
 
@@ -4321,7 +4340,8 @@ Acceptance criteria:
 - Manual ER rolls that underfill `minER` fail through the same invariant.
 - `FlinsParty` creates and optimizes successfully with exactly three requested
   and three executed Sucrose Bursts and no insufficient-energy warning.
-- RaidenParty and FlinsParty2 accepted totals remain unchanged.
+- RaidenParty satisfies Xingqiu's cyclic ER target with its existing ATK% sands
+  and completes without a hidden exception; FlinsParty2 retains its accepted total.
 
 Test cases to add or update:
 
@@ -4329,6 +4349,8 @@ Test cases to add or update:
 - Boundary: target one micro-unit above the maximum throws.
 - Abnormal: explicit insufficient manual ER allocation throws.
 - Integration: three-loop `FlinsParty` requests no unsupported second Burst.
+- Integration: RaidenParty completes with set-aware feasible Xingqiu ER and a
+  real nonzero process failure would surface for any future fatal configuration.
 
 Verification:
 
@@ -4340,6 +4362,20 @@ Verification:
 - `./gradlew FlinsParty2`
 - `python scripts/agent_validate.py --path src/java/mechanics/optimization/ArtifactOptimizer.java --path src/java/simulation/party/FlinsPartyDefinition.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Exact-cap heuristic allocation succeeds; a target 0.0001 percentage points
+  above it and an insufficient manual ER allocation both fail through the same
+  requested/achieved `ENERGY_RECHARGE` diagnostic.
+- Catalog party definitions now pass equipped artifact-set static stats into
+  allocation. RaidenParty converges at Xingqiu 179% and Xiangling 174%, reserves
+  nine Xingqiu ER rolls, and reports 1,317,080 damage / 62,718 DPS over 21.0s.
+- FlinsParty completes with exactly three Sucrose Burst casts, no energy or
+  feasibility warning, and 18,765,805 damage / 188,601 DPS over 99.5s.
+- FlinsParty2 retains 14,077,198 damage / 203,722 DPS over 69.1s.
+- ReactionRegressionTest, PartyCatalogRegressionTest, build, Javadoc, routed
+  agent validation, and all three sample smoke runs pass.
 
 ### Phase 3: Accept Feasible Deterministic Party Output
 
@@ -4368,7 +4404,8 @@ Acceptance criteria:
 - Repeated complete payloads match and contain three successful Sucrose Bursts.
 - No artifact ER infeasibility exception or insufficient-energy warning occurs.
 - README and ledger describe the accepted behavior without changing audited
-  RaidenParty/FlinsParty2 baselines.
+  FlinsParty2 baseline; any set-aware RaidenParty baseline change is explicitly
+  re-accepted rather than hidden.
 - Preflight passes and no generated report is staged.
 
 Test cases to add or update:

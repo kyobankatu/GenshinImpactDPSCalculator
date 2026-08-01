@@ -150,7 +150,7 @@ public final class RaidenPartyDefinition extends AbstractPartyDefinition {
                 raidenConfig,
                 raiden.getBaseStats(),
                 raiden.getWeapon().getStats(),
-                raiden.getWeapon().getStats().merge(new StatsContainer()));
+                emblemSetBonusStats());
         raiden.setArtifacts(new EmblemOfSeveredFate(resultRaiden.stats));
         raiden.setArtifactRolls(resultRaiden.rolls);
         sim.addCharacter(raiden);
@@ -167,7 +167,7 @@ public final class RaidenPartyDefinition extends AbstractPartyDefinition {
             xqConfig.manualRolls = partyManualRolls.get(CharacterId.XINGQIU);
         }
         ArtifactOptimizer.OptimizationResult resultXq = ArtifactOptimizer.generate(
-                xqConfig, xingqiu.getBaseStats(), xingqiu.getWeapon().getStats(), new StatsContainer());
+                xqConfig, xingqiu.getBaseStats(), xingqiu.getWeapon().getStats(), emblemSetBonusStats());
         xingqiu.setArtifacts(new EmblemOfSeveredFate(resultXq.stats));
         xingqiu.setArtifactRolls(resultXq.rolls);
         sim.addCharacter(xingqiu);
@@ -185,7 +185,7 @@ public final class RaidenPartyDefinition extends AbstractPartyDefinition {
             xlConfig.manualRolls = partyManualRolls.get(CharacterId.XIANGLING);
         }
         ArtifactOptimizer.OptimizationResult resultXl = ArtifactOptimizer.generate(
-                xlConfig, xiangling.getBaseStats(), xiangling.getWeapon().getStats(), new StatsContainer());
+                xlConfig, xiangling.getBaseStats(), xiangling.getWeapon().getStats(), emblemSetBonusStats());
         xiangling.setArtifacts(new EmblemOfSeveredFate(resultXl.stats));
         xiangling.setArtifactRolls(resultXl.rolls);
         sim.addCharacter(xiangling);
@@ -202,11 +202,23 @@ public final class RaidenPartyDefinition extends AbstractPartyDefinition {
             bennettConfig.manualRolls = partyManualRolls.get(CharacterId.BENNETT);
         }
         ArtifactOptimizer.OptimizationResult resultBennett = ArtifactOptimizer.generate(
-                bennettConfig, bennett.getBaseStats(), bennett.getWeapon().getStats(), new StatsContainer());
+                bennettConfig,
+                bennett.getBaseStats(),
+                bennett.getWeapon().getStats(),
+                new NoblesseOblige(new StatsContainer()).getStats());
         bennett.setArtifacts(new NoblesseOblige(resultBennett.stats));
         bennett.setArtifactRolls(resultBennett.rolls);
         sim.addCharacter(bennett);
 
         ResonanceManager.applyResonances(sim);
+    }
+
+    /**
+     * Returns the static stats supplied by the equipped Emblem set.
+     *
+     * @return a fresh set-stat container for artifact allocation
+     */
+    private static StatsContainer emblemSetBonusStats() {
+        return new EmblemOfSeveredFate(new StatsContainer()).getStats();
     }
 }

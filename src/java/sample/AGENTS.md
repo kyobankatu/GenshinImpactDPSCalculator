@@ -29,4 +29,5 @@
 - If you change action keys, boundary labels, cooldown expectations, or team composition assumptions, update these scripts as needed.
 - Keep these files explicit and readable. They serve as integration tests and usage documentation more than reusable library code.
 - When adding a new party, prefer adding one `simulation.party.PartyDefinition` and registering it in `PartyCatalog`; do not add party-specific sample wrappers or RL factories.
+- Let fatal setup, optimization, simulation, and report failures propagate so command-line and Gradle callers receive a failing process status.
 - Do not push sample display-name conventions deeper into runtime logic; adapt them at the sample or profile boundary.

@@ -86,6 +86,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_IneffaBirgittaSummonLifecycle();
         testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost();
         testAccuracyPhaseF_TimingAwareEnergyAnalysis();
+        testAccuracyPhaseF_ArtifactOptimizerRejectsUnreachableEr();
         testAccuracyPhaseF_ColumbinaGravityAndDewRegression();
         testAccuracyPhaseF_ColumbinaStandInBoundaries();
         testAccuracyPhaseF_ArtifactLunarReactionBuffRegression();
@@ -1399,6 +1400,42 @@ public class ReactionRegressionTest {
                 "A Burst interval without enough flat or particle energy should use the sentinel");
     }
 
+    private static void testAccuracyPhaseF_ArtifactOptimizerRejectsUnreachableEr() {
+        double maximumEr = 1.0
+                + (model.standards.KQMSConstants.FIXED_ROLLS + 10)
+                        * model.standards.KQMSConstants.ENERGY_RECHARGE;
+        StatsContainer baseStats = new StatsContainer();
+        baseStats.set(StatType.ENERGY_RECHARGE, 1.0);
+        StatsContainer emptyStats = new StatsContainer();
+
+        mechanics.optimization.ArtifactOptimizer.OptimizationConfig exactConfig =
+                energyOnlyArtifactConfig(maximumEr);
+        mechanics.optimization.ArtifactOptimizer.OptimizationResult[] exactResult = { null };
+        captureStandardOutput(() -> exactResult[0] = mechanics.optimization.ArtifactOptimizer.generate(
+                exactConfig, baseStats, emptyStats, emptyStats));
+        assertClose(
+                maximumEr - 1.0,
+                exactResult[0].stats.get(StatType.ENERGY_RECHARGE),
+                EPS,
+                "Artifact optimizer should accept an exactly reachable ER target");
+
+        mechanics.optimization.ArtifactOptimizer.OptimizationConfig impossibleConfig =
+                energyOnlyArtifactConfig(maximumEr + 0.000001);
+        String impossibleMessage = captureArtifactErFailure(
+                impossibleConfig, baseStats, emptyStats);
+        assertTrue(impossibleMessage.contains("ENERGY_RECHARGE target unreachable"),
+                "Unreachable ER failure should identify the constrained stat");
+        assertTrue(impossibleMessage.contains("requested") && impossibleMessage.contains("achieved"),
+                "Unreachable ER failure should report requested and achieved values");
+
+        mechanics.optimization.ArtifactOptimizer.OptimizationConfig manualConfig =
+                energyOnlyArtifactConfig(1.20);
+        manualConfig.manualRolls = java.util.Map.of(StatType.ENERGY_RECHARGE, 0);
+        String manualMessage = captureArtifactErFailure(manualConfig, baseStats, emptyStats);
+        assertTrue(manualMessage.contains("ENERGY_RECHARGE target unreachable"),
+                "Insufficient manual ER rolls should use the same feasibility guard");
+    }
+
     private static void testAccuracyPhaseF_ColumbinaGravityAndDewRegression() {
         model.character.Columbina columbina = new model.character.Columbina(new TestWeapon(), blankArtifact());
         CombatSimulator sim = simulatorWithExistingCharacter(columbina);
@@ -2535,6 +2572,36 @@ public class ReactionRegressionTest {
         double beforeDamage = sim.getTotalDamage();
         sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE, action);
         return sim.getTotalDamage() - beforeDamage;
+    }
+
+    private static mechanics.optimization.ArtifactOptimizer.OptimizationConfig energyOnlyArtifactConfig(
+            double minER) {
+        mechanics.optimization.ArtifactOptimizer.OptimizationConfig config =
+                new mechanics.optimization.ArtifactOptimizer.OptimizationConfig();
+        config.mainStatSands = StatType.HP_PERCENT;
+        config.mainStatGoblet = StatType.ATK_PERCENT;
+        config.mainStatCirclet = StatType.DEF_PERCENT;
+        config.subStatPriority = java.util.List.of(StatType.ENERGY_RECHARGE);
+        config.minER = minER;
+        config.useCritRatio = false;
+        return config;
+    }
+
+    private static String captureArtifactErFailure(
+            mechanics.optimization.ArtifactOptimizer.OptimizationConfig config,
+            StatsContainer baseStats,
+            StatsContainer emptyStats) {
+        String[] message = { null };
+        captureStandardOutput(() -> {
+            try {
+                mechanics.optimization.ArtifactOptimizer.generate(
+                        config, baseStats, emptyStats, emptyStats);
+            } catch (IllegalStateException expected) {
+                message[0] = expected.getMessage();
+            }
+        });
+        assertTrue(message[0] != null, "Artifact optimizer should reject an unreachable ER target");
+        return message[0];
     }
 
     private static List<String> runMoondriftDrawSequence(DoubleSupplier drawSource) {

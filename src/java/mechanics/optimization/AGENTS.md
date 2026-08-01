@@ -8,7 +8,7 @@
 - These classes repeatedly execute full simulations and are tightly coupled to the runtime engine.
 
 ## Java files in this directory
-- `ArtifactOptimizer.java`: generates KQMS-style artifact stat blocks and liquid roll allocations for one character.
+- `ArtifactOptimizer.java`: generates KQMS-style artifact stat blocks and liquid roll allocations for one character, rejecting results below the configured static ER minimum.
 - `IterativeSimulator.java`: runs the ER convergence loop and the joint party hill-climbing loop for DPS rolls.
 - `OptimizerPipeline.java`: orchestrates two-phase optimization by combining ER calibration with DPS optimization and merging ER rolls back into the final result.
 - `ProfileAction.java`: typed optimizer/RL profile action commands mapped to simulator action keys.
@@ -27,5 +27,6 @@
 ## Agent guidance
 - Any change here should be validated with at least one real sample simulation, not only compilation.
 - Keep the distinction clear between heuristic artifact generation, ER reservation, and hill-climbing roll swaps.
+- Never return a best-effort build below `OptimizationConfig.minER`; change the loadout or legal rotation at its party owner instead of bypassing KQMS caps.
 - If optimizer results become unstable, inspect simulator determinism first, especially random or time-sensitive weapon effects.
 - Keep profile parsing and file-name translation in adapter/loader classes. Runtime optimization decisions should use `CharacterId` and `ProfileAction`, not raw display strings.

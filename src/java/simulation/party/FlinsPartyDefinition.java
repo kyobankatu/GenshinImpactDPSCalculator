@@ -17,7 +17,6 @@ import model.character.Flins;
 import model.character.Ineffa;
 import model.character.Sucrose;
 import model.entity.Enemy;
-import model.stats.StatsContainer;
 import model.type.CharacterId;
 import model.type.StatType;
 import model.weapon.Deathmatch;
@@ -133,7 +132,6 @@ public final class FlinsPartyDefinition extends AbstractPartyDefinition {
 
             sim.switchCharacter(CharacterId.SUCROSE);
             skill(sim, CharacterId.SUCROSE);
-            burst(sim, CharacterId.SUCROSE);
 
             sim.switchCharacter(CharacterId.FLINS);
             skill(sim, CharacterId.FLINS);
@@ -178,7 +176,10 @@ public final class FlinsPartyDefinition extends AbstractPartyDefinition {
             flinsConfig.manualRolls = partyManualRolls.get(CharacterId.FLINS);
         }
         ArtifactOptimizer.OptimizationResult resultFlins = ArtifactOptimizer.generate(
-                flinsConfig, flins.getBaseStats(), flins.getWeapon().getStats(), new StatsContainer());
+                flinsConfig,
+                flins.getBaseStats(),
+                flins.getWeapon().getStats(),
+                new NightOfTheSkysUnveiling().getStats());
         flins.setArtifacts(new NightOfTheSkysUnveiling(resultFlins.stats));
         flins.setArtifactRolls(resultFlins.rolls);
         sim.addCharacter(flins);
@@ -195,7 +196,10 @@ public final class FlinsPartyDefinition extends AbstractPartyDefinition {
             ineffaConfig.manualRolls = partyManualRolls.get(CharacterId.INEFFA);
         }
         ArtifactOptimizer.OptimizationResult resultIneffa = ArtifactOptimizer.generate(
-                ineffaConfig, ineffa.getBaseStats(), ineffa.getWeapon().getStats(), new StatsContainer());
+                ineffaConfig,
+                ineffa.getBaseStats(),
+                ineffa.getWeapon().getStats(),
+                new AubadeOfMorningstarAndMoon().getStats());
         ineffa.setArtifacts(new AubadeOfMorningstarAndMoon(resultIneffa.stats));
         ineffa.setArtifactRolls(resultIneffa.rolls);
         sim.addCharacter(ineffa);
@@ -217,7 +221,10 @@ public final class FlinsPartyDefinition extends AbstractPartyDefinition {
             colConfig.manualRolls = partyManualRolls.get(CharacterId.COLUMBINA);
         }
         ArtifactOptimizer.OptimizationResult resultCol = ArtifactOptimizer.generate(
-                colConfig, columbina.getBaseStats(), columbina.getWeapon().getStats(), new StatsContainer());
+                colConfig,
+                columbina.getBaseStats(),
+                columbina.getWeapon().getStats(),
+                new SilkenMoonsSerenade().getStats());
         columbina.setArtifacts(new SilkenMoonsSerenade(resultCol.stats));
         columbina.setArtifactRolls(resultCol.rolls);
         sim.addCharacter(columbina);
@@ -233,7 +240,10 @@ public final class FlinsPartyDefinition extends AbstractPartyDefinition {
             sucConfig.manualRolls = partyManualRolls.get(CharacterId.SUCROSE);
         }
         ArtifactOptimizer.OptimizationResult resultSuc = ArtifactOptimizer.generate(
-                sucConfig, sucrose.getBaseStats(), sucrose.getWeapon().getStats(), new StatsContainer());
+                sucConfig,
+                sucrose.getBaseStats(),
+                sucrose.getWeapon().getStats(),
+                new ViridescentVenerer().getStats());
         sucrose.setArtifacts(new ViridescentVenerer(resultSuc.stats));
         sucrose.setArtifactRolls(resultSuc.rolls);
         sim.addCharacter(sucrose);
