@@ -9131,7 +9131,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phase 1 is complete and Phase 2 is next.
+- In progress; Phases 1-2 are complete and Phase 3 is next.
 - Requirement: standard Electro-Charged must wake at the first coexisting Aura's
   natural expiry, deal a premature tick only when more than 0.5 seconds elapsed
   since the previous EC damage tick, and retain its ordinary one-second cadence.
@@ -9221,7 +9221,7 @@ Completion evidence:
   general clock contract; changing timer snapshot architecture is excluded.
 - The documentation preflight passes without checks or artifact leaks.
 
-### Phase 2: Expose Typed Aura Expiry - Pending
+### Phase 2: Expose Typed Aura Expiry - Done
 
 Why second:
 
@@ -9265,6 +9265,18 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/agent_validate.py --path src/java/model/entity/Enemy.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- `Enemy.getAuraExpiryTime` exposes only an absolute typed deadline and keeps
+  `AuraState` fields private. A fresh taxed 1U source reports 9.5 seconds; after
+  one second of decay and 0.4U consumption it reports 4.75 seconds at the
+  unchanged source decay rate.
+- Exact expiry is excluded by the stored absolute deadline before floating-point
+  residual gauge is considered. Non-decaying and absent Auras report positive
+  infinity, allowing callers to treat both as no finite wake deadline.
+- Snapshot mutation/restore recovers the original 9.5-second expiry exactly.
+  ReactionRegressionTest, build, Javadoc, routed validation, and preflight pass.
 
 ### Phase 3: Schedule Standard EC at Aura Expiry - Pending
 

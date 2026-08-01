@@ -298,6 +298,29 @@ public class Enemy {
     }
 
     /**
+     * Returns the absolute time when an active Aura will naturally decay to zero.
+     *
+     * <p>Non-decaying compatibility Auras and elements with no active future
+     * expiry return positive infinity. Discrete consumption and same-element
+     * application update the returned time through the Aura state's existing
+     * rebase policy.
+     *
+     * @param element element whose natural expiry is requested
+     * @param currentTime simulator time used to exclude already expired Auras
+     * @return absolute natural expiry, or positive infinity when no finite future
+     *         expiry exists
+     */
+    public double getAuraExpiryTime(model.type.Element element, double currentTime) {
+        AuraState state = auraGauge.get(element);
+        if (state == null
+                || state.expiryTime <= currentTime
+                || state.currentUnitsAt(currentTime) <= 0.0) {
+            return INFINITE_EXPIRY;
+        }
+        return state.expiryTime;
+    }
+
+    /**
      * Removes runtime auras that have expired by the given simulator time,
      * either because their expiry has passed or their decayed value has reached
      * zero.

@@ -118,6 +118,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseG_SourceAuraTaxAndDecayContract();
         testAccuracyPhaseG_SameElementAuraExtensionContract();
         testAccuracyPhaseG_AuraDecaySnapshotContract();
+        testAccuracyPhaseG_AuraExpiryContract();
         testAccuracyPhaseG_InvalidSourceAuraContract();
         testAccuracyPhaseG_RuntimeAuraApplicationContract();
         testAccuracyPhaseG_AnemoGeoAuraConsumptionContract();
@@ -581,6 +582,35 @@ public class ReactionRegressionTest {
         assertClose(capturedUnits - 0.8 / 9.5,
                 enemy.getAuraUnits(Element.HYDRO, 3.0), EPS,
                 "Aura restore should preserve the selected source decay rate");
+    }
+
+    private static void testAccuracyPhaseG_AuraExpiryContract() {
+        CombatSimulator sim = simulatorWith(testCharacter(Element.ELECTRO));
+        sim.getEnemy().applyAura(Element.HYDRO, 1.0, sim.getCurrentTime());
+        assertClose(9.5, sim.getEnemy().getAuraExpiryTime(Element.HYDRO, sim.getCurrentTime()), EPS,
+                "Fresh 1U source should expose its exact 9.5-second Aura expiry");
+
+        SimulatorSnapshot snapshot = sim.saveSnapshot();
+        sim.advanceTime(1.0);
+        sim.getEnemy().reduceAura(Element.HYDRO, 0.4, sim.getCurrentTime());
+        assertClose(4.75, sim.getEnemy().getAuraExpiryTime(Element.HYDRO, sim.getCurrentTime()), EPS,
+                "Discrete consumption should rebase expiry at the original decay rate");
+
+        sim.restoreSnapshot(snapshot);
+        assertClose(9.5, sim.getEnemy().getAuraExpiryTime(Element.HYDRO, sim.getCurrentTime()), EPS,
+                "Snapshot restore should recover the original Aura expiry");
+        assertTrue(Double.isInfinite(
+                        sim.getEnemy().getAuraExpiryTime(Element.HYDRO, 9.5)),
+                "An Aura queried at exact natural expiry should have no future deadline");
+
+        sim.getEnemy().setAura(Element.ELECTRO, 1.0);
+        assertTrue(Double.isInfinite(
+                        sim.getEnemy().getAuraExpiryTime(Element.ELECTRO, sim.getCurrentTime())),
+                "A non-decaying compatibility Aura should expose infinite expiry");
+        sim.getEnemy().setAura(Element.ELECTRO, 0.0);
+        assertTrue(Double.isInfinite(
+                        sim.getEnemy().getAuraExpiryTime(Element.ELECTRO, sim.getCurrentTime())),
+                "An absent Aura should expose no finite future expiry");
     }
 
     private static void testAccuracyPhaseG_InvalidSourceAuraContract() {
