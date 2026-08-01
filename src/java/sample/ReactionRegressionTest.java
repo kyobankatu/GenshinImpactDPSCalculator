@@ -124,6 +124,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseG_SameElementAuraExtensionContract();
         testAccuracyPhaseG_AuraDecaySnapshotContract();
         testAccuracyPhaseG_AuraExpiryContract();
+        testAccuracyPhaseG_FreezeStateContract();
         testAccuracyPhaseG_BurningStateSnapshotContract();
         testAccuracyPhaseG_QuickenStateSnapshotContract();
         testAccuracyPhaseG_InvalidSourceAuraContract();
@@ -894,6 +895,91 @@ public class ReactionRegressionTest {
         assertTrue(Double.isInfinite(
                         sim.getEnemy().getAuraExpiryTime(Element.ELECTRO, sim.getCurrentTime())),
                 "An absent Aura should expose no finite future expiry");
+    }
+
+    private static void testAccuracyPhaseG_FreezeStateContract() {
+        Enemy enemy = new Enemy(90);
+        Enemy.FreezeAuraState initial = enemy.applyFreezeAura(1.6, 0.0);
+        double expectedDuration = 2.0 * Math.sqrt(12.0) - 4.0;
+        assertClose(1.6, initial.units, EPS,
+                "Equal 1U sources should create 1.6U Frozen gauge");
+        assertClose(0.4, initial.decayRate, EPS,
+                "A rested Frozen Aura should start at 0.4U/s");
+        assertClose(expectedDuration, initial.getEndTime(), EPS,
+                "1.6U Frozen gauge should derive the sourced exact duration");
+
+        double midpoint = expectedDuration / 2.0;
+        double expectedMidpoint = 1.6 - 0.4 * midpoint - 0.05 * midpoint * midpoint;
+        assertClose(expectedMidpoint, initial.remainingUnitsAt(midpoint), EPS,
+                "Frozen gauge should follow accelerating nonlinear decay");
+        assertClose(0.4 + 0.1 * midpoint, initial.decayRateAt(midpoint), EPS,
+                "Frozen decay rate should accelerate by 0.1U/s^2 while active");
+        assertClose(0.0, initial.remainingUnitsAt(expectedDuration), EPS,
+                "Frozen gauge should reach zero at exact expiry");
+        assertTrue(!enemy.isFrozen(expectedDuration),
+                "Frozen state should be inactive at exact expiry");
+
+        Enemy extensionEnemy = new Enemy(90);
+        Enemy.FreezeAuraState extensionInitial = extensionEnemy.applyFreezeAura(1.6, 0.0);
+        double remainingBeforeExtension = extensionInitial.remainingUnitsAt(1.0);
+        Enemy.FreezeAuraState extension = extensionEnemy.applyFreezeAura(0.8, 1.0);
+        assertClose(remainingBeforeExtension + 0.8, extension.units, EPS,
+                "Refreeze should add gauge to the current remaining amount");
+        assertClose(0.5, extension.decayRate, EPS,
+                "Refreeze should retain the instantaneous active decay rate");
+        assertTrue(extension.getEndTime() > extensionInitial.getEndTime(),
+                "Refreeze should extend the exact Frozen expiry");
+
+        Enemy recoveryEnemy = new Enemy(90);
+        recoveryEnemy.applyFreezeAura(1.6, 0.0);
+        recoveryEnemy.clearFreezeAura(1.0);
+        Enemy.FreezeAuraState cleared = recoveryEnemy.captureFreezeAuraState();
+        assertClose(0.5, cleared.decayRate, EPS,
+                "Clearing Freeze should retain its instantaneous rate");
+        assertClose(0.45, cleared.decayRateAt(1.25), EPS,
+                "Inactive Freeze rate should recover by 0.2U/s^2");
+        assertClose(0.4, cleared.decayRateAt(1.5), EPS,
+                "Inactive Freeze rate should recover only to the 0.4U/s floor");
+        Enemy.FreezeAuraState reapplied = recoveryEnemy.applyFreezeAura(0.8, 1.25);
+        assertClose(0.45, reapplied.decayRate, EPS,
+                "Freeze reapplied during recovery should use the recovered rate");
+
+        Enemy consumptionEnemy = new Enemy(90);
+        consumptionEnemy.applyFreezeAura(1.6, 0.0);
+        Enemy.FreezeAuraState partial = consumptionEnemy.reduceFreezeAura(0.4, 0.5);
+        assertClose(0.9875, partial.units, EPS,
+                "Partial Freeze consumption should rebase the decayed remainder");
+        assertClose(0.45, partial.decayRate, EPS,
+                "Partial Freeze consumption should preserve current decay rate");
+        consumptionEnemy.reduceFreezeAura(1.0, 0.5);
+        assertTrue(!consumptionEnemy.isFrozen(0.5),
+                "Exact or excess Freeze consumption should clear active gauge");
+        Enemy.FreezeAuraState beforeInvalid = consumptionEnemy.captureFreezeAuraState();
+        consumptionEnemy.applyFreezeAura(Double.NaN, 1.0);
+        assertClose(beforeInvalid.units, consumptionEnemy.captureFreezeAuraState().units, EPS,
+                "Invalid Freeze application should not mutate gauge");
+
+        CombatSimulator sim = simulatorWith(testCharacter(Element.CRYO));
+        sim.getEnemy().applyFreezeAura(1.6, sim.getCurrentTime());
+        sim.advanceTime(0.75);
+        SimulatorSnapshot snapshot = sim.saveSnapshot();
+        double capturedRemaining = sim.getEnemy().getFreezeAuraUnits(sim.getCurrentTime());
+        double capturedEnd = sim.getEnemy().captureFreezeAuraState().getEndTime();
+        sim.getEnemy().clearFreezeAura(sim.getCurrentTime());
+        sim.advanceTime(1.0);
+        sim.restoreSnapshot(snapshot);
+        Enemy.FreezeAuraState restored = sim.getEnemy().captureFreezeAuraState();
+        assertClose(1.6, restored.units, EPS,
+                "Snapshot restore should recover stored Frozen gauge");
+        assertClose(0.4, restored.decayRate, EPS,
+                "Snapshot restore should recover Frozen decay rate");
+        assertClose(0.0, restored.lastUpdateTime, EPS,
+                "Snapshot restore should recover Frozen update time");
+        assertClose(capturedRemaining,
+                restored.remainingUnitsAt(sim.getCurrentTime()), EPS,
+                "Snapshot restore should recover current Frozen remainder");
+        assertClose(capturedEnd, restored.getEndTime(), EPS,
+                "Snapshot restore should recover exact Frozen expiry");
     }
 
     private static void testAccuracyPhaseG_BurningStateSnapshotContract() {

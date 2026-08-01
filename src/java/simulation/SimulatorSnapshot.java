@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import mechanics.buff.Buff;
+import model.entity.Enemy;
 import model.type.CharacterId;
 import model.type.Element;
 import simulation.runtime.ReactionState;
@@ -83,6 +84,8 @@ public class SimulatorSnapshot {
     public final int moonridgeDewCount;
     public final List<ReactionState.DendroCoreState> dendroCores;
     public final int nextDendroCoreId;
+    /** Complete accelerating Frozen Aura payload. */
+    public final Enemy.FreezeAuraState enemyFreezeAura;
     /**
      * Full enemy aura state keyed by element, each value holding
      * {@code {units, applicationTime, duration}} so continuous natural decay is
@@ -126,6 +129,7 @@ public class SimulatorSnapshot {
      * @param moonridgeDewCount Moonridge Dew count
      * @param dendroCores active Dendro Core payloads
      * @param nextDendroCoreId next Dendro Core identifier
+     * @param enemyFreezeAura complete Frozen Aura gauge and decay payload
      * @param enemyAura          enemy aura state map ({units, applicationTime, duration} per element)
      * @param characters         per-character snapshots
      * @param teamBuffRefs       team buff object references
@@ -156,6 +160,7 @@ public class SimulatorSnapshot {
             int moonridgeDewCount,
             List<ReactionState.DendroCoreState> dendroCores,
             int nextDendroCoreId,
+            Enemy.FreezeAuraState enemyFreezeAura,
             Map<Element, double[]> enemyAura,
             Map<CharacterId, CharacterSnapshot> characters,
             List<Buff> teamBuffRefs,
@@ -184,6 +189,7 @@ public class SimulatorSnapshot {
         this.moonridgeDewCount = moonridgeDewCount;
         this.dendroCores = new ArrayList<>(dendroCores);
         this.nextDendroCoreId = nextDendroCoreId;
+        this.enemyFreezeAura = enemyFreezeAura;
         this.enemyAura = new HashMap<>(enemyAura);
         this.characters = characters;
         this.teamBuffRefs = new ArrayList<>(teamBuffRefs);

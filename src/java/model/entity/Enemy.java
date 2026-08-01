@@ -16,12 +16,76 @@ import java.util.Map;
  */
 public class Enemy {
     private static final double AURA_TAX = 0.8;
+    private static final double FREEZE_BASE_DECAY_RATE = 0.4;
+    private static final double FREEZE_ACTIVE_ACCELERATION = 0.1;
+    private static final double FREEZE_RECOVERY_ACCELERATION = 0.2;
+    private static final double FREEZE_GAUGE_EPSILON = 1e-9;
     private int level;
     private Map<StatType, Double> resistances; // RES for each element
     private java.util.Map<model.type.Element, AuraState> auraGauge = new HashMap<>();
-    private double freezeAuraUnits = 0.0;
+    private FreezeAuraState freezeAuraState = new FreezeAuraState(
+            0.0, FREEZE_BASE_DECAY_RATE, 0.0);
 
     private static final double INFINITE_EXPIRY = Double.POSITIVE_INFINITY;
+
+    /** Immutable accelerating Frozen Aura gauge payload. */
+    public static final class FreezeAuraState {
+        /** Frozen gauge present at {@link #lastUpdateTime}. */
+        public final double units;
+        /** Instantaneous decay rate at {@link #lastUpdateTime}. */
+        public final double decayRate;
+        /** Time at which {@link #units} and {@link #decayRate} were measured. */
+        public final double lastUpdateTime;
+
+        private FreezeAuraState(double units, double decayRate, double lastUpdateTime) {
+            this.units = units;
+            this.decayRate = decayRate;
+            this.lastUpdateTime = lastUpdateTime;
+        }
+
+        /** Returns current Frozen gauge after accelerating active decay. */
+        public double remainingUnitsAt(double currentTime) {
+            double elapsed = Math.max(0.0, currentTime - lastUpdateTime);
+            double remaining = units
+                    - decayRate * elapsed
+                    - 0.5 * FREEZE_ACTIVE_ACCELERATION * elapsed * elapsed;
+            return remaining > FREEZE_GAUGE_EPSILON ? remaining : 0.0;
+        }
+
+        /** Returns the exact absolute time at which the current gauge depletes. */
+        public double getEndTime() {
+            return lastUpdateTime + activeDuration();
+        }
+
+        /**
+         * Returns the instantaneous decay rate after active acceleration or
+         * inactive thaw recovery.
+         */
+        public double decayRateAt(double currentTime) {
+            double elapsed = Math.max(0.0, currentTime - lastUpdateTime);
+            double activeDuration = activeDuration();
+            double activeElapsed = Math.min(elapsed, activeDuration);
+            double endRate = decayRate
+                    + FREEZE_ACTIVE_ACCELERATION * activeElapsed;
+            if (elapsed <= activeDuration) {
+                return endRate;
+            }
+            return Math.max(
+                    FREEZE_BASE_DECAY_RATE,
+                    endRate - FREEZE_RECOVERY_ACCELERATION
+                            * (elapsed - activeDuration));
+        }
+
+        private double activeDuration() {
+            if (units <= 0.0) {
+                return 0.0;
+            }
+            double discriminant = decayRate * decayRate
+                    + 2.0 * FREEZE_ACTIVE_ACCELERATION * units;
+            return (-decayRate + Math.sqrt(discriminant))
+                    / FREEZE_ACTIVE_ACCELERATION;
+        }
+    }
 
     /**
      * Time-aware elemental aura state. The simulator still uses a simplified
@@ -552,47 +616,102 @@ public class Enemy {
         return 6.0 + normalized * 5.0;
     }
 
-    /**
-     * Sets the simplified Freeze Aura gauge used by single-target reaction logic.
-     *
-     * @param units Freeze Aura units; non-positive values clear the state
-     */
+    /** Replaces Frozen gauge at the requested time. */
+    public FreezeAuraState setFreezeAura(double units, double currentTime) {
+        if (!Double.isFinite(units) || !Double.isFinite(currentTime)) {
+            return freezeAuraState;
+        }
+        double currentRate = freezeAuraState.decayRateAt(currentTime);
+        freezeAuraState = new FreezeAuraState(
+                Math.max(0.0, units), currentRate, currentTime);
+        return freezeAuraState;
+    }
+
+    /** Compatibility wrapper that replaces gauge at its last update time. */
     public void setFreezeAura(double units) {
-        freezeAuraUnits = Math.max(0.0, units);
+        setFreezeAura(units, freezeAuraState.lastUpdateTime);
     }
 
-    /**
-     * Reduces the simplified Freeze Aura gauge.
-     *
-     * @param units amount to remove
-     */
+    /** Adds Frozen gauge without resetting its current decay rate. */
+    public FreezeAuraState applyFreezeAura(double units, double currentTime) {
+        if (!Double.isFinite(units)
+                || units <= 0.0
+                || !Double.isFinite(currentTime)) {
+            return freezeAuraState;
+        }
+        double remaining = freezeAuraState.remainingUnitsAt(currentTime);
+        double currentRate = freezeAuraState.decayRateAt(currentTime);
+        freezeAuraState = new FreezeAuraState(
+                remaining + units, currentRate, currentTime);
+        return freezeAuraState;
+    }
+
+    /** Reduces current Frozen gauge while preserving instantaneous decay. */
+    public FreezeAuraState reduceFreezeAura(double units, double currentTime) {
+        if (!Double.isFinite(units)
+                || units <= 0.0
+                || !Double.isFinite(currentTime)) {
+            return freezeAuraState;
+        }
+        double remaining = Math.max(
+                0.0, freezeAuraState.remainingUnitsAt(currentTime) - units);
+        freezeAuraState = new FreezeAuraState(
+                remaining, freezeAuraState.decayRateAt(currentTime), currentTime);
+        return freezeAuraState;
+    }
+
+    /** Compatibility wrapper that reduces gauge at its last update time. */
     public void reduceFreezeAura(double units) {
-        freezeAuraUnits = Math.max(0.0, freezeAuraUnits - units);
+        reduceFreezeAura(units, freezeAuraState.lastUpdateTime);
     }
 
-    /**
-     * Clears the simplified Freeze Aura state.
-     */
+    /** Clears Frozen gauge while retaining its current thawing rate. */
+    public void clearFreezeAura(double currentTime) {
+        if (!Double.isFinite(currentTime)) {
+            return;
+        }
+        freezeAuraState = new FreezeAuraState(
+                0.0, freezeAuraState.decayRateAt(currentTime), currentTime);
+    }
+
+    /** Compatibility wrapper that clears gauge at its last update time. */
     public void clearFreezeAura() {
-        freezeAuraUnits = 0.0;
+        clearFreezeAura(freezeAuraState.lastUpdateTime);
     }
 
-    /**
-     * Returns whether the enemy currently has Freeze Aura.
-     *
-     * @return {@code true} if Frozen
-     */
+    /** Returns whether Frozen gauge remains at the requested time. */
+    public boolean isFrozen(double currentTime) {
+        return freezeAuraState.remainingUnitsAt(currentTime) > 0.0;
+    }
+
+    /** Compatibility wrapper that queries the last update time. */
     public boolean isFrozen() {
-        return freezeAuraUnits > 0.0;
+        return isFrozen(freezeAuraState.lastUpdateTime);
     }
 
-    /**
-     * Returns the current simplified Freeze Aura units.
-     *
-     * @return Freeze Aura units
-     */
+    /** Returns current Frozen gauge at the requested time. */
+    public double getFreezeAuraUnits(double currentTime) {
+        return freezeAuraState.remainingUnitsAt(currentTime);
+    }
+
+    /** Compatibility wrapper that returns gauge at the last update time. */
     public double getFreezeAuraUnits() {
-        return freezeAuraUnits;
+        return getFreezeAuraUnits(freezeAuraState.lastUpdateTime);
+    }
+
+    /** Returns an immutable copy of the complete Frozen Aura payload. */
+    public FreezeAuraState captureFreezeAuraState() {
+        return new FreezeAuraState(
+                freezeAuraState.units,
+                freezeAuraState.decayRate,
+                freezeAuraState.lastUpdateTime);
+    }
+
+    /** Restores a previously captured Frozen Aura payload. */
+    public void restoreFreezeAuraState(FreezeAuraState state) {
+        freezeAuraState = state == null
+                ? new FreezeAuraState(0.0, FREEZE_BASE_DECAY_RATE, 0.0)
+                : new FreezeAuraState(state.units, state.decayRate, state.lastUpdateTime);
     }
 
     /**

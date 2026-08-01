@@ -789,6 +789,9 @@ public class CombatSimulator {
 
         // Enemy aura (full state so continuous decay survives restore)
         Map<model.type.Element, double[]> enemyAura = (enemy != null) ? enemy.captureAuraState() : new HashMap<>();
+        model.entity.Enemy.FreezeAuraState enemyFreezeAura = enemy != null
+                ? enemy.captureFreezeAuraState()
+                : null;
 
         // ICD
         Map<String, double[]> icdStates = icdManager.saveStates();
@@ -833,7 +836,7 @@ public class CombatSimulator {
                 burningState, nextBurningGeneration,
                 quickenEndTime, quickenState, moondriftCount, lunarCrystallizeTriggerCount,
                 verdantDewCount, moonridgeDewCount,
-                dendroCores, nextDendroCoreId, enemyAura,
+                dendroCores, nextDendroCoreId, enemyFreezeAura, enemyAura,
                 characters,
                 teamBuffRefs, teamBuffTimes,
                 fieldBuffRefs, fieldBuffTimes);
@@ -882,6 +885,7 @@ public class CombatSimulator {
         // Enemy aura (restore full state so continuous decay resumes correctly)
         if (enemy != null) {
             enemy.restoreAuraState(snap.enemyAura);
+            enemy.restoreFreezeAuraState(snap.enemyFreezeAura);
         }
 
         // ICD

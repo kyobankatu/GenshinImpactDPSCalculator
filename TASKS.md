@@ -10268,7 +10268,7 @@ Completion evidence:
   but omits Freeze. The exclusions isolate the finite lifecycle from unresolved
   dual-Aura reaction order.
 
-### Phase 2: Add Typed Freeze State and Snapshot Continuity - Pending
+### Phase 2: Add Typed Freeze State and Snapshot Continuity - Done
 
 Target files:
 
@@ -10314,7 +10314,26 @@ Verification:
 - `python scripts/agent_validate.py --path src/java/model/entity/Enemy.java --path src/java/simulation/SimulatorSnapshot.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Route Freeze and Shatter Through Current Time - Pending
+Completion evidence:
+
+- `Enemy.FreezeAuraState` stores immutable gauge, instantaneous rate, and update
+  time. Its analytic remaining/rate/end queries implement active 0.1U/s^2
+  acceleration and inactive 0.2U/s^2 recovery to the 0.4U/s floor.
+- Typed replace, additive apply, partial reduction, clear, capture, and restore
+  operations keep transition arithmetic inside `Enemy`; compatibility wrappers
+  remain for the two fixture callers pending Phase 3 runtime migration.
+- Regression proves 1.6U from equal 1U sources, exact
+  `2 * sqrt(12) - 4` expiry, nonlinear midpoint gauge/rate, active extension
+  without rate reset, partial/full recovery, partial/exact consumption, invalid
+  input stability, and exact snapshot restoration.
+- `SimulatorSnapshot` now carries the immutable Freeze payload. The profiler
+  edit only forwards the existing active snapshot value and does not change RL
+  observations, protocol, actions, or training.
+- `ReactionRegressionTest`, `build`, `javadoc`, routed build, party catalog, the
+  preflight-selected short Java rollout benchmark, and full preflight pass. No
+  persistent service, training process, or HPC job was started.
+
+### Phase 3: Route Freeze and Shatter Through Current Time - In Progress
 
 Target files:
 
