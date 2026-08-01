@@ -62,6 +62,9 @@ previous Eye periodic event, leaving one refreshed stream.
 The B-025 correction is complete. Guoba's periodic duration now stops after its
 four sourced flame hits.
 
+The active queue is B-026: Skill and Burst must refresh one Birgitta summon
+whose 20-second lifetime contains exactly ten two-second Discharge attacks.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -3266,6 +3269,144 @@ Completion evidence:
   `c7f2780605ab245f1482ea80263d396d8bd7b802cbe273d4860f43e8655ec1cf`.
 - The final trace contains Guoba hits at 8.4, 9.9, 11.4, and 12.9 seconds only;
   the invalid 14.4-second fifth hit is gone.
+
+## Implementation Order: Ineffa Birgitta Summon Lifecycle
+
+Status:
+
+- Planned; Phase 1 evidence is recorded below.
+- Requirement: Skill or Burst summons/refreshed exactly one Birgitta, which
+  attacks ten times at two-second intervals during its 20-second lifetime.
+
+Scope:
+
+- Extract one Ineffa-owned Birgitta summon helper used by Skill and Burst.
+- Cancel the previous Birgitta periodic event when either action refreshes it.
+- Correct the local duration to ten attacks and re-accept `FlinsParty2`.
+
+Out of scope for this pass:
+
+- Birgitta ICD/gauge, Overclock damage, Thundercloud state, particles, shield,
+  Burst damage/buffs, summon positioning, optimizer policy, reports, or RL.
+- Generic periodic cadence/boundary changes.
+
+Design boundaries:
+
+- `Ineffa` owns the current Birgitta event handle and summon policy.
+- `PeriodicDamageEvent` owns cancellation mechanics already introduced by
+  B-024.
+- Skill and Burst depend on one private helper rather than duplicate event
+  construction.
+
+### Phase 1: Record Birgitta Summon and Lifetime Evidence - Done
+
+Why first:
+
+Missing Burst refresh, overlapping Skill streams, and the terminal eleventh hit
+all derive from one summon lifecycle and must be specified together.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record the current Wiki/KQM summon contract, accessed 2026-08-02.
+- Record duplicate post-recast timestamps and the +22-second terminal hit.
+- Define one helper and ten-hit replacement-stream test design.
+
+Acceptance criteria:
+
+- Sources, access date, one-summon rule, Skill/Burst entry points, interval,
+  duration, and hit count are explicit.
+- Pre-fix overlap and missing Burst-refresh symptoms are recorded.
+- Generic timer and unrelated Ineffa behavior remain excluded.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 adds executable coverage.
+
+Verification:
+
+- inspect Ineffa Skill/Burst and complete `FlinsParty2` Birgitta timestamps
+- `python scripts/preflight.py --run`
+
+### Phase 2: Implement and Test One Refreshable Birgitta
+
+Why second:
+
+A single helper gives Skill and Burst the same summon contract and centralizes
+event replacement and hit-count policy.
+
+Target files:
+
+- `src/java/model/character/Ineffa.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Extract Birgitta action/event construction into a private helper.
+- Call it from Skill and Burst, cancelling any prior event first.
+- End the inclusive periodic duration on the tenth +20-second hit.
+
+Acceptance criteria:
+
+- One summon attacks at +2, +4, ..., +20 seconds and never at +22.
+- Skill recast and Burst refresh each leave one replacement stream.
+- Burst alone summons Birgitta.
+- Existing no-ICD metadata, Overclock callback, and particles are preserved.
+
+Test cases to add or update:
+
+- Normal: one Skill yields ten exact Discharge timestamps.
+- Burst: Burst without prior Skill creates a Discharge at +2 seconds.
+- Refresh: Skill recast removes the old stream at the next due timestamp.
+- Abnormal: advancing past +22 seconds produces no eleventh hit.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Accept the FlinsParty2 Birgitta Delta
+
+Why last:
+
+The reference rotation repeatedly casts both Skill and Burst, so corrected
+replacement semantics alter damage, Lunar follow-ups, particles, and aura.
+
+Target files:
+
+- `README.md`
+- `TASKS.md`
+- `BACKLOG.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+
+Tasks:
+
+- Run two fresh `FlinsParty2` payloads after the correction.
+- Confirm no overlapping Birgitta timestamps and no +22-second terminal hit.
+- Update the deterministic Flins baseline.
+
+Acceptance criteria:
+
+- Both normalized payloads and numeric summaries match.
+- Detailed trace reflects one current Skill/Burst-refreshed Birgitta stream.
+- Numeric baseline documents agree.
+- Agent assets and routed preflight checks pass.
+
+Test cases to add or update:
+
+- No further production test; Phase 2 owns summon lifecycle and hit count.
+
+Verification:
+
+- two fresh `./gradlew FlinsParty2` runs
+- `python scripts/validate_agent_assets.py` when baseline gate changes
+- `python scripts/preflight.py --run`
 
 ## Cross-Cutting Rules
 

@@ -602,3 +602,25 @@ experiment record.
   payloads report 1,331,957 damage / 63,427 DPS with normalized SHA-256
   `c7f2780605ab245f1482ea80263d396d8bd7b802cbe273d4860f43e8655ec1cf`;
   the final trace contains only four Guoba hits.
+
+### B-026 — Birgitta summons overlap, overrun, and ignore Burst refresh
+
+- Status: `planned`
+- Source: 2/3 (observable duplicate output and sourced summon divergence)
+- Symptom: each Skill registers an independent 11-hit Birgitta event, old
+  streams continue after recast, and Burst does not summon or refresh Birgitta
+  at all.
+- Scope: `src/java/model/character/Ineffa.java`,
+  `src/java/sample/ReactionRegressionTest.java`
+- Risk: `planned`
+- Proof: actual-Ineffa ten-hit and Skill/Burst refresh regression plus two fresh
+  deterministic `FlinsParty2` payloads
+- Notes: adopt the current Genshin Impact Wiki and KQM contracts (accessed
+  2026-08-02): only one Ineffa-summoned Birgitta may exist; Skill or Burst
+  summons/refreshes it; it attacks every two seconds for 20 seconds. Sources:
+  https://genshin-impact.fandom.com/wiki/Ineffa and
+  https://library.keqingmains.com/characters/electro/ineffa. Extract one helper,
+  reuse cancellable periodic lifecycle, and use an inclusive 18-second event
+  duration from the +2-second first tick to the +20-second tenth tick. Pre-fix
+  audited `FlinsParty2` baseline is 15,434,039 damage / 226,306 DPS. See
+  `TASKS.md` implementation block `Ineffa Birgitta Summon Lifecycle`.
