@@ -160,10 +160,9 @@ The B-056 through B-063 reaction-state passes are complete. The current B-064
 pass adds Overload's target-wide 0.1-second and owner-specific 0.5-second damage
 limits while preserving every reaction notification and gauge transition.
 
-The B-064 Overload damage-sequence pass is complete. B-066 now gates standard
-Crystallize behind a snapshot-safe target-wide one-second cooldown while
-leaving Lunar-Crystallize on its separate reaction path. Catalog acceptance is
-the current phase.
+The B-064 Overload damage-sequence pass and B-066 standard Crystallize cooldown
+are complete. Standard Crystallize now uses a snapshot-safe target-wide
+one-second gate while Lunar-Crystallize remains on its separate reaction path.
 
 ## Scope
 
@@ -11154,7 +11153,7 @@ Completion evidence:
   pass. Routed validation reports no leaks; RL-routed catalog/rollout checks were
   not run under this session's explicit simulator-only boundary.
 
-### Phase 3: Accept Crystallize-GCD-Neutral Catalog Baselines - Pending
+### Phase 3: Accept Crystallize-GCD-Neutral Catalog Baselines - Done
 
 Why third:
 
@@ -11192,3 +11191,20 @@ Verification:
 - two fresh `./gradlew --no-daemon FlinsParty` runs
 - two fresh `./gradlew --no-daemon FlinsParty2` runs
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Two fresh no-daemon runs per party are pairwise exact after removing only the
+  Gradle elapsed-success line. Normalized SHA-256 remains
+  `03301ef5a3d650a91cfa07660cb0077d8c1585da04d79803a97f36e8249ba85a`
+  for Raiden, `9b0b3556ca8f4eb799e6965156aab3bc70e512c7056cdf7e0202572c3996e464`
+  for Flins, and `23dc585acc02d3bd7bca7fe3f5b65db62b3e1489fcedb12a02b9725b774b7dd4`
+  for Flins2.
+- Totals/DPS remain 1,352,375/64,399, 22,675,823/227,898, and
+  15,817,125/228,902. Action/reaction/DoT/ordinary-ICD counts remain
+  152/55/11/38, 613/230/48/88, and 468/140/33/71.
+- None of the catalog parties enters standard Crystallize. All six logs contain
+  zero warning/error/failed-action/insufficient-energy matches, so the current
+  Lunar catalog remains byte-identical to B-064.
+- README documents the standard-only cooldown. The tracked generated report was
+  restored and no generated output is staged.

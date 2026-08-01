@@ -287,6 +287,10 @@ Elemental Gauge Theory contract:
   Aura, but damage is limited to one accepted instance per target every 0.1
   seconds and per `CharacterId` every 0.5 seconds. Snapshot rollback preserves
   both exact cooldown boundaries.
+- **Standard Crystallize cooldown**: non-Lunar Crystallize has one target-wide
+  one-second cooldown shared across owners, hits, and Aura elements. Suppressed
+  attempts do not notify or consume Aura, the exact boundary is accepted, and
+  snapshots preserve it. Lunar-Crystallize remains on its separate cadence.
 - **Burning fuel**: Pyro-on-Dendro or Pyro-on-Quicken preserves the larger
   current Dendro-like gauge as fuel; Dendro-on-Pyro establishes Dendro fuel
   without consuming underlying Pyro. Burning replaces natural decay for both

@@ -1773,14 +1773,14 @@ experiment record.
 
 ### B-066 — Standard Crystallize has no one-second global cooldown
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 3 (sourced reaction-mechanic divergence)
 - Symptom: repeated Geo hits and one Geo hit against multiple ordinary Auras
   notify and consume every Crystallize, producing extra reactions/shard effects
   and excessive Aura consumption within one second.
 - Scope: standard-only one-second single-target GCD, shared owner/element policy,
   no-consumption suppression, snapshot continuity, and catalog controls
-- Risk: `planned`
+- Risk: `validated`
 - Proof: same-hit dual Aura winner, pre/exact time boundary, cross-owner/element
   sharing, blocked no-consumption, snapshot replay, Lunar bypass, and repeated
   party payloads
@@ -1795,6 +1795,15 @@ experiment record.
   https://library.keqingmains.com/evidence/combat-mechanics/elemental-effects/transformative-reactions#crystallize-icd-correction,
   https://github.com/genshinsim/gcsim/blob/main/pkg/reactable/crystallize.go,
   and https://github.com/genshinsim/gcsim/blob/main/pkg/reactable/lunarcrystallize.go.
+  Completed with one snapshot-safe standard-only boundary checked after Lunar
+  conversion and before notification or Aura handling. Focused regression
+  covers same-hit Electro/Hydro priority, shared owner/element suppression at
+  0.999 seconds, exact 1.000-second acceptance, no blocked consumption/refresh,
+  restore replay, and uninterrupted three-trigger Lunar Harmony cadence. Six
+  fresh controls exactly retain B-064 hashes `03301ef5a3d650a91cfa07660cb0077d8c1585da04d79803a97f36e8249ba85a`,
+  `9b0b3556ca8f4eb799e6965156aab3bc70e512c7056cdf7e0202572c3996e464`,
+  and `23dc585acc02d3bd7bca7fe3f5b65db62b3e1489fcedb12a02b9725b774b7dd4`
+  with unchanged values, event counts, and zero warning matches.
 
 ### B-067 — Superconduct damage ignores its reaction damage sequence
 
