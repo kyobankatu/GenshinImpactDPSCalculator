@@ -110,6 +110,10 @@ shred applications refresh one ten-second typed debuff instead of stacking, and
 only an on-field equipping owner who triggered the Swirl may apply it. The
 separate first-Swirl formula-order gap remains deferred as B-042.
 
+The B-043 Noblesse Oblige correction is in progress. Its teamwide 20% ATK buff
+will refresh one twelve-second typed window instead of stacking repeated or
+multi-wearer applications.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -5522,6 +5526,182 @@ Completion evidence:
   VV stacking. The generated committed report was restored and is not staged.
 - README, plan, and ledger retain B-042 as a separate deferred formula-order
   issue; this phase does not claim immediate first-Swirl shred.
+
+## Implementation Order: Noblesse Oblige Non-Stack Refresh
+
+Status:
+
+- In progress; Phase 1 is complete and Phases 2-3 remain.
+- Requirement: 4pc Noblesse Oblige must contribute one teamwide 20% ATK window
+  for twelve seconds, refreshed rather than added by another application.
+
+Scope:
+
+- Replace the existing typed Noblesse team buff through the simulator's
+  no-stack API.
+- Preserve the 20% value, twelve-second duration, 2pc Burst DMG bonus, teamwide
+  targeting, and burst-trigger path.
+- Cover repeated use, exact refresh expiry, multi-wearer behavior, typed scope,
+  actual Bennett activation, and the accepted Raiden party output.
+
+Out of scope for this pass:
+
+- Changing Bennett's Burst damage, field ATK buff, healing, energy, cooldown,
+  animation, rotation, artifact allocation, or constellation behavior.
+- Changing other artifact set stacking rules or the
+  `BurstTriggeredArtifactEffect` interface.
+- Changing damage formula order, buff source-stack infrastructure, RL paths,
+  generated reports, or committed `docs/` output.
+
+Definitions:
+
+- Noblesse window: one simulator-owned `BuffId.NOBLESSE_OBLIGE_4PC` team buff
+  active over `[startTime, startTime + 12.0)` and contributing 0.20 ATK%.
+- Refresh: remove the previous typed Noblesse window and add a new twelve-second
+  window without summing their ATK values.
+
+Design boundaries:
+
+- `NoblesseOblige` owns construction and burst-trigger dispatch of its set
+  effect.
+- `BuffManager.applyTeamBuffNoStack` owns same-ID replacement and keeps
+  unrelated typed or custom ATK buffs independent.
+- Existing character action and source-attribution context remain unchanged.
+
+### Phase 1: Record Noblesse Non-Stack Evidence - Done
+
+Why first:
+
+The explicit non-stack rule must be recorded before changing current additive
+team-buff behavior.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record the maintained set description: Burst use grants all party members 20%
+  ATK for twelve seconds and the effect cannot stack.
+- Record the maintained KQM artifact guidance that duplicate 4pc Noblesse buffs
+  do not grant double effect.
+- Trace the current normal `applyTeamBuff` call and prove same-ID applications
+  remain simultaneously applicable and additive.
+
+Acceptance criteria:
+
+- Value, duration, non-stack rule, access date, source URLs, classification, and
+  simulator adaptation are recorded.
+- The implementation is bounded to the artifact's existing typed team buff and
+  existing simulator replacement policy.
+- No production source changes occur in this phase.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 adds the pre-fix failing
+  duplicate and refresh cases.
+
+Verification:
+
+- inspect `NoblesseOblige`, `BuffManager`, `Bennett`, and
+  `BurstTriggeredArtifactEffect`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- The maintained Genshin Impact Wiki Noblesse page and KQM Artifacts guide were
+  accessed 2026-08-02. Both state that the 20% twelve-second 4pc effect does not
+  stack; KQM explicitly uses duplicate Noblesse wearers as its example.
+- Classification: adopt the non-stack rule and adapt it to one typed
+  simulator-owned team buff. Current `applyTeamBuff` storage leaves duplicate
+  `NOBLESSE_OBLIGE_4PC` instances additive during stat assembly.
+
+### Phase 2: Replace Duplicate Noblesse Windows and Regress Boundaries
+
+Why second:
+
+The artifact-local behavior and exact time window must be settled before
+accepting the catalog party baseline.
+
+Target files:
+
+- `src/java/model/artifact/NoblesseOblige.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Route the typed 4pc buff through `CombatSimulator.applyTeamBuffNoStack`.
+- Add an actual Bennett Burst regression for initial teamwide activation.
+- Add repeated and multi-instance artifact applications proving one refreshed
+  0.20 value and exact expiry.
+- Prove an unrelated ATK% buff remains independently additive.
+
+Acceptance criteria:
+
+- One Burst applies exactly 0.20 ATK% to both owner and ally.
+- A second Noblesse application at five seconds remains exactly 0.20, keeps one
+  typed instance, is active at 16.999 seconds, and expires at exactly 17.0.
+- Separate Noblesse artifact instances refresh rather than stack.
+- An unrelated typed/custom ATK buff still combines with Noblesse normally.
+- The 2pc Burst DMG bonus remains exactly 0.20.
+
+Test cases to add or update:
+
+- Normal: actual Bennett Burst with owner and ally stat resolution.
+- Refresh: same artifact at zero and five seconds with exact expiry boundary.
+- Multi-wearer proxy: a second Noblesse instance applies during the first
+  window and leaves one 0.20 typed effect.
+- Scope: an unrelated 0.10 ATK% buff plus Noblesse resolves to 0.30.
+- Static: constructor retains 0.20 Burst DMG bonus.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew PartyCatalogRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/model/artifact/NoblesseOblige.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Re-Accept the Noblesse Catalog Baseline
+
+Why last:
+
+RaidenParty equips Noblesse on Bennett and is the smallest deterministic
+catalog integration check for preserving ordinary one-wearer rotations.
+
+Target files:
+
+- `README.md` only if the accepted value changes
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Run two fresh complete `RaidenParty` payloads and compare normalized logs.
+- Record ER, warnings, duration, total, DPS, and normalized hash.
+- Close B-043 and retain unrelated deferred systems unchanged.
+
+Acceptance criteria:
+
+- Repeated normalized payloads match and contain no new energy or optimizer
+  warning.
+- A normal single-Noblesse rotation remains unchanged unless the corrected
+  overlap path is actually exercised.
+- Plan and ledger agree on the accepted baseline and no generated output is
+  staged.
+
+Test cases to add or update:
+
+- No further production test; Phase 2 owns mechanic boundaries and Phase 3 owns
+  deterministic catalog acceptance.
+
+Verification:
+
+- two fresh `./gradlew RaidenParty` runs
+- `python scripts/preflight.py --run`
 
 ## NCCL/DDP Distributed RL Training Plan
 

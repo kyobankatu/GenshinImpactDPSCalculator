@@ -1036,3 +1036,25 @@ experiment record.
   autonomous discovery is explicitly forbidden from changing damage formula
   order without new user authority. B-041 must not hide or claim to solve this
   separate ordering issue.
+
+### B-043 — Noblesse Oblige duplicate 4pc buffs stack instead of refreshing
+
+- Status: `in-progress`
+- Source: 3 (sourced artifact-mechanic divergence)
+- Symptom: each Burst-triggered Noblesse application uses normal team-buff
+  insertion, so overlapping same-ID windows contribute 40% or more ATK instead
+  of one refreshed 20% value.
+- Scope: Noblesse typed team-buff replacement, focused boundary regression, and
+  deterministic RaidenParty acceptance
+- Risk: `planned`
+- Proof: actual Bennett activation, duplicate/multi-instance refresh and exact
+  expiry tests, plus matching repeated RaidenParty payloads
+- Notes: adopt the maintained Genshin Impact Wiki set description and KQM
+  Artifacts guide, accessed 2026-08-02. The 4pc effect grants all party members
+  20% ATK for twelve seconds and cannot stack; KQM explicitly says two Noblesse
+  wearers do not double it. Sources:
+  https://genshin-impact.fandom.com/wiki/Noblesse_Oblige and
+  https://keqingmains.com/misc/artifacts/. Adapt repeated applications to one
+  `NOBLESSE_OBLIGE_4PC` simulator team buff replaced through
+  `applyTeamBuffNoStack`. See `TASKS.md` implementation block
+  `Noblesse Oblige Non-Stack Refresh`.
