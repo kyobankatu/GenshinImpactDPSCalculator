@@ -1739,8 +1739,8 @@ Completion evidence:
 
 Status:
 
-- In progress.
-- Phases 1-2 are complete; Phase 3 remains.
+- Implemented and verified.
+- Phases 1-3 are complete.
 - Requirement: Manifest Flame activation must be a damageless 0U Electro Skill
   with no ICD, and Northland Spearstorm must apply 1U without ICD.
 
@@ -1847,7 +1847,7 @@ Verification:
 - `./gradlew build`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Accept the FlinsParty2 Skill-Metadata Delta
+### Phase 3: Accept the FlinsParty2 Skill-Metadata Delta - Done
 
 Why last:
 
@@ -1883,6 +1883,16 @@ Verification:
 - two fresh `./gradlew FlinsParty2` runs
 - `python scripts/validate_agent_assets.py` when the baseline gate changes
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Both post-fix payloads and the pre-fix payload matched after excluding
+  Gradle's elapsed-time line, with SHA-256
+  `a9cdfbf0d3a0a01356d9d113afdd7f0afe8ef8510494f4b193107d533c8dbb6e`.
+- Both logs contain four damageless activations and 12 Spearstorm hits, with
+  zero Spearstorm-related ICD blocks.
+- The accepted result remains 15,434,039 damage / 226,306 DPS, so README and
+  the verification gate require no numeric update.
 
 ## Cross-Cutting Rules
 
