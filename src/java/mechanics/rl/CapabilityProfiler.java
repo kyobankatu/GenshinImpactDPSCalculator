@@ -917,6 +917,9 @@ public class CapabilityProfiler {
                     activeCharacter.currentEnergy,
                     activeCharacter.lastSkillTime,
                     activeCharacter.lastBurstTime,
+                    activeCharacter.skillCooldownEndTime,
+                    activeCharacter.burstCooldownEndTime,
+                    activeCharacter.activeChargeCooldownDuration,
                     activeCharacter.chargeRestoreTimes,
                     idleCharacter.activeBuffRefs,
                     idleCharacter.activeBuffTimes));

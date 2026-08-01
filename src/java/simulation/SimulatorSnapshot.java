@@ -31,6 +31,9 @@ public class SimulatorSnapshot {
         public final double currentEnergy;
         public final double lastSkillTime;
         public final double lastBurstTime;
+        public final double skillCooldownEndTime;
+        public final double burstCooldownEndTime;
+        public final double activeChargeCooldownDuration;
         public final List<Double> chargeRestoreTimes;
         /** Active buff references with their timing captured as [startTime, expirationTime]. */
         public final List<Buff> activeBuffRefs;
@@ -40,12 +43,18 @@ public class SimulatorSnapshot {
                 double currentEnergy,
                 double lastSkillTime,
                 double lastBurstTime,
+                double skillCooldownEndTime,
+                double burstCooldownEndTime,
+                double activeChargeCooldownDuration,
                 List<Double> chargeRestoreTimes,
                 List<Buff> activeBuffRefs,
                 List<double[]> activeBuffTimes) {
             this.currentEnergy = currentEnergy;
             this.lastSkillTime = lastSkillTime;
             this.lastBurstTime = lastBurstTime;
+            this.skillCooldownEndTime = skillCooldownEndTime;
+            this.burstCooldownEndTime = burstCooldownEndTime;
+            this.activeChargeCooldownDuration = activeChargeCooldownDuration;
             this.chargeRestoreTimes = new ArrayList<>(chargeRestoreTimes);
             this.activeBuffRefs = new ArrayList<>(activeBuffRefs);
             this.activeBuffTimes = new ArrayList<>(activeBuffTimes);

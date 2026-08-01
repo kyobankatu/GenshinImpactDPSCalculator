@@ -792,6 +792,9 @@ public class CombatSimulator {
                     character.getCurrentEnergy(),
                     character.getLastSkillTime(),
                     character.getLastBurstTime(),
+                    character.getSkillCooldownEndTime(),
+                    character.getBurstCooldownEndTime(),
+                    character.getActiveChargeCooldownDuration(),
                     character.getChargeRestoreTimes(),
                     buffRefs,
                     buffTimes));
@@ -874,7 +877,13 @@ public class CombatSimulator {
                 continue;
             }
             character.restoreCurrentEnergy(cs.currentEnergy);
-            character.restoreCooldowns(cs.lastSkillTime, cs.lastBurstTime, cs.chargeRestoreTimes);
+            character.restoreCooldowns(
+                    cs.lastSkillTime,
+                    cs.lastBurstTime,
+                    cs.skillCooldownEndTime,
+                    cs.burstCooldownEndTime,
+                    cs.activeChargeCooldownDuration,
+                    cs.chargeRestoreTimes);
             character.clearBuffs();
             for (int i = 0; i < cs.activeBuffRefs.size(); i++) {
                 mechanics.buff.Buff buff = cs.activeBuffRefs.get(i);

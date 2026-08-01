@@ -4875,7 +4875,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phase 1 is complete and Phases 2-3 remain.
+- In progress; Phases 1-2 are complete and Phase 3 remains.
 - Requirement: Impetuous Winds' existing 5% cooldown-reduction stat must affect
   Skill and Burst readiness using cast-time snapshot semantics.
 
@@ -4973,7 +4973,7 @@ Completion evidence:
 - Repository search finds `CD_REDUCTION` only in `StatType` and the Impetuous
   Winds buff, while readiness currently compares base cooldowns directly.
 
-### Phase 2: Capture Effective Cooldowns in Runtime State
+### Phase 2: Capture Effective Cooldowns in Runtime State - Done
 
 Why second:
 
@@ -4986,13 +4986,15 @@ Target files:
 - `src/java/model/entity/Character.java`
 - `src/java/simulation/SimulatorSnapshot.java`
 - `src/java/simulation/CombatSimulator.java`
+- `src/java/mechanics/rl/CapabilityProfiler.java`
 - `src/java/sample/ReactionRegressionTest.java`
 - `TASKS.md`
 
 Tasks:
 
-- Pass an effective duration from `Character.markSkillUsed` and
-  `Character.markBurstUsed` into `CooldownState`.
+- Add `Character.markSkillUsed` and `markBurstUsed` overloads that merge
+  simulator-applicable buffs and pass an effective duration into
+  `CooldownState`; retain the existing overloads for isolated fixtures.
 - Record exact end times for single-charge Skill and Burst uses; readiness and
   remaining-time queries read those end times.
 - For multi-charge Skills, capture one effective duration when an empty queue
@@ -5000,6 +5002,8 @@ Tasks:
   pending restores complete.
 - Extend character snapshots with cooldown end times and active charge
   duration, then restore them without recomputation.
+- Preserve those fields when the existing capability profiler composes a
+  simulator snapshot; do not change profile behavior or generated data.
 - Add actual-resonance, exact boundary, no-resonance, multi-charge snapshot,
   and simulator save/restore regressions.
 
@@ -5033,8 +5037,23 @@ Verification:
 - `./gradlew PartyCatalogRegressionTest`
 - `./gradlew build`
 - `./gradlew javadoc`
-- `python scripts/agent_validate.py --path src/java/model/entity/state/CooldownState.java --path src/java/model/entity/Character.java --path src/java/simulation/SimulatorSnapshot.java --path src/java/simulation/CombatSimulator.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/agent_validate.py --path src/java/model/entity/state/CooldownState.java --path src/java/model/entity/Character.java --path src/java/simulation/SimulatorSnapshot.java --path src/java/simulation/CombatSimulator.java --path src/java/mechanics/rl/CapabilityProfiler.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Actual two-Anemo resonance produces 5% cooldown reduction: a 10-second Skill
+  is ready at 9.5 seconds and a 20-second Burst at 19.0, with pre-boundary
+  checks remaining unavailable and base metadata unchanged.
+- The one-Anemo no-trigger case retains exact 10- and 20-second boundaries.
+- A temporary 5% source starts a two-charge queue at restore times 9.5 and
+  10.5; the second use after buff expiry reuses the captured 9.5-second
+  duration.
+- Simulator restore recovers single Skill/Burst end times, both charge restore
+  times, and the active charge duration; an over-100% defensive input clamps to
+  immediate readiness without negative time.
+- ReactionRegressionTest, PartyCatalogRegressionTest, build, Javadoc, routed
+  validation, and preflight pass.
 
 ### Phase 3: Accept Simulator Integration and Close B-039
 
@@ -5045,13 +5064,23 @@ compatible where no current party activates Anemo resonance.
 
 Target files:
 
+- `src/java/model/character/Bennett.java`
+- `src/java/model/character/Columbina.java`
+- `src/java/model/character/Flins.java`
+- `src/java/model/character/Ineffa.java`
+- `src/java/model/character/RaidenShogun.java`
+- `src/java/model/character/Sucrose.java`
+- `src/java/model/character/Xiangling.java`
+- `src/java/model/character/Xingqiu.java`
 - `TASKS.md`
 - `BACKLOG.md`
 
 Tasks:
 
-- Run catalog validation and deterministic `RaidenParty` and `FlinsParty2`
-  samples after the cooldown change.
+- Migrate every production Skill/Burst cooldown mark to pass the simulator's
+  applicable buffs into the Phase 2 overload.
+- Run focused regression, catalog validation, and deterministic `RaidenParty`
+  and `FlinsParty2` samples after the caller migration.
 - Confirm current catalog parties contain at most one Anemo member and retain
   their accepted cooldown, ER, warning, and damage behavior.
 - Close B-039 with focused state and full-simulator evidence.
@@ -5071,6 +5100,7 @@ Test cases to add or update:
 
 Verification:
 
+- `./gradlew ReactionRegressionTest`
 - `./gradlew PartyCatalogRegressionTest`
 - `./gradlew RaidenParty`
 - `./gradlew FlinsParty2`

@@ -14,9 +14,12 @@ import java.util.List;
 public class CooldownState {
     private double lastSkillTime = -999.0;
     private double lastBurstTime = -999.0;
+    private double skillCooldownEndTime = -999.0;
+    private double burstCooldownEndTime = -999.0;
     private double skillCD = 6.0;
     private double burstCD = 15.0;
     private int skillMaxCharges = 1;
+    private double activeChargeCooldownDuration = 0.0;
     private final List<Double> chargeRestoreTimes = new ArrayList<>();
 
     /**
@@ -65,7 +68,7 @@ public class CooldownState {
      * @return {@code true} if both cooldown has elapsed and energy is sufficient
      */
     public boolean canBurst(double currentTime, double currentEnergy, double energyCost) {
-        return (currentTime - lastBurstTime) >= burstCD && currentEnergy >= energyCost;
+        return currentTime >= burstCooldownEndTime && currentEnergy >= energyCost;
     }
 
     /**
@@ -79,14 +82,14 @@ public class CooldownState {
      */
     public double getSkillCDRemaining(double currentTime) {
         if (skillMaxCharges > 1) {
-            chargeRestoreTimes.removeIf(time -> time <= currentTime);
+            removeRestoredCharges(currentTime);
             int available = skillMaxCharges - chargeRestoreTimes.size();
             if (available > 0) {
                 return 0.0;
             }
             return chargeRestoreTimes.get(0) - currentTime;
         }
-        return Math.max(0.0, lastSkillTime + skillCD - currentTime);
+        return Math.max(0.0, skillCooldownEndTime - currentTime);
     }
 
     /**
@@ -96,20 +99,27 @@ public class CooldownState {
      * @return remaining cooldown in seconds (0 if ready)
      */
     public double getBurstCDRemaining(double currentTime) {
-        return Math.max(0.0, lastBurstTime + burstCD - currentTime);
+        return Math.max(0.0, burstCooldownEndTime - currentTime);
     }
 
     /**
      * Records that the skill has just been used at the given time, updating
      * either the last-skill timestamp or the charge restore queue.
      *
-     * @param currentTime current simulation time in seconds
+     * @param currentTime               current simulation time in seconds
+     * @param effectiveCooldownDuration cooldown duration captured at use
      */
-    public void markSkillUsed(double currentTime) {
+    public void markSkillUsed(double currentTime, double effectiveCooldownDuration) {
+        double boundedDuration = Math.max(0.0, effectiveCooldownDuration);
         if (skillMaxCharges > 1) {
-            chargeRestoreTimes.removeIf(time -> time <= currentTime);
-            chargeRestoreTimes.add(currentTime + skillCD);
+            removeRestoredCharges(currentTime);
+            if (chargeRestoreTimes.isEmpty()) {
+                activeChargeCooldownDuration = boundedDuration;
+            }
+            chargeRestoreTimes.add(currentTime + activeChargeCooldownDuration);
             Collections.sort(chargeRestoreTimes);
+        } else {
+            skillCooldownEndTime = currentTime + boundedDuration;
         }
         lastSkillTime = currentTime;
     }
@@ -117,10 +127,12 @@ public class CooldownState {
     /**
      * Records that the burst has just been used at the given time.
      *
-     * @param currentTime current simulation time in seconds
+     * @param currentTime               current simulation time in seconds
+     * @param effectiveCooldownDuration cooldown duration captured at use
      */
-    public void markBurstUsed(double currentTime) {
+    public void markBurstUsed(double currentTime, double effectiveCooldownDuration) {
         lastBurstTime = currentTime;
+        burstCooldownEndTime = currentTime + Math.max(0.0, effectiveCooldownDuration);
     }
 
     /**
@@ -129,6 +141,7 @@ public class CooldownState {
      */
     public void resetChargeState() {
         chargeRestoreTimes.clear();
+        activeChargeCooldownDuration = 0.0;
     }
 
     /**
@@ -159,6 +172,21 @@ public class CooldownState {
         return lastBurstTime;
     }
 
+    /** @return captured single-charge Skill cooldown end time */
+    public double getSkillCooldownEndTime() {
+        return skillCooldownEndTime;
+    }
+
+    /** @return captured Burst cooldown end time */
+    public double getBurstCooldownEndTime() {
+        return burstCooldownEndTime;
+    }
+
+    /** @return captured duration shared by the active charge restore queue */
+    public double getActiveChargeCooldownDuration() {
+        return activeChargeCooldownDuration;
+    }
+
     /**
      * Returns a copy of the current charge restore times list.
      *
@@ -171,14 +199,33 @@ public class CooldownState {
     /**
      * Restores cooldown state from previously captured values.
      *
-     * @param savedLastSkillTime      last skill use time
-     * @param savedLastBurstTime      last burst use time
-     * @param savedChargeRestoreTimes charge restore schedule
+     * @param savedLastSkillTime          last skill use time
+     * @param savedLastBurstTime          last burst use time
+     * @param savedSkillCooldownEndTime   single-charge Skill readiness boundary
+     * @param savedBurstCooldownEndTime   Burst readiness boundary
+     * @param savedChargeCooldownDuration active multi-charge queue duration
+     * @param savedChargeRestoreTimes     charge restore schedule
      */
-    public void restore(double savedLastSkillTime, double savedLastBurstTime, List<Double> savedChargeRestoreTimes) {
+    public void restore(
+            double savedLastSkillTime,
+            double savedLastBurstTime,
+            double savedSkillCooldownEndTime,
+            double savedBurstCooldownEndTime,
+            double savedChargeCooldownDuration,
+            List<Double> savedChargeRestoreTimes) {
         this.lastSkillTime = savedLastSkillTime;
         this.lastBurstTime = savedLastBurstTime;
+        this.skillCooldownEndTime = savedSkillCooldownEndTime;
+        this.burstCooldownEndTime = savedBurstCooldownEndTime;
+        this.activeChargeCooldownDuration = savedChargeCooldownDuration;
         this.chargeRestoreTimes.clear();
         this.chargeRestoreTimes.addAll(savedChargeRestoreTimes);
+    }
+
+    private void removeRestoredCharges(double currentTime) {
+        chargeRestoreTimes.removeIf(time -> time <= currentTime);
+        if (chargeRestoreTimes.isEmpty()) {
+            activeChargeCooldownDuration = 0.0;
+        }
     }
 }

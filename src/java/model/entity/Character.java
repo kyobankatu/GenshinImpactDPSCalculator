@@ -192,9 +192,10 @@ public abstract class Character {
     }
 
     /**
-     * Returns the full effective stats including base, weapon, artifacts,
-     * passives, and all currently active buffs (self and team).
-     * Used for damage calculations.
+     * Returns effective character-owned stats including base, weapon,
+     * artifacts, passives, and active buffs stored on this character.
+     * Simulator-managed team, field, and provider buffs are merged by callers
+     * through {@link simulation.CombatSimulator#getApplicableBuffs(Character)}.
      *
      * @param currentTime current simulation time
      * @return stats container with all bonuses merged in
@@ -418,7 +419,21 @@ public abstract class Character {
      * @param currentTime current simulation time
      */
     public void markSkillUsed(double currentTime) {
-        cooldownState.markSkillUsed(currentTime);
+        markSkillUsed(currentTime, null);
+    }
+
+    /**
+     * Records Skill use with simulator-managed buffs included in the cast-time
+     * cooldown snapshot.
+     *
+     * @param currentTime    current simulation time
+     * @param applicableBuffs simulator-managed buffs applicable to this character
+     */
+    public void markSkillUsed(double currentTime, java.util.List<mechanics.buff.Buff> applicableBuffs) {
+        cooldownState.markSkillUsed(
+                currentTime,
+                getEffectiveCooldownDuration(
+                        cooldownState.getSkillCD(), currentTime, applicableBuffs));
     }
 
     /**
@@ -428,8 +443,22 @@ public abstract class Character {
      * @param currentTime current simulation time
      */
     public void markBurstUsed(double currentTime) {
+        markBurstUsed(currentTime, null);
+    }
+
+    /**
+     * Records Burst use with simulator-managed buffs included in the cast-time
+     * cooldown snapshot.
+     *
+     * @param currentTime    current simulation time
+     * @param applicableBuffs simulator-managed buffs applicable to this character
+     */
+    public void markBurstUsed(double currentTime, java.util.List<mechanics.buff.Buff> applicableBuffs) {
         energyState.markBurstUsed(getEnergyCost(), getMaxEnergy(), currentTime);
-        cooldownState.markBurstUsed(currentTime);
+        cooldownState.markBurstUsed(
+                currentTime,
+                getEffectiveCooldownDuration(
+                        cooldownState.getBurstCD(), currentTime, applicableBuffs));
     }
 
     /**
@@ -492,6 +521,21 @@ public abstract class Character {
         return cooldownState.getLastBurstTime();
     }
 
+    /** @return captured single-charge Skill cooldown end time */
+    public double getSkillCooldownEndTime() {
+        return cooldownState.getSkillCooldownEndTime();
+    }
+
+    /** @return captured Burst cooldown end time */
+    public double getBurstCooldownEndTime() {
+        return cooldownState.getBurstCooldownEndTime();
+    }
+
+    /** @return captured duration shared by the active charge restore queue */
+    public double getActiveChargeCooldownDuration() {
+        return cooldownState.getActiveChargeCooldownDuration();
+    }
+
     /**
      * Marks whether this character belongs to the custom Lunar archetype
      * (Ineffa / Flins / Columbina). Lunar characters receive synergy buffs
@@ -517,12 +561,27 @@ public abstract class Character {
     /**
      * Restores cooldown state from snapshot values.
      *
-     * @param lastSkillTime      last skill use time
-     * @param lastBurstTime      last burst use time
-     * @param chargeRestoreTimes charge restore schedule
+     * @param lastSkillTime                last skill use time
+     * @param lastBurstTime                last burst use time
+     * @param skillCooldownEndTime         single-charge Skill readiness boundary
+     * @param burstCooldownEndTime         Burst readiness boundary
+     * @param activeChargeCooldownDuration active multi-charge queue duration
+     * @param chargeRestoreTimes           charge restore schedule
      */
-    public void restoreCooldowns(double lastSkillTime, double lastBurstTime, java.util.List<Double> chargeRestoreTimes) {
-        cooldownState.restore(lastSkillTime, lastBurstTime, chargeRestoreTimes);
+    public void restoreCooldowns(
+            double lastSkillTime,
+            double lastBurstTime,
+            double skillCooldownEndTime,
+            double burstCooldownEndTime,
+            double activeChargeCooldownDuration,
+            java.util.List<Double> chargeRestoreTimes) {
+        cooldownState.restore(
+                lastSkillTime,
+                lastBurstTime,
+                skillCooldownEndTime,
+                burstCooldownEndTime,
+                activeChargeCooldownDuration,
+                chargeRestoreTimes);
     }
 
     /**
@@ -532,5 +591,22 @@ public abstract class Character {
      */
     public void restoreCurrentEnergy(double energy) {
         energyState.setCurrentEnergy(energy);
+    }
+
+    private double getEffectiveCooldownDuration(
+            double baseCooldown,
+            double currentTime,
+            java.util.List<mechanics.buff.Buff> applicableBuffs) {
+        StatsContainer stats = getEffectiveStats(currentTime);
+        if (applicableBuffs != null) {
+            for (mechanics.buff.Buff buff : applicableBuffs) {
+                if (!buff.isExpired(currentTime)) {
+                    buff.apply(stats, currentTime);
+                }
+            }
+        }
+        double reduction = stats.get(StatType.CD_REDUCTION);
+        double boundedReduction = Math.max(0.0, Math.min(1.0, reduction));
+        return baseCooldown * (1.0 - boundedReduction);
     }
 }

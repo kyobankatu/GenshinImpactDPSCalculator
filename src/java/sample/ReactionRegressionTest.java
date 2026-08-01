@@ -11,6 +11,7 @@ import java.util.function.DoubleSupplier;
 import mechanics.analysis.EnergyAnalyzer;
 import mechanics.buff.Buff;
 import mechanics.buff.BuffId;
+import mechanics.buff.SimpleBuff;
 import mechanics.element.ResonanceManager;
 import mechanics.energy.EnergyManager;
 import mechanics.energy.ParticleType;
@@ -89,6 +90,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_IneffaBirgittaSummonLifecycle();
         testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost();
         testAccuracyPhaseF_PartySizeParticleEnergyMultipliers();
+        testAccuracyPhaseF_ImpetuousWindsCooldownSnapshot();
         testAccuracyPhaseF_TimingAwareEnergyAnalysis();
         testAccuracyPhaseF_ArtifactOptimizerRejectsUnreachableEr();
         testAccuracyPhaseF_ColumbinaGravityAndDewRegression();
@@ -1440,6 +1442,95 @@ public class ReactionRegressionTest {
                 Element.PHYSICAL, 1.0, ParticleType.PARTICLE, emptySim);
         assertEquals(0, emptyNotifications[0],
                 "Particle distribution without an active character should be a no-op");
+    }
+
+    private static void testAccuracyPhaseF_ImpetuousWindsCooldownSnapshot() {
+        TestCharacter resonanceOwner = testCharacter(Element.ANEMO, CharacterId.SUCROSE);
+        resonanceOwner.setSkillCD(10.0);
+        resonanceOwner.setBurstCD(20.0);
+        TestCharacter resonanceAlly = testCharacter(Element.ANEMO, CharacterId.XIANGLING);
+        CombatSimulator resonanceSim = new CombatSimulator();
+        resonanceSim.setLoggingEnabled(false);
+        resonanceSim.addCharacter(resonanceOwner);
+        resonanceSim.addCharacter(resonanceAlly);
+        ResonanceManager.applyResonances(resonanceSim);
+
+        StatsContainer resonanceStats = new StatsContainer();
+        for (Buff buff : resonanceSim.getApplicableBuffs(resonanceOwner)) {
+            buff.apply(resonanceStats, 0.0);
+        }
+        assertClose(0.05, resonanceStats.get(StatType.CD_REDUCTION), EPS,
+                "Two Anemo characters should activate Impetuous Winds");
+        resonanceOwner.markSkillUsed(0.0, resonanceSim.getApplicableBuffs(resonanceOwner));
+        resonanceOwner.markBurstUsed(0.0, resonanceSim.getApplicableBuffs(resonanceOwner));
+        resonanceOwner.restoreCurrentEnergy(resonanceOwner.getMaxEnergy());
+        assertTrue(!resonanceOwner.canSkill(9.499),
+                "Reduced Skill should remain unavailable before 9.5 seconds");
+        assertTrue(resonanceOwner.canSkill(9.5),
+                "Reduced Skill should be ready at exactly 9.5 seconds");
+        assertTrue(!resonanceOwner.canBurst(18.999),
+                "Reduced Burst should remain unavailable before 19 seconds");
+        assertTrue(resonanceOwner.canBurst(19.0),
+                "Reduced Burst should be ready at exactly 19 seconds");
+        assertClose(10.0, resonanceOwner.getSkillCD(), EPS,
+                "Cooldown reduction should not rewrite base Skill metadata");
+        assertClose(20.0, resonanceOwner.getBurstCD(), EPS,
+                "Cooldown reduction should not rewrite base Burst metadata");
+
+        SimulatorSnapshot resonanceSnapshot = resonanceSim.saveSnapshot();
+        resonanceSim.advanceTime(20.0);
+        resonanceSim.restoreSnapshot(resonanceSnapshot);
+        assertClose(9.5, resonanceOwner.getSkillCDRemaining(resonanceSim.getCurrentTime()), EPS,
+                "Snapshot restore should recover reduced Skill cooldown end time");
+        assertClose(19.0, resonanceOwner.getBurstCDRemaining(resonanceSim.getCurrentTime()), EPS,
+                "Snapshot restore should recover reduced Burst cooldown end time");
+
+        TestCharacter noResonanceOwner = testCharacter(Element.ANEMO, CharacterId.SUCROSE);
+        noResonanceOwner.setSkillCD(10.0);
+        noResonanceOwner.setBurstCD(20.0);
+        simulatorWith(noResonanceOwner);
+        noResonanceOwner.markSkillUsed(0.0);
+        noResonanceOwner.markBurstUsed(0.0);
+        noResonanceOwner.restoreCurrentEnergy(noResonanceOwner.getMaxEnergy());
+        assertTrue(!noResonanceOwner.canSkill(9.5) && noResonanceOwner.canSkill(10.0),
+                "One Anemo character should retain the base Skill cooldown");
+        assertTrue(!noResonanceOwner.canBurst(19.0) && noResonanceOwner.canBurst(20.0),
+                "One Anemo character should retain the base Burst cooldown");
+
+        TestCharacter chargeOwner = testCharacter(Element.ANEMO, CharacterId.SUCROSE);
+        chargeOwner.setSkillCD(10.0);
+        chargeOwner.setSkillMaxCharges(2);
+        CombatSimulator chargeSim = simulatorWith(chargeOwner);
+        chargeSim.applyTeamBuff(new SimpleBuff(
+                "Temporary Cooldown Reduction",
+                BuffId.CUSTOM,
+                0.5,
+                0.0,
+                stats -> stats.add(StatType.CD_REDUCTION, 0.05)));
+        chargeOwner.markSkillUsed(0.0, chargeSim.getApplicableBuffs(chargeOwner));
+        chargeSim.advanceTime(1.0);
+        chargeOwner.markSkillUsed(
+                chargeSim.getCurrentTime(), chargeSim.getApplicableBuffs(chargeOwner));
+        List<Double> expectedChargeRestores = java.util.List.of(9.5, 10.5);
+        assertEquals(expectedChargeRestores, chargeOwner.getChargeRestoreTimes(),
+                "Active multi-charge queue should retain its first cooldown snapshot");
+        SimulatorSnapshot chargeSnapshot = chargeSim.saveSnapshot();
+        assertTrue(!chargeOwner.canSkill(9.499),
+                "Both reduced charges should remain pending before the first boundary");
+        assertTrue(chargeOwner.canSkill(9.5),
+                "One reduced charge should restore at the first exact boundary");
+        chargeSim.restoreSnapshot(chargeSnapshot);
+        assertEquals(expectedChargeRestores, chargeOwner.getChargeRestoreTimes(),
+                "Snapshot restore should recover pending reduced charge times");
+        assertClose(9.5, chargeOwner.getActiveChargeCooldownDuration(), EPS,
+                "Snapshot restore should recover the active charge duration");
+
+        TestCharacter cappedOwner = testCharacter(Element.ANEMO, CharacterId.SUCROSE)
+                .withStat(StatType.CD_REDUCTION, 1.5);
+        cappedOwner.setSkillCD(10.0);
+        cappedOwner.markSkillUsed(0.0);
+        assertTrue(cappedOwner.canSkill(0.0),
+                "Cooldown reduction above 100% should clamp to a non-negative duration");
     }
 
     private static void testAccuracyPhaseF_TimingAwareEnergyAnalysis() {
