@@ -90,6 +90,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_CryoResonanceConditionalCritContract();
         testAccuracyPhaseF_ElectroResonanceTypedTriggerContract();
         testAccuracyPhaseF_SucroseNoIcdApplicationContract();
+        testAccuracyPhaseF_XianglingGuobaNoIcdApplicationContract();
         testAccuracyPhaseF_XianglingChiliPickupOptIn();
         testAccuracyPhaseF_XingqiuOrbitalApplicationCadence();
         testAccuracyPhaseF_DamageHooksDispatchOnce();
@@ -1893,6 +1894,40 @@ public class ReactionRegressionTest {
                 "Assumed chili pickup should expire after ten seconds");
     }
 
+    private static void testAccuracyPhaseF_XianglingGuobaNoIcdApplicationContract() {
+        RecordingDamageWeapon reactingWeapon = new RecordingDamageWeapon("Guoba Attack");
+        model.character.Xiangling reactingXiangling = new model.character.Xiangling(
+                reactingWeapon, blankArtifact());
+        CombatSimulator reactingSim = simulatorWithExistingCharacter(reactingXiangling);
+        List<ReactionResult.Kind> reactingKinds = captureReactionKinds(reactingSim);
+        reactingSim.getEnemy().setAura(Element.HYDRO, 4.0, reactingSim.getCurrentTime());
+        reactingSim.performAction(CharacterId.XIANGLING,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        reactingSim.advanceTime(6.51);
+
+        assertEquals(4, reactingWeapon.actions.size(), "Guoba should deal four periodic hits");
+        assertEquals(4, countReactions(reactingKinds, ReactionResult.Kind.VAPORIZE),
+                "Every Guoba hit should apply Pyro and Vaporize without ICD");
+        assertTrue(reactingWeapon.actions.stream().allMatch(action -> action.getElement() == Element.PYRO
+                        && action.getActionType() == ActionType.SKILL
+                        && action.getICDType() == ICDType.None
+                        && action.getICDTag() == ICDTag.ElementalSkill
+                        && action.getGaugeUnits() == 1.0),
+                "Every Guoba hit should retain its sourced Pyro Skill application contract");
+
+        RecordingDamageWeapon noAuraWeapon = new RecordingDamageWeapon("Guoba Attack");
+        model.character.Xiangling noAuraXiangling = new model.character.Xiangling(
+                noAuraWeapon, blankArtifact());
+        CombatSimulator noAuraSim = simulatorWithExistingCharacter(noAuraXiangling);
+        List<ReactionResult.Kind> noAuraKinds = captureReactionKinds(noAuraSim);
+        noAuraSim.performAction(CharacterId.XIANGLING,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        noAuraSim.advanceTime(6.51);
+
+        assertEquals(4, noAuraWeapon.actions.size(), "Guoba should still deal four hits without an aura");
+        assertEquals(0, noAuraKinds.size(), "Guoba should not fabricate reactions without an aura");
+    }
+
     private static List<ReactionResult.Kind> captureReactionKinds(CombatSimulator sim) {
         List<ReactionResult.Kind> kinds = new ArrayList<>();
         sim.addReactionListener((result, source, time, simulator) -> kinds.add(result.getKind()));
@@ -2114,6 +2149,29 @@ public class ReactionRegressionTest {
     private static final class TestWeapon extends Weapon {
         private TestWeapon() {
             super("Test Weapon", new StatsContainer());
+        }
+    }
+
+    /** Captures matching damage actions from the production damage-hook path. */
+    private static final class RecordingDamageWeapon extends Weapon
+            implements model.entity.DamageTriggeredWeaponEffect {
+        private final String actionName;
+        private final List<AttackAction> actions = new ArrayList<>();
+
+        private RecordingDamageWeapon(String actionName) {
+            super("Recording Damage Weapon", new StatsContainer());
+            this.actionName = actionName;
+        }
+
+        @Override
+        public void onDamage(
+                Character user,
+                AttackAction action,
+                double currentTime,
+                CombatSimulator sim) {
+            if (actionName.equals(action.getName())) {
+                actions.add(action);
+            }
         }
     }
 

@@ -158,7 +158,7 @@ public class Xiangling extends Character implements FormStateProvider {
         // Guoba Setup
         AttackAction guobaHit = new AttackAction("Guoba Attack", mv, Element.PYRO, StatType.BASE_ATK,
                 StatType.SKILL_DMG_BONUS, 0.0, true, ActionType.SKILL);
-        guobaHit.setICD(ICDType.Standard, ICDTag.ElementalSkill, 1.0);
+        guobaHit.setICD(ICDType.None, ICDTag.ElementalSkill, 1.0);
 
         // Guoba duration 7s approx, 4 hits.
         // Drops chili at end (approx t+7s).

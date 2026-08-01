@@ -2364,7 +2364,7 @@ Completion evidence:
 
 Status:
 
-- Planned; Phase 1 evidence is recorded below.
+- In progress; Phases 1-2 are complete and Phase 3 remains.
 - Requirement: every Guoba flame hit must apply 1U Pyro without entering or
   consulting a shared Skill ICD group.
 
@@ -2423,7 +2423,7 @@ Verification:
 - inspect `Xiangling.skill` and the final detailed `RaidenParty` trace
 - `python scripts/preflight.py --run`
 
-### Phase 2: Encode and Test Guoba No-ICD Hits
+### Phase 2: Encode and Test Guoba No-ICD Hits - Done
 
 Why second:
 
