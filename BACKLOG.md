@@ -1268,14 +1268,14 @@ experiment record.
 
 ### B-050 — Swirl and Crystallize consume full trigger gauge instead of half
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 3 (maintained Elemental Gauge Theory divergence)
 - Symptom: 1U Anemo/Geo currently subtracts 1U from the aura, so a fresh taxed
   0.8U aura is deleted; the sourced 0.5 modifier should leave 0.3U.
 - Scope: typed Swirl, standard Crystallize, and Lunar-Crystallize consumption,
   residual/expiry regressions, unchanged reaction side effects, and three audited
   party baselines
-- Risk: `planned`
+- Risk: `validated`
 - Proof: actual 1U/2U residual gauges, standard/Lunar parity, full-depletion and
   unrelated-reaction boundaries, first-VV ordering, and two matching payloads
   for each audited party
@@ -1285,6 +1285,16 @@ experiment record.
   Swirl propagation to other targets, absorption, formula order, shield
   absorption, and other reaction modifiers are excluded. See `TASKS.md`
   implementation block `Anemo and Geo Aura Consumption`.
+  Completed with typed half-gauge consumption, residual preservation, actual
+  standard/Lunar boundaries, and unchanged first-VV ordering. Accepted repeated
+  payloads are unchanged RaidenParty
+  `1565f197fe7813ef53bc7ee4107a6b68aae7337fdf1efb9e5d865502f2813d80`
+  at 1,348,716 / 64,225, FlinsParty
+  `4ad65138b5288f4c627194509fc24be69b8d21771efc09a66a1bd79dd92a2b96`
+  at 22,620,467 / 227,341, and FlinsParty2
+  `118edbd3665d167d31e9bbbbffc97ffc499a40db5199a573a5e25ed8eea023a6`
+  at 15,482,126 / 224,054. All durations and warnings remain stable; FlinsParty2
+  ER/allocation changes are recorded in the plan acceptance evidence.
 
 ### B-051 — Overload and Superconduct discard residual aura after subtraction
 

@@ -139,9 +139,9 @@ The B-049 standard aura-tax and decay correction is complete. Ordinary source
 application now uses taxed aura units, source-class decay, and sourced
 same-element extension semantics through the enemy-owned aura model.
 
-The B-050 Anemo/Geo reaction-consumption correction is in progress. Its sourced
-0.5 multiplier and shared runtime consumption are complete; affected party
-acceptance remains below.
+The B-050 Anemo/Geo reaction-consumption correction is complete. Swirl and both
+Crystallize variants now consume half of the trigger source gauge and preserve
+the decayed residual aura.
 
 ## Scope
 
@@ -7764,7 +7764,7 @@ Completion evidence:
 
 Status:
 
-- Phases 1-2 are complete; Phase 3 remains pending.
+- Complete; all three phases are implemented and accepted.
 - Requirement: Swirl and Crystallize triggers consume half of their pre-tax
   Anemo/Geo source gauge from the existing aura, rather than the full source
   gauge used by ordinary transformative reactions.
@@ -7905,7 +7905,7 @@ Completion evidence:
   Overload/Superconduct residuals is recorded as B-051 rather than expanded into
   this phase. Build, reaction regression, and routed validation pass.
 
-### Phase 3: Re-Accept Swirl-Sensitive Party Baselines
+### Phase 3: Re-Accept Swirl-Sensitive Party Baselines - Done
 
 Why last:
 
@@ -7947,3 +7947,31 @@ Verification:
 - two fresh `./gradlew FlinsParty2` runs
 - `python scripts/validate_agent_assets.py`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Two normalized payloads per party match exactly: unchanged RaidenParty
+  `1565f197fe7813ef53bc7ee4107a6b68aae7337fdf1efb9e5d865502f2813d80`,
+  FlinsParty `4ad65138b5288f4c627194509fc24be69b8d21771efc09a66a1bd79dd92a2b96`,
+  and FlinsParty2
+  `118edbd3665d167d31e9bbbbffc97ffc499a40db5199a573a5e25ed8eea023a6`.
+  All six runs complete without warning, error, failed action, or insufficient
+  energy output.
+- RaidenParty remains 1,348,716 / 64,225 over 21.0 seconds with identical full
+  payload, optimizer rolls, and 100/175/179/174% ER because it contains no
+  Anemo/Geo trigger.
+- FlinsParty is 22,620,467 / 227,341 over 99.5 seconds, +2,159,828. Residual
+  auras increase final-run Swirls from 47 to 58 and immediate Lunar-Charged
+  reactions from 127 to 172, while 48 scheduled Lunar ticks, optimizer rolls,
+  rotation, and 109/100/100/180% ER remain unchanged. Per-source deltas are
+  Columbina +260,031, Sucrose +683,401, Thundercloud +12,855, Flins +718,738,
+  and Ineffa +484,803.
+- FlinsParty2 is 15,482,126 / 224,054 over 69.1 seconds, +687,148. Swirls rise
+  from 31 to 35 and immediate Lunar-Charged reactions from 80 to 105 while 33
+  scheduled ticks remain. The ER optimizer selects 130/128/100/196% and adjusts
+  Sucrose to 16 EM rolls, Ineffa to 10 CD/6 CR/4 ATK rolls, and Columbina to
+  5 CD/0 HP/8 CR rolls; Flins rolls remain unchanged. Per-source deltas are
+  Columbina +51,659, Sucrose +162,214, Thundercloud -16,709, Flins +383,654,
+  and Ineffa +106,331.
+- README, verification reference, plan, and ledger agree. Generated FlinsParty2
+  HTML was restored and no output artifact is staged.
