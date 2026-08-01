@@ -74,6 +74,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseE_LunarBloomDewState();
         testAccuracyPhaseE_LunarCrystallizeHarmonyCadence();
         testAccuracyPhaseF_RaidenResolveAndEnergyRegression();
+        testAccuracyPhaseF_FlinsSkillApplicationContract();
         testAccuracyPhaseF_FlinsThundercloudConditionalHits();
         testAccuracyPhaseF_FlinsSymphonyZeroGaugeContract();
         testAccuracyPhaseF_IneffaOverclockZeroGaugeContract();
@@ -1028,6 +1029,61 @@ public class ReactionRegressionTest {
         reactingSim.advanceTime(10.0);
         assertEquals(1, elementalReactions[0],
                 "Only the 1U initial standard-Burst hit should trigger an elemental reaction");
+    }
+
+    private static void testAccuracyPhaseF_FlinsSkillApplicationContract() {
+        model.character.Flins flins = new model.character.Flins(new TestWeapon(), blankArtifact());
+        CombatSimulator sim = simulatorWithExistingCharacter(flins);
+        List<AttackAction> actions = new ArrayList<>();
+        int[] elementalReactions = { 0 };
+        sim.addListener((actor, action, time) -> actions.add(action));
+        sim.addReactionListener((result, source, time, simulator) -> {
+            if (result.getKind() == ReactionResult.Kind.LUNAR_CHARGED && result.getTransformDamage() > 0.0) {
+                elementalReactions[0]++;
+            }
+        });
+        sim.getEnemy().setAura(Element.HYDRO, 4.0, sim.getCurrentTime());
+        double activationStart = sim.getCurrentTime();
+        double damageBeforeActivation = sim.getTotalDamage();
+
+        flins.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), sim);
+
+        AttackAction activation = findAction(actions, "Enter Form");
+        assertEquals(Element.ELECTRO, activation.getElement(), "Flins form activation should be an Electro hit");
+        assertEquals(ActionType.SKILL, activation.getActionType(), "Flins form activation should retain Skill typing");
+        assertEquals(ICDType.None, activation.getICDType(), "Flins form activation should have no ICD");
+        assertEquals(ICDTag.ElementalSkill, activation.getICDTag(),
+                "Flins form activation should retain Skill tag");
+        assertClose(0.0, activation.getGaugeUnits(), EPS, "Flins form activation should apply 0U Electro");
+        assertClose(0.3, sim.getCurrentTime() - activationStart, EPS,
+                "Flins form activation should retain its 0.3-second duration");
+        assertClose(damageBeforeActivation, sim.getTotalDamage(), EPS,
+                "Flins form activation should remain damageless");
+        assertEquals(0, elementalReactions[0], "Flins 0U form activation should not trigger a reaction");
+        assertTrue(sim.getEnemy().getAuraUnits(Element.HYDRO, sim.getCurrentTime()) > 0.0,
+                "Flins 0U form activation should preserve Hydro aura");
+        assertTrue(flins.isFormActive(sim.getCurrentTime()), "Flins form activation should enter Manifest Flame");
+
+        elementalReactions[0] = 0;
+        sim.getEnemy().setAura(Element.HYDRO, 4.0, sim.getCurrentTime());
+        double spearstormStart = sim.getCurrentTime();
+        double damageBeforeSpearstorm = sim.getTotalDamage();
+
+        flins.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), sim);
+
+        AttackAction spearstorm = findAction(actions, "Northland Spearstorm");
+        assertEquals(Element.ELECTRO, spearstorm.getElement(), "Flins Spearstorm should remain Electro");
+        assertEquals(ActionType.SKILL, spearstorm.getActionType(), "Flins Spearstorm should retain Skill typing");
+        assertEquals(ICDType.None, spearstorm.getICDType(), "Flins Spearstorm should have no ICD");
+        assertEquals(ICDTag.ElementalSkill, spearstorm.getICDTag(), "Flins Spearstorm should retain Skill tag");
+        assertClose(1.0, spearstorm.getGaugeUnits(), EPS, "Flins Spearstorm should apply 1U Electro");
+        assertClose(0.3, sim.getCurrentTime() - spearstormStart, EPS,
+                "Flins Spearstorm should retain its 0.3-second duration");
+        assertEquals(1, elementalReactions[0], "Flins Spearstorm should trigger one elemental reaction on Hydro");
+        assertTrue(sim.getTotalDamage() > damageBeforeSpearstorm,
+                "Flins Spearstorm should retain positive direct damage");
+        assertTrue(flins.isThunderousSymphonyActive(sim.getCurrentTime()),
+                "Flins Spearstorm should activate Thunderous Symphony state");
     }
 
     private static void testAccuracyPhaseF_FlinsSymphonyZeroGaugeContract() {

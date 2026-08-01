@@ -1740,7 +1740,7 @@ Completion evidence:
 Status:
 
 - In progress.
-- Phase 1 is complete; Phases 2-3 remain.
+- Phases 1-2 are complete; Phase 3 remains.
 - Requirement: Manifest Flame activation must be a damageless 0U Electro Skill
   with no ICD, and Northland Spearstorm must apply 1U without ICD.
 
@@ -1805,7 +1805,7 @@ Verification:
 - inspect `Flins.skill_enterForm`, `Flins.skill_spearstorm`, and current log
 - `python scripts/preflight.py --run`
 
-### Phase 2: Encode and Test Skill Action Contracts
+### Phase 2: Encode and Test Skill Action Contracts - Done
 
 Why second:
 

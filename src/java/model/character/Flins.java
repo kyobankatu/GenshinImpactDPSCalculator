@@ -348,7 +348,10 @@ public class Flins extends Character
         if (sim.isLoggingEnabled())
             System.out.println("Flins entering Manifest Flame form.");
 
-        sim.performAction(this.characterId, new AttackAction("Enter Form", 0, Element.PHYSICAL, StatType.BASE_ATK, null, 0.3));
+        AttackAction activation = new AttackAction("Enter Form", 0.0, Element.ELECTRO, StatType.BASE_ATK,
+                null, 0.3, false, ActionType.SKILL);
+        activation.setICD(ICDType.None, ICDTag.ElementalSkill, 0.0);
+        sim.performAction(this.characterId, activation);
 
     }
 
@@ -364,7 +367,7 @@ public class Flins extends Character
 
         AttackAction hit = new AttackAction("Northland Spearstorm", mv, Element.ELECTRO, StatType.BASE_ATK,
                 StatType.SKILL_DMG_BONUS, 0.0, false, ActionType.SKILL);
-        hit.setICD(ICDType.Standard, ICDTag.ElementalSkill, 1.0);
+        hit.setICD(ICDType.None, ICDTag.ElementalSkill, 1.0);
         hit.setAnimationDuration(0.3);
 
         // CD and Symphony state start from cast time, not after animation ends
