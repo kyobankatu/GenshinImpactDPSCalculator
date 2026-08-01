@@ -105,6 +105,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ElectroResonanceTypedTriggerContract();
         testAccuracyPhaseF_SucroseNoIcdApplicationContract();
         testAccuracyPhaseF_RaidenCastAndMusouIcdContract();
+        testAccuracyPhaseF_RaidenEyeBuffRefreshContract();
         testAccuracyPhaseF_PeriodicCancellationAndRaidenEyeDamageTrigger();
         testAccuracyPhaseF_BennettSkillAndBurstApplicationContract();
         testAccuracyPhaseF_XianglingGuobaNoIcdApplicationContract();
@@ -2935,6 +2936,74 @@ public class ReactionRegressionTest {
                 "Physical Raiden Normal should retain the generic Normal tag");
         assertEquals(ICDTag.ChargedAttack, findAction(physicalWeapon.actions, "Raiden CA").getICDTag(),
                 "Physical Raiden Charged should retain the generic Charged tag");
+    }
+
+    private static void testAccuracyPhaseF_RaidenEyeBuffRefreshContract() {
+        model.character.RaidenShogun raiden = new model.character.RaidenShogun(
+                new TestWeapon(), blankArtifact());
+        TestCharacter ally = testCharacter(Element.HYDRO, CharacterId.XINGQIU);
+        CombatSimulator sim = simulatorWithExistingCharacter(raiden);
+        sim.addCharacter(ally);
+
+        captureStandardOutput(() -> sim.performAction(CharacterId.RAIDEN_SHOGUN,
+                CharacterActionRequest.of(CharacterActionKey.SKILL)));
+        assertClose(0.27, resolvedStat(sim, raiden, StatType.BURST_DMG_BONUS), EPS,
+                "Raiden Eye should scale from Raiden's 90-Energy Burst cost");
+        assertClose(0.18, resolvedStat(sim, ally, StatType.BURST_DMG_BONUS), EPS,
+                "Raiden Eye should scale independently from an ally's 60-Energy Burst cost");
+        assertRaidenEyeBuff(raiden, "Initial Raiden Eye buff");
+        assertRaidenEyeBuff(ally, "Initial ally Eye buff");
+
+        sim.advanceTime(9.5);
+        assertClose(10.0, sim.getCurrentTime(), EPS,
+                "Raiden Eye fixture should reach the exact Skill cooldown boundary");
+        captureStandardOutput(() -> sim.performAction(CharacterId.RAIDEN_SHOGUN,
+                CharacterActionRequest.of(CharacterActionKey.SKILL)));
+        assertClose(10.5, sim.getCurrentTime(), EPS,
+                "Raiden Eye refresh should retain the existing Skill action time");
+        assertClose(0.27, resolvedStat(sim, raiden, StatType.BURST_DMG_BONUS), EPS,
+                "Raiden Eye recast should refresh rather than double Raiden's bonus");
+        assertClose(0.18, resolvedStat(sim, ally, StatType.BURST_DMG_BONUS), EPS,
+                "Raiden Eye recast should refresh rather than double the ally's bonus");
+        Buff refreshedRaidenEye = assertRaidenEyeBuff(raiden, "Refreshed Raiden Eye buff");
+        Buff refreshedAllyEye = assertRaidenEyeBuff(ally, "Refreshed ally Eye buff");
+        assertClose(35.5, refreshedRaidenEye.getExpirationTime(), EPS,
+                "Refreshed Raiden Eye should retain a 25-second window");
+        assertClose(35.5, refreshedAllyEye.getExpirationTime(), EPS,
+                "Refreshed ally Eye should retain a 25-second window");
+
+        sim.advanceTime(24.999);
+        assertClose(0.27, resolvedStat(sim, raiden, StatType.BURST_DMG_BONUS), EPS,
+                "Refreshed Raiden Eye should remain active immediately before 25 seconds");
+        assertClose(0.18, resolvedStat(sim, ally, StatType.BURST_DMG_BONUS), EPS,
+                "Refreshed ally Eye should remain active immediately before 25 seconds");
+        StatsContainer raidenAtExpiry = new StatsContainer();
+        refreshedRaidenEye.apply(raidenAtExpiry, refreshedRaidenEye.getExpirationTime());
+        assertClose(0.0, raidenAtExpiry.get(StatType.BURST_DMG_BONUS), EPS,
+                "Raiden Eye's half-open window should exclude its exact expiry");
+        StatsContainer allyAtExpiry = new StatsContainer();
+        refreshedAllyEye.apply(allyAtExpiry, refreshedAllyEye.getExpirationTime());
+        assertClose(0.0, allyAtExpiry.get(StatType.BURST_DMG_BONUS), EPS,
+                "Ally Eye's half-open window should exclude its exact expiry");
+        sim.advanceTime(0.001001);
+        assertClose(0.0, resolvedStat(sim, raiden, StatType.BURST_DMG_BONUS), EPS,
+                "Refreshed Raiden Eye should be absent after 25 seconds");
+        assertClose(0.0, resolvedStat(sim, ally, StatType.BURST_DMG_BONUS), EPS,
+                "Refreshed ally Eye should be absent after 25 seconds");
+    }
+
+    private static Buff assertRaidenEyeBuff(Character character, String message) {
+        long count = character.getActiveBuffs().stream()
+                .filter(buff -> buff.getId() == BuffId.RAIDEN_EYE_OF_STORMY_JUDGMENT)
+                .count();
+        assertEquals(1L, count, message + " count");
+        Buff eyeBuff = character.getActiveBuffs().stream()
+                .filter(buff -> buff.getId() == BuffId.RAIDEN_EYE_OF_STORMY_JUDGMENT)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError(message + " should exist"));
+        assertEquals(CharacterId.RAIDEN_SHOGUN, eyeBuff.getSourceCharacterId(),
+                message + " source");
+        return eyeBuff;
     }
 
     private static void testAccuracyPhaseF_PeriodicCancellationAndRaidenEyeDamageTrigger() {

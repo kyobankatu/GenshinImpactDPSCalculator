@@ -5734,7 +5734,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phase 1 is complete and Phases 2-3 remain.
+- In progress; Phases 1-2 are complete and Phase 3 remains.
 - Requirement: each party member may have one Eye of Stormy Judgment Burst DMG
   buff, refreshed to 25 seconds when Raiden recasts her Skill.
 
@@ -5823,7 +5823,7 @@ Completion evidence:
   typed character-buff replacement. Current code appends a new same-ID value on
   every legal recast, so stat assembly adds both throughout their overlap.
 
-### Phase 2: Refresh Recipient Eye Buffs and Regress Recasts
+### Phase 2: Refresh Recipient Eye Buffs and Regress Recasts - Done
 
 Why second:
 
@@ -5870,6 +5870,18 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/agent_validate.py --path src/java/model/character/RaidenShogun.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- `RaidenShogun.skill` now removes each recipient's prior typed Eye before
+  adding its newly timed, recipient-scaled instance; coordinated attacks,
+  cooldown, source, and all values remain in their existing owner boundary.
+- The actual Skill regression proves Raiden 0.27 and a 60-cost ally 0.18 after
+  the initial cast and exact-CD recast, one typed Raiden-sourced buff each,
+  refreshed expiration at 35.5 seconds, active stats at 35.499, exact half-open
+  expiry exclusion at 35.5, and absence after crossing the boundary.
+- Reaction and party-catalog regressions, build, Javadoc, routed validation, and
+  preflight pass.
 
 ### Phase 3: Re-Accept the Raiden Eye Baseline
 

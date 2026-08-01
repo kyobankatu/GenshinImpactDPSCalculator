@@ -259,6 +259,7 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
         for (Character c : sim.getPartyMembers()) {
             double cost = c.getEnergyCost();
             double burstBonus = cost * 0.003;
+            c.removeBuff(BuffId.RAIDEN_EYE_OF_STORMY_JUDGMENT);
             c.addBuff(new mechanics.buff.SimpleBuff("Eye of Stormy Judgment", BuffId.RAIDEN_EYE_OF_STORMY_JUDGMENT,
                     25.0, sim.getCurrentTime(), s -> {
                 s.add(StatType.BURST_DMG_BONUS, burstBonus);
