@@ -1415,6 +1415,160 @@ Completion evidence:
 - Only Ineffa's rounded contribution changed, from 2,946,003 to 3,205,782;
   the accepted result is 15,604,338 damage / 228,803 DPS.
 
+## Implementation Order: Flins Thunderous Symphony Zero-Gauge Damage
+
+Status:
+
+- In progress.
+- Phase 1 is complete; Phases 2-3 remain.
+- Requirement: Thunderous Symphony and its conditional Additional hit must
+  retain direct Lunar-Charged damage while applying 0U and entering no ICD
+  group.
+
+Scope:
+
+- Explicitly encode both Thunderous Symphony actions as 0U/no-ICD in `Flins`.
+- Add actual-character regression coverage for main and Additional hit
+  metadata, aura preservation, direct damage, and conditional scheduling.
+- Re-run `FlinsParty2` and accept the reaction/DPS delta.
+
+Out of scope for this pass:
+
+- Changing damage multipliers, Lunar classification, animation or Additional
+  hit timing, Thundercloud conditions, form duration, cooldowns, or energy.
+- Changing the standard Flins Burst, generic ICD/reaction services, optimizer
+  behavior, RL contracts, or generated `docs/` output.
+
+Design boundaries:
+
+- `model.character.Flins` remains the only owner of Symphony action metadata.
+- Runtime ICD, aura, and Lunar formula services remain generic typed-action
+  consumers.
+- Regression observes actual Flins requests and simulator state; no test-only
+  production API is introduced.
+
+### Phase 1: Record Thunderous Symphony Application Evidence - Done
+
+Why first:
+
+These attacks are Electro damage but intentionally carry no gauge, so the
+source contract must be fixed before changing their inherited defaults.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record the Genshin Impact Wiki Flins advanced-property table, accessed
+  2026-08-02: main and Additional Symphony damage are each 0U/no-ICD.
+- Corroborate the distinct direct Lunar-Charged talent hits against KQM TCL.
+- Classify the simulator decision as `adopt` and record pre-fix hit/block
+  counts and baseline.
+
+Acceptance criteria:
+
+- Source URLs, access date, classification, and bounded test design are
+  recorded.
+- Pre-fix `FlinsParty2` is 15,604,338 damage / 228,803 DPS.
+- The log identifies 12 main and 12 Additional hits, with four and eight
+  inherited neutral-tag ICD blocks respectively.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 adds executable coverage.
+
+Verification:
+
+- inspect current `FlinsParty2` action and ICD counts
+- `python scripts/preflight.py --run`
+
+### Phase 2: Encode and Test Zero-Gauge Symphony Damage
+
+Why second:
+
+After evidence is fixed, both action definitions and the actual-character
+contract can be corrected atomically.
+
+Target files:
+
+- `src/java/model/character/Flins.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Set main and Additional Symphony actions to `ICDType.None`, Burst tag, and
+  0U before execution or event registration.
+- Extend actual-Flins regression coverage for both actions and the 0.1-second
+  conditional Additional hit.
+- Verify Hydro aura and reaction listeners remain unchanged while positive
+  direct damage is recorded.
+
+Acceptance criteria:
+
+- Both actions expose 0U/no-ICD metadata and retain Burst typing and Lunar
+  consideration.
+- Main and Additional hits cannot consume Hydro aura or trigger an elemental
+  reaction.
+- Direct damage and conditional Additional scheduling remain active.
+- No runtime/formula or standard-Burst code changes.
+
+Test cases to add or update:
+
+- Normal: active Thundercloud produces main plus one Additional direct hit.
+- No-trigger: both 0U hits preserve a pre-existing Hydro aura and emit no
+  reaction.
+- Conditional: without Thundercloud, Symphony emits only the main hit.
+- Boundary: the Additional hit remains scheduled 0.1 seconds after the main
+  hit without entering an ICD group.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Accept the FlinsParty2 Zero-Gauge Delta
+
+Why last:
+
+The integrated reaction and optimizer baseline can be accepted only after the
+focused action contract is committed.
+
+Target files:
+
+- `README.md`
+- `TASKS.md`
+- `BACKLOG.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+
+Tasks:
+
+- Run two fresh `FlinsParty2` invocations and compare complete logs.
+- Confirm all 24 Symphony hits retain direct damage with zero related ICD
+  blocks or elemental application.
+- Update the audited baseline and close B-014.
+
+Acceptance criteria:
+
+- Two fresh runs have identical optimizer decisions and final summaries.
+- No Symphony hit mutates aura or enters ICD state.
+- Current README, verification gate, backlog, and plan values agree.
+- Agent assets and routed preflight checks pass.
+
+Test cases to add or update:
+
+- No further production test; Phase 2 owns the mechanic contract and this phase
+  performs full-party integration acceptance.
+
+Verification:
+
+- two fresh `./gradlew FlinsParty2` runs
+- `python scripts/validate_agent_assets.py`
+- `python scripts/preflight.py --run`
+
 ## Cross-Cutting Rules
 
 ### Testing

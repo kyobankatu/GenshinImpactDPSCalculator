@@ -276,3 +276,25 @@ experiment record.
   All 40 Birgitta Discharge hits retained direct damage with zero related ICD
   blocks; only Ineffa's rounded contribution changed, from 2,946,003 to
   3,205,782. The accepted result is 15,604,338 damage / 228,803 DPS.
+
+### B-014 — Flins Thunderous Symphony incorrectly applies Electro
+
+- Status: `planned`
+- Source: 3 (sourced game-accuracy divergence exposed by B-009 output)
+- Symptom: Thunderous Symphony and its Additional hit inherit the 1U/Standard
+  default under the neutral ICD tag. In the current `FlinsParty2` run, all 12
+  main and 12 Additional hits enter that shared group; four main and eight
+  Additional applications are blocked instead of both actions applying 0U.
+- Scope: `src/java/model/character/Flins.java`,
+  `src/java/sample/ReactionRegressionTest.java`
+- Risk: `planned`
+- Proof: focused actual-Flins zero-gauge regression plus two matching
+  `./gradlew FlinsParty2` summaries
+- Notes: adopt the Genshin Impact Wiki Flins advanced-property table (accessed
+  2026-08-02), which records Thunderous Symphony Damage and Thunderous Symphony
+  Additional Damage as 0U/no-ICD. KQM's maintained Flins TCL independently
+  corroborates the two distinct talent hits and their direct Lunar-Charged
+  damage model. Sources: https://genshin-impact.fandom.com/wiki/Flins and
+  https://library.keqingmains.com/characters/electro/flins. Pre-fix
+  `FlinsParty2` is 15,604,338 damage / 228,803 DPS. See `TASKS.md`
+  implementation block `Flins Thunderous Symphony Zero-Gauge Damage`.
