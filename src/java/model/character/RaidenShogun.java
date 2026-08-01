@@ -211,7 +211,7 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
 
         AttackAction e = new AttackAction("Raiden E Cast", mv, Element.ELECTRO, StatType.BASE_ATK,
                 StatType.SKILL_DMG_BONUS, 0.5, false, ActionType.SKILL); // Dynamic
-        e.setICD(ICDType.Standard, ICDTag.ElementalSkill, 1.0);
+        e.setICD(ICDType.None, ICDTag.ElementalSkill, 1.0);
         sim.performAction(this.characterId, e);
 
         // Team Buff Logic (Eye of Stormy Judgment)
@@ -282,7 +282,7 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
 
         AttackAction q = new AttackAction("Musou Shinsetsu", mv, Element.ELECTRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 1.5, false, ActionType.BURST); // Raiden dynamic stats (No Snapshot)
-        q.setICD(ICDType.Standard, ICDTag.ElementalBurst, 2.0); // 2U Application
+        q.setICD(ICDType.None, ICDTag.ElementalBurst, 2.0);
         if (this.constellation >= 2) {
             q.setDefenseIgnore(0.60);
         }
@@ -386,7 +386,8 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
                 a.setDefenseIgnore(0.60);
             }
         }
-        a.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
+        a.setICD(ICDType.Standard,
+                countsAsBurst ? ICDTag.Raiden_MusouIsshin : ICDTag.NormalAttack, 1.0);
         sim.performAction(this.characterId, a);
 
         normalAttackStep++;
@@ -434,7 +435,8 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
                 ca.setDefenseIgnore(0.60);
             }
         }
-        ca.setICD(ICDType.Standard, ICDTag.ChargedAttack, 1.0);
+        ca.setICD(ICDType.Standard,
+                countsAsBurst ? ICDTag.Raiden_MusouIsshin : ICDTag.ChargedAttack, 1.0);
         sim.performAction(this.characterId, ca);
         normalAttackStep = 0;
     }

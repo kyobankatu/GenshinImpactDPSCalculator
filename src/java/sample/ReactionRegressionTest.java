@@ -90,6 +90,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_CryoResonanceConditionalCritContract();
         testAccuracyPhaseF_ElectroResonanceTypedTriggerContract();
         testAccuracyPhaseF_SucroseNoIcdApplicationContract();
+        testAccuracyPhaseF_RaidenCastAndMusouIcdContract();
         testAccuracyPhaseF_BennettSkillAndBurstApplicationContract();
         testAccuracyPhaseF_XianglingGuobaNoIcdApplicationContract();
         testAccuracyPhaseF_XianglingChiliPickupOptIn();
@@ -2025,6 +2026,86 @@ public class ReactionRegressionTest {
                 "Fantastic Voyage should still deal damage without an aura");
         assertEquals(0, noAuraBurstKinds.size(),
                 "Fantastic Voyage should not fabricate reactions without an aura");
+    }
+
+    private static void testAccuracyPhaseF_RaidenCastAndMusouIcdContract() {
+        RecordingDamageWeapon skillWeapon = new RecordingDamageWeapon("");
+        model.character.RaidenShogun skillRaiden = new model.character.RaidenShogun(
+                skillWeapon, blankArtifact());
+        CombatSimulator skillSim = simulatorWithExistingCharacter(skillRaiden);
+        List<ReactionResult.Kind> skillKinds = captureReactionKinds(skillSim);
+        skillSim.getEnemy().setAura(Element.CRYO, 4.0, skillSim.getCurrentTime());
+        captureStandardOutput(() -> skillSim.performAction(CharacterId.RAIDEN_SHOGUN,
+                CharacterActionRequest.of(CharacterActionKey.SKILL)));
+        double firstEyeTime = skillSim.getCurrentTime() + 0.9;
+        skillSim.registerEvent(new simulation.event.SimpleTimerEvent(firstEyeTime - 0.001, 1.0) {
+            @Override
+            public void onTick(CombatSimulator activeSim) {
+                activeSim.getEnemy().setAura(Element.CRYO, 4.0, activeSim.getCurrentTime());
+                finish();
+            }
+        });
+        captureStandardOutput(() -> skillSim.advanceTime(1.81));
+
+        AttackAction skillCast = findAction(skillWeapon.actions, "Raiden E Cast");
+        AttackAction firstEye = findAction(skillWeapon.actions, "Eye of Stormy Judgment");
+        assertEquals(ICDType.None, skillCast.getICDType(), "Raiden Skill cast should have no ICD");
+        assertEquals(ICDTag.ElementalSkill, skillCast.getICDTag(),
+                "Raiden Skill cast should retain its Skill tag");
+        assertClose(1.0, skillCast.getGaugeUnits(), EPS, "Raiden Skill cast should apply 1U Electro");
+        assertEquals(ICDType.Standard, firstEye.getICDType(), "Raiden Eye should use standard ICD");
+        assertEquals(ICDTag.ElementalSkill, firstEye.getICDTag(), "Raiden Eye should retain its Skill tag");
+        assertClose(1.0, firstEye.getGaugeUnits(), EPS, "Raiden Eye should apply 1U Electro");
+        assertEquals(2, countReactions(skillKinds, ReactionResult.Kind.SUPERCONDUCT),
+                "Skill cast and first Eye should both apply before Eye ICD blocks its next hit");
+
+        RecordingDamageWeapon burstWeapon = new RecordingDamageWeapon("");
+        model.character.RaidenShogun burstRaiden = new model.character.RaidenShogun(
+                burstWeapon, blankArtifact());
+        CombatSimulator burstSim = simulatorWithExistingCharacter(burstRaiden);
+        List<ReactionResult.Kind> burstKinds = captureReactionKinds(burstSim);
+        captureStandardOutput(() -> burstSim.performAction(CharacterId.RAIDEN_SHOGUN,
+                CharacterActionRequest.of(CharacterActionKey.BURST)));
+
+        AttackAction burstCast = findAction(burstWeapon.actions, "Musou Shinsetsu");
+        assertEquals(ICDType.None, burstCast.getICDType(), "Raiden Burst initial hit should have no ICD");
+        assertEquals(ICDTag.ElementalBurst, burstCast.getICDTag(),
+                "Raiden Burst initial hit should retain its Burst tag");
+        assertClose(2.0, burstCast.getGaugeUnits(), EPS, "Raiden Burst initial hit should apply 2U Electro");
+
+        burstSim.setEnemy(new Enemy(90));
+        burstSim.getEnemy().setAura(Element.PYRO, 4.0, burstSim.getCurrentTime());
+        captureStandardOutput(() -> burstSim.performAction(CharacterId.RAIDEN_SHOGUN,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL)));
+        burstSim.getEnemy().setAura(Element.PYRO, 4.0, burstSim.getCurrentTime());
+        captureStandardOutput(() -> burstSim.performAction(CharacterId.RAIDEN_SHOGUN,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE)));
+
+        AttackAction burstNormal = findAction(burstWeapon.actions, "Raiden Burst N1");
+        AttackAction burstCharge = findAction(burstWeapon.actions, "Raiden Burst CA");
+        assertEquals(ICDTag.Raiden_MusouIsshin, burstNormal.getICDTag(),
+                "Raiden Burst Normal should use the shared Musou tag");
+        assertEquals(ICDTag.Raiden_MusouIsshin, burstCharge.getICDTag(),
+                "Raiden Burst Charged should use the shared Musou tag");
+        assertEquals(ICDType.Standard, burstNormal.getICDType(),
+                "Raiden Burst Normal should use standard ICD");
+        assertEquals(ICDType.Standard, burstCharge.getICDType(),
+                "Raiden Burst Charged should use standard ICD");
+        assertEquals(1, countReactions(burstKinds, ReactionResult.Kind.OVERLOAD),
+                "Immediate Burst Normal and Charged attacks should share one ICD group");
+
+        RecordingDamageWeapon physicalWeapon = new RecordingDamageWeapon("Raiden ");
+        model.character.RaidenShogun physicalRaiden = new model.character.RaidenShogun(
+                physicalWeapon, blankArtifact());
+        CombatSimulator physicalSim = simulatorWithExistingCharacter(physicalRaiden);
+        physicalSim.performAction(CharacterId.RAIDEN_SHOGUN,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        physicalSim.performAction(CharacterId.RAIDEN_SHOGUN,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        assertEquals(ICDTag.NormalAttack, findAction(physicalWeapon.actions, "Raiden N1").getICDTag(),
+                "Physical Raiden Normal should retain the generic Normal tag");
+        assertEquals(ICDTag.ChargedAttack, findAction(physicalWeapon.actions, "Raiden CA").getICDTag(),
+                "Physical Raiden Charged should retain the generic Charged tag");
     }
 
     private static List<ReactionResult.Kind> captureReactionKinds(CombatSimulator sim) {

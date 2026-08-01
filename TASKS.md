@@ -2815,7 +2815,7 @@ Completion evidence:
 
 Status:
 
-- Planned; Phase 1 evidence is recorded below.
+- In progress; Phases 1-2 are complete and Phase 3 remains.
 - Requirement: Skill and Burst initial hits use no ICD, Eye uses standard Skill
   ICD, and Musou Isshin Normal/Charged attacks share one standard ICD group.
 
@@ -2875,7 +2875,7 @@ Verification:
 - inspect Raiden action construction and the detailed `RaidenParty` trace
 - `python scripts/preflight.py --run`
 
-### Phase 2: Encode and Test Raiden Typed ICD Contracts
+### Phase 2: Encode and Test Raiden Typed ICD Contracts - Done
 
 Why second:
 
