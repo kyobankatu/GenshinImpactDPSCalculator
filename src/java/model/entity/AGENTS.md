@@ -22,6 +22,7 @@
 - `SwitchAwareArtifact.java`: capability interface for artifacts that react to switch events.
 - `SwitchAwareCharacter.java`: capability interface for characters that react to switch events.
 - `SwitchAwareWeaponEffect.java`: capability interface for weapons that react to switch events.
+- `TargetDependentWeaponEffect.java`: capability interface for per-hit weapon stats that depend on live enemy state.
 - `Weapon.java`: base class for weapons with fixed stats, passive stat application, display metadata, and NA-energy category information.
 - `WeaponTeamBuffProvider.java`: capability interface for weapons that provide team buffs.
 

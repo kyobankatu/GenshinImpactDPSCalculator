@@ -109,9 +109,8 @@ public class CombatActionResolver {
     private ActionResolutionContext createContext(Character attacker, AttackAction action) {
         applicableBuffBuffer.clear();
         applicableBuffBuffer.addAll(sim.getApplicableBuffs(attacker));
-        StatsContainer resolvedStats = action.isUseSnapshot()
-                ? null
-                : DamageCalculator.resolveStats(attacker, action, applicableBuffBuffer, sim.getCurrentTime());
+        StatsContainer resolvedStats = DamageCalculator.resolveTargetStats(
+                attacker, sim.getEnemy(), action, applicableBuffBuffer, sim.getCurrentTime());
         return new ActionResolutionContext(new ArrayList<>(applicableBuffBuffer), resolvedStats);
     }
 

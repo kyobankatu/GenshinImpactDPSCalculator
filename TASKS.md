@@ -73,8 +73,8 @@ particle income to hide an earlier deficit.
 The B-028 correction is complete. Raiden's Eye now triggers from resolved party
 damage instead of attacking autonomously on a fixed timer.
 
-The B-031 Dragon's Bane correction is in progress. Its enemy-aura condition
-will be evaluated per hit before reaction consumption instead of being folded
+The B-031 Dragon's Bane correction is complete. Its enemy-aura condition is
+evaluated per hit before reaction consumption instead of being folded
 unconditionally into the wielder's stat sheet and snapshots.
 
 ## Scope
@@ -3836,7 +3836,7 @@ depends on them:
 
 Status:
 
-- In progress; Phase 1 is complete and Phase 2 remains.
+- Complete; Phases 1-2 passed their acceptance criteria.
 - Requirement: Dragon's Bane R5 grants 36% all-damage bonus only when the
   target is currently affected by Hydro or Pyro, evaluated for every direct
   hit before that hit consumes or replaces the aura.
@@ -3918,7 +3918,7 @@ Verification:
   `CombatActionResolver`
 - `python scripts/preflight.py --run`
 
-### Phase 2: Resolve Dragon's Bane from Pre-Hit Target State
+### Phase 2: Resolve Dragon's Bane from Pre-Hit Target State - Done
 
 Why second:
 
@@ -3981,6 +3981,17 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/agent_validate.py --path src/java/model/entity/TargetDependentWeaponEffect.java --path src/java/model/weapon/DragonsBane.java --path src/java/mechanics/formula/DamageCalculator.java --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Focused regression proves no/Electro aura exclusion, Hydro/Pyro inclusion,
+  immediate-pre-expiry inclusion, exact-expiry exclusion, and a consuming
+  Pyro-on-Hydro Vaporize using the pre-hit condition.
+- Runtime snapshot hits alternate eligible and ineligible target state without
+  storing or accumulating the 36% bonus.
+- `ReactionRegressionTest`, `build`, warning-free Javadoc, focused agent
+  validation, and preflight pass; cataloged party baselines are unchanged
+  because no current party equips Dragon's Bane.
 
 ## NCCL/DDP Distributed RL Training Plan
 

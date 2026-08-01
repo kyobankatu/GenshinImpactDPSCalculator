@@ -6,6 +6,7 @@ import model.entity.Character;
 import model.entity.DamageTriggeredArtifactEffect;
 import model.entity.DamageTriggeredWeaponEffect;
 import model.entity.Enemy;
+import model.entity.TargetDependentWeaponEffect;
 import java.util.List;
 import mechanics.buff.Buff;
 
@@ -198,6 +199,60 @@ public class DamageCalculator {
             }
         }
         return stats;
+    }
+
+    /**
+     * Resolves stats for one target before that hit mutates enemy aura state.
+     *
+     * <p>Enemy-state-dependent weapon effects are applied to a copy so live
+     * character stats, snapshots, and caller-owned pre-resolved containers are
+     * never mutated by a per-hit condition.</p>
+     *
+     * @param attacker    attacking character
+     * @param target      enemy being hit
+     * @param action      attack action whose snapshot policy is honored
+     * @param activeBuffs currently active buffs (may be {@code null})
+     * @param currentTime current simulation time in seconds
+     * @return resolved per-hit stats including eligible target-dependent effects
+     */
+    public static StatsContainer resolveTargetStats(
+            Character attacker,
+            Enemy target,
+            simulation.action.AttackAction action,
+            List<Buff> activeBuffs,
+            double currentTime) {
+        StatsContainer stats = resolveStats(attacker, action, activeBuffs, currentTime);
+        if (!(attacker.getWeapon() instanceof TargetDependentWeaponEffect)) {
+            return stats;
+        }
+        StatsContainer perHitStats = stats.merge(null);
+        TargetDependentWeaponEffect effect = (TargetDependentWeaponEffect) attacker.getWeapon();
+        effect.applyTargetDependentStats(perHitStats, target, currentTime);
+        return perHitStats;
+    }
+
+    /**
+     * Reuses stats already resolved for this target, or resolves them when absent.
+     *
+     * @param attacker         attacking character
+     * @param target           enemy being hit
+     * @param action           attack action whose snapshot policy is honored
+     * @param activeBuffs      currently active buffs (may be {@code null})
+     * @param preResolvedStats complete per-hit target stats, or {@code null}
+     * @param currentTime      current simulation time in seconds
+     * @return complete per-hit stats
+     */
+    static StatsContainer resolveTargetStats(
+            Character attacker,
+            Enemy target,
+            simulation.action.AttackAction action,
+            List<Buff> activeBuffs,
+            StatsContainer preResolvedStats,
+            double currentTime) {
+        if (preResolvedStats != null) {
+            return preResolvedStats;
+        }
+        return resolveTargetStats(attacker, target, action, activeBuffs, currentTime);
     }
 
     /**

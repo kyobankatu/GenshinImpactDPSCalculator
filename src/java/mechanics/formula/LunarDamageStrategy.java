@@ -37,7 +37,8 @@ final class LunarDamageStrategy implements DamageStrategy {
             double reactionMultiplier,
             CombatSimulator sim) {
 
-        StatsContainer stats = DamageCalculator.resolveStats(attacker, action, activeBuffs, preResolvedStats, currentTime);
+        StatsContainer stats = DamageCalculator.resolveTargetStats(
+                attacker, target, action, activeBuffs, preResolvedStats, currentTime);
 
         StatType scaling = action.getScalingStat();
         if (scaling == null) {

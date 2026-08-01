@@ -1,14 +1,19 @@
 package model.weapon;
 
+import model.entity.Enemy;
+import model.entity.TargetDependentWeaponEffect;
 import model.entity.Weapon;
 import model.stats.StatsContainer;
+import model.type.Element;
 import model.type.StatType;
 import model.type.WeaponType;
 
 /**
  * Dragon's Bane polearm with an aura-conditional damage bonus passive.
  */
-public class DragonsBane extends Weapon {
+public class DragonsBane extends Weapon implements TargetDependentWeaponEffect {
+    private static final double R5_TARGET_DAMAGE_BONUS = 0.36;
+
     /**
      * Constructs Dragon's Bane with Lv 90 base stats.
      */
@@ -21,16 +26,21 @@ public class DragonsBane extends Weapon {
     }
 
     /**
-     * Applies the passive damage bonus used when the target is affected by
-     * Hydro or Pyro.
+     * Applies the R5 damage bonus when the target has a live Hydro or Pyro aura.
      *
-     * @param stats the stats container to mutate in-place
-     * @param currentTime simulation time in seconds
+     * <p>This enemy-state-dependent bonus is resolved for every hit and is not
+     * included in persistent or snapshotted character stats.</p>
+     *
+     * @param stats       per-hit stats container to mutate
+     * @param target      enemy being hit
+     * @param currentTime simulation time in seconds used for aura decay
      */
     @Override
-    public void applyPassive(StatsContainer stats, double currentTime) {
-        // R5: DMG vs Hydro/Pyro +36%
-        // Assuming conditions met (Raiden National maintains Pyro/Hydro aura)
-        stats.add(StatType.DMG_BONUS_ALL, 0.36);
+    public void applyTargetDependentStats(StatsContainer stats, Enemy target, double currentTime) {
+        boolean affectedByHydro = target.getAuraUnits(Element.HYDRO, currentTime) > 0.0;
+        boolean affectedByPyro = target.getAuraUnits(Element.PYRO, currentTime) > 0.0;
+        if (affectedByHydro || affectedByPyro) {
+            stats.add(StatType.DMG_BONUS_ALL, R5_TARGET_DAMAGE_BONUS);
+        }
     }
 }

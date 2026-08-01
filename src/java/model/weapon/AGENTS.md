@@ -12,7 +12,7 @@
 - `AmenomaKageuchi.java`: sword with Succession Seed tracking and delayed burst energy refund.
 - `CalamityQueller.java`: polearm with persistent elemental damage bonus and stateful stacking ATK passive driven by skill use and timed stack gain.
 - `Deathmatch.java`: polearm whose passive depends on single-target versus multi-target mode.
-- `DragonsBane.java`: polearm that assumes Hydro/Pyro condition uptime and grants unconditional modeled damage bonus.
+- `DragonsBane.java`: polearm that evaluates its Hydro/Pyro target condition for every direct hit.
 - `FavoniusCodex.java`: catalyst with crit-based particle generation on damage and internal cooldown.
 - `NocturnesCurtainCall.java`: catalyst for Lunar teams with HP bonus, Lunar-triggered energy recovery, and temporary Lunar crit-damage buff.
 - `PrimordialJadeWingedSpear.java`: polearm with on-hit stack tracking, timed expiration, and max-stack damage bonus.
@@ -28,7 +28,7 @@
 ## Coupling and dependencies
 - All classes extend `model.entity.Weapon`.
 - Stateful passives depend on `simulation.CombatSimulator`, `simulation.action.AttackAction`, `mechanics.buff.Buff`, `mechanics.energy.EnergyManager`, or focused capability interfaces such as action-triggered, damage-triggered, switch-aware, team-buff, or reaction-listener behavior.
-- Weapon passives are applied during `Character` stat assembly and triggered via typed action dispatch or `DamageCalculator` hit hooks only when the weapon implements the relevant capability.
+- Weapon passives are applied during `Character` stat assembly and triggered via typed action dispatch or `DamageCalculator` target/damage hooks only when the weapon implements the relevant capability.
 - Several weapons depend on custom Lunar state or on names and timing established elsewhere in the simulator.
 
 ## Agent guidance

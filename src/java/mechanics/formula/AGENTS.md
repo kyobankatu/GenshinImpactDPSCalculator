@@ -8,7 +8,7 @@
 - It is the single most sensitive package for DPS output changes.
 
 ## Java files in this directory
-- `DamageCalculator.java`: strategy-selecting facade that resolves final damage for a single `AttackAction` and fires damage-trigger hooks after calculation.
+- `DamageCalculator.java`: strategy-selecting facade that resolves target-dependent stats and final damage for a single `AttackAction`, then fires damage-trigger hooks.
 - `DamageStrategy.java`: internal interface for damage formula implementations.
 - `StandardDamageStrategy.java`: standard Genshin damage formula path, including additive reaction contributions such as Aggravate and Spread before DMG bonus, crit, DEF, and RES.
 - `LunarDamageStrategy.java`: custom Lunar damage formula path.
@@ -20,6 +20,9 @@
 - `DamageCalculator` is the sole dispatcher for weapon and artifact damage-trigger
   capability interfaces after final damage is computed. Formula strategies and
   runtime resolvers must not dispatch the same hit independently.
+- Target-dependent weapon stats are copied and resolved before reaction handling
+  mutates enemy aura; formula strategies consume that per-hit view without
+  mutating character snapshots.
 - `simulation.CombatSimulator` depends on this class during every hit resolution.
 
 ## Agent guidance

@@ -712,7 +712,7 @@ experiment record.
 
 ### B-031 — Dragon's Bane grants its aura bonus unconditionally
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 1/3 (explicit source-code assumption and sourced mechanic divergence)
 - Symptom: `DragonsBane.applyPassive` adds 36% all-damage bonus to every stat
   assembly, including no-aura targets and snapshots, even though the passive is
@@ -734,3 +734,8 @@ experiment record.
   view before the triggering hit consumes aura. Existing cataloged parties do
   not equip Dragon's Bane, so no accepted party baseline is expected to change.
   See `TASKS.md` implementation block `Dragon's Bane Target-Aura Passive`.
+  Completed 2026-08-02 with a narrow `TargetDependentWeaponEffect` capability.
+  `CombatActionResolver` captures copied target stats before reaction handling;
+  direct formula callers use the same resolver. Regression covers no/Electro,
+  Hydro/Pyro, exact aura expiry, consuming Vaporize, and repeated runtime
+  snapshot hits without stored or accumulated bonus.

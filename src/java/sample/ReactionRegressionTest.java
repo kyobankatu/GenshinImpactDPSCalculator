@@ -89,6 +89,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ColumbinaStandInBoundaries();
         testAccuracyPhaseF_ArtifactLunarReactionBuffRegression();
         testAccuracyPhaseF_WeaponReactionBonusRegression();
+        testAccuracyPhaseF_DragonsBaneTargetAuraContract();
         testAccuracyPhaseF_DendroResonanceReactionEmContract();
         testAccuracyPhaseF_CryoResonanceConditionalCritContract();
         testAccuracyPhaseF_ElectroResonanceTypedTriggerContract();
@@ -1728,6 +1729,80 @@ public class ReactionRegressionTest {
                 "Sunny Morning Sleep-In should grant EM only after owner-triggered Swirl");
     }
 
+    private static void testAccuracyPhaseF_DragonsBaneTargetAuraContract() {
+        TestCharacter owner = testCharacter(Element.PYRO);
+        owner.setWeapon(new model.weapon.DragonsBane());
+        CombatSimulator sim = simulatorWith(owner);
+        AttackAction directHit = damageHit("Dragon's Bane direct hit", Element.PHYSICAL, 1.0);
+        double baseDamage = calculateDirectDamage(sim, owner, directHit, 0.0, 1.0);
+        double affectedDamage = baseDamage * 1.36;
+
+        assertClose(0.0, owner.getEffectiveStats(0.0).get(StatType.DMG_BONUS_ALL), EPS,
+                "Dragon's Bane target bonus should not enter effective character stats");
+        assertClose(baseDamage, calculateDirectDamage(sim, owner, directHit, 0.0, 1.0), EPS,
+                "Dragon's Bane should not grant damage without an eligible aura");
+
+        sim.getEnemy().setAura(Element.ELECTRO, 1.0);
+        assertClose(baseDamage, calculateDirectDamage(sim, owner, directHit, 0.0, 1.0), EPS,
+                "Dragon's Bane should not grant damage against Electro aura");
+        sim.getEnemy().setAura(Element.ELECTRO, 0.0);
+
+        sim.getEnemy().setAura(Element.HYDRO, 1.0);
+        assertClose(affectedDamage, calculateDirectDamage(sim, owner, directHit, 0.0, 1.0), EPS,
+                "Dragon's Bane should grant 36% damage against Hydro aura");
+        sim.getEnemy().setAura(Element.HYDRO, 0.0);
+        sim.getEnemy().setAura(Element.PYRO, 1.0);
+        assertClose(affectedDamage, calculateDirectDamage(sim, owner, directHit, 0.0, 1.0), EPS,
+                "Dragon's Bane should grant 36% damage against Pyro aura");
+
+        sim.getEnemy().setAura(Element.PYRO, 0.0);
+        sim.getEnemy().setAura(Element.HYDRO, 1.0, 0.0);
+        assertClose(affectedDamage, calculateDirectDamage(sim, owner, directHit, 10.999, 1.0), EPS,
+                "Dragon's Bane should remain active immediately before aura expiry");
+        assertClose(baseDamage, calculateDirectDamage(sim, owner, directHit, 11.0, 1.0), EPS,
+                "Dragon's Bane should be inactive at exact aura expiry");
+
+        sim.getEnemy().setAura(Element.HYDRO, 0.5);
+        AttackAction vaporizeHit = new AttackAction(
+                "Dragon's Bane Vaporize hit",
+                1.0,
+                Element.PYRO,
+                StatType.BASE_ATK);
+        vaporizeHit.setICD(ICDType.None, ICDTag.None, 1.0);
+        double vaporizeMultiplier = ReactionCalculator.calculate(
+                Element.PYRO,
+                Element.HYDRO,
+                owner.getEffectiveStats(0.0).get(StatType.ELEMENTAL_MASTERY),
+                90).getAmpMultiplier();
+        double beforeVaporize = sim.getTotalDamage();
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE, vaporizeHit);
+        assertClose(affectedDamage * vaporizeMultiplier, sim.getTotalDamage() - beforeVaporize, EPS,
+                "Dragon's Bane should use pre-hit Hydro aura for a consuming Vaporize hit");
+        assertClose(0.0, sim.getEnemy().getAuraUnits(Element.HYDRO), EPS,
+                "Vaporize fixture should consume the Hydro aura after eligibility is captured");
+
+        owner.captureSnapshot(0.0, null);
+        AttackAction snapshotHit = new AttackAction(
+                "Dragon's Bane snapshot hit",
+                1.0,
+                Element.PHYSICAL,
+                StatType.BASE_ATK,
+                StatType.PHYSICAL_DMG_BONUS,
+                0.0,
+                true);
+        snapshotHit.setICD(ICDType.None, ICDTag.None, 0.0);
+        sim.getEnemy().setAura(Element.HYDRO, 1.0);
+        assertClose(affectedDamage, performAndMeasureDamage(sim, snapshotHit), EPS,
+                "Snapshot hit should evaluate a newly applied Hydro aura");
+        assertClose(affectedDamage, performAndMeasureDamage(sim, snapshotHit), EPS,
+                "Repeated snapshot hits should not accumulate target bonus mutations");
+        sim.getEnemy().setAura(Element.HYDRO, 0.0);
+        assertClose(baseDamage, performAndMeasureDamage(sim, snapshotHit), EPS,
+                "Snapshot hit should lose the bonus when the target aura is removed");
+        assertClose(0.0, owner.getSnapshot().get(StatType.DMG_BONUS_ALL), EPS,
+                "Dragon's Bane target bonus should never be stored in the snapshot");
+    }
+
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
         ReactionResult.Kind[] primaryKinds = {
                 ReactionResult.Kind.BURNING,
@@ -2358,6 +2433,28 @@ public class ReactionRegressionTest {
         AttackAction action = new AttackAction(name, multiplier, element, StatType.BASE_ATK);
         action.setICD(ICDType.None, ICDTag.None, 0.0);
         return action;
+    }
+
+    private static double calculateDirectDamage(
+            CombatSimulator sim,
+            Character attacker,
+            AttackAction action,
+            double currentTime,
+            double reactionMultiplier) {
+        return DamageCalculator.calculateDamage(
+                attacker,
+                sim.getEnemy(),
+                action,
+                sim.getApplicableBuffs(attacker),
+                currentTime,
+                reactionMultiplier,
+                sim);
+    }
+
+    private static double performAndMeasureDamage(CombatSimulator sim, AttackAction action) {
+        double beforeDamage = sim.getTotalDamage();
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE, action);
+        return sim.getTotalDamage() - beforeDamage;
     }
 
     private static AttackAction catalyzeDamageHit(String name, Element element) {
