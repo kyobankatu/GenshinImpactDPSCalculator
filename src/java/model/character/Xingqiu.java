@@ -22,6 +22,7 @@ import simulation.action.CharacterActionRequest;
  * Xingqiu character implementation with Raincutter sword-wave scheduling.
  */
 public class Xingqiu extends Character implements FormStateProvider {
+    private static final double ORBITAL_APPLICATION_INTERVAL = 2.25;
 
     private int normalAttackStep = 0;
     private java.util.Map<String, Double> triggerCooldowns = new java.util.HashMap<>();
@@ -168,10 +169,16 @@ public class Xingqiu extends Character implements FormStateProvider {
 
         AttackAction orbital = new AttackAction("Raincutter Orbital", 0.0, Element.HYDRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 0.0, false, ActionType.OTHER);
-        orbital.setICD(ICDType.Standard, ICDTag.Xingqiu_Orbital, 1.0);
+        // The contact pulse's 2.25s event cadence is its ICD; every pulse applies 1U Hydro.
+        orbital.setICD(ICDType.None, ICDTag.Xingqiu_Orbital, 1.0);
 
         sim.registerEvent(
-                new simulation.event.PeriodicDamageEvent("Xingqiu", orbital, sim.getCurrentTime(), 2.2, 18.0));
+                new simulation.event.PeriodicDamageEvent(
+                        "Xingqiu",
+                        orbital,
+                        sim.getCurrentTime(),
+                        ORBITAL_APPLICATION_INTERVAL,
+                        18.0));
 
         // Register Raincutter Trigger (Self-contained)
         double expiryTime = sim.getCurrentTime() + 18.0;

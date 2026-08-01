@@ -40,7 +40,7 @@ public enum ICDTag {
     Xiangling_Pyronado,
     /** Xingqiu's Rain Sword sword-rain hits during Normal Attacks. */
     Xingqiu_Raincutter,
-    /** Xingqiu's Rain Sword orbital shield hits. */
+    /** Xingqiu's zero-damage Rain Sword orbital contact pulses. */
     Xingqiu_Orbital,
     /** Raiden Shogun's Musou Isshin Normal Attack hits during Burst state. */
     Raiden_MusouIsshin,

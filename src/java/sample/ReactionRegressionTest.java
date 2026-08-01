@@ -77,6 +77,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ArtifactLunarReactionBuffRegression();
         testAccuracyPhaseF_WeaponReactionBonusRegression();
         testAccuracyPhaseF_XianglingChiliPickupOptIn();
+        testAccuracyPhaseF_XingqiuOrbitalApplicationCadence();
         testAccuracyPhase2_TimeAwareLinearDecay();
         testAccuracyPhase2_QueryBeforeAndAtApplication();
         testAccuracyPhase2_ExpiryBoundaries();
@@ -1104,6 +1105,75 @@ public class ReactionRegressionTest {
         expiredRippleColumbina.onAction(CharacterActionRequest.of(CharacterActionKey.CHARGE), expiredRippleSim);
         assertEquals(0, expiredCleanseHits[0],
                 "Columbina should not assume reactions are near Ripple after it expires");
+    }
+
+    private static void testAccuracyPhaseF_XingqiuOrbitalApplicationCadence() {
+        model.character.Xingqiu inactiveXingqiu =
+                new model.character.Xingqiu(new TestWeapon(), blankArtifact());
+        CombatSimulator inactiveSim = simulatorWithExistingCharacter(inactiveXingqiu);
+        inactiveSim.advanceTime(20.0);
+        assertClose(0.0, inactiveSim.getEnemy().getAuraUnits(Element.HYDRO), EPS,
+                "Xingqiu orbital Hydro should not apply before Raincutter is cast");
+
+        model.character.Xingqiu xingqiu = new model.character.Xingqiu(new TestWeapon(), blankArtifact());
+        CombatSimulator sim = simulatorWithExistingCharacter(xingqiu);
+        List<Double> orbitalTimes = new ArrayList<>();
+        sim.addReactionListener((result, source, time, activeSim) -> {
+            if (result.getKind() == ReactionResult.Kind.VAPORIZE) {
+                orbitalTimes.add(time);
+            }
+        });
+
+        xingqiu.onAction(CharacterActionRequest.of(CharacterActionKey.BURST), sim);
+        double firstOrbitalTime = sim.getCurrentTime();
+        sim.getEnemy().setAura(Element.PYRO, 1.0);
+        sim.registerEvent(new simulation.event.SimpleTimerEvent(firstOrbitalTime + 2.249, 2.25) {
+            @Override
+            public void onTick(CombatSimulator activeSim) {
+                activeSim.getEnemy().setAura(Element.PYRO, 1.0);
+                if (activeSim.getCurrentTime() >= firstOrbitalTime + 17.999) {
+                    finish();
+                }
+            }
+        });
+        sim.advanceTime(18.01);
+
+        assertEquals(9, orbitalTimes.size(),
+                "Every Xingqiu orbital pulse should apply Hydro through the inclusive 18-second boundary");
+        for (int i = 0; i < orbitalTimes.size(); i++) {
+            assertClose(firstOrbitalTime + i * 2.25, orbitalTimes.get(i), EPS,
+                    "Xingqiu orbital pulses should use the sourced 2.25-second cadence");
+        }
+        assertClose(0.0, sim.getTotalDamage(), EPS,
+                "Xingqiu orbital contact pulses should deal no direct damage");
+
+        int countAtExpiry = orbitalTimes.size();
+        sim.advanceTime(10.0);
+        assertEquals(countAtExpiry, orbitalTimes.size(),
+                "Xingqiu orbital pulses should stop after the Raincutter event expires");
+
+        model.character.Xingqiu gaugeXingqiu =
+                new model.character.Xingqiu(new TestWeapon(), blankArtifact());
+        CombatSimulator gaugeSim = simulatorWithExistingCharacter(gaugeXingqiu);
+        gaugeXingqiu.onAction(CharacterActionRequest.of(CharacterActionKey.BURST), gaugeSim);
+        for (Element element : Element.values()) {
+            gaugeSim.getEnemy().setAura(element, 0.0);
+        }
+        gaugeSim.advanceTime(0.0);
+        assertClose(1.0, gaugeSim.getEnemy().getAuraUnits(Element.HYDRO), EPS,
+                "Xingqiu orbital contact pulses should apply 1U Hydro");
+
+        List<AttackAction> raincutterWave = xingqiu.getRaincutterAttack(0);
+        assertEquals(2, raincutterWave.size(), "Xingqiu C6 Raincutter should start with a two-sword wave");
+        AttackAction raincutterSword = raincutterWave.get(0);
+        assertClose(1.09, raincutterSword.getDamagePercent(), EPS,
+                "Xingqiu Raincutter swords should retain the configured level-12 multiplier");
+        assertEquals(ActionType.BURST, raincutterSword.getActionType(),
+                "Xingqiu Raincutter swords should remain Burst damage");
+        assertEquals(ICDType.Standard, raincutterSword.getICDType(),
+                "Xingqiu Raincutter swords should retain standard ICD");
+        assertEquals(ICDTag.Xingqiu_Raincutter, raincutterSword.getICDTag(),
+                "Xingqiu Raincutter swords should retain their separate ICD group");
     }
 
     private static void testAccuracyPhaseF_ArtifactLunarReactionBuffRegression() {

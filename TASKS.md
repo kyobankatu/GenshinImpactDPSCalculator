@@ -516,7 +516,7 @@ Status note:
 Status:
 
 - In progress.
-- Phase 1 is complete; Phases 2-3 remain.
+- Phases 1-2 are complete; Phase 3 remains.
 - Requirement: Xingqiu's non-damaging orbital Rain Swords must apply Hydro on
   their sourced 2.25-second contact cadence without inheriting the separate
   Raincutter sword-wave three-hit ICD rule.
@@ -588,7 +588,7 @@ Verification:
 
 - `./gradlew RaidenParty`
 
-### Phase 2: Make Orbital Cadence the Application Boundary
+### Phase 2: Make Orbital Cadence the Application Boundary - Done
 
 Why second:
 
