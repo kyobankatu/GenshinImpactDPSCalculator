@@ -9537,7 +9537,7 @@ Completion evidence:
 - ReactionRegressionTest, build, Javadoc, routed party-catalog validation, the
   local Java rollout smoke benchmark, and preflight pass without artifact leaks.
 
-### Phase 3: Consume and Refresh Burning Fuel - In Progress
+### Phase 3: Consume and Refresh Burning Fuel - Done
 
 Why third:
 
@@ -9591,7 +9591,27 @@ Verification:
 - `python scripts/agent_validate.py --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/mechanics/reaction/ReactionEffectScheduler.java --path src/java/model/entity/Enemy.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
 
-### Phase 4: Re-Accept Burning-Neutral Party Baselines - Pending
+Completion evidence:
+
+- Pyro-on-Dendro now preserves the existing taxed Dendro as fuel.
+  Dendro-on-Pyro preserves underlying Pyro and force-replaces Dendro from the
+  trigger source, allowing weaker refreshes to overwrite stronger old fuel.
+- The scheduler derives special decay as the maximum of 0.4U/s and twice the
+  Aura's private natural rate. Its single event reads immutable current state at
+  each impact, synchronizes underlying Dendro to fuel, applies live Pyro RES,
+  and clears both state and Aura at exact depletion.
+- Focused regression proves no immediate damage, the first 0.25-second boundary,
+  eight ticks over two seconds for 1U Dendro, sixteen over four seconds for 2U,
+  no late tick, and both trigger directions' underlying Aura preservation.
+- A Pyro refresh changes the next tick from Sucrose's 1000 pre-RES payload to
+  Xiangling's 2000 payload without extending fuel. A weaker 0.5U Dendro source
+  overwrites fuel to taxed 0.4U and ends one second later under the latest owner.
+  Clearing/restarting before the first tick leaves two queued generations but
+  records exactly one 900-damage tick.
+- Existing impact-time Burning RES activation/expiry remains exact.
+  ReactionRegressionTest, build, Javadoc, routed validation, and preflight pass.
+
+### Phase 4: Re-Accept Burning-Neutral Party Baselines - In Progress
 
 Why last:
 

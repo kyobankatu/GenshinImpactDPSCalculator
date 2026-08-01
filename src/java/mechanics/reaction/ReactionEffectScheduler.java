@@ -23,6 +23,8 @@ public class ReactionEffectScheduler {
     private static final double DENDRO_CORE_DAMAGE_WINDOW = 0.5;
     private static final double STANDARD_EC_TICK_INTERVAL = 1.0;
     private static final double STANDARD_EC_PREMATURE_TICK_THRESHOLD = 0.5;
+    private static final double BURNING_TICK_INTERVAL = 0.25;
+    private static final double BURNING_MIN_FUEL_DECAY_RATE = 0.4;
     private static final double TIMING_EPSILON = 1e-9;
 
     private final CombatSimulator sim;
@@ -73,14 +75,49 @@ public class ReactionEffectScheduler {
      * @param preResistanceDamage damage per 0.25 s Burning tick before RES
      */
     public void scheduleBurning(CharacterId ownerId, double preResistanceDamage) {
-        sim.setBurningEndTime(sim.getCurrentTime() + 2.0);
-        sim.getEnemy().setAura(
-                Element.PYRO,
-                Math.max(1.0, sim.getEnemy().getAuraUnits(Element.PYRO, sim.getCurrentTime())),
-                sim.getCurrentTime());
+        scheduleBurning(ownerId, preResistanceDamage, false);
+    }
+
+    /**
+     * Starts or refreshes Burning from the current underlying Dendro Aura.
+     *
+     * @param ownerId character credited with Burning damage
+     * @param preResistanceDamage damage per 0.25 s tick before RES
+     * @param replaceFuel whether this application is a Dendro fuel overwrite
+     */
+    public void scheduleBurning(
+            CharacterId ownerId,
+            double preResistanceDamage,
+            boolean replaceFuel) {
+        double currentTime = sim.getCurrentTime();
+        double fuelUnits = sim.getEnemy().getAuraUnits(Element.DENDRO, currentTime);
+        if (fuelUnits <= 0.0) {
+            sim.clearBurning();
+            return;
+        }
+        double naturalDecayRate = sim.getEnemy().getAuraDecayRate(Element.DENDRO, currentTime);
+        double fuelDecayRate = Math.max(
+                BURNING_MIN_FUEL_DECAY_RATE, naturalDecayRate * 2.0);
+        ReactionState.BurningState state = sim.getBurningState();
+        boolean startsNewGeneration = state == null
+                || state.remainingFuelAt(currentTime) <= TIMING_EPSILON;
+        if (startsNewGeneration) {
+            state = sim.startBurning(
+                    ownerId, preResistanceDamage, fuelUnits, fuelDecayRate);
+        } else {
+            if (replaceFuel) {
+                state = sim.replaceBurningFuel(fuelUnits, fuelDecayRate);
+            }
+            if (state != null) {
+                state = sim.refreshBurningDamage(ownerId, preResistanceDamage);
+            }
+        }
+        if (state == null) {
+            return;
+        }
         if (!sim.isBurningTimerRunning()) {
             sim.setBurningTimerRunning(true);
-            sim.registerEvent(createBurningTickEvent(ownerId, preResistanceDamage));
+            sim.registerEvent(createBurningTickEvent(state.generation));
         }
     }
 
@@ -257,41 +294,81 @@ public class ReactionEffectScheduler {
         }
     }
 
-    private TimerEvent createBurningTickEvent(CharacterId ownerId, double preResistanceDamage) {
+    private TimerEvent createBurningTickEvent(int generation) {
         return new TimerEvent() {
-            private double nextTick = sim.getCurrentTime() + 0.25;
+            private double nextDamageTime = sim.getCurrentTime() + BURNING_TICK_INTERVAL;
+            private boolean finished = false;
 
             @Override
             public void tick(CombatSimulator simContext) {
-                if (simContext.getCurrentTime() > simContext.getBurningEndTime()) {
-                    simContext.setBurningTimerRunning(false);
-                    nextTick = Double.MAX_VALUE;
+                ReactionState.BurningState state = simContext.getBurningState();
+                if (state == null || state.generation != generation) {
+                    finish();
                     return;
                 }
 
-                double tickDamage = applyCurrentResistance(
-                        preResistanceDamage, Element.PYRO, simContext);
-                if (simContext.isLoggingEnabled()) {
-                    System.out.println(String.format("   [DoT] Burning Damage: %,.0f", tickDamage));
+                double currentTime = simContext.getCurrentTime();
+                double dendroUnits = simContext.getEnemy().getAuraUnits(
+                        Element.DENDRO, currentTime);
+                if (dendroUnits <= 0.0) {
+                    simContext.clearBurning();
+                    finish();
+                    return;
                 }
-                simContext.recordDamage(ownerId, tickDamage);
-                simContext.getCombatLogSink().log(
-                        simContext.getCurrentTime(), ownerId.getDisplayName(), "Burning", tickDamage,
-                        "Burning", tickDamage, simContext.getEnemy().getAuraMap(simContext.getCurrentTime()));
 
-                nextTick += 0.25;
+                double remainingFuel = state.remainingFuelAt(currentTime);
+                boolean damageTick = currentTime + TIMING_EPSILON >= nextDamageTime
+                        && currentTime <= state.getEndTime() + TIMING_EPSILON;
+                if (damageTick) {
+                    recordBurningTick(state);
+                    nextDamageTime += BURNING_TICK_INTERVAL;
+                }
+
+                double excessDendro = dendroUnits - remainingFuel;
+                if (excessDendro > TIMING_EPSILON) {
+                    simContext.getEnemy().reduceAura(
+                            Element.DENDRO, excessDendro, currentTime);
+                }
+
+                if (remainingFuel <= TIMING_EPSILON) {
+                    simContext.clearBurning();
+                    finish();
+                    return;
+                }
+                simContext.advanceBurning();
             }
 
             @Override
             public double getNextTickTime() {
-                return nextTick;
+                ReactionState.BurningState state = sim.getBurningState();
+                if (state == null || state.generation != generation) {
+                    return nextDamageTime;
+                }
+                return Math.min(nextDamageTime, state.getEndTime());
             }
 
             @Override
             public boolean isFinished(double time) {
-                return nextTick == Double.MAX_VALUE || time > sim.getBurningEndTime() + 1.0;
+                return finished;
+            }
+
+            private void finish() {
+                finished = true;
+                nextDamageTime = Double.MAX_VALUE;
             }
         };
+    }
+
+    private void recordBurningTick(ReactionState.BurningState state) {
+        double tickDamage = applyCurrentResistance(
+                state.preResistanceDamage, Element.PYRO, sim);
+        if (sim.isLoggingEnabled()) {
+            System.out.println(String.format("   [DoT] Burning Damage: %,.0f", tickDamage));
+        }
+        sim.recordDamage(state.ownerId, tickDamage);
+        sim.getCombatLogSink().log(
+                sim.getCurrentTime(), state.ownerId.getDisplayName(), "Burning", tickDamage,
+                "Burning", tickDamage, sim.getEnemy().getAuraMap(sim.getCurrentTime()));
     }
 
     private TimerEvent createDendroCoreExpiryEvent(int coreId) {

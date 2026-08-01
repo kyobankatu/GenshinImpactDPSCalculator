@@ -214,6 +214,36 @@ public class Enemy {
     }
 
     /**
+     * Replaces an Aura with a standard source regardless of its current amount.
+     *
+     * <p>This is reserved for mechanics such as Burning fuel where a new Dendro
+     * source overwrites the old fuel even when the source is weaker. The source
+     * still receives ordinary Aura Tax and source-class natural decay metadata.
+     *
+     * @param element persistent Aura element to replace
+     * @param sourceGaugeUnits source gauge before Aura Tax
+     * @param currentTime simulator replacement time in seconds
+     * @return {@code true} when a valid persistent source replaced the Aura
+     */
+    public boolean replaceAuraFromSource(
+            model.type.Element element,
+            double sourceGaugeUnits,
+            double currentTime) {
+        if (!canPersistAsAura(element)
+                || !Double.isFinite(sourceGaugeUnits)
+                || sourceGaugeUnits <= 0.0
+                || !Double.isFinite(currentTime)) {
+            return false;
+        }
+        double taxedUnits = sourceGaugeUnits * AURA_TAX;
+        double sourceDuration = 2.5 * sourceGaugeUnits + 7.0;
+        double sourceDecayRate = taxedUnits / sourceDuration;
+        auraGauge.put(element, new AuraState(
+                element, taxedUnits, currentTime, sourceDecayRate));
+        return true;
+    }
+
+    /**
      * Reduces the gauge of the given element by {@code decay} units, ignoring
      * natural decay.
      *

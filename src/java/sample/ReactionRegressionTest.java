@@ -51,6 +51,7 @@ public class ReactionRegressionTest {
         testPhase3FreezeAndShatter();
         testPhase4Crystallize();
         testPhase5Burning();
+        testAccuracyPhaseG_BurningRefreshAndGenerationContract();
         testPhase6BloomCores();
         testPhase7HyperbloomAndBurgeon();
         testPhase8QuickenAggravateSpread();
@@ -249,26 +250,98 @@ public class ReactionRegressionTest {
 
         TestCharacter character = testCharacter(Element.PYRO);
         CombatSimulator sim = simulatorWith(character);
-        sim.getEnemy().setAura(Element.DENDRO, 1.0);
+        sim.getEnemy().applyAura(Element.DENDRO, 1.0, sim.getCurrentTime());
         sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE, reactionHit("Pyro burning trigger", Element.PYRO));
         assertTrue(sim.isBurningActive(), "Burning should be active after Pyro on Dendro");
         assertClose(0.0, sim.getTotalDamage(), EPS, "Burning should not deal immediate damage");
+        assertClose(0.8, sim.getEnemy().getAuraUnits(Element.DENDRO, sim.getCurrentTime()), EPS,
+                "Pyro-on-Dendro should preserve the taxed Dendro fuel at trigger time");
 
-        sim.advanceTime(0.26);
+        sim.advanceTime(0.24);
+        assertClose(0.0, sim.getTotalDamage(), EPS,
+                "Burning should remain silent before its first 0.25-second tick");
+        sim.advanceTime(0.01);
         assertClose(expectedTransformative(0.25, Element.PYRO, 0.0), sim.getTotalDamage(), 0.5,
                 "First Burning tick after RES");
-        assertTrue(sim.getEnemy().getAuraUnits(Element.PYRO) >= 1.0, "Burning should maintain Pyro aura");
 
-        sim.advanceTime(2.25);
-        assertTrue(!sim.isBurningActive(), "Simplified Burning should expire after its fixed window");
+        sim.advanceTime(1.74);
+        assertClose(expectedTransformative(0.25, Element.PYRO, 0.0) * 7.0,
+                sim.getTotalDamage(), 1.0,
+                "A 1U Dendro source should deal seven ticks before exact two-second depletion");
+        sim.advanceTime(0.01);
+        assertClose(expectedTransformative(0.25, Element.PYRO, 0.0) * 8.0,
+                sim.getTotalDamage(), 1.0,
+                "A 1U Dendro source should deal its eighth tick at exact depletion");
+        assertTrue(!sim.isBurningActive(), "Burning should clear at exact Dendro fuel depletion");
+        assertClose(0.0, sim.getEnemy().getAuraUnits(Element.DENDRO, sim.getCurrentTime()), EPS,
+                "Exact Burning depletion should clear underlying Dendro fuel");
+        sim.advanceTime(0.25);
+        assertClose(expectedTransformative(0.25, Element.PYRO, 0.0) * 8.0,
+                sim.getTotalDamage(), 1.0,
+                "Burning should not deal a ninth tick after fuel depletion");
 
         TestCharacter dendroCharacter = testCharacter(Element.DENDRO);
         CombatSimulator reverse = simulatorWith(dendroCharacter);
-        reverse.getEnemy().setAura(Element.PYRO, 1.0);
+        reverse.getEnemy().applyAura(Element.PYRO, 1.0, reverse.getCurrentTime());
         reverse.performActionWithoutTimeAdvance(CharacterId.SUCROSE, reactionHit("Dendro burning trigger", Element.DENDRO));
         assertTrue(reverse.isBurningActive(), "Burning should also trigger from Dendro on Pyro");
-        assertTrue(reverse.getEnemy().getAuraUnits(Element.PYRO) >= 1.0,
-                "Burning should maintain Pyro aura for Dendro-on-Pyro trigger order");
+        assertClose(0.8, reverse.getEnemy().getAuraUnits(Element.PYRO, reverse.getCurrentTime()), EPS,
+                "Dendro-on-Pyro should preserve the underlying taxed Pyro Aura");
+        assertClose(0.8, reverse.getEnemy().getAuraUnits(Element.DENDRO, reverse.getCurrentTime()), EPS,
+                "Dendro-on-Pyro should establish taxed Dendro fuel");
+
+        CombatSimulator strong = simulatorWith(testCharacter(Element.PYRO));
+        strong.getEnemy().applyAura(Element.DENDRO, 2.0, strong.getCurrentTime());
+        strong.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, reactionHit("2U Pyro burning trigger", Element.PYRO));
+        strong.advanceTime(4.0);
+        assertClose(expectedTransformative(0.25, Element.PYRO, 0.0) * 16.0,
+                strong.getTotalDamage(), 2.0,
+                "A 2U Dendro source should supply sixteen Burning ticks over four seconds");
+        assertTrue(!strong.isBurningActive(),
+                "A 2U Dendro source should deplete after exactly four seconds");
+    }
+
+    private static void testAccuracyPhaseG_BurningRefreshAndGenerationContract() {
+        CombatSimulator refresh = simulatorWith(testCharacter(Element.PYRO));
+        ReactionEffectScheduler scheduler = new ReactionEffectScheduler(refresh);
+        refresh.getEnemy().applyAura(Element.DENDRO, 2.0, refresh.getCurrentTime());
+        scheduler.scheduleBurning(CharacterId.SUCROSE, 1000.0);
+        refresh.advanceTime(0.25);
+        assertClose(900.0, refresh.getDamageByCharacter(CharacterId.SUCROSE), EPS,
+                "The initial Burning owner should receive the first live-RES tick");
+
+        double endBeforePyroRefresh = refresh.getBurningState().getEndTime();
+        scheduler.scheduleBurning(CharacterId.XIANGLING, 2000.0, false);
+        assertClose(endBeforePyroRefresh, refresh.getBurningState().getEndTime(), EPS,
+                "A Pyro refresh should not replace or extend Dendro fuel");
+        refresh.advanceTime(0.25);
+        assertClose(1800.0, refresh.getDamageByCharacter(CharacterId.XIANGLING), EPS,
+                "The latest Pyro applier should own the next Burning tick");
+
+        refresh.getEnemy().replaceAuraFromSource(
+                Element.DENDRO, 0.5, refresh.getCurrentTime());
+        scheduler.scheduleBurning(CharacterId.SUCROSE, 1500.0, true);
+        ReactionState.BurningState overwritten = refresh.getBurningState();
+        assertClose(0.4, overwritten.fuelUnits, EPS,
+                "A weaker Dendro refresh should overwrite stronger remaining fuel");
+        assertClose(1.5, overwritten.getEndTime(), EPS,
+                "Overwritten 0.4U fuel should last one second at the minimum decay rate");
+        assertEquals(CharacterId.SUCROSE, overwritten.ownerId,
+                "The latest Dendro applier should own refreshed Burning damage");
+        refresh.advanceTime(1.0);
+        assertTrue(!refresh.isBurningActive(),
+                "Overwritten weaker Dendro fuel should clear at its exact end");
+
+        CombatSimulator stale = simulatorWith(testCharacter(Element.PYRO));
+        ReactionEffectScheduler staleScheduler = new ReactionEffectScheduler(stale);
+        stale.getEnemy().applyAura(Element.DENDRO, 1.0, stale.getCurrentTime());
+        staleScheduler.scheduleBurning(CharacterId.SUCROSE, 1000.0);
+        stale.clearBurning();
+        staleScheduler.scheduleBurning(CharacterId.SUCROSE, 1000.0);
+        stale.advanceTime(0.25);
+        assertClose(900.0, stale.getTotalDamage(), EPS,
+                "A superseded Burning event should terminate without duplicating damage");
     }
 
     private static void testPhase6BloomCores() {
@@ -4070,6 +4143,8 @@ public class ReactionRegressionTest {
         TestCharacter burningOwner = testCharacter(Element.PYRO, CharacterId.XIANGLING);
         CombatSimulator burningSim = simulatorWith(burningOwner);
         ReactionEffectScheduler burningScheduler = new ReactionEffectScheduler(burningSim);
+        burningSim.getEnemy().applyAura(
+                Element.DENDRO, 1.0, burningSim.getCurrentTime());
         burningScheduler.scheduleBurning(CharacterId.XIANGLING, 1000.0);
         burningSim.advanceTime(0.25);
         assertClose(900.0, burningSim.getTotalDamage(), EPS,

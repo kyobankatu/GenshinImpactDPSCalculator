@@ -445,8 +445,13 @@ public class CombatActionResolver {
         } else if (result.getKind() == ReactionResult.Kind.BURNING) {
             double resFactor = resolveImpactResistance(context, Element.PYRO);
             double tickDamage = result.getTransformDamage() * resFactor;
-            sim.getEnemy().reduceAura(aura, action.getGaugeUnits(), sim.getCurrentTime());
-            reactionEffectScheduler.scheduleBurning(characterId, result.getTransformDamage());
+            boolean replacesFuel = trigger == Element.DENDRO;
+            if (replacesFuel) {
+                sim.getEnemy().replaceAuraFromSource(
+                        Element.DENDRO, action.getGaugeUnits(), sim.getCurrentTime());
+            }
+            reactionEffectScheduler.scheduleBurning(
+                    characterId, result.getTransformDamage(), replacesFuel);
             if (sim.isLoggingEnabled()) {
                 System.out.println(String.format(
                         "   [Reaction] %s on %s -> Burning Tick Damage: %,.0f",

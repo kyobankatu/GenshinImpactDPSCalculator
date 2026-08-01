@@ -79,6 +79,10 @@ public class ReactionStateController {
     }
 
     public boolean isBurningActive() {
+        ReactionState.BurningState state = reactionState.getBurningState();
+        if (state != null) {
+            return state.remainingFuelAt(sim.getCurrentTime()) > 0.0;
+        }
         return sim.getCurrentTime() < reactionState.getBurningEndTime();
     }
 
