@@ -1,0 +1,4 @@
+interface:
+  display_name: "Genshin GPU Job Submission"
+  short_description: "Submit ybatch training and evaluation jobs"
+  default_prompt: "Use $submit-genshin-gpu-job to select the resource, profile, and submission command for this run."

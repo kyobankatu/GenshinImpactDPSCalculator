@@ -1,0 +1,4 @@
+interface:
+  display_name: "Genshin Work Discovery"
+  short_description: "Find the next worthwhile item"
+  default_prompt: "Use $discover-genshin-work to replenish the queue once the active plan is finished."

@@ -49,9 +49,13 @@ def validate(root: Path) -> list[str]:
         canonical = codex_root / name / "SKILL.md"
         shim = claude_root / name / "SKILL.md"
         metadata = codex_root / name / "agents" / "openai.yaml"
-        for path in (canonical, shim, metadata):
+        shim_metadata = claude_root / name / "agents" / "openai.yaml"
+        for path in (canonical, shim, metadata, shim_metadata):
             if not path.is_file() or path.is_symlink():
                 errors.append(f"{path.relative_to(root)} must be a regular file")
+        if metadata.is_file() and shim_metadata.is_file():
+            if metadata.read_bytes() != shim_metadata.read_bytes():
+                errors.append(f"{name}: Claude shim metadata differs")
         if not canonical.is_file() or not shim.is_file():
             continue
         try:

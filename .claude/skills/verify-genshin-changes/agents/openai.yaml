@@ -1,0 +1,4 @@
+interface:
+  display_name: "Genshin Change Verification"
+  short_description: "Run the minimum sufficient checks"
+  default_prompt: "Use $verify-genshin-changes to select and run the checks this change set requires."

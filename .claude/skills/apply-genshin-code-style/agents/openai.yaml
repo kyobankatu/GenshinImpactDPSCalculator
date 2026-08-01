@@ -1,0 +1,4 @@
+interface:
+  display_name: "Genshin Code Style"
+  short_description: "Apply mandatory notation and Javadoc rules"
+  default_prompt: "Use $apply-genshin-code-style before writing or editing source in this repository."

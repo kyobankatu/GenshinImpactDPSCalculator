@@ -34,6 +34,22 @@ class AgentValidationRouterTest(unittest.TestCase):
         root = Path(__file__).resolve().parents[2]
         self.assertEqual([], validate(root))
 
+    def test_both_clients_carry_the_same_skill_assets(self) -> None:
+        root = Path(__file__).resolve().parents[2]
+        codex_root = root / ".agents" / "skills"
+        claude_root = root / ".claude" / "skills"
+        for canonical in sorted(path for path in codex_root.iterdir() if path.is_dir()):
+            name = canonical.name
+            with self.subTest(skill=name):
+                metadata = canonical / "agents" / "openai.yaml"
+                shim_metadata = claude_root / name / "agents" / "openai.yaml"
+                self.assertTrue(shim_metadata.is_file(), f"{name}: Claude shim metadata missing")
+                self.assertEqual(
+                    metadata.read_bytes(),
+                    shim_metadata.read_bytes(),
+                    f"{name}: Claude shim metadata differs",
+                )
+
 
 if __name__ == "__main__":
     unittest.main()

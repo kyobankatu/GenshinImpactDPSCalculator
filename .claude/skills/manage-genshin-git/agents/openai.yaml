@@ -1,0 +1,4 @@
+interface:
+  display_name: "Genshin Git Hygiene"
+  short_description: "Commit, branch, and push safely"
+  default_prompt: "Use $manage-genshin-git to choose the branch, commit subjects, and push target for this change."
