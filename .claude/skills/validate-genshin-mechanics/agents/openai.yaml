@@ -1,0 +1,4 @@
+interface:
+  display_name: "Genshin Mechanics Validation"
+  short_description: "Verify combat mechanics accurately"
+  default_prompt: "Use $validate-genshin-mechanics to audit and validate a combat mechanic."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Genshin Optimization Benchmarking"
+  short_description: "Benchmark optimizer changes reproducibly"
+  default_prompt: "Use $benchmark-genshin-optimization to evaluate an optimizer or rollout performance change."

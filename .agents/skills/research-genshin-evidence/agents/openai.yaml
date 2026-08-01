@@ -1,0 +1,4 @@
+interface:
+  display_name: "Genshin Evidence Research"
+  short_description: "Trace game mechanics to evidence"
+  default_prompt: "Use $research-genshin-evidence to research a game mechanic or reconcile conflicting sources."

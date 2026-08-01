@@ -1,0 +1,4 @@
+interface:
+  display_name: "Genshin Experiment Management"
+  short_description: "Track durable simulation experiments"
+  default_prompt: "Use $manage-genshin-experiments to plan, resume, and hand off a simulation or RL experiment."

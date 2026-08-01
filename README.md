@@ -160,6 +160,32 @@ python3 src/python/rl/evaluate_policy.py --mode both --checkpoint output/recurre
 5. **Java RL Layer**: `mechanics.rl` provides action masking, observation encoding, reward logic, generic party-backed RL factories, vectorized rollout, and the local rollout service.
 6. **Python RL Layer**: `src/python/rl/` provides recurrent PPO training, checkpoint loading, deterministic/stochastic evaluation, rollout benchmarking, and W&B metric logging.
 
+## Agent Workflows
+
+The repository includes project-specific workflows for both Codex and Claude.
+Canonical skills live under `.agents/skills/`; `.claude/skills/` exposes the
+same catalog to Claude while routing detailed instructions to the canonical
+copy. The catalog covers simulator changes, mechanic accuracy, hybrid RL,
+optimizer benchmarking, HTML reports, native HPC rollout operation, new
+content, sourced game research, durable experiments, safe artifact cleanup,
+result presentation, and explicitly requested agent coordination.
+
+Validate skill discovery and references with:
+
+```bash
+python scripts/validate_agent_assets.py
+```
+
+Plan the smallest checks for changed paths without executing them:
+
+```bash
+python scripts/agent_validate.py --path src/java/mechanics/reaction/ReactionSystem.java
+python scripts/agent_validate.py --base origin/master
+```
+
+Pass `--run` only when the printed Gradle/Python checks are intended. This tool
+does not submit scheduler jobs or start persistent rollout services.
+
 ## Accuracy Notes
 
 `TASKS.md` tracks the current implementation plan and latest audit notes. The

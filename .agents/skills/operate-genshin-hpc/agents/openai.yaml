@@ -1,0 +1,4 @@
+interface:
+  display_name: "Genshin HPC Operations"
+  short_description: "Run native distributed rollout jobs"
+  default_prompt: "Use $operate-genshin-hpc to plan and validate an HPC rollout or training run."

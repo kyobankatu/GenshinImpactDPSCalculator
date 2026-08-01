@@ -1,0 +1,4 @@
+interface:
+  display_name: "Genshin Artifact Cleanup"
+  short_description: "Clean generated artifacts safely"
+  default_prompt: "Use $clean-genshin-artifacts to classify and safely clean generated simulation or RL artifacts."

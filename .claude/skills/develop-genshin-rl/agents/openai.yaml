@@ -1,0 +1,4 @@
+interface:
+  display_name: "Genshin RL Development"
+  short_description: "Coordinate Java and Python RL changes"
+  default_prompt: "Use $develop-genshin-rl to change and validate the hybrid RL stack."

@@ -74,3 +74,11 @@
 - Before editing, check whether the target file is source, generated documentation, or an output artifact.
 - Prefer validating behavior with the smallest relevant sample simulation instead of changing multiple team scripts at once.
 - If a requested change is ambiguous because game logic is underspecified, document the assumption in your final response.
+
+## Project skills and agent tools
+- Canonical project skills live under `.agents/skills/`; Claude discovers thin project shims under `.claude/skills/` that route to the same canonical instructions. Read a selected skill completely before its action, including only the reference it routes for the current target.
+- Use `develop-genshin-simulator` for cross-package runtime changes, `validate-genshin-mechanics` for accuracy work, `develop-genshin-rl` for Java/Python RL contracts, `benchmark-genshin-optimization` for performance claims, `validate-genshin-reports` for HTML output, `operate-genshin-hpc` for native cluster runs, and `add-genshin-content` for characters, equipment, parties, or configuration.
+- Use `research-genshin-evidence` for sourced game research, `manage-genshin-experiments` for durable long-run state, `clean-genshin-artifacts` before expanding cleanup, `present-genshin-results` for technical communication, and `coordinate-genshin-agents` only for explicitly requested collaboration or independent review.
+- Run `python scripts/validate_agent_assets.py` after changing a skill, its metadata, a routed reference, or a Claude shim.
+- Use `python scripts/agent_validate.py --path PATH` to print the focused checks implied by one or more changed paths. Add `--run` only when those checks are intended; the tool never submits HPC jobs or starts a persistent rollout service.
+- These project skills supplement, but never override, root and nearest-package `AGENTS.md` instructions.

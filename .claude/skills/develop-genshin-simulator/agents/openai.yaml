@@ -1,0 +1,4 @@
+interface:
+  display_name: "Genshin Simulator Development"
+  short_description: "Route simulator changes safely"
+  default_prompt: "Use $develop-genshin-simulator to implement and validate a simulator change."

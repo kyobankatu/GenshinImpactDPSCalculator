@@ -1,0 +1,4 @@
+interface:
+  display_name: "Genshin Report Validation"
+  short_description: "Validate simulation HTML reports"
+  default_prompt: "Use $validate-genshin-reports to change and verify simulation reporting."

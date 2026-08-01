@@ -1,0 +1,4 @@
+interface:
+  display_name: "Coordinate Genshin Agents"
+  short_description: "Coordinate bounded independent reviews"
+  default_prompt: "Use $coordinate-genshin-agents for an explicitly requested multi-agent or Codex-Claude simulator review."

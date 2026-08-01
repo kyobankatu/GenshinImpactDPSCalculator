@@ -1,0 +1,4 @@
+interface:
+  display_name: "Present Genshin Results"
+  short_description: "Present sourced simulator results"
+  default_prompt: "Use $present-genshin-results to create a clear, sourced simulator or RL result presentation."
