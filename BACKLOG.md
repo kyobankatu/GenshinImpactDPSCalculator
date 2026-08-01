@@ -334,3 +334,27 @@ experiment record.
   `a9cdfbf0d3a0a01356d9d113afdd7f0afe8ef8510494f4b193107d533c8dbb6e`.
   Both logs contained zero standard-Burst hits and retained the accepted
   15,434,039 damage / 226,306 DPS baseline.
+
+### B-016 — Flins Skill activation and Spearstorm use incorrect application metadata
+
+- Status: `planned`
+- Source: 1 (source audit of adjacent Flins Skill metadata)
+- Symptom: Manifest Flame activation is modeled as a Physical `OTHER` action,
+  while the documented activation is a damageless 0U Electro Skill attack.
+  Northland Spearstorm is modeled with standard ICD instead of 1U/no-ICD.
+- Scope: `src/java/model/character/Flins.java`,
+  `src/java/sample/ReactionRegressionTest.java`
+- Risk: `planned`
+- Proof: focused actual-Flins activation/Spearstorm regression plus two
+  matching `./gradlew FlinsParty2` summaries
+- Notes: adopt the Genshin Impact Wiki Ancient Rite advanced-property table
+  (accessed 2026-08-02), which records Activation Knockback as 0U/no-ICD and
+  Northland Spearstorm Damage as 1U/no-ICD. Its gameplay notes identify the
+  activation as a damageless Electro attack. The Japanese Genshin Wiki's Flins
+  testing notes independently identify the special Skill as a separate
+  elemental application. Sources:
+  https://genshin-impact.fandom.com/wiki/Ancient_Rite%3A_Arcane_Light and
+  https://wikiwiki.jp/genshinwiki/%E6%83%85%E5%A0%B1%E6%8F%90%E4%BE%9B/%E3%83%95%E3%83%AA%E3%83%B3%E3%82%BA.
+  The current `FlinsParty2` baseline is 15,434,039 damage / 226,306 DPS, with
+  four form activations and 12 Spearstorm hits. See `TASKS.md` implementation
+  block `Flins Skill Activation Metadata`.

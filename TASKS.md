@@ -1735,6 +1735,155 @@ Completion evidence:
 - The accepted result remains 15,434,039 damage / 226,306 DPS, so README and
   the verification gate require no numeric update.
 
+## Implementation Order: Flins Skill Activation Metadata
+
+Status:
+
+- In progress.
+- Phase 1 is complete; Phases 2-3 remain.
+- Requirement: Manifest Flame activation must be a damageless 0U Electro Skill
+  with no ICD, and Northland Spearstorm must apply 1U without ICD.
+
+Scope:
+
+- Explicitly type and configure the activation and Spearstorm actions in
+  `Flins`.
+- Add actual-character regression coverage for action identity, gauge, aura,
+  reaction, timing, and direct damage.
+- Re-run `FlinsParty2` and accept or reject any integration delta.
+
+Out of scope for this pass:
+
+- Adding missing constellations, charged/plunge attacks, knockback physics, or
+  changing form duration, particle generation, cooldowns, Burst actions, or
+  multipliers.
+- Changing generic ICD/reaction services, optimizer behavior, RL contracts, or
+  generated `docs/` output.
+
+Design boundaries:
+
+- `model.character.Flins` remains the sole owner of Skill action metadata.
+- Runtime action, ICD, aura, and formula services remain generic consumers.
+- Regression drives public action requests without a test-only production API.
+
+### Phase 1: Record Skill Activation and Spearstorm Evidence - Done
+
+Why first:
+
+The activation is an Electro hit identity with 0 gauge rather than Physical
+damage, while the follow-up Skill applies 1U, so both contracts need explicit
+source evidence before implementation.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record activation 0U/no-ICD and Spearstorm 1U/no-ICD from the maintained
+  advanced-property table, accessed 2026-08-02.
+- Corroborate the special Skill's separate application from Japanese testing
+  notes.
+- Record pre-fix action counts and the current integration baseline.
+
+Acceptance criteria:
+
+- Sources, access date, adopted classification, scope, and test design are
+  recorded.
+- Pre-fix `FlinsParty2` is 15,434,039 damage / 226,306 DPS with four activation
+  and 12 Spearstorm actions.
+- Activation identity changes are distinguished from damage/application
+  changes.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 adds executable coverage.
+
+Verification:
+
+- inspect `Flins.skill_enterForm`, `Flins.skill_spearstorm`, and current log
+- `python scripts/preflight.py --run`
+
+### Phase 2: Encode and Test Skill Action Contracts
+
+Why second:
+
+After evidence is fixed, both Skill action definitions and their sequential
+actual-character behavior can change together.
+
+Target files:
+
+- `src/java/model/character/Flins.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Replace the implicit activation action with an explicit Electro Skill action
+  using `ICDType.None`, Skill tag, and 0U.
+- Set Spearstorm to `ICDType.None`, Skill tag, and 1U.
+- Add regression coverage for activation no-reaction and Spearstorm reaction.
+
+Acceptance criteria:
+
+- Activation is Electro/Skill/0U/no-ICD, deals zero damage, advances 0.3 s,
+  preserves aura, and emits no elemental reaction.
+- Spearstorm is Electro/Skill/1U/no-ICD and can trigger a reaction while
+  retaining positive direct damage.
+- Form and Symphony state transitions remain active.
+- No Burst or generic runtime code changes.
+
+Test cases to add or update:
+
+- Normal: first Skill enters Manifest Flame through an Electro Skill action.
+- No-trigger: 0U activation on Hydro preserves aura and creates no reaction.
+- Application: second Skill emits 1U/no-ICD Spearstorm and reacts with Hydro.
+- Boundary: both actions retain their existing 0.3-second durations.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Accept the FlinsParty2 Skill-Metadata Delta
+
+Why last:
+
+Skill typing may affect listeners even when gauge and direct damage do not, so
+the full party result requires fresh deterministic acceptance.
+
+Target files:
+
+- `README.md`
+- `TASKS.md`
+- `BACKLOG.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+
+Tasks:
+
+- Run two fresh `FlinsParty2` invocations and compare simulator payloads.
+- Confirm four activation and 12 Spearstorm actions retain intended behavior.
+- Update the audited baseline only if the typed Skill correction changes it.
+
+Acceptance criteria:
+
+- Two fresh simulator payloads and summaries match.
+- No activation consumes aura or deals damage; no Spearstorm is ICD-blocked.
+- Numeric baseline documents agree if changed.
+- Agent assets and routed preflight checks pass.
+
+Test cases to add or update:
+
+- No further production test; Phase 2 owns the mechanic contract.
+
+Verification:
+
+- two fresh `./gradlew FlinsParty2` runs
+- `python scripts/validate_agent_assets.py` when the baseline gate changes
+- `python scripts/preflight.py --run`
+
 ## Cross-Cutting Rules
 
 ### Testing
