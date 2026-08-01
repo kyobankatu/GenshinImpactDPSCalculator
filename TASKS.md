@@ -50,6 +50,9 @@ The B-021 correction is complete. Xingqiu's two Fatal Rainscreen strikes now
 each use their sourced 1U/no-ICD contract instead of sharing standard Skill
 ICD.
 
+The active queue is B-022: Bennett's Press Skill must use 2U/no ICD and his
+Burst must retain 2U while no longer entering a Burst ICD group.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -2656,6 +2659,143 @@ Completion evidence:
   `2fbe19b421aa18de1dd2d9e342c0de369177635ea49f6644ced01046c0f0342e`.
 - The final detailed trace shows both Skill hits trigger Electro-Charged and Hit
   2 has no preceding `ElementalSkill` ICD block.
+
+## Implementation Order: Bennett Skill and Burst Application Metadata
+
+Status:
+
+- Planned; Phase 1 evidence is recorded below.
+- Requirement: Passion Overload Press applies 2U Pyro with no ICD, while
+  Fantastic Voyage applies 2U Pyro with no ICD.
+
+Scope:
+
+- Correct Bennett's Press Skill gauge and Skill/Burst ICD metadata.
+- Add actual-character regression coverage for both actions.
+- Re-run and accept the deterministic `RaidenParty` integration delta.
+
+Out of scope for this pass:
+
+- Held Skill variants, C4 follow-up, cooldown reduction, field buffs, healing,
+  C6 infusion, particles, animation timing, optimizer policy, reports, or RL.
+- Changing generic ICD or elemental-gauge formulas.
+
+Design boundaries:
+
+- `Bennett` owns its character-specific action metadata.
+- Press and Burst retain typed Skill/Burst tags for diagnostics without sharing
+  ICD state.
+- Buff, energy, and artifact-trigger behavior remains unchanged.
+
+### Phase 1: Record Bennett Application Evidence - Done
+
+Why first:
+
+Press and Burst share a 2U/no-ICD contract but have different action types, so
+both exact metadata rows and the excluded held variants must be fixed first.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record the current KQM Bennett attack table, accessed 2026-08-02.
+- Record Press and Fantastic Voyage gauge, ICD, element, and damage type.
+- Record the pre-fix audited baseline and focused test design.
+
+Acceptance criteria:
+
+- Source URL, access date, 2U gauge, no-ICD policy, and action types are
+  explicit.
+- Existing Press 1U/standard ICD and Burst 2U/standard ICD divergences are
+  recorded separately.
+- Held Skill and cooldown behavior remain out of scope.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 adds executable coverage.
+
+Verification:
+
+- inspect `Bennett.skill`, `Bennett.burst`, and the detailed sample trace
+- `python scripts/preflight.py --run`
+
+### Phase 2: Encode and Test Bennett Application Contracts
+
+Why second:
+
+Both sourced rows can be corrected locally and tested through actual Bennett
+actions without modifying shared gauge or ICD infrastructure.
+
+Target files:
+
+- `src/java/model/character/Bennett.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Set Press Skill to 2U/no ICD with its typed Skill tag.
+- Set Fantastic Voyage to 2U/no ICD with its typed Burst tag.
+- Capture and verify both actions through the production damage-hook path.
+
+Acceptance criteria:
+
+- Press is Pyro Skill damage with 2U, `ICDType.None`, and Skill tag.
+- Fantastic Voyage is Pyro Burst damage with 2U, `ICDType.None`, and Burst tag.
+- Each action independently triggers its expected reaction with a valid aura.
+- No-aura actions deal damage without fabricating reactions.
+
+Test cases to add or update:
+
+- Normal: Press triggers Overloaded and Burst triggers Vaporize.
+- Abnormal: isolated no-aura actions produce damage and no reactions.
+- Contract: captured Skill/Burst actions retain 2U, no ICD, and typed tags.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Accept the RaidenParty Gauge Delta
+
+Why last:
+
+Press's stronger Pyro gauge can alter aura ownership and downstream reactions in
+the audited reference rotation.
+
+Target files:
+
+- `README.md`
+- `TASKS.md`
+- `BACKLOG.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+
+Tasks:
+
+- Run two fresh `RaidenParty` payloads after the correction.
+- Inspect Press/Burst application and downstream reaction logs.
+- Update documented Raiden totals only if the deterministic result changes.
+
+Acceptance criteria:
+
+- Both normalized payloads and numeric summaries match.
+- Bennett's sourced action metadata is visible in the detailed trace.
+- Numeric baseline documents agree if changed.
+- Agent assets and routed preflight checks pass.
+
+Test cases to add or update:
+
+- No further production test; Phase 2 owns action and reaction behavior.
+
+Verification:
+
+- two fresh `./gradlew RaidenParty` runs
+- `python scripts/validate_agent_assets.py` when baseline gate changes
+- `python scripts/preflight.py --run`
 
 ## Cross-Cutting Rules
 

@@ -495,7 +495,7 @@ experiment record.
 
 ### B-022 — Bennett Press Skill uses the wrong gauge and ICD
 
-- Status: `candidate`
+- Status: `planned`
 - Source: 3 (adjacent audited-party action metadata divergence)
 - Symptom: Passion Overload Press is modeled as 1U with standard Skill ICD,
   while the sourced attack is 2U with no ICD; Fantastic Voyage also uses a
@@ -505,7 +505,9 @@ experiment record.
 - Risk: `planned`
 - Proof: actual-Bennett Skill/Burst metadata and aura regression plus fresh
   deterministic `RaidenParty` acceptance
-- Notes: candidate recorded while B-021 is active; do not promote concurrently.
-  KQM's Bennett attack table (accessed 2026-08-02) records Press as 2U/no ICD
-  and Fantastic Voyage as 2U/no ICD. Source:
-  https://library.keqingmains.com/characters/pyro/bennett.
+- Notes: adopt KQM's Bennett attack table (accessed 2026-08-02), which records
+  Press as 2U/no ICD and Fantastic Voyage as 2U/no ICD. Held variants have
+  distinct hit structures and remain excluded. Source:
+  https://library.keqingmains.com/characters/pyro/bennett. Pre-fix audited
+  `RaidenParty` baseline is 1,464,729 damage / 69,749 DPS. See `TASKS.md`
+  implementation block `Bennett Skill and Burst Application Metadata`.
