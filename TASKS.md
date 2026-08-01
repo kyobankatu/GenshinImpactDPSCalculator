@@ -7980,6 +7980,199 @@ Completion evidence:
 - README, verification reference, plan, and ledger agree. Generated FlinsParty2
   HTML was restored and no output artifact is staged.
 
+## Implementation Order: Bloom Directional Aura Consumption
+
+Status:
+
+- In progress; Phase 1 is complete and Phases 2-3 remain.
+- Requirement: standard Bloom and Lunar-Bloom must consume existing aura with
+  the sourced Hydro:Dendro 2:1 directional ratio instead of a shared 1.0
+  trigger-gauge multiplier.
+
+Scope:
+
+- Consume `0.5 * source gauge` when Hydro triggers Bloom on Dendro.
+- Consume `2.0 * source gauge` when Dendro triggers Bloom on Hydro.
+- Apply the same core-creation consumption policy after Lunar conversion.
+- Preserve Dendro Core ownership, damage, cap/expiry policy, reaction
+  notification, and Lunar Dew increments.
+- Re-accept the three deterministic audited party baselines as no-Dendro
+  controls.
+
+Out of scope for this pass:
+
+- Treating Quicken as a coexisting Dendro aura for Bloom, Quicken gauge state,
+  Burning gauge internals, Hyperbloom/Burgeon consumption, and Freeze.
+- Multi-target cores, simultaneous-reaction priority, source action gauge
+  metadata, and changes to core damage or ownership.
+- RL contracts/training, reports, dependencies, build structure, and generated
+  output.
+
+Definitions:
+
+- Weak Hydro direction: Hydro source gauge multiplied by 0.5 and subtracted
+  from the current Dendro aura.
+- Strong Dendro direction: Dendro source gauge multiplied by 2.0 and subtracted
+  from the current Hydro aura.
+- Directional consumption policy: a typed resolver decision based on reaction
+  kind, trigger element, and aura element; display labels do not participate.
+
+Cross-cutting design rules:
+
+- Keep the resolver responsible only for orchestration and delegate the
+  directional arithmetic to one side-effect-free typed helper.
+- Extend the existing aura-consumption policy instead of duplicating Bloom and
+  Lunar-Bloom branches, preserving single responsibility and open extension by
+  reaction kind.
+- Tests exercise public simulator actions and observable state; they do not
+  couple to private helper implementation.
+
+### Phase 1: Record Bloom Evidence and Runtime Boundary - Done
+
+Why first:
+
+The existing stateful branch uses one full-gauge subtraction in both trigger
+directions, so the asymmetric rule and Lunar conversion boundary must be fixed
+before changing shared resolver policy.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record maintained Bloom consumption-ratio evidence and access date.
+- Inventory standard/Lunar core creation, typed reaction conversion, current
+  aura subtraction, Dew counters, ownership, and existing core regressions.
+- Define Quicken coexistence and other Dendro-special state as separate work.
+
+Acceptance criteria:
+
+- Evidence identifies Hydro as the weak element and gives the 2:1
+  Hydro:Dendro ratio.
+- Expected residuals are explicit for both trigger directions and exact/full
+  depletion boundaries.
+- Later phases cover standard/Lunar parity, side effects, and no-Dendro party
+  controls without expanding into excluded state models.
+
+Test cases to add or update:
+
+- No production test in this phase; Phase 2 adds pre-fix failing directional
+  action boundaries.
+
+Verification:
+
+- inspect `CombatActionResolver`, `ReactionCalculator`, `ReactionResult`,
+  `ReactionEffectScheduler`, Dendro Core state, Dew counters, and Bloom tests
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- The maintained KQM Transformative Reactions reference states that Bloom
+  gauge consumption has a 2:1 Hydro:Dendro ratio, identifies Hydro as the weak
+  element, and says application order changes gauge consumption rather than
+  damage. Source accessed 2026-08-02:
+  https://library.keqingmains.com/combat-mechanics/elemental-effects/transformative-reactions.
+- Adapt the ratio as 0.5x Hydro-on-Dendro and 2.0x Dendro-on-Hydro consumption,
+  matching the repository's pre-tax trigger-gauge convention.
+- Standard and Lunar-Bloom share the same stateful core branch after typed Lunar
+  conversion. Core creation, ownership, Dew counters, delayed damage, and
+  notifications are already separate from the one aura subtraction in scope.
+
+### Phase 2: Implement Directional Standard and Lunar-Bloom Consumption
+
+Why second:
+
+The runtime can adopt the sourced asymmetry through the existing typed
+consumption policy once both directions and no-change side effects are
+executable.
+
+Target files:
+
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Extend the typed aura-consumption helper with trigger and aura elements.
+- Apply 0.5 only to Hydro-on-Dendro Bloom/Lunar-Bloom and 2.0 only to
+  Dendro-on-Hydro Bloom/Lunar-Bloom.
+- Route the stateful Bloom branch through that helper and add actual action
+  regressions for residual, depletion, notification, core, ownership, and Dew
+  behavior.
+
+Acceptance criteria:
+
+- 1U Hydro on fresh taxed 2U Dendro leaves 1.1U; 2U Hydro leaves 0.6U.
+- 1U Dendro on fresh taxed 4U Hydro leaves 1.2U; fresh taxed 2U Hydro fully
+  depletes without exposing negative gauge.
+- Lunar-Bloom matches both directional consumptions while retaining one core
+  and one increment to each Dew counter.
+- Core damage/ownership, reaction listener count, cap/expiry, Swirl,
+  Crystallize, Overload, and Superconduct behavior remain unchanged.
+
+Test cases to add or update:
+
+- Weak direction: 1U and 2U Hydro triggers leave 1.1U and 0.6U Dendro.
+- Strong direction: 1U Dendro leaves 1.2U from taxed 4U Hydro and removes taxed
+  2U Hydro completely.
+- Lunar: both directions use the same multipliers and preserve core plus Dew
+  side effects.
+- Boundary: exactly or less than directional consumption removes the aura with
+  no negative units.
+- No-change: one reaction notification and core owner remain the triggering
+  character; established non-Bloom consumption regressions still pass.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Re-Accept Bloom-Neutral Party Baselines
+
+Why last:
+
+None of the three audited parties contains Dendro, so exact repeated payloads
+provide a broad no-change control over shared reaction orchestration.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Run two fresh payloads each for RaidenParty, FlinsParty, and FlinsParty2.
+- Compare normalized hashes, totals, DPS, ER, optimizer allocation, warnings,
+  and durations against B-051.
+- Close B-052 only when all three payloads are exact no-change controls.
+
+Acceptance criteria:
+
+- Each repeated payload matches its pair and the corresponding B-051 payload.
+- No warning, energy, optimizer, action, aura, or generated-output regression is
+  introduced.
+- Plan and ledger agree; tracked generated HTML is restored and no output is
+  staged.
+
+Test cases to add or update:
+
+- Normal integration: all three audited parties complete deterministically.
+- Abnormal integration: any non-Bloom payload delta blocks acceptance and is
+  investigated rather than normalized away.
+
+Verification:
+
+- two fresh `./gradlew RaidenParty` runs
+- two fresh `./gradlew FlinsParty` runs
+- two fresh `./gradlew FlinsParty2` runs
+- `python scripts/preflight.py --run`
+
 ## Implementation Order: Overload and Superconduct Residual Aura
 
 Status:

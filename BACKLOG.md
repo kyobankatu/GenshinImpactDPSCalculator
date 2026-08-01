@@ -1328,3 +1328,27 @@ experiment record.
   `118edbd3665d167d31e9bbbbffc97ffc499a40db5199a573a5e25ed8eea023a6`
   at 15,482,126 / 224,054. Durations, ER contracts, and warning-free output are
   stable.
+
+### B-052 — Bloom consumes the same gauge in both trigger directions
+
+- Status: `in-progress`
+- Source: 3 (maintained transformative-reaction divergence)
+- Symptom: standard Bloom and Lunar-Bloom subtract the trigger's full source
+  gauge in both directions, but Hydro is Bloom's weak element and the sourced
+  Hydro:Dendro consumption ratio is 2:1.
+- Scope: typed Hydro-on-Dendro 0.5x and Dendro-on-Hydro 2.0x aura consumption,
+  standard/Lunar parity, focused core/Dew/ownership boundaries, and audited
+  no-Dendro party controls
+- Risk: `planned`
+- Proof: actual 1U/2U residual and full-depletion cases in both directions,
+  Lunar-Bloom side-effect parity, and unchanged repeated payloads for all three
+  audited parties
+- Notes: adopt the maintained KQM Transformative Reactions reference, accessed
+  2026-08-02. It records a 2:1 Hydro:Dendro consumption ratio, identifies Hydro
+  as the weak element, and states that application order affects gauge consumed
+  rather than Bloom damage. Source:
+  https://library.keqingmains.com/combat-mechanics/elemental-effects/transformative-reactions.
+  Adapt this to the repository's pre-tax trigger gauges as 0.5x
+  Hydro-on-Dendro and 2.0x Dendro-on-Hydro. Quicken-as-Dendro coexistence,
+  Burning internals, and other special state remain separate. See `TASKS.md`
+  implementation block `Bloom Directional Aura Consumption`.
