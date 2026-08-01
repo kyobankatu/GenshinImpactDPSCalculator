@@ -134,11 +134,11 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
     public void onAction(CharacterActionRequest request, CombatSimulator sim) {
         switch (request.getKey()) {
             case SKILL:
-                markSkillUsed(sim.getCurrentTime());
+                markSkillUsed(sim.getCurrentTime(), sim.getApplicableBuffs(this));
                 skill(sim);
                 break;
             case BURST:
-                markBurstUsed(sim.getCurrentTime());
+                markBurstUsed(sim.getCurrentTime(), sim.getApplicableBuffs(this));
                 burst(sim);
                 break;
             case NORMAL:

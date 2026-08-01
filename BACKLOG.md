@@ -914,7 +914,7 @@ experiment record.
 
 ### B-039 — Impetuous Winds cooldown reduction is never consumed
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 3 (sourced resonance-mechanic divergence)
 - Symptom: `ResonanceManager` adds `CD_REDUCTION = 0.05`, but Skill/Burst
   readiness, remaining cooldowns, charge restoration, and snapshots use only
@@ -937,4 +937,12 @@ experiment record.
   retaining base cooldown metadata. Movement speed and stamina portions of
   Impetuous Winds remain outside the DPS simulator's modeled state. See
   `TASKS.md` implementation block
-  `Cooldown Reduction Snapshot and Impetuous Winds`.
+  `Cooldown Reduction Snapshot and Impetuous Winds`. Completed 2026-08-02.
+  Actual two-Anemo regression proves exact 9.5-second Skill and 19.0-second
+  Burst boundaries, one-Anemo no-trigger behavior, cast-time persistence after
+  a temporary buff expires, multi-charge queue reuse, defensive clamping, and
+  exact simulator snapshot restoration. All eight production character models
+  now pass simulator-applicable buffs when starting cooldowns. RaidenParty
+  retains 100%/175%/179%/174% ER and 1,317,080 damage / 62,718 DPS over 21.0
+  seconds; FlinsParty2 retains 141%/132%/105%/193% ER and 14,077,198 damage /
+  203,722 DPS over 69.1 seconds, with no new warning in either run.

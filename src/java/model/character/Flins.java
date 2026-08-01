@@ -244,14 +244,14 @@ public class Flins extends Character
         switch (request.getKey()) {
             case SKILL:
                 if (!isManifestFlameActive(sim.getCurrentTime())) {
-                    markSkillUsed(sim.getCurrentTime());
+                    markSkillUsed(sim.getCurrentTime(), sim.getApplicableBuffs(this));
                     skill_enterForm(sim);
                 } else {
                     skill_spearstorm(sim); // CD enforced by CombatSimulator
                 }
                 break;
             case BURST:
-                markBurstUsed(sim.getCurrentTime());
+                markBurstUsed(sim.getCurrentTime(), sim.getApplicableBuffs(this));
                 if (isThunderousSymphonyActive(sim.getCurrentTime())) {
                     burst_symphony(sim);
                 } else {

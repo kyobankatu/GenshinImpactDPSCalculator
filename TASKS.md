@@ -97,9 +97,9 @@ recipients in two- and three-character parties use the sourced 0.8 and 0.7
 multipliers while the established four-character 0.6 contract remains
 unchanged.
 
-The B-039 Impetuous Winds correction is in progress. Its existing 5% cooldown
-reduction stat will shorten Skill and Burst cooldown state at cast time and
-remain exact across multi-charge scheduling and simulator snapshot restore.
+The B-039 Impetuous Winds correction is complete. Its existing 5% cooldown
+reduction stat shortens Skill and Burst cooldown state at cast time and remains
+exact across multi-charge scheduling and simulator snapshot restore.
 
 ## Scope
 
@@ -4875,7 +4875,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phases 1-2 are complete and Phase 3 remains.
+- Implemented; Phases 1-3 are complete.
 - Requirement: Impetuous Winds' existing 5% cooldown-reduction stat must affect
   Skill and Burst readiness using cast-time snapshot semantics.
 
@@ -5055,7 +5055,7 @@ Completion evidence:
 - ReactionRegressionTest, PartyCatalogRegressionTest, build, Javadoc, routed
   validation, and preflight pass.
 
-### Phase 3: Accept Simulator Integration and Close B-039
+### Phase 3: Accept Simulator Integration and Close B-039 - Done
 
 Why last:
 
@@ -5105,6 +5105,23 @@ Verification:
 - `./gradlew RaidenParty`
 - `./gradlew FlinsParty2`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Bennett, Columbina, Flins, Ineffa, Raiden Shogun, Sucrose, Xiangling, and
+  Xingqiu pass simulator-applicable buffs into every production Skill/Burst
+  cooldown start; Flins's form Skill branch that intentionally starts no new
+  cooldown remains unchanged.
+- ReactionRegressionTest, PartyCatalogRegressionTest, and build pass after the
+  caller migration.
+- RaidenParty retains Bennett/Raiden Shogun/Xingqiu/Xiangling ER of
+  100%/175%/179%/174% and 1,317,080 damage / 62,718 DPS over 21.0 seconds with
+  zero warning matches.
+- FlinsParty2 retains Sucrose/Flins/Ineffa/Columbina ER of
+  141%/132%/105%/193% and 14,077,198 damage / 203,722 DPS over 69.1 seconds
+  with zero warning matches.
+- The generated `docs/simulation_report.html` update was restored before
+  staging, and final preflight passes without artifact leakage.
 
 ## NCCL/DDP Distributed RL Training Plan
 

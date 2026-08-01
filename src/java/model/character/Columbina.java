@@ -258,7 +258,7 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                 }
                 break;
             case SKILL:
-                markSkillUsed(currentTime);
+                markSkillUsed(currentTime, sim.getApplicableBuffs(this));
                 // Summon Gravity Ripple
                 AttackAction skill = new AttackAction(
                         "Eternal Tides",
@@ -305,7 +305,7 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                 }
                 break;
             case BURST:
-                markBurstUsed(currentTime);
+                markBurstUsed(currentTime, sim.getApplicableBuffs(this));
                 // Lunar Domain
                 AttackAction burst = new AttackAction(
                         "Moonlit Melancholy",
