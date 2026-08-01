@@ -439,3 +439,25 @@ experiment record.
   boundary. `RaidenParty` remains 1,440,416 / 68,591; both `FlinsParty2`
   payloads remain 15,434,039 / 226,306 with normalized SHA-256
   `a9cdfbf0d3a0a01356d9d113afdd7f0afe8ef8510494f4b193107d533c8dbb6e`.
+
+### B-020 — Guoba incorrectly uses standard Skill ICD
+
+- Status: `planned`
+- Source: 1 (adjacent periodic-action metadata audit)
+- Symptom: Guoba's four flame hits are modeled with standard Skill ICD even
+  though each hit applies Pyro independently; the final detailed
+  `RaidenParty` trace contains five Guoba hits across casts and two false
+  `ElementalSkill` application blocks.
+- Scope: `src/java/model/character/Xiangling.java`,
+  `src/java/sample/ReactionRegressionTest.java`
+- Risk: `planned`
+- Proof: actual-Xiangling four-hit metadata/reaction regression plus two fresh
+  deterministic `RaidenParty` payloads
+- Notes: adopt the KQM Theorycrafting Library Xiangling attack table (accessed
+  2026-08-02), which records Guoba as 1U Pyro, no ICD, snapshotting Skill
+  damage. The same table records Pyronado's three cast swings as standard ICD
+  and its periodic Pyronado hit as no ICD, matching current code and excluding
+  those actions from this fix. Source:
+  https://library.keqingmains.com/characters/pyro/xiangling. Pre-fix audited
+  `RaidenParty` baseline is 1,440,416 damage / 68,591 DPS. See `TASKS.md`
+  implementation block `Xiangling Guoba No-ICD Application`.

@@ -46,6 +46,10 @@ The Ineffa Skill application correction is now active. Its 1U/no-ICD contract
 and pre-fix Birgitta cadence are recorded; implementation and sample acceptance
 remain.
 
+The current simulator-only queue is correcting Xiangling's Guoba application.
+The sourced 1U/no-ICD contract differs from the current standard Skill ICD;
+Pyronado metadata is already aligned and remains out of scope.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -2355,6 +2359,145 @@ Completion evidence:
 - Both `FlinsParty2` payloads remain 15,434,039 damage / 226,306 DPS with
   normalized SHA-256
   `a9cdfbf0d3a0a01356d9d113afdd7f0afe8ef8510494f4b193107d533c8dbb6e`.
+
+## Implementation Order: Xiangling Guoba No-ICD Application
+
+Status:
+
+- Planned; Phase 1 evidence is recorded below.
+- Requirement: every Guoba flame hit must apply 1U Pyro without entering or
+  consulting a shared Skill ICD group.
+
+Scope:
+
+- Correct Guoba's `AttackAction` metadata in `Xiangling`.
+- Add actual-character regression coverage for all four periodic hits.
+- Re-run and accept the deterministic `RaidenParty` integration delta.
+
+Out of scope for this pass:
+
+- Pyronado metadata, hit cadence, animation timing, particle generation, C1
+  shred, chili pickup, multipliers, optimizer policy, reports, or RL.
+- Changing generic ICD behavior or `ICDTag.ElementalSkill` semantics.
+
+Design boundaries:
+
+- `Xiangling` owns Guoba's character-specific action metadata.
+- The generic ICD engine remains unchanged and is tested through the scheduled
+  Guoba hits rather than bypassed in test setup.
+- Pyronado's three cast swings retain standard Burst ICD; its periodic hit
+  retains no ICD.
+
+### Phase 1: Record Guoba Application Evidence - Done
+
+Why first:
+
+Guoba and Pyronado have different per-attack ICD contracts, so the exact local
+change must be fixed before editing the character implementation.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record the current KQM Xiangling attack table, accessed 2026-08-02.
+- Record Guoba's 1U/no-ICD contract and the already-correct Pyronado contracts.
+- Record the pre-fix audited sample summary and focused test design.
+
+Acceptance criteria:
+
+- Source URL, access date, gauge, ICD, damage type, and excluded Pyronado scope
+  are explicit.
+- The final detailed pre-fix `RaidenParty` trace records five Guoba hits, two of
+  which are incorrectly blocked by `ElementalSkill` ICD.
+- Phase 2 changes remain character-local.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 adds executable coverage.
+
+Verification:
+
+- inspect `Xiangling.skill` and the final detailed `RaidenParty` trace
+- `python scripts/preflight.py --run`
+
+### Phase 2: Encode and Test Guoba No-ICD Hits
+
+Why second:
+
+The source contract can be expressed by one local action-metadata change and
+verified through the real periodic event path.
+
+Target files:
+
+- `src/java/model/character/Xiangling.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Set Guoba to no ICD while retaining its Skill tag and 1U Pyro application.
+- Capture the four scheduled Guoba actions from an actual Xiangling instance.
+- Verify that consecutive hits react independently instead of being blocked.
+
+Acceptance criteria:
+
+- All four Guoba hits are Pyro Skill damage with 1U, `ICDType.None`, and the
+  typed Skill tag.
+- All four hits can trigger reactions at the 1.5-second cadence.
+- A no-aura run deals damage without fabricating reactions.
+- Generic ICD code and Pyronado metadata are unchanged.
+
+Test cases to add or update:
+
+- Normal: four consecutive Guoba hits against refreshed Hydro each Vaporize.
+- Abnormal: no-aura Guoba still produces four damage actions and no reactions.
+- Contract: every captured hit retains Skill damage, 1U, no ICD, and Skill tag.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Accept the RaidenParty Application Delta
+
+Why last:
+
+Removing false application blocks can alter aura ownership, reactions, and
+optimized output in the reference party and therefore requires fresh evidence.
+
+Target files:
+
+- `README.md`
+- `TASKS.md`
+- `BACKLOG.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+
+Tasks:
+
+- Run two fresh `RaidenParty` payloads after the correction.
+- Confirm the detailed trace has five Guoba hits and zero Guoba ICD blocks.
+- Update documented Raiden totals only if the deterministic result changes.
+
+Acceptance criteria:
+
+- Both normalized payloads and numeric summaries match.
+- Guoba's sourced application cadence is visible in the detailed trace.
+- Numeric baseline documents agree if changed.
+- Agent assets and routed preflight checks pass.
+
+Test cases to add or update:
+
+- No further production test; Phase 2 owns action and reaction behavior.
+
+Verification:
+
+- two fresh `./gradlew RaidenParty` runs
+- `python scripts/validate_agent_assets.py` when baseline gate changes
+- `python scripts/preflight.py --run`
 
 ## Cross-Cutting Rules
 
