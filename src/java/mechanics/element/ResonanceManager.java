@@ -1,5 +1,6 @@
 package mechanics.element;
 
+import mechanics.buff.Buff;
 import mechanics.buff.BuffId;
 import simulation.CombatSimulator;
 import model.entity.Character;
@@ -123,27 +124,17 @@ public class ResonanceManager {
                 if (sim.isLoggingEnabled()) {
                     System.out.println("   [Resonance] Shattering Ice (Cryo) Applied (+15% CR vs Cryo/Frozen)");
                 }
-                sim.applyTeamBuff(new SimpleBuff("Shattering Ice", BuffId.SHATTERING_ICE, 99999, 0, stats -> {
-                    // Conditional CR not directly supported by SimpleBuff static application
-                    // We need a conditional buff logic or assume uptime.
-                    // For Simplicity: We will assume modest uptime or assume active if enemy has
-                    // Cryo/Frozen?
-                    // Better: The CombatSimulator/DamageCalculator handles dynamic stats.
-                    // But SimpleBuff applies at `getEffectiveStats`.
-                    // We can add a "Conditional" stat type? Or just add Flat CR for now
-                    // and note it assumes Aura.
-                    // Ideally: Check Enemy Aura?
-                    // Since Buff.apply takes `currentTime`, but not `Enemy`, we can't check aura
-                    // here easily
-                    // without changing Buff interface or accessing Sim globally (which we can
-                    // capture via closure).
-
-                    // Let's rely on checking Sim state if possible.
-                    // But SimpleBuff functional interface is (StatsContainer) -> void.
-                    // We'll trust the user has Cryo aura for Cryo teams.
-                    stats.add(StatType.CRIT_RATE, 0.15);
-                    // Note: In a real advanced sim, this should be conditional.
-                }));
+                sim.applyTeamBuff(new Buff("Shattering Ice", BuffId.SHATTERING_ICE, 99999, 0) {
+                    @Override
+                    protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
+                        boolean affectedByCryo = sim.getEnemy() != null
+                                && sim.getEnemy().getAuraUnits(Element.CRYO, currentTime) > 0.0;
+                        boolean frozen = sim.getEnemy() != null && sim.getEnemy().isFrozen();
+                        if (affectedByCryo || frozen) {
+                            stats.add(StatType.CRIT_RATE, 0.15);
+                        }
+                    }
+                });
                 break;
 
             case GEO:

@@ -87,6 +87,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ArtifactLunarReactionBuffRegression();
         testAccuracyPhaseF_WeaponReactionBonusRegression();
         testAccuracyPhaseF_DendroResonanceReactionEmContract();
+        testAccuracyPhaseF_CryoResonanceConditionalCritContract();
         testAccuracyPhaseF_SucroseNoIcdApplicationContract();
         testAccuracyPhaseF_XianglingChiliPickupOptIn();
         testAccuracyPhaseF_XingqiuOrbitalApplicationCadence();
@@ -1679,6 +1680,39 @@ public class ReactionRegressionTest {
                 "Refreshed primary buff should expire at its replacement boundary");
     }
 
+    private static void testAccuracyPhaseF_CryoResonanceConditionalCritContract() {
+        TestCharacter owner = testCharacter(Element.CRYO, CharacterId.SUCROSE);
+        CombatSimulator sim = simulatorWith(owner);
+        sim.addCharacter(testCharacter(Element.CRYO, CharacterId.XIANGLING));
+        ResonanceManager.applyResonances(sim);
+        double baseCrit = resolvedStat(sim, owner, StatType.CRIT_RATE);
+        assertClose(0.05, baseCrit, EPS,
+                "Cryo resonance should not grant CRIT Rate against an unaffected enemy");
+
+        sim.getEnemy().setAura(Element.PYRO, 1.0);
+        assertClose(baseCrit, resolvedStat(sim, owner, StatType.CRIT_RATE), EPS,
+                "Cryo resonance should not grant CRIT Rate against an unrelated aura");
+
+        sim.getEnemy().setAura(Element.PYRO, 0.0);
+        sim.getEnemy().setAura(Element.CRYO, 1.0);
+        assertClose(baseCrit + 0.15, resolvedStat(sim, owner, StatType.CRIT_RATE), EPS,
+                "Cryo resonance should grant 15% CRIT Rate against Cryo aura");
+
+        sim.getEnemy().setAura(Element.CRYO, 0.0);
+        sim.getEnemy().setFreezeAura(1.0);
+        assertClose(baseCrit + 0.15, resolvedStat(sim, owner, StatType.CRIT_RATE), EPS,
+                "Cryo resonance should grant 15% CRIT Rate against Frozen state");
+
+        sim.getEnemy().clearFreezeAura();
+        sim.getEnemy().setAura(Element.CRYO, 1.0, sim.getCurrentTime());
+        sim.advanceTime(10.999);
+        assertClose(baseCrit + 0.15, resolvedStat(sim, owner, StatType.CRIT_RATE), EPS,
+                "Cryo resonance should remain active immediately before aura expiry");
+        sim.advanceTime(0.001);
+        assertClose(baseCrit, resolvedStat(sim, owner, StatType.CRIT_RATE), EPS,
+                "Cryo resonance should be inactive exactly at aura expiry");
+    }
+
     private static void assertSprawlingGreeneryTrigger(ReactionResult.Kind kind, double expectedEm) {
         TestCharacter owner = testCharacter(Element.DENDRO, CharacterId.SUCROSE);
         CombatSimulator sim = simulatorWith(owner);
@@ -1690,10 +1724,14 @@ public class ReactionRegressionTest {
     }
 
     private static double resolvedElementalMastery(CombatSimulator sim, Character character) {
+        return resolvedStat(sim, character, StatType.ELEMENTAL_MASTERY);
+    }
+
+    private static double resolvedStat(CombatSimulator sim, Character character, StatType statType) {
         AttackAction probe = damageHit("Resonance stat probe", Element.PHYSICAL, 0.0);
         return DamageCalculator.resolveStats(
                 character, probe, sim.getApplicableBuffs(character), sim.getCurrentTime())
-                .get(StatType.ELEMENTAL_MASTERY);
+                .get(statType);
     }
 
     private static void testAccuracyPhaseF_SucroseNoIcdApplicationContract() {

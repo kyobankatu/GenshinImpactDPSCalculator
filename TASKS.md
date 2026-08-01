@@ -2060,7 +2060,7 @@ Completion evidence:
 Status:
 
 - In progress.
-- Phase 1 is complete; Phases 2-3 remain.
+- Phases 1-2 are complete; Phase 3 remains.
 - Requirement: Shattering Ice must grant +15% CRIT Rate only while the target
   is Frozen or has a positive, current-time Cryo aura.
 
@@ -2119,7 +2119,7 @@ Verification:
 - inspect `ResonanceManager`, `Enemy`, and stat resolution
 - `python scripts/preflight.py --run`
 
-### Phase 2: Implement and Test Dynamic Cryo Resonance
+### Phase 2: Implement and Test Dynamic Cryo Resonance - Done
 
 Why second:
 
