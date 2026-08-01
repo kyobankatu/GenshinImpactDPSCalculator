@@ -59,6 +59,9 @@ Musou Isshin Normal/Charged shared ICD group now match their sourced contracts.
 The B-024 correction is complete. Recasting Raiden's Skill now cancels the
 previous Eye periodic event, leaving one refreshed stream.
 
+The active queue is B-025: Guoba's periodic duration must stop after four flame
+hits instead of producing a fifth hit outside its seven-second field duration.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -3116,6 +3119,143 @@ Completion evidence:
   `df040feaf6c35da05783cca75d2992824d3246c654fc917e050888588b9586f4`.
 - After the 14.2-second recast, only replacement hits at 15.6, 16.5, 17.4,
   18.3, 19.2, 20.1, and 21.0 seconds remain; all stale old-stream hits are gone.
+
+## Implementation Order: Guoba Four-Hit Lifetime
+
+Status:
+
+- Planned; Phase 1 evidence is recorded below.
+- Requirement: one Guoba cast deals exactly four flame hits at +2.0, +3.5,
+  +5.0, and +6.5 seconds, with no +8.0-second hit.
+
+Scope:
+
+- Correct Guoba's character-local periodic duration.
+- Extend actual-Xiangling regression through the former fifth-hit boundary.
+- Re-run and accept the deterministic `RaidenParty` integration delta.
+
+Out of scope for this pass:
+
+- Generic `PeriodicDamageEvent` boundary semantics, other periodic effects,
+  Guoba ICD/gauge, particles, C1, chili timing, multipliers, optimizer policy,
+  reports, or RL.
+
+Design boundaries:
+
+- `Xiangling` owns the number and schedule of Guoba flame hits.
+- Generic timer semantics remain unchanged because existing effects explicitly
+  rely on inclusive terminal ticks.
+- The existing +7.0-second chili timing remains independent from flame ticks.
+
+### Phase 1: Record Guoba Lifetime Evidence - Done
+
+Why first:
+
+The generic periodic boundary is shared by effects with different intended
+counts, so Guoba's exact four-hit timestamps must be fixed before editing.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record KQM's four-hit, seven-second Guoba contract, accessed 2026-08-02.
+- Record the five pre-fix sample timestamps and local duration cause.
+- Explicitly preserve generic inclusive timer behavior.
+
+Acceptance criteria:
+
+- Source URL, access date, hit count, duration, and expected timestamps are
+  recorded.
+- Pre-fix trace evidence includes the erroneous +8.0-second fifth hit.
+- The correction is scoped to `Xiangling` and its regression.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 extends executable
+  coverage.
+
+Verification:
+
+- inspect `Xiangling.skill`, periodic semantics, and final sample timestamps
+- `python scripts/preflight.py --run`
+
+### Phase 2: Enforce and Test Four Guoba Hits
+
+Why second:
+
+The sourced hit count can be represented by a character-local duration change
+without changing the shared scheduler.
+
+Target files:
+
+- `src/java/model/character/Xiangling.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Set Guoba's periodic duration so its inclusive final tick is +6.5 seconds.
+- Advance the existing actual-character tests past +8.0 seconds.
+- Assert exact four-hit count and timestamps with and without an aura.
+
+Acceptance criteria:
+
+- Guoba hits exactly at +2.0, +3.5, +5.0, and +6.5 seconds.
+- No damage, reaction, particle, or C1 callback occurs at +8.0 seconds.
+- Existing 1U/no-ICD metadata and chili timing remain unchanged.
+- Other periodic event tests are unchanged.
+
+Test cases to add or update:
+
+- Normal: four sourced timestamps each react against sufficient Hydro.
+- Abnormal: advancing beyond +8.0 produces no fifth action or reaction.
+- No aura: four damage actions and zero reactions across the full boundary.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Accept the RaidenParty Guoba-Lifetime Delta
+
+Why last:
+
+The invalid fifth hit currently contributes damage, particles, aura, and
+downstream reactions in the audited rotation.
+
+Target files:
+
+- `README.md`
+- `TASKS.md`
+- `BACKLOG.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+
+Tasks:
+
+- Run two fresh `RaidenParty` payloads after the lifetime correction.
+- Confirm each cast contributes only its four in-lifetime hits.
+- Update the deterministic Raiden baseline.
+
+Acceptance criteria:
+
+- Both normalized payloads and numeric summaries match.
+- Detailed trace contains no Guoba hit at cast time +8.0 seconds.
+- Numeric baseline documents agree.
+- Agent assets and routed preflight checks pass.
+
+Test cases to add or update:
+
+- No further production test; Phase 2 owns hit-count and boundary behavior.
+
+Verification:
+
+- two fresh `./gradlew RaidenParty` runs
+- `python scripts/validate_agent_assets.py` when baseline gate changes
+- `python scripts/preflight.py --run`
 
 ## Cross-Cutting Rules
 

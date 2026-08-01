@@ -577,3 +577,24 @@ experiment record.
   `df040feaf6c35da05783cca75d2992824d3246c654fc917e050888588b9586f4`.
   The final trace contains only the seven replacement-stream hits from 15.6
   through 21.0 seconds after the 14.2-second recast.
+
+### B-025 — Guoba periodic event produces a fifth flame hit
+
+- Status: `planned`
+- Source: 2 (observable sample hit-count defect after periodic-event audit)
+- Symptom: one Guoba cast is configured from +2.0 seconds at 1.5-second
+  intervals with an inclusive six-second event duration, producing hits at
+  +2.0, +3.5, +5.0, +6.5, and the out-of-duration +8.0 seconds.
+- Scope: `src/java/model/character/Xiangling.java`,
+  `src/java/sample/ReactionRegressionTest.java`
+- Risk: `planned`
+- Proof: actual-Xiangling timestamp/boundary regression plus two fresh
+  deterministic `RaidenParty` payloads
+- Notes: adopt the KQM Xiangling table (accessed 2026-08-02), which records
+  Guoba as four flame hits during its seven-second duration. Source:
+  https://library.keqingmains.com/characters/pyro/xiangling. Preserve generic
+  inclusive periodic boundaries because Xingqiu orbital and Sucrose pulse
+  regressions rely on them; set Guoba's local duration to end on its fourth
+  +6.5-second tick. Pre-fix audited `RaidenParty` baseline is 1,361,340 damage
+  / 64,826 DPS. See `TASKS.md` implementation block
+  `Guoba Four-Hit Lifetime`.
