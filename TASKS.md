@@ -2664,7 +2664,7 @@ Completion evidence:
 
 Status:
 
-- Planned; Phase 1 evidence is recorded below.
+- In progress; Phases 1-2 are complete and Phase 3 remains.
 - Requirement: Passion Overload Press applies 2U Pyro with no ICD, while
   Fantastic Voyage applies 2U Pyro with no ICD.
 
@@ -2722,7 +2722,7 @@ Verification:
 - inspect `Bennett.skill`, `Bennett.burst`, and the detailed sample trace
 - `python scripts/preflight.py --run`
 
-### Phase 2: Encode and Test Bennett Application Contracts
+### Phase 2: Encode and Test Bennett Application Contracts - Done
 
 Why second:
 

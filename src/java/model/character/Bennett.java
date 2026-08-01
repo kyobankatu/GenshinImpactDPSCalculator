@@ -131,7 +131,7 @@ public class Bennett extends Character implements FormStateProvider {
         double mv = getTalentValue("Passion Overload Tap", 2.34);
         AttackAction hit = new AttackAction("Passion Overload (Tap)", mv, Element.PYRO, StatType.BASE_ATK,
                 StatType.SKILL_DMG_BONUS, 0.0, false, ActionType.SKILL);
-        hit.setICD(ICDType.Standard, ICDTag.ElementalSkill, 1.0);
+        hit.setICD(ICDType.None, ICDTag.ElementalSkill, 2.0);
         sim.performAction(this.characterId, hit);
 
         // Generate 2 Pyro Particles (Tap)
@@ -142,7 +142,7 @@ public class Bennett extends Character implements FormStateProvider {
         double mv = getTalentValue("Fantastic Voyage Hit", 3.96);
         AttackAction q = new AttackAction("Fantastic Voyage Hit", mv, Element.PYRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 0.8, ActionType.BURST);
-        q.setICD(ICDType.Standard, ICDTag.ElementalBurst, 2.0); // 2U application
+        q.setICD(ICDType.None, ICDTag.ElementalBurst, 2.0);
         sim.performAction(this.characterId, q);
 
         // Trigger Artifact Buffs

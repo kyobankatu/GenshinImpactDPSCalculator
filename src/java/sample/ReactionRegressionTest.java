@@ -90,6 +90,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_CryoResonanceConditionalCritContract();
         testAccuracyPhaseF_ElectroResonanceTypedTriggerContract();
         testAccuracyPhaseF_SucroseNoIcdApplicationContract();
+        testAccuracyPhaseF_BennettSkillAndBurstApplicationContract();
         testAccuracyPhaseF_XianglingGuobaNoIcdApplicationContract();
         testAccuracyPhaseF_XianglingChiliPickupOptIn();
         testAccuracyPhaseF_XingqiuSkillNoIcdApplicationContract();
@@ -1961,6 +1962,69 @@ public class ReactionRegressionTest {
                 "Fatal Rainscreen should still deal two hits without an aura");
         assertEquals(0, noAuraKinds.size(),
                 "Fatal Rainscreen should not fabricate reactions without an aura");
+    }
+
+    private static void testAccuracyPhaseF_BennettSkillAndBurstApplicationContract() {
+        RecordingDamageWeapon skillWeapon = new RecordingDamageWeapon("Passion Overload");
+        model.character.Bennett skillBennett = new model.character.Bennett(skillWeapon, blankArtifact());
+        CombatSimulator skillSim = simulatorWithExistingCharacter(skillBennett);
+        List<ReactionResult.Kind> skillKinds = captureReactionKinds(skillSim);
+        skillSim.getEnemy().setAura(Element.ELECTRO, 2.0, skillSim.getCurrentTime());
+        skillSim.performAction(CharacterId.BENNETT,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+
+        assertEquals(1, skillWeapon.actions.size(), "Bennett Press should deal one Skill hit");
+        AttackAction skill = skillWeapon.actions.get(0);
+        assertEquals(Element.PYRO, skill.getElement(), "Bennett Press should deal Pyro damage");
+        assertEquals(ActionType.SKILL, skill.getActionType(), "Bennett Press should retain Skill typing");
+        assertEquals(ICDType.None, skill.getICDType(), "Bennett Press should have no ICD");
+        assertEquals(ICDTag.ElementalSkill, skill.getICDTag(), "Bennett Press should retain its Skill tag");
+        assertClose(2.0, skill.getGaugeUnits(), EPS, "Bennett Press should apply 2U Pyro");
+        assertEquals(1, countReactions(skillKinds, ReactionResult.Kind.OVERLOAD),
+                "Bennett Press should trigger Overloaded against Electro");
+
+        RecordingDamageWeapon burstWeapon = new RecordingDamageWeapon("Fantastic Voyage Hit");
+        model.character.Bennett burstBennett = new model.character.Bennett(burstWeapon, blankArtifact());
+        CombatSimulator burstSim = simulatorWithExistingCharacter(burstBennett);
+        List<ReactionResult.Kind> burstKinds = captureReactionKinds(burstSim);
+        burstSim.getEnemy().setAura(Element.HYDRO, 2.0, burstSim.getCurrentTime());
+        captureStandardOutput(() -> burstSim.performAction(CharacterId.BENNETT,
+                CharacterActionRequest.of(CharacterActionKey.BURST)));
+
+        assertEquals(1, burstWeapon.actions.size(), "Fantastic Voyage should deal one Burst hit");
+        AttackAction burst = burstWeapon.actions.get(0);
+        assertEquals(Element.PYRO, burst.getElement(), "Fantastic Voyage should deal Pyro damage");
+        assertEquals(ActionType.BURST, burst.getActionType(), "Fantastic Voyage should retain Burst typing");
+        assertEquals(ICDType.None, burst.getICDType(), "Fantastic Voyage should have no ICD");
+        assertEquals(ICDTag.ElementalBurst, burst.getICDTag(),
+                "Fantastic Voyage should retain its Burst tag");
+        assertClose(2.0, burst.getGaugeUnits(), EPS, "Fantastic Voyage should apply 2U Pyro");
+        assertEquals(1, countReactions(burstKinds, ReactionResult.Kind.VAPORIZE),
+                "Fantastic Voyage should trigger Vaporize against Hydro");
+
+        RecordingDamageWeapon noAuraSkillWeapon = new RecordingDamageWeapon("Passion Overload");
+        model.character.Bennett noAuraSkillBennett = new model.character.Bennett(
+                noAuraSkillWeapon, blankArtifact());
+        CombatSimulator noAuraSkillSim = simulatorWithExistingCharacter(noAuraSkillBennett);
+        List<ReactionResult.Kind> noAuraSkillKinds = captureReactionKinds(noAuraSkillSim);
+        noAuraSkillSim.performAction(CharacterId.BENNETT,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        assertEquals(1, noAuraSkillWeapon.actions.size(),
+                "Bennett Press should still deal damage without an aura");
+        assertEquals(0, noAuraSkillKinds.size(),
+                "Bennett Press should not fabricate reactions without an aura");
+
+        RecordingDamageWeapon noAuraBurstWeapon = new RecordingDamageWeapon("Fantastic Voyage Hit");
+        model.character.Bennett noAuraBurstBennett = new model.character.Bennett(
+                noAuraBurstWeapon, blankArtifact());
+        CombatSimulator noAuraBurstSim = simulatorWithExistingCharacter(noAuraBurstBennett);
+        List<ReactionResult.Kind> noAuraBurstKinds = captureReactionKinds(noAuraBurstSim);
+        captureStandardOutput(() -> noAuraBurstSim.performAction(CharacterId.BENNETT,
+                CharacterActionRequest.of(CharacterActionKey.BURST)));
+        assertEquals(1, noAuraBurstWeapon.actions.size(),
+                "Fantastic Voyage should still deal damage without an aura");
+        assertEquals(0, noAuraBurstKinds.size(),
+                "Fantastic Voyage should not fabricate reactions without an aura");
     }
 
     private static List<ReactionResult.Kind> captureReactionKinds(CombatSimulator sim) {
