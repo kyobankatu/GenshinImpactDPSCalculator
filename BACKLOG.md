@@ -884,7 +884,7 @@ experiment record.
 
 ### B-038 — Off-field particle energy always uses the four-character multiplier
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 3 (sourced energy-mechanic divergence)
 - Symptom: `EnergyDistributor` applies an unconditional 0.6 off-field factor,
   so two- and three-character parties receive less particle energy than the
@@ -904,4 +904,10 @@ experiment record.
   multiplier: active collection remains 1.0, particle base values and ER still
   compose normally, flat energy remains unscaled, and four-or-more members use
   the current 0.6 minimum. See `TASKS.md` implementation block
-  `Party-Size Particle Energy Multipliers`.
+  `Party-Size Particle Energy Multipliers`. Completed 2026-08-02. Regression
+  covers two through five registered members, active and off-field neutral
+  particles, same-element particles, neutral orbs, flat energy, and an empty
+  simulator. RaidenParty retains 100%/175%/179%/174% ER and 1,317,080 damage /
+  62,718 DPS over 21.0 seconds. FlinsParty2 retains
+  141%/132%/105%/193% ER and 14,077,198 damage / 203,722 DPS over 69.1 seconds;
+  neither four-character acceptance run adds an energy or optimizer warning.

@@ -92,9 +92,9 @@ The B-035 Wandering Evenstar correction is complete. Its R5 owner and ally ATK
 bonuses share one effective-EM snapshot, activate after the sourced 64-frame
 delay, and refresh every ten seconds while the owner is off-field.
 
-The B-038 party-size energy correction is in progress. Off-field particle
-recipients in two- and three-character parties will use the sourced 0.8 and
-0.7 multipliers while the established four-character 0.6 contract remains
+The B-038 party-size energy correction is complete. Off-field particle
+recipients in two- and three-character parties use the sourced 0.8 and 0.7
+multipliers while the established four-character 0.6 contract remains
 unchanged.
 
 ## Scope
@@ -4649,7 +4649,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phases 1-2 are complete and Phase 3 remains.
+- Implemented; Phases 1-3 are complete.
 - Requirement: off-field particle energy must scale with the current party size
   instead of applying the four-character multiplier to every party.
 
@@ -4813,7 +4813,7 @@ Completion evidence:
 - ReactionRegressionTest, PartyCatalogRegressionTest, build, Javadoc, routed
   validation, and preflight pass.
 
-### Phase 3: Re-Accept Four-Character Energy Baselines
+### Phase 3: Re-Accept Four-Character Energy Baselines - Done
 
 Why last:
 
@@ -4853,6 +4853,19 @@ Verification:
 - `./gradlew RaidenParty`
 - `./gradlew FlinsParty2`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- RaidenParty retains Bennett/Raiden Shogun/Xingqiu/Xiangling ER of
+  100%/175%/179%/174% and reports 1,317,080 damage / 62,718 DPS over 21.0
+  seconds with no new energy or optimizer warning.
+- FlinsParty2 retains Sucrose/Flins/Ineffa/Columbina ER of
+  141%/132%/105%/193% and reports 14,077,198 damage / 203,722 DPS over 69.1
+  seconds with zero warning matches.
+- Both full-party results exactly match their accepted pre-change baselines;
+  the derived four-member factor therefore preserves integration behavior.
+- The generated `docs/simulation_report.html` update was restored before
+  staging, and final preflight passes without artifact leakage.
 
 ## NCCL/DDP Distributed RL Training Plan
 
