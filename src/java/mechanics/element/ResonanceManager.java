@@ -128,7 +128,8 @@ public class ResonanceManager {
                     protected void applyStats(model.stats.StatsContainer stats, double currentTime) {
                         boolean affectedByCryo = sim.getEnemy() != null
                                 && sim.getEnemy().getAuraUnits(Element.CRYO, currentTime) > 0.0;
-                        boolean frozen = sim.getEnemy() != null && sim.getEnemy().isFrozen();
+                        boolean frozen = sim.getEnemy() != null
+                                && sim.getEnemy().isFrozen(currentTime);
                         if (affectedByCryo || frozen) {
                             stats.add(StatType.CRIT_RATE, 0.15);
                         }

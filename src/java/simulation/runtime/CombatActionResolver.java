@@ -251,7 +251,7 @@ public class CombatActionResolver {
             CharacterId characterId,
             AttackAction action,
             ActionResolutionContext context) {
-        boolean canShatter = sim.getEnemy().isFrozen()
+        boolean canShatter = sim.getEnemy().isFrozen(sim.getCurrentTime())
                 && (action.getElement() == Element.GEO || action.isShatterTrigger());
         if (!canShatter) {
             return;
@@ -271,7 +271,7 @@ public class CombatActionResolver {
                     sim.getCurrentTime(), attacker.getName(), "Shatter", damage,
                     "Shatter", damage, sim.getEnemy().getAuraMap(sim.getCurrentTime()));
         }
-        sim.getEnemy().clearFreezeAura();
+        sim.getEnemy().clearFreezeAura(sim.getCurrentTime());
     }
 
     private double getReactionBonus(Element trigger, Element aura, StatsContainer stats) {
@@ -430,9 +430,10 @@ public class CombatActionResolver {
     private void handleStatefulReaction(Character attacker, CharacterId characterId, Element trigger, Element aura,
             AttackAction action, ReactionResult result, StatsContainer stats, ActionResolutionContext context) {
         if (result.getKind() == ReactionResult.Kind.FROZEN) {
-            double freezeUnits = Math.min(action.getGaugeUnits(),
-                    Math.max(0.5, sim.getEnemy().getAuraUnits(aura, sim.getCurrentTime())));
-            sim.getEnemy().setFreezeAura(freezeUnits);
+            double freezeUnits = 2.0 * Math.min(
+                    action.getGaugeUnits(),
+                    sim.getEnemy().getAuraUnits(aura, sim.getCurrentTime()));
+            sim.getEnemy().applyFreezeAura(freezeUnits, sim.getCurrentTime());
             sim.getEnemy().reduceAura(aura, action.getGaugeUnits(), sim.getCurrentTime());
             if (sim.isLoggingEnabled()) {
                 System.out.println(String.format(

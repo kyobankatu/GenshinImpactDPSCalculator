@@ -49,6 +49,7 @@ public class ReactionRegressionTest {
         testPhase1ReactionMetadataAndMultipliers();
         testPhase2Superconduct();
         testPhase3FreezeAndShatter();
+        testAccuracyPhaseG_FreezeResolverContract();
         testPhase4Crystallize();
         testPhase5Burning();
         testAccuracyPhaseG_BurningRefreshAndGenerationContract();
@@ -216,17 +217,78 @@ public class ReactionRegressionTest {
 
         TestCharacter character = testCharacter(Element.CRYO);
         CombatSimulator sim = simulatorWith(character);
-        sim.getEnemy().setAura(Element.HYDRO, 1.0);
+        sim.getEnemy().applyAura(Element.HYDRO, 1.0, sim.getCurrentTime());
         sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE, reactionHit("Cryo freeze trigger", Element.CRYO));
-        assertTrue(sim.getEnemy().isFrozen(), "Cryo on Hydro should create Freeze Aura");
+        assertTrue(sim.getEnemy().isFrozen(sim.getCurrentTime()),
+                "Cryo on Hydro should create Freeze Aura");
+        assertClose(1.6, sim.getEnemy().getFreezeAuraUnits(sim.getCurrentTime()), EPS,
+                "Equal 1U Cryo and Hydro sources should create 1.6U Frozen gauge");
         assertClose(0.0, sim.getTotalDamage(), EPS, "Freeze should not deal immediate damage");
 
         AttackAction shatterHit = reactionHit("Blunt shatter trigger", Element.PHYSICAL);
         shatterHit.setShatterTrigger(true);
         sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE, shatterHit);
-        assertTrue(!sim.getEnemy().isFrozen(), "Shatter should clear Freeze Aura");
+        assertTrue(!sim.getEnemy().isFrozen(sim.getCurrentTime()),
+                "Shatter should clear Freeze Aura");
         assertClose(expectedTransformative(3.0, Element.PHYSICAL, 0.0), sim.getTotalDamage(), 0.5,
                 "Shatter reaction damage after RES");
+    }
+
+    private static void testAccuracyPhaseG_FreezeResolverContract() {
+        CombatSimulator hydroTrigger = simulatorWith(testCharacter(Element.HYDRO));
+        hydroTrigger.getEnemy().applyAura(
+                Element.CRYO, 1.0, hydroTrigger.getCurrentTime());
+        hydroTrigger.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Hydro-on-Cryo finite Freeze fixture", Element.HYDRO));
+        assertClose(1.6, hydroTrigger.getEnemy().getFreezeAuraUnits(
+                hydroTrigger.getCurrentTime()), EPS,
+                "Hydro on equal Cryo source should create 1.6U Frozen gauge");
+
+        CombatSimulator extension = simulatorWith(testCharacter(Element.CRYO));
+        extension.getEnemy().applyAura(Element.HYDRO, 2.0, extension.getCurrentTime());
+        extension.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Initial extensible Freeze fixture", Element.CRYO));
+        extension.advanceTime(0.5);
+        Enemy.FreezeAuraState beforeExtension = extension.getEnemy().captureFreezeAuraState();
+        double remainingBeforeExtension = beforeExtension.remainingUnitsAt(
+                extension.getCurrentTime());
+        double hydroBeforeExtension = extension.getEnemy().getAuraUnits(
+                Element.HYDRO, extension.getCurrentTime());
+        extension.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Active refreeze fixture", Element.CRYO));
+        Enemy.FreezeAuraState afterExtension = extension.getEnemy().captureFreezeAuraState();
+        assertClose(
+                remainingBeforeExtension + 2.0 * Math.min(1.0, hydroBeforeExtension),
+                afterExtension.units,
+                EPS,
+                "Matching application should add exact gauge to active Freeze");
+        assertClose(beforeExtension.decayRateAt(extension.getCurrentTime()),
+                afterExtension.decayRate, EPS,
+                "Resolver refreeze should preserve instantaneous decay rate");
+        assertTrue(afterExtension.getEndTime() > beforeExtension.getEndTime(),
+                "Resolver refreeze should extend exact Frozen expiry");
+
+        CombatSimulator expired = simulatorWith(testCharacter(Element.CRYO));
+        List<ReactionResult.Kind> expiredKinds = captureReactionKinds(expired);
+        expired.getEnemy().applyAura(Element.HYDRO, 1.0, expired.getCurrentTime());
+        expired.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Expiring Freeze fixture", Element.CRYO));
+        double freezeEnd = expired.getEnemy().captureFreezeAuraState().getEndTime();
+        expired.advanceTime(freezeEnd - expired.getCurrentTime());
+        AttackAction expiredShatter = reactionHit(
+                "Exact-expiry Shatter fixture", Element.PHYSICAL);
+        expiredShatter.setShatterTrigger(true);
+        expired.performActionWithoutTimeAdvance(CharacterId.SUCROSE, expiredShatter);
+        assertEquals(0, countReactions(expiredKinds, ReactionResult.Kind.SHATTER),
+                "A blunt hit at exact Freeze expiry should not notify Shatter");
+        assertClose(0.0, expired.getTotalDamage(), EPS,
+                "A blunt hit at exact Freeze expiry should not deal Shatter damage");
+        assertTrue(!expired.getEnemy().isFrozen(expired.getCurrentTime()),
+                "Freeze should remain inactive after an exact-expiry blunt hit");
     }
 
     private static void testPhase4Crystallize() {
@@ -3818,11 +3880,14 @@ public class ReactionRegressionTest {
                 "Cryo resonance should grant 15% CRIT Rate against Cryo aura");
 
         sim.getEnemy().setAura(Element.CRYO, 0.0);
-        sim.getEnemy().setFreezeAura(1.0);
+        sim.getEnemy().setFreezeAura(1.0, sim.getCurrentTime());
         assertClose(baseCrit + 0.15, resolvedStat(sim, owner, StatType.CRIT_RATE), EPS,
                 "Cryo resonance should grant 15% CRIT Rate against Frozen state");
+        double freezeEnd = sim.getEnemy().captureFreezeAuraState().getEndTime();
+        sim.advanceTime(freezeEnd - sim.getCurrentTime());
+        assertClose(baseCrit, resolvedStat(sim, owner, StatType.CRIT_RATE), EPS,
+                "Cryo resonance should be inactive at exact Freeze expiry");
 
-        sim.getEnemy().clearFreezeAura();
         sim.getEnemy().setAura(Element.CRYO, 1.0, sim.getCurrentTime());
         sim.advanceTime(10.999);
         assertClose(baseCrit + 0.15, resolvedStat(sim, owner, StatType.CRIT_RATE), EPS,

@@ -10333,7 +10333,7 @@ Completion evidence:
   preflight-selected short Java rollout benchmark, and full preflight pass. No
   persistent service, training process, or HPC job was started.
 
-### Phase 3: Route Freeze and Shatter Through Current Time - In Progress
+### Phase 3: Route Freeze and Shatter Through Current Time - Done
 
 Target files:
 
@@ -10371,7 +10371,23 @@ Verification:
 - `python scripts/agent_validate.py --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/mechanics/element/ResonanceManager.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
 
-### Phase 4: Re-Accept Freeze-Neutral Catalog Baselines - Pending
+Completion evidence:
+
+- Both Hydro-on-Cryo and Cryo-on-Hydro now create
+  `2 * min(current origin, trigger source)` gauge through the typed additive API;
+  equal 1U sources produce exact 1.6U Freeze.
+- An active refreeze against remaining opposite Aura adds its exact sourced
+  gauge and preserves instantaneous decay rate, extending expiry without
+  resetting thaw progression.
+- Shatter eligibility and clear use simulator time. Regression proves a blunt
+  hit before expiry retains existing Physical damage/clear behavior, while a
+  hit at exact expiry emits no Shatter notification or damage.
+- Shattering Ice now queries Freeze at buff-resolution time and loses its 15%
+  CRIT Rate exactly at Frozen expiry. Ordinary Cryo Aura timing remains exact.
+- `ReactionRegressionTest`, `build`, `javadoc`, routed validation, and full
+  preflight pass with no persistent service or external job.
+
+### Phase 4: Re-Accept Freeze-Neutral Catalog Baselines - In Progress
 
 Target files:
 
