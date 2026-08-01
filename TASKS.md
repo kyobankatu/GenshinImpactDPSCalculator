@@ -27,6 +27,10 @@ The current autonomous session is simulator-only. Python RL training and the
 Java RL bridge are excluded; the retained NCCL/DDP plan below is paused until a
 future explicit user request.
 
+The Xingqiu orbital Hydro application correction is now active. Its sourced
+contract and current `RaidenParty` baseline are complete; implementation and
+integration validation remain.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -506,6 +510,175 @@ Status note:
 - Implemented. `ProfileCapabilities` is intentionally not required for routine
   verification because it is expensive on local machines and rewrites capability
   profile data.
+
+## Implementation Order: Xingqiu Orbital Hydro Application
+
+Status:
+
+- In progress.
+- Phase 1 is complete; Phases 2-3 remain.
+- Requirement: Xingqiu's non-damaging orbital Rain Swords must apply Hydro on
+  their sourced 2.25-second contact cadence without inheriting the separate
+  Raincutter sword-wave three-hit ICD rule.
+
+Scope:
+
+- Keep damaging Raincutter sword waves as Burst damage with their existing
+  standard ICD and C6 2-3-5 pattern.
+- Keep orbital Rain Swords as zero-damage Hydro application.
+- Make the orbital's 2.25-second cadence the single owner of its application
+  interval instead of layering a generic standard ICD over it.
+- Record the single-target simulator's continuous-contact assumption explicitly.
+
+Out of scope for this pass:
+
+- Player damage reduction, interruption resistance, healing, or Rain Sword
+  shattering.
+- Multi-target geometry, melee-range checks, movement, and field positioning.
+- Changes to Raincutter wave damage multipliers, C6 sequencing, or energy gain.
+- Python RL training, the Java RL bridge, tensor layouts, or capability profiles.
+- Generated `docs/` and `output/` reports.
+
+Definitions:
+
+- Orbital Rain Sword pulse:
+  Xingqiu's zero-damage, 1U Hydro contact application while Rain Swords orbit the
+  active character. Its sourced ICD is 2.25 seconds.
+- Raincutter sword wave:
+  The separate damaging Burst attacks triggered by Normal Attack animations;
+  these retain standard hit/time ICD behavior.
+
+### Phase 1: Establish the Sourced Contract and Baseline - Done
+
+Why first:
+
+The zero-damage orbital and damaging sword wave use similar names. Their source
+contracts and current simulator ownership must be separated before changing ICD
+behavior.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+- `README.md`
+- `src/java/model/character/Xingqiu.java`
+- `config/characters/Xingqiu/Xingqiu_Multipliers.csv`
+
+Tasks:
+
+- Confirm the configured level-12 Raincutter sword multiplier and existing
+  damaging sword-wave path.
+- Trace the orbital event interval, gauge, ICD tag, and zero-damage path.
+- Record KQM's maintained character reference and evidence entry for the
+  2.25-second orbital ICD.
+- Capture the unchanged pre-fix `RaidenParty` total and Xingqiu contribution.
+
+Acceptance criteria:
+
+- The plan distinguishes orbital pulses from damaging Raincutter sword waves.
+- Stable source URLs and the accessed date are recorded in `BACKLOG.md`.
+- The pre-fix run records total damage, DPS, and non-zero Xingqiu contribution.
+
+Test cases to add or update:
+
+- No production test change in this audit phase; Phase 2 adds executable
+  contract coverage after the intended ownership boundary is fixed.
+
+Verification:
+
+- `./gradlew RaidenParty`
+
+### Phase 2: Make Orbital Cadence the Application Boundary
+
+Why second:
+
+The sourced distinction from Phase 1 permits a local character-owned fix without
+adding Xingqiu-specific branches to the generic ICD manager.
+
+Target files:
+
+- `src/java/model/character/Xingqiu.java`
+- `src/java/model/type/ICDTag.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Tasks:
+
+- Replace the approximate 2.2-second orbital interval with a named 2.25-second
+  constant.
+- Make each scheduled orbital pulse eligible to apply Hydro, using the event
+  cadence rather than standard three-hit/time ICD to throttle it.
+- Preserve zero direct damage, 1U Hydro, and separate typed identity for the
+  orbital action.
+- Leave Raincutter sword waves on their current standard ICD and damage path.
+
+Acceptance criteria:
+
+- Orbital actions occur at exactly 2.25-second intervals through the active
+  duration and stop after expiry.
+- Every orbital action is zero damage and 1U Hydro, and is not blocked by the
+  standard three-hit rule.
+- Raincutter sword waves still use the configured level-12 multiplier, Burst
+  damage type, and standard `Xingqiu_Raincutter` ICD.
+- Generic ICD, event, and action-runtime classes gain no Xingqiu-specific logic.
+
+Test cases to add or update:
+
+- Normal path: capture consecutive orbital action times and assert 2.25-second
+  spacing, zero multiplier, 1U gauge, and unrestricted application ICD.
+- Boundary path: assert the last valid pulse is inside the 18-second Raincutter
+  window and no pulse occurs after event expiry.
+- Separation path: assert a generated Raincutter sword remains damaging Burst
+  damage with standard `Xingqiu_Raincutter` ICD.
+- Abnormal/no-trigger path: advance a simulator without casting Raincutter and
+  assert that no orbital action appears.
+
+Verification:
+
+- `./gradlew build`
+- `./gradlew ReactionRegressionTest`
+
+### Phase 3: Validate the Party Delta and Close the Accuracy Note
+
+Why last:
+
+The benchmark and documentation can be updated only after the corrected cadence
+and its focused regression pass.
+
+Target files:
+
+- `README.md`
+- `TASKS.md`
+- `BACKLOG.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+
+Tasks:
+
+- Run `RaidenParty` repeatedly and record the total, DPS, Xingqiu contribution,
+  and the delta from the Phase 1 run.
+- Describe orbital pulses as zero-damage Hydro contact application and damaging
+  Raincutter waves as a separate modeled source.
+- Update the audited numeric baseline only from observed current output, noting
+  any remaining Skyward Spine nondeterminism until B-003 is complete.
+- Mark B-001 done with source provenance and the verified simulator decision.
+
+Acceptance criteria:
+
+- `RaidenParty` completes with non-zero Xingqiu direct damage and corrected
+  orbital application cadence.
+- README and the verification skill agree on the observed current baseline.
+- The ledger records the implementation decision, source URLs, accessed date,
+  and remaining continuous-contact simplification.
+
+Test cases to add or update:
+
+- No additional production test is required; Phase 2 owns the mechanic contract
+  and this phase performs the catalog-backed sample integration check.
+
+Verification:
+
+- `./gradlew RaidenParty`
+- `python scripts/validate_agent_assets.py`
+- `python scripts/preflight.py --run`
 
 ## Cross-Cutting Rules
 

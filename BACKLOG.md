@@ -34,14 +34,23 @@ experiment record.
 
 ### B-001 — Xingqiu orbital rain swords deal no damage
 
-- Status: `candidate`
+- Status: `planned`
 - Source: 1 (README known simplifications)
-- Symptom: `RaidenParty` models rain swords as zero-damage Hydro aura ticks, so Xingqiu contributes aura
-  application but no direct damage in the contribution chart.
+- Symptom: the premise conflated zero-damage orbital contact pulses with the
+  separate damaging Raincutter sword waves. Direct damage already exists, but
+  orbitals currently run every 2.2 seconds under standard three-hit/time ICD,
+  producing an incorrect effective Hydro application cadence.
 - Scope: `src/java/model/character/`, `src/java/simulation/party/`
 - Risk: `planned`
 - Proof: `./gradlew ReactionRegressionTest`, `./gradlew RaidenParty` with a recorded total delta
-- Notes: needs a sourced multiplier and ICD grouping before implementation.
+- Notes: KQM's maintained Xingqiu reference separates zero-damage Rain Sword
+  orbitals (1U, 2.25-second ICD) from damaging Raincutter sword waves (Burst
+  damage, standard ICD). The KQM evidence entry independently records the
+  orbital ICD as 2.25 seconds. Accessed 2026-08-01:
+  https://library.keqingmains.com/characters/hydro/xingqiu and
+  https://library.keqingmains.com/evidence/characters/hydro/xingqiu.
+  Pre-fix `RaidenParty`: 1,362,938 damage / 64,902 DPS; Xingqiu contributed
+  269,959 damage (19.8%). Implementation is planned in `TASKS.md`.
 
 ### B-002 — Xiangling Chili pickup is assumed
 
