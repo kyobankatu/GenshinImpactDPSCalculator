@@ -2514,14 +2514,58 @@ public class ReactionRegressionTest {
     private static void testAccuracyPhaseF_ArtifactLunarReactionBuffRegression() {
         TestCharacter owner = testCharacter(Element.ELECTRO).asLunar();
         owner.setArtifacts(new model.artifact.NightOfTheSkysUnveiling());
+        TestCharacter ally = testCharacter(Element.ANEMO, CharacterId.XIANGLING);
         CombatSimulator sim = simulatorWith(owner);
+        sim.addCharacter(ally);
         double beforeCrit = owner.getEffectiveStats(sim.getCurrentTime()).get(StatType.CRIT_RATE);
+        assertClose(0.0, resolvedStat(sim, ally, StatType.LUNAR_CHARGED_DMG_BONUS), EPS,
+                "Night should grant no Lunar bonus before Intent is active");
         sim.getEnemy().setAura(Element.HYDRO, 1.0);
         sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
                 reactionHit("Artifact Lunar-Charged trigger", Element.ELECTRO));
         double afterCrit = owner.getEffectiveStats(sim.getCurrentTime()).get(StatType.CRIT_RATE);
         assertClose(beforeCrit + 0.15, afterCrit, EPS,
                 "Night of the Sky's Unveiling should grant on-field Lunar reaction CRIT Rate");
+        assertClose(0.10, resolvedStat(sim, owner, StatType.LUNAR_CHARGED_DMG_BONUS), EPS,
+                "Night Intent should grant its wearer 10% Lunar-Charged DMG");
+        assertClose(0.10, resolvedStat(sim, ally, StatType.LUNAR_BLOOM_DMG_BONUS), EPS,
+                "Night Intent should grant allies 10% Lunar-Bloom DMG");
+        assertClose(0.10, resolvedStat(sim, ally, StatType.LUNAR_CRYSTALLIZE_DMG_BONUS), EPS,
+                "Night Intent should grant allies 10% Lunar-Crystallize DMG");
+
+        Buff intent = owner.getActiveBuffs().stream()
+                .filter(buff -> buff.getId() == BuffId.GLEAMING_MOON_INTENT)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Night Intent should be active"));
+        Buff synergy = sim.getApplicableBuffs(ally).stream()
+                .filter(buff -> buff.getId() == BuffId.GLEAMING_MOON_SYNERGY)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Night synergy provider should be routed"));
+        assertEquals(owner.getCharacterId(), synergy.getSourceCharacterId(),
+                "Night-only synergy should be sourced by its canonical owner");
+        StatsContainer atIntentExpiry = new StatsContainer();
+        synergy.apply(atIntentExpiry, intent.getExpirationTime());
+        assertClose(0.0, atIntentExpiry.get(StatType.LUNAR_CHARGED_DMG_BONUS), EPS,
+                "Exact Intent expiry should remove the Night-only synergy");
+
+        TestCharacter firstOwner = testCharacter(Element.ELECTRO, CharacterId.FLINS).asLunar();
+        firstOwner.setArtifacts(new model.artifact.NightOfTheSkysUnveiling());
+        TestCharacter secondOwner = testCharacter(Element.HYDRO, CharacterId.COLUMBINA).asLunar();
+        secondOwner.setArtifacts(new model.artifact.NightOfTheSkysUnveiling());
+        CombatSimulator duplicateSim = simulatorWith(firstOwner);
+        duplicateSim.addCharacter(secondOwner);
+        duplicateSim.updateMoonsign();
+        duplicateSim.setActiveCharacter(CharacterId.FLINS);
+        duplicateSim.notifyReaction(ReactionResult.lunar(0.0, ReactionResult.LunarType.CHARGED), firstOwner);
+        assertClose(0.10, resolvedStat(duplicateSim, secondOwner, StatType.LUNAR_CHARGED_DMG_BONUS), EPS,
+                "Duplicate Night sets should retain one distinct Intent bonus");
+        List<Buff> duplicateSynergies = duplicateSim.getApplicableBuffs(secondOwner).stream()
+                .filter(buff -> buff.getId() == BuffId.GLEAMING_MOON_SYNERGY)
+                .collect(java.util.stream.Collectors.toList());
+        assertEquals(1, duplicateSynergies.size(),
+                "Duplicate Night sets should expose one canonical synergy provider");
+        assertEquals(CharacterId.FLINS, duplicateSynergies.get(0).getSourceCharacterId(),
+                "The first Night wearer should source a Night-only duplicate party");
     }
 
     private static void testAccuracyPhaseF_ArtifactTeamBuffProviderRouting() {
@@ -2613,6 +2657,10 @@ public class ReactionRegressionTest {
                 .filter(buff -> buff.getId() == BuffId.GLEAMING_MOON_SYNERGY)
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Silken synergy provider should be routed"));
+        assertEquals(1L, sim.getApplicableBuffs(intentOwner).stream()
+                        .filter(buff -> buff.getId() == BuffId.GLEAMING_MOON_SYNERGY)
+                        .count(),
+                "Mixed Night and Silken sets should expose one canonical synergy provider");
         assertEquals(CharacterId.INEFFA, synergy.getSourceCharacterId(),
                 "Silken synergy should be sourced by its canonical owner");
 

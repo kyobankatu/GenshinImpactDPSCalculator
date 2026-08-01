@@ -1,17 +1,23 @@
 package model.artifact;
 
+import java.util.List;
+
+import model.entity.ArtifactTeamBuffProvider;
+import model.entity.Character;
+import model.entity.ReactionAwareArtifact;
 import model.stats.StatsContainer;
 import model.type.StatType;
 import mechanics.buff.Buff;
 import mechanics.buff.BuffId;
+import simulation.CombatSimulator;
 import simulation.CombatSimulator.Moonsign;
-import model.entity.ReactionAwareArtifact;
 
 /**
  * Night of the Sky's Unveiling artifact set with Lunar reaction-triggered
  * self CRIT buffs.
  */
-public class NightOfTheSkysUnveiling extends model.entity.ArtifactSet implements ReactionAwareArtifact {
+public class NightOfTheSkysUnveiling extends model.entity.ArtifactSet
+        implements ArtifactTeamBuffProvider, ReactionAwareArtifact {
 
     /**
      * Constructs Night of the Sky's Unveiling with the 2-piece Elemental
@@ -60,10 +66,11 @@ public class NightOfTheSkysUnveiling extends model.entity.ArtifactSet implements
 
                 Moonsign sign = sim.getMoonsign();
                 double crBonus = 0.0;
-                if (sign == Moonsign.NASCENT_GLEAM)
+                if (sign == Moonsign.NASCENT_GLEAM) {
                     crBonus = 0.15;
-                else if (sign == Moonsign.ASCENDANT_GLEAM)
+                } else if (sign == Moonsign.ASCENDANT_GLEAM) {
                     crBonus = 0.30;
+                }
                 // Assuming NONE gives 0.
 
                 if (crBonus > 0) {
@@ -81,5 +88,18 @@ public class NightOfTheSkysUnveiling extends model.entity.ArtifactSet implements
                 }
             }
         }
+    }
+
+    /**
+     * Supplies the party-wide Lunar Reaction bonus derived from active Gleaming
+     * Moon effects.
+     *
+     * @param owner character equipping this artifact set
+     * @param sim active simulator whose party statuses are inspected
+     * @return one canonical dynamic team buff, or an empty list for duplicate sets
+     */
+    @Override
+    public List<Buff> getArtifactTeamBuffs(Character owner, CombatSimulator sim) {
+        return GleamingMoonSynergy.getArtifactTeamBuffs(this, owner, sim);
     }
 }

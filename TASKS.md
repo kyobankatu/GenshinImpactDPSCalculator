@@ -8686,7 +8686,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phase 1 is complete and Phase 2 is next.
+- In progress; Phases 1-2 are complete and Phase 3 is next.
 - Requirement: Night of the Sky's Unveiling must supply its 10% party-wide
   Lunar Reaction bonus while Intent is active even when no Silken Moon's
   Serenade set is equipped.
@@ -8774,7 +8774,7 @@ Completion evidence:
   separate Thundercloud trigger classification unchanged.
 - The documentation-only preflight passes with no checks or artifact leaks.
 
-### Phase 2: Share Canonical Gleaming Moon Synergy - Pending
+### Phase 2: Share Canonical Gleaming Moon Synergy - Done
 
 Why second:
 
@@ -8826,6 +8826,24 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/agent_validate.py --path src/java/model/artifact/GleamingMoonSynergy.java --path src/java/model/artifact/NightOfTheSkysUnveiling.java --path src/java/model/artifact/SilkenMoonsSerenade.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- `GleamingMoonSynergy` now exclusively owns provider election, distinct active
+  effect counting, and construction of the three typed dynamic bonuses. Night
+  and Silken each depend only on the existing generic provider capability and
+  delegate their result, while all trigger behavior remains in its owning set.
+- An actual on-field Night Lunar-Charged reaction proves 15% Nascent CRIT Rate,
+  one Intent status, and team-wide 10% Lunar-Charged, Lunar-Bloom, and
+  Lunar-Crystallize bonuses. The dynamic bonus is zero before activation and at
+  exact Intent expiry.
+- Two Night wearers expose one first-Night-sourced synergy and one 10% distinct
+  Intent bonus. Existing mixed Night/Silken checks expose one Silken-sourced
+  synergy, reach 20% with Intent plus Devotion, and fall to 10%/0% at exact
+  effect expiries. Duplicate IDs, duplicate Silken sets, team EM, and artifact
+  fixed stats remain covered.
+- ReactionRegressionTest, build, Javadoc, routed validation, and preflight all
+  pass without an artifact leak.
 
 ### Phase 3: Re-Accept Artifact-Provider Party Baselines - Pending
 

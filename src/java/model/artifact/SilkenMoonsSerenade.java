@@ -1,6 +1,5 @@
 package model.artifact;
 
-import java.util.Collections;
 import java.util.List;
 
 import model.stats.StatsContainer;
@@ -9,8 +8,8 @@ import mechanics.buff.Buff;
 import mechanics.buff.BuffId;
 import simulation.CombatSimulator;
 import simulation.CombatSimulator.Moonsign;
-import model.entity.ArtifactSet;
 import model.entity.ArtifactTeamBuffProvider;
+import model.entity.ArtifactSet;
 import model.entity.Character;
 import model.entity.DamageTriggeredArtifactEffect;
 
@@ -101,48 +100,6 @@ public class SilkenMoonsSerenade extends ArtifactSet
      */
     @Override
     public List<Buff> getArtifactTeamBuffs(Character owner, CombatSimulator sim) {
-        if (!isCanonicalProvider(sim)) {
-            return Collections.emptyList();
-        }
-
-        Buff synergy = new Buff("Gleaming Moon: Synergy", BuffId.GLEAMING_MOON_SYNERGY) {
-            @Override
-            protected void applyStats(StatsContainer stats, double currentTime) {
-                double bonus = countDistinctGleamingMoonEffects(sim, currentTime) * 0.10;
-                stats.add(StatType.LUNAR_CHARGED_DMG_BONUS, bonus);
-                stats.add(StatType.LUNAR_BLOOM_DMG_BONUS, bonus);
-                stats.add(StatType.LUNAR_CRYSTALLIZE_DMG_BONUS, bonus);
-            }
-        }.sourcedBy(owner.getCharacterId());
-        return Collections.singletonList(synergy);
-    }
-
-    private boolean isCanonicalProvider(CombatSimulator sim) {
-        for (Character member : sim.getPartyMembers()) {
-            if (member.getArtifacts() == null) {
-                continue;
-            }
-            for (ArtifactSet artifact : member.getArtifacts()) {
-                if (artifact instanceof SilkenMoonsSerenade) {
-                    return artifact == this;
-                }
-            }
-        }
-        return false;
-    }
-
-    private int countDistinctGleamingMoonEffects(CombatSimulator sim, double currentTime) {
-        boolean hasDevotion = false;
-        boolean hasIntent = false;
-        for (Character member : sim.getPartyMembers()) {
-            for (Buff buff : member.getActiveBuffs()) {
-                if (buff.isExpired(currentTime)) {
-                    continue;
-                }
-                hasDevotion |= buff.getId() == BuffId.GLEAMING_MOON_DEVOTION;
-                hasIntent |= buff.getId() == BuffId.GLEAMING_MOON_INTENT;
-            }
-        }
-        return (hasDevotion ? 1 : 0) + (hasIntent ? 1 : 0);
+        return GleamingMoonSynergy.getArtifactTeamBuffs(this, owner, sim);
     }
 }
