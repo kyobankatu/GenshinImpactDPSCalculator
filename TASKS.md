@@ -92,6 +92,11 @@ The B-035 Wandering Evenstar correction is complete. Its R5 owner and ally ATK
 bonuses share one effective-EM snapshot, activate after the sourced 64-frame
 delay, and refresh every ten seconds while the owner is off-field.
 
+The B-038 party-size energy correction is in progress. Off-field particle
+recipients in two- and three-character parties will use the sourced 0.8 and
+0.7 multipliers while the established four-character 0.6 contract remains
+unchanged.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -4639,6 +4644,202 @@ Completion evidence:
   189,384 DPS over 99.5 seconds.
 - Sucrose contribution rises from 400,869 to 417,667 damage; the remaining
   increase is distributed across allies receiving the linked snapshot share.
+
+## Implementation Order: Party-Size Particle Energy Multipliers
+
+Status:
+
+- In progress; Phase 1 is complete and Phases 2-3 remain.
+- Requirement: off-field particle energy must scale with the current party size
+  instead of applying the four-character multiplier to every party.
+
+Scope:
+
+- Resolve the off-field particle multiplier from the simulator party size.
+- Use 0.8 for two characters, 0.7 for three characters, and 0.6 for four or
+  more characters; the active recipient remains at 1.0.
+- Cover elemental and neutral particle distribution through the shared
+  `EnergyDistributor` path.
+- Preserve ER scaling, element matching, flat-energy behavior, particle
+  notifications, and accepted four-character sample baselines.
+
+Out of scope for this pass:
+
+- Changing particle or orb base values, ER calculation, energy caps, Burst
+  costs, generated particle counts, enemy drop timing, or optimizer policy.
+- Introducing distance or collection-range simulation.
+- Changing four-character rotations, party definitions, RL contracts, report
+  schemas, or generated output.
+- Defining unsupported behavior above four party members beyond retaining the
+  current 0.6 minimum multiplier.
+
+Definitions:
+
+- Active multiplier: the 1.0 collection factor used by the on-field character.
+- Off-field multiplier: the party-size-dependent factor applied before ER:
+  0.8 for two characters, 0.7 for three, and 0.6 for four or more.
+- Party size: the number of characters registered in the simulator when the
+  particles are distributed.
+
+Design boundaries:
+
+- `EnergyDistributor` owns collection-range multiplication and derives it from
+  `CombatSimulator.getPartyMembers()` without exposing party-size rules to
+  characters or party definitions.
+- `EnergyState` continues to own ER-scaled accounting and energy caps; it does
+  not gain party knowledge.
+- Regression fixtures create distinct typed character IDs and inspect
+  pre-ER particle totals, keeping tests independent from Burst costs and caps.
+- Existing static `EnergyManager` entry points remain source-compatible.
+
+### Phase 1: Record Energy Evidence and Freeze Contracts - Done
+
+Why first:
+
+The party-size values are game-mechanic inputs and must be sourced before the
+shared energy path changes.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record maintained KQM energy evidence demonstrating a 0.8 off-field factor
+  in a two-character party and the standard 0.6 four-character factor.
+- Record the community energy reference's explicit 0.8/0.7/0.6 mapping for
+  two-, three-, and four-character parties.
+- Trace the current constant 0.6 through `EnergyDistributor` and freeze the
+  active, ER, element, flat-energy, and four-character invariants.
+
+Acceptance criteria:
+
+- The values, source classifications, access date, and URLs are present in the
+  durable ledger.
+- The owning class and bounded test matrix are explicit.
+- No production source changes occur in this phase.
+
+Normal tests:
+
+- Planning validation confirms the item has one active plan and does not enter
+  the paused RL plan.
+
+Abnormal tests:
+
+- Source review rejects any inference that changes particle base values or
+  makes flat energy party-size-dependent.
+
+Verification:
+
+- inspect `EnergyDistributor`, `EnergyManager`, `EnergyState`, and
+  `EnergyAnalyzer`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- KQM and the community Energy reference were accessed 2026-08-02 and recorded
+  in B-038 with the exact mapping and simulator adaptation.
+- The pre-fix implementation has one unconditional
+  `OFF_FIELD_PENALTY = 0.6`; active collection, ER scaling, and flat energy are
+  separate and remain out of the correction.
+
+### Phase 2: Implement and Regress Party-Size Distribution
+
+Why second:
+
+The shared distributor can implement the sourced rule locally while executable
+regression fixes every supported party-size boundary.
+
+Target files:
+
+- `src/java/mechanics/energy/EnergyDistributor.java`
+- `src/java/mechanics/energy/EnergyManager.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Replace the constant off-field factor with a private party-size resolver.
+- Apply the resolved factor only to off-field particle and orb recipients.
+- Add two-, three-, and four-character regression fixtures using distinct
+  `CharacterId` values and neutral particles so element matching is isolated.
+- Retain active 1.0 collection and add a same-element elemental case to prove
+  base-value and party-size multiplication compose correctly.
+
+Acceptance criteria:
+
+- At 100% ER, one neutral particle gives the active character 2.0 energy and
+  off-field characters 1.6, 1.4, or 1.2 for party sizes two, three, or four.
+- One same-element particle gives a three-character off-field recipient 2.1
+  pre-ER energy, while an active same-element recipient receives 3.0.
+- Flat energy remains equal for all recipients and no-active distribution still
+  returns without notifying or mutating characters.
+- Production code depends only on simulator party membership and retains one
+  reason to change for particle distribution policy.
+
+Normal tests:
+
+- Neutral particle distribution for two-, three-, and four-character parties.
+- Same-element particle distribution in a three-character party.
+- Existing four-character energy and reaction regressions.
+
+Abnormal tests:
+
+- Empty simulator particle distribution is a no-op.
+- Flat-energy distribution bypasses every party-size multiplier.
+- More than four registered characters retain the minimum 0.6 factor rather
+  than producing a negative or unsupported extrapolation.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew PartyCatalogRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/mechanics/energy/EnergyDistributor.java --path src/java/mechanics/energy/EnergyManager.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Re-Accept Four-Character Energy Baselines
+
+Why last:
+
+Full party runs must prove that deriving the multiplier from party size does not
+move established four-character optimizer or rotation results.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Run deterministic `RaidenParty` and `FlinsParty2` samples after the change.
+- Compare totals, DPS, duration, Burst warnings, and ER output with accepted
+  four-character baselines.
+- Close B-038 with focused and integration evidence.
+
+Acceptance criteria:
+
+- `RaidenParty` retains 1,317,080 damage / 62,718 DPS over 21.0 seconds.
+- `FlinsParty2` retains 14,077,198 damage / 203,722 DPS over 69.1 seconds.
+- Neither run gains a new insufficient-energy or optimizer warning.
+- Preflight passes and no generated report is staged.
+
+Normal tests:
+
+- One fresh complete run of each deterministic four-character sample.
+
+Abnormal tests:
+
+- Any baseline movement or energy warning keeps the phase open and is traced
+  before documentation is accepted.
+
+Verification:
+
+- `./gradlew RaidenParty`
+- `./gradlew FlinsParty2`
+- `python scripts/preflight.py --run`
 
 ## NCCL/DDP Distributed RL Training Plan
 

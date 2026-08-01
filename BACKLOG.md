@@ -881,3 +881,27 @@ experiment record.
   `[StatsRecorder]` lines; report and build regressions pass
 - Notes: completed 2026-08-02 by removing only the character/time-specific
   console branch. Snapshot stat and buff-name collection remain unchanged.
+
+### B-038 — Off-field particle energy always uses the four-character multiplier
+
+- Status: `in-progress`
+- Source: 3 (sourced energy-mechanic divergence)
+- Symptom: `EnergyDistributor` applies an unconditional 0.6 off-field factor,
+  so two- and three-character parties receive less particle energy than the
+  game's 0.8 and 0.7 party-size factors.
+- Scope: party-size particle distribution, energy Javadoc, focused regression,
+  and accepted four-character sample baselines
+- Risk: `planned`
+- Proof: executable two-/three-/four-character particle cases and unchanged
+  deterministic `RaidenParty` and `FlinsParty2` results
+- Notes: adopt the maintained KQM Energy TCL examples and the community Energy
+  reference, accessed 2026-08-02. KQM's controlled two-character nonmatching
+  particle example derives the off-field result with a 0.8 factor and its
+  full-party examples use 0.6. The community Energy reference explicitly maps
+  inactive conversion to 80%, 70%, and 60% for parties of two, three, and four.
+  Sources: https://library.keqingmains.com/evidence/combat-mechanics/energy and
+  https://genshin-impact.fandom.com/wiki/Energy. Adapt only the off-field range
+  multiplier: active collection remains 1.0, particle base values and ER still
+  compose normally, flat energy remains unscaled, and four-or-more members use
+  the current 0.6 minimum. See `TASKS.md` implementation block
+  `Party-Size Particle Energy Multipliers`.
