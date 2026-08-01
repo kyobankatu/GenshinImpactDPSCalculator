@@ -123,6 +123,10 @@ bonus is derived dynamically from the party's distinct active Gleaming Moon
 effects through an artifact team-buff provider rather than the obsolete manager
 scan that always resolved to zero.
 
+The B-046 Ascendant Blessing expiry correction is planned. An expired stronger
+Blessing must not block a weaker non-Moonsign Skill or Burst from establishing
+a new 20-second non-stacking window.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -6651,3 +6655,181 @@ Acceptance criteria:
 Do not run `ProfileCapabilities` for this plan unless party definitions or
 capability inputs change; it rewrites generated capability-profile data and is
 unrelated to NCCL transport.
+
+## Implementation Order: Ascendant Blessing Expiry Replacement
+
+Status:
+
+- Phase 1 is complete; Phases 2-3 remain pending.
+- Requirement: only active Ascendant Blessing instances may participate in the
+  non-stacking strength comparison; an exactly expired instance must not block
+  the next eligible activation.
+
+Scope:
+
+- Preserve the sourced 20-second duration, 36% cap, elemental stat scaling,
+  non-stacking behavior, and active stronger-value precedence.
+- Exclude expired typed Blessings from the pre-insertion strength comparison.
+- Cover active stronger/weaker ordering, same-value refresh, exact expiry,
+  replacement timing, and deterministic party output.
+
+Out of scope for this pass:
+
+- Changing Lunar reaction formulas, the 36% cap, stat conversion coefficients,
+  Moonsign qualification, party composition, rotations, or optimizer policy.
+- Changing the active stronger-value precedence without direct behavioral
+  evidence.
+- RL code, training, rollout services, GPU jobs, report UI, or generated output.
+
+Definitions:
+
+- Active Blessing: a typed `MOONSIGN_ASCENDANT_BLESSING` whose half-open window
+  contains the simulator's current time.
+- Replacement: removal of stale typed instances followed by one newly timed
+  Blessing calculated from the triggering non-Lunar character.
+
+Design boundaries:
+
+- `MoonsignManager` owns Blessing calculation and replacement policy.
+- `Buff` remains the single owner of the repository-wide half-open expiry
+  contract; this change consumes `isExpired` rather than duplicating timing
+  arithmetic.
+- `ReactionRegressionTest` exercises the public simulator action path and
+  inspects typed state; no test-only production hook is added.
+
+### Phase 1: Record Ascendant Blessing Expiry Evidence - Done
+
+Why first:
+
+The game contract and simulator lifetime semantics must be fixed before changing
+the stronger-value guard.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record the maintained team-bonus description: 20 seconds, elemental
+  stat-based Lunar Reaction DMG, 36% cap, and non-stacking effect.
+- Trace the live team-buff list and the `Buff` half-open expiry contract.
+- Record that `applyAscendantBlessing` compares every retained typed instance
+  without checking whether its 20-second window has ended.
+- Bound the correction to active-state filtering before the existing strength
+  comparison.
+
+Acceptance criteria:
+
+- Duration, cap, scaling categories, non-stack rule, source URLs, access date,
+  defect cause, and simulator adaptation are recorded.
+- Production source is unchanged in this evidence phase.
+- The plan contains normal and abnormal boundary tests for each later phase.
+
+Test cases to add or update:
+
+- No production test in this phase; Phase 2 owns the failing exact-expiry case.
+
+Verification:
+
+- inspect `Buff`, `BuffManager`, `MoonsignManager`,
+  `ActionTimelineExecutor`, and `ReactionRegressionTest`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- The maintained Genshin Impact Wiki team-bonus page and Icy Veins Moonsign
+  guide were accessed 2026-08-02. Both record a 20-second team Lunar Reaction
+  DMG bonus after a non-Moonsign Skill/Burst, elemental stat scaling, and a 36%
+  cap; the maintained team-bonus page explicitly records non-stacking.
+- Sources: https://genshin-impact.fandom.com/wiki/Team_Bonus and
+  https://www.icy-veins.com/genshin-impact/nod-krai-moonsign.
+- `Buff.isExpired` closes a timed window at `currentTime >= expirationTime`,
+  while simulator team buffs remain in the live list. The manager's stronger
+  guard omits that predicate, so an expired larger value can reject every later
+  smaller activation indefinitely.
+
+### Phase 2: Filter Expired Blessings and Add Boundaries - Pending
+
+Why second:
+
+The smallest production correction can be proven directly against the public
+activation path before accepting an integration baseline.
+
+Target files:
+
+- `src/java/simulation/runtime/MoonsignManager.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Restrict stronger-value rejection to active typed `MoonsignBuff` instances.
+- Add a focused regression using non-Lunar characters with distinct elemental
+  scaling values and Skill/Burst actions under Ascendant Gleam.
+- Assert typed count, value, active stronger precedence, same-value refresh,
+  exact-expiry replacement, and post-expiry application.
+
+Acceptance criteria:
+
+- A stronger active Blessing remains selected when a weaker source acts.
+- An equal activation refreshes one 20-second typed window.
+- At the exact expiration timestamp, a weaker activation replaces stale state
+  and grants its own value for a new 20-second window.
+- No duplicate typed Blessings remain after any accepted activation.
+
+Test cases to add or update:
+
+- Normal: an initial eligible action creates one correctly scaled Blessing.
+- Active conflict: a weaker action before expiry leaves the stronger window
+  and value unchanged.
+- Refresh: the same value before expiry replaces and extends one window.
+- Boundary: a weaker action exactly at expiry creates a new lower-value window.
+- Abnormal: non-Skill/Burst and Lunar-character actions do not trigger the
+  Blessing path.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/simulation/runtime/MoonsignManager.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Confirm Deterministic Flins Integration - Pending
+
+Why last:
+
+The Flins sample exercises Ascendant Gleam through normal action sequencing and
+must remain deterministic when no expired stronger-to-weaker transition occurs.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Run two fresh complete `FlinsParty` payloads and compare normalized logs.
+- Record ER, warnings, duration, total, DPS, and normalized hash.
+- Close B-046 only after focused, build, Javadoc, routed, and preflight checks
+  pass with no generated artifact staged.
+
+Acceptance criteria:
+
+- Repeated normalized payloads match and contain no new warnings.
+- Existing party damage, DPS, duration, and ER baseline remain unchanged unless
+  the trace proves an expired stronger-to-weaker transition.
+- Plan and ledger carry the focused regression and integration evidence.
+
+Test cases to add or update:
+
+- Normal integration: the complete party uses the public action path and
+  completes with its established deterministic payload.
+- Abnormal integration: no warning, energy failure, or generated tracked output
+  is introduced.
+
+Verification:
+
+- two fresh `./gradlew FlinsParty` runs
+- `python scripts/preflight.py --run`

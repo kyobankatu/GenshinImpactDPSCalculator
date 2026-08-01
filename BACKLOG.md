@@ -1124,3 +1124,26 @@ experiment record.
   `491cd43e7077114acbe4f00e38c02030426141331d05a921e598573d82347c40`.
   ER and timings are unchanged, warning matches remain zero, and all increases
   are confined to Lunar-classified character damage.
+
+### B-046 — Expired Ascendant Blessing blocks weaker reactivation
+
+- Status: `ready`
+- Source: 4 (simulator invariant and sourced duration divergence)
+- Symptom: `MoonsignManager` compares a new Blessing against every retained
+  typed Blessing without filtering expired entries. Once a high-value source's
+  20-second window ends, its stale value can still reject every weaker source
+  indefinitely.
+- Scope: active-state filtering in Blessing precedence, focused public-path
+  boundary regression, and deterministic FlinsParty acceptance
+- Risk: `bounded`
+- Proof: exact-expiry weaker replacement plus active stronger and equal-refresh
+  boundaries, followed by matching repeated party payloads
+- Notes: adopt the maintained Genshin Impact Wiki team-bonus page and Icy Veins
+  Moonsign guide, accessed 2026-08-02. They record a 20-second elemental
+  stat-scaled Lunar Reaction DMG team bonus capped at 36%; the maintained
+  team-bonus page explicitly states that the effect cannot stack. Sources:
+  https://genshin-impact.fandom.com/wiki/Team_Bonus and
+  https://www.icy-veins.com/genshin-impact/nod-krai-moonsign. Preserve current
+  active stronger-value precedence, but apply it only to unexpired typed
+  Blessings under the repository's `[start, expiration)` buff contract. See
+  `TASKS.md` implementation block `Ascendant Blessing Expiry Replacement`.
