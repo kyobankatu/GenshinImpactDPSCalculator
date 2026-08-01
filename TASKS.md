@@ -105,6 +105,10 @@ The B-040 Sacrificial Sword correction is complete. Its R5 Composed passive
 uses deterministic-testable Skill-damage draws, resets only the applicable
 Skill cooldown, and enforces the sourced sixteen-second weapon cooldown.
 
+The B-041 Viridescent Venerer correction is in progress. Same-element 40% RES
+shred applications will refresh one ten-second typed debuff instead of stacking,
+and only an on-field equipping owner who triggered the Swirl may apply it.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -5304,6 +5308,190 @@ Completion evidence:
 - ReactionRegressionTest, PartyCatalogRegressionTest, build, Javadoc, routed
   validation, and preflight pass. No catalog party equips Sacrificial Sword, so
   no accepted sample baseline changes.
+
+## Implementation Order: Viridescent Venerer Shred Refresh
+
+Status:
+
+- In progress; Phase 1 is complete and Phases 2-3 remain.
+- Requirement: each Swirled element must have one independently refreshed 40%
+  Viridescent Venerer RES shred, applied only by its on-field equipping trigger.
+
+Scope:
+
+- Require the VV owner to be both the Swirl trigger and active character.
+- Store VV shred as simulator-managed typed team buffs rather than duplicate
+  character-owned instances.
+- Replace the same element's typed buff on reapplication while preserving
+  independent Pyro, Hydro, Cryo, and Electro durations.
+- Cover owner/field eligibility, same-element refresh, exact expiry, different
+  elements, and accepted Flins party outputs.
+
+Out of scope for this pass:
+
+- Changing reaction damage/formula ordering so the first single-target Swirl
+  benefits from the newly applied shred; that separately forbidden change is
+  recorded as deferred B-042.
+- Modeling multiple enemies, Swirl AoE propagation, ping, hitlag extension, or
+  enemy-specific debuff state.
+- Changing the 2pc Anemo bonus, 4pc 60% Swirl bonus, resistance formula, aura
+  rules, artifact allocation, rotations, or party loadouts.
+- Changing RL tensors, protocol, training, capability profiles, generated
+  reports, or committed `docs/` output.
+
+Definitions:
+
+- Element-specific VV buff: one typed `BuffId.VV_SHRED_<ELEMENT>` simulator
+  team buff that contributes 0.40 matching resistance shred for ten seconds.
+- Refresh: remove the prior buff with the same typed ID and insert one new
+  ten-second window without summing their stat values.
+
+Design boundaries:
+
+- `ViridescentVenerer` owns reaction eligibility, element mapping, source
+  attribution, and buff construction.
+- `BuffManager.applyTeamBuffNoStack` owns typed replacement; the artifact does
+  not mutate each character's active-buff list directly.
+- `ResistanceCalculator` and reaction formula ordering remain unchanged.
+- Different element IDs remain independently active and expire on their own
+  timelines.
+
+### Phase 1: Record VV Eligibility and Duration Evidence - Done
+
+Why first:
+
+Same-element refresh and different-element coexistence must be distinguished
+before replacing currently stacked buffs.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record the maintained KQM VV description: 40% matching RES shred for ten
+  seconds, multiple elements active with independent durations.
+- Record KQM v1.5 trigger tests requiring the equipping character to trigger
+  the Swirl while on field.
+- Trace current per-character `addBuff` calls and prove repeated same-element
+  Swirls leave multiple active buffs with the same typed ID.
+- Record the immediate-first-Swirl formula-order gap separately as B-042.
+
+Acceptance criteria:
+
+- Values, eligibility, independent-element rule, test dates, access date,
+  source URLs, classification, and simulator adaptation are recorded.
+- B-041 has a bounded artifact/buff-manager solution and B-042 preserves the
+  explicitly excluded formula-order issue.
+- No production source changes occur in this phase.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 adds the pre-fix failing
+  stack, eligibility, and refresh cases.
+
+Verification:
+
+- inspect `ViridescentVenerer`, `ReactionAwareArtifact`, `BuffManager`,
+  `SimulationEventDispatcher`, and `ResistanceCalculator`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- KQM Artifacts and artifact evidence were accessed 2026-08-02. Trigger tests
+  are recorded as v1.5, added and last tested 2021-05-22.
+- Current code creates a new same-ID buff on every eligible Swirl and appends it
+  to every character without removal, making stat assembly additive.
+
+### Phase 2: Replace Same-Element Shred and Regress Boundaries
+
+Why second:
+
+The typed replacement behavior and all local boundaries must be proven before
+optimizer-driven party baselines are re-accepted.
+
+Target files:
+
+- `src/java/model/artifact/ViridescentVenerer.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Require `triggerCh == owner` in addition to the existing on-field condition.
+- Route the source-attributed element buff through
+  `CombatSimulator.applyTeamBuffNoStack`.
+- Add actual-artifact regressions for same-element no-stack refresh, exact
+  expiry, different-element coexistence, off-field owner, and different trigger.
+
+Acceptance criteria:
+
+- Repeated same-element Swirls produce exactly 0.40 shred, never 0.80 or more.
+- A second Swirl at five seconds refreshes the element through 14.999 seconds
+  and it is absent at exactly 15.0 seconds.
+- Pyro and Hydro shreds coexist at 0.40 each with independent typed IDs.
+- Off-field owner or a different trigger produces no VV shred.
+- One non-VV subsequent elemental hit observes the refreshed 0.40 shred.
+
+Test cases to add or update:
+
+- Normal: on-field owner-triggered Pyro Swirl and subsequent Pyro hit.
+- Refresh: same element at 0 and 5 seconds, exact 15-second expiry.
+- Multi-element: simultaneous Pyro and Hydro typed values remain independent.
+- No-trigger: owner off field and active owner who did not trigger the Swirl.
+- Defensive: unsupported non-Swirl/non-swirlable elements add no buff.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew PartyCatalogRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/model/artifact/ViridescentVenerer.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Re-Accept VV Party Baselines
+
+Why last:
+
+Both deterministic Flins parties equip VV and must expose the full numerical
+effect of removing illegal same-element stacking.
+
+Target files:
+
+- `README.md`
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Run two fresh complete `FlinsParty` payloads and compare normalized logs.
+- Run two fresh complete `FlinsParty2` payloads and compare normalized logs.
+- Record ER, warnings, duration, total, DPS, and normalized hashes; replace
+  accepted README baselines if the sourced correction moves them.
+- Close B-041 without claiming resolution of deferred B-042.
+
+Acceptance criteria:
+
+- Each party's repeated normalized payloads match and contain no new energy or
+  optimizer warning.
+- Numerical deltas are attributed to removing same-element VV stacking, not
+  hidden rotation or loadout changes.
+- README, plan, and ledger agree on both accepted baselines and B-042 remains
+  visibly deferred.
+- Preflight passes and no generated report is staged.
+
+Test cases to add or update:
+
+- No further production test; Phase 2 owns mechanic boundaries and Phase 3 owns
+  deterministic full-party acceptance.
+
+Verification:
+
+- two fresh `./gradlew FlinsParty` runs
+- two fresh `./gradlew FlinsParty2` runs
+- `python scripts/preflight.py --run`
 
 ## NCCL/DDP Distributed RL Training Plan
 

@@ -984,3 +984,46 @@ experiment record.
   reset, null injection, and unchanged Lv90 stats. Catalog validation passes;
   no registered party equips Sacrificial Sword, so accepted sample behavior is
   unchanged.
+
+### B-041 — Viridescent Venerer same-element shred stacks instead of refreshing
+
+- Status: `in-progress`
+- Source: 3 (sourced artifact-mechanic divergence)
+- Symptom: every eligible Swirl appends another 40% same-element RES shred buff
+  to every character, so repeated Pyro/Hydro/Cryo/Electro Swirls add to 80%,
+  120%, or more instead of refreshing one ten-second element window. The code
+  also checks that the owner is active but not that the owner triggered Swirl.
+- Scope: VV eligibility and typed no-stack team-buff refresh, focused
+  regression, and deterministic Flins/FlinsParty2 acceptance
+- Risk: `planned`
+- Proof: same-element refresh/expiry and owner-trigger regressions plus matching
+  repeated full-party payloads
+- Notes: adopt the maintained KQM Artifacts page and VV evidence, accessed
+  2026-08-02. The set grants 40% matching RES shred for ten seconds; different
+  Swirled elements can coexist with independent durations. KQM trigger tests,
+  added and last tested 2021-05-22 in v1.5, require the equipping character to
+  trigger Swirl while on field. Sources:
+  https://library.keqingmains.com/equipment/artifacts and
+  https://library.keqingmains.com/evidence/equipment/artifacts. Adapt each
+  element to one typed simulator team buff replaced through
+  `applyTeamBuffNoStack`; preserve different element IDs independently. See
+  `TASKS.md` implementation block `Viridescent Venerer Shred Refresh`.
+
+### B-042 — First single-target Swirl does not receive immediate VV shred
+
+- Status: `deferred`
+- Source: 3 (sourced artifact/formula-order divergence)
+- Symptom: reaction stats are captured before `notifyReaction` applies VV, so
+  the triggering single-target Swirl's transformative damage uses pre-shred RES
+  even though maintained KQM evidence says the shred applies instantly to that
+  Swirl.
+- Scope: reaction notification and transformative resistance calculation order
+- Risk: `planned`
+- Proof: first-Swirl damage regression versus the 40% shred resistance result
+- Notes: KQM Artifacts and v1.6 VV evidence, accessed 2026-08-02, state that
+  single-target shred applies instantly and increases the Swirl on that enemy.
+  Sources: https://library.keqingmains.com/equipment/artifacts and
+  https://library.keqingmains.com/evidence/equipment/artifacts. Deferred because
+  autonomous discovery is explicitly forbidden from changing damage formula
+  order without new user authority. B-041 must not hide or claim to solve this
+  separate ordering issue.
