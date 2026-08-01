@@ -363,3 +363,25 @@ experiment record.
   `a9cdfbf0d3a0a01356d9d113afdd7f0afe8ef8510494f4b193107d533c8dbb6e`.
   Both logs retain four activations and 12 Spearstorm hits with zero related ICD
   blocks. The accepted result remains 15,434,039 damage / 226,306 DPS.
+
+### B-017 — Dendro resonance omits reaction-triggered EM buffs
+
+- Status: `planned`
+- Source: 2 (source scan of explicit approximation comments)
+- Symptom: Sprawling Greenery applies only its permanent +50 EM and omits the
+  independently timed +30 and +20 EM reaction-triggered team buffs.
+- Scope: `src/java/mechanics/element/ResonanceManager.java`,
+  `src/java/mechanics/buff/BuffId.java`,
+  `src/java/sample/ReactionRegressionTest.java`
+- Risk: `planned`
+- Proof: focused resonance reaction/duration regression plus unchanged audited
+  sample baselines
+- Notes: adopt the current Genshin Impact Wiki Dendro and Team Bonus contracts
+  (accessed 2026-08-02): +50 base EM; +30 EM for 6 seconds after Burning,
+  Quicken, Bloom, or Lunar-Bloom; +20 EM for 6 seconds after Aggravate, Spread,
+  Hyperbloom, or Burgeon; the two durations are independent. Sources:
+  https://genshin-impact.fandom.com/wiki/Dendro and
+  https://genshin-impact.fandom.com/wiki/Team_Bonus. Neither audited sample
+  currently has Dendro resonance, so pre-fix baselines are 1,440,416 / 68,591
+  for `RaidenParty` and 15,434,039 / 226,306 for `FlinsParty2`. See `TASKS.md`
+  implementation block `Dendro Resonance Reaction EM`.

@@ -1894,6 +1894,157 @@ Completion evidence:
 - The accepted result remains 15,434,039 damage / 226,306 DPS, so README and
   the verification gate require no numeric update.
 
+## Implementation Order: Dendro Resonance Reaction EM
+
+Status:
+
+- In progress.
+- Phase 1 is complete; Phases 2-3 remain.
+- Requirement: Sprawling Greenery must grant permanent +50 EM and independently
+  refreshed +30/+20 EM windows for their documented reaction groups.
+
+Scope:
+
+- Add typed identities for the two temporary resonance buffs.
+- Register one Dendro-resonance reaction listener with explicit typed reaction
+  classification and independent six-second no-stack refreshes.
+- Add focused regression coverage for trigger groups, stacking, refresh, and
+  inclusive/exclusive time boundaries.
+- Confirm audited non-Dendro sample baselines remain unchanged.
+
+Out of scope for this pass:
+
+- Cryo or Geo resonance conditions, defensive resonance effects, changes to
+  reaction calculation, Dendro Core behavior, Lunar-Bloom conversion, reports,
+  optimizer logic, or RL contracts.
+- Introducing display-string reaction dispatch or a generic buff framework
+  refactor.
+
+Design boundaries:
+
+- `ResonanceManager` owns resonance reaction classification and registration.
+- `BuffId` provides independent logical identities; `BuffManager` continues to
+  own no-stack replacement and timing.
+- `ReactionResult.Kind` is the only trigger identity used by the listener.
+- Tests drive the public event and stat-resolution paths without test APIs.
+
+### Phase 1: Record Sprawling Greenery Trigger Evidence - Done
+
+Why first:
+
+The two reaction groups have separate values and independent durations, and the
+current Lunar-Bloom wording extends the first group beyond the older contract.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record current +50 base, +30 primary-group, +20 secondary-group, six-second,
+  and independent-duration rules, accessed 2026-08-02.
+- Include Lunar-Bloom in the primary group and retain typed standard reaction
+  kinds for every trigger.
+- Record unchanged pre-fix sample baselines and bounded implementation scope.
+
+Acceptance criteria:
+
+- Source URLs, access date, adopted classification, exact groups, values, and
+  duration semantics are recorded.
+- The current omission is linked to the explicit implementation comment.
+- Sample non-coverage is explicit, so focused regression is the primary proof.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 adds executable coverage.
+
+Verification:
+
+- inspect `ResonanceManager` and `ReactionResult.Kind`
+- `python scripts/preflight.py --run`
+
+### Phase 2: Implement Independent Reaction EM Windows
+
+Why second:
+
+After trigger evidence is fixed, typed identities, listener policy, and time
+boundaries can be implemented and tested atomically.
+
+Target files:
+
+- `src/java/mechanics/element/ResonanceManager.java`
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Add separate primary and secondary Sprawling Greenery temporary Buff IDs.
+- Register a Dendro resonance listener that refreshes each six-second buff
+  without same-group stacking.
+- Classify all documented standard and Lunar reaction kinds through small
+  private helpers.
+- Add focused public-path regression for values, stacking, refresh, and expiry.
+
+Acceptance criteria:
+
+- Base/primary/secondary resolved EM values are 50/80/70 and simultaneous EM
+  is 100 above the unbuffed character value.
+- Repeated triggers refresh but do not stack the same group.
+- Primary and secondary windows expire independently at `[start, end)`.
+- Unrelated reaction kinds do not grant temporary EM.
+- No display labels or generic reaction code determine eligibility.
+
+Test cases to add or update:
+
+- Normal: Quicken grants +30 and Aggravate grants +20.
+- Stacking: active primary and secondary buffs combine with base +50.
+- Refresh: repeated Bloom/Lunar-Bloom replaces the primary window at +30.
+- Boundary: each buff applies before 6 seconds and is absent exactly at expiry.
+- Abnormal: Vaporize grants no temporary Dendro resonance EM.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Confirm Shared-Resonance Integration Stability
+
+Why last:
+
+The focused test owns Dendro behavior, while current audited non-Dendro parties
+must prove the shared manager change has no unrelated effect.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Run fresh `RaidenParty` and `FlinsParty2` samples.
+- Confirm their current deterministic summaries remain unchanged.
+- Close B-017 and record focused plus integration evidence.
+
+Acceptance criteria:
+
+- `RaidenParty` remains 1,440,416 damage / 68,591 DPS.
+- `FlinsParty2` remains 15,434,039 damage / 226,306 DPS.
+- README and verification gate require no numeric update.
+- Agent assets and routed preflight checks pass.
+
+Test cases to add or update:
+
+- No further production test; Phase 2 owns Dendro resonance behavior.
+
+Verification:
+
+- `./gradlew RaidenParty`
+- `./gradlew FlinsParty2`
+- `python scripts/preflight.py --run`
+
 ## Cross-Cutting Rules
 
 ### Testing
