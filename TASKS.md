@@ -10796,8 +10796,8 @@ Completion evidence:
 
 ## Implementation Order: Overload Damage Sequence
 
-Status: Phases 1-2 are complete. Phase 3 is accepting deterministic catalog
-baselines for the snapshot-safe target and owner damage cooldown state.
+Status: Phases 1-3 are complete. Snapshot-safe target and owner Overload damage
+cooldowns are implemented and accepted against deterministic catalog baselines.
 
 Scope:
 
@@ -10946,7 +10946,7 @@ Completion evidence:
   preflight report no leaks; `PartyCatalogRegressionTest` and `BenchmarkRLJava`
   were not run because this autonomous pass explicitly excludes RL execution.
 
-### Phase 3: Accept Overload-Limited Catalog Baselines - In Progress
+### Phase 3: Accept Overload-Limited Catalog Baselines - Done
 
 Why third:
 
@@ -10984,3 +10984,22 @@ Verification:
 - two fresh `./gradlew --no-daemon FlinsParty` runs
 - two fresh `./gradlew --no-daemon FlinsParty2` runs
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Two fresh no-daemon runs per catalog party match pairwise after removing only
+  Gradle's elapsed-success line: Raiden
+  `03301ef5a3d650a91cfa07660cb0077d8c1585da04d79803a97f36e8249ba85a`,
+  unchanged Flins
+  `9b0b3556ca8f4eb799e6965156aab3bc70e512c7056cdf7e0202572c3996e464`,
+  and unchanged Flins2
+  `23dc585acc02d3bd7bca7fe3f5b65db62b3e1489fcedb12a02b9725b774b7dd4`.
+- Raiden changes from 1,365,787/65,037 to 1,352,375/64,399. The exact 13,412
+  delta is one Xiangling-owned Overload blocked at displayed T=11.4 after her
+  T=10.9 Pyronado Overload; all other final reaction lines are identical.
+- Timed/reaction/DoT/ordinary-ICD counts remain 152/55/11/38, 613/230/48/88,
+  and 468/140/33/71. Both Flins totals remain 22,675,823/227,898 and
+  15,817,125/228,902; all six runs contain zero warning/error/failed-action/
+  insufficient-energy lines.
+- README documents both damage limits. The tracked generated report was restored
+  and no generated output is staged.

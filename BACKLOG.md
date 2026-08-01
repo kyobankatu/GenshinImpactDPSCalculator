@@ -1724,14 +1724,14 @@ experiment record.
 
 ### B-064 — Overload damage ignores target and owner damage sequences
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 1/3 (README known difference plus KQM/gcsim evidence)
 - Symptom: every notified Overload records transformative damage, so rapid
   reactions from one or multiple owners overcount damage instead of retaining
   the reaction/gauge effects while a reaction-damage limit is active.
 - Scope: single-target 0.1-second global GCD, per-`CharacterId` 0.5-second
   damage sequence, snapshot continuity, focused regressions, and catalog controls
-- Risk: `planned`
+- Risk: `validated`
 - Proof: first/pre-boundary/exact-boundary damage, cross-owner independence after
   the global limit, blocked notification/gauge continuity, snapshot replay, and
   repeated deterministic party payloads
@@ -1745,6 +1745,12 @@ experiment record.
   https://github.com/genshinsim/gcsim/blob/main/pkg/reactable/overload.go,
   https://github.com/genshinsim/gcsim/blob/main/pkg/core/attacks/icd_groups.dm.go,
   and https://github.com/genshinsim/gcsim/blob/main/pkg/target/icd.go.
+  Completed with snapshot-safe target/owner cooldown state and resolver-local
+  damage gating after notification/consumption. Focused tests cover both
+  pre-boundaries, exact boundaries, cross-owner behavior, six unchanged
+  notifications/consumptions, restore replay, and Superconduct isolation.
+  Raiden suppresses one 13,412-damage Xiangling Overload and accepts
+  1,352,375/64,399; both Flins samples remain byte-identical to B-063.
 
 ### B-065 — Remaining Frozen dual-Aura reactions need trigger-residual policy
 

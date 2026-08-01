@@ -282,6 +282,10 @@ Elemental Gauge Theory contract:
   trigger-specific reaction order rather than target-map iteration. For example,
   Pyro attempts Overload before Vaporize and Anemo attempts Electro Swirl before
   Hydro Swirl.
+- **Overload damage sequence**: every valid reaction still notifies and consumes
+  Aura, but damage is limited to one accepted instance per target every 0.1
+  seconds and per `CharacterId` every 0.5 seconds. Snapshot rollback preserves
+  both exact cooldown boundaries.
 - **Burning fuel**: Pyro-on-Dendro or Pyro-on-Quicken preserves the larger
   current Dendro-like gauge as fuel; Dendro-on-Pyro establishes Dendro fuel
   without consuming underlying Pyro. Burning replaces natural decay for both
