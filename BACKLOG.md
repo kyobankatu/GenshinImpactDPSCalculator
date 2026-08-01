@@ -279,7 +279,7 @@ experiment record.
 
 ### B-014 — Flins Thunderous Symphony incorrectly applies Electro
 
-- Status: `planned`
+- Status: `done`
 - Source: 3 (sourced game-accuracy divergence exposed by B-009 output)
 - Symptom: Thunderous Symphony and its Additional hit inherit the 1U/Standard
   default under the neutral ICD tag. In the current `FlinsParty2` run, all 12
@@ -298,3 +298,10 @@ experiment record.
   https://library.keqingmains.com/characters/electro/flins. Pre-fix
   `FlinsParty2` is 15,604,338 damage / 228,803 DPS. See `TASKS.md`
   implementation block `Flins Thunderous Symphony Zero-Gauge Damage`.
+  Completed 2026-08-02. Three post-fix simulator payloads matched after
+  excluding Gradle's elapsed-time status line, with SHA-256
+  `a9cdfbf0d3a0a01356d9d113afdd7f0afe8ef8510494f4b193107d533c8dbb6e`.
+  All 12 main and 12 Additional hits retained direct damage with zero related
+  ICD blocks or elemental reactions. Flins changed from 7,004,707 to 6,834,944
+  and Columbina from 4,349,846 to 4,349,309. The accepted result is 15,434,039
+  damage / 226,306 DPS.

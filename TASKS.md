@@ -1419,8 +1419,8 @@ Completion evidence:
 
 Status:
 
-- In progress.
-- Phases 1-2 are complete; Phase 3 remains.
+- Implemented and verified.
+- Phases 1-3 are complete.
 - Requirement: Thunderous Symphony and its conditional Additional hit must
   retain direct Lunar-Charged damage while applying 0U and entering no ICD
   group.
@@ -1530,7 +1530,7 @@ Verification:
 - `./gradlew build`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Accept the FlinsParty2 Zero-Gauge Delta
+### Phase 3: Accept the FlinsParty2 Zero-Gauge Delta - Done
 
 Why last:
 
@@ -1568,6 +1568,16 @@ Verification:
 - two fresh `./gradlew FlinsParty2` runs
 - `python scripts/validate_agent_assets.py`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Three simulator payloads were identical after excluding Gradle's elapsed-time
+  status line, with SHA-256
+  `a9cdfbf0d3a0a01356d9d113afdd7f0afe8ef8510494f4b193107d533c8dbb6e`.
+- All 12 main and 12 Additional hits retained direct damage with zero related
+  ICD blocks or elemental reactions.
+- Flins changed from 7,004,707 to 6,834,944 and Columbina from 4,349,846 to
+  4,349,309; the accepted result is 15,434,039 damage / 226,306 DPS.
 
 ## Cross-Cutting Rules
 
