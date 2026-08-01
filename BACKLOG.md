@@ -1436,3 +1436,21 @@ experiment record.
   `d8732dfb6f34dcd80d910553525e622178eca55da249895562ac4570158337d5`.
   Values, ER, allocations, cadence, and warnings are unchanged; raw optimizer
   map key order is explicitly excluded from these semantic hashes.
+
+### B-055 — Joint optimizer result key order changes between JVM processes
+
+- Status: `in-progress`
+- Source: 2 (B-054 repeated sample output)
+- Symptom: identical Flins allocations render `Result:` maps in different key
+  orders across JVM executions, changing full payload hashes even though every
+  stat value, DPS, ER, final total, and event is identical.
+- Scope: insertion-ordered hill-climber result map, exact output/return
+  regression, and fresh-JVM Flins sample acceptance
+- Risk: `planned`
+- Proof: focused three-stat output order plus matching raw normalized hashes from
+  two no-daemon runs of each affected Flins sample
+- Notes: B-053 versus B-054 differs only in six/five optimizer `Result:` lines
+  for FlinsParty/FlinsParty2. Java `HashMap` does not guarantee iteration order;
+  preserve the caller's typed optimization-stat order without changing search
+  traversal, allocation values, or DPS. See `TASKS.md` implementation block
+  `Deterministic Optimizer Result Rendering`.

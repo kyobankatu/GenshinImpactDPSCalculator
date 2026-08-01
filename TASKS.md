@@ -8917,3 +8917,174 @@ Completion evidence:
   delta and is retained as separate follow-up work.
 - README and the verification reference require no value update. The tracked
   FlinsParty2 HTML report was restored to HEAD and no generated output is staged.
+
+## Implementation Order: Deterministic Optimizer Result Rendering
+
+Status:
+
+- In progress; Phase 1 is complete and Phase 2 is next.
+- Requirement: identical joint optimizer allocations must render in one stable
+  stat order across fresh JVM processes so full sample payload hashes remain
+  valid regression evidence.
+
+Scope:
+
+- Preserve the caller's typed `statsToOptimize` order in each hill-climber result
+  map and its console representation.
+- Preserve optimizer candidate enumeration, comparisons, caps, tie behavior,
+  returned values, DPS, ER, and final allocations.
+- Add a focused executable output/returned-order regression.
+- Re-run affected Flins samples in independent JVMs and retain Raiden as a
+  no-change control.
+
+Out of scope for this pass:
+
+- Changing optimizer strategy, performance, budgets, stat priorities, tie
+  breaking, ER convergence, artifact values, or party definitions.
+- General canonical serialization of every map in the application, report
+  rendering, dependencies, build structure, and generated output.
+- Reaction/mechanic behavior, RL contracts/training, and HPC jobs.
+
+Definitions:
+
+- Stable result order: insertion order exactly matching the caller-provided
+  `statsToOptimize` list throughout initialization, hill-climbing mutation,
+  return, and `Result:` logging.
+- Independent JVM evidence: sample invocations with Gradle daemon reuse disabled,
+  normalized only by removing Gradle's elapsed-time line.
+
+### Phase 1: Record Unordered Result Reproduction - Done
+
+Why first:
+
+The allocation values are already deterministic; the plan must prevent a local
+map replacement from being mistaken for an optimizer algorithm change.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record the B-053/B-054 payload difference and isolate every changed line.
+- Define caller stat order as the rendering contract and exclude all search
+  behavior changes.
+- Define focused and fresh-process verification before changing production code.
+
+Acceptance criteria:
+
+- The observed diff contains only `Result:` key permutations with identical
+  keys, values, and DPS.
+- One collection choice can preserve order without changing lookup or mutation
+  semantics.
+- Tests prove both returned key order and exact rendered order.
+
+Test cases to add or update:
+
+- No production test in this phase; Phase 2 adds a three-stat equal-DPS fixture.
+
+Verification:
+
+- compare B-053 and B-054 RaidenParty, FlinsParty, and FlinsParty2 payloads
+- inspect `IterativeSimulator.optimizeSubstatsNDim`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- B-053/B-054 semantic payloads match for all three parties. The complete
+  affected diffs are six FlinsParty and five FlinsParty2 `Result:` lines whose
+  `HashMap` keys are permuted; values and adjacent DPS are identical. Raiden has
+  no differing line.
+- `optimizeSubstatsNDim` initializes keys from the ordered
+  `statsToOptimize` list, then mutates only existing entries. An insertion-
+  ordered map therefore fixes return/render order without altering enumeration,
+  lookup, candidate evaluation, or tie behavior.
+- The focused test will independently inspect returned key order and captured
+  output. Documentation preflight passes without checks or artifact leaks.
+
+### Phase 2: Preserve Typed Optimization Order - Pending
+
+Why second:
+
+The implementation is a collection-level correction only after its output and
+return contracts are explicit.
+
+Target files:
+
+- `src/java/mechanics/optimization/IterativeSimulator.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Initialize per-character hill-climber results with insertion-order semantics.
+- Add a zero-damage fixture that leaves the balanced allocation unchanged and
+  captures its exact three-stat result line.
+- Assert the returned key order independently from console string formatting.
+
+Acceptance criteria:
+
+- `[CRIT_RATE, CRIT_DMG, ATK_PERCENT]` returns and renders in that exact order.
+- Equal-DPS candidate evaluation terminates with the existing balanced values.
+- Existing optimizer feasibility, reaction, build, and Javadoc gates pass.
+
+Test cases to add or update:
+
+- Normal: six rolls over three stats return two each in requested order.
+- Tie: every candidate remains at zero DPS and preserves current no-improvement
+  behavior.
+- Output: captured line is exactly ordered and includes unchanged rounded DPS.
+- No-change: unreachable ER still throws its typed feasibility error.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/mechanics/optimization/IterativeSimulator.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Accept Fresh-JVM Payload Determinism - Pending
+
+Why last:
+
+Same-process repetition cannot settle the reproduced identity-hash ordering
+failure; acceptance requires fresh JVM boundaries after the focused test passes.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Run two no-daemon payloads each for FlinsParty and FlinsParty2.
+- Run one RaidenParty control and compare all values against B-054.
+- Compare raw normalized hashes, allocations, totals, ER, cadence, warnings,
+  and tracked/untracked output state.
+
+Acceptance criteria:
+
+- Each affected no-daemon pair has one raw normalized hash without excluding
+  optimizer result lines.
+- The ordered result lines follow each party's requested stat lists and all
+  allocation values remain unchanged.
+- Totals, DPS, durations, ER, event cadence, and warnings match B-054.
+- The tracked report is restored and no generated artifact is staged.
+
+Test cases to add or update:
+
+- Normal integration: fresh JVM Flins samples are byte-stable after elapsed-time
+  normalization.
+- No-change integration: Raiden values and every simulator event count remain
+  unchanged.
+- Abnormal integration: no warning, failed action, insufficient energy, report,
+  or artifact leak appears.
+
+Verification:
+
+- two fresh `./gradlew --no-daemon FlinsParty` runs
+- two fresh `./gradlew --no-daemon FlinsParty2` runs
+- one fresh `./gradlew --no-daemon RaidenParty` run
+- `python scripts/preflight.py --run`
