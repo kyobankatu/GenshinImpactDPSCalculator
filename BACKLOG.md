@@ -227,7 +227,7 @@ experiment record.
 
 ### B-012 — Ineffa Overclock incorrectly applies Electro
 
-- Status: `planned`
+- Status: `done`
 - Source: 3 (sourced game-accuracy divergence exposed by B-009 output)
 - Symptom: Overclocking Circuit defaults to 1U/standard ICD, so five of 40
   follow-ups apply Electro in the current `FlinsParty2` run and the other 35
@@ -244,4 +244,9 @@ experiment record.
   Sources: https://genshin-impact.fandom.com/wiki/Overclocking_Circuit and
   https://wikiwiki.jp/genshinwiki/%E3%82%A4%E3%83%8D%E3%83%95%E3%82%A1.
   Pre-fix `FlinsParty2` is 15,562,611 damage / 228,191 DPS. See `TASKS.md`
-  implementation block `Ineffa Overclock Zero-Gauge Damage`.
+  implementation block `Ineffa Overclock Zero-Gauge Damage`. Completed
+  2026-08-02. Two complete post-fix logs were byte-identical with SHA-256
+  `5bfd4741b9334150863210acc31be5a5f394c74355dadd2374a6615e1db3ea04`.
+  All 40 Overclock follow-ups retained direct damage with zero related ICD
+  blocks; only Ineffa's contribution changed, from 3,164,054 to 2,946,003.
+  The accepted result is 15,344,560 damage / 224,994 DPS.

@@ -39,9 +39,8 @@ The Sucrose elemental-application correction is complete. Skill and every Burst
 damage pulse use their sourced 1U/no-ICD contract, while the zero-damage Burst
 cast no longer applies Anemo.
 
-The Ineffa Overclock correction is now active. Its 0U direct Lunar-Charged
-contract and pre-fix `FlinsParty2` behavior are recorded; implementation and
-sample acceptance remain.
+The Ineffa Overclock correction is complete. The direct Lunar-Charged follow-up
+retains its damage while applying 0U and bypassing elemental ICD state.
 
 ## Scope
 
@@ -1098,8 +1097,8 @@ Verification:
 
 Status:
 
-- In progress.
-- Phases 1-2 are complete; Phase 3 remains.
+- Implemented.
+- Phases 1-3 are complete.
 - Requirement: Ineffa's Overclocking Circuit follow-up must deal direct
   Lunar-Charged damage without applying Electro or entering an ICD group.
 
@@ -1215,7 +1214,7 @@ Verification:
 - `./gradlew build`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Accept the FlinsParty2 Aura and Damage Delta
+### Phase 3: Accept the FlinsParty2 Aura and Damage Delta - Done
 
 Why last:
 
