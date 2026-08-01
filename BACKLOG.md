@@ -1561,3 +1561,34 @@ experiment record.
   one tick under competing generations. Six catalog control runs are
   warning-free and pairwise exact at 1,365,787 / 65,037, 22,675,823 / 227,898,
   and 15,817,125 / 228,902 with no Burning events.
+
+### B-059 — Quicken is an expiry timestamp instead of a consumable Aura
+
+- Status: `in-progress`
+- Source: 1/3 (README Dendro difference plus maintained Quicken gauge references)
+- Symptom: Quicken stores only an end timestamp, every retrigger extends it even
+  when the new gauge is weaker, and Hydro cannot trigger Bloom on a Quicken-only
+  target or consume Quicken alongside underlying Dendro.
+- Scope: typed Quicken gauge/decay state, stronger-only refresh, snapshot
+  payload, Hydro Bloom consumption with/without underlying Dendro, additive
+  non-consumption regressions, and deterministic catalog-party controls
+- Risk: `planned`
+- Proof: exact 0.8U duration/decay, weaker no-op and stronger replacement,
+  Quicken-only Bloom, combined Dendro+Quicken one-core dual consumption,
+  Spread/Aggravate non-consumption, expiry/snapshot boundaries, and unchanged
+  party baselines
+- Notes: maintained KQM specifies that Quicken acts as Dendro when reacting with
+  Hydro/Pyro, coexists with Dendro/Electro/Cryo, and uses
+  `min(Dendro, Electro) * 5 + 6` duration. The maintained advanced gauge
+  reference additionally specifies that weaker retriggers do not change the
+  Aura, stronger retriggers replace gauge/rate, and Hydro/Pyro consume it while
+  Spread/Aggravate do not. Its simultaneous-priority reference states that
+  Hydro Bloom consumes coexisting Quicken and Dendro simultaneously. gcsim
+  independently implements stronger-only Quicken attachment and one Bloom core
+  while reducing both gauges. Sources accessed 2026-08-02:
+  https://library.keqingmains.com/combat-mechanics/elemental-effects/additive-reactions,
+  https://genshin-impact.fandom.com/wiki/Elemental_Gauge_Theory/Advanced_Mechanics,
+  https://genshin-impact.fandom.com/wiki/Elemental_Gauge_Theory/Simultaneous_Reaction_Priority,
+  and https://github.com/genshinsim/gcsim/blob/main/pkg/reactable/catalyze.go.
+  Pyro consumption into Burning fuel is deferred to a separate reaction-priority
+  item; this pass implements Quicken lifecycle and Hydro Bloom.

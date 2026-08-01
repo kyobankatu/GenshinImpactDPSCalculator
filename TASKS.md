@@ -5747,6 +5747,234 @@ Acceptance criteria:
 - Plan and ledger agree on the accepted baseline and no generated output is
   staged.
 
+## Implementation Order: Consumable Quicken Aura
+
+Objective: replace Quicken's unconditional expiry timestamp with a typed Aura
+gauge that decays, refreshes by gauge strength, and participates in Hydro Bloom
+without being consumed by Aggravate or Spread.
+
+Scope:
+
+- Quicken gauge, decay rate, last update, exact expiry, and snapshot payload.
+- Creation from the smaller existing/trigger gauge and stronger-only refresh.
+- Hydro Bloom on Quicken-only targets and simultaneous Dendro/Quicken
+  consumption with one core/reaction notification.
+- Aggravate/Spread non-consumption and catalog-party no-change controls.
+
+Out of scope:
+
+- Pyro consuming Quicken into Burning fuel and its simultaneous reaction order.
+- Quicken as B-058 Burning fuel, enemy shields, multi-target reactions, and
+  hitlag.
+- RL learner/service/protocol changes and persistent jobs.
+
+Cross-cutting rules:
+
+- `ReactionState` owns Quicken gauge; the resolver owns typed reaction routing;
+  `ReactionEffectScheduler` remains the sole Dendro Core owner.
+- Reuse typed `ReactionResult`, `Element`, and existing directional Bloom
+  consumption; do not dispatch on labels.
+- One Hydro application creates at most one core while consuming every
+  coexisting Dendro-like Aura required by the single-target priority contract.
+- Preserve compatibility wrappers only for existing tests/callers that set an
+  explicit Quicken end; new production behavior must use typed state.
+- Follow source style, explicit staging, and the no-generated-artifact boundary.
+
+### Phase 1: Record Quicken Gauge Evidence and Resolver Boundaries - Done
+
+Why first:
+
+Quicken creation, refresh, additive use, Bloom use, and Burning use have distinct
+consumption rules. The typed boundary must be fixed before replacing the shared
+timestamp.
+
+Target files:
+
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Record maintained gauge, duration, refresh, coexistence, and consumption
+  evidence plus the independent implementation reference.
+- Inventory state/snapshot, creation, additive, Bloom, and Dendro Core paths.
+- Exclude Pyro/Burning priority rather than partially implementing it.
+
+Acceptance criteria:
+
+- The plan distinguishes Quicken gauge decay from ordinary elemental Auras and
+  from additive reaction damage.
+- Every phase names files, normal/abnormal tests, and commands.
+- No production behavior or generated output changes in this phase.
+
+Test cases to add or update:
+
+- No production test; Phases 2 and 3 own state and reaction checks.
+
+Verification:
+
+- inspect `ReactionState`, `SimulatorSnapshot`, `CombatActionResolver`,
+  `ReactionEffectScheduler`, `ReactionCalculator`, and Quicken/Bloom regressions
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Maintained KQM and the advanced gauge reference agree on smaller-gauge
+  creation, `gauge * 5 + 6` duration, Dendro/Electro non-consumption, and
+  Hydro/Pyro consumption. The advanced reference explicitly defines weaker
+  retriggers as no-ops and stronger/equal retriggers as replacements.
+- The simultaneous-priority reference and gcsim independently agree that one
+  Hydro Bloom consumes coexisting Dendro and Quicken while creating one core.
+  Sources are recorded in B-059.
+- Inventory confirms the current end-only state cannot be consumed, every
+  retrigger refreshes, and the resolver only inspects ordinary `Enemy` Auras.
+  The planned typed state and one-core routing isolate those responsibilities.
+- Pyro/Burning priority is explicitly excluded for a later sourced item. The
+  documentation preflight passes without checks or leaks.
+
+### Phase 2: Add Typed Quicken Gauge and Snapshot State - Pending
+
+Why second:
+
+Creation and Bloom consumption require a single tested gauge API instead of
+editing an expiry timestamp from multiple resolver branches.
+
+Target files:
+
+- `src/java/simulation/runtime/ReactionState.java`
+- `src/java/simulation/runtime/ReactionStateController.java`
+- `src/java/simulation/CombatSimulator.java`
+- `src/java/simulation/SimulatorSnapshot.java`
+- `src/java/mechanics/rl/CapabilityProfiler.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Add immutable Quicken units/rate/update state with exact remaining/end queries.
+- Add stronger-or-equal replacement, weaker no-op, typed consumption, expiry,
+  clear, and restore operations.
+- Preserve the explicit-end compatibility path while production migrates.
+
+Acceptance criteria:
+
+- 0.8U Quicken derives ten seconds and decays continuously to zero.
+- Weaker replacement leaves gauge/rate/end unchanged; stronger/equal refresh
+  replaces and recalculates from current time.
+- Consumption rebases remaining gauge and exact end; invalid input cannot create
+  stale state.
+- Snapshot restores all typed fields and pending events remain excluded.
+
+Test cases to add or update:
+
+- Normal: 0.8U state, mid-duration gauge, and exact expiry.
+- Refresh: weaker no-op, equal refresh, stronger replacement.
+- Consumption: partial, exact clear, over-consumption, invalid amount.
+- Snapshot: mutate/clear then exact restore.
+- Compatibility: explicit end still enables existing additive fixtures.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/simulation/runtime/ReactionState.java --path src/java/simulation/SimulatorSnapshot.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Route Quicken Creation and Hydro Bloom Consumption - Pending
+
+Why third:
+
+The resolver can now use tested typed operations for creation, refresh, and
+coexisting Dendro-like Aura consumption without owning timer arithmetic.
+
+Target files:
+
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Create/refresh typed Quicken from the smaller current Aura/trigger gauge.
+- Trigger one standard/Lunar Bloom and one core when Hydro meets Quicken alone.
+- When Dendro and Quicken coexist, retain one Bloom/core while consuming 0.5
+  times Hydro source gauge from both.
+- Prove Aggravate/Spread read Quicken without consuming it and expiry blocks all
+  three reaction families.
+
+Acceptance criteria:
+
+- A 1U trigger against taxed 1U Aura creates 0.8U Quicken for ten seconds.
+- Weaker Quicken does not shorten/extend stronger remaining state; stronger or
+  equal state refresh follows the typed contract.
+- Hydro on Quicken alone emits one Bloom/Lunar-Bloom, consumes typed gauge, and
+  creates one owned core/dew update as applicable.
+- Hydro on coexisting Dendro+Quicken consumes both gauges but emits only one
+  reaction/core.
+- Aggravate and Spread leave Quicken units/end unchanged; exact expiry prevents
+  additive and Bloom reactions.
+
+Test cases to add or update:
+
+- Normal: both Quicken trigger directions and exact 0.8U/10s state.
+- Refresh: weaker no-op and stronger/equal replacement through real actions.
+- Quicken-only: standard and Lunar Hydro Bloom/core ownership.
+- Coexistence: one core plus dual 0.5U consumption.
+- Non-consumption: Aggravate/Spread before expiry.
+- Abnormal: no core/reaction at exact expiry and no duplicate notification.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 4: Re-Accept Quicken-Neutral Party Baselines - Pending
+
+Why last:
+
+The catalog parties do not use Dendro/Quicken, so exact repeats isolate
+cross-system regressions from the intended focused behavior.
+
+Target files:
+
+- `README.md`
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Run two fresh no-daemon payloads each for all three catalog parties.
+- Compare totals, ER, allocations, cadence, warnings, and hashes with B-058.
+- Document typed Quicken/Bloom behavior and retain explicit Pyro/Burning limits.
+
+Acceptance criteria:
+
+- All pairs match B-058 values and contain no Quicken/Bloom changes.
+- No warning, failed action, duplicate reaction/core, or artifact leak occurs.
+- README, plan, ledger, and checkpoint agree.
+
+Test cases to add or update:
+
+- Normal integration: all catalog runs complete and pairwise match.
+- No-change integration: values, ER, allocation, and cadence remain exact.
+- Abnormal integration: no warning/error/generated-report staging.
+
+Verification:
+
+- two fresh `./gradlew RaidenParty` runs
+- two fresh `./gradlew FlinsParty` runs
+- two fresh `./gradlew FlinsParty2` runs
+- `python scripts/preflight.py --run`
+
+### B-043 Phase 3 Acceptance Appendix
+
+The following retained test matrix and completion evidence belongs to the
+preceding Noblesse catalog plan.
+
 Test cases to add or update:
 
 - No further production test; Phase 2 owns mechanic boundaries and Phase 3 owns
