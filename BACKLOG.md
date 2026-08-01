@@ -1691,3 +1691,29 @@ experiment record.
   lists, stable Physical/same-element fallback, Pyro Overload-before-Vaporize,
   and Anemo Electro-before-Hydro Swirl. Six fresh-JVM controls are pairwise
   exact, retain every B-061 value/ER/count, and contain zero warning lines.
+
+### B-063 — Pyro Vaporizes hidden Hydro instead of Melting Frozen Aura
+
+- Status: `in-progress`
+- Source: 1/3 (README Frozen priority exclusion plus KQM/gcsim evidence)
+- Symptom: the ordinary resolver cannot see typed Frozen Aura, so non-blunt Pyro
+  iterates a stronger Freeze origin's hidden Hydro and triggers Vaporize while
+  leaving Freeze active.
+- Scope: non-blunt Pyro Melt against typed Frozen, simultaneous underlying Cryo
+  consumption, hidden Hydro preservation, blunt Shatter order, exact expiry,
+  and catalog controls
+- Risk: `planned`
+- Proof: Melt-only hidden-Hydro case, dual Frozen/Cryo reduction, partial Frozen
+  survival, Shatter-before-Vaporize blunt case, expiry fallback, and unchanged
+  no-Freeze party baselines
+- Notes: KQM states Frozen behaves as Cryo, hidden Hydro/Cryo continues decaying,
+  Pyro on Frozen with underlying Hydro triggers only Melt and leaves Hydro, and
+  heavy attacks Shatter before elemental reaction. gcsim independently reduces
+  both Frozen and ordinary Cryo with Pyro's 2x Melt modifier. Sources accessed
+  2026-08-02:
+  https://library.keqingmains.com/combat-mechanics/elemental-effects/elemental-gauge-theory,
+  https://library.keqingmains.com/evidence/combat-mechanics/elemental-effects/transformative-reactions#freeze-aura-mechanics,
+  and https://github.com/genshinsim/gcsim/blob/main/pkg/reactable/melt.go.
+  This pass implements Pyro/Frozen only. Electro/Anemo/Geo interactions,
+  additional coexisting ordinary elements, trigger residuals, Freeze resistance,
+  Shatter ICD, hitlag, poise, and multi-target behavior remain separate.

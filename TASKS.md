@@ -10421,6 +10421,147 @@ Verification:
 - two fresh `./gradlew --no-daemon FlinsParty2` runs
 - `python scripts/preflight.py --run`
 
+## Implementation Order: Pyro Melt Against Frozen Aura
+
+Objective: resolve non-blunt Pyro against typed Frozen Aura as Melt before
+ordinary hidden Auras, while preserving the existing Shatter-first heavy-hit
+order.
+
+Scope:
+
+- Typed Frozen eligibility for non-blunt Pyro.
+- 2x Melt consumption from Frozen and coexisting ordinary Cryo.
+- Hidden Hydro preservation and one Melt notification/multiplier.
+- Shatter-first blunt behavior, exact expiry fallback, and catalog controls.
+
+Out of scope:
+
+- Electro, Anemo, or Geo against Frozen and unrelated coexisting Aura priority.
+- Trigger residual attachment, Freeze resistance, Shatter damage ICD/gauge,
+  hitlag, poise, multi-target behavior, RL changes, and persistent jobs.
+
+Cross-cutting rules:
+
+- The resolver selects synthetic Frozen Melt; `Enemy` remains the typed gauge
+  owner and `ReactionCalculator` remains the formula/metadata owner.
+- Reuse the existing amplifying handler for multiplier, logging, and ordinary
+  Cryo reduction; consume Frozen through its time-aware typed API.
+- Return after Frozen Melt so hidden Hydro cannot react with the same trigger.
+- Preserve `tryTriggerShatter` before gauge resolution; blunt Pyro sees exposed
+  ordinary Aura only after Shatter clears Frozen.
+- Keep explicit staging and generated-artifact safety.
+
+### Phase 1: Record Frozen Melt Evidence and Priority Boundary - Done
+
+Target files:
+
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Record Frozen-as-Cryo, hidden-Aura, Melt consumption, and heavy-hit evidence.
+- Inventory Shatter-before-gauge order and typed Freeze operations.
+- Exclude other trigger families and unrelated coexisting Auras.
+
+Acceptance criteria:
+
+- Non-blunt and blunt order are distinguished explicitly.
+- Frozen and ordinary Cryo consumption are specified separately from Hydro.
+- No production behavior changes occur in this phase.
+
+Test cases to add or update:
+
+- No production test; Phase 2 owns focused behavior.
+
+Verification:
+
+- inspect resolver, typed Freeze, Melt, Shatter, and regression paths
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- KQM defines Frozen as Cryo-reactable, confirms hidden origin Aura persistence,
+  and records Melt-only behavior over hidden Hydro plus Shatter-first heavy hits.
+- Maintained gcsim applies Pyro's 2x Melt reduction to both ordinary Cryo and
+  Frozen while taking the larger consumed amount for trigger handling.
+- Inventory confirms Shatter already runs before gauge resolution, but typed
+  Frozen is absent from the ordinary resolver and can survive an incorrect
+  Vaporize against hidden Hydro. The focused early-return path isolates the fix.
+
+### Phase 2: Resolve Typed Frozen Melt - Pending
+
+Target files:
+
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Detect active typed Frozen for non-blunt Pyro before ordinary Aura iteration.
+- Emit one Melt, apply its multiplier, consume 2x from Frozen/ordinary Cryo, and
+  suppress hidden ordinary reactions for that trigger.
+- Regress partial/exact depletion, hidden Hydro/Cryo, blunt, and expiry paths.
+
+Acceptance criteria:
+
+- Non-blunt Pyro on Frozen+Hydro emits Melt only, leaves Hydro exact, and clears
+  1.6U Frozen with a 1U trigger.
+- Coexisting ordinary Cryo loses the same 2x amount as Frozen.
+- A 0.5U trigger partially consumes stronger Frozen and still emits one Melt.
+- Blunt Pyro emits Shatter first then reacts with exposed Hydro normally.
+- At exact Frozen expiry, Pyro follows ordinary Aura resolution.
+
+Test cases to add or update:
+
+- Hidden Hydro: Melt count/multiplier, no Vaporize, unchanged Hydro.
+- Hidden Cryo: simultaneous exact/partial Frozen and Cryo reduction.
+- Partial Frozen: stronger gauge remains current-time-aware.
+- Blunt: Shatter notification precedes exposed ordinary reaction.
+- Expiry: no Frozen Melt at exact end.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Re-Accept Frozen-Melt-Neutral Baselines - Pending
+
+Target files:
+
+- `README.md`
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Run two no-daemon controls per catalog party against B-062.
+- Record hashes, values, ER, cadence, warnings, and Freeze/Melt absence.
+- Document Pyro/Frozen order and close B-063.
+
+Acceptance criteria:
+
+- All six runs match B-062 exactly with no Frozen/Melt path activation.
+- Focused/full validation pass; tracked generated report is restored.
+- Plan, ledger, README, and checkpoint agree.
+
+Test cases to add or update:
+
+- Normal: pairwise exact catalog controls.
+- No-change: accepted values/ER/cadence and priority hashes.
+- Abnormal: zero warning/generated-artifact leak.
+
+Verification:
+
+- two fresh `./gradlew --no-daemon RaidenParty` runs
+- two fresh `./gradlew --no-daemon FlinsParty` runs
+- two fresh `./gradlew --no-daemon FlinsParty2` runs
+- `python scripts/preflight.py --run`
+
 ## Implementation Order: Deterministic Simultaneous Reaction Priority
 
 Objective: make ordinary multi-Aura reaction resolution follow one explicit
