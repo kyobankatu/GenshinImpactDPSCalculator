@@ -40,7 +40,7 @@ Checks the router does not select but that a change may still require:
 `README.md` records the current audited totals:
 
 - `./gradlew RaidenParty`: 1,362,938 total damage / 64,902 DPS
-- `./gradlew FlinsParty2`: 17,044,468 total damage / 246,664 DPS
+- `./gradlew FlinsParty2`: 15,892,535 total damage / 233,028 DPS
 
 A change to either number is a reportable result. If the change is intended, update `README.md` in the same
 commit and say so; if it is unintended, treat it as a regression. Known nondeterminism: `RaidenParty` can vary

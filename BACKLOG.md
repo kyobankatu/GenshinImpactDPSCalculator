@@ -121,7 +121,7 @@ experiment record.
 
 ### B-008 — FlinsParty2 audited numeric baseline is stale
 
-- Status: `candidate`
+- Status: `done`
 - Source: 2 (sample output observed while verifying B-006)
 - Symptom: `README.md` and the verification skill record 17,044,468 damage /
   246,664 DPS, while repeated runs at the current revision produce 15,892,535
@@ -130,5 +130,7 @@ experiment record.
 - Risk: `local`
 - Proof: repeated `./gradlew FlinsParty2` runs with identical totals, followed
   by `python scripts/validate_agent_assets.py`
-- Notes: documentation-only correction. The mismatch predates B-006 and is not
-  caused by its regression-test change.
+- Notes: documentation-only correction completed 2026-08-01. Two consecutive
+  current-revision runs and the independent B-006 audit produced the same
+  15,892,535 damage / 233,028 DPS result. The mismatch predated B-006 and was
+  not caused by its regression-test change.
