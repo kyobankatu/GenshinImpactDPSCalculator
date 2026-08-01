@@ -9,6 +9,34 @@ import model.type.CharacterId;
  * Holds transient simulation state for Electro-Charged and Thundercloud handling.
  */
 public class ReactionState {
+    private static final double GAUGE_EPSILON = 1e-9;
+    /** Immutable consumable Quicken Aura payload. */
+    public static final class QuickenState {
+        /** Quicken gauge present at {@link #lastUpdateTime}. */
+        public final double units;
+        /** Linear Quicken decay in units per second. */
+        public final double decayRate;
+        /** Time at which {@link #units} was measured. */
+        public final double lastUpdateTime;
+
+        private QuickenState(double units, double decayRate, double lastUpdateTime) {
+            this.units = units;
+            this.decayRate = decayRate;
+            this.lastUpdateTime = lastUpdateTime;
+        }
+
+        /** Returns current Quicken units after linear decay. */
+        public double remainingUnitsAt(double currentTime) {
+            double elapsed = Math.max(0.0, currentTime - lastUpdateTime);
+            return Math.max(0.0, units - decayRate * elapsed);
+        }
+
+        /** Returns the exact absolute Quicken expiry time. */
+        public double getEndTime() {
+            return lastUpdateTime + units / decayRate;
+        }
+    }
+
     /** Immutable single-target Burning fuel and damage payload. */
     public static final class BurningState {
         /** Character credited with the next Burning damage tick. */
@@ -103,6 +131,7 @@ public class ReactionState {
     private BurningState burningState;
     private int nextBurningGeneration = 1;
     private double quickenEndTime = -1.0;
+    private QuickenState quickenState;
     private int moondriftCount = 0;
     private int lunarCrystallizeTriggerCount = 0;
     private int verdantDewCount = 0;
@@ -339,11 +368,81 @@ public class ReactionState {
     }
 
     public double getQuickenEndTime() {
-        return quickenEndTime;
+        return quickenState != null ? quickenState.getEndTime() : quickenEndTime;
     }
 
     public void setQuickenEndTime(double quickenEndTime) {
+        quickenState = null;
         this.quickenEndTime = quickenEndTime;
+    }
+
+    /**
+     * Creates or refreshes Quicken when the incoming gauge is not weaker.
+     *
+     * @param units incoming Quicken gauge units
+     * @param currentTime simulator application time
+     * @return active state, or {@code null} for invalid input
+     */
+    public QuickenState applyQuicken(double units, double currentTime) {
+        if (!Double.isFinite(units) || units <= 0.0 || !Double.isFinite(currentTime)) {
+            return null;
+        }
+        if (quickenState != null) {
+            double remaining = quickenState.remainingUnitsAt(currentTime);
+            if (remaining > 0.0 && units + GAUGE_EPSILON < remaining) {
+                return quickenState;
+            }
+        }
+        double duration = units * 5.0 + 6.0;
+        quickenState = new QuickenState(units, units / duration, currentTime);
+        quickenEndTime = quickenState.getEndTime();
+        return quickenState;
+    }
+
+    /**
+     * Consumes current Quicken gauge and preserves its selected decay rate.
+     *
+     * @param units gauge units to consume
+     * @param currentTime simulator consumption time
+     * @return remaining state, or {@code null} after exact/over-consumption
+     */
+    public QuickenState consumeQuicken(double units, double currentTime) {
+        if (quickenState == null
+                || !Double.isFinite(units)
+                || units <= 0.0
+                || !Double.isFinite(currentTime)) {
+            return quickenState;
+        }
+        double remaining = quickenState.remainingUnitsAt(currentTime) - units;
+        if (remaining <= 0.0) {
+            clearQuicken();
+            return null;
+        }
+        quickenState = new QuickenState(
+                remaining, quickenState.decayRate, currentTime);
+        quickenEndTime = quickenState.getEndTime();
+        return quickenState;
+    }
+
+    /** Returns the immutable typed Quicken state. */
+    public QuickenState getQuickenState() {
+        return quickenState;
+    }
+
+    /** Clears typed and compatibility Quicken state. */
+    public void clearQuicken() {
+        quickenState = null;
+        quickenEndTime = -1.0;
+    }
+
+    /** Restores an immutable Quicken payload from a simulator snapshot. */
+    public void restoreQuicken(QuickenState state, double compatibilityEndTime) {
+        quickenState = state == null
+                ? null
+                : new QuickenState(state.units, state.decayRate, state.lastUpdateTime);
+        quickenEndTime = quickenState != null
+                ? quickenState.getEndTime()
+                : compatibilityEndTime;
     }
 
     public int getMoondriftCount() {

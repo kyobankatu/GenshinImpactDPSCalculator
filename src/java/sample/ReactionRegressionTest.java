@@ -123,6 +123,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseG_AuraDecaySnapshotContract();
         testAccuracyPhaseG_AuraExpiryContract();
         testAccuracyPhaseG_BurningStateSnapshotContract();
+        testAccuracyPhaseG_QuickenStateSnapshotContract();
         testAccuracyPhaseG_InvalidSourceAuraContract();
         testAccuracyPhaseG_RuntimeAuraApplicationContract();
         testAccuracyPhaseG_AnemoGeoAuraConsumptionContract();
@@ -764,6 +765,70 @@ public class ReactionRegressionTest {
                 "Rejecting an invalid Burning payload should clear stale state");
         assertTrue(!sim.isBurningTimerRunning(),
                 "Rejecting an invalid Burning payload should clear the timer flag");
+    }
+
+    private static void testAccuracyPhaseG_QuickenStateSnapshotContract() {
+        CombatSimulator sim = simulatorWith(testCharacter(Element.ELECTRO));
+        ReactionState.QuickenState initial = sim.applyQuicken(0.8);
+        assertTrue(initial != null, "A valid Quicken gauge should create typed state");
+        assertClose(10.0, initial.getEndTime(), EPS,
+                "0.8U Quicken should derive an exact ten-second duration");
+        assertClose(0.08, initial.decayRate, EPS,
+                "0.8U Quicken should derive its gauge-over-duration decay rate");
+
+        sim.advanceTime(2.5);
+        assertClose(0.6, sim.getQuickenState().remainingUnitsAt(sim.getCurrentTime()), EPS,
+                "Typed Quicken should decay continuously between applications");
+        ReactionState.QuickenState weaker = sim.applyQuicken(0.5);
+        assertClose(10.0, weaker.getEndTime(), EPS,
+                "A weaker Quicken application should leave the existing end unchanged");
+        assertClose(0.8, weaker.units, EPS,
+                "A weaker Quicken application should leave stored gauge unchanged");
+
+        ReactionState.QuickenState equal = sim.applyQuicken(0.6);
+        assertClose(11.5, equal.getEndTime(), EPS,
+                "An equal Quicken application should refresh from the current time");
+        ReactionState.QuickenState stronger = sim.applyQuicken(0.8);
+        assertClose(12.5, stronger.getEndTime(), EPS,
+                "A stronger Quicken application should replace gauge and duration");
+
+        ReactionState.QuickenState consumed = sim.consumeQuicken(0.3);
+        assertTrue(consumed != null, "Partial Quicken consumption should retain state");
+        assertClose(0.5, consumed.units, EPS,
+                "Partial Quicken consumption should rebase remaining gauge");
+        assertClose(8.75, consumed.getEndTime(), EPS,
+                "Partial consumption should preserve the selected decay rate");
+
+        SimulatorSnapshot snapshot = sim.saveSnapshot();
+        assertTrue(sim.applyQuicken(Double.NaN) == null,
+                "An invalid Quicken application should be rejected");
+        assertClose(0.5, sim.getQuickenState().units, EPS,
+                "An invalid Quicken application should not mutate active state");
+        sim.consumeQuicken(1.0);
+        assertTrue(sim.getQuickenState() == null,
+                "Over-consumption should clear typed Quicken state");
+        assertTrue(!sim.isQuickenActive(),
+                "Cleared typed Quicken should be inactive");
+
+        sim.restoreSnapshot(snapshot);
+        ReactionState.QuickenState restored = sim.getQuickenState();
+        assertTrue(restored != null, "Snapshot restore should recover typed Quicken state");
+        assertClose(0.5, restored.units, EPS,
+                "Snapshot restore should recover Quicken units");
+        assertClose(0.08, restored.decayRate, EPS,
+                "Snapshot restore should recover Quicken decay rate");
+        assertClose(2.5, restored.lastUpdateTime, EPS,
+                "Snapshot restore should recover Quicken update time");
+        assertClose(8.75, restored.getEndTime(), EPS,
+                "Snapshot restore should recover Quicken expiry");
+
+        CombatSimulator compatibility = simulatorWith(testCharacter(Element.DENDRO));
+        compatibility.setQuickenEndTime(5.0);
+        assertTrue(compatibility.isQuickenActive(),
+                "Explicit Quicken end should retain compatibility behavior");
+        compatibility.advanceTime(5.0);
+        assertTrue(!compatibility.isQuickenActive(),
+                "Explicit Quicken end should remain exclusive at exact expiry");
     }
 
     private static void testAccuracyPhaseG_InvalidSourceAuraContract() {

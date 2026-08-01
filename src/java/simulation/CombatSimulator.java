@@ -779,6 +779,7 @@ public class CombatSimulator {
         simulation.runtime.ReactionState.BurningState burningState = reactionState.getBurningState();
         int nextBurningGeneration = reactionState.getNextBurningGeneration();
         double quickenEndTime = reactionState.getQuickenEndTime();
+        simulation.runtime.ReactionState.QuickenState quickenState = reactionState.getQuickenState();
         int moondriftCount = reactionState.getMoondriftCount();
         int lunarCrystallizeTriggerCount = reactionState.getLunarCrystallizeTriggerCount();
         int verdantDewCount = reactionState.getVerdantDewCount();
@@ -830,7 +831,7 @@ public class CombatSimulator {
                 lastSwapTime, activeCharacterId, currentMoonsign,
                 icdStates, ecTimerRunning, thundercloudEndTime, burningTimerRunning, burningEndTime,
                 burningState, nextBurningGeneration,
-                quickenEndTime, moondriftCount, lunarCrystallizeTriggerCount,
+                quickenEndTime, quickenState, moondriftCount, lunarCrystallizeTriggerCount,
                 verdantDewCount, moonridgeDewCount,
                 dendroCores, nextDendroCoreId, enemyAura,
                 characters,
@@ -871,7 +872,7 @@ public class CombatSimulator {
             reactionState.setBurningEndTime(snap.burningEndTime);
         }
         reactionState.setBurningTimerRunning(snap.burningTimerRunning);
-        reactionState.setQuickenEndTime(snap.quickenEndTime);
+        reactionState.restoreQuicken(snap.quickenState, snap.quickenEndTime);
         reactionState.setMoondriftCount(snap.moondriftCount);
         reactionState.setLunarCrystallizeTriggerCount(snap.lunarCrystallizeTriggerCount);
         reactionState.setVerdantDewCount(snap.verdantDewCount);
@@ -1050,6 +1051,26 @@ public class CombatSimulator {
 
     public void setQuickenEndTime(double endTime) {
         reactionStateController.setQuickenEndTime(endTime);
+    }
+
+    /** Applies typed Quicken gauge at the current simulator time. */
+    public simulation.runtime.ReactionState.QuickenState applyQuicken(double units) {
+        return reactionStateController.applyQuicken(units);
+    }
+
+    /** Consumes typed Quicken gauge at the current simulator time. */
+    public simulation.runtime.ReactionState.QuickenState consumeQuicken(double units) {
+        return reactionStateController.consumeQuicken(units);
+    }
+
+    /** Returns the immutable current Quicken payload. */
+    public simulation.runtime.ReactionState.QuickenState getQuickenState() {
+        return reactionStateController.getQuickenState();
+    }
+
+    /** Clears typed and compatibility Quicken state. */
+    public void clearQuicken() {
+        reactionStateController.clearQuicken();
     }
 
     public boolean hasLunarReactionConversion() {

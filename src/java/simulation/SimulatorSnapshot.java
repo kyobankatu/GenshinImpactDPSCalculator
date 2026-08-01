@@ -76,6 +76,7 @@ public class SimulatorSnapshot {
     public final ReactionState.BurningState burningState;
     public final int nextBurningGeneration;
     public final double quickenEndTime;
+    public final ReactionState.QuickenState quickenState;
     public final int moondriftCount;
     public final int lunarCrystallizeTriggerCount;
     public final int verdantDewCount;
@@ -118,6 +119,7 @@ public class SimulatorSnapshot {
      * @param burningState typed Burning fuel and damage payload
      * @param nextBurningGeneration next Burning event generation
      * @param quickenEndTime Quicken expiry time
+     * @param quickenState typed consumable Quicken Aura payload
      * @param moondriftCount active Moondrift count
      * @param lunarCrystallizeTriggerCount Lunar-Crystallize trigger count
      * @param verdantDewCount Verdant Dew count
@@ -147,6 +149,7 @@ public class SimulatorSnapshot {
             ReactionState.BurningState burningState,
             int nextBurningGeneration,
             double quickenEndTime,
+            ReactionState.QuickenState quickenState,
             int moondriftCount,
             int lunarCrystallizeTriggerCount,
             int verdantDewCount,
@@ -174,6 +177,7 @@ public class SimulatorSnapshot {
         this.burningState = burningState;
         this.nextBurningGeneration = nextBurningGeneration;
         this.quickenEndTime = quickenEndTime;
+        this.quickenState = quickenState;
         this.moondriftCount = moondriftCount;
         this.lunarCrystallizeTriggerCount = lunarCrystallizeTriggerCount;
         this.verdantDewCount = verdantDewCount;

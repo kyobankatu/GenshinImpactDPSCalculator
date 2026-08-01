@@ -5832,7 +5832,7 @@ Completion evidence:
 - Pyro/Burning priority is explicitly excluded for a later sourced item. The
   documentation preflight passes without checks or leaks.
 
-### Phase 2: Add Typed Quicken Gauge and Snapshot State - Pending
+### Phase 2: Add Typed Quicken Gauge and Snapshot State - Done
 
 Why second:
 
@@ -5881,7 +5881,23 @@ Verification:
 - `python scripts/agent_validate.py --path src/java/simulation/runtime/ReactionState.java --path src/java/simulation/SimulatorSnapshot.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Route Quicken Creation and Hydro Bloom Consumption - Pending
+Completion evidence:
+
+- `ReactionState.QuickenState` stores immutable units, decay rate, and update
+  time with exact remaining/end queries. Typed apply, consume, clear, and restore
+  transitions leave timer arithmetic inside the state owner.
+- Regression proves 0.8U lasts ten seconds at 0.08U/s, decays to 0.6U after 2.5
+  seconds, rejects a 0.5U weaker refresh, and accepts floating-equal 0.6U and
+  stronger 0.8U replacements from the current time.
+- Partial 0.3U consumption rebases to 0.5U with the original decay rate and an
+  8.75-second exact end. Invalid application is non-mutating, over-consumption
+  clears state, and snapshot restore recovers units/rate/update/end exactly.
+- Explicit `setQuickenEndTime` remains active-before/exclusive-at-end for legacy
+  fixtures. `CapabilityProfiler` only forwards the immutable snapshot field.
+- ReactionRegressionTest, build, Javadoc, party-catalog regression, local Java
+  rollout smoke benchmark, routed validation, and preflight pass.
+
+### Phase 3: Route Quicken Creation and Hydro Bloom Consumption - In Progress
 
 Why third:
 

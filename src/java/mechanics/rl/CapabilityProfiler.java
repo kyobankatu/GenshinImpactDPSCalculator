@@ -940,6 +940,7 @@ public class CapabilityProfiler {
                 activePostSubject.burningState,
                 activePostSubject.nextBurningGeneration,
                 activePostSubject.quickenEndTime,
+                activePostSubject.quickenState,
                 activePostSubject.moondriftCount,
                 activePostSubject.lunarCrystallizeTriggerCount,
                 activePostSubject.verdantDewCount,

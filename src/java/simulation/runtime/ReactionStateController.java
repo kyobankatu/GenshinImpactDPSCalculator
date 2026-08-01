@@ -138,6 +138,10 @@ public class ReactionStateController {
     }
 
     public boolean isQuickenActive() {
+        ReactionState.QuickenState state = reactionState.getQuickenState();
+        if (state != null) {
+            return state.remainingUnitsAt(sim.getCurrentTime()) > 0.0;
+        }
         return sim.getCurrentTime() < reactionState.getQuickenEndTime();
     }
 
@@ -147,6 +151,26 @@ public class ReactionStateController {
 
     public void setQuickenEndTime(double endTime) {
         reactionState.setQuickenEndTime(endTime);
+    }
+
+    /** Applies typed Quicken gauge at the current simulator time. */
+    public ReactionState.QuickenState applyQuicken(double units) {
+        return reactionState.applyQuicken(units, sim.getCurrentTime());
+    }
+
+    /** Consumes typed Quicken gauge at the current simulator time. */
+    public ReactionState.QuickenState consumeQuicken(double units) {
+        return reactionState.consumeQuicken(units, sim.getCurrentTime());
+    }
+
+    /** Returns the immutable current Quicken payload. */
+    public ReactionState.QuickenState getQuickenState() {
+        return reactionState.getQuickenState();
+    }
+
+    /** Clears typed and compatibility Quicken state. */
+    public void clearQuicken() {
+        reactionState.clearQuicken();
     }
 
     public int getMoondriftCount() {
