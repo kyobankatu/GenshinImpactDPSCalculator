@@ -31,6 +31,10 @@ The Xingqiu orbital Hydro application correction is complete. Orbital Rain
 Swords now use their sourced 2.25-second application cadence independently from
 the damaging Raincutter sword-wave ICD.
 
+The deterministic damage-proc correction is now active. Its audit confirmed
+duplicate weapon/artifact damage-hook dispatch and unseeded Skyward Spine draws;
+implementation and reproducibility acceptance remain.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -677,6 +681,235 @@ Test cases to add or update:
 Verification:
 
 - `./gradlew RaidenParty`
+- `python scripts/validate_agent_assets.py`
+- `python scripts/preflight.py --run`
+
+## Implementation Order: Deterministic Damage Proc Evaluation
+
+Status:
+
+- In progress.
+- Phase 1 is complete; Phases 2-4 remain.
+- Requirement: one resolved hit must dispatch each damage-trigger hook exactly
+  once, and `RaidenParty` optimizer candidates must evaluate Skyward Spine under
+  the same reproducible random sequence.
+
+Scope:
+
+- Give `DamageCalculator` facade sole ownership of post-calculation weapon and
+  artifact damage-hook dispatch.
+- Keep standard and Lunar damage strategies responsible only for formulas.
+- Inject Skyward Spine's proc draw behind a `DoubleSupplier` while preserving a
+  stochastic default constructor for general simulations.
+- Give `RaidenPartyDefinition` a fixed per-simulator seed so every optimizer
+  candidate receives common random numbers.
+- Use explicit optimization-target iteration order for the benchmark party.
+
+Out of scope for this pass:
+
+- Changing Skyward Spine's documented 50% chance, 2-second cooldown, 40% ATK
+  damage, or eligible Normal/Charged action types.
+- Converting random procs to expected-value state machines.
+- Seeding unrelated weapons, Columbina effects, or RL policy sampling.
+- Adding weapon/passive state to `SimulatorSnapshot`; RL snapshot consumers are
+  excluded from the current session.
+- Python RL, Java RL bridge, capability profiles, generated reports, and HPC
+  jobs.
+
+Definitions:
+
+- Damage hook:
+  A post-final-damage callback through `DamageTriggeredWeaponEffect` or
+  `DamageTriggeredArtifactEffect` for one resolved `AttackAction`.
+- Proc draw source:
+  A `DoubleSupplier` returning values in the random draw domain used by Skyward
+  Spine's chance gate.
+- Common random numbers:
+  Reinitializing every optimizer candidate's weapon with the same seed so
+  candidate differences reflect builds rather than different random streams.
+
+### Phase 1: Audit Hook and Randomness Ownership - Done
+
+Why first:
+
+Determinism cannot be repaired by seeding alone while one hit may consume two
+draws and dispatch artifact effects twice.
+
+Target files:
+
+- `src/java/mechanics/formula/StandardDamageStrategy.java`
+- `src/java/mechanics/formula/LunarDamageStrategy.java`
+- `src/java/mechanics/formula/DamageCalculator.java`
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/model/weapon/SkywardSpine.java`
+- `src/java/model/weapon/FavoniusCodex.java`
+- `src/java/mechanics/optimization/IterativeSimulator.java`
+- `src/java/simulation/party/RaidenPartyDefinition.java`
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Trace every production `DamageTriggeredWeaponEffect` and
+  `DamageTriggeredArtifactEffect` dispatch site.
+- Confirm standard and Lunar paths both dispatch before the resolver dispatches
+  the same hit again.
+- Reproduce `RaidenParty` variance across isolated runs and identify the random
+  sources on that execution path.
+- Record snapshot and iteration-order risks without expanding into excluded RL
+  state work.
+
+Acceptance criteria:
+
+- The plan names the single intended hook owner and every duplicate call site.
+- The 50% Skyward Spine chance is shown to become 75% when a failed first draw
+  receives a duplicate same-hit draw.
+- At least three pre-fix runs record optimizer iteration count, Vacuum Blade
+  count, total damage, and DPS variance.
+
+Test cases to add or update:
+
+- No production tests in the audit phase; Phase 2 adds hook-count coverage and
+  Phase 3 adds deterministic draw boundaries.
+
+Verification:
+
+- `./gradlew build`
+- `./gradlew ReactionRegressionTest`
+- three isolated `./gradlew RaidenParty` runs
+
+### Phase 2: Dispatch Each Damage Hook Once
+
+Why second:
+
+The number and ordering of proc draws must be correct before a deterministic
+source can make optimizer comparisons meaningful.
+
+Target files:
+
+- `src/java/mechanics/formula/StandardDamageStrategy.java`
+- `src/java/mechanics/formula/LunarDamageStrategy.java`
+- `src/java/mechanics/formula/DamageCalculator.java`
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `src/java/mechanics/formula/AGENTS.md`
+
+Tasks:
+
+- Remove post-damage side effects from both formula strategies.
+- Make `DamageCalculator` invoke weapon and artifact hooks once after the chosen
+  strategy returns final damage.
+- Remove duplicate resolver dispatch while preserving damage recording, direct
+  damage capture, normal-attack energy, and combat logging order.
+- Update package guidance to state the facade's single-dispatch contract.
+
+Acceptance criteria:
+
+- One standard hit invokes one weapon hook and one artifact hook.
+- One Lunar hit invokes one weapon hook and one artifact hook.
+- Direct `DamageCalculator` callers still receive the same single hook dispatch.
+- Neither formula strategies nor resolver contain independent hook fan-out.
+
+Test cases to add or update:
+
+- Normal path: counting weapon and artifact capabilities each observe one
+  standard hit.
+- Alternate path: the same capabilities each observe one Lunar hit.
+- Boundary path: a direct `DamageCalculator` call dispatches once without a
+  resolver and an `OTHER` follow-up does not duplicate the parent hit.
+- Abnormal path: characters without damage-trigger capabilities resolve damage
+  normally.
+
+Verification:
+
+- `./gradlew build`
+- `./gradlew ReactionRegressionTest`
+
+### Phase 3: Inject and Seed Skyward Spine Proc Draws
+
+Why third:
+
+After Phase 2 fixes draw count, an injected source can make chance boundaries
+testable and optimizer candidates comparable.
+
+Target files:
+
+- `src/java/model/weapon/SkywardSpine.java`
+- `src/java/simulation/party/RaidenPartyDefinition.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `src/java/model/weapon/AGENTS.md`
+
+Tasks:
+
+- Add a `DoubleSupplier` constructor and have the no-argument constructor retain
+  stochastic `Math.random` behavior.
+- Reject a null draw source before weapon use.
+- Use one fixed seed for each newly created `RaidenParty` simulator, including
+  optimizer candidates and final sample simulation.
+- Replace unordered optimization-target construction with party-order-preserving
+  iteration.
+
+Acceptance criteria:
+
+- Draw `0.499999` triggers and draw `0.5` does not.
+- A successful proc blocks draws through 1.999 seconds and permits a new draw at
+  exactly 2.0 seconds.
+- A failed draw does not start cooldown, and `OTHER` follow-ups consume no draw.
+- Two separately created benchmark simulators receive identical proc sequences.
+- Default `new SkywardSpine()` remains source-compatible and stochastic.
+
+Test cases to add or update:
+
+- Normal path: identical injected sequences produce identical proc totals.
+- Invalid path: null supplier construction fails immediately.
+- Probability boundary: `0.499999` succeeds and `0.5` fails.
+- Cooldown boundaries: 1.999 blocked and 2.0 eligible.
+- Recursion guard: Vacuum Blade's `OTHER` action does not consume another draw.
+
+Verification:
+
+- `./gradlew build`
+- `./gradlew ReactionRegressionTest`
+- `./gradlew RaidenParty`
+
+### Phase 4: Prove Optimizer Reproducibility and Refresh Baselines
+
+Why last:
+
+Only the combined hook and seeded-proc changes can establish a trustworthy
+numeric benchmark.
+
+Target files:
+
+- `README.md`
+- `TASKS.md`
+- `BACKLOG.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+
+Tasks:
+
+- Run `RaidenParty` at least three times in fresh Gradle invocations.
+- Compare optimizer outer iterations, ER targets, roll allocations, Vacuum Blade
+  count, total damage, and DPS byte-for-byte for the relevant summary lines.
+- Update README and verification-skill baselines to the observed corrected value.
+- Mark B-003 done and record remaining stochastic defaults outside the benchmark
+  definition.
+
+Acceptance criteria:
+
+- Three fresh runs have identical optimizer decisions and final summaries.
+- The audited baseline reflects single hook dispatch and the seeded 50% proc.
+- README no longer describes `RaidenParty` itself as nondeterministic.
+- Agent assets and all routed preflight checks pass.
+
+Test cases to add or update:
+
+- No further production test; Phases 2-3 own the contracts and this phase is the
+  full optimizer/sample acceptance check.
+
+Verification:
+
+- three fresh `./gradlew RaidenParty` runs
 - `python scripts/validate_agent_assets.py`
 - `python scripts/preflight.py --run`
 

@@ -71,14 +71,22 @@ experiment record.
 
 ### B-003 — Skyward Spine random procs make output nondeterministic
 
-- Status: `candidate`
+- Status: `planned`
 - Source: 1 (README known simplifications)
 - Symptom: random Vacuum Blade procs make optimizer and sample totals vary run to run, which weakens every
   numeric baseline comparison.
 - Scope: `src/java/model/weapon/`, `src/java/mechanics/optimization/`
 - Risk: `planned`
 - Proof: repeated `./gradlew RaidenParty` runs showing a controlled or reported distribution
-- Notes: prefer a seeded or expectation-based option over removing the mechanic.
+- Notes: read-only audit at `d0561ea` found two independent causes. Standard and
+  Lunar formula strategies dispatch damage hooks before `CombatActionResolver`
+  dispatches them again, so a failed 50% Skyward Spine draw receives a second
+  same-hit draw and becomes 75% effective probability. `Math.random()` then
+  gives optimizer candidates different streams. Three isolated pre-fix runs
+  produced 1,362,938 / 64,902, 1,361,884 / 64,852, and 1,362,938 / 64,902 with
+  differing optimizer iterations and Vacuum Blade counts. Planned correction:
+  single facade-owned hook dispatch plus injected, per-simulator seeded draws
+  for `RaidenParty`; stochastic general construction remains available.
 
 ### B-004 — FlinsParty2 shield HP is logged but never consumed
 
