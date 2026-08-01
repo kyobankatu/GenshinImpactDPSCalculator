@@ -1807,7 +1807,7 @@ experiment record.
 
 ### B-067 — Superconduct damage ignores its reaction damage sequence
 
-- Status: `candidate`
+- Status: `in-progress`
 - Source: 3 (KQM/gcsim reaction-damage divergence)
 - Symptom: every rapid Superconduct notification records damage, exceeding the
   sourced two damage hits per owner in 0.5 seconds and target-wide 0.1-second GCD.
@@ -1820,3 +1820,14 @@ experiment record.
 - Notes: KQM's v2.5 Superconduct update and maintained gcsim `superconductGCD`
   plus `ICDGroupReactionA` provide matching target/owner dimensions. Promote
   only after B-066 closes; do not fold it into Crystallize's whole-reaction GCD.
+  KQM specifies at most two damage instances from one character in a 0.5-second
+  interval while later reactions still reduce gauge and stagger. Maintained
+  gcsim emits `OnSuperconduct` before its target-wide 0.1-second attack GCD;
+  target-passing attacks then use owner-specific `ICDGroupReactionA`, whose
+  fixed 0.5-second counter accepts entries one and two and suppresses later
+  entries until the timer started by entry one resets. Sources accessed
+  2026-08-02:
+  https://library.keqingmains.com/evidence/combat-mechanics/elemental-effects/transformative-reactions#superconduct-mechanic-update,
+  https://github.com/genshinsim/gcsim/blob/main/pkg/reactable/superconduct.go,
+  https://github.com/genshinsim/gcsim/blob/main/pkg/core/attacks/icd_groups.dm.go,
+  and https://github.com/genshinsim/gcsim/blob/main/pkg/target/icd.go.

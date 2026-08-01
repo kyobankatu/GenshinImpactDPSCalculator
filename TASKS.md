@@ -161,8 +161,8 @@ pass adds Overload's target-wide 0.1-second and owner-specific 0.5-second damage
 limits while preserving every reaction notification and gauge transition.
 
 The B-064 Overload damage-sequence pass and B-066 standard Crystallize cooldown
-are complete. Standard Crystallize now uses a snapshot-safe target-wide
-one-second gate while Lunar-Crystallize remains on its separate reaction path.
+are complete. The current B-067 pass adds Superconduct's target and owner damage
+sequence while preserving reaction, Aura, and physical-shred effects.
 
 ## Scope
 
@@ -11208,3 +11208,173 @@ Completion evidence:
   Lunar catalog remains byte-identical to B-064.
 - README documents the standard-only cooldown. The tracked generated report was
   restored and no generated output is staged.
+
+## Implementation Order: Superconduct Damage Sequence
+
+Status: Phase 1 is complete. Phase 2 will add snapshot-safe target/owner damage
+sequence state while retaining every non-damage reaction effect.
+
+Scope:
+
+- One-enemy 0.1-second target-wide Superconduct damage GCD.
+- Per-`CharacterId` fixed 0.5-second damage window accepting two hits.
+- Continued notification, Aura consumption, and physical RES shred refresh.
+- Snapshot save/restore and deterministic catalog acceptance.
+
+Out of scope for this pass:
+
+- Frozen-Superconduct trigger residuals, adjacent-target AoE, multi-target
+  damage caps, stagger/poise simulation, and hitlag extension.
+- Overload, Shatter, Swirl, action application ICD, RL changes, and persistent
+  jobs.
+
+Definitions:
+
+- **Target GCD**: the earliest time any owner may enqueue the next Superconduct
+  damage attempt on the one modeled enemy.
+- **Owner sequence**: a fixed window started by the first target-accepted damage
+  attempt; entries one and two deal damage, later entries do not until reset.
+
+Cross-cutting rules:
+
+- `ReactionState` owns typed target/owner policy and no resolver dependencies.
+- The controller/facade inject current simulator time; snapshots preserve the
+  immutable owner states.
+- Notify and consume before damage gating. Refresh physical shred for every
+  valid reaction, including target- and owner-blocked damage attempts.
+- Apply target GCD before owner sequence. Target-blocked attempts do not mutate
+  owner state; owner-blocked attempts still start the next target GCD.
+- Exact 0.1/0.5-second boundaries are inclusive.
+- Preserve explicit staging and generated-artifact safety.
+
+### Phase 1: Record Superconduct Damage-Sequence Evidence - Done
+
+Why first:
+
+- A whole-reaction gate would incorrectly suppress gauge and shred, while a
+  sliding owner window would diverge from the maintained fixed counter.
+
+Target files:
+
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Record KQM's owner-specific two-hit/0.5-second finding.
+- Confirm maintained target GCD ordering and fixed owner counter semantics.
+- Inventory current notification, consumption, shred, damage, and snapshot order.
+
+Acceptance criteria:
+
+- Damage-only suppression and both policy dimensions are explicit.
+- Target-blocked and owner-blocked state transitions are distinguished.
+- No production behavior changes occur in this phase.
+
+Test cases to add or update:
+
+- No production test; Phase 2 owns focused sequence behavior.
+
+Verification:
+
+- inspect KQM Superconduct mechanic update and maintained gcsim paths
+- inspect resolver, reaction state/controller, snapshot, and regression paths
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- KQM v2.5 records at most two Superconduct damage instances from one character
+  in 0.5 seconds while further reactions retain gauge reduction and stagger.
+- Maintained gcsim independently emits the reaction before a target-wide
+  0.1-second attack GCD, then routes accepted attacks through owner-specific
+  `ReactionA` entries one/two followed by zeros until its fixed timer resets.
+- The current resolver notifies and consumes before damage, but applies physical
+  shred after damage. Phase 2 must move shred ahead of the damage-only gate.
+
+### Phase 2: Implement Snapshot-Safe Superconduct Damage Sequence - Pending
+
+Why second:
+
+- Phase 1 defines one reusable policy call and the required side-effect order.
+
+Target files:
+
+- `src/java/simulation/runtime/ReactionState.java`
+- `src/java/simulation/runtime/ReactionStateController.java`
+- `src/java/simulation/CombatSimulator.java`
+- `src/java/simulation/SimulatorSnapshot.java`
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `src/java/mechanics/rl/CapabilityProfiler.java` (snapshot forwarding only)
+- `TASKS.md`
+
+Tasks:
+
+- Add typed target and immutable per-owner fixed-window state with snapshot round
+  trip.
+- Refresh physical shred before the Superconduct damage-only decision.
+- Regress target/owner boundaries, cross-owner state, all side effects, and
+  restore replay.
+
+Acceptance criteria:
+
+- Target attempts before 0.1 seconds deal no damage and start no owner window.
+- One owner deals its first two target-accepted hits, not its third; another
+  owner has an independent two-hit sequence.
+- Exact 0.1 and 0.5 seconds are accepted.
+- Every blocked attempt still notifies, consumes Aura, and refreshes shred.
+- Snapshot restore reproduces target and owner sequence decisions.
+
+Test cases to add or update:
+
+- Normal: owner hits one/two and exact 0.5-second reset hit.
+- Abnormal: 0.05-second cross-owner target block and same-owner third hit.
+- Side effect: listener/Aura counts plus post-expiry physical damage prove
+  blocked reactions refresh shred.
+- Snapshot: restore after owner hit two and replay blocked/accepted decisions.
+- No-change: immediate Overload damage behavior remains isolated.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- routed validation/preflight planning without RL execution
+
+### Phase 3: Accept Superconduct-Sequence Catalog Baselines - Pending
+
+Why third:
+
+- Catalog acceptance follows focused damage/effect and snapshot verification.
+
+Target files:
+
+- `README.md`
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Run two no-daemon controls per catalog party against B-066.
+- Record hashes, totals, ER/cadence, Superconduct counts, and warnings.
+- Document the damage-only sequence and close B-067.
+
+Acceptance criteria:
+
+- All pairs are deterministic and every delta is attributable, or exact
+  no-change is proven.
+- Tracked generated report is restored and no artifact is staged.
+- Plan, ledger, README, and checkpoint agree.
+
+Test cases to add or update:
+
+- Normal: pairwise exact catalog controls.
+- No-change: accepted totals/ER/cadence and non-Superconduct paths.
+- Abnormal: zero warning/generated-artifact leak.
+
+Verification:
+
+- two fresh `./gradlew --no-daemon RaidenParty` runs
+- two fresh `./gradlew --no-daemon FlinsParty` runs
+- two fresh `./gradlew --no-daemon FlinsParty2` runs
+- `python scripts/preflight.py --run`
