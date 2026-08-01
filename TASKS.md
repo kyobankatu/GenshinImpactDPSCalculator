@@ -82,6 +82,10 @@ Favonius and Moondrift streams keep ER calibration and the final rotation on
 the same stochastic scenario without changing generic randomness. The stable
 trace exposed a separate ER-feasibility defect recorded as B-033.
 
+The B-033 ER-feasibility correction is in progress. Artifact generation will
+reject unmet `minER` contracts, and `FlinsParty` will request only the three
+Sucrose Bursts its fixed loadout and rotation energy can legally sustain.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -4197,6 +4201,185 @@ Completion evidence:
   seconds. This disproves random-stream drift as the cause: the requested
   258.3% exceeds the current loadout's roughly 166.1% artifact ER ceiling and
   is silently accepted. B-033 owns that newly isolated defect.
+
+## Implementation Order: Artifact ER Feasibility and Legal FlinsParty Burst Cadence
+
+Status:
+
+- In progress; Phase 1 is complete and Phases 2-3 remain.
+- Requirement: artifact generation must never return a build below its declared
+  `minER`, and `FlinsParty` must use a deterministic Burst cadence that is
+  feasible under its KQMS loadout instead of relying on an impossible target.
+
+Scope:
+
+- Validate achieved static ER after all fixed, main-stat, and liquid-roll
+  allocation in `ArtifactOptimizer`.
+- Fail an infeasible `minER` with requested/achieved diagnostics before an
+  underfilled build enters the optimizer pipeline.
+- Remove the second Sucrose Burst request from each `FlinsParty` loop while
+  retaining its Skill and the first Burst, yielding three evenly repeated
+  Burst casts across the full sample.
+- Cover exact feasible and just-over-cap ER boundaries plus repeated full-party
+  acceptance.
+
+Out of scope for this pass:
+
+- Raising or bypassing KQMS per-stat/liquid-roll caps, auto-changing main stats,
+  weapons, artifacts, or party members, or clamping an ER requirement.
+- Changing `EnergyAnalyzer` replay math, optimizer DPS hill-climbing, character
+  energy generation, action cooldowns, RL contracts, or generated reports.
+- Claiming the revised sample rotation is globally DPS-optimal; it is a legal,
+  reproducible reference rotation under the existing loadout.
+
+Definitions:
+
+- ER feasibility check: post-allocation comparison of `config.minER` against
+  the static ER sum from character, weapon, set, and generated artifact stats.
+- Legal Sucrose cadence: one Skill+Burst setup near the start of each of the
+  three outer `FlinsParty` loops; the later Skill remains but its unsupported
+  Burst request is removed.
+
+Design boundaries:
+
+- `ArtifactOptimizer` owns the invariant that a successful result satisfies its
+  declared static minimum stats.
+- `OptimizerPipeline` continues to consume successful results without knowing
+  party-specific loadout details.
+- `FlinsPartyDefinition` owns the scripted action cadence and adapts the sample
+  rather than weakening global KQMS constraints.
+- Failure diagnostics report values and the `ENERGY_RECHARGE` stat identity;
+  display names do not control runtime behavior.
+
+### Phase 1: Isolate the Unreachable ER Contract - Done
+
+Why first:
+
+The deterministic B-032 trace distinguishes an allocation-feasibility defect
+from random energy variance and makes the legal response testable.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record the 258.3% Sucrose target, approximately 166.1% achievable build, and
+  three stable skipped-Burst timestamps.
+- Reject cap bypass, silent clamping, and unrequested loadout substitution.
+- Define fail-fast artifact generation plus a party-owned legal Burst cadence.
+
+Acceptance criteria:
+
+- Requested, achievable, and observed runtime values are recorded from matching
+  seeded runs.
+- The generic invariant and party-specific adaptation have separate owners.
+- No production source changes occur in this phase.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 adds allocation boundaries
+  and full sample behavior.
+
+Verification:
+
+- inspect `ArtifactOptimizer`, `OptimizerPipeline`, Sucrose artifact config, and
+  both Sucrose Burst sites in `FlinsPartyDefinition`
+- `python scripts/preflight.py --run`
+
+### Phase 2: Reject Underfilled ER and Use a Legal Burst Cadence
+
+Why second:
+
+The invariant and legal party response must land together so no committed
+phase leaves the runnable sample failing solely because the new guard exposed
+its known invalid request.
+
+Target files:
+
+- `src/java/mechanics/optimization/ArtifactOptimizer.java`
+- `src/java/simulation/party/FlinsPartyDefinition.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `src/java/mechanics/optimization/AGENTS.md`
+- `TASKS.md`
+
+Tasks:
+
+- Calculate achieved ER after allocation and throw an actionable state error
+  when it remains below `minER` beyond floating-point tolerance.
+- Cover heuristic and manual-roll infeasibility without changing allocation
+  caps or priorities.
+- Remove only the later Sucrose Burst in each outer loop; retain the associated
+  Skill for damage, particles, and buff behavior.
+- Verify unaffected audited parties retain their accepted baselines.
+
+Acceptance criteria:
+
+- A target at the exact legal ER ceiling succeeds; a target just above it fails
+  with requested and achieved ER in the message.
+- Manual ER rolls that underfill `minER` fail through the same invariant.
+- `FlinsParty` creates and optimizes successfully with exactly three requested
+  and three executed Sucrose Bursts and no insufficient-energy warning.
+- RaidenParty and FlinsParty2 accepted totals remain unchanged.
+
+Test cases to add or update:
+
+- Normal: exact maximum achievable ER returns an artifact result.
+- Boundary: target one micro-unit above the maximum throws.
+- Abnormal: explicit insufficient manual ER allocation throws.
+- Integration: three-loop `FlinsParty` requests no unsupported second Burst.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew PartyCatalogRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `./gradlew RaidenParty`
+- `./gradlew FlinsParty2`
+- `python scripts/agent_validate.py --path src/java/mechanics/optimization/ArtifactOptimizer.java --path src/java/simulation/party/FlinsPartyDefinition.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Accept Feasible Deterministic Party Output
+
+Why last:
+
+Repeated full optimizer-to-final runs are required to accept the revised ER
+targets, three-Burst cadence, total, and duration after the legal rotation
+change.
+
+Target files:
+
+- `README.md`
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Run at least two fresh `FlinsParty` invocations and compare normalized logs.
+- Record ER targets, Sucrose Burst count, warning count, duration, total, DPS,
+  and normalized hash.
+- Remove the temporary B-033 warning note from README and replace it with the
+  accepted legal-cadence statement.
+
+Acceptance criteria:
+
+- Repeated complete payloads match and contain three successful Sucrose Bursts.
+- No artifact ER infeasibility exception or insufficient-energy warning occurs.
+- README and ledger describe the accepted behavior without changing audited
+  RaidenParty/FlinsParty2 baselines.
+- Preflight passes and no generated report is staged.
+
+Test cases to add or update:
+
+- No further production test; Phase 2 owns invariant coverage and this phase
+  owns full integration acceptance.
+
+Verification:
+
+- at least two fresh `./gradlew FlinsParty` runs
+- `python scripts/preflight.py --run`
 
 ## NCCL/DDP Distributed RL Training Plan
 

@@ -772,7 +772,7 @@ experiment record.
 
 ### B-033 — Artifact optimizer silently accepts unreachable ER targets
 
-- Status: `candidate`
+- Status: `in-progress`
 - Source: 2 (reproducible sample warning and optimizer/loadout mismatch)
 - Symptom: `FlinsParty` requests 258.3% ER for Sucrose, but the fixed triple-EM
   main stats and ten-liquid-roll per-stat cap can supply only about 166.1% ER;
@@ -788,4 +788,8 @@ experiment record.
   The deterministic result proves this is not seed variance. Plan must choose
   and document whether an unreachable target changes main stats/loadout,
   changes the legal rotation, or fails explicitly; it must not exceed KQMS roll
-  constraints or clamp the requirement without evidence.
+  constraints or clamp the requirement without evidence. Adopt fail-fast
+  artifact generation and remove the unsupported second Sucrose Burst from
+  each outer loop while preserving the Skill and first Burst. See `TASKS.md`
+  implementation block
+  `Artifact ER Feasibility and Legal FlinsParty Burst Cadence`.
