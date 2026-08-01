@@ -219,7 +219,7 @@ public class Sucrose extends Character implements FormStateProvider {
         AttackAction hit = new AttackAction("Astable Anemohypostasis Creation - 6308", mv, Element.ANEMO,
                 StatType.BASE_ATK,
                 StatType.SKILL_DMG_BONUS, 0.0, false, ActionType.SKILL);
-        hit.setICD(ICDType.Standard, ICDTag.ElementalSkill, 1.0);
+        hit.setICD(ICDType.None, ICDTag.ElementalSkill, 1.0);
         hit.setAnimationDuration(0.5);
         sim.performAction(this.characterId, hit);
 
@@ -247,15 +247,19 @@ public class Sucrose extends Character implements FormStateProvider {
         AttackAction cast = new AttackAction("Forbidden Creation - Isomer 75 (Cast)", 0.0, Element.ANEMO,
                 StatType.BASE_ATK,
                 null, 1.5, ActionType.BURST);
+        cast.setICD(ICDType.None, ICDTag.ElementalBurst, 0.0);
         cast.setAnimationDuration(0.3);
         sim.performAction(this.characterId, cast);
 
         double duration = (this.constellation >= 2) ? 8.0 : 6.0;
 
+        AttackAction burstTick = new AttackAction("Forbidden Creation - Isomer 75 / Type II (DoT)", dotMv,
+                Element.ANEMO, StatType.BASE_ATK, StatType.BURST_DMG_BONUS, 0.0, false, ActionType.BURST);
+        burstTick.setICD(ICDType.None, ICDTag.ElementalBurst, 1.0);
+
         sim.registerEvent(new PeriodicDamageEvent(
                 this.name,
-                new AttackAction("Forbidden Creation - Isomer 75 / Type II (DoT)", dotMv, Element.ANEMO,
-                        StatType.BASE_ATK, StatType.BURST_DMG_BONUS, 0.0, false, ActionType.BURST),
+                burstTick,
                 sim.getCurrentTime() + 2.0,
                 2.0,
                 duration,
@@ -285,7 +289,7 @@ public class Sucrose extends Character implements FormStateProvider {
                         AttackAction extra = new AttackAction("Forbidden Creation - Isomer 75 (Absorb)", absorbMv,
                                 this.absorbedElement, StatType.BASE_ATK, StatType.BURST_DMG_BONUS, 0.0, false,
                                 ActionType.BURST);
-                        extra.setICD(ICDType.Standard, ICDTag.ElementalBurst, 1.0);
+                        extra.setICD(ICDType.None, ICDTag.ElementalBurst, 1.0);
                         s.performAction(this.characterId, extra);
                     }
 

@@ -922,7 +922,7 @@ Verification:
 Status:
 
 - In progress.
-- Phase 1 is complete; Phases 2-3 remain.
+- Phases 1-2 are complete; Phase 3 remains.
 - Requirement: Sucrose's Skill and every Burst damage pulse must apply their
   documented 1U element without ICD, while the zero-damage Burst cast must not
   apply Anemo.
@@ -1000,7 +1000,7 @@ Verification:
 - `./gradlew FlinsParty2`
 - `python scripts/preflight.py --run`
 
-### Phase 2: Encode Sucrose Gauge and ICD Metadata
+### Phase 2: Encode Sucrose Gauge and ICD Metadata - Done
 
 Why second:
 

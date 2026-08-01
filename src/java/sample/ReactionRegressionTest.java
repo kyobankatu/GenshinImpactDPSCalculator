@@ -80,6 +80,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ColumbinaStandInBoundaries();
         testAccuracyPhaseF_ArtifactLunarReactionBuffRegression();
         testAccuracyPhaseF_WeaponReactionBonusRegression();
+        testAccuracyPhaseF_SucroseNoIcdApplicationContract();
         testAccuracyPhaseF_XianglingChiliPickupOptIn();
         testAccuracyPhaseF_XingqiuOrbitalApplicationCadence();
         testAccuracyPhaseF_DamageHooksDispatchOnce();
@@ -1364,6 +1365,60 @@ public class ReactionRegressionTest {
                 "Sunny Morning Sleep-In should grant EM only after owner-triggered Swirl");
     }
 
+    private static void testAccuracyPhaseF_SucroseNoIcdApplicationContract() {
+        model.character.Sucrose skillSucrose = new model.character.Sucrose(new TestWeapon(), blankArtifact());
+        CombatSimulator skillSim = simulatorWithExistingCharacter(skillSucrose);
+        List<AttackAction> skillActions = new ArrayList<>();
+        skillSim.addListener((actor, action, time) -> skillActions.add(action));
+        skillSim.performAction(CharacterId.SUCROSE, CharacterActionRequest.of(CharacterActionKey.SKILL));
+
+        AttackAction skill = findAction(skillActions, "Astable Anemohypostasis Creation - 6308");
+        assertEquals(ICDType.None, skill.getICDType(), "Sucrose Skill should have no ICD");
+        assertEquals(ICDTag.ElementalSkill, skill.getICDTag(), "Sucrose Skill should retain a typed Skill tag");
+        assertClose(1.0, skill.getGaugeUnits(), EPS, "Sucrose Skill should apply 1U Anemo");
+
+        model.character.Sucrose burstSucrose = new model.character.Sucrose(new TestWeapon(), blankArtifact());
+        CombatSimulator burstSim = simulatorWithExistingCharacter(burstSucrose);
+        List<AttackAction> burstActions = new ArrayList<>();
+        List<ReactionResult.Kind> burstReactions = captureReactionKinds(burstSim);
+        burstSim.addListener((actor, action, time) -> burstActions.add(action));
+        burstSim.getEnemy().setAura(Element.PYRO, 4.0, burstSim.getCurrentTime());
+        burstSim.performAction(CharacterId.SUCROSE, CharacterActionRequest.of(CharacterActionKey.BURST));
+
+        AttackAction cast = findAction(burstActions, "Forbidden Creation - Isomer 75 (Cast)");
+        assertEquals(ICDType.None, cast.getICDType(), "Sucrose Burst cast should not enter an ICD group");
+        assertClose(0.0, cast.getGaugeUnits(), EPS, "Sucrose Burst cast should not apply Anemo");
+        assertEquals(0, burstReactions.size(), "Sucrose Burst cast should not trigger a reaction");
+
+        burstSim.getEnemy().setAura(Element.PYRO, 4.0, burstSim.getCurrentTime());
+        burstSim.advanceTime(2.01);
+        assertEquals(1, countReactions(burstReactions, ReactionResult.Kind.SWIRL),
+                "First Sucrose Burst tick should apply Anemo without ICD");
+        burstSim.getEnemy().setAura(Element.PYRO, 4.0, burstSim.getCurrentTime());
+        burstSim.advanceTime(2.0);
+        assertEquals(2, countReactions(burstReactions, ReactionResult.Kind.SWIRL),
+                "Consecutive Sucrose Burst ticks should each apply Anemo without ICD");
+
+        model.character.Sucrose absorbSucrose = new model.character.Sucrose(new TestWeapon(), blankArtifact());
+        CombatSimulator absorbSim = simulatorWithExistingCharacter(absorbSucrose);
+        List<AttackAction> absorbActions = new ArrayList<>();
+        absorbSim.addListener((actor, action, time) -> absorbActions.add(action));
+        absorbSim.addReactionListener((result, source, time, simulator) -> {
+            if (result.getKind() == ReactionResult.Kind.SWIRL) {
+                simulator.getEnemy().setAura(Element.HYDRO, 4.0, time);
+            }
+        });
+        absorbSim.getEnemy().setAura(Element.PYRO, 4.0, absorbSim.getCurrentTime());
+        absorbSim.performAction(CharacterId.SUCROSE, CharacterActionRequest.of(CharacterActionKey.BURST));
+        absorbSim.advanceTime(2.01);
+
+        AttackAction absorbed = findAction(absorbActions, "Forbidden Creation - Isomer 75 (Absorb)");
+        assertEquals(ICDType.None, absorbed.getICDType(), "Sucrose absorbed Burst damage should have no ICD");
+        assertEquals(ICDTag.ElementalBurst, absorbed.getICDTag(),
+                "Sucrose absorbed Burst damage should retain a typed Burst tag");
+        assertClose(1.0, absorbed.getGaugeUnits(), EPS, "Sucrose absorbed Burst damage should apply 1U");
+    }
+
     private static void testAccuracyPhaseF_XianglingChiliPickupOptIn() {
         model.character.Xiangling noPickup = new model.character.Xiangling(
                 new model.weapon.TheCatch(), blankArtifact());
@@ -1403,6 +1458,25 @@ public class ReactionRegressionTest {
         List<ReactionResult.Kind> kinds = new ArrayList<>();
         sim.addReactionListener((result, source, time, simulator) -> kinds.add(result.getKind()));
         return kinds;
+    }
+
+    private static int countReactions(List<ReactionResult.Kind> kinds, ReactionResult.Kind expected) {
+        int count = 0;
+        for (ReactionResult.Kind kind : kinds) {
+            if (kind == expected) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private static AttackAction findAction(List<AttackAction> actions, String name) {
+        for (AttackAction action : actions) {
+            if (name.equals(action.getName())) {
+                return action;
+            }
+        }
+        throw new AssertionError("Expected action not observed: " + name);
     }
 
     private static String captureStandardOutput(Runnable action) {
