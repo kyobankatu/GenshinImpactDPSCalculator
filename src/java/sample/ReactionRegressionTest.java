@@ -52,6 +52,7 @@ public class ReactionRegressionTest {
         testPhase4Crystallize();
         testPhase5Burning();
         testAccuracyPhaseG_BurningRefreshAndGenerationContract();
+        testAccuracyPhaseG_QuickenBurningFuelContract();
         testPhase6BloomCores();
         testPhase7HyperbloomAndBurgeon();
         testPhase8QuickenAggravateSpread();
@@ -344,6 +345,109 @@ public class ReactionRegressionTest {
         stale.advanceTime(0.25);
         assertClose(900.0, stale.getTotalDamage(), EPS,
                 "A superseded Burning event should terminate without duplicating damage");
+    }
+
+    private static void testAccuracyPhaseG_QuickenBurningFuelContract() {
+        CombatSimulator quickenOnly = simulatorWith(testCharacter(Element.PYRO));
+        List<ReactionResult.Kind> quickenOnlyKinds = captureReactionKinds(quickenOnly);
+        quickenOnly.applyQuicken(0.8);
+        quickenOnly.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Quicken-only Burning fixture", Element.PYRO));
+        assertEquals(1, countReactions(quickenOnlyKinds, ReactionResult.Kind.BURNING),
+                "Pyro on Quicken alone should emit one Burning reaction");
+        assertClose(0.0, quickenOnly.getTotalDamage(), EPS,
+                "Quicken-only Burning should not deal immediate damage");
+        quickenOnly.advanceTime(0.24);
+        assertClose(0.0, quickenOnly.getTotalDamage(), EPS,
+                "Quicken-only Burning should remain silent before 0.25 seconds");
+        quickenOnly.advanceTime(0.01);
+        assertClose(expectedTransformative(0.25, Element.PYRO, 0.0),
+                quickenOnly.getTotalDamage(), 0.5,
+                "Quicken-only Burning should deal its first tick at 0.25 seconds");
+        quickenOnly.advanceTime(1.75);
+        assertClose(expectedTransformative(0.25, Element.PYRO, 0.0) * 8.0,
+                quickenOnly.getTotalDamage(), 1.0,
+                "0.8U Quicken should supply eight Burning ticks over two seconds");
+        assertTrue(quickenOnly.getQuickenState() == null,
+                "Quicken-only Burning should consume typed Quicken exactly");
+        assertTrue(!quickenOnly.isBurningActive(),
+                "Quicken-only Burning should clear at exact shared-fuel depletion");
+        quickenOnly.advanceTime(0.25);
+        assertClose(expectedTransformative(0.25, Element.PYRO, 0.0) * 8.0,
+                quickenOnly.getTotalDamage(), 1.0,
+                "Quicken-only Burning should not deal a ninth tick");
+
+        CombatSimulator equal = simulatorWith(testCharacter(Element.PYRO));
+        List<ReactionResult.Kind> equalKinds = captureReactionKinds(equal);
+        equal.applyQuicken(0.8);
+        equal.getEnemy().applyAura(Element.DENDRO, 1.0, equal.getCurrentTime());
+        equal.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Equal Dendro-Quicken Burning fixture", Element.PYRO));
+        equal.advanceTime(2.0);
+        assertEquals(1, countReactions(equalKinds, ReactionResult.Kind.BURNING),
+                "Coexisting equal fuels should emit one Burning reaction");
+        assertClose(0.0, equal.getEnemy().getAuraUnits(
+                Element.DENDRO, equal.getCurrentTime()), EPS,
+                "Equal coexisting Dendro should deplete with shared fuel");
+        assertTrue(equal.getQuickenState() == null,
+                "Equal coexisting Quicken should deplete with shared fuel");
+        assertClose(expectedTransformative(0.25, Element.PYRO, 0.0) * 8.0,
+                equal.getTotalDamage(), 1.0,
+                "Equal coexisting fuels should retain one eight-tick stream");
+
+        CombatSimulator unequal = simulatorWith(testCharacter(Element.PYRO));
+        unequal.applyQuicken(0.8);
+        unequal.getEnemy().applyAura(Element.DENDRO, 0.5, unequal.getCurrentTime());
+        unequal.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Unequal Dendro-Quicken Burning fixture", Element.PYRO));
+        unequal.advanceTime(1.0);
+        assertClose(0.0, unequal.getEnemy().getAuraUnits(
+                Element.DENDRO, unequal.getCurrentTime()), EPS,
+                "The smaller coexisting Dendro fuel should deplete after one second");
+        assertTrue(unequal.isQuickenActive(),
+                "The larger Quicken fuel should sustain Burning after Dendro depletes");
+        assertTrue(unequal.isBurningActive(),
+                "Shared Burning should remain active while the larger fuel remains");
+        unequal.advanceTime(1.0);
+        assertTrue(unequal.getQuickenState() == null,
+                "The larger Quicken fuel should deplete at the shared exact end");
+        assertClose(expectedTransformative(0.25, Element.PYRO, 0.0) * 8.0,
+                unequal.getTotalDamage(), 1.0,
+                "Unequal fuels should retain the larger gauge's tick count");
+
+        CombatSimulator refresh = simulatorWith(testCharacter(Element.PYRO));
+        ReactionEffectScheduler refreshScheduler = new ReactionEffectScheduler(refresh);
+        refresh.applyQuicken(0.8);
+        refresh.getEnemy().applyAura(Element.DENDRO, 1.0, refresh.getCurrentTime());
+        refreshScheduler.scheduleBurning(CharacterId.SUCROSE, 1000.0);
+        refresh.advanceTime(0.5);
+        refresh.getEnemy().replaceAuraFromSource(
+                Element.DENDRO, 0.5, refresh.getCurrentTime());
+        refreshScheduler.scheduleBurning(CharacterId.XIANGLING, 1200.0, true);
+        assertClose(1.5, refresh.getBurningState().getEndTime(), EPS,
+                "Dendro refresh should overwrite the shared Burning fuel end");
+        refresh.advanceTime(1.0);
+        assertTrue(!refresh.isBurningActive(),
+                "Overwritten shared Burning fuel should clear at its exact end");
+        assertClose(0.2, refresh.getQuickenState().units, EPS,
+                "Dendro overwrite should still apply special decay to coexisting Quicken");
+
+        CombatSimulator expired = simulatorWith(testCharacter(Element.PYRO));
+        List<ReactionResult.Kind> expiredKinds = captureReactionKinds(expired);
+        expired.applyQuicken(0.8);
+        expired.advanceTime(10.0);
+        expired.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Expired Quicken Burning fixture", Element.PYRO));
+        assertEquals(0, countReactions(expiredKinds, ReactionResult.Kind.BURNING),
+                "Pyro at exact Quicken expiry should not emit Burning");
+        assertTrue(!expired.isBurningActive(),
+                "Expired Quicken should not create Burning state");
+        assertClose(0.8, expired.getEnemy().getAuraUnits(Element.PYRO), EPS,
+                "Pyro should apply normally after exact Quicken expiry");
     }
 
     private static void testPhase6BloomCores() {

@@ -180,6 +180,10 @@ public class CombatActionResolver {
                 attacker, characterId, action, context, stats, currentAuras)) {
             reactionTriggered = true;
         }
+        if (tryTriggerQuickenOnlyBurning(
+                attacker, characterId, action, context, stats, currentAuras)) {
+            reactionTriggered = true;
+        }
 
         for (Element aura : currentAuras) {
             ReactionResult result = ReactionCalculator.calculate(
@@ -511,6 +515,38 @@ public class CombatActionResolver {
                 result,
                 context,
                 false);
+        return true;
+    }
+
+    private boolean tryTriggerQuickenOnlyBurning(
+            Character attacker,
+            CharacterId characterId,
+            AttackAction action,
+            ActionResolutionContext context,
+            StatsContainer stats,
+            Set<Element> currentAuras) {
+        if (action.getElement() != Element.PYRO
+                || !currentAuras.isEmpty()
+                || !sim.isQuickenActive()
+                || sim.getQuickenState() == null) {
+            return false;
+        }
+        ReactionResult result = ReactionCalculator.calculate(
+                Element.PYRO,
+                Element.DENDRO,
+                stats.get(StatType.ELEMENTAL_MASTERY),
+                90,
+                getReactionBonus(Element.PYRO, Element.DENDRO, stats));
+        sim.notifyReaction(result, attacker);
+        handleStatefulReaction(
+                attacker,
+                characterId,
+                Element.PYRO,
+                Element.DENDRO,
+                action,
+                result,
+                stats,
+                context);
         return true;
     }
 

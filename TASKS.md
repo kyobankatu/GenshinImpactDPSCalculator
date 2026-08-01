@@ -5822,7 +5822,7 @@ Completion evidence:
 - Electro/Cryo coexistence and trigger-residual priority remain explicit
   exclusions. Documentation preflight passes without routed checks or leaks.
 
-### Phase 2: Consume Quicken as Burning Fuel - Pending
+### Phase 2: Consume Quicken as Burning Fuel - Done
 
 Target files:
 
@@ -5867,7 +5867,24 @@ Verification:
 - `python scripts/agent_validate.py --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/mechanics/reaction/ReactionEffectScheduler.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Re-Accept Quicken-Burning-Neutral Baselines - Pending
+Completion evidence:
+
+- The resolver now exposes typed Quicken to Pyro only when no ordinary Aura
+  competes. Dendro+Quicken continues through the ordinary Dendro reaction path,
+  so both cases emit one Burning reaction and one timer generation.
+- Initial shared fuel is the larger current Dendro/Quicken gauge. Each event
+  subtracts only the difference between the shared special rate and each
+  gauge's existing natural rate; epsilon cleanup removes exact floating-point
+  residue without deleting meaningful remaining gauge.
+- Focused regressions prove eight 0.25-second ticks from 0.8U Quicken, exact
+  no-ninth-tick cleanup, equal and unequal coexistence, Dendro overwrite while
+  Quicken coexists, and ordinary Pyro application at exact Quicken expiry.
+- Existing latest-owner, live-RES, stale-generation, Dendro-only Burning,
+  Quicken Bloom, and Additive contracts pass unchanged.
+- `ReactionRegressionTest`, `build`, `javadoc`, routed validation, and full
+  preflight pass. No persistent service, RL process, or HPC job was started.
+
+### Phase 3: Re-Accept Quicken-Burning-Neutral Baselines - In Progress
 
 Target files:
 
