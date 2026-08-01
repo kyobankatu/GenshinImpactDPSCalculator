@@ -853,3 +853,17 @@ experiment record.
   109%/100%/100%/180% ER and three Sucrose Bursts, emit zero warnings, and
   report 18,843,690 damage / 189,384 DPS over 99.5 seconds with normalized
   SHA-256 `5fcfe756770e925d4afde9f5e1bc9a23ba9cd86b2620aa99af3cab4e61234744`.
+
+### B-036 — Shattering Ice Javadoc still describes the removed unconditional buff
+
+- Status: `done`
+- Source: 4 (documentation accuracy audit)
+- Symptom: `ResonanceManager` class documentation says Shattering Ice applies
+  Crit Rate unconditionally and should eventually become aura-conditional,
+  while B-018 already implemented and tested the Cryo/Frozen condition.
+- Scope: `src/java/mechanics/element/ResonanceManager.java`
+- Risk: `local`
+- Proof: Javadoc describes the current condition, `./gradlew javadoc` is
+  warning-free, and the existing resonance regression passes
+- Notes: completed 2026-08-02 as a documentation-only correction. No resonance
+  values, aura checks, buff timing, or party baseline changed.

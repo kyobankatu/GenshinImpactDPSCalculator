@@ -25,9 +25,8 @@ import java.util.Map;
  *       placeholder buff (defensive stats are not fully modelled).</li>
  *   <li><b>Fervent Flames (Pyro x2)</b> – {@code +25% ATK}.</li>
  *   <li><b>Soothing Water (Hydro x2)</b> – {@code +25% HP}.</li>
- *   <li><b>Shattering Ice (Cryo x2)</b> – {@code +15% Crit Rate} (applied
- *       unconditionally; ideally this is conditional on the enemy having a
- *       Cryo/Frozen aura).</li>
+ *   <li><b>Shattering Ice (Cryo x2)</b> – {@code +15% Crit Rate} while the
+ *       enemy is affected by Cryo or Frozen.</li>
  *   <li><b>Enduring Rock (Geo x2)</b> – {@code +15% DMG Bonus}, {@code -20%
  *       Geo RES} on enemy.</li>
  *   <li><b>Sprawling Greenery (Dendro x2)</b> – {@code +50 EM}.</li>
