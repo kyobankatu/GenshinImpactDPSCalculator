@@ -490,6 +490,7 @@ public class Flins extends Character
         AttackAction hit = new AttackAction("Thunderous Symphony", mainMv, Element.ELECTRO,
                 StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 0.0, false, ActionType.BURST);
+        hit.setICD(ICDType.None, ICDTag.ElementalBurst, 0.0);
         hit.setLunarConsidered(true);
         hit.setAnimationDuration(1.0);
 
@@ -498,6 +499,7 @@ public class Flins extends Character
             AttackAction extra = new AttackAction("Thunderous Symphony (Additional)", addMv,
                     Element.ELECTRO, StatType.BASE_ATK,
                     StatType.BURST_DMG_BONUS, 0.0, false, ActionType.BURST);
+            extra.setICD(ICDType.None, ICDTag.ElementalBurst, 0.0);
             extra.setLunarConsidered(true);
             final double additionalTime = sim.getCurrentTime() + 0.1;
             sim.registerEvent(new simulation.event.TimerEvent() {

@@ -75,6 +75,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseE_LunarCrystallizeHarmonyCadence();
         testAccuracyPhaseF_RaidenResolveAndEnergyRegression();
         testAccuracyPhaseF_FlinsThundercloudConditionalHits();
+        testAccuracyPhaseF_FlinsSymphonyZeroGaugeContract();
         testAccuracyPhaseF_IneffaOverclockZeroGaugeContract();
         testAccuracyPhaseF_IneffaSkillNoIcdApplicationContract();
         testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost();
@@ -988,6 +989,67 @@ public class ReactionRegressionTest {
         assertTrue(cloudMiddleHits[0] == noCloudMiddleHits[0] + 2,
                 "Flins standard burst should add conditional middle hits while Thundercloud is active"
                         + " (noCloud=" + noCloudMiddleHits[0] + ", cloud=" + cloudMiddleHits[0] + ")");
+    }
+
+    private static void testAccuracyPhaseF_FlinsSymphonyZeroGaugeContract() {
+        model.character.Flins cloudFlins = new model.character.Flins(new TestWeapon(), blankArtifact());
+        CombatSimulator cloudSim = simulatorWithExistingCharacter(cloudFlins);
+        List<AttackAction> cloudActions = new ArrayList<>();
+        List<Double> symphonyTimes = new ArrayList<>();
+        List<ReactionResult.Kind> cloudReactions = captureReactionKinds(cloudSim);
+        cloudSim.addListener((actor, action, time) -> {
+            cloudActions.add(action);
+            if (action.getName().startsWith("Thunderous Symphony")) {
+                symphonyTimes.add(time);
+            }
+        });
+        cloudFlins.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), cloudSim);
+        cloudFlins.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), cloudSim);
+        cloudSim.setThundercloudEndTime(cloudSim.getCurrentTime() + 30.0);
+        cloudSim.getEnemy().setAura(Element.HYDRO, 4.0, cloudSim.getCurrentTime());
+        cloudReactions.clear();
+        double damageBeforeBurst = cloudSim.getTotalDamage();
+
+        cloudFlins.onAction(CharacterActionRequest.of(CharacterActionKey.BURST), cloudSim);
+
+        AttackAction main = findAction(cloudActions, "Thunderous Symphony");
+        AttackAction additional = findAction(cloudActions, "Thunderous Symphony (Additional)");
+        assertEquals(ICDType.None, main.getICDType(), "Flins Symphony main hit should have no ICD");
+        assertEquals(ICDType.None, additional.getICDType(), "Flins Symphony Additional hit should have no ICD");
+        assertEquals(ICDTag.ElementalBurst, main.getICDTag(), "Flins Symphony main hit should retain Burst tag");
+        assertEquals(ICDTag.ElementalBurst, additional.getICDTag(),
+                "Flins Symphony Additional hit should retain Burst tag");
+        assertClose(0.0, main.getGaugeUnits(), EPS, "Flins Symphony main hit should apply 0U Electro");
+        assertClose(0.0, additional.getGaugeUnits(), EPS,
+                "Flins Symphony Additional hit should apply 0U Electro");
+        assertEquals(ActionType.BURST, main.getActionType(), "Flins Symphony main hit should retain Burst typing");
+        assertEquals(ActionType.BURST, additional.getActionType(),
+                "Flins Symphony Additional hit should retain Burst typing");
+        assertTrue(main.isLunarConsidered() && additional.isLunarConsidered(),
+                "Flins Symphony hits should retain direct Lunar-Charged consideration");
+        assertEquals(2, symphonyTimes.size(), "Active Thundercloud should produce main and Additional hits");
+        assertClose(0.1, symphonyTimes.get(1) - symphonyTimes.get(0), EPS,
+                "Flins Symphony Additional hit should retain its 0.1-second delay");
+        assertEquals(0, cloudReactions.size(), "Zero-gauge Symphony hits should not trigger elemental reactions");
+        assertTrue(cloudSim.getEnemy().getAuraUnits(Element.HYDRO, cloudSim.getCurrentTime()) > 0.0,
+                "Zero-gauge Symphony hits should preserve the existing Hydro aura");
+        assertTrue(cloudSim.getTotalDamage() > damageBeforeBurst,
+                "Zero-gauge Symphony hits should retain positive direct damage");
+
+        model.character.Flins noCloudFlins = new model.character.Flins(new TestWeapon(), blankArtifact());
+        CombatSimulator noCloudSim = simulatorWithExistingCharacter(noCloudFlins);
+        List<AttackAction> noCloudActions = new ArrayList<>();
+        noCloudSim.addListener((actor, action, time) -> noCloudActions.add(action));
+        noCloudFlins.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), noCloudSim);
+        noCloudFlins.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), noCloudSim);
+
+        noCloudFlins.onAction(CharacterActionRequest.of(CharacterActionKey.BURST), noCloudSim);
+
+        assertTrue(noCloudActions.stream().anyMatch(action -> "Thunderous Symphony".equals(action.getName())),
+                "Symphony state should produce the main hit without Thundercloud");
+        assertTrue(noCloudActions.stream()
+                .noneMatch(action -> "Thunderous Symphony (Additional)".equals(action.getName())),
+                "Symphony without Thundercloud should not produce the Additional hit");
     }
 
     private static void testAccuracyPhaseF_IneffaOverclockZeroGaugeContract() {
