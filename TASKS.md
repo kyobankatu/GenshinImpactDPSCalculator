@@ -35,6 +35,10 @@ The deterministic damage-proc correction is complete. Weapon and artifact
 damage hooks dispatch once through `DamageCalculator`, and `RaidenParty` uses
 common seeded Skyward Spine draws for reproducible optimizer evaluation.
 
+The Sucrose elemental-application correction is now active. Its sourced
+contract and pre-fix `FlinsParty2` baseline are recorded; implementation and
+sample acceptance remain.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -910,6 +914,179 @@ Test cases to add or update:
 Verification:
 
 - three fresh `./gradlew RaidenParty` runs
+- `python scripts/validate_agent_assets.py`
+- `python scripts/preflight.py --run`
+
+## Implementation Order: Sucrose No-ICD Elemental Application
+
+Status:
+
+- In progress.
+- Phase 1 is complete; Phases 2-3 remain.
+- Requirement: Sucrose's Skill and every Burst damage pulse must apply their
+  documented 1U element without ICD, while the zero-damage Burst cast must not
+  apply Anemo.
+
+Scope:
+
+- Make `Sucrose` explicitly define gauge and ICD for Skill, Burst cast, Burst
+  Anemo DoT, and absorbed-element damage.
+- Keep those action contracts inside the character model that creates them.
+- Add focused executable regression coverage for the action metadata and the
+  no-ICD behavior across consecutive Burst ticks.
+- Re-run `FlinsParty2` and refresh its audited numeric baseline if the corrected
+  reaction cadence changes the result.
+
+Out of scope for this pass:
+
+- Changing generic `AttackAction` defaults or `ICDManager` behavior.
+- Correcting Flins, Ineffa, or other characters that still use
+  `ICDTag.None`; each needs separate mechanic evidence.
+- Changing Sucrose animation timing, absorption priority, damage multipliers,
+  particle generation, buffs, or constellation behavior.
+- Changing reaction formulas, aura decay, rotations, optimizer algorithms, RL
+  contracts, or generated `docs/` output.
+
+Design boundaries:
+
+- `model.character.Sucrose` owns the game-specific gauge and ICD metadata.
+- `CombatActionResolver` and `ICDManager` continue consuming typed action
+  metadata without Sucrose-specific branches (open/closed and single
+  responsibility).
+- `ReactionRegressionTest` observes emitted actions and reaction behavior
+  through public simulator listeners rather than exposing new production test
+  APIs (dependency inversion and interface segregation).
+
+### Phase 1: Record the Sourced Contract and Pre-Fix Baseline - Done
+
+Why first:
+
+The exact gauge and ICD rules must be established before changing an accuracy
+behavior that affects reaction count and sample damage.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record the maintained KQM TCL Sucrose attack table accessed 2026-08-02: Skill
+  `1U / ICD None`; Burst Anemo DoT `1U / ICD None`; Burst absorbed damage
+  `1U / ICD None`.
+- Record KQM's v2.3 Evidence Vault observation that the Anemo and absorbed
+  Burst damage occur simultaneously and produce one combined tick reaction
+  sequence.
+- Corroborate the no-ICD classification against the current Genshin Impact Wiki
+  character-data search result and classify the simulator decision as `adopt`.
+- Preserve the current `FlinsParty2` baseline and identify blocked Sucrose Burst
+  pulses before editing.
+
+Acceptance criteria:
+
+- Stable source URLs, access date, classification, simulator decision, and
+  bounded regression design are recorded.
+- The pre-fix sample remains 15,892,535 damage / 233,028 DPS.
+- The pre-fix log identifies three Sucrose Burst DoT pulses rejected by the
+  default Standard/None ICD state.
+
+Test cases to add or update:
+
+- No production test in this documentation phase; Phase 2 adds the executable
+  contract before source correction is committed.
+
+Verification:
+
+- `./gradlew FlinsParty2`
+- `python scripts/preflight.py --run`
+
+### Phase 2: Encode Sucrose Gauge and ICD Metadata
+
+Why second:
+
+With the evidence fixed, the character can explicitly emit correct actions and
+the regression can prove both application and no-application paths.
+
+Target files:
+
+- `src/java/model/character/Sucrose.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Set Sucrose Skill to `ICDType.None` with 1U Anemo application.
+- Make the zero-damage Burst cast use zero gauge so it cannot cause an early
+  Swirl or consume aura.
+- Set each Burst Anemo DoT and absorbed-element hit to `ICDType.None` with 1U.
+- Keep typed tags descriptive even though no-ICD actions do not share state.
+- Add a focused actual-character regression through simulator action and
+  reaction listeners.
+
+Acceptance criteria:
+
+- The Burst cast emits zero gauge and no reaction.
+- Consecutive Burst ticks each emit 1U/no-ICD metadata and can each trigger the
+  expected reaction when aura is available.
+- Skill remains 1U and is explicitly no-ICD.
+- No generic runtime, formula, or reaction policy changes.
+
+Test cases to add or update:
+
+- Normal: Skill action metadata is 1U, `ICDType.None`, and the Skill tag.
+- Normal: Burst Anemo and absorbed-element actions are both 1U and
+  `ICDType.None`.
+- No-trigger: the zero-damage Burst cast has 0U and does not notify a reaction.
+- Boundary: two consecutive modeled Burst ticks are not suppressed by a shared
+  standard ICD counter.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Accept the FlinsParty2 Delta and Close the Accuracy Note
+
+Why last:
+
+The optimizer/sample baseline can be refreshed only after the corrected action
+contract and focused regression are committed.
+
+Target files:
+
+- `README.md`
+- `TASKS.md`
+- `BACKLOG.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+
+Tasks:
+
+- Run two fresh `FlinsParty2` invocations and compare ER targets, optimizer
+  rolls, Sucrose reaction activity, total damage, and DPS.
+- Confirm no Sucrose Burst pulse is logged as ICD-blocked.
+- Update the audited README and verification-skill baseline to the corrected
+  value.
+- Mark B-011 and this plan complete while preserving unrelated
+  positive-gauge `ICDTag.None` findings for later sourced work.
+
+Acceptance criteria:
+
+- Two fresh runs produce the same corrected summary or any remaining declared
+  random component is reported explicitly.
+- The expected Sucrose no-ICD applications are visible and no Burst cast
+  application is present.
+- README, verification gate, backlog, and plan agree on the accepted result.
+- Agent assets and all routed preflight checks pass.
+
+Test cases to add or update:
+
+- No further production test; Phase 2 owns the mechanic contract and this phase
+  is the optimizer/sample integration acceptance check.
+
+Verification:
+
+- two fresh `./gradlew FlinsParty2` runs
 - `python scripts/validate_agent_assets.py`
 - `python scripts/preflight.py --run`
 

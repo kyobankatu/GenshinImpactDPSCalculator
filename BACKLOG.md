@@ -195,3 +195,26 @@ experiment record.
 - Proof: n/a
 - Notes: rejected by the value gate. Implementing an unused policy without a
   mechanic-specific contract or observable caller would manufacture scope.
+
+### B-011 — Sucrose Skill and Burst use incorrect standard ICD defaults
+
+- Status: `planned`
+- Source: 3 (sourced game-accuracy divergence exposed by B-009 output)
+- Symptom: Sucrose's zero-damage Burst cast applies a default 1U Anemo hit,
+  while the real Burst DoT and absorbed-element pulses use standard ICD; three
+  DoT pulses are suppressed in the current `FlinsParty2` run.
+- Scope: `src/java/model/character/Sucrose.java`,
+  `src/java/sample/ReactionRegressionTest.java`
+- Risk: `planned`
+- Proof: focused action/reaction regression plus two matching
+  `./gradlew FlinsParty2` summaries
+- Notes: adopt the maintained KQM TCL table (accessed 2026-08-02), which records
+  Skill, Burst DoT, and Burst absorbed damage as 1U with no ICD. KQM's Sucrose
+  Evidence Vault (v2.3 test, added 2021-12-16) records simultaneous Anemo and
+  absorbed-element Burst damage, and the current Genshin Impact Wiki character
+  data independently lists Sucrose gauge/ICD fields. Sources:
+  https://library.keqingmains.com/characters/anemo/sucrose,
+  https://library.keqingmains.com/evidence/characters/anemo/sucrose, and
+  https://genshin-impact.fandom.com/wiki/Sucrose. Pre-fix `FlinsParty2` is
+  15,892,535 damage / 233,028 DPS. See `TASKS.md` implementation block
+  `Sucrose No-ICD Elemental Application`.
