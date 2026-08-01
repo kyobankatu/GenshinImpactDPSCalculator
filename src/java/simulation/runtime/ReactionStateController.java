@@ -2,6 +2,7 @@ package simulation.runtime;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import model.type.CharacterId;
 import simulation.CombatSimulator;
@@ -23,6 +24,34 @@ public class ReactionStateController {
     public ReactionStateController(CombatSimulator sim, ReactionState reactionState) {
         this.sim = sim;
         this.reactionState = reactionState;
+    }
+
+    /**
+     * Attempts to accept Overload reaction damage at the current simulator time.
+     *
+     * @param ownerId character that owns the Overload reaction
+     * @return {@code true} when target and owner cooldowns both permit damage
+     */
+    public boolean tryStartOverloadDamageCooldown(CharacterId ownerId) {
+        return reactionState.tryStartOverloadDamageCooldown(
+                ownerId, sim.getCurrentTime());
+    }
+
+    /** Returns the target-wide Overload damage cooldown end time. */
+    public double getOverloadTargetDamageCooldownEndTime() {
+        return reactionState.getOverloadTargetDamageCooldownEndTime();
+    }
+
+    /** Returns a defensive copy of owner-specific Overload cooldown end times. */
+    public Map<CharacterId, Double> copyOverloadOwnerDamageCooldownEndTimes() {
+        return reactionState.copyOverloadOwnerDamageCooldownEndTimes();
+    }
+
+    /** Restores both dimensions of Overload reaction-damage cooldown state. */
+    public void restoreOverloadDamageCooldowns(
+            double targetEndTime,
+            Map<CharacterId, Double> ownerEndTimes) {
+        reactionState.restoreOverloadDamageCooldowns(targetEndTime, ownerEndTimes);
     }
 
     /**

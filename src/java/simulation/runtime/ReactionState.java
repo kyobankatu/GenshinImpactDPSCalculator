@@ -1,15 +1,18 @@
 package simulation.runtime;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 import model.type.CharacterId;
 
-/**
- * Holds transient simulation state for Electro-Charged and Thundercloud handling.
- */
+/** Holds snapshot-relevant transient state for reaction runtime policies. */
 public class ReactionState {
     private static final double GAUGE_EPSILON = 1e-9;
+    private static final double TIMING_EPSILON = 1e-9;
+    private static final double OVERLOAD_TARGET_DAMAGE_GCD = 0.1;
+    private static final double OVERLOAD_OWNER_DAMAGE_COOLDOWN = 0.5;
     /** Immutable consumable Quicken Aura payload. */
     public static final class QuickenState {
         /** Quicken gauge present at {@link #lastUpdateTime}. */
@@ -132,12 +135,79 @@ public class ReactionState {
     private int nextBurningGeneration = 1;
     private double quickenEndTime = -1.0;
     private QuickenState quickenState;
+    private double overloadTargetDamageCooldownEndTime = -1.0;
+    private final Map<CharacterId, Double> overloadOwnerDamageCooldownEndTimes =
+            new EnumMap<>(CharacterId.class);
     private int moondriftCount = 0;
     private int lunarCrystallizeTriggerCount = 0;
     private int verdantDewCount = 0;
     private int moonridgeDewCount = 0;
     private final List<DendroCoreState> dendroCores = new ArrayList<>();
     private int nextDendroCoreId = 1;
+
+    /**
+     * Attempts to start both Overload damage-sequence cooldowns.
+     *
+     * <p>The one-enemy simulator applies a 0.1-second target-wide gate before
+     * the 0.5-second owner-specific gate. Blocked attempts do not start either
+     * cooldown because no reaction-damage hit was accepted.
+     *
+     * @param ownerId character that owns the Overload reaction
+     * @param currentTime simulator time in seconds
+     * @return {@code true} when this Overload may deal damage
+     */
+    public boolean tryStartOverloadDamageCooldown(
+            CharacterId ownerId, double currentTime) {
+        if (ownerId == null || !Double.isFinite(currentTime)) {
+            return false;
+        }
+        double ownerEndTime = overloadOwnerDamageCooldownEndTimes.getOrDefault(
+                ownerId, -1.0);
+        if (currentTime + TIMING_EPSILON < overloadTargetDamageCooldownEndTime
+                || currentTime + TIMING_EPSILON < ownerEndTime) {
+            return false;
+        }
+        overloadTargetDamageCooldownEndTime =
+                currentTime + OVERLOAD_TARGET_DAMAGE_GCD;
+        overloadOwnerDamageCooldownEndTimes.put(
+                ownerId, currentTime + OVERLOAD_OWNER_DAMAGE_COOLDOWN);
+        return true;
+    }
+
+    /** Returns the target-wide Overload damage cooldown end time. */
+    public double getOverloadTargetDamageCooldownEndTime() {
+        return overloadTargetDamageCooldownEndTime;
+    }
+
+    /** Returns a defensive copy of owner-specific Overload cooldown end times. */
+    public Map<CharacterId, Double> copyOverloadOwnerDamageCooldownEndTimes() {
+        return new EnumMap<>(overloadOwnerDamageCooldownEndTimes);
+    }
+
+    /**
+     * Restores Overload damage-sequence state from a simulator snapshot.
+     *
+     * @param targetEndTime target-wide cooldown end time
+     * @param ownerEndTimes owner-specific cooldown end times
+     */
+    public void restoreOverloadDamageCooldowns(
+            double targetEndTime,
+            Map<CharacterId, Double> ownerEndTimes) {
+        overloadTargetDamageCooldownEndTime = Double.isFinite(targetEndTime)
+                ? targetEndTime
+                : -1.0;
+        overloadOwnerDamageCooldownEndTimes.clear();
+        if (ownerEndTimes == null) {
+            return;
+        }
+        for (Map.Entry<CharacterId, Double> entry : ownerEndTimes.entrySet()) {
+            CharacterId ownerId = entry.getKey();
+            Double endTime = entry.getValue();
+            if (ownerId != null && endTime != null && Double.isFinite(endTime)) {
+                overloadOwnerDamageCooldownEndTimes.put(ownerId, endTime);
+            }
+        }
+    }
 
     /**
      * Returns whether an EC-related timer is active.

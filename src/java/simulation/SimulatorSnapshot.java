@@ -1,6 +1,7 @@
 package simulation;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +79,8 @@ public class SimulatorSnapshot {
     public final int nextBurningGeneration;
     public final double quickenEndTime;
     public final ReactionState.QuickenState quickenState;
+    public final double overloadTargetDamageCooldownEndTime;
+    public final Map<CharacterId, Double> overloadOwnerDamageCooldownEndTimes;
     public final int moondriftCount;
     public final int lunarCrystallizeTriggerCount;
     public final int verdantDewCount;
@@ -123,6 +126,8 @@ public class SimulatorSnapshot {
      * @param nextBurningGeneration next Burning event generation
      * @param quickenEndTime Quicken expiry time
      * @param quickenState typed consumable Quicken Aura payload
+     * @param overloadTargetDamageCooldownEndTime target-wide Overload damage cooldown end
+     * @param overloadOwnerDamageCooldownEndTimes owner-specific Overload damage cooldown ends
      * @param moondriftCount active Moondrift count
      * @param lunarCrystallizeTriggerCount Lunar-Crystallize trigger count
      * @param verdantDewCount Verdant Dew count
@@ -154,6 +159,8 @@ public class SimulatorSnapshot {
             int nextBurningGeneration,
             double quickenEndTime,
             ReactionState.QuickenState quickenState,
+            double overloadTargetDamageCooldownEndTime,
+            Map<CharacterId, Double> overloadOwnerDamageCooldownEndTimes,
             int moondriftCount,
             int lunarCrystallizeTriggerCount,
             int verdantDewCount,
@@ -183,6 +190,12 @@ public class SimulatorSnapshot {
         this.nextBurningGeneration = nextBurningGeneration;
         this.quickenEndTime = quickenEndTime;
         this.quickenState = quickenState;
+        this.overloadTargetDamageCooldownEndTime =
+                overloadTargetDamageCooldownEndTime;
+        this.overloadOwnerDamageCooldownEndTimes =
+                new EnumMap<>(CharacterId.class);
+        this.overloadOwnerDamageCooldownEndTimes.putAll(
+                overloadOwnerDamageCooldownEndTimes);
         this.moondriftCount = moondriftCount;
         this.lunarCrystallizeTriggerCount = lunarCrystallizeTriggerCount;
         this.verdantDewCount = verdantDewCount;

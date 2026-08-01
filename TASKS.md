@@ -10796,8 +10796,8 @@ Completion evidence:
 
 ## Implementation Order: Overload Damage Sequence
 
-Status: Phase 1 is complete. Phase 2 will add snapshot-safe target and owner
-damage cooldown state without suppressing reaction or gauge effects.
+Status: Phases 1-2 are complete. Phase 3 is accepting deterministic catalog
+baselines for the snapshot-safe target and owner damage cooldown state.
 
 Scope:
 
@@ -10878,7 +10878,7 @@ Completion evidence:
   action ICD cannot express the separate reaction-damage limits, and reaction
   state is already the snapshot-aligned owner for transient reaction policy.
 
-### Phase 2: Implement Snapshot-Safe Overload Damage Limits - Pending
+### Phase 2: Implement Snapshot-Safe Overload Damage Limits - Done
 
 Why second:
 
@@ -10893,6 +10893,7 @@ Target files:
 - `src/java/simulation/SimulatorSnapshot.java`
 - `src/java/simulation/runtime/CombatActionResolver.java`
 - `src/java/sample/ReactionRegressionTest.java`
+- `src/java/mechanics/rl/CapabilityProfiler.java` (snapshot forwarding only)
 - `TASKS.md`
 
 Tasks:
@@ -10927,10 +10928,25 @@ Verification:
 - `./gradlew ReactionRegressionTest`
 - `./gradlew build`
 - `./gradlew javadoc`
-- `python scripts/agent_validate.py --path src/java/simulation/runtime/ReactionState.java --path src/java/simulation/runtime/ReactionStateController.java --path src/java/simulation/CombatSimulator.java --path src/java/simulation/SimulatorSnapshot.java --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/sample/ReactionRegressionTest.java --run`
-- `python scripts/preflight.py --run`
+- `python scripts/agent_validate.py --path src/java/simulation/runtime/ReactionState.java --path src/java/simulation/runtime/ReactionStateController.java --path src/java/simulation/CombatSimulator.java --path src/java/simulation/SimulatorSnapshot.java --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/sample/ReactionRegressionTest.java --path src/java/mechanics/rl/CapabilityProfiler.java`
+- `python scripts/preflight.py`
 
-### Phase 3: Accept Overload-Limited Catalog Baselines - Pending
+Completion evidence:
+
+- The first Overload starts target 0.1-second and owner 0.5-second limits;
+  different-owner 0.05-second damage is blocked and exact 0.1-second damage is
+  accepted without the blocked attempt starting a cooldown.
+- The original owner remains blocked at 0.49 seconds and is accepted at exactly
+  0.5 seconds. All six reactions notify and consume 1U Aura while only three
+  record damage; immediate Superconduct remains unaffected.
+- Snapshot save/restore preserves both typed cooldown dimensions and exact replay
+  boundaries through defensive `CharacterId` map copies. Capability profiling
+  only forwards the enlarged snapshot payload; no RL algorithm or tensor changed.
+- `ReactionRegressionTest`, `build`, and `javadoc` pass. Routed validation and
+  preflight report no leaks; `PartyCatalogRegressionTest` and `BenchmarkRLJava`
+  were not run because this autonomous pass explicitly excludes RL execution.
+
+### Phase 3: Accept Overload-Limited Catalog Baselines - In Progress
 
 Why third:
 

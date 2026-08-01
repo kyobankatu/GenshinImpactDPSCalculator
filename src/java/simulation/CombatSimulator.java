@@ -780,6 +780,10 @@ public class CombatSimulator {
         int nextBurningGeneration = reactionState.getNextBurningGeneration();
         double quickenEndTime = reactionState.getQuickenEndTime();
         simulation.runtime.ReactionState.QuickenState quickenState = reactionState.getQuickenState();
+        double overloadTargetDamageCooldownEndTime =
+                reactionStateController.getOverloadTargetDamageCooldownEndTime();
+        Map<CharacterId, Double> overloadOwnerDamageCooldownEndTimes =
+                reactionStateController.copyOverloadOwnerDamageCooldownEndTimes();
         int moondriftCount = reactionState.getMoondriftCount();
         int lunarCrystallizeTriggerCount = reactionState.getLunarCrystallizeTriggerCount();
         int verdantDewCount = reactionState.getVerdantDewCount();
@@ -834,7 +838,10 @@ public class CombatSimulator {
                 lastSwapTime, activeCharacterId, currentMoonsign,
                 icdStates, ecTimerRunning, thundercloudEndTime, burningTimerRunning, burningEndTime,
                 burningState, nextBurningGeneration,
-                quickenEndTime, quickenState, moondriftCount, lunarCrystallizeTriggerCount,
+                quickenEndTime, quickenState,
+                overloadTargetDamageCooldownEndTime,
+                overloadOwnerDamageCooldownEndTimes,
+                moondriftCount, lunarCrystallizeTriggerCount,
                 verdantDewCount, moonridgeDewCount,
                 dendroCores, nextDendroCoreId, enemyFreezeAura, enemyAura,
                 characters,
@@ -876,6 +883,9 @@ public class CombatSimulator {
         }
         reactionState.setBurningTimerRunning(snap.burningTimerRunning);
         reactionState.restoreQuicken(snap.quickenState, snap.quickenEndTime);
+        reactionStateController.restoreOverloadDamageCooldowns(
+                snap.overloadTargetDamageCooldownEndTime,
+                snap.overloadOwnerDamageCooldownEndTimes);
         reactionState.setMoondriftCount(snap.moondriftCount);
         reactionState.setLunarCrystallizeTriggerCount(snap.lunarCrystallizeTriggerCount);
         reactionState.setVerdantDewCount(snap.verdantDewCount);
@@ -953,6 +963,16 @@ public class CombatSimulator {
      */
     public boolean isECTimerRunning() {
         return reactionStateController.isEcTimerRunning();
+    }
+
+    /**
+     * Attempts to accept Overload reaction damage at the current time.
+     *
+     * @param ownerId character that owns the Overload reaction
+     * @return {@code true} when target and owner damage limits both allow it
+     */
+    public boolean tryStartOverloadDamageCooldown(CharacterId ownerId) {
+        return reactionStateController.tryStartOverloadDamageCooldown(ownerId);
     }
 
     /**

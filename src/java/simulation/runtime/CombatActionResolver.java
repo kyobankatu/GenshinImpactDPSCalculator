@@ -426,6 +426,16 @@ public class CombatActionResolver {
                     aura, getAuraConsumption(action, result, trigger, aura), sim.getCurrentTime());
         }
 
+        if (isOverload(result)
+                && !sim.tryStartOverloadDamageCooldown(characterId)) {
+            if (sim.isLoggingEnabled()) {
+                System.out.println(String.format(
+                        "   [Reaction] %s on %s -> %s Damage blocked (damage sequence)",
+                        trigger, aura, result.getName()));
+            }
+            return;
+        }
+
         double resFactor = resolveImpactResistance(context, reactionElement);
         double reactBonus = result.isElectroCharged()
                 ? stats.get(StatType.ELECTRO_CHARGED_DMG_BONUS)
@@ -458,6 +468,11 @@ public class CombatActionResolver {
                 applySuperconductPhysicalResShred();
             }
         }
+    }
+
+    private boolean isOverload(ReactionResult result) {
+        return result.getKind() == ReactionResult.Kind.OVERLOAD
+                || result.getKind() == ReactionResult.Kind.OVERLOADED;
     }
 
     private void handleStatefulReaction(Character attacker, CharacterId characterId, Element trigger, Element aura,

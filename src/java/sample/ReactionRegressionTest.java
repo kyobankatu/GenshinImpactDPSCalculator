@@ -136,6 +136,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseG_AnemoGeoAuraConsumptionContract();
         testAccuracyPhaseG_BloomDirectionalAuraConsumptionContract();
         testAccuracyPhaseG_TransformativeResidualAuraContract();
+        testAccuracyPhaseG_OverloadDamageSequenceContract();
         testAccuracyPhaseF_PeriodicCancellationAndRaidenEyeDamageTrigger();
         testAccuracyPhaseF_BennettSkillAndBurstApplicationContract();
         testAccuracyPhaseF_XianglingGuobaNoIcdApplicationContract();
@@ -1523,6 +1524,91 @@ public class ReactionRegressionTest {
             assertClose(0.0, depleted.getEnemy().getAuraUnits(Element.ELECTRO), EPS,
                     "Overload should fully remove aura at or below 1U consumption");
         }
+    }
+
+    private static void testAccuracyPhaseG_OverloadDamageSequenceContract() {
+        CombatSimulator sim = simulatorWith(testCharacter(
+                Element.PYRO, CharacterId.SUCROSE));
+        sim.addCharacter(testCharacter(Element.PYRO, CharacterId.XIANGLING));
+        sim.getEnemy().setAura(Element.ELECTRO, 8.0);
+        List<ReactionResult.Kind> kinds = captureReactionKinds(sim);
+        double overloadDamage = expectedTransformative(2.75, Element.PYRO, 0.0);
+
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Initial Overload damage-sequence fixture", Element.PYRO));
+        assertClose(overloadDamage, sim.getTotalDamage(), 0.5,
+                "The first Overload should deal reaction damage");
+        SimulatorSnapshot snapshot = sim.saveSnapshot();
+        assertClose(0.1, snapshot.overloadTargetDamageCooldownEndTime, EPS,
+                "First Overload should start the target-wide damage GCD");
+        assertClose(0.5, snapshot.overloadOwnerDamageCooldownEndTimes.get(
+                CharacterId.SUCROSE), EPS,
+                "First Overload should start the owner's damage cooldown");
+
+        sim.advanceTime(0.05);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING,
+                reactionHit("Pre-target-boundary Overload fixture", Element.PYRO));
+        assertClose(overloadDamage, sim.getTotalDamage(), 0.5,
+                "A different owner should be damage-blocked before 0.1 seconds");
+
+        sim.advanceTime(0.05);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING,
+                reactionHit("Exact-target-boundary Overload fixture", Element.PYRO));
+        assertClose(overloadDamage * 2.0, sim.getTotalDamage(), 0.5,
+                "A different owner should deal damage at exactly 0.1 seconds");
+
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Post-target owner-blocked Overload fixture", Element.PYRO));
+        sim.advanceTime(0.39);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Pre-owner-boundary Overload fixture", Element.PYRO));
+        assertClose(overloadDamage * 2.0, sim.getTotalDamage(), 0.5,
+                "The original owner should remain damage-blocked before 0.5 seconds");
+
+        sim.advanceTime(0.01);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Exact-owner-boundary Overload fixture", Element.PYRO));
+        assertClose(overloadDamage * 3.0, sim.getTotalDamage(), 0.5,
+                "The original owner should deal damage at exactly 0.5 seconds");
+        assertEquals(6, countReactions(kinds, ReactionResult.Kind.OVERLOAD),
+                "Damage-blocked hits should still notify every Overload reaction");
+        assertClose(2.0, sim.getEnemy().getAuraUnits(
+                Element.ELECTRO, sim.getCurrentTime()), EPS,
+                "Every accepted and blocked Overload should consume exactly 1U Aura");
+
+        sim.restoreSnapshot(snapshot);
+        assertClose(0.0, sim.getCurrentTime(), EPS,
+                "Snapshot restore should rewind the Overload cooldown clock");
+        assertClose(overloadDamage, sim.getTotalDamage(), 0.5,
+                "Snapshot restore should rewind damage with cooldown state");
+        sim.advanceTime(0.1);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING,
+                reactionHit("Restored target-boundary Overload fixture", Element.PYRO));
+        sim.advanceTime(0.4);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Restored owner-boundary Overload fixture", Element.PYRO));
+        assertClose(overloadDamage * 3.0, sim.getTotalDamage(), 0.5,
+                "Restored target and owner cooldowns should preserve exact boundaries");
+
+        CombatSimulator superconduct = simulatorWith(testCharacter(Element.ELECTRO));
+        superconduct.getEnemy().setAura(Element.CRYO, 3.0);
+        superconduct.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("First non-Overload damage-sequence fixture", Element.ELECTRO));
+        superconduct.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Second non-Overload damage-sequence fixture", Element.ELECTRO));
+        assertClose(expectedTransformative(1.5, Element.CRYO, 0.0) * 2.0,
+                superconduct.getTotalDamage(), 0.5,
+                "Overload limits should not suppress immediate Superconduct damage");
     }
 
     private static void testAccuracyPhaseG_BloomDirectionalAuraConsumptionContract() {
