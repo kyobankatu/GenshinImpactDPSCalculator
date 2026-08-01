@@ -949,7 +949,7 @@ experiment record.
 
 ### B-040 — Sacrificial Sword has no Composed passive
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 3 (explicit stat-only weapon and sourced passive divergence)
 - Symptom: `SacrificialSword` provides 454 base ATK and 61.3% ER but never
   attempts or applies its Skill cooldown reset, so every equipped simulation
@@ -975,4 +975,12 @@ experiment record.
   one draw per resolved hit, a success resets current Skill state and starts
   weapon cooldown, and a multi-charge reset removes only the earliest restore.
   Enemy shields and multiple-enemy trials remain unmodeled. See `TASKS.md`
-  implementation block `Sacrificial Sword Composed Passive`.
+  implementation block `Sacrificial Sword Composed Passive`. Completed
+  2026-08-02 with an injectable R5 damage-triggered passive and focused
+  `CooldownState.resetSkillCooldown`. Regression covers actual dispatch,
+  0.799999 success and 0.8 failure, multi-hit retry, same-time and 15.999-second
+  suppression, exact 16.0-second eligibility, non-Skill and zero-motion-value
+  exclusions, ready-Skill cooldown consumption, multi-charge earliest-only
+  reset, null injection, and unchanged Lv90 stats. Catalog validation passes;
+  no registered party equips Sacrificial Sword, so accepted sample behavior is
+  unchanged.

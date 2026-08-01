@@ -112,6 +112,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_DamageHooksDispatchOnce();
         testAccuracyPhaseF_SkywardSpineInjectedProcBoundaries();
         testAccuracyPhaseF_FavoniusInjectedProcBoundaries();
+        testAccuracyPhaseF_SacrificialSwordProcBoundaries();
         testAccuracyPhaseF_WanderingEvenstarTimedSnapshot();
         testAccuracyPhaseF_ColumbinaMoondriftInjectedDrawBoundaries();
         testAccuracyPhase2_TimeAwareLinearDecay();
@@ -1960,6 +1961,143 @@ public class ReactionRegressionTest {
         assertEquals(2, replayDrawIndex[0], "Identical Favonius sequences should consume equal draws");
         assertClose(energyAfterFirstProc, replayOwner.getCurrentEnergy(), EPS,
                 "Identical Favonius sequences should generate equal energy");
+    }
+
+    private static void testAccuracyPhaseF_SacrificialSwordProcBoundaries() {
+        boolean nullRejected = false;
+        try {
+            new model.weapon.SacrificialSword(null);
+        } catch (NullPointerException expected) {
+            nullRejected = true;
+        }
+        assertTrue(nullRejected, "Sacrificial Sword should reject a null proc draw source");
+
+        AttackAction skillHit = new AttackAction(
+                "Sacrificial Skill Hit",
+                1.0,
+                Element.PHYSICAL,
+                StatType.BASE_ATK,
+                StatType.SKILL_DMG_BONUS,
+                0.0,
+                ActionType.SKILL);
+        skillHit.setICD(ICDType.None, ICDTag.ElementalSkill, 0.0);
+        AttackAction zeroSkillHit = new AttackAction(
+                "Sacrificial Zero Skill Hit",
+                0.0,
+                Element.PHYSICAL,
+                StatType.BASE_ATK,
+                StatType.SKILL_DMG_BONUS,
+                0.0,
+                ActionType.SKILL);
+        AttackAction normalHit = new AttackAction(
+                "Sacrificial Normal Hit",
+                1.0,
+                Element.PHYSICAL,
+                StatType.BASE_ATK,
+                StatType.PHYSICAL_DMG_BONUS,
+                0.0,
+                ActionType.NORMAL);
+
+        int[] dispatchDraws = { 0 };
+        model.weapon.SacrificialSword dispatchWeapon = new model.weapon.SacrificialSword(() -> {
+            dispatchDraws[0]++;
+            return 0.799999;
+        });
+        TestCharacter dispatchOwner = testCharacter(Element.HYDRO);
+        dispatchOwner.setWeapon(dispatchWeapon);
+        dispatchOwner.setSkillCD(10.0);
+        CombatSimulator dispatchSim = simulatorWith(dispatchOwner);
+        dispatchOwner.markSkillUsed(0.0);
+        dispatchSim.performActionWithoutTimeAdvance(CharacterId.SUCROSE, skillHit);
+        assertEquals(1, dispatchDraws[0],
+                "A resolved Skill hit should dispatch one Sacrificial draw");
+        assertTrue(dispatchOwner.canSkill(0.0),
+                "A draw just below 0.8 should reset the pending Skill cooldown");
+        assertClose(454.0, dispatchWeapon.getStats().get(StatType.BASE_ATK), EPS,
+                "Sacrificial Sword should retain its Lv90 base ATK");
+        assertClose(0.613, dispatchWeapon.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "Sacrificial Sword should retain its Lv90 Energy Recharge");
+
+        int[] failedDraws = { 0 };
+        model.weapon.SacrificialSword failedWeapon = new model.weapon.SacrificialSword(() -> {
+            failedDraws[0]++;
+            return 0.8;
+        });
+        TestCharacter failedOwner = testCharacter(Element.HYDRO);
+        failedOwner.setSkillCD(10.0);
+        failedOwner.markSkillUsed(0.0);
+        failedWeapon.onDamage(failedOwner, skillHit, 0.0, simulatorWith(failedOwner));
+        assertEquals(1, failedDraws[0], "A draw equal to 0.8 should be consumed and fail");
+        assertTrue(!failedOwner.canSkill(9.999),
+                "A failed boundary draw should preserve the Skill cooldown");
+
+        double[] retrySequence = { 0.8, 0.1, 0.1 };
+        int[] retryIndex = { 0 };
+        model.weapon.SacrificialSword retryWeapon = new model.weapon.SacrificialSword(
+                () -> retrySequence[retryIndex[0]++]);
+        TestCharacter retryOwner = testCharacter(Element.HYDRO);
+        retryOwner.setWeapon(retryWeapon);
+        retryOwner.setSkillCD(30.0);
+        CombatSimulator retrySim = simulatorWith(retryOwner);
+        retryOwner.markSkillUsed(0.0);
+        retryWeapon.onDamage(retryOwner, skillHit, 0.0, retrySim);
+        assertEquals(1, retryIndex[0], "A failed Skill hit should permit a later-hit retry");
+        retryWeapon.onDamage(retryOwner, skillHit, 0.0, retrySim);
+        assertEquals(2, retryIndex[0], "A later Skill hit should consume the successful retry draw");
+        assertTrue(retryOwner.canSkill(0.0), "The successful retry should reset Skill cooldown");
+        retryWeapon.onDamage(retryOwner, skillHit, 0.0, retrySim);
+        assertEquals(2, retryIndex[0], "A successful retry should suppress further same-time draws");
+
+        retryOwner.markSkillUsed(1.0);
+        retryWeapon.onDamage(retryOwner, skillHit, 15.999, retrySim);
+        assertEquals(2, retryIndex[0], "Composed should not draw before sixteen seconds");
+        assertTrue(!retryOwner.canSkill(15.999),
+                "A suppressed pre-boundary hit should not reset Skill cooldown");
+        retryWeapon.onDamage(retryOwner, skillHit, 16.0, retrySim);
+        assertEquals(3, retryIndex[0], "Composed should draw at exactly sixteen seconds");
+        assertTrue(retryOwner.canSkill(16.0),
+                "An exact-boundary success should reset Skill cooldown");
+
+        int[] ineligibleDraws = { 0 };
+        model.weapon.SacrificialSword ineligibleWeapon = new model.weapon.SacrificialSword(() -> {
+            ineligibleDraws[0]++;
+            return 0.0;
+        });
+        TestCharacter ineligibleOwner = testCharacter(Element.HYDRO);
+        CombatSimulator ineligibleSim = simulatorWith(ineligibleOwner);
+        ineligibleWeapon.onDamage(ineligibleOwner, normalHit, 0.0, ineligibleSim);
+        ineligibleWeapon.onDamage(ineligibleOwner, zeroSkillHit, 0.0, ineligibleSim);
+        assertEquals(0, ineligibleDraws[0],
+                "Non-Skill and zero-damage Skill actions should not consume draws");
+
+        int[] readyDraws = { 0 };
+        model.weapon.SacrificialSword readyWeapon = new model.weapon.SacrificialSword(() -> {
+            readyDraws[0]++;
+            return 0.0;
+        });
+        TestCharacter readyOwner = testCharacter(Element.HYDRO);
+        CombatSimulator readySim = simulatorWith(readyOwner);
+        readyWeapon.onDamage(readyOwner, skillHit, 0.0, readySim);
+        readyOwner.setSkillCD(30.0);
+        readyOwner.markSkillUsed(1.0);
+        readyWeapon.onDamage(readyOwner, skillHit, 1.0, readySim);
+        assertEquals(1, readyDraws[0],
+                "A ready-Skill proc should consume the weapon cooldown");
+        assertTrue(!readyOwner.canSkill(1.0),
+                "A hit during weapon cooldown should not reset a newly pending Skill");
+
+        model.weapon.SacrificialSword chargeWeapon = new model.weapon.SacrificialSword(() -> 0.0);
+        TestCharacter chargeOwner = testCharacter(Element.HYDRO);
+        chargeOwner.setSkillCD(10.0);
+        chargeOwner.setSkillMaxCharges(2);
+        CombatSimulator chargeSim = simulatorWith(chargeOwner);
+        chargeOwner.markSkillUsed(0.0);
+        chargeOwner.markSkillUsed(1.0);
+        chargeWeapon.onDamage(chargeOwner, skillHit, 2.0, chargeSim);
+        assertEquals(java.util.List.of(11.0), chargeOwner.getChargeRestoreTimes(),
+                "Composed should remove only the earliest pending charge restore");
+        assertClose(10.0, chargeOwner.getActiveChargeCooldownDuration(), EPS,
+                "A remaining charge should retain the captured restore duration");
     }
 
     private static void testAccuracyPhaseF_WanderingEvenstarTimedSnapshot() {

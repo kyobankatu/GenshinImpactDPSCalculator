@@ -101,9 +101,9 @@ The B-039 Impetuous Winds correction is complete. Its existing 5% cooldown
 reduction stat shortens Skill and Burst cooldown state at cast time and remains
 exact across multi-charge scheduling and simulator snapshot restore.
 
-The B-040 Sacrificial Sword correction is in progress. Its R5 Composed passive
-will use deterministic-testable Skill-damage draws, reset only the applicable
-Skill cooldown, and enforce the sourced sixteen-second weapon cooldown.
+The B-040 Sacrificial Sword correction is complete. Its R5 Composed passive
+uses deterministic-testable Skill-damage draws, resets only the applicable
+Skill cooldown, and enforces the sourced sixteen-second weapon cooldown.
 
 ## Scope
 
@@ -5131,7 +5131,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phase 1 is complete and Phase 2 remains.
+- Implemented; Phases 1-2 are complete.
 - Requirement: R5 Sacrificial Sword must have an 80% chance to end its wielder's
   Skill cooldown after Skill damage, no more than once every sixteen seconds.
 
@@ -5225,7 +5225,7 @@ Completion evidence:
 - The pre-fix weapon has only 454 base ATK and 61.3% ER; repository search finds
   no Skill-cooldown reset API or Composed dispatch.
 
-### Phase 2: Implement, Regress, and Close Composed
+### Phase 2: Implement, Regress, and Close Composed - Done
 
 Why second:
 
@@ -5287,6 +5287,23 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/agent_validate.py --path src/java/model/entity/state/CooldownState.java --path src/java/model/entity/Character.java --path src/java/model/weapon/SacrificialSword.java --path src/java/model/weapon/AGENTS.md --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- An actual damage-dispatch Skill hit with draw 0.799999 resets a pending
+  cooldown; draw 0.8 fails and leaves it pending. The weapon retains 454 base
+  ATK and 61.3% ER.
+- A failed first Skill hit retries and succeeds on the second, after which
+  same-time and 15.999-second events consume no draw; exact 16.0 seconds is
+  eligible and resets again.
+- Normal and zero-motion-value Skill actions consume no draw. A proc while the
+  Skill is ready starts weapon cooldown and suppresses a newly pending Skill at
+  one second.
+- A two-charge proc removes only restore time 10.0 while preserving 11.0 and
+  the captured ten-second duration; null draw injection fails immediately.
+- ReactionRegressionTest, PartyCatalogRegressionTest, build, Javadoc, routed
+  validation, and preflight pass. No catalog party equips Sacrificial Sword, so
+  no accepted sample baseline changes.
 
 ## NCCL/DDP Distributed RL Training Plan
 

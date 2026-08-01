@@ -17,7 +17,8 @@
 - `NocturnesCurtainCall.java`: catalyst for Lunar teams with HP bonus, Lunar-triggered energy recovery, and temporary Lunar crit-damage buff.
 - `PrimordialJadeWingedSpear.java`: polearm with on-hit stack tracking, timed expiration, and max-stack damage bonus.
 - `ProspectorShovel.java`: custom polearm with Electro-Charged bonus and Moonsign-gated Lunar-Charged bonus.
-- `SacrificialSword.java`: sword currently modeled as base stats only.
+- `SacrificialSword.java`: R5 sword with an injectable Skill-damage reset draw
+  and a sixteen-second Composed cooldown.
 - `SkywardBlade.java`: sword with burst-triggered buff window and extra physical proc on normal or charged actions.
 - `SkywardSpine.java`: polearm with crit-rate and attack-speed stats plus random vacuum-blade proc logic.
 - `SunnyMorningSleepIn.java`: catalyst with reaction-listener registration and separate EM buffs for swirl, skill hits, and burst hits.

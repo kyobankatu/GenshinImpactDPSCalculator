@@ -462,6 +462,16 @@ public abstract class Character {
     }
 
     /**
+     * Ends the currently applicable Skill cooldown without changing last-use
+     * metadata or unrelated pending charge restores.
+     *
+     * @param currentTime current simulation time
+     */
+    public void resetSkillCooldown(double currentTime) {
+        cooldownState.resetSkillCooldown(currentTime);
+    }
+
+    /**
      * Records that the rotation requested a burst but current energy was
      * insufficient. This feeds ER calibration without executing the action.
      */

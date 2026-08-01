@@ -136,6 +136,29 @@ public class CooldownState {
     }
 
     /**
+     * Ends the currently applicable Skill cooldown.
+     *
+     * <p>For a multi-charge Skill, only the earliest pending restore (the
+     * displayed cooldown timer) is removed. Later pending restores retain their
+     * captured schedule.
+     *
+     * @param currentTime current simulation time in seconds
+     */
+    public void resetSkillCooldown(double currentTime) {
+        if (skillMaxCharges > 1) {
+            removeRestoredCharges(currentTime);
+            if (!chargeRestoreTimes.isEmpty()) {
+                chargeRestoreTimes.remove(0);
+            }
+            if (chargeRestoreTimes.isEmpty()) {
+                activeChargeCooldownDuration = 0.0;
+            }
+            return;
+        }
+        skillCooldownEndTime = currentTime;
+    }
+
+    /**
      * Clears all pending skill charge restore timestamps. Used when resetting
      * the simulation state.
      */
