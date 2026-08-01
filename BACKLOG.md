@@ -1877,3 +1877,30 @@ experiment record.
   `9b0b3556ca8f4eb799e6965156aab3bc70e512c7056cdf7e0202572c3996e464`,
   and `23dc585acc02d3bd7bca7fe3f5b65db62b3e1489fcedb12a02b9725b774b7dd4`
   with unchanged values/counts and zero Shatter or warning matches.
+
+### B-069 — Active standard Electro-Charged refreshes retain stale tick ownership
+
+- Status: `in-progress`
+- Source: 3 (README simplification audit plus KQM/gcsim evidence)
+- Symptom: every standard Electro-Charged reapplication deals another immediate
+  damage instance, while its active timer closure retains the first trigger's
+  pre-resistance damage and reports every periodic tick as `Thundercloud`.
+- Scope: standard refresh damage policy, latest owner/pre-resistance payload,
+  typed tick attribution, snapshot continuity, and catalog controls
+- Risk: `planned`
+- Proof: low/high-EM owner refresh, repeated refresh suppression, continued
+  notification/Aura effects, payload restore, B-056 timing, Lunar no-change,
+  and repeated catalog payloads
+- Notes: KQM records the first Electro-Charged tick under the reaction trigger
+  and later ticks under the latest character to apply an elemental source before
+  the tick. Its EM snapshot evidence separately shows that reapplication updates
+  subsequent damage. Maintained gcsim similarly updates the active attack
+  snapshot on every reaction while only a newly created sequence queues the
+  immediate tick and timer. Adopt this in the one-enemy standard path without
+  claiming multi-target spread/ICD behavior and without changing
+  Lunar-Charged. Live impact resistance remains B-048 policy. Sources accessed
+  2026-08-02:
+  https://library.keqingmains.com/evidence/combat-mechanics/elemental-effects/transformative-reactions#what-determines-whether-electro-charged-damage-is-calculated-using-the-electro-or-hydro-user,
+  https://library.keqingmains.com/evidence/combat-mechanics/elemental-effects/transformative-reactions#electro-charged-snapshots-em-until-reapplying,
+  https://library.keqingmains.com/evidence/combat-mechanics/elemental-effects/transformative-reactions#electro-charged-icd,
+  and https://github.com/genshinsim/gcsim/blob/main/pkg/reactable/electrocharged.go.

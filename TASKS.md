@@ -161,8 +161,9 @@ pass adds Overload's target-wide 0.1-second and owner-specific 0.5-second damage
 limits while preserving every reaction notification and gauge transition.
 
 The B-064 Overload, B-066 standard Crystallize, B-067 Superconduct, and B-068
-Shatter sequence passes are complete. Shatter damage now observes target/owner
-limits while notification and the current whole-Freeze clear continue.
+Shatter sequence passes are complete. The current B-069 pass corrects active
+standard Electro-Charged reapplications so they refresh the next tick's owner
+and damage snapshot without dealing another immediate damage instance.
 
 ## Scope
 
@@ -11411,6 +11412,177 @@ Completion evidence:
   zero Superconduct and warning/error/failed-action/insufficient-energy matches.
 - README documents damage-only sequence behavior. The tracked generated report
   was restored and no generated output is staged.
+
+## Implementation Order: Standard Electro-Charged Refresh Ownership
+
+Status: Phase 1 is complete. Phase 2 will add a snapshot-safe standard
+Electro-Charged tick payload and suppress immediate damage from active refreshes.
+
+Scope:
+
+- Active standard Electro-Charged reapplications refresh the next tick owner.
+- The latest owner's pre-resistance damage snapshot supplies the next tick.
+- Active reapplications continue reaction notification and coexisting Aura
+  application without recording a second immediate damage instance.
+- Snapshot save/restore and deterministic catalog acceptance.
+
+Out of scope for this pass:
+
+- Lunar-Charged/Thundercloud timing, ownership, weighting, or reporting.
+- Multi-target Electro-Charged spread and target-wide reaction damage ICD.
+- Hitlag behavior, adjacent-target ownership, RL behavior, and persistent jobs.
+
+Definitions:
+
+- **Active refresh**: a standard Electro-Charged reaction while the one-enemy
+  standard Electro-Charged periodic event is already active.
+- **Tick payload**: immutable latest-owner state containing `CharacterId` and
+  pre-resistance damage, updated by every standard application.
+
+Cross-cutting rules:
+
+- `ReactionState` owns the typed payload; the scheduler owns periodic timing and
+  reads the current payload only at impact.
+- The resolver distinguishes reaction notification/Aura effects from immediate
+  damage, and does not infer ownership from display strings.
+- Controller/facade methods mediate mutable state; snapshots preserve payload
+  independently of the intentionally omitted pending event queue.
+- Standard and Lunar paths remain explicit rather than sharing payload policy.
+- Preserve explicit staging and generated-artifact safety.
+
+### Phase 1: Record Electro-Charged Refresh Evidence - Done
+
+Why first:
+
+- Current code captures the first trigger's damage in a timer closure and also
+  damages on every refresh, so timing and ownership must be fixed together.
+
+Target files:
+
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Record the maintained ownership, EM refresh, and single-active-sequence rules.
+- Inventory resolver, scheduler, reaction-state, snapshot, and regression paths.
+- Fix standard/Lunar and single-target/multi-target boundaries before code edits.
+
+Acceptance criteria:
+
+- Refresh side effects, suppressed immediate damage, next-tick ownership, and
+  live impact resistance are explicit.
+- No production behavior changes occur in this phase.
+
+Test cases to add or update:
+
+- No production test; Phase 2 owns focused timing and ownership behavior.
+
+Verification:
+
+- inspect KQM Electro-Charged ownership, EM snapshot, and ICD evidence
+- inspect maintained gcsim Electro-Charged timer and payload refresh path
+- inspect resolver, scheduler, snapshot, controller, and regression paths
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- KQM records the initial tick under the triggering character and later ticks
+  under the latest character to apply an elemental source before that tick.
+- KQM's EM snapshot finding shows that reapplication updates subsequent damage.
+- Maintained gcsim updates the active Electro-Charged attack snapshot on every
+  reaction but starts immediate/timer damage only for a newly created sequence.
+- The current timer closure instead retains the first pre-resistance value and
+  records periodic damage under the untyped `Thundercloud` display source.
+
+### Phase 2: Implement Snapshot-Safe Refresh Ownership - Pending
+
+Why second:
+
+- Phase 1 establishes one coherent owner/damage payload without changing Lunar
+  behavior or the B-056 premature-expiry timing contract.
+
+Target files:
+
+- `src/java/simulation/runtime/ReactionState.java`
+- `src/java/simulation/runtime/ReactionStateController.java`
+- `src/java/simulation/CombatSimulator.java`
+- `src/java/simulation/SimulatorSnapshot.java`
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/mechanics/reaction/ReactionEffectScheduler.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `src/java/mechanics/rl/CapabilityProfiler.java` (snapshot forwarding only)
+- `TASKS.md`
+
+Tasks:
+
+- Add immutable standard Electro-Charged owner/pre-resistance payload state.
+- Update it on every standard reaction and read it at each periodic impact.
+- Suppress active-refresh immediate damage while preserving notification/Aura.
+- Attribute standard ticks to typed owner identity and round-trip the payload.
+
+Acceptance criteria:
+
+- A new standard sequence deals its existing immediate hit and first timed tick.
+- Active refreshes deal no immediate damage even after 0.5 seconds.
+- The next tick uses the latest owner's EM snapshot and damage attribution.
+- Live Electro RES is still resolved at impact and B-056 expiry behavior passes.
+- Snapshot restore reproduces the typed payload; Lunar behavior is unchanged.
+
+Test cases to add or update:
+
+- Normal: low-EM initial owner followed by high-EM refresh owner before tick.
+- Normal: a later refresh replaces owner and pre-resistance damage again.
+- Abnormal: repeated active refreshes do not add immediate damage.
+- Side effect: every refresh still notifies and applies the triggering Aura.
+- Snapshot: owner and pre-resistance payload survive save/mutate/restore.
+- No-change: premature Aura expiry, live RES, and Lunar cadence fixtures pass.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- routed validation/preflight planning without RL execution
+
+### Phase 3: Accept Electro-Charged Catalog Baselines - Pending
+
+Why third:
+
+- `RaidenParty` exercises standard Electro-Charged frequently, so focused tests
+  must pass before accepting its attribution and total changes.
+
+Target files:
+
+- `README.md`
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Run two no-daemon controls per catalog party against B-068.
+- Record hashes, totals, ER/cadence, reaction counts, and warning lines.
+- Attribute every standard-party delta and prove Lunar parties unchanged.
+
+Acceptance criteria:
+
+- All pairs are deterministic and every delta is explained by active refreshes
+  or standard tick ownership; Lunar catalog payloads remain byte-identical.
+- Tracked generated report is restored and no artifact is staged.
+- Plan, ledger, README, and checkpoint agree.
+
+Test cases to add or update:
+
+- Normal: pairwise exact catalog controls and expected Raiden attribution delta.
+- No-change: exact Flins/Flins2 Lunar totals, cadence, and event counts.
+- Abnormal: zero warning/generated-artifact leak.
+
+Verification:
+
+- two fresh `./gradlew --no-daemon RaidenParty` runs
+- two fresh `./gradlew --no-daemon FlinsParty` runs
+- two fresh `./gradlew --no-daemon FlinsParty2` runs
+- `python scripts/preflight.py --run`
 
 ## Implementation Order: Shatter Damage Sequence
 
