@@ -88,6 +88,10 @@ fixed loadout and rotation energy can legally sustain, and catalog parties
 include equipped artifact-set static stats in allocation. Fatal sample
 configuration errors propagate to the Gradle caller.
 
+The B-035 Wandering Evenstar correction is in progress. Its R5 owner and ally
+ATK bonuses will share one effective-EM snapshot, activate after the sourced
+64-frame delay, and refresh every ten seconds while the owner is off-field.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -4430,6 +4434,187 @@ Completion evidence:
   62,718 DPS over 21.0 seconds and normalized SHA-256
   `ff1adfd3b3705f1cc34a32036af0950aa8a1246a6412589eb214966b3f3c33dc`.
 - FlinsParty2 retains its accepted 14,077,198 damage / 203,722 DPS baseline.
+
+## Implementation Order: Wandering Evenstar Timed EM Snapshot
+
+Status:
+
+- In progress; Phase 1 is complete and Phases 2-3 remain.
+- Requirement: Wandering Evenstar must derive both R5 ATK bonuses from one
+  equipped-owner EM snapshot at the sourced activation cadence instead of
+  splitting its calculation across incompatible stat-assembly stages.
+
+Scope:
+
+- Add a narrow lifecycle capability for a weapon that must register simulator
+  events when its owner joins a party.
+- Trigger Wildling Nightstar after 64 frames and every ten seconds thereafter,
+  including while the owner is off-field.
+- Capture the owner's effective EM once per trigger, then apply 48% as owner
+  flat ATK and 14.4% as flat ATK to each other party member for the shared
+  twelve-second window.
+- Cover activation, expiry/refresh timing, snapshot stability, off-field use,
+  and independent stacking from multiple equipped copies.
+
+Out of scope for this pass:
+
+- Changing refinement level, weapon base stats, artifact allocation, Sucrose
+  talents, generic stat-assembly order, or other Tulaytullah-series weapons.
+- Modeling party distance; the single-target party simulator treats all other
+  members as nearby for this team buff.
+- Changing the intentionally excluded timer-event portion of simulator/RL
+  snapshots, RL observations or actions, generated reports, or committed docs.
+- Inferring percentage-based EM conversion chaining beyond the effective flat
+  EM visible to the simulator at each snapshot.
+
+Definitions:
+
+- `SimulatorInitializedWeaponEffect`: focused capability invoked once after an
+  equipped owner is added to a simulator, allowing a weapon to register its own
+  time-driven behavior without coupling generic `Weapon.applyPassive` to the
+  simulator.
+- Wildling Nightstar snapshot: one captured owner EM value used to derive both
+  the 48% owner bonus and 30%-of-that ally bonus until the next ten-second
+  refresh.
+
+Design boundaries:
+
+- `CombatSimulator` owns lifecycle dispatch after party insertion.
+- Wandering Evenstar owns its trigger cadence, captured value, and buff objects.
+- Buff application remains typed and source-attributed; multiple equipped
+  copies use independent instances and stack without display-name matching.
+- The default `Weapon` and unrelated weapon capabilities remain unchanged.
+
+### Phase 1: Record Wildling Nightstar Evidence and Pre-Fix Defect - Done
+
+Why first:
+
+The timed snapshot and shared EM basis must be sourced before changing a weapon
+that affects an accepted optimizer-driven party baseline.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record the R5 48%, 30% team share, 10-second trigger, 12-second duration, and
+  off-field wording from HoYoWiki.
+- Record KQM's 64-frame first activation and ten-second series resnapshot test.
+- Trace the pre-fix owner calculation through `StatAssembler`, where weapon
+  passive evaluation precedes artifact merging, while the team provider reads
+  artifact EM separately.
+
+Acceptance criteria:
+
+- Material values, timing, source dates, simulator classification, and URLs are
+  recorded in the durable ledger.
+- The observable pre-fix defect and bounded regression design are explicit.
+- No production source changes occur in this phase.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 introduces the failing
+  timing and shared-snapshot cases.
+
+Verification:
+
+- inspect `WanderingEvenstar`, `StatAssembler`, `BuffManager`, `CombatSimulator.addCharacter`, and timer events
+- `python scripts/preflight.py --run`
+
+### Phase 2: Register and Apply One Timed EM Snapshot
+
+Why second:
+
+The lifecycle seam and weapon implementation land together so the new interface
+has an immediate production caller and executable behavior.
+
+Target files:
+
+- new `src/java/model/entity/SimulatorInitializedWeaponEffect.java`
+- `src/java/simulation/CombatSimulator.java`
+- `src/java/model/weapon/WanderingEvenstar.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `src/java/model/entity/AGENTS.md`
+- `src/java/model/weapon/AGENTS.md`
+- `TASKS.md`
+
+Tasks:
+
+- Dispatch the initialization capability once after an owner is inserted into
+  the party.
+- Replace permanent split-basis provider/passive logic with one 64-frame-start,
+  ten-second periodic event that captures full effective owner EM including
+  applicable simulator buffs.
+- Maintain separate source-attributed owner and ally flat-ATK buffs from the
+  same captured value, refreshing their twelve-second windows without stacking
+  one equipped instance with itself.
+- Preserve independent stacking for multiple equipped copies and off-field
+  activation.
+
+Acceptance criteria:
+
+- No Evenstar ATK exists before 64/60 seconds; both bonuses appear at the exact
+  boundary and use one captured EM value.
+- EM changes inside a ten-second interval do not alter either bonus; the next
+  trigger updates both together and maintains continuous uptime.
+- The owner receives 48% and each other member 14.4% of captured EM as flat ATK.
+- Two equipped copies contribute independent ally shares without duplicate
+  lifecycle registration from one weapon.
+
+Test cases to add or update:
+
+- Boundary: 64-frame first activation and the next trigger at +10 seconds.
+- Normal: owner and ally R5 values from one known EM snapshot.
+- Snapshot: mid-window EM change is held until the next trigger.
+- Off-field: activation occurs while another party member is active.
+- Multi-instance: two owners' ally shares stack once each.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew PartyCatalogRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/model/weapon/WanderingEvenstar.java --path src/java/model/entity/SimulatorInitializedWeaponEffect.java --path src/java/simulation/CombatSimulator.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Accept the Timed FlinsParty Baseline
+
+Why last:
+
+The optimizer and full rotation must demonstrate that the corrected periodic
+buff remains deterministic and does not reintroduce energy warnings.
+
+Target files:
+
+- `README.md`
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Run two fresh complete FlinsParty payloads and compare normalized logs.
+- Record ER targets, total, DPS, duration, warning count, and normalized hash.
+- Document the timed Evenstar assumption and close B-035.
+
+Acceptance criteria:
+
+- Repeated complete payloads match with no insufficient-energy or optimizer
+  warning.
+- The numeric delta is attributable to the corrected owner/ally shared snapshot.
+- Documentation and ledger contain the accepted baseline and evidence.
+
+Test cases to add or update:
+
+- No further production test; Phase 2 owns weapon boundaries and Phase 3 owns
+  full-party acceptance.
+
+Verification:
+
+- two fresh `./gradlew FlinsParty` runs
+- `python scripts/preflight.py --run`
 
 ## NCCL/DDP Distributed RL Training Plan
 

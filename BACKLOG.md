@@ -818,3 +818,31 @@ experiment record.
   62,718 DPS baseline and agent-asset validation passes
 - Notes: completed 2026-08-02 as a documentation-only follow-up to B-033. No
   simulator behavior or historical TASKS/BACKLOG evidence was changed.
+
+### B-035 — Wandering Evenstar evaluates the owner's bonus before artifact EM
+
+- Status: `in-progress`
+- Source: 3 (sourced weapon-mechanic divergence)
+- Symptom: `Weapon.applyPassive` runs before artifact stats are merged, so
+  Wandering Evenstar derives its owner's 33.6% self-only remainder from base
+  and weapon EM while its 14.4% team share uses base, weapon, and artifact EM.
+  The two pieces therefore do not total the declared R5 48% conversion for the
+  high-EM Sucrose equipped in `FlinsParty`; the buff is also active at time zero
+  and dynamically recalculated instead of snapshotting every ten seconds.
+- Scope: weapon simulator-initialization capability, Wandering Evenstar timed
+  snapshot buffs, focused regression, and FlinsParty acceptance
+- Risk: `planned`
+- Proof: exact first-activation and ten-second resnapshot regressions plus two
+  matching warning-free `./gradlew FlinsParty` payloads
+- Notes: adopt the R5 Wildling Nightstar values from HoYoWiki's Wandering
+  Evenstar entry and adapt the maintained KQM TCL timing evidence, accessed
+  2026-08-02. HoYoWiki specifies a 48% owner conversion every 10 seconds for
+  12 seconds, a 30% share of that buff to nearby party members, and off-field
+  activation. KQM's v3.2 evidence, added 2022-11-09, records first activation
+  after 64 frames and confirms Tulaytullah-series resnapshotting every 10
+  seconds. Sources:
+  https://wiki.hoyolab.com/pc/genshin/entry/2910 and
+  https://library.keqingmains.com/evidence/equipment/weapons. Implement one
+  per-equipped-weapon timer with captured flat ATK buffs; do not make generic
+  weapon passives aware of artifact or simulator internals. See `TASKS.md`
+  implementation block `Wandering Evenstar Timed EM Snapshot`.
