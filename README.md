@@ -231,8 +231,10 @@ Known simplifications:
   expected damage. Her Moondrift extra attacks remain random. Flins's Thunderous
   Symphony correctly uses its active 30-energy cost while retaining an 80-energy
   maximum. Viridescent Venerer applies one independently refreshed 40% shred per
-  Swirled element only when its on-field owner triggers the reaction. The
-  accepted result is 13,633,123 damage / 197,296 DPS over 69.1 seconds.
+  Swirled element only when its on-field owner triggers the reaction. Silken
+  Moon's Serenade dynamically contributes 10% Lunar Reaction DMG for each
+  distinct active Intent/Devotion effect, capped at 20%. The accepted result is
+  14,194,732 damage / 205,423 DPS over 69.1 seconds.
 - `FlinsParty`: generic Favonius Codex and Columbina construction remains
   stochastic, while this optimizer-driven sample injects independent fixed
   Windfall and Moondrift streams so every candidate and final run uses the same
@@ -241,8 +243,9 @@ Known simplifications:
   silently returning an underfilled build. Wandering Evenstar snapshots the
   owner's effective EM after 64 frames and every 10 seconds for its linked
   owner/team ATK buffs. Viridescent Venerer uses the same non-stacking,
-  owner-triggered shred contract. The accepted result is 18,343,092 damage / 184,353 DPS
-  over 99.5 seconds with three successful Sucrose Bursts.
+  owner-triggered shred contract. Silken Moon's Serenade resolves the same
+  distinct-effect dynamic Lunar bonus. The accepted result is 18,930,343 damage /
+  190,255 DPS over 99.5 seconds with three successful Sucrose Bursts.
 
 ### Continuous Aura Decay Model
 
@@ -271,6 +274,6 @@ Latest validation baseline from the accuracy pass:
 
 - `./gradlew ReactionRegressionTest`
 - `./gradlew RaidenParty`: 1,312,883 total damage / 62,518 DPS
-- `./gradlew FlinsParty2`: 13,633,123 total damage / 197,296 DPS
+- `./gradlew FlinsParty2`: 14,194,732 total damage / 205,423 DPS
 - `./gradlew BenchmarkRLJava`
 - `./gradlew ProfileCapabilities`

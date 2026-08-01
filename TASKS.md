@@ -118,10 +118,10 @@ The B-044 Raiden Eye correction is complete. Recasting Transcendence: Baleful
 Omen refreshes each member's one 25-second Burst DMG buff instead of adding
 another same-ID value during the overlap.
 
-The B-045 Silken Moon's Serenade correction is in progress. Its Lunar Reaction
-bonus will be derived dynamically from the party's distinct active Gleaming Moon
-effects; the current manager scans the wrong buff source and always resolves
-the bonus to zero.
+The B-045 Silken Moon's Serenade correction is complete. Its Lunar Reaction
+bonus is derived dynamically from the party's distinct active Gleaming Moon
+effects through an artifact team-buff provider rather than the obsolete manager
+scan that always resolved to zero.
 
 ## Scope
 
@@ -5948,7 +5948,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phases 1-3 are complete and Phase 4 remains.
+- Complete; all four phases are verified and pushed.
 - Requirement: while Silken Moon's Serenade is equipped, all party members gain
   10% Lunar Reaction DMG for each distinct active Gleaming Moon effect, with
   duplicate effects never stacking.
@@ -6188,7 +6188,7 @@ Completion evidence:
 - Reaction and party-catalog regressions, build, Javadoc, routed validation, and
   preflight pass.
 
-### Phase 4: Re-Accept Silken Party Baselines
+### Phase 4: Re-Accept Silken Party Baselines - Done
 
 Why last:
 
@@ -6231,6 +6231,25 @@ Verification:
 - two fresh `./gradlew FlinsParty2` runs
 - `python scripts/validate_agent_assets.py`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Two `FlinsParty` runs produced identical complete logs and normalized SHA-256
+  `f6d276fde49b6677c928545e689f530c6d7cac492a45f2b952c668bb644b32f6`.
+  ER remains Sucrose 109%, Flins 100%, Ineffa 100%, and Columbina 180%, with
+  zero warning matches and 18,930,343 damage / 190,255 DPS over 99.5 seconds.
+- Two `FlinsParty2` runs match after excluding only Gradle's elapsed-time line,
+  at normalized SHA-256
+  `491cd43e7077114acbe4f00e38c02030426141331d05a921e598573d82347c40`.
+  ER remains Sucrose 141%, Flins 132%, Ineffa 105%, and Columbina 193%, with
+  zero warning matches and 14,194,732 damage / 205,423 DPS over 69.1 seconds.
+- Relative to the pre-fix values, totals increase by 587,251 (3.20%) and 561,609
+  (4.12%). In both payloads, Sucrose and Thundercloud totals are unchanged;
+  every increase is confined to Columbina, Flins, and Ineffa Lunar-classified
+  damage. Rotations, loadouts, ER, and durations are unchanged.
+- README and the verification skill carry the new accepted values. The generated
+  committed report was restored, agent assets and preflight pass, and no output
+  artifact is staged.
 
 ## NCCL/DDP Distributed RL Training Plan
 

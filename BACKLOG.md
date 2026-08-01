@@ -1094,7 +1094,7 @@ experiment record.
 
 ### B-045 — Silken Gleaming Moon Lunar bonus never activates
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 3 (sourced artifact-mechanic divergence)
 - Symptom: `MoonsignManager` searches simulator team/field/provider buffs for
   Intent and Devotion even though both are character-owned, so its distinct
@@ -1102,7 +1102,7 @@ experiment record.
 - Scope: generic artifact team-buff capability, dynamic Silken distinct-effect
   provider, obsolete manager removal, focused boundaries, and deterministic
   Flins/FlinsParty2 acceptance
-- Risk: `planned`
+- Risk: `validated`
 - Proof: provider routing tests; 0/10/20% dynamic, duplicate, off-field, exact
   expiry, and multi-wearer regressions; matching repeated party payloads
 - Notes: adopt the Luna I Silken Moon's Serenade description from the HoYoLAB
@@ -1115,3 +1115,12 @@ experiment record.
   Adapt with a generic artifact team-buff provider and one dynamic typed Silken
   buff that counts distinct unexpired character statuses at resolution time.
   See `TASKS.md` implementation block `Silken Gleaming Moon Dynamic Bonus`.
+  Completed with generic provider routing plus actual 0/10/20%, off-field EM,
+  duplicate, exact expiry, and multi-wearer regressions. Two FlinsParty logs
+  accept 18,930,343 / 190,255 over 99.5 seconds at normalized SHA-256
+  `f6d276fde49b6677c928545e689f530c6d7cac492a45f2b952c668bb644b32f6`;
+  two FlinsParty2 logs accept 14,194,732 / 205,423 over 69.1 seconds at
+  normalized SHA-256
+  `491cd43e7077114acbe4f00e38c02030426141331d05a921e598573d82347c40`.
+  ER and timings are unchanged, warning matches remain zero, and all increases
+  are confined to Lunar-classified character damage.
