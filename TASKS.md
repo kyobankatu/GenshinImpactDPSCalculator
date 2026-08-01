@@ -50,8 +50,8 @@ The B-021 correction is complete. Xingqiu's two Fatal Rainscreen strikes now
 each use their sourced 1U/no-ICD contract instead of sharing standard Skill
 ICD.
 
-The active queue is B-022: Bennett's Press Skill must use 2U/no ICD and his
-Burst must retain 2U while no longer entering a Burst ICD group.
+The B-022 correction is complete. Bennett's Press Skill now uses 2U/no ICD and
+his Burst retains 2U without entering a Burst ICD group.
 
 ## Scope
 
@@ -2664,7 +2664,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phases 1-2 are complete and Phase 3 remains.
+- Implemented and verified; Phases 1-3 are complete.
 - Requirement: Passion Overload Press applies 2U Pyro with no ICD, while
   Fantastic Voyage applies 2U Pyro with no ICD.
 
@@ -2760,7 +2760,7 @@ Verification:
 - `./gradlew build`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Accept the RaidenParty Gauge Delta
+### Phase 3: Accept the RaidenParty Gauge Delta - Done
 
 Why last:
 
@@ -2796,6 +2796,17 @@ Verification:
 - two fresh `./gradlew RaidenParty` runs
 - `python scripts/validate_agent_assets.py` when baseline gate changes
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Actual-character regression captures Press as 2U/no-ICD Pyro Skill damage
+  and Fantastic Voyage as 2U/no-ICD Pyro Burst damage, including Overloaded,
+  Vaporize, and isolated no-aura paths.
+- Both post-fix `RaidenParty` payloads report 1,433,347 damage / 68,255 DPS and
+  match after excluding Gradle's elapsed-time line, with SHA-256
+  `e35dfd3b864ddbc2ff132dae447eeed51506bbe26c5980fecf1bf1535c0ef59f`.
+- The intentional decrease reflects the sourced stronger Press gauge retaining
+  a 2U Pyro aura at 14.8 seconds and changing downstream reaction ownership.
 
 ## Cross-Cutting Rules
 
