@@ -10539,7 +10539,7 @@ Completion evidence:
   Pyro skips Melt and follows ordinary Vaporize resolution.
 - Reaction regression, build, Javadoc, routed validation, and preflight all pass.
 
-### Phase 3: Re-Accept Frozen-Melt-Neutral Baselines - In Progress
+### Phase 3: Re-Accept Frozen-Melt-Neutral Baselines - Done
 
 Target files:
 
@@ -10571,6 +10571,22 @@ Verification:
 - two fresh `./gradlew --no-daemon FlinsParty` runs
 - two fresh `./gradlew --no-daemon FlinsParty2` runs
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Two fresh no-daemon runs per catalog party match pairwise after removing only
+  Gradle's elapsed-success line: Raiden
+  `bbd1c4f61f00024213e1c6f49519fe7abe0ad568c8dacf4c562437e5e6b59abc`,
+  Flins `9b0b3556ca8f4eb799e6965156aab3bc70e512c7056cdf7e0202572c3996e464`,
+  and Flins2
+  `23dc585acc02d3bd7bca7fe3f5b65db62b3e1489fcedb12a02b9725b774b7dd4`.
+- Totals/DPS remain 1,365,787/65,037, 22,675,823/227,898, and
+  15,817,125/228,902. ER and timed/reaction/delayed/ICD counts retain the B-062
+  contracts because every normalized payload is byte-identical.
+- All six runs contain zero Melt/Frozen/Shatter and zero
+  warning/error/failed-action/insufficient-energy lines.
+- README documents the Pyro/Frozen order and narrows the remaining Frozen
+  exclusions. The tracked generated report was restored.
 
 ## Implementation Order: Deterministic Simultaneous Reaction Priority
 

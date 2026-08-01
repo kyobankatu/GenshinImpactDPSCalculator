@@ -295,8 +295,11 @@ Elemental Gauge Theory contract:
   Quicken and coexisting Dendro while creating one core.
 - **Frozen Aura**: Freeze stores twice the smaller current origin/trigger gauge,
   decays as `F(t) = F0 - 0.4t - 0.05t^2`, and extends without resetting its
-  instantaneous decay rate. Shatter clears the live gauge, inactive decay rate
-  recovers toward 0.4 U/s, and snapshots preserve the complete payload.
+  instantaneous decay rate. Non-blunt Pyro resolves one forward Melt against
+  Frozen before hidden ordinary Auras, consumes Frozen and coexisting Cryo at
+  2x gauge, and preserves hidden Hydro. Blunt hits Shatter first and then react
+  with the exposed ordinary Aura. Inactive decay rate recovers toward 0.4 U/s,
+  and snapshots preserve the complete payload.
 - **Single source of truth**: reaction eligibility/consumption, combat logs, the
   HTML Aura Timeline, RL observations, and snapshot save/restore all read the same
   current-time-aware aura value. Snapshots preserve application time and decay
@@ -304,8 +307,9 @@ Elemental Gauge Theory contract:
 - **Aura Timeline**: rendered as continuous (non-stepped) lines that slope down to
   zero at expiry, matching the per-event aura bars in the Timeline view.
 
-Known differences from exact game internals: Frozen dual-Aura reaction priority,
-trigger residuals, resistance, hitlag, and poise; a separately reactable 2U
+Known differences from exact game internals: Frozen interactions for Electro,
+Anemo, and Geo plus unrelated coexisting-Aura priority, trigger residuals,
+resistance, hitlag, and poise; a separately reactable 2U
 Burning Aura and Burning's 1U Pyro reapplication ICD; Swirl spread;
 Electro-Charged ownership/damage-ICD/hitlag interactions; and some reaction
 gauge modifiers remain simplified. The simulator also does not model

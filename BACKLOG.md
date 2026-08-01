@@ -1694,7 +1694,7 @@ experiment record.
 
 ### B-063 — Pyro Vaporizes hidden Hydro instead of Melting Frozen Aura
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 1/3 (README Frozen priority exclusion plus KQM/gcsim evidence)
 - Symptom: the ordinary resolver cannot see typed Frozen Aura, so non-blunt Pyro
   iterates a stronger Freeze origin's hidden Hydro and triggers Vaporize while
@@ -1702,7 +1702,7 @@ experiment record.
 - Scope: non-blunt Pyro Melt against typed Frozen, simultaneous underlying Cryo
   consumption, hidden Hydro preservation, blunt Shatter order, exact expiry,
   and catalog controls
-- Risk: `planned`
+- Risk: `validated`
 - Proof: Melt-only hidden-Hydro case, dual Frozen/Cryo reduction, partial Frozen
   survival, Shatter-before-Vaporize blunt case, expiry fallback, and unchanged
   no-Freeze party baselines
@@ -1717,3 +1717,7 @@ experiment record.
   This pass implements Pyro/Frozen only. Electro/Anemo/Geo interactions,
   additional coexisting ordinary elements, trigger residuals, Freeze resistance,
   Shatter ICD, hitlag, poise, and multi-target behavior remain separate.
+  Implemented with one resolver-local typed-Frozen branch. Focused regressions
+  cover Melt-only hidden Hydro, dual Frozen/Cryo consumption, partial survival,
+  Shatter-before-Vaporize, and exact expiry. Six fresh catalog controls exactly
+  retain the B-062 hashes, values, ER/cadence counts, and zero-warning contract.
