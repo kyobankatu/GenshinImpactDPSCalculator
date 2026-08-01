@@ -56,6 +56,9 @@ his Burst retains 2U without entering a Burst ICD group.
 The B-023 correction is complete. Raiden's Skill and Burst cast metadata and
 Musou Isshin Normal/Charged shared ICD group now match their sourced contracts.
 
+The active queue is B-024: recasting Raiden's Skill must cancel the previous
+Eye periodic event so one refreshed Eye, not two overlapping streams, remains.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -2962,6 +2965,147 @@ Completion evidence:
   `c1b6624fb2ea1a3d361a778a5aeead7d731c8bb3f0dae05c5c8d85b6d34c4da0`.
 - Detailed logs show the first Eye can apply independently from Skill cast and
   Burst Normal/Charged blocks use `Raiden_MusouIsshin`.
+
+## Implementation Order: Raiden Eye Refresh Lifecycle
+
+Status:
+
+- Planned; Phase 1 evidence is recorded below.
+- Requirement: recasting Transcendence: Baleful Omen replaces the previous Eye
+  periodic stream and refreshes its duration without overlapping attacks.
+
+Scope:
+
+- Add explicit cancellation lifecycle to `PeriodicDamageEvent`.
+- Retain and cancel Raiden's prior Eye event before registering its replacement.
+- Add timer-level and actual-Raiden refresh regression coverage.
+
+Out of scope for this pass:
+
+- Eye's 0.9-second cadence, 25-second duration, trigger-on-damage fidelity,
+  particles, ICD metadata, Skill cooldown, damage multiplier, optimizer policy,
+  reports, or RL.
+- General event deduplication or changing other periodic effects.
+
+Design boundaries:
+
+- `PeriodicDamageEvent` owns its cancelled/finished state.
+- `RaidenShogun` owns only the currently registered Eye event handle.
+- Cancellation is idempotent and a cancelled event deals no further damage or
+  invokes its callback.
+
+### Phase 1: Record Overlapping Eye Evidence - Done
+
+Why first:
+
+The duplicate stream must be distinguished from legitimate 0.9-second Eye
+cadence before changing reusable timer lifecycle.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record the current 25-second Eye and 0.9-second per-party cadence sources.
+- Record the post-recast duplicate timestamps in the audited sample.
+- Define cancellation behavior and focused timer/character tests.
+
+Acceptance criteria:
+
+- Source URLs, access date, refresh interpretation, and observed duplicate count
+  are recorded.
+- The pre-fix final trace records old-stream times 15.0, 15.9, ..., 20.4 and
+  new-stream times 15.6, 16.5, ..., 21.0 after the 14.2-second recast.
+- Other periodic event users remain out of scope.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 adds executable coverage.
+
+Verification:
+
+- inspect `RaidenShogun.skill`, `PeriodicDamageEvent`, and sample timestamps
+- `python scripts/preflight.py --run`
+
+### Phase 2: Implement and Test Eye Event Replacement
+
+Why second:
+
+An explicit event lifecycle keeps cancellation policy reusable and avoids
+embedding scheduler internals in the character.
+
+Target files:
+
+- `src/java/simulation/event/PeriodicDamageEvent.java`
+- `src/java/model/character/RaidenShogun.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Add idempotent `cancel()` and make cancelled events immediately finished.
+- Prevent cancelled events from executing damage or callbacks.
+- Cancel Raiden's retained Eye event before registering a replacement.
+
+Acceptance criteria:
+
+- A cancelled periodic event executes neither action nor callback.
+- Repeated cancellation is safe and the scheduler drops the event at its next
+  due time.
+- Raiden recast produces only replacement-stream Eye hits after refresh.
+- Other non-cancelled periodic events retain existing cadence.
+
+Test cases to add or update:
+
+- Normal: non-cancelled periodic event still ticks on schedule.
+- Abnormal: cancel before due time yields zero damage/callback ticks.
+- Refresh: actual Raiden recast has no old-stream Eye hit after replacement.
+- Boundary: calling `cancel()` twice remains a no-op after the first call.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Accept the RaidenParty Eye-Refresh Delta
+
+Why last:
+
+Removing duplicate Eye hits changes damage, particles, aura, and optimizer
+results in the audited rotation after the second Skill cast.
+
+Target files:
+
+- `README.md`
+- `TASKS.md`
+- `BACKLOG.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+
+Tasks:
+
+- Run two fresh `RaidenParty` payloads after event replacement.
+- Confirm only the replacement Eye stream remains after the 14.2-second recast.
+- Update the deterministic Raiden baseline.
+
+Acceptance criteria:
+
+- Both normalized payloads and numeric summaries match.
+- Detailed trace has no stale old-stream Eye timestamps after refresh.
+- Numeric baseline documents agree.
+- Agent assets and routed preflight checks pass.
+
+Test cases to add or update:
+
+- No further production test; Phase 2 owns timer and refresh behavior.
+
+Verification:
+
+- two fresh `./gradlew RaidenParty` runs
+- `python scripts/validate_agent_assets.py` when baseline gate changes
+- `python scripts/preflight.py --run`
 
 ## Cross-Cutting Rules
 

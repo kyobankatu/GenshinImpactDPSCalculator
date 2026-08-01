@@ -547,3 +547,27 @@ experiment record.
   N/CA ICD, and unchanged physical tags. Both post-fix `RaidenParty` payloads
   report 1,402,417 damage / 66,782 DPS with normalized SHA-256
   `c1b6624fb2ea1a3d361a778a5aeead7d731c8bb3f0dae05c5c8d85b6d34c4da0`.
+
+### B-024 — Raiden Skill recast leaves two Eye event streams active
+
+- Status: `planned`
+- Source: 2 (observable audited-sample duplicate output)
+- Symptom: the 14.2-second Skill recast registers a second 0.9-second periodic
+  Eye event without ending the first; the final trace contains old-stream hits
+  at 15.0 through 20.4 seconds and new-stream hits at 15.6 through 21.0 seconds.
+- Scope: `src/java/simulation/event/PeriodicDamageEvent.java`,
+  `src/java/model/character/RaidenShogun.java`,
+  `src/java/sample/ReactionRegressionTest.java`
+- Risk: `planned`
+- Proof: timer cancellation and actual-Raiden recast regression plus two fresh
+  deterministic `RaidenParty` payloads
+- Notes: adopt the current KQM and Genshin Impact Wiki Skill contract (accessed
+  2026-08-02): Eye is one 25-second status whose coordinated attack can occur
+  once every 0.9 seconds per party. Recasting refreshes that status; it does not
+  create an independently stacking Eye. Sources:
+  https://library.keqingmains.com/characters/electro/raiden-shogun and
+  https://genshin-impact.fandom.com/wiki/Raiden_Shogun. Implement explicit,
+  idempotent `PeriodicDamageEvent` cancellation and let Raiden retain only the
+  current event handle. Pre-fix audited `RaidenParty` baseline is 1,402,417
+  damage / 66,782 DPS. See `TASKS.md` implementation block
+  `Raiden Eye Refresh Lifecycle`.
