@@ -1063,3 +1063,25 @@ experiment record.
   SHA-256 `ff1adfd3b3705f1cc34a32036af0950aa8a1246a6412589eb214966b3f3c33dc`
   at unchanged 100%/175%/179%/174% ER and 1,317,080 / 62,718 over 21.0
   seconds, with zero warning matches.
+
+### B-044 — Raiden Eye Burst DMG buff stacks on legal Skill recast
+
+- Status: `in-progress`
+- Source: 3 (sourced character-mechanic divergence)
+- Symptom: Raiden's ten-second Skill recast appends another 25-second same-ID
+  buff to every recipient, doubling their Energy Cost-scaled Burst DMG Bonus for
+  the fifteen-second overlap.
+- Scope: Raiden recipient-buff replacement, actual recast boundary regression,
+  and deterministic RaidenParty acceptance
+- Risk: `planned`
+- Proof: one typed source-attributed value per recipient before/after an exact-CD
+  recast, exact refreshed expiry, and matching repeated RaidenParty payloads
+- Notes: adopt the maintained KQM Raiden TCL and guide, accessed 2026-08-02. The
+  TCL describes one Eye granted to nearby members, a Talent 9 value of 0.3% per
+  Energy, 25-second duration, and ten-second cooldown; the guide explicitly
+  describes subsequent Skill use as refreshing it. Sources:
+  https://library.keqingmains.com/characters/electro/raiden-shogun and
+  https://keqingmains.com/raiden/. Adapt the singular recipient status through
+  `removeBuff(RAIDEN_EYE_OF_STORMY_JUDGMENT)` before adding its newly timed,
+  recipient-scaled instance. See `TASKS.md` implementation block
+  `Raiden Eye Buff Refresh`.

@@ -114,6 +114,10 @@ The B-043 Noblesse Oblige correction is complete. Its teamwide 20% ATK buff
 refreshes one twelve-second typed window instead of stacking repeated or
 multi-wearer applications.
 
+The B-044 Raiden Eye correction is in progress. Recasting Transcendence:
+Baleful Omen will refresh each member's one 25-second Burst DMG buff instead of
+adding another same-ID value during the overlap.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -5725,6 +5729,185 @@ Completion evidence:
 - The ordinary catalog rotation has no overlapping Noblesse reapplication, so
   its unchanged result isolates the correction to the newly regressed overlap
   path. No generated report or output is staged.
+
+## Implementation Order: Raiden Eye Buff Refresh
+
+Status:
+
+- In progress; Phase 1 is complete and Phases 2-3 remain.
+- Requirement: each party member may have one Eye of Stormy Judgment Burst DMG
+  buff, refreshed to 25 seconds when Raiden recasts her Skill.
+
+Scope:
+
+- Replace each recipient's existing typed Eye buff before adding the newly
+  calculated recipient-specific value.
+- Preserve the 0.3% per Energy Cost scaling, 25-second duration, partywide
+  targeting, Raiden source attribution, Skill damage, coordinated attacks, and
+  ten-second Skill cooldown.
+- Cover recipient scaling, recast overlap, exact expiry, typed instance count,
+  source attribution, and accepted RaidenParty output.
+
+Out of scope for this pass:
+
+- Changing Raiden talent levels or multipliers, Resolve, energy restoration,
+  coordinated-attack cadence, particle chance, ICD, Burst stance, or C6.
+- Changing generic character-buff storage or introducing a team buff whose
+  value must vary by recipient.
+- Changing rotations, optimizer allocation, damage formula order, RL paths,
+  generated reports, or committed `docs/` output.
+
+Definitions:
+
+- Eye recipient buff: one character-owned
+  `BuffId.RAIDEN_EYE_OF_STORMY_JUDGMENT` window sourced by Raiden, active over
+  `[applicationTime, applicationTime + 25.0)`, with Burst DMG Bonus equal to
+  `recipientEnergyCost * 0.003`.
+- Refresh: remove the recipient's prior typed Eye buff and add one newly timed
+  instance without summing values.
+
+Design boundaries:
+
+- `RaidenShogun.skill` owns per-recipient scaling, replacement, and creation.
+- Character `removeBuff(BuffId)` owns typed replacement for character-local
+  values; simulator team buffs are unsuitable because values differ by energy
+  cost.
+- Cooldown, action resolution, and coordinated-attack lifetime remain
+  unchanged.
+
+### Phase 1: Record Eye Recast Semantics - Done
+
+Why first:
+
+The singular buff and refresh behavior must be distinguished from intentionally
+stacked status effects before changing a long-overlap Skill.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record the maintained KQM TCL values: one Eye granted to nearby party members,
+  0.3% Burst DMG per Energy at Talent 9, 25-second duration, and ten-second CD.
+- Record the maintained KQM guide's instruction to refresh Raiden's Skill in
+  subsequent rotations.
+- Trace the current per-recipient `addBuff` loop and prove legal recasts leave
+  duplicate same-ID values additive for fifteen seconds.
+
+Acceptance criteria:
+
+- Scaling, duration, cooldown, refresh semantics, access date, source URLs,
+  classification, and simulator adaptation are recorded.
+- The correction remains inside Raiden's existing per-recipient buff loop.
+- No production source changes occur in this phase.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 adds the pre-fix failing
+  legal-recast case.
+
+Verification:
+
+- inspect `RaidenShogun`, `Character` buff replacement, `CooldownState`, and
+  `CombatActionResolver`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- KQM's maintained Raiden TCL and Raiden guide were accessed 2026-08-02. The
+  TCL records one Eye, 0.3% per Energy, 25 seconds, and ten-second CD; the guide
+  calls subsequent Skill use a refresh.
+- Classification: adopt one refreshed recipient status and adapt it through
+  typed character-buff replacement. Current code appends a new same-ID value on
+  every legal recast, so stat assembly adds both throughout their overlap.
+
+### Phase 2: Refresh Recipient Eye Buffs and Regress Recasts
+
+Why second:
+
+The exact overlap and recipient-specific values must be proven before catalog
+acceptance.
+
+Target files:
+
+- `src/java/model/character/RaidenShogun.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Remove each recipient's existing typed Eye buff immediately before adding the
+  refreshed value.
+- Add an actual Skill/recast regression at the ten-second cooldown boundary.
+- Assert separate Raiden and ally Energy Cost scaling, one typed instance,
+  Raiden source attribution, and exact refreshed expiry.
+
+Acceptance criteria:
+
+- An initial Skill grants Raiden 0.27 and a 60-cost ally 0.18 Burst DMG Bonus.
+- A legal recast at exactly ten seconds leaves those same values, not 0.54 and
+  0.36, and leaves one typed buff per recipient.
+- A recast started at the exact 10.0-second cooldown boundary applies its
+  refreshed buff after the existing 0.5-second Skill action; it remains active
+  at 35.499 seconds and is absent at exactly 35.5 seconds.
+- Every refreshed instance remains sourced by Raiden.
+- Skill cast and coordinated-attack behavior remain covered by existing tests.
+
+Test cases to add or update:
+
+- Normal: actual initial Skill with 90- and 60-cost recipients.
+- Recast: actual second Skill at the exact cooldown boundary.
+- Identity: one typed Eye instance per character and Raiden source ID.
+- Expiry: active immediately before and absent exactly 25 seconds after recast.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew PartyCatalogRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/model/character/RaidenShogun.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Re-Accept the Raiden Eye Baseline
+
+Why last:
+
+RaidenParty exercises the full Eye, Burst, optimizer, and energy path and must
+remain deterministic when its rotation does not overlap a recast.
+
+Target files:
+
+- `README.md` only if the accepted value changes
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Run two fresh complete `RaidenParty` payloads and compare normalized logs.
+- Record ER, warnings, duration, total, DPS, and normalized hash.
+- Close B-044 without changing unrelated deferred work.
+
+Acceptance criteria:
+
+- Repeated normalized payloads match and contain no new energy or optimizer
+  warning.
+- The existing one-cast catalog rotation remains numerically unchanged unless
+  it actually exercises a duplicate Eye window.
+- Plan and ledger agree on the accepted baseline and no generated output is
+  staged.
+
+Test cases to add or update:
+
+- No further production test; Phase 2 owns recast mechanics and Phase 3 owns
+  deterministic catalog acceptance.
+
+Verification:
+
+- two fresh `./gradlew RaidenParty` runs
+- `python scripts/preflight.py --run`
 
 ## NCCL/DDP Distributed RL Training Plan
 
