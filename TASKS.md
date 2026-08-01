@@ -161,8 +161,8 @@ pass adds Overload's target-wide 0.1-second and owner-specific 0.5-second damage
 limits while preserving every reaction notification and gauge transition.
 
 The B-064 Overload, B-066 standard Crystallize, and B-067 Superconduct sequence
-passes are complete. Superconduct damage now observes target/owner limits while
-reaction notification, Aura consumption, and physical shred continue.
+passes are complete. The current B-068 pass adds Shatter's target and owner
+damage sequence while preserving notification and current Freeze clearing.
 
 ## Scope
 
@@ -11411,3 +11411,169 @@ Completion evidence:
   zero Superconduct and warning/error/failed-action/insufficient-energy matches.
 - README documents damage-only sequence behavior. The tracked generated report
   was restored and no generated output is staged.
+
+## Implementation Order: Shatter Damage Sequence
+
+Status: Phase 1 is complete. Phase 2 will reuse the fixed owner-sequence policy
+for snapshot-safe Shatter damage-only gating.
+
+Scope:
+
+- One-enemy 0.2-second target-wide Shatter damage GCD.
+- Per-`CharacterId` fixed 0.5-second damage window accepting two hits.
+- Continued notification and the simulator's existing whole-Freeze clear.
+- Snapshot save/restore and deterministic catalog acceptance.
+
+Out of scope for this pass:
+
+- Partial Frozen durability, trigger residuals, poise-scaled reduction, Freeze
+  resistance, hitlag extension, adjacent targets, and multi-target damage caps.
+- Superconduct behavior changes, other reaction sequences, RL changes, and
+  persistent jobs.
+
+Definitions:
+
+- **Target GCD**: the earliest time any owner may enqueue the next Shatter
+  damage attempt on the one modeled enemy.
+- **Owner sequence**: the same generic fixed-window policy used by B-067;
+  entries one and two damage, later target-passing entries do not until reset.
+
+Cross-cutting rules:
+
+- `ReactionState` owns reaction-specific target fields and reusable immutable
+  owner payloads; resolver state does not leak into the policy.
+- Controller/facade inject current time; snapshots preserve Shatter separately
+  from Superconduct.
+- Notify and clear Freeze before damage gating. Target-blocked attempts do not
+  mutate owner state; owner-blocked attempts still start the next target GCD.
+- Exact 0.2/0.5-second boundaries are inclusive.
+- Preserve explicit staging and generated-artifact safety.
+
+### Phase 1: Record Shatter Damage-Sequence Evidence - Done
+
+Why first:
+
+- Shatter's target GCD differs from Superconduct and its existing Freeze clear
+  must remain an effect rather than becoming damage-conditional.
+
+Target files:
+
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Record KQM's two-hit/0.5-second finding and maintained target GCD.
+- Confirm maintained event/reduction-before-damage order and owner sequence.
+- Inventory the current resolver and snapshot boundaries.
+
+Acceptance criteria:
+
+- Damage-only suppression, both timing dimensions, and current Freeze-clear
+  simplification are explicit.
+- No production behavior changes occur in this phase.
+
+Test cases to add or update:
+
+- No production test; Phase 2 owns focused sequence behavior.
+
+Verification:
+
+- inspect KQM Shatter Damage ICD and maintained gcsim Freeze/ICD paths
+- inspect resolver, reaction state/controller, snapshot, and regression paths
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- KQM v1.5 records at most two Shatter damage instances within 0.5 seconds.
+- Maintained gcsim emits the reaction and reduces Frozen before one target
+  `shatterGCD` of 0.2 seconds, then uses owner-specific `ReactionA` entries
+  one/two followed by zeros until its fixed timer reset.
+- The current resolver notifies, damages, and only then clears all typed Freeze.
+  Phase 2 must move the existing clear before a damage-only policy decision.
+
+### Phase 2: Implement Snapshot-Safe Shatter Damage Sequence - Pending
+
+Why second:
+
+- Phase 1 establishes reuse of the fixed owner-window state without coupling
+  Shatter and Superconduct target clocks.
+
+Target files:
+
+- `src/java/simulation/runtime/ReactionState.java`
+- `src/java/simulation/runtime/ReactionStateController.java`
+- `src/java/simulation/CombatSimulator.java`
+- `src/java/simulation/SimulatorSnapshot.java`
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `src/java/mechanics/rl/CapabilityProfiler.java` (snapshot forwarding only)
+- `TASKS.md`
+
+Tasks:
+
+- Generalize B-067's immutable owner payload name and shared fixed-window helper.
+- Add separate Shatter target/owner state with snapshot round trip.
+- Clear Freeze before the Shatter damage-only decision and regress boundaries.
+
+Acceptance criteria:
+
+- Target attempts before 0.2 seconds deal no damage and start no owner window.
+- One owner deals first/two target-passing hits, not third; another owner is
+  independent, and exact owner reset is accepted.
+- Every blocked attempt still notifies and clears the reapplied Freeze fixture.
+- Snapshot restore reproduces target and owner decisions.
+- Superconduct sequence behavior remains unchanged.
+
+Test cases to add or update:
+
+- Normal: owner hits one/two and exact 0.5-second reset from a snapshot.
+- Abnormal: 0.1-second cross-owner target block and same-owner third hit.
+- Side effect: listener count and `isFrozen` prove blocked Shatter clears state.
+- Snapshot: restore after owner hit two and exercise exact reset.
+- No-change: B-067 focused sequence continues to pass.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- routed validation/preflight planning without RL execution
+
+### Phase 3: Accept Shatter-Sequence Catalog Baselines - Pending
+
+Why third:
+
+- Catalog acceptance follows focused sequence and snapshot verification.
+
+Target files:
+
+- `README.md`
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Run two no-daemon controls per catalog party against B-067.
+- Record hashes, totals, ER/cadence, Shatter counts, and warnings.
+- Document the damage-only sequence and close B-068.
+
+Acceptance criteria:
+
+- All pairs are deterministic and every delta is attributable, or exact
+  no-change is proven.
+- Tracked generated report is restored and no artifact is staged.
+- Plan, ledger, README, and checkpoint agree.
+
+Test cases to add or update:
+
+- Normal: pairwise exact catalog controls.
+- No-change: accepted totals/ER/cadence and non-Shatter paths.
+- Abnormal: zero warning/generated-artifact leak.
+
+Verification:
+
+- two fresh `./gradlew --no-daemon RaidenParty` runs
+- two fresh `./gradlew --no-daemon FlinsParty` runs
+- two fresh `./gradlew --no-daemon FlinsParty2` runs
+- `python scripts/preflight.py --run`

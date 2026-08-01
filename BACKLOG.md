@@ -1841,3 +1841,28 @@ experiment record.
   `9b0b3556ca8f4eb799e6965156aab3bc70e512c7056cdf7e0202572c3996e464`,
   and `23dc585acc02d3bd7bca7fe3f5b65db62b3e1489fcedb12a02b9725b774b7dd4`
   with unchanged values/counts and zero Superconduct or warning matches.
+
+### B-068 — Shatter damage ignores target and owner damage sequences
+
+- Status: `in-progress`
+- Source: 3 (B-063 out-of-scope accuracy gap plus KQM/gcsim evidence)
+- Symptom: every rapid Shatter notification records damage, ignoring both the
+  target attack GCD and fixed two-hit owner damage sequence.
+- Scope: target/owner damage-only state, continued notification/Freeze clear,
+  snapshot continuity, and catalog controls
+- Risk: `planned`
+- Proof: target pre/exact boundary, owner first/second/third/reset sequence,
+  cross-owner state, Freeze clear on blocked damage, restore replay, and
+  repeated party payloads
+- Notes: KQM's v1.5 Shatter Damage ICD finding records at most two Shatter
+  damage instances in 0.5 seconds. Maintained gcsim independently emits
+  `OnShatter` and reduces Frozen before a target-wide 0.2-second `shatterGCD`,
+  then routes target-passing damage through owner-specific
+  `ICDGroupReactionA`, whose fixed 0.5-second sequence accepts entries one and
+  two. Adopt those dimensions in the one-enemy abstraction without changing
+  the repository's current whole-Freeze clear simplification. Sources accessed
+  2026-08-02:
+  https://library.keqingmains.com/evidence/combat-mechanics/elemental-effects/transformative-reactions#shatter-damage-icd,
+  https://github.com/genshinsim/gcsim/blob/main/pkg/reactable/freeze.go,
+  https://github.com/genshinsim/gcsim/blob/main/pkg/core/attacks/icd_groups.dm.go,
+  and https://github.com/genshinsim/gcsim/blob/main/pkg/target/icd.go.
