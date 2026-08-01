@@ -632,7 +632,7 @@ experiment record.
 
 ### B-027 — Aggregate ER calibration permits mid-rotation Burst failures
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 2 (observable `FlinsParty2` warning and energy timeline)
 - Symptom: the accepted final simulation skips Columbina Burst at 20.3 seconds
   with about 52/60 energy and again at 54.3 seconds with 59.8/60 energy even
@@ -650,3 +650,8 @@ experiment record.
   final tail with the first preloaded window for cyclic refill. The
   pre-fix baseline is 14,316,424 damage / 213,042 DPS. See `TASKS.md`
   implementation block `Timing-Aware ER Calibration`.
+  Completed 2026-08-02. Both accepted runs reserve 141%/132%/105%/193% ER
+  for Sucrose/Flins/Ineffa/Columbina, execute all 20 requested Bursts including
+  all four Columbina Bursts, and contain no insufficient-energy warning. Both
+  report 14,077,198 damage / 203,722 DPS with normalized SHA-256
+  `63d95d817af04e4263fb92f8492609296980154f37261fceafbc9222a0d248f6`.

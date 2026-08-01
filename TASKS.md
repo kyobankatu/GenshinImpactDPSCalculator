@@ -66,8 +66,9 @@ The B-026 correction is complete. Ineffa's Skill and Burst now refresh one
 Birgitta summon whose 20-second lifetime contains exactly ten two-second
 Discharge attacks.
 
-The active queue is B-027. ER calibration must satisfy every requested Burst
-interval instead of allowing later particle income to hide an earlier deficit.
+The B-027 correction is complete. ER calibration now replays requested Burst
+intervals with energy cap, carry, and cyclic refill instead of allowing later
+particle income to hide an earlier deficit.
 
 ## Scope
 
@@ -3426,7 +3427,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phases 1-2 are complete and Phase 3 remains.
+- Complete; Phases 1-3 passed their acceptance criteria.
 - Requirement: ER calibration must select a target that funds every requested
   Burst in rotation order, including the cyclic final-to-first interval.
 
@@ -3540,7 +3541,7 @@ Verification:
 - `./gradlew build`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Accept the Warning-Free FlinsParty2 Baseline
+### Phase 3: Accept the Warning-Free FlinsParty2 Baseline - Done
 
 Why last:
 
@@ -3576,6 +3577,18 @@ Verification:
 - two fresh `./gradlew FlinsParty2` runs
 - `python scripts/validate_agent_assets.py`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Both payloads reserve 141%/132%/105%/193% ER for
+  Sucrose/Flins/Ineffa/Columbina and execute all 20 requested Bursts, including
+  all four Columbina Bursts, without an insufficient-energy warning.
+- Both payloads report 14,077,198 damage / 203,722 DPS and match after excluding
+  Gradle's elapsed-time line, with SHA-256
+  `63d95d817af04e4263fb92f8492609296980154f37261fceafbc9222a0d248f6`.
+- Interval regression covers skipped-window closure, later-income masking,
+  cyclic tail/first income, no-particle sentinel behavior, alternate Burst
+  costs, and precise insufficient-energy diagnostics.
 
 ## Cross-Cutting Rules
 
