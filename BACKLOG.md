@@ -681,3 +681,17 @@ experiment record.
   Both accepted payloads contain 17 damage-triggered Eye attacks and report
   1,283,512 damage / 61,120 DPS with normalized SHA-256
   `58bc339e94e09cbb91ca31f42696a4c2b2c9ce535654916bddfe90e610c6d7fd`.
+
+### B-029 — ReactionCalculator Javadoc describes nonexistent parameters
+
+- Status: `done`
+- Source: 4 (Javadoc coverage defect)
+- Symptom: `./gradlew javadoc` reports three warnings because
+  `convertSwirlName` documents `raw` instead of `aura` and `calculateShatter`
+  carries a four-argument generic formula comment for its three parameters.
+- Scope: `src/java/mechanics/reaction/ReactionCalculator.java`
+- Risk: `local`
+- Proof: warning-free `./gradlew javadoc` plus unchanged reaction regression
+- Notes: documentation-only correction discovered 2026-08-02; no formula,
+  multiplier, public signature, or reaction behavior changes. Completed
+  2026-08-02 with warning-free Javadoc and passing reaction regression.

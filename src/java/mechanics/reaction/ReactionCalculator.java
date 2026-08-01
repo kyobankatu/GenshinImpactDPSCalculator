@@ -182,7 +182,7 @@ public class ReactionCalculator {
      * Normalizes the Swirl reaction name format.
      * For example, converts {@code "Swirl-PYRO"} to {@code "Swirl-Pyro"}.
      *
-     * @param raw the raw reaction string
+     * @param aura aura element included in the Swirl display name
      * @return formatted reaction string
      */
     private static String convertSwirlName(Element aura) {
@@ -195,17 +195,13 @@ public class ReactionCalculator {
     }
 
     /**
-     * Computes the base damage for transformative reactions based on character
-     * level,
-     * Elemental Mastery, the specific reaction's multiplier, and any external
-     * bonuses.
+     * Calculates Shatter damage from the trigger's level, Elemental Mastery,
+     * and reaction damage bonus.
      *
-     * @param level         character level
-     * @param em            character Elemental Mastery
-     * @param reactionMulti base multiplier for the reaction type (e.g. Overload =
-     *                      2.0)
-     * @param bonusPct      additional percentage bonus for the reaction
-     * @return total computed transformative damage
+     * @param em character Elemental Mastery
+     * @param level character level
+     * @param reactionBonus additional Shatter damage bonus
+     * @return resolved Shatter reaction result
      */
     public static ReactionResult calculateShatter(double em, int level, double reactionBonus) {
         double dmg = calculateTransformativeDamage(level, em, SHATTER_MULTIPLIER, reactionBonus);
