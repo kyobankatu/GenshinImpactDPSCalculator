@@ -64,6 +64,7 @@ public class MoonsignManager {
         for (Buff buff : sim.getTeamBuffList()) {
             if (buff.getId() == BuffId.MOONSIGN_ASCENDANT_BLESSING
                     && buff instanceof MoonsignBuff
+                    && !buff.isExpired(sim.getCurrentTime())
                     && ((MoonsignBuff) buff).getValue() > bonus) {
                 return;
             }

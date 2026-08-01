@@ -97,6 +97,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ColumbinaStandInBoundaries();
         testAccuracyPhaseF_ArtifactTeamBuffProviderRouting();
         testAccuracyPhaseF_SilkenMoonsSerenadeDynamicBonus();
+        testAccuracyPhaseF_AscendantBlessingExpiryReplacement();
         testAccuracyPhaseF_ArtifactLunarReactionBuffRegression();
         testAccuracyPhaseF_ViridescentVenererRefreshContract();
         testAccuracyPhaseF_NoblesseObligeRefreshContract();
@@ -2341,6 +2342,94 @@ public class ReactionRegressionTest {
                         .filter(buff -> buff.getId() == BuffId.GLEAMING_MOON_SYNERGY)
                         .count(),
                 "Two Silken wearers should expose one canonical synergy provider");
+    }
+
+    private static void testAccuracyPhaseF_AscendantBlessingExpiryReplacement() {
+        TestCharacter strongSource = testCharacter(Element.PYRO, CharacterId.BENNETT)
+                .withStat(StatType.BASE_ATK, 4000.0);
+        TestCharacter weakSource = testCharacter(Element.ANEMO, CharacterId.SUCROSE)
+                .withStat(StatType.ELEMENTAL_MASTERY, 400.0);
+        TestCharacter lunarSource = testCharacter(Element.ELECTRO, CharacterId.FLINS).asLunar();
+        CombatSimulator sim = simulatorWith(strongSource);
+        sim.addCharacter(weakSource);
+        sim.addCharacter(lunarSource);
+        sim.setMoonsign(CombatSimulator.Moonsign.ASCENDANT_GLEAM);
+
+        AttackAction strongSkill = blessingFixtureAction("Strong Blessing Skill", ActionType.SKILL);
+        AttackAction weakBurst = blessingFixtureAction("Weak Blessing Burst", ActionType.BURST);
+        sim.performAction(CharacterId.BENNETT, strongSkill);
+        simulation.runtime.MoonsignManager.MoonsignBuff initial = requireAscendantBlessing(sim);
+        assertClose(0.36, initial.getValue(), EPS,
+                "Ascendant Blessing should cap a 4000 ATK Pyro source at 36%");
+        assertClose(0.0, initial.getStartTime(), EPS,
+                "Initial Ascendant Blessing should begin at the triggering action time");
+        assertClose(20.0, initial.getExpirationTime(), EPS,
+                "Initial Ascendant Blessing should retain its sourced 20-second window");
+
+        sim.advanceTime(5.0);
+        sim.performAction(CharacterId.SUCROSE, weakBurst);
+        simulation.runtime.MoonsignManager.MoonsignBuff retained = requireAscendantBlessing(sim);
+        assertClose(0.36, retained.getValue(), EPS,
+                "An active stronger Ascendant Blessing should reject a weaker value");
+        assertClose(20.0, retained.getExpirationTime(), EPS,
+                "A rejected weaker value should not extend the active stronger window");
+
+        sim.performAction(CharacterId.BENNETT, strongSkill);
+        simulation.runtime.MoonsignManager.MoonsignBuff refreshed = requireAscendantBlessing(sim);
+        assertClose(0.36, refreshed.getValue(), EPS,
+                "An equal Ascendant Blessing should retain its calculated value");
+        assertClose(5.0, refreshed.getStartTime(), EPS,
+                "An equal Ascendant Blessing should refresh at the new trigger time");
+        assertClose(25.0, refreshed.getExpirationTime(), EPS,
+                "An equal Ascendant Blessing should refresh one 20-second window");
+
+        sim.advanceTime(20.0);
+        assertTrue(refreshed.isExpired(sim.getCurrentTime()),
+                "The stronger Ascendant Blessing should be expired at its exact boundary");
+        sim.performAction(CharacterId.SUCROSE, weakBurst);
+        simulation.runtime.MoonsignManager.MoonsignBuff replacement = requireAscendantBlessing(sim);
+        assertClose(0.09, replacement.getValue(), EPS,
+                "An expired stronger Blessing should not block a weaker Anemo replacement");
+        assertClose(25.0, replacement.getStartTime(), EPS,
+                "The weaker replacement should begin at the exact expiry boundary");
+        assertClose(45.0, replacement.getExpirationTime(), EPS,
+                "The weaker replacement should establish a fresh 20-second window");
+
+        TestCharacter gatedStrongSource = testCharacter(Element.PYRO, CharacterId.BENNETT)
+                .withStat(StatType.BASE_ATK, 4000.0);
+        TestCharacter gatedLunarSource = testCharacter(Element.ELECTRO, CharacterId.FLINS).asLunar();
+        CombatSimulator gatedSim = simulatorWith(gatedStrongSource);
+        gatedSim.addCharacter(gatedLunarSource);
+        gatedSim.setMoonsign(CombatSimulator.Moonsign.ASCENDANT_GLEAM);
+        gatedSim.performAction(CharacterId.BENNETT,
+                blessingFixtureAction("Non-triggering Normal", ActionType.NORMAL));
+        gatedSim.performAction(CharacterId.FLINS,
+                blessingFixtureAction("Lunar Skill", ActionType.SKILL));
+        assertTrue(gatedSim.getTeamBuffList().stream()
+                        .noneMatch(buff -> buff.getId() == BuffId.MOONSIGN_ASCENDANT_BLESSING),
+                "Normal actions and Lunar-character Skills should not grant Ascendant Blessing");
+    }
+
+    private static AttackAction blessingFixtureAction(String name, ActionType actionType) {
+        AttackAction action = new AttackAction(
+                name, 0.0, Element.PHYSICAL, StatType.BASE_ATK, null, 0.0, actionType);
+        action.setICD(ICDType.None, ICDTag.None, 0.0);
+        return action;
+    }
+
+    private static simulation.runtime.MoonsignManager.MoonsignBuff requireAscendantBlessing(
+            CombatSimulator sim) {
+        long count = sim.getTeamBuffList().stream()
+                .filter(buff -> buff.getId() == BuffId.MOONSIGN_ASCENDANT_BLESSING)
+                .count();
+        assertEquals(1L, count, "Ascendant Blessing should retain one typed team buff");
+        Buff blessing = sim.getTeamBuffList().stream()
+                .filter(buff -> buff.getId() == BuffId.MOONSIGN_ASCENDANT_BLESSING)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Ascendant Blessing should exist"));
+        assertTrue(blessing instanceof simulation.runtime.MoonsignManager.MoonsignBuff,
+                "Ascendant Blessing should retain its value-bearing implementation");
+        return (simulation.runtime.MoonsignManager.MoonsignBuff) blessing;
     }
 
     private static void testAccuracyPhaseF_ViridescentVenererRefreshContract() {

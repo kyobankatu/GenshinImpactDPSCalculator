@@ -6660,7 +6660,7 @@ unrelated to NCCL transport.
 
 Status:
 
-- Phase 1 is complete; Phases 2-3 remain pending.
+- Phases 1-2 are complete; Phase 3 remains pending.
 - Requirement: only active Ascendant Blessing instances may participate in the
   non-stacking strength comparison; an exactly expired instance must not block
   the next eligible activation.
@@ -6749,7 +6749,7 @@ Completion evidence:
   guard omits that predicate, so an expired larger value can reject every later
   smaller activation indefinitely.
 
-### Phase 2: Filter Expired Blessings and Add Boundaries - Pending
+### Phase 2: Filter Expired Blessings and Add Boundaries - Done
 
 Why second:
 
@@ -6795,6 +6795,17 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/agent_validate.py --path src/java/simulation/runtime/MoonsignManager.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- The stronger-value guard now considers only typed Blessings active at the
+  simulator's current time through the shared `Buff.isExpired` contract.
+- The public action-path regression proves initial capped 36% application,
+  active rejection of a 9% value without extending the strong window, equal
+  refresh from 5.0 to 25.0 seconds, and exact-expiry replacement by a 9% window
+  from 25.0 to 45.0 seconds with one typed instance throughout.
+- Normal actions and Lunar-character Skills remain ineligible. Reaction
+  regression, build, Javadoc, routed validation, and preflight pass.
 
 ### Phase 3: Confirm Deterministic Flins Integration - Pending
 
