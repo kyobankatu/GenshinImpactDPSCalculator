@@ -230,8 +230,9 @@ Known simplifications:
   plus source-class decay. Overload and Superconduct preserve any positive aura
   remaining after their sourced full-gauge consumption. Standard Electro-Charged
   wakes at premature Aura expiry and suppresses terminal damage within 0.5
-  seconds of the prior tick. The accepted set-aware result is 1,365,787 damage /
-  65,037 DPS over 21.0 seconds.
+  seconds of the prior tick. Overload damage follows its target and owner damage
+  sequence limits. The accepted set-aware result is 1,352,375 damage / 64,399
+  DPS over 21.0 seconds.
 - `FlinsParty2`: defensive shield HP is logged but not consumed by enemy attacks,
   Columbina treats every Lunar reaction during Gravity Ripple as nearby because
   field position is not simulated, and her Thundercloud extra strikes use 33%
@@ -322,7 +323,7 @@ multi-target or per-enemy aura gauges.
 Latest validation baseline from the accuracy pass:
 
 - `./gradlew ReactionRegressionTest`
-- `./gradlew RaidenParty`: 1,365,787 total damage / 65,037 DPS
+- `./gradlew RaidenParty`: 1,352,375 total damage / 64,399 DPS
 - `./gradlew FlinsParty`: 22,675,823 total damage / 227,898 DPS
 - `./gradlew FlinsParty2`: 15,817,125 total damage / 228,902 DPS
 - `./gradlew BenchmarkRLJava`
