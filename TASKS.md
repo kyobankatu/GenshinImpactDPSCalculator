@@ -9131,7 +9131,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phases 1-2 are complete and Phase 3 is next.
+- In progress; Phases 1-3 are complete and Phase 4 is next.
 - Requirement: standard Electro-Charged must wake at the first coexisting Aura's
   natural expiry, deal a premature tick only when more than 0.5 seconds elapsed
   since the previous EC damage tick, and retain its ordinary one-second cadence.
@@ -9278,7 +9278,7 @@ Completion evidence:
 - Snapshot mutation/restore recovers the original 9.5-second expiry exactly.
   ReactionRegressionTest, build, Javadoc, routed validation, and preflight pass.
 
-### Phase 3: Schedule Standard EC at Aura Expiry - Pending
+### Phase 3: Schedule Standard EC at Aura Expiry - Done
 
 Why third:
 
@@ -9327,6 +9327,22 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/agent_validate.py --path src/java/mechanics/reaction/ReactionEffectScheduler.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Standard and Lunar timers now have separate event implementations. Standard
+  EC chooses the earliest nominal/Hydro/Electro deadline, while Lunar retains
+  its fixed two-second/Thundercloud-end policy and typed notifications.
+- A 0.5U finite Hydro fixture ticks normally at 1.0 seconds, then exactly at its
+  1.7-second expiry and consumes another 0.4U from residual Electro. A 0.48U
+  fixture expires 0.4 seconds after the nominal tick with no damage or second
+  consumption and clears the running flag.
+- Applying stronger Hydro before the obsolete 1.7-second wake produces no early
+  damage and reschedules the next hit to the original 2.0-second nominal time.
+  A Lunar fixture remains silent through 1.999 seconds and first ticks at 2.0.
+- Existing nominal 0.4U dual consumption and impact-time RES activation/expiry
+  tests remain exact. ReactionRegressionTest, build, Javadoc, routed validation,
+  and preflight all pass.
 
 ### Phase 4: Re-Accept EC-Sensitive Party Baselines - Pending
 

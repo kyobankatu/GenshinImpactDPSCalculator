@@ -61,6 +61,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseA_AuraDecayTwoUnitLongerThanOneUnit();
         testAccuracyPhaseA_VaporizeConsumesExpectedAura();
         testAccuracyPhaseA_ElectroChargedCoexistence();
+        testAccuracyPhaseA_ElectroChargedPrematureExpiry();
         testAccuracyPhaseA_QuickenCoexistsWithDendroFollowup();
         testAccuracyPhaseB_StandardIcdThreeHitRule();
         testAccuracyPhaseB_StandardIcdTimeRule();
@@ -957,6 +958,72 @@ public class ReactionRegressionTest {
                 "Standard Electro-Charged tick should consume 0.4U Hydro on top of natural decay");
         assertClose(0.4 - 0.8 / 9.5, sim.getEnemy().getAuraUnits(Element.ELECTRO), 0.01,
                 "Standard Electro-Charged tick should consume 0.4U Electro on top of natural decay");
+    }
+
+    private static void testAccuracyPhaseA_ElectroChargedPrematureExpiry() {
+        CombatSimulator premature = simulatorWith(testCharacter(Element.ELECTRO));
+        ReactionEffectScheduler prematureScheduler = new ReactionEffectScheduler(premature);
+        premature.getEnemy().setAura(Element.HYDRO, 0.5, premature.getCurrentTime());
+        prematureScheduler.scheduleElectroCharged(Element.ELECTRO, 4.0, 1000.0, false);
+        premature.advanceTime(1.0);
+        assertClose(900.0, premature.getTotalDamage(), EPS,
+                "Standard EC should retain its first nominal one-second tick");
+        double prematureExpiry = premature.getEnemy().getAuraExpiryTime(
+                Element.HYDRO, premature.getCurrentTime());
+        assertClose(1.7, prematureExpiry, EPS,
+                "Nominal consumption should leave a Hydro Aura expiring 0.7 seconds later");
+        premature.advanceTime(prematureExpiry - premature.getCurrentTime() - 0.001);
+        assertClose(900.0, premature.getTotalDamage(), EPS,
+                "Premature EC damage should not occur before exact Aura expiry");
+        premature.advanceTime(0.001);
+        assertClose(1800.0, premature.getTotalDamage(), EPS,
+                "Aura expiry more than 0.5 seconds later should deal one premature EC tick");
+        assertClose(2.08, premature.getEnemy().getAuraUnits(
+                        Element.ELECTRO, premature.getCurrentTime()), EPS,
+                "Premature damage tick should consume another 0.4U from the remaining Aura");
+        assertTrue(!premature.isECTimerRunning(),
+                "Premature terminal EC damage should finish its timer");
+
+        CombatSimulator suppressed = simulatorWith(testCharacter(Element.ELECTRO));
+        ReactionEffectScheduler suppressedScheduler = new ReactionEffectScheduler(suppressed);
+        suppressed.getEnemy().setAura(Element.HYDRO, 0.48, suppressed.getCurrentTime());
+        suppressedScheduler.scheduleElectroCharged(Element.ELECTRO, 4.0, 1000.0, false);
+        suppressed.advanceTime(1.0);
+        double suppressedExpiry = suppressed.getEnemy().getAuraExpiryTime(
+                Element.HYDRO, suppressed.getCurrentTime());
+        assertClose(1.4, suppressedExpiry, EPS,
+                "Suppression fixture should leave only 0.4 seconds of Hydro Aura");
+        suppressed.advanceTime(suppressedExpiry - suppressed.getCurrentTime());
+        assertClose(900.0, suppressed.getTotalDamage(), EPS,
+                "Aura expiry within 0.5 seconds should not deal terminal EC damage");
+        assertTrue(!suppressed.isECTimerRunning(),
+                "Suppressed terminal expiry should finish its EC timer");
+        assertClose(2.536470588, suppressed.getEnemy().getAuraUnits(
+                        Element.ELECTRO, suppressed.getCurrentTime()), 1e-6,
+                "Suppressed expiry should not consume another 0.4U Electro");
+
+        CombatSimulator extended = simulatorWith(testCharacter(Element.ELECTRO));
+        ReactionEffectScheduler extendedScheduler = new ReactionEffectScheduler(extended);
+        extended.getEnemy().setAura(Element.HYDRO, 0.5, extended.getCurrentTime());
+        extendedScheduler.scheduleElectroCharged(Element.ELECTRO, 4.0, 1000.0, false);
+        extended.advanceTime(1.2);
+        extended.getEnemy().applyAura(Element.HYDRO, 2.0, extended.getCurrentTime());
+        extended.advanceTime(0.5);
+        assertClose(900.0, extended.getTotalDamage(), EPS,
+                "Aura extension should cancel damage at the obsolete premature expiry");
+        extended.advanceTime(0.3);
+        assertClose(1800.0, extended.getTotalDamage(), EPS,
+                "Extended EC should retain its original nominal second tick");
+
+        CombatSimulator lunar = simulatorWith(testCharacter(Element.ELECTRO).asLunar());
+        ReactionEffectScheduler lunarScheduler = new ReactionEffectScheduler(lunar);
+        lunarScheduler.scheduleElectroCharged(Element.ELECTRO, 1.0, 1000.0, true);
+        lunar.advanceTime(1.999);
+        assertClose(0.0, lunar.getTotalDamage(), EPS,
+                "Lunar-Charged should not inherit the standard premature wake policy");
+        lunar.advanceTime(0.001);
+        assertTrue(lunar.getTotalDamage() > 0.0,
+                "Lunar-Charged should retain its fixed two-second first tick");
     }
 
     private static void testAccuracyPhaseA_QuickenCoexistsWithDendroFollowup() {

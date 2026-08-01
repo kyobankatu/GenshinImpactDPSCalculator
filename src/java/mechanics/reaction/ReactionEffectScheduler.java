@@ -21,6 +21,9 @@ public class ReactionEffectScheduler {
     private static final double[] LUNAR_CHARGED_WEIGHTS = { 1.0, 0.5, 1.0 / 12.0, 1.0 / 12.0 };
     private static final int DENDRO_CORE_DAMAGE_HIT_CAP = 2;
     private static final double DENDRO_CORE_DAMAGE_WINDOW = 0.5;
+    private static final double STANDARD_EC_TICK_INTERVAL = 1.0;
+    private static final double STANDARD_EC_PREMATURE_TICK_THRESHOLD = 0.5;
+    private static final double TIMING_EPSILON = 1e-9;
 
     private final CombatSimulator sim;
     private final List<Double> recentDendroCoreDamageTimes = new ArrayList<>();
@@ -43,12 +46,11 @@ public class ReactionEffectScheduler {
             sim.setThundercloudEndTime(sim.getCurrentTime() + 6.0);
         }
 
+        sim.getEnemy().applyAura(trigger, gaugeUnits, sim.getCurrentTime());
         if (!sim.isECTimerRunning()) {
             sim.setECTimerRunning(true);
             sim.registerEvent(createElectroChargedTickEvent(preResistanceDamage, isLunar));
         }
-
-        sim.getEnemy().applyAura(trigger, gaugeUnits, sim.getCurrentTime());
     }
 
     /**
@@ -123,51 +125,91 @@ public class ReactionEffectScheduler {
     }
 
     private TimerEvent createElectroChargedTickEvent(double preResistanceDamage, boolean isLunar) {
+        if (isLunar) {
+            return createLunarChargedTickEvent();
+        }
+        return createStandardElectroChargedTickEvent(preResistanceDamage);
+    }
+
+    private TimerEvent createStandardElectroChargedTickEvent(double preResistanceDamage) {
         return new TimerEvent() {
-            private double nextTick = sim.getCurrentTime() + (isLunar ? 2.0 : 1.0);
+            private double lastDamageTime = sim.getCurrentTime();
+            private double nominalTickTime = lastDamageTime + STANDARD_EC_TICK_INTERVAL;
+            private double nextTick = getNextStandardElectroChargedWake(nominalTickTime);
+            private boolean finished = false;
 
             @Override
             public void tick(CombatSimulator simContext) {
-                boolean shouldTick = isLunar
-                        ? (simContext.getCurrentTime() <= simContext.getThundercloudEndTime())
-                        : (simContext.getEnemy().getAuraUnits(Element.HYDRO, simContext.getCurrentTime()) > 0
-                                && simContext.getEnemy().getAuraUnits(Element.ELECTRO, simContext.getCurrentTime()) > 0);
-                if (!shouldTick) {
+                double currentTime = simContext.getCurrentTime();
+                boolean hydroActive = simContext.getEnemy().getAuraUnits(Element.HYDRO, currentTime) > 0.0;
+                boolean electroActive = simContext.getEnemy().getAuraUnits(Element.ELECTRO, currentTime) > 0.0;
+
+                if (!hydroActive || !electroActive) {
+                    if (currentTime - lastDamageTime
+                            > STANDARD_EC_PREMATURE_TICK_THRESHOLD + TIMING_EPSILON) {
+                        recordElectroChargedTick(preResistanceDamage, false);
+                        simContext.getEnemy().reduceAura(Element.HYDRO, 0.4, currentTime);
+                        simContext.getEnemy().reduceAura(Element.ELECTRO, 0.4, currentTime);
+                    }
+                    finishElectroChargedEvent();
+                    return;
+                }
+
+                if (currentTime + TIMING_EPSILON < nominalTickTime) {
+                    nextTick = getNextStandardElectroChargedWake(nominalTickTime);
+                    return;
+                }
+
+                recordElectroChargedTick(preResistanceDamage, false);
+                lastDamageTime = currentTime;
+                simContext.getEnemy().reduceAura(Element.HYDRO, 0.4, currentTime);
+                simContext.getEnemy().reduceAura(Element.ELECTRO, 0.4, currentTime);
+
+                hydroActive = simContext.getEnemy().getAuraUnits(Element.HYDRO, currentTime) > 0.0;
+                electroActive = simContext.getEnemy().getAuraUnits(Element.ELECTRO, currentTime) > 0.0;
+                if (!hydroActive || !electroActive) {
+                    finishElectroChargedEvent();
+                    return;
+                }
+
+                nominalTickTime = currentTime + STANDARD_EC_TICK_INTERVAL;
+                nextTick = getNextStandardElectroChargedWake(nominalTickTime);
+            }
+
+            private void finishElectroChargedEvent() {
+                sim.setECTimerRunning(false);
+                finished = true;
+                nextTick = Double.MAX_VALUE;
+            }
+
+            @Override
+            public double getNextTickTime() {
+                return nextTick;
+            }
+
+            @Override
+            public boolean isFinished(double time) {
+                return finished;
+            }
+        };
+    }
+
+    private TimerEvent createLunarChargedTickEvent() {
+        return new TimerEvent() {
+            private double nextTick = sim.getCurrentTime() + 2.0;
+
+            @Override
+            public void tick(CombatSimulator simContext) {
+                if (simContext.getCurrentTime() > simContext.getThundercloudEndTime()) {
                     simContext.setECTimerRunning(false);
                     nextTick = Double.MAX_VALUE;
                     return;
                 }
 
-                String label = "Electro-Charged Tick";
-                double finalDamage = applyCurrentResistance(
-                        preResistanceDamage, Element.ELECTRO, simContext);
-                if (isLunar) {
-                    label = "Lunar-Charged Reaction";
-                    finalDamage = computeWeightedLunarReactionDamage(
-                            simContext, Element.ELECTRO, StatType.LUNAR_CHARGED_DMG_BONUS);
-                }
-
-                if (simContext.isLoggingEnabled()) {
-                    System.out.println(String.format("   [DoT] %s Damage: %,.0f", label, finalDamage));
-                }
-
-                simContext.recordDamage("Thundercloud", finalDamage);
-                simContext.getCombatLogSink().log(
-                        simContext.getCurrentTime(), "Thundercloud", label, finalDamage,
-                        label, finalDamage, simContext.getEnemy().getAuraMap(simContext.getCurrentTime()));
-
-                if (isLunar) {
-                    simContext.notifyReaction(
-                            ReactionResult.transform(
-                                    finalDamage,
-                                    "Thundercloud-Strike",
-                                    ReactionResult.Kind.THUNDERCLOUD_STRIKE),
-                            simContext.getActiveCharacter());
-                }
-
+                recordElectroChargedTick(0.0, true);
                 simContext.getEnemy().reduceAura(Element.HYDRO, 0.4, simContext.getCurrentTime());
                 simContext.getEnemy().reduceAura(Element.ELECTRO, 0.4, simContext.getCurrentTime());
-                nextTick += (isLunar ? 2.0 : 1.0);
+                nextTick += 2.0;
             }
 
             @Override
@@ -180,6 +222,39 @@ public class ReactionEffectScheduler {
                 return nextTick == Double.MAX_VALUE || time > 1000;
             }
         };
+    }
+
+    private double getNextStandardElectroChargedWake(double nominalTickTime) {
+        double currentTime = sim.getCurrentTime();
+        double hydroExpiry = sim.getEnemy().getAuraExpiryTime(Element.HYDRO, currentTime);
+        double electroExpiry = sim.getEnemy().getAuraExpiryTime(Element.ELECTRO, currentTime);
+        return Math.min(nominalTickTime, Math.min(hydroExpiry, electroExpiry));
+    }
+
+    private void recordElectroChargedTick(double preResistanceDamage, boolean isLunar) {
+        String label = isLunar ? "Lunar-Charged Reaction" : "Electro-Charged Tick";
+        double finalDamage = isLunar
+                ? computeWeightedLunarReactionDamage(
+                        sim, Element.ELECTRO, StatType.LUNAR_CHARGED_DMG_BONUS)
+                : applyCurrentResistance(preResistanceDamage, Element.ELECTRO, sim);
+
+        if (sim.isLoggingEnabled()) {
+            System.out.println(String.format("   [DoT] %s Damage: %,.0f", label, finalDamage));
+        }
+
+        sim.recordDamage("Thundercloud", finalDamage);
+        sim.getCombatLogSink().log(
+                sim.getCurrentTime(), "Thundercloud", label, finalDamage,
+                label, finalDamage, sim.getEnemy().getAuraMap(sim.getCurrentTime()));
+
+        if (isLunar) {
+            sim.notifyReaction(
+                    ReactionResult.transform(
+                            finalDamage,
+                            "Thundercloud-Strike",
+                            ReactionResult.Kind.THUNDERCLOUD_STRIKE),
+                    sim.getActiveCharacter());
+        }
     }
 
     private TimerEvent createBurningTickEvent(CharacterId ownerId, double preResistanceDamage) {
