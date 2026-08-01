@@ -987,7 +987,7 @@ experiment record.
 
 ### B-041 — Viridescent Venerer same-element shred stacks instead of refreshing
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 3 (sourced artifact-mechanic divergence)
 - Symptom: every eligible Swirl appends another 40% same-element RES shred buff
   to every character, so repeated Pyro/Hydro/Cryo/Electro Swirls add to 80%,
@@ -995,7 +995,7 @@ experiment record.
   also checks that the owner is active but not that the owner triggered Swirl.
 - Scope: VV eligibility and typed no-stack team-buff refresh, focused
   regression, and deterministic Flins/FlinsParty2 acceptance
-- Risk: `planned`
+- Risk: `validated`
 - Proof: same-element refresh/expiry and owner-trigger regressions plus matching
   repeated full-party payloads
 - Notes: adopt the maintained KQM Artifacts page and VV evidence, accessed
@@ -1008,6 +1008,15 @@ experiment record.
   element to one typed simulator team buff replaced through
   `applyTeamBuffNoStack`; preserve different element IDs independently. See
   `TASKS.md` implementation block `Viridescent Venerer Shred Refresh`.
+  Completed with owner-trigger and exact refresh/expiry regressions. Two
+  deterministic `FlinsParty` runs accept 18,343,092 / 184,353 over 99.5 seconds
+  at normalized SHA-256
+  `bb6bc281eeb54ad747502b4bc6259715b9d540e1e225735982ea8e30301c26fd`;
+  two `FlinsParty2` runs accept 13,633,123 / 197,296 over 69.1 seconds at
+  normalized SHA-256
+  `95d03747cc7e917445a2b840db0bb2cbad095ecb211064d895bc6ea4c68c798a`.
+  ER and durations are unchanged and no warning lines appear. Deferred B-042
+  remains outside this correction.
 
 ### B-042 — First single-target Swirl does not receive immediate VV shred
 

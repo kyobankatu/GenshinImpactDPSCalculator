@@ -105,9 +105,10 @@ The B-040 Sacrificial Sword correction is complete. Its R5 Composed passive
 uses deterministic-testable Skill-damage draws, resets only the applicable
 Skill cooldown, and enforces the sourced sixteen-second weapon cooldown.
 
-The B-041 Viridescent Venerer correction is in progress. Same-element 40% RES
-shred applications will refresh one ten-second typed debuff instead of stacking,
-and only an on-field equipping owner who triggered the Swirl may apply it.
+The B-041 Viridescent Venerer correction is complete. Same-element 40% RES
+shred applications refresh one ten-second typed debuff instead of stacking, and
+only an on-field equipping owner who triggered the Swirl may apply it. The
+separate first-Swirl formula-order gap remains deferred as B-042.
 
 ## Scope
 
@@ -5313,7 +5314,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phases 1-2 are complete and Phase 3 remains.
+- Complete; all three phases are verified and pushed.
 - Requirement: each Swirled element must have one independently refreshed 40%
   Viridescent Venerer RES shred, applied only by its on-field equipping trigger.
 
@@ -5463,7 +5464,7 @@ Completion evidence:
 - Reaction and party-catalog regressions, build, Javadoc, routed validation, and
   preflight pass.
 
-### Phase 3: Re-Accept VV Party Baselines
+### Phase 3: Re-Accept VV Party Baselines - Done
 
 Why last:
 
@@ -5504,6 +5505,23 @@ Verification:
 - two fresh `./gradlew FlinsParty` runs
 - two fresh `./gradlew FlinsParty2` runs
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Two `FlinsParty` runs produced identical complete logs and normalized SHA-256
+  `bb6bc281eeb54ad747502b4bc6259715b9d540e1e225735982ea8e30301c26fd`.
+  ER remains Sucrose 109%, Flins 100%, Ineffa 100%, and Columbina 180%, with
+  zero warning matches and 18,343,092 damage / 184,353 DPS over 99.5 seconds.
+- Two `FlinsParty2` runs produced identical complete logs and normalized SHA-256
+  `95d03747cc7e917445a2b840db0bb2cbad095ecb211064d895bc6ea4c68c798a`.
+  ER remains Sucrose 141%, Flins 132%, Ineffa 105%, and Columbina 193%, with
+  zero warning matches and 13,633,123 damage / 197,296 DPS over 69.1 seconds.
+- Relative to the pre-fix baselines, the totals decrease by 500,598 (2.66%) and
+  444,075 (3.15%), respectively, with no rotation, loadout, ER, or duration
+  change. The deltas are therefore accepted as removal of illegal same-element
+  VV stacking. The generated committed report was restored and is not staged.
+- README, plan, and ledger retain B-042 as a separate deferred formula-order
+  issue; this phase does not claim immediate first-Swirl shred.
 
 ## NCCL/DDP Distributed RL Training Plan
 
