@@ -117,6 +117,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseG_SameElementAuraExtensionContract();
         testAccuracyPhaseG_AuraDecaySnapshotContract();
         testAccuracyPhaseG_InvalidSourceAuraContract();
+        testAccuracyPhaseG_RuntimeAuraApplicationContract();
         testAccuracyPhaseF_PeriodicCancellationAndRaidenEyeDamageTrigger();
         testAccuracyPhaseF_BennettSkillAndBurstApplicationContract();
         testAccuracyPhaseF_XianglingGuobaNoIcdApplicationContract();
@@ -426,13 +427,11 @@ public class ReactionRegressionTest {
         assertClose(immediate, sim.getTotalDamage(), 0.5, "Thundercloud should not tick before 2 seconds");
         sim.advanceTime(0.2);
         assertTrue(sim.getTotalDamage() > immediate, "Thundercloud should tick at the 2 second cadence");
-        // Hydro was applied with the legacy infinite-expiry aura, so it only loses
-        // the 0.4 GU tick consumption. Electro was applied with a finite duration
-        // by the Electro-Charged scheduler, so it also reflects natural decay over
-        // the 2 second Thundercloud cadence (1U over the 11s simplified duration).
+        // Hydro is an infinite fixture aura and only loses tick consumption.
+        // Electro is the taxed 0.8U side introduced by the 1U source trigger.
         assertClose(0.6, sim.getEnemy().getAuraUnits(Element.HYDRO), 0.01,
                 "Thundercloud tick should consume 0.4 GU Hydro");
-        assertClose(0.6 - 2.0 / 11.0, sim.getEnemy().getAuraUnits(Element.ELECTRO), 0.01,
+        assertClose(0.4 - 2.0 * 0.8 / 9.5, sim.getEnemy().getAuraUnits(Element.ELECTRO), 0.01,
                 "Thundercloud tick should consume 0.4 GU Electro on top of natural decay");
     }
 
@@ -592,6 +591,41 @@ public class ReactionRegressionTest {
                 "Invalid or non-persistent source applications should create no aura");
     }
 
+    private static void testAccuracyPhaseG_RuntimeAuraApplicationContract() {
+        CombatSimulator sim = simulatorWith(testCharacter(Element.ELECTRO));
+        AttackAction oneUnit = reactionHit("Runtime 1U Electro aura fixture", Element.ELECTRO);
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE, oneUnit);
+        assertClose(0.8, sim.getEnemy().getAuraUnits(Element.ELECTRO), EPS,
+                "A real 1U action should establish 0.8U after Aura Tax");
+
+        sim.advanceTime(1.0);
+        AttackAction twoUnit = reactionHit("Runtime 2U Electro aura fixture", Element.ELECTRO);
+        twoUnit.setICD(ICDType.None, ICDTag.None, 2.0);
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE, twoUnit);
+        assertClose(1.6, sim.getEnemy().getAuraUnits(Element.ELECTRO), EPS,
+                "A real stronger same-element action should extend to its taxed amount");
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE, oneUnit);
+        assertClose(1.6, sim.getEnemy().getAuraUnits(Element.ELECTRO), EPS,
+                "A weaker real action should not shorten the stronger current aura");
+
+        CombatSimulator invalid = simulatorWith(testCharacter(Element.ANEMO));
+        invalid.setLoggingEnabled(true);
+        String invalidLog = captureStandardOutput(() -> {
+            invalid.performActionWithoutTimeAdvance(
+                    CharacterId.SUCROSE, reactionHit("Runtime Anemo aura fixture", Element.ANEMO));
+            invalid.performActionWithoutTimeAdvance(
+                    CharacterId.SUCROSE, reactionHit("Runtime Geo aura fixture", Element.GEO));
+            invalid.performActionWithoutTimeAdvance(
+                    CharacterId.SUCROSE, reactionHit("Runtime Physical aura fixture", Element.PHYSICAL));
+            invalid.performActionWithoutTimeAdvance(
+                    CharacterId.SUCROSE, damageHit("Runtime zero-gauge fixture", Element.PYRO, 0.0));
+        });
+        assertTrue(invalid.getEnemy().getActiveAuras(invalid.getCurrentTime()).isEmpty(),
+                "Non-persistent and zero-gauge runtime actions should establish no aura");
+        assertTrue(!invalidLog.contains("[Aura] Applied"),
+                "Rejected runtime source elements should not emit false aura logs");
+    }
+
     private static void testAccuracyPhase2_QueryBeforeAndAtApplication() {
         Enemy enemy = new Enemy(90);
         enemy.setAura(Element.PYRO, 1.0, 5.0);
@@ -697,16 +731,14 @@ public class ReactionRegressionTest {
                 reactionHit("Electro charged coexistence trigger", Element.ELECTRO));
         assertClose(1.0, sim.getEnemy().getAuraUnits(Element.HYDRO), EPS,
                 "Electro-Charged should keep Hydro aura before tick consumption");
-        assertClose(1.0, sim.getEnemy().getAuraUnits(Element.ELECTRO), EPS,
-                "Electro-Charged should keep Electro aura before tick consumption");
+        assertClose(0.8, sim.getEnemy().getAuraUnits(Element.ELECTRO), EPS,
+                "Electro-Charged should tax the new Electro source aura once");
 
         sim.advanceTime(1.01);
-        // Both auras were applied with a finite duration, so each tick consumes
-        // 0.4U on top of natural decay (1U over the 11s simplified duration) at the
-        // 1 second standard Electro-Charged cadence.
+        // Hydro is explicit fixture state; Electro is a taxed 1U source aura.
         assertClose(0.6 - 1.0 / 11.0, sim.getEnemy().getAuraUnits(Element.HYDRO), 0.01,
                 "Standard Electro-Charged tick should consume 0.4U Hydro on top of natural decay");
-        assertClose(0.6 - 1.0 / 11.0, sim.getEnemy().getAuraUnits(Element.ELECTRO), 0.01,
+        assertClose(0.4 - 0.8 / 9.5, sim.getEnemy().getAuraUnits(Element.ELECTRO), 0.01,
                 "Standard Electro-Charged tick should consume 0.4U Electro on top of natural decay");
     }
 
@@ -732,7 +764,7 @@ public class ReactionRegressionTest {
         CombatSimulator sim = simulatorWith(testCharacter(Element.PYRO));
         sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
                 standardIcdHit("Standard ICD hit 1", Element.PYRO, ICDTag.ElementalSkill, 0.0));
-        assertClose(1.0, sim.getEnemy().getAuraUnits(Element.PYRO), EPS,
+        assertClose(0.8, sim.getEnemy().getAuraUnits(Element.PYRO), EPS,
                 "First standard ICD hit should apply aura");
 
         sim.getEnemy().setAura(Element.PYRO, 0.0);
@@ -743,7 +775,7 @@ public class ReactionRegressionTest {
 
         sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
                 standardIcdHit("Standard ICD hit 3", Element.PYRO, ICDTag.ElementalSkill, 0.0));
-        assertClose(1.0, sim.getEnemy().getAuraUnits(Element.PYRO), EPS,
+        assertClose(0.8, sim.getEnemy().getAuraUnits(Element.PYRO), EPS,
                 "Third quick same-group hit should apply by the 3-hit ICD rule");
     }
 
@@ -755,7 +787,7 @@ public class ReactionRegressionTest {
         sim.advanceTime(2.51);
         sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
                 standardIcdHit("Standard ICD time hit 2", Element.PYRO, ICDTag.ElementalBurst, 0.0));
-        assertClose(1.0, sim.getEnemy().getAuraUnits(Element.PYRO), EPS,
+        assertClose(0.8, sim.getEnemy().getAuraUnits(Element.PYRO), EPS,
                 "Same-group hit after 2.5s should apply aura");
     }
 
@@ -1859,8 +1891,8 @@ public class ReactionRegressionTest {
             gaugeSim.getEnemy().setAura(element, 0.0);
         }
         gaugeSim.advanceTime(0.0);
-        assertClose(1.0, gaugeSim.getEnemy().getAuraUnits(Element.HYDRO), EPS,
-                "Xingqiu orbital contact pulses should apply 1U Hydro");
+        assertClose(0.8, gaugeSim.getEnemy().getAuraUnits(Element.HYDRO), EPS,
+                "Xingqiu orbital 1U source should establish 0.8U Hydro aura");
 
         List<AttackAction> raincutterWave = xingqiu.getRaincutterAttack(0);
         assertEquals(2, raincutterWave.size(), "Xingqiu C6 Raincutter should start with a two-sword wave");

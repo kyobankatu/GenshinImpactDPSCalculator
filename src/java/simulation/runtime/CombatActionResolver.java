@@ -575,19 +575,15 @@ public class CombatActionResolver {
     }
 
     /**
-     * Applies the trigger element as a new aura when it is one of the persistent elements
-     * (i.e., not Physical/Anemo/Geo).
+     * Applies the trigger's source gauge as an aura when the element can persist.
      *
      * @param trigger    trigger element
      * @param gaugeUnits gauge units to apply
      */
     private void applyTriggerAuraIfPersistent(Element trigger, double gaugeUnits) {
-        if (trigger == Element.PHYSICAL || trigger == Element.ANEMO || trigger == Element.GEO) {
-            return;
-        }
-        sim.getEnemy().setAura(trigger, gaugeUnits, sim.getCurrentTime());
-        if (sim.isLoggingEnabled()) {
-            System.out.println(String.format("   [Aura] Applied %s (%.1f U)", trigger, gaugeUnits));
+        boolean applied = sim.getEnemy().applyAura(trigger, gaugeUnits, sim.getCurrentTime());
+        if (applied && sim.isLoggingEnabled()) {
+            System.out.println(String.format("   [Aura] Applied %s source (%.1f U)", trigger, gaugeUnits));
         }
     }
 

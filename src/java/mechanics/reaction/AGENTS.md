@@ -15,6 +15,9 @@
 - `ReactionCalculator` depends on `model.type.Element`.
 - `simulation.runtime.CombatActionResolver` uses `ReactionCalculator` and then forwards `ReactionResult` through simulator reaction listeners, artifact hooks, resonance logic, and RL or weapon logic that listens for reactions.
 - `ReactionEffectScheduler` owns delayed Bloom core explosions, Burning ticks, Electro-Charged or Lunar-Charged tick effects, and Lunar-Crystallize Harmony-style follow-ups.
+- Electro-Charged scheduling passes the trigger's pre-tax source gauge to
+  `Enemy.applyAura`; Burning maintenance writes reaction-owned raw aura state
+  and must not apply standard source tax a second time.
 - `model.artifact.ViridescentVenerer`, `model.artifact.NightOfTheSkysUnveiling`, `mechanics.element.ResonanceManager`, and `model.weapon.SunnyMorningSleepIn` should depend on `ReactionResult.Kind`, `LunarType`, related element, or helper methods before falling back to labels.
 
 ## Agent guidance

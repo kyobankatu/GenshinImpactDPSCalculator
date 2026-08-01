@@ -179,8 +179,9 @@ public class Enemy {
      * @param element          persistent aura element to apply
      * @param sourceGaugeUnits source gauge before Aura Tax
      * @param currentTime      simulator application time in seconds
+     * @return {@code true} when a valid persistent elemental source was handled
      */
-    public void applyAura(
+    public boolean applyAura(
             model.type.Element element,
             double sourceGaugeUnits,
             double currentTime) {
@@ -188,7 +189,7 @@ public class Enemy {
                 || !Double.isFinite(sourceGaugeUnits)
                 || sourceGaugeUnits <= 0.0
                 || !Double.isFinite(currentTime)) {
-            return;
+            return false;
         }
 
         double taxedUnits = sourceGaugeUnits * AURA_TAX;
@@ -197,18 +198,19 @@ public class Enemy {
         AuraState state = auraGauge.get(element);
         if (state == null || state.currentUnitsAt(currentTime) <= 0.0) {
             auraGauge.put(element, new AuraState(element, taxedUnits, currentTime, sourceDecayRate));
-            return;
+            return true;
         }
 
         double currentUnits = state.currentUnitsAt(currentTime);
         if (taxedUnits <= currentUnits) {
-            return;
+            return true;
         }
         if (element == model.type.Element.PYRO) {
             state.rebase(taxedUnits, currentTime, sourceDecayRate);
         } else {
             state.rebase(taxedUnits, currentTime);
         }
+        return true;
     }
 
     /**

@@ -33,7 +33,7 @@ public class ReactionEffectScheduler {
      * Applies Electro-Charged state transitions and registers periodic tick events.
      *
      * @param trigger    triggering element
-     * @param gaugeUnits gauge to apply as lingering aura
+     * @param gaugeUnits pre-tax source gauge to apply as the coexisting aura
      * @param preResistanceDamage standard Electro-Charged tick damage before RES
      * @param isLunar    whether Thundercloud/Lunar-Charged policy is active
      */
@@ -48,7 +48,7 @@ public class ReactionEffectScheduler {
             sim.registerEvent(createElectroChargedTickEvent(preResistanceDamage, isLunar));
         }
 
-        sim.getEnemy().setAura(trigger, gaugeUnits, sim.getCurrentTime());
+        sim.getEnemy().applyAura(trigger, gaugeUnits, sim.getCurrentTime());
     }
 
     /**

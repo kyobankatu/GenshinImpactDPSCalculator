@@ -136,8 +136,8 @@ reaction, delayed reaction, and weighted party damage now resolve matching
 enemy RES reduction at impact without retaining it in attacker snapshots.
 
 The B-049 standard aura-tax and decay correction is in progress. Its sourced
-contract and enemy-owned aura application model are complete; runtime routing is
-the next phase below.
+contract, enemy-owned aura application model, and runtime routing are complete;
+audited party acceptance is the remaining phase below.
 
 ## Scope
 
@@ -7461,7 +7461,7 @@ Completion evidence:
 
 Status:
 
-- Phases 1-2 are complete; Phases 3-4 remain pending.
+- Phases 1-3 are complete; Phase 4 remains pending.
 - Requirement: a standard elemental source that establishes or extends an aura
   must apply the sourced 0.8 Aura Tax and source-gauge decay rate instead of the
   simulator's generic `6 + 5U` replacement model.
@@ -7624,7 +7624,7 @@ Completion evidence:
   update branches, consumed-state restoration, and invalid value/element no-op
   policy. Reaction regression, build, Javadoc, and routed validation pass.
 
-### Phase 3: Route Standard Runtime Aura Applications
+### Phase 3: Route Standard Runtime Aura Applications - Done
 
 Why third:
 
@@ -7671,6 +7671,18 @@ Verification:
 - `./gradlew build`
 - `python scripts/agent_validate.py --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/mechanics/reaction/ReactionEffectScheduler.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Ordinary no-reaction application and the Electro/Hydro element introduced by
+  Electro-Charged now pass pre-tax action gauge to `Enemy.applyAura`. Burning
+  retains explicit reaction-state assignment and is not taxed twice.
+- Actual runtime regression proves 1U to 0.8U, stronger 2U max extension, weaker
+  no-shortening behavior, EC's taxed introduced side plus unchanged 0.4U tick
+  consumption, and rejection of 0U/Physical/Anemo/Geo state and false aura logs.
+- Existing standard/no/shared ICD, Lunar-Charged cadence, orbital Hydro, aura
+  ownership, reaction damage, and notification regressions pass with their
+  expected taxed runtime gauges. Build and routed validation pass.
 
 ### Phase 4: Re-Accept Aura-Sensitive Party Baselines
 
