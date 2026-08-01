@@ -80,8 +80,13 @@ Guard rails that make the loop safe to leave running:
 - Never revert a `done` item, or re-litigate a rejection the user recorded, without a new ledger entry.
 - One item in flight. Two half-finished items are worse than one finished item.
 
-The loop's only clean ending is convergence: a full sweep that produces no item passing both gates. Report
-that and stop. Manufacturing work to fill remaining time is a failure, not diligence.
+The loop has two clean endings: convergence, meaning a full sweep produces no item passing both gates, or the
+time box expiring. Report whichever applies and stop. Manufacturing work to fill remaining time is a failure,
+not diligence.
+
+Time-limited sessions add a scheduling constraint on top of this loop; see
+[time-box.md](time-box.md) for deadline handling, the fit test before starting work, the reserve, and the
+wind-down procedure.
 
 ## Per-phase loop
 
