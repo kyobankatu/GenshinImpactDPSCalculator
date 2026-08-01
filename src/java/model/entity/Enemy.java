@@ -15,6 +15,7 @@ import java.util.Map;
  * reproducible benchmark comparisons.
  */
 public class Enemy {
+    private static final double AURA_TAX = 0.8;
     private int level;
     private Map<StatType, Double> resistances; // RES for each element
     private java.util.Map<model.type.Element, AuraState> auraGauge = new HashMap<>();
@@ -39,21 +40,19 @@ public class Enemy {
         private final model.type.Element element;
         private double units;
         private double applicationTime;
-        private double duration;
         private double expiryTime;
-        private final double decayRate;
+        private double decayRate;
 
-        private AuraState(model.type.Element element, double units, double applicationTime, double duration) {
+        private AuraState(model.type.Element element, double units, double applicationTime, double decayRate) {
             this.element = element;
             this.units = units;
             this.applicationTime = applicationTime;
-            this.duration = duration;
-            if (Double.isInfinite(duration) || duration <= 0.0) {
+            if (!Double.isFinite(decayRate) || decayRate <= 0.0) {
                 this.decayRate = 0.0;
                 this.expiryTime = INFINITE_EXPIRY;
             } else {
-                this.decayRate = units / duration;
-                this.expiryTime = applicationTime + duration;
+                this.decayRate = decayRate;
+                this.expiryTime = applicationTime + units / decayRate;
             }
         }
 
@@ -89,12 +88,22 @@ public class Enemy {
             this.units = newUnits;
             this.applicationTime = currentTime;
             if (decayRate <= 0.0) {
-                this.duration = INFINITE_EXPIRY;
                 this.expiryTime = INFINITE_EXPIRY;
             } else {
-                this.duration = newUnits / decayRate;
-                this.expiryTime = currentTime + this.duration;
+                this.expiryTime = currentTime + newUnits / decayRate;
             }
+        }
+
+        /**
+         * Re-bases the aura with a new source-selected decay rate.
+         *
+         * @param newUnits    aura units present after the new application
+         * @param currentTime simulator time of the application
+         * @param newDecayRate new decay rate in aura units per second
+         */
+        private void rebase(double newUnits, double currentTime, double newDecayRate) {
+            this.decayRate = newDecayRate;
+            rebase(newUnits, currentTime);
         }
     }
 
@@ -130,7 +139,7 @@ public class Enemy {
         if (units <= 0) {
             auraGauge.remove(element);
         } else {
-            auraGauge.put(element, new AuraState(element, units, 0.0, INFINITE_EXPIRY));
+            auraGauge.put(element, new AuraState(element, units, 0.0, 0.0));
         }
     }
 
@@ -149,7 +158,56 @@ public class Enemy {
         if (units <= 0) {
             auraGauge.remove(element);
         } else {
-            auraGauge.put(element, new AuraState(element, units, currentTime, auraDuration(units)));
+            double duration = auraDuration(units);
+            auraGauge.put(element, new AuraState(element, units, currentTime, units / duration));
+        }
+    }
+
+    /**
+     * Applies a standard elemental source as a finite enemy aura.
+     *
+     * <p>The source gauge is taxed by {@value #AURA_TAX}. A fresh aura receives
+     * the source-selected decay rate derived from {@code 2.5 * U + 7} seconds.
+     * Same-element applications replace the current amount only when the newly
+     * taxed gauge is greater. Non-Pyro auras retain their first decay rate until
+     * exhausted; Pyro adopts the new source rate whenever its amount changes.
+     *
+     * <p>Non-finite/non-positive values and elements that cannot persist as
+     * enemy auras are ignored. This method does not model innate/self auras or
+     * reaction-created special state.
+     *
+     * @param element          persistent aura element to apply
+     * @param sourceGaugeUnits source gauge before Aura Tax
+     * @param currentTime      simulator application time in seconds
+     */
+    public void applyAura(
+            model.type.Element element,
+            double sourceGaugeUnits,
+            double currentTime) {
+        if (!canPersistAsAura(element)
+                || !Double.isFinite(sourceGaugeUnits)
+                || sourceGaugeUnits <= 0.0
+                || !Double.isFinite(currentTime)) {
+            return;
+        }
+
+        double taxedUnits = sourceGaugeUnits * AURA_TAX;
+        double sourceDuration = 2.5 * sourceGaugeUnits + 7.0;
+        double sourceDecayRate = taxedUnits / sourceDuration;
+        AuraState state = auraGauge.get(element);
+        if (state == null || state.currentUnitsAt(currentTime) <= 0.0) {
+            auraGauge.put(element, new AuraState(element, taxedUnits, currentTime, sourceDecayRate));
+            return;
+        }
+
+        double currentUnits = state.currentUnitsAt(currentTime);
+        if (taxedUnits <= currentUnits) {
+            return;
+        }
+        if (element == model.type.Element.PYRO) {
+            state.rebase(taxedUnits, currentTime, sourceDecayRate);
+        } else {
+            state.rebase(taxedUnits, currentTime);
         }
     }
 
@@ -367,7 +425,7 @@ public class Enemy {
     /**
      * Captures the full per-element aura state for simulator snapshot/rollback.
      *
-     * <p>Each entry holds {@code {units, applicationTime, duration}} so that
+     * <p>Each entry holds {@code {units, applicationTime, decayRate}} so that
      * continuous natural decay can be resumed exactly after a restore, rather
      * than being flattened to a non-decaying value.
      *
@@ -378,7 +436,7 @@ public class Enemy {
         for (Map.Entry<model.type.Element, AuraState> entry : auraGauge.entrySet()) {
             AuraState state = entry.getValue();
             snapshot.put(entry.getKey(),
-                    new double[] { state.units, state.applicationTime, state.duration });
+                    new double[] { state.units, state.applicationTime, state.decayRate });
         }
         return snapshot;
     }
@@ -403,6 +461,14 @@ public class Enemy {
             auraGauge.put(entry.getKey(),
                     new AuraState(entry.getKey(), values[0], values[1], values[2]));
         }
+    }
+
+    private boolean canPersistAsAura(model.type.Element element) {
+        return element == model.type.Element.PYRO
+                || element == model.type.Element.HYDRO
+                || element == model.type.Element.CRYO
+                || element == model.type.Element.ELECTRO
+                || element == model.type.Element.DENDRO;
     }
 
     private double auraDuration(double units) {

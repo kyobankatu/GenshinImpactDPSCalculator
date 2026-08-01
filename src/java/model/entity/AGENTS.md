@@ -15,7 +15,9 @@
 - `CharacterTeamBuffProvider.java`: capability interface for characters that provide team buffs.
 - `DamageTriggeredArtifactEffect.java`: capability interface for artifacts that react after damage is calculated.
 - `DamageTriggeredWeaponEffect.java`: capability interface for weapons that react after damage is calculated.
-- `Enemy.java`: target model containing level, resistances, time-aware elemental aura gauges, and simplified Freeze aura state.
+- `Enemy.java`: target model containing level, resistances, time-aware elemental
+  aura gauges with source application tax/decay policy, and simplified Freeze
+  aura state.
 - `FormStateProvider.java`: capability interface for characters that expose form or stance state to observation/reporting layers.
 - `ReactionAwareArtifact.java`: capability interface for artifacts that listen to reaction results.
 - `ReactionAwareCharacter.java`: capability interface for characters with reaction-listener behavior.
@@ -32,6 +34,9 @@
 - `Character` depends on `model.stats.StatsContainer`, `model.type.CharacterId`, `model.type.StatType`, `model.entity.Weapon`, `model.entity.ArtifactSet`, and `mechanics.buff.Buff`.
 - `Enemy` is consumed heavily by `simulation.runtime.CombatActionResolver`, `simulation.CombatSimulator`, and `mechanics.formula.DamageCalculator`.
 - Aura state in `Enemy` is time-aware for runtime-applied elemental gauges; persistent reaction states such as Burning, Quicken, Dendro Cores, Thundercloud, Dew, and Moondrifts live in `simulation.runtime.ReactionState`.
+- Standard source application belongs to `Enemy.applyAura`; callers pass the
+  pre-tax source gauge. Raw `setAura` methods are explicit state/fixture setup
+  and must not silently acquire source-application policy.
 - `Weapon` and `ArtifactSet` are called by `Character` during stat assembly; event behavior is dispatched only when a concrete item implements the relevant capability interface. Simulator-initialized weapon behavior is registered after party insertion.
 - Concrete character, weapon, and artifact packages all extend these types.
 

@@ -136,8 +136,8 @@ reaction, delayed reaction, and weighted party damage now resolve matching
 enemy RES reduction at impact without retaining it in attacker snapshots.
 
 The B-049 standard aura-tax and decay correction is in progress. Its sourced
-contract and runtime path inventory are complete; implementation starts with the
-enemy-owned aura application model below.
+contract and enemy-owned aura application model are complete; runtime routing is
+the next phase below.
 
 ## Scope
 
@@ -7461,7 +7461,7 @@ Completion evidence:
 
 Status:
 
-- Phase 1 is complete; Phases 2-4 remain pending.
+- Phases 1-2 are complete; Phases 3-4 remain pending.
 - Requirement: a standard elemental source that establishes or extends an aura
   must apply the sourced 0.8 Aura Tax and source-gauge decay rate instead of the
   simulator's generic `6 + 5U` replacement model.
@@ -7559,7 +7559,7 @@ Completion evidence:
   excluded. Report, log, resonance, target-dependent stats, and RL observation
   code already consume `Enemy` current-time readers.
 
-### Phase 2: Implement Taxed Aura State and Same-Element Extension
+### Phase 2: Implement Taxed Aura State and Same-Element Extension - Done
 
 Why second:
 
@@ -7609,6 +7609,20 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/agent_validate.py --path src/java/model/entity/Enemy.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- `Enemy.applyAura` is the sole source-application policy: it applies 0.8 Tax,
+  derives linear rate from `2.5 * U + 7`, performs max-style extension, retains
+  the first non-Pyro rate, and updates Pyro rate only when amount changes.
+- Aura snapshots now persist current units, application time, and actual decay
+  rate. Consumption and restore therefore preserve rates selected by source
+  application or same-element extension; raw finite/infinite setters remain
+  explicit fixture/state APIs.
+- Regression proves exact 0.8/1.2/1.6/3.2 start values and
+  9.5/10.75/12/17-second expiries, stronger/weaker Electro extension, both Pyro
+  update branches, consumed-state restoration, and invalid value/element no-op
+  policy. Reaction regression, build, Javadoc, and routed validation pass.
 
 ### Phase 3: Route Standard Runtime Aura Applications
 

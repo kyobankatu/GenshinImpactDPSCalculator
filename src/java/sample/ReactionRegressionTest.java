@@ -113,6 +113,10 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_LiveResistanceSnapshotContract();
         testAccuracyPhaseF_ImmediateReactionLiveResistanceContract();
         testAccuracyPhaseF_DelayedReactionLiveResistanceContract();
+        testAccuracyPhaseG_SourceAuraTaxAndDecayContract();
+        testAccuracyPhaseG_SameElementAuraExtensionContract();
+        testAccuracyPhaseG_AuraDecaySnapshotContract();
+        testAccuracyPhaseG_InvalidSourceAuraContract();
         testAccuracyPhaseF_PeriodicCancellationAndRaidenEyeDamageTrigger();
         testAccuracyPhaseF_BennettSkillAndBurstApplicationContract();
         testAccuracyPhaseF_XianglingGuobaNoIcdApplicationContract();
@@ -505,6 +509,87 @@ public class ReactionRegressionTest {
                 "1U aura should reach zero at its configured expiry");
         assertClose(0.0, enemy.getAuraUnits(Element.PYRO, 20.0), EPS,
                 "Decayed aura should never read below zero after expiry");
+    }
+
+    private static void testAccuracyPhaseG_SourceAuraTaxAndDecayContract() {
+        double[][] fixtures = {
+            { 1.0, 0.8, 9.5 },
+            { 1.5, 1.2, 10.75 },
+            { 2.0, 1.6, 12.0 },
+            { 4.0, 3.2, 17.0 }
+        };
+        for (double[] fixture : fixtures) {
+            Enemy enemy = new Enemy(90);
+            double sourceGauge = fixture[0];
+            double taxedGauge = fixture[1];
+            double duration = fixture[2];
+            enemy.applyAura(Element.ELECTRO, sourceGauge, 0.0);
+            assertClose(taxedGauge, enemy.getAuraUnits(Element.ELECTRO, 0.0), EPS,
+                    "Fresh source should apply the exact taxed aura gauge");
+            assertClose(taxedGauge / 2.0,
+                    enemy.getAuraUnits(Element.ELECTRO, duration / 2.0), EPS,
+                    "Source aura should decay linearly to half at its sourced midpoint");
+            assertClose(0.0, enemy.getAuraUnits(Element.ELECTRO, duration), EPS,
+                    "Source aura should reach zero at its sourced expiry");
+        }
+    }
+
+    private static void testAccuracyPhaseG_SameElementAuraExtensionContract() {
+        Enemy electro = new Enemy(90);
+        electro.applyAura(Element.ELECTRO, 1.0, 0.0);
+        electro.applyAura(Element.ELECTRO, 2.0, 1.0);
+        assertClose(1.6, electro.getAuraUnits(Element.ELECTRO, 1.0), EPS,
+                "A stronger Electro source should replace the decayed current gauge");
+        assertClose(0.8, electro.getAuraUnits(Element.ELECTRO, 10.5), EPS,
+                "Electro extension should retain the first 1U decay rate");
+        electro.applyAura(Element.ELECTRO, 1.0, 10.5);
+        assertClose(0.8, electro.getAuraUnits(Element.ELECTRO, 10.5), EPS,
+                "An equal weaker source should not change amount or rate");
+        assertClose(0.0, electro.getAuraUnits(Element.ELECTRO, 20.0), EPS,
+                "Extended Electro should expire on the retained D(1) rate");
+
+        Enemy pyro = new Enemy(90);
+        pyro.applyAura(Element.PYRO, 1.0, 0.0);
+        pyro.applyAura(Element.PYRO, 2.0, 1.0);
+        assertClose(0.8, pyro.getAuraUnits(Element.PYRO, 7.0), EPS,
+                "Amount-changing Pyro should adopt the stronger source decay rate");
+        pyro.applyAura(Element.PYRO, 1.0, 7.0);
+        assertClose(0.8, pyro.getAuraUnits(Element.PYRO, 7.0), EPS,
+                "Non-changing Pyro application should retain its current rate");
+        pyro.applyAura(Element.PYRO, 1.0, 7.1);
+        assertClose(0.8, pyro.getAuraUnits(Element.PYRO, 7.1), EPS,
+                "Amount-changing Pyro should restore the newly taxed amount");
+        assertClose(0.4, pyro.getAuraUnits(Element.PYRO, 11.85), EPS,
+                "Amount-changing weaker Pyro should adopt the new D(1) rate");
+    }
+
+    private static void testAccuracyPhaseG_AuraDecaySnapshotContract() {
+        Enemy enemy = new Enemy(90);
+        enemy.applyAura(Element.HYDRO, 1.0, 0.0);
+        enemy.reduceAura(Element.HYDRO, 0.2, 2.0);
+        Map<Element, double[]> snapshot = enemy.captureAuraState();
+        double capturedUnits = enemy.getAuraUnits(Element.HYDRO, 2.0);
+        enemy.applyAura(Element.HYDRO, 4.0, 3.0);
+        enemy.restoreAuraState(snapshot);
+        assertClose(capturedUnits, enemy.getAuraUnits(Element.HYDRO, 2.0), EPS,
+                "Aura restore should recover consumed current units");
+        assertClose(capturedUnits - 0.8 / 9.5,
+                enemy.getAuraUnits(Element.HYDRO, 3.0), EPS,
+                "Aura restore should preserve the selected source decay rate");
+    }
+
+    private static void testAccuracyPhaseG_InvalidSourceAuraContract() {
+        Enemy enemy = new Enemy(90);
+        enemy.applyAura(Element.PHYSICAL, 1.0, 0.0);
+        enemy.applyAura(Element.ANEMO, 1.0, 0.0);
+        enemy.applyAura(Element.GEO, 1.0, 0.0);
+        enemy.applyAura(Element.PYRO, 0.0, 0.0);
+        enemy.applyAura(Element.HYDRO, -1.0, 0.0);
+        enemy.applyAura(Element.CRYO, Double.NaN, 0.0);
+        enemy.applyAura(Element.ELECTRO, Double.POSITIVE_INFINITY, 0.0);
+        enemy.applyAura(Element.DENDRO, 1.0, Double.NaN);
+        assertTrue(enemy.getActiveAuras(0.0).isEmpty(),
+                "Invalid or non-persistent source applications should create no aura");
     }
 
     private static void testAccuracyPhase2_QueryBeforeAndAtApplication() {
