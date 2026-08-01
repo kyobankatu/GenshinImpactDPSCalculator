@@ -237,6 +237,7 @@ public class Ineffa extends Character implements FormStateProvider, CharacterTea
                         double ocMv = 0.65;
                         AttackAction oc = new AttackAction("Overclock (Lunar)", ocMv, Element.ELECTRO,
                                 StatType.BASE_ATK, StatType.SKILL_DMG_BONUS, 0.0, false, ActionType.SKILL);
+                        oc.setICD(ICDType.None, ICDTag.None, 0.0);
 
                         // Critical: Mark as Lunar-Charged
                         oc.setLunarReactionType(AttackAction.LunarReactionType.CHARGED);

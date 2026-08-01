@@ -75,6 +75,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseE_LunarCrystallizeHarmonyCadence();
         testAccuracyPhaseF_RaidenResolveAndEnergyRegression();
         testAccuracyPhaseF_FlinsThundercloudConditionalHits();
+        testAccuracyPhaseF_IneffaOverclockZeroGaugeContract();
         testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost();
         testAccuracyPhaseF_ColumbinaGravityAndDewRegression();
         testAccuracyPhaseF_ColumbinaStandInBoundaries();
@@ -986,6 +987,52 @@ public class ReactionRegressionTest {
         assertTrue(cloudMiddleHits[0] == noCloudMiddleHits[0] + 2,
                 "Flins standard burst should add conditional middle hits while Thundercloud is active"
                         + " (noCloud=" + noCloudMiddleHits[0] + ", cloud=" + cloudMiddleHits[0] + ")");
+    }
+
+    private static void testAccuracyPhaseF_IneffaOverclockZeroGaugeContract() {
+        model.character.Ineffa inactiveIneffa = new model.character.Ineffa(new TestWeapon(), blankArtifact());
+        CombatSimulator inactiveSim = simulatorWithExistingCharacter(inactiveIneffa);
+        List<AttackAction> inactiveActions = new ArrayList<>();
+        inactiveSim.addListener((actor, action, time) -> inactiveActions.add(action));
+        inactiveIneffa.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), inactiveSim);
+        inactiveSim.advanceTime(2.01);
+        assertTrue(inactiveActions.stream().noneMatch(action -> "Overclock (Lunar)".equals(action.getName())),
+                "Ineffa should not emit Overclock while Thundercloud is inactive");
+
+        model.character.Ineffa activeIneffa = new model.character.Ineffa(new TestWeapon(), blankArtifact());
+        CombatSimulator activeSim = simulatorWithExistingCharacter(activeIneffa);
+        List<AttackAction> activeActions = new ArrayList<>();
+        activeSim.addListener((actor, action, time) -> activeActions.add(action));
+        activeSim.setThundercloudEndTime(activeSim.getCurrentTime() + 30.0);
+        activeIneffa.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), activeSim);
+        double damageBeforeTick = activeSim.getTotalDamage();
+        activeSim.advanceTime(2.01);
+
+        AttackAction overclock = findAction(activeActions, "Overclock (Lunar)");
+        assertEquals(ICDType.None, overclock.getICDType(), "Ineffa Overclock should not enter an ICD group");
+        assertEquals(ICDTag.None, overclock.getICDTag(), "Ineffa Overclock should use the neutral ICD tag");
+        assertClose(0.0, overclock.getGaugeUnits(), EPS, "Ineffa Overclock should apply 0U Electro");
+        assertEquals(AttackAction.LunarReactionType.CHARGED, overclock.getLunarReactionType(),
+                "Ineffa Overclock should retain direct Lunar-Charged classification");
+        assertTrue(overclock.getDamagePercent() > 0.0 && activeSim.getTotalDamage() > damageBeforeTick,
+                "Ineffa Overclock should retain positive direct damage");
+
+        model.character.Ineffa auraIneffa = new model.character.Ineffa(new TestWeapon(), blankArtifact());
+        CombatSimulator auraSim = simulatorWithExistingCharacter(auraIneffa);
+        auraSim.getEnemy().setAura(Element.HYDRO, 1.0, auraSim.getCurrentTime());
+        auraSim.performActionWithoutTimeAdvance(CharacterId.INEFFA, overclock);
+        assertClose(1.0, auraSim.getEnemy().getAuraUnits(Element.HYDRO, auraSim.getCurrentTime()), EPS,
+                "Zero-gauge Overclock should not consume Hydro or trigger elemental application");
+
+        model.character.Ineffa expiredIneffa = new model.character.Ineffa(new TestWeapon(), blankArtifact());
+        CombatSimulator expiredSim = simulatorWithExistingCharacter(expiredIneffa);
+        List<AttackAction> expiredActions = new ArrayList<>();
+        expiredSim.addListener((actor, action, time) -> expiredActions.add(action));
+        expiredIneffa.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), expiredSim);
+        expiredSim.setThundercloudEndTime(expiredSim.getCurrentTime() + 2.0);
+        expiredSim.advanceTime(2.0);
+        assertTrue(expiredActions.stream().noneMatch(action -> "Overclock (Lunar)".equals(action.getName())),
+                "Ineffa should not emit Overclock at the Thundercloud expiry boundary");
     }
 
     private static void testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost() {

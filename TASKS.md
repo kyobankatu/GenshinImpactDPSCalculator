@@ -1099,7 +1099,7 @@ Verification:
 Status:
 
 - In progress.
-- Phase 1 is complete; Phases 2-3 remain.
+- Phases 1-2 are complete; Phase 3 remains.
 - Requirement: Ineffa's Overclocking Circuit follow-up must deal direct
   Lunar-Charged damage without applying Electro or entering an ICD group.
 
@@ -1169,7 +1169,7 @@ Verification:
 - `./gradlew FlinsParty2`
 - `python scripts/preflight.py --run`
 
-### Phase 2: Make Overclock Explicitly Zero-Gauge
+### Phase 2: Make Overclock Explicitly Zero-Gauge - Done
 
 Why second:
 
