@@ -442,7 +442,7 @@ experiment record.
 
 ### B-020 — Guoba incorrectly uses standard Skill ICD
 
-- Status: `planned`
+- Status: `done`
 - Source: 1 (adjacent periodic-action metadata audit)
 - Symptom: Guoba's four flame hits are modeled with standard Skill ICD even
   though each hit applies Pyro independently; the final detailed
@@ -460,4 +460,9 @@ experiment record.
   those actions from this fix. Source:
   https://library.keqingmains.com/characters/pyro/xiangling. Pre-fix audited
   `RaidenParty` baseline is 1,440,416 damage / 68,591 DPS. See `TASKS.md`
-  implementation block `Xiangling Guoba No-ICD Application`.
+  implementation block `Xiangling Guoba No-ICD Application`. Completed
+  2026-08-02. Focused regression covers four no-ICD hits with and without a
+  Hydro aura. Both post-fix `RaidenParty` payloads report 1,461,315 damage /
+  69,586 DPS with normalized SHA-256
+  `66fbe8eb153acd729db6d51b9cc545c8fe366e43bc0d126fd5ab30b660477fc4`;
+  the final detailed trace contains five Guoba hits and zero Guoba ICD blocks.

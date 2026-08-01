@@ -42,13 +42,9 @@ cast no longer applies Anemo.
 The Ineffa Overclock correction is complete. The direct Lunar-Charged follow-up
 retains its damage while applying 0U and bypassing elemental ICD state.
 
-The Ineffa Skill application correction is now active. Its 1U/no-ICD contract
-and pre-fix Birgitta cadence are recorded; implementation and sample acceptance
-remain.
-
-The current simulator-only queue is correcting Xiangling's Guoba application.
-The sourced 1U/no-ICD contract differs from the current standard Skill ICD;
-Pyronado metadata is already aligned and remains out of scope.
+The current simulator-only accuracy queue through B-020 is complete. Xiangling's
+Guoba now follows its sourced 1U/no-ICD contract, while Pyronado's distinct
+application metadata remains unchanged.
 
 ## Scope
 
@@ -2364,7 +2360,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phases 1-2 are complete and Phase 3 remains.
+- Implemented and verified; Phases 1-3 are complete.
 - Requirement: every Guoba flame hit must apply 1U Pyro without entering or
   consulting a shared Skill ICD group.
 
@@ -2462,7 +2458,7 @@ Verification:
 - `./gradlew build`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Accept the RaidenParty Application Delta
+### Phase 3: Accept the RaidenParty Application Delta - Done
 
 Why last:
 
@@ -2498,6 +2494,17 @@ Verification:
 - two fresh `./gradlew RaidenParty` runs
 - `python scripts/validate_agent_assets.py` when baseline gate changes
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- The actual-character regression captures four periodic Guoba hits as Pyro
+  Skill damage with 1U, no ICD, and the typed Skill tag; all four Vaporize with
+  Hydro and the no-aura path produces four hits with no reactions.
+- Both post-fix `RaidenParty` payloads report 1,461,315 damage / 69,586 DPS and
+  match after excluding Gradle's elapsed-time line, with SHA-256
+  `66fbe8eb153acd729db6d51b9cc545c8fe366e43bc0d126fd5ab30b660477fc4`.
+- The final detailed trace contains five Guoba hits and zero Guoba application
+  blocks; unrelated Skill actions continue to report their own ICD decisions.
 
 ## Cross-Cutting Rules
 
