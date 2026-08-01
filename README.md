@@ -228,6 +228,11 @@ Known simplifications:
   expected damage. Her Moondrift extra attacks remain random. Flins's Thunderous
   Symphony correctly uses its active 30-energy cost while retaining an 80-energy
   maximum.
+- `FlinsParty`: generic Favonius Codex and Columbina construction remains
+  stochastic, while this optimizer-driven sample injects independent fixed
+  Windfall and Moondrift streams so every candidate and final run uses the same
+  random scenario. The now-reproducible Sucrose ER infeasibility is tracked as
+  B-033 in `BACKLOG.md` rather than hidden by run-to-run random variation.
 
 ### Continuous Aura Decay Model
 

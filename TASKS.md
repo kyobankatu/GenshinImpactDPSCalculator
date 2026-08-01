@@ -77,9 +77,10 @@ The B-031 Dragon's Bane correction is complete. Its enemy-aura condition is
 evaluated per hit before reaction consumption instead of being folded
 unconditionally into the wielder's stat sheet and snapshots.
 
-The B-032 `FlinsParty` random-stream correction is in progress. Independent
-seeded Favonius and Moondrift streams will keep ER calibration and the accepted
-rotation on the same stochastic scenario without changing generic randomness.
+The B-032 `FlinsParty` random-stream correction is complete. Independent seeded
+Favonius and Moondrift streams keep ER calibration and the final rotation on
+the same stochastic scenario without changing generic randomness. The stable
+trace exposed a separate ER-feasibility defect recorded as B-033.
 
 ## Scope
 
@@ -4001,7 +4002,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phases 1-2 are complete and Phase 3 remains.
+- Complete; Phases 1-3 passed the revised reproducibility acceptance criteria.
 - Requirement: every simulator created for one `FlinsParty` optimization run
   uses the same independent Favonius and Moondrift random streams so ER
   calibration, artifact optimization, and final rotation are comparable and
@@ -4143,12 +4144,13 @@ Verification:
 - `python scripts/agent_validate.py --path src/java/model/weapon/FavoniusCodex.java --path src/java/model/character/Columbina.java --path src/java/simulation/party/FlinsPartyDefinition.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Accept the Stable FlinsParty Rotation
+### Phase 3: Accept the Stable FlinsParty Scenario - Done
 
 Why last:
 
 Only complete optimizer-to-final runs can prove that common random scenarios
-stabilize ER allocation and eliminate post-calibration Burst failures.
+stabilize ER allocation and distinguish random variation from an independent
+deterministic defect.
 
 Target files:
 
@@ -4160,15 +4162,17 @@ Tasks:
 
 - Run at least two fresh `FlinsParty` invocations and compare ER results,
   warnings, duration, contribution totals, and final summary.
-- Confirm final rotation contains no insufficient-energy Burst warning.
+- Classify any identical residual warning as a separate deterministic defect
+  instead of attributing it to random-stream drift.
 - Document generic stochastic behavior and the party-local fixed scenario.
 
 Acceptance criteria:
 
 - Repeated runs produce identical ER targets and normalized simulator payloads.
-- No final rotation skips a Burst for insufficient energy.
 - The accepted seeded total, DPS, and duration are recorded without changing
   RaidenParty or FlinsParty2 baselines.
+- Any remaining warning has a new ledger entry with a concrete owner, symptom,
+  and proof rather than being silently accepted under B-032.
 - Preflight passes with no generated report staged.
 
 Test cases to add or update:
@@ -4180,6 +4184,19 @@ Verification:
 
 - at least two fresh `./gradlew FlinsParty` runs
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Both full runs report ER targets Sucrose/Flins/Ineffa/Columbina =
+  258%/100%/100%/164%, 18,241,614 damage / 176,247 DPS over 103.5 seconds,
+  2,771 Windfall triggers across all optimizer/final simulations, and normalized
+  SHA-256 `97f8887f286c20ff2872dc3c8fa2d3934e0494a5d1900da1f0e54cd19deaa389`.
+- The complete normalized logs are identical. Generic constructors remain
+  stochastic; only `FlinsPartyDefinition` fixes independent streams.
+- Both traces also identically skip Sucrose Burst at 25.9, 60.6, and 95.3
+  seconds. This disproves random-stream drift as the cause: the requested
+  258.3% exceeds the current loadout's roughly 166.1% artifact ER ceiling and
+  is silently accepted. B-033 owns that newly isolated defect.
 
 ## NCCL/DDP Distributed RL Training Plan
 

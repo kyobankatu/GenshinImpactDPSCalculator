@@ -742,7 +742,7 @@ experiment record.
 
 ### B-032 — FlinsParty random streams destabilize ER calibration
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 2 (observable sample warning and non-reproducible ER result)
 - Symptom: unchanged `FlinsParty` runs choose materially different Sucrose and
   Columbina ER targets, then skip Sucrose Bursts for insufficient energy in the
@@ -752,8 +752,7 @@ experiment record.
   focused regressions, and repeated sample acceptance
 - Risk: `planned`
 - Proof: draw/cooldown boundary regression plus repeated `./gradlew FlinsParty`
-  runs with identical ER results, no Burst warning, and matching normalized
-  payloads
+  runs with identical ER results and normalized payloads
 - Notes: new evidence after B-005; generic Moondrift randomness remains an
   accepted model choice, but it changes the number of Favonius-eligible damage
   hooks and therefore the energy scenario used during calibration. Two runs on
@@ -764,4 +763,29 @@ experiment record.
   103.7 seconds. Preserve stochastic default constructors, but adapt the sample
   to independent fixed Favonius and Moondrift streams recreated for every
   simulator. See `TASKS.md` implementation block
-  `Deterministic FlinsParty Energy Scenario`.
+  `Deterministic FlinsParty Energy Scenario`. Completed 2026-08-02. Both
+  accepted runs report 258%/100%/100%/164% ER, 18,241,614 damage / 176,247 DPS
+  over 103.5 seconds, 2,771 Windfall triggers, and normalized SHA-256
+  `97f8887f286c20ff2872dc3c8fa2d3934e0494a5d1900da1f0e54cd19deaa389`.
+  The identical residual Sucrose Burst warnings are not random-stream drift;
+  they exposed the separate feasibility defect B-033.
+
+### B-033 — Artifact optimizer silently accepts unreachable ER targets
+
+- Status: `candidate`
+- Source: 2 (reproducible sample warning and optimizer/loadout mismatch)
+- Symptom: `FlinsParty` requests 258.3% ER for Sucrose, but the fixed triple-EM
+  main stats and ten-liquid-roll per-stat cap can supply only about 166.1% ER;
+  `ArtifactOptimizer` returns that underfilled build without a diagnostic and
+  the final rotation skips Sucrose Burst at 25.9, 60.6, and 95.3 seconds.
+- Scope: artifact ER feasibility reporting/allocation, optimizer pipeline
+  contract, party loadout response, and focused plus repeated sample regression
+- Risk: `planned`
+- Proof: regression that detects an unmet `minER` before final optimization and
+  a repeated `FlinsParty` result with an explicit feasible resolution and no
+  silently underfilled ER target
+- Notes: discovered after B-032 made the stochastic scenario reproducible.
+  The deterministic result proves this is not seed variance. Plan must choose
+  and document whether an unreachable target changes main stats/loadout,
+  changes the legal rotation, or fails explicitly; it must not exceed KQMS roll
+  constraints or clamp the requirement without evidence.
