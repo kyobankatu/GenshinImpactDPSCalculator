@@ -629,3 +629,24 @@ experiment record.
   post-fix `FlinsParty2` payloads report 14,316,424 damage / 213,042 DPS with
   normalized SHA-256
   `1990a24b7dea2d237f7d7823c2ca77c64649eaddd98a1174730fdb3a7384a6bb`.
+
+### B-027 — Aggregate ER calibration permits mid-rotation Burst failures
+
+- Status: `planned`
+- Source: 2 (observable `FlinsParty2` warning and energy timeline)
+- Symptom: the accepted final simulation skips Columbina Burst at 20.3 seconds
+  with about 52/60 energy and again at 54.3 seconds with 59.8/60 energy even
+  though ER calibration reports convergence.
+- Scope: `src/java/model/entity/state/EnergyState.java`,
+  `src/java/mechanics/analysis/EnergyAnalyzer.java`,
+  `src/java/simulation/runtime/ActionGateway.java`, and focused regressions
+- Risk: `planned`
+- Proof: interval-level ER regression plus two deterministic `FlinsParty2`
+  payloads containing no insufficient-energy warning
+- Notes: discovered 2026-08-02 after B-026. The current analyzer divides total
+  rotation cost by total particle energy, which hides a deficient interval
+  behind later particle income. Close an accounting window on every requested
+  Burst, including skipped attempts; combine the final tail with the first
+  preloaded window for cyclic refill; choose the maximum per-window ER. The
+  pre-fix baseline is 14,316,424 damage / 213,042 DPS. See `TASKS.md`
+  implementation block `Timing-Aware ER Calibration`.

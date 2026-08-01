@@ -66,6 +66,9 @@ The B-026 correction is complete. Ineffa's Skill and Burst now refresh one
 Birgitta summon whose 20-second lifetime contains exactly ten two-second
 Discharge attacks.
 
+The active queue is B-027. ER calibration must satisfy every requested Burst
+interval instead of allowing later particle income to hide an earlier deficit.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -3418,6 +3421,159 @@ Completion evidence:
   each replacement begins two seconds later and no superseded stream resumes.
 - The executable actual-Ineffa regression verifies ten exact hits at +2 through
   +20 seconds, no +22-second hit, Burst-only summon, and Skill/Burst refresh.
+
+## Implementation Order: Timing-Aware ER Calibration
+
+Status:
+
+- Planned; Phase 1 evidence is recorded below.
+- Requirement: ER calibration must select a target that funds every requested
+  Burst in rotation order, including the cyclic final-to-first interval.
+
+Scope:
+
+- Close energy-accounting windows on successful and skipped Burst requests.
+- Calculate required ER from the worst chronological interval rather than
+  aggregate rotation totals.
+- Keep runtime energy spending and optimizer analysis as separate roles.
+- Re-accept the `FlinsParty2` optimizer and numeric baseline.
+
+Out of scope for this pass:
+
+- Particle values, funnel timing, Burst costs/cooldowns, artifact roll sizes,
+  rotation scripts, damage formulas, RL tensor/protocol changes, or generated
+  report output.
+- Replacing the iterative optimizer or changing its public result shape.
+
+Design boundaries:
+
+- `EnergyState` records interval inputs and requested Burst costs without
+  deciding the target ER.
+- `EnergyAnalyzer` owns cyclic interval reconstruction and worst-case ER math.
+- `ActionGateway` owns the user-facing insufficient-energy diagnostic.
+- `IterativeSimulator` continues to own convergence and simulator rebuilding.
+
+### Phase 1: Record the Mid-Rotation ER Failure - Done
+
+Why first:
+
+The current aggregate formula, exact warning points, and intended cyclic
+boundary must be fixed before changing accounting semantics.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record both Columbina Burst failures in the accepted `FlinsParty2` trace.
+- Distinguish the displayed `60/60` rounding from the recorded 59.8/60 energy.
+- Specify per-request windows and final-tail-to-first-window cyclic handling.
+
+Acceptance criteria:
+
+- The ledger names the observable warnings and pre-fix baseline.
+- Runtime accounting, analysis, and convergence ownership are explicit.
+- Unrelated energy generation and RL contracts remain excluded.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 adds interval and
+  integration regressions.
+
+Verification:
+
+- inspect `FlinsParty2` warnings and generated energy timeline
+- `python scripts/preflight.py --run`
+
+### Phase 2: Calibrate Against the Worst Burst Interval
+
+Why second:
+
+Attempt-level windows provide the minimum chronological input needed for the
+analyzer to reject an aggregate target that fails in the middle of a rotation.
+
+Target files:
+
+- `src/java/model/entity/state/EnergyState.java`
+- `src/java/model/entity/Character.java`
+- `src/java/mechanics/analysis/EnergyAnalyzer.java`
+- `src/java/simulation/runtime/ActionGateway.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Record and reset one particle/flat window for every successful or skipped
+  Burst request while preserving actual energy on a skip.
+- Reconstruct the cyclic first interval from post-final tail income plus the
+  income before the first requested Burst.
+- Return the maximum finite per-window ER requirement, retaining the existing
+  9.99 sentinel when an interval cannot be funded.
+- Print insufficient energy with enough precision to distinguish 59.8 from 60.
+
+Acceptance criteria:
+
+- A locally deficient interval cannot be hidden by excess energy in a later
+  interval.
+- A skipped request closes only its analysis window and does not spend runtime
+  energy or start Burst cooldown.
+- One-Burst rotations retain cyclic start-full/end-full calibration behavior.
+- Existing Flins alternate 30-energy Burst accounting remains correct.
+
+Test cases to add or update:
+
+- Normal: balanced chronological windows retain the expected ER target.
+- Boundary: final tail and pre-first income combine into the cyclic first
+  interval.
+- Abnormal: one 30-particle interval for a 60-cost Burst requires 200% ER even
+  when later windows contain excess particles.
+- No-particle: an unfunded interval returns the 9.99 sentinel.
+- Diagnostic: a 59.8/60 skip is logged without rounding to 60/60.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Accept the Warning-Free FlinsParty2 Baseline
+
+Why last:
+
+The real optimizer run proves the new interval policy reserves enough ER after
+artifact quantization and repeated simulation.
+
+Target files:
+
+- `README.md`
+- `TASKS.md`
+- `BACKLOG.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+
+Tasks:
+
+- Run two fresh `FlinsParty2` payloads with timing-aware calibration.
+- Confirm every scripted Columbina Burst executes and no energy warning remains.
+- Update the deterministic Flins baseline and record normalized payload hashes.
+
+Acceptance criteria:
+
+- Both normalized payloads and numeric summaries match.
+- The final trace has no insufficient-energy warning for any character.
+- Numeric baseline documents agree.
+- Agent assets and routed preflight checks pass.
+
+Test cases to add or update:
+
+- No further production test; Phase 2 owns interval math and skip semantics.
+
+Verification:
+
+- two fresh `./gradlew FlinsParty2` runs
+- `python scripts/validate_agent_assets.py`
+- `python scripts/preflight.py --run`
 
 ## Cross-Cutting Rules
 
