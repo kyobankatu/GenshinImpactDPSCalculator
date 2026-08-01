@@ -78,7 +78,8 @@ final class LunarDamageStrategy implements DamageStrategy {
         double cr = stats.get(StatType.CRIT_RATE);
         double cd = stats.get(StatType.CRIT_DMG) + stats.get(StatType.LUNAR_REACTION_CRIT_DMG);
         double critMult = 1.0 + (Math.min(cr, 1.0) * cd);
-        double resMult = ResistanceCalculator.calculateMultiplier(target, stats, action.getElement());
+        double resMult = ResistanceCalculator.calculateMultiplier(
+                target, activeBuffs, currentTime, action.getElement());
 
         try {
             String formula = String.format(

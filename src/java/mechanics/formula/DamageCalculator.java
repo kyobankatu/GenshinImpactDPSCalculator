@@ -58,8 +58,8 @@ public class DamageCalculator {
      * clamping.</li>
      * <li>Reaction multiplier passed in from {@code CombatSimulator}.</li>
      * <li>Defense: via {@link #calculateDefMulti} at attacker level 90.</li>
-     * <li>Resistance: via {@link #calculateResMulti} after accumulating
-     * element-specific shred.</li>
+     * <li>Resistance: via {@link #calculateResMulti} after resolving live
+     * enemy-facing element-specific reduction at impact.</li>
      * </ol>
      *
      * <p>

@@ -73,7 +73,8 @@ final class StandardDamageStrategy implements DamageStrategy {
             totalDefIgnore = 1.0;
         }
         double defMulti = DamageCalculator.calculateDefMulti(attackerLevel, target.getLevel(), totalDefIgnore);
-        double resMulti = ResistanceCalculator.calculateMultiplier(target, stats, action.getElement());
+        double resMulti = ResistanceCalculator.calculateMultiplier(
+                target, activeBuffs, currentTime, action.getElement());
 
         return baseDmg * (1 + dmgBonus) * critMulti * reactionMultiplier * defMulti * resMulti;
     }

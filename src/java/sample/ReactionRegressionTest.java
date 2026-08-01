@@ -109,6 +109,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_SucroseNoIcdApplicationContract();
         testAccuracyPhaseF_RaidenCastAndMusouIcdContract();
         testAccuracyPhaseF_RaidenEyeBuffRefreshContract();
+        testAccuracyPhaseF_LiveResistanceSnapshotContract();
         testAccuracyPhaseF_PeriodicCancellationAndRaidenEyeDamageTrigger();
         testAccuracyPhaseF_BennettSkillAndBurstApplicationContract();
         testAccuracyPhaseF_XianglingGuobaNoIcdApplicationContract();
@@ -3272,6 +3273,81 @@ public class ReactionRegressionTest {
         assertEquals(CharacterId.RAIDEN_SHOGUN, eyeBuff.getSourceCharacterId(),
                 message + " source");
         return eyeBuff;
+    }
+
+    private static void testAccuracyPhaseF_LiveResistanceSnapshotContract() {
+        TestCharacter owner = testCharacter(Element.PYRO, CharacterId.XIANGLING)
+                .withStat(StatType.CRIT_RATE, 0.0)
+                .withStat(StatType.CRIT_DMG, 0.0);
+        CombatSimulator sim = simulatorWith(owner);
+        AttackAction snapshotHit = new AttackAction(
+                "Snapshot Pyro RES fixture", 1.0, Element.PYRO, StatType.BASE_ATK,
+                StatType.PYRO_DMG_BONUS, 0.0, true, ActionType.SKILL);
+        snapshotHit.setICD(ICDType.None, ICDTag.None, 0.0);
+        owner.captureSnapshot(sim.getCurrentTime(), sim.getTeamBuffs());
+        double baseline = calculateDirectDamage(sim, owner, snapshotHit, sim.getCurrentTime(), 1.0);
+
+        sim.applyTeamBuff(new SimpleBuff(
+                "Live Pyro RES fixture", BuffId.XIANGLING_GUOBA_C1_SHRED,
+                10.0, sim.getCurrentTime(), stats -> stats.add(StatType.PYRO_RES_SHRED, 0.15)));
+        double reducedSnapshot = calculateDirectDamage(
+                sim, owner, snapshotHit, sim.getCurrentTime(), 1.0);
+        assertClose(baseline * (1.025 / 0.90), reducedSnapshot, EPS,
+                "A snapshotted Pyro hit should use reduction activated after its snapshot");
+
+        AttackAction liveHit = new AttackAction(
+                "Live Pyro RES fixture", 1.0, Element.PYRO, StatType.BASE_ATK,
+                StatType.PYRO_DMG_BONUS, 0.0, false, ActionType.SKILL);
+        liveHit.setICD(ICDType.None, ICDTag.None, 0.0);
+        double reducedLive = calculateDirectDamage(sim, owner, liveHit, sim.getCurrentTime(), 1.0);
+        assertClose(reducedLive, reducedSnapshot, EPS,
+                "Live and snapshotted hits should share one impact-time RES multiplier");
+
+        sim.applyTeamBuff(new SimpleBuff(
+                "Generic RES fixture", 10.0, sim.getCurrentTime(),
+                stats -> stats.add(StatType.RES_SHRED, 0.10)));
+        sim.applyTeamBuff(new SimpleBuff(
+                "Unrelated Hydro RES fixture", 10.0, sim.getCurrentTime(),
+                stats -> stats.add(StatType.HYDRO_RES_SHRED, 0.40)));
+        double combined = calculateDirectDamage(sim, owner, snapshotHit, sim.getCurrentTime(), 1.0);
+        assertClose(baseline * (1.075 / 0.90), combined, EPS,
+                "Generic and matching elemental reduction should add once without unrelated elements");
+
+        TestCharacter staleOwner = testCharacter(Element.PYRO, CharacterId.XIANGLING)
+                .withStat(StatType.CRIT_RATE, 0.0)
+                .withStat(StatType.CRIT_DMG, 0.0);
+        CombatSimulator staleSim = simulatorWith(staleOwner);
+        staleSim.applyTeamBuff(new SimpleBuff(
+                "Expiring Pyro RES fixture", BuffId.XIANGLING_GUOBA_C1_SHRED,
+                10.0, staleSim.getCurrentTime(),
+                stats -> stats.add(StatType.PYRO_RES_SHRED, 0.15)));
+        staleOwner.captureSnapshot(staleSim.getCurrentTime(), staleSim.getTeamBuffs());
+        staleSim.advanceTime(10.0);
+        double afterExpiry = calculateDirectDamage(
+                staleSim, staleOwner, snapshotHit, staleSim.getCurrentTime(), 1.0);
+        assertClose(baseline, afterExpiry, EPS,
+                "A snapshotted hit should not retain reduction at its exact expiry");
+
+        TestCharacter lunarOwner = testCharacter(Element.ELECTRO, CharacterId.FLINS)
+                .withStat(StatType.CRIT_RATE, 0.0)
+                .withStat(StatType.CRIT_DMG, 0.0)
+                .asLunar();
+        CombatSimulator lunarSim = simulatorWith(lunarOwner);
+        AttackAction lunarHit = new AttackAction(
+                "Snapshot Lunar RES fixture", 1.0, Element.ELECTRO, StatType.BASE_ATK,
+                StatType.ELECTRO_DMG_BONUS, 0.0, true, ActionType.SKILL);
+        lunarHit.setLunarReactionType(AttackAction.LunarReactionType.CHARGED);
+        lunarHit.setICD(ICDType.None, ICDTag.None, 0.0);
+        lunarOwner.captureSnapshot(lunarSim.getCurrentTime(), lunarSim.getTeamBuffs());
+        double lunarBaseline = calculateDirectDamage(
+                lunarSim, lunarOwner, lunarHit, lunarSim.getCurrentTime(), 1.0);
+        lunarSim.applyTeamBuff(new SimpleBuff(
+                "Live Electro RES fixture", 10.0, lunarSim.getCurrentTime(),
+                stats -> stats.add(StatType.ELECTRO_RES_SHRED, 0.15)));
+        double lunarReduced = calculateDirectDamage(
+                lunarSim, lunarOwner, lunarHit, lunarSim.getCurrentTime(), 1.0);
+        assertClose(lunarBaseline * (1.025 / 0.90), lunarReduced, EPS,
+                "A snapshotted Lunar hit should use live matching RES reduction");
     }
 
     private static void testAccuracyPhaseF_PeriodicCancellationAndRaidenEyeDamageTrigger() {

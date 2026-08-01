@@ -7080,7 +7080,7 @@ Completion evidence:
 
 Status:
 
-- Phase 1 is complete; Phases 2-5 remain pending.
+- Phases 1-2 are complete; Phases 3-5 remain pending.
 - Requirement: elemental and Physical RES reduction is enemy-facing state and
   must be evaluated at each damage impact, never captured with attacker stats.
 
@@ -7184,7 +7184,7 @@ Completion evidence:
   that immutable list for immediate damage prevents B-048 from changing B-042's
   separately deferred first-Swirl ordering.
 
-### Phase 2: Centralize Live RES for Standard and Lunar Hits - Pending
+### Phase 2: Centralize Live RES for Standard and Lunar Hits - Done
 
 Why second:
 
@@ -7232,6 +7232,18 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/agent_validate.py --path src/java/mechanics/formula --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- `ResistanceCalculator` now reconstructs generic and matching element-specific
+  reduction from the unexpired impact-time buff list without reading or mutating
+  attacker snapshots. Standard and Lunar strategies share that API.
+- Regression proves post-snapshot 15% activation, exact-expiry removal of a
+  snapshot-contained 15%, live/snapshot parity, generic plus matching elemental
+  addition, unrelated Hydro exclusion from Pyro, and Lunar Electro parity.
+- Formula documentation and nearest-package guidance identify RES reduction as
+  impact-time enemy state. Reaction regression, build, Javadoc, routed
+  validation, and preflight pass.
 
 ### Phase 3: Route Immediate Reaction RES Through Captured Buffs - Pending
 

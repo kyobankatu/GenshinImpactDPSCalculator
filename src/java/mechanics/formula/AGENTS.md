@@ -12,7 +12,9 @@
 - `DamageStrategy.java`: internal interface for damage formula implementations.
 - `StandardDamageStrategy.java`: standard Genshin damage formula path, including additive reaction contributions such as Aggravate and Spread before DMG bonus, crit, DEF, and RES.
 - `LunarDamageStrategy.java`: custom Lunar damage formula path.
-- `ResistanceCalculator.java`: shared resistance multiplier helper.
+- `ResistanceCalculator.java`: shared resistance multiplier helper and the
+  impact-time extractor for enemy-facing reduction buffs, which must never be
+  read from attacker snapshots.
 
 ## Coupling and dependencies
 - `DamageCalculator` depends on `model.stats.StatsContainer`, `model.type.StatType`, `model.entity.Character`, `model.entity.Enemy`, `mechanics.buff.Buff`, `simulation.action.AttackAction`, and `simulation.CombatSimulator`.

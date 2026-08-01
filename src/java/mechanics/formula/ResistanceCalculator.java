@@ -1,5 +1,8 @@
 package mechanics.formula;
 
+import java.util.List;
+
+import mechanics.buff.Buff;
 import model.entity.Enemy;
 import model.stats.StatsContainer;
 import model.type.Element;
@@ -44,6 +47,32 @@ public final class ResistanceCalculator {
     }
 
     /**
+     * Resolves enemy-facing resistance reduction from buffs active at impact.
+     *
+     * <p>Resistance reduction is not an attacker stat and therefore must not be
+     * read from a stored attacker snapshot. Applying the captured impact-time
+     * buff list to an empty container extracts only its live generic and
+     * element-specific reduction values without mutating the snapshot.
+     *
+     * @param activeBuffs buffs captured for the current damage impact
+     * @param currentTime simulation time of the impact
+     * @param element     damage element being resolved
+     * @return live generic plus matching element-specific resistance reduction
+     */
+    public static double getTotalResShred(
+            List<Buff> activeBuffs, double currentTime, Element element) {
+        StatsContainer liveReduction = new StatsContainer();
+        if (activeBuffs != null) {
+            for (Buff buff : activeBuffs) {
+                if (!buff.isExpired(currentTime)) {
+                    buff.apply(liveReduction, currentTime);
+                }
+            }
+        }
+        return getTotalResShred(liveReduction, element);
+    }
+
+    /**
      * Resolves the final resistance multiplier for the specified target and element.
      *
      * @param target  enemy being hit
@@ -54,6 +83,21 @@ public final class ResistanceCalculator {
     public static double calculateMultiplier(Enemy target, StatsContainer stats, Element element) {
         double baseRes = target.getRes(element.getBonusStatType());
         return calculateResMulti(baseRes, getTotalResShred(stats, element));
+    }
+
+    /**
+     * Resolves the target multiplier from enemy-facing buffs active at impact.
+     *
+     * @param target      enemy being hit
+     * @param activeBuffs buffs captured for the current damage impact
+     * @param currentTime simulation time of the impact
+     * @param element     damage element being resolved
+     * @return outgoing damage multiplier after live resistance reduction
+     */
+    public static double calculateMultiplier(
+            Enemy target, List<Buff> activeBuffs, double currentTime, Element element) {
+        double baseRes = target.getRes(element.getBonusStatType());
+        return calculateResMulti(baseRes, getTotalResShred(activeBuffs, currentTime, element));
     }
 
     /**
