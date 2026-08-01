@@ -18,6 +18,7 @@ import mechanics.energy.ParticleType;
 import mechanics.formula.DamageCalculator;
 import mechanics.formula.ResistanceCalculator;
 import mechanics.reaction.ReactionCalculator;
+import mechanics.reaction.ReactionEffectScheduler;
 import mechanics.reaction.ReactionResult;
 import model.entity.ArtifactSet;
 import model.entity.Character;
@@ -111,6 +112,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_RaidenEyeBuffRefreshContract();
         testAccuracyPhaseF_LiveResistanceSnapshotContract();
         testAccuracyPhaseF_ImmediateReactionLiveResistanceContract();
+        testAccuracyPhaseF_DelayedReactionLiveResistanceContract();
         testAccuracyPhaseF_PeriodicCancellationAndRaidenEyeDamageTrigger();
         testAccuracyPhaseF_BennettSkillAndBurstApplicationContract();
         testAccuracyPhaseF_XianglingGuobaNoIcdApplicationContract();
@@ -3400,6 +3402,96 @@ public class ReactionRegressionTest {
         assertClose(expectedTransformative(2.75, Element.PYRO, 0.0) * (1.15 / 0.90),
                 postVvOverload, 0.5,
                 "A later Pyro reaction should use the already-active VV reduction");
+    }
+
+    private static void testAccuracyPhaseF_DelayedReactionLiveResistanceContract() {
+        TestCharacter electroOwner = testCharacter(Element.ELECTRO, CharacterId.SUCROSE);
+        CombatSimulator electroSim = simulatorWith(electroOwner);
+        ReactionEffectScheduler electroScheduler = new ReactionEffectScheduler(electroSim);
+        electroSim.getEnemy().setAura(Element.HYDRO, 4.0, electroSim.getCurrentTime());
+        electroScheduler.scheduleElectroCharged(Element.ELECTRO, 4.0, 1000.0, false);
+        electroSim.advanceTime(1.0);
+        assertClose(900.0, electroSim.getTotalDamage(), EPS,
+                "Electro-Charged first tick should use baseline Electro RES");
+        electroSim.applyTeamBuff(new SimpleBuff(
+                "Timed Electro RES fixture", 1.5, electroSim.getCurrentTime(),
+                stats -> stats.add(StatType.ELECTRO_RES_SHRED, 0.15)));
+        electroSim.advanceTime(1.0);
+        assertClose(900.0 + 1025.0, electroSim.getTotalDamage(), EPS,
+                "Electro-Charged second tick should use newly active Electro reduction");
+        electroSim.advanceTime(1.0);
+        assertClose(900.0 + 1025.0 + 900.0, electroSim.getTotalDamage(), EPS,
+                "Electro-Charged tick should drop reduction after exact expiry");
+
+        TestCharacter burningOwner = testCharacter(Element.PYRO, CharacterId.XIANGLING);
+        CombatSimulator burningSim = simulatorWith(burningOwner);
+        ReactionEffectScheduler burningScheduler = new ReactionEffectScheduler(burningSim);
+        burningScheduler.scheduleBurning(CharacterId.XIANGLING, 1000.0);
+        burningSim.advanceTime(0.25);
+        assertClose(900.0, burningSim.getTotalDamage(), EPS,
+                "Burning first tick should use baseline Pyro RES");
+        burningSim.applyTeamBuff(new SimpleBuff(
+                "Timed Burning Pyro RES fixture", 0.5, burningSim.getCurrentTime(),
+                stats -> stats.add(StatType.PYRO_RES_SHRED, 0.15)));
+        burningSim.advanceTime(0.25);
+        assertClose(900.0 + 1025.0, burningSim.getTotalDamage(), EPS,
+                "Burning second tick should use newly active Pyro reduction");
+        burningSim.advanceTime(0.25);
+        assertClose(900.0 + 1025.0 + 900.0, burningSim.getTotalDamage(), EPS,
+                "Burning tick should drop reduction at exact expiry");
+
+        TestCharacter bloomOwner = testCharacter(Element.HYDRO, CharacterId.SUCROSE);
+        CombatSimulator bloomSim = simulatorWith(bloomOwner);
+        ReactionEffectScheduler bloomScheduler = new ReactionEffectScheduler(bloomSim);
+        bloomScheduler.createDendroCore(CharacterId.SUCROSE, 1000.0);
+        bloomSim.applyTeamBuff(new SimpleBuff(
+                "Post-creation Dendro RES fixture", 10.0, bloomSim.getCurrentTime(),
+                stats -> stats.add(StatType.DENDRO_RES_SHRED, 0.15)));
+        bloomSim.advanceTime(6.0);
+        assertClose(1025.0, bloomSim.getTotalDamage(), EPS,
+                "Bloom explosion should use Dendro reduction activated after core creation");
+
+        TestCharacter staleBloomOwner = testCharacter(Element.HYDRO, CharacterId.SUCROSE);
+        CombatSimulator staleBloomSim = simulatorWith(staleBloomOwner);
+        ReactionEffectScheduler staleBloomScheduler = new ReactionEffectScheduler(staleBloomSim);
+        staleBloomSim.applyTeamBuff(new SimpleBuff(
+                "Expired core Dendro RES fixture", 1.0, staleBloomSim.getCurrentTime(),
+                stats -> stats.add(StatType.DENDRO_RES_SHRED, 0.15)));
+        staleBloomScheduler.createDendroCore(CharacterId.SUCROSE, 1000.0);
+        staleBloomSim.advanceTime(6.0);
+        assertClose(900.0, staleBloomSim.getTotalDamage(), EPS,
+                "Bloom explosion should not retain creation-time Dendro reduction");
+
+        TestCharacter coreOwner = testCharacter(Element.ELECTRO, CharacterId.SUCROSE);
+        CombatSimulator coreSim = simulatorWith(coreOwner);
+        ReactionEffectScheduler coreScheduler = new ReactionEffectScheduler(coreSim);
+        coreSim.applyTeamBuff(new SimpleBuff(
+                "Core consumption Dendro RES fixture", 10.0, coreSim.getCurrentTime(),
+                stats -> stats.add(StatType.DENDRO_RES_SHRED, 0.15)));
+        coreSim.addDendroCore(CharacterId.SUCROSE, 1000.0);
+        coreScheduler.consumeDendroCores(CharacterId.SUCROSE, 1000.0, "Hyperbloom", 1);
+        assertClose(1025.0, coreSim.getTotalDamage(), EPS,
+                "Hyperbloom consumption should use current Dendro reduction");
+        coreSim.addDendroCore(CharacterId.SUCROSE, 1000.0);
+        coreScheduler.consumeDendroCores(CharacterId.SUCROSE, 1000.0, "Burgeon", 1);
+        assertClose(2050.0, coreSim.getTotalDamage(), EPS,
+                "Burgeon consumption should share current Dendro reduction");
+
+        TestCharacter lunarOwner = testCharacter(Element.ELECTRO, CharacterId.FLINS).asLunar();
+        CombatSimulator lunarSim = simulatorWith(lunarOwner);
+        ReactionEffectScheduler lunarScheduler = new ReactionEffectScheduler(lunarSim);
+        double lunarBaseline = lunarScheduler.computeInitialLunarChargedDamage();
+        lunarSim.applyTeamBuff(new SimpleBuff(
+                "Weighted Lunar Electro RES fixture", 10.0, lunarSim.getCurrentTime(),
+                stats -> stats.add(StatType.ELECTRO_RES_SHRED, 0.15)));
+        double lunarReduced = lunarScheduler.computeInitialLunarChargedDamage();
+        assertClose(lunarBaseline * (1.025 / 0.90), lunarReduced, EPS,
+                "Weighted Lunar damage should use current matching reduction once");
+        lunarSim.applyTeamBuff(new SimpleBuff(
+                "Weighted Lunar unrelated RES fixture", 10.0, lunarSim.getCurrentTime(),
+                stats -> stats.add(StatType.HYDRO_RES_SHRED, 0.40)));
+        assertClose(lunarReduced, lunarScheduler.computeInitialLunarChargedDamage(), EPS,
+                "Weighted Lunar damage should ignore unrelated elemental reduction");
     }
 
     private static void testAccuracyPhaseF_PeriodicCancellationAndRaidenEyeDamageTrigger() {

@@ -1036,8 +1036,9 @@ public class CombatSimulator {
         return reactionState.incrementMoonridgeDewCount();
     }
 
-    public simulation.runtime.ReactionState.DendroCoreState addDendroCore(CharacterId ownerId, double damage) {
-        return reactionStateController.addDendroCore(ownerId, damage);
+    public simulation.runtime.ReactionState.DendroCoreState addDendroCore(
+            CharacterId ownerId, double preResistanceDamage) {
+        return reactionStateController.addDendroCore(ownerId, preResistanceDamage);
     }
 
     public java.util.List<simulation.runtime.ReactionState.DendroCoreState> getDendroCores() {

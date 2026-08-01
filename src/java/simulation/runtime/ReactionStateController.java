@@ -122,8 +122,8 @@ public class ReactionStateController {
         return reactionState.incrementLunarCrystallizeTriggerCount();
     }
 
-    public ReactionState.DendroCoreState addDendroCore(CharacterId ownerId, double damage) {
-        return reactionState.addDendroCore(ownerId, sim.getCurrentTime(), damage);
+    public ReactionState.DendroCoreState addDendroCore(CharacterId ownerId, double preResistanceDamage) {
+        return reactionState.addDendroCore(ownerId, sim.getCurrentTime(), preResistanceDamage);
     }
 
     public List<ReactionState.DendroCoreState> getDendroCores() {

@@ -290,17 +290,17 @@ public class CombatActionResolver {
                         stats.get(StatType.ELEMENTAL_MASTERY), 90, stats.get(StatType.HYPERBLOOM_DMG_BONUS))
                 : ReactionCalculator.calculateBurgeon(
                         stats.get(StatType.ELEMENTAL_MASTERY), 90, stats.get(StatType.BURGEON_DMG_BONUS));
-        double resFactor = resolveImpactResistance(context, Element.DENDRO);
-        double damage = result.getTransformDamage() * resFactor;
         int maxCores = action.getDendroCoreConsumptionLimit();
         if (maxCores <= 0) {
             maxCores = action.getElement() == Element.ELECTRO ? 1 : Integer.MAX_VALUE;
         }
         int consumed = reactionEffectScheduler.consumeDendroCores(
-                characterId, damage, result.getName(), maxCores);
+                characterId, result.getTransformDamage(), result.getName(), maxCores);
         if (consumed > 0) {
             sim.notifyReaction(result, attacker);
             if (sim.isLoggingEnabled()) {
+                double damage = result.getTransformDamage()
+                        * resolveImpactResistance(context, Element.DENDRO);
                 System.out.println(String.format(
                         "   [Reaction] %s consumed %d Dendro Core(s) -> %s Damage: %,.0f each",
                         action.getElement(), consumed, result.getName(), damage));
@@ -384,7 +384,8 @@ public class CombatActionResolver {
         double reactBonus = result.isElectroCharged()
                 ? stats.get(StatType.ELECTRO_CHARGED_DMG_BONUS)
                 : 0.0;
-        double transDmg = result.getTransformDamage() * (1.0 + reactBonus) * resFactor;
+        double preResistanceDamage = result.getTransformDamage() * (1.0 + reactBonus);
+        double transDmg = preResistanceDamage * resFactor;
 
         boolean isLunar = result.getKind() == ReactionResult.Kind.LUNAR_CHARGED;
         String reactionLabel = isLunar ? "Lunar-Charged" : result.getName();
@@ -404,7 +405,8 @@ public class CombatActionResolver {
         }
 
         if (result.isElectroCharged()) {
-            reactionEffectScheduler.scheduleElectroCharged(trigger, action.getGaugeUnits(), transDmg, isLunar);
+            reactionEffectScheduler.scheduleElectroCharged(
+                    trigger, action.getGaugeUnits(), preResistanceDamage, isLunar);
         } else {
             if (result.getKind() == ReactionResult.Kind.SUPERCONDUCT) {
                 applySuperconductPhysicalResShred();
@@ -439,7 +441,7 @@ public class CombatActionResolver {
             double resFactor = resolveImpactResistance(context, Element.PYRO);
             double tickDamage = result.getTransformDamage() * resFactor;
             sim.getEnemy().reduceAura(aura, action.getGaugeUnits(), sim.getCurrentTime());
-            reactionEffectScheduler.scheduleBurning(characterId, tickDamage);
+            reactionEffectScheduler.scheduleBurning(characterId, result.getTransformDamage());
             if (sim.isLoggingEnabled()) {
                 System.out.println(String.format(
                         "   [Reaction] %s on %s -> Burning Tick Damage: %,.0f",
@@ -450,7 +452,7 @@ public class CombatActionResolver {
             double resFactor = resolveImpactResistance(context, Element.DENDRO);
             double coreDamage = result.getTransformDamage() * resFactor;
             sim.getEnemy().reduceAura(aura, action.getGaugeUnits(), sim.getCurrentTime());
-            reactionEffectScheduler.createDendroCore(characterId, coreDamage);
+            reactionEffectScheduler.createDendroCore(characterId, result.getTransformDamage());
             if (result.getKind() == ReactionResult.Kind.LUNAR_BLOOM) {
                 sim.incrementVerdantDewCount();
                 sim.incrementMoonridgeDewCount();

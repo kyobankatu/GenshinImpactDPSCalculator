@@ -34,17 +34,18 @@ public class ReactionEffectScheduler {
      *
      * @param trigger    triggering element
      * @param gaugeUnits gauge to apply as lingering aura
-     * @param transDmg   standard Electro-Charged tick damage
+     * @param preResistanceDamage standard Electro-Charged tick damage before RES
      * @param isLunar    whether Thundercloud/Lunar-Charged policy is active
      */
-    public void scheduleElectroCharged(Element trigger, double gaugeUnits, double transDmg, boolean isLunar) {
+    public void scheduleElectroCharged(
+            Element trigger, double gaugeUnits, double preResistanceDamage, boolean isLunar) {
         if (isLunar) {
             sim.setThundercloudEndTime(sim.getCurrentTime() + 6.0);
         }
 
         if (!sim.isECTimerRunning()) {
             sim.setECTimerRunning(true);
-            sim.registerEvent(createElectroChargedTickEvent(transDmg, isLunar));
+            sim.registerEvent(createElectroChargedTickEvent(preResistanceDamage, isLunar));
         }
 
         sim.getEnemy().setAura(trigger, gaugeUnits, sim.getCurrentTime());
@@ -67,9 +68,9 @@ public class ReactionEffectScheduler {
      * Starts or refreshes simplified Burning ticks for a single non-attacking target.
      *
      * @param ownerId    character credited with Burning damage
-     * @param tickDamage post-RES damage per 0.25 s Burning tick
+     * @param preResistanceDamage damage per 0.25 s Burning tick before RES
      */
-    public void scheduleBurning(CharacterId ownerId, double tickDamage) {
+    public void scheduleBurning(CharacterId ownerId, double preResistanceDamage) {
         sim.setBurningEndTime(sim.getCurrentTime() + 2.0);
         sim.getEnemy().setAura(
                 Element.PYRO,
@@ -77,7 +78,7 @@ public class ReactionEffectScheduler {
                 sim.getCurrentTime());
         if (!sim.isBurningTimerRunning()) {
             sim.setBurningTimerRunning(true);
-            sim.registerEvent(createBurningTickEvent(ownerId, tickDamage));
+            sim.registerEvent(createBurningTickEvent(ownerId, preResistanceDamage));
         }
     }
 
@@ -85,16 +86,16 @@ public class ReactionEffectScheduler {
      * Creates a Dendro Core and schedules its delayed Bloom explosion.
      *
      * @param ownerId character credited with the Bloom core explosion
-     * @param damage  final Dendro damage dealt by the core
+     * @param preResistanceDamage Dendro damage before impact-time RES
      */
-    public void createDendroCore(CharacterId ownerId, double damage) {
+    public void createDendroCore(CharacterId ownerId, double preResistanceDamage) {
         if (sim.getDendroCores().size() >= 5) {
             ReactionState.DendroCoreState oldest = sim.removeOldestDendroCore();
             if (oldest != null) {
                 explodeDendroCore(oldest, "Bloom");
             }
         }
-        ReactionState.DendroCoreState core = sim.addDendroCore(ownerId, damage);
+        ReactionState.DendroCoreState core = sim.addDendroCore(ownerId, preResistanceDamage);
         sim.registerEvent(createDendroCoreExpiryEvent(core.id));
     }
 
@@ -102,22 +103,26 @@ public class ReactionEffectScheduler {
      * Consumes Dendro Cores for Hyperbloom/Burgeon in the single-target abstraction.
      *
      * @param ownerId       character credited with the reaction
-     * @param damage        final Dendro damage for each consumed core
+     * @param preResistanceDamage Dendro damage before impact-time RES
      * @param reactionLabel display label
      * @param maxCores      maximum cores consumed by this hit
      * @return number of consumed cores
      */
-    public int consumeDendroCores(CharacterId ownerId, double damage, String reactionLabel, int maxCores) {
+    public int consumeDendroCores(
+            CharacterId ownerId,
+            double preResistanceDamage,
+            String reactionLabel,
+            int maxCores) {
         int consumed = 0;
         while (consumed < maxCores && !sim.getDendroCores().isEmpty()) {
             sim.removeOldestDendroCore();
-            recordDendroCoreDamage(ownerId, reactionLabel, damage);
+            recordDendroCoreDamage(ownerId, reactionLabel, preResistanceDamage);
             consumed++;
         }
         return consumed;
     }
 
-    private TimerEvent createElectroChargedTickEvent(double transDmg, boolean isLunar) {
+    private TimerEvent createElectroChargedTickEvent(double preResistanceDamage, boolean isLunar) {
         return new TimerEvent() {
             private double nextTick = sim.getCurrentTime() + (isLunar ? 2.0 : 1.0);
 
@@ -134,7 +139,8 @@ public class ReactionEffectScheduler {
                 }
 
                 String label = "Electro-Charged Tick";
-                double finalDamage = transDmg;
+                double finalDamage = applyCurrentResistance(
+                        preResistanceDamage, Element.ELECTRO, simContext);
                 if (isLunar) {
                     label = "Lunar-Charged Reaction";
                     finalDamage = computeWeightedLunarReactionDamage(
@@ -176,7 +182,7 @@ public class ReactionEffectScheduler {
         };
     }
 
-    private TimerEvent createBurningTickEvent(CharacterId ownerId, double tickDamage) {
+    private TimerEvent createBurningTickEvent(CharacterId ownerId, double preResistanceDamage) {
         return new TimerEvent() {
             private double nextTick = sim.getCurrentTime() + 0.25;
 
@@ -188,6 +194,8 @@ public class ReactionEffectScheduler {
                     return;
                 }
 
+                double tickDamage = applyCurrentResistance(
+                        preResistanceDamage, Element.PYRO, simContext);
                 if (simContext.isLoggingEnabled()) {
                     System.out.println(String.format("   [DoT] Burning Damage: %,.0f", tickDamage));
                 }
@@ -254,16 +262,18 @@ public class ReactionEffectScheduler {
     }
 
     private void explodeDendroCore(ReactionState.DendroCoreState core, String label) {
-        recordDendroCoreDamage(core.ownerId, label, core.damage);
+        recordDendroCoreDamage(core.ownerId, label, core.preResistanceDamage);
     }
 
-    private void recordDendroCoreDamage(CharacterId ownerId, String label, double damage) {
+    private void recordDendroCoreDamage(
+            CharacterId ownerId, String label, double preResistanceDamage) {
         if (!canRecordDendroCoreDamage()) {
             if (sim.isLoggingEnabled()) {
                 System.out.println(String.format("   [Reaction] %s Damage capped by same-target core limit", label));
             }
             return;
         }
+        double damage = applyCurrentResistance(preResistanceDamage, Element.DENDRO, sim);
         if (sim.isLoggingEnabled()) {
             System.out.println(String.format("   [Reaction] %s Damage: %,.0f", label, damage));
         }
@@ -301,11 +311,8 @@ public class ReactionEffectScheduler {
             double cr = stats.get(StatType.CRIT_RATE);
             double cd = stats.get(StatType.CRIT_DMG);
             double critMult = 1.0 + (Math.min(cr, 1.0) * cd);
-            double resMult = ResistanceCalculator.calculateResMulti(
-                    simContext.getEnemy().getRes(damageElement.getBonusStatType()), 0.0);
-
             double damage = 1.8 * 1446.85 * (1.0 + baseBonus) * (1.0 + uniqueBonus)
-                    * (1.0 + emBonus) * critMult * resMult * columbinaMult;
+                    * (1.0 + emBonus) * critMult * columbinaMult;
             potentialDamages.add(damage);
         }
 
@@ -314,6 +321,14 @@ public class ReactionEffectScheduler {
         for (int i = 0; i < potentialDamages.size() && i < LUNAR_CHARGED_WEIGHTS.length; i++) {
             total += potentialDamages.get(i) * LUNAR_CHARGED_WEIGHTS[i];
         }
-        return total;
+        return applyCurrentResistance(total, damageElement, simContext);
+    }
+
+    private double applyCurrentResistance(
+            double preResistanceDamage, Element damageElement, CombatSimulator simContext) {
+        double multiplier = ResistanceCalculator.calculateMultiplier(
+                simContext.getEnemy(), simContext.getTeamBuffList(),
+                simContext.getCurrentTime(), damageElement);
+        return preResistanceDamage * multiplier;
     }
 }

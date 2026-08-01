@@ -7080,7 +7080,7 @@ Completion evidence:
 
 Status:
 
-- Phases 1-3 are complete; Phases 4-5 remain pending.
+- Phases 1-4 are complete; Phase 5 remains pending.
 - Requirement: elemental and Physical RES reduction is enemy-facing state and
   must be evaluated at each damage impact, never captured with attacker stats.
 
@@ -7303,7 +7303,7 @@ Completion evidence:
 - Reaction regression, build, routed validation, and preflight pass with aura,
   ownership, ICD, and notification tests unchanged.
 
-### Phase 4: Apply RES at Delayed Reaction Impact - Pending
+### Phase 4: Apply RES at Delayed Reaction Impact - Done
 
 Why fourth:
 
@@ -7357,6 +7357,20 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/agent_validate.py --path src/java/mechanics/reaction/ReactionEffectScheduler.java --path src/java/simulation/runtime/ReactionState.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Electro-Charged, Burning, and Dendro Core state now retain pre-RES damage;
+  current matching reduction is applied only when each tick, explosion, or core
+  consumption is recorded. Dendro Core snapshot state documents that contract.
+- Weighted Lunar damage applies one current matching multiplier after party
+  weighting instead of hardcoding zero reduction per member.
+- Regression proves 900/1,025/900 transitions inside one Electro-Charged and
+  Burning series; post-creation and expired-at-impact Bloom boundaries;
+  Hyperbloom/Burgeon current Dendro reduction; and matching/unrelated weighted
+  Lunar elements. Existing cadence, duration, ownership, aura, snapshot, and
+  core hit-cap regressions pass.
+- Reaction regression, build, Javadoc, routed validation, and preflight pass.
 
 ### Phase 5: Re-Accept Affected Party Baselines - Pending
 

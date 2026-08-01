@@ -25,6 +25,8 @@
 - Party definitions may inject fixed random streams when optimizer candidates and final sample runs require common random scenarios; generic content constructors remain stochastic.
 - The observer interfaces are implemented or consumed by reaction systems, weapon passives, RL code, and character logic.
 - `SimulatorSnapshot` must stay aligned with `CombatSimulator`, `Party`, `Enemy`, and `simulation.runtime.ReactionState` whenever new runtime state becomes rollback-relevant.
+- `ReactionState.DendroCoreState` stores pre-resistance damage so delayed core
+  impacts can resolve current enemy-facing reduction after snapshot restore.
 - Logic-bearing party lookup and damage attribution should use `CharacterId`; string overloads are compatibility or boundary adapters.
 
 ## Agent guidance

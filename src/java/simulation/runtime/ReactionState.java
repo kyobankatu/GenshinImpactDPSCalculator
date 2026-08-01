@@ -9,19 +9,39 @@ import model.type.CharacterId;
  * Holds transient simulation state for Electro-Charged and Thundercloud handling.
  */
 public class ReactionState {
+    /** Immutable delayed Dendro Core payload stored across snapshot/restore. */
     public static final class DendroCoreState {
+        /** Stable runtime core identifier. */
         public final int id;
+        /** Character credited when this core deals damage. */
         public final CharacterId ownerId;
+        /** Core creation time. */
         public final double creationTime;
+        /** Scheduled natural explosion time. */
         public final double expiryTime;
-        public final double damage;
+        /** Reaction damage before resistance is evaluated at impact. */
+        public final double preResistanceDamage;
 
-        public DendroCoreState(int id, CharacterId ownerId, double creationTime, double expiryTime, double damage) {
+        /**
+         * Creates an immutable delayed Dendro Core payload.
+         *
+         * @param id stable runtime identifier
+         * @param ownerId character credited for later damage
+         * @param creationTime core creation time
+         * @param expiryTime natural explosion time
+         * @param preResistanceDamage damage before impact-time resistance
+         */
+        public DendroCoreState(
+                int id,
+                CharacterId ownerId,
+                double creationTime,
+                double expiryTime,
+                double preResistanceDamage) {
             this.id = id;
             this.ownerId = ownerId;
             this.creationTime = creationTime;
             this.expiryTime = expiryTime;
-            this.damage = damage;
+            this.preResistanceDamage = preResistanceDamage;
         }
     }
 
@@ -144,8 +164,11 @@ public class ReactionState {
         return moonridgeDewCount;
     }
 
-    public DendroCoreState addDendroCore(CharacterId ownerId, double currentTime, double damage) {
-        DendroCoreState core = new DendroCoreState(nextDendroCoreId++, ownerId, currentTime, currentTime + 6.0, damage);
+    public DendroCoreState addDendroCore(
+            CharacterId ownerId, double currentTime, double preResistanceDamage) {
+        DendroCoreState core = new DendroCoreState(
+                nextDendroCoreId++, ownerId, currentTime,
+                currentTime + 6.0, preResistanceDamage);
         dendroCores.add(core);
         return core;
     }
