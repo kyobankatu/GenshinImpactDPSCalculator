@@ -366,7 +366,7 @@ experiment record.
 
 ### B-017 — Dendro resonance omits reaction-triggered EM buffs
 
-- Status: `planned`
+- Status: `done`
 - Source: 2 (source scan of explicit approximation comments)
 - Symptom: Sprawling Greenery applies only its permanent +50 EM and omits the
   independently timed +30 and +20 EM reaction-triggered team buffs.
@@ -384,4 +384,9 @@ experiment record.
   https://genshin-impact.fandom.com/wiki/Team_Bonus. Neither audited sample
   currently has Dendro resonance, so pre-fix baselines are 1,440,416 / 68,591
   for `RaidenParty` and 15,434,039 / 226,306 for `FlinsParty2`. See `TASKS.md`
-  implementation block `Dendro Resonance Reaction EM`.
+  implementation block `Dendro Resonance Reaction EM`. Completed 2026-08-02.
+  Focused regression covers every trigger kind, Lunar-Bloom, unrelated
+  reactions, independent six-second boundaries, and same-group refresh.
+  `RaidenParty` remains 1,440,416 / 68,591; `FlinsParty2` remains 15,434,039 /
+  226,306 with normalized payload SHA-256
+  `a9cdfbf0d3a0a01356d9d113afdd7f0afe8ef8510494f4b193107d533c8dbb6e`.

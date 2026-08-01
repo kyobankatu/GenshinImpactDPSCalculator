@@ -1898,8 +1898,8 @@ Completion evidence:
 
 Status:
 
-- In progress.
-- Phases 1-2 are complete; Phase 3 remains.
+- Implemented and verified.
+- Phases 1-3 are complete.
 - Requirement: Sprawling Greenery must grant permanent +50 EM and independently
   refreshed +30/+20 EM windows for their documented reaction groups.
 
@@ -2010,7 +2010,7 @@ Verification:
 - `./gradlew build`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Confirm Shared-Resonance Integration Stability
+### Phase 3: Confirm Shared-Resonance Integration Stability - Done
 
 Why last:
 
@@ -2044,6 +2044,16 @@ Verification:
 - `./gradlew RaidenParty`
 - `./gradlew FlinsParty2`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Focused regression covers all eight documented trigger kinds including
+  Lunar-Bloom, unrelated Vaporize, independent stacking/expiry, and same-group
+  refresh.
+- `RaidenParty` remains 1,440,416 damage / 68,591 DPS.
+- `FlinsParty2` remains 15,434,039 damage / 226,306 DPS and its normalized
+  payload retains SHA-256
+  `a9cdfbf0d3a0a01356d9d113afdd7f0afe8ef8510494f4b193107d533c8dbb6e`.
 
 ## Cross-Cutting Rules
 
