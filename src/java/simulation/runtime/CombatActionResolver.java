@@ -198,6 +198,15 @@ public class CombatActionResolver {
                 continue;
             }
             result = convertToLunarIfEligible(result);
+            if (result.getKind() == ReactionResult.Kind.CRYSTALLIZE
+                    && !sim.tryStartStandardCrystallizeCooldown()) {
+                if (sim.isLoggingEnabled()) {
+                    System.out.println(String.format(
+                            "   [ICD] %s on %s -> Crystallize blocked (global cooldown)",
+                            trigger, aura));
+                }
+                continue;
+            }
 
             reactionTriggered = true;
             sim.notifyReaction(result, attacker);

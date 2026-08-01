@@ -160,9 +160,10 @@ The B-056 through B-063 reaction-state passes are complete. The current B-064
 pass adds Overload's target-wide 0.1-second and owner-specific 0.5-second damage
 limits while preserving every reaction notification and gauge transition.
 
-The B-064 Overload damage-sequence pass is complete. The current B-066 pass
-adds the standard Crystallize reaction's target-wide one-second cooldown while
-leaving Lunar-Crystallize on its separate reaction path.
+The B-064 Overload damage-sequence pass is complete. B-066 now gates standard
+Crystallize behind a snapshot-safe target-wide one-second cooldown while
+leaving Lunar-Crystallize on its separate reaction path. Catalog acceptance is
+the current phase.
 
 ## Scope
 
@@ -11089,7 +11090,7 @@ Completion evidence:
   the same Geo hit and has no cross-hit cooldown. B-062 already defines the
   deterministic Aura winner order needed after gating.
 
-### Phase 2: Implement Snapshot-Safe Standard Crystallize GCD - Pending
+### Phase 2: Implement Snapshot-Safe Standard Crystallize GCD - Done
 
 Why second:
 
@@ -11137,6 +11138,21 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - routed validation/preflight planning without RL execution
+
+Completion evidence:
+
+- `ReactionState` owns one finite standard-only boundary; controller, simulator,
+  and snapshot APIs preserve it without coupling the policy to resolver state.
+- The converted result is gated before `reactionTriggered`, listener dispatch,
+  Aura reduction, or stateful handling. Lunar-Crystallize never calls the gate.
+- Focused regression proves one Electro winner from a same-hit Electro/Hydro
+  fixture, shared cross-owner/Hydro suppression at 0.999 seconds, acceptance at
+  exactly 1.000 seconds, no blocked consumption/refresh, and snapshot replay.
+- Three immediate Lunar triggers still increment cadence three times and retain
+  the existing fourth Harmony notification.
+- `./gradlew ReactionRegressionTest`, `./gradlew build`, and `./gradlew javadoc`
+  pass. Routed validation reports no leaks; RL-routed catalog/rollout checks were
+  not run under this session's explicit simulator-only boundary.
 
 ### Phase 3: Accept Crystallize-GCD-Neutral Catalog Baselines - Pending
 

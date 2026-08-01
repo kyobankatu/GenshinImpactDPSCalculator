@@ -137,6 +137,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseG_BloomDirectionalAuraConsumptionContract();
         testAccuracyPhaseG_TransformativeResidualAuraContract();
         testAccuracyPhaseG_OverloadDamageSequenceContract();
+        testAccuracyPhaseG_StandardCrystallizeCooldownContract();
         testAccuracyPhaseF_PeriodicCancellationAndRaidenEyeDamageTrigger();
         testAccuracyPhaseF_BennettSkillAndBurstApplicationContract();
         testAccuracyPhaseF_XianglingGuobaNoIcdApplicationContract();
@@ -1609,6 +1610,90 @@ public class ReactionRegressionTest {
         assertClose(expectedTransformative(1.5, Element.CRYO, 0.0) * 2.0,
                 superconduct.getTotalDamage(), 0.5,
                 "Overload limits should not suppress immediate Superconduct damage");
+    }
+
+    private static void testAccuracyPhaseG_StandardCrystallizeCooldownContract() {
+        CombatSimulator dualAura = simulatorWith(testCharacter(Element.GEO));
+        List<ReactionResult> dualAuraResults = new ArrayList<>();
+        dualAura.addReactionListener((result, source, time, simulator) ->
+                dualAuraResults.add(result));
+        dualAura.getEnemy().setAura(Element.ELECTRO, 2.0);
+        dualAura.getEnemy().setAura(Element.HYDRO, 2.0);
+        dualAura.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Dual-Aura standard Crystallize fixture", Element.GEO));
+        assertEquals(1, dualAuraResults.size(),
+                "One Geo hit should notify at most one standard Crystallize");
+        assertEquals(Element.ELECTRO, dualAuraResults.get(0).getRelatedElement(),
+                "Standard Crystallize should retain B-062 Aura priority");
+        assertClose(1.5, dualAura.getEnemy().getAuraUnits(Element.ELECTRO), EPS,
+                "Accepted standard Crystallize should consume the priority Aura");
+        assertClose(2.0, dualAura.getEnemy().getAuraUnits(Element.HYDRO), EPS,
+                "Same-hit blocked Crystallize should not consume a second Aura");
+
+        CombatSimulator timed = simulatorWith(testCharacter(
+                Element.GEO, CharacterId.SUCROSE));
+        timed.addCharacter(testCharacter(Element.GEO, CharacterId.XIANGLING));
+        List<ReactionResult.Kind> timedKinds = captureReactionKinds(timed);
+        timed.getEnemy().setAura(Element.ELECTRO, 0.5);
+        timed.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Initial standard Crystallize fixture", Element.GEO));
+        SimulatorSnapshot snapshot = timed.saveSnapshot();
+        assertClose(1.0, snapshot.standardCrystallizeCooldownEndTime, EPS,
+                "First standard Crystallize should start a one-second cooldown");
+
+        timed.getEnemy().setAura(Element.HYDRO, 2.0);
+        timed.advanceTime(0.999);
+        timed.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING,
+                reactionHit("Shared pre-boundary Crystallize fixture", Element.GEO));
+        assertEquals(1, countReactions(timedKinds, ReactionResult.Kind.CRYSTALLIZE),
+                "Cooldown should be shared across owners and Aura elements");
+        assertClose(2.0, timed.getEnemy().getAuraUnits(Element.HYDRO), EPS,
+                "Pre-boundary standard Crystallize should not consume Aura");
+
+        timed.advanceTime(0.001);
+        timed.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING,
+                reactionHit("Exact-boundary Crystallize fixture", Element.GEO));
+        assertEquals(2, countReactions(timedKinds, ReactionResult.Kind.CRYSTALLIZE),
+                "Standard Crystallize should trigger at exactly one second");
+        assertClose(1.5, timed.getEnemy().getAuraUnits(Element.HYDRO), EPS,
+                "Exact-boundary standard Crystallize should consume Aura");
+
+        timed.restoreSnapshot(snapshot);
+        timed.getEnemy().setAura(Element.CRYO, 2.0);
+        int restoredCount = countReactions(
+                timedKinds, ReactionResult.Kind.CRYSTALLIZE);
+        timed.advanceTime(0.999);
+        timed.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING,
+                reactionHit("Restored pre-boundary Crystallize fixture", Element.GEO));
+        assertEquals(restoredCount, countReactions(
+                timedKinds, ReactionResult.Kind.CRYSTALLIZE),
+                "Snapshot restore should recover the active standard cooldown");
+        timed.advanceTime(0.001);
+        timed.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING,
+                reactionHit("Restored exact-boundary Crystallize fixture", Element.GEO));
+        assertEquals(restoredCount + 1, countReactions(
+                timedKinds, ReactionResult.Kind.CRYSTALLIZE),
+                "A blocked retry should not refresh the restored boundary");
+
+        CombatSimulator lunar = simulatorWith(testCharacter(Element.GEO).asLunar());
+        List<ReactionResult.Kind> lunarKinds = captureReactionKinds(lunar);
+        lunar.getEnemy().setAura(Element.HYDRO, 3.0);
+        for (int i = 0; i < 3; i++) {
+            lunar.performActionWithoutTimeAdvance(
+                    CharacterId.SUCROSE,
+                    reactionHit("Rapid Lunar-Crystallize fixture " + i, Element.GEO));
+        }
+        assertEquals(4, countReactions(
+                lunarKinds, ReactionResult.Kind.LUNAR_CRYSTALLIZE),
+                "Three rapid Lunar-Crystallize triggers should retain the Harmony notification");
+        assertEquals(3, lunar.getLunarCrystallizeTriggerCount(),
+                "Lunar-Crystallize triggers should bypass the standard global cooldown");
     }
 
     private static void testAccuracyPhaseG_BloomDirectionalAuraConsumptionContract() {

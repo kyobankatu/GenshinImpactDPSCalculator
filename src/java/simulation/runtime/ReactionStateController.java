@@ -54,6 +54,22 @@ public class ReactionStateController {
         reactionState.restoreOverloadDamageCooldowns(targetEndTime, ownerEndTimes);
     }
 
+    /** Attempts to accept standard Crystallize at the current simulator time. */
+    public boolean tryStartStandardCrystallizeCooldown() {
+        return reactionState.tryStartStandardCrystallizeCooldown(
+                sim.getCurrentTime());
+    }
+
+    /** Returns the target-wide standard Crystallize cooldown end time. */
+    public double getStandardCrystallizeCooldownEndTime() {
+        return reactionState.getStandardCrystallizeCooldownEndTime();
+    }
+
+    /** Restores the target-wide standard Crystallize cooldown boundary. */
+    public void restoreStandardCrystallizeCooldown(double endTime) {
+        reactionState.restoreStandardCrystallizeCooldown(endTime);
+    }
+
     /**
      * Sets whether an EC-related timer is active.
      *

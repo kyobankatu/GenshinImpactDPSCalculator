@@ -13,6 +13,7 @@ public class ReactionState {
     private static final double TIMING_EPSILON = 1e-9;
     private static final double OVERLOAD_TARGET_DAMAGE_GCD = 0.1;
     private static final double OVERLOAD_OWNER_DAMAGE_COOLDOWN = 0.5;
+    private static final double STANDARD_CRYSTALLIZE_COOLDOWN = 1.0;
     /** Immutable consumable Quicken Aura payload. */
     public static final class QuickenState {
         /** Quicken gauge present at {@link #lastUpdateTime}. */
@@ -138,6 +139,7 @@ public class ReactionState {
     private double overloadTargetDamageCooldownEndTime = -1.0;
     private final Map<CharacterId, Double> overloadOwnerDamageCooldownEndTimes =
             new EnumMap<>(CharacterId.class);
+    private double standardCrystallizeCooldownEndTime = -1.0;
     private int moondriftCount = 0;
     private int lunarCrystallizeTriggerCount = 0;
     private int verdantDewCount = 0;
@@ -207,6 +209,37 @@ public class ReactionState {
                 overloadOwnerDamageCooldownEndTimes.put(ownerId, endTime);
             }
         }
+    }
+
+    /**
+     * Attempts to start the target-wide standard Crystallize cooldown.
+     *
+     * <p>Blocked attempts leave the existing boundary unchanged. Lunar-
+     * Crystallize is excluded by the resolver before this policy is called.
+     *
+     * @param currentTime simulator time in seconds
+     * @return {@code true} when standard Crystallize may trigger
+     */
+    public boolean tryStartStandardCrystallizeCooldown(double currentTime) {
+        if (!Double.isFinite(currentTime)
+                || currentTime + TIMING_EPSILON < standardCrystallizeCooldownEndTime) {
+            return false;
+        }
+        standardCrystallizeCooldownEndTime =
+                currentTime + STANDARD_CRYSTALLIZE_COOLDOWN;
+        return true;
+    }
+
+    /** Returns the target-wide standard Crystallize cooldown end time. */
+    public double getStandardCrystallizeCooldownEndTime() {
+        return standardCrystallizeCooldownEndTime;
+    }
+
+    /** Restores the standard Crystallize cooldown boundary. */
+    public void restoreStandardCrystallizeCooldown(double endTime) {
+        standardCrystallizeCooldownEndTime = Double.isFinite(endTime)
+                ? endTime
+                : -1.0;
     }
 
     /**

@@ -943,6 +943,7 @@ public class CapabilityProfiler {
                 activePostSubject.quickenState,
                 activePostSubject.overloadTargetDamageCooldownEndTime,
                 activePostSubject.overloadOwnerDamageCooldownEndTimes,
+                activePostSubject.standardCrystallizeCooldownEndTime,
                 activePostSubject.moondriftCount,
                 activePostSubject.lunarCrystallizeTriggerCount,
                 activePostSubject.verdantDewCount,

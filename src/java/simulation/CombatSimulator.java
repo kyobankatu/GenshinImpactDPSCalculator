@@ -784,6 +784,8 @@ public class CombatSimulator {
                 reactionStateController.getOverloadTargetDamageCooldownEndTime();
         Map<CharacterId, Double> overloadOwnerDamageCooldownEndTimes =
                 reactionStateController.copyOverloadOwnerDamageCooldownEndTimes();
+        double standardCrystallizeCooldownEndTime =
+                reactionStateController.getStandardCrystallizeCooldownEndTime();
         int moondriftCount = reactionState.getMoondriftCount();
         int lunarCrystallizeTriggerCount = reactionState.getLunarCrystallizeTriggerCount();
         int verdantDewCount = reactionState.getVerdantDewCount();
@@ -841,6 +843,7 @@ public class CombatSimulator {
                 quickenEndTime, quickenState,
                 overloadTargetDamageCooldownEndTime,
                 overloadOwnerDamageCooldownEndTimes,
+                standardCrystallizeCooldownEndTime,
                 moondriftCount, lunarCrystallizeTriggerCount,
                 verdantDewCount, moonridgeDewCount,
                 dendroCores, nextDendroCoreId, enemyFreezeAura, enemyAura,
@@ -886,6 +889,8 @@ public class CombatSimulator {
         reactionStateController.restoreOverloadDamageCooldowns(
                 snap.overloadTargetDamageCooldownEndTime,
                 snap.overloadOwnerDamageCooldownEndTimes);
+        reactionStateController.restoreStandardCrystallizeCooldown(
+                snap.standardCrystallizeCooldownEndTime);
         reactionState.setMoondriftCount(snap.moondriftCount);
         reactionState.setLunarCrystallizeTriggerCount(snap.lunarCrystallizeTriggerCount);
         reactionState.setVerdantDewCount(snap.verdantDewCount);
@@ -973,6 +978,15 @@ public class CombatSimulator {
      */
     public boolean tryStartOverloadDamageCooldown(CharacterId ownerId) {
         return reactionStateController.tryStartOverloadDamageCooldown(ownerId);
+    }
+
+    /**
+     * Attempts to accept standard Crystallize at the current time.
+     *
+     * @return {@code true} when the target-wide cooldown permits the reaction
+     */
+    public boolean tryStartStandardCrystallizeCooldown() {
+        return reactionStateController.tryStartStandardCrystallizeCooldown();
     }
 
     /**
