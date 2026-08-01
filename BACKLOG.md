@@ -1807,13 +1807,13 @@ experiment record.
 
 ### B-067 — Superconduct damage ignores its reaction damage sequence
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 3 (KQM/gcsim reaction-damage divergence)
 - Symptom: every rapid Superconduct notification records damage, exceeding the
   sourced two damage hits per owner in 0.5 seconds and target-wide 0.1-second GCD.
 - Scope: target/owner hit-window state, continued reaction/gauge/shred effects,
   snapshot continuity, and catalog controls
-- Risk: `planned`
+- Risk: `validated`
 - Proof: global pre/exact boundary, first/second/third owner hit sequence,
   cross-owner behavior, unaffected gauge/shred, restore replay, and repeated
   party payloads
@@ -1831,3 +1831,13 @@ experiment record.
   https://github.com/genshinsim/gcsim/blob/main/pkg/reactable/superconduct.go,
   https://github.com/genshinsim/gcsim/blob/main/pkg/core/attacks/icd_groups.dm.go,
   and https://github.com/genshinsim/gcsim/blob/main/pkg/target/icd.go.
+  Completed with snapshot-safe target and immutable owner sequence state.
+  Notification, Aura consumption, and physical shred refresh precede damage-only
+  gating. Focused regression covers 0.05/0.10-second target timing, owner entries
+  one/two/three, an independent owner, owner-blocked target-GCD advancement,
+  exact 0.5-second reset, seven unchanged reactions/consumptions, restore replay,
+  and blocked-hit shred refresh. Six fresh catalog controls exactly retain
+  B-066 hashes `03301ef5a3d650a91cfa07660cb0077d8c1585da04d79803a97f36e8249ba85a`,
+  `9b0b3556ca8f4eb799e6965156aab3bc70e512c7056cdf7e0202572c3996e464`,
+  and `23dc585acc02d3bd7bca7fe3f5b65db62b3e1489fcedb12a02b9725b774b7dd4`
+  with unchanged values/counts and zero Superconduct or warning matches.
