@@ -954,8 +954,10 @@ public class ReactionRegressionTest {
         model.character.Flins noCloudFlins = new model.character.Flins(new TestWeapon(), blankArtifact());
         CombatSimulator noCloud = simulatorWithExistingCharacter(noCloudFlins);
         int[] noCloudMiddleHits = { 0 };
+        List<AttackAction> noCloudActions = new ArrayList<>();
         List<Double> noCloudDelayedHitTimes = new ArrayList<>();
         noCloud.addListener((actor, action, time) -> {
+            noCloudActions.add(action);
             if ("Cometh the Night (Middle)".equals(action.getName())) {
                 noCloudMiddleHits[0]++;
                 noCloudDelayedHitTimes.add(time);
@@ -974,12 +976,32 @@ public class ReactionRegressionTest {
         assertClose(3.6, noCloudDelayedHitTimes.get(2), EPS,
                 "Flins delayed final hit should use a fixed scheduled time");
 
+        AttackAction initial = findAction(noCloudActions, "Cometh the Night (Initial)");
+        AttackAction middle = findAction(noCloudActions, "Cometh the Night (Middle)");
+        AttackAction fin = findAction(noCloudActions, "Cometh the Night (Final)");
+        assertEquals(ICDType.None, initial.getICDType(), "Flins standard Burst initial hit should have no ICD");
+        assertEquals(ICDTag.ElementalBurst, initial.getICDTag(),
+                "Flins standard Burst initial hit should retain Burst tag");
+        assertClose(1.0, initial.getGaugeUnits(), EPS, "Flins standard Burst initial hit should apply 1U");
+        assertEquals(ICDType.None, middle.getICDType(), "Flins standard Burst middle hits should have no ICD");
+        assertEquals(ICDTag.ElementalBurst, middle.getICDTag(),
+                "Flins standard Burst middle hits should retain Burst tag");
+        assertClose(0.0, middle.getGaugeUnits(), EPS, "Flins standard Burst middle hits should apply 0U");
+        assertEquals(ICDType.None, fin.getICDType(), "Flins standard Burst final hit should have no ICD");
+        assertEquals(ICDTag.ElementalBurst, fin.getICDTag(),
+                "Flins standard Burst final hit should retain Burst tag");
+        assertClose(0.0, fin.getGaugeUnits(), EPS, "Flins standard Burst final hit should apply 0U");
+        assertTrue(middle.getDamagePercent() > 0.0 && fin.getDamagePercent() > 0.0,
+                "Flins standard Burst delayed hits should retain positive direct damage");
+
         model.character.Flins cloudFlins = new model.character.Flins(new TestWeapon(), blankArtifact());
         CombatSimulator cloud = simulatorWithExistingCharacter(cloudFlins);
         int[] cloudMiddleHits = { 0 };
+        List<AttackAction> cloudActions = new ArrayList<>();
         cloud.addListener((actor, action, time) -> {
             if ("Cometh the Night (Middle)".equals(action.getName())) {
                 cloudMiddleHits[0]++;
+                cloudActions.add(action);
             }
         });
         cloud.setThundercloudEndTime(cloud.getCurrentTime() + 30.0);
@@ -989,6 +1011,23 @@ public class ReactionRegressionTest {
         assertTrue(cloudMiddleHits[0] == noCloudMiddleHits[0] + 2,
                 "Flins standard burst should add conditional middle hits while Thundercloud is active"
                         + " (noCloud=" + noCloudMiddleHits[0] + ", cloud=" + cloudMiddleHits[0] + ")");
+        assertTrue(cloudActions.stream().allMatch(action -> action.getICDType() == ICDType.None
+                && action.getICDTag() == ICDTag.ElementalBurst && action.getGaugeUnits() == 0.0),
+                "All Thundercloud-conditional middle hits should retain 0U/no-ICD metadata");
+
+        model.character.Flins reactingFlins = new model.character.Flins(new TestWeapon(), blankArtifact());
+        CombatSimulator reactingSim = simulatorWithExistingCharacter(reactingFlins);
+        int[] elementalReactions = { 0 };
+        reactingSim.addReactionListener((result, source, time, simulator) -> {
+            if (result.getKind() == ReactionResult.Kind.LUNAR_CHARGED && result.getTransformDamage() > 0.0) {
+                elementalReactions[0]++;
+            }
+        });
+        reactingSim.getEnemy().setAura(Element.HYDRO, 4.0, reactingSim.getCurrentTime());
+        reactingFlins.onAction(CharacterActionRequest.of(CharacterActionKey.BURST), reactingSim);
+        reactingSim.advanceTime(10.0);
+        assertEquals(1, elementalReactions[0],
+                "Only the 1U initial standard-Burst hit should trigger an elemental reaction");
     }
 
     private static void testAccuracyPhaseF_FlinsSymphonyZeroGaugeContract() {

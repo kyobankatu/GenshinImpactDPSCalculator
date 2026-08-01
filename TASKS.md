@@ -1584,7 +1584,7 @@ Completion evidence:
 Status:
 
 - In progress.
-- Phase 1 is complete; Phases 2-3 remain.
+- Phases 1-2 are complete; Phase 3 remains.
 - Requirement: the standard Burst initial hit must apply 1U without ICD while
   every delayed middle and final hit retains direct Lunar damage at 0U/no-ICD.
 
@@ -1649,7 +1649,7 @@ Verification:
 - inspect `Flins.burst_standard` and the current `FlinsParty2` log
 - `python scripts/preflight.py --run`
 
-### Phase 2: Encode and Test Per-Hit Standard-Burst Gauge
+### Phase 2: Encode and Test Per-Hit Standard-Burst Gauge - Done
 
 Why second:
 

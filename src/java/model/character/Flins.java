@@ -411,6 +411,7 @@ public class Flins extends Character
         AttackAction hit = new AttackAction("Cometh the Night (Initial)", initialMv, Element.ELECTRO,
                 StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 0.0, false, ActionType.BURST);
+        hit.setICD(ICDType.None, ICDTag.ElementalBurst, 1.0);
         hit.setLunarConsidered(true);
         hit.setAnimationDuration(1.5);
         sim.performAction(this.characterId, hit);
@@ -425,6 +426,7 @@ public class Flins extends Character
         for (int i = 0; i < middleCount; i++) {
             AttackAction mid = new AttackAction("Cometh the Night (Middle)", midMv, Element.ELECTRO, StatType.BASE_ATK,
                     StatType.BURST_DMG_BONUS, 0.0, false, ActionType.BURST);
+            mid.setICD(ICDType.None, ICDTag.ElementalBurst, 0.0);
             mid.setLunarConsidered(true);
 
             final int idx = i;
@@ -453,6 +455,7 @@ public class Flins extends Character
         // Final Hit
         AttackAction fin = new AttackAction("Cometh the Night (Final)", finMv, Element.ELECTRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 0.0, false, ActionType.BURST);
+        fin.setICD(ICDType.None, ICDTag.ElementalBurst, 0.0);
         fin.setLunarConsidered(true);
         final double finalHitTime = delayedHitBaseTime + 1.0 + (middleCount * 0.3) + 0.5;
         sim.registerEvent(new simulation.event.TimerEvent() {
