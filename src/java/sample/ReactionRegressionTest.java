@@ -30,6 +30,7 @@ import simulation.SimulatorSnapshot;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.event.PeriodicDamageEvent;
 
 /**
  * Lightweight regression checks for elemental reaction behavior.
@@ -91,6 +92,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ElectroResonanceTypedTriggerContract();
         testAccuracyPhaseF_SucroseNoIcdApplicationContract();
         testAccuracyPhaseF_RaidenCastAndMusouIcdContract();
+        testAccuracyPhaseF_RaidenEyeRefreshReplacesPeriodicEvent();
         testAccuracyPhaseF_BennettSkillAndBurstApplicationContract();
         testAccuracyPhaseF_XianglingGuobaNoIcdApplicationContract();
         testAccuracyPhaseF_XianglingChiliPickupOptIn();
@@ -2108,6 +2110,54 @@ public class ReactionRegressionTest {
                 "Physical Raiden Charged should retain the generic Charged tag");
     }
 
+    private static void testAccuracyPhaseF_RaidenEyeRefreshReplacesPeriodicEvent() {
+        int[] cancelledCallbacks = {0};
+        CombatSimulator cancelledSim = simulatorWith(testCharacter(Element.PHYSICAL));
+        PeriodicDamageEvent cancelledEvent = new PeriodicDamageEvent(
+                "Reaction Tester", null, 1.0, 1.0, 3.0,
+                sim -> cancelledCallbacks[0]++);
+        cancelledSim.registerEvent(cancelledEvent);
+        cancelledEvent.cancel();
+        cancelledEvent.cancel();
+        cancelledSim.advanceTime(2.0);
+        assertEquals(0, cancelledCallbacks[0],
+                "Cancelled periodic events should not execute callbacks");
+
+        int[] activeCallbacks = {0};
+        CombatSimulator activeSim = simulatorWith(testCharacter(Element.PHYSICAL));
+        activeSim.registerEvent(new PeriodicDamageEvent(
+                "Reaction Tester", null, 1.0, 1.0, 3.0,
+                sim -> activeCallbacks[0]++));
+        activeSim.advanceTime(1.0);
+        assertEquals(1, activeCallbacks[0],
+                "Non-cancelled periodic events should retain their cadence");
+
+        RecordingDamageWeapon eyeWeapon = new RecordingDamageWeapon("Eye of Stormy Judgment");
+        model.character.RaidenShogun raiden = new model.character.RaidenShogun(
+                eyeWeapon, blankArtifact());
+        CombatSimulator sim = simulatorWithExistingCharacter(raiden);
+        captureStandardOutput(() -> sim.performAction(CharacterId.RAIDEN_SHOGUN,
+                CharacterActionRequest.of(CharacterActionKey.SKILL)));
+        captureStandardOutput(() -> sim.advanceTime(9.5));
+        captureStandardOutput(() -> sim.performAction(CharacterId.RAIDEN_SHOGUN,
+                CharacterActionRequest.of(CharacterActionKey.SKILL)));
+        double refreshTime = sim.getCurrentTime();
+        captureStandardOutput(() -> sim.advanceTime(2.0));
+
+        List<Double> postRefreshEyeTimes = new ArrayList<>();
+        for (double time : eyeWeapon.times) {
+            if (time > refreshTime) {
+                postRefreshEyeTimes.add(time);
+            }
+        }
+        assertEquals(2, postRefreshEyeTimes.size(),
+                "Raiden Skill refresh should leave only one Eye event stream");
+        assertClose(refreshTime + 0.9, postRefreshEyeTimes.get(0), EPS,
+                "Replacement Eye should start at its sourced cadence");
+        assertClose(refreshTime + 1.8, postRefreshEyeTimes.get(1), EPS,
+                "Replacement Eye should continue at its sourced cadence");
+    }
+
     private static List<ReactionResult.Kind> captureReactionKinds(CombatSimulator sim) {
         List<ReactionResult.Kind> kinds = new ArrayList<>();
         sim.addReactionListener((result, source, time, simulator) -> kinds.add(result.getKind()));
@@ -2337,6 +2387,7 @@ public class ReactionRegressionTest {
             implements model.entity.DamageTriggeredWeaponEffect {
         private final String actionNamePrefix;
         private final List<AttackAction> actions = new ArrayList<>();
+        private final List<Double> times = new ArrayList<>();
 
         private RecordingDamageWeapon(String actionNamePrefix) {
             super("Recording Damage Weapon", new StatsContainer());
@@ -2351,6 +2402,7 @@ public class ReactionRegressionTest {
                 CombatSimulator sim) {
             if (action.getName().startsWith(actionNamePrefix)) {
                 actions.add(action);
+                times.add(currentTime);
             }
         }
     }

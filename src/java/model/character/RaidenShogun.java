@@ -21,6 +21,7 @@ import model.type.ActionType;
 import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionRequest;
+import simulation.event.PeriodicDamageEvent;
 
 /**
  * Raiden Shogun character implementation with Resolve stacking and Musou Isshin form logic.
@@ -204,6 +205,7 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
     private boolean musouActive = false;
     private double musouEnergyCount = 0;
     private double nextEnergyRestoreTime = 0;
+    private PeriodicDamageEvent eyeDamageEvent;
 
     private void skill(CombatSimulator sim) {
         registerResolveListener(sim);
@@ -231,13 +233,17 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
                 StatType.BASE_ATK, StatType.SKILL_DMG_BONUS, 0.0, false, ActionType.SKILL); // Dynamic
         coordAttack.setICD(ICDType.Standard, ICDTag.ElementalSkill, 1.0); // 1U
 
-        sim.registerEvent(new simulation.event.PeriodicDamageEvent(
+        if (eyeDamageEvent != null) {
+            eyeDamageEvent.cancel();
+        }
+        eyeDamageEvent = new PeriodicDamageEvent(
                 this.name, coordAttack, sim.getCurrentTime() + 0.9, 0.9, 25.0,
                 s -> {
                     // 50% chance to generate 1 particle -> Average 0.5
                     s.getEnergyDistributor().distributeParticles(Element.ELECTRO, 0.5,
                             mechanics.energy.ParticleType.PARTICLE);
-                }));
+                });
+        sim.registerEvent(eyeDamageEvent);
     }
 
     private void burst(CombatSimulator sim) {

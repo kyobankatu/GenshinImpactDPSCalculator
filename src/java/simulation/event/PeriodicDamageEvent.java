@@ -20,6 +20,7 @@ public class PeriodicDamageEvent implements TimerEvent {
     private double nextTickTime;
     private double interval;
     private double duration;
+    private boolean cancelled;
 
     private java.util.function.Consumer<CombatSimulator> onTick;
 
@@ -78,6 +79,10 @@ public class PeriodicDamageEvent implements TimerEvent {
      */
     @Override
     public void tick(CombatSimulator sim) {
+        if (cancelled) {
+            return;
+        }
+
         // Perform the action
         if (tickAction != null) {
             sim.performActionWithoutTimeAdvance(sourceName, tickAction);
@@ -101,6 +106,16 @@ public class PeriodicDamageEvent implements TimerEvent {
      */
     @Override
     public boolean isFinished(double currentTime) {
-        return currentTime >= (startTime + duration);
+        return cancelled || currentTime >= (startTime + duration);
+    }
+
+    /**
+     * Cancels all future damage and callbacks from this event.
+     *
+     * <p>Cancellation is idempotent. The simulation clock removes the event
+     * when it next reaches the queue head.
+     */
+    public void cancel() {
+        cancelled = true;
     }
 }

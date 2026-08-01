@@ -2970,7 +2970,7 @@ Completion evidence:
 
 Status:
 
-- Planned; Phase 1 evidence is recorded below.
+- In progress; Phases 1-2 are complete and Phase 3 remains.
 - Requirement: recasting Transcendence: Baleful Omen replaces the previous Eye
   periodic stream and refreshes its duration without overlapping attacks.
 
@@ -3029,7 +3029,7 @@ Verification:
 - inspect `RaidenShogun.skill`, `PeriodicDamageEvent`, and sample timestamps
 - `python scripts/preflight.py --run`
 
-### Phase 2: Implement and Test Eye Event Replacement
+### Phase 2: Implement and Test Eye Event Replacement - Done
 
 Why second:
 
