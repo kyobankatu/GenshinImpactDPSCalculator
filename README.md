@@ -325,6 +325,10 @@ Elemental Gauge Theory contract:
   unchanged, stronger/equal gauges replace it, Aggravate/Spread do not consume
   it, and Hydro Bloom consumes 0.5 times the Hydro source gauge from both
   Quicken and coexisting Dendro while creating one core.
+- **Dendro Core damage cap**: Bloom, Hyperbloom, and Burgeon share the existing
+  two-hit/0.5-second single-target damage cap. Snapshots preserve both active
+  cores and accepted damage timestamps so rollback branches replay the same cap
+  decisions; capped hits still consume their configured cores.
 - **Frozen Aura**: Freeze stores twice the smaller current origin/trigger gauge,
   decays as `F(t) = F0 - 0.4t - 0.05t^2`, and extends without resetting its
   instantaneous decay rate. Non-blunt Pyro resolves one forward Melt against

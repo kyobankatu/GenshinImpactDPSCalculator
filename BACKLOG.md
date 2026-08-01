@@ -1990,7 +1990,7 @@ experiment record.
 
 ### B-072 — Dendro Core damage-cap history survives snapshot rollback
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 4 (snapshot invariant and regression-coverage audit)
 - Symptom: active Dendro Core payloads are snapshotted, but the two-hit/0.5-second
   damage-cap history remains mutable only inside `ReactionEffectScheduler`.
@@ -2005,4 +2005,13 @@ experiment record.
   the exact 0.5-second boundary, and repeat catalog payloads
 - Notes: this is a simulator rollback correction, not a change to the accepted
   two-hit/0.5-second game-mechanic policy. See `TASKS.md` implementation block
-  `Dendro Core Damage-Cap Snapshot State`.
+  `Dendro Core Damage-Cap Snapshot State`. Completed by moving policy state to
+  `ReactionState`, validating defensive copy/restore, and replaying real core
+  consumption after a future branch mutation. Repeated catalog payloads remain
+  exact at Raiden
+  `86a70a9357148363fcc465e648accb749cc774a3a3adf8c0aac35a583c37e601`,
+  FlinsParty
+  `2d530f72e3cf4d0d6ee6209ef68dff6cf1454707fd3b5e43fb21e249a682ed68`,
+  and FlinsParty2
+  `23dc585acc02d3bd7bca7fe3f5b65db62b3e1489fcedb12a02b9725b774b7dd4`;
+  all six logs contain zero Core/Bloom-family and warning matches.

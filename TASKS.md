@@ -171,8 +171,8 @@ damage now share a snapshot-safe 0.5-second target cooldown across sequences.
 The B-071 pass is complete. Per-element target and owner Swirl damage sequences
 now retain reaction notification and Aura consumption.
 
-The current B-072 pass makes the existing Dendro Core two-hit damage-cap
-history snapshot-safe so rollback branches cannot retain future hit decisions.
+The B-072 pass is complete. The existing Dendro Core two-hit damage-cap history
+is snapshot-safe, so rollback branches cannot retain future hit decisions.
 
 ## Scope
 
@@ -11424,8 +11424,8 @@ Completion evidence:
 
 ## Implementation Order: Dendro Core Damage-Cap Snapshot State
 
-Status: Phases 1-2 are complete. Phase 3 will accept deterministic catalog
-baselines for snapshot-safe Dendro Core damage-cap history.
+Status: Phases 1-3 are complete. Snapshot-safe Dendro Core damage-cap history
+and deterministic catalog baselines are accepted.
 
 Scope:
 
@@ -11562,7 +11562,7 @@ Completion evidence:
   agent validation report the expected RL checks, which were not executed under
   the simulator-only session boundary.
 
-### Phase 3: Accept Core-Snapshot-Neutral Catalog Baselines - Pending
+### Phase 3: Accept Core-Snapshot-Neutral Catalog Baselines - Done
 
 Why third:
 
@@ -11599,6 +11599,20 @@ Verification:
 - two fresh `./gradlew --no-daemon FlinsParty` runs
 - two fresh `./gradlew --no-daemon FlinsParty2` runs
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Two normalized payloads per party match B-071 exactly: RaidenParty
+  `86a70a9357148363fcc465e648accb749cc774a3a3adf8c0aac35a583c37e601`,
+  FlinsParty
+  `2d530f72e3cf4d0d6ee6209ef68dff6cf1454707fd3b5e43fb21e249a682ed68`,
+  and FlinsParty2
+  `23dc585acc02d3bd7bca7fe3f5b65db62b3e1489fcedb12a02b9725b774b7dd4`.
+- Totals/DPS remain 1,304,576/62,123, 22,639,410/227,532, and
+  15,817,125/228,902. All six logs contain zero Dendro Core, Bloom-family,
+  warning, error, failed-action, or insufficient-energy matches.
+- README documents rollback-complete cap state. The tracked generated report
+  was restored and no generated output is staged.
 
 ## Implementation Order: Swirl Damage Sequences
 
