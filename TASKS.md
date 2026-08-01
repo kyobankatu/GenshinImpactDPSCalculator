@@ -42,6 +42,10 @@ cast no longer applies Anemo.
 The Ineffa Overclock correction is complete. The direct Lunar-Charged follow-up
 retains its damage while applying 0U and bypassing elemental ICD state.
 
+The Ineffa Skill application correction is now active. Its 1U/no-ICD contract
+and pre-fix Birgitta cadence are recorded; implementation and sample acceptance
+remain.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -1241,6 +1245,155 @@ Acceptance criteria:
 - Overclock contributes direct damage without any elemental application or ICD
   state.
 - README, verification gate, backlog, and plan agree on the accepted baseline.
+- Agent assets and routed preflight checks pass.
+
+Test cases to add or update:
+
+- No further production test; Phase 2 owns the mechanic contract and this phase
+  performs full-party integration acceptance.
+
+Verification:
+
+- two fresh `./gradlew FlinsParty2` runs
+- `python scripts/validate_agent_assets.py`
+- `python scripts/preflight.py --run`
+
+## Implementation Order: Ineffa Skill No-ICD Application
+
+Status:
+
+- In progress.
+- Phase 1 is complete; Phases 2-3 remain.
+- Requirement: Ineffa's Skill hit and every Birgitta Discharge must apply their
+  documented 1U Electro without ICD suppression.
+
+Scope:
+
+- Explicitly encode Skill and Birgitta Discharge as 1U/no-ICD in `Ineffa`.
+- Add actual-character regression coverage for repeated Birgitta applications.
+- Re-run `FlinsParty2` and accept the aura/reaction/DPS delta.
+
+Out of scope for this pass:
+
+- Changing Skill/Birgitta damage, timing, duration, particle generation,
+  shield behavior, or Overclock.
+- Changing Ineffa Burst, Flins actions, generic ICD rules, reaction formulas,
+  optimizer behavior, RL contracts, or generated `docs/` output.
+
+Design boundaries:
+
+- `model.character.Ineffa` remains the only owner of Skill action metadata.
+- Runtime ICD and reaction services remain generic consumers of typed actions.
+- Regression observes the character through simulator actions and reactions;
+  no test-only production API is introduced.
+
+### Phase 1: Record Skill and Birgitta Application Evidence - Done
+
+Why first:
+
+The periodic 2-second cadence differs materially between no ICD and the default
+2.5-second/three-hit rule, so source evidence must precede implementation.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record the Genshin Impact Wiki Ineffa advanced-property table, accessed
+  2026-08-02: Skill Damage and Birgitta Discharge Damage are each 1U/no-ICD.
+- Corroborate the 1U Skill contract and 2-second Birgitta cadence against the
+  Japanese Genshin Wiki character analysis.
+- Classify the simulator decision as `adopt` and record the pre-fix hit/block
+  counts.
+
+Acceptance criteria:
+
+- Source URLs, access date, classification, and bounded test design are
+  recorded.
+- Pre-fix `FlinsParty2` is 15,344,560 damage / 224,994 DPS.
+- The log identifies 40 Birgitta hits, of which 18 are incorrectly blocked by
+  default Standard/None ICD.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 adds executable coverage.
+
+Verification:
+
+- `./gradlew FlinsParty2`
+- `python scripts/preflight.py --run`
+
+### Phase 2: Encode and Test No-ICD Skill Applications
+
+Why second:
+
+After evidence is fixed, the character-local metadata and repeated-hit behavior
+can be corrected together.
+
+Target files:
+
+- `src/java/model/character/Ineffa.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Set the initial Skill action to `ICDType.None`, Skill tag, and 1U.
+- Create Birgitta's periodic action explicitly and set it to
+  `ICDType.None`, Skill tag, and 1U before event registration.
+- Add an actual-Ineffa regression covering metadata and consecutive 2-second
+  applications.
+
+Acceptance criteria:
+
+- Skill and Birgitta actions expose 1U/no-ICD metadata.
+- Consecutive Birgitta hits can each trigger Electro application when Hydro
+  aura is replenished.
+- Birgitta with no reactive aura deals damage without a false reaction.
+- Overclock remains 0U and no runtime/formula code changes.
+
+Test cases to add or update:
+
+- Normal: Skill emits 1U/no-ICD with the typed Skill tag.
+- Normal: two consecutive Birgitta ticks each trigger the expected reaction
+  against replenished Hydro.
+- No-trigger: a Birgitta tick against no aura still deals direct damage and
+  produces no elemental reaction.
+- Boundary: the second tick at the exact 2-second cadence is not suppressed.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Accept the FlinsParty2 Application Delta
+
+Why last:
+
+The integrated reaction cadence and optimizer baseline can be accepted only
+after the focused contract is committed.
+
+Target files:
+
+- `README.md`
+- `TASKS.md`
+- `BACKLOG.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+
+Tasks:
+
+- Run two fresh `FlinsParty2` invocations and compare complete logs.
+- Confirm all 40 Birgitta hits avoid ICD blocks and retain direct damage.
+- Update the audited baseline and close B-013.
+
+Acceptance criteria:
+
+- Two fresh runs have identical optimizer decisions and final summaries.
+- No Birgitta Discharge is ICD-blocked at its 2-second cadence.
+- Current README, verification gate, backlog, and plan values agree.
 - Agent assets and routed preflight checks pass.
 
 Test cases to add or update:

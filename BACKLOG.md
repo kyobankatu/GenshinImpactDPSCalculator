@@ -250,3 +250,24 @@ experiment record.
   All 40 Overclock follow-ups retained direct damage with zero related ICD
   blocks; only Ineffa's contribution changed, from 3,164,054 to 2,946,003.
   The accepted result is 15,344,560 damage / 224,994 DPS.
+
+### B-013 — Ineffa Skill and Birgitta use incorrect standard ICD
+
+- Status: `planned`
+- Source: 3 (sourced game-accuracy divergence exposed by B-009 output)
+- Symptom: the Skill hit uses standard ICD and Birgitta Discharge inherits the
+  Standard/None default, suppressing 18 of 40 periodic Electro applications in
+  the current `FlinsParty2` run.
+- Scope: `src/java/model/character/Ineffa.java`,
+  `src/java/sample/ReactionRegressionTest.java`
+- Risk: `planned`
+- Proof: focused repeated-Birgitta regression plus two matching
+  `./gradlew FlinsParty2` summaries
+- Notes: adopt the Genshin Impact Wiki Ineffa advanced-property table (accessed
+  2026-08-02), which records both Skill Damage and Birgitta Discharge Damage as
+  1U/no-ICD. The Japanese Genshin Wiki independently records 1U for the Skill
+  and a 2-second Birgitta Discharge cadence. Sources:
+  https://genshin-impact.fandom.com/wiki/Ineffa and
+  https://wikiwiki.jp/genshinwiki/%E3%82%A4%E3%83%8D%E3%83%95%E3%82%A1.
+  Pre-fix `FlinsParty2` is 15,344,560 damage / 224,994 DPS. See `TASKS.md`
+  implementation block `Ineffa Skill No-ICD Application`.
