@@ -417,7 +417,7 @@ experiment record.
 
 ### B-019 — Electro resonance accepts unrelated Lunar reactions
 
-- Status: `planned`
+- Status: `done`
 - Source: 1 (typed reaction helper audit after resonance corrections)
 - Symptom: `ReactionResult.triggersElectroResonance()` returns true for every
   Lunar reaction, so Lunar-Bloom and Lunar-Crystallize can generate Electro
@@ -434,4 +434,8 @@ experiment record.
   Lunar-Bloom, Lunar-Crystallize, Spread, and Burgeon are excluded. Pre-fix
   baselines are 1,440,416 / 68,591 for `RaidenParty` and 15,434,039 / 226,306
   for `FlinsParty2`. See `TASKS.md` implementation block
-  `Electro Resonance Typed Trigger Set`.
+  `Electro Resonance Typed Trigger Set`. Completed 2026-08-02. Typed and live
+  listener regression covers positive/negative sets and the shared five-second
+  boundary. `RaidenParty` remains 1,440,416 / 68,591; both `FlinsParty2`
+  payloads remain 15,434,039 / 226,306 with normalized SHA-256
+  `a9cdfbf0d3a0a01356d9d113afdd7f0afe8ef8510494f4b193107d533c8dbb6e`.
