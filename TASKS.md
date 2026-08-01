@@ -77,6 +77,10 @@ The B-031 Dragon's Bane correction is complete. Its enemy-aura condition is
 evaluated per hit before reaction consumption instead of being folded
 unconditionally into the wielder's stat sheet and snapshots.
 
+The B-032 `FlinsParty` random-stream correction is in progress. Independent
+seeded Favonius and Moondrift streams will keep ER calibration and the accepted
+rotation on the same stochastic scenario without changing generic randomness.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -3992,6 +3996,190 @@ Completion evidence:
 - `ReactionRegressionTest`, `build`, warning-free Javadoc, focused agent
   validation, and preflight pass; cataloged party baselines are unchanged
   because no current party equips Dragon's Bane.
+
+## Implementation Order: Deterministic FlinsParty Energy Scenario
+
+Status:
+
+- In progress; Phase 1 is complete and Phases 2-3 remain.
+- Requirement: every simulator created for one `FlinsParty` optimization run
+  uses the same independent Favonius and Moondrift random streams so ER
+  calibration, artifact optimization, and final rotation are comparable and
+  reproducible.
+
+Scope:
+
+- Make Favonius Codex proc draws injectable while preserving stochastic default
+  construction.
+- Make Columbina's Moondrift Harmony draw injectable independently from weapon
+  proc draws while preserving stochastic default construction.
+- Give `FlinsPartyDefinition` fixed, separate seeds for both streams on every
+  simulator construction.
+- Cover draw thresholds, cooldown behavior, stream independence, and repeated
+  `FlinsParty` integration output.
+
+Out of scope for this pass:
+
+- Replacing probability with expected-value damage/energy, changing Favonius
+  particle count or cooldown, or changing Moondrift's 33% chance.
+- Making every generic simulation deterministic, changing the documented
+  random `FlinsParty2` Moondrift behavior, or changing accepted Raiden/FlinsParty2
+  numeric baselines.
+- Changing ER replay formulas, optimizer search policy, rotation timing, RL
+  contracts, reports, or generated `docs/` output.
+
+Definitions:
+
+- `FavoniusCodex(DoubleSupplier)`: constructor whose supplier provides Windfall
+  chance draws for deterministic tests and party scenarios.
+- `Columbina(..., DoubleSupplier)`: constructor whose supplier provides only
+  Moondrift Harmony extra-attack draws.
+- Favonius and Moondrift seed constants: independent `FlinsPartyDefinition`
+  streams recreated from the same seeds for every simulator instance.
+
+Design boundaries:
+
+- Each stochastic mechanic owns its draw source and cooldown/chance decision.
+- `FlinsPartyDefinition` owns reproducibility policy for its optimizer and final
+  sample; generic weapon and character constructors remain stochastic.
+- Separate streams prevent an added Moondrift hit from shifting later Favonius
+  decisions, while repeated simulator construction receives common random
+  numbers.
+- Tests inject finite deterministic sequences without adding global RNG state.
+
+### Phase 1: Record FlinsParty ER Nondeterminism - Done
+
+Why first:
+
+Known random damage is already accepted under B-005, so this phase must prove
+the separate symptom that random hit/proc ordering changes ER decisions and
+rotation validity.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record two unchanged-tree `FlinsParty` runs with ER results, Burst warnings,
+  duration, and final totals.
+- Trace Moondrift extra hits through damage hooks into Favonius draw count and
+  neutral particle distribution.
+- Define independent per-simulator random streams instead of global seeding or
+  expected-value replacement.
+
+Acceptance criteria:
+
+- Two runs demonstrate different Sucrose/Columbina ER targets and each contains
+  skipped Sucrose Bursts after calibration.
+- The symptom is distinguished from B-005's accepted random damage total.
+- No production source changes occur in this phase.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 adds deterministic draw,
+  threshold, cooldown, and Moondrift coverage.
+
+Verification:
+
+- two fresh `./gradlew FlinsParty` runs with extracted `ER Result`, Burst
+  warning, total, DPS, and duration lines
+- `python scripts/preflight.py --run`
+
+### Phase 2: Inject Independent Favonius and Moondrift Draws
+
+Why second:
+
+The observed coupling identifies two owning classes and requires separate draw
+sources before the party can seed a stable scenario.
+
+Target files:
+
+- `src/java/model/weapon/FavoniusCodex.java`
+- `src/java/model/character/Columbina.java`
+- `src/java/simulation/party/FlinsPartyDefinition.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `src/java/model/weapon/AGENTS.md`
+- `src/java/model/character/AGENTS.md`
+- `src/java/simulation/party/AGENTS.md`
+- `TASKS.md`
+
+Tasks:
+
+- Add null-rejecting `DoubleSupplier` constructors and route default
+  construction through `Math::random`.
+- Replace direct `Math.random()` calls with the mechanic-owned suppliers.
+- Construct `FlinsParty` Columbina and Favonius Codex with independent seeded
+  `Random` streams recreated for each simulator.
+- Add regressions for chance boundaries, failed-draw retry, cooldown boundaries,
+  deterministic replay, and Moondrift extra-hit decisions.
+
+Acceptance criteria:
+
+- Favonius draws below CRIT Rate proc, equal/above values fail, failed draws do
+  not start cooldown, and +6.000 seconds permits the next draw.
+- Moondrift draws below 0.33 add one attack and a draw at 0.33 does not.
+- Null suppliers fail at construction and identical supplied sequences replay
+  identically.
+- Existing default constructors remain stochastic and public talent-data
+  construction remains source-compatible.
+
+Test cases to add or update:
+
+- Favonius normal: successful draw generates the R5 neutral particles.
+- Favonius abnormal: null supplier and equal-threshold draw are rejected/no-proc.
+- Favonius boundary: failed same-time retry and 5.999/6.000-second cooldown.
+- Moondrift normal/boundary: 0.329999 adds an extra hit; 0.33 does not.
+- Replay: two fresh injected instances consume equal draw counts and produce
+  equal particle/action outcomes.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew PartyCatalogRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/model/weapon/FavoniusCodex.java --path src/java/model/character/Columbina.java --path src/java/simulation/party/FlinsPartyDefinition.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Accept the Stable FlinsParty Rotation
+
+Why last:
+
+Only complete optimizer-to-final runs can prove that common random scenarios
+stabilize ER allocation and eliminate post-calibration Burst failures.
+
+Target files:
+
+- `README.md`
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Run at least two fresh `FlinsParty` invocations and compare ER results,
+  warnings, duration, contribution totals, and final summary.
+- Confirm final rotation contains no insufficient-energy Burst warning.
+- Document generic stochastic behavior and the party-local fixed scenario.
+
+Acceptance criteria:
+
+- Repeated runs produce identical ER targets and normalized simulator payloads.
+- No final rotation skips a Burst for insufficient energy.
+- The accepted seeded total, DPS, and duration are recorded without changing
+  RaidenParty or FlinsParty2 baselines.
+- Preflight passes with no generated report staged.
+
+Test cases to add or update:
+
+- No additional production test; Phase 2 owns draw contracts and this phase
+  owns full integration reproducibility.
+
+Verification:
+
+- at least two fresh `./gradlew FlinsParty` runs
+- `python scripts/preflight.py --run`
 
 ## NCCL/DDP Distributed RL Training Plan
 

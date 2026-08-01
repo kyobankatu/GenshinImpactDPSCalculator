@@ -739,3 +739,29 @@ experiment record.
   direct formula callers use the same resolver. Regression covers no/Electro,
   Hydro/Pyro, exact aura expiry, consuming Vaporize, and repeated runtime
   snapshot hits without stored or accumulated bonus.
+
+### B-032 — FlinsParty random streams destabilize ER calibration
+
+- Status: `in-progress`
+- Source: 2 (observable sample warning and non-reproducible ER result)
+- Symptom: unchanged `FlinsParty` runs choose materially different Sucrose and
+  Columbina ER targets, then skip Sucrose Bursts for insufficient energy in the
+  final rotation because Moondrift and Favonius use unrelated global random
+  draws in each simulator constructed by the optimizer.
+- Scope: injectable Favonius/Moondrift draws, `FlinsPartyDefinition` seeds,
+  focused regressions, and repeated sample acceptance
+- Risk: `planned`
+- Proof: draw/cooldown boundary regression plus repeated `./gradlew FlinsParty`
+  runs with identical ER results, no Burst warning, and matching normalized
+  payloads
+- Notes: new evidence after B-005; generic Moondrift randomness remains an
+  accepted model choice, but it changes the number of Favonius-eligible damage
+  hooks and therefore the energy scenario used during calibration. Two runs on
+  2026-08-02 produced initial ER results Sucrose/Columbina 282%/151% and
+  233%/148%. The first skipped Sucrose Bursts at 25.9 and 80.6 seconds and
+  reported 18,314,718 damage / 174,759 DPS over 104.8 seconds; the second
+  skipped at 45.9 and 79.5 seconds and reported 18,455,373 / 177,969 over
+  103.7 seconds. Preserve stochastic default constructors, but adapt the sample
+  to independent fixed Favonius and Moondrift streams recreated for every
+  simulator. See `TASKS.md` implementation block
+  `Deterministic FlinsParty Energy Scenario`.
