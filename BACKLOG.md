@@ -1949,3 +1949,28 @@ experiment record.
   1,304,576/62,123 with normalized hash
   `86a70a9357148363fcc465e648accb749cc774a3a3adf8c0aac35a583c37e601`.
   Event counts and ER remain exact; Flins/Flins2 retain B-069 hashes and totals.
+
+### B-071 — Swirl damage ignores per-element target and owner sequences
+
+- Status: `in-progress`
+- Source: 3 (remaining reaction-sequence audit plus KQM/gcsim evidence)
+- Symptom: every rapid Swirl reaction records damage, without the target-wide
+  0.1-second per-element GCD or owner/element two-hit 0.5-second sequence.
+- Scope: single-target per-element damage-only state, owner/element fixed
+  sequences, continued notification/Aura consumption, snapshots, and controls
+- Risk: `planned`
+- Proof: target pre/exact boundary, owner first/second/third/reset, cross-owner
+  and cross-element independence, continued side effects, restore replay, and
+  repeated catalog payloads
+- Notes: KQM records at most two Swirl damage instances per Element on one enemy
+  in 0.5 seconds. Maintained gcsim emits the typed Swirl event and consumes Aura
+  before a separate 0.1-second GCD for each Swirled Element, then queues damage
+  with element-specific ICD tags and owner-specific `ICDGroupReactionA`. Adopt
+  both damage-only dimensions in the one-enemy model. Do not add adjacent-target
+  AoE, element spread, chain reactions, or alter valid double Swirl across
+  distinct elements. Sources accessed 2026-08-02:
+  https://library.keqingmains.com/combat-mechanics/elemental-effects/transformative-reactions#swirl,
+  https://library.keqingmains.com/combat-mechanics/internal-cooldown,
+  https://github.com/genshinsim/gcsim/blob/main/pkg/reactable/swirl.go,
+  https://github.com/genshinsim/gcsim/blob/main/pkg/core/attacks/icd_groups.dm.go,
+  and https://github.com/genshinsim/gcsim/blob/main/pkg/target/icd.go.

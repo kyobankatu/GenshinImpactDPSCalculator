@@ -168,6 +168,9 @@ snapshot without dealing another immediate damage instance.
 The B-070 pass is complete. Standard Electro-Charged immediate and periodic
 damage now share a snapshot-safe 0.5-second target cooldown across sequences.
 
+The current B-071 pass adds per-element target and owner Swirl damage sequences
+while retaining reaction notification and Aura consumption.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -11415,6 +11418,172 @@ Completion evidence:
   zero Superconduct and warning/error/failed-action/insufficient-energy matches.
 - README documents damage-only sequence behavior. The tracked generated report
   was restored and no generated output is staged.
+
+## Implementation Order: Swirl Damage Sequences
+
+Status: Phase 1 is complete. Phase 2 will add snapshot-safe per-element target
+and owner Swirl damage-only sequences.
+
+Scope:
+
+- Per-Swirled-Element 0.1-second target damage GCD.
+- Per-`CharacterId` and Swirled Element fixed 0.5-second two-hit sequence.
+- Continued reaction notification and sourced half-gauge Aura consumption.
+- Snapshot save/restore and deterministic catalog acceptance.
+
+Out of scope for this pass:
+
+- Multi-target AoE, element spread/application, chain reactions, and geometry.
+- Hydro AoE's special no-damage rule, poise, hitlag, and Frozen double Swirl.
+- RL behavior, protocol/tensor changes, training, and persistent jobs.
+
+Definitions:
+
+- **Swirled Element**: Pyro, Hydro, Electro, or Cryo damage element derived from
+  the consumed Aura; each has independent target and owner state.
+- **Owner sequence**: first two target-passing attempts damage in a fixed
+  0.5-second window; later attempts do not until the original window resets.
+
+Cross-cutting rules:
+
+- `ReactionState` owns nested per-element typed state; controller/facade inject
+  current time and snapshots deep-copy both dimensions.
+- Notification and Aura consumption precede damage decisions. Target-blocked
+  attempts do not mutate owner state; owner-blocked attempts start target GCD.
+- Exact 0.1/0.5-second boundaries are inclusive.
+- Distinct elements and owners remain independent, preserving double Swirl.
+- Preserve explicit staging and generated-artifact safety.
+
+### Phase 1: Record Swirl Damage-Sequence Evidence - Done
+
+Why first:
+
+- Swirl combines a maintained target GCD and element-specific owner sequence;
+  both must be modeled without crossing the multi-target boundary.
+
+Target files:
+
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Record KQM's per-element two-hit/0.5-second damage sequence.
+- Confirm maintained event/consumption, element GCD, and owner ICD ordering.
+- Inventory resolver, reusable sequence helper, snapshot, and test boundaries.
+
+Acceptance criteria:
+
+- Both damage-only dimensions and owner/element independence are explicit.
+- Multi-target spread and current double-Swirl boundaries are explicit.
+- No production behavior changes occur in this phase.
+
+Test cases to add or update:
+
+- No production test; Phase 2 owns focused sequence behavior.
+
+Verification:
+
+- inspect KQM Swirl and internal-cooldown references
+- inspect maintained gcsim `swirl.go`, ReactionA, and target ICD paths
+- inspect resolver, reaction state/controller, snapshots, and regressions
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- KQM records two Swirl damage instances per Element per enemy in 0.5 seconds.
+- Maintained gcsim emits/consumes before one 0.1-second GCD per Element and uses
+  separate Pyro/Hydro/Cryo/Electro tags with owner-specific ReactionA state.
+- Current resolver consumes half source gauge and records every Swirl damage
+  without either damage-only decision.
+
+### Phase 2: Implement Snapshot-Safe Swirl Damage Sequences - Pending
+
+Why second:
+
+- Phase 1 establishes nested state ownership and side-effect ordering before
+  extending the reusable fixed-window helper.
+
+Target files:
+
+- `src/java/simulation/runtime/ReactionState.java`
+- `src/java/simulation/runtime/ReactionStateController.java`
+- `src/java/simulation/CombatSimulator.java`
+- `src/java/simulation/SimulatorSnapshot.java`
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `src/java/mechanics/rl/CapabilityProfiler.java` (snapshot forwarding only)
+- `TASKS.md`
+
+Tasks:
+
+- Add per-element target boundaries and nested immutable owner sequence maps.
+- Deep-copy/restore both dimensions and route resolver damage through policy.
+- Regress timing, owner/element independence, side effects, and snapshots.
+
+Acceptance criteria:
+
+- Same-element target attempts before 0.1 seconds deal no damage and start no
+  owner state; exact boundary is accepted.
+- One owner/element deals first/two target-passing hits, not third; exact 0.5
+  reset is accepted. Another owner and another Element are independent.
+- Every blocked attempt still notifies and consumes the current Aura fixture.
+- Snapshot restore reproduces active target and owner decisions.
+- Existing dual-element Swirl and B-041 VV behavior remain unchanged.
+
+Test cases to add or update:
+
+- Normal: owner entries one/two and exact 0.5-second reset.
+- Abnormal: same-element target block and same-owner third attempt.
+- Independence: second owner and Hydro versus Pyro state.
+- Side effect: listener count and half-gauge consumption on blocked paths.
+- Snapshot: restore active target and fixed owner window.
+- No-change: simultaneous Electro/Hydro priority and VV fixtures pass.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- routed validation/preflight planning without RL execution
+
+### Phase 3: Accept Swirl-Sequence Catalog Baselines - Pending
+
+Why third:
+
+- Both Flins catalogs use Sucrose Swirls, so acceptance follows focused timing
+  and snapshot verification.
+
+Target files:
+
+- `README.md`
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Run two no-daemon controls per catalog party against B-070.
+- Record hashes, totals, ER/cadence, Swirl counts, and warning lines.
+- Attribute every delta or prove exact no-change.
+
+Acceptance criteria:
+
+- All pairs are deterministic and every delta is attributable.
+- Tracked generated report is restored and no artifact is staged.
+- Plan, ledger, README, and checkpoint agree.
+
+Test cases to add or update:
+
+- Normal: pairwise exact catalog controls.
+- No-change: accepted totals/ER/cadence and valid dual-element Swirls.
+- Abnormal: zero warning/generated-artifact leak.
+
+Verification:
+
+- two fresh `./gradlew --no-daemon RaidenParty` runs
+- two fresh `./gradlew --no-daemon FlinsParty` runs
+- two fresh `./gradlew --no-daemon FlinsParty2` runs
+- `python scripts/preflight.py --run`
 
 ## Implementation Order: Standard Electro-Charged Damage Cooldown
 
