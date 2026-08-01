@@ -143,9 +143,9 @@ The B-050 Anemo/Geo reaction-consumption correction is complete. Swirl and both
 Crystallize variants now consume half of the trigger source gauge and preserve
 the decayed residual aura.
 
-The B-051 Overload/Superconduct residual correction is in progress. Its sourced
-1.0 consumption and runtime residual behavior are complete; deterministic party
-acceptance remains below.
+The B-051 Overload/Superconduct residual correction is complete. Both reactions
+now retain positive decayed aura after their sourced 1.0 trigger-gauge
+consumption and rely on the shared enemy state for full depletion.
 
 ## Scope
 
@@ -7984,7 +7984,7 @@ Completion evidence:
 
 Status:
 
-- Phases 1-2 are complete; Phase 3 remains pending.
+- Complete; all three phases are implemented and accepted.
 - Requirement: Overload and Superconduct subtract their 1.0-modified trigger
   source gauge and retain any positive decayed aura remainder.
 
@@ -8120,7 +8120,7 @@ Completion evidence:
   B-050 Swirl residuals, reaction ownership/listeners, build, reaction regression,
   and routed validation all pass.
 
-### Phase 3: Re-Accept Transformative-Reaction Party Baselines
+### Phase 3: Re-Accept Transformative-Reaction Party Baselines - Done
 
 Why last:
 
@@ -8162,3 +8162,27 @@ Verification:
 - two fresh `./gradlew FlinsParty2` runs
 - `python scripts/validate_agent_assets.py`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Each party's two normalized payloads match exactly: RaidenParty
+  `985f95d5c7779b81013dad0cf6232557b453ea44034c224f1b3ec1795a3b8614`,
+  unchanged FlinsParty
+  `4ad65138b5288f4c627194509fc24be69b8d21771efc09a66a1bd79dd92a2b96`,
+  and unchanged FlinsParty2
+  `118edbd3665d167d31e9bbbbffc97ffc499a40db5199a573a5e25ed8eea023a6`.
+  All six runs complete without warning, error, failed action, or insufficient
+  energy output.
+- RaidenParty is 1,363,709 / 64,939 over 21.0 seconds, +14,993 from B-050.
+  Immediate EC count remains 22 but one reaction moves from 8.2 to 10.6 seconds;
+  EC ticks decrease from five to four and Pyro-on-Hydro Vaporizes increase from
+  sixteen to seventeen. The added Pyronado Vaporize raises Xiangling by 18,407
+  while one removed tick lowers Thundercloud by 3,414. Bennett, Xingqiu, Raiden,
+  every other reaction count, optimizer rolls, rotation, and 100/175/179/174%
+  ER are unchanged.
+- FlinsParty retains 22,620,467 / 227,341, its complete B-050 payload,
+  optimizer, 99.5-second rotation, and 109/100/100/180% ER. FlinsParty2 retains
+  15,482,126 / 224,054, its complete B-050 payload, optimizer, 69.1-second
+  rotation, and 130/128/100/196% ER.
+- README, verification reference, plan, and ledger agree. Generated FlinsParty2
+  HTML was restored and no output artifact is staged.

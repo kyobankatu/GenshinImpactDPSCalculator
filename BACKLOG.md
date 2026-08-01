@@ -1298,7 +1298,7 @@ experiment record.
 
 ### B-051 — Overload and Superconduct discard residual aura after subtraction
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 3 (B-050 resolver audit plus maintained Elemental Gauge Theory)
 - Symptom: the resolver subtracts the trigger's full gauge and then clears the
   aura unconditionally, so a 1U trigger against a fresh taxed 2U aura ends at
@@ -1306,7 +1306,7 @@ experiment record.
 - Scope: remove redundant full-clear policy for Overload/Superconduct, preserve
   residual decay rate, focused strong-aura boundaries, and affected deterministic
   party baselines
-- Risk: `planned`
+- Risk: `validated`
 - Proof: 1U trigger against 1.6U leaves 0.6U for both reaction directions,
   equal/weaker auras still fully clear, and repeated party payloads are
   deterministic and warning-free
@@ -1317,3 +1317,14 @@ experiment record.
   B-050 is closed; see `TASKS.md` implementation block
   `Overload and Superconduct Residual Aura` for this separate residual-policy
   change.
+  Completed by making typed reduction the only post-reaction aura mutation.
+  Focused regressions cover both Overload/Superconduct directions, 1.6 to 0.6U,
+  D(2) residual expiry, full depletion, reaction count, and subsequent Physical
+  reduction. Accepted repeated payloads are RaidenParty
+  `985f95d5c7779b81013dad0cf6232557b453ea44034c224f1b3ec1795a3b8614`
+  at 1,363,709 / 64,939, unchanged FlinsParty
+  `4ad65138b5288f4c627194509fc24be69b8d21771efc09a66a1bd79dd92a2b96`
+  at 22,620,467 / 227,341, and unchanged FlinsParty2
+  `118edbd3665d167d31e9bbbbffc97ffc499a40db5199a573a5e25ed8eea023a6`
+  at 15,482,126 / 224,054. Durations, ER contracts, and warning-free output are
+  stable.

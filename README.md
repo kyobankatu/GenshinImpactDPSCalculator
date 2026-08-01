@@ -227,8 +227,9 @@ Known simplifications:
   Stormy Judgment buff instead of stacking with its first 25-second window. The
   simulator resolves enemy RES reduction at each impact rather than retaining it
   in attacker snapshots, and ordinary source application uses the 0.8 Aura Tax
-  plus source-class decay. The accepted set-aware result is 1,348,716 damage /
-  64,225 DPS over 21.0 seconds.
+  plus source-class decay. Overload and Superconduct preserve any positive aura
+  remaining after their sourced full-gauge consumption. The accepted set-aware
+  result is 1,363,709 damage / 64,939 DPS over 21.0 seconds.
 - `FlinsParty2`: defensive shield HP is logged but not consumed by enemy attacks,
   Columbina treats every Lunar reaction during Gravity Ripple as nearby because
   field position is not simulated, and her Thundercloud extra strikes use 33%
@@ -287,7 +288,7 @@ multi-target or per-enemy aura gauges.
 Latest validation baseline from the accuracy pass:
 
 - `./gradlew ReactionRegressionTest`
-- `./gradlew RaidenParty`: 1,348,716 total damage / 64,225 DPS
+- `./gradlew RaidenParty`: 1,363,709 total damage / 64,939 DPS
 - `./gradlew FlinsParty2`: 15,482,126 total damage / 224,054 DPS
 - `./gradlew BenchmarkRLJava`
 - `./gradlew ProfileCapabilities`
