@@ -176,6 +176,11 @@ public class CombatActionResolver {
         StatsContainer stats = getReactionStats(attacker, action, context);
         double em = stats.get(StatType.ELEMENTAL_MASTERY);
 
+        if (tryTriggerQuickenOnlyBloom(
+                attacker, characterId, action, context, stats, currentAuras)) {
+            reactionTriggered = true;
+        }
+
         for (Element aura : currentAuras) {
             ReactionResult result = ReactionCalculator.calculate(
                     trigger, aura, em, 90, getReactionBonus(trigger, aura, stats));
@@ -459,31 +464,82 @@ public class CombatActionResolver {
             }
         } else if (result.getKind() == ReactionResult.Kind.BLOOM
                 || result.getKind() == ReactionResult.Kind.LUNAR_BLOOM) {
-            double resFactor = resolveImpactResistance(context, Element.DENDRO);
-            double coreDamage = result.getTransformDamage() * resFactor;
-            sim.getEnemy().reduceAura(
-                    aura, getAuraConsumption(action, result, trigger, aura), sim.getCurrentTime());
-            reactionEffectScheduler.createDendroCore(characterId, result.getTransformDamage());
-            if (result.getKind() == ReactionResult.Kind.LUNAR_BLOOM) {
-                sim.incrementVerdantDewCount();
-                sim.incrementMoonridgeDewCount();
-            }
-            if (sim.isLoggingEnabled()) {
-                System.out.println(String.format(
-                        "   [Reaction] %s on %s -> %s Core Damage: %,.0f",
-                        trigger, aura, result.getName(), coreDamage));
-            }
+            handleBloomReaction(
+                    characterId, action, trigger, aura, result, context, true);
         } else if (result.getKind() == ReactionResult.Kind.QUICKEN) {
             double quickenGauge = Math.min(
                     sim.getEnemy().getAuraUnits(aura, sim.getCurrentTime()), action.getGaugeUnits());
-            double duration = Math.max(0.0, quickenGauge) * 5.0 + 6.0;
-            sim.setQuickenEndTime(sim.getCurrentTime() + duration);
+            ReactionState.QuickenState quickenState = sim.applyQuicken(quickenGauge);
             sim.getEnemy().reduceAura(aura, action.getGaugeUnits(), sim.getCurrentTime());
             if (sim.isLoggingEnabled()) {
+                double duration = quickenState != null
+                        ? Math.max(0.0, quickenState.getEndTime() - sim.getCurrentTime())
+                        : 0.0;
                 System.out.println(String.format(
                         "   [Reaction] %s on %s -> Quicken (%.1fs)",
                         trigger, aura, duration));
             }
+        }
+    }
+
+    private boolean tryTriggerQuickenOnlyBloom(
+            Character attacker,
+            CharacterId characterId,
+            AttackAction action,
+            ActionResolutionContext context,
+            StatsContainer stats,
+            Set<Element> currentAuras) {
+        if (action.getElement() != Element.HYDRO
+                || currentAuras.contains(Element.DENDRO)
+                || !sim.isQuickenActive()
+                || sim.getQuickenState() == null) {
+            return false;
+        }
+        ReactionResult result = ReactionCalculator.calculate(
+                Element.HYDRO,
+                Element.DENDRO,
+                stats.get(StatType.ELEMENTAL_MASTERY),
+                90,
+                stats.get(StatType.BLOOM_DMG_BONUS));
+        result = convertToLunarIfEligible(result);
+        sim.notifyReaction(result, attacker);
+        handleBloomReaction(
+                characterId,
+                action,
+                Element.HYDRO,
+                Element.DENDRO,
+                result,
+                context,
+                false);
+        return true;
+    }
+
+    private void handleBloomReaction(
+            CharacterId characterId,
+            AttackAction action,
+            Element trigger,
+            Element aura,
+            ReactionResult result,
+            ActionResolutionContext context,
+            boolean consumeEnemyAura) {
+        double consumption = getAuraConsumption(action, result, trigger, aura);
+        if (consumeEnemyAura) {
+            sim.getEnemy().reduceAura(aura, consumption, sim.getCurrentTime());
+        }
+        if (trigger == Element.HYDRO && sim.getQuickenState() != null) {
+            sim.consumeQuicken(consumption);
+        }
+        double resFactor = resolveImpactResistance(context, Element.DENDRO);
+        double coreDamage = result.getTransformDamage() * resFactor;
+        reactionEffectScheduler.createDendroCore(characterId, result.getTransformDamage());
+        if (result.getKind() == ReactionResult.Kind.LUNAR_BLOOM) {
+            sim.incrementVerdantDewCount();
+            sim.incrementMoonridgeDewCount();
+        }
+        if (sim.isLoggingEnabled()) {
+            System.out.println(String.format(
+                    "   [Reaction] %s on %s -> %s Core Damage: %,.0f",
+                    trigger, aura, result.getName(), coreDamage));
         }
     }
 

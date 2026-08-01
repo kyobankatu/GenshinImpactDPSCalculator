@@ -5897,7 +5897,7 @@ Completion evidence:
 - ReactionRegressionTest, build, Javadoc, party-catalog regression, local Java
   rollout smoke benchmark, routed validation, and preflight pass.
 
-### Phase 3: Route Quicken Creation and Hydro Bloom Consumption - In Progress
+### Phase 3: Route Quicken Creation and Hydro Bloom Consumption - Done
 
 Why third:
 
@@ -5948,7 +5948,26 @@ Verification:
 - `python scripts/agent_validate.py --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
 
-### Phase 4: Re-Accept Quicken-Neutral Party Baselines - Pending
+Completion evidence:
+
+- Both real trigger directions now create typed 0.8U Quicken for exactly ten
+  seconds from taxed 1U Aura. A real 0.5U retrigger after one second leaves the
+  original end unchanged; a 2U retrigger replaces gauge and ends sixteen seconds
+  after the refresh.
+- Aggravate and Spread preserve stored units and exact end while retaining their
+  existing additive damage. An exact ten-second expiry suppresses Spread and a
+  separate exact-expiry Hydro hit applies ordinary Hydro without Bloom/core.
+- Hydro on Quicken alone emits one Bloom, creates one core owned by the Hydro
+  character, consumes 0.5U Quicken, and deals no immediate damage. Lunar
+  conversion emits one Lunar-Bloom/core and increments both Dew counters once.
+- Hydro on coexisting 2U fixture Dendro and 1U Quicken emits one Bloom/core and
+  leaves 1.5U Dendro plus 0.5U Quicken, proving simultaneous dual consumption
+  without duplicate notification.
+- Bloom creation/dew handling remains in one helper and Dendro Core scheduling
+  remains in `ReactionEffectScheduler`. ReactionRegressionTest, build, Javadoc,
+  routed validation, and preflight pass.
+
+### Phase 4: Re-Accept Quicken-Neutral Party Baselines - In Progress
 
 Why last:
 

@@ -55,6 +55,7 @@ public class ReactionRegressionTest {
         testPhase6BloomCores();
         testPhase7HyperbloomAndBurgeon();
         testPhase8QuickenAggravateSpread();
+        testAccuracyPhaseG_QuickenBloomConsumptionContract();
         testPhase9LunarReactionConversion();
         testPhase10LunarChargedThundercloud();
         testPhase11LunarBloom();
@@ -427,16 +428,27 @@ public class ReactionRegressionTest {
                 .withStat(StatType.CRIT_DMG, 1.0)
                 .withStat(StatType.ELECTRO_DMG_BONUS, 0.50);
         CombatSimulator aggravateSim = simulatorWith(electroCharacter);
-        aggravateSim.getEnemy().setAura(Element.DENDRO, 1.0);
+        aggravateSim.getEnemy().applyAura(
+                Element.DENDRO, 1.0, aggravateSim.getCurrentTime());
         aggravateSim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
                 reactionHit("Electro quicken trigger", Element.ELECTRO));
         assertTrue(aggravateSim.isQuickenActive(), "Electro on Dendro should create Quicken");
+        assertClose(0.8, aggravateSim.getQuickenState().units, EPS,
+                "Electro on a taxed 1U Dendro Aura should create 0.8U Quicken");
+        assertClose(10.0, aggravateSim.getQuickenState().getEndTime(), EPS,
+                "A real 0.8U Quicken Aura should last ten seconds");
         assertClose(0.0, aggravateSim.getTotalDamage(), EPS, "Quicken should not deal immediate damage");
 
+        double aggravateGauge = aggravateSim.getQuickenState().units;
+        double aggravateEnd = aggravateSim.getQuickenState().getEndTime();
         aggravateSim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
                 catalyzeDamageHit("Electro aggravated hit", Element.ELECTRO));
         assertClose(expectedStandardCatalyzeDamage(1.15, 0.50, 1.0, 1.0), aggravateSim.getTotalDamage(), 0.5,
                 "Aggravate should add base damage before DMG Bonus/Crit/DEF/RES");
+        assertClose(aggravateGauge, aggravateSim.getQuickenState().units, EPS,
+                "Aggravate should not consume Quicken gauge");
+        assertClose(aggravateEnd, aggravateSim.getQuickenState().getEndTime(), EPS,
+                "Aggravate should not refresh Quicken expiry");
 
         ReactionResult spread = ReactionCalculator.calculateSpread(0.0, 90, 0.0);
         assertEquals(ReactionResult.Kind.SPREAD, spread.getKind(), "Spread kind");
@@ -448,22 +460,112 @@ public class ReactionRegressionTest {
                 .withStat(StatType.CRIT_DMG, 1.0)
                 .withStat(StatType.DENDRO_DMG_BONUS, 0.50);
         CombatSimulator spreadSim = simulatorWith(dendroCharacter);
-        spreadSim.getEnemy().setAura(Element.ELECTRO, 1.0);
+        spreadSim.getEnemy().applyAura(
+                Element.ELECTRO, 1.0, spreadSim.getCurrentTime());
         spreadSim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
                 reactionHit("Dendro quicken trigger", Element.DENDRO));
         assertTrue(spreadSim.isQuickenActive(), "Dendro on Electro should create Quicken");
+        assertClose(0.8, spreadSim.getQuickenState().units, EPS,
+                "Dendro on a taxed 1U Electro Aura should create 0.8U Quicken");
+        double spreadGauge = spreadSim.getQuickenState().units;
+        double spreadEnd = spreadSim.getQuickenState().getEndTime();
         spreadSim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
                 catalyzeDamageHit("Dendro spread hit", Element.DENDRO));
         assertClose(expectedStandardCatalyzeDamage(1.25, 0.50, 1.0, 1.0), spreadSim.getTotalDamage(), 0.5,
                 "Spread should add base damage before DMG Bonus/Crit/DEF/RES");
+        assertClose(spreadGauge, spreadSim.getQuickenState().units, EPS,
+                "Spread should not consume Quicken gauge");
+        assertClose(spreadEnd, spreadSim.getQuickenState().getEndTime(), EPS,
+                "Spread should not refresh Quicken expiry");
 
-        spreadSim.advanceTime(11.1);
+        spreadSim.advanceTime(10.1);
         double beforeExpiredHit = spreadSim.getTotalDamage();
         spreadSim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
                 catalyzeDamageHit("Expired quicken Dendro hit", Element.DENDRO));
         double expiredHit = spreadSim.getTotalDamage() - beforeExpiredHit;
         assertClose(expectedStandardDamage(0.50, 1.0, 1.0), expiredHit, 0.5,
                 "Expired Quicken should not trigger Spread");
+    }
+
+    private static void testAccuracyPhaseG_QuickenBloomConsumptionContract() {
+        CombatSimulator quickenOnly = simulatorWith(testCharacter(Element.HYDRO));
+        List<ReactionResult.Kind> quickenOnlyKinds = captureReactionKinds(quickenOnly);
+        quickenOnly.applyQuicken(1.0);
+        quickenOnly.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, reactionHit("Quicken-only Bloom fixture", Element.HYDRO));
+        assertEquals(1, countReactions(quickenOnlyKinds, ReactionResult.Kind.BLOOM),
+                "Hydro on Quicken alone should emit one Bloom reaction");
+        assertEquals(1, quickenOnly.getDendroCores().size(),
+                "Hydro on Quicken alone should create one Dendro Core");
+        assertEquals(CharacterId.SUCROSE, quickenOnly.getDendroCores().get(0).ownerId,
+                "Quicken-only Bloom should retain the Hydro trigger owner");
+        assertClose(0.5, quickenOnly.getQuickenState().units, EPS,
+                "1U Hydro Bloom should consume 0.5U Quicken");
+        assertClose(0.0, quickenOnly.getTotalDamage(), EPS,
+                "Quicken-only Bloom should not deal immediate damage");
+
+        CombatSimulator coexist = simulatorWith(testCharacter(Element.HYDRO));
+        List<ReactionResult.Kind> coexistKinds = captureReactionKinds(coexist);
+        coexist.applyQuicken(1.0);
+        coexist.getEnemy().setAura(Element.DENDRO, 2.0);
+        coexist.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, reactionHit("Dendro-Quicken Bloom fixture", Element.HYDRO));
+        assertEquals(1, countReactions(coexistKinds, ReactionResult.Kind.BLOOM),
+                "Hydro on coexisting Dendro and Quicken should emit one Bloom");
+        assertEquals(1, coexist.getDendroCores().size(),
+                "Coexisting Dendro and Quicken should create only one core");
+        assertClose(1.5, coexist.getEnemy().getAuraUnits(Element.DENDRO), EPS,
+                "Coexisting Bloom should consume 0.5U underlying Dendro");
+        assertClose(0.5, coexist.getQuickenState().units, EPS,
+                "Coexisting Bloom should consume 0.5U Quicken simultaneously");
+
+        CombatSimulator lunar = simulatorWith(testCharacter(Element.HYDRO).asLunar());
+        List<ReactionResult.Kind> lunarKinds = captureReactionKinds(lunar);
+        lunar.applyQuicken(1.0);
+        lunar.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, reactionHit("Quicken-only Lunar-Bloom fixture", Element.HYDRO));
+        assertEquals(1, countReactions(lunarKinds, ReactionResult.Kind.LUNAR_BLOOM),
+                "Lunar Hydro on Quicken alone should emit one Lunar-Bloom");
+        assertEquals(1, lunar.getDendroCores().size(),
+                "Quicken-only Lunar-Bloom should create one core");
+        assertEquals(1, lunar.getVerdantDewCount(),
+                "Quicken-only Lunar-Bloom should increment Verdant Dew once");
+        assertEquals(1, lunar.getMoonridgeDewCount(),
+                "Quicken-only Lunar-Bloom should increment Moonridge Dew once");
+
+        CombatSimulator expired = simulatorWith(testCharacter(Element.HYDRO));
+        List<ReactionResult.Kind> expiredKinds = captureReactionKinds(expired);
+        expired.applyQuicken(0.8);
+        expired.advanceTime(10.0);
+        expired.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, reactionHit("Expired Quicken Bloom fixture", Element.HYDRO));
+        assertEquals(0, countReactions(expiredKinds, ReactionResult.Kind.BLOOM),
+                "Hydro at exact Quicken expiry should not emit Bloom");
+        assertEquals(0, expired.getDendroCores().size(),
+                "Hydro at exact Quicken expiry should not create a core");
+        assertClose(0.8, expired.getEnemy().getAuraUnits(Element.HYDRO), EPS,
+                "Hydro should apply normally after exact Quicken expiry");
+
+        CombatSimulator refresh = simulatorWith(testCharacter(Element.ELECTRO));
+        refresh.getEnemy().applyAura(Element.DENDRO, 1.0, refresh.getCurrentTime());
+        refresh.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, reactionHit("Initial real Quicken fixture", Element.ELECTRO));
+        refresh.advanceTime(1.0);
+        double originalEnd = refresh.getQuickenState().getEndTime();
+        refresh.getEnemy().setAura(Element.DENDRO, 0.5);
+        AttackAction weakElectro = reactionHit("Weaker real Quicken fixture", Element.ELECTRO);
+        weakElectro.setICD(ICDType.None, ICDTag.None, 0.5);
+        refresh.performActionWithoutTimeAdvance(CharacterId.SUCROSE, weakElectro);
+        assertClose(originalEnd, refresh.getQuickenState().getEndTime(), EPS,
+                "A weaker real Quicken retrigger should not change expiry");
+        refresh.getEnemy().setAura(Element.DENDRO, 2.0);
+        AttackAction strongElectro = reactionHit("Stronger real Quicken fixture", Element.ELECTRO);
+        strongElectro.setICD(ICDType.None, ICDTag.None, 2.0);
+        refresh.performActionWithoutTimeAdvance(CharacterId.SUCROSE, strongElectro);
+        assertClose(2.0, refresh.getQuickenState().units, EPS,
+                "A stronger real Quicken retrigger should replace gauge");
+        assertClose(17.0, refresh.getQuickenState().getEndTime(), EPS,
+                "A 2U real Quicken retrigger should refresh to sixteen seconds");
     }
 
     private static void testPhase9LunarReactionConversion() {
