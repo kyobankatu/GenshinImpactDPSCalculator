@@ -9,6 +9,8 @@ import java.util.Map;
 
 import mechanics.analysis.EnergyAnalyzer;
 import mechanics.buff.BuffId;
+import mechanics.element.ResonanceManager;
+import mechanics.formula.DamageCalculator;
 import mechanics.formula.ResistanceCalculator;
 import mechanics.reaction.ReactionCalculator;
 import mechanics.reaction.ReactionResult;
@@ -84,6 +86,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ColumbinaStandInBoundaries();
         testAccuracyPhaseF_ArtifactLunarReactionBuffRegression();
         testAccuracyPhaseF_WeaponReactionBonusRegression();
+        testAccuracyPhaseF_DendroResonanceReactionEmContract();
         testAccuracyPhaseF_SucroseNoIcdApplicationContract();
         testAccuracyPhaseF_XianglingChiliPickupOptIn();
         testAccuracyPhaseF_XingqiuOrbitalApplicationCadence();
@@ -1614,6 +1617,85 @@ public class ReactionRegressionTest {
                 "Sunny Morning Sleep-In should grant EM only after owner-triggered Swirl");
     }
 
+    private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
+        ReactionResult.Kind[] primaryKinds = {
+                ReactionResult.Kind.BURNING,
+                ReactionResult.Kind.QUICKEN,
+                ReactionResult.Kind.BLOOM,
+                ReactionResult.Kind.LUNAR_BLOOM
+        };
+        for (ReactionResult.Kind kind : primaryKinds) {
+            assertSprawlingGreeneryTrigger(kind, 80.0);
+        }
+
+        ReactionResult.Kind[] secondaryKinds = {
+                ReactionResult.Kind.AGGRAVATE,
+                ReactionResult.Kind.SPREAD,
+                ReactionResult.Kind.HYPERBLOOM,
+                ReactionResult.Kind.BURGEON
+        };
+        for (ReactionResult.Kind kind : secondaryKinds) {
+            assertSprawlingGreeneryTrigger(kind, 70.0);
+        }
+        assertSprawlingGreeneryTrigger(ReactionResult.Kind.VAPORIZE, 50.0);
+
+        TestCharacter owner = testCharacter(Element.DENDRO, CharacterId.SUCROSE);
+        CombatSimulator independentSim = simulatorWith(owner);
+        independentSim.addCharacter(testCharacter(Element.DENDRO, CharacterId.XIANGLING));
+        ResonanceManager.applyResonances(independentSim);
+        assertClose(50.0, resolvedElementalMastery(independentSim, owner), EPS,
+                "Dendro resonance should retain its permanent 50 EM base");
+
+        independentSim.notifyReaction(
+                ReactionResult.state("Quicken", ReactionResult.Kind.QUICKEN, null), owner);
+        assertClose(80.0, resolvedElementalMastery(independentSim, owner), EPS,
+                "Dendro primary reaction should add 30 EM");
+        independentSim.advanceTime(3.0);
+        independentSim.notifyReaction(
+                ReactionResult.additive(0.0, "Aggravate", ReactionResult.Kind.AGGRAVATE, Element.ELECTRO), owner);
+        assertClose(100.0, resolvedElementalMastery(independentSim, owner), EPS,
+                "Dendro primary and secondary reaction buffs should stack independently");
+        independentSim.advanceTime(3.0);
+        assertClose(70.0, resolvedElementalMastery(independentSim, owner), EPS,
+                "Dendro primary buff should expire exactly six seconds after its trigger");
+        independentSim.advanceTime(3.0);
+        assertClose(50.0, resolvedElementalMastery(independentSim, owner), EPS,
+                "Dendro secondary buff should expire on its independent boundary");
+
+        TestCharacter refreshOwner = testCharacter(Element.DENDRO, CharacterId.SUCROSE);
+        CombatSimulator refreshSim = simulatorWith(refreshOwner);
+        refreshSim.addCharacter(testCharacter(Element.DENDRO, CharacterId.XIANGLING));
+        ResonanceManager.applyResonances(refreshSim);
+        refreshSim.notifyReaction(ReactionResult.transform(0.0, "Bloom", ReactionResult.Kind.BLOOM), refreshOwner);
+        refreshSim.advanceTime(5.0);
+        refreshSim.notifyReaction(ReactionResult.lunar(0.0, ReactionResult.LunarType.BLOOM), refreshOwner);
+        assertClose(80.0, resolvedElementalMastery(refreshSim, refreshOwner), EPS,
+                "Repeated primary triggers should refresh at 30 EM without stacking");
+        refreshSim.advanceTime(1.0);
+        assertClose(80.0, resolvedElementalMastery(refreshSim, refreshOwner), EPS,
+                "Lunar-Bloom should refresh the primary buff beyond its original expiry");
+        refreshSim.advanceTime(5.0);
+        assertClose(50.0, resolvedElementalMastery(refreshSim, refreshOwner), EPS,
+                "Refreshed primary buff should expire at its replacement boundary");
+    }
+
+    private static void assertSprawlingGreeneryTrigger(ReactionResult.Kind kind, double expectedEm) {
+        TestCharacter owner = testCharacter(Element.DENDRO, CharacterId.SUCROSE);
+        CombatSimulator sim = simulatorWith(owner);
+        sim.addCharacter(testCharacter(Element.DENDRO, CharacterId.XIANGLING));
+        ResonanceManager.applyResonances(sim);
+        sim.notifyReaction(ReactionResult.transform(0.0, kind.name(), kind), owner);
+        assertClose(expectedEm, resolvedElementalMastery(sim, owner), EPS,
+                "Unexpected Sprawling Greenery EM for " + kind);
+    }
+
+    private static double resolvedElementalMastery(CombatSimulator sim, Character character) {
+        AttackAction probe = damageHit("Resonance stat probe", Element.PHYSICAL, 0.0);
+        return DamageCalculator.resolveStats(
+                character, probe, sim.getApplicableBuffs(character), sim.getCurrentTime())
+                .get(StatType.ELEMENTAL_MASTERY);
+    }
+
     private static void testAccuracyPhaseF_SucroseNoIcdApplicationContract() {
         model.character.Sucrose skillSucrose = new model.character.Sucrose(new TestWeapon(), blankArtifact());
         CombatSimulator skillSim = simulatorWithExistingCharacter(skillSucrose);
@@ -1774,6 +1856,10 @@ public class ReactionRegressionTest {
         return new TestCharacter(element);
     }
 
+    private static TestCharacter testCharacter(Element element, CharacterId characterId) {
+        return new TestCharacter(element, characterId);
+    }
+
     private static CombatSimulator simulatorWith(TestCharacter character) {
         CombatSimulator sim = new CombatSimulator();
         sim.setLoggingEnabled(false);
@@ -1841,8 +1927,12 @@ public class ReactionRegressionTest {
 
     private static final class TestCharacter extends Character {
         private TestCharacter(Element element) {
+            this(element, CharacterId.SUCROSE);
+        }
+
+        private TestCharacter(Element element, CharacterId characterId) {
             this.name = "Reaction Tester";
-            this.characterId = CharacterId.SUCROSE;
+            this.characterId = characterId;
             this.element = element;
             this.weapon = new TestWeapon();
             this.artifacts = new ArtifactSet[0];

@@ -117,6 +117,10 @@ public enum BuffId {
     ENDURING_ROCK,
     /** 元素共鳴「繁茂の草」(草草): 元素熟知 +50 ほか。 */
     SPRAWLING_GREENERY,
+    /** 繁茂の草: 燃焼・原激化・開花系による 6 秒間の元素熟知 +30。 */
+    SPRAWLING_GREENERY_PRIMARY_REACTION,
+    /** 繁茂の草: 超激化・草激化・超開花・烈開花による 6 秒間の元素熟知 +20。 */
+    SPRAWLING_GREENERY_SECONDARY_REACTION,
     /** 元素共鳴「迅速の風」(風風): 移動速度+, スタミナ消費 -15%, クールタイム短縮。 */
     IMPETUOUS_WINDS
 }

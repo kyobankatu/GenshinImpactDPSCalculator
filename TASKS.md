@@ -1899,7 +1899,7 @@ Completion evidence:
 Status:
 
 - In progress.
-- Phase 1 is complete; Phases 2-3 remain.
+- Phases 1-2 are complete; Phase 3 remains.
 - Requirement: Sprawling Greenery must grant permanent +50 EM and independently
   refreshed +30/+20 EM windows for their documented reaction groups.
 
@@ -1964,7 +1964,7 @@ Verification:
 - inspect `ResonanceManager` and `ReactionResult.Kind`
 - `python scripts/preflight.py --run`
 
-### Phase 2: Implement Independent Reaction EM Windows
+### Phase 2: Implement Independent Reaction EM Windows - Done
 
 Why second:
 

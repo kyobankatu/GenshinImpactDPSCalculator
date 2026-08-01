@@ -158,13 +158,12 @@ public class ResonanceManager {
 
             case DENDRO:
                 if (sim.isLoggingEnabled()) {
-                    System.out.println("   [Resonance] Sprawling Greenery (Dendro) Applied (+50 EM)");
+                    System.out.println("   [Resonance] Sprawling Greenery (Dendro) Applied (+50 EM, reaction buffs)");
                 }
                 sim.applyTeamBuff(new SimpleBuff("Sprawling Greenery", BuffId.SPRAWLING_GREENERY, 99999, 0, stats -> {
                     stats.add(StatType.ELEMENTAL_MASTERY, 50.0);
-                    // Note: Specific reactions give more EM (30/20). Ignoring for base
-                    // implementation.
                 }));
+                registerSprawlingGreeneryReactionBuffs(sim);
                 break;
 
             case ANEMO:
@@ -200,5 +199,56 @@ public class ResonanceManager {
             default:
                 break;
         }
+    }
+
+    /**
+     * Registers the two independently refreshed Sprawling Greenery reaction buffs.
+     *
+     * @param sim simulator whose reaction bus and team buffs receive the resonance effects
+     */
+    private static void registerSprawlingGreeneryReactionBuffs(CombatSimulator sim) {
+        sim.addReactionListener((result, source, time, activeSim) -> {
+            if (isSprawlingGreeneryPrimaryReaction(result.getKind())) {
+                activeSim.applyTeamBuffNoStack(new SimpleBuff(
+                        "Sprawling Greenery: Primary Reaction",
+                        BuffId.SPRAWLING_GREENERY_PRIMARY_REACTION,
+                        6.0,
+                        time,
+                        stats -> stats.add(StatType.ELEMENTAL_MASTERY, 30.0)));
+            } else if (isSprawlingGreenerySecondaryReaction(result.getKind())) {
+                activeSim.applyTeamBuffNoStack(new SimpleBuff(
+                        "Sprawling Greenery: Secondary Reaction",
+                        BuffId.SPRAWLING_GREENERY_SECONDARY_REACTION,
+                        6.0,
+                        time,
+                        stats -> stats.add(StatType.ELEMENTAL_MASTERY, 20.0)));
+            }
+        });
+    }
+
+    /**
+     * Returns whether a reaction grants the six-second 30 EM resonance buff.
+     *
+     * @param kind typed reaction kind
+     * @return {@code true} for Burning, Quicken, Bloom, or Lunar-Bloom
+     */
+    private static boolean isSprawlingGreeneryPrimaryReaction(ReactionResult.Kind kind) {
+        return kind == ReactionResult.Kind.BURNING
+                || kind == ReactionResult.Kind.QUICKEN
+                || kind == ReactionResult.Kind.BLOOM
+                || kind == ReactionResult.Kind.LUNAR_BLOOM;
+    }
+
+    /**
+     * Returns whether a reaction grants the six-second 20 EM resonance buff.
+     *
+     * @param kind typed reaction kind
+     * @return {@code true} for Aggravate, Spread, Hyperbloom, or Burgeon
+     */
+    private static boolean isSprawlingGreenerySecondaryReaction(ReactionResult.Kind kind) {
+        return kind == ReactionResult.Kind.AGGRAVATE
+                || kind == ReactionResult.Kind.SPREAD
+                || kind == ReactionResult.Kind.HYPERBLOOM
+                || kind == ReactionResult.Kind.BURGEON;
     }
 }
