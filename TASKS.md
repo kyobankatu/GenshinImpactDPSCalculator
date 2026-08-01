@@ -11418,8 +11418,8 @@ Completion evidence:
 
 ## Implementation Order: Standard Electro-Charged Damage Cooldown
 
-Status: Phase 1 is complete. Phase 2 will add a snapshot-safe standard
-Electro-Charged target damage cooldown across sequence boundaries.
+Status: Phases 1-2 are complete. The snapshot-safe standard Electro-Charged
+target damage cooldown is implemented; Phase 3 will accept catalog baselines.
 
 Scope:
 
@@ -11495,7 +11495,7 @@ Completion evidence:
 - Current B-056 local `lastDamageTime` is discarded when its event finishes, so
   a new sequence can bypass the prior target damage boundary.
 
-### Phase 2: Implement Snapshot-Safe Standard EC Damage Cooldown - Pending
+### Phase 2: Implement Snapshot-Safe Standard EC Damage Cooldown - Done
 
 Why second:
 
@@ -11545,6 +11545,27 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - routed validation/preflight planning without RL execution
+
+Completion evidence:
+
+- `ReactionState` owns a 0.5-second target cooldown end and last successful
+  standard EC damage time. Controller/facade methods inject simulator time and
+  snapshots round-trip both primitives independently of the typed owner payload.
+- A new sequence checks the target cooldown before scheduling. Blocked damage
+  still retains prior notification, source Aura application, latest owner/EM
+  payload, and a timer starting one second from the new sequence.
+- Nominal and premature timer ticks share the same target policy. Only accepted
+  damage records a tick, advances last-success time, and consumes 0.4U from both
+  Auras; blocked attempts leave the cooldown and both gauges unchanged.
+- Focused regression covers a restart at 0.4 seconds after the prior tick,
+  exact 0.5-second acceptance, unchanged notification/Aura/owner/timer effects,
+  restart-relative next-tick timing, blocked nominal gauge consumption, and
+  snapshot pre/exact replay.
+- B-056 premature expiry, B-069 owner/EM attribution, B-048 live RES, and Lunar
+  fixed-cadence regressions continue to pass.
+- `./gradlew ReactionRegressionTest`, `./gradlew build`, and `./gradlew javadoc`
+  pass. Routed validation reports no leaks; RL-routed catalog/rollout checks were
+  not run under this session's explicit simulator-only boundary.
 
 ### Phase 3: Accept Standard EC Cooldown Catalog Baselines - Pending
 

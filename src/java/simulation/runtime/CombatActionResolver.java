@@ -492,6 +492,25 @@ public class CombatActionResolver {
             return;
         }
 
+        if (result.getKind() == ReactionResult.Kind.ELECTRO_CHARGED) {
+            boolean damageAccepted =
+                    sim.tryStartStandardElectroChargedDamageCooldown();
+            reactionEffectScheduler.scheduleElectroCharged(
+                    characterId,
+                    trigger,
+                    action.getGaugeUnits(),
+                    preResistanceDamage,
+                    false);
+            if (!damageAccepted) {
+                if (sim.isLoggingEnabled()) {
+                    System.out.println(String.format(
+                            "   [Reaction] %s on %s -> %s Damage blocked (target cooldown)",
+                            trigger, aura, reactionLabel));
+                }
+                return;
+            }
+        }
+
         if (sim.isLoggingEnabled()) {
             System.out.println(String.format(
                     "   [Reaction] %s on %s -> %s Damage: %,.0f",
@@ -505,13 +524,13 @@ public class CombatActionResolver {
                     reactionLabel, triggerDmg, sim.getEnemy().getAuraMap(sim.getCurrentTime()));
         }
 
-        if (result.isElectroCharged()) {
+        if (isLunar) {
             reactionEffectScheduler.scheduleElectroCharged(
                     characterId,
                     trigger,
                     action.getGaugeUnits(),
                     preResistanceDamage,
-                    isLunar);
+                    true);
         }
     }
 

@@ -74,6 +74,8 @@ public class SimulatorSnapshot {
     public final boolean ecTimerRunning;
     public final ReactionState.StandardElectroChargedState
             standardElectroChargedState;
+    public final double standardElectroChargedDamageCooldownEndTime;
+    public final double standardElectroChargedLastDamageTime;
     public final double thundercloudEndTime;
     public final boolean burningTimerRunning;
     public final double burningEndTime;
@@ -129,6 +131,8 @@ public class SimulatorSnapshot {
      * @param icdStates          ICD group states
      * @param ecTimerRunning     EC timer flag
      * @param standardElectroChargedState latest standard EC tick payload
+     * @param standardElectroChargedDamageCooldownEndTime standard EC target cooldown end
+     * @param standardElectroChargedLastDamageTime last successful standard EC damage time
      * @param thundercloudEndTime thundercloud expiry time
      * @param burningTimerRunning Burning timer flag
      * @param burningEndTime compatibility Burning expiry time
@@ -168,6 +172,8 @@ public class SimulatorSnapshot {
             Map<String, double[]> icdStates,
             boolean ecTimerRunning,
             ReactionState.StandardElectroChargedState standardElectroChargedState,
+            double standardElectroChargedDamageCooldownEndTime,
+            double standardElectroChargedLastDamageTime,
             double thundercloudEndTime,
             boolean burningTimerRunning,
             double burningEndTime,
@@ -207,6 +213,10 @@ public class SimulatorSnapshot {
         this.icdStates = icdStates;
         this.ecTimerRunning = ecTimerRunning;
         this.standardElectroChargedState = standardElectroChargedState;
+        this.standardElectroChargedDamageCooldownEndTime =
+                standardElectroChargedDamageCooldownEndTime;
+        this.standardElectroChargedLastDamageTime =
+                standardElectroChargedLastDamageTime;
         this.thundercloudEndTime = thundercloudEndTime;
         this.burningTimerRunning = burningTimerRunning;
         this.burningEndTime = burningEndTime;

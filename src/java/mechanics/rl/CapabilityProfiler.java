@@ -935,6 +935,8 @@ public class CapabilityProfiler {
                 activePostSubject.icdStates,
                 activePostSubject.ecTimerRunning,
                 activePostSubject.standardElectroChargedState,
+                activePostSubject.standardElectroChargedDamageCooldownEndTime,
+                activePostSubject.standardElectroChargedLastDamageTime,
                 activePostSubject.thundercloudEndTime,
                 activePostSubject.burningTimerRunning,
                 activePostSubject.burningEndTime,

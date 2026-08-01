@@ -776,6 +776,10 @@ public class CombatSimulator {
         simulation.runtime.ReactionState.StandardElectroChargedState
                 standardElectroChargedState =
                 reactionState.getStandardElectroChargedState();
+        double standardElectroChargedDamageCooldownEndTime =
+                reactionState.getStandardElectroChargedDamageCooldownEndTime();
+        double standardElectroChargedLastDamageTime =
+                reactionState.getStandardElectroChargedLastDamageTime();
         double thundercloudEndTime = reactionState.getThundercloudEndTime();
         boolean burningTimerRunning = reactionState.isBurningTimerRunning();
         double burningEndTime = reactionState.getBurningEndTime();
@@ -852,6 +856,8 @@ public class CombatSimulator {
                 totalDamage, damageBySource,
                 lastSwapTime, activeCharacterId, currentMoonsign,
                 icdStates, ecTimerRunning, standardElectroChargedState,
+                standardElectroChargedDamageCooldownEndTime,
+                standardElectroChargedLastDamageTime,
                 thundercloudEndTime, burningTimerRunning, burningEndTime,
                 burningState, nextBurningGeneration,
                 quickenEndTime, quickenState,
@@ -899,6 +905,9 @@ public class CombatSimulator {
         reactionState.setEcTimerRunning(snap.ecTimerRunning);
         reactionState.restoreStandardElectroChargedState(
                 snap.standardElectroChargedState);
+        reactionState.restoreStandardElectroChargedDamageCooldown(
+                snap.standardElectroChargedDamageCooldownEndTime,
+                snap.standardElectroChargedLastDamageTime);
         reactionState.setThundercloudEndTime(snap.thundercloudEndTime);
         reactionState.restoreBurning(snap.burningState, snap.nextBurningGeneration);
         if (snap.burningState == null) {
@@ -1017,6 +1026,23 @@ public class CombatSimulator {
     /** Clears the standard Electro-Charged tick payload. */
     public void clearStandardElectroChargedState() {
         reactionStateController.clearStandardElectroChargedState();
+    }
+
+    /** Attempts to accept target-wide standard Electro-Charged damage. */
+    public boolean tryStartStandardElectroChargedDamageCooldown() {
+        return reactionStateController
+                .tryStartStandardElectroChargedDamageCooldown();
+    }
+
+    /** Returns the standard Electro-Charged target cooldown end time. */
+    public double getStandardElectroChargedDamageCooldownEndTime() {
+        return reactionStateController
+                .getStandardElectroChargedDamageCooldownEndTime();
+    }
+
+    /** Returns the last successful standard Electro-Charged damage time. */
+    public double getStandardElectroChargedLastDamageTime() {
+        return reactionStateController.getStandardElectroChargedLastDamageTime();
     }
 
     /**

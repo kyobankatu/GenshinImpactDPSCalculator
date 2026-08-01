@@ -71,6 +71,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseA_ElectroChargedCoexistence();
         testAccuracyPhaseA_ElectroChargedPrematureExpiry();
         testAccuracyPhaseA_ElectroChargedRefreshOwnership();
+        testAccuracyPhaseA_ElectroChargedDamageCooldown();
         testAccuracyPhaseA_QuickenCoexistsWithDendroFollowup();
         testAccuracyPhaseB_StandardIcdThreeHitRule();
         testAccuracyPhaseB_StandardIcdTimeRule();
@@ -2248,6 +2249,111 @@ public class ReactionRegressionTest {
                 "Snapshot restore should recover the latest standard EC owner");
         assertClose(refreshDamage / 0.9, restoredState.preResistanceDamage, 0.5,
                 "Snapshot restore should recover the standard EC damage payload");
+    }
+
+    private static void testAccuracyPhaseA_ElectroChargedDamageCooldown() {
+        CombatSimulator blocked = expiredElectroChargedSequenceFixture();
+        List<ReactionResult.Kind> blockedReactions = new ArrayList<>();
+        blocked.addReactionListener((result, source, time, simulator) ->
+                blockedReactions.add(result.getKind()));
+        blocked.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING,
+                reactionHit("Blocked standard EC sequence restart", Element.HYDRO));
+        assertClose(900.0, blocked.getTotalDamage(), EPS,
+                "A sequence restart before target cooldown expiry should deal no damage");
+        assertEquals(1, blockedReactions.size(),
+                "A cooldown-blocked sequence restart should still notify");
+        assertEquals(ReactionResult.Kind.ELECTRO_CHARGED,
+                blockedReactions.get(0),
+                "A cooldown-blocked restart should retain the EC reaction kind");
+        assertTrue(blocked.isECTimerRunning(),
+                "A cooldown-blocked restart should still start its periodic timer");
+        assertEquals(CharacterId.XIANGLING,
+                blocked.getStandardElectroChargedState().ownerId,
+                "A cooldown-blocked restart should still update tick ownership");
+        assertTrue(blocked.getEnemy().getAuraUnits(
+                        Element.HYDRO, blocked.getCurrentTime()) > 0.0,
+                "A cooldown-blocked restart should still apply Hydro Aura");
+        assertClose(1.5,
+                blocked.getStandardElectroChargedDamageCooldownEndTime(), EPS,
+                "Blocked damage should not refresh the prior target cooldown");
+        blocked.advanceTime(0.6);
+        assertClose(900.0, blocked.getTotalDamage(), EPS,
+                "A blocked restart should schedule its next tick from restart time");
+
+        CombatSimulator exact = expiredElectroChargedSequenceFixture();
+        exact.advanceTime(0.1);
+        exact.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING,
+                reactionHit("Exact standard EC sequence restart", Element.HYDRO));
+        assertClose(900.0 + expectedTransformative(
+                        2.0, Element.ELECTRO, 0.0),
+                exact.getTotalDamage(), 0.5,
+                "A sequence restart at exactly 0.5 seconds should deal damage");
+
+        CombatSimulator noConsumption = simulatorWith(
+                testCharacter(Element.ELECTRO));
+        ReactionEffectScheduler scheduler =
+                new ReactionEffectScheduler(noConsumption);
+        noConsumption.getEnemy().setAura(
+                Element.HYDRO, 4.0, noConsumption.getCurrentTime());
+        scheduler.scheduleElectroCharged(
+                CharacterId.SUCROSE, Element.ELECTRO, 4.0, 1000.0, false);
+        noConsumption.advanceTime(0.75);
+        assertTrue(noConsumption.tryStartStandardElectroChargedDamageCooldown(),
+                "Cooldown fixture should accept its synthetic damage at 0.75 seconds");
+        double hydroBefore = noConsumption.getEnemy().getAuraUnits(
+                Element.HYDRO, noConsumption.getCurrentTime());
+        double electroBefore = noConsumption.getEnemy().getAuraUnits(
+                Element.ELECTRO, noConsumption.getCurrentTime());
+        double hydroDecayRate = noConsumption.getEnemy().getAuraDecayRate(
+                Element.HYDRO, noConsumption.getCurrentTime());
+        double electroDecayRate = noConsumption.getEnemy().getAuraDecayRate(
+                Element.ELECTRO, noConsumption.getCurrentTime());
+        noConsumption.advanceTime(0.25);
+        assertClose(0.0, noConsumption.getTotalDamage(), EPS,
+                "A nominal EC tick inside the target cooldown should deal no damage");
+        assertClose(hydroBefore - hydroDecayRate * 0.25,
+                noConsumption.getEnemy().getAuraUnits(
+                        Element.HYDRO, noConsumption.getCurrentTime()), EPS,
+                "A blocked EC tick should not consume Hydro beyond natural decay");
+        assertClose(electroBefore - electroDecayRate * 0.25,
+                noConsumption.getEnemy().getAuraUnits(
+                        Element.ELECTRO, noConsumption.getCurrentTime()), EPS,
+                "A blocked EC tick should not consume Electro beyond natural decay");
+
+        CombatSimulator snapshotSim = simulatorWith(
+                testCharacter(Element.ELECTRO));
+        assertTrue(snapshotSim.tryStartStandardElectroChargedDamageCooldown(),
+                "Snapshot fixture should accept initial standard EC damage");
+        SimulatorSnapshot snapshot = snapshotSim.saveSnapshot();
+        snapshotSim.advanceTime(0.499);
+        assertTrue(!snapshotSim.tryStartStandardElectroChargedDamageCooldown(),
+                "Snapshot fixture should block immediately before reset");
+        snapshotSim.restoreSnapshot(snapshot);
+        assertClose(0.0, snapshotSim.getStandardElectroChargedLastDamageTime(), EPS,
+                "Snapshot restore should recover the last successful EC damage time");
+        snapshotSim.advanceTime(0.5);
+        assertTrue(snapshotSim.tryStartStandardElectroChargedDamageCooldown(),
+                "Snapshot-restored EC cooldown should accept the exact boundary");
+    }
+
+    private static CombatSimulator expiredElectroChargedSequenceFixture() {
+        CombatSimulator sim = simulatorWith(testCharacter(
+                Element.ELECTRO, CharacterId.SUCROSE));
+        sim.addCharacter(testCharacter(Element.HYDRO, CharacterId.XIANGLING));
+        ReactionEffectScheduler scheduler = new ReactionEffectScheduler(sim);
+        sim.getEnemy().setAura(Element.HYDRO, 0.48, sim.getCurrentTime());
+        scheduler.scheduleElectroCharged(
+                CharacterId.SUCROSE, Element.ELECTRO, 4.0, 1000.0, false);
+        sim.advanceTime(1.4);
+        assertClose(900.0, sim.getTotalDamage(), EPS,
+                "Expired-sequence fixture should contain one nominal EC tick");
+        assertTrue(!sim.isECTimerRunning(),
+                "Expired-sequence fixture should finish before restart");
+        assertClose(1.0, sim.getStandardElectroChargedLastDamageTime(), EPS,
+                "Expired-sequence fixture should retain its last successful tick time");
+        return sim;
     }
 
     private static void testAccuracyPhaseA_QuickenCoexistsWithDendroFollowup() {

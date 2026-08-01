@@ -190,8 +190,12 @@ public class ReactionEffectScheduler {
 
     private TimerEvent createStandardElectroChargedTickEvent() {
         return new TimerEvent() {
-            private double lastDamageTime = sim.getCurrentTime();
-            private double nominalTickTime = lastDamageTime + STANDARD_EC_TICK_INTERVAL;
+            private double lastDamageTime =
+                    sim.getStandardElectroChargedLastDamageTime() >= 0.0
+                            ? sim.getStandardElectroChargedLastDamageTime()
+                            : sim.getCurrentTime();
+            private double nominalTickTime =
+                    sim.getCurrentTime() + STANDARD_EC_TICK_INTERVAL;
             private double nextTick = getNextStandardElectroChargedWake(nominalTickTime);
             private boolean finished = false;
 
@@ -209,8 +213,11 @@ public class ReactionEffectScheduler {
 
                 if (!hydroActive || !electroActive) {
                     if (currentTime - lastDamageTime
-                            > STANDARD_EC_PREMATURE_TICK_THRESHOLD + TIMING_EPSILON) {
+                            > STANDARD_EC_PREMATURE_TICK_THRESHOLD + TIMING_EPSILON
+                            && simContext
+                                    .tryStartStandardElectroChargedDamageCooldown()) {
                         recordStandardElectroChargedTick(state);
+                        lastDamageTime = currentTime;
                         simContext.getEnemy().reduceAura(Element.HYDRO, 0.4, currentTime);
                         simContext.getEnemy().reduceAura(Element.ELECTRO, 0.4, currentTime);
                     }
@@ -223,10 +230,12 @@ public class ReactionEffectScheduler {
                     return;
                 }
 
-                recordStandardElectroChargedTick(state);
-                lastDamageTime = currentTime;
-                simContext.getEnemy().reduceAura(Element.HYDRO, 0.4, currentTime);
-                simContext.getEnemy().reduceAura(Element.ELECTRO, 0.4, currentTime);
+                if (simContext.tryStartStandardElectroChargedDamageCooldown()) {
+                    recordStandardElectroChargedTick(state);
+                    lastDamageTime = currentTime;
+                    simContext.getEnemy().reduceAura(Element.HYDRO, 0.4, currentTime);
+                    simContext.getEnemy().reduceAura(Element.ELECTRO, 0.4, currentTime);
+                }
 
                 hydroActive = simContext.getEnemy().getAuraUnits(Element.HYDRO, currentTime) > 0.0;
                 electroActive = simContext.getEnemy().getAuraUnits(Element.ELECTRO, currentTime) > 0.0;

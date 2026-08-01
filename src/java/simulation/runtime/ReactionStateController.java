@@ -169,6 +169,29 @@ public class ReactionStateController {
         reactionState.restoreStandardElectroChargedState(state);
     }
 
+    /** Attempts to accept standard Electro-Charged target damage. */
+    public boolean tryStartStandardElectroChargedDamageCooldown() {
+        return reactionState.tryStartStandardElectroChargedDamageCooldown(
+                sim.getCurrentTime());
+    }
+
+    /** Returns the standard Electro-Charged target cooldown end time. */
+    public double getStandardElectroChargedDamageCooldownEndTime() {
+        return reactionState.getStandardElectroChargedDamageCooldownEndTime();
+    }
+
+    /** Returns the last successful standard Electro-Charged damage time. */
+    public double getStandardElectroChargedLastDamageTime() {
+        return reactionState.getStandardElectroChargedLastDamageTime();
+    }
+
+    /** Restores standard Electro-Charged target damage timing. */
+    public void restoreStandardElectroChargedDamageCooldown(
+            double cooldownEndTime, double lastDamageTime) {
+        reactionState.restoreStandardElectroChargedDamageCooldown(
+                cooldownEndTime, lastDamageTime);
+    }
+
     /**
      * Returns whether Thundercloud is active at the current time.
      *

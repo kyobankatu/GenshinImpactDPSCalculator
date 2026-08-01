@@ -20,6 +20,7 @@ public class ReactionState {
     private static final double SHATTER_OWNER_SEQUENCE_WINDOW = 0.5;
     private static final int SHATTER_OWNER_DAMAGE_LIMIT = 2;
     private static final double STANDARD_CRYSTALLIZE_COOLDOWN = 1.0;
+    private static final double STANDARD_EC_DAMAGE_COOLDOWN = 0.5;
     /** Immutable consumable Quicken Aura payload. */
     public static final class QuickenState {
         /** Quicken gauge present at {@link #lastUpdateTime}. */
@@ -164,6 +165,8 @@ public class ReactionState {
 
     private boolean ecTimerRunning = false;
     private StandardElectroChargedState standardElectroChargedState;
+    private double standardElectroChargedDamageCooldownEndTime = -1.0;
+    private double standardElectroChargedLastDamageTime = -1.0;
     private double thundercloudEndTime = -1.0;
     private boolean burningTimerRunning = false;
     private double burningEndTime = -1.0;
@@ -482,6 +485,39 @@ public class ReactionState {
         }
         updateStandardElectroChargedState(
                 state.ownerId, state.preResistanceDamage);
+    }
+
+    /** Attempts to accept target-wide standard Electro-Charged damage. */
+    public boolean tryStartStandardElectroChargedDamageCooldown(
+            double currentTime) {
+        if (!Double.isFinite(currentTime)
+                || currentTime + TIMING_EPSILON
+                        < standardElectroChargedDamageCooldownEndTime) {
+            return false;
+        }
+        standardElectroChargedDamageCooldownEndTime =
+                currentTime + STANDARD_EC_DAMAGE_COOLDOWN;
+        standardElectroChargedLastDamageTime = currentTime;
+        return true;
+    }
+
+    /** Returns the standard Electro-Charged target cooldown end time. */
+    public double getStandardElectroChargedDamageCooldownEndTime() {
+        return standardElectroChargedDamageCooldownEndTime;
+    }
+
+    /** Returns the last successful standard Electro-Charged damage time. */
+    public double getStandardElectroChargedLastDamageTime() {
+        return standardElectroChargedLastDamageTime;
+    }
+
+    /** Restores standard Electro-Charged target damage timing. */
+    public void restoreStandardElectroChargedDamageCooldown(
+            double cooldownEndTime, double lastDamageTime) {
+        standardElectroChargedDamageCooldownEndTime =
+                Double.isFinite(cooldownEndTime) ? cooldownEndTime : -1.0;
+        standardElectroChargedLastDamageTime =
+                Double.isFinite(lastDamageTime) ? lastDamageTime : -1.0;
     }
 
     /**
