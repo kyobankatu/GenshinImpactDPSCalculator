@@ -1668,14 +1668,14 @@ experiment record.
 
 ### B-062 — Simultaneous Aura reaction order depends on HashSet iteration
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 3 (B-061 control diff plus maintained gcsim reaction order)
 - Symptom: `Enemy.getActiveAuras` returns a `HashSet`, so adding unrelated fields
   changed Pyro-on-Hydro+Electro and Anemo-on-Hydro+Electro log order between
   builds. B-060 itself used different order for FlinsParty and FlinsParty2.
 - Scope: trigger-specific deterministic single-target Aura reaction priority,
   dual-Aura order regressions, and catalog baseline re-acceptance
-- Risk: `planned`
+- Risk: `validated`
 - Proof: explicit order for every supported trigger, stable logs across fresh JVM
   processes, unchanged reaction values, and documented unresolved residual rules
 - Notes: gcsim's maintained `React` dispatcher orders Electro, Pyro, Cryo,
@@ -1686,3 +1686,8 @@ experiment record.
   https://github.com/genshinsim/gcsim/blob/main/pkg/reactable/reactable.go.
   Do not infer trigger residual attachment or Frozen/Burning synthetic Aura
   priority in this item; order only already-supported ordinary Aura reactions.
+  Completed with a pure typed `ReactionPriority` policy and resolver routing
+  independent of target storage. Regression covers all seven elemental trigger
+  lists, stable Physical/same-element fallback, Pyro Overload-before-Vaporize,
+  and Anemo Electro-before-Hydro Swirl. Six fresh-JVM controls are pairwise
+  exact, retain every B-061 value/ER/count, and contain zero warning lines.

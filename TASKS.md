@@ -10550,7 +10550,7 @@ Completion evidence:
 - `ReactionRegressionTest`, `build`, `javadoc`, routed validation, and full
   preflight pass without persistent service or external job.
 
-### Phase 3: Accept Deterministic Priority Baselines - In Progress
+### Phase 3: Accept Deterministic Priority Baselines - Done
 
 Target files:
 
@@ -10582,6 +10582,25 @@ Verification:
 - two fresh `./gradlew --no-daemon FlinsParty` runs
 - two fresh `./gradlew --no-daemon FlinsParty2` runs
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Two fresh no-daemon runs per catalog party are byte-identical after removing
+  only Gradle's elapsed-success line: Raiden
+  `bbd1c4f61f00024213e1c6f49519fe7abe0ad568c8dacf4c562437e5e6b59abc`,
+  Flins `9b0b3556ca8f4eb799e6965156aab3bc70e512c7056cdf7e0202572c3996e464`,
+  and Flins2
+  `23dc585acc02d3bd7bca7fe3f5b65db62b3e1489fcedb12a02b9725b774b7dd4`.
+- Totals/DPS remain 1,365,787/65,037, 22,675,823/227,898, and
+  15,817,125/228,902. ER and timed/reaction/delayed/ICD counts remain exactly
+  100/175/179/174 with 152/55/11/38, 109/100/100/180 with 613/230/48/88, and
+  130/128/100/196 with 468/140/33/71.
+- Every run contains zero warning/error/failed-action/insufficient-energy lines.
+  Raiden uses Overload before Vaporize; both Flins parties use Electro Swirl
+  before Hydro Swirl, matching the explicit policy and maintained reference.
+- README documents ordinary simultaneous priority and retains synthetic-state,
+  residual, and multi-target exclusions. The tracked report was restored and no
+  generated output is staged.
 
 Completion evidence:
 

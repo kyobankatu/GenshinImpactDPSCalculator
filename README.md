@@ -278,6 +278,10 @@ Elemental Gauge Theory contract:
 - **Discrete consumption**: reactions (Vaporize, Swirl, Electro-Charged ticks,
   Quicken, etc.) consume the decayed *current* value at the reaction time, then
   natural decay resumes from the remaining units.
+- **Simultaneous priority**: ordinary coexisting Auras use an explicit
+  trigger-specific reaction order rather than target-map iteration. For example,
+  Pyro attempts Overload before Vaporize and Anemo attempts Electro Swirl before
+  Hydro Swirl.
 - **Burning fuel**: Pyro-on-Dendro or Pyro-on-Quicken preserves the larger
   current Dendro-like gauge as fuel; Dendro-on-Pyro establishes Dendro fuel
   without consuming underlying Pyro. Burning replaces natural decay for both
