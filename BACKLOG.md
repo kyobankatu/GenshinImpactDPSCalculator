@@ -1599,3 +1599,26 @@ experiment record.
   standard/Lunar core with exact gauge/dew ownership, dual 0.5U consumption,
   and exact-expiry suppression. Six catalog controls retain B-058 hashes,
   values, ER, and cadence with no Quicken/Bloom or warning lines.
+
+### B-060 — Pyro cannot consume Quicken into Burning fuel
+
+- Status: `in-progress`
+- Source: 3 (B-058/B-059 excluded boundary with maintained priority evidence)
+- Symptom: a Quicken-only target is invisible to the ordinary Aura resolver, so
+  Pyro applies without Burning; when Dendro and Quicken coexist, B-058 consumes
+  only Dendro and leaves Quicken untouched.
+- Scope: Quicken-only Pyro Burning, shared Dendro/Quicken special fuel decay,
+  exact depletion/ownership/live-RES regressions, and catalog controls
+- Risk: `planned`
+- Proof: Quicken-only Burning ticks and gauge depletion, coexisting gauge decay,
+  Dendro refresh continuity, exact no-late-tick end, and unchanged party hashes
+- Notes: KQM states Quicken acts as Dendro when reacted with Pyro. The maintained
+  simultaneous-priority reference states that Pyro on Quicken+Dendro triggers
+  Burning and consumes both simultaneously. The advanced gauge reference gives
+  Quicken's current decay and Burning's minimum/doubled-natural special decay;
+  gcsim independently applies the Burning-fuel rate to both Quicken and Dendro.
+  Sources accessed 2026-08-02 are the B-059 URLs plus
+  https://github.com/genshinsim/gcsim/blob/main/pkg/reactable/reactable.go.
+  This pass handles Quicken-only and Dendro+Quicken. Electro/Cryo coexisting
+  reaction priority, a separately consumable Burning Aura, Pyro application,
+  AoE, and hitlag remain separate.

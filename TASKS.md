@@ -5747,6 +5747,159 @@ Acceptance criteria:
 - Plan and ledger agree on the accepted baseline and no generated output is
   staged.
 
+## Implementation Order: Quicken-Fueled Burning
+
+Objective: allow Pyro to start Burning from typed Quicken and make active
+Burning replace natural decay for both coexisting Dendro-like gauges.
+
+Scope:
+
+- Quicken-only Pyro Burning in the single-target resolver.
+- Shared special decay for typed Quicken and ordinary Dendro during Burning.
+- Exact depletion, latest-owner damage, live resistance, and no-late-tick tests.
+- Deterministic catalog-party controls.
+
+Out of scope:
+
+- Electro/Cryo plus Quicken simultaneous priority and trigger residual gauge.
+- The separate 2U Burning Aura, Burning Pyro application ICD, AoE, and hitlag.
+- RL learner/service/protocol changes and persistent jobs.
+
+Cross-cutting rules:
+
+- `CombatActionResolver` only selects a sourced reaction; the scheduler owns
+  special decay and damage cadence; typed state APIs own gauge arithmetic.
+- Derive Burning fuel from the larger current Dendro/Quicken gauge at initial
+  creation; a Dendro refresh retains B-058 overwrite semantics.
+- Replace natural decay, do not add 0.4U/s on top of it; synchronize both gauges
+  once per event interval and emit one damage tick.
+- Keep the Quicken-only synthetic path restricted when other reactive Auras are
+  present; unresolved simultaneous priority remains explicit.
+- Follow source style, explicit staging, and artifact safety rules.
+
+### Phase 1: Record Quicken-Burning Evidence and Event Math - Done
+
+Target files:
+
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Record Quicken-as-Dendro and simultaneous-consumption evidence.
+- Inventory resolver visibility, scheduler fuel selection, event decay, and
+  existing typed state operations.
+- Define the reactive-coexistence exclusion.
+
+Acceptance criteria:
+
+- The plan distinguishes initial fuel selection from later Dendro overwrite.
+- Special decay explicitly replaces each source's natural rate.
+- No behavior changes occur in this phase.
+
+Test cases to add or update:
+
+- No production test; Phase 2 owns focused mechanics.
+
+Verification:
+
+- inspect Quicken/Burning resolver, scheduler, state, priority, and regression paths
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- KQM and the maintained priority reference define Quicken as Dendro for Pyro
+  and require simultaneous Quicken/Dendro consumption. gcsim independently
+  applies one Burning-fuel decay rate to both typed gauges; sources are recorded
+  in B-060.
+- Inventory confirms typed Quicken is absent from resolver Aura iteration and
+  the Burning scheduler currently exits whenever Dendro is absent. Its target-
+  remaining sync also assumes Dendro is the only fuel.
+- The replacement math subtracts only `special rate - natural rate` over each
+  event interval, preventing natural and special decay from being added. Initial
+  fuel uses the larger current gauge while a Dendro refresh retains B-058's
+  overwrite rule.
+- Electro/Cryo coexistence and trigger-residual priority remain explicit
+  exclusions. Documentation preflight passes without routed checks or leaks.
+
+### Phase 2: Consume Quicken as Burning Fuel - Pending
+
+Target files:
+
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/mechanics/reaction/ReactionEffectScheduler.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Trigger Burning for Pyro on typed Quicken when no ordinary Aura competes.
+- Start initial fuel from max(current Dendro, current Quicken); retain Dendro
+  overwrite behavior for Dendro refreshes.
+- On each event wake, subtract only the extra amount needed beyond each gauge's
+  natural decay so both follow the shared special rate.
+- Stop when both fuels deplete and retain latest owner/live resistance.
+
+Acceptance criteria:
+
+- Pyro on 0.8U Quicken starts Burning without immediate damage and produces
+  eight 0.25-second ticks over two seconds while Quicken reaches zero.
+- Equal coexisting Dendro/Quicken gauges both reach zero together with one tick
+  stream; unequal smaller gauge may deplete first while the larger sustains it.
+- Dendro refresh overwrites shared fuel and subsequent dual decay remains
+  deterministic.
+- Exact expiry has no late tick and stale generations remain silent.
+- Existing Dendro-only B-058 and Quicken Bloom/Additive contracts remain exact.
+
+Test cases to add or update:
+
+- Quicken-only: first boundary, eight ticks, exact clear, no ninth tick.
+- Coexistence: equal and unequal gauge depletion under one event.
+- Refresh: Dendro overwrite while Quicken coexists.
+- Dynamic: latest owner, live RES activation/expiry, stale generation.
+- Abnormal: exact-expired Quicken applies ordinary Pyro without Burning.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/mechanics/reaction/ReactionEffectScheduler.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Re-Accept Quicken-Burning-Neutral Baselines - Pending
+
+Target files:
+
+- `README.md`
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Run two no-daemon controls for each catalog party against B-059.
+- Record hashes, values, ER, cadence, warnings, and absence of affected reactions.
+- Update the documented Dendro boundary and close B-060.
+
+Acceptance criteria:
+
+- All six runs match B-059 exactly with no Quicken/Burning events or warnings.
+- Focused and full validation pass; tracked generated report is restored.
+- Plan, ledger, README, and checkpoint agree.
+
+Test cases to add or update:
+
+- Normal: pairwise exact catalog runs.
+- No-change: accepted totals/ER/cadence.
+- Abnormal: no warning or artifact leak.
+
+Verification:
+
+- two fresh `./gradlew RaidenParty` runs
+- two fresh `./gradlew FlinsParty` runs
+- two fresh `./gradlew FlinsParty2` runs
+- `python scripts/preflight.py --run`
+
 ## Implementation Order: Consumable Quicken Aura
 
 Objective: replace Quicken's unconditional expiry timestamp with a typed Aura
