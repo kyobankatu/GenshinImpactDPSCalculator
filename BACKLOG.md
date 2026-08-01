@@ -1987,3 +1987,22 @@ experiment record.
   Sucrose and the party total by 36,413 to 22,639,410 / 227,532; its 172
   immediate Lunar reactions, 48 ticks, optimizer allocation, and ER remain
   unchanged.
+
+### B-072 — Dendro Core damage-cap history survives snapshot rollback
+
+- Status: `in-progress`
+- Source: 4 (snapshot invariant and regression-coverage audit)
+- Symptom: active Dendro Core payloads are snapshotted, but the two-hit/0.5-second
+  damage-cap history remains mutable only inside `ReactionEffectScheduler`.
+  Hits executed after a save therefore remain in the scheduler after restore
+  and can suppress valid Bloom, Hyperbloom, or Burgeon damage on the replayed
+  branch.
+- Scope: reaction-owned core damage history, defensive snapshot round trip,
+  focused branch-replay regression, and deterministic catalog controls
+- Risk: `planned`
+- Proof: save after one accepted core hit, mutate the future branch, restore,
+  accept the replayed second hit, reject only the replayed third hit, accept at
+  the exact 0.5-second boundary, and repeat catalog payloads
+- Notes: this is a simulator rollback correction, not a change to the accepted
+  two-hit/0.5-second game-mechanic policy. See `TASKS.md` implementation block
+  `Dendro Core Damage-Cap Snapshot State`.

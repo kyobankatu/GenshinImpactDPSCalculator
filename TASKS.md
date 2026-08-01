@@ -171,6 +171,9 @@ damage now share a snapshot-safe 0.5-second target cooldown across sequences.
 The B-071 pass is complete. Per-element target and owner Swirl damage sequences
 now retain reaction notification and Aura consumption.
 
+The current B-072 pass makes the existing Dendro Core two-hit damage-cap
+history snapshot-safe so rollback branches cannot retain future hit decisions.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -11418,6 +11421,168 @@ Completion evidence:
   zero Superconduct and warning/error/failed-action/insufficient-energy matches.
 - README documents damage-only sequence behavior. The tracked generated report
   was restored and no generated output is staged.
+
+## Implementation Order: Dendro Core Damage-Cap Snapshot State
+
+Status: Phase 1 is complete. Phase 2 will move the existing Dendro Core
+damage-cap history into snapshot-owned reaction state.
+
+Scope:
+
+- Existing single-target two-hit/0.5-second Dendro Core damage-cap history.
+- One reaction-state owner for decisions, defensive copies, and restore.
+- Snapshot branch replay and deterministic catalog acceptance.
+
+Out of scope for this pass:
+
+- Core creation, consumption count, expiry, damage, ownership, or resistance
+  formulas.
+- Multi-target hit caps, geometry, self-damage, or reaction policy changes.
+- RL behavior, protocol/tensor changes, training, and persistent jobs.
+
+Definitions:
+
+- **Core damage history**: timestamps of accepted Bloom, Hyperbloom, or Burgeon
+  damage instances still active in the target's fixed 0.5-second window.
+
+Cross-cutting rules:
+
+- `ReactionState` owns snapshot-relevant reaction policy; the scheduler only
+  requests a current-time decision.
+- Copy and restore expose no mutable internal list. Invalid, future, and expired
+  timestamps are rejected at the snapshot boundary.
+- The exact 0.5-second boundary remains inclusive. Damage-capped core
+  consumption still removes the configured cores.
+- Preserve explicit staging and generated-artifact safety.
+
+### Phase 1: Record Core-Cap Snapshot Gap - Done
+
+Why first:
+
+- The existing cap policy is correct during a linear run; only rollback state
+  ownership is defective, so the no-change boundary must precede code edits.
+
+Target files:
+
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Inventory core payload, cap-history, save/restore, and profiler forwarding.
+- Define a replay that distinguishes one saved hit from two future hits.
+- Freeze core formulas, consumption behavior, and multi-target exclusions.
+
+Acceptance criteria:
+
+- The missing snapshot field and its observable replay error are explicit.
+- One role owns pruning, hit acceptance, copies, and restore validation.
+- No production behavior changes occur in this phase.
+
+Test cases to add or update:
+
+- No production test; Phase 2 adds the failing branch-replay boundaries.
+
+Verification:
+
+- inspect `ReactionEffectScheduler`, `ReactionState`, `CombatSimulator`,
+  `SimulatorSnapshot`, and existing core regressions
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Active core payloads and identifiers round-trip through `ReactionState`, but
+  accepted damage timestamps are a scheduler-local mutable list omitted from
+  both save and restore.
+- Restoring a snapshot rewinds time, damage, and cores without rebuilding the
+  scheduler, so post-save timestamps remain and incorrectly consume replay cap.
+- The fix will preserve the existing shared two-hit/0.5-second target policy;
+  it changes only branch determinism and snapshot completeness.
+
+### Phase 2: Implement Snapshot-Safe Core Damage History - Pending
+
+Why second:
+
+- Phase 1 fixes ownership and replay semantics before the snapshot constructor
+  and scheduler call site change together.
+
+Target files:
+
+- `src/java/simulation/runtime/ReactionState.java`
+- `src/java/simulation/runtime/ReactionStateController.java`
+- `src/java/simulation/CombatSimulator.java`
+- `src/java/simulation/SimulatorSnapshot.java`
+- `src/java/mechanics/reaction/ReactionEffectScheduler.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `src/java/mechanics/rl/CapabilityProfiler.java` (snapshot forwarding only)
+- `TASKS.md`
+
+Tasks:
+
+- Move cap constants/history/decision into `ReactionState`.
+- Add defensive active-history copy/restore through controller and snapshot.
+- Add actual core-consumption replay and exact-boundary regressions.
+
+Acceptance criteria:
+
+- A snapshot saved after one accepted hit restores exactly one active timestamp.
+- Future branch hits do not survive restore: replayed hit two damages and hit
+  three is capped while every configured core is consumed.
+- At exactly 0.5 seconds old hits expire and two new hits can damage.
+- Existing core overflow, Hyperbloom/Burgeon, resistance, and snapshot tests pass.
+
+Test cases to add or update:
+
+- Normal: save one accepted Hyperbloom and accept replayed second damage.
+- Abnormal: mutate two future attempts, restore, then cap only replayed third.
+- Boundary: exact 0.5-second expiry accepts two fresh instances.
+- Snapshot: copied history is size one and replay damage/core counts rewind.
+- No-change: current same-time Burgeon two-hit cap and core removal pass.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- routed validation/preflight planning without RL execution
+
+### Phase 3: Accept Core-Snapshot-Neutral Catalog Baselines - Pending
+
+Why third:
+
+- Catalog no-change is accepted only after focused rollback behavior passes.
+
+Target files:
+
+- `README.md`
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Run two no-daemon controls per catalog party against B-071.
+- Record hashes, totals, ER/cadence, Dendro Core activity, and warnings.
+- Close B-072 and document snapshot completeness.
+
+Acceptance criteria:
+
+- All pairs are deterministic and byte-identical to B-071 because no catalog
+  party creates Dendro Cores.
+- Tracked generated report is restored and no artifact is staged.
+- Plan, ledger, README, and checkpoint agree.
+
+Test cases to add or update:
+
+- Normal: pairwise exact catalog controls.
+- No-change: zero Dendro Core output and accepted totals/ER/cadence.
+- Abnormal: zero warning/generated-artifact leak.
+
+Verification:
+
+- two fresh `./gradlew --no-daemon RaidenParty` runs
+- two fresh `./gradlew --no-daemon FlinsParty` runs
+- two fresh `./gradlew --no-daemon FlinsParty2` runs
+- `python scripts/preflight.py --run`
 
 ## Implementation Order: Swirl Damage Sequences
 
