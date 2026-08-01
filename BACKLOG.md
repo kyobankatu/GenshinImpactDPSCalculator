@@ -1721,3 +1721,46 @@ experiment record.
   cover Melt-only hidden Hydro, dual Frozen/Cryo consumption, partial survival,
   Shatter-before-Vaporize, and exact expiry. Six fresh catalog controls exactly
   retain the B-062 hashes, values, ER/cadence counts, and zero-warning contract.
+
+### B-064 — Overload damage ignores target and owner damage sequences
+
+- Status: `in-progress`
+- Source: 1/3 (README known difference plus KQM/gcsim evidence)
+- Symptom: every notified Overload records transformative damage, so rapid
+  reactions from one or multiple owners overcount damage instead of retaining
+  the reaction/gauge effects while a reaction-damage limit is active.
+- Scope: single-target 0.1-second global GCD, per-`CharacterId` 0.5-second
+  damage sequence, snapshot continuity, focused regressions, and catalog controls
+- Risk: `planned`
+- Proof: first/pre-boundary/exact-boundary damage, cross-owner independence after
+  the global limit, blocked notification/gauge continuity, snapshot replay, and
+  repeated deterministic party payloads
+- Notes: KQM's "Overload Reaction ICD" finding (added/tested in v1.5) records a
+  0.5-second damage immunity for Overload from the same character while gauge
+  reduction and stagger still occur. Maintained gcsim independently combines a
+  target-wide 0.1-second `overloadGCD` with `ICDGroupReactionB`, whose damage
+  sequence permits one hit per character every 0.5 seconds. Adopt both limits
+  in the repository's one-enemy abstraction. Sources accessed 2026-08-02:
+  https://library.keqingmains.com/evidence/combat-mechanics/elemental-effects/transformative-reactions#overload-reaction-icd,
+  https://github.com/genshinsim/gcsim/blob/main/pkg/reactable/overload.go,
+  https://github.com/genshinsim/gcsim/blob/main/pkg/core/attacks/icd_groups.dm.go,
+  and https://github.com/genshinsim/gcsim/blob/main/pkg/target/icd.go.
+
+### B-065 — Remaining Frozen dual-Aura reactions need trigger-residual policy
+
+- Status: `blocked`
+- Source: 1/3 (README known difference plus KQM/gcsim audit)
+- Symptom: Electro and Anemo cannot react with typed Frozen, while Geo always
+  clears it through Shatter before ordinary Aura resolution.
+- Scope: Electro/Frozen, Anemo/Frozen, Geo/Shatter residual, hidden-Aura priority,
+  and trigger-gauge carry between multiple reactions
+- Risk: `blocked`
+- Proof: sourced directional gauge matrices for Frozen-only and hidden
+  Hydro/Cryo cases plus focused reaction-order/consumption regressions
+- Notes: the KQM Evidence Vault marks its original Freeze table inaccurate and
+  records gauge-dependent exceptions for Electro, Anemo, Geo, and heavy hits.
+  Maintained gcsim models these with residual trigger durability and separate
+  reaction attempts, but this simulator intentionally lacks trigger carry and
+  poise-aware Shatter durability. A narrow change would encode known-wrong dual
+  reactions. Keep blocked until a trigger-residual plan or explicit
+  simplification decision is authorized.

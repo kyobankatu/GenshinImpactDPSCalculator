@@ -156,6 +156,10 @@ correction, B-054 Night-only Gleaming Moon provider, and B-055 deterministic
 optimizer rendering are complete. The current B-056 pass addresses standard
 Electro-Charged premature expiry ticks; Lunar-Charged behavior remains frozen.
 
+The B-056 through B-063 reaction-state passes are complete. The current B-064
+pass adds Overload's target-wide 0.1-second and owner-specific 0.5-second damage
+limits while preserving every reaction notification and gauge transition.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -10789,3 +10793,178 @@ Completion evidence:
 - README documents finite typed Freeze and retains the exact coexistence,
   residual, resistance, hitlag, poise, and Shatter-ICD exclusions. The tracked
   generated report was restored and no output is staged.
+
+## Implementation Order: Overload Damage Sequence
+
+Status: Phase 1 is complete. Phase 2 will add snapshot-safe target and owner
+damage cooldown state without suppressing reaction or gauge effects.
+
+Scope:
+
+- Single-target 0.1-second Overload damage GCD.
+- Per-`CharacterId`, per-target 0.5-second Overload damage sequence.
+- Reaction notification and gauge-consumption continuity while damage is blocked.
+- Snapshot save/restore and deterministic catalog acceptance.
+
+Out of scope for this pass:
+
+- Multi-target AoE propagation, adjacent-target reaction limits, poise, and
+  knockback.
+- Superconduct, Swirl, Shatter, Bloom-family, Burning, or Crystallize damage
+  sequences.
+- Action elemental-application ICD, reaction formulas, target geometry, RL
+  changes, and persistent jobs.
+
+Definitions:
+
+- **Overload target GCD**: the earliest time any owner may deal the next
+  Overload damage instance to this simulator's one enemy.
+- **Overload owner cooldown**: the earliest time one `CharacterId` may deal its
+  next Overload damage instance to that enemy.
+
+Cross-cutting rules:
+
+- `ReactionState` owns mutable cooldown data, `ReactionStateController` exposes
+  current-time policy, and `CombatActionResolver` only gates damage recording.
+- A blocked damage instance still notifies Overload and consumes Aura exactly.
+- Cooldowns start only when damage is accepted; exact 0.1/0.5-second boundaries
+  are inclusive.
+- Snapshot payloads use typed `CharacterId` keys and defensive copies.
+- Preserve explicit staging and generated-artifact safety.
+
+### Phase 1: Record Overload Damage-Sequence Evidence - Done
+
+Why first:
+
+- Damage suppression must be separated from reaction eligibility and ordinary
+  elemental-application ICD before introducing runtime state.
+
+Target files:
+
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Reconcile KQM's per-character 0.5-second evidence with maintained gcsim's
+  target-wide 0.1-second GCD and `ReactionB` damage group.
+- Inventory resolver damage, notification, consumption, and snapshot boundaries.
+- Record excluded AoE, poise, and other-reaction limits.
+
+Acceptance criteria:
+
+- The two independent cooldown dimensions and exact-boundary policy are explicit.
+- Suppressed damage does not suppress reaction notification or gauge consumption.
+- No production behavior changes occur in this phase.
+
+Test cases to add or update:
+
+- No production test; Phase 2 owns focused state and resolver behavior.
+
+Verification:
+
+- inspect KQM Overload ICD evidence and maintained gcsim overload/ICD policies
+- inspect resolver, reaction state/controller, snapshot, and regression paths
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- KQM's v1.5 reproducible finding records one Overload damage instance per
+  character/target in 0.5 seconds while later reactions still consume gauge.
+- Maintained gcsim independently applies a target-wide 0.1-second `overloadGCD`
+  before queuing damage and a per-character `ReactionB` sequence of one damage
+  hit per 0.5 seconds.
+- The current resolver always records every notified Overload's damage. Existing
+  action ICD cannot express the separate reaction-damage limits, and reaction
+  state is already the snapshot-aligned owner for transient reaction policy.
+
+### Phase 2: Implement Snapshot-Safe Overload Damage Limits - Pending
+
+Why second:
+
+- Phase 1 fixes ownership and boundary semantics before state is added across the
+  runtime and snapshot contract.
+
+Target files:
+
+- `src/java/simulation/runtime/ReactionState.java`
+- `src/java/simulation/runtime/ReactionStateController.java`
+- `src/java/simulation/CombatSimulator.java`
+- `src/java/simulation/SimulatorSnapshot.java`
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Store target-wide and per-owner next-damage times in `ReactionState`.
+- Expose one current-time decision through the controller/facade and preserve it
+  through defensive snapshot save/restore.
+- Gate only Overload damage/log recording after reaction notification and Aura
+  consumption.
+- Regress target, owner, exact-boundary, cross-owner, side-effect, and restore
+  behavior.
+
+Acceptance criteria:
+
+- The first Overload deals damage and starts both limits.
+- Any owner is blocked before 0.1 seconds; the same owner remains blocked before
+  0.5 seconds; a different owner may deal damage at exactly 0.1 seconds.
+- The original owner may deal damage at exactly 0.5 seconds.
+- Every blocked hit still emits one Overload and consumes exactly 1x Aura.
+- Snapshot restore reproduces both active cooldown boundaries.
+
+Test cases to add or update:
+
+- Normal: first damage, different owner at 0.1 seconds, original at 0.5 seconds.
+- Abnormal: same/different owner before each boundary deals no reaction damage.
+- Side effect: blocked hits retain notification count and exact residual Aura.
+- Snapshot: save active limits, cross boundaries, restore, and replay exact gates.
+- No-change: non-Overload transformative damage remains immediate.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/simulation/runtime/ReactionState.java --path src/java/simulation/runtime/ReactionStateController.java --path src/java/simulation/CombatSimulator.java --path src/java/simulation/SimulatorSnapshot.java --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Accept Overload-Limited Catalog Baselines - Pending
+
+Why third:
+
+- Catalog deltas can be interpreted only after focused damage-sequence and
+  snapshot behavior pass.
+
+Target files:
+
+- `README.md`
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Run two no-daemon controls per catalog party against B-063.
+- Attribute every changed Overload damage instance, or prove exact no-change.
+- Record hashes, totals, ER/cadence, warnings, and close B-064.
+
+Acceptance criteria:
+
+- Each catalog pair is byte-identical and every delta is attributable to a
+  blocked Overload damage instance.
+- ER, action cadence, reaction notifications, and Aura behavior remain stable.
+- Focused/full validation pass and tracked generated report is restored.
+
+Test cases to add or update:
+
+- Normal: pairwise exact catalog controls.
+- No-change: ER/action/reaction cadence outside damage suppression.
+- Abnormal: zero warning/generated-artifact leak.
+
+Verification:
+
+- two fresh `./gradlew --no-daemon RaidenParty` runs
+- two fresh `./gradlew --no-daemon FlinsParty` runs
+- two fresh `./gradlew --no-daemon FlinsParty2` runs
+- `python scripts/preflight.py --run`
