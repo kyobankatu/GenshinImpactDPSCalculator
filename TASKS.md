@@ -140,8 +140,8 @@ application now uses taxed aura units, source-class decay, and sourced
 same-element extension semantics through the enemy-owned aura model.
 
 The B-050 Anemo/Geo reaction-consumption correction is in progress. Its sourced
-0.5 multiplier and affected resolver branches are recorded below before the
-shared runtime change.
+0.5 multiplier and shared runtime consumption are complete; affected party
+acceptance remains below.
 
 ## Scope
 
@@ -7764,7 +7764,7 @@ Completion evidence:
 
 Status:
 
-- Phase 1 is complete; Phases 2-3 remain pending.
+- Phases 1-2 are complete; Phase 3 remains pending.
 - Requirement: Swirl and Crystallize triggers consume half of their pre-tax
   Anemo/Geo source gauge from the existing aura, rather than the full source
   gauge used by ordinary transformative reactions.
@@ -7844,7 +7844,7 @@ Completion evidence:
   Crystallize stateful branches in `CombatActionResolver`; damage and reaction
   notification are already separate from aura subtraction.
 
-### Phase 2: Scale Swirl and Crystallize Aura Consumption
+### Phase 2: Scale Swirl and Crystallize Aura Consumption - Done
 
 Why second:
 
@@ -7889,6 +7889,21 @@ Verification:
 - `./gradlew build`
 - `python scripts/agent_validate.py --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- `CombatActionResolver` now selects aura consumption from typed reaction kind;
+  Swirl, Crystallize, and Lunar-Crystallize use `source gauge * 0.5`, while all
+  other reaction families retain their existing policy.
+- Actual finite-aura regression proves 1U Swirl/Geo 0.8 to 0.3, 2U Swirl 1.6 to
+  0.6, standard/Lunar Crystallize parity with retained Moondrift creation,
+  exact/below 0.5 depletion, and unchanged full-consumption Overload. Existing
+  first-VV damage ordering, reaction notification, damage, and Lunar cadence
+  tests pass.
+- Swirl's former post-reduction unconditional clear is skipped so the scaled
+  residual persists. The separate unconditional-clear defect for
+  Overload/Superconduct residuals is recorded as B-051 rather than expanded into
+  this phase. Build, reaction regression, and routed validation pass.
 
 ### Phase 3: Re-Accept Swirl-Sensitive Party Baselines
 

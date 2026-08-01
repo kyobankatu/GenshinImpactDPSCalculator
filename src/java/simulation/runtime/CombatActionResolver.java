@@ -380,7 +380,8 @@ public class CombatActionResolver {
         Element reactionElement = getTransformativeReactionElement(result);
 
         if (!result.isElectroCharged()) {
-            sim.getEnemy().reduceAura(aura, action.getGaugeUnits(), sim.getCurrentTime());
+            sim.getEnemy().reduceAura(
+                    aura, getAuraConsumption(action, result), sim.getCurrentTime());
         }
 
         double resFactor = resolveImpactResistance(context, reactionElement);
@@ -414,7 +415,9 @@ public class CombatActionResolver {
             if (result.getKind() == ReactionResult.Kind.SUPERCONDUCT) {
                 applySuperconductPhysicalResShred();
             }
-            sim.getEnemy().setAura(aura, 0);
+            if (result.getKind() != ReactionResult.Kind.SWIRL) {
+                sim.getEnemy().setAura(aura, 0);
+            }
         }
     }
 
@@ -431,14 +434,16 @@ public class CombatActionResolver {
                         trigger, aura, freezeUnits));
             }
         } else if (result.getKind() == ReactionResult.Kind.CRYSTALLIZE) {
-            sim.getEnemy().reduceAura(aura, action.getGaugeUnits(), sim.getCurrentTime());
+            sim.getEnemy().reduceAura(
+                    aura, getAuraConsumption(action, result), sim.getCurrentTime());
             if (sim.isLoggingEnabled()) {
                 System.out.println(String.format(
                         "   [Reaction] %s on %s -> %s",
                         trigger, aura, result.getName()));
             }
         } else if (result.getKind() == ReactionResult.Kind.LUNAR_CRYSTALLIZE) {
-            sim.getEnemy().reduceAura(aura, action.getGaugeUnits(), sim.getCurrentTime());
+            sim.getEnemy().reduceAura(
+                    aura, getAuraConsumption(action, result), sim.getCurrentTime());
             handleLunarCrystallize(attacker, characterId, trigger, aura, result);
         } else if (result.getKind() == ReactionResult.Kind.BURNING) {
             double resFactor = resolveImpactResistance(context, Element.PYRO);
@@ -572,6 +577,28 @@ public class CombatActionResolver {
             return result.getDamageElement();
         }
         return Element.PYRO;
+    }
+
+    /**
+     * Returns the source-gauge amount consumed from an existing aura.
+     *
+     * <p>Anemo and Geo triggers use the sourced 0.5 unit modifier for Swirl and
+     * both Crystallize variants. Other reaction families retain their existing
+     * source-gauge consumption policy.
+     *
+     * @param action source action carrying pre-tax gauge units
+     * @param result typed reaction outcome
+     * @return aura gauge units to subtract
+     */
+    private double getAuraConsumption(AttackAction action, ReactionResult result) {
+        switch (result.getKind()) {
+            case SWIRL:
+            case CRYSTALLIZE:
+            case LUNAR_CRYSTALLIZE:
+                return action.getGaugeUnits() * 0.5;
+            default:
+                return action.getGaugeUnits();
+        }
     }
 
     /**

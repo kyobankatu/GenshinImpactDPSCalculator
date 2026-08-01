@@ -1285,3 +1285,23 @@ experiment record.
   Swirl propagation to other targets, absorption, formula order, shield
   absorption, and other reaction modifiers are excluded. See `TASKS.md`
   implementation block `Anemo and Geo Aura Consumption`.
+
+### B-051 — Overload and Superconduct discard residual aura after subtraction
+
+- Status: `candidate`
+- Source: 3 (B-050 resolver audit plus maintained Elemental Gauge Theory)
+- Symptom: the resolver subtracts the trigger's full gauge and then clears the
+  aura unconditionally, so a 1U trigger against a fresh taxed 2U aura ends at
+  zero instead of retaining 0.6U.
+- Scope: remove redundant full-clear policy for Overload/Superconduct, preserve
+  residual decay rate, focused strong-aura boundaries, and affected deterministic
+  party baselines
+- Risk: `planned`
+- Proof: 1U trigger against 1.6U leaves 0.6U for both reaction directions,
+  equal/weaker auras still fully clear, and repeated party payloads are
+  deterministic and warning-free
+- Notes: KQM Elemental Gauge Theory states these reactions use a 1x modifier and
+  explicitly gives a 2U taxed Cryo aura followed by 1U Electro leaving 0.6U.
+  Source accessed 2026-08-02:
+  https://library.keqingmains.com/combat-mechanics/elemental-effects/elemental-gauge-theory.
+  Do not promote until B-050 closes; this is a separate residual-policy change.

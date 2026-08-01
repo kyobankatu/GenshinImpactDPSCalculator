@@ -118,6 +118,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseG_AuraDecaySnapshotContract();
         testAccuracyPhaseG_InvalidSourceAuraContract();
         testAccuracyPhaseG_RuntimeAuraApplicationContract();
+        testAccuracyPhaseG_AnemoGeoAuraConsumptionContract();
         testAccuracyPhaseF_PeriodicCancellationAndRaidenEyeDamageTrigger();
         testAccuracyPhaseF_BennettSkillAndBurstApplicationContract();
         testAccuracyPhaseF_XianglingGuobaNoIcdApplicationContract();
@@ -227,7 +228,8 @@ public class ReactionRegressionTest {
         sim.getEnemy().setAura(Element.HYDRO, 1.0);
         sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE, reactionHit("Geo crystallize trigger", Element.GEO));
         assertClose(0.0, sim.getTotalDamage(), EPS, "Crystallize should not deal offensive damage");
-        assertClose(0.0, sim.getEnemy().getAuraUnits(Element.HYDRO), EPS, "Crystallize should consume Hydro aura");
+        assertClose(0.5, sim.getEnemy().getAuraUnits(Element.HYDRO), EPS,
+                "1U Crystallize should consume 0.5U from explicit Hydro fixture state");
     }
 
     private static void testPhase5Burning() {
@@ -624,6 +626,55 @@ public class ReactionRegressionTest {
                 "Non-persistent and zero-gauge runtime actions should establish no aura");
         assertTrue(!invalidLog.contains("[Aura] Applied"),
                 "Rejected runtime source elements should not emit false aura logs");
+    }
+
+    private static void testAccuracyPhaseG_AnemoGeoAuraConsumptionContract() {
+        CombatSimulator swirl = simulatorWith(testCharacter(Element.ANEMO));
+        swirl.getEnemy().applyAura(Element.PYRO, 1.0, swirl.getCurrentTime());
+        swirl.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, reactionHit("1U Swirl consumption fixture", Element.ANEMO));
+        assertClose(0.3, swirl.getEnemy().getAuraUnits(Element.PYRO), EPS,
+                "1U Swirl should leave 0.3U from a fresh taxed 1U source aura");
+
+        CombatSimulator strongSwirl = simulatorWith(testCharacter(Element.ANEMO));
+        strongSwirl.getEnemy().applyAura(Element.HYDRO, 2.0, strongSwirl.getCurrentTime());
+        AttackAction twoUnitSwirl = reactionHit("2U Swirl consumption fixture", Element.ANEMO);
+        twoUnitSwirl.setICD(ICDType.None, ICDTag.None, 2.0);
+        strongSwirl.performActionWithoutTimeAdvance(CharacterId.SUCROSE, twoUnitSwirl);
+        assertClose(0.6, strongSwirl.getEnemy().getAuraUnits(Element.HYDRO), EPS,
+                "2U Swirl should consume 1U from a fresh taxed 2U source aura");
+
+        CombatSimulator crystallize = simulatorWith(testCharacter(Element.GEO));
+        crystallize.getEnemy().applyAura(Element.ELECTRO, 1.0, crystallize.getCurrentTime());
+        crystallize.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, reactionHit("1U Crystallize consumption fixture", Element.GEO));
+        assertClose(0.3, crystallize.getEnemy().getAuraUnits(Element.ELECTRO), EPS,
+                "1U Crystallize should leave 0.3U from a fresh taxed 1U source aura");
+
+        CombatSimulator lunar = simulatorWith(testCharacter(Element.GEO).asLunar());
+        lunar.getEnemy().applyAura(Element.HYDRO, 1.0, lunar.getCurrentTime());
+        lunar.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, reactionHit("Lunar-Crystallize consumption fixture", Element.GEO));
+        assertClose(0.3, lunar.getEnemy().getAuraUnits(Element.HYDRO), EPS,
+                "Lunar-Crystallize should use the same 0.5 Geo modifier");
+        assertEquals(3, lunar.getMoondriftCount(),
+                "Scaled Lunar-Crystallize consumption should preserve Moondrift creation");
+
+        for (double boundary : new double[] { 0.5, 0.4 }) {
+            CombatSimulator depleted = simulatorWith(testCharacter(Element.ANEMO));
+            depleted.getEnemy().setAura(Element.CRYO, boundary);
+            depleted.performActionWithoutTimeAdvance(
+                    CharacterId.SUCROSE, reactionHit("Swirl depletion fixture", Element.ANEMO));
+            assertClose(0.0, depleted.getEnemy().getAuraUnits(Element.CRYO), EPS,
+                    "Swirl should fully remove aura at or below scaled consumption");
+        }
+
+        CombatSimulator overload = simulatorWith(testCharacter(Element.PYRO));
+        overload.getEnemy().setAura(Element.ELECTRO, 1.0);
+        overload.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, reactionHit("Overload consumption fixture", Element.PYRO));
+        assertClose(0.0, overload.getEnemy().getAuraUnits(Element.ELECTRO), EPS,
+                "Non-Anemo/Geo transformative reactions should retain full-gauge consumption");
     }
 
     private static void testAccuracyPhase2_QueryBeforeAndAtApplication() {
