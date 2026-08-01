@@ -35,7 +35,7 @@ public class NoblesseOblige extends ArtifactSet implements BurstTriggeredArtifac
         // implying full set usually.
         // Assuming this object represents the active set bonus.
 
-        sim.applyTeamBuff(new mechanics.buff.SimpleBuff("Noblesse Oblige (4pc)", BuffId.NOBLESSE_OBLIGE_4PC,
+        sim.applyTeamBuffNoStack(new mechanics.buff.SimpleBuff("Noblesse Oblige (4pc)", BuffId.NOBLESSE_OBLIGE_4PC,
                 12.0, sim.getCurrentTime(), s -> {
             s.add(StatType.ATK_PERCENT, 0.20);
         }));

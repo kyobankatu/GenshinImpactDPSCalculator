@@ -97,6 +97,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ColumbinaStandInBoundaries();
         testAccuracyPhaseF_ArtifactLunarReactionBuffRegression();
         testAccuracyPhaseF_ViridescentVenererRefreshContract();
+        testAccuracyPhaseF_NoblesseObligeRefreshContract();
         testAccuracyPhaseF_WeaponReactionBonusRegression();
         testAccuracyPhaseF_DragonsBaneTargetAuraContract();
         testAccuracyPhaseF_DendroResonanceReactionEmContract();
@@ -2298,6 +2299,64 @@ public class ReactionRegressionTest {
                                 || buff.getId() == BuffId.VV_SHRED_CRYO
                                 || buff.getId() == BuffId.VV_SHRED_ELECTRO),
                 "Unsupported or non-Swirl reactions should not add a VV buff");
+    }
+
+    private static void testAccuracyPhaseF_NoblesseObligeRefreshContract() {
+        model.artifact.NoblesseOblige equippedSet =
+                new model.artifact.NoblesseOblige(new StatsContainer());
+        assertClose(0.20, equippedSet.getStats().get(StatType.BURST_DMG_BONUS), EPS,
+                "Noblesse should retain its 20% two-piece Burst DMG bonus");
+
+        model.character.Bennett bennett = new model.character.Bennett(new TestWeapon(), equippedSet);
+        TestCharacter ally = testCharacter(Element.HYDRO, CharacterId.XINGQIU);
+        CombatSimulator actualBurstSim = simulatorWithExistingCharacter(bennett);
+        actualBurstSim.addCharacter(ally);
+        captureStandardOutput(() -> actualBurstSim.performAction(
+                CharacterId.BENNETT, CharacterActionRequest.of(CharacterActionKey.BURST)));
+        assertClose(0.20, resolvedStat(actualBurstSim, bennett, StatType.ATK_PERCENT), EPS,
+                "An actual Bennett Burst should apply one Noblesse buff to its owner");
+        assertClose(0.20, resolvedStat(actualBurstSim, ally, StatType.ATK_PERCENT), EPS,
+                "An actual Bennett Burst should apply one Noblesse buff to its ally");
+
+        TestCharacter refreshOwner = testCharacter(Element.PYRO, CharacterId.BENNETT);
+        CombatSimulator refreshSim = simulatorWith(refreshOwner);
+        model.artifact.NoblesseOblige refreshSet =
+                new model.artifact.NoblesseOblige(new StatsContainer());
+        refreshSim.applyTeamBuff(new SimpleBuff("Independent ATK fixture", 20.0, 0.0,
+                stats -> stats.add(StatType.ATK_PERCENT, 0.10)));
+        captureStandardOutput(() -> refreshSet.onBurst(refreshSim));
+        assertClose(0.30, resolvedStat(refreshSim, refreshOwner, StatType.ATK_PERCENT), EPS,
+                "Noblesse should combine with an unrelated ATK buff");
+        refreshSim.advanceTime(5.0);
+        captureStandardOutput(() -> refreshSet.onBurst(refreshSim));
+        assertClose(0.30, resolvedStat(refreshSim, refreshOwner, StatType.ATK_PERCENT), EPS,
+                "Repeated Noblesse applications should refresh rather than stack");
+        assertEquals(1L, refreshSim.getTeamBuffs().stream()
+                        .filter(buff -> buff.getId() == BuffId.NOBLESSE_OBLIGE_4PC)
+                        .count(),
+                "Noblesse refresh should retain one typed team buff");
+        refreshSim.advanceTime(11.999);
+        assertClose(0.30, resolvedStat(refreshSim, refreshOwner, StatType.ATK_PERCENT), EPS,
+                "Refreshed Noblesse should remain active immediately before twelve seconds");
+        refreshSim.advanceTime(0.001);
+        assertClose(0.10, resolvedStat(refreshSim, refreshOwner, StatType.ATK_PERCENT), EPS,
+                "Refreshed Noblesse should expire at exactly twelve seconds");
+
+        TestCharacter multiOwner = testCharacter(Element.PYRO, CharacterId.BENNETT);
+        CombatSimulator multiSim = simulatorWith(multiOwner);
+        model.artifact.NoblesseOblige firstSet =
+                new model.artifact.NoblesseOblige(new StatsContainer());
+        model.artifact.NoblesseOblige secondSet =
+                new model.artifact.NoblesseOblige(new StatsContainer());
+        captureStandardOutput(() -> firstSet.onBurst(multiSim));
+        multiSim.advanceTime(1.0);
+        captureStandardOutput(() -> secondSet.onBurst(multiSim));
+        assertClose(0.20, resolvedStat(multiSim, multiOwner, StatType.ATK_PERCENT), EPS,
+                "Separate Noblesse instances should refresh one shared team effect");
+        assertEquals(1L, multiSim.getTeamBuffs().stream()
+                        .filter(buff -> buff.getId() == BuffId.NOBLESSE_OBLIGE_4PC)
+                        .count(),
+                "Separate Noblesse instances should leave one typed team buff");
     }
 
     private static void testAccuracyPhaseF_WeaponReactionBonusRegression() {

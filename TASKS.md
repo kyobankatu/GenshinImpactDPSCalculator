@@ -5531,7 +5531,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phase 1 is complete and Phases 2-3 remain.
+- In progress; Phases 1-2 are complete and Phase 3 remains.
 - Requirement: 4pc Noblesse Oblige must contribute one teamwide 20% ATK window
   for twelve seconds, refreshed rather than added by another application.
 
@@ -5617,7 +5617,7 @@ Completion evidence:
   simulator-owned team buff. Current `applyTeamBuff` storage leaves duplicate
   `NOBLESSE_OBLIGE_4PC` instances additive during stat assembly.
 
-### Phase 2: Replace Duplicate Noblesse Windows and Regress Boundaries
+### Phase 2: Replace Duplicate Noblesse Windows and Regress Boundaries - Done
 
 Why second:
 
@@ -5664,6 +5664,18 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/agent_validate.py --path src/java/model/artifact/NoblesseOblige.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Noblesse now routes its existing typed 4pc team buff through
+  `applyTeamBuffNoStack`; values, duration, targeting, constructor stats, and
+  Burst dispatch remain unchanged.
+- The regression proves actual Bennett owner/ally activation, one 0.20 value
+  after same-instance and separate-instance reapplication, one live typed buff,
+  coexistence with an unrelated 0.10 ATK buff, active state at 16.999 seconds,
+  exact expiry at 17.0 seconds, and the unchanged 0.20 2pc Burst DMG bonus.
+- Reaction and party-catalog regressions, build, Javadoc, routed validation, and
+  preflight pass.
 
 ### Phase 3: Re-Accept the Noblesse Catalog Baseline
 
