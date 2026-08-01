@@ -6,6 +6,7 @@ import model.type.CharacterId;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.function.Function;
 import java.util.function.Consumer;
 
@@ -207,7 +208,7 @@ public class IterativeSimulator {
                 + " (budget: " + totalRolls + " rolls)");
 
         // 1. Balanced initialization
-        Map<model.type.StatType, Integer> currentRolls = new HashMap<>();
+        Map<model.type.StatType, Integer> currentRolls = new LinkedHashMap<>();
         int nStats = statsToOptimize.size();
         int base = totalRolls / nStats;
         int remainder = totalRolls % nStats;

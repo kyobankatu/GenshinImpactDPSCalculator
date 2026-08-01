@@ -8922,7 +8922,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phase 1 is complete and Phase 2 is next.
+- In progress; Phases 1-2 are complete and Phase 3 is next.
 - Requirement: identical joint optimizer allocations must render in one stable
   stat order across fresh JVM processes so full sample payload hashes remain
   valid regression evidence.
@@ -9003,7 +9003,7 @@ Completion evidence:
 - The focused test will independently inspect returned key order and captured
   output. Documentation preflight passes without checks or artifact leaks.
 
-### Phase 2: Preserve Typed Optimization Order - Pending
+### Phase 2: Preserve Typed Optimization Order - Done
 
 Why second:
 
@@ -9044,6 +9044,18 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/agent_validate.py --path src/java/mechanics/optimization/IterativeSimulator.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- The hill-climber now initializes `currentRolls` as a `LinkedHashMap`; all
+  reads, swaps, caps, comparisons, and iteration over the separate typed stat
+  list remain unchanged.
+- A zero-damage three-stat fixture proves the equal-DPS path keeps two rolls per
+  stat, returns keys as CRIT_RATE/CRIT_DMG/ATK_PERCENT, and renders exactly
+  `{CRIT_RATE=2, CRIT_DMG=2, ATK_PERCENT=2} => DPS: 0`.
+- Existing unreachable/exact/manual ER feasibility coverage remains green.
+  ReactionRegressionTest, build, Javadoc, routed build/RaidenParty/FlinsParty2,
+  and preflight pass; generated tracked HTML was restored afterward.
 
 ### Phase 3: Accept Fresh-JVM Payload Determinism - Pending
 

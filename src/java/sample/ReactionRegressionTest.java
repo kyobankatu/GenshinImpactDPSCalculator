@@ -94,6 +94,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ImpetuousWindsCooldownSnapshot();
         testAccuracyPhaseF_TimingAwareEnergyAnalysis();
         testAccuracyPhaseF_ArtifactOptimizerRejectsUnreachableEr();
+        testAccuracyPhaseF_ArtifactOptimizerStableResultOrder();
         testAccuracyPhaseF_ColumbinaGravityAndDewRegression();
         testAccuracyPhaseF_ColumbinaStandInBoundaries();
         testAccuracyPhaseF_ArtifactTeamBuffProviderRouting();
@@ -1920,6 +1921,35 @@ public class ReactionRegressionTest {
         String manualMessage = captureArtifactErFailure(manualConfig, baseStats, emptyStats);
         assertTrue(manualMessage.contains("ENERGY_RECHARGE target unreachable"),
                 "Insufficient manual ER rolls should use the same feasibility guard");
+    }
+
+    private static void testAccuracyPhaseF_ArtifactOptimizerStableResultOrder() {
+        List<StatType> requestedOrder = List.of(
+                StatType.CRIT_RATE,
+                StatType.CRIT_DMG,
+                StatType.ATK_PERCENT);
+        List<Map<StatType, Integer>> results = new ArrayList<>();
+
+        String output = captureStandardOutput(() -> results.add(
+                mechanics.optimization.IterativeSimulator.optimizeSubstatsNDim(
+                        rolls -> simulatorWith(testCharacter(Element.PYRO, CharacterId.XIANGLING)),
+                        sim -> sim.advanceTime(1.0),
+                        CharacterId.XIANGLING,
+                        requestedOrder,
+                        6)));
+
+        Map<StatType, Integer> result = results.get(0);
+        assertEquals(requestedOrder, new ArrayList<>(result.keySet()),
+                "Joint optimizer should return rolls in requested stat order");
+        assertEquals(Integer.valueOf(2), result.get(StatType.CRIT_RATE),
+                "Equal-DPS fixture should retain balanced CRIT Rate rolls");
+        assertEquals(Integer.valueOf(2), result.get(StatType.CRIT_DMG),
+                "Equal-DPS fixture should retain balanced CRIT DMG rolls");
+        assertEquals(Integer.valueOf(2), result.get(StatType.ATK_PERCENT),
+                "Equal-DPS fixture should retain balanced ATK rolls");
+        assertTrue(output.contains(
+                        "Result: {CRIT_RATE=2, CRIT_DMG=2, ATK_PERCENT=2} => DPS: 0"),
+                "Joint optimizer should render result keys in requested stat order");
     }
 
     private static void testAccuracyPhaseF_ColumbinaGravityAndDewRegression() {
