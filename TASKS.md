@@ -11017,8 +11017,8 @@ Completion evidence:
 
 ## Implementation Order: Standard Crystallize Global Cooldown
 
-Status: Phase 1 is complete. Phase 2 will add snapshot-safe standard
-Crystallize gating before reaction notification and Aura consumption.
+Status: Phases 1-3 are complete. Snapshot-safe standard Crystallize gating and
+its deterministic catalog baselines are accepted.
 
 Scope:
 
@@ -11218,8 +11218,8 @@ Completion evidence:
 
 ## Implementation Order: Superconduct Damage Sequence
 
-Status: Phase 1 is complete. Phase 2 will add snapshot-safe target/owner damage
-sequence state while retaining every non-damage reaction effect.
+Status: Phases 1-3 are complete. Snapshot-safe Superconduct target/owner damage
+sequences and their deterministic catalog baselines are accepted.
 
 Scope:
 
@@ -12049,8 +12049,8 @@ Completion evidence:
 
 ## Implementation Order: Shatter Damage Sequence
 
-Status: Phase 1 is complete. Phase 2 will reuse the fixed owner-sequence policy
-for snapshot-safe Shatter damage-only gating.
+Status: Phases 1-3 are complete. Snapshot-safe Shatter target/owner damage
+sequences and their deterministic catalog baselines are accepted.
 
 Scope:
 
