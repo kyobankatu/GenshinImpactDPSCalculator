@@ -169,10 +169,11 @@ public class Xiangling extends Character implements FormStateProvider {
                 s -> {
                     // C1 Shred
                     if (this.constellation >= 1) {
-                        s.applyFieldBuff(
-                                new mechanics.buff.SimpleBuff("Guoba C1 Shred", BuffId.XIANGLING_GUOBA_C1_SHRED, 6.0, s.getCurrentTime(), st -> {
+                        s.applyTeamBuffNoStack(new mechanics.buff.SimpleBuff(
+                                "Guoba C1 Shred", BuffId.XIANGLING_GUOBA_C1_SHRED,
+                                6.0, s.getCurrentTime(), st -> {
                                     st.add(StatType.PYRO_RES_SHRED, 0.15);
-                                }));
+                                }).sourcedBy(this.characterId));
                     }
 
                     // Particles

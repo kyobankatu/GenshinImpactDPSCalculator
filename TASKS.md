@@ -6867,7 +6867,7 @@ Completion evidence:
 
 Status:
 
-- Phase 1 is complete; Phases 2-3 remain pending.
+- Phases 1-2 are complete; Phase 3 remains pending.
 - Requirement: a Guoba hit at C1 or above establishes one 15% Pyro RES reduction
   for six seconds; later Guoba hits refresh that one enemy-facing status.
 
@@ -6959,7 +6959,7 @@ Completion evidence:
   1,312,883 damage / 62,518 DPS over 21.0 seconds, and Guoba hits at 8.4, 9.9,
   11.4, and 12.9 seconds.
 
-### Phase 2: Refresh One Team-Visible Guoba C1 Status - Pending
+### Phase 2: Refresh One Team-Visible Guoba C1 Status - Done
 
 Why second:
 
@@ -7004,6 +7004,16 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/agent_validate.py --path src/java/model/character/Xiangling.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Guoba's actual delayed callback now replaces one typed simulator team buff
+  after each damage hit and explicitly attributes it to Xiangling.
+- The actual-character regression proves no pre-hit status; one 15% value at
+  +2.0, +3.5, +5.0, and +6.5 seconds; one typed instance throughout; active
+  Bennett and off-field Xiangling visibility; final +12.5 exact expiry; and
+  unchanged four-hit, no-ICD, 1U, reaction, and no-aura contracts.
+- Reaction regression, build, Javadoc, routed validation, and preflight pass.
 
 ### Phase 3: Accept the RaidenParty Guoba C1 Delta - Pending
 

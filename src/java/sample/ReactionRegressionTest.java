@@ -2946,14 +2946,38 @@ public class ReactionRegressionTest {
         model.character.Xiangling reactingXiangling = new model.character.Xiangling(
                 reactingWeapon, blankArtifact());
         CombatSimulator reactingSim = simulatorWithExistingCharacter(reactingXiangling);
+        TestCharacter reactingAlly = testCharacter(Element.PYRO, CharacterId.BENNETT);
+        reactingSim.addCharacter(reactingAlly);
+        reactingSim.setActiveCharacter(CharacterId.BENNETT);
         List<ReactionResult.Kind> reactingKinds = captureReactionKinds(reactingSim);
         reactingSim.getEnemy().setAura(Element.HYDRO, 4.0, reactingSim.getCurrentTime());
         reactingSim.performAction(CharacterId.XIANGLING,
                 CharacterActionRequest.of(CharacterActionKey.SKILL));
-        reactingSim.advanceTime(8.01);
+
+        reactingSim.advanceTime(1.999);
+        assertClose(0.0, resolvedStat(reactingSim, reactingXiangling, StatType.PYRO_RES_SHRED), EPS,
+                "Guoba C1 shred should be absent before the first flame hit");
+        assertTrue(reactingSim.getTeamBuffList().stream()
+                        .noneMatch(buff -> buff.getId() == BuffId.XIANGLING_GUOBA_C1_SHRED),
+                "Guoba C1 should not create a typed status before its first hit");
+
+        double[] expectedTimes = {2.0, 3.5, 5.0, 6.5};
+        for (int i = 0; i < expectedTimes.length; i++) {
+            reactingSim.advanceTime(i == 0 ? 0.001 : 1.5);
+            assertEquals(i + 1, reactingWeapon.actions.size(),
+                    "Each Guoba timestamp should execute exactly one new flame hit");
+            mechanics.buff.Buff shred = requireGuobaC1Shred(reactingSim);
+            assertClose(expectedTimes[i], shred.getStartTime(), EPS,
+                    "Each Guoba hit should refresh the C1 start time");
+            assertClose(expectedTimes[i] + 6.0, shred.getExpirationTime(), EPS,
+                    "Each Guoba hit should refresh one six-second C1 window");
+            assertClose(0.15, resolvedStat(reactingSim, reactingXiangling, StatType.PYRO_RES_SHRED), EPS,
+                    "Off-field Xiangling should observe the enemy's refreshed C1 shred");
+            assertClose(0.15, resolvedStat(reactingSim, reactingAlly, StatType.PYRO_RES_SHRED), EPS,
+                    "The active ally should observe the same refreshed C1 shred");
+        }
 
         assertEquals(4, reactingWeapon.actions.size(), "Guoba should deal four periodic hits");
-        double[] expectedTimes = {2.0, 3.5, 5.0, 6.5};
         for (int i = 0; i < expectedTimes.length; i++) {
             assertClose(expectedTimes[i], reactingWeapon.times.get(i), EPS,
                     "Guoba should use its sourced four-hit cadence");
@@ -2967,6 +2991,18 @@ public class ReactionRegressionTest {
                         && action.getGaugeUnits() == 1.0),
                 "Every Guoba hit should retain its sourced Pyro Skill application contract");
 
+        reactingSim.advanceTime(5.999);
+        assertClose(0.15, resolvedStat(reactingSim, reactingXiangling, StatType.PYRO_RES_SHRED), EPS,
+                "Final Guoba C1 shred should remain active immediately before six seconds");
+        Buff finalShred = requireGuobaC1Shred(reactingSim);
+        StatsContainer atExactExpiry = new StatsContainer();
+        finalShred.apply(atExactExpiry, finalShred.getExpirationTime());
+        assertClose(0.0, atExactExpiry.get(StatType.PYRO_RES_SHRED), EPS,
+                "Final Guoba C1 shred should exclude its exact expiry");
+        reactingSim.advanceTime(0.001001);
+        assertClose(0.0, resolvedStat(reactingSim, reactingXiangling, StatType.PYRO_RES_SHRED), EPS,
+                "Final Guoba C1 shred should be absent after 12.5 seconds");
+
         RecordingDamageWeapon noAuraWeapon = new RecordingDamageWeapon("Guoba Attack");
         model.character.Xiangling noAuraXiangling = new model.character.Xiangling(
                 noAuraWeapon, blankArtifact());
@@ -2979,6 +3015,20 @@ public class ReactionRegressionTest {
         assertEquals(4, noAuraWeapon.actions.size(),
                 "Guoba should not produce a fifth hit after its field duration");
         assertEquals(0, noAuraKinds.size(), "Guoba should not fabricate reactions without an aura");
+    }
+
+    private static Buff requireGuobaC1Shred(CombatSimulator sim) {
+        long count = sim.getTeamBuffList().stream()
+                .filter(buff -> buff.getId() == BuffId.XIANGLING_GUOBA_C1_SHRED)
+                .count();
+        assertEquals(1L, count, "Guoba C1 refresh should retain one typed team buff");
+        Buff shred = sim.getTeamBuffList().stream()
+                .filter(buff -> buff.getId() == BuffId.XIANGLING_GUOBA_C1_SHRED)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Guoba C1 shred should exist"));
+        assertEquals(CharacterId.XIANGLING, shred.getSourceCharacterId(),
+                "Guoba C1 shred should be sourced by Xiangling");
+        return shred;
     }
 
     private static void testAccuracyPhaseF_XingqiuSkillNoIcdApplicationContract() {
