@@ -1402,7 +1402,7 @@ experiment record.
 
 ### B-054 — Night-only Intent has no Gleaming Moon team synergy provider
 
-- Status: `active`
+- Status: `done`
 - Source: 3 (maintained artifact wording plus artifact-provider audit)
 - Symptom: Night of the Sky's Unveiling creates Intent but only Silken Moon's
   Serenade implements `ArtifactTeamBuffProvider`, so a party with Night and no
@@ -1410,7 +1410,7 @@ experiment record.
 - Scope: shared canonical synergy policy, Night provider capability,
   Night-only/duplicate/mixed-set expiry regressions, and exact no-change party
   controls
-- Risk: `planned`
+- Risk: `validated`
 - Proof: Night-only Intent gives 10% to all party members for all typed Lunar
   reaction bonuses; duplicate providers remain one; mixed Intent plus Devotion
   remains 20% and Silken-sourced; repeated catalog payloads remain exact
@@ -1423,3 +1423,16 @@ experiment record.
   when it is absent. Thundercloud Strike's Intent trigger classification is a
   separate evidence question and is excluded. See `TASKS.md` implementation
   block `Night-Only Gleaming Moon Synergy`.
+  Completed with one shared policy that retains first-Silken precedence and
+  uses first-Night fallback only when no Silken exists. Focused regressions
+  prove Night-only team-wide 10% across all Lunar types, exact Intent expiry,
+  one provider under duplicate Night sets, mixed-set 20% and Silken sourcing,
+  plus unchanged Silken EM and duplicate handling. Repeated semantic payloads
+  match B-053 exactly: RaidenParty
+  `dae58b38c4c64fba719885cfdf1facb0ac229187a712ab9a41ace16bd2dceed2`,
+  FlinsParty
+  `5d4cd7f4577704c541438bfa4b00525071d9b3183a77a2243fd0b47944d1dd18`,
+  and FlinsParty2
+  `d8732dfb6f34dcd80d910553525e622178eca55da249895562ac4570158337d5`.
+  Values, ER, allocations, cadence, and warnings are unchanged; raw optimizer
+  map key order is explicitly excluded from these semantic hashes.

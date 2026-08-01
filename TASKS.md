@@ -8686,7 +8686,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phases 1-2 are complete and Phase 3 is next.
+- Complete; all three phases are implemented and accepted.
 - Requirement: Night of the Sky's Unveiling must supply its 10% party-wide
   Lunar Reaction bonus while Intent is active even when no Silken Moon's
   Serenade set is equipped.
@@ -8845,7 +8845,7 @@ Completion evidence:
 - ReactionRegressionTest, build, Javadoc, routed validation, and preflight all
   pass without an artifact leak.
 
-### Phase 3: Re-Accept Artifact-Provider Party Baselines - Pending
+### Phase 3: Re-Accept Artifact-Provider Party Baselines - Done
 
 Why last:
 
@@ -8871,8 +8871,9 @@ Tasks:
 Acceptance criteria:
 
 - Each repeated pair matches exactly without warning or energy failure.
-- All three payloads match B-053 exactly because each affected catalog party
-  already had a canonical Silken provider.
+- All simulation payload content matches B-053 because each affected catalog
+  party already had a canonical Silken provider. JVM-dependent unordered
+  optimizer-map presentation is excluded from the semantic payload hash.
 - README, verification reference, plan, and ledger agree; generated HTML and
   output artifacts are not staged.
 
@@ -8890,3 +8891,29 @@ Verification:
 - two fresh `./gradlew FlinsParty2` runs
 - `python scripts/validate_agent_assets.py`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Each party's two semantic payloads match exactly and also match B-053 after
+  excluding Gradle's elapsed-time line and unordered optimizer `Result` map
+  presentation: RaidenParty
+  `dae58b38c4c64fba719885cfdf1facb0ac229187a712ab9a41ace16bd2dceed2`,
+  FlinsParty
+  `5d4cd7f4577704c541438bfa4b00525071d9b3183a77a2243fd0b47944d1dd18`,
+  and FlinsParty2
+  `d8732dfb6f34dcd80d910553525e622178eca55da249895562ac4570158337d5`.
+- RaidenParty retains 1,363,709 / 64,939 over 21.0 seconds and
+  100/175/179/174% ER. FlinsParty retains 22,675,823 / 227,898 over 99.5
+  seconds and 109/100/100/180% ER. FlinsParty2 retains 15,817,125 / 228,902
+  over 69.1 seconds and 130/128/100/196% ER; every optimizer allocation value
+  is unchanged.
+- FlinsParty and FlinsParty2 retain exactly 613/468 timed actions, 230/140
+  reaction logs, 48/33 delayed Lunar ticks, 172/105 immediate Lunar-Charged
+  reactions, and 88/71 ICD blocks. All six runs contain zero warning, error,
+  failed-action, or insufficient-energy matches.
+- Raw Flins hashes differ from B-053 only because Java's unordered optimizer
+  map prints identical entries in a different order; the two fresh runs agree
+  with each other. This pre-existing baseline weakness is not a simulation
+  delta and is retained as separate follow-up work.
+- README and the verification reference require no value update. The tracked
+  FlinsParty2 HTML report was restored to HEAD and no generated output is staged.
