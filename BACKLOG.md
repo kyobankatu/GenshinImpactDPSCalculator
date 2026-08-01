@@ -466,3 +466,41 @@ experiment record.
   69,586 DPS with normalized SHA-256
   `66fbe8eb153acd729db6d51b9cc545c8fe366e43bc0d126fd5ab30b660477fc4`;
   the final detailed trace contains five Guoba hits and zero Guoba ICD blocks.
+
+### B-021 — Fatal Rainscreen's second hit is blocked by Skill ICD
+
+- Status: `planned`
+- Source: 3 (adjacent audited-party action metadata divergence)
+- Symptom: Xingqiu's two Skill strikes share standard Skill ICD, so the second
+  1U Hydro application is blocked in the final `RaidenParty` trace at 2.6
+  seconds.
+- Scope: `src/java/model/character/Xingqiu.java`,
+  `src/java/sample/ReactionRegressionTest.java`
+- Risk: `planned`
+- Proof: actual-Xingqiu two-hit metadata/reaction regression plus two fresh
+  deterministic `RaidenParty` payloads
+- Notes: adopt the KQM Theorycrafting Library Xingqiu attack table (accessed
+  2026-08-02), which records Fatal Rainscreen as two 1U Hydro Skill hits with
+  no ICD. Its separate Rain Sword orbitals use 1U/2.25-second application and
+  Raincutter sword waves use standard ICD; those paths are already modeled and
+  remain excluded. Source:
+  https://library.keqingmains.com/characters/hydro/xingqiu. Pre-fix audited
+  `RaidenParty` baseline is 1,461,315 damage / 69,586 DPS. See `TASKS.md`
+  implementation block `Xingqiu Fatal Rainscreen No-ICD Application`.
+
+### B-022 — Bennett Press Skill uses the wrong gauge and ICD
+
+- Status: `candidate`
+- Source: 3 (adjacent audited-party action metadata divergence)
+- Symptom: Passion Overload Press is modeled as 1U with standard Skill ICD,
+  while the sourced attack is 2U with no ICD; Fantastic Voyage also uses a
+  standard type despite its sourced no-ICD metadata.
+- Scope: `src/java/model/character/Bennett.java`,
+  `src/java/sample/ReactionRegressionTest.java`
+- Risk: `planned`
+- Proof: actual-Bennett Skill/Burst metadata and aura regression plus fresh
+  deterministic `RaidenParty` acceptance
+- Notes: candidate recorded while B-021 is active; do not promote concurrently.
+  KQM's Bennett attack table (accessed 2026-08-02) records Press as 2U/no ICD
+  and Fantastic Voyage as 2U/no ICD. Source:
+  https://library.keqingmains.com/characters/pyro/bennett.

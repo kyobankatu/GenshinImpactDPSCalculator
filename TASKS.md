@@ -46,6 +46,9 @@ The current simulator-only accuracy queue through B-020 is complete. Xiangling's
 Guoba now follows its sourced 1U/no-ICD contract, while Pyronado's distinct
 application metadata remains unchanged.
 
+The active queue is B-021: Xingqiu's two Fatal Rainscreen strikes must each use
+their sourced 1U/no-ICD contract instead of sharing standard Skill ICD.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -2505,6 +2508,142 @@ Completion evidence:
   `66fbe8eb153acd729db6d51b9cc545c8fe366e43bc0d126fd5ab30b660477fc4`.
 - The final detailed trace contains five Guoba hits and zero Guoba application
   blocks; unrelated Skill actions continue to report their own ICD decisions.
+
+## Implementation Order: Xingqiu Fatal Rainscreen No-ICD Application
+
+Status:
+
+- Planned; Phase 1 evidence is recorded below.
+- Requirement: both Fatal Rainscreen strikes must independently apply 1U Hydro
+  without entering or consulting a Skill ICD group.
+
+Scope:
+
+- Correct the two Skill-hit `AttackAction` metadata entries in `Xingqiu`.
+- Add actual-character regression coverage for both strikes.
+- Re-run and accept the deterministic `RaidenParty` integration delta.
+
+Out of scope for this pass:
+
+- Rain Sword orbitals, Raincutter sword waves, Burst duration, C4 multiplier,
+  particle generation, animation timing, optimizer policy, reports, or RL.
+- Changing generic ICD behavior or typed tag semantics.
+
+Design boundaries:
+
+- `Xingqiu` owns Fatal Rainscreen's character-specific action metadata.
+- Both hits retain the typed Skill tag for diagnostics without sharing ICD.
+- Existing orbital cadence and Raincutter's standard typed ICD remain separate.
+
+### Phase 1: Record Fatal Rainscreen Application Evidence - Done
+
+Why first:
+
+Xingqiu has three distinct Hydro application paths, so the Skill correction
+must be isolated from the already-audited orbital and sword-wave contracts.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record the current KQM Xingqiu attack table, accessed 2026-08-02.
+- Record Fatal Rainscreen's two 1U/no-ICD hits and excluded Burst paths.
+- Record the pre-fix final-trace block and focused test design.
+
+Acceptance criteria:
+
+- Source URL, access date, hit count, gauge, ICD, and damage type are explicit.
+- The pre-fix detailed `RaidenParty` trace shows Hit 2 blocked by
+  `ElementalSkill` ICD at 2.6 seconds.
+- Phase 2 changes remain character-local.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 adds executable coverage.
+
+Verification:
+
+- inspect `Xingqiu.skill` and the final detailed `RaidenParty` trace
+- `python scripts/preflight.py --run`
+
+### Phase 2: Encode and Test Two Independent Skill Applications
+
+Why second:
+
+The sourced contract can be expressed by two local metadata changes and tested
+through the actual Skill execution path.
+
+Target files:
+
+- `src/java/model/character/Xingqiu.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Set both Fatal Rainscreen hits to no ICD while retaining Skill tags and 1U.
+- Capture both damage actions through the production hook path.
+- Verify both hits can react independently at their modeled cadence.
+
+Acceptance criteria:
+
+- Both hits are Hydro Skill damage with 1U, `ICDType.None`, and the typed Skill
+  tag.
+- Both hits trigger reactions against a sufficient Pyro aura.
+- A no-aura run produces both damage actions and no reactions.
+- Orbital and Raincutter metadata are unchanged.
+
+Test cases to add or update:
+
+- Normal: both Fatal Rainscreen strikes Vaporize independently.
+- Abnormal: no-aura Skill still produces two damage hits and no reactions.
+- Contract: both captured hits retain Hydro Skill, 1U, no ICD, and Skill tag.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Accept the RaidenParty Skill-Application Delta
+
+Why last:
+
+The second Hydro application can alter the early aura sequence and optimized
+damage in the audited reference party.
+
+Target files:
+
+- `README.md`
+- `TASKS.md`
+- `BACKLOG.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+
+Tasks:
+
+- Run two fresh `RaidenParty` payloads after the correction.
+- Confirm both detailed Skill hits apply and Hit 2 has no Skill ICD block.
+- Update documented Raiden totals only if the deterministic result changes.
+
+Acceptance criteria:
+
+- Both normalized payloads and numeric summaries match.
+- The sourced two-hit application is visible in the detailed trace.
+- Numeric baseline documents agree if changed.
+- Agent assets and routed preflight checks pass.
+
+Test cases to add or update:
+
+- No further production test; Phase 2 owns action and reaction behavior.
+
+Verification:
+
+- two fresh `./gradlew RaidenParty` runs
+- `python scripts/validate_agent_assets.py` when baseline gate changes
+- `python scripts/preflight.py --run`
 
 ## Cross-Cutting Rules
 
