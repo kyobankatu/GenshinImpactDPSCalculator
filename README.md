@@ -235,8 +235,10 @@ Known simplifications:
   Windfall and Moondrift streams so every candidate and final run uses the same
   random scenario. Its legal cadence requests one Sucrose Burst in each of
   three outer loops; artifact allocation rejects unmet ER targets instead of
-  silently returning an underfilled build. The accepted result is 18,765,805
-  damage / 188,601 DPS over 99.5 seconds with three successful Sucrose Bursts.
+  silently returning an underfilled build. Wandering Evenstar snapshots the
+  owner's effective EM after 64 frames and every 10 seconds for its linked
+  owner/team ATK buffs. The accepted result is 18,843,690 damage / 189,384 DPS
+  over 99.5 seconds with three successful Sucrose Bursts.
 
 ### Continuous Aura Decay Model
 

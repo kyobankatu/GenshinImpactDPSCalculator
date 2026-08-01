@@ -780,7 +780,7 @@ experiment record.
   the final rotation skips Sucrose Burst at 25.9, 60.6, and 95.3 seconds.
 - Scope: artifact ER feasibility reporting/allocation, optimizer pipeline
   contract, party loadout response, and focused plus repeated sample regression
-- Risk: `accepted`
+- Risk: `planned`
 - Proof: regression that detects an unmet `minER` before final optimization and
   a repeated `FlinsParty` result with an explicit feasible resolution and no
   silently underfilled ER target
@@ -821,7 +821,7 @@ experiment record.
 
 ### B-035 — Wandering Evenstar evaluates the owner's bonus before artifact EM
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 3 (sourced weapon-mechanic divergence)
 - Symptom: `Weapon.applyPassive` runs before artifact stats are merged, so
   Wandering Evenstar derives its owner's 33.6% self-only remainder from base
@@ -845,4 +845,11 @@ experiment record.
   https://library.keqingmains.com/evidence/equipment/weapons. Implement one
   per-equipped-weapon timer with captured flat ATK buffs; do not make generic
   weapon passives aware of artifact or simulator internals. See `TASKS.md`
-  implementation block `Wandering Evenstar Timed EM Snapshot`.
+  implementation block `Wandering Evenstar Timed EM Snapshot`. Completed
+  2026-08-02 with a narrow simulator-initialized weapon capability. Regression
+  covers pre-activation, the 64-frame boundary, shared owner/ally snapshot
+  values, interval stability, the +10-second refresh, off-field activation,
+  and two-copy stacking. Two accepted FlinsParty runs retain
+  109%/100%/100%/180% ER and three Sucrose Bursts, emit zero warnings, and
+  report 18,843,690 damage / 189,384 DPS over 99.5 seconds with normalized
+  SHA-256 `5fcfe756770e925d4afde9f5e1bc9a23ba9cd86b2620aa99af3cab4e61234744`.

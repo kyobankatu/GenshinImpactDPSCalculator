@@ -88,9 +88,9 @@ fixed loadout and rotation energy can legally sustain, and catalog parties
 include equipped artifact-set static stats in allocation. Fatal sample
 configuration errors propagate to the Gradle caller.
 
-The B-035 Wandering Evenstar correction is in progress. Its R5 owner and ally
-ATK bonuses will share one effective-EM snapshot, activate after the sourced
-64-frame delay, and refresh every ten seconds while the owner is off-field.
+The B-035 Wandering Evenstar correction is complete. Its R5 owner and ally ATK
+bonuses share one effective-EM snapshot, activate after the sourced 64-frame
+delay, and refresh every ten seconds while the owner is off-field.
 
 ## Scope
 
@@ -4439,7 +4439,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phases 1-2 are complete and Phase 3 remains.
+- Implemented; Phases 1-3 are complete.
 - Requirement: Wandering Evenstar must derive both R5 ATK bonuses from one
   equipped-owner EM snapshot at the sourced activation cadence instead of
   splitting its calculation across incompatible stat-assembly stages.
@@ -4593,7 +4593,7 @@ Completion evidence:
 - ReactionRegressionTest, PartyCatalogRegressionTest, build, Javadoc, routed
   validation, and preflight pass.
 
-### Phase 3: Accept the Timed FlinsParty Baseline
+### Phase 3: Accept the Timed FlinsParty Baseline - Done
 
 Why last:
 
@@ -4628,6 +4628,17 @@ Verification:
 
 - two fresh `./gradlew FlinsParty` runs
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Two complete FlinsParty payloads match after excluding Gradle's elapsed-time
+  line, with normalized SHA-256
+  `5fcfe756770e925d4afde9f5e1bc9a23ba9cd86b2620aa99af3cab4e61234744`.
+- Both retain Sucrose/Flins/Ineffa/Columbina ER of 109%/100%/100%/180%, execute
+  three Sucrose Bursts, emit zero warnings, and report 18,843,690 damage /
+  189,384 DPS over 99.5 seconds.
+- Sucrose contribution rises from 400,869 to 417,667 damage; the remaining
+  increase is distributed across allies receiving the linked snapshot share.
 
 ## NCCL/DDP Distributed RL Training Plan
 
