@@ -83,6 +83,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseC_HyperbloomConsumesOneCoreForSingleProjectile();
         testAccuracyPhaseC_BurgeonConsumesAoECores();
         testAccuracyPhaseC_CoreExplosionHitCap();
+        testAccuracyPhaseC_CoreDamageCapSnapshotContract();
         testAccuracyPhaseC_LunarBloomUsesSameCorePolicy();
         testAccuracyPhaseD_QuickenRefreshesDuration();
         testAccuracyPhaseD_AggravateUsesTriggerEm();
@@ -2634,6 +2635,47 @@ public class ReactionRegressionTest {
         assertEquals(0, sim.getDendroCores().size(), "All configured cores should be consumed");
         assertClose(expectedTransformative(3.0, Element.DENDRO, 0.0) * 2.0, sim.getTotalDamage(), 1.0,
                 "Only two core explosions should damage the same target inside the 0.5s cap window");
+    }
+
+    private static void testAccuracyPhaseC_CoreDamageCapSnapshotContract() {
+        CombatSimulator sim = simulatorWith(testCharacter(Element.ELECTRO));
+        ReactionEffectScheduler scheduler = new ReactionEffectScheduler(sim);
+        for (int i = 0; i < 4; i++) {
+            sim.addDendroCore(CharacterId.SUCROSE, 1000.0);
+        }
+
+        scheduler.consumeDendroCores(
+                CharacterId.SUCROSE, 1000.0, "Saved Hyperbloom", 1);
+        SimulatorSnapshot snapshot = sim.saveSnapshot();
+        assertEquals(1, snapshot.recentDendroCoreDamageTimes.size(),
+                "Snapshot should preserve one accepted Dendro Core hit");
+        assertEquals(3, snapshot.dendroCores.size(),
+                "Snapshot should retain the three unconsumed cores");
+
+        scheduler.consumeDendroCores(
+                CharacterId.SUCROSE, 1000.0, "Discarded Burgeon branch", 2);
+        assertClose(1800.0, sim.getTotalDamage(), EPS,
+                "The future branch should accept only its second target hit");
+        assertEquals(1, sim.getDendroCores().size(),
+                "Damage-capped future hits should still consume cores");
+
+        sim.restoreSnapshot(snapshot);
+        scheduler.consumeDendroCores(
+                CharacterId.SUCROSE, 1000.0, "Replayed Burgeon branch", 2);
+        assertClose(1800.0, sim.getTotalDamage(), EPS,
+                "Restore should accept replayed hit two and cap only hit three");
+        assertEquals(1, sim.getDendroCores().size(),
+                "Replayed capped hits should retain core-consumption behavior");
+        assertEquals(2, sim.saveSnapshot().recentDendroCoreDamageTimes.size(),
+                "Replay should rebuild exactly two active damage timestamps");
+
+        sim.advanceTime(0.5);
+        sim.addDendroCore(CharacterId.SUCROSE, 1000.0);
+        sim.addDendroCore(CharacterId.SUCROSE, 1000.0);
+        scheduler.consumeDendroCores(
+                CharacterId.SUCROSE, 1000.0, "Boundary Hyperbloom", 2);
+        assertClose(3600.0, sim.getTotalDamage(), EPS,
+                "Exactly 0.5 seconds should accept two fresh core damage hits");
     }
 
     private static void testAccuracyPhaseC_LunarBloomUsesSameCorePolicy() {

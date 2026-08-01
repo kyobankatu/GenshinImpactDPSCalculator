@@ -100,6 +100,7 @@ public class SimulatorSnapshot {
     public final int verdantDewCount;
     public final int moonridgeDewCount;
     public final List<ReactionState.DendroCoreState> dendroCores;
+    public final List<Double> recentDendroCoreDamageTimes;
     public final int nextDendroCoreId;
     /** Complete accelerating Frozen Aura payload. */
     public final Enemy.FreezeAuraState enemyFreezeAura;
@@ -157,6 +158,7 @@ public class SimulatorSnapshot {
      * @param verdantDewCount Verdant Dew count
      * @param moonridgeDewCount Moonridge Dew count
      * @param dendroCores active Dendro Core payloads
+     * @param recentDendroCoreDamageTimes active target damage-cap timestamps
      * @param nextDendroCoreId next Dendro Core identifier
      * @param enemyFreezeAura complete Frozen Aura gauge and decay payload
      * @param enemyAura          enemy aura state map ({units, applicationTime, duration} per element)
@@ -203,6 +205,7 @@ public class SimulatorSnapshot {
             int verdantDewCount,
             int moonridgeDewCount,
             List<ReactionState.DendroCoreState> dendroCores,
+            List<Double> recentDendroCoreDamageTimes,
             int nextDendroCoreId,
             Enemy.FreezeAuraState enemyFreezeAura,
             Map<Element, double[]> enemyAura,
@@ -268,6 +271,8 @@ public class SimulatorSnapshot {
         this.verdantDewCount = verdantDewCount;
         this.moonridgeDewCount = moonridgeDewCount;
         this.dendroCores = new ArrayList<>(dendroCores);
+        this.recentDendroCoreDamageTimes =
+                new ArrayList<>(recentDendroCoreDamageTimes);
         this.nextDendroCoreId = nextDendroCoreId;
         this.enemyFreezeAura = enemyFreezeAura;
         this.enemyAura = new HashMap<>(enemyAura);

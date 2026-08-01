@@ -11424,8 +11424,8 @@ Completion evidence:
 
 ## Implementation Order: Dendro Core Damage-Cap Snapshot State
 
-Status: Phase 1 is complete. Phase 2 will move the existing Dendro Core
-damage-cap history into snapshot-owned reaction state.
+Status: Phases 1-2 are complete. Phase 3 will accept deterministic catalog
+baselines for snapshot-safe Dendro Core damage-cap history.
 
 Scope:
 
@@ -11499,7 +11499,7 @@ Completion evidence:
 - The fix will preserve the existing shared two-hit/0.5-second target policy;
   it changes only branch determinism and snapshot completeness.
 
-### Phase 2: Implement Snapshot-Safe Core Damage History - Pending
+### Phase 2: Implement Snapshot-Safe Core Damage History - Done
 
 Why second:
 
@@ -11545,6 +11545,22 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - routed validation/preflight planning without RL execution
+
+Completion evidence:
+
+- `ReactionState` now owns the two-hit/0.5-second constants, active timestamp
+  list, pruning, acceptance, defensive copy, and validated restore. The
+  scheduler retains only its damage-recording role and requests one facade
+  decision per consumed core.
+- Snapshot save/restore and profiler merge forwarding carry the active history;
+  restore rejects null, non-finite, future, expired, and over-limit entries.
+- Focused real-consumption coverage saves one accepted Hyperbloom, mutates two
+  Burgeon attempts on a discarded branch, restores three cores and one hit,
+  accepts replayed hit two, caps only hit three, and proves capped attempts
+  still consume cores. At exactly 0.5 seconds two fresh hits are accepted.
+- `ReactionRegressionTest`, `build`, and `javadoc` pass. Routed preflight and
+  agent validation report the expected RL checks, which were not executed under
+  the simulator-only session boundary.
 
 ### Phase 3: Accept Core-Snapshot-Neutral Catalog Baselines - Pending
 

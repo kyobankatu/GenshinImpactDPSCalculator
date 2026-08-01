@@ -958,6 +958,7 @@ public class CapabilityProfiler {
                 activePostSubject.verdantDewCount,
                 activePostSubject.moonridgeDewCount,
                 activePostSubject.dendroCores,
+                activePostSubject.recentDendroCoreDamageTimes,
                 activePostSubject.nextDendroCoreId,
                 activePostSubject.enemyFreezeAura,
                 activePostSubject.enemyAura,

@@ -25,6 +25,8 @@ public class ReactionState {
     private static final double SWIRL_TARGET_DAMAGE_GCD = 0.1;
     private static final double SWIRL_OWNER_SEQUENCE_WINDOW = 0.5;
     private static final int SWIRL_OWNER_DAMAGE_LIMIT = 2;
+    private static final double DENDRO_CORE_DAMAGE_WINDOW = 0.5;
+    private static final int DENDRO_CORE_DAMAGE_LIMIT = 2;
     /** Immutable consumable Quicken Aura payload. */
     public static final class QuickenState {
         /** Quicken gauge present at {@link #lastUpdateTime}. */
@@ -199,6 +201,7 @@ public class ReactionState {
     private int verdantDewCount = 0;
     private int moonridgeDewCount = 0;
     private final List<DendroCoreState> dendroCores = new ArrayList<>();
+    private final List<Double> recentDendroCoreDamageTimes = new ArrayList<>();
     private int nextDendroCoreId = 1;
 
     /**
@@ -973,6 +976,58 @@ public class ReactionState {
 
     public void clearDendroCores() {
         dendroCores.clear();
+    }
+
+    /** Attempts to accept Dendro Core damage in the current target window. */
+    public boolean tryStartDendroCoreDamage(double currentTime) {
+        if (!Double.isFinite(currentTime)) {
+            return false;
+        }
+        recentDendroCoreDamageTimes.removeIf(
+                time -> !isActiveDendroCoreDamageTime(time, currentTime));
+        if (recentDendroCoreDamageTimes.size() >= DENDRO_CORE_DAMAGE_LIMIT) {
+            return false;
+        }
+        recentDendroCoreDamageTimes.add(currentTime);
+        return true;
+    }
+
+    /** Returns a defensive copy of active Dendro Core damage timestamps. */
+    public List<Double> copyRecentDendroCoreDamageTimes(double currentTime) {
+        List<Double> copy = new ArrayList<>();
+        for (Double time : recentDendroCoreDamageTimes) {
+            if (isActiveDendroCoreDamageTime(time, currentTime)) {
+                copy.add(time);
+            }
+        }
+        return copy;
+    }
+
+    /** Restores valid active Dendro Core damage timestamps. */
+    public void restoreRecentDendroCoreDamageTimes(
+            List<Double> damageTimes, double currentTime) {
+        recentDendroCoreDamageTimes.clear();
+        if (damageTimes == null || !Double.isFinite(currentTime)) {
+            return;
+        }
+        for (Double time : damageTimes) {
+            if (recentDendroCoreDamageTimes.size() >= DENDRO_CORE_DAMAGE_LIMIT) {
+                break;
+            }
+            if (isActiveDendroCoreDamageTime(time, currentTime)) {
+                recentDendroCoreDamageTimes.add(time);
+            }
+        }
+    }
+
+    private boolean isActiveDendroCoreDamageTime(
+            Double damageTime, double currentTime) {
+        return damageTime != null
+                && Double.isFinite(damageTime)
+                && Double.isFinite(currentTime)
+                && damageTime <= currentTime + TIMING_EPSILON
+                && currentTime - damageTime + TIMING_EPSILON
+                        < DENDRO_CORE_DAMAGE_WINDOW;
     }
 
     public void restoreDendroCores(List<DendroCoreState> cores, int nextCoreId) {

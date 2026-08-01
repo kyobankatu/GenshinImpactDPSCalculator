@@ -19,8 +19,6 @@ import simulation.event.TimerEvent;
  */
 public class ReactionEffectScheduler {
     private static final double[] LUNAR_CHARGED_WEIGHTS = { 1.0, 0.5, 1.0 / 12.0, 1.0 / 12.0 };
-    private static final int DENDRO_CORE_DAMAGE_HIT_CAP = 2;
-    private static final double DENDRO_CORE_DAMAGE_WINDOW = 0.5;
     private static final double STANDARD_EC_TICK_INTERVAL = 1.0;
     private static final double STANDARD_EC_PREMATURE_TICK_THRESHOLD = 0.5;
     private static final double BURNING_TICK_INTERVAL = 0.25;
@@ -28,7 +26,6 @@ public class ReactionEffectScheduler {
     private static final double TIMING_EPSILON = 1e-9;
 
     private final CombatSimulator sim;
-    private final List<Double> recentDendroCoreDamageTimes = new ArrayList<>();
 
     public ReactionEffectScheduler(CombatSimulator sim) {
         this.sim = sim;
@@ -515,13 +512,7 @@ public class ReactionEffectScheduler {
     }
 
     private boolean canRecordDendroCoreDamage() {
-        double now = sim.getCurrentTime();
-        recentDendroCoreDamageTimes.removeIf(time -> now - time >= DENDRO_CORE_DAMAGE_WINDOW);
-        if (recentDendroCoreDamageTimes.size() >= DENDRO_CORE_DAMAGE_HIT_CAP) {
-            return false;
-        }
-        recentDendroCoreDamageTimes.add(now);
-        return true;
+        return sim.tryStartDendroCoreDamage();
     }
 
     private double computeWeightedLunarReactionDamage(

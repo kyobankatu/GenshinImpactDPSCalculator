@@ -815,6 +815,8 @@ public class CombatSimulator {
         int verdantDewCount = reactionState.getVerdantDewCount();
         int moonridgeDewCount = reactionState.getMoonridgeDewCount();
         List<simulation.runtime.ReactionState.DendroCoreState> dendroCores = reactionStateController.copyDendroCores();
+        List<Double> recentDendroCoreDamageTimes =
+                reactionStateController.copyRecentDendroCoreDamageTimes();
         int nextDendroCoreId = reactionStateController.getNextDendroCoreId();
 
         // Enemy aura (full state so continuous decay survives restore)
@@ -879,7 +881,8 @@ public class CombatSimulator {
                 swirlOwnerDamageSequenceStates,
                 moondriftCount, lunarCrystallizeTriggerCount,
                 verdantDewCount, moonridgeDewCount,
-                dendroCores, nextDendroCoreId, enemyFreezeAura, enemyAura,
+                dendroCores, recentDendroCoreDamageTimes,
+                nextDendroCoreId, enemyFreezeAura, enemyAura,
                 characters,
                 teamBuffRefs, teamBuffTimes,
                 fieldBuffRefs, fieldBuffTimes);
@@ -943,6 +946,8 @@ public class CombatSimulator {
         reactionState.setVerdantDewCount(snap.verdantDewCount);
         reactionState.setMoonridgeDewCount(snap.moonridgeDewCount);
         reactionStateController.restoreDendroCores(snap.dendroCores, snap.nextDendroCoreId);
+        reactionStateController.restoreRecentDendroCoreDamageTimes(
+                snap.recentDendroCoreDamageTimes);
 
         // Enemy aura (restore full state so continuous decay resumes correctly)
         if (enemy != null) {
@@ -1288,5 +1293,10 @@ public class CombatSimulator {
 
     public void clearDendroCores() {
         reactionStateController.clearDendroCores();
+    }
+
+    /** Attempts to accept one Dendro Core damage instance. */
+    public boolean tryStartDendroCoreDamage() {
+        return reactionStateController.tryStartDendroCoreDamage();
     }
 }

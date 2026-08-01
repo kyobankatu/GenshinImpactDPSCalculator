@@ -393,6 +393,23 @@ public class ReactionStateController {
         reactionState.clearDendroCores();
     }
 
+    /** Attempts to accept Dendro Core damage at the current simulator time. */
+    public boolean tryStartDendroCoreDamage() {
+        return reactionState.tryStartDendroCoreDamage(sim.getCurrentTime());
+    }
+
+    /** Returns a defensive copy of active Dendro Core damage timestamps. */
+    public List<Double> copyRecentDendroCoreDamageTimes() {
+        return reactionState.copyRecentDendroCoreDamageTimes(
+                sim.getCurrentTime());
+    }
+
+    /** Restores Dendro Core damage-cap history at the current simulator time. */
+    public void restoreRecentDendroCoreDamageTimes(List<Double> damageTimes) {
+        reactionState.restoreRecentDendroCoreDamageTimes(
+                damageTimes, sim.getCurrentTime());
+    }
+
     public int getNextDendroCoreId() {
         return reactionState.getNextDendroCoreId();
     }
