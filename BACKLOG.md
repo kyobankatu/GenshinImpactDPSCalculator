@@ -1844,13 +1844,13 @@ experiment record.
 
 ### B-068 — Shatter damage ignores target and owner damage sequences
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 3 (B-063 out-of-scope accuracy gap plus KQM/gcsim evidence)
 - Symptom: every rapid Shatter notification records damage, ignoring both the
   target attack GCD and fixed two-hit owner damage sequence.
 - Scope: target/owner damage-only state, continued notification/Freeze clear,
   snapshot continuity, and catalog controls
-- Risk: `planned`
+- Risk: `validated`
 - Proof: target pre/exact boundary, owner first/second/third/reset sequence,
   cross-owner state, Freeze clear on blocked damage, restore replay, and
   repeated party payloads
@@ -1866,3 +1866,14 @@ experiment record.
   https://github.com/genshinsim/gcsim/blob/main/pkg/reactable/freeze.go,
   https://github.com/genshinsim/gcsim/blob/main/pkg/core/attacks/icd_groups.dm.go,
   and https://github.com/genshinsim/gcsim/blob/main/pkg/target/icd.go.
+  Completed by generalizing B-067's immutable fixed owner payload while keeping
+  separate target clocks/maps. Notification and current whole-Freeze clear now
+  precede Shatter damage-only gating. Focused regression covers 0.1/0.2-second
+  target timing, owner entries one/two/three, independent owner state,
+  owner-blocked target-GCD advancement, six notifications with blocked Freeze
+  clears, active-target restore, and exact 0.5-second owner reset. Six fresh
+  catalog controls exactly retain B-067 hashes
+  `03301ef5a3d650a91cfa07660cb0077d8c1585da04d79803a97f36e8249ba85a`,
+  `9b0b3556ca8f4eb799e6965156aab3bc70e512c7056cdf7e0202572c3996e464`,
+  and `23dc585acc02d3bd7bca7fe3f5b65db62b3e1489fcedb12a02b9725b774b7dd4`
+  with unchanged values/counts and zero Shatter or warning matches.

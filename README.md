@@ -291,6 +291,10 @@ Elemental Gauge Theory contract:
   consumes Aura, and refreshes physical RES shred. Damage uses a target-wide
   0.1-second GCD, then accepts two target-passing attempts per `CharacterId` in
   a fixed 0.5-second window. Snapshots preserve both policy dimensions.
+- **Shatter damage sequence**: every valid Shatter still notifies and clears the
+  simulator's whole Frozen Aura. Damage uses a target-wide 0.2-second GCD, then
+  accepts two target-passing attempts per `CharacterId` in a fixed 0.5-second
+  window. Snapshots preserve both policy dimensions.
 - **Standard Crystallize cooldown**: non-Lunar Crystallize has one target-wide
   one-second cooldown shared across owners, hits, and Aura elements. Suppressed
   attempts do not notify or consume Aura, the exact boundary is accepted, and
