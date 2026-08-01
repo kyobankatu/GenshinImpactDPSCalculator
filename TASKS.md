@@ -53,6 +53,9 @@ ICD.
 The B-022 correction is complete. Bennett's Press Skill now uses 2U/no ICD and
 his Burst retains 2U without entering a Burst ICD group.
 
+The active queue is B-023: Raiden's Skill and Burst cast metadata and Musou
+Isshin Normal/Charged shared ICD group must match their sourced contracts.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -2807,6 +2810,148 @@ Completion evidence:
   `e35dfd3b864ddbc2ff132dae447eeed51506bbe26c5980fecf1bf1535c0ef59f`.
 - The intentional decrease reflects the sourced stronger Press gauge retaining
   a 2U Pyro aura at 14.8 seconds and changing downstream reaction ownership.
+
+## Implementation Order: Raiden Cast and Musou Isshin ICD Metadata
+
+Status:
+
+- Planned; Phase 1 evidence is recorded below.
+- Requirement: Skill and Burst initial hits use no ICD, Eye uses standard Skill
+  ICD, and Musou Isshin Normal/Charged attacks share one standard ICD group.
+
+Scope:
+
+- Correct Raiden's Skill cast and Burst initial ICD metadata.
+- Route Burst-state Normal and Charged attacks through the existing dedicated
+  `Raiden_MusouIsshin` tag.
+- Add actual-character regression and re-accept `RaidenParty`.
+
+Out of scope for this pass:
+
+- Plunging-attack ICD, attack multipliers, hit splitting, Eye trigger policy,
+  particle probability, Resolve, energy restoration, cooldowns, optimizer
+  policy, reports, or RL.
+- New ICD tags or generic ICD behavior.
+
+Design boundaries:
+
+- `RaidenShogun` owns the action-specific metadata and state-dependent tag
+  choice.
+- Existing `ICDTag.Raiden_MusouIsshin` is the single typed group for Burst-state
+  Normal and Charged attacks.
+- Physical pre-Burst Normal and Charged attacks retain their generic groups.
+
+### Phase 1: Record Raiden Application and Grouping Evidence - Done
+
+Why first:
+
+Raiden has separate cast, coordinated, and converted-attack contracts, so the
+exact no-ICD and shared-ICD boundaries must be fixed before editing.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record current KQM and Genshin Impact Wiki tables, accessed 2026-08-02.
+- Record Skill cast, Eye, Burst initial, and Musou Isshin N/CA contracts.
+- Record pre-fix detailed blocks and focused test design.
+
+Acceptance criteria:
+
+- Sources, access date, gauges, ICD policies, and shared group are explicit.
+- The pre-fix Skill cast suppresses the first Eye application and Burst N/CA use
+  independent generic groups.
+- Plunge behavior remains explicitly unresolved and out of scope.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 adds executable coverage.
+
+Verification:
+
+- inspect Raiden action construction and the detailed `RaidenParty` trace
+- `python scripts/preflight.py --run`
+
+### Phase 2: Encode and Test Raiden Typed ICD Contracts
+
+Why second:
+
+All corrected policies fit existing `AttackAction`, `ICDType`, and `ICDTag`
+contracts and can be tested through a real Raiden instance.
+
+Target files:
+
+- `src/java/model/character/RaidenShogun.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Set Skill cast to 1U/no ICD while retaining its Skill tag.
+- Keep Eye at 1U/standard Skill ICD and set Burst initial to 2U/no ICD.
+- Use `Raiden_MusouIsshin` for Burst-state Normal and Charged attacks only.
+
+Acceptance criteria:
+
+- Skill cast and first Eye can both apply Electro; subsequent Eye hits obey
+  standard ICD.
+- Burst initial is 2U/no-ICD Electro Burst damage.
+- Burst-state N and CA share standard typed ICD and block the second immediate
+  application; physical N/CA keep independent generic tags.
+- No display labels drive grouping.
+
+Test cases to add or update:
+
+- Normal: Skill cast and first Eye both react; Burst initial has 2U/no ICD.
+- Boundary: immediate Burst N then CA shares one group and permits only one
+  application.
+- Abnormal: non-Burst physical N/CA retain NormalAttack/ChargedAttack tags.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Accept the RaidenParty ICD Delta
+
+Why last:
+
+The first Eye application and shared Burst combo ICD directly affect the
+reference party's reaction sequence and damage.
+
+Target files:
+
+- `README.md`
+- `TASKS.md`
+- `BACKLOG.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+
+Tasks:
+
+- Run two fresh `RaidenParty` payloads after the correction.
+- Inspect the first Eye and Burst N/CA application decisions.
+- Update documented Raiden totals to the deterministic accepted result.
+
+Acceptance criteria:
+
+- Both normalized payloads and numeric summaries match.
+- Detailed logs reflect sourced cast/Eye and shared Musou ICD behavior.
+- Numeric baseline documents agree.
+- Agent assets and routed preflight checks pass.
+
+Test cases to add or update:
+
+- No further production test; Phase 2 owns action and ICD grouping behavior.
+
+Verification:
+
+- two fresh `./gradlew RaidenParty` runs
+- `python scripts/validate_agent_assets.py` when baseline gate changes
+- `python scripts/preflight.py --run`
 
 ## Cross-Cutting Rules
 

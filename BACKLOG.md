@@ -518,3 +518,28 @@ experiment record.
   `e35dfd3b864ddbc2ff132dae447eeed51506bbe26c5980fecf1bf1535c0ef59f`.
   The accepted decrease follows the stronger 2U Press aura changing downstream
   reaction ownership.
+
+### B-023 — Raiden cast hits and Musou attacks use incorrect ICD groups
+
+- Status: `planned`
+- Source: 3 (audited-party action metadata divergence)
+- Symptom: Raiden's Skill cast incorrectly shares standard ICD with Eye and
+  suppresses its first coordinated application; Burst initial uses standard ICD;
+  Burst-state Normal and Charged attacks use independent generic groups instead
+  of their existing shared Musou Isshin tag.
+- Scope: `src/java/model/character/RaidenShogun.java`,
+  `src/java/sample/ReactionRegressionTest.java`
+- Risk: `planned`
+- Proof: actual-Raiden cast/Eye/Burst/shared-group regression plus two fresh
+  deterministic `RaidenParty` payloads
+- Notes: adopt the current Genshin Impact Wiki advanced properties and KQM
+  Raiden table (accessed 2026-08-02): Skill DMG is 1U/no ICD, Eye is 1U/standard
+  Skill ICD, Burst initial is 2U/no ICD, and Musou Isshin Normal/Charged attacks
+  share standard ICD. Sources:
+  https://genshin-impact.fandom.com/wiki/Raiden_Shogun and
+  https://library.keqingmains.com/characters/electro/raiden-shogun. The existing
+  dedicated `ICDTag.Raiden_MusouIsshin` is currently unused and can express the
+  shared group without an API change. Plunge ICD remains excluded pending exact
+  grouping evidence. Pre-fix audited `RaidenParty` baseline is 1,433,347 damage
+  / 68,255 DPS. See `TASKS.md` implementation block
+  `Raiden Cast and Musou Isshin ICD Metadata`.
