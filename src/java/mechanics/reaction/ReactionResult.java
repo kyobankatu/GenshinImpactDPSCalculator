@@ -447,7 +447,7 @@ public class ReactionResult {
      * @return {@code true} if High Voltage should trigger on this reaction
      */
     public boolean triggersElectroResonance() {
-        if (isElectroCharged() || isLunarReaction()) {
+        if (isElectroCharged()) {
             return true;
         }
         return kind == Kind.SUPERCONDUCT

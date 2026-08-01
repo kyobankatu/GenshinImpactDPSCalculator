@@ -2207,7 +2207,7 @@ Completion evidence:
 Status:
 
 - In progress.
-- Phase 1 is complete; Phases 2-3 remain.
+- Phases 1-2 are complete; Phase 3 remains.
 - Requirement: High Voltage must generate particles only for its seven
   documented reaction kinds, including Lunar-Charged but excluding other Lunar
   reactions, with one shared five-second cooldown.
@@ -2266,7 +2266,7 @@ Verification:
 - inspect `ReactionResult.triggersElectroResonance` and resonance listener
 - `python scripts/preflight.py --run`
 
-### Phase 2: Narrow and Test Electro Resonance Eligibility
+### Phase 2: Narrow and Test Electro Resonance Eligibility - Done
 
 Why second:
 

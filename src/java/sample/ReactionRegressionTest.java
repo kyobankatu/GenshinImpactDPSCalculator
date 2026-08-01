@@ -88,6 +88,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_WeaponReactionBonusRegression();
         testAccuracyPhaseF_DendroResonanceReactionEmContract();
         testAccuracyPhaseF_CryoResonanceConditionalCritContract();
+        testAccuracyPhaseF_ElectroResonanceTypedTriggerContract();
         testAccuracyPhaseF_SucroseNoIcdApplicationContract();
         testAccuracyPhaseF_XianglingChiliPickupOptIn();
         testAccuracyPhaseF_XingqiuOrbitalApplicationCadence();
@@ -1711,6 +1712,75 @@ public class ReactionRegressionTest {
         sim.advanceTime(0.001);
         assertClose(baseCrit, resolvedStat(sim, owner, StatType.CRIT_RATE), EPS,
                 "Cryo resonance should be inactive exactly at aura expiry");
+    }
+
+    private static void testAccuracyPhaseF_ElectroResonanceTypedTriggerContract() {
+        ReactionResult.Kind[] eligibleKinds = {
+                ReactionResult.Kind.SUPERCONDUCT,
+                ReactionResult.Kind.OVERLOADED,
+                ReactionResult.Kind.OVERLOAD,
+                ReactionResult.Kind.ELECTRO_CHARGED,
+                ReactionResult.Kind.LUNAR_CHARGED,
+                ReactionResult.Kind.QUICKEN,
+                ReactionResult.Kind.AGGRAVATE,
+                ReactionResult.Kind.HYPERBLOOM
+        };
+        for (ReactionResult.Kind kind : eligibleKinds) {
+            assertTrue(ReactionResult.transform(0.0, kind.name(), kind).triggersElectroResonance(),
+                    "Electro resonance should accept " + kind);
+        }
+
+        ReactionResult.Kind[] ineligibleKinds = {
+                ReactionResult.Kind.LUNAR_BLOOM,
+                ReactionResult.Kind.LUNAR_CRYSTALLIZE,
+                ReactionResult.Kind.SPREAD,
+                ReactionResult.Kind.BURGEON,
+                ReactionResult.Kind.VAPORIZE
+        };
+        for (ReactionResult.Kind kind : ineligibleKinds) {
+            assertTrue(!ReactionResult.transform(0.0, kind.name(), kind).triggersElectroResonance(),
+                    "Electro resonance should reject " + kind);
+        }
+
+        TestCharacter owner = testCharacter(Element.ELECTRO, CharacterId.SUCROSE);
+        TestCharacter ally = testCharacter(Element.ELECTRO, CharacterId.XIANGLING);
+        CombatSimulator sim = simulatorWith(owner);
+        sim.addCharacter(ally);
+        owner.restoreCurrentEnergy(0.0);
+        ally.restoreCurrentEnergy(0.0);
+        ResonanceManager.applyResonances(sim);
+        double emptyEnergy = partyEnergy(owner, ally);
+
+        sim.notifyReaction(ReactionResult.lunar(0.0, ReactionResult.LunarType.BLOOM), owner);
+        assertClose(emptyEnergy, partyEnergy(owner, ally), EPS,
+                "Lunar-Bloom should not generate an Electro resonance particle");
+
+        sim.notifyReaction(ReactionResult.transform(
+                0.0, "Superconduct", ReactionResult.Kind.SUPERCONDUCT), owner);
+        double afterFirstParticle = partyEnergy(owner, ally);
+        assertTrue(afterFirstParticle > emptyEnergy,
+                "First eligible reaction should generate an Electro resonance particle");
+
+        sim.notifyReaction(ReactionResult.transform(
+                0.0, "Overloaded", ReactionResult.Kind.OVERLOADED), owner);
+        assertClose(afterFirstParticle, partyEnergy(owner, ally), EPS,
+                "Electro resonance should share one cooldown across eligible reaction kinds");
+        sim.advanceTime(4.999);
+        sim.notifyReaction(ReactionResult.state("Quicken", ReactionResult.Kind.QUICKEN, null), owner);
+        assertClose(afterFirstParticle, partyEnergy(owner, ally), EPS,
+                "Electro resonance should remain on cooldown before five seconds");
+        sim.advanceTime(0.001);
+        sim.notifyReaction(ReactionResult.lunar(0.0, ReactionResult.LunarType.CHARGED), owner);
+        assertTrue(partyEnergy(owner, ally) > afterFirstParticle,
+                "Electro resonance should generate another particle at exactly five seconds");
+    }
+
+    private static double partyEnergy(Character... characters) {
+        double total = 0.0;
+        for (Character character : characters) {
+            total += character.getCurrentEnergy();
+        }
+        return total;
     }
 
     private static void assertSprawlingGreeneryTrigger(ReactionResult.Kind kind, double expectedEm) {
