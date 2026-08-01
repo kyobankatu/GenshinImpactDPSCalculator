@@ -946,3 +946,33 @@ experiment record.
   retains 100%/175%/179%/174% ER and 1,317,080 damage / 62,718 DPS over 21.0
   seconds; FlinsParty2 retains 141%/132%/105%/193% ER and 14,077,198 damage /
   203,722 DPS over 69.1 seconds, with no new warning in either run.
+
+### B-040 — Sacrificial Sword has no Composed passive
+
+- Status: `in-progress`
+- Source: 3 (explicit stat-only weapon and sourced passive divergence)
+- Symptom: `SacrificialSword` provides 454 base ATK and 61.3% ER but never
+  attempts or applies its Skill cooldown reset, so every equipped simulation
+  omits the weapon's defining passive.
+- Scope: Skill-cooldown reset state, damage-triggered Sacrificial Sword,
+  injected draws, focused regression, and weapon catalog documentation
+- Risk: `planned`
+- Proof: actual-weapon trigger/failure/internal-cooldown/multi-charge regressions
+  plus build and catalog validation
+- Notes: adopt the maintained KQM Swords page, KQM Sacrificial-series evidence,
+  and the community Sacrificial Sword page, accessed 2026-08-02. All record the
+  R5 Composed values as 80% and sixteen seconds; the weapon pages also confirm
+  Lv90 454 base ATK and 61.3% ER. KQM experiments record multi-hit Skill retry,
+  procs while Skill is already ready, and reset of only the displayed earliest
+  timer for multi-charge Skills. Relevant experiments were last tested in
+  v1.3 (shield exception, 2021-02-04), v1.5 (multi-charge scope, 2021-05-06),
+  v2.0 (multi-hit interactions, 2021-08-19), and v3.3 (ready-Skill proc,
+  2022-12-11). Sources:
+  https://library.keqingmains.com/equipment/weapons/swords,
+  https://library.keqingmains.com/evidence/equipment/weapons, and
+  https://genshin-impact.fandom.com/wiki/Sacrificial_Sword. Adapt to the
+  simulator's single unshielded target: positive direct Skill damage receives
+  one draw per resolved hit, a success resets current Skill state and starts
+  weapon cooldown, and a multi-charge reset removes only the earliest restore.
+  Enemy shields and multiple-enemy trials remain unmodeled. See `TASKS.md`
+  implementation block `Sacrificial Sword Composed Passive`.

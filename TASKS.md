@@ -101,6 +101,10 @@ The B-039 Impetuous Winds correction is complete. Its existing 5% cooldown
 reduction stat shortens Skill and Burst cooldown state at cast time and remains
 exact across multi-charge scheduling and simulator snapshot restore.
 
+The B-040 Sacrificial Sword correction is in progress. Its R5 Composed passive
+will use deterministic-testable Skill-damage draws, reset only the applicable
+Skill cooldown, and enforce the sourced sixteen-second weapon cooldown.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -5122,6 +5126,167 @@ Completion evidence:
   with zero warning matches.
 - The generated `docs/simulation_report.html` update was restored before
   staging, and final preflight passes without artifact leakage.
+
+## Implementation Order: Sacrificial Sword Composed Passive
+
+Status:
+
+- In progress; Phase 1 is complete and Phase 2 remains.
+- Requirement: R5 Sacrificial Sword must have an 80% chance to end its wielder's
+  Skill cooldown after Skill damage, no more than once every sixteen seconds.
+
+Scope:
+
+- Add a focused Skill-cooldown reset operation to `CooldownState` and expose it
+  through `Character`.
+- Implement Sacrificial Sword as a damage-triggered weapon with an injectable
+  draw source, R5 probability, and internal cooldown.
+- Reset the single Skill end time or the earliest pending multi-charge restore,
+  matching the currently displayed cooldown timer.
+- Cover probability and cooldown boundaries, action typing, multi-hit retry,
+  ready-Skill behavior, and multi-charge reset scope.
+
+Out of scope for this pass:
+
+- Adding Sacrificial Sword to a catalog party or changing any party loadout,
+  optimizer configuration, rotation, or accepted damage baseline.
+- Modeling enemy shields; the simulator has no enemy shield state, so the
+  sourced shielded-target non-proc exception cannot be represented here.
+- Modeling multiple enemies or one probability trial per enemy.
+- Implementing the Sacrificial Bow, Greatsword, or Fragments.
+- Adding reset effects for other weapons, artifacts, characters, Burst
+  cooldowns, elemental application ICD, or particle-generation ICD.
+- Changing RL tensors, protocol, training, capability profiles, generated
+  reports, or committed `docs/` output.
+
+Definitions:
+
+- Composed proc: one successful R5 draw after positive direct Skill damage that
+  resets the wielder's applicable Skill cooldown and starts a sixteen-second
+  weapon cooldown.
+- Displayed charge timer: the earliest pending restore in a multi-charge Skill
+  queue; resetting it leaves later pending restores intact.
+
+Design boundaries:
+
+- `CooldownState` owns reset mutation and charge-queue ordering; it does not
+  know weapons, damage, or randomness.
+- `Character` exposes reset intent without exposing mutable cooldown internals.
+- Sacrificial Sword owns eligibility, probability, injected randomness, and
+  its weapon cooldown through `DamageTriggeredWeaponEffect`.
+- Generic damage dispatch remains unchanged and invokes only capability-bearing
+  weapons.
+
+### Phase 1: Record Composed and Reset-Scope Evidence - Done
+
+Why first:
+
+The passive wording, R5 values, per-hit behavior, and multi-charge reset scope
+must be sourced before adding a shared cooldown mutation.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record the maintained weapon description and community weapon page for R5
+  80% probability, sixteen-second cooldown, Lv90 stats, and Skill-damage
+  trigger wording.
+- Record KQM evidence that multi-hit Skills can retry, a proc may occur when the
+  Skill is already ready, and multi-charge users reset only the displayed
+  earliest cooldown.
+- Trace the current stat-only `SacrificialSword` and confirm no generic Skill
+  reset operation exists.
+
+Acceptance criteria:
+
+- Source titles/versions or maintained status, experiment dates, access date,
+  URLs, classification, and simulator limitations are recorded in B-040.
+- The owning state and weapon boundaries and exact test matrix are explicit.
+- No production source changes occur in this phase.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 adds the failing reset and
+  weapon cases.
+
+Verification:
+
+- inspect `SacrificialSword`, `DamageTriggeredWeaponEffect`,
+  `CombatActionResolver`, `Character`, and `CooldownState`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- KQM Swords and Sacrificial-series evidence plus the community Sacrificial
+  Sword page were accessed 2026-08-02 and recorded in B-040.
+- The pre-fix weapon has only 454 base ATK and 61.3% ER; repository search finds
+  no Skill-cooldown reset API or Composed dispatch.
+
+### Phase 2: Implement, Regress, and Close Composed
+
+Why second:
+
+The narrow state reset and the only caller land together so no unused mutable
+API is introduced.
+
+Target files:
+
+- `src/java/model/entity/state/CooldownState.java`
+- `src/java/model/entity/Character.java`
+- `src/java/model/weapon/SacrificialSword.java`
+- `src/java/model/weapon/AGENTS.md`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Add a Skill reset that sets a single-charge end to the reset time or removes
+  only the earliest pending multi-charge restore.
+- Implement R5 Composed through `DamageTriggeredWeaponEffect` with a default
+  stochastic source and a non-null injected `DoubleSupplier` constructor.
+- Draw only for positive direct Skill damage when the weapon cooldown is ready;
+  use a strict draw-below-0.8 success boundary and start cooldown on success.
+- Add actual-weapon regression for trigger, no-trigger, multi-hit retry,
+  internal cooldown, exact boundary, ready Skill, and multi-charge scope.
+- Update the weapon catalog description and close B-040 after full validation.
+
+Acceptance criteria:
+
+- Draw 0.799999 resets a pending Skill; draw 0.8 does not.
+- A failed first Skill hit may succeed on a later hit, while a successful hit
+  suppresses every trial before sixteen seconds and allows one at exactly
+  sixteen seconds.
+- Non-Skill or zero direct damage never draws or resets.
+- A proc while Skill is already ready consumes the weapon cooldown without
+  creating negative or future Skill state.
+- Multi-charge reset removes only the earliest restore and preserves later
+  entries and their captured duration.
+- Existing weapon stats remain 454 base ATK and 61.3% ER; catalog parties and
+  accepted outputs remain unaffected because none equips the weapon.
+
+Test cases to add or update:
+
+- Normal: successful single-charge R5 reset and second Skill availability.
+- Probability: exact failure at 0.8 and success just below it.
+- Multi-hit: failed first hit, successful second hit, then no extra draw.
+- Cooldown: 15.999-second suppression and exact 16.0-second eligibility.
+- Type/no-damage: Normal/Burst and zero-damage Skill do not trigger.
+- Ready state: eligible success consumes weapon cooldown with a no-op reset.
+- Charges: only earliest pending restore is removed.
+- Constructor: null draw source fails immediately.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew PartyCatalogRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/model/entity/state/CooldownState.java --path src/java/model/entity/Character.java --path src/java/model/weapon/SacrificialSword.java --path src/java/model/weapon/AGENTS.md --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
 
 ## NCCL/DDP Distributed RL Training Plan
 
