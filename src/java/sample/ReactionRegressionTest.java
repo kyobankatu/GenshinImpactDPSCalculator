@@ -1,5 +1,8 @@
 package sample;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +58,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseB_NoIcdAppliesEveryHit();
         testAccuracyPhaseB_SharedIcdBlocksRelatedHits();
         testAccuracyPhaseB_DamageStillOccursWhenApplicationBlocked();
+        testAccuracyPhaseB_IcdLoggingMatchesApplicationDecision();
         testAccuracyPhaseC_CoreOverflowExplodesOldest();
         testAccuracyPhaseC_HyperbloomConsumesOneCoreForSingleProjectile();
         testAccuracyPhaseC_BurgeonConsumesAoECores();
@@ -677,6 +681,27 @@ public class ReactionRegressionTest {
                 "Second same-group hit should not apply aura while ICD-blocked");
         assertClose(firstDamage * 2.0, sim.getTotalDamage(), 0.5,
                 "ICD-blocked elemental application should not suppress direct damage");
+    }
+
+    private static void testAccuracyPhaseB_IcdLoggingMatchesApplicationDecision() {
+        CombatSimulator zeroGaugeSim = simulatorWith(testCharacter(Element.PYRO));
+        zeroGaugeSim.setLoggingEnabled(true);
+        String zeroGaugeLog = captureStandardOutput(() -> zeroGaugeSim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                damageHit("Zero-gauge logging hit", Element.PYRO, 1.0)));
+        assertTrue(!zeroGaugeLog.contains("[ICD] Applied blocked"),
+                "Zero-gauge attacks should not be reported as ICD-blocked");
+
+        CombatSimulator blockedSim = simulatorWith(testCharacter(Element.PYRO));
+        blockedSim.setLoggingEnabled(true);
+        String blockedLog = captureStandardOutput(() -> {
+            blockedSim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                    standardIcdHit("ICD logging hit 1", Element.PYRO, ICDTag.ElementalSkill, 0.0));
+            blockedSim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                    standardIcdHit("ICD logging hit 2", Element.PYRO, ICDTag.ElementalSkill, 0.0));
+        });
+        assertTrue(blockedLog.contains("[ICD] Applied blocked (ElementalSkill)"),
+                "A positive-gauge application rejected by ICD should retain the blocked diagnostic");
     }
 
     private static void testAccuracyPhaseC_CoreOverflowExplodesOldest() {
@@ -1378,6 +1403,18 @@ public class ReactionRegressionTest {
         List<ReactionResult.Kind> kinds = new ArrayList<>();
         sim.addReactionListener((result, source, time, simulator) -> kinds.add(result.getKind()));
         return kinds;
+    }
+
+    private static String captureStandardOutput(Runnable action) {
+        PrintStream originalOut = System.out;
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        try (PrintStream capturedOut = new PrintStream(output, true, StandardCharsets.UTF_8)) {
+            System.setOut(capturedOut);
+            action.run();
+        } finally {
+            System.setOut(originalOut);
+        }
+        return new String(output.toByteArray(), StandardCharsets.UTF_8);
     }
 
     private static AttackAction reactionHit(String name, Element element) {

@@ -164,3 +164,34 @@ experiment record.
   current-revision runs and the independent B-006 audit produced the same
   15,892,535 damage / 233,028 DPS result. The mismatch predated B-006 and was
   not caused by its regression-test change.
+
+### B-009 — Zero-gauge attacks are logged as ICD-blocked
+
+- Status: `done`
+- Source: 2 (observable `FlinsParty2` output defect)
+- Symptom: successful zero-gauge attacks print `[ICD] Applied blocked (None)`,
+  falsely reporting an elemental-application rejection and obscuring real ICD
+  blocks in the 2,900-line sample log.
+- Scope: `src/java/simulation/runtime/CombatActionResolver.java`,
+  `src/java/sample/ReactionRegressionTest.java`
+- Risk: `local`
+- Proof: `./gradlew ReactionRegressionTest` plus `./gradlew FlinsParty2` with an
+  unchanged numeric baseline
+- Notes: completed 2026-08-02. A focused output-capture regression proves that
+  zero-gauge attacks remain silent while a positive-gauge application rejected
+  by standard ICD retains its diagnostic. `FlinsParty2` remained at 15,892,535
+  damage / 233,028 DPS. Positive-gauge actions that use `ICDTag.None` still
+  produce real blocked decisions and require separate mechanic evidence rather
+  than being hidden by this logging fix.
+
+### B-010 — Reserved special ICD type has no implementation
+
+- Status: `rejected`
+- Source: 4 (implementation marker audit)
+- Symptom: none; `ICDType.Special` is reserved but has no production or test
+  callers.
+- Scope: `src/java/model/type/ICDType.java`, `src/java/mechanics/element/ICDManager.java`
+- Risk: `local`
+- Proof: n/a
+- Notes: rejected by the value gate. Implementing an unused policy without a
+  mechanic-specific contract or observable caller would manufacture scope.

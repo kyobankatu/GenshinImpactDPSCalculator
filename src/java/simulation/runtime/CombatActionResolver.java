@@ -89,7 +89,7 @@ public class CombatActionResolver {
             }
             if (applied && action.getGaugeUnits() > 0) {
                 reactionMulti = resolveGaugeAndReactions(c, characterId, action, context);
-            } else if (sim.isLoggingEnabled()) {
+            } else if (!applied && action.getGaugeUnits() > 0 && sim.isLoggingEnabled()) {
                 System.out.println(String.format("   [ICD] Applied blocked (%s)", action.getICDTag()));
             }
 
