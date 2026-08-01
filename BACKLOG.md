@@ -305,3 +305,27 @@ experiment record.
   ICD blocks or elemental reactions. Flins changed from 7,004,707 to 6,834,944
   and Columbina from 4,349,846 to 4,349,309. The accepted result is 15,434,039
   damage / 226,306 DPS.
+
+### B-015 — Flins standard Burst delayed hits incorrectly apply Electro
+
+- Status: `planned`
+- Source: 1 (source audit of adjacent Flins Burst metadata)
+- Symptom: the standard Burst initial, middle, and final actions omit explicit
+  ICD metadata and therefore normalize to 1U/Standard under the neutral tag.
+  The documented contract is 1U/no-ICD for the initial hit and 0U/no-ICD for
+  every middle and final hit.
+- Scope: `src/java/model/character/Flins.java`,
+  `src/java/sample/ReactionRegressionTest.java`
+- Risk: `planned`
+- Proof: focused actual-Flins standard-Burst metadata/reaction regression plus
+  two matching `./gradlew FlinsParty2` summaries
+- Notes: adopt the Genshin Impact Wiki Flins advanced-property table (accessed
+  2026-08-02), which records Initial Skill Damage as 1U/no-ICD and both Middle
+  Phase and Final Phase Lunar-Charged Damage as 0U/no-ICD. KQM's maintained
+  Flins TCL corroborates the initial, middle, and final talent-hit split and
+  direct Lunar-Charged model. Sources:
+  https://genshin-impact.fandom.com/wiki/Flins and
+  https://library.keqingmains.com/characters/electro/flins. The current
+  `FlinsParty2` rotation does not execute the standard Burst, so its pre-fix
+  baseline remains 15,434,039 damage / 226,306 DPS. See `TASKS.md`
+  implementation block `Flins Standard Burst Elemental Application`.

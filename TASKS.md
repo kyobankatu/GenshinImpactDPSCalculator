@@ -1579,6 +1579,153 @@ Completion evidence:
 - Flins changed from 7,004,707 to 6,834,944 and Columbina from 4,349,846 to
   4,349,309; the accepted result is 15,434,039 damage / 226,306 DPS.
 
+## Implementation Order: Flins Standard Burst Elemental Application
+
+Status:
+
+- In progress.
+- Phase 1 is complete; Phases 2-3 remain.
+- Requirement: the standard Burst initial hit must apply 1U without ICD while
+  every delayed middle and final hit retains direct Lunar damage at 0U/no-ICD.
+
+Scope:
+
+- Explicitly encode initial, middle, and final standard-Burst ICD/gauge
+  metadata in `Flins`.
+- Extend actual-Flins regression coverage for application, delayed hit counts,
+  metadata, reactions, and direct damage.
+- Confirm the unaffected `FlinsParty2` baseline remains deterministic.
+
+Out of scope for this pass:
+
+- Changing multipliers, Lunar classification, delayed timing or hit count,
+  Thundercloud conditions, cooldowns, energy, or Thunderous Symphony.
+- Changing generic ICD/reaction services, optimizer behavior, RL contracts, or
+  generated `docs/` output.
+
+Design boundaries:
+
+- `model.character.Flins` remains the sole owner of standard-Burst action
+  metadata and scheduling.
+- Generic simulator services consume typed actions without Flins branches.
+- Regression uses actual action requests and listeners without a test-only
+  production API.
+
+### Phase 1: Record Standard-Burst Application Evidence - Done
+
+Why first:
+
+The initial and delayed hits intentionally differ in gauge despite sharing one
+talent, so the per-hit source contract must precede implementation.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record the Genshin Impact Wiki advanced-property rows, accessed 2026-08-02:
+  initial 1U/no-ICD, middle and final 0U/no-ICD.
+- Corroborate the three hit classes and direct Lunar model against KQM TCL.
+- Record inherited current metadata and the absence of standard Burst from the
+  current `FlinsParty2` rotation.
+
+Acceptance criteria:
+
+- Source URLs, access date, adopted classification, and bounded test design are
+  recorded.
+- Pre-fix `FlinsParty2` is 15,434,039 damage / 226,306 DPS and contains zero
+  standard-Burst hits.
+- The expected no-change integration result is explicit rather than inferred
+  after implementation.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 adds executable coverage.
+
+Verification:
+
+- inspect `Flins.burst_standard` and the current `FlinsParty2` log
+- `python scripts/preflight.py --run`
+
+### Phase 2: Encode and Test Per-Hit Standard-Burst Gauge
+
+Why second:
+
+After evidence is fixed, all three action definitions and their shared
+actual-character regression can change atomically.
+
+Target files:
+
+- `src/java/model/character/Flins.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Set initial Burst to `ICDType.None`, Burst tag, and 1U.
+- Set every middle and final action to `ICDType.None`, Burst tag, and 0U.
+- Extend the standard-Burst regression to inspect all actions and reaction
+  behavior after delayed execution.
+
+Acceptance criteria:
+
+- Initial, middle, and final actions expose the documented metadata.
+- Against Hydro, only the initial elemental application triggers a positive
+  Lunar-Charged reaction; delayed 0U hits do not reapply Electro.
+- All delayed hits retain positive direct damage and existing timing/counts.
+- No Symphony or generic runtime code changes.
+
+Test cases to add or update:
+
+- Normal: no-Thundercloud cast emits one initial, two middle, and one final hit.
+- Application: initial is 1U/no-ICD and can trigger one elemental reaction.
+- No-trigger: all delayed middle/final hits are 0U/no-ICD and add no elemental
+  reaction.
+- Conditional: active Thundercloud retains four middle hits with identical 0U
+  metadata.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Confirm the Unchanged FlinsParty2 Baseline
+
+Why last:
+
+The current rotation does not use this action, but a full integration pass must
+prove that the scoped correction has no unrelated effect.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Run two fresh `FlinsParty2` invocations and compare simulator payloads.
+- Confirm zero standard-Burst hits and an unchanged accepted baseline.
+- Close B-015 without rewriting numeric baselines when they remain unchanged.
+
+Acceptance criteria:
+
+- Two fresh simulator payloads and summaries match.
+- `FlinsParty2` remains 15,434,039 damage / 226,306 DPS.
+- README and verification gate remain unchanged.
+- Routed preflight checks pass.
+
+Test cases to add or update:
+
+- No further production test; Phase 2 owns the mechanic contract.
+
+Verification:
+
+- two fresh `./gradlew FlinsParty2` runs
+- `python scripts/preflight.py --run`
+
 ## Cross-Cutting Rules
 
 ### Testing
