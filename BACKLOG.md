@@ -1186,7 +1186,7 @@ experiment record.
 
 ### B-048 — Resistance shred is incorrectly snapshotted with attacker stats
 
-- Status: `planned`
+- Status: `done`
 - Source: 2 (B-047 integration trace and formula audit)
 - Symptom: `DamageCalculator.resolveStats` returns only the caster's stored
   snapshot for snapshot actions, so live enemy-facing RES shred buffs are
@@ -1196,7 +1196,7 @@ experiment record.
 - Scope: classify attacker buffs versus enemy-facing resistance state, resolve
   resistance shred at impact for standard/Lunar/direct reaction paths, focused
   snapshot boundaries, and affected deterministic party baselines
-- Risk: `planned`
+- Risk: `validated`
 - Proof: snapshot before shred then hit during it, snapshot during shred then hit
   after expiry, live non-snapshot parity, and full-party delta attribution
 - Notes: this is broader than Guoba C1 and also affects Viridescent Venerer,
@@ -1215,3 +1215,15 @@ experiment record.
   https://keqingmains.com/misc/team-building/, and
   https://library.keqingmains.com/combat-mechanics/enemy-mechanics/enemy-resistances.
   See `TASKS.md` implementation block `Live Resistance Reduction Resolution`.
+  Completed by separating impact-time enemy RES effects from attacker snapshots
+  across standard, Lunar, immediate, delayed, core, and weighted reaction paths.
+  Focused regression covers activation, exact expiry, unrelated elements,
+  first-Swirl ordering, later cross-element Swirl, and delayed tick/explosion
+  transitions. Repeated accepted payloads are RaidenParty
+  `0b437864068daf8d903a7bd755e2428d96962dbce2df1bee527f909221fc79f0`
+  at 1,358,959 / 64,712, FlinsParty
+  `0afbc2fd6f3b3d2319a3ff224cf2f1117ace1024240e1cbc4c5dd9185408159e`
+  at 20,460,639 / 205,635, and FlinsParty2
+  `f3d7a0bdfbfe6f56837135a538d20fe08659df2bba22d8444972968781526f26`
+  at 14,794,978 / 214,110. All six integration runs are deterministic and
+  warning-free with unchanged durations and ER contracts.

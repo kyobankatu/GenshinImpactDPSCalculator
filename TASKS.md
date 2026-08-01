@@ -131,6 +131,10 @@ The B-047 Guoba C1 correction is complete. Each Guoba hit refreshes one
 six-second 15% Pyro RES reduction visible to every attacker's live stat
 resolution instead of stacking active-character-only field buffs.
 
+The B-048 resistance correction is complete. Standard, Lunar, immediate
+reaction, delayed reaction, and weighted party damage now resolve matching
+enemy RES reduction at impact without retaining it in attacker snapshots.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -7080,14 +7084,14 @@ Completion evidence:
 
 Status:
 
-- Phases 1-4 are complete; Phase 5 remains pending.
+- Complete; all five phases are implemented and accepted.
 - Requirement: elemental and Physical RES reduction is enemy-facing state and
   must be evaluated at each damage impact, never captured with attacker stats.
 
 Scope:
 
-- Centralize live RES-reduction extraction from the buff list captured at the
-  start of an immediate hit.
+- Centralize live RES-reduction extraction from the enemy-effect list captured
+  at the start of an immediate hit.
 - Route standard, Lunar, Shatter, transformative, stateful, and core-trigger
   immediate damage through that resolver.
 - Store delayed Electro-Charged, Burning, and Dendro Core damage before RES and
@@ -7113,8 +7117,9 @@ Definitions:
   container at the damage timestamp.
 - Pre-RES damage: reaction damage after its owner stats and reaction bonuses but
   before the target's resistance multiplier.
-- Immediate hit boundary: the immutable applicable-buff list captured before
-  reaction callbacks for one `CombatActionResolver` invocation.
+- Immediate hit boundary: the immutable team-effect list captured before
+  reaction callbacks for one `CombatActionResolver` invocation. Attacker stat
+  targeting remains separate from this enemy-state list.
 
 Design boundaries:
 
@@ -7180,9 +7185,10 @@ Completion evidence:
   and miss newly active reduction. Standard Electro-Charged, Burning, and Bloom
   store post-RES values for later impacts, while weighted Lunar damage hardcodes
   zero reduction.
-- The resolver captures applicable buffs before reaction notification. Reusing
-  that immutable list for immediate damage prevents B-048 from changing B-042's
-  separately deferred first-Swirl ordering.
+- The resolver captures team effects before reaction notification. Reusing that
+  immutable enemy-state list for immediate damage prevents B-048 from changing
+  B-042's separately deferred first-Swirl ordering without filtering a Pyro,
+  Hydro, Cryo, or Electro debuff by an Anemo reaction owner's element.
 
 ### Phase 2: Centralize Live RES for Standard and Lunar Hits - Done
 
@@ -7262,7 +7268,7 @@ Tasks:
 
 - Route Shatter, Hyperbloom/Burgeon, transformative, Burning creation, and Bloom
   creation through the central live RES multiplier.
-- Pass the start-of-hit applicable list through existing context and handlers.
+- Pass the start-of-hit enemy-effect list through existing context and handlers.
 - Add snapshot/live parity and first-Swirl non-immediacy regressions.
 
 Acceptance criteria:
@@ -7374,7 +7380,7 @@ Completion evidence:
   core hit-cap regressions pass.
 - Reaction regression, build, Javadoc, routed validation, and preflight pass.
 
-### Phase 5: Re-Accept Affected Party Baselines - Pending
+### Phase 5: Re-Accept Affected Party Baselines - Done
 
 Why last:
 
@@ -7399,7 +7405,8 @@ Tasks:
 Acceptance criteria:
 
 - Each party's repeated normalized payloads match with no new warning.
-- Timings, rotations, ER, and unrelated damage categories remain unchanged.
+- Timings, rotations, and ER remain unchanged; any optimizer reallocation and
+  resulting secondary category delta is deterministic and explicitly attributed.
 - Numerical changes align with active reduction element/time windows and no
   first-Swirl immediate benefit appears.
 - README, verification skill, plan, and ledger agree; no generated output is
@@ -7418,3 +7425,30 @@ Verification:
 - two fresh `./gradlew FlinsParty2` runs
 - `python scripts/validate_agent_assets.py`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Two normalized payloads per party match exactly: RaidenParty SHA-256
+  `0b437864068daf8d903a7bd755e2428d96962dbce2df1bee527f909221fc79f0`,
+  FlinsParty `0afbc2fd6f3b3d2319a3ff224cf2f1117ace1024240e1cbc4c5dd9185408159e`,
+  and FlinsParty2
+  `f3d7a0bdfbfe6f56837135a538d20fe08659df2bba22d8444972968781526f26`.
+  All six runs complete without warning, error, failed action, or insufficient
+  ER output.
+- RaidenParty is 1,358,959 damage / 64,712 DPS over 21.0 seconds, an intended
+  +48,120 total delta isolated to Xiangling's Pyronado/Guoba direct damage and
+  matching Overloads during Guoba C1. Bennett, Thundercloud, Xingqiu, Raiden,
+  optimizer rolls, and ER remain unchanged (100/175/179/174%).
+- FlinsParty is 20,460,639 damage / 205,635 DPS over 99.5 seconds, +1,530,296
+  from impact-time VV on Electro/Hydro direct, delayed, Thundercloud, and
+  weighted Lunar damage. Sucrose damage, optimizer rolls, duration, rotation,
+  and ER remain unchanged (109/100/100/180%).
+- FlinsParty2 is 14,794,978 damage / 214,110 DPS over 69.1 seconds, +600,246.
+  Matching VV windows account for the material gains. The corrected objective
+  moves one Ineffa optimizer roll from ATK% to CRIT_RATE; the resulting weighted
+  reaction redistribution includes a documented 55-damage Sucrose decrease.
+  Duration, rotation, and ER remain unchanged (141/132/105/193%).
+- Focused regression proves that a first VV-triggering Swirl does not read the
+  reduction it emits, while a later Anemo-owned Swirl reads the already-active
+  cross-element reduction. The tracked `docs/simulation_report.html` generated
+  by FlinsParty2 was restored, and no generated output is staged.

@@ -210,7 +210,8 @@ python scripts/preflight.py --run
 ## Accuracy Notes
 
 `TASKS.md` tracks the current implementation plan and latest audit notes. The
-current audited benchmark parties are `RaidenParty` and `FlinsParty2`.
+current audited benchmark parties are `RaidenParty`, `FlinsParty`, and
+`FlinsParty2`.
 
 Known simplifications:
 
@@ -224,7 +225,9 @@ Known simplifications:
   definition enables that assumption. Artifact allocation includes Emblem's
   static 20% ER. Raiden's second Skill refreshes one recipient-specific Eye of
   Stormy Judgment buff instead of stacking with its first 25-second window. The
-  accepted set-aware result is 1,310,839 damage / 62,421 DPS over 21.0 seconds.
+  simulator resolves enemy RES reduction at each impact rather than retaining it
+  in attacker snapshots. The accepted set-aware result is 1,358,959 damage /
+  64,712 DPS over 21.0 seconds.
 - `FlinsParty2`: defensive shield HP is logged but not consumed by enemy attacks,
   Columbina treats every Lunar reaction during Gravity Ripple as nearby because
   field position is not simulated, and her Thundercloud extra strikes use 33%
@@ -233,8 +236,9 @@ Known simplifications:
   maximum. Viridescent Venerer applies one independently refreshed 40% shred per
   Swirled element only when its on-field owner triggers the reaction. Silken
   Moon's Serenade dynamically contributes 10% Lunar Reaction DMG for each
-  distinct active Intent/Devotion effect, capped at 20%. The accepted result is
-  14,194,732 damage / 205,423 DPS over 69.1 seconds.
+  distinct active Intent/Devotion effect, capped at 20%. Standard, delayed, and
+  weighted Lunar damage all resolve matching RES reduction at impact. The
+  accepted result is 14,794,978 damage / 214,110 DPS over 69.1 seconds.
 - `FlinsParty`: generic Favonius Codex and Columbina construction remains
   stochastic, while this optimizer-driven sample injects independent fixed
   Windfall and Moondrift streams so every candidate and final run uses the same
@@ -244,8 +248,9 @@ Known simplifications:
   owner's effective EM after 64 frames and every 10 seconds for its linked
   owner/team ATK buffs. Viridescent Venerer uses the same non-stacking,
   owner-triggered shred contract. Silken Moon's Serenade resolves the same
-  distinct-effect dynamic Lunar bonus. The accepted result is 18,930,343 damage /
-  190,255 DPS over 99.5 seconds with three successful Sucrose Bursts.
+  distinct-effect dynamic Lunar bonus, and reaction damage resolves matching RES
+  reduction at impact. The accepted result is 20,460,639 damage / 205,635 DPS
+  over 99.5 seconds with three successful Sucrose Bursts.
 
 ### Continuous Aura Decay Model
 
@@ -273,7 +278,7 @@ model above and does not model multi-target or per-enemy aura gauges.
 Latest validation baseline from the accuracy pass:
 
 - `./gradlew ReactionRegressionTest`
-- `./gradlew RaidenParty`: 1,310,839 total damage / 62,421 DPS
-- `./gradlew FlinsParty2`: 14,194,732 total damage / 205,423 DPS
+- `./gradlew RaidenParty`: 1,358,959 total damage / 64,712 DPS
+- `./gradlew FlinsParty2`: 14,794,978 total damage / 214,110 DPS
 - `./gradlew BenchmarkRLJava`
 - `./gradlew ProfileCapabilities`
