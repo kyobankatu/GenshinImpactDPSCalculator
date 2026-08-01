@@ -88,7 +88,10 @@ public class DamageCalculator {
             double reactionMultiplier,
             simulation.CombatSimulator sim) {
         DamageStrategy strategy = action.isLunarConsidered() ? LUNAR_STRATEGY : STANDARD_STRATEGY;
-        return strategy.calculate(attacker, target, action, activeBuffs, currentTime, reactionMultiplier, sim);
+        double damage = strategy.calculate(
+                attacker, target, action, activeBuffs, currentTime, reactionMultiplier, sim);
+        notifyDamageHooks(attacker, action, currentTime, sim, damage);
+        return damage;
     }
 
     /**
@@ -122,8 +125,10 @@ public class DamageCalculator {
             double reactionMultiplier,
             simulation.CombatSimulator sim) {
         DamageStrategy strategy = action.isLunarConsidered() ? LUNAR_STRATEGY : STANDARD_STRATEGY;
-        return strategy.calculate(attacker, target, action, activeBuffs, preResolvedStats, currentTime,
-                reactionMultiplier, sim);
+        double damage = strategy.calculate(
+                attacker, target, action, activeBuffs, preResolvedStats, currentTime, reactionMultiplier, sim);
+        notifyDamageHooks(attacker, action, currentTime, sim, damage);
+        return damage;
     }
 
     /**

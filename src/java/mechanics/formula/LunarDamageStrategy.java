@@ -100,9 +100,7 @@ final class LunarDamageStrategy implements DamageStrategy {
             e.printStackTrace();
         }
 
-        double lunarDamage = baseSection * multiplier * critMult * resMult * columbinaMultiplier;
-        DamageCalculator.notifyDamageHooks(attacker, action, currentTime, sim, lunarDamage);
-        return lunarDamage;
+        return baseSection * multiplier * critMult * resMult * columbinaMultiplier;
     }
 
     private double getLunarReactionSpecificBonus(StatsContainer stats, AttackAction action) {

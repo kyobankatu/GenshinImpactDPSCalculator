@@ -17,7 +17,9 @@
 ## Coupling and dependencies
 - `DamageCalculator` depends on `model.stats.StatsContainer`, `model.type.StatType`, `model.entity.Character`, `model.entity.Enemy`, `mechanics.buff.Buff`, `simulation.action.AttackAction`, and `simulation.CombatSimulator`.
 - Standard damage resolution and Lunar damage resolution are split into focused strategy classes.
-- Weapon and artifact damage-trigger capability interfaces are fired here after final damage is computed.
+- `DamageCalculator` is the sole dispatcher for weapon and artifact damage-trigger
+  capability interfaces after final damage is computed. Formula strategies and
+  runtime resolvers must not dispatch the same hit independently.
 - `simulation.CombatSimulator` depends on this class during every hit resolution.
 
 ## Agent guidance

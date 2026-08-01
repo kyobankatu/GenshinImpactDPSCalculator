@@ -12,10 +12,7 @@ import mechanics.formula.ResistanceCalculator;
 import mechanics.reaction.ReactionCalculator;
 import mechanics.reaction.ReactionEffectScheduler;
 import mechanics.reaction.ReactionResult;
-import model.entity.ArtifactSet;
 import model.entity.Character;
-import model.entity.DamageTriggeredArtifactEffect;
-import model.entity.DamageTriggeredWeaponEffect;
 import model.stats.StatsContainer;
 import model.type.ActionType;
 import model.type.CharacterId;
@@ -610,11 +607,6 @@ public class CombatActionResolver {
                 attacker, sim.getEnemy(), action, context.applicableBuffs, context.resolvedStats,
                 sim.getCurrentTime(), reactionMulti, sim);
 
-        if (attacker.getWeapon() instanceof DamageTriggeredWeaponEffect) {
-            ((DamageTriggeredWeaponEffect) attacker.getWeapon()).onDamage(
-                    attacker, action, sim.getCurrentTime(), sim);
-        }
-
         if (action.getActionType() == ActionType.NORMAL || action.getActionType() == ActionType.CHARGE) {
             applyExpectedNormalAttackEnergy(attacker);
         }
@@ -624,14 +616,6 @@ public class CombatActionResolver {
         }
         sim.recordDamage(attacker.getCharacterId(), damage);
         sim.captureResolvedActionDamage(attacker.getCharacterId(), damage);
-
-        if (attacker.getArtifacts() != null) {
-            for (ArtifactSet artifact : attacker.getArtifacts()) {
-                if (artifact instanceof DamageTriggeredArtifactEffect) {
-                    ((DamageTriggeredArtifactEffect) artifact).onDamage(sim, action, damage, attacker);
-                }
-            }
-        }
 
         if (sim.isLoggingEnabled()) {
             String reactionLabel = action.getAdditiveReactionName() != null

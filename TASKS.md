@@ -689,7 +689,7 @@ Verification:
 Status:
 
 - In progress.
-- Phase 1 is complete; Phases 2-4 remain.
+- Phases 1-2 are complete; Phases 3-4 remain.
 - Requirement: one resolved hit must dispatch each damage-trigger hook exactly
   once, and `RaidenParty` optimizer candidates must evaluate Skyward Spine under
   the same reproducible random sequence.
@@ -778,7 +778,7 @@ Verification:
 - `./gradlew ReactionRegressionTest`
 - three isolated `./gradlew RaidenParty` runs
 
-### Phase 2: Dispatch Each Damage Hook Once
+### Phase 2: Dispatch Each Damage Hook Once - Done
 
 Why second:
 

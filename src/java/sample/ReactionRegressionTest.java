@@ -78,6 +78,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_WeaponReactionBonusRegression();
         testAccuracyPhaseF_XianglingChiliPickupOptIn();
         testAccuracyPhaseF_XingqiuOrbitalApplicationCadence();
+        testAccuracyPhaseF_DamageHooksDispatchOnce();
         testAccuracyPhase2_TimeAwareLinearDecay();
         testAccuracyPhase2_QueryBeforeAndAtApplication();
         testAccuracyPhase2_ExpiryBoundaries();
@@ -1176,6 +1177,67 @@ public class ReactionRegressionTest {
                 "Xingqiu Raincutter swords should retain their separate ICD group");
     }
 
+    private static void testAccuracyPhaseF_DamageHooksDispatchOnce() {
+        CountingDamageWeapon weapon = new CountingDamageWeapon();
+        CountingDamageArtifact artifact = new CountingDamageArtifact();
+        TestCharacter character = testCharacter(Element.ELECTRO);
+        character.setWeapon(weapon);
+        character.setArtifacts(artifact);
+        CombatSimulator sim = simulatorWith(character);
+
+        AttackAction standard = new AttackAction(
+                "Counting Standard Hit",
+                1.0,
+                Element.ELECTRO,
+                StatType.BASE_ATK,
+                StatType.ELECTRO_DMG_BONUS,
+                0.0,
+                ActionType.SKILL);
+        standard.setICD(ICDType.None, ICDTag.None, 0.0);
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE, standard);
+        assertEquals(1, weapon.damageHookCount,
+                "One standard hit should dispatch its weapon damage hook once");
+        assertEquals(1, artifact.damageHookCount,
+                "One standard hit should dispatch its artifact damage hook once");
+
+        AttackAction lunar = new AttackAction(
+                "Counting Lunar Hit",
+                1.0,
+                Element.ELECTRO,
+                StatType.BASE_ATK,
+                StatType.ELECTRO_DMG_BONUS,
+                0.0,
+                ActionType.SKILL);
+        lunar.setLunarReactionType(AttackAction.LunarReactionType.CHARGED);
+        lunar.setICD(ICDType.None, ICDTag.None, 0.0);
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE, lunar);
+        assertEquals(2, weapon.damageHookCount,
+                "One Lunar hit should dispatch its weapon damage hook once");
+        assertEquals(2, artifact.damageHookCount,
+                "One Lunar hit should dispatch its artifact damage hook once");
+
+        AttackAction direct = new AttackAction(
+                "Counting Direct Formula Hit",
+                1.0,
+                Element.PHYSICAL,
+                StatType.BASE_ATK,
+                StatType.PHYSICAL_DMG_BONUS,
+                0.0,
+                ActionType.OTHER);
+        mechanics.formula.DamageCalculator.calculateDamage(
+                character,
+                sim.getEnemy(),
+                direct,
+                sim.getApplicableBuffs(character),
+                sim.getCurrentTime(),
+                1.0,
+                sim);
+        assertEquals(3, weapon.damageHookCount,
+                "A direct DamageCalculator caller should dispatch its weapon hook once");
+        assertEquals(3, artifact.damageHookCount,
+                "A direct DamageCalculator caller should dispatch its artifact hook once");
+    }
+
     private static void testAccuracyPhaseF_ArtifactLunarReactionBuffRegression() {
         TestCharacter owner = testCharacter(Element.ELECTRO).asLunar();
         owner.setArtifacts(new model.artifact.NightOfTheSkysUnveiling());
@@ -1420,6 +1482,44 @@ public class ReactionRegressionTest {
     private static final class TestWeapon extends Weapon {
         private TestWeapon() {
             super("Test Weapon", new StatsContainer());
+        }
+    }
+
+    /** Counts weapon damage-hook dispatches without adding combat behavior. */
+    private static final class CountingDamageWeapon extends Weapon
+            implements model.entity.DamageTriggeredWeaponEffect {
+        private int damageHookCount;
+
+        private CountingDamageWeapon() {
+            super("Counting Damage Weapon", new StatsContainer());
+        }
+
+        @Override
+        public void onDamage(
+                Character user,
+                AttackAction action,
+                double currentTime,
+                CombatSimulator sim) {
+            damageHookCount++;
+        }
+    }
+
+    /** Counts artifact damage-hook dispatches without adding combat behavior. */
+    private static final class CountingDamageArtifact extends ArtifactSet
+            implements model.entity.DamageTriggeredArtifactEffect {
+        private int damageHookCount;
+
+        private CountingDamageArtifact() {
+            super("Counting Damage Artifact", new StatsContainer());
+        }
+
+        @Override
+        public void onDamage(
+                CombatSimulator sim,
+                AttackAction action,
+                double damage,
+                Character owner) {
+            damageHookCount++;
         }
     }
 }
