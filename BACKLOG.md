@@ -605,7 +605,7 @@ experiment record.
 
 ### B-026 — Birgitta summons overlap, overrun, and ignore Burst refresh
 
-- Status: `planned`
+- Status: `completed`
 - Source: 2/3 (observable duplicate output and sourced summon divergence)
 - Symptom: each Skill registers an independent 11-hit Birgitta event, old
   streams continue after recast, and Burst does not summon or refresh Birgitta
@@ -624,3 +624,8 @@ experiment record.
   duration from the +2-second first tick to the +20-second tenth tick. Pre-fix
   audited `FlinsParty2` baseline is 15,434,039 damage / 226,306 DPS. See
   `TASKS.md` implementation block `Ineffa Birgitta Summon Lifecycle`.
+  Completed 2026-08-02. Actual-Ineffa regression covers Skill and Burst summon,
+  ten-hit lifetime, no +22-second hit, and Skill/Burst replacement. Both
+  post-fix `FlinsParty2` payloads report 14,316,424 damage / 213,042 DPS with
+  normalized SHA-256
+  `1990a24b7dea2d237f7d7823c2ca77c64649eaddd98a1174730fdb3a7384a6bb`.

@@ -62,8 +62,9 @@ previous Eye periodic event, leaving one refreshed stream.
 The B-025 correction is complete. Guoba's periodic duration now stops after its
 four sourced flame hits.
 
-The active queue is B-026: Skill and Burst must refresh one Birgitta summon
-whose 20-second lifetime contains exactly ten two-second Discharge attacks.
+The B-026 correction is complete. Ineffa's Skill and Burst now refresh one
+Birgitta summon whose 20-second lifetime contains exactly ten two-second
+Discharge attacks.
 
 ## Scope
 
@@ -3274,7 +3275,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phases 1-2 are complete and Phase 3 remains.
+- Complete; Phases 1-3 passed their acceptance criteria.
 - Requirement: Skill or Burst summons/refreshed exactly one Birgitta, which
   attacks ten times at two-second intervals during its 20-second lifetime.
 
@@ -3371,7 +3372,7 @@ Verification:
 - `./gradlew build`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Accept the FlinsParty2 Birgitta Delta
+### Phase 3: Accept the FlinsParty2 Birgitta Delta - Done
 
 Why last:
 
@@ -3407,6 +3408,16 @@ Verification:
 - two fresh `./gradlew FlinsParty2` runs
 - `python scripts/validate_agent_assets.py` when baseline gate changes
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Both post-fix payloads report 14,316,424 damage / 213,042 DPS and match after
+  excluding Gradle's elapsed-time line, with SHA-256
+  `1990a24b7dea2d237f7d7823c2ca77c64649eaddd98a1174730fdb3a7384a6bb`.
+- The trace contains one Birgitta stream after each Skill or Burst completion;
+  each replacement begins two seconds later and no superseded stream resumes.
+- The executable actual-Ineffa regression verifies ten exact hits at +2 through
+  +20 seconds, no +22-second hit, Burst-only summon, and Skill/Burst refresh.
 
 ## Cross-Cutting Rules
 
