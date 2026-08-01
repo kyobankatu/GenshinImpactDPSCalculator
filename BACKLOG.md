@@ -1632,14 +1632,14 @@ experiment record.
 
 ### B-061 — Freeze Aura never decays or survives snapshot restore
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 1/3 (README known difference, KQM gauge evidence, and gcsim reference)
 - Symptom: `Enemy` stores one non-time-aware `freezeAuraUnits` value, so a target
   remains Frozen forever unless Shattered; snapshot save/restore omits Freeze
   entirely, and repeated Freeze replaces instead of extending its gauge.
 - Scope: typed accelerating Freeze gauge, natural expiry, refreeze extension,
   Shatter consumption, snapshot continuity, and deterministic catalog controls
-- Risk: `planned`
+- Risk: `validated`
 - Proof: exact 1U-source gauge/duration, midpoint nonlinear decay, exact expiry,
   active extension without decay reset, thawing-rate recovery, Shatter clear,
   snapshot restore, and unchanged non-Freeze party hashes
@@ -1658,3 +1658,31 @@ experiment record.
   Freeze lifecycle only. Dual underlying Aura reaction priority, trigger
   residual attachment, Freeze resistance, hitlag, poise damage, and Shatter
   damage ICD remain separate.
+  Completed with immutable gauge/rate/update state, exact nonlinear expiry,
+  active extension, inactive rate recovery, time-aware Shatter/resonance, and
+  full snapshot continuity. Regression covers both source directions, midpoint,
+  exact expiry, extension, reduction, recovery, invalid input, Shatter, and
+  resonance. Six catalog controls are pairwise exact with unchanged values, ER,
+  cadence, and zero Freeze/Shatter/warning lines. B-060 hash differences in
+  Raiden/Flins are line-order-only and exposed B-062.
+
+### B-062 — Simultaneous Aura reaction order depends on HashSet iteration
+
+- Status: `candidate`
+- Source: 3 (B-061 control diff plus maintained gcsim reaction order)
+- Symptom: `Enemy.getActiveAuras` returns a `HashSet`, so adding unrelated fields
+  changed Pyro-on-Hydro+Electro and Anemo-on-Hydro+Electro log order between
+  builds. B-060 itself used different order for FlinsParty and FlinsParty2.
+- Scope: trigger-specific deterministic single-target Aura reaction priority,
+  dual-Aura order regressions, and catalog baseline re-acceptance
+- Risk: `planned`
+- Proof: explicit order for every supported trigger, stable logs across fresh JVM
+  processes, unchanged reaction values, and documented unresolved residual rules
+- Notes: gcsim's maintained `React` dispatcher orders Electro, Pyro, Cryo,
+  Hydro, Anemo, Geo, and Dendro reaction attempts explicitly rather than
+  iterating target storage. Its current order places Overload before Vaporize
+  for Pyro and Electro Swirl before Hydro Swirl for Anemo, matching the B-061
+  post-layout logs. Source accessed 2026-08-02:
+  https://github.com/genshinsim/gcsim/blob/main/pkg/reactable/reactable.go.
+  Do not infer trigger residual attachment or Frozen/Burning synthetic Aura
+  priority in this item; order only already-supported ordinary Aura reactions.

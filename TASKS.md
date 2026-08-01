@@ -10387,7 +10387,7 @@ Completion evidence:
 - `ReactionRegressionTest`, `build`, `javadoc`, routed validation, and full
   preflight pass with no persistent service or external job.
 
-### Phase 4: Re-Accept Freeze-Neutral Catalog Baselines - In Progress
+### Phase 4: Re-Accept Freeze-Neutral Catalog Baselines - Done
 
 Target files:
 
@@ -10403,7 +10403,8 @@ Tasks:
 
 Acceptance criteria:
 
-- All six runs match B-060 exactly with no Freeze/Shatter events or warnings.
+- All six runs are pairwise exact with unchanged B-060 values, ER, cadence, and
+  no Freeze/Shatter events or warnings; ordering-only differences are explained.
 - Focused/full validation pass and the tracked generated report is restored.
 - Plan, ledger, README, and durable checkpoint agree.
 
@@ -10419,3 +10420,24 @@ Verification:
 - two fresh `./gradlew --no-daemon FlinsParty` runs
 - two fresh `./gradlew --no-daemon FlinsParty2` runs
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Two fresh no-daemon runs per catalog party match pairwise after removing only
+  Gradle's elapsed-success line: Raiden
+  `bbd1c4f61f00024213e1c6f49519fe7abe0ad568c8dacf4c562437e5e6b59abc`,
+  Flins `9b0b3556ca8f4eb799e6965156aab3bc70e512c7056cdf7e0202572c3996e464`,
+  and unchanged Flins2
+  `23dc585acc02d3bd7bca7fe3f5b65db62b3e1489fcedb12a02b9725b774b7dd4`.
+- Totals/DPS remain 1,365,787/65,037, 22,675,823/227,898, and
+  15,817,125/228,902. ER and timed/reaction/delayed/ICD counts remain exactly
+  100/175/179/174 with 152/55/11/38, 109/100/100/180 with 613/230/48/88, and
+  130/128/100/196 with 468/140/33/71.
+- Every run contains zero Freeze/Shatter reaction lines and zero
+  warning/error/failed-action/insufficient-energy lines. Raiden and Flins differ
+  from B-060 only by reversed adjacent Hydro/Electro reaction log lines; values,
+  allocations, counts, and all other output are unchanged. The `HashSet` order
+  issue is recorded separately as B-062 instead of being hidden in Freeze scope.
+- README documents finite typed Freeze and retains the exact coexistence,
+  residual, resistance, hitlag, poise, and Shatter-ICD exclusions. The tracked
+  generated report was restored and no output is staged.
