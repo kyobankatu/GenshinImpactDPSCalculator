@@ -772,7 +772,7 @@ experiment record.
 
 ### B-033 — Artifact optimizer silently accepts unreachable ER targets
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 2 (reproducible sample warning and optimizer/loadout mismatch)
 - Symptom: `FlinsParty` requests 258.3% ER for Sucrose, but the fixed triple-EM
   main stats and ten-liquid-roll per-stat cap can supply only about 166.1% ER;
@@ -780,7 +780,7 @@ experiment record.
   the final rotation skips Sucrose Burst at 25.9, 60.6, and 95.3 seconds.
 - Scope: artifact ER feasibility reporting/allocation, optimizer pipeline
   contract, party loadout response, and focused plus repeated sample regression
-- Risk: `planned`
+- Risk: `accepted`
 - Proof: regression that detects an unmet `minER` before final optimization and
   a repeated `FlinsParty` result with an explicit feasible resolution and no
   silently underfilled ER target
@@ -792,4 +792,15 @@ experiment record.
   artifact generation and remove the unsupported second Sucrose Burst from
   each outer loop while preserving the Skill and first Burst. See `TASKS.md`
   implementation block
-  `Artifact ER Feasibility and Legal FlinsParty Burst Cadence`.
+  `Artifact ER Feasibility and Legal FlinsParty Burst Cadence`. Completed
+  2026-08-02. Exact-cap, just-over-cap, and insufficient-manual-allocation
+  regressions pass. Catalog parties now include equipped artifact-set static
+  stats during allocation, and fatal sample errors propagate to Gradle.
+  Two accepted `FlinsParty` runs report Sucrose/Flins/Ineffa/Columbina ER of
+  109%/100%/100%/180%, three successful Sucrose Bursts, zero warnings,
+  18,765,805 damage / 188,601 DPS over 99.5 seconds, and normalized SHA-256
+  `acbb84038b3846771d1af195410e3d11daad7f152ea4ea450c37c2d05ee2dd85`.
+  Two set-aware RaidenParty runs report 1,317,080 damage / 62,718 DPS over
+  21.0 seconds and normalized SHA-256
+  `ff1adfd3b3705f1cc34a32036af0950aa8a1246a6412589eb214966b3f3c33dc`.
+  FlinsParty2 retains 14,077,198 damage / 203,722 DPS over 69.1 seconds.

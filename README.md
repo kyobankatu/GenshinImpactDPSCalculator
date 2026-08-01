@@ -221,7 +221,9 @@ Known simplifications:
   per-simulator Skyward Spine proc seed so optimizer candidates and sample runs
   are reproducible. Generic Skyward Spine construction remains stochastic, and
   generic Xiangling simulations do not pick up the chili unless their party
-  definition enables that assumption.
+  definition enables that assumption. Artifact allocation includes Emblem's
+  static 20% ER; the accepted set-aware result is 1,317,080 damage / 62,718 DPS
+  over 21.0 seconds.
 - `FlinsParty2`: defensive shield HP is logged but not consumed by enemy attacks,
   Columbina treats every Lunar reaction during Gravity Ripple as nearby because
   field position is not simulated, and her Thundercloud extra strikes use 33%
@@ -231,8 +233,10 @@ Known simplifications:
 - `FlinsParty`: generic Favonius Codex and Columbina construction remains
   stochastic, while this optimizer-driven sample injects independent fixed
   Windfall and Moondrift streams so every candidate and final run uses the same
-  random scenario. The now-reproducible Sucrose ER infeasibility is tracked as
-  B-033 in `BACKLOG.md` rather than hidden by run-to-run random variation.
+  random scenario. Its legal cadence requests one Sucrose Burst in each of
+  three outer loops; artifact allocation rejects unmet ER targets instead of
+  silently returning an underfilled build. The accepted result is 18,765,805
+  damage / 188,601 DPS over 99.5 seconds with three successful Sucrose Bursts.
 
 ### Continuous Aura Decay Model
 

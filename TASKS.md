@@ -82,11 +82,11 @@ Favonius and Moondrift streams keep ER calibration and the final rotation on
 the same stochastic scenario without changing generic randomness. The stable
 trace exposed a separate ER-feasibility defect recorded as B-033.
 
-The B-033 ER-feasibility correction is in progress. Artifact generation will
-reject unmet `minER` contracts, `FlinsParty` will request only the three
-Sucrose Bursts its fixed loadout and rotation energy can legally sustain, and
-catalog parties will include equipped artifact-set static stats in allocation.
-Fatal sample configuration errors will propagate to the Gradle caller.
+The B-033 ER-feasibility correction is complete. Artifact generation rejects
+unmet `minER` contracts, `FlinsParty` requests only the three Sucrose Bursts its
+fixed loadout and rotation energy can legally sustain, and catalog parties
+include equipped artifact-set static stats in allocation. Fatal sample
+configuration errors propagate to the Gradle caller.
 
 ## Scope
 
@@ -4208,7 +4208,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phases 1-2 are complete and Phase 3 remains.
+- Implemented; Phases 1-3 are complete.
 - Requirement: artifact generation must never return a build below its declared
   `minER`, and `FlinsParty` must use a deterministic Burst cadence that is
   feasible under its KQMS loadout instead of relying on an impossible target.
@@ -4377,7 +4377,7 @@ Completion evidence:
 - ReactionRegressionTest, PartyCatalogRegressionTest, build, Javadoc, routed
   agent validation, and all three sample smoke runs pass.
 
-### Phase 3: Accept Feasible Deterministic Party Output
+### Phase 3: Accept Feasible Deterministic Party Output - Done
 
 Why last:
 
@@ -4417,6 +4417,19 @@ Verification:
 
 - at least two fresh `./gradlew FlinsParty` runs
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Two fresh FlinsParty payloads match after excluding Gradle's elapsed-time
+  line, with normalized SHA-256
+  `acbb84038b3846771d1af195410e3d11daad7f152ea4ea450c37c2d05ee2dd85`.
+- Both report Sucrose/Flins/Ineffa/Columbina ER of 109%/100%/100%/180%, exactly
+  three successful Sucrose Bursts, zero warnings, and 18,765,805 damage /
+  188,601 DPS over 99.5 seconds.
+- Two set-aware RaidenParty payloads likewise match with 1,317,080 damage /
+  62,718 DPS over 21.0 seconds and normalized SHA-256
+  `ff1adfd3b3705f1cc34a32036af0950aa8a1246a6412589eb214966b3f3c33dc`.
+- FlinsParty2 retains its accepted 14,077,198 damage / 203,722 DPS baseline.
 
 ## NCCL/DDP Distributed RL Training Plan
 
