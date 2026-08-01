@@ -135,6 +135,10 @@ The B-048 resistance correction is complete. Standard, Lunar, immediate
 reaction, delayed reaction, and weighted party damage now resolve matching
 enemy RES reduction at impact without retaining it in attacker snapshots.
 
+The B-049 standard aura-tax and decay correction is in progress. Its sourced
+contract and runtime path inventory are complete; implementation starts with the
+enemy-owned aura application model below.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -7452,3 +7456,250 @@ Completion evidence:
   reduction it emits, while a later Anemo-owned Swirl reads the already-active
   cross-element reduction. The tracked `docs/simulation_report.html` generated
   by FlinsParty2 was restored, and no generated output is staged.
+
+## Implementation Order: Standard Aura Tax and Decay Rates
+
+Status:
+
+- Phase 1 is complete; Phases 2-4 remain pending.
+- Requirement: a standard elemental source that establishes or extends an aura
+  must apply the sourced 0.8 Aura Tax and source-gauge decay rate instead of the
+  simulator's generic `6 + 5U` replacement model.
+
+Scope:
+
+- Add one enemy-owned API for applying a source gauge as a finite aura.
+- Represent current taxed aura units separately from the source gauge that
+  selects the decay rate.
+- Preserve the first non-Pyro aura's decay rate across same-element extensions.
+- Apply the documented Pyro rule: update to the new source decay rate only when
+  the Pyro application changes the current aura amount.
+- Route ordinary no-reaction application and the second Electro-Charged element
+  through the same API.
+- Preserve exact snapshot/restore of current units and decay rate.
+
+Out of scope for this pass:
+
+- Freeze coexisting auras and duration, Quicken/Burning internal gauge state,
+  Bloom-family directional consumption, or Electro-Charged premature terminal
+  ticks.
+- Swirl application to additional targets, multi-target geometry, per-enemy
+  aura stores, and innate/self auras.
+- Changing reaction consumption modifiers, including the separate Swirl and
+  Crystallize 0.5 multiplier gap, or changing character action gauge metadata.
+- RL tensors/protocol/training, report layout, Gradle structure, dependencies,
+  and generated `docs/` or `output/` files.
+
+Definitions:
+
+- Source gauge: the action's typed 1U/1.5U/2U/4U application value before Aura
+  Tax; reaction trigger consumption continues to use this value.
+- Taxed aura gauge: `source gauge * 0.8`, stored on the enemy when that element
+  becomes an aura.
+- Source decay rate: linear units-per-second derived from the maintained KQM
+  seconds-per-unit table (1U 11.875, 1.5U 8.9583, 2U 7.5, 4U 5.3125).
+- Same-element extension: replace the decayed current amount with the greater of
+  current and newly taxed gauge; never add the two amounts.
+
+### Phase 1: Record Aura Application Evidence and Runtime Boundaries - Done
+
+Why first:
+
+Aura units and action source units currently share one `double`; implementation
+must establish their different meanings and special Pyro rule before changing
+the shared enemy model.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record maintained Aura Tax, decay-rate, same-element extension, and Pyro
+  update evidence with access date and simulator adaptation.
+- Inventory finite `Enemy.setAura` production callers, test fixtures,
+  consumption paths, snapshot fields, and report/RL readers.
+- Define excluded special-reaction work so it is not inferred into this pass.
+
+Acceptance criteria:
+
+- Evidence distinguishes source gauge from taxed aura gauge and gives expected
+  initial amount/duration for 1U, 1.5U, 2U, and 4U.
+- Ordinary no-reaction and Electro-Charged application callers are identified;
+  Burning's maintained reaction state is not misclassified as a fresh source.
+- Snapshot/restore and all current-time readers are explicitly covered by later
+  phases without changing public observation shapes.
+
+Test cases to add or update:
+
+- No production test in this phase; Phases 2 and 3 add pre-fix failing unit and
+  runtime boundaries.
+
+Verification:
+
+- inspect `Enemy`, `CombatActionResolver`, `ReactionEffectScheduler`, all
+  `setAura` callers, aura regressions, and snapshot consumers
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- The maintained KQM Elemental Gauge Theory states a 0.8 Aura Tax, source-class
+  rates of 11.875/8.9583/7.5/5.3125 seconds per unit, first-aura rate retention,
+  max-style same-element extension, and Pyro's conditional rate update. The
+  maintained Elemental Gauge Database independently lists 0.8/1.2/1.6/3.2
+  taxed gauges and 9.5/10.75/12/17-second durations. Sources accessed
+  2026-08-02: https://library.keqingmains.com/combat-mechanics/elemental-effects/elemental-gauge-theory
+  and https://library.keqingmains.com/resources/compendiums/elemental-gauges.
+- Adopt the standard source application and extension rules exactly within the
+  single-target aura model. Existing `setAura` fixtures remain explicit state
+  setup; the new production API owns tax and extension policy.
+- Runtime finite applications occur in ordinary no-reaction resolution and
+  Electro-Charged scheduling. Burning writes maintained reaction state and is
+  excluded. Report, log, resonance, target-dependent stats, and RL observation
+  code already consume `Enemy` current-time readers.
+
+### Phase 2: Implement Taxed Aura State and Same-Element Extension
+
+Why second:
+
+The enemy model must own gauge conversion, decay class, extension, and snapshot
+semantics before runtime reaction paths can call the new contract.
+
+Target files:
+
+- `src/java/model/entity/Enemy.java`
+- `src/java/model/entity/AGENTS.md`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Add a source-application API that taxes supported positive source gauges and
+  selects the matching decay rate.
+- Preserve exact current units/rate across consumption and snapshot restore.
+- Implement non-Pyro first-rate retention and conditional Pyro rate updates.
+- Keep explicit infinite/raw fixture setup separate from production policy.
+
+Acceptance criteria:
+
+- Fresh 1U/1.5U/2U/4U sources store 0.8/1.2/1.6/3.2 and expire at
+  9.5/10.75/12/17 seconds respectively.
+- A stronger same-element non-Pyro source replaces the current amount while
+  retaining the first source's decay rate; a weaker non-extending source changes
+  neither amount nor rate.
+- Pyro changes rate when its amount changes and retains rate when it does not.
+- Consumption and snapshot restore preserve the selected rate exactly.
+- Zero, negative, Physical, Anemo, Geo, NaN, infinite, and unsupported source
+  values cannot create malformed finite aura state.
+
+Test cases to add or update:
+
+- Normal: all four supported source classes have exact taxed start and expiry.
+- Extension: 1U Electro then 2U becomes 1.6U at the original 1U rate.
+- No-op: a weaker Electro source under a stronger remaining gauge changes none.
+- Pyro: amount-changing 2U refresh adopts D(2); non-changing 1U keeps D(2).
+- Snapshot: consume, capture, advance, restore, and continue at the same rate.
+- Abnormal: invalid elements/values are rejected or ignored by explicit policy.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/model/entity/Enemy.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Route Standard Runtime Aura Applications
+
+Why third:
+
+Only after the state contract is proven can ordinary actions and coexistence
+scheduling stop calling the raw fixture setter.
+
+Target files:
+
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/mechanics/reaction/ReactionEffectScheduler.java`
+- `src/java/mechanics/reaction/AGENTS.md`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Route persistent no-reaction trigger elements through source application.
+- Route the newly introduced Electro/Hydro side of Electro-Charged through the
+  same source contract without taxing existing aura consumption.
+- Leave Burning-maintained Pyro state on the explicit raw-state path.
+- Add actual action and EC scheduling regressions, including repeated aura
+  extension and exact expiry.
+
+Acceptance criteria:
+
+- A real 1U action against no aura establishes 0.8U with D(1) expiry.
+- Repeated same-element actions extend by max replacement and do not add gauge.
+- EC's introduced element is taxed once while the existing element remains
+  unchanged until tick consumption/decay.
+- Anemo/Geo/Physical and 0U actions never establish a persistent aura.
+- Reaction ownership, damage, ICD, and 0.4U EC tick consumption are unchanged.
+
+Test cases to add or update:
+
+- Normal: actual 1U action initial application and 2U stronger extension.
+- EC: Hydro aura plus 1U Electro produces 0.8U Electro before scheduled ticks.
+- No-op: same-element weaker reapplication below current gauge does not shorten
+  the existing aura.
+- Abnormal: 0U, Anemo, Geo, Physical, and ICD-blocked actions do not add aura.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `python scripts/agent_validate.py --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/mechanics/reaction/ReactionEffectScheduler.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 4: Re-Accept Aura-Sensitive Party Baselines
+
+Why last:
+
+The corrected initial amounts, expiry times, and extensions can alter reaction
+ownership throughout every audited rotation and therefore require full trace
+attribution after focused contracts pass.
+
+Target files:
+
+- `README.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Run two fresh payloads each for RaidenParty, FlinsParty, and FlinsParty2.
+- Compare normalized hashes, totals, DPS, duration, ER, warnings, reaction
+  sequence, aura ownership, and optimizer allocations with B-048 baselines.
+- Update current accuracy notes and close B-049 only after all deltas are
+  attributable to taxed application, sourced decay, or deterministic optimizer
+  response.
+
+Acceptance criteria:
+
+- Each party's two normalized payloads match without warning or energy failure.
+- Durations and rotations remain unchanged; reaction/aura deltas agree with the
+  focused source-application model.
+- README, verification skill, plan, and ledger agree and no generated output is
+  staged.
+
+Test cases to add or update:
+
+- Normal integration: all three parties complete deterministically.
+- Abnormal integration: no warning, optimizer failure, invalid aura, asset, or
+  generated-file regression is introduced.
+
+Verification:
+
+- two fresh `./gradlew RaidenParty` runs
+- two fresh `./gradlew FlinsParty` runs
+- two fresh `./gradlew FlinsParty2` runs
+- `python scripts/validate_agent_assets.py`
+- `python scripts/preflight.py --run`

@@ -1227,3 +1227,29 @@ experiment record.
   `f3d7a0bdfbfe6f56837135a538d20fe08659df2bba22d8444972968781526f26`
   at 14,794,978 / 214,110. All six integration runs are deterministic and
   warning-free with unchanged durations and ER contracts.
+
+### B-049 — Runtime aura application omits Aura Tax and source decay classes
+
+- Status: `in-progress`
+- Source: 1 (README known simplification), confirmed by Source 3 evidence
+- Symptom: every finite source currently stores its full action gauge and uses
+  `6 + 5U` duration, so 1U/2U/4U begin at 1/2/4 and last 11/16/26 seconds
+  instead of beginning at 0.8/1.6/3.2 and lasting 9.5/12/17 seconds. Reapplication
+  replaces state and decay rate without same-element extension rules.
+- Scope: enemy-owned standard source application, Aura Tax, source decay class,
+  non-Pyro and Pyro same-element extension, snapshot preservation, ordinary
+  action/EC routing, focused regressions, and audited party baselines
+- Risk: `planned`
+- Proof: exact 1U/1.5U/2U/4U initial/expiry boundaries, non-Pyro/Pyro extension
+  and no-op cases, consume/snapshot restore, actual action/EC routing, and two
+  matching payloads for all three audited parties
+- Notes: adopt the maintained KQM standard source-application model, accessed
+  2026-08-02. Elemental Gauge Theory specifies 0.8 Aura Tax, source-class decay
+  rates, first-aura rate retention, same-element max-style extension, and Pyro's
+  conditional rate update; the maintained gauge database independently lists
+  taxed gauges and durations. Sources:
+  https://library.keqingmains.com/combat-mechanics/elemental-effects/elemental-gauge-theory
+  and https://library.keqingmains.com/resources/compendiums/elemental-gauges.
+  Freeze, Dendro-special reaction tax, Swirl spread, EC terminal ticks,
+  multi-target state, and reaction consumption multipliers are excluded. See
+  `TASKS.md` implementation block `Standard Aura Tax and Decay Rates`.
