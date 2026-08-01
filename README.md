@@ -224,7 +224,7 @@ Known simplifications:
   definition enables that assumption. Artifact allocation includes Emblem's
   static 20% ER. Raiden's second Skill refreshes one recipient-specific Eye of
   Stormy Judgment buff instead of stacking with its first 25-second window. The
-  accepted set-aware result is 1,312,883 damage / 62,518 DPS over 21.0 seconds.
+  accepted set-aware result is 1,310,839 damage / 62,421 DPS over 21.0 seconds.
 - `FlinsParty2`: defensive shield HP is logged but not consumed by enemy attacks,
   Columbina treats every Lunar reaction during Gravity Ripple as nearby because
   field position is not simulated, and her Thundercloud extra strikes use 33%
@@ -273,7 +273,7 @@ model above and does not model multi-target or per-enemy aura gauges.
 Latest validation baseline from the accuracy pass:
 
 - `./gradlew ReactionRegressionTest`
-- `./gradlew RaidenParty`: 1,312,883 total damage / 62,518 DPS
+- `./gradlew RaidenParty`: 1,310,839 total damage / 62,421 DPS
 - `./gradlew FlinsParty2`: 14,194,732 total damage / 205,423 DPS
 - `./gradlew BenchmarkRLJava`
 - `./gradlew ProfileCapabilities`

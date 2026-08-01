@@ -1156,14 +1156,14 @@ experiment record.
 
 ### B-047 — Guoba C1 shred stacks and excludes off-field attackers
 
-- Status: `ready`
+- Status: `done`
 - Source: 3 (sourced character-mechanic divergence)
 - Symptom: each Guoba hit appends another 15% same-ID field buff, yielding up to
   60% Pyro RES shred for the active character while excluding off-field party
   members from an opponent status.
 - Scope: one typed team-visible Guoba C1 refresh, explicit Xiangling source,
   actual four-hit boundaries, and deterministic RaidenParty acceptance
-- Risk: `bounded`
+- Risk: `validated`
 - Proof: actual owner/ally 15% visibility, one typed instance over four refreshes,
   +6.5/+12.5 timing boundaries, and matching repeated party payloads
 - Notes: adopt the KQM Xiangling TCL, maintained KQM guide, and maintained
@@ -1175,3 +1175,34 @@ experiment record.
   the opponent status as one `XIANGLING_GUOBA_C1_SHRED` team-visible simulator
   buff refreshed by each actual hit and explicitly sourced by Xiangling. See
   `TASKS.md` implementation block `Guoba C1 Enemy Shred Refresh`.
+  Completed with actual +2.0/+3.5/+5.0/+6.5 refreshes, active/off-field stat
+  visibility, one typed Xiangling-sourced instance, and exact +12.5 expiry.
+  Two RaidenParty logs match normalized SHA-256
+  `d7fc2de0e9ece10da808a9fbde36e594f759ddbb6532d654de637f3da6be9c76`
+  at 1,310,839 damage / 62,421 DPS over 21.0 seconds with unchanged ER and zero
+  warnings. The 2,044 reduction is isolated to Bennett's two 14.8-second Pyro
+  actions and associated Overload while the old four same-ID instances were
+  active. Snapshot attacks remain governed by B-048.
+
+### B-048 — Resistance shred is incorrectly snapshotted with attacker stats
+
+- Status: `candidate`
+- Source: 2 (B-047 integration trace and formula audit)
+- Symptom: `DamageCalculator.resolveStats` returns only the caster's stored
+  snapshot for snapshot actions, so live enemy-facing RES shred buffs are
+  omitted if applied after cast and retained if they expire before impact.
+  B-047 therefore makes Guoba C1 visible to off-field Xiangling stat resolution
+  but cannot change an already snapshotted Pyronado hit.
+- Scope: classify attacker buffs versus enemy-facing resistance state, resolve
+  resistance shred at impact for standard/Lunar/direct reaction paths, focused
+  snapshot boundaries, and affected deterministic party baselines
+- Risk: `planned`
+- Proof: snapshot before shred then hit during it, snapshot during shred then hit
+  after expiry, live non-snapshot parity, and full-party delta attribution
+- Notes: this is broader than Guoba C1 and also affects Viridescent Venerer,
+  Superconduct, and any typed elemental/physical RES shred currently represented
+  in `StatsContainer`. The game-facing source for B-047 explicitly places its
+  status on opponents; repository snapshot documentation says caster stats are
+  captured at cast time. Promote only after auditing every RES-shred producer
+  and reaction path and writing a phased `TASKS.md` design; do not patch one
+  damage strategy in isolation.

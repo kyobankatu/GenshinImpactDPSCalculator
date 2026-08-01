@@ -127,9 +127,9 @@ The B-046 Ascendant Blessing expiry correction is complete. An expired stronger
 Blessing no longer blocks a weaker non-Moonsign Skill or Burst from establishing
 a new 20-second non-stacking window.
 
-The B-047 Guoba C1 correction is planned. Each Guoba hit must refresh one
-six-second 15% Pyro RES reduction that applies to every attacker instead of
-stacking active-character-only field buffs.
+The B-047 Guoba C1 correction is complete. Each Guoba hit refreshes one
+six-second 15% Pyro RES reduction visible to every attacker's live stat
+resolution instead of stacking active-character-only field buffs.
 
 ## Scope
 
@@ -6867,7 +6867,7 @@ Completion evidence:
 
 Status:
 
-- Phases 1-2 are complete; Phase 3 remains pending.
+- Complete; all three phases are verified and pushed.
 - Requirement: a Guoba hit at C1 or above establishes one 15% Pyro RES reduction
   for six seconds; later Guoba hits refresh that one enemy-facing status.
 
@@ -7015,7 +7015,7 @@ Completion evidence:
   unchanged four-hit, no-ICD, 1U, reaction, and no-aura contracts.
 - Reaction regression, build, Javadoc, routed validation, and preflight pass.
 
-### Phase 3: Accept the RaidenParty Guoba C1 Delta - Pending
+### Phase 3: Accept the RaidenParty Guoba C1 Delta - Done
 
 Why last:
 
@@ -7057,3 +7057,21 @@ Verification:
 - two fresh `./gradlew RaidenParty` runs
 - `python scripts/validate_agent_assets.py`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Two complete RaidenParty runs produced identical logs after excluding only
+  Gradle's elapsed-time line, at normalized SHA-256
+  `d7fc2de0e9ece10da808a9fbde36e594f759ddbb6532d654de637f3da6be9c76`.
+- ER remains Bennett 100%, Raiden Shogun 175%, Xingqiu 179%, and Xiangling 174%,
+  with zero warning matches and 1,310,839 damage / 62,421 DPS over 21.0 seconds.
+- The 2,044 reduction is isolated to Bennett at 14.8 seconds while the old four
+  C1 instances overlapped: Passion Overload 8,183 to 7,139, N2 1,700 to 1,483,
+  and associated Overload 6,129 to 5,346. Every other character total and all
+  action times are unchanged.
+- Pyronado remains unchanged because the existing formula path snapshots RES
+  shred with attacker stats instead of resolving enemy debuffs at impact. This
+  separate architecture defect is recorded as B-048 and is not claimed solved
+  by B-047.
+- README and the verification skill carry the accepted baseline. Agent assets
+  and final preflight pass; generated output is not staged.
