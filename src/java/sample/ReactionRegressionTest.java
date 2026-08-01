@@ -95,6 +95,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ArtifactOptimizerRejectsUnreachableEr();
         testAccuracyPhaseF_ColumbinaGravityAndDewRegression();
         testAccuracyPhaseF_ColumbinaStandInBoundaries();
+        testAccuracyPhaseF_ArtifactTeamBuffProviderRouting();
         testAccuracyPhaseF_ArtifactLunarReactionBuffRegression();
         testAccuracyPhaseF_ViridescentVenererRefreshContract();
         testAccuracyPhaseF_NoblesseObligeRefreshContract();
@@ -2214,6 +2215,39 @@ public class ReactionRegressionTest {
                 "Night of the Sky's Unveiling should grant on-field Lunar reaction CRIT Rate");
     }
 
+    private static void testAccuracyPhaseF_ArtifactTeamBuffProviderRouting() {
+        TestCharacter owner = testCharacter(Element.ANEMO, CharacterId.SUCROSE);
+        owner.setArtifacts(new FixtureArtifactTeamBuffProvider());
+        TestCharacter ally = testCharacter(Element.PYRO, CharacterId.XIANGLING);
+        CombatSimulator sim = simulatorWith(owner);
+        sim.addCharacter(ally);
+        sim.applyTeamBuff(new SimpleBuff("Independent provider fixture", 20.0, 0.0,
+                stats -> stats.add(StatType.ATK_FLAT, 10.0)));
+
+        assertClose(50.0, resolvedStat(sim, owner, StatType.ATK_FLAT), EPS,
+                "Artifact and simulator team buffs should coexist for the owner");
+        assertClose(50.0, resolvedStat(sim, ally, StatType.ATK_FLAT), EPS,
+                "Artifact and simulator team buffs should coexist for an ally");
+        assertClose(0.0, resolvedStat(sim, owner, StatType.DEF_FLAT), EPS,
+                "Artifact team-buff targeting should exclude the wrong element");
+        assertClose(25.0, resolvedStat(sim, ally, StatType.DEF_FLAT), EPS,
+                "Artifact team-buff targeting should include the configured element");
+
+        List<Buff> ownerBuffs = sim.getApplicableBuffs(owner);
+        Buff fallbackSource = ownerBuffs.stream()
+                .filter(buff -> buff.getDisplayName().equals("Artifact provider fallback source"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Artifact fallback-source buff should be routed"));
+        assertEquals(CharacterId.SUCROSE, fallbackSource.getSourceCharacterId(),
+                "Artifact provider should attribute an unknown source to its owner");
+        Buff explicitSource = sim.getApplicableBuffs(ally).stream()
+                .filter(buff -> buff.getDisplayName().equals("Artifact provider explicit source"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Artifact explicit-source buff should be routed"));
+        assertEquals(CharacterId.COLUMBINA, explicitSource.getSourceCharacterId(),
+                "Artifact provider should preserve an explicit source");
+    }
+
     private static void testAccuracyPhaseF_ViridescentVenererRefreshContract() {
         ReactionResult pyroSwirl = ReactionCalculator.calculate(Element.ANEMO, Element.PYRO, 0.0, 90);
         ReactionResult hydroSwirl = ReactionCalculator.calculate(Element.ANEMO, Element.HYDRO, 0.0, 90);
@@ -3457,6 +3491,25 @@ public class ReactionRegressionTest {
                 double damage,
                 Character owner) {
             damageHookCount++;
+        }
+    }
+
+    /** Supplies fixture team buffs through the artifact provider capability. */
+    private static final class FixtureArtifactTeamBuffProvider extends ArtifactSet
+            implements model.entity.ArtifactTeamBuffProvider {
+        private FixtureArtifactTeamBuffProvider() {
+            super("Artifact Team Provider Fixture", new StatsContainer());
+        }
+
+        @Override
+        public List<Buff> getArtifactTeamBuffs(Character owner, CombatSimulator sim) {
+            Buff fallbackSource = new SimpleBuff("Artifact provider fallback source",
+                    Double.MAX_VALUE, 0.0, stats -> stats.add(StatType.ATK_FLAT, 40.0));
+            Buff explicitSource = new SimpleBuff("Artifact provider explicit source",
+                    Double.MAX_VALUE, 0.0, stats -> stats.add(StatType.DEF_FLAT, 25.0))
+                    .forElement(Element.PYRO)
+                    .sourcedBy(CharacterId.COLUMBINA);
+            return java.util.List.of(fallbackSource, explicitSource);
         }
     }
 }

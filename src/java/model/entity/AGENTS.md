@@ -9,6 +9,7 @@
 ## Java files in this directory
 - `ActionTriggeredWeaponEffect.java`: capability interface for weapons that react to character action dispatch.
 - `ArtifactSet.java`: base class for artifact sets, limited to fixed stats, passive stat application, and display metadata.
+- `ArtifactTeamBuffProvider.java`: capability interface for artifact sets that provide dynamically resolved team buffs.
 - `BurstTriggeredArtifactEffect.java`: capability interface for artifacts that react to burst use.
 - `Character.java`: abstract playable-character base with typed identity, stat assembly, buffs, snapshots, energy tracking, cooldown state, action hooks, and capability extension points.
 - `CharacterTeamBuffProvider.java`: capability interface for characters that provide team buffs.

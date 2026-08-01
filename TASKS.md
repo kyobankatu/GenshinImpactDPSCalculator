@@ -5948,7 +5948,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phase 1 is complete and Phases 2-4 remain.
+- In progress; Phases 1-2 are complete and Phases 3-4 remain.
 - Requirement: while Silken Moon's Serenade is equipped, all party members gain
   10% Lunar Reaction DMG for each distinct active Gleaming Moon effect, with
   duplicate effects never stacking.
@@ -6055,7 +6055,7 @@ Completion evidence:
   current manager scans only team/field/provider buffs. Its count is therefore
   zero and the intended Synergy buff is unreachable.
 
-### Phase 2: Route Artifact-Owned Team Buff Providers
+### Phase 2: Route Artifact-Owned Team Buff Providers - Done
 
 Why second:
 
@@ -6065,6 +6065,7 @@ of the runtime manager.
 Target files:
 
 - `src/java/model/entity/ArtifactTeamBuffProvider.java`
+- `src/java/model/entity/AGENTS.md`
 - `src/java/simulation/runtime/BuffManager.java`
 - `src/java/sample/ReactionRegressionTest.java`
 - `TASKS.md`
@@ -6101,6 +6102,17 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/agent_validate.py --path src/java/model/entity/ArtifactTeamBuffProvider.java --path src/java/simulation/runtime/BuffManager.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- The new narrow `ArtifactTeamBuffProvider` returns artifact-owned team buffs
+  from owner plus simulator context; `BuffManager` performs only capability
+  discovery, fallback source attribution, targeting, and aggregation.
+- The fixture regression proves owner/ally routing, unknown-source attribution
+  to Sucrose, preservation of an explicit Columbina source, Pyro-only targeting,
+  and coexistence with an independent simulator team buff.
+- Reaction regression, build, Javadoc, routed validation, and preflight pass;
+  no artifact-specific class or ID entered runtime policy.
 
 ### Phase 3: Provide Dynamic Non-Stacking Silken Bonus
 

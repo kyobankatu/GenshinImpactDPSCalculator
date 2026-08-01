@@ -5,6 +5,8 @@ import java.util.List;
 
 import mechanics.buff.Buff;
 import mechanics.buff.BuffId;
+import model.entity.ArtifactSet;
+import model.entity.ArtifactTeamBuffProvider;
 import model.entity.Character;
 import model.entity.CharacterTeamBuffProvider;
 import model.entity.WeaponTeamBuffProvider;
@@ -79,7 +81,8 @@ public class BuffManager {
      * Collects all buffs currently applicable to the given character.
      *
      * <p>Sources aggregated are simulator-owned team buffs, weapon-provided team buffs,
-     * character-provided team buffs, and active-character-only field buffs.
+     * artifact-provided team buffs, character-provided team buffs, and
+     * active-character-only field buffs.
      *
      * @param character character whose applicable buffs are being queried
      * @return collected buff list
@@ -100,6 +103,23 @@ public class BuffManager {
                         buff.sourcedBy(member.getCharacterId());
                     }
                     buffs.add(buff);
+                }
+            }
+            if (member.getArtifacts() != null) {
+                for (ArtifactSet artifact : member.getArtifacts()) {
+                    if (!(artifact instanceof ArtifactTeamBuffProvider)) {
+                        continue;
+                    }
+                    List<Buff> artifactBuffs = ((ArtifactTeamBuffProvider) artifact)
+                            .getArtifactTeamBuffs(member, sim);
+                    for (Buff buff : artifactBuffs) {
+                        if (buff.getSourceCharacterId() == model.type.CharacterId.UNKNOWN) {
+                            buff.sourcedBy(member.getCharacterId());
+                        }
+                        if (buff.appliesToCharacter(character)) {
+                            buffs.add(buff);
+                        }
+                    }
                 }
             }
             if (member instanceof CharacterTeamBuffProvider) {
