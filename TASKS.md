@@ -10421,6 +10421,152 @@ Verification:
 - two fresh `./gradlew --no-daemon FlinsParty2` runs
 - `python scripts/preflight.py --run`
 
+## Implementation Order: Deterministic Simultaneous Reaction Priority
+
+Objective: make ordinary multi-Aura reaction resolution follow one explicit
+trigger-specific priority instead of `HashSet` iteration identity.
+
+Scope:
+
+- Pure priority ordering for every elemental trigger supported by the resolver.
+- Resolver routing through that order without changing formulas or consumption.
+- Pyro-on-EC and Anemo-on-EC ordering regressions.
+- Deterministic catalog baselines across fresh JVM processes.
+
+Out of scope:
+
+- Trigger residual gauge, reaction cancellation after earlier consumption, and
+  hidden/innate/self Aura behavior.
+- Typed Frozen, Burning, Quicken, or Dendro Core synthetic-state priority.
+- Multi-target reaction spread, reaction damage ICD, hitlag, RL behavior, and
+  persistent jobs.
+
+Cross-cutting rules:
+
+- `ReactionPriority` is a pure mechanics policy; `Enemy` remains a target state
+  store and `CombatActionResolver` remains the transition orchestrator.
+- Priority uses typed `Element` values only. Unknown/nonreactive leftovers use
+  stable enum declaration order so same-element extension still executes.
+- Match maintained gcsim ordinary dispatcher order for each trigger, but retain
+  this simulator's existing reaction calculations and consumption semantics.
+- Do not make storage containers ordered merely to influence mechanics.
+- Preserve explicit staging and generated-artifact safety.
+
+### Phase 1: Record Priority Evidence and HashSet Failure - Done
+
+Target files:
+
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Record the B-061 before/after class-layout control evidence.
+- Inventory resolver iteration and maintained trigger dispatch order.
+- Define ordinary-Aura and synthetic-state boundaries.
+
+Acceptance criteria:
+
+- The plan gives an explicit ordered Aura list for every elemental trigger.
+- Storage order is not treated as reaction policy.
+- No production behavior changes occur in this phase.
+
+Test cases to add or update:
+
+- No production test; Phase 2 owns pure and integrated ordering.
+
+Verification:
+
+- compare normalized B-060/B-061 controls
+- inspect `Enemy.getActiveAuras`, resolver, calculator, and gcsim dispatcher
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- B-061 controls proved that adding unrelated `Enemy` fields reversed adjacent
+  Hydro/Electro reaction log lines while every value, count, and result remained
+  unchanged. B-060 itself used opposite orders in FlinsParty and FlinsParty2.
+- `Enemy.getActiveAuras` returns `HashSet`; the resolver directly iterates it.
+  Maintained gcsim dispatches typed attempts explicitly and puts Overload before
+  Vaporize for Pyro and Electro Swirl before Hydro Swirl for Anemo.
+- Planned ordinary priorities are Electro `[Pyro, Hydro, Cryo, Dendro]`, Pyro
+  `[Electro, Hydro, Cryo, Dendro]`, Cryo `[Electro, Pyro, Hydro]`, Hydro
+  `[Pyro, Cryo, Dendro, Electro]`, Anemo `[Electro, Pyro, Hydro, Cryo]`, Geo
+  `[Electro, Hydro, Cryo, Pyro]`, and Dendro `[Electro, Pyro, Hydro]`.
+- Frozen/Burning/Quicken synthetic state and residual behavior remain explicit
+  exclusions. Documentation preflight passes without routed checks or leaks.
+
+### Phase 2: Implement Typed Ordinary Aura Priority - Pending
+
+Target files:
+
+- `src/java/mechanics/reaction/ReactionPriority.java`
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Add a pure trigger-to-ordered-Aura policy with stable leftover ordering.
+- Route ordinary resolver iteration through the policy.
+- Regress every trigger list and integrated Pyro/Anemo Hydro+Electro behavior.
+
+Acceptance criteria:
+
+- Every documented list is exact regardless of input set implementation/order.
+- Pyro notifies Overloaded before Vaporize on Hydro+Electro.
+- Anemo notifies Electro Swirl before Hydro Swirl on Hydro+Electro.
+- Unsupported Physical and same-element inputs remain stable and nonreactive.
+- Existing full reaction regression remains exact.
+
+Test cases to add or update:
+
+- Pure: reverse-ordered EnumSet/HashSet inputs for all seven trigger lists.
+- Integrated: Pyro dual Aura kind order and Anemo related-element order.
+- Fallback: same element and Physical trigger.
+- No-change: formulas, totals, gauge, and prior Freeze/Burning contracts.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/mechanics/reaction/ReactionPriority.java --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Accept Deterministic Priority Baselines - Pending
+
+Target files:
+
+- `README.md`
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Run two no-daemon controls per catalog party against B-061 values.
+- Record deterministic hashes, values, ER, cadence, warnings, and order changes.
+- Document ordinary simultaneous priority and close B-062.
+
+Acceptance criteria:
+
+- Each fresh-JVM pair is byte-identical and follows the sourced order.
+- Totals, DPS, ER, allocations, and event counts remain B-061-exact.
+- Focused/full validation pass; tracked generated report is restored.
+
+Test cases to add or update:
+
+- Normal: all three catalog parties complete pairwise exactly.
+- No-change: accepted values/ER/cadence.
+- Abnormal: zero warnings and generated-artifact leak.
+
+Verification:
+
+- two fresh `./gradlew --no-daemon RaidenParty` runs
+- two fresh `./gradlew --no-daemon FlinsParty` runs
+- two fresh `./gradlew --no-daemon FlinsParty2` runs
+- `python scripts/preflight.py --run`
+
 Completion evidence:
 
 - Two fresh no-daemon runs per catalog party match pairwise after removing only

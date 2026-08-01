@@ -1668,7 +1668,7 @@ experiment record.
 
 ### B-062 — Simultaneous Aura reaction order depends on HashSet iteration
 
-- Status: `candidate`
+- Status: `in-progress`
 - Source: 3 (B-061 control diff plus maintained gcsim reaction order)
 - Symptom: `Enemy.getActiveAuras` returns a `HashSet`, so adding unrelated fields
   changed Pyro-on-Hydro+Electro and Anemo-on-Hydro+Electro log order between
