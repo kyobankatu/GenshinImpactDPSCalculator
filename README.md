@@ -222,8 +222,9 @@ Known simplifications:
   are reproducible. Generic Skyward Spine construction remains stochastic, and
   generic Xiangling simulations do not pick up the chili unless their party
   definition enables that assumption. Artifact allocation includes Emblem's
-  static 20% ER; the accepted set-aware result is 1,317,080 damage / 62,718 DPS
-  over 21.0 seconds.
+  static 20% ER. Raiden's second Skill refreshes one recipient-specific Eye of
+  Stormy Judgment buff instead of stacking with its first 25-second window. The
+  accepted set-aware result is 1,312,883 damage / 62,518 DPS over 21.0 seconds.
 - `FlinsParty2`: defensive shield HP is logged but not consumed by enemy attacks,
   Columbina treats every Lunar reaction during Gravity Ripple as nearby because
   field position is not simulated, and her Thundercloud extra strikes use 33%
@@ -269,7 +270,7 @@ model above and does not model multi-target or per-enemy aura gauges.
 Latest validation baseline from the accuracy pass:
 
 - `./gradlew ReactionRegressionTest`
-- `./gradlew RaidenParty`: 1,317,080 total damage / 62,718 DPS
+- `./gradlew RaidenParty`: 1,312,883 total damage / 62,518 DPS
 - `./gradlew FlinsParty2`: 13,633,123 total damage / 197,296 DPS
 - `./gradlew BenchmarkRLJava`
 - `./gradlew ProfileCapabilities`

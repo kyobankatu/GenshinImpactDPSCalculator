@@ -114,9 +114,9 @@ The B-043 Noblesse Oblige correction is complete. Its teamwide 20% ATK buff
 refreshes one twelve-second typed window instead of stacking repeated or
 multi-wearer applications.
 
-The B-044 Raiden Eye correction is in progress. Recasting Transcendence:
-Baleful Omen will refresh each member's one 25-second Burst DMG buff instead of
-adding another same-ID value during the overlap.
+The B-044 Raiden Eye correction is complete. Recasting Transcendence: Baleful
+Omen refreshes each member's one 25-second Burst DMG buff instead of adding
+another same-ID value during the overlap.
 
 ## Scope
 
@@ -5734,7 +5734,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phases 1-2 are complete and Phase 3 remains.
+- Complete; all three phases are verified and pushed.
 - Requirement: each party member may have one Eye of Stormy Judgment Burst DMG
   buff, refreshed to 25 seconds when Raiden recasts her Skill.
 
@@ -5883,16 +5883,17 @@ Completion evidence:
 - Reaction and party-catalog regressions, build, Javadoc, routed validation, and
   preflight pass.
 
-### Phase 3: Re-Accept the Raiden Eye Baseline
+### Phase 3: Re-Accept the Raiden Eye Baseline - Done
 
 Why last:
 
-RaidenParty exercises the full Eye, Burst, optimizer, and energy path and must
-remain deterministic when its rotation does not overlap a recast.
+RaidenParty exercises the full Eye, Burst, optimizer, and energy path, including
+a second Skill while the first 25-second Eye window is active.
 
 Target files:
 
 - `README.md` only if the accepted value changes
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
 - `TASKS.md`
 - `BACKLOG.md`
 
@@ -5900,14 +5901,16 @@ Tasks:
 
 - Run two fresh complete `RaidenParty` payloads and compare normalized logs.
 - Record ER, warnings, duration, total, DPS, and normalized hash.
+- Update current baseline references if removing the duplicate Eye changes the
+  accepted value.
 - Close B-044 without changing unrelated deferred work.
 
 Acceptance criteria:
 
 - Repeated normalized payloads match and contain no new energy or optimizer
   warning.
-- The existing one-cast catalog rotation remains numerically unchanged unless
-  it actually exercises a duplicate Eye window.
+- Any numerical delta is isolated to Burst damage after the second Skill and
+  agrees with removing one duplicate recipient Eye value.
 - Plan and ledger agree on the accepted baseline and no generated output is
   staged.
 
@@ -5920,6 +5923,21 @@ Verification:
 
 - two fresh `./gradlew RaidenParty` runs
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Two complete `RaidenParty` runs produced identical logs and normalized
+  SHA-256 `10df2aa5678cb8697eb6de92437c329ade06f0d06f155513c4c76bad64cabec8`.
+- ER remains Bennett 100%, Raiden Shogun 175%, Xingqiu 179%, and Xiangling
+  174%, with zero warning matches and 1,312,883 damage / 62,518 DPS over 21.0
+  seconds.
+- Comparison with the prior accepted payload isolates all 4,197 removed damage
+  to seven Xingqiu Raincutter hits after Raiden's second Skill at 14.2 seconds;
+  Bennett, Raiden, Xiangling, and Thundercloud totals are byte-for-byte
+  unchanged. This supersedes the prior 1,317,080 / 62,718 baseline with no ER,
+  optimizer allocation, rotation, or duration change.
+- README and the verification skill reference carry the new accepted value;
+  generated output is not staged.
 
 ## NCCL/DDP Distributed RL Training Plan
 

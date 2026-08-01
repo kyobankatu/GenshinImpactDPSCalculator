@@ -1066,14 +1066,14 @@ experiment record.
 
 ### B-044 — Raiden Eye Burst DMG buff stacks on legal Skill recast
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 3 (sourced character-mechanic divergence)
 - Symptom: Raiden's ten-second Skill recast appends another 25-second same-ID
   buff to every recipient, doubling their Energy Cost-scaled Burst DMG Bonus for
   the fifteen-second overlap.
 - Scope: Raiden recipient-buff replacement, actual recast boundary regression,
   and deterministic RaidenParty acceptance
-- Risk: `planned`
+- Risk: `validated`
 - Proof: one typed source-attributed value per recipient before/after an exact-CD
   recast, exact refreshed expiry, and matching repeated RaidenParty payloads
 - Notes: adopt the maintained KQM Raiden TCL and guide, accessed 2026-08-02. The
@@ -1084,4 +1084,10 @@ experiment record.
   https://keqingmains.com/raiden/. Adapt the singular recipient status through
   `removeBuff(RAIDEN_EYE_OF_STORMY_JUDGMENT)` before adding its newly timed,
   recipient-scaled instance. See `TASKS.md` implementation block
-  `Raiden Eye Buff Refresh`.
+  `Raiden Eye Buff Refresh`. Completed with actual exact-CD recast, independent
+  90/60-cost scaling, one typed Raiden-sourced instance, and exact half-open
+  expiry regressions. Two RaidenParty logs match normalized SHA-256
+  `10df2aa5678cb8697eb6de92437c329ade06f0d06f155513c4c76bad64cabec8`
+  at unchanged 100%/175%/179%/174% ER and 1,312,883 / 62,518 over 21.0
+  seconds. The 4,197 reduction is isolated to seven Xingqiu Raincutter hits
+  after the second Skill; all other damage categories and timings are unchanged.
