@@ -7080,7 +7080,7 @@ Completion evidence:
 
 Status:
 
-- Phases 1-2 are complete; Phases 3-5 remain pending.
+- Phases 1-3 are complete; Phases 4-5 remain pending.
 - Requirement: elemental and Physical RES reduction is enemy-facing state and
   must be evaluated at each damage impact, never captured with attacker stats.
 
@@ -7245,7 +7245,7 @@ Completion evidence:
   impact-time enemy state. Reaction regression, build, Javadoc, routed
   validation, and preflight pass.
 
-### Phase 3: Route Immediate Reaction RES Through Captured Buffs - Pending
+### Phase 3: Route Immediate Reaction RES Through Captured Buffs - Done
 
 Why third:
 
@@ -7290,6 +7290,18 @@ Verification:
 - `./gradlew build`
 - `python scripts/agent_validate.py --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Shatter, core triggers, transformative reactions, Burning creation, and Bloom
+  creation now use the central multiplier with the immutable start-of-hit buff
+  list. Existing owner-stat snapshots remain limited to EM/reaction bonuses.
+- Regression proves post-snapshot live Overload reduction, exact-expiry stale
+  exclusion, first-Swirl non-immediacy including VV's independent 60% Swirl
+  bonus, and later Pyro-reaction use of already-active VV reduction. Existing
+  Superconduct tests retain same-hit exclusion and next-hit Physical inclusion.
+- Reaction regression, build, routed validation, and preflight pass with aura,
+  ownership, ICD, and notification tests unchanged.
 
 ### Phase 4: Apply RES at Delayed Reaction Impact - Pending
 

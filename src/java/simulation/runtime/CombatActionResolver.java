@@ -187,9 +187,9 @@ public class CombatActionResolver {
             if (result.getType() == ReactionResult.Type.AMP) {
                 reactionMulti = handleAmplifyingReaction(trigger, aura, action, result);
             } else if (result.isStateful()) {
-                handleStatefulReaction(attacker, characterId, trigger, aura, action, result, stats);
+                handleStatefulReaction(attacker, characterId, trigger, aura, action, result, stats, context);
             } else if (result.getType() == ReactionResult.Type.TRANSFORMATIVE) {
-                handleTransformativeReaction(attacker, characterId, action, trigger, aura, result, stats);
+                handleTransformativeReaction(attacker, characterId, action, trigger, aura, result, stats, context);
             }
         }
 
@@ -248,9 +248,7 @@ public class CombatActionResolver {
         ReactionResult result = ReactionCalculator.calculateShatter(
                 stats.get(StatType.ELEMENTAL_MASTERY), 90, 0.0);
         sim.notifyReaction(result, attacker);
-        double resFactor = DamageCalculator.calculateResMulti(
-                sim.getEnemy().getRes(StatType.PHYSICAL_DMG_BONUS),
-                ResistanceCalculator.getTotalResShred(stats, Element.PHYSICAL));
+        double resFactor = resolveImpactResistance(context, Element.PHYSICAL);
         double damage = result.getTransformDamage() * resFactor;
         if (sim.isLoggingEnabled()) {
             System.out.println(String.format("   [Reaction] Frozen target -> Shatter Damage: %,.0f", damage));
@@ -292,9 +290,7 @@ public class CombatActionResolver {
                         stats.get(StatType.ELEMENTAL_MASTERY), 90, stats.get(StatType.HYPERBLOOM_DMG_BONUS))
                 : ReactionCalculator.calculateBurgeon(
                         stats.get(StatType.ELEMENTAL_MASTERY), 90, stats.get(StatType.BURGEON_DMG_BONUS));
-        double resFactor = DamageCalculator.calculateResMulti(
-                sim.getEnemy().getRes(StatType.DENDRO_DMG_BONUS),
-                ResistanceCalculator.getTotalResShred(stats, Element.DENDRO));
+        double resFactor = resolveImpactResistance(context, Element.DENDRO);
         double damage = result.getTransformDamage() * resFactor;
         int maxCores = action.getDendroCoreConsumptionLimit();
         if (maxCores <= 0) {
@@ -367,6 +363,7 @@ public class CombatActionResolver {
      * @param aura        consumed aura element
      * @param result      resolved reaction result
      * @param stats       stats used for reaction bonuses
+     * @param context     start-of-hit buffs used for impact resistance
      */
     private void handleTransformativeReaction(
             Character attacker,
@@ -375,16 +372,15 @@ public class CombatActionResolver {
             Element trigger,
             Element aura,
             ReactionResult result,
-            StatsContainer stats) {
+            StatsContainer stats,
+            ActionResolutionContext context) {
         Element reactionElement = getTransformativeReactionElement(result);
 
         if (!result.isElectroCharged()) {
             sim.getEnemy().reduceAura(aura, action.getGaugeUnits(), sim.getCurrentTime());
         }
 
-        double res = sim.getEnemy().getRes(reactionElement.getBonusStatType());
-        double resFactor = DamageCalculator.calculateResMulti(
-                res, ResistanceCalculator.getTotalResShred(stats, reactionElement));
+        double resFactor = resolveImpactResistance(context, reactionElement);
         double reactBonus = result.isElectroCharged()
                 ? stats.get(StatType.ELECTRO_CHARGED_DMG_BONUS)
                 : 0.0;
@@ -418,7 +414,7 @@ public class CombatActionResolver {
     }
 
     private void handleStatefulReaction(Character attacker, CharacterId characterId, Element trigger, Element aura,
-            AttackAction action, ReactionResult result, StatsContainer stats) {
+            AttackAction action, ReactionResult result, StatsContainer stats, ActionResolutionContext context) {
         if (result.getKind() == ReactionResult.Kind.FROZEN) {
             double freezeUnits = Math.min(action.getGaugeUnits(),
                     Math.max(0.5, sim.getEnemy().getAuraUnits(aura, sim.getCurrentTime())));
@@ -440,9 +436,7 @@ public class CombatActionResolver {
             sim.getEnemy().reduceAura(aura, action.getGaugeUnits(), sim.getCurrentTime());
             handleLunarCrystallize(attacker, characterId, trigger, aura, result);
         } else if (result.getKind() == ReactionResult.Kind.BURNING) {
-            double resFactor = DamageCalculator.calculateResMulti(
-                    sim.getEnemy().getRes(StatType.PYRO_DMG_BONUS),
-                    ResistanceCalculator.getTotalResShred(stats, Element.PYRO));
+            double resFactor = resolveImpactResistance(context, Element.PYRO);
             double tickDamage = result.getTransformDamage() * resFactor;
             sim.getEnemy().reduceAura(aura, action.getGaugeUnits(), sim.getCurrentTime());
             reactionEffectScheduler.scheduleBurning(characterId, tickDamage);
@@ -453,9 +447,7 @@ public class CombatActionResolver {
             }
         } else if (result.getKind() == ReactionResult.Kind.BLOOM
                 || result.getKind() == ReactionResult.Kind.LUNAR_BLOOM) {
-            double resFactor = DamageCalculator.calculateResMulti(
-                    sim.getEnemy().getRes(StatType.DENDRO_DMG_BONUS),
-                    ResistanceCalculator.getTotalResShred(stats, Element.DENDRO));
+            double resFactor = resolveImpactResistance(context, Element.DENDRO);
             double coreDamage = result.getTransformDamage() * resFactor;
             sim.getEnemy().reduceAura(aura, action.getGaugeUnits(), sim.getCurrentTime());
             reactionEffectScheduler.createDendroCore(characterId, coreDamage);
@@ -549,6 +541,19 @@ public class CombatActionResolver {
                 12.0,
                 sim.getCurrentTime(),
                 stats -> stats.add(StatType.PHYS_RES_SHRED, 0.40)));
+    }
+
+    /**
+     * Resolves enemy resistance from the immutable buff list captured before
+     * reaction callbacks for the current hit.
+     *
+     * @param context start-of-hit action context
+     * @param element damage element whose resistance is being resolved
+     * @return impact-time target resistance multiplier
+     */
+    private double resolveImpactResistance(ActionResolutionContext context, Element element) {
+        return ResistanceCalculator.calculateMultiplier(
+                sim.getEnemy(), context.applicableBuffs, sim.getCurrentTime(), element);
     }
 
     /**

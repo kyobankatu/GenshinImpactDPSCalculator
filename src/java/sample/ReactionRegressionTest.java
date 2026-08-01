@@ -110,6 +110,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_RaidenCastAndMusouIcdContract();
         testAccuracyPhaseF_RaidenEyeBuffRefreshContract();
         testAccuracyPhaseF_LiveResistanceSnapshotContract();
+        testAccuracyPhaseF_ImmediateReactionLiveResistanceContract();
         testAccuracyPhaseF_PeriodicCancellationAndRaidenEyeDamageTrigger();
         testAccuracyPhaseF_BennettSkillAndBurstApplicationContract();
         testAccuracyPhaseF_XianglingGuobaNoIcdApplicationContract();
@@ -3348,6 +3349,57 @@ public class ReactionRegressionTest {
                 lunarSim, lunarOwner, lunarHit, lunarSim.getCurrentTime(), 1.0);
         assertClose(lunarBaseline * (1.025 / 0.90), lunarReduced, EPS,
                 "A snapshotted Lunar hit should use live matching RES reduction");
+    }
+
+    private static void testAccuracyPhaseF_ImmediateReactionLiveResistanceContract() {
+        TestCharacter snapshotOwner = testCharacter(Element.PYRO, CharacterId.XIANGLING);
+        CombatSimulator snapshotSim = simulatorWith(snapshotOwner);
+        AttackAction snapshotTrigger = new AttackAction(
+                "Snapshot Overload RES fixture", 0.0, Element.PYRO, StatType.BASE_ATK,
+                StatType.PYRO_DMG_BONUS, 0.0, true, ActionType.SKILL);
+        snapshotTrigger.setICD(ICDType.None, ICDTag.None, 1.0);
+        snapshotOwner.captureSnapshot(snapshotSim.getCurrentTime(), snapshotSim.getTeamBuffs());
+        snapshotSim.applyTeamBuff(new SimpleBuff(
+                "Live reaction Pyro RES fixture", 10.0, snapshotSim.getCurrentTime(),
+                stats -> stats.add(StatType.PYRO_RES_SHRED, 0.15)));
+        snapshotSim.getEnemy().setAura(Element.ELECTRO, 4.0, snapshotSim.getCurrentTime());
+        snapshotSim.performActionWithoutTimeAdvance(CharacterId.XIANGLING, snapshotTrigger);
+        assertClose(expectedTransformative(2.75, Element.PYRO, 0.0) * (1.025 / 0.90),
+                snapshotSim.getTotalDamage(), 0.5,
+                "A snapshotted Overload trigger should use reduction activated after snapshot");
+
+        TestCharacter staleOwner = testCharacter(Element.PYRO, CharacterId.XIANGLING);
+        CombatSimulator staleSim = simulatorWith(staleOwner);
+        staleSim.applyTeamBuff(new SimpleBuff(
+                "Stale reaction Pyro RES fixture", 10.0, staleSim.getCurrentTime(),
+                stats -> stats.add(StatType.PYRO_RES_SHRED, 0.15)));
+        staleOwner.captureSnapshot(staleSim.getCurrentTime(), staleSim.getTeamBuffs());
+        staleSim.advanceTime(10.0);
+        staleSim.getEnemy().setAura(Element.ELECTRO, 4.0, staleSim.getCurrentTime());
+        staleSim.performActionWithoutTimeAdvance(CharacterId.XIANGLING, snapshotTrigger);
+        assertClose(expectedTransformative(2.75, Element.PYRO, 0.0),
+                staleSim.getTotalDamage(), 0.5,
+                "A snapshotted Overload trigger should ignore reduction at exact expiry");
+
+        TestCharacter vvOwner = testCharacter(Element.ANEMO, CharacterId.SUCROSE);
+        vvOwner.setArtifacts(new model.artifact.ViridescentVenerer());
+        TestCharacter pyroAlly = testCharacter(Element.PYRO, CharacterId.XIANGLING);
+        CombatSimulator vvSim = simulatorWith(vvOwner);
+        vvSim.addCharacter(pyroAlly);
+        vvSim.getEnemy().setAura(Element.PYRO, 4.0, vvSim.getCurrentTime());
+        vvSim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, reactionHit("First VV Swirl RES fixture", Element.ANEMO));
+        double firstSwirlDamage = vvSim.getTotalDamage();
+        assertClose(expectedTransformative(0.6, Element.PYRO, 0.0) * 1.60, firstSwirlDamage, 0.5,
+                "The first Swirl should not use the VV reduction emitted by that reaction");
+
+        vvSim.getEnemy().setAura(Element.ELECTRO, 4.0, vvSim.getCurrentTime());
+        vvSim.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING, reactionHit("Post-VV Overload RES fixture", Element.PYRO));
+        double postVvOverload = vvSim.getTotalDamage() - firstSwirlDamage;
+        assertClose(expectedTransformative(2.75, Element.PYRO, 0.0) * (1.15 / 0.90),
+                postVvOverload, 0.5,
+                "A later Pyro reaction should use the already-active VV reduction");
     }
 
     private static void testAccuracyPhaseF_PeriodicCancellationAndRaidenEyeDamageTrigger() {
