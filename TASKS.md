@@ -7984,7 +7984,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phases 1-2 are complete and Phase 3 remains.
+- Complete; all three phases are implemented and accepted.
 - Requirement: standard Bloom and Lunar-Bloom must consume existing aura with
   the sourced Hydro:Dendro 2:1 directional ratio instead of a shared 1.0
   trigger-gauge multiplier.
@@ -8150,7 +8150,7 @@ Completion evidence:
 - Reaction regression, build, Javadoc, and routed build/reaction validation all
   pass.
 
-### Phase 3: Re-Accept Bloom-Neutral Party Baselines
+### Phase 3: Re-Accept Bloom-Neutral Party Baselines - Done
 
 Why last:
 
@@ -8189,6 +8189,25 @@ Verification:
 - two fresh `./gradlew FlinsParty` runs
 - two fresh `./gradlew FlinsParty2` runs
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Each pair and its B-051 baseline has the same normalized SHA-256:
+  RaidenParty
+  `985f95d5c7779b81013dad0cf6232557b453ea44034c224f1b3ec1795a3b8614`,
+  FlinsParty
+  `4ad65138b5288f4c627194509fc24be69b8d21771efc09a66a1bd79dd92a2b96`,
+  and FlinsParty2
+  `118edbd3665d167d31e9bbbbffc97ffc499a40db5199a573a5e25ed8eea023a6`.
+- RaidenParty remains 1,363,709 / 64,939 over 21.0 seconds at
+  100/175/179/174% ER. FlinsParty remains 22,620,467 / 227,341 over 99.5
+  seconds at 109/100/100/180% ER. FlinsParty2 remains 15,482,126 / 224,054
+  over 69.1 seconds at 130/128/100/196% ER.
+- All six runs complete without warning, error, failed action, or insufficient
+  energy output. Their optimizer allocations and complete payloads are exact
+  no-change controls because none of the parties contains Dendro.
+- The tracked FlinsParty2 HTML report was clean before execution and restored
+  afterward; no generated output is staged.
 
 ## Implementation Order: Overload and Superconduct Residual Aura
 

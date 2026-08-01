@@ -1331,7 +1331,7 @@ experiment record.
 
 ### B-052 — Bloom consumes the same gauge in both trigger directions
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 3 (maintained transformative-reaction divergence)
 - Symptom: standard Bloom and Lunar-Bloom subtract the trigger's full source
   gauge in both directions, but Hydro is Bloom's weak element and the sourced
@@ -1352,3 +1352,13 @@ experiment record.
   Hydro-on-Dendro and 2.0x Dendro-on-Hydro. Quicken-as-Dendro coexistence,
   Burning internals, and other special state remain separate. See `TASKS.md`
   implementation block `Bloom Directional Aura Consumption`.
+  Completed with one typed consumption policy shared by standard and
+  Lunar-Bloom. Actual action regressions cover both directional residuals,
+  exact/over-consumption, one reaction/core owner, no immediate damage, and
+  Lunar Dew parity. Repeated no-Dendro controls retain RaidenParty
+  `985f95d5c7779b81013dad0cf6232557b453ea44034c224f1b3ec1795a3b8614`
+  at 1,363,709 / 64,939, FlinsParty
+  `4ad65138b5288f4c627194509fc24be69b8d21771efc09a66a1bd79dd92a2b96`
+  at 22,620,467 / 227,341, and FlinsParty2
+  `118edbd3665d167d31e9bbbbffc97ffc499a40db5199a573a5e25ed8eea023a6`
+  at 15,482,126 / 224,054 with stable ER, durations, and warning-free output.
