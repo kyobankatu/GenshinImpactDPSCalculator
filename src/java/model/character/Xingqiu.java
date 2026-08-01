@@ -143,13 +143,13 @@ public class Xingqiu extends Character implements FormStateProvider {
         double mv1 = getTalentValue("Rain Screen Hit 1", 2.86);
         AttackAction hit1 = new AttackAction("Fatal Rainscreen Hit 1", mv1 * mvMulti, Element.HYDRO, StatType.BASE_ATK,
                 StatType.SKILL_DMG_BONUS, 0.5, ActionType.SKILL);
-        hit1.setICD(ICDType.Standard, ICDTag.ElementalSkill, 1.0);
+        hit1.setICD(ICDType.None, ICDTag.ElementalSkill, 1.0);
         sim.performAction(this.characterId, hit1);
 
         double mv2 = getTalentValue("Rain Screen Hit 2", 3.25);
         AttackAction hit2 = new AttackAction("Fatal Rainscreen Hit 2", mv2 * mvMulti, Element.HYDRO, StatType.BASE_ATK,
                 StatType.SKILL_DMG_BONUS, 0.5, ActionType.SKILL);
-        hit2.setICD(ICDType.Standard, ICDTag.ElementalSkill, 1.0);
+        hit2.setICD(ICDType.None, ICDTag.ElementalSkill, 1.0);
         sim.performAction(this.characterId, hit2);
 
         // Generate 5 Hydro Particles

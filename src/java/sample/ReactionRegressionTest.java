@@ -92,6 +92,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_SucroseNoIcdApplicationContract();
         testAccuracyPhaseF_XianglingGuobaNoIcdApplicationContract();
         testAccuracyPhaseF_XianglingChiliPickupOptIn();
+        testAccuracyPhaseF_XingqiuSkillNoIcdApplicationContract();
         testAccuracyPhaseF_XingqiuOrbitalApplicationCadence();
         testAccuracyPhaseF_DamageHooksDispatchOnce();
         testAccuracyPhaseF_SkywardSpineInjectedProcBoundaries();
@@ -1928,6 +1929,40 @@ public class ReactionRegressionTest {
         assertEquals(0, noAuraKinds.size(), "Guoba should not fabricate reactions without an aura");
     }
 
+    private static void testAccuracyPhaseF_XingqiuSkillNoIcdApplicationContract() {
+        RecordingDamageWeapon reactingWeapon = new RecordingDamageWeapon("Fatal Rainscreen");
+        model.character.Xingqiu reactingXingqiu = new model.character.Xingqiu(
+                reactingWeapon, blankArtifact());
+        CombatSimulator reactingSim = simulatorWithExistingCharacter(reactingXingqiu);
+        List<ReactionResult.Kind> reactingKinds = captureReactionKinds(reactingSim);
+        reactingSim.getEnemy().setAura(Element.PYRO, 4.0, reactingSim.getCurrentTime());
+        reactingSim.performAction(CharacterId.XINGQIU,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+
+        assertEquals(2, reactingWeapon.actions.size(), "Fatal Rainscreen should deal two Skill hits");
+        assertEquals(2, countReactions(reactingKinds, ReactionResult.Kind.VAPORIZE),
+                "Both Fatal Rainscreen hits should apply Hydro and Vaporize without ICD");
+        assertTrue(reactingWeapon.actions.stream().allMatch(action -> action.getElement() == Element.HYDRO
+                        && action.getActionType() == ActionType.SKILL
+                        && action.getICDType() == ICDType.None
+                        && action.getICDTag() == ICDTag.ElementalSkill
+                        && action.getGaugeUnits() == 1.0),
+                "Both Fatal Rainscreen hits should retain their sourced Hydro Skill contract");
+
+        RecordingDamageWeapon noAuraWeapon = new RecordingDamageWeapon("Fatal Rainscreen");
+        model.character.Xingqiu noAuraXingqiu = new model.character.Xingqiu(
+                noAuraWeapon, blankArtifact());
+        CombatSimulator noAuraSim = simulatorWithExistingCharacter(noAuraXingqiu);
+        List<ReactionResult.Kind> noAuraKinds = captureReactionKinds(noAuraSim);
+        noAuraSim.performAction(CharacterId.XINGQIU,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+
+        assertEquals(2, noAuraWeapon.actions.size(),
+                "Fatal Rainscreen should still deal two hits without an aura");
+        assertEquals(0, noAuraKinds.size(),
+                "Fatal Rainscreen should not fabricate reactions without an aura");
+    }
+
     private static List<ReactionResult.Kind> captureReactionKinds(CombatSimulator sim) {
         List<ReactionResult.Kind> kinds = new ArrayList<>();
         sim.addReactionListener((result, source, time, simulator) -> kinds.add(result.getKind()));
@@ -2155,12 +2190,12 @@ public class ReactionRegressionTest {
     /** Captures matching damage actions from the production damage-hook path. */
     private static final class RecordingDamageWeapon extends Weapon
             implements model.entity.DamageTriggeredWeaponEffect {
-        private final String actionName;
+        private final String actionNamePrefix;
         private final List<AttackAction> actions = new ArrayList<>();
 
-        private RecordingDamageWeapon(String actionName) {
+        private RecordingDamageWeapon(String actionNamePrefix) {
             super("Recording Damage Weapon", new StatsContainer());
-            this.actionName = actionName;
+            this.actionNamePrefix = actionNamePrefix;
         }
 
         @Override
@@ -2169,7 +2204,7 @@ public class ReactionRegressionTest {
                 AttackAction action,
                 double currentTime,
                 CombatSimulator sim) {
-            if (actionName.equals(action.getName())) {
+            if (action.getName().startsWith(actionNamePrefix)) {
                 actions.add(action);
             }
         }

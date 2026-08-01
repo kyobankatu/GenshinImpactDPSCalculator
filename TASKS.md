@@ -2513,7 +2513,7 @@ Completion evidence:
 
 Status:
 
-- Planned; Phase 1 evidence is recorded below.
+- In progress; Phases 1-2 are complete and Phase 3 remains.
 - Requirement: both Fatal Rainscreen strikes must independently apply 1U Hydro
   without entering or consulting a Skill ICD group.
 
@@ -2569,7 +2569,7 @@ Verification:
 - inspect `Xingqiu.skill` and the final detailed `RaidenParty` trace
 - `python scripts/preflight.py --run`
 
-### Phase 2: Encode and Test Two Independent Skill Applications
+### Phase 2: Encode and Test Two Independent Skill Applications - Done
 
 Why second:
 
