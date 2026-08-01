@@ -256,6 +256,6 @@ Latest validation baseline from the accuracy pass:
 
 - `./gradlew ReactionRegressionTest`
 - `./gradlew RaidenParty`: 1,440,416 total damage / 68,591 DPS
-- `./gradlew FlinsParty2`: 15,892,535 total damage / 233,028 DPS
+- `./gradlew FlinsParty2`: 15,562,611 total damage / 228,191 DPS
 - `./gradlew BenchmarkRLJava`
 - `./gradlew ProfileCapabilities`

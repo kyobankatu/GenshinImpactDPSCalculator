@@ -35,9 +35,9 @@ The deterministic damage-proc correction is complete. Weapon and artifact
 damage hooks dispatch once through `DamageCalculator`, and `RaidenParty` uses
 common seeded Skyward Spine draws for reproducible optimizer evaluation.
 
-The Sucrose elemental-application correction is now active. Its sourced
-contract and pre-fix `FlinsParty2` baseline are recorded; implementation and
-sample acceptance remain.
+The Sucrose elemental-application correction is complete. Skill and every Burst
+damage pulse use their sourced 1U/no-ICD contract, while the zero-damage Burst
+cast no longer applies Anemo.
 
 ## Scope
 
@@ -921,8 +921,8 @@ Verification:
 
 Status:
 
-- In progress.
-- Phases 1-2 are complete; Phase 3 remains.
+- Implemented.
+- Phases 1-3 are complete.
 - Requirement: Sucrose's Skill and every Burst damage pulse must apply their
   documented 1U element without ICD, while the zero-damage Burst cast must not
   apply Anemo.
@@ -1046,7 +1046,7 @@ Verification:
 - `./gradlew build`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Accept the FlinsParty2 Delta and Close the Accuracy Note
+### Phase 3: Accept the FlinsParty2 Delta and Close the Accuracy Note - Done
 
 Why last:
 

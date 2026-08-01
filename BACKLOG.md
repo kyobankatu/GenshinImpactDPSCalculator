@@ -198,7 +198,7 @@ experiment record.
 
 ### B-011 — Sucrose Skill and Burst use incorrect standard ICD defaults
 
-- Status: `planned`
+- Status: `done`
 - Source: 3 (sourced game-accuracy divergence exposed by B-009 output)
 - Symptom: Sucrose's zero-damage Burst cast applies a default 1U Anemo hit,
   while the real Burst DoT and absorbed-element pulses use standard ICD; three
@@ -217,4 +217,10 @@ experiment record.
   https://library.keqingmains.com/evidence/characters/anemo/sucrose, and
   https://genshin-impact.fandom.com/wiki/Sucrose. Pre-fix `FlinsParty2` is
   15,892,535 damage / 233,028 DPS. See `TASKS.md` implementation block
-  `Sucrose No-ICD Elemental Application`.
+  `Sucrose No-ICD Elemental Application`. Completed 2026-08-02. The Burst cast
+  now has 0U, while Skill, Burst DoT, and absorbed damage explicitly use 1U with
+  no ICD. Two complete post-fix logs were byte-identical with SHA-256
+  `b57d5f0e3619ee2b6788c1c075434a3c1f9b794c8435e60354cdb8d25eac9e40`.
+  All five modeled Burst DoT pulses applied; only standard Normal Attack ICD
+  blocks remained for Sucrose. The accepted result is 15,562,611 damage /
+  228,191 DPS.
