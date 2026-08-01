@@ -11291,7 +11291,7 @@ Completion evidence:
 - The current resolver notifies and consumes before damage, but applies physical
   shred after damage. Phase 2 must move shred ahead of the damage-only gate.
 
-### Phase 2: Implement Snapshot-Safe Superconduct Damage Sequence - Pending
+### Phase 2: Implement Snapshot-Safe Superconduct Damage Sequence - Done
 
 Why second:
 
@@ -11340,6 +11340,23 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - routed validation/preflight planning without RL execution
+
+Completion evidence:
+
+- `ReactionState` owns one target boundary and immutable owner fixed-window
+  payloads. Controller/facade inject time and snapshots round-trip both policy
+  dimensions without exposing resolver details.
+- Resolver notification and Aura reduction remain ahead of gating. Physical
+  shred now refreshes before both target- and owner-damage decisions.
+- Focused regression covers 0.05/0.10-second target boundaries, owner entries
+  one/two/three, independent owner state, exact 0.5-second reset, an owner block
+  starting the next target GCD, seven unchanged notifications/consumptions, and
+  snapshot replay after owner entry two.
+- A separate physical hit at 12.15 seconds proves the damage-blocked 0.20-second
+  reaction refreshed the 12-second shred after the last damaging hit's expiry.
+- `./gradlew ReactionRegressionTest`, `./gradlew build`, and `./gradlew javadoc`
+  pass. Routed validation reports no leaks; RL-routed catalog/rollout checks were
+  not run under this session's explicit simulator-only boundary.
 
 ### Phase 3: Accept Superconduct-Sequence Catalog Baselines - Pending
 

@@ -435,8 +435,21 @@ public class CombatActionResolver {
                     aura, getAuraConsumption(action, result, trigger, aura), sim.getCurrentTime());
         }
 
+        if (result.getKind() == ReactionResult.Kind.SUPERCONDUCT) {
+            applySuperconductPhysicalResShred();
+        }
+
         if (isOverload(result)
                 && !sim.tryStartOverloadDamageCooldown(characterId)) {
+            if (sim.isLoggingEnabled()) {
+                System.out.println(String.format(
+                        "   [Reaction] %s on %s -> %s Damage blocked (damage sequence)",
+                        trigger, aura, result.getName()));
+            }
+            return;
+        }
+        if (result.getKind() == ReactionResult.Kind.SUPERCONDUCT
+                && !sim.tryStartSuperconductDamageSequence(characterId)) {
             if (sim.isLoggingEnabled()) {
                 System.out.println(String.format(
                         "   [Reaction] %s on %s -> %s Damage blocked (damage sequence)",
@@ -472,10 +485,6 @@ public class CombatActionResolver {
         if (result.isElectroCharged()) {
             reactionEffectScheduler.scheduleElectroCharged(
                     trigger, action.getGaugeUnits(), preResistanceDamage, isLunar);
-        } else {
-            if (result.getKind() == ReactionResult.Kind.SUPERCONDUCT) {
-                applySuperconductPhysicalResShred();
-            }
         }
     }
 

@@ -13,6 +13,9 @@ public class ReactionState {
     private static final double TIMING_EPSILON = 1e-9;
     private static final double OVERLOAD_TARGET_DAMAGE_GCD = 0.1;
     private static final double OVERLOAD_OWNER_DAMAGE_COOLDOWN = 0.5;
+    private static final double SUPERCONDUCT_TARGET_DAMAGE_GCD = 0.1;
+    private static final double SUPERCONDUCT_OWNER_SEQUENCE_WINDOW = 0.5;
+    private static final int SUPERCONDUCT_OWNER_DAMAGE_LIMIT = 2;
     private static final double STANDARD_CRYSTALLIZE_COOLDOWN = 1.0;
     /** Immutable consumable Quicken Aura payload. */
     public static final class QuickenState {
@@ -128,6 +131,20 @@ public class ReactionState {
         }
     }
 
+    /** Immutable owner-specific Superconduct damage-sequence payload. */
+    public static final class SuperconductDamageSequenceState {
+        /** Fixed window end time started by the first target-accepted attempt. */
+        public final double windowEndTime;
+        /** Number of target-accepted attempts observed in the fixed window. */
+        public final int attemptCount;
+
+        private SuperconductDamageSequenceState(
+                double windowEndTime, int attemptCount) {
+            this.windowEndTime = windowEndTime;
+            this.attemptCount = attemptCount;
+        }
+    }
+
     private boolean ecTimerRunning = false;
     private double thundercloudEndTime = -1.0;
     private boolean burningTimerRunning = false;
@@ -138,6 +155,10 @@ public class ReactionState {
     private QuickenState quickenState;
     private double overloadTargetDamageCooldownEndTime = -1.0;
     private final Map<CharacterId, Double> overloadOwnerDamageCooldownEndTimes =
+            new EnumMap<>(CharacterId.class);
+    private double superconductTargetDamageCooldownEndTime = -1.0;
+    private final Map<CharacterId, SuperconductDamageSequenceState>
+            superconductOwnerDamageSequenceStates =
             new EnumMap<>(CharacterId.class);
     private double standardCrystallizeCooldownEndTime = -1.0;
     private int moondriftCount = 0;
@@ -207,6 +228,87 @@ public class ReactionState {
             Double endTime = entry.getValue();
             if (ownerId != null && endTime != null && Double.isFinite(endTime)) {
                 overloadOwnerDamageCooldownEndTimes.put(ownerId, endTime);
+            }
+        }
+    }
+
+    /**
+     * Attempts to accept Superconduct reaction damage.
+     *
+     * <p>The target-wide GCD is evaluated first. A target-accepted attempt then
+     * advances the owner's fixed sequence even when its damage is suppressed.
+     *
+     * @param ownerId character that owns the Superconduct reaction
+     * @param currentTime simulator time in seconds
+     * @return {@code true} when this Superconduct may deal damage
+     */
+    public boolean tryStartSuperconductDamageSequence(
+            CharacterId ownerId, double currentTime) {
+        if (ownerId == null || !Double.isFinite(currentTime)
+                || currentTime + TIMING_EPSILON
+                        < superconductTargetDamageCooldownEndTime) {
+            return false;
+        }
+        superconductTargetDamageCooldownEndTime =
+                currentTime + SUPERCONDUCT_TARGET_DAMAGE_GCD;
+
+        SuperconductDamageSequenceState state =
+                superconductOwnerDamageSequenceStates.get(ownerId);
+        if (state == null
+                || currentTime + TIMING_EPSILON >= state.windowEndTime) {
+            superconductOwnerDamageSequenceStates.put(
+                    ownerId,
+                    new SuperconductDamageSequenceState(
+                            currentTime + SUPERCONDUCT_OWNER_SEQUENCE_WINDOW, 1));
+            return true;
+        }
+
+        int attemptCount = Math.min(
+                SUPERCONDUCT_OWNER_DAMAGE_LIMIT + 1,
+                state.attemptCount + 1);
+        superconductOwnerDamageSequenceStates.put(
+                ownerId,
+                new SuperconductDamageSequenceState(
+                        state.windowEndTime, attemptCount));
+        return attemptCount <= SUPERCONDUCT_OWNER_DAMAGE_LIMIT;
+    }
+
+    /** Returns the target-wide Superconduct damage cooldown end time. */
+    public double getSuperconductTargetDamageCooldownEndTime() {
+        return superconductTargetDamageCooldownEndTime;
+    }
+
+    /** Returns a defensive copy of owner-specific Superconduct sequence state. */
+    public Map<CharacterId, SuperconductDamageSequenceState>
+            copySuperconductOwnerDamageSequenceStates() {
+        return new EnumMap<>(superconductOwnerDamageSequenceStates);
+    }
+
+    /** Restores both dimensions of Superconduct damage-sequence state. */
+    public void restoreSuperconductDamageSequence(
+            double targetEndTime,
+            Map<CharacterId, SuperconductDamageSequenceState> ownerStates) {
+        superconductTargetDamageCooldownEndTime = Double.isFinite(targetEndTime)
+                ? targetEndTime
+                : -1.0;
+        superconductOwnerDamageSequenceStates.clear();
+        if (ownerStates == null) {
+            return;
+        }
+        for (Map.Entry<CharacterId, SuperconductDamageSequenceState> entry
+                : ownerStates.entrySet()) {
+            CharacterId ownerId = entry.getKey();
+            SuperconductDamageSequenceState state = entry.getValue();
+            if (ownerId != null && state != null
+                    && Double.isFinite(state.windowEndTime)
+                    && state.attemptCount > 0) {
+                superconductOwnerDamageSequenceStates.put(
+                        ownerId,
+                        new SuperconductDamageSequenceState(
+                                state.windowEndTime,
+                                Math.min(
+                                        SUPERCONDUCT_OWNER_DAMAGE_LIMIT + 1,
+                                        state.attemptCount)));
             }
         }
     }

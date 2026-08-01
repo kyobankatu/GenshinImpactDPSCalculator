@@ -784,6 +784,11 @@ public class CombatSimulator {
                 reactionStateController.getOverloadTargetDamageCooldownEndTime();
         Map<CharacterId, Double> overloadOwnerDamageCooldownEndTimes =
                 reactionStateController.copyOverloadOwnerDamageCooldownEndTimes();
+        double superconductTargetDamageCooldownEndTime =
+                reactionStateController.getSuperconductTargetDamageCooldownEndTime();
+        Map<CharacterId, simulation.runtime.ReactionState.SuperconductDamageSequenceState>
+                superconductOwnerDamageSequenceStates =
+                reactionStateController.copySuperconductOwnerDamageSequenceStates();
         double standardCrystallizeCooldownEndTime =
                 reactionStateController.getStandardCrystallizeCooldownEndTime();
         int moondriftCount = reactionState.getMoondriftCount();
@@ -843,6 +848,8 @@ public class CombatSimulator {
                 quickenEndTime, quickenState,
                 overloadTargetDamageCooldownEndTime,
                 overloadOwnerDamageCooldownEndTimes,
+                superconductTargetDamageCooldownEndTime,
+                superconductOwnerDamageSequenceStates,
                 standardCrystallizeCooldownEndTime,
                 moondriftCount, lunarCrystallizeTriggerCount,
                 verdantDewCount, moonridgeDewCount,
@@ -889,6 +896,9 @@ public class CombatSimulator {
         reactionStateController.restoreOverloadDamageCooldowns(
                 snap.overloadTargetDamageCooldownEndTime,
                 snap.overloadOwnerDamageCooldownEndTimes);
+        reactionStateController.restoreSuperconductDamageSequence(
+                snap.superconductTargetDamageCooldownEndTime,
+                snap.superconductOwnerDamageSequenceStates);
         reactionStateController.restoreStandardCrystallizeCooldown(
                 snap.standardCrystallizeCooldownEndTime);
         reactionState.setMoondriftCount(snap.moondriftCount);
@@ -978,6 +988,16 @@ public class CombatSimulator {
      */
     public boolean tryStartOverloadDamageCooldown(CharacterId ownerId) {
         return reactionStateController.tryStartOverloadDamageCooldown(ownerId);
+    }
+
+    /**
+     * Attempts to accept Superconduct reaction damage at the current time.
+     *
+     * @param ownerId character that owns the Superconduct reaction
+     * @return {@code true} when target and owner damage limits both allow it
+     */
+    public boolean tryStartSuperconductDamageSequence(CharacterId ownerId) {
+        return reactionStateController.tryStartSuperconductDamageSequence(ownerId);
     }
 
     /**

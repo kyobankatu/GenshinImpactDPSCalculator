@@ -81,6 +81,9 @@ public class SimulatorSnapshot {
     public final ReactionState.QuickenState quickenState;
     public final double overloadTargetDamageCooldownEndTime;
     public final Map<CharacterId, Double> overloadOwnerDamageCooldownEndTimes;
+    public final double superconductTargetDamageCooldownEndTime;
+    public final Map<CharacterId, ReactionState.SuperconductDamageSequenceState>
+            superconductOwnerDamageSequenceStates;
     public final double standardCrystallizeCooldownEndTime;
     public final int moondriftCount;
     public final int lunarCrystallizeTriggerCount;
@@ -129,6 +132,8 @@ public class SimulatorSnapshot {
      * @param quickenState typed consumable Quicken Aura payload
      * @param overloadTargetDamageCooldownEndTime target-wide Overload damage cooldown end
      * @param overloadOwnerDamageCooldownEndTimes owner-specific Overload damage cooldown ends
+     * @param superconductTargetDamageCooldownEndTime target-wide Superconduct damage cooldown end
+     * @param superconductOwnerDamageSequenceStates owner-specific Superconduct sequence states
      * @param standardCrystallizeCooldownEndTime standard Crystallize cooldown end
      * @param moondriftCount active Moondrift count
      * @param lunarCrystallizeTriggerCount Lunar-Crystallize trigger count
@@ -163,6 +168,9 @@ public class SimulatorSnapshot {
             ReactionState.QuickenState quickenState,
             double overloadTargetDamageCooldownEndTime,
             Map<CharacterId, Double> overloadOwnerDamageCooldownEndTimes,
+            double superconductTargetDamageCooldownEndTime,
+            Map<CharacterId, ReactionState.SuperconductDamageSequenceState>
+                    superconductOwnerDamageSequenceStates,
             double standardCrystallizeCooldownEndTime,
             int moondriftCount,
             int lunarCrystallizeTriggerCount,
@@ -199,6 +207,12 @@ public class SimulatorSnapshot {
                 new EnumMap<>(CharacterId.class);
         this.overloadOwnerDamageCooldownEndTimes.putAll(
                 overloadOwnerDamageCooldownEndTimes);
+        this.superconductTargetDamageCooldownEndTime =
+                superconductTargetDamageCooldownEndTime;
+        this.superconductOwnerDamageSequenceStates =
+                new EnumMap<>(CharacterId.class);
+        this.superconductOwnerDamageSequenceStates.putAll(
+                superconductOwnerDamageSequenceStates);
         this.standardCrystallizeCooldownEndTime =
                 standardCrystallizeCooldownEndTime;
         this.moondriftCount = moondriftCount;

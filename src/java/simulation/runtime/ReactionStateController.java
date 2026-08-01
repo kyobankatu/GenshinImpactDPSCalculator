@@ -54,6 +54,32 @@ public class ReactionStateController {
         reactionState.restoreOverloadDamageCooldowns(targetEndTime, ownerEndTimes);
     }
 
+    /** Attempts to accept Superconduct damage at the current simulator time. */
+    public boolean tryStartSuperconductDamageSequence(CharacterId ownerId) {
+        return reactionState.tryStartSuperconductDamageSequence(
+                ownerId, sim.getCurrentTime());
+    }
+
+    /** Returns the target-wide Superconduct damage cooldown end time. */
+    public double getSuperconductTargetDamageCooldownEndTime() {
+        return reactionState.getSuperconductTargetDamageCooldownEndTime();
+    }
+
+    /** Returns a defensive copy of owner-specific Superconduct sequence state. */
+    public Map<CharacterId, ReactionState.SuperconductDamageSequenceState>
+            copySuperconductOwnerDamageSequenceStates() {
+        return reactionState.copySuperconductOwnerDamageSequenceStates();
+    }
+
+    /** Restores both dimensions of Superconduct damage-sequence state. */
+    public void restoreSuperconductDamageSequence(
+            double targetEndTime,
+            Map<CharacterId, ReactionState.SuperconductDamageSequenceState>
+                    ownerStates) {
+        reactionState.restoreSuperconductDamageSequence(
+                targetEndTime, ownerStates);
+    }
+
     /** Attempts to accept standard Crystallize at the current simulator time. */
     public boolean tryStartStandardCrystallizeCooldown() {
         return reactionState.tryStartStandardCrystallizeCooldown(

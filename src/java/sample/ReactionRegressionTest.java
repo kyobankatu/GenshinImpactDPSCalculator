@@ -137,6 +137,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseG_BloomDirectionalAuraConsumptionContract();
         testAccuracyPhaseG_TransformativeResidualAuraContract();
         testAccuracyPhaseG_OverloadDamageSequenceContract();
+        testAccuracyPhaseG_SuperconductDamageSequenceContract();
         testAccuracyPhaseG_StandardCrystallizeCooldownContract();
         testAccuracyPhaseF_PeriodicCancellationAndRaidenEyeDamageTrigger();
         testAccuracyPhaseF_BennettSkillAndBurstApplicationContract();
@@ -1604,12 +1605,13 @@ public class ReactionRegressionTest {
         superconduct.performActionWithoutTimeAdvance(
                 CharacterId.SUCROSE,
                 reactionHit("First non-Overload damage-sequence fixture", Element.ELECTRO));
+        superconduct.advanceTime(0.1);
         superconduct.performActionWithoutTimeAdvance(
                 CharacterId.SUCROSE,
                 reactionHit("Second non-Overload damage-sequence fixture", Element.ELECTRO));
         assertClose(expectedTransformative(1.5, Element.CRYO, 0.0) * 2.0,
                 superconduct.getTotalDamage(), 0.5,
-                "Overload limits should not suppress immediate Superconduct damage");
+                "Overload limits should not suppress boundary Superconduct damage");
     }
 
     private static void testAccuracyPhaseG_StandardCrystallizeCooldownContract() {
@@ -1694,6 +1696,122 @@ public class ReactionRegressionTest {
                 "Three rapid Lunar-Crystallize triggers should retain the Harmony notification");
         assertEquals(3, lunar.getLunarCrystallizeTriggerCount(),
                 "Lunar-Crystallize triggers should bypass the standard global cooldown");
+    }
+
+    private static void testAccuracyPhaseG_SuperconductDamageSequenceContract() {
+        CombatSimulator sim = simulatorWith(testCharacter(
+                Element.ELECTRO, CharacterId.SUCROSE));
+        sim.addCharacter(testCharacter(Element.ELECTRO, CharacterId.XIANGLING));
+        sim.getEnemy().setAura(Element.CRYO, 8.0);
+        List<ReactionResult.Kind> kinds = captureReactionKinds(sim);
+        double superconductDamage = expectedTransformative(
+                1.5, Element.CRYO, 0.0);
+
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Initial Superconduct sequence fixture", Element.ELECTRO));
+        sim.advanceTime(0.05);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING,
+                reactionHit("Pre-target-boundary Superconduct fixture", Element.ELECTRO));
+        assertClose(superconductDamage, sim.getTotalDamage(), 0.5,
+                "A different owner should be damage-blocked before 0.1 seconds");
+
+        sim.advanceTime(0.05);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Second owner Superconduct fixture", Element.ELECTRO));
+        assertClose(superconductDamage * 2.0, sim.getTotalDamage(), 0.5,
+                "The owner should deal its second hit at the target boundary");
+        SimulatorSnapshot snapshot = sim.saveSnapshot();
+        assertClose(0.2, snapshot.superconductTargetDamageCooldownEndTime, EPS,
+                "Second Superconduct should advance the target damage GCD");
+        ReactionState.SuperconductDamageSequenceState ownerState =
+                snapshot.superconductOwnerDamageSequenceStates.get(
+                        CharacterId.SUCROSE);
+        assertClose(0.5, ownerState.windowEndTime, EPS,
+                "The owner sequence should retain its first-hit fixed boundary");
+        assertEquals(2, ownerState.attemptCount,
+                "The owner sequence should record two target-accepted attempts");
+        assertTrue(!snapshot.superconductOwnerDamageSequenceStates.containsKey(
+                CharacterId.XIANGLING),
+                "A target-blocked attempt should not start an owner sequence");
+
+        sim.advanceTime(0.1);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Third owner Superconduct fixture", Element.ELECTRO));
+        assertClose(superconductDamage * 2.0, sim.getTotalDamage(), 0.5,
+                "The owner's third target-accepted hit should deal no damage");
+        sim.advanceTime(0.05);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING,
+                reactionHit("Post-owner-block target GCD fixture", Element.ELECTRO));
+        assertClose(superconductDamage * 2.0, sim.getTotalDamage(), 0.5,
+                "An owner-blocked attempt should still start the target GCD");
+        sim.advanceTime(0.05);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING,
+                reactionHit("Independent owner Superconduct fixture", Element.ELECTRO));
+        assertClose(superconductDamage * 3.0, sim.getTotalDamage(), 0.5,
+                "Another owner should have an independent damage sequence");
+        sim.advanceTime(0.2);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Exact owner-reset Superconduct fixture", Element.ELECTRO));
+        assertClose(superconductDamage * 4.0, sim.getTotalDamage(), 0.5,
+                "The original owner should deal damage at exactly 0.5 seconds");
+        assertEquals(7, countReactions(kinds, ReactionResult.Kind.SUPERCONDUCT),
+                "Damage-blocked attempts should still notify every Superconduct");
+        assertClose(1.0, sim.getEnemy().getAuraUnits(Element.CRYO), EPS,
+                "Every accepted and blocked Superconduct should consume Aura");
+
+        sim.restoreSnapshot(snapshot);
+        assertClose(superconductDamage * 2.0, sim.getTotalDamage(), 0.5,
+                "Snapshot restore should rewind Superconduct damage");
+        sim.advanceTime(0.1);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Restored third Superconduct fixture", Element.ELECTRO));
+        assertClose(superconductDamage * 2.0, sim.getTotalDamage(), 0.5,
+                "Snapshot restore should recover the owner damage limit");
+        sim.advanceTime(0.3);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Restored owner-reset Superconduct fixture", Element.ELECTRO));
+        assertClose(superconductDamage * 3.0, sim.getTotalDamage(), 0.5,
+                "Restored owner sequence should reset at its exact boundary");
+
+        CombatSimulator baseline = simulatorWith(testCharacter(Element.PHYSICAL));
+        baseline.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                damageHit("Late physical baseline fixture", Element.PHYSICAL, 1.0));
+        double baselinePhysicalDamage = baseline.getTotalDamage();
+
+        CombatSimulator shred = simulatorWith(testCharacter(Element.ELECTRO));
+        List<ReactionResult.Kind> shredKinds = captureReactionKinds(shred);
+        shred.getEnemy().setAura(Element.CRYO, 4.0);
+        for (int i = 0; i < 3; i++) {
+            if (i > 0) {
+                shred.advanceTime(0.1);
+            }
+            shred.performActionWithoutTimeAdvance(
+                    CharacterId.SUCROSE,
+                    reactionHit("Superconduct shred refresh fixture " + i, Element.ELECTRO));
+        }
+        assertClose(superconductDamage * 2.0, shred.getTotalDamage(), 0.5,
+                "The third owner hit should refresh shred without dealing damage");
+        assertEquals(3, countReactions(
+                shredKinds, ReactionResult.Kind.SUPERCONDUCT),
+                "Owner-blocked Superconduct should retain reaction notification");
+        shred.advanceTime(11.95);
+        double damageBeforePhysical = shred.getTotalDamage();
+        shred.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                damageHit("Physical after blocked Superconduct", Element.PHYSICAL, 1.0));
+        double refreshedPhysicalDamage = shred.getTotalDamage() - damageBeforePhysical;
+        assertTrue(refreshedPhysicalDamage > baselinePhysicalDamage * 1.20,
+                "Damage-blocked Superconduct should refresh physical RES shred");
     }
 
     private static void testAccuracyPhaseG_BloomDirectionalAuraConsumptionContract() {
