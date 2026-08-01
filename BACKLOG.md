@@ -1522,7 +1522,7 @@ experiment record.
 
 ### B-058 — Burning discards its Dendro fuel and uses a fixed lifetime
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 1/3 (README known difference confirmed by maintained gauge references)
 - Symptom: the resolver immediately subtracts the triggering source from the
   existing Aura, then the scheduler creates an infinite Pyro Aura and keeps
@@ -1552,3 +1552,12 @@ experiment record.
   Burning Aura consumption by Hydro/Cryo/Electro/Anemo/Geo, the separate Pyro
   application ICD, Quicken fuel, AoE, and hitlag remain out of scope. See
   `TASKS.md` implementation block `Burning Fuel and Refresh State`.
+  Completed with an immutable simulator-owned fuel/damage payload, exact
+  `max(0.4 U/s, 2 * natural rate)` depletion, source-direction Aura setup,
+  Dendro overwrite, latest-applier ownership, live-resistance ticks, and stale
+  event generations. Focused regression proves 8 ticks/2 seconds for 1U and 16
+  ticks/4 seconds for 2U, exact no-late-tick depletion, both source directions,
+  weaker Dendro replacement, Pyro owner-only refresh, snapshot continuity, and
+  one tick under competing generations. Six catalog control runs are
+  warning-free and pairwise exact at 1,365,787 / 65,037, 22,675,823 / 227,898,
+  and 15,817,125 / 228,902 with no Burning events.

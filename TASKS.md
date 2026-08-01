@@ -27,7 +27,7 @@ The current autonomous session is simulator-only. Python RL training and the
 Java RL bridge are excluded; the retained NCCL/DDP plan below is paused until a
 future explicit user request.
 
-The B-058 Burning fuel correction is in progress. It replaces the fixed
+The B-058 Burning fuel correction is complete. It replaces the fixed
 two-second approximation with typed Dendro-fuel decay and refresh ownership
 while retaining the repository's single-target boundary.
 
@@ -9611,7 +9611,7 @@ Completion evidence:
 - Existing impact-time Burning RES activation/expiry remains exact.
   ReactionRegressionTest, build, Javadoc, routed validation, and preflight pass.
 
-### Phase 4: Re-Accept Burning-Neutral Party Baselines - In Progress
+### Phase 4: Re-Accept Burning-Neutral Party Baselines - Done
 
 Why last:
 
@@ -9654,6 +9654,28 @@ Verification:
 - two fresh `./gradlew FlinsParty2` runs
 - `python scripts/validate_agent_assets.py`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Two fresh no-daemon runs of every catalog party match pairwise with zero
+  Burning lines and zero warning/error/failed-action/insufficient-energy lines.
+  Accepted totals remain RaidenParty 1,365,787 / 65,037, FlinsParty 22,675,823 /
+  227,898, and FlinsParty2 15,817,125 / 228,902.
+- ER remains 100/175/179/174% for Raiden, 109/100/100/180% for Flins, and
+  130/128/100/196% for Flins2. Timed/reaction/delayed/ICD counts remain
+  152/55/11/38, 613/230/48/88, and 468/140/33/71 respectively.
+- Pair hashes after removing only Gradle's elapsed-success line are Raiden
+  `e52e586cca64148195ad8dc9ab9f0827922a7f01f931faedb0a6ecbab7100dda`,
+  Flins `6338bcc75a29a52f3245cb4573823ba1245724d3be60064dcebefa7b38aa03ab`,
+  and Flins2
+  `23dc585acc02d3bd7bca7fe3f5b65db62b3e1489fcedb12a02b9725b774b7dd4`.
+  The latter two exactly match the existing B-055 no-daemon references.
+- README now records the implemented Burning fuel contract and narrows remaining
+  differences to the separate Burning Aura/Pyro application, Quicken fuel, and
+  other already listed systems. The verification gate includes all three
+  accepted totals.
+- The generated tracked HTML report was restored to HEAD; no generated output
+  is staged.
 
 ### B-056 Phase 4 Acceptance Appendix
 

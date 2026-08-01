@@ -276,8 +276,13 @@ Elemental Gauge Theory contract:
 - **Same-element extension**: a new taxed source gauge replaces the decayed
   current amount only when larger; gauges are not added together.
 - **Discrete consumption**: reactions (Vaporize, Swirl, Electro-Charged ticks,
-  Burning maintenance, Quicken, etc.) consume the decayed *current* value at the
-  reaction time, then natural decay resumes from the remaining units.
+  Quicken, etc.) consume the decayed *current* value at the reaction time, then
+  natural decay resumes from the remaining units.
+- **Burning fuel**: Pyro-on-Dendro preserves the taxed Dendro gauge as fuel;
+  Dendro-on-Pyro establishes it without consuming underlying Pyro. Fuel replaces
+  natural Dendro decay with `max(0.4 U/s, 2 * natural rate)`, Dendro
+  reapplication overwrites it, and the latest Pyro/Dendro applier owns the
+  continuing 0.25-second damage ticks.
 - **Single source of truth**: reaction eligibility/consumption, combat logs, the
   HTML Aura Timeline, RL observations, and snapshot save/restore all read the same
   current-time-aware aura value. Snapshots preserve application time and decay
@@ -285,15 +290,17 @@ Elemental Gauge Theory contract:
 - **Aura Timeline**: rendered as continuous (non-stepped) lines that slope down to
   zero at expiry, matching the per-event aura bars in the Timeline view.
 
-Known differences from exact game internals: Freeze coexistence, Dendro-special
-consumption, Swirl spread, Electro-Charged ownership/damage-ICD/hitlag
-interactions, and some reaction gauge modifiers remain simplified. The
-simulator also does not model multi-target or per-enemy aura gauges.
+Known differences from exact game internals: Freeze coexistence, a separately
+reactable 2U Burning Aura and Burning's 1U Pyro reapplication ICD, Quicken as
+Burning fuel, Swirl spread, Electro-Charged ownership/damage-ICD/hitlag
+interactions, and some reaction gauge modifiers remain simplified. The simulator
+also does not model multi-target or per-enemy aura gauges.
 
 Latest validation baseline from the accuracy pass:
 
 - `./gradlew ReactionRegressionTest`
 - `./gradlew RaidenParty`: 1,365,787 total damage / 65,037 DPS
+- `./gradlew FlinsParty`: 22,675,823 total damage / 227,898 DPS
 - `./gradlew FlinsParty2`: 15,817,125 total damage / 228,902 DPS
 - `./gradlew BenchmarkRLJava`
 - `./gradlew ProfileCapabilities`
