@@ -45,13 +45,16 @@ experiment record.
 
 ### B-002 — Xiangling Chili pickup is assumed
 
-- Status: `candidate`
+- Status: `done`
 - Source: 1 (README known simplifications)
 - Symptom: `RaidenParty` assumes the Chili pickup unconditionally rather than modeling the pickup event.
 - Scope: `src/java/simulation/party/`, `src/java/model/character/`
 - Risk: `local`
 - Proof: `./gradlew RaidenParty` plus a regression covering the no-pickup path
-- Notes: document the assumption explicitly if modeling is rejected.
+- Notes: make pickup an explicit party opt-in while keeping the generic
+  Xiangling model on the conservative no-pickup path. Completed 2026-08-01;
+  `ReactionRegressionTest` covers no pickup and the delayed 10-second buff
+  window, while `RaidenParty` remained at 1,362,938 damage / 64,902 DPS.
 
 ### B-003 — Skyward Spine random procs make output nondeterministic
 

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import mechanics.analysis.EnergyAnalyzer;
+import mechanics.buff.BuffId;
 import mechanics.formula.ResistanceCalculator;
 import mechanics.reaction.ReactionCalculator;
 import mechanics.reaction.ReactionResult;
@@ -74,6 +75,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ColumbinaGravityAndDewRegression();
         testAccuracyPhaseF_ArtifactLunarReactionBuffRegression();
         testAccuracyPhaseF_WeaponReactionBonusRegression();
+        testAccuracyPhaseF_XianglingChiliPickupOptIn();
         testAccuracyPhase2_TimeAwareLinearDecay();
         testAccuracyPhase2_QueryBeforeAndAtApplication();
         testAccuracyPhase2_ExpiryBoundaries();
@@ -1045,6 +1047,41 @@ public class ReactionRegressionTest {
         double afterEm = owner.getEffectiveStats(sim.getCurrentTime()).get(StatType.ELEMENTAL_MASTERY);
         assertClose(beforeEm + 120.0, afterEm, EPS,
                 "Sunny Morning Sleep-In should grant EM only after owner-triggered Swirl");
+    }
+
+    private static void testAccuracyPhaseF_XianglingChiliPickupOptIn() {
+        model.character.Xiangling noPickup = new model.character.Xiangling(
+                new model.weapon.TheCatch(), blankArtifact());
+        CombatSimulator noPickupSim = simulatorWithExistingCharacter(noPickup);
+        noPickupSim.performAction(CharacterId.XIANGLING,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        assertTrue(noPickupSim.getTeamBuffs().stream()
+                        .noneMatch(buff -> buff.getId() == BuffId.XIANGLING_CHILI),
+                "Xiangling should not assume a chili pickup by default");
+
+        model.character.Xiangling assumedPickup = new model.character.Xiangling(
+                new model.weapon.TheCatch(), blankArtifact());
+        assumedPickup.setChiliPickupAssumed(true);
+        CombatSimulator assumedPickupSim = simulatorWithExistingCharacter(assumedPickup);
+        assumedPickupSim.performAction(CharacterId.XIANGLING,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        mechanics.buff.Buff chili = assumedPickupSim.getTeamBuffs().stream()
+                .filter(buff -> buff.getId() == BuffId.XIANGLING_CHILI)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Opted-in Xiangling should register a chili buff"));
+
+        StatsContainer beforePickup = new StatsContainer();
+        chili.apply(beforePickup, 6.99);
+        assertClose(0.0, beforePickup.get(StatType.ATK_PERCENT), EPS,
+                "Assumed chili pickup should not apply before Guoba disappears");
+        StatsContainer duringPickup = new StatsContainer();
+        chili.apply(duringPickup, 7.0);
+        assertClose(0.10, duringPickup.get(StatType.ATK_PERCENT), EPS,
+                "Assumed chili pickup should apply after Guoba disappears");
+        StatsContainer afterPickup = new StatsContainer();
+        chili.apply(afterPickup, 17.0);
+        assertClose(0.0, afterPickup.get(StatType.ATK_PERCENT), EPS,
+                "Assumed chili pickup should expire after ten seconds");
     }
 
     private static List<ReactionResult.Kind> captureReactionKinds(CombatSimulator sim) {

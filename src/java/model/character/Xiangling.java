@@ -25,6 +25,7 @@ import simulation.event.PeriodicDamageEvent;
 public class Xiangling extends Character implements FormStateProvider {
 
     private int normalAttackStep = 0;
+    private boolean chiliPickupAssumed = false;
 
     /**
      * Constructs Xiangling with the shared talent data source.
@@ -59,6 +60,20 @@ public class Xiangling extends Character implements FormStateProvider {
         this.constellation = (int) getTalentValue("Constellation", 6.0);
         setSkillCD(12.0);
         setBurstCD(20.0);
+    }
+
+    /**
+     * Configures whether the rotation assumes that Guoba's chili is collected.
+     *
+     * <p>The simulator has no movement or world-pickup model, so generic
+     * Xiangling instances conservatively leave the chili uncollected. Party
+     * definitions may opt into an explicit pickup assumption when their
+     * rotation requires it.
+     *
+     * @param chiliPickupAssumed {@code true} to activate the delayed chili buff
+     */
+    public void setChiliPickupAssumed(boolean chiliPickupAssumed) {
+        this.chiliPickupAssumed = chiliPickupAssumed;
     }
 
     /**
@@ -165,13 +180,15 @@ public class Xiangling extends Character implements FormStateProvider {
                             mechanics.energy.ParticleType.PARTICLE);
                 }));
 
-        // Chili Pickup at end of duration (assuming auto-pickup for sim efficiency)
-        // "Beware, It's Super Hot!"
-        double chiliAtk = getTalentValue("Attack Bonus", 0.10);
-        sim.applyTeamBuff(new mechanics.buff.SimpleBuff("Xiangling Chili", BuffId.XIANGLING_CHILI, 10.0,
-                sim.getCurrentTime() + 7.0, s -> {
-            s.add(StatType.ATK_PERCENT, chiliAtk);
-        }));
+        if (chiliPickupAssumed) {
+            // Guoba leaves the chili after disappearing; pickup is represented
+            // as an explicit party assumption because movement is out of scope.
+            double chiliAtk = getTalentValue("Attack Bonus", 0.10);
+            sim.applyTeamBuff(new mechanics.buff.SimpleBuff("Xiangling Chili", BuffId.XIANGLING_CHILI, 10.0,
+                    sim.getCurrentTime() + 7.0, s -> {
+                s.add(StatType.ATK_PERCENT, chiliAtk);
+            }));
+        }
     }
 
     private void burst(CombatSimulator sim) {

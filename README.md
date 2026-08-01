@@ -215,8 +215,10 @@ current audited benchmark parties are `RaidenParty` and `FlinsParty2`.
 Known simplifications:
 
 - `RaidenParty`: Xingqiu orbital rain swords are modeled as zero-damage Hydro
-  aura ticks, Xiangling Chili pickup is assumed, and Skyward Spine random Vacuum
-  Blade procs can make optimizer/sample output nondeterministic.
+  aura ticks, the party definition explicitly opts into Xiangling Chili pickup,
+  and Skyward Spine random Vacuum Blade procs can make optimizer/sample output
+  nondeterministic. Generic Xiangling simulations do not pick up the chili
+  unless their party definition enables that assumption.
 - `FlinsParty2`: defensive shield HP is logged but not consumed by enemy attacks,
   some custom effects use deterministic stand-ins for random or field-position
   behavior, and the scripted sample can warn when it fires Flins burst below full

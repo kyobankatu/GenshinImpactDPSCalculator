@@ -170,6 +170,7 @@ public final class RaidenPartyDefinition extends AbstractPartyDefinition {
         sim.addCharacter(xingqiu);
 
         Xiangling xiangling = new Xiangling(new TheCatch(), null);
+        xiangling.setChiliPickupAssumed(true);
         ArtifactOptimizer.OptimizationConfig xlConfig = new ArtifactOptimizer.OptimizationConfig();
         xlConfig.mainStatSands = StatType.ATK_PERCENT;
         xlConfig.mainStatGoblet = StatType.PYRO_DMG_BONUS;
