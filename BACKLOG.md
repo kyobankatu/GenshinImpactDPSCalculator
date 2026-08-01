@@ -224,3 +224,24 @@ experiment record.
   All five modeled Burst DoT pulses applied; only standard Normal Attack ICD
   blocks remained for Sucrose. The accepted result is 15,562,611 damage /
   228,191 DPS.
+
+### B-012 — Ineffa Overclock incorrectly applies Electro
+
+- Status: `planned`
+- Source: 3 (sourced game-accuracy divergence exposed by B-009 output)
+- Symptom: Overclocking Circuit defaults to 1U/standard ICD, so five of 40
+  follow-ups apply Electro in the current `FlinsParty2` run and the other 35
+  emit misleading mechanic-level ICD blocks; the passive should apply no aura.
+- Scope: `src/java/model/character/Ineffa.java`,
+  `src/java/sample/ReactionRegressionTest.java`
+- Risk: `planned`
+- Proof: focused actual-Ineffa regression plus two matching
+  `./gradlew FlinsParty2` summaries
+- Notes: adopt the Genshin Impact Wiki advanced-property row for Overclocking
+  Circuit (Version 5.8 mechanic, accessed 2026-08-02), which identifies Extra
+  Lunar-Charged as 0U/no-ICD. The Japanese Genshin Wiki independently describes
+  the passive as direct Lunar-Charged damage with no Electro application.
+  Sources: https://genshin-impact.fandom.com/wiki/Overclocking_Circuit and
+  https://wikiwiki.jp/genshinwiki/%E3%82%A4%E3%83%8D%E3%83%95%E3%82%A1.
+  Pre-fix `FlinsParty2` is 15,562,611 damage / 228,191 DPS. See `TASKS.md`
+  implementation block `Ineffa Overclock Zero-Gauge Damage`.

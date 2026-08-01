@@ -39,6 +39,10 @@ The Sucrose elemental-application correction is complete. Skill and every Burst
 damage pulse use their sourced 1U/no-ICD contract, while the zero-damage Burst
 cast no longer applies Anemo.
 
+The Ineffa Overclock correction is now active. Its 0U direct Lunar-Charged
+contract and pre-fix `FlinsParty2` behavior are recorded; implementation and
+sample acceptance remain.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -1083,6 +1087,167 @@ Test cases to add or update:
 
 - No further production test; Phase 2 owns the mechanic contract and this phase
   is the optimizer/sample integration acceptance check.
+
+Verification:
+
+- two fresh `./gradlew FlinsParty2` runs
+- `python scripts/validate_agent_assets.py`
+- `python scripts/preflight.py --run`
+
+## Implementation Order: Ineffa Overclock Zero-Gauge Damage
+
+Status:
+
+- In progress.
+- Phase 1 is complete; Phases 2-3 remain.
+- Requirement: Ineffa's Overclocking Circuit follow-up must deal direct
+  Lunar-Charged damage without applying Electro or entering an ICD group.
+
+Scope:
+
+- Explicitly encode the Overclock follow-up as 0U/no-ICD in `Ineffa`.
+- Add focused actual-character regression coverage for Thundercloud inactive
+  and active paths.
+- Re-run `FlinsParty2` and accept the resulting aura/reaction/DPS delta.
+
+Out of scope for this pass:
+
+- Changing Birgitta Discharge gauge, ICD, cadence, duration, particles, or
+  damage.
+- Changing Ineffa's shield, Burst, constellations, Lunar damage formula, or
+  Thundercloud creation.
+- Correcting Flins or other remaining `ICDTag.None` actions without their own
+  sourced contract.
+- Changing runtime ICD policy, reaction formulas, optimizer behavior, RL
+  contracts, or generated `docs/` output.
+
+Design boundaries:
+
+- `model.character.Ineffa` owns the passive follow-up metadata and condition.
+- Existing `CombatSimulator` Thundercloud state and `AttackAction` typed fields
+  are consumed unchanged; no character branch enters runtime policy.
+- `ReactionRegressionTest` verifies emitted actions through public listeners
+  and owns no production helper API.
+
+### Phase 1: Record the Overclock Contract and Pre-Fix Behavior - Done
+
+Why first:
+
+Direct Lunar-Charged damage and elemental Electro damage use different
+application rules, so the exact 0U contract must be sourced before editing.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record the current Genshin Impact Wiki Overclocking Circuit advanced-property
+  row, accessed 2026-08-02: `Extra Lunar-Charged`, 0U, no ICD.
+- Corroborate against the Japanese Genshin Wiki explanation that the passive
+  follow-up is direct Lunar-Charged damage and does not apply Electro.
+- Classify the simulator decision as `adopt` and define a bounded actual-
+  character regression.
+- Record the current full-sample Overclock count and incorrect ICD behavior.
+
+Acceptance criteria:
+
+- Stable source URLs, version/scope, access date, classification, and test
+  design are recorded.
+- The current `FlinsParty2` baseline is 15,562,611 damage / 228,191 DPS.
+- The pre-fix log identifies 40 Overclock follow-ups: 35 standard-ICD blocks
+  and five unintended Electro applications.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 adds the executable
+  contract with the source correction.
+
+Verification:
+
+- `./gradlew FlinsParty2`
+- `python scripts/preflight.py --run`
+
+### Phase 2: Make Overclock Explicitly Zero-Gauge
+
+Why second:
+
+Once the source contract is fixed, the character-local action metadata can be
+corrected and proven independently from the full party.
+
+Target files:
+
+- `src/java/model/character/Ineffa.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Set Overclock to `ICDType.None`, a typed neutral tag, and 0U.
+- Preserve its Lunar-Charged classification, 65% ATK motion value, timing, and
+  damage attribution.
+- Add actual Ineffa tests that advance Birgitta across a Thundercloud boundary
+  and inspect the emitted follow-up.
+
+Acceptance criteria:
+
+- No Overclock action is emitted while Thundercloud is inactive.
+- Active Thundercloud emits one Overclock follow-up per Birgitta tick with 0U
+  and no ICD.
+- The follow-up still deals positive direct Lunar-Charged damage and cannot
+  create an elemental reaction from an existing aura.
+- No generic runtime or formula code changes.
+
+Test cases to add or update:
+
+- No-trigger: Birgitta fires without Overclock when Thundercloud is inactive.
+- Normal: active Thundercloud emits Overclock with Lunar-Charged metadata and
+  positive damage.
+- Invalid application: a Hydro aura remains free of an Overclock-triggered
+  Lunar-Charged reaction because the follow-up applies 0U.
+- Boundary: an expired Thundercloud does not emit the follow-up on the next
+  Birgitta tick.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Accept the FlinsParty2 Aura and Damage Delta
+
+Why last:
+
+Full-party optimizer and reaction results can be accepted only after the
+character-local contract is committed.
+
+Target files:
+
+- `README.md`
+- `TASKS.md`
+- `BACKLOG.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+
+Tasks:
+
+- Run two fresh `FlinsParty2` invocations and compare complete logs.
+- Confirm all Overclock follow-ups avoid ICD diagnostics and elemental aura
+  application while retaining damage.
+- Update the audited baseline and close B-012.
+
+Acceptance criteria:
+
+- Two fresh runs have matching optimizer decisions and final summaries.
+- Overclock contributes direct damage without any elemental application or ICD
+  state.
+- README, verification gate, backlog, and plan agree on the accepted baseline.
+- Agent assets and routed preflight checks pass.
+
+Test cases to add or update:
+
+- No further production test; Phase 2 owns the mechanic contract and this phase
+  performs full-party integration acceptance.
 
 Verification:
 
