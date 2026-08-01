@@ -9,6 +9,57 @@ import model.type.CharacterId;
  * Holds transient simulation state for Electro-Charged and Thundercloud handling.
  */
 public class ReactionState {
+    /** Immutable single-target Burning fuel and damage payload. */
+    public static final class BurningState {
+        /** Character credited with the next Burning damage tick. */
+        public final CharacterId ownerId;
+        /** Burning damage before impact-time resistance. */
+        public final double preResistanceDamage;
+        /** Fuel units present at {@link #lastUpdateTime}. */
+        public final double fuelUnits;
+        /** Special Burning fuel decay in units per second. */
+        public final double fuelDecayRate;
+        /** Time at which {@link #fuelUnits} was measured. */
+        public final double lastUpdateTime;
+        /** Event generation used to reject superseded timer events. */
+        public final int generation;
+
+        private BurningState(
+                CharacterId ownerId,
+                double preResistanceDamage,
+                double fuelUnits,
+                double fuelDecayRate,
+                double lastUpdateTime,
+                int generation) {
+            this.ownerId = ownerId;
+            this.preResistanceDamage = preResistanceDamage;
+            this.fuelUnits = fuelUnits;
+            this.fuelDecayRate = fuelDecayRate;
+            this.lastUpdateTime = lastUpdateTime;
+            this.generation = generation;
+        }
+
+        /**
+         * Returns fuel remaining after continuous special decay.
+         *
+         * @param currentTime simulator time in seconds
+         * @return remaining fuel units, never negative
+         */
+        public double remainingFuelAt(double currentTime) {
+            double elapsed = Math.max(0.0, currentTime - lastUpdateTime);
+            return Math.max(0.0, fuelUnits - fuelDecayRate * elapsed);
+        }
+
+        /**
+         * Returns the exact absolute fuel depletion time.
+         *
+         * @return absolute simulator time in seconds
+         */
+        public double getEndTime() {
+            return lastUpdateTime + fuelUnits / fuelDecayRate;
+        }
+    }
+
     /** Immutable delayed Dendro Core payload stored across snapshot/restore. */
     public static final class DendroCoreState {
         /** Stable runtime core identifier. */
@@ -49,6 +100,8 @@ public class ReactionState {
     private double thundercloudEndTime = -1.0;
     private boolean burningTimerRunning = false;
     private double burningEndTime = -1.0;
+    private BurningState burningState;
+    private int nextBurningGeneration = 1;
     private double quickenEndTime = -1.0;
     private int moondriftCount = 0;
     private int lunarCrystallizeTriggerCount = 0;
@@ -107,6 +160,182 @@ public class ReactionState {
 
     public void setBurningEndTime(double burningEndTime) {
         this.burningEndTime = burningEndTime;
+    }
+
+    /**
+     * Starts a new typed Burning generation.
+     *
+     * @param ownerId damage owner
+     * @param preResistanceDamage damage before impact-time resistance
+     * @param fuelUnits current Dendro fuel units
+     * @param fuelDecayRate special fuel decay in units per second
+     * @param currentTime simulator time in seconds
+     * @return immutable state, or {@code null} when the payload is invalid
+     */
+    public BurningState startBurning(
+            CharacterId ownerId,
+            double preResistanceDamage,
+            double fuelUnits,
+            double fuelDecayRate,
+            double currentTime) {
+        if (!isValidBurningPayload(
+                ownerId, preResistanceDamage, fuelUnits, fuelDecayRate, currentTime)) {
+            clearBurning();
+            return null;
+        }
+        burningState = new BurningState(
+                ownerId,
+                preResistanceDamage,
+                fuelUnits,
+                fuelDecayRate,
+                currentTime,
+                nextBurningGeneration++);
+        burningEndTime = burningState.getEndTime();
+        return burningState;
+    }
+
+    /**
+     * Replaces active Dendro fuel while retaining the timer generation.
+     *
+     * @param fuelUnits replacement fuel units
+     * @param fuelDecayRate replacement special decay rate
+     * @param currentTime simulator refresh time
+     * @return refreshed state, or {@code null} when no valid state remains
+     */
+    public BurningState replaceBurningFuel(
+            double fuelUnits, double fuelDecayRate, double currentTime) {
+        if (burningState == null || !isValidBurningPayload(
+                burningState.ownerId,
+                burningState.preResistanceDamage,
+                fuelUnits,
+                fuelDecayRate,
+                currentTime)) {
+            clearBurning();
+            return null;
+        }
+        burningState = new BurningState(
+                burningState.ownerId,
+                burningState.preResistanceDamage,
+                fuelUnits,
+                fuelDecayRate,
+                currentTime,
+                burningState.generation);
+        burningEndTime = burningState.getEndTime();
+        return burningState;
+    }
+
+    /**
+     * Updates the latest Burning damage owner without replacing its fuel.
+     *
+     * @param ownerId new damage owner
+     * @param preResistanceDamage new damage before impact-time resistance
+     * @param currentTime simulator refresh time
+     * @return refreshed state, or {@code null} when no valid state remains
+     */
+    public BurningState refreshBurningDamage(
+            CharacterId ownerId, double preResistanceDamage, double currentTime) {
+        if (burningState == null) {
+            return null;
+        }
+        double remainingFuel = burningState.remainingFuelAt(currentTime);
+        if (!isValidBurningPayload(
+                ownerId,
+                preResistanceDamage,
+                remainingFuel,
+                burningState.fuelDecayRate,
+                currentTime)) {
+            clearBurning();
+            return null;
+        }
+        burningState = new BurningState(
+                ownerId,
+                preResistanceDamage,
+                remainingFuel,
+                burningState.fuelDecayRate,
+                currentTime,
+                burningState.generation);
+        burningEndTime = burningState.getEndTime();
+        return burningState;
+    }
+
+    /**
+     * Rebases active fuel at the requested time after continuous decay.
+     *
+     * @param currentTime simulator time in seconds
+     * @return rebased state, or {@code null} after depletion
+     */
+    public BurningState advanceBurning(double currentTime) {
+        if (burningState == null) {
+            return null;
+        }
+        double remainingFuel = burningState.remainingFuelAt(currentTime);
+        if (remainingFuel <= 0.0) {
+            clearBurning();
+            return null;
+        }
+        burningState = new BurningState(
+                burningState.ownerId,
+                burningState.preResistanceDamage,
+                remainingFuel,
+                burningState.fuelDecayRate,
+                currentTime,
+                burningState.generation);
+        burningEndTime = burningState.getEndTime();
+        return burningState;
+    }
+
+    /** Returns the immutable current Burning payload. */
+    public BurningState getBurningState() {
+        return burningState;
+    }
+
+    /** Returns the next timer generation identifier. */
+    public int getNextBurningGeneration() {
+        return nextBurningGeneration;
+    }
+
+    /** Clears typed Burning data and invalidates existing timer generations. */
+    public void clearBurning() {
+        burningState = null;
+        burningEndTime = -1.0;
+        burningTimerRunning = false;
+        nextBurningGeneration++;
+    }
+
+    /**
+     * Restores a captured typed Burning payload.
+     *
+     * @param state immutable captured state, or {@code null}
+     * @param nextGeneration next generation counter from the snapshot
+     */
+    public void restoreBurning(BurningState state, int nextGeneration) {
+        burningState = state == null
+                ? null
+                : new BurningState(
+                        state.ownerId,
+                        state.preResistanceDamage,
+                        state.fuelUnits,
+                        state.fuelDecayRate,
+                        state.lastUpdateTime,
+                        state.generation);
+        nextBurningGeneration = Math.max(1, nextGeneration);
+        burningEndTime = burningState != null ? burningState.getEndTime() : -1.0;
+    }
+
+    private boolean isValidBurningPayload(
+            CharacterId ownerId,
+            double preResistanceDamage,
+            double fuelUnits,
+            double fuelDecayRate,
+            double currentTime) {
+        return ownerId != null
+                && Double.isFinite(preResistanceDamage)
+                && preResistanceDamage >= 0.0
+                && Double.isFinite(fuelUnits)
+                && fuelUnits > 0.0
+                && Double.isFinite(fuelDecayRate)
+                && fuelDecayRate > 0.0
+                && Double.isFinite(currentTime);
     }
 
     public double getQuickenEndTime() {

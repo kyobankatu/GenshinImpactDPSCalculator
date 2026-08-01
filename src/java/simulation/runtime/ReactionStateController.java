@@ -90,6 +90,49 @@ public class ReactionStateController {
         reactionState.setBurningEndTime(endTime);
     }
 
+    /** Starts a typed Burning generation at the current simulator time. */
+    public ReactionState.BurningState startBurning(
+            CharacterId ownerId,
+            double preResistanceDamage,
+            double fuelUnits,
+            double fuelDecayRate) {
+        return reactionState.startBurning(
+                ownerId,
+                preResistanceDamage,
+                fuelUnits,
+                fuelDecayRate,
+                sim.getCurrentTime());
+    }
+
+    /** Replaces active Burning fuel at the current simulator time. */
+    public ReactionState.BurningState replaceBurningFuel(
+            double fuelUnits, double fuelDecayRate) {
+        return reactionState.replaceBurningFuel(
+                fuelUnits, fuelDecayRate, sim.getCurrentTime());
+    }
+
+    /** Refreshes active Burning damage ownership at the current simulator time. */
+    public ReactionState.BurningState refreshBurningDamage(
+            CharacterId ownerId, double preResistanceDamage) {
+        return reactionState.refreshBurningDamage(
+                ownerId, preResistanceDamage, sim.getCurrentTime());
+    }
+
+    /** Rebases active Burning fuel at the current simulator time. */
+    public ReactionState.BurningState advanceBurning() {
+        return reactionState.advanceBurning(sim.getCurrentTime());
+    }
+
+    /** Returns the current immutable Burning payload. */
+    public ReactionState.BurningState getBurningState() {
+        return reactionState.getBurningState();
+    }
+
+    /** Clears typed Burning fuel, damage, and timer state. */
+    public void clearBurning() {
+        reactionState.clearBurning();
+    }
+
     public boolean isQuickenActive() {
         return sim.getCurrentTime() < reactionState.getQuickenEndTime();
     }

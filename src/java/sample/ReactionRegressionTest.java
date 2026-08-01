@@ -37,6 +37,7 @@ import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
 import simulation.event.PeriodicDamageEvent;
+import simulation.runtime.ReactionState;
 
 /**
  * Lightweight regression checks for elemental reaction behavior.
@@ -120,6 +121,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseG_SameElementAuraExtensionContract();
         testAccuracyPhaseG_AuraDecaySnapshotContract();
         testAccuracyPhaseG_AuraExpiryContract();
+        testAccuracyPhaseG_BurningStateSnapshotContract();
         testAccuracyPhaseG_InvalidSourceAuraContract();
         testAccuracyPhaseG_RuntimeAuraApplicationContract();
         testAccuracyPhaseG_AnemoGeoAuraConsumptionContract();
@@ -612,6 +614,83 @@ public class ReactionRegressionTest {
         assertTrue(Double.isInfinite(
                         sim.getEnemy().getAuraExpiryTime(Element.ELECTRO, sim.getCurrentTime())),
                 "An absent Aura should expose no finite future expiry");
+    }
+
+    private static void testAccuracyPhaseG_BurningStateSnapshotContract() {
+        Enemy enemy = new Enemy(90);
+        enemy.applyAura(Element.DENDRO, 1.0, 0.0);
+        assertClose(0.8 / 9.5, enemy.getAuraDecayRate(Element.DENDRO, 0.0), EPS,
+                "A finite Dendro source should expose its natural decay rate");
+        assertClose(0.0, enemy.getAuraDecayRate(Element.DENDRO, 9.5), EPS,
+                "An Aura at exact expiry should expose no natural decay rate");
+        enemy.setAura(Element.DENDRO, 1.0);
+        assertClose(0.0, enemy.getAuraDecayRate(Element.DENDRO, 0.0), EPS,
+                "A non-decaying compatibility Aura should expose a zero rate");
+        enemy.setAura(Element.DENDRO, 0.0);
+        assertClose(0.0, enemy.getAuraDecayRate(Element.DENDRO, 0.0), EPS,
+                "An absent Aura should expose a zero decay rate");
+
+        CombatSimulator sim = simulatorWith(testCharacter(Element.PYRO));
+        ReactionState.BurningState initial = sim.startBurning(
+                CharacterId.SUCROSE, 1000.0, 0.8, 0.4);
+        assertTrue(initial != null, "A valid Burning payload should start typed state");
+        assertClose(2.0, initial.getEndTime(), EPS,
+                "0.8U Burning fuel at 0.4U/s should last exactly two seconds");
+        assertEquals(CharacterId.SUCROSE, initial.ownerId,
+                "Typed Burning state should retain the damage owner");
+        int generation = initial.generation;
+
+        sim.advanceTime(0.5);
+        ReactionState.BurningState ownerRefresh = sim.refreshBurningDamage(
+                CharacterId.XIANGLING, 1200.0);
+        assertTrue(ownerRefresh != null, "An active Burning owner refresh should retain state");
+        assertClose(0.6, ownerRefresh.fuelUnits, EPS,
+                "Owner refresh should preserve continuously decayed fuel");
+        assertClose(2.0, ownerRefresh.getEndTime(), EPS,
+                "Owner refresh should not extend Burning fuel duration");
+        assertEquals(CharacterId.XIANGLING, ownerRefresh.ownerId,
+                "Owner refresh should replace the latest damage owner");
+        assertClose(1200.0, ownerRefresh.preResistanceDamage, EPS,
+                "Owner refresh should replace pre-resistance damage");
+        assertEquals(generation, ownerRefresh.generation,
+                "Owner refresh should retain the active timer generation");
+
+        ReactionState.BurningState fuelRefresh = sim.replaceBurningFuel(0.4, 0.4);
+        assertTrue(fuelRefresh != null, "A valid Dendro refresh should replace Burning fuel");
+        assertClose(1.5, fuelRefresh.getEndTime(), EPS,
+                "Replacement fuel should derive a new exact depletion time");
+        assertEquals(generation, fuelRefresh.generation,
+                "Fuel replacement should retain the active timer generation");
+
+        sim.setBurningTimerRunning(true);
+        SimulatorSnapshot snapshot = sim.saveSnapshot();
+        sim.clearBurning();
+        assertTrue(sim.getBurningState() == null, "Clearing Burning should remove typed state");
+        sim.restoreSnapshot(snapshot);
+        ReactionState.BurningState restored = sim.getBurningState();
+        assertTrue(restored != null, "Snapshot restore should recover typed Burning state");
+        assertEquals(CharacterId.XIANGLING, restored.ownerId,
+                "Snapshot restore should recover Burning ownership");
+        assertClose(1200.0, restored.preResistanceDamage, EPS,
+                "Snapshot restore should recover Burning damage");
+        assertClose(0.4, restored.fuelUnits, EPS,
+                "Snapshot restore should recover Burning fuel");
+        assertClose(0.4, restored.fuelDecayRate, EPS,
+                "Snapshot restore should recover Burning decay rate");
+        assertClose(0.5, restored.lastUpdateTime, EPS,
+                "Snapshot restore should recover Burning update time");
+        assertEquals(generation, restored.generation,
+                "Snapshot restore should recover Burning generation");
+        assertTrue(sim.isBurningTimerRunning(),
+                "Snapshot restore should recover the Burning timer flag");
+
+        ReactionState.BurningState invalid = sim.startBurning(
+                null, Double.NaN, -1.0, 0.0);
+        assertTrue(invalid == null, "An invalid Burning payload should be rejected");
+        assertTrue(sim.getBurningState() == null,
+                "Rejecting an invalid Burning payload should clear stale state");
+        assertTrue(!sim.isBurningTimerRunning(),
+                "Rejecting an invalid Burning payload should clear the timer flag");
     }
 
     private static void testAccuracyPhaseG_InvalidSourceAuraContract() {

@@ -9468,7 +9468,7 @@ Completion evidence:
   and hitlag remain explicit exclusions rather than inferred behavior.
 - The documentation preflight passes with no routed checks or artifact leaks.
 
-### Phase 2: Add Typed Burning Fuel State and Snapshot Payload - Pending
+### Phase 2: Add Typed Burning Fuel State and Snapshot Payload - Done
 
 Why second:
 
@@ -9518,7 +9518,26 @@ Verification:
 - `python scripts/agent_validate.py --path src/java/simulation/runtime/ReactionState.java --path src/java/simulation/SimulatorSnapshot.java --path src/java/model/entity/Enemy.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Consume and Refresh Burning Fuel - Pending
+Completion evidence:
+
+- `ReactionState.BurningState` is an immutable typed payload for owner,
+  pre-resistance damage, fuel, special decay rate, last update, and event
+  generation. Start, fuel replacement, owner refresh, continuous rebase, clear,
+  and restore transitions preserve one ownership boundary.
+- `Enemy.getAuraDecayRate` returns the private source-class rate without
+  exposing mutable Aura state. Regression covers a finite 1U Dendro source,
+  exact expiry, a non-decaying fixture, and absence.
+- A 0.8U/0.4U-per-second payload reports an exact two-second end. Owner refresh
+  after 0.5 seconds retains 0.6U and the same end/generation; 0.4U replacement
+  derives a 1.5-second end. Snapshot restore recovers every field and timer flag,
+  while invalid input clears stale state.
+- `CapabilityProfiler` only forwards the added immutable fields when rebuilding
+  its existing snapshot. No learner, service, protocol, or training behavior
+  changed.
+- ReactionRegressionTest, build, Javadoc, routed party-catalog validation, the
+  local Java rollout smoke benchmark, and preflight pass without artifact leaks.
+
+### Phase 3: Consume and Refresh Burning Fuel - In Progress
 
 Why third:
 

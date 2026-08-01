@@ -321,6 +321,27 @@ public class Enemy {
     }
 
     /**
+     * Returns the natural decay rate of an active Aura in units per second.
+     *
+     * <p>Non-decaying compatibility Auras, absent Auras, and Auras at or after
+     * exact expiry return zero. The rate is read-only and remains the source
+     * class rate after ordinary discrete consumption.
+     *
+     * @param element element whose natural decay rate is requested
+     * @param currentTime simulator time used to exclude expired Auras
+     * @return finite non-negative decay rate in Aura units per second
+     */
+    public double getAuraDecayRate(model.type.Element element, double currentTime) {
+        AuraState state = auraGauge.get(element);
+        if (state == null
+                || state.expiryTime <= currentTime
+                || state.currentUnitsAt(currentTime) <= 0.0) {
+            return 0.0;
+        }
+        return state.decayRate;
+    }
+
+    /**
      * Removes runtime auras that have expired by the given simulator time,
      * either because their expiry has passed or their decayed value has reached
      * zero.

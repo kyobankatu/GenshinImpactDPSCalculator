@@ -937,6 +937,8 @@ public class CapabilityProfiler {
                 activePostSubject.thundercloudEndTime,
                 activePostSubject.burningTimerRunning,
                 activePostSubject.burningEndTime,
+                activePostSubject.burningState,
+                activePostSubject.nextBurningGeneration,
                 activePostSubject.quickenEndTime,
                 activePostSubject.moondriftCount,
                 activePostSubject.lunarCrystallizeTriggerCount,

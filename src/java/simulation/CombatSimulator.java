@@ -776,6 +776,8 @@ public class CombatSimulator {
         double thundercloudEndTime = reactionState.getThundercloudEndTime();
         boolean burningTimerRunning = reactionState.isBurningTimerRunning();
         double burningEndTime = reactionState.getBurningEndTime();
+        simulation.runtime.ReactionState.BurningState burningState = reactionState.getBurningState();
+        int nextBurningGeneration = reactionState.getNextBurningGeneration();
         double quickenEndTime = reactionState.getQuickenEndTime();
         int moondriftCount = reactionState.getMoondriftCount();
         int lunarCrystallizeTriggerCount = reactionState.getLunarCrystallizeTriggerCount();
@@ -827,6 +829,7 @@ public class CombatSimulator {
                 totalDamage, damageBySource,
                 lastSwapTime, activeCharacterId, currentMoonsign,
                 icdStates, ecTimerRunning, thundercloudEndTime, burningTimerRunning, burningEndTime,
+                burningState, nextBurningGeneration,
                 quickenEndTime, moondriftCount, lunarCrystallizeTriggerCount,
                 verdantDewCount, moonridgeDewCount,
                 dendroCores, nextDendroCoreId, enemyAura,
@@ -863,8 +866,11 @@ public class CombatSimulator {
         // Reaction state
         reactionState.setEcTimerRunning(snap.ecTimerRunning);
         reactionState.setThundercloudEndTime(snap.thundercloudEndTime);
+        reactionState.restoreBurning(snap.burningState, snap.nextBurningGeneration);
+        if (snap.burningState == null) {
+            reactionState.setBurningEndTime(snap.burningEndTime);
+        }
         reactionState.setBurningTimerRunning(snap.burningTimerRunning);
-        reactionState.setBurningEndTime(snap.burningEndTime);
         reactionState.setQuickenEndTime(snap.quickenEndTime);
         reactionState.setMoondriftCount(snap.moondriftCount);
         reactionState.setLunarCrystallizeTriggerCount(snap.lunarCrystallizeTriggerCount);
@@ -995,6 +1001,43 @@ public class CombatSimulator {
 
     public void setBurningEndTime(double endTime) {
         reactionStateController.setBurningEndTime(endTime);
+    }
+
+    /** Starts a typed Burning state at the current simulator time. */
+    public simulation.runtime.ReactionState.BurningState startBurning(
+            CharacterId ownerId,
+            double preResistanceDamage,
+            double fuelUnits,
+            double fuelDecayRate) {
+        return reactionStateController.startBurning(
+                ownerId, preResistanceDamage, fuelUnits, fuelDecayRate);
+    }
+
+    /** Replaces active Burning fuel at the current simulator time. */
+    public simulation.runtime.ReactionState.BurningState replaceBurningFuel(
+            double fuelUnits, double fuelDecayRate) {
+        return reactionStateController.replaceBurningFuel(fuelUnits, fuelDecayRate);
+    }
+
+    /** Refreshes Burning damage ownership without replacing fuel. */
+    public simulation.runtime.ReactionState.BurningState refreshBurningDamage(
+            CharacterId ownerId, double preResistanceDamage) {
+        return reactionStateController.refreshBurningDamage(ownerId, preResistanceDamage);
+    }
+
+    /** Rebases active Burning fuel at the current simulator time. */
+    public simulation.runtime.ReactionState.BurningState advanceBurning() {
+        return reactionStateController.advanceBurning();
+    }
+
+    /** Returns the immutable current Burning payload. */
+    public simulation.runtime.ReactionState.BurningState getBurningState() {
+        return reactionStateController.getBurningState();
+    }
+
+    /** Clears typed Burning fuel, damage, and timer state. */
+    public void clearBurning() {
+        reactionStateController.clearBurning();
     }
 
     public boolean isQuickenActive() {

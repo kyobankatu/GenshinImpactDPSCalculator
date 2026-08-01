@@ -73,6 +73,8 @@ public class SimulatorSnapshot {
     public final double thundercloudEndTime;
     public final boolean burningTimerRunning;
     public final double burningEndTime;
+    public final ReactionState.BurningState burningState;
+    public final int nextBurningGeneration;
     public final double quickenEndTime;
     public final int moondriftCount;
     public final int lunarCrystallizeTriggerCount;
@@ -111,6 +113,17 @@ public class SimulatorSnapshot {
      * @param icdStates          ICD group states
      * @param ecTimerRunning     EC timer flag
      * @param thundercloudEndTime thundercloud expiry time
+     * @param burningTimerRunning Burning timer flag
+     * @param burningEndTime compatibility Burning expiry time
+     * @param burningState typed Burning fuel and damage payload
+     * @param nextBurningGeneration next Burning event generation
+     * @param quickenEndTime Quicken expiry time
+     * @param moondriftCount active Moondrift count
+     * @param lunarCrystallizeTriggerCount Lunar-Crystallize trigger count
+     * @param verdantDewCount Verdant Dew count
+     * @param moonridgeDewCount Moonridge Dew count
+     * @param dendroCores active Dendro Core payloads
+     * @param nextDendroCoreId next Dendro Core identifier
      * @param enemyAura          enemy aura state map ({units, applicationTime, duration} per element)
      * @param characters         per-character snapshots
      * @param teamBuffRefs       team buff object references
@@ -131,6 +144,8 @@ public class SimulatorSnapshot {
             double thundercloudEndTime,
             boolean burningTimerRunning,
             double burningEndTime,
+            ReactionState.BurningState burningState,
+            int nextBurningGeneration,
             double quickenEndTime,
             int moondriftCount,
             int lunarCrystallizeTriggerCount,
@@ -156,6 +171,8 @@ public class SimulatorSnapshot {
         this.thundercloudEndTime = thundercloudEndTime;
         this.burningTimerRunning = burningTimerRunning;
         this.burningEndTime = burningEndTime;
+        this.burningState = burningState;
+        this.nextBurningGeneration = nextBurningGeneration;
         this.quickenEndTime = quickenEndTime;
         this.moondriftCount = moondriftCount;
         this.lunarCrystallizeTriggerCount = lunarCrystallizeTriggerCount;
