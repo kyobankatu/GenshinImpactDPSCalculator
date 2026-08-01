@@ -911,3 +911,30 @@ experiment record.
   62,718 DPS over 21.0 seconds. FlinsParty2 retains
   141%/132%/105%/193% ER and 14,077,198 damage / 203,722 DPS over 69.1 seconds;
   neither four-character acceptance run adds an energy or optimizer warning.
+
+### B-039 — Impetuous Winds cooldown reduction is never consumed
+
+- Status: `in-progress`
+- Source: 3 (sourced resonance-mechanic divergence)
+- Symptom: `ResonanceManager` adds `CD_REDUCTION = 0.05`, but Skill/Burst
+  readiness, remaining cooldowns, charge restoration, and snapshots use only
+  base cooldown values, so Anemo resonance shortens no cooldown at all.
+- Scope: cast-time cooldown state, Character stat adaptation, simulator
+  snapshots, actual resonance regression, and unaffected catalog baselines
+- Risk: `planned`
+- Proof: exact 5%-reduced Skill/Burst and multi-charge boundaries that survive
+  snapshot restore, plus unchanged non-Anemo-resonance samples
+- Notes: adopt KQM's maintained Elemental Resonance and Cooldowns contracts,
+  accessed 2026-08-02. The resonance table lists Anemo resonance as 5% cooldown
+  reduction for all Skills and Bursts. The cooldown reference says cooldown is
+  calculated at ability cast; its multi-charge experiment was added and last
+  tested 2021-04-18 in v1.4 and records that the first charge entering cooldown
+  snapshots reduction for the active charge queue. Sources:
+  https://library.keqingmains.com/combat-mechanics/elemental-effects/elemental-resonance,
+  https://library.keqingmains.com/combat-mechanics/cooldowns, and
+  https://library.keqingmains.com/evidence/combat-mechanics/cooldowns. Adapt by
+  capturing an effective non-negative duration in `CooldownState` while
+  retaining base cooldown metadata. Movement speed and stamina portions of
+  Impetuous Winds remain outside the DPS simulator's modeled state. See
+  `TASKS.md` implementation block
+  `Cooldown Reduction Snapshot and Impetuous Winds`.

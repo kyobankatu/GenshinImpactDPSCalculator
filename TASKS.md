@@ -97,6 +97,10 @@ recipients in two- and three-character parties use the sourced 0.8 and 0.7
 multipliers while the established four-character 0.6 contract remains
 unchanged.
 
+The B-039 Impetuous Winds correction is in progress. Its existing 5% cooldown
+reduction stat will shorten Skill and Burst cooldown state at cast time and
+remain exact across multi-charge scheduling and simulator snapshot restore.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -4866,6 +4870,211 @@ Completion evidence:
   the derived four-member factor therefore preserves integration behavior.
 - The generated `docs/simulation_report.html` update was restored before
   staging, and final preflight passes without artifact leakage.
+
+## Implementation Order: Cooldown Reduction Snapshot and Impetuous Winds
+
+Status:
+
+- In progress; Phase 1 is complete and Phases 2-3 remain.
+- Requirement: Impetuous Winds' existing 5% cooldown-reduction stat must affect
+  Skill and Burst readiness using cast-time snapshot semantics.
+
+Scope:
+
+- Resolve percentage cooldown reduction from a character's effective stats
+  when a Skill or Burst enters cooldown.
+- Store effective single-charge Skill and Burst cooldown end times in
+  `CooldownState`.
+- Snapshot one cooldown duration while a multi-charge Skill restore queue is
+  active, and preserve all cooldown state across simulator save/restore.
+- Cover actual Anemo resonance activation, exact readiness boundaries,
+  no-resonance behavior, multi-charge scheduling, and snapshot restoration.
+
+Out of scope for this pass:
+
+- Modeling Impetuous Winds' movement-speed or stamina-consumption effects;
+  movement and exploration stamina are not simulator DPS state.
+- Adding characters, other cooldown-reduction/reset sources, slowing-water
+  debuffs, held-Skill timing variants, or cooldown display UI.
+- Changing action durations, swap cooldown, internal elemental ICD, particle
+  generation ICD, or periodic-event cadence.
+- Changing RL actions, observations, privileged tensor layouts, binary
+  protocol, training code, or generated capability profiles.
+- Editing generated reports or committed `docs/` output.
+
+Definitions:
+
+- Effective cooldown duration: base Skill or Burst cooldown multiplied by
+  `1 - CD_REDUCTION`, bounded to a non-negative duration at cast time.
+- Cooldown end time: immutable readiness boundary captured when a
+  single-charge Skill or Burst is used.
+- Active charge duration: the effective duration captured when the first
+  pending restore enters a multi-charge queue and reused until that queue is
+  empty.
+
+Design boundaries:
+
+- `Character` owns effective-stat lookup and converts typed cooldown reduction
+  into an effective duration at action use.
+- `CooldownState` owns timestamps, readiness, charge queues, and restoration;
+  it does not assemble stats or know elemental resonance.
+- `ResonanceManager` remains the source of the permanent typed
+  `CD_REDUCTION = 0.05` buff and needs no cooldown-state dependency.
+- `SimulatorSnapshot` carries state values only; no cooldown rule or stat
+  calculation enters the snapshot container.
+- Existing base cooldown getters remain unchanged for metadata, reporting, and
+  normalized observations.
+
+### Phase 1: Record Resonance and Cooldown Snapshot Evidence - Done
+
+Why first:
+
+Cooldown scope and snapshot timing are separate mechanic claims and both must
+be sourced before shared runtime state changes.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record KQM's maintained Impetuous Winds contract: 5% reduction for all
+  Skills and Bursts.
+- Record KQM's cooldown rule that duration is calculated when the ability is
+  cast and its v1.4 multi-charge experiment showing the first pending charge
+  snapshots cooldown reduction for the queue.
+- Trace the current dead `CD_REDUCTION` stat from `ResonanceManager` through
+  effective stat assembly and prove no cooldown consumer reads it.
+
+Acceptance criteria:
+
+- Material values, source title/date or maintained status, access date, URLs,
+  classification, and simulator adaptation are in B-039.
+- The state ownership and bounded regression matrix are explicit.
+- No production source changes occur in this phase.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 adds the pre-fix failing
+  readiness and restoration cases.
+
+Verification:
+
+- inspect `ResonanceManager`, `Character`, `CooldownState`,
+  `SimulatorSnapshot`, and `CombatSimulator.saveSnapshot/restoreSnapshot`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- KQM Elemental Resonance and Cooldowns references were accessed 2026-08-02;
+  the snapshot experiment is identified as v1.4, added and last tested
+  2021-04-18.
+- Repository search finds `CD_REDUCTION` only in `StatType` and the Impetuous
+  Winds buff, while readiness currently compares base cooldowns directly.
+
+### Phase 2: Capture Effective Cooldowns in Runtime State
+
+Why second:
+
+The state model must preserve cast-time values before the resonance can be
+accepted as executable behavior or restored in branched simulation.
+
+Target files:
+
+- `src/java/model/entity/state/CooldownState.java`
+- `src/java/model/entity/Character.java`
+- `src/java/simulation/SimulatorSnapshot.java`
+- `src/java/simulation/CombatSimulator.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Pass an effective duration from `Character.markSkillUsed` and
+  `Character.markBurstUsed` into `CooldownState`.
+- Record exact end times for single-charge Skill and Burst uses; readiness and
+  remaining-time queries read those end times.
+- For multi-charge Skills, capture one effective duration when an empty queue
+  receives its first pending restore and reuse it for later charges until all
+  pending restores complete.
+- Extend character snapshots with cooldown end times and active charge
+  duration, then restore them without recomputation.
+- Add actual-resonance, exact boundary, no-resonance, multi-charge snapshot,
+  and simulator save/restore regressions.
+
+Acceptance criteria:
+
+- A 10-second Skill under Impetuous Winds is unavailable at 9.499 seconds and
+  ready at 9.5; a 20-second Burst is unavailable at 18.999 and ready at 19.0
+  after energy is restored.
+- Without the resonance, the same abilities retain exact 10- and 20-second
+  readiness boundaries.
+- A multi-charge queue started under 5% reduction retains 9.5-second restore
+  durations for later charges even after a temporary source expires.
+- Snapshot restore reproduces remaining Skill/Burst times and charge restore
+  times exactly.
+- Cooldown reduction cannot produce a negative effective duration, and base
+  cooldown metadata remains unchanged.
+
+Test cases to add or update:
+
+- Normal: two distinct Anemo members activate the actual resonance buff.
+- Boundary: 9.499/9.5-second Skill and 18.999/19.0-second Burst checks.
+- No-trigger: one Anemo member retains base cooldowns.
+- Snapshot: a temporary reduction expires after cast without extending the
+  captured cooldown, including a second pending charge.
+- Restore: save, advance, restore, and compare all cooldown state values.
+- Defensive: reduction above 100% clamps to an immediate, non-negative end.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew PartyCatalogRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/model/entity/state/CooldownState.java --path src/java/model/entity/Character.java --path src/java/simulation/SimulatorSnapshot.java --path src/java/simulation/CombatSimulator.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Accept Simulator Integration and Close B-039
+
+Why last:
+
+Catalog and sample runs must show the shared cooldown representation remains
+compatible where no current party activates Anemo resonance.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Run catalog validation and deterministic `RaidenParty` and `FlinsParty2`
+  samples after the cooldown change.
+- Confirm current catalog parties contain at most one Anemo member and retain
+  their accepted cooldown, ER, warning, and damage behavior.
+- Close B-039 with focused state and full-simulator evidence.
+
+Acceptance criteria:
+
+- Party catalog validation passes without party-order or RL-registry changes.
+- `RaidenParty` retains 1,317,080 damage / 62,718 DPS over 21.0 seconds.
+- `FlinsParty2` retains 14,077,198 damage / 203,722 DPS over 69.1 seconds.
+- No sample gains a cooldown, energy, or optimizer warning; no generated report
+  is staged.
+
+Test cases to add or update:
+
+- No further production test; Phase 2 owns active Anemo-resonance and snapshot
+  boundaries, while Phase 3 owns unaffected catalog integration.
+
+Verification:
+
+- `./gradlew PartyCatalogRegressionTest`
+- `./gradlew RaidenParty`
+- `./gradlew FlinsParty2`
+- `python scripts/preflight.py --run`
 
 ## NCCL/DDP Distributed RL Training Plan
 
