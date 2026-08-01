@@ -139,6 +139,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseG_BloomDirectionalAuraConsumptionContract();
         testAccuracyPhaseG_TransformativeResidualAuraContract();
         testAccuracyPhaseG_OverloadDamageSequenceContract();
+        testAccuracyPhaseG_SwirlDamageSequenceContract();
         testAccuracyPhaseG_SuperconductDamageSequenceContract();
         testAccuracyPhaseG_ShatterDamageSequenceContract();
         testAccuracyPhaseG_StandardCrystallizeCooldownContract();
@@ -1615,6 +1616,119 @@ public class ReactionRegressionTest {
         assertClose(expectedTransformative(1.5, Element.CRYO, 0.0) * 2.0,
                 superconduct.getTotalDamage(), 0.5,
                 "Overload limits should not suppress boundary Superconduct damage");
+    }
+
+    private static void testAccuracyPhaseG_SwirlDamageSequenceContract() {
+        CombatSimulator sim = simulatorWith(testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE));
+        sim.addCharacter(testCharacter(Element.ANEMO, CharacterId.XIANGLING));
+        List<ReactionResult.Kind> kinds = captureReactionKinds(sim);
+        double swirlDamage = expectedTransformative(
+                0.6, Element.PYRO, 0.0);
+
+        sim.getEnemy().setAura(Element.PYRO, 2.0);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Initial Pyro Swirl sequence fixture", Element.ANEMO));
+        assertClose(swirlDamage, sim.getTotalDamage(), 0.5,
+                "The first Pyro Swirl should deal reaction damage");
+
+        sim.advanceTime(0.05);
+        sim.getEnemy().setAura(Element.PYRO, 2.0);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING,
+                reactionHit("Pre-target Pyro Swirl fixture", Element.ANEMO));
+        assertClose(swirlDamage, sim.getTotalDamage(), 0.5,
+                "Another owner should be target-blocked before 0.1 seconds");
+        assertClose(1.5, sim.getEnemy().getAuraUnits(Element.PYRO), EPS,
+                "Target-blocked Swirl should still consume half source gauge");
+
+        sim.getEnemy().setAura(Element.HYDRO, 2.0);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING,
+                reactionHit("Independent Hydro Swirl fixture", Element.ANEMO));
+        assertClose(swirlDamage * 2.0, sim.getTotalDamage(), 0.5,
+                "Hydro Swirl should have independent per-element state");
+        sim.getEnemy().setAura(Element.HYDRO, 0.0);
+
+        sim.advanceTime(0.05);
+        sim.getEnemy().setAura(Element.PYRO, 2.0);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Second Pyro Swirl sequence fixture", Element.ANEMO));
+        assertClose(swirlDamage * 3.0, sim.getTotalDamage(), 0.5,
+                "The owner should deal its second Pyro Swirl at the target boundary");
+        SimulatorSnapshot snapshot = sim.saveSnapshot();
+        assertClose(0.2, snapshot.swirlTargetDamageCooldownEndTimes.get(
+                Element.PYRO), EPS,
+                "The second Pyro Swirl should advance its target GCD");
+        ReactionState.FixedDamageSequenceState ownerState =
+                snapshot.swirlOwnerDamageSequenceStates.get(
+                        Element.PYRO).get(CharacterId.SUCROSE);
+        assertClose(0.5, ownerState.windowEndTime, EPS,
+                "The Pyro Swirl owner should retain the first fixed boundary");
+        assertEquals(2, ownerState.attemptCount,
+                "The Pyro Swirl owner should record two accepted attempts");
+        assertTrue(!snapshot.swirlOwnerDamageSequenceStates.get(
+                        Element.PYRO).containsKey(CharacterId.XIANGLING),
+                "A target-blocked Pyro Swirl should not start owner state");
+        assertTrue(snapshot.swirlOwnerDamageSequenceStates.get(
+                        Element.HYDRO).containsKey(CharacterId.XIANGLING),
+                "Hydro Swirl should preserve independent owner state");
+
+        sim.advanceTime(0.1);
+        sim.getEnemy().setAura(Element.PYRO, 2.0);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Third Pyro Swirl sequence fixture", Element.ANEMO));
+        assertClose(swirlDamage * 3.0, sim.getTotalDamage(), 0.5,
+                "The owner's third Pyro Swirl should deal no damage");
+        assertClose(1.5, sim.getEnemy().getAuraUnits(Element.PYRO), EPS,
+                "Owner-blocked Swirl should still consume half source gauge");
+
+        sim.advanceTime(0.05);
+        sim.getEnemy().setAura(Element.PYRO, 2.0);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING,
+                reactionHit("Post-owner target-blocked Pyro Swirl fixture", Element.ANEMO));
+        assertClose(swirlDamage * 3.0, sim.getTotalDamage(), 0.5,
+                "An owner-blocked attempt should still start the target GCD");
+
+        sim.advanceTime(0.05);
+        sim.getEnemy().setAura(Element.PYRO, 2.0);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING,
+                reactionHit("Independent owner Pyro Swirl fixture", Element.ANEMO));
+        assertClose(swirlDamage * 4.0, sim.getTotalDamage(), 0.5,
+                "Another owner should have an independent Pyro Swirl sequence");
+
+        sim.advanceTime(0.2);
+        sim.getEnemy().setAura(Element.PYRO, 2.0);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Exact owner-reset Pyro Swirl fixture", Element.ANEMO));
+        assertClose(swirlDamage * 5.0, sim.getTotalDamage(), 0.5,
+                "The original owner should deal damage at exactly 0.5 seconds");
+        assertEquals(9, countReactions(kinds, ReactionResult.Kind.SWIRL),
+                "Every damage-blocked Swirl should retain reaction notification");
+
+        sim.restoreSnapshot(snapshot);
+        assertClose(swirlDamage * 3.0, sim.getTotalDamage(), 0.5,
+                "Snapshot restore should rewind Swirl damage and state");
+        sim.advanceTime(0.1);
+        sim.getEnemy().setAura(Element.PYRO, 2.0);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Restored third Pyro Swirl fixture", Element.ANEMO));
+        assertClose(swirlDamage * 3.0, sim.getTotalDamage(), 0.5,
+                "Snapshot restore should recover the Pyro owner damage limit");
+        sim.advanceTime(0.3);
+        sim.getEnemy().setAura(Element.PYRO, 2.0);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Restored reset Pyro Swirl fixture", Element.ANEMO));
+        assertClose(swirlDamage * 4.0, sim.getTotalDamage(), 0.5,
+                "Restored Pyro owner state should reset at its exact boundary");
     }
 
     private static void testAccuracyPhaseG_StandardCrystallizeCooldownContract() {
@@ -5285,6 +5399,7 @@ public class ReactionRegressionTest {
         assertClose(expectedTransformative(0.6, Element.PYRO, 0.0) * 1.60, firstSwirlDamage, 0.5,
                 "The first Swirl should not use the VV reduction emitted by that reaction");
 
+        vvSim.advanceTime(0.1);
         vvSim.getEnemy().setAura(Element.PYRO, 4.0, vvSim.getCurrentTime());
         vvSim.performActionWithoutTimeAdvance(
                 CharacterId.SUCROSE, reactionHit("Second VV Swirl RES fixture", Element.ANEMO));

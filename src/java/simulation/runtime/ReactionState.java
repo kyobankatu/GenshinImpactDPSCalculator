@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import model.type.CharacterId;
+import model.type.Element;
 
 /** Holds snapshot-relevant transient state for reaction runtime policies. */
 public class ReactionState {
@@ -21,6 +22,9 @@ public class ReactionState {
     private static final int SHATTER_OWNER_DAMAGE_LIMIT = 2;
     private static final double STANDARD_CRYSTALLIZE_COOLDOWN = 1.0;
     private static final double STANDARD_EC_DAMAGE_COOLDOWN = 0.5;
+    private static final double SWIRL_TARGET_DAMAGE_GCD = 0.1;
+    private static final double SWIRL_OWNER_SEQUENCE_WINDOW = 0.5;
+    private static final int SWIRL_OWNER_DAMAGE_LIMIT = 2;
     /** Immutable consumable Quicken Aura payload. */
     public static final class QuickenState {
         /** Quicken gauge present at {@link #lastUpdateTime}. */
@@ -186,6 +190,10 @@ public class ReactionState {
             shatterOwnerDamageSequenceStates =
             new EnumMap<>(CharacterId.class);
     private double standardCrystallizeCooldownEndTime = -1.0;
+    private final Map<Element, Double> swirlTargetDamageCooldownEndTimes =
+            new EnumMap<>(Element.class);
+    private final Map<Element, Map<CharacterId, FixedDamageSequenceState>>
+            swirlOwnerDamageSequenceStates = new EnumMap<>(Element.class);
     private int moondriftCount = 0;
     private int lunarCrystallizeTriggerCount = 0;
     private int verdantDewCount = 0;
@@ -434,6 +442,90 @@ public class ReactionState {
         standardCrystallizeCooldownEndTime = Double.isFinite(endTime)
                 ? endTime
                 : -1.0;
+    }
+
+    /** Attempts to accept Swirl damage for one owner and Swirled Element. */
+    public boolean tryStartSwirlDamageSequence(
+            CharacterId ownerId, Element swirledElement, double currentTime) {
+        if (ownerId == null || !isSwirlElement(swirledElement)
+                || !Double.isFinite(currentTime)) {
+            return false;
+        }
+        double targetEndTime = swirlTargetDamageCooldownEndTimes.getOrDefault(
+                swirledElement, -1.0);
+        if (currentTime + TIMING_EPSILON < targetEndTime) {
+            return false;
+        }
+        swirlTargetDamageCooldownEndTimes.put(
+                swirledElement, currentTime + SWIRL_TARGET_DAMAGE_GCD);
+        Map<CharacterId, FixedDamageSequenceState> ownerStates =
+                swirlOwnerDamageSequenceStates.computeIfAbsent(
+                        swirledElement,
+                        ignored -> new EnumMap<>(CharacterId.class));
+        return advanceFixedDamageSequence(
+                ownerStates,
+                ownerId,
+                currentTime,
+                SWIRL_OWNER_SEQUENCE_WINDOW,
+                SWIRL_OWNER_DAMAGE_LIMIT);
+    }
+
+    /** Returns a defensive copy of per-element Swirl target boundaries. */
+    public Map<Element, Double> copySwirlTargetDamageCooldownEndTimes() {
+        return new EnumMap<>(swirlTargetDamageCooldownEndTimes);
+    }
+
+    /** Returns a deep defensive copy of Swirl owner sequence state. */
+    public Map<Element, Map<CharacterId, FixedDamageSequenceState>>
+            copySwirlOwnerDamageSequenceStates() {
+        Map<Element, Map<CharacterId, FixedDamageSequenceState>> copy =
+                new EnumMap<>(Element.class);
+        for (Map.Entry<Element, Map<CharacterId, FixedDamageSequenceState>> entry
+                : swirlOwnerDamageSequenceStates.entrySet()) {
+            copy.put(entry.getKey(), new EnumMap<>(entry.getValue()));
+        }
+        return copy;
+    }
+
+    /** Restores both dimensions of per-element Swirl damage state. */
+    public void restoreSwirlDamageSequence(
+            Map<Element, Double> targetEndTimes,
+            Map<Element, Map<CharacterId, FixedDamageSequenceState>> ownerStates) {
+        swirlTargetDamageCooldownEndTimes.clear();
+        if (targetEndTimes != null) {
+            for (Map.Entry<Element, Double> entry : targetEndTimes.entrySet()) {
+                if (isSwirlElement(entry.getKey()) && entry.getValue() != null
+                        && Double.isFinite(entry.getValue())) {
+                    swirlTargetDamageCooldownEndTimes.put(
+                            entry.getKey(), entry.getValue());
+                }
+            }
+        }
+
+        swirlOwnerDamageSequenceStates.clear();
+        if (ownerStates == null) {
+            return;
+        }
+        for (Map.Entry<Element, Map<CharacterId, FixedDamageSequenceState>> entry
+                : ownerStates.entrySet()) {
+            if (!isSwirlElement(entry.getKey())) {
+                continue;
+            }
+            Map<CharacterId, FixedDamageSequenceState> restored =
+                    new EnumMap<>(CharacterId.class);
+            restoreFixedDamageSequenceStates(
+                    restored, entry.getValue(), SWIRL_OWNER_DAMAGE_LIMIT);
+            if (!restored.isEmpty()) {
+                swirlOwnerDamageSequenceStates.put(entry.getKey(), restored);
+            }
+        }
+    }
+
+    private boolean isSwirlElement(Element element) {
+        return element == Element.PYRO
+                || element == Element.HYDRO
+                || element == Element.ELECTRO
+                || element == Element.CRYO;
     }
 
     /**

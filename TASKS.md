@@ -11421,8 +11421,8 @@ Completion evidence:
 
 ## Implementation Order: Swirl Damage Sequences
 
-Status: Phase 1 is complete. Phase 2 will add snapshot-safe per-element target
-and owner Swirl damage-only sequences.
+Status: Phases 1-2 are complete. Phase 3 will accept deterministic catalog
+baselines for the snapshot-safe Swirl damage sequences.
 
 Scope:
 
@@ -11497,7 +11497,7 @@ Completion evidence:
 - Current resolver consumes half source gauge and records every Swirl damage
   without either damage-only decision.
 
-### Phase 2: Implement Snapshot-Safe Swirl Damage Sequences - Pending
+### Phase 2: Implement Snapshot-Safe Swirl Damage Sequences - Done
 
 Why second:
 
@@ -11546,6 +11546,24 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - routed validation/preflight planning without RL execution
+
+Completion evidence:
+
+- `ReactionState` now owns typed per-Element target GCD boundaries and nested
+  per-Element/per-`CharacterId` fixed owner windows. Snapshot save, merge
+  forwarding, restore, and all public access route through defensive copies.
+- Resolver ordering preserves reaction notification and half-gauge Aura
+  consumption before the damage-only policy. A target-blocked attempt leaves
+  owner state untouched, while an owner-blocked attempt advances the target GCD.
+- Focused actual-action coverage proves the 0.05-second target block, exact
+  0.1-second acceptance, first/two/third owner behavior, exact 0.5-second reset,
+  second-owner and Hydro/Pyro independence, nine retained notifications, blocked
+  half-gauge consumption, and snapshot rewind/replay.
+- The pre-existing same-Element VV fixture now performs its second Swirl at the
+  exact target boundary; its first-hit resistance-order contract is unchanged.
+  `ReactionRegressionTest`, `build`, and `javadoc` pass. Routed preflight and
+  agent validation report the expected RL checks, which were not executed under
+  the simulator-only session boundary.
 
 ### Phase 3: Accept Swirl-Sequence Catalog Baselines - Pending
 

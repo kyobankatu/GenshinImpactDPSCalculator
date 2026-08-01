@@ -17,6 +17,7 @@ import model.entity.ArtifactSet;
 import model.entity.SimulatorInitializedArtifactEffect;
 import model.entity.SimulatorInitializedWeaponEffect;
 import model.type.CharacterId;
+import model.type.Element;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionRequest;
 import simulation.event.TimerEvent;
@@ -803,6 +804,12 @@ public class CombatSimulator {
                 reactionStateController.copyShatterOwnerDamageSequenceStates();
         double standardCrystallizeCooldownEndTime =
                 reactionStateController.getStandardCrystallizeCooldownEndTime();
+        Map<model.type.Element, Double> swirlTargetDamageCooldownEndTimes =
+                reactionStateController.copySwirlTargetDamageCooldownEndTimes();
+        Map<model.type.Element, Map<CharacterId,
+                simulation.runtime.ReactionState.FixedDamageSequenceState>>
+                swirlOwnerDamageSequenceStates =
+                reactionStateController.copySwirlOwnerDamageSequenceStates();
         int moondriftCount = reactionState.getMoondriftCount();
         int lunarCrystallizeTriggerCount = reactionState.getLunarCrystallizeTriggerCount();
         int verdantDewCount = reactionState.getVerdantDewCount();
@@ -868,6 +875,8 @@ public class CombatSimulator {
                 shatterTargetDamageCooldownEndTime,
                 shatterOwnerDamageSequenceStates,
                 standardCrystallizeCooldownEndTime,
+                swirlTargetDamageCooldownEndTimes,
+                swirlOwnerDamageSequenceStates,
                 moondriftCount, lunarCrystallizeTriggerCount,
                 verdantDewCount, moonridgeDewCount,
                 dendroCores, nextDendroCoreId, enemyFreezeAura, enemyAura,
@@ -926,6 +935,9 @@ public class CombatSimulator {
                 snap.shatterOwnerDamageSequenceStates);
         reactionStateController.restoreStandardCrystallizeCooldown(
                 snap.standardCrystallizeCooldownEndTime);
+        reactionStateController.restoreSwirlDamageSequence(
+                snap.swirlTargetDamageCooldownEndTimes,
+                snap.swirlOwnerDamageSequenceStates);
         reactionState.setMoondriftCount(snap.moondriftCount);
         reactionState.setLunarCrystallizeTriggerCount(snap.lunarCrystallizeTriggerCount);
         reactionState.setVerdantDewCount(snap.verdantDewCount);
@@ -1032,6 +1044,13 @@ public class CombatSimulator {
     public boolean tryStartStandardElectroChargedDamageCooldown() {
         return reactionStateController
                 .tryStartStandardElectroChargedDamageCooldown();
+    }
+
+    /** Attempts to accept Swirl damage for one owner and Swirled Element. */
+    public boolean tryStartSwirlDamageSequence(
+            CharacterId ownerId, Element swirledElement) {
+        return reactionStateController.tryStartSwirlDamageSequence(
+                ownerId, swirledElement);
     }
 
     /** Returns the standard Electro-Charged target cooldown end time. */

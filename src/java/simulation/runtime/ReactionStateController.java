@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import model.type.CharacterId;
+import model.type.Element;
 import simulation.CombatSimulator;
 
 /**
@@ -119,6 +120,32 @@ public class ReactionStateController {
     /** Restores the target-wide standard Crystallize cooldown boundary. */
     public void restoreStandardCrystallizeCooldown(double endTime) {
         reactionState.restoreStandardCrystallizeCooldown(endTime);
+    }
+
+    /** Attempts to accept Swirl damage at the current simulator time. */
+    public boolean tryStartSwirlDamageSequence(
+            CharacterId ownerId, Element swirledElement) {
+        return reactionState.tryStartSwirlDamageSequence(
+                ownerId, swirledElement, sim.getCurrentTime());
+    }
+
+    /** Returns a defensive copy of per-element Swirl target boundaries. */
+    public Map<Element, Double> copySwirlTargetDamageCooldownEndTimes() {
+        return reactionState.copySwirlTargetDamageCooldownEndTimes();
+    }
+
+    /** Returns a deep defensive copy of Swirl owner sequence state. */
+    public Map<Element, Map<CharacterId, ReactionState.FixedDamageSequenceState>>
+            copySwirlOwnerDamageSequenceStates() {
+        return reactionState.copySwirlOwnerDamageSequenceStates();
+    }
+
+    /** Restores both dimensions of per-element Swirl damage state. */
+    public void restoreSwirlDamageSequence(
+            Map<Element, Double> targetEndTimes,
+            Map<Element, Map<CharacterId, ReactionState.FixedDamageSequenceState>>
+                    ownerStates) {
+        reactionState.restoreSwirlDamageSequence(targetEndTimes, ownerStates);
     }
 
     /**

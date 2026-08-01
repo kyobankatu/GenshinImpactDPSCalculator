@@ -446,6 +446,17 @@ public class CombatActionResolver {
             applySuperconductPhysicalResShred();
         }
 
+        if (result.getKind() == ReactionResult.Kind.SWIRL
+                && !sim.tryStartSwirlDamageSequence(
+                        characterId, reactionElement)) {
+            if (sim.isLoggingEnabled()) {
+                System.out.println(String.format(
+                        "   [Reaction] %s on %s -> %s Damage blocked (damage sequence)",
+                        trigger, aura, result.getName()));
+            }
+            return;
+        }
+
         if (isOverload(result)
                 && !sim.tryStartOverloadDamageCooldown(characterId)) {
             if (sim.isLoggingEnabled()) {

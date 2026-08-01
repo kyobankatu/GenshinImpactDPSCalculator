@@ -951,6 +951,8 @@ public class CapabilityProfiler {
                 activePostSubject.shatterTargetDamageCooldownEndTime,
                 activePostSubject.shatterOwnerDamageSequenceStates,
                 activePostSubject.standardCrystallizeCooldownEndTime,
+                activePostSubject.swirlTargetDamageCooldownEndTimes,
+                activePostSubject.swirlOwnerDamageSequenceStates,
                 activePostSubject.moondriftCount,
                 activePostSubject.lunarCrystallizeTriggerCount,
                 activePostSubject.verdantDewCount,

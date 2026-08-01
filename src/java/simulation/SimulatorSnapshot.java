@@ -92,6 +92,9 @@ public class SimulatorSnapshot {
     public final Map<CharacterId, ReactionState.FixedDamageSequenceState>
             shatterOwnerDamageSequenceStates;
     public final double standardCrystallizeCooldownEndTime;
+    public final Map<Element, Double> swirlTargetDamageCooldownEndTimes;
+    public final Map<Element, Map<CharacterId, ReactionState.FixedDamageSequenceState>>
+            swirlOwnerDamageSequenceStates;
     public final int moondriftCount;
     public final int lunarCrystallizeTriggerCount;
     public final int verdantDewCount;
@@ -147,6 +150,8 @@ public class SimulatorSnapshot {
      * @param shatterTargetDamageCooldownEndTime target-wide Shatter damage cooldown end
      * @param shatterOwnerDamageSequenceStates owner-specific Shatter sequence states
      * @param standardCrystallizeCooldownEndTime standard Crystallize cooldown end
+     * @param swirlTargetDamageCooldownEndTimes per-element Swirl target cooldown ends
+     * @param swirlOwnerDamageSequenceStates per-element and owner Swirl sequence states
      * @param moondriftCount active Moondrift count
      * @param lunarCrystallizeTriggerCount Lunar-Crystallize trigger count
      * @param verdantDewCount Verdant Dew count
@@ -190,6 +195,9 @@ public class SimulatorSnapshot {
             Map<CharacterId, ReactionState.FixedDamageSequenceState>
                     shatterOwnerDamageSequenceStates,
             double standardCrystallizeCooldownEndTime,
+            Map<Element, Double> swirlTargetDamageCooldownEndTimes,
+            Map<Element, Map<CharacterId, ReactionState.FixedDamageSequenceState>>
+                    swirlOwnerDamageSequenceStates,
             int moondriftCount,
             int lunarCrystallizeTriggerCount,
             int verdantDewCount,
@@ -244,6 +252,17 @@ public class SimulatorSnapshot {
                 shatterOwnerDamageSequenceStates);
         this.standardCrystallizeCooldownEndTime =
                 standardCrystallizeCooldownEndTime;
+        this.swirlTargetDamageCooldownEndTimes =
+                new EnumMap<>(Element.class);
+        this.swirlTargetDamageCooldownEndTimes.putAll(
+                swirlTargetDamageCooldownEndTimes);
+        this.swirlOwnerDamageSequenceStates = new EnumMap<>(Element.class);
+        for (Map.Entry<Element, Map<CharacterId,
+                ReactionState.FixedDamageSequenceState>> entry
+                : swirlOwnerDamageSequenceStates.entrySet()) {
+            this.swirlOwnerDamageSequenceStates.put(
+                    entry.getKey(), new EnumMap<>(entry.getValue()));
+        }
         this.moondriftCount = moondriftCount;
         this.lunarCrystallizeTriggerCount = lunarCrystallizeTriggerCount;
         this.verdantDewCount = verdantDewCount;
