@@ -22,6 +22,7 @@
 ## Coupling and dependencies
 - `CombatSimulator` depends on nearly every major subsystem through a façade role: `model.entity`, `mechanics.buff`, `mechanics.formula`, `mechanics.reaction`, `mechanics.element`, `mechanics.energy`, `visualization`, runtime collaborators, and event classes.
 - Character, weapon, artifact, optimizer, RL, and visualization code all depend back on `CombatSimulator`.
+- Party definitions may inject fixed random streams when optimizer candidates and final sample runs require common random scenarios; generic content constructors remain stochastic.
 - The observer interfaces are implemented or consumed by reaction systems, weapon passives, RL code, and character logic.
 - `SimulatorSnapshot` must stay aligned with `CombatSimulator`, `Party`, `Enemy`, and `simulation.runtime.ReactionState` whenever new runtime state becomes rollback-relevant.
 - Logic-bearing party lookup and damage attribution should use `CharacterId`; string overloads are compatibility or boundary adapters.

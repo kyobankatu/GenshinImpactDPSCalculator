@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import mechanics.element.ResonanceManager;
 import mechanics.optimization.ArtifactOptimizer;
@@ -29,6 +30,8 @@ import simulation.CombatSimulator;
  * Shared FlinsParty sample definition.
  */
 public final class FlinsPartyDefinition extends AbstractPartyDefinition {
+    private static final long FAVONIUS_PROC_SEED = 2026080201L;
+    private static final long MOONDRIFT_PROC_SEED = 2026080202L;
     private static final CharacterId[] PARTY_ORDER = {
             CharacterId.FLINS,
             CharacterId.INEFFA,
@@ -197,7 +200,12 @@ public final class FlinsPartyDefinition extends AbstractPartyDefinition {
         ineffa.setArtifactRolls(resultIneffa.rolls);
         sim.addCharacter(ineffa);
 
-        Columbina columbina = new Columbina(new FavoniusCodex(), null);
+        Random favoniusRandom = new Random(FAVONIUS_PROC_SEED);
+        Random moondriftRandom = new Random(MOONDRIFT_PROC_SEED);
+        Columbina columbina = new Columbina(
+                new FavoniusCodex(favoniusRandom::nextDouble),
+                null,
+                moondriftRandom::nextDouble);
         ArtifactOptimizer.OptimizationConfig colConfig = new ArtifactOptimizer.OptimizationConfig();
         colConfig.mainStatSands = StatType.ENERGY_RECHARGE;
         colConfig.mainStatGoblet = StatType.HP_PERCENT;

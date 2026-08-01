@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.DoubleSupplier;
 
 import mechanics.analysis.EnergyAnalyzer;
 import mechanics.buff.BuffId;
@@ -103,6 +104,8 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_XingqiuOrbitalApplicationCadence();
         testAccuracyPhaseF_DamageHooksDispatchOnce();
         testAccuracyPhaseF_SkywardSpineInjectedProcBoundaries();
+        testAccuracyPhaseF_FavoniusInjectedProcBoundaries();
+        testAccuracyPhaseF_ColumbinaMoondriftInjectedDrawBoundaries();
         testAccuracyPhase2_TimeAwareLinearDecay();
         testAccuracyPhase2_QueryBeforeAndAtApplication();
         testAccuracyPhase2_ExpiryBoundaries();
@@ -1701,6 +1704,83 @@ public class ReactionRegressionTest {
                 "Identical Skyward Spine sequences should produce identical proc damage");
     }
 
+    private static void testAccuracyPhaseF_FavoniusInjectedProcBoundaries() {
+        boolean nullRejected = false;
+        try {
+            new model.weapon.FavoniusCodex(null);
+        } catch (NullPointerException expected) {
+            nullRejected = true;
+        }
+        assertTrue(nullRejected, "Favonius Codex should reject a null proc draw source");
+
+        double[] draws = { 0.5, 0.499999, 0.0 };
+        int[] drawIndex = { 0 };
+        model.weapon.FavoniusCodex weapon = new model.weapon.FavoniusCodex(
+                () -> draws[drawIndex[0]++]);
+        TestCharacter owner = testCharacter(Element.HYDRO).withStat(StatType.CRIT_RATE, 0.5);
+        owner.setWeapon(weapon);
+        CombatSimulator sim = simulatorWith(owner);
+        owner.restoreCurrentEnergy(0.0);
+        AttackAction hit = damageHit("Favonius draw boundary", Element.HYDRO, 1.0);
+
+        weapon.onDamage(owner, hit, 0.0, sim);
+        assertEquals(1, drawIndex[0], "A draw equal to CRIT Rate should not trigger Windfall");
+        assertClose(0.0, owner.getCurrentEnergy(), EPS,
+                "A failed Favonius draw should not generate particles");
+
+        captureStandardOutput(() -> weapon.onDamage(owner, hit, 0.0, sim));
+        assertEquals(2, drawIndex[0], "A failed Favonius draw should permit an immediate retry");
+        double energyAfterFirstProc = owner.getCurrentEnergy();
+        assertTrue(energyAfterFirstProc > 0.0,
+                "A Favonius draw below CRIT Rate should generate neutral particles");
+
+        weapon.onDamage(owner, hit, 5.999, sim);
+        assertEquals(2, drawIndex[0], "Favonius should not draw before its six-second cooldown");
+        captureStandardOutput(() -> weapon.onDamage(owner, hit, 6.0, sim));
+        assertEquals(3, drawIndex[0], "Favonius should draw at exactly six seconds after a proc");
+
+        int[] replayDrawIndex = { 0 };
+        model.weapon.FavoniusCodex replayWeapon = new model.weapon.FavoniusCodex(
+                () -> draws[replayDrawIndex[0]++]);
+        TestCharacter replayOwner = testCharacter(Element.HYDRO).withStat(StatType.CRIT_RATE, 0.5);
+        replayOwner.setWeapon(replayWeapon);
+        CombatSimulator replaySim = simulatorWith(replayOwner);
+        replayOwner.restoreCurrentEnergy(0.0);
+        replayWeapon.onDamage(replayOwner, hit, 0.0, replaySim);
+        captureStandardOutput(() -> replayWeapon.onDamage(replayOwner, hit, 0.0, replaySim));
+        assertEquals(2, replayDrawIndex[0], "Identical Favonius sequences should consume equal draws");
+        assertClose(energyAfterFirstProc, replayOwner.getCurrentEnergy(), EPS,
+                "Identical Favonius sequences should generate equal energy");
+    }
+
+    private static void testAccuracyPhaseF_ColumbinaMoondriftInjectedDrawBoundaries() {
+        boolean nullRejected = false;
+        try {
+            new model.character.Columbina(new TestWeapon(), blankArtifact(), (DoubleSupplier) null);
+        } catch (NullPointerException expected) {
+            nullRejected = true;
+        }
+        assertTrue(nullRejected, "Columbina should reject a null Moondrift draw source");
+
+        double[] draws = { 0.329999, 0.33 };
+        int[] drawIndex = { 0 };
+        List<String> actions = runMoondriftDrawSequence(() -> draws[drawIndex[0]++]);
+        assertEquals(2, drawIndex[0], "Two Crystallize Interferences should consume two draws");
+        assertEquals(3, actions.size(), "One of two Moondrift draws should add an extra attack");
+        assertEquals("Interference (Crystallize)", actions.get(0), "First Moondrift main attack");
+        assertEquals("Interference (Crystallize) Extra", actions.get(1),
+                "A draw below 0.33 should add the Moondrift extra attack");
+        assertEquals("Interference (Crystallize)", actions.get(2),
+                "A draw equal to 0.33 should not add an extra attack");
+
+        int[] replayDrawIndex = { 0 };
+        List<String> replayActions = runMoondriftDrawSequence(() -> draws[replayDrawIndex[0]++]);
+        assertEquals(drawIndex[0], replayDrawIndex[0],
+                "Identical Moondrift sequences should consume equal draws");
+        assertEquals(actions, replayActions,
+                "Identical Moondrift sequences should produce equal action outcomes");
+    }
+
     private static void testAccuracyPhaseF_ArtifactLunarReactionBuffRegression() {
         TestCharacter owner = testCharacter(Element.ELECTRO).asLunar();
         owner.setArtifacts(new model.artifact.NightOfTheSkysUnveiling());
@@ -2455,6 +2535,27 @@ public class ReactionRegressionTest {
         double beforeDamage = sim.getTotalDamage();
         sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE, action);
         return sim.getTotalDamage() - beforeDamage;
+    }
+
+    private static List<String> runMoondriftDrawSequence(DoubleSupplier drawSource) {
+        model.character.Columbina columbina = new model.character.Columbina(
+                new TestWeapon(), blankArtifact(), drawSource);
+        CombatSimulator sim = simulatorWithExistingCharacter(columbina);
+        List<String> actions = new ArrayList<>();
+        sim.addListener((actor, action, time) -> {
+            if (action.getName().startsWith("Interference (Crystallize)")) {
+                actions.add(action.getName());
+            }
+        });
+        columbina.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), sim);
+        columbina.onAction(CharacterActionRequest.of(CharacterActionKey.BURST), sim);
+        ReactionResult crystallize = ReactionResult.lunar(
+                0.0, ReactionResult.LunarType.CRYSTALLIZE);
+        for (int i = 0; i < 6; i++) {
+            sim.advanceTime(2.0);
+            columbina.onReaction(crystallize, columbina, sim.getCurrentTime(), sim);
+        }
+        return actions;
     }
 
     private static AttackAction catalyzeDamageHit(String name, Element element) {

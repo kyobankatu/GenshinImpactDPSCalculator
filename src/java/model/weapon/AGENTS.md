@@ -13,7 +13,7 @@
 - `CalamityQueller.java`: polearm with persistent elemental damage bonus and stateful stacking ATK passive driven by skill use and timed stack gain.
 - `Deathmatch.java`: polearm whose passive depends on single-target versus multi-target mode.
 - `DragonsBane.java`: polearm that evaluates its Hydro/Pyro target condition for every direct hit.
-- `FavoniusCodex.java`: catalyst with crit-based particle generation on damage and internal cooldown.
+- `FavoniusCodex.java`: catalyst with injectable crit-based particle generation draws and an internal cooldown.
 - `NocturnesCurtainCall.java`: catalyst for Lunar teams with HP bonus, Lunar-triggered energy recovery, and temporary Lunar crit-damage buff.
 - `PrimordialJadeWingedSpear.java`: polearm with on-hit stack tracking, timed expiration, and max-stack damage bonus.
 - `ProspectorShovel.java`: custom polearm with Electro-Charged bonus and Moonsign-gated Lunar-Charged bonus.

@@ -1,5 +1,8 @@
 package model.weapon;
 
+import java.util.Objects;
+import java.util.function.DoubleSupplier;
+
 import model.entity.DamageTriggeredWeaponEffect;
 import model.entity.Weapon;
 import model.entity.Character;
@@ -14,18 +17,31 @@ import model.type.WeaponType;
  * Favonius Codex catalyst with a CRIT-triggered particle generation passive.
  */
 public class FavoniusCodex extends Weapon implements DamageTriggeredWeaponEffect {
+    private final DoubleSupplier procDraw;
+    private double lastProcTime = -10.0;
+
     /**
-     * Constructs Favonius Codex with Lv 90 base stats.
+     * Constructs Favonius Codex with Lv 90 base stats and stochastic proc draws.
      */
     public FavoniusCodex() {
+        this(Math::random);
+    }
+
+    /**
+     * Constructs Favonius Codex with an explicit Windfall draw source.
+     *
+     * @param procDraw source of chance values, where values below the wielder's
+     *                 CRIT Rate trigger Windfall
+     * @throws NullPointerException if {@code procDraw} is null
+     */
+    public FavoniusCodex(DoubleSupplier procDraw) {
         super("Favonius Codex", new StatsContainer());
+        this.procDraw = Objects.requireNonNull(procDraw, "procDraw");
         StatsContainer s = this.getStats();
         s.add(StatType.BASE_ATK, 510);
         s.add(StatType.ENERGY_RECHARGE, 0.459); // 45.9%
         this.weaponType = WeaponType.CATALYST;
     }
-
-    private double lastProcTime = -10.0; // Ready immediately
 
     /**
      * Attempts to trigger Windfall on a damage event and generate neutral
@@ -52,12 +68,14 @@ public class FavoniusCodex extends Weapon implements DamageTriggeredWeaponEffect
         double cr = user.getEffectiveStats(currentTime).get(StatType.CRIT_RATE);
 
         // Clamp CR
-        if (cr > 1.0)
+        if (cr > 1.0) {
             cr = 1.0;
-        if (cr < 0.0)
+        }
+        if (cr < 0.0) {
             cr = 0.0;
+        }
 
-        if (Math.random() < cr) {
+        if (procDraw.getAsDouble() < cr) {
             // Trigger
             System.out.println(
                     String.format("   [Favonius] Windfall Triggered by %s (CR: %.1f%%)", user.getName(), cr * 100));

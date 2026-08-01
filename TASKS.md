@@ -4001,7 +4001,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phase 1 is complete and Phases 2-3 remain.
+- In progress; Phases 1-2 are complete and Phase 3 remains.
 - Requirement: every simulator created for one `FlinsParty` optimization run
   uses the same independent Favonius and Moondrift random streams so ER
   calibration, artifact optimization, and final rotation are comparable and
@@ -4087,7 +4087,7 @@ Verification:
   warning, total, DPS, and duration lines
 - `python scripts/preflight.py --run`
 
-### Phase 2: Inject Independent Favonius and Moondrift Draws
+### Phase 2: Inject Independent Favonius and Moondrift Draws - Done
 
 Why second:
 
@@ -4102,7 +4102,7 @@ Target files:
 - `src/java/sample/ReactionRegressionTest.java`
 - `src/java/model/weapon/AGENTS.md`
 - `src/java/model/character/AGENTS.md`
-- `src/java/simulation/party/AGENTS.md`
+- `src/java/simulation/AGENTS.md`
 - `TASKS.md`
 
 Tasks:

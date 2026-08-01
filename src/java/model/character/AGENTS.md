@@ -9,7 +9,7 @@
 
 ## Java files in this directory
 - `Bennett.java`: Pyro sword support with burst field ATK buff, optional infusion logic, healing log output, and simple normal or charged attack handling.
-- `Columbina.java`: custom Lunar Hydro character with Gravity Ripple, Lunar Domain, Gravity accumulation, Dew resources, interference triggers, and simulator reaction-listener behavior.
+- `Columbina.java`: custom Lunar Hydro character with Gravity Ripple, Lunar Domain, Gravity accumulation, Dew resources, interference triggers, injectable Moondrift draws, and simulator reaction-listener behavior.
 - `Flins.java`: custom Lunar Electro polearm DPS with form switching, alternate burst cost and state, Lunar base-bonus team support, and constellation-driven reaction-listener behavior.
 - `Ineffa.java`: custom Lunar Electro support with shielded skill summon, burst-driven EM sharing, Birgitta periodic attacks, and permanent Lunar base-bonus team buff generation.
 - `RaidenShogun.java`: Electro burst carry with resolve-stack listeners, Musou state energy restoration, coordinated Eye attacks, and burst-mode attack conversion.

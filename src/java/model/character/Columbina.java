@@ -19,6 +19,8 @@ import simulation.event.TimerEvent;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.DoubleSupplier;
 
 /**
  * Custom "Lunar" Hydro character implementation.
@@ -73,6 +75,7 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
     private static final double THUNDERCLOUD_EXPECTED_EXTRA_RATE = 0.33;
     private static final String THUNDERCLOUD_EXPECTED_EXTRA_LABEL =
             "Lunar-Charged Reaction (33% Expected Extra)";
+    private final DoubleSupplier moondriftDraw;
 
     // Resources
     private int gravity = 0;
@@ -106,14 +109,48 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
      * @param artifacts equipped artifact set
      */
     public Columbina(model.entity.Weapon weapon, model.entity.ArtifactSet artifacts) {
-        this(weapon, artifacts, TalentDataManager.getInstance());
+        this(weapon, artifacts, TalentDataManager.getInstance(), Math::random);
+    }
+
+    /**
+     * Constructs Columbina with an explicit Moondrift Harmony draw source.
+     *
+     * @param weapon         equipped weapon
+     * @param artifacts      equipped artifact set
+     * @param moondriftDraw  source of chance values, where values below
+     *                       {@code 0.33} produce the extra attack
+     * @throws NullPointerException if {@code moondriftDraw} is null
+     */
+    public Columbina(
+            model.entity.Weapon weapon,
+            model.entity.ArtifactSet artifacts,
+            DoubleSupplier moondriftDraw) {
+        this(weapon, artifacts, TalentDataManager.getInstance(), moondriftDraw);
     }
 
     public Columbina(
             model.entity.Weapon weapon,
             model.entity.ArtifactSet artifacts,
             TalentDataSource talentData) {
+        this(weapon, artifacts, talentData, Math::random);
+    }
+
+    /**
+     * Constructs Columbina with explicit talent data and Moondrift draws.
+     *
+     * @param weapon         equipped weapon
+     * @param artifacts      equipped artifact set
+     * @param talentData     source of talent multipliers and constellation data
+     * @param moondriftDraw  source of Moondrift Harmony chance values
+     * @throws NullPointerException if {@code moondriftDraw} is null
+     */
+    public Columbina(
+            model.entity.Weapon weapon,
+            model.entity.ArtifactSet artifacts,
+            TalentDataSource talentData,
+            DoubleSupplier moondriftDraw) {
         super(talentData);
+        this.moondriftDraw = Objects.requireNonNull(moondriftDraw, "moondriftDraw");
         this.name = "Columbina";
         this.characterId = CharacterId.COLUMBINA;
         this.weapon = weapon;
@@ -486,7 +523,7 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                 ic.setAnimationDuration(0);
                 sim.performAction(this.characterId, ic);
                 // 4th Passive: 33% extra Moondrift (Moondrift Harmony) when Lunar Domain active
-                if (sim.getCurrentTime() <= domainEndTime && Math.random() < 0.33) {
+                if (sim.getCurrentTime() <= domainEndTime && moondriftDraw.getAsDouble() < 0.33) {
                     AttackAction icExtra = new AttackAction(
                             "Interference (Crystallize) Extra",
                             getMultiplier("Interference Crystallize"),
