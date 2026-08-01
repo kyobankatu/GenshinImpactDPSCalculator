@@ -3124,7 +3124,7 @@ Completion evidence:
 
 Status:
 
-- Planned; Phase 1 evidence is recorded below.
+- In progress; Phases 1-2 are complete and Phase 3 remains.
 - Requirement: one Guoba cast deals exactly four flame hits at +2.0, +3.5,
   +5.0, and +6.5 seconds, with no +8.0-second hit.
 
@@ -3182,7 +3182,7 @@ Verification:
 - inspect `Xiangling.skill`, periodic semantics, and final sample timestamps
 - `python scripts/preflight.py --run`
 
-### Phase 2: Enforce and Test Four Guoba Hits
+### Phase 2: Enforce and Test Four Guoba Hits - Done
 
 Why second:
 

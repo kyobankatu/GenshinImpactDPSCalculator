@@ -1908,9 +1908,14 @@ public class ReactionRegressionTest {
         reactingSim.getEnemy().setAura(Element.HYDRO, 4.0, reactingSim.getCurrentTime());
         reactingSim.performAction(CharacterId.XIANGLING,
                 CharacterActionRequest.of(CharacterActionKey.SKILL));
-        reactingSim.advanceTime(6.51);
+        reactingSim.advanceTime(8.01);
 
         assertEquals(4, reactingWeapon.actions.size(), "Guoba should deal four periodic hits");
+        double[] expectedTimes = {2.0, 3.5, 5.0, 6.5};
+        for (int i = 0; i < expectedTimes.length; i++) {
+            assertClose(expectedTimes[i], reactingWeapon.times.get(i), EPS,
+                    "Guoba should use its sourced four-hit cadence");
+        }
         assertEquals(4, countReactions(reactingKinds, ReactionResult.Kind.VAPORIZE),
                 "Every Guoba hit should apply Pyro and Vaporize without ICD");
         assertTrue(reactingWeapon.actions.stream().allMatch(action -> action.getElement() == Element.PYRO
@@ -1927,9 +1932,10 @@ public class ReactionRegressionTest {
         List<ReactionResult.Kind> noAuraKinds = captureReactionKinds(noAuraSim);
         noAuraSim.performAction(CharacterId.XIANGLING,
                 CharacterActionRequest.of(CharacterActionKey.SKILL));
-        noAuraSim.advanceTime(6.51);
+        noAuraSim.advanceTime(8.01);
 
-        assertEquals(4, noAuraWeapon.actions.size(), "Guoba should still deal four hits without an aura");
+        assertEquals(4, noAuraWeapon.actions.size(),
+                "Guoba should not produce a fifth hit after its field duration");
         assertEquals(0, noAuraKinds.size(), "Guoba should not fabricate reactions without an aura");
     }
 

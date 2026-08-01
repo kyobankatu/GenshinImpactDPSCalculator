@@ -162,7 +162,7 @@ public class Xiangling extends Character implements FormStateProvider {
 
         // Guoba duration 7s approx, 4 hits.
         // Drops chili at end (approx t+7s).
-        double duration = 6.0; // 4 hits over 6s duration
+        double duration = 4.5;
 
         sim.registerEvent(new PeriodicDamageEvent(
                 this.name, guobaHit, sim.getCurrentTime() + 2.0, 1.5, duration,
