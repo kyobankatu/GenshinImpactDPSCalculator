@@ -59,8 +59,8 @@ Musou Isshin Normal/Charged shared ICD group now match their sourced contracts.
 The B-024 correction is complete. Recasting Raiden's Skill now cancels the
 previous Eye periodic event, leaving one refreshed stream.
 
-The active queue is B-025: Guoba's periodic duration must stop after four flame
-hits instead of producing a fifth hit outside its seven-second field duration.
+The B-025 correction is complete. Guoba's periodic duration now stops after its
+four sourced flame hits.
 
 ## Scope
 
@@ -3124,7 +3124,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phases 1-2 are complete and Phase 3 remains.
+- Implemented and verified; Phases 1-3 are complete.
 - Requirement: one Guoba cast deals exactly four flame hits at +2.0, +3.5,
   +5.0, and +6.5 seconds, with no +8.0-second hit.
 
@@ -3220,7 +3220,7 @@ Verification:
 - `./gradlew build`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Accept the RaidenParty Guoba-Lifetime Delta
+### Phase 3: Accept the RaidenParty Guoba-Lifetime Delta - Done
 
 Why last:
 
@@ -3256,6 +3256,16 @@ Verification:
 - two fresh `./gradlew RaidenParty` runs
 - `python scripts/validate_agent_assets.py` when baseline gate changes
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Actual-Xiangling regression advances past +8.0 seconds and retains exactly
+  four hits at +2.0, +3.5, +5.0, and +6.5 seconds with and without an aura.
+- Both post-fix `RaidenParty` payloads report 1,331,957 damage / 63,427 DPS and
+  match after excluding Gradle's elapsed-time line, with SHA-256
+  `c7f2780605ab245f1482ea80263d396d8bd7b802cbe273d4860f43e8655ec1cf`.
+- The final trace contains Guoba hits at 8.4, 9.9, 11.4, and 12.9 seconds only;
+  the invalid 14.4-second fifth hit is gone.
 
 ## Cross-Cutting Rules
 

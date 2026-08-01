@@ -580,7 +580,7 @@ experiment record.
 
 ### B-025 — Guoba periodic event produces a fifth flame hit
 
-- Status: `planned`
+- Status: `done`
 - Source: 2 (observable sample hit-count defect after periodic-event audit)
 - Symptom: one Guoba cast is configured from +2.0 seconds at 1.5-second
   intervals with an inclusive six-second event duration, producing hits at
@@ -597,4 +597,8 @@ experiment record.
   regressions rely on them; set Guoba's local duration to end on its fourth
   +6.5-second tick. Pre-fix audited `RaidenParty` baseline is 1,361,340 damage
   / 64,826 DPS. See `TASKS.md` implementation block
-  `Guoba Four-Hit Lifetime`.
+  `Guoba Four-Hit Lifetime`. Completed 2026-08-02. Boundary regression confirms
+  four exact timestamps and no +8.0-second hit. Both post-fix `RaidenParty`
+  payloads report 1,331,957 damage / 63,427 DPS with normalized SHA-256
+  `c7f2780605ab245f1482ea80263d396d8bd7b802cbe273d4860f43e8655ec1cf`;
+  the final trace contains only four Guoba hits.
