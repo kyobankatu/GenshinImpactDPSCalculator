@@ -1770,3 +1770,44 @@ experiment record.
   poise-aware Shatter durability. A narrow change would encode known-wrong dual
   reactions. Keep blocked until a trigger-residual plan or explicit
   simplification decision is authorized.
+
+### B-066 — Standard Crystallize has no one-second global cooldown
+
+- Status: `in-progress`
+- Source: 3 (sourced reaction-mechanic divergence)
+- Symptom: repeated Geo hits and one Geo hit against multiple ordinary Auras
+  notify and consume every Crystallize, producing extra reactions/shard effects
+  and excessive Aura consumption within one second.
+- Scope: standard-only one-second single-target GCD, shared owner/element policy,
+  no-consumption suppression, snapshot continuity, and catalog controls
+- Risk: `planned`
+- Proof: same-hit dual Aura winner, pre/exact time boundary, cross-owner/element
+  sharing, blocked no-consumption, snapshot replay, Lunar bypass, and repeated
+  party payloads
+- Notes: KQM's Crystallize ICD finding (v2.7) records a one-second GCD per
+  monster shared across attacks, owners, and Aura elements. Its v2.8 correction
+  proves the GCD also prevents gauge consumption. Maintained gcsim independently
+  checks one target `crystallizeGCD` before standard event/reduction and sets it
+  for 60 frames. `TryAddLCr` is a separate Lunar path without this standard GCD.
+  Adopt the standard-only rule in the one-enemy abstraction. Sources accessed
+  2026-08-02:
+  https://library.keqingmains.com/evidence/combat-mechanics/elemental-effects/transformative-reactions#crystallize-icd,
+  https://library.keqingmains.com/evidence/combat-mechanics/elemental-effects/transformative-reactions#crystallize-icd-correction,
+  https://github.com/genshinsim/gcsim/blob/main/pkg/reactable/crystallize.go,
+  and https://github.com/genshinsim/gcsim/blob/main/pkg/reactable/lunarcrystallize.go.
+
+### B-067 — Superconduct damage ignores its reaction damage sequence
+
+- Status: `candidate`
+- Source: 3 (KQM/gcsim reaction-damage divergence)
+- Symptom: every rapid Superconduct notification records damage, exceeding the
+  sourced two damage hits per owner in 0.5 seconds and target-wide 0.1-second GCD.
+- Scope: target/owner hit-window state, continued reaction/gauge/shred effects,
+  snapshot continuity, and catalog controls
+- Risk: `planned`
+- Proof: global pre/exact boundary, first/second/third owner hit sequence,
+  cross-owner behavior, unaffected gauge/shred, restore replay, and repeated
+  party payloads
+- Notes: KQM's v2.5 Superconduct update and maintained gcsim `superconductGCD`
+  plus `ICDGroupReactionA` provide matching target/owner dimensions. Promote
+  only after B-066 closes; do not fold it into Crystallize's whole-reaction GCD.

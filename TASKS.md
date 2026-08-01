@@ -160,6 +160,10 @@ The B-056 through B-063 reaction-state passes are complete. The current B-064
 pass adds Overload's target-wide 0.1-second and owner-specific 0.5-second damage
 limits while preserving every reaction notification and gauge transition.
 
+The B-064 Overload damage-sequence pass is complete. The current B-066 pass
+adds the standard Crystallize reaction's target-wide one-second cooldown while
+leaving Lunar-Crystallize on its separate reaction path.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -11003,3 +11007,172 @@ Completion evidence:
   insufficient-energy lines.
 - README documents both damage limits. The tracked generated report was restored
   and no generated output is staged.
+
+## Implementation Order: Standard Crystallize Global Cooldown
+
+Status: Phase 1 is complete. Phase 2 will add snapshot-safe standard
+Crystallize gating before reaction notification and Aura consumption.
+
+Scope:
+
+- One-second standard Crystallize cooldown for the simulator's single enemy.
+- Shared cooldown across owners, ordinary Aura elements, and hits.
+- Suppressed reaction notification, Aura consumption, and shard side effects.
+- Snapshot save/restore and deterministic catalog acceptance.
+
+Out of scope for this pass:
+
+- Lunar-Crystallize, Moondrift, or Harmony cadence.
+- Shard pickup, shield absorption, Archaic Petra, multi-target state, and crystal
+  spawn geometry.
+- Action elemental-application ICD, other reaction damage sequences, RL changes,
+  and persistent jobs.
+
+Definitions:
+
+- **Standard Crystallize cooldown**: the earliest time any owner/element may
+  trigger the next non-Lunar Crystallize on the one modeled enemy.
+
+Cross-cutting rules:
+
+- `ReactionState` owns the cooldown timestamp; the controller/facade expose one
+  current-time decision and snapshots preserve it.
+- Gate before `notifyReaction` and stateful handling so blocked attempts do not
+  consume Aura or create side effects.
+- Exact one-second boundary is inclusive and blocked attempts do not refresh it.
+- Lunar conversion occurs before the gate and bypasses standard Crystallize GCD.
+- Preserve explicit staging and generated-artifact safety.
+
+### Phase 1: Record Standard Crystallize GCD Evidence - Done
+
+Why first:
+
+- Standard and Lunar behavior plus no-consumption semantics must be separated
+  before inserting a gate into shared reaction iteration.
+
+Target files:
+
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Record the sourced one-second per-target/shared-owner/shared-element contract.
+- Confirm suppressed standard Crystallize does not consume Aura.
+- Inventory conversion, notification, resolver priority, and snapshot boundaries.
+
+Acceptance criteria:
+
+- Standard-only eligibility and the exact inclusive boundary are explicit.
+- Same-hit multi-Aura behavior selects at most one ordinary Aura by B-062 order.
+- No production behavior changes occur in this phase.
+
+Test cases to add or update:
+
+- No production test; Phase 2 owns focused cooldown behavior.
+
+Verification:
+
+- inspect KQM Crystallize ICD/correction and maintained gcsim standard/Lunar paths
+- inspect resolver, reaction state/controller, snapshot, and regression paths
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- KQM v2.7 measures a one-second per-monster cooldown shared across attacks,
+  characters, and Aura elements; its v2.8 correction proves blocked attempts do
+  not consume gauge.
+- Maintained gcsim independently stores one target `crystallizeGCD`, checks it
+  before standard reduction/event emission, and sets it for 60 frames. Its
+  Lunar-Crystallize path bypasses that method and has no standard GCD.
+- The current ordinary resolver notifies and consumes every compatible Aura in
+  the same Geo hit and has no cross-hit cooldown. B-062 already defines the
+  deterministic Aura winner order needed after gating.
+
+### Phase 2: Implement Snapshot-Safe Standard Crystallize GCD - Pending
+
+Why second:
+
+- Phase 1 establishes that the gate precedes all reaction side effects and does
+  not apply after Lunar conversion.
+
+Target files:
+
+- `src/java/simulation/runtime/ReactionState.java`
+- `src/java/simulation/runtime/ReactionStateController.java`
+- `src/java/simulation/CombatSimulator.java`
+- `src/java/simulation/SimulatorSnapshot.java`
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `src/java/mechanics/rl/CapabilityProfiler.java` (snapshot forwarding only)
+- `TASKS.md`
+
+Tasks:
+
+- Add one typed standard Crystallize cooldown timestamp and snapshot round trip.
+- Gate converted reaction results before notification/handling.
+- Regress same-hit dual Aura, pre/exact boundary, shared owner/element, blocked
+  no-consumption, snapshot replay, and Lunar bypass.
+
+Acceptance criteria:
+
+- A dual-Aura Geo hit notifies/consumes only B-062's first ordinary Aura.
+- Any owner/element before one second is blocked without notification or
+  consumption; exact one second is accepted.
+- Blocked attempts do not refresh the original boundary.
+- Snapshot restore reproduces the active boundary.
+- Rapid Lunar-Crystallize remains outside the standard cooldown.
+
+Test cases to add or update:
+
+- Normal: first standard reaction and exact one-second retry.
+- Abnormal: same-hit second Aura and 0.999-second cross-owner/element retry.
+- Side effect: listener count and both Aura residuals prove no blocked handling.
+- Snapshot: save active GCD, pass boundary, restore, and replay.
+- No-change: three immediate Lunar triggers retain current Harmony behavior.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- routed validation/preflight planning without RL execution
+
+### Phase 3: Accept Crystallize-GCD-Neutral Catalog Baselines - Pending
+
+Why third:
+
+- Catalog acceptance follows only after focused standard/Lunar separation and
+  snapshot behavior pass.
+
+Target files:
+
+- `README.md`
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Run two no-daemon controls per catalog party against B-064.
+- Record hashes, totals, ER/cadence, Crystallize path counts, and warnings.
+- Document standard-only GCD and close B-066.
+
+Acceptance criteria:
+
+- All pairs are deterministic and every delta is attributable, or exact
+  no-change is proven.
+- Lunar behavior remains stable; tracked generated report is restored.
+- Plan, ledger, README, and checkpoint agree.
+
+Test cases to add or update:
+
+- Normal: pairwise exact catalog controls.
+- No-change: accepted totals/ER/cadence and Lunar paths.
+- Abnormal: zero warning/generated-artifact leak.
+
+Verification:
+
+- two fresh `./gradlew --no-daemon RaidenParty` runs
+- two fresh `./gradlew --no-daemon FlinsParty` runs
+- two fresh `./gradlew --no-daemon FlinsParty2` runs
+- `python scripts/preflight.py --run`
