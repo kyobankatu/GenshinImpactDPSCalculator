@@ -34,5 +34,8 @@
 ## Agent guidance
 - Before editing a weapon, confirm whether its passive is stat-only, action-triggered, damage-triggered, reaction-triggered, or switch-stateful.
 - Be cautious with randomness. Random procs can destabilize optimizer or RL behavior if introduced into heavily reused paths.
+- Keep stochastic default constructors for general simulations, but inject the
+  draw source when a benchmark or optimizer requires common reproducible random
+  numbers. Reject null sources at construction.
 - If a weapon grants team buffs, implement `WeaponTeamBuffProvider` and audit `Character.getEffectiveStats` behavior to avoid recursive stat loops.
 - Prefer implementing the narrowest capability interface instead of adding optional methods to `Weapon`.

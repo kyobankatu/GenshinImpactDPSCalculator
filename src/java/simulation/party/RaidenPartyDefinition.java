@@ -1,9 +1,10 @@
 package simulation.party;
 
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import mechanics.element.ResonanceManager;
 import mechanics.optimization.ArtifactOptimizer;
@@ -27,6 +28,7 @@ import simulation.CombatSimulator;
  * Shared Raiden National party definition for sample and RL execution.
  */
 public final class RaidenPartyDefinition extends AbstractPartyDefinition {
+    private static final long SKYWARD_SPINE_PROC_SEED = 20260801L;
     private static final CharacterId[] PARTY_ORDER = {
             CharacterId.RAIDEN_SHOGUN,
             CharacterId.XINGQIU,
@@ -51,7 +53,7 @@ public final class RaidenPartyDefinition extends AbstractPartyDefinition {
 
     @Override
     public Map<CharacterId, List<StatType>> optimizationTargets() {
-        Map<CharacterId, List<StatType>> targets = new HashMap<>();
+        Map<CharacterId, List<StatType>> targets = new LinkedHashMap<>();
         targets.put(CharacterId.RAIDEN_SHOGUN,
                 Arrays.asList(StatType.CRIT_RATE, StatType.CRIT_DMG, StatType.ATK_PERCENT));
         targets.put(CharacterId.XINGQIU,
@@ -130,7 +132,8 @@ public final class RaidenPartyDefinition extends AbstractPartyDefinition {
 
     private void setupParty(CombatSimulator sim, Map<CharacterId, Double> erTargets,
             Map<CharacterId, Map<StatType, Integer>> partyManualRolls) {
-        RaidenShogun raiden = new RaidenShogun(new SkywardSpine(), null);
+        Random skywardSpineRandom = new Random(SKYWARD_SPINE_PROC_SEED);
+        RaidenShogun raiden = new RaidenShogun(new SkywardSpine(skywardSpineRandom::nextDouble), null);
         ArtifactOptimizer.OptimizationConfig raidenConfig = new ArtifactOptimizer.OptimizationConfig();
         raidenConfig.mainStatSands = StatType.ENERGY_RECHARGE;
         raidenConfig.mainStatGoblet = StatType.ELECTRO_DMG_BONUS;

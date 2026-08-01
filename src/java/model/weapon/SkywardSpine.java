@@ -1,5 +1,8 @@
 package model.weapon;
 
+import java.util.Objects;
+import java.util.function.DoubleSupplier;
+
 import model.entity.DamageTriggeredWeaponEffect;
 import model.entity.Weapon;
 import model.entity.Character;
@@ -15,18 +18,31 @@ import model.type.Element;
  * Blade proc.
  */
 public class SkywardSpine extends Weapon implements DamageTriggeredWeaponEffect {
+    private final DoubleSupplier procDraw;
+    private double lastVacuumTime = -10.0;
+
     /**
-     * Constructs Skyward Spine with Lv 90 base stats.
+     * Constructs Skyward Spine with Lv 90 base stats and stochastic proc draws.
      */
     public SkywardSpine() {
+        this(Math::random);
+    }
+
+    /**
+     * Constructs Skyward Spine with an explicit proc draw source.
+     *
+     * @param procDraw source of chance values, where values below {@code 0.5}
+     *                 trigger Vacuum Blade
+     * @throws NullPointerException if {@code procDraw} is null
+     */
+    public SkywardSpine(DoubleSupplier procDraw) {
         super("Skyward Spine", new StatsContainer());
+        this.procDraw = Objects.requireNonNull(procDraw, "procDraw");
         StatsContainer s = this.getStats();
         s.add(StatType.BASE_ATK, 674); // Lv90
         s.add(StatType.ENERGY_RECHARGE, 0.368);
         this.weaponType = WeaponType.POLEARM;
     }
-
-    private double lastVacuumTime = -10.0;
 
     /**
      * Applies the weapon's constant CRIT Rate and attack speed bonuses.
@@ -54,7 +70,7 @@ public class SkywardSpine extends Weapon implements DamageTriggeredWeaponEffect 
         if (action.getActionType() == ActionType.NORMAL || action.getActionType() == ActionType.CHARGE) {
             if (currentTime - lastVacuumTime >= 2.0) {
                 // 50% Chance
-                if (Math.random() < 0.5) {
+                if (procDraw.getAsDouble() < 0.5) {
                     lastVacuumTime = currentTime;
 
                     // Trigger Vacuum Blade
@@ -67,8 +83,10 @@ public class SkywardSpine extends Weapon implements DamageTriggeredWeaponEffect 
                     double dmg = mechanics.formula.DamageCalculator.calculateDamage(user, sim.getEnemy(), vacuum, buffs,
                             currentTime, 1.0, sim);
 
-                    System.out.println(String.format("   [Weapon] Skyward Spine Vacuum Blade triggered!"));
-                    System.out.println(String.format("   -> Damage: %,.0f", dmg));
+                    if (sim.isLoggingEnabled()) {
+                        System.out.println("   [Weapon] Skyward Spine Vacuum Blade triggered!");
+                        System.out.println(String.format("   -> Damage: %,.0f", dmg));
+                    }
                     sim.recordDamage(user.getCharacterId(), dmg);
                 }
             }

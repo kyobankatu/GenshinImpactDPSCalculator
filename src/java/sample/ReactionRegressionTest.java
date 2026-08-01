@@ -79,6 +79,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_XianglingChiliPickupOptIn();
         testAccuracyPhaseF_XingqiuOrbitalApplicationCadence();
         testAccuracyPhaseF_DamageHooksDispatchOnce();
+        testAccuracyPhaseF_SkywardSpineInjectedProcBoundaries();
         testAccuracyPhase2_TimeAwareLinearDecay();
         testAccuracyPhase2_QueryBeforeAndAtApplication();
         testAccuracyPhase2_ExpiryBoundaries();
@@ -1236,6 +1237,79 @@ public class ReactionRegressionTest {
                 "A direct DamageCalculator caller should dispatch its weapon hook once");
         assertEquals(3, artifact.damageHookCount,
                 "A direct DamageCalculator caller should dispatch its artifact hook once");
+    }
+
+    private static void testAccuracyPhaseF_SkywardSpineInjectedProcBoundaries() {
+        boolean nullRejected = false;
+        try {
+            new model.weapon.SkywardSpine(null);
+        } catch (NullPointerException expected) {
+            nullRejected = true;
+        }
+        assertTrue(nullRejected, "Skyward Spine should reject a null proc draw source");
+
+        double[] draws = { 0.5, 0.499999, 0.25 };
+        int[] drawIndex = { 0 };
+        model.weapon.SkywardSpine weapon = new model.weapon.SkywardSpine(
+                () -> draws[drawIndex[0]++]);
+        TestCharacter character = testCharacter(Element.ELECTRO);
+        character.setWeapon(weapon);
+        CombatSimulator sim = simulatorWith(character);
+        AttackAction normal = new AttackAction(
+                "Skyward Spine Proc Test",
+                1.0,
+                Element.PHYSICAL,
+                StatType.BASE_ATK,
+                StatType.PHYSICAL_DMG_BONUS,
+                0.0,
+                ActionType.NORMAL);
+        AttackAction other = new AttackAction(
+                "Skyward Spine Other Test",
+                1.0,
+                Element.PHYSICAL,
+                StatType.BASE_ATK,
+                StatType.PHYSICAL_DMG_BONUS,
+                0.0,
+                ActionType.OTHER);
+
+        weapon.onDamage(character, normal, 0.0, sim);
+        assertEquals(1, drawIndex[0], "A 0.5 draw should be consumed and fail the strict 50% chance gate");
+        assertClose(0.0, sim.getTotalDamage(), EPS, "A 0.5 Skyward Spine draw should not proc");
+
+        weapon.onDamage(character, normal, 0.1, sim);
+        assertEquals(2, drawIndex[0], "A failed Skyward Spine draw should not start cooldown");
+        double afterFirstProc = sim.getTotalDamage();
+        assertTrue(afterFirstProc > 0.0, "A 0.499999 Skyward Spine draw should proc");
+
+        weapon.onDamage(character, normal, 2.099, sim);
+        assertEquals(2, drawIndex[0], "Skyward Spine should not draw at 1.999 seconds of cooldown");
+        assertClose(afterFirstProc, sim.getTotalDamage(), EPS,
+                "Skyward Spine should not deal another Vacuum Blade hit before cooldown");
+
+        weapon.onDamage(character, other, 2.1, sim);
+        assertEquals(2, drawIndex[0], "OTHER follow-ups should not consume Skyward Spine proc draws");
+
+        weapon.onDamage(character, normal, 2.1, sim);
+        assertEquals(3, drawIndex[0], "Skyward Spine should draw at exactly 2.0 seconds after a proc");
+        assertTrue(sim.getTotalDamage() > afterFirstProc,
+                "An eligible successful draw should deal a second Vacuum Blade hit");
+
+        double firstSequenceDamage = sim.getTotalDamage();
+        int[] repeatedDrawIndex = { 0 };
+        model.weapon.SkywardSpine repeatedWeapon = new model.weapon.SkywardSpine(
+                () -> draws[repeatedDrawIndex[0]++]);
+        TestCharacter repeatedCharacter = testCharacter(Element.ELECTRO);
+        repeatedCharacter.setWeapon(repeatedWeapon);
+        CombatSimulator repeatedSim = simulatorWith(repeatedCharacter);
+        repeatedWeapon.onDamage(repeatedCharacter, normal, 0.0, repeatedSim);
+        repeatedWeapon.onDamage(repeatedCharacter, normal, 0.1, repeatedSim);
+        repeatedWeapon.onDamage(repeatedCharacter, normal, 2.099, repeatedSim);
+        repeatedWeapon.onDamage(repeatedCharacter, other, 2.1, repeatedSim);
+        repeatedWeapon.onDamage(repeatedCharacter, normal, 2.1, repeatedSim);
+        assertEquals(drawIndex[0], repeatedDrawIndex[0],
+                "Identical Skyward Spine sequences should consume the same number of draws");
+        assertClose(firstSequenceDamage, repeatedSim.getTotalDamage(), EPS,
+                "Identical Skyward Spine sequences should produce identical proc damage");
     }
 
     private static void testAccuracyPhaseF_ArtifactLunarReactionBuffRegression() {
