@@ -561,3 +561,397 @@ depends on them:
 - exploration-specific systems
 - full open-world status interactions that do not affect offensive output in the
   current single-target simulator
+
+## NCCL/DDP Distributed RL Training Plan
+
+### Objective and Target Topology
+
+Enable data-parallel recurrent PPO training on one `rtx6000-ada2_2` allocation
+without changing Java combat semantics or the Java/Python binary protocol. This
+resource provides two NVIDIA RTX 6000 Ada GPUs (48 GB each), 96 CPU threads,
+and 384 GB host memory. The initial production topology is therefore:
+
+- two PyTorch learner processes launched by `torchrun`, one process per GPU
+- `nccl` as the distributed process group backend
+- one Java rollout service per learner rank, each bound to a distinct localhost
+  port and configured with a bounded share of Java worker threads
+- rank-local rollout collection and PPO loss calculation; DDP performs gradient
+  all-reduce during `backward()`
+- rank 0 owns checkpoints, CSV/W&B output, and user-facing summaries; all ranks
+  fail together on a fatal error
+
+The first implementation targets exactly one node and two GPUs. Multi-node
+support is deferred until the single-node contract, recovery behavior, and
+performance characteristics are proven.
+
+Non-goals:
+
+- replacing the Java rollout service, action mask, observations, reward, or
+  binary protocol
+- model parallelism, FSDP, parameter-server architectures, or PPO algorithm
+  changes unrelated to distribution
+- requiring NCCL/GPU availability for current local CPU or single-GPU commands
+- Java-service-to-Java-service communication
+
+### Distributed Ownership and SOLID Boundaries
+
+- `distributed_runtime.py` owns process-group lifecycle, rank discovery,
+  collective helpers, and rank-aware logging/checkpoint permissions. It must
+  not know PPO or socket protocol details (single responsibility).
+- `distributed_rollout.py` maps one DDP rank to exactly one Java endpoint and
+  validates service metadata. It depends on the existing rollout-client
+  interface rather than a concrete socket implementation (dependency inversion).
+- `train_recurrent_ppo.py` remains the composition root and training loop. It
+  delegates distributed concerns rather than branching across the loop
+  (open/closed and single responsibility).
+- Checkpointing, metrics, and launch validation are small injectable helpers,
+  so they can be tested without a GPU or live Java service (interface
+  segregation and dependency inversion).
+- Java remains responsible only for simulation and vectorized rollouts. A Java
+  endpoint is private to one learner rank; runner and Vine snapshot state never
+  cross rank boundaries.
+
+Every phase must preserve `python3 src/python/rl/train_recurrent_ppo.py` as the
+single-process development path. New source belongs under `src/python/rl/`;
+generated checkpoints, logs, reports, and scheduler output do not belong in
+commits.
+
+### Phase 0: Record Baseline and Validate the Allocation
+
+Target files:
+
+- `TASKS.md`
+- `README.md`
+- optional new `src/python/rl/benchmark_training.py` only if current benchmarks
+  cannot record learner-versus-rollout timings
+
+Requirements:
+
+- Document `rtx6000-ada2_2`: 2 GPUs, 96 CPU threads, 384 GB RAM, 48 GB/GPU.
+- Define a reproducible one-GPU baseline with fixed seed, party catalog, update
+  count, rollout service, and evaluation cadence.
+- Capture update wall time, rollout env-steps/s, optimizer time, GPU memory, CPU
+  utilization, Java worker count, and deterministic evaluation.
+- Start with two Java services at 40 workers each, leaving CPU headroom for the
+  Python learners/system threads; tune only after measurement.
+- Preflight `torch.cuda.is_available()`, GPU count, CUDA/PyTorch versions, and
+  `torch.distributed.is_nccl_available()`.
+
+Normal tests:
+
+- One-GPU short training writes a valid checkpoint and deterministic summary.
+- `benchmark_rollout.py` against the matching Java service reports non-zero,
+  stable env-steps/s.
+
+Abnormal tests:
+
+- Fewer than two visible GPUs is an actionable DDP preflight error while the
+  normal single-process command still works.
+- Java worker totals above the allocation budget are rejected or warned before
+  training begins.
+- An unreachable rollout endpoint fails before checkpoint/log creation.
+
+Acceptance criteria:
+
+- An exact baseline record with commands, versions, allocation, and metrics.
+- A comparator exists for later correctness and speedup decisions.
+
+### Phase 1: Introduce a Testable Distributed Runtime Abstraction
+
+Target files:
+
+- new `src/python/rl/distributed_runtime.py`
+- new `src/python/rl/tests/test_distributed_runtime.py`
+- `src/python/rl/train_recurrent_ppo.py`
+- `src/python/rl/AGENTS.md`
+- `README.md`
+
+Requirements:
+
+- Add immutable `DistributedContext`: `enabled`, `rank`, `local_rank`,
+  `world_size`, `device`, `is_primary`.
+- Add one lifecycle API that reads `torchrun` variables, validates them,
+  initializes `torch.distributed` with `nccl`, pins the local CUDA device, and
+  always destroys the process group in `finally` cleanup.
+- Add `--distributed off|auto|required`: `off` preserves current behavior,
+  `auto` enables only under `torchrun`, and `required` rejects direct execution.
+- Hide collective operations behind helpers such as scalar mean/sum, barrier,
+  and failure propagation. Other modules must not import `torch.distributed`.
+- Derive per-rank random seeds deterministically from user seed and rank; store
+  the derivation in checkpoint metadata.
+
+Normal tests:
+
+- Unit test constructs a disabled context without process-group initialization.
+- `torchrun --standalone --nproc_per_node=2` assigns devices 0 and 1; both ranks
+  pass a barrier and exit cleanly.
+- A DDP smoke program confirms scalar all-reduce agrees on both ranks.
+
+Abnormal tests:
+
+- `--distributed required` outside `torchrun` identifies missing variables.
+- `LOCAL_RANK` outside the visible CUDA range fails before model creation.
+- Partial `RANK`/`WORLD_SIZE` environment fails rather than silently mixing
+  distributed and local operation.
+- Initialization failure cleans up partial process-group state with rank-aware
+  diagnostics.
+
+Acceptance criteria:
+
+- Direct single-process execution is behaviorally unchanged.
+- DDP lifecycle contains no PPO, Java protocol, W&B, or checkpoint code.
+- Disabled, valid two-rank, and invalid-launch paths are covered.
+
+### Phase 2: Define Rank-Local Rollout Topology and Preflight Validation
+
+Target files:
+
+- new `src/python/rl/distributed_rollout.py`
+- new `src/python/rl/tests/test_distributed_rollout.py`
+- `src/python/rl/rollout_service_client.py`
+- `src/python/rl/train_recurrent_ppo.py`
+- `src/python/rl/benchmark_rollout.py`
+- `src/python/rl/AGENTS.md`
+- `README.md`
+
+Requirements:
+
+- Add `--rank-endpoints host:port,...` for DDP. Count must equal `WORLD_SIZE`;
+  rank `r` owns only endpoint `r`.
+- Keep current `--endpoints` fan-out semantics unchanged outside DDP; do not
+  reinterpret a fan-out client as a rank-local DDP client.
+- Add `RankLocalRolloutClientFactory`, creating exactly one
+  `RolloutServiceClient` for the current rank behind the existing client API.
+- Before creating a runner, validate cross-rank protocol version, observation,
+  action/privileged size, feature layout, and ordered party catalog.
+- Require `envs % world_size == 0` initially and report `local_envs`; do not
+  silently alter global batch size.
+- Each rank creates, steps, releases snapshots for, and closes only its local
+  Java runner.
+
+Normal tests:
+
+- Unit test maps two endpoints deterministically to ranks 0 and 1.
+- Two-service smoke run proves distinct runner/snapshot ownership.
+- Matching endpoint metadata permits equal local environment counts.
+
+Abnormal tests:
+
+- Endpoint count mismatch, duplicate rank endpoint, malformed endpoint, and
+  connection timeout fail before runner creation.
+- Metadata or party-catalog mismatch identifies the differing field.
+- `envs % world_size != 0` fails before the first PPO update.
+
+Acceptance criteria:
+
+- One DDP rank owns one Java service without a protocol-version change.
+- Existing local/multi-endpoint benchmark behavior remains unchanged.
+- Endpoint selection is unit-testable without GPUs.
+
+### Phase 3: Make Recurrent PPO Correct Under DDP
+
+Target files:
+
+- `src/python/rl/train_recurrent_ppo.py`
+- `src/python/rl/recurrent_ppo.py`
+- new `src/python/rl/distributed_metrics.py`
+- new `src/python/rl/tests/test_distributed_training.py`
+- `src/python/rl/tests/test_recurrent_ppo.py` or the closest focused test module
+
+Requirements:
+
+- Wrap the policy with `torch.nn.parallel.DistributedDataParallel` only after
+  movement to rank-local CUDA. Provide an unwrapped-policy accessor for metadata,
+  checkpointing, and evaluation.
+- Retain rank-local rollout buffers/hidden states; never gather trajectories
+  merely to train.
+- Normalize advantages with global count, sum, and squared-sum collectives so
+  all ranks use identical normalization, including defined zero-variance logic.
+- Require identical PPO minibatch/update counts on every rank. Validate local
+  sequence chunks before backward to prevent a DDP deadlock.
+- Reduce metrics with count-aware sums. Rank 0 reports global loss, throughput,
+  invalid-action rate, and per-party values.
+- Give RND, SIL, Vine PPO, role metrics, and evaluation an explicit policy:
+  DDP-correct collectives or early validation rejection. Initial scope supports
+  plain PPO and RND; gate Vine/SIL until implemented and tested.
+- Run periodic evaluation only on rank 0 after a barrier; peers wait at the same
+  synchronization point.
+
+Normal tests:
+
+- Deterministic CPU `gloo` test verifies two ranks obtain identical globally
+  normalized advantages and reduced metrics.
+- Two-GPU NCCL smoke training completes two updates and shows matching final
+  model parameter hashes across ranks.
+- Single-process training retains tensor shapes, action masks, and checkpoint
+  schema.
+
+Abnormal tests:
+
+- Unequal local minibatch availability fails on every rank before DDP backward.
+- NaN/Inf loss, gradient, advantage, or metric triggers coordinated termination
+  with offending rank/tensor category logged.
+- Unsupported Vine/SIL distributed mode fails at argument validation.
+- Rollout/optimization failure on one rank reaches peers without an indefinite
+  NCCL wait.
+
+Acceptance criteria:
+
+- DDP synchronizes gradients and all ranks have the same optimizer-step count.
+- Global metrics are sample-count-weighted, not averages of rank averages.
+- The model implementation remains free of distributed-only business logic.
+
+### Phase 4: Add Rank-Safe Checkpointing, Resumption, and Observability
+
+Target files:
+
+- new `src/python/rl/checkpointing.py`
+- new `src/python/rl/training_metrics.py`
+- new `src/python/rl/tests/test_checkpointing.py`
+- `src/python/rl/train_recurrent_ppo.py`
+- `src/python/rl/evaluate_policy.py`
+- `src/python/rl/AGENTS.md`
+- `README.md`
+
+Requirements:
+
+- Only rank 0 writes checkpoints, CSV files, W&B events, and reports. Other
+  ranks log rank-local diagnostics to stdout with rank prefixes only.
+- Save atomically through a temporary file and rename after successful
+  `torch.save`; synchronize only after the final path exists.
+- Add format version, world size, global/local batch size, seed derivation,
+  policy metadata, and service/party compatibility metadata. Legacy
+  single-process checkpoints remain loadable when fields are absent.
+- Store unwrapped policy and optimizer state. Initially reject resume with a
+  different world size unless optimizer-state resharding is added deliberately.
+- W&B init/finalization are rank-0-only. Log allocation, rank count,
+  local/global envs, and reduced performance metrics.
+- Bounded shutdown closes local clients/runners, releases snapshots, finalizes
+  the process group, and preserves the last complete checkpoint.
+
+Normal tests:
+
+- Two-rank smoke training produces one complete checkpoint and one CSV row per
+  global update.
+- Same-world-size resume validates model, optimizer, topology, and metadata.
+- `evaluate_policy.py` loads legacy and DDP-produced checkpoints without DDP.
+
+Abnormal tests:
+
+- Simulated rank-0 write failure leaves no corrupted final checkpoint and all
+  ranks exit clearly.
+- Incompatible world size, observation layout, party catalog, or policy config
+  fails before rollout creation.
+- Interruption closes both local Java runners; a non-primary rank never writes
+  outputs or starts another W&B run.
+
+Acceptance criteria:
+
+- Output directories have no concurrent-writer corruption.
+- Resumed runs state their topology/compatibility assumptions.
+- Evaluation remains a single-process checkpoint consumer.
+
+### Phase 5: Provide a Reproducible Two-GPU Launch and Failure Diagnostics
+
+Target files:
+
+- new `src/python/rl/launch_distributed_training.py`
+- new `src/python/rl/tests/test_distributed_launch.py`
+- `README.md`
+- `src/python/rl/AGENTS.md`
+- `TASKS.md`
+
+Requirements:
+
+- Add a local single-node launcher that validates inputs, starts two Java rollout
+  services on explicit ports, and invokes
+  `torchrun --standalone --nproc_per_node=2` with `--distributed required` and
+  matching `--rank-endpoints`.
+- Keep it scheduler-neutral: no submission syntax or external network dependency.
+- Default to 40 Java workers/service; expose a validated override that reserves
+  configurable CPU headroom.
+- Add health checks, bounded startup timeout, child logs under `output/`, signal
+  forwarding, ordered shutdown, and non-zero exit propagation.
+- Print resolved commands, GPU/rank mapping, ports, local/global envs, and output
+  paths before training.
+- Document helper and equivalent manual commands for `rtx6000-ada2_2`.
+
+Normal tests:
+
+- Dry-run renders two Java commands and one torchrun command without processes.
+- Two-GPU smoke starts two ports, completes one or two updates, writes one
+  checkpoint, and cleans up children.
+- Documented manual launch creates the same topology as the helper.
+
+Abnormal tests:
+
+- Occupied port, Java startup/missing classes, missing CUDA/NCCL, or learner
+  non-zero exit terminates siblings and returns non-zero.
+- Invalid worker allocation, duplicate ports, metadata timeout, and stale PID
+  state fail with actionable diagnostics.
+- A second signal during shutdown does not skip cleanup or hang NCCL.
+
+Acceptance criteria:
+
+- One documented command starts the supported `rtx6000-ada2_2` two-GPU job.
+- The helper requires no Java changes or scheduler-specific tracked files.
+
+### Phase 6: Performance and Correctness Acceptance
+
+Target files:
+
+- `README.md`
+- `TASKS.md`
+- new or updated `src/python/rl/benchmark_training.py`
+- new `src/python/rl/tests/test_training_configuration.py`
+
+Requirements:
+
+- Run the fixed Phase 0 workload on one GPU and two GPUs with equal global batch
+  semantics, seed, party selection, and evaluation cadence.
+- Report rollout env-steps/s, optimizer updates/s, wall time, GPU memory, Java
+  CPU utilization, NCCL communication/wait where available, and deterministic/
+  stochastic per-party evaluation.
+- Define acceptance before the final run: two-GPU throughput must improve over
+  baseline without increased invalid-action rate or material deterministic-eval
+  regression outside a documented seed tolerance.
+- Document Java worker/local-environment tuning; do not leave hidden defaults.
+- Record unsupported features and scaling limits such as small-PPO-batch
+  all-reduce overhead or Java rollout bottlenecks.
+
+Normal tests:
+
+- Two-GPU benchmark repeats successfully with synchronized ranks, valid
+  checkpoint/evaluation, matching parameters, and clean Java-service exit.
+- `./gradlew build`, local single-process training, and evaluation remain
+  runnable.
+
+Abnormal tests:
+
+- Below-baseline throughput, GPU OOM, NCCL timeout, or evaluation regression
+  marks the run non-accepted and retains diagnostics.
+- GPU-memory/CPU-capacity-invalid configurations fail in preflight, not after a
+  long rollout.
+
+Acceptance criteria:
+
+- A repeatable accepted `rtx6000-ada2_2` configuration and observed performance
+  are documented.
+- Correctness, failure behavior, and cleanup are acceptance requirements.
+
+### Phase-Gated Verification Matrix
+
+- Phase 0: one-GPU baseline, `benchmark_rollout.py`, deterministic evaluation.
+- Phase 1: focused runtime tests and two-rank NCCL barrier smoke.
+- Phase 2: focused topology tests and two-endpoint metadata smoke.
+- Phase 3: focused DDP/PPO tests, two-update `torchrun` smoke, and
+  single-process training smoke.
+- Phase 4: checkpoint tests, same-world-size resume, and single-process
+  evaluation of a DDP checkpoint.
+- Phase 5: launcher dry run and orchestrated local two-GPU smoke.
+- Phase 6: benchmark comparison, final deterministic/stochastic evaluation, and
+  `./gradlew build` because the rollout service is an integration boundary.
+
+Do not run `ProfileCapabilities` for this plan unless party definitions or
+capability inputs change; it rewrites generated capability-profile data and is
+unrelated to NCCL transport.

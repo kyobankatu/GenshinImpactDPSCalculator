@@ -9,27 +9,11 @@ These are project-level requirements, not preferences. They apply to code you wr
 | Indentation | exactly four spaces per level; no tabs |
 | Extra spaces | never pad for visual alignment |
 | Braces | required for every block, including one-statement `if` / `else` / `for` / `while` |
-| Comparison direction | write `<` and `<=`; avoid `>` and `>=` in new or edited expressions |
 | Control flow | no `goto`-style jumps or label-driven escapes |
 | Javadoc | required on all classes and major methods |
 
-### Comparison direction and existing code
-
-The repository currently contains around 240 `>` / `>=` occurrences, so the rule is not retroactive. Apply it
-to expressions you author or touch. Rewriting untouched comparisons is an unrequested refactor and is
-forbidden by the project's stability-over-cleanliness rule.
-
-Rewrite by swapping operands rather than negating:
-
-```java
-// preferred
-if (0 < erRolls) {
-    ...
-}
-if (level <= 90) {
-    ...
-}
-```
+Comparison operator direction is not constrained. Write whichever of `<`, `<=`, `>`, `>=` reads most
+naturally, and match the surrounding code.
 
 ## Naming
 

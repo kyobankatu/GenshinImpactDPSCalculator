@@ -74,7 +74,6 @@ cd rl_optimization && python train.py
 - Indent must be 4
 - Don't insert extra spaces
 - Don't omit "{}"
-- Don't use left symbol like ">" and ">=". Please use right synbol like "<" and "<="
 - Avoid using goto
 - Write specification for all Classes and major methods for javadoc
 
