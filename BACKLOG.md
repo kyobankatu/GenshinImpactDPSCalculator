@@ -709,3 +709,28 @@ experiment record.
 - Notes: capture only the fixture Skill call that activates Sunny Morning
   Sleep-In; retain production logging and all assertions. Completed 2026-08-02;
   the regression passes without the fallback line.
+
+### B-031 — Dragon's Bane grants its aura bonus unconditionally
+
+- Status: `in-progress`
+- Source: 1/3 (explicit source-code assumption and sourced mechanic divergence)
+- Symptom: `DragonsBane.applyPassive` adds 36% all-damage bonus to every stat
+  assembly, including no-aura targets and snapshots, even though the passive is
+  conditional on the target being affected by Hydro or Pyro.
+- Scope: target-dependent weapon capability, damage formula stat resolution,
+  Dragon's Bane, and focused reaction regression coverage
+- Risk: `planned`
+- Proof: actual-weapon damage regression covering Hydro/Pyro, no/Electro aura,
+  exact expiry, Vaporize ordering, and repeated snapshot hits
+- Notes: adopt the R5 passive description and maintained KQM evidence, accessed
+  2026-08-02. HoYoLAB records up to 36% increased damage against enemies
+  affected by Hydro or Pyro. KQM's Bane-series testing records that the passive
+  applies off-field and to amplifying reaction hits, but not transformative
+  reaction damage; its Xiangling guide explicitly classifies Dragon's Bane as
+  enemy-state-dependent and non-snapshotting. Sources:
+  https://www.hoyolab.com/article/20362150,
+  https://library.keqingmains.com/evidence/equipment/weapons, and
+  https://keqingmains.com/xiangling/. Adapt by capturing a copied per-hit stat
+  view before the triggering hit consumes aura. Existing cataloged parties do
+  not equip Dragon's Bane, so no accepted party baseline is expected to change.
+  See `TASKS.md` implementation block `Dragon's Bane Target-Aura Passive`.

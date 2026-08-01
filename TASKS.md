@@ -73,6 +73,10 @@ particle income to hide an earlier deficit.
 The B-028 correction is complete. Raiden's Eye now triggers from resolved party
 damage instead of attacking autonomously on a fixed timer.
 
+The B-031 Dragon's Bane correction is in progress. Its enemy-aura condition
+will be evaluated per hit before reaction consumption instead of being folded
+unconditionally into the wielder's stat sheet and snapshots.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -3827,6 +3831,156 @@ depends on them:
 - exploration-specific systems
 - full open-world status interactions that do not affect offensive output in the
   current single-target simulator
+
+## Implementation Order: Dragon's Bane Target-Aura Passive
+
+Status:
+
+- In progress; Phase 1 is complete and Phase 2 remains.
+- Requirement: Dragon's Bane R5 grants 36% all-damage bonus only when the
+  target is currently affected by Hydro or Pyro, evaluated for every direct
+  hit before that hit consumes or replaces the aura.
+
+Scope:
+
+- Add a narrow weapon capability for stats that depend on the current target.
+- Resolve that capability per direct hit without mutating stat snapshots or
+  pre-resolved stat containers.
+- Replace Dragon's Bane's unconditional stat passive with live Hydro/Pyro aura
+  evaluation.
+- Cover direct, amplifying-reaction, expiry, and snapshot behavior in the
+  executable reaction regression.
+
+Out of scope for this pass:
+
+- Equipping Dragon's Bane in an existing party, adding weapon refinements,
+  changing optimizer loadouts, or changing accepted Raiden/Flins baselines.
+- Applying the bonus to transformative reaction damage, adding multi-target
+  enemy selection, changing aura decay/consumption, changing standard or Lunar
+  formulas, RL contracts, reports, or generated `docs/` output.
+- Converting Deathmatch or any other manually configured conditional weapon.
+
+Definitions:
+
+- `TargetDependentWeaponEffect`: weapon capability that adds per-hit stats from
+  the target's current state without changing the character's persistent or
+  snapshotted stats.
+- `DamageCalculator.resolveTargetStats`: formula-boundary helper that copies
+  resolved stats and applies `TargetDependentWeaponEffect` for one target and
+  timestamp.
+
+Design boundaries:
+
+- `DragonsBane` owns Hydro/Pyro eligibility and the R5 36% value.
+- `CombatActionResolver` captures target-dependent stats before reaction aura
+  mutation and passes that immutable per-hit view to the damage formula.
+- `DamageCalculator` owns the same per-hit resolution for direct callers and
+  never mutates a character snapshot or a caller-owned stat container.
+- Standard and Lunar strategies consume the resolved view without knowing a
+  concrete weapon class.
+
+### Phase 1: Record Bane Passive Evidence and Formula Boundary - Done
+
+Why first:
+
+The passive text alone does not settle snapshot timing or reaction ordering, so
+the target-state and non-snapshot contracts must be fixed before code changes.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record current HoYoLAB passive wording and maintained KQM Bane-series tests.
+- Record KQM's explicit finding that Dragon's Bane is enemy-state-dependent
+  and cannot be snapshotted.
+- Define pre-reaction target-state capture and copied per-hit stats as the
+  implementation boundary.
+
+Acceptance criteria:
+
+- R5 value, eligible auras, direct/amplifying scope, off-field behavior, and
+  non-snapshot timing are traceable to recorded sources accessed 2026-08-02.
+- The plan distinguishes pre-hit aura eligibility from post-reaction aura
+  state and excludes transformative reaction damage.
+- No production source changes occur in this phase.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 adds executable weapon,
+  reaction-order, expiry, and snapshot coverage.
+
+Verification:
+
+- inspect `DragonsBane`, `StatAssembler`, `DamageCalculator`, and
+  `CombatActionResolver`
+- `python scripts/preflight.py --run`
+
+### Phase 2: Resolve Dragon's Bane from Pre-Hit Target State
+
+Why second:
+
+The recorded contract now identifies the narrow capability and the exact point
+where target state must be captured before reaction handling mutates aura.
+
+Target files:
+
+- `new src/java/model/entity/TargetDependentWeaponEffect.java`
+- `src/java/model/weapon/DragonsBane.java`
+- `src/java/mechanics/formula/DamageCalculator.java`
+- `src/java/mechanics/formula/StandardDamageStrategy.java`
+- `src/java/mechanics/formula/LunarDamageStrategy.java`
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `src/java/model/entity/AGENTS.md`
+- `src/java/model/weapon/AGENTS.md`
+- `src/java/mechanics/formula/AGENTS.md`
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Introduce the target-dependent weapon capability with documented mutation
+  and ownership semantics.
+- Remove Dragon's Bane's unconditional `applyPassive` bonus and add 36% only
+  for positive current Hydro or Pyro aura units.
+- Copy and augment resolved stats once per hit before reaction processing;
+  preserve direct `DamageCalculator` caller behavior.
+- Add actual-weapon regressions for eligible/ineligible auras, exact expiry,
+  amplifying reaction ordering, and repeated snapshotted hits.
+
+Acceptance criteria:
+
+- No aura, Electro aura, and an exactly expired Hydro/Pyro aura receive no
+  Dragon's Bane damage bonus.
+- Live Hydro and Pyro auras each grant exactly 36% additive all-damage bonus.
+- A Pyro hit that Vaporizes a Hydro aura receives the bonus even when reaction
+  handling consumes that aura before final damage is recorded.
+- Snapshot capture never stores the conditional bonus; repeated snapshot hits
+  evaluate live target state independently and do not accumulate mutations.
+- Existing weapons, direct formula calls, reaction behavior, and builds remain
+  valid.
+
+Test cases to add or update:
+
+- Normal: non-reacting direct damage against live Hydro and Pyro receives 36%.
+- No-trigger: no aura and Electro aura match the unmodified damage result.
+- Boundary: a decaying aura is eligible immediately before expiry and
+  ineligible at exact expiry.
+- Reaction ordering: Pyro-on-Hydro Vaporize receives both the 1.5 multiplier
+  and the 36% pre-hit target bonus.
+- Snapshot: capture without target aura, then alternate eligible and ineligible
+  targets across repeated hits with no retained or stacked bonus.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/model/entity/TargetDependentWeaponEffect.java --path src/java/model/weapon/DragonsBane.java --path src/java/mechanics/formula/DamageCalculator.java --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
 
 ## NCCL/DDP Distributed RL Training Plan
 
