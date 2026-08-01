@@ -165,6 +165,9 @@ Shatter, and B-069 standard Electro-Charged refresh passes are complete. Active
 standard reapplications now refresh the next tick's typed owner and damage
 snapshot without dealing another immediate damage instance.
 
+The current B-070 pass adds the remaining single-target standard
+Electro-Charged 0.5-second damage cooldown across sequence boundaries.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -11412,6 +11415,174 @@ Completion evidence:
   zero Superconduct and warning/error/failed-action/insufficient-energy matches.
 - README documents damage-only sequence behavior. The tracked generated report
   was restored and no generated output is staged.
+
+## Implementation Order: Standard Electro-Charged Damage Cooldown
+
+Status: Phase 1 is complete. Phase 2 will add a snapshot-safe standard
+Electro-Charged target damage cooldown across sequence boundaries.
+
+Scope:
+
+- One-enemy 0.5-second standard Electro-Charged damage cooldown.
+- Successful-damage time shared by immediate, periodic, and premature ticks.
+- Blocked damage retains reaction/Aura/timer effects and consumes no tick gauge.
+- Snapshot save/restore and deterministic catalog acceptance.
+
+Out of scope for this pass:
+
+- Adjacent-target AoE, synchronization, ownership transfer, or per-enemy maps.
+- Lunar-Charged behavior, hitlag, network-delay findings, and gauge-class wane.
+- RL behavior, protocol/tensor changes, training, and persistent jobs.
+
+Definitions:
+
+- **Damage cooldown**: target-wide interval beginning only when standard
+  Electro-Charged damage succeeds; exact 0.5 seconds is accepted.
+- **Successful-damage time**: the last immediate or timer tick that passed the
+  cooldown, used by B-056's premature terminal threshold across event restarts.
+
+Cross-cutting rules:
+
+- `ReactionState` owns cooldown/last-damage primitives; controller/facade inject
+  current time and snapshots preserve both values.
+- The resolver and scheduler gate damage only after reaction side effects that
+  remain legal; blocked timer ticks do not consume either Aura.
+- Standard and Lunar paths remain explicit and independent.
+- Preserve explicit staging and generated-artifact safety.
+
+### Phase 1: Record Standard EC Damage-Cooldown Evidence - Done
+
+Why first:
+
+- B-069 removes active-refresh damage, leaving sequence restarts as the bounded
+  single-target path where the target cooldown is still observable.
+
+Target files:
+
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Record target cooldown, exact reset, and no-consumption findings.
+- Confirm maintained new-sequence/periodic attack tags and fixed timer group.
+- Inventory B-056/B-069 timing, state, snapshot, and regression boundaries.
+
+Acceptance criteria:
+
+- Damage-only gating, cross-sequence persistence, successful-tick timing, and
+  single-target limitations are explicit.
+- No production behavior changes occur in this phase.
+
+Test cases to add or update:
+
+- No production test; Phase 2 owns focused cooldown behavior.
+
+Verification:
+
+- inspect KQM Electro-Charged ICD and gauge-consumption evidence
+- inspect maintained gcsim EC attack tags and ReactionB reset timer
+- inspect resolver, scheduler, reaction state/controller, and snapshots
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- KQM v2.3 records one EC damage instance per enemy in about 0.5 seconds and
+  confirms blocked ticks consume no gauge.
+- Maintained gcsim assigns `ICDTagECDamage`/`ICDGroupReactionB` to the new
+  sequence attack and reuses that attack for periodic ticks; ReactionB resets
+  after 30 frames and gauge wane follows only nonzero damage.
+- Current B-056 local `lastDamageTime` is discarded when its event finishes, so
+  a new sequence can bypass the prior target damage boundary.
+
+### Phase 2: Implement Snapshot-Safe Standard EC Damage Cooldown - Pending
+
+Why second:
+
+- Phase 1 establishes one shared damage decision while preserving B-069's
+  separate active-refresh suppression and typed ownership payload.
+
+Target files:
+
+- `src/java/simulation/runtime/ReactionState.java`
+- `src/java/simulation/runtime/ReactionStateController.java`
+- `src/java/simulation/CombatSimulator.java`
+- `src/java/simulation/SimulatorSnapshot.java`
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/mechanics/reaction/ReactionEffectScheduler.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `src/java/mechanics/rl/CapabilityProfiler.java` (snapshot forwarding only)
+- `TASKS.md`
+
+Tasks:
+
+- Store target cooldown end and last successful standard EC damage time.
+- Gate new-sequence immediate, nominal, and premature damage through one policy.
+- Consume tick gauge only on successful timer damage and preserve event timing.
+- Round-trip both primitives and regress B-056/B-069 behavior.
+
+Acceptance criteria:
+
+- A sequence restart before 0.5 seconds notifies/applies Aura/starts its timer
+  but deals no immediate damage; exact 0.5 seconds deals damage.
+- Blocked timer damage consumes neither Hydro nor Electro.
+- Premature threshold uses the last successful damage across event restarts.
+- Snapshot restore reproduces pre/exact decisions.
+- B-069 owner/EM attribution and Lunar behavior remain unchanged.
+
+Test cases to add or update:
+
+- Normal: new-sequence and exact 0.5-second acceptance.
+- Abnormal: sequence restart just before reset has zero immediate damage.
+- Side effect: blocked restart still notifies, reapplies Aura, and starts timer.
+- Gauge: blocked timer attempt leaves both values unchanged except natural decay.
+- Snapshot: active target boundary and successful-damage time restore exactly.
+- No-change: B-056 expiry, B-069 ownership, live RES, and Lunar fixtures pass.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- routed validation/preflight planning without RL execution
+
+### Phase 3: Accept Standard EC Cooldown Catalog Baselines - Pending
+
+Why third:
+
+- Catalog acceptance follows focused cross-sequence and snapshot verification.
+
+Target files:
+
+- `README.md`
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Run two no-daemon controls per catalog party against B-069.
+- Record hashes, totals, ER/cadence, event counts, and warning lines.
+- Attribute every standard-party delta and prove Lunar parties unchanged.
+
+Acceptance criteria:
+
+- All pairs are deterministic and every delta is attributable, or exact
+  no-change is proven.
+- Tracked generated report is restored and no artifact is staged.
+- Plan, ledger, README, and checkpoint agree.
+
+Test cases to add or update:
+
+- Normal: pairwise exact catalog controls.
+- No-change: accepted Lunar totals/ER/cadence and event counts.
+- Abnormal: zero warning/generated-artifact leak.
+
+Verification:
+
+- two fresh `./gradlew --no-daemon RaidenParty` runs
+- two fresh `./gradlew --no-daemon FlinsParty` runs
+- two fresh `./gradlew --no-daemon FlinsParty2` runs
+- `python scripts/preflight.py --run`
 
 ## Implementation Order: Standard Electro-Charged Refresh Ownership
 

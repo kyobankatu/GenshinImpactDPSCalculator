@@ -1914,3 +1914,29 @@ experiment record.
   62,285 DPS with normalized hash
   `dc46bf544a8c07c2db8177bf1f9f4b8114bd7bd6e4f29fdd35230823694b2ac0`.
   Flins/Flins2 retain B-068 hashes, totals, and event counts exactly.
+
+### B-070 — Standard Electro-Charged damage cooldown resets between sequences
+
+- Status: `in-progress`
+- Source: 3 (B-069 excluded boundary plus KQM/gcsim evidence)
+- Symptom: B-056 may finish one standard Electro-Charged timer less than 0.5
+  seconds after its last damage, after which a newly triggered sequence records
+  immediate damage without retaining the target's prior cooldown.
+- Scope: one-enemy standard EC damage cooldown, successful-damage timestamp,
+  no-consumption blocked ticks, snapshot continuity, and catalog controls
+- Risk: `planned`
+- Proof: cross-sequence pre/exact boundary, blocked new-sequence side effects,
+  premature tick threshold, no blocked gauge consumption, restore replay,
+  B-069 ownership, Lunar no-change, and repeated catalog payloads
+- Notes: KQM v2.3 records one Electro-Charged damage instance per enemy in about
+  0.5 seconds, including primary and AoE ticks, and separately establishes that
+  blocked ticks consume no Hydro/Electro gauge. Maintained gcsim tags both the
+  new-sequence attack and later ticks with `ICDTagECDamage` and the fixed
+  0.5-second `ICDGroupReactionB`; only successful damage schedules gauge wane.
+  Adopt the target dimension in the one-enemy standard path without claiming
+  adjacent-target synchronization or changing Lunar-Charged. Sources accessed
+  2026-08-02:
+  https://library.keqingmains.com/evidence/combat-mechanics/elemental-effects/transformative-reactions#electro-charged-icd,
+  https://library.keqingmains.com/evidence/combat-mechanics/elemental-effects/transformative-reactions#ec-ticks-only-consume-gauge-when-they-deal-damage,
+  https://github.com/genshinsim/gcsim/blob/main/pkg/reactable/electrocharged.go,
+  and https://github.com/genshinsim/gcsim/blob/main/pkg/core/attacks/icd_groups.dm.go.
