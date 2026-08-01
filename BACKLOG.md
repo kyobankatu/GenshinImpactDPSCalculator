@@ -1602,14 +1602,14 @@ experiment record.
 
 ### B-060 — Pyro cannot consume Quicken into Burning fuel
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 3 (B-058/B-059 excluded boundary with maintained priority evidence)
 - Symptom: a Quicken-only target is invisible to the ordinary Aura resolver, so
   Pyro applies without Burning; when Dendro and Quicken coexist, B-058 consumes
   only Dendro and leaves Quicken untouched.
 - Scope: Quicken-only Pyro Burning, shared Dendro/Quicken special fuel decay,
   exact depletion/ownership/live-RES regressions, and catalog controls
-- Risk: `planned`
+- Risk: `validated`
 - Proof: Quicken-only Burning ticks and gauge depletion, coexisting gauge decay,
   Dendro refresh continuity, exact no-late-tick end, and unchanged party hashes
 - Notes: KQM states Quicken acts as Dendro when reacted with Pyro. The maintained
@@ -1622,3 +1622,10 @@ experiment record.
   This pass handles Quicken-only and Dendro+Quicken. Electro/Cryo coexisting
   reaction priority, a separately consumable Burning Aura, Pyro application,
   AoE, and hitlag remain separate.
+  Completed with Quicken-only resolver routing, max-current shared fuel,
+  per-gauge replacement of natural decay, and exact epsilon cleanup. Regression
+  proves eight ticks over two seconds for 0.8U Quicken, one equal-coexistence
+  stream, smaller-gauge early depletion, Dendro overwrite, ordinary Pyro after
+  exact Quicken expiry, and retained owner/RES/generation contracts. Six catalog
+  controls exactly retain B-059 hashes, values, ER, cadence, and zero affected
+  reaction or warning lines.

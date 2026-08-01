@@ -278,11 +278,12 @@ Elemental Gauge Theory contract:
 - **Discrete consumption**: reactions (Vaporize, Swirl, Electro-Charged ticks,
   Quicken, etc.) consume the decayed *current* value at the reaction time, then
   natural decay resumes from the remaining units.
-- **Burning fuel**: Pyro-on-Dendro preserves the taxed Dendro gauge as fuel;
-  Dendro-on-Pyro establishes it without consuming underlying Pyro. Fuel replaces
-  natural Dendro decay with `max(0.4 U/s, 2 * natural rate)`, Dendro
-  reapplication overwrites it, and the latest Pyro/Dendro applier owns the
-  continuing 0.25-second damage ticks.
+- **Burning fuel**: Pyro-on-Dendro or Pyro-on-Quicken preserves the larger
+  current Dendro-like gauge as fuel; Dendro-on-Pyro establishes Dendro fuel
+  without consuming underlying Pyro. Burning replaces natural decay for both
+  coexisting Dendro and Quicken with `max(0.4 U/s, 2 * natural rate)`, Dendro
+  reapplication overwrites the shared fuel, and the latest Pyro/Dendro applier
+  owns the continuing 0.25-second damage ticks.
 - **Quicken Aura**: Quicken stores the smaller Dendro/Electro gauge and decays
   over `gauge * 5 + 6` seconds. Weaker retriggers leave the current Aura
   unchanged, stronger/equal gauges replace it, Aggravate/Spread do not consume
@@ -296,10 +297,10 @@ Elemental Gauge Theory contract:
   zero at expiry, matching the per-event aura bars in the Timeline view.
 
 Known differences from exact game internals: Freeze coexistence, a separately
-reactable 2U Burning Aura and Burning's 1U Pyro reapplication ICD, Quicken as
-Burning fuel, Swirl spread, Electro-Charged ownership/damage-ICD/hitlag
-interactions, and some reaction gauge modifiers remain simplified. The simulator
-also does not model multi-target or per-enemy aura gauges.
+reactable 2U Burning Aura and Burning's 1U Pyro reapplication ICD, Swirl spread,
+Electro-Charged ownership/damage-ICD/hitlag interactions, and some reaction
+gauge modifiers remain simplified. The simulator also does not model
+multi-target or per-enemy aura gauges.
 
 Latest validation baseline from the accuracy pass:
 

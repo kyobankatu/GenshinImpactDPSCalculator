@@ -5884,7 +5884,7 @@ Completion evidence:
 - `ReactionRegressionTest`, `build`, `javadoc`, routed validation, and full
   preflight pass. No persistent service, RL process, or HPC job was started.
 
-### Phase 3: Re-Accept Quicken-Burning-Neutral Baselines - In Progress
+### Phase 3: Re-Accept Quicken-Burning-Neutral Baselines - Done
 
 Target files:
 
@@ -5916,6 +5916,24 @@ Verification:
 - two fresh `./gradlew FlinsParty` runs
 - two fresh `./gradlew FlinsParty2` runs
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Two fresh no-daemon runs per catalog party exactly match B-059 after removing
+  only Gradle's elapsed-success line: Raiden
+  `e52e586cca64148195ad8dc9ab9f0827922a7f01f931faedb0a6ecbab7100dda`,
+  Flins `6338bcc75a29a52f3245cb4573823ba1245724d3be60064dcebefa7b38aa03ab`,
+  and Flins2
+  `23dc585acc02d3bd7bca7fe3f5b65db62b3e1489fcedb12a02b9725b774b7dd4`.
+- Totals/DPS remain 1,365,787/65,037, 22,675,823/227,898, and
+  15,817,125/228,902. ER and timed/reaction/delayed/ICD counts remain exactly
+  100/175/179/174 with 152/55/11/38, 109/100/100/180 with 613/230/48/88, and
+  130/128/100/196 with 468/140/33/71.
+- Every run contains zero Quicken/Aggravate/Spread/Bloom/Burning reaction lines
+  and zero warning/error/failed-action/insufficient-energy lines.
+- README records Quicken as shared Burning fuel and removes that item from known
+  differences. The tracked generated report was restored and no output is
+  staged.
 
 ## Implementation Order: Consumable Quicken Aura
 
