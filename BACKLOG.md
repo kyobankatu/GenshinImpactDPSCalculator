@@ -1127,7 +1127,7 @@ experiment record.
 
 ### B-046 — Expired Ascendant Blessing blocks weaker reactivation
 
-- Status: `ready`
+- Status: `done`
 - Source: 4 (simulator invariant and sourced duration divergence)
 - Symptom: `MoonsignManager` compares a new Blessing against every retained
   typed Blessing without filtering expired entries. Once a high-value source's
@@ -1135,9 +1135,9 @@ experiment record.
   indefinitely.
 - Scope: active-state filtering in Blessing precedence, focused public-path
   boundary regression, and deterministic FlinsParty acceptance
-- Risk: `bounded`
-- Proof: exact-expiry weaker replacement plus active stronger and equal-refresh
-  boundaries, followed by matching repeated party payloads
+- Risk: `validated`
+- Proof: exact-expiry 36%-to-9% replacement plus active stronger and
+  equal-refresh boundaries, followed by matching repeated party payloads
 - Notes: adopt the maintained Genshin Impact Wiki team-bonus page and Icy Veins
   Moonsign guide, accessed 2026-08-02. They record a 20-second elemental
   stat-scaled Lunar Reaction DMG team bonus capped at 36%; the maintained
@@ -1147,3 +1147,9 @@ experiment record.
   active stronger-value precedence, but apply it only to unexpired typed
   Blessings under the repository's `[start, expiration)` buff contract. See
   `TASKS.md` implementation block `Ascendant Blessing Expiry Replacement`.
+  Completed with one typed instance across initial, active conflict, refresh,
+  and exact-expiry replacement boundaries. Two FlinsParty logs retain normalized
+  SHA-256
+  `f6d276fde49b6677c928545e689f530c6d7cac492a45f2b952c668bb644b32f6`,
+  18,930,343 damage / 190,255 DPS over 99.5 seconds, unchanged ER, and zero
+  warning matches.

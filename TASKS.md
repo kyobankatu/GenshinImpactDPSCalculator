@@ -123,8 +123,8 @@ bonus is derived dynamically from the party's distinct active Gleaming Moon
 effects through an artifact team-buff provider rather than the obsolete manager
 scan that always resolved to zero.
 
-The B-046 Ascendant Blessing expiry correction is planned. An expired stronger
-Blessing must not block a weaker non-Moonsign Skill or Burst from establishing
+The B-046 Ascendant Blessing expiry correction is complete. An expired stronger
+Blessing no longer blocks a weaker non-Moonsign Skill or Burst from establishing
 a new 20-second non-stacking window.
 
 ## Scope
@@ -6660,7 +6660,7 @@ unrelated to NCCL transport.
 
 Status:
 
-- Phases 1-2 are complete; Phase 3 remains pending.
+- Complete; all three phases are verified and pushed.
 - Requirement: only active Ascendant Blessing instances may participate in the
   non-stacking strength comparison; an exactly expired instance must not block
   the next eligible activation.
@@ -6807,7 +6807,7 @@ Completion evidence:
 - Normal actions and Lunar-character Skills remain ineligible. Reaction
   regression, build, Javadoc, routed validation, and preflight pass.
 
-### Phase 3: Confirm Deterministic Flins Integration - Pending
+### Phase 3: Confirm Deterministic Flins Integration - Done
 
 Why last:
 
@@ -6844,3 +6844,15 @@ Verification:
 
 - two fresh `./gradlew FlinsParty` runs
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Two complete `FlinsParty` runs produced identical logs after excluding only
+  Gradle's elapsed-time line, at normalized SHA-256
+  `f6d276fde49b6677c928545e689f530c6d7cac492a45f2b952c668bb644b32f6`.
+- ER remains Sucrose 109%, Flins 100%, Ineffa 100%, and Columbina 180%, with
+  zero warning matches and unchanged 18,930,343 damage / 190,255 DPS over 99.5
+  seconds. The trace contains only Sucrose Blessing refreshes and therefore
+  correctly has no integration delta from the exact-expiry correction.
+- Focused regression, build, Javadoc, routed validation, and final preflight
+  pass; generated `output/simulation_report.html` remains untracked.
