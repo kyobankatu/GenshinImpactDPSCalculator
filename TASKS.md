@@ -118,6 +118,11 @@ The B-044 Raiden Eye correction is complete. Recasting Transcendence: Baleful
 Omen refreshes each member's one 25-second Burst DMG buff instead of adding
 another same-ID value during the overlap.
 
+The B-045 Silken Moon's Serenade correction is in progress. Its Lunar Reaction
+bonus will be derived dynamically from the party's distinct active Gleaming Moon
+effects; the current manager scans the wrong buff source and always resolves
+the bonus to zero.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -5938,6 +5943,266 @@ Completion evidence:
   optimizer allocation, rotation, or duration change.
 - README and the verification skill reference carry the new accepted value;
   generated output is not staged.
+
+## Implementation Order: Silken Gleaming Moon Dynamic Bonus
+
+Status:
+
+- In progress; Phase 1 is complete and Phases 2-4 remain.
+- Requirement: while Silken Moon's Serenade is equipped, all party members gain
+  10% Lunar Reaction DMG for each distinct active Gleaming Moon effect, with
+  duplicate effects never stacking.
+
+Scope:
+
+- Add a narrow artifact team-buff provider capability routed by `BuffManager`.
+- Move the Silken-derived Lunar Reaction bonus into one dynamic typed provider
+  buff owned by the artifact.
+- Count active, unexpired Intent and Devotion status types from character-owned
+  buffs at damage-resolution time.
+- Preserve Devotion's 60/120 EM, eight-second refresh, off-field trigger, and
+  2pc 20% ER.
+- Cover no-effect, one-effect, two-effect, duplicate, expiry, off-field,
+  multi-Silken, source, and accepted Flins party outputs.
+
+Out of scope for this pass:
+
+- Adding new Gleaming Moon effect types not represented by current `BuffId`
+  values.
+- Changing Night of the Sky's Unveiling's Intent trigger, crit value, duration,
+  or on-field condition.
+- Changing Lunar reaction formulas, Moonsign qualification, character kits,
+  rotations, optimizer allocation, RL paths, generated reports, or committed
+  `docs/` output.
+
+Definitions:
+
+- Distinct active effects: boolean presence of unexpired
+  `GLEAMING_MOON_DEVOTION` and `GLEAMING_MOON_INTENT` anywhere in the party;
+  duplicate copies of either ID count once.
+- Dynamic bonus: 0.10 multiplied by the distinct active-effect count, evaluated
+  at the damage/stat resolution time rather than snapshotted on trigger.
+- Canonical provider: the first Silken-equipped party member supplies the one
+  typed `GLEAMING_MOON_SYNERGY` provider buff when multiple copies are equipped.
+
+Design boundaries:
+
+- `ArtifactTeamBuffProvider` exposes only artifact-owned team buffs and does
+  not add Silken-specific policy to simulator core.
+- `BuffManager` discovers and source-attributes provider buffs alongside its
+  existing weapon and character provider paths.
+- `SilkenMoonsSerenade` owns distinct-effect counting, duplicate-set
+  suppression, and dynamic Lunar stat construction.
+- `MoonsignManager` returns to Moonsign state and Ascendant Blessing policy; it
+  no longer owns one artifact's derived stat.
+
+### Phase 1: Record Silken Distinct-Effect Evidence and Failure - Done
+
+Why first:
+
+The official wording distinguishes different Gleaming Moon effect types from
+duplicate applications, so both source and storage layers must be identified
+before changing the derived bonus.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record the Luna I Silken description: elemental damage grants Devotion for
+  eight seconds and 60/120 team EM; each different Gleaming Moon effect grants
+  10% Lunar Reaction DMG; generated effects cannot stack; off-field triggering
+  is allowed.
+- Trace Intent and Devotion to character-owned `activeBuffs`.
+- Trace `MoonsignManager.updateGleamingMoonSynergy` to
+  `sim.getApplicableBuffs`, which excludes character-owned buffs, proving its
+  active-effect count remains zero.
+- Define a capability-based provider rather than adding a concrete artifact
+  dependency to simulator runtime.
+
+Acceptance criteria:
+
+- Values, duration, off-field behavior, distinct/non-stack rule, release
+  version, publication/access dates, source URLs, classification, and simulator
+  adaptation are recorded.
+- The zero-bonus defect and its wrong-source cause are concrete and bounded.
+- No production source changes occur in this phase.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phases 2-3 add provider routing and
+  pre-fix failing Silken behavior.
+
+Verification:
+
+- inspect `SilkenMoonsSerenade`, `NightOfTheSkysUnveiling`, `BuffManager`,
+  `MoonsignManager`, `Character`, and `DamageCalculator`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- The HoYoLAB Silken guide published 2025-09-19 for Luna I and maintained
+  artifact database descriptions were accessed 2026-08-02. They agree on 20%
+  ER, eight-second 60/120 EM Devotion, off-field triggering, 10% per different
+  Gleaming Moon effect, and non-stacking generated effects.
+- Sources: https://www.hoyolab.com/article/41239522 and
+  https://gi.gachabase.net/artifacts/15042/silken-moons-serenade/beta?lang=en.
+  Classification: adopt the distinct dynamic count and adapt it to typed
+  character statuses plus one artifact-provided team buff.
+- Both Gleaming statuses are stored in `Character.activeBuffs`, while the
+  current manager scans only team/field/provider buffs. Its count is therefore
+  zero and the intended Synergy buff is unreachable.
+
+### Phase 2: Route Artifact-Owned Team Buff Providers
+
+Why second:
+
+The generic capability boundary must be proven before moving Silken policy out
+of the runtime manager.
+
+Target files:
+
+- `src/java/model/entity/ArtifactTeamBuffProvider.java`
+- `src/java/simulation/runtime/BuffManager.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Add a focused artifact team-buff provider interface receiving owner and
+  simulator context.
+- Extend `BuffManager.getApplicableBuffs` to collect provider output from
+  equipped artifacts and attribute unknown sources to the owner.
+- Add a fixture artifact proving owner and ally routing, targeting, source
+  attribution, and coexistence with existing provider categories.
+
+Acceptance criteria:
+
+- One fixture artifact contributes its team stat to owner and ally through
+  normal stat resolution.
+- Explicit and fallback source attribution are preserved.
+- Artifact provider routing does not alter weapon, character, field, team, or
+  character-owned buff behavior.
+- No Silken-specific class or `BuffId` appears in `BuffManager`.
+
+Test cases to add or update:
+
+- Normal: owner and ally receive one fixture artifact team stat.
+- Source: an unknown source is attributed to the artifact owner.
+- Targeting: standard `Buff` element/character filters still apply.
+- Coexistence: fixture artifact and an existing team buff add independently.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/model/entity/ArtifactTeamBuffProvider.java --path src/java/simulation/runtime/BuffManager.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Provide Dynamic Non-Stacking Silken Bonus
+
+Why third:
+
+Once provider routing is stable, the artifact can own its complete derived
+effect without simulator-specific artifact policy.
+
+Target files:
+
+- `src/java/model/artifact/SilkenMoonsSerenade.java`
+- `src/java/simulation/CombatSimulator.java`
+- `src/java/simulation/runtime/MoonsignManager.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Implement `ArtifactTeamBuffProvider` on Silken and return one canonical typed
+  dynamic Lunar bonus across duplicate set wearers.
+- Count distinct unexpired Intent/Devotion IDs directly from party character
+  buffs at the resolution time.
+- Remove the obsolete trigger-time Synergy update call and runtime-manager
+  method/delegator.
+- Add actual Silken damage-hook regressions for Devotion and all dynamic bonus
+  boundaries.
+
+Acceptance criteria:
+
+- No Gleaming effect resolves 0.00 Lunar bonus; Devotion alone resolves 0.10;
+  Devotion plus Intent resolves 0.20.
+- Repeated Devotion or Intent instances do not exceed their one distinct count.
+- Exact Intent expiry drops 0.20 to 0.10 without another hit, and exact Devotion
+  expiry drops the remaining bonus to zero.
+- Ascendant Devotion remains 120 EM, refreshes for eight seconds, and triggers
+  while its owner is off field.
+- Two Silken wearers still provide one dynamic synergy buff and no doubled EM
+  or Lunar bonus.
+
+Test cases to add or update:
+
+- Empty: equipped Silken with no active Gleaming status gives zero.
+- Normal: actual off-field elemental hit grants 120 EM and 10% Lunar bonus.
+- Two-effect: active Intent raises the dynamic result to 20%.
+- Duplicate: repeated hits/status copies remain at one count per ID.
+- Expiry: exact four- and eight-second boundaries reduce the live count without
+  explicit refresh callbacks.
+- Multi-wearer: two Silken sets expose one provider and one Devotion value.
+- Static: 2pc ER remains 20%.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew PartyCatalogRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/model/artifact/SilkenMoonsSerenade.java --path src/java/simulation/CombatSimulator.java --path src/java/simulation/runtime/MoonsignManager.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 4: Re-Accept Silken Party Baselines
+
+Why last:
+
+Both deterministic Flins parties equip Silken, and FlinsParty2 also equips Night
+of the Sky's Unveiling, so the full 10%/20% dynamic effect must be accepted in
+optimizer and final-rotation outputs.
+
+Target files:
+
+- `README.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Run two fresh complete `FlinsParty` payloads and compare normalized logs.
+- Run two fresh complete `FlinsParty2` payloads and compare normalized logs.
+- Record ER, warnings, duration, total, DPS, normalized hashes, and damage deltas
+  attributable to enabling the sourced dynamic Lunar bonus.
+- Update current baseline references and close B-045.
+
+Acceptance criteria:
+
+- Each party's repeated normalized payloads match and contain no new energy or
+  optimizer warning.
+- Numerical changes are limited to dynamic Gleaming Moon Lunar bonus effects;
+  rotations, loadouts, ER, and durations remain unchanged.
+- README, verification skill, plan, and ledger agree on current values.
+- Agent assets and preflight pass and no generated report is staged.
+
+Test cases to add or update:
+
+- No further production test; Phase 3 owns mechanic boundaries and Phase 4 owns
+  deterministic full-party acceptance.
+
+Verification:
+
+- two fresh `./gradlew FlinsParty` runs
+- two fresh `./gradlew FlinsParty2` runs
+- `python scripts/validate_agent_assets.py`
+- `python scripts/preflight.py --run`
 
 ## NCCL/DDP Distributed RL Training Plan
 

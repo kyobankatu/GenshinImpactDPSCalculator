@@ -1091,3 +1091,27 @@ experiment record.
   at unchanged 100%/175%/179%/174% ER and 1,312,883 / 62,518 over 21.0
   seconds. The 4,197 reduction is isolated to seven Xingqiu Raincutter hits
   after the second Skill; all other damage categories and timings are unchanged.
+
+### B-045 — Silken Gleaming Moon Lunar bonus never activates
+
+- Status: `in-progress`
+- Source: 3 (sourced artifact-mechanic divergence)
+- Symptom: `MoonsignManager` searches simulator team/field/provider buffs for
+  Intent and Devotion even though both are character-owned, so its distinct
+  count is always zero and Silken's 10%/20% Lunar Reaction bonus is absent.
+- Scope: generic artifact team-buff capability, dynamic Silken distinct-effect
+  provider, obsolete manager removal, focused boundaries, and deterministic
+  Flins/FlinsParty2 acceptance
+- Risk: `planned`
+- Proof: provider routing tests; 0/10/20% dynamic, duplicate, off-field, exact
+  expiry, and multi-wearer regressions; matching repeated party payloads
+- Notes: adopt the Luna I Silken Moon's Serenade description from the HoYoLAB
+  guide published 2025-09-19 and maintained artifact database, accessed
+  2026-08-02. Elemental damage grants eight-second Devotion and 60/120 team EM,
+  including off field; each different Gleaming Moon effect grants 10% party
+  Lunar Reaction DMG; generated Gleaming effects cannot stack. Sources:
+  https://www.hoyolab.com/article/41239522 and
+  https://gi.gachabase.net/artifacts/15042/silken-moons-serenade/beta?lang=en.
+  Adapt with a generic artifact team-buff provider and one dynamic typed Silken
+  buff that counts distinct unexpired character statuses at resolution time.
+  See `TASKS.md` implementation block `Silken Gleaming Moon Dynamic Bonus`.
