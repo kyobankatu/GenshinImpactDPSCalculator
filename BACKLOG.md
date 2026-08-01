@@ -1186,7 +1186,7 @@ experiment record.
 
 ### B-048 — Resistance shred is incorrectly snapshotted with attacker stats
 
-- Status: `candidate`
+- Status: `planned`
 - Source: 2 (B-047 integration trace and formula audit)
 - Symptom: `DamageCalculator.resolveStats` returns only the caster's stored
   snapshot for snapshot actions, so live enemy-facing RES shred buffs are
@@ -1206,3 +1206,12 @@ experiment record.
   captured at cast time. Promote only after auditing every RES-shred producer
   and reaction path and writing a phased `TASKS.md` design; do not patch one
   damage strategy in isolation.
+  KQM's maintained Xiangling guide explicitly states that RES, DEF, and other
+  enemy-state conditions cannot snapshot, while its team-building guide states
+  VV resistance reduction cannot snapshot. The KQM enemy-resistance reference
+  defines effective resistance from current base resistance minus current
+  reduction. Sources accessed 2026-08-02:
+  https://keqingmains.com/xiangling/,
+  https://keqingmains.com/misc/team-building/, and
+  https://library.keqingmains.com/combat-mechanics/enemy-mechanics/enemy-resistances.
+  See `TASKS.md` implementation block `Live Resistance Reduction Resolution`.

@@ -1182,7 +1182,6 @@ Verification:
 - two fresh `./gradlew FlinsParty2` runs
 - `python scripts/validate_agent_assets.py`
 - `python scripts/preflight.py --run`
-
 ## Implementation Order: Ineffa Overclock Zero-Gauge Damage
 
 Status:
@@ -7075,3 +7074,307 @@ Completion evidence:
   by B-047.
 - README and the verification skill carry the accepted baseline. Agent assets
   and final preflight pass; generated output is not staged.
+
+
+## Implementation Order: Live Resistance Reduction Resolution
+
+Status:
+
+- Phase 1 is complete; Phases 2-5 remain pending.
+- Requirement: elemental and Physical RES reduction is enemy-facing state and
+  must be evaluated at each damage impact, never captured with attacker stats.
+
+Scope:
+
+- Centralize live RES-reduction extraction from the buff list captured at the
+  start of an immediate hit.
+- Route standard, Lunar, Shatter, transformative, stateful, and core-trigger
+  immediate damage through that resolver.
+- Store delayed Electro-Charged, Burning, and Dendro Core damage before RES and
+  apply current RES reduction at each tick or explosion.
+- Include current team RES reduction in weighted Lunar reaction damage.
+- Preserve all attacker-side snapshot stats, reaction ownership, timing, hit
+  caps, aura behavior, and deferred first-Swirl ordering.
+
+Out of scope for this pass:
+
+- Changing base resistance values, the three-region RES formula, DEF reduction,
+  vulnerability, aura/reaction ordering, trigger ownership, or multi-target
+  enemy state.
+- Making the first Swirl benefit immediately from the VV status it creates;
+  B-042 remains deferred and the start-of-hit buff list preserves that boundary.
+- Migrating buffs into per-enemy storage, adding new shred producers, changing
+  snapshot eligibility of attacker stats, RL paths, reports, or generated output.
+
+Definitions:
+
+- Impact-time RES reduction: generic plus damage-element-specific reduction
+  reconstructed by applying unexpired captured/team buffs to an empty stat
+  container at the damage timestamp.
+- Pre-RES damage: reaction damage after its owner stats and reaction bonuses but
+  before the target's resistance multiplier.
+- Immediate hit boundary: the immutable applicable-buff list captured before
+  reaction callbacks for one `CombatActionResolver` invocation.
+
+Design boundaries:
+
+- `ResistanceCalculator` owns extraction and multiplier construction; formula
+  strategies and runtime paths do not reimplement typed-stat selection.
+- `DamageCalculator` continues to own attacker stat snapshot selection and
+  damage-hook dispatch.
+- `CombatActionResolver` passes its pre-reaction context to all immediate
+  reaction resistance calculations.
+- `ReactionEffectScheduler` owns delayed pre-RES payloads and applies current
+  team reduction only when damage is recorded.
+
+### Phase 1: Record Non-Snapshot RES Evidence and Path Inventory - Done
+
+Why first:
+
+This high-risk formula change must enumerate every producer and consumer and
+preserve B-042's deferred ordering before APIs change.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record maintained KQM snapshot and enemy-resistance evidence.
+- Inventory RES producers: VV, Guoba C1, Xingqiu C2, Superconduct, and Enduring
+  Rock.
+- Inventory consumers in standard/Lunar strategies, immediate reaction paths,
+  and delayed reaction scheduling.
+- Define start-of-hit versus delayed-impact buff timing and the B-042 boundary.
+
+Acceptance criteria:
+
+- Source URLs, access date, adopted rule, simulator adaptation, all producers,
+  all consumers, and excluded ordering work are recorded.
+- Each later phase has normal, expiry, snapshot, and abnormal test cases.
+- Production source is unchanged in this evidence phase.
+
+Test cases to add or update:
+
+- No production test in this phase; Phases 2-4 add pre-fix failing boundaries.
+
+Verification:
+
+- inspect `DamageCalculator`, both damage strategies, `ResistanceCalculator`,
+  `CombatActionResolver`, `ReactionEffectScheduler`, `ReactionState`, all
+  `RES_SHRED` writers, and existing reaction/VV/Guoba regressions
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- KQM's maintained Xiangling guide states that RES, DEF, and enemy-state
+  conditions cannot snapshot; its maintained team-building guide explicitly
+  says VV resistance reduction cannot snapshot. The KQM enemy-resistance page
+  defines current resistance as base resistance minus reduction. Sources
+  accessed 2026-08-02: https://keqingmains.com/xiangling/,
+  https://keqingmains.com/misc/team-building/, and
+  https://library.keqingmains.com/combat-mechanics/enemy-mechanics/enemy-resistances.
+- All current RES writers are simulator team buffs. Immediate formulas consume
+  attacker `StatsContainer`; snapshot actions therefore retain stale reduction
+  and miss newly active reduction. Standard Electro-Charged, Burning, and Bloom
+  store post-RES values for later impacts, while weighted Lunar damage hardcodes
+  zero reduction.
+- The resolver captures applicable buffs before reaction notification. Reusing
+  that immutable list for immediate damage prevents B-048 from changing B-042's
+  separately deferred first-Swirl ordering.
+
+### Phase 2: Centralize Live RES for Standard and Lunar Hits - Pending
+
+Why second:
+
+The shared extraction contract must be proven before migrating custom reaction
+callers.
+
+Target files:
+
+- `src/java/mechanics/formula/ResistanceCalculator.java`
+- `src/java/mechanics/formula/StandardDamageStrategy.java`
+- `src/java/mechanics/formula/LunarDamageStrategy.java`
+- `src/java/mechanics/formula/DamageCalculator.java`
+- `src/java/mechanics/formula/AGENTS.md`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Add one live-buff RES extraction API using generic and element-specific stats.
+- Make both damage strategies ignore snapshot-stored RES fields and use their
+  captured applicable buffs at the impact time.
+- Update formula documentation and add standard/Lunar snapshot boundaries.
+
+Acceptance criteria:
+
+- Snapshot before shred then hit during it uses current reduction.
+- Snapshot during shred then hit at/after expiry does not retain reduction.
+- Non-snapshot and snapshot hits at the same time use identical RES multipliers.
+- Generic and matching elemental reductions add once; unrelated elements do not.
+- Standard and Lunar strategies share the same central extraction.
+
+Test cases to add or update:
+
+- Normal: live 15% Pyro reduction increases a snapshotted Pyro hit.
+- Expiry: a snapshot containing 15% returns to baseline at exact buff expiry.
+- Parity: live and snapshot standard hits match under one active reduction.
+- Lunar: a snapshot Lunar hit observes the same current reduction.
+- Abnormal: Hydro-only reduction does not affect Pyro and duplicate application
+  is not introduced by formula resolution.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/mechanics/formula --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Route Immediate Reaction RES Through Captured Buffs - Pending
+
+Why third:
+
+Shatter and transformative/stateful reactions bypass the strategy classes and
+must adopt the same pre-reaction context without changing reaction order.
+
+Target files:
+
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Route Shatter, Hyperbloom/Burgeon, transformative, Burning creation, and Bloom
+  creation through the central live RES multiplier.
+- Pass the start-of-hit applicable list through existing context and handlers.
+- Add snapshot/live parity and first-Swirl non-immediacy regressions.
+
+Acceptance criteria:
+
+- Immediate reactions use current captured reduction regardless of attacker
+  snapshot state.
+- Superconduct damage does not benefit from the Physical reduction it creates,
+  while the next Physical hit does.
+- The first VV-triggering Swirl retains the established pre-VV result and a
+  later eligible reaction sees already-active reduction.
+- Aura consumption, ownership, ICD, and notification counts remain unchanged.
+
+Test cases to add or update:
+
+- Normal: snapshotted trigger and live trigger produce equal transformed damage
+  under pre-existing matching reduction.
+- Superconduct: same-hit exclusion and subsequent Physical inclusion.
+- Ordering: first Swirl does not read its newly emitted VV buff.
+- Element mismatch: unrelated reduction leaves reaction damage unchanged.
+- Abnormal: no reduction and expired reduction retain baseline damage.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `python scripts/agent_validate.py --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 4: Apply RES at Delayed Reaction Impact - Pending
+
+Why fourth:
+
+Timer and core state currently retain post-RES values, so later ticks cannot
+respond to reduction activation or expiry.
+
+Target files:
+
+- `src/java/mechanics/reaction/ReactionEffectScheduler.java`
+- `src/java/simulation/runtime/ReactionState.java`
+- `src/java/simulation/AGENTS.md`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Store standard Electro-Charged, Burning, and Dendro Core payloads before RES.
+- Apply current team reduction at each tick, overflow/expiry explosion, and core
+  consumption impact.
+- Apply current reduction once to weighted Lunar-Charged and Lunar-Crystallize
+  damage after party weighting.
+- Clarify state-field semantics and cover activation/expiry between scheduling
+  and damage.
+
+Acceptance criteria:
+
+- A reduction activated after scheduling affects later damage; one expired
+  before impact does not.
+- Electro-Charged and Burning ticks can change across one scheduled series as
+  reduction windows change.
+- Bloom expiry and Hyperbloom/Burgeon consumption use impact-time Dendro RES.
+- Weighted Lunar damage uses one current matching multiplier and no per-member
+  duplication.
+- Existing cadence, duration, hit caps, ownership, and aura transitions remain.
+
+Test cases to add or update:
+
+- Electro-Charged: baseline first tick, reduced second tick, baseline after
+  expiry.
+- Burning: activation and exact-expiry transitions inside one timer.
+- Bloom: reduction added after core creation affects explosion; expired creation
+  reduction does not persist.
+- Hyperbloom/Burgeon: consumption uses current Dendro reduction.
+- Lunar: matching reduction changes weighted current damage; unrelated reduction
+  does not.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/mechanics/reaction/ReactionEffectScheduler.java --path src/java/simulation/runtime/ReactionState.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 5: Re-Accept Affected Party Baselines - Pending
+
+Why last:
+
+RaidenParty contains snapshotted Pyronado plus Guoba/Xingqiu reduction, while
+both Flins parties contain VV and weighted Lunar reaction damage.
+
+Target files:
+
+- `README.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Run two fresh payloads each for RaidenParty, FlinsParty, and FlinsParty2.
+- Compare normalized hashes, totals, DPS, duration, ER, warnings, and per-source
+  deltas against B-047/B-046 accepted values.
+- Update current baseline references and close B-048 only after each delta is
+  attributable to impact-time matching RES reduction.
+
+Acceptance criteria:
+
+- Each party's repeated normalized payloads match with no new warning.
+- Timings, rotations, ER, and unrelated damage categories remain unchanged.
+- Numerical changes align with active reduction element/time windows and no
+  first-Swirl immediate benefit appears.
+- README, verification skill, plan, and ledger agree; no generated output is
+  staged.
+
+Test cases to add or update:
+
+- Normal integration: all three parties complete with deterministic payloads.
+- Abnormal integration: no energy, optimizer, warning, asset, or generated-file
+  regression is introduced.
+
+Verification:
+
+- two fresh `./gradlew RaidenParty` runs
+- two fresh `./gradlew FlinsParty` runs
+- two fresh `./gradlew FlinsParty2` runs
+- `python scripts/validate_agent_assets.py`
+- `python scripts/preflight.py --run`
