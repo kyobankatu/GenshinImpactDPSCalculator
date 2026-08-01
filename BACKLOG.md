@@ -521,7 +521,7 @@ experiment record.
 
 ### B-023 — Raiden cast hits and Musou attacks use incorrect ICD groups
 
-- Status: `planned`
+- Status: `done`
 - Source: 3 (audited-party action metadata divergence)
 - Symptom: Raiden's Skill cast incorrectly shares standard ICD with Eye and
   suppresses its first coordinated application; Burst initial uses standard ICD;
@@ -542,4 +542,8 @@ experiment record.
   shared group without an API change. Plunge ICD remains excluded pending exact
   grouping evidence. Pre-fix audited `RaidenParty` baseline is 1,433,347 damage
   / 68,255 DPS. See `TASKS.md` implementation block
-  `Raiden Cast and Musou Isshin ICD Metadata`.
+  `Raiden Cast and Musou Isshin ICD Metadata`. Completed 2026-08-02. Focused
+  regression covers cast/Eye separation, 2U/no-ICD Burst initial, shared Burst
+  N/CA ICD, and unchanged physical tags. Both post-fix `RaidenParty` payloads
+  report 1,402,417 damage / 66,782 DPS with normalized SHA-256
+  `c1b6624fb2ea1a3d361a778a5aeead7d731c8bb3f0dae05c5c8d85b6d34c4da0`.

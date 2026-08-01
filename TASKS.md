@@ -53,8 +53,8 @@ ICD.
 The B-022 correction is complete. Bennett's Press Skill now uses 2U/no ICD and
 his Burst retains 2U without entering a Burst ICD group.
 
-The active queue is B-023: Raiden's Skill and Burst cast metadata and Musou
-Isshin Normal/Charged shared ICD group must match their sourced contracts.
+The B-023 correction is complete. Raiden's Skill and Burst cast metadata and
+Musou Isshin Normal/Charged shared ICD group now match their sourced contracts.
 
 ## Scope
 
@@ -2815,7 +2815,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phases 1-2 are complete and Phase 3 remains.
+- Implemented and verified; Phases 1-3 are complete.
 - Requirement: Skill and Burst initial hits use no ICD, Eye uses standard Skill
   ICD, and Musou Isshin Normal/Charged attacks share one standard ICD group.
 
@@ -2916,7 +2916,7 @@ Verification:
 - `./gradlew build`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Accept the RaidenParty ICD Delta
+### Phase 3: Accept the RaidenParty ICD Delta - Done
 
 Why last:
 
@@ -2952,6 +2952,16 @@ Verification:
 - two fresh `./gradlew RaidenParty` runs
 - `python scripts/validate_agent_assets.py` when baseline gate changes
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Actual-character regression covers Skill cast plus first/second Eye decisions,
+  2U/no-ICD Burst initial, shared Burst N/CA ICD, and unaffected physical tags.
+- Both post-fix `RaidenParty` payloads report 1,402,417 damage / 66,782 DPS and
+  match after excluding Gradle's elapsed-time line, with SHA-256
+  `c1b6624fb2ea1a3d361a778a5aeead7d731c8bb3f0dae05c5c8d85b6d34c4da0`.
+- Detailed logs show the first Eye can apply independently from Skill cast and
+  Burst Normal/Charged blocks use `Raiden_MusouIsshin`.
 
 ## Cross-Cutting Rules
 
