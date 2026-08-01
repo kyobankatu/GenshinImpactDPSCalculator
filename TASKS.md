@@ -10489,7 +10489,7 @@ Completion evidence:
   Frozen is absent from the ordinary resolver and can survive an incorrect
   Vaporize against hidden Hydro. The focused early-return path isolates the fix.
 
-### Phase 2: Resolve Typed Frozen Melt - Pending
+### Phase 2: Resolve Typed Frozen Melt - Done
 
 Target files:
 
@@ -10507,7 +10507,7 @@ Tasks:
 Acceptance criteria:
 
 - Non-blunt Pyro on Frozen+Hydro emits Melt only, leaves Hydro exact, and clears
-  1.6U Frozen with a 1U trigger.
+  2.0U Frozen with a 1U trigger.
 - Coexisting ordinary Cryo loses the same 2x amount as Frozen.
 - A 0.5U trigger partially consumes stronger Frozen and still emits one Melt.
 - Blunt Pyro emits Shatter first then reacts with exposed Hydro normally.
@@ -10529,7 +10529,17 @@ Verification:
 - `python scripts/agent_validate.py --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Re-Accept Frozen-Melt-Neutral Baselines - Pending
+Completion evidence:
+
+- Non-blunt 1U Pyro now emits one forward Melt, consumes 2.0U typed Frozen,
+  preserves 0.6U hidden Hydro, and applies the exact 2x damage multiplier.
+- A 0.25U trigger reduces both typed Frozen and hidden ordinary Cryo by 0.5U;
+  a separate 0.5U trigger leaves exactly 2.0U from a 3.0U Frozen gauge.
+- Blunt Pyro emits Shatter then Vaporize against exposed Hydro, while exact-expiry
+  Pyro skips Melt and follows ordinary Vaporize resolution.
+- Reaction regression, build, Javadoc, routed validation, and preflight all pass.
+
+### Phase 3: Re-Accept Frozen-Melt-Neutral Baselines - In Progress
 
 Target files:
 

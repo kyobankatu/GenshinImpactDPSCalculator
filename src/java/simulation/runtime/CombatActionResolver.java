@@ -181,6 +181,11 @@ public class CombatActionResolver {
                 attacker, characterId, action, context, stats, currentAuras)) {
             reactionTriggered = true;
         }
+        Double frozenMeltMultiplier = tryTriggerPyroMeltOnFrozen(
+                attacker, action, stats);
+        if (frozenMeltMultiplier != null) {
+            return frozenMeltMultiplier;
+        }
         if (tryTriggerQuickenOnlyBurning(
                 attacker, characterId, action, context, stats, currentAuras)) {
             reactionTriggered = true;
@@ -245,6 +250,33 @@ public class CombatActionResolver {
                     false);
         }
         return result;
+    }
+
+    /**
+     * Resolves non-shattered Frozen gauge as Cryo for an incoming Pyro hit.
+     *
+     * @return the Melt multiplier, or {@code null} when Frozen Melt does not apply
+     */
+    private Double tryTriggerPyroMeltOnFrozen(
+            Character attacker,
+            AttackAction action,
+            StatsContainer stats) {
+        if (action.getElement() != Element.PYRO
+                || !sim.getEnemy().isFrozen(sim.getCurrentTime())) {
+            return null;
+        }
+        ReactionResult result = ReactionCalculator.calculate(
+                Element.PYRO,
+                Element.CRYO,
+                stats.get(StatType.ELEMENTAL_MASTERY),
+                90,
+                getReactionBonus(Element.PYRO, Element.CRYO, stats));
+        sim.notifyReaction(result, attacker);
+        double multiplier = handleAmplifyingReaction(
+                Element.PYRO, Element.CRYO, action, result);
+        sim.getEnemy().reduceFreezeAura(
+                action.getGaugeUnits() * 2.0, sim.getCurrentTime());
+        return multiplier;
     }
 
     private void tryTriggerShatter(

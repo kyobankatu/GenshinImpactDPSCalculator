@@ -52,6 +52,7 @@ public class ReactionRegressionTest {
         testPhase2Superconduct();
         testPhase3FreezeAndShatter();
         testAccuracyPhaseG_FreezeResolverContract();
+        testAccuracyPhaseG_PyroFrozenMeltContract();
         testPhase4Crystallize();
         testPhase5Burning();
         testAccuracyPhaseG_BurningRefreshAndGenerationContract();
@@ -379,6 +380,100 @@ public class ReactionRegressionTest {
                 "A blunt hit at exact Freeze expiry should not deal Shatter damage");
         assertTrue(!expired.getEnemy().isFrozen(expired.getCurrentTime()),
                 "Freeze should remain inactive after an exact-expiry blunt hit");
+    }
+
+    private static void testAccuracyPhaseG_PyroFrozenMeltContract() {
+        CombatSimulator hiddenHydro = simulatorWith(testCharacter(Element.PYRO));
+        hiddenHydro.getEnemy().applyAura(
+                Element.HYDRO, 2.0, hiddenHydro.getCurrentTime());
+        hiddenHydro.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Hidden Hydro Freeze fixture", Element.CRYO));
+        List<ReactionResult.Kind> hiddenHydroKinds = captureReactionKinds(hiddenHydro);
+        hiddenHydro.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                catalyzeDamageHit("Pyro-on-Frozen Melt fixture", Element.PYRO));
+        assertEquals(1, hiddenHydroKinds.size(),
+                "Non-blunt Pyro on Frozen should notify exactly one reaction");
+        assertEquals(ReactionResult.Kind.MELT, hiddenHydroKinds.get(0),
+                "Non-blunt Pyro on Frozen should Melt");
+        assertClose(0.6, hiddenHydro.getEnemy().getAuraUnits(
+                Element.HYDRO, hiddenHydro.getCurrentTime()), EPS,
+                "Frozen Melt should preserve hidden Hydro aura");
+        assertTrue(!hiddenHydro.getEnemy().isFrozen(hiddenHydro.getCurrentTime()),
+                "A 1U Pyro hit should consume a 2U Frozen gauge");
+        assertClose(expectedStandardDamage(0.0, 0.05, 0.50) * 2.0,
+                hiddenHydro.getTotalDamage(), 0.5,
+                "Pyro on Frozen should use the forward Melt multiplier");
+
+        CombatSimulator hiddenCryo = simulatorWith(testCharacter(Element.PYRO));
+        hiddenCryo.getEnemy().applyAura(
+                Element.CRYO, 2.0, hiddenCryo.getCurrentTime());
+        hiddenCryo.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Hidden Cryo Freeze fixture", Element.HYDRO));
+        List<ReactionResult.Kind> hiddenCryoKinds = captureReactionKinds(hiddenCryo);
+        AttackAction weakPyro = reactionHit(
+                "Weak Pyro-on-Frozen Melt fixture", Element.PYRO);
+        weakPyro.setICD(ICDType.None, ICDTag.None, 0.25);
+        hiddenCryo.performActionWithoutTimeAdvance(CharacterId.SUCROSE, weakPyro);
+        assertEquals(1, countReactions(hiddenCryoKinds, ReactionResult.Kind.MELT),
+                "Weak Pyro on Frozen should notify one Melt");
+        assertClose(1.5, hiddenCryo.getEnemy().getFreezeAuraUnits(
+                hiddenCryo.getCurrentTime()), EPS,
+                "Pyro Melt should consume Frozen gauge at twice trigger strength");
+        assertClose(0.1, hiddenCryo.getEnemy().getAuraUnits(
+                Element.CRYO, hiddenCryo.getCurrentTime()), EPS,
+                "Pyro Melt should consume coexisting hidden Cryo at twice trigger strength");
+
+        CombatSimulator strongFrozen = simulatorWith(testCharacter(Element.PYRO));
+        strongFrozen.getEnemy().applyFreezeAura(
+                3.0, strongFrozen.getCurrentTime());
+        List<ReactionResult.Kind> strongFrozenKinds = captureReactionKinds(strongFrozen);
+        AttackAction halfUnitPyro = reactionHit(
+                "Strong Frozen partial-consumption fixture", Element.PYRO);
+        halfUnitPyro.setICD(ICDType.None, ICDTag.None, 0.5);
+        strongFrozen.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, halfUnitPyro);
+        assertEquals(1, countReactions(strongFrozenKinds, ReactionResult.Kind.MELT),
+                "Partial Frozen consumption should still notify one Melt");
+        assertClose(2.0, strongFrozen.getEnemy().getFreezeAuraUnits(
+                strongFrozen.getCurrentTime()), EPS,
+                "A 0.5U Pyro hit should consume exactly 1U Frozen gauge");
+
+        CombatSimulator blunt = simulatorWith(testCharacter(Element.PYRO));
+        blunt.getEnemy().applyAura(Element.HYDRO, 2.0, blunt.getCurrentTime());
+        blunt.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Blunt hidden Hydro Freeze fixture", Element.CRYO));
+        List<ReactionResult.Kind> bluntKinds = captureReactionKinds(blunt);
+        AttackAction bluntPyro = reactionHit(
+                "Blunt Pyro-on-Frozen fixture", Element.PYRO);
+        bluntPyro.setShatterTrigger(true);
+        blunt.performActionWithoutTimeAdvance(CharacterId.SUCROSE, bluntPyro);
+        assertEquals(2, bluntKinds.size(),
+                "Blunt Pyro on Frozen should notify Shatter and exposed-aura reaction");
+        assertEquals(ReactionResult.Kind.SHATTER, bluntKinds.get(0),
+                "Blunt Pyro should Shatter before gauge resolution");
+        assertEquals(ReactionResult.Kind.VAPORIZE, bluntKinds.get(1),
+                "Blunt Pyro should Vaporize exposed hidden Hydro after Shatter");
+        assertClose(0.1, blunt.getEnemy().getAuraUnits(
+                Element.HYDRO, blunt.getCurrentTime()), EPS,
+                "Reverse Vaporize should consume half of a 1U Pyro trigger");
+
+        CombatSimulator expired = simulatorWith(testCharacter(Element.PYRO));
+        expired.getEnemy().setAura(Element.HYDRO, 1.0, expired.getCurrentTime());
+        expired.getEnemy().applyFreezeAura(1.6, expired.getCurrentTime());
+        double freezeEnd = expired.getEnemy().captureFreezeAuraState().getEndTime();
+        expired.advanceTime(freezeEnd - expired.getCurrentTime());
+        List<ReactionResult.Kind> expiredKinds = captureReactionKinds(expired);
+        expired.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Exact-expiry Pyro fixture", Element.PYRO));
+        assertEquals(0, countReactions(expiredKinds, ReactionResult.Kind.MELT),
+                "Pyro at exact Frozen expiry should not Melt");
+        assertEquals(1, countReactions(expiredKinds, ReactionResult.Kind.VAPORIZE),
+                "Pyro at exact Frozen expiry should react with exposed Hydro");
     }
 
     private static void testPhase4Crystallize() {
