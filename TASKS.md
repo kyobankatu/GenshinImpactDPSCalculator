@@ -27,6 +27,10 @@ The current autonomous session is simulator-only. Python RL training and the
 Java RL bridge are excluded; the retained NCCL/DDP plan below is paused until a
 future explicit user request.
 
+The B-058 Burning fuel correction is in progress. It replaces the fixed
+two-second approximation with typed Dendro-fuel decay and refresh ownership
+while retaining the repository's single-target boundary.
+
 The Xingqiu orbital Hydro application correction is complete. Orbital Rain
 Swords now use their sourced 2.25-second application cadence independently from
 the damaging Raincutter sword-wave ICD.
@@ -9373,6 +9377,250 @@ Acceptance criteria:
   events; both Lunar parties remain byte-stable.
 - README, verification reference, plan, and ledger agree; tracked HTML is
   restored and no generated output is staged.
+
+## Implementation Order: Burning Fuel and Refresh State
+
+Objective: replace the fixed two-second Burning approximation with one typed,
+single-target Burning state whose lifetime follows the consumed Dendro fuel and
+whose owner/damage payload follows the latest Pyro or Dendro application.
+
+Scope:
+
+- Source-direction setup for Pyro-on-Dendro and Dendro-on-Pyro.
+- Burning fuel units and special decay at
+  `max(0.4 U/s, 2 * natural Dendro decay rate)`.
+- Dendro refresh overwrite and Pyro refresh ownership semantics.
+- Existing 0.25-second damage cadence, live impact resistance, logs, and
+  snapshot payloads.
+- Focused regression and deterministic catalog-party controls.
+
+Out of scope:
+
+- A separately reactable 2U Burning Aura and its consumption by
+  Hydro/Cryo/Electro/Anemo/Geo.
+- Burning's separate 1U Pyro application with two-second ICD.
+- Quicken as Burning fuel, AoE spread/self-damage, target switching, and hitlag.
+- RL learner/service changes, persistent jobs, and multi-target architecture.
+
+Cross-cutting rules:
+
+- `ReactionState` owns mutable Burning state; the resolver selects source
+  direction; the scheduler owns time and damage policy; `Enemy` owns Aura math.
+- Keep typed elements and `CharacterId`; do not dispatch on display strings.
+- Use one state transition per refresh and one timer event per active Burning
+  generation; stale events must terminate without damage.
+- Preserve current-time Aura reads, live resistance at tick impact, explicit
+  staging, and the no-generated-artifact boundary.
+- Follow repository Java notation/Javadoc rules and avoid unrelated refactors.
+
+### Phase 1: Record Burning Evidence and Runtime Contract - Done
+
+Why first:
+
+The current fixed window conflates Burning Aura, Dendro fuel, and Pyro
+application. The replacement requires an explicit source-backed boundary before
+state or event code changes.
+
+Target files:
+
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Record maintained tick, fuel, decay, overwrite, and ownership evidence.
+- Inventory resolver, state, snapshot, timer, and regression ownership.
+- Define the single-target exclusions that require a future dedicated Burning
+  Aura model.
+
+Acceptance criteria:
+
+- The plan distinguishes damage cadence, Burning fuel, Burning Aura, and Pyro
+  application rather than representing all four with one expiry timestamp.
+- Every implementation phase names target files, normal/abnormal tests, and
+  verification commands.
+- No behavior changes or generated outputs occur in this phase.
+
+Test cases to add or update:
+
+- No production test in this phase; Phases 2 and 3 own state and event tests.
+
+Verification:
+
+- inspect `CombatActionResolver`, `ReactionEffectScheduler`, `ReactionState`,
+  `SimulatorSnapshot`, `Enemy`, and all Burning regressions
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Maintained KQM separates 0.25-second Burning damage from the 1U Pyro
+  application's two-second ICD. The maintained gauge reference specifies a
+  distinct Dendro fuel that replaces natural decay with at least 0.4U/s and
+  overwrites on Dendro reapplication; gcsim independently implements the same
+  fuel boundary and latest-applier damage ownership. Sources are recorded in
+  B-058.
+- The runtime inventory confirms that `CombatActionResolver` currently consumes
+  the opposite Aura immediately, `ReactionEffectScheduler` captures stale owner
+  and damage values, and `ReactionState`/`SimulatorSnapshot` retain only a fixed
+  end timestamp. The planned ownership boundaries remove those three causes
+  without adding multi-target or RL scope.
+- Burning Aura consumption, its separate Pyro application, Quicken fuel, AoE,
+  and hitlag remain explicit exclusions rather than inferred behavior.
+- The documentation preflight passes with no routed checks or artifact leaks.
+
+### Phase 2: Add Typed Burning Fuel State and Snapshot Payload - Pending
+
+Why second:
+
+The event must read refreshable owner, damage, fuel, decay, and generation data
+from one simulator-owned state rather than capture stale values in its closure.
+
+Target files:
+
+- `src/java/simulation/runtime/ReactionState.java`
+- `src/java/simulation/runtime/ReactionStateController.java`
+- `src/java/simulation/CombatSimulator.java`
+- `src/java/simulation/SimulatorSnapshot.java`
+- `src/java/model/entity/Enemy.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Replace the Burning end-only payload with typed fuel units, decay rate,
+  owner, pre-resistance damage, generation, and last-update time.
+- Expose the current natural Aura decay rate without leaking mutable Aura state.
+- Save and restore the complete Burning payload under the existing contract
+  that pending timer events are intentionally cleared.
+
+Acceptance criteria:
+
+- Active state computes a finite end from remaining fuel and decay rate; clear
+  state is inactive and cannot expose a stale owner or damage value.
+- Natural Aura decay-rate queries return exact finite rates, zero for
+  non-decaying fixtures, and zero for absent/expired Auras.
+- Snapshot mutation/restore recovers the full Burning payload exactly while the
+  event queue remains empty by design.
+
+Test cases to add or update:
+
+- Normal: typed 0.8U fuel at 0.4U/s reports a two-second end.
+- Boundary: zero/negative/non-finite fuel or decay clears/rejects state.
+- Refresh: owner, damage, generation, and timing update atomically.
+- Aura: finite, infinite, absent, and exact-expiry decay-rate queries.
+- Snapshot: mutate/clear then restore every Burning field.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/simulation/runtime/ReactionState.java --path src/java/simulation/SimulatorSnapshot.java --path src/java/model/entity/Enemy.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Consume and Refresh Burning Fuel - Pending
+
+Why third:
+
+The resolver and scheduler can now depend on one tested state contract and keep
+source selection separate from timer policy.
+
+Target files:
+
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/mechanics/reaction/ReactionEffectScheduler.java`
+- `src/java/model/entity/Enemy.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Preserve existing Dendro for Pyro-on-Dendro; establish taxed Dendro fuel for
+  Dendro-on-Pyro instead of consuming the existing Pyro Aura.
+- Replace active Burning fuel when Dendro reapplies, even when the new source is
+  weaker; leave fuel unchanged for Pyro refreshes.
+- At each 0.25-second tick, advance fuel and underlying Dendro at the special
+  rate, read the latest owner/damage, apply live resistance, and stop exactly at
+  depletion. Superseded event generations terminate silently.
+
+Acceptance criteria:
+
+- A 1U Dendro source supplies taxed 0.8U fuel and exactly eight 0.25-second
+  damage ticks over two seconds; 2U supplies 1.6U and sixteen ticks over four.
+- Neither trigger direction immediately consumes its opposite underlying Aura.
+- A weaker Dendro refresh overwrites fuel and owner/damage; a Pyro refresh
+  updates owner/damage without replacing fuel.
+- Exact depletion clears timer/state and Dendro without a ninth/late tick;
+  stale timer generations do no damage.
+- Resistance is evaluated at every impact and existing non-Burning reaction
+  behavior remains unchanged.
+
+Test cases to add or update:
+
+- Normal: 1U and 2U source direction fixtures with exact fuel/tick counts.
+- Direction: Pyro-on-Dendro preserves fuel; Dendro-on-Pyro preserves Pyro and
+  establishes taxed Dendro.
+- Refresh: weaker Dendro overwrite and Pyro owner-only refresh.
+- Boundary: exact depletion, invalid/absent fuel, and superseded event.
+- Dynamic: resistance activation/expiry across ticks and no immediate damage.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/mechanics/reaction/ReactionEffectScheduler.java --path src/java/model/entity/Enemy.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 4: Re-Accept Burning-Neutral Party Baselines - Pending
+
+Why last:
+
+The three catalog parties do not intentionally use Burning, so repeated exact
+payloads provide strong cross-system no-change controls after runtime-state and
+snapshot edits.
+
+Target files:
+
+- `README.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Run two fresh payloads each for RaidenParty, FlinsParty, and FlinsParty2.
+- Compare hashes, totals, ER, optimizer allocation, cadence, warnings, and
+  generated-report status against B-056.
+- Narrow README's Dendro-special difference to the explicitly excluded Burning
+  Aura/Pyro-application and Quicken interactions.
+
+Acceptance criteria:
+
+- Every repeated pair is deterministic and retains its accepted B-056 values.
+- No Burning events occur in any control party, and no warning, energy failure,
+  duplicate timer, or generated artifact leaks into the commit.
+- README, verification reference, plan, ledger, and session checkpoint agree.
+
+Test cases to add or update:
+
+- Normal integration: all three parties complete with exact repeated payloads.
+- No-change integration: accepted totals, ER, allocations, and cadence remain.
+- Abnormal integration: no warning/error/failed-action/generated-file leakage.
+
+Verification:
+
+- two fresh `./gradlew RaidenParty` runs
+- two fresh `./gradlew FlinsParty` runs
+- two fresh `./gradlew FlinsParty2` runs
+- `python scripts/validate_agent_assets.py`
+- `python scripts/preflight.py --run`
+
+### B-056 Phase 4 Acceptance Appendix
+
+The following test matrix and completion evidence belongs to the preceding
+Electro-Charged plan and is retained here because B-058 was appended before the
+existing acceptance appendix.
 
 Test cases to add or update:
 

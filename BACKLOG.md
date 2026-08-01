@@ -1501,3 +1501,54 @@ experiment record.
   Raiden's +2,078 is fully attributed to seven added delayed EC ticks, one
   removed immediate EC, and one removed Vaporize; ER, rolls, duration, and
   warnings remain stable.
+
+### B-057 — Night Intent accepts Thundercloud Strike as a Lunar Reaction trigger
+
+- Status: `blocked`
+- Source: 3 (B-054 artifact trigger audit)
+- Symptom: `NightOfTheSkysUnveiling` explicitly refreshes Intent for
+  `THUNDERCLOUD_STRIKE` in addition to typed Lunar Reactions, but the set wording
+  requires party members to trigger Lunar Reactions and the strike is modeled as
+  a separate follow-up kind.
+- Scope: Night trigger classification and exact four-second uptime regression
+- Risk: `blocked`
+- Proof: maintained in-game experiment or technical finding that explicitly
+  states whether Thundercloud Strike does or does not activate/refresh Intent
+- Notes: official-description mirrors, KQM's artifact catalog, and current
+  guides repeat only the generic "trigger Lunar Reactions" wording. No maintained
+  source found on 2026-08-02 resolves Thundercloud Strike specifically. Do not
+  infer behavior from the repository enum name; leave current behavior unchanged
+  until direct evidence is available.
+
+### B-058 — Burning discards its Dendro fuel and uses a fixed lifetime
+
+- Status: `in-progress`
+- Source: 1/3 (README known difference confirmed by maintained gauge references)
+- Symptom: the resolver immediately subtracts the triggering source from the
+  existing Aura, then the scheduler creates an infinite Pyro Aura and keeps
+  Burning alive for exactly two seconds. This loses the underlying Dendro fuel,
+  cannot derive duration from its gauge, and leaves a stale damage owner when
+  Dendro or Pyro refreshes an active Burning state.
+- Scope: typed single-target Burning fuel state, source-direction setup,
+  0.25-second special Dendro consumption, refresh ownership/damage, snapshot
+  payload, focused regressions, and unaffected catalog-party controls
+- Risk: `planned`
+- Proof: 1U/2U fuel durations, exact depletion, Dendro overwrite, Pyro refresh
+  without fuel replacement, live-resistance ticks, snapshot payload continuity,
+  and repeated deterministic party baselines
+- Notes: maintained KQM documents 0.25-second Burning damage, a separate 1U
+  Pyro application with two-second ICD, and a state requiring both Burning and
+  Dendro Aura. The current Genshin Impact Wiki gauge reference specifies that
+  Burning replaces natural Dendro decay with
+  `max(0.4 U/s, 2 * natural decay rate)` and that Dendro reapplication
+  overwrites the fuel. The independently maintained gcsim implementation uses
+  a distinct non-decaying Burning Aura and Burning-fuel durability with the
+  same minimum/s doubled-natural rate and refresh ownership. Sources accessed
+  2026-08-02:
+  https://library.keqingmains.com/combat-mechanics/elemental-effects/transformative-reactions,
+  https://genshin-impact.fandom.com/wiki/Elemental_Gauge_Theory/Advanced_Mechanics,
+  and https://github.com/genshinsim/gcsim/blob/main/pkg/reactable/burning.go.
+  This pass models uninterrupted single-target fuel and refresh behavior.
+  Burning Aura consumption by Hydro/Cryo/Electro/Anemo/Geo, the separate Pyro
+  application ICD, Quicken fuel, AoE, and hitlag remain out of scope. See
+  `TASKS.md` implementation block `Burning Fuel and Refresh State`.
