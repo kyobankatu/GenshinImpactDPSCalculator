@@ -1,17 +1,24 @@
 package model.artifact;
 
+import java.util.Collections;
+import java.util.List;
+
 import model.stats.StatsContainer;
 import model.type.StatType;
 import mechanics.buff.Buff;
 import mechanics.buff.BuffId;
 import simulation.CombatSimulator;
 import simulation.CombatSimulator.Moonsign;
+import model.entity.ArtifactSet;
+import model.entity.ArtifactTeamBuffProvider;
+import model.entity.Character;
 import model.entity.DamageTriggeredArtifactEffect;
 
 /**
  * Silken Moon's Serenade artifact set with Moonsign-dependent team EM support.
  */
-public class SilkenMoonsSerenade extends model.entity.ArtifactSet implements DamageTriggeredArtifactEffect {
+public class SilkenMoonsSerenade extends ArtifactSet
+        implements DamageTriggeredArtifactEffect, ArtifactTeamBuffProvider {
 
     /**
      * Constructs Silken Moon's Serenade with the 2-piece Energy Recharge bonus.
@@ -53,10 +60,11 @@ public class SilkenMoonsSerenade extends model.entity.ArtifactSet implements Dam
 
             Moonsign sign = sim.getMoonsign();
             double emBonus = 0.0;
-            if (sign == Moonsign.NASCENT_GLEAM)
+            if (sign == Moonsign.NASCENT_GLEAM) {
                 emBonus = 60.0;
-            else if (sign == Moonsign.ASCENDANT_GLEAM)
+            } else if (sign == Moonsign.ASCENDANT_GLEAM) {
                 emBonus = 120.0;
+            }
 
             if (emBonus > 0) {
                 final double finalBonus = emBonus;
@@ -79,11 +87,62 @@ public class SilkenMoonsSerenade extends model.entity.ArtifactSet implements Dam
                     m.addBuff(devotionBuff);
                 }
 
-                // Update Synergy
-                // (Ideally we call this to refresh synergy whenever buffs change, but doing it
-                // on trigger is safe enough)
-                sim.updateGleamingMoonSynergy();
             }
         }
+    }
+
+    /**
+     * Supplies the party-wide Lunar Reaction bonus derived from currently active
+     * distinct Gleaming Moon effects.
+     *
+     * @param owner character equipping this artifact set
+     * @param sim active simulator whose party statuses are inspected
+     * @return one canonical dynamic team buff, or an empty list for duplicate sets
+     */
+    @Override
+    public List<Buff> getArtifactTeamBuffs(Character owner, CombatSimulator sim) {
+        if (!isCanonicalProvider(sim)) {
+            return Collections.emptyList();
+        }
+
+        Buff synergy = new Buff("Gleaming Moon: Synergy", BuffId.GLEAMING_MOON_SYNERGY) {
+            @Override
+            protected void applyStats(StatsContainer stats, double currentTime) {
+                double bonus = countDistinctGleamingMoonEffects(sim, currentTime) * 0.10;
+                stats.add(StatType.LUNAR_CHARGED_DMG_BONUS, bonus);
+                stats.add(StatType.LUNAR_BLOOM_DMG_BONUS, bonus);
+                stats.add(StatType.LUNAR_CRYSTALLIZE_DMG_BONUS, bonus);
+            }
+        }.sourcedBy(owner.getCharacterId());
+        return Collections.singletonList(synergy);
+    }
+
+    private boolean isCanonicalProvider(CombatSimulator sim) {
+        for (Character member : sim.getPartyMembers()) {
+            if (member.getArtifacts() == null) {
+                continue;
+            }
+            for (ArtifactSet artifact : member.getArtifacts()) {
+                if (artifact instanceof SilkenMoonsSerenade) {
+                    return artifact == this;
+                }
+            }
+        }
+        return false;
+    }
+
+    private int countDistinctGleamingMoonEffects(CombatSimulator sim, double currentTime) {
+        boolean hasDevotion = false;
+        boolean hasIntent = false;
+        for (Character member : sim.getPartyMembers()) {
+            for (Buff buff : member.getActiveBuffs()) {
+                if (buff.isExpired(currentTime)) {
+                    continue;
+                }
+                hasDevotion |= buff.getId() == BuffId.GLEAMING_MOON_DEVOTION;
+                hasIntent |= buff.getId() == BuffId.GLEAMING_MOON_INTENT;
+            }
+        }
+        return (hasDevotion ? 1 : 0) + (hasIntent ? 1 : 0);
     }
 }

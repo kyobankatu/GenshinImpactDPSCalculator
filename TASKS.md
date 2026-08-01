@@ -5948,7 +5948,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phases 1-2 are complete and Phases 3-4 remain.
+- In progress; Phases 1-3 are complete and Phase 4 remains.
 - Requirement: while Silken Moon's Serenade is equipped, all party members gain
   10% Lunar Reaction DMG for each distinct active Gleaming Moon effect, with
   duplicate effects never stacking.
@@ -6114,7 +6114,7 @@ Completion evidence:
 - Reaction regression, build, Javadoc, routed validation, and preflight pass;
   no artifact-specific class or ID entered runtime policy.
 
-### Phase 3: Provide Dynamic Non-Stacking Silken Bonus
+### Phase 3: Provide Dynamic Non-Stacking Silken Bonus - Done
 
 Why third:
 
@@ -6124,6 +6124,7 @@ effect without simulator-specific artifact policy.
 Target files:
 
 - `src/java/model/artifact/SilkenMoonsSerenade.java`
+- `src/java/model/artifact/AGENTS.md`
 - `src/java/simulation/CombatSimulator.java`
 - `src/java/simulation/runtime/MoonsignManager.java`
 - `src/java/sample/ReactionRegressionTest.java`
@@ -6171,6 +6172,21 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/agent_validate.py --path src/java/model/artifact/SilkenMoonsSerenade.java --path src/java/simulation/CombatSimulator.java --path src/java/simulation/runtime/MoonsignManager.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Silken now supplies one canonical typed team buff through
+  `ArtifactTeamBuffProvider`; its stat application counts unexpired Intent and
+  Devotion IDs directly from character-owned buffs at the requested resolution
+  time. The obsolete simulator façade and Moonsign-manager trigger-time policy
+  are removed.
+- The actual artifact regression proves no-effect 0%, Intent-only 10%,
+  Intent-plus-Devotion 20% for all three Lunar reaction stats, off-field
+  Ascendant 120 EM, repeated/duplicate non-stacking, exact 4-second reduction to
+  10%, exact 8-second reduction to zero, one canonical provider across two sets,
+  and unchanged 20% 2pc ER.
+- Reaction and party-catalog regressions, build, Javadoc, routed validation, and
+  preflight pass.
 
 ### Phase 4: Re-Accept Silken Party Baselines
 

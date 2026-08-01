@@ -27,46 +27,6 @@ public class MoonsignManager {
     }
 
     /**
-     * Recalculates and reapplies the Gleaming Moon Synergy buff based on currently active
-     * Gleaming Moon effects across the party.
-     */
-    public void updateGleamingMoonSynergy() {
-        boolean hasIntent = false;
-        boolean hasDevotion = false;
-
-        for (Character member : sim.getPartyMembers()) {
-            for (Buff buff : sim.getApplicableBuffs(member)) {
-                if (buff.getId() == BuffId.GLEAMING_MOON_INTENT) {
-                    hasIntent = true;
-                }
-                if (buff.getId() == BuffId.GLEAMING_MOON_DEVOTION) {
-                    hasDevotion = true;
-                }
-            }
-        }
-
-        int count = (hasIntent ? 1 : 0) + (hasDevotion ? 1 : 0);
-        if (count <= 0) {
-            return;
-        }
-
-        final double bonus = 0.10 * count;
-        Buff synergyBuff = new Buff("Gleaming Moon: Synergy", BuffId.GLEAMING_MOON_SYNERGY, 8.0,
-                sim.getCurrentTime()) {
-            @Override
-            protected void applyStats(StatsContainer stats, double currentTime) {
-                stats.add(StatType.LUNAR_CHARGED_DMG_BONUS, bonus);
-                stats.add(StatType.LUNAR_BLOOM_DMG_BONUS, bonus);
-                stats.add(StatType.LUNAR_CRYSTALLIZE_DMG_BONUS, bonus);
-            }
-        };
-
-        for (Character member : sim.getPartyMembers()) {
-            member.addBuff(synergyBuff);
-        }
-    }
-
-    /**
      * Recomputes the current {@link CombatSimulator.Moonsign} state from the simulator's
      * party composition and updates the simulator accordingly.
      */

@@ -96,6 +96,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ColumbinaGravityAndDewRegression();
         testAccuracyPhaseF_ColumbinaStandInBoundaries();
         testAccuracyPhaseF_ArtifactTeamBuffProviderRouting();
+        testAccuracyPhaseF_SilkenMoonsSerenadeDynamicBonus();
         testAccuracyPhaseF_ArtifactLunarReactionBuffRegression();
         testAccuracyPhaseF_ViridescentVenererRefreshContract();
         testAccuracyPhaseF_NoblesseObligeRefreshContract();
@@ -2246,6 +2247,100 @@ public class ReactionRegressionTest {
                 .orElseThrow(() -> new AssertionError("Artifact explicit-source buff should be routed"));
         assertEquals(CharacterId.COLUMBINA, explicitSource.getSourceCharacterId(),
                 "Artifact provider should preserve an explicit source");
+    }
+
+    private static void testAccuracyPhaseF_SilkenMoonsSerenadeDynamicBonus() {
+        model.artifact.SilkenMoonsSerenade silken = new model.artifact.SilkenMoonsSerenade();
+        assertClose(0.20, silken.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "Silken should retain its 20% two-piece Energy Recharge");
+
+        TestCharacter silkenOwner = testCharacter(Element.ELECTRO, CharacterId.INEFFA).asLunar();
+        silkenOwner.setArtifacts(silken);
+        TestCharacter intentOwner = testCharacter(Element.ELECTRO, CharacterId.FLINS).asLunar();
+        intentOwner.setArtifacts(new model.artifact.NightOfTheSkysUnveiling());
+        CombatSimulator sim = simulatorWith(silkenOwner);
+        sim.addCharacter(intentOwner);
+        sim.updateMoonsign();
+        sim.setActiveCharacter(CharacterId.FLINS);
+
+        assertClose(0.0, resolvedStat(sim, silkenOwner, StatType.LUNAR_CHARGED_DMG_BONUS), EPS,
+                "Silken should grant no Lunar bonus without a Gleaming Moon effect");
+        sim.notifyReaction(ReactionResult.lunar(0.0, ReactionResult.LunarType.CHARGED), intentOwner);
+        assertClose(0.10, resolvedStat(sim, silkenOwner, StatType.LUNAR_CHARGED_DMG_BONUS), EPS,
+                "Intent alone should grant one dynamic Silken Lunar bonus");
+
+        sim.performActionWithoutTimeAdvance(CharacterId.INEFFA,
+                damageHit("Off-field Silken trigger", Element.ELECTRO, 1.0));
+        assertClose(120.0, resolvedStat(sim, silkenOwner, StatType.ELEMENTAL_MASTERY), EPS,
+                "Off-field Ascendant Silken damage should grant 120 team EM");
+        assertClose(0.20, resolvedStat(sim, silkenOwner, StatType.LUNAR_CHARGED_DMG_BONUS), EPS,
+                "Intent and Devotion should grant 20% Lunar-Charged DMG");
+        assertClose(0.20, resolvedStat(sim, intentOwner, StatType.LUNAR_BLOOM_DMG_BONUS), EPS,
+                "Intent and Devotion should grant 20% Lunar-Bloom DMG to allies");
+        assertClose(0.20, resolvedStat(sim, intentOwner, StatType.LUNAR_CRYSTALLIZE_DMG_BONUS), EPS,
+                "Intent and Devotion should grant 20% Lunar-Crystallize DMG to allies");
+
+        sim.performActionWithoutTimeAdvance(CharacterId.INEFFA,
+                damageHit("Repeated Silken trigger", Element.ELECTRO, 1.0));
+        intentOwner.addBuff(new Buff("Duplicate Intent fixture", BuffId.GLEAMING_MOON_INTENT, 4.0,
+                sim.getCurrentTime()) {
+            @Override
+            protected void applyStats(StatsContainer stats, double currentTime) {
+            }
+        });
+        assertClose(200.0, resolvedStat(sim, intentOwner, StatType.ELEMENTAL_MASTERY), EPS,
+                "Repeated Devotion should refresh rather than stack team EM");
+        assertClose(0.20, resolvedStat(sim, intentOwner, StatType.LUNAR_CHARGED_DMG_BONUS), EPS,
+                "Duplicate Gleaming Moon IDs should count once each");
+
+        Buff intent = intentOwner.getActiveBuffs().stream()
+                .filter(buff -> buff.getId() == BuffId.GLEAMING_MOON_INTENT)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Intent fixture should be active"));
+        Buff devotion = silkenOwner.getActiveBuffs().stream()
+                .filter(buff -> buff.getId() == BuffId.GLEAMING_MOON_DEVOTION)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Devotion fixture should be active"));
+        Buff synergy = sim.getApplicableBuffs(silkenOwner).stream()
+                .filter(buff -> buff.getId() == BuffId.GLEAMING_MOON_SYNERGY)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Silken synergy provider should be routed"));
+        assertEquals(CharacterId.INEFFA, synergy.getSourceCharacterId(),
+                "Silken synergy should be sourced by its canonical owner");
+
+        StatsContainer atIntentExpiry = new StatsContainer();
+        synergy.apply(atIntentExpiry, intent.getExpirationTime());
+        assertClose(0.10, atIntentExpiry.get(StatType.LUNAR_CHARGED_DMG_BONUS), EPS,
+                "Exact Intent expiry should leave only Devotion's dynamic bonus");
+        StatsContainer atDevotionExpiry = new StatsContainer();
+        synergy.apply(atDevotionExpiry, devotion.getExpirationTime());
+        assertClose(0.0, atDevotionExpiry.get(StatType.LUNAR_CHARGED_DMG_BONUS), EPS,
+                "Exact Devotion expiry should remove the remaining dynamic bonus");
+        StatsContainer devotionAtExpiry = new StatsContainer();
+        devotion.apply(devotionAtExpiry, devotion.getExpirationTime());
+        assertClose(0.0, devotionAtExpiry.get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Devotion should exclude its exact eight-second expiry");
+
+        TestCharacter firstOwner = testCharacter(Element.ELECTRO, CharacterId.INEFFA).asLunar();
+        firstOwner.setArtifacts(new model.artifact.SilkenMoonsSerenade());
+        TestCharacter secondOwner = testCharacter(Element.HYDRO, CharacterId.COLUMBINA).asLunar();
+        secondOwner.setArtifacts(new model.artifact.SilkenMoonsSerenade());
+        CombatSimulator multiSim = simulatorWith(firstOwner);
+        multiSim.addCharacter(secondOwner);
+        multiSim.updateMoonsign();
+        multiSim.setActiveCharacter(CharacterId.COLUMBINA);
+        multiSim.performActionWithoutTimeAdvance(CharacterId.INEFFA,
+                damageHit("First Silken owner trigger", Element.ELECTRO, 1.0));
+        multiSim.performActionWithoutTimeAdvance(CharacterId.COLUMBINA,
+                damageHit("Second Silken owner trigger", Element.HYDRO, 1.0));
+        assertClose(120.0, resolvedStat(multiSim, firstOwner, StatType.ELEMENTAL_MASTERY), EPS,
+                "Two Silken wearers should retain one Devotion EM value");
+        assertClose(0.10, resolvedStat(multiSim, secondOwner, StatType.LUNAR_CHARGED_DMG_BONUS), EPS,
+                "Two Silken wearers should retain one distinct Devotion bonus");
+        assertEquals(1L, multiSim.getApplicableBuffs(firstOwner).stream()
+                        .filter(buff -> buff.getId() == BuffId.GLEAMING_MOON_SYNERGY)
+                        .count(),
+                "Two Silken wearers should expose one canonical synergy provider");
     }
 
     private static void testAccuracyPhaseF_ViridescentVenererRefreshContract() {

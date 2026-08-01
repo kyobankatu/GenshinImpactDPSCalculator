@@ -624,13 +624,6 @@ public class CombatSimulator {
     }
 
     /**
-     * Recomputes party-wide Gleaming Moon synergy.
-     */
-    public void updateGleamingMoonSynergy() {
-        moonsignManager.updateGleamingMoonSynergy();
-    }
-
-    /**
      * Recomputes Moonsign from current party composition.
      */
     public void updateMoonsign() {

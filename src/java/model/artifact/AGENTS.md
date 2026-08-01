@@ -12,7 +12,7 @@
 - `EmblemOfSeveredFate.java`: ER-focused set that adds ER stats and converts ER into burst damage bonus.
 - `NightOfTheSkysUnveiling.java`: Lunar reaction set that grants temporary crit-rate buffs when its owner is on field during Lunar reactions.
 - `NoblesseOblige.java`: burst-focused set that applies a team ATK buff on burst use.
-- `SilkenMoonsSerenade.java`: Lunar-oriented set that grants party EM after elemental damage and refreshes Gleaming Moon synergy.
+- `SilkenMoonsSerenade.java`: Lunar-oriented set that grants party EM after elemental damage and dynamically provides the distinct Gleaming Moon Lunar bonus.
 - `ViridescentVenerer.java`: Anemo support set that boosts swirl damage and applies element-specific resistance shred when on-field swirl occurs.
 
 ## Coupling and dependencies
