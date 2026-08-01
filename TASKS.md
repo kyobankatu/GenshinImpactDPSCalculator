@@ -8681,3 +8681,194 @@ Completion evidence:
   rotation, and 130/128/100/196% ER.
 - README, verification reference, plan, and ledger agree. Generated FlinsParty2
   HTML was restored and no output artifact is staged.
+
+## Implementation Order: Night-Only Gleaming Moon Synergy
+
+Status:
+
+- In progress; Phase 1 is complete and Phase 2 is next.
+- Requirement: Night of the Sky's Unveiling must supply its 10% party-wide
+  Lunar Reaction bonus while Intent is active even when no Silken Moon's
+  Serenade set is equipped.
+
+Scope:
+
+- Share one dynamic Gleaming Moon synergy policy between Night and Silken.
+- Preserve one canonical provider: the first Silken wearer when any Silken set
+  exists, otherwise the first Night wearer.
+- Count unexpired Intent and Devotion as distinct effects, at 10% each and 20%
+  maximum, for all three typed Lunar Reaction damage bonuses.
+- Preserve existing Night Intent and Silken Devotion trigger, duration, stat,
+  refresh, source, and party-routing behavior.
+- Re-accept the three deterministic party baselines as exact no-change controls.
+
+Out of scope for this pass:
+
+- Changing whether Thundercloud Strike activates Intent, Night or Silken
+  trigger conditions, Moonsign calculation, reaction formulas, or buff duration.
+- Duplicate-set trigger ownership beyond the existing typed buff uniqueness
+  policy, new artifacts, characters, parties, or report layout.
+- RL contracts/training, HPC jobs, dependencies, build structure, and generated
+  output.
+
+Definitions:
+
+- Canonical provider: exactly one equipped artifact instance that exposes the
+  dynamic synergy buff to `BuffManager`.
+- Distinct effect: at least one unexpired `GLEAMING_MOON_INTENT` or
+  `GLEAMING_MOON_DEVOTION` status anywhere in the party; duplicate IDs do not
+  increase the count.
+
+### Phase 1: Record Night Provider Evidence and Ownership - Done
+
+Why first:
+
+The current Silken implementation produces correct mixed-set results, so the
+fix must explicitly preserve that ownership while adding the missing Night-only
+case.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record maintained Night and Silken wording, distinct-effect stacking, and the
+  current provider gap.
+- Define the canonical-provider precedence and exact no-change boundary.
+- Separate Night's existing reaction trigger classification from this provider
+  repair.
+
+Acceptance criteria:
+
+- Evidence supports 10% with Intent alone and 20% with Intent plus Devotion.
+- One policy owns provider election and effect counting; artifacts only adapt
+  their typed capability to that policy.
+- The plan names normal, duplicate, expiry, source, and unaffected integration
+  tests before production code changes.
+
+Test cases to add or update:
+
+- No production test in this phase; Phase 2 adds the missing Night-only and
+  mixed-set boundaries.
+
+Verification:
+
+- inspect `NightOfTheSkysUnveiling`, `SilkenMoonsSerenade`,
+  `ArtifactTeamBuffProvider`, `BuffManager`, and existing Phase F regressions
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- KQM's maintained Nod-Krai guide independently states Night's 10% party-wide
+  Lunar Reaction bonus while Intent is active, Silken's corresponding 10% while
+  Devotion is active, and their distinct-effect 20% combination. Source accessed
+  2026-08-02: https://keqingmains.com/misc/nod-krai-guide/.
+- Runtime inspection proves `BuffManager` routes generic
+  `ArtifactTeamBuffProvider` capabilities correctly, but only Silken implements
+  that capability. Night therefore creates Intent without any Night-only
+  provider.
+- The implementation boundary retains Silken precedence for every existing
+  mixed party, falls back to Night only when Silken is absent, and leaves the
+  separate Thundercloud trigger classification unchanged.
+- The documentation-only preflight passes with no checks or artifact leaks.
+
+### Phase 2: Share Canonical Gleaming Moon Synergy - Pending
+
+Why second:
+
+The shared policy and both artifact adapters can be changed together only after
+the provider precedence and regression boundaries are durable.
+
+Target files:
+
+- `src/java/model/artifact/GleamingMoonSynergy.java`
+- `src/java/model/artifact/NightOfTheSkysUnveiling.java`
+- `src/java/model/artifact/SilkenMoonsSerenade.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Add a focused package policy for canonical provider election, distinct active
+  effect counting, and typed dynamic buff construction.
+- Make Night implement `ArtifactTeamBuffProvider` and delegate to the policy.
+- Replace Silken's private provider/count implementation with the same policy.
+- Add actual Night-only, duplicate-Night, Silken-only, and mixed-set tests.
+
+Acceptance criteria:
+
+- Night-only Intent grants 10% Lunar-Charged, Lunar-Bloom, and
+  Lunar-Crystallize DMG to the wearer and allies.
+- Exact Intent expiry removes the Night-only bonus.
+- Duplicate Night sets expose one synergy buff and still grant only 10%.
+- Mixed Night plus Silken exposes one Silken-sourced synergy buff, grants 20%
+  with both distinct effects, and falls back to 10% as either expires.
+- Existing Silken-only, duplicate-Silken, Devotion EM, and unrelated stats are
+  unchanged.
+
+Test cases to add or update:
+
+- Normal: actual on-field Night Lunar reaction creates Intent and a team-wide
+  10% bonus for all Lunar types.
+- Mixed: Intent plus Devotion gives 20%, with the first Silken wearer retained
+  as the source.
+- Boundary: exact four/eight-second expiries exclude the corresponding effect.
+- Abnormal: no active effect gives zero; duplicate Night/Silken providers and
+  duplicate status IDs cannot stack beyond distinct-effect count.
+- No-change: Night CRIT Rate and Silken team EM values remain exact.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/model/artifact/GleamingMoonSynergy.java --path src/java/model/artifact/NightOfTheSkysUnveiling.java --path src/java/model/artifact/SilkenMoonsSerenade.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Re-Accept Artifact-Provider Party Baselines - Pending
+
+Why last:
+
+The catalog Flins parties already equip Night and Silken together, making exact
+payload equality the strongest guard that provider extraction changed no
+runtime order, attribution, optimizer input, or report data.
+
+Target files:
+
+- `README.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Run two fresh payloads each for RaidenParty, FlinsParty, and FlinsParty2.
+- Compare normalized hashes, totals, duration, ER, optimizer rolls, action and
+  reaction cadence, warnings, and artifact-source attribution.
+- Update current references only if behavior legitimately changes; otherwise
+  record exact equality and close B-054.
+
+Acceptance criteria:
+
+- Each repeated pair matches exactly without warning or energy failure.
+- All three payloads match B-053 exactly because each affected catalog party
+  already had a canonical Silken provider.
+- README, verification reference, plan, and ledger agree; generated HTML and
+  output artifacts are not staged.
+
+Test cases to add or update:
+
+- Normal integration: all three parties complete deterministically with their
+  accepted totals and hashes.
+- Abnormal integration: no duplicate synergy, source-attribution, warning, ER,
+  optimizer, report, or untracked-artifact regression appears.
+
+Verification:
+
+- two fresh `./gradlew RaidenParty` runs
+- two fresh `./gradlew FlinsParty` runs
+- two fresh `./gradlew FlinsParty2` runs
+- `python scripts/validate_agent_assets.py`
+- `python scripts/preflight.py --run`

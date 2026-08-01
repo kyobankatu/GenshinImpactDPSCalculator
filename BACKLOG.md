@@ -1399,3 +1399,27 @@ experiment record.
   at 22,675,823 / 227,898, and FlinsParty2
   `3077dba03531db0d61f1de2f0d8ae7e8a38fa389edca87855d2860aa965a6c82`
   at 15,817,125 / 228,902 with stable durations, ER, and warning-free output.
+
+### B-054 — Night-only Intent has no Gleaming Moon team synergy provider
+
+- Status: `active`
+- Source: 3 (maintained artifact wording plus artifact-provider audit)
+- Symptom: Night of the Sky's Unveiling creates Intent but only Silken Moon's
+  Serenade implements `ArtifactTeamBuffProvider`, so a party with Night and no
+  Silken receives 0% instead of the specified 10% Lunar Reaction DMG bonus.
+- Scope: shared canonical synergy policy, Night provider capability,
+  Night-only/duplicate/mixed-set expiry regressions, and exact no-change party
+  controls
+- Risk: `planned`
+- Proof: Night-only Intent gives 10% to all party members for all typed Lunar
+  reaction bonuses; duplicate providers remain one; mixed Intent plus Devotion
+  remains 20% and Silken-sourced; repeated catalog payloads remain exact
+- Notes: the maintained KQM Nod-Krai guide records 15%/30% wearer CRIT Rate
+  while Intent is active and a separate 10% party-wide Lunar Reaction DMG bonus;
+  distinct Intent and Devotion effects stack to 20%, while duplicate effects do
+  not. Source accessed 2026-08-02:
+  https://keqingmains.com/misc/nod-krai-guide/. Preserve the existing first-
+  Silken provider whenever Silken is equipped and use first-Night fallback only
+  when it is absent. Thundercloud Strike's Intent trigger classification is a
+  separate evidence question and is excluded. See `TASKS.md` implementation
+  block `Night-Only Gleaming Moon Synergy`.
