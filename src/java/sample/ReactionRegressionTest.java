@@ -94,7 +94,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ElectroResonanceTypedTriggerContract();
         testAccuracyPhaseF_SucroseNoIcdApplicationContract();
         testAccuracyPhaseF_RaidenCastAndMusouIcdContract();
-        testAccuracyPhaseF_RaidenEyeRefreshReplacesPeriodicEvent();
+        testAccuracyPhaseF_PeriodicCancellationAndRaidenEyeDamageTrigger();
         testAccuracyPhaseF_BennettSkillAndBurstApplicationContract();
         testAccuracyPhaseF_XianglingGuobaNoIcdApplicationContract();
         testAccuracyPhaseF_XianglingChiliPickupOptIn();
@@ -2147,15 +2147,13 @@ public class ReactionRegressionTest {
         skillSim.getEnemy().setAura(Element.CRYO, 4.0, skillSim.getCurrentTime());
         captureStandardOutput(() -> skillSim.performAction(CharacterId.RAIDEN_SHOGUN,
                 CharacterActionRequest.of(CharacterActionKey.SKILL)));
-        double firstEyeTime = skillSim.getCurrentTime() + 0.9;
-        skillSim.registerEvent(new simulation.event.SimpleTimerEvent(firstEyeTime - 0.001, 1.0) {
-            @Override
-            public void onTick(CombatSimulator activeSim) {
-                activeSim.getEnemy().setAura(Element.CRYO, 4.0, activeSim.getCurrentTime());
-                finish();
-            }
-        });
-        captureStandardOutput(() -> skillSim.advanceTime(1.81));
+        AttackAction eyeTrigger = damageHit("Raiden Eye Trigger", Element.PHYSICAL, 1.0);
+        eyeTrigger.setAnimationDuration(0.0);
+        skillSim.getEnemy().setAura(Element.CRYO, 4.0, skillSim.getCurrentTime());
+        captureStandardOutput(() -> skillSim.performAction(CharacterId.RAIDEN_SHOGUN, eyeTrigger));
+        skillSim.advanceTime(0.9);
+        skillSim.getEnemy().setAura(Element.CRYO, 4.0, skillSim.getCurrentTime());
+        captureStandardOutput(() -> skillSim.performAction(CharacterId.RAIDEN_SHOGUN, eyeTrigger));
 
         AttackAction skillCast = findAction(skillWeapon.actions, "Raiden E Cast");
         AttackAction firstEye = findAction(skillWeapon.actions, "Eye of Stormy Judgment");
@@ -2218,7 +2216,7 @@ public class ReactionRegressionTest {
                 "Physical Raiden Charged should retain the generic Charged tag");
     }
 
-    private static void testAccuracyPhaseF_RaidenEyeRefreshReplacesPeriodicEvent() {
+    private static void testAccuracyPhaseF_PeriodicCancellationAndRaidenEyeDamageTrigger() {
         int[] cancelledCallbacks = {0};
         CombatSimulator cancelledSim = simulatorWith(testCharacter(Element.PHYSICAL));
         PeriodicDamageEvent cancelledEvent = new PeriodicDamageEvent(
@@ -2244,26 +2242,62 @@ public class ReactionRegressionTest {
         model.character.RaidenShogun raiden = new model.character.RaidenShogun(
                 eyeWeapon, blankArtifact());
         CombatSimulator sim = simulatorWithExistingCharacter(raiden);
-        captureStandardOutput(() -> sim.performAction(CharacterId.RAIDEN_SHOGUN,
-                CharacterActionRequest.of(CharacterActionKey.SKILL)));
-        captureStandardOutput(() -> sim.advanceTime(9.5));
-        captureStandardOutput(() -> sim.performAction(CharacterId.RAIDEN_SHOGUN,
-                CharacterActionRequest.of(CharacterActionKey.SKILL)));
-        double refreshTime = sim.getCurrentTime();
-        captureStandardOutput(() -> sim.advanceTime(2.0));
-
-        List<Double> postRefreshEyeTimes = new ArrayList<>();
-        for (double time : eyeWeapon.times) {
-            if (time > refreshTime) {
-                postRefreshEyeTimes.add(time);
+        double[] eyeParticles = {0.0};
+        sim.addParticleListener((element, count, time) -> {
+            if (element == Element.ELECTRO) {
+                eyeParticles[0] += count;
             }
-        }
-        assertEquals(2, postRefreshEyeTimes.size(),
-                "Raiden Skill refresh should leave only one Eye event stream");
-        assertClose(refreshTime + 0.9, postRefreshEyeTimes.get(0), EPS,
-                "Replacement Eye should start at its sourced cadence");
-        assertClose(refreshTime + 1.8, postRefreshEyeTimes.get(1), EPS,
-                "Replacement Eye should continue at its sourced cadence");
+        });
+        captureStandardOutput(() -> sim.performAction(CharacterId.RAIDEN_SHOGUN,
+                CharacterActionRequest.of(CharacterActionKey.SKILL)));
+        double eyeStartTime = sim.getCurrentTime();
+        captureStandardOutput(() -> sim.advanceTime(3.0));
+        assertEquals(0, eyeWeapon.actions.size(),
+                "Raiden Eye should not attack while the party deals no damage");
+
+        AttackAction trigger = damageHit("Eye Trigger", Element.PHYSICAL, 1.0);
+        trigger.setAnimationDuration(0.0);
+        captureStandardOutput(() -> sim.performAction(CharacterId.RAIDEN_SHOGUN, trigger));
+        assertEquals(1, eyeWeapon.actions.size(),
+                "Positive timeline damage should trigger one Raiden Eye attack");
+        assertClose(0.5, eyeParticles[0], EPS,
+                "Each coordinated attack should emit 0.5 expected Electro particles");
+
+        captureStandardOutput(() -> sim.performAction(CharacterId.RAIDEN_SHOGUN, trigger));
+        sim.advanceTime(0.899);
+        captureStandardOutput(() -> sim.performAction(CharacterId.RAIDEN_SHOGUN, trigger));
+        assertEquals(1, eyeWeapon.actions.size(),
+                "Damage inside the Eye cooldown should not trigger another attack");
+
+        sim.advanceTime(0.001);
+        captureStandardOutput(() -> sim.performAction(CharacterId.RAIDEN_SHOGUN, trigger));
+        assertEquals(2, eyeWeapon.actions.size(),
+                "Damage at the exact Eye cooldown boundary should trigger");
+
+        sim.advanceTime(0.9);
+        AttackAction zeroDamage = damageHit("Zero Damage Eye Trigger", Element.PHYSICAL, 0.0);
+        zeroDamage.setAnimationDuration(0.0);
+        captureStandardOutput(() -> sim.performAction(CharacterId.RAIDEN_SHOGUN, zeroDamage));
+        assertEquals(2, eyeWeapon.actions.size(),
+                "Zero direct damage should not trigger Raiden Eye");
+
+        captureStandardOutput(() -> sim.performActionWithoutTimeAdvance(CharacterId.RAIDEN_SHOGUN, trigger));
+        captureStandardOutput(() -> sim.advanceTime(0.0));
+        assertEquals(3, eyeWeapon.actions.size(),
+                "No-time-advance damage should trigger through resolved-damage dispatch");
+
+        sim.advanceTime(eyeStartTime + 25.0 - sim.getCurrentTime());
+        captureStandardOutput(() -> sim.performAction(CharacterId.RAIDEN_SHOGUN, trigger));
+        assertEquals(3, eyeWeapon.actions.size(),
+                "Expired Eye state should reject otherwise eligible damage");
+
+        captureStandardOutput(() -> sim.performAction(CharacterId.RAIDEN_SHOGUN,
+                CharacterActionRequest.of(CharacterActionKey.SKILL)));
+        captureStandardOutput(() -> sim.performAction(CharacterId.RAIDEN_SHOGUN, trigger));
+        assertEquals(4, eyeWeapon.actions.size(),
+                "Skill refresh should retain one listener-owned Eye trigger");
+        assertClose(2.0, eyeParticles[0], EPS,
+                "Four coordinated attacks should emit four expected particle procs");
     }
 
     private static List<ReactionResult.Kind> captureReactionKinds(CombatSimulator sim) {

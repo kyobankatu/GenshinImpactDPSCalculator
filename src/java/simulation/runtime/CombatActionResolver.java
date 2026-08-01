@@ -616,6 +616,7 @@ public class CombatActionResolver {
         }
         sim.recordDamage(attacker.getCharacterId(), damage);
         sim.captureResolvedActionDamage(attacker.getCharacterId(), damage);
+        sim.notifyDamage(attacker, action, damage);
 
         if (sim.isLoggingEnabled()) {
             String reactionLabel = action.getAdditiveReactionName() != null

@@ -539,6 +539,26 @@ public class CombatSimulator {
     }
 
     /**
+     * Adds a resolved direct-damage listener.
+     *
+     * @param listener listener to register
+     */
+    public void addDamageListener(DamageListener listener) {
+        eventDispatcher.addDamageListener(listener);
+    }
+
+    /**
+     * Dispatches one resolved direct-damage event.
+     *
+     * @param actor acting character
+     * @param action resolved attack action
+     * @param damage final direct damage
+     */
+    public void notifyDamage(Character actor, AttackAction action, double damage) {
+        eventDispatcher.notifyDamage(actor, action, damage, getCurrentTime());
+    }
+
+    /**
      * Adds a particle listener.
      *
      * @param listener listener to register

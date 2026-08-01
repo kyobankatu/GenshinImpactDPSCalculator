@@ -658,7 +658,7 @@ experiment record.
 
 ### B-028 — Raiden Eye attacks on a timer without triggering damage
 
-- Status: `planned`
+- Status: `in-progress`
 - Source: 3 (sourced game-accuracy divergence)
 - Symptom: Raiden Skill currently schedules autonomous Eye damage every 0.9
   seconds, producing 22 coordinated attacks in the accepted `RaidenParty` trace

@@ -11,6 +11,7 @@ import model.entity.ReactionAwareArtifact;
 import model.type.Element;
 import simulation.ActionListener;
 import simulation.CombatSimulator;
+import simulation.DamageListener;
 import simulation.ParticleListener;
 import simulation.SimulationEventBus;
 import simulation.action.AttackAction;
@@ -20,6 +21,7 @@ import simulation.action.AttackAction;
  */
 public class SimulationEventDispatcher implements SimulationEventBus {
     private final List<ActionListener> actionListeners = new ArrayList<>();
+    private final List<DamageListener> damageListeners = new ArrayList<>();
     private final List<ParticleListener> particleListeners = new ArrayList<>();
     private final List<CombatSimulator.ReactionListener> reactionListeners = new ArrayList<>();
 
@@ -31,6 +33,16 @@ public class SimulationEventDispatcher implements SimulationEventBus {
     @Override
     public void addActionListener(ActionListener listener) {
         actionListeners.add(listener);
+    }
+
+    /**
+     * Registers a listener for resolved direct damage.
+     *
+     * @param listener the listener to register
+     */
+    @Override
+    public void addDamageListener(DamageListener listener) {
+        damageListeners.add(listener);
     }
 
     /**
@@ -64,6 +76,21 @@ public class SimulationEventDispatcher implements SimulationEventBus {
     public void notifyAction(Character actor, AttackAction action, double time) {
         for (ActionListener listener : new ArrayList<>(actionListeners)) {
             listener.onAction(actor, action, time);
+        }
+    }
+
+    /**
+     * Notifies all registered listeners of resolved direct damage.
+     *
+     * @param actor acting character
+     * @param action resolved attack action
+     * @param damage final direct damage
+     * @param time simulation time in seconds
+     */
+    @Override
+    public void notifyDamage(Character actor, AttackAction action, double damage, double time) {
+        for (DamageListener listener : new ArrayList<>(damageListeners)) {
+            listener.onDamage(actor, action, damage, time);
         }
     }
 

@@ -11,6 +11,7 @@
 - `ActionListener.java`: observer interface for executed attack actions.
 - `CombatLogSink.java`: logging abstraction used by runtime code to write combat events without depending directly on visualization internals.
 - `CombatSimulator.java`: public runtime façade that coordinates collaborators and exposes simulator APIs for samples, mechanics, characters, and reports.
+- `DamageListener.java`: observer interface for resolved direct damage from timeline and no-time-advance attacks.
 - `DamageTracker.java`: damage-accounting interface implemented by runtime reporting.
 - `ParticleListener.java`: observer interface for particle-generation events.
 - `Party.java`: current-party container that tracks members by `CharacterId`, preserves a name-to-id adapter for boundary calls, and maintains the active character.

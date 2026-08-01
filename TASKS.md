@@ -3597,7 +3597,7 @@ Completion evidence:
 
 Status:
 
-- Planned; Phase 1 evidence is recorded below.
+- In progress; Phases 1-2 are complete and Phase 3 remains.
 - Requirement: while active, the Eye performs one coordinated attack only when
   a party attack deals positive damage and its party-wide 0.9-second cooldown
   is ready.
@@ -3665,7 +3665,7 @@ Verification:
 - inspect `RaidenShogun.skill`, action resolution, and `RaidenParty` Eye times
 - `python scripts/preflight.py --run`
 
-### Phase 2: Trigger One Eye from Resolved Damage
+### Phase 2: Trigger One Eye from Resolved Damage - Done
 
 Why second:
 

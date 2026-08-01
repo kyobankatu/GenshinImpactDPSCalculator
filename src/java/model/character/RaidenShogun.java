@@ -21,7 +21,7 @@ import model.type.ActionType;
 import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionRequest;
-import simulation.event.PeriodicDamageEvent;
+import simulation.event.SimpleTimerEvent;
 
 /**
  * Raiden Shogun character implementation with Resolve stacking and Musou Isshin form logic.
@@ -205,7 +205,46 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
     private boolean musouActive = false;
     private double musouEnergyCount = 0;
     private double nextEnergyRestoreTime = 0;
-    private PeriodicDamageEvent eyeDamageEvent;
+    private boolean eyeDamageListenerRegistered = false;
+    private AttackAction eyeCoordinatedAttack;
+    private double eyeExpirationTime = Double.NEGATIVE_INFINITY;
+    private double nextEyeTriggerTime = Double.NEGATIVE_INFINITY;
+
+    /**
+     * Registers the one resolved-damage listener that drives Raiden's Eye.
+     *
+     * <p>The 0.9-second cooldown begins at triggering damage. Coordinated damage
+     * is deferred to a same-timestamp event so the source action finishes before
+     * the Eye resolves; exact in-game frame delay is intentionally not modeled.
+     *
+     * @param sim active combat simulator
+     */
+    private void registerEyeDamageListener(CombatSimulator sim) {
+        if (eyeDamageListenerRegistered) {
+            return;
+        }
+        sim.addDamageListener((actor, action, damage, time) -> {
+            AttackAction activeEyeAttack = eyeCoordinatedAttack;
+            if (activeEyeAttack == null || action == activeEyeAttack || damage <= 0.0) {
+                return;
+            }
+            if (time >= eyeExpirationTime || time + 1e-9 < nextEyeTriggerTime) {
+                return;
+            }
+
+            nextEyeTriggerTime = time + 0.9;
+            sim.registerEvent(new SimpleTimerEvent(time, 1.0) {
+                @Override
+                public void onTick(CombatSimulator activeSim) {
+                    activeSim.performActionWithoutTimeAdvance(characterId, activeEyeAttack);
+                    activeSim.getEnergyDistributor().distributeParticles(
+                            Element.ELECTRO, 0.5, mechanics.energy.ParticleType.PARTICLE);
+                    finish();
+                }
+            });
+        });
+        eyeDamageListenerRegistered = true;
+    }
 
     private void skill(CombatSimulator sim) {
         registerResolveListener(sim);
@@ -226,24 +265,16 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
             }).sourcedBy(this.getCharacterId()));
         }
 
-        // Particle Generation & Coordinated Attack
-        // MV: 75.6% (Lv10)
+        // Coordinated Attack: 75.6% MV at Lv10.
         double coordMv = getTalentValue("Raiden E Coordinated", 0.756);
         AttackAction coordAttack = new AttackAction("Eye of Stormy Judgment", coordMv, Element.ELECTRO,
                 StatType.BASE_ATK, StatType.SKILL_DMG_BONUS, 0.0, false, ActionType.SKILL); // Dynamic
         coordAttack.setICD(ICDType.Standard, ICDTag.ElementalSkill, 1.0); // 1U
 
-        if (eyeDamageEvent != null) {
-            eyeDamageEvent.cancel();
-        }
-        eyeDamageEvent = new PeriodicDamageEvent(
-                this.name, coordAttack, sim.getCurrentTime() + 0.9, 0.9, 25.0,
-                s -> {
-                    // 50% chance to generate 1 particle -> Average 0.5
-                    s.getEnergyDistributor().distributeParticles(Element.ELECTRO, 0.5,
-                            mechanics.energy.ParticleType.PARTICLE);
-                });
-        sim.registerEvent(eyeDamageEvent);
+        registerEyeDamageListener(sim);
+        eyeCoordinatedAttack = coordAttack;
+        eyeExpirationTime = sim.getCurrentTime() + 25.0;
+        nextEyeTriggerTime = sim.getCurrentTime();
     }
 
     private void burst(CombatSimulator sim) {

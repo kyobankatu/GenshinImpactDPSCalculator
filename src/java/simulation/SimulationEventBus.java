@@ -22,6 +22,13 @@ public interface SimulationEventBus {
     void addActionListener(ActionListener listener);
 
     /**
+     * Registers a resolved-damage listener.
+     *
+     * @param listener listener to register
+     */
+    void addDamageListener(DamageListener listener);
+
+    /**
      * Registers a particle listener.
      *
      * @param listener listener to register
@@ -43,6 +50,16 @@ public interface SimulationEventBus {
      * @param time      simulation time in seconds
      */
     void notifyAction(Character actor, AttackAction action, double time);
+
+    /**
+     * Dispatches a resolved direct-damage event.
+     *
+     * @param actor acting character
+     * @param action resolved attack action
+     * @param damage final direct damage
+     * @param time simulation time in seconds
+     */
+    void notifyDamage(Character actor, AttackAction action, double damage, double time);
 
     /**
      * Dispatches a particle-generation event.
