@@ -8922,7 +8922,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phases 1-2 are complete and Phase 3 is next.
+- Complete; all three phases are implemented and accepted.
 - Requirement: identical joint optimizer allocations must render in one stable
   stat order across fresh JVM processes so full sample payload hashes remain
   valid regression evidence.
@@ -9057,7 +9057,7 @@ Completion evidence:
   ReactionRegressionTest, build, Javadoc, routed build/RaidenParty/FlinsParty2,
   and preflight pass; generated tracked HTML was restored afterward.
 
-### Phase 3: Accept Fresh-JVM Payload Determinism - Pending
+### Phase 3: Accept Fresh-JVM Payload Determinism - Done
 
 Why last:
 
@@ -9100,3 +9100,24 @@ Verification:
 - two fresh `./gradlew --no-daemon FlinsParty2` runs
 - one fresh `./gradlew --no-daemon RaidenParty` run
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Two independent no-daemon FlinsParty payloads match raw normalized SHA-256
+  `6338bcc75a29a52f3245cb4573823ba1245724d3be60064dcebefa7b38aa03ab`;
+  two FlinsParty2 payloads match
+  `23dc585acc02d3bd7bca7fe3f5b65db62b3e1489fcedb12a02b9725b774b7dd4`.
+  Normalization removes only Gradle's elapsed-time line and retains every
+  optimizer `Result:` line.
+- FlinsParty result keys now consistently follow
+  CRIT_RATE/CRIT_DMG/ATK_PERCENT or CRIT_RATE/CRIT_DMG/HP_PERCENT; FlinsParty2
+  follows the same caller orders. Every allocation value and intermediate DPS
+  matches B-054.
+- FlinsParty retains 22,675,823 / 227,898, 109/100/100/180% ER, and
+  613/230/48/172/88 timed/reaction/delayed/immediate/ICD counts. FlinsParty2
+  retains 15,817,125 / 228,902, 130/128/100/196% ER, and
+  468/140/33/105/71 counts. The fresh Raiden control retains 1,363,709 / 64,939,
+  100/175/179/174% ER, and 152/57/4/38 timed/reaction/DoT/ICD counts.
+- All five runs contain zero warning, error, failed-action, or
+  insufficient-energy matches. The tracked HTML report was restored and no
+  generated output is staged.

@@ -1439,14 +1439,14 @@ experiment record.
 
 ### B-055 — Joint optimizer result key order changes between JVM processes
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 2 (B-054 repeated sample output)
 - Symptom: identical Flins allocations render `Result:` maps in different key
   orders across JVM executions, changing full payload hashes even though every
   stat value, DPS, ER, final total, and event is identical.
 - Scope: insertion-ordered hill-climber result map, exact output/return
   regression, and fresh-JVM Flins sample acceptance
-- Risk: `planned`
+- Risk: `validated`
 - Proof: focused three-stat output order plus matching raw normalized hashes from
   two no-daemon runs of each affected Flins sample
 - Notes: B-053 versus B-054 differs only in six/five optimizer `Result:` lines
@@ -1454,3 +1454,11 @@ experiment record.
   preserve the caller's typed optimization-stat order without changing search
   traversal, allocation values, or DPS. See `TASKS.md` implementation block
   `Deterministic Optimizer Result Rendering`.
+  Completed by preserving insertion order in each hill-climber result and by
+  adding an equal-DPS three-stat regression for returned and rendered order.
+  Independent no-daemon runs now match raw normalized hashes without excluding
+  result lines: FlinsParty
+  `6338bcc75a29a52f3245cb4573823ba1245724d3be60064dcebefa7b38aa03ab`
+  and FlinsParty2
+  `23dc585acc02d3bd7bca7fe3f5b65db62b3e1489fcedb12a02b9725b774b7dd4`.
+  Totals, ER, allocations, cadence, and warnings remain unchanged.
