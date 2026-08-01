@@ -1,6 +1,6 @@
 ---
 name: run-genshin-autonomous-session
-description: Run long unattended implementation sessions on this repository without pausing for approval, by building an ordered work queue, staying inside pre-cleared authority, choosing safe reversible defaults when authority is unclear, checkpointing durably after every phase, and never idling. Use whenever work must proceed for hours while the user is unavailable.
+description: Run long unattended implementation sessions on this repository without pausing for approval, by building an ordered work queue, staying inside pre-cleared authority, choosing safe reversible defaults when authority is unclear, checkpointing durably after every phase, replenishing the queue from the backlog when a plan finishes, and never idling. Use whenever work must proceed for hours while the user is unavailable.
 ---
 
 # Run an unattended Genshin session
@@ -11,8 +11,9 @@ description: Run long unattended implementation sessions on this repository with
 4. Keep every action inside pre-cleared authority: edit `src/`, `config/`, `scripts/`, `.agents/`, `.claude/skills/`, and `TASKS.md`; commit and push a work branch. Anything outside that is deferred to the handoff, never attempted and never asked about mid-session.
 5. Work one plan phase at a time. Implement, run the routed verification, commit, then advance. Never leave the tree non-building between phases, and never start a phase whose predecessor failed verification.
 6. Never idle. When an item is blocked by a missing decision, a failing dependency, unavailable hardware, or a needed approval, write the block down and move to the next independent queue item immediately.
-7. Checkpoint durably after every phase: update the plan status, commit with a conventional subject, and append to the session record. Assume the session can be killed between any two tool calls.
-8. Report honestly. A failed check is recorded as failed with its output; a skipped check is recorded as skipped. Never infer a result you did not observe in order to keep the loop moving.
-9. Close with one handoff: completed phases, exact verification commands and their observed results, every deferred decision with its rationale, the remaining queue, and the next command to run.
+7. When the queue empties because every plan phase is done, replenish it through `discover-genshin-work` against the `BACKLOG.md` ledger. Promote one gated item, implement it, and continue the loop. Never invent an item that the ledger's value and risk gates would reject.
+8. Checkpoint durably after every phase: update the plan status and the ledger entry, commit with a conventional subject, and append to the session record. Assume the session can be killed between any two tool calls.
+9. Report honestly. A failed check is recorded as failed with its output; a skipped check is recorded as skipped. Never infer a result you did not observe in order to keep the loop moving.
+10. Close with one handoff: completed phases and ledger entries, exact verification commands and their observed results, every deferred decision with its rationale, the remaining queue, and the next command to run.
 
-Never widen scope to fill available time, never batch a risky action because no one is watching, and never leave the repository in a state that needs your live context to interpret.
+Never batch a risky action because no one is watching, and never leave the repository in a state that needs your live context to interpret. Widen scope only through the ledger's gates; if a full discovery sweep finds nothing that passes them, stop and report rather than manufacturing work.

@@ -11,6 +11,7 @@ Do these without asking:
 - read anything in the working tree;
 - create and edit files under `src/`, `config/`, `scripts/`, `.agents/skills/`, `.claude/skills/`;
 - update `TASKS.md` plan status, phases, and cross-cutting rules;
+- add and update `BACKLOG.md` ledger entries, including recording rejections and deferrals;
 - update `README.md` and `AGENTS.md` when a change makes their statements untrue;
 - run `./gradlew` builds, regression entry points, and sample parties;
 - run `python -m pytest src/python/rl/tests`, `python scripts/agent_validate.py`,
@@ -56,6 +57,31 @@ If all readings of a task require a deferred action, the item is blocked. Write 
 - Order by dependency first, then by risk: land the low-risk verifiable items before speculative ones.
 - One phase in flight at a time. Do not interleave edits from two phases in one commit.
 - Re-derive the queue from the repository, not from memory, after any interruption.
+
+## Replenishment
+
+The session is a loop, not a single pass. When every phase of every active `TASKS.md` plan is done and no
+requested work remains, replenish rather than stop:
+
+1. Enter `discover-genshin-work` and sweep the approved sources against `BACKLOG.md`.
+2. Promote exactly one item that passes the value and risk gates.
+3. For risk `local`, implement directly. For risk `planned`, write the `TASKS.md` plan block first through
+   `plan-genshin-implementation`, then execute its phases.
+4. Verify, commit, mark the ledger entry `done`, and loop.
+
+Guard rails that make the loop safe to leave running:
+
+- `TASKS.md` `## Deferred Systems` is forbidden. Record such items as `deferred` and move on.
+- Game-accuracy changes need a recorded source; without provenance the item is `blocked`, never guessed.
+- Contract surfaces stay risk `planned` at minimum: damage formula order, `StatType`, action masks,
+  observation and privileged layouts, party ordering, capability profiles, checkpoint metadata, rollout
+  protocol.
+- Record rejections in the ledger, or the next cycle rediscovers them.
+- Never revert a `done` item, or re-litigate a rejection the user recorded, without a new ledger entry.
+- One item in flight. Two half-finished items are worse than one finished item.
+
+The loop's only clean ending is convergence: a full sweep that produces no item passing both gates. Report
+that and stop. Manufacturing work to fill remaining time is a failure, not diligence.
 
 ## Per-phase loop
 

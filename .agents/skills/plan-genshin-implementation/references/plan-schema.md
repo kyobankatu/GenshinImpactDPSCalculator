@@ -82,3 +82,5 @@ Use the commands the repository actually exposes:
 - Deleting a finished phase to shorten the document.
 - Duplicating the cross-cutting testing rules inside each phase.
 - Recording run-by-run measurements, job IDs, or W&B links in the plan; those belong in an experiment record.
+- Recording undiscovered or rejected candidate work in the plan; that belongs in the `BACKLOG.md` ledger
+  maintained by `discover-genshin-work`. The plan holds only work that is being done.

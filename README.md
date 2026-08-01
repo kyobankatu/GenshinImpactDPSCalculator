@@ -175,8 +175,13 @@ for `TASKS.md` phase plans, `apply-genshin-code-style` for the mandatory
 notation and Javadoc rules, `verify-genshin-changes` for the pre-commit check
 set, `manage-genshin-git` for branch and commit hygiene,
 `submit-genshin-gpu-job` for the concrete `ybatch` submission path on this
-machine, `diagnose-genshin-training` for misbehaving PPO runs, and
-`run-genshin-autonomous-session` for long unattended sessions.
+machine, `diagnose-genshin-training` for misbehaving PPO runs,
+`run-genshin-autonomous-session` for long unattended sessions, and
+`discover-genshin-work` to replenish the queue once the active plan is finished.
+
+`TASKS.md` holds the work that is being done. `BACKLOG.md` is the durable ledger
+of discovered candidates and settled decisions, so a long session does not
+rediscover or re-litigate the same item after a restart.
 
 Validate skill discovery and references with:
 
