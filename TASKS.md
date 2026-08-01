@@ -23,6 +23,10 @@ Generic simulation and RL launch paths backed by shared party definitions are
 now implemented. Party-specific sample wrappers and party-specific RL simulator
 factories have been removed for the migrated parties.
 
+The current autonomous session is simulator-only. Python RL training and the
+Java RL bridge are excluded; the retained NCCL/DDP plan below is paused until a
+future explicit user request.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -563,6 +567,13 @@ depends on them:
   current single-target simulator
 
 ## NCCL/DDP Distributed RL Training Plan
+
+Status:
+
+- Paused by user on 2026-08-01 and excluded from the current simulator-only
+  autonomous session.
+- Resume only after a new explicit RL request; none of its phases are active for
+  work discovery or queue ordering.
 
 ### Objective and Target Topology
 

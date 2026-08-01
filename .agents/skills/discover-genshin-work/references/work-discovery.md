@@ -7,11 +7,15 @@ It is a replenishment procedure, not a licence to refactor.
 
 Discovery starts only when all of these hold:
 
-- every phase of every active `TASKS.md` plan block is marked ` - Done`;
-- no explicitly requested work remains in the session queue;
+- the newest user instruction has been converted into an inclusion/exclusion filter;
+- every in-scope phase of every active `TASKS.md` plan block is marked ` - Done`, or is waiting only on a
+  recorded asynchronous check while independent work is available;
+- no explicitly requested in-scope work remains in the primary queue;
 - the working tree is clean and the last verification passed.
 
-If any is false, the session has work already. Go do that instead.
+If any is false, the session has work already. Go do that instead. Plans explicitly paused by the user are
+not active for this entry condition; mark their ledger item `deferred` and never rediscover them until the
+user explicitly resumes that subsystem.
 
 ## Approved sources, in priority order
 
@@ -24,7 +28,8 @@ If any is false, the session has work already. Go do that instead.
 | 5 | RL stack improvements | training stability, rollout throughput, observation or reward gaps, evaluation tooling, Python test coverage |
 
 Sources 1 and 2 come from the repository itself and need no external evidence. Source 3 always needs a
-citation. Sources 4 and 5 need a named symptom, not a preference.
+citation. Sources 4 and 5 need a named symptom, not a preference. Skip any row excluded by the current
+scope filter; in particular, a simulator-only session does not sweep source 5.
 
 ## Forbidden zone
 
@@ -113,7 +118,7 @@ provenance can silently break behavior that was already correct, and the sample 
 
 ## Cycle
 
-1. Confirm the entry condition.
+1. Confirm the entry condition and scope filter.
 2. Sweep sources in priority order until enough candidates exist to choose from.
 3. Check each against the ledger; drop settled duplicates.
 4. Apply the value gate, then the risk gate. Record every candidate including rejections.
@@ -123,6 +128,10 @@ provenance can silently break behavior that was already correct, and the sample 
    `benchmark-genshin-optimization`.
 7. Verify with `verify-genshin-changes`, commit, mark the entry `done`.
 8. Return to step 1.
+
+When an explicitly authorized sub-agent is available, the primary agent may assign a second accepted,
+independent item through `coordinate-genshin-agents`. The delegate works from an isolated baseline and cannot
+change the ledger status. The primary integration queue still closes one item at a time.
 
 One item in flight at a time. Two half-finished items are worse than one finished item.
 

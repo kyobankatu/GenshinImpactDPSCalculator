@@ -1,4 +1,4 @@
 interface:
   display_name: "Genshin Autonomous Session"
-  short_description: "Work for hours without approval stops"
+  short_description: "Run scoped work without idle approval stops"
   default_prompt: "Use $run-genshin-autonomous-session to run this work queue unattended without pausing for approval."

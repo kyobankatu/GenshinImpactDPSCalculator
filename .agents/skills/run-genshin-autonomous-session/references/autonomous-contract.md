@@ -52,18 +52,39 @@ If all readings of a task require a deferred action, the item is blocked. Write 
 
 ## Queue discipline
 
-- Build the queue from `TASKS.md` phases plus explicitly requested work. Include spare independent items so
+- Derive an explicit scope filter from the newest user instruction. Excluded subsystems never enter the queue,
+  discovery sweep, delegated work, or opportunistic cleanup. A previously active excluded plan is marked paused
+  in `TASKS.md` and its ledger item is deferred until the user explicitly resumes it.
+- Build the queue from allowed `TASKS.md` phases plus explicitly requested work. Include spare independent items so
   a block never leaves the session with nothing to do.
 - Order by dependency first, then by risk: land the low-risk verifiable items before speculative ones.
-- One phase in flight at a time. Do not interleave edits from two phases in one commit.
+- Integrate one phase at a time on the primary branch. Delegated branches may be in flight concurrently only
+  when the user explicitly authorized sub-agents and their write sets do not overlap.
 - Re-derive the queue from the repository, not from memory, after any interruption.
+
+## Asynchronous jobs and delegated branches
+
+- Submission is not completion. Record the scheduler job ID, source revision or dirty-state hash, command,
+  resource, output paths, and retry safety before leaving the job in the background.
+- Never poll in a tight loop or wait for a queued/training job when independent allowed work exists. Check at
+  phase boundaries or when the scheduler's state is likely to have changed.
+- A mandatory asynchronous result keeps its owning phase in `validating`. Continue only work that does not
+  depend on that result, and never claim the phase complete early.
+- Sub-agent authority is never inferred from session length. When the user explicitly grants it, compose
+  `coordinate-genshin-agents` and assign a backlog-gated task to an isolated branch or worktree with a fixed
+  baseline, exact write set, tests, deadline, and no publication authority.
+- The primary agent owns conflict resolution, review, integration order, final verification, commits to the
+  session branch, pushes, scheduler actions, and user communication. Do not wait for a delegate unless its
+  result is the next unavoidable dependency.
+- At wind-down, collect completed delegate handoffs and close session-owned delegates. Leave unfinished
+  branches unintegrated and record their exact state; never rush an unverified merge to meet the deadline.
 
 ## Replenishment
 
 The session is a loop, not a single pass. When every phase of every active `TASKS.md` plan is done and no
 requested work remains, replenish rather than stop:
 
-1. Enter `discover-genshin-work` and sweep the approved sources against `BACKLOG.md`.
+1. Enter `discover-genshin-work` and sweep the approved in-scope sources against `BACKLOG.md`.
 2. Promote exactly one item that passes the value and risk gates.
 3. For risk `local`, implement directly. For risk `planned`, write the `TASKS.md` plan block first through
    `plan-genshin-implementation`, then execute its phases.

@@ -1,6 +1,6 @@
 ---
 name: coordinate-genshin-agents
-description: Coordinate explicitly requested bounded sub-agent, Codex-Claude, independent review, comparison, or handoff work for this simulator. Use when the user asks for multiple agents, cross-client collaboration, independent audits, or parallel non-overlapping investigation.
+description: Coordinate explicitly requested bounded sub-agent, branch-isolated implementation, Codex-Claude, independent review, comparison, or handoff work for this simulator. Use when the user asks for multiple agents, parallel branches, cross-client collaboration, independent audits, or non-blocking investigation.
 ---
 
 # Coordinate Genshin agents

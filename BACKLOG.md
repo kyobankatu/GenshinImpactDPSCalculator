@@ -100,11 +100,13 @@ experiment record.
 
 ### B-007 — NCCL/DDP distributed RL training
 
-- Status: `planned`
+- Status: `deferred`
 - Source: user request
 - Symptom: recurrent PPO trains in a single process, leaving the second GPU of an `rtx6000-ada2_2`
   allocation idle.
 - Scope: `src/python/rl/`
 - Risk: `planned`
 - Proof: the per-phase verification matrix in the plan block
-- Notes: plan block `## NCCL/DDP Distributed RL Training Plan` in `TASKS.md`, Phases 0 through 6.
+- Notes: paused by the user on 2026-08-01 so the current autonomous session can
+  focus exclusively on the simulator. The retained `TASKS.md` plan may be
+  resumed only by a future explicit RL request.
