@@ -1952,7 +1952,7 @@ experiment record.
 
 ### B-071 — Swirl damage ignores per-element target and owner sequences
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 3 (remaining reaction-sequence audit plus KQM/gcsim evidence)
 - Symptom: every rapid Swirl reaction records damage, without the target-wide
   0.1-second per-element GCD or owner/element two-hit 0.5-second sequence.
@@ -1974,3 +1974,16 @@ experiment record.
   https://github.com/genshinsim/gcsim/blob/main/pkg/reactable/swirl.go,
   https://github.com/genshinsim/gcsim/blob/main/pkg/core/attacks/icd_groups.dm.go,
   and https://github.com/genshinsim/gcsim/blob/main/pkg/target/icd.go.
+  Completed with snapshot-safe typed target and owner state plus actual-action
+  timing, side-effect, independence, and restore regressions. Repeated catalog
+  payloads match at Raiden
+  `86a70a9357148363fcc465e648accb749cc774a3a3adf8c0aac35a583c37e601`,
+  FlinsParty
+  `2d530f72e3cf4d0d6ee6209ef68dff6cf1454707fd3b5e43fb21e249a682ed68`,
+  and FlinsParty2
+  `23dc585acc02d3bd7bca7fe3f5b65db62b3e1489fcedb12a02b9725b774b7dd4`.
+  Raiden and FlinsParty2 remain exact to B-070. FlinsParty retains all 58
+  Swirl notifications but suppresses five damage instances, reducing only
+  Sucrose and the party total by 36,413 to 22,639,410 / 227,532; its 172
+  immediate Lunar reactions, 48 ticks, optimizer allocation, and ER remain
+  unchanged.

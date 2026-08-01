@@ -260,9 +260,10 @@ Known simplifications:
   owner/team ATK buffs. Viridescent Venerer uses the same non-stacking,
   owner-triggered shred contract. Silken Moon's Serenade resolves the same
   distinct-effect dynamic Lunar bonus, and reaction damage resolves matching RES
-  reduction at impact. Swirl uses its sourced half-gauge consumption. Ineffa's
+  reduction at impact. Swirl uses its sourced half-gauge consumption and
+  per-element target/owner damage sequences. Ineffa's
   Aubade set uses 80 EM and initializes its owner-only off-field state. The
-  accepted result is 22,675,823 damage / 227,898 DPS
+  accepted result is 22,639,410 damage / 227,532 DPS
   over 99.5 seconds with three successful Sucrose Bursts.
 
 ### Continuous Aura Decay Model
@@ -301,6 +302,10 @@ Elemental Gauge Theory contract:
   consumes Aura, and refreshes physical RES shred. Damage uses a target-wide
   0.1-second GCD, then accepts two target-passing attempts per `CharacterId` in
   a fixed 0.5-second window. Snapshots preserve both policy dimensions.
+- **Swirl damage sequence**: every valid Swirl still notifies and consumes half
+  the source gauge. Each Swirled Element has an independent target-wide
+  0.1-second GCD, then accepts two target-passing attempts per `CharacterId` in
+  a fixed 0.5-second window. Snapshots preserve both typed dimensions.
 - **Shatter damage sequence**: every valid Shatter still notifies and clears the
   simulator's whole Frozen Aura. Damage uses a target-wide 0.2-second GCD, then
   accepts two target-passing attempts per `CharacterId` in a fixed 0.5-second
@@ -346,7 +351,7 @@ Latest validation baseline from the accuracy pass:
 
 - `./gradlew ReactionRegressionTest`
 - `./gradlew RaidenParty`: 1,304,576 total damage / 62,123 DPS
-- `./gradlew FlinsParty`: 22,675,823 total damage / 227,898 DPS
+- `./gradlew FlinsParty`: 22,639,410 total damage / 227,532 DPS
 - `./gradlew FlinsParty2`: 15,817,125 total damage / 228,902 DPS
 - `./gradlew BenchmarkRLJava`
 - `./gradlew ProfileCapabilities`

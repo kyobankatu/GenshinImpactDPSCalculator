@@ -168,8 +168,8 @@ snapshot without dealing another immediate damage instance.
 The B-070 pass is complete. Standard Electro-Charged immediate and periodic
 damage now share a snapshot-safe 0.5-second target cooldown across sequences.
 
-The current B-071 pass adds per-element target and owner Swirl damage sequences
-while retaining reaction notification and Aura consumption.
+The B-071 pass is complete. Per-element target and owner Swirl damage sequences
+now retain reaction notification and Aura consumption.
 
 ## Scope
 
@@ -11421,8 +11421,8 @@ Completion evidence:
 
 ## Implementation Order: Swirl Damage Sequences
 
-Status: Phases 1-2 are complete. Phase 3 will accept deterministic catalog
-baselines for the snapshot-safe Swirl damage sequences.
+Status: Phases 1-3 are complete. Snapshot-safe Swirl damage sequences and their
+deterministic catalog baselines are accepted.
 
 Scope:
 
@@ -11565,7 +11565,7 @@ Completion evidence:
   agent validation report the expected RL checks, which were not executed under
   the simulator-only session boundary.
 
-### Phase 3: Accept Swirl-Sequence Catalog Baselines - Pending
+### Phase 3: Accept Swirl-Sequence Catalog Baselines - Done
 
 Why third:
 
@@ -11602,6 +11602,26 @@ Verification:
 - two fresh `./gradlew --no-daemon FlinsParty` runs
 - two fresh `./gradlew --no-daemon FlinsParty2` runs
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Two normalized payloads per party match exactly: RaidenParty
+  `86a70a9357148363fcc465e648accb749cc774a3a3adf8c0aac35a583c37e601`,
+  FlinsParty
+  `2d530f72e3cf4d0d6ee6209ef68dff6cf1454707fd3b5e43fb21e249a682ed68`,
+  and FlinsParty2
+  `23dc585acc02d3bd7bca7fe3f5b65db62b3e1489fcedb12a02b9725b774b7dd4`.
+- RaidenParty remains exactly 1,304,576 / 62,123 with B-070 event counts and
+  100/175/179/174% ER. FlinsParty2 remains exactly 15,817,125 / 228,902 with 35
+  accepted Swirls, 105 immediate Lunar reactions, 33 ticks, and
+  130/128/100/196% ER.
+- FlinsParty retains all 58 Swirl notifications while five damage instances are
+  blocked by the new policy. The 36,413 delta is isolated to Sucrose, producing
+  22,639,410 / 227,532; 172 immediate Lunar reactions, 48 ticks, artifact
+  allocation, and 109/100/100/180% ER are unchanged.
+- All six runs contain zero warning, error, failed-action, or insufficient-energy
+  matches. The tracked generated report was restored and no generated output is
+  staged.
 
 ## Implementation Order: Standard Electro-Charged Damage Cooldown
 
