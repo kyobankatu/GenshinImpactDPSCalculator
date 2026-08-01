@@ -1362,3 +1362,29 @@ experiment record.
   at 22,620,467 / 227,341, and FlinsParty2
   `118edbd3665d167d31e9bbbbffc97ffc499a40db5199a573a5e25ed8eea023a6`
   at 15,482,126 / 224,054 with stable ER, durations, and warning-free output.
+
+### B-053 — Aubade uses the wrong 2-piece stat and misses initial off-field state
+
+- Status: `in-progress`
+- Source: 2/3 (current party impact and maintained artifact data divergence)
+- Symptom: Aubade of Morningstar and Moon adds 18% ATK instead of 80 Elemental
+  Mastery, and its owner-only 4-piece buff is created only by switch callbacks,
+  so an initially off-field wearer has no bonus until entering the field.
+- Scope: corrected fixed stat, opt-in simulator artifact initialization,
+  owner-only off-field/three-second state boundaries, focused snapshot/no-stack
+  regressions, and both affected Flins party baselines
+- Risk: `planned`
+- Proof: exact constructor stats; initial active/off-field, 20%/60%, ally,
+  2.999/3.0-second, reactivation, duplicate, and snapshot boundaries; repeated
+  deterministic Raiden/Flins/FlinsParty2 payloads
+- Notes: the maintained Genshin Impact Wiki set entry records 80 EM for 2 pieces,
+  20% owner Lunar Reaction DMG while off-field, another 40% at Ascendant Gleam,
+  and removal after three active seconds; its gameplay notes explicitly say the
+  bonus is not a team bonus. Icy Veins independently records the same values.
+  Sources accessed 2026-08-02:
+  https://genshin-impact.fandom.com/wiki/Aubade_of_Morningstar_and_Moon and
+  https://www.icy-veins.com/genshin-impact/artifacts/15043. Both Flins party
+  optimizers consume the current wrong static block. Use an opt-in artifact
+  initialization capability rather than a concrete-set conditional. See
+  `TASKS.md` implementation block
+  `Aubade Static Stats and Initial Off-Field State`.

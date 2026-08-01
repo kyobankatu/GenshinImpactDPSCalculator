@@ -8209,6 +8209,223 @@ Completion evidence:
 - The tracked FlinsParty2 HTML report was clean before execution and restored
   afterward; no generated output is staged.
 
+## Implementation Order: Aubade Static Stats and Initial Off-Field State
+
+Status:
+
+- In progress; Phase 1 is complete and Phases 2-3 remain.
+- Requirement: Aubade of Morningstar and Moon must provide 80 Elemental Mastery
+  as its 2-piece bonus and make its owner-only Lunar Reaction bonus available
+  from the owner's initial off-field state.
+
+Scope:
+
+- Replace the incorrect 18% ATK 2-piece stat with 80 Elemental Mastery.
+- Add a narrow simulator-initialized artifact capability that receives the
+  owner and whether that owner starts active.
+- Initialize Aubade for owners who join the completed runtime as off-field,
+  while granting no 4-piece state to an owner who starts active.
+- Preserve 20% owner Lunar Reaction DMG off-field, an additional 40% at
+  Ascendant Gleam, and the three-second switch-in linger.
+- Re-accept RaidenParty as an unrelated control and both Aubade-equipped Flins
+  party baselines.
+
+Out of scope for this pass:
+
+- Artifact inventory/piece-count modeling, alternate set selection, rarity,
+  substat farming, or changing optimizer KQMS roll constraints.
+- Turning Aubade into a team buff, changing Lunar damage formulas, Moonsign
+  derivation, Silken Moon, or Night of the Sky's Unveiling.
+- EC/Freeze/Dendro state, RL contracts/training, reports, dependencies, and
+  generated output.
+
+Definitions:
+
+- Initial off-field owner: a character added after another party member is
+  already active; Aubade's owner bonus is live immediately at simulator time 0.
+- Initial active owner: the first party member, who has not yet satisfied the
+  off-field activation condition and receives no Aubade 4-piece bonus.
+- Lingering state: after an activated owner becomes active, the owner-only
+  bonus remains in `[switch-in, switch-in + 3.0)` and is absent at exact expiry.
+
+Cross-cutting design rules:
+
+- Depend on a capability interface from simulator orchestration; do not add an
+  artifact-name conditional or optional lifecycle method to `ArtifactSet`.
+- Keep fixed stat data and switch-state policy inside Aubade; keep party-active
+  discovery in `CombatSimulator`.
+- Reuse one typed `AUBADE_BONUS` owner buff and mutate only its expiry, avoiding
+  duplicate instances across repeated swaps.
+- Exercise behavior through public simulator, switch, stat-resolution, and
+  snapshot APIs rather than concrete private buff internals.
+
+### Phase 1: Record Aubade Evidence and Lifecycle Inventory - Done
+
+Why first:
+
+The current class has both incorrect static data and a runtime activation gap;
+the owner-only boundary and initial state must be explicit before adding a
+shared artifact lifecycle capability.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record maintained 2-piece, 4-piece, owner-only, Moonsign, and three-second
+  wording with access date.
+- Inventory artifact construction in both Flins parties, optimizer static-stat
+  inputs, party insertion/active selection, switch callbacks, owner buff
+  resolution, and snapshot behavior.
+- Define no-change boundaries for unrelated artifacts and party systems.
+
+Acceptance criteria:
+
+- Evidence distinguishes 80 EM from the current 18% ATK and confirms that the
+  20%/60% Lunar bonus applies only to the wearer.
+- Initial active versus initial off-field behavior and exact three-second expiry
+  are stated without assuming a synthetic switch at time 0.
+- Later phases name fixed stats, lifecycle initialization, no-stack behavior,
+  snapshot continuity, and all affected party baselines.
+
+Test cases to add or update:
+
+- No production test in this phase; Phase 2 adds pre-fix failing fixed-stat and
+  lifecycle cases.
+
+Verification:
+
+- inspect Aubade, artifact capabilities, `CombatSimulator.addCharacter`,
+  `Party`, `SwitchManager`, stat assembly, snapshots, both Flins party factories,
+  and current artifact regressions
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- The maintained Genshin Impact Wiki set entry records 80 Elemental Mastery for
+  2 pieces; while off-field, the wearer gains 20% Lunar Reaction DMG plus 40%
+  more at Ascendant Gleam, and the effect disappears after three active seconds.
+  Its gameplay notes explicitly classify the bonus as owner-only. Icy Veins
+  independently reproduces the same set values. Sources accessed 2026-08-02:
+  https://genshin-impact.fandom.com/wiki/Aubade_of_Morningstar_and_Moon and
+  https://www.icy-veins.com/genshin-impact/artifacts/15043.
+- The implementation currently adds 18% ATK in both constructors. Both party
+  optimizers read that incorrect static block before constructing the equipped
+  set, so allocation and final stats are affected without double-counting.
+- `Party` makes its first member active. Aubade only creates its owner buff from
+  switch callbacks, leaving initially off-field wearers uninitialized until
+  their first field entry. Character snapshot restore preserves an initialized
+  buff reference, so initializing once at party insertion closes that gap
+  without a separate snapshot format.
+
+### Phase 2: Implement Aubade Stats and Initialization Contract
+
+Why second:
+
+The concrete set can be corrected safely once runtime initialization is exposed
+through one opt-in interface and proven against active/off-field transitions.
+
+Target files:
+
+- `src/java/model/entity/SimulatorInitializedArtifactEffect.java`
+- `src/java/model/entity/AGENTS.md`
+- `src/java/model/artifact/AubadeOfMorningstarAndMoon.java`
+- `src/java/model/artifact/AGENTS.md`
+- `src/java/simulation/CombatSimulator.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Add the narrow initialization capability and dispatch it once after party
+  insertion with the actual initial-active flag.
+- Correct both Aubade constructors to 80 EM and remove the obsolete exploratory
+  comments without changing unrelated artifact code.
+- Initialize one off-field owner buff, retain no initial active-owner bonus, and
+  preserve dynamic Moonsign and switch linger behavior.
+- Add fixed-stat, owner-only, active/off-field, exact expiry, repeated switch,
+  and snapshot regressions.
+
+Acceptance criteria:
+
+- Both constructors add exactly 80 EM and zero ATK%; supplied main/sub stats are
+  retained without adding the set bonus twice.
+- An initially off-field owner resolves 20% at Nascent and 60% at Ascendant;
+  an ally resolves no Aubade bonus.
+- An initially active owner resolves no bonus until it first switches out.
+- Activated switch-in retains the bonus through 2.999 seconds and loses it at
+  exact 3.0; switching out reactivates it immediately.
+- Repeated transitions retain one typed owner buff, and save/restore preserves
+  the initialized state and expiry.
+- Characters with null/plain artifacts and all unrelated artifact dispatch
+  remain unchanged.
+
+Test cases to add or update:
+
+- Static normal: empty and supplied-stat constructors each add exactly 80 EM.
+- Static abnormal: no 18% ATK remains and supplied input is not double-counted.
+- Initial state: off-field owner gets 20%/60%; active owner gets zero; ally gets
+  zero.
+- Switch boundary: +2.999 active retains, exact +3.0 loses, switch-out revives.
+- Idempotence: repeated in/out transitions leave one `AUBADE_BONUS` instance.
+- Snapshot: restore returns the owner, activation mode, and exact remaining
+  expiry behavior.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/model/entity/SimulatorInitializedArtifactEffect.java --path src/java/model/artifact/AubadeOfMorningstarAndMoon.java --path src/java/simulation/CombatSimulator.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Re-Accept Aubade Party Baselines
+
+Why last:
+
+Correcting the fixed stat changes optimizer objectives and direct/reaction
+damage for one wearer in each Flins party, while initialization may change the
+first off-field window.
+
+Target files:
+
+- `README.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Run two fresh payloads each for RaidenParty, FlinsParty, and FlinsParty2.
+- Compare normalized hashes, totals, DPS, ER, optimizer rolls, per-source
+  damage, and timelines against B-052.
+- Attribute Flins deltas to corrected Aubade stats/state and accept Raiden only
+  as an exact unrelated control.
+
+Acceptance criteria:
+
+- Each pair matches without warning, energy, optimizer, or action failure.
+- Raiden is exact no-change; Flins changes are deterministic and confined to
+  Aubade wearer stats, resulting reaction damage, and optimizer response.
+- README, verification skill, plan, and ledger agree; generated output is not
+  staged.
+
+Test cases to add or update:
+
+- Normal integration: all three audited parties complete deterministically.
+- Abnormal integration: unexplained non-Aubade deltas, warnings, ER failures,
+  or generated-file leakage block acceptance.
+
+Verification:
+
+- two fresh `./gradlew RaidenParty` runs
+- two fresh `./gradlew FlinsParty` runs
+- two fresh `./gradlew FlinsParty2` runs
+- `python scripts/validate_agent_assets.py`
+- `python scripts/preflight.py --run`
+
 ## Implementation Order: Overload and Superconduct Residual Aura
 
 Status:
