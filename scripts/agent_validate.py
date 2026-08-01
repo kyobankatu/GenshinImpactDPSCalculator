@@ -59,7 +59,7 @@ def select_checks(paths: list[str], windows: bool | None = None) -> list[Check]:
 
     if any(path == "AGENTS.md" or path == "README.md" or path.startswith((".agents/", ".claude/", "scripts/")) for path in normalized):
         add("agent-assets", (sys.executable, "scripts/validate_agent_assets.py"))
-        add("agent-tools-tests", (sys.executable, "-m", "unittest", "scripts.tests.test_agent_tools"))
+        add("agent-tools-tests", (sys.executable, "-m", "unittest", "discover", "-s", "scripts/tests", "-t", "."))
 
     java_or_config = any(path == "build.gradle" or path.startswith(("src/java/", "config/characters/", "config/capability_profiles/")) for path in normalized)
     if java_or_config:

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Genshin Training Diagnosis"
+  short_description: "Triage broken PPO runs"
+  default_prompt: "Use $diagnose-genshin-training to localize why this training or evaluation run behaves wrong."

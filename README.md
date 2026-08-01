@@ -170,6 +170,14 @@ optimizer benchmarking, HTML reports, native HPC rollout operation, new
 content, sourced game research, durable experiments, safe artifact cleanup,
 result presentation, and explicitly requested agent coordination.
 
+It also covers the day-to-day development loop: `plan-genshin-implementation`
+for `TASKS.md` phase plans, `apply-genshin-code-style` for the mandatory
+notation and Javadoc rules, `verify-genshin-changes` for the pre-commit check
+set, `manage-genshin-git` for branch and commit hygiene,
+`submit-genshin-gpu-job` for the concrete `ybatch` submission path on this
+machine, `diagnose-genshin-training` for misbehaving PPO runs, and
+`run-genshin-autonomous-session` for long unattended sessions.
+
 Validate skill discovery and references with:
 
 ```bash
@@ -185,6 +193,14 @@ python scripts/agent_validate.py --base origin/master
 
 Pass `--run` only when the printed Gradle/Python checks are intended. This tool
 does not submit scheduler jobs or start persistent rollout services.
+
+Gate a change set before committing. This adds a leak check that rejects staged
+paths the repository keeps untracked on purpose:
+
+```bash
+python scripts/preflight.py
+python scripts/preflight.py --run
+```
 
 ## Accuracy Notes
 
