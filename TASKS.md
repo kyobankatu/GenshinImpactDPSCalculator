@@ -143,6 +143,10 @@ The B-050 Anemo/Geo reaction-consumption correction is complete. Swirl and both
 Crystallize variants now consume half of the trigger source gauge and preserve
 the decayed residual aura.
 
+The B-051 Overload/Superconduct residual correction is in progress. Its sourced
+1.0 consumption and unconditional-clear defect are recorded below before the
+runtime fix.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -7975,3 +7979,174 @@ Completion evidence:
   and Ineffa +106,331.
 - README, verification reference, plan, and ledger agree. Generated FlinsParty2
   HTML was restored and no output artifact is staged.
+
+## Implementation Order: Overload and Superconduct Residual Aura
+
+Status:
+
+- Phase 1 is complete; Phases 2-3 remain pending.
+- Requirement: Overload and Superconduct subtract their 1.0-modified trigger
+  source gauge and retain any positive decayed aura remainder.
+
+Scope:
+
+- Remove the post-subtraction unconditional clear for Overload and Superconduct.
+- Preserve full depletion when trigger consumption equals or exceeds current
+  aura and retain the aura's selected decay rate otherwise.
+- Preserve reaction damage, Superconduct Physical RES ordering, notifications,
+  ownership, and all other reaction-family consumption.
+- Re-accept the three deterministic aura-sensitive party baselines.
+
+Out of scope for this pass:
+
+- Swirl/Crystallize consumption (B-050), Melt/Vaporize modifiers, Freeze,
+  Electro-Charged, Dendro-family gauges, and reaction damage formulas.
+- Simultaneous reaction priority, aura transition to an excess trigger, innate
+  aura, multi-target state, enemy attacks, and shields.
+- RL contracts/training, report layout, dependencies, build structure, and
+  generated output.
+
+Definitions:
+
+- Transformative residual: `current decayed aura - trigger source gauge` after
+  the sourced 1.0 Overload/Superconduct unit modifier.
+- Full depletion: residual at or below zero, removed by `Enemy.reduceAura`
+  without a separate clear operation.
+
+### Phase 1: Record Residual Evidence and Clear Path - Done
+
+Why first:
+
+The multiplier is already numerically correct; evidence must distinguish the
+post-subtraction clear defect from B-050 and unrelated trigger-transition work.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record maintained 1.0 consumption and strong-aura residual examples.
+- Inventory the shared Transformative reduction/clear path and existing
+  Superconduct/Overload regressions.
+- Define follow-up ownership, formula, and integration no-change boundaries.
+
+Acceptance criteria:
+
+- Evidence gives a concrete fresh 2U aura plus 1U trigger result of 0.6U.
+- The redundant clear after `reduceAura` is identified as the only production
+  mutation in scope.
+- Later tests cover both element directions, exact depletion, decay, and
+  Superconduct's next-hit Physical reduction.
+
+Test cases to add or update:
+
+- No production test in this phase; Phase 2 adds failing residual boundaries.
+
+Verification:
+
+- inspect `CombatActionResolver`, `ReactionCalculator`, Superconduct regressions,
+  and B-050 consumption tests
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- KQM Elemental Gauge Theory states Overload/Superconduct use a 1x unit modifier
+  and gives 1.6U taxed Cryo followed by 1U Electro leaving 0.6U. It also states
+  triggers greater than the current aura fully consume it without creating
+  negative gauge. Source accessed 2026-08-02:
+  https://library.keqingmains.com/combat-mechanics/elemental-effects/elemental-gauge-theory.
+- The resolver already subtracts the full action source gauge, then erases the
+  result with a shared unconditional `setAura(..., 0)`. Removing that clear lets
+  `Enemy.reduceAura` own both residual and full-depletion boundaries.
+
+### Phase 2: Preserve Transformative Residual Aura
+
+Why second:
+
+The shared mutation can be removed only after both residual and full-depletion
+contracts are executable.
+
+Target files:
+
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Remove the redundant non-EC Transformative aura clear.
+- Add actual Overload/Superconduct direction, residual decay, exact depletion,
+  and damage/status-order regressions.
+- Confirm Swirl's 0.5 residual and all non-target reaction tests remain stable.
+
+Acceptance criteria:
+
+- 1U Pyro on fresh taxed 2U Electro and 1U Electro on fresh taxed 2U Pyro each
+  leave 0.6U at D(2).
+- Both Superconduct directions retain 0.6U and still emit one 40% Physical RES
+  reduction after reaction damage.
+- Fresh 1U taxed aura is fully removed by a 1U trigger, and no negative gauge is
+  exposed.
+- Reaction damage, ownership, listener count, first-hit Superconduct exclusion,
+  next-Physical-hit inclusion, and B-050 consumption remain unchanged.
+
+Test cases to add or update:
+
+- Normal: both Overload directions over strong auras leave 0.6U.
+- Superconduct: both directions leave 0.6U and preserve status timing.
+- Decay: 0.6U residual continues at D(2) and expires 4.5 seconds later.
+- Boundary: equal/weaker current auras fully deplete without negatives.
+- No-change: 1U Swirl still leaves 0.3U and subsequent Physical damage observes
+  Superconduct only after the triggering hit.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `python scripts/agent_validate.py --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Re-Accept Transformative-Reaction Party Baselines
+
+Why last:
+
+Residual Pyro/Electro can change later Overload and EC ownership in RaidenParty;
+the Flins parties provide no-change controls for a non-Pyro/Cryo rotation.
+
+Target files:
+
+- `README.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Run two fresh payloads each for RaidenParty, FlinsParty, and FlinsParty2.
+- Attribute hashes, totals, reaction counts, optimizer rolls, ER, and per-source
+  deltas against B-050.
+- Update current baselines and close B-051 only after deterministic agreement.
+
+Acceptance criteria:
+
+- Each pair matches without warning or energy failure.
+- Raiden deltas align with retained Overload residuals; both Flins scenarios are
+  unchanged unless the trace proves an eligible reaction path.
+- README, verification skill, plan, and ledger agree; generated output is not
+  staged.
+
+Test cases to add or update:
+
+- Normal integration: all three parties complete deterministically.
+- Abnormal integration: no warning, ER, optimizer, invalid-aura, or output leak
+  is introduced.
+
+Verification:
+
+- two fresh `./gradlew RaidenParty` runs
+- two fresh `./gradlew FlinsParty` runs
+- two fresh `./gradlew FlinsParty2` runs
+- `python scripts/validate_agent_assets.py`
+- `python scripts/preflight.py --run`

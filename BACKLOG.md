@@ -1298,7 +1298,7 @@ experiment record.
 
 ### B-051 — Overload and Superconduct discard residual aura after subtraction
 
-- Status: `candidate`
+- Status: `in-progress`
 - Source: 3 (B-050 resolver audit plus maintained Elemental Gauge Theory)
 - Symptom: the resolver subtracts the trigger's full gauge and then clears the
   aura unconditionally, so a 1U trigger against a fresh taxed 2U aura ends at
@@ -1314,4 +1314,6 @@ experiment record.
   explicitly gives a 2U taxed Cryo aura followed by 1U Electro leaving 0.6U.
   Source accessed 2026-08-02:
   https://library.keqingmains.com/combat-mechanics/elemental-effects/elemental-gauge-theory.
-  Do not promote until B-050 closes; this is a separate residual-policy change.
+  B-050 is closed; see `TASKS.md` implementation block
+  `Overload and Superconduct Residual Aura` for this separate residual-policy
+  change.
