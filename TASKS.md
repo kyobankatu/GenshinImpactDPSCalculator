@@ -4649,7 +4649,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phase 1 is complete and Phases 2-3 remain.
+- In progress; Phases 1-2 are complete and Phase 3 remains.
 - Requirement: off-field particle energy must scale with the current party size
   instead of applying the four-character multiplier to every party.
 
@@ -4744,7 +4744,7 @@ Completion evidence:
   `OFF_FIELD_PENALTY = 0.6`; active collection, ER scaling, and flat energy are
   separate and remain out of the correction.
 
-### Phase 2: Implement and Regress Party-Size Distribution
+### Phase 2: Implement and Regress Party-Size Distribution - Done
 
 Why second:
 
@@ -4799,6 +4799,19 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/agent_validate.py --path src/java/mechanics/energy/EnergyDistributor.java --path src/java/mechanics/energy/EnergyManager.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Focused regression proves neutral-particle totals of 2.0 for the active
+  recipient and 1.6/1.4/1.2 for off-field recipients in two-/three-/four-member
+  parties; a five-member defensive fixture retains 1.2.
+- Same-element three-member distribution produces 3.0 active and 2.1 off-field
+  energy, while a neutral orb produces 6.0 active and 4.8 off-field energy in a
+  two-member party.
+- Flat energy remains exactly 3.0 for every three-member recipient, and an
+  empty simulator neither distributes energy nor emits a particle notification.
+- ReactionRegressionTest, PartyCatalogRegressionTest, build, Javadoc, routed
+  validation, and preflight pass.
 
 ### Phase 3: Re-Accept Four-Character Energy Baselines
 

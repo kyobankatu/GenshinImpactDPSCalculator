@@ -12,6 +12,8 @@ import mechanics.analysis.EnergyAnalyzer;
 import mechanics.buff.Buff;
 import mechanics.buff.BuffId;
 import mechanics.element.ResonanceManager;
+import mechanics.energy.EnergyManager;
+import mechanics.energy.ParticleType;
 import mechanics.formula.DamageCalculator;
 import mechanics.formula.ResistanceCalculator;
 import mechanics.reaction.ReactionCalculator;
@@ -86,6 +88,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_IneffaSkillNoIcdApplicationContract();
         testAccuracyPhaseF_IneffaBirgittaSummonLifecycle();
         testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost();
+        testAccuracyPhaseF_PartySizeParticleEnergyMultipliers();
         testAccuracyPhaseF_TimingAwareEnergyAnalysis();
         testAccuracyPhaseF_ArtifactOptimizerRejectsUnreachableEr();
         testAccuracyPhaseF_ColumbinaGravityAndDewRegression();
@@ -1361,6 +1364,82 @@ public class ReactionRegressionTest {
         flins.receiveFlatEnergy(100.0);
         assertClose(80.0, flins.getCurrentEnergy(), EPS,
                 "Flins energy gain should still cap at the 80-energy bar");
+    }
+
+    private static void testAccuracyPhaseF_PartySizeParticleEnergyMultipliers() {
+        CharacterId[] characterIds = {
+            CharacterId.SUCROSE,
+            CharacterId.XIANGLING,
+            CharacterId.XINGQIU,
+            CharacterId.BENNETT,
+            CharacterId.COLUMBINA
+        };
+        double[] expectedOffFieldEnergy = { 1.6, 1.4, 1.2, 1.2 };
+
+        for (int partySize = 2; partySize <= 5; partySize++) {
+            CombatSimulator sim = new CombatSimulator();
+            sim.setLoggingEnabled(false);
+            List<TestCharacter> members = new ArrayList<>();
+            for (int index = 0; index < partySize; index++) {
+                TestCharacter member = testCharacter(Element.ANEMO, characterIds[index]);
+                members.add(member);
+                sim.addCharacter(member);
+            }
+
+            EnergyManager.distributeParticles(
+                    Element.PHYSICAL, 1.0, ParticleType.PARTICLE, sim);
+
+            assertClose(2.0, members.get(0).getTotalParticleEnergy(), EPS,
+                    "Active neutral particle energy should not depend on party size");
+            for (int index = 1; index < members.size(); index++) {
+                assertClose(
+                        expectedOffFieldEnergy[partySize - 2],
+                        members.get(index).getTotalParticleEnergy(),
+                        EPS,
+                        "Off-field neutral particle energy should follow party size");
+            }
+        }
+
+        CombatSimulator elementalSim = new CombatSimulator();
+        elementalSim.setLoggingEnabled(false);
+        TestCharacter elementalActive = testCharacter(Element.ANEMO, CharacterId.SUCROSE);
+        TestCharacter elementalOffField = testCharacter(Element.ANEMO, CharacterId.XIANGLING);
+        TestCharacter elementalThird = testCharacter(Element.ANEMO, CharacterId.XINGQIU);
+        elementalSim.addCharacter(elementalActive);
+        elementalSim.addCharacter(elementalOffField);
+        elementalSim.addCharacter(elementalThird);
+        EnergyManager.distributeParticles(Element.ANEMO, 1.0, ParticleType.PARTICLE, elementalSim);
+        assertClose(3.0, elementalActive.getTotalParticleEnergy(), EPS,
+                "Active same-element particle should retain its base value");
+        assertClose(2.1, elementalOffField.getTotalParticleEnergy(), EPS,
+                "Three-member off-field multiplier should compose with same-element value");
+
+        CombatSimulator orbSim = new CombatSimulator();
+        orbSim.setLoggingEnabled(false);
+        TestCharacter orbActive = testCharacter(Element.ANEMO, CharacterId.SUCROSE);
+        TestCharacter orbOffField = testCharacter(Element.ANEMO, CharacterId.XIANGLING);
+        orbSim.addCharacter(orbActive);
+        orbSim.addCharacter(orbOffField);
+        EnergyManager.distributeParticles(Element.PHYSICAL, 1.0, ParticleType.ORB, orbSim);
+        assertClose(6.0, orbActive.getTotalParticleEnergy(), EPS,
+                "Neutral orb should retain the active base value");
+        assertClose(4.8, orbOffField.getTotalParticleEnergy(), EPS,
+                "Two-member off-field multiplier should apply to neutral orbs");
+
+        EnergyManager.distributeFlatEnergy(3.0, elementalSim);
+        for (Character member : elementalSim.getPartyMembers()) {
+            assertClose(3.0, member.getTotalFlatEnergy(), EPS,
+                    "Flat energy should bypass party-size multipliers");
+        }
+
+        CombatSimulator emptySim = new CombatSimulator();
+        emptySim.setLoggingEnabled(false);
+        int[] emptyNotifications = { 0 };
+        emptySim.addParticleListener((element, count, time) -> emptyNotifications[0]++);
+        EnergyManager.distributeParticles(
+                Element.PHYSICAL, 1.0, ParticleType.PARTICLE, emptySim);
+        assertEquals(0, emptyNotifications[0],
+                "Particle distribution without an active character should be a no-op");
     }
 
     private static void testAccuracyPhaseF_TimingAwareEnergyAnalysis() {

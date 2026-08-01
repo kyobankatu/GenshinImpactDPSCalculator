@@ -10,7 +10,9 @@ import simulation.CombatSimulator;
  * single {@link CombatSimulator}.
  */
 public class EnergyDistributor {
-    private static final double OFF_FIELD_PENALTY = 0.6;
+    private static final double TWO_MEMBER_OFF_FIELD_MULTIPLIER = 0.8;
+    private static final double THREE_MEMBER_OFF_FIELD_MULTIPLIER = 0.7;
+    private static final double FOUR_MEMBER_OFF_FIELD_MULTIPLIER = 0.6;
 
     private final CombatSimulator sim;
 
@@ -30,6 +32,7 @@ public class EnergyDistributor {
                 }
                 return;
             }
+            double offFieldMultiplier = getOffFieldMultiplier(sim.getPartyMembers().size());
 
             for (Character c : sim.getPartyMembers()) {
                 boolean isActive = c == activeChar;
@@ -44,7 +47,7 @@ public class EnergyDistributor {
                     baseValue = type.getValue(isSameElement);
                 }
 
-                double rangeMultiplier = isActive ? 1.0 : OFF_FIELD_PENALTY;
+                double rangeMultiplier = isActive ? 1.0 : offFieldMultiplier;
                 double er = c.getEffectiveStats(sim.getCurrentTime()).get(StatType.ENERGY_RECHARGE);
                 double particleBase = count * baseValue * rangeMultiplier;
                 c.receiveParticleEnergy(particleBase, er);
@@ -58,6 +61,28 @@ public class EnergyDistributor {
             }
             throw e;
         }
+    }
+
+    /**
+     * Resolves the inactive-character collection factor for the current party.
+     *
+     * <p>A one-character party has no off-field recipient. Four or more
+     * registered characters retain the standard full-party minimum.
+     *
+     * @param partySize number of registered party members
+     * @return multiplier applied before Energy Recharge
+     */
+    private static double getOffFieldMultiplier(int partySize) {
+        if (partySize <= 1) {
+            return 1.0;
+        }
+        if (partySize == 2) {
+            return TWO_MEMBER_OFF_FIELD_MULTIPLIER;
+        }
+        if (partySize == 3) {
+            return THREE_MEMBER_OFF_FIELD_MULTIPLIER;
+        }
+        return FOUR_MEMBER_OFF_FIELD_MULTIPLIER;
     }
 
     public void distributeFlatEnergy(double amount) {

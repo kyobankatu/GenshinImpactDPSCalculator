@@ -15,8 +15,9 @@ import model.type.Element;
  * <ul>
  *   <li>{@code baseValue} is determined by the particle's element and
  *       {@link ParticleType} (same-element vs. different-element values).</li>
- *   <li>{@code rangeMult} is {@code 1.0} for the active character and
- *       {@code 0.6} for off-field characters in a 4-member party.</li>
+ *   <li>{@code rangeMult} is {@code 1.0} for the active character. Off-field
+ *       characters use {@code 0.8}, {@code 0.7}, or {@code 0.6} in a party of
+ *       two, three, or four or more members, respectively.</li>
  * </ul>
  */
 public class EnergyManager {
