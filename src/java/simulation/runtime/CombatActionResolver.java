@@ -415,9 +415,6 @@ public class CombatActionResolver {
             if (result.getKind() == ReactionResult.Kind.SUPERCONDUCT) {
                 applySuperconductPhysicalResShred();
             }
-            if (result.getKind() != ReactionResult.Kind.SWIRL) {
-                sim.getEnemy().setAura(aura, 0);
-            }
         }
     }
 

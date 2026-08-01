@@ -119,6 +119,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseG_InvalidSourceAuraContract();
         testAccuracyPhaseG_RuntimeAuraApplicationContract();
         testAccuracyPhaseG_AnemoGeoAuraConsumptionContract();
+        testAccuracyPhaseG_TransformativeResidualAuraContract();
         testAccuracyPhaseF_PeriodicCancellationAndRaidenEyeDamageTrigger();
         testAccuracyPhaseF_BennettSkillAndBurstApplicationContract();
         testAccuracyPhaseF_XianglingGuobaNoIcdApplicationContract();
@@ -675,6 +676,63 @@ public class ReactionRegressionTest {
                 CharacterId.SUCROSE, reactionHit("Overload consumption fixture", Element.PYRO));
         assertClose(0.0, overload.getEnemy().getAuraUnits(Element.ELECTRO), EPS,
                 "Non-Anemo/Geo transformative reactions should retain full-gauge consumption");
+    }
+
+    private static void testAccuracyPhaseG_TransformativeResidualAuraContract() {
+        CombatSimulator pyroOverload = simulatorWith(testCharacter(Element.PYRO));
+        List<ReactionResult.Kind> pyroKinds = captureReactionKinds(pyroOverload);
+        pyroOverload.getEnemy().applyAura(Element.ELECTRO, 2.0, pyroOverload.getCurrentTime());
+        pyroOverload.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, reactionHit("Pyro Overload residual fixture", Element.PYRO));
+        assertClose(0.6, pyroOverload.getEnemy().getAuraUnits(Element.ELECTRO), EPS,
+                "1U Pyro Overload should leave 0.6U from taxed 2U Electro");
+        assertEquals(1, countReactions(pyroKinds, ReactionResult.Kind.OVERLOAD),
+                "Residual Overload should emit one typed reaction");
+
+        CombatSimulator electroOverload = simulatorWith(testCharacter(Element.ELECTRO));
+        electroOverload.getEnemy().applyAura(Element.PYRO, 2.0, electroOverload.getCurrentTime());
+        electroOverload.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, reactionHit("Electro Overload residual fixture", Element.ELECTRO));
+        assertClose(0.6, electroOverload.getEnemy().getAuraUnits(Element.PYRO), EPS,
+                "1U Electro Overload should leave 0.6U from taxed 2U Pyro");
+
+        CombatSimulator cryoSuperconduct = simulatorWith(testCharacter(Element.CRYO));
+        cryoSuperconduct.getEnemy().applyAura(
+                Element.ELECTRO, 2.0, cryoSuperconduct.getCurrentTime());
+        cryoSuperconduct.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, reactionHit("Cryo Superconduct residual fixture", Element.CRYO));
+        assertClose(0.6, cryoSuperconduct.getEnemy().getAuraUnits(Element.ELECTRO), EPS,
+                "1U Cryo Superconduct should leave 0.6U from taxed 2U Electro");
+
+        CombatSimulator electroSuperconduct = simulatorWith(testCharacter(Element.ELECTRO));
+        List<ReactionResult.Kind> superconductKinds = captureReactionKinds(electroSuperconduct);
+        electroSuperconduct.getEnemy().applyAura(
+                Element.CRYO, 2.0, electroSuperconduct.getCurrentTime());
+        electroSuperconduct.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, reactionHit("Electro Superconduct residual fixture", Element.ELECTRO));
+        assertClose(0.6, electroSuperconduct.getEnemy().getAuraUnits(Element.CRYO), EPS,
+                "1U Electro Superconduct should leave 0.6U from taxed 2U Cryo");
+        assertEquals(1, countReactions(superconductKinds, ReactionResult.Kind.SUPERCONDUCT),
+                "Residual Superconduct should emit one typed reaction");
+
+        pyroOverload.advanceTime(4.49);
+        assertTrue(pyroOverload.getEnemy().getAuraUnits(
+                Element.ELECTRO, pyroOverload.getCurrentTime()) > 0.0,
+                "A 0.6U D(2) residual should remain just before 4.5 seconds");
+        pyroOverload.advanceTime(0.02);
+        assertClose(0.0, pyroOverload.getEnemy().getAuraUnits(
+                Element.ELECTRO, pyroOverload.getCurrentTime()), EPS,
+                "A 0.6U D(2) residual should expire after 4.5 seconds");
+
+        for (double sourceGauge : new double[] { 1.0, 0.5 }) {
+            CombatSimulator depleted = simulatorWith(testCharacter(Element.PYRO));
+            depleted.getEnemy().applyAura(
+                    Element.ELECTRO, sourceGauge, depleted.getCurrentTime());
+            depleted.performActionWithoutTimeAdvance(
+                    CharacterId.SUCROSE, reactionHit("Overload depletion fixture", Element.PYRO));
+            assertClose(0.0, depleted.getEnemy().getAuraUnits(Element.ELECTRO), EPS,
+                    "Overload should fully remove aura at or below 1U consumption");
+        }
     }
 
     private static void testAccuracyPhase2_QueryBeforeAndAtApplication() {

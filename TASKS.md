@@ -144,8 +144,8 @@ Crystallize variants now consume half of the trigger source gauge and preserve
 the decayed residual aura.
 
 The B-051 Overload/Superconduct residual correction is in progress. Its sourced
-1.0 consumption and unconditional-clear defect are recorded below before the
-runtime fix.
+1.0 consumption and runtime residual behavior are complete; deterministic party
+acceptance remains below.
 
 ## Scope
 
@@ -7984,7 +7984,7 @@ Completion evidence:
 
 Status:
 
-- Phase 1 is complete; Phases 2-3 remain pending.
+- Phases 1-2 are complete; Phase 3 remains pending.
 - Requirement: Overload and Superconduct subtract their 1.0-modified trigger
   source gauge and retain any positive decayed aura remainder.
 
@@ -8061,7 +8061,7 @@ Completion evidence:
   result with a shared unconditional `setAura(..., 0)`. Removing that clear lets
   `Enemy.reduceAura` own both residual and full-depletion boundaries.
 
-### Phase 2: Preserve Transformative Residual Aura
+### Phase 2: Preserve Transformative Residual Aura - Done
 
 Why second:
 
@@ -8107,6 +8107,18 @@ Verification:
 - `./gradlew build`
 - `python scripts/agent_validate.py --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Non-EC Transformative handling now relies solely on the preceding typed
+  `reduceAura` call; the redundant unconditional clear is removed.
+- Actual reaction regressions prove both Overload directions and both
+  Superconduct directions leave 0.6U from a fresh taxed 2U aura, emit one typed
+  reaction, and retain D(2) until exact 4.5-second residual expiry. Fresh 1U and
+  0.5U source auras fully deplete without negative state.
+- Existing Superconduct reaction damage and subsequent Physical RES benefit,
+  B-050 Swirl residuals, reaction ownership/listeners, build, reaction regression,
+  and routed validation all pass.
 
 ### Phase 3: Re-Accept Transformative-Reaction Party Baselines
 
