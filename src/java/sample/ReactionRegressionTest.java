@@ -987,11 +987,18 @@ public class ReactionRegressionTest {
         assertClose(80.0, flins.getMaxEnergy(), EPS, "Flins energy bar should remain 80 during special burst state");
         assertClose(30.0, flins.getEnergyCost(), EPS, "Flins Thunderous Symphony burst should cost 30");
 
+        flins.restoreCurrentEnergy(29.0);
         flinsSim.performAction(CharacterId.FLINS, CharacterActionRequest.of(CharacterActionKey.BURST));
+        assertClose(29.0, flins.getCurrentEnergy(), EPS,
+                "Flins special burst should skip below its 30-energy cost");
+        assertClose(30.0, flins.getMissedBurstCost(), EPS,
+                "Skipped Flins special burst should record the active 30-energy cost");
 
-        assertClose(50.0, flins.getCurrentEnergy(), EPS,
-                "Flins special burst should spend 30 energy instead of draining the full bar");
-        flins.receiveFlatEnergy(40.0);
+        flins.restoreCurrentEnergy(30.0);
+        flinsSim.performAction(CharacterId.FLINS, CharacterActionRequest.of(CharacterActionKey.BURST));
+        assertClose(0.0, flins.getCurrentEnergy(), EPS,
+                "Flins special burst should succeed at exactly 30 energy");
+        flins.receiveFlatEnergy(100.0);
         assertClose(80.0, flins.getCurrentEnergy(), EPS,
                 "Flins energy gain should still cap at the 80-energy bar");
     }

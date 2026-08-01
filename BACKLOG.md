@@ -92,14 +92,19 @@ experiment record.
 
 ### B-006 — FlinsParty2 sample can fire Flins burst below full energy
 
-- Status: `candidate`
+- Status: `done`
 - Source: 1 (README known simplifications)
 - Symptom: the scripted sample emits a warning when the burst fires below full energy, so the rotation is
   known to be slightly invalid.
 - Scope: `src/java/simulation/party/`
 - Risk: `local`
 - Proof: `./gradlew FlinsParty2` with no energy warning, and a recorded total delta
-- Notes: either fix the rotation timing or raise the ER target; record which and why.
+- Notes: the premise became stale after commit `27c99a1d`, which separated
+  Flins's 80-energy maximum from Thunderous Symphony's active 30-energy cost
+  and made insufficient bursts skip. Confirmed 2026-08-01 without changing the
+  rotation or ER target; regression now covers the 29/80 failure and 30/80
+  success boundaries. Two unchanged-tree `FlinsParty2` runs both produced
+  15,892,535 damage / 233,028 DPS with no Flins insufficient-energy warning.
 
 ### B-007 — NCCL/DDP distributed RL training
 
@@ -113,3 +118,17 @@ experiment record.
 - Notes: paused by the user on 2026-08-01 so the current autonomous session can
   focus exclusively on the simulator. The retained `TASKS.md` plan may be
   resumed only by a future explicit RL request.
+
+### B-008 — FlinsParty2 audited numeric baseline is stale
+
+- Status: `candidate`
+- Source: 2 (sample output observed while verifying B-006)
+- Symptom: `README.md` and the verification skill record 17,044,468 damage /
+  246,664 DPS, while repeated runs at the current revision produce 15,892,535
+  damage / 233,028 DPS.
+- Scope: `README.md`, `.agents/skills/verify-genshin-changes/`
+- Risk: `local`
+- Proof: repeated `./gradlew FlinsParty2` runs with identical totals, followed
+  by `python scripts/validate_agent_assets.py`
+- Notes: documentation-only correction. The mismatch predates B-006 and is not
+  caused by its regression-test change.
