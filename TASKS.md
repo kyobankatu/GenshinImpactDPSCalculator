@@ -7984,7 +7984,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phase 1 is complete and Phases 2-3 remain.
+- In progress; Phases 1-2 are complete and Phase 3 remains.
 - Requirement: standard Bloom and Lunar-Bloom must consume existing aura with
   the sourced Hydro:Dendro 2:1 directional ratio instead of a shared 1.0
   trigger-gauge multiplier.
@@ -8080,7 +8080,7 @@ Completion evidence:
   conversion. Core creation, ownership, Dew counters, delayed damage, and
   notifications are already separate from the one aura subtraction in scope.
 
-### Phase 2: Implement Directional Standard and Lunar-Bloom Consumption
+### Phase 2: Implement Directional Standard and Lunar-Bloom Consumption - Done
 
 Why second:
 
@@ -8132,6 +8132,23 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/agent_validate.py --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- The existing typed aura-consumption helper now accepts trigger and aura
+  elements. It applies 0.5x only to Hydro-on-Dendro Bloom/Lunar-Bloom and 2.0x
+  only to Dendro-on-Hydro Bloom/Lunar-Bloom; established Anemo/Geo and default
+  policies remain in the same side-effect-free switch.
+- Public action regressions prove weak-direction 1U/2U residuals of 1.1U/0.6U,
+  a strong-direction 1U residual of 1.2U from taxed 4U Hydro, and complete
+  removal from taxed 2U and 1U Hydro without negative state.
+- Standard Bloom emits one typed notification, creates one core owned by the
+  trigger character, and deals no immediate damage. Both Lunar directions
+  retain directional consumption, one core, and one Verdant/Moonridge Dew
+  increment. Existing core expiry/cap, Swirl, Crystallize, Overload, and
+  Superconduct regressions pass.
+- Reaction regression, build, Javadoc, and routed build/reaction validation all
+  pass.
 
 ### Phase 3: Re-Accept Bloom-Neutral Party Baselines
 

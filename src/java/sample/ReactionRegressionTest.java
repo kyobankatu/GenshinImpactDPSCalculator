@@ -119,6 +119,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseG_InvalidSourceAuraContract();
         testAccuracyPhaseG_RuntimeAuraApplicationContract();
         testAccuracyPhaseG_AnemoGeoAuraConsumptionContract();
+        testAccuracyPhaseG_BloomDirectionalAuraConsumptionContract();
         testAccuracyPhaseG_TransformativeResidualAuraContract();
         testAccuracyPhaseF_PeriodicCancellationAndRaidenEyeDamageTrigger();
         testAccuracyPhaseF_BennettSkillAndBurstApplicationContract();
@@ -733,6 +734,81 @@ public class ReactionRegressionTest {
             assertClose(0.0, depleted.getEnemy().getAuraUnits(Element.ELECTRO), EPS,
                     "Overload should fully remove aura at or below 1U consumption");
         }
+    }
+
+    private static void testAccuracyPhaseG_BloomDirectionalAuraConsumptionContract() {
+        CombatSimulator weak = simulatorWith(testCharacter(Element.HYDRO));
+        List<ReactionResult.Kind> weakKinds = captureReactionKinds(weak);
+        weak.getEnemy().applyAura(Element.DENDRO, 2.0, weak.getCurrentTime());
+        weak.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, reactionHit("1U weak Bloom consumption fixture", Element.HYDRO));
+        assertClose(1.1, weak.getEnemy().getAuraUnits(Element.DENDRO), EPS,
+                "1U Hydro Bloom should consume 0.5U from taxed 2U Dendro");
+        assertEquals(1, countReactions(weakKinds, ReactionResult.Kind.BLOOM),
+                "Directional Bloom should emit one typed reaction");
+        assertEquals(1, weak.getDendroCores().size(),
+                "Directional Bloom should create one Dendro Core");
+        assertEquals(CharacterId.SUCROSE, weak.getDendroCores().get(0).ownerId,
+                "Directional Bloom should retain the triggering character as core owner");
+        assertClose(0.0, weak.getTotalDamage(), EPS,
+                "Directional consumption should not make Bloom deal immediate damage");
+
+        CombatSimulator strongWeak = simulatorWith(testCharacter(Element.HYDRO));
+        strongWeak.getEnemy().applyAura(Element.DENDRO, 2.0, strongWeak.getCurrentTime());
+        AttackAction twoUnitHydro = reactionHit("2U weak Bloom consumption fixture", Element.HYDRO);
+        twoUnitHydro.setICD(ICDType.None, ICDTag.None, 2.0);
+        strongWeak.performActionWithoutTimeAdvance(CharacterId.SUCROSE, twoUnitHydro);
+        assertClose(0.6, strongWeak.getEnemy().getAuraUnits(Element.DENDRO), EPS,
+                "2U Hydro Bloom should consume 1U from taxed 2U Dendro");
+
+        CombatSimulator strong = simulatorWith(testCharacter(Element.DENDRO));
+        strong.getEnemy().applyAura(Element.HYDRO, 4.0, strong.getCurrentTime());
+        strong.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, reactionHit("1U strong Bloom consumption fixture", Element.DENDRO));
+        assertClose(1.2, strong.getEnemy().getAuraUnits(Element.HYDRO), EPS,
+                "1U Dendro Bloom should consume 2U from taxed 4U Hydro");
+
+        for (double hydroSourceGauge : new double[] { 2.0, 1.0 }) {
+            CombatSimulator depleted = simulatorWith(testCharacter(Element.DENDRO));
+            depleted.getEnemy().applyAura(
+                    Element.HYDRO, hydroSourceGauge, depleted.getCurrentTime());
+            depleted.performActionWithoutTimeAdvance(
+                    CharacterId.SUCROSE, reactionHit("Strong Bloom depletion fixture", Element.DENDRO));
+            assertClose(0.0, depleted.getEnemy().getAuraUnits(Element.HYDRO), EPS,
+                    "Dendro Bloom should fully remove Hydro at or below 2U consumption");
+        }
+
+        CombatSimulator lunarWeak = simulatorWith(testCharacter(Element.HYDRO).asLunar());
+        List<ReactionResult.Kind> lunarWeakKinds = captureReactionKinds(lunarWeak);
+        lunarWeak.getEnemy().applyAura(
+                Element.DENDRO, 2.0, lunarWeak.getCurrentTime());
+        lunarWeak.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, reactionHit("Weak Lunar-Bloom fixture", Element.HYDRO));
+        assertClose(1.1, lunarWeak.getEnemy().getAuraUnits(Element.DENDRO), EPS,
+                "Lunar-Bloom should preserve weak Hydro consumption");
+        assertEquals(1, countReactions(lunarWeakKinds, ReactionResult.Kind.LUNAR_BLOOM),
+                "Directional Lunar-Bloom should emit one typed reaction");
+        assertEquals(1, lunarWeak.getDendroCores().size(),
+                "Directional Lunar-Bloom should create one Dendro Core");
+        assertEquals(CharacterId.SUCROSE, lunarWeak.getDendroCores().get(0).ownerId,
+                "Directional Lunar-Bloom should retain core ownership");
+        assertEquals(1, lunarWeak.getVerdantDewCount(),
+                "Directional Lunar-Bloom should increment Verdant Dew once");
+        assertEquals(1, lunarWeak.getMoonridgeDewCount(),
+                "Directional Lunar-Bloom should increment Moonridge Dew once");
+
+        CombatSimulator lunarStrong = simulatorWith(testCharacter(Element.DENDRO).asLunar());
+        lunarStrong.getEnemy().applyAura(Element.HYDRO, 4.0, lunarStrong.getCurrentTime());
+        lunarStrong.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, reactionHit("Strong Lunar-Bloom fixture", Element.DENDRO));
+        assertClose(1.2, lunarStrong.getEnemy().getAuraUnits(Element.HYDRO), EPS,
+                "Lunar-Bloom should preserve strong Dendro consumption");
+        assertEquals(1, lunarStrong.getDendroCores().size(),
+                "Strong Lunar-Bloom should retain core creation");
+        assertEquals(1, lunarStrong.getVerdantDewCount(),
+                "Strong Lunar-Bloom should increment Verdant Dew once");
+        assertEquals(1, lunarStrong.getMoonridgeDewCount(),
+                "Strong Lunar-Bloom should increment Moonridge Dew once");
     }
 
     private static void testAccuracyPhase2_QueryBeforeAndAtApplication() {

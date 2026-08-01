@@ -381,7 +381,7 @@ public class CombatActionResolver {
 
         if (!result.isElectroCharged()) {
             sim.getEnemy().reduceAura(
-                    aura, getAuraConsumption(action, result), sim.getCurrentTime());
+                    aura, getAuraConsumption(action, result, trigger, aura), sim.getCurrentTime());
         }
 
         double resFactor = resolveImpactResistance(context, reactionElement);
@@ -432,7 +432,7 @@ public class CombatActionResolver {
             }
         } else if (result.getKind() == ReactionResult.Kind.CRYSTALLIZE) {
             sim.getEnemy().reduceAura(
-                    aura, getAuraConsumption(action, result), sim.getCurrentTime());
+                    aura, getAuraConsumption(action, result, trigger, aura), sim.getCurrentTime());
             if (sim.isLoggingEnabled()) {
                 System.out.println(String.format(
                         "   [Reaction] %s on %s -> %s",
@@ -440,7 +440,7 @@ public class CombatActionResolver {
             }
         } else if (result.getKind() == ReactionResult.Kind.LUNAR_CRYSTALLIZE) {
             sim.getEnemy().reduceAura(
-                    aura, getAuraConsumption(action, result), sim.getCurrentTime());
+                    aura, getAuraConsumption(action, result, trigger, aura), sim.getCurrentTime());
             handleLunarCrystallize(attacker, characterId, trigger, aura, result);
         } else if (result.getKind() == ReactionResult.Kind.BURNING) {
             double resFactor = resolveImpactResistance(context, Element.PYRO);
@@ -456,7 +456,8 @@ public class CombatActionResolver {
                 || result.getKind() == ReactionResult.Kind.LUNAR_BLOOM) {
             double resFactor = resolveImpactResistance(context, Element.DENDRO);
             double coreDamage = result.getTransformDamage() * resFactor;
-            sim.getEnemy().reduceAura(aura, action.getGaugeUnits(), sim.getCurrentTime());
+            sim.getEnemy().reduceAura(
+                    aura, getAuraConsumption(action, result, trigger, aura), sim.getCurrentTime());
             reactionEffectScheduler.createDendroCore(characterId, result.getTransformDamage());
             if (result.getKind() == ReactionResult.Kind.LUNAR_BLOOM) {
                 sim.incrementVerdantDewCount();
@@ -580,19 +581,36 @@ public class CombatActionResolver {
      * Returns the source-gauge amount consumed from an existing aura.
      *
      * <p>Anemo and Geo triggers use the sourced 0.5 unit modifier for Swirl and
-     * both Crystallize variants. Other reaction families retain their existing
+     * both Crystallize variants. Bloom uses its directional ratio: Hydro on
+     * Dendro consumes 0.5 times the source gauge, while Dendro on Hydro consumes
+     * 2.0 times the source gauge. Other reaction families retain their existing
      * source-gauge consumption policy.
      *
      * @param action source action carrying pre-tax gauge units
      * @param result typed reaction outcome
+     * @param trigger trigger element
+     * @param aura existing aura element
      * @return aura gauge units to subtract
      */
-    private double getAuraConsumption(AttackAction action, ReactionResult result) {
+    private double getAuraConsumption(
+            AttackAction action,
+            ReactionResult result,
+            Element trigger,
+            Element aura) {
         switch (result.getKind()) {
             case SWIRL:
             case CRYSTALLIZE:
             case LUNAR_CRYSTALLIZE:
                 return action.getGaugeUnits() * 0.5;
+            case BLOOM:
+            case LUNAR_BLOOM:
+                if (trigger == Element.HYDRO && aura == Element.DENDRO) {
+                    return action.getGaugeUnits() * 0.5;
+                }
+                if (trigger == Element.DENDRO && aura == Element.HYDRO) {
+                    return action.getGaugeUnits() * 2.0;
+                }
+                return action.getGaugeUnits();
             default:
                 return action.getGaugeUnits();
         }
