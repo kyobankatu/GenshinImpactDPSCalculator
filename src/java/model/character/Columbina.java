@@ -70,6 +70,10 @@ import java.util.Map;
  * registers herself as a {@link CombatSimulator.ReactionListener} on first action.
  */
 public class Columbina extends Character implements CharacterTeamBuffProvider, ReactionAwareCharacter {
+    private static final double THUNDERCLOUD_EXPECTED_EXTRA_RATE = 0.33;
+    private static final String THUNDERCLOUD_EXPECTED_EXTRA_LABEL =
+            "Lunar-Charged Reaction (33% Expected Extra)";
+
     // Resources
     private int gravity = 0;
     private static final int MAX_GRAVITY = 60;
@@ -340,15 +344,15 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
     @Override
     public void onReaction(mechanics.reaction.ReactionResult result, model.entity.Character source, double time,
             CombatSimulator sim) {
-        // 4th Passive: Thundercloud-Strike — add expected extra 33% within Lunar Domain
+        // Use expected damage so repeated Thundercloud-heavy rotations remain comparable.
         if (result.isThundercloudStrike()) {
             if (time <= domainEndTime) {
-                double extra = result.getTransformDamage() * 0.33;
+                double extra = result.getTransformDamage() * THUNDERCLOUD_EXPECTED_EXTRA_RATE;
                 sim.recordDamage("Thundercloud", extra);
                 if (sim.isLoggingEnabled()) {
                     visualization.VisualLogger.getInstance().log(time, "Thundercloud",
-                            "Lunar-Charged Reaction (Extra)", extra,
-                            "Lunar-Charged Reaction (Extra)", extra, sim.getEnemy().getAuraMap(time));
+                            THUNDERCLOUD_EXPECTED_EXTRA_LABEL, extra,
+                            THUNDERCLOUD_EXPECTED_EXTRA_LABEL, extra, sim.getEnemy().getAuraMap(time));
                 }
             }
             return;
@@ -358,9 +362,10 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
         if (type == null)
             return;
 
-        boolean nearRipple = (time <= rippleEndTime);
+        // Position is not simulated, so an active Ripple implies that the reaction is nearby.
+        boolean rippleAssumedNearby = time <= rippleEndTime;
 
-        if (nearRipple) {
+        if (rippleAssumedNearby) {
             double gravityCooldown = (constellation >= 2) ? (2.0 / 1.34) : 2.0;
             if (time - lastGravityTime >= gravityCooldown) {
                 accumulateGravity(type, sim);

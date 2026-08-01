@@ -220,9 +220,11 @@ Known simplifications:
   nondeterministic. Generic Xiangling simulations do not pick up the chili
   unless their party definition enables that assumption.
 - `FlinsParty2`: defensive shield HP is logged but not consumed by enemy attacks,
-  and some custom effects use deterministic stand-ins for random or
-  field-position behavior. Flins's Thunderous Symphony correctly uses its
-  active 30-energy cost while retaining an 80-energy maximum.
+  Columbina treats every Lunar reaction during Gravity Ripple as nearby because
+  field position is not simulated, and her Thundercloud extra strikes use 33%
+  expected damage. Her Moondrift extra attacks remain random. Flins's Thunderous
+  Symphony correctly uses its active 30-energy cost while retaining an 80-energy
+  maximum.
 
 ### Continuous Aura Decay Model
 

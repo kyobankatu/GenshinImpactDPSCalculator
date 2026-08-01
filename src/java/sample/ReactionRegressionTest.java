@@ -73,6 +73,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_FlinsThundercloudConditionalHits();
         testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost();
         testAccuracyPhaseF_ColumbinaGravityAndDewRegression();
+        testAccuracyPhaseF_ColumbinaStandInBoundaries();
         testAccuracyPhaseF_ArtifactLunarReactionBuffRegression();
         testAccuracyPhaseF_WeaponReactionBonusRegression();
         testAccuracyPhaseF_XianglingChiliPickupOptIn();
@@ -1027,6 +1028,82 @@ public class ReactionRegressionTest {
 
         assertEquals(3, cleanseHits[0],
                 "Columbina should gain Verdant Dew from Lunar-Bloom near Ripple and consume it for Moondew Cleanse");
+    }
+
+    private static void testAccuracyPhaseF_ColumbinaStandInBoundaries() {
+        model.character.Columbina columbina = new model.character.Columbina(new TestWeapon(), blankArtifact());
+        CombatSimulator sim = simulatorWithExistingCharacter(columbina);
+        ReactionResult thundercloudStrike = ReactionResult.transform(
+                100.0,
+                "Thundercloud Strike",
+                ReactionResult.Kind.THUNDERCLOUD_STRIKE);
+
+        columbina.onAction(CharacterActionRequest.of(CharacterActionKey.BURST), sim);
+        double beforeExpectedExtra = sim.getTotalDamage();
+        columbina.onReaction(thundercloudStrike, columbina, sim.getCurrentTime(), sim);
+        assertClose(33.0, sim.getTotalDamage() - beforeExpectedExtra, EPS,
+                "Columbina should model the 33% Thundercloud proc as expected extra damage");
+
+        sim.advanceTime(20.0 - sim.getCurrentTime());
+        double beforeDomainBoundary = sim.getTotalDamage();
+        columbina.onReaction(thundercloudStrike, columbina, sim.getCurrentTime(), sim);
+        assertClose(33.0, sim.getTotalDamage() - beforeDomainBoundary, EPS,
+                "Columbina expected Thundercloud extra should apply at the domain expiry boundary");
+
+        sim.advanceTime(0.01);
+        double afterDomainExpiry = sim.getTotalDamage();
+        columbina.onReaction(thundercloudStrike, columbina, sim.getCurrentTime(), sim);
+        assertClose(afterDomainExpiry, sim.getTotalDamage(), EPS,
+                "Columbina expected Thundercloud extra should not apply after the domain expires");
+
+        model.character.Columbina rippleColumbina = new model.character.Columbina(new TestWeapon(), blankArtifact());
+        CombatSimulator rippleSim = simulatorWithExistingCharacter(rippleColumbina);
+        int[] cleanseHits = { 0 };
+        rippleSim.addListener((actor, action, time) -> {
+            if (action.getName().startsWith("Moondew Cleanse Hit")) {
+                cleanseHits[0]++;
+            }
+        });
+        ReactionResult lunarBloom = ReactionResult.lunar(
+                0.0,
+                ReactionResult.LunarType.BLOOM,
+                Element.DENDRO,
+                Element.DENDRO,
+                true,
+                false);
+
+        rippleColumbina.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), rippleSim);
+        rippleSim.advanceTime(25.0 - rippleSim.getCurrentTime());
+        for (Element element : Element.values()) {
+            rippleSim.getEnemy().setAura(element, 0.0);
+        }
+        rippleColumbina.onReaction(lunarBloom, rippleColumbina, rippleSim.getCurrentTime(), rippleSim);
+        rippleColumbina.onAction(CharacterActionRequest.of(CharacterActionKey.CHARGE), rippleSim);
+        assertEquals(3, cleanseHits[0],
+                "Columbina should assume reactions are near Ripple at its expiry boundary");
+
+        model.character.Columbina expiredRippleColumbina =
+                new model.character.Columbina(new TestWeapon(), blankArtifact());
+        CombatSimulator expiredRippleSim = simulatorWithExistingCharacter(expiredRippleColumbina);
+        int[] expiredCleanseHits = { 0 };
+        expiredRippleSim.addListener((actor, action, time) -> {
+            if (action.getName().startsWith("Moondew Cleanse Hit")) {
+                expiredCleanseHits[0]++;
+            }
+        });
+        expiredRippleColumbina.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), expiredRippleSim);
+        expiredRippleSim.advanceTime(25.01 - expiredRippleSim.getCurrentTime());
+        for (Element element : Element.values()) {
+            expiredRippleSim.getEnemy().setAura(element, 0.0);
+        }
+        expiredRippleColumbina.onReaction(
+                lunarBloom,
+                expiredRippleColumbina,
+                expiredRippleSim.getCurrentTime(),
+                expiredRippleSim);
+        expiredRippleColumbina.onAction(CharacterActionRequest.of(CharacterActionKey.CHARGE), expiredRippleSim);
+        assertEquals(0, expiredCleanseHits[0],
+                "Columbina should not assume reactions are near Ripple after it expires");
     }
 
     private static void testAccuracyPhaseF_ArtifactLunarReactionBuffRegression() {

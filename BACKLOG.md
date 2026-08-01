@@ -80,15 +80,20 @@ experiment record.
 
 ### B-005 — FlinsParty2 custom effects use deterministic stand-ins
 
-- Status: `candidate`
+- Status: `done`
 - Source: 1 (README known simplifications)
 - Symptom: some custom effects substitute deterministic values for random or field-position behavior, so the
   reported total is a point estimate presented as exact.
 - Scope: `src/java/model/character/`, `src/java/mechanics/buff/`
 - Risk: `local`
 - Proof: regression asserting the stand-in value plus a log or report note making it visible
-- Notes: these are non-canonical Lunar mechanics; making the assumption explicit may be preferable to
-  modeling randomness.
+- Notes: completed 2026-08-01 by naming the two actual assumptions: active
+  Gravity Ripple implies nearby field position, and Thundercloud's 33% extra
+  strike chance is represented as expected damage. The report labels the latter
+  as `33% Expected Extra`; regression covers the expected value and inclusive
+  expiry boundaries. Moondrift's separate 33% extra attack remains random and
+  is documented as such. `FlinsParty2` remained at 15,892,535 damage / 233,028
+  DPS.
 
 ### B-006 — FlinsParty2 sample can fire Flins burst below full energy
 
