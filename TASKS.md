@@ -4439,7 +4439,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phase 1 is complete and Phases 2-3 remain.
+- In progress; Phases 1-2 are complete and Phase 3 remains.
 - Requirement: Wandering Evenstar must derive both R5 ATK bonuses from one
   equipped-owner EM snapshot at the sourced activation cadence instead of
   splitting its calculation across incompatible stat-assembly stages.
@@ -4523,7 +4523,7 @@ Verification:
 - inspect `WanderingEvenstar`, `StatAssembler`, `BuffManager`, `CombatSimulator.addCharacter`, and timer events
 - `python scripts/preflight.py --run`
 
-### Phase 2: Register and Apply One Timed EM Snapshot
+### Phase 2: Register and Apply One Timed EM Snapshot - Done
 
 Why second:
 
@@ -4579,6 +4579,19 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/agent_validate.py --path src/java/model/weapon/WanderingEvenstar.java --path src/java/model/entity/SimulatorInitializedWeaponEffect.java --path src/java/simulation/CombatSimulator.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Focused regression proves zero ATK immediately before 64/60 seconds, then
+  owner 48% and ally 14.4% from one 865 EM snapshot at activation.
+- A +100 EM mid-window buff leaves both ATK values unchanged until the exact
+  +10-second trigger, where both update from the new 965 EM snapshot.
+- The owner remains off-field during activation, and two independent equipped
+  copies stack one ally share each.
+- FlinsParty smoke completes with unchanged 109%/100%/100%/180% ER, three
+  Sucrose Bursts, no warnings, and 18,843,690 damage / 189,384 DPS over 99.5s.
+- ReactionRegressionTest, PartyCatalogRegressionTest, build, Javadoc, routed
+  validation, and preflight pass.
 
 ### Phase 3: Accept the Timed FlinsParty Baseline
 

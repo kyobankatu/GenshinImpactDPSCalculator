@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.function.DoubleSupplier;
 
 import mechanics.analysis.EnergyAnalyzer;
+import mechanics.buff.Buff;
 import mechanics.buff.BuffId;
 import mechanics.element.ResonanceManager;
 import mechanics.formula.DamageCalculator;
@@ -106,6 +107,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_DamageHooksDispatchOnce();
         testAccuracyPhaseF_SkywardSpineInjectedProcBoundaries();
         testAccuracyPhaseF_FavoniusInjectedProcBoundaries();
+        testAccuracyPhaseF_WanderingEvenstarTimedSnapshot();
         testAccuracyPhaseF_ColumbinaMoondriftInjectedDrawBoundaries();
         testAccuracyPhase2_TimeAwareLinearDecay();
         testAccuracyPhase2_QueryBeforeAndAtApplication();
@@ -1788,6 +1790,76 @@ public class ReactionRegressionTest {
         assertEquals(2, replayDrawIndex[0], "Identical Favonius sequences should consume equal draws");
         assertClose(energyAfterFirstProc, replayOwner.getCurrentEnergy(), EPS,
                 "Identical Favonius sequences should generate equal energy");
+    }
+
+    private static void testAccuracyPhaseF_WanderingEvenstarTimedSnapshot() {
+        double firstTriggerTime = 64.0 / 60.0;
+        TestCharacter ally = testCharacter(Element.PYRO, CharacterId.XIANGLING);
+        TestCharacter owner = testCharacter(Element.ANEMO, CharacterId.SUCROSE)
+                .withStat(StatType.ELEMENTAL_MASTERY, 500.0);
+        StatsContainer artifactStats = new StatsContainer();
+        artifactStats.set(StatType.ELEMENTAL_MASTERY, 200.0);
+        owner.setArtifacts(new ArtifactSet("Evenstar EM Fixture", artifactStats));
+        owner.setWeapon(new model.weapon.WanderingEvenstar());
+
+        CombatSimulator sim = new CombatSimulator();
+        sim.setLoggingEnabled(false);
+        sim.setEnemy(new Enemy(90));
+        sim.addCharacter(ally);
+        sim.addCharacter(owner);
+
+        assertClose(0.0, resolvedStat(sim, owner, StatType.ATK_FLAT), EPS,
+                "Wandering Evenstar owner buff should be absent before 64 frames");
+        assertClose(0.0, resolvedStat(sim, ally, StatType.ATK_FLAT), EPS,
+                "Wandering Evenstar ally buff should be absent before 64 frames");
+        sim.advanceTime(firstTriggerTime - 0.000001);
+        assertClose(0.0, resolvedStat(sim, owner, StatType.ATK_FLAT), EPS,
+                "Wandering Evenstar should remain inactive immediately before 64 frames");
+        sim.advanceTime(0.000001);
+
+        double firstSnapshotEM = 500.0 + 200.0 + 165.0;
+        assertClose(firstSnapshotEM * 0.48, resolvedStat(sim, owner, StatType.ATK_FLAT), EPS,
+                "Wandering Evenstar owner buff should use base, weapon, and artifact EM");
+        assertClose(firstSnapshotEM * 0.48 * 0.30, resolvedStat(sim, ally, StatType.ATK_FLAT), EPS,
+                "Wandering Evenstar ally share should use the owner's captured EM");
+
+        owner.addBuff(new Buff("Evenstar Snapshot EM", 20.0, sim.getCurrentTime()) {
+            @Override
+            protected void applyStats(StatsContainer stats, double currentTime) {
+                stats.add(StatType.ELEMENTAL_MASTERY, 100.0);
+            }
+        });
+        sim.advanceTime(9.999);
+        assertClose(firstSnapshotEM * 0.48, resolvedStat(sim, owner, StatType.ATK_FLAT), EPS,
+                "Wandering Evenstar owner buff should not change inside a snapshot interval");
+        assertClose(firstSnapshotEM * 0.48 * 0.30, resolvedStat(sim, ally, StatType.ATK_FLAT), EPS,
+                "Wandering Evenstar ally share should not change inside a snapshot interval");
+        sim.advanceTime(0.001);
+
+        double secondSnapshotEM = firstSnapshotEM + 100.0;
+        assertClose(secondSnapshotEM * 0.48, resolvedStat(sim, owner, StatType.ATK_FLAT), EPS,
+                "Wandering Evenstar owner buff should update at the ten-second resnapshot");
+        assertClose(secondSnapshotEM * 0.48 * 0.30, resolvedStat(sim, ally, StatType.ATK_FLAT), EPS,
+                "Wandering Evenstar ally share should update from the same resnapshot");
+
+        TestCharacter stackTarget = testCharacter(Element.HYDRO, CharacterId.XINGQIU);
+        TestCharacter firstOwner = testCharacter(Element.ANEMO, CharacterId.SUCROSE)
+                .withStat(StatType.ELEMENTAL_MASTERY, 200.0);
+        TestCharacter secondOwner = testCharacter(Element.HYDRO, CharacterId.COLUMBINA)
+                .withStat(StatType.ELEMENTAL_MASTERY, 100.0);
+        firstOwner.setWeapon(new model.weapon.WanderingEvenstar());
+        secondOwner.setWeapon(new model.weapon.WanderingEvenstar());
+        CombatSimulator stackSim = new CombatSimulator();
+        stackSim.setLoggingEnabled(false);
+        stackSim.setEnemy(new Enemy(90));
+        stackSim.addCharacter(stackTarget);
+        stackSim.addCharacter(firstOwner);
+        stackSim.addCharacter(secondOwner);
+        stackSim.advanceTime(firstTriggerTime);
+        double expectedStackedShare = (200.0 + 165.0) * 0.48 * 0.30
+                + (100.0 + 165.0) * 0.48 * 0.30;
+        assertClose(expectedStackedShare, resolvedStat(stackSim, stackTarget, StatType.ATK_FLAT), EPS,
+                "Independent Wandering Evenstar ally shares should stack once each");
     }
 
     private static void testAccuracyPhaseF_ColumbinaMoondriftInjectedDrawBoundaries() {

@@ -22,7 +22,7 @@
 - `SkywardSpine.java`: polearm with crit-rate and attack-speed stats plus random vacuum-blade proc logic.
 - `SunnyMorningSleepIn.java`: catalyst with reaction-listener registration and separate EM buffs for swirl, skill hits, and burst hits.
 - `TheCatch.java`: polearm with burst damage and burst crit passive.
-- `WanderingEvenstar.java`: catalyst that converts the wielder's EM into self and team flat ATK through passive plus team-buff split logic.
+- `WanderingEvenstar.java`: catalyst that snapshots the wielder's effective EM on its timed trigger and derives source-attributed self and team flat-ATK buffs.
 - `WolfFang.java`: sword with skill and burst damage bonus plus on-field crit-rate stack tracking for skill and burst hits.
 
 ## Coupling and dependencies
@@ -38,4 +38,5 @@
   draw source when a benchmark or optimizer requires common reproducible random
   numbers. Reject null sources at construction.
 - If a weapon grants team buffs, implement `WeaponTeamBuffProvider` and audit `Character.getEffectiveStats` behavior to avoid recursive stat loops.
+- Use `SimulatorInitializedWeaponEffect` when a weapon must own a periodic trigger; derive every linked buff from one captured stat view rather than separate assembly stages.
 - Prefer implementing the narrowest capability interface instead of adding optional methods to `Weapon`.

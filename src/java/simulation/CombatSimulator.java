@@ -13,6 +13,7 @@ import mechanics.buff.Buff;
 import mechanics.energy.EnergyDistributor;
 import model.entity.Character;
 import model.entity.Enemy;
+import model.entity.SimulatorInitializedWeaponEffect;
 import model.type.CharacterId;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionRequest;
@@ -164,13 +165,18 @@ public class CombatSimulator {
     }
 
     /**
-     * Adds a character to the party and initializes rotation energy state.
+     * Adds a character to the party and initializes rotation energy and
+     * equipped-weapon lifecycle state.
      *
      * @param character character to add
      */
     public void addCharacter(Character character) {
         character.resetEnergyStats();
         party.addMember(character);
+        if (character.getWeapon() instanceof SimulatorInitializedWeaponEffect) {
+            ((SimulatorInitializedWeaponEffect) character.getWeapon())
+                    .initializeForSimulator(character, this);
+        }
     }
 
     /**
