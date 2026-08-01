@@ -84,6 +84,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_IneffaSkillNoIcdApplicationContract();
         testAccuracyPhaseF_IneffaBirgittaSummonLifecycle();
         testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost();
+        testAccuracyPhaseF_TimingAwareEnergyAnalysis();
         testAccuracyPhaseF_ColumbinaGravityAndDewRegression();
         testAccuracyPhaseF_ColumbinaStandInBoundaries();
         testAccuracyPhaseF_ArtifactLunarReactionBuffRegression();
@@ -1308,13 +1309,18 @@ public class ReactionRegressionTest {
     private static void testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost() {
         TestBurstCharacter gated = new TestBurstCharacter(60.0);
         CombatSimulator gateSim = simulatorWithExistingCharacter(gated);
-        gated.restoreCurrentEnergy(59.0);
+        gated.restoreCurrentEnergy(59.8);
 
-        gateSim.performAction(CharacterId.SUCROSE, CharacterActionRequest.of(CharacterActionKey.BURST));
+        gateSim.setLoggingEnabled(true);
+        String skippedLog = captureStandardOutput(() -> gateSim.performAction(
+                CharacterId.SUCROSE, CharacterActionRequest.of(CharacterActionKey.BURST)));
+        gateSim.setLoggingEnabled(false);
 
         assertEquals(0, gated.burstCasts, "Burst should not execute below current energy cost");
-        assertClose(59.0, gated.getCurrentEnergy(), EPS, "Skipped burst should not consume energy");
+        assertClose(59.8, gated.getCurrentEnergy(), EPS, "Skipped burst should not consume energy");
         assertClose(60.0, gated.getMissedBurstCost(), EPS, "Skipped burst cost should feed ER calibration");
+        assertTrue(skippedLog.contains("(59.8/60.0)"),
+                "Insufficient-energy diagnostics should not round a deficit to 60/60");
         Map<CharacterId, Double> missedBurstER = EnergyAnalyzer.calculateERRequirements(gateSim);
         assertTrue(missedBurstER.get(CharacterId.SUCROSE) > 1.0,
                 "Missed burst should raise required ER above base when particle energy is absent");
@@ -1348,6 +1354,45 @@ public class ReactionRegressionTest {
         flins.receiveFlatEnergy(100.0);
         assertClose(80.0, flins.getCurrentEnergy(), EPS,
                 "Flins energy gain should still cap at the 80-energy bar");
+    }
+
+    private static void testAccuracyPhaseF_TimingAwareEnergyAnalysis() {
+        TestBurstCharacter intervalCharacter = new TestBurstCharacter(60.0);
+        CombatSimulator intervalSim = simulatorWithExistingCharacter(intervalCharacter);
+
+        intervalSim.performAction(CharacterId.SUCROSE,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        intervalCharacter.receiveParticleEnergy(30.0, 1.0);
+        intervalSim.performAction(CharacterId.SUCROSE,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        intervalCharacter.receiveParticleEnergy(90.0, 1.0);
+        intervalSim.performAction(CharacterId.SUCROSE,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        intervalCharacter.receiveParticleEnergy(60.0, 1.0);
+
+        assertEquals(3, intervalCharacter.getBurstEnergyWindows().size(),
+                "Successful and skipped Burst requests should both close analysis windows");
+        Map<CharacterId, Double> intervalER = EnergyAnalyzer.calculateERRequirements(intervalSim);
+        assertClose(2.0, intervalER.get(CharacterId.SUCROSE), EPS,
+                "Later excess particles should not hide a deficient 30-energy interval");
+
+        TestBurstCharacter cyclicCharacter = new TestBurstCharacter(60.0);
+        CombatSimulator cyclicSim = simulatorWithExistingCharacter(cyclicCharacter);
+        cyclicCharacter.receiveParticleEnergy(10.0, 1.0);
+        cyclicSim.performAction(CharacterId.SUCROSE,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        cyclicCharacter.receiveParticleEnergy(20.0, 1.0);
+        Map<CharacterId, Double> cyclicER = EnergyAnalyzer.calculateERRequirements(cyclicSim);
+        assertClose(2.0, cyclicER.get(CharacterId.SUCROSE), EPS,
+                "Final tail and pre-first particles should form one cyclic interval");
+
+        TestBurstCharacter unfundedCharacter = new TestBurstCharacter(60.0);
+        CombatSimulator unfundedSim = simulatorWithExistingCharacter(unfundedCharacter);
+        unfundedSim.performAction(CharacterId.SUCROSE,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        Map<CharacterId, Double> unfundedER = EnergyAnalyzer.calculateERRequirements(unfundedSim);
+        assertClose(9.99, unfundedER.get(CharacterId.SUCROSE), EPS,
+                "A Burst interval without enough flat or particle energy should use the sentinel");
     }
 
     private static void testAccuracyPhaseF_ColumbinaGravityAndDewRegression() {

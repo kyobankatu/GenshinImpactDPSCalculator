@@ -632,7 +632,7 @@ experiment record.
 
 ### B-027 — Aggregate ER calibration permits mid-rotation Burst failures
 
-- Status: `planned`
+- Status: `in-progress`
 - Source: 2 (observable `FlinsParty2` warning and energy timeline)
 - Symptom: the accepted final simulation skips Columbina Burst at 20.3 seconds
   with about 52/60 energy and again at 54.3 seconds with 59.8/60 energy even
@@ -646,7 +646,7 @@ experiment record.
 - Notes: discovered 2026-08-02 after B-026. The current analyzer divides total
   rotation cost by total particle energy, which hides a deficient interval
   behind later particle income. Close an accounting window on every requested
-  Burst, including skipped attempts; combine the final tail with the first
-  preloaded window for cyclic refill; choose the maximum per-window ER. The
+  Burst, including skipped attempts; replay energy cap and carry; combine the
+  final tail with the first preloaded window for cyclic refill. The
   pre-fix baseline is 14,316,424 damage / 213,042 DPS. See `TASKS.md`
   implementation block `Timing-Aware ER Calibration`.

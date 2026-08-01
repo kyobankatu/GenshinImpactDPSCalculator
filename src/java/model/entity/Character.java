@@ -441,8 +441,8 @@ public abstract class Character {
     }
 
     /**
-     * @return list of per-burst-window energy subtotals
-     *         ({@code [particle, flat, burstCost]} per entry)
+     * @return list of per-request Burst energy subtotals
+     *         ({@code [particle, flat, burstCost]} per entry, including skips)
      */
     public java.util.List<double[]> getBurstEnergyWindows() {
         return energyState.getBurstEnergyWindows();

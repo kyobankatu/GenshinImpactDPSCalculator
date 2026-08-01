@@ -12,8 +12,9 @@ import java.util.List;
  *   <li><b>Flat energy</b> – fixed amounts (e.g. from Bennett's Burst restoration)
  *       that bypass ER scaling</li>
  * </ul>
- * Per-burst-window subtotals are recorded so the {@code EnergyManager} can
- * evaluate ER tuning quality after each burst usage.
+ * Per-request Burst windows are recorded so the {@code EnergyAnalyzer} can
+ * evaluate ER tuning quality at every scripted Burst boundary, including
+ * requests that runtime energy gating skips.
  */
 public class EnergyState {
     private double currentEnergy = 0.0;
@@ -91,11 +92,9 @@ public class EnergyState {
      * @param currentTime simulation time of the burst use
      */
     public void markBurstUsed(double burstCost, double maxEnergy, double currentTime) {
-        burstEnergyWindows.add(new double[] { particleEnergyThisWindow, flatEnergyThisWindow, burstCost });
+        closeBurstEnergyWindow(burstCost);
         double preBurstPercent = maxEnergy > 0.0 ? Math.min(100.0, currentEnergy / maxEnergy * 100.0) : 0.0;
         burstEnergyMarkers.add(new double[] { currentTime, preBurstPercent });
-        particleEnergyThisWindow = 0.0;
-        flatEnergyThisWindow = 0.0;
         currentEnergy = Math.max(0.0, Math.min(maxEnergy, currentEnergy - burstCost));
     }
 
@@ -107,6 +106,21 @@ public class EnergyState {
      */
     public void recordMissedBurst(double burstCost) {
         missedBurstCost += burstCost;
+        closeBurstEnergyWindow(burstCost);
+    }
+
+    /**
+     * Closes one analysis window at a requested Burst boundary.
+     *
+     * <p>This method resets only accounting subtotals. A skipped Burst keeps
+     * its runtime energy and cooldown state unchanged.
+     *
+     * @param burstCost cost requested at the boundary
+     */
+    private void closeBurstEnergyWindow(double burstCost) {
+        burstEnergyWindows.add(new double[] { particleEnergyThisWindow, flatEnergyThisWindow, burstCost });
+        particleEnergyThisWindow = 0.0;
+        flatEnergyThisWindow = 0.0;
     }
 
     /**
@@ -158,7 +172,7 @@ public class EnergyState {
     }
 
     /**
-     * Returns per-burst window subtotals.
+     * Returns per-request Burst window subtotals.
      * <p>Each entry is {@code [particleEnergy, flatEnergy, burstCost]}.
      *
      * @return list of burst window subtotal arrays

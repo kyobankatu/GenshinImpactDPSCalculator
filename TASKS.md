@@ -3426,15 +3426,15 @@ Completion evidence:
 
 Status:
 
-- Planned; Phase 1 evidence is recorded below.
+- In progress; Phases 1-2 are complete and Phase 3 remains.
 - Requirement: ER calibration must select a target that funds every requested
   Burst in rotation order, including the cyclic final-to-first interval.
 
 Scope:
 
 - Close energy-accounting windows on successful and skipped Burst requests.
-- Calculate required ER from the worst chronological interval rather than
-  aggregate rotation totals.
+- Calculate required ER by replaying chronological intervals with energy cap
+  and carry rather than averaging aggregate rotation totals.
 - Keep runtime energy spending and optimizer analysis as separate roles.
 - Re-accept the `FlinsParty2` optimizer and numeric baseline.
 
@@ -3487,7 +3487,7 @@ Verification:
 - inspect `FlinsParty2` warnings and generated energy timeline
 - `python scripts/preflight.py --run`
 
-### Phase 2: Calibrate Against the Worst Burst Interval
+### Phase 2: Calibrate Against the Worst Burst Interval - Done
 
 Why second:
 
@@ -3501,6 +3501,7 @@ Target files:
 - `src/java/mechanics/analysis/EnergyAnalyzer.java`
 - `src/java/simulation/runtime/ActionGateway.java`
 - `src/java/sample/ReactionRegressionTest.java`
+- `BACKLOG.md`
 - `TASKS.md`
 
 Tasks:
@@ -3509,14 +3510,15 @@ Tasks:
   Burst request while preserving actual energy on a skip.
 - Reconstruct the cyclic first interval from post-final tail income plus the
   income before the first requested Burst.
-- Return the maximum finite per-window ER requirement, retaining the existing
-  9.99 sentinel when an interval cannot be funded.
+- Find the minimum ER that sustains the chronological cycle, retaining the
+  existing 9.99 sentinel when the sequence cannot be funded.
 - Print insufficient energy with enough precision to distinguish 59.8 from 60.
 
 Acceptance criteria:
 
 - A locally deficient interval cannot be hidden by excess energy in a later
   interval.
+- Alternate Burst costs preserve legitimate post-Burst energy between requests.
 - A skipped request closes only its analysis window and does not spend runtime
   energy or start Burst cooldown.
 - One-Burst rotations retain cyclic start-full/end-full calibration behavior.
