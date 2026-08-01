@@ -695,3 +695,17 @@ experiment record.
 - Notes: documentation-only correction discovered 2026-08-02; no formula,
   multiplier, public signature, or reaction behavior changes. Completed
   2026-08-02 with warning-free Javadoc and passing reaction regression.
+
+### B-030 — Reaction regression emits a fixture fallback action message
+
+- Status: `done`
+- Source: 2 (observable regression output defect)
+- Symptom: successful `ReactionRegressionTest` output includes `Reaction Tester
+  does nothing specific for SKILL`, which is fixture fallback narration rather
+  than a diagnostic or assertion result.
+- Scope: `src/java/sample/ReactionRegressionTest.java`
+- Risk: `local`
+- Proof: passing regression output without the fallback line
+- Notes: capture only the fixture Skill call that activates Sunny Morning
+  Sleep-In; retain production logging and all assertions. Completed 2026-08-02;
+  the regression passes without the fallback line.

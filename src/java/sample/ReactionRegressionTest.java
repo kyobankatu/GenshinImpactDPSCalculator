@@ -1717,7 +1717,8 @@ public class ReactionRegressionTest {
         TestCharacter owner = testCharacter(Element.ANEMO);
         owner.setWeapon(new model.weapon.SunnyMorningSleepIn());
         CombatSimulator sim = simulatorWith(owner);
-        sim.performAction(CharacterId.SUCROSE, CharacterActionRequest.of(CharacterActionKey.SKILL));
+        captureStandardOutput(() -> sim.performAction(
+                CharacterId.SUCROSE, CharacterActionRequest.of(CharacterActionKey.SKILL)));
         double beforeEm = owner.getEffectiveStats(sim.getCurrentTime()).get(StatType.ELEMENTAL_MASTERY);
         sim.getEnemy().setAura(Element.PYRO, 1.0);
         sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
