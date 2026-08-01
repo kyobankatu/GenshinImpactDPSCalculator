@@ -1230,7 +1230,7 @@ experiment record.
 
 ### B-049 — Runtime aura application omits Aura Tax and source decay classes
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 1 (README known simplification), confirmed by Source 3 evidence
 - Symptom: every finite source currently stores its full action gauge and uses
   `6 + 5U` duration, so 1U/2U/4U begin at 1/2/4 and last 11/16/26 seconds
@@ -1239,7 +1239,7 @@ experiment record.
 - Scope: enemy-owned standard source application, Aura Tax, source decay class,
   non-Pyro and Pyro same-element extension, snapshot preservation, ordinary
   action/EC routing, focused regressions, and audited party baselines
-- Risk: `planned`
+- Risk: `validated`
 - Proof: exact 1U/1.5U/2U/4U initial/expiry boundaries, non-Pyro/Pyro extension
   and no-op cases, consume/snapshot restore, actual action/EC routing, and two
   matching payloads for all three audited parties
@@ -1253,3 +1253,15 @@ experiment record.
   Freeze, Dendro-special reaction tax, Swirl spread, EC terminal ticks,
   multi-target state, and reaction consumption multipliers are excluded. See
   `TASKS.md` implementation block `Standard Aura Tax and Decay Rates`.
+  Completed with an enemy-owned source application API, exact source-class
+  boundaries, non-Pyro/Pyro extension rules, decay-rate snapshots, ordinary/EC
+  runtime routing, and invalid-source handling. Two accepted payloads each are
+  RaidenParty
+  `1565f197fe7813ef53bc7ee4107a6b68aae7337fdf1efb9e5d865502f2813d80`
+  at 1,348,716 / 64,225, FlinsParty
+  `b374971bc2ee6237bf0eb9eada25c13b0b6976168a40354cca9b4d050fb77da8`
+  at unchanged 20,460,639 / 205,635, and FlinsParty2
+  `44712083d51e77ed23637f94b48f390db7414572c14e61123f0085378691968c`
+  at unchanged 14,794,978 / 214,110. Raiden's -10,243 delta is exactly two
+  immediate EC events and one EC tick removed by the corrected taxed gauges;
+  all durations, ER contracts, and warnings remain stable.

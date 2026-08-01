@@ -135,9 +135,9 @@ The B-048 resistance correction is complete. Standard, Lunar, immediate
 reaction, delayed reaction, and weighted party damage now resolve matching
 enemy RES reduction at impact without retaining it in attacker snapshots.
 
-The B-049 standard aura-tax and decay correction is in progress. Its sourced
-contract, enemy-owned aura application model, and runtime routing are complete;
-audited party acceptance is the remaining phase below.
+The B-049 standard aura-tax and decay correction is complete. Ordinary source
+application now uses taxed aura units, source-class decay, and sourced
+same-element extension semantics through the enemy-owned aura model.
 
 ## Scope
 
@@ -7461,7 +7461,7 @@ Completion evidence:
 
 Status:
 
-- Phases 1-3 are complete; Phase 4 remains pending.
+- Complete; all four phases are implemented and accepted.
 - Requirement: a standard elemental source that establishes or extends an aura
   must apply the sourced 0.8 Aura Tax and source-gauge decay rate instead of the
   simulator's generic `6 + 5U` replacement model.
@@ -7684,7 +7684,7 @@ Completion evidence:
   ownership, reaction damage, and notification regressions pass with their
   expected taxed runtime gauges. Build and routed validation pass.
 
-### Phase 4: Re-Accept Aura-Sensitive Party Baselines
+### Phase 4: Re-Accept Aura-Sensitive Party Baselines - Done
 
 Why last:
 
@@ -7729,3 +7729,29 @@ Verification:
 - two fresh `./gradlew FlinsParty2` runs
 - `python scripts/validate_agent_assets.py`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Each party's two normalized payloads match: RaidenParty SHA-256
+  `1565f197fe7813ef53bc7ee4107a6b68aae7337fdf1efb9e5d865502f2813d80`,
+  FlinsParty `b374971bc2ee6237bf0eb9eada25c13b0b6976168a40354cca9b4d050fb77da8`,
+  and FlinsParty2
+  `44712083d51e77ed23637f94b48f390db7414572c14e61123f0085378691968c`.
+  All six runs complete without warning, error, failed action, or insufficient
+  ER output.
+- RaidenParty is 1,348,716 damage / 64,225 DPS over 21.0 seconds, -10,243 from
+  B-048. Taxed EC gauges remove exactly two 3,414 immediate EC reactions at
+  10.6 and 18.1 seconds and one 3,414 EC tick at 18.1 seconds (display-rounded
+  components account for the one-point total difference). Bennett, Xingqiu,
+  Xiangling, all other reactions, optimizer rolls, rotation, and
+  100/175/179/174% ER are unchanged.
+- FlinsParty retains 20,460,639 / 205,635 over 99.5 seconds and
+  109/100/100/180% ER. Aura-sensitive intermediate optimizer scores require an
+  additional coordinate pass, but converge to the same rolls; the final timed
+  damage/reaction trace is unchanged.
+- FlinsParty2 retains 14,794,978 / 214,110 over 69.1 seconds, the same optimizer
+  rolls, timed damage/reaction trace, and 141/132/105/193% ER. Its normalized
+  payload changes only with the source-aura log wording.
+- README's aura contract and current baselines, the verification reference, plan,
+  and ledger agree. The tracked FlinsParty2 HTML report was restored and no
+  generated output is staged.

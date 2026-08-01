@@ -226,8 +226,9 @@ Known simplifications:
   static 20% ER. Raiden's second Skill refreshes one recipient-specific Eye of
   Stormy Judgment buff instead of stacking with its first 25-second window. The
   simulator resolves enemy RES reduction at each impact rather than retaining it
-  in attacker snapshots. The accepted set-aware result is 1,358,959 damage /
-  64,712 DPS over 21.0 seconds.
+  in attacker snapshots, and ordinary source application uses the 0.8 Aura Tax
+  plus source-class decay. The accepted set-aware result is 1,348,716 damage /
+  64,225 DPS over 21.0 seconds.
 - `FlinsParty2`: defensive shield HP is logged but not consumed by enemy attacks,
   Columbina treats every Lunar reaction during Gravity Ripple as nearby because
   field position is not simulated, and her Thundercloud extra strikes use 33%
@@ -255,30 +256,36 @@ Known simplifications:
 ### Continuous Aura Decay Model
 
 Enemy elemental auras decay continuously over time rather than persisting at full
-strength until a fixed expiry. The model is intentionally simplified:
+strength until a fixed expiry. Standard source application follows the maintained
+Elemental Gauge Theory contract:
 
-- **Duration formula**: a runtime-applied aura lasts `6 + units * 5` seconds
-  (1U = 11 s, 2U = 16 s, 4U = 26 s).
-- **Linear decay**: units fall linearly from the applied value to zero across that
-  duration at a fixed per-aura rate (`units / duration` units per second).
+- **Aura Tax and duration**: a source establishes `source gauge * 0.8` aura and
+  its unextended duration is `2.5 * source gauge + 7` seconds (1U = 0.8U for
+  9.5 s, 1.5U = 1.2U for 10.75 s, 2U = 1.6U for 12 s, 4U = 3.2U for 17 s).
+- **Linear decay**: taxed units fall linearly at the source-class rate. Non-Pyro
+  same-element extensions retain the first aura's rate; Pyro adopts the new
+  source rate only when the application changes the current amount.
+- **Same-element extension**: a new taxed source gauge replaces the decayed
+  current amount only when larger; gauges are not added together.
 - **Discrete consumption**: reactions (Vaporize, Swirl, Electro-Charged ticks,
   Burning maintenance, Quicken, etc.) consume the decayed *current* value at the
   reaction time, then natural decay resumes from the remaining units.
 - **Single source of truth**: reaction eligibility/consumption, combat logs, the
   HTML Aura Timeline, RL observations, and snapshot save/restore all read the same
-  current-time-aware aura value. Snapshots preserve application time and duration
-  so decay resumes correctly after rollback.
+  current-time-aware aura value. Snapshots preserve application time and decay
+  rate so decay resumes correctly after rollback.
 - **Aura Timeline**: rendered as continuous (non-stepped) lines that slope down to
   zero at expiry, matching the per-event aura bars in the Timeline view.
 
-Known differences from exact game internals: the real game uses non-linear gauge
-decay and hidden reaction "tax" rules; this simulator uses the linear duration
-model above and does not model multi-target or per-enemy aura gauges.
+Known differences from exact game internals: Freeze coexistence, Dendro-special
+consumption, Swirl spread, Electro-Charged terminal ticks, and some reaction
+gauge modifiers remain simplified. The simulator also does not model
+multi-target or per-enemy aura gauges.
 
 Latest validation baseline from the accuracy pass:
 
 - `./gradlew ReactionRegressionTest`
-- `./gradlew RaidenParty`: 1,358,959 total damage / 64,712 DPS
+- `./gradlew RaidenParty`: 1,348,716 total damage / 64,225 DPS
 - `./gradlew FlinsParty2`: 14,794,978 total damage / 214,110 DPS
 - `./gradlew BenchmarkRLJava`
 - `./gradlew ProfileCapabilities`
