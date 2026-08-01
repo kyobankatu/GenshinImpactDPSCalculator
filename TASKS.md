@@ -165,8 +165,8 @@ Shatter, and B-069 standard Electro-Charged refresh passes are complete. Active
 standard reapplications now refresh the next tick's typed owner and damage
 snapshot without dealing another immediate damage instance.
 
-The current B-070 pass adds the remaining single-target standard
-Electro-Charged 0.5-second damage cooldown across sequence boundaries.
+The B-070 pass is complete. Standard Electro-Charged immediate and periodic
+damage now share a snapshot-safe 0.5-second target cooldown across sequences.
 
 ## Scope
 
@@ -11418,8 +11418,8 @@ Completion evidence:
 
 ## Implementation Order: Standard Electro-Charged Damage Cooldown
 
-Status: Phases 1-2 are complete. The snapshot-safe standard Electro-Charged
-target damage cooldown is implemented; Phase 3 will accept catalog baselines.
+Status: Phases 1-3 are complete. The snapshot-safe standard Electro-Charged
+target damage cooldown and deterministic catalog baselines are accepted.
 
 Scope:
 
@@ -11567,7 +11567,7 @@ Completion evidence:
   pass. Routed validation reports no leaks; RL-routed catalog/rollout checks were
   not run under this session's explicit simulator-only boundary.
 
-### Phase 3: Accept Standard EC Cooldown Catalog Baselines - Pending
+### Phase 3: Accept Standard EC Cooldown Catalog Baselines - Done
 
 Why third:
 
@@ -11604,6 +11604,27 @@ Verification:
 - two fresh `./gradlew --no-daemon FlinsParty` runs
 - two fresh `./gradlew --no-daemon FlinsParty2` runs
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Two fresh no-daemon runs per party are pairwise exact after removing only the
+  Gradle elapsed-success line. Normalized SHA-256 is
+  `86a70a9357148363fcc465e648accb749cc774a3a3adf8c0aac35a583c37e601`
+  for Raiden; Flins and Flins2 retain B-069 hashes
+  `9b0b3556ca8f4eb799e6965156aab3bc70e512c7056cdf7e0202572c3996e464`
+  and `23dc585acc02d3bd7bca7fe3f5b65db62b3e1489fcedb12a02b9725b774b7dd4`.
+- Raiden changes from 1,307,990/62,285 to 1,304,576/62,123. One
+  Xingqiu-owned new-sequence immediate hit is blocked by the target cooldown
+  after a preceding periodic tick. Immediate counts change 8 to 7, target block
+  counts 0 to 1, while all 13 active refresh deferrals and 11 ticks remain.
+- Raiden ER remains Bennett/Raiden/Xingqiu/Xiangling 100/175/179/174%.
+  Flins and Flins2 remain 22,675,823/227,898 and 15,817,125/228,902 with
+  byte-identical ER/cadence and Lunar breakdowns.
+- Action/reaction/DoT/ordinary-ICD counts remain 152/55/11/38,
+  613/230/48/88, and 468/140/33/71. All six logs contain zero
+  warning/error/failed-action/insufficient-energy matches.
+- README documents the shared target cooldown and accepted baselines. The
+  tracked generated report was restored and no generated output is staged.
 
 ## Implementation Order: Standard Electro-Charged Refresh Ownership
 

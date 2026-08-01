@@ -1917,7 +1917,7 @@ experiment record.
 
 ### B-070 — Standard Electro-Charged damage cooldown resets between sequences
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 3 (B-069 excluded boundary plus KQM/gcsim evidence)
 - Symptom: B-056 may finish one standard Electro-Charged timer less than 0.5
   seconds after its last damage, after which a newly triggered sequence records
@@ -1940,3 +1940,12 @@ experiment record.
   https://library.keqingmains.com/evidence/combat-mechanics/elemental-effects/transformative-reactions#ec-ticks-only-consume-gauge-when-they-deal-damage,
   https://github.com/genshinsim/gcsim/blob/main/pkg/reactable/electrocharged.go,
   and https://github.com/genshinsim/gcsim/blob/main/pkg/core/attacks/icd_groups.dm.go.
+  Completed with snapshot-safe cooldown/last-success timing shared by immediate,
+  nominal, and premature standard ticks. Focused regression covers cross-sequence
+  pre/exact timing, retained notification/Aura/owner/timer effects, blocked
+  nominal no-consumption, restart-relative tick timing, and snapshot replay.
+  Raiden has one Xingqiu-owned new-sequence immediate hit blocked less than 0.5
+  seconds after the preceding periodic tick, reducing 1,307,990/62,285 to
+  1,304,576/62,123 with normalized hash
+  `86a70a9357148363fcc465e648accb749cc774a3a3adf8c0aac35a583c37e601`.
+  Event counts and ER remain exact; Flins/Flins2 retain B-069 hashes and totals.

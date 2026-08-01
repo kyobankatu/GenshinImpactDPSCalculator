@@ -232,8 +232,10 @@ Known simplifications:
   wakes at premature Aura expiry and suppresses terminal damage within 0.5
   seconds of the prior tick. Active reapplications update the next periodic
   tick's typed owner and EM snapshot without dealing another immediate reaction
-  hit. Overload damage follows its target and owner damage sequence limits. The
-  accepted set-aware result is 1,307,990 damage / 62,285 DPS over 21.0 seconds.
+  hit. Successful immediate and periodic damage share one 0.5-second target
+  cooldown across sequence restarts. Overload damage follows its target and
+  owner damage sequence limits. The accepted set-aware result is 1,304,576
+  damage / 62,123 DPS over 21.0 seconds.
 - `FlinsParty2`: defensive shield HP is logged but not consumed by enemy attacks,
   Columbina treats every Lunar reaction during Gravity Ripple as nearby because
   field position is not simulated, and her Thundercloud extra strikes use 33%
@@ -284,7 +286,9 @@ Elemental Gauge Theory contract:
   reaction hit, while active reapplications only notify, reapply their source
   Aura, and replace the next tick's typed owner/pre-resistance damage snapshot.
   Periodic damage is credited to that `CharacterId` and resolves Electro RES at
-  impact. Snapshot rollback preserves the latest payload.
+  impact. Immediate and periodic damage share a target-wide 0.5-second cooldown;
+  blocked ticks do not consume Aura. Snapshot rollback preserves the latest
+  payload and both damage-timing boundaries.
 - **Simultaneous priority**: ordinary coexisting Auras use an explicit
   trigger-specific reaction order rather than target-map iteration. For example,
   Pyro attempts Overload before Vaporize and Anemo attempts Electro Swirl before
@@ -341,7 +345,7 @@ multi-target or per-enemy aura gauges.
 Latest validation baseline from the accuracy pass:
 
 - `./gradlew ReactionRegressionTest`
-- `./gradlew RaidenParty`: 1,307,990 total damage / 62,285 DPS
+- `./gradlew RaidenParty`: 1,304,576 total damage / 62,123 DPS
 - `./gradlew FlinsParty`: 22,675,823 total damage / 227,898 DPS
 - `./gradlew FlinsParty2`: 15,817,125 total damage / 228,902 DPS
 - `./gradlew BenchmarkRLJava`
