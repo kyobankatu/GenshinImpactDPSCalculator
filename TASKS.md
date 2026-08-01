@@ -3274,7 +3274,7 @@ Completion evidence:
 
 Status:
 
-- Planned; Phase 1 evidence is recorded below.
+- In progress; Phases 1-2 are complete and Phase 3 remains.
 - Requirement: Skill or Burst summons/refreshed exactly one Birgitta, which
   attacks ten times at two-second intervals during its 20-second lifetime.
 
@@ -3332,7 +3332,7 @@ Verification:
 - inspect Ineffa Skill/Burst and complete `FlinsParty2` Birgitta timestamps
 - `python scripts/preflight.py --run`
 
-### Phase 2: Implement and Test One Refreshable Birgitta
+### Phase 2: Implement and Test One Refreshable Birgitta - Done
 
 Why second:
 

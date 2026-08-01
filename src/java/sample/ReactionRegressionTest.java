@@ -82,6 +82,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_FlinsSymphonyZeroGaugeContract();
         testAccuracyPhaseF_IneffaOverclockZeroGaugeContract();
         testAccuracyPhaseF_IneffaSkillNoIcdApplicationContract();
+        testAccuracyPhaseF_IneffaBirgittaSummonLifecycle();
         testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost();
         testAccuracyPhaseF_ColumbinaGravityAndDewRegression();
         testAccuracyPhaseF_ColumbinaStandInBoundaries();
@@ -1248,6 +1249,62 @@ public class ReactionRegressionTest {
                 "Birgitta against no reactive aura should retain direct damage");
     }
 
+    private static void testAccuracyPhaseF_IneffaBirgittaSummonLifecycle() {
+        RecordingDamageWeapon lifetimeWeapon = new RecordingDamageWeapon("Birgitta Discharge");
+        model.character.Ineffa lifetimeIneffa = new model.character.Ineffa(
+                lifetimeWeapon, blankArtifact());
+        CombatSimulator lifetimeSim = simulatorWithExistingCharacter(lifetimeIneffa);
+        lifetimeSim.performAction(CharacterId.INEFFA,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        double skillEndTime = lifetimeSim.getCurrentTime();
+        lifetimeSim.advanceTime(22.01);
+
+        assertEquals(10, lifetimeWeapon.actions.size(),
+                "One Birgitta summon should deal ten Discharge attacks");
+        for (int i = 0; i < lifetimeWeapon.times.size(); i++) {
+            assertClose(skillEndTime + (i + 1) * 2.0, lifetimeWeapon.times.get(i), EPS,
+                    "Birgitta should attack every two seconds through +20 seconds");
+        }
+
+        RecordingDamageWeapon burstWeapon = new RecordingDamageWeapon("Birgitta Discharge");
+        model.character.Ineffa burstIneffa = new model.character.Ineffa(burstWeapon, blankArtifact());
+        CombatSimulator burstSim = simulatorWithExistingCharacter(burstIneffa);
+        captureStandardOutput(() -> burstSim.performAction(CharacterId.INEFFA,
+                CharacterActionRequest.of(CharacterActionKey.BURST)));
+        double burstEndTime = burstSim.getCurrentTime();
+        burstSim.advanceTime(2.01);
+        assertEquals(1, burstWeapon.actions.size(), "Ineffa Burst should summon Birgitta");
+        assertClose(burstEndTime + 2.0, burstWeapon.times.get(0), EPS,
+                "Burst-summoned Birgitta should use the two-second cadence");
+
+        RecordingDamageWeapon skillRefreshWeapon = new RecordingDamageWeapon("Birgitta Discharge");
+        model.character.Ineffa skillRefreshIneffa = new model.character.Ineffa(
+                skillRefreshWeapon, blankArtifact());
+        CombatSimulator skillRefreshSim = simulatorWithExistingCharacter(skillRefreshIneffa);
+        skillRefreshSim.performAction(CharacterId.INEFFA,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        skillRefreshSim.advanceTime(15.4);
+        skillRefreshSim.performAction(CharacterId.INEFFA,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        double skillRefreshTime = skillRefreshSim.getCurrentTime();
+        skillRefreshSim.advanceTime(4.01);
+        assertEquals(2, countTimesAfter(skillRefreshWeapon.times, skillRefreshTime),
+                "Skill refresh should leave only one Birgitta stream");
+
+        RecordingDamageWeapon burstRefreshWeapon = new RecordingDamageWeapon("Birgitta Discharge");
+        model.character.Ineffa burstRefreshIneffa = new model.character.Ineffa(
+                burstRefreshWeapon, blankArtifact());
+        CombatSimulator burstRefreshSim = simulatorWithExistingCharacter(burstRefreshIneffa);
+        burstRefreshSim.performAction(CharacterId.INEFFA,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        captureStandardOutput(() -> burstRefreshSim.performAction(CharacterId.INEFFA,
+                CharacterActionRequest.of(CharacterActionKey.BURST)));
+        double burstRefreshTime = burstRefreshSim.getCurrentTime();
+        burstRefreshSim.advanceTime(4.01);
+        assertEquals(2, countTimesAfter(burstRefreshWeapon.times, burstRefreshTime),
+                "Burst refresh should leave only one Birgitta stream");
+    }
+
     private static void testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost() {
         TestBurstCharacter gated = new TestBurstCharacter(60.0);
         CombatSimulator gateSim = simulatorWithExistingCharacter(gated);
@@ -2174,6 +2231,16 @@ public class ReactionRegressionTest {
         int count = 0;
         for (ReactionResult.Kind kind : kinds) {
             if (kind == expected) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private static int countTimesAfter(List<Double> times, double boundary) {
+        int count = 0;
+        for (double time : times) {
+            if (time > boundary) {
                 count++;
             }
         }

@@ -35,9 +35,10 @@ import mechanics.energy.ParticleType;
  *       scaled on ATK; summons Birgitta who fires periodic Electro hits every 2 s for
  *       20 s.  If Thundercloud is active when Birgitta fires, an additional Lunar-Charged
  *       hit (65% ATK) is triggered.</li>
- *   <li><b>Supreme Instruction (Burst)</b> — large Electro Burst hit; triggers the
- *       Reconstruction Protocol (P2) passive which grants 6% of Ineffa's ATK as flat EM
- *       to all party members for 20 s (on-field only for non-Ineffa members).</li>
+ *   <li><b>Supreme Instruction (Burst)</b> — large Electro Burst hit; refreshes
+ *       Birgitta and triggers the Reconstruction Protocol (P2) passive which grants
+ *       6% of Ineffa's ATK as flat EM to all party members for 20 s (on-field only
+ *       for non-Ineffa members).</li>
  *   <li><b>Lunar Base Bonus team buff</b> — provides {@code LUNAR_BASE_BONUS} scaling
  *       with ATK: {@code min(0.14, ATK / 100 * 0.007)}.</li>
  * </ul>
@@ -48,6 +49,7 @@ public class Ineffa extends Character implements FormStateProvider, CharacterTea
 
     private int normalAttackStep = 0;
     private double shieldHealth = 0;
+    private PeriodicDamageEvent birgittaEvent;
 
     /**
      * Constructs Ineffa with the given weapon and artifact set.
@@ -217,20 +219,30 @@ public class Ineffa extends Character implements FormStateProvider, CharacterTea
             System.out.println("Ineffa Shield Generated: " + (int) this.shieldHealth + " HP");
         }
 
-        // Summon Birgitta (20s, tick 2s)
-        // Birgitta Discharge DMG: 163.2%
+        refreshBirgitta(sim);
+    }
+
+    /**
+     * Replaces the current Birgitta summon with one ten-hit, 20-second stream.
+     *
+     * @param sim active combat simulator
+     */
+    private void refreshBirgitta(CombatSimulator sim) {
         double birgittaMv = getTalentValue("Birgitta DMG", 1.632);
 
         AttackAction birgittaDischarge = new AttackAction("Birgitta Discharge", birgittaMv, Element.ELECTRO,
                 StatType.BASE_ATK, StatType.SKILL_DMG_BONUS, 0.0, false, ActionType.SKILL);
         birgittaDischarge.setICD(ICDType.None, ICDTag.ElementalSkill, 1.0);
 
-        sim.registerEvent(new PeriodicDamageEvent(
+        if (birgittaEvent != null) {
+            birgittaEvent.cancel();
+        }
+        birgittaEvent = new PeriodicDamageEvent(
                 this.name, // Source must be a registered character
                 birgittaDischarge,
                 sim.getCurrentTime() + 2.0,
                 2.0,
-                20.0,
+                18.0,
                 s -> {
                     // Passive 1 (Overclocking Circuit)
                     // Condition: Thundercloud is active (time-based state from Lunar-Charged).
@@ -250,7 +262,8 @@ public class Ineffa extends Character implements FormStateProvider, CharacterTea
 
                     // Generate Particles (1 per hit)
                     s.getEnergyDistributor().distributeParticles(Element.ELECTRO, 0.667, ParticleType.PARTICLE);
-                }));
+                });
+        sim.registerEvent(birgittaEvent);
     }
 
     /**
@@ -270,6 +283,8 @@ public class Ineffa extends Character implements FormStateProvider, CharacterTea
         hit.setICD(ICDType.None, ICDTag.ElementalBurst, 2.0); // 2U usually
         hit.setAnimationDuration(1.7);
         sim.performAction(this.characterId, hit);
+
+        refreshBirgitta(sim);
 
         // Passive 2: Reconstruction Protocol (Team EM Buff)
         double myAtk = this.getEffectiveStats(sim.getCurrentTime()).getTotalAtk();
