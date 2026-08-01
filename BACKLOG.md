@@ -1039,14 +1039,14 @@ experiment record.
 
 ### B-043 — Noblesse Oblige duplicate 4pc buffs stack instead of refreshing
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 3 (sourced artifact-mechanic divergence)
 - Symptom: each Burst-triggered Noblesse application uses normal team-buff
   insertion, so overlapping same-ID windows contribute 40% or more ATK instead
   of one refreshed 20% value.
 - Scope: Noblesse typed team-buff replacement, focused boundary regression, and
   deterministic RaidenParty acceptance
-- Risk: `planned`
+- Risk: `validated`
 - Proof: actual Bennett activation, duplicate/multi-instance refresh and exact
   expiry tests, plus matching repeated RaidenParty payloads
 - Notes: adopt the maintained Genshin Impact Wiki set description and KQM
@@ -1057,4 +1057,9 @@ experiment record.
   https://keqingmains.com/misc/artifacts/. Adapt repeated applications to one
   `NOBLESSE_OBLIGE_4PC` simulator team buff replaced through
   `applyTeamBuffNoStack`. See `TASKS.md` implementation block
-  `Noblesse Oblige Non-Stack Refresh`.
+  `Noblesse Oblige Non-Stack Refresh`. Completed with actual Bennett owner/ally
+  activation, same- and separate-instance refresh, unrelated-buff coexistence,
+  exact expiry, and 2pc static regressions. Two RaidenParty logs match normalized
+  SHA-256 `ff1adfd3b3705f1cc34a32036af0950aa8a1246a6412589eb214966b3f3c33dc`
+  at unchanged 100%/175%/179%/174% ER and 1,317,080 / 62,718 over 21.0
+  seconds, with zero warning matches.

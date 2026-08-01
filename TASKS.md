@@ -110,8 +110,8 @@ shred applications refresh one ten-second typed debuff instead of stacking, and
 only an on-field equipping owner who triggered the Swirl may apply it. The
 separate first-Swirl formula-order gap remains deferred as B-042.
 
-The B-043 Noblesse Oblige correction is in progress. Its teamwide 20% ATK buff
-will refresh one twelve-second typed window instead of stacking repeated or
+The B-043 Noblesse Oblige correction is complete. Its teamwide 20% ATK buff
+refreshes one twelve-second typed window instead of stacking repeated or
 multi-wearer applications.
 
 ## Scope
@@ -5531,7 +5531,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phases 1-2 are complete and Phase 3 remains.
+- Complete; all three phases are verified and pushed.
 - Requirement: 4pc Noblesse Oblige must contribute one teamwide 20% ATK window
   for twelve seconds, refreshed rather than added by another application.
 
@@ -5677,7 +5677,7 @@ Completion evidence:
 - Reaction and party-catalog regressions, build, Javadoc, routed validation, and
   preflight pass.
 
-### Phase 3: Re-Accept the Noblesse Catalog Baseline
+### Phase 3: Re-Accept the Noblesse Catalog Baseline - Done
 
 Why last:
 
@@ -5714,6 +5714,17 @@ Verification:
 
 - two fresh `./gradlew RaidenParty` runs
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Two complete `RaidenParty` runs produced identical logs and normalized
+  SHA-256 `ff1adfd3b3705f1cc34a32036af0950aa8a1246a6412589eb214966b3f3c33dc`.
+- ER remains Bennett 100%, Raiden Shogun 175%, Xingqiu 179%, and Xiangling
+  174%, with zero warning matches and the unchanged accepted 1,317,080 damage /
+  62,718 DPS over 21.0 seconds.
+- The ordinary catalog rotation has no overlapping Noblesse reapplication, so
+  its unchanged result isolates the correction to the newly regressed overlap
+  path. No generated report or output is staged.
 
 ## NCCL/DDP Distributed RL Training Plan
 
