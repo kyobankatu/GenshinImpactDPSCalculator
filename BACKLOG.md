@@ -605,7 +605,7 @@ experiment record.
 
 ### B-026 — Birgitta summons overlap, overrun, and ignore Burst refresh
 
-- Status: `completed`
+- Status: `done`
 - Source: 2/3 (observable duplicate output and sourced summon divergence)
 - Symptom: each Skill registers an independent 11-hit Birgitta event, old
   streams continue after recast, and Burst does not summon or refresh Birgitta
