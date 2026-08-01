@@ -1465,14 +1465,14 @@ experiment record.
 
 ### B-056 — Standard Electro-Charged cannot tick at premature Aura expiry
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 1/3 (README known simplification confirmed by maintained EGT evidence)
 - Symptom: the EC event wakes only at one-second intervals, so an Aura that
   naturally expires 0.5-1.0 seconds after the prior tick produces no sourced
   premature terminal tick; sub-0.5 suppression is not explicitly modeled.
 - Scope: read-only typed Aura expiry, standard EC wake policy, early/suppressed/
   extension regressions, and three audited party baselines
-- Risk: `planned`
+- Risk: `validated`
 - Proof: exact finite expiry queries, one eligible early tick, one suppressed
   expiry, extension cancellation, unchanged nominal/Lunar behavior, and repeated
   deterministic party payloads
@@ -1488,3 +1488,16 @@ experiment record.
   Adapt only standard single-target no-hitlag timing. Ownership refresh, EC ICD,
   AoE, and Lunar-Charged are separate. See `TASKS.md` implementation block
   `Electro-Charged Premature Expiry Ticks`.
+  Completed with a read-only Aura expiry API and separate standard/Lunar event
+  policies. Focused regressions prove finite/infinite/absent/snapshot expiry,
+  ordinary 0.4U consumption, a 0.7-second terminal tick, 0.4-second suppression,
+  extension cancellation, live RES, and unchanged two-second Lunar cadence.
+  Repeated accepted payloads are RaidenParty
+  `d5dd65169069937a30bf8b8be0c32765dc26309e6132b58f29e9b28bb3cde7c3`
+  at 1,365,787 / 65,037, unchanged FlinsParty
+  `8271526ca511bcb8c49f2a3d15fc22114c2044124ed7bf2f61a2255fc9a45d67`,
+  and unchanged FlinsParty2
+  `b28a4a831f4e91ea687ac6c0f3df542fc06364e48514f1e3ef7460111257b27d`.
+  Raiden's +2,078 is fully attributed to seven added delayed EC ticks, one
+  removed immediate EC, and one removed Vaporize; ER, rolls, duration, and
+  warnings remain stable.

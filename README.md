@@ -228,8 +228,10 @@ Known simplifications:
   simulator resolves enemy RES reduction at each impact rather than retaining it
   in attacker snapshots, and ordinary source application uses the 0.8 Aura Tax
   plus source-class decay. Overload and Superconduct preserve any positive aura
-  remaining after their sourced full-gauge consumption. The accepted set-aware
-  result is 1,363,709 damage / 64,939 DPS over 21.0 seconds.
+  remaining after their sourced full-gauge consumption. Standard Electro-Charged
+  wakes at premature Aura expiry and suppresses terminal damage within 0.5
+  seconds of the prior tick. The accepted set-aware result is 1,365,787 damage /
+  65,037 DPS over 21.0 seconds.
 - `FlinsParty2`: defensive shield HP is logged but not consumed by enemy attacks,
   Columbina treats every Lunar reaction during Gravity Ripple as nearby because
   field position is not simulated, and her Thundercloud extra strikes use 33%
@@ -284,14 +286,14 @@ Elemental Gauge Theory contract:
   zero at expiry, matching the per-event aura bars in the Timeline view.
 
 Known differences from exact game internals: Freeze coexistence, Dendro-special
-consumption, Swirl spread, Electro-Charged terminal ticks, and some reaction
-gauge modifiers remain simplified. The simulator also does not model
-multi-target or per-enemy aura gauges.
+consumption, Swirl spread, Electro-Charged ownership/damage-ICD/hitlag
+interactions, and some reaction gauge modifiers remain simplified. The
+simulator also does not model multi-target or per-enemy aura gauges.
 
 Latest validation baseline from the accuracy pass:
 
 - `./gradlew ReactionRegressionTest`
-- `./gradlew RaidenParty`: 1,363,709 total damage / 64,939 DPS
+- `./gradlew RaidenParty`: 1,365,787 total damage / 65,037 DPS
 - `./gradlew FlinsParty2`: 15,817,125 total damage / 228,902 DPS
 - `./gradlew BenchmarkRLJava`
 - `./gradlew ProfileCapabilities`

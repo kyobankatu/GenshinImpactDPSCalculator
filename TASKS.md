@@ -9131,7 +9131,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phases 1-3 are complete and Phase 4 is next.
+- Complete; all four phases are implemented and accepted.
 - Requirement: standard Electro-Charged must wake at the first coexisting Aura's
   natural expiry, deal a premature tick only when more than 0.5 seconds elapsed
   since the previous EC damage tick, and retain its ordinary one-second cadence.
@@ -9344,7 +9344,7 @@ Completion evidence:
   tests remain exact. ReactionRegressionTest, build, Javadoc, routed validation,
   and preflight all pass.
 
-### Phase 4: Re-Accept EC-Sensitive Party Baselines - Pending
+### Phase 4: Re-Accept EC-Sensitive Party Baselines - Done
 
 Why last:
 
@@ -9388,3 +9388,28 @@ Verification:
 - two fresh `./gradlew FlinsParty2` runs
 - `python scripts/validate_agent_assets.py`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Each pair's normalized payload matches exactly: RaidenParty
+  `d5dd65169069937a30bf8b8be0c32765dc26309e6132b58f29e9b28bb3cde7c3`,
+  unchanged FlinsParty
+  `8271526ca511bcb8c49f2a3d15fc22114c2044124ed7bf2f61a2255fc9a45d67`,
+  and unchanged FlinsParty2
+  `b28a4a831f4e91ea687ac6c0f3df542fc06364e48514f1e3ef7460111257b27d`.
+  All six runs contain zero warning, error, failed-action, or
+  insufficient-energy matches.
+- RaidenParty accepts 1,365,787 / 65,037 over 21.0 seconds, +2,078 from B-055.
+  Standard delayed EC ticks increase from four to eleven and Thundercloud gains
+  23,899; additional 0.4U consumption removes one later immediate EC and one
+  Vaporize, lowering Raiden by 3,415 and Xiangling by 18,407. Bennett, Xingqiu,
+  Overload count, 152 timed actions, 38 ICD blocks, every optimizer roll, and
+  100/175/179/174% ER are unchanged.
+- FlinsParty retains 22,675,823 / 227,898, 109/100/100/180% ER, and exact
+  613/230/48/172/88 timed/reaction/delayed/immediate/ICD counts. FlinsParty2
+  retains 15,817,125 / 228,902, 130/128/100/196% ER, and exact
+  468/140/33/105/71 counts, proving the Lunar event path is byte-stable.
+- README and the verification reference now carry the accepted Raiden value and
+  narrow the remaining EC simplifications to ownership, damage ICD, and hitlag.
+  The tracked FlinsParty2 HTML report was restored and no generated output is
+  staged.
