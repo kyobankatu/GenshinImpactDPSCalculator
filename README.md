@@ -255,7 +255,7 @@ model above and does not model multi-target or per-enemy aura gauges.
 Latest validation baseline from the accuracy pass:
 
 - `./gradlew ReactionRegressionTest`
-- `./gradlew RaidenParty`: 1,331,957 total damage / 63,427 DPS
+- `./gradlew RaidenParty`: 1,283,512 total damage / 61,120 DPS
 - `./gradlew FlinsParty2`: 14,077,198 total damage / 203,722 DPS
 - `./gradlew BenchmarkRLJava`
 - `./gradlew ProfileCapabilities`

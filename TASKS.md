@@ -70,8 +70,8 @@ The B-027 correction is complete. ER calibration now replays requested Burst
 intervals with energy cap, carry, and cyclic refill instead of allowing later
 particle income to hide an earlier deficit.
 
-The active queue is B-028. Raiden's Eye must trigger from resolved party damage
-instead of attacking autonomously on a fixed timer.
+The B-028 correction is complete. Raiden's Eye now triggers from resolved party
+damage instead of attacking autonomously on a fixed timer.
 
 ## Scope
 
@@ -3597,7 +3597,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phases 1-2 are complete and Phase 3 remains.
+- Complete; Phases 1-3 passed their acceptance criteria.
 - Requirement: while active, the Eye performs one coordinated attack only when
   a party attack deals positive damage and its party-wide 0.9-second cooldown
   is ready.
@@ -3721,7 +3721,7 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Accept the Triggered RaidenParty Baseline
+### Phase 3: Accept the Triggered RaidenParty Baseline - Done
 
 Why last:
 
@@ -3757,6 +3757,17 @@ Verification:
 - two fresh `./gradlew RaidenParty` runs
 - `python scripts/validate_agent_assets.py`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Both payloads report 1,283,512 damage / 61,120 DPS and match after excluding
+  Gradle's elapsed-time line, with SHA-256
+  `58bc339e94e09cbb91ca31f42696a4c2b2c9ce535654916bddfe90e610c6d7fd`.
+- Each payload contains 17 Eye attacks aligned to positive damage events rather
+  than the pre-fix 22 autonomous periodic ticks.
+- Executable regression covers idle, positive and zero damage, timeline and
+  no-time-advance dispatch, exact 0.9-second cooldown, expiry, refresh,
+  recursion prevention, particles, and unchanged Eye ICD/gauge metadata.
 
 ## Cross-Cutting Rules
 

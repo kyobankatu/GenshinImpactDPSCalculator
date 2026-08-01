@@ -658,7 +658,7 @@ experiment record.
 
 ### B-028 — Raiden Eye attacks on a timer without triggering damage
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 3 (sourced game-accuracy divergence)
 - Symptom: Raiden Skill currently schedules autonomous Eye damage every 0.9
   seconds, producing 22 coordinated attacks in the accepted `RaidenParty` trace
@@ -676,3 +676,8 @@ experiment record.
   Adapt the small real hit delay to a same-timestamp one-shot simulator event.
   Pre-fix `RaidenParty` is 1,331,957 damage / 63,427 DPS. See `TASKS.md`
   implementation block `Raiden Eye Damage Trigger`.
+  Completed 2026-08-02. Idle and zero-damage actions no longer trigger Eye;
+  timeline and no-time-advance positive damage share one 0.9-second cooldown.
+  Both accepted payloads contain 17 damage-triggered Eye attacks and report
+  1,283,512 damage / 61,120 DPS with normalized SHA-256
+  `58bc339e94e09cbb91ca31f42696a4c2b2c9ce535654916bddfe90e610c6d7fd`.
