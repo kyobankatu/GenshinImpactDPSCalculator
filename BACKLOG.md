@@ -804,3 +804,17 @@ experiment record.
   21.0 seconds and normalized SHA-256
   `ff1adfd3b3705f1cc34a32036af0950aa8a1246a6412589eb214966b3f3c33dc`.
   FlinsParty2 retains 14,077,198 damage / 203,722 DPS over 69.1 seconds.
+
+### B-034 — RaidenParty validation baseline remains stale after set-aware allocation
+
+- Status: `done`
+- Source: 1/4 (README validation baseline and verification-skill coverage)
+- Symptom: README's accepted accuracy note records the set-aware result, but
+  the validation command list and verification skill still expect the prior
+  1,283,512 damage / 61,120 DPS payload.
+- Scope: `README.md`, `.agents/skills/verify-genshin-changes/`
+- Risk: `local`
+- Proof: both references contain the twice-reproduced 1,317,080 damage /
+  62,718 DPS baseline and agent-asset validation passes
+- Notes: completed 2026-08-02 as a documentation-only follow-up to B-033. No
+  simulator behavior or historical TASKS/BACKLOG evidence was changed.
