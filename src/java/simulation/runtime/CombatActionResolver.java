@@ -476,6 +476,22 @@ public class CombatActionResolver {
         String reactionLabel = isLunar ? "Lunar-Charged" : result.getName();
         double triggerDmg = isLunar ? reactionEffectScheduler.computeInitialLunarChargedDamage() : transDmg;
 
+        if (result.getKind() == ReactionResult.Kind.ELECTRO_CHARGED
+                && sim.isStandardElectroChargedActive()) {
+            reactionEffectScheduler.scheduleElectroCharged(
+                    characterId,
+                    trigger,
+                    action.getGaugeUnits(),
+                    preResistanceDamage,
+                    false);
+            if (sim.isLoggingEnabled()) {
+                System.out.println(String.format(
+                        "   [Reaction] %s on %s -> %s Damage deferred (active sequence)",
+                        trigger, aura, reactionLabel));
+            }
+            return;
+        }
+
         if (sim.isLoggingEnabled()) {
             System.out.println(String.format(
                     "   [Reaction] %s on %s -> %s Damage: %,.0f",
@@ -491,7 +507,11 @@ public class CombatActionResolver {
 
         if (result.isElectroCharged()) {
             reactionEffectScheduler.scheduleElectroCharged(
-                    trigger, action.getGaugeUnits(), preResistanceDamage, isLunar);
+                    characterId,
+                    trigger,
+                    action.getGaugeUnits(),
+                    preResistanceDamage,
+                    isLunar);
         }
     }
 

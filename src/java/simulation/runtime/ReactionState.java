@@ -148,7 +148,22 @@ public class ReactionState {
         }
     }
 
+    /** Immutable owner and damage payload for the next standard EC tick. */
+    public static final class StandardElectroChargedState {
+        /** Character credited with the next standard Electro-Charged tick. */
+        public final CharacterId ownerId;
+        /** Tick damage before impact-time Electro resistance. */
+        public final double preResistanceDamage;
+
+        private StandardElectroChargedState(
+                CharacterId ownerId, double preResistanceDamage) {
+            this.ownerId = ownerId;
+            this.preResistanceDamage = preResistanceDamage;
+        }
+    }
+
     private boolean ecTimerRunning = false;
+    private StandardElectroChargedState standardElectroChargedState;
     private double thundercloudEndTime = -1.0;
     private boolean burningTimerRunning = false;
     private double burningEndTime = -1.0;
@@ -434,6 +449,39 @@ public class ReactionState {
      */
     public void setEcTimerRunning(boolean running) {
         this.ecTimerRunning = running;
+    }
+
+    /** Returns the latest standard Electro-Charged tick payload. */
+    public StandardElectroChargedState getStandardElectroChargedState() {
+        return standardElectroChargedState;
+    }
+
+    /** Replaces the next standard Electro-Charged tick payload. */
+    public void updateStandardElectroChargedState(
+            CharacterId ownerId, double preResistanceDamage) {
+        if (ownerId == null || !Double.isFinite(preResistanceDamage)
+                || preResistanceDamage < 0.0) {
+            standardElectroChargedState = null;
+            return;
+        }
+        standardElectroChargedState = new StandardElectroChargedState(
+                ownerId, preResistanceDamage);
+    }
+
+    /** Clears standard Electro-Charged ownership when its sequence finishes. */
+    public void clearStandardElectroChargedState() {
+        standardElectroChargedState = null;
+    }
+
+    /** Restores a standard Electro-Charged payload from a simulator snapshot. */
+    public void restoreStandardElectroChargedState(
+            StandardElectroChargedState state) {
+        if (state == null) {
+            clearStandardElectroChargedState();
+            return;
+        }
+        updateStandardElectroChargedState(
+                state.ownerId, state.preResistanceDamage);
     }
 
     /**

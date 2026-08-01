@@ -70,6 +70,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseA_VaporizeConsumesExpectedAura();
         testAccuracyPhaseA_ElectroChargedCoexistence();
         testAccuracyPhaseA_ElectroChargedPrematureExpiry();
+        testAccuracyPhaseA_ElectroChargedRefreshOwnership();
         testAccuracyPhaseA_QuickenCoexistsWithDendroFollowup();
         testAccuracyPhaseB_StandardIcdThreeHitRule();
         testAccuracyPhaseB_StandardIcdTimeRule();
@@ -2108,7 +2109,8 @@ public class ReactionRegressionTest {
         CombatSimulator premature = simulatorWith(testCharacter(Element.ELECTRO));
         ReactionEffectScheduler prematureScheduler = new ReactionEffectScheduler(premature);
         premature.getEnemy().setAura(Element.HYDRO, 0.5, premature.getCurrentTime());
-        prematureScheduler.scheduleElectroCharged(Element.ELECTRO, 4.0, 1000.0, false);
+        prematureScheduler.scheduleElectroCharged(
+                CharacterId.SUCROSE, Element.ELECTRO, 4.0, 1000.0, false);
         premature.advanceTime(1.0);
         assertClose(900.0, premature.getTotalDamage(), EPS,
                 "Standard EC should retain its first nominal one-second tick");
@@ -2131,7 +2133,8 @@ public class ReactionRegressionTest {
         CombatSimulator suppressed = simulatorWith(testCharacter(Element.ELECTRO));
         ReactionEffectScheduler suppressedScheduler = new ReactionEffectScheduler(suppressed);
         suppressed.getEnemy().setAura(Element.HYDRO, 0.48, suppressed.getCurrentTime());
-        suppressedScheduler.scheduleElectroCharged(Element.ELECTRO, 4.0, 1000.0, false);
+        suppressedScheduler.scheduleElectroCharged(
+                CharacterId.SUCROSE, Element.ELECTRO, 4.0, 1000.0, false);
         suppressed.advanceTime(1.0);
         double suppressedExpiry = suppressed.getEnemy().getAuraExpiryTime(
                 Element.HYDRO, suppressed.getCurrentTime());
@@ -2149,7 +2152,8 @@ public class ReactionRegressionTest {
         CombatSimulator extended = simulatorWith(testCharacter(Element.ELECTRO));
         ReactionEffectScheduler extendedScheduler = new ReactionEffectScheduler(extended);
         extended.getEnemy().setAura(Element.HYDRO, 0.5, extended.getCurrentTime());
-        extendedScheduler.scheduleElectroCharged(Element.ELECTRO, 4.0, 1000.0, false);
+        extendedScheduler.scheduleElectroCharged(
+                CharacterId.SUCROSE, Element.ELECTRO, 4.0, 1000.0, false);
         extended.advanceTime(1.2);
         extended.getEnemy().applyAura(Element.HYDRO, 2.0, extended.getCurrentTime());
         extended.advanceTime(0.5);
@@ -2161,13 +2165,89 @@ public class ReactionRegressionTest {
 
         CombatSimulator lunar = simulatorWith(testCharacter(Element.ELECTRO).asLunar());
         ReactionEffectScheduler lunarScheduler = new ReactionEffectScheduler(lunar);
-        lunarScheduler.scheduleElectroCharged(Element.ELECTRO, 1.0, 1000.0, true);
+        lunarScheduler.scheduleElectroCharged(
+                CharacterId.SUCROSE, Element.ELECTRO, 1.0, 1000.0, true);
         lunar.advanceTime(1.999);
         assertClose(0.0, lunar.getTotalDamage(), EPS,
                 "Lunar-Charged should not inherit the standard premature wake policy");
         lunar.advanceTime(0.001);
         assertTrue(lunar.getTotalDamage() > 0.0,
                 "Lunar-Charged should retain its fixed two-second first tick");
+    }
+
+    private static void testAccuracyPhaseA_ElectroChargedRefreshOwnership() {
+        double initialEm = 0.0;
+        double refreshEm = 1000.0;
+        TestCharacter initialOwner = testCharacter(
+                Element.ELECTRO, CharacterId.SUCROSE)
+                .withStat(StatType.ELEMENTAL_MASTERY, initialEm);
+        TestCharacter refreshOwner = testCharacter(
+                Element.HYDRO, CharacterId.XIANGLING)
+                .withStat(StatType.ELEMENTAL_MASTERY, refreshEm);
+        CombatSimulator sim = simulatorWith(initialOwner);
+        sim.addCharacter(refreshOwner);
+        List<CharacterId> reactionOwners = new ArrayList<>();
+        sim.addReactionListener((result, source, time, simulator) -> {
+            if (result.getKind() == ReactionResult.Kind.ELECTRO_CHARGED) {
+                reactionOwners.add(source.getCharacterId());
+            }
+        });
+
+        sim.getEnemy().setAura(Element.HYDRO, 4.0, sim.getCurrentTime());
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Initial standard EC owner", Element.ELECTRO));
+        double initialDamage = expectedTransformative(
+                2.0, Element.ELECTRO, initialEm);
+        double refreshDamage = expectedTransformative(
+                2.0, Element.ELECTRO, refreshEm);
+        assertClose(initialDamage, sim.getTotalDamage(), 0.5,
+                "A new standard EC sequence should retain its immediate damage");
+
+        sim.advanceTime(0.2);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING,
+                reactionHit("First active standard EC refresh", Element.HYDRO));
+        assertClose(initialDamage, sim.getTotalDamage(), 0.5,
+                "An active EC refresh should not deal another immediate hit");
+        ReactionState.StandardElectroChargedState refreshedState =
+                sim.getStandardElectroChargedState();
+        assertEquals(CharacterId.XIANGLING, refreshedState.ownerId,
+                "An active EC refresh should replace the next tick owner");
+        assertClose(refreshDamage / 0.9, refreshedState.preResistanceDamage, 0.5,
+                "An active EC refresh should replace the next tick EM snapshot");
+
+        sim.advanceTime(0.4);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING,
+                reactionHit("Second active standard EC refresh", Element.HYDRO));
+        assertClose(initialDamage, sim.getTotalDamage(), 0.5,
+                "An active EC refresh after 0.5 seconds should still defer damage");
+        assertEquals(3, reactionOwners.size(),
+                "Every active EC refresh should continue reaction notification");
+        assertTrue(sim.getEnemy().getAuraUnits(
+                        Element.HYDRO, sim.getCurrentTime()) > 0.0,
+                "An active EC refresh should continue applying its source Aura");
+
+        sim.advanceTime(0.4);
+        assertClose(initialDamage + refreshDamage, sim.getTotalDamage(), 1.0,
+                "The next standard EC tick should use the latest owner's EM snapshot");
+        assertClose(initialDamage,
+                sim.getDamageByCharacter(CharacterId.SUCROSE), 0.5,
+                "The initial owner should retain only the new-sequence immediate hit");
+        assertClose(refreshDamage,
+                sim.getDamageByCharacter(CharacterId.XIANGLING), 0.5,
+                "The refreshed owner should receive the next periodic EC tick");
+
+        SimulatorSnapshot snapshot = sim.saveSnapshot();
+        sim.updateStandardElectroChargedState(CharacterId.SUCROSE, 1.0);
+        sim.restoreSnapshot(snapshot);
+        ReactionState.StandardElectroChargedState restoredState =
+                sim.getStandardElectroChargedState();
+        assertEquals(CharacterId.XIANGLING, restoredState.ownerId,
+                "Snapshot restore should recover the latest standard EC owner");
+        assertClose(refreshDamage / 0.9, restoredState.preResistanceDamage, 0.5,
+                "Snapshot restore should recover the standard EC damage payload");
     }
 
     private static void testAccuracyPhaseA_QuickenCoexistsWithDendroFollowup() {
@@ -5121,7 +5201,8 @@ public class ReactionRegressionTest {
         CombatSimulator electroSim = simulatorWith(electroOwner);
         ReactionEffectScheduler electroScheduler = new ReactionEffectScheduler(electroSim);
         electroSim.getEnemy().setAura(Element.HYDRO, 4.0, electroSim.getCurrentTime());
-        electroScheduler.scheduleElectroCharged(Element.ELECTRO, 4.0, 1000.0, false);
+        electroScheduler.scheduleElectroCharged(
+                CharacterId.SUCROSE, Element.ELECTRO, 4.0, 1000.0, false);
         electroSim.advanceTime(1.0);
         assertClose(900.0, electroSim.getTotalDamage(), EPS,
                 "Electro-Charged first tick should use baseline Electro RES");

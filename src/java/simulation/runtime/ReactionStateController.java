@@ -139,6 +139,36 @@ public class ReactionStateController {
         return reactionState.isEcTimerRunning();
     }
 
+    /** Returns whether a standard Electro-Charged sequence is active. */
+    public boolean isStandardElectroChargedActive() {
+        return reactionState.isEcTimerRunning()
+                && reactionState.getStandardElectroChargedState() != null;
+    }
+
+    /** Returns the latest standard Electro-Charged tick payload. */
+    public ReactionState.StandardElectroChargedState
+            getStandardElectroChargedState() {
+        return reactionState.getStandardElectroChargedState();
+    }
+
+    /** Replaces the next standard Electro-Charged tick payload. */
+    public void updateStandardElectroChargedState(
+            CharacterId ownerId, double preResistanceDamage) {
+        reactionState.updateStandardElectroChargedState(
+                ownerId, preResistanceDamage);
+    }
+
+    /** Clears standard Electro-Charged ownership state. */
+    public void clearStandardElectroChargedState() {
+        reactionState.clearStandardElectroChargedState();
+    }
+
+    /** Restores standard Electro-Charged ownership state. */
+    public void restoreStandardElectroChargedState(
+            ReactionState.StandardElectroChargedState state) {
+        reactionState.restoreStandardElectroChargedState(state);
+    }
+
     /**
      * Returns whether Thundercloud is active at the current time.
      *

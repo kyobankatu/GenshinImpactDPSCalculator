@@ -773,6 +773,9 @@ public class CombatSimulator {
 
         // Reaction state
         boolean ecTimerRunning = reactionState.isEcTimerRunning();
+        simulation.runtime.ReactionState.StandardElectroChargedState
+                standardElectroChargedState =
+                reactionState.getStandardElectroChargedState();
         double thundercloudEndTime = reactionState.getThundercloudEndTime();
         boolean burningTimerRunning = reactionState.isBurningTimerRunning();
         double burningEndTime = reactionState.getBurningEndTime();
@@ -848,7 +851,8 @@ public class CombatSimulator {
                 currentTime, rotationTime,
                 totalDamage, damageBySource,
                 lastSwapTime, activeCharacterId, currentMoonsign,
-                icdStates, ecTimerRunning, thundercloudEndTime, burningTimerRunning, burningEndTime,
+                icdStates, ecTimerRunning, standardElectroChargedState,
+                thundercloudEndTime, burningTimerRunning, burningEndTime,
                 burningState, nextBurningGeneration,
                 quickenEndTime, quickenState,
                 overloadTargetDamageCooldownEndTime,
@@ -893,6 +897,8 @@ public class CombatSimulator {
 
         // Reaction state
         reactionState.setEcTimerRunning(snap.ecTimerRunning);
+        reactionState.restoreStandardElectroChargedState(
+                snap.standardElectroChargedState);
         reactionState.setThundercloudEndTime(snap.thundercloudEndTime);
         reactionState.restoreBurning(snap.burningState, snap.nextBurningGeneration);
         if (snap.burningState == null) {
@@ -988,6 +994,29 @@ public class CombatSimulator {
      */
     public boolean isECTimerRunning() {
         return reactionStateController.isEcTimerRunning();
+    }
+
+    /** Returns whether the standard Electro-Charged sequence is active. */
+    public boolean isStandardElectroChargedActive() {
+        return reactionStateController.isStandardElectroChargedActive();
+    }
+
+    /** Returns the latest standard Electro-Charged tick payload. */
+    public simulation.runtime.ReactionState.StandardElectroChargedState
+            getStandardElectroChargedState() {
+        return reactionStateController.getStandardElectroChargedState();
+    }
+
+    /** Replaces the next standard Electro-Charged tick payload. */
+    public void updateStandardElectroChargedState(
+            CharacterId ownerId, double preResistanceDamage) {
+        reactionStateController.updateStandardElectroChargedState(
+                ownerId, preResistanceDamage);
+    }
+
+    /** Clears the standard Electro-Charged tick payload. */
+    public void clearStandardElectroChargedState() {
+        reactionStateController.clearStandardElectroChargedState();
     }
 
     /**

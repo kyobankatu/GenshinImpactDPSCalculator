@@ -72,6 +72,8 @@ public class SimulatorSnapshot {
     public final CombatSimulator.Moonsign moonsign;
     public final Map<String, double[]> icdStates;
     public final boolean ecTimerRunning;
+    public final ReactionState.StandardElectroChargedState
+            standardElectroChargedState;
     public final double thundercloudEndTime;
     public final boolean burningTimerRunning;
     public final double burningEndTime;
@@ -126,6 +128,7 @@ public class SimulatorSnapshot {
      * @param moonsign           current moonsign state
      * @param icdStates          ICD group states
      * @param ecTimerRunning     EC timer flag
+     * @param standardElectroChargedState latest standard EC tick payload
      * @param thundercloudEndTime thundercloud expiry time
      * @param burningTimerRunning Burning timer flag
      * @param burningEndTime compatibility Burning expiry time
@@ -164,6 +167,7 @@ public class SimulatorSnapshot {
             CombatSimulator.Moonsign moonsign,
             Map<String, double[]> icdStates,
             boolean ecTimerRunning,
+            ReactionState.StandardElectroChargedState standardElectroChargedState,
             double thundercloudEndTime,
             boolean burningTimerRunning,
             double burningEndTime,
@@ -202,6 +206,7 @@ public class SimulatorSnapshot {
         this.moonsign = moonsign;
         this.icdStates = icdStates;
         this.ecTimerRunning = ecTimerRunning;
+        this.standardElectroChargedState = standardElectroChargedState;
         this.thundercloudEndTime = thundercloudEndTime;
         this.burningTimerRunning = burningTimerRunning;
         this.burningEndTime = burningEndTime;

@@ -11415,8 +11415,8 @@ Completion evidence:
 
 ## Implementation Order: Standard Electro-Charged Refresh Ownership
 
-Status: Phase 1 is complete. Phase 2 will add a snapshot-safe standard
-Electro-Charged tick payload and suppress immediate damage from active refreshes.
+Status: Phases 1-2 are complete. Snapshot-safe standard Electro-Charged refresh
+ownership is implemented; Phase 3 will accept deterministic catalog baselines.
 
 Scope:
 
@@ -11495,7 +11495,7 @@ Completion evidence:
 - The current timer closure instead retains the first pre-resistance value and
   records periodic damage under the untyped `Thundercloud` display source.
 
-### Phase 2: Implement Snapshot-Safe Refresh Ownership - Pending
+### Phase 2: Implement Snapshot-Safe Refresh Ownership - Done
 
 Why second:
 
@@ -11544,6 +11544,27 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - routed validation/preflight planning without RL execution
+
+Completion evidence:
+
+- `ReactionState.StandardElectroChargedState` immutably holds the latest typed
+  owner and pre-resistance damage; controller/facade and snapshot paths preserve
+  it without coupling standard ownership to Lunar Thundercloud state.
+- The scheduler updates the payload on every standard application, reads it at
+  periodic impact, applies live Electro RES, and clears it when the sequence
+  finishes. Standard periodic damage is credited to `CharacterId` rather than
+  the untyped `Thundercloud` display source.
+- The resolver defers only active standard refresh damage after notification,
+  while the scheduler still reapplies the triggering Aura and updates payload.
+  New standard sequences and all Lunar immediate damage retain existing paths.
+- Focused regression covers low-to-high EM ownership replacement, active
+  refreshes at 0.2 and 0.6 seconds, three notifications, continuing Aura,
+  owner-specific damage attribution, and payload save/mutate/restore.
+- Existing B-056 premature-expiry and B-048 live-RES fixtures pass, as does the
+  existing Lunar fixed two-second fixture.
+- `./gradlew ReactionRegressionTest`, `./gradlew build`, and `./gradlew javadoc`
+  pass. Routed validation reports no leaks; RL-routed catalog/rollout checks were
+  not run under this session's explicit simulator-only boundary.
 
 ### Phase 3: Accept Electro-Charged Catalog Baselines - Pending
 

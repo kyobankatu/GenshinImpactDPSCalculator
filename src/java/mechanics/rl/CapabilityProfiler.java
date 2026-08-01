@@ -934,6 +934,7 @@ public class CapabilityProfiler {
                 activePostSubject.moonsign,
                 activePostSubject.icdStates,
                 activePostSubject.ecTimerRunning,
+                activePostSubject.standardElectroChargedState,
                 activePostSubject.thundercloudEndTime,
                 activePostSubject.burningTimerRunning,
                 activePostSubject.burningEndTime,
