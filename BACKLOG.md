@@ -867,3 +867,17 @@ experiment record.
   warning-free, and the existing resonance regression passes
 - Notes: completed 2026-08-02 as a documentation-only correction. No resonance
   values, aura checks, buff timing, or party baseline changed.
+
+### B-037 — StatsRecorder prints an Ineffa-only debug window in normal samples
+
+- Status: `done`
+- Source: 2 (observable FlinsParty and FlinsParty2 output defect)
+- Symptom: every recorded simulation prints `[StatsRecorder] Buffs on Ineffa`
+  and its internal applicable-buff list at 1.9, 2.0, and 2.1 seconds despite no
+  warning or diagnostic condition.
+- Scope: `src/java/mechanics/analysis/StatsRecorder.java`
+- Risk: `local`
+- Proof: `./gradlew FlinsParty` retains its accepted numeric result with zero
+  `[StatsRecorder]` lines; report and build regressions pass
+- Notes: completed 2026-08-02 by removing only the character/time-specific
+  console branch. Snapshot stat and buff-name collection remain unchanged.

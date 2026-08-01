@@ -88,15 +88,6 @@ public class StatsRecorder {
 
             // Apply Dynamic Team Buffs (to match damage calculation logic)
             List<Buff> applicableBuffs = s.getApplicableBuffs(c);
-            if (c.getCharacterId() == CharacterId.INEFFA && s.getCurrentTime() > 1.9 && s.getCurrentTime() < 2.2) {
-                System.out.println("[StatsRecorder] Buffs on Ineffa at " + s.getCurrentTime() + ":");
-                if (applicableBuffs != null) {
-                    for (Buff b : applicableBuffs) {
-                        System.out
-                                .println("   - " + b.getName() + " (Expired: " + b.isExpired(s.getCurrentTime()) + ")");
-                    }
-                }
-            }
 
             List<String> buffNames = new ArrayList<>();
             Set<String> seenBuffKeys = new HashSet<>();
