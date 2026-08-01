@@ -2059,8 +2059,8 @@ Completion evidence:
 
 Status:
 
-- In progress.
-- Phases 1-2 are complete; Phase 3 remains.
+- Implemented and verified.
+- Phases 1-3 are complete.
 - Requirement: Shattering Ice must grant +15% CRIT Rate only while the target
   is Frozen or has a positive, current-time Cryo aura.
 
@@ -2159,7 +2159,7 @@ Verification:
 - `./gradlew build`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Confirm Shared-Resonance Integration Stability
+### Phase 3: Confirm Shared-Resonance Integration Stability - Done
 
 Why last:
 
@@ -2192,6 +2192,15 @@ Verification:
 - `./gradlew RaidenParty`
 - `./gradlew FlinsParty2`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Focused regression covers no aura, unrelated Pyro, Cryo aura, Frozen state,
+  and the exact finite-aura expiry boundary.
+- `RaidenParty` remains 1,440,416 damage / 68,591 DPS.
+- `FlinsParty2` remains 15,434,039 damage / 226,306 DPS with normalized
+  payload SHA-256
+  `a9cdfbf0d3a0a01356d9d113afdd7f0afe8ef8510494f4b193107d533c8dbb6e`.
 
 ## Cross-Cutting Rules
 

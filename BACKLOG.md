@@ -393,7 +393,7 @@ experiment record.
 
 ### B-018 — Cryo resonance grants unconditional CRIT Rate
 
-- Status: `planned`
+- Status: `done`
 - Source: 2 (source scan of explicit approximation comments)
 - Symptom: Shattering Ice grants +15% CRIT Rate unconditionally, including
   against enemies with no Cryo aura and enemies affected by unrelated elements.
@@ -409,4 +409,8 @@ experiment record.
   stat or Buff API change is needed. Neither audited sample has Cryo resonance,
   so pre-fix baselines are 1,440,416 / 68,591 for `RaidenParty` and 15,434,039 /
   226,306 for `FlinsParty2`. See `TASKS.md` implementation block
-  `Conditional Cryo Resonance CRIT Rate`.
+  `Conditional Cryo Resonance CRIT Rate`. Completed 2026-08-02. Focused
+  regression covers no aura, unrelated aura, Cryo, Frozen, and exact aura
+  expiry. `RaidenParty` remains 1,440,416 / 68,591; `FlinsParty2` remains
+  15,434,039 / 226,306 with normalized payload SHA-256
+  `a9cdfbf0d3a0a01356d9d113afdd7f0afe8ef8510494f4b193107d533c8dbb6e`.
