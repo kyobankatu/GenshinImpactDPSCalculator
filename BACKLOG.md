@@ -1265,3 +1265,23 @@ experiment record.
   at unchanged 14,794,978 / 214,110. Raiden's -10,243 delta is exactly two
   immediate EC events and one EC tick removed by the corrected taxed gauges;
   all durations, ER contracts, and warnings remain stable.
+
+### B-050 — Swirl and Crystallize consume full trigger gauge instead of half
+
+- Status: `in-progress`
+- Source: 3 (maintained Elemental Gauge Theory divergence)
+- Symptom: 1U Anemo/Geo currently subtracts 1U from the aura, so a fresh taxed
+  0.8U aura is deleted; the sourced 0.5 modifier should leave 0.3U.
+- Scope: typed Swirl, standard Crystallize, and Lunar-Crystallize consumption,
+  residual/expiry regressions, unchanged reaction side effects, and three audited
+  party baselines
+- Risk: `planned`
+- Proof: actual 1U/2U residual gauges, standard/Lunar parity, full-depletion and
+  unrelated-reaction boundaries, first-VV ordering, and two matching payloads
+  for each audited party
+- Notes: adopt KQM Elemental Gauge Theory's Anemo/Geo 0.5 unit modifier, accessed
+  2026-08-02:
+  https://library.keqingmains.com/combat-mechanics/elemental-effects/elemental-gauge-theory.
+  Swirl propagation to other targets, absorption, formula order, shield
+  absorption, and other reaction modifiers are excluded. See `TASKS.md`
+  implementation block `Anemo and Geo Aura Consumption`.

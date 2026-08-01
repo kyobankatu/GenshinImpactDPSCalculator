@@ -139,6 +139,10 @@ The B-049 standard aura-tax and decay correction is complete. Ordinary source
 application now uses taxed aura units, source-class decay, and sourced
 same-element extension semantics through the enemy-owned aura model.
 
+The B-050 Anemo/Geo reaction-consumption correction is in progress. Its sourced
+0.5 multiplier and affected resolver branches are recorded below before the
+shared runtime change.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -7755,3 +7759,176 @@ Completion evidence:
 - README's aura contract and current baselines, the verification reference, plan,
   and ledger agree. The tracked FlinsParty2 HTML report was restored and no
   generated output is staged.
+
+## Implementation Order: Anemo and Geo Aura Consumption
+
+Status:
+
+- Phase 1 is complete; Phases 2-3 remain pending.
+- Requirement: Swirl and Crystallize triggers consume half of their pre-tax
+  Anemo/Geo source gauge from the existing aura, rather than the full source
+  gauge used by ordinary transformative reactions.
+
+Scope:
+
+- Apply a 0.5 source-gauge multiplier to single-target Swirl consumption.
+- Apply the same multiplier to standard and Lunar Crystallize consumption.
+- Preserve reaction damage, listeners, VV timing, Moondrift policy, ownership,
+  and current aura decay rate after partial consumption.
+- Re-accept all three aura-sensitive deterministic party baselines.
+
+Out of scope for this pass:
+
+- Swirl's propagated elemental application to additional targets, absorption,
+  multi-target geometry, or simultaneous-reaction priority.
+- Crystallize shield generation/absorption, enemy attacks, Freeze, Dendro-special
+  consumption, Electro-Charged terminal ticks, or same-element source extension.
+- The deferred B-042 question of whether first-Swirl damage receives same-hit VV
+  reduction; this pass changes only aura consumption after reaction detection.
+- Action gauge metadata, damage formulas, RL contracts/training, reports,
+  dependencies, and generated output.
+
+Definitions:
+
+- Anemo/Geo consumption: `trigger source gauge * 0.5`, subtracted from the
+  current decayed aura at the reaction timestamp.
+- Residual aura: the current aura after scaled discrete consumption, continuing
+  at its already-selected decay rate.
+
+### Phase 1: Record Consumption Evidence and Resolver Inventory - Done
+
+Why first:
+
+The existing resolver shares full-gauge consumption across reaction families;
+the source-specific multiplier and Lunar conversion boundary must be fixed
+before changing those branches.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record maintained Swirl/Crystallize 0.5 multiplier evidence and access date.
+- Inventory standard Swirl, standard Crystallize, and Lunar-Crystallize consumers
+  plus existing aura/damage/listener regressions.
+- Define no-change boundaries for all other reaction consumption and B-042.
+
+Acceptance criteria:
+
+- Evidence gives exact 1U and 2U trigger consumption expectations.
+- All three runtime branches and affected party scenarios are named.
+- Later phases include residual, full-depletion, unrelated-reaction, and
+  integration tests.
+
+Test cases to add or update:
+
+- No production test in this phase; Phase 2 adds failing consumption boundaries.
+
+Verification:
+
+- inspect `CombatActionResolver`, `ReactionCalculator`, `ReactionResult`, VV,
+  Lunar-Crystallize handling, and current aura regressions
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- The maintained KQM Elemental Gauge Theory states that all Anemo and Geo
+  triggers have a 0.5 unit modifier: 1U consumes 0.5U, 2U consumes 1U, and 4U
+  consumes 2U. Source accessed 2026-08-02:
+  https://library.keqingmains.com/combat-mechanics/elemental-effects/elemental-gauge-theory.
+- Adopt the multiplier for single-target standard/Lunar consumption. Swirl
+  propagation is multi-target and remains excluded.
+- Current full-gauge consumers are transformative Swirl and the standard/Lunar
+  Crystallize stateful branches in `CombatActionResolver`; damage and reaction
+  notification are already separate from aura subtraction.
+
+### Phase 2: Scale Swirl and Crystallize Aura Consumption
+
+Why second:
+
+The three resolver branches can share one typed consumption helper after the
+sourced boundary is fixed.
+
+Target files:
+
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Centralize reaction-kind-based aura consumption without using display labels.
+- Apply 0.5 only to Swirl, Crystallize, and Lunar-Crystallize.
+- Add actual action regressions over taxed finite auras and preserve exact
+  current-time decay/rebase behavior.
+
+Acceptance criteria:
+
+- 1U Anemo/Geo against fresh 0.8U leaves 0.3U; 2U against 1.6U leaves 0.6U.
+- Standard and Lunar Crystallize leave the same residual gauge.
+- A residual below or equal to scaled consumption is removed without negatives.
+- Overload/Superconduct, amplifying reactions, Bloom/Quicken, EC ticks, damage,
+  notifications, VV first-Swirl ordering, and Moondrift cadence are unchanged.
+
+Test cases to add or update:
+
+- Normal: 1U Swirl and standard Crystallize each leave 0.3U from a fresh 1U
+  source aura.
+- Strong: 2U Swirl consumes 1U from a fresh 2U source aura.
+- Lunar: Lunar-Crystallize matches standard Geo consumption while retaining
+  conversion and Moondrift state.
+- Boundary: exactly 0.5U and less are fully removed; no negative aura appears.
+- No-change: 1U Overload still consumes 1U and first VV Swirl damage remains on
+  the pre-VV resistance multiplier.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `python scripts/agent_validate.py --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Re-Accept Swirl-Sensitive Party Baselines
+
+Why last:
+
+Residual Hydro/Electro after Sucrose hits can change later EC, Lunar, and aura
+ownership, so full deterministic traces must be attributed after focused tests.
+
+Target files:
+
+- `README.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Run two fresh payloads each for RaidenParty, FlinsParty, and FlinsParty2.
+- Compare normalized hashes, totals, DPS, ER, optimizer allocation, reaction
+  sequence, and per-source changes against B-049.
+- Update current baselines and close B-050 only with complete attribution.
+
+Acceptance criteria:
+
+- Each repeated payload matches without warning or energy failure.
+- Any party delta follows residual-aura windows; RaidenParty remains unchanged if
+  its rotation has no Anemo/Geo trigger.
+- README, verification skill, plan, and ledger agree; generated output is not
+  staged.
+
+Test cases to add or update:
+
+- Normal integration: all three audited parties complete deterministically.
+- Abnormal integration: no warning, optimizer, ER, invalid-aura, or generated
+  output regression appears.
+
+Verification:
+
+- two fresh `./gradlew RaidenParty` runs
+- two fresh `./gradlew FlinsParty` runs
+- two fresh `./gradlew FlinsParty2` runs
+- `python scripts/validate_agent_assets.py`
+- `python scripts/preflight.py --run`
