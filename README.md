@@ -240,8 +240,10 @@ Known simplifications:
   Moon's Serenade dynamically contributes 10% Lunar Reaction DMG for each
   distinct active Intent/Devotion effect, capped at 20%. Standard, delayed, and
   weighted Lunar damage all resolve matching RES reduction at impact. Anemo
-  Swirl consumes half its source gauge, preserving sourced residual auras. The
-  accepted result is 15,482,126 damage / 224,054 DPS over 69.1 seconds.
+  Swirl consumes half its source gauge, preserving sourced residual auras.
+  Aubade of Morningstar and Moon grants its sourced 80 EM and initializes its
+  owner-only off-field Lunar bonus before the first swap. The accepted result is
+  15,817,125 damage / 228,902 DPS over 69.1 seconds.
 - `FlinsParty`: generic Favonius Codex and Columbina construction remains
   stochastic, while this optimizer-driven sample injects independent fixed
   Windfall and Moondrift streams so every candidate and final run uses the same
@@ -252,8 +254,9 @@ Known simplifications:
   owner/team ATK buffs. Viridescent Venerer uses the same non-stacking,
   owner-triggered shred contract. Silken Moon's Serenade resolves the same
   distinct-effect dynamic Lunar bonus, and reaction damage resolves matching RES
-  reduction at impact. Swirl uses its sourced half-gauge consumption. The
-  accepted result is 22,620,467 damage / 227,341 DPS
+  reduction at impact. Swirl uses its sourced half-gauge consumption. Ineffa's
+  Aubade set uses 80 EM and initializes its owner-only off-field state. The
+  accepted result is 22,675,823 damage / 227,898 DPS
   over 99.5 seconds with three successful Sucrose Bursts.
 
 ### Continuous Aura Decay Model
@@ -289,6 +292,6 @@ Latest validation baseline from the accuracy pass:
 
 - `./gradlew ReactionRegressionTest`
 - `./gradlew RaidenParty`: 1,363,709 total damage / 64,939 DPS
-- `./gradlew FlinsParty2`: 15,482,126 total damage / 224,054 DPS
+- `./gradlew FlinsParty2`: 15,817,125 total damage / 228,902 DPS
 - `./gradlew BenchmarkRLJava`
 - `./gradlew ProfileCapabilities`

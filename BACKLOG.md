@@ -1365,7 +1365,7 @@ experiment record.
 
 ### B-053 — Aubade uses the wrong 2-piece stat and misses initial off-field state
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 2/3 (current party impact and maintained artifact data divergence)
 - Symptom: Aubade of Morningstar and Moon adds 18% ATK instead of 80 Elemental
   Mastery, and its owner-only 4-piece buff is created only by switch callbacks,
@@ -1388,3 +1388,14 @@ experiment record.
   initialization capability rather than a concrete-set conditional. See
   `TASKS.md` implementation block
   `Aubade Static Stats and Initial Off-Field State`.
+  Completed with exact 80 EM constructors and an opt-in initialized-artifact
+  capability. Public regressions cover initial active/off-field state, 20%/60%
+  owner-only values, all Lunar types, exact three-second expiry, immediate
+  switch-out reactivation, one typed buff, and snapshot continuity. Accepted
+  repeated payloads are unchanged RaidenParty
+  `985f95d5c7779b81013dad0cf6232557b453ea44034c224f1b3ec1795a3b8614`
+  at 1,363,709 / 64,939, FlinsParty
+  `1a514b75a60f384c56a577e84a82af3bce4ef652e5304132c184f01c94f2a81f`
+  at 22,675,823 / 227,898, and FlinsParty2
+  `3077dba03531db0d61f1de2f0d8ae7e8a38fa389edca87855d2860aa965a6c82`
+  at 15,817,125 / 228,902 with stable durations, ER, and warning-free output.

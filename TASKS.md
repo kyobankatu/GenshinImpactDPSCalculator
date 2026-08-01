@@ -8213,7 +8213,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phases 1-2 are complete and Phase 3 remains.
+- Complete; all three phases are implemented and accepted.
 - Requirement: Aubade of Morningstar and Moon must provide 80 Elemental Mastery
   as its 2-piece bonus and make its owner-only Lunar Reaction bonus available
   from the owner's initial off-field state.
@@ -8398,7 +8398,7 @@ Completion evidence:
 - Reaction regression, build, Javadoc, and routed build/reaction validation all
   pass. Null/plain artifact paths continue through the unchanged no-op branch.
 
-### Phase 3: Re-Accept Aubade Party Baselines
+### Phase 3: Re-Accept Aubade Party Baselines - Done
 
 Why last:
 
@@ -8442,6 +8442,38 @@ Verification:
 - two fresh `./gradlew FlinsParty2` runs
 - `python scripts/validate_agent_assets.py`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Two normalized payloads per party match exactly: unchanged RaidenParty
+  `985f95d5c7779b81013dad0cf6232557b453ea44034c224f1b3ec1795a3b8614`,
+  FlinsParty
+  `1a514b75a60f384c56a577e84a82af3bce4ef652e5304132c184f01c94f2a81f`,
+  and FlinsParty2
+  `3077dba03531db0d61f1de2f0d8ae7e8a38fa389edca87855d2860aa965a6c82`.
+  All six runs complete without warning, error, failed action, or insufficient
+  energy output.
+- RaidenParty is the exact B-052 control at 1,363,709 / 64,939 over 21.0 seconds,
+  the same optimizer payload, and 100/175/179/174% ER.
+- FlinsParty is 22,675,823 / 227,898 over 99.5 seconds, +55,356. Optimizer rolls
+  and 109/100/100/180% ER are unchanged. Correcting Ineffa's 18% ATK to 80 EM
+  lowers Ineffa by 43,539 while weighted Lunar contributions raise Columbina by
+  24,855, Sucrose by 6,323, Thundercloud by 40,777, and Flins by 26,941
+  (display-rounded components differ from the exact total by one).
+- FlinsParty2 is 15,817,125 / 228,902 over 69.1 seconds, +334,999 at unchanged
+  130/128/100/196% ER. Columbina gains 167,855, Sucrose 6,989, Thundercloud
+  62,248, Flins 59,729, and Ineffa 38,178. Sucrose, Flins, and Columbina rolls
+  are unchanged; the corrected global objective moves one Ineffa roll from ATK%
+  to CRIT_RATE, yielding 10 CD/7 CR/3 ATK rolls.
+- Both Flins scenarios retain exactly 613/468 timed actions, 230/140 reaction
+  logs, 48/33 delayed Lunar ticks, 172/105 immediate Lunar-Charged reactions,
+  and 88/71 ICD blocks respectively. The initial-state capability changes no
+  current rotation event because each Aubade owner enters before acting; the
+  integration deltas are therefore fixed-stat and deterministic optimizer
+  effects.
+- README, verification reference, plan, and ledger agree. The tracked
+  FlinsParty2 HTML report was clean before execution and restored afterward; no
+  generated output is staged.
 
 ## Implementation Order: Overload and Superconduct Residual Aura
 
