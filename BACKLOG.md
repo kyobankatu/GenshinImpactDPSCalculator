@@ -253,7 +253,7 @@ experiment record.
 
 ### B-013 — Ineffa Skill and Birgitta use incorrect standard ICD
 
-- Status: `planned`
+- Status: `done`
 - Source: 3 (sourced game-accuracy divergence exposed by B-009 output)
 - Symptom: the Skill hit uses standard ICD and Birgitta Discharge inherits the
   Standard/None default, suppressing 18 of 40 periodic Electro applications in
@@ -270,4 +270,9 @@ experiment record.
   https://genshin-impact.fandom.com/wiki/Ineffa and
   https://wikiwiki.jp/genshinwiki/%E3%82%A4%E3%83%8D%E3%83%95%E3%82%A1.
   Pre-fix `FlinsParty2` is 15,344,560 damage / 224,994 DPS. See `TASKS.md`
-  implementation block `Ineffa Skill No-ICD Application`.
+  implementation block `Ineffa Skill No-ICD Application`. Completed 2026-08-02.
+  Two complete post-fix logs were byte-identical with SHA-256
+  `c8e837b24225f64f7a19081fed4d99fbadd8d515c403564894304651a615978a`.
+  All 40 Birgitta Discharge hits retained direct damage with zero related ICD
+  blocks; only Ineffa's rounded contribution changed, from 2,946,003 to
+  3,205,782. The accepted result is 15,604,338 damage / 228,803 DPS.

@@ -1262,8 +1262,8 @@ Verification:
 
 Status:
 
-- In progress.
-- Phases 1-2 are complete; Phase 3 remains.
+- Implemented and verified.
+- Phases 1-3 are complete.
 - Requirement: Ineffa's Skill hit and every Birgitta Discharge must apply their
   documented 1U Electro without ICD suppression.
 
@@ -1369,7 +1369,7 @@ Verification:
 - `./gradlew build`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Accept the FlinsParty2 Application Delta
+### Phase 3: Accept the FlinsParty2 Application Delta - Done
 
 Why last:
 
@@ -1406,6 +1406,14 @@ Verification:
 - two fresh `./gradlew FlinsParty2` runs
 - `python scripts/validate_agent_assets.py`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Two complete logs were byte-identical with SHA-256
+  `c8e837b24225f64f7a19081fed4d99fbadd8d515c403564894304651a615978a`.
+- All 40 Birgitta Discharge hits executed with zero related ICD blocks.
+- Only Ineffa's rounded contribution changed, from 2,946,003 to 3,205,782;
+  the accepted result is 15,604,338 damage / 228,803 DPS.
 
 ## Cross-Cutting Rules
 
