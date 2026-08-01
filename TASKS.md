@@ -147,6 +147,11 @@ The B-051 Overload/Superconduct residual correction is complete. Both reactions
 now retain positive decayed aura after their sourced 1.0 trigger-gauge
 consumption and rely on the shared enemy state for full depletion.
 
+The B-052 directional Bloom correction, B-053 Aubade initialization/stat
+correction, B-054 Night-only Gleaming Moon provider, and B-055 deterministic
+optimizer rendering are complete. The current B-056 pass addresses standard
+Electro-Charged premature expiry ticks; Lunar-Charged behavior remains frozen.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -9121,3 +9126,237 @@ Completion evidence:
 - All five runs contain zero warning, error, failed-action, or
   insufficient-energy matches. The tracked HTML report was restored and no
   generated output is staged.
+
+## Implementation Order: Electro-Charged Premature Expiry Ticks
+
+Status:
+
+- In progress; Phase 1 is complete and Phase 2 is next.
+- Requirement: standard Electro-Charged must wake at the first coexisting Aura's
+  natural expiry, deal a premature tick only when more than 0.5 seconds elapsed
+  since the previous EC damage tick, and retain its ordinary one-second cadence.
+
+Scope:
+
+- Expose the finite/infinite natural expiry of one typed enemy Aura as read-only
+  state.
+- Schedule standard EC at the earlier of its next nominal tick or either Aura's
+  natural expiry.
+- Suppress terminal damage when the first Aura expires within 0.5 seconds of the
+  previous EC damage instance.
+- Re-evaluate Aura state when an earlier expiry event wakes so intervening
+  same-element extension cancels obsolete premature timing.
+- Preserve 0.4U dual consumption only on damage ticks and re-accept deterministic
+  party baselines.
+
+Out of scope for this pass:
+
+- EC ownership/EM refresh, EC damage ICD or multi-target arcs, hitlag effects,
+  simultaneous-event priority, innate/self Aura, or server-frame delay.
+- Lunar-Charged/Thundercloud cadence, duration, weighted damage, notifications,
+  and Aura policy.
+- Other reaction families, damage formulas, optimizer behavior, reports, RL
+  contracts/training, HPC jobs, dependencies, and generated output.
+
+Definitions:
+
+- Nominal tick: standard EC damage exactly one second after the prior EC damage
+  instance.
+- Premature tick: standard EC damage at the first coexisting Aura's natural
+  expiry when that expiry is more than 0.5 seconds after the prior EC damage.
+- Suppressed terminal expiry: Aura expiry at most 0.5 seconds after the prior EC
+  damage, which ends the timer without another damage or 0.4U consumption.
+
+### Phase 1: Record EC Expiry Evidence and Event Policy - Done
+
+Why first:
+
+The current integer-second scheduler is correct for nominal ticks; evidence and
+strict exclusions must distinguish the missing wake time from ownership, ICD,
+and Lunar mechanics.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record maintained EGT and Evidence Vault timing/consumption rules.
+- Inventory scheduler, Aura state, clock, snapshot, resistance, and Lunar paths.
+- Define finite, infinite, early, suppressed, extended, and no-change tests.
+
+Acceptance criteria:
+
+- Maintained evidence independently supports ordinary, premature, suppressed,
+  and 0.4U consumption behavior.
+- `Enemy` remains the sole owner of expiry math; the scheduler only reads it.
+- Standard and Lunar event policies remain explicitly separate.
+
+Test cases to add or update:
+
+- No production test in this phase; Phase 2 covers expiry queries and Phase 3
+  covers event behavior.
+
+Verification:
+
+- inspect `Enemy`, `ReactionEffectScheduler`, `SimulationClock`, EC regressions,
+  snapshots, and B-049 source application
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Maintained KQM EGT specifies ordinary one-second EC ticks, a premature tick
+  when either Aura completely decays before the next interval except within 0.5
+  seconds of the prior tick, and 0.4U consumption from both gauges per damage
+  tick. The Evidence Vault independently records 0.8-second early damage and
+  0.4-second no-damage examples. Sources accessed 2026-08-02 are recorded in
+  B-056.
+- `Enemy.AuraState` already owns exact finite/infinite expiry and rebases it
+  after discrete consumption. The scheduler currently cannot read that value
+  and always adds one/two seconds; `SimulationClock` can safely requeue a
+  `TimerEvent` at a mutable absolute time and expires Auras before dispatch.
+- Standard EC may therefore use the read-only expiry while Lunar retains its
+  existing fixed two-second path. Snapshot restore clears all timer events as a
+  general clock contract; changing timer snapshot architecture is excluded.
+- The documentation preflight passes without checks or artifact leaks.
+
+### Phase 2: Expose Typed Aura Expiry - Pending
+
+Why second:
+
+The scheduler cannot choose a premature wake time without a stable read-only API,
+and it must not duplicate private decay arithmetic.
+
+Target files:
+
+- `src/java/model/entity/Enemy.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Add a typed current-time-aware natural expiry query to `Enemy`.
+- Define absent/expired Aura as no future expiry and preserve positive finite and
+  compatibility infinite states.
+- Cover source application, discrete rebase, clear, natural expiry, and snapshot
+  restore.
+
+Acceptance criteria:
+
+- A fresh 1U source reports 9.5 seconds and retains that expiry until consumed.
+- A 0.4U consumption at one second rebases expiry from current units at the
+  original decay rate.
+- Infinite fixture Aura reports positive infinity; absent/expired Aura reports
+  no future expiry without exposing mutable state.
+- Snapshot restore recovers the exact queried expiry.
+
+Test cases to add or update:
+
+- Normal: finite source before and after consumption.
+- Boundary: exact natural expiry and explicit clear return no future expiry.
+- Compatibility: non-decaying fixture returns infinity.
+- Snapshot: mutate then restore recovers original expiry.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/model/entity/Enemy.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Schedule Standard EC at Aura Expiry - Pending
+
+Why third:
+
+Event policy can depend on the tested expiry API while keeping damage recording,
+live resistance, and Aura consumption in the existing scheduler owner.
+
+Target files:
+
+- `src/java/mechanics/reaction/ReactionEffectScheduler.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Compute each next standard EC wake from nominal and current Aura expiries.
+- Distinguish nominal damage, eligible premature damage, suppressed expiry, and
+  stale expiry after Aura extension.
+- Retain existing live-resistance and 0.4U consumption paths for every damage
+  tick; leave Lunar event code behaviorally unchanged.
+
+Acceptance criteria:
+
+- Normal EC still damages at one-second intervals and consumes 0.4U from both.
+- A first Aura expiring between 0.5 and 1.0 seconds after the previous tick deals
+  one early terminal tick at exact expiry.
+- An Aura expiring below 0.5 seconds ends EC with no extra damage or consumption.
+- Extending the threatened Aura before its old expiry cancels that early tick and
+  retains the nominal schedule.
+- Lunar-Charged still first ticks at two seconds independent of standard Aura
+  expiry, and existing impact-time resistance checks remain exact.
+
+Test cases to add or update:
+
+- Normal: strong dual Aura nominal tick and 0.4U consumption.
+- Premature: finite 0.5U fixture produces a tick between one and two seconds.
+- Suppressed: finite 0.48U fixture ends below the half-second threshold.
+- Extension: stronger same-element application before the obsolete expiry
+  reschedules without damage.
+- No-change: infinite Aura, live RES activation/expiry, and Lunar two-second
+  cadence.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/mechanics/reaction/ReactionEffectScheduler.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 4: Re-Accept EC-Sensitive Party Baselines - Pending
+
+Why last:
+
+RaidenParty contains standard EC while both Flins parties exercise the excluded
+Lunar event path, so all three are required to attribute changes and prove the
+boundary.
+
+Target files:
+
+- `README.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Run two fresh payloads each for RaidenParty, FlinsParty, and FlinsParty2.
+- Compare hashes, totals, ER, allocations, reaction/tick/action cadence, source
+  attribution, and warnings against B-055.
+- Update accepted references only for traced standard-EC terminal differences.
+
+Acceptance criteria:
+
+- Every repeated pair matches without warning or energy failure.
+- Any Raiden delta is exactly explained by premature/suppressed standard EC
+  events; both Lunar parties remain byte-stable.
+- README, verification reference, plan, and ledger agree; tracked HTML is
+  restored and no generated output is staged.
+
+Test cases to add or update:
+
+- Normal integration: all three parties complete deterministically.
+- No-change integration: both Lunar parties retain exact B-055 payloads.
+- Abnormal integration: no duplicate timer, event-loop, warning, report, ER,
+  optimizer, or artifact leak occurs.
+
+Verification:
+
+- two fresh `./gradlew RaidenParty` runs
+- two fresh `./gradlew FlinsParty` runs
+- two fresh `./gradlew FlinsParty2` runs
+- `python scripts/validate_agent_assets.py`
+- `python scripts/preflight.py --run`

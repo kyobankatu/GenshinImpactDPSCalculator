@@ -1462,3 +1462,29 @@ experiment record.
   and FlinsParty2
   `23dc585acc02d3bd7bca7fe3f5b65db62b3e1489fcedb12a02b9725b774b7dd4`.
   Totals, ER, allocations, cadence, and warnings remain unchanged.
+
+### B-056 — Standard Electro-Charged cannot tick at premature Aura expiry
+
+- Status: `in-progress`
+- Source: 1/3 (README known simplification confirmed by maintained EGT evidence)
+- Symptom: the EC event wakes only at one-second intervals, so an Aura that
+  naturally expires 0.5-1.0 seconds after the prior tick produces no sourced
+  premature terminal tick; sub-0.5 suppression is not explicitly modeled.
+- Scope: read-only typed Aura expiry, standard EC wake policy, early/suppressed/
+  extension regressions, and three audited party baselines
+- Risk: `planned`
+- Proof: exact finite expiry queries, one eligible early tick, one suppressed
+  expiry, extension cancellation, unchanged nominal/Lunar behavior, and repeated
+  deterministic party payloads
+- Notes: adopt the maintained KQM Elemental Gauge Theory and independently
+  recorded Evidence Vault experiments, accessed 2026-08-02. EGT specifies
+  one-second ticks, premature damage when an Aura completely decays before the
+  next interval except within 0.5 seconds of the previous tick, and 0.4U dual
+  consumption per damage tick. The Evidence Vault gives concrete 0.8-second
+  early-damage and 0.4-second no-damage cases. Sources:
+  https://library.keqingmains.com/combat-mechanics/elemental-effects/elemental-gauge-theory
+  and
+  https://library.keqingmains.com/evidence/combat-mechanics/elemental-effects/transformative-reactions.
+  Adapt only standard single-target no-hitlag timing. Ownership refresh, EC ICD,
+  AoE, and Lunar-Charged are separate. See `TASKS.md` implementation block
+  `Electro-Charged Premature Expiry Ticks`.
