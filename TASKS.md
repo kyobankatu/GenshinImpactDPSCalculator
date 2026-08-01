@@ -46,8 +46,9 @@ The current simulator-only accuracy queue through B-020 is complete. Xiangling's
 Guoba now follows its sourced 1U/no-ICD contract, while Pyronado's distinct
 application metadata remains unchanged.
 
-The active queue is B-021: Xingqiu's two Fatal Rainscreen strikes must each use
-their sourced 1U/no-ICD contract instead of sharing standard Skill ICD.
+The B-021 correction is complete. Xingqiu's two Fatal Rainscreen strikes now
+each use their sourced 1U/no-ICD contract instead of sharing standard Skill
+ICD.
 
 ## Scope
 
@@ -2513,7 +2514,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phases 1-2 are complete and Phase 3 remains.
+- Implemented and verified; Phases 1-3 are complete.
 - Requirement: both Fatal Rainscreen strikes must independently apply 1U Hydro
   without entering or consulting a Skill ICD group.
 
@@ -2608,7 +2609,7 @@ Verification:
 - `./gradlew build`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Accept the RaidenParty Skill-Application Delta
+### Phase 3: Accept the RaidenParty Skill-Application Delta - Done
 
 Why last:
 
@@ -2644,6 +2645,17 @@ Verification:
 - two fresh `./gradlew RaidenParty` runs
 - `python scripts/validate_agent_assets.py` when baseline gate changes
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Actual-character regression captures both Fatal Rainscreen hits as Hydro
+  Skill damage with 1U, no ICD, and the typed Skill tag; both Vaporize with a
+  Pyro aura and the no-aura path produces two hits with no reactions.
+- Both post-fix `RaidenParty` payloads report 1,464,729 damage / 69,749 DPS and
+  match after excluding Gradle's elapsed-time line, with SHA-256
+  `2fbe19b421aa18de1dd2d9e342c0de369177635ea49f6644ced01046c0f0342e`.
+- The final detailed trace shows both Skill hits trigger Electro-Charged and Hit
+  2 has no preceding `ElementalSkill` ICD block.
 
 ## Cross-Cutting Rules
 

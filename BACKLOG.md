@@ -469,7 +469,7 @@ experiment record.
 
 ### B-021 — Fatal Rainscreen's second hit is blocked by Skill ICD
 
-- Status: `planned`
+- Status: `done`
 - Source: 3 (adjacent audited-party action metadata divergence)
 - Symptom: Xingqiu's two Skill strikes share standard Skill ICD, so the second
   1U Hydro application is blocked in the final `RaidenParty` trace at 2.6
@@ -487,6 +487,11 @@ experiment record.
   https://library.keqingmains.com/characters/hydro/xingqiu. Pre-fix audited
   `RaidenParty` baseline is 1,461,315 damage / 69,586 DPS. See `TASKS.md`
   implementation block `Xingqiu Fatal Rainscreen No-ICD Application`.
+  Completed 2026-08-02. Focused regression covers both 1U/no-ICD hits with and
+  without an aura. Both post-fix `RaidenParty` payloads report 1,464,729 damage
+  / 69,749 DPS with normalized SHA-256
+  `2fbe19b421aa18de1dd2d9e342c0de369177635ea49f6644ced01046c0f0342e`;
+  the detailed Hit 2 now triggers Electro-Charged without a Skill ICD block.
 
 ### B-022 — Bennett Press Skill uses the wrong gauge and ICD
 
