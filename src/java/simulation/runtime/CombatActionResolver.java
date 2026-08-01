@@ -11,6 +11,7 @@ import mechanics.formula.DamageCalculator;
 import mechanics.formula.ResistanceCalculator;
 import mechanics.reaction.ReactionCalculator;
 import mechanics.reaction.ReactionEffectScheduler;
+import mechanics.reaction.ReactionPriority;
 import mechanics.reaction.ReactionResult;
 import model.entity.Character;
 import model.stats.StatsContainer;
@@ -185,7 +186,7 @@ public class CombatActionResolver {
             reactionTriggered = true;
         }
 
-        for (Element aura : currentAuras) {
+        for (Element aura : ReactionPriority.orderAuras(trigger, currentAuras)) {
             ReactionResult result = ReactionCalculator.calculate(
                     trigger, aura, em, 90, getReactionBonus(trigger, aura, stats));
             if (result.getType() == ReactionResult.Type.NONE) {

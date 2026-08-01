@@ -19,6 +19,7 @@ import mechanics.formula.DamageCalculator;
 import mechanics.formula.ResistanceCalculator;
 import mechanics.reaction.ReactionCalculator;
 import mechanics.reaction.ReactionEffectScheduler;
+import mechanics.reaction.ReactionPriority;
 import mechanics.reaction.ReactionResult;
 import model.entity.ArtifactSet;
 import model.entity.Character;
@@ -47,6 +48,7 @@ public class ReactionRegressionTest {
 
     public static void main(String[] args) {
         testPhase1ReactionMetadataAndMultipliers();
+        testAccuracyPhaseG_ReactionPriorityContract();
         testPhase2Superconduct();
         testPhase3FreezeAndShatter();
         testAccuracyPhaseG_FreezeResolverContract();
@@ -180,6 +182,94 @@ public class ReactionRegressionTest {
         assertEquals(Element.PYRO, swirl.getRelatedElement(), "Swirl related element");
         assertEquals(Element.PYRO, swirl.getDamageElement(), "Swirl damage element");
         assertClose(1446.85 * 0.6, swirl.getTransformDamage(), 0.01, "Swirl base damage");
+    }
+
+    private static void testAccuracyPhaseG_ReactionPriorityContract() {
+        assertElementOrder(
+                ReactionPriority.orderAuras(
+                        Element.ELECTRO,
+                        reverseSet(
+                                Element.PYRO, Element.HYDRO, Element.CRYO,
+                                Element.DENDRO, Element.ELECTRO)),
+                Element.PYRO, Element.HYDRO, Element.CRYO,
+                Element.DENDRO, Element.ELECTRO);
+        assertElementOrder(
+                ReactionPriority.orderAuras(
+                        Element.PYRO,
+                        reverseSet(
+                                Element.ELECTRO, Element.HYDRO, Element.CRYO,
+                                Element.DENDRO, Element.PYRO)),
+                Element.ELECTRO, Element.HYDRO, Element.CRYO,
+                Element.DENDRO, Element.PYRO);
+        assertElementOrder(
+                ReactionPriority.orderAuras(
+                        Element.CRYO,
+                        reverseSet(
+                                Element.ELECTRO, Element.PYRO,
+                                Element.HYDRO, Element.CRYO)),
+                Element.ELECTRO, Element.PYRO, Element.HYDRO, Element.CRYO);
+        assertElementOrder(
+                ReactionPriority.orderAuras(
+                        Element.HYDRO,
+                        reverseSet(
+                                Element.PYRO, Element.CRYO, Element.DENDRO,
+                                Element.ELECTRO, Element.HYDRO)),
+                Element.PYRO, Element.CRYO, Element.DENDRO,
+                Element.ELECTRO, Element.HYDRO);
+        assertElementOrder(
+                ReactionPriority.orderAuras(
+                        Element.ANEMO,
+                        reverseSet(
+                                Element.ELECTRO, Element.PYRO, Element.HYDRO,
+                                Element.CRYO, Element.ANEMO)),
+                Element.ELECTRO, Element.PYRO, Element.HYDRO,
+                Element.CRYO, Element.ANEMO);
+        assertElementOrder(
+                ReactionPriority.orderAuras(
+                        Element.GEO,
+                        reverseSet(
+                                Element.ELECTRO, Element.HYDRO, Element.CRYO,
+                                Element.PYRO, Element.GEO)),
+                Element.ELECTRO, Element.HYDRO, Element.CRYO,
+                Element.PYRO, Element.GEO);
+        assertElementOrder(
+                ReactionPriority.orderAuras(
+                        Element.DENDRO,
+                        reverseSet(
+                                Element.ELECTRO, Element.PYRO,
+                                Element.HYDRO, Element.DENDRO)),
+                Element.ELECTRO, Element.PYRO, Element.HYDRO, Element.DENDRO);
+        assertElementOrder(
+                ReactionPriority.orderAuras(
+                        Element.PHYSICAL,
+                        reverseSet(Element.ELECTRO, Element.HYDRO)),
+                Element.HYDRO, Element.ELECTRO);
+
+        CombatSimulator pyro = simulatorWith(testCharacter(Element.PYRO));
+        List<ReactionResult.Kind> pyroKinds = captureReactionKinds(pyro);
+        pyro.getEnemy().setAura(Element.HYDRO, 1.0);
+        pyro.getEnemy().setAura(Element.ELECTRO, 1.0);
+        pyro.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Pyro simultaneous priority fixture", Element.PYRO));
+        assertEquals(ReactionResult.Kind.OVERLOAD, pyroKinds.get(0),
+                "Pyro should notify Overloaded before Vaporize");
+        assertEquals(ReactionResult.Kind.VAPORIZE, pyroKinds.get(1),
+                "Pyro should notify Vaporize after Overloaded");
+
+        CombatSimulator anemo = simulatorWith(testCharacter(Element.ANEMO));
+        List<Element> swirlElements = new ArrayList<>();
+        anemo.addReactionListener((result, source, time, simulator) -> {
+            if (result.getKind() == ReactionResult.Kind.SWIRL) {
+                swirlElements.add(result.getRelatedElement());
+            }
+        });
+        anemo.getEnemy().setAura(Element.HYDRO, 1.0);
+        anemo.getEnemy().setAura(Element.ELECTRO, 1.0);
+        anemo.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Anemo simultaneous priority fixture", Element.ANEMO));
+        assertElementOrder(swirlElements, Element.ELECTRO, Element.HYDRO);
     }
 
     private static void testPhase2Superconduct() {
@@ -4922,6 +5012,24 @@ public class ReactionRegressionTest {
 
     private static double expectedStandardDamage(double dmgBonus, double critRate, double critDmg) {
         return 1000.0 * (1.0 + dmgBonus) * (1.0 + Math.min(critRate, 1.0) * critDmg) * 0.5 * 0.9;
+    }
+
+    private static java.util.Set<Element> reverseSet(Element... elements) {
+        java.util.Set<Element> result = new java.util.LinkedHashSet<>();
+        for (int i = elements.length - 1; i >= 0; i--) {
+            result.add(elements[i]);
+        }
+        return result;
+    }
+
+    private static void assertElementOrder(
+            List<Element> actual, Element... expected) {
+        assertEquals(expected.length, actual.size(),
+                "Element order should contain the expected number of entries");
+        for (int i = 0; i < expected.length; i++) {
+            assertEquals(expected[i], actual.get(i),
+                    "Element order mismatch at index " + i);
+        }
     }
 
     private static void assertClose(double expected, double actual, double tolerance, String message) {

@@ -10496,7 +10496,7 @@ Completion evidence:
 - Frozen/Burning/Quicken synthetic state and residual behavior remain explicit
   exclusions. Documentation preflight passes without routed checks or leaks.
 
-### Phase 2: Implement Typed Ordinary Aura Priority - Pending
+### Phase 2: Implement Typed Ordinary Aura Priority - Done
 
 Target files:
 
@@ -10534,7 +10534,23 @@ Verification:
 - `python scripts/agent_validate.py --path src/java/mechanics/reaction/ReactionPriority.java --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Accept Deterministic Priority Baselines - Pending
+Completion evidence:
+
+- New pure `ReactionPriority` owns trigger-specific ordinary-Aura ordering and
+  returns an immutable list. Known reactive Auras precede leftovers, which use
+  stable `Element` declaration order independent of input Set implementation.
+- The resolver changes only its ordinary Aura iteration source; state storage,
+  reaction formulas, consumption, synthetic-state routing, and notifications
+  retain their existing owners.
+- Regression supplies reverse insertion order for all seven elemental trigger
+  policies, checks Physical/same-element fallback, and proves integrated Pyro
+  emits Overload before Vaporize while Anemo emits Electro Swirl before Hydro.
+- Full reaction regression retains Freeze, Burning, Quicken, EC, Lunar, formula,
+  gauge, character, weapon, artifact, and resonance contracts.
+- `ReactionRegressionTest`, `build`, `javadoc`, routed validation, and full
+  preflight pass without persistent service or external job.
+
+### Phase 3: Accept Deterministic Priority Baselines - In Progress
 
 Target files:
 
