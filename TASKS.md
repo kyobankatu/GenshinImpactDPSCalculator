@@ -10190,3 +10190,197 @@ Completion evidence:
   narrow the remaining EC simplifications to ownership, damage ICD, and hitlag.
   The tracked FlinsParty2 HTML report was restored and no generated output is
   staged.
+
+## Implementation Order: Finite Typed Freeze Aura
+
+Objective: replace the permanent scalar Freeze flag with a typed target Aura
+whose gauge accelerates to natural expiry, extends without resetting active
+decay, and survives simulator snapshot/restore.
+
+Scope:
+
+- Initial Frozen gauge and accelerating current-time-aware decay.
+- Active refreeze extension and inactive decay-rate recovery.
+- Time-aware Shatter checks/clear and Cryo resonance checks.
+- Full simulator snapshot payload and catalog-party no-change controls.
+
+Out of scope:
+
+- Dual underlying Hydro/Cryo reaction priority and trigger residual attachment.
+- Freeze resistance, hitlag, poise damage, innate Aura, and enemy-specific rules.
+- Shatter damage ICD/gauge by attack, multi-target reactions, RL behavior, and
+  persistent jobs.
+
+Cross-cutting rules:
+
+- `Enemy` owns immutable Freeze Aura state because it is target Aura data;
+  `CombatActionResolver` selects Freeze and Shatter transitions only.
+- Use current-time-aware APIs for production decisions. Keep no-time wrappers
+  solely for source compatibility and migrate all known runtime consumers.
+- Initial gauge is `2 * min(current origin, trigger source)`; active refreeze
+  adds gauge and preserves instantaneous decay rate.
+- Active decay uses `units - rate * elapsed - 0.05 * elapsed^2`, with rate
+  increasing by 0.1U/s^2. After depletion or Shatter, rate recovers by 0.2U/s^2
+  toward 0.4U/s and is retained for a later Freeze.
+- Preserve ordinary Aura state and snapshot contracts; explicit staging and
+  generated-artifact safety remain mandatory.
+
+### Phase 1: Record Freeze Gauge Evidence and State Math - Done
+
+Target files:
+
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Record maintained initial-gauge, duration, coexistence, and extension evidence.
+- Confirm the independent accelerating-decay and thaw-recovery implementation.
+- Inventory scalar Freeze, resolver, Shatter, resonance, and snapshot callers.
+
+Acceptance criteria:
+
+- Initial, active-decay, extension, depletion, and inactive-recovery equations
+  are explicit and dimensionally consistent.
+- Unresolved coexistence/priority behavior is excluded rather than inferred.
+- No production behavior changes in this phase.
+
+Test cases to add or update:
+
+- No production test; Phases 2 and 3 own typed state and resolver behavior.
+
+Verification:
+
+- inspect `Enemy`, resolver, Shatter, resonance, snapshot, and regression paths
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- KQM's duration equation rearranges exactly to
+  `F0 = 0.4 * duration + 0.05 * duration^2`, establishing the continuous decay
+  function and exact positive-root expiry used by the plan.
+- KQM confirms hidden Hydro/Cryo continues ordinary decay and refreeze extends
+  Frozen Aura. gcsim independently uses twice the smaller gauge, preserves
+  active decay rate on extension, accelerates by 0.1U/s^2, and thaws at
+  0.2U/s^2 toward the 0.4U/s floor.
+- Inventory confirms Freeze is a permanent scalar in `Enemy`; Shatter and Cryo
+  resonance use no-time checks, and `SimulatorSnapshot` captures ordinary Auras
+  but omits Freeze. The exclusions isolate the finite lifecycle from unresolved
+  dual-Aura reaction order.
+
+### Phase 2: Add Typed Freeze State and Snapshot Continuity - Pending
+
+Target files:
+
+- `src/java/model/entity/Enemy.java`
+- `src/java/simulation/SimulatorSnapshot.java`
+- `src/java/simulation/CombatSimulator.java`
+- `src/java/mechanics/rl/CapabilityProfiler.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Add immutable units/rate/update Freeze payload with remaining, rate, and exact
+  end queries across active decay and inactive recovery.
+- Add initial/apply, extension, reduction, clear, current-time query, capture,
+  and restore APIs while retaining compatibility wrappers.
+- Carry the typed payload through simulator snapshots; the RL profiler change is
+  constructor forwarding only and must not alter RL behavior.
+
+Acceptance criteria:
+
+- 1U source interaction creates 1.6U Frozen gauge and expires at
+  `2 * sqrt(12) - 4` seconds with nonlinear midpoint gauge.
+- Extension adds to current gauge without resetting instantaneous active rate.
+- Shatter clear retains thawing rate; later application uses recovered rate,
+  bounded below by 0.4U/s.
+- Snapshot restore recovers gauge, rate, update time, and exact future expiry.
+- Invalid/non-positive updates cannot create active Freeze.
+
+Test cases to add or update:
+
+- Normal: 1.6U initial gauge, midpoint residual/rate, exact expiry.
+- Extension: active add preserves rate and lengthens exact end.
+- Recovery: clear, partial thaw, full floor recovery, then reapply.
+- Consumption: partial, exact/over clear, invalid amount.
+- Snapshot: mutate/clear then exact payload restore.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/model/entity/Enemy.java --path src/java/simulation/SimulatorSnapshot.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Route Freeze and Shatter Through Current Time - Pending
+
+Target files:
+
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/mechanics/element/ResonanceManager.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Create/extend Freeze from exact current origin and trigger gauges.
+- Make Shatter eligibility/clear and Cryo resonance query current Freeze state.
+- Preserve underlying ordinary Aura decay and the existing reaction order.
+
+Acceptance criteria:
+
+- Both Hydro-on-Cryo and Cryo-on-Hydro create the sourced finite gauge.
+- A matching refreeze while an opposite Aura remains extends the current state.
+- At exact expiry, Shatter cannot trigger and Cryo resonance loses Frozen status.
+- Before expiry, Shatter deals existing damage and clears only Frozen state.
+- Existing ordinary Aura consumption and regression behavior remain stable.
+
+Test cases to add or update:
+
+- Directional: Hydro/Cryo source order with equal gauges.
+- Timing: before/exact/after expiry Shatter and resonance checks.
+- Extension: refreeze with coexisting opposite Aura.
+- Abnormal: expired Freeze hit does not notify or damage Shatter.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/simulation/runtime/CombatActionResolver.java --path src/java/mechanics/element/ResonanceManager.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 4: Re-Accept Freeze-Neutral Catalog Baselines - Pending
+
+Target files:
+
+- `README.md`
+- `BACKLOG.md`
+- `TASKS.md`
+
+Tasks:
+
+- Run two no-daemon controls for each catalog party against B-060.
+- Record hashes, values, ER, cadence, warnings, and absence of Freeze/Shatter.
+- Document finite Freeze while retaining explicit coexistence limitations.
+
+Acceptance criteria:
+
+- All six runs match B-060 exactly with no Freeze/Shatter events or warnings.
+- Focused/full validation pass and the tracked generated report is restored.
+- Plan, ledger, README, and durable checkpoint agree.
+
+Test cases to add or update:
+
+- Normal: pairwise exact catalog runs.
+- No-change: accepted totals/ER/cadence.
+- Abnormal: no warning or generated-artifact leak.
+
+Verification:
+
+- two fresh `./gradlew --no-daemon RaidenParty` runs
+- two fresh `./gradlew --no-daemon FlinsParty` runs
+- two fresh `./gradlew --no-daemon FlinsParty2` runs
+- `python scripts/preflight.py --run`

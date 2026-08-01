@@ -1629,3 +1629,32 @@ experiment record.
   exact Quicken expiry, and retained owner/RES/generation contracts. Six catalog
   controls exactly retain B-059 hashes, values, ER, cadence, and zero affected
   reaction or warning lines.
+
+### B-061 — Freeze Aura never decays or survives snapshot restore
+
+- Status: `in-progress`
+- Source: 1/3 (README known difference, KQM gauge evidence, and gcsim reference)
+- Symptom: `Enemy` stores one non-time-aware `freezeAuraUnits` value, so a target
+  remains Frozen forever unless Shattered; snapshot save/restore omits Freeze
+  entirely, and repeated Freeze replaces instead of extending its gauge.
+- Scope: typed accelerating Freeze gauge, natural expiry, refreeze extension,
+  Shatter consumption, snapshot continuity, and deterministic catalog controls
+- Risk: `planned`
+- Proof: exact 1U-source gauge/duration, midpoint nonlinear decay, exact expiry,
+  active extension without decay reset, thawing-rate recovery, Shatter clear,
+  snapshot restore, and unchanged non-Freeze party hashes
+- Notes: KQM defines the initial Frozen Aura as twice the smaller current origin
+  and trigger gauge, with duration `2 * sqrt(5 * frozen gauge + 4) - 4`; it also
+  states that underlying Hydro/Cryo continues natural decay and matching
+  reapplication extends Freeze. This is equivalent to
+  `F(t) = F0 - 0.4t - 0.05t^2`. gcsim independently starts at twice the smaller
+  gauge, adds refreeze durability without resetting the current decay rate,
+  accelerates active decay by 0.1U/s^2, and recovers the inactive rate by
+  0.2U/s^2 toward 0.4U/s. Sources accessed 2026-08-02:
+  https://library.keqingmains.com/combat-mechanics/elemental-effects/elemental-gauge-theory,
+  https://library.keqingmains.com/evidence/combat-mechanics/elemental-effects/transformative-reactions#duration-of-freeze-aura,
+  and https://github.com/genshinsim/gcsim/blob/main/pkg/reactable/freeze.go.
+  This pass preserves the existing single-target resolver and implements finite
+  Freeze lifecycle only. Dual underlying Aura reaction priority, trigger
+  residual attachment, Freeze resistance, hitlag, poise damage, and Shatter
+  damage ICD remain separate.
