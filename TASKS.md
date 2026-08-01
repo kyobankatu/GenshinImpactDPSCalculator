@@ -7294,12 +7294,14 @@ Verification:
 Completion evidence:
 
 - Shatter, core triggers, transformative reactions, Burning creation, and Bloom
-  creation now use the central multiplier with the immutable start-of-hit buff
-  list. Existing owner-stat snapshots remain limited to EM/reaction bonuses.
+  creation now use the central multiplier with the immutable start-of-hit enemy
+  effect list. This list is independent of attacker targeting, while existing
+  owner-stat snapshots remain limited to EM/reaction bonuses.
 - Regression proves post-snapshot live Overload reduction, exact-expiry stale
   exclusion, first-Swirl non-immediacy including VV's independent 60% Swirl
-  bonus, and later Pyro-reaction use of already-active VV reduction. Existing
-  Superconduct tests retain same-hit exclusion and next-hit Physical inclusion.
+  bonus, later Anemo-triggered Swirl use of already-active cross-element VV
+  reduction, and later Pyro-reaction use of that reduction. Existing Superconduct
+  tests retain same-hit exclusion and next-hit Physical inclusion.
 - Reaction regression, build, routed validation, and preflight pass with aura,
   ownership, ICD, and notification tests unchanged.
 

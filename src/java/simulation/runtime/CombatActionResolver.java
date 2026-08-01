@@ -111,7 +111,10 @@ public class CombatActionResolver {
         applicableBuffBuffer.addAll(sim.getApplicableBuffs(attacker));
         StatsContainer resolvedStats = DamageCalculator.resolveTargetStats(
                 attacker, sim.getEnemy(), action, applicableBuffBuffer, sim.getCurrentTime());
-        return new ActionResolutionContext(new ArrayList<>(applicableBuffBuffer), resolvedStats);
+        return new ActionResolutionContext(
+                new ArrayList<>(applicableBuffBuffer),
+                new ArrayList<>(sim.getTeamBuffList()),
+                resolvedStats);
     }
 
     /**
@@ -546,7 +549,7 @@ public class CombatActionResolver {
     }
 
     /**
-     * Resolves enemy resistance from the immutable buff list captured before
+     * Resolves enemy resistance from the immutable team-buff list captured before
      * reaction callbacks for the current hit.
      *
      * @param context start-of-hit action context
@@ -555,7 +558,7 @@ public class CombatActionResolver {
      */
     private double resolveImpactResistance(ActionResolutionContext context, Element element) {
         return ResistanceCalculator.calculateMultiplier(
-                sim.getEnemy(), context.applicableBuffs, sim.getCurrentTime(), element);
+                sim.getEnemy(), context.resistanceBuffs, sim.getCurrentTime(), element);
     }
 
     /**
@@ -659,6 +662,8 @@ public class CombatActionResolver {
     private static final class ActionResolutionContext {
         /** Buffs that were applicable to the action when resolution started. */
         private final List<Buff> applicableBuffs;
+        /** Enemy resistance effects that existed when resolution started. */
+        private final List<Buff> resistanceBuffs;
         /** Resolved stats container, or {@code null} when the action uses snapshot semantics. */
         private final StatsContainer resolvedStats;
 
@@ -666,10 +671,15 @@ public class CombatActionResolver {
          * Creates a resolution context.
          *
          * @param applicableBuffs snapshot of applicable buffs
+         * @param resistanceBuffs snapshot of enemy resistance effects
          * @param resolvedStats   resolved stats, or {@code null} for snapshot actions
          */
-        private ActionResolutionContext(List<Buff> applicableBuffs, StatsContainer resolvedStats) {
+        private ActionResolutionContext(
+                List<Buff> applicableBuffs,
+                List<Buff> resistanceBuffs,
+                StatsContainer resolvedStats) {
             this.applicableBuffs = applicableBuffs;
+            this.resistanceBuffs = resistanceBuffs;
             this.resolvedStats = resolvedStats;
         }
     }

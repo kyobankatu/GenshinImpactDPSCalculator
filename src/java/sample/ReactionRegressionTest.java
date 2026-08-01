@@ -3395,10 +3395,18 @@ public class ReactionRegressionTest {
         assertClose(expectedTransformative(0.6, Element.PYRO, 0.0) * 1.60, firstSwirlDamage, 0.5,
                 "The first Swirl should not use the VV reduction emitted by that reaction");
 
+        vvSim.getEnemy().setAura(Element.PYRO, 4.0, vvSim.getCurrentTime());
+        vvSim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, reactionHit("Second VV Swirl RES fixture", Element.ANEMO));
+        double secondSwirlDamage = vvSim.getTotalDamage() - firstSwirlDamage;
+        assertClose(expectedTransformative(0.6, Element.PYRO, 0.0) * 1.60 * (1.15 / 0.90),
+                secondSwirlDamage, 0.5,
+                "A later Swirl should use the already-active cross-element VV reduction");
+
         vvSim.getEnemy().setAura(Element.ELECTRO, 4.0, vvSim.getCurrentTime());
         vvSim.performActionWithoutTimeAdvance(
                 CharacterId.XIANGLING, reactionHit("Post-VV Overload RES fixture", Element.PYRO));
-        double postVvOverload = vvSim.getTotalDamage() - firstSwirlDamage;
+        double postVvOverload = vvSim.getTotalDamage() - firstSwirlDamage - secondSwirlDamage;
         assertClose(expectedTransformative(2.75, Element.PYRO, 0.0) * (1.15 / 0.90),
                 postVvOverload, 0.5,
                 "A later Pyro reaction should use the already-active VV reduction");
