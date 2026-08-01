@@ -655,3 +655,24 @@ experiment record.
   all four Columbina Bursts, and contain no insufficient-energy warning. Both
   report 14,077,198 damage / 203,722 DPS with normalized SHA-256
   `63d95d817af04e4263fb92f8492609296980154f37261fceafbc9222a0d248f6`.
+
+### B-028 — Raiden Eye attacks on a timer without triggering damage
+
+- Status: `planned`
+- Source: 3 (sourced game-accuracy divergence)
+- Symptom: Raiden Skill currently schedules autonomous Eye damage every 0.9
+  seconds, producing 22 coordinated attacks in the accepted `RaidenParty` trace
+  even when no character deals damage at those exact trigger times.
+- Scope: resolved-damage event dispatch, `src/java/model/character/RaidenShogun.java`,
+  and focused reaction regression coverage
+- Risk: `planned`
+- Proof: actual-Raiden idle/damage/cooldown/refresh regression plus two
+  deterministic `RaidenParty` payloads
+- Notes: adopt the maintained KQM Raiden guide and KQM TCL evidence (accessed
+  2026-08-02). The Eye triggers only when an attack deals damage, at most once
+  every 0.9 seconds per party, and cooldown begins at the triggering damage.
+  Sources: https://keqingmains.com/raiden/ and
+  https://library.keqingmains.com/evidence/characters/electro/raiden-shogun.
+  Adapt the small real hit delay to a same-timestamp one-shot simulator event.
+  Pre-fix `RaidenParty` is 1,331,957 damage / 63,427 DPS. See `TASKS.md`
+  implementation block `Raiden Eye Damage Trigger`.

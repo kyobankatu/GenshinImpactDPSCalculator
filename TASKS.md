@@ -70,6 +70,9 @@ The B-027 correction is complete. ER calibration now replays requested Burst
 intervals with energy cap, carry, and cyclic refill instead of allowing later
 particle income to hide an earlier deficit.
 
+The active queue is B-028. Raiden's Eye must trigger from resolved party damage
+instead of attacking autonomously on a fixed timer.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -3589,6 +3592,171 @@ Completion evidence:
 - Interval regression covers skipped-window closure, later-income masking,
   cyclic tail/first income, no-particle sentinel behavior, alternate Burst
   costs, and precise insufficient-energy diagnostics.
+
+## Implementation Order: Raiden Eye Damage Trigger
+
+Status:
+
+- Planned; Phase 1 evidence is recorded below.
+- Requirement: while active, the Eye performs one coordinated attack only when
+  a party attack deals positive damage and its party-wide 0.9-second cooldown
+  is ready.
+
+Scope:
+
+- Add a resolved-direct-damage listener contract below action orchestration.
+- Dispatch damage events for timeline and no-time-advance attack resolution.
+- Replace Raiden's autonomous periodic event with damage-triggered Eye state.
+- Preserve Eye duration, ICD/gauge, dynamic Raiden stats, and particle model.
+
+Out of scope for this pass:
+
+- Multi-target trigger rules, shielded/immune enemies, transformative-reaction
+  trigger exceptions, co-op scaling, exact frame delay, damage formulas,
+  optimizer policy, RL tensor/protocol changes, or generated reports.
+- Changing generic action-listener semantics or periodic-event behavior.
+
+Definitions:
+
+- `DamageListener`: simulation event listener receiving actor, action, resolved
+  direct damage, and timestamp for every resolved `AttackAction`.
+
+Design boundaries:
+
+- `CombatActionResolver` emits factual resolved-damage events.
+- `SimulationEventDispatcher` owns listener registration and fan-out.
+- `RaidenShogun` owns Eye activation, expiry, cooldown, recursion prevention,
+  attack construction, and particles.
+- Eye resolution uses a same-timestamp one-shot event so the triggering attack
+  finishes resolution before the coordinated attack executes.
+
+### Phase 1: Record Eye Trigger Evidence and Runtime Boundary - Done
+
+Why first:
+
+The trigger condition, cooldown origin, event ordering, and deliberate delay
+simplification must be explicit before replacing the existing timer.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record current KQM guide and TCL evidence with access date.
+- Record the pre-fix autonomous Eye count and accepted Raiden baseline.
+- Define resolved-damage dispatch and same-timestamp deferred resolution.
+
+Acceptance criteria:
+
+- Damage requirement, party-wide 0.9-second cooldown, cooldown origin, and
+  25-second active state are explicit.
+- The simulator adaptation and excluded shield/reaction edge cases are named.
+- No production code changes in the evidence phase.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 adds event and character
+  lifecycle coverage.
+
+Verification:
+
+- inspect `RaidenShogun.skill`, action resolution, and `RaidenParty` Eye times
+- `python scripts/preflight.py --run`
+
+### Phase 2: Trigger One Eye from Resolved Damage
+
+Why second:
+
+A resolver-level event covers player actions and off-field/no-time-advance hits
+without coupling Raiden to action orchestration or display labels.
+
+Target files:
+
+- `new src/java/simulation/DamageListener.java`
+- `src/java/simulation/SimulationEventBus.java`
+- `src/java/simulation/runtime/SimulationEventDispatcher.java`
+- `src/java/simulation/CombatSimulator.java`
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/model/character/RaidenShogun.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `src/java/simulation/AGENTS.md`
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Dispatch resolved direct damage with typed actor/action identity and amount.
+- Register one Raiden-owned listener and refresh Eye attack/expiry/cooldown state
+  on each Skill cast.
+- Schedule one same-time coordinated attack for eligible positive damage and
+  reject zero damage, Eye self-damage, cooldown, and expiry cases.
+- Generate the existing expected 0.5 Electro particles only on an Eye attack.
+- Remove Raiden's periodic event handle and timer registration.
+
+Acceptance criteria:
+
+- Advancing time without damage produces no Eye attacks or Eye particles.
+- Timeline and no-time-advance positive damage can trigger the Eye.
+- Repeated damage inside 0.9 seconds produces one attack; exact cooldown expiry
+  permits the next attack and uses triggering-damage time as the boundary.
+- Skill recast updates one listener-owned Eye state without duplicate attacks.
+- Existing Eye 1U/standard-Skill ICD metadata remains unchanged.
+
+Test cases to add or update:
+
+- Normal: positive party damage triggers one Eye and 0.5 expected particles.
+- Idle: advancing several seconds after Skill causes no Eye damage.
+- Boundary: same-time and +0.899-second hits are blocked; +0.900 is accepted.
+- Off-field: `performActionWithoutTimeAdvance` damage triggers after due events run.
+- Abnormal: zero direct damage and expired Eye state produce no trigger.
+- Refresh: multiple Skill casts still yield one coordinated attack per eligible
+  damage event.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Accept the Triggered RaidenParty Baseline
+
+Why last:
+
+The reference rotation establishes the intended damage, aura, particle, ER,
+and optimizer delta after autonomous Eye ticks are removed.
+
+Target files:
+
+- `README.md`
+- `TASKS.md`
+- `BACKLOG.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+
+Tasks:
+
+- Run two fresh `RaidenParty` payloads after the trigger correction.
+- Confirm Eye timestamps follow eligible damage and never appear during idle.
+- Update the deterministic Raiden baseline and normalized payload hash.
+
+Acceptance criteria:
+
+- Both normalized payloads and numeric summaries match.
+- Detailed trace contains only damage-triggered Eye attacks at legal cadence.
+- Numeric baseline documents agree.
+- Agent assets and routed preflight checks pass.
+
+Test cases to add or update:
+
+- No further production test; Phase 2 owns generic dispatch and Eye lifecycle.
+
+Verification:
+
+- two fresh `./gradlew RaidenParty` runs
+- `python scripts/validate_agent_assets.py`
+- `python scripts/preflight.py --run`
 
 ## Cross-Cutting Rules
 
