@@ -390,3 +390,23 @@ experiment record.
   `RaidenParty` remains 1,440,416 / 68,591; `FlinsParty2` remains 15,434,039 /
   226,306 with normalized payload SHA-256
   `a9cdfbf0d3a0a01356d9d113afdd7f0afe8ef8510494f4b193107d533c8dbb6e`.
+
+### B-018 — Cryo resonance grants unconditional CRIT Rate
+
+- Status: `planned`
+- Source: 2 (source scan of explicit approximation comments)
+- Symptom: Shattering Ice grants +15% CRIT Rate unconditionally, including
+  against enemies with no Cryo aura and enemies affected by unrelated elements.
+- Scope: `src/java/mechanics/element/ResonanceManager.java`,
+  `src/java/sample/ReactionRegressionTest.java`
+- Risk: `planned`
+- Proof: focused dynamic Cryo/Frozen/aura-expiry regression plus unchanged
+  audited sample baselines
+- Notes: adopt the current Genshin Impact Wiki Cryo contract (accessed
+  2026-08-02): +15% CRIT Rate applies only against enemies that are Frozen or
+  affected by Cryo. Source: https://genshin-impact.fandom.com/wiki/Cryo. The
+  existing time-aware Enemy aura and Freeze state are sufficient; no global
+  stat or Buff API change is needed. Neither audited sample has Cryo resonance,
+  so pre-fix baselines are 1,440,416 / 68,591 for `RaidenParty` and 15,434,039 /
+  226,306 for `FlinsParty2`. See `TASKS.md` implementation block
+  `Conditional Cryo Resonance CRIT Rate`.

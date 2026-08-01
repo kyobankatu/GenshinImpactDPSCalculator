@@ -2055,6 +2055,144 @@ Completion evidence:
   payload retains SHA-256
   `a9cdfbf0d3a0a01356d9d113afdd7f0afe8ef8510494f4b193107d533c8dbb6e`.
 
+## Implementation Order: Conditional Cryo Resonance CRIT Rate
+
+Status:
+
+- In progress.
+- Phase 1 is complete; Phases 2-3 remain.
+- Requirement: Shattering Ice must grant +15% CRIT Rate only while the target
+  is Frozen or has a positive, current-time Cryo aura.
+
+Scope:
+
+- Replace the unconditional SimpleBuff effect with a time-aware resonance Buff.
+- Add focused regression coverage for inactive, Cryo, Frozen, unrelated aura,
+  and exact aura-expiry states.
+- Confirm audited non-Cryo samples remain unchanged.
+
+Out of scope for this pass:
+
+- Electro status-duration reduction, Freeze duration, aura formulas, Geo or
+  Dendro resonance, optimizer logic, reports, defensive systems, or RL.
+- Generalizing conditional Buff construction beyond this resonance.
+
+Design boundaries:
+
+- `ResonanceManager` owns the condition; `Enemy` remains the source of current
+  Cryo/Freeze state.
+- The existing `Buff.applyStats` time parameter drives aura evaluation.
+- No static/global simulator reference or display-string condition is added.
+
+### Phase 1: Record Shattering Ice Condition Evidence - Done
+
+Why first:
+
+The +15% value is correct but its target-state condition is omitted, so source
+wording and boundary semantics must be recorded before changing stat assembly.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record the current Frozen-or-Cryo condition and +15% value, accessed
+  2026-08-02.
+- Confirm Enemy exposes current-time aura units and explicit Freeze state.
+- Record unchanged non-Cryo sample baselines and local implementation scope.
+
+Acceptance criteria:
+
+- Source URL, access date, adopted classification, and exact condition are
+  recorded.
+- The existing unconditional approximation comment is linked to this item.
+- Tests distinguish Cryo aura, Freeze state, unrelated aura, and expiry.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 adds executable coverage.
+
+Verification:
+
+- inspect `ResonanceManager`, `Enemy`, and stat resolution
+- `python scripts/preflight.py --run`
+
+### Phase 2: Implement and Test Dynamic Cryo Resonance
+
+Why second:
+
+After the condition is fixed, a single time-aware Buff and focused stat tests
+can establish the runtime contract atomically.
+
+Target files:
+
+- `src/java/mechanics/element/ResonanceManager.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Apply +15% CRIT Rate only when current Cryo aura is positive or Freeze state
+  is active.
+- Preserve the permanent resonance registration and typed Buff identity.
+- Add resolved-stat regression at inactive, active, and expiry boundaries.
+
+Acceptance criteria:
+
+- No aura and Pyro aura grant no CRIT Rate.
+- Cryo aura and Freeze state each grant exactly +15% CRIT Rate.
+- A finite Cryo aura grants the bonus before expiry and not exactly at expiry.
+- No Enemy or generic Buff API changes.
+
+Test cases to add or update:
+
+- Normal: positive Cryo aura grants +15% CRIT Rate.
+- Alternate normal: explicit Frozen state grants +15% without Cryo aura.
+- No-trigger: no aura and Pyro aura grant 0%.
+- Boundary: finite Cryo aura bonus is absent exactly at aura expiry.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Confirm Shared-Resonance Integration Stability
+
+Why last:
+
+Focused tests own Cryo behavior; current non-Cryo reference parties must remain
+unchanged after a shared-manager edit.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Run fresh `RaidenParty` and `FlinsParty2` samples.
+- Confirm deterministic summaries and close B-018.
+
+Acceptance criteria:
+
+- `RaidenParty` remains 1,440,416 damage / 68,591 DPS.
+- `FlinsParty2` remains 15,434,039 damage / 226,306 DPS.
+- README and verification gate remain unchanged.
+- Routed preflight checks pass.
+
+Test cases to add or update:
+
+- No further production test; Phase 2 owns Cryo resonance behavior.
+
+Verification:
+
+- `./gradlew RaidenParty`
+- `./gradlew FlinsParty2`
+- `python scripts/preflight.py --run`
+
 ## Cross-Cutting Rules
 
 ### Testing
