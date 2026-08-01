@@ -5313,7 +5313,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phase 1 is complete and Phases 2-3 remain.
+- In progress; Phases 1-2 are complete and Phase 3 remains.
 - Requirement: each Swirled element must have one independently refreshed 40%
   Viridescent Venerer RES shred, applied only by its on-field equipping trigger.
 
@@ -5404,7 +5404,7 @@ Completion evidence:
 - Current code creates a new same-ID buff on every eligible Swirl and appends it
   to every character without removal, making stat assembly additive.
 
-### Phase 2: Replace Same-Element Shred and Regress Boundaries
+### Phase 2: Replace Same-Element Shred and Regress Boundaries - Done
 
 Why second:
 
@@ -5450,6 +5450,18 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/agent_validate.py --path src/java/model/artifact/ViridescentVenerer.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- `ViridescentVenerer` now requires the owner to be both active and the Swirl
+  trigger, creates one source-attributed typed buff for the Swirled element, and
+  delegates same-ID replacement to `applyTeamBuffNoStack`.
+- The regression proves one 0.40 Pyro value across a five-second refresh, active
+  state at 14.999 seconds, exact expiry at 15.0 seconds, independent Pyro/Hydro
+  windows, off-field and wrong-trigger rejection, unsupported reaction defense,
+  and the expected 1.15/0.90 resistance multiplier on a subsequent Pyro hit.
+- Reaction and party-catalog regressions, build, Javadoc, routed validation, and
+  preflight pass.
 
 ### Phase 3: Re-Accept VV Party Baselines
 

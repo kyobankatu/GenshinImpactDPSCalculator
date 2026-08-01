@@ -52,62 +52,45 @@ public class ViridescentVenerer extends model.entity.ArtifactSet implements Reac
         // Decreases opponent's Elemental RES to the element infused in the Swirl by 40%
         // for 10s.
 
-        // Trigger condition: Swirl reaction
-        if (result.isSwirl()) {
-            // Check if owner is on field?
-            // "The effect... can be triggered by the equipping character even if they are
-            // not on the field?" -> Usually NO.
-            // VV specifically requires the character to be ON FIELD to trigger the RES
-            // shred.
-            // (Common knowledge: VV only triggers on-field).
-            // Let's implement ON FIELD requirement.
+        if (!result.isSwirl() || sim.getActiveCharacter() != owner || triggerCh != owner) {
+            return;
+        }
 
-            if (sim.getActiveCharacter() == owner) {
-                model.type.Element elem = result.getSwirlElement();
-                if (elem != null) {
-                    // Apply Team Buff for RES Shred against this element
-                    // (Equivalent to Enemy Debuff in single-target sim)
+        model.type.Element elem = result.getSwirlElement();
+        StatType shredStat = getVvShredStat(elem);
+        if (shredStat == null) {
+            return;
+        }
 
-                    StatType shredStat = null;
-                    switch (elem) {
-                        case PYRO:
-                            shredStat = StatType.PYRO_RES_SHRED;
-                            break;
-                        case HYDRO:
-                            shredStat = StatType.HYDRO_RES_SHRED;
-                            break;
-                        case CRYO:
-                            shredStat = StatType.CRYO_RES_SHRED;
-                            break;
-                        case ELECTRO:
-                            shredStat = StatType.ELECTRO_RES_SHRED;
-                            break;
-                        case ANEMO:
-                        case GEO:
-                        case DENDRO:
-                        case PHYSICAL:
-                            // Cannot swirl these
-                            break;
-                    }
-
-                    if (shredStat != null) {
-                        final StatType targetStat = shredStat;
-                        final String buffName = "VV Shred: " + elem.toString();
-
-                        Buff vvBuff = new Buff(buffName, getVvBuffId(elem), 10.0, sim.getCurrentTime()) {
-                            @Override
-                            protected void applyStats(StatsContainer stats, double currentTime) {
-                                stats.add(targetStat, 0.40);
-                            }
-                        }.sourcedBy(owner.getCharacterId());
-
-                        // Apply to ALL party members
-                        for (model.entity.Character m : sim.getPartyMembers()) {
-                            m.addBuff(vvBuff);
-                        }
-                    }
-                }
+        Buff vvBuff = new Buff("VV Shred: " + elem, getVvBuffId(elem), 10.0, sim.getCurrentTime()) {
+            @Override
+            protected void applyStats(StatsContainer stats, double currentTime) {
+                stats.add(shredStat, 0.40);
             }
+        }.sourcedBy(owner.getCharacterId());
+        sim.applyTeamBuffNoStack(vvBuff);
+    }
+
+    private StatType getVvShredStat(model.type.Element elem) {
+        if (elem == null) {
+            return null;
+        }
+        switch (elem) {
+            case PYRO:
+                return StatType.PYRO_RES_SHRED;
+            case HYDRO:
+                return StatType.HYDRO_RES_SHRED;
+            case CRYO:
+                return StatType.CRYO_RES_SHRED;
+            case ELECTRO:
+                return StatType.ELECTRO_RES_SHRED;
+            case ANEMO:
+            case GEO:
+            case DENDRO:
+            case PHYSICAL:
+                return null;
+            default:
+                throw new IllegalArgumentException("Unsupported element: " + elem);
         }
     }
 

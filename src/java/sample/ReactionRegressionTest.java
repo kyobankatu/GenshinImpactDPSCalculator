@@ -96,6 +96,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ColumbinaGravityAndDewRegression();
         testAccuracyPhaseF_ColumbinaStandInBoundaries();
         testAccuracyPhaseF_ArtifactLunarReactionBuffRegression();
+        testAccuracyPhaseF_ViridescentVenererRefreshContract();
         testAccuracyPhaseF_WeaponReactionBonusRegression();
         testAccuracyPhaseF_DragonsBaneTargetAuraContract();
         testAccuracyPhaseF_DendroResonanceReactionEmContract();
@@ -2209,6 +2210,94 @@ public class ReactionRegressionTest {
         double afterCrit = owner.getEffectiveStats(sim.getCurrentTime()).get(StatType.CRIT_RATE);
         assertClose(beforeCrit + 0.15, afterCrit, EPS,
                 "Night of the Sky's Unveiling should grant on-field Lunar reaction CRIT Rate");
+    }
+
+    private static void testAccuracyPhaseF_ViridescentVenererRefreshContract() {
+        ReactionResult pyroSwirl = ReactionCalculator.calculate(Element.ANEMO, Element.PYRO, 0.0, 90);
+        ReactionResult hydroSwirl = ReactionCalculator.calculate(Element.ANEMO, Element.HYDRO, 0.0, 90);
+
+        TestCharacter owner = testCharacter(Element.ANEMO, CharacterId.SUCROSE);
+        owner.setArtifacts(new model.artifact.ViridescentVenerer());
+        TestCharacter ally = testCharacter(Element.PYRO, CharacterId.XIANGLING);
+        CombatSimulator refreshSim = simulatorWith(owner);
+        refreshSim.addCharacter(ally);
+
+        refreshSim.notifyReaction(pyroSwirl, owner);
+        assertClose(0.40, resolvedStat(refreshSim, owner, StatType.PYRO_RES_SHRED), EPS,
+                "VV should apply one Pyro resistance shred to the team");
+        refreshSim.advanceTime(5.0);
+        refreshSim.notifyReaction(pyroSwirl, owner);
+        assertClose(0.40, resolvedStat(refreshSim, ally, StatType.PYRO_RES_SHRED), EPS,
+                "Repeated Pyro Swirls should refresh rather than stack VV shred");
+        assertEquals(1L, refreshSim.getTeamBuffs().stream()
+                        .filter(buff -> buff.getId() == BuffId.VV_SHRED_PYRO)
+                        .count(),
+                "VV should retain one simulator-owned buff per element");
+
+        CombatSimulator baselineDamageSim = simulatorWith(testCharacter(Element.PYRO, CharacterId.XIANGLING));
+        baselineDamageSim.performActionWithoutTimeAdvance(CharacterId.XIANGLING,
+                damageHit("VV baseline Pyro hit", Element.PYRO, 1.0));
+        double baselineDamage = baselineDamageSim.getTotalDamage();
+        double beforeVvDamage = refreshSim.getTotalDamage();
+        refreshSim.performActionWithoutTimeAdvance(CharacterId.XIANGLING,
+                damageHit("VV-shredded Pyro hit", Element.PYRO, 1.0));
+        double vvDamage = refreshSim.getTotalDamage() - beforeVvDamage;
+        assertClose(baselineDamage * (1.15 / 0.90), vvDamage, EPS,
+                "A subsequent Pyro hit should observe the refreshed 40% VV shred");
+
+        refreshSim.advanceTime(9.999);
+        assertClose(0.40, resolvedStat(refreshSim, ally, StatType.PYRO_RES_SHRED), EPS,
+                "Refreshed VV should remain active immediately before ten seconds");
+        refreshSim.advanceTime(0.001);
+        assertClose(0.0, resolvedStat(refreshSim, ally, StatType.PYRO_RES_SHRED), EPS,
+                "Refreshed VV should expire at exactly ten seconds");
+
+        TestCharacter multiOwner = testCharacter(Element.ANEMO, CharacterId.SUCROSE);
+        multiOwner.setArtifacts(new model.artifact.ViridescentVenerer());
+        CombatSimulator multiSim = simulatorWith(multiOwner);
+        multiSim.notifyReaction(pyroSwirl, multiOwner);
+        multiSim.advanceTime(2.0);
+        multiSim.notifyReaction(hydroSwirl, multiOwner);
+        assertClose(0.40, resolvedStat(multiSim, multiOwner, StatType.PYRO_RES_SHRED), EPS,
+                "Pyro VV should coexist with a later Hydro VV application");
+        assertClose(0.40, resolvedStat(multiSim, multiOwner, StatType.HYDRO_RES_SHRED), EPS,
+                "Hydro VV should retain its independent typed duration");
+        multiSim.advanceTime(8.0);
+        assertClose(0.0, resolvedStat(multiSim, multiOwner, StatType.PYRO_RES_SHRED), EPS,
+                "Earlier Pyro VV should expire independently");
+        assertClose(0.40, resolvedStat(multiSim, multiOwner, StatType.HYDRO_RES_SHRED), EPS,
+                "Later Hydro VV should remain active after Pyro expires");
+
+        TestCharacter offFieldOwner = testCharacter(Element.ANEMO, CharacterId.SUCROSE);
+        offFieldOwner.setArtifacts(new model.artifact.ViridescentVenerer());
+        TestCharacter activeAlly = testCharacter(Element.PYRO, CharacterId.XIANGLING);
+        CombatSimulator offFieldSim = simulatorWith(offFieldOwner);
+        offFieldSim.addCharacter(activeAlly);
+        offFieldSim.setActiveCharacter(CharacterId.XIANGLING);
+        offFieldSim.notifyReaction(pyroSwirl, offFieldOwner);
+        assertClose(0.0, resolvedStat(offFieldSim, activeAlly, StatType.PYRO_RES_SHRED), EPS,
+                "An off-field VV owner should not apply resistance shred");
+
+        TestCharacter wrongTriggerOwner = testCharacter(Element.ANEMO, CharacterId.SUCROSE);
+        wrongTriggerOwner.setArtifacts(new model.artifact.ViridescentVenerer());
+        TestCharacter wrongTrigger = testCharacter(Element.PYRO, CharacterId.XIANGLING);
+        CombatSimulator wrongTriggerSim = simulatorWith(wrongTriggerOwner);
+        wrongTriggerSim.addCharacter(wrongTrigger);
+        wrongTriggerSim.notifyReaction(pyroSwirl, wrongTrigger);
+        assertClose(0.0, resolvedStat(wrongTriggerSim, wrongTriggerOwner, StatType.PYRO_RES_SHRED), EPS,
+                "An active VV owner should not apply shred for another character's Swirl");
+
+        ReactionResult unsupportedSwirl = new ReactionResult(
+                ReactionResult.Type.TRANSFORMATIVE, 1.0, 0.0, "Unsupported Swirl",
+                ReactionResult.Kind.SWIRL, Element.DENDRO);
+        wrongTriggerSim.notifyReaction(unsupportedSwirl, wrongTriggerOwner);
+        wrongTriggerSim.notifyReaction(ReactionResult.none(), wrongTriggerOwner);
+        assertTrue(wrongTriggerSim.getTeamBuffs().stream()
+                        .noneMatch(buff -> buff.getId() == BuffId.VV_SHRED_PYRO
+                                || buff.getId() == BuffId.VV_SHRED_HYDRO
+                                || buff.getId() == BuffId.VV_SHRED_CRYO
+                                || buff.getId() == BuffId.VV_SHRED_ELECTRO),
+                "Unsupported or non-Swirl reactions should not add a VV buff");
     }
 
     private static void testAccuracyPhaseF_WeaponReactionBonusRegression() {
