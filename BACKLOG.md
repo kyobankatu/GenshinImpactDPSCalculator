@@ -1153,3 +1153,25 @@ experiment record.
   `f6d276fde49b6677c928545e689f530c6d7cac492a45f2b952c668bb644b32f6`,
   18,930,343 damage / 190,255 DPS over 99.5 seconds, unchanged ER, and zero
   warning matches.
+
+### B-047 — Guoba C1 shred stacks and excludes off-field attackers
+
+- Status: `ready`
+- Source: 3 (sourced character-mechanic divergence)
+- Symptom: each Guoba hit appends another 15% same-ID field buff, yielding up to
+  60% Pyro RES shred for the active character while excluding off-field party
+  members from an opponent status.
+- Scope: one typed team-visible Guoba C1 refresh, explicit Xiangling source,
+  actual four-hit boundaries, and deterministic RaidenParty acceptance
+- Risk: `bounded`
+- Proof: actual owner/ally 15% visibility, one typed instance over four refreshes,
+  +6.5/+12.5 timing boundaries, and matching repeated party payloads
+- Notes: adopt the KQM Xiangling TCL, maintained KQM guide, and maintained
+  constellation description, accessed 2026-08-02. They describe opponents hit
+  by Guoba receiving 15% Pyro RES reduction for six seconds. Sources:
+  https://library.keqingmains.com/characters/pyro/xiangling,
+  https://keqingmains.com/xiangling/, and
+  https://genshin-impact.fandom.com/wiki/Crispy_Outside%2C_Tender_Inside. Adapt
+  the opponent status as one `XIANGLING_GUOBA_C1_SHRED` team-visible simulator
+  buff refreshed by each actual hit and explicitly sourced by Xiangling. See
+  `TASKS.md` implementation block `Guoba C1 Enemy Shred Refresh`.

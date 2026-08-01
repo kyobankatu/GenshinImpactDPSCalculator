@@ -127,6 +127,10 @@ The B-046 Ascendant Blessing expiry correction is complete. An expired stronger
 Blessing no longer blocks a weaker non-Moonsign Skill or Burst from establishing
 a new 20-second non-stacking window.
 
+The B-047 Guoba C1 correction is planned. Each Guoba hit must refresh one
+six-second 15% Pyro RES reduction that applies to every attacker instead of
+stacking active-character-only field buffs.
+
 ## Scope
 
 The reaction core, aura/ICD detail passes, Bloom-family behavior, Quicken-family
@@ -775,6 +779,7 @@ Verification:
 - `./gradlew RaidenParty`
 - `python scripts/validate_agent_assets.py`
 - `python scripts/preflight.py --run`
+
 
 ## Implementation Order: Deterministic Damage Proc Evaluation
 
@@ -6856,3 +6861,189 @@ Completion evidence:
   correctly has no integration delta from the exact-expiry correction.
 - Focused regression, build, Javadoc, routed validation, and final preflight
   pass; generated `output/simulation_report.html` remains untracked.
+
+
+## Implementation Order: Guoba C1 Enemy Shred Refresh
+
+Status:
+
+- Phase 1 is complete; Phases 2-3 remain pending.
+- Requirement: a Guoba hit at C1 or above establishes one 15% Pyro RES reduction
+  for six seconds; later Guoba hits refresh that one enemy-facing status.
+
+Scope:
+
+- Replace Guoba's active-character-only field insertion with one typed
+  team-visible simulator buff representing the enemy debuff.
+- Refresh the typed six-second window on every actual Guoba hit.
+- Attribute the delayed status explicitly to Xiangling.
+- Cover actual four-hit cadence, owner/ally visibility, non-stacking, refresh,
+  exact expiry, and deterministic RaidenParty acceptance.
+
+Out of scope for this pass:
+
+- Changing Guoba damage, four-hit timing, gauge, ICD, particles, targeting,
+  chili pickup, Skill cooldown, talent multipliers, or constellation data.
+- Changing Pyronado, other resistance effects, reaction formula ordering,
+  rotations, artifact optimization, or enemy-specific debuff containers.
+- RL code, training, rollout services, GPU jobs, reports, or generated output.
+
+Definitions:
+
+- Enemy-facing team visibility: the shred is available when resolving any party
+  member's Pyro damage, whether that attacker is active or off field.
+- Refresh: remove every existing `XIANGLING_GUOBA_C1_SHRED` simulator team buff
+  and add one new instance starting at the current Guoba hit time.
+
+Design boundaries:
+
+- `Xiangling` owns the constellation trigger, value, source, and duration.
+- `BuffManager.applyTeamBuffNoStack` owns typed replacement; no Guoba-specific
+  branch enters simulator core.
+- `ReactionRegressionTest` drives the actual character and periodic event path.
+
+### Phase 1: Record Guoba C1 Status Evidence and Failure - Done
+
+Why first:
+
+The opponent status wording and current field/team semantics determine both the
+replacement API and the required visibility tests.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record the maintained KQM TCL, KQM guide, and constellation description for
+  15% Pyro RES reduction lasting six seconds on opponents hit by Guoba.
+- Trace Guoba's sourced four-hit times and callback ordering.
+- Record that normal field insertion appends four same-ID values and exposes
+  them only to the active character.
+- Preserve the pre-fix deterministic RaidenParty payload for delta analysis.
+
+Acceptance criteria:
+
+- Trigger, value, duration, status target, source URLs, access date, simulator
+  adaptation, and failure cause are recorded.
+- The planned tests distinguish active/off-field visibility from stacking.
+- No production source changes occur in this evidence phase.
+
+Test cases to add or update:
+
+- No production test in this phase; Phase 2 extends the existing actual-Guoba
+  regression with the pre-fix failing state boundaries.
+
+Verification:
+
+- inspect `Xiangling`, `PeriodicDamageEvent`, `BuffManager`, `Buff`, and the
+  existing Guoba regression
+- one pre-fix `./gradlew RaidenParty` trace
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- The KQM Xiangling TCL, maintained KQM guide, and maintained constellation page
+  were accessed 2026-08-02. Each describes one 15% Pyro RES reduction for six
+  seconds on opponents hit by Guoba. Sources:
+  https://library.keqingmains.com/characters/pyro/xiangling,
+  https://keqingmains.com/xiangling/, and
+  https://genshin-impact.fandom.com/wiki/Crispy_Outside%2C_Tender_Inside.
+- `PeriodicDamageEvent` invokes Guoba's callback after each actual damage hit at
+  +2.0, +3.5, +5.0, and +6.5 seconds. The callback appends a normal field buff,
+  producing up to 60% for the active character while excluding off-field Pyro
+  attackers from an opponent debuff.
+- The pre-fix RaidenParty trace retains normalized SHA-256
+  `10df2aa5678cb8697eb6de92437c329ade06f0d06f155513c4c76bad64cabec8`,
+  1,312,883 damage / 62,518 DPS over 21.0 seconds, and Guoba hits at 8.4, 9.9,
+  11.4, and 12.9 seconds.
+
+### Phase 2: Refresh One Team-Visible Guoba C1 Status - Pending
+
+Why second:
+
+The actual periodic path can prove replacement, targeting, source, and timing in
+one bounded character-local change.
+
+Target files:
+
+- `src/java/model/character/Xiangling.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Apply Guoba C1 through typed team-buff replacement after each hit.
+- Explicitly source the delayed buff from Xiangling.
+- Extend the actual Guoba regression to inspect owner and ally values, typed
+  count, start/expiry times, every refresh, and exact expiry.
+
+Acceptance criteria:
+
+- Before the first hit, no Guoba C1 status is present.
+- Each of four hit callbacks leaves exactly one 15% typed status.
+- Final status starts at +6.5 and expires at +12.5 seconds.
+- Active ally and off-field Xiangling both resolve the same 15% Pyro shred.
+- Source is Xiangling and the exact expiry resolves zero.
+
+Test cases to add or update:
+
+- Normal: first actual Guoba hit creates one 15% status for owner and ally.
+- Refresh: second through fourth hits remain 15% and move one expiry forward.
+- Targeting: switching the ally active before ticks does not exclude off-field
+  Xiangling or the active ally.
+- Boundary: +12.499 remains active and +12.5 is inactive.
+- Abnormal: before +2.0 there is no status and no duplicate typed instance is
+  retained at any hit.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/agent_validate.py --path src/java/model/character/Xiangling.java --path src/java/sample/ReactionRegressionTest.java --run`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Accept the RaidenParty Guoba C1 Delta - Pending
+
+Why last:
+
+RaidenParty uses C6 Xiangling and exercises both on-field Raiden damage and
+off-field Xiangling Pyronado during all four Guoba refreshes.
+
+Target files:
+
+- `README.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Run two fresh complete RaidenParty payloads and compare normalized logs.
+- Isolate damage changes to the 15% refreshed enemy status and affected Pyro
+  actions after the first Guoba hit.
+- Record ER, warnings, duration, total, DPS, normalized hash, and accepted delta.
+- Update current baseline references and close B-047.
+
+Acceptance criteria:
+
+- Repeated normalized payloads match and contain no new warning.
+- Changed damage is limited to Pyro actions inside sourced Guoba C1 windows;
+  rotations, ER, duration, and unrelated categories remain unchanged.
+- README, verification skill, plan, and ledger agree on the accepted baseline.
+- Agent assets and preflight pass and no generated output is staged.
+
+Test cases to add or update:
+
+- Normal integration: complete C6 Xiangling rotation resolves the refreshed
+  status through normal periodic callbacks.
+- Abnormal integration: no energy, optimizer, warning, or generated-artifact
+  regression is introduced.
+
+Verification:
+
+- two fresh `./gradlew RaidenParty` runs
+- `python scripts/validate_agent_assets.py`
+- `python scripts/preflight.py --run`
