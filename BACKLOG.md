@@ -1564,7 +1564,7 @@ experiment record.
 
 ### B-059 — Quicken is an expiry timestamp instead of a consumable Aura
 
-- Status: `in-progress`
+- Status: `done`
 - Source: 1/3 (README Dendro difference plus maintained Quicken gauge references)
 - Symptom: Quicken stores only an end timestamp, every retrigger extends it even
   when the new gauge is weaker, and Hydro cannot trigger Bloom on a Quicken-only
@@ -1592,3 +1592,10 @@ experiment record.
   and https://github.com/genshinsim/gcsim/blob/main/pkg/reactable/catalyze.go.
   Pyro consumption into Burning fuel is deferred to a separate reaction-priority
   item; this pass implements Quicken lifecycle and Hydro Bloom.
+  Completed with immutable units/rate/update state, stronger-or-equal refresh,
+  typed consumption, snapshot continuity, and resolver-owned Quicken-only and
+  coexisting-Dendro Hydro Bloom. Regression proves 0.8U/10s in both trigger
+  directions, weaker/stronger real retriggers, additive non-consumption, one
+  standard/Lunar core with exact gauge/dew ownership, dual 0.5U consumption,
+  and exact-expiry suppression. Six catalog controls retain B-058 hashes,
+  values, ER, and cadence with no Quicken/Bloom or warning lines.

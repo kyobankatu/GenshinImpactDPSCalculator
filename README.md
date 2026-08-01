@@ -283,6 +283,11 @@ Elemental Gauge Theory contract:
   natural Dendro decay with `max(0.4 U/s, 2 * natural rate)`, Dendro
   reapplication overwrites it, and the latest Pyro/Dendro applier owns the
   continuing 0.25-second damage ticks.
+- **Quicken Aura**: Quicken stores the smaller Dendro/Electro gauge and decays
+  over `gauge * 5 + 6` seconds. Weaker retriggers leave the current Aura
+  unchanged, stronger/equal gauges replace it, Aggravate/Spread do not consume
+  it, and Hydro Bloom consumes 0.5 times the Hydro source gauge from both
+  Quicken and coexisting Dendro while creating one core.
 - **Single source of truth**: reaction eligibility/consumption, combat logs, the
   HTML Aura Timeline, RL observations, and snapshot save/restore all read the same
   current-time-aware aura value. Snapshots preserve application time and decay
