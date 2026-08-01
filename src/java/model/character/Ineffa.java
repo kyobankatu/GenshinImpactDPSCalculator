@@ -204,7 +204,7 @@ public class Ineffa extends Character implements FormStateProvider, CharacterTea
 
         AttackAction hit = new AttackAction("Enhanced Cleaning Module", mv, Element.ELECTRO, StatType.BASE_ATK,
                 StatType.SKILL_DMG_BONUS, 0.0, false, ActionType.SKILL);
-        hit.setICD(ICDType.Standard, ICDTag.ElementalSkill, 1.0);
+        hit.setICD(ICDType.None, ICDTag.ElementalSkill, 1.0);
         hit.setAnimationDuration(0.6); // Cast Time
         sim.performAction(this.characterId, hit);
 
@@ -221,10 +221,13 @@ public class Ineffa extends Character implements FormStateProvider, CharacterTea
         // Birgitta Discharge DMG: 163.2%
         double birgittaMv = getTalentValue("Birgitta DMG", 1.632);
 
+        AttackAction birgittaDischarge = new AttackAction("Birgitta Discharge", birgittaMv, Element.ELECTRO,
+                StatType.BASE_ATK, StatType.SKILL_DMG_BONUS, 0.0, false, ActionType.SKILL);
+        birgittaDischarge.setICD(ICDType.None, ICDTag.ElementalSkill, 1.0);
+
         sim.registerEvent(new PeriodicDamageEvent(
                 this.name, // Source must be a registered character
-                new AttackAction("Birgitta Discharge", birgittaMv, Element.ELECTRO, StatType.BASE_ATK,
-                        StatType.SKILL_DMG_BONUS, 0.0, false, ActionType.SKILL),
+                birgittaDischarge,
                 sim.getCurrentTime() + 2.0,
                 2.0,
                 20.0,

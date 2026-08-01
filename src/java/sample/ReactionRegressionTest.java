@@ -76,6 +76,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_RaidenResolveAndEnergyRegression();
         testAccuracyPhaseF_FlinsThundercloudConditionalHits();
         testAccuracyPhaseF_IneffaOverclockZeroGaugeContract();
+        testAccuracyPhaseF_IneffaSkillNoIcdApplicationContract();
         testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost();
         testAccuracyPhaseF_ColumbinaGravityAndDewRegression();
         testAccuracyPhaseF_ColumbinaStandInBoundaries();
@@ -1033,6 +1034,50 @@ public class ReactionRegressionTest {
         expiredSim.advanceTime(2.0);
         assertTrue(expiredActions.stream().noneMatch(action -> "Overclock (Lunar)".equals(action.getName())),
                 "Ineffa should not emit Overclock at the Thundercloud expiry boundary");
+    }
+
+    private static void testAccuracyPhaseF_IneffaSkillNoIcdApplicationContract() {
+        model.character.Ineffa reactingIneffa = new model.character.Ineffa(new TestWeapon(), blankArtifact());
+        CombatSimulator reactingSim = simulatorWithExistingCharacter(reactingIneffa);
+        List<AttackAction> actions = new ArrayList<>();
+        int[] elementalReactions = { 0 };
+        reactingSim.addReactionListener((result, source, time, simulator) -> {
+            if (result.getKind() == ReactionResult.Kind.LUNAR_CHARGED && result.getTransformDamage() > 0.0) {
+                elementalReactions[0]++;
+            }
+        });
+        reactingSim.addListener((actor, action, time) -> actions.add(action));
+        reactingSim.getEnemy().setAura(Element.HYDRO, 1.0, reactingSim.getCurrentTime());
+        reactingIneffa.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), reactingSim);
+
+        AttackAction skill = findAction(actions, "Enhanced Cleaning Module");
+        assertEquals(ICDType.None, skill.getICDType(), "Ineffa Skill should have no ICD");
+        assertEquals(ICDTag.ElementalSkill, skill.getICDTag(), "Ineffa Skill should retain a typed Skill tag");
+        assertClose(1.0, skill.getGaugeUnits(), EPS, "Ineffa Skill should apply 1U Electro");
+
+        elementalReactions[0] = 0;
+        reactingSim.setThundercloudEndTime(reactingSim.getCurrentTime());
+        reactingSim.getEnemy().setAura(Element.HYDRO, 1.0, reactingSim.getCurrentTime());
+        reactingSim.advanceTime(2.01);
+        assertEquals(1, elementalReactions[0], "First Birgitta tick should apply Electro without ICD");
+
+        elementalReactions[0] = 0;
+        reactingSim.setThundercloudEndTime(reactingSim.getCurrentTime());
+        reactingSim.getEnemy().setAura(Element.HYDRO, 1.0, reactingSim.getCurrentTime());
+        reactingSim.advanceTime(2.0);
+        assertEquals(1, elementalReactions[0],
+                "Second Birgitta tick at the 2-second cadence should not be ICD-suppressed");
+
+        model.character.Ineffa noAuraIneffa = new model.character.Ineffa(new TestWeapon(), blankArtifact());
+        CombatSimulator noAuraSim = simulatorWithExistingCharacter(noAuraIneffa);
+        List<ReactionResult.Kind> noAuraReactions = captureReactionKinds(noAuraSim);
+        noAuraIneffa.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), noAuraSim);
+        double damageBeforeTick = noAuraSim.getTotalDamage();
+        noAuraSim.setThundercloudEndTime(noAuraSim.getCurrentTime());
+        noAuraSim.advanceTime(2.01);
+        assertEquals(0, noAuraReactions.size(), "Birgitta against no reactive aura should not create a reaction");
+        assertTrue(noAuraSim.getTotalDamage() > damageBeforeTick,
+                "Birgitta against no reactive aura should retain direct damage");
     }
 
     private static void testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost() {

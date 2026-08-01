@@ -1263,7 +1263,7 @@ Verification:
 Status:
 
 - In progress.
-- Phase 1 is complete; Phases 2-3 remain.
+- Phases 1-2 are complete; Phase 3 remains.
 - Requirement: Ineffa's Skill hit and every Birgitta Discharge must apply their
   documented 1U Electro without ICD suppression.
 
@@ -1325,7 +1325,7 @@ Verification:
 - `./gradlew FlinsParty2`
 - `python scripts/preflight.py --run`
 
-### Phase 2: Encode and Test No-ICD Skill Applications
+### Phase 2: Encode and Test No-ICD Skill Applications - Done
 
 Why second:
 
