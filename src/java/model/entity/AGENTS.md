@@ -22,6 +22,9 @@
 - `ReactionAwareArtifact.java`: capability interface for artifacts that listen to reaction results.
 - `ReactionAwareCharacter.java`: capability interface for characters with reaction-listener behavior.
 - `SimulatorInitializedWeaponEffect.java`: capability interface for weapons that register simulator-bound timed behavior after their owner joins a party.
+- `SimulatorInitializedArtifactEffect.java`: capability interface for artifacts
+  that initialize simulator-bound state after party insertion, including the
+  owner's initial active/off-field state.
 - `StatAssembler.java`: internal helper that assembles structural and effective character stats.
 - `SwitchAwareArtifact.java`: capability interface for artifacts that react to switch events.
 - `SwitchAwareCharacter.java`: capability interface for characters that react to switch events.
@@ -37,7 +40,10 @@
 - Standard source application belongs to `Enemy.applyAura`; callers pass the
   pre-tax source gauge. Raw `setAura` methods are explicit state/fixture setup
   and must not silently acquire source-application policy.
-- `Weapon` and `ArtifactSet` are called by `Character` during stat assembly; event behavior is dispatched only when a concrete item implements the relevant capability interface. Simulator-initialized weapon behavior is registered after party insertion.
+- `Weapon` and `ArtifactSet` are called by `Character` during stat assembly;
+  event behavior is dispatched only when a concrete item implements the
+  relevant capability interface. Simulator-initialized weapon and artifact
+  behavior is registered after party insertion.
 - Concrete character, weapon, and artifact packages all extend these types.
 
 ## Agent guidance

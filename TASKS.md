@@ -8213,7 +8213,7 @@ Completion evidence:
 
 Status:
 
-- In progress; Phase 1 is complete and Phases 2-3 remain.
+- In progress; Phases 1-2 are complete and Phase 3 remains.
 - Requirement: Aubade of Morningstar and Moon must provide 80 Elemental Mastery
   as its 2-piece bonus and make its owner-only Lunar Reaction bonus available
   from the owner's initial off-field state.
@@ -8320,7 +8320,7 @@ Completion evidence:
   buff reference, so initializing once at party insertion closes that gap
   without a separate snapshot format.
 
-### Phase 2: Implement Aubade Stats and Initialization Contract
+### Phase 2: Implement Aubade Stats and Initialization Contract - Done
 
 Why second:
 
@@ -8380,6 +8380,23 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/agent_validate.py --path src/java/model/entity/SimulatorInitializedArtifactEffect.java --path src/java/model/artifact/AubadeOfMorningstarAndMoon.java --path src/java/simulation/CombatSimulator.java --path src/java/sample/ReactionRegressionTest.java --run`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Both Aubade constructors now add exactly 80 Elemental Mastery and no ATK%.
+  Supplied artifact stats retain their existing EM/CR values and receive the set
+  bonus once.
+- `SimulatorInitializedArtifactEffect` is a narrow opt-in capability dispatched
+  once after party insertion. `CombatSimulator` supplies the actual
+  initial-active flag without naming Aubade or expanding `ArtifactSet`.
+- Aubade initializes one typed owner buff only for an initially off-field
+  wearer. Regression proves 20% Nascent and 60% Ascendant values across all
+  Lunar types, zero ally bonus, and zero initial bonus for an active wearer.
+- Public switch regression proves activity at +2.999 seconds, exclusion at exact
+  +3.000, immediate switch-out reactivation, and one `AUBADE_BONUS` instance.
+  Snapshot restore recovers the active owner and exact remaining linger expiry.
+- Reaction regression, build, Javadoc, and routed build/reaction validation all
+  pass. Null/plain artifact paths continue through the unchanged no-op branch.
 
 ### Phase 3: Re-Accept Aubade Party Baselines
 

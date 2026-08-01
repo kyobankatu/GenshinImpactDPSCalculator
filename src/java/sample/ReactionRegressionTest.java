@@ -97,6 +97,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ColumbinaGravityAndDewRegression();
         testAccuracyPhaseF_ColumbinaStandInBoundaries();
         testAccuracyPhaseF_ArtifactTeamBuffProviderRouting();
+        testAccuracyPhaseF_AubadeInitializationContract();
         testAccuracyPhaseF_SilkenMoonsSerenadeDynamicBonus();
         testAccuracyPhaseF_AscendantBlessingExpiryReplacement();
         testAccuracyPhaseF_ArtifactLunarReactionBuffRegression();
@@ -2648,6 +2649,85 @@ public class ReactionRegressionTest {
                         .filter(buff -> buff.getId() == BuffId.GLEAMING_MOON_SYNERGY)
                         .count(),
                 "Two Silken wearers should expose one canonical synergy provider");
+    }
+
+    private static void testAccuracyPhaseF_AubadeInitializationContract() {
+        model.artifact.AubadeOfMorningstarAndMoon empty =
+                new model.artifact.AubadeOfMorningstarAndMoon();
+        assertClose(80.0, empty.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Aubade should grant 80 Elemental Mastery as its two-piece bonus");
+        assertClose(0.0, empty.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Aubade should not retain the obsolete 18% ATK bonus");
+
+        StatsContainer suppliedStats = new StatsContainer();
+        suppliedStats.add(StatType.ELEMENTAL_MASTERY, 25.0);
+        suppliedStats.add(StatType.CRIT_RATE, 0.10);
+        model.artifact.AubadeOfMorningstarAndMoon supplied =
+                new model.artifact.AubadeOfMorningstarAndMoon(suppliedStats);
+        assertClose(105.0, supplied.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Aubade should add its 80 EM once to supplied artifact stats");
+        assertClose(0.10, supplied.getStats().get(StatType.CRIT_RATE), EPS,
+                "Aubade should preserve supplied main and substats");
+        assertClose(0.0, supplied.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Supplied Aubade stats should not acquire the obsolete ATK bonus");
+
+        TestCharacter activeAlly = testCharacter(Element.ANEMO, CharacterId.SUCROSE);
+        TestCharacter offFieldOwner = testCharacter(Element.ELECTRO, CharacterId.INEFFA).asLunar();
+        offFieldOwner.setArtifacts(new model.artifact.AubadeOfMorningstarAndMoon());
+        CombatSimulator sim = simulatorWith(activeAlly);
+        sim.addCharacter(offFieldOwner);
+        sim.setMoonsign(CombatSimulator.Moonsign.NASCENT_GLEAM);
+
+        assertClose(0.20, resolvedStat(sim, offFieldOwner, StatType.LUNAR_CHARGED_DMG_BONUS), EPS,
+                "An initially off-field Aubade owner should receive 20% Lunar damage");
+        assertClose(0.0, resolvedStat(sim, activeAlly, StatType.LUNAR_CHARGED_DMG_BONUS), EPS,
+                "Aubade should not grant its owner-only bonus to allies");
+        sim.setMoonsign(CombatSimulator.Moonsign.ASCENDANT_GLEAM);
+        assertClose(0.60, resolvedStat(sim, offFieldOwner, StatType.LUNAR_CHARGED_DMG_BONUS), EPS,
+                "An Ascendant off-field owner should receive the full 60% bonus");
+        assertClose(0.60, resolvedStat(sim, offFieldOwner, StatType.LUNAR_BLOOM_DMG_BONUS), EPS,
+                "Aubade should apply its dynamic bonus to Lunar-Bloom");
+        assertClose(0.60, resolvedStat(sim, offFieldOwner, StatType.LUNAR_CRYSTALLIZE_DMG_BONUS), EPS,
+                "Aubade should apply its dynamic bonus to Lunar-Crystallize");
+
+        sim.switchCharacter(CharacterId.INEFFA);
+        sim.advanceTime(1.0);
+        SimulatorSnapshot lingeringSnapshot = sim.saveSnapshot();
+        sim.advanceTime(1.899);
+        assertClose(0.60, resolvedStat(sim, offFieldOwner, StatType.LUNAR_CHARGED_DMG_BONUS), EPS,
+                "Aubade should remain active just before three on-field seconds");
+        sim.advanceTime(0.001);
+        assertClose(0.0, resolvedStat(sim, offFieldOwner, StatType.LUNAR_CHARGED_DMG_BONUS), EPS,
+                "Aubade should expire at exactly three on-field seconds");
+
+        sim.restoreSnapshot(lingeringSnapshot);
+        assertEquals(CharacterId.INEFFA, sim.getActiveCharacter().getCharacterId(),
+                "Aubade snapshot restore should recover the active owner");
+        sim.advanceTime(1.899);
+        assertClose(0.60, resolvedStat(sim, offFieldOwner, StatType.LUNAR_CHARGED_DMG_BONUS), EPS,
+                "Aubade snapshot restore should preserve remaining linger time");
+        sim.advanceTime(0.001);
+        assertClose(0.0, resolvedStat(sim, offFieldOwner, StatType.LUNAR_CHARGED_DMG_BONUS), EPS,
+                "Restored Aubade linger should retain exact expiry");
+        sim.switchCharacter(CharacterId.SUCROSE);
+        assertClose(0.60, resolvedStat(sim, offFieldOwner, StatType.LUNAR_CHARGED_DMG_BONUS), EPS,
+                "Switching out should reactivate Aubade immediately");
+        assertEquals(1L, offFieldOwner.getActiveBuffs().stream()
+                        .filter(buff -> buff.getId() == BuffId.AUBADE_BONUS)
+                        .count(),
+                "Repeated Aubade transitions should retain one typed owner buff");
+
+        TestCharacter activeOwner = testCharacter(Element.ELECTRO, CharacterId.INEFFA).asLunar();
+        activeOwner.setArtifacts(new model.artifact.AubadeOfMorningstarAndMoon());
+        CombatSimulator activeSim = simulatorWith(activeOwner);
+        activeSim.setMoonsign(CombatSimulator.Moonsign.ASCENDANT_GLEAM);
+        assertClose(0.0, resolvedStat(activeSim, activeOwner, StatType.LUNAR_CHARGED_DMG_BONUS), EPS,
+                "An initially active Aubade owner should not start with the off-field bonus");
+        TestCharacter secondAlly = testCharacter(Element.ANEMO, CharacterId.SUCROSE);
+        activeSim.addCharacter(secondAlly);
+        activeSim.switchCharacter(CharacterId.SUCROSE);
+        assertClose(0.60, resolvedStat(activeSim, activeOwner, StatType.LUNAR_CHARGED_DMG_BONUS), EPS,
+                "An initially active owner should activate Aubade after first switching out");
     }
 
     private static void testAccuracyPhaseF_AscendantBlessingExpiryReplacement() {

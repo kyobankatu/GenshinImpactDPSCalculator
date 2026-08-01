@@ -8,7 +8,9 @@
 - These classes combine static stats with explicitly opted-in event-driven set effects.
 
 ## Java files in this directory
-- `AubadeOfMorningstarAndMoon.java`: custom Lunar set that changes off-field and switch-in Lunar reaction bonuses based on Moonsign state.
+- `AubadeOfMorningstarAndMoon.java`: owner-only Lunar set that initializes from
+  off-field party state and changes its switch-in lingering bonus based on
+  Moonsign state.
 - `EmblemOfSeveredFate.java`: ER-focused set that adds ER stats and converts ER into burst damage bonus.
 - `NightOfTheSkysUnveiling.java`: Lunar reaction set that grants temporary crit-rate buffs when its owner is on field during Lunar reactions.
 - `NoblesseOblige.java`: burst-focused set that applies a team ATK buff on burst use.
@@ -17,7 +19,10 @@
 
 ## Coupling and dependencies
 - All classes extend `model.entity.ArtifactSet`.
-- Event-driven behavior is exposed through focused capability interfaces such as `ReactionAwareArtifact`, `DamageTriggeredArtifactEffect`, `SwitchAwareArtifact`, and `BurstTriggeredArtifactEffect`.
+- Event-driven behavior is exposed through focused capability interfaces such
+  as `SimulatorInitializedArtifactEffect`, `ReactionAwareArtifact`,
+  `DamageTriggeredArtifactEffect`, `SwitchAwareArtifact`, and
+  `BurstTriggeredArtifactEffect`.
 - Most set effects depend on `simulation.CombatSimulator`, `mechanics.buff.Buff` or `SimpleBuff`, and `model.type.StatType`.
 - Lunar sets depend on `simulation.CombatSimulator.Moonsign` and typed Lunar reaction metadata from `mechanics.reaction.ReactionResult`.
 - `ViridescentVenerer` should use typed `mechanics.reaction.ReactionResult` metadata for swirl behavior rather than parsing display labels.

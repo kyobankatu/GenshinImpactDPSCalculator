@@ -13,6 +13,8 @@ import mechanics.buff.Buff;
 import mechanics.energy.EnergyDistributor;
 import model.entity.Character;
 import model.entity.Enemy;
+import model.entity.ArtifactSet;
+import model.entity.SimulatorInitializedArtifactEffect;
 import model.entity.SimulatorInitializedWeaponEffect;
 import model.type.CharacterId;
 import simulation.action.AttackAction;
@@ -165,8 +167,8 @@ public class CombatSimulator {
     }
 
     /**
-     * Adds a character to the party and initializes rotation energy and
-     * equipped-weapon lifecycle state.
+     * Adds a character to the party and initializes rotation energy plus
+     * equipped weapon and artifact lifecycle state.
      *
      * @param character character to add
      */
@@ -176,6 +178,21 @@ public class CombatSimulator {
         if (character.getWeapon() instanceof SimulatorInitializedWeaponEffect) {
             ((SimulatorInitializedWeaponEffect) character.getWeapon())
                     .initializeForSimulator(character, this);
+        }
+        initializeArtifactsForSimulator(character);
+    }
+
+    /** Initializes opted-in artifacts from the owner's actual initial field state. */
+    private void initializeArtifactsForSimulator(Character character) {
+        if (character.getArtifacts() == null) {
+            return;
+        }
+        boolean startsActive = party.getActiveCharacter() == character;
+        for (ArtifactSet artifact : character.getArtifacts()) {
+            if (artifact instanceof SimulatorInitializedArtifactEffect) {
+                ((SimulatorInitializedArtifactEffect) artifact)
+                        .initializeForSimulator(character, this, startsActive);
+            }
         }
     }
 
