@@ -66,7 +66,7 @@ public class ReactionStateController {
     }
 
     /** Returns a defensive copy of owner-specific Superconduct sequence state. */
-    public Map<CharacterId, ReactionState.SuperconductDamageSequenceState>
+    public Map<CharacterId, ReactionState.FixedDamageSequenceState>
             copySuperconductOwnerDamageSequenceStates() {
         return reactionState.copySuperconductOwnerDamageSequenceStates();
     }
@@ -74,10 +74,35 @@ public class ReactionStateController {
     /** Restores both dimensions of Superconduct damage-sequence state. */
     public void restoreSuperconductDamageSequence(
             double targetEndTime,
-            Map<CharacterId, ReactionState.SuperconductDamageSequenceState>
+            Map<CharacterId, ReactionState.FixedDamageSequenceState>
                     ownerStates) {
         reactionState.restoreSuperconductDamageSequence(
                 targetEndTime, ownerStates);
+    }
+
+    /** Attempts to accept Shatter damage at the current simulator time. */
+    public boolean tryStartShatterDamageSequence(CharacterId ownerId) {
+        return reactionState.tryStartShatterDamageSequence(
+                ownerId, sim.getCurrentTime());
+    }
+
+    /** Returns the target-wide Shatter damage cooldown end time. */
+    public double getShatterTargetDamageCooldownEndTime() {
+        return reactionState.getShatterTargetDamageCooldownEndTime();
+    }
+
+    /** Returns a defensive copy of owner-specific Shatter sequence state. */
+    public Map<CharacterId, ReactionState.FixedDamageSequenceState>
+            copyShatterOwnerDamageSequenceStates() {
+        return reactionState.copyShatterOwnerDamageSequenceStates();
+    }
+
+    /** Restores both dimensions of Shatter damage-sequence state. */
+    public void restoreShatterDamageSequence(
+            double targetEndTime,
+            Map<CharacterId, ReactionState.FixedDamageSequenceState>
+                    ownerStates) {
+        reactionState.restoreShatterDamageSequence(targetEndTime, ownerStates);
     }
 
     /** Attempts to accept standard Crystallize at the current simulator time. */

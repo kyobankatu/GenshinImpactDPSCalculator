@@ -786,9 +786,14 @@ public class CombatSimulator {
                 reactionStateController.copyOverloadOwnerDamageCooldownEndTimes();
         double superconductTargetDamageCooldownEndTime =
                 reactionStateController.getSuperconductTargetDamageCooldownEndTime();
-        Map<CharacterId, simulation.runtime.ReactionState.SuperconductDamageSequenceState>
+        Map<CharacterId, simulation.runtime.ReactionState.FixedDamageSequenceState>
                 superconductOwnerDamageSequenceStates =
                 reactionStateController.copySuperconductOwnerDamageSequenceStates();
+        double shatterTargetDamageCooldownEndTime =
+                reactionStateController.getShatterTargetDamageCooldownEndTime();
+        Map<CharacterId, simulation.runtime.ReactionState.FixedDamageSequenceState>
+                shatterOwnerDamageSequenceStates =
+                reactionStateController.copyShatterOwnerDamageSequenceStates();
         double standardCrystallizeCooldownEndTime =
                 reactionStateController.getStandardCrystallizeCooldownEndTime();
         int moondriftCount = reactionState.getMoondriftCount();
@@ -850,6 +855,8 @@ public class CombatSimulator {
                 overloadOwnerDamageCooldownEndTimes,
                 superconductTargetDamageCooldownEndTime,
                 superconductOwnerDamageSequenceStates,
+                shatterTargetDamageCooldownEndTime,
+                shatterOwnerDamageSequenceStates,
                 standardCrystallizeCooldownEndTime,
                 moondriftCount, lunarCrystallizeTriggerCount,
                 verdantDewCount, moonridgeDewCount,
@@ -899,6 +906,9 @@ public class CombatSimulator {
         reactionStateController.restoreSuperconductDamageSequence(
                 snap.superconductTargetDamageCooldownEndTime,
                 snap.superconductOwnerDamageSequenceStates);
+        reactionStateController.restoreShatterDamageSequence(
+                snap.shatterTargetDamageCooldownEndTime,
+                snap.shatterOwnerDamageSequenceStates);
         reactionStateController.restoreStandardCrystallizeCooldown(
                 snap.standardCrystallizeCooldownEndTime);
         reactionState.setMoondriftCount(snap.moondriftCount);
@@ -998,6 +1008,16 @@ public class CombatSimulator {
      */
     public boolean tryStartSuperconductDamageSequence(CharacterId ownerId) {
         return reactionStateController.tryStartSuperconductDamageSequence(ownerId);
+    }
+
+    /**
+     * Attempts to accept Shatter reaction damage at the current time.
+     *
+     * @param ownerId character that owns the Shatter reaction
+     * @return {@code true} when target and owner damage limits both allow it
+     */
+    public boolean tryStartShatterDamageSequence(CharacterId ownerId) {
+        return reactionStateController.tryStartShatterDamageSequence(ownerId);
     }
 
     /**

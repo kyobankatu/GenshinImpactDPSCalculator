@@ -16,6 +16,9 @@ public class ReactionState {
     private static final double SUPERCONDUCT_TARGET_DAMAGE_GCD = 0.1;
     private static final double SUPERCONDUCT_OWNER_SEQUENCE_WINDOW = 0.5;
     private static final int SUPERCONDUCT_OWNER_DAMAGE_LIMIT = 2;
+    private static final double SHATTER_TARGET_DAMAGE_GCD = 0.2;
+    private static final double SHATTER_OWNER_SEQUENCE_WINDOW = 0.5;
+    private static final int SHATTER_OWNER_DAMAGE_LIMIT = 2;
     private static final double STANDARD_CRYSTALLIZE_COOLDOWN = 1.0;
     /** Immutable consumable Quicken Aura payload. */
     public static final class QuickenState {
@@ -131,14 +134,14 @@ public class ReactionState {
         }
     }
 
-    /** Immutable owner-specific Superconduct damage-sequence payload. */
-    public static final class SuperconductDamageSequenceState {
+    /** Immutable owner-specific fixed damage-sequence payload. */
+    public static final class FixedDamageSequenceState {
         /** Fixed window end time started by the first target-accepted attempt. */
         public final double windowEndTime;
         /** Number of target-accepted attempts observed in the fixed window. */
         public final int attemptCount;
 
-        private SuperconductDamageSequenceState(
+        private FixedDamageSequenceState(
                 double windowEndTime, int attemptCount) {
             this.windowEndTime = windowEndTime;
             this.attemptCount = attemptCount;
@@ -157,8 +160,12 @@ public class ReactionState {
     private final Map<CharacterId, Double> overloadOwnerDamageCooldownEndTimes =
             new EnumMap<>(CharacterId.class);
     private double superconductTargetDamageCooldownEndTime = -1.0;
-    private final Map<CharacterId, SuperconductDamageSequenceState>
+    private final Map<CharacterId, FixedDamageSequenceState>
             superconductOwnerDamageSequenceStates =
+            new EnumMap<>(CharacterId.class);
+    private double shatterTargetDamageCooldownEndTime = -1.0;
+    private final Map<CharacterId, FixedDamageSequenceState>
+            shatterOwnerDamageSequenceStates =
             new EnumMap<>(CharacterId.class);
     private double standardCrystallizeCooldownEndTime = -1.0;
     private int moondriftCount = 0;
@@ -252,25 +259,12 @@ public class ReactionState {
         superconductTargetDamageCooldownEndTime =
                 currentTime + SUPERCONDUCT_TARGET_DAMAGE_GCD;
 
-        SuperconductDamageSequenceState state =
-                superconductOwnerDamageSequenceStates.get(ownerId);
-        if (state == null
-                || currentTime + TIMING_EPSILON >= state.windowEndTime) {
-            superconductOwnerDamageSequenceStates.put(
-                    ownerId,
-                    new SuperconductDamageSequenceState(
-                            currentTime + SUPERCONDUCT_OWNER_SEQUENCE_WINDOW, 1));
-            return true;
-        }
-
-        int attemptCount = Math.min(
-                SUPERCONDUCT_OWNER_DAMAGE_LIMIT + 1,
-                state.attemptCount + 1);
-        superconductOwnerDamageSequenceStates.put(
+        return advanceFixedDamageSequence(
+                superconductOwnerDamageSequenceStates,
                 ownerId,
-                new SuperconductDamageSequenceState(
-                        state.windowEndTime, attemptCount));
-        return attemptCount <= SUPERCONDUCT_OWNER_DAMAGE_LIMIT;
+                currentTime,
+                SUPERCONDUCT_OWNER_SEQUENCE_WINDOW,
+                SUPERCONDUCT_OWNER_DAMAGE_LIMIT);
     }
 
     /** Returns the target-wide Superconduct damage cooldown end time. */
@@ -279,7 +273,7 @@ public class ReactionState {
     }
 
     /** Returns a defensive copy of owner-specific Superconduct sequence state. */
-    public Map<CharacterId, SuperconductDamageSequenceState>
+    public Map<CharacterId, FixedDamageSequenceState>
             copySuperconductOwnerDamageSequenceStates() {
         return new EnumMap<>(superconductOwnerDamageSequenceStates);
     }
@@ -287,28 +281,108 @@ public class ReactionState {
     /** Restores both dimensions of Superconduct damage-sequence state. */
     public void restoreSuperconductDamageSequence(
             double targetEndTime,
-            Map<CharacterId, SuperconductDamageSequenceState> ownerStates) {
+            Map<CharacterId, FixedDamageSequenceState> ownerStates) {
         superconductTargetDamageCooldownEndTime = Double.isFinite(targetEndTime)
                 ? targetEndTime
                 : -1.0;
-        superconductOwnerDamageSequenceStates.clear();
-        if (ownerStates == null) {
+        restoreFixedDamageSequenceStates(
+                superconductOwnerDamageSequenceStates,
+                ownerStates,
+                SUPERCONDUCT_OWNER_DAMAGE_LIMIT);
+    }
+
+    /**
+     * Attempts to accept Shatter reaction damage.
+     *
+     * @param ownerId character that owns the Shatter reaction
+     * @param currentTime simulator time in seconds
+     * @return {@code true} when this Shatter may deal damage
+     */
+    public boolean tryStartShatterDamageSequence(
+            CharacterId ownerId, double currentTime) {
+        if (ownerId == null || !Double.isFinite(currentTime)
+                || currentTime + TIMING_EPSILON
+                        < shatterTargetDamageCooldownEndTime) {
+            return false;
+        }
+        shatterTargetDamageCooldownEndTime =
+                currentTime + SHATTER_TARGET_DAMAGE_GCD;
+        return advanceFixedDamageSequence(
+                shatterOwnerDamageSequenceStates,
+                ownerId,
+                currentTime,
+                SHATTER_OWNER_SEQUENCE_WINDOW,
+                SHATTER_OWNER_DAMAGE_LIMIT);
+    }
+
+    /** Returns the target-wide Shatter damage cooldown end time. */
+    public double getShatterTargetDamageCooldownEndTime() {
+        return shatterTargetDamageCooldownEndTime;
+    }
+
+    /** Returns a defensive copy of owner-specific Shatter sequence state. */
+    public Map<CharacterId, FixedDamageSequenceState>
+            copyShatterOwnerDamageSequenceStates() {
+        return new EnumMap<>(shatterOwnerDamageSequenceStates);
+    }
+
+    /** Restores both dimensions of Shatter damage-sequence state. */
+    public void restoreShatterDamageSequence(
+            double targetEndTime,
+            Map<CharacterId, FixedDamageSequenceState> ownerStates) {
+        shatterTargetDamageCooldownEndTime = Double.isFinite(targetEndTime)
+                ? targetEndTime
+                : -1.0;
+        restoreFixedDamageSequenceStates(
+                shatterOwnerDamageSequenceStates,
+                ownerStates,
+                SHATTER_OWNER_DAMAGE_LIMIT);
+    }
+
+    private boolean advanceFixedDamageSequence(
+            Map<CharacterId, FixedDamageSequenceState> ownerStates,
+            CharacterId ownerId,
+            double currentTime,
+            double windowDuration,
+            int damageLimit) {
+        FixedDamageSequenceState state = ownerStates.get(ownerId);
+        if (state == null
+                || currentTime + TIMING_EPSILON >= state.windowEndTime) {
+            ownerStates.put(
+                    ownerId,
+                    new FixedDamageSequenceState(
+                            currentTime + windowDuration, 1));
+            return true;
+        }
+
+        int attemptCount = Math.min(damageLimit + 1, state.attemptCount + 1);
+        ownerStates.put(
+                ownerId,
+                new FixedDamageSequenceState(
+                        state.windowEndTime, attemptCount));
+        return attemptCount <= damageLimit;
+    }
+
+    private void restoreFixedDamageSequenceStates(
+            Map<CharacterId, FixedDamageSequenceState> targetStates,
+            Map<CharacterId, FixedDamageSequenceState> sourceStates,
+            int damageLimit) {
+        targetStates.clear();
+        if (sourceStates == null) {
             return;
         }
-        for (Map.Entry<CharacterId, SuperconductDamageSequenceState> entry
-                : ownerStates.entrySet()) {
+        for (Map.Entry<CharacterId, FixedDamageSequenceState> entry
+                : sourceStates.entrySet()) {
             CharacterId ownerId = entry.getKey();
-            SuperconductDamageSequenceState state = entry.getValue();
+            FixedDamageSequenceState state = entry.getValue();
             if (ownerId != null && state != null
                     && Double.isFinite(state.windowEndTime)
                     && state.attemptCount > 0) {
-                superconductOwnerDamageSequenceStates.put(
+                targetStates.put(
                         ownerId,
-                        new SuperconductDamageSequenceState(
+                        new FixedDamageSequenceState(
                                 state.windowEndTime,
-                                Math.min(
-                                        SUPERCONDUCT_OWNER_DAMAGE_LIMIT + 1,
-                                        state.attemptCount)));
+                                Math.min(damageLimit + 1, state.attemptCount)));
             }
         }
     }

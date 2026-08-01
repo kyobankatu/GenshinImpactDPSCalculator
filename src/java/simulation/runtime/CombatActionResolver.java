@@ -302,6 +302,14 @@ public class CombatActionResolver {
         ReactionResult result = ReactionCalculator.calculateShatter(
                 stats.get(StatType.ELEMENTAL_MASTERY), 90, 0.0);
         sim.notifyReaction(result, attacker);
+        sim.getEnemy().clearFreezeAura(sim.getCurrentTime());
+        if (!sim.tryStartShatterDamageSequence(characterId)) {
+            if (sim.isLoggingEnabled()) {
+                System.out.println(
+                        "   [Reaction] Frozen target -> Shatter Damage blocked (damage sequence)");
+            }
+            return;
+        }
         double resFactor = resolveImpactResistance(context, Element.PHYSICAL);
         double damage = result.getTransformDamage() * resFactor;
         if (sim.isLoggingEnabled()) {
@@ -313,7 +321,6 @@ public class CombatActionResolver {
                     sim.getCurrentTime(), attacker.getName(), "Shatter", damage,
                     "Shatter", damage, sim.getEnemy().getAuraMap(sim.getCurrentTime()));
         }
-        sim.getEnemy().clearFreezeAura(sim.getCurrentTime());
     }
 
     private double getReactionBonus(Element trigger, Element aura, StatsContainer stats) {

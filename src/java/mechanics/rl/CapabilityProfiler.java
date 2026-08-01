@@ -945,6 +945,8 @@ public class CapabilityProfiler {
                 activePostSubject.overloadOwnerDamageCooldownEndTimes,
                 activePostSubject.superconductTargetDamageCooldownEndTime,
                 activePostSubject.superconductOwnerDamageSequenceStates,
+                activePostSubject.shatterTargetDamageCooldownEndTime,
+                activePostSubject.shatterOwnerDamageSequenceStates,
                 activePostSubject.standardCrystallizeCooldownEndTime,
                 activePostSubject.moondriftCount,
                 activePostSubject.lunarCrystallizeTriggerCount,

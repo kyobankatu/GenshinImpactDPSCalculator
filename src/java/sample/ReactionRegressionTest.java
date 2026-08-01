@@ -138,6 +138,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseG_TransformativeResidualAuraContract();
         testAccuracyPhaseG_OverloadDamageSequenceContract();
         testAccuracyPhaseG_SuperconductDamageSequenceContract();
+        testAccuracyPhaseG_ShatterDamageSequenceContract();
         testAccuracyPhaseG_StandardCrystallizeCooldownContract();
         testAccuracyPhaseF_PeriodicCancellationAndRaidenEyeDamageTrigger();
         testAccuracyPhaseF_BennettSkillAndBurstApplicationContract();
@@ -1726,7 +1727,7 @@ public class ReactionRegressionTest {
         SimulatorSnapshot snapshot = sim.saveSnapshot();
         assertClose(0.2, snapshot.superconductTargetDamageCooldownEndTime, EPS,
                 "Second Superconduct should advance the target damage GCD");
-        ReactionState.SuperconductDamageSequenceState ownerState =
+        ReactionState.FixedDamageSequenceState ownerState =
                 snapshot.superconductOwnerDamageSequenceStates.get(
                         CharacterId.SUCROSE);
         assertClose(0.5, ownerState.windowEndTime, EPS,
@@ -1812,6 +1813,104 @@ public class ReactionRegressionTest {
         double refreshedPhysicalDamage = shred.getTotalDamage() - damageBeforePhysical;
         assertTrue(refreshedPhysicalDamage > baselinePhysicalDamage * 1.20,
                 "Damage-blocked Superconduct should refresh physical RES shred");
+    }
+
+    private static void testAccuracyPhaseG_ShatterDamageSequenceContract() {
+        CombatSimulator sim = simulatorWith(testCharacter(
+                Element.PHYSICAL, CharacterId.SUCROSE));
+        sim.addCharacter(testCharacter(Element.PHYSICAL, CharacterId.XIANGLING));
+        List<ReactionResult.Kind> kinds = captureReactionKinds(sim);
+        double shatterDamage = expectedTransformative(
+                3.0, Element.PHYSICAL, 0.0);
+
+        sim.getEnemy().applyFreezeAura(2.0, sim.getCurrentTime());
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                shatterHit("Initial Shatter sequence fixture"));
+        assertClose(shatterDamage, sim.getTotalDamage(), 0.5,
+                "The first Shatter should deal reaction damage");
+
+        sim.advanceTime(0.1);
+        sim.getEnemy().applyFreezeAura(2.0, sim.getCurrentTime());
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING,
+                shatterHit("Pre-target-boundary Shatter fixture"));
+        assertClose(shatterDamage, sim.getTotalDamage(), 0.5,
+                "A different owner should be damage-blocked before 0.2 seconds");
+        assertTrue(!sim.getEnemy().isFrozen(sim.getCurrentTime()),
+                "Target-blocked Shatter should still clear Freeze");
+
+        sim.advanceTime(0.1);
+        sim.getEnemy().applyFreezeAura(2.0, sim.getCurrentTime());
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                shatterHit("Second owner Shatter fixture"));
+        assertClose(shatterDamage * 2.0, sim.getTotalDamage(), 0.5,
+                "The owner should deal its second hit at the target boundary");
+        SimulatorSnapshot snapshot = sim.saveSnapshot();
+        assertClose(0.4, snapshot.shatterTargetDamageCooldownEndTime, EPS,
+                "Second Shatter should advance the target damage GCD");
+        ReactionState.FixedDamageSequenceState ownerState =
+                snapshot.shatterOwnerDamageSequenceStates.get(
+                        CharacterId.SUCROSE);
+        assertClose(0.5, ownerState.windowEndTime, EPS,
+                "The Shatter owner sequence should retain its fixed boundary");
+        assertEquals(2, ownerState.attemptCount,
+                "The Shatter owner sequence should record two accepted attempts");
+        assertTrue(!snapshot.shatterOwnerDamageSequenceStates.containsKey(
+                CharacterId.XIANGLING),
+                "A target-blocked Shatter should not start an owner sequence");
+
+        sim.advanceTime(0.2);
+        sim.getEnemy().applyFreezeAura(2.0, sim.getCurrentTime());
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                shatterHit("Third owner Shatter fixture"));
+        assertClose(shatterDamage * 2.0, sim.getTotalDamage(), 0.5,
+                "The owner's third target-accepted Shatter should deal no damage");
+        assertTrue(!sim.getEnemy().isFrozen(sim.getCurrentTime()),
+                "Owner-blocked Shatter should still clear Freeze");
+
+        sim.advanceTime(0.1);
+        sim.getEnemy().applyFreezeAura(2.0, sim.getCurrentTime());
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING,
+                shatterHit("Post-owner-block target GCD Shatter fixture"));
+        assertClose(shatterDamage * 2.0, sim.getTotalDamage(), 0.5,
+                "An owner-blocked Shatter should still start the target GCD");
+        assertTrue(!sim.getEnemy().isFrozen(sim.getCurrentTime()),
+                "Repeated target-blocked Shatter should still clear Freeze");
+
+        sim.advanceTime(0.1);
+        sim.getEnemy().applyFreezeAura(2.0, sim.getCurrentTime());
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING,
+                shatterHit("Independent owner Shatter fixture"));
+        assertClose(shatterDamage * 3.0, sim.getTotalDamage(), 0.5,
+                "Another owner should have an independent Shatter sequence");
+        assertEquals(6, countReactions(kinds, ReactionResult.Kind.SHATTER),
+                "Damage-blocked attempts should still notify every Shatter");
+
+        sim.restoreSnapshot(snapshot);
+        assertClose(shatterDamage * 2.0, sim.getTotalDamage(), 0.5,
+                "Snapshot restore should rewind Shatter damage");
+        sim.advanceTime(0.1);
+        sim.getEnemy().applyFreezeAura(2.0, sim.getCurrentTime());
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING,
+                shatterHit("Restored target-blocked Shatter fixture"));
+        assertClose(shatterDamage * 2.0, sim.getTotalDamage(), 0.5,
+                "Snapshot restore should recover the active Shatter target GCD");
+        assertTrue(!sim.getEnemy().isFrozen(sim.getCurrentTime()),
+                "Restored target-blocked Shatter should clear Freeze");
+
+        sim.advanceTime(0.2);
+        sim.getEnemy().applyFreezeAura(2.0, sim.getCurrentTime());
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                shatterHit("Restored exact owner-reset Shatter fixture"));
+        assertClose(shatterDamage * 3.0, sim.getTotalDamage(), 0.5,
+                "Restored Shatter owner sequence should reset at exactly 0.5 seconds");
     }
 
     private static void testAccuracyPhaseG_BloomDirectionalAuraConsumptionContract() {
@@ -5243,6 +5342,12 @@ public class ReactionRegressionTest {
     private static AttackAction reactionHit(String name, Element element) {
         AttackAction action = new AttackAction(name, 0.0, element, StatType.BASE_ATK);
         action.setICD(ICDType.None, ICDTag.None, 1.0);
+        return action;
+    }
+
+    private static AttackAction shatterHit(String name) {
+        AttackAction action = reactionHit(name, Element.PHYSICAL);
+        action.setShatterTrigger(true);
         return action;
     }
 

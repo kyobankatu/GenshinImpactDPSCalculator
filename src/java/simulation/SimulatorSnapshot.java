@@ -82,8 +82,11 @@ public class SimulatorSnapshot {
     public final double overloadTargetDamageCooldownEndTime;
     public final Map<CharacterId, Double> overloadOwnerDamageCooldownEndTimes;
     public final double superconductTargetDamageCooldownEndTime;
-    public final Map<CharacterId, ReactionState.SuperconductDamageSequenceState>
+    public final Map<CharacterId, ReactionState.FixedDamageSequenceState>
             superconductOwnerDamageSequenceStates;
+    public final double shatterTargetDamageCooldownEndTime;
+    public final Map<CharacterId, ReactionState.FixedDamageSequenceState>
+            shatterOwnerDamageSequenceStates;
     public final double standardCrystallizeCooldownEndTime;
     public final int moondriftCount;
     public final int lunarCrystallizeTriggerCount;
@@ -134,6 +137,8 @@ public class SimulatorSnapshot {
      * @param overloadOwnerDamageCooldownEndTimes owner-specific Overload damage cooldown ends
      * @param superconductTargetDamageCooldownEndTime target-wide Superconduct damage cooldown end
      * @param superconductOwnerDamageSequenceStates owner-specific Superconduct sequence states
+     * @param shatterTargetDamageCooldownEndTime target-wide Shatter damage cooldown end
+     * @param shatterOwnerDamageSequenceStates owner-specific Shatter sequence states
      * @param standardCrystallizeCooldownEndTime standard Crystallize cooldown end
      * @param moondriftCount active Moondrift count
      * @param lunarCrystallizeTriggerCount Lunar-Crystallize trigger count
@@ -169,8 +174,11 @@ public class SimulatorSnapshot {
             double overloadTargetDamageCooldownEndTime,
             Map<CharacterId, Double> overloadOwnerDamageCooldownEndTimes,
             double superconductTargetDamageCooldownEndTime,
-            Map<CharacterId, ReactionState.SuperconductDamageSequenceState>
+            Map<CharacterId, ReactionState.FixedDamageSequenceState>
                     superconductOwnerDamageSequenceStates,
+            double shatterTargetDamageCooldownEndTime,
+            Map<CharacterId, ReactionState.FixedDamageSequenceState>
+                    shatterOwnerDamageSequenceStates,
             double standardCrystallizeCooldownEndTime,
             int moondriftCount,
             int lunarCrystallizeTriggerCount,
@@ -213,6 +221,12 @@ public class SimulatorSnapshot {
                 new EnumMap<>(CharacterId.class);
         this.superconductOwnerDamageSequenceStates.putAll(
                 superconductOwnerDamageSequenceStates);
+        this.shatterTargetDamageCooldownEndTime =
+                shatterTargetDamageCooldownEndTime;
+        this.shatterOwnerDamageSequenceStates =
+                new EnumMap<>(CharacterId.class);
+        this.shatterOwnerDamageSequenceStates.putAll(
+                shatterOwnerDamageSequenceStates);
         this.standardCrystallizeCooldownEndTime =
                 standardCrystallizeCooldownEndTime;
         this.moondriftCount = moondriftCount;
