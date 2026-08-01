@@ -414,3 +414,24 @@ experiment record.
   expiry. `RaidenParty` remains 1,440,416 / 68,591; `FlinsParty2` remains
   15,434,039 / 226,306 with normalized payload SHA-256
   `a9cdfbf0d3a0a01356d9d113afdd7f0afe8ef8510494f4b193107d533c8dbb6e`.
+
+### B-019 — Electro resonance accepts unrelated Lunar reactions
+
+- Status: `planned`
+- Source: 1 (typed reaction helper audit after resonance corrections)
+- Symptom: `ReactionResult.triggersElectroResonance()` returns true for every
+  Lunar reaction, so Lunar-Bloom and Lunar-Crystallize can generate Electro
+  particles even though High Voltage only includes Lunar-Charged.
+- Scope: `src/java/mechanics/reaction/ReactionResult.java`,
+  `src/java/sample/ReactionRegressionTest.java`
+- Risk: `planned`
+- Proof: typed eligibility and five-second listener regression plus fresh
+  deterministic `FlinsParty2` acceptance
+- Notes: adopt the current Genshin Impact Wiki Electro contract (accessed
+  2026-08-02): Superconduct, Overloaded, Electro-Charged, Lunar-Charged,
+  Quicken, Aggravate, and Hyperbloom generate one Electro particle on a
+  five-second cooldown. Source: https://genshin-impact.fandom.com/wiki/Electro.
+  Lunar-Bloom, Lunar-Crystallize, Spread, and Burgeon are excluded. Pre-fix
+  baselines are 1,440,416 / 68,591 for `RaidenParty` and 15,434,039 / 226,306
+  for `FlinsParty2`. See `TASKS.md` implementation block
+  `Electro Resonance Typed Trigger Set`.

@@ -2202,6 +2202,150 @@ Completion evidence:
   payload SHA-256
   `a9cdfbf0d3a0a01356d9d113afdd7f0afe8ef8510494f4b193107d533c8dbb6e`.
 
+## Implementation Order: Electro Resonance Typed Trigger Set
+
+Status:
+
+- In progress.
+- Phase 1 is complete; Phases 2-3 remain.
+- Requirement: High Voltage must generate particles only for its seven
+  documented reaction kinds, including Lunar-Charged but excluding other Lunar
+  reactions, with one shared five-second cooldown.
+
+Scope:
+
+- Narrow `ReactionResult.triggersElectroResonance()` to the exact typed set.
+- Add direct eligibility and listener cooldown regression coverage.
+- Re-run audited Electro-resonance parties and accept any energy/DPS delta.
+
+Out of scope for this pass:
+
+- Hydro status-duration reduction, particle energy coefficients, reaction
+  formulas, Dendro/Cryo/Geo/Anemo resonance, optimizer policy, reports, or RL.
+- Display-string fallback or changes to Lunar reaction classification itself.
+
+Design boundaries:
+
+- `ReactionResult.Kind` remains the source of truth for eligibility.
+- `ResonanceManager` remains the owner of the shared five-second cooldown and
+  particle distribution.
+- Tests distinguish pure helper policy from event-listener behavior.
+
+### Phase 1: Record High Voltage Trigger Evidence - Done
+
+Why first:
+
+The current broad Lunar helper is attractive but semantically wrong, so the
+exact positive and negative typed sets must be fixed before narrowing it.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Record the seven current trigger reactions and five-second cooldown, accessed
+  2026-08-02.
+- Explicitly reject Lunar-Bloom and Lunar-Crystallize from High Voltage.
+- Record pre-fix audited baselines and focused listener-test design.
+
+Acceptance criteria:
+
+- Source URL, access date, exact typed sets, cooldown, and scope are recorded.
+- Lunar-Charged remains eligible while other Lunar kinds are explicitly
+  excluded.
+- Integration impact is measured rather than assumed.
+
+Test cases to add or update:
+
+- No production test in this evidence phase; Phase 2 adds executable coverage.
+
+Verification:
+
+- inspect `ReactionResult.triggersElectroResonance` and resonance listener
+- `python scripts/preflight.py --run`
+
+### Phase 2: Narrow and Test Electro Resonance Eligibility
+
+Why second:
+
+After the source set is fixed, helper policy and listener cooldown can be
+corrected and verified atomically.
+
+Target files:
+
+- `src/java/mechanics/reaction/ReactionResult.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `TASKS.md`
+
+Tasks:
+
+- Replace broad Lunar eligibility with explicit Electro-Charged and
+  Lunar-Charged kinds plus the five other documented reactions.
+- Add positive/negative Kind regression.
+- Add a two-Electro-party listener regression for unrelated reactions and the
+  shared five-second cooldown.
+
+Acceptance criteria:
+
+- All seven documented kinds return true.
+- Lunar-Bloom, Lunar-Crystallize, Spread, Burgeon, and unrelated reactions
+  return false.
+- Eligible reactions inside five seconds produce no second particle; one at
+  exactly five seconds does.
+- No display labels influence policy.
+
+Test cases to add or update:
+
+- Normal: each documented standard reaction and Lunar-Charged is eligible.
+- Abnormal: other Lunar and non-Electro Dendro reactions are ineligible.
+- Boundary: shared cooldown blocks at 4.999 seconds and permits at 5.0 seconds.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Accept Electro-Party Integration Results
+
+Why last:
+
+Removing false particles can alter energy and rotation output, especially in
+the Electro-heavy Flins reference party.
+
+Target files:
+
+- `README.md`
+- `TASKS.md`
+- `BACKLOG.md`
+- `.agents/skills/verify-genshin-changes/references/verification-gate.md`
+
+Tasks:
+
+- Run fresh `RaidenParty` and two `FlinsParty2` payloads.
+- Confirm false Lunar-Bloom/Crystallize triggers no longer generate particles.
+- Update numeric baselines only if integration results change.
+
+Acceptance criteria:
+
+- Raiden and Flins summaries are deterministic and documented.
+- High Voltage particle logs correspond only to eligible reactions and CD.
+- Numeric baseline documents agree if changed.
+- Agent assets and routed preflight checks pass.
+
+Test cases to add or update:
+
+- No further production test; Phase 2 owns trigger and cooldown policy.
+
+Verification:
+
+- `./gradlew RaidenParty`
+- two fresh `./gradlew FlinsParty2` runs
+- `python scripts/validate_agent_assets.py` when baseline gate changes
+- `python scripts/preflight.py --run`
+
 ## Cross-Cutting Rules
 
 ### Testing
