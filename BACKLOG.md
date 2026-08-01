@@ -71,7 +71,7 @@ experiment record.
 
 ### B-003 — Skyward Spine random procs make output nondeterministic
 
-- Status: `planned`
+- Status: `done`
 - Source: 1 (README known simplifications)
 - Symptom: random Vacuum Blade procs make optimizer and sample totals vary run to run, which weakens every
   numeric baseline comparison.
@@ -87,6 +87,10 @@ experiment record.
   differing optimizer iterations and Vacuum Blade counts. Planned correction:
   single facade-owned hook dispatch plus injected, per-simulator seeded draws
   for `RaidenParty`; stochastic general construction remains available.
+  Completed 2026-08-01. Three fresh post-fix summaries had identical SHA-256
+  `65330f4d67cf44ba65142950c615fab0d085850a74d2baf33fd1f30f3319cbca`,
+  including ER/roll decisions, two optimizer passes, three Vacuum Blade procs,
+  per-source contributions, and 1,440,416 damage / 68,591 DPS.
 
 ### B-004 — FlinsParty2 shield HP is logged but never consumed
 

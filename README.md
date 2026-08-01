@@ -217,9 +217,10 @@ Known simplifications:
 - `RaidenParty`: Xingqiu's contact-based orbital Rain Swords are modeled as
   zero-damage 1U Hydro pulses every 2.25 seconds, while his separate Raincutter
   sword waves deal Burst damage. Continuous enemy contact is assumed. The party
-  definition explicitly opts into Xiangling Chili pickup, and Skyward Spine
-  random Vacuum Blade procs can make optimizer/sample output nondeterministic.
-  Generic Xiangling simulations do not pick up the chili unless their party
+  definition explicitly opts into Xiangling Chili pickup and uses a fixed
+  per-simulator Skyward Spine proc seed so optimizer candidates and sample runs
+  are reproducible. Generic Skyward Spine construction remains stochastic, and
+  generic Xiangling simulations do not pick up the chili unless their party
   definition enables that assumption.
 - `FlinsParty2`: defensive shield HP is logged but not consumed by enemy attacks,
   Columbina treats every Lunar reaction during Gravity Ripple as nearby because

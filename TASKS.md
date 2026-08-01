@@ -31,9 +31,9 @@ The Xingqiu orbital Hydro application correction is complete. Orbital Rain
 Swords now use their sourced 2.25-second application cadence independently from
 the damaging Raincutter sword-wave ICD.
 
-The deterministic damage-proc correction is now active. Its audit confirmed
-duplicate weapon/artifact damage-hook dispatch and unseeded Skyward Spine draws;
-implementation and reproducibility acceptance remain.
+The deterministic damage-proc correction is complete. Weapon and artifact
+damage hooks dispatch once through `DamageCalculator`, and `RaidenParty` uses
+common seeded Skyward Spine draws for reproducible optimizer evaluation.
 
 ## Scope
 
@@ -688,8 +688,8 @@ Verification:
 
 Status:
 
-- In progress.
-- Phases 1-3 are complete; Phase 4 remains.
+- Implemented.
+- Phases 1-4 are complete.
 - Requirement: one resolved hit must dispatch each damage-trigger hook exactly
   once, and `RaidenParty` optimizer candidates must evaluate Skyward Spine under
   the same reproducible random sequence.
@@ -872,7 +872,7 @@ Verification:
 - `./gradlew ReactionRegressionTest`
 - `./gradlew RaidenParty`
 
-### Phase 4: Prove Optimizer Reproducibility and Refresh Baselines
+### Phase 4: Prove Optimizer Reproducibility and Refresh Baselines - Done
 
 Why last:
 

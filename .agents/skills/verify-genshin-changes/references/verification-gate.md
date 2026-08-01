@@ -43,8 +43,9 @@ Checks the router does not select but that a change may still require:
 - `./gradlew FlinsParty2`: 15,892,535 total damage / 233,028 DPS
 
 A change to either number is a reportable result. If the change is intended, update `README.md` in the same
-commit and say so; if it is unintended, treat it as a regression. Known nondeterminism: `RaidenParty` can vary
-because Skyward Spine Vacuum Blade procs are random, and the optimizer consumes that randomness.
+commit and say so; if it is unintended, treat it as a regression. `RaidenParty` uses a fixed per-simulator
+Skyward Spine seed and its optimizer/sample summary is expected to be reproducible. Generic Skyward Spine
+construction remains stochastic.
 
 ## Leak check
 
