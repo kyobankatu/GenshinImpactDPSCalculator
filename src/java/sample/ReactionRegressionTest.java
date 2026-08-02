@@ -5431,6 +5431,60 @@ public class ReactionRegressionTest {
         }
         assertTrue(highAlleyFlashRefinementRejected,
                 "The Alley Flash should reject refinement six");
+
+        model.weapon.Deathmatch deathmatch = new model.weapon.Deathmatch();
+        assertEquals("Deathmatch", deathmatch.getName(), "Deathmatch display name");
+        assertClose(454.0, deathmatch.getBaseAtk(), EPS, "Deathmatch base ATK");
+        assertClose(0.368, deathmatch.getStats().get(StatType.CRIT_RATE), EPS,
+                "Deathmatch CRIT Rate");
+        assertEquals(model.type.WeaponType.POLEARM, deathmatch.getWeaponType(),
+                "Deathmatch weapon type");
+        assertEquals(1, deathmatch.getRefinement(), "Deathmatch default refinement");
+
+        StatsContainer r1SingleStats = new StatsContainer();
+        deathmatch.applyPassive(r1SingleStats, 0.0);
+        assertClose(0.24, r1SingleStats.get(StatType.ATK_PERCENT), EPS,
+                "R1 Deathmatch single-target ATK");
+        assertClose(0.0, r1SingleStats.get(StatType.DEF_PERCENT), EPS,
+                "Deathmatch single-target branch should not add DEF");
+        deathmatch.setSingleTarget(false);
+        StatsContainer r1MultiStats = new StatsContainer();
+        deathmatch.applyPassive(r1MultiStats, 0.0);
+        assertClose(0.16, r1MultiStats.get(StatType.ATK_PERCENT), EPS,
+                "R1 Deathmatch multi-target ATK");
+        assertClose(0.16, r1MultiStats.get(StatType.DEF_PERCENT), EPS,
+                "R1 Deathmatch multi-target DEF");
+
+        model.weapon.Deathmatch r5Deathmatch = new model.weapon.Deathmatch(5);
+        StatsContainer r5SingleStats = new StatsContainer();
+        r5Deathmatch.applyPassive(r5SingleStats, 0.0);
+        assertClose(0.48, r5SingleStats.get(StatType.ATK_PERCENT), EPS,
+                "R5 Deathmatch single-target ATK");
+        r5Deathmatch.setSingleTarget(false);
+        StatsContainer r5MultiStats = new StatsContainer();
+        r5Deathmatch.applyPassive(r5MultiStats, 0.0);
+        assertClose(0.32, r5MultiStats.get(StatType.ATK_PERCENT), EPS,
+                "R5 Deathmatch multi-target ATK");
+        assertClose(0.32, r5MultiStats.get(StatType.DEF_PERCENT), EPS,
+                "R5 Deathmatch multi-target DEF");
+
+        boolean lowDeathmatchRefinementRejected = false;
+        try {
+            new model.weapon.Deathmatch(0);
+        } catch (IllegalArgumentException expected) {
+            lowDeathmatchRefinementRejected = true;
+        }
+        assertTrue(lowDeathmatchRefinementRejected,
+                "Deathmatch should reject refinement zero");
+
+        boolean highDeathmatchRefinementRejected = false;
+        try {
+            new model.weapon.Deathmatch(6);
+        } catch (IllegalArgumentException expected) {
+            highDeathmatchRefinementRejected = true;
+        }
+        assertTrue(highDeathmatchRefinementRejected,
+                "Deathmatch should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {

@@ -10,16 +10,39 @@ import model.type.WeaponType;
  */
 public class Deathmatch extends Weapon {
     private boolean singleTarget = true; // Default to single target context (Boss)
+    private final int refinement;
 
     /**
-     * Constructs Deathmatch with Lv 90 base stats.
+     * Constructs an R1 Deathmatch, preserving the existing default.
      */
     public Deathmatch() {
+        this(1);
+    }
+
+    /**
+     * Constructs Deathmatch at a selected refinement.
+     *
+     * @param refinement refinement rank in the inclusive range 1-5
+     */
+    public Deathmatch(int refinement) {
         super("Deathmatch", new StatsContainer());
+        if (refinement < 1 || refinement > 5) {
+            throw new IllegalArgumentException("Weapon refinement must be between 1 and 5");
+        }
+        this.refinement = refinement;
         StatsContainer s = this.getStats();
         s.add(StatType.BASE_ATK, 454);
         s.add(StatType.CRIT_RATE, 0.368);
         this.weaponType = WeaponType.POLEARM;
+    }
+
+    /**
+     * Returns this weapon's refinement rank.
+     *
+     * @return refinement in the inclusive range 1-5
+     */
+    public int getRefinement() {
+        return refinement;
     }
 
     /**
@@ -41,15 +64,12 @@ public class Deathmatch extends Weapon {
      */
     @Override
     public void applyPassive(StatsContainer stats, double currentTime) {
-        // Refinement 1
-        // < 2 opponents: ATK +24%
-        // >= 2 opponents: ATK +16%, DEF +16%
-
         if (singleTarget) {
-            stats.add(StatType.ATK_PERCENT, 0.24);
+            stats.add(StatType.ATK_PERCENT, 0.18 + 0.06 * refinement);
         } else {
-            stats.add(StatType.ATK_PERCENT, 0.16);
-            stats.add(StatType.DEF_PERCENT, 0.16);
+            double multiTargetBonus = 0.12 + 0.04 * refinement;
+            stats.add(StatType.ATK_PERCENT, multiTargetBonus);
+            stats.add(StatType.DEF_PERCENT, multiTargetBonus);
         }
     }
 }
