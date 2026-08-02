@@ -139,6 +139,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_MoonsignReactionWeapons();
         testAccuracyPhaseF_MoonsignEmAndBloomWeapons();
         testAccuracyPhaseF_CatalystDualWindowWeapons();
+        testAccuracyPhaseF_FruitOfFulfillment();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -8735,6 +8736,113 @@ public class ReactionRegressionTest {
         }
         assertTrue(highTruthRefinementRejected,
                 "Reliquary should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_FruitOfFulfillment() {
+        model.weapon.FruitOfFulfillment fruit =
+                new model.weapon.FruitOfFulfillment();
+        assertEquals("Fruit of Fulfillment", fruit.getName(),
+                "Fruit of Fulfillment display name");
+        assertClose(510.0, fruit.getBaseAtk(), EPS,
+                "Fruit of Fulfillment base ATK");
+        assertClose(0.459,
+                fruit.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "Fruit of Fulfillment Energy Recharge");
+        assertEquals(model.type.WeaponType.CATALYST, fruit.getWeaponType(),
+                "Fruit of Fulfillment weapon type");
+        assertEquals(5, fruit.getRefinement(),
+                "Fruit of Fulfillment default refinement");
+
+        TestCharacter fruitAlly = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        TestCharacter fruitOwner = testCharacter(
+                Element.DENDRO, CharacterId.SUCROSE);
+        fruitOwner.setWeapon(fruit);
+        CombatSimulator fruitSim = simulatorWith(fruitAlly);
+        fruitSim.addCharacter(fruitOwner);
+        ReactionResult overload = ReactionResult.transform(
+                0.0, "Overloaded", ReactionResult.Kind.OVERLOAD);
+        fruitSim.notifyReaction(ReactionResult.none(), fruitOwner);
+        fruitSim.notifyReaction(overload, fruitAlly);
+        assertEquals(0, fruit.getStackCount(),
+                "NONE and foreign reactions should not add Fruit stacks");
+        fruitSim.notifyReaction(overload, fruitOwner);
+        fruitSim.notifyReaction(overload, fruitOwner);
+        assertEquals(1, fruit.getStackCount(),
+                "Fruit should reject a second stack inside 0.3 seconds");
+        for (int expectedStack = 2; expectedStack <= 5; expectedStack++) {
+            fruitSim.advanceTime(0.3);
+            fruitSim.notifyReaction(overload, fruitOwner);
+            assertEquals(expectedStack, fruit.getStackCount(),
+                    "Fruit stack count at exact 0.3-second boundary");
+        }
+        assertClose(180.0,
+                resolvedStat(fruitSim, fruitOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "R5 Fruit five-stack Elemental Mastery");
+        assertClose(-0.25,
+                resolvedStat(fruitSim, fruitOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "Fruit should lose exactly five-percent ATK per stack");
+        fruitSim.advanceTime(0.3);
+        fruitSim.notifyReaction(overload, fruitOwner);
+        assertEquals(5, fruit.getStackCount(),
+                "Fruit stacks should cap at five");
+
+        fruitSim.advanceTime(6.0 - 1e-6);
+        assertEquals(5, fruit.getStackCount(),
+                "Stale decay timers should not reduce refreshed Fruit stacks");
+        fruitSim.advanceTime(1e-6 + 1e-9);
+        assertEquals(4, fruit.getStackCount(),
+                "Fruit should lose one stack at six seconds without reaction");
+        fruitSim.advanceTime(24.0);
+        assertEquals(0, fruit.getStackCount(),
+                "Fruit should decay one stack every six seconds to zero");
+        fruitSim.advanceTime(6.0);
+        assertEquals(0, fruit.getStackCount(),
+                "Fruit decay should remain floored at zero");
+
+        model.weapon.FruitOfFulfillment r1Fruit =
+                new model.weapon.FruitOfFulfillment(1);
+        TestCharacter r1FruitOwner = testCharacter(Element.DENDRO);
+        r1FruitOwner.setWeapon(r1Fruit);
+        CombatSimulator r1FruitSim = simulatorWith(r1FruitOwner);
+        r1FruitSim.notifyReaction(overload, r1FruitOwner);
+        assertClose(24.0,
+                resolvedStat(r1FruitSim, r1FruitOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "R1 Fruit one-stack Elemental Mastery");
+        assertClose(-0.05,
+                resolvedStat(r1FruitSim, r1FruitOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "R1 Fruit one-stack ATK penalty");
+
+        boolean fruitReuseRejected = false;
+        try {
+            fruit.initializeForSimulator(fruitOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            fruitReuseRejected = true;
+        }
+        assertTrue(fruitReuseRejected,
+                "Fruit should reject cross-simulator reuse");
+
+        boolean lowFruitRefinementRejected = false;
+        try {
+            new model.weapon.FruitOfFulfillment(0);
+        } catch (IllegalArgumentException expected) {
+            lowFruitRefinementRejected = true;
+        }
+        assertTrue(lowFruitRefinementRejected,
+                "Fruit should reject refinement zero");
+
+        boolean highFruitRefinementRejected = false;
+        try {
+            new model.weapon.FruitOfFulfillment(6);
+        } catch (IllegalArgumentException expected) {
+            highFruitRefinementRejected = true;
+        }
+        assertTrue(highFruitRefinementRejected,
+                "Fruit should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {
