@@ -14291,8 +14291,8 @@ Verification:
 
 ## Implementation Order: Timed EM Team Weapon Campaign
 
-Status: Active. Generalize one verified periodic EM snapshot and add its two
-missing weapon-family variants without changing timer or buff dispatch.
+Status: Complete. One verified periodic EM snapshot now supports all three
+weapon-family variants without changing timer or buff dispatch.
 
 Scope:
 
@@ -14304,7 +14304,7 @@ Out of scope for this pass:
 - Runtime equipment swaps, report assets, characters, formulas, RL, generated
   docs, and unrelated periodic effects.
 
-### Phase 1: Generalize and complete the timed EM team-stat family
+### Phase 1: Generalize and complete the timed EM team-stat family - Done (`961825a`)
 
 Target files:
 
@@ -14319,6 +14319,14 @@ Target files:
 - `src/java/model/weapon/MakhairaAquamarine.java` (new)
 - `src/java/model/weapon/XiphosMoonlight.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Wandering retains its timing/snapshot/stack behavior with R1-R5 support;
+  Makhaira and Xiphos prove owner/ally R1/R5 conversion and metadata.
+- Xiphos total ER affects off-field particle recovery and reporting while its
+  typed component stays out of Emblem/Raiden conversion; build, reaction/report
+  regressions, Javadoc, preflight, and diff checks pass.
 
 Acceptance criteria:
 

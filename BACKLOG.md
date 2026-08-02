@@ -2392,7 +2392,7 @@ experiment record.
 
 ### B-102 — Timed EM team-stat weapon coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Wandering Evenstar refinement support, Makhaira Aquamarine, and
   Xiphos' Moonlight; RL excluded
 - **Value/risk:** two additions reuse and consolidate an already-regressed timer,
@@ -2401,3 +2401,5 @@ experiment record.
   first trigger, ten-second cadence, 12-second duration, 30% ally share, and
   Xiphos exclusion from Raiden A4/Emblem conversion
 - **Plan:** `TASKS.md` Timed EM Team Weapon Campaign
+- **Completion:** `961825a` adds Makhaira/Xiphos, refines Wandering, and adds a
+  typed non-converting ER contract; build/Javadoc/reaction/report/leak gates pass
