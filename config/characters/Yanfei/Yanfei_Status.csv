@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Yanfei,STATS,Base HP,90,9352,0
+Yanfei,STATS,Base ATK,90,240,0
+Yanfei,STATS,Base DEF,90,587,0
+Yanfei,STATS,Ascension Pyro DMG,90,0.24,0
+Yanfei,STATS,Energy Cost,90,80,0
+Yanfei,STATS,Constellation,6,6,0
+Yanfei,CONFIG,Character Level,90,90,0
+Yanfei,CONFIG,Normal Level,9,9,0
+Yanfei,CONFIG,Skill Level,12,12,0
+Yanfei,CONFIG,Burst Level,12,12,0

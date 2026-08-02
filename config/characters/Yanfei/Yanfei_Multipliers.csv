@@ -1,0 +1,22 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Yanfei,NORMAL,N1,9,0.991807,0
+Yanfei,NORMAL,N2,9,0.886135,0
+Yanfei,NORMAL,N3,9,1.292218,0
+Yanfei,CHARGE,Charged 0 Seals,9,1.523438,0
+Yanfei,CHARGE,Charged 1 Seals,9,1.792280,0
+Yanfei,CHARGE,Charged 2 Seals,9,2.061122,0
+Yanfei,CHARGE,Charged 3 Seals,9,2.329964,0
+Yanfei,CHARGE,Charged 4 Seals,9,2.598806,0
+Yanfei,PLUNGE,High Plunge,9,2.607632,0
+Yanfei,SKILL,Signed Edict,9,2.8832,0
+Yanfei,SKILL,Signed Edict C3,12,3.3920,0
+Yanfei,BURST,Done Deal,9,3.1008,0
+Yanfei,BURST,Done Deal C5,12,3.6480,0
+Yanfei,BURST,Brilliance Charged DMG Bonus,9,0.518,0
+Yanfei,BURST,Brilliance Charged DMG Bonus C5,12,0.596,0
+Yanfei,PASSIVE,Scarlet Seal Duration,1,10.0,0
+Yanfei,PASSIVE,Normal Projectile Travel,1,0.16666666666666666,0
+Yanfei,PASSIVE,Skill Particles,1,3.0,0
+Yanfei,PASSIVE,Brilliance Duration,1,15.0,0
+Yanfei,PASSIVE,Brilliance Seal Interval,1,1.0,0
+Yanfei,PASSIVE,A1 Pyro DMG per Seal,1,0.05,0
