@@ -50,10 +50,10 @@ wave added the Golden Majesty weapon family, six legacy boundary artifact sets,
 and Razor through isolated implementation lanes; RL and generated
 documentation remained excluded.
 
-The B-162 follow-on legacy character campaign is in progress. Stable identities
-plus Rosaria, Diluc, Keqing, and Ningguang are implemented; Ganyu remains in an
-isolated implementation lane. RL, generated docs, and deferred defensive or
-geometry systems remain excluded.
+The B-162 follow-on legacy character campaign is complete. The current B-163
+stateful weapon campaign adds reusable region and derived-damage primitives,
+then eight sourced weapons through isolated implementation lanes. RL,
+generated docs, and deferred defensive or geometry systems remain excluded.
 
 The B-158 derived-stat equipment and Fischl wave is complete. It adds reusable
 final-DEF/EM conversion, two five-star weapons, four asset-backed artifact sets,
@@ -12879,8 +12879,7 @@ Completion evidence:
 
 ## Implementation Order: Follow-on Legacy Character Campaign
 
-Status: In progress. Phases 1-2 and Ningguang in Phase 3 are implemented;
-Ganyu is the remaining B-162 unit.
+Status: Complete. All three phases are implemented and verified.
 
 Scope:
 
@@ -13017,7 +13016,7 @@ Completion evidence:
   executable preflight pass on the combined tree; Diluc C4 is numerically
   covered as exactly +40%, not a duplicate +80% contribution.
 
-### Phase 3: Ningguang and Ganyu Vertical Slices
+### Phase 3: Ningguang and Ganyu Vertical Slices - Done
 
 Why:
 
@@ -13067,10 +13066,131 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/preflight.py --run`
 
-Progress:
+Completion evidence:
 
-- Commit `1ca6d6d` implements Ningguang; its focused, reaction, build, Javadoc,
-  party-catalog, and executable preflight gates pass. Ganyu remains in progress.
+- Commits `1ca6d6d`, `9117319`, `4f265d2`, and `4555bb1` implement both
+  characters and preserve independent Burst, deployable, and delayed-hit
+  snapshots after independent review.
+- All five campaign regressions, party catalog, reaction regression, build,
+  Javadoc, and executable preflight pass on the pushed combined tree.
+
+## Implementation Order: Follow-on Stateful Weapon Campaign
+
+Status: In progress. Phase 1 is pending.
+
+Scope:
+
+- Add exact region metadata and action-specific derived-damage stats required
+  by the remaining sourced weapon inventory.
+- Add Crane's Echoing Call, Lumidouce Elegy, Peak Patrol Song, Sturdy Bone,
+  Vivid Notions, Lithic Blade, Lithic Spear, and Chain Breaker with R1-R5
+  coefficients and snapshot-safe mutable state.
+- Use KQM TCL `80ba6241` and gcsim `ef41805d`, accessed 2026-08-03, while
+  preferring the published 16-32% Sturdy Bone coefficient over gcsim's
+  inconsistent implementation constant.
+
+Out of scope:
+
+- Stamina consumption, enemy geometry, multi-target selection, incoming
+  damage, RL, generated docs, and Deferred Systems. Sturdy Bone's Sprint
+  stamina reduction remains excluded because no stamina model exists.
+
+### Phase 1: Region and Derived-Damage Primitives
+
+Requirements:
+
+- Add fail-closed typed character regions without changing numeric identities.
+- Route final-ATK Normal additive damage and Plunging-only CRIT DMG through the
+  standard formula without affecting other action categories or Lunar damage.
+
+Target files:
+
+- `src/java/model/type/CharacterRegion.java` (new)
+- `src/java/model/type/CharacterId.java`
+- `src/java/model/type/StatType.java`
+- `src/java/mechanics/formula/StandardDamageStrategy.java`
+- focused identity and formula regression executables
+
+Tests:
+
+- Normal: Liyue, Natlan, other, and UNKNOWN region lookup; Normal final-ATK
+  addition; Plunging CRIT DMG.
+- Boundary: zero ratios and non-Normal/non-Plunging actions are unchanged.
+- Abnormal: unknown identities fail closed and negative/invalid IDs retain the
+  UNKNOWN contract.
+
+### Phase 2: Crane's Echoing Call and Peak Patrol Song
+
+Requirements:
+
+- Implement owner-Plunge team window and 0.7-second ally-Plunge Energy ICD.
+- Implement 0.1-second Normal/Plunge stacks and trigger-time final-DEF team
+  elemental bonus snapshot, excluding Physical damage.
+- Capture and restore all mutable windows, stacks, and ICDs.
+
+Target files:
+
+- two new weapon classes under `src/java/model/weapon/`
+- two focused regression executables under `src/java/sample/`
+
+Tests:
+
+- Normal: R1/R5 metadata, team scope, stack values, Energy, and DEF snapshot.
+- Boundary: exact 0.1/0.7/6/15/20-second windows and stack caps.
+- Abnormal: wrong owner/category, zero-damage contact, duplicate binding,
+  cross-instance state, and foreign snapshot restore.
+
+### Phase 3: Lumidouce Elegy and Vivid Notions
+
+Requirements:
+
+- Implement Burning/Dendro-on-Burning stacks with same-hit de-duplication,
+  two-stack Energy restore, and twelve-second Energy ICD.
+- Implement the two independent Plunging CRIT DMG windows and cancellation
+  exactly 0.1 seconds after a Plunging hit.
+- Preserve all mutable state through simulator snapshot restore.
+
+Target files:
+
+- two new weapon classes under `src/java/model/weapon/`
+- two focused regression executables under `src/java/sample/`
+
+Tests:
+
+- Normal: R1/R5 metadata, eligible trigger paths, stacking, Energy, and
+  additive Plunging CRIT DMG windows.
+- Boundary: 0.1/8/12/15-second expiry and cooldown behavior.
+- Abnormal: duplicate same-hit trigger, derived reaction, wrong owner/element,
+  irrelevant action, foreign simulator, and foreign snapshot state.
+
+### Phase 4: Sturdy Bone and Region-Composition Weapons
+
+Requirements:
+
+- Implement Sturdy Bone's 18-hit/seven-second Normal additive window after
+  Dash, excluding only the unsupported stamina reduction.
+- Share one Lithic composition implementation between Blade and Spear, and
+  implement Chain Breaker's Natlan-or-different-element union without double
+  counting.
+
+Target files:
+
+- new Sturdy Bone, Lithic base/Blade/Spear, and Chain Breaker classes
+- focused regression executables for Sturdy, Lithic family, and Chain Breaker
+
+Tests:
+
+- Normal: R1-R5 metadata, final-ATK addition, Liyue stacks, and union counts.
+- Boundary: 18th/19th hit, seven-second expiry, four-stack cap, and exactly
+  three qualifying Chain Breaker members.
+- Abnormal: wrong action/owner, UNKNOWN region fail-closed, duplicate union
+  membership, invalid refinement, and independent instances.
+
+Campaign verification:
+
+- all new focused regressions
+- `./gradlew ReactionRegressionTest PartyCatalogRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
 
 ## Implementation Order: Parallel Foundational Content Campaign
 

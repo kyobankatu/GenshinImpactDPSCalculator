@@ -3434,22 +3434,26 @@ experiment record.
 
 ### B-162 — Follow-on legacy character inventory
 
-- **Status:** in progress
+- **Status:** complete
 - **Source:** B-161 normalized character asset/class inventory
 - **Units:** Rosaria, Diluc, Keqing, Ningguang, and Ganyu
 - **Plan:** three-phase `TASKS.md` Follow-on Legacy Character Campaign with a
   shared typed-identity prerequisite and branch-isolated vertical slices.
-- **Progress:** identities plus Rosaria, Diluc, Keqing, and Ningguang are
-  implemented through `aaff2bc`; Ganyu remains in an isolated worktree.
+- **Completion:** commits `514f7a2` through `4555bb1` add all five character
+  slices and independent-review snapshot/timing corrections; focused, catalog,
+  reaction, build, Javadoc, and executable preflight gates pass.
 
 ### B-163 — Follow-on stateful weapon inventory
 
-- **Status:** candidate
+- **Status:** in progress
 - **Source:** B-161 normalized weapon asset/class inventory
 - **Units:** Crane's Echoing Call, Lumidouce Elegy, Peak Patrol Song, Sturdy
   Bone, Vivid Notions, Lithic Blade, Lithic Spear, and Chain Breaker
 - **Reason:** sourced candidates remain, with some requiring shared region,
   final-ATK, Plunge-CRIT-DMG, or team-buff primitives before implementation.
+- **Plan:** four-phase `TASKS.md` stateful weapon campaign; Phase 1 supplies
+  typed region and derived-damage primitives before three isolated weapon
+  batches.
 
 ### B-164 — Unmatched weapon assets behind deferred systems
 
