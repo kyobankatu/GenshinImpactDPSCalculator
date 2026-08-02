@@ -2308,10 +2308,12 @@ experiment record.
 
 ### B-095 — Frost Burial weapon coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Dragonspine Spear, Snow-Tombed Starsilver, Frostbearer; RL excluded
 - **Value/risk:** three complete variants share one bounded, injectable proc
   implementation and reuse the live target-Aura API
 - **Evidence boundary:** KQM TCL metadata, R1-R5 chance/base/Cryo multipliers,
   Normal/Charged gates, and ten-second cooldown
 - **Plan:** `TASKS.md` Frost Burial Weapon Campaign
+- **Completion:** `cd34797` adds the shared proc policy, all three variants, and
+  focused regressions; build/Javadoc/leak gates pass

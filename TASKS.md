@@ -13906,7 +13906,7 @@ Verification:
 
 ## Implementation Order: Frost Burial Weapon Campaign
 
-Status: Active. Add the three Dragonspine Frost Burial weapons through one
+Status: Complete. The three Dragonspine Frost Burial weapons now share one
 refinement-aware, target-Aura-aware direct proc policy.
 
 Scope:
@@ -13919,7 +13919,7 @@ Out of scope for this pass:
 - Multi-target multiplication, falling-projectile delay, characters, formulas,
   RL, generated docs, and unrelated proc families.
 
-### Phase 1: Add Shared Frost Burial and Three Variants
+### Phase 1: Add Shared Frost Burial and Three Variants - Done (`cd34797`)
 
 Target files:
 
@@ -13928,6 +13928,15 @@ Target files:
 - `src/java/model/weapon/SnowTombedStarsilver.java` (new)
 - `src/java/model/weapon/Frostbearer.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Shared policy proves active-owner positive Normal/Charged gates, failed-roll
+  retry, successful ten-second CT, recursion exclusion, and injected draws.
+- R1 base/Cryo proc damage proves the 80%/200% 2.5 ratio and exact CT boundary;
+  all three R5 variants produce damage with their sourced metadata.
+- Refinement/null validation, reaction regression, build, Javadoc, preflight,
+  and diff checks pass.
 
 Acceptance criteria:
 
