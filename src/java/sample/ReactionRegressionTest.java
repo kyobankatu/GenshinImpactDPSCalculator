@@ -200,6 +200,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ElectroResonanceTypedTriggerContract();
         testAccuracyPhaseF_SucroseNoIcdApplicationContract();
         testAccuracyPhaseF_SucroseReactionLifecycleAccuracy();
+        testAccuracyPhaseF_SucroseBurstAbsorptionOrdering();
         testAccuracyPhaseF_SucroseC4AlchemaniaLifecycle();
         testAccuracyPhaseF_RaidenCastAndMusouIcdContract();
         testAccuracyPhaseF_RaidenEyeBuffRefreshContract();
@@ -18732,6 +18733,109 @@ public class ReactionRegressionTest {
                 "C5 Sucrose should not grant the C6 absorption bonus");
     }
 
+    private static void testAccuracyPhaseF_SucroseBurstAbsorptionOrdering() {
+        model.character.Sucrose weakAuraSucrose = new model.character.Sucrose(
+                new TestWeapon(), blankArtifact(), 6, () -> 4.0);
+        CombatSimulator weakAuraSim = simulatorWithExistingCharacter(
+                weakAuraSucrose);
+        TestCharacter weakAuraAlly = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        weakAuraSim.addCharacter(weakAuraAlly);
+        List<AttackAction> weakAuraActions = new ArrayList<>();
+        weakAuraSim.addListener((actor, action, time) ->
+                weakAuraActions.add(action));
+        weakAuraSim.performAction(
+                CharacterId.SUCROSE,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        weakAuraSim.advanceTime(1.99);
+        weakAuraSim.getEnemy().setAura(
+                Element.PYRO, 0.5, weakAuraSim.getCurrentTime());
+        weakAuraSim.advanceTime(0.02);
+
+        List<AttackAction> weakAbsorbedHits = weakAuraActions.stream()
+                .filter(action -> action.getName().equals(
+                        "Forbidden Creation - Isomer 75 (Absorb)"))
+                .collect(Collectors.toList());
+        assertEquals(1, weakAbsorbedHits.size(),
+                "A weak aura should still produce first-tick absorbed damage");
+        assertEquals(Element.PYRO, weakAbsorbedHits.get(0).getElement(),
+                "Sucrose should capture the weak aura before Anemo consumes it");
+        assertClose(50.0,
+                resolvedStat(
+                        weakAuraSim,
+                        weakAuraAlly,
+                        StatType.ELEMENTAL_MASTERY),
+                EPS,
+                "The weak-aura Burst Swirl should still trigger Sucrose A1");
+        assertClose(0.20,
+                resolvedStat(
+                        weakAuraSim,
+                        weakAuraAlly,
+                        StatType.PYRO_DMG_BONUS),
+                EPS,
+                "Weak-aura absorption should trigger Sucrose C6");
+
+        weakAuraSim.advanceTime(2.0);
+        long repeatedAbsorbedHits = weakAuraActions.stream()
+                .filter(action -> action.getName().equals(
+                        "Forbidden Creation - Isomer 75 (Absorb)"))
+                .count();
+        assertEquals(2L, repeatedAbsorbedHits,
+                "Later Burst ticks should retain the captured element");
+
+        model.character.Sucrose prioritySucrose = new model.character.Sucrose(
+                new TestWeapon(), blankArtifact(), 0, () -> 4.0);
+        CombatSimulator prioritySim = simulatorWithExistingCharacter(
+                prioritySucrose);
+        List<AttackAction> priorityActions = new ArrayList<>();
+        prioritySim.addListener((actor, action, time) ->
+                priorityActions.add(action));
+        prioritySim.performAction(
+                CharacterId.SUCROSE,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        prioritySim.advanceTime(1.99);
+        prioritySim.getEnemy().setAura(
+                Element.HYDRO, 4.0, prioritySim.getCurrentTime());
+        prioritySim.getEnemy().setAura(
+                Element.PYRO, 0.5, prioritySim.getCurrentTime());
+        prioritySim.advanceTime(0.02);
+        prioritySim.getEnemy().setAura(
+                Element.PYRO, 0.0, prioritySim.getCurrentTime());
+        prioritySim.getEnemy().setAura(
+                Element.HYDRO, 4.0, prioritySim.getCurrentTime());
+        prioritySim.advanceTime(2.0);
+        List<AttackAction> priorityAbsorbedHits = priorityActions.stream()
+                .filter(action -> action.getName().equals(
+                        "Forbidden Creation - Isomer 75 (Absorb)"))
+                .collect(Collectors.toList());
+        assertEquals(2, priorityAbsorbedHits.size(),
+                "Two priority fixture ticks should deal absorbed damage");
+        for (AttackAction absorbedHit : priorityAbsorbedHits) {
+            assertEquals(Element.PYRO, absorbedHit.getElement(),
+                    "Sucrose should preserve first-captured Pyro over later Hydro");
+        }
+
+        model.character.Sucrose unsupportedSucrose = new model.character.Sucrose(
+                new TestWeapon(), blankArtifact(), 0, () -> 4.0);
+        CombatSimulator unsupportedSim = simulatorWithExistingCharacter(
+                unsupportedSucrose);
+        List<AttackAction> unsupportedActions = new ArrayList<>();
+        unsupportedSim.addListener((actor, action, time) ->
+                unsupportedActions.add(action));
+        unsupportedSim.performAction(
+                CharacterId.SUCROSE,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        unsupportedSim.advanceTime(1.99);
+        unsupportedSim.getEnemy().setAura(
+                Element.DENDRO, 4.0, unsupportedSim.getCurrentTime());
+        unsupportedSim.advanceTime(0.02);
+        assertEquals(0L, unsupportedActions.stream()
+                        .filter(action -> action.getName().equals(
+                                "Forbidden Creation - Isomer 75 (Absorb)"))
+                        .count(),
+                "Unsupported-only aura should not be absorbed");
+    }
+
     private static BuffId catalystConversionBuffId(Element element) {
         switch (element) {
             case PYRO:
@@ -19623,6 +19727,55 @@ public class ReactionRegressionTest {
     }
 
     private static void testAccuracyPhaseF_PeriodicCancellationAndRaidenEyeDamageTrigger() {
+        List<String> callbackOrder = new ArrayList<>();
+        CombatSimulator orderingSim = simulatorWith(
+                testCharacter(Element.PHYSICAL));
+        orderingSim.addDamageListener((actor, action, damage, time) ->
+                callbackOrder.add("action"));
+        AttackAction periodicProbe = typedDamageHit(
+                "Periodic callback ordering probe", ActionType.OTHER, 1.0);
+        orderingSim.registerEvent(new PeriodicDamageEvent(
+                "Reaction Tester",
+                periodicProbe,
+                1.0,
+                1.0,
+                2.0,
+                sim -> callbackOrder.add("pre"),
+                sim -> callbackOrder.add("post")));
+        orderingSim.advanceTime(1.0);
+        assertEquals(java.util.List.of("pre", "action", "post"),
+                callbackOrder,
+                "Periodic callbacks should surround the tick action");
+
+        List<String> legacyOrder = new ArrayList<>();
+        CombatSimulator legacyOrderingSim = simulatorWith(
+                testCharacter(Element.PHYSICAL));
+        legacyOrderingSim.addDamageListener((actor, action, damage, time) ->
+                legacyOrder.add("action"));
+        legacyOrderingSim.registerEvent(new PeriodicDamageEvent(
+                "Reaction Tester",
+                periodicProbe,
+                1.0,
+                1.0,
+                2.0,
+                sim -> legacyOrder.add("post")));
+        legacyOrderingSim.advanceTime(1.0);
+        assertEquals(java.util.List.of("action", "post"),
+                legacyOrder,
+                "Legacy periodic constructors should retain action/post order");
+
+        CombatSimulator nullCallbackSim = simulatorWith(
+                testCharacter(Element.PHYSICAL));
+        nullCallbackSim.registerEvent(new PeriodicDamageEvent(
+                "Reaction Tester",
+                null,
+                1.0,
+                1.0,
+                2.0,
+                null,
+                null));
+        nullCallbackSim.advanceTime(1.0);
+
         int[] cancelledCallbacks = {0};
         CombatSimulator cancelledSim = simulatorWith(testCharacter(Element.PHYSICAL));
         PeriodicDamageEvent cancelledEvent = new PeriodicDamageEvent(

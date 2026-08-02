@@ -12,6 +12,7 @@ import mechanics.energy.ParticleType;
 import mechanics.reaction.ReactionResult;
 import model.entity.ArtifactSet;
 import model.entity.Character;
+import model.entity.Enemy;
 import model.entity.FormStateProvider;
 import model.entity.ReactionAwareCharacter;
 import model.entity.SimulatorInitializedCharacterEffect;
@@ -58,6 +59,12 @@ public class Sucrose extends Character implements
         ReactionAwareCharacter {
     private static final double ALCHEMANIA_COUNT_COOLDOWN = 0.1;
     private static final int ALCHEMANIA_HIT_THRESHOLD = 7;
+    private static final Element[] BURST_ABSORPTION_PRIORITY = {
+            Element.PYRO,
+            Element.HYDRO,
+            Element.ELECTRO,
+            Element.CRYO
+    };
 
     private int normalAttackStep = 0;
     private final DoubleSupplier alchemaniaReductionDraw;
@@ -428,27 +435,8 @@ public class Sucrose extends Character implements
                 sim.getCurrentTime() + 2.0,
                 2.0,
                 duration,
+                this::captureBurstAbsorption,
                 s -> {
-                    if (this.absorbedElement == null) {
-                        model.entity.Enemy enemy = s.getEnemy();
-                        if (enemy != null) {
-                            if (enemy.getAuraUnits(Element.PYRO, s.getCurrentTime()) > 0)
-                                this.absorbedElement = Element.PYRO;
-                            else if (enemy.getAuraUnits(Element.HYDRO, s.getCurrentTime()) > 0)
-                                this.absorbedElement = Element.HYDRO;
-                            else if (enemy.getAuraUnits(Element.ELECTRO, s.getCurrentTime()) > 0)
-                                this.absorbedElement = Element.ELECTRO;
-                            else if (enemy.getAuraUnits(Element.CRYO, s.getCurrentTime()) > 0)
-                                this.absorbedElement = Element.CRYO;
-                        }
-
-                        if (this.absorbedElement != null) {
-                            if (this.constellation >= 6) {
-                                applyC6Buff(s, this.absorbedElement);
-                            }
-                        }
-                    }
-
                     if (this.absorbedElement != null) {
                         AttackAction extra = new AttackAction("Forbidden Creation - Isomer 75 (Absorb)", absorbMv,
                                 this.absorbedElement, StatType.BASE_ATK, StatType.BURST_DMG_BONUS, 0.0, false,
@@ -459,6 +447,29 @@ public class Sucrose extends Character implements
 
                     applyA4Passive(s);
                 }));
+    }
+
+    /**
+     * Captures the first supported aura immediately before a Burst tick.
+     *
+     * @param sim simulator about to resolve the Burst's Anemo damage
+     */
+    private void captureBurstAbsorption(CombatSimulator sim) {
+        Enemy enemy = sim.getEnemy();
+        if (absorbedElement != null || enemy == null) {
+            return;
+        }
+        double time = sim.getCurrentTime();
+        for (Element candidate : BURST_ABSORPTION_PRIORITY) {
+            if (enemy.getAuraUnits(candidate, time) <= 0.0) {
+                continue;
+            }
+            absorbedElement = candidate;
+            if (constellation >= 6) {
+                applyC6Buff(sim, absorbedElement);
+            }
+            return;
+        }
     }
 
     /**

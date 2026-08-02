@@ -3051,7 +3051,7 @@ experiment record.
 
 ### B-142 — Sucrose Burst absorption pre-reaction aura capture
 
-- **Status:** candidate
+- **Status:** complete
 - **Source:** delegated B-141 implementation review
 - **Scope/risk:** Burst currently chooses its absorbed element from residual
   enemy aura after the Anemo tick, so a weak aura can be consumed before the
@@ -3063,4 +3063,8 @@ experiment record.
   https://library.keqingmains.com/evidence/characters/anemo/sucrose
 - **Boundary:** 0.5U/1U aura, multi-aura priority, Swirl dispatch, first-only
   absorption, C6 ordering, periodic event behavior, and snapshot limitations
-- **Decision:** accepted candidate; plan only after active B-141 is complete
+- **Plan:** one-phase `TASKS.md` Sucrose Burst Absorption Ordering
+- **Completion:** backward-compatible pre/action/post periodic ordering,
+  pre-damage aura capture, weak and multi-aura priority, first-only absorption,
+  unsupported aura, null callback, C6/A1 integration, and representative party
+  regressions pass focused and full gates

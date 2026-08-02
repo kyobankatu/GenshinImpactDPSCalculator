@@ -12912,6 +12912,72 @@ Completion evidence:
   (`FlinsParty`), and 20,999,900 / 303,906 (`FlinsParty2`); the Sucrose teams
   increase because A1 now activates on their real Normal/Burst Swirls.
 
+## Implementation Order: Sucrose Burst Absorption Ordering
+
+Status: Complete. Implemented B-142 as a backward-compatible periodic-event
+pre-tick hook and Sucrose-owned aura capture; generic reaction ordering, new
+absorption priorities, event snapshotting, RL, and generated docs are excluded.
+
+Evidence:
+
+- `PeriodicDamageEvent` currently resolves its action before the character
+  callback can inspect aura, while the maintained KQM Sucrose evidence page,
+  accessed 2026-08-02, records Burst absorption and Anemo damage as simultaneous:
+  https://library.keqingmains.com/evidence/characters/anemo/sucrose
+
+### Phase 1: Capture Absorption Aura Before Burst Damage - Done
+
+Target files:
+
+- `src/java/simulation/event/PeriodicDamageEvent.java`
+- `src/java/model/character/Sucrose.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Periodic events optionally run one pre-tick callback immediately before the
+  action and retain the existing action-then-post-callback behavior by default.
+- Sucrose captures the first supported Pyro/Hydro/Electro/Cryo aura before a
+  Burst tick, then resolves Anemo damage, absorption damage, C6, and A4 in the
+  established order without recapturing on later ticks.
+- A weak aura that the Anemo tick fully consumes still becomes the absorbed
+  element, while no aura produces no absorption and later ticks may retry.
+- Existing periodic-event users and Sucrose A1/C6 lifecycle behavior remain
+  unchanged outside the corrected absorption timing.
+
+Test cases:
+
+- Normal: generic pre/action/post ordering, 0.5U weak-aura absorption, absorbed
+  damage element, A1 Swirl, C6 source/duration, and later absorbed ticks.
+- Boundary: no-aura first tick then second-tick absorption, supported-element
+  priority under multiple auras, and first-only capture after aura changes.
+- Abnormal: null callbacks, unsupported-only aura, C5 exclusion, and legacy
+  periodic constructor ordering; the combat resolver's required-enemy
+  precondition remains outside this character-scoped pass.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- representative party samples twice
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- `PeriodicDamageEvent` keeps both legacy constructors and adds an optional
+  pre-tick callback; regressions prove pre/action/post, legacy action/post,
+  cancellation, cadence, and null-callback behavior.
+- Sucrose captures a supported aura before Anemo damage, preserves the existing
+  Pyro/Hydro/Electro/Cryo priority, retries after an aura-less tick, and never
+  replaces the first absorbed element on later ticks.
+- Focused regressions cover 0.5U aura capture, actual A1 Swirl, C6 activation,
+  repeated absorbed damage, dual aura, and unsupported-only aura behavior.
+- Reaction regression, build, Javadoc, party catalog, and representative
+  samples pass. Two runs each reproduce 1,275,070 / 60,718 (`RaidenParty`),
+  32,047,365 / 322,084 (`FlinsParty`), and 22,146,093 / 320,493
+  (`FlinsParty2`); the final increase reflects corrected pre-damage absorption.
+
 ## Implementation Order: Expanded Artifact Coverage Campaign
 
 Status: Complete. This campaign adds six missing four-piece artifact sets

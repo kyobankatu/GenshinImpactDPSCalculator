@@ -1,11 +1,13 @@
 package simulation.event;
 
+import java.util.function.Consumer;
+
 import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 
 /**
  * A {@link TimerEvent} that fires a repeating {@link AttackAction} at a fixed interval
- * for a defined duration, optionally running an additional callback on each tick.
+ * for a defined duration, optionally running callbacks before and after each tick.
  *
  * <p>Typical use-cases: field DoT effects such as Beidou's Stormbreaker lightning,
  * Fischl's Oz shots, Xiangling's Pyronado hits, or any ability that deals repeated
@@ -22,7 +24,8 @@ public class PeriodicDamageEvent implements TimerEvent {
     private double duration;
     private boolean cancelled;
 
-    private java.util.function.Consumer<CombatSimulator> onTick;
+    private Consumer<CombatSimulator> preTick;
+    private Consumer<CombatSimulator> onTick;
 
     /**
      * Constructs a periodic damage event without an additional callback.
@@ -52,12 +55,29 @@ public class PeriodicDamageEvent implements TimerEvent {
      *                   (e.g. applying a DEF shred); may be {@code null}
      */
     public PeriodicDamageEvent(String sourceName, AttackAction tickAction, double startTime, double interval,
-            double duration, java.util.function.Consumer<CombatSimulator> onTick) {
+            double duration, Consumer<CombatSimulator> onTick) {
+        this(sourceName, tickAction, startTime, interval, duration, null, onTick);
+    }
+
+    /**
+     * Constructs a periodic damage event with optional callbacks around each tick action.
+     *
+     * @param sourceName the name of the character owning this event
+     * @param tickAction the {@link AttackAction} to execute on each tick; may be {@code null}
+     * @param startTime  the simulation time of the first tick
+     * @param interval   the time in seconds between consecutive ticks
+     * @param duration   the total duration in seconds
+     * @param preTick    optional callback invoked immediately before the tick action; may be {@code null}
+     * @param onTick     optional callback invoked after the tick action; may be {@code null}
+     */
+    public PeriodicDamageEvent(String sourceName, AttackAction tickAction, double startTime, double interval,
+            double duration, Consumer<CombatSimulator> preTick, Consumer<CombatSimulator> onTick) {
         this.sourceName = sourceName;
         this.tickAction = tickAction;
         this.startTime = startTime;
         this.interval = interval;
         this.duration = duration;
+        this.preTick = preTick;
         this.onTick = onTick;
         this.nextTickTime = startTime;
     }
@@ -73,7 +93,8 @@ public class PeriodicDamageEvent implements TimerEvent {
     /**
      * Executes the tick action via
      * {@link CombatSimulator#performActionWithoutTimeAdvance(String, AttackAction)},
-     * then invokes the optional callback, and advances {@link #nextTickTime} by the interval.
+     * invoking the optional callbacks immediately before and after it, then advances
+     * {@link #nextTickTime} by the interval.
      *
      * @param sim the {@link CombatSimulator} managing this event
      */
@@ -83,17 +104,18 @@ public class PeriodicDamageEvent implements TimerEvent {
             return;
         }
 
-        // Perform the action
+        if (preTick != null) {
+            preTick.accept(sim);
+        }
+
         if (tickAction != null) {
             sim.performActionWithoutTimeAdvance(sourceName, tickAction);
         }
 
-        // Run Callback (e.g. C1 Shred)
         if (onTick != null) {
             onTick.accept(sim);
         }
 
-        // Update next tick
         nextTickTime += interval;
     }
 
