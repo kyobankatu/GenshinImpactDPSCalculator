@@ -22,8 +22,10 @@ public enum BuffId {
     CUSTOM,
     /** 雷電将軍 命ノ星座 4 凸「神威・天日の眼」など、特定範囲の万能ダメージ強化。 */
     FANTASTIC_VOYAGE,
-    /** 雷電将軍 元素爆発「奥義・夢想真説」状態の万能効果。 */
+    /** 行秋 元素爆発「古華剣・裁雨留虹」の継続状態。 */
     RAINCUTTER,
+    /** 行秋 命ノ星座 2 による水元素耐性低下。 */
+    XINGQIU_C2_HYDRO_SHRED,
     /** Lunar 拡張: コロンビーナの「皓月の意志」。 */
     GLEAMING_MOON_INTENT,
     /** Lunar 拡張: コロンビーナの「皓月の献身」。 */

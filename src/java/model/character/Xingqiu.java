@@ -17,16 +17,23 @@ import model.type.ActionType;
 import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionRequest;
+import simulation.event.PeriodicDamageEvent;
 
 /**
  * Xingqiu character implementation with Raincutter sword-wave scheduling.
  */
 public class Xingqiu extends Character implements FormStateProvider {
     private static final double ORBITAL_APPLICATION_INTERVAL = 2.25;
+    private static final double RAINCUTTER_BASE_DURATION = 15.0;
+    private static final double RAINCUTTER_C2_DURATION = 18.0;
+    private static final double RAINCUTTER_TRIGGER_COOLDOWN = 1.0;
+    private static final double C2_HYDRO_SHRED_DURATION = 4.0;
 
     private int normalAttackStep = 0;
-    private java.util.Map<String, Double> triggerCooldowns = new java.util.HashMap<>();
+    private final java.util.Map<BuffId, Double> triggerCooldowns = new java.util.HashMap<>();
     private int raincutterWaveCount = 0;
+    private int raincutterBurstGeneration = 0;
+    private PeriodicDamageEvent raincutterOrbitalEvent;
 
     /**
      * Constructs Xingqiu with the shared talent data source.
@@ -81,7 +88,7 @@ public class Xingqiu extends Character implements FormStateProvider {
      */
     @Override
     public boolean isFormActive(double currentTime) {
-        return (currentTime - getLastBurstTime()) < 18.0;
+        return currentTime - getLastBurstTime() < getRaincutterDuration();
     }
 
     /**
@@ -132,11 +139,8 @@ public class Xingqiu extends Character implements FormStateProvider {
 
     private void skill(CombatSimulator sim) {
         double mvMulti = 1.0;
-        // Check for C4 (50% DMG multiplier if Burst active)
-        boolean isBurstActive = sim.getApplicableBuffs(this).stream()
-                .anyMatch(b -> b.getId() == BuffId.RAINCUTTER);
-        if (isBurstActive) {
-            mvMulti = 1.5; // Multiplicative increase
+        if (constellation >= 4 && isFormActive(sim.getCurrentTime())) {
+            mvMulti = 1.5;
             System.out.println("   [Xingqiu] C4 Activation: Skill DMG x1.5");
         }
 
@@ -157,50 +161,53 @@ public class Xingqiu extends Character implements FormStateProvider {
     }
 
     private void burst(CombatSimulator sim) {
+        raincutterBurstGeneration++;
+        int burstGeneration = raincutterBurstGeneration;
+        raincutterWaveCount = 0;
+        triggerCooldowns.clear();
+
         AttackAction cast = new AttackAction("Raincutter Cast", 0.0, Element.HYDRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 1.0, ActionType.BURST);
         sim.performAction(this.characterId, cast);
 
-        // Buff Logic
-        sim.applyTeamBuff(new mechanics.buff.SimpleBuff("Raincutter", BuffId.RAINCUTTER, 18.0,
-                sim.getCurrentTime(), s -> {
-            s.add(StatType.HYDRO_RES_SHRED, 0.15); // Hydro RES shred (C2)
-        }));
+        double raincutterDuration = getRaincutterDuration();
+        sim.applyTeamBuffNoStack(new mechanics.buff.SimpleBuff(
+                "Raincutter", BuffId.RAINCUTTER, raincutterDuration, sim.getCurrentTime(), stats -> {
+                }).sourcedBy(characterId));
 
         AttackAction orbital = new AttackAction("Raincutter Orbital", 0.0, Element.HYDRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 0.0, false, ActionType.OTHER);
         // The contact pulse's 2.25s event cadence is its ICD; every pulse applies 1U Hydro.
         orbital.setICD(ICDType.None, ICDTag.Xingqiu_Orbital, 1.0);
 
-        sim.registerEvent(
-                new simulation.event.PeriodicDamageEvent(
-                        "Xingqiu",
-                        orbital,
-                        sim.getCurrentTime(),
-                        ORBITAL_APPLICATION_INTERVAL,
-                        18.0));
+        if (raincutterOrbitalEvent != null) {
+            raincutterOrbitalEvent.cancel();
+        }
+        raincutterOrbitalEvent = new PeriodicDamageEvent(
+                "Xingqiu",
+                orbital,
+                sim.getCurrentTime(),
+                ORBITAL_APPLICATION_INTERVAL,
+                raincutterDuration);
+        sim.registerEvent(raincutterOrbitalEvent);
 
         // Register Raincutter Trigger (Self-contained)
-        double expiryTime = sim.getCurrentTime() + 18.0;
+        double expiryTime = sim.getCurrentTime() + raincutterDuration;
         final Xingqiu self = this;
 
         sim.addListener((actor, action, time) -> {
-            if (time > expiryTime)
-                return; // Expired
+            if (burstGeneration != self.raincutterBurstGeneration || time >= expiryTime) {
+                return;
+            }
 
             // Trigger on Normal Attacks (Atomic)
             if (action.getActionType() == model.type.ActionType.NORMAL) {
                 // Check internal CD (1.0s)
-                Double lastTrigger = self.triggerCooldowns.get("Raincutter");
-                if (lastTrigger == null || time - lastTrigger >= 1.0) {
+                Double lastTrigger = self.triggerCooldowns.get(BuffId.RAINCUTTER);
+                if (lastTrigger == null || time - lastTrigger >= RAINCUTTER_TRIGGER_COOLDOWN) {
                     // Fire Raincutter (Multiple Swords)
-                    java.util.List<AttackAction> rainSwords = self.getRaincutterAttack(self.raincutterWaveCount++);
-
-                    if (rainSwords.size() == 5) {
-                        // C6 Energy Restore
-                        sim.getEnergyDistributor().distributeFlatEnergy(3.0);
-                        System.out.println("   [Energy] Xingqiu C6 restored 3 Energy");
-                    }
+                    int waveCount = self.raincutterWaveCount++;
+                    java.util.List<AttackAction> rainSwords = self.getRaincutterAttack(waveCount);
 
                     System.out.println(
                             "   [Trigger] Raincutter Wave (" + rainSwords.size() + " Swords) on " + action.getName());
@@ -209,10 +216,28 @@ public class Xingqiu extends Character implements FormStateProvider {
                     for (AttackAction sword : rainSwords) {
                         sim.performActionWithoutTimeAdvance(self.getCharacterId(), sword);
                     }
-                    self.triggerCooldowns.put("Raincutter", time);
+
+                    if (self.constellation >= 2) {
+                        sim.applyTeamBuffNoStack(new mechanics.buff.SimpleBuff(
+                                "Xingqiu C2 Hydro RES Shred",
+                                BuffId.XINGQIU_C2_HYDRO_SHRED,
+                                C2_HYDRO_SHRED_DURATION,
+                                time,
+                                stats -> stats.add(StatType.HYDRO_RES_SHRED, 0.15))
+                                .sourcedBy(self.getCharacterId()));
+                    }
+                    if (self.constellation >= 6 && waveCount % 3 == 2) {
+                        self.receiveFlatEnergy(3.0);
+                        System.out.println("   [Energy] Xingqiu C6 restored 3 Energy");
+                    }
+                    self.triggerCooldowns.put(BuffId.RAINCUTTER, time);
                 }
             }
         });
+    }
+
+    private double getRaincutterDuration() {
+        return constellation >= 2 ? RAINCUTTER_C2_DURATION : RAINCUTTER_BASE_DURATION;
     }
 
     /**
