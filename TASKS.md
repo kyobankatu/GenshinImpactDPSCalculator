@@ -12773,6 +12773,59 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
 
+## Implementation Order: Five-Star EM Support Weapon Campaign
+
+Status: Active. Add two complete five-star EM support weapons using an
+off-field hit state machine and live party composition.
+
+Scope:
+
+- Add Elegy for the End and A Thousand Floating Dreams with sourced metadata,
+  R1-R5 values, exact buff targeting, timing, stacking, and focused regressions.
+
+Out of scope for this pass:
+
+- Freedom-Sworn's unsupported Plunging DMG stat, characters, formulas, RL,
+  generated docs, and unrelated support weapons.
+
+### Phase 1: Add Elegy for the End and A Thousand Floating Dreams
+
+Target files:
+
+- `src/java/model/weapon/ElegyForTheEnd.java` (new)
+- `src/java/model/weapon/AThousandFloatingDreams.java` (new)
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/simulation/runtime/BuffManager.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Elegy grants 60-120 EM and records Skill/Burst hit sigils at exact 0.2-second
+  CT while off-field; four sigils produce a half-open 12-second party 100-200
+  EM and 20-40% ATK buff, then reject sigils for exactly 20 seconds.
+- Floating Dreams dynamically grants 32-64 EM per same-element ally and
+  10-26% owner-element DMG per different-element ally, capped at three of each;
+  every other party member receives stackable 40-48 EM from each provider.
+- Metadata, post-hit order, owner/simulator binding, live party changes,
+  provider targeting, same-type replacement, R1-R5 defaults, and validation
+  are explicit.
+
+Test cases to add or update:
+
+- Normal: metadata/static EM, Elegy four-hit trigger, Floating Dreams mixed
+  party tiers and ally-only EM, R5.
+- Boundary: exact 0.2/12/20 seconds, three-stack composition caps, R1, multiple
+  Floating Dreams providers and same-type Elegy replacement.
+- Abnormal: Elegy Normal hits and foreign owner, Floating Dreams owner
+  exclusion, cross-simulator reuse, refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
+
 ## Implementation Order: Remaining 3-Star Bane Weapon Campaign
 
 Status: Complete. Three independent weapon classes reuse the verified live

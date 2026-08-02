@@ -2463,3 +2463,13 @@ experiment record.
 - **Plan:** `TASKS.md` Energy-Conditional Emblem Weapon Campaign
 - **Completion:** `a3935ae` adds both emblem state machines and focused
   regressions; build/Javadoc/leak gates pass
+
+### B-108 — Five-star EM support weapon coverage
+
+- **Status:** active
+- **Scope:** Elegy for the End and A Thousand Floating Dreams; RL excluded
+- **Value/risk:** two complete support passives reuse typed damage hooks and
+  party buffs; one dormant provider-targeting path needs a local correction
+- **Evidence boundary:** KQM TCL metadata, R1-R5 EM/ATK/elemental values,
+  Elegy 0.2/12/20-second boundaries, live composition, and provider stacking
+- **Plan:** `TASKS.md` Five-Star EM Support Weapon Campaign
