@@ -2796,3 +2796,26 @@ experiment record.
   Artist pass focused ordering, fixed-stat, activation, refresh, exact expiry,
   invalid callback, binding, reaction regression, build, Javadoc, and
   preflight checks
+
+### B-129 — Husk of Opulent Dreams Curiosity state
+
+- **Status:** done
+- **Source:** content inventory following explicit broad coverage request
+- **Scope:** complete Husk of Opulent Dreams two-/four-piece outgoing behavior;
+  RL excluded
+- **Value/risk:** adds a broadly used exact DEF/Geo set; overlapping switch,
+  hit cooldown, off-field gain, and no-gain decay timers require one planned
+  state-machine phase
+- **Evidence boundary:** maintained KQM catalog and evidence, accessed
+  2026-08-02, establish values, zero-damage/immune Geo hits, timer restart,
+  field-independent decay, and multiple stack losses inside ten seconds:
+  https://library.keqingmains.com/equipment/artifacts#husk-of-opulent-dreams
+  https://library.keqingmains.com/evidence/equipment/artifacts#husk-of-opulent-dreams
+- **Classification:** implement exact simulator-lifecycle combat state;
+  artifact unequip and party removal remain outside the runtime lifecycle
+- **Risk/proof:** planned; focused timing/state regressions plus reaction
+  regression, build, Javadoc, and preflight
+- **Plan:** `TASKS.md` Husk Curiosity Campaign
+- **Completion:** complete fixed/stack stats, field-aware hit and timer gains,
+  switch resets, stale/coincident event ordering, exact decay, invalid binding,
+  reaction regression, build, Javadoc, and preflight checks pass

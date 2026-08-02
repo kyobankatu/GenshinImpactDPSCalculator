@@ -34,6 +34,9 @@ The B-128 action-use artifact campaign is complete. Successful typed actions
 now reach equipped artifacts, and Heart of Depth plus Martial Artist use the
 shared callback without changing RL or generated documentation.
 
+The B-129 Husk of Opulent Dreams campaign is complete. It adds the exact
+field-aware Curiosity gain and decay cadence through existing simulator hooks.
+
 The B-058 Burning fuel correction is complete. It replaces the fixed
 two-second approximation with typed Dendro-fuel decay and refresh ownership
 while retaining the repository's single-target boundary.
@@ -13069,6 +13072,77 @@ Completion evidence:
   character; all action keys, rejected Burst, null/plain/no-set cases pass.
 - Reaction regression, build, Javadoc, and executable preflight passed on
   2026-08-02.
+
+## Implementation Order: Husk Curiosity Campaign
+
+Status: Complete. This campaign adds one complete stateful artifact set;
+RL and generated docs remain excluded.
+
+Scope:
+
+- Add Husk of Opulent Dreams fixed stats, field-aware Curiosity gains, stack
+  bonuses, and no-gain decay.
+
+Out of scope for this pass:
+
+- Artifact unequip/party removal, multi-target identity, shields, incoming
+  damage, RL, and generated docs.
+
+Definitions:
+
+- `Curiosity`: at most four owner-local stacks, each granting DEF +6% and Geo
+  DMG +6% in addition to the fixed DEF +30% two-piece bonus.
+
+### Phase 1: Field-Aware Gain and Decay - Done
+
+Why:
+
+- Gain, refresh, switch, and decay timers form one inseparable state machine.
+
+Target files:
+
+- `src/java/model/artifact/HuskOfOpulentDreams.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Tasks:
+
+- Gain or refresh once per 0.3 seconds from owner Geo hits while on field,
+  including zero-damage hits.
+- Gain or refresh every three seconds off field, restarting that cadence after
+  field transitions.
+- Lose the first stack after six seconds without gain and further stacks at
+  the sourced three-second decay cadence; invalidate stale scheduled events
+  with generation tokens.
+
+Acceptance criteria:
+
+- Fixed and per-stack stats reach exact one-to-four-stack values and cap.
+- On-field, off-field, switch-reset, refresh, and decay state remain owner- and
+  simulator-local at exact time boundaries.
+- Event rescheduling never depends on mutating a queued event's sort key.
+
+Test cases to add or update:
+
+- Normal: fixed stats, Geo-hit gain, off-field 3/6/9/12-second gains, cap, and
+  one-to-four-stack stat values.
+- Boundary: 0.3-second CT, six-second first decay, three-second later decay,
+  on/off-field timer restart, and gain at a coincident boundary.
+- Abnormal: zero damage, non-Geo/wrong owner/simulator, null stats, duplicate
+  binding, stale events after switch/refresh, and independent instances.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
+
+Completion evidence:
+
+- Fixed/per-stack stats, zero-damage Geo hits, 0.3-second CT, off-field
+  cadence, cap refresh, switch reset, and exact decay regressions pass.
+- Coincident gain supersedes decay through immutable one-shot events and stale
+  token rejection; reaction regression, build, Javadoc, and preflight pass.
 
 ### Phase 2: Skill-Activated Damage Sets - Done
 

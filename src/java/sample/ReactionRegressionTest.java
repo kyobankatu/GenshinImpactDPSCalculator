@@ -162,6 +162,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ExpandedArtifactSetsPhaseThree();
         testAccuracyPhaseF_ArtifactActionCallbackContract();
         testAccuracyPhaseF_ActionUseArtifactSets();
+        testAccuracyPhaseF_HuskCuriosityState();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -12105,6 +12106,190 @@ public class ReactionRegressionTest {
                 "Heart of Depth should reject null supplied stats");
         assertTrue(nullMartialStatsRejected,
                 "Martial Artist should reject null supplied stats");
+    }
+
+    private static void testAccuracyPhaseF_HuskCuriosityState() {
+        StatsContainer suppliedStats = new StatsContainer();
+        suppliedStats.set(StatType.CRIT_RATE, 0.10);
+        model.artifact.HuskOfOpulentDreams suppliedHusk =
+                new model.artifact.HuskOfOpulentDreams(suppliedStats);
+        assertEquals("Husk of Opulent Dreams", suppliedHusk.getName(),
+                "Husk display name");
+        assertClose(0.30,
+                suppliedHusk.getStats().get(StatType.DEF_PERCENT), EPS,
+                "Husk two-piece DEF bonus");
+        assertClose(0.10,
+                suppliedHusk.getStats().get(StatType.CRIT_RATE), EPS,
+                "Husk should preserve supplied stats");
+
+        model.artifact.HuskOfOpulentDreams onFieldHusk =
+                new model.artifact.HuskOfOpulentDreams();
+        TestCharacter onFieldOwner = testCharacter(Element.GEO);
+        onFieldOwner.setArtifacts(onFieldHusk);
+        CombatSimulator onFieldSim = simulatorWith(onFieldOwner);
+        AttackAction geoHit = damageHit("Husk Geo fixture", Element.GEO, 0.0);
+        AttackAction physicalHit = damageHit(
+                "Husk Physical fixture", Element.PHYSICAL, 1.0);
+        assertClose(0.30,
+                resolvedStat(onFieldSim, onFieldOwner, StatType.DEF_PERCENT),
+                EPS, "Husk fixed DEF before stacks");
+        onFieldHusk.onDamage(onFieldSim, geoHit, 0.0, onFieldOwner);
+        assertClose(0.36,
+                resolvedStat(onFieldSim, onFieldOwner, StatType.DEF_PERCENT),
+                EPS, "Husk should stack from a zero-damage Geo hit");
+        assertClose(0.06,
+                resolvedStat(onFieldSim, onFieldOwner,
+                        StatType.GEO_DMG_BONUS), EPS,
+                "Husk one-stack Geo bonus");
+        onFieldSim.advanceTime(0.299);
+        onFieldHusk.onDamage(onFieldSim, geoHit, 0.0, onFieldOwner);
+        assertClose(0.36,
+                resolvedStat(onFieldSim, onFieldOwner, StatType.DEF_PERCENT),
+                EPS, "Husk should enforce the 0.3-second hit cooldown");
+        onFieldSim.advanceTime(0.001 + 1e-9);
+        onFieldHusk.onDamage(onFieldSim, geoHit, 0.0, onFieldOwner);
+        for (int i = 0; i < 2; i++) {
+            onFieldSim.advanceTime(0.3 + 1e-9);
+            onFieldHusk.onDamage(onFieldSim, geoHit, 0.0, onFieldOwner);
+        }
+        assertClose(0.54,
+                resolvedStat(onFieldSim, onFieldOwner, StatType.DEF_PERCENT),
+                EPS, "Husk four-stack DEF cap");
+        assertClose(0.24,
+                resolvedStat(onFieldSim, onFieldOwner,
+                        StatType.GEO_DMG_BONUS), EPS,
+                "Husk four-stack Geo cap");
+        onFieldSim.advanceTime(0.3 + 1e-9);
+        onFieldHusk.onDamage(onFieldSim, geoHit, 0.0, onFieldOwner);
+        onFieldSim.advanceTime(5.999);
+        assertClose(0.24,
+                resolvedStat(onFieldSim, onFieldOwner,
+                        StatType.GEO_DMG_BONUS), EPS,
+                "Husk capped gain should refresh decay timing");
+        onFieldSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.18,
+                resolvedStat(onFieldSim, onFieldOwner,
+                        StatType.GEO_DMG_BONUS), EPS,
+                "Husk should lose the first stack at six seconds");
+        onFieldSim.advanceTime(3.0 + 1e-9);
+        assertClose(0.12,
+                resolvedStat(onFieldSim, onFieldOwner,
+                        StatType.GEO_DMG_BONUS), EPS,
+                "Husk should lose later stacks every three seconds");
+        onFieldHusk.onDamage(onFieldSim, physicalHit, 100.0, onFieldOwner);
+        onFieldHusk.onDamage(
+                new CombatSimulator(), geoHit, 0.0, onFieldOwner);
+        onFieldHusk.onDamage(
+                onFieldSim, geoHit, 0.0,
+                testCharacter(Element.GEO, CharacterId.AMBER));
+        assertClose(0.12,
+                resolvedStat(onFieldSim, onFieldOwner,
+                        StatType.GEO_DMG_BONUS), EPS,
+                "Husk should reject invalid damage callbacks");
+
+        model.artifact.HuskOfOpulentDreams offFieldHusk =
+                new model.artifact.HuskOfOpulentDreams();
+        TestCharacter activeAlly = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        TestCharacter offFieldOwner = testCharacter(
+                Element.GEO, CharacterId.SUCROSE);
+        offFieldOwner.setArtifacts(offFieldHusk);
+        CombatSimulator offFieldSim = simulatorWithExistingCharacter(activeAlly);
+        offFieldSim.addCharacter(offFieldOwner);
+        offFieldHusk.onDamage(
+                offFieldSim, geoHit, 0.0, offFieldOwner);
+        assertClose(0.0,
+                resolvedStat(offFieldSim, offFieldOwner,
+                        StatType.GEO_DMG_BONUS), EPS,
+                "Husk should reject Geo-hit gains while off field");
+        offFieldSim.advanceTime(2.999);
+        assertClose(0.0,
+                resolvedStat(offFieldSim, offFieldOwner,
+                        StatType.GEO_DMG_BONUS), EPS,
+                "Husk should wait three seconds before off-field gain");
+        for (int expectedStacks = 1; expectedStacks <= 4; expectedStacks++) {
+            offFieldSim.advanceTime(expectedStacks == 1 ? 0.001 + 1e-9 : 3.0);
+            assertClose(0.06 * expectedStacks,
+                    resolvedStat(offFieldSim, offFieldOwner,
+                            StatType.GEO_DMG_BONUS), EPS,
+                    "Husk off-field stack cadence " + expectedStacks);
+        }
+
+        model.artifact.HuskOfOpulentDreams resetHusk =
+                new model.artifact.HuskOfOpulentDreams();
+        TestCharacter resetAlly = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        TestCharacter resetOwner = testCharacter(
+                Element.GEO, CharacterId.SUCROSE);
+        resetOwner.setArtifacts(resetHusk);
+        CombatSimulator resetSim = simulatorWithExistingCharacter(resetAlly);
+        resetSim.addCharacter(resetOwner);
+        resetSim.advanceTime(1.0);
+        resetSim.setActiveCharacter(resetOwner.getCharacterId());
+        resetHusk.onSwitchIn(resetSim, resetOwner);
+        resetSim.advanceTime(2.0);
+        assertClose(0.0,
+                resolvedStat(resetSim, resetOwner, StatType.GEO_DMG_BONUS),
+                EPS, "Husk should invalidate a stale off-field gain");
+        resetHusk.onSwitchOut(resetSim, resetOwner);
+        resetSim.setActiveCharacter(resetAlly.getCharacterId());
+        resetSim.advanceTime(2.999);
+        assertClose(0.0,
+                resolvedStat(resetSim, resetOwner, StatType.GEO_DMG_BONUS),
+                EPS, "Husk switch-out should restart the three-second timer");
+        resetSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.06,
+                resolvedStat(resetSim, resetOwner, StatType.GEO_DMG_BONUS),
+                EPS, "Husk restarted off-field timer should gain exactly once");
+
+        model.artifact.HuskOfOpulentDreams coincidentHusk =
+                new model.artifact.HuskOfOpulentDreams();
+        TestCharacter coincidentOwner = testCharacter(Element.GEO);
+        coincidentOwner.setArtifacts(coincidentHusk);
+        CombatSimulator coincidentSim = simulatorWith(coincidentOwner);
+        coincidentHusk.onDamage(
+                coincidentSim, geoHit, 0.0, coincidentOwner);
+        TestCharacter coincidentAlly = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        coincidentSim.addCharacter(coincidentAlly);
+        coincidentSim.advanceTime(3.0);
+        coincidentHusk.onSwitchOut(coincidentSim, coincidentOwner);
+        coincidentSim.setActiveCharacter(coincidentAlly.getCharacterId());
+        coincidentSim.advanceTime(3.0);
+        assertClose(0.12,
+                resolvedStat(coincidentSim, coincidentOwner,
+                        StatType.GEO_DMG_BONUS), EPS,
+                "Husk coincident off-field gain should supersede decay");
+
+        coincidentHusk.initializeForSimulator(
+                coincidentOwner, coincidentSim, false);
+        boolean crossBindingRejected = false;
+        try {
+            coincidentHusk.initializeForSimulator(
+                    coincidentOwner, new CombatSimulator(), false);
+        } catch (IllegalStateException expected) {
+            crossBindingRejected = true;
+        }
+        assertTrue(crossBindingRejected,
+                "Husk should reject cross-simulator reuse");
+        model.artifact.HuskOfOpulentDreams independentHusk =
+                new model.artifact.HuskOfOpulentDreams();
+        TestCharacter independentOwner = testCharacter(Element.GEO);
+        independentOwner.setArtifacts(independentHusk);
+        CombatSimulator independentSim = simulatorWith(independentOwner);
+        assertClose(0.0,
+                resolvedStat(independentSim, independentOwner,
+                        StatType.GEO_DMG_BONUS), EPS,
+                "Independent Husk instances should not share state");
+
+        boolean nullStatsRejected = false;
+        try {
+            new model.artifact.HuskOfOpulentDreams(null);
+        } catch (NullPointerException expected) {
+            nullStatsRejected = true;
+        }
+        assertTrue(nullStatsRejected,
+                "Husk should reject null supplied stats");
     }
 
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {
