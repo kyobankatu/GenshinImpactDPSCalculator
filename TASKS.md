@@ -13360,8 +13360,8 @@ Verification:
 
 ## Implementation Order: Action-Use Window Weapon Campaign
 
-Status: Active. Generalize the verified Skill-use window without breaking its
-API, then add Skill-, Dash-, and Burst-triggered weapon variants.
+Status: Complete. The verified Skill-use API now delegates to a generic typed
+action window, with Skill-, Dash-, and Burst-triggered weapon variants added.
 
 Scope:
 
@@ -13375,7 +13375,7 @@ Out of scope for this pass:
 - Stamina consumption and movement speed, which have no simulator combat stat;
   formulas, characters, RL, and generated docs.
 
-### Phase 1: Add Action-Use Window Weapons
+### Phase 1: Add Action-Use Window Weapons - Done
 
 Target files:
 
@@ -13388,9 +13388,18 @@ Target files:
 
 | Unit | Action window | Focused verification | Status |
 |---|---|---|---|
-| Generic base + Skill compatibility + Etherlight | Skill -> EM 100-200 for 20s | old event weapons unchanged, refresh/expiry, R1/R5 | Pending |
-| Wine and Song | Dash -> ATK 20-40% for 5s | Normal non-trigger, metadata, exact expiry | Pending |
-| Skyrider Sword | Burst -> ATK 12-24% for 15s | Skill non-trigger, metadata, exact expiry | Pending |
+| Generic base + Skill compatibility + Etherlight | Skill -> EM 100-200 for 20s | old event weapons unchanged, refresh/expiry, R1/R5 | Done (`c672bbf`) |
+| Wine and Song | Dash -> ATK 20-40% for 5s | Normal non-trigger, metadata, exact expiry | Done (`a59b00c`) |
+| Skyrider Sword | Burst -> ATK 12-24% for 15s | Skill non-trigger, metadata, exact expiry | Done (`dbf3b15`) |
+
+Completion evidence:
+
+- Oathsworn Eye and Windblume Ode retain their prior constructor, trigger,
+  refresh, and expiry regressions through the Skill specialization.
+- Etherlight, Wine and Song, and Skyrider Sword prove isolated Skill, Dash, and
+  Burst keys with exact 20/5/15-second windows and no wrong-action leakage.
+- Every unit passes reaction regression, build, and preflight; shared/final
+  public APIs pass Javadoc with no generated artifact staged.
 
 Acceptance criteria:
 

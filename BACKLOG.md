@@ -2199,10 +2199,12 @@ experiment record.
 
 ### B-086 — Action-use window weapon coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Etherlight Spindlelute, Wine and Song, and Skyrider Sword; RL excluded
 - **Value/risk:** three local content additions plus a source-compatible
   generalization of the already verified Skill-use window
 - **Evidence boundary:** KQM TCL metadata, R1-R5 values, typed Skill/Dash/Burst
   triggers and durations; movement speed/stamina remain unmodeled
 - **Plan:** `TASKS.md` Action-Use Window Weapon Campaign
+- **Completion:** `c672bbf`, `a59b00c`, and `dbf3b15` preserve the Skill API and
+  add all variants; focused/build/Javadoc/leak gates pass
