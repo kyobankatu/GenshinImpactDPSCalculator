@@ -137,6 +137,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_OffFieldHitBows();
         testAccuracyPhaseF_SkillBurstOffensiveWeapons();
         testAccuracyPhaseF_MoonsignReactionWeapons();
+        testAccuracyPhaseF_MoonsignEmAndBloomWeapons();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -8325,6 +8326,180 @@ public class ReactionRegressionTest {
         }
         assertTrue(highSerenityRefinementRejected,
                 "Serenity's Call should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_MoonsignEmAndBloomWeapons() {
+        ReactionResult overload = ReactionResult.transform(
+                0.0, "Overloaded", ReactionResult.Kind.OVERLOAD);
+        model.weapon.SnareHook snareHook = new model.weapon.SnareHook();
+        assertEquals("Snare Hook", snareHook.getName(),
+                "Snare Hook display name");
+        assertClose(454.0, snareHook.getBaseAtk(), EPS,
+                "Snare Hook base ATK");
+        assertClose(0.613,
+                snareHook.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "Snare Hook Energy Recharge");
+        assertEquals(model.type.WeaponType.BOW, snareHook.getWeaponType(),
+                "Snare Hook weapon type");
+        assertEquals(5, snareHook.getRefinement(),
+                "Snare Hook default refinement");
+
+        TestCharacter snareAlly = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        TestCharacter snareOwner = testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE);
+        snareOwner.setWeapon(snareHook);
+        CombatSimulator snareSim = simulatorWith(snareAlly);
+        snareSim.addCharacter(snareOwner);
+        snareSim.notifyReaction(ReactionResult.none(), snareOwner);
+        snareSim.notifyReaction(overload, snareAlly);
+        assertClose(0.0,
+                resolvedStat(snareSim, snareOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "NONE and foreign reactions should not activate Snare Hook");
+        snareSim.notifyReaction(overload, snareOwner);
+        assertClose(120.0,
+                resolvedStat(snareSim, snareOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "R5 Snare Hook off-field reaction EM");
+        snareSim.setMoonsign(CombatSimulator.Moonsign.ASCENDANT_GLEAM);
+        assertClose(240.0,
+                resolvedStat(snareSim, snareOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "R5 Snare Hook live Ascendant EM");
+        snareSim.advanceTime(12.0);
+        assertClose(0.0,
+                resolvedStat(snareSim, snareOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Snare Hook should expire at exactly twelve seconds");
+
+        model.weapon.SnareHook r1Snare = new model.weapon.SnareHook(1);
+        TestCharacter r1SnareOwner = testCharacter(Element.ANEMO);
+        r1SnareOwner.setWeapon(r1Snare);
+        CombatSimulator r1SnareSim = simulatorWith(r1SnareOwner);
+        r1SnareSim.notifyReaction(overload, r1SnareOwner);
+        assertClose(60.0,
+                resolvedStat(r1SnareSim, r1SnareOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "R1 Snare Hook reaction EM");
+        r1SnareSim.setMoonsign(CombatSimulator.Moonsign.ASCENDANT_GLEAM);
+        assertClose(120.0,
+                resolvedStat(r1SnareSim, r1SnareOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "R1 Snare Hook Ascendant EM");
+
+        model.weapon.BlackmarrowLantern lantern =
+                new model.weapon.BlackmarrowLantern();
+        assertEquals("Blackmarrow Lantern", lantern.getName(),
+                "Blackmarrow Lantern display name");
+        assertClose(454.0, lantern.getBaseAtk(), EPS,
+                "Blackmarrow Lantern base ATK");
+        assertClose(221.0,
+                lantern.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Blackmarrow Lantern EM substat");
+        assertEquals(model.type.WeaponType.CATALYST, lantern.getWeaponType(),
+                "Blackmarrow Lantern weapon type");
+        assertEquals(5, lantern.getRefinement(),
+                "Blackmarrow Lantern default refinement");
+
+        TestCharacter lanternOwner = testCharacter(Element.DENDRO);
+        lanternOwner.setWeapon(lantern);
+        CombatSimulator lanternSim = simulatorWith(lanternOwner);
+        assertClose(0.96,
+                resolvedStat(lanternSim, lanternOwner,
+                        StatType.BLOOM_DMG_BONUS), EPS,
+                "R5 Blackmarrow Bloom DMG");
+        assertClose(0.24,
+                resolvedStat(lanternSim, lanternOwner,
+                        StatType.LUNAR_BLOOM_DMG_BONUS), EPS,
+                "R5 Blackmarrow base Lunar-Bloom DMG");
+        lanternSim.setMoonsign(CombatSimulator.Moonsign.ASCENDANT_GLEAM);
+        assertClose(0.48,
+                resolvedStat(lanternSim, lanternOwner,
+                        StatType.LUNAR_BLOOM_DMG_BONUS), EPS,
+                "R5 Blackmarrow Ascendant Lunar-Bloom DMG");
+        assertClose(0.96,
+                resolvedStat(lanternSim, lanternOwner,
+                        StatType.BLOOM_DMG_BONUS), EPS,
+                "Ascendant should not change Blackmarrow ordinary Bloom DMG");
+        lanternSim.setMoonsign(CombatSimulator.Moonsign.NASCENT_GLEAM);
+        assertClose(0.24,
+                resolvedStat(lanternSim, lanternOwner,
+                        StatType.LUNAR_BLOOM_DMG_BONUS), EPS,
+                "Leaving Ascendant should remove Blackmarrow's extra tier");
+
+        model.weapon.BlackmarrowLantern r1Lantern =
+                new model.weapon.BlackmarrowLantern(1);
+        TestCharacter r1LanternOwner = testCharacter(Element.DENDRO);
+        r1LanternOwner.setWeapon(r1Lantern);
+        CombatSimulator r1LanternSim = simulatorWith(r1LanternOwner);
+        assertClose(0.48,
+                resolvedStat(r1LanternSim, r1LanternOwner,
+                        StatType.BLOOM_DMG_BONUS), EPS,
+                "R1 Blackmarrow Bloom DMG");
+        assertClose(0.12,
+                resolvedStat(r1LanternSim, r1LanternOwner,
+                        StatType.LUNAR_BLOOM_DMG_BONUS), EPS,
+                "R1 Blackmarrow base Lunar-Bloom DMG");
+        r1LanternSim.setMoonsign(CombatSimulator.Moonsign.ASCENDANT_GLEAM);
+        assertClose(0.24,
+                resolvedStat(r1LanternSim, r1LanternOwner,
+                        StatType.LUNAR_BLOOM_DMG_BONUS), EPS,
+                "R1 Blackmarrow Ascendant Lunar-Bloom DMG");
+
+        boolean snareReuseRejected = false;
+        try {
+            snareHook.initializeForSimulator(snareOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            snareReuseRejected = true;
+        }
+        assertTrue(snareReuseRejected,
+                "Snare Hook should reject cross-simulator reuse");
+
+        boolean lanternReuseRejected = false;
+        try {
+            lantern.initializeForSimulator(lanternOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            lanternReuseRejected = true;
+        }
+        assertTrue(lanternReuseRejected,
+                "Blackmarrow Lantern should reject cross-simulator reuse");
+
+        boolean lowSnareRefinementRejected = false;
+        try {
+            new model.weapon.SnareHook(0);
+        } catch (IllegalArgumentException expected) {
+            lowSnareRefinementRejected = true;
+        }
+        assertTrue(lowSnareRefinementRejected,
+                "Snare Hook should reject refinement zero");
+
+        boolean highSnareRefinementRejected = false;
+        try {
+            new model.weapon.SnareHook(6);
+        } catch (IllegalArgumentException expected) {
+            highSnareRefinementRejected = true;
+        }
+        assertTrue(highSnareRefinementRejected,
+                "Snare Hook should reject refinement six");
+
+        boolean lowLanternRefinementRejected = false;
+        try {
+            new model.weapon.BlackmarrowLantern(0);
+        } catch (IllegalArgumentException expected) {
+            lowLanternRefinementRejected = true;
+        }
+        assertTrue(lowLanternRefinementRejected,
+                "Blackmarrow Lantern should reject refinement zero");
+
+        boolean highLanternRefinementRejected = false;
+        try {
+            new model.weapon.BlackmarrowLantern(6);
+        } catch (IllegalArgumentException expected) {
+            highLanternRefinementRejected = true;
+        }
+        assertTrue(highLanternRefinementRejected,
+                "Blackmarrow Lantern should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {
