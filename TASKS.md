@@ -27,8 +27,8 @@ The current autonomous session is simulator-only. Python RL training and the
 Java RL bridge are excluded; the retained NCCL/DDP plan below is paused until a
 future explicit user request.
 
-The prior simulator content campaigns, including static action-bonus weapons,
-are complete; RL and generated docs remain excluded.
+The prior simulator content campaigns are complete. The Amber character
+vertical slice is active; RL and generated docs remain excluded.
 
 The B-058 Burning fuel correction is complete. It replaces the fixed
 two-second approximation with typed Dendro-fuel decay and refresh ownership
@@ -12896,4 +12896,65 @@ Verification:
 - `./gradlew ReactionRegressionTest`
 - `./gradlew build`
 - `./gradlew javadoc` at the batch boundary
+- `python scripts/preflight.py`
+
+## Implementation Order: Amber Character Vertical Slice
+
+Status: In progress. One character/data/regression unit will add Amber through
+C6 within a stationary one-enemy combat boundary.
+
+Scope:
+
+- Add stable `CharacterId.AMBER`, Lv. 90 data, typed Normal/fully Charged/
+  Plunge attacks, delayed Baron Bunny, and fixed-center Fiery Rain.
+- Implement Burst A1 CRIT Rate, C1 second Charged arrow, C3/C5 talent values,
+  C4 Skill cooldown/charge changes, and C6 party ATK.
+
+Out of scope for this pass:
+
+- Weak-point A4, manual C2 foot detonation, Baron Bunny HP/taunt/destruction,
+  random outer-AoE placement, movement speed, stamina, parties, RL, and docs.
+
+Definitions:
+
+- **Center-hit Burst stand-in**: all 18 sourced Fiery Rain waves hit the one
+  modeled enemy over two seconds and share standard 1U Burst ICD.
+
+### Phase 1: Add Amber Data, Delayed Actions, Constellations, and Regression
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/model/character/Amber.java` (new)
+- `config/characters/Amber/Amber_Status.csv` (new)
+- `config/characters/Amber/Amber_Multipliers.csv` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Amber has a stable additive ID and sourced Lv. 90 base stats/config without
+  changing existing IDs.
+- Baron Bunny snapshots at cast, explodes exactly once after eight seconds as
+  a 2U/no-ICD Skill hit, then generates four Pyro particles; C4 uses two charges
+  and a 12-second cooldown, while C5 selects level-12 damage.
+- Fiery Rain consumes 40 Energy, snapshots, schedules exactly 18 standard-ICD
+  1U Burst waves over two seconds, receives A1 +10% Burst CRIT Rate, and C3 uses
+  level-12 damage; C6 grants the party 15% ATK for ten seconds.
+- C1 adds one 20%-strength Charged-damage arrow sharing Charged ICD; unsupported
+  C2/A4 and target-placement behavior is not fabricated.
+
+Test cases to add or update:
+
+- Static/normal: ID round trip, Lv. 90 stats, typed action metadata.
+- Skill: no early hit/particle, exact delayed explosion, gauge/ICD/snapshot,
+  C0/C4 charge readiness, and C0/C5 multiplier.
+- Burst: exact wave count, Energy, metadata, A1 CRIT, C0/C3 multiplier, and C6
+  owner/ally ATK before and at expiry.
+- Boundary/abnormal: C0/C1 Charged hit count and explicit excluded-state scope.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
 - `python scripts/preflight.py`

@@ -2112,3 +2112,13 @@ experiment record.
 - **Plan:** `TASKS.md` Static Action-Bonus Weapon Campaign
 - **Completion:** `e65e673`, `31fd61e`, and `b814dd2` add all three weapons with
   action isolation, refinement boundaries, build, Javadoc, and leak gates passing
+
+### B-079 — Amber character and constellation coverage
+
+- **Status:** active
+- **Scope:** stationary one-enemy Amber vertical slice; RL excluded
+- **Value/risk:** high-value starter character using existing delayed event,
+  snapshot, charge, typed action, ICD, particle, and team-buff contracts
+- **Evidence boundary:** KQM TCL stats/talents/frames/gauge/ICD/particles and
+  constellations; weak points, C2, summon HP/taunt, and random placement excluded
+- **Plan:** `TASKS.md` Amber Character Vertical Slice
