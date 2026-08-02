@@ -13203,6 +13203,173 @@ Completion evidence:
 - All ten focused regressions, party catalog, reaction regression, build,
   Javadoc, and executable preflight pass on the pushed combined tree.
 
+## Implementation Order: Legacy Support Character Campaign
+
+Status: In progress. Phase 1 is pending; three offensive vertical slices are
+bounded for branch-isolated implementation.
+
+Scope:
+
+- Add typed identities and complete loadable data/code slices for Jean,
+  Chongyun, and Diona.
+- Implement every sourced offensive action, particle, ICD/gauge, passive, and
+  constellation branch representable through existing simulator contracts.
+- Keep one focused executable per character and one independently revertible
+  implementation commit per vertical slice.
+
+Out of scope for this pass:
+
+- Healing, shields and shield durability, incoming damage/counters, stamina,
+  movement speed, enemy displacement, geometry/multi-target selection, RL,
+  generated docs, and Deferred Systems.
+- Approximation of an excluded branch through unrelated Energy, buff, or
+  enemy-state APIs.
+
+Definitions:
+
+- `JEAN`, `CHONGYUN`, and `DIONA`: stable typed character identities with
+  Mondstadt/Liyue regions and unchanged existing numeric IDs.
+- An offensive vertical slice consists of aligned CSV data, one character
+  runtime class, representable constellations, and a focused regression.
+
+Campaign inventory:
+
+| Unit | Type | Source readiness | Shared prerequisite | Verification | Status |
+|---|---|---|---|---|---|
+| Jean | character | pinned KQM/gcsim | typed identity | `JeanRegressionTest` | pending |
+| Chongyun | character | pinned KQM/gcsim | typed identity | `ChongyunRegressionTest` | pending |
+| Diona | character | pinned KQM/gcsim | typed identity | `DionaRegressionTest` | pending |
+
+### Phase 1: Reserve Typed Identities
+
+Why first:
+
+- Every isolated class and CSV loader must compile against one published,
+  immutable identity baseline.
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+
+Tasks:
+
+- Assign new stable numeric IDs without renumbering any existing identity.
+- Record Jean/Diona as Mondstadt and Chongyun as Liyue.
+- Extend name, numeric, region, and UNKNOWN fallback regression coverage.
+
+Acceptance criteria:
+
+- All three names and numeric IDs round-trip through `CharacterId` while old
+  IDs remain unchanged and invalid input remains `UNKNOWN`.
+
+Test cases to add or update:
+
+- Normal: display-name, numeric-ID, and region lookup for all three identities.
+- Boundary: existing Ganyu and UNKNOWN IDs remain stable.
+- Abnormal: null name and adjacent unassigned numeric IDs fail closed.
+
+Verification:
+
+- `./gradlew LegacyCharacterIdentityRegressionTest build`
+
+### Phase 2: Jean and Chongyun Isolated Vertical Slices
+
+Why second:
+
+- Their disjoint character/config/test paths can proceed concurrently after
+  Phase 1, while shared runtime remains unchanged.
+
+Target files:
+
+- `src/java/model/character/Jean.java` (new)
+- `config/characters/Jean/Jean_Status.csv` (new)
+- `config/characters/Jean/Jean_Multipliers.csv` (new)
+- `src/java/sample/JeanRegressionTest.java` (new)
+- `src/java/model/character/Chongyun.java` (new)
+- `config/characters/Chongyun/Chongyun_Status.csv` (new)
+- `config/characters/Chongyun/Chongyun_Multipliers.csv` (new)
+- `src/java/sample/ChongyunRegressionTest.java` (new)
+
+Tasks:
+
+- Add exact level-90 status and talent-level multipliers with typed Normal,
+  Charged, Plunging, Skill, and Burst actions.
+- Implement representable particles, fields, infusions, action-speed or
+  resistance effects, passives, and constellations without fabricating
+  healing, displacement, stamina, incoming hits, or geometry.
+- Preserve periodic/delayed state and cooldowns through simulator snapshots
+  whenever the selected mechanics create mutable runtime state.
+
+Acceptance criteria:
+
+- Both characters load without fallback data and every included action reports
+  the sourced element, category, timing, gauge, ICD, Energy, and cooldown.
+- Unsupported defensive/spatial branches remain inert and explicitly covered.
+
+Test cases to add or update:
+
+- Normal: metadata, attack chains, Skill/Burst, particles, passives, and every
+  representable constellation.
+- Boundary: exact cooldown/duration/cadence, infusion or field ownership,
+  switch behavior, and snapshot replay.
+- Abnormal: invalid constellation, insufficient Energy, wrong callback,
+  duplicate binding, excluded healing/displacement/stamina, and independent
+  instances.
+
+Verification:
+
+- `./gradlew JeanRegressionTest ChongyunRegressionTest`
+- `./gradlew ReactionRegressionTest PartyCatalogRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Diona Offensive Vertical Slice
+
+Why:
+
+- Diona is independent of Phase 2 code but shares the published identity and
+  the campaign's explicit shield/healing exclusions.
+
+Target files:
+
+- `src/java/model/character/Diona.java` (new)
+- `config/characters/Diona/Diona_Status.csv` (new)
+- `config/characters/Diona/Diona_Multipliers.csv` (new)
+- `src/java/sample/DionaRegressionTest.java` (new)
+
+Tasks:
+
+- Add exact level-90 status/talent data and typed bow, Skill-paw, and Burst
+  impact/periodic offensive actions.
+- Implement representable particles, ICD/gauge, field debuffs or buffs,
+  passives, and constellations while excluding shields, healing, stamina, and
+  projectile geometry.
+- Capture every mutable offensive field/cooldown state needed by snapshot
+  rollback.
+
+Acceptance criteria:
+
+- Diona's included action sequence, Energy/cooldown gates, periodic cadence,
+  particles, and representable constellation effects are deterministic and
+  data-aligned.
+- Shield/healing/player-state branches do not synthesize unrelated stats or
+  callbacks.
+
+Test cases to add or update:
+
+- Normal: metadata, bow chain, Skill variants, Burst impact/ticks, particles,
+  passives, and representable constellations.
+- Boundary: exact cooldown, duration, periodic cadence, field expiry, and
+  snapshot replay.
+- Abnormal: insufficient Energy, invalid constellation, excluded shield/heal/
+  stamina paths, wrong callback, and independent instances.
+
+Verification:
+
+- `./gradlew DionaRegressionTest`
+- `./gradlew ReactionRegressionTest PartyCatalogRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
 ## Implementation Order: Parallel Foundational Content Campaign
 
 Status: Complete. All inventory units and campaign verification are done.

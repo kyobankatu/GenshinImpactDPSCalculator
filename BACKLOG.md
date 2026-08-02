@@ -3468,3 +3468,17 @@ experiment record.
 - **Decision:** do not implement partial passives that silently omit their
   defining trigger. Revisit only after the corresponding system is explicitly
   resumed by the user.
+
+### B-165 — Legacy support character campaign
+
+- **Status:** in progress
+- **Source:** explicit broad content-expansion request and post-B-163 missing
+  character class/config inventory
+- **Units:** Jean, Chongyun, and Diona offensive vertical slices
+- **Evidence:** pinned KQM TCL `80ba6241` and gcsim `ef41805d`, plus local
+  character assets, accessed 2026-08-03
+- **Boundary:** healing, shields, incoming damage, stamina, movement,
+  displacement, geometry, multi-target selection, RL, generated docs, and
+  Deferred Systems remain excluded.
+- **Plan:** three-phase `TASKS.md` Legacy Support Character Campaign with a
+  shared typed-identity baseline and branch-isolated implementation lanes.
