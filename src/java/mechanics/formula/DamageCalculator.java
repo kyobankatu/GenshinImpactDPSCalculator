@@ -191,7 +191,11 @@ public class DamageCalculator {
             simulation.action.AttackAction action,
             List<Buff> activeBuffs,
             double currentTime) {
-        StatsContainer stats = action.isUseSnapshot() ? attacker.getSnapshot() : attacker.getEffectiveStats(currentTime);
+        StatsContainer stats = action.hasStatSnapshot()
+                ? action.getStatSnapshot()
+                : action.isUseSnapshot()
+                        ? attacker.getSnapshot()
+                        : attacker.getEffectiveStats(currentTime);
         if (!action.isUseSnapshot() && activeBuffs != null) {
             for (Buff buff : activeBuffs) {
                 if (!buff.isExpired(currentTime)) {
@@ -304,6 +308,9 @@ public class DamageCalculator {
             List<Buff> activeBuffs,
             StatsContainer preResolvedStats,
             double currentTime) {
+        if (action.hasStatSnapshot()) {
+            return action.getStatSnapshot();
+        }
         if (action.isUseSnapshot()) {
             return attacker.getSnapshot();
         }

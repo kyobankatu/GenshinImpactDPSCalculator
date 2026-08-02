@@ -71,6 +71,7 @@ public class Ningguang extends Character implements
     private int lastNormalVariant;
     private boolean screenActive;
     private double screenExpiresAt = Double.NEGATIVE_INFINITY;
+    private StatsContainer screenSnapshot;
     private long screenGeneration;
     private double nextParticleTime = Double.NEGATIVE_INFINITY;
     private double nextC2ResetTime = Double.NEGATIVE_INFINITY;
@@ -302,6 +303,7 @@ public class Ningguang extends Character implements
             captureSnapshot(
                     activeSim.getCurrentTime(),
                     activeSim.getApplicableBuffs(this));
+            screenSnapshot = getSnapshot().merge(null);
             activeSim.performActionWithoutTimeAdvance(characterId, screen);
             if (activeSim.getCurrentTime() >= nextParticleTime) {
                 nextParticleTime = activeSim.getCurrentTime()
@@ -322,9 +324,15 @@ public class Ningguang extends Character implements
         double castTime = sim.getCurrentTime();
         markBurstUsed(castTime, sim.getApplicableBuffs(this));
         boolean consumedScreen = screenActive;
+        StatsContainer consumedScreenSnapshot = consumedScreen
+                && screenSnapshot != null
+                        ? screenSnapshot.merge(null)
+                        : null;
         if (consumedScreen) {
             destroyScreen(sim, castTime);
         }
+        captureSnapshot(castTime, sim.getApplicableBuffs(this));
+        StatsContainer burstSnapshot = getSnapshot().merge(null);
         boolean c3 = constellation >= 3;
         double multiplier = getTalentValue(
                 c3 ? "Burst C3" : "Burst",
@@ -338,7 +346,8 @@ public class Ningguang extends Character implements
                     ICDType.Standard,
                     ICDTag.ElementalBurst,
                     2.0,
-                    false);
+                    true);
+            burstGem.setStatSnapshot(burstSnapshot);
             schedule(sim,
                     castTime + BURST_HIT_FRAMES[gem] * FRAME,
                     activeSim -> activeSim.performActionWithoutTimeAdvance(
@@ -355,6 +364,7 @@ public class Ningguang extends Character implements
                         ICDTag.ElementalBurst,
                         2.0,
                         true);
+                screenGem.setStatSnapshot(consumedScreenSnapshot);
                 schedule(sim, castTime + 154.0 * FRAME,
                         activeSim -> activeSim.performActionWithoutTimeAdvance(
                                 characterId, screenGem));

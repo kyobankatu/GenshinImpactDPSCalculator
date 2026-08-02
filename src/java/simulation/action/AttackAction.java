@@ -62,6 +62,7 @@ public class AttackAction {
     }
 
     private boolean useSnapshot;
+    private StatsContainer statSnapshot;
 
     // ICD & Gauge Parameters
     private model.type.ICDType icdType; // Default
@@ -399,6 +400,35 @@ public class AttackAction {
      */
     public boolean isUseSnapshot() {
         return useSnapshot;
+    }
+
+    /**
+     * Stores an action-owned stat snapshot for delayed damage resolution.
+     *
+     * <p>The supplied container is copied so a later character snapshot cannot
+     * overwrite this action's cast or deployable state.</p>
+     *
+     * @param snapshot resolved stats captured for this action
+     */
+    public void setStatSnapshot(StatsContainer snapshot) {
+        statSnapshot = snapshot == null ? null : snapshot.merge(null);
+        if (statSnapshot != null) {
+            useSnapshot = true;
+        }
+    }
+
+    /** Returns whether this action owns an independent stat snapshot. */
+    public boolean hasStatSnapshot() {
+        return statSnapshot != null;
+    }
+
+    /**
+     * Returns a defensive copy of this action's stat snapshot.
+     *
+     * @return copied snapshot, or {@code null} when the character fallback applies
+     */
+    public StatsContainer getStatSnapshot() {
+        return statSnapshot == null ? null : statSnapshot.merge(null);
     }
 
     /**

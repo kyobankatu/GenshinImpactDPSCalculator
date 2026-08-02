@@ -3,6 +3,7 @@ package sample;
 import java.util.ArrayList;
 import java.util.List;
 
+import mechanics.buff.SimpleBuff;
 import mechanics.data.TalentDataSource;
 import model.character.Ningguang;
 import model.entity.Character;
@@ -34,6 +35,7 @@ public final class NingguangRegressionTest {
         testSwitchClearsJadesAndPlunge();
         testJadeScreenTimingParticlesAndExpiry();
         testBurstScreenC2AndEnergy();
+        testBurstSnapshotsRemainIndependent();
         testConstellationTalentAndC6Jades();
         testInsufficientEnergyAndCrossSimulatorBinding();
         System.out.println("NingguangRegressionTest passed");
@@ -242,6 +244,39 @@ public final class NingguangRegressionTest {
                 "Ningguang C6 Jades consumed");
     }
 
+    private static void testBurstSnapshotsRemainIndependent() {
+        Ningguang ningguang = ningguangAtConstellation(2);
+        CombatSimulator sim = simulatorWith(ningguang);
+        List<ActionRecord> records = captureNingguangActions(sim);
+        perform(sim, CharacterActionKey.SKILL);
+        ningguang.addBuff(new SimpleBuff(
+                "Burst-only ATK",
+                30.0 * FRAME,
+                sim.getCurrentTime(),
+                stats -> stats.add(StatType.ATK_PERCENT, 1.0)));
+        perform(sim, CharacterActionKey.BURST);
+        ningguang.addBuff(new SimpleBuff(
+                "Replacement Screen ATK",
+                30.0 * FRAME,
+                sim.getCurrentTime(),
+                stats -> stats.add(StatType.ATK_PERCENT, 2.0)));
+        perform(sim, CharacterActionKey.SKILL);
+
+        ActionRecord normalGemRecord = find(records, "Starshatter Gem");
+        ActionRecord screenGemRecord = find(
+                records, "Starshatter Jade Screen Gem");
+        AttackAction normalGem = normalGemRecord.action;
+        AttackAction screenGem = screenGemRecord.action;
+        assertClose(1.0,
+                normalGem.getStatSnapshot().get(StatType.ATK_PERCENT), EPS,
+                "Ningguang normal Burst gems keep the Burst snapshot");
+        assertClose(0.0,
+                screenGem.getStatSnapshot().get(StatType.ATK_PERCENT), EPS,
+                "Ningguang Screen gems keep the consumed Screen snapshot");
+        assertTrue(normalGemRecord.damage > screenGemRecord.damage,
+                "Ningguang damage resolves each Gem's owned snapshot");
+    }
+
     private static void testInsufficientEnergyAndCrossSimulatorBinding() {
         Ningguang noEnergy = ningguangAtConstellation(0);
         CombatSimulator noEnergySim = simulatorWith(noEnergy);
@@ -300,7 +335,7 @@ public final class NingguangRegressionTest {
         List<ActionRecord> records = new ArrayList<>();
         sim.addDamageListener((actor, action, damage, time) -> {
             if (actor.getCharacterId() == CharacterId.NINGGUANG) {
-                records.add(new ActionRecord(action, time));
+                records.add(new ActionRecord(action, damage, time));
             }
         });
         return records;
@@ -371,10 +406,15 @@ public final class NingguangRegressionTest {
 
     private static final class ActionRecord {
         private final AttackAction action;
+        private final double damage;
         private final double time;
 
-        private ActionRecord(AttackAction action, double time) {
+        private ActionRecord(
+                AttackAction action,
+                double damage,
+                double time) {
             this.action = action;
+            this.damage = damage;
             this.time = time;
         }
     }

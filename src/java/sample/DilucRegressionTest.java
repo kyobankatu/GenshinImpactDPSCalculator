@@ -5,6 +5,7 @@ import java.util.List;
 
 import mechanics.buff.Buff;
 import mechanics.buff.BuffId;
+import mechanics.buff.SimpleBuff;
 import mechanics.data.TalentDataSource;
 import model.character.Diluc;
 import model.entity.Character;
@@ -301,6 +302,11 @@ public final class DilucRegressionTest {
 
     private static void testBurstCadenceGaugeInfusionAndC5() {
         Diluc c0 = dilucAtConstellation(0);
+        c0.addBuff(new SimpleBuff(
+                "Frame-100 ATK",
+                20.0 * FRAME,
+                90.0 * FRAME,
+                stats -> stats.add(StatType.ATK_PERCENT, 1.0)));
         CombatSimulator sim = simulatorWith(c0);
         c0.restoreCurrentEnergy(40.0);
         List<ActionRecord> burst = captureNamedActions(sim, "Dawn");
@@ -356,6 +362,12 @@ public final class DilucRegressionTest {
         assertClose(3.468,
                 burst.get(9).action.getDamagePercent(), EPS,
                 "Diluc Dawn explosion multiplier");
+        assertTrue(!burst.get(0).action.hasStatSnapshot(),
+                "Diluc Dawn initial strike resolves dynamically");
+        assertClose(1.0,
+                burst.get(1).action.getStatSnapshot().get(
+                        StatType.ATK_PERCENT), EPS,
+                "Diluc Dawn follow-ups keep the frame-100 snapshot");
 
         List<ActionRecord> normals = captureNamedActions(
                 sim, "Tempered Sword");
@@ -481,11 +493,15 @@ public final class DilucRegressionTest {
         assertEquals(1, diluc.getSkillStage(sim.getCurrentTime()),
                 "Diluc Skill chain active before switch");
         diluc.onSwitchOut(sim);
-        assertEquals(0, diluc.getSkillStage(sim.getCurrentTime()),
-                "Diluc switch closes Skill chain");
-        assertClose(10.0 - 43.0 * FRAME,
+        assertEquals(1, diluc.getSkillStage(sim.getCurrentTime()),
+                "Diluc switch preserves Skill chain");
+        assertClose(0.0,
                 diluc.getSkillCDRemaining(sim.getCurrentTime()), EPS,
-                "Diluc switch exposes original Skill cooldown");
+                "Diluc switch keeps the next Skill stage available");
+        perform(sim, CharacterActionKey.SKILL);
+        assertEquals("Searing Onslaught 2",
+                records.get(records.size() - 1).action.getName(),
+                "Diluc resumes the second Skill stage after switching");
     }
 
     private static void testIndependentInstancesAndSimulatorBinding() {

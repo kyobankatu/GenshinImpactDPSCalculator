@@ -336,21 +336,27 @@ public class Rosaria extends Character
     private void ritesOfTermination(CombatSimulator sim) {
         double castTime = sim.getCurrentTime();
         long generation = ++burstGeneration;
+        StatsContainer[] initialSnapshot = new StatsContainer[1];
+        StatsContainer[] lanceSnapshot = new StatsContainer[1];
         int tickCount = constellation >= 2
                 ? C2_BURST_TICKS : BASE_BURST_TICKS;
         burstExpirationTime = castTime
                 + (56.0 + 120.0 * tickCount + 30.0) * FRAME;
 
-        captureSnapshot(castTime, sim.getApplicableBuffs(this));
         markBurstUsed(castTime, sim.getApplicableBuffs(this));
         applyA4Share(sim, castTime);
 
         schedule(sim, castTime + 15.0 * FRAME, activeSim -> {
             if (generation == burstGeneration) {
+                captureSnapshot(
+                        activeSim.getCurrentTime(),
+                        activeSim.getApplicableBuffs(this));
+                initialSnapshot[0] = getSnapshot().merge(null);
                 resolveBurstHit(
                         activeSim,
                         "Rites of Termination Initial 1",
-                        getBurstInitialMultiplier(0));
+                        getBurstInitialMultiplier(0),
+                        initialSnapshot[0]);
             }
         });
         schedule(sim, castTime + 56.0 * FRAME, activeSim -> {
@@ -360,12 +366,15 @@ public class Rosaria extends Character
             captureSnapshot(
                     activeSim.getCurrentTime(),
                     activeSim.getApplicableBuffs(this));
+            lanceSnapshot[0] = getSnapshot().merge(null);
             resolveBurstHit(
                     activeSim,
                     "Rites of Termination Initial 2",
-                    getBurstInitialMultiplier(1));
+                    getBurstInitialMultiplier(1),
+                    lanceSnapshot[0]);
         });
-        scheduleBurstTicks(sim, castTime, generation, tickCount);
+        scheduleBurstTicks(
+                sim, castTime, generation, tickCount, lanceSnapshot);
         sim.advanceTime(70.0 * FRAME);
     }
 
@@ -373,7 +382,8 @@ public class Rosaria extends Character
             CombatSimulator sim,
             double castTime,
             long generation,
-            int tickCount) {
+            int tickCount,
+            StatsContainer[] lanceSnapshot) {
         double firstTickTime = castTime + 176.0 * FRAME;
         sim.registerEvent(new SimpleTimerEvent(
                 firstTickTime, BURST_TICK_INTERVAL) {
@@ -389,7 +399,8 @@ public class Rosaria extends Character
                 resolveBurstHit(
                         activeSim,
                         "Rites of Termination Ice Lance DoT",
-                        getBurstDotMultiplier());
+                        getBurstDotMultiplier(),
+                        lanceSnapshot[0]);
                 resolvedTicks++;
                 if (resolvedTicks == tickCount) {
                     finish();
@@ -401,7 +412,8 @@ public class Rosaria extends Character
     private void resolveBurstHit(
             CombatSimulator sim,
             String actionName,
-            double multiplier) {
+            double multiplier,
+            StatsContainer snapshot) {
         AttackAction burst = new AttackAction(
                 actionName,
                 multiplier,
@@ -411,6 +423,7 @@ public class Rosaria extends Character
                 0.0,
                 true,
                 ActionType.BURST);
+        burst.setStatSnapshot(snapshot);
         burst.setICD(ICDType.None, ICDTag.ElementalBurst, 1.0);
         sim.performActionWithoutTimeAdvance(characterId, burst);
         if (constellation >= 6 && sim.getEnemy() != null) {

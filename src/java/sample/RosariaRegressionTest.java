@@ -230,6 +230,11 @@ public final class RosariaRegressionTest {
                 30.0,
                 0.0,
                 stats -> stats.add(StatType.CRIT_RATE, 0.95)));
+        c0.addBuff(new SimpleBuff(
+                "Rosaria frame-15 ATK",
+                30.0 * FRAME,
+                10.0 * FRAME,
+                stats -> stats.add(StatType.ATK_PERCENT, 1.0)));
         CombatSimulator c0Sim = simulatorWith(c0);
         TestCharacter ally = new TestCharacter(
                 CharacterId.NOELLE, Element.GEO);
@@ -251,6 +256,14 @@ public final class RosariaRegressionTest {
                 "Rosaria Burst animation length");
         assertTrue(c0Hits.get(0).action.isUseSnapshot(),
                 "Rosaria Burst initial hit is snapshotted");
+        assertClose(1.24,
+                c0Hits.get(0).action.getStatSnapshot().get(
+                        StatType.ATK_PERCENT), EPS,
+                "Rosaria first Burst hit snapshots at frame 15");
+        assertClose(0.24,
+                c0Hits.get(1).action.getStatSnapshot().get(
+                        StatType.ATK_PERCENT), EPS,
+                "Rosaria lance snapshots independently at frame 56");
         assertClose(0.15,
                 applicableStats(c0Sim, ally).get(StatType.CRIT_RATE) - 0.05,
                 EPS, "Rosaria A4 share caps at 15 percent");

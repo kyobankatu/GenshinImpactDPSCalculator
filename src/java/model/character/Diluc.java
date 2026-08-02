@@ -154,12 +154,10 @@ public class Diluc extends Character implements
         initializedSimulator = sim;
     }
 
-    /** Resets the Normal and Skill chains when Diluc leaves the field. */
+    /** Resets only the Normal chain when Diluc leaves the field. */
     @Override
     public void onSwitchOut(CombatSimulator sim) {
         normalAttackStep = 0;
-        skillStage = 0;
-        skillChainDeadline = Double.NEGATIVE_INFINITY;
     }
 
     /** Returns Diluc's 40-Energy Burst cost. */
@@ -378,6 +376,7 @@ public class Diluc extends Character implements
     private void dawn(CombatSimulator sim) {
         double castTime = sim.getCurrentTime();
         markBurstUsed(castTime, sim.getApplicableBuffs(this));
+        StatsContainer[] dawnSnapshot = new StatsContainer[1];
 
         infusionExpiresAt = castTime + A4_INFUSION_DURATION;
         removeBuff(BuffId.DILUC_A4_PYRO_DMG_BONUS);
@@ -393,12 +392,16 @@ public class Diluc extends Character implements
             schedule(
                     sim,
                     castTime + BURST_HIT_FRAMES[hit] * FRAME,
-                    activeSim -> resolveDawnHit(activeSim, hitIndex));
+                    activeSim -> resolveDawnHit(
+                            activeSim, hitIndex, dawnSnapshot));
         }
         sim.advanceTime(140.0 * FRAME);
     }
 
-    private void resolveDawnHit(CombatSimulator sim, int hitIndex) {
+    private void resolveDawnHit(
+            CombatSimulator sim,
+            int hitIndex,
+            StatsContainer[] dawnSnapshot) {
         boolean c5 = constellation >= 5;
         String name;
         String key;
@@ -425,10 +428,19 @@ public class Diluc extends Character implements
                 StatType.BURST_DMG_BONUS,
                 0.0,
                 ActionType.BURST);
+        if (hitIndex > 0 && dawnSnapshot[0] != null) {
+            burst.setStatSnapshot(dawnSnapshot[0]);
+        }
         double gauge = hitIndex == 0 || hitIndex == 5 ? 2.0 : 0.0;
         burst.setICD(ICDType.None, ICDTag.ElementalBurst, gauge);
         burst.setShatterTrigger(hitIndex == 0);
         sim.performActionWithoutTimeAdvance(characterId, burst);
+        if (hitIndex == 0) {
+            captureSnapshot(
+                    sim.getCurrentTime(),
+                    sim.getApplicableBuffs(this));
+            dawnSnapshot[0] = getSnapshot().merge(null);
+        }
     }
 
     private void armC4Window(CombatSimulator sim, double castTime) {
