@@ -127,6 +127,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ReactionWindowWeapons();
         testAccuracyPhaseF_HybridReactionWindowWeapons();
         testAccuracyPhaseF_SelfContainedFourStarWeapons();
+        testAccuracyPhaseF_EnergyAwareActionWeapons();
         testAccuracyPhaseF_HitStackWeapons();
         testAccuracyPhaseF_AdditionalClaymoreHitStackWeapons();
         testAccuracyPhaseF_AdditionalMultiStatHitStackWeapons();
@@ -7736,6 +7737,198 @@ public class ReactionRegressionTest {
         }
         assertTrue(nullDrawRejected,
                 "Frost Burial weapons should reject null draw sources");
+    }
+
+    private static void testAccuracyPhaseF_EnergyAwareActionWeapons() {
+        model.weapon.Hamayumi unboundHamayumi = new model.weapon.Hamayumi();
+        StatsContainer unboundHamayumiStats = new StatsContainer();
+        unboundHamayumi.applyPassive(unboundHamayumiStats, 0.0);
+        assertClose(0.32,
+                unboundHamayumiStats.get(StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Unbound Hamayumi should retain its base Normal bonus");
+        assertClose(0.24,
+                unboundHamayumiStats.get(StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "Unbound Hamayumi should retain its base Charged bonus");
+
+        model.weapon.Hamayumi hamayumi = new model.weapon.Hamayumi();
+        assertEquals("Hamayumi", hamayumi.getName(), "Hamayumi display name");
+        assertClose(454.0, hamayumi.getBaseAtk(), EPS, "Hamayumi base ATK");
+        assertClose(0.551, hamayumi.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Hamayumi ATK substat");
+        assertEquals(model.type.WeaponType.BOW, hamayumi.getWeaponType(),
+                "Hamayumi weapon type");
+        assertEquals(5, hamayumi.getRefinement(),
+                "Hamayumi default refinement");
+
+        TestCharacter hamayumiOwner = testCharacter(Element.PYRO);
+        hamayumiOwner.setWeapon(hamayumi);
+        CombatSimulator hamayumiSim = simulatorWith(hamayumiOwner);
+        assertClose(0.64,
+                resolvedStat(hamayumiSim, hamayumiOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS),
+                EPS,
+                "R5 Hamayumi full-Energy Normal bonus");
+        assertClose(0.48,
+                resolvedStat(hamayumiSim, hamayumiOwner,
+                        StatType.CHARGED_ATTACK_DMG_BONUS),
+                EPS,
+                "R5 Hamayumi full-Energy Charged bonus");
+        hamayumiOwner.spendEnergy(1.0);
+        assertClose(0.32,
+                resolvedStat(hamayumiSim, hamayumiOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS),
+                EPS,
+                "Hamayumi should immediately lose full-Energy doubling after spend");
+        assertClose(0.24,
+                resolvedStat(hamayumiSim, hamayumiOwner,
+                        StatType.CHARGED_ATTACK_DMG_BONUS),
+                EPS,
+                "Hamayumi base Charged bonus below full Energy");
+        hamayumiOwner.restoreCurrentEnergy(hamayumiOwner.getMaxEnergy());
+        assertClose(0.64,
+                resolvedStat(hamayumiSim, hamayumiOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS),
+                EPS,
+                "Hamayumi should double again at exact maximum Energy");
+
+        model.weapon.Hamayumi r1Hamayumi = new model.weapon.Hamayumi(1);
+        TestCharacter r1HamayumiOwner = testCharacter(Element.PYRO);
+        r1HamayumiOwner.setWeapon(r1Hamayumi);
+        CombatSimulator r1HamayumiSim = simulatorWith(r1HamayumiOwner);
+        assertClose(0.32,
+                resolvedStat(r1HamayumiSim, r1HamayumiOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS),
+                EPS,
+                "R1 Hamayumi full-Energy Normal bonus");
+        assertClose(0.24,
+                resolvedStat(r1HamayumiSim, r1HamayumiOwner,
+                        StatType.CHARGED_ATTACK_DMG_BONUS),
+                EPS,
+                "R1 Hamayumi full-Energy Charged bonus");
+
+        model.weapon.MoonweaversDawn unboundMoonweaver =
+                new model.weapon.MoonweaversDawn();
+        StatsContainer unboundMoonweaverStats = new StatsContainer();
+        unboundMoonweaver.applyPassive(unboundMoonweaverStats, 0.0);
+        assertClose(0.40,
+                unboundMoonweaverStats.get(StatType.BURST_DMG_BONUS), EPS,
+                "Unbound Moonweaver's Dawn should retain its base Burst bonus");
+
+        model.weapon.MoonweaversDawn moonweaver =
+                new model.weapon.MoonweaversDawn();
+        assertEquals("Moonweaver's Dawn", moonweaver.getName(),
+                "Moonweaver's Dawn display name");
+        assertClose(565.0, moonweaver.getBaseAtk(), EPS,
+                "Moonweaver's Dawn base ATK");
+        assertClose(0.276,
+                moonweaver.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Moonweaver's Dawn ATK substat");
+        assertEquals(model.type.WeaponType.SWORD, moonweaver.getWeaponType(),
+                "Moonweaver's Dawn weapon type");
+        assertEquals(5, moonweaver.getRefinement(),
+                "Moonweaver's Dawn default refinement");
+
+        TestBurstCharacter eightyEnergyOwner = new TestBurstCharacter(80.0);
+        eightyEnergyOwner.setWeapon(moonweaver);
+        CombatSimulator eightyEnergySim =
+                simulatorWithExistingCharacter(eightyEnergyOwner);
+        assertClose(0.40,
+                resolvedStat(eightyEnergySim, eightyEnergyOwner,
+                        StatType.BURST_DMG_BONUS),
+                EPS,
+                "Moonweaver's Dawn should use no capacity tier above 60 Energy");
+
+        model.weapon.MoonweaversDawn sixtyMoonweaver =
+                new model.weapon.MoonweaversDawn();
+        TestBurstCharacter sixtyEnergyOwner = new TestBurstCharacter(60.0);
+        sixtyEnergyOwner.setWeapon(sixtyMoonweaver);
+        CombatSimulator sixtyEnergySim =
+                simulatorWithExistingCharacter(sixtyEnergyOwner);
+        assertClose(0.72,
+                resolvedStat(sixtyEnergySim, sixtyEnergyOwner,
+                        StatType.BURST_DMG_BONUS),
+                EPS,
+                "R5 Moonweaver's Dawn exact 60-Energy tier");
+
+        model.weapon.MoonweaversDawn fortyMoonweaver =
+                new model.weapon.MoonweaversDawn();
+        TestBurstCharacter fortyEnergyOwner = new TestBurstCharacter(40.0);
+        fortyEnergyOwner.setWeapon(fortyMoonweaver);
+        CombatSimulator fortyEnergySim =
+                simulatorWithExistingCharacter(fortyEnergyOwner);
+        assertClose(0.96,
+                resolvedStat(fortyEnergySim, fortyEnergyOwner,
+                        StatType.BURST_DMG_BONUS),
+                EPS,
+                "R5 Moonweaver's Dawn exact 40-Energy tier should be exclusive");
+
+        model.weapon.MoonweaversDawn r1Moonweaver =
+                new model.weapon.MoonweaversDawn(1);
+        TestBurstCharacter r1SixtyOwner = new TestBurstCharacter(60.0);
+        r1SixtyOwner.setWeapon(r1Moonweaver);
+        CombatSimulator r1SixtySim =
+                simulatorWithExistingCharacter(r1SixtyOwner);
+        assertClose(0.36,
+                resolvedStat(r1SixtySim, r1SixtyOwner,
+                        StatType.BURST_DMG_BONUS),
+                EPS,
+                "R1 Moonweaver's Dawn 60-Energy tier");
+
+        boolean hamayumiReuseRejected = false;
+        try {
+            TestCharacter otherOwner = testCharacter(Element.HYDRO);
+            hamayumi.initializeForSimulator(otherOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            hamayumiReuseRejected = true;
+        }
+        assertTrue(hamayumiReuseRejected,
+                "Hamayumi should reject cross-simulator reuse");
+
+        boolean moonweaverReuseRejected = false;
+        try {
+            TestBurstCharacter otherOwner = new TestBurstCharacter(60.0);
+            moonweaver.initializeForSimulator(otherOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            moonweaverReuseRejected = true;
+        }
+        assertTrue(moonweaverReuseRejected,
+                "Moonweaver's Dawn should reject cross-simulator reuse");
+
+        boolean lowHamayumiRefinementRejected = false;
+        try {
+            new model.weapon.Hamayumi(0);
+        } catch (IllegalArgumentException expected) {
+            lowHamayumiRefinementRejected = true;
+        }
+        assertTrue(lowHamayumiRefinementRejected,
+                "Hamayumi should reject refinement zero");
+
+        boolean highHamayumiRefinementRejected = false;
+        try {
+            new model.weapon.Hamayumi(6);
+        } catch (IllegalArgumentException expected) {
+            highHamayumiRefinementRejected = true;
+        }
+        assertTrue(highHamayumiRefinementRejected,
+                "Hamayumi should reject refinement six");
+
+        boolean lowMoonweaverRefinementRejected = false;
+        try {
+            new model.weapon.MoonweaversDawn(0);
+        } catch (IllegalArgumentException expected) {
+            lowMoonweaverRefinementRejected = true;
+        }
+        assertTrue(lowMoonweaverRefinementRejected,
+                "Moonweaver's Dawn should reject refinement zero");
+
+        boolean highMoonweaverRefinementRejected = false;
+        try {
+            new model.weapon.MoonweaversDawn(6);
+        } catch (IllegalArgumentException expected) {
+            highMoonweaverRefinementRejected = true;
+        }
+        assertTrue(highMoonweaverRefinementRejected,
+                "Moonweaver's Dawn should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_SelfContainedFourStarWeapons() {
