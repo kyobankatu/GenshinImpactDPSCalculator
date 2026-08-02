@@ -2692,7 +2692,7 @@ experiment record.
 
 ### B-124 — Stateful craftable weapon coverage
 
-- **Status:** in-progress
+- **Status:** done
 - **Scope:** Ring of Yaxche, Cloudforged, Hakushin Ring, and Crescent Pike; RL
   excluded
 - **Value/risk:** closes four missing weapons through existing typed hooks;
@@ -2709,3 +2709,6 @@ experiment record.
   Energy-decrease path; Crescent Pike observes particle notification while the
   holder is active as collection
 - **Plan:** `TASKS.md` Stateful Craftable Weapon Campaign
+- **Completion:** both isolated source phases were reviewed on the main branch;
+  focused metadata, snapshot, stack, element-window, collection, and follow-up
+  regressions plus reaction regression, build, Javadoc, and preflight pass

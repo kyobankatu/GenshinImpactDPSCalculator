@@ -152,6 +152,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ThreeStarRuntimeBoundaryPhaseOne();
         testAccuracyPhaseF_ThreeStarRuntimeBoundaryPhaseTwo();
         testAccuracyPhaseF_StatefulCraftableWeaponPhaseOne();
+        testAccuracyPhaseF_StatefulCraftableWeaponPhaseTwo();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -10380,6 +10381,316 @@ public class ReactionRegressionTest {
                 "Cloudforged should reject refinement six");
     }
 
+    private static void testAccuracyPhaseF_StatefulCraftableWeaponPhaseTwo() {
+        model.weapon.HakushinRing hakushin =
+                new model.weapon.HakushinRing();
+        assertEquals("Hakushin Ring", hakushin.getName(),
+                "Hakushin Ring display name");
+        assertEquals(model.type.WeaponType.CATALYST,
+                hakushin.getWeaponType(), "Hakushin Ring weapon type");
+        assertClose(565.0, hakushin.getBaseAtk(), EPS,
+                "Hakushin Ring base ATK");
+        assertClose(0.306,
+                hakushin.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "Hakushin Ring Energy Recharge");
+        assertEquals(5, hakushin.getRefinement(),
+                "Hakushin Ring default refinement");
+
+        TestCharacter electroOwner = testCharacter(
+                Element.ELECTRO, CharacterId.SUCROSE);
+        electroOwner.setWeapon(hakushin);
+        TestCharacter pyroAlly = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        TestCharacter hydroAlly = testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU);
+        CombatSimulator hakushinSim = simulatorWith(electroOwner);
+        hakushinSim.addCharacter(pyroAlly);
+        hakushinSim.addCharacter(hydroAlly);
+        hakushinSim.notifyReaction(ReactionResult.transform(
+                0.0, "Overloaded", ReactionResult.Kind.OVERLOADED),
+                electroOwner);
+        assertClose(0.20,
+                resolvedStat(hakushinSim, electroOwner,
+                        StatType.ELECTRO_DMG_BONUS), EPS,
+                "R5 Hakushin should include its Electro holder");
+        assertClose(0.20,
+                resolvedStat(hakushinSim, pyroAlly,
+                        StatType.PYRO_DMG_BONUS), EPS,
+                "R5 Hakushin should buff involved Pyro members");
+        assertClose(0.0,
+                resolvedStat(hakushinSim, hydroAlly,
+                        StatType.HYDRO_DMG_BONUS), EPS,
+                "Hakushin should exclude uninvolved elements");
+
+        hakushinSim.advanceTime(3.0);
+        hakushinSim.notifyReaction(ReactionResult.transform(
+                0.0,
+                "Electro-Charged",
+                ReactionResult.Kind.ELECTRO_CHARGED), electroOwner);
+        hakushinSim.advanceTime(3.0);
+        assertClose(0.0,
+                resolvedStat(hakushinSim, electroOwner,
+                        StatType.ELECTRO_DMG_BONUS), EPS,
+                "Hakushin should not refresh an active Electro window");
+        assertClose(0.0,
+                resolvedStat(hakushinSim, pyroAlly,
+                        StatType.PYRO_DMG_BONUS), EPS,
+                "Hakushin Pyro window should expire at exactly six seconds");
+        assertClose(0.20,
+                resolvedStat(hakushinSim, hydroAlly,
+                        StatType.HYDRO_DMG_BONUS), EPS,
+                "A newly involved Hakushin element should keep its own window");
+        hakushinSim.advanceTime(3.0);
+        assertClose(0.0,
+                resolvedStat(hakushinSim, hydroAlly,
+                        StatType.HYDRO_DMG_BONUS), EPS,
+                "Hakushin Hydro window should expire at exactly six seconds");
+
+        model.weapon.HakushinRing hyperbloomHakushin =
+                new model.weapon.HakushinRing();
+        TestCharacter hyperbloomOwner = testCharacter(
+                Element.ELECTRO, CharacterId.SUCROSE);
+        hyperbloomOwner.setWeapon(hyperbloomHakushin);
+        TestCharacter dendroAlly = testCharacter(
+                Element.DENDRO, CharacterId.KAEYA);
+        TestCharacter excludedHydroAlly = testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU);
+        CombatSimulator hyperbloomSim = simulatorWith(hyperbloomOwner);
+        hyperbloomSim.addCharacter(dendroAlly);
+        hyperbloomSim.addCharacter(excludedHydroAlly);
+        hyperbloomSim.notifyReaction(ReactionResult.transform(
+                0.0, "Hyperbloom", ReactionResult.Kind.HYPERBLOOM),
+                hyperbloomOwner);
+        assertClose(0.20,
+                resolvedStat(hyperbloomSim, dendroAlly,
+                        StatType.DENDRO_DMG_BONUS), EPS,
+                "Hakushin Hyperbloom should include Dendro");
+        assertClose(0.0,
+                resolvedStat(hyperbloomSim, excludedHydroAlly,
+                        StatType.HYDRO_DMG_BONUS), EPS,
+                "Hakushin Hyperbloom should exclude Hydro");
+
+        model.weapon.HakushinRing r1Hakushin =
+                new model.weapon.HakushinRing(1);
+        TestCharacter anemoOwner = testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE);
+        anemoOwner.setWeapon(r1Hakushin);
+        TestCharacter electroAlly = testCharacter(
+                Element.ELECTRO, CharacterId.RAIDEN_SHOGUN);
+        CombatSimulator swirlSim = simulatorWith(anemoOwner);
+        swirlSim.addCharacter(electroAlly);
+        swirlSim.notifyReaction(ReactionResult.transform(
+                0.0,
+                "Pyro Swirl",
+                ReactionResult.Kind.SWIRL,
+                Element.PYRO), anemoOwner);
+        assertClose(0.0,
+                resolvedStat(swirlSim, anemoOwner,
+                        StatType.ANEMO_DMG_BONUS), EPS,
+                "Hakushin should reject non-Electro Swirl");
+        swirlSim.notifyReaction(ReactionResult.transform(
+                0.0,
+                "Electro Swirl",
+                ReactionResult.Kind.SWIRL,
+                Element.ELECTRO), anemoOwner);
+        assertClose(0.10,
+                resolvedStat(swirlSim, anemoOwner,
+                        StatType.ANEMO_DMG_BONUS), EPS,
+                "R1 Hakushin Electro Swirl should include Anemo holder");
+        assertClose(0.10,
+                resolvedStat(swirlSim, electroAlly,
+                        StatType.ELECTRO_DMG_BONUS), EPS,
+                "R1 Hakushin Electro Swirl should include Electro allies");
+
+        model.weapon.HakushinRing offFieldHakushin =
+                new model.weapon.HakushinRing();
+        TestCharacter offFieldOwner = testCharacter(
+                Element.ELECTRO, CharacterId.SUCROSE);
+        offFieldOwner.setWeapon(offFieldHakushin);
+        TestCharacter activePyro = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        CombatSimulator offFieldHakushinSim = simulatorWith(offFieldOwner);
+        offFieldHakushinSim.addCharacter(activePyro);
+        offFieldHakushinSim.setActiveCharacter(CharacterId.AMBER);
+        offFieldHakushinSim.notifyReaction(ReactionResult.transform(
+                0.0, "Overloaded", ReactionResult.Kind.OVERLOADED),
+                offFieldOwner);
+        assertClose(0.0,
+                resolvedStat(offFieldHakushinSim, activePyro,
+                        StatType.PYRO_DMG_BONUS), EPS,
+                "Hakushin should reject off-field owner reactions");
+        offFieldHakushin.initializeForSimulator(
+                offFieldOwner, offFieldHakushinSim);
+        boolean hakushinReuseRejected = false;
+        try {
+            offFieldHakushin.initializeForSimulator(
+                    offFieldOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            hakushinReuseRejected = true;
+        }
+        assertTrue(hakushinReuseRejected,
+                "Hakushin Ring should reject cross-simulator reuse");
+
+        model.weapon.CrescentPike crescentPike =
+                new model.weapon.CrescentPike();
+        assertEquals("Crescent Pike", crescentPike.getName(),
+                "Crescent Pike display name");
+        assertEquals(model.type.WeaponType.POLEARM,
+                crescentPike.getWeaponType(), "Crescent Pike weapon type");
+        assertClose(565.0, crescentPike.getBaseAtk(), EPS,
+                "Crescent Pike base ATK");
+        assertClose(0.345,
+                crescentPike.getStats().get(StatType.PHYSICAL_DMG_BONUS), EPS,
+                "Crescent Pike Physical DMG Bonus");
+        assertEquals(5, crescentPike.getRefinement(),
+                "Crescent Pike default refinement");
+
+        TestCharacter pikeOwner = testCharacter(
+                Element.PHYSICAL, CharacterId.SUCROSE);
+        pikeOwner.setWeapon(crescentPike);
+        CombatSimulator pikeSim = simulatorWith(pikeOwner);
+        List<AttackAction> pikeDamageActions = new ArrayList<>();
+        pikeSim.addDamageListener((actor, action, damage, time) ->
+                pikeDamageActions.add(action));
+        pikeSim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                typedDamageHit("Pike pre-particle Normal", ActionType.NORMAL, 1.0));
+        assertEquals(0,
+                countNamedActions(pikeDamageActions,
+                        "Crescent Pike Infusion Needle"),
+                "Crescent Pike should require particle collection");
+
+        pikeDamageActions.clear();
+        pikeSim.notifyParticle(Element.PYRO, 1.0);
+        pikeSim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                typedDamageHit("Pike active Normal", ActionType.NORMAL, 1.0));
+        assertEquals(1,
+                countNamedActions(pikeDamageActions,
+                        "Crescent Pike Infusion Needle"),
+                "Crescent Pike should add one hit to a Normal Attack");
+        AttackAction r5PikeProc = findAction(
+                pikeDamageActions, "Crescent Pike Infusion Needle");
+        assertClose(0.40, r5PikeProc.getDamagePercent(), EPS,
+                "R5 Crescent Pike follow-up motion value");
+        assertEquals(Element.PHYSICAL, r5PikeProc.getElement(),
+                "Crescent Pike follow-up element");
+        assertEquals(ActionType.OTHER, r5PikeProc.getActionType(),
+                "Crescent Pike follow-up action type");
+
+        pikeDamageActions.clear();
+        pikeSim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                typedDamageHit("Pike active Charged", ActionType.CHARGE, 1.0));
+        assertEquals(1,
+                countNamedActions(pikeDamageActions,
+                        "Crescent Pike Infusion Needle"),
+                "Crescent Pike should add one hit to a Charged Attack");
+        pikeDamageActions.clear();
+        pikeSim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                typedDamageHit("Pike active Skill", ActionType.SKILL, 1.0));
+        pikeSim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                typedDamageHit("Pike zero Normal", ActionType.NORMAL, 0.0));
+        assertEquals(0,
+                countNamedActions(pikeDamageActions,
+                        "Crescent Pike Infusion Needle"),
+                "Crescent Pike should reject Skill and zero-MV damage");
+        pikeSim.advanceTime(5.0);
+        pikeDamageActions.clear();
+        pikeSim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                typedDamageHit("Pike expired Normal", ActionType.NORMAL, 1.0));
+        assertEquals(0,
+                countNamedActions(pikeDamageActions,
+                        "Crescent Pike Infusion Needle"),
+                "Crescent Pike should expire at exactly five seconds");
+
+        model.weapon.CrescentPike r1Pike =
+                new model.weapon.CrescentPike(1);
+        TestCharacter r1PikeOwner = testCharacter(
+                Element.PHYSICAL, CharacterId.SUCROSE);
+        r1PikeOwner.setWeapon(r1Pike);
+        CombatSimulator r1PikeSim = simulatorWith(r1PikeOwner);
+        List<AttackAction> r1PikeActions = new ArrayList<>();
+        r1PikeSim.addDamageListener((actor, action, damage, time) ->
+                r1PikeActions.add(action));
+        r1PikeSim.notifyParticle(Element.PHYSICAL, 1.0);
+        r1PikeSim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                typedDamageHit("R1 Pike Normal", ActionType.NORMAL, 1.0));
+        assertClose(0.20,
+                findAction(r1PikeActions,
+                        "Crescent Pike Infusion Needle").getDamagePercent(),
+                EPS, "R1 Crescent Pike follow-up motion value");
+        r1Pike.initializeForSimulator(r1PikeOwner, r1PikeSim);
+        boolean pikeReuseRejected = false;
+        try {
+            r1Pike.initializeForSimulator(r1PikeOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            pikeReuseRejected = true;
+        }
+        assertTrue(pikeReuseRejected,
+                "Crescent Pike should reject cross-simulator reuse");
+
+        model.weapon.CrescentPike offFieldPike =
+                new model.weapon.CrescentPike();
+        TestCharacter offFieldPikeOwner = testCharacter(
+                Element.PHYSICAL, CharacterId.SUCROSE);
+        offFieldPikeOwner.setWeapon(offFieldPike);
+        TestCharacter particleCollector = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        CombatSimulator offFieldPikeSim = simulatorWith(offFieldPikeOwner);
+        offFieldPikeSim.addCharacter(particleCollector);
+        offFieldPikeSim.setActiveCharacter(CharacterId.AMBER);
+        offFieldPikeSim.notifyParticle(Element.PYRO, 1.0);
+        offFieldPikeSim.setActiveCharacter(CharacterId.SUCROSE);
+        List<AttackAction> offFieldPikeActions = new ArrayList<>();
+        offFieldPikeSim.addDamageListener((actor, action, damage, time) ->
+                offFieldPikeActions.add(action));
+        offFieldPikeSim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                typedDamageHit("Off-field particle Normal", ActionType.NORMAL, 1.0));
+        assertEquals(0,
+                countNamedActions(offFieldPikeActions,
+                        "Crescent Pike Infusion Needle"),
+                "Crescent Pike should reject particles collected off-field");
+
+        boolean lowHakushinRefinementRejected = false;
+        try {
+            new model.weapon.HakushinRing(0);
+        } catch (IllegalArgumentException expected) {
+            lowHakushinRefinementRejected = true;
+        }
+        assertTrue(lowHakushinRefinementRejected,
+                "Hakushin Ring should reject refinement zero");
+        boolean highHakushinRefinementRejected = false;
+        try {
+            new model.weapon.HakushinRing(6);
+        } catch (IllegalArgumentException expected) {
+            highHakushinRefinementRejected = true;
+        }
+        assertTrue(highHakushinRefinementRejected,
+                "Hakushin Ring should reject refinement six");
+        boolean lowPikeRefinementRejected = false;
+        try {
+            new model.weapon.CrescentPike(0);
+        } catch (IllegalArgumentException expected) {
+            lowPikeRefinementRejected = true;
+        }
+        assertTrue(lowPikeRefinementRejected,
+                "Crescent Pike should reject refinement zero");
+        boolean highPikeRefinementRejected = false;
+        try {
+            new model.weapon.CrescentPike(6);
+        } catch (IllegalArgumentException expected) {
+            highPikeRefinementRejected = true;
+        }
+        assertTrue(highPikeRefinementRejected,
+                "Crescent Pike should reject refinement six");
+    }
+
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {
         ReactionResult[] pyroReactions = {
                 ReactionResult.amp(2.0, "Vaporize", ReactionResult.Kind.VAPORIZE),
@@ -14868,6 +15179,16 @@ public class ReactionRegressionTest {
             }
         }
         throw new AssertionError("Expected action not observed: " + name);
+    }
+
+    private static int countNamedActions(List<AttackAction> actions, String name) {
+        int count = 0;
+        for (AttackAction action : actions) {
+            if (name.equals(action.getName())) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private static String captureStandardOutput(Runnable action) {

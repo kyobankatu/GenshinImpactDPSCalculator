@@ -12775,7 +12775,7 @@ Verification:
 
 ## Implementation Order: Stateful Craftable Weapon Campaign
 
-Status: In progress. This campaign adds four missing craftable/event weapons
+Status: Complete. This campaign adds four missing craftable/event weapons
 whose passives fit existing action, reaction, particle, and damage hooks; RL
 and generated documentation remain excluded.
 
@@ -12831,13 +12831,23 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
 
-### Phase 2: Reaction and Particle Follow-Ups
+### Phase 2: Reaction and Particle Follow-Ups - Done
 
 Target files:
 
 - `src/java/model/weapon/HakushinRing.java` (new)
 - `src/java/model/weapon/CrescentPike.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Branch-isolated source commit `5bc8c47` adds element-targeted non-refreshing
+  team windows and an active-collector Physical follow-up without shared
+  runtime changes.
+- Focused regressions cover R1/R5 metadata, holder/party filtering, independent
+  exact expiries, Hyperbloom and Swirl elements, off-field rejection,
+  nonrecursive Normal/Charged procs, zero/wrong actions, rebinding, and invalid
+  refinement; reaction regression, build, Javadoc, and preflight gates pass.
 
 Acceptance criteria:
 
