@@ -178,8 +178,9 @@ public final class FischlRegressionTest {
         assertClose(18.0 / 60.0 + 10.0,
                 fischl.getOzActiveUntil(), EPS,
                 "Fischl C0 Oz lifetime");
-        assertClose(0.0, fischl.getSkillCDRemaining(sim.getCurrentTime()), EPS,
-                "Fischl Skill exposes recast while Oz active");
+        assertClose(67.0 / 60.0,
+                fischl.getSkillCDRemaining(sim.getCurrentTime()), EPS,
+                "Fischl initial recast unlocks 92 frames after deployment");
         assertEquals(0, ticks.size(), "Fischl Oz waits for first tick");
 
         sim.advanceTime(93.0 / 60.0 - sim.getCurrentTime() - 0.001);
@@ -225,7 +226,8 @@ public final class FischlRegressionTest {
         List<ActionRecord> ticks = captureNamedActions(sim, "Oz Attack");
         perform(sim, CharacterActionKey.SKILL);
         double originalExpiry = fischl.getOzActiveUntil();
-        double recastStart = sim.getCurrentTime();
+        double recastRequestTime = sim.getCurrentTime();
+        double recastStart = 110.0 / 60.0;
         perform(sim, CharacterActionKey.SKILL);
 
         assertEquals(1, summon.size(),
@@ -234,7 +236,10 @@ public final class FischlRegressionTest {
                 "Fischl recast should not extend Oz lifetime");
         assertClose(recastStart + 37.0 / 60.0,
                 sim.getCurrentTime(), EPS,
-                "Fischl recast duration");
+                "Fischl recast request waits for unlock then resolves");
+        assertClose(67.0 / 60.0,
+                recastStart - recastRequestTime, EPS,
+                "Fischl initial recast lock remaining after Skill action");
         assertTrue(fischl.getSkillCDRemaining(sim.getCurrentTime()) > 0.0,
                 "Fischl recast cooldown active");
         assertClose(92.0 / 60.0 - 37.0 / 60.0,
@@ -243,11 +248,11 @@ public final class FischlRegressionTest {
 
         double expectedTick = recastStart + 2.0 / 60.0 + 70.0 / 60.0;
         sim.advanceTime(expectedTick - sim.getCurrentTime() - 0.001);
-        assertEquals(0, ticks.size(),
-                "Fischl recast resets pending Oz timer");
+        assertEquals(1, ticks.size(),
+                "Fischl recast invalidates the next old Oz timer");
         sim.advanceTime(0.002);
-        assertEquals(1, ticks.size(), "Fischl recast first tick");
-        assertClose(expectedTick, ticks.get(0).time, EPS,
+        assertEquals(2, ticks.size(), "Fischl recast first tick");
+        assertClose(expectedTick, ticks.get(1).time, EPS,
                 "Fischl recast first tick time");
 
         Fischl buffed = fischlAtConstellation(0);
@@ -268,7 +273,7 @@ public final class FischlRegressionTest {
                 plainSim, "Oz Attack");
         perform(plainSim, CharacterActionKey.SKILL);
         plainSim.advanceTime(93.0 / 60.0 - plainSim.getCurrentTime());
-        assertClose(plainTicks.get(0).damage, ticks.get(0).damage, EPS,
+        assertClose(plainTicks.get(0).damage, ticks.get(1).damage, EPS,
                 "Fischl recast refreshes to post-buff stats");
         assertTrue(buffedTicks.get(0).damage > plainTicks.get(0).damage,
                 "Fischl Oz retains expired cast-time ATK snapshot");

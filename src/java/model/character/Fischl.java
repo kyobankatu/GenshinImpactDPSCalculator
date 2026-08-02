@@ -314,7 +314,10 @@ public class Fischl extends Character implements
         nextFullSkillReadyTime = castTime + 18.0 / 60.0 + SKILL_COOLDOWN;
         schedule(sim, castTime + 18.0 / 60.0, activeSim -> {
             deployOz(activeSim, activeSim.getCurrentTime(), 75.0 / 60.0);
-            exposeOzRecast(activeSim.getCurrentTime());
+            exposeOzRecast(
+                    activeSim,
+                    activeSim.getCurrentTime(),
+                    RECAST_COOLDOWN);
         });
         schedule(sim, castTime + 38.0 / 60.0, activeSim -> {
             double baseMultiplier = constellation >= 3 ? 2.3088 : 1.96248;
@@ -396,7 +399,7 @@ public class Fischl extends Character implements
                 return;
             }
             deployOz(activeSim, activeSim.getCurrentTime(), 79.0 / 60.0);
-            exposeOzRecast(activeSim.getCurrentTime());
+            exposeOzRecast(activeSim, activeSim.getCurrentTime(), 0.0);
             burstFormUntil = Double.NEGATIVE_INFINITY;
         });
         sim.advanceTime(148.0 / 60.0);
@@ -540,9 +543,16 @@ public class Fischl extends Character implements
                 && result.getRelatedElement() == Element.ELECTRO;
     }
 
-    private void exposeOzRecast(double time) {
-        setSkillCD(0.0);
-        resetSkillCooldown(time);
+    private void exposeOzRecast(
+            CombatSimulator sim,
+            double time,
+            double recastCooldown) {
+        if (recastCooldown <= EPSILON) {
+            resetSkillCooldown(time);
+        } else {
+            setSkillCD(recastCooldown);
+            markSkillUsed(time, sim.getApplicableBuffs(this));
+        }
         setSkillCD(SKILL_COOLDOWN);
     }
 
