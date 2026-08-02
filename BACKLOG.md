@@ -2576,10 +2576,13 @@ experiment record.
 
 ### B-117 — Sequence of Solitude coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Sequence of Solitude; RL excluded
 - **Value/risk:** one complete passive reuses immediate nonrecursive damage and
   the existing Max-HP scaling path without shared runtime changes
 - **Evidence boundary:** KQM TCL metadata, R1-R5 Max-HP proc values, positive
   active hit gate, and 15-second activation CT
 - **Plan:** `TASKS.md` Sequence of Solitude Campaign
+- **Completion:** `09eb8ff` adds immediate nonrecursive total-HP damage, exact
+  cooldown behavior, R1/R5 ratios, and focused abnormal regressions;
+  build/Javadoc/leak gates pass

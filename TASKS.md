@@ -15114,7 +15114,7 @@ Verification:
 
 ## Implementation Order: Sequence of Solitude Campaign
 
-Status: Active. Add Sequence of Solitude with a nonrecursive Max-HP Physical
+Status: Complete. Sequence of Solitude now has a nonrecursive Max-HP Physical
 proc on a fixed 15-second cooldown.
 
 Scope:
@@ -15127,12 +15127,19 @@ Out of scope for this pass:
 - Multi-target AoE multiplication, other bows, characters, formulas, RL, and
   generated docs.
 
-### Phase 1: Add Sequence of Solitude
+### Phase 1: Add Sequence of Solitude - Done (`09eb8ff`)
 
 Target files:
 
 - `src/java/model/weapon/SequenceOfSolitude.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- R1/R5 metadata and exact 1:2 proc ratio, total-HP scaling, immediate damage,
+  nonrecursion, and before/exact 15-second cooldown behavior pass.
+- Active/source/simulator/positive gates and cross-simulator binding are
+  explicit; build, reaction regression, Javadoc, and artifact-leak gates pass.
 
 Acceptance criteria:
 
