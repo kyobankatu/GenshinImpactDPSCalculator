@@ -3068,3 +3068,20 @@ experiment record.
   pre-damage aura capture, weak and multi-aura priority, first-only absorption,
   unsupported aura, null callback, C6/A1 integration, and representative party
   regressions pass focused and full gates
+
+### B-143 — Raiden Shogun C6 Wishbearer cooldown lifecycle
+
+- **Status:** in-progress
+- **Source:** delegated supported-character constellation audit
+- **Scope/risk:** add clamped flat Burst cooldown reduction and apply it to all
+  non-Raiden party members at one-second intervals, at most five times per
+  Musou Isshin state; shared cooldown/snapshot state requires a separate phase
+- **Evidence:** maintained KQM Raiden page and cooldown table, accessed
+  2026-08-02, specify one second per qualifying Musou hit, one-second trigger
+  cooldown, five triggers maximum, and Raiden exclusion:
+  https://library.keqingmains.com/characters/electro/raiden-shogun
+  https://library.keqingmains.com/combat-mechanics/cooldowns
+- **Boundary:** ready/partial/full cooldown clamp, invalid reduction, initial
+  cast, C5, positive resolved damage, multi-hit same timestamp, 0.999/1.000
+  trigger interval, five/six hits, switch end, recast reset, and snapshot restore
+- **Plan:** two-phase `TASKS.md` Raiden C6 Wishbearer Lifecycle

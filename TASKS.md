@@ -12978,6 +12978,92 @@ Completion evidence:
   32,047,365 / 322,084 (`FlinsParty`), and 22,146,093 / 320,493
   (`FlinsParty2`); the final increase reflects corrected pre-damage absorption.
 
+## Implementation Order: Raiden C6 Wishbearer Lifecycle
+
+Status: In progress. Implement B-143 as a shared flat Burst cooldown operation
+followed by character-owned hit markers; cooldown carries, non-Burst cooldowns,
+enemy-count geometry, RL, and generated docs are excluded.
+
+Evidence:
+
+- The maintained KQM Raiden page and cooldown table, accessed 2026-08-02,
+  specify one second of ally Burst cooldown reduction per qualifying Musou hit,
+  a one-second trigger cooldown, at most five triggers, and Raiden exclusion:
+  https://library.keqingmains.com/characters/electro/raiden-shogun
+  https://library.keqingmains.com/combat-mechanics/cooldowns
+
+### Phase 1: Add Flat Burst Cooldown Reduction - Done
+
+Target files:
+
+- `src/java/model/entity/state/CooldownState.java`
+- `src/java/model/entity/Character.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- A finite non-negative flat amount shortens only the pending Burst cooldown,
+  clamps at the current time, discards excess, and reports actual reduction.
+- Ready and zero reductions are inert, invalid values are rejected without
+  mutation, and last-use/configured-duration metadata remain unchanged.
+- Existing simulator snapshots restore a divergent Burst reduction exactly.
+
+Test cases:
+
+- Normal: partial reduction and returned amount.
+- Boundary: ready, zero, exact/full clamp, excess discard, and snapshot restore.
+- Abnormal: negative, NaN, and positive/negative infinity with state retention.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Partial and full reductions report the applied amount, clamp at readiness,
+  preserve last-use/configured cooldown metadata, and discard excess.
+- Ready/zero inputs, invalid values with state retention, and divergent
+  snapshot rollback pass the focused regression, build, and Javadoc gates.
+
+### Phase 2: Add Wishbearer Hit Lifecycle
+
+Target files:
+
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/model/character/RaidenShogun.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- C6 positive resolved Musou Normal/Charged/Plunging hits reduce every other
+  party member's pending Burst cooldown by one second and never reduce Raiden's.
+- One typed cooldown marker enforces a half-open one-second interval and typed
+  trigger markers enforce five activations per Musou state across multi-hits.
+- Initial Burst cast, pre/post-form attacks, C5, wrong actor/category, zero or
+  negative damage, and missing target are inert.
+- Switching/end clears the C6 markers; a new Burst state receives a fresh five
+  triggers, and in-form marker/cooldown state survives snapshot rollback.
+
+Test cases:
+
+- Normal: ally partial cooldown, multiple allies, Raiden exclusion, all three
+  Musou input categories, and fresh-state reset.
+- Boundary: N4/Charged same-time multi-hits, 0.999/1.000 seconds, five/six
+  triggers, ready ally, switch end, and active snapshot replay.
+- Abnormal: C5, initial cast, physical/post-form hit, wrong actor, non-positive
+  damage, missing enemy, and cross-simulator reuse assumptions.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- representative party samples twice
+- `python scripts/preflight.py --run`
+
 ## Implementation Order: Expanded Artifact Coverage Campaign
 
 Status: Complete. This campaign adds six missing four-piece artifact sets

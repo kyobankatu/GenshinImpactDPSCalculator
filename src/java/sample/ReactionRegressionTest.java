@@ -115,6 +115,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_PartySizeParticleEnergyMultipliers();
         testAccuracyPhaseF_ImpetuousWindsCooldownSnapshot();
         testAccuracyPhaseF_PartialSkillCooldownReductionContract();
+        testAccuracyPhaseF_PartialBurstCooldownReductionContract();
         testAccuracyPhaseF_TimingAwareEnergyAnalysis();
         testAccuracyPhaseF_ArtifactOptimizerRejectsUnreachableEr();
         testAccuracyPhaseF_ArtifactOptimizerStableResultOrder();
@@ -4916,6 +4917,65 @@ public class ReactionRegressionTest {
             assertEquals(beforeInvalid, snapshotOwner.getChargeRestoreTimes(),
                     "Rejected flat reduction should preserve charge state");
         }
+    }
+
+    private static void testAccuracyPhaseF_PartialBurstCooldownReductionContract() {
+        TestCharacter owner = testCharacter(
+                Element.ELECTRO, CharacterId.RAIDEN_SHOGUN);
+        owner.setBurstCD(20.0);
+        CombatSimulator sim = simulatorWith(owner);
+        owner.markBurstUsed(0.0);
+        assertClose(4.0, owner.reduceBurstCooldown(2.0, 4.0), EPS,
+                "Flat reduction should shorten a pending Burst cooldown");
+        assertClose(14.0, owner.getBurstCDRemaining(2.0), EPS,
+                "Burst reduction should preserve the readiness boundary");
+        assertClose(0.0, owner.getLastBurstTime(), EPS,
+                "Flat reduction should preserve last Burst-use metadata");
+        assertClose(20.0, owner.getBurstCD(), EPS,
+                "Flat reduction should preserve configured Burst cooldown");
+
+        SimulatorSnapshot reducedSnapshot = sim.saveSnapshot();
+        assertClose(14.0, owner.reduceBurstCooldown(2.0, 30.0), EPS,
+                "Excess Burst reduction should clamp at current time");
+        assertClose(0.0, owner.getBurstCDRemaining(2.0), EPS,
+                "Full Burst reduction should make the cooldown ready");
+        assertClose(0.0, owner.reduceBurstCooldown(2.0, 1.0), EPS,
+                "A ready Burst cooldown should ignore further reduction");
+        sim.restoreSnapshot(reducedSnapshot);
+        assertClose(14.0, owner.getBurstCDRemaining(2.0), EPS,
+                "Snapshot restore should recover a divergent Burst reduction");
+        assertClose(0.0, owner.reduceBurstCooldown(2.0, 0.0), EPS,
+                "Zero Burst reduction should be inert");
+
+        double beforeInvalid = owner.getBurstCooldownEndTime();
+        double[] invalidReductions = {
+                -1.0,
+                Double.NaN,
+                Double.POSITIVE_INFINITY,
+                Double.NEGATIVE_INFINITY
+        };
+        for (double invalidReduction : invalidReductions) {
+            boolean rejected = false;
+            try {
+                owner.reduceBurstCooldown(2.0, invalidReduction);
+            } catch (IllegalArgumentException expected) {
+                rejected = true;
+            }
+            assertTrue(rejected,
+                    "Invalid flat Burst reduction should be rejected: "
+                            + invalidReduction);
+            assertClose(beforeInvalid,
+                    owner.getBurstCooldownEndTime(),
+                    EPS,
+                    "Rejected Burst reduction should preserve cooldown state");
+        }
+
+        TestCharacter readyOwner = testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU);
+        readyOwner.setBurstCD(20.0);
+        readyOwner.markBurstUsed(0.0);
+        assertClose(0.0, readyOwner.reduceBurstCooldown(20.0, 5.0), EPS,
+                "Naturally ready Burst cooldown should ignore reduction");
     }
 
     private static void testAccuracyPhaseF_TimingAwareEnergyAnalysis() {

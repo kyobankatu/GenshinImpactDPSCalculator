@@ -203,6 +203,33 @@ public class CooldownState {
     }
 
     /**
+     * Shortens the pending Burst cooldown by a flat amount.
+     *
+     * <p>Excess reduction is discarded when the cooldown reaches
+     * {@code currentTime}. Last-use and configured-duration metadata are
+     * preserved.
+     *
+     * @param currentTime current simulation time in seconds
+     * @param reduction non-negative finite reduction in seconds
+     * @return actual reduction applied in seconds
+     * @throws IllegalArgumentException if {@code reduction} is negative or not finite
+     */
+    public double reduceBurstCooldown(double currentTime, double reduction) {
+        if (!Double.isFinite(reduction) || reduction < 0.0) {
+            throw new IllegalArgumentException(
+                    "Burst cooldown reduction must be finite and non-negative");
+        }
+        if (reduction == 0.0 || burstCooldownEndTime <= currentTime) {
+            return 0.0;
+        }
+
+        double previousEndTime = burstCooldownEndTime;
+        burstCooldownEndTime = Math.max(
+                currentTime, previousEndTime - reduction);
+        return previousEndTime - burstCooldownEndTime;
+    }
+
+    /**
      * Clears all pending skill charge restore timestamps. Used when resetting
      * the simulation state.
      */
