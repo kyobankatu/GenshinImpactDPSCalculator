@@ -3250,3 +3250,22 @@ experiment record.
   regression, build, Javadoc, party catalog, and preflight.
 - **Closure:** R1-R5 Justice bonuses and Lv. 90 metadata pass focused and full
   gates without introducing unsupported healing state.
+
+### B-153 — Static five-star weapon branches
+
+- **Status:** active
+- **Source:** local image-backed missing-weapon inventory after B-152
+- **Scope/risk:** add exact always-on branches and Lv. 90 metadata for Aquila
+  Favonia, Wolf's Gravestone, Amos' Bow, Haran Geppaku Futsu, and Skyward Atlas;
+  low
+- **Evidence:** maintained KQM sword, claymore, bow, and catalyst catalogs,
+  accessed 2026-08-02:
+  https://library.keqingmains.com/equipment/weapons/swords
+  https://library.keqingmains.com/equipment/weapons/claymores
+  https://library.keqingmains.com/equipment/weapons/bows
+  https://library.keqingmains.com/equipment/weapons/catalysts
+- **Boundary:** incoming damage/healing, enemy HP, projectile flight time,
+  cross-party Skill callbacks, autonomous cloud attacks, R1/R5, and stat
+  isolation.
+- **Proof/plan:** two-phase `TASKS.md` Static Five-Star Weapon Branch Campaign
+  plus reaction regression, build, Javadoc, party catalog, and preflight.

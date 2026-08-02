@@ -37,6 +37,10 @@ player-damage, shield-absorption, RL, or generated-documentation systems.
 The B-152 Black Sword campaign is complete. It adds the weapon's full
 outgoing-damage contract while keeping player healing in Deferred Systems.
 
+The active B-153 static five-star weapon campaign is adding five exact
+always-on passive branches while preserving explicit unreachable-trigger
+boundaries.
+
 The B-128 action-use artifact campaign is complete. Successful typed actions
 now reach equipped artifacts, and Heart of Depth plus Martial Artist use the
 shared callback without changing RL or generated documentation.
@@ -12908,6 +12912,102 @@ Completion evidence:
 - `./gradlew ReactionRegressionTest`, `./gradlew build javadoc
   PartyCatalogRegressionTest`, and `python scripts/preflight.py --run` passed
   on 2026-08-02.
+
+## Implementation Order: Static Five-Star Weapon Branch Campaign
+
+Status: In progress. This campaign adds five missing five-star weapons whose
+always-on outgoing bonuses are exact in the current simulator boundary; RL and
+generated documentation remain excluded.
+
+Scope:
+
+- Add Aquila Favonia, Wolf's Gravestone, Amos' Bow, Haran Geppaku Futsu, and
+  Skyward Atlas with Lv. 90 metadata and refinement-aware always-on bonuses.
+- Share the all-element stat initialization used by Haran and Skyward Atlas
+  through `StaticElementalDamageWeapon`.
+
+Out of scope for this pass:
+
+- Incoming player damage/healing, enemy HP thresholds, projectile travel time,
+  cross-party Skill-use Wavespike state, autonomous cloud attacks, optimizer
+  defaults, RL, and generated docs.
+
+Definitions:
+
+- `StaticElementalDamageWeapon`: package-local abstract weapon base that stores
+  refinement metadata and adds one refinement-aware bonus to all seven
+  elemental DMG stats while excluding Physical DMG.
+
+### Phase 1: Add Aquila, Wolf's Gravestone, and Amos' Bow - Done
+
+Target files:
+
+- `src/java/model/weapon/AquilaFavonia.java` (new)
+- `src/java/model/weapon/WolfsGravestone.java` (new)
+- `src/java/model/weapon/AmosBow.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Every class exposes canonical name/type, exact Lv. 90 Base ATK and substat,
+  an R5 default, selected refinement, and refinement 0/6 rejection.
+- Aquila and Wolf's Gravestone add 20%/25%/30%/35%/40% ATK without inventing
+  incoming-damage or enemy-low-HP triggers.
+- Amos adds 12%/15%/18%/21%/24% Normal and Charged Attack DMG without
+  inventing projectile travel duration.
+
+Test cases to add or update:
+
+- Normal: R5 metadata and all exact active bonuses.
+- Boundary: R1/R5 and arbitrary negative/positive times.
+- Abnormal: invalid refinement, unrelated-stat preservation, inactive trigger
+  branches, and independent instances.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build javadoc PartyCatalogRegressionTest`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Focused regressions cover all Lv. 90 metadata, R1/R5 active values,
+  arbitrary-time behavior, unrelated-stat preservation, unreachable trigger
+  branches, independent instances, and invalid refinement.
+- `./gradlew ReactionRegressionTest`, `./gradlew build javadoc
+  PartyCatalogRegressionTest`, and `python scripts/preflight.py --run` passed
+  on 2026-08-02.
+
+### Phase 2: Add Haran and Skyward Atlas Elemental Branches
+
+Target files:
+
+- `src/java/model/weapon/StaticElementalDamageWeapon.java` (new)
+- `src/java/model/weapon/HaranGeppakuFutsu.java` (new)
+- `src/java/model/weapon/SkywardAtlas.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Both classes expose canonical names/types, exact Lv. 90 metadata, R5
+  defaults, selected refinement, and refinement 0/6 rejection.
+- Both add 12%/15%/18%/21%/24% to every elemental DMG stat at all times while
+  leaving Physical and generic all-DMG unchanged.
+- The shared base remains package-local and validates all constructor inputs
+  needed by its two concrete classes.
+
+Test cases to add or update:
+
+- Normal: R5 metadata and all seven elemental bonuses for both classes.
+- Boundary: R1/R5, Physical exclusion, arbitrary time, and supplied stats.
+- Abnormal: invalid refinement, no generic all-DMG leakage, inactive trigger
+  branches, and independent instances.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build javadoc PartyCatalogRegressionTest`
+- `python scripts/preflight.py --run`
 
 ## Implementation Order: Missing Artifact Runtime Coverage Campaign
 

@@ -141,6 +141,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_TenacityOfTheMillelithContract();
         testAccuracyPhaseF_StaticActionBonusWeaponMetadata();
         testAccuracyPhaseF_TheBlackSwordContract();
+        testAccuracyPhaseF_StaticFiveStarWeaponPhaseOne();
         testAccuracyPhaseF_LegacyWeaponRefinements();
         testAccuracyPhaseF_SkillUseEventWeapons();
         testAccuracyPhaseF_WatatsumiWavewalkerWeapons();
@@ -8437,6 +8438,122 @@ public class ReactionRegressionTest {
         }
         assertTrue(highRefinementRejected,
                 "The Black Sword should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_StaticFiveStarWeaponPhaseOne() {
+        model.weapon.AquilaFavonia aquila =
+                new model.weapon.AquilaFavonia();
+        assertEquals("Aquila Favonia", aquila.getName(),
+                "Aquila Favonia display name");
+        assertClose(674.0, aquila.getBaseAtk(), EPS,
+                "Aquila Favonia base ATK");
+        assertClose(0.413,
+                aquila.getStats().get(StatType.PHYSICAL_DMG_BONUS), EPS,
+                "Aquila Favonia Physical DMG Bonus");
+        assertEquals(model.type.WeaponType.SWORD, aquila.getWeaponType(),
+                "Aquila Favonia weapon type");
+        assertEquals(5, aquila.getRefinement(),
+                "Aquila Favonia default refinement");
+        StatsContainer aquilaStats = new StatsContainer();
+        aquilaStats.set(StatType.ATK_PERCENT, 0.10);
+        aquila.applyPassive(aquilaStats, -100.0);
+        assertClose(0.50, aquilaStats.get(StatType.ATK_PERCENT), EPS,
+                "R5 Aquila Favonia should add ATK without replacing supplied stats");
+        assertClose(0.0, aquilaStats.get(StatType.DMG_BONUS_ALL), EPS,
+                "Aquila Favonia should not invent its incoming-damage proc");
+        model.weapon.AquilaFavonia r1Aquila =
+                new model.weapon.AquilaFavonia(1);
+        StatsContainer r1AquilaStats = new StatsContainer();
+        r1Aquila.applyPassive(r1AquilaStats, 1000.0);
+        assertClose(0.20, r1AquilaStats.get(StatType.ATK_PERCENT), EPS,
+                "R1 Aquila Favonia ATK passive");
+
+        model.weapon.WolfsGravestone gravestone =
+                new model.weapon.WolfsGravestone();
+        assertEquals("Wolf's Gravestone", gravestone.getName(),
+                "Wolf's Gravestone display name");
+        assertClose(608.0, gravestone.getBaseAtk(), EPS,
+                "Wolf's Gravestone base ATK");
+        assertClose(0.496,
+                gravestone.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Wolf's Gravestone ATK substat");
+        assertEquals(model.type.WeaponType.CLAYMORE,
+                gravestone.getWeaponType(),
+                "Wolf's Gravestone weapon type");
+        assertEquals(5, gravestone.getRefinement(),
+                "Wolf's Gravestone default refinement");
+        StatsContainer gravestoneStats = new StatsContainer();
+        gravestone.applyPassive(gravestoneStats, 0.0);
+        assertClose(0.40,
+                gravestoneStats.get(StatType.ATK_PERCENT), EPS,
+                "R5 Wolf's Gravestone ATK passive");
+        assertClose(0.0, gravestoneStats.get(StatType.DMG_BONUS_ALL), EPS,
+                "Wolf's Gravestone should not invent its enemy-HP team window");
+        model.weapon.WolfsGravestone r1Gravestone =
+                new model.weapon.WolfsGravestone(1);
+        StatsContainer r1GravestoneStats = new StatsContainer();
+        r1Gravestone.applyPassive(r1GravestoneStats, 500.0);
+        assertClose(0.20,
+                r1GravestoneStats.get(StatType.ATK_PERCENT), EPS,
+                "R1 Wolf's Gravestone ATK passive");
+
+        model.weapon.AmosBow amos = new model.weapon.AmosBow();
+        assertEquals("Amos' Bow", amos.getName(), "Amos' Bow display name");
+        assertClose(608.0, amos.getBaseAtk(), EPS, "Amos' Bow base ATK");
+        assertClose(0.496,
+                amos.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Amos' Bow ATK substat");
+        assertEquals(model.type.WeaponType.BOW, amos.getWeaponType(),
+                "Amos' Bow weapon type");
+        assertEquals(5, amos.getRefinement(),
+                "Amos' Bow default refinement");
+        StatsContainer amosStats = new StatsContainer();
+        amos.applyPassive(amosStats, -1.0);
+        assertClose(0.24,
+                amosStats.get(StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "R5 Amos' Bow Normal damage bonus");
+        assertClose(0.24,
+                amosStats.get(StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "R5 Amos' Bow Charged damage bonus");
+        assertClose(0.0, amosStats.get(StatType.SKILL_DMG_BONUS), EPS,
+                "Amos' Bow should not modify Skill damage");
+        assertClose(0.0, amosStats.get(StatType.DMG_BONUS_ALL), EPS,
+                "Amos' Bow should not invent projectile flight time");
+        model.weapon.AmosBow r1Amos = new model.weapon.AmosBow(1);
+        StatsContainer r1AmosStats = new StatsContainer();
+        r1Amos.applyPassive(r1AmosStats, 1000.0);
+        assertClose(0.12,
+                r1AmosStats.get(StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "R1 Amos' Bow Normal damage bonus");
+        assertClose(0.12,
+                r1AmosStats.get(StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "R1 Amos' Bow Charged damage bonus");
+
+        java.util.List<java.util.function.IntFunction<model.entity.Weapon>>
+                constructors = java.util.Arrays.asList(
+                        model.weapon.AquilaFavonia::new,
+                        model.weapon.WolfsGravestone::new,
+                        model.weapon.AmosBow::new);
+        for (java.util.function.IntFunction<model.entity.Weapon> constructor
+                : constructors) {
+            boolean lowRefinementRejected = false;
+            try {
+                constructor.apply(0);
+            } catch (IllegalArgumentException expected) {
+                lowRefinementRejected = true;
+            }
+            assertTrue(lowRefinementRejected,
+                    "Static five-star weapon should reject refinement zero");
+
+            boolean highRefinementRejected = false;
+            try {
+                constructor.apply(6);
+            } catch (IllegalArgumentException expected) {
+                highRefinementRejected = true;
+            }
+            assertTrue(highRefinementRejected,
+                    "Static five-star weapon should reject refinement six");
+        }
     }
 
     private static void testAccuracyPhaseF_AmberCharacterContract() {
