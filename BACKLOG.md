@@ -2991,7 +2991,7 @@ experiment record.
 
 ### B-139 — Sucrose C4 Alchemania cooldown reduction
 
-- **Status:** in-progress
+- **Status:** complete
 - **Source:** delegated supported-character constellation audit
 - **Scope/risk:** add injected 1-7-second draw, seven-hit counter, partial
   earliest-charge cooldown reduction, and Charged support; shared cooldown API
@@ -3004,3 +3004,6 @@ experiment record.
   remaining-CD clamp, no overflow into the next charge, wrong owner/category,
   and snapshot restore require explicit regressions
 - **Plan:** two-phase `TASKS.md` Sucrose C4 Alchemania Lifecycle
+- **Completion:** partial earliest-charge reduction, sourced Charged Attack,
+  typed seven-hit/0.1-second state, deterministic party draws, exact bounds,
+  invalid inputs, switching, and snapshot replay pass focused and full gates

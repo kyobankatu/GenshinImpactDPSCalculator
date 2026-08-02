@@ -198,6 +198,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_CryoResonanceConditionalCritContract();
         testAccuracyPhaseF_ElectroResonanceTypedTriggerContract();
         testAccuracyPhaseF_SucroseNoIcdApplicationContract();
+        testAccuracyPhaseF_SucroseC4AlchemaniaLifecycle();
         testAccuracyPhaseF_RaidenCastAndMusouIcdContract();
         testAccuracyPhaseF_RaidenEyeBuffRefreshContract();
         testAccuracyPhaseF_LiveResistanceSnapshotContract();
@@ -18221,6 +18222,277 @@ public class ReactionRegressionTest {
         assertEquals(ICDTag.ElementalBurst, absorbed.getICDTag(),
                 "Sucrose absorbed Burst damage should retain a typed Burst tag");
         assertClose(1.0, absorbed.getGaugeUnits(), EPS, "Sucrose absorbed Burst damage should apply 1U");
+    }
+
+    private static void testAccuracyPhaseF_SucroseC4AlchemaniaLifecycle() {
+        RecordingDamageWeapon chargedWeapon =
+                new RecordingDamageWeapon("Sucrose Charged Attack");
+        model.character.Sucrose chargedSucrose = new model.character.Sucrose(
+                chargedWeapon, blankArtifact(), 4, () -> 4.0);
+        CombatSimulator chargedSim =
+                simulatorWithExistingCharacter(chargedSucrose);
+        chargedSim.performAction(
+                CharacterId.SUCROSE,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        AttackAction charged = chargedWeapon.actions.get(0);
+        assertClose(2.0427, charged.getDamagePercent(), EPS,
+                "Sucrose Charged Attack should use its sourced level-9 value");
+        assertEquals(Element.ANEMO, charged.getElement(),
+                "Sucrose Charged Attack should deal Anemo damage");
+        assertEquals(ActionType.CHARGE, charged.getActionType(),
+                "Sucrose Charged Attack should retain its typed category");
+        assertEquals(StatType.CHARGED_ATTACK_DMG_BONUS, charged.getBonusStat(),
+                "Sucrose Charged Attack should use Charged DMG Bonus");
+        assertEquals(ICDType.Standard, charged.getICDType(),
+                "Sucrose Charged Attack should use standard ICD");
+        assertEquals(ICDTag.ChargedAttack, charged.getICDTag(),
+                "Sucrose Charged Attack should use the Charged ICD group");
+        assertClose(1.0, charged.getGaugeUnits(), EPS,
+                "Sucrose Charged Attack should apply 1U Anemo");
+        assertClose(69.0 / 60.0, chargedSim.getCurrentTime(), EPS,
+                "Sucrose Charged Attack should consume 69 frames");
+        assertEquals(1, activeBuffCount(
+                        chargedSucrose,
+                        BuffId.SUCROSE_C4_ALCHEMANIA_HIT,
+                        0.0),
+                "A resolved Charged hit should enter the C4 counter");
+
+        double[] reductions = { 1.0, 4.0, 7.0 };
+        for (double reduction : reductions) {
+            int[] drawCount = { 0 };
+            model.character.Sucrose sucrose = new model.character.Sucrose(
+                    new TestWeapon(),
+                    blankArtifact(),
+                    4,
+                    () -> {
+                        drawCount[0]++;
+                        return reduction;
+                    });
+            CombatSimulator sim = simulatorWithExistingCharacter(sucrose);
+            sucrose.markSkillUsed(0.0);
+            sucrose.markSkillUsed(1.0);
+            notifySucroseC4Hits(sim, sucrose, 7);
+            assertEquals(1, drawCount[0],
+                    "The seventh C4 hit should consume exactly one draw");
+            assertEquals(java.util.List.of(15.0 - reduction, 16.0),
+                    sucrose.getChargeRestoreTimes(),
+                    "C4 should reduce only the earliest pending Skill charge");
+            assertEquals(0, activeBuffCount(
+                            sucrose,
+                            BuffId.SUCROSE_C4_ALCHEMANIA_HIT,
+                            sim.getCurrentTime()),
+                    "The seventh C4 hit should reset the six-hit counter");
+        }
+
+        model.character.Sucrose clampedSucrose = new model.character.Sucrose(
+                new TestWeapon(), blankArtifact(), 4, () -> 7.0);
+        CombatSimulator clampedSim =
+                simulatorWithExistingCharacter(clampedSucrose);
+        clampedSucrose.markSkillUsed(0.0);
+        clampedSucrose.markSkillUsed(1.0);
+        clampedSim.advanceTime(14.0);
+        notifySucroseC4Hits(clampedSim, clampedSucrose, 7);
+        assertEquals(java.util.List.of(16.0),
+                clampedSucrose.getChargeRestoreTimes(),
+                "C4 excess reduction should not carry into the second charge");
+
+        int[] readyDraws = { 0 };
+        model.character.Sucrose readySucrose = new model.character.Sucrose(
+                new TestWeapon(), blankArtifact(), 4, () -> {
+                    readyDraws[0]++;
+                    return 4.0;
+                });
+        CombatSimulator readySim = simulatorWithExistingCharacter(readySucrose);
+        notifySucroseC4Hits(readySim, readySucrose, 7);
+        assertEquals(1, readyDraws[0],
+                "C4 counter should run while both Skill charges are ready");
+        assertEquals(java.util.List.of(), readySucrose.getChargeRestoreTimes(),
+                "A ready Skill should remain ready after the seventh C4 hit");
+
+        model.character.Sucrose intervalSucrose = new model.character.Sucrose(
+                new TestWeapon(), blankArtifact(), 4, () -> 4.0);
+        CombatSimulator intervalSim =
+                simulatorWithExistingCharacter(intervalSucrose);
+        AttackAction normalProbe = typedDamageHit(
+                "Sucrose C4 Normal Probe", ActionType.NORMAL, 1.0);
+        AttackAction chargedProbe = typedDamageHit(
+                "Sucrose C4 Charged Probe", ActionType.CHARGE, 1.0);
+        intervalSim.notifyDamage(intervalSucrose, normalProbe, 100.0);
+        intervalSim.notifyDamage(intervalSucrose, chargedProbe, 100.0);
+        assertEquals(1, activeBuffCount(
+                        intervalSucrose,
+                        BuffId.SUCROSE_C4_ALCHEMANIA_HIT,
+                        intervalSim.getCurrentTime()),
+                "Simultaneous Normal and Charged hits should count once");
+        intervalSim.advanceTime(0.099);
+        intervalSim.notifyDamage(intervalSucrose, normalProbe, 100.0);
+        assertEquals(1, activeBuffCount(
+                        intervalSucrose,
+                        BuffId.SUCROSE_C4_ALCHEMANIA_HIT,
+                        intervalSim.getCurrentTime()),
+                "C4 should reject a second count at 0.099 seconds");
+        intervalSim.advanceTime(0.001);
+        intervalSim.notifyDamage(intervalSucrose, normalProbe, 100.0);
+        assertEquals(2, activeBuffCount(
+                        intervalSucrose,
+                        BuffId.SUCROSE_C4_ALCHEMANIA_HIT,
+                        intervalSim.getCurrentTime()),
+                "C4 should accept a second count at exactly 0.100 seconds");
+
+        int[] c3Draws = { 0 };
+        model.character.Sucrose c3Sucrose = new model.character.Sucrose(
+                new TestWeapon(), blankArtifact(), 3, () -> {
+                    c3Draws[0]++;
+                    return 4.0;
+                });
+        CombatSimulator c3Sim = simulatorWithExistingCharacter(c3Sucrose);
+        notifySucroseC4Hits(c3Sim, c3Sucrose, 7);
+        assertEquals(0, c3Draws[0], "C3 Sucrose should not run C4 draws");
+        assertEquals(0, activeBuffCount(
+                        c3Sucrose,
+                        BuffId.SUCROSE_C4_ALCHEMANIA_HIT,
+                        c3Sim.getCurrentTime()),
+                "C3 Sucrose should not create C4 counter markers");
+
+        model.character.Sucrose rejectedSucrose = new model.character.Sucrose(
+                new TestWeapon(), blankArtifact(), 4, () -> 4.0);
+        CombatSimulator rejectedSim =
+                simulatorWithExistingCharacter(rejectedSucrose);
+        TestCharacter foreignActor =
+                testCharacter(Element.HYDRO, CharacterId.XINGQIU);
+        rejectedSim.addCharacter(foreignActor);
+        rejectedSim.notifyDamage(foreignActor, normalProbe, 100.0);
+        rejectedSim.notifyDamage(
+                rejectedSucrose,
+                typedDamageHit("Sucrose C4 Skill Probe", ActionType.SKILL, 1.0),
+                100.0);
+        rejectedSim.notifyDamage(rejectedSucrose, normalProbe, 0.0);
+        assertEquals(0, activeBuffCount(
+                        rejectedSucrose,
+                        BuffId.SUCROSE_C4_ALCHEMANIA_HIT,
+                        rejectedSim.getCurrentTime()),
+                "Foreign, wrong-category, and zero damage should not count for C4");
+        rejectedSim.setEnemy(null);
+        rejectedSim.notifyDamage(rejectedSucrose, normalProbe, 100.0);
+        assertEquals(0, activeBuffCount(
+                        rejectedSucrose,
+                        BuffId.SUCROSE_C4_ALCHEMANIA_HIT,
+                        rejectedSim.getCurrentTime()),
+                "C4 should not count without a combat target");
+
+        model.character.Sucrose snapshotSucrose = new model.character.Sucrose(
+                new TestWeapon(), blankArtifact(), 4, () -> 4.0);
+        CombatSimulator snapshotSim =
+                simulatorWithExistingCharacter(snapshotSucrose);
+        snapshotSucrose.markSkillUsed(0.0);
+        snapshotSucrose.markSkillUsed(1.0);
+        notifySucroseC4Hits(snapshotSim, snapshotSucrose, 6);
+        snapshotSim.addCharacter(
+                testCharacter(Element.HYDRO, CharacterId.XINGQIU));
+        snapshotSim.setActiveCharacter(CharacterId.XINGQIU);
+        SimulatorSnapshot sixHitSnapshot = snapshotSim.saveSnapshot();
+        snapshotSim.advanceTime(0.1);
+        snapshotSim.notifyDamage(snapshotSucrose, normalProbe, 100.0);
+        assertEquals(java.util.List.of(11.0, 16.0),
+                snapshotSucrose.getChargeRestoreTimes(),
+                "Divergent seventh hit should reduce the earliest charge");
+        snapshotSim.restoreSnapshot(sixHitSnapshot);
+        assertEquals(java.util.List.of(15.0, 16.0),
+                snapshotSucrose.getChargeRestoreTimes(),
+                "Snapshot should restore the pre-C4 charge schedule");
+        assertEquals(6, activeBuffCount(
+                        snapshotSucrose,
+                        BuffId.SUCROSE_C4_ALCHEMANIA_HIT,
+                        snapshotSim.getCurrentTime()),
+                "Snapshot should restore six persistent C4 hit markers");
+        assertEquals(CharacterId.XINGQIU,
+                snapshotSim.getActiveCharacter().getCharacterId(),
+                "C4 counter should persist while Sucrose is off-field");
+        snapshotSim.advanceTime(0.1);
+        snapshotSim.notifyDamage(snapshotSucrose, normalProbe, 100.0);
+        assertEquals(java.util.List.of(11.0, 16.0),
+                snapshotSucrose.getChargeRestoreTimes(),
+                "Snapshot replay should reproduce the same C4 reduction");
+
+        double[] invalidDraws = {
+                0.0, 1.5, 8.0, Double.NaN,
+                Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY
+        };
+        for (double invalidDraw : invalidDraws) {
+            model.character.Sucrose invalidSucrose = new model.character.Sucrose(
+                    new TestWeapon(), blankArtifact(), 4, () -> invalidDraw);
+            CombatSimulator invalidSim =
+                    simulatorWithExistingCharacter(invalidSucrose);
+            invalidSucrose.markSkillUsed(0.0);
+            notifySucroseC4Hits(invalidSim, invalidSucrose, 6);
+            invalidSim.advanceTime(0.1);
+            boolean rejected = false;
+            try {
+                invalidSim.notifyDamage(invalidSucrose, normalProbe, 100.0);
+            } catch (IllegalArgumentException expected) {
+                rejected = true;
+            }
+            assertTrue(rejected,
+                    "Invalid C4 draw should be rejected: " + invalidDraw);
+            assertEquals(java.util.List.of(15.0),
+                    invalidSucrose.getChargeRestoreTimes(),
+                    "Invalid C4 draw should preserve Skill cooldown state");
+            assertEquals(6, activeBuffCount(
+                            invalidSucrose,
+                            BuffId.SUCROSE_C4_ALCHEMANIA_HIT,
+                            invalidSim.getCurrentTime()),
+                    "Invalid C4 draw should preserve counter state");
+        }
+
+        boolean nullDrawRejected = false;
+        try {
+            new model.character.Sucrose(
+                    new TestWeapon(), blankArtifact(), 4, null);
+        } catch (NullPointerException expected) {
+            nullDrawRejected = true;
+        }
+        assertTrue(nullDrawRejected, "Null C4 draw source should be rejected");
+        for (int invalidConstellation : new int[] { -1, 7 }) {
+            boolean rejected = false;
+            try {
+                new model.character.Sucrose(
+                        new TestWeapon(),
+                        blankArtifact(),
+                        invalidConstellation,
+                        () -> 4.0);
+            } catch (IllegalArgumentException expected) {
+                rejected = true;
+            }
+            assertTrue(rejected,
+                    "Invalid Sucrose constellation should be rejected: "
+                            + invalidConstellation);
+        }
+
+        model.character.Sucrose boundSucrose = new model.character.Sucrose(
+                new TestWeapon(), blankArtifact(), 4, () -> 4.0);
+        simulatorWithExistingCharacter(boundSucrose);
+        boolean crossSimulatorRejected = false;
+        try {
+            simulatorWithExistingCharacter(boundSucrose);
+        } catch (IllegalStateException expected) {
+            crossSimulatorRejected = true;
+        }
+        assertTrue(crossSimulatorRejected,
+                "Sucrose C4 listener should reject cross-simulator reuse");
+    }
+
+    private static void notifySucroseC4Hits(
+            CombatSimulator sim,
+            model.character.Sucrose sucrose,
+            int hitCount) {
+        AttackAction normal = typedDamageHit(
+                "Sucrose C4 Count Probe", ActionType.NORMAL, 1.0);
+        for (int i = 0; i < hitCount; i++) {
+            sim.notifyDamage(sucrose, normal, 100.0);
+            if (i + 1 < hitCount) {
+                sim.advanceTime(0.1);
+            }
+        }
     }
 
     private static void testAccuracyPhaseF_XianglingChiliPickupOptIn() {

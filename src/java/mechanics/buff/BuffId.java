@@ -74,6 +74,10 @@ public enum BuffId {
     SUCROSE_CATALYST_CONVERSION_A1_CRYO,
     /** スクロース命ノ星座 6 のボーナス。 */
     SUCROSE_C6_BONUS,
+    /** スクロース命ノ星座 4 の通常/重撃カウント。 */
+    SUCROSE_C4_ALCHEMANIA_HIT,
+    /** スクロース命ノ星座 4 の 0.1 秒カウントクールダウン。 */
+    SUCROSE_C4_ALCHEMANIA_COUNT_COOLDOWN,
     /** Lunar 拡張: フリンスの Lunar 加算ダメージボーナス。 */
     FLINS_LUNAR_BASE_BONUS,
     /** フリンス命ノ星座 2 による雷元素耐性低下。 */

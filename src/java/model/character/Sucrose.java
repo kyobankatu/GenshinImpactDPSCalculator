@@ -1,27 +1,31 @@
 package model.character;
 
+import java.util.Objects;
+import java.util.function.DoubleSupplier;
+
+import mechanics.buff.Buff;
+import mechanics.buff.BuffId;
+import mechanics.buff.SimpleBuff;
 import mechanics.data.TalentDataManager;
 import mechanics.data.TalentDataSource;
-import model.entity.FormStateProvider;
-import model.entity.Character;
-import model.entity.Weapon;
+import mechanics.energy.ParticleType;
 import model.entity.ArtifactSet;
-import mechanics.buff.BuffId;
+import model.entity.Character;
+import model.entity.FormStateProvider;
+import model.entity.SimulatorInitializedCharacterEffect;
+import model.entity.Weapon;
 import model.stats.StatsContainer;
+import model.type.ActionType;
 import model.type.CharacterId;
 import model.type.Element;
-import model.type.StatType;
-import model.type.ICDType;
 import model.type.ICDTag;
-import model.type.ActionType;
+import model.type.ICDType;
+import model.type.StatType;
 import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
 import simulation.event.PeriodicDamageEvent;
-import mechanics.buff.SimpleBuff;
-import mechanics.energy.EnergyManager;
-import mechanics.energy.ParticleType;
 
 /**
  * Anemo Catalyst support character (Sucrose) implementation.
@@ -38,15 +42,22 @@ import mechanics.energy.ParticleType;
  *       own EM to all non-Sucrose party members for 8 s.</li>
  *   <li><b>Catalyst Conversion (A1)</b> — if a swirl occurs, party members matching
  *       the swirled element gain +50 EM for 8 s.</li>
+ *   <li><b>C4</b> — every seventh resolved Normal/Charged hit reduces only the
+ *       earliest Skill charge cooldown by an injected integer from 1-7 s.</li>
  *   <li><b>C6</b> — absorbed element gains +20% elemental DMG for the remaining
  *       burst duration.</li>
  * </ul>
  *
  * <p>C1 grants a second Skill charge (max 2); C2 extends burst duration to 8 s.
  */
-public class Sucrose extends Character implements FormStateProvider {
+public class Sucrose extends Character implements
+        FormStateProvider, SimulatorInitializedCharacterEffect {
+    private static final double ALCHEMANIA_COUNT_COOLDOWN = 0.1;
+    private static final int ALCHEMANIA_HIT_THRESHOLD = 7;
 
     private int normalAttackStep = 0;
+    private final DoubleSupplier alchemaniaReductionDraw;
+    private CombatSimulator initializedSimulator;
 
     // Burst State
     private Element absorbedElement = null;
@@ -60,11 +71,107 @@ public class Sucrose extends Character implements FormStateProvider {
      * @param artifacts equipped artifact set
      */
     public Sucrose(Weapon weapon, ArtifactSet artifacts) {
-        this(weapon, artifacts, TalentDataManager.getInstance());
+        this(
+                weapon,
+                artifacts,
+                TalentDataManager.getInstance(),
+                6,
+                Sucrose::randomAlchemaniaReduction);
     }
 
-    public Sucrose(Weapon weapon, ArtifactSet artifacts, TalentDataSource talentData) {
+    /**
+     * Constructs C6 Sucrose with explicit talent data and stochastic C4 draws.
+     *
+     * @param weapon equipped weapon
+     * @param artifacts equipped artifact set
+     * @param talentData talent value source
+     */
+    public Sucrose(
+            Weapon weapon,
+            ArtifactSet artifacts,
+            TalentDataSource talentData) {
+        this(weapon, artifacts, talentData, 6, Sucrose::randomAlchemaniaReduction);
+    }
+
+    /**
+     * Constructs C6 Sucrose with explicit C4 reduction draws.
+     *
+     * @param weapon equipped weapon
+     * @param artifacts equipped artifact set
+     * @param alchemaniaReductionDraw source of integer reductions in [1, 7]
+     */
+    public Sucrose(
+            Weapon weapon,
+            ArtifactSet artifacts,
+            DoubleSupplier alchemaniaReductionDraw) {
+        this(
+                weapon,
+                artifacts,
+                TalentDataManager.getInstance(),
+                6,
+                alchemaniaReductionDraw);
+    }
+
+    /**
+     * Constructs C6 Sucrose with explicit talent data and C4 draws.
+     *
+     * @param weapon equipped weapon
+     * @param artifacts equipped artifact set
+     * @param talentData talent value source
+     * @param alchemaniaReductionDraw source of integer reductions in [1, 7]
+     */
+    public Sucrose(
+            Weapon weapon,
+            ArtifactSet artifacts,
+            TalentDataSource talentData,
+            DoubleSupplier alchemaniaReductionDraw) {
+        this(weapon, artifacts, talentData, 6, alchemaniaReductionDraw);
+    }
+
+    /**
+     * Constructs Sucrose with explicit constellation and C4 reduction draws.
+     *
+     * @param weapon equipped weapon
+     * @param artifacts equipped artifact set
+     * @param constellation constellation level in the inclusive range 0-6
+     * @param alchemaniaReductionDraw source of integer reductions in [1, 7]
+     */
+    public Sucrose(
+            Weapon weapon,
+            ArtifactSet artifacts,
+            int constellation,
+            DoubleSupplier alchemaniaReductionDraw) {
+        this(
+                weapon,
+                artifacts,
+                TalentDataManager.getInstance(),
+                constellation,
+                alchemaniaReductionDraw);
+    }
+
+    /**
+     * Constructs Sucrose with explicit talent data, constellation, and C4 draw.
+     *
+     * @param weapon equipped weapon
+     * @param artifacts equipped artifact set
+     * @param talentData talent value source
+     * @param constellation constellation level in the inclusive range 0-6
+     * @param alchemaniaReductionDraw source of integer reductions in [1, 7]
+     */
+    public Sucrose(
+            Weapon weapon,
+            ArtifactSet artifacts,
+            TalentDataSource talentData,
+            int constellation,
+            DoubleSupplier alchemaniaReductionDraw) {
         super(talentData);
+        if (constellation < 0 || constellation > 6) {
+            throw new IllegalArgumentException(
+                    "Sucrose constellation must be between 0 and 6");
+        }
+        this.alchemaniaReductionDraw = Objects.requireNonNull(
+                alchemaniaReductionDraw,
+                "Alchemania reduction draw source is required");
         this.name = "Sucrose";
         this.characterId = CharacterId.SUCROSE;
 
@@ -78,14 +185,43 @@ public class Sucrose extends Character implements FormStateProvider {
         this.artifacts = new ArtifactSet[] { artifacts };
         this.element = Element.ANEMO;
 
-        // Defaults
-        this.constellation = 6;
+        this.constellation = constellation;
 
         setSkillCD(15.0);
         setBurstCD(20.0);
 
         // C1: +1 charge (max 2); each charge has its own 15s CD
         setSkillMaxCharges((this.constellation >= 1) ? 2 : 1);
+    }
+
+    /**
+     * Binds the C4 damage listener to exactly one simulator.
+     *
+     * @param sim simulator receiving Sucrose
+     * @throws IllegalStateException if this instance is reused across simulators
+     */
+    @Override
+    public void initializeForSimulator(CombatSimulator sim) {
+        if (initializedSimulator != null && initializedSimulator != sim) {
+            throw new IllegalStateException(
+                    "Sucrose cannot be reused across CombatSimulator instances");
+        }
+        if (initializedSimulator == sim) {
+            return;
+        }
+        initializedSimulator = sim;
+        if (constellation >= 4) {
+            sim.addDamageListener((actor, action, damage, time) -> {
+                if (actor != this
+                        || damage <= 0.0
+                        || sim.getEnemy() == null
+                        || (action.getActionType() != ActionType.NORMAL
+                                && action.getActionType() != ActionType.CHARGE)) {
+                    return;
+                }
+                recordAlchemaniaHit(time);
+            });
+        }
     }
 
     /**
@@ -125,6 +261,7 @@ public class Sucrose extends Character implements FormStateProvider {
      *   <li>{@link CharacterActionKey#SKILL} — casts the Skill.</li>
      *   <li>{@link CharacterActionKey#BURST} — casts the Burst.</li>
      *   <li>{@link CharacterActionKey#NORMAL} — advances the normal attack combo.</li>
+     *   <li>{@link CharacterActionKey#CHARGE} — casts one Charged Attack.</li>
      * </ul>
      *
      * @param request typed action request
@@ -132,6 +269,7 @@ public class Sucrose extends Character implements FormStateProvider {
      */
     @Override
     public void onAction(CharacterActionRequest request, CombatSimulator sim) {
+        initializeForSimulator(sim);
         switch (request.getKey()) {
             case SKILL:
                 markSkillUsed(sim.getCurrentTime(), sim.getApplicableBuffs(this));
@@ -143,6 +281,9 @@ public class Sucrose extends Character implements FormStateProvider {
                 break;
             case NORMAL:
                 normalAttack(sim);
+                break;
+            case CHARGE:
+                chargedAttack(sim);
                 break;
             default:
                 break;
@@ -202,8 +343,28 @@ public class Sucrose extends Character implements FormStateProvider {
         sim.performAction(this.characterId, hit);
 
         normalAttackStep++;
-        if (normalAttackStep >= 4)
+        if (normalAttackStep >= 4) {
             normalAttackStep = 0;
+        }
+    }
+
+    /**
+     * Executes Sucrose's level-9 Charged Attack.
+     *
+     * @param sim active simulator
+     */
+    private void chargedAttack(CombatSimulator sim) {
+        AttackAction charged = new AttackAction(
+                "Sucrose Charged Attack",
+                getTalentValue("Charged Attack", 2.0427),
+                Element.ANEMO,
+                StatType.BASE_ATK,
+                StatType.CHARGED_ATTACK_DMG_BONUS,
+                69.0 / 60.0,
+                ActionType.CHARGE);
+        charged.setICD(ICDType.Standard, ICDTag.ChargedAttack, 1.0);
+        sim.performAction(this.characterId, charged);
+        normalAttackStep = 0;
     }
 
     /**
@@ -393,6 +554,75 @@ public class Sucrose extends Character implements FormStateProvider {
                     break;
             }
         }).sourcedBy(this.getCharacterId()));
+    }
+
+    private void recordAlchemaniaHit(double hitTime) {
+        if (hasActiveMarker(
+                BuffId.SUCROSE_C4_ALCHEMANIA_COUNT_COOLDOWN,
+                hitTime)) {
+            return;
+        }
+
+        int countedHits = countActiveMarkers(
+                BuffId.SUCROSE_C4_ALCHEMANIA_HIT,
+                hitTime);
+        if (countedHits + 1 < ALCHEMANIA_HIT_THRESHOLD) {
+            addBuff(createMarker(
+                    "Alchemania Counted Hit",
+                    BuffId.SUCROSE_C4_ALCHEMANIA_HIT,
+                    Double.MAX_VALUE,
+                    hitTime));
+        } else {
+            double reduction = alchemaniaReductionDraw.getAsDouble();
+            if (!Double.isFinite(reduction)
+                    || reduction < 1.0
+                    || reduction > 7.0
+                    || reduction != Math.rint(reduction)) {
+                throw new IllegalArgumentException(
+                        "Alchemania reduction draw must be an integer between 1 and 7");
+            }
+            removeBuff(BuffId.SUCROSE_C4_ALCHEMANIA_HIT);
+            reduceSkillCooldown(hitTime, reduction);
+        }
+
+        removeBuff(BuffId.SUCROSE_C4_ALCHEMANIA_COUNT_COOLDOWN);
+        addBuff(createMarker(
+                "Alchemania Count Cooldown",
+                BuffId.SUCROSE_C4_ALCHEMANIA_COUNT_COOLDOWN,
+                ALCHEMANIA_COUNT_COOLDOWN,
+                hitTime));
+    }
+
+    private int countActiveMarkers(BuffId id, double currentTime) {
+        int count = 0;
+        for (Buff buff : getActiveBuffs()) {
+            if (buff.getId() == id && !buff.isExpired(currentTime)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private boolean hasActiveMarker(BuffId id, double currentTime) {
+        return countActiveMarkers(id, currentTime) > 0;
+    }
+
+    private Buff createMarker(
+            String markerName,
+            BuffId id,
+            double duration,
+            double currentTime) {
+        return new SimpleBuff(
+                markerName,
+                id,
+                duration,
+                currentTime,
+                stats -> {
+                }).sourcedBy(characterId);
+    }
+
+    private static double randomAlchemaniaReduction() {
+        return 1.0 + Math.floor(Math.random() * 7.0);
     }
 
 }

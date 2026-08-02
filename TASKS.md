@@ -13870,9 +13870,9 @@ Evidence:
 
 ## Implementation Order: Sucrose C4 Alchemania Lifecycle
 
-Status: In progress. Implement B-139 through one bounded shared cooldown
-operation followed by Sucrose-owned typed counter state; RL, generated docs,
-stamina, multi-target hits, and the unknown counter inactivity cap are excluded.
+Status: Complete. B-139 uses one bounded shared cooldown operation followed by
+Sucrose-owned typed counter state; RL, generated docs, stamina, multi-target
+hits, and the unknown counter inactivity cap remain excluded.
 
 Evidence:
 
@@ -13928,21 +13928,23 @@ Evidence:
 - Two `RaidenParty` runs remain 1,275,070 damage / 60,718 DPS. Reaction
   regression, build, Javadoc, sample simulation, and preflight pass.
 
-### Phase 2: Typed Alchemania Counter and Charged Attack
+### Phase 2: Typed Alchemania Counter and Charged Attack - Done
 
 Target files:
 
 - `src/java/mechanics/buff/BuffId.java`
 - `src/java/model/character/Sucrose.java`
 - `config/characters/Sucrose/Sucrose_Multipliers.csv`
+- `src/java/simulation/party/FlinsPartyDefinition.java`
+- `src/java/simulation/party/FlinsParty2Definition.java`
 - `src/java/sample/ReactionRegressionTest.java`
 
 Acceptance criteria:
 
 - Sucrose supports the sourced level-9 Charged Attack as one 204.27% Anemo
   Charged hit with standard Normal/Charged ICD, 1U gauge, and 69-frame action.
-- C4 counts only accepted Sucrose Normal/Charged hits, at most one per 0.1
-  seconds; the seventh removes the counter and applies an injected inclusive
+- C4 counts only positive resolved Sucrose Normal/Charged hits, at most one per
+  0.1 seconds; the seventh removes the counter and applies an injected integer
   1-7-second reduction to only the earliest pending Skill charge.
 - Counter and 0.1-second gate use typed Sucrose-owned markers and survive snapshot
   rollback; C0-C3, Skill/Burst/Plunge, and invalid draws do not alter cooldowns.
@@ -13963,6 +13965,22 @@ Verification:
 - `./gradlew javadoc`
 - `./gradlew RaidenParty`
 - `python scripts/preflight.py`
+
+Evidence:
+
+- Sucrose's sourced level-9 Charged Attack resolves as one 204.27% Anemo,
+  Charged-category, standard-ICD 1U hit over 69 frames and enters C4 through
+  the shared resolved-damage listener.
+- Typed six-hit progress and 0.1-second markers cover simultaneous, 0.099/
+  0.100-second, C3, target, owner, category, positive-damage, switch, exact
+  seven-hit, invalid draw, and cross-simulator boundaries.
+- Injected 1/4/7-second draws reduce only the earliest charge; ready state,
+  partial/full clamp, no carry, and six-hit snapshot rollback/replay pass.
+- Production Flins party definitions use a fixed four-second draw. Two runs
+  each match at 31,443,262 damage / 316,013 DPS for `FlinsParty` and 20,805,520
+  / 301,093 for `FlinsParty2`; two `RaidenParty` runs remain 1,275,070 / 60,718.
+- Reaction regression, party catalog regression, build, Javadoc, samples, and
+  preflight pass.
 
 ### Phase 2: Skill-Activated Damage Sets - Done
 

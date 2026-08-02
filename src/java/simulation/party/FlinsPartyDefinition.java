@@ -229,7 +229,8 @@ public final class FlinsPartyDefinition extends AbstractPartyDefinition {
         columbina.setArtifactRolls(resultCol.rolls);
         sim.addCharacter(columbina);
 
-        Sucrose sucrose = new Sucrose(new WanderingEvenstar(), null);
+        Sucrose sucrose = new Sucrose(
+                new WanderingEvenstar(), null, () -> 4.0);
         ArtifactOptimizer.OptimizationConfig sucConfig = new ArtifactOptimizer.OptimizationConfig();
         sucConfig.mainStatSands = StatType.ELEMENTAL_MASTERY;
         sucConfig.mainStatGoblet = StatType.ELEMENTAL_MASTERY;
