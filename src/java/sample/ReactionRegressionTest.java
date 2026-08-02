@@ -135,6 +135,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_FrostBurialWeapons();
         testAccuracyPhaseF_DeterministicPhysicalProcWeapons();
         testAccuracyPhaseF_OffFieldHitBows();
+        testAccuracyPhaseF_SkillBurstOffensiveWeapons();
         testAccuracyPhaseF_ActionUseWindowWeapons();
         testAccuracyPhaseF_AdditionalSkillUseStatWeapons();
         testAccuracyPhaseF_SamuraiConductWeapons();
@@ -7739,6 +7740,192 @@ public class ReactionRegressionTest {
         }
         assertTrue(nullDrawRejected,
                 "Frost Burial weapons should reject null draw sources");
+    }
+
+    private static void testAccuracyPhaseF_SkillBurstOffensiveWeapons() {
+        model.weapon.FleuveCendreFerryman fleuve =
+                new model.weapon.FleuveCendreFerryman();
+        assertEquals("Fleuve Cendre Ferryman", fleuve.getName(),
+                "Fleuve Cendre Ferryman display name");
+        assertClose(510.0, fleuve.getBaseAtk(), EPS,
+                "Fleuve Cendre Ferryman base ATK");
+        assertClose(0.459,
+                fleuve.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "Fleuve Cendre Ferryman Energy Recharge");
+        assertClose(0.16,
+                fleuve.getStats().get(StatType.SKILL_CRIT_RATE), EPS,
+                "R5 Fleuve Cendre Ferryman Skill CRIT Rate");
+        assertEquals(model.type.WeaponType.SWORD, fleuve.getWeaponType(),
+                "Fleuve Cendre Ferryman weapon type");
+        assertEquals(5, fleuve.getRefinement(),
+                "Fleuve Cendre Ferryman default refinement");
+
+        TestCharacter fleuveOwner = testCharacter(Element.HYDRO);
+        fleuveOwner.setWeapon(fleuve);
+        CombatSimulator fleuveSim = simulatorWith(fleuveOwner);
+        assertClose(1.459,
+                resolvedStat(fleuveSim, fleuveOwner, StatType.ENERGY_RECHARGE), EPS,
+                "Fleuve should expose only static ER before Skill use");
+        fleuve.onAction(
+                fleuveOwner,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL),
+                fleuveSim);
+        assertClose(1.459,
+                resolvedStat(fleuveSim, fleuveOwner, StatType.ENERGY_RECHARGE), EPS,
+                "Normal use should not activate Fleuve ER");
+        fleuve.onAction(
+                fleuveOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                fleuveSim);
+        assertClose(1.779,
+                resolvedStat(fleuveSim, fleuveOwner, StatType.ENERGY_RECHARGE), EPS,
+                "R5 Fleuve Skill-use ER window");
+        fleuveSim.advanceTime(2.0);
+        fleuve.onAction(
+                fleuveOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                fleuveSim);
+        fleuveSim.advanceTime(4.999);
+        assertClose(1.779,
+                resolvedStat(fleuveSim, fleuveOwner, StatType.ENERGY_RECHARGE), EPS,
+                "Refreshed Fleuve ER should remain before expiry");
+        fleuveSim.advanceTime(0.001 + 1e-9);
+        assertClose(1.459,
+                resolvedStat(fleuveSim, fleuveOwner, StatType.ENERGY_RECHARGE), EPS,
+                "Fleuve ER should expire at exactly five seconds");
+
+        model.weapon.FleuveCendreFerryman r1Fleuve =
+                new model.weapon.FleuveCendreFerryman(1);
+        TestCharacter r1FleuveOwner = testCharacter(Element.HYDRO);
+        r1FleuveOwner.setWeapon(r1Fleuve);
+        CombatSimulator r1FleuveSim = simulatorWith(r1FleuveOwner);
+        r1Fleuve.onAction(
+                r1FleuveOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                r1FleuveSim);
+        assertClose(0.08,
+                r1Fleuve.getStats().get(StatType.SKILL_CRIT_RATE), EPS,
+                "R1 Fleuve Skill CRIT Rate");
+        assertClose(1.619,
+                resolvedStat(r1FleuveSim, r1FleuveOwner,
+                        StatType.ENERGY_RECHARGE),
+                EPS,
+                "R1 Fleuve Skill-use ER window");
+
+        model.weapon.LuxuriousSeaLord seaLord =
+                new model.weapon.LuxuriousSeaLord();
+        assertEquals("Luxurious Sea-Lord", seaLord.getName(),
+                "Luxurious Sea-Lord display name");
+        assertClose(454.0, seaLord.getBaseAtk(), EPS,
+                "Luxurious Sea-Lord base ATK");
+        assertClose(0.551,
+                seaLord.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Luxurious Sea-Lord ATK substat");
+        assertClose(0.24,
+                seaLord.getStats().get(StatType.BURST_DMG_BONUS), EPS,
+                "R5 Luxurious Sea-Lord Burst DMG Bonus");
+        assertEquals(model.type.WeaponType.CLAYMORE, seaLord.getWeaponType(),
+                "Luxurious Sea-Lord weapon type");
+        assertEquals(5, seaLord.getRefinement(),
+                "Luxurious Sea-Lord default refinement");
+
+        AttackAction normalHit = typedDamageHit(
+                "Sea-Lord Normal", ActionType.NORMAL, 1.0);
+        AttackAction zeroBurstHit = typedDamageHit(
+                "Sea-Lord zero Burst", ActionType.BURST, 0.0);
+        AttackAction burstHit = typedDamageHit(
+                "Sea-Lord Burst", ActionType.BURST, 1.0);
+        AttackAction classifiedHit = typedDamageHit(
+                "Sea-Lord classified Normal", ActionType.NORMAL, 1.0);
+        classifiedHit.setCountsAsBurstDmg(true);
+
+        TestCharacter seaLordOwner = testCharacter(Element.HYDRO);
+        seaLordOwner.setWeapon(seaLord);
+        CombatSimulator seaLordSim = simulatorWith(seaLordOwner);
+        seaLord.onDamage(seaLordOwner, normalHit, 0.0, seaLordSim);
+        seaLord.onDamage(seaLordOwner, zeroBurstHit, 0.0, seaLordSim);
+        assertClose(0.0, seaLordSim.getTotalDamage(), EPS,
+                "Wrong and zero hits should not trigger Luxurious Sea-Lord");
+        seaLord.onDamage(seaLordOwner, burstHit, 0.0, seaLordSim);
+        double r5SeaLordProc = seaLordSim.getTotalDamage();
+        assertTrue(r5SeaLordProc > 0.0,
+                "Luxurious Sea-Lord should proc from Burst damage");
+        seaLordSim.advanceTime(14.999);
+        seaLord.onDamage(
+                seaLordOwner,
+                classifiedHit,
+                seaLordSim.getCurrentTime(),
+                seaLordSim);
+        assertClose(r5SeaLordProc, seaLordSim.getTotalDamage(), EPS,
+                "Luxurious Sea-Lord should remain on CT before fifteen seconds");
+        seaLordSim.advanceTime(0.001 + 1e-9);
+        seaLord.onDamage(
+                seaLordOwner,
+                classifiedHit,
+                seaLordSim.getCurrentTime(),
+                seaLordSim);
+        assertClose(r5SeaLordProc * 2.0, seaLordSim.getTotalDamage(), EPS,
+                "Counts-as-Burst damage should proc at exact fifteen-second CT");
+
+        model.weapon.LuxuriousSeaLord r1SeaLord =
+                new model.weapon.LuxuriousSeaLord(1);
+        TestCharacter r1SeaLordOwner = testCharacter(Element.HYDRO);
+        r1SeaLordOwner.setWeapon(r1SeaLord);
+        CombatSimulator r1SeaLordSim = simulatorWith(r1SeaLordOwner);
+        r1SeaLord.onDamage(r1SeaLordOwner, burstHit, 0.0, r1SeaLordSim);
+        assertClose(r5SeaLordProc * 0.5, r1SeaLordSim.getTotalDamage(), EPS,
+                "R1 Sea-Lord should use 100% instead of 200% ATK");
+        assertClose(0.12,
+                r1SeaLord.getStats().get(StatType.BURST_DMG_BONUS), EPS,
+                "R1 Luxurious Sea-Lord Burst DMG Bonus");
+
+        model.weapon.LuxuriousSeaLord offFieldSeaLord =
+                new model.weapon.LuxuriousSeaLord();
+        TestCharacter offFieldOwner = testCharacter(
+                Element.HYDRO, CharacterId.SUCROSE);
+        offFieldOwner.setWeapon(offFieldSeaLord);
+        CombatSimulator offFieldSim = simulatorWith(offFieldOwner);
+        offFieldSim.addCharacter(testCharacter(Element.PYRO, CharacterId.AMBER));
+        offFieldSim.setActiveCharacter(CharacterId.AMBER);
+        offFieldSeaLord.onDamage(offFieldOwner, burstHit, 0.0, offFieldSim);
+        assertClose(0.0, offFieldSim.getTotalDamage(), EPS,
+                "Off-field Burst damage should not trigger Luxurious Sea-Lord");
+
+        boolean lowFleuveRefinementRejected = false;
+        try {
+            new model.weapon.FleuveCendreFerryman(0);
+        } catch (IllegalArgumentException expected) {
+            lowFleuveRefinementRejected = true;
+        }
+        assertTrue(lowFleuveRefinementRejected,
+                "Fleuve Cendre Ferryman should reject refinement zero");
+
+        boolean highFleuveRefinementRejected = false;
+        try {
+            new model.weapon.FleuveCendreFerryman(6);
+        } catch (IllegalArgumentException expected) {
+            highFleuveRefinementRejected = true;
+        }
+        assertTrue(highFleuveRefinementRejected,
+                "Fleuve Cendre Ferryman should reject refinement six");
+
+        boolean lowSeaLordRefinementRejected = false;
+        try {
+            new model.weapon.LuxuriousSeaLord(0);
+        } catch (IllegalArgumentException expected) {
+            lowSeaLordRefinementRejected = true;
+        }
+        assertTrue(lowSeaLordRefinementRejected,
+                "Luxurious Sea-Lord should reject refinement zero");
+
+        boolean highSeaLordRefinementRejected = false;
+        try {
+            new model.weapon.LuxuriousSeaLord(6);
+        } catch (IllegalArgumentException expected) {
+            highSeaLordRefinementRejected = true;
+        }
+        assertTrue(highSeaLordRefinementRejected,
+                "Luxurious Sea-Lord should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_OffFieldHitBows() {
