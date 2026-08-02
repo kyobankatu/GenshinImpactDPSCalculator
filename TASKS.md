@@ -14236,7 +14236,7 @@ Verification:
 
 ## Implementation Order: Reaction Utility Claymore Campaign
 
-Status: Active. Add two complete reaction-driven claymores using existing party,
+Status: Complete. Two reaction-driven claymores now use existing party,
 reaction attribution, action stat, and flat-Energy contracts.
 
 Scope:
@@ -14249,13 +14249,20 @@ Out of scope for this pass:
 - Pickup interactions, delayed visual effects, reaction formulas, characters,
   RL, generated docs, and unrelated weapons.
 
-### Phase 1: Add both reaction utility claymores
+### Phase 1: Add both reaction utility claymores - Done (`8fbad3a`)
 
 Target files:
 
 - `src/java/model/weapon/EarthShaker.java` (new)
 - `src/java/model/weapon/FlameForgedInsight.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Earth proves all typed Pyro families, related-element filtering, party-only
+  attribution, off-field allies, refresh, exact expiry, and R1/R5 values.
+- Flame proves all six listed families, owner-only off-field attribution, flat
+  Energy/cap, exact CT/expiry, and R1/R5 values; all project gates pass.
 
 Acceptance criteria:
 

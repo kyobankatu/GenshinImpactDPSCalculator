@@ -2380,10 +2380,12 @@ experiment record.
 
 ### B-101 — Reaction utility claymore coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Earth Shaker and Flame-Forged Insight; RL excluded
 - **Value/risk:** two complete passives reuse typed reaction attribution, party
   membership, Skill DMG stats, and flat Energy without runtime dispatch changes
 - **Evidence boundary:** KQM TCL metadata, R1-R5 values, reaction families,
   off-field behavior, eight/15-second windows, and Flame's 15-second CT
 - **Plan:** `TASKS.md` Reaction Utility Claymore Campaign
+- **Completion:** `8fbad3a` adds both typed reaction listeners and focused
+  regressions; build/Javadoc/leak gates pass
