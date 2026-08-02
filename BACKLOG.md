@@ -2091,10 +2091,12 @@ experiment record.
 
 ### B-077 — Remaining 3-star Bane weapon coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Cool Steel, Bloodtainted Greatsword, and Raven Bow; RL excluded
 - **Value/risk:** three local content additions reuse the verified impact-time
   Aura base with no shared formula or mutable-state change
 - **Evidence boundary:** KQM TCL Lv. 90 metadata, eligible Aura pairs, and R1-R5
   values; Black Tassel remains excluded because enemy type is not modeled
 - **Plan:** `TASKS.md` Remaining 3-Star Bane Weapon Campaign
+- **Completion:** `45eae33`, `53abaaf`, and `9749303` add all three supported
+  variants with reaction regression, build, Javadoc, and leak gates passing

@@ -27,9 +27,9 @@ The current autonomous session is simulator-only. Python RL training and the
 Java RL bridge are excluded; the retained NCCL/DDP plan below is paused until a
 future explicit user request.
 
-The Favonius, Sacrificial, target-Aura weapon, and Kaeya vertical-slice
-campaigns are complete. The remaining 3-star Bane weapon campaign is active;
-RL and generated docs remain excluded.
+The Favonius, Sacrificial, target-Aura weapon, Kaeya vertical-slice, and
+remaining 3-star Bane weapon campaigns are complete; RL and generated docs
+remain excluded.
 
 The B-058 Burning fuel correction is complete. It replaces the fixed
 two-second approximation with typed Dendro-fuel decay and refresh ownership
@@ -12776,8 +12776,8 @@ Verification:
 
 ## Implementation Order: Remaining 3-Star Bane Weapon Campaign
 
-Status: In progress. Three independent weapon classes will reuse the verified
-live target-Aura implementation without changing formula or Aura behavior.
+Status: Complete. Three independent weapon classes reuse the verified live
+target-Aura implementation without changing formula or Aura behavior.
 
 Scope:
 
@@ -12791,7 +12791,7 @@ Out of scope for this pass:
 - Black Tassel's slime enemy type, formula/Aura changes, transformative reaction
   bonuses, characters, parties, RL, and generated docs.
 
-### Phase 1: Add the Remaining Supported 3-Star Bane Weapons
+### Phase 1: Add the Remaining Supported 3-Star Bane Weapons - Done
 
 Target files:
 
@@ -12802,9 +12802,18 @@ Target files:
 
 | Unit | Eligible Aura | Focused verification | Status |
 |---|---|---|---|
-| Cool Steel | Hydro/Cryo | 401 ATK, 35.2% ATK, sword, R1/R5 damage | Ready |
-| Bloodtainted Greatsword | Pyro/Electro | 354 ATK, 187 EM, claymore, R1/R5 damage | Ready |
-| Raven Bow | Hydro/Pyro | 448 ATK, 94 EM, bow, R1/R5 damage | Ready |
+| Cool Steel | Hydro/Cryo | 401 ATK, 35.2% ATK, sword, R1/R5 damage | Done (`45eae33`) |
+| Bloodtainted Greatsword | Pyro/Electro | 354 ATK, 187 EM, claymore, R1/R5 damage | Done (`53abaaf`) |
+| Raven Bow | Hydro/Pyro | 448 ATK, 94 EM, bow, R1/R5 damage | Done (`9749303`) |
+
+Completion evidence:
+
+- Each weapon exposes sourced Lv. 90 metadata and both R1/R5 passive values;
+  each eligible Aura pair and one ineligible element are covered.
+- Existing no-Aura, expiry, snapshot/effective-stat exclusion, and invalid
+  refinement coverage remains green through the shared base regression.
+- Every unit passes reaction regression, build, and preflight; the final public
+  API boundary passes Javadoc with no generated artifact staged.
 
 Acceptance criteria:
 
