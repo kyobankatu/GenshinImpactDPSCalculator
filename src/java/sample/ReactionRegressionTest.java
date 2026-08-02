@@ -163,6 +163,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ArtifactActionCallbackContract();
         testAccuracyPhaseF_ActionUseArtifactSets();
         testAccuracyPhaseF_HuskCuriosityState();
+        testAccuracyPhaseF_ScholarPartyEnergySet();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -12290,6 +12291,108 @@ public class ReactionRegressionTest {
         }
         assertTrue(nullStatsRejected,
                 "Husk should reject null supplied stats");
+    }
+
+    private static void testAccuracyPhaseF_ScholarPartyEnergySet() {
+        StatsContainer suppliedStats = new StatsContainer();
+        suppliedStats.set(StatType.ELEMENTAL_MASTERY, 40.0);
+        model.artifact.Scholar suppliedScholar =
+                new model.artifact.Scholar(suppliedStats);
+        assertEquals("Scholar", suppliedScholar.getName(),
+                "Scholar display name");
+        assertClose(0.20,
+                suppliedScholar.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "Scholar two-piece Energy Recharge");
+        assertClose(40.0,
+                suppliedScholar.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Scholar should preserve supplied stats");
+
+        model.artifact.Scholar scholar = new model.artifact.Scholar();
+        TestCharacter owner = testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE);
+        owner.setWeapon(new model.weapon.DullBlade());
+        owner.setArtifacts(scholar);
+        TestCharacter bowAlly = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        bowAlly.setWeapon(new model.weapon.HuntersBow());
+        TestCharacter catalystAlly = testCharacter(
+                Element.ELECTRO, CharacterId.LISA);
+        catalystAlly.setWeapon(new model.weapon.ApprenticesNotes());
+        TestCharacter polearmAlly = testCharacter(
+                Element.PYRO, CharacterId.XIANGLING);
+        polearmAlly.setWeapon(new model.weapon.BeginnersProtector());
+        CombatSimulator sim = simulatorWith(owner);
+        sim.addCharacter(bowAlly);
+        sim.addCharacter(catalystAlly);
+        sim.addCharacter(polearmAlly);
+        owner.restoreCurrentEnergy(0.0);
+        bowAlly.restoreCurrentEnergy(0.0);
+        catalystAlly.restoreCurrentEnergy(0.0);
+        polearmAlly.restoreCurrentEnergy(0.0);
+        scholar.initializeForSimulator(owner, sim, true);
+
+        sim.setActiveCharacter(catalystAlly.getCharacterId());
+        sim.notifyParticle(Element.PYRO, 1.0);
+        assertClose(0.0, owner.getCurrentEnergy(), EPS,
+                "Scholar should exclude Sword users");
+        assertClose(3.0, bowAlly.getCurrentEnergy(), EPS,
+                "Scholar should grant flat Energy to Bow users");
+        assertClose(3.0, catalystAlly.getCurrentEnergy(), EPS,
+                "Scholar should grant flat Energy to Catalyst users");
+        assertClose(0.0, polearmAlly.getCurrentEnergy(), EPS,
+                "Scholar should exclude Polearm users");
+
+        sim.advanceTime(2.999);
+        sim.notifyParticle(Element.HYDRO, 2.0);
+        assertClose(3.0, bowAlly.getCurrentEnergy(), EPS,
+                "Scholar should enforce its three-second cooldown");
+        sim.advanceTime(0.001 + 1e-9);
+        sim.notifyParticle(Element.PHYSICAL, 1.0);
+        assertClose(6.0, bowAlly.getCurrentEnergy(), EPS,
+                "Scholar should retrigger at exact cooldown expiry");
+        assertClose(6.0, catalystAlly.getCurrentEnergy(), EPS,
+                "Scholar should ignore particle element");
+
+        sim.advanceTime(3.0);
+        sim.notifyParticle(Element.PYRO, 0.0);
+        sim.notifyParticle(Element.PYRO, -1.0);
+        assertClose(6.0, bowAlly.getCurrentEnergy(), EPS,
+                "Scholar should reject non-positive particle counts");
+        bowAlly.restoreCurrentEnergy(bowAlly.getMaxEnergy() - 1.0);
+        sim.notifyParticle(Element.DENDRO, 1.0);
+        assertClose(bowAlly.getMaxEnergy(), bowAlly.getCurrentEnergy(), EPS,
+                "Scholar flat Energy should respect the Energy cap");
+        assertClose(9.0, catalystAlly.getCurrentEnergy(), EPS,
+                "Rejected notifications should not consume Scholar cooldown");
+
+        boolean crossBindingRejected = false;
+        try {
+            scholar.initializeForSimulator(owner, new CombatSimulator(), true);
+        } catch (IllegalStateException expected) {
+            crossBindingRejected = true;
+        }
+        assertTrue(crossBindingRejected,
+                "Scholar should reject cross-simulator reuse");
+
+        model.artifact.Scholar independentScholar =
+                new model.artifact.Scholar();
+        TestCharacter independentOwner = testCharacter(Element.HYDRO);
+        independentOwner.setWeapon(new model.weapon.ApprenticesNotes());
+        independentOwner.setArtifacts(independentScholar);
+        CombatSimulator independentSim = simulatorWith(independentOwner);
+        independentOwner.restoreCurrentEnergy(0.0);
+        independentSim.notifyParticle(Element.HYDRO, 1.0);
+        assertClose(3.0, independentOwner.getCurrentEnergy(), EPS,
+                "Scholar instances should have independent cooldowns");
+
+        boolean nullStatsRejected = false;
+        try {
+            new model.artifact.Scholar(null);
+        } catch (NullPointerException expected) {
+            nullStatsRejected = true;
+        }
+        assertTrue(nullStatsRejected,
+                "Scholar should reject null supplied stats");
     }
 
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {

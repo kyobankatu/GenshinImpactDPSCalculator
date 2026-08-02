@@ -2819,3 +2819,17 @@ experiment record.
 - **Completion:** complete fixed/stack stats, field-aware hit and timer gains,
   switch resets, stale/coincident event ordering, exact decay, invalid binding,
   reaction regression, build, Javadoc, and preflight checks pass
+
+### B-130 — Scholar party Energy set
+
+- **Status:** done
+- **Source:** content inventory following explicit broad coverage request
+- **Scope/risk:** local artifact listener; RL excluded
+- **Evidence:** maintained KQM artifact catalog, accessed 2026-08-02, specifies
+  ER +20%, three flat Energy to Bow/Catalyst party members, and three-second CT:
+  https://library.keqingmains.com/equipment/artifacts#scholar
+- **Boundary:** the existing particle notification represents both modeled
+  particles and orbs after normal Energy distribution
+- **Completion:** supplied/fixed stats, weapon filtering, field independence,
+  flat Energy, cap, exact cooldown, rejected notifications, listener binding,
+  reaction regression, build, Javadoc, and preflight checks pass
