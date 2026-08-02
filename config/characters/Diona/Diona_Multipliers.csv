@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Diona,NORMAL,N1,9,0.6636,0
+Diona,NORMAL,N2,9,0.6162,0
+Diona,NORMAL,N3,9,0.8374,0
+Diona,NORMAL,N4,9,0.7900,0
+Diona,NORMAL,N5,9,0.9875,0
+Diona,CHARGE,Fully Charged Aimed Shot,9,2.1080,0
+Diona,PLUNGE,Plunge High,9,2.6086,0
+Diona,SKILL,Icy Paw,12,0.8384,0
+Diona,BURST,Signature Mix Initial,12,1.6000,0
+Diona,BURST,Signature Mix Tick,12,1.0528,0
