@@ -2160,3 +2160,13 @@ experiment record.
 - **Plan:** `TASKS.md` Watatsumi Wavewalker Weapon Campaign
 - **Completion:** `f111166`, `3951ccc`, and `3c562e6` add the shared party
   aggregate and all variants; focused/build/Javadoc/leak gates pass
+
+### B-083 — Reciprocal hit weapon coverage
+
+- **Status:** active
+- **Scope:** Solar Pearl, Mitternachts Waltz, and Dodoco Tales; RL excluded
+- **Value/risk:** three complete weapon passives share existing typed direct-hit
+  dispatch and add no formula, random, target, or party state
+- **Evidence boundary:** KQM TCL Lv. 90 metadata, R1-R5 values, trigger action
+  groups, and five-/six-second durations
+- **Plan:** `TASKS.md` Reciprocal Hit Weapon Campaign

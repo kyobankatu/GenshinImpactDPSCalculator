@@ -13160,3 +13160,58 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc` at the shared/final API boundary
 - `python scripts/preflight.py`
+
+## Implementation Order: Reciprocal Hit Weapon Campaign
+
+Status: Active. Add three weapons whose direct hits open refresh-only windows
+for a different action or stat group through one typed policy.
+
+Scope:
+
+- Add a shared dual-direction hit-triggered stat-window implementation with
+  typed action groups, independent expirations, and refinement validation.
+- Add Solar Pearl, Mitternachts Waltz, and Dodoco Tales with sourced Lv. 90
+  metadata, R1-R5 values, R5 defaults, and focused regressions.
+
+Out of scope for this pass:
+
+- Indirect reaction hits, charged attacks for Solar Pearl/Mitternachts Waltz,
+  new action dispatch, formulas, characters, RL, and generated docs.
+
+### Phase 1: Add Reciprocal Hit Weapons
+
+Target files:
+
+- `src/java/model/weapon/ReciprocalHitStatWeapon.java` (new)
+- `src/java/model/weapon/SolarPearl.java` (new)
+- `src/java/model/weapon/MitternachtsWaltz.java` (new)
+- `src/java/model/weapon/DodocoTales.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+| Unit | Reciprocal windows | Focused verification | Status |
+|---|---|---|---|
+| Shared base + Solar Pearl | Normal -> Skill/Burst; Skill/Burst -> Normal | ordering, independent refresh/expiry, R1/R5 | Pending |
+| Mitternachts Waltz | Normal -> Skill; Skill -> Normal | bow metadata, 5s windows, exclusions | Pending |
+| Dodoco Tales | Normal -> Charged; Charged -> ATK | catalyst metadata, unequal bonuses, 6s windows | Pending |
+
+Acceptance criteria:
+
+- Only positive direct hits in the configured typed action groups activate the
+  opposite window after that hit; zero-damage and unrelated actions do nothing.
+- Each direction refreshes without stacking, expires at exact duration, and can
+  coexist independently with the other direction.
+- Refinements 0/6 fail; metadata and R1-R5 values match KQM TCL; repeated stat
+  compilation is stable and unrelated stats remain unchanged.
+
+Test cases to add or update:
+
+- Normal: both directions, simultaneous active windows, refresh, and metadata.
+- Boundary: R1/R5, immediately before/exact expiry, triggering-hit ordering.
+- Abnormal: zero-damage, unrelated/Charged action exclusions, refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc` at the shared/final API boundary
+- `python scripts/preflight.py`
