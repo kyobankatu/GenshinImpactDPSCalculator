@@ -5933,6 +5933,77 @@ public class ReactionRegressionTest {
             highRefinementRejected = true;
         }
         assertTrue(highRefinementRejected, "Solar Pearl should reject refinement six");
+
+        model.weapon.MitternachtsWaltz mitternachtsWaltz =
+                new model.weapon.MitternachtsWaltz();
+        assertEquals("Mitternachts Waltz", mitternachtsWaltz.getName(),
+                "Mitternachts Waltz display name");
+        assertClose(510.0, mitternachtsWaltz.getBaseAtk(), EPS,
+                "Mitternachts Waltz base ATK");
+        assertClose(0.517,
+                mitternachtsWaltz.getStats().get(StatType.PHYSICAL_DMG_BONUS), EPS,
+                "Mitternachts Waltz Physical DMG Bonus");
+        assertEquals(model.type.WeaponType.BOW, mitternachtsWaltz.getWeaponType(),
+                "Mitternachts Waltz weapon type");
+        assertEquals(5, mitternachtsWaltz.getRefinement(),
+                "Mitternachts Waltz default refinement");
+
+        TestCharacter waltzOwner = testCharacter(Element.ELECTRO);
+        waltzOwner.setWeapon(mitternachtsWaltz);
+        CombatSimulator waltzSim = simulatorWith(waltzOwner);
+        mitternachtsWaltz.onDamage(waltzOwner, normalHit, 0.0, waltzSim);
+        assertClose(0.40,
+                resolvedStat(waltzSim, waltzOwner, StatType.SKILL_DMG_BONUS), EPS,
+                "R5 Mitternachts Waltz Normal hit should enable Skill damage");
+        assertClose(0.0,
+                resolvedStat(waltzSim, waltzOwner, StatType.BURST_DMG_BONUS), EPS,
+                "Mitternachts Waltz Normal hit should not enable Burst damage");
+        mitternachtsWaltz.onDamage(waltzOwner, skillHit, 0.0, waltzSim);
+        assertClose(0.40,
+                resolvedStat(waltzSim, waltzOwner, StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "R5 Mitternachts Waltz Skill hit should enable Normal damage");
+        assertClose(0.40,
+                effectiveStatAt(waltzOwner, StatType.SKILL_DMG_BONUS, 4.999), EPS,
+                "Mitternachts Waltz should remain active before five seconds");
+        assertClose(0.0,
+                effectiveStatAt(waltzOwner, StatType.SKILL_DMG_BONUS, 5.0), EPS,
+                "Mitternachts Waltz should expire at exactly five seconds");
+
+        AttackAction burstHit = typedDamageHit(
+                "Mitternachts Waltz Burst", ActionType.BURST, 1.0);
+        mitternachtsWaltz.onDamage(waltzOwner, burstHit, 6.0, waltzSim);
+        mitternachtsWaltz.onDamage(waltzOwner, chargedHit, 6.0, waltzSim);
+        assertClose(0.0,
+                effectiveStatAt(waltzOwner, StatType.NORMAL_ATTACK_DMG_BONUS, 6.0), EPS,
+                "Burst and Charged hits should not activate Mitternachts Waltz");
+
+        model.weapon.MitternachtsWaltz r1Waltz =
+                new model.weapon.MitternachtsWaltz(1);
+        TestCharacter r1WaltzOwner = testCharacter(Element.ELECTRO);
+        r1WaltzOwner.setWeapon(r1Waltz);
+        CombatSimulator r1WaltzSim = simulatorWith(r1WaltzOwner);
+        r1Waltz.onDamage(r1WaltzOwner, normalHit, 0.0, r1WaltzSim);
+        assertClose(0.20,
+                resolvedStat(r1WaltzSim, r1WaltzOwner, StatType.SKILL_DMG_BONUS), EPS,
+                "R1 Mitternachts Waltz Skill damage bonus");
+
+        boolean lowWaltzRefinementRejected = false;
+        try {
+            new model.weapon.MitternachtsWaltz(0);
+        } catch (IllegalArgumentException expected) {
+            lowWaltzRefinementRejected = true;
+        }
+        assertTrue(lowWaltzRefinementRejected,
+                "Mitternachts Waltz should reject refinement zero");
+
+        boolean highWaltzRefinementRejected = false;
+        try {
+            new model.weapon.MitternachtsWaltz(6);
+        } catch (IllegalArgumentException expected) {
+            highWaltzRefinementRejected = true;
+        }
+        assertTrue(highWaltzRefinementRejected,
+                "Mitternachts Waltz should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
