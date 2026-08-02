@@ -15486,3 +15486,100 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Three-Star Runtime-Boundary Weapon Campaign
+
+Status: In progress. This campaign adds all eleven representable missing
+three-star weapons while leaving the unsupported incoming-switch TTDS contract
+explicitly unimplemented; RL and generated documentation remain excluded.
+
+Scope:
+
+- Add Harbinger of Dawn and Ferrous Shadow using the simulator's full-player-HP
+  boundary.
+- Add Slingshot using immediate action resolution, plus eight weapons whose
+  weak-point, enemy-type, defeat, or healing states are unreachable or have no
+  gameplay state in the current runtime.
+- Centralize intentionally inactive metadata/refinement behavior without
+  fabricating triggers.
+
+Out of scope for this pass:
+
+- Thrilling Tales of Dragon Slayers, incoming switch callbacks, player current
+  HP and healing, enemy defeat/type, weak points, projectile travel time,
+  shared runtime changes, RL, and generated docs.
+
+### Phase 1: Full-HP Conditional Weapons - Done
+
+Target files:
+
+- `src/java/model/weapon/HarbingerOfDawn.java` (new)
+- `src/java/model/weapon/FerrousShadow.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Harbinger metadata and R1/R5 full-HP CRIT values pass at negative and
+  positive times.
+- Ferrous metadata, R1/R5 refinement, and absence of fabricated Charged bonus
+  pass; refinement 0/6 rejection and all local gates pass.
+
+Acceptance criteria:
+
+- Harbinger exposes exact Lv. 90 metadata and applies R1-R5 Vigorous CRIT Rate
+  continuously because player HP remains full in the supported runtime.
+- Ferrous exposes exact Lv. 90 metadata and no Unbending bonus because player
+  HP never falls below any R1-R5 threshold.
+- Both expose R5 defaults, selected refinement, and reject refinement 0/6.
+
+Test cases to add or update:
+
+- Normal: R5 metadata and Vigorous CRIT Rate.
+- Boundary: R1/R5 values and arbitrary-time behavior.
+- Abnormal: refinement 0/6; Ferrous must not synthesize Charged bonus.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
+
+### Phase 2: Immediate-Impact and Boundary-Inactive Weapons
+
+Target files:
+
+- `src/java/model/weapon/BoundaryInactiveWeapon.java` (new)
+- `src/java/model/weapon/TravelersHandySword.java` (new)
+- `src/java/model/weapon/WhiteIronGreatsword.java` (new)
+- `src/java/model/weapon/BlackTassel.java` (new)
+- `src/java/model/weapon/Messenger.java` (new)
+- `src/java/model/weapon/RecurveBow.java` (new)
+- `src/java/model/weapon/SharpshootersOath.java` (new)
+- `src/java/model/weapon/OtherworldlyStory.java` (new)
+- `src/java/model/weapon/TwinNephrite.java` (new)
+- `src/java/model/weapon/Slingshot.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- All nine classes expose exact Lv. 90 metadata, R5 defaults, selected
+  refinement, and refinement validation.
+- Slingshot grants only its R1-R5 close-impact Normal/Charged bonus under the
+  simulator's immediate-resolution boundary.
+- The other eight classes share an explicit no-op boundary and do not infer a
+  slime, weak point, defeat, player HP change, healing, or movement effect.
+
+Test cases to add or update:
+
+- Normal: table-driven metadata for all nine and Slingshot NA/CA bonuses.
+- Boundary: R1/R5 behavior and arbitrary negative/positive times.
+- Abnormal: refinement 0/6 for every class, no Skill/Burst Slingshot bonus,
+  and no stat mutation from the inactive family.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`

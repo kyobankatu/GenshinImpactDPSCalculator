@@ -2669,3 +2669,20 @@ experiment record.
 - **Completion:** branch-isolated family implementation `ace27be` centralizes
   the defeat boundary; table-driven regressions and reaction regression,
   build, Javadoc, and preflight gates pass
+
+### B-123 — Three-star runtime-boundary weapon coverage
+
+- **Status:** in-progress
+- **Scope:** Harbinger of Dawn, Traveler's Handy Sword, Ferrous Shadow, White
+  Iron Greatsword, Black Tassel, Messenger, Recurve Bow, Sharpshooter's Oath,
+  Slingshot, Otherworldly Story, and Twin Nephrite; RL excluded
+- **Value/risk:** closes every remaining three-star gap whose active state is
+  uniquely determined under current full-player-HP, generic immortal enemy,
+  immediate-impact combat boundaries
+- **Evidence boundary:** maintained KQM weapon catalogs and evidence vault,
+  accessed 2026-08-02, provide metadata/passive values and healing/travel
+  behavior: https://library.keqingmains.com/evidence/equipment/weapons
+- **Boundary:** TTDS remains unimplemented because character swaps occur but
+  weapons receive no incoming-character callback; representing it as no-op
+  would be observably incomplete
+- **Plan:** `TASKS.md` Three-Star Runtime-Boundary Weapon Campaign

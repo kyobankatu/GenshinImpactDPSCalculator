@@ -149,6 +149,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_IsolatedRuntimeWeaponPhaseOne();
         testAccuracyPhaseF_IsolatedRuntimeWeaponPhaseTwo();
         testAccuracyPhaseF_BlackcliffWeaponFamily();
+        testAccuracyPhaseF_ThreeStarRuntimeBoundaryPhaseOne();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -9904,6 +9905,90 @@ public class ReactionRegressionTest {
             assertTrue(highRefinementRejected,
                     names[index] + " should reject refinement six");
         }
+    }
+
+    private static void testAccuracyPhaseF_ThreeStarRuntimeBoundaryPhaseOne() {
+        model.weapon.HarbingerOfDawn harbinger =
+                new model.weapon.HarbingerOfDawn();
+        assertEquals("Harbinger of Dawn", harbinger.getName(),
+                "Harbinger display name");
+        assertClose(401.0, harbinger.getBaseAtk(), EPS,
+                "Harbinger base ATK");
+        assertClose(0.469,
+                harbinger.getStats().get(StatType.CRIT_DMG), EPS,
+                "Harbinger CRIT DMG");
+        assertEquals(model.type.WeaponType.SWORD,
+                harbinger.getWeaponType(), "Harbinger weapon type");
+        assertEquals(5, harbinger.getRefinement(),
+                "Harbinger default refinement");
+        StatsContainer harbingerStats = new StatsContainer();
+        harbinger.applyPassive(harbingerStats, -1.0);
+        assertClose(0.28, harbingerStats.get(StatType.CRIT_RATE), EPS,
+                "R5 Harbinger full-HP CRIT Rate");
+        model.weapon.HarbingerOfDawn r1Harbinger =
+                new model.weapon.HarbingerOfDawn(1);
+        StatsContainer r1HarbingerStats = new StatsContainer();
+        r1Harbinger.applyPassive(r1HarbingerStats, 100.0);
+        assertClose(0.14, r1HarbingerStats.get(StatType.CRIT_RATE), EPS,
+                "R1 Harbinger full-HP CRIT Rate");
+
+        model.weapon.FerrousShadow ferrous =
+                new model.weapon.FerrousShadow();
+        assertEquals("Ferrous Shadow", ferrous.getName(),
+                "Ferrous Shadow display name");
+        assertClose(401.0, ferrous.getBaseAtk(), EPS,
+                "Ferrous Shadow base ATK");
+        assertClose(0.352,
+                ferrous.getStats().get(StatType.HP_PERCENT), EPS,
+                "Ferrous Shadow HP substat");
+        assertEquals(model.type.WeaponType.CLAYMORE,
+                ferrous.getWeaponType(), "Ferrous Shadow weapon type");
+        assertEquals(5, ferrous.getRefinement(),
+                "Ferrous Shadow default refinement");
+        StatsContainer ferrousStats = new StatsContainer();
+        ferrousStats.set(StatType.CHARGED_ATTACK_DMG_BONUS, 0.10);
+        ferrous.applyPassive(ferrousStats, -1.0);
+        ferrous.applyPassive(ferrousStats, 100.0);
+        assertClose(0.10,
+                ferrousStats.get(StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "Ferrous Shadow should remain inactive at full HP");
+        model.weapon.FerrousShadow r1Ferrous =
+                new model.weapon.FerrousShadow(1);
+        assertEquals(1, r1Ferrous.getRefinement(),
+                "Ferrous Shadow selected R1");
+
+        boolean lowHarbingerRefinementRejected = false;
+        try {
+            new model.weapon.HarbingerOfDawn(0);
+        } catch (IllegalArgumentException expected) {
+            lowHarbingerRefinementRejected = true;
+        }
+        assertTrue(lowHarbingerRefinementRejected,
+                "Harbinger should reject refinement zero");
+        boolean highHarbingerRefinementRejected = false;
+        try {
+            new model.weapon.HarbingerOfDawn(6);
+        } catch (IllegalArgumentException expected) {
+            highHarbingerRefinementRejected = true;
+        }
+        assertTrue(highHarbingerRefinementRejected,
+                "Harbinger should reject refinement six");
+        boolean lowFerrousRefinementRejected = false;
+        try {
+            new model.weapon.FerrousShadow(0);
+        } catch (IllegalArgumentException expected) {
+            lowFerrousRefinementRejected = true;
+        }
+        assertTrue(lowFerrousRefinementRejected,
+                "Ferrous Shadow should reject refinement zero");
+        boolean highFerrousRefinementRejected = false;
+        try {
+            new model.weapon.FerrousShadow(6);
+        } catch (IllegalArgumentException expected) {
+            highFerrousRefinementRejected = true;
+        }
+        assertTrue(highFerrousRefinementRejected,
+                "Ferrous Shadow should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {
