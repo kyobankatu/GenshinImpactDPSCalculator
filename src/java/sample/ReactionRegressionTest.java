@@ -155,6 +155,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_FavoniusInjectedProcBoundaries();
         testAccuracyPhaseF_FavoniusFamilyMetadata();
         testAccuracyPhaseF_SacrificialSwordProcBoundaries();
+        testAccuracyPhaseF_SacrificialFamilyMetadata();
         testAccuracyPhaseF_WanderingEvenstarTimedSnapshot();
         testAccuracyPhaseF_ColumbinaMoondriftInjectedDrawBoundaries();
         testAccuracyPhase2_TimeAwareLinearDecay();
@@ -4129,6 +4130,14 @@ public class ReactionRegressionTest {
                 "An exact-boundary R1 success should reset Skill cooldown");
     }
 
+    private static void testAccuracyPhaseF_SacrificialFamilyMetadata() {
+        model.weapon.SacrificialGreatsword greatsword =
+                new model.weapon.SacrificialGreatsword(5, () -> 0.0);
+        assertWeaponMetadata(greatsword, "Sacrificial Greatsword", 565.0, 0.306,
+                model.type.WeaponType.CLAYMORE);
+        assertSacrificialResetsSkill(greatsword, "Sacrificial Greatsword");
+    }
+
     private static void testAccuracyPhaseF_WanderingEvenstarTimedSnapshot() {
         double firstTriggerTime = 64.0 / 60.0;
         TestCharacter ally = testCharacter(Element.PYRO, CharacterId.XIANGLING);
@@ -5993,6 +6002,26 @@ public class ReactionRegressionTest {
         captureStandardOutput(() -> weapon.onDamage(owner, hit, 0.0, sim));
         assertTrue(owner.getCurrentEnergy() > 0.0,
                 weaponName + " should inherit neutral-particle Windfall");
+    }
+
+    private static void assertSacrificialResetsSkill(
+            model.weapon.SacrificialWeapon weapon,
+            String weaponName) {
+        TestCharacter owner = testCharacter(Element.HYDRO);
+        owner.setWeapon(weapon);
+        owner.setSkillCD(10.0);
+        owner.markSkillUsed(0.0);
+        CombatSimulator sim = simulatorWith(owner);
+        AttackAction skillHit = new AttackAction(
+                weaponName + " Composed fixture",
+                1.0,
+                Element.HYDRO,
+                StatType.BASE_ATK,
+                StatType.SKILL_DMG_BONUS,
+                0.0,
+                ActionType.SKILL);
+        captureStandardOutput(() -> weapon.onDamage(owner, skillHit, 0.0, sim));
+        assertTrue(owner.canSkill(0.0), weaponName + " should inherit Composed Skill reset");
     }
 
     private static void assertClose(double expected, double actual, double tolerance, String message) {
