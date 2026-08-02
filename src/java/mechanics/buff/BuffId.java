@@ -76,6 +76,8 @@ public enum BuffId {
     SUCROSE_C6_BONUS,
     /** Lunar 拡張: フリンスの Lunar 加算ダメージボーナス。 */
     FLINS_LUNAR_BASE_BONUS,
+    /** フリンス命ノ星座 2 による雷元素耐性低下。 */
+    FLINS_C2_ELECTRO_RES_SHRED,
     /** Lunar 拡張: コロンビーナの Lunar 加算ダメージボーナス。 */
     COLUMBINA_LUNAR_BASE_BONUS,
     /** Lunar 拡張: コロンビーナ C1 による Lunar 反応ボーナス。 */

@@ -97,6 +97,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_RaidenResolveAndEnergyRegression();
         testAccuracyPhaseF_RaidenConstellationLifecycle();
         testAccuracyPhaseF_FlinsA1AndC1Lifecycle();
+        testAccuracyPhaseF_FlinsC2AndC4();
         testAccuracyPhaseF_FlinsSkillApplicationContract();
         testAccuracyPhaseF_FlinsThundercloudConditionalHits();
         testAccuracyPhaseF_FlinsSymphonyZeroGaugeContract();
@@ -3168,6 +3169,206 @@ public class ReactionRegressionTest {
         }
         assertTrue(crossSimulatorRejected,
                 "Flins should reject cross-simulator listener reuse");
+    }
+
+    private static void testAccuracyPhaseF_FlinsC2AndC4() {
+        RecordingDamageWeapon c2Weapon =
+                new RecordingDamageWeapon("The Devil's Wall Follow-Up");
+        model.character.Flins c2Flins = new model.character.Flins(
+                c2Weapon, blankArtifact(), flinsTalentData(2));
+        CombatSimulator c2Sim = simulatorWithExistingCharacter(c2Flins);
+        c2Flins.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), c2Sim);
+        c2Flins.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), c2Sim);
+        c2Flins.onAction(CharacterActionRequest.of(CharacterActionKey.NORMAL), c2Sim);
+        assertEquals(1, c2Weapon.actions.size(),
+                "Flins C2 should add one follow-up to the first Manifest Normal");
+        AttackAction c2FollowUp = c2Weapon.actions.get(0);
+        assertClose(0.50, c2FollowUp.getDamagePercent(), EPS,
+                "Flins C2 follow-up multiplier");
+        assertEquals(Element.ELECTRO, c2FollowUp.getElement(),
+                "Flins C2 follow-up element");
+        assertEquals(ActionType.OTHER, c2FollowUp.getActionType(),
+                "Flins C2 follow-up action category");
+        assertEquals(AttackAction.LunarReactionType.CHARGED,
+                c2FollowUp.getLunarReactionType(),
+                "Flins C2 follow-up should use direct Lunar-Charged damage");
+        assertEquals(ICDType.None, c2FollowUp.getICDType(),
+                "Flins C2 follow-up should have no ICD");
+        assertEquals(ICDTag.None, c2FollowUp.getICDTag(),
+                "Flins C2 follow-up should not enter an elemental ICD group");
+        assertClose(0.0, c2FollowUp.getGaugeUnits(), EPS,
+                "Flins C2 follow-up should apply zero gauge");
+        c2Flins.onAction(CharacterActionRequest.of(CharacterActionKey.NORMAL), c2Sim);
+        assertEquals(1, c2Weapon.actions.size(),
+                "Flins C2 follow-up should be consumed after one Normal hit");
+
+        RecordingDamageWeapon c1Weapon =
+                new RecordingDamageWeapon("The Devil's Wall Follow-Up");
+        model.character.Flins c1Flins = new model.character.Flins(
+                c1Weapon, blankArtifact(), flinsTalentData(1));
+        CombatSimulator c1Sim = simulatorWithExistingCharacter(c1Flins);
+        c1Flins.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), c1Sim);
+        c1Flins.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), c1Sim);
+        c1Flins.onAction(CharacterActionRequest.of(CharacterActionKey.NORMAL), c1Sim);
+        assertTrue(c1Weapon.actions.isEmpty(),
+                "Flins C1 should not receive the C2 follow-up");
+
+        RecordingDamageWeapon beforeExpiryWeapon =
+                new RecordingDamageWeapon("The Devil's Wall Follow-Up");
+        model.character.Flins beforeExpiryFlins = new model.character.Flins(
+                beforeExpiryWeapon, blankArtifact(), flinsTalentData(2));
+        CombatSimulator beforeExpirySim =
+                simulatorWithExistingCharacter(beforeExpiryFlins);
+        beforeExpiryFlins.onAction(
+                CharacterActionRequest.of(CharacterActionKey.SKILL), beforeExpirySim);
+        double spearstormCastTime = beforeExpirySim.getCurrentTime();
+        beforeExpiryFlins.onAction(
+                CharacterActionRequest.of(CharacterActionKey.SKILL), beforeExpirySim);
+        beforeExpirySim.advanceTime(
+                spearstormCastTime + 5.999 - beforeExpirySim.getCurrentTime());
+        beforeExpiryFlins.onAction(
+                CharacterActionRequest.of(CharacterActionKey.NORMAL), beforeExpirySim);
+        assertEquals(1, beforeExpiryWeapon.actions.size(),
+                "Flins C2 follow-up should trigger immediately before six seconds");
+
+        RecordingDamageWeapon atExpiryWeapon =
+                new RecordingDamageWeapon("The Devil's Wall Follow-Up");
+        model.character.Flins atExpiryFlins = new model.character.Flins(
+                atExpiryWeapon, blankArtifact(), flinsTalentData(2));
+        CombatSimulator atExpirySim = simulatorWithExistingCharacter(atExpiryFlins);
+        atExpiryFlins.onAction(
+                CharacterActionRequest.of(CharacterActionKey.SKILL), atExpirySim);
+        double atExpiryCastTime = atExpirySim.getCurrentTime();
+        atExpiryFlins.onAction(
+                CharacterActionRequest.of(CharacterActionKey.SKILL), atExpirySim);
+        atExpirySim.advanceTime(
+                atExpiryCastTime + 6.0 - atExpirySim.getCurrentTime());
+        atExpiryFlins.onAction(
+                CharacterActionRequest.of(CharacterActionKey.NORMAL), atExpirySim);
+        assertTrue(atExpiryWeapon.actions.isEmpty(),
+                "Flins C2 follow-up should be absent at exact six-second expiry");
+
+        model.character.Flins shredFlins = new model.character.Flins(
+                new TestWeapon(), blankArtifact(), flinsTalentData(2));
+        CombatSimulator shredSim = new CombatSimulator();
+        shredSim.setLoggingEnabled(false);
+        shredSim.setEnemy(new Enemy(90));
+        List<Double> shredDuringTrigger = new ArrayList<>();
+        shredSim.addDamageListener((actor, action, damage, time) -> {
+            if (actor == shredFlins
+                    && "Northland Spearstorm".equals(action.getName())) {
+                shredDuringTrigger.add(
+                        resolvedStat(shredSim, shredFlins, StatType.ELECTRO_RES_SHRED));
+            }
+        });
+        shredSim.addCharacter(shredFlins);
+        shredSim.setMoonsign(CombatSimulator.Moonsign.ASCENDANT_GLEAM);
+        shredFlins.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), shredSim);
+        shredFlins.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), shredSim);
+        assertEquals(1, shredDuringTrigger.size(),
+                "Flins C2 shred ordering fixture should observe Spearstorm once");
+        assertClose(0.0, shredDuringTrigger.get(0), EPS,
+                "Flins C2 triggering Electro hit should not benefit from its own shred");
+        Buff firstShred = requireFlinsC2Shred(shredSim);
+        assertClose(0.25,
+                resolvedStat(shredSim, shredFlins, StatType.ELECTRO_RES_SHRED), EPS,
+                "Flins C2 should apply Electro shred after an on-field hit");
+        double firstShredStart = firstShred.getStartTime();
+        shredSim.advanceTime(1.0);
+        shredFlins.onAction(CharacterActionRequest.of(CharacterActionKey.NORMAL), shredSim);
+        Buff refreshedShred = requireFlinsC2Shred(shredSim);
+        assertTrue(refreshedShred.getStartTime() > firstShredStart,
+                "Flins C2 should refresh rather than stack on later Electro hits");
+        double refreshedStart = refreshedShred.getStartTime();
+        shredSim.advanceTime(refreshedStart + 6.999 - shredSim.getCurrentTime());
+        assertClose(0.25,
+                resolvedStat(shredSim, shredFlins, StatType.ELECTRO_RES_SHRED), EPS,
+                "Flins C2 shred should remain active before seven seconds");
+        shredSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0,
+                resolvedStat(shredSim, shredFlins, StatType.ELECTRO_RES_SHRED), EPS,
+                "Flins C2 shred should expire at exactly seven seconds");
+
+        model.character.Flins nascentFlins = new model.character.Flins(
+                new TestWeapon(), blankArtifact(), flinsTalentData(2));
+        CombatSimulator nascentSim = simulatorWithExistingCharacter(nascentFlins);
+        nascentFlins.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), nascentSim);
+        nascentFlins.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), nascentSim);
+        assertTrue(nascentSim.getTeamBuffList().stream().noneMatch(
+                        buff -> buff.getId() == BuffId.FLINS_C2_ELECTRO_RES_SHRED),
+                "Flins C2 should not shred at Nascent Gleam");
+
+        model.character.Flins offFieldFlins = new model.character.Flins(
+                new TestWeapon(), blankArtifact(), flinsTalentData(2));
+        CombatSimulator offFieldSim = simulatorWithExistingCharacter(offFieldFlins);
+        offFieldSim.addCharacter(
+                testCharacter(Element.HYDRO, CharacterId.XINGQIU));
+        offFieldSim.setMoonsign(CombatSimulator.Moonsign.ASCENDANT_GLEAM);
+        offFieldSim.setActiveCharacter(CharacterId.XINGQIU);
+        offFieldSim.performActionWithoutTimeAdvance(
+                CharacterId.FLINS,
+                new AttackAction(
+                        "Off-field Flins Electro fixture",
+                        1.0,
+                        Element.ELECTRO,
+                        StatType.BASE_ATK));
+        assertTrue(offFieldSim.getTeamBuffList().stream().noneMatch(
+                        buff -> buff.getId() == BuffId.FLINS_C2_ELECTRO_RES_SHRED),
+                "Off-field Flins Electro damage should not apply C2 shred");
+
+        model.character.Flins c3Flins = new model.character.Flins(
+                new TestWeapon(), blankArtifact(), flinsTalentData(3));
+        CombatSimulator c3Sim = simulatorWithExistingCharacter(c3Flins);
+        assertClose(0.0, resolvedStat(c3Sim, c3Flins, StatType.ATK_PERCENT), EPS,
+                "Flins C3 should not receive C4 ATK");
+        assertClose(352.0 * 0.08,
+                resolvedStat(c3Sim, c3Flins, StatType.ELEMENTAL_MASTERY), EPS,
+                "Flins C3 Whispering Flame should retain eight percent ATK");
+
+        model.character.Flins c4Flins = new model.character.Flins(
+                new TestWeapon(), blankArtifact(), flinsTalentData(4));
+        CombatSimulator c4Sim = simulatorWithExistingCharacter(c4Flins);
+        assertClose(0.20, resolvedStat(c4Sim, c4Flins, StatType.ATK_PERCENT), EPS,
+                "Flins C4 should grant twenty percent ATK");
+        assertClose(352.0 * 1.20 * 0.10,
+                resolvedStat(c4Sim, c4Flins, StatType.ELEMENTAL_MASTERY), EPS,
+                "Flins C4 Whispering Flame should use post-C4 ATK at ten percent");
+
+        StatsContainer belowCapStats = new StatsContainer();
+        belowCapStats.add(StatType.ATK_FLAT, 1776.6);
+        model.character.Flins belowCapFlins = new model.character.Flins(
+                new TestWeapon(),
+                new ArtifactSet("Flins C4 below-cap fixture", belowCapStats),
+                flinsTalentData(4));
+        CombatSimulator belowCapSim = simulatorWithExistingCharacter(belowCapFlins);
+        assertClose(219.9,
+                resolvedStat(belowCapSim, belowCapFlins, StatType.ELEMENTAL_MASTERY), EPS,
+                "Flins C4 should preserve EM immediately below the cap");
+
+        StatsContainer cappedStats = new StatsContainer();
+        cappedStats.add(StatType.ATK_FLAT, 1777.6);
+        model.character.Flins cappedFlins = new model.character.Flins(
+                new TestWeapon(),
+                new ArtifactSet("Flins C4 capped fixture", cappedStats),
+                flinsTalentData(4));
+        CombatSimulator cappedSim = simulatorWithExistingCharacter(cappedFlins);
+        assertClose(220.0,
+                resolvedStat(cappedSim, cappedFlins, StatType.ELEMENTAL_MASTERY), EPS,
+                "Flins C4 Whispering Flame should cap at 220 EM");
+    }
+
+    private static Buff requireFlinsC2Shred(CombatSimulator sim) {
+        List<Buff> buffs = new ArrayList<>();
+        for (Buff buff : sim.getTeamBuffList()) {
+            if (buff.getId() == BuffId.FLINS_C2_ELECTRO_RES_SHRED) {
+                buffs.add(buff);
+            }
+        }
+        assertEquals(1, buffs.size(),
+                "Flins C2 should retain one typed Electro shred");
+        assertEquals(CharacterId.FLINS, buffs.get(0).getSourceCharacterId(),
+                "Flins C2 shred should retain source ownership");
+        return buffs.get(0);
     }
 
     private static void testAccuracyPhaseF_FlinsThundercloudConditionalHits() {

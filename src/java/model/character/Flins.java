@@ -60,6 +60,7 @@ public class Flins extends Character
     private double thunderousSymphonyEndTime = -1;
     private double northlandSpearstormNextTime = 0;
     private double normalAttackParticleNextTime = 0; // 2s CD on Manifest Flame NA particle
+    private double c2NormalFollowUpEndTime = Double.NEGATIVE_INFINITY;
 
     // C1 state
     private CombatSimulator initializedSimulator;
@@ -209,9 +210,15 @@ public class Flins extends Character
      */
     @Override
     public void applyPassive(StatsContainer stats) {
-        // Whispering Flame: EM increased by 8% of ATK (Max 160)
+        if (constellation >= 4) {
+            stats.add(StatType.ATK_PERCENT, 0.20);
+        }
+
+        // Whispering Flame: C4 raises 8%/160 to 10%/220.
         double atk = stats.getTotalAtk();
-        double bonusEm = Math.min(160.0, atk * 0.08);
+        double emRatio = constellation >= 4 ? 0.10 : 0.08;
+        double emCap = constellation >= 4 ? 220.0 : 160.0;
+        double bonusEm = Math.min(emCap, atk * emRatio);
         stats.add(StatType.ELEMENTAL_MASTERY, bonusEm);
 
         if (initializedSimulator != null
@@ -239,6 +246,25 @@ public class Flins extends Character
         initializedSimulator = sim;
         if (constellation >= 1) {
             sim.addReactionListener(this);
+        }
+        if (constellation >= 2) {
+            sim.addDamageListener((actor, action, damage, time) -> {
+                if (actor != this
+                        || action.getElement() != Element.ELECTRO
+                        || damage <= 0.0
+                        || sim.getActiveCharacter() != this
+                        || sim.getMoonsign()
+                                != CombatSimulator.Moonsign.ASCENDANT_GLEAM) {
+                    return;
+                }
+                sim.applyTeamBuffNoStack(new SimpleBuff(
+                        "The Devil's Wall Electro RES Shred",
+                        BuffId.FLINS_C2_ELECTRO_RES_SHRED,
+                        7.0,
+                        time,
+                        stats -> stats.add(StatType.ELECTRO_RES_SHRED, 0.25))
+                        .sourcedBy(characterId));
+            });
         }
     }
 
@@ -341,10 +367,12 @@ public class Flins extends Character
         if (isMultiHit) {
             // First Hit
             sim.performAction(this.characterId, hit);
+            triggerC2NormalFollowUp(sim, inForm, attackTime);
             // Second Hit (Same MV)
             sim.performAction(this.characterId, hit);
         } else {
             sim.performAction(this.characterId, hit);
+            triggerC2NormalFollowUp(sim, inForm, attackTime);
         }
 
         // Manifest Flame NA: generate 1 Electro particle with 2s CD
@@ -358,6 +386,30 @@ public class Flins extends Character
             normalAttackStep = 0;
 
         // sim.advanceTime(0.3); // Handled by hit.setAnimationDuration
+    }
+
+    private void triggerC2NormalFollowUp(
+            CombatSimulator sim,
+            boolean inForm,
+            double hitTime) {
+        if (constellation < 2
+                || !inForm
+                || hitTime >= c2NormalFollowUpEndTime) {
+            return;
+        }
+        c2NormalFollowUpEndTime = Double.NEGATIVE_INFINITY;
+        AttackAction followUp = new AttackAction(
+                "The Devil's Wall Follow-Up",
+                0.50,
+                Element.ELECTRO,
+                StatType.BASE_ATK,
+                null,
+                0.0,
+                false,
+                ActionType.OTHER);
+        followUp.setICD(ICDType.None, ICDTag.None, 0.0);
+        followUp.setLunarReactionType(AttackAction.LunarReactionType.CHARGED);
+        sim.performActionWithoutTimeAdvance(characterId, followUp);
     }
 
     /**
@@ -399,6 +451,9 @@ public class Flins extends Character
         this.northlandSpearstormNextTime = castTime + spearstormCD;
         this.thunderousSymphonyEndTime = castTime + 6.0;
         this.thunderousSymphonyActive = true;
+        if (constellation >= 2) {
+            c2NormalFollowUpEndTime = castTime + 6.0;
+        }
 
         sim.performAction(this.characterId, hit);
         if (sim.isLoggingEnabled())

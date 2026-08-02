@@ -13342,6 +13342,8 @@ Completion evidence:
 
 ### Phase 2: C2 Follow-Up and C4 Passive
 
+Status: Done.
+
 Target files:
 
 - `src/java/model/character/Flins.java`
@@ -13372,6 +13374,15 @@ Verification:
 - `./gradlew javadoc`
 - `./gradlew FlinsParty2`
 - `python scripts/preflight.py`
+
+Evidence:
+
+- C2 one-shot follow-up, 5.999/6-second consumption, typed shred refresh,
+  Nascent/off-field rejection, 6.999/7-second expiry, and C4 219.9/220 EM cap
+  regressions pass.
+- `FlinsParty2` remains deterministic at 15,468,205 damage / 223,852 DPS in
+  two runs because its current Flins configuration does not enable C2/C4.
+- Reaction regression, build, Javadoc, sample simulation, and preflight pass.
 
 ### Phase 3: C3/C5 Talent Levels and C6 Elevation
 
