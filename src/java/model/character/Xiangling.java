@@ -18,6 +18,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionRequest;
 import simulation.event.PeriodicDamageEvent;
+import simulation.event.TimerEvent;
 
 /**
  * Xiangling character implementation with Guoba and Pyronado scheduling.
@@ -293,12 +294,56 @@ public class Xiangling extends Character implements FormStateProvider {
             AttackAction hit = new AttackAction(name, mv, Element.PHYSICAL, StatType.BASE_ATK,
                     StatType.NORMAL_ATTACK_DMG_BONUS, dur, ActionType.NORMAL);
             hit.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
+            double hitTime = sim.getCurrentTime();
             sim.performAction(this.characterId, hit);
+            if (normalAttackStep == 4 && constellation >= 2) {
+                scheduleImplode(sim, hitTime);
+            }
         }
 
         normalAttackStep++;
         if (normalAttackStep >= 5)
             normalAttackStep = 0;
+    }
+
+    /**
+     * Schedules the C2 Implode explosion two seconds after the final Normal hit.
+     *
+     * <p>The explosion is created at resolution time so it reads Xiangling's live
+     * stats. KQM records 1U Pyro application but no special ICD rule, so this
+     * implementation retains the simulator's conservative standard ICD behavior.
+     *
+     * @param sim active combat simulator
+     * @param hitTime timestamp of the N5 hit that applied Implode
+     */
+    private void scheduleImplode(CombatSimulator sim, double hitTime) {
+        final double explosionTime = hitTime + 2.0;
+        sim.registerEvent(new TimerEvent() {
+            @Override
+            public double getNextTickTime() {
+                return explosionTime;
+            }
+
+            @Override
+            public void tick(CombatSimulator activeSim) {
+                AttackAction implode = new AttackAction(
+                        "Xiangling C2 Implode",
+                        0.75,
+                        Element.PYRO,
+                        StatType.BASE_ATK,
+                        null,
+                        0.0,
+                        false,
+                        ActionType.OTHER);
+                implode.setICD(ICDType.Standard, ICDTag.None, 1.0);
+                activeSim.performActionWithoutTimeAdvance(Xiangling.this.characterId, implode);
+            }
+
+            @Override
+            public boolean isFinished(double currentTime) {
+                return currentTime >= explosionTime;
+            }
+        });
     }
 
     private void chargeAttack(CombatSimulator sim) {
