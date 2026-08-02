@@ -202,6 +202,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_EnergyConditionalEmblemWeapons();
         testAccuracyPhaseF_FiveStarElementalMasterySupportWeapons();
         testAccuracyPhaseF_FreedomSwornContract();
+        testAccuracyPhaseF_SongOfBrokenPinesContract();
         testAccuracyPhaseF_FiveStarCatalystStackWeapons();
         testAccuracyPhaseF_InjectedBowProcWeapons();
         testAccuracyPhaseF_LivePartyFiveStarWeapons();
@@ -19085,6 +19086,321 @@ public class ReactionRegressionTest {
         }
         assertTrue(highRefinementRejected,
                 "Freedom-Sworn should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_SongOfBrokenPinesContract() {
+        model.weapon.SongOfBrokenPines song =
+                new model.weapon.SongOfBrokenPines();
+        assertEquals("Song of Broken Pines", song.getName(),
+                "Song of Broken Pines display name");
+        assertClose(741.0, song.getBaseAtk(), EPS,
+                "Song of Broken Pines base ATK");
+        assertClose(0.207,
+                song.getStats().get(StatType.PHYSICAL_DMG_BONUS), EPS,
+                "Song of Broken Pines Physical DMG");
+        assertEquals(model.type.WeaponType.CLAYMORE, song.getWeaponType(),
+                "Song of Broken Pines weapon type");
+        assertEquals(5, song.getRefinement(),
+                "Song of Broken Pines default refinement");
+
+        TestCharacter ally = testCharacter(Element.PYRO, CharacterId.AMBER);
+        TestCharacter owner = testCharacter(Element.CRYO, CharacterId.KAEYA);
+        owner.setWeapon(song);
+        CombatSimulator sim = simulatorWith(ally);
+        sim.addCharacter(owner);
+        assertClose(0.32,
+                resolvedStat(sim, owner, StatType.ATK_PERCENT), EPS,
+                "R5 Song unconditional ATK");
+
+        AttackAction normalHit = typedDamageHit(
+                "Song Normal hit", ActionType.NORMAL, 1.0);
+        AttackAction chargedHit = typedDamageHit(
+                "Song Charged hit", ActionType.CHARGE, 1.0);
+        AttackAction skillHit = typedDamageHit(
+                "Song Skill hit", ActionType.SKILL, 1.0);
+        AttackAction zeroNormalHit = typedDamageHit(
+                "Song zero Normal hit", ActionType.NORMAL, 0.0);
+        song.onDamage(owner, zeroNormalHit, 0.0, sim);
+        song.onDamage(owner, skillHit, 0.0, sim);
+        song.onDamage(ally, normalHit, 0.0, sim);
+        assertEquals(0, song.getSigilCount(),
+                "Zero, wrong-type, and foreign hits should not add Song sigils");
+
+        song.onDamage(owner, normalHit, 0.0, sim);
+        song.onDamage(owner, chargedHit, 0.3 - 1e-6, sim);
+        assertEquals(1, song.getSigilCount(),
+                "Song should reject a sigil before 0.3 seconds");
+        SimulatorSnapshot oneSigilSnapshot = sim.saveSnapshot();
+        sim.advanceTime(0.3);
+        song.onDamage(owner, chargedHit, sim.getCurrentTime(), sim);
+        assertEquals(2, song.getSigilCount(),
+                "Song should accept Charged hits at exact sigil CT");
+        sim.advanceTime(0.3);
+        song.onDamage(owner, normalHit, sim.getCurrentTime(), sim);
+        assertEquals(3, song.getSigilCount(),
+                "Song should retain three sigils before activation");
+        sim.advanceTime(0.3);
+
+        normalHit.setAnimationDuration(1.2);
+        SimulatorSnapshot preActivationSnapshot = sim.saveSnapshot();
+        double expectedFourthDamage = calculateDirectDamage(
+                sim,
+                owner,
+                normalHit,
+                sim.getCurrentTime(),
+                1.0);
+        sim.restoreSnapshot(preActivationSnapshot);
+        double damageBeforeFourthHit = sim.getTotalDamage();
+        sim.performAction(owner.getCharacterId(), normalHit);
+        assertClose(expectedFourthDamage,
+                sim.getTotalDamage() - damageBeforeFourthHit, EPS,
+                "Fourth Song hit should resolve before Banner-Hymn applies");
+        assertClose(2.1, sim.getCurrentTime(), EPS,
+                "Fourth Song Normal should use its pre-activation duration");
+        assertEquals(0, song.getSigilCount(),
+                "Fourth Song sigil should be consumed");
+        assertClose(0.72,
+                resolvedStat(sim, owner, StatType.ATK_PERCENT), EPS,
+                "R5 Song owner should receive static and shared ATK");
+        assertClose(0.40,
+                resolvedStat(sim, ally, StatType.ATK_PERCENT), EPS,
+                "R5 Song ally should receive shared ATK");
+        assertClose(0.24,
+                resolvedStat(sim, ally, StatType.NORMAL_ATTACK_SPD), EPS,
+                "R5 Song should grant Normal-only attack speed");
+
+        AttackAction spedNormal = typedDamageHit(
+                "Song sped Normal", ActionType.NORMAL, 1.0);
+        spedNormal.setAnimationDuration(1.2);
+        double spedNormalStart = sim.getCurrentTime();
+        sim.performAction(owner.getCharacterId(), spedNormal);
+        assertClose(spedNormalStart + 1.2 / 1.24,
+                sim.getCurrentTime(), EPS,
+                "Song should shorten the next Normal action");
+
+        AttackAction unspedCharged = typedDamageHit(
+                "Song unsped Charged", ActionType.CHARGE, 1.0);
+        unspedCharged.setAnimationDuration(1.2);
+        double chargedStart = sim.getCurrentTime();
+        sim.performAction(owner.getCharacterId(), unspedCharged);
+        assertClose(chargedStart + 1.2, sim.getCurrentTime(), EPS,
+                "Song should not shorten Charged actions");
+        for (ActionType actionType : new ActionType[] {
+                ActionType.SKILL, ActionType.BURST, ActionType.PLUNGE }) {
+            AttackAction unspedAction = typedDamageHit(
+                    "Song unsped " + actionType, actionType, 1.0);
+            unspedAction.setAnimationDuration(1.2);
+            double actionStart = sim.getCurrentTime();
+            sim.performAction(owner.getCharacterId(), unspedAction);
+            assertClose(actionStart + 1.2, sim.getCurrentTime(), EPS,
+                    "Song should not shorten " + actionType + " actions");
+        }
+
+        sim.restoreSnapshot(oneSigilSnapshot);
+        assertEquals(1, song.getSigilCount(),
+                "Song snapshot should restore one retained sigil");
+        assertClose(0.0, sim.getCurrentTime(), EPS,
+                "Song snapshot should restore sigil time");
+
+        model.weapon.SongOfBrokenPines boundarySong =
+                new model.weapon.SongOfBrokenPines();
+        TestCharacter boundaryOwner = testCharacter(
+                Element.CRYO, CharacterId.KAEYA);
+        boundaryOwner.setWeapon(boundarySong);
+        CombatSimulator boundarySim = simulatorWith(boundaryOwner);
+        for (int i = 0; i < 4; i++) {
+            if (i > 0) {
+                boundarySim.advanceTime(0.3);
+            }
+            boundarySong.onDamage(
+                    boundaryOwner,
+                    i % 2 == 0 ? normalHit : chargedHit,
+                    boundarySim.getCurrentTime(),
+                    boundarySim);
+        }
+        SimulatorSnapshot activeSongSnapshot = boundarySim.saveSnapshot();
+        boundarySim.advanceTime(12.0 - 1e-6);
+        assertClose(0.24,
+                resolvedStat(boundarySim, boundaryOwner,
+                        StatType.NORMAL_ATTACK_SPD), EPS,
+                "Song should remain active before twelve seconds");
+        boundarySim.advanceTime(1e-6 + 1e-9);
+        assertClose(0.0,
+                resolvedStat(boundarySim, boundaryOwner,
+                        StatType.NORMAL_ATTACK_SPD), EPS,
+                "Song should expire at exactly twelve seconds");
+        boundarySim.restoreSnapshot(activeSongSnapshot);
+        assertClose(0.24,
+                resolvedStat(boundarySim, boundaryOwner,
+                        StatType.NORMAL_ATTACK_SPD), EPS,
+                "Song snapshot should restore active Banner-Hymn");
+        boundarySim.advanceTime(20.0 - 1e-6);
+        boundarySong.onDamage(
+                boundaryOwner,
+                normalHit,
+                boundarySim.getCurrentTime(),
+                boundarySim);
+        assertEquals(0, boundarySong.getSigilCount(),
+                "Song should reject sigils before its restored lock ends");
+        boundarySim.advanceTime(1e-6 + 1e-9);
+        boundarySong.onDamage(
+                boundaryOwner,
+                normalHit,
+                boundarySim.getCurrentTime(),
+                boundarySim);
+        assertEquals(1, boundarySong.getSigilCount(),
+                "Song should accept a sigil at exact lock expiry");
+
+        model.weapon.SongOfBrokenPines r1Song =
+                new model.weapon.SongOfBrokenPines(1);
+        TestCharacter r1Owner = testCharacter(Element.CRYO, CharacterId.KAEYA);
+        r1Owner.setWeapon(r1Song);
+        CombatSimulator r1Sim = simulatorWith(r1Owner);
+        assertClose(0.16,
+                resolvedStat(r1Sim, r1Owner, StatType.ATK_PERCENT), EPS,
+                "R1 Song unconditional ATK");
+        for (int i = 0; i < 4; i++) {
+            if (i > 0) {
+                r1Sim.advanceTime(0.3);
+            }
+            r1Song.onDamage(
+                    r1Owner, normalHit, r1Sim.getCurrentTime(), r1Sim);
+        }
+        assertClose(0.36,
+                resolvedStat(r1Sim, r1Owner, StatType.ATK_PERCENT), EPS,
+                "R1 Song owner static and shared ATK");
+        assertClose(0.12,
+                resolvedStat(r1Sim, r1Owner,
+                        StatType.NORMAL_ATTACK_SPD), EPS,
+                "R1 Song Normal attack speed");
+
+        model.weapon.SongOfBrokenPines cappedSong =
+                new model.weapon.SongOfBrokenPines();
+        TestCharacter cappedOwner = testCharacter(
+                Element.CRYO, CharacterId.KAEYA)
+                .withStat(StatType.ATK_SPD, 0.50);
+        cappedOwner.setWeapon(cappedSong);
+        CombatSimulator cappedSim = simulatorWith(cappedOwner);
+        for (int i = 0; i < 4; i++) {
+            if (i > 0) {
+                cappedSim.advanceTime(0.3);
+            }
+            cappedSong.onDamage(
+                    cappedOwner,
+                    normalHit,
+                    cappedSim.getCurrentTime(),
+                    cappedSim);
+        }
+        AttackAction cappedNormal = typedDamageHit(
+                "Song capped Normal", ActionType.NORMAL, 1.0);
+        cappedNormal.setAnimationDuration(1.6);
+        double cappedStart = cappedSim.getCurrentTime();
+        cappedSim.performAction(cappedOwner.getCharacterId(), cappedNormal);
+        assertClose(cappedStart + 1.0, cappedSim.getCurrentTime(), EPS,
+                "Combined Normal attack speed should respect the 60% cap");
+
+        model.weapon.ElegyForTheEnd coexistElegy =
+                new model.weapon.ElegyForTheEnd();
+        model.weapon.FreedomSworn coexistFreedom =
+                new model.weapon.FreedomSworn();
+        model.weapon.SongOfBrokenPines coexistSong =
+                new model.weapon.SongOfBrokenPines(1);
+        TestCharacter coexistTarget = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        TestCharacter elegyOwner = testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE);
+        TestCharacter freedomOwner = testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU);
+        TestCharacter songOwner = testCharacter(
+                Element.CRYO, CharacterId.KAEYA);
+        elegyOwner.setWeapon(coexistElegy);
+        freedomOwner.setWeapon(coexistFreedom);
+        songOwner.setWeapon(coexistSong);
+        CombatSimulator coexistSim = simulatorWith(coexistTarget);
+        coexistSim.addCharacter(elegyOwner);
+        coexistSim.addCharacter(freedomOwner);
+        coexistSim.addCharacter(songOwner);
+        AttackAction elegyHit = typedDamageHit(
+                "Three-way Elegy hit", ActionType.SKILL, 1.0);
+        for (int i = 0; i < 4; i++) {
+            if (i > 0) {
+                coexistSim.advanceTime(0.2);
+            }
+            coexistElegy.onDamage(
+                    elegyOwner,
+                    elegyHit,
+                    coexistSim.getCurrentTime(),
+                    coexistSim);
+        }
+        ReactionResult overload = ReactionResult.transform(
+                100.0, "Overloaded", ReactionResult.Kind.OVERLOAD);
+        coexistSim.notifyReaction(overload, freedomOwner);
+        coexistSim.advanceTime(0.5);
+        coexistSim.notifyReaction(overload, freedomOwner);
+        for (int i = 0; i < 4; i++) {
+            if (i > 0) {
+                coexistSim.advanceTime(0.3);
+            }
+            coexistSong.onDamage(
+                    songOwner,
+                    i % 2 == 0 ? normalHit : chargedHit,
+                    coexistSim.getCurrentTime(),
+                    coexistSim);
+        }
+        assertClose(0.20,
+                resolvedStat(coexistSim, coexistTarget,
+                        StatType.ATK_PERCENT), EPS,
+                "Later R1 Song should replace the shared R5 ATK effect");
+        assertClose(200.0,
+                resolvedStat(coexistSim, coexistTarget,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Song should preserve Elegy's unique EM");
+        assertClose(0.32,
+                resolvedStat(coexistSim, coexistTarget,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Song should preserve Freedom-Sworn's unique action bonus");
+        assertClose(0.12,
+                resolvedStat(coexistSim, coexistTarget,
+                        StatType.NORMAL_ATTACK_SPD), EPS,
+                "Song's unique Normal speed should coexist with both songs");
+
+        boolean mismatchedStateRejected = false;
+        try {
+            coexistSong.restoreWeaponState(
+                    coexistFreedom.captureWeaponState());
+        } catch (IllegalArgumentException expected) {
+            mismatchedStateRejected = true;
+        }
+        assertTrue(mismatchedStateRejected,
+                "Song should reject Freedom-Sworn snapshot state");
+        coexistSong.initializeForSimulator(songOwner, coexistSim);
+
+        boolean reuseRejected = false;
+        try {
+            song.initializeForSimulator(owner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            reuseRejected = true;
+        }
+        assertTrue(reuseRejected,
+                "Song should reject cross-simulator reuse");
+
+        boolean lowRefinementRejected = false;
+        try {
+            new model.weapon.SongOfBrokenPines(0);
+        } catch (IllegalArgumentException expected) {
+            lowRefinementRejected = true;
+        }
+        assertTrue(lowRefinementRejected,
+                "Song should reject refinement zero");
+
+        boolean highRefinementRejected = false;
+        try {
+            new model.weapon.SongOfBrokenPines(6);
+        } catch (IllegalArgumentException expected) {
+            highRefinementRejected = true;
+        }
+        assertTrue(highRefinementRejected,
+                "Song should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_FiveStarCatalystStackWeapons() {

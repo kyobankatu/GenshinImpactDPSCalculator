@@ -3275,7 +3275,7 @@ experiment record.
 
 ### B-154 — Millennial Movement weapon campaign
 
-- **Status:** active
+- **Status:** done
 - **Source:** missing five-star weapon inventory after B-153
 - **Scope/risk:** snapshot-safe shared movement state, Elegy migration,
   Freedom-Sworn, Song of Broken Pines, and Normal-only attack speed; medium
@@ -3287,3 +3287,7 @@ experiment record.
   speed, post-trigger ordering, snapshot rollback, and R1/R5.
 - **Proof/plan:** three-phase `TASKS.md` Millennial Movement Weapon Campaign
   plus reaction regression, build, Javadoc, party catalog, and preflight.
+- **Closure:** all three weapons now share snapshot-safe sigil and replacement
+  state; Freedom-Sworn and Song of Broken Pines implement their exact R1-R5
+  offensive effects, ordering, timing boundaries, and unique-effect
+  coexistence with all local gates passing.

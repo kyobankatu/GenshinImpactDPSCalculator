@@ -41,9 +41,9 @@ The B-153 static five-star weapon campaign is complete. It adds five exact
 always-on passive branches while preserving explicit unreachable-trigger
 boundaries.
 
-The active B-154 Millennial Movement campaign is consolidating typed sigil,
-same-effect replacement, and snapshot-safe weapon state before adding two
-missing five-star weapons.
+The B-154 Millennial Movement campaign is complete. Elegy for the End,
+Freedom-Sworn, and Song of Broken Pines now share typed sigil, same-effect
+replacement, and snapshot-safe weapon state contracts.
 
 The B-128 action-use artifact campaign is complete. Successful typed actions
 now reach equipped artifacts, and Heart of Depth plus Martial Artist use the
@@ -12919,7 +12919,7 @@ Completion evidence:
 
 ## Implementation Order: Millennial Movement Weapon Campaign
 
-Status: In progress. This campaign replaces one isolated Elegy state machine
+Status: Complete. This campaign replaces one isolated Elegy state machine
 with a snapshot-aware shared contract, then adds Freedom-Sworn and Song of
 Broken Pines; RL and generated documentation remain excluded.
 
@@ -13045,7 +13045,7 @@ Completion evidence:
   PartyCatalogRegressionTest`, and `python scripts/preflight.py --run` passed
   on 2026-08-02.
 
-### Phase 3: Add Song of Broken Pines
+### Phase 3: Add Song of Broken Pines - Done
 
 Target files:
 
@@ -13062,7 +13062,8 @@ Acceptance criteria:
 - Four sigils grant 12-second R1-R5 Normal-only attack speed and shared ATK,
   followed by the 20-second acquisition lock; the fourth hit is unbuffed.
 - Normal-only speed shortens Normal actions without changing Charged, Skill,
-  Burst, or Plunging durations, and snapshot restore preserves sigil/lock state.
+  Burst, or Plunging durations, respects the combined 60% speed cap, and
+  snapshot restore preserves sigil/lock state.
 
 Test cases to add or update:
 
@@ -13077,6 +13078,18 @@ Verification:
 - `./gradlew ReactionRegressionTest`
 - `./gradlew build javadoc PartyCatalogRegressionTest`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Song of Broken Pines now exposes exact R1-R5 static ATK, four-hit sigils,
+  shared ATK, and Normal-only Banner-Hymn speed through the shared movement
+  state machine.
+- Focused regressions cover fourth-hit ordering, exact 0.3/12/20-second
+  boundaries, snapshots, the 60% speed cap, invalid inputs, and three-weapon
+  unique-effect coexistence with latest shared-ATK replacement.
+- `./gradlew ReactionRegressionTest`, `./gradlew build javadoc
+  PartyCatalogRegressionTest`, and `python scripts/preflight.py --run` passed
+  on 2026-08-02.
 
 ## Implementation Order: Static Five-Star Weapon Branch Campaign
 

@@ -155,6 +155,8 @@ public enum BuffId {
     MILLENNIAL_MOVEMENT_ATK,
     /** 武器「蒼古なる自由への誓い」の通常・重撃・落下攻撃強化。 */
     FREEDOM_SWORN_SONG_OF_RESISTANCE,
+    /** 武器「松籟の響く頃」の通常攻撃速度強化。 */
+    SONG_OF_BROKEN_PINES_BANNER_HYMN,
     /** 武器「千夜に浮かぶ夢」の味方元素熟知共有。 */
     A_THOUSAND_FLOATING_DREAMS_TEAM_EM,
     /** 武器「龍殺しの英傑譚」の交代先への攻撃力バフ。 */

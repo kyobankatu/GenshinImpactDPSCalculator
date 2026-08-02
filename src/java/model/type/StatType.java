@@ -161,6 +161,8 @@ public enum StatType {
     BURST_CRIT_RATE,
     /** Attack speed bonus (multiplicative on animation duration). */
     ATK_SPD,
+    /** Attack speed bonus that applies only to Normal Attack animations. */
+    NORMAL_ATTACK_SPD,
 
     /** Generic all-damage DMG bonus% applied to every damage instance. */
     DMG_BONUS_ALL,

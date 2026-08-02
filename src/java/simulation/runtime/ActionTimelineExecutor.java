@@ -41,12 +41,13 @@ public class ActionTimelineExecutor {
      */
     public void execute(CharacterId characterId, AttackAction action) {
         Character character = requireCharacter(characterId);
+        double animationDuration = resolveAnimationDuration(character, action);
         sim.performActionWithoutTimeAdvance(characterId, action);
 
         applyAscendantBlessingIfNeeded(character, action);
         eventBus.notifyAction(character, action, sim.getCurrentTime());
 
-        sim.advanceTime(resolveAnimationDuration(character, action));
+        sim.advanceTime(animationDuration);
     }
 
     /**
@@ -84,8 +85,9 @@ public class ActionTimelineExecutor {
     }
 
     /**
-     * Computes the effective animation duration of the action, applying ATK_SPD scaling
-     * to normal and charged attacks.
+     * Computes the effective animation duration of the action, applying generic
+     * attack speed to Normal and Charged Attacks and Normal-only speed where
+     * applicable.
      *
      * @param character acting character
      * @param action executed action
@@ -107,6 +109,10 @@ public class ActionTimelineExecutor {
         }
 
         double speed = stats.get(StatType.ATK_SPD);
+        if (actionType == ActionType.NORMAL) {
+            speed += stats.get(StatType.NORMAL_ATTACK_SPD);
+        }
+        speed = Math.min(0.60, speed);
         if (speed <= 0) {
             return duration;
         }
