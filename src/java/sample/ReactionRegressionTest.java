@@ -4912,6 +4912,20 @@ public class ReactionRegressionTest {
         model.weapon.MagicGuide r1MagicGuide = new model.weapon.MagicGuide(1);
         assertTargetAuraWeaponDamage(
                 r1MagicGuide, Element.HYDRO, Element.PYRO, 0.12, "R1 Magic Guide");
+
+        model.weapon.CoolSteel coolSteel = new model.weapon.CoolSteel();
+        assertEquals("Cool Steel", coolSteel.getName(), "Cool Steel display name");
+        assertClose(401.0, coolSteel.getBaseAtk(), EPS, "Cool Steel base ATK");
+        assertClose(0.352, coolSteel.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Cool Steel ATK substat");
+        assertEquals(model.type.WeaponType.SWORD, coolSteel.getWeaponType(),
+                "Cool Steel weapon type");
+        assertTargetAuraWeaponDamage(
+                coolSteel, Element.HYDRO, Element.ELECTRO, 0.24, "Cool Steel");
+
+        model.weapon.CoolSteel r1CoolSteel = new model.weapon.CoolSteel(1);
+        assertTargetAuraWeaponDamage(
+                r1CoolSteel, Element.CRYO, Element.PYRO, 0.12, "R1 Cool Steel");
     }
 
     private static void testAccuracyPhaseF_KaeyaCharacterContract() {
