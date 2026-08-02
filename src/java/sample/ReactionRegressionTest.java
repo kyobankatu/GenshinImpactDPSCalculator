@@ -4897,6 +4897,20 @@ public class ReactionRegressionTest {
                 "Rainslasher weapon type");
         assertTargetAuraWeaponDamage(
                 rainslasher, Element.HYDRO, Element.PYRO, 0.36, "Rainslasher");
+
+        model.weapon.MagicGuide magicGuide = new model.weapon.MagicGuide();
+        assertEquals("Magic Guide", magicGuide.getName(), "Magic Guide display name");
+        assertClose(354.0, magicGuide.getBaseAtk(), EPS, "Magic Guide base ATK");
+        assertClose(187.0, magicGuide.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Magic Guide Elemental Mastery");
+        assertEquals(model.type.WeaponType.CATALYST, magicGuide.getWeaponType(),
+                "Magic Guide weapon type");
+        assertTargetAuraWeaponDamage(
+                magicGuide, Element.ELECTRO, Element.PYRO, 0.24, "Magic Guide");
+
+        model.weapon.MagicGuide r1MagicGuide = new model.weapon.MagicGuide(1);
+        assertTargetAuraWeaponDamage(
+                r1MagicGuide, Element.HYDRO, Element.PYRO, 0.12, "R1 Magic Guide");
     }
 
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
