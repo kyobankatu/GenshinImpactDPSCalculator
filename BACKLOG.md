@@ -2878,7 +2878,7 @@ experiment record.
 
 ### B-133 — Flins passive and constellation coverage
 
-- **Status:** in-progress
+- **Status:** complete
 - **Source:** delegated supported-character inventory under broad coverage
 - **Scope/risk:** planned A1/C1 lifecycle, C2-C6, typed shred, and talent data;
   RL excluded
@@ -2892,6 +2892,10 @@ experiment record.
 - **Proof/plan:** three-phase normal/boundary/abnormal matrix in `TASKS.md`
   `Flins Constellation Campaign`, plus reaction regression, `FlinsParty2`,
   build, Javadoc, and preflight
+- **Completion:** A1/C1 lifecycle, C2/C4, C3/C5 talent levels, N4 per-hit
+  data, C6 35%/10% elevation, and weighted provider-buff resolution pass all
+  planned checks; two post-fix `FlinsParty2` runs match at 20,805,526 damage /
+  301,093 DPS
 
 ### B-134 — Ineffa offensive constellation coverage
 

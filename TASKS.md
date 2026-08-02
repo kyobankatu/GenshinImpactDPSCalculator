@@ -44,8 +44,9 @@ excluded.
 The B-132 Raiden constellation pass is complete. It adds C1 Resolve gain
 modifiers and C4's ally-only ATK window at normal or early Musou Isshin end.
 
-The B-133 Flins constellation campaign is in progress. It corrects A1/C1
-lifecycle behavior, adds C2/C4, and then closes representable C3/C5/C6 gaps.
+The B-133 Flins constellation campaign is complete. It corrects A1/C1,
+implements C2-C6, fixes N4 per-hit multipliers, and resolves provider buffs in
+weighted Lunar reaction damage.
 
 The B-058 Burning fuel correction is complete. It replaces the fixed
 two-second approximation with typed Dendro-fuel decay and refresh ownership
@@ -13386,10 +13387,17 @@ Evidence:
 
 ### Phase 3: C3/C5 Talent Levels and C6 Elevation
 
+Status: Done.
+
 Target files:
 
 - `src/java/model/character/Flins.java`
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/mechanics/formula/DamageCalculator.java`
+- `src/java/mechanics/formula/LunarDamageStrategy.java`
+- `src/java/mechanics/reaction/ReactionEffectScheduler.java`
 - `config/characters/Flins/Flins_Multipliers.csv`
+- `src/java/model/type/StatType.java`
 - `src/java/sample/ReactionRegressionTest.java`
 
 Acceptance criteria:
@@ -13415,6 +13423,18 @@ Verification:
 - `./gradlew javadoc`
 - `./gradlew FlinsParty2`
 - `python scripts/preflight.py`
+
+Evidence:
+
+- Exact C2/C3 Burst, C4/C5 Skill, physical/Manifest N4 per-hit, C6
+  Nascent/Ascendant/return, typed ownership, weighted reaction, and ordinary
+  Electro regressions pass.
+- Weighted Lunar reaction candidates now resolve applicable character, weapon,
+  artifact, team, and field buffs before ranking; expired buffs remain excluded.
+- Two `FlinsParty2` runs match at 20,805,526 damage / 301,093 DPS, up from
+  15,468,205 / 223,852 after provider buffs became visible to weighted Lunar
+  reaction damage.
+- Reaction regression, build, Javadoc, sample simulation, and preflight pass.
 
 ## Implementation Order: Raiden Constellation Lifecycle
 

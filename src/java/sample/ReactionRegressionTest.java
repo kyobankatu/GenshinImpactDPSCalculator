@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.DoubleSupplier;
+import java.util.stream.Collectors;
 
 import mechanics.analysis.EnergyAnalyzer;
 import mechanics.buff.Buff;
@@ -98,6 +99,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_RaidenConstellationLifecycle();
         testAccuracyPhaseF_FlinsA1AndC1Lifecycle();
         testAccuracyPhaseF_FlinsC2AndC4();
+        testAccuracyPhaseF_FlinsC3C5AndC6();
         testAccuracyPhaseF_FlinsSkillApplicationContract();
         testAccuracyPhaseF_FlinsThundercloudConditionalHits();
         testAccuracyPhaseF_FlinsSymphonyZeroGaugeContract();
@@ -3369,6 +3371,275 @@ public class ReactionRegressionTest {
         assertEquals(CharacterId.FLINS, buffs.get(0).getSourceCharacterId(),
                 "Flins C2 shred should retain source ownership");
         return buffs.get(0);
+    }
+
+    private static void testAccuracyPhaseF_FlinsC3C5AndC6() {
+        List<AttackAction> c2BurstActions = new ArrayList<>();
+        model.character.Flins c2Flins = new model.character.Flins(
+                new TestWeapon(), blankArtifact(), flinsTalentData(2));
+        CombatSimulator c2BurstSim = simulatorWithExistingCharacter(c2Flins);
+        c2BurstSim.addListener((actor, action, time) -> c2BurstActions.add(action));
+        c2Flins.onAction(CharacterActionRequest.of(CharacterActionKey.BURST), c2BurstSim);
+        c2BurstSim.advanceTime(10.0);
+        assertClose(4.4173,
+                findAction(c2BurstActions, "Cometh the Night (Initial)")
+                        .getDamagePercent(),
+                EPS,
+                "Flins C2 should retain level-nine Burst initial multiplier");
+        assertClose(0.2761,
+                findAction(c2BurstActions, "Cometh the Night (Middle)")
+                        .getDamagePercent(),
+                EPS,
+                "Flins C2 should retain level-nine Burst middle multiplier");
+        assertClose(1.9878,
+                findAction(c2BurstActions, "Cometh the Night (Final)")
+                        .getDamagePercent(),
+                EPS,
+                "Flins C2 should retain level-nine Burst final multiplier");
+
+        List<AttackAction> c3BurstActions = new ArrayList<>();
+        model.character.Flins c3Flins = new model.character.Flins(
+                new TestWeapon(), blankArtifact(), flinsTalentData(3));
+        CombatSimulator c3BurstSim = simulatorWithExistingCharacter(c3Flins);
+        c3BurstSim.addListener((actor, action, time) -> c3BurstActions.add(action));
+        c3Flins.onAction(CharacterActionRequest.of(CharacterActionKey.BURST), c3BurstSim);
+        c3BurstSim.advanceTime(10.0);
+        assertClose(5.1968,
+                findAction(c3BurstActions, "Cometh the Night (Initial)")
+                        .getDamagePercent(),
+                EPS,
+                "Flins C3 should select level-twelve Burst initial multiplier");
+        assertClose(0.3248,
+                findAction(c3BurstActions, "Cometh the Night (Middle)")
+                        .getDamagePercent(),
+                EPS,
+                "Flins C3 should select level-twelve Burst middle multiplier");
+        assertClose(2.3386,
+                findAction(c3BurstActions, "Cometh the Night (Final)")
+                        .getDamagePercent(),
+                EPS,
+                "Flins C3 should select level-twelve Burst final multiplier");
+
+        List<AttackAction> c2SymphonyActions = new ArrayList<>();
+        model.character.Flins c2SymphonyFlins = new model.character.Flins(
+                new TestWeapon(), blankArtifact(), flinsTalentData(2));
+        CombatSimulator c2SymphonySim =
+                simulatorWithExistingCharacter(c2SymphonyFlins);
+        c2SymphonySim.addListener(
+                (actor, action, time) -> c2SymphonyActions.add(action));
+        c2SymphonyFlins.onAction(
+                CharacterActionRequest.of(CharacterActionKey.SKILL), c2SymphonySim);
+        c2SymphonyFlins.onAction(
+                CharacterActionRequest.of(CharacterActionKey.SKILL), c2SymphonySim);
+        c2SymphonySim.setThundercloudEndTime(c2SymphonySim.getCurrentTime() + 30.0);
+        c2SymphonyFlins.onAction(
+                CharacterActionRequest.of(CharacterActionKey.BURST), c2SymphonySim);
+        assertClose(1.2148,
+                findAction(c2SymphonyActions, "Thunderous Symphony")
+                        .getDamagePercent(),
+                EPS,
+                "Flins C2 should retain level-nine Symphony multiplier");
+        assertClose(1.7669,
+                findAction(c2SymphonyActions, "Thunderous Symphony (Additional)")
+                        .getDamagePercent(),
+                EPS,
+                "Flins C2 should retain level-nine Symphony Additional multiplier");
+
+        List<AttackAction> c3SymphonyActions = new ArrayList<>();
+        model.character.Flins c3SymphonyFlins = new model.character.Flins(
+                new TestWeapon(), blankArtifact(), flinsTalentData(3));
+        CombatSimulator c3SymphonySim =
+                simulatorWithExistingCharacter(c3SymphonyFlins);
+        c3SymphonySim.addListener(
+                (actor, action, time) -> c3SymphonyActions.add(action));
+        c3SymphonyFlins.onAction(
+                CharacterActionRequest.of(CharacterActionKey.SKILL), c3SymphonySim);
+        c3SymphonyFlins.onAction(
+                CharacterActionRequest.of(CharacterActionKey.SKILL), c3SymphonySim);
+        c3SymphonySim.setThundercloudEndTime(c3SymphonySim.getCurrentTime() + 30.0);
+        c3SymphonyFlins.onAction(
+                CharacterActionRequest.of(CharacterActionKey.BURST), c3SymphonySim);
+        assertClose(1.4291,
+                findAction(c3SymphonyActions, "Thunderous Symphony")
+                        .getDamagePercent(),
+                EPS,
+                "Flins C3 should select level-twelve Symphony multiplier");
+        assertClose(2.0787,
+                findAction(c3SymphonyActions, "Thunderous Symphony (Additional)")
+                        .getDamagePercent(),
+                EPS,
+                "Flins C3 should select level-twelve Symphony Additional multiplier");
+
+        List<AttackAction> physicalActions = new ArrayList<>();
+        model.character.Flins physicalFlins = new model.character.Flins(
+                new TestWeapon(), blankArtifact(), flinsTalentData(0));
+        CombatSimulator physicalSim = simulatorWithExistingCharacter(physicalFlins);
+        physicalSim.addListener((actor, action, time) -> physicalActions.add(action));
+        for (int i = 0; i < 4; i++) {
+            physicalFlins.onAction(
+                    CharacterActionRequest.of(CharacterActionKey.NORMAL), physicalSim);
+        }
+        List<AttackAction> physicalN4 = physicalActions.stream()
+                .filter(action -> "Flins N4".equals(action.getName()))
+                .collect(Collectors.toList());
+        assertEquals(2, physicalN4.size(),
+                "Flins physical N4 should retain two separate hits");
+        assertTrue(physicalN4.stream().allMatch(
+                        action -> Math.abs(action.getDamagePercent() - 0.5886) < EPS),
+                "Flins physical N4 should use the per-hit level-nine multiplier");
+
+        List<AttackAction> c4SkillActions = new ArrayList<>();
+        model.character.Flins c4SkillFlins = new model.character.Flins(
+                new TestWeapon(), blankArtifact(), flinsTalentData(4));
+        CombatSimulator c4SkillSim = simulatorWithExistingCharacter(c4SkillFlins);
+        c4SkillSim.addListener((actor, action, time) -> c4SkillActions.add(action));
+        c4SkillFlins.onAction(
+                CharacterActionRequest.of(CharacterActionKey.SKILL), c4SkillSim);
+        for (int i = 0; i < 5; i++) {
+            c4SkillFlins.onAction(
+                    CharacterActionRequest.of(CharacterActionKey.NORMAL), c4SkillSim);
+        }
+        c4SkillFlins.onAction(
+                CharacterActionRequest.of(CharacterActionKey.SKILL), c4SkillSim);
+        assertFlinsManifestMultipliers(
+                c4SkillActions,
+                new double[] { 0.9902, 0.9996, 1.2380, 0.7093, 1.7002 },
+                "Flins C4");
+        assertClose(3.0328,
+                findAction(c4SkillActions, "Northland Spearstorm")
+                        .getDamagePercent(),
+                EPS,
+                "Flins C4 should retain level-nine Spearstorm multiplier");
+
+        List<AttackAction> c5SkillActions = new ArrayList<>();
+        model.character.Flins c5SkillFlins = new model.character.Flins(
+                new TestWeapon(), blankArtifact(), flinsTalentData(5));
+        CombatSimulator c5SkillSim = simulatorWithExistingCharacter(c5SkillFlins);
+        c5SkillSim.addListener((actor, action, time) -> c5SkillActions.add(action));
+        c5SkillFlins.onAction(
+                CharacterActionRequest.of(CharacterActionKey.SKILL), c5SkillSim);
+        for (int i = 0; i < 5; i++) {
+            c5SkillFlins.onAction(
+                    CharacterActionRequest.of(CharacterActionKey.NORMAL), c5SkillSim);
+        }
+        c5SkillFlins.onAction(
+                CharacterActionRequest.of(CharacterActionKey.SKILL), c5SkillSim);
+        assertFlinsManifestMultipliers(
+                c5SkillActions,
+                new double[] { 1.1650, 1.1760, 1.4565, 0.8345, 2.0002 },
+                "Flins C5");
+        assertClose(3.5680,
+                findAction(c5SkillActions, "Northland Spearstorm")
+                        .getDamagePercent(),
+                EPS,
+                "Flins C5 should select level-twelve Spearstorm multiplier");
+
+        model.character.Flins c5Flins = new model.character.Flins(
+                new TestWeapon(), blankArtifact(), flinsTalentData(5));
+        CombatSimulator c5Nascent = simulatorWithExistingCharacter(c5Flins);
+        model.character.Flins c6Flins = new model.character.Flins(
+                new TestWeapon(), blankArtifact(), flinsTalentData(6));
+        CombatSimulator c6Nascent = simulatorWithExistingCharacter(c6Flins);
+        assertClose(0.0,
+                resolvedStat(c5Nascent, c5Flins, StatType.LUNAR_MULTIPLIER), EPS,
+                "Flins C5 should have no C6 elevation");
+        assertClose(0.35,
+                resolvedStat(c6Nascent, c6Flins, StatType.LUNAR_MULTIPLIER), EPS,
+                "Flins C6 should always receive 35 percent personal elevation");
+        double c5NascentReaction =
+                new ReactionEffectScheduler(c5Nascent)
+                        .computeInitialLunarChargedDamage();
+        double c6NascentReaction =
+                new ReactionEffectScheduler(c6Nascent)
+                        .computeInitialLunarChargedDamage();
+        assertClose(c5NascentReaction * 1.35, c6NascentReaction, 0.5,
+                "Flins C6 personal Lunar-Charged reaction damage should be elevated by 35 percent");
+
+        TestCharacter c6Ally = testCharacter(Element.HYDRO, CharacterId.XINGQIU);
+        c6Nascent.addCharacter(c6Ally);
+        assertClose(0.0,
+                resolvedStat(c6Nascent, c6Ally, StatType.LUNAR_MULTIPLIER), EPS,
+                "Flins C6 party elevation should be absent at Nascent Gleam");
+        c6Nascent.setMoonsign(CombatSimulator.Moonsign.ASCENDANT_GLEAM);
+        assertClose(0.45,
+                resolvedStat(c6Nascent, c6Flins, StatType.LUNAR_MULTIPLIER), EPS,
+                "Ascendant Flins C6 should combine 35 percent personal and 10 percent party elevation");
+        assertClose(0.10,
+                resolvedStat(c6Nascent, c6Ally, StatType.LUNAR_MULTIPLIER), EPS,
+                "Ascendant Flins C6 should elevate party Lunar-Charged damage by 10 percent");
+        List<Buff> c6Buffs = c6Nascent.getApplicableBuffs(c6Ally).stream()
+                .filter(buff -> buff.getId()
+                        == BuffId.FLINS_C6_LUNAR_CHARGED_ELEVATION)
+                .collect(Collectors.toList());
+        assertEquals(1, c6Buffs.size(),
+                "Flins C6 party elevation should retain one typed provider buff");
+        assertEquals(CharacterId.FLINS, c6Buffs.get(0).getSourceCharacterId(),
+                "Flins C6 party elevation should retain source ownership");
+        c6Nascent.setMoonsign(CombatSimulator.Moonsign.NASCENT_GLEAM);
+        assertClose(0.35,
+                resolvedStat(c6Nascent, c6Flins, StatType.LUNAR_MULTIPLIER), EPS,
+                "Returning to Nascent Gleam should remove only Flins C6 party elevation");
+        assertClose(0.0,
+                resolvedStat(c6Nascent, c6Ally, StatType.LUNAR_MULTIPLIER), EPS,
+                "Returning to Nascent Gleam should remove ally C6 elevation immediately");
+
+        model.character.Flins c5AscendantFlins = new model.character.Flins(
+                new TestWeapon(), blankArtifact(), flinsTalentData(5));
+        CombatSimulator c5Ascendant =
+                simulatorWithExistingCharacter(c5AscendantFlins);
+        c5Ascendant.setMoonsign(CombatSimulator.Moonsign.ASCENDANT_GLEAM);
+        model.character.Flins c6AscendantFlins = new model.character.Flins(
+                new TestWeapon(), blankArtifact(), flinsTalentData(6));
+        CombatSimulator c6Ascendant =
+                simulatorWithExistingCharacter(c6AscendantFlins);
+        c6Ascendant.setMoonsign(CombatSimulator.Moonsign.ASCENDANT_GLEAM);
+        double c5AscendantReaction =
+                new ReactionEffectScheduler(c5Ascendant)
+                        .computeInitialLunarChargedDamage();
+        double c6AscendantReaction =
+                new ReactionEffectScheduler(c6Ascendant)
+                        .computeInitialLunarChargedDamage();
+        assertClose(c5AscendantReaction * 1.45, c6AscendantReaction, 0.5,
+                "Ascendant Flins C6 reaction damage should combine to 45 percent elevation");
+
+        AttackAction ordinaryElectro = new AttackAction(
+                "Flins C6 ordinary Electro fixture",
+                1.0,
+                Element.ELECTRO,
+                StatType.BASE_ATK,
+                StatType.SKILL_DMG_BONUS,
+                0.0,
+                false,
+                ActionType.SKILL);
+        ordinaryElectro.setICD(ICDType.None, ICDTag.None, 0.0);
+        c5Nascent.performActionWithoutTimeAdvance(
+                CharacterId.FLINS, ordinaryElectro);
+        double c5OrdinaryDamage = c5Nascent.getLastActionDirectDamageCapture();
+        c6Ascendant.setMoonsign(CombatSimulator.Moonsign.NASCENT_GLEAM);
+        c6Ascendant.performActionWithoutTimeAdvance(
+                CharacterId.FLINS, ordinaryElectro);
+        assertClose(c5OrdinaryDamage,
+                c6Ascendant.getLastActionDirectDamageCapture(), 0.5,
+                "Flins C6 elevation should not change ordinary Electro damage");
+    }
+
+    private static void assertFlinsManifestMultipliers(
+            List<AttackAction> actions,
+            double[] expected,
+            String scenario) {
+        for (int step = 0; step < expected.length; step++) {
+            String actionName = "Flins N" + (step + 1) + " (Manifest)";
+            List<AttackAction> matching = actions.stream()
+                    .filter(action -> actionName.equals(action.getName()))
+                    .collect(Collectors.toList());
+            int expectedHitCount = step == 3 ? 2 : 1;
+            assertEquals(expectedHitCount, matching.size(),
+                    scenario + " should emit the expected hit count for " + actionName);
+            for (AttackAction action : matching) {
+                assertClose(expected[step], action.getDamagePercent(), EPS,
+                        scenario + " multiplier for " + actionName);
+            }
+        }
     }
 
     private static void testAccuracyPhaseF_FlinsThundercloudConditionalHits() {

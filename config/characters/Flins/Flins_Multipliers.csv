@@ -2,17 +2,28 @@ Character,AbilityType,Key,Level,Value1,Value2
 Flins,NORMAL,N1,9,0.8217,0
 Flins,NORMAL,N2,9,0.8295,0
 Flins,NORMAL,N3,9,1.0274,0
-Flins,NORMAL,N4,9,1.1772,0
+Flins,NORMAL,N4,9,0.5886,0
 Flins,NORMAL,N5,9,1.4109,0
 Flins,NORMAL,Charge,9,1.8928,0
 Flins,NORMAL,Form N1,9,0.9902,0
 Flins,NORMAL,Form N2,9,0.9996,0
 Flins,NORMAL,Form N3,9,1.2380,0
-Flins,NORMAL,Form N4,9,1.4186,0
+Flins,NORMAL,Form N4,9,0.7093,0
 Flins,NORMAL,Form N5,9,1.7002,0
+Flins,NORMAL,Form N1 C5,12,1.1650,0
+Flins,NORMAL,Form N2 C5,12,1.1760,0
+Flins,NORMAL,Form N3 C5,12,1.4565,0
+Flins,NORMAL,Form N4 C5,12,0.8345,0
+Flins,NORMAL,Form N5 C5,12,2.0002,0
 Flins,SKILL,Spearstorm DMG,9,3.0328,0
+Flins,SKILL,Spearstorm DMG C5,12,3.5680,0
 Flins,BURST,Burst Initial,9,4.4173,0
 Flins,BURST,Burst Middle,9,0.2761,0
 Flins,BURST,Burst Final,9,1.9878,0
 Flins,BURST,Symphony DMG,9,1.2148,0
 Flins,BURST,Symphony Additional,9,1.7669,0
+Flins,BURST,Burst Initial C3,12,5.1968,0
+Flins,BURST,Burst Middle C3,12,0.3248,0
+Flins,BURST,Burst Final C3,12,2.3386,0
+Flins,BURST,Symphony DMG C3,12,1.4291,0
+Flins,BURST,Symphony Additional C3,12,2.0787,0

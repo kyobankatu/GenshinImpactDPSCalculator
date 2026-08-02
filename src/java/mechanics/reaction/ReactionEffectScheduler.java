@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import mechanics.buff.Buff;
 import mechanics.formula.ResistanceCalculator;
 import model.entity.Character;
 import model.stats.StatsContainer;
@@ -519,7 +520,7 @@ public class ReactionEffectScheduler {
             CombatSimulator simContext, Element damageElement, StatType reactionBonusStat) {
         List<Double> potentialDamages = new ArrayList<>();
         for (Character member : simContext.getPartyMembers()) {
-            StatsContainer stats = member.getEffectiveStats(simContext.getCurrentTime());
+            StatsContainer stats = resolveLunarReactionStats(member, simContext);
             double baseBonus = stats.get(StatType.LUNAR_BASE_BONUS);
             double uniqueBonus = stats.get(StatType.LUNAR_UNIQUE_BONUS)
                     + stats.get(reactionBonusStat)
@@ -527,14 +528,14 @@ public class ReactionEffectScheduler {
             if (reactionBonusStat == StatType.LUNAR_CHARGED_DMG_BONUS) {
                 uniqueBonus += stats.get(StatType.ELECTRO_CHARGED_DMG_BONUS);
             }
-            double columbinaMult = 1.0 + stats.get(StatType.LUNAR_MULTIPLIER);
+            double lunarMultiplier = 1.0 + stats.get(StatType.LUNAR_MULTIPLIER);
             double em = stats.get(StatType.ELEMENTAL_MASTERY);
             double emBonus = (2.78 * em) / (em + 1400.0);
             double cr = stats.get(StatType.CRIT_RATE);
             double cd = stats.get(StatType.CRIT_DMG);
             double critMult = 1.0 + (Math.min(cr, 1.0) * cd);
             double damage = 1.8 * 1446.85 * (1.0 + baseBonus) * (1.0 + uniqueBonus)
-                    * (1.0 + emBonus) * critMult * columbinaMult;
+                    * (1.0 + emBonus) * critMult * lunarMultiplier;
             potentialDamages.add(damage);
         }
 
@@ -544,6 +545,19 @@ public class ReactionEffectScheduler {
             total += potentialDamages.get(i) * LUNAR_CHARGED_WEIGHTS[i];
         }
         return applyCurrentResistance(total, damageElement, simContext);
+    }
+
+    private StatsContainer resolveLunarReactionStats(
+            Character member,
+            CombatSimulator simContext) {
+        double currentTime = simContext.getCurrentTime();
+        StatsContainer stats = member.getEffectiveStats(currentTime);
+        for (Buff buff : simContext.getApplicableBuffs(member)) {
+            if (!buff.isExpired(currentTime)) {
+                buff.apply(stats, currentTime);
+            }
+        }
+        return stats;
     }
 
     private double applyCurrentResistance(

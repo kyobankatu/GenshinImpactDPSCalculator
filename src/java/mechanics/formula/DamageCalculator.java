@@ -41,9 +41,8 @@ public class DamageCalculator {
      * {@code LUNAR_MOONSIGN_BONUS}.</li>
      * <li>Crit: {@code 1 + min(CR,1) * CD}</li>
      * <li>Res: via {@link #calculateResMulti}.</li>
-     * <li>Columbina multiplier: {@code 1 + LUNAR_MULTIPLIER} – applied last as an
-     * independent
-     * final multiplier, scaling with {@code (EM / 2000) * 1.5}.</li>
+     * <li>Lunar elevation: {@code 1 + LUNAR_MULTIPLIER} – applied last as an
+     * independent final multiplier.</li>
      * </ol>
      *
      * <strong>Standard path</strong>

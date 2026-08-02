@@ -63,7 +63,7 @@ final class LunarDamageStrategy implements DamageStrategy {
 
         double mv = action.getDamagePercent();
         double totalBaseBonus = stats.get(StatType.LUNAR_BASE_BONUS);
-        double columbinaMultiplier = 1.0 + stats.get(StatType.LUNAR_MULTIPLIER);
+        double lunarMultiplier = 1.0 + stats.get(StatType.LUNAR_MULTIPLIER);
         double uniqueBonus = stats.get(StatType.LUNAR_UNIQUE_BONUS);
         double baseSection = 3.0 * (statVal * mv) * (1.0 + totalBaseBonus) * (1.0 + uniqueBonus);
 
@@ -83,26 +83,26 @@ final class LunarDamageStrategy implements DamageStrategy {
 
         try {
             String formula = String.format(
-                    "3.0 * (%.0f * %.2f) * (1 + %.3f + %.2f) * (1 + %.3f + (%.3f + %.3f + %.3f)) * %.3f * %.3f * %.3f (Columbina)",
+                    "3.0 * (%.0f * %.2f) * (1 + %.3f + %.2f) * (1 + %.3f + (%.3f + %.3f + %.3f)) * %.3f * %.3f * %.3f (LunarMult)",
                     statVal, mv,
                     totalBaseBonus, uniqueBonus,
                     reactionBonus, statGearBonus, burstBonus, ecBonus,
-                    critMult, resMult, columbinaMultiplier);
+                    critMult, resMult, lunarMultiplier);
             action.setDebugFormula(formula);
 
             if (sim.isLoggingEnabled()) {
                 System.out.println("[FormulaDebug] " + action.getName() + ": " + formula);
                 System.out.println(String.format(
-                        "[FormulaValues] Stat:%.0f MV:%.2f BaseI:%.3f Uniq:%.2f React:%.3f Gear:%.3f Burst:%.3f Moonsign:%.3f Crit:%.3f Res:%.3f ColMult:%.3f",
+                        "[FormulaValues] Stat:%.0f MV:%.2f BaseI:%.3f Uniq:%.2f React:%.3f Gear:%.3f Burst:%.3f Moonsign:%.3f Crit:%.3f Res:%.3f LunarMult:%.3f",
                         statVal, mv, totalBaseBonus, uniqueBonus, reactionBonus, statGearBonus, burstBonus,
-                        ecBonus, critMult, resMult, columbinaMultiplier));
+                        ecBonus, critMult, resMult, lunarMultiplier));
             }
         } catch (Exception e) {
             System.err.println("[FormulaError] Failed to format: " + e.getMessage());
             e.printStackTrace();
         }
 
-        return baseSection * multiplier * critMult * resMult * columbinaMultiplier;
+        return baseSection * multiplier * critMult * resMult * lunarMultiplier;
     }
 
     private double getLunarReactionSpecificBonus(StatsContainer stats, AttackAction action) {

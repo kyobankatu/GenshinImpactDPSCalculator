@@ -122,12 +122,8 @@ public enum StatType {
     LUNAR_MOONSIGN_BONUS, // Ascendant Blessing (Moonsign Team Bonus)
     /** Additive base damage bonus used by Ineffa and Flins (applied before DMG%). */
     LUNAR_BASE_BONUS, // Additive Base (Ineffa/Flins)
-    /**
-     * Independent final damage multiplier used by Columbina's passive.
-     * Scales as {@code (EM / 2000) * 1.5}; displayed as {@code ColMult} in
-     * formula debug logs.
-     */
-    LUNAR_MULTIPLIER, // Independent Multiplier (Columbina Passive)
+    /** Independent final multiplier for elevated Lunar damage. */
+    LUNAR_MULTIPLIER,
     /** Unique damage bonus exclusive to Flins. */
     LUNAR_UNIQUE_BONUS, // Unique Bonus (Flins)
     /**

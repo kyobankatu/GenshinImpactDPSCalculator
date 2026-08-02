@@ -40,8 +40,9 @@ import mechanics.energy.ParticleType;
  *       + final Electro hits; extra middle hits when Thundercloud is active.</li>
  *   <li><b>Thunderous Symphony (Burst, cost 30)</b> — fired while Thunderous Symphony
  *       is active; deals main + optional Additional hit when Thundercloud is active.</li>
- *   <li><b>Whispering Flame passive</b> — grants EM equal to 8% of ATK (max 160) and
- *       {@code LUNAR_UNIQUE_BONUS +20%}.</li>
+ *   <li><b>Whispering Flame passive</b> — grants EM equal to 8% of ATK (max 160).</li>
+ *   <li><b>Symphony of Winter passive</b> — grants
+ *       {@code LUNAR_CHARGED_DMG_BONUS +20%} at Ascendant Gleam.</li>
  *   <li><b>Lunar Base Bonus team buff</b> — provides {@code LUNAR_BASE_BONUS} scaling
  *       with ATK: {@code min(0.14, ATK / 100 * 0.007)}.</li>
  * </ul>
@@ -52,6 +53,15 @@ import mechanics.energy.ParticleType;
 public class Flins extends Character
         implements FormStateProvider, CharacterTeamBuffProvider,
         ReactionAwareCharacter, SimulatorInitializedCharacterEffect {
+    private static final double[] NORMAL_ATTACK_DEFAULTS = {
+        0.8217, 0.8295, 1.0274, 0.5886, 1.4109
+    };
+    private static final double[] MANIFEST_NORMAL_DEFAULTS = {
+        0.9902, 0.9996, 1.2380, 0.7093, 1.7002
+    };
+    private static final double[] C5_MANIFEST_NORMAL_DEFAULTS = {
+        1.1650, 1.1760, 1.4565, 0.8345, 2.0002
+    };
 
     private int normalAttackStep = 0;
 
@@ -203,8 +213,8 @@ public class Flins extends Character
     }
 
     /**
-     * Applies the Whispering Flame passive: grants EM equal to 8% of total ATK
-     * (capped at 160) and {@code LUNAR_UNIQUE_BONUS +20%}.
+     * Applies Whispering Flame, Symphony of Winter, and self-only constellation
+     * stat effects.
      *
      * @param stats the stats container to modify
      */
@@ -212,6 +222,9 @@ public class Flins extends Character
     public void applyPassive(StatsContainer stats) {
         if (constellation >= 4) {
             stats.add(StatType.ATK_PERCENT, 0.20);
+        }
+        if (constellation >= 6) {
+            stats.add(StatType.LUNAR_MULTIPLIER, 0.35);
         }
 
         // Whispering Flame: C4 raises 8%/160 to 10%/220.
@@ -331,7 +344,15 @@ public class Flins extends Character
         String name = "Flins " + key + (inForm ? " (Manifest)" : "");
         String lookupKey = inForm ? "Form " + key : key;
 
-        double mv = getTalentValue(lookupKey, 0.8); // Default fallback
+        double[] normalDefaults = inForm
+                ? MANIFEST_NORMAL_DEFAULTS
+                : NORMAL_ATTACK_DEFAULTS;
+        double mv = getTalentValue(lookupKey, normalDefaults[normalAttackStep]);
+        if (inForm && constellation >= 5) {
+            mv = getTalentValue(
+                    lookupKey + " C5",
+                    C5_MANIFEST_NORMAL_DEFAULTS[normalAttackStep]);
+        }
         double dur = 0.3;
 
         switch (normalAttackStep) {
@@ -438,7 +459,12 @@ public class Flins extends Character
      */
     private void skill_spearstorm(CombatSimulator sim) {
         // Northland Spearstorm
-        double mv = getTalentValue("Spearstorm DMG", 3.0328);
+        String spearstormKey = constellation >= 5
+                ? "Spearstorm DMG C5"
+                : "Spearstorm DMG";
+        double mv = getTalentValue(
+                spearstormKey,
+                constellation >= 5 ? 3.5680 : 3.0328);
 
         AttackAction hit = new AttackAction("Northland Spearstorm", mv, Element.ELECTRO, StatType.BASE_ATK,
                 StatType.SKILL_DMG_BONUS, 0.0, false, ActionType.SKILL);
@@ -483,9 +509,16 @@ public class Flins extends Character
      */
     private void burst_standard(CombatSimulator sim) {
         // Ancient Ritual: Cometh the Night (Cost 80)
-        double initialMv = getTalentValue("Burst Initial", 4.417);
-        double middleMv = getTalentValue("Burst Middle", 0.276);
-        double finalMv = getTalentValue("Burst Final", 1.988);
+        String burstSuffix = constellation >= 3 ? " C3" : "";
+        double initialMv = getTalentValue(
+                "Burst Initial" + burstSuffix,
+                constellation >= 3 ? 5.1968 : 4.4173);
+        double middleMv = getTalentValue(
+                "Burst Middle" + burstSuffix,
+                constellation >= 3 ? 0.3248 : 0.2761);
+        double finalMv = getTalentValue(
+                "Burst Final" + burstSuffix,
+                constellation >= 3 ? 2.3386 : 1.9878);
         boolean thundercloudActiveAtCast = isThundercloudActive(sim);
 
         // Initial
@@ -568,8 +601,13 @@ public class Flins extends Character
      */
     private void burst_symphony(CombatSimulator sim) {
         // Thunderous Symphony (Cost 30)
-        double mainMv = getTalentValue("Symphony DMG", 1.215);
-        double addMv = getTalentValue("Symphony Additional", 1.767);
+        String burstSuffix = constellation >= 3 ? " C3" : "";
+        double mainMv = getTalentValue(
+                "Symphony DMG" + burstSuffix,
+                constellation >= 3 ? 1.4291 : 1.2148);
+        double addMv = getTalentValue(
+                "Symphony Additional" + burstSuffix,
+                constellation >= 3 ? 2.0787 : 1.7669);
 
         AttackAction hit = new AttackAction("Thunderous Symphony", mainMv, Element.ELECTRO,
                 StatType.BASE_ATK,
@@ -670,6 +708,22 @@ public class Flins extends Character
                 stats.add(StatType.LUNAR_BASE_BONUS, bonus);
             }
         }.sourcedBy(this.getCharacterId()));
+        if (constellation >= 6) {
+            buffs.add(new mechanics.buff.Buff(
+                    "Flins C6: Ascendant Lunar-Charged Elevation",
+                    BuffId.FLINS_C6_LUNAR_CHARGED_ELEVATION,
+                    Double.MAX_VALUE,
+                    0.0) {
+                @Override
+                protected void applyStats(StatsContainer stats, double currentTime) {
+                    if (initializedSimulator != null
+                            && initializedSimulator.getMoonsign()
+                                    == CombatSimulator.Moonsign.ASCENDANT_GLEAM) {
+                        stats.add(StatType.LUNAR_MULTIPLIER, 0.10);
+                    }
+                }
+            }.sourcedBy(this.getCharacterId()));
+        }
         return buffs;
     }
 
