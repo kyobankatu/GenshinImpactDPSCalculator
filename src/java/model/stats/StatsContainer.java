@@ -77,9 +77,13 @@ public class StatsContainer {
                 Math.max(0.0, get(StatType.ENERGY_RECHARGE) - 1.0)
                         * energyRechargeRatio);
         double maxHpConversion = get(StatType.MAX_HP_TO_ATK_FLAT_RATIO);
+        double elementalMasteryConversion = get(
+                StatType.ELEMENTAL_MASTERY_TO_ATK_FLAT_RATIO);
         return base * (1.0 + pct + energyRechargeAtk)
                 + flat
-                + getTotalHp() * maxHpConversion;
+                + getTotalHp() * maxHpConversion
+                + get(StatType.ELEMENTAL_MASTERY)
+                        * elementalMasteryConversion;
     }
 
     /**

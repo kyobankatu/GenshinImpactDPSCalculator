@@ -49,7 +49,8 @@ public class DamageCalculator {
      * <strong>Standard path</strong>
      * <ol>
      * <li>Resolve stats – snapshot or live, then apply active buffs.</li>
-     * <li>Base damage: {@code (scalingStat * MV) + FLAT_DMG_BONUS}</li>
+     * <li>Base damage: {@code (scalingStat * MV) + FLAT_DMG_BONUS}, including
+     * typed action-specific final-stat additions.</li>
      * <li>DMG Bonus%: sum of {@code DMG_BONUS_ALL}, element-specific bonus, action
      * bonus stat,
      * and any extra bonuses attached to the action.</li>

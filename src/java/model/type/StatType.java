@@ -44,6 +44,8 @@ public enum StatType {
     ENERGY_RECHARGE_TO_ATK_PERCENT_RATIO,
     /** Maximum ATK% obtainable from Energy-Recharge-to-ATK conversion. */
     ENERGY_RECHARGE_TO_ATK_PERCENT_CAP,
+    /** Flat ATK gained per point of final Elemental Mastery. */
+    ELEMENTAL_MASTERY_TO_ATK_FLAT_RATIO,
 
     /** Character's base DEF from level/ascension. */
     BASE_DEF,
@@ -189,6 +191,8 @@ public enum StatType {
     DMG_BONUS_ALL,
     /** Flat damage added to the Additive Bonus step of the damage formula. */
     FLAT_DMG_BONUS,
+    /** Final-DEF ratio added to Normal and Charged Attack base damage. */
+    DEF_TO_NORMAL_CHARGED_FLAT_DMG_RATIO,
 
     // -----------------------------------------------------------------------
     // Debuffs / Enemy mitigation reduction stats
