@@ -182,6 +182,9 @@ public final class KeqingRegressionTest {
                 "Keqing Charged Attack consumes Stiletto");
         assertTrue(!keqing.isElectroInfusionActive(sim.getCurrentTime()),
                 "Keqing Charged detonation does not grant infusion");
+        sim.advanceTime(100.0 * FRAME);
+        assertClose(7.5, keqing.getTotalParticleEnergy(), EPS,
+                "Keqing Thunderclap pair generates one expected particle set");
 
         Keqing expiryKeqing = keqingAtConstellation(0);
         CombatSimulator expirySim = simulatorWith(expiryKeqing);
