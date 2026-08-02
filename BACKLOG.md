@@ -3434,11 +3434,11 @@ experiment record.
 
 ### B-162 — Follow-on legacy character inventory
 
-- **Status:** candidate
+- **Status:** in progress
 - **Source:** B-161 normalized character asset/class inventory
 - **Units:** Rosaria, Diluc, Keqing, Ningguang, and Ganyu
-- **Reason:** sourced and valuable, but intentionally left for a later bounded
-  campaign after the three independent B-161 character lanes converge.
+- **Plan:** three-phase `TASKS.md` Follow-on Legacy Character Campaign with a
+  shared typed-identity prerequisite and branch-isolated vertical slices.
 
 ### B-163 — Follow-on stateful weapon inventory
 

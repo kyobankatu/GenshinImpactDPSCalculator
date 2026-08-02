@@ -50,6 +50,11 @@ wave added the Golden Majesty weapon family, six legacy boundary artifact sets,
 and Razor through isolated implementation lanes; RL and generated
 documentation remained excluded.
 
+The B-162 follow-on legacy character campaign is in progress. Rosaria, Diluc,
+Keqing, Ningguang, and Ganyu are being added as independently revertible
+single-target offensive slices; RL, generated docs, and deferred defensive or
+geometry systems remain excluded.
+
 The B-158 derived-stat equipment and Fischl wave is complete. It adds reusable
 final-DEF/EM conversion, two five-star weapons, four asset-backed artifact sets,
 and Fischl through bounded branch-isolated lanes.
@@ -12871,6 +12876,181 @@ Completion evidence:
   the focused switch contract regression.
 - `./gradlew ReactionRegressionTest`, `./gradlew build`, `./gradlew javadoc`,
   and `python scripts/preflight.py` passed on 2026-08-02.
+
+## Implementation Order: Follow-on Legacy Character Campaign
+
+Status: In progress. B-162 promotes five asset-backed legacy characters from
+the durable inventory into one implementation-first campaign.
+
+Scope:
+
+- Reserve stable typed identities and character-owned buff keys before branch
+  isolation.
+- Add Rosaria, Diluc, Keqing, Ningguang, and Ganyu as complete stationary
+  single-target offensive vertical slices with sourced talent-9 values,
+  actions, cooldowns, energy, elemental application, particles, passives, and
+  representable constellations.
+- Keep each character and focused regression independently revertible and run
+  combined reaction/build gates after integration.
+
+Out of scope for this pass:
+
+- Enemy/player geometry, actual random CRIT outcomes, weak points, stamina,
+  incoming damage, shields, healing, enemy defeat, multi-target selection, RL,
+  generated docs, and every system listed under Deferred Systems.
+- Effects whose defining trigger cannot be represented faithfully by current
+  typed callbacks; these remain explicit class-level boundaries rather than
+  unconditional approximations.
+
+Definitions:
+
+- `RosariaRegressionTest`, `DilucRegressionTest`, `KeqingRegressionTest`,
+  `NingguangRegressionTest`, and `GanyuRegressionTest`: focused executable
+  regressions covering each new character without extending the shared
+  reaction test file.
+
+### Phase 1: Stable Character and Buff Identities
+
+Why first:
+
+- Isolated character branches require immutable typed identities before their
+  source and tests can be implemented without central-file conflicts.
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+
+Tasks:
+
+- Reserve stable numeric IDs 21-25 for the five B-162 characters.
+- Add only the typed buff keys required by representable passives and
+  constellations.
+- Extend identity regression coverage for display/numeric round trips and
+  invalid boundaries.
+
+Acceptance criteria:
+
+- Every new identity resolves bidirectionally without changing IDs 1-20 or the
+  UNKNOWN fallback.
+- Character branches can express all included timed bonuses and resistance
+  reductions without display-string control flow.
+
+Test cases to add or update:
+
+- Normal: display and numeric round trips for IDs 21-25.
+- Boundary: existing IDs remain stable and UNKNOWN handles null, unmatched,
+  negative, zero, and out-of-range input.
+
+Verification:
+
+- `./gradlew LegacyCharacterIdentityRegressionTest`
+- `./gradlew build`
+- `python scripts/preflight.py`
+
+### Phase 2: Rosaria, Diluc, and Keqing Vertical Slices
+
+Why second:
+
+- These independent melee kits exercise reusable Normal/Charged chains,
+  infusion windows, periodic Burst damage, party buffs, and resistance debuffs
+  against the stable Phase 1 baseline.
+
+Target files:
+
+- `src/java/model/character/Rosaria.java` (new)
+- `src/java/model/character/Diluc.java` (new)
+- `src/java/model/character/Keqing.java` (new)
+- `src/java/sample/RosariaRegressionTest.java` (new)
+- `src/java/sample/DilucRegressionTest.java` (new)
+- `src/java/sample/KeqingRegressionTest.java` (new)
+
+Tasks:
+
+- Implement each base kit with talent-9 multipliers, sourced action timing,
+  cooldown/energy contracts, gauges, ICD, particle travel, and stationary
+  single-target Burst cadence.
+- Implement ascension passives and constellations whose offensive triggers are
+  observable through current simulator hooks; document unsupported branches at
+  each class boundary.
+- Add focused normal, boundary, abnormal, constellation, switch-state, and
+  duplicate-initialization regressions per character.
+
+Acceptance criteria:
+
+- Each character executes all offensive action types without null equipment,
+  rejects constellations outside 0-6, and preserves independent runtime state.
+- Rosaria's Burst/team CRIT and Physical shred, Diluc's three-stage Skill and
+  Burst infusion, and Keqing's Stellar Restoration/Burst bonuses obey their
+  sourced windows and typed ownership rules within the stated boundaries.
+
+Test cases to add or update:
+
+- Normal: action multipliers/timing, element/gauge/ICD, energy spend, particles,
+  periodic hits, infusion, passives, and supported constellations.
+- Boundary: exact cooldown/expiry/stack cadence, switch behavior, C0/C6 talent
+  levels, and independent simulator/character instances.
+- Abnormal: invalid constellation, insufficient energy, action on cooldown,
+  wrong owner/action/element callbacks, duplicate initialization, and expired
+  state.
+
+Verification:
+
+- `./gradlew RosariaRegressionTest DilucRegressionTest KeqingRegressionTest`
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `python scripts/preflight.py`
+
+### Phase 3: Ningguang and Ganyu Vertical Slices
+
+Why:
+
+- The remaining ranged kits add owned projectile counters, delayed Skill
+  damage, multi-pulse Bursts, and timed field bonuses after the campaign's
+  common identity and listener patterns are proven.
+
+Target files:
+
+- `src/java/model/character/Ningguang.java` (new)
+- `src/java/model/character/Ganyu.java` (new)
+- `src/java/sample/NingguangRegressionTest.java` (new)
+- `src/java/sample/GanyuRegressionTest.java` (new)
+
+Tasks:
+
+- Implement Ningguang's Normal/Charged Star Jade ownership, Jade Screen hit,
+  and Starshatter projectile sequence with representable constellations.
+- Implement Ganyu's Frostflake arrow/bloom, Trail of the Qilin hits, Celestial
+  Shower stationary-target cadence, field bonuses, and representable
+  constellations.
+- Add focused state, timing, application, particle, and invalid-trigger
+  regressions, then run the combined campaign gate.
+
+Acceptance criteria:
+
+- Star Jade and Frostflake state cannot leak across characters, simulators, or
+  expired windows, and every delayed hit retains typed owner attribution.
+- Included passives and constellations change only their documented action,
+  element, target, or field windows; geometry and random targeting remain
+  explicit boundaries.
+
+Test cases to add or update:
+
+- Normal: counters, charged/bloom multipliers, delayed/periodic hits, energy,
+  particles, application, passives, and supported constellations.
+- Boundary: counter caps/consumption, exact duration and cooldown expiry,
+  switch behavior, projectile cadence, and independent instances.
+- Abnormal: invalid constellation, insufficient energy, wrong callback,
+  duplicate initialization, expired state, and zero/irrelevant damage events.
+
+Verification:
+
+- `./gradlew NingguangRegressionTest GanyuRegressionTest`
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py --run`
 
 ## Implementation Order: Parallel Foundational Content Campaign
 
