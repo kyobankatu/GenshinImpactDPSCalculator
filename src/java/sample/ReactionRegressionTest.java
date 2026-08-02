@@ -126,6 +126,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ReciprocalHitWeapons();
         testAccuracyPhaseF_ReactionWindowWeapons();
         testAccuracyPhaseF_HitStackWeapons();
+        testAccuracyPhaseF_AdditionalClaymoreHitStackWeapons();
         testAccuracyPhaseF_ActionUseWindowWeapons();
         testAccuracyPhaseF_KaeyaCharacterContract();
         testAccuracyPhaseF_AmberCharacterContract();
@@ -6514,6 +6515,82 @@ public class ReactionRegressionTest {
         }
         assertTrue(highIbisRefinementRejected,
                 "Ibis Piercer should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_AdditionalClaymoreHitStackWeapons() {
+        model.weapon.SkyriderGreatsword skyrider =
+                new model.weapon.SkyriderGreatsword();
+        assertEquals("Skyrider Greatsword", skyrider.getName(),
+                "Skyrider Greatsword display name");
+        assertClose(401.0, skyrider.getBaseAtk(), EPS,
+                "Skyrider Greatsword base ATK");
+        assertClose(0.439,
+                skyrider.getStats().get(StatType.PHYSICAL_DMG_BONUS), EPS,
+                "Skyrider Greatsword Physical DMG Bonus");
+        assertEquals(model.type.WeaponType.CLAYMORE, skyrider.getWeaponType(),
+                "Skyrider Greatsword weapon type");
+        assertEquals(5, skyrider.getRefinement(),
+                "Skyrider Greatsword default refinement");
+
+        TestCharacter owner = testCharacter(Element.PHYSICAL);
+        owner.setWeapon(skyrider);
+        CombatSimulator sim = simulatorWith(owner);
+        AttackAction normalHit = typedDamageHit(
+                "Skyrider Greatsword Normal", ActionType.NORMAL, 1.0);
+        AttackAction chargeHit = typedDamageHit(
+                "Skyrider Greatsword Charge", ActionType.CHARGE, 1.0);
+        AttackAction skillHit = typedDamageHit(
+                "Skyrider Greatsword Skill", ActionType.SKILL, 1.0);
+        AttackAction zeroNormalHit = typedDamageHit(
+                "Skyrider Greatsword zero Normal", ActionType.NORMAL, 0.0);
+        skyrider.onDamage(owner, normalHit, 0.0, sim);
+        skyrider.onDamage(owner, chargeHit, 0.499, sim);
+        assertClose(0.10,
+                effectiveStatAt(owner, StatType.ATK_PERCENT, 0.499), EPS,
+                "Skyrider Greatsword should reject a hit immediately before CT");
+        skyrider.onDamage(owner, chargeHit, 0.5, sim);
+        skyrider.onDamage(owner, normalHit, 1.0, sim);
+        skyrider.onDamage(owner, chargeHit, 1.5, sim);
+        assertClose(0.40,
+                effectiveStatAt(owner, StatType.ATK_PERCENT, 1.5), EPS,
+                "R5 Skyrider Greatsword should cap at four stacks");
+        skyrider.onDamage(owner, normalHit, 2.0, sim);
+        skyrider.onDamage(owner, skillHit, 2.5, sim);
+        skyrider.onDamage(owner, zeroNormalHit, 2.5, sim);
+        assertClose(0.40,
+                effectiveStatAt(owner, StatType.ATK_PERCENT, 7.999), EPS,
+                "Skyrider Greatsword cap hit should refresh the shared duration");
+        assertClose(0.0,
+                effectiveStatAt(owner, StatType.ATK_PERCENT, 8.0), EPS,
+                "Skyrider Greatsword should expire all stacks exactly");
+
+        model.weapon.SkyriderGreatsword r1Skyrider =
+                new model.weapon.SkyriderGreatsword(1);
+        TestCharacter r1Owner = testCharacter(Element.PHYSICAL);
+        r1Owner.setWeapon(r1Skyrider);
+        CombatSimulator r1Sim = simulatorWith(r1Owner);
+        r1Skyrider.onDamage(r1Owner, normalHit, 0.0, r1Sim);
+        assertClose(0.06,
+                resolvedStat(r1Sim, r1Owner, StatType.ATK_PERCENT), EPS,
+                "R1 Skyrider Greatsword first stack");
+
+        boolean lowRefinementRejected = false;
+        try {
+            new model.weapon.SkyriderGreatsword(0);
+        } catch (IllegalArgumentException expected) {
+            lowRefinementRejected = true;
+        }
+        assertTrue(lowRefinementRejected,
+                "Skyrider Greatsword should reject refinement zero");
+
+        boolean highRefinementRejected = false;
+        try {
+            new model.weapon.SkyriderGreatsword(6);
+        } catch (IllegalArgumentException expected) {
+            highRefinementRejected = true;
+        }
+        assertTrue(highRefinementRejected,
+                "Skyrider Greatsword should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_ActionUseWindowWeapons() {
