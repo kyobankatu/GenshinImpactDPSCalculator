@@ -27,8 +27,8 @@ The current autonomous session is simulator-only. Python RL training and the
 Java RL bridge are excluded; the retained NCCL/DDP plan below is paused until a
 future explicit user request.
 
-The Favonius, Sacrificial, and target-Aura weapon campaigns are complete. The
-Kaeya vertical-slice campaign is active; RL and generated docs remain excluded.
+The Favonius, Sacrificial, target-Aura weapon, and Kaeya vertical-slice
+campaigns are complete; RL and generated docs remain excluded.
 
 The B-058 Burning fuel correction is complete. It replaces the fixed
 two-second approximation with typed Dendro-fuel decay and refresh ownership
@@ -12700,8 +12700,8 @@ Verification:
 
 ## Implementation Order: Kaeya Character Vertical Slice
 
-Status: In progress. One independently revertible character/data/regression unit
-will add Kaeya through C6 within the simulator's one-enemy boundary.
+Status: Complete. One independently revertible character/data/regression unit
+adds Kaeya through C6 within the simulator's one-enemy boundary.
 
 Scope:
 
@@ -12723,7 +12723,7 @@ Definitions:
 - **Stationary Burst stand-in**: 13 evenly scheduled hits over eight seconds at
   C0-C5 and 17 at C6, preserving standard ICD and one immutable stat snapshot.
 
-### Phase 1: Add Kaeya Data, Actions, Constellations, and Regression
+### Phase 1: Add Kaeya Data, Actions, Constellations, and Regression - Done
 
 Why first:
 
@@ -12737,6 +12737,15 @@ Target files:
 - `config/characters/Kaeya/Kaeya_Status.csv` (new)
 - `config/characters/Kaeya/Kaeya_Multipliers.csv` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Commit `f891f32` adds stable ID 9, aligned Lv. 90/talent configuration,
+  typed physical attacks, Frostgnaw, and snapshotted Glacial Waltz.
+- Fixed-count Burst scheduling produces exactly 13 C0 or 17 C6 hits without
+  duration-boundary drift; C1, C3, C5, C6, and single-target A4 regressions pass.
+- `ReactionRegressionTest`, `build`, Javadoc, and preflight pass with no
+  generated or deliberately untracked artifact staged.
 
 Acceptance criteria:
 

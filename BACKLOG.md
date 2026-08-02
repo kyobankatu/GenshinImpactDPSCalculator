@@ -2079,10 +2079,12 @@ experiment record.
 
 ### B-076 — Kaeya character and constellation coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** one-enemy simulator character vertical slice; RL excluded
 - **Value/risk:** planned content addition using existing typed actions, periodic
   event, Frozen state, snapshot, and per-action bonus contracts
 - **Evidence boundary:** KQM TCL Lv. 90/talent/gauge/ICD/particle/constellation
   data; C2/C4, healing, movement, and multi-target behavior remain unsupported
 - **Plan:** `TASKS.md` Kaeya Character Vertical Slice
+- **Completion:** `f891f32` adds the sourced one-enemy vertical slice with exact
+  C0/C6 Burst counts; reaction regression, build, Javadoc, and leak gates pass
