@@ -143,6 +143,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ScionOfTheBlazingSun();
         testAccuracyPhaseF_AlleyHunter();
         testAccuracyPhaseF_SequenceOfSolitude();
+        testAccuracyPhaseF_EyeOfPerception();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -9198,6 +9199,113 @@ public class ReactionRegressionTest {
         }
         assertTrue(highSequenceRefinementRejected,
                 "Sequence should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_EyeOfPerception() {
+        model.weapon.EyeOfPerception eye =
+                new model.weapon.EyeOfPerception(() -> 0.499);
+        assertEquals("Eye of Perception", eye.getName(),
+                "Eye of Perception display name");
+        assertClose(454.0, eye.getBaseAtk(), EPS,
+                "Eye of Perception base ATK");
+        assertClose(0.551,
+                eye.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Eye of Perception ATK substat");
+        assertEquals(model.type.WeaponType.CATALYST, eye.getWeaponType(),
+                "Eye of Perception weapon type");
+        assertEquals(5, eye.getRefinement(),
+                "Eye of Perception default refinement");
+
+        TestCharacter eyeOwner = testCharacter(
+                Element.ELECTRO, CharacterId.SUCROSE);
+        eyeOwner.setWeapon(eye);
+        CombatSimulator eyeSim = simulatorWith(eyeOwner);
+        AttackAction zeroNormal = typedDamageHit(
+                "Zero Normal", ActionType.NORMAL, 0.0);
+        AttackAction skillHit = typedDamageHit(
+                "Skill", ActionType.SKILL, 1.0);
+        AttackAction normalHit = typedDamageHit(
+                "Normal", ActionType.NORMAL, 1.0);
+        AttackAction chargedHit = typedDamageHit(
+                "Charged", ActionType.CHARGE, 1.0);
+        AttackAction generatedProc = typedDamageHit(
+                "Eye of Perception Proc", ActionType.OTHER, 3.6);
+        eye.onDamage(eyeOwner, zeroNormal, 0.0, eyeSim);
+        eye.onDamage(eyeOwner, skillHit, 0.0, eyeSim);
+        assertClose(0.0, eyeSim.getTotalDamage(), EPS,
+                "Zero and wrong-type hits should not proc Eye of Perception");
+        eye.onDamage(eyeOwner, normalHit, 0.0, eyeSim);
+        double firstProcDamage = eyeSim.getTotalDamage();
+        assertTrue(firstProcDamage > 0.0,
+                "Eye of Perception should resolve its Bolt immediately");
+        eye.onDamage(eyeOwner, generatedProc, 0.0, eyeSim);
+        assertClose(firstProcDamage, eyeSim.getTotalDamage(), EPS,
+                "Eye of Perception's generated proc should not recurse");
+        eyeSim.advanceTime(8.0 - 1e-6);
+        eye.onDamage(eyeOwner, chargedHit, eyeSim.getCurrentTime(), eyeSim);
+        assertClose(firstProcDamage, eyeSim.getTotalDamage(), EPS,
+                "R5 Eye should remain on cooldown before eight seconds");
+        eyeSim.advanceTime(1e-6 + 1e-9);
+        eye.onDamage(eyeOwner, chargedHit, eyeSim.getCurrentTime(), eyeSim);
+        assertClose(firstProcDamage * 2.0, eyeSim.getTotalDamage(), EPS,
+                "R5 Eye should reactivate at exact eight-second CT");
+
+        model.weapon.EyeOfPerception failedEye =
+                new model.weapon.EyeOfPerception(() -> 0.5);
+        TestCharacter failedEyeOwner = testCharacter(Element.ELECTRO);
+        failedEyeOwner.setWeapon(failedEye);
+        CombatSimulator failedEyeSim = simulatorWith(failedEyeOwner);
+        failedEye.onDamage(failedEyeOwner, normalHit, 0.0, failedEyeSim);
+        assertClose(0.0, failedEyeSim.getTotalDamage(), EPS,
+                "Eye draw at exactly 0.5 should fail");
+
+        model.weapon.EyeOfPerception r1Eye =
+                new model.weapon.EyeOfPerception(1, () -> 0.0);
+        TestCharacter r1EyeOwner = testCharacter(
+                Element.ELECTRO, CharacterId.SUCROSE);
+        r1EyeOwner.setWeapon(r1Eye);
+        CombatSimulator r1EyeSim = simulatorWith(r1EyeOwner);
+        r1Eye.onDamage(r1EyeOwner, normalHit, 0.0, r1EyeSim);
+        double r1ProcDamage = r1EyeSim.getTotalDamage();
+        assertClose(firstProcDamage * (2.0 / 3.0), r1ProcDamage, EPS,
+                "R1 Eye Bolt should use 240-percent ATK");
+        r1EyeSim.advanceTime(12.0 - 1e-6);
+        r1Eye.onDamage(r1EyeOwner, chargedHit,
+                r1EyeSim.getCurrentTime(), r1EyeSim);
+        assertClose(r1ProcDamage, r1EyeSim.getTotalDamage(), EPS,
+                "R1 Eye should remain on cooldown before twelve seconds");
+        r1EyeSim.advanceTime(1e-6 + 1e-9);
+        r1Eye.onDamage(r1EyeOwner, chargedHit,
+                r1EyeSim.getCurrentTime(), r1EyeSim);
+        assertClose(r1ProcDamage * 2.0, r1EyeSim.getTotalDamage(), EPS,
+                "R1 Eye should reactivate at exact twelve-second CT");
+
+        boolean nullEyeDrawRejected = false;
+        try {
+            new model.weapon.EyeOfPerception(1, null);
+        } catch (NullPointerException expected) {
+            nullEyeDrawRejected = true;
+        }
+        assertTrue(nullEyeDrawRejected,
+                "Eye of Perception should reject a null draw source");
+
+        boolean lowEyeRefinementRejected = false;
+        try {
+            new model.weapon.EyeOfPerception(0);
+        } catch (IllegalArgumentException expected) {
+            lowEyeRefinementRejected = true;
+        }
+        assertTrue(lowEyeRefinementRejected,
+                "Eye of Perception should reject refinement zero");
+
+        boolean highEyeRefinementRejected = false;
+        try {
+            new model.weapon.EyeOfPerception(6);
+        } catch (IllegalArgumentException expected) {
+            highEyeRefinementRejected = true;
+        }
+        assertTrue(highEyeRefinementRejected,
+                "Eye of Perception should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {
