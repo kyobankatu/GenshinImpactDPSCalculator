@@ -13673,3 +13673,55 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc` at the shared/final API boundary
 - `python scripts/preflight.py`
+
+## Implementation Order: Skill-Use Stat Weapon Expansion
+
+Status: Active. Add three complete damage-relevant Skill-use windows through
+the existing verified action-use policy.
+
+Scope:
+
+- Add Flute of Ezpitzal, Footprint of the Rainbow, and Tamayuratei no Ohanashi
+  with sourced metadata, Skill triggers, R1-R5 values, R5 defaults, and tests.
+
+Out of scope for this pass:
+
+- Tamayuratei's Movement SPD, which has no combat stat or timing path;
+  characters, formulas, RL, generated docs, and unrelated weapon families.
+
+### Phase 1: Add Three Skill-Use Stat Weapons
+
+Target files:
+
+- `src/java/model/weapon/FluteOfEzpitzal.java` (new)
+- `src/java/model/weapon/FootprintOfTheRainbow.java` (new)
+- `src/java/model/weapon/TamayurateiNoOhanashi.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+| Unit | Skill-use window | Focused verification | Status |
+|---|---|---|---|
+| Flute of Ezpitzal | DEF 16-32% for 15s | sword metadata, refresh/expiry, R1/R5 | Pending |
+| Footprint of the Rainbow | DEF 16-32% for 15s | polearm metadata, action isolation, R1/R5 | Pending |
+| Tamayuratei no Ohanashi | ATK 20-40% for 10s | unequal formula/duration, refresh/expiry | Pending |
+
+Acceptance criteria:
+
+- Skill use activates before resolution, refreshes without stacking, remains
+  active immediately before and absent at exact expiry.
+- Normal/Burst use and repeated stat reads do not activate or accumulate state;
+  unrelated stats remain unchanged.
+- Metadata, R1-R5 values, R5 defaults, and invalid refinement behavior match
+  KQM TCL; unsupported movement speed is documented rather than approximated.
+
+Test cases to add or update:
+
+- Normal: every Skill trigger, metadata, R5 DEF/ATK value, refresh.
+- Boundary: R1 values and before/exact 15/10-second expiry.
+- Abnormal: Normal/Burst exclusion, repeated reads, refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`

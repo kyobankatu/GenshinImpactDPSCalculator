@@ -2256,3 +2256,14 @@ experiment record.
 - **Plan:** `TASKS.md` Samurai Conduct Weapon Campaign
 - **Completion:** `0a1c228` adds Energy spend, shared Samurai Conduct, both
   weapons, and focused regressions; build/Javadoc/leak gates pass
+
+### B-091 — Skill-use stat weapon expansion
+
+- **Status:** active
+- **Scope:** Flute of Ezpitzal, Footprint of the Rainbow, and Tamayuratei no
+  Ohanashi; RL excluded
+- **Value/risk:** three complete combat-stat windows reuse a verified typed
+  action policy with no shared-code changes
+- **Evidence boundary:** KQM TCL metadata, R1-R5 values, Skill use, refresh-only
+  15/10-second windows; Movement SPD remains unmodeled
+- **Plan:** `TASKS.md` Skill-Use Stat Weapon Expansion
