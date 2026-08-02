@@ -128,7 +128,7 @@ public class StatsRecorder {
 
             statMap.put(StatType.CRIT_RATE, effStats.get(StatType.CRIT_RATE));
             statMap.put(StatType.CRIT_DMG, effStats.get(StatType.CRIT_DMG));
-            statMap.put(StatType.ENERGY_RECHARGE, effStats.get(StatType.ENERGY_RECHARGE));
+            statMap.put(StatType.ENERGY_RECHARGE, effStats.getTotalEnergyRecharge());
             statMap.put(StatType.ELEMENTAL_MASTERY, effStats.get(StatType.ELEMENTAL_MASTERY));
 
             statMap.put(StatType.PYRO_DMG_BONUS, effStats.get(StatType.PYRO_DMG_BONUS));

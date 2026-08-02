@@ -95,6 +95,10 @@ public enum BuffId {
     SUPERCONDUCT_PHYS_RES_SHRED,
     /** 武器「漂泊の宵星」効果。 */
     WANDERING_EVENSTAR_WILDLING_NIGHTSTAR,
+    /** 武器「マカイラの水色」効果。 */
+    MAKHAIRA_AQUAMARINE_DESERT_PAVILION,
+    /** 武器「サイフォスの月明かり」効果。 */
+    XIPHOS_MOONLIGHT_JINNIS_WHISPER,
     /** Aubade 系武器ボーナス。 */
     AUBADE_BONUS,
     /** 聖遺物 4 セット「翠緑の影」: 拡散後の炎元素耐性ダウン。 */

@@ -1,8 +1,9 @@
 package mechanics.energy;
 
+import mechanics.buff.Buff;
 import model.entity.Character;
+import model.stats.StatsContainer;
 import model.type.Element;
-import model.type.StatType;
 import simulation.CombatSimulator;
 
 /**
@@ -48,7 +49,14 @@ public class EnergyDistributor {
                 }
 
                 double rangeMultiplier = isActive ? 1.0 : offFieldMultiplier;
-                double er = c.getEffectiveStats(sim.getCurrentTime()).get(StatType.ENERGY_RECHARGE);
+                double currentTime = sim.getCurrentTime();
+                StatsContainer energyStats = c.getEffectiveStats(currentTime);
+                for (Buff buff : sim.getApplicableBuffs(c)) {
+                    if (!buff.isExpired(currentTime)) {
+                        buff.apply(energyStats, currentTime);
+                    }
+                }
+                double er = energyStats.getTotalEnergyRecharge();
                 double particleBase = count * baseValue * rangeMultiplier;
                 c.receiveParticleEnergy(particleBase, er);
             }

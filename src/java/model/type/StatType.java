@@ -55,6 +55,11 @@ public enum StatType {
     ELEMENTAL_MASTERY,
     /** Energy Recharge as a decimal (e.g. 1.0 = 100 %). */
     ENERGY_RECHARGE,
+    /**
+     * Energy Recharge that affects particle recovery but is excluded from
+     * Energy-Recharge-to-damage conversions such as Raiden A4 and Emblem.
+     */
+    NON_CONVERTING_ENERGY_RECHARGE,
 
     // -----------------------------------------------------------------------
     // Elemental and Physical DMG Bonus%

@@ -96,6 +96,19 @@ public class StatsContainer {
     }
 
     /**
+     * Returns Energy Recharge used for particle recovery and presentation.
+     *
+     * <p>The ordinary component remains independently addressable for effects
+     * that convert only eligible Energy Recharge into another stat.</p>
+     *
+     * @return ordinary plus non-converting Energy Recharge
+     */
+    public double getTotalEnergyRecharge() {
+        return get(StatType.ENERGY_RECHARGE)
+                + get(StatType.NON_CONVERTING_ENERGY_RECHARGE);
+    }
+
+    /**
      * Creates and returns a new {@code StatsContainer} whose values are the
      * element-wise sum of this container and {@code other}. Neither operand is
      * modified. If {@code other} is {@code null} a copy of this container is

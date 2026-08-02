@@ -4185,13 +4185,28 @@ public class ReactionRegressionTest {
 
     private static void testAccuracyPhaseF_WanderingEvenstarTimedSnapshot() {
         double firstTriggerTime = 64.0 / 60.0;
+        model.weapon.WanderingEvenstar wanderingEvenstar =
+                new model.weapon.WanderingEvenstar();
+        assertEquals("Wandering Evenstar", wanderingEvenstar.getName(),
+                "Wandering Evenstar display name");
+        assertClose(510.0, wanderingEvenstar.getBaseAtk(), EPS,
+                "Wandering Evenstar base ATK");
+        assertClose(165.0,
+                wanderingEvenstar.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Wandering Evenstar EM substat");
+        assertEquals(model.type.WeaponType.CATALYST,
+                wanderingEvenstar.getWeaponType(),
+                "Wandering Evenstar weapon type");
+        assertEquals(5, wanderingEvenstar.getRefinement(),
+                "Wandering Evenstar default refinement");
+
         TestCharacter ally = testCharacter(Element.PYRO, CharacterId.XIANGLING);
         TestCharacter owner = testCharacter(Element.ANEMO, CharacterId.SUCROSE)
                 .withStat(StatType.ELEMENTAL_MASTERY, 500.0);
         StatsContainer artifactStats = new StatsContainer();
         artifactStats.set(StatType.ELEMENTAL_MASTERY, 200.0);
         owner.setArtifacts(new ArtifactSet("Evenstar EM Fixture", artifactStats));
-        owner.setWeapon(new model.weapon.WanderingEvenstar());
+        owner.setWeapon(wanderingEvenstar);
 
         CombatSimulator sim = new CombatSimulator();
         sim.setLoggingEnabled(false);
@@ -4251,6 +4266,199 @@ public class ReactionRegressionTest {
                 + (100.0 + 165.0) * 0.48 * 0.30;
         assertClose(expectedStackedShare, resolvedStat(stackSim, stackTarget, StatType.ATK_FLAT), EPS,
                 "Independent Wandering Evenstar ally shares should stack once each");
+
+        model.weapon.MakhairaAquamarine makhaira =
+                new model.weapon.MakhairaAquamarine();
+        assertEquals("Makhaira Aquamarine", makhaira.getName(),
+                "Makhaira Aquamarine display name");
+        assertClose(510.0, makhaira.getBaseAtk(), EPS,
+                "Makhaira Aquamarine base ATK");
+        assertClose(165.0,
+                makhaira.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Makhaira Aquamarine EM substat");
+        assertEquals(model.type.WeaponType.CLAYMORE, makhaira.getWeaponType(),
+                "Makhaira Aquamarine weapon type");
+        assertEquals(5, makhaira.getRefinement(),
+                "Makhaira Aquamarine default refinement");
+
+        TestCharacter makhairaAlly = testCharacter(
+                Element.PYRO, CharacterId.XIANGLING);
+        TestCharacter makhairaOwner = testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE)
+                .withStat(StatType.ELEMENTAL_MASTERY, 100.0);
+        makhairaOwner.setWeapon(makhaira);
+        CombatSimulator makhairaSim = new CombatSimulator();
+        makhairaSim.setLoggingEnabled(false);
+        makhairaSim.setEnemy(new Enemy(90));
+        makhairaSim.addCharacter(makhairaAlly);
+        makhairaSim.addCharacter(makhairaOwner);
+        makhairaSim.advanceTime(firstTriggerTime);
+        double makhairaSnapshotEM = 100.0 + 165.0;
+        assertClose(makhairaSnapshotEM * 0.48,
+                resolvedStat(makhairaSim, makhairaOwner, StatType.ATK_FLAT), EPS,
+                "R5 Makhaira owner ATK conversion");
+        assertClose(makhairaSnapshotEM * 0.48 * 0.30,
+                resolvedStat(makhairaSim, makhairaAlly, StatType.ATK_FLAT), EPS,
+                "R5 Makhaira ally ATK share");
+
+        model.weapon.XiphosMoonlight xiphos =
+                new model.weapon.XiphosMoonlight();
+        assertEquals("Xiphos' Moonlight", xiphos.getName(),
+                "Xiphos' Moonlight display name");
+        assertClose(510.0, xiphos.getBaseAtk(), EPS,
+                "Xiphos' Moonlight base ATK");
+        assertClose(165.0,
+                xiphos.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Xiphos' Moonlight EM substat");
+        assertEquals(model.type.WeaponType.SWORD, xiphos.getWeaponType(),
+                "Xiphos' Moonlight weapon type");
+        assertEquals(5, xiphos.getRefinement(),
+                "Xiphos' Moonlight default refinement");
+
+        TestCharacter xiphosAlly = testCharacter(
+                Element.PYRO, CharacterId.XIANGLING);
+        TestCharacter xiphosOwner = testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE)
+                .withStat(StatType.ELEMENTAL_MASTERY, 100.0);
+        xiphosOwner.setWeapon(xiphos);
+        CombatSimulator xiphosSim = new CombatSimulator();
+        xiphosSim.setLoggingEnabled(false);
+        xiphosSim.setEnemy(new Enemy(90));
+        xiphosSim.addCharacter(xiphosAlly);
+        xiphosSim.addCharacter(xiphosOwner);
+        xiphosSim.advanceTime(firstTriggerTime);
+        double xiphosSnapshotEM = 100.0 + 165.0;
+        assertClose(1.0 + xiphosSnapshotEM * 0.00072,
+                resolvedStat(xiphosSim, xiphosOwner,
+                        StatType.ENERGY_RECHARGE), EPS,
+                "R5 Xiphos owner ER conversion");
+        assertClose(1.0 + xiphosSnapshotEM * 0.00072 * 0.30,
+                resolvedStat(xiphosSim, xiphosAlly,
+                        StatType.ENERGY_RECHARGE), EPS,
+                "R5 Xiphos ally ER share");
+
+        AttackAction erProbe = damageHit(
+                "Xiphos non-converting ER probe", Element.PHYSICAL, 0.0);
+        StatsContainer xiphosOwnerStats = DamageCalculator.resolveStats(
+                xiphosOwner,
+                erProbe,
+                xiphosSim.getApplicableBuffs(xiphosOwner),
+                xiphosSim.getCurrentTime());
+        assertClose(1.0,
+                xiphosOwnerStats.get(StatType.ENERGY_RECHARGE), EPS,
+                "Xiphos should not enter the damage-converting ER channel");
+        assertClose(xiphosSnapshotEM * 0.00072,
+                xiphosOwnerStats.get(
+                        StatType.NON_CONVERTING_ENERGY_RECHARGE), EPS,
+                "Xiphos should retain its typed non-converting ER component");
+
+        xiphosOwner.restoreCurrentEnergy(0.0);
+        xiphosSim.getEnergyDistributor().distributeParticles(
+                Element.ANEMO, 1.0, ParticleType.PARTICLE);
+        double expectedXiphosParticleEnergy = 3.0 * 0.8
+                * (1.0 + xiphosSnapshotEM * 0.00072);
+        assertClose(expectedXiphosParticleEnergy,
+                xiphosOwner.getCurrentEnergy(), EPS,
+                "Off-field particle recovery should include Xiphos total ER");
+
+        model.weapon.XiphosMoonlight emblemXiphos =
+                new model.weapon.XiphosMoonlight();
+        TestCharacter emblemOwner = testCharacter(Element.ANEMO)
+                .withStat(StatType.ELEMENTAL_MASTERY, 100.0);
+        emblemOwner.setWeapon(emblemXiphos);
+        emblemOwner.setArtifacts(new model.artifact.EmblemOfSeveredFate(
+                new StatsContainer()));
+        CombatSimulator emblemSim = simulatorWith(emblemOwner);
+        emblemSim.advanceTime(firstTriggerTime);
+        assertClose(0.30,
+                resolvedStat(emblemSim, emblemOwner,
+                        StatType.BURST_DMG_BONUS), EPS,
+                "Xiphos ER should not increase Emblem Burst conversion");
+
+        model.weapon.MakhairaAquamarine r1Makhaira =
+                new model.weapon.MakhairaAquamarine(1);
+        TestCharacter r1MakhairaOwner = testCharacter(Element.ANEMO);
+        r1MakhairaOwner.setWeapon(r1Makhaira);
+        CombatSimulator r1MakhairaSim = simulatorWith(r1MakhairaOwner);
+        r1MakhairaSim.advanceTime(firstTriggerTime);
+        assertClose(165.0 * 0.24,
+                resolvedStat(r1MakhairaSim, r1MakhairaOwner,
+                        StatType.ATK_FLAT), EPS,
+                "R1 Makhaira owner ATK conversion");
+
+        model.weapon.XiphosMoonlight r1Xiphos =
+                new model.weapon.XiphosMoonlight(1);
+        TestCharacter r1XiphosOwner = testCharacter(Element.ANEMO);
+        r1XiphosOwner.setWeapon(r1Xiphos);
+        CombatSimulator r1XiphosSim = simulatorWith(r1XiphosOwner);
+        r1XiphosSim.advanceTime(firstTriggerTime);
+        assertClose(1.0 + 165.0 * 0.00036,
+                resolvedStat(r1XiphosSim, r1XiphosOwner,
+                        StatType.ENERGY_RECHARGE), EPS,
+                "R1 Xiphos owner ER conversion");
+
+        boolean crossSimulatorReuseRejected = false;
+        try {
+            xiphos.initializeForSimulator(xiphosOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            crossSimulatorReuseRejected = true;
+        }
+        assertTrue(crossSimulatorReuseRejected,
+                "Timed EM team weapons should reject cross-simulator reuse");
+
+        boolean lowWanderingRefinementRejected = false;
+        try {
+            new model.weapon.WanderingEvenstar(0);
+        } catch (IllegalArgumentException expected) {
+            lowWanderingRefinementRejected = true;
+        }
+        assertTrue(lowWanderingRefinementRejected,
+                "Wandering Evenstar should reject refinement zero");
+
+        boolean highWanderingRefinementRejected = false;
+        try {
+            new model.weapon.WanderingEvenstar(6);
+        } catch (IllegalArgumentException expected) {
+            highWanderingRefinementRejected = true;
+        }
+        assertTrue(highWanderingRefinementRejected,
+                "Wandering Evenstar should reject refinement six");
+
+        boolean lowMakhairaRefinementRejected = false;
+        try {
+            new model.weapon.MakhairaAquamarine(0);
+        } catch (IllegalArgumentException expected) {
+            lowMakhairaRefinementRejected = true;
+        }
+        assertTrue(lowMakhairaRefinementRejected,
+                "Makhaira Aquamarine should reject refinement zero");
+
+        boolean highMakhairaRefinementRejected = false;
+        try {
+            new model.weapon.MakhairaAquamarine(6);
+        } catch (IllegalArgumentException expected) {
+            highMakhairaRefinementRejected = true;
+        }
+        assertTrue(highMakhairaRefinementRejected,
+                "Makhaira Aquamarine should reject refinement six");
+
+        boolean lowXiphosRefinementRejected = false;
+        try {
+            new model.weapon.XiphosMoonlight(0);
+        } catch (IllegalArgumentException expected) {
+            lowXiphosRefinementRejected = true;
+        }
+        assertTrue(lowXiphosRefinementRejected,
+                "Xiphos' Moonlight should reject refinement zero");
+
+        boolean highXiphosRefinementRejected = false;
+        try {
+            new model.weapon.XiphosMoonlight(6);
+        } catch (IllegalArgumentException expected) {
+            highXiphosRefinementRejected = true;
+        }
+        assertTrue(highXiphosRefinementRejected,
+                "Xiphos' Moonlight should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_ColumbinaMoondriftInjectedDrawBoundaries() {
@@ -9705,9 +9913,12 @@ public class ReactionRegressionTest {
 
     private static double resolvedStat(CombatSimulator sim, Character character, StatType statType) {
         AttackAction probe = damageHit("Resonance stat probe", Element.PHYSICAL, 0.0);
-        return DamageCalculator.resolveStats(
-                character, probe, sim.getApplicableBuffs(character), sim.getCurrentTime())
-                .get(statType);
+        StatsContainer stats = DamageCalculator.resolveStats(
+                character, probe, sim.getApplicableBuffs(character), sim.getCurrentTime());
+        if (statType == StatType.ENERGY_RECHARGE) {
+            return stats.getTotalEnergyRecharge();
+        }
+        return stats.get(statType);
     }
 
     private static double effectiveStatAt(

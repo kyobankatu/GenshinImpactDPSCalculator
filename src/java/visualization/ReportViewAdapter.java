@@ -397,7 +397,9 @@ public final class ReportViewAdapter {
                     + safeStats.getOrDefault(StatType.DEF_FLAT, 0.0);
             this.cr = safeStats.getOrDefault(StatType.CRIT_RATE, 0.0) * 100;
             this.cd = safeStats.getOrDefault(StatType.CRIT_DMG, 0.0) * 100;
-            this.er = safeStats.getOrDefault(StatType.ENERGY_RECHARGE, 0.0) * 100;
+            this.er = (safeStats.getOrDefault(StatType.ENERGY_RECHARGE, 0.0)
+                    + safeStats.getOrDefault(
+                            StatType.NON_CONVERTING_ENERGY_RECHARGE, 0.0)) * 100;
             this.em = safeStats.getOrDefault(StatType.ELEMENTAL_MASTERY, 0.0);
             this.dmg = strongestElementalBonusPercent(safeStats);
             this.energy = energyPercent;
