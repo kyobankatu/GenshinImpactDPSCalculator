@@ -2317,3 +2317,13 @@ experiment record.
 - **Plan:** `TASKS.md` Frost Burial Weapon Campaign
 - **Completion:** `cd34797` adds the shared proc policy, all three variants, and
   focused regressions; build/Javadoc/leak gates pass
+
+### B-096 — Energy-aware action weapon coverage
+
+- **Status:** active
+- **Scope:** Hamayumi and Moonweaver's Dawn; RL excluded
+- **Value/risk:** two complete dynamic passives consume stable owner Energy APIs
+  without adding event dispatch or mutating runtime state
+- **Evidence boundary:** KQM TCL metadata, R1-R5 action bonuses, full-Energy
+  doubling, and 60/40 maximum-Energy tiers
+- **Plan:** `TASKS.md` Energy-Aware Action Weapon Campaign

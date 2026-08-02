@@ -13960,3 +13960,48 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Energy-Aware Action Weapon Campaign
+
+Status: Active. Add two dynamic action-DMG weapons through owner Energy and
+maximum Energy reads without changing Energy runtime behavior.
+
+Scope:
+
+- Add Hamayumi and Moonweaver's Dawn with sourced metadata, R1-R5 values, R5
+  defaults, exact Energy thresholds, and focused regressions.
+
+Out of scope for this pass:
+
+- Energy mutation, character behavior, formulas, RL, generated docs, and
+  unrelated conditional weapons.
+
+### Phase 1: Add Two Energy-Aware Action Weapons
+
+Target files:
+
+- `src/java/model/weapon/Hamayumi.java` (new)
+- `src/java/model/weapon/MoonweaversDawn.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Hamayumi always grants its Normal/Charged bonuses and doubles both only while
+  current Energy is at least maximum Energy, updating immediately after spend/gain.
+- Moonweaver always grants Burst DMG and adds exactly one capacity tier: none
+  above 60, the 60 tier at 41-60, and the larger 40 tier at 40 or below.
+- Both expose sourced metadata, R1-R5 values/defaults, bind to one simulator,
+  and reject refinement 0/6 or cross-simulator reuse.
+
+Test cases to add or update:
+
+- Normal: base/full Hamayumi values and 80/60/40 Moonweaver tiers, metadata, R5.
+- Boundary: exact Energy equality, immediate dynamic loss, R1 values.
+- Abnormal: unbound passive, cross-simulator reuse, refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
