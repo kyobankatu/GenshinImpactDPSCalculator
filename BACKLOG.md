@@ -2088,3 +2088,13 @@ experiment record.
 - **Plan:** `TASKS.md` Kaeya Character Vertical Slice
 - **Completion:** `f891f32` adds the sourced one-enemy vertical slice with exact
   C0/C6 Burst counts; reaction regression, build, Javadoc, and leak gates pass
+
+### B-077 — Remaining 3-star Bane weapon coverage
+
+- **Status:** active
+- **Scope:** Cool Steel, Bloodtainted Greatsword, and Raven Bow; RL excluded
+- **Value/risk:** three local content additions reuse the verified impact-time
+  Aura base with no shared formula or mutable-state change
+- **Evidence boundary:** KQM TCL Lv. 90 metadata, eligible Aura pairs, and R1-R5
+  values; Black Tassel remains excluded because enemy type is not modeled
+- **Plan:** `TASKS.md` Remaining 3-Star Bane Weapon Campaign

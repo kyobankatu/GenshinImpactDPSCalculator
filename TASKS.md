@@ -28,7 +28,8 @@ Java RL bridge are excluded; the retained NCCL/DDP plan below is paused until a
 future explicit user request.
 
 The Favonius, Sacrificial, target-Aura weapon, and Kaeya vertical-slice
-campaigns are complete; RL and generated docs remain excluded.
+campaigns are complete. The remaining 3-star Bane weapon campaign is active;
+RL and generated docs remain excluded.
 
 The B-058 Burning fuel correction is complete. It replaces the fixed
 two-second approximation with typed Dendro-fuel decay and refresh ownership
@@ -12771,4 +12772,58 @@ Verification:
 - `./gradlew ReactionRegressionTest`
 - `./gradlew build`
 - `./gradlew javadoc`
+- `python scripts/preflight.py`
+
+## Implementation Order: Remaining 3-Star Bane Weapon Campaign
+
+Status: In progress. Three independent weapon classes will reuse the verified
+live target-Aura implementation without changing formula or Aura behavior.
+
+Scope:
+
+- Add Cool Steel, Bloodtainted Greatsword, and Raven Bow at Lv. 90 with R1-R5
+  Bane values and typed categories.
+- Reuse impact-time Aura eligibility and keep the passive outside owner stats
+  and snapshots.
+
+Out of scope for this pass:
+
+- Black Tassel's slime enemy type, formula/Aura changes, transformative reaction
+  bonuses, characters, parties, RL, and generated docs.
+
+### Phase 1: Add the Remaining Supported 3-Star Bane Weapons
+
+Target files:
+
+- `src/java/model/weapon/CoolSteel.java` (new)
+- `src/java/model/weapon/BloodtaintedGreatsword.java` (new)
+- `src/java/model/weapon/RavenBow.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+| Unit | Eligible Aura | Focused verification | Status |
+|---|---|---|---|
+| Cool Steel | Hydro/Cryo | 401 ATK, 35.2% ATK, sword, R1/R5 damage | Ready |
+| Bloodtainted Greatsword | Pyro/Electro | 354 ATK, 187 EM, claymore, R1/R5 damage | Ready |
+| Raven Bow | Hydro/Pyro | 448 ATK, 94 EM, bow, R1/R5 damage | Ready |
+
+Acceptance criteria:
+
+- All variants expose sourced Lv. 90 metadata and 12/15/18/21/24% refinement
+  progression through the existing shared base.
+- Eligible live Auras apply once at impact; absent, expired, or ineligible Auras
+  apply no bonus and never mutate owner effective or snapshotted stats.
+- Refinements 0/6 fail through the existing shared validation and all existing
+  target-Aura weapon regressions remain green.
+
+Test cases to add or update:
+
+- Normal/static: each name, base ATK, substat, category, and R5 eligible Aura.
+- Boundary: each R1 bonus and alternative eligible element.
+- Abnormal: one ineligible Aura per variant and shared invalid refinement.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc` at the batch boundary
 - `python scripts/preflight.py`
