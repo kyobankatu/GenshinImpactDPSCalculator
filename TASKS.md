@@ -15111,3 +15111,46 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Sequence of Solitude Campaign
+
+Status: Active. Add Sequence of Solitude with a nonrecursive Max-HP Physical
+proc on a fixed 15-second cooldown.
+
+Scope:
+
+- Add Sequence of Solitude with sourced metadata, R1-R5 values, immediate HP
+  scaling damage, exact cooldown behavior, and focused regressions.
+
+Out of scope for this pass:
+
+- Multi-target AoE multiplication, other bows, characters, formulas, RL, and
+  generated docs.
+
+### Phase 1: Add Sequence of Solitude
+
+Target files:
+
+- `src/java/model/weapon/SequenceOfSolitude.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Any positive active-owner attack hit at exact 15-second CT produces one
+  immediate nonrecursive Physical action scaling from 40-80% of Max HP.
+- Metadata, HP scaling, positive/active/source/simulator gates, exact cooldown,
+  R1-R5 defaults/validation, and binding are explicit.
+
+Test cases to add or update:
+
+- Normal: metadata, immediate R5 HP proc, arbitrary positive action type.
+- Boundary: before/exact 15-second CT and R1/R5 damage ratio.
+- Abnormal: zero/off-field/foreign/recursive/wrong-simulator hits,
+  cross-simulator reuse, refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`

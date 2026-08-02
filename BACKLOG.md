@@ -2573,3 +2573,13 @@ experiment record.
 - **Completion:** `4aca5e4` adds fixed-cadence off-field growth, delayed
   on-field decay, grace reset, cap/floor behavior, and focused regressions;
   build/Javadoc/leak gates pass
+
+### B-117 — Sequence of Solitude coverage
+
+- **Status:** active
+- **Scope:** Sequence of Solitude; RL excluded
+- **Value/risk:** one complete passive reuses immediate nonrecursive damage and
+  the existing Max-HP scaling path without shared runtime changes
+- **Evidence boundary:** KQM TCL metadata, R1-R5 Max-HP proc values, positive
+  active hit gate, and 15-second activation CT
+- **Plan:** `TASKS.md` Sequence of Solitude Campaign
