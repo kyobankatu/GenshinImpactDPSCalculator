@@ -602,7 +602,9 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
                 StatType.BASE_ATK,
                 countsAsBurst
                         ? StatType.BURST_DMG_BONUS
-                        : StatType.PHYSICAL_DMG_BONUS,
+                        : actionType == ActionType.CHARGE
+                                ? StatType.CHARGED_ATTACK_DMG_BONUS
+                                : StatType.NORMAL_ATTACK_DMG_BONUS,
                 animationDuration,
                 false,
                 actionType);

@@ -175,9 +175,7 @@ public class Bennett extends Character implements FormStateProvider {
     }
 
     private void normalAttack(CombatSimulator sim) {
-        // C6 Infusion Logic
-        boolean hasInfusion = sim.getApplicableBuffs(this).stream()
-                .anyMatch(b -> b.getId() == BuffId.FANTASTIC_VOYAGE);
+        boolean hasInfusion = hasC6Infusion(sim);
         Element dmgElement = hasInfusion ? Element.PYRO : Element.PHYSICAL;
 
         String key = "N" + (normalAttackStep + 1);
@@ -204,57 +202,38 @@ public class Bennett extends Character implements FormStateProvider {
                 break;
         }
 
-        AttackAction hit = new AttackAction(name, mv, dmgElement, StatType.BASE_ATK,
-                hasInfusion ? StatType.NORMAL_ATTACK_DMG_BONUS : StatType.PHYSICAL_DMG_BONUS, // Using Normal Bonus for
-                                                                                              // Pyro too?
-                                                                                              // Actually Pyro Infusion
-                                                                                              // benefits from Pyro DMG
-                                                                                              // Bonus.
-                                                                                              // StatsContainer usually
-                                                                                              // adds specific element
-                                                                                              // bonus to general DMG?
-                                                                                              // Wait,
-                                                                                              // `StatType.NORMAL_ATTACK_DMG_BONUS`
-                                                                                              // is generic.
-                                                                                              // The Element arg
-                                                                                              // determines if Pyro/Phys
-                                                                                              // Bonus applies in
-                                                                                              // `DamageCalculator`.
-                                                                                              // So passing
-                                                                                              // `NORMAL_ATTACK_DMG_BONUS`
-                                                                                              // is correct for the
-                                                                                              // additive bonus.
-                dur, ActionType.NORMAL);
-
-        // Wait, Constructor of AttackAction takes `bonusType` (StatType).
-        // If I pass NORMAL_ATTACK_DMG_BONUS, it adds that.
-        // The DamageCalculator also looks up `stats.get(DMG_BONUS_ELEMENT)` e.g.
-        // PYRO_DMG_BONUS automatically based on element.
-        // So this is correct.
+        AttackAction hit = new AttackAction(
+                name,
+                mv,
+                dmgElement,
+                StatType.BASE_ATK,
+                StatType.NORMAL_ATTACK_DMG_BONUS,
+                dur,
+                ActionType.NORMAL);
 
         hit.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
         sim.performAction(this.characterId, hit);
 
         normalAttackStep++;
-        if (normalAttackStep >= 5)
+        if (normalAttackStep >= 5) {
             normalAttackStep = 0;
+        }
     }
 
     private void chargeAttack(CombatSimulator sim) {
-        boolean hasInfusion = sim.getApplicableBuffs(this).stream()
-                .anyMatch(b -> b.getId() == BuffId.FANTASTIC_VOYAGE);
+        boolean hasInfusion = hasC6Infusion(sim);
         Element dmgElement = hasInfusion ? Element.PYRO : Element.PHYSICAL;
 
         double mv1 = getTalentValue("CA_1", 1.03);
         double mv2 = getTalentValue("CA_2", 1.12);
 
         AttackAction hit1 = new AttackAction("Bennett CA_1", mv1, dmgElement, StatType.BASE_ATK,
-                StatType.PHYSICAL_DMG_BONUS, 0.2, ActionType.CHARGE);
+                StatType.CHARGED_ATTACK_DMG_BONUS, 0.2, ActionType.CHARGE);
         hit1.setICD(ICDType.Standard, ICDTag.ChargedAttack, 1.0);
-        sim.performActionWithoutTimeAdvance(this.name, hit1);
+        sim.performActionWithoutTimeAdvance(characterId, hit1);
 
         AttackAction hit2 = new AttackAction("Bennett CA_2", mv2, dmgElement, StatType.BASE_ATK,
-                StatType.PHYSICAL_DMG_BONUS, 0.6, ActionType.CHARGE);
+                StatType.CHARGED_ATTACK_DMG_BONUS, 0.6, ActionType.CHARGE);
         hit2.setICD(ICDType.Standard, ICDTag.ChargedAttack, 1.0);
         sim.performAction(this.characterId, hit2);
 
@@ -262,8 +241,7 @@ public class Bennett extends Character implements FormStateProvider {
     }
 
     private void plunge(CombatSimulator sim) {
-        boolean hasInfusion = sim.getApplicableBuffs(this).stream()
-                .anyMatch(b -> b.getId() == BuffId.FANTASTIC_VOYAGE);
+        boolean hasInfusion = hasC6Infusion(sim);
         Element dmgElement = hasInfusion ? Element.PYRO : Element.PHYSICAL;
 
         double mv = getTalentValue("Plunge High", 2.93);
@@ -271,5 +249,11 @@ public class Bennett extends Character implements FormStateProvider {
                 StatType.PLUNGING_ATTACK_DMG_BONUS, 1.0, ActionType.PLUNGE);
         p.setICD(ICDType.Standard, ICDTag.None, 1.0);
         sim.performAction(this.characterId, p);
+    }
+
+    private boolean hasC6Infusion(CombatSimulator sim) {
+        return constellation >= 6
+                && sim.getApplicableBuffs(this).stream()
+                        .anyMatch(buff -> buff.getId() == BuffId.FANTASTIC_VOYAGE);
     }
 }

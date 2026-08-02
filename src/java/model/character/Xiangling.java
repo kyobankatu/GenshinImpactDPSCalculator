@@ -349,7 +349,7 @@ public class Xiangling extends Character implements FormStateProvider {
     private void chargeAttack(CombatSimulator sim) {
         double mv = getTalentValue("CA", 2.24);
         AttackAction hit = new AttackAction("Xiangling CA", mv, Element.PHYSICAL, StatType.BASE_ATK,
-                StatType.PHYSICAL_DMG_BONUS, 0.8, ActionType.CHARGE);
+                StatType.CHARGED_ATTACK_DMG_BONUS, 0.8, ActionType.CHARGE);
         hit.setICD(ICDType.Standard, ICDTag.ChargedAttack, 1.0);
         sim.performAction(this.characterId, hit);
 

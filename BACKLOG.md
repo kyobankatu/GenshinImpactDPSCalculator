@@ -3150,10 +3150,19 @@ experiment record.
 
 ### B-147 — Existing physical Charged bonus routing corrections
 
-- **Status:** candidate
+- **Status:** complete
 - **Source:** delegated supported-character action coverage audit
 - **Scope/risk:** Bennett, Xiangling, and Xingqiu Charged hits currently resolve
-  Physical DMG Bonus instead of Charged DMG Bonus; Bennett Normal also needs a
-  focused category audit
+  Physical DMG Bonus instead of Charged DMG Bonus; Bennett Normal and Raiden's
+  physical Normal/Charged factory share the same category error
+- **Evidence:** `StandardDamageStrategy` already adds the element's DMG Bonus;
+  current KQM Bennett data and infusion documentation, accessed 2026-08-02,
+  confirm Normal/Charged categories and C6-only Pyro infusion:
+  https://library.keqingmains.com/characters/pyro/bennett
+  https://library.keqingmains.com/combat-mechanics/elemental-effects/weapon-infusion
 - **Boundary:** isolated Normal/Charged/Physical/elemental bonuses, multi-hit
   metadata, action duration, and affected equipment interactions
+- **Plan:** one-phase `TASKS.md` Physical Attack Category Corrections
+- **Closure:** all residual physical Normal/Charged category misroutes removed;
+  four-character metadata, C0/C6 Bennett infusion, two-hit timing/ICD/gauge,
+  Raiden Musou exclusion, full gates, and stable representative parties pass

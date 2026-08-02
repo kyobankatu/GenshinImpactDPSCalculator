@@ -341,12 +341,12 @@ public class Xingqiu extends Character implements FormStateProvider {
         double mv2 = getTalentValue("CA_2", 1.03);
 
         AttackAction hit1 = new AttackAction("Xingqiu CA_1", mv1, Element.PHYSICAL, StatType.BASE_ATK,
-                StatType.PHYSICAL_DMG_BONUS, 0.2, ActionType.CHARGE);
+                StatType.CHARGED_ATTACK_DMG_BONUS, 0.2, ActionType.CHARGE);
         hit1.setICD(ICDType.Standard, ICDTag.ChargedAttack, 1.0);
-        sim.performActionWithoutTimeAdvance(this.name, hit1);
+        sim.performActionWithoutTimeAdvance(characterId, hit1);
 
         AttackAction hit2 = new AttackAction("Xingqiu CA_2", mv2, Element.PHYSICAL, StatType.BASE_ATK,
-                StatType.PHYSICAL_DMG_BONUS, 0.6, ActionType.CHARGE);
+                StatType.CHARGED_ATTACK_DMG_BONUS, 0.6, ActionType.CHARGE);
         hit2.setICD(ICDType.Standard, ICDTag.ChargedAttack, 1.0);
         sim.performAction(this.characterId, hit2);
 

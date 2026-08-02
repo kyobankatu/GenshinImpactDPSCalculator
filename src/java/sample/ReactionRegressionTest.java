@@ -182,6 +182,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_HuskCuriosityState();
         testAccuracyPhaseF_ScholarPartyEnergySet();
         testAccuracyPhaseF_BennettAndXianglingPassiveAccuracy();
+        testAccuracyPhaseF_PhysicalAttackCategoryRouting();
         testAccuracyPhaseF_XingqiuConstellationOrdering();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
@@ -15148,6 +15149,213 @@ public class ReactionRegressionTest {
         c0Sim.advanceTime(3.0);
         assertTrue(c0Weapon.actions.isEmpty(),
                 "Xiangling C0 should never schedule C2 Implode");
+    }
+
+    private static void testAccuracyPhaseF_PhysicalAttackCategoryRouting() {
+        mechanics.data.TalentDataSource c0BennettData =
+                (characterName, key, defaultValue) ->
+                        "Bennett".equals(characterName)
+                                && "Constellation".equals(key)
+                                ? 0.0 : defaultValue;
+        RecordingDamageWeapon c0BennettWeapon =
+                new RecordingDamageWeapon("Bennett ");
+        model.character.Bennett c0Bennett = new model.character.Bennett(
+                c0BennettWeapon, blankArtifact(), c0BennettData);
+        CombatSimulator c0BennettSim = simulatorWithExistingCharacter(c0Bennett);
+        c0BennettSim.performAction(
+                CharacterId.BENNETT,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        c0BennettSim.performAction(
+                CharacterId.BENNETT,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        double c0ChargeStart = c0BennettSim.getCurrentTime();
+        c0BennettSim.performAction(
+                CharacterId.BENNETT,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        c0BennettSim.performAction(
+                CharacterId.BENNETT,
+                CharacterActionRequest.of(CharacterActionKey.PLUNGE));
+        AttackAction c0Normal = c0BennettWeapon.actions.stream()
+                .filter(action -> action.getName().startsWith("Bennett N"))
+                .findFirst()
+                .orElseThrow();
+        assertPhysicalNormalCategory(c0Normal, "Bennett C0 field Normal");
+        List<AttackAction> c0Charged = c0BennettWeapon.actions.stream()
+                .filter(action -> action.getName().startsWith("Bennett CA_"))
+                .collect(java.util.stream.Collectors.toList());
+        assertEquals(2, c0Charged.size(),
+                "Bennett Charged should retain two damage hits");
+        for (AttackAction action : c0Charged) {
+            assertPhysicalChargedCategory(action, "Bennett C0 field Charged");
+        }
+        assertClose(c0ChargeStart + 0.6,
+                c0BennettWeapon.times.get(c0BennettWeapon.actions.indexOf(
+                        c0BennettWeapon.actions.stream()
+                                .filter(action -> action.getName().equals("Bennett Plunge"))
+                                .findFirst()
+                                .orElseThrow())), EPS,
+                "Bennett two-hit Charged should advance only its final 0.6-second duration");
+        AttackAction c0Plunge = c0BennettWeapon.actions.stream()
+                .filter(action -> action.getName().equals("Bennett Plunge"))
+                .findFirst()
+                .orElseThrow();
+        assertEquals(Element.PHYSICAL, c0Plunge.getElement(),
+                "Bennett C0 should remain Physical inside Fantastic Voyage");
+        assertEquals(StatType.PLUNGING_ATTACK_DMG_BONUS, c0Plunge.getBonusStat(),
+                "Bennett C0 Plunge should retain Plunging DMG Bonus");
+
+        RecordingDamageWeapon c6BennettWeapon =
+                new RecordingDamageWeapon("Bennett ");
+        model.character.Bennett c6Bennett = new model.character.Bennett(
+                c6BennettWeapon, blankArtifact());
+        CombatSimulator c6BennettSim = simulatorWithExistingCharacter(c6Bennett);
+        c6BennettSim.performAction(
+                CharacterId.BENNETT,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        c6BennettSim.performAction(
+                CharacterId.BENNETT,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        c6BennettSim.performAction(
+                CharacterId.BENNETT,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        c6BennettSim.performAction(
+                CharacterId.BENNETT,
+                CharacterActionRequest.of(CharacterActionKey.PLUNGE));
+        AttackAction c6Normal = c6BennettWeapon.actions.stream()
+                .filter(action -> action.getName().startsWith("Bennett N"))
+                .findFirst()
+                .orElseThrow();
+        assertEquals(Element.PYRO, c6Normal.getElement(),
+                "Bennett C6 field should infuse Normal damage with Pyro");
+        assertEquals(StatType.NORMAL_ATTACK_DMG_BONUS, c6Normal.getBonusStat(),
+                "Bennett C6 infused Normal should retain Normal DMG Bonus");
+        for (AttackAction action : c6BennettWeapon.actions) {
+            if (action.getName().startsWith("Bennett CA_")) {
+                assertEquals(Element.PYRO, action.getElement(),
+                        "Bennett C6 field should infuse Charged damage with Pyro");
+                assertEquals(StatType.CHARGED_ATTACK_DMG_BONUS,
+                        action.getBonusStat(),
+                        "Bennett C6 infused Charged should retain Charged DMG Bonus");
+            }
+        }
+        AttackAction c6Plunge = c6BennettWeapon.actions.stream()
+                .filter(action -> action.getName().equals("Bennett Plunge"))
+                .findFirst()
+                .orElseThrow();
+        assertEquals(Element.PYRO, c6Plunge.getElement(),
+                "Bennett C6 field should infuse Plunging damage with Pyro");
+        assertEquals(StatType.PLUNGING_ATTACK_DMG_BONUS, c6Plunge.getBonusStat(),
+                "Bennett C6 infused Plunge should retain Plunging DMG Bonus");
+
+        RecordingDamageWeapon xianglingWeapon =
+                new RecordingDamageWeapon("Xiangling CA");
+        model.character.Xiangling xiangling = new model.character.Xiangling(
+                xianglingWeapon, blankArtifact());
+        CombatSimulator xianglingSim = simulatorWithExistingCharacter(xiangling);
+        double xianglingStart = xianglingSim.getCurrentTime();
+        xianglingSim.performAction(
+                CharacterId.XIANGLING,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        assertEquals(1, xianglingWeapon.actions.size(),
+                "Xiangling Charged should retain one damage hit");
+        assertPhysicalChargedCategory(
+                xianglingWeapon.actions.get(0), "Xiangling Charged");
+        assertClose(xianglingStart + 0.8, xianglingSim.getCurrentTime(), EPS,
+                "Xiangling Charged should retain its 0.8-second duration");
+
+        RecordingDamageWeapon xingqiuWeapon =
+                new RecordingDamageWeapon("Xingqiu CA_");
+        model.character.Xingqiu xingqiu = new model.character.Xingqiu(
+                xingqiuWeapon, blankArtifact());
+        CombatSimulator xingqiuSim = simulatorWithExistingCharacter(xingqiu);
+        double xingqiuStart = xingqiuSim.getCurrentTime();
+        xingqiuSim.performAction(
+                CharacterId.XINGQIU,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        assertEquals(2, xingqiuWeapon.actions.size(),
+                "Xingqiu Charged should retain two damage hits");
+        for (AttackAction action : xingqiuWeapon.actions) {
+            assertPhysicalChargedCategory(action, "Xingqiu Charged");
+        }
+        assertClose(xingqiuStart, xingqiuWeapon.times.get(0), EPS,
+                "Xingqiu Charged hits should resolve at one timestamp");
+        assertClose(xingqiuStart, xingqiuWeapon.times.get(1), EPS,
+                "Xingqiu Charged hits should resolve at one timestamp");
+        assertClose(xingqiuStart + 0.6, xingqiuSim.getCurrentTime(), EPS,
+                "Xingqiu Charged should advance only its final duration");
+
+        RecordingDamageWeapon raidenWeapon = new RecordingDamageWeapon("Raiden ");
+        model.character.RaidenShogun raiden = new model.character.RaidenShogun(
+                raidenWeapon, blankArtifact());
+        CombatSimulator raidenSim = simulatorWithExistingCharacter(raiden);
+        raidenSim.performAction(
+                CharacterId.RAIDEN_SHOGUN,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        raidenSim.performAction(
+                CharacterId.RAIDEN_SHOGUN,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        AttackAction raidenNormal = raidenWeapon.actions.stream()
+                .filter(action -> action.getName().equals("Raiden N1"))
+                .findFirst()
+                .orElseThrow();
+        assertPhysicalNormalCategory(raidenNormal, "Raiden physical Normal");
+        AttackAction raidenCharged = raidenWeapon.actions.stream()
+                .filter(action -> action.getName().equals("Raiden CA"))
+                .findFirst()
+                .orElseThrow();
+        assertPhysicalChargedCategory(raidenCharged, "Raiden physical Charged");
+
+        raidenSim.performAction(
+                CharacterId.RAIDEN_SHOGUN,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        raidenSim.performAction(
+                CharacterId.RAIDEN_SHOGUN,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        List<AttackAction> musouCharged = raidenWeapon.actions.stream()
+                .filter(action -> action.getName().startsWith("Raiden Burst CA Hit"))
+                .collect(java.util.stream.Collectors.toList());
+        assertEquals(2, musouCharged.size(),
+                "Raiden Musou Charged should retain two damage hits");
+        for (AttackAction action : musouCharged) {
+            assertEquals(Element.ELECTRO, action.getElement(),
+                    "Raiden Musou Charged should remain Electro");
+            assertEquals(StatType.BURST_DMG_BONUS, action.getBonusStat(),
+                    "Raiden Musou Charged should remain Burst damage");
+            assertTrue(action.isCountsAsBurstDmg(),
+                    "Raiden Musou Charged should retain Burst classification");
+        }
+    }
+
+    private static void assertPhysicalNormalCategory(
+            AttackAction action,
+            String label) {
+        assertEquals(Element.PHYSICAL, action.getElement(),
+                label + " should retain Physical element routing");
+        assertEquals(ActionType.NORMAL, action.getActionType(),
+                label + " should retain Normal action type");
+        assertEquals(StatType.NORMAL_ATTACK_DMG_BONUS, action.getBonusStat(),
+                label + " should use Normal DMG Bonus");
+        assertTrue(action.getBonusStat() != StatType.PHYSICAL_DMG_BONUS,
+                label + " should not double-count Physical DMG Bonus");
+    }
+
+    private static void assertPhysicalChargedCategory(
+            AttackAction action,
+            String label) {
+        assertEquals(Element.PHYSICAL, action.getElement(),
+                label + " should retain Physical element routing");
+        assertEquals(ActionType.CHARGE, action.getActionType(),
+                label + " should retain Charged action type");
+        assertEquals(StatType.CHARGED_ATTACK_DMG_BONUS, action.getBonusStat(),
+                label + " should use Charged DMG Bonus");
+        assertTrue(action.getBonusStat() != StatType.PHYSICAL_DMG_BONUS,
+                label + " should not double-count Physical DMG Bonus");
+        assertEquals(ICDType.Standard, action.getICDType(),
+                label + " should retain standard ICD");
+        assertEquals(ICDTag.ChargedAttack, action.getICDTag(),
+                label + " should retain the Charged ICD group");
+        assertClose(1.0, action.getGaugeUnits(), EPS,
+                label + " should retain 1U application metadata");
     }
 
     private static void testAccuracyPhaseF_XingqiuConstellationOrdering() {

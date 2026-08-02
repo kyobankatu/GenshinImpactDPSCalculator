@@ -13273,6 +13273,78 @@ Completion evidence:
   (`FlinsParty2`). Raiden decreases by 1,859 damage because Noblesse now starts
   at Bennett Burst input rather than after its 0.8-second animation.
 
+## Implementation Order: Physical Attack Category Corrections
+
+Status: Complete. Implemented B-147 as one four-character metadata correction;
+new infusion persistence systems, stamina, animation retiming, weapon changes,
+RL, and generated docs are excluded.
+
+Evidence:
+
+- `StandardDamageStrategy` already resolves the hit element's Physical/Pyro
+  bonus before the action-specific bonus, so passing `PHYSICAL_DMG_BONUS` as
+  `bonusStat` doubles Physical bonus and drops Normal/Charged bonus.
+- Current KQM Bennett data and weapon-infusion documentation, accessed
+  2026-08-02, confirm separate Normal/Charged categories and C6-only Pyro
+  infusion for Normal, Charged, and Plunging attacks:
+  https://library.keqingmains.com/characters/pyro/bennett
+  https://library.keqingmains.com/combat-mechanics/elemental-effects/weapon-infusion
+
+### Phase 1: Separate Element and Action Damage Bonuses - Done
+
+Target files:
+
+- `src/java/model/character/Bennett.java`
+- `src/java/model/character/Xiangling.java`
+- `src/java/model/character/Xingqiu.java`
+- `src/java/model/character/RaidenShogun.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Every physical Normal uses `NORMAL_ATTACK_DMG_BONUS`; every physical Charged
+  hit uses `CHARGED_ATTACK_DMG_BONUS`, while the Physical element continues to
+  contribute Physical DMG Bonus exactly once through the standard formula.
+- Bennett C0-C5 remains Physical inside Fantastic Voyage; C6 converts Normal,
+  Charged, and Plunging damage to Pyro without replacing their action bonus.
+- Bennett/Xingqiu two-hit Charged attacks retain one logical duration, shared
+  typed ICD/gauge, and exact multipliers; Xiangling and Raiden retain existing
+  timing and combo reset behavior.
+- Musou Isshin attacks remain Burst damage and are not changed by the physical
+  routing correction.
+
+Test cases:
+
+- Normal: metadata matrix for all four characters and C0/C6 Bennett field.
+- Boundary: two-hit ordering/duration, Raiden physical versus Musou category,
+  and Bennett pre-field/in-field element transition.
+- Abnormal: Physical bonus is never supplied as the action bonus; unrelated
+  Skill/Burst/Plunge categories remain unchanged.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `./gradlew PartyCatalogRegressionTest`
+- representative party samples twice
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Bennett, Xiangling, Xingqiu, and Raiden physical attacks now obtain Physical
+  bonus once from their element and Normal/Charged bonus from their action
+  category; no character still passes Physical bonus for a typed Normal/Charged
+  hit.
+- Bennett C0 field Normal/Charged/Plunge stays Physical while C6 converts all
+  three to Pyro without replacing action bonuses. Two-hit metadata, ICD, gauge,
+  same-time resolution, and one logical duration are covered for Bennett and
+  Xingqiu; Raiden Musou remains Burst damage.
+- Reaction regression, build, Javadoc, party catalog, and representative
+  samples pass. Two runs each reproduce 1,273,211 / 60,629 (`RaidenParty`),
+  32,047,365 / 322,084 (`FlinsParty`), and 22,146,093 / 320,493
+  (`FlinsParty2`).
+
 ## Implementation Order: Expanded Artifact Coverage Campaign
 
 Status: Complete. This campaign adds six missing four-piece artifact sets
