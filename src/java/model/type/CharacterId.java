@@ -29,6 +29,8 @@ public enum CharacterId {
     XIANGLING(7, "Xiangling"),
     /** Xingqiu (Hydro sword off-field reaction enabler). */
     XINGQIU(8, "Xingqiu"),
+    /** Kaeya (Cryo sword DPS and off-field Burst source). */
+    KAEYA(9, "Kaeya"),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown");
 

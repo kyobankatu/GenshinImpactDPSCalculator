@@ -119,6 +119,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_WeaponReactionBonusRegression();
         testAccuracyPhaseF_DragonsBaneTargetAuraContract();
         testAccuracyPhaseF_TargetAuraWeaponMetadata();
+        testAccuracyPhaseF_KaeyaCharacterContract();
         testAccuracyPhaseF_DendroResonanceReactionEmContract();
         testAccuracyPhaseF_CryoResonanceConditionalCritContract();
         testAccuracyPhaseF_ElectroResonanceTypedTriggerContract();
@@ -4913,6 +4914,138 @@ public class ReactionRegressionTest {
                 r1MagicGuide, Element.HYDRO, Element.PYRO, 0.12, "R1 Magic Guide");
     }
 
+    private static void testAccuracyPhaseF_KaeyaCharacterContract() {
+        assertEquals(CharacterId.KAEYA, CharacterId.fromName("Kaeya"),
+                "Kaeya display name should resolve to a typed id");
+        assertEquals(CharacterId.KAEYA, CharacterId.fromNumericId(9),
+                "Kaeya numeric id should round trip");
+
+        model.character.Kaeya configured = new model.character.Kaeya(
+                new TestWeapon(), blankArtifact());
+        assertClose(11636.0, configured.getBaseStats().get(StatType.BASE_HP), EPS,
+                "Kaeya Lv90 base HP");
+        assertClose(223.0, configured.getBaseStats().get(StatType.BASE_ATK), EPS,
+                "Kaeya Lv90 base ATK");
+        assertClose(792.0, configured.getBaseStats().get(StatType.BASE_DEF), EPS,
+                "Kaeya Lv90 base DEF");
+        assertClose(1.267, configured.getBaseStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "Kaeya Lv90 Energy Recharge");
+
+        RecordingDamageWeapon baselineSkillWeapon = new RecordingDamageWeapon("Frostgnaw");
+        model.character.Kaeya baselineSkillKaeya = new model.character.Kaeya(
+                baselineSkillWeapon, blankArtifact(), kaeyaTalentData(0));
+        CombatSimulator baselineSkillSim = simulatorWithExistingCharacter(baselineSkillKaeya);
+        baselineSkillKaeya.restoreCurrentEnergy(0.0);
+        baselineSkillSim.performAction(
+                CharacterId.KAEYA, CharacterActionRequest.of(CharacterActionKey.SKILL));
+        assertEquals(1, baselineSkillWeapon.actions.size(),
+                "Frostgnaw should deal one Skill hit");
+        AttackAction frostgnaw = baselineSkillWeapon.actions.get(0);
+        assertEquals(ActionType.SKILL, frostgnaw.getActionType(),
+                "Frostgnaw should retain Skill typing");
+        assertEquals(ICDType.None, frostgnaw.getICDType(),
+                "Frostgnaw should have no elemental ICD");
+        assertClose(2.0, frostgnaw.getGaugeUnits(), EPS,
+                "Frostgnaw should apply 2U Cryo");
+        assertClose(3.2504, frostgnaw.getDamagePercent(), EPS,
+                "C0 Frostgnaw should use talent-9 damage");
+        assertClose(2.67 * 3.0, baselineSkillKaeya.getTotalParticleEnergy(), EPS,
+                "Single-target Frostgnaw should generate 2.67 Cryo particles");
+
+        model.character.Kaeya frozenSkillKaeya = new model.character.Kaeya(
+                new TestWeapon(), blankArtifact(), kaeyaTalentData(0));
+        CombatSimulator frozenSkillSim = simulatorWithExistingCharacter(frozenSkillKaeya);
+        frozenSkillKaeya.restoreCurrentEnergy(0.0);
+        frozenSkillSim.getEnemy().setAura(Element.HYDRO, 1.0);
+        frozenSkillSim.performAction(
+                CharacterId.KAEYA, CharacterActionRequest.of(CharacterActionKey.SKILL));
+        assertTrue(frozenSkillSim.getEnemy().isFrozen(frozenSkillSim.getCurrentTime()),
+                "Frostgnaw should Freeze a Hydro-affected target");
+        assertClose(3.67 * 3.0, frozenSkillKaeya.getTotalParticleEnergy(), EPS,
+                "Frozen single-target Frostgnaw should add one A4 particle");
+
+        RecordingDamageWeapon c0NormalWeapon = new RecordingDamageWeapon("Kaeya N1");
+        model.character.Kaeya c0NormalKaeya = new model.character.Kaeya(
+                c0NormalWeapon, blankArtifact(), kaeyaTalentData(0));
+        CombatSimulator c0NormalSim = simulatorWithExistingCharacter(c0NormalKaeya);
+        c0NormalSim.getEnemy().setAura(Element.CRYO, 1.0);
+        c0NormalSim.performAction(
+                CharacterId.KAEYA, CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        assertClose(0.0,
+                c0NormalWeapon.actions.get(0).getExtraBonuses()
+                        .getOrDefault(StatType.CRIT_RATE, 0.0), EPS,
+                "C0 Kaeya should not receive Excellent Blood CRIT Rate");
+
+        RecordingDamageWeapon c1NormalWeapon = new RecordingDamageWeapon("Kaeya N");
+        model.character.Kaeya c1NormalKaeya = new model.character.Kaeya(
+                c1NormalWeapon, blankArtifact(), kaeyaTalentData(1));
+        CombatSimulator c1NormalSim = simulatorWithExistingCharacter(c1NormalKaeya);
+        c1NormalSim.getEnemy().setAura(Element.CRYO, 1.0);
+        c1NormalSim.performAction(
+                CharacterId.KAEYA, CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        assertClose(0.15,
+                c1NormalWeapon.actions.get(0).getExtraBonuses()
+                        .getOrDefault(StatType.CRIT_RATE, 0.0), EPS,
+                "C1 Kaeya should gain 15% Normal CRIT Rate against Cryo aura");
+        c1NormalSim.getEnemy().setAura(Element.CRYO, 0.0);
+        c1NormalSim.performAction(
+                CharacterId.KAEYA, CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        assertClose(0.0,
+                c1NormalWeapon.actions.get(1).getExtraBonuses()
+                        .getOrDefault(StatType.CRIT_RATE, 0.0), EPS,
+                "C1 Kaeya should not gain CRIT Rate without Cryo or Frozen state");
+
+        RecordingDamageWeapon c0BurstWeapon = new RecordingDamageWeapon("Glacial Waltz Icicle");
+        model.character.Kaeya c0BurstKaeya = new model.character.Kaeya(
+                c0BurstWeapon, blankArtifact(), kaeyaTalentData(0));
+        CombatSimulator c0BurstSim = simulatorWithExistingCharacter(c0BurstKaeya);
+        c0BurstKaeya.restoreCurrentEnergy(60.0);
+        c0BurstSim.performAction(
+                CharacterId.KAEYA, CharacterActionRequest.of(CharacterActionKey.BURST));
+        assertClose(0.0, c0BurstKaeya.getCurrentEnergy(), EPS,
+                "C0 Glacial Waltz should consume 60 Energy");
+        c0BurstSim.advanceTime(8.0);
+        assertEquals(13, c0BurstWeapon.actions.size(),
+                "C0 stationary Glacial Waltz should deal thirteen hits");
+        AttackAction c0Icicle = c0BurstWeapon.actions.get(0);
+        assertTrue(c0Icicle.isUseSnapshot(), "Glacial Waltz should use its cast snapshot");
+        assertEquals(ICDType.Standard, c0Icicle.getICDType(),
+                "Glacial Waltz should use standard ICD");
+        assertClose(1.0, c0Icicle.getGaugeUnits(), EPS,
+                "Glacial Waltz should apply 1U Cryo on eligible hits");
+        assertClose(1.3192, c0Icicle.getDamagePercent(), EPS,
+                "C0 Glacial Waltz should use talent-9 damage");
+
+        RecordingDamageWeapon c6BurstWeapon = new RecordingDamageWeapon("Glacial Waltz Icicle");
+        model.character.Kaeya c6BurstKaeya = new model.character.Kaeya(
+                c6BurstWeapon, blankArtifact(), kaeyaTalentData(6));
+        CombatSimulator c6BurstSim = simulatorWithExistingCharacter(c6BurstKaeya);
+        TestCharacter c6BurstAlly = testCharacter(Element.PYRO, CharacterId.XIANGLING);
+        c6BurstSim.addCharacter(c6BurstAlly);
+        c6BurstKaeya.restoreCurrentEnergy(60.0);
+        c6BurstAlly.restoreCurrentEnergy(0.0);
+        c6BurstSim.performAction(
+                CharacterId.KAEYA, CharacterActionRequest.of(CharacterActionKey.BURST));
+        assertClose(15.0, c6BurstKaeya.getCurrentEnergy(), EPS,
+                "C6 Glacial Waltz should refund 15 flat Energy only to Kaeya");
+        assertClose(0.0, c6BurstAlly.getCurrentEnergy(), EPS,
+                "C6 Glacial Waltz should not refund flat Energy to allies");
+        c6BurstSim.advanceTime(8.0);
+        assertEquals(17, c6BurstWeapon.actions.size(),
+                "C6 stationary Glacial Waltz should include the additional icicle");
+        assertClose(1.55, c6BurstWeapon.actions.get(0).getDamagePercent(), EPS,
+                "C5 should raise Glacial Waltz to its level-12 multiplier");
+
+        RecordingDamageWeapon c6SkillWeapon = new RecordingDamageWeapon("Frostgnaw");
+        model.character.Kaeya c6SkillKaeya = new model.character.Kaeya(
+                c6SkillWeapon, blankArtifact(), kaeyaTalentData(6));
+        CombatSimulator c6SkillSim = simulatorWithExistingCharacter(c6SkillKaeya);
+        c6SkillSim.performAction(
+                CharacterId.KAEYA, CharacterActionRequest.of(CharacterActionKey.SKILL));
+        assertClose(3.82, c6SkillWeapon.actions.get(0).getDamagePercent(), EPS,
+                "C3 should raise Frostgnaw to its level-12 multiplier");
+    }
+
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
         ReactionResult.Kind[] primaryKinds = {
                 ReactionResult.Kind.BURNING,
@@ -6139,6 +6272,15 @@ public class ReactionRegressionTest {
         if (Math.abs(expected - actual) > tolerance) {
             throw new AssertionError(message + ": expected " + expected + " but got " + actual);
         }
+    }
+
+    private static mechanics.data.TalentDataSource kaeyaTalentData(int constellation) {
+        return (characterName, key, defaultValue) -> {
+            if ("Kaeya".equals(characterName) && "Constellation".equals(key)) {
+                return constellation;
+            }
+            return defaultValue;
+        };
     }
 
     private static void assertTrue(boolean condition, String message) {

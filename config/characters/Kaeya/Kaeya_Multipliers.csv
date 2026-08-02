@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Kaeya,NORMAL,N1,9,0.9875,0
+Kaeya,NORMAL,N2,9,0.9496,0
+Kaeya,NORMAL,N3,9,1.1992,0
+Kaeya,NORMAL,N4,9,1.3019,0
+Kaeya,NORMAL,N5,9,1.6211,0
+Kaeya,CHARGE,CA_1,9,1.0112,0
+Kaeya,CHARGE,CA_2,9,1.3430,0
+Kaeya,PLUNGE,Plunge High,9,2.9336,0
+Kaeya,SKILL,Frostgnaw,12,3.82,0
+Kaeya,BURST,Glacial Waltz,12,1.55,0

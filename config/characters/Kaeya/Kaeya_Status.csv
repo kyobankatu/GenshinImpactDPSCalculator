@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Kaeya,STATS,Base HP,90,11636,0
+Kaeya,STATS,Base ATK,90,223,0
+Kaeya,STATS,Base DEF,90,792,0
+Kaeya,STATS,Ascension ER,90,0.267,0
+Kaeya,STATS,Energy Cost,90,60,0
+Kaeya,STATS,Constellation,6,6,0
+Kaeya,CONFIG,Character Level,90,90,0
+Kaeya,CONFIG,Normal Level,9,9,0
+Kaeya,CONFIG,Skill Level,12,12,0
+Kaeya,CONFIG,Burst Level,12,12,0
