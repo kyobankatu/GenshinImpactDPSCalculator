@@ -14462,8 +14462,8 @@ Verification:
 
 ## Implementation Order: Sumeru Action-Proc Bow Campaign
 
-Status: Active. Add two complete action-opened bow states using typed actions,
-hits, switch-out, timers, and generated Physical damage.
+Status: Complete. Two action-opened bow states now use typed actions, hits,
+switch-out, timers, and generated Physical damage.
 
 Scope:
 
@@ -14475,13 +14475,20 @@ Out of scope for this pass:
 - Multi-target multiplication, visual projectile travel, characters, formulas,
   RL, generated docs, and unrelated Sumeru weapons.
 
-### Phase 1: Add End of the Line and King's Squire
+### Phase 1: Add End of the Line and King's Squire - Done (`6e74d66`)
 
 Target files:
 
 - `src/java/model/weapon/EndOfTheLine.java` (new)
 - `src/java/model/weapon/KingsSquire.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Flowrider proves three positive typed procs, two-second proc CT, 12-second
+  activation CT, 15-second expiry, exclusions, and R1/R5 values.
+- Squire proves Skill/Burst states, 20-second CT, natural/switch single end proc,
+  stale-timer rejection, and R1/R5 values; all project gates pass.
 
 Acceptance criteria:
 
