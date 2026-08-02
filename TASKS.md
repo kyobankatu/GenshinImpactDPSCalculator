@@ -50,9 +50,9 @@ wave added the Golden Majesty weapon family, six legacy boundary artifact sets,
 and Razor through isolated implementation lanes; RL and generated
 documentation remained excluded.
 
-The B-162 follow-on legacy character campaign is in progress. Rosaria, Diluc,
-Keqing, Ningguang, and Ganyu are being added as independently revertible
-single-target offensive slices; RL, generated docs, and deferred defensive or
+The B-162 follow-on legacy character campaign is in progress. Stable identities
+plus Rosaria, Diluc, Keqing, and Ningguang are implemented; Ganyu remains in an
+isolated implementation lane. RL, generated docs, and deferred defensive or
 geometry systems remain excluded.
 
 The B-158 derived-stat equipment and Fischl wave is complete. It adds reusable
@@ -12879,8 +12879,8 @@ Completion evidence:
 
 ## Implementation Order: Follow-on Legacy Character Campaign
 
-Status: In progress. B-162 promotes five asset-backed legacy characters from
-the durable inventory into one implementation-first campaign.
+Status: In progress. Phases 1-2 and Ningguang in Phase 3 are implemented;
+Ganyu is the remaining B-162 unit.
 
 Scope:
 
@@ -12909,7 +12909,7 @@ Definitions:
   regressions covering each new character without extending the shared
   reaction test file.
 
-### Phase 1: Stable Character and Buff Identities
+### Phase 1: Stable Character and Buff Identities - Done
 
 Why first:
 
@@ -12949,7 +12949,12 @@ Verification:
 - `./gradlew build`
 - `python scripts/preflight.py`
 
-### Phase 2: Rosaria, Diluc, and Keqing Vertical Slices
+Completion evidence:
+
+- Commit `514f7a2` reserves IDs 21-25 and eleven typed buff identities;
+  identity, reaction, build, and executable preflight gates pass.
+
+### Phase 2: Rosaria, Diluc, and Keqing Vertical Slices - Done
 
 Why second:
 
@@ -12979,8 +12984,10 @@ Tasks:
 
 Acceptance criteria:
 
-- Each character executes all offensive action types without null equipment,
-  rejects constellations outside 0-6, and preserves independent runtime state.
+- Each character executes every offensive action with a complete sourced timing
+  contract without null equipment, rejects constellations outside 0-6, and
+  preserves independent runtime state; Diluc's unsourced Charged sequence is an
+  explicit evidence boundary.
 - Rosaria's Burst/team CRIT and Physical shred, Diluc's three-stage Skill and
   Burst infusion, and Keqing's Stellar Restoration/Burst bonuses obey their
   sourced windows and typed ownership rules within the stated boundaries.
@@ -13001,6 +13008,14 @@ Verification:
 - `./gradlew ReactionRegressionTest`
 - `./gradlew build`
 - `python scripts/preflight.py`
+
+Completion evidence:
+
+- Commits `259f87e`, `4258902`, `7a8592d`, and `aaff2bc` add the three
+  independently revertible character slices and focused regressions.
+- All three focused tests, `ReactionRegressionTest`, `build`, Javadoc, and the
+  executable preflight pass on the combined tree; Diluc C4 is numerically
+  covered as exactly +40%, not a duplicate +80% contribution.
 
 ### Phase 3: Ningguang and Ganyu Vertical Slices
 
@@ -13051,6 +13066,11 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py --run`
+
+Progress:
+
+- Commit `1ca6d6d` implements Ningguang; its focused, reaction, build, Javadoc,
+  party-catalog, and executable preflight gates pass. Ganyu remains in progress.
 
 ## Implementation Order: Parallel Foundational Content Campaign
 

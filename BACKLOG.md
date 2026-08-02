@@ -3439,6 +3439,8 @@ experiment record.
 - **Units:** Rosaria, Diluc, Keqing, Ningguang, and Ganyu
 - **Plan:** three-phase `TASKS.md` Follow-on Legacy Character Campaign with a
   shared typed-identity prerequisite and branch-isolated vertical slices.
+- **Progress:** identities plus Rosaria, Diluc, Keqing, and Ningguang are
+  implemented through `aaff2bc`; Ganyu remains in an isolated worktree.
 
 ### B-163 — Follow-on stateful weapon inventory
 
