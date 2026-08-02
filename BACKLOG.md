@@ -2415,3 +2415,13 @@ experiment record.
 - **Plan:** `TASKS.md` Self-Contained Five-Star Weapon Campaign
 - **Completion:** `4130ebc` adds both weapons and focused typed regressions;
   build/Javadoc/leak gates pass
+
+### B-104 — Energy and proximity five-star weapon coverage
+
+- **Status:** active
+- **Scope:** Azurelight and Aqua Simulacra; RL excluded
+- **Value/risk:** two complete passives reuse live Energy and static stat
+  assembly; Aqua's nearby condition is explicit under the single-enemy model
+- **Evidence boundary:** KQM TCL metadata, R1-R5 ATK/CRIT/HP/DMG values,
+  Skill triggering-hit order, zero Energy, and 12-second duration
+- **Plan:** `TASKS.md` Energy and Proximity Five-Star Weapon Campaign

@@ -14406,3 +14406,49 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Energy and Proximity Five-Star Weapon Campaign
+
+Status: Active. Add one live-Energy Skill-window sword and one single-enemy
+proximity bow without extending simulator dispatch.
+
+Scope:
+
+- Add Azurelight and Aqua Simulacra with sourced metadata, R1-R5 values, R5
+  defaults, exact dynamic/static bonuses, and focused regressions.
+
+Out of scope for this pass:
+
+- Multi-target distance modeling, overworld no-enemy states, characters,
+  formulas, RL, generated docs, and unrelated weapons.
+
+### Phase 1: Add Azurelight and Aqua Simulacra
+
+Target files:
+
+- `src/java/model/weapon/Azurelight.java` (new)
+- `src/java/model/weapon/AquaSimulacra.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Azurelight opens one refresh-only half-open 12-second 24-48% ATK window on
+  active-owner Skill use; while live Energy is exactly zero, it grants another
+  24-48% ATK and 40-80% CRIT DMG, with immediate state transitions.
+- Aqua Simulacra grants 16-32% HP and 20-40% all DMG under the simulator's
+  explicit single-nearby-enemy combat assumption, including off-field damage.
+- Metadata, hook order for the triggering Skill, owner/simulator binding,
+  R1-R5 defaults/validation, refresh, and exact expiry are explicit.
+
+Test cases to add or update:
+
+- Normal: metadata, Azure full/zero Energy transitions, Aqua static stats, R5.
+- Boundary: Azure refresh/exact 12 seconds, exact zero versus positive Energy, R1.
+- Abnormal: wrong/off-field Azure action, cross-simulator reuse, refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
