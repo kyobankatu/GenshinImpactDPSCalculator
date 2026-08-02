@@ -1,0 +1,12 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Lisa,NORMAL,N1,9,0.6732,0
+Lisa,NORMAL,N2,9,0.6106,0
+Lisa,NORMAL,N3,9,0.7276,0
+Lisa,NORMAL,N4,9,0.9343,0
+Lisa,CHARGE,Charged Attack,9,3.0110,0
+Lisa,PLUNGE,Plunge High,9,2.6076,0
+Lisa,SKILL,Violet Arc Hold 0,12,6.4000,0
+Lisa,SKILL,Violet Arc Hold 1,12,7.3600,0
+Lisa,SKILL,Violet Arc Hold 2,12,8.4800,0
+Lisa,SKILL,Violet Arc Hold 3,12,9.7400,0
+Lisa,BURST,Lightning Rose Discharge,12,0.7310,0

@@ -33,6 +33,8 @@ public enum CharacterId {
     KAEYA(9, "Kaeya"),
     /** Amber (Pyro bow DPS with delayed Skill and fixed-area Burst). */
     AMBER(10, "Amber"),
+    /** Lisa (Electro catalyst DPS with Conductive stacks and a periodic Burst). */
+    LISA(11, "Lisa"),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown");
 

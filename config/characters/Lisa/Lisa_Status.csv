@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Lisa,STATS,Base HP,90,9570,0
+Lisa,STATS,Base ATK,90,232,0
+Lisa,STATS,Base DEF,90,573,0
+Lisa,STATS,Ascension EM,90,96,0
+Lisa,STATS,Energy Cost,90,80,0
+Lisa,STATS,Constellation,6,6,0
+Lisa,CONFIG,Character Level,90,90,0
+Lisa,CONFIG,Normal Level,9,9,0
+Lisa,CONFIG,Skill Level,12,12,0
+Lisa,CONFIG,Burst Level,12,12,0

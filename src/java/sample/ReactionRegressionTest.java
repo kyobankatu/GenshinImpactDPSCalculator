@@ -131,6 +131,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ActionUseWindowWeapons();
         testAccuracyPhaseF_KaeyaCharacterContract();
         testAccuracyPhaseF_AmberCharacterContract();
+        testAccuracyPhaseF_LisaCharacterContract();
         testAccuracyPhaseF_DendroResonanceReactionEmContract();
         testAccuracyPhaseF_CryoResonanceConditionalCritContract();
         testAccuracyPhaseF_ElectroResonanceTypedTriggerContract();
@@ -5403,6 +5404,211 @@ public class ReactionRegressionTest {
                 "C6 Wildfire should expire at exactly ten seconds");
     }
 
+    private static void testAccuracyPhaseF_LisaCharacterContract() {
+        assertEquals(CharacterId.LISA, CharacterId.fromName("Lisa"),
+                "Lisa display name should resolve to a typed id");
+        assertEquals(CharacterId.LISA, CharacterId.fromNumericId(11),
+                "Lisa numeric id should round trip");
+
+        model.character.Lisa configured = new model.character.Lisa(
+                new TestWeapon(), blankArtifact());
+        assertClose(9570.0, configured.getBaseStats().get(StatType.BASE_HP), EPS,
+                "Lisa Lv90 base HP");
+        assertClose(232.0, configured.getBaseStats().get(StatType.BASE_ATK), EPS,
+                "Lisa Lv90 base ATK");
+        assertClose(573.0, configured.getBaseStats().get(StatType.BASE_DEF), EPS,
+                "Lisa Lv90 base DEF");
+        assertClose(96.0,
+                configured.getBaseStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Lisa Lv90 ascension EM");
+        assertClose(80.0, configured.getEnergyCost(), EPS,
+                "Lisa Burst Energy cost");
+
+        RecordingDamageWeapon normalWeapon = new RecordingDamageWeapon("Lisa N");
+        model.character.Lisa normalLisa = new model.character.Lisa(
+                normalWeapon, blankArtifact(), lisaTalentData(0));
+        CombatSimulator normalSim = simulatorWithExistingCharacter(normalLisa);
+        for (int i = 0; i < 4; i++) {
+            normalSim.performAction(
+                    CharacterId.LISA, CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        }
+        double[] normalMultipliers = { 0.6732, 0.6106, 0.7276, 0.9343 };
+        assertEquals(4, normalWeapon.actions.size(),
+                "Lisa should execute a four-hit Normal chain");
+        for (int i = 0; i < normalWeapon.actions.size(); i++) {
+            AttackAction action = normalWeapon.actions.get(i);
+            assertClose(normalMultipliers[i], action.getDamagePercent(), EPS,
+                    "Lisa Normal multiplier " + (i + 1));
+            assertEquals(Element.ELECTRO, action.getElement(),
+                    "Lisa Normals should deal Electro damage");
+            assertEquals(ICDType.Standard, action.getICDType(),
+                    "Lisa Normals should use standard ICD");
+            assertClose(1.0, action.getGaugeUnits(), EPS,
+                    "Lisa Normals should apply 1U Electro");
+        }
+
+        RecordingDamageWeapon plungeWeapon = new RecordingDamageWeapon(
+                "Lisa High Plunge");
+        model.character.Lisa plungeLisa = new model.character.Lisa(
+                plungeWeapon, blankArtifact(), lisaTalentData(0));
+        CombatSimulator plungeSim = simulatorWithExistingCharacter(plungeLisa);
+        plungeSim.performAction(
+                CharacterId.LISA, CharacterActionRequest.of(CharacterActionKey.PLUNGE));
+        AttackAction plunge = plungeWeapon.actions.get(0);
+        assertEquals(Element.ELECTRO, plunge.getElement(),
+                "Lisa catalyst Plunge should deal Electro damage");
+        assertEquals(ActionType.PLUNGE, plunge.getActionType(),
+                "Lisa Plunge should retain Plunge typing");
+        assertClose(1.0, plunge.getGaugeUnits(), EPS,
+                "Lisa Plunge should apply 1U Electro");
+        assertTrue(plunge.getBonusStat() == null,
+                "Lisa Plunge should not add an unrelated Physical bonus stat");
+
+        RecordingDamageWeapon chargeWeapon = new RecordingDamageWeapon(
+                "Lisa Charged Attack");
+        model.character.Lisa chargeLisa = new model.character.Lisa(
+                chargeWeapon, blankArtifact(), lisaTalentData(0));
+        CombatSimulator chargeSim = simulatorWithExistingCharacter(chargeLisa);
+        chargeSim.performAction(
+                CharacterId.LISA, CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        AttackAction recordedCharge = chargeWeapon.actions.get(0);
+        assertEquals(ICDType.None, recordedCharge.getICDType(),
+                "Lisa's 91-frame Charged action should clear its 0.5-second ICD");
+        assertClose(1.0, recordedCharge.getGaugeUnits(), EPS,
+                "Lisa Charged attacks should apply 1U Electro");
+
+        RecordingDamageWeapon stackWeapon = new RecordingDamageWeapon("Violet Arc Hold");
+        model.character.Lisa stackLisa = new model.character.Lisa(
+                stackWeapon, blankArtifact(), lisaTalentData(0));
+        CombatSimulator stackSim = simulatorWithExistingCharacter(stackLisa);
+        for (int i = 0; i < 4; i++) {
+            stackSim.performAction(
+                    CharacterId.LISA, CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        }
+        stackSim.performAction(
+                CharacterId.LISA, CharacterActionRequest.of(CharacterActionKey.SKILL));
+        assertEquals(1, stackWeapon.actions.size(),
+                "Lisa Hold Skill should resolve once after four Charged hits");
+        AttackAction cappedHold = stackWeapon.actions.get(0);
+        assertEquals("Violet Arc Hold (3 Conductive)", cappedHold.getName(),
+                "Lisa Conductive should cap at three stacks");
+        assertClose(8.2824, cappedHold.getDamagePercent(), EPS,
+                "C0 Lisa should consume three stacks at talent level nine");
+        assertEquals(ICDType.None, cappedHold.getICDType(),
+                "Lisa Hold Skill should have no ICD");
+        assertClose(2.0, cappedHold.getGaugeUnits(), EPS,
+                "Lisa Hold Skill should apply 2U Electro");
+        assertClose(15.0, stackLisa.getTotalParticleEnergy(), EPS,
+                "Lisa Hold Skill should generate five on-field Electro particles");
+        stackSim.performAction(
+                CharacterId.LISA, CharacterActionRequest.of(CharacterActionKey.SKILL));
+        assertEquals("Violet Arc Hold (0 Conductive)",
+                stackWeapon.actions.get(1).getName(),
+                "Lisa Hold Skill should consume all Conductive stacks");
+
+        RecordingDamageWeapon expiryWeapon = new RecordingDamageWeapon("Violet Arc Hold");
+        model.character.Lisa expiryLisa = new model.character.Lisa(
+                expiryWeapon, blankArtifact(), lisaTalentData(0));
+        CombatSimulator expirySim = simulatorWithExistingCharacter(expiryLisa);
+        expirySim.performAction(
+                CharacterId.LISA, CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        double firstStackTime = expirySim.getCurrentTime();
+        expirySim.advanceTime(1.0);
+        expirySim.performAction(
+                CharacterId.LISA, CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        expirySim.advanceTime(firstStackTime + 15.0 - expirySim.getCurrentTime());
+        expirySim.performAction(
+                CharacterId.LISA, CharacterActionRequest.of(CharacterActionKey.SKILL));
+        assertEquals("Violet Arc Hold (1 Conductive)",
+                expiryWeapon.actions.get(0).getName(),
+                "Lisa should expire each Conductive stack independently at fifteen seconds");
+
+        RecordingDamageWeapon c1Weapon = new RecordingDamageWeapon("Violet Arc Hold");
+        model.character.Lisa c1Lisa = new model.character.Lisa(
+                c1Weapon, blankArtifact(), lisaTalentData(1));
+        CombatSimulator c1Sim = simulatorWithExistingCharacter(c1Lisa);
+        c1Lisa.restoreCurrentEnergy(0.0);
+        c1Sim.performAction(
+                CharacterId.LISA, CharacterActionRequest.of(CharacterActionKey.SKILL));
+        assertClose(2.0, c1Lisa.getTotalFlatEnergy(), EPS,
+                "Lisa C1 should refund two flat Energy for one target");
+
+        RecordingDamageWeapon c5Weapon = new RecordingDamageWeapon("Violet Arc Hold");
+        model.character.Lisa c5Lisa = new model.character.Lisa(
+                c5Weapon, blankArtifact(), lisaTalentData(5));
+        CombatSimulator c5Sim = simulatorWithExistingCharacter(c5Lisa);
+        for (int i = 0; i < 3; i++) {
+            c5Sim.performAction(
+                    CharacterId.LISA, CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        }
+        c5Sim.performAction(
+                CharacterId.LISA, CharacterActionRequest.of(CharacterActionKey.SKILL));
+        assertClose(9.7400, c5Weapon.actions.get(0).getDamagePercent(), EPS,
+                "Lisa C5 should use the level-12 three-stack Hold multiplier");
+
+        model.character.Lisa cooldownLisa = new model.character.Lisa(
+                new TestWeapon(), blankArtifact(), lisaTalentData(0));
+        cooldownLisa.markSkillUsed(0.0);
+        assertTrue(!cooldownLisa.canSkill(15.999),
+                "Lisa Hold Skill should remain unavailable before sixteen seconds");
+        assertTrue(cooldownLisa.canSkill(16.0),
+                "Lisa Hold Skill should return at sixteen seconds");
+
+        RecordingDamageWeapon burstWeapon = new RecordingDamageWeapon("Lightning Rose");
+        model.character.Lisa burstLisa = new model.character.Lisa(
+                burstWeapon, blankArtifact(), lisaTalentData(0));
+        CombatSimulator burstSim = simulatorWithExistingCharacter(burstLisa);
+        burstLisa.restoreCurrentEnergy(80.0);
+        double burstStart = burstSim.getCurrentTime();
+        burstSim.performAction(
+                CharacterId.LISA, CharacterActionRequest.of(CharacterActionKey.BURST));
+        assertClose(0.0, burstLisa.getCurrentEnergy(), EPS,
+                "Lightning Rose should consume 80 Energy");
+        burstSim.advanceTime(burstStart + 15.0 - burstSim.getCurrentTime());
+        assertEquals(30, burstWeapon.actions.size(),
+                "Lightning Rose should resolve one summon hit and 29 discharges");
+        AttackAction summon = burstWeapon.actions.get(0);
+        assertEquals("Lightning Rose Summon", summon.getName(),
+                "Lightning Rose should start with its unlisted summon hit");
+        assertClose(0.10, summon.getDamagePercent(), EPS,
+                "Lightning Rose summon should use its fixed 10% multiplier");
+        assertClose(0.0, summon.getGaugeUnits(), EPS,
+                "Lightning Rose summon should not apply Electro aura");
+        AttackAction discharge = burstWeapon.actions.get(1);
+        assertClose(0.6215, discharge.getDamagePercent(), EPS,
+                "C0 Lightning Rose should use its talent-9 discharge multiplier");
+        assertEquals(ICDType.Standard, discharge.getICDType(),
+                "Lightning Rose discharges should use standard ICD");
+        assertClose(1.0, discharge.getGaugeUnits(), EPS,
+                "Lightning Rose discharges should apply 1U Electro");
+        assertTrue(discharge.isUseSnapshot(),
+                "Lightning Rose discharges should use the cast snapshot");
+        for (int i = 1; i < burstWeapon.times.size(); i++) {
+            assertClose(burstStart + i * 0.5, burstWeapon.times.get(i), EPS,
+                    "Lightning Rose should discharge every half second");
+        }
+
+        RecordingDamageWeapon c3BurstWeapon = new RecordingDamageWeapon(
+                "Lightning Rose Discharge");
+        model.character.Lisa c3BurstLisa = new model.character.Lisa(
+                c3BurstWeapon, blankArtifact(), lisaTalentData(3));
+        CombatSimulator c3BurstSim = simulatorWithExistingCharacter(c3BurstLisa);
+        c3BurstLisa.restoreCurrentEnergy(80.0);
+        c3BurstSim.performAction(
+                CharacterId.LISA, CharacterActionRequest.of(CharacterActionKey.BURST));
+        assertClose(0.7310, c3BurstWeapon.actions.get(0).getDamagePercent(), EPS,
+                "Lisa C3 should use the level-12 discharge multiplier");
+
+        model.character.Lisa burstCooldownLisa = new model.character.Lisa(
+                new TestWeapon(), blankArtifact(), lisaTalentData(0));
+        burstCooldownLisa.markBurstUsed(0.0);
+        assertTrue(!burstCooldownLisa.canBurst(19.999),
+                "Lightning Rose should remain unavailable before twenty seconds");
+        burstCooldownLisa.restoreCurrentEnergy(80.0);
+        assertTrue(burstCooldownLisa.canBurst(20.0),
+                "Lightning Rose should return at twenty seconds with sufficient Energy");
+    }
+
     private static void testAccuracyPhaseF_LegacyWeaponRefinements() {
         model.weapon.AlleyFlash alleyFlash = new model.weapon.AlleyFlash();
         assertEquals("The Alley Flash", alleyFlash.getName(),
@@ -8351,6 +8557,15 @@ public class ReactionRegressionTest {
     private static mechanics.data.TalentDataSource amberTalentData(int constellation) {
         return (characterName, key, defaultValue) -> {
             if ("Amber".equals(characterName) && "Constellation".equals(key)) {
+                return constellation;
+            }
+            return defaultValue;
+        };
+    }
+
+    private static mechanics.data.TalentDataSource lisaTalentData(int constellation) {
+        return (characterName, key, defaultValue) -> {
+            if ("Lisa".equals(characterName) && "Constellation".equals(key)) {
                 return constellation;
             }
             return defaultValue;
