@@ -106,7 +106,7 @@ public final class DerivedActionDamageRegressionTest {
                 "Albedo numeric lookup");
         assertEquals(CharacterId.FISCHL, CharacterId.fromNumericId(15),
                 "existing identity remains stable");
-        assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(18),
+        assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(21),
                 "unknown numeric identity fallback");
     }
 

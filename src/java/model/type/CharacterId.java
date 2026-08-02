@@ -47,6 +47,12 @@ public enum CharacterId {
     YAE_MIKO(16, "Yae Miko"),
     /** Albedo (Geo sword off-field Skill DPS). */
     ALBEDO(17, "Albedo"),
+    /** Venti (Anemo bow Burst support). */
+    VENTI(18, "Venti"),
+    /** Yoimiya (Pyro bow Normal Attack DPS). */
+    YOIMIYA(19, "Yoimiya"),
+    /** Yanfei (Pyro catalyst Charged Attack DPS). */
+    YANFEI(20, "Yanfei"),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown");
 

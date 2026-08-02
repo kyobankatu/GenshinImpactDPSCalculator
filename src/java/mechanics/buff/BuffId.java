@@ -199,6 +199,18 @@ public enum BuffId {
     ALBEDO_A4_TEAM_EM,
     /** Albedo C4 active-character Plunging Attack DMG bonus. */
     ALBEDO_C4_PLUNGING_DMG_BONUS,
+    /** Venti C2 Anemo and Physical resistance reduction. */
+    VENTI_C2_RES_SHRED,
+    /** Venti C6 Anemo and absorbed-element resistance reduction. */
+    VENTI_C6_RES_SHRED,
+    /** Yoimiya A1 Pyro DMG Bonus stacks. */
+    YOIMIYA_A1_PYRO_DMG_BONUS,
+    /** Yoimiya A4 team ATK bonus. */
+    YOIMIYA_A4_TEAM_ATK,
+    /** Yanfei A1 Pyro DMG Bonus after Scarlet Seal consumption. */
+    YANFEI_A1_PYRO_DMG_BONUS,
+    /** Yanfei Brilliance Charged Attack DMG bonus. */
+    YANFEI_BRILLIANCE_CHARGED_DMG_BONUS,
     /** 武器「千夜に浮かぶ夢」の味方元素熟知共有。 */
     A_THOUSAND_FLOATING_DREAMS_TEAM_EM,
     /** 武器「龍殺しの英傑譚」の交代先への攻撃力バフ。 */
