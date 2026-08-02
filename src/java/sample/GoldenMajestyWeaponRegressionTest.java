@@ -82,6 +82,10 @@ public final class GoldenMajestyWeaponRegressionTest {
                 assertClose(FIXED_ATTACK_PERCENT,
                         weapon.getStats().get(StatType.ATK_PERCENT),
                         "Golden Majesty ATK substat");
+                assertClose(0.15 + 0.05 * refinement,
+                        weapon.getShieldStrengthBonus(),
+                        "Golden Majesty inactive shield coefficient R"
+                                + refinement);
                 assertClose(0.03 + 0.01 * refinement,
                         weapon.getAttackBonusPerStack(),
                         "Golden Majesty stack coefficient R" + refinement);

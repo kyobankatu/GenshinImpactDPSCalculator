@@ -34,6 +34,7 @@ public abstract class GoldenMajestyWeapon extends Weapon
     private static final double STACK_COOLDOWN = 0.3;
 
     private final int refinement;
+    private final double shieldStrengthBonus;
     private final double attackBonusPerStack;
     private Character owner;
     private CombatSimulator simulator;
@@ -55,6 +56,7 @@ public abstract class GoldenMajestyWeapon extends Weapon
                     "Golden Majesty refinement must be between 1 and 5");
         }
         this.refinement = refinement;
+        this.shieldStrengthBonus = 0.15 + 0.05 * refinement;
         this.attackBonusPerStack = 0.03 + 0.01 * refinement;
         this.weaponType = weaponType;
         getStats().set(StatType.BASE_ATK, 608.0);
@@ -64,6 +66,11 @@ public abstract class GoldenMajestyWeapon extends Weapon
     /** Returns the selected refinement rank. */
     public final int getRefinement() {
         return refinement;
+    }
+
+    /** Returns the sourced but currently inactive Shield Strength coefficient. */
+    public final double getShieldStrengthBonus() {
+        return shieldStrengthBonus;
     }
 
     /** Returns the representable unshielded ATK bonus granted per stack. */
