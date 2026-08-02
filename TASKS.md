@@ -14014,3 +14014,51 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Deterministic Physical Proc Weapon Campaign
+
+Status: Active. Add three deterministic proc state machines while reusing the
+existing generated Physical action pipeline.
+
+Scope:
+
+- Add Kagotsurube Isshin, The Flute, and Debate Club with sourced metadata,
+  refinement behavior, exact trigger windows/CTs, and focused regressions.
+
+Out of scope for this pass:
+
+- Multi-target multiplication, visual projectile delay, healing, characters,
+  formulas, RL, generated docs, and unrelated proc weapons.
+
+### Phase 1: Add Three Deterministic Physical Proc Weapons
+
+Target files:
+
+- `src/java/model/weapon/KagotsurubeIsshin.java` (new)
+- `src/java/model/weapon/TheFlute.java` (new)
+- `src/java/model/weapon/DebateClub.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Isshin accepts positive Normal/Charged/Plunge hits, deals 180% ATK Physical,
+  grants 15% ATK for eight seconds, and uses an exact eight-second CT.
+- The Flute gains one 30-second Harmonic per positive Normal/Charged hit at exact
+  0.5-second CT and consumes five to deal refinement-aware 100-200% ATK Physical.
+- Debate Club opens a half-open 15-second window on Skill use and lets positive
+  Normal/Charged hits deal 60-120% ATK Physical at exact three-second CT.
+- Generated actions cannot recurse; all owner hits require active field; metadata,
+  R1-R5 defaults/validation apply where refinements exist.
+
+Test cases to add or update:
+
+- Normal: each proc, Isshin ATK window, five Harmonics, Debate Skill window.
+- Boundary: exact 8/0.5/30/3/15-second boundaries and R1/R5 multipliers.
+- Abnormal: wrong/zero/off-field/recursive hits and refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`

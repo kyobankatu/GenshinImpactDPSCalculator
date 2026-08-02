@@ -2329,3 +2329,13 @@ experiment record.
 - **Plan:** `TASKS.md` Energy-Aware Action Weapon Campaign
 - **Completion:** `8ff2ef7` adds both dynamic weapons and focused regressions;
   build/Javadoc/leak gates pass
+
+### B-097 — Deterministic physical proc weapon coverage
+
+- **Status:** active
+- **Scope:** Kagotsurube Isshin, The Flute, and Debate Club; RL excluded
+- **Value/risk:** three complete proc passives add bounded local state only and
+  reuse the verified generated Physical action pipeline
+- **Evidence boundary:** KQM TCL metadata, typed gates, 180% Isshin proc/window,
+  five-Harmonic Flute, and 15-second/three-second Debate policy
+- **Plan:** `TASKS.md` Deterministic Physical Proc Weapon Campaign
