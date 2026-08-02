@@ -113,6 +113,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_IneffaC3AndC5TalentLevels();
         testAccuracyPhaseF_IneffaC6ThundercloudFollowUp();
         testAccuracyPhaseF_IneffaNormalAttack3MultiHit();
+        testAccuracyPhaseF_IneffaBasicActionCoverage();
         testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost();
         testAccuracyPhaseF_PartySizeParticleEnergyMultipliers();
         testAccuracyPhaseF_ImpetuousWindsCooldownSnapshot();
@@ -4950,6 +4951,87 @@ public class ReactionRegressionTest {
                 "Ineffa combo should wrap to N1 after N4");
         assertClose(1.5, sim.getCurrentTime(), EPS,
                 "Wrapped Ineffa N1 should advance one additional action duration");
+    }
+
+    private static void testAccuracyPhaseF_IneffaBasicActionCoverage() {
+        RecordingDamageWeapon weapon = new RecordingDamageWeapon("Ineffa ");
+        model.character.Ineffa ineffa = new model.character.Ineffa(
+                weapon, blankArtifact());
+        CombatSimulator sim = simulatorWithExistingCharacter(ineffa);
+        sim.performAction(
+                CharacterId.INEFFA,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        sim.performAction(
+                CharacterId.INEFFA,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+
+        double chargeStart = sim.getCurrentTime();
+        sim.performAction(
+                CharacterId.INEFFA,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        AttackAction charged = weapon.actions.stream()
+                .filter(action -> action.getName().equals("Ineffa Charged Attack"))
+                .findFirst()
+                .orElseThrow();
+        assertClose(1.7440, charged.getDamagePercent(), EPS,
+                "Ineffa Charged should use its sourced level-9 multiplier");
+        assertPhysicalChargedCategory(charged, "Ineffa Charged");
+        assertClose(chargeStart + 0.8, sim.getCurrentTime(), EPS,
+                "Ineffa Charged should use the polearm duration approximation");
+        sim.performAction(
+                CharacterId.INEFFA,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        assertEquals("Ineffa N1", weapon.actions.get(weapon.actions.size() - 1).getName(),
+                "Ineffa Charged should reset the Normal combo");
+
+        sim.performAction(
+                CharacterId.INEFFA,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        double plungeStart = sim.getCurrentTime();
+        sim.performAction(
+                CharacterId.INEFFA,
+                CharacterActionRequest.of(CharacterActionKey.PLUNGE));
+        AttackAction plunge = weapon.actions.stream()
+                .filter(action -> action.getName().equals("Ineffa High Plunge"))
+                .findFirst()
+                .orElseThrow();
+        assertClose(2.9336, plunge.getDamagePercent(), EPS,
+                "Ineffa Plunge should use its sourced level-9 multiplier");
+        assertEquals(Element.PHYSICAL, plunge.getElement(),
+                "Ineffa Plunge should deal Physical damage");
+        assertEquals(ActionType.PLUNGE, plunge.getActionType(),
+                "Ineffa Plunge should retain typed action metadata");
+        assertEquals(StatType.PLUNGING_ATTACK_DMG_BONUS, plunge.getBonusStat(),
+                "Ineffa Plunge should use Plunging DMG Bonus");
+        assertEquals(ICDType.None, plunge.getICDType(),
+                "Ineffa high Plunge should have no ICD");
+        assertEquals(ICDTag.None, plunge.getICDTag(),
+                "Ineffa high Plunge should not enter an elemental ICD group");
+        assertClose(1.0, plunge.getGaugeUnits(), EPS,
+                "Ineffa high Plunge should retain 1U metadata");
+        assertClose(plungeStart + 1.0, sim.getCurrentTime(), EPS,
+                "Ineffa high Plunge should use the one-second approximation");
+        sim.performAction(
+                CharacterId.INEFFA,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        assertEquals("Ineffa N1", weapon.actions.get(weapon.actions.size() - 1).getName(),
+                "Ineffa Plunge should reset the Normal combo");
+
+        int actionCount = weapon.actions.size();
+        double rejectedTime = sim.getCurrentTime();
+        boolean rejected = false;
+        try {
+            sim.performAction(
+                    CharacterId.INEFFA,
+                    CharacterActionRequest.of(CharacterActionKey.DASH));
+        } catch (IllegalArgumentException expected) {
+            rejected = true;
+        }
+        assertTrue(rejected, "Ineffa should reject unsupported Dash input");
+        assertEquals(actionCount, weapon.actions.size(),
+                "Rejected Ineffa input should not deal damage");
+        assertClose(rejectedTime, sim.getCurrentTime(), EPS,
+                "Rejected Ineffa input should not advance simulation time");
     }
 
     private static void testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost() {

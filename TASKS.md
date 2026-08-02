@@ -12887,7 +12887,7 @@ Completion evidence:
   every non-Normal input; unsupported Dash is rejected before time or damage.
 - Reaction regression, build, Javadoc, party catalog, and preflight pass.
 
-### Phase 2: Ineffa Charged and High Plunge - Pending
+### Phase 2: Ineffa Charged and High Plunge - Done
 
 Target files:
 
@@ -12904,6 +12904,12 @@ Acceptance criteria and tests:
   explicitly without mutating simulation time or damage state.
 - Regressions cover both metadata paths, isolated Physical/action bonuses,
   combo interruption, unsupported input, and CSV/runtime alignment.
+
+Completion evidence:
+
+- Ineffa now dispatches sourced Physical Charged and high-Plunge actions with
+  independent action categories and resets its combo on non-Normal input.
+- Reaction regression, build, Javadoc, party catalog, and preflight pass.
 
 ### Phase 3: Flins High Plunge Form Boundary - Pending
 

@@ -4,6 +4,8 @@ Ineffa,NORMAL,N2,9,0.629,0
 Ineffa,NORMAL,N3 Hit 1,9,0.418,0
 Ineffa,NORMAL,N3 Hit 2,9,0.418,0
 Ineffa,NORMAL,N4,9,1.030,0
+Ineffa,CHARGE,Charged Attack,9,1.7440,0
+Ineffa,PLUNGE,Plunge High,9,2.9336,0
 Ineffa,SKILL,Skill DMG,9,1.4688,0
 Ineffa,SKILL,Shield Ratio,9,3.760128,0
 Ineffa,SKILL,Shield Flat,9,2819.7734,0

@@ -155,6 +155,8 @@ public class Ineffa extends Character
      *   <li>{@link CharacterActionKey#SKILL} — casts the Enhanced Cleaning Module.</li>
      *   <li>{@link CharacterActionKey#BURST} — casts Supreme Instruction.</li>
      *   <li>{@link CharacterActionKey#NORMAL} — advances the normal attack combo.</li>
+     *   <li>{@link CharacterActionKey#CHARGE} — casts one Charged Attack.</li>
+     *   <li>{@link CharacterActionKey#PLUNGE} — casts one high Plunging Attack.</li>
      * </ul>
      *
      * @param request typed action request
@@ -163,6 +165,9 @@ public class Ineffa extends Character
     @Override
     public void onAction(CharacterActionRequest request, CombatSimulator sim) {
         initializeForSimulator(sim);
+        if (request.getKey() != CharacterActionKey.NORMAL) {
+            normalAttackStep = 0;
+        }
         switch (request.getKey()) {
             case SKILL:
                 markSkillUsed(sim.getCurrentTime(), sim.getApplicableBuffs(this));
@@ -175,8 +180,15 @@ public class Ineffa extends Character
             case NORMAL:
                 normalAttack(sim);
                 break;
-            default:
+            case CHARGE:
+                chargedAttack(sim);
                 break;
+            case PLUNGE:
+                plungingAttack(sim);
+                break;
+            default:
+                throw new IllegalArgumentException(
+                        "Unsupported action for Ineffa: " + request.getKey());
         }
     }
 
@@ -247,6 +259,42 @@ public class Ineffa extends Character
         if (normalAttackStep >= 4) {
             normalAttackStep = 0;
         }
+    }
+
+    /**
+     * Executes Ineffa's level-9 Physical Charged Attack.
+     *
+     * @param sim active simulator
+     */
+    private void chargedAttack(CombatSimulator sim) {
+        AttackAction charged = new AttackAction(
+                "Ineffa Charged Attack",
+                getTalentValue("Charged Attack", 1.7440),
+                Element.PHYSICAL,
+                StatType.BASE_ATK,
+                StatType.CHARGED_ATTACK_DMG_BONUS,
+                0.8,
+                ActionType.CHARGE);
+        charged.setICD(ICDType.Standard, ICDTag.ChargedAttack, 1.0);
+        sim.performAction(characterId, charged);
+    }
+
+    /**
+     * Executes Ineffa's level-9 high Physical Plunging Attack.
+     *
+     * @param sim active simulator
+     */
+    private void plungingAttack(CombatSimulator sim) {
+        AttackAction plunge = new AttackAction(
+                "Ineffa High Plunge",
+                getTalentValue("Plunge High", 2.9336),
+                Element.PHYSICAL,
+                StatType.BASE_ATK,
+                StatType.PLUNGING_ATTACK_DMG_BONUS,
+                1.0,
+                ActionType.PLUNGE);
+        plunge.setICD(ICDType.None, ICDTag.None, 1.0);
+        sim.performAction(characterId, plunge);
     }
 
     /**
