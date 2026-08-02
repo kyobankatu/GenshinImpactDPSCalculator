@@ -2971,7 +2971,7 @@ experiment record.
 
 ### B-138 — Lisa C6 Pulsating Witch switch-in lifecycle
 
-- **Status:** in-progress
+- **Status:** complete
 - **Source:** delegated supported-character constellation audit
 - **Scope/risk:** add typed character switch-in dispatch and apply three
   Conductive stacks with one five-second cooldown and refreshed 15-second
@@ -2984,6 +2984,10 @@ experiment record.
   cooldown, existing stack refresh, Hold consumption, and snapshot restore
   need explicit regressions
 - **Plan:** two-phase `TASKS.md` Lisa C6 Switch-In Lifecycle
+- **Completion:** typed incoming switch dispatch, three independent Conductive
+  markers, five-second C6 cooldown, exact expiry/reactivation boundaries, Hold
+  consumption, and snapshot rollback pass focused and full gates; two
+  `RaidenParty` runs remain 1,275,070 damage / 60,718 DPS
 
 ### B-139 — Sucrose C4 Alchemania cooldown reduction
 

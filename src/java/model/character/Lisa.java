@@ -1,14 +1,15 @@
 package model.character;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import mechanics.buff.Buff;
+import mechanics.buff.BuffId;
+import mechanics.buff.SimpleBuff;
 import mechanics.data.TalentDataManager;
 import mechanics.data.TalentDataSource;
 import mechanics.energy.ParticleType;
 import model.entity.ArtifactSet;
 import model.entity.BurstTriggeredArtifactEffect;
 import model.entity.Character;
+import model.entity.SwitchAwareCharacter;
 import model.entity.Weapon;
 import model.stats.StatsContainer;
 import model.type.ActionType;
@@ -28,15 +29,15 @@ import simulation.event.SimpleTimerEvent;
  * <p>The repository's single Skill key selects Hold Violet Arc. Charged hits
  * add independently expiring Conductive stacks that the Hold consumes. C1,
  * C3, and C5 are represented. Press Skill, enemy DEF state for A4, incoming
- * damage for C2, multi-target C4, and switch-in C6 remain outside this slice.
+ * damage for C2 and multi-target C4 remain outside this slice. C6 applies
+ * three typed Conductive markers on eligible standard switch-in.
  */
-public class Lisa extends Character {
+public class Lisa extends Character implements SwitchAwareCharacter {
     private static final double CONDUCTIVE_DURATION = 15.0;
     private static final int MAX_CONDUCTIVE_STACKS = 3;
     private static final int BURST_DISCHARGE_COUNT = 29;
     private static final double BURST_DISCHARGE_INTERVAL = 0.5;
 
-    private final List<Double> conductiveExpirations = new ArrayList<>();
     private int normalAttackStep;
 
     /**
@@ -92,6 +93,46 @@ public class Lisa extends Character {
     @Override
     public void applyPassive(StatsContainer stats) {
         // A1 is modeled as Conductive application on Charged hits.
+    }
+
+    /**
+     * Lisa has no switch-out effect; this method satisfies the shared switch
+     * capability used by her C6 switch-in behavior.
+     *
+     * @param sim active simulator whose party still has Lisa active
+     */
+    @Override
+    public void onSwitchOut(CombatSimulator sim) {
+    }
+
+    /**
+     * Applies C6 Pulsating Witch on an eligible in-combat standard switch.
+     *
+     * <p>The single-target simulator stores Conductive on Lisa as three typed
+     * markers. Replacing them together models the sourced simultaneous stack
+     * application and refreshes all expiries to 15 seconds. A typed five-second
+     * marker preserves the in-combat cooldown across simulator snapshots.
+     *
+     * @param sim active simulator whose party already has Lisa active
+     */
+    @Override
+    public void onSwitchIn(CombatSimulator sim) {
+        double currentTime = sim.getCurrentTime();
+        if (constellation < 6
+                || sim.getEnemy() == null
+                || hasActiveMarker(
+                        BuffId.LISA_C6_PULSATING_WITCH_COOLDOWN,
+                        currentTime)) {
+            return;
+        }
+
+        replaceConductiveStacks(currentTime, MAX_CONDUCTIVE_STACKS);
+        removeBuff(BuffId.LISA_C6_PULSATING_WITCH_COOLDOWN);
+        addBuff(createMarker(
+                "Pulsating Witch Cooldown",
+                BuffId.LISA_C6_PULSATING_WITCH_COOLDOWN,
+                5.0,
+                currentTime));
     }
 
     /**
@@ -259,20 +300,82 @@ public class Lisa extends Character {
 
     private void addConductiveStack(double currentTime) {
         pruneConductiveStacks(currentTime);
-        if (conductiveExpirations.size() >= MAX_CONDUCTIVE_STACKS) {
-            conductiveExpirations.remove(0);
+        int activeStacks = countActiveConductiveStacks(currentTime);
+        if (activeStacks >= MAX_CONDUCTIVE_STACKS) {
+            Buff oldestStack = null;
+            for (Buff buff : getActiveBuffs()) {
+                if (buff.getId() == BuffId.LISA_CONDUCTIVE_STACK
+                        && !buff.isExpired(currentTime)) {
+                    oldestStack = buff;
+                    break;
+                }
+            }
+            if (oldestStack != null) {
+                getActiveBuffs().remove(oldestStack);
+            }
         }
-        conductiveExpirations.add(currentTime + CONDUCTIVE_DURATION);
+        addBuff(createMarker(
+                "Conductive Stack",
+                BuffId.LISA_CONDUCTIVE_STACK,
+                CONDUCTIVE_DURATION,
+                currentTime));
     }
 
     private int consumeConductiveStacks(double currentTime) {
         pruneConductiveStacks(currentTime);
-        int stacks = conductiveExpirations.size();
-        conductiveExpirations.clear();
+        int stacks = countActiveConductiveStacks(currentTime);
+        removeBuff(BuffId.LISA_CONDUCTIVE_STACK);
         return stacks;
     }
 
     private void pruneConductiveStacks(double currentTime) {
-        conductiveExpirations.removeIf(expiration -> currentTime >= expiration);
+        getActiveBuffs().removeIf(buff ->
+                buff.getId() == BuffId.LISA_CONDUCTIVE_STACK
+                        && buff.isExpired(currentTime));
+    }
+
+    private int countActiveConductiveStacks(double currentTime) {
+        int count = 0;
+        for (Buff buff : getActiveBuffs()) {
+            if (buff.getId() == BuffId.LISA_CONDUCTIVE_STACK
+                    && !buff.isExpired(currentTime)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private void replaceConductiveStacks(double currentTime, int count) {
+        removeBuff(BuffId.LISA_CONDUCTIVE_STACK);
+        for (int i = 0; i < count; i++) {
+            addBuff(createMarker(
+                    "Conductive Stack",
+                    BuffId.LISA_CONDUCTIVE_STACK,
+                    CONDUCTIVE_DURATION,
+                    currentTime));
+        }
+    }
+
+    private boolean hasActiveMarker(BuffId id, double currentTime) {
+        for (Buff buff : getActiveBuffs()) {
+            if (buff.getId() == id && !buff.isExpired(currentTime)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Buff createMarker(
+            String markerName,
+            BuffId id,
+            double duration,
+            double currentTime) {
+        return new SimpleBuff(
+                markerName,
+                id,
+                duration,
+                currentTime,
+                stats -> {
+                }).sourcedBy(characterId);
     }
 }

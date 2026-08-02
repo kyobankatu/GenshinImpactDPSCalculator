@@ -192,6 +192,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_KaeyaCharacterContract();
         testAccuracyPhaseF_AmberCharacterContract();
         testAccuracyPhaseF_LisaCharacterContract();
+        testAccuracyPhaseF_LisaC6PulsatingWitchLifecycle();
         testAccuracyPhaseF_DendroResonanceReactionEmContract();
         testAccuracyPhaseF_CryoResonanceConditionalCritContract();
         testAccuracyPhaseF_ElectroResonanceTypedTriggerContract();
@@ -7348,6 +7349,242 @@ public class ReactionRegressionTest {
         burstCooldownLisa.restoreCurrentEnergy(80.0);
         assertTrue(burstCooldownLisa.canBurst(20.0),
                 "Lightning Rose should return at twenty seconds with sufficient Energy");
+    }
+
+    private static void testAccuracyPhaseF_LisaC6PulsatingWitchLifecycle() {
+        RecordingDamageWeapon holdWeapon =
+                new RecordingDamageWeapon("Violet Arc Hold");
+        model.character.Lisa c6Lisa = new model.character.Lisa(
+                holdWeapon, blankArtifact(), lisaTalentData(6));
+        TestCharacter ally = testCharacter(Element.HYDRO, CharacterId.XINGQIU);
+        CombatSimulator c6Sim = simulatorWithExistingCharacter(c6Lisa);
+        c6Sim.addCharacter(ally);
+        assertEquals(0, activeBuffCount(
+                        c6Lisa, BuffId.LISA_CONDUCTIVE_STACK, 0.0),
+                "Initial active Lisa should not fabricate C6 Conductive");
+        c6Sim.switchCharacter(CharacterId.LISA);
+        assertClose(0.0, c6Sim.getCurrentTime(), EPS,
+                "Same-active C6 Lisa switch should be a complete no-op");
+        c6Sim.setActiveCharacter(CharacterId.XINGQIU);
+        assertEquals(0, activeBuffCount(
+                        c6Lisa, BuffId.LISA_CONDUCTIVE_STACK, 0.0),
+                "Direct Lisa field changes should not trigger C6");
+
+        c6Sim.switchCharacter(CharacterId.LISA);
+        List<Buff> firstStacks = activeBuffs(
+                c6Lisa, BuffId.LISA_CONDUCTIVE_STACK, 0.0);
+        assertEquals(3, firstStacks.size(),
+                "C6 Lisa standard switch-in should apply three Conductive stacks");
+        for (Buff stack : firstStacks) {
+            assertClose(0.0, stack.getStartTime(), EPS,
+                    "C6 Conductive should start before switch delay");
+            assertClose(15.0, stack.getExpirationTime(), EPS,
+                    "C6 Conductive should share one 15-second expiry");
+            assertEquals(CharacterId.LISA, stack.getSourceCharacterId(),
+                    "C6 Conductive should retain Lisa ownership");
+        }
+        Buff firstCooldown = activeBuffs(
+                c6Lisa,
+                BuffId.LISA_C6_PULSATING_WITCH_COOLDOWN,
+                0.0).get(0);
+        assertClose(5.0, firstCooldown.getExpirationTime(), EPS,
+                "C6 Lisa should start one five-second in-combat cooldown");
+        c6Sim.performAction(
+                CharacterId.LISA,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        assertEquals("Violet Arc Hold (3 Conductive)",
+                holdWeapon.actions.get(0).getName(),
+                "C6 Conductive should feed the existing three-stack Hold path");
+        assertClose(9.7400, holdWeapon.actions.get(0).getDamagePercent(), EPS,
+                "C6 Lisa should use the inherited C5 Hold multiplier");
+        assertEquals(0, activeBuffCount(
+                        c6Lisa,
+                        BuffId.LISA_CONDUCTIVE_STACK,
+                        c6Sim.getCurrentTime()),
+                "Lisa Hold should consume all typed Conductive markers");
+
+        model.character.Lisa c5Lisa = new model.character.Lisa(
+                new TestWeapon(), blankArtifact(), lisaTalentData(5));
+        CombatSimulator c5Sim = simulatorWithExistingCharacter(c5Lisa);
+        c5Sim.addCharacter(testCharacter(Element.HYDRO, CharacterId.XINGQIU));
+        c5Sim.setActiveCharacter(CharacterId.XINGQIU);
+        c5Sim.switchCharacter(CharacterId.LISA);
+        assertEquals(0, activeBuffCount(
+                        c5Lisa, BuffId.LISA_CONDUCTIVE_STACK, 0.0),
+                "C5 Lisa should not apply C6 Conductive");
+        assertEquals(0, activeBuffCount(
+                        c5Lisa,
+                        BuffId.LISA_C6_PULSATING_WITCH_COOLDOWN,
+                        0.0),
+                "C5 Lisa should not create a C6 cooldown marker");
+
+        model.character.Lisa noEnemyLisa = new model.character.Lisa(
+                new TestWeapon(), blankArtifact(), lisaTalentData(6));
+        CombatSimulator noEnemySim =
+                simulatorWithExistingCharacter(noEnemyLisa);
+        noEnemySim.addCharacter(
+                testCharacter(Element.HYDRO, CharacterId.XINGQIU));
+        noEnemySim.setEnemy(null);
+        noEnemySim.setActiveCharacter(CharacterId.XINGQIU);
+        noEnemySim.switchCharacter(CharacterId.LISA);
+        assertEquals(0, activeBuffCount(
+                        noEnemyLisa, BuffId.LISA_CONDUCTIVE_STACK, 0.0),
+                "C6 Lisa should not apply Conductive without a combat target");
+        assertEquals(0, activeBuffCount(
+                        noEnemyLisa,
+                        BuffId.LISA_C6_PULSATING_WITCH_COOLDOWN,
+                        0.0),
+                "Out-of-combat C6 should not start its cooldown marker");
+
+        model.character.Lisa refreshLisa = new model.character.Lisa(
+                new TestWeapon(), blankArtifact(), lisaTalentData(6));
+        CombatSimulator refreshSim = simulatorWithExistingCharacter(refreshLisa);
+        refreshSim.addCharacter(
+                testCharacter(Element.HYDRO, CharacterId.XINGQIU));
+        refreshSim.performAction(
+                CharacterId.LISA,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        refreshSim.advanceTime(1.0);
+        refreshSim.performAction(
+                CharacterId.LISA,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        double refreshTime = refreshSim.getCurrentTime();
+        refreshSim.setActiveCharacter(CharacterId.XINGQIU);
+        refreshSim.switchCharacter(CharacterId.LISA);
+        List<Buff> refreshedStacks = activeBuffs(
+                refreshLisa, BuffId.LISA_CONDUCTIVE_STACK, refreshTime);
+        assertEquals(3, refreshedStacks.size(),
+                "C6 switch-in should replace existing stacks with exactly three");
+        for (Buff stack : refreshedStacks) {
+            assertClose(refreshTime, stack.getStartTime(), EPS,
+                    "C6 should align every refreshed Conductive start");
+            assertClose(refreshTime + 15.0, stack.getExpirationTime(), EPS,
+                    "C6 should align every refreshed Conductive expiry");
+        }
+
+        model.character.Lisa beforeCooldownLisa = new model.character.Lisa(
+                new TestWeapon(), blankArtifact(), lisaTalentData(6));
+        CombatSimulator beforeCooldownSim =
+                simulatorWithExistingCharacter(beforeCooldownLisa);
+        beforeCooldownSim.addCharacter(
+                testCharacter(Element.HYDRO, CharacterId.XINGQIU));
+        beforeCooldownSim.setActiveCharacter(CharacterId.XINGQIU);
+        beforeCooldownSim.switchCharacter(CharacterId.LISA);
+        beforeCooldownLisa.removeBuff(BuffId.LISA_CONDUCTIVE_STACK);
+        beforeCooldownSim.setActiveCharacter(CharacterId.XINGQIU);
+        beforeCooldownSim.advanceTime(4.999 - beforeCooldownSim.getCurrentTime());
+        beforeCooldownSim.switchCharacter(CharacterId.LISA);
+        assertEquals(0, activeBuffCount(
+                        beforeCooldownLisa,
+                        BuffId.LISA_CONDUCTIVE_STACK,
+                        beforeCooldownSim.getCurrentTime()),
+                "C6 Lisa should remain gated at 4.999 seconds");
+
+        model.character.Lisa exactCooldownLisa = new model.character.Lisa(
+                new TestWeapon(), blankArtifact(), lisaTalentData(6));
+        CombatSimulator exactCooldownSim =
+                simulatorWithExistingCharacter(exactCooldownLisa);
+        exactCooldownSim.addCharacter(
+                testCharacter(Element.HYDRO, CharacterId.XINGQIU));
+        exactCooldownSim.setActiveCharacter(CharacterId.XINGQIU);
+        exactCooldownSim.switchCharacter(CharacterId.LISA);
+        exactCooldownLisa.removeBuff(BuffId.LISA_CONDUCTIVE_STACK);
+        exactCooldownSim.setActiveCharacter(CharacterId.XINGQIU);
+        exactCooldownSim.advanceTime(5.0 - exactCooldownSim.getCurrentTime());
+        exactCooldownSim.switchCharacter(CharacterId.LISA);
+        List<Buff> exactStacks = activeBuffs(
+                exactCooldownLisa,
+                BuffId.LISA_CONDUCTIVE_STACK,
+                exactCooldownSim.getCurrentTime());
+        assertEquals(3, exactStacks.size(),
+                "C6 Lisa should reactivate at exactly five seconds");
+        assertClose(20.0, exactStacks.get(0).getExpirationTime(), EPS,
+                "Exact-boundary C6 should refresh Conductive from five seconds");
+
+        model.character.Lisa expiryLisa = new model.character.Lisa(
+                new TestWeapon(), blankArtifact(), lisaTalentData(6));
+        CombatSimulator expirySim = simulatorWithExistingCharacter(expiryLisa);
+        expirySim.addCharacter(
+                testCharacter(Element.HYDRO, CharacterId.XINGQIU));
+        expirySim.setActiveCharacter(CharacterId.XINGQIU);
+        expirySim.switchCharacter(CharacterId.LISA);
+        expirySim.advanceTime(14.999 - expirySim.getCurrentTime());
+        assertEquals(3, activeBuffCount(
+                        expiryLisa,
+                        BuffId.LISA_CONDUCTIVE_STACK,
+                        expirySim.getCurrentTime()),
+                "C6 Conductive should remain active at 14.999 seconds");
+        expirySim.advanceTime(0.001);
+        assertEquals(0, activeBuffCount(
+                        expiryLisa,
+                        BuffId.LISA_CONDUCTIVE_STACK,
+                        expirySim.getCurrentTime()),
+                "C6 Conductive should expire at exactly fifteen seconds");
+
+        model.character.Lisa snapshotLisa = new model.character.Lisa(
+                new TestWeapon(), blankArtifact(), lisaTalentData(6));
+        CombatSimulator snapshotSim =
+                simulatorWithExistingCharacter(snapshotLisa);
+        snapshotSim.addCharacter(
+                testCharacter(Element.HYDRO, CharacterId.XINGQIU));
+        snapshotSim.setActiveCharacter(CharacterId.XINGQIU);
+        snapshotSim.switchCharacter(CharacterId.LISA);
+        SimulatorSnapshot c6Snapshot = snapshotSim.saveSnapshot();
+        snapshotLisa.removeBuff(BuffId.LISA_CONDUCTIVE_STACK);
+        snapshotLisa.removeBuff(BuffId.LISA_C6_PULSATING_WITCH_COOLDOWN);
+        snapshotSim.restoreSnapshot(c6Snapshot);
+        assertEquals(3, activeBuffCount(
+                        snapshotLisa,
+                        BuffId.LISA_CONDUCTIVE_STACK,
+                        snapshotSim.getCurrentTime()),
+                "Snapshot restore should recover C6 Conductive membership");
+        assertEquals(1, activeBuffCount(
+                        snapshotLisa,
+                        BuffId.LISA_C6_PULSATING_WITCH_COOLDOWN,
+                        snapshotSim.getCurrentTime()),
+                "Snapshot restore should recover the C6 cooldown marker");
+        assertEquals(CharacterId.LISA,
+                snapshotSim.getActiveCharacter().getCharacterId(),
+                "Snapshot active restore should not invoke C6 a second time");
+
+        model.character.Lisa preProcLisa = new model.character.Lisa(
+                new TestWeapon(), blankArtifact(), lisaTalentData(6));
+        CombatSimulator preProcSim = simulatorWithExistingCharacter(preProcLisa);
+        preProcSim.addCharacter(
+                testCharacter(Element.HYDRO, CharacterId.XINGQIU));
+        preProcSim.setActiveCharacter(CharacterId.XINGQIU);
+        SimulatorSnapshot preProcSnapshot = preProcSim.saveSnapshot();
+        preProcSim.switchCharacter(CharacterId.LISA);
+        preProcSim.restoreSnapshot(preProcSnapshot);
+        assertEquals(0, activeBuffCount(
+                        preProcLisa,
+                        BuffId.LISA_CONDUCTIVE_STACK,
+                        preProcSim.getCurrentTime()),
+                "Rollback before C6 should remove divergent Conductive markers");
+        assertEquals(0, activeBuffCount(
+                        preProcLisa,
+                        BuffId.LISA_C6_PULSATING_WITCH_COOLDOWN,
+                        preProcSim.getCurrentTime()),
+                "Rollback before C6 should remove its divergent cooldown marker");
+        assertEquals(CharacterId.XINGQIU,
+                preProcSim.getActiveCharacter().getCharacterId(),
+                "Rollback should restore the pre-C6 active character directly");
+    }
+
+    private static int activeBuffCount(
+            Character character,
+            BuffId id,
+            double currentTime) {
+        return activeBuffs(character, id, currentTime).size();
+    }
+
+    private static List<Buff> activeBuffs(
+            Character character,
+            BuffId id,
+            double currentTime) {
+        return character.getActiveBuffs().stream()
+                .filter(buff -> buff.getId() == id && !buff.isExpired(currentTime))
+                .collect(Collectors.toList());
     }
 
     private static void testAccuracyPhaseF_LegacyWeaponRefinements() {

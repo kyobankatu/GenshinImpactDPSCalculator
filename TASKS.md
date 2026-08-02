@@ -13765,9 +13765,9 @@ Evidence:
 
 ## Implementation Order: Lisa C6 Switch-In Lifecycle
 
-Status: In progress. Implement B-138 through a narrow shared switch capability
-followed by Lisa-owned typed state; retain the stationary single-target model
-and exclude co-op, out-of-combat party setup, RL, and generated docs.
+Status: Complete. B-138 uses a narrow shared switch capability followed by
+Lisa-owned typed state; the stationary single-target model remains intact and
+co-op, out-of-combat party setup, RL, and generated docs remain excluded.
 
 Evidence:
 
@@ -13821,7 +13821,7 @@ Evidence:
 - Two `RaidenParty` runs remain 1,275,070 damage / 60,718 DPS.
 - Reaction regression, build, Javadoc, sample simulation, and preflight pass.
 
-### Phase 2: Typed Conductive and Pulsating Witch
+### Phase 2: Typed Conductive and Pulsating Witch - Done
 
 Target files:
 
@@ -13853,6 +13853,20 @@ Verification:
 - `./gradlew javadoc`
 - `./gradlew RaidenParty`
 - `python scripts/preflight.py`
+
+Evidence:
+
+- Charged attacks now create independent typed, Lisa-owned Conductive markers;
+  cap replacement, Hold consumption, and half-open 15-second expiry retain the
+  prior behavior while becoming snapshot-safe.
+- Eligible C6 switches replace current stacks with exactly three aligned
+  markers and one typed five-second cooldown. C5, missing enemy, initial,
+  direct, same-target, and 4.999-second paths remain inert; exact 5.000-second
+  reactivation and 14.999/15-second stack boundaries pass.
+- Pre- and post-proc snapshots restore active membership, marker timing, and
+  cooldown without replaying character switch callbacks.
+- Two `RaidenParty` runs remain 1,275,070 damage / 60,718 DPS. Reaction
+  regression, build, Javadoc, sample simulation, and preflight pass.
 
 ### Phase 2: Skill-Activated Damage Sets - Done
 
