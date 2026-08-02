@@ -129,6 +129,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_AdditionalClaymoreHitStackWeapons();
         testAccuracyPhaseF_DirectPhysicalProcWeapons();
         testAccuracyPhaseF_ActionUseWindowWeapons();
+        testAccuracyPhaseF_AdditionalSkillUseStatWeapons();
         testAccuracyPhaseF_SamuraiConductWeapons();
         testAccuracyPhaseF_KaeyaCharacterContract();
         testAccuracyPhaseF_AmberCharacterContract();
@@ -7427,6 +7428,167 @@ public class ReactionRegressionTest {
         }
         assertTrue(highSwordRefinementRejected,
                 "Skyrider Sword should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_AdditionalSkillUseStatWeapons() {
+        model.weapon.FluteOfEzpitzal flute = new model.weapon.FluteOfEzpitzal();
+        assertEquals("Flute of Ezpitzal", flute.getName(),
+                "Flute of Ezpitzal display name");
+        assertClose(454.0, flute.getBaseAtk(), EPS,
+                "Flute of Ezpitzal base ATK");
+        assertClose(0.690, flute.getStats().get(StatType.DEF_PERCENT), EPS,
+                "Flute of Ezpitzal DEF substat");
+        assertEquals(model.type.WeaponType.SWORD, flute.getWeaponType(),
+                "Flute of Ezpitzal weapon type");
+        assertEquals(5, flute.getRefinement(),
+                "Flute of Ezpitzal default refinement");
+
+        TestCharacter fluteOwner = testCharacter(Element.GEO);
+        fluteOwner.setWeapon(flute);
+        CombatSimulator fluteSim = simulatorWith(fluteOwner);
+        flute.onAction(fluteOwner,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL), fluteSim);
+        assertClose(0.690,
+                resolvedStat(fluteSim, fluteOwner, StatType.DEF_PERCENT), EPS,
+                "Normal use should not activate Flute of Ezpitzal");
+        flute.onAction(fluteOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL), fluteSim);
+        assertClose(1.010,
+                resolvedStat(fluteSim, fluteOwner, StatType.DEF_PERCENT), EPS,
+                "R5 Flute of Ezpitzal should add 32% DEF");
+        assertClose(1.010,
+                resolvedStat(fluteSim, fluteOwner, StatType.DEF_PERCENT), EPS,
+                "Repeated Flute of Ezpitzal reads should not accumulate");
+        fluteSim.advanceTime(10.0);
+        flute.onAction(fluteOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL), fluteSim);
+        fluteSim.advanceTime(14.999);
+        assertClose(1.010,
+                resolvedStat(fluteSim, fluteOwner, StatType.DEF_PERCENT), EPS,
+                "Refreshed Flute of Ezpitzal should remain active before expiry");
+        fluteSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.690,
+                resolvedStat(fluteSim, fluteOwner, StatType.DEF_PERCENT), EPS,
+                "Flute of Ezpitzal should expire exactly at fifteen seconds");
+
+        model.weapon.FluteOfEzpitzal r1Flute =
+                new model.weapon.FluteOfEzpitzal(1);
+        TestCharacter r1FluteOwner = testCharacter(Element.GEO);
+        r1FluteOwner.setWeapon(r1Flute);
+        CombatSimulator r1FluteSim = simulatorWith(r1FluteOwner);
+        r1Flute.onAction(r1FluteOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL), r1FluteSim);
+        assertClose(0.850,
+                resolvedStat(r1FluteSim, r1FluteOwner, StatType.DEF_PERCENT), EPS,
+                "R1 Flute of Ezpitzal DEF window");
+
+        model.weapon.FootprintOfTheRainbow footprint =
+                new model.weapon.FootprintOfTheRainbow();
+        assertEquals("Footprint of the Rainbow", footprint.getName(),
+                "Footprint of the Rainbow display name");
+        assertClose(510.0, footprint.getBaseAtk(), EPS,
+                "Footprint of the Rainbow base ATK");
+        assertClose(0.517,
+                footprint.getStats().get(StatType.DEF_PERCENT), EPS,
+                "Footprint of the Rainbow DEF substat");
+        assertEquals(model.type.WeaponType.POLEARM, footprint.getWeaponType(),
+                "Footprint of the Rainbow weapon type");
+        assertEquals(5, footprint.getRefinement(),
+                "Footprint of the Rainbow default refinement");
+
+        TestCharacter footprintOwner = testCharacter(Element.GEO);
+        footprintOwner.setWeapon(footprint);
+        CombatSimulator footprintSim = simulatorWith(footprintOwner);
+        footprint.onAction(footprintOwner,
+                CharacterActionRequest.of(CharacterActionKey.BURST), footprintSim);
+        assertClose(0.517,
+                resolvedStat(footprintSim, footprintOwner, StatType.DEF_PERCENT), EPS,
+                "Burst use should not activate Footprint of the Rainbow");
+        footprint.onAction(footprintOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL), footprintSim);
+        assertClose(0.837,
+                resolvedStat(footprintSim, footprintOwner, StatType.DEF_PERCENT), EPS,
+                "R5 Footprint of the Rainbow should add 32% DEF");
+        footprintSim.advanceTime(15.0 + 1e-9);
+        assertClose(0.517,
+                resolvedStat(footprintSim, footprintOwner, StatType.DEF_PERCENT), EPS,
+                "Footprint of the Rainbow should expire at fifteen seconds");
+
+        model.weapon.FootprintOfTheRainbow r1Footprint =
+                new model.weapon.FootprintOfTheRainbow(1);
+        TestCharacter r1FootprintOwner = testCharacter(Element.GEO);
+        r1FootprintOwner.setWeapon(r1Footprint);
+        CombatSimulator r1FootprintSim = simulatorWith(r1FootprintOwner);
+        r1Footprint.onAction(r1FootprintOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL), r1FootprintSim);
+        assertClose(0.677,
+                resolvedStat(r1FootprintSim, r1FootprintOwner,
+                        StatType.DEF_PERCENT), EPS,
+                "R1 Footprint of the Rainbow DEF window");
+
+        model.weapon.TamayurateiNoOhanashi tamayuratei =
+                new model.weapon.TamayurateiNoOhanashi();
+        assertEquals("Tamayuratei no Ohanashi", tamayuratei.getName(),
+                "Tamayuratei no Ohanashi display name");
+        assertClose(565.0, tamayuratei.getBaseAtk(), EPS,
+                "Tamayuratei no Ohanashi base ATK");
+        assertClose(0.306,
+                tamayuratei.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "Tamayuratei no Ohanashi Energy Recharge");
+        assertEquals(model.type.WeaponType.POLEARM, tamayuratei.getWeaponType(),
+                "Tamayuratei no Ohanashi weapon type");
+        assertEquals(5, tamayuratei.getRefinement(),
+                "Tamayuratei no Ohanashi default refinement");
+
+        TestCharacter tamayurateiOwner = testCharacter(Element.PYRO);
+        tamayurateiOwner.setWeapon(tamayuratei);
+        CombatSimulator tamayurateiSim = simulatorWith(tamayurateiOwner);
+        tamayuratei.onAction(tamayurateiOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL), tamayurateiSim);
+        assertClose(0.40,
+                resolvedStat(tamayurateiSim, tamayurateiOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "R5 Tamayuratei no Ohanashi ATK window");
+        tamayurateiSim.advanceTime(9.999);
+        assertClose(0.40,
+                resolvedStat(tamayurateiSim, tamayurateiOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "Tamayuratei no Ohanashi should remain active before ten seconds");
+        tamayurateiSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0,
+                resolvedStat(tamayurateiSim, tamayurateiOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "Tamayuratei no Ohanashi should expire exactly at ten seconds");
+
+        model.weapon.TamayurateiNoOhanashi r1Tamayuratei =
+                new model.weapon.TamayurateiNoOhanashi(1);
+        TestCharacter r1TamayurateiOwner = testCharacter(Element.PYRO);
+        r1TamayurateiOwner.setWeapon(r1Tamayuratei);
+        CombatSimulator r1TamayurateiSim = simulatorWith(r1TamayurateiOwner);
+        r1Tamayuratei.onAction(r1TamayurateiOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL), r1TamayurateiSim);
+        assertClose(0.20,
+                resolvedStat(r1TamayurateiSim, r1TamayurateiOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "R1 Tamayuratei no Ohanashi ATK window");
+
+        boolean lowRefinementRejected = false;
+        try {
+            new model.weapon.FluteOfEzpitzal(0);
+        } catch (IllegalArgumentException expected) {
+            lowRefinementRejected = true;
+        }
+        assertTrue(lowRefinementRejected,
+                "Flute of Ezpitzal should reject refinement zero");
+
+        boolean highRefinementRejected = false;
+        try {
+            new model.weapon.TamayurateiNoOhanashi(6);
+        } catch (IllegalArgumentException expected) {
+            highRefinementRejected = true;
+        }
+        assertTrue(highRefinementRejected,
+                "Tamayuratei no Ohanashi should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
