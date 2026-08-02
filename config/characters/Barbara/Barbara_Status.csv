@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Barbara,STATS,Base HP,90,9787,0
+Barbara,STATS,Base ATK,90,159,0
+Barbara,STATS,Base DEF,90,669,0
+Barbara,STATS,Ascension HP,90,0.24,0
+Barbara,STATS,Energy Cost,90,80,0
+Barbara,STATS,Constellation,6,6,0
+Barbara,CONFIG,Character Level,90,90,0
+Barbara,CONFIG,Normal Level,9,9,0
+Barbara,CONFIG,Skill Level,12,12,0
+Barbara,CONFIG,Burst Level,12,12,0

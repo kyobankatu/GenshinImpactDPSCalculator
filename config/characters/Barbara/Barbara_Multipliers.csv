@@ -1,0 +1,18 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Barbara,NORMAL,N1,9,0.64328,0
+Barbara,NORMAL,N2,9,0.60384,0
+Barbara,NORMAL,N3,9,0.69768,0
+Barbara,NORMAL,N4,9,0.93840,0
+Barbara,CHARGE,Charged Attack,9,2.82608,0
+Barbara,PLUNGE,Plunge Drop,9,1.044064,0
+Barbara,PLUNGE,Plunge Low,9,2.087686,0
+Barbara,PLUNGE,Plunge High,9,2.607632,0
+Barbara,SKILL,Skill Droplet,12,1.1680,0
+Barbara,BURST,Shining Miracle,12,0.0,0
+Barbara,PASSIVE,Skill Duration,1,15.0,0
+Barbara,PASSIVE,Encore Max Extension,1,5.0,0
+Barbara,PASSIVE,C1 Energy Interval,1,10.0,0
+Barbara,PASSIVE,C1 Energy,1,1.0,0
+Barbara,PASSIVE,C2 Skill CD Reduction,1,0.15,0
+Barbara,PASSIVE,C2 Hydro DMG Bonus,1,0.15,0
+Barbara,PASSIVE,C4 Charged Energy,1,1.0,0
