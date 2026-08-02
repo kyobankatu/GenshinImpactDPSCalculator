@@ -30,6 +30,7 @@ public final class DionaRegressionTest {
         testNormalChargeAndPlungeActions();
         testNormalChainSnapshotRestore();
         testHoldSkillAndC2();
+        testDelayedProjectileAndParticleSnapshotRestore();
         testBurstTicksC1C4AndC6();
         testBurstSnapshotRestore();
         testEnergyCooldownAndBindingGuards();
@@ -168,6 +169,62 @@ public final class DionaRegressionTest {
                 "Diona restored Normal branch keeps total damage");
         assertTrue(sim.getTotalDamage() > branchDamage,
                 "Diona restored Normal branch resolves its hit");
+    }
+
+    private static void testDelayedProjectileAndParticleSnapshotRestore() {
+        Diona chargedDiona = new Diona(null, null, 0);
+        CombatSimulator chargedSim = simulatorWith(chargedDiona);
+        List<ActionRecord> charged = captureNamedActions(
+                chargedSim, "Katzlein Style Fully Charged");
+        perform(chargedSim, CharacterActionKey.CHARGE);
+        SimulatorSnapshot chargedSnapshot = chargedSim.saveSnapshot();
+        assertEquals(0, charged.size(),
+                "Diona snapshot captures charged projectile in flight");
+        chargedSim.advanceTime(2.0 * FRAME + 0.001);
+        assertEquals(1, charged.size(),
+                "Diona original charged projectile resolves");
+        double impactTime = charged.get(0).time;
+
+        chargedSim.restoreSnapshot(chargedSnapshot);
+        charged.clear();
+        chargedSim.advanceTime(2.0 * FRAME + 0.001);
+        assertEquals(1, charged.size(),
+                "Diona restored charged projectile resolves once");
+        assertClose(impactTime, charged.get(0).time,
+                "Diona restored charged projectile keeps impact time");
+
+        chargedSim.restoreSnapshot(chargedSnapshot);
+        chargedSim.restoreSnapshot(chargedSnapshot);
+        charged.clear();
+        chargedSim.advanceTime(2.0 * FRAME + 0.001);
+        assertEquals(1, charged.size(),
+                "Diona repeated restore keeps one charged impact");
+
+        Diona particleDiona = new Diona(null, null, 0);
+        CombatSimulator particleSim = simulatorWith(particleDiona);
+        List<Double> particleTimes = new ArrayList<>();
+        particleSim.addParticleListener((element, count, time) ->
+                particleTimes.add(time));
+        perform(particleSim, CharacterActionKey.SKILL);
+        particleDiona.resetSkillCooldown(particleSim.getCurrentTime());
+        perform(particleSim, CharacterActionKey.SKILL);
+        SimulatorSnapshot particleSnapshot = particleSim.saveSnapshot();
+        particleSim.advanceTime(3.0);
+        assertEquals(2, particleTimes.size(),
+                "Diona original branch resolves two particle packets");
+
+        particleSim.restoreSnapshot(particleSnapshot);
+        particleTimes.clear();
+        particleSim.advanceTime(3.0);
+        assertEquals(2, particleTimes.size(),
+                "Diona restore replays two particle packets");
+
+        particleSim.restoreSnapshot(particleSnapshot);
+        particleSim.restoreSnapshot(particleSnapshot);
+        particleTimes.clear();
+        particleSim.advanceTime(3.0);
+        assertEquals(2, particleTimes.size(),
+                "Diona repeated restore keeps two particle packets");
     }
 
     private static void testBurstTicksC1C4AndC6() {

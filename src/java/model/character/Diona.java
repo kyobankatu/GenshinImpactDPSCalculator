@@ -1,5 +1,6 @@
 package model.character;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -57,6 +58,8 @@ public final class Diona extends Character
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
     private PendingSignatureMix pendingSignatureMix;
+    private PendingChargedImpact pendingChargedImpact;
+    private List<Double> pendingParticleTimes = new ArrayList<>();
 
     /** Constructs repository-default C6 Diona. */
     public Diona(Weapon weapon, ArtifactSet artifacts) {
@@ -124,7 +127,11 @@ public final class Diona extends Character
     /** Captures Diona's Normal chain and reconstructible Burst progress. */
     @Override
     public State captureCharacterState() {
-        return new DionaState(normalAttackStep, pendingSignatureMix);
+        return new DionaState(
+                normalAttackStep,
+                pendingSignatureMix,
+                pendingChargedImpact,
+                pendingParticleTimes);
     }
 
     /**
@@ -151,11 +158,28 @@ public final class Diona extends Character
         pendingSignatureMix = restored.pendingSignatureMix == null
                 ? null
                 : restored.pendingSignatureMix.copy();
+        pendingChargedImpact = restored.pendingChargedImpact == null
+                ? null
+                : restored.pendingChargedImpact.copy();
+        pendingParticleTimes = new ArrayList<>(
+                restored.pendingParticleTimes);
+        double currentTime = simulator.getCurrentTime();
         normalizeSignatureMixProgress(simulator.getCurrentTime());
         if (pendingSignatureMix != null) {
             scheduleSignatureMixFutureEffects(
                     simulator,
                     pendingSignatureMix);
+        }
+        if (pendingChargedImpact != null) {
+            if (pendingChargedImpact.time <= currentTime) {
+                pendingChargedImpact = null;
+            } else {
+                scheduleChargedImpact(simulator, pendingChargedImpact);
+            }
+        }
+        pendingParticleTimes.removeIf(time -> time <= currentTime);
+        for (Double time : new ArrayList<>(pendingParticleTimes)) {
+            scheduleParticle(simulator, time);
         }
     }
 
@@ -259,26 +283,15 @@ public final class Diona extends Character
                 && isBurstFieldActive(castTime);
         int durationFrames = c4Field ? 58 : 94;
         int hitmarkFrames = c4Field ? 50 : 86;
-        AttackAction charged = attack(
-                "Katzlein Style Fully Charged Aimed Shot",
-                getTalentValue("Fully Charged Aimed Shot", 2.1080),
-                Element.CRYO,
-                StatType.CHARGED_ATTACK_DMG_BONUS,
-                ActionType.CHARGE,
-                ICDType.Standard,
-                ICDTag.ChargedAttack,
-                1.0,
-                0.0);
         schedule(sim, castTime + hitmarkFrames * FRAME, activeSim -> {
-            charged.setStatSnapshot(captureActionSnapshot(
-                    activeSim,
-                    activeSim.getCurrentTime()));
-            schedule(
-                    activeSim,
+            pendingChargedImpact = new PendingChargedImpact(
                     activeSim.getCurrentTime()
                             + PROJECTILE_TRAVEL_FRAMES * FRAME,
-                    impactSim -> impactSim.performActionWithoutTimeAdvance(
-                            characterId, charged));
+                    getTalentValue("Fully Charged Aimed Shot", 2.1080),
+                    captureActionSnapshot(
+                            activeSim,
+                            activeSim.getCurrentTime()));
+            scheduleChargedImpact(activeSim, pendingChargedImpact);
         });
         sim.advanceTime(durationFrames * FRAME);
     }
@@ -327,14 +340,9 @@ public final class Diona extends Character
             schedule(sim, impactTime, activeSim -> {
                 activeSim.performActionWithoutTimeAdvance(characterId, action);
                 if (pawIndex == 0) {
-                    schedule(activeSim,
-                            activeSim.getCurrentTime() + PARTICLE_TRAVEL,
-                            particleSim -> particleSim.getEnergyDistributor()
-                                    .distributeParticles(
-                                            Element.CRYO,
-                                            getTalentValue(
-                                                    "Hold Skill Particles", 4.0),
-                                            ParticleType.PARTICLE));
+                    queueParticle(
+                            activeSim,
+                            activeSim.getCurrentTime() + PARTICLE_TRAVEL);
                 }
             });
         }
@@ -507,6 +515,47 @@ public final class Diona extends Character
         return stats;
     }
 
+    private void scheduleChargedImpact(
+            CombatSimulator sim,
+            PendingChargedImpact payload) {
+        schedule(sim, payload.time, activeSim -> {
+            if (pendingChargedImpact != payload) {
+                return;
+            }
+            pendingChargedImpact = null;
+            AttackAction charged = attack(
+                    "Katzlein Style Fully Charged Aimed Shot",
+                    payload.multiplier,
+                    Element.CRYO,
+                    StatType.CHARGED_ATTACK_DMG_BONUS,
+                    ActionType.CHARGE,
+                    ICDType.Standard,
+                    ICDTag.ChargedAttack,
+                    1.0,
+                    0.0);
+            charged.setStatSnapshot(payload.snapshot);
+            activeSim.performActionWithoutTimeAdvance(
+                    characterId, charged);
+        });
+    }
+
+    private void queueParticle(CombatSimulator sim, double time) {
+        pendingParticleTimes.add(time);
+        scheduleParticle(sim, time);
+    }
+
+    private void scheduleParticle(CombatSimulator sim, double time) {
+        schedule(sim, time, activeSim -> {
+            if (!pendingParticleTimes.remove(time)) {
+                return;
+            }
+            activeSim.getEnergyDistributor().distributeParticles(
+                    Element.CRYO,
+                    getTalentValue("Hold Skill Particles", 4.0),
+                    ParticleType.PARTICLE);
+        });
+    }
+
     private static AttackAction attack(
             String name,
             double multiplier,
@@ -546,14 +595,43 @@ public final class Diona extends Character
     private static final class DionaState implements State {
         private final int normalAttackStep;
         private final PendingSignatureMix pendingSignatureMix;
+        private final PendingChargedImpact pendingChargedImpact;
+        private final List<Double> pendingParticleTimes;
 
         private DionaState(
                 int normalAttackStep,
-                PendingSignatureMix pendingSignatureMix) {
+                PendingSignatureMix pendingSignatureMix,
+                PendingChargedImpact pendingChargedImpact,
+                List<Double> pendingParticleTimes) {
             this.normalAttackStep = normalAttackStep;
             this.pendingSignatureMix = pendingSignatureMix == null
                     ? null
                     : pendingSignatureMix.copy();
+            this.pendingChargedImpact = pendingChargedImpact == null
+                    ? null
+                    : pendingChargedImpact.copy();
+            this.pendingParticleTimes = new ArrayList<>(
+                    pendingParticleTimes);
+        }
+    }
+
+    /** Immutable payload for an aimed shot released before its impact. */
+    private static final class PendingChargedImpact {
+        private final double time;
+        private final double multiplier;
+        private final StatsContainer snapshot;
+
+        private PendingChargedImpact(
+                double time,
+                double multiplier,
+                StatsContainer snapshot) {
+            this.time = time;
+            this.multiplier = multiplier;
+            this.snapshot = snapshot.merge(null);
+        }
+
+        private PendingChargedImpact copy() {
+            return new PendingChargedImpact(time, multiplier, snapshot);
         }
     }
 
