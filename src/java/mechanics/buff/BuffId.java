@@ -92,6 +92,8 @@ public enum BuffId {
     INEFFA_C1_CARRIER_FLOW_COMPOSITE,
     /** イネファ命ノ星座 4 の元素エネルギー回復クールダウン。 */
     INEFFA_C4_ENERGY_COOLDOWN,
+    /** イネファ命ノ星座 6 の追撃クールダウン。 */
+    INEFFA_C6_FOLLOW_UP_COOLDOWN,
     /** 雷電将軍「諸願百日の儀」: 諸願スタックによる元素爆発 DMG ボーナス。 */
     RAIDEN_EYE_OF_STORMY_JUDGMENT,
     /** 雷電将軍 命ノ星座 4「常道への誓い」による味方攻撃力ボーナス。 */

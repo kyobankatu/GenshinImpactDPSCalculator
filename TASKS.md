@@ -13438,8 +13438,8 @@ Evidence:
 
 ## Implementation Order: Ineffa Representable Constellation Campaign
 
-Status: In progress. Implement C1, the independently representable C2 shield,
-C3-C6, and exact talent data; leave C2 Punishment Edict damage in blocked
+Status: Complete. Implemented C1, the independently representable C2 shield,
+C3-C6, and exact talent data; C2 Punishment Edict damage remains in blocked
 backlog B-135 rather than inventing its unspecified delay.
 
 Scope:
@@ -13539,6 +13539,8 @@ Evidence:
 
 ### Phase 3: C6 Thundercloud Follow-Up
 
+Status: Done.
+
 Target files:
 
 - `src/java/model/character/Ineffa.java`
@@ -13567,6 +13569,18 @@ Verification:
 - `./gradlew javadoc`
 - `./gradlew FlinsParty2`
 - `python scripts/preflight.py`
+
+Evidence:
+
+- A real scheduled Thundercloud tick triggers one off-field Ineffa follow-up
+  while Carrier Flow Composite is active; C5, absent or expired Carrier,
+  ordinary Lunar-Charged, and zero-damage synthetic events remain inert.
+- The follow-up is an Ineffa-owned 135% ATK direct Lunar-Charged Electro hit
+  with 0U/no-ICD metadata and Aura preservation. Its typed 3.5-second cooldown
+  rejects the immediate and 3.499-second cases, refreshes at 3.5 seconds,
+  survives snapshot restore, and does not recurse.
+- Two C0 `FlinsParty2` runs match at 20,805,520 damage / 301,093 DPS.
+- Reaction regression, build, Javadoc, sample simulation, and preflight pass.
 
 ## Implementation Order: Raiden Constellation Lifecycle
 

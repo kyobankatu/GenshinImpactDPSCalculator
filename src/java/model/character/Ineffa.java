@@ -406,6 +406,13 @@ public class Ineffa extends Character
             Character source,
             double time,
             CombatSimulator sim) {
+        if (constellation >= 6
+                && result.getKind() == ReactionResult.Kind.THUNDERCLOUD_STRIKE
+                && result.getTransformDamage() > 0.0
+                && hasActiveCarrierFlowComposite(sim, time)
+                && !hasActiveBuff(BuffId.INEFFA_C6_FOLLOW_UP_COOLDOWN, time)) {
+            triggerC6FollowUp(sim, time);
+        }
         if (constellation < 4
                 || result.getKind() != ReactionResult.Kind.LUNAR_CHARGED
                 || result.getTransformDamage() <= 0.0
@@ -421,6 +428,42 @@ public class Ineffa extends Character
                 time,
                 stats -> {
                 }).sourcedBy(characterId));
+    }
+
+    private void triggerC6FollowUp(CombatSimulator sim, double time) {
+        removeBuff(BuffId.INEFFA_C6_FOLLOW_UP_COOLDOWN);
+        addBuff(new SimpleBuff(
+                "A Dawning Morn for You Cooldown",
+                BuffId.INEFFA_C6_FOLLOW_UP_COOLDOWN,
+                3.5,
+                time,
+                stats -> {
+                }).sourcedBy(characterId));
+
+        AttackAction followUp = new AttackAction(
+                "A Dawning Morn for You",
+                1.35,
+                Element.ELECTRO,
+                StatType.BASE_ATK,
+                null,
+                0.0,
+                false,
+                ActionType.OTHER);
+        followUp.setICD(ICDType.None, ICDTag.None, 0.0);
+        followUp.setLunarReactionType(AttackAction.LunarReactionType.CHARGED);
+        sim.performActionWithoutTimeAdvance(characterId, followUp);
+    }
+
+    private boolean hasActiveCarrierFlowComposite(
+            CombatSimulator sim,
+            double currentTime) {
+        for (Buff buff : sim.getTeamBuffList()) {
+            if (buff.getId() == BuffId.INEFFA_C1_CARRIER_FLOW_COMPOSITE
+                    && !buff.isExpired(currentTime)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean hasActiveBuff(BuffId id, double currentTime) {

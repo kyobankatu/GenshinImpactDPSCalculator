@@ -2899,7 +2899,7 @@ experiment record.
 
 ### B-134 — Ineffa offensive constellation coverage
 
-- **Status:** in-progress
+- **Status:** complete
 - **Source:** delegated supported-character inventory under broad coverage
 - **Scope/risk:** C1, C2 shield activation, C3-C6, and weighted Lunar stat
   assembly; C2 Punishment Edict damage and RL excluded
@@ -2911,6 +2911,10 @@ experiment record.
   maintained timing description is "after a brief delay"; C1 snapshot and C6
   0U/no-ICD require explicit adaptations
 - **Plan:** three-phase `TASKS.md` Ineffa Representable Constellation Campaign
+- **Completion:** C1 Carrier Flow Composite, C2 shield activation, exact C3/C5
+  talent levels, C4 Energy lifecycle, and C6 Thundercloud follow-up pass the
+  planned normal, boundary, abnormal, snapshot, and real-tick checks; two C0
+  `FlinsParty2` runs match at 20,805,520 damage / 301,093 DPS
 
 ### B-135 — Ineffa C2 Punishment Edict delayed damage
 
@@ -2924,3 +2928,19 @@ experiment record.
 - **Boundary:** do not invent the automatic delay or substitute generic
   on-attack behavior; C2 Burst shield activation is independently representable
 - **Reopen gate:** authoritative timing frames or a maintained measurement
+
+### B-136 — Ineffa normal attack 3 two-hit correction
+
+- **Status:** candidate
+- **Source:** delegated B-134 character audit
+- **Scope/risk:** replace the single 41.8% normal attack 3 action with its two
+  41.8% hits while preserving total action timing, Electro infusion, gauge,
+  and normal-attack ICD behavior
+- **Evidence:** the maintained KQM talent table lists normal attack 3 as
+  `41.8% + 41.8%`, while `Ineffa.java` and `Ineffa_Multipliers.csv` currently
+  expose only one `0.418` hit:
+  https://library.keqingmains.com/characters/electro/ineffa
+- **Boundary:** model distinct hit events without adding action time twice;
+  verify shared ICD state and the physical/infused element paths
+- **Test:** exact two-hit count and multiplier, one action-duration advance,
+  Aura/ICD behavior, and unchanged non-N3 normal attacks

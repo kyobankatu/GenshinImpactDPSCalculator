@@ -108,6 +108,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_IneffaBirgittaSummonLifecycle();
         testAccuracyPhaseF_IneffaC1C2AndC4Lifecycle();
         testAccuracyPhaseF_IneffaC3AndC5TalentLevels();
+        testAccuracyPhaseF_IneffaC6ThundercloudFollowUp();
         testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost();
         testAccuracyPhaseF_PartySizeParticleEnergyMultipliers();
         testAccuracyPhaseF_ImpetuousWindsCooldownSnapshot();
@@ -4270,6 +4271,151 @@ public class ReactionRegressionTest {
                         .getDamagePercent(),
                 EPS,
                 "Ineffa C5 should not raise Skill above its C3 level");
+    }
+
+    private static void testAccuracyPhaseF_IneffaC6ThundercloudFollowUp() {
+        RecordingDamageWeapon c5Weapon =
+                new RecordingDamageWeapon("A Dawning Morn for You");
+        model.character.Ineffa c5Ineffa = new model.character.Ineffa(
+                c5Weapon, blankArtifact(), ineffaTalentData(5));
+        CombatSimulator c5Sim = simulatorWithExistingCharacter(c5Ineffa);
+        c5Ineffa.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), c5Sim);
+        c5Sim.notifyReaction(
+                ReactionResult.transform(
+                        100.0,
+                        "C5 Thundercloud fixture",
+                        ReactionResult.Kind.THUNDERCLOUD_STRIKE),
+                c5Ineffa);
+        assertTrue(c5Weapon.actions.isEmpty(),
+                "Ineffa C5 should not emit the C6 follow-up");
+
+        RecordingDamageWeapon noCarrierWeapon =
+                new RecordingDamageWeapon("A Dawning Morn for You");
+        model.character.Ineffa noCarrierIneffa = new model.character.Ineffa(
+                noCarrierWeapon, blankArtifact(), ineffaTalentData(6));
+        CombatSimulator noCarrierSim =
+                simulatorWithExistingCharacter(noCarrierIneffa);
+        noCarrierSim.notifyReaction(
+                ReactionResult.transform(
+                        100.0,
+                        "No Carrier Thundercloud fixture",
+                        ReactionResult.Kind.THUNDERCLOUD_STRIKE),
+                noCarrierIneffa);
+        assertTrue(noCarrierWeapon.actions.isEmpty(),
+                "Ineffa C6 should require Carrier Flow Composite");
+
+        RecordingDamageWeapon boundaryWeapon =
+                new RecordingDamageWeapon("A Dawning Morn for You");
+        model.character.Ineffa boundaryIneffa = new model.character.Ineffa(
+                boundaryWeapon, blankArtifact(), ineffaTalentData(6));
+        CombatSimulator boundarySim =
+                simulatorWithExistingCharacter(boundaryIneffa);
+        boundaryIneffa.onAction(
+                CharacterActionRequest.of(CharacterActionKey.SKILL), boundarySim);
+        boundarySim.getEnemy().setAura(
+                Element.HYDRO, 1.0, boundarySim.getCurrentTime());
+        ReactionResult thundercloudStrike = ReactionResult.transform(
+                100.0,
+                "Thundercloud cooldown fixture",
+                ReactionResult.Kind.THUNDERCLOUD_STRIKE);
+        boundarySim.notifyReaction(thundercloudStrike, boundaryIneffa);
+        assertEquals(1, boundaryWeapon.actions.size(),
+                "Ineffa C6 should emit one follow-up after a Thundercloud strike");
+        AttackAction firstFollowUp = boundaryWeapon.actions.get(0);
+        assertClose(1.35, firstFollowUp.getDamagePercent(), EPS,
+                "Ineffa C6 follow-up multiplier");
+        assertEquals(Element.ELECTRO, firstFollowUp.getElement(),
+                "Ineffa C6 follow-up element");
+        assertEquals(ActionType.OTHER, firstFollowUp.getActionType(),
+                "Ineffa C6 follow-up action category");
+        assertEquals(AttackAction.LunarReactionType.CHARGED,
+                firstFollowUp.getLunarReactionType(),
+                "Ineffa C6 follow-up should be direct Lunar-Charged damage");
+        assertEquals(ICDType.None, firstFollowUp.getICDType(),
+                "Ineffa C6 follow-up should have no ICD");
+        assertEquals(ICDTag.None, firstFollowUp.getICDTag(),
+                "Ineffa C6 follow-up should use the neutral ICD tag");
+        assertClose(0.0, firstFollowUp.getGaugeUnits(), EPS,
+                "Ineffa C6 follow-up should apply zero gauge");
+        assertClose(1.0,
+                boundarySim.getEnemy().getAuraUnits(
+                        Element.HYDRO, boundarySim.getCurrentTime()),
+                EPS,
+                "Ineffa C6 zero-gauge follow-up should preserve Aura");
+        SimulatorSnapshot c6Snapshot = boundarySim.saveSnapshot();
+        boundarySim.notifyReaction(thundercloudStrike, boundaryIneffa);
+        assertEquals(1, boundaryWeapon.actions.size(),
+                "Ineffa C6 follow-up should not recurse or repeat immediately");
+        boundarySim.advanceTime(3.499);
+        boundarySim.notifyReaction(thundercloudStrike, boundaryIneffa);
+        assertEquals(1, boundaryWeapon.actions.size(),
+                "Ineffa C6 should remain gated immediately before 3.5 seconds");
+        boundarySim.advanceTime(0.001 + 1e-9);
+        boundarySim.notifyReaction(thundercloudStrike, boundaryIneffa);
+        assertEquals(2, boundaryWeapon.actions.size(),
+                "Ineffa C6 should refresh at exactly 3.5 seconds");
+        boundarySim.restoreSnapshot(c6Snapshot);
+        boundarySim.notifyReaction(thundercloudStrike, boundaryIneffa);
+        assertEquals(2, boundaryWeapon.actions.size(),
+                "Ineffa C6 cooldown should survive simulator snapshot restore");
+
+        RecordingDamageWeapon wrongEventWeapon =
+                new RecordingDamageWeapon("A Dawning Morn for You");
+        model.character.Ineffa wrongEventIneffa = new model.character.Ineffa(
+                wrongEventWeapon, blankArtifact(), ineffaTalentData(6));
+        CombatSimulator wrongEventSim =
+                simulatorWithExistingCharacter(wrongEventIneffa);
+        wrongEventIneffa.onAction(
+                CharacterActionRequest.of(CharacterActionKey.SKILL), wrongEventSim);
+        wrongEventSim.notifyReaction(
+                ReactionResult.lunar(100.0, ReactionResult.LunarType.CHARGED),
+                wrongEventIneffa);
+        wrongEventSim.notifyReaction(
+                ReactionResult.transform(
+                        0.0,
+                        "Synthetic Thundercloud fixture",
+                        ReactionResult.Kind.THUNDERCLOUD_STRIKE),
+                wrongEventIneffa);
+        assertTrue(wrongEventWeapon.actions.isEmpty(),
+                "Ineffa C6 should reject ordinary and zero-damage reaction events");
+
+        RecordingDamageWeapon expiryWeapon =
+                new RecordingDamageWeapon("A Dawning Morn for You");
+        model.character.Ineffa expiryIneffa = new model.character.Ineffa(
+                expiryWeapon, blankArtifact(), ineffaTalentData(6));
+        CombatSimulator expirySim = simulatorWithExistingCharacter(expiryIneffa);
+        expiryIneffa.onAction(
+                CharacterActionRequest.of(CharacterActionKey.SKILL), expirySim);
+        double carrierStart = requireIneffaCarrier(expirySim).getStartTime();
+        expirySim.advanceTime(
+                carrierStart + 20.0 - expirySim.getCurrentTime());
+        expirySim.notifyReaction(thundercloudStrike, expiryIneffa);
+        assertTrue(expiryWeapon.actions.isEmpty(),
+                "Ineffa C6 should not trigger at exact Carrier expiry");
+
+        RecordingDamageWeapon realTickWeapon =
+                new RecordingDamageWeapon("A Dawning Morn for You");
+        model.character.Ineffa realTickIneffa = new model.character.Ineffa(
+                realTickWeapon, blankArtifact(), ineffaTalentData(6));
+        CombatSimulator realTickSim =
+                simulatorWithExistingCharacter(realTickIneffa);
+        TestCharacter activeAlly =
+                testCharacter(Element.HYDRO, CharacterId.XINGQIU);
+        realTickSim.addCharacter(activeAlly);
+        realTickIneffa.onAction(
+                CharacterActionRequest.of(CharacterActionKey.SKILL), realTickSim);
+        realTickSim.setActiveCharacter(CharacterId.XINGQIU);
+        realTickSim.getEnemy().setAura(
+                Element.HYDRO, 4.0, realTickSim.getCurrentTime());
+        new ReactionEffectScheduler(realTickSim).scheduleElectroCharged(
+                CharacterId.INEFFA,
+                Element.ELECTRO,
+                1.0,
+                0.0,
+                true);
+        realTickSim.advanceTime(2.01);
+        assertEquals(1, realTickWeapon.actions.size(),
+                "A real Thundercloud tick should trigger off-field Ineffa C6 once");
     }
 
     private static void testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost() {
