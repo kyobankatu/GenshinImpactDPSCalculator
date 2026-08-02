@@ -134,6 +134,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_DirectPhysicalProcWeapons();
         testAccuracyPhaseF_FrostBurialWeapons();
         testAccuracyPhaseF_DeterministicPhysicalProcWeapons();
+        testAccuracyPhaseF_OffFieldHitBows();
         testAccuracyPhaseF_ActionUseWindowWeapons();
         testAccuracyPhaseF_AdditionalSkillUseStatWeapons();
         testAccuracyPhaseF_SamuraiConductWeapons();
@@ -7738,6 +7739,174 @@ public class ReactionRegressionTest {
         }
         assertTrue(nullDrawRejected,
                 "Frost Burial weapons should reject null draw sources");
+    }
+
+    private static void testAccuracyPhaseF_OffFieldHitBows() {
+        AttackAction positiveHit = typedDamageHit(
+                "Off-field bow hit", ActionType.SKILL, 1.0);
+        AttackAction zeroHit = typedDamageHit(
+                "Off-field bow zero hit", ActionType.SKILL, 0.0);
+
+        model.weapon.FadingTwilight fadingTwilight =
+                new model.weapon.FadingTwilight();
+        assertEquals("Fading Twilight", fadingTwilight.getName(),
+                "Fading Twilight display name");
+        assertClose(565.0, fadingTwilight.getBaseAtk(), EPS,
+                "Fading Twilight base ATK");
+        assertClose(0.306,
+                fadingTwilight.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "Fading Twilight Energy Recharge");
+        assertEquals(model.type.WeaponType.BOW, fadingTwilight.getWeaponType(),
+                "Fading Twilight weapon type");
+        assertEquals(5, fadingTwilight.getRefinement(),
+                "Fading Twilight default refinement");
+
+        TestCharacter fadingOwner = testCharacter(
+                Element.ELECTRO, CharacterId.SUCROSE);
+        fadingOwner.setWeapon(fadingTwilight);
+        CombatSimulator fadingSim = simulatorWith(fadingOwner);
+        assertClose(0.12,
+                resolvedStat(fadingSim, fadingOwner, StatType.DMG_BONUS_ALL), EPS,
+                "R5 Fading Twilight initial Evengleam");
+        fadingTwilight.onDamage(fadingOwner, zeroHit, 0.0, fadingSim);
+        assertClose(0.12,
+                resolvedStat(fadingSim, fadingOwner, StatType.DMG_BONUS_ALL), EPS,
+                "Zero damage should not cycle Fading Twilight");
+        fadingTwilight.onDamage(fadingOwner, positiveHit, 0.0, fadingSim);
+        assertClose(0.20,
+                resolvedStat(fadingSim, fadingOwner, StatType.DMG_BONUS_ALL), EPS,
+                "First hit should cycle Fading Twilight to Afterglow");
+        fadingSim.advanceTime(6.999);
+        fadingTwilight.onDamage(
+                fadingOwner, positiveHit, fadingSim.getCurrentTime(), fadingSim);
+        assertClose(0.20,
+                resolvedStat(fadingSim, fadingOwner, StatType.DMG_BONUS_ALL), EPS,
+                "Fading Twilight should not cycle before seven seconds");
+
+        fadingSim.addCharacter(testCharacter(Element.PYRO, CharacterId.AMBER));
+        fadingSim.setActiveCharacter(CharacterId.AMBER);
+        fadingSim.advanceTime(0.001 + 1e-9);
+        fadingTwilight.onDamage(
+                fadingOwner, positiveHit, fadingSim.getCurrentTime(), fadingSim);
+        assertClose(0.28,
+                resolvedStat(fadingSim, fadingOwner, StatType.DMG_BONUS_ALL), EPS,
+                "Fading Twilight should cycle off-field at exact CT");
+        fadingSim.advanceTime(7.0);
+        fadingTwilight.onDamage(
+                fadingOwner, positiveHit, fadingSim.getCurrentTime(), fadingSim);
+        assertClose(0.12,
+                resolvedStat(fadingSim, fadingOwner, StatType.DMG_BONUS_ALL), EPS,
+                "Fading Twilight should cycle from Dawnblaze to Evengleam");
+
+        model.weapon.FadingTwilight r1FadingTwilight =
+                new model.weapon.FadingTwilight(1);
+        TestCharacter r1FadingOwner = testCharacter(Element.ELECTRO);
+        r1FadingOwner.setWeapon(r1FadingTwilight);
+        CombatSimulator r1FadingSim = simulatorWith(r1FadingOwner);
+        assertClose(0.06,
+                resolvedStat(r1FadingSim, r1FadingOwner,
+                        StatType.DMG_BONUS_ALL),
+                EPS,
+                "R1 Fading Twilight Evengleam");
+        r1FadingTwilight.onDamage(r1FadingOwner, positiveHit, 0.0, r1FadingSim);
+        assertClose(0.10,
+                resolvedStat(r1FadingSim, r1FadingOwner,
+                        StatType.DMG_BONUS_ALL),
+                EPS,
+                "R1 Fading Twilight Afterglow");
+
+        model.weapon.RainbowSerpentsRainBow rainbow =
+                new model.weapon.RainbowSerpentsRainBow();
+        assertEquals("Rainbow Serpent's Rain Bow", rainbow.getName(),
+                "Rainbow Serpent's Rain Bow display name");
+        assertClose(510.0, rainbow.getBaseAtk(), EPS,
+                "Rainbow Serpent's Rain Bow base ATK");
+        assertClose(0.459,
+                rainbow.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "Rainbow Serpent's Rain Bow Energy Recharge");
+        assertEquals(model.type.WeaponType.BOW, rainbow.getWeaponType(),
+                "Rainbow Serpent's Rain Bow weapon type");
+        assertEquals(5, rainbow.getRefinement(),
+                "Rainbow Serpent's Rain Bow default refinement");
+
+        TestCharacter rainbowOwner = testCharacter(
+                Element.HYDRO, CharacterId.SUCROSE);
+        rainbowOwner.setWeapon(rainbow);
+        CombatSimulator rainbowSim = simulatorWith(rainbowOwner);
+        rainbow.onDamage(rainbowOwner, positiveHit, 0.0, rainbowSim);
+        assertClose(0.0,
+                resolvedStat(rainbowSim, rainbowOwner, StatType.ATK_PERCENT), EPS,
+                "On-field damage should not activate Rainbow Serpent's Rain Bow");
+        rainbowSim.addCharacter(testCharacter(Element.PYRO, CharacterId.AMBER));
+        rainbowSim.setActiveCharacter(CharacterId.AMBER);
+        rainbow.onDamage(rainbowOwner, zeroHit, 0.0, rainbowSim);
+        assertClose(0.0,
+                resolvedStat(rainbowSim, rainbowOwner, StatType.ATK_PERCENT), EPS,
+                "Zero off-field damage should not activate Rainbow");
+        rainbow.onDamage(rainbowOwner, positiveHit, 0.0, rainbowSim);
+        assertClose(0.56,
+                resolvedStat(rainbowSim, rainbowOwner, StatType.ATK_PERCENT), EPS,
+                "R5 Rainbow off-field-hit ATK bonus");
+        rainbowSim.setActiveCharacter(CharacterId.SUCROSE);
+        rainbowSim.advanceTime(7.999);
+        assertClose(0.56,
+                resolvedStat(rainbowSim, rainbowOwner, StatType.ATK_PERCENT), EPS,
+                "Rainbow ATK should persist on-field before expiry");
+        rainbowSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0,
+                resolvedStat(rainbowSim, rainbowOwner, StatType.ATK_PERCENT), EPS,
+                "Rainbow ATK should expire at exactly eight seconds");
+
+        model.weapon.RainbowSerpentsRainBow r1Rainbow =
+                new model.weapon.RainbowSerpentsRainBow(1);
+        TestCharacter r1RainbowOwner = testCharacter(
+                Element.HYDRO, CharacterId.SUCROSE);
+        r1RainbowOwner.setWeapon(r1Rainbow);
+        CombatSimulator r1RainbowSim = simulatorWith(r1RainbowOwner);
+        r1RainbowSim.addCharacter(testCharacter(Element.PYRO, CharacterId.AMBER));
+        r1RainbowSim.setActiveCharacter(CharacterId.AMBER);
+        r1Rainbow.onDamage(r1RainbowOwner, positiveHit, 0.0, r1RainbowSim);
+        assertClose(0.28,
+                resolvedStat(r1RainbowSim, r1RainbowOwner,
+                        StatType.ATK_PERCENT),
+                EPS,
+                "R1 Rainbow off-field-hit ATK bonus");
+
+        boolean lowFadingRefinementRejected = false;
+        try {
+            new model.weapon.FadingTwilight(0);
+        } catch (IllegalArgumentException expected) {
+            lowFadingRefinementRejected = true;
+        }
+        assertTrue(lowFadingRefinementRejected,
+                "Fading Twilight should reject refinement zero");
+
+        boolean highFadingRefinementRejected = false;
+        try {
+            new model.weapon.FadingTwilight(6);
+        } catch (IllegalArgumentException expected) {
+            highFadingRefinementRejected = true;
+        }
+        assertTrue(highFadingRefinementRejected,
+                "Fading Twilight should reject refinement six");
+
+        boolean lowRainbowRefinementRejected = false;
+        try {
+            new model.weapon.RainbowSerpentsRainBow(0);
+        } catch (IllegalArgumentException expected) {
+            lowRainbowRefinementRejected = true;
+        }
+        assertTrue(lowRainbowRefinementRejected,
+                "Rainbow Serpent's Rain Bow should reject refinement zero");
+
+        boolean highRainbowRefinementRejected = false;
+        try {
+            new model.weapon.RainbowSerpentsRainBow(6);
+        } catch (IllegalArgumentException expected) {
+            highRainbowRefinementRejected = true;
+        }
+        assertTrue(highRainbowRefinementRejected,
+                "Rainbow Serpent's Rain Bow should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_DeterministicPhysicalProcWeapons() {
