@@ -13481,3 +13481,58 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc` at the final public-class boundary
 - `python scripts/preflight.py`
+
+## Implementation Order: Direct Physical Proc Weapon Campaign
+
+Status: Active. Add three weapon passives through one deterministic-testable
+direct-damage proc policy.
+
+Scope:
+
+- Add a shared positive-hit action gate, refinement-aware chance/multiplier,
+  successful-proc cooldown, injected draw source, and physical proc action.
+- Add Prototype Archaic, Fillet Blade, and Halberd with sourced Lv. 90 metadata,
+  R1-R5 values, stochastic defaults where applicable, and focused regressions.
+
+Out of scope for this pass:
+
+- AoE target counts in the single-target simulator, characters, formulas, RL,
+  generated docs, and unrelated weapon families.
+
+### Phase 1: Add Shared Proc Policy and Three Weapons
+
+Target files:
+
+- `src/java/model/weapon/DirectDamageProcWeapon.java` (new)
+- `src/java/model/weapon/PrototypeArchaic.java` (new)
+- `src/java/model/weapon/FilletBlade.java` (new)
+- `src/java/model/weapon/Halberd.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+| Unit | Trigger and proc | Focused verification | Status |
+|---|---|---|---|
+| Shared base + Prototype Archaic | Normal/Charged, 50%, 15s, 240-480% ATK | draw order, cooldown, physical damage, R1/R5 | Pending |
+| Fillet Blade | any positive hit, 50%, 15-11s, 240-400% ATK | OTHER action support, failed draw, exact cooldown | Pending |
+| Halberd | Normal, 100%, 10s, 160-320% ATK | deterministic trigger, Charged exclusion, metadata | Pending |
+
+Acceptance criteria:
+
+- Ineligible, zero-damage, and cooldown-blocked events consume no random draw;
+  failed draws do not start cooldown; exact cooldown is eligible.
+- Successful procs resolve immediately as non-recursive Physical `OTHER`
+  actions through the normal damage pipeline and use the owner's live stats.
+- Refinement 0/6 and null draw suppliers fail; metadata and R1-R5 values match
+  the cited KQM TCL pages.
+
+Test cases to add or update:
+
+- Normal: successful proc damage, every weapon's action gate and metadata.
+- Boundary: failed then successful draw, before/exact cooldown, R1/R5 scaling.
+- Abnormal: zero damage, wrong action, null draw, refinement 0/6, recursion guard.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc` at the shared/final API boundary
+- `python scripts/preflight.py`

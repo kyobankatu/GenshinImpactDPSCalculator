@@ -2220,3 +2220,13 @@ experiment record.
 - **Plan:** `TASKS.md` Claymore Hit-Stack Weapon Campaign
 - **Completion:** `b718c14` and `7e4cba0` add both variants; focused/build/
   Javadoc/leak gates pass
+
+### B-088 — Direct physical proc weapon coverage
+
+- **Status:** active
+- **Scope:** Prototype Archaic, Fillet Blade, and Halberd; RL excluded
+- **Value/risk:** three complete passives share one bounded proc implementation;
+  injected draws keep tests and optimizers reproducible
+- **Evidence boundary:** KQM TCL metadata, positive-hit/action gates, R1-R5
+  chances, multipliers, cooldowns, and Physical damage formula
+- **Plan:** `TASKS.md` Direct Physical Proc Weapon Campaign
