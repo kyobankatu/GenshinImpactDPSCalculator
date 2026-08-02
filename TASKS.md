@@ -14179,3 +14179,50 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Moonsign Reaction Weapon Campaign
+
+Status: Active. Add one shared off-field reaction window and two complete
+Moonsign-sensitive weapons without changing the simulator reaction contract.
+
+Scope:
+
+- Add Master Key and Serenity's Call with sourced metadata, R1-R5 values, R5
+  defaults, exact 12-second windows, off-field activation, and live Moonsign
+  scaling.
+
+Out of scope for this pass:
+
+- Reaction damage formulas, characters, shields, Plunging-only stats, RL,
+  generated docs, and unrelated weapons.
+
+### Phase 1: Add the shared window and both weapons
+
+Target files:
+
+- `src/java/model/weapon/MoonsignReactionWindowWeapon.java` (new)
+- `src/java/model/weapon/MasterKey.java` (new)
+- `src/java/model/weapon/SerenitysCall.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- An attributed non-NONE reaction from the equipped owner activates or refreshes
+  one half-open 12-second window even while that owner is off-field.
+- Master Key grants 60-120 EM and Serenity's Call grants 16-32% HP during the
+  window; Ascendant Gleam doubles the current bonus and other Moonsigns do not.
+- Moonsign changes take effect immediately, metadata and R1-R5 defaults are
+  correct, and one weapon instance cannot silently bind to multiple simulators.
+
+Test cases to add or update:
+
+- Normal: off-field owner reaction, both weapon stats, metadata, R5.
+- Boundary: live Moonsign transitions, refresh, exact 12-second expiry, R1.
+- Abnormal: NONE/foreign-source reactions, cross-simulator reuse, refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`

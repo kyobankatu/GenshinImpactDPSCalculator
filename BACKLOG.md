@@ -2365,3 +2365,13 @@ experiment record.
 - **Plan:** `TASKS.md` Skill/Burst Offensive Weapon Campaign
 - **Completion:** `7e88815` adds both weapons and focused typed regressions;
   build/Javadoc/leak gates pass
+
+### B-100 — Moonsign reaction weapon coverage
+
+- **Status:** active
+- **Scope:** Master Key and Serenity's Call; RL excluded
+- **Value/risk:** two complete off-field passives share one bounded reaction
+  listener and consume the existing live Moonsign API without dispatch changes
+- **Evidence boundary:** KQM TCL metadata, R1-R5 EM/HP values, attributed
+  off-field reactions, 12-second duration, and Ascendant Gleam doubling
+- **Plan:** `TASKS.md` Moonsign Reaction Weapon Campaign
