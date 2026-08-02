@@ -155,6 +155,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_StatefulCraftableWeaponPhaseTwo();
         testAccuracyPhaseF_WeaponSwitchCallbackContract();
         testAccuracyPhaseF_SwitchActivatedWeapons();
+        testAccuracyPhaseF_CoreArtifactSetsPhaseOne();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -11023,6 +11024,135 @@ public class ReactionRegressionTest {
                 "Sacrificial Jade should reject refinement six");
         assertTrue(lowTalesRejected,
                 "TTDS should reject refinement zero");
+    }
+
+    private static void testAccuracyPhaseF_CoreArtifactSetsPhaseOne() {
+        StatsContainer gladiatorStats = new StatsContainer();
+        gladiatorStats.set(StatType.CRIT_RATE, 0.20);
+        model.artifact.GladiatorsFinale suppliedGladiator =
+                new model.artifact.GladiatorsFinale(gladiatorStats);
+        assertEquals("Gladiator's Finale", suppliedGladiator.getName(),
+                "Gladiator display name");
+        assertClose(0.18,
+                suppliedGladiator.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Gladiator two-piece ATK");
+        assertClose(0.20,
+                suppliedGladiator.getStats().get(StatType.CRIT_RATE), EPS,
+                "Gladiator should preserve supplied stats");
+
+        Weapon[] gladiatorWeapons = {
+            new model.weapon.DullBlade(),
+            new model.weapon.WasterGreatsword(),
+            new model.weapon.BeginnersProtector(),
+            new model.weapon.HuntersBow(),
+            new model.weapon.ApprenticesNotes(),
+            null
+        };
+        double[] expectedNormalBonuses = {0.35, 0.35, 0.35, 0.0, 0.0, 0.0};
+        for (int index = 0; index < gladiatorWeapons.length; index++) {
+            TestCharacter owner = testCharacter(Element.PHYSICAL);
+            owner.setWeapon(gladiatorWeapons[index]);
+            owner.setArtifacts(new model.artifact.GladiatorsFinale());
+            simulatorWith(owner);
+            assertClose(0.18,
+                    effectiveStatAt(owner, StatType.ATK_PERCENT, 0.0), EPS,
+                    "Gladiator static ATK for weapon index " + index);
+            assertClose(expectedNormalBonuses[index],
+                    effectiveStatAt(
+                            owner, StatType.NORMAL_ATTACK_DMG_BONUS, 0.0),
+                    EPS, "Gladiator weapon gate index " + index);
+        }
+
+        StatsContainer goldenStats = new StatsContainer();
+        goldenStats.set(StatType.CRIT_DMG, 0.40);
+        model.artifact.GoldenTroupe suppliedGolden =
+                new model.artifact.GoldenTroupe(goldenStats);
+        assertEquals("Golden Troupe", suppliedGolden.getName(),
+                "Golden Troupe display name");
+        assertClose(0.45,
+                suppliedGolden.getStats().get(StatType.SKILL_DMG_BONUS), EPS,
+                "Golden Troupe fixed Skill bonus");
+        assertClose(0.40,
+                suppliedGolden.getStats().get(StatType.CRIT_DMG), EPS,
+                "Golden Troupe should preserve supplied stats");
+
+        TestCharacter goldenLead = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        model.artifact.GoldenTroupe goldenTroupe =
+                new model.artifact.GoldenTroupe();
+        TestCharacter goldenOwner = testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU);
+        goldenOwner.setArtifacts(goldenTroupe);
+        CombatSimulator goldenSim = simulatorWith(goldenLead);
+        goldenSim.addCharacter(goldenOwner);
+        assertClose(0.70,
+                effectiveStatAt(
+                        goldenOwner, StatType.SKILL_DMG_BONUS, 0.0), EPS,
+                "Initially off-field Golden Troupe");
+        goldenSim.switchCharacter(CharacterId.XINGQIU);
+        assertClose(0.70,
+                resolvedStat(goldenSim, goldenOwner,
+                        StatType.SKILL_DMG_BONUS), EPS,
+                "Golden Troupe switch-in grace");
+        goldenSim.advanceTime(1.899);
+        assertClose(0.70,
+                resolvedStat(goldenSim, goldenOwner,
+                        StatType.SKILL_DMG_BONUS), EPS,
+                "Golden Troupe before exact grace expiry");
+        goldenSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.45,
+                resolvedStat(goldenSim, goldenOwner,
+                        StatType.SKILL_DMG_BONUS), EPS,
+                "Golden Troupe at exact two-second grace expiry");
+        goldenSim.switchCharacter(CharacterId.AMBER);
+        assertClose(0.70,
+                resolvedStat(goldenSim, goldenOwner,
+                        StatType.SKILL_DMG_BONUS), EPS,
+                "Golden Troupe immediately after switch-out");
+        goldenSim.switchCharacter(CharacterId.XINGQIU);
+        assertClose(0.70,
+                resolvedStat(goldenSim, goldenOwner,
+                        StatType.SKILL_DMG_BONUS), EPS,
+                "Golden Troupe repeated switch-in grace");
+
+        model.artifact.GoldenTroupe directGolden =
+                new model.artifact.GoldenTroupe();
+        TestCharacter directGoldenOwner = testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU);
+        directGoldenOwner.setArtifacts(directGolden);
+        TestCharacter directGoldenAlly = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        CombatSimulator directGoldenSim = simulatorWith(directGoldenOwner);
+        directGoldenSim.addCharacter(directGoldenAlly);
+        directGoldenSim.setActiveCharacter(CharacterId.AMBER);
+        assertClose(0.70,
+                resolvedStat(directGoldenSim, directGoldenOwner,
+                        StatType.SKILL_DMG_BONUS), EPS,
+                "Direct setter off-field Golden Troupe");
+        directGoldenSim.setActiveCharacter(CharacterId.XINGQIU);
+        assertClose(0.45,
+                resolvedStat(directGoldenSim, directGoldenOwner,
+                        StatType.SKILL_DMG_BONUS), EPS,
+                "Direct setter should not fabricate switch-in grace");
+
+        goldenTroupe.initializeForSimulator(goldenOwner, goldenSim, false);
+        boolean goldenCrossSimulatorRejected = false;
+        try {
+            goldenTroupe.initializeForSimulator(
+                    goldenOwner, new CombatSimulator(), false);
+        } catch (IllegalStateException expected) {
+            goldenCrossSimulatorRejected = true;
+        }
+        assertTrue(goldenCrossSimulatorRejected,
+                "Golden Troupe should reject cross-simulator reuse");
+        boolean nullGladiatorStatsRejected = false;
+        try {
+            new model.artifact.GladiatorsFinale(null);
+        } catch (NullPointerException expected) {
+            nullGladiatorStatsRejected = true;
+        }
+        assertTrue(nullGladiatorStatsRejected,
+                "Gladiator should reject null supplied stats");
     }
 
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {

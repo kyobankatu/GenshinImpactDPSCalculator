@@ -15817,7 +15817,7 @@ Out of scope for this pass:
 - Artifact piece-count modeling, healing/current HP, shields, Nightsoul,
   enemy defeat, optimizer defaults, RL, and generated docs.
 
-### Phase 1: Weapon-Type and Field-State Sets
+### Phase 1: Weapon-Type and Field-State Sets - Done
 
 Target files:
 
@@ -15848,6 +15848,14 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+Completion evidence:
+
+- Focused regressions cover supplied-stat preservation, all Gladiator weapon
+  gates including null, Golden Troupe initial field states, standard and direct
+  switches, repeated grace windows, exact two-second expiry, and rebinding.
+- `./gradlew ReactionRegressionTest`, `./gradlew build`, `./gradlew javadoc`,
+  and `python scripts/preflight.py` passed on 2026-08-02.
 
 ### Phase 2: Reaction Composition and Skill-Hit Stacks
 
