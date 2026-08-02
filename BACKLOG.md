@@ -2833,3 +2833,23 @@ experiment record.
 - **Completion:** supplied/fixed stats, weapon filtering, field independence,
   flat Energy, cap, exact cooldown, rejected notifications, listener binding,
   reaction regression, build, Javadoc, and preflight checks pass
+
+### B-131 — Supported character passive and constellation accuracy
+
+- **Status:** in-progress
+- **Source:** read-only supported-character inventory after explicit broad
+  content request
+- **Scope:** Bennett A1, Xiangling C2, and Xingqiu C2/C4/C6; RL excluded
+- **Value/risk:** fixes two observable Xingqiu mis-gates and party-wide Energy,
+  adds two missing offensive passives, and preserves disjoint source ownership
+- **Evidence boundary:** maintained KQM character pages and Xiangling evidence,
+  accessed 2026-08-02, establish cooldown, hit-time delay, unsnapshotted/no-tag
+  damage, constellation durations, ordering, multipliers, wave cycle, and
+  Energy ownership:
+  https://library.keqingmains.com/characters/pyro/bennett
+  https://library.keqingmains.com/characters/pyro/xiangling
+  https://library.keqingmains.com/evidence/characters/pyro/xiangling
+  https://library.keqingmains.com/characters/hydro/xingqiu
+- **Risk/proof:** planned; focused character regressions plus reaction
+  regression, build, Javadoc, and preflight
+- **Plan:** `TASKS.md` Supported Character Passive Campaign

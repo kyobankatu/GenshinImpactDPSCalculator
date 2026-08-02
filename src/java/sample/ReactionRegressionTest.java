@@ -164,6 +164,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ActionUseArtifactSets();
         testAccuracyPhaseF_HuskCuriosityState();
         testAccuracyPhaseF_ScholarPartyEnergySet();
+        testAccuracyPhaseF_BennettAndXianglingPassiveAccuracy();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -12393,6 +12394,125 @@ public class ReactionRegressionTest {
         }
         assertTrue(nullStatsRejected,
                 "Scholar should reject null supplied stats");
+    }
+
+    private static void testAccuracyPhaseF_BennettAndXianglingPassiveAccuracy() {
+        RecordingDamageWeapon bennettWeapon =
+                new RecordingDamageWeapon("Passion Overload");
+        model.character.Bennett bennett = new model.character.Bennett(
+                bennettWeapon, blankArtifact());
+        CombatSimulator bennettSim = simulatorWithExistingCharacter(bennett);
+        bennettSim.performAction(
+                CharacterId.BENNETT,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        assertClose(4.0,
+                bennett.getSkillCDRemaining(bennettSim.getCurrentTime()), EPS,
+                "Bennett Rekindle should set the Tap Skill cooldown to four seconds");
+        bennettSim.advanceTime(3.999);
+        assertClose(0.001,
+                bennett.getSkillCDRemaining(bennettSim.getCurrentTime()), EPS,
+                "Bennett Skill should remain gated before four seconds");
+        bennettSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0,
+                bennett.getSkillCDRemaining(bennettSim.getCurrentTime()), EPS,
+                "Bennett Skill should become ready at exactly four seconds");
+        bennettSim.performAction(
+                CharacterId.BENNETT,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        assertEquals(2, bennettWeapon.actions.size(),
+                "Bennett should execute a second Skill at Rekindle expiry");
+
+        mechanics.data.TalentDataSource c2XianglingData =
+                (characterName, key, defaultValue) ->
+                        "Xiangling".equals(characterName)
+                                && "Constellation".equals(key)
+                                ? 2.0 : defaultValue;
+        model.character.Xiangling c2Xiangling = new model.character.Xiangling(
+                new TestWeapon(), blankArtifact(), c2XianglingData);
+        CombatSimulator c2Sim = simulatorWithExistingCharacter(c2Xiangling);
+        List<AttackAction> implodeActions = new ArrayList<>();
+        List<Double> implodeTimes = new ArrayList<>();
+        List<Double> n5Times = new ArrayList<>();
+        c2Sim.addDamageListener((actor, action, damage, time) -> {
+            if ("Xiangling N5".equals(action.getName())) {
+                n5Times.add(time);
+            }
+            if ("Xiangling C2 Implode".equals(action.getName())) {
+                implodeActions.add(action);
+                implodeTimes.add(time);
+            }
+        });
+        for (int i = 0; i < 4; i++) {
+            c2Sim.performAction(
+                    CharacterId.XIANGLING,
+                    CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        }
+        c2Sim.advanceTime(3.0);
+        assertTrue(implodeActions.isEmpty(),
+                "Xiangling C2 should not trigger before the final Normal");
+        c2Sim.performAction(
+                CharacterId.XIANGLING,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        assertEquals(1, n5Times.size(),
+                "Xiangling N5 hit time should be observable once");
+        double firstN5Time = n5Times.get(0);
+        double beforeImplode = firstN5Time + 1.999 - c2Sim.getCurrentTime();
+        c2Sim.advanceTime(beforeImplode);
+        assertTrue(implodeActions.isEmpty(),
+                "Xiangling C2 should wait two seconds from the N5 hit");
+        c2Sim.applyTeamBuff(new SimpleBuff(
+                "Implode live-stat fixture", 2.0, c2Sim.getCurrentTime(),
+                stats -> {
+                    stats.add(StatType.ATK_FLAT, 1000.0);
+                    stats.add(StatType.NORMAL_ATTACK_DMG_BONUS, 1.0);
+                    stats.add(StatType.SKILL_DMG_BONUS, 1.0);
+                    stats.add(StatType.BURST_DMG_BONUS, 1.0);
+                }));
+        c2Sim.advanceTime(0.001 + 1e-9);
+        assertEquals(1, implodeActions.size(),
+                "Xiangling C2 should trigger once at exact expiry");
+        assertClose(firstN5Time + 2.0, implodeTimes.get(0), EPS,
+                "Xiangling C2 should use the N5 hit timestamp");
+        AttackAction implode = implodeActions.get(0);
+        assertClose(0.75, implode.getDamagePercent(), EPS,
+                "Xiangling C2 Implode multiplier");
+        assertEquals(Element.PYRO, implode.getElement(),
+                "Xiangling C2 Implode element");
+        assertEquals(ActionType.OTHER, implode.getActionType(),
+                "Xiangling C2 should have no ability type");
+        assertEquals(null, implode.getBonusStat(),
+                "Xiangling C2 should have no ability bonus stat");
+        assertTrue(!implode.isUseSnapshot(),
+                "Xiangling C2 should resolve live stats");
+
+        for (int i = 0; i < 5; i++) {
+            c2Sim.performAction(
+                    CharacterId.XIANGLING,
+                    CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        }
+        double secondN5Time = n5Times.get(1);
+        c2Sim.advanceTime(secondN5Time + 2.0 - c2Sim.getCurrentTime() + 1e-9);
+        assertEquals(2, implodeActions.size(),
+                "Repeated Xiangling Normal strings should schedule independent Implodes");
+
+        mechanics.data.TalentDataSource c0XianglingData =
+                (characterName, key, defaultValue) ->
+                        "Xiangling".equals(characterName)
+                                && "Constellation".equals(key)
+                                ? 0.0 : defaultValue;
+        RecordingDamageWeapon c0Weapon =
+                new RecordingDamageWeapon("Xiangling C2 Implode");
+        model.character.Xiangling c0Xiangling = new model.character.Xiangling(
+                c0Weapon, blankArtifact(), c0XianglingData);
+        CombatSimulator c0Sim = simulatorWithExistingCharacter(c0Xiangling);
+        for (int i = 0; i < 5; i++) {
+            c0Sim.performAction(
+                    CharacterId.XIANGLING,
+                    CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        }
+        c0Sim.advanceTime(3.0);
+        assertTrue(c0Weapon.actions.isEmpty(),
+                "Xiangling C0 should never schedule C2 Implode");
     }
 
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {

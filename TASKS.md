@@ -37,6 +37,10 @@ shared callback without changing RL or generated documentation.
 The B-129 Husk of Opulent Dreams campaign is complete. It adds the exact
 field-aware Curiosity gain and decay cadence through existing simulator hooks.
 
+The B-131 supported-character accuracy campaign is in progress. It corrects
+Bennett A1, adds Xiangling C2, and fixes Xingqiu C2/C4/C6 behavior; RL remains
+excluded.
+
 The B-058 Burning fuel correction is complete. It replaces the fixed
 two-second approximation with typed Dendro-fuel decay and refresh ownership
 while retaining the repository's single-target boundary.
@@ -13143,6 +13147,119 @@ Completion evidence:
   cadence, cap refresh, switch reset, and exact decay regressions pass.
 - Coincident gain supersedes decay through immutable one-shot events and stale
   token rejection; reaction regression, build, Javadoc, and preflight pass.
+
+## Implementation Order: Supported Character Passive Campaign
+
+Status: In progress. This campaign adds or corrects sourced passives and
+constellations in three already-supported characters; RL and generated docs
+remain excluded.
+
+Scope:
+
+- Apply Bennett's unconditional A1 Skill cooldown reduction.
+- Add Xiangling C2's delayed live-stat Implode damage.
+- Correct Xingqiu's constellation gates, durations, hit-applied C2 shred, C4
+  multiplier, C6 wave cycle, and owner-only Energy.
+
+Out of scope for this pass:
+
+- Healing, shield/interruption, player HP, enemy defeat, multi-target state,
+  Bennett A4/C6 infusion redesign, RL, and generated docs.
+
+Definitions:
+
+- `Implode`: one unsnapshotted Pyro `OTHER` hit with no ability-type bonus,
+  scheduled two seconds from Xiangling's N5 hit time.
+- `Raincutter C2 shred`: one typed, nonstacking four-second Hydro RES reduction
+  applied after a sword-rain wave hits.
+
+### Phase 1: Independent Bennett and Xiangling Passives - Done
+
+Why first:
+
+- These disjoint character-local changes have no shared runtime prerequisite.
+
+Target files:
+
+- `src/java/model/character/Bennett.java`
+- `src/java/model/character/Xiangling.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Tasks:
+
+- Set Bennett's ascended Tap Skill base cooldown to four seconds.
+- On Xiangling C2+, schedule one 75% current-ATK Pyro Implode exactly two
+  seconds from each N5 hit, with no snapshot or ability-type bonus.
+
+Acceptance criteria:
+
+- Bennett's Skill becomes ready at four seconds and remains gated before it.
+- C0/C1 Xiangling never schedules Implode; C2+ schedules exactly one per N5,
+  resolves at hit+2, and reads buffs active at resolution.
+
+Test cases to add or update:
+
+- Normal: Bennett t=4 reuse; Xiangling C2 N1-N5 sequence and Pyro damage.
+- Boundary: t=3.999/4 and Implode t=1.999/2 from captured hit time.
+- Abnormal: Xiangling C0, early combo hits, no Normal/Skill/Burst bonus,
+  non-snapshot stat change, and repeated attack strings.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
+
+Completion evidence:
+
+- Bennett's A1 cooldown boundary and repeated cast pass at t=3.999/4.000.
+- Xiangling C2 schedules one live-stat, no-ability-tag Implode per N5 at
+  hit+2 seconds; early hits, C0, timing, and repeated strings are covered.
+- Reaction regression, build, Javadoc, and preflight pass.
+
+### Phase 2: Xingqiu Constellation Ordering
+
+Why second:
+
+- Xingqiu's form duration, wave listener, typed shred, and Energy ownership
+  must be corrected as one ordering contract.
+
+Target files:
+
+- `src/java/model/character/Xingqiu.java`
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Tasks:
+
+- Use 15-second C0/C1 and 18-second C2+ Burst/orbital/form windows.
+- Apply C2 Hydro RES -15% for four seconds after each sword-rain wave, not on
+  cast; refresh one typed effect.
+- Gate C4's multiplicative Skill x1.5 and C6's 2-3-5 cycle plus owner-only
+  three flat Energy to their actual constellation levels.
+
+Acceptance criteria:
+
+- C0 uses 2-3 waves, 15 seconds, no shred, no C4 multiplier, and no C6 Energy.
+- C2 uses 18 seconds and applies shred only after a wave; C4 multiplies both
+  Skill hits only during form; C6 third-wave hit grants only Xingqiu 3 Energy.
+- Recasts restart wave/cooldown state without duplicate active effects.
+
+Test cases to add or update:
+
+- Normal: C0/C2/C4/C6 matrices, wave sizes, duration, Skill damage, shred,
+  owner/ally Energy, and repeated Burst cycles.
+- Boundary: exact 15/18-second form and four-second shred expiry/refresh.
+- Abnormal: pre-wave C2, C3 no C4, C5 no C6, non-Normal triggers, and no
+  party-wide Energy.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
 
 ### Phase 2: Skill-Activated Damage Sets - Done
 
