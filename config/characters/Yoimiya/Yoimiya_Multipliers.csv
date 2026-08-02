@@ -1,0 +1,17 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Yoimiya,NORMAL,N1 Hit 1,9,0.5994,0
+Yoimiya,NORMAL,N1 Hit 2,9,0.5994,0
+Yoimiya,NORMAL,N2,9,1.14996,0
+Yoimiya,NORMAL,N3,9,1.494948,0
+Yoimiya,NORMAL,N4 Hit 1,9,0.7807,0
+Yoimiya,NORMAL,N4 Hit 2,9,0.7807,0
+Yoimiya,NORMAL,N5,9,1.78044,0
+Yoimiya,CHARGE,Fully Charged Aimed Shot,9,2.108,0
+Yoimiya,PLUNGE,Plunge High,9,2.6076,0
+Yoimiya,SKILL,Blazing Arrow Multiplier,9,1.58793,0
+Yoimiya,SKILL,Blazing Arrow Multiplier C3,12,1.67646,0
+Yoimiya,BURST,Ryuukin Saxifrage,9,2.1624,0
+Yoimiya,BURST,Ryuukin Saxifrage C5,12,2.544,0
+Yoimiya,BURST,Aurous Blaze Explosion,9,2.074,0
+Yoimiya,BURST,Aurous Blaze Explosion C5,12,2.44,0
+Yoimiya,PASSIVE,C4 Skill Cooldown Reduction,1,1.2,0
