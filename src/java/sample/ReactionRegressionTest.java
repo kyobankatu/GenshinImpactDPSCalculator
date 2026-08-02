@@ -5597,6 +5597,68 @@ public class ReactionRegressionTest {
         }
         assertTrue(highOathswornRefinementRejected,
                 "Oathsworn Eye should reject refinement six");
+
+        model.weapon.WindblumeOde windblumeOde = new model.weapon.WindblumeOde();
+        assertEquals("Windblume Ode", windblumeOde.getName(),
+                "Windblume Ode display name");
+        assertClose(510.0, windblumeOde.getBaseAtk(), EPS,
+                "Windblume Ode base ATK");
+        assertClose(165.0, windblumeOde.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Windblume Ode Elemental Mastery");
+        assertEquals(model.type.WeaponType.BOW, windblumeOde.getWeaponType(),
+                "Windblume Ode weapon type");
+        assertEquals(5, windblumeOde.getRefinement(),
+                "Windblume Ode default refinement");
+
+        TestCharacter windblumeOwner = testCharacter(Element.ANEMO);
+        windblumeOwner.setWeapon(windblumeOde);
+        CombatSimulator windblumeSim = simulatorWith(windblumeOwner);
+        assertClose(0.0, resolvedStat(windblumeSim, windblumeOwner, StatType.ATK_PERCENT), EPS,
+                "Windblume Ode should be inactive before Skill use");
+        captureStandardOutput(() -> windblumeSim.performAction(
+                CharacterId.SUCROSE, CharacterActionRequest.of(CharacterActionKey.SKILL)));
+        assertClose(0.32,
+                resolvedStat(windblumeSim, windblumeOwner, StatType.ATK_PERCENT), EPS,
+                "R5 Windblume Ode should activate immediately on Skill use");
+        windblumeSim.advanceTime(3.0);
+        captureStandardOutput(() -> windblumeSim.performAction(
+                CharacterId.SUCROSE, CharacterActionRequest.of(CharacterActionKey.SKILL)));
+        windblumeSim.advanceTime(5.999);
+        assertClose(0.32,
+                resolvedStat(windblumeSim, windblumeOwner, StatType.ATK_PERCENT), EPS,
+                "Refreshed Windblume Ode should remain active before expiry");
+        windblumeSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0,
+                resolvedStat(windblumeSim, windblumeOwner, StatType.ATK_PERCENT), EPS,
+                "Windblume Ode should be inactive at exact expiry");
+
+        model.weapon.WindblumeOde r1WindblumeOde = new model.weapon.WindblumeOde(1);
+        TestCharacter r1WindblumeOwner = testCharacter(Element.ANEMO);
+        r1WindblumeOwner.setWeapon(r1WindblumeOde);
+        CombatSimulator r1WindblumeSim = simulatorWith(r1WindblumeOwner);
+        captureStandardOutput(() -> r1WindblumeSim.performAction(
+                CharacterId.SUCROSE, CharacterActionRequest.of(CharacterActionKey.SKILL)));
+        assertClose(0.16,
+                resolvedStat(r1WindblumeSim, r1WindblumeOwner, StatType.ATK_PERCENT), EPS,
+                "R1 Windblume Ode ATK bonus");
+
+        boolean lowWindblumeRefinementRejected = false;
+        try {
+            new model.weapon.WindblumeOde(0);
+        } catch (IllegalArgumentException expected) {
+            lowWindblumeRefinementRejected = true;
+        }
+        assertTrue(lowWindblumeRefinementRejected,
+                "Windblume Ode should reject refinement zero");
+
+        boolean highWindblumeRefinementRejected = false;
+        try {
+            new model.weapon.WindblumeOde(6);
+        } catch (IllegalArgumentException expected) {
+            highWindblumeRefinementRejected = true;
+        }
+        assertTrue(highWindblumeRefinementRejected,
+                "Windblume Ode should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
