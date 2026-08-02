@@ -13484,7 +13484,7 @@ Verification:
 
 ## Implementation Order: Direct Physical Proc Weapon Campaign
 
-Status: Active. Add three weapon passives through one deterministic-testable
+Status: Complete. Three weapon passives now share one deterministic-testable
 direct-damage proc policy.
 
 Scope:
@@ -13499,7 +13499,7 @@ Out of scope for this pass:
 - AoE target counts in the single-target simulator, characters, formulas, RL,
   generated docs, and unrelated weapon families.
 
-### Phase 1: Add Shared Proc Policy and Three Weapons
+### Phase 1: Add Shared Proc Policy and Three Weapons - Done
 
 Target files:
 
@@ -13511,9 +13511,18 @@ Target files:
 
 | Unit | Trigger and proc | Focused verification | Status |
 |---|---|---|---|
-| Shared base + Prototype Archaic | Normal/Charged, 50%, 15s, 240-480% ATK | draw order, cooldown, physical damage, R1/R5 | Pending |
-| Fillet Blade | any positive hit, 50%, 15-11s, 240-400% ATK | OTHER action support, failed draw, exact cooldown | Pending |
-| Halberd | Normal, 100%, 10s, 160-320% ATK | deterministic trigger, Charged exclusion, metadata | Pending |
+| Shared base + Prototype Archaic | Normal/Charged, 50%, 15s, 240-480% ATK | draw order, cooldown, physical damage, R1/R5 | Done (`9833fa3`) |
+| Fillet Blade | any positive hit, 50%, 15-11s, 240-400% ATK | OTHER action support, failed draw, exact cooldown | Done (`20cfb49`) |
+| Halberd | Normal, 100%, 10s, 160-320% ATK | deterministic trigger, Charged exclusion, metadata | Done (`7695dde`) |
+
+Completion evidence:
+
+- Prototype Archaic proves draw ordering, strict 50% chance, failed-draw retry,
+  Normal/Charged gating, exact 15-second CT, and 240/480% scaling.
+- Fillet Blade accepts positive `OTHER` and Skill hits, rejects zero damage,
+  and proves refinement-dependent 15/11-second CT and 240/400% scaling.
+- Halberd proves deterministic Normal-only 160/320% Physical procs and exact
+  ten-second CT; reaction regression, build, Javadoc, and preflight pass.
 
 Acceptance criteria:
 

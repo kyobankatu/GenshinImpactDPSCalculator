@@ -2223,10 +2223,12 @@ experiment record.
 
 ### B-088 — Direct physical proc weapon coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Prototype Archaic, Fillet Blade, and Halberd; RL excluded
 - **Value/risk:** three complete passives share one bounded proc implementation;
   injected draws keep tests and optimizers reproducible
 - **Evidence boundary:** KQM TCL metadata, positive-hit/action gates, R1-R5
   chances, multipliers, cooldowns, and Physical damage formula
 - **Plan:** `TASKS.md` Direct Physical Proc Weapon Campaign
+- **Completion:** `9833fa3`, `20cfb49`, and `7695dde` add the shared proc policy
+  and all variants; focused/build/Javadoc/leak gates pass
