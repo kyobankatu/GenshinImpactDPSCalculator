@@ -120,6 +120,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_DragonsBaneTargetAuraContract();
         testAccuracyPhaseF_TargetAuraWeaponMetadata();
         testAccuracyPhaseF_StaticActionBonusWeaponMetadata();
+        testAccuracyPhaseF_LegacyWeaponRefinements();
         testAccuracyPhaseF_KaeyaCharacterContract();
         testAccuracyPhaseF_AmberCharacterContract();
         testAccuracyPhaseF_DendroResonanceReactionEmContract();
@@ -5392,6 +5393,44 @@ public class ReactionRegressionTest {
         c6BurstSim.advanceTime(0.001);
         assertClose(0.0, resolvedStat(c6BurstSim, c6BurstAlly, StatType.ATK_PERCENT), EPS,
                 "C6 Wildfire should expire at exactly ten seconds");
+    }
+
+    private static void testAccuracyPhaseF_LegacyWeaponRefinements() {
+        model.weapon.AlleyFlash alleyFlash = new model.weapon.AlleyFlash();
+        assertEquals("The Alley Flash", alleyFlash.getName(),
+                "The Alley Flash display name");
+        assertClose(620.0, alleyFlash.getBaseAtk(), EPS,
+                "The Alley Flash base ATK");
+        assertClose(55.0, alleyFlash.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "The Alley Flash Elemental Mastery");
+        assertClose(0.12, alleyFlash.getStats().get(StatType.DMG_BONUS_ALL), EPS,
+                "The Alley Flash default should preserve R1 damage");
+        assertEquals(model.type.WeaponType.SWORD, alleyFlash.getWeaponType(),
+                "The Alley Flash weapon type");
+        assertEquals(1, alleyFlash.getRefinement(),
+                "The Alley Flash default refinement");
+
+        model.weapon.AlleyFlash r5AlleyFlash = new model.weapon.AlleyFlash(5);
+        assertClose(0.24, r5AlleyFlash.getStats().get(StatType.DMG_BONUS_ALL), EPS,
+                "R5 The Alley Flash damage bonus");
+
+        boolean lowAlleyFlashRefinementRejected = false;
+        try {
+            new model.weapon.AlleyFlash(0);
+        } catch (IllegalArgumentException expected) {
+            lowAlleyFlashRefinementRejected = true;
+        }
+        assertTrue(lowAlleyFlashRefinementRejected,
+                "The Alley Flash should reject refinement zero");
+
+        boolean highAlleyFlashRefinementRejected = false;
+        try {
+            new model.weapon.AlleyFlash(6);
+        } catch (IllegalArgumentException expected) {
+            highAlleyFlashRefinementRejected = true;
+        }
+        assertTrue(highAlleyFlashRefinementRejected,
+                "The Alley Flash should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
