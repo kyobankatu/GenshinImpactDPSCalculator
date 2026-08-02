@@ -154,6 +154,22 @@ public enum BuffId {
     NIGHTTIME_WHISPERS_IN_THE_ECHOING_WOODS_4PC,
     /** 聖遺物「辰砂往生録」の潜光。 */
     VERMILLION_HEREAFTER_NASCENT_LIGHT,
+    /** Disenchantment in Deep Shadow live Superconduct CRIT Rate bonus. */
+    DISENCHANTMENT_SUPERCONDUCT_CRIT_RATE,
+    /** Scroll of the Hero of Cinder City Pyro DMG bonus. */
+    SCROLL_CINDER_CITY_PYRO_DMG_BONUS,
+    /** Scroll of the Hero of Cinder City Hydro DMG bonus. */
+    SCROLL_CINDER_CITY_HYDRO_DMG_BONUS,
+    /** Scroll of the Hero of Cinder City Electro DMG bonus. */
+    SCROLL_CINDER_CITY_ELECTRO_DMG_BONUS,
+    /** Scroll of the Hero of Cinder City Cryo DMG bonus. */
+    SCROLL_CINDER_CITY_CRYO_DMG_BONUS,
+    /** Scroll of the Hero of Cinder City Anemo DMG bonus. */
+    SCROLL_CINDER_CITY_ANEMO_DMG_BONUS,
+    /** Scroll of the Hero of Cinder City Geo DMG bonus. */
+    SCROLL_CINDER_CITY_GEO_DMG_BONUS,
+    /** Scroll of the Hero of Cinder City Dendro DMG bonus. */
+    SCROLL_CINDER_CITY_DENDRO_DMG_BONUS,
     SUPERCONDUCT_PHYS_RES_SHRED,
     /** 武器「漂泊の宵星」効果。 */
     WANDERING_EVENSTAR_WILDLING_NIGHTSTAR,
