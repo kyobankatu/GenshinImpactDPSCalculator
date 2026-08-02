@@ -15006,3 +15006,49 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Scion of the Blazing Sun Campaign
+
+Status: Active. Add Scion of the Blazing Sun with a nonrecursive Physical proc
+and single-target Heartsearer window.
+
+Scope:
+
+- Add Scion of the Blazing Sun with sourced metadata, R1-R5 values, exact proc/
+  debuff timing, single-enemy targeting, and focused regressions.
+
+Out of scope for this pass:
+
+- Multi-target debuff partitioning, characters, formulas, RL, generated docs,
+  and unrelated Battle Pass weapons.
+
+### Phase 1: Add Scion of the Blazing Sun
+
+Target files:
+
+- `src/java/model/weapon/ScionOfTheBlazingSun.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Positive active-owner Charged hits at exact ten-second CT produce one
+  immediate nonrecursive 60-120% ATK Physical action, then open a half-open
+  ten-second owner Charged DMG window of 28-56% against the modeled target.
+- Triggering Charged damage resolves before Heartsearer; generated proc damage
+  cannot recurse or refresh the state.
+- Metadata, positive/typed/active/source gates, exact expiry/reactivation,
+  R1-R5 defaults/validation, and binding are explicit.
+
+Test cases to add or update:
+
+- Normal: metadata, immediate proc and Heartsearer, R5.
+- Boundary: exact ten-second expiry/reactivation, R1 MV/bonus.
+- Abnormal: zero/wrong/off-field/recursive hits, cross-simulator reuse,
+  refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`

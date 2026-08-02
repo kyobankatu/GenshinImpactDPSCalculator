@@ -2547,3 +2547,13 @@ experiment record.
 - **Plan:** `TASKS.md` Fruit of Fulfillment Campaign
 - **Completion:** `c7ebd3a` adds the complete stack/decay state machine and
   focused regressions; build/Javadoc/leak gates pass
+
+### B-115 — Scion of the Blazing Sun coverage
+
+- **Status:** active
+- **Scope:** Scion of the Blazing Sun; RL excluded
+- **Value/risk:** one complete passive reuses typed post-hit and immediate
+  nonrecursive Physical action contracts under the single-enemy model
+- **Evidence boundary:** KQM TCL metadata, R1-R5 proc/Charged values, positive
+  active Charged gate, ten-second activation CT and Heartsearer duration
+- **Plan:** `TASKS.md` Scion of the Blazing Sun Campaign
