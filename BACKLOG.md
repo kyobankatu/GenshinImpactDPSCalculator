@@ -2439,3 +2439,13 @@ experiment record.
 - **Plan:** `TASKS.md` Sumeru Action-Proc Bow Campaign
 - **Completion:** `6e74d66` adds both state machines and focused regressions;
   build/Javadoc/leak gates pass
+
+### B-106 — Typed five-star bow coverage
+
+- **Status:** active
+- **Scope:** Polar Star and Astral Vulture's Crimson Plumage; RL excluded
+- **Value/risk:** two complete passives reuse typed hit/reaction and live party
+  reads without simulator dispatch changes
+- **Evidence boundary:** KQM TCL metadata, R1-R5 stack/ATK/Charged/Burst values,
+  independent 12-second hit stacks, Swirl attribution, and one/two ally tiers
+- **Plan:** `TASKS.md` Typed Five-Star Bow Campaign

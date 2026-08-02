@@ -14513,3 +14513,51 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Typed Five-Star Bow Campaign
+
+Status: Active. Add two complete five-star bows using typed hit stacks, owner
+Swirl attribution, and live party element composition.
+
+Scope:
+
+- Add Polar Star and Astral Vulture's Crimson Plumage with sourced metadata,
+  R1-R5 values, R5 defaults, exact windows, and focused regressions.
+
+Out of scope for this pass:
+
+- Movement speed, Hexerei effects, multi-target multiplication, characters,
+  formulas, RL, generated docs, and unrelated five-star bows.
+
+### Phase 1: Add Polar Star and Astral Vulture's Crimson Plumage
+
+Target files:
+
+- `src/java/model/weapon/PolarStar.java` (new)
+- `src/java/model/weapon/AstralVulturesCrimsonPlumage.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Polar Star always grants 12-24% Skill/Burst DMG; positive active-owner
+  Normal, Charged, Skill, and Burst hits each own one independently refreshed
+  half-open 12-second stack, granting 10/20/30/48%-20/40/60/96% ATK by count.
+- Active-owner Swirl opens Astral Vulture's half-open 12-second 24-48% ATK
+  window; one/two-or-more different-element allies dynamically grant the exact
+  20/48%-40/96% Charged and 10/24%-20/48% Burst tiers.
+- Metadata, typed/related-element/source/active gates, live party changes,
+  R1-R5 defaults/validation, refresh, and exact expiry are explicit.
+
+Test cases to add or update:
+
+- Normal: four Polar types/tiers, Astral Swirl and one/two ally tiers, metadata, R5.
+- Boundary: independent Polar expiry/refresh, Astral exact 12 seconds, R1.
+- Abnormal: zero/wrong/off-field Polar hits, NONE/foreign/off-field Astral
+  reactions, cross-simulator reuse, refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
