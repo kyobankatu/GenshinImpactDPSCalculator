@@ -138,6 +138,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_SkillBurstOffensiveWeapons();
         testAccuracyPhaseF_MoonsignReactionWeapons();
         testAccuracyPhaseF_ReactionUtilityClaymores();
+        testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_ActionUseWindowWeapons();
         testAccuracyPhaseF_AdditionalSkillUseStatWeapons();
         testAccuracyPhaseF_SamuraiConductWeapons();
@@ -8552,6 +8553,236 @@ public class ReactionRegressionTest {
         }
         assertTrue(highInsightRefinementRejected,
                 "Flame-Forged Insight should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_SelfContainedFiveStarWeapons() {
+        model.weapon.SkywardPride pride = new model.weapon.SkywardPride();
+        assertEquals("Skyward Pride", pride.getName(),
+                "Skyward Pride display name");
+        assertClose(674.0, pride.getBaseAtk(), EPS,
+                "Skyward Pride base ATK");
+        assertClose(0.368,
+                pride.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "Skyward Pride Energy Recharge");
+        assertClose(0.16,
+                pride.getStats().get(StatType.DMG_BONUS_ALL), EPS,
+                "R5 Skyward Pride all-DMG bonus");
+        assertEquals(model.type.WeaponType.CLAYMORE, pride.getWeaponType(),
+                "Skyward Pride weapon type");
+        assertEquals(5, pride.getRefinement(),
+                "Skyward Pride default refinement");
+
+        TestCharacter prideOwner = testCharacter(Element.PHYSICAL);
+        prideOwner.setWeapon(pride);
+        CombatSimulator prideSim = simulatorWith(prideOwner);
+        AttackAction normalHit = typedDamageHit(
+                "Skyward Pride Normal", ActionType.NORMAL, 1.0);
+        AttackAction chargedHit = typedDamageHit(
+                "Skyward Pride Charged", ActionType.CHARGE, 1.0);
+        AttackAction wrongHit = typedDamageHit(
+                "Skyward Pride Skill", ActionType.SKILL, 1.0);
+        AttackAction zeroHit = typedDamageHit(
+                "Skyward Pride zero Normal", ActionType.NORMAL, 0.0);
+        AttackAction recursiveHit = typedDamageHit(
+                "Skyward Pride Vacuum Blade", ActionType.NORMAL, 1.0);
+
+        pride.onDamage(prideOwner, normalHit, 0.0, prideSim);
+        assertClose(0.0, prideSim.getTotalDamage(), EPS,
+                "Skyward Pride should be inactive before Burst use");
+        pride.onAction(
+                prideOwner,
+                CharacterActionRequest.of(CharacterActionKey.BURST),
+                prideSim);
+        pride.onDamage(prideOwner, wrongHit, 0.0, prideSim);
+        pride.onDamage(prideOwner, zeroHit, 0.0, prideSim);
+        pride.onDamage(prideOwner, recursiveHit, 0.0, prideSim);
+        assertClose(0.0, prideSim.getTotalDamage(), EPS,
+                "Wrong, zero, and recursive hits should not consume Pride blades");
+
+        pride.onDamage(prideOwner, normalHit, 0.0, prideSim);
+        double r5BladeDamage = prideSim.getTotalDamage();
+        assertTrue(r5BladeDamage > 0.0,
+                "Skyward Pride should generate a Physical blade after Normal damage");
+        for (int i = 1; i < 8; i++) {
+            pride.onDamage(prideOwner, i % 2 == 0 ? normalHit : chargedHit,
+                    0.0, prideSim);
+        }
+        assertClose(r5BladeDamage * 8.0, prideSim.getTotalDamage(), EPS,
+                "Skyward Pride should generate exactly eight equal blades");
+        pride.onDamage(prideOwner, normalHit, 0.0, prideSim);
+        assertClose(r5BladeDamage * 8.0, prideSim.getTotalDamage(), EPS,
+                "A ninth hit should not generate another Skyward Pride blade");
+
+        model.weapon.SkywardPride r1Pride = new model.weapon.SkywardPride(1);
+        TestCharacter r1PrideOwner = testCharacter(Element.PHYSICAL);
+        r1PrideOwner.setWeapon(r1Pride);
+        CombatSimulator r1PrideSim = simulatorWith(r1PrideOwner);
+        r1Pride.onAction(
+                r1PrideOwner,
+                CharacterActionRequest.of(CharacterActionKey.BURST),
+                r1PrideSim);
+        r1Pride.onDamage(r1PrideOwner, normalHit, 0.0, r1PrideSim);
+        double r1BladeDamage = r1PrideSim.getTotalDamage();
+        assertClose(0.08,
+                r1Pride.getStats().get(StatType.DMG_BONUS_ALL), EPS,
+                "R1 Skyward Pride all-DMG bonus");
+        double expectedBladeRatio = (1.60 * 1.16) / (0.80 * 1.08);
+        assertClose(expectedBladeRatio, r5BladeDamage / r1BladeDamage, EPS,
+                "Skyward Pride blades should use R1/R5 motion values");
+
+        model.weapon.SkywardPride expiringPride =
+                new model.weapon.SkywardPride();
+        TestCharacter expiringPrideOwner = testCharacter(Element.PHYSICAL);
+        expiringPrideOwner.setWeapon(expiringPride);
+        CombatSimulator expiringPrideSim = simulatorWith(expiringPrideOwner);
+        expiringPride.onAction(
+                expiringPrideOwner,
+                CharacterActionRequest.of(CharacterActionKey.BURST),
+                expiringPrideSim);
+        expiringPrideSim.advanceTime(19.999);
+        expiringPride.onDamage(
+                expiringPrideOwner,
+                normalHit,
+                expiringPrideSim.getCurrentTime(),
+                expiringPrideSim);
+        assertTrue(expiringPrideSim.getTotalDamage() > 0.0,
+                "Skyward Pride should remain active before twenty seconds");
+        double beforeExpiry = expiringPrideSim.getTotalDamage();
+        expiringPrideSim.advanceTime(0.001 + 1e-9);
+        expiringPride.onDamage(
+                expiringPrideOwner,
+                normalHit,
+                expiringPrideSim.getCurrentTime(),
+                expiringPrideSim);
+        assertClose(beforeExpiry, expiringPrideSim.getTotalDamage(), EPS,
+                "Skyward Pride should expire at exactly twenty seconds");
+
+        model.weapon.SkywardPride offFieldPride =
+                new model.weapon.SkywardPride();
+        TestCharacter offFieldPrideOwner = testCharacter(
+                Element.PHYSICAL, CharacterId.SUCROSE);
+        offFieldPrideOwner.setWeapon(offFieldPride);
+        CombatSimulator offFieldPrideSim = simulatorWith(offFieldPrideOwner);
+        offFieldPride.onAction(
+                offFieldPrideOwner,
+                CharacterActionRequest.of(CharacterActionKey.BURST),
+                offFieldPrideSim);
+        offFieldPrideSim.addCharacter(testCharacter(
+                Element.PYRO, CharacterId.AMBER));
+        offFieldPrideSim.setActiveCharacter(CharacterId.AMBER);
+        offFieldPride.onDamage(
+                offFieldPrideOwner, normalHit, 0.0, offFieldPrideSim);
+        assertClose(0.0, offFieldPrideSim.getTotalDamage(), EPS,
+                "Off-field hits should not generate Skyward Pride blades");
+
+        model.weapon.LightbearingMoonshard moonshard =
+                new model.weapon.LightbearingMoonshard();
+        assertEquals("Lightbearing Moonshard", moonshard.getName(),
+                "Lightbearing Moonshard display name");
+        assertClose(542.0, moonshard.getBaseAtk(), EPS,
+                "Lightbearing Moonshard base ATK");
+        assertClose(0.882,
+                moonshard.getStats().get(StatType.CRIT_DMG), EPS,
+                "Lightbearing Moonshard CRIT DMG");
+        assertClose(0.40,
+                moonshard.getStats().get(StatType.DEF_PERCENT), EPS,
+                "R5 Lightbearing Moonshard DEF");
+        assertEquals(model.type.WeaponType.SWORD, moonshard.getWeaponType(),
+                "Lightbearing Moonshard weapon type");
+        assertEquals(5, moonshard.getRefinement(),
+                "Lightbearing Moonshard default refinement");
+
+        TestCharacter moonshardOwner = testCharacter(Element.GEO);
+        moonshardOwner.setWeapon(moonshard);
+        CombatSimulator moonshardSim = simulatorWith(moonshardOwner);
+        assertClose(0.0,
+                resolvedStat(moonshardSim, moonshardOwner,
+                        StatType.LUNAR_CRYSTALLIZE_DMG_BONUS), EPS,
+                "Moonshard should be inactive before Skill use");
+        moonshard.onAction(
+                moonshardOwner,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL),
+                moonshardSim);
+        assertClose(0.0,
+                resolvedStat(moonshardSim, moonshardOwner,
+                        StatType.LUNAR_CRYSTALLIZE_DMG_BONUS), EPS,
+                "Non-Skill use should not activate Moonshard");
+        moonshard.onAction(
+                moonshardOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                moonshardSim);
+        assertClose(1.28,
+                resolvedStat(moonshardSim, moonshardOwner,
+                        StatType.LUNAR_CRYSTALLIZE_DMG_BONUS), EPS,
+                "R5 Moonshard Lunar-Crystallize window");
+        moonshardSim.advanceTime(2.0);
+        moonshard.onAction(
+                moonshardOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                moonshardSim);
+        moonshardSim.advanceTime(4.999);
+        assertClose(1.28,
+                resolvedStat(moonshardSim, moonshardOwner,
+                        StatType.LUNAR_CRYSTALLIZE_DMG_BONUS), EPS,
+                "Refreshed Moonshard should remain active before expiry");
+        moonshardSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0,
+                resolvedStat(moonshardSim, moonshardOwner,
+                        StatType.LUNAR_CRYSTALLIZE_DMG_BONUS), EPS,
+                "Moonshard should expire at exactly five seconds");
+
+        model.weapon.LightbearingMoonshard r1Moonshard =
+                new model.weapon.LightbearingMoonshard(1);
+        TestCharacter r1MoonshardOwner = testCharacter(Element.GEO);
+        r1MoonshardOwner.setWeapon(r1Moonshard);
+        CombatSimulator r1MoonshardSim = simulatorWith(r1MoonshardOwner);
+        r1Moonshard.onAction(
+                r1MoonshardOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                r1MoonshardSim);
+        assertClose(0.20,
+                r1Moonshard.getStats().get(StatType.DEF_PERCENT), EPS,
+                "R1 Lightbearing Moonshard DEF");
+        assertClose(0.64,
+                resolvedStat(r1MoonshardSim, r1MoonshardOwner,
+                        StatType.LUNAR_CRYSTALLIZE_DMG_BONUS), EPS,
+                "R1 Moonshard Lunar-Crystallize window");
+
+        boolean lowPrideRefinementRejected = false;
+        try {
+            new model.weapon.SkywardPride(0);
+        } catch (IllegalArgumentException expected) {
+            lowPrideRefinementRejected = true;
+        }
+        assertTrue(lowPrideRefinementRejected,
+                "Skyward Pride should reject refinement zero");
+
+        boolean highPrideRefinementRejected = false;
+        try {
+            new model.weapon.SkywardPride(6);
+        } catch (IllegalArgumentException expected) {
+            highPrideRefinementRejected = true;
+        }
+        assertTrue(highPrideRefinementRejected,
+                "Skyward Pride should reject refinement six");
+
+        boolean lowMoonshardRefinementRejected = false;
+        try {
+            new model.weapon.LightbearingMoonshard(0);
+        } catch (IllegalArgumentException expected) {
+            lowMoonshardRefinementRejected = true;
+        }
+        assertTrue(lowMoonshardRefinementRejected,
+                "Lightbearing Moonshard should reject refinement zero");
+
+        boolean highMoonshardRefinementRejected = false;
+        try {
+            new model.weapon.LightbearingMoonshard(6);
+        } catch (IllegalArgumentException expected) {
+            highMoonshardRefinementRejected = true;
+        }
+        assertTrue(highMoonshardRefinementRejected,
+                "Lightbearing Moonshard should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_OffFieldHitBows() {
