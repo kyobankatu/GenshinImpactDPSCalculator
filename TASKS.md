@@ -14071,3 +14071,48 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Off-Field Hit Weapon Campaign
+
+Status: Active. Add two bow passives whose explicit off-field hit behavior can
+be represented by the existing post-damage hook.
+
+Scope:
+
+- Add Fading Twilight and Rainbow Serpent's Rain Bow with sourced metadata,
+  R1-R5 values, R5 defaults, exact CT/windows, and focused regressions.
+
+Out of scope for this pass:
+
+- Multi-target hit multiplication, characters, formulas, RL, generated docs,
+  and unrelated off-field equipment.
+
+### Phase 1: Add Two Off-Field Hit Bows
+
+Target files:
+
+- `src/java/model/weapon/FadingTwilight.java` (new)
+- `src/java/model/weapon/RainbowSerpentsRainBow.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Fading Twilight starts in Evengleam and cycles Evengleam -> Afterglow ->
+  Dawnblaze -> Evengleam after positive hits at exact seven-second CT, including
+  while off-field; its triggering hit uses the prior state through post-damage order.
+- Rainbow activates only after positive off-field damage, grants 28-56% ATK in
+  one refresh-only half-open eight-second window, and retains it on-field.
+- Both expose sourced metadata and R1-R5 values/defaults and reject rank 0/6.
+
+Test cases to add or update:
+
+- Normal: three-state cycle, off-field Rainbow trigger, metadata, R5.
+- Boundary: before/exact seven-second CT, before/exact eight-second expiry, R1.
+- Abnormal: zero damage, Rainbow on-field damage, refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`

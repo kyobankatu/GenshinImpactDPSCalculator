@@ -2341,3 +2341,13 @@ experiment record.
 - **Plan:** `TASKS.md` Deterministic Physical Proc Weapon Campaign
 - **Completion:** `2e69b5f` adds all three state machines and focused regressions;
   build/Javadoc/leak gates pass
+
+### B-098 — Off-field hit bow coverage
+
+- **Status:** active
+- **Scope:** Fading Twilight and Rainbow Serpent's Rain Bow; RL excluded
+- **Value/risk:** two complete passives use existing active-character and
+  post-damage state without new dispatch or shared runtime mutation
+- **Evidence boundary:** KQM TCL metadata, R1-R5 three-state DMG values,
+  seven-second switch CT, and off-field 28-56% ATK eight-second window
+- **Plan:** `TASKS.md` Off-Field Hit Weapon Campaign
