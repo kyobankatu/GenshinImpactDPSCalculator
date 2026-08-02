@@ -125,6 +125,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_WatatsumiWavewalkerWeapons();
         testAccuracyPhaseF_ReciprocalHitWeapons();
         testAccuracyPhaseF_ReactionWindowWeapons();
+        testAccuracyPhaseF_HitStackWeapons();
         testAccuracyPhaseF_KaeyaCharacterContract();
         testAccuracyPhaseF_AmberCharacterContract();
         testAccuracyPhaseF_DendroResonanceReactionEmContract();
@@ -6293,6 +6294,98 @@ public class ReactionRegressionTest {
         swordSim.advanceTime(0.001 + 1e-9);
         assertClose(0.0, resolvedStat(swordSim, swordOwner, StatType.ATK_PERCENT), EPS,
                 "Dark Iron Sword should expire at exactly twelve seconds");
+    }
+
+    private static void testAccuracyPhaseF_HitStackWeapons() {
+        model.weapon.BalladOfTheBoundlessBlue ballad =
+                new model.weapon.BalladOfTheBoundlessBlue();
+        assertEquals("Ballad of the Boundless Blue", ballad.getName(),
+                "Ballad display name");
+        assertClose(565.0, ballad.getBaseAtk(), EPS, "Ballad base ATK");
+        assertClose(0.306, ballad.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "Ballad Energy Recharge");
+        assertEquals(model.type.WeaponType.CATALYST, ballad.getWeaponType(),
+                "Ballad weapon type");
+        assertEquals(5, ballad.getRefinement(), "Ballad default refinement");
+
+        TestCharacter owner = testCharacter(Element.HYDRO);
+        owner.setWeapon(ballad);
+        CombatSimulator sim = simulatorWith(owner);
+        AttackAction normalHit = typedDamageHit("Ballad Normal", ActionType.NORMAL, 1.0);
+        AttackAction skillHit = typedDamageHit("Ballad Skill", ActionType.SKILL, 1.0);
+        AttackAction zeroChargeHit = typedDamageHit("Ballad zero Charge", ActionType.CHARGE, 0.0);
+
+        ballad.onDamage(owner, normalHit, 0.0, sim);
+        assertClose(0.16,
+                effectiveStatAt(owner, StatType.NORMAL_ATTACK_DMG_BONUS, 0.0), EPS,
+                "Ballad first R5 Normal stack");
+        assertClose(0.12,
+                effectiveStatAt(owner, StatType.CHARGED_ATTACK_DMG_BONUS, 0.0), EPS,
+                "Ballad first R5 Charged stack");
+        ballad.onDamage(owner, normalHit, 0.299, sim);
+        assertClose(0.16,
+                effectiveStatAt(owner, StatType.NORMAL_ATTACK_DMG_BONUS, 0.299), EPS,
+                "Ballad should reject a hit immediately before CT");
+        ballad.onDamage(owner, normalHit, 0.3, sim);
+        ballad.onDamage(owner, normalHit, 0.6, sim);
+        assertClose(0.48,
+                effectiveStatAt(owner, StatType.NORMAL_ATTACK_DMG_BONUS, 0.6), EPS,
+                "Ballad should allow a stack at exact CT and cap at three");
+        assertClose(0.36,
+                effectiveStatAt(owner, StatType.CHARGED_ATTACK_DMG_BONUS, 0.6), EPS,
+                "Ballad should scale unequal Charged bonuses across three stacks");
+
+        ballad.onDamage(owner, normalHit, 0.9, sim);
+        ballad.onDamage(owner, skillHit, 1.2, sim);
+        ballad.onDamage(owner, zeroChargeHit, 1.2, sim);
+        assertClose(0.48,
+                effectiveStatAt(owner, StatType.NORMAL_ATTACK_DMG_BONUS, 6.899), EPS,
+                "Ballad cap refresh should preserve all stacks before expiry");
+        assertClose(0.0,
+                effectiveStatAt(owner, StatType.NORMAL_ATTACK_DMG_BONUS, 6.9), EPS,
+                "Ballad should expire all stacks exactly");
+
+        model.weapon.BalladOfTheBoundlessBlue persistentBallad =
+                new model.weapon.BalladOfTheBoundlessBlue();
+        TestCharacter persistentOwner = testCharacter(Element.HYDRO, CharacterId.SUCROSE);
+        persistentOwner.setWeapon(persistentBallad);
+        CombatSimulator persistentSim = simulatorWith(persistentOwner);
+        persistentBallad.onDamage(persistentOwner, normalHit, 0.0, persistentSim);
+        persistentSim.addCharacter(testCharacter(Element.PYRO, CharacterId.XIANGLING));
+        persistentSim.setActiveCharacter(CharacterId.XIANGLING);
+        assertClose(0.16,
+                effectiveStatAt(
+                        persistentOwner, StatType.NORMAL_ATTACK_DMG_BONUS, 1.0), EPS,
+                "Ballad stacks should persist while the owner is off-field");
+
+        model.weapon.BalladOfTheBoundlessBlue r1Ballad =
+                new model.weapon.BalladOfTheBoundlessBlue(1);
+        TestCharacter r1Owner = testCharacter(Element.HYDRO);
+        r1Owner.setWeapon(r1Ballad);
+        CombatSimulator r1Sim = simulatorWith(r1Owner);
+        r1Ballad.onDamage(r1Owner, normalHit, 0.0, r1Sim);
+        assertClose(0.08,
+                resolvedStat(r1Sim, r1Owner, StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "R1 Ballad Normal bonus");
+        assertClose(0.06,
+                resolvedStat(r1Sim, r1Owner, StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "R1 Ballad Charged bonus");
+
+        boolean lowRefinementRejected = false;
+        try {
+            new model.weapon.BalladOfTheBoundlessBlue(0);
+        } catch (IllegalArgumentException expected) {
+            lowRefinementRejected = true;
+        }
+        assertTrue(lowRefinementRejected, "Ballad should reject refinement zero");
+
+        boolean highRefinementRejected = false;
+        try {
+            new model.weapon.BalladOfTheBoundlessBlue(6);
+        } catch (IllegalArgumentException expected) {
+            highRefinementRejected = true;
+        }
+        assertTrue(highRefinementRejected, "Ballad should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
