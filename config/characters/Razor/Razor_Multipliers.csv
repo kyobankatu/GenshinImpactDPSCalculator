@@ -1,0 +1,21 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Razor,NORMAL,N1,9,1.6132,0
+Razor,NORMAL,N2,9,1.38972,0
+Razor,NORMAL,N3,9,1.73752,0
+Razor,NORMAL,N4,9,2.28808,0
+Razor,CHARGE,Charged Spin,9,1.1490,0
+Razor,PLUNGE,Plunge High,9,3.764769,0
+Razor,SKILL,Claw and Thunder Press,12,3.9840,0
+Razor,SKILL,Claw and Thunder Hold,12,5.9040,0
+Razor,BURST,Lightning Fang,12,3.20,0
+Razor,BURST,Lightning Fang Echo,12,0.48,0
+Razor,BURST,Lightning Fang Attack Speed,12,0.40,0
+Razor,PASSIVE,Electro Sigil Duration,1,18.0,0
+Razor,PASSIVE,Electro Sigil Energy Recharge,1,0.20,0
+Razor,PASSIVE,Electro Sigil Energy,1,5.0,0
+Razor,PASSIVE,Lightning Fang Duration,1,15.0,0
+Razor,PASSIVE,Hunger Energy Recharge,1,0.30,0
+Razor,PASSIVE,C1 Damage Bonus,1,0.10,0
+Razor,PASSIVE,C1 Duration,1,8.0,0
+Razor,PASSIVE,C6 Lightning,1,1.0,0
+Razor,PASSIVE,C6 Cooldown,1,10.0,0

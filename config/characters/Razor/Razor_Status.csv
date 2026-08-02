@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Razor,STATS,Base HP,90,11962,0
+Razor,STATS,Base ATK,90,234,0
+Razor,STATS,Base DEF,90,751,0
+Razor,STATS,Ascension Physical DMG,90,0.30,0
+Razor,STATS,Energy Cost,90,80,0
+Razor,STATS,Constellation,6,6,0
+Razor,CONFIG,Character Level,90,90,0
+Razor,CONFIG,Normal Level,9,9,0
+Razor,CONFIG,Skill Level,12,12,0
+Razor,CONFIG,Burst Level,12,12,0

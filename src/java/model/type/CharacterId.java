@@ -39,6 +39,8 @@ public enum CharacterId {
     BARBARA(12, "Barbara"),
     /** Noelle (Geo claymore on-field DPS). */
     NOELLE(13, "Noelle"),
+    /** Razor (Electro claymore on-field DPS). */
+    RAZOR(14, "Razor"),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown");
 
