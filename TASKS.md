@@ -13790,3 +13790,51 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Hybrid Reaction Window Weapon Campaign
+
+Status: Active. Add two unequal ATK/EM windows with reaction-only and
+Skill-hit-or-reaction trigger policies.
+
+Scope:
+
+- Add a shared active-owner window that listens to attributed reactions and can
+  optionally refresh after positive Skill damage.
+- Add Missive Windspear and Mailed Flower with sourced metadata, R1-R5 values,
+  R5 defaults, exact durations, and focused regressions.
+
+Out of scope for this pass:
+
+- Multi-target hit counts, characters, formulas, RL, generated docs, and
+  unrelated reaction equipment.
+
+### Phase 1: Add Hybrid Reaction Windows
+
+Target files:
+
+- `src/java/model/weapon/SkillHitOrReactionWindowWeapon.java` (new)
+- `src/java/model/weapon/MissiveWindspear.java` (new)
+- `src/java/model/weapon/MailedFlower.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Missive activates only after an attributed non-NONE owner reaction; Mailed
+  also activates after positive Skill damage and rejects wrong/zero hits.
+- Both require the owner on-field to trigger/refresh, persist after switching
+  out, refresh without stacking, and use half-open 10/8-second windows.
+- Mailed's triggering hit is calculated before activation through the existing
+  post-damage hook; metadata, R1-R5 values/defaults, and invalid ranks match KQM.
+
+Test cases to add or update:
+
+- Normal: reaction trigger, Mailed Skill trigger, ATK/EM values, metadata.
+- Boundary: R1/R5, refresh, before/exact 10/8-second expiry, off-field persistence.
+- Abnormal: NONE/foreign/off-field reaction, Normal/zero Skill, refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc` at the shared/final API boundary
+- `python scripts/preflight.py`

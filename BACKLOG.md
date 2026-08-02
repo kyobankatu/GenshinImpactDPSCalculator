@@ -2281,3 +2281,13 @@ experiment record.
 - **Plan:** `TASKS.md` Additional Hit-Stack Weapon Expansion
 - **Completion:** `bf06373` adds both variants and focused regressions;
   build/Javadoc/leak gates pass
+
+### B-093 — Hybrid reaction-window weapon coverage
+
+- **Status:** active
+- **Scope:** Missive Windspear and Mailed Flower; RL excluded
+- **Value/risk:** two complete unequal-stat windows share attributed reaction
+  and post-damage Skill hooks already used by the simulator
+- **Evidence boundary:** KQM TCL metadata, R1-R5 ATK/EM values, 10/8-second
+  windows, Mailed active-owner gate and trigger-hit ordering
+- **Plan:** `TASKS.md` Hybrid Reaction Window Weapon Campaign
