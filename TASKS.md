@@ -12830,6 +12830,166 @@ Completion evidence:
 - `./gradlew ReactionRegressionTest`, `./gradlew build`, `./gradlew javadoc`,
   and `python scripts/preflight.py` passed on 2026-08-02.
 
+## Implementation Order: Expanded Artifact Coverage Campaign
+
+Status: In progress. This campaign adds six missing four-piece artifact sets
+whose complete combat effects fit existing stat, energy, reaction, damage,
+party-buff, and enemy-aura contracts; RL and generated docs remain excluded.
+
+Scope:
+
+- Add Wanderer's Troupe and Finale of the Deep Galleries for weapon- and
+  energy-state conditionals.
+- Add Instructor and Deepwood Memories for reaction and team-debuff support.
+- Add Blizzard Strayer and Nymph's Dream for live target state and independent
+  action-category stacks.
+
+Out of scope for this pass:
+
+- Healing/current HP, shields, enemy defeat, incoming damage, Nightsoul,
+  multi-target geometry, action-cast contract expansion, RL, and generated docs.
+
+Definitions:
+
+- Each class represents an equipped four-piece set and includes its two-piece
+  fixed stats, matching the existing artifact abstraction.
+
+### Phase 1: Weapon and Energy-State Sets - Done
+
+Why first:
+
+- These owner-local sets need no team-global typed buff identity and establish
+  metadata/constructor patterns for the batch.
+
+Target files:
+
+- `src/java/model/artifact/WanderersTroupe.java` (new)
+- `src/java/model/artifact/FinaleOfTheDeepGalleries.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Tasks:
+
+- Implement supplied/fresh stats, canonical names, strict binding, and exact
+  weapon or current-energy conditionals.
+- Track Finale's six-second cross-category lockouts after Normal/Burst damage.
+
+Acceptance criteria:
+
+- Wanderer's Troupe grants EM +80 and Charged Attack DMG +35% only to Bow or
+  Catalyst owners.
+- Finale grants Cryo DMG +15%; at zero Energy it grants Normal and Burst DMG
+  +60%, while Normal/Burst hits suppress the opposite bonus for six seconds.
+
+Test cases to add or update:
+
+- Normal: metadata, supplied stats, all weapon gates, zero/nonzero Energy, and
+  both Finale hit directions.
+- Boundary: exact six-second lock expiry and off-field Burst damage.
+- Abnormal: null stats, wrong callback binding, duplicate/cross-simulator init,
+  non-Normal/Burst and zero-damage hit classifications.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
+
+Completion evidence:
+
+- Table-driven weapon gates plus Finale energy, category, off-field, exact
+  six-second lock, invalid callback, binding, metadata, and supplied-stat
+  regressions pass.
+
+### Phase 2: Reaction and Dendro Support Sets - Done
+
+Why second:
+
+- These sets share post-resolution ordering and typed nonstacking team effects.
+
+Target files:
+
+- `src/java/model/artifact/Instructor.java` (new)
+- `src/java/model/artifact/DeepwoodMemories.java` (new)
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Tasks:
+
+- Implement Instructor's on-field owner reaction refresh and team EM window.
+- Implement Deepwood's Skill/Burst hit-triggered party Dendro RES shred.
+
+Acceptance criteria:
+
+- Instructor grants EM +80 and refreshes one typed party EM +120 window for
+  eight seconds after an on-field owner reaction, after the triggering reaction.
+- Deepwood grants Dendro DMG +15% and applies one typed Dendro RES shred +30%
+  for eight seconds after owner Skill/Burst hits, including off-field hits.
+
+Test cases to add or update:
+
+- Normal: owner/on-field reaction, off-field Skill/Burst hit, all-party scope,
+  and fixed two-piece stats.
+- Boundary: exact eight-second expiry/refresh and trigger-hit exclusion.
+- Abnormal: NONE/wrong/off-field Instructor reaction, wrong/non-Skill/Burst
+  Deepwood hit, same-id replacement, and cross binding.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
+
+Completion evidence:
+
+- Instructor owner/field/NONE, typed refresh, and exact expiry plus Deepwood
+  off-field/zero-damage categories, party scope, typed refresh, and exact
+  expiry regressions pass.
+- Both phases pass `./gradlew ReactionRegressionTest`, `./gradlew build`,
+  `./gradlew javadoc`, and `python scripts/preflight.py` on 2026-08-02.
+
+### Phase 3: Target State and Independent Hit Categories
+
+Why third:
+
+- Live pre-hit aura/freeze reads and independent category windows carry the
+  highest ordering risk in this batch.
+
+Target files:
+
+- `src/java/model/artifact/BlizzardStrayer.java` (new)
+- `src/java/model/artifact/NymphsDream.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Tasks:
+
+- Resolve Blizzard bonuses from live pre-hit Cryo aura and literal Freeze state.
+- Track Nymph Normal, Charged, Plunging, Skill, and Burst eight-second windows
+  independently and map active-category count to exact ATK/Hydro tiers.
+
+Acceptance criteria:
+
+- Blizzard grants Cryo DMG +15%, CRIT Rate +20% against Cryo, and +40% against
+  literally Frozen targets without snapshotting or buffing the Freeze-applying hit.
+- Nymph grants Hydro DMG +15%; one/two/three-or-more active categories grant
+  ATK +7/16/25% and Hydro DMG +4/9/15%, with same-category refresh only.
+
+Test cases to add or update:
+
+- Normal: Cryo/Frozen/clear target states and every Nymph category.
+- Boundary: pre-hit Freeze/removal ordering and exact eight-second independent
+  refresh/expiry tiers.
+- Abnormal: null enemy/simulator, wrong owner/simulator, unclassified/zero hit,
+  duplicate binding, and independent instances.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
+
 ### Phase 2: Switch-Activated Weapons - Done
 
 Target files:

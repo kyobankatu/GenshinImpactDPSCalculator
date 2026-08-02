@@ -157,6 +157,8 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_SwitchActivatedWeapons();
         testAccuracyPhaseF_CoreArtifactSetsPhaseOne();
         testAccuracyPhaseF_CoreArtifactSetsPhaseTwo();
+        testAccuracyPhaseF_ExpandedArtifactSetsPhaseOne();
+        testAccuracyPhaseF_ExpandedArtifactSetsPhaseTwo();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -11333,6 +11335,346 @@ public class ReactionRegressionTest {
                 "Gilded Dreams should reject null supplied stats");
         assertTrue(nullPaleStatsRejected,
                 "Pale Flame should reject null supplied stats");
+    }
+
+    private static void testAccuracyPhaseF_ExpandedArtifactSetsPhaseOne() {
+        StatsContainer wandererStats = new StatsContainer();
+        wandererStats.set(StatType.CRIT_RATE, 0.15);
+        model.artifact.WanderersTroupe suppliedWanderer =
+                new model.artifact.WanderersTroupe(wandererStats);
+        assertEquals("Wanderer's Troupe", suppliedWanderer.getName(),
+                "Wanderer's Troupe display name");
+        assertClose(80.0,
+                suppliedWanderer.getStats().get(StatType.ELEMENTAL_MASTERY),
+                EPS, "Wanderer's Troupe two-piece EM");
+        assertClose(0.15,
+                suppliedWanderer.getStats().get(StatType.CRIT_RATE), EPS,
+                "Wanderer's Troupe should preserve supplied stats");
+
+        Weapon[] wandererWeapons = {
+            new model.weapon.DullBlade(),
+            new model.weapon.WasterGreatsword(),
+            new model.weapon.BeginnersProtector(),
+            new model.weapon.HuntersBow(),
+            new model.weapon.ApprenticesNotes(),
+            null
+        };
+        for (int index = 0; index < wandererWeapons.length; index++) {
+            TestCharacter owner = testCharacter(Element.ANEMO);
+            owner.setWeapon(wandererWeapons[index]);
+            owner.setArtifacts(new model.artifact.WanderersTroupe());
+            simulatorWith(owner);
+            double expectedChargedBonus = index == 3 || index == 4
+                    ? 0.35 : 0.0;
+            assertClose(80.0,
+                    effectiveStatAt(
+                            owner, StatType.ELEMENTAL_MASTERY, 0.0), EPS,
+                    "Wanderer's Troupe static EM index " + index);
+            assertClose(expectedChargedBonus,
+                    effectiveStatAt(
+                            owner, StatType.CHARGED_ATTACK_DMG_BONUS, 0.0),
+                    EPS, "Wanderer's Troupe weapon gate index " + index);
+        }
+
+        StatsContainer finaleStats = new StatsContainer();
+        finaleStats.set(StatType.CRIT_DMG, 0.25);
+        model.artifact.FinaleOfTheDeepGalleries suppliedFinale =
+                new model.artifact.FinaleOfTheDeepGalleries(finaleStats);
+        assertEquals("Finale of the Deep Galleries", suppliedFinale.getName(),
+                "Finale display name");
+        assertClose(0.15,
+                suppliedFinale.getStats().get(StatType.CRYO_DMG_BONUS), EPS,
+                "Finale two-piece Cryo bonus");
+        assertClose(0.25,
+                suppliedFinale.getStats().get(StatType.CRIT_DMG), EPS,
+                "Finale should preserve supplied stats");
+
+        model.artifact.FinaleOfTheDeepGalleries finale =
+                new model.artifact.FinaleOfTheDeepGalleries();
+        TestCharacter finaleOwner = testCharacter(
+                Element.CRYO, CharacterId.SUCROSE);
+        finaleOwner.setArtifacts(finale);
+        CombatSimulator finaleSim = simulatorWith(finaleOwner);
+        finaleOwner.restoreCurrentEnergy(0.0);
+        assertClose(0.60,
+                resolvedStat(finaleSim, finaleOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Finale zero-Energy Normal bonus");
+        assertClose(0.60,
+                resolvedStat(finaleSim, finaleOwner,
+                        StatType.BURST_DMG_BONUS), EPS,
+                "Finale zero-Energy Burst bonus");
+        AttackAction finaleNormal = typedDamageHit(
+                "Finale Normal fixture", ActionType.NORMAL, 1.0);
+        AttackAction finaleBurst = typedDamageHit(
+                "Finale Burst fixture", ActionType.BURST, 1.0);
+        AttackAction finaleSkill = typedDamageHit(
+                "Finale Skill fixture", ActionType.SKILL, 1.0);
+        finale.onDamage(finaleSim, finaleSkill, 100.0, finaleOwner);
+        finale.onDamage(finaleSim, finaleNormal, 0.0, finaleOwner);
+        assertClose(0.60,
+                resolvedStat(finaleSim, finaleOwner,
+                        StatType.BURST_DMG_BONUS), EPS,
+                "Finale should reject Skill and zero-damage callbacks");
+        finale.onDamage(finaleSim, finaleNormal, 100.0, finaleOwner);
+        assertClose(0.60,
+                resolvedStat(finaleSim, finaleOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Finale Normal hit should retain Normal bonus");
+        assertClose(0.0,
+                resolvedStat(finaleSim, finaleOwner,
+                        StatType.BURST_DMG_BONUS), EPS,
+                "Finale Normal hit should suppress Burst bonus");
+        finaleOwner.restoreCurrentEnergy(10.0);
+        assertClose(0.0,
+                resolvedStat(finaleSim, finaleOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Finale should require exactly zero Energy");
+        finaleOwner.restoreCurrentEnergy(0.0);
+        finaleSim.advanceTime(5.999);
+        assertClose(0.0,
+                resolvedStat(finaleSim, finaleOwner,
+                        StatType.BURST_DMG_BONUS), EPS,
+                "Finale before Burst lock expiry");
+        finaleSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.60,
+                resolvedStat(finaleSim, finaleOwner,
+                        StatType.BURST_DMG_BONUS), EPS,
+                "Finale at exact Burst lock expiry");
+        finale.onDamage(finaleSim, finaleBurst, 100.0, finaleOwner);
+        assertClose(0.0,
+                resolvedStat(finaleSim, finaleOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Finale Burst hit should suppress Normal bonus");
+        assertClose(0.60,
+                resolvedStat(finaleSim, finaleOwner,
+                        StatType.BURST_DMG_BONUS), EPS,
+                "Finale Burst hit should retain Burst bonus");
+
+        TestCharacter finaleAlly = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        finaleSim.addCharacter(finaleAlly);
+        finaleSim.setActiveCharacter(CharacterId.AMBER);
+        finaleSim.advanceTime(6.0);
+        finale.onDamage(finaleSim, finaleBurst, 100.0, finaleOwner);
+        assertClose(0.0,
+                resolvedStat(finaleSim, finaleOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Finale should accept off-field Burst damage");
+        finale.onDamage(
+                new CombatSimulator(), finaleNormal, 100.0, finaleOwner);
+        finale.onDamage(finaleSim, finaleNormal, 100.0, finaleAlly);
+
+        finale.initializeForSimulator(finaleOwner, finaleSim, false);
+        boolean finaleCrossSimulatorRejected = false;
+        try {
+            finale.initializeForSimulator(
+                    finaleOwner, new CombatSimulator(), false);
+        } catch (IllegalStateException expected) {
+            finaleCrossSimulatorRejected = true;
+        }
+        assertTrue(finaleCrossSimulatorRejected,
+                "Finale should reject cross-simulator reuse");
+        boolean nullWandererStatsRejected = false;
+        boolean nullFinaleStatsRejected = false;
+        try {
+            new model.artifact.WanderersTroupe(null);
+        } catch (NullPointerException expected) {
+            nullWandererStatsRejected = true;
+        }
+        try {
+            new model.artifact.FinaleOfTheDeepGalleries(null);
+        } catch (NullPointerException expected) {
+            nullFinaleStatsRejected = true;
+        }
+        assertTrue(nullWandererStatsRejected,
+                "Wanderer's Troupe should reject null supplied stats");
+        assertTrue(nullFinaleStatsRejected,
+                "Finale should reject null supplied stats");
+    }
+
+    private static void testAccuracyPhaseF_ExpandedArtifactSetsPhaseTwo() {
+        StatsContainer instructorStats = new StatsContainer();
+        instructorStats.set(StatType.CRIT_RATE, 0.10);
+        model.artifact.Instructor suppliedInstructor =
+                new model.artifact.Instructor(instructorStats);
+        assertEquals("Instructor", suppliedInstructor.getName(),
+                "Instructor display name");
+        assertClose(80.0,
+                suppliedInstructor.getStats().get(StatType.ELEMENTAL_MASTERY),
+                EPS, "Instructor two-piece EM");
+        assertClose(0.10,
+                suppliedInstructor.getStats().get(StatType.CRIT_RATE), EPS,
+                "Instructor should preserve supplied stats");
+
+        model.artifact.Instructor instructor =
+                new model.artifact.Instructor();
+        TestCharacter instructorOwner = testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE);
+        instructorOwner.setArtifacts(instructor);
+        TestCharacter instructorAlly = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        CombatSimulator instructorSim = simulatorWith(instructorOwner);
+        instructorSim.addCharacter(instructorAlly);
+        ReactionResult instructorReaction = ReactionResult.transform(
+                0.0, "Instructor Swirl", ReactionResult.Kind.SWIRL,
+                Element.PYRO);
+        instructorSim.notifyReaction(ReactionResult.none(), instructorOwner);
+        instructorSim.notifyReaction(instructorReaction, instructorAlly);
+        assertClose(80.0,
+                resolvedStat(instructorSim, instructorOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Instructor should reject NONE and wrong triggers");
+        instructorSim.notifyReaction(instructorReaction, instructorOwner);
+        assertClose(200.0,
+                resolvedStat(instructorSim, instructorOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Instructor owner team EM");
+        assertClose(120.0,
+                resolvedStat(instructorSim, instructorAlly,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Instructor ally team EM");
+        assertEquals(1,
+                (int) instructorSim.getTeamBuffList().stream()
+                        .filter(buff -> buff.getId()
+                                == BuffId.INSTRUCTOR_4PC_TEAM_EM)
+                        .count(),
+                "Instructor should apply one typed team buff");
+        instructorSim.setActiveCharacter(CharacterId.AMBER);
+        instructorSim.advanceTime(4.0);
+        instructorSim.notifyReaction(instructorReaction, instructorOwner);
+        instructorSim.advanceTime(3.999);
+        assertClose(120.0,
+                resolvedStat(instructorSim, instructorAlly,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Off-field Instructor trigger should not refresh");
+        instructorSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0,
+                resolvedStat(instructorSim, instructorAlly,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Instructor should expire at exactly eight seconds");
+        instructorSim.setActiveCharacter(CharacterId.SUCROSE);
+        instructorSim.notifyReaction(instructorReaction, instructorOwner);
+        instructorSim.advanceTime(4.0);
+        instructorSim.notifyReaction(instructorReaction, instructorOwner);
+        assertEquals(1,
+                (int) instructorSim.getTeamBuffList().stream()
+                        .filter(buff -> buff.getId()
+                                == BuffId.INSTRUCTOR_4PC_TEAM_EM)
+                        .count(),
+                "Instructor refresh should replace the typed buff");
+        instructorSim.advanceTime(7.999);
+        assertClose(120.0,
+                resolvedStat(instructorSim, instructorAlly,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Instructor before refreshed expiry");
+        instructorSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0,
+                resolvedStat(instructorSim, instructorAlly,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Instructor at refreshed exact expiry");
+
+        StatsContainer deepwoodStats = new StatsContainer();
+        deepwoodStats.set(StatType.CRIT_DMG, 0.20);
+        model.artifact.DeepwoodMemories suppliedDeepwood =
+                new model.artifact.DeepwoodMemories(deepwoodStats);
+        assertEquals("Deepwood Memories", suppliedDeepwood.getName(),
+                "Deepwood Memories display name");
+        assertClose(0.15,
+                suppliedDeepwood.getStats().get(StatType.DENDRO_DMG_BONUS),
+                EPS, "Deepwood two-piece Dendro bonus");
+        assertClose(0.20,
+                suppliedDeepwood.getStats().get(StatType.CRIT_DMG), EPS,
+                "Deepwood should preserve supplied stats");
+
+        model.artifact.DeepwoodMemories deepwood =
+                new model.artifact.DeepwoodMemories();
+        TestCharacter deepwoodOwner = testCharacter(
+                Element.DENDRO, CharacterId.SUCROSE);
+        deepwoodOwner.setArtifacts(deepwood);
+        TestCharacter deepwoodAlly = testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU);
+        CombatSimulator deepwoodSim = simulatorWith(deepwoodOwner);
+        deepwoodSim.addCharacter(deepwoodAlly);
+        deepwoodSim.setActiveCharacter(CharacterId.XINGQIU);
+        AttackAction deepwoodSkill = typedDamageHit(
+                "Deepwood Skill fixture", ActionType.SKILL, 1.0);
+        AttackAction deepwoodBurst = typedDamageHit(
+                "Deepwood Burst fixture", ActionType.BURST, 1.0);
+        AttackAction deepwoodNormal = typedDamageHit(
+                "Deepwood Normal fixture", ActionType.NORMAL, 1.0);
+        assertClose(0.15,
+                resolvedStat(deepwoodSim, deepwoodOwner,
+                        StatType.DENDRO_DMG_BONUS), EPS,
+                "Deepwood static Dendro bonus");
+        assertClose(0.0,
+                resolvedStat(deepwoodSim, deepwoodOwner,
+                        StatType.DENDRO_RES_SHRED), EPS,
+                "Deepwood trigger hit should start without shred");
+        deepwood.onDamage(deepwoodSim, deepwoodNormal, 100.0, deepwoodOwner);
+        assertClose(0.0,
+                resolvedStat(deepwoodSim, deepwoodOwner,
+                        StatType.DENDRO_RES_SHRED), EPS,
+                "Deepwood should reject Normal hits");
+        deepwood.onDamage(deepwoodSim, deepwoodSkill, 0.0, deepwoodOwner);
+        assertClose(0.30,
+                resolvedStat(deepwoodSim, deepwoodOwner,
+                        StatType.DENDRO_RES_SHRED), EPS,
+                "Off-field zero-damage Deepwood Skill hit");
+        assertClose(0.30,
+                resolvedStat(deepwoodSim, deepwoodAlly,
+                        StatType.DENDRO_RES_SHRED), EPS,
+                "Deepwood shred should apply to the party's target stats");
+        assertEquals(1,
+                (int) deepwoodSim.getTeamBuffList().stream()
+                        .filter(buff -> buff.getId()
+                                == BuffId.DEEPWOOD_MEMORIES_4PC_SHRED)
+                        .count(),
+                "Deepwood should apply one typed shred");
+        deepwoodSim.advanceTime(4.0);
+        deepwood.onDamage(deepwoodSim, deepwoodBurst, 100.0, deepwoodOwner);
+        deepwoodSim.advanceTime(7.999);
+        assertClose(0.30,
+                resolvedStat(deepwoodSim, deepwoodOwner,
+                        StatType.DENDRO_RES_SHRED), EPS,
+                "Deepwood before refreshed expiry");
+        deepwoodSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0,
+                resolvedStat(deepwoodSim, deepwoodOwner,
+                        StatType.DENDRO_RES_SHRED), EPS,
+                "Deepwood at exact refreshed expiry");
+        deepwood.onDamage(
+                new CombatSimulator(), deepwoodSkill, 100.0, deepwoodOwner);
+        deepwood.onDamage(
+                deepwoodSim, deepwoodSkill, 100.0, deepwoodAlly);
+
+        instructor.initializeForSimulator(
+                instructorOwner, instructorSim, true);
+        boolean instructorCrossSimulatorRejected = false;
+        try {
+            instructor.initializeForSimulator(
+                    instructorOwner, new CombatSimulator(), true);
+        } catch (IllegalStateException expected) {
+            instructorCrossSimulatorRejected = true;
+        }
+        assertTrue(instructorCrossSimulatorRejected,
+                "Instructor should reject cross-simulator reuse");
+        boolean nullInstructorStatsRejected = false;
+        boolean nullDeepwoodStatsRejected = false;
+        try {
+            new model.artifact.Instructor(null);
+        } catch (NullPointerException expected) {
+            nullInstructorStatsRejected = true;
+        }
+        try {
+            new model.artifact.DeepwoodMemories(null);
+        } catch (NullPointerException expected) {
+            nullDeepwoodStatsRejected = true;
+        }
+        assertTrue(nullInstructorStatsRejected,
+                "Instructor should reject null supplied stats");
+        assertTrue(nullDeepwoodStatsRejected,
+                "Deepwood should reject null supplied stats");
     }
 
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {

@@ -2750,3 +2750,22 @@ experiment record.
 - **Completion:** Gladiator's Finale, Golden Troupe, Gilded Dreams, and Pale
   Flame passed focused metadata, field, composition, timing, trigger, binding,
   independence, reaction regression, build, Javadoc, and preflight checks
+
+### B-127 — Expanded artifact set coverage
+
+- **Status:** in-progress
+- **Source:** explicit broad content-coverage request
+- **Scope:** Wanderer's Troupe, Finale of the Deep Galleries, Instructor,
+  Deepwood Memories, Blizzard Strayer, and Nymph's Dream; RL excluded
+- **Value/risk:** adds six complete and broadly useful sets through existing
+  owner, reaction, damage, party-buff, energy, and enemy-state capabilities
+- **Evidence boundary:** maintained KQM artifact catalog and evidence vault,
+  accessed 2026-08-02, provide fixed values, pre-/post-hit ordering, exact
+  durations, category independence, target state, and field requirements:
+  https://library.keqingmains.com/equipment/artifacts
+  https://library.keqingmains.com/evidence/equipment/artifacts
+- **Classification:** adopt exact described combat behavior; unavailable
+  unequip/co-op behavior remains outside simulator lifecycle
+- **Risk/proof:** planned; focused regressions plus reaction regression, build,
+  Javadoc, and preflight
+- **Plan:** `TASKS.md` Expanded Artifact Coverage Campaign
