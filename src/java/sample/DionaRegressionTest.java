@@ -1,6 +1,10 @@
 package sample;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import mechanics.buff.Buff;
+import mechanics.buff.SimpleBuff;
 import model.character.Diona;
 import model.entity.Enemy;
 import model.stats.StatsContainer;
@@ -8,12 +12,14 @@ import model.type.CharacterId;
 import model.type.StatType;
 import simulation.CombatSimulator;
 import simulation.SimulatorSnapshot;
+import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
 
 /** Focused metadata, action, field, constellation, and guard checks. */
 public final class DionaRegressionTest {
     private static final double EPSILON = 1e-8;
+    private static final double FRAME = 1.0 / 60.0;
 
     private DionaRegressionTest() {
     }
@@ -55,12 +61,27 @@ public final class DionaRegressionTest {
     private static void testNormalChargeAndPlungeActions() {
         Diona diona = new Diona(null, null, 0);
         CombatSimulator sim = simulatorWith(diona);
+        List<ActionRecord> normals = captureNamedActions(
+                sim, "Katzlein Style N");
         for (int step = 0; step < 5; step++) {
             perform(sim, CharacterActionKey.NORMAL);
         }
+        assertEquals(5, normals.size(), "Diona Normal hit count");
+        assertClose(29.0 * FRAME, normals.get(0).time,
+                "Diona N1 hitmark plus projectile travel");
         double afterNormals = sim.getTotalDamage();
         assertTrue(afterNormals > 0.0, "Diona Normal chain deals damage");
+
+        List<ActionRecord> charged = captureNamedActions(
+                sim, "Katzlein Style Fully Charged");
+        double chargeStart = sim.getCurrentTime();
         perform(sim, CharacterActionKey.CHARGE);
+        assertEquals(0, charged.size(),
+                "Diona charged projectile remains in flight at frame 94");
+        sim.advanceTime(2.0 * FRAME + 0.001);
+        assertEquals(1, charged.size(), "Diona charged projectile hit count");
+        assertClose(chargeStart + 96.0 * FRAME, charged.get(0).time,
+                "Diona charged snapshot and travel timing");
         perform(sim, CharacterActionKey.PLUNGE);
         assertTrue(sim.getTotalDamage() > afterNormals,
                 "Diona Charged and Plunging attacks deal damage");
@@ -69,13 +90,22 @@ public final class DionaRegressionTest {
     private static void testHoldSkillAndC2() {
         Diona c0 = new Diona(null, null, 0);
         CombatSimulator c0Sim = simulatorWith(c0);
+        List<ActionRecord> c0Paws = captureNamedActions(c0Sim, "Icy Paw");
         c0.restoreCurrentEnergy(0.0);
         perform(c0Sim, CharacterActionKey.SKILL);
+        assertEquals(5, c0Paws.size(), "Diona Hold Skill paw count");
+        for (ActionRecord paw : c0Paws) {
+            assertClose(0.71264, paw.action.getDamagePercent(),
+                    "Diona C0 Skill level-9 multiplier");
+            assertTrue(paw.action.hasStatSnapshot(),
+                    "Diona paw owns cast-time snapshot");
+        }
         c0Sim.advanceTime(2.5);
         double c0Damage = c0Sim.getTotalDamage();
         assertTrue(c0Damage > 0.0, "Diona Hold Skill resolves five paws");
-        assertClose(15.0, c0.getSkillCooldownEndTime(),
-                "Diona Hold Skill starts 15-second cooldown");
+        assertClose(15.0 + 29.0 * FRAME,
+                c0.getSkillCooldownEndTime(),
+                "Diona Hold Skill starts cooldown at frame 29");
         assertClose(12.0, c0.getCurrentEnergy(),
                 "Diona Hold Skill resolves four expected Cryo particles");
 
@@ -85,9 +115,57 @@ public final class DionaRegressionTest {
         c2Sim.advanceTime(2.5);
         assertTrue(c2Sim.getTotalDamage() > c0Damage,
                 "Diona C2 increases Icy Paw damage");
+
+        Diona snapshotDiona = new Diona(null, null, 0);
+        snapshotDiona.addBuff(new SimpleBuff(
+                "Diona cast-only Skill ATK",
+                20.0 * FRAME,
+                0.0,
+                stats -> stats.add(StatType.ATK_PERCENT, 1.0)));
+        CombatSimulator snapshotSim = simulatorWith(snapshotDiona);
+        List<ActionRecord> snapshotPaws = captureNamedActions(
+                snapshotSim, "Icy Paw");
+        perform(snapshotSim, CharacterActionKey.SKILL);
+        assertClose(1.0,
+                snapshotPaws.get(0).action.getStatSnapshot()
+                        .get(StatType.ATK_PERCENT),
+                "Diona paw retains cast-only ATK");
+
+        Diona c5 = new Diona(null, null, 5);
+        CombatSimulator c5Sim = simulatorWith(c5);
+        List<ActionRecord> c5Paws = captureNamedActions(c5Sim, "Icy Paw");
+        perform(c5Sim, CharacterActionKey.SKILL);
+        assertClose(0.8384, c5Paws.get(0).action.getDamagePercent(),
+                "Diona C5 raises Skill to level 12");
     }
 
     private static void testBurstTicksC1C4AndC6() {
+        Diona c0 = new Diona(null, null, 0);
+        CombatSimulator c0Sim = simulatorWith(c0);
+        List<ActionRecord> c0Initial = captureNamedActions(
+                c0Sim, "Signature Mix Initial");
+        perform(c0Sim, CharacterActionKey.BURST);
+        assertClose(1.3600,
+                c0Initial.get(0).action.getDamagePercent(),
+                "Diona C0 Burst level-9 multiplier");
+        assertTrue(c0Initial.get(0).action.hasStatSnapshot(),
+                "Diona Burst initial owns cast-time snapshot");
+        assertClose(41.0 * FRAME, c0.getLastBurstTime(),
+                "Diona Burst cooldown starts at frame 41");
+        assertClose(20.0 + 41.0 * FRAME, c0.getBurstCooldownEndTime(),
+                "Diona Burst cooldown keeps sourced delay");
+        assertClose(0.0, c0.getCurrentEnergy(),
+                "Diona Burst spends Energy at frame 43");
+
+        Diona c3 = new Diona(null, null, 3);
+        CombatSimulator c3Sim = simulatorWith(c3);
+        List<ActionRecord> c3Initial = captureNamedActions(
+                c3Sim, "Signature Mix Initial");
+        perform(c3Sim, CharacterActionKey.BURST);
+        assertClose(1.6000,
+                c3Initial.get(0).action.getDamagePercent(),
+                "Diona C3 raises Burst to level 12");
+
         Diona diona = new Diona(null, null, 6);
         CombatSimulator sim = simulatorWith(diona);
         perform(sim, CharacterActionKey.BURST);
@@ -171,6 +249,19 @@ public final class DionaRegressionTest {
         return stats;
     }
 
+    private static List<ActionRecord> captureNamedActions(
+            CombatSimulator sim,
+            String namePrefix) {
+        List<ActionRecord> records = new ArrayList<>();
+        sim.addDamageListener((actor, action, damage, time) -> {
+            if (actor.getCharacterId() == CharacterId.DIONA
+                    && action.getName().startsWith(namePrefix)) {
+                records.add(new ActionRecord(action, time));
+            }
+        });
+        return records;
+    }
+
     private static void assertClose(
             double expected,
             double actual,
@@ -213,5 +304,15 @@ public final class DionaRegressionTest {
         }
         throw new AssertionError(message + ": expected "
                 + expected.getSimpleName());
+    }
+
+    private static final class ActionRecord {
+        private final AttackAction action;
+        private final double time;
+
+        private ActionRecord(AttackAction action, double time) {
+            this.action = action;
+            this.time = time;
+        }
     }
 }

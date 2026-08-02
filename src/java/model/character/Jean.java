@@ -63,7 +63,7 @@ public class Jean extends Character implements
             13, 6, 17, 37, 25
     };
     private static final int[] NORMAL_ACTION_FRAMES = {
-            25, 20, 31, 49, 68
+            22, 14, 28, 44, 68
     };
 
     private CombatSimulator initializedSimulator;
@@ -316,7 +316,7 @@ public class Jean extends Character implements
                                 Element.ANEMO,
                                 getTalentValue(
                                         "Skill Particles",
-                                        8.0 / 3.0),
+                                        2.67),
                                 ParticleType.PARTICLE));
     }
 
@@ -326,9 +326,11 @@ public class Jean extends Character implements
         boolean c3 = constellation >= 3;
 
         schedule(sim, castTime + 38.0 * FRAME, activeSim ->
-                markBurstUsed(
+                markBurstCooldownUsed(
                         activeSim.getCurrentTime(),
                         activeSim.getApplicableBuffs(this)));
+        schedule(sim, castTime + 41.0 * FRAME, activeSim ->
+                spendBurstEnergy(activeSim.getCurrentTime()));
         if (constellation >= 4) {
             schedule(sim, castTime + 39.0 * FRAME, activeSim ->
                     replaceC4Marker(

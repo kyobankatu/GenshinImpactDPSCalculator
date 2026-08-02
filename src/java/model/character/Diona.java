@@ -49,6 +49,7 @@ public final class Diona extends Character
     private static final int BURST_START_FRAME = 58;
     private static final int BURST_TICK_INTERVAL_FRAMES = 120;
     private static final int BURST_TICK_COUNT = 6;
+    private static final int PROJECTILE_TRAVEL_FRAMES = 10;
 
     private final Buff c6TeamBuff;
     private CombatSimulator initializedSimulator;
@@ -181,7 +182,9 @@ public final class Diona extends Character
 
     private void normalAttack(CombatSimulator sim) {
         double[] multipliers = { 0.6636, 0.6162, 0.8374, 0.7900, 0.9875 };
+        int[] hitmarkFrames = { 19, 11, 21, 10, 38 };
         int[] durationFrames = { 30, 21, 44, 21, 73 };
+        double castTime = sim.getCurrentTime();
         int step = normalAttackStep;
         AttackAction normal = attack(
                 "Katzlein Style N" + (step + 1),
@@ -192,14 +195,29 @@ public final class Diona extends Character
                 ICDType.Standard,
                 ICDTag.None,
                 0.0,
-                durationFrames[step] * FRAME);
-        sim.performAction(characterId, normal);
+                0.0);
+        double snapshotTime = castTime + hitmarkFrames[step] * FRAME;
+        schedule(sim, snapshotTime, activeSim -> {
+            normal.setStatSnapshot(captureActionSnapshot(
+                    activeSim,
+                    activeSim.getCurrentTime()));
+            schedule(
+                    activeSim,
+                    activeSim.getCurrentTime()
+                            + PROJECTILE_TRAVEL_FRAMES * FRAME,
+                    impactSim -> impactSim.performActionWithoutTimeAdvance(
+                            characterId, normal));
+        });
         normalAttackStep = (normalAttackStep + 1) % multipliers.length;
+        sim.advanceTime(durationFrames[step] * FRAME);
     }
 
     private void fullyChargedAimedShot(CombatSimulator sim) {
-        int durationFrames = constellation >= 4
-                && isBurstFieldActive(sim.getCurrentTime()) ? 58 : 94;
+        double castTime = sim.getCurrentTime();
+        boolean c4Field = constellation >= 4
+                && isBurstFieldActive(castTime);
+        int durationFrames = c4Field ? 58 : 94;
+        int hitmarkFrames = c4Field ? 50 : 86;
         AttackAction charged = attack(
                 "Katzlein Style Fully Charged Aimed Shot",
                 getTalentValue("Fully Charged Aimed Shot", 2.1080),
@@ -209,8 +227,19 @@ public final class Diona extends Character
                 ICDType.Standard,
                 ICDTag.ChargedAttack,
                 1.0,
-                durationFrames * FRAME);
-        sim.performAction(characterId, charged);
+                0.0);
+        schedule(sim, castTime + hitmarkFrames * FRAME, activeSim -> {
+            charged.setStatSnapshot(captureActionSnapshot(
+                    activeSim,
+                    activeSim.getCurrentTime()));
+            schedule(
+                    activeSim,
+                    activeSim.getCurrentTime()
+                            + PROJECTILE_TRAVEL_FRAMES * FRAME,
+                    impactSim -> impactSim.performActionWithoutTimeAdvance(
+                            characterId, charged));
+        });
+        sim.advanceTime(durationFrames * FRAME);
     }
 
     private void highPlunge(CombatSimulator sim) {
@@ -229,11 +258,18 @@ public final class Diona extends Character
 
     private void holdIcyPaws(CombatSimulator sim) {
         double castTime = sim.getCurrentTime();
-        markSkillUsed(castTime, sim.getApplicableBuffs(this));
+        StatsContainer skillSnapshot = captureActionSnapshot(sim, castTime);
+        schedule(sim, castTime + 29.0 * FRAME, activeSim ->
+                markSkillUsed(
+                        activeSim.getCurrentTime(),
+                        activeSim.getApplicableBuffs(this)));
+        boolean c5 = constellation >= 5;
         for (int paw = 0; paw < 5; paw++) {
             AttackAction action = attack(
                     "Icy Paw " + (paw + 1),
-                    getTalentValue("Icy Paw", 0.8384),
+                    getTalentValue(
+                            c5 ? "Icy Paw C5" : "Icy Paw",
+                            c5 ? 0.8384 : 0.71264),
                     Element.CRYO,
                     StatType.SKILL_DMG_BONUS,
                     ActionType.SKILL,
@@ -241,6 +277,7 @@ public final class Diona extends Character
                     ICDTag.ElementalSkill,
                     1.0,
                     0.0);
+            action.setStatSnapshot(skillSnapshot);
             if (constellation >= 2) {
                 action.addBonusStat(StatType.SKILL_DMG_BONUS, 0.15);
             }
@@ -265,9 +302,14 @@ public final class Diona extends Character
 
     private void signatureMix(CombatSimulator sim) {
         double castTime = sim.getCurrentTime();
-        markBurstUsed(castTime, sim.getApplicableBuffs(this));
         captureSnapshot(castTime, sim.getApplicableBuffs(this));
         StatsContainer burstSnapshot = getSnapshot().merge(null);
+        schedule(sim, castTime + 41.0 * FRAME, activeSim ->
+                markBurstCooldownUsed(
+                        activeSim.getCurrentTime(),
+                        activeSim.getApplicableBuffs(this)));
+        schedule(sim, castTime + 43.0 * FRAME, activeSim ->
+                spendBurstEnergy(activeSim.getCurrentTime()));
         double burstFieldStart = castTime + BURST_START_FRAME * FRAME;
         double burstFieldEnd = burstFieldStart + BURST_FIELD_DURATION;
         getActiveBuffs().removeIf(
@@ -276,9 +318,13 @@ public final class Diona extends Character
                 burstFieldStart,
                 BURST_FIELD_DURATION));
 
+        boolean c3 = constellation >= 3;
         AttackAction initial = attack(
                 "Signature Mix Initial",
-                getTalentValue("Signature Mix Initial", 1.6000),
+                getTalentValue(
+                        c3 ? "Signature Mix Initial C3"
+                                : "Signature Mix Initial",
+                        c3 ? 1.6000 : 1.3600),
                 Element.CRYO,
                 StatType.BURST_DMG_BONUS,
                 ActionType.BURST,
@@ -286,6 +332,7 @@ public final class Diona extends Character
                 ICDTag.ElementalBurst,
                 1.0,
                 0.0);
+        initial.setStatSnapshot(burstSnapshot);
         schedule(sim, burstFieldStart,
                 activeSim -> activeSim.performActionWithoutTimeAdvance(
                         characterId, initial));
@@ -293,7 +340,10 @@ public final class Diona extends Character
         for (int tick = 1; tick <= BURST_TICK_COUNT; tick++) {
             AttackAction dot = attack(
                     "Signature Mix Tick " + tick,
-                    getTalentValue("Signature Mix Tick", 1.0528),
+                    getTalentValue(
+                            c3 ? "Signature Mix Tick C3"
+                                    : "Signature Mix Tick",
+                            c3 ? 1.0528 : 0.89488),
                     Element.CRYO,
                     StatType.BURST_DMG_BONUS,
                     ActionType.BURST,
@@ -313,6 +363,18 @@ public final class Diona extends Character
                     activeSim -> receiveFlatEnergy(15.0));
         }
         sim.advanceTime(64.0 * FRAME);
+    }
+
+    private StatsContainer captureActionSnapshot(
+            CombatSimulator sim,
+            double currentTime) {
+        StatsContainer stats = getEffectiveStats(currentTime);
+        for (Buff buff : sim.getApplicableBuffs(this)) {
+            if (!buff.isExpired(currentTime)) {
+                buff.apply(stats, currentTime);
+            }
+        }
+        return stats;
     }
 
     private static AttackAction attack(

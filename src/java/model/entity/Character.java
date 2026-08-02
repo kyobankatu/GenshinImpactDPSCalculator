@@ -463,7 +463,28 @@ public abstract class Character {
      * @param applicableBuffs simulator-managed buffs applicable to this character
      */
     public void markBurstUsed(double currentTime, java.util.List<mechanics.buff.Buff> applicableBuffs) {
+        spendBurstEnergy(currentTime);
+        markBurstCooldownUsed(currentTime, applicableBuffs);
+    }
+
+    /**
+     * Spends Burst Energy and closes the current Energy accounting window.
+     *
+     * @param currentTime sourced Energy-consumption time
+     */
+    public void spendBurstEnergy(double currentTime) {
         energyState.markBurstUsed(getEnergyCost(), getMaxEnergy(), currentTime);
+    }
+
+    /**
+     * Starts the Burst cooldown independently from Energy consumption.
+     *
+     * @param currentTime sourced cooldown-start time
+     * @param applicableBuffs simulator-managed cooldown buffs at that time
+     */
+    public void markBurstCooldownUsed(
+            double currentTime,
+            java.util.List<mechanics.buff.Buff> applicableBuffs) {
         cooldownState.markBurstUsed(
                 currentTime,
                 getEffectiveCooldownDuration(

@@ -97,7 +97,7 @@ public final class JeanRegressionTest {
                 0.88796, 0.83740, 1.10758, 1.21028, 1.45518
         };
         int[] hitmarks = { 13, 6, 17, 37, 25 };
-        int[] durations = { 25, 20, 31, 49, 68 };
+        int[] durations = { 22, 14, 28, 44, 68 };
         double castTime = 0.0;
         for (int step = 0; step < multipliers.length; step++) {
             perform(sim, CharacterActionKey.NORMAL);
@@ -212,8 +212,8 @@ public final class JeanRegressionTest {
         assertClose(0.0, c0.getTotalParticleEnergy(), EPS,
                 "Jean particles wait for 100-frame travel");
         advanceTo(c0Sim, 121.0 * FRAME);
-        assertClose(8.0, c0.getTotalParticleEnergy(), EPS,
-                "Jean receives expected 8/3 same-element particles");
+        assertClose(8.01, c0.getTotalParticleEnergy(), EPS,
+                "Jean receives expected 2.67 same-element particles");
 
         Jean c5 = jeanAtConstellation(5);
         CombatSimulator c5Sim = simulatorWith(c5);
@@ -315,7 +315,7 @@ public final class JeanRegressionTest {
         assertClose(castTime + 13.0 * FRAME / 1.15,
                 normals.get(0).time, EPS,
                 "Jean C2 scales Normal hitmark");
-        assertClose(castTime + 25.0 * FRAME / 1.15,
+        assertClose(castTime + 22.0 * FRAME / 1.15,
                 sim.getCurrentTime(), EPS,
                 "Jean C2 scales Normal animation");
         advanceTo(sim, 121.0 * FRAME + 15.0);
