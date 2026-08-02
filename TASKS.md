@@ -13847,3 +13847,50 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc` at the shared/final API boundary
 - `python scripts/preflight.py`
+
+## Implementation Order: Self-Contained Four-Star Weapon Expansion
+
+Status: Active. Add three bounded passives driven by Skill use, elemental
+damage, or current party composition without extending simulator contracts.
+
+Scope:
+
+- Add Prototype Starglitter, Iron Sting, and Ballad of the Fjords with sourced
+  metadata, R1-R5 values, R5 defaults, exact conditions, and regressions.
+
+Out of scope for this pass:
+
+- Enemy-death, healing, shield, or pickup events; characters, formulas, RL,
+  generated docs, and unrelated weapon families.
+
+### Phase 1: Add Three Self-Contained Four-Star Weapons
+
+Target files:
+
+- `src/java/model/weapon/PrototypeStarglitter.java` (new)
+- `src/java/model/weapon/IronSting.java` (new)
+- `src/java/model/weapon/BalladOfTheFjords.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Starglitter gains one stack on each Skill use, caps at two, refreshes one
+  shared half-open 12-second duration, and grants only Normal/Charged DMG.
+- Iron Sting gains a stack only after positive non-Physical direct damage while
+  on-field, respects an exact one-second CT, caps at two, and refreshes one
+  shared half-open six-second duration retained off-field.
+- Fjords grants EM only when the live party contains at least three distinct
+  playable elements; metadata, R1-R5 values/defaults, and invalid ranks match KQM.
+
+Test cases to add or update:
+
+- Normal: valid triggers/composition, stack values and caps, metadata, R5.
+- Boundary: R1, exact CT and expiry, shared refresh, live party composition.
+- Abnormal: wrong/zero/Physical/off-field hit, two-element party, refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
