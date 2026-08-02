@@ -2560,3 +2560,13 @@ experiment record.
 - **Completion:** `a22e1ba` adds the immediate Physical proc, post-hit
   Heartsearer window, exact CT behavior, and focused abnormal regressions;
   build/Javadoc/leak gates pass
+
+### B-116 — Alley Hunter coverage
+
+- **Status:** active
+- **Scope:** Alley Hunter; RL excluded
+- **Value/risk:** one complete passive reuses the simulator's fixed timer and
+  live active-character state without extending switch contracts
+- **Evidence boundary:** KQM TCL metadata, R1-R5 growth/decay values, ten-stack
+  cap, one-second cadence, and four-second on-field grace
+- **Plan:** `TASKS.md` Alley Hunter Campaign

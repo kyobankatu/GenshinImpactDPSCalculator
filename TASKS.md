@@ -15059,3 +15059,48 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Alley Hunter Campaign
+
+Status: Active. Add Alley Hunter with fixed-cadence off-field growth and
+on-field decay after its four-second grace period.
+
+Scope:
+
+- Add Alley Hunter with sourced metadata, R1-R5 values, live field-state
+  progression, cap/floor behavior, and focused regressions.
+
+Out of scope for this pass:
+
+- Other bows, characters, formulas, RL, generated docs, and changes to the
+  simulator switch lifecycle.
+
+### Phase 1: Add Alley Hunter
+
+Target files:
+
+- `src/java/model/weapon/AlleyHunter.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- A bound off-field owner gains one 2-4% all-DMG stack on each fixed one-second
+  combat tick, up to ten stacks and 20-40% total.
+- After the owner remains active for four full seconds, each subsequent
+  one-second tick removes two stacks, matching 4-8% per second, to zero.
+- Metadata, initial active/off-field state, exact cadence/grace, return-field
+  reset, cap/floor, R1-R5 defaults/validation, and binding are explicit.
+
+Test cases to add or update:
+
+- Normal: metadata, off-field growth to R5 cap, on-field delayed decay.
+- Boundary: exact one/four/five-second ticks, cap/floor, switch-out grace reset,
+  R1 values.
+- Abnormal: cross-simulator reuse and refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
