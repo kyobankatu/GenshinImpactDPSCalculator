@@ -27,6 +27,7 @@ public final class RedhornStonethresherRegressionTest {
         testMetadataAndRefinementValues();
         testLateMergedFinalDefense();
         testActionRoutingAndUnrelatedStats();
+        testZeroMultiplierHitBoundary();
         testIndependentInstancesAndValidation();
         System.out.println("RedhornStonethresherRegressionTest passed");
     }
@@ -88,6 +89,21 @@ public final class RedhornStonethresherRegressionTest {
                 "Redhorn unrelated Geo DMG");
     }
 
+    private static void testZeroMultiplierHitBoundary() {
+        StatsContainer stats = assembledStats(new RedhornStonethresher(1));
+        double expectedHitDamage = stats.getTotalDef() * 0.40 * 0.45;
+
+        assertClose(0.0,
+                calculate(stats, ActionType.NORMAL, 0.0, false),
+                "Redhorn excludes zero-multiplier non-hit Normal casts");
+        assertClose(0.0,
+                calculate(stats, ActionType.CHARGE, 0.0, false),
+                "Redhorn excludes zero-multiplier non-hit Charged casts");
+        assertClose(expectedHitDamage,
+                calculate(stats, ActionType.NORMAL, 0.0, true),
+                "Redhorn includes explicit zero-multiplier Normal hits");
+    }
+
     private static void testIndependentInstancesAndValidation() {
         RedhornStonethresher r1 = new RedhornStonethresher(1);
         RedhornStonethresher r5 = new RedhornStonethresher(5);
@@ -123,6 +139,14 @@ public final class RedhornStonethresherRegressionTest {
     private static double calculate(
             StatsContainer stats,
             ActionType actionType) {
+        return calculate(stats, actionType, 1.0, true);
+    }
+
+    private static double calculate(
+            StatsContainer stats,
+            ActionType actionType,
+            double damagePercent,
+            boolean hitEffectTrigger) {
         TestCharacter attacker = new TestCharacter();
         Enemy enemy = new Enemy(90);
         CombatSimulator sim = new CombatSimulator();
@@ -130,12 +154,13 @@ public final class RedhornStonethresherRegressionTest {
         sim.setEnemy(enemy);
         AttackAction action = new AttackAction(
                 "Redhorn Test Hit",
-                1.0,
+                damagePercent,
                 Element.PHYSICAL,
                 StatType.BASE_ATK,
                 null,
                 0.0,
                 actionType);
+        action.setHitEffectTrigger(hitEffectTrigger);
         return DamageCalculator.calculateDamage(
                 attacker,
                 enemy,
