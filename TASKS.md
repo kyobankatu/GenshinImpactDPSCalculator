@@ -30,9 +30,9 @@ future explicit user request.
 The prior simulator content campaigns, including Skill-focused event weapons,
 are complete; RL and generated docs remain excluded.
 
-The B-128 action-use artifact campaign is in progress. It adds one shared
-post-gate artifact action callback, then uses it for Heart of Depth and Martial
-Artist without changing RL or generated documentation.
+The B-128 action-use artifact campaign is complete. Successful typed actions
+now reach equipped artifacts, and Heart of Depth plus Martial Artist use the
+shared callback without changing RL or generated documentation.
 
 The B-058 Burning fuel correction is complete. It replaces the fixed
 two-second approximation with typed Dendro-fuel decay and refresh ownership
@@ -13003,7 +13003,7 @@ Completion evidence:
 
 ## Implementation Order: Action-Use Artifact Campaign
 
-Status: In progress. This campaign adds the missing artifact action-use
+Status: Complete. This campaign adds the missing artifact action-use
 capability and two complete Skill-activated sets; RL and generated docs remain
 excluded.
 
@@ -13070,7 +13070,7 @@ Completion evidence:
 - Reaction regression, build, Javadoc, and executable preflight passed on
   2026-08-02.
 
-### Phase 2: Skill-Activated Damage Sets
+### Phase 2: Skill-Activated Damage Sets - Done
 
 Why second:
 
@@ -13111,6 +13111,13 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+Completion evidence:
+
+- Both sets pass supplied/fixed-stat, off-field Skill, immediate activation,
+  refresh, exact expiry, invalid callback, binding, and independence checks.
+- Reaction regression, build, Javadoc, and executable preflight passed on
+  2026-08-02.
 
 ### Phase 2: Switch-Activated Weapons - Done
 

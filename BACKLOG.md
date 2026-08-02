@@ -2775,7 +2775,7 @@ experiment record.
 
 ### B-128 — Action-use artifact coverage
 
-- **Status:** in-progress
+- **Status:** done
 - **Source:** explicit broad content-coverage request
 - **Scope:** shared successful-action artifact callback, Heart of Depth, and
   Martial Artist; RL excluded
@@ -2792,3 +2792,7 @@ experiment record.
 - **Risk/proof:** planned; focused dispatch/timing regressions plus reaction
   regression, build, Javadoc, and preflight
 - **Plan:** `TASKS.md` Action-Use Artifact Campaign
+- **Completion:** accepted-action dispatch plus Heart of Depth and Martial
+  Artist pass focused ordering, fixed-stat, activation, refresh, exact expiry,
+  invalid callback, binding, reaction regression, build, Javadoc, and
+  preflight checks

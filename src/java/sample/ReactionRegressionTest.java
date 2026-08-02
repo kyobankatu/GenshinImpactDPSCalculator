@@ -161,6 +161,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ExpandedArtifactSetsPhaseTwo();
         testAccuracyPhaseF_ExpandedArtifactSetsPhaseThree();
         testAccuracyPhaseF_ArtifactActionCallbackContract();
+        testAccuracyPhaseF_ActionUseArtifactSets();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -11921,6 +11922,189 @@ public class ReactionRegressionTest {
         simulatorWithExistingCharacter(plainArtifact).performAction(
                 plainArtifact.getCharacterId(),
                 CharacterActionRequest.of(CharacterActionKey.NORMAL));
+    }
+
+    private static void testAccuracyPhaseF_ActionUseArtifactSets() {
+        StatsContainer heartStats = new StatsContainer();
+        heartStats.set(StatType.CRIT_DMG, 0.20);
+        model.artifact.HeartOfDepth suppliedHeart =
+                new model.artifact.HeartOfDepth(heartStats);
+        assertEquals("Heart of Depth", suppliedHeart.getName(),
+                "Heart of Depth display name");
+        assertClose(0.15,
+                suppliedHeart.getStats().get(StatType.HYDRO_DMG_BONUS), EPS,
+                "Heart of Depth two-piece Hydro bonus");
+        assertClose(0.20,
+                suppliedHeart.getStats().get(StatType.CRIT_DMG), EPS,
+                "Heart of Depth should preserve supplied stats");
+
+        model.artifact.HeartOfDepth heart =
+                new model.artifact.HeartOfDepth();
+        TestCharacter heartOwner = testCharacter(
+                Element.HYDRO, CharacterId.SUCROSE);
+        heart.onAction(
+                heartOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                new CombatSimulator());
+        heartOwner.setArtifacts(heart);
+        TestCharacter heartActive = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        CombatSimulator heartSim = simulatorWithExistingCharacter(heartActive);
+        heartSim.addCharacter(heartOwner);
+        assertClose(0.0,
+                resolvedStat(heartSim, heartOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Heart of Depth should start without four-piece bonus");
+        heartSim.performAction(
+                heartOwner.getCharacterId(),
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        assertClose(0.30,
+                resolvedStat(heartSim, heartOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Heart of Depth immediate Normal bonus");
+        assertClose(0.30,
+                resolvedStat(heartSim, heartOwner,
+                        StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "Heart of Depth immediate Charged bonus");
+        heartSim.advanceTime(10.0);
+        heartSim.performAction(
+                heartOwner.getCharacterId(),
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        heartSim.advanceTime(14.999);
+        assertClose(0.30,
+                resolvedStat(heartSim, heartOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Heart of Depth should refresh before expiry");
+        heartSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0,
+                resolvedStat(heartSim, heartOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Heart of Depth should expire at exactly 15 seconds");
+        heart.onAction(
+                heartActive,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                heartSim);
+        heart.onAction(
+                heartOwner,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL),
+                heartSim);
+        heart.onAction(
+                heartOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                new CombatSimulator());
+        assertClose(0.0,
+                resolvedStat(heartSim, heartOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Heart of Depth should reject invalid callbacks");
+        heart.initializeForSimulator(heartOwner, heartSim, false);
+        boolean heartCrossBindingRejected = false;
+        try {
+            heart.initializeForSimulator(
+                    heartOwner, new CombatSimulator(), false);
+        } catch (IllegalStateException expected) {
+            heartCrossBindingRejected = true;
+        }
+        assertTrue(heartCrossBindingRejected,
+                "Heart of Depth should reject cross-simulator reuse");
+
+        StatsContainer martialStats = new StatsContainer();
+        martialStats.set(StatType.ATK_FLAT, 25.0);
+        model.artifact.MartialArtist suppliedMartial =
+                new model.artifact.MartialArtist(martialStats);
+        assertEquals("Martial Artist", suppliedMartial.getName(),
+                "Martial Artist display name");
+        assertClose(0.15,
+                suppliedMartial.getStats().get(
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Martial Artist two-piece Normal bonus");
+        assertClose(0.15,
+                suppliedMartial.getStats().get(
+                        StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "Martial Artist two-piece Charged bonus");
+        assertClose(25.0,
+                suppliedMartial.getStats().get(StatType.ATK_FLAT), EPS,
+                "Martial Artist should preserve supplied stats");
+
+        model.artifact.MartialArtist martial =
+                new model.artifact.MartialArtist();
+        TestCharacter martialOwner = testCharacter(Element.PHYSICAL);
+        martialOwner.setArtifacts(martial);
+        CombatSimulator martialSim = simulatorWith(martialOwner);
+        assertClose(0.15,
+                resolvedStat(martialSim, martialOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Martial Artist fixed Normal bonus");
+        martialSim.performAction(
+                martialOwner.getCharacterId(),
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        assertClose(0.40,
+                resolvedStat(martialSim, martialOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Martial Artist activated Normal bonus");
+        assertClose(0.40,
+                resolvedStat(martialSim, martialOwner,
+                        StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "Martial Artist activated Charged bonus");
+        martialSim.advanceTime(4.0);
+        martialSim.performAction(
+                martialOwner.getCharacterId(),
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        martialSim.advanceTime(7.999);
+        assertClose(0.40,
+                resolvedStat(martialSim, martialOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Martial Artist should refresh before exact expiry");
+        martialSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.15,
+                resolvedStat(martialSim, martialOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Martial Artist should expire at exactly eight seconds");
+        martial.onAction(
+                martialOwner,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE),
+                martialSim);
+        assertClose(0.15,
+                resolvedStat(martialSim, martialOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Martial Artist should ignore non-Skill callbacks");
+        martial.initializeForSimulator(martialOwner, martialSim, true);
+        boolean martialCrossBindingRejected = false;
+        try {
+            martial.initializeForSimulator(
+                    martialOwner, new CombatSimulator(), true);
+        } catch (IllegalStateException expected) {
+            martialCrossBindingRejected = true;
+        }
+        assertTrue(martialCrossBindingRejected,
+                "Martial Artist should reject cross-simulator reuse");
+
+        model.artifact.MartialArtist independentMartial =
+                new model.artifact.MartialArtist();
+        TestCharacter independentOwner = testCharacter(
+                Element.PHYSICAL, CharacterId.AMBER);
+        independentOwner.setArtifacts(independentMartial);
+        CombatSimulator independentSim = simulatorWith(independentOwner);
+        assertClose(0.15,
+                resolvedStat(independentSim, independentOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Martial Artist instances should not share active state");
+
+        boolean nullHeartStatsRejected = false;
+        boolean nullMartialStatsRejected = false;
+        try {
+            new model.artifact.HeartOfDepth(null);
+        } catch (NullPointerException expected) {
+            nullHeartStatsRejected = true;
+        }
+        try {
+            new model.artifact.MartialArtist(null);
+        } catch (NullPointerException expected) {
+            nullMartialStatsRejected = true;
+        }
+        assertTrue(nullHeartStatsRejected,
+                "Heart of Depth should reject null supplied stats");
+        assertTrue(nullMartialStatsRejected,
+                "Martial Artist should reject null supplied stats");
     }
 
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {
