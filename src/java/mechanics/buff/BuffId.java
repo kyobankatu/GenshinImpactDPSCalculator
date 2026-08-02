@@ -181,6 +181,8 @@ public enum BuffId {
     ELEGY_FAREWELL_SONG,
     /** 武器「草薙の稲光」の元素爆発後元素チャージ効率。 */
     ENGULFING_LIGHTNING_ER,
+    /** Key of Khaj-Nisut three-stack team Elemental Mastery bonus. */
+    KEY_OF_KHAJ_NISUT_TEAM_EM,
     /** 「千年の大楽章」各武器が共有する攻撃力効果。 */
     MILLENNIAL_MOVEMENT_ATK,
     /** 武器「蒼古なる自由への誓い」の通常・重撃・落下攻撃強化。 */
@@ -191,6 +193,12 @@ public enum BuffId {
     GOLDEN_MAJESTY_ATK_STACKS,
     /** Golden Majesty 武器シリーズの 0.3 秒スタック獲得間隔。 */
     GOLDEN_MAJESTY_STACK_COOLDOWN,
+    /** Yae Miko C4 team Electro DMG bonus. */
+    YAE_MIKO_C4_ELECTRO_DMG_BONUS,
+    /** Albedo A4 team Elemental Mastery bonus. */
+    ALBEDO_A4_TEAM_EM,
+    /** Albedo C4 active-character Plunging Attack DMG bonus. */
+    ALBEDO_C4_PLUNGING_DMG_BONUS,
     /** 武器「千夜に浮かぶ夢」の味方元素熟知共有。 */
     A_THOUSAND_FLOATING_DREAMS_TEAM_EM,
     /** 武器「龍殺しの英傑譚」の交代先への攻撃力バフ。 */
