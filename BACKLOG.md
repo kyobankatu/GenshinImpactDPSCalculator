@@ -3502,3 +3502,19 @@ experiment record.
 - **Completion:** commits `b6b8f52` through `db603ba` add the shared contract,
   complete Jean/Chongyun/Diona reconstruction, and close both independent
   audits; all focused/full gates and the routed rollout benchmark pass.
+
+### B-167 — Qiqi offensive vertical slice
+
+- **Status:** in-progress
+- **Source:** explicit broad content-expansion request and post-B-166 missing
+  character class inventory
+- **Symptom:** Qiqi has a local image but no typed identity, loadable combat
+  class, talent CSV, or executable regression.
+- **Evidence:** pinned KQM TCL `80ba6241` and gcsim `ef41805d`, including its
+  maintained frame sheet links and explicit approximate nine-swipe cadence,
+  accessed 2026-08-03.
+- **Scope/risk:** planned one-phase offensive slice with snapshot-safe Skill,
+  Burst talisman, and representable C1/C2/C3/C5.
+- **Boundary:** healing, A4 randomness, C4 enemy ATK, C6 revival, geometry, RL,
+  and generated docs remain excluded.
+- **Proof:** `TASKS.md` Qiqi Offensive Vertical Slice and focused/full gates.

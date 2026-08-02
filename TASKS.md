@@ -50,10 +50,9 @@ wave added the Golden Majesty weapon family, six legacy boundary artifact sets,
 and Razor through isolated implementation lanes; RL and generated
 documentation remained excluded.
 
-The B-162 follow-on legacy character campaign is complete. The current B-163
-stateful weapon campaign adds reusable region and derived-damage primitives,
-then eight sourced weapons through isolated implementation lanes. RL,
-generated docs, and deferred defensive or geometry systems remain excluded.
+The B-162 through B-166 follow-on content and snapshot campaigns are complete.
+B-167 now adds one bounded Qiqi offensive vertical slice; RL, generated docs,
+and deferred healing, defensive, or geometry systems remain excluded.
 
 The B-158 derived-stat equipment and Fischl wave is complete. It adds reusable
 final-DEF/EM conversion, two five-star weapons, four asset-backed artifact sets,
@@ -13471,6 +13470,71 @@ Completion evidence:
 - Character contract and all three focused regressions, reaction regression,
   party catalog, build, Javadoc, executable preflight, and the routed Java
   rollout benchmark pass on 2026-08-03.
+
+## Implementation Order: Qiqi Offensive Vertical Slice
+
+Status: In progress. B-167 is one implementation-first content unit.
+
+Scope:
+
+- Add typed Qiqi identity, Lv. 90 status/talent CSV data, complete basic attack
+  categories, Herald of Frost's initial and nine snapshot swipes, and Burst.
+- Represent C1 Energy while the Burst talisman is active, C2's Cryo/Frozen
+  Normal/Charged bonus, and C3/C5 talent levels.
+- Reuse the character snapshot contract for combo, summon generation, pending
+  swipes, and talisman timing.
+
+Out of scope for this pass:
+
+- Healing and incoming-healing bonuses, A4's random talisman, C4 enemy ATK
+  reduction, C6 revival, multi-target geometry, RL, and generated docs.
+
+### Phase 1: Add Qiqi Offensive Content Slice
+
+Why:
+
+- Qiqi is the next source-ready missing character whose offensive behavior
+  does not require a deferred player-damage, shield, or multi-target system.
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `config/characters/Qiqi/Qiqi_Status.csv` (new)
+- `config/characters/Qiqi/Qiqi_Multipliers.csv` (new)
+- `src/java/model/character/Qiqi.java` (new)
+- `src/java/sample/QiqiRegressionTest.java` (new)
+
+Tasks:
+
+- Adapt pinned gcsim `ef41805d` frame/cadence data and pinned KQM TCL
+  `80ba6241` talent/application contracts to the single-target simulator.
+- Preserve N3/N4/Charged multi-hit identity, Skill snapshot ownership, recast
+  cancellation, Burst talisman timing, and exact typed ICD/gauge metadata.
+- Add focused normal, boundary, abnormal, and repeated-restore regressions.
+
+Acceptance criteria:
+
+- All supported actions load from aligned CSV keys and emit exact hit counts,
+  multipliers, action categories, timings, elements, and cooldown/Energy state.
+- One Skill cast emits one initial hit and nine snapshot swipes; recast and
+  repeated restore leave exactly one current stream.
+- C1, C2, C3, and C5 activate only at their sourced boundaries, while excluded
+  healing/defensive/random effects are not fabricated.
+
+Test cases to add or update:
+
+- Normal: identity/data, full Normal chain, two-hit Charged, Plunge, Skill
+  cadence/snapshot, Burst, C1/C2/C3/C5.
+- Boundary: exact swipe/talisman expiry, Skill recast, single/double restore,
+  Cryo/Frozen versus unrelated Aura.
+- Abnormal: cooldown/Energy rejection, wrong state type, cross-simulator
+  binding, and excluded effects causing no offensive mutation.
+
+Verification:
+
+- `./gradlew QiqiRegressionTest`
+- `./gradlew ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
 
 ## Implementation Order: Parallel Foundational Content Campaign
 
