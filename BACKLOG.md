@@ -2514,10 +2514,12 @@ experiment record.
 
 ### B-112 — Moonsign EM and Bloom weapon coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Snare Hook and Blackmarrow Lantern; RL excluded
 - **Value/risk:** two complete passives reuse verified Moonsign reaction-window
   and live-state contracts without shared runtime changes
 - **Evidence boundary:** KQM TCL metadata, R1-R5 EM/Bloom/Lunar-Bloom values,
   off-field reactions, exact 12-second window, live Ascendant doubling
 - **Plan:** `TASKS.md` Moonsign EM and Bloom Weapon Campaign
+- **Completion:** `8908f92` adds both Moonsign weapons and focused regressions;
+  build/Javadoc/leak gates pass

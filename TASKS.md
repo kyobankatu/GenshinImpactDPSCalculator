@@ -14851,8 +14851,8 @@ Verification:
 
 ## Implementation Order: Moonsign EM and Bloom Weapon Campaign
 
-Status: Active. Add two complete Moonsign weapons through the verified reaction
-window and live Moonsign stat contracts.
+Status: Complete. Two Moonsign weapons now use the verified reaction window
+and live Moonsign stat contracts.
 
 Scope:
 
@@ -14863,13 +14863,20 @@ Out of scope for this pass:
 
 - Characters, formulas, RL, generated docs, and unrelated Moonsign equipment.
 
-### Phase 1: Add Snare Hook and Blackmarrow Lantern
+### Phase 1: Add Snare Hook and Blackmarrow Lantern - Done (`8908f92`)
 
 Target files:
 
 - `src/java/model/weapon/SnareHook.java` (new)
 - `src/java/model/weapon/BlackmarrowLantern.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Snare proves R1/R5 off-field owner reactions, NONE/foreign exclusion, live
+  Ascendant doubling, exact expiry, metadata, and inherited binding rejection.
+- Blackmarrow proves R1/R5 Bloom/Lunar values and reversible live Ascendant
+  Lunar-only addition without altering Bloom; all project gates pass.
 
 Acceptance criteria:
 
