@@ -12875,7 +12875,7 @@ verification ownership.
 
 Scope:
 
-- Add four exact low-rarity artifact sets whose combat-relevant effects fit
+- Add fourteen exact artifact sets whose combat-relevant effects fit
   existing typed stats or whose remaining effects are exploration-only.
 - Add all five Royal weapons with exact Lv. 90 metadata and the narrowest
   truthful representation of their Focus passive.
@@ -12898,9 +12898,10 @@ Campaign inventory:
 | Lucky Dog | artifact | ready | none | `StaticArtifactRegressionTest` | done |
 | Gambler | artifact | ready | none | `StaticArtifactRegressionTest` | done |
 | Resolution of Sojourner | artifact | ready | action CRIT routing audit | `StaticArtifactRegressionTest` | done |
-| Royal family | weapon batch | delegated evidence | isolated family base | `RoyalWeaponRegressionTest` | active |
+| Royal family | weapon batch | delegated evidence | isolated family base | `RoyalWeaponRegressionTest` | done |
 | Barbara | character | delegated evidence | typed `CharacterId` and CSV | `BarbaraRegressionTest` | active |
 | Static combat-boundary sets | artifact batch | ready | none | `StaticArtifactRegressionTest` | done |
+| Static elemental/support sets | artifact batch | ready | none | `StaticArtifactRegressionTest` | active |
 
 ### Phase 1: Low-Rarity Artifact Sets - Done
 
@@ -12954,7 +12955,7 @@ Completion evidence:
   ReactionRegressionTest build javadoc`, and `python scripts/preflight.py
   --run` passed on 2026-08-03.
 
-### Phase 2: Royal Weapon Family
+### Phase 2: Royal Weapon Family - Done
 
 Target files:
 
@@ -12987,6 +12988,16 @@ Verification:
 - `./gradlew ReactionRegressionTest`
 - `./gradlew build javadoc`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- All five Royal weapons expose exact Lv. 90 metadata, R1-R5 Focus values,
+  five-stack cap, invalid-refinement rejection, and independent family types.
+- Focus remains explicitly inactive because average-CRIT damage resolution
+  does not expose realized critical hits; regression rejects adding partial,
+  unresettable CRIT state through a damage callback.
+- `./gradlew RoyalWeaponRegressionTest ReactionRegressionTest build javadoc`
+  and the delegated executable preflight passed on 2026-08-03.
 
 ### Phase 3: Barbara Offensive Vertical Slice
 
@@ -13078,6 +13089,41 @@ Completion evidence:
 - `./gradlew StaticArtifactRegressionTest`, `./gradlew
   ReactionRegressionTest build javadoc`, and `python scripts/preflight.py
   --run` passed on 2026-08-03.
+
+### Phase 5: Static Elemental and Support Artifact Sets
+
+Target files:
+
+- `src/java/model/artifact/ArchaicPetra.java` (new)
+- `src/java/model/artifact/DefendersWill.java` (new)
+- `src/java/model/artifact/CelestialGift.java` (new)
+- `src/java/model/artifact/FragmentOfHarmonicWhimsy.java` (new)
+- `src/java/model/artifact/MaidenBeloved.java` (new)
+- `src/java/sample/StaticArtifactRegressionTest.java`
+
+Acceptance criteria:
+
+- Archaic Petra grants Geo DMG +15%, Defender's Will grants DEF +30%,
+  Celestial Gift grants Energy Recharge +20%, Fragment grants ATK +18%, and
+  Maiden grants Healing Bonus +15%.
+- Crystal pickup, player elemental resistance, Bond of Life, and incoming
+  healing effects remain inactive because their required state is outside the
+  current simulator contract.
+- Canonical names, supplied-stat preservation, independent instances, null
+  rejection, and unrelated-stat isolation remain exact.
+
+Test cases to add or update:
+
+- Normal: canonical names and all exact fixed stats.
+- Boundary: arbitrary time and fresh/supplied container behavior.
+- Abnormal: null supplied stats and zero unsupported conditional branches.
+
+Verification:
+
+- `./gradlew StaticArtifactRegressionTest`
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build javadoc`
+- `python scripts/preflight.py --run`
 
 ## Implementation Order: Black Sword Campaign
 
