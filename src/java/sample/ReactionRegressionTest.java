@@ -139,6 +139,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_MoonsignReactionWeapons();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
+        testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
         testAccuracyPhaseF_ActionUseWindowWeapons();
         testAccuracyPhaseF_AdditionalSkillUseStatWeapons();
         testAccuracyPhaseF_SamuraiConductWeapons();
@@ -8783,6 +8784,184 @@ public class ReactionRegressionTest {
         }
         assertTrue(highMoonshardRefinementRejected,
                 "Lightbearing Moonshard should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_EnergyProximityFiveStarWeapons() {
+        model.weapon.Azurelight azurelight = new model.weapon.Azurelight();
+        assertEquals("Azurelight", azurelight.getName(),
+                "Azurelight display name");
+        assertClose(674.0, azurelight.getBaseAtk(), EPS,
+                "Azurelight base ATK");
+        assertClose(0.221,
+                azurelight.getStats().get(StatType.CRIT_RATE), EPS,
+                "Azurelight CRIT Rate");
+        assertEquals(model.type.WeaponType.SWORD, azurelight.getWeaponType(),
+                "Azurelight weapon type");
+        assertEquals(5, azurelight.getRefinement(),
+                "Azurelight default refinement");
+
+        TestCharacter azureOwner = testCharacter(Element.CRYO);
+        azureOwner.setWeapon(azurelight);
+        CombatSimulator azureSim = simulatorWith(azureOwner);
+        azureOwner.restoreCurrentEnergy(20.0);
+        double baseCritDamage = resolvedStat(
+                azureSim, azureOwner, StatType.CRIT_DMG);
+        assertClose(0.0,
+                resolvedStat(azureSim, azureOwner, StatType.ATK_PERCENT), EPS,
+                "Azurelight should be inactive before Skill use");
+        azurelight.onAction(
+                azureOwner,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL),
+                azureSim);
+        assertClose(0.0,
+                resolvedStat(azureSim, azureOwner, StatType.ATK_PERCENT), EPS,
+                "Non-Skill use should not activate Azurelight");
+
+        azurelight.onAction(
+                azureOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                azureSim);
+        assertClose(0.48,
+                resolvedStat(azureSim, azureOwner, StatType.ATK_PERCENT), EPS,
+                "R5 Azurelight positive-Energy ATK window");
+        assertClose(baseCritDamage,
+                resolvedStat(azureSim, azureOwner, StatType.CRIT_DMG), EPS,
+                "Positive Energy should not activate Azurelight CRIT DMG");
+
+        azureOwner.restoreCurrentEnergy(0.0);
+        assertClose(0.96,
+                resolvedStat(azureSim, azureOwner, StatType.ATK_PERCENT), EPS,
+                "R5 Azurelight zero-Energy double ATK");
+        assertClose(baseCritDamage + 0.80,
+                resolvedStat(azureSim, azureOwner, StatType.CRIT_DMG), EPS,
+                "R5 Azurelight zero-Energy CRIT DMG");
+        azureOwner.restoreCurrentEnergy(0.000001);
+        assertClose(0.48,
+                resolvedStat(azureSim, azureOwner, StatType.ATK_PERCENT), EPS,
+                "Any positive Energy should remove Azurelight's zero branch");
+
+        azureSim.advanceTime(5.0);
+        azurelight.onAction(
+                azureOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                azureSim);
+        azureSim.advanceTime(11.999);
+        assertClose(0.48,
+                resolvedStat(azureSim, azureOwner, StatType.ATK_PERCENT), EPS,
+                "Refreshed Azurelight should remain active before expiry");
+        azureSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0,
+                resolvedStat(azureSim, azureOwner, StatType.ATK_PERCENT), EPS,
+                "Azurelight should expire at exactly twelve seconds");
+
+        model.weapon.Azurelight offFieldAzure = new model.weapon.Azurelight();
+        TestCharacter offFieldAzureOwner = testCharacter(
+                Element.CRYO, CharacterId.SUCROSE);
+        offFieldAzureOwner.setWeapon(offFieldAzure);
+        CombatSimulator offFieldAzureSim = simulatorWith(offFieldAzureOwner);
+        offFieldAzureSim.addCharacter(testCharacter(
+                Element.PYRO, CharacterId.AMBER));
+        offFieldAzureSim.setActiveCharacter(CharacterId.AMBER);
+        offFieldAzure.onAction(
+                offFieldAzureOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                offFieldAzureSim);
+        assertClose(0.0,
+                resolvedStat(offFieldAzureSim, offFieldAzureOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "Off-field Skill calls should not activate Azurelight");
+
+        model.weapon.Azurelight r1Azurelight = new model.weapon.Azurelight(1);
+        TestCharacter r1AzureOwner = testCharacter(Element.CRYO);
+        r1AzureOwner.setWeapon(r1Azurelight);
+        CombatSimulator r1AzureSim = simulatorWith(r1AzureOwner);
+        r1AzureOwner.restoreCurrentEnergy(0.0);
+        double r1BaseCritDamage = resolvedStat(
+                r1AzureSim, r1AzureOwner, StatType.CRIT_DMG);
+        r1Azurelight.onAction(
+                r1AzureOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                r1AzureSim);
+        assertClose(0.48,
+                resolvedStat(r1AzureSim, r1AzureOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "R1 Azurelight zero-Energy double ATK");
+        assertClose(r1BaseCritDamage + 0.40,
+                resolvedStat(r1AzureSim, r1AzureOwner,
+                        StatType.CRIT_DMG), EPS,
+                "R1 Azurelight zero-Energy CRIT DMG");
+
+        boolean crossSimulatorReuseRejected = false;
+        try {
+            azurelight.initializeForSimulator(azureOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            crossSimulatorReuseRejected = true;
+        }
+        assertTrue(crossSimulatorReuseRejected,
+                "Azurelight should reject cross-simulator reuse");
+
+        model.weapon.AquaSimulacra aqua = new model.weapon.AquaSimulacra();
+        assertEquals("Aqua Simulacra", aqua.getName(),
+                "Aqua Simulacra display name");
+        assertClose(542.0, aqua.getBaseAtk(), EPS,
+                "Aqua Simulacra base ATK");
+        assertClose(0.882,
+                aqua.getStats().get(StatType.CRIT_DMG), EPS,
+                "Aqua Simulacra CRIT DMG");
+        assertClose(0.32,
+                aqua.getStats().get(StatType.HP_PERCENT), EPS,
+                "R5 Aqua Simulacra HP");
+        assertClose(0.40,
+                aqua.getStats().get(StatType.DMG_BONUS_ALL), EPS,
+                "R5 Aqua Simulacra nearby-opponent all-DMG");
+        assertEquals(model.type.WeaponType.BOW, aqua.getWeaponType(),
+                "Aqua Simulacra weapon type");
+        assertEquals(5, aqua.getRefinement(),
+                "Aqua Simulacra default refinement");
+
+        model.weapon.AquaSimulacra r1Aqua = new model.weapon.AquaSimulacra(1);
+        assertClose(0.16,
+                r1Aqua.getStats().get(StatType.HP_PERCENT), EPS,
+                "R1 Aqua Simulacra HP");
+        assertClose(0.20,
+                r1Aqua.getStats().get(StatType.DMG_BONUS_ALL), EPS,
+                "R1 Aqua Simulacra nearby-opponent all-DMG");
+
+        boolean lowAzureRefinementRejected = false;
+        try {
+            new model.weapon.Azurelight(0);
+        } catch (IllegalArgumentException expected) {
+            lowAzureRefinementRejected = true;
+        }
+        assertTrue(lowAzureRefinementRejected,
+                "Azurelight should reject refinement zero");
+
+        boolean highAzureRefinementRejected = false;
+        try {
+            new model.weapon.Azurelight(6);
+        } catch (IllegalArgumentException expected) {
+            highAzureRefinementRejected = true;
+        }
+        assertTrue(highAzureRefinementRejected,
+                "Azurelight should reject refinement six");
+
+        boolean lowAquaRefinementRejected = false;
+        try {
+            new model.weapon.AquaSimulacra(0);
+        } catch (IllegalArgumentException expected) {
+            lowAquaRefinementRejected = true;
+        }
+        assertTrue(lowAquaRefinementRejected,
+                "Aqua Simulacra should reject refinement zero");
+
+        boolean highAquaRefinementRejected = false;
+        try {
+            new model.weapon.AquaSimulacra(6);
+        } catch (IllegalArgumentException expected) {
+            highAquaRefinementRejected = true;
+        }
+        assertTrue(highAquaRefinementRejected,
+                "Aqua Simulacra should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_OffFieldHitBows() {
