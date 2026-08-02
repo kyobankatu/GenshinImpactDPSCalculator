@@ -14074,8 +14074,8 @@ Verification:
 
 ## Implementation Order: Off-Field Hit Weapon Campaign
 
-Status: Active. Add two bow passives whose explicit off-field hit behavior can
-be represented by the existing post-damage hook.
+Status: Complete. Two bow passives now represent their explicit off-field hit
+behavior through the existing post-damage hook.
 
 Scope:
 
@@ -14087,13 +14087,22 @@ Out of scope for this pass:
 - Multi-target hit multiplication, characters, formulas, RL, generated docs,
   and unrelated off-field equipment.
 
-### Phase 1: Add Two Off-Field Hit Bows
+### Phase 1: Add Two Off-Field Hit Bows - Done (`aee7c8b`)
 
 Target files:
 
 - `src/java/model/weapon/FadingTwilight.java` (new)
 - `src/java/model/weapon/RainbowSerpentsRainBow.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Fading proves initial state, zero-hit exclusion, exact seven-second CT,
+  off-field cycling, full three-state wrap, and R1/R5 values.
+- Rainbow proves on-field/zero-hit exclusion, off-field activation, on-field
+  retention, exact eight-second expiry, and R1/R5 values.
+- Metadata, invalid ranks, reaction regression, build, Javadoc, preflight, and
+  diff checks pass.
 
 Acceptance criteria:
 

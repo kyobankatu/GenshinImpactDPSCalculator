@@ -2344,10 +2344,12 @@ experiment record.
 
 ### B-098 — Off-field hit bow coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Fading Twilight and Rainbow Serpent's Rain Bow; RL excluded
 - **Value/risk:** two complete passives use existing active-character and
   post-damage state without new dispatch or shared runtime mutation
 - **Evidence boundary:** KQM TCL metadata, R1-R5 three-state DMG values,
   seven-second switch CT, and off-field 28-56% ATK eight-second window
 - **Plan:** `TASKS.md` Off-Field Hit Weapon Campaign
+- **Completion:** `aee7c8b` adds both bows and focused off-field regressions;
+  build/Javadoc/leak gates pass
