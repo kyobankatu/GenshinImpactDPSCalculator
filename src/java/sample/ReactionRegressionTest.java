@@ -123,6 +123,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_LegacyWeaponRefinements();
         testAccuracyPhaseF_SkillUseEventWeapons();
         testAccuracyPhaseF_WatatsumiWavewalkerWeapons();
+        testAccuracyPhaseF_ReciprocalHitWeapons();
         testAccuracyPhaseF_KaeyaCharacterContract();
         testAccuracyPhaseF_AmberCharacterContract();
         testAccuracyPhaseF_DendroResonanceReactionEmContract();
@@ -5848,6 +5849,92 @@ public class ReactionRegressionTest {
         assertTrue(highRefinementRejected, "Akuoumaru should reject refinement six");
     }
 
+    private static void testAccuracyPhaseF_ReciprocalHitWeapons() {
+        model.weapon.SolarPearl solarPearl = new model.weapon.SolarPearl();
+        assertEquals("Solar Pearl", solarPearl.getName(), "Solar Pearl display name");
+        assertClose(510.0, solarPearl.getBaseAtk(), EPS, "Solar Pearl base ATK");
+        assertClose(0.276, solarPearl.getStats().get(StatType.CRIT_RATE), EPS,
+                "Solar Pearl CRIT Rate");
+        assertEquals(model.type.WeaponType.CATALYST, solarPearl.getWeaponType(),
+                "Solar Pearl weapon type");
+        assertEquals(5, solarPearl.getRefinement(), "Solar Pearl default refinement");
+
+        TestCharacter owner = testCharacter(Element.HYDRO);
+        owner.setWeapon(solarPearl);
+        CombatSimulator sim = simulatorWith(owner);
+        AttackAction normalHit = typedDamageHit(
+                "Solar Pearl Normal", ActionType.NORMAL, 1.0);
+        AttackAction skillHit = typedDamageHit(
+                "Solar Pearl Skill", ActionType.SKILL, 1.0);
+        AttackAction chargedHit = typedDamageHit(
+                "Solar Pearl Charged", ActionType.CHARGE, 1.0);
+        AttackAction zeroNormalHit = typedDamageHit(
+                "Solar Pearl zero Normal", ActionType.NORMAL, 0.0);
+
+        assertClose(0.0, resolvedStat(sim, owner, StatType.SKILL_DMG_BONUS), EPS,
+                "Solar Pearl should be inactive before a direct hit");
+        solarPearl.onDamage(owner, normalHit, 0.0, sim);
+        assertClose(0.40, resolvedStat(sim, owner, StatType.SKILL_DMG_BONUS), EPS,
+                "R5 Solar Pearl Normal hit should enable Skill damage");
+        assertClose(0.40, resolvedStat(sim, owner, StatType.BURST_DMG_BONUS), EPS,
+                "R5 Solar Pearl Normal hit should enable Burst damage");
+        assertClose(0.0,
+                resolvedStat(sim, owner, StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Normal hit should not enable its own Solar Pearl bonus");
+
+        solarPearl.onDamage(owner, skillHit, 1.0, sim);
+        assertClose(0.40,
+                resolvedStat(sim, owner, StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Solar Pearl Skill hit should enable Normal damage");
+        solarPearl.onDamage(owner, normalHit, 5.0, sim);
+        assertClose(0.40, effectiveStatAt(owner, StatType.SKILL_DMG_BONUS, 6.999), EPS,
+                "Refreshed Skill window should remain active after six seconds");
+        assertClose(0.40,
+                effectiveStatAt(owner, StatType.NORMAL_ATTACK_DMG_BONUS, 6.999), EPS,
+                "Independent Normal window should remain active before expiry");
+        assertClose(0.0,
+                effectiveStatAt(owner, StatType.NORMAL_ATTACK_DMG_BONUS, 7.0), EPS,
+                "Independent Normal window should expire exactly six seconds later");
+        assertClose(0.40, effectiveStatAt(owner, StatType.SKILL_DMG_BONUS, 10.999), EPS,
+                "Refreshed Skill window should remain active before expiry");
+        assertClose(0.0, effectiveStatAt(owner, StatType.SKILL_DMG_BONUS, 11.0), EPS,
+                "Refreshed Skill window should expire exactly");
+
+        solarPearl.onDamage(owner, chargedHit, 12.0, sim);
+        solarPearl.onDamage(owner, zeroNormalHit, 12.0, sim);
+        assertClose(0.0, effectiveStatAt(owner, StatType.SKILL_DMG_BONUS, 12.0), EPS,
+                "Charged and zero-damage hits should not activate Solar Pearl");
+
+        model.weapon.SolarPearl r1SolarPearl = new model.weapon.SolarPearl(1);
+        assertEquals(1, r1SolarPearl.getRefinement(), "Solar Pearl R1 refinement");
+        TestCharacter r1Owner = testCharacter(Element.HYDRO);
+        r1Owner.setWeapon(r1SolarPearl);
+        CombatSimulator r1Sim = simulatorWith(r1Owner);
+        r1SolarPearl.onDamage(r1Owner, normalHit, 0.0, r1Sim);
+        r1SolarPearl.onDamage(r1Owner, skillHit, 0.0, r1Sim);
+        assertClose(0.20, resolvedStat(r1Sim, r1Owner, StatType.SKILL_DMG_BONUS), EPS,
+                "R1 Solar Pearl Skill damage bonus");
+        assertClose(0.20,
+                resolvedStat(r1Sim, r1Owner, StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "R1 Solar Pearl Normal damage bonus");
+
+        boolean lowRefinementRejected = false;
+        try {
+            new model.weapon.SolarPearl(0);
+        } catch (IllegalArgumentException expected) {
+            lowRefinementRejected = true;
+        }
+        assertTrue(lowRefinementRejected, "Solar Pearl should reject refinement zero");
+
+        boolean highRefinementRejected = false;
+        try {
+            new model.weapon.SolarPearl(6);
+        } catch (IllegalArgumentException expected) {
+            highRefinementRejected = true;
+        }
+        assertTrue(highRefinementRejected, "Solar Pearl should reject refinement six");
+    }
+
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
         ReactionResult.Kind[] primaryKinds = {
                 ReactionResult.Kind.BURNING,
@@ -6034,6 +6121,13 @@ public class ReactionRegressionTest {
         return DamageCalculator.resolveStats(
                 character, probe, sim.getApplicableBuffs(character), sim.getCurrentTime())
                 .get(statType);
+    }
+
+    private static double effectiveStatAt(
+            Character character,
+            StatType statType,
+            double currentTime) {
+        return character.getEffectiveStats(currentTime).get(statType);
     }
 
     private static void testAccuracyPhaseF_SucroseNoIcdApplicationContract() {
@@ -6833,6 +6927,20 @@ public class ReactionRegressionTest {
         AttackAction action = new AttackAction(name, multiplier, element, StatType.BASE_ATK);
         action.setICD(ICDType.None, ICDTag.None, 0.0);
         return action;
+    }
+
+    private static AttackAction typedDamageHit(
+            String name,
+            ActionType actionType,
+            double multiplier) {
+        return new AttackAction(
+                name,
+                multiplier,
+                Element.PHYSICAL,
+                StatType.BASE_ATK,
+                StatType.DMG_BONUS_ALL,
+                0.0,
+                actionType);
     }
 
     private static double calculateDirectDamage(
