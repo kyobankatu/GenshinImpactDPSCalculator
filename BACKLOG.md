@@ -2284,10 +2284,12 @@ experiment record.
 
 ### B-093 — Hybrid reaction-window weapon coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Missive Windspear and Mailed Flower; RL excluded
 - **Value/risk:** two complete unequal-stat windows share attributed reaction
   and post-damage Skill hooks already used by the simulator
 - **Evidence boundary:** KQM TCL metadata, R1-R5 ATK/EM values, 10/8-second
   windows, Mailed active-owner gate and trigger-hit ordering
 - **Plan:** `TASKS.md` Hybrid Reaction Window Weapon Campaign
+- **Completion:** `9a7e8ae` adds the shared attributed trigger policy, both
+  weapons, and focused regressions; build/Javadoc/leak gates pass

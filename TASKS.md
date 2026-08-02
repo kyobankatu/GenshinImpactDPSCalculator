@@ -13793,7 +13793,7 @@ Verification:
 
 ## Implementation Order: Hybrid Reaction Window Weapon Campaign
 
-Status: Active. Add two unequal ATK/EM windows with reaction-only and
+Status: Complete. Two unequal ATK/EM windows now use explicit reaction-only and
 Skill-hit-or-reaction trigger policies.
 
 Scope:
@@ -13808,7 +13808,7 @@ Out of scope for this pass:
 - Multi-target hit counts, characters, formulas, RL, generated docs, and
   unrelated reaction equipment.
 
-### Phase 1: Add Hybrid Reaction Windows
+### Phase 1: Add Hybrid Reaction Windows - Done (`9a7e8ae`)
 
 Target files:
 
@@ -13816,6 +13816,15 @@ Target files:
 - `src/java/model/weapon/MissiveWindspear.java` (new)
 - `src/java/model/weapon/MailedFlower.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Missive proves attributed non-NONE reaction activation, refresh, exact
+  ten-second expiry, and rejection of Skill, NONE, and foreign reactions.
+- Mailed proves positive Skill and reaction activation, trigger-hit ordering,
+  off-field persistence without off-field refresh, and exact eight-second expiry.
+- Metadata, R1/R5 values, invalid ranks, reaction regression, build, Javadoc,
+  preflight, and diff checks pass.
 
 Acceptance criteria:
 
