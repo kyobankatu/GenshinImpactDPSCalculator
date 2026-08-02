@@ -5485,6 +5485,52 @@ public class ReactionRegressionTest {
         }
         assertTrue(highDeathmatchRefinementRejected,
                 "Deathmatch should reject refinement six");
+
+        model.weapon.TheCatch theCatch = new model.weapon.TheCatch();
+        assertEquals("The Catch", theCatch.getName(), "The Catch display name");
+        assertClose(510.0, theCatch.getBaseAtk(), EPS, "The Catch base ATK");
+        assertClose(0.459, theCatch.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "The Catch Energy Recharge");
+        assertEquals(model.type.WeaponType.POLEARM, theCatch.getWeaponType(),
+                "The Catch weapon type");
+        assertEquals(5, theCatch.getRefinement(), "The Catch default refinement");
+
+        StatsContainer r5CatchStats = new StatsContainer();
+        theCatch.applyPassive(r5CatchStats, 0.0);
+        assertClose(0.32, r5CatchStats.get(StatType.BURST_DMG_BONUS), EPS,
+                "R5 The Catch Burst damage bonus");
+        assertClose(0.12, r5CatchStats.get(StatType.BURST_CRIT_RATE), EPS,
+                "R5 The Catch Burst CRIT Rate");
+        assertClose(0.0, r5CatchStats.get(StatType.SKILL_DMG_BONUS), EPS,
+                "The Catch should not modify Skill damage");
+        assertClose(0.0, r5CatchStats.get(StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "The Catch should not modify Normal damage");
+
+        model.weapon.TheCatch r1Catch = new model.weapon.TheCatch(1);
+        StatsContainer r1CatchStats = new StatsContainer();
+        r1Catch.applyPassive(r1CatchStats, 0.0);
+        assertClose(0.16, r1CatchStats.get(StatType.BURST_DMG_BONUS), EPS,
+                "R1 The Catch Burst damage bonus");
+        assertClose(0.06, r1CatchStats.get(StatType.BURST_CRIT_RATE), EPS,
+                "R1 The Catch Burst CRIT Rate");
+
+        boolean lowCatchRefinementRejected = false;
+        try {
+            new model.weapon.TheCatch(0);
+        } catch (IllegalArgumentException expected) {
+            lowCatchRefinementRejected = true;
+        }
+        assertTrue(lowCatchRefinementRejected,
+                "The Catch should reject refinement zero");
+
+        boolean highCatchRefinementRejected = false;
+        try {
+            new model.weapon.TheCatch(6);
+        } catch (IllegalArgumentException expected) {
+            highCatchRefinementRejected = true;
+        }
+        assertTrue(highCatchRefinementRejected,
+                "The Catch should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
