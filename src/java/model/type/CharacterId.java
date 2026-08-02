@@ -69,6 +69,8 @@ public enum CharacterId {
     CHONGYUN(27, "Chongyun", CharacterRegion.LIYUE),
     /** Diona (Cryo bow support). */
     DIONA(28, "Diona", CharacterRegion.MONDSTADT),
+    /** Qiqi (Cryo sword healer and driver). */
+    QIQI(29, "Qiqi", CharacterRegion.LIYUE),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 

@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Qiqi,STATS,Base HP,90,12368,0
+Qiqi,STATS,Base ATK,90,287,0
+Qiqi,STATS,Base DEF,90,922,0
+Qiqi,STATS,Ascension Healing Bonus,90,0.2215,0
+Qiqi,STATS,Energy Cost,90,80,0
+Qiqi,STATS,Constellation,6,6,0
+Qiqi,CONFIG,Character Level,90,90,0
+Qiqi,CONFIG,Normal Level,9,9,0
+Qiqi,CONFIG,Skill Level,12,12,0
+Qiqi,CONFIG,Burst Level,12,12,0

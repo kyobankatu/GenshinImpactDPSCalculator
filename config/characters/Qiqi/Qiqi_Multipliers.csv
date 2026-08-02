@@ -1,0 +1,14 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Qiqi,NORMAL,N1,9,0.69362,0
+Qiqi,NORMAL,N2,9,0.71416,0
+Qiqi,NORMAL,N3,9,0.44398,0
+Qiqi,NORMAL,N4,9,0.45346,0
+Qiqi,NORMAL,N5,9,1.15814,0
+Qiqi,CHARGE,Charged Attack,9,1.18184,0
+Qiqi,PLUNGE,High Plunge,9,2.933586,0
+Qiqi,SKILL,Herald Initial,9,1.632,0
+Qiqi,SKILL,Herald Swipe,9,0.612,0
+Qiqi,SKILL,Herald Initial C5,12,1.920,0
+Qiqi,SKILL,Herald Swipe C5,12,0.720,0
+Qiqi,BURST,Preserver of Fortune,9,4.8416,0
+Qiqi,BURST,Preserver of Fortune C3,12,5.696,0
