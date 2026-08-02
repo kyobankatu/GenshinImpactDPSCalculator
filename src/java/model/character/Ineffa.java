@@ -3,6 +3,8 @@ package model.character;
 import model.entity.FormStateProvider;
 import model.entity.Character;
 import model.entity.CharacterTeamBuffProvider;
+import model.entity.ReactionAwareCharacter;
+import model.entity.SimulatorInitializedCharacterEffect;
 import model.entity.Weapon;
 import model.entity.ArtifactSet;
 import model.stats.StatsContainer;
@@ -25,6 +27,8 @@ import mechanics.data.TalentDataManager;
 import mechanics.data.TalentDataSource;
 import mechanics.energy.EnergyManager;
 import mechanics.energy.ParticleType;
+import mechanics.formula.DamageCalculator;
+import mechanics.reaction.ReactionResult;
 
 /**
  * Custom "Lunar" Electro character implementation.
@@ -45,11 +49,14 @@ import mechanics.energy.ParticleType;
  *
  * <p>Ineffa is a Lunar character ({@link #isLunarCharacter()} returns {@code true}).
  */
-public class Ineffa extends Character implements FormStateProvider, CharacterTeamBuffProvider {
+public class Ineffa extends Character
+        implements FormStateProvider, CharacterTeamBuffProvider,
+        ReactionAwareCharacter, SimulatorInitializedCharacterEffect {
 
     private int normalAttackStep = 0;
     private double shieldHealth = 0;
     private PeriodicDamageEvent birgittaEvent;
+    private CombatSimulator initializedSimulator;
 
     /**
      * Constructs Ineffa with the given weapon and artifact set.
@@ -78,8 +85,7 @@ public class Ineffa extends Character implements FormStateProvider, CharacterTea
         this.artifacts = new ArtifactSet[] { artifacts };
         this.element = Element.ELECTRO;
 
-        // Defaults
-        this.constellation = 0;
+        this.constellation = (int) getTalentValue("Constellation", 0);
 
         setSkillCD(16.0);
         setBurstCD(15.0);
@@ -121,6 +127,27 @@ public class Ineffa extends Character implements FormStateProvider, CharacterTea
     }
 
     /**
+     * Binds Ineffa's constellation listeners before the first party action.
+     *
+     * @param sim simulator receiving this character
+     * @throws IllegalStateException if this character is reused across simulators
+     */
+    @Override
+    public void initializeForSimulator(CombatSimulator sim) {
+        if (initializedSimulator != null && initializedSimulator != sim) {
+            throw new IllegalStateException(
+                    "Ineffa cannot be reused across CombatSimulator instances");
+        }
+        if (initializedSimulator == sim) {
+            return;
+        }
+        initializedSimulator = sim;
+        if (constellation >= 4) {
+            sim.addReactionListener(this);
+        }
+    }
+
+    /**
      * Handles typed action requests dispatched by the combat simulator.
      *
      * <p>Supported actions:
@@ -135,6 +162,7 @@ public class Ineffa extends Character implements FormStateProvider, CharacterTea
      */
     @Override
     public void onAction(CharacterActionRequest request, CombatSimulator sim) {
+        initializeForSimulator(sim);
         switch (request.getKey()) {
             case SKILL:
                 markSkillUsed(sim.getCurrentTime(), sim.getApplicableBuffs(this));
@@ -210,16 +238,47 @@ public class Ineffa extends Character implements FormStateProvider, CharacterTea
         hit.setAnimationDuration(0.6); // Cast Time
         sim.performAction(this.characterId, hit);
 
-        // Shield Logic
-        double atk = this.getEffectiveStats(sim.getCurrentTime()).getTotalAtk();
-        double shieldRatio = getTalentValue("Shield Ratio", 3.76);
-        double shieldFlat = getTalentValue("Shield Flat", 2820);
-        this.shieldHealth = atk * shieldRatio + shieldFlat;
-        if (sim.isLoggingEnabled()) {
-            System.out.println("Ineffa Shield Generated: " + (int) this.shieldHealth + " HP");
-        }
+        activateOpticalFlowShield(sim, hit);
 
         refreshBirgitta(sim);
+    }
+
+    private void activateOpticalFlowShield(
+            CombatSimulator sim,
+            AttackAction sourceAction) {
+        double currentTime = sim.getCurrentTime();
+        double atk = DamageCalculator.resolveStats(
+                this,
+                sourceAction,
+                sim.getApplicableBuffs(this),
+                currentTime).getTotalAtk();
+        double shieldRatio = getTalentValue("Shield Ratio", 3.76);
+        double shieldFlat = getTalentValue("Shield Flat", 2820);
+        shieldHealth = atk * shieldRatio + shieldFlat;
+        if (constellation >= 1) {
+            double lunarChargedBonus = Math.min(0.50, (atk / 100.0) * 0.025);
+            sim.applyTeamBuffNoStack(new SimpleBuff(
+                    "Carrier Flow Composite",
+                    BuffId.INEFFA_C1_CARRIER_FLOW_COMPOSITE,
+                    20.0,
+                    currentTime,
+                    stats -> stats.add(
+                            StatType.LUNAR_CHARGED_DMG_BONUS,
+                            lunarChargedBonus))
+                    .sourcedBy(characterId));
+        }
+        if (sim.isLoggingEnabled()) {
+            System.out.println("Ineffa Shield Generated: " + (int) shieldHealth + " HP");
+        }
+    }
+
+    /**
+     * Returns the most recently generated Optical Flow Shield absorption.
+     *
+     * @return shield absorption value
+     */
+    public double getShieldHealth() {
+        return shieldHealth;
     }
 
     /**
@@ -284,6 +343,11 @@ public class Ineffa extends Character implements FormStateProvider, CharacterTea
         hit.setAnimationDuration(1.7);
         sim.performAction(this.characterId, hit);
 
+        if (constellation >= 2) {
+            // Punishment Edict damage remains blocked until its delay is sourced.
+            activateOpticalFlowShield(sim, hit);
+        }
+
         refreshBirgitta(sim);
 
         // Passive 2: Reconstruction Protocol (Team EM Buff)
@@ -312,6 +376,46 @@ public class Ineffa extends Character implements FormStateProvider, CharacterTea
             }
             m.addBuff(buffToApply);
         }
+    }
+
+    /**
+     * Restores C4 Energy on real Lunar-Charged reaction triggers.
+     *
+     * @param result resolved reaction
+     * @param source triggering character
+     * @param time reaction time
+     * @param sim active simulator
+     */
+    @Override
+    public void onReaction(
+            ReactionResult result,
+            Character source,
+            double time,
+            CombatSimulator sim) {
+        if (constellation < 4
+                || result.getKind() != ReactionResult.Kind.LUNAR_CHARGED
+                || result.getTransformDamage() <= 0.0
+                || hasActiveBuff(BuffId.INEFFA_C4_ENERGY_COOLDOWN, time)) {
+            return;
+        }
+        receiveFlatEnergy(5.0);
+        removeBuff(BuffId.INEFFA_C4_ENERGY_COOLDOWN);
+        addBuff(new SimpleBuff(
+                "The Edictless Path Cooldown",
+                BuffId.INEFFA_C4_ENERGY_COOLDOWN,
+                4.0,
+                time,
+                stats -> {
+                }).sourcedBy(characterId));
+    }
+
+    private boolean hasActiveBuff(BuffId id, double currentTime) {
+        for (Buff buff : getActiveBuffs()) {
+            if (buff.getId() == id && !buff.isExpired(currentTime)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

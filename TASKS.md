@@ -13436,6 +13436,127 @@ Evidence:
   reaction damage.
 - Reaction regression, build, Javadoc, sample simulation, and preflight pass.
 
+## Implementation Order: Ineffa Representable Constellation Campaign
+
+Status: In progress. Implement C1, the independently representable C2 shield,
+C3-C6, and exact talent data; leave C2 Punishment Edict damage in blocked
+backlog B-135 rather than inventing its unspecified delay.
+
+Scope:
+
+- Preserve the existing single-target and weighted Lunar reaction model.
+- Reuse simulator initialization and reaction events for pre-action C4 and
+  post-Thundercloud C6 behavior.
+- Keep RL and generated documentation excluded.
+
+### Phase 1: C1/C2 Shield and C4 Lifecycle
+
+Status: Done.
+
+Target files:
+
+- `src/java/mechanics/buff/BuffId.java`
+- `config/characters/Ineffa/Ineffa_Status.csv`
+- `src/java/model/character/Ineffa.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Ineffa reads typed constellation data and binds idempotently before actions,
+  rejecting cross-simulator reuse.
+- Skill at C1+ and Burst at C2+ activate the shield and refresh one sourced,
+  typed 20-second Carrier Flow Composite team buff using activation-time ATK;
+  Lunar-Charged bonus scales at 2.5% per 100 ATK and caps at 50%.
+- C4 restores exactly 5 flat Energy on a real party Lunar-Charged trigger with
+  a four-second cooldown; direct/synthetic/wrong reactions do not restore.
+
+Test cases:
+
+- Normal: Skill/Burst Carrier activation, refresh, source, and C4 party trigger.
+- Boundary: C1 49.9/50% cap, buff 19.999/20, C4 3.999/4 seconds.
+- Abnormal: C0/C1 Burst, wrong/zero/direct reactions, duplicate initialization,
+  and cross-simulator reuse.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `./gradlew FlinsParty2`
+- `python scripts/preflight.py`
+
+Evidence:
+
+- Typed C0-C4 configuration, C1 skill/C2 Burst activation and refresh,
+  49.9/50% cap, 19.999/20-second expiry, C4 wrong/synthetic rejection,
+  3.999/4-second cooldown, snapshot restore, and cross-simulator regressions
+  pass.
+- C1 uses activation-time ATK because maintained sources do not yet establish
+  dynamic ATK following; B-135 retains only the unsourced C2 delayed damage.
+- Two C0 `FlinsParty2` runs remain 20,805,526 damage / 301,093 DPS.
+- Reaction regression, build, Javadoc, sample simulation, and preflight pass.
+
+### Phase 2: C3/C5 Talent Levels
+
+Target files:
+
+- `config/characters/Ineffa/Ineffa_Multipliers.csv`
+- `src/java/model/character/Ineffa.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- C3 selects level-12 Skill, shield, and Birgitta values while C2 retains
+  level 9; C5 selects level-12 Burst while C4 retains level 9.
+- Distinct CSV keys avoid the current level-column overwrite limitation.
+- Skill, Burst, Birgitta cadence, gauge, ICD, and shield duration remain
+  unchanged apart from sourced multipliers.
+
+Test cases:
+
+- Normal: exact C2/C3 Skill/shield/Birgitta and C4/C5 Burst values.
+- Boundary: each constellation threshold and ten-hit Birgitta stream.
+- Abnormal: C3 Burst and C5 Skill do not gain an extra talent level.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `./gradlew FlinsParty2`
+- `python scripts/preflight.py`
+
+### Phase 3: C6 Thundercloud Follow-Up
+
+Target files:
+
+- `src/java/model/character/Ineffa.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- While Carrier Flow Composite is active, a resolved Thundercloud strike emits
+  one 135% ATK direct Lunar-Charged Electro hit near the active character.
+- The hit is owned by Ineffa, 0U/no-ICD, cannot recurse, and uses a 3.5-second
+  cooldown independent from C4.
+- C5, expired Carrier, ordinary Lunar-Charged triggers, and synthetic zero
+  events do not emit the C6 follow-up.
+
+Test cases:
+
+- Normal: real Thundercloud tick and off-field Ineffa ownership.
+- Boundary: 3.499/3.5-second cooldown and Carrier exact expiry.
+- Abnormal: C5, no/expired Carrier, wrong event kind, zero-gauge Aura safety,
+  and no recursive second action.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `./gradlew FlinsParty2`
+- `python scripts/preflight.py`
+
 ## Implementation Order: Raiden Constellation Lifecycle
 
 Status: Complete. This pass implements sourced, representable C1 and C4

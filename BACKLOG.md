@@ -2899,10 +2899,10 @@ experiment record.
 
 ### B-134 — Ineffa offensive constellation coverage
 
-- **Status:** candidate
+- **Status:** in-progress
 - **Source:** delegated supported-character inventory under broad coverage
-- **Scope/risk:** planned C1, C2 offensive activation, C3-C6, and weighted
-  Lunar stat assembly; RL excluded
+- **Scope/risk:** C1, C2 shield activation, C3-C6, and weighted Lunar stat
+  assembly; C2 Punishment Edict damage and RL excluded
 - **Evidence:** KQM Ineffa reference and Luna V Quick Guide, accessed
   2026-08-02; the maintained evidence vault is currently empty:
   https://library.keqingmains.com/characters/electro/ineffa
@@ -2910,4 +2910,17 @@ experiment record.
 - **Boundary:** C2 Punishment Edict damage remains blocked because the only
   maintained timing description is "after a brief delay"; C1 snapshot and C6
   0U/no-ICD require explicit adaptations
-- **Next gate:** implement only after B-133 or stronger technical evidence
+- **Plan:** three-phase `TASKS.md` Ineffa Representable Constellation Campaign
+
+### B-135 — Ineffa C2 Punishment Edict delayed damage
+
+- **Status:** blocked
+- **Source:** B-134 evidence reconciliation
+- **Scope/risk:** 300% ATK direct Lunar-Charged damage after Burst; AoE remains
+  within the single-target abstraction
+- **Evidence:** current KQM main page and game-data mirrors only specify "after
+  a brief delay" or target defeat; the maintained evidence vault has no timing
+  measurement as of 2026-08-02
+- **Boundary:** do not invent the automatic delay or substitute generic
+  on-attack behavior; C2 Burst shield activation is independently representable
+- **Reopen gate:** authoritative timing frames or a maintained measurement

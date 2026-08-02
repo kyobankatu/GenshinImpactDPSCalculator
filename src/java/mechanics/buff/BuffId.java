@@ -88,6 +88,10 @@ public enum BuffId {
     COLUMBINA_C2_LUNAR_REACTION_BONUS,
     /** Lunar 拡張: イネファの Lunar 加算ダメージボーナス。 */
     INEFFA_LUNAR_BASE_BONUS,
+    /** イネファ命ノ星座 1 の Carrier Flow Composite。 */
+    INEFFA_C1_CARRIER_FLOW_COMPOSITE,
+    /** イネファ命ノ星座 4 の元素エネルギー回復クールダウン。 */
+    INEFFA_C4_ENERGY_COOLDOWN,
     /** 雷電将軍「諸願百日の儀」: 諸願スタックによる元素爆発 DMG ボーナス。 */
     RAIDEN_EYE_OF_STORMY_JUDGMENT,
     /** 雷電将軍 命ノ星座 4「常道への誓い」による味方攻撃力ボーナス。 */

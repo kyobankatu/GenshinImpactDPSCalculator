@@ -106,6 +106,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_IneffaOverclockZeroGaugeContract();
         testAccuracyPhaseF_IneffaSkillNoIcdApplicationContract();
         testAccuracyPhaseF_IneffaBirgittaSummonLifecycle();
+        testAccuracyPhaseF_IneffaC1C2AndC4Lifecycle();
         testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost();
         testAccuracyPhaseF_PartySizeParticleEnergyMultipliers();
         testAccuracyPhaseF_ImpetuousWindsCooldownSnapshot();
@@ -3982,6 +3983,181 @@ public class ReactionRegressionTest {
         burstRefreshSim.advanceTime(4.01);
         assertEquals(2, countTimesAfter(burstRefreshWeapon.times, burstRefreshTime),
                 "Burst refresh should leave only one Birgitta stream");
+    }
+
+    private static void testAccuracyPhaseF_IneffaC1C2AndC4Lifecycle() {
+        model.character.Ineffa c0Ineffa = new model.character.Ineffa(
+                new TestWeapon(), blankArtifact(), ineffaTalentData(0));
+        CombatSimulator c0Sim = simulatorWithExistingCharacter(c0Ineffa);
+        c0Ineffa.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), c0Sim);
+        assertTrue(c0Sim.getTeamBuffList().stream().noneMatch(
+                        buff -> buff.getId()
+                                == BuffId.INEFFA_C1_CARRIER_FLOW_COMPOSITE),
+                "Ineffa C0 should not create Carrier Flow Composite");
+
+        TestCharacter c1Ally = testCharacter(Element.HYDRO, CharacterId.XINGQIU);
+        model.character.Ineffa c1Ineffa = new model.character.Ineffa(
+                new TestWeapon(), blankArtifact(), ineffaTalentData(1));
+        CombatSimulator c1Sim = simulatorWithExistingCharacter(c1Ineffa);
+        c1Sim.addCharacter(c1Ally);
+        c1Ineffa.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), c1Sim);
+        Buff firstCarrier = requireIneffaCarrier(c1Sim);
+        assertClose(330.0 / 100.0 * 0.025,
+                resolvedStat(c1Sim, c1Ineffa, StatType.LUNAR_CHARGED_DMG_BONUS),
+                EPS,
+                "Ineffa C1 should snapshot activation-time ATK for herself");
+        assertClose(330.0 / 100.0 * 0.025,
+                resolvedStat(c1Sim, c1Ally, StatType.LUNAR_CHARGED_DMG_BONUS),
+                EPS,
+                "Ineffa C1 should apply Carrier Flow Composite to allies");
+        double firstCarrierStart = firstCarrier.getStartTime();
+        c1Ineffa.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), c1Sim);
+        Buff refreshedCarrier = requireIneffaCarrier(c1Sim);
+        assertTrue(refreshedCarrier.getStartTime() > firstCarrierStart,
+                "Ineffa C1 should refresh rather than stack Carrier Flow Composite");
+        double refreshedCarrierStart = refreshedCarrier.getStartTime();
+        c1Sim.advanceTime(
+                refreshedCarrierStart + 19.999 - c1Sim.getCurrentTime());
+        assertClose(330.0 / 100.0 * 0.025,
+                resolvedStat(c1Sim, c1Ally, StatType.LUNAR_CHARGED_DMG_BONUS),
+                EPS,
+                "Ineffa C1 should remain active immediately before 20 seconds");
+        c1Sim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0,
+                resolvedStat(c1Sim, c1Ally, StatType.LUNAR_CHARGED_DMG_BONUS),
+                EPS,
+                "Ineffa C1 should expire at exactly 20 seconds");
+
+        StatsContainer belowCapStats = new StatsContainer();
+        belowCapStats.add(StatType.ATK_FLAT, 1666.0);
+        model.character.Ineffa belowCapIneffa = new model.character.Ineffa(
+                new TestWeapon(),
+                new ArtifactSet("Ineffa C1 below-cap fixture", belowCapStats),
+                ineffaTalentData(1));
+        CombatSimulator belowCapSim = simulatorWithExistingCharacter(belowCapIneffa);
+        belowCapIneffa.onAction(
+                CharacterActionRequest.of(CharacterActionKey.SKILL), belowCapSim);
+        assertClose(0.499,
+                resolvedStat(
+                        belowCapSim,
+                        belowCapIneffa,
+                        StatType.LUNAR_CHARGED_DMG_BONUS),
+                EPS,
+                "Ineffa C1 should preserve the value immediately below its cap");
+
+        StatsContainer cappedStats = new StatsContainer();
+        cappedStats.add(StatType.ATK_FLAT, 1670.0);
+        model.character.Ineffa cappedIneffa = new model.character.Ineffa(
+                new TestWeapon(),
+                new ArtifactSet("Ineffa C1 capped fixture", cappedStats),
+                ineffaTalentData(1));
+        CombatSimulator cappedSim = simulatorWithExistingCharacter(cappedIneffa);
+        cappedIneffa.onAction(
+                CharacterActionRequest.of(CharacterActionKey.SKILL), cappedSim);
+        assertClose(0.50,
+                resolvedStat(cappedSim, cappedIneffa,
+                        StatType.LUNAR_CHARGED_DMG_BONUS),
+                EPS,
+                "Ineffa C1 should cap Carrier Flow Composite at 50 percent");
+
+        model.character.Ineffa c1BurstIneffa = new model.character.Ineffa(
+                new TestWeapon(), blankArtifact(), ineffaTalentData(1));
+        CombatSimulator c1BurstSim = simulatorWithExistingCharacter(c1BurstIneffa);
+        c1BurstIneffa.onAction(
+                CharacterActionRequest.of(CharacterActionKey.BURST), c1BurstSim);
+        assertClose(0.0, c1BurstIneffa.getShieldHealth(), EPS,
+                "Ineffa C1 Burst should not activate the C2 shield");
+        assertTrue(c1BurstSim.getTeamBuffList().stream().noneMatch(
+                        buff -> buff.getId()
+                                == BuffId.INEFFA_C1_CARRIER_FLOW_COMPOSITE),
+                "Ineffa C1 Burst should not activate Carrier Flow Composite");
+
+        model.character.Ineffa c2BurstIneffa = new model.character.Ineffa(
+                new TestWeapon(), blankArtifact(), ineffaTalentData(2));
+        CombatSimulator c2BurstSim = simulatorWithExistingCharacter(c2BurstIneffa);
+        c2BurstIneffa.onAction(
+                CharacterActionRequest.of(CharacterActionKey.BURST), c2BurstSim);
+        assertTrue(c2BurstIneffa.getShieldHealth() > 0.0,
+                "Ineffa C2 Burst should activate Optical Flow Shield Barrier");
+        requireIneffaCarrier(c2BurstSim);
+
+        model.character.Ineffa c3Ineffa = new model.character.Ineffa(
+                new TestWeapon(), blankArtifact(), ineffaTalentData(3));
+        CombatSimulator c3Sim = simulatorWithExistingCharacter(c3Ineffa);
+        c3Ineffa.restoreCurrentEnergy(0.0);
+        c3Sim.notifyReaction(
+                ReactionResult.lunar(100.0, ReactionResult.LunarType.CHARGED),
+                testCharacter(Element.HYDRO));
+        assertClose(0.0, c3Ineffa.getCurrentEnergy(), EPS,
+                "Ineffa C3 should not receive C4 Energy");
+
+        model.character.Ineffa c4Ineffa = new model.character.Ineffa(
+                new TestWeapon(), blankArtifact(), ineffaTalentData(4));
+        CombatSimulator c4Sim = simulatorWithExistingCharacter(c4Ineffa);
+        c4Ineffa.initializeForSimulator(c4Sim);
+        c4Ineffa.restoreCurrentEnergy(0.0);
+        Character reactionSource = testCharacter(Element.HYDRO);
+        c4Sim.notifyReaction(
+                ReactionResult.transform(
+                        0.0,
+                        "Synthetic direct Lunar fixture",
+                        ReactionResult.Kind.LUNAR_CHARGED),
+                reactionSource);
+        c4Sim.notifyReaction(
+                ReactionResult.transform(
+                        100.0,
+                        "Wrong reaction fixture",
+                        ReactionResult.Kind.THUNDERCLOUD_STRIKE),
+                reactionSource);
+        assertClose(0.0, c4Ineffa.getCurrentEnergy(), EPS,
+                "Ineffa C4 should reject synthetic and wrong reaction events");
+        c4Sim.notifyReaction(
+                ReactionResult.lunar(100.0, ReactionResult.LunarType.CHARGED),
+                reactionSource);
+        assertClose(5.0, c4Ineffa.getCurrentEnergy(), EPS,
+                "Ineffa C4 should restore five flat Energy on a real party trigger");
+        SimulatorSnapshot c4Snapshot = c4Sim.saveSnapshot();
+        c4Sim.advanceTime(3.999);
+        c4Sim.notifyReaction(
+                ReactionResult.lunar(100.0, ReactionResult.LunarType.CHARGED),
+                reactionSource);
+        assertClose(5.0, c4Ineffa.getCurrentEnergy(), EPS,
+                "Ineffa C4 should remain gated immediately before four seconds");
+        c4Sim.advanceTime(0.001 + 1e-9);
+        c4Sim.notifyReaction(
+                ReactionResult.lunar(100.0, ReactionResult.LunarType.CHARGED),
+                reactionSource);
+        assertClose(10.0, c4Ineffa.getCurrentEnergy(), EPS,
+                "Ineffa C4 should restore Energy at exactly four seconds");
+        c4Sim.restoreSnapshot(c4Snapshot);
+        c4Sim.notifyReaction(
+                ReactionResult.lunar(100.0, ReactionResult.LunarType.CHARGED),
+                reactionSource);
+        assertClose(5.0, c4Ineffa.getCurrentEnergy(), EPS,
+                "Ineffa C4 cooldown should survive simulator snapshot restore");
+
+        boolean crossSimulatorRejected = false;
+        try {
+            CombatSimulator otherSim = new CombatSimulator();
+            otherSim.setLoggingEnabled(false);
+            otherSim.addCharacter(c4Ineffa);
+        } catch (IllegalStateException expected) {
+            crossSimulatorRejected = true;
+        }
+        assertTrue(crossSimulatorRejected,
+                "Ineffa should reject cross-simulator listener reuse");
+    }
+
+    private static Buff requireIneffaCarrier(CombatSimulator sim) {
+        List<Buff> buffs = sim.getTeamBuffList().stream()
+                .filter(buff -> buff.getId()
+                        == BuffId.INEFFA_C1_CARRIER_FLOW_COMPOSITE)
+                .collect(Collectors.toList());
+        assertEquals(1, buffs.size(),
+                "Ineffa should retain one typed Carrier Flow Composite buff");
+        assertEquals(CharacterId.INEFFA, buffs.get(0).getSourceCharacterId(),
+                "Carrier Flow Composite should retain Ineffa source ownership");
+        return buffs.get(0);
     }
 
     private static void testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost() {
@@ -18280,6 +18456,15 @@ public class ReactionRegressionTest {
     private static mechanics.data.TalentDataSource flinsTalentData(int constellation) {
         return (characterName, key, defaultValue) -> {
             if ("Flins".equals(characterName) && "Constellation".equals(key)) {
+                return constellation;
+            }
+            return defaultValue;
+        };
+    }
+
+    private static mechanics.data.TalentDataSource ineffaTalentData(int constellation) {
+        return (characterName, key, defaultValue) -> {
+            if ("Ineffa".equals(characterName) && "Constellation".equals(key)) {
                 return constellation;
             }
             return defaultValue;
