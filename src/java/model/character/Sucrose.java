@@ -9,9 +9,11 @@ import mechanics.buff.SimpleBuff;
 import mechanics.data.TalentDataManager;
 import mechanics.data.TalentDataSource;
 import mechanics.energy.ParticleType;
+import mechanics.reaction.ReactionResult;
 import model.entity.ArtifactSet;
 import model.entity.Character;
 import model.entity.FormStateProvider;
+import model.entity.ReactionAwareCharacter;
 import model.entity.SimulatorInitializedCharacterEffect;
 import model.entity.Weapon;
 import model.stats.StatsContainer;
@@ -44,14 +46,16 @@ import simulation.event.PeriodicDamageEvent;
  *       the swirled element gain +50 EM for 8 s.</li>
  *   <li><b>C4</b> — every seventh resolved Normal/Charged hit reduces only the
  *       earliest Skill charge cooldown by an injected integer from 1-7 s.</li>
- *   <li><b>C6</b> — absorbed element gains +20% elemental DMG for the remaining
- *       burst duration.</li>
+ *   <li><b>C6</b> — absorbed element gains +20% elemental DMG for 10 s from
+ *       absorption.</li>
  * </ul>
  *
  * <p>C1 grants a second Skill charge (max 2); C2 extends burst duration to 8 s.
  */
 public class Sucrose extends Character implements
-        FormStateProvider, SimulatorInitializedCharacterEffect {
+        FormStateProvider,
+        SimulatorInitializedCharacterEffect,
+        ReactionAwareCharacter {
     private static final double ALCHEMANIA_COUNT_COOLDOWN = 0.1;
     private static final int ALCHEMANIA_HIT_THRESHOLD = 7;
 
@@ -195,7 +199,7 @@ public class Sucrose extends Character implements
     }
 
     /**
-     * Binds the C4 damage listener to exactly one simulator.
+     * Binds the A1 reaction and C4 damage listeners to exactly one simulator.
      *
      * @param sim simulator receiving Sucrose
      * @throws IllegalStateException if this instance is reused across simulators
@@ -210,6 +214,7 @@ public class Sucrose extends Character implements
             return;
         }
         initializedSimulator = sim;
+        sim.addReactionListener(this);
         if (constellation >= 4) {
             sim.addDamageListener((actor, action, damage, time) -> {
                 if (actor != this
@@ -369,7 +374,7 @@ public class Sucrose extends Character implements
 
     /**
      * Casts the Skill: fires an Anemo hit, generates 4 Anemo particles, and
-     * triggers the A4 and A1 passives.
+     * triggers the A4 passive. A1 is driven by the resolved reaction listener.
      *
      * @param sim the combat simulator context
      */
@@ -387,7 +392,6 @@ public class Sucrose extends Character implements
         sim.getEnergyDistributor().distributeParticles(Element.ANEMO, 4.0, ParticleType.PARTICLE);
 
         applyA4Passive(sim);
-        applyA1PassiveIfSwirled(sim);
     }
 
     /**
@@ -440,8 +444,7 @@ public class Sucrose extends Character implements
 
                         if (this.absorbedElement != null) {
                             if (this.constellation >= 6) {
-                                double remainingTime = duration - (s.getCurrentTime() - getLastBurstTime());
-                                applyC6Buff(s, this.absorbedElement, remainingTime > 0 ? remainingTime : 0.1);
+                                applyC6Buff(s, this.absorbedElement);
                             }
                         }
                     }
@@ -455,7 +458,6 @@ public class Sucrose extends Character implements
                     }
 
                     applyA4Passive(s);
-                    applyA1PassiveIfSwirled(s);
                 }));
     }
 
@@ -476,39 +478,46 @@ public class Sucrose extends Character implements
     }
 
     /**
-     * Applies the Catalyst Conversion (A1) passive: if the enemy currently has
-     * a Pyro, Hydro, Electro, or Cryo aura, grants +50 EM to all party members
-     * of the matching element for 8 s.
+     * Applies Catalyst Conversion from an actual Sucrose-triggered Swirl.
      *
-     * @param sim the combat simulator context
+     * @param result resolved reaction carrying the swirled element
+     * @param source character that triggered the reaction
+     * @param time reaction time
+     * @param sim simulator dispatching the reaction
      */
-    private void applyA1PassiveIfSwirled(CombatSimulator sim) {
-        model.entity.Enemy enemy = sim.getEnemy();
-        if (enemy == null)
+    @Override
+    public void onReaction(
+            ReactionResult result,
+            Character source,
+            double time,
+            CombatSimulator sim) {
+        if (sim != initializedSimulator
+                || source != this
+                || result == null
+                || !result.isSwirl()) {
             return;
-
-        Element swirled = null;
-        if (enemy.getAuraUnits(Element.PYRO, sim.getCurrentTime()) > 0)
-            swirled = Element.PYRO;
-        else if (enemy.getAuraUnits(Element.HYDRO, sim.getCurrentTime()) > 0)
-            swirled = Element.HYDRO;
-        else if (enemy.getAuraUnits(Element.ELECTRO, sim.getCurrentTime()) > 0)
-            swirled = Element.ELECTRO;
-        else if (enemy.getAuraUnits(Element.CRYO, sim.getCurrentTime()) > 0)
-            swirled = Element.CRYO;
-
-        if (swirled != null) {
-            final Element swirledElem = swirled;
-            final BuffId buffId = getCatalystConversionBuffId(swirledElem);
-            sim.applyTeamBuffNoStack(
-                    new SimpleBuff("Catalyst Conversion (A1) [" + swirled.name() + "]", buffId, 8.0, sim.getCurrentTime(),
-                            st -> {
-                                st.add(StatType.ELEMENTAL_MASTERY, 50.0);
-                            }).forElement(swirledElem).sourcedBy(this.getCharacterId()));
         }
+
+        Element swirledElement = result.getSwirlElement();
+        BuffId buffId = getCatalystConversionBuffId(swirledElement);
+        if (buffId == null) {
+            return;
+        }
+        sim.applyTeamBuffNoStack(new SimpleBuff(
+                "Catalyst Conversion (A1) [" + swirledElement.name() + "]",
+                buffId,
+                8.0,
+                time,
+                stats -> stats.add(StatType.ELEMENTAL_MASTERY, 50.0))
+                .forElement(swirledElement)
+                .exclude(characterId)
+                .sourcedBy(characterId));
     }
 
     private BuffId getCatalystConversionBuffId(Element element) {
+        if (element == null) {
+            return null;
+        }
         switch (element) {
             case PYRO:
                 return BuffId.SUCROSE_CATALYST_CONVERSION_A1_PYRO;
@@ -519,41 +528,44 @@ public class Sucrose extends Character implements
             case CRYO:
                 return BuffId.SUCROSE_CATALYST_CONVERSION_A1_CRYO;
             default:
-                throw new IllegalArgumentException("Unsupported catalyst conversion element: " + element);
+                return null;
         }
     }
 
     /**
-     * Applies the C6 elemental DMG bonus (+20%) to all party members for the
-     * absorbed element for the specified duration.
+     * Applies the C6 elemental DMG bonus (+20%) for ten seconds from absorption.
      *
-     * @param sim      the combat simulator context
-     * @param elem     the absorbed element type
-     * @param duration remaining burst duration in seconds
+     * @param sim the combat simulator context
+     * @param elem the absorbed element type
      */
-    private void applyC6Buff(CombatSimulator sim, Element elem, double duration) {
-        sim.applyTeamBuff(new SimpleBuff("Sucrose C6 Bonus", BuffId.SUCROSE_C6_BONUS, duration, sim.getCurrentTime(), st -> {
-            switch (elem) {
-                case PYRO:
-                    st.add(StatType.PYRO_DMG_BONUS, 0.20);
-                    break;
-                case HYDRO:
-                    st.add(StatType.HYDRO_DMG_BONUS, 0.20);
-                    break;
-                case ELECTRO:
-                    st.add(StatType.ELECTRO_DMG_BONUS, 0.20);
-                    break;
-                case CRYO:
-                    st.add(StatType.CRYO_DMG_BONUS, 0.20);
-                    break;
-                case DENDRO:
-                case GEO:
-                case ANEMO:
-                case PHYSICAL:
-                    // C6 only buffs absorbed element (Pyro/Hydro/Electro/Cryo)
-                    break;
-            }
-        }).sourcedBy(this.getCharacterId()));
+    private void applyC6Buff(CombatSimulator sim, Element elem) {
+        sim.applyTeamBuffNoStack(new SimpleBuff(
+                "Sucrose C6 Bonus",
+                BuffId.SUCROSE_C6_BONUS,
+                10.0,
+                sim.getCurrentTime(),
+                st -> {
+                    switch (elem) {
+                        case PYRO:
+                            st.add(StatType.PYRO_DMG_BONUS, 0.20);
+                            break;
+                        case HYDRO:
+                            st.add(StatType.HYDRO_DMG_BONUS, 0.20);
+                            break;
+                        case ELECTRO:
+                            st.add(StatType.ELECTRO_DMG_BONUS, 0.20);
+                            break;
+                        case CRYO:
+                            st.add(StatType.CRYO_DMG_BONUS, 0.20);
+                            break;
+                        case DENDRO:
+                        case GEO:
+                        case ANEMO:
+                        case PHYSICAL:
+                            // C6 only buffs absorbed element.
+                            break;
+                    }
+                }).sourcedBy(characterId));
     }
 
     private void recordAlchemaniaHit(double hitTime) {

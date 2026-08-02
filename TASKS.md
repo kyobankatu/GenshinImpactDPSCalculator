@@ -12848,6 +12848,70 @@ Completion evidence:
 - `./gradlew ReactionRegressionTest`, `./gradlew build`, `./gradlew javadoc`,
   and `python scripts/preflight.py` passed on 2026-08-02.
 
+## Implementation Order: Sucrose Reaction Lifecycle Accuracy
+
+Status: Complete. Implemented B-141 as one character-owned reaction-listener
+and fixed absorption window pass; Hexerei additions, environment-object Swirls,
+multi-target simulation, RL, and generated docs are excluded.
+
+Evidence:
+
+- The maintained KQM Sucrose page and evidence vault, accessed 2026-08-02,
+  specify that Sucrose-triggered Swirl grants matching-element party members
+  EM +50 for eight seconds and that C6 lasts ten seconds from absorption:
+  https://library.keqingmains.com/characters/anemo/sucrose
+  https://library.keqingmains.com/evidence/characters/anemo/sucrose
+
+### Phase 1: Correct A1 Dispatch and C6 Duration - Done
+
+Target files:
+
+- `src/java/model/character/Sucrose.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Sucrose registers one reaction listener per bound simulator and rejects
+  cross-simulator reuse without duplicating either the A1 or C4 listener.
+- Only a Swirl dispatched with Sucrose as source and a supported Pyro, Hydro,
+  Electro, or Cryo result element refreshes one typed eight-second A1 buff.
+- A1 grants EM +50 only to matching-element party members, excludes Sucrose,
+  works while she is off-field, and does not infer from residual enemy aura.
+- C6 absorption grants one owner-sourced corresponding elemental DMG +20%
+  team buff for ten seconds from the actual absorption time; C5 does not.
+- A1/C6 membership and remaining duration survive simulator snapshots.
+
+Test cases:
+
+- Normal: four supported Swirl elements, matching/nonmatching/Sucrose targets,
+  off-field Sucrose, A1 refresh, late C6 absorption, and source attribution.
+- Boundary: A1 at 7.999/8.000 seconds, C6 at 9.999/10.000 seconds, and active
+  snapshot rollback for both windows.
+- Abnormal: foreign source, NONE/non-Swirl/null-element/unsupported-element,
+  wrong simulator, duplicate initialization, cross-binding, and C5 absorption.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- representative party samples twice
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Sucrose now uses the shared reaction-aware character contract and registers
+  A1 once per simulator; post-action residual-aura inference was removed.
+- Focused regressions cover four Swirl elements, matching and nonmatching
+  recipients, an actual 0.5U aura-consuming Charged Swirl, off-field Burst
+  Swirl, coexisting/refreshing windows, invalid callbacks, and snapshots.
+- C6 starts a typed owner-sourced ten-second buff at late absorption, applies
+  the absorbed-element bonus to all recipients, and remains absent at C5.
+- Reaction regression, build, Javadoc, and representative samples pass. Two
+  runs each reproduce 1,275,070 / 60,718 (`RaidenParty`), 32,047,365 / 322,084
+  (`FlinsParty`), and 20,999,900 / 303,906 (`FlinsParty2`); the Sucrose teams
+  increase because A1 now activates on their real Normal/Burst Swirls.
+
 ## Implementation Order: Expanded Artifact Coverage Campaign
 
 Status: Complete. This campaign adds six missing four-piece artifact sets

@@ -199,6 +199,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_CryoResonanceConditionalCritContract();
         testAccuracyPhaseF_ElectroResonanceTypedTriggerContract();
         testAccuracyPhaseF_SucroseNoIcdApplicationContract();
+        testAccuracyPhaseF_SucroseReactionLifecycleAccuracy();
         testAccuracyPhaseF_SucroseC4AlchemaniaLifecycle();
         testAccuracyPhaseF_RaidenCastAndMusouIcdContract();
         testAccuracyPhaseF_RaidenEyeBuffRefreshContract();
@@ -18455,6 +18456,298 @@ public class ReactionRegressionTest {
         assertClose(1.0, absorbed.getGaugeUnits(), EPS, "Sucrose absorbed Burst damage should apply 1U");
     }
 
+    private static void testAccuracyPhaseF_SucroseReactionLifecycleAccuracy() {
+        Element[] supportedElements = {
+                Element.PYRO,
+                Element.HYDRO,
+                Element.ELECTRO,
+                Element.CRYO
+        };
+        for (Element swirledElement : supportedElements) {
+            model.character.Sucrose sucrose = new model.character.Sucrose(
+                    new TestWeapon(), blankArtifact(), 0, () -> 4.0);
+            CombatSimulator sim = simulatorWithExistingCharacter(sucrose);
+            TestCharacter matching = testCharacter(
+                    swirledElement, CharacterId.AMBER);
+            TestCharacter nonmatching = testCharacter(
+                    Element.PHYSICAL, CharacterId.XINGQIU);
+            sim.addCharacter(matching);
+            sim.addCharacter(nonmatching);
+            sim.setActiveCharacter(CharacterId.AMBER);
+
+            ReactionResult swirl = ReactionResult.transform(
+                    0.0,
+                    swirledElement.name() + " Swirl",
+                    ReactionResult.Kind.SWIRL,
+                    swirledElement);
+            sim.notifyReaction(swirl, sucrose);
+            assertClose(50.0,
+                    resolvedStat(sim, matching, StatType.ELEMENTAL_MASTERY),
+                    EPS,
+                    "Sucrose A1 matching-element EM for " + swirledElement);
+            assertClose(0.0,
+                    resolvedStat(sim, nonmatching, StatType.ELEMENTAL_MASTERY),
+                    EPS,
+                    "Sucrose A1 should exclude nonmatching elements");
+            assertClose(0.0,
+                    resolvedStat(sim, sucrose, StatType.ELEMENTAL_MASTERY),
+                    EPS,
+                    "Sucrose A1 should exclude Sucrose");
+
+            BuffId expectedBuffId = catalystConversionBuffId(swirledElement);
+            List<Buff> matchingBuffs = sim.getTeamBuffList().stream()
+                    .filter(buff -> buff.getId() == expectedBuffId)
+                    .collect(Collectors.toList());
+            assertEquals(1, matchingBuffs.size(),
+                    "Sucrose A1 should create one typed element window");
+            assertEquals(CharacterId.SUCROSE,
+                    matchingBuffs.get(0).getSourceCharacterId(),
+                    "Sucrose A1 should preserve source attribution");
+        }
+
+        model.character.Sucrose actionSucrose = new model.character.Sucrose(
+                new TestWeapon(), blankArtifact(), 0, () -> 4.0);
+        CombatSimulator actionSim = simulatorWithExistingCharacter(actionSucrose);
+        TestCharacter actionPyroAlly = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        actionSim.addCharacter(actionPyroAlly);
+        actionSim.getEnemy().setAura(
+                Element.PYRO, 0.5, actionSim.getCurrentTime());
+        actionSim.performAction(
+                CharacterId.SUCROSE,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        assertClose(50.0,
+                resolvedStat(
+                        actionSim,
+                        actionPyroAlly,
+                        StatType.ELEMENTAL_MASTERY),
+                EPS,
+                "A real Swirl should trigger A1 after consuming a weak aura");
+        assertClose(0.0,
+                actionSim.getEnemy().getAuraUnits(
+                        Element.PYRO, actionSim.getCurrentTime()),
+                EPS,
+                "The A1 action fixture should fully consume the weak aura");
+
+        actionSim.setActiveCharacter(CharacterId.AMBER);
+        actionSim.getEnemy().setAura(
+                Element.PYRO, 4.0, actionSim.getCurrentTime());
+        actionSim.performAction(
+                CharacterId.SUCROSE,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        actionSim.advanceTime(2.01);
+        assertClose(50.0,
+                resolvedStat(
+                        actionSim,
+                        actionPyroAlly,
+                        StatType.ELEMENTAL_MASTERY),
+                EPS,
+                "An off-field Sucrose Burst Swirl should trigger A1");
+
+        model.character.Sucrose auraSucrose = new model.character.Sucrose(
+                new TestWeapon(), blankArtifact(), 0, () -> 4.0);
+        CombatSimulator auraSim = simulatorWithExistingCharacter(auraSucrose);
+        TestCharacter pyroAlly = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        TestCharacter hydroAlly = testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU);
+        auraSim.addCharacter(pyroAlly);
+        auraSim.addCharacter(hydroAlly);
+        auraSim.getEnemy().setAura(Element.PYRO, 4.0, auraSim.getCurrentTime());
+        ReactionResult hydroSwirl = ReactionResult.transform(
+                0.0,
+                "Hydro Swirl",
+                ReactionResult.Kind.SWIRL,
+                Element.HYDRO);
+        auraSim.notifyReaction(hydroSwirl, auraSucrose);
+        assertClose(0.0,
+                resolvedStat(auraSim, pyroAlly, StatType.ELEMENTAL_MASTERY),
+                EPS,
+                "Sucrose A1 should not infer the residual enemy aura");
+        assertClose(50.0,
+                resolvedStat(auraSim, hydroAlly, StatType.ELEMENTAL_MASTERY),
+                EPS,
+                "Sucrose A1 should use the dispatched Swirl element");
+
+        ReactionResult pyroSwirl = ReactionResult.transform(
+                0.0,
+                "Pyro Swirl",
+                ReactionResult.Kind.SWIRL,
+                Element.PYRO);
+        auraSim.notifyReaction(pyroSwirl, auraSucrose);
+        assertClose(50.0,
+                resolvedStat(auraSim, pyroAlly, StatType.ELEMENTAL_MASTERY),
+                EPS,
+                "Different Sucrose A1 element windows should coexist");
+        assertClose(50.0,
+                resolvedStat(auraSim, hydroAlly, StatType.ELEMENTAL_MASTERY),
+                EPS,
+                "A second A1 element should preserve the first window");
+
+        auraSim.advanceTime(4.0);
+        auraSim.notifyReaction(hydroSwirl, auraSucrose);
+        List<Buff> refreshedA1 = auraSim.getTeamBuffList().stream()
+                .filter(buff -> buff.getId()
+                        == BuffId.SUCROSE_CATALYST_CONVERSION_A1_HYDRO)
+                .collect(Collectors.toList());
+        assertEquals(1, refreshedA1.size(),
+                "Sucrose A1 refresh should replace rather than stack");
+        assertClose(12.0, refreshedA1.get(0).getExpirationTime(), EPS,
+                "Sucrose A1 refresh should restart its eight-second window");
+        SimulatorSnapshot a1Snapshot = auraSim.saveSnapshot();
+        auraSim.advanceTime(7.999);
+        assertClose(50.0,
+                resolvedStat(auraSim, hydroAlly, StatType.ELEMENTAL_MASTERY),
+                EPS,
+                "Sucrose A1 should remain active at 7.999 seconds");
+        auraSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0,
+                resolvedStat(auraSim, hydroAlly, StatType.ELEMENTAL_MASTERY),
+                EPS,
+                "Sucrose A1 should expire at exactly eight seconds");
+        auraSim.restoreSnapshot(a1Snapshot);
+        assertClose(50.0,
+                resolvedStat(auraSim, hydroAlly, StatType.ELEMENTAL_MASTERY),
+                EPS,
+                "Snapshot restore should recover the active Sucrose A1 window");
+
+        model.character.Sucrose rollbackSucrose = new model.character.Sucrose(
+                new TestWeapon(), blankArtifact(), 0, () -> 4.0);
+        CombatSimulator rollbackSim = simulatorWithExistingCharacter(
+                rollbackSucrose);
+        TestCharacter rollbackHydro = testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU);
+        rollbackSim.addCharacter(rollbackHydro);
+        SimulatorSnapshot preA1Snapshot = rollbackSim.saveSnapshot();
+        rollbackSim.notifyReaction(hydroSwirl, rollbackSucrose);
+        rollbackSim.restoreSnapshot(preA1Snapshot);
+        assertClose(0.0,
+                resolvedStat(
+                        rollbackSim,
+                        rollbackHydro,
+                        StatType.ELEMENTAL_MASTERY),
+                EPS,
+                "Pre-trigger rollback should remove divergent Sucrose A1 state");
+
+        TestCharacter foreignSource = testCharacter(
+                Element.ANEMO, CharacterId.XIANGLING);
+        auraSim.addCharacter(foreignSource);
+        int teamBuffCount = auraSim.getTeamBuffList().size();
+        auraSim.notifyReaction(ReactionResult.none(), auraSucrose);
+        auraSim.notifyReaction(hydroSwirl, foreignSource);
+        auraSim.notifyReaction(ReactionResult.transform(
+                0.0,
+                "Unknown Swirl",
+                ReactionResult.Kind.SWIRL), auraSucrose);
+        auraSim.notifyReaction(ReactionResult.transform(
+                0.0,
+                "Dendro Swirl",
+                ReactionResult.Kind.SWIRL,
+                Element.DENDRO), auraSucrose);
+        auraSucrose.onReaction(
+                null, auraSucrose, auraSim.getCurrentTime(), auraSim);
+        auraSucrose.onReaction(
+                hydroSwirl,
+                auraSucrose,
+                auraSim.getCurrentTime(),
+                new CombatSimulator());
+        assertEquals(teamBuffCount, auraSim.getTeamBuffList().size(),
+                "Invalid Sucrose A1 callbacks should remain inert");
+
+        model.character.Sucrose c6Sucrose = new model.character.Sucrose(
+                new TestWeapon(), blankArtifact(), 6, () -> 4.0);
+        CombatSimulator c6Sim = simulatorWithExistingCharacter(c6Sucrose);
+        TestCharacter c6PyroAlly = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        TestCharacter c6HydroAlly = testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU);
+        c6Sim.addCharacter(c6PyroAlly);
+        c6Sim.addCharacter(c6HydroAlly);
+        c6Sim.performAction(
+                CharacterId.SUCROSE,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        c6Sim.advanceTime(2.01);
+        assertEquals(0L, c6Sim.getTeamBuffList().stream()
+                        .filter(buff -> buff.getId() == BuffId.SUCROSE_C6_BONUS)
+                        .count(),
+                "C6 should remain inactive before Elemental Absorption");
+        c6Sim.getEnemy().setAura(Element.PYRO, 4.0, c6Sim.getCurrentTime());
+        c6Sim.advanceTime(2.0);
+        List<Buff> c6Buffs = c6Sim.getTeamBuffList().stream()
+                .filter(buff -> buff.getId() == BuffId.SUCROSE_C6_BONUS)
+                .collect(Collectors.toList());
+        assertEquals(1, c6Buffs.size(),
+                "Late C6 absorption should create one typed window");
+        Buff c6Buff = c6Buffs.get(0);
+        assertClose(10.0,
+                c6Buff.getExpirationTime() - c6Buff.getStartTime(),
+                EPS,
+                "Sucrose C6 should last ten seconds from absorption");
+        assertEquals(CharacterId.SUCROSE, c6Buff.getSourceCharacterId(),
+                "Sucrose C6 should preserve source attribution");
+        assertClose(0.20,
+                resolvedStat(c6Sim, c6PyroAlly, StatType.PYRO_DMG_BONUS),
+                EPS,
+                "Sucrose C6 should grant the absorbed-element bonus");
+        assertClose(0.20,
+                resolvedStat(c6Sim, c6HydroAlly, StatType.PYRO_DMG_BONUS),
+                EPS,
+                "Sucrose C6 should buff all recipients regardless of innate element");
+        assertClose(0.0,
+                resolvedStat(c6Sim, c6HydroAlly, StatType.HYDRO_DMG_BONUS),
+                EPS,
+                "Sucrose C6 should not grant unrelated elemental bonuses");
+        SimulatorSnapshot c6Snapshot = c6Sim.saveSnapshot();
+        c6Sim.advanceTime(
+                c6Buff.getStartTime() + 9.999 - c6Sim.getCurrentTime());
+        assertClose(0.20,
+                resolvedStat(c6Sim, c6PyroAlly, StatType.PYRO_DMG_BONUS),
+                EPS,
+                "Sucrose C6 should remain active at 9.999 seconds");
+        c6Sim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0,
+                resolvedStat(c6Sim, c6PyroAlly, StatType.PYRO_DMG_BONUS),
+                EPS,
+                "Sucrose C6 should expire at exactly ten seconds");
+        c6Sim.restoreSnapshot(c6Snapshot);
+        assertClose(0.20,
+                resolvedStat(c6Sim, c6PyroAlly, StatType.PYRO_DMG_BONUS),
+                EPS,
+                "Snapshot restore should recover the active Sucrose C6 window");
+
+        model.character.Sucrose c5Sucrose = new model.character.Sucrose(
+                new TestWeapon(), blankArtifact(), 5, () -> 4.0);
+        CombatSimulator c5Sim = simulatorWithExistingCharacter(c5Sucrose);
+        TestCharacter c5PyroAlly = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        c5Sim.addCharacter(c5PyroAlly);
+        c5Sim.getEnemy().setAura(Element.PYRO, 4.0, c5Sim.getCurrentTime());
+        c5Sim.performAction(
+                CharacterId.SUCROSE,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        c5Sim.advanceTime(2.01);
+        assertClose(0.0,
+                resolvedStat(c5Sim, c5PyroAlly, StatType.PYRO_DMG_BONUS),
+                EPS,
+                "C5 Sucrose should not grant the C6 absorption bonus");
+    }
+
+    private static BuffId catalystConversionBuffId(Element element) {
+        switch (element) {
+            case PYRO:
+                return BuffId.SUCROSE_CATALYST_CONVERSION_A1_PYRO;
+            case HYDRO:
+                return BuffId.SUCROSE_CATALYST_CONVERSION_A1_HYDRO;
+            case ELECTRO:
+                return BuffId.SUCROSE_CATALYST_CONVERSION_A1_ELECTRO;
+            case CRYO:
+                return BuffId.SUCROSE_CATALYST_CONVERSION_A1_CRYO;
+            default:
+                throw new IllegalArgumentException(
+                        "Unsupported Sucrose A1 fixture element: " + element);
+        }
+    }
+
     private static void testAccuracyPhaseF_SucroseC4AlchemaniaLifecycle() {
         RecordingDamageWeapon chargedWeapon =
                 new RecordingDamageWeapon("Sucrose Charged Attack");
@@ -18709,7 +19002,7 @@ public class ReactionRegressionTest {
             crossSimulatorRejected = true;
         }
         assertTrue(crossSimulatorRejected,
-                "Sucrose C4 listener should reject cross-simulator reuse");
+                "Sucrose listeners should reject cross-simulator reuse");
     }
 
     private static void notifySucroseC4Hits(

@@ -3027,3 +3027,40 @@ experiment record.
   handling, supplied-stat preservation, resolved Charged-hit activation,
   timing/refresh/expiry, invalid callback, binding, and snapshot regressions
   pass focused and full gates; representative party outputs remain stable
+
+### B-141 — Sucrose A1 and C6 reaction lifecycle accuracy
+
+- **Status:** complete
+- **Source:** delegated supported-character accuracy audit
+- **Scope/risk:** replace residual-enemy-aura inference with the dispatched
+  Swirl result and make C6 last ten seconds from absorption; shared reaction
+  listener registration and team-buff timing require focused regression
+- **Evidence:** maintained KQM Sucrose main page and evidence vault, accessed
+  2026-08-02, specify matching-element EM +50 for eight seconds when Sucrose
+  triggers Swirl and a ten-second C6 elemental bonus from absorption:
+  https://library.keqingmains.com/characters/anemo/sucrose
+  https://library.keqingmains.com/evidence/characters/anemo/sucrose
+- **Boundary:** wrong source/reaction/element/simulator, off-field trigger,
+  same/different-element targeting, refresh, 7.999/8.000 and 9.999/10.000
+  expiry, C5 exclusion, duplicate registration, and snapshot restore
+- **Plan:** one-phase `TASKS.md` Sucrose Reaction Lifecycle Accuracy
+- **Completion:** reaction-result A1 dispatch, all four supported element
+  targets, weak-aura and off-field real Swirls, same/different-element windows,
+  fixed ten-second C6, invalid callbacks, exact expiry, and active/pre-trigger
+  snapshot regressions pass focused and full gates
+
+### B-142 — Sucrose Burst absorption pre-reaction aura capture
+
+- **Status:** candidate
+- **Source:** delegated B-141 implementation review
+- **Scope/risk:** Burst currently chooses its absorbed element from residual
+  enemy aura after the Anemo tick, so a weak aura can be consumed before the
+  callback observes it; resolver/event ordering and multi-aura priority need a
+  separately planned correction rather than expansion of B-141
+- **Evidence:** current `PeriodicDamageEvent` resolves damage before its callback;
+  maintained KQM Sucrose documentation confirms absorption and Anemo damage are
+  simultaneous, accessed 2026-08-02:
+  https://library.keqingmains.com/evidence/characters/anemo/sucrose
+- **Boundary:** 0.5U/1U aura, multi-aura priority, Swirl dispatch, first-only
+  absorption, C6 ordering, periodic event behavior, and snapshot limitations
+- **Decision:** accepted candidate; plan only after active B-141 is complete
