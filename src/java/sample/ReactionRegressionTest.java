@@ -137,6 +137,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_OffFieldHitBows();
         testAccuracyPhaseF_SkillBurstOffensiveWeapons();
         testAccuracyPhaseF_MoonsignReactionWeapons();
+        testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_ActionUseWindowWeapons();
         testAccuracyPhaseF_AdditionalSkillUseStatWeapons();
         testAccuracyPhaseF_SamuraiConductWeapons();
@@ -8107,6 +8108,242 @@ public class ReactionRegressionTest {
         }
         assertTrue(highSerenityRefinementRejected,
                 "Serenity's Call should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_ReactionUtilityClaymores() {
+        ReactionResult[] pyroReactions = {
+                ReactionResult.amp(2.0, "Vaporize", ReactionResult.Kind.VAPORIZE),
+                ReactionResult.amp(1.5, "Melt", ReactionResult.Kind.MELT),
+                ReactionResult.transform(
+                        0.0, "Overload", ReactionResult.Kind.OVERLOAD),
+                ReactionResult.transform(
+                        0.0, "Overloaded", ReactionResult.Kind.OVERLOADED),
+                ReactionResult.state(
+                        "Burning", ReactionResult.Kind.BURNING, Element.PYRO),
+                ReactionResult.transform(
+                        0.0, "Burgeon", ReactionResult.Kind.BURGEON),
+                ReactionResult.transform(
+                        0.0, "Pyro Swirl", ReactionResult.Kind.SWIRL, Element.PYRO),
+                ReactionResult.state(
+                        "Pyro Crystallize", ReactionResult.Kind.CRYSTALLIZE,
+                        Element.PYRO)
+        };
+        for (ReactionResult reaction : pyroReactions) {
+            model.weapon.EarthShaker earthShaker = new model.weapon.EarthShaker();
+            TestCharacter earthOwner = testCharacter(
+                    Element.GEO, CharacterId.SUCROSE);
+            earthOwner.setWeapon(earthShaker);
+            CombatSimulator earthSim = simulatorWith(earthOwner);
+            TestCharacter offFieldAlly = testCharacter(
+                    Element.PYRO, CharacterId.AMBER);
+            earthSim.addCharacter(offFieldAlly);
+            earthSim.notifyReaction(reaction, offFieldAlly);
+            assertClose(0.32,
+                    resolvedStat(earthSim, earthOwner,
+                            StatType.SKILL_DMG_BONUS), EPS,
+                    "Earth Shaker reaction family " + reaction.getKind());
+        }
+
+        model.weapon.EarthShaker earthShaker = new model.weapon.EarthShaker();
+        assertEquals("Earth Shaker", earthShaker.getName(),
+                "Earth Shaker display name");
+        assertClose(565.0, earthShaker.getBaseAtk(), EPS,
+                "Earth Shaker base ATK");
+        assertClose(0.276,
+                earthShaker.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Earth Shaker ATK substat");
+        assertEquals(model.type.WeaponType.CLAYMORE, earthShaker.getWeaponType(),
+                "Earth Shaker weapon type");
+        assertEquals(5, earthShaker.getRefinement(),
+                "Earth Shaker default refinement");
+
+        TestCharacter earthOwner = testCharacter(Element.GEO, CharacterId.SUCROSE);
+        earthOwner.setWeapon(earthShaker);
+        CombatSimulator earthSim = simulatorWith(earthOwner);
+        TestCharacter earthAlly = testCharacter(Element.PYRO, CharacterId.AMBER);
+        earthSim.addCharacter(earthAlly);
+        ReactionResult pyroSwirl = ReactionResult.transform(
+                0.0, "Pyro Swirl", ReactionResult.Kind.SWIRL, Element.PYRO);
+        ReactionResult hydroSwirl = ReactionResult.transform(
+                0.0, "Hydro Swirl", ReactionResult.Kind.SWIRL, Element.HYDRO);
+        earthSim.notifyReaction(hydroSwirl, earthAlly);
+        TestCharacter nonPartySource = testCharacter(
+                Element.PYRO, CharacterId.XIANGLING);
+        earthSim.notifyReaction(pyroSwirl, nonPartySource);
+        assertClose(0.0,
+                resolvedStat(earthSim, earthOwner,
+                        StatType.SKILL_DMG_BONUS), EPS,
+                "Unrelated and nonparty reactions should not activate Earth Shaker");
+        earthSim.notifyReaction(pyroSwirl, earthAlly);
+        earthSim.advanceTime(4.0);
+        earthSim.notifyReaction(pyroSwirl, earthAlly);
+        earthSim.advanceTime(7.999);
+        assertClose(0.32,
+                resolvedStat(earthSim, earthOwner,
+                        StatType.SKILL_DMG_BONUS), EPS,
+                "Refreshed Earth Shaker should remain active before expiry");
+        earthSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0,
+                resolvedStat(earthSim, earthOwner,
+                        StatType.SKILL_DMG_BONUS), EPS,
+                "Earth Shaker should expire at exactly eight seconds");
+
+        model.weapon.EarthShaker r1EarthShaker = new model.weapon.EarthShaker(1);
+        TestCharacter r1EarthOwner = testCharacter(Element.GEO);
+        r1EarthOwner.setWeapon(r1EarthShaker);
+        CombatSimulator r1EarthSim = simulatorWith(r1EarthOwner);
+        r1EarthSim.notifyReaction(pyroReactions[0], r1EarthOwner);
+        assertClose(0.16,
+                resolvedStat(r1EarthSim, r1EarthOwner,
+                        StatType.SKILL_DMG_BONUS), EPS,
+                "R1 Earth Shaker Skill DMG window");
+
+        ReactionResult[] insightReactions = {
+                ReactionResult.transform(
+                        0.0, "Electro-Charged", ReactionResult.Kind.ELECTRO_CHARGED),
+                ReactionResult.lunar(0.0, ReactionResult.LunarType.CHARGED),
+                ReactionResult.transform(0.0, "Bloom", ReactionResult.Kind.BLOOM),
+                ReactionResult.lunar(0.0, ReactionResult.LunarType.BLOOM),
+                ReactionResult.state(
+                        "Crystallize", ReactionResult.Kind.CRYSTALLIZE, Element.HYDRO),
+                ReactionResult.lunar(0.0, ReactionResult.LunarType.CRYSTALLIZE)
+        };
+        for (ReactionResult reaction : insightReactions) {
+            model.weapon.FlameForgedInsight insight =
+                    new model.weapon.FlameForgedInsight();
+            TestCharacter insightOwner = testCharacter(
+                    Element.HYDRO, CharacterId.XINGQIU);
+            insightOwner.setWeapon(insight);
+            CombatSimulator insightSim = simulatorWith(insightOwner);
+            insightSim.addCharacter(testCharacter(Element.PYRO, CharacterId.AMBER));
+            insightSim.setActiveCharacter(CharacterId.AMBER);
+            insightOwner.restoreCurrentEnergy(0.0);
+            insightSim.notifyReaction(reaction, insightOwner);
+            assertClose(24.0, insightOwner.getCurrentEnergy(), EPS,
+                    "Flame-Forged Insight Energy for " + reaction.getKind());
+            assertClose(285.0,
+                    resolvedStat(insightSim, insightOwner,
+                            StatType.ELEMENTAL_MASTERY), EPS,
+                    "Flame-Forged Insight EM for " + reaction.getKind());
+        }
+
+        model.weapon.FlameForgedInsight insight =
+                new model.weapon.FlameForgedInsight();
+        assertEquals("Flame-Forged Insight", insight.getName(),
+                "Flame-Forged Insight display name");
+        assertClose(510.0, insight.getBaseAtk(), EPS,
+                "Flame-Forged Insight base ATK");
+        assertClose(165.0,
+                insight.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Flame-Forged Insight EM substat");
+        assertEquals(model.type.WeaponType.CLAYMORE, insight.getWeaponType(),
+                "Flame-Forged Insight weapon type");
+        assertEquals(5, insight.getRefinement(),
+                "Flame-Forged Insight default refinement");
+
+        TestCharacter insightOwner = testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU);
+        insightOwner.setWeapon(insight);
+        CombatSimulator insightSim = simulatorWith(insightOwner);
+        TestCharacter insightAlly = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        insightSim.addCharacter(insightAlly);
+        insightSim.setActiveCharacter(CharacterId.AMBER);
+        insightOwner.restoreCurrentEnergy(0.0);
+        insightSim.notifyReaction(insightReactions[0], insightAlly);
+        insightSim.notifyReaction(pyroReactions[0], insightOwner);
+        assertClose(0.0, insightOwner.getCurrentEnergy(), EPS,
+                "Ally and unrelated reactions should not trigger Insight");
+        assertClose(165.0,
+                resolvedStat(insightSim, insightOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Rejected Insight reactions should not open the EM window");
+
+        insightSim.notifyReaction(insightReactions[0], insightOwner);
+        assertClose(24.0, insightOwner.getCurrentEnergy(), EPS,
+                "R5 Insight should restore flat Energy off-field");
+        insightOwner.restoreCurrentEnergy(0.0);
+        insightSim.advanceTime(14.999);
+        insightSim.notifyReaction(insightReactions[1], insightOwner);
+        assertClose(0.0, insightOwner.getCurrentEnergy(), EPS,
+                "Insight should remain on CT before fifteen seconds");
+        assertClose(285.0,
+                resolvedStat(insightSim, insightOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Insight EM should remain active before expiry");
+        insightSim.advanceTime(0.001 + 1e-9);
+        assertClose(165.0,
+                resolvedStat(insightSim, insightOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Insight EM should expire at exactly fifteen seconds");
+        insightSim.notifyReaction(insightReactions[1], insightOwner);
+        assertClose(24.0, insightOwner.getCurrentEnergy(), EPS,
+                "Insight should retrigger at exact fifteen-second CT");
+
+        insightOwner.restoreCurrentEnergy(insightOwner.getMaxEnergy() - 5.0);
+        insightSim.advanceTime(15.0);
+        insightSim.notifyReaction(insightReactions[2], insightOwner);
+        assertClose(insightOwner.getMaxEnergy(), insightOwner.getCurrentEnergy(), EPS,
+                "Insight Energy restoration should respect the Energy cap");
+
+        model.weapon.FlameForgedInsight r1Insight =
+                new model.weapon.FlameForgedInsight(1);
+        TestCharacter r1InsightOwner = testCharacter(Element.HYDRO);
+        r1InsightOwner.setWeapon(r1Insight);
+        CombatSimulator r1InsightSim = simulatorWith(r1InsightOwner);
+        r1InsightOwner.restoreCurrentEnergy(0.0);
+        r1InsightSim.notifyReaction(insightReactions[2], r1InsightOwner);
+        assertClose(12.0, r1InsightOwner.getCurrentEnergy(), EPS,
+                "R1 Insight flat Energy restoration");
+        assertClose(225.0,
+                resolvedStat(r1InsightSim, r1InsightOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "R1 Insight static and reaction EM");
+
+        boolean crossSimulatorReuseRejected = false;
+        try {
+            insight.initializeForSimulator(insightOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            crossSimulatorReuseRejected = true;
+        }
+        assertTrue(crossSimulatorReuseRejected,
+                "Flame-Forged Insight should reject cross-simulator reuse");
+
+        boolean lowEarthRefinementRejected = false;
+        try {
+            new model.weapon.EarthShaker(0);
+        } catch (IllegalArgumentException expected) {
+            lowEarthRefinementRejected = true;
+        }
+        assertTrue(lowEarthRefinementRejected,
+                "Earth Shaker should reject refinement zero");
+
+        boolean highEarthRefinementRejected = false;
+        try {
+            new model.weapon.EarthShaker(6);
+        } catch (IllegalArgumentException expected) {
+            highEarthRefinementRejected = true;
+        }
+        assertTrue(highEarthRefinementRejected,
+                "Earth Shaker should reject refinement six");
+
+        boolean lowInsightRefinementRejected = false;
+        try {
+            new model.weapon.FlameForgedInsight(0);
+        } catch (IllegalArgumentException expected) {
+            lowInsightRefinementRejected = true;
+        }
+        assertTrue(lowInsightRefinementRejected,
+                "Flame-Forged Insight should reject refinement zero");
+
+        boolean highInsightRefinementRejected = false;
+        try {
+            new model.weapon.FlameForgedInsight(6);
+        } catch (IllegalArgumentException expected) {
+            highInsightRefinementRejected = true;
+        }
+        assertTrue(highInsightRefinementRejected,
+                "Flame-Forged Insight should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_OffFieldHitBows() {
