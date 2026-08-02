@@ -13613,8 +13613,8 @@ Verification:
 
 ## Implementation Order: Samurai Conduct Weapon Campaign
 
-Status: Active. Add the two shared Skill-hit energy weapons with sourced drain
-delay and periodic recovery.
+Status: Complete. Both Skill-hit energy weapons now share a sourced delayed
+drain and periodic recovery policy.
 
 Scope:
 
@@ -13629,7 +13629,7 @@ Out of scope for this pass:
 - Latency-dependent variation around the sourced 22-24-frame drain, multi-hit
   target counts, characters, RL, and generated docs.
 
-### Phase 1: Add Energy Spend and Samurai Conduct Weapons
+### Phase 1: Add Energy Spend and Samurai Conduct Weapons - Done (`0a1c228`)
 
 Target files:
 
@@ -13639,6 +13639,16 @@ Target files:
 - `src/java/model/weapon/KitainCrossSpear.java` (new)
 - `src/java/model/weapon/KatsuragikiriNagamasa.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Runtime Energy spending clamps at zero, rejects invalid values, and leaves
+  gain and Burst-window accounting unchanged.
+- Samurai Conduct rejects wrong/zero hits, starts at positive Skill damage even
+  off-field, drains at 23 frames, restores at 2/4/6 seconds, and retriggers at
+  exact ten-second CT without duplicate events.
+- Both weapons prove exact metadata, static 6/12% Skill bonuses, R1/R5 recovery,
+  defaults, and invalid ranks; reaction regression, build, Javadoc, and preflight pass.
 
 Acceptance criteria:
 

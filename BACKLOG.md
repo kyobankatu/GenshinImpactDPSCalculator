@@ -2247,10 +2247,12 @@ experiment record.
 
 ### B-090 — Samurai Conduct weapon coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Kitain Cross Spear and Katsuragikiri Nagamasa; RL excluded
 - **Value/risk:** two complete passives share one typed trigger and add one
   narrow, reusable Energy spend operation
 - **Evidence boundary:** KQM TCL metadata, R1-R5 Skill bonus/recovery, positive
   Skill hit, 10-second CT, 22-24-frame drain delay, off-field and zero-Energy behavior
 - **Plan:** `TASKS.md` Samurai Conduct Weapon Campaign
+- **Completion:** `0a1c228` adds Energy spend, shared Samurai Conduct, both
+  weapons, and focused regressions; build/Javadoc/leak gates pass
