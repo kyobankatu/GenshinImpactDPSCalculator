@@ -6234,6 +6234,65 @@ public class ReactionRegressionTest {
         }
         assertTrue(highEmeraldRefinementRejected,
                 "Emerald Orb should reject refinement six");
+
+        model.weapon.DarkIronSword darkIronSword = new model.weapon.DarkIronSword();
+        assertEquals("Dark Iron Sword", darkIronSword.getName(),
+                "Dark Iron Sword display name");
+        assertClose(401.0, darkIronSword.getBaseAtk(), EPS,
+                "Dark Iron Sword base ATK");
+        assertClose(141.0,
+                darkIronSword.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Dark Iron Sword Elemental Mastery");
+        assertEquals(model.type.WeaponType.SWORD, darkIronSword.getWeaponType(),
+                "Dark Iron Sword weapon type");
+        assertEquals(1, darkIronSword.getRefinement(),
+                "Dark Iron Sword fixed refinement");
+
+        ReactionResult[] overloadedReactions = {
+                ReactionResult.transform(0.0, "Overload", ReactionResult.Kind.OVERLOAD),
+                ReactionResult.transform(0.0, "Overloaded", ReactionResult.Kind.OVERLOADED),
+                ReactionResult.transform(
+                        0.0, "Superconduct", ReactionResult.Kind.SUPERCONDUCT),
+                ReactionResult.transform(
+                        0.0, "Electro-Charged", ReactionResult.Kind.ELECTRO_CHARGED),
+                ReactionResult.state("Quicken", ReactionResult.Kind.QUICKEN, Element.DENDRO),
+                ReactionResult.additive(
+                        0.0, "Aggravate", ReactionResult.Kind.AGGRAVATE, Element.ELECTRO),
+                ReactionResult.transform(
+                        0.0, "Hyperbloom", ReactionResult.Kind.HYPERBLOOM),
+                ReactionResult.lunar(0.0, ReactionResult.LunarType.CHARGED),
+                ReactionResult.transform(
+                        0.0, "Electro Swirl", ReactionResult.Kind.SWIRL, Element.ELECTRO)
+        };
+        for (ReactionResult reaction : overloadedReactions) {
+            assertReactionWindowBonus(
+                    new model.weapon.DarkIronSword(), reaction,
+                    StatType.ATK_PERCENT, 0.20,
+                    "Dark Iron Sword " + reaction.getKind());
+        }
+        assertReactionWindowBonus(
+                new model.weapon.DarkIronSword(),
+                ReactionResult.transform(0.0, "Bloom", ReactionResult.Kind.BLOOM),
+                StatType.ATK_PERCENT, 0.0,
+                "Dark Iron Sword Bloom exclusion");
+        assertReactionWindowBonus(
+                new model.weapon.DarkIronSword(),
+                ReactionResult.transform(
+                        0.0, "Hydro Swirl", ReactionResult.Kind.SWIRL, Element.HYDRO),
+                StatType.ATK_PERCENT, 0.0,
+                "Dark Iron Sword Hydro Swirl exclusion");
+
+        model.weapon.DarkIronSword expiringSword = new model.weapon.DarkIronSword();
+        TestCharacter swordOwner = testCharacter(Element.ELECTRO);
+        swordOwner.setWeapon(expiringSword);
+        CombatSimulator swordSim = simulatorWith(swordOwner);
+        swordSim.notifyReaction(overloadedReactions[0], swordOwner);
+        swordSim.advanceTime(11.999);
+        assertClose(0.20, resolvedStat(swordSim, swordOwner, StatType.ATK_PERCENT), EPS,
+                "Dark Iron Sword should remain active before twelve seconds");
+        swordSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0, resolvedStat(swordSim, swordOwner, StatType.ATK_PERCENT), EPS,
+                "Dark Iron Sword should expire at exactly twelve seconds");
     }
 
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
