@@ -211,6 +211,28 @@ public enum BuffId {
     YANFEI_A1_PYRO_DMG_BONUS,
     /** Yanfei Brilliance Charged Attack DMG bonus. */
     YANFEI_BRILLIANCE_CHARGED_DMG_BONUS,
+    /** Rosaria A4 team CRIT Rate bonus. */
+    ROSARIA_A4_TEAM_CRIT_RATE,
+    /** Rosaria C6 Physical resistance reduction. */
+    ROSARIA_C6_PHYSICAL_RES_SHRED,
+    /** Diluc A4 Pyro DMG bonus during Searing Onslaught infusion. */
+    DILUC_A4_PYRO_DMG_BONUS,
+    /** Diluc C4 Searing Onslaught DMG bonus. */
+    DILUC_C4_SKILL_DMG_BONUS,
+    /** Keqing A4 CRIT Rate and Energy Recharge bonus. */
+    KEQING_A4_CRIT_RATE_AND_ER,
+    /** Keqing C4 ATK bonus after an Electro reaction. */
+    KEQING_C4_ATK_BONUS,
+    /** Keqing C6 Electro DMG bonus stacks. */
+    KEQING_C6_ELECTRO_DMG_BONUS,
+    /** Ganyu A1 Frostflake CRIT Rate bonus. */
+    GANYU_A1_FROSTFLAKE_CRIT_RATE,
+    /** Ganyu A4 active-character Cryo DMG bonus. */
+    GANYU_A4_CRYO_DMG_BONUS,
+    /** Ganyu C1 Cryo resistance reduction. */
+    GANYU_C1_CRYO_RES_SHRED,
+    /** Ganyu C4 Celestial Shower DMG bonus. */
+    GANYU_C4_CELESTIAL_SHOWER_DMG_BONUS,
     /** 武器「千夜に浮かぶ夢」の味方元素熟知共有。 */
     A_THOUSAND_FLOATING_DREAMS_TEAM_EM,
     /** 武器「龍殺しの英傑譚」の交代先への攻撃力バフ。 */

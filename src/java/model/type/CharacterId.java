@@ -53,6 +53,16 @@ public enum CharacterId {
     YOIMIYA(19, "Yoimiya"),
     /** Yanfei (Pyro catalyst Charged Attack DPS). */
     YANFEI(20, "Yanfei"),
+    /** Rosaria (Cryo polearm DPS and team CRIT support). */
+    ROSARIA(21, "Rosaria"),
+    /** Diluc (Pyro claymore on-field DPS). */
+    DILUC(22, "Diluc"),
+    /** Keqing (Electro sword on-field DPS). */
+    KEQING(23, "Keqing"),
+    /** Ningguang (Geo catalyst on-field DPS). */
+    NINGGUANG(24, "Ningguang"),
+    /** Ganyu (Cryo bow Charged Attack DPS). */
+    GANYU(25, "Ganyu"),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown");
 
