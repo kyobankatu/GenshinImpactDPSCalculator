@@ -141,6 +141,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_CatalystDualWindowWeapons();
         testAccuracyPhaseF_FruitOfFulfillment();
         testAccuracyPhaseF_ScionOfTheBlazingSun();
+        testAccuracyPhaseF_AlleyHunter();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -8974,6 +8975,121 @@ public class ReactionRegressionTest {
         }
         assertTrue(highScionRefinementRejected,
                 "Scion should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_AlleyHunter() {
+        model.weapon.AlleyHunter alleyHunter =
+                new model.weapon.AlleyHunter();
+        assertEquals("Alley Hunter", alleyHunter.getName(),
+                "Alley Hunter display name");
+        assertClose(565.0, alleyHunter.getBaseAtk(), EPS,
+                "Alley Hunter base ATK");
+        assertClose(0.276,
+                alleyHunter.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Alley Hunter ATK substat");
+        assertEquals(model.type.WeaponType.BOW, alleyHunter.getWeaponType(),
+                "Alley Hunter weapon type");
+        assertEquals(5, alleyHunter.getRefinement(),
+                "Alley Hunter default refinement");
+
+        TestCharacter activeAlly = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        TestCharacter alleyOwner = testCharacter(
+                Element.CRYO, CharacterId.KAEYA);
+        alleyOwner.setWeapon(alleyHunter);
+        CombatSimulator alleySim = simulatorWith(activeAlly);
+        alleySim.addCharacter(alleyOwner);
+        alleySim.advanceTime(1.0 - 1e-6);
+        assertClose(0.0,
+                resolvedStat(alleySim, alleyOwner, StatType.DMG_BONUS_ALL), EPS,
+                "Alley Hunter should wait for its exact first tick");
+        alleySim.advanceTime(1e-6 + 1e-9);
+        assertEquals(1, alleyHunter.getStackCount(),
+                "Alley Hunter first off-field stack at one second");
+        assertClose(0.04,
+                resolvedStat(alleySim, alleyOwner, StatType.DMG_BONUS_ALL), EPS,
+                "R5 Alley Hunter first off-field bonus");
+        alleySim.advanceTime(9.0);
+        assertEquals(10, alleyHunter.getStackCount(),
+                "Alley Hunter should reach ten stacks");
+        assertClose(0.40,
+                resolvedStat(alleySim, alleyOwner, StatType.DMG_BONUS_ALL), EPS,
+                "R5 Alley Hunter capped off-field bonus");
+        alleySim.advanceTime(1.0);
+        assertEquals(10, alleyHunter.getStackCount(),
+                "Alley Hunter should remain capped off-field");
+
+        alleySim.setActiveCharacter(CharacterId.KAEYA);
+        alleySim.advanceTime(4.0);
+        assertClose(0.40,
+                resolvedStat(alleySim, alleyOwner, StatType.DMG_BONUS_ALL), EPS,
+                "Alley Hunter should retain its bonus for four active seconds");
+        alleySim.advanceTime(1.0);
+        assertEquals(8, alleyHunter.getStackCount(),
+                "Alley Hunter should remove two stacks after the grace period");
+        assertClose(0.32,
+                resolvedStat(alleySim, alleyOwner, StatType.DMG_BONUS_ALL), EPS,
+                "R5 Alley Hunter first on-field decay tick");
+
+        alleySim.setActiveCharacter(CharacterId.AMBER);
+        alleySim.advanceTime(1.0);
+        assertEquals(9, alleyHunter.getStackCount(),
+                "Returning off-field should grow and reset the active grace");
+        alleySim.setActiveCharacter(CharacterId.KAEYA);
+        alleySim.advanceTime(4.0);
+        assertEquals(9, alleyHunter.getStackCount(),
+                "Reset Alley Hunter grace should retain stacks for four ticks");
+        alleySim.advanceTime(5.0);
+        assertEquals(0, alleyHunter.getStackCount(),
+                "Alley Hunter decay should floor at zero");
+
+        model.weapon.AlleyHunter r1AlleyHunter =
+                new model.weapon.AlleyHunter(1);
+        TestCharacter r1ActiveAlly = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        TestCharacter r1AlleyOwner = testCharacter(
+                Element.CRYO, CharacterId.KAEYA);
+        r1AlleyOwner.setWeapon(r1AlleyHunter);
+        CombatSimulator r1AlleySim = simulatorWith(r1ActiveAlly);
+        r1AlleySim.addCharacter(r1AlleyOwner);
+        r1AlleySim.advanceTime(10.0);
+        assertClose(0.20,
+                resolvedStat(r1AlleySim, r1AlleyOwner,
+                        StatType.DMG_BONUS_ALL), EPS,
+                "R1 Alley Hunter capped off-field bonus");
+        r1AlleySim.setActiveCharacter(CharacterId.KAEYA);
+        r1AlleySim.advanceTime(5.0);
+        assertClose(0.16,
+                resolvedStat(r1AlleySim, r1AlleyOwner,
+                        StatType.DMG_BONUS_ALL), EPS,
+                "R1 Alley Hunter first decay should remove four percent");
+
+        boolean alleyReuseRejected = false;
+        try {
+            alleyHunter.initializeForSimulator(alleyOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            alleyReuseRejected = true;
+        }
+        assertTrue(alleyReuseRejected,
+                "Alley Hunter should reject cross-simulator reuse");
+
+        boolean lowAlleyRefinementRejected = false;
+        try {
+            new model.weapon.AlleyHunter(0);
+        } catch (IllegalArgumentException expected) {
+            lowAlleyRefinementRejected = true;
+        }
+        assertTrue(lowAlleyRefinementRejected,
+                "Alley Hunter should reject refinement zero");
+
+        boolean highAlleyRefinementRejected = false;
+        try {
+            new model.weapon.AlleyHunter(6);
+        } catch (IllegalArgumentException expected) {
+            highAlleyRefinementRejected = true;
+        }
+        assertTrue(highAlleyRefinementRejected,
+                "Alley Hunter should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {
