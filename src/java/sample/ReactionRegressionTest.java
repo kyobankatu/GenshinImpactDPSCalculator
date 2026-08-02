@@ -140,6 +140,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
+        testAccuracyPhaseF_SumeruActionProcBows();
         testAccuracyPhaseF_ActionUseWindowWeapons();
         testAccuracyPhaseF_AdditionalSkillUseStatWeapons();
         testAccuracyPhaseF_SamuraiConductWeapons();
@@ -8962,6 +8963,264 @@ public class ReactionRegressionTest {
         }
         assertTrue(highAquaRefinementRejected,
                 "Aqua Simulacra should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_SumeruActionProcBows() {
+        model.weapon.EndOfTheLine endOfTheLine =
+                new model.weapon.EndOfTheLine();
+        assertEquals("End of the Line", endOfTheLine.getName(),
+                "End of the Line display name");
+        assertClose(510.0, endOfTheLine.getBaseAtk(), EPS,
+                "End of the Line base ATK");
+        assertClose(0.459,
+                endOfTheLine.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "End of the Line Energy Recharge");
+        assertEquals(model.type.WeaponType.BOW, endOfTheLine.getWeaponType(),
+                "End of the Line weapon type");
+        assertEquals(5, endOfTheLine.getRefinement(),
+                "End of the Line default refinement");
+
+        TestCharacter lineOwner = testCharacter(Element.HYDRO);
+        lineOwner.setWeapon(endOfTheLine);
+        CombatSimulator lineSim = simulatorWith(lineOwner);
+        AttackAction normalHit = typedDamageHit(
+                "End of the Line Normal", ActionType.NORMAL, 1.0);
+        AttackAction zeroHit = typedDamageHit(
+                "End of the Line zero Normal", ActionType.NORMAL, 0.0);
+        AttackAction wrongHit = typedDamageHit(
+                "End of the Line Other", ActionType.OTHER, 1.0);
+        AttackAction recursiveHit = typedDamageHit(
+                "End of the Line Flowrider", ActionType.NORMAL, 1.0);
+
+        endOfTheLine.onDamage(lineOwner, normalHit, 0.0, lineSim);
+        endOfTheLine.onAction(
+                lineOwner,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL),
+                lineSim);
+        assertClose(0.0, lineSim.getTotalDamage(), EPS,
+                "End of the Line should be inactive before Skill use");
+        endOfTheLine.onAction(
+                lineOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                lineSim);
+        endOfTheLine.onDamage(lineOwner, zeroHit, 0.0, lineSim);
+        endOfTheLine.onDamage(lineOwner, wrongHit, 0.0, lineSim);
+        endOfTheLine.onDamage(lineOwner, recursiveHit, 0.0, lineSim);
+        assertClose(0.0, lineSim.getTotalDamage(), EPS,
+                "Wrong, zero, and recursive hits should not consume Flowrider");
+
+        endOfTheLine.onDamage(lineOwner, normalHit, 0.0, lineSim);
+        double r5FlowriderDamage = lineSim.getTotalDamage();
+        assertTrue(r5FlowriderDamage > 0.0,
+                "Flowrider should proc immediately after Skill use");
+        lineSim.advanceTime(1.999);
+        endOfTheLine.onDamage(
+                lineOwner, normalHit, lineSim.getCurrentTime(), lineSim);
+        assertClose(r5FlowriderDamage, lineSim.getTotalDamage(), EPS,
+                "Flowrider should remain on CT before two seconds");
+        lineSim.advanceTime(0.001 + 1e-9);
+        endOfTheLine.onDamage(
+                lineOwner, normalHit, lineSim.getCurrentTime(), lineSim);
+        lineSim.advanceTime(2.0);
+        endOfTheLine.onDamage(
+                lineOwner, normalHit, lineSim.getCurrentTime(), lineSim);
+        assertClose(r5FlowriderDamage * 3.0, lineSim.getTotalDamage(), EPS,
+                "Flowrider should generate exactly three equal procs");
+        lineSim.advanceTime(2.0);
+        endOfTheLine.onDamage(
+                lineOwner, normalHit, lineSim.getCurrentTime(), lineSim);
+        assertClose(r5FlowriderDamage * 3.0, lineSim.getTotalDamage(), EPS,
+                "A fourth hit should not generate Flowrider damage");
+
+        lineSim.advanceTime(5.999 - 1e-9);
+        endOfTheLine.onAction(
+                lineOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                lineSim);
+        endOfTheLine.onDamage(
+                lineOwner, normalHit, lineSim.getCurrentTime(), lineSim);
+        assertClose(r5FlowriderDamage * 3.0, lineSim.getTotalDamage(), EPS,
+                "Flowrider should not reactivate before twelve seconds");
+        lineSim.advanceTime(0.001 + 2e-9);
+        endOfTheLine.onAction(
+                lineOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                lineSim);
+        endOfTheLine.onDamage(
+                lineOwner, normalHit, lineSim.getCurrentTime(), lineSim);
+        assertClose(r5FlowriderDamage * 4.0, lineSim.getTotalDamage(), EPS,
+                "Flowrider should reactivate at exact twelve-second CT");
+
+        model.weapon.EndOfTheLine expiringLine =
+                new model.weapon.EndOfTheLine();
+        TestCharacter expiringLineOwner = testCharacter(Element.HYDRO);
+        expiringLineOwner.setWeapon(expiringLine);
+        CombatSimulator expiringLineSim = simulatorWith(expiringLineOwner);
+        expiringLine.onAction(
+                expiringLineOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                expiringLineSim);
+        expiringLineSim.advanceTime(15.0 + 1e-9);
+        expiringLine.onDamage(
+                expiringLineOwner,
+                normalHit,
+                expiringLineSim.getCurrentTime(),
+                expiringLineSim);
+        assertClose(0.0, expiringLineSim.getTotalDamage(), EPS,
+                "Flowrider should expire at exactly fifteen seconds");
+
+        model.weapon.EndOfTheLine r1Line = new model.weapon.EndOfTheLine(1);
+        TestCharacter r1LineOwner = testCharacter(Element.HYDRO);
+        r1LineOwner.setWeapon(r1Line);
+        CombatSimulator r1LineSim = simulatorWith(r1LineOwner);
+        r1Line.onAction(
+                r1LineOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                r1LineSim);
+        r1Line.onDamage(r1LineOwner, normalHit, 0.0, r1LineSim);
+        assertClose(2.0, r5FlowriderDamage / r1LineSim.getTotalDamage(), EPS,
+                "Flowrider should use R1/R5 80/160% motion values");
+
+        model.weapon.KingsSquire squire = new model.weapon.KingsSquire();
+        assertEquals("King's Squire", squire.getName(),
+                "King's Squire display name");
+        assertClose(454.0, squire.getBaseAtk(), EPS,
+                "King's Squire base ATK");
+        assertClose(0.551,
+                squire.getStats().get(StatType.ATK_PERCENT), EPS,
+                "King's Squire ATK substat");
+        assertEquals(model.type.WeaponType.BOW, squire.getWeaponType(),
+                "King's Squire weapon type");
+        assertEquals(5, squire.getRefinement(),
+                "King's Squire default refinement");
+
+        TestCharacter squireOwner = testCharacter(Element.DENDRO);
+        squireOwner.setWeapon(squire);
+        CombatSimulator squireSim = simulatorWith(squireOwner);
+        squire.onAction(
+                squireOwner,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL),
+                squireSim);
+        assertClose(0.0,
+                resolvedStat(squireSim, squireOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Wrong actions should not activate King's Squire");
+        squire.onAction(
+                squireOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                squireSim);
+        assertClose(140.0,
+                resolvedStat(squireSim, squireOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "R5 King's Squire EM state");
+        squireSim.advanceTime(11.999);
+        assertClose(140.0,
+                resolvedStat(squireSim, squireOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "King's Squire should remain active before twelve seconds");
+        squireSim.advanceTime(0.001 + 1e-9);
+        double r5SquireProc = squireSim.getTotalDamage();
+        assertTrue(r5SquireProc > 0.0,
+                "King's Squire should proc on natural expiry");
+        assertClose(0.0,
+                resolvedStat(squireSim, squireOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "King's Squire EM should expire at twelve seconds");
+        squireSim.advanceTime(7.999);
+        squire.onAction(
+                squireOwner,
+                CharacterActionRequest.of(CharacterActionKey.BURST),
+                squireSim);
+        assertClose(0.0,
+                resolvedStat(squireSim, squireOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "King's Squire should remain on activation CT before twenty seconds");
+        squireSim.advanceTime(0.001 + 1e-9);
+        squire.onAction(
+                squireOwner,
+                CharacterActionRequest.of(CharacterActionKey.BURST),
+                squireSim);
+        assertClose(140.0,
+                resolvedStat(squireSim, squireOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Burst should activate King's Squire at exact twenty-second CT");
+
+        model.weapon.KingsSquire switchedSquire =
+                new model.weapon.KingsSquire();
+        TestCharacter switchedOwner = testCharacter(
+                Element.DENDRO, CharacterId.SUCROSE);
+        switchedOwner.setWeapon(switchedSquire);
+        CombatSimulator switchedSim = simulatorWith(switchedOwner);
+        switchedSim.addCharacter(testCharacter(
+                Element.PYRO, CharacterId.AMBER));
+        switchedSquire.onAction(
+                switchedOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                switchedSim);
+        switchedSim.advanceTime(5.0);
+        switchedSquire.onSwitchOut(switchedOwner, switchedSim);
+        double switchProcDamage = switchedSim.getTotalDamage();
+        assertTrue(switchProcDamage > 0.0,
+                "Switch-out should end King's Squire and proc immediately");
+        assertClose(0.0,
+                resolvedStat(switchedSim, switchedOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Switch-out should remove King's Squire EM");
+        switchedSim.advanceTime(7.0 + 1e-9);
+        assertClose(switchProcDamage, switchedSim.getTotalDamage(), EPS,
+                "A stale King's Squire timer should not proc again");
+
+        model.weapon.KingsSquire r1Squire = new model.weapon.KingsSquire(1);
+        TestCharacter r1SquireOwner = testCharacter(Element.DENDRO);
+        r1SquireOwner.setWeapon(r1Squire);
+        CombatSimulator r1SquireSim = simulatorWith(r1SquireOwner);
+        r1Squire.onAction(
+                r1SquireOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                r1SquireSim);
+        assertClose(60.0,
+                resolvedStat(r1SquireSim, r1SquireOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "R1 King's Squire EM state");
+        r1SquireSim.advanceTime(12.0 + 1e-9);
+        assertClose(1.8, r5SquireProc / r1SquireSim.getTotalDamage(), EPS,
+                "King's Squire should use R1/R5 100/180% motion values");
+
+        boolean lowLineRefinementRejected = false;
+        try {
+            new model.weapon.EndOfTheLine(0);
+        } catch (IllegalArgumentException expected) {
+            lowLineRefinementRejected = true;
+        }
+        assertTrue(lowLineRefinementRejected,
+                "End of the Line should reject refinement zero");
+
+        boolean highLineRefinementRejected = false;
+        try {
+            new model.weapon.EndOfTheLine(6);
+        } catch (IllegalArgumentException expected) {
+            highLineRefinementRejected = true;
+        }
+        assertTrue(highLineRefinementRejected,
+                "End of the Line should reject refinement six");
+
+        boolean lowSquireRefinementRejected = false;
+        try {
+            new model.weapon.KingsSquire(0);
+        } catch (IllegalArgumentException expected) {
+            lowSquireRefinementRejected = true;
+        }
+        assertTrue(lowSquireRefinementRejected,
+                "King's Squire should reject refinement zero");
+
+        boolean highSquireRefinementRejected = false;
+        try {
+            new model.weapon.KingsSquire(6);
+        } catch (IllegalArgumentException expected) {
+            highSquireRefinementRejected = true;
+        }
+        assertTrue(highSquireRefinementRejected,
+                "King's Squire should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_OffFieldHitBows() {
