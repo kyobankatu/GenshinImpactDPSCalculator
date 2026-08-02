@@ -13963,7 +13963,7 @@ Verification:
 
 ## Implementation Order: Energy-Aware Action Weapon Campaign
 
-Status: Active. Add two dynamic action-DMG weapons through owner Energy and
+Status: Complete. Two dynamic action-DMG weapons now use owner Energy and
 maximum Energy reads without changing Energy runtime behavior.
 
 Scope:
@@ -13976,13 +13976,22 @@ Out of scope for this pass:
 - Energy mutation, character behavior, formulas, RL, generated docs, and
   unrelated conditional weapons.
 
-### Phase 1: Add Two Energy-Aware Action Weapons
+### Phase 1: Add Two Energy-Aware Action Weapons - Done (`8ff2ef7`)
 
 Target files:
 
 - `src/java/model/weapon/Hamayumi.java` (new)
 - `src/java/model/weapon/MoonweaversDawn.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Hamayumi proves unbound base values, exact full-Energy doubling, immediate
+  loss after spend, restoration at equality, and R1/R5 values.
+- Moonweaver proves unbound base and exclusive 80/60/40-capacity behavior,
+  including exact tier boundaries and R1/R5 values.
+- Metadata, reuse/refinement rejection, reaction regression, build, Javadoc,
+  preflight, and diff checks pass.
 
 Acceptance criteria:
 
