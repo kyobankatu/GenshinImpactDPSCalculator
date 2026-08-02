@@ -27,9 +27,9 @@ The current autonomous session is simulator-only. Python RL training and the
 Java RL bridge are excluded; the retained NCCL/DDP plan below is paused until a
 future explicit user request.
 
-The Favonius weapon family is complete with shared R1-R5 Windfall behavior and
-all five weapon categories. The Sacrificial family content campaign is active;
-RL and generated docs remain excluded.
+The Favonius and Sacrificial weapon families are complete with shared R1-R5
+passives and all canonical family members. The target-Aura weapon campaign is
+active; RL and generated docs remain excluded.
 
 The B-058 Burning fuel correction is complete. It replaces the fixed
 two-second approximation with typed Dendro-fuel decay and refresh ownership
@@ -12517,78 +12517,6 @@ Checkpoint 1 evidence:
   pass for every implementation commit; shared and Warbow public Javadoc also
   passes.
 
-## Implementation Order: Sacrificial Weapon Family Content Campaign
-
-Status: In progress. Shared R1-R5 Composed behavior precedes three missing
-weapon variants.
-
-Scope:
-
-- Preserve existing R5 `SacrificialSword` constructors and reset behavior while
-  extracting one validated refinement-aware Composed implementation.
-- Add Lv. 90 Sacrificial Greatsword, Bow, and Fragments with typed categories,
-  canonical substats, injectable draws, and focused regressions.
-
-Out of scope for this pass:
-
-- Multi-target hit ordering, non-damaging Skills, charges beyond the existing
-  whole-Skill cooldown reset, new characters/parties, RL, and generated docs.
-
-Definitions:
-
-- **SacrificialWeapon**: shared abstract owner of refinement scaling, eligible
-  Skill-damage filtering, cooldown-reset draws, and Composed internal cooldown.
-
-### Phase 1: Add the Complete Sacrificial Weapon Family
-
-Why first:
-
-- Existing Sword behavior is already routed through the correct damage hook;
-  extraction avoids duplicating mutable cooldown state across three variants.
-
-Target files:
-
-- `src/java/model/weapon/SacrificialWeapon.java` (new)
-- `src/java/model/weapon/SacrificialSword.java`
-- `src/java/model/weapon/SacrificialGreatsword.java` (new)
-- `src/java/model/weapon/SacrificialBow.java` (new)
-- `src/java/model/weapon/SacrificialFragments.java` (new)
-- `src/java/sample/ReactionRegressionTest.java`
-
-Tasks:
-
-- Extract Composed and add refinement 1-5 validation without changing R5 Sword.
-- Add each missing variant and verify it in an independent implementation commit.
-
-| Unit | Prerequisite | Focused verification | Status |
-|---|---|---|---|
-| Shared Composed + Sacrificial Sword | Existing damage hook and cooldown state | eligibility, null/refinement, R1/R5 chance and CT | In progress |
-| Sacrificial Greatsword | Shared Composed | 565 ATK, 30.6% ER, claymore, inherited reset | Pending |
-| Sacrificial Bow | Shared Composed | 565 ATK, 30.6% ER, bow, inherited reset | Pending |
-| Sacrificial Fragments | Shared Composed | 454 ATK, 221 EM, catalyst, inherited reset | Pending |
-
-Acceptance criteria:
-
-- R1-R5 map to 40-80% reset chance and 30/26/22/19/16-second cooldowns;
-  invalid refinements and null draws fail fast.
-- Only positive Elemental Skill damage may reset the owner's applicable Skill
-  cooldown; failed draws permit retry and exact cooldown expiry succeeds.
-- All four family members expose canonical Lv. 90 metadata and one shared
-  implementation; existing Sword callers remain source-compatible.
-
-Test cases to add or update:
-
-- Normal/boundary: R1 and R5 success, equality failure, pre-CT block, exact CT.
-- Abnormal: non-Skill, zero damage, null draw, and refinement 0/6.
-- Static/integration: each variant's metadata and inherited cooldown reset.
-
-Verification:
-
-- `./gradlew ReactionRegressionTest`
-- `./gradlew build`
-- `./gradlew javadoc` at the batch boundary
-- `python scripts/preflight.py`
-
 Acceptance criteria:
 
 - Existing no-argument and injected-draw Codex construction remains compatible.
@@ -12612,4 +12540,152 @@ Verification:
 
 - `./gradlew ReactionRegressionTest`
 - `./gradlew build`
+- `python scripts/preflight.py`
+
+## Implementation Order: Sacrificial Weapon Family Content Campaign
+
+Status: Complete. Shared R1-R5 Composed behavior and all four Sacrificial family
+members are verified and pushed.
+
+Scope:
+
+- Preserve existing R5 `SacrificialSword` constructors and reset behavior while
+  extracting one validated refinement-aware Composed implementation.
+- Add Lv. 90 Sacrificial Greatsword, Bow, and Fragments with typed categories,
+  canonical substats, injectable draws, and focused regressions.
+
+Out of scope for this pass:
+
+- Multi-target hit ordering, non-damaging Skills, charges beyond the existing
+  whole-Skill cooldown reset, new characters/parties, RL, and generated docs.
+
+Definitions:
+
+- **SacrificialWeapon**: shared abstract owner of refinement scaling, eligible
+  Skill-damage filtering, cooldown-reset draws, and Composed internal cooldown.
+
+### Phase 1: Add the Complete Sacrificial Weapon Family - Done
+
+Why first:
+
+- Existing Sword behavior is already routed through the correct damage hook;
+  extraction avoids duplicating mutable cooldown state across three variants.
+
+Target files:
+
+- `src/java/model/weapon/SacrificialWeapon.java` (new)
+- `src/java/model/weapon/SacrificialSword.java`
+- `src/java/model/weapon/SacrificialGreatsword.java` (new)
+- `src/java/model/weapon/SacrificialBow.java` (new)
+- `src/java/model/weapon/SacrificialFragments.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Tasks:
+
+- Extract Composed and add refinement 1-5 validation without changing R5 Sword.
+- Add each missing variant and verify it in an independent implementation commit.
+
+| Unit | Prerequisite | Focused verification | Status |
+|---|---|---|---|
+| Shared Composed + Sacrificial Sword | Existing damage hook and cooldown state | eligibility, null/refinement, R1/R5 chance and CT | Done (`ba6a19d`) |
+| Sacrificial Greatsword | Shared Composed | 565 ATK, 30.6% ER, claymore, inherited reset | Done (`0773001`) |
+| Sacrificial Bow | Shared Composed | 565 ATK, 30.6% ER, bow, inherited reset | Done (`ecda078`) |
+| Sacrificial Fragments | Shared Composed | 454 ATK, 221 EM, catalyst, inherited reset | Done (`496a79b`) |
+
+Completion evidence:
+
+- Existing R5 positive-Skill, retry, exact 16-second CT, ineligible-hit,
+  already-ready, and multi-charge behavior remains green.
+- R1 40% equality/success and exact 30-second CT pass; all variants expose
+  sourced Lv. 90 metadata and inherit the same reset path.
+- Every unit passes `ReactionRegressionTest`, `build`, and preflight; shared and
+  final public APIs pass Javadoc with no generated artifact staged.
+
+Acceptance criteria:
+
+- R1-R5 map to 40-80% reset chance and 30/26/22/19/16-second cooldowns;
+  invalid refinements and null draws fail fast.
+- Only positive Elemental Skill damage may reset the owner's applicable Skill
+  cooldown; failed draws permit retry and exact cooldown expiry succeeds.
+- All four family members expose canonical Lv. 90 metadata and one shared
+  implementation; existing Sword callers remain source-compatible.
+
+Test cases to add or update:
+
+- Normal/boundary: R1 and R5 success, equality failure, pre-CT block, exact CT.
+- Abnormal: non-Skill, zero damage, null draw, and refinement 0/6.
+- Static/integration: each variant's metadata and inherited cooldown reset.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc` at the batch boundary
+- `python scripts/preflight.py`
+
+## Implementation Order: Target-Aura Weapon Content Campaign
+
+Status: In progress. One refinement-aware live-Aura base precedes three missing
+weapon variants.
+
+Scope:
+
+- Preserve Dragon's Bane's per-hit pre-reaction Aura behavior while adding
+  refinement ranks 1-5.
+- Add Lion's Roar, Rainslasher, and Magic Guide with canonical Lv. 90 metadata,
+  eligible Aura sets, R1-R5 damage bonuses, and focused direct-damage tests.
+
+Out of scope for this pass:
+
+- Aura changes, snapshot formula changes, multi-target state, new characters or
+  parties, RL, optimizer baselines, and generated docs.
+
+Definitions:
+
+- **TargetAuraDamageWeapon**: shared abstract weapon that adds per-hit all-DMG
+  bonus only when the current enemy has a live eligible elemental Aura.
+
+### Phase 1: Add Refinement-Aware Target-Aura Weapons
+
+Why first:
+
+- Dragon's Bane already proves the formula hook and pre-consumption lookup;
+  extraction keeps all related weapons out of persistent attacker snapshots.
+
+Target files:
+
+- `src/java/model/weapon/TargetAuraDamageWeapon.java` (new)
+- `src/java/model/weapon/DragonsBane.java`
+- `src/java/model/weapon/LionsRoar.java` (new)
+- `src/java/model/weapon/Rainslasher.java` (new)
+- `src/java/model/weapon/MagicGuide.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+| Unit | Eligible Aura | Focused verification | Status |
+|---|---|---|---|
+| Shared base + Dragon's Bane | Hydro/Pyro | R1/R5 metadata, live/expired Aura, invalid refinement | In progress |
+| Lion's Roar | Pyro/Electro | 510 ATK, 41.3% ATK, sword, eligible/ineligible damage | Pending |
+| Rainslasher | Hydro/Electro | 510 ATK, 165 EM, claymore, eligible/ineligible damage | Pending |
+| Magic Guide | Hydro/Electro | 354 ATK, 187 EM, catalyst, R1/R5 damage | Pending |
+
+Acceptance criteria:
+
+- Bonuses resolve from enemy Aura at impact and never enter structural,
+  effective, or snapshotted owner stats.
+- Refinements 1-5 produce each weapon's sourced bonus progression; 0/6 fail.
+- Eligible live Auras apply once, ineligible/expired/no Aura applies none, and
+  existing Dragon's Bane R5 callers remain compatible.
+
+Test cases to add or update:
+
+- Normal: each eligible element and R1/R5 direct-damage multiplier.
+- Boundary: Aura expiry at impact.
+- Abnormal: no Aura, ineligible Aura, and refinement 0/6.
+- Static: display name, base ATK, substat, and typed weapon category.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc` at the batch boundary
 - `python scripts/preflight.py`

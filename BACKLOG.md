@@ -2055,10 +2055,22 @@ experiment record.
 
 ### B-074 — Sacrificial weapon family content coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** simulator weapon content; RL and generated docs excluded
 - **Value/risk:** high-value planned extraction of proven Sword behavior followed
   by three local content variants
 - **Evidence boundary:** Lv. 90 stats and R1-R5 Composed chance/cooldowns are
   sourced; unsupported multi-target and non-damaging behavior remains explicit
 - **Plan:** `TASKS.md` Sacrificial Weapon Family Content Campaign
+- **Completion:** `ba6a19d`, `0773001`, `ecda078`, and `496a79b` provide shared
+  R1-R5 Composed and all family variants with focused/build/Javadoc gates
+
+### B-075 — Target-Aura weapon content coverage
+
+- **Status:** active
+- **Scope:** simulator weapon content; live target Aura only
+- **Value/risk:** planned shared extraction of proven Dragon's Bane behavior,
+  followed by three independently reversible variants
+- **Evidence boundary:** Lv. 90 metadata, eligible elements, and R1-R5 bonuses
+  are sourced; no formula, Aura, RL, or multi-target changes
+- **Plan:** `TASKS.md` Target-Aura Weapon Content Campaign
