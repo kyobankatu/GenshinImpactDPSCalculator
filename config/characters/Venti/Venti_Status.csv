@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Venti,STATS,Base HP,90,10531,0
+Venti,STATS,Base ATK,90,263,0
+Venti,STATS,Base DEF,90,669,0
+Venti,STATS,Ascension ER,90,0.32,0
+Venti,STATS,Energy Cost,90,60,0
+Venti,CONFIG,Character Level,90,90,0
+Venti,CONFIG,Normal Level,9,9,0
+Venti,CONFIG,Skill Level,12,12,0
+Venti,CONFIG,Burst Level,12,12,0
+Venti,CONFIG,Constellation,6,6,0
