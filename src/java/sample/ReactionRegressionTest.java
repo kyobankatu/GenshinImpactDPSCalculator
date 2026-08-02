@@ -146,6 +146,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_FiveStarElementalMasterySupportWeapons();
         testAccuracyPhaseF_FiveStarCatalystStackWeapons();
         testAccuracyPhaseF_InjectedBowProcWeapons();
+        testAccuracyPhaseF_LivePartyFiveStarWeapons();
         testAccuracyPhaseF_ActionUseWindowWeapons();
         testAccuracyPhaseF_AdditionalSkillUseStatWeapons();
         testAccuracyPhaseF_SamuraiConductWeapons();
@@ -10460,6 +10461,217 @@ public class ReactionRegressionTest {
         }
         assertTrue(highHuntRefinementRejected,
                 "Viridescent Hunt should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_LivePartyFiveStarWeapons() {
+        model.weapon.TheFirstGreatMagic firstMagic =
+                new model.weapon.TheFirstGreatMagic();
+        assertEquals("The First Great Magic", firstMagic.getName(),
+                "The First Great Magic display name");
+        assertClose(608.0, firstMagic.getBaseAtk(), EPS,
+                "The First Great Magic base ATK");
+        assertClose(0.662,
+                firstMagic.getStats().get(StatType.CRIT_DMG), EPS,
+                "The First Great Magic CRIT DMG");
+        assertEquals(model.type.WeaponType.BOW, firstMagic.getWeaponType(),
+                "The First Great Magic weapon type");
+        assertEquals(5, firstMagic.getRefinement(),
+                "The First Great Magic default refinement");
+
+        TestCharacter magicOwner = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        magicOwner.setWeapon(firstMagic);
+        CombatSimulator magicSim = simulatorWith(magicOwner);
+        assertClose(0.32,
+                resolvedStat(magicSim, magicOwner,
+                        StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "R5 First Great Magic Charged DMG");
+        assertClose(0.32,
+                resolvedStat(magicSim, magicOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "First Great Magic should count its owner as one Gimmick");
+        magicSim.addCharacter(testCharacter(
+                Element.PYRO, CharacterId.XIANGLING));
+        assertClose(0.64,
+                resolvedStat(magicSim, magicOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "First Great Magic two-member ATK tier");
+        magicSim.addCharacter(testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU));
+        assertClose(0.64,
+                resolvedStat(magicSim, magicOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "Different-element members should not add Gimmick stacks");
+        magicSim.addCharacter(testCharacter(
+                Element.PYRO, CharacterId.BENNETT));
+        assertClose(0.96,
+                resolvedStat(magicSim, magicOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "First Great Magic three-member ATK tier");
+        magicSim.addCharacter(testCharacter(
+                Element.PYRO, CharacterId.SUCROSE));
+        assertClose(0.96,
+                resolvedStat(magicSim, magicOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "First Great Magic Gimmick stacks should cap at three");
+
+        model.weapon.TheFirstGreatMagic r1FirstMagic =
+                new model.weapon.TheFirstGreatMagic(1);
+        TestCharacter r1MagicOwner = testCharacter(Element.PYRO);
+        r1MagicOwner.setWeapon(r1FirstMagic);
+        CombatSimulator r1MagicSim = simulatorWith(r1MagicOwner);
+        assertClose(0.16,
+                resolvedStat(r1MagicSim, r1MagicOwner,
+                        StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "R1 First Great Magic Charged DMG");
+        assertClose(0.16,
+                resolvedStat(r1MagicSim, r1MagicOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "R1 First Great Magic one-member ATK tier");
+
+        model.weapon.UrakuMisugiri uraku =
+                new model.weapon.UrakuMisugiri();
+        assertEquals("Uraku Misugiri", uraku.getName(),
+                "Uraku Misugiri display name");
+        assertClose(542.0, uraku.getBaseAtk(), EPS,
+                "Uraku Misugiri base ATK");
+        assertClose(0.882,
+                uraku.getStats().get(StatType.CRIT_DMG), EPS,
+                "Uraku Misugiri CRIT DMG");
+        assertEquals(model.type.WeaponType.SWORD, uraku.getWeaponType(),
+                "Uraku Misugiri weapon type");
+        assertEquals(5, uraku.getRefinement(),
+                "Uraku Misugiri default refinement");
+
+        TestCharacter urakuOwner = testCharacter(
+                Element.GEO, CharacterId.SUCROSE);
+        urakuOwner.setWeapon(uraku);
+        TestCharacter urakuAlly = testCharacter(
+                Element.GEO, CharacterId.AMBER);
+        CombatSimulator urakuSim = simulatorWith(urakuOwner);
+        urakuSim.addCharacter(urakuAlly);
+        assertClose(0.32,
+                resolvedStat(urakuSim, urakuOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "R5 Uraku base Normal DMG");
+        assertClose(0.48,
+                resolvedStat(urakuSim, urakuOwner,
+                        StatType.SKILL_DMG_BONUS), EPS,
+                "R5 Uraku base Skill DMG");
+        assertClose(0.40,
+                resolvedStat(urakuSim, urakuOwner,
+                        StatType.DEF_PERCENT), EPS,
+                "R5 Uraku DEF passive");
+
+        AttackAction geoHit = damageHit(
+                "Uraku Geo fixture", Element.GEO, 1.0);
+        urakuSim.notifyDamage(urakuOwner, geoHit, 0.0);
+        urakuSim.notifyDamage(
+                urakuOwner,
+                damageHit("Uraku Pyro fixture", Element.PYRO, 1.0),
+                100.0);
+        urakuSim.notifyDamage(urakuAlly, geoHit, 100.0);
+        assertClose(0.32,
+                resolvedStat(urakuSim, urakuOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Zero, non-Geo, and off-field damage should not open Uraku");
+        urakuSim.setActiveCharacter(CharacterId.AMBER);
+        urakuSim.notifyDamage(urakuAlly, geoHit, 100.0);
+        assertClose(0.64,
+                resolvedStat(urakuSim, urakuOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Active ally Geo damage should double Uraku Normal DMG");
+        assertClose(0.96,
+                resolvedStat(urakuSim, urakuOwner,
+                        StatType.SKILL_DMG_BONUS), EPS,
+                "Active ally Geo damage should double Uraku Skill DMG");
+        assertClose(0.40,
+                resolvedStat(urakuSim, urakuOwner,
+                        StatType.DEF_PERCENT), EPS,
+                "Uraku Geo window should not double DEF");
+        urakuSim.advanceTime(15.0);
+        assertClose(0.32,
+                resolvedStat(urakuSim, urakuOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Uraku Geo window should expire at exactly 15 seconds");
+        urakuSim.setActiveCharacter(CharacterId.SUCROSE);
+        urakuSim.notifyDamage(urakuOwner, geoHit, 100.0);
+        assertClose(0.64,
+                resolvedStat(urakuSim, urakuOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Active owner Geo damage should also open Uraku");
+
+        model.weapon.UrakuMisugiri r1Uraku =
+                new model.weapon.UrakuMisugiri(1);
+        TestCharacter r1UrakuOwner = testCharacter(Element.GEO);
+        r1UrakuOwner.setWeapon(r1Uraku);
+        CombatSimulator r1UrakuSim = simulatorWith(r1UrakuOwner);
+        assertClose(0.16,
+                resolvedStat(r1UrakuSim, r1UrakuOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "R1 Uraku base Normal DMG");
+        assertClose(0.24,
+                resolvedStat(r1UrakuSim, r1UrakuOwner,
+                        StatType.SKILL_DMG_BONUS), EPS,
+                "R1 Uraku base Skill DMG");
+        assertClose(0.20,
+                resolvedStat(r1UrakuSim, r1UrakuOwner,
+                        StatType.DEF_PERCENT), EPS,
+                "R1 Uraku DEF passive");
+
+        boolean magicReuseRejected = false;
+        try {
+            firstMagic.initializeForSimulator(magicOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            magicReuseRejected = true;
+        }
+        assertTrue(magicReuseRejected,
+                "First Great Magic should reject cross-simulator reuse");
+
+        boolean urakuReuseRejected = false;
+        try {
+            uraku.initializeForSimulator(urakuOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            urakuReuseRejected = true;
+        }
+        assertTrue(urakuReuseRejected,
+                "Uraku should reject cross-simulator reuse");
+
+        boolean lowMagicRefinementRejected = false;
+        try {
+            new model.weapon.TheFirstGreatMagic(0);
+        } catch (IllegalArgumentException expected) {
+            lowMagicRefinementRejected = true;
+        }
+        assertTrue(lowMagicRefinementRejected,
+                "First Great Magic should reject refinement zero");
+
+        boolean highMagicRefinementRejected = false;
+        try {
+            new model.weapon.TheFirstGreatMagic(6);
+        } catch (IllegalArgumentException expected) {
+            highMagicRefinementRejected = true;
+        }
+        assertTrue(highMagicRefinementRejected,
+                "First Great Magic should reject refinement six");
+
+        boolean lowUrakuRefinementRejected = false;
+        try {
+            new model.weapon.UrakuMisugiri(0);
+        } catch (IllegalArgumentException expected) {
+            lowUrakuRefinementRejected = true;
+        }
+        assertTrue(lowUrakuRefinementRejected,
+                "Uraku should reject refinement zero");
+
+        boolean highUrakuRefinementRejected = false;
+        try {
+            new model.weapon.UrakuMisugiri(6);
+        } catch (IllegalArgumentException expected) {
+            highUrakuRefinementRejected = true;
+        }
+        assertTrue(highUrakuRefinementRejected,
+                "Uraku should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_OffFieldHitBows() {
