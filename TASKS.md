@@ -13425,8 +13425,8 @@ Verification:
 
 ## Implementation Order: Claymore Hit-Stack Weapon Campaign
 
-Status: Active. Extend the verified typed hit-stack policy with two claymores
-whose complete damage-relevant passives require no new runtime abstraction.
+Status: Complete. The verified typed hit-stack policy now covers both planned
+claymores without adding runtime abstractions.
 
 Scope:
 
@@ -13439,7 +13439,7 @@ Out of scope for this pass:
 
 - Characters, formulas, RL, generated docs, and unrelated weapon families.
 
-### Phase 1: Add Claymore Hit-Stack Weapons
+### Phase 1: Add Claymore Hit-Stack Weapons - Done
 
 Target files:
 
@@ -13449,8 +13449,17 @@ Target files:
 
 | Unit | Passive | Focused verification | Status |
 |---|---|---|---|
-| Skyrider Greatsword | Normal/Charged hit -> ATK 6-10%, max four | CT, cap/refresh, metadata, R1/R5 | Pending |
-| Whiteblind | Normal/Charged hit -> ATK and DEF 6-12%, max four | dual stats, action gate, expiry, R1/R5 | Pending |
+| Skyrider Greatsword | Normal/Charged hit -> ATK 6-10%, max four | CT, cap/refresh, metadata, R1/R5 | Done (`b718c14`) |
+| Whiteblind | Normal/Charged hit -> ATK and DEF 6-12%, max four | dual stats, action gate, expiry, R1/R5 | Done (`7e4cba0`) |
+
+Completion evidence:
+
+- Skyrider Greatsword proves exact 0.5-second CT, four-stack cap refresh,
+  wrong-action and zero-damage exclusion, and exact shared expiry.
+- Whiteblind applies equal dynamic ATK/DEF stacks while preserving its static
+  DEF substat after expiry; metadata, R1/R5, and invalid ranks are covered.
+- Reaction regression, build, Javadoc, and preflight pass with no generated
+  artifact staged.
 
 Acceptance criteria:
 

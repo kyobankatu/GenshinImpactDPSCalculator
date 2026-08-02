@@ -2211,10 +2211,12 @@ experiment record.
 
 ### B-087 — Claymore hit-stack weapon coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Skyrider Greatsword and Whiteblind; RL excluded
 - **Value/risk:** two complete passives reuse the verified typed hit-stack
   policy without extending simulator state or trigger dispatch
 - **Evidence boundary:** KQM TCL metadata, R1-R5 values, Normal/Charged action
   gates, 0.5-second CT, four-stack cap, and shared six-second duration
 - **Plan:** `TASKS.md` Claymore Hit-Stack Weapon Campaign
+- **Completion:** `b718c14` and `7e4cba0` add both variants; focused/build/
+  Javadoc/leak gates pass
