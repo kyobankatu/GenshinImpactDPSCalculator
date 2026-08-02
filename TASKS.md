@@ -14795,7 +14795,7 @@ Verification:
 
 ## Implementation Order: Live Party Five-Star Weapon Campaign
 
-Status: Active. Add two combat-complete five-star weapons using live party
+Status: Complete. Two combat-complete five-star weapons now use live party
 composition and attributed active-character Geo damage.
 
 Scope:
@@ -14808,13 +14808,20 @@ Out of scope for this pass:
 - First Great Magic's non-DPS Movement SPD, characters, formulas, RL,
   generated docs, and unrelated party-state weapons.
 
-### Phase 1: Add The First Great Magic and Uraku Misugiri
+### Phase 1: Add The First Great Magic and Uraku Misugiri - Done (`35c25d2`)
 
 Target files:
 
 - `src/java/model/weapon/TheFirstGreatMagic.java` (new)
 - `src/java/model/weapon/UrakuMisugiri.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- First Great Magic proves R1/R5 Charged values, live one/two/three same-element
+  ATK tiers, owner inclusion, different-element exclusion, cap, and binding.
+- Uraku proves base Normal/Skill/DEF, active ally/owner Geo activation,
+  zero/non-Geo/off-field gates, exact expiry, and R1/R5; all gates pass.
 
 Acceptance criteria:
 

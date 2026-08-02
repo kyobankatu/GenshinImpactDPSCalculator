@@ -2502,10 +2502,12 @@ experiment record.
 
 ### B-111 — Live-party five-star weapon coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** The First Great Magic and Uraku Misugiri; RL excluded
 - **Value/risk:** two complete DPS passives reuse live party reads and the
   attributed global damage listener without shared runtime changes
 - **Evidence boundary:** KQM TCL metadata, R1-R5 Charged/ATK/Normal/Skill/DEF
   values, same-element tiers, positive active-character Geo, 15-second window
 - **Plan:** `TASKS.md` Live Party Five-Star Weapon Campaign
+- **Completion:** `35c25d2` adds both live-party passives and focused
+  regressions; build/Javadoc/leak gates pass
