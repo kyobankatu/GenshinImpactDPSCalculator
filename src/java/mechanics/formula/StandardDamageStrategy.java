@@ -39,23 +39,46 @@ final class StandardDamageStrategy implements DamageStrategy {
             double reactionMultiplier,
             CombatSimulator sim) {
 
+        if (!action.isHitEffectTrigger()) {
+            return 0.0;
+        }
+
         StatsContainer stats = DamageCalculator.resolveTargetStats(
                 attacker, target, action, activeBuffs, preResolvedStats, currentTime);
 
+        boolean isNormalDamage = action.getActionType() == ActionType.NORMAL;
+        boolean isChargedDamage = action.getActionType() == ActionType.CHARGE;
+        boolean isSkillDamage = action.getActionType() == ActionType.SKILL
+                || action.isCountsAsSkillDmg();
         double baseStatValue = action.getScalingStatValue(stats);
         double mv = action.getDamagePercent();
         double flatDmg = stats.get(StatType.FLAT_DMG_BONUS);
-        if (action.isHitEffectTrigger()
-                && (action.getActionType() == ActionType.NORMAL
-                || action.getActionType() == ActionType.CHARGE)) {
+        if (isNormalDamage || isChargedDamage) {
             flatDmg += stats.getTotalDef() * stats.get(
                     StatType.DEF_TO_NORMAL_CHARGED_FLAT_DMG_RATIO);
+        }
+        if (isSkillDamage) {
+            flatDmg += stats.getTotalDef()
+                    * stats.get(StatType.DEF_TO_SKILL_FLAT_DMG_RATIO);
+        }
+        double elementalMastery = stats.get(StatType.ELEMENTAL_MASTERY);
+        if (isNormalDamage || isSkillDamage) {
+            flatDmg += elementalMastery * stats.get(
+                    StatType.ELEMENTAL_MASTERY_TO_NORMAL_SKILL_FLAT_DMG_RATIO);
+        }
+        if (isChargedDamage) {
+            flatDmg += elementalMastery * stats.get(
+                    StatType.ELEMENTAL_MASTERY_TO_CHARGED_FLAT_DMG_RATIO);
         }
         double baseDmg = (baseStatValue * mv) + flatDmg + action.getAdditiveBaseDmgBonus();
 
         double dmgBonus = stats.get(StatType.DMG_BONUS_ALL)
                 + stats.get(action.getElement().getBonusStatType())
                 + (action.getBonusStat() != null ? stats.get(action.getBonusStat()) : 0.0);
+        if (isSkillDamage) {
+            dmgBonus += elementalMastery * stats.get(
+                    StatType.ELEMENTAL_MASTERY_TO_SKILL_DMG_BONUS_RATIO);
+        }
         if (action.getActionType() == ActionType.PLUNGE
                 && action.getBonusStat() != StatType.PLUNGING_ATTACK_DMG_BONUS) {
             dmgBonus += stats.get(StatType.PLUNGING_ATTACK_DMG_BONUS);

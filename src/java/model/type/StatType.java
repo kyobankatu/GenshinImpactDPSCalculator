@@ -193,6 +193,14 @@ public enum StatType {
     FLAT_DMG_BONUS,
     /** Final-DEF ratio added to Normal and Charged Attack base damage. */
     DEF_TO_NORMAL_CHARGED_FLAT_DMG_RATIO,
+    /** Final-DEF ratio added to Elemental Skill base damage. */
+    DEF_TO_SKILL_FLAT_DMG_RATIO,
+    /** Final-EM ratio added to Normal and Elemental Skill base damage. */
+    ELEMENTAL_MASTERY_TO_NORMAL_SKILL_FLAT_DMG_RATIO,
+    /** Final-EM ratio added to Charged Attack base damage. */
+    ELEMENTAL_MASTERY_TO_CHARGED_FLAT_DMG_RATIO,
+    /** Elemental Skill DMG Bonus gained per point of final Elemental Mastery. */
+    ELEMENTAL_MASTERY_TO_SKILL_DMG_BONUS_RATIO,
 
     // -----------------------------------------------------------------------
     // Debuffs / Enemy mitigation reduction stats

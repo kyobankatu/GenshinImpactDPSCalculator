@@ -43,6 +43,10 @@ public enum CharacterId {
     RAZOR(14, "Razor"),
     /** Fischl (Electro bow off-field DPS and battery). */
     FISCHL(15, "Fischl"),
+    /** Yae Miko (Electro catalyst off-field Skill DPS). */
+    YAE_MIKO(16, "Yae Miko"),
+    /** Albedo (Geo sword off-field Skill DPS). */
+    ALBEDO(17, "Albedo"),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown");
 
