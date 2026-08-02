@@ -71,6 +71,10 @@ public enum CharacterId {
     DIONA(28, "Diona", CharacterRegion.MONDSTADT),
     /** Qiqi (Cryo sword healer and driver). */
     QIQI(29, "Qiqi", CharacterRegion.LIYUE),
+    /** Mona (Hydro catalyst support and burst amplifier). */
+    MONA(30, "Mona", CharacterRegion.MONDSTADT),
+    /** Beidou (Electro claymore counter attacker and off-field DPS). */
+    BEIDOU(31, "Beidou", CharacterRegion.LIYUE),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 

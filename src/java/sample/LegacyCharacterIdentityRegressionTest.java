@@ -24,6 +24,9 @@ public final class LegacyCharacterIdentityRegressionTest {
         assertIdentity(CharacterId.JEAN, 26, "Jean");
         assertIdentity(CharacterId.CHONGYUN, 27, "Chongyun");
         assertIdentity(CharacterId.DIONA, 28, "Diona");
+        assertIdentity(CharacterId.QIQI, 29, "Qiqi");
+        assertIdentity(CharacterId.MONA, 30, "Mona");
+        assertIdentity(CharacterId.BEIDOU, 31, "Beidou");
         assertEquals(CharacterId.BENNETT, CharacterId.fromNumericId(1),
                 "first prior numeric ID");
         assertEquals(CharacterId.YANFEI, CharacterId.fromNumericId(20),
@@ -32,12 +35,14 @@ public final class LegacyCharacterIdentityRegressionTest {
                 "negative numeric fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(0),
                 "zero numeric fallback");
-        assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(29),
+        assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(32),
                 "high numeric fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName(null),
                 "null name fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("rosaria"),
                 "case-sensitive name fallback");
+        assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("mona"),
+                "new identity case-sensitive fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("Not A Character"),
                 "unmatched name fallback");
         assertEquals(CharacterRegion.LIYUE, CharacterId.GANYU.getRegion(),
@@ -54,6 +59,10 @@ public final class LegacyCharacterIdentityRegressionTest {
                 "Jean Mondstadt region lookup");
         assertEquals(CharacterRegion.MONDSTADT, CharacterId.DIONA.getRegion(),
                 "Diona Mondstadt region lookup");
+        assertEquals(CharacterRegion.MONDSTADT, CharacterId.MONA.getRegion(),
+                "Mona Mondstadt region lookup");
+        assertEquals(CharacterRegion.LIYUE, CharacterId.BEIDOU.getRegion(),
+                "Beidou Liyue region lookup");
         assertEquals(CharacterRegion.UNKNOWN,
                 CharacterId.COLUMBINA.getRegion(),
                 "unverified custom region fails closed");
