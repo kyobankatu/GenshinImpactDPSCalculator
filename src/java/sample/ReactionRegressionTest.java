@@ -6004,6 +6004,80 @@ public class ReactionRegressionTest {
         }
         assertTrue(highWaltzRefinementRejected,
                 "Mitternachts Waltz should reject refinement six");
+
+        model.weapon.DodocoTales dodocoTales = new model.weapon.DodocoTales();
+        assertEquals("Dodoco Tales", dodocoTales.getName(),
+                "Dodoco Tales display name");
+        assertClose(454.0, dodocoTales.getBaseAtk(), EPS, "Dodoco Tales base ATK");
+        assertClose(0.551, dodocoTales.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Dodoco Tales ATK substat");
+        assertEquals(model.type.WeaponType.CATALYST, dodocoTales.getWeaponType(),
+                "Dodoco Tales weapon type");
+        assertEquals(5, dodocoTales.getRefinement(),
+                "Dodoco Tales default refinement");
+
+        TestCharacter dodocoOwner = testCharacter(Element.PYRO);
+        dodocoOwner.setWeapon(dodocoTales);
+        CombatSimulator dodocoSim = simulatorWith(dodocoOwner);
+        dodocoTales.onDamage(dodocoOwner, normalHit, 0.0, dodocoSim);
+        assertClose(0.32,
+                resolvedStat(dodocoSim, dodocoOwner, StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "R5 Dodoco Tales Normal hit should enable Charged damage");
+        assertClose(0.551,
+                resolvedStat(dodocoSim, dodocoOwner, StatType.ATK_PERCENT), EPS,
+                "Normal hit should not enable Dodoco Tales ATK");
+        dodocoTales.onDamage(dodocoOwner, chargedHit, 0.0, dodocoSim);
+        assertClose(0.711,
+                resolvedStat(dodocoSim, dodocoOwner, StatType.ATK_PERCENT), EPS,
+                "R5 Dodoco Tales Charged hit should add 16% ATK");
+        assertClose(0.32,
+                effectiveStatAt(dodocoOwner, StatType.CHARGED_ATTACK_DMG_BONUS, 5.999), EPS,
+                "Dodoco Tales Charged damage should remain active before expiry");
+        assertClose(0.0,
+                effectiveStatAt(dodocoOwner, StatType.CHARGED_ATTACK_DMG_BONUS, 6.0), EPS,
+                "Dodoco Tales Charged damage should expire exactly");
+        assertClose(0.551, effectiveStatAt(dodocoOwner, StatType.ATK_PERCENT, 6.0), EPS,
+                "Dodoco Tales ATK window should expire exactly");
+
+        dodocoTales.onDamage(dodocoOwner, skillHit, 7.0, dodocoSim);
+        assertClose(0.0,
+                effectiveStatAt(dodocoOwner, StatType.CHARGED_ATTACK_DMG_BONUS, 7.0), EPS,
+                "Skill hits should not activate Dodoco Tales");
+
+        model.weapon.DodocoTales r1DodocoTales = new model.weapon.DodocoTales(1);
+        TestCharacter r1DodocoOwner = testCharacter(Element.PYRO);
+        r1DodocoOwner.setWeapon(r1DodocoTales);
+        CombatSimulator r1DodocoSim = simulatorWith(r1DodocoOwner);
+        r1DodocoTales.onDamage(r1DodocoOwner, normalHit, 0.0, r1DodocoSim);
+        r1DodocoTales.onDamage(r1DodocoOwner, chargedHit, 0.0, r1DodocoSim);
+        assertClose(0.16,
+                resolvedStat(
+                        r1DodocoSim,
+                        r1DodocoOwner,
+                        StatType.CHARGED_ATTACK_DMG_BONUS),
+                EPS,
+                "R1 Dodoco Tales Charged damage bonus");
+        assertClose(0.631,
+                resolvedStat(r1DodocoSim, r1DodocoOwner, StatType.ATK_PERCENT), EPS,
+                "R1 Dodoco Tales ATK bonus");
+
+        boolean lowDodocoRefinementRejected = false;
+        try {
+            new model.weapon.DodocoTales(0);
+        } catch (IllegalArgumentException expected) {
+            lowDodocoRefinementRejected = true;
+        }
+        assertTrue(lowDodocoRefinementRejected,
+                "Dodoco Tales should reject refinement zero");
+
+        boolean highDodocoRefinementRejected = false;
+        try {
+            new model.weapon.DodocoTales(6);
+        } catch (IllegalArgumentException expected) {
+            highDodocoRefinementRejected = true;
+        }
+        assertTrue(highDodocoRefinementRejected,
+                "Dodoco Tales should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
