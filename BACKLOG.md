@@ -2948,3 +2948,53 @@ experiment record.
 - **Completion:** N3 resolves two sourced 41.8% hits with one logical action
   notification and one 0.3-second duration; combo, metadata, full regression,
   and two unchanged `FlinsParty2` runs pass
+
+### B-137 — Raiden normal and Musou multi-hit separation
+
+- **Status:** complete
+- **Source:** delegated supported-character multi-hit audit
+- **Scope/risk:** split physical N4, Musou N4, and Musou Charged into sourced
+  per-hit actions; shared simulator APIs, C6, RL, and multi-target behavior are
+  excluded
+- **Evidence:** maintained KQM Raiden table, accessed 2026-08-02, lists
+  physical N4 53.25% + 53.25%, Musou N4 51.95% + 52.10%, Musou Charged
+  103.6% + 125.06%, per-hit Resolve scaling, Burst classification, and shared
+  standard ICD:
+  https://library.keqingmains.com/characters/electro/raiden-shogun
+- **Boundary:** each pair resolves at one timestamp and advances one action
+  duration; all Musou hits retain C2 DEF ignore and one typed ICD group
+- **Plan:** one-phase `TASKS.md` Raiden Multi-Hit Accuracy
+- **Completion:** all three sourced pairs, per-hit Resolve, Burst/C2 metadata,
+  shared third-hit ICD, single action timing, and unaffected single-hit attacks
+  pass focused and full gates; two `RaidenParty` runs match at 1,275,070 damage
+  / 60,718 DPS
+
+### B-138 — Lisa C6 Pulsating Witch switch-in lifecycle
+
+- **Status:** candidate
+- **Source:** delegated supported-character constellation audit
+- **Scope/risk:** add typed character switch-in dispatch and apply three
+  Conductive stacks with one five-second cooldown and refreshed 15-second
+  expiry; shared switch ordering and snapshot behavior require a planned pass
+- **Evidence:** maintained KQM Lisa main page and evidence vault, accessed
+  2026-08-02:
+  https://library.keqingmains.com/characters/electro/lisa
+  https://library.keqingmains.com/evidence/characters/electro/lisa
+- **Boundary:** C5, missing enemy, repeated pseudo-switch, 4.999/5.000-second
+  cooldown, existing stack refresh, Hold consumption, and snapshot restore
+  need explicit regressions
+
+### B-139 — Sucrose C4 Alchemania cooldown reduction
+
+- **Status:** candidate
+- **Source:** delegated supported-character constellation audit
+- **Scope/risk:** add injected 1-7-second draw, seven-hit counter, partial
+  earliest-charge cooldown reduction, and Charged support; shared cooldown API
+  and snapshot state make this higher risk than B-137/B-138
+- **Evidence:** maintained KQM Sucrose page and cooldown table, accessed
+  2026-08-02:
+  https://library.keqingmains.com/characters/anemo/sucrose
+  https://library.keqingmains.com/combat-mechanics/cooldowns
+- **Boundary:** 0.1-second hit counting, 6/7 hits, injected draw bounds,
+  remaining-CD clamp, no overflow into the next charge, wrong owner/category,
+  and snapshot restore require explicit regressions

@@ -97,6 +97,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseE_LunarCrystallizeHarmonyCadence();
         testAccuracyPhaseF_RaidenResolveAndEnergyRegression();
         testAccuracyPhaseF_RaidenConstellationLifecycle();
+        testAccuracyPhaseF_RaidenMultiHitAttackContract();
         testAccuracyPhaseF_FlinsA1AndC1Lifecycle();
         testAccuracyPhaseF_FlinsC2AndC4();
         testAccuracyPhaseF_FlinsC3C5AndC6();
@@ -3089,6 +3090,144 @@ public class ReactionRegressionTest {
         return new AttackAction(
                 name, 0.0, Element.PHYSICAL, StatType.BASE_ATK,
                 null, 0.0, false, ActionType.BURST);
+    }
+
+    private static void testAccuracyPhaseF_RaidenMultiHitAttackContract() {
+        RecordingDamageWeapon physicalWeapon = new RecordingDamageWeapon("Raiden ");
+        model.character.RaidenShogun physicalRaiden =
+                new model.character.RaidenShogun(
+                        physicalWeapon, blankArtifact(), raidenTalentData(0));
+        CombatSimulator physicalSim =
+                simulatorWithExistingCharacter(physicalRaiden);
+        List<AttackAction> physicalLogicalActions = new ArrayList<>();
+        physicalSim.addListener(
+                (actor, action, time) -> physicalLogicalActions.add(action));
+        for (int i = 0; i < 5; i++) {
+            physicalSim.performAction(
+                    CharacterId.RAIDEN_SHOGUN,
+                    CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        }
+        physicalSim.performAction(
+                CharacterId.RAIDEN_SHOGUN,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE));
+
+        List<AttackAction> physicalN4 = physicalWeapon.actions.stream()
+                .filter(action -> action.getName().startsWith("Raiden N4 Hit"))
+                .collect(Collectors.toList());
+        assertEquals(2, physicalN4.size(),
+                "Raiden physical N4 should resolve two damage hits");
+        assertEquals("Raiden N4 Hit 1", physicalN4.get(0).getName(),
+                "Raiden physical N4 first hit name");
+        assertEquals("Raiden N4 Hit 2", physicalN4.get(1).getName(),
+                "Raiden physical N4 second hit name");
+        assertClose(0.5325, physicalN4.get(0).getDamagePercent(), EPS,
+                "Raiden physical N4 first multiplier");
+        assertClose(0.5325, physicalN4.get(1).getDamagePercent(), EPS,
+                "Raiden physical N4 second multiplier");
+        assertClose(0.95, physicalWeapon.times.get(3), EPS,
+                "Raiden physical N4 first hit timestamp");
+        assertClose(0.95, physicalWeapon.times.get(4), EPS,
+                "Raiden physical N4 second hit timestamp");
+        assertClose(2.85, physicalSim.getCurrentTime(), EPS,
+                "Raiden physical combo and Charged should advance six actions");
+        assertEquals(7, physicalWeapon.actions.size(),
+                "Only Raiden physical N4 should add one extra damage event");
+        assertEquals(6, physicalLogicalActions.size(),
+                "Raiden physical requests should emit one logical event each");
+        assertEquals("Raiden N4 Hit 2", physicalLogicalActions.get(3).getName(),
+                "Raiden physical N4 final hit should own the logical event");
+        assertEquals("Raiden N5", physicalWeapon.actions.get(5).getName(),
+                "Raiden N5 should remain one hit after split N4");
+        assertEquals("Raiden CA", physicalWeapon.actions.get(6).getName(),
+                "Raiden physical Charged should remain one hit");
+
+        RecordingDamageWeapon musouWeapon = new RecordingDamageWeapon("Raiden ");
+        model.character.RaidenShogun musouRaiden =
+                new model.character.RaidenShogun(
+                        musouWeapon, blankArtifact(), raidenTalentData(2));
+        CombatSimulator musouSim = simulatorWithExistingCharacter(musouRaiden);
+        TestCharacter resolveSource =
+                testCharacter(Element.HYDRO, CharacterId.XIANGLING);
+        musouSim.addCharacter(resolveSource);
+        musouSim.performAction(
+                CharacterId.RAIDEN_SHOGUN,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        resolveSource.markBurstUsed(musouSim.getCurrentTime());
+        musouSim.performAction(
+                CharacterId.XIANGLING,
+                raidenResolveSourceBurst("Raiden multi-hit Resolve source"));
+        assertClose(14.4, musouRaiden.getResolveStacks(), EPS,
+                "Raiden C2 fixture should include its inherited C1 Resolve bonus");
+        musouSim.performAction(
+                CharacterId.RAIDEN_SHOGUN,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        double musouNormalStart = musouSim.getCurrentTime();
+        for (int i = 0; i < 4; i++) {
+            musouSim.performAction(
+                    CharacterId.RAIDEN_SHOGUN,
+                    CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        }
+
+        List<AttackAction> musouN4 = musouWeapon.actions.stream()
+                .filter(action -> action.getName().startsWith(
+                        "Raiden Burst N4 Hit"))
+                .collect(Collectors.toList());
+        assertEquals(2, musouN4.size(),
+                "Raiden Musou N4 should resolve two damage hits");
+        double resolvePerHit = 14.4 * 0.0123;
+        assertClose(0.5195 + resolvePerHit,
+                musouN4.get(0).getDamagePercent(), EPS,
+                "Raiden Musou N4 first multiplier and Resolve");
+        assertClose(0.5210 + resolvePerHit,
+                musouN4.get(1).getDamagePercent(), EPS,
+                "Raiden Musou N4 second multiplier and Resolve");
+        for (AttackAction hit : musouN4) {
+            assertTrue(hit.isCountsAsBurstDmg(),
+                    "Every Raiden Musou N4 hit should count as Burst damage");
+            assertClose(0.60, hit.getDefenseIgnore(), EPS,
+                    "Every Raiden C2 Musou N4 hit should ignore DEF");
+            assertEquals(ICDType.Standard, hit.getICDType(),
+                    "Every Raiden Musou N4 hit should use standard ICD");
+            assertEquals(ICDTag.Raiden_MusouIsshin, hit.getICDTag(),
+                    "Every Raiden Musou N4 hit should share the Musou ICD tag");
+        }
+        assertClose(musouNormalStart + 1.4, musouSim.getCurrentTime(), EPS,
+                "Raiden Musou N1-N4 should advance four action durations");
+
+        double musouChargeStart = musouSim.getCurrentTime();
+        musouSim.performAction(
+                CharacterId.RAIDEN_SHOGUN,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        List<AttackAction> musouCharge = musouWeapon.actions.stream()
+                .filter(action -> action.getName().startsWith(
+                        "Raiden Burst CA Hit"))
+                .collect(Collectors.toList());
+        assertEquals(2, musouCharge.size(),
+                "Raiden Musou Charged should resolve two damage hits");
+        assertClose(1.036 + resolvePerHit,
+                musouCharge.get(0).getDamagePercent(), EPS,
+                "Raiden Musou Charged first multiplier and Resolve");
+        assertClose(1.2506 + resolvePerHit,
+                musouCharge.get(1).getDamagePercent(), EPS,
+                "Raiden Musou Charged second multiplier and Resolve");
+        for (AttackAction hit : musouCharge) {
+            assertEquals(ActionType.CHARGE, hit.getActionType(),
+                    "Every Raiden Musou Charged hit should retain Charged typing");
+            assertTrue(hit.isCountsAsBurstDmg(),
+                    "Every Raiden Musou Charged hit should count as Burst damage");
+            assertClose(0.60, hit.getDefenseIgnore(), EPS,
+                    "Every Raiden C2 Musou Charged hit should ignore DEF");
+            assertEquals(ICDTag.Raiden_MusouIsshin, hit.getICDTag(),
+                    "Every Raiden Musou Charged hit should share the Musou ICD tag");
+        }
+        int chargeStartIndex = musouWeapon.actions.indexOf(musouCharge.get(0));
+        assertClose(musouChargeStart, musouWeapon.times.get(chargeStartIndex), EPS,
+                "Raiden Musou Charged first hit timestamp");
+        assertClose(musouChargeStart,
+                musouWeapon.times.get(chargeStartIndex + 1), EPS,
+                "Raiden Musou Charged second hit timestamp");
+        assertClose(musouChargeStart + 0.8, musouSim.getCurrentTime(), EPS,
+                "Raiden Musou Charged should advance one action duration");
     }
 
     private static Buff requireRaidenC4Buff(CombatSimulator sim) {
@@ -17998,17 +18137,24 @@ public class ReactionRegressionTest {
                 CharacterActionRequest.of(CharacterActionKey.CHARGE)));
 
         AttackAction burstNormal = findAction(burstWeapon.actions, "Raiden Burst N1");
-        AttackAction burstCharge = findAction(burstWeapon.actions, "Raiden Burst CA");
+        AttackAction burstChargeFirst = findAction(
+                burstWeapon.actions, "Raiden Burst CA Hit 1");
+        AttackAction burstChargeSecond = findAction(
+                burstWeapon.actions, "Raiden Burst CA Hit 2");
         assertEquals(ICDTag.Raiden_MusouIsshin, burstNormal.getICDTag(),
                 "Raiden Burst Normal should use the shared Musou tag");
-        assertEquals(ICDTag.Raiden_MusouIsshin, burstCharge.getICDTag(),
-                "Raiden Burst Charged should use the shared Musou tag");
+        assertEquals(ICDTag.Raiden_MusouIsshin, burstChargeFirst.getICDTag(),
+                "Raiden Burst Charged first hit should use the shared Musou tag");
+        assertEquals(ICDTag.Raiden_MusouIsshin, burstChargeSecond.getICDTag(),
+                "Raiden Burst Charged second hit should use the shared Musou tag");
         assertEquals(ICDType.Standard, burstNormal.getICDType(),
                 "Raiden Burst Normal should use standard ICD");
-        assertEquals(ICDType.Standard, burstCharge.getICDType(),
-                "Raiden Burst Charged should use standard ICD");
-        assertEquals(1, countReactions(burstKinds, ReactionResult.Kind.OVERLOAD),
-                "Immediate Burst Normal and Charged attacks should share one ICD group");
+        assertEquals(ICDType.Standard, burstChargeFirst.getICDType(),
+                "Raiden Burst Charged first hit should use standard ICD");
+        assertEquals(ICDType.Standard, burstChargeSecond.getICDType(),
+                "Raiden Burst Charged second hit should use standard ICD");
+        assertEquals(2, countReactions(burstKinds, ReactionResult.Kind.OVERLOAD),
+                "Raiden N1 plus two Charged hits should satisfy shared third-hit ICD");
 
         RecordingDamageWeapon physicalWeapon = new RecordingDamageWeapon("Raiden ");
         model.character.RaidenShogun physicalRaiden = new model.character.RaidenShogun(

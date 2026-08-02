@@ -402,104 +402,148 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
                 break;
         }
 
-        String key;
-        double mv;
-        ActionType type;
+        String actionName;
+        double resolveBonus = 0.0;
         boolean countsAsBurst;
         Element dmgElement;
 
         if (musouActive) {
-            // Burst Mode (Electro)
-            key = "Burst " + stepName;
-            double baseMv = getTalentValue(key, 0.5);
             double scaling = getTalentValue("Resolve Normal Scaling", 0.0123);
-            mv = baseMv + (activeResolveBonus * scaling);
-
-            type = ActionType.NORMAL; // Still normal attack type for triggers
-            countsAsBurst = true; // But benefits from Burst Dmg Bonus
+            resolveBonus = activeResolveBonus * scaling;
+            countsAsBurst = true;
             dmgElement = Element.ELECTRO;
-            stepName = "Raiden Burst N" + (normalAttackStep + 1);
+            actionName = "Raiden Burst N" + (normalAttackStep + 1);
         } else {
-            // Physical Mode
-            key = stepName;
-            mv = getTalentValue(key, 0.5);
-
-            type = ActionType.NORMAL;
             countsAsBurst = false;
-            dmgElement = Element.PHYSICAL; // Should update Character to support Physical defaults? Or just pass
-                                           // ELEMENT.
-            // Wait, Element.PHYSICAL exists?
-            try {
-                dmgElement = Element.valueOf("PHYSICAL");
-            } catch (IllegalArgumentException e) {
-                dmgElement = Element.PHYSICAL; // Fallback if enum exists, otherwise assume logic checks
-            }
-            stepName = "Raiden N" + (normalAttackStep + 1);
+            dmgElement = Element.PHYSICAL;
+            actionName = "Raiden N" + (normalAttackStep + 1);
         }
 
-        AttackAction a = new AttackAction(stepName, mv, dmgElement, StatType.BASE_ATK,
-                countsAsBurst ? StatType.BURST_DMG_BONUS : StatType.PHYSICAL_DMG_BONUS,
-                dur, false, type);
-
-        if (countsAsBurst) {
-            a.setCountsAsBurstDmg(true);
-            if (this.constellation >= 2) {
-                a.setDefenseIgnore(0.60);
-            }
+        if (normalAttackStep == 3) {
+            String keyPrefix = countsAsBurst ? "Burst N4 Hit " : "N4 Hit ";
+            double firstDefault = countsAsBurst ? 0.5195 : 0.5325;
+            double secondDefault = countsAsBurst ? 0.5210 : 0.5325;
+            AttackAction firstHit = createRaidenAttack(
+                    actionName + " Hit 1",
+                    getTalentValue(keyPrefix + "1", firstDefault) + resolveBonus,
+                    dmgElement,
+                    countsAsBurst,
+                    ActionType.NORMAL,
+                    0.0);
+            AttackAction secondHit = createRaidenAttack(
+                    actionName + " Hit 2",
+                    getTalentValue(keyPrefix + "2", secondDefault) + resolveBonus,
+                    dmgElement,
+                    countsAsBurst,
+                    ActionType.NORMAL,
+                    dur);
+            sim.performActionWithoutTimeAdvance(characterId, firstHit);
+            sim.performAction(characterId, secondHit);
+        } else {
+            String key = countsAsBurst ? "Burst " + stepName : stepName;
+            AttackAction hit = createRaidenAttack(
+                    actionName,
+                    getTalentValue(key, 0.5) + resolveBonus,
+                    dmgElement,
+                    countsAsBurst,
+                    ActionType.NORMAL,
+                    dur);
+            sim.performAction(characterId, hit);
         }
-        a.setICD(ICDType.Standard,
-                countsAsBurst ? ICDTag.Raiden_MusouIsshin : ICDTag.NormalAttack, 1.0);
-        sim.performAction(this.characterId, a);
 
         normalAttackStep++;
-        if (normalAttackStep >= 5)
+        if (normalAttackStep >= 5) {
             normalAttackStep = 0;
+        }
     }
 
     private void chargeAttack(CombatSimulator sim) {
         checkMusouEnergy(sim);
 
-        String key;
-        double mv;
-        boolean countsAsBurst;
-        Element dmgElement;
-        String actionName;
-
         if (musouActive) {
-            // Burst CA (2 Hits)
             double base1 = getTalentValue("Burst CA_1", 1.036);
-            double base2 = getTalentValue("Burst CA_2", 1.251);
+            double base2 = getTalentValue("Burst CA_2", 1.2506);
             double scaling = getTalentValue("Resolve CA Scaling", 0.0123);
-
             double bonus = activeResolveBonus * scaling;
-            mv = (base1 + bonus) + (base2 + bonus);
-
-            countsAsBurst = true;
-            dmgElement = Element.ELECTRO;
-            actionName = "Raiden Burst CA";
+            AttackAction firstHit = createRaidenAttack(
+                    "Raiden Burst CA Hit 1",
+                    base1 + bonus,
+                    Element.ELECTRO,
+                    true,
+                    ActionType.CHARGE,
+                    0.0);
+            AttackAction secondHit = createRaidenAttack(
+                    "Raiden Burst CA Hit 2",
+                    base2 + bonus,
+                    Element.ELECTRO,
+                    true,
+                    ActionType.CHARGE,
+                    0.8);
+            sim.performActionWithoutTimeAdvance(characterId, firstHit);
+            sim.performAction(characterId, secondHit);
         } else {
-            // Physical CA (1 Hit)
-            mv = getTalentValue("CA", 1.83);
-
-            countsAsBurst = false;
-            dmgElement = Element.PHYSICAL;
-            actionName = "Raiden CA";
+            AttackAction physicalHit = createRaidenAttack(
+                    "Raiden CA",
+                    getTalentValue("CA", 1.83),
+                    Element.PHYSICAL,
+                    false,
+                    ActionType.CHARGE,
+                    0.8);
+            sim.performAction(characterId, physicalHit);
         }
+        normalAttackStep = 0;
+    }
 
-        AttackAction ca = new AttackAction(actionName, mv, dmgElement, StatType.BASE_ATK,
-                countsAsBurst ? StatType.BURST_DMG_BONUS : StatType.PHYSICAL_DMG_BONUS,
-                0.8, false, ActionType.CHARGE);
-
+    /**
+     * Creates one physical or Musou attack hit with its shared classification.
+     *
+     * <p>Musou multi-hit actions call this once per sourced multiplier so each
+     * hit receives Burst classification, C2 DEF ignore, and the shared ICD
+     * group independently while the caller assigns timeline advancement only
+     * to the final hit.
+     *
+     * @param actionName display label for this hit
+     * @param multiplier talent and Resolve multiplier for this hit
+     * @param damageElement Physical or Electro damage element
+     * @param countsAsBurst whether Musou Burst rules apply
+     * @param actionType input action category retained for trigger behavior
+     * @param animationDuration timeline duration in seconds for this hit
+     * @return configured attack hit
+     */
+    private AttackAction createRaidenAttack(
+            String actionName,
+            double multiplier,
+            Element damageElement,
+            boolean countsAsBurst,
+            ActionType actionType,
+            double animationDuration) {
+        AttackAction action = new AttackAction(
+                actionName,
+                multiplier,
+                damageElement,
+                StatType.BASE_ATK,
+                countsAsBurst
+                        ? StatType.BURST_DMG_BONUS
+                        : StatType.PHYSICAL_DMG_BONUS,
+                animationDuration,
+                false,
+                actionType);
         if (countsAsBurst) {
-            ca.setCountsAsBurstDmg(true);
-            if (this.constellation >= 2) {
-                ca.setDefenseIgnore(0.60);
+            action.setCountsAsBurstDmg(true);
+            if (constellation >= 2) {
+                action.setDefenseIgnore(0.60);
             }
         }
-        ca.setICD(ICDType.Standard,
-                countsAsBurst ? ICDTag.Raiden_MusouIsshin : ICDTag.ChargedAttack, 1.0);
-        sim.performAction(this.characterId, ca);
-        normalAttackStep = 0;
+        ICDTag icdTag;
+        if (countsAsBurst) {
+            icdTag = ICDTag.Raiden_MusouIsshin;
+        } else if (actionType == ActionType.CHARGE) {
+            icdTag = ICDTag.ChargedAttack;
+        } else {
+            icdTag = ICDTag.NormalAttack;
+        }
+        action.setICD(ICDType.Standard, icdTag, 1.0);
+        return action;
     }
 
     private void plunge(CombatSimulator sim) {

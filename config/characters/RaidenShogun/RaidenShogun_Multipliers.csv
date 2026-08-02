@@ -5,7 +5,8 @@ Raiden Shogun,SKILL,Raiden E Coordinated,9,0.714,0
 Raiden Shogun,NORMAL,N1,9,0.728,0
 Raiden Shogun,NORMAL,N2,9,0.730,0
 Raiden Shogun,NORMAL,N3,9,0.916,0
-Raiden Shogun,NORMAL,N4,9,1.064,0
+Raiden Shogun,NORMAL,N4 Hit 1,9,0.5325,0
+Raiden Shogun,NORMAL,N4 Hit 2,9,0.5325,0
 Raiden Shogun,NORMAL,N5,9,1.202,0
 Raiden Shogun,CHARGE,CA,9,1.83,0
 Raiden Shogun,PLUNGE,Plunge Drop,9,1.175,0
@@ -14,10 +15,11 @@ Raiden Shogun,PLUNGE,Plunge High,9,2.93,0
 Raiden Shogun,BURST,Burst N1,9,0.752,0
 Raiden Shogun,BURST,Burst N2,9,0.739,0
 Raiden Shogun,BURST,Burst N3,9,0.905,0
-Raiden Shogun,BURST,Burst N4,9,1.040,0
+Raiden Shogun,BURST,Burst N4 Hit 1,9,0.5195,0
+Raiden Shogun,BURST,Burst N4 Hit 2,9,0.5210,0
 Raiden Shogun,BURST,Burst N5,9,1.244,0
 Raiden Shogun,BURST,Burst CA_1,9,1.036,0
-Raiden Shogun,BURST,Burst CA_2,9,1.251,0
+Raiden Shogun,BURST,Burst CA_2,9,1.2506,0
 Raiden Shogun,BURST,Burst Plunge Drop,9,1.175,0
 Raiden Shogun,BURST,Burst Plunge Low,9,2.35,0
 Raiden Shogun,BURST,Burst Plunge High,9,2.93,0

@@ -13280,7 +13280,7 @@ Completion evidence:
 
 ## Implementation Order: Flins Constellation Campaign
 
-Status: In progress. This campaign implements sourced, single-target Flins
+Status: Complete. This campaign implements sourced, single-target Flins
 passives and constellations while retaining the documented weighted Lunar
 reaction simplification; RL and generated docs remain excluded.
 
@@ -13699,6 +13699,68 @@ Completion evidence:
   ally targeting, one typed window, and exact expiry regressions pass.
 - Two post-fix `RaidenParty` runs both produced 1,271,521 damage / 60,549 DPS,
   versus 1,227,785 / 58,466 before the sourced post-cast timer correction.
+- Reaction regression, build, Javadoc, sample simulation, and preflight pass.
+
+## Implementation Order: Raiden Multi-Hit Accuracy
+
+Status: Complete. Corrected B-137 in one character-local phase; retained the
+single-target model and excluded C6 cooldown reduction, RL, and generated docs.
+
+Evidence:
+
+- The maintained KQM Raiden table, accessed 2026-08-02, lists physical N4 as
+  53.25% + 53.25%, Musou N4 as 51.95% + 52.10%, Musou Charged as 103.6% +
+  125.06%, and 1.23% Resolve scaling on each Musou hit:
+  https://library.keqingmains.com/characters/electro/raiden-shogun
+
+### Phase 1: Split N4 and Musou Charged Damage Events
+
+Status: Done.
+
+Target files:
+
+- `config/characters/RaidenShogun/RaidenShogun_Multipliers.csv`
+- `src/java/model/character/RaidenShogun.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Physical N4, Musou N4, and Musou Charged each resolve their two sourced
+  multipliers as independent same-action damage events.
+- Every Musou hit receives Resolve scaling independently, retains Burst damage
+  classification and C2 DEF ignore, and shares the Musou standard ICD group.
+- Only each pair's final hit advances time and emits the logical action event;
+  other normal steps and physical Charged remain single-hit.
+
+Test cases:
+
+- Normal: exact per-hit physical N4, Musou N4, and Musou Charged values with
+  zero and nonzero Resolve.
+- Boundary: one animation duration per pair and third-hit standard ICD behavior
+  across N1 plus the two Charged hits.
+- Abnormal: N1/N2/N3/N5 and physical Charged are not duplicated; both Musou
+  hits retain C2 DEF ignore and Burst classification.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `./gradlew RaidenParty`
+- `python scripts/preflight.py`
+
+Evidence:
+
+- Physical N4 resolves two 53.25% hits; Musou N4 resolves 51.95% and 52.10%,
+  and Musou Charged resolves 103.6% and 125.06% as independent same-timestamp
+  damage events with only the final hit advancing the action duration.
+- A 14.4-Resolve C2 fixture applies 1.23% per stack to every Musou hit; both
+  hits retain Burst classification, 60% DEF ignore, and shared Musou standard
+  ICD. N1 plus the two Charged hits reaches the standard third-hit application.
+- N1/N2/N3/N5 and physical Charged remain single-hit and logical action
+  listeners still receive one event per player action.
+- Two `RaidenParty` runs match at 1,275,070 damage / 60,718 DPS, up from
+  1,271,521 / 60,549 after per-hit Resolve and trigger resolution.
 - Reaction regression, build, Javadoc, sample simulation, and preflight pass.
 
 ### Phase 2: Skill-Activated Damage Sets - Done
