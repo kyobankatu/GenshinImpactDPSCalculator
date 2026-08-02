@@ -13903,3 +13903,51 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Frost Burial Weapon Campaign
+
+Status: Active. Add the three Dragonspine Frost Burial weapons through one
+refinement-aware, target-Aura-aware direct proc policy.
+
+Scope:
+
+- Add Dragonspine Spear, Snow-Tombed Starsilver, and Frostbearer with sourced
+  metadata, R1-R5 values, R5 defaults, injected draws, and regressions.
+
+Out of scope for this pass:
+
+- Multi-target multiplication, falling-projectile delay, characters, formulas,
+  RL, generated docs, and unrelated proc families.
+
+### Phase 1: Add Shared Frost Burial and Three Variants
+
+Target files:
+
+- `src/java/model/weapon/FrostBurialWeapon.java` (new)
+- `src/java/model/weapon/DragonspineSpear.java` (new)
+- `src/java/model/weapon/SnowTombedStarsilver.java` (new)
+- `src/java/model/weapon/Frostbearer.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Only positive Normal/Charged hits by the active owner roll; failed rolls do
+  not start CT, successful rolls start an exact ten-second CT, and proc recursion
+  is impossible.
+- The generated Physical proc uses 80-140% ATK normally and 200-360% ATK when
+  Cryo Aura is live at proc resolution, with deterministic injected draws.
+- All three variants expose sourced metadata, R1-R5 values/defaults, and reject
+  refinement 0/6 and null draw sources.
+
+Test cases to add or update:
+
+- Normal: each variant metadata/proc, Cryo enhanced ratio, R5 default.
+- Boundary: failed-then-success draw, before/exact ten-second CT, R1 values.
+- Abnormal: Skill/zero/off-field/recursive hit, refinement 0/6, null source.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`

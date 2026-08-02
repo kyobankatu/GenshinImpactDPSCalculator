@@ -2305,3 +2305,13 @@ experiment record.
 - **Plan:** `TASKS.md` Self-Contained Four-Star Weapon Expansion
 - **Completion:** `e0564b2` adds all three weapons and focused regressions;
   build/Javadoc/leak gates pass
+
+### B-095 — Frost Burial weapon coverage
+
+- **Status:** active
+- **Scope:** Dragonspine Spear, Snow-Tombed Starsilver, Frostbearer; RL excluded
+- **Value/risk:** three complete variants share one bounded, injectable proc
+  implementation and reuse the live target-Aura API
+- **Evidence boundary:** KQM TCL metadata, R1-R5 chance/base/Cryo multipliers,
+  Normal/Charged gates, and ten-second cooldown
+- **Plan:** `TASKS.md` Frost Burial Weapon Campaign
