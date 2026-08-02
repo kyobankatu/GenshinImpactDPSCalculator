@@ -6161,6 +6161,79 @@ public class ReactionRegressionTest {
             highRefinementRejected = true;
         }
         assertTrue(highRefinementRejected, "Mappa Mare should reject refinement six");
+
+        model.weapon.EmeraldOrb emeraldOrb = new model.weapon.EmeraldOrb();
+        assertEquals("Emerald Orb", emeraldOrb.getName(), "Emerald Orb display name");
+        assertClose(448.0, emeraldOrb.getBaseAtk(), EPS, "Emerald Orb base ATK");
+        assertClose(94.0, emeraldOrb.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Emerald Orb Elemental Mastery");
+        assertEquals(model.type.WeaponType.CATALYST, emeraldOrb.getWeaponType(),
+                "Emerald Orb weapon type");
+        assertEquals(5, emeraldOrb.getRefinement(), "Emerald Orb default refinement");
+
+        ReactionResult[] rapidsReactions = {
+                ReactionResult.amp(2.0, "Vaporize", ReactionResult.Kind.VAPORIZE),
+                ReactionResult.transform(
+                        0.0, "Electro-Charged", ReactionResult.Kind.ELECTRO_CHARGED),
+                ReactionResult.state("Frozen", ReactionResult.Kind.FROZEN, Element.CRYO),
+                ReactionResult.transform(0.0, "Bloom", ReactionResult.Kind.BLOOM),
+                ReactionResult.lunar(0.0, ReactionResult.LunarType.CHARGED),
+                ReactionResult.lunar(0.0, ReactionResult.LunarType.BLOOM),
+                ReactionResult.transform(
+                        0.0, "Hydro Swirl", ReactionResult.Kind.SWIRL, Element.HYDRO)
+        };
+        for (ReactionResult reaction : rapidsReactions) {
+            assertReactionWindowBonus(
+                    new model.weapon.EmeraldOrb(), reaction,
+                    StatType.ATK_PERCENT, 0.40,
+                    "Emerald Orb " + reaction.getKind());
+        }
+        assertReactionWindowBonus(
+                new model.weapon.EmeraldOrb(),
+                ReactionResult.amp(1.5, "Melt", ReactionResult.Kind.MELT),
+                StatType.ATK_PERCENT, 0.0,
+                "Emerald Orb Melt exclusion");
+        assertReactionWindowBonus(
+                new model.weapon.EmeraldOrb(),
+                ReactionResult.transform(
+                        0.0, "Pyro Swirl", ReactionResult.Kind.SWIRL, Element.PYRO),
+                StatType.ATK_PERCENT, 0.0,
+                "Emerald Orb Pyro Swirl exclusion");
+
+        model.weapon.EmeraldOrb expiringOrb = new model.weapon.EmeraldOrb();
+        TestCharacter orbOwner = testCharacter(Element.HYDRO);
+        orbOwner.setWeapon(expiringOrb);
+        CombatSimulator orbSim = simulatorWith(orbOwner);
+        orbSim.notifyReaction(rapidsReactions[0], orbOwner);
+        orbSim.advanceTime(11.999);
+        assertClose(0.40, resolvedStat(orbSim, orbOwner, StatType.ATK_PERCENT), EPS,
+                "Emerald Orb should remain active before twelve seconds");
+        orbSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0, resolvedStat(orbSim, orbOwner, StatType.ATK_PERCENT), EPS,
+                "Emerald Orb should expire at exactly twelve seconds");
+
+        model.weapon.EmeraldOrb r1EmeraldOrb = new model.weapon.EmeraldOrb(1);
+        assertReactionWindowBonus(
+                r1EmeraldOrb, rapidsReactions[0],
+                StatType.ATK_PERCENT, 0.20, "R1 Emerald Orb");
+
+        boolean lowEmeraldRefinementRejected = false;
+        try {
+            new model.weapon.EmeraldOrb(0);
+        } catch (IllegalArgumentException expected) {
+            lowEmeraldRefinementRejected = true;
+        }
+        assertTrue(lowEmeraldRefinementRejected,
+                "Emerald Orb should reject refinement zero");
+
+        boolean highEmeraldRefinementRejected = false;
+        try {
+            new model.weapon.EmeraldOrb(6);
+        } catch (IllegalArgumentException expected) {
+            highEmeraldRefinementRejected = true;
+        }
+        assertTrue(highEmeraldRefinementRejected,
+                "Emerald Orb should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
@@ -7404,6 +7477,19 @@ public class ReactionRegressionTest {
         sim.getEnemy().setAura(ineligibleElement, 1.0);
         assertClose(baseDamage, calculateDirectDamage(sim, owner, hit, 0.0, 1.0), EPS,
                 weaponName + " ineligible target damage");
+    }
+
+    private static void assertReactionWindowBonus(
+            model.weapon.ReactionWindowWeapon weapon,
+            ReactionResult reaction,
+            StatType statType,
+            double expectedBonus,
+            String scenario) {
+        TestCharacter owner = testCharacter(Element.HYDRO);
+        owner.setWeapon(weapon);
+        CombatSimulator sim = simulatorWith(owner);
+        sim.notifyReaction(reaction, owner);
+        assertClose(expectedBonus, resolvedStat(sim, owner, statType), EPS, scenario);
     }
 
     private static void assertClose(double expected, double actual, double tolerance, String message) {
