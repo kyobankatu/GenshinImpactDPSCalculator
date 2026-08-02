@@ -127,6 +127,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ReactionWindowWeapons();
         testAccuracyPhaseF_HitStackWeapons();
         testAccuracyPhaseF_AdditionalClaymoreHitStackWeapons();
+        testAccuracyPhaseF_DirectPhysicalProcWeapons();
         testAccuracyPhaseF_ActionUseWindowWeapons();
         testAccuracyPhaseF_KaeyaCharacterContract();
         testAccuracyPhaseF_AmberCharacterContract();
@@ -6658,6 +6659,96 @@ public class ReactionRegressionTest {
         }
         assertTrue(highWhiteblindRefinementRejected,
                 "Whiteblind should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_DirectPhysicalProcWeapons() {
+        double[] draws = { 0.5, 0.499999, 0.25 };
+        int[] drawIndex = { 0 };
+        model.weapon.PrototypeArchaic archaic = new model.weapon.PrototypeArchaic(
+                () -> draws[drawIndex[0]++]);
+        assertEquals("Prototype Archaic", archaic.getName(),
+                "Prototype Archaic display name");
+        assertClose(565.0, archaic.getBaseAtk(), EPS,
+                "Prototype Archaic base ATK");
+        assertClose(0.276, archaic.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Prototype Archaic ATK substat");
+        assertEquals(model.type.WeaponType.CLAYMORE, archaic.getWeaponType(),
+                "Prototype Archaic weapon type");
+        assertEquals(5, archaic.getRefinement(),
+                "Prototype Archaic default refinement");
+
+        TestCharacter owner = testCharacter(Element.PHYSICAL);
+        owner.setWeapon(archaic);
+        CombatSimulator sim = simulatorWith(owner);
+        AttackAction normalHit = typedDamageHit(
+                "Prototype Archaic Normal", ActionType.NORMAL, 1.0);
+        AttackAction chargeHit = typedDamageHit(
+                "Prototype Archaic Charge", ActionType.CHARGE, 1.0);
+        AttackAction skillHit = typedDamageHit(
+                "Prototype Archaic Skill", ActionType.SKILL, 1.0);
+        AttackAction zeroNormalHit = typedDamageHit(
+                "Prototype Archaic zero Normal", ActionType.NORMAL, 0.0);
+        archaic.onDamage(owner, skillHit, 0.0, sim);
+        archaic.onDamage(owner, zeroNormalHit, 0.0, sim);
+        assertEquals(0, drawIndex[0],
+                "Ineligible Prototype Archaic hits should not consume draws");
+        archaic.onDamage(owner, normalHit, 0.0, sim);
+        assertEquals(1, drawIndex[0],
+                "A draw at the strict Prototype Archaic boundary should be consumed");
+        assertClose(0.0, sim.getTotalDamage(), EPS,
+                "A 0.5 Prototype Archaic draw should fail");
+        archaic.onDamage(owner, chargeHit, 0.1, sim);
+        assertEquals(2, drawIndex[0],
+                "A failed Prototype Archaic draw should not start cooldown");
+        double firstProcDamage = sim.getTotalDamage();
+        assertTrue(firstProcDamage > 0.0,
+                "A successful Prototype Archaic draw should deal Physical damage");
+        archaic.onDamage(owner, normalHit, 15.099, sim);
+        assertEquals(2, drawIndex[0],
+                "Prototype Archaic should not draw immediately before cooldown");
+        assertClose(firstProcDamage, sim.getTotalDamage(), EPS,
+                "Prototype Archaic should not proc during cooldown");
+        archaic.onDamage(owner, normalHit, 15.1, sim);
+        assertEquals(3, drawIndex[0],
+                "Prototype Archaic should draw at exact cooldown");
+        assertClose(firstProcDamage * 2.0, sim.getTotalDamage(), EPS,
+                "Repeated R5 Prototype Archaic procs should deal equal damage");
+
+        model.weapon.PrototypeArchaic r1Archaic =
+                new model.weapon.PrototypeArchaic(1, () -> 0.0);
+        TestCharacter r1Owner = testCharacter(Element.PHYSICAL);
+        r1Owner.setWeapon(r1Archaic);
+        CombatSimulator r1Sim = simulatorWith(r1Owner);
+        r1Archaic.onDamage(r1Owner, normalHit, 0.0, r1Sim);
+        assertClose(firstProcDamage * 0.5, r1Sim.getTotalDamage(), EPS,
+                "R1 Prototype Archaic should use half the R5 motion value");
+
+        boolean nullRejected = false;
+        try {
+            new model.weapon.PrototypeArchaic(null);
+        } catch (NullPointerException expected) {
+            nullRejected = true;
+        }
+        assertTrue(nullRejected,
+                "Prototype Archaic should reject a null draw source");
+
+        boolean lowRefinementRejected = false;
+        try {
+            new model.weapon.PrototypeArchaic(0);
+        } catch (IllegalArgumentException expected) {
+            lowRefinementRejected = true;
+        }
+        assertTrue(lowRefinementRejected,
+                "Prototype Archaic should reject refinement zero");
+
+        boolean highRefinementRejected = false;
+        try {
+            new model.weapon.PrototypeArchaic(6);
+        } catch (IllegalArgumentException expected) {
+            highRefinementRejected = true;
+        }
+        assertTrue(highRefinementRejected,
+                "Prototype Archaic should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_ActionUseWindowWeapons() {
