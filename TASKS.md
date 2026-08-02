@@ -13670,6 +13670,190 @@ Completion evidence:
 - Razor, party catalog, equipment boundary, reaction, build, Javadoc, and
   executable preflight checks pass after integration review.
 
+## Implementation Order: Legacy Reaction Characters and Stateful Weapons Wave
+
+Status: In progress. Primary owns typed identity/buff reservations and the
+weapon batch; Venti and Yoimiya start in physical branch-isolated worktrees,
+then Yanfei reuses the first available lane. RL, generated docs, and Deferred
+Systems remain excluded.
+
+Evidence:
+
+- Maintained KQM character pages and current gcsim implementations for Venti,
+  Yoimiya, and Yanfei, accessed 2026-08-03.
+- Maintained KQM claymore/catalyst catalogs and current gcsim implementations
+  for Fruitful Hook, Serpent Spine, Tulaytullah's Remembrance, and Fang of the
+  Mountain King, accessed 2026-08-03.
+
+Scope:
+
+- Add three owner-local old-base-kit offensive character slices with sourced
+  actions, periodic/coordinated effects, Energy, ICD, and representable C1-C6.
+- Add four exact R1-R5 stateful weapons using existing action, damage,
+  reaction, switch, timer, speed, and snapshot contracts.
+
+Out of scope:
+
+- Suction, placement/multi-target geometry, actual enemy HP or random crit
+  outcomes, stamina, incoming player damage, enemy defeats, shields, Hexerei,
+  RL, parties, and generated docs.
+
+### Phase 1: Reserve Character and Buff Identities
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java` (new)
+
+Acceptance criteria:
+
+- `VENTI`, `YOIMIYA`, and `YANFEI` receive stable numeric IDs 18-20.
+- Typed Venti resistance and Yoimiya/Yanfei buff identities are reserved once
+  before isolated branches; all existing numeric IDs remain stable.
+- No behavior or display-string dispatch is introduced in shared code.
+
+Test cases:
+
+- Normal: name/numeric round trips and typed buff identity uniqueness.
+- Boundary/abnormal: prior IDs unchanged and unknown numeric fallback.
+
+Verification:
+
+- `./gradlew LegacyCharacterIdentityRegressionTest ReactionRegressionTest build`
+- `python scripts/preflight.py --run`
+
+### Phase 2: Four Stateful Weapons
+
+Target files:
+
+- `src/java/model/weapon/FruitfulHook.java` (new)
+- `src/java/model/weapon/SerpentSpine.java` (new)
+- `src/java/model/weapon/TulaytullahsRemembrance.java` (new)
+- `src/java/model/weapon/FangOfTheMountainKing.java` (new)
+- one focused regression per weapon under `src/java/sample/`
+
+Acceptance criteria:
+
+- Exact Lv. 90 metadata, R5 defaults, and R1-R5 coefficients are exposed.
+- Fruitful Hook grants unconditional Plunge CRIT Rate and a post-Plunge-hit
+  ten-second Normal/Charged/Plunge DMG window.
+- Serpent Spine gains one persistent all-DMG stack per four on-field seconds,
+  up to five; incoming-damage removal is inactive because that deferred event
+  does not exist, while switching and snapshots preserve exact timer state.
+- Tulaytullah grants static Normal speed and a Skill-opened 14-second Normal
+  DMG window with sourced passive-time, 0.3-second hit-stack, cap, and switch
+  cancellation behavior.
+- Fang gains independently expiring six-second stacks from owner Skill hits
+  and sourced Burning/Burgeon reactions, capped at six, with Skill/Burst DMG.
+
+Test cases:
+
+- Normal: R1/R5 metadata, stack acquisition, live eligible damage, off-field
+  reaction ownership, timers, speed, and snapshots.
+- Boundary: exact 0.3/4/6/10/14-second edges, max stacks, refresh/expiry order.
+- Abnormal: dummy/wrong actions, non-owner reactions, switch cancellation,
+  invalid refinement/binding/state, and independent instances.
+
+Verification:
+
+- all four focused weapon regressions
+- `./gradlew ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Venti Offensive Vertical Slice
+
+Target files:
+
+- `src/java/model/character/Venti.java` (new)
+- `config/characters/Venti/Venti_Status.csv` (new)
+- `config/characters/Venti/Venti_Multipliers.csv` (new)
+- `src/java/sample/VentiRegressionTest.java` (new)
+
+Acceptance criteria:
+
+- Typed basic attacks, Skill, generation-safe Burst ticks, first-aura elemental
+  absorption, A4 Energy, cooldowns, ICD/gauge, and switching follow sourced
+  stationary single-target timing.
+- Representable C2-C6 offensive RES/talent branches are covered; suction,
+  airborne state, C1 geometry, defeat Energy, and Hexerei remain excluded.
+- Burst/absorption state is owner-local and stale timers cannot cross reuse.
+
+Test cases:
+
+- Normal: actions, Burst cadence/absorption, reactions, Energy, C2-C6.
+- Boundary: hitmarks, duration, absorption priority, cooldown and expiry.
+- Abnormal: physical/no aura, stale generation, cross reuse, invalid
+  constellation/action, and independent instances.
+
+Verification:
+
+- `./gradlew VentiRegressionTest PartyCatalogRegressionTest`
+- `./gradlew ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 4: Yoimiya Offensive Vertical Slice
+
+Target files:
+
+- `src/java/model/character/Yoimiya.java` (new)
+- `config/characters/Yoimiya/Yoimiya_Status.csv` (new)
+- `config/characters/Yoimiya/Yoimiya_Multipliers.csv` (new)
+- `src/java/sample/YoimiyaRegressionTest.java` (new)
+
+Acceptance criteria:
+
+- Five-step Normal sequence, Niwabi infusion/modifiers, Aurous Blaze party-hit
+  trigger/cooldown, A1/A4, Energy, ICD/gauge, cooldowns, and switching follow
+  sourced single-target behavior.
+- Representable C1 and C3-C5 branches are covered; actual-crit C2, C6 random
+  arrows, enemy-defeat transfer, aimed geometry, and hitlag remain excluded.
+- Mark and listener state is owner-local, non-recursive, and generation-safe.
+
+Test cases:
+
+- Normal: action sequence, Skill window, mark detonation, A1/A4, C1/C3-C5.
+- Boundary: infusion/mark duration, two-second trigger CT, swap and recast.
+- Abnormal: self/dummy/zero/wrong-owner hits, stale mark, cross reuse, invalid
+  constellation/action, and independent instances.
+
+Verification:
+
+- `./gradlew YoimiyaRegressionTest PartyCatalogRegressionTest`
+- `./gradlew ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 5: Yanfei Offensive Vertical Slice
+
+Target files:
+
+- `src/java/model/character/Yanfei.java` (new)
+- `config/characters/Yanfei/Yanfei_Status.csv` (new)
+- `config/characters/Yanfei/Yanfei_Multipliers.csv` (new)
+- `src/java/sample/YanfeiRegressionTest.java` (new)
+
+Acceptance criteria:
+
+- Typed attacks, Scarlet Seal generation/consumption, seal-scaled Charged
+  damage, Skill/Burst max seals, Brilliance cadence/window, Energy,
+  cooldowns, ICD/gauge, and switching follow sourced behavior.
+- A1 and representable C1/C3/C5/C6 branches are covered; stamina, actual-crit
+  A4, enemy-HP C2, and C4 shield remain excluded.
+- Seal/Burst timer state is owner-local and stale events reject cross reuse.
+
+Test cases:
+
+- Normal: action sequence, 0-4 seals, Skill/Burst, Brilliance, A1, C1/C3/C5/C6.
+- Boundary: seal consumption, one-second gain cadence, Burst duration/expiry.
+- Abnormal: dummy/unsupported action, cross reuse, invalid constellation,
+  stale timer, and independent instances.
+
+Verification:
+
+- `./gradlew YanfeiRegressionTest PartyCatalogRegressionTest`
+- `./gradlew ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
 ## Implementation Order: Derived-Damage Weapons and Summon Characters Wave
 
 Status: Complete. Shared typed formula/identity primitives, four weapons, Yae

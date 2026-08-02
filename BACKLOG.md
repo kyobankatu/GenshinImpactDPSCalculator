@@ -3411,3 +3411,46 @@ experiment record.
 - **Decision:** do not create a no-op or inferred artifact class solely to
   eliminate an image/class count difference. All 61 sourced asset-backed sets
   already have concrete classes; future external evidence may create a new ID.
+
+### B-161 — Legacy reaction characters and stateful weapons wave
+
+- **Status:** in-progress
+- **Source:** explicit broad content-expansion request and post-B-159 normalized
+  character/weapon asset inventory
+- **Scope/risk:** Venti, Yoimiya, Yanfei, Fruitful Hook, Serpent Spine,
+  Tulaytullah's Remembrance, and Fang of the Mountain King; planned and split
+  into branch-isolated character lanes plus one primary weapon batch
+- **Evidence:** maintained KQM character/weapon catalogs and current
+  `genshinsim/gcsim` implementations, accessed 2026-08-03
+- **Boundary:** suction/geometry, actual enemy HP and crit outcomes, stamina,
+  incoming player damage, defeat transfer, Hexerei, shields, RL, and generated
+  docs remain excluded.
+- **Proof/plan:** five-phase `TASKS.md` Legacy Reaction Characters and Stateful
+  Weapons Wave with focused regressions and combined local gates.
+
+### B-162 — Follow-on legacy character inventory
+
+- **Status:** candidate
+- **Source:** B-161 normalized character asset/class inventory
+- **Units:** Rosaria, Diluc, Keqing, Ningguang, and Ganyu
+- **Reason:** sourced and valuable, but intentionally left for a later bounded
+  campaign after the three independent B-161 character lanes converge.
+
+### B-163 — Follow-on stateful weapon inventory
+
+- **Status:** candidate
+- **Source:** B-161 normalized weapon asset/class inventory
+- **Units:** Crane's Echoing Call, Lumidouce Elegy, Peak Patrol Song, Sturdy
+  Bone, Vivid Notions, Lithic Blade, Lithic Spear, and Chain Breaker
+- **Reason:** sourced candidates remain, with some requiring shared region,
+  final-ATK, Plunge-CRIT-DMG, or team-buff primitives before implementation.
+
+### B-164 — Unmatched weapon assets behind deferred systems
+
+- **Status:** deferred
+- **Source:** B-161 normalized weapon asset/class inventory
+- **Units:** HP/healing, shield/player-damage, weak-point/pickup/geometry,
+  Bond-of-Life, Nightsoul, Stellar-Conduct, and Hexerei dependent weapons
+- **Decision:** do not implement partial passives that silently omit their
+  defining trigger. Revisit only after the corresponding system is explicitly
+  resumed by the user.
