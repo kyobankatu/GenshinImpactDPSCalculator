@@ -2427,3 +2427,13 @@ experiment record.
 - **Plan:** `TASKS.md` Energy and Proximity Five-Star Weapon Campaign
 - **Completion:** `ab98b46` adds both weapons and focused live-state/static
   regressions; build/Javadoc/leak gates pass
+
+### B-105 — Sumeru action-proc bow coverage
+
+- **Status:** active
+- **Scope:** End of the Line and King's Squire; RL excluded
+- **Value/risk:** two complete passives reuse verified typed action, hit,
+  switch-out, timer, and generated Physical damage contracts
+- **Evidence boundary:** KQM TCL metadata, R1-R5 proc/EM values, three/two-second
+  Flowrider limits, 12/15-second states, and 12/20-second activation CTs
+- **Plan:** `TASKS.md` Sumeru Action-Proc Bow Campaign

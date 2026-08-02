@@ -14459,3 +14459,50 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Sumeru Action-Proc Bow Campaign
+
+Status: Active. Add two complete action-opened bow states using typed actions,
+hits, switch-out, timers, and generated Physical damage.
+
+Scope:
+
+- Add End of the Line and King's Squire with sourced metadata, R1-R5 values,
+  R5 defaults, exact limits/durations/CTs, and focused regressions.
+
+Out of scope for this pass:
+
+- Multi-target multiplication, visual projectile travel, characters, formulas,
+  RL, generated docs, and unrelated Sumeru weapons.
+
+### Phase 1: Add End of the Line and King's Squire
+
+Target files:
+
+- `src/java/model/weapon/EndOfTheLine.java` (new)
+- `src/java/model/weapon/KingsSquire.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Active-owner Skill use opens End of the Line's half-open 15-second Flowrider
+  at exact 12-second activation CT; up to three positive attack hits generate
+  one 80-160% ATK Physical proc each at exact two-second proc CT.
+- Active-owner Skill or Burst use opens King's Squire's half-open 12-second
+  60-140 EM state at exact 20-second CT; natural expiry or switch-out ends it
+  once and generates one 100-180% ATK Physical proc without stale-timer repeats.
+- Metadata, R1-R5 defaults/validation, active/wrong/zero/recursive exclusions,
+  triggering-action order, counters, and exact boundaries are explicit.
+
+Test cases to add or update:
+
+- Normal: both metadata, three Flowrider procs, Skill/Burst Squire states, R5.
+- Boundary: exact two/12/15/20 seconds, natural versus switch end, R1.
+- Abnormal: wrong/zero/off-field/recursive hits, stale timer, refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
