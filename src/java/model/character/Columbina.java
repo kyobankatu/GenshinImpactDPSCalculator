@@ -7,10 +7,12 @@ import mechanics.formula.DamageCalculator;
 import model.entity.CharacterTeamBuffProvider;
 import model.entity.Character;
 import model.entity.ReactionAwareCharacter;
+import model.type.ActionType;
 import model.type.CharacterId;
 import model.type.Element;
 import model.type.ICDType;
 import model.type.ICDTag;
+import model.type.StatType;
 import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
@@ -75,6 +77,12 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
     private static final double THUNDERCLOUD_EXPECTED_EXTRA_RATE = 0.33;
     private static final String THUNDERCLOUD_EXPECTED_EXTRA_LABEL =
             "Lunar-Charged Reaction (33% Expected Extra)";
+    private static final double[] NORMAL_ATTACK_DEFAULTS = {
+            0.7955, 0.6226, 0.9942
+    };
+    private static final double[] NORMAL_ATTACK_DURATIONS = {
+            0.5, 0.5, 0.5
+    };
     private final DoubleSupplier moondriftDraw;
 
     // Resources
@@ -85,6 +93,7 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
     private int verdantDew = 0;
     private int moonridgeDew = 0;
     private static final int MAX_DEW = 3;
+    private int normalAttackStep = 0;
 
     // States
     private double rippleEndTime = 0;
@@ -222,7 +231,9 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
      *       event, and generates 4 Hydro particles.</li>
      *   <li>{@link CharacterActionKey#BURST} — casts Moonlit Melancholy and applies the 20 s Lunar Domain
      *       reaction bonus team buff.</li>
-     *   <li>{@link CharacterActionKey#NORMAL} — fires Columbina's current normal attack.</li>
+     *   <li>{@link CharacterActionKey#NORMAL} — advances Columbina's three-hit normal combo.</li>
+     *   <li>{@link CharacterActionKey#PLUNGE} — performs one high Plunging Attack.</li>
+     *   <li>Any non-{@code NORMAL} action resets the normal attack combo.</li>
      * </ul>
      *
      * @param request typed action request
@@ -236,25 +247,20 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
         }
 
         double currentTime = sim.getCurrentTime();
+        if (request.getKey() != CharacterActionKey.NORMAL) {
+            normalAttackStep = 0;
+        }
 
         switch (request.getKey()) {
             case CHARGE:
                 if (moonridgeDew > 0) {
-                    performSpecialCA(sim, true);
+                    performSpecialCA(sim);
                     moonridgeDew--;
                 } else if (verdantDew > 0) {
-                    performSpecialCA(sim, false);
+                    performSpecialCA(sim);
                     verdantDew--;
                 } else {
-                    // Standard CA
-                    AttackAction ca = new AttackAction(
-                            "Columbina Charged",
-                            getMultiplier("Charged Attack"),
-                            Element.HYDRO,
-                            model.type.StatType.BASE_ATK,
-                            null);
-                    ca.setAnimationDuration(1.5); // Estimate
-                    sim.performAction(this.characterId, ca);
+                    performChargedAttack(sim);
                 }
                 break;
             case SKILL:
@@ -264,10 +270,11 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                         "Eternal Tides",
                         getMultiplier("Skill DMG"),
                         Element.HYDRO,
-                        model.type.StatType.BASE_HP,
-                        null);
+                        StatType.BASE_HP,
+                        StatType.SKILL_DMG_BONUS,
+                        0.8,
+                        ActionType.SKILL);
                 skill.setICD(ICDType.Standard, ICDTag.Columbina_Cast, 1.0);
-                skill.setAnimationDuration(0.8);
                 sim.performAction(this.characterId, skill);
 
                 // Set Ripple Duration (25s)
@@ -311,10 +318,11 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                         "Moonlit Melancholy",
                         getMultiplier("Burst Skill"),
                         Element.HYDRO,
-                        model.type.StatType.BASE_HP, // Scales with HP
-                        null);
+                        StatType.BASE_HP,
+                        StatType.BURST_DMG_BONUS,
+                        2.0,
+                        ActionType.BURST);
                 burst.setICD(ICDType.None, ICDTag.ElementalBurst, 2.0);
-                burst.setAnimationDuration(2.0);
                 sim.performAction(this.characterId, burst);
 
                 domainEndTime = currentTime + 20.0;
@@ -326,29 +334,84 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                                 .sourcedBy(this.getCharacterId()));
                 break;
             case NORMAL:
-                AttackAction na = new AttackAction(
-                        "Columbina Normal",
-                        getMultiplier("Normal 1"),
-                        Element.HYDRO,
-                        model.type.StatType.BASE_ATK,
-                        null);
-                na.setAnimationDuration(0.5);
-                sim.performAction(this.characterId, na);
+                performNormalAttack(sim);
+                break;
+            case PLUNGE:
+                performPlungingAttack(sim);
                 break;
             default:
-                break;
+                throw new IllegalArgumentException(
+                        "Unsupported action for Columbina: " + request.getKey());
         }
+    }
+
+    /**
+     * Executes the next hit in Columbina's three-hit Hydro normal combo.
+     *
+     * @param sim active simulator
+     */
+    private void performNormalAttack(CombatSimulator sim) {
+        String talentKey = "Normal " + (normalAttackStep + 1);
+        AttackAction normal = new AttackAction(
+                "Columbina N" + (normalAttackStep + 1),
+                getTalentValue(talentKey, NORMAL_ATTACK_DEFAULTS[normalAttackStep]),
+                Element.HYDRO,
+                StatType.BASE_ATK,
+                StatType.NORMAL_ATTACK_DMG_BONUS,
+                NORMAL_ATTACK_DURATIONS[normalAttackStep],
+                ActionType.NORMAL);
+        normal.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
+        sim.performAction(characterId, normal);
+
+        normalAttackStep++;
+        if (normalAttackStep >= NORMAL_ATTACK_DEFAULTS.length) {
+            normalAttackStep = 0;
+        }
+    }
+
+    /**
+     * Executes Columbina's standard Hydro Charged Attack.
+     *
+     * @param sim active simulator
+     */
+    private void performChargedAttack(CombatSimulator sim) {
+        AttackAction charged = new AttackAction(
+                "Columbina Charged Attack",
+                getMultiplier("Charged Attack"),
+                Element.HYDRO,
+                StatType.BASE_ATK,
+                StatType.CHARGED_ATTACK_DMG_BONUS,
+                1.5,
+                ActionType.CHARGE);
+        charged.setICD(ICDType.None, ICDTag.ChargedAttack, 1.0);
+        sim.performAction(characterId, charged);
+    }
+
+    /**
+     * Executes one high Hydro Plunging Attack using the existing approximation.
+     *
+     * @param sim active simulator
+     */
+    private void performPlungingAttack(CombatSimulator sim) {
+        AttackAction plunge = new AttackAction(
+                "Columbina High Plunge",
+                getMultiplier("Plunge High"),
+                Element.HYDRO,
+                StatType.BASE_ATK,
+                StatType.PLUNGING_ATTACK_DMG_BONUS,
+                1.0,
+                ActionType.PLUNGE);
+        plunge.setICD(ICDType.None, ICDTag.None, 1.0);
+        sim.performAction(characterId, plunge);
     }
 
     /**
      * Fires three Moondew Cleanse hits (Dendro, HP-scaling) as part of an
      * enhanced Charged Attack when a Dew stack is available.
      *
-     * @param sim       the combat simulator context
-     * @param moonridge {@code true} if consuming a Moonridge Dew stack (unused branch
-     *                  distinction; both variants use the same attack pattern)
+     * @param sim the combat simulator context
      */
-    private void performSpecialCA(CombatSimulator sim, boolean moonridge) {
+    private void performSpecialCA(CombatSimulator sim) {
         double mv = getMultiplier("Moondew Cleanse");
 
         for (int i = 0; i < 3; i++) {
@@ -356,12 +419,17 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                     "Moondew Cleanse Hit " + (i + 1),
                     mv,
                     Element.DENDRO,
-                    model.type.StatType.BASE_HP,
-                    null);
+                    StatType.BASE_HP,
+                    null,
+                    i == 2 ? 1.5 : 0.0,
+                    ActionType.OTHER);
             special.setLunarReactionType(AttackAction.LunarReactionType.BLOOM);
             special.setICD(ICDType.None, ICDTag.None, 0.0); // Lunar Reaction DMG: no aura application
-            special.setAnimationDuration(0.5 + (i * 0.1));
-            sim.performAction(this.characterId, special);
+            if (i == 2) {
+                sim.performAction(this.characterId, special);
+            } else {
+                sim.performActionWithoutTimeAdvance(this.characterId, special);
+            }
         }
     }
 
@@ -410,7 +478,10 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
             }
 
             boolean domainActive = (time <= domainEndTime);
-            if (domainActive && type == AttackAction.LunarReactionType.BLOOM) {
+            boolean triggeredReaction = result.isStateful();
+            if (domainActive
+                    && triggeredReaction
+                    && type == AttackAction.LunarReactionType.BLOOM) {
                 // 4th Passive: up to 3 Moonridge Dews per 18s window
                 if (time - dewWindowStart >= 18.0) {
                     dewWindowStart = time;
@@ -422,9 +493,11 @@ public class Columbina extends Character implements CharacterTeamBuffProvider, R
                 }
             }
 
-            if (type == AttackAction.LunarReactionType.BLOOM) {
-                if (verdantDew < MAX_DEW)
+            if (triggeredReaction
+                    && type == AttackAction.LunarReactionType.BLOOM) {
+                if (verdantDew < MAX_DEW) {
                     verdantDew++;
+                }
             }
         }
     }

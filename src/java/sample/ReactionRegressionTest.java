@@ -121,6 +121,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_TimingAwareEnergyAnalysis();
         testAccuracyPhaseF_ArtifactOptimizerRejectsUnreachableEr();
         testAccuracyPhaseF_ArtifactOptimizerStableResultOrder();
+        testAccuracyPhaseF_ColumbinaBasicActionCoverage();
         testAccuracyPhaseF_ColumbinaGravityAndDewRegression();
         testAccuracyPhaseF_ColumbinaStandInBoundaries();
         testAccuracyPhaseF_ArtifactTeamBuffProviderRouting();
@@ -5403,6 +5404,230 @@ public class ReactionRegressionTest {
                 "Joint optimizer should render result keys in requested stat order");
     }
 
+    private static void testAccuracyPhaseF_ColumbinaBasicActionCoverage() {
+        RecordingDamageWeapon actionWeapon = new RecordingDamageWeapon("");
+        model.character.Columbina columbina = new model.character.Columbina(
+                actionWeapon, blankArtifact());
+        CombatSimulator sim = simulatorWithExistingCharacter(columbina);
+
+        for (int i = 0; i < 4; i++) {
+            sim.performAction(
+                    CharacterId.COLUMBINA,
+                    CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        }
+        List<AttackAction> normalActions = actionWeapon.actions.stream()
+                .filter(action -> action.getName().startsWith("Columbina N"))
+                .collect(java.util.stream.Collectors.toList());
+        assertEquals(List.of(
+                        "Columbina N1",
+                        "Columbina N2",
+                        "Columbina N3",
+                        "Columbina N1"),
+                normalActions.stream()
+                        .map(AttackAction::getName)
+                        .collect(java.util.stream.Collectors.toList()),
+                "Columbina Normal input should advance and wrap its three-hit combo");
+        double[] expectedNormalMultipliers = { 0.7955, 0.6226, 0.9942, 0.7955 };
+        for (int i = 0; i < normalActions.size(); i++) {
+            AttackAction normal = normalActions.get(i);
+            assertClose(expectedNormalMultipliers[i], normal.getDamagePercent(), EPS,
+                    "Columbina Normal should use its sourced level-9 multiplier");
+            assertEquals(Element.HYDRO, normal.getElement(),
+                    "Columbina Normal should deal Hydro damage");
+            assertEquals(StatType.NORMAL_ATTACK_DMG_BONUS, normal.getBonusStat(),
+                    "Columbina Normal should use Normal DMG Bonus");
+            assertEquals(ActionType.NORMAL, normal.getActionType(),
+                    "Columbina Normal should retain typed action metadata");
+            assertEquals(ICDType.Standard, normal.getICDType(),
+                    "Columbina Normal should use standard ICD");
+            assertEquals(ICDTag.NormalAttack, normal.getICDTag(),
+                    "Columbina Normal should share the Normal ICD group");
+            assertClose(1.0, normal.getGaugeUnits(), EPS,
+                    "Columbina Normal should apply 1U Hydro");
+            assertClose(0.5, normal.getAnimationDuration(), EPS,
+                    "Columbina Normal should preserve the existing action approximation");
+        }
+
+        sim.performAction(
+                CharacterId.COLUMBINA,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        AttackAction charged = actionWeapon.actions.stream()
+                .filter(action -> action.getName().equals("Columbina Charged Attack"))
+                .findFirst()
+                .orElseThrow();
+        assertClose(1.9734, charged.getDamagePercent(), EPS,
+                "Columbina Charged should use its sourced level-9 multiplier");
+        assertEquals(Element.HYDRO, charged.getElement(),
+                "Columbina Charged should deal Hydro damage");
+        assertEquals(StatType.CHARGED_ATTACK_DMG_BONUS, charged.getBonusStat(),
+                "Columbina Charged should use Charged DMG Bonus");
+        assertEquals(ActionType.CHARGE, charged.getActionType(),
+                "Columbina Charged should retain typed action metadata");
+        assertEquals(ICDType.None, charged.getICDType(),
+                "Columbina Charged should have no ICD");
+        assertEquals(ICDTag.ChargedAttack, charged.getICDTag(),
+                "Columbina Charged should retain the Charged group label");
+        assertClose(1.0, charged.getGaugeUnits(), EPS,
+                "Columbina Charged should apply 1U Hydro");
+        assertClose(1.5, charged.getAnimationDuration(), EPS,
+                "Columbina Charged should preserve the existing duration approximation");
+
+        sim.performAction(
+                CharacterId.COLUMBINA,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        List<AttackAction> normalsAfterCharge = actionWeapon.actions.stream()
+                .filter(action -> action.getName().startsWith("Columbina N"))
+                .collect(java.util.stream.Collectors.toList());
+        assertEquals("Columbina N1",
+                normalsAfterCharge.get(normalsAfterCharge.size() - 1).getName(),
+                "Columbina Charged should reset the Normal combo");
+
+        sim.performAction(
+                CharacterId.COLUMBINA,
+                CharacterActionRequest.of(CharacterActionKey.PLUNGE));
+        AttackAction plunge = actionWeapon.actions.stream()
+                .filter(action -> action.getName().equals("Columbina High Plunge"))
+                .findFirst()
+                .orElseThrow();
+        assertClose(2.607632, plunge.getDamagePercent(), EPS,
+                "Columbina Plunge should use its sourced high-Plunge multiplier");
+        assertEquals(Element.HYDRO, plunge.getElement(),
+                "Columbina Plunge should deal Hydro damage");
+        assertEquals(StatType.PLUNGING_ATTACK_DMG_BONUS, plunge.getBonusStat(),
+                "Columbina Plunge should use Plunging DMG Bonus");
+        assertEquals(ActionType.PLUNGE, plunge.getActionType(),
+                "Columbina Plunge should retain typed action metadata");
+        assertEquals(ICDType.None, plunge.getICDType(),
+                "Columbina high Plunge should have no ICD");
+        assertClose(1.0, plunge.getGaugeUnits(), EPS,
+                "Columbina high Plunge should apply 1U Hydro");
+
+        sim.performAction(
+                CharacterId.COLUMBINA,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        AttackAction skill = actionWeapon.actions.stream()
+                .filter(action -> action.getName().equals("Eternal Tides"))
+                .findFirst()
+                .orElseThrow();
+        assertClose(0.28424, skill.getDamagePercent(), EPS,
+                "Columbina Skill should retain its sourced multiplier");
+        assertEquals(StatType.SKILL_DMG_BONUS, skill.getBonusStat(),
+                "Columbina Skill should use Skill DMG Bonus");
+        assertEquals(ActionType.SKILL, skill.getActionType(),
+                "Columbina Skill should retain typed action metadata");
+        assertEquals(ICDType.Standard, skill.getICDType(),
+                "Columbina Skill should retain standard ICD");
+        assertEquals(ICDTag.Columbina_Cast, skill.getICDTag(),
+                "Columbina Skill should retain its cast ICD group");
+        assertClose(1.0, skill.getGaugeUnits(), EPS,
+                "Columbina Skill should apply 1U Hydro");
+
+        sim.performAction(
+                CharacterId.COLUMBINA,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        AttackAction burst = actionWeapon.actions.stream()
+                .filter(action -> action.getName().equals("Moonlit Melancholy"))
+                .findFirst()
+                .orElseThrow();
+        assertClose(0.5481, burst.getDamagePercent(), EPS,
+                "Columbina Burst should retain its sourced multiplier");
+        assertEquals(StatType.BURST_DMG_BONUS, burst.getBonusStat(),
+                "Columbina Burst should use Burst DMG Bonus");
+        assertEquals(ActionType.BURST, burst.getActionType(),
+                "Columbina Burst should retain typed action metadata");
+        assertEquals(ICDType.None, burst.getICDType(),
+                "Columbina Burst should have no ICD");
+        assertEquals(ICDTag.ElementalBurst, burst.getICDTag(),
+                "Columbina Burst should retain the Burst ICD group");
+        assertClose(2.0, burst.getGaugeUnits(), EPS,
+                "Columbina Burst should apply 2U Hydro");
+
+        boolean dashRejected = false;
+        try {
+            sim.performAction(
+                    CharacterId.COLUMBINA,
+                    CharacterActionRequest.of(CharacterActionKey.DASH));
+        } catch (IllegalArgumentException expected) {
+            dashRejected = true;
+        }
+        assertTrue(dashRejected,
+                "Columbina should reject unsupported Dash input explicitly");
+
+        RecordingDamageWeapon moondewWeapon = new RecordingDamageWeapon(
+                "Moondew Cleanse Hit");
+        model.character.Columbina moondewColumbina =
+                new model.character.Columbina(moondewWeapon, blankArtifact());
+        CombatSimulator moondewSim = simulatorWithExistingCharacter(
+                moondewColumbina);
+        List<String> logicalActions = new ArrayList<>();
+        moondewSim.addListener((actor, action, time) ->
+                logicalActions.add(action.getName()));
+        moondewSim.performAction(
+                CharacterId.COLUMBINA,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        moondewSim.advanceTime(25.0 - moondewSim.getCurrentTime());
+        for (Element element : Element.values()) {
+            moondewSim.getEnemy().setAura(element, 0.0);
+        }
+        moondewSim.getEnemy().setAura(Element.PYRO, 1.0);
+        moondewSim.notifyReaction(
+                ReactionResult.lunar(
+                        0.0,
+                        ReactionResult.LunarType.BLOOM,
+                        Element.DENDRO,
+                        Element.DENDRO,
+                        true,
+                        false),
+                moondewColumbina);
+        double moondewStart = moondewSim.getCurrentTime();
+        moondewSim.performAction(
+                CharacterId.COLUMBINA,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        assertEquals(3, moondewWeapon.actions.size(),
+                "One Dew should produce exactly three Moondew Cleanse hits");
+        for (int i = 0; i < moondewWeapon.actions.size(); i++) {
+            AttackAction moondew = moondewWeapon.actions.get(i);
+            assertEquals("Moondew Cleanse Hit " + (i + 1), moondew.getName(),
+                    "Moondew Cleanse hit names should retain deterministic order");
+            assertClose(0.0257, moondew.getDamagePercent(), EPS,
+                    "Moondew Cleanse should use its sourced level-9 multiplier");
+            assertEquals(Element.DENDRO, moondew.getElement(),
+                    "Moondew Cleanse should retain Dendro presentation damage");
+            assertEquals(StatType.BASE_HP, moondew.getScalingStat(),
+                    "Moondew Cleanse should scale from Max HP");
+            assertEquals(null, moondew.getBonusStat(),
+                    "Moondew Cleanse should not use ordinary Charged DMG Bonus");
+            assertEquals(ActionType.OTHER, moondew.getActionType(),
+                    "Moondew Cleanse damage should remain outside ordinary attack categories");
+            assertEquals(AttackAction.LunarReactionType.BLOOM,
+                    moondew.getLunarReactionType(),
+                    "Moondew Cleanse should remain Lunar-Bloom damage");
+            assertEquals(ICDType.None, moondew.getICDType(),
+                    "Moondew Cleanse should have no ICD");
+            assertClose(0.0, moondew.getGaugeUnits(), EPS,
+                    "Moondew Cleanse should apply no elemental Aura");
+            assertClose(moondewStart, moondewWeapon.times.get(i), EPS,
+                    "All Moondew Cleanse hits should resolve at one action timestamp");
+        }
+        assertClose(moondewStart + 1.5, moondewSim.getCurrentTime(), EPS,
+                "Moondew Cleanse should advance one Charged action duration");
+        assertClose(1.0,
+                moondewSim.getEnemy().getAuraUnits(Element.PYRO), EPS,
+                "Moondew Cleanse 0U hits should preserve an existing Aura");
+        assertEquals("Moondew Cleanse Hit 3",
+                logicalActions.get(logicalActions.size() - 1),
+                "Moondew Cleanse should emit one final logical action event");
+
+        moondewSim.performAction(
+                CharacterId.COLUMBINA,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        assertEquals("Columbina Charged Attack",
+                logicalActions.get(logicalActions.size() - 1),
+                "After one Dew is consumed, Charged input should use the standard fallback");
+        assertEquals(3, moondewWeapon.actions.size(),
+                "A standard Charged fallback should not fabricate another Moondew hit");
+    }
+
     private static void testAccuracyPhaseF_ColumbinaGravityAndDewRegression() {
         model.character.Columbina columbina = new model.character.Columbina(new TestWeapon(), blankArtifact());
         CombatSimulator sim = simulatorWithExistingCharacter(columbina);
@@ -5425,8 +5650,8 @@ public class ReactionRegressionTest {
                 columbina);
         columbina.onAction(CharacterActionRequest.of(CharacterActionKey.CHARGE), sim);
 
-        assertEquals(3, cleanseHits[0],
-                "Columbina should gain Verdant Dew from Lunar-Bloom near Ripple and consume it for Moondew Cleanse");
+        assertEquals(1, cleanseHits[0],
+                "Columbina should emit one logical Moondew action after gaining Verdant Dew near Ripple");
     }
 
     private static void testAccuracyPhaseF_ColumbinaStandInBoundaries() {
@@ -5478,8 +5703,8 @@ public class ReactionRegressionTest {
         }
         rippleColumbina.onReaction(lunarBloom, rippleColumbina, rippleSim.getCurrentTime(), rippleSim);
         rippleColumbina.onAction(CharacterActionRequest.of(CharacterActionKey.CHARGE), rippleSim);
-        assertEquals(3, cleanseHits[0],
-                "Columbina should assume reactions are near Ripple at its expiry boundary");
+        assertEquals(1, cleanseHits[0],
+                "Columbina should emit one logical Moondew action at the Ripple expiry boundary");
 
         model.character.Columbina expiredRippleColumbina =
                 new model.character.Columbina(new TestWeapon(), blankArtifact());

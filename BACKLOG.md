@@ -3109,3 +3109,42 @@ experiment record.
   multiplier and metadata, Normal-combo reset, C2 interaction, form boundary,
   C5, and snapshot replay pass focused and full gates with stable representative
   party outputs
+
+### B-145 — Columbina basic action input and classification coverage
+
+- **Status:** complete
+- **Source:** delegated supported-character action coverage audit
+- **Scope/risk:** route the existing N1-N3, standard Charged, high Plunge,
+  Skill, Burst, and Moondew Cleanse data through typed action metadata; Flins
+  sample damage may change where weapon or artifact hooks depend on categories
+- **Evidence:** local `Columbina_Multipliers.csv`; current Genshin Wiki combat
+  data and KQM quick guide, accessed 2026-08-02:
+  https://genshin-impact.fandom.com/wiki/Columbina
+  https://keqingmains.com/q/columbina-quickguide/
+- **Boundary:** combo wrap/reset, 1U/no-ICD Charged and Plunge, 2U Burst,
+  three 0U Moondew hits with one action duration, unsupported input, and stable
+  representative parties
+- **Plan:** one-phase `TASKS.md` Columbina Basic Action Coverage
+- **Closure:** typed N1-N3/Charged/Plunge/Skill/Burst dispatch, correct
+  multipliers and metadata, combo lifecycle, one-action Moondew multi-hit,
+  stateful Dew gating, self-regeneration rejection, and unsupported input pass
+  focused and full gates with stable representative party outputs
+
+### B-146 — Global Noblesse Oblige Burst dispatch
+
+- **Status:** candidate
+- **Source:** delegated supported-artifact dispatch audit
+- **Scope/risk:** replace four character-local Burst callbacks with one
+  post-gate typed path so every supported character can activate Noblesse once
+- **Boundary:** insufficient Energy, non-Burst, duplicate dispatch, refresh,
+  activation ordering, and snapshots
+
+### B-147 — Existing physical Charged bonus routing corrections
+
+- **Status:** candidate
+- **Source:** delegated supported-character action coverage audit
+- **Scope/risk:** Bennett, Xiangling, and Xingqiu Charged hits currently resolve
+  Physical DMG Bonus instead of Charged DMG Bonus; Bennett Normal also needs a
+  focused category audit
+- **Boundary:** isolated Normal/Charged/Physical/elemental bonuses, multi-hit
+  metadata, action duration, and affected equipment interactions

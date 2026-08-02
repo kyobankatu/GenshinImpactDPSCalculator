@@ -13137,6 +13137,76 @@ Completion evidence:
   32,047,365 / 322,084 (`FlinsParty`), and 22,146,093 / 320,493
   (`FlinsParty2`).
 
+## Implementation Order: Columbina Basic Action Coverage
+
+Status: Complete. Implemented B-145 as one character-local phase; stamina,
+low Plunge and collision hits, measured animation frames, Lunar engine changes,
+new rotations, RL, and generated docs are excluded.
+
+Evidence:
+
+- `config/characters/Columbina/Columbina_Multipliers.csv` contains the level-9
+  N1-N3, standard Charged, Plunge, Skill, Burst, and Moondew values. Current
+  Genshin Wiki combat data and the KQM quick guide, accessed 2026-08-02, specify
+  their action categories, elemental application, and Lunar-Bloom replacement:
+  https://genshin-impact.fandom.com/wiki/Columbina
+  https://keqingmains.com/q/columbina-quickguide/
+
+### Phase 1: Add Typed Basic Action Dispatch - Done
+
+Target files:
+
+- `src/java/model/character/Columbina.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Repeated `NORMAL` input advances N1-N3 and wraps, using the corresponding
+  sourced multiplier, Hydro Normal metadata, standard shared ICD, and 1U.
+- Standard Charged and high Plunge inputs expose sourced multipliers with
+  Charged/Plunging bonus categories, typed actions, no ICD, and 1U; any
+  non-Normal input resets the combo.
+- Skill and Burst use Skill/Burst bonus categories and action types while
+  preserving their existing scaling, durations, application, and lifecycle.
+- Moondew Cleanse resolves three Lunar-Bloom direct-damage hits under one typed
+  Charged input at one timestamp, excludes ordinary attack bonuses and hit
+  hooks, applies 0U/no ICD, consumes one Dew, and advances one 1.5-second action
+  duration.
+- Unsupported typed input fails explicitly instead of silently doing nothing.
+
+Test cases:
+
+- Normal: N1-N3/wrap, standard Charged, high Plunge, Skill, Burst, and Moondew.
+- Boundary: combo interruption, three same-time Moondew hits, one duration,
+  one Dew consumption, and category-specific resolved bonuses.
+- Abnormal: unsupported Dash, no-Dew Charged fallback, and 0U Moondew Aura
+  preservation.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `./gradlew PartyCatalogRegressionTest`
+- representative party samples twice
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Columbina now exposes sourced N1-N3, standard Charged, high Plunge, Skill,
+  and Burst multipliers with correct typed bonus, ICD, gauge, scaling, combo,
+  and duration metadata.
+- Moondew Cleanse resolves three same-time 0U Lunar-Bloom damage instances,
+  emits one logical action, advances one duration, consumes one Dew, excludes
+  ordinary attack categories, and cannot regenerate Dew from its own direct
+  Lunar notification; zero-damage stateful Lunar-Bloom still grants Dew.
+- Independent review found the stateful-Bloom and ordinary-Charged category
+  risks; both were corrected before closure.
+- Reaction regression, build, Javadoc, party catalog, and representative
+  samples pass. Two runs each reproduce 1,275,070 / 60,718 (`RaidenParty`),
+  32,047,365 / 322,084 (`FlinsParty`), and 22,146,093 / 320,493
+  (`FlinsParty2`).
+
 ## Implementation Order: Expanded Artifact Coverage Campaign
 
 Status: Complete. This campaign adds six missing four-piece artifact sets
