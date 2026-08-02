@@ -3,6 +3,7 @@ package simulation.runtime;
 import model.entity.ActionTriggeredArtifactEffect;
 import model.entity.ActionTriggeredWeaponEffect;
 import model.entity.ArtifactSet;
+import model.entity.BurstTriggeredArtifactEffect;
 import model.entity.Character;
 import model.type.CharacterId;
 import simulation.CombatSimulator;
@@ -83,6 +84,7 @@ public class ActionGateway {
             }
 
             dispatchArtifactActionEffects(character, request);
+            dispatchBurstArtifactEffects(character, request);
 
             sim.beginActionDirectDamageCapture(characterId);
             try {
@@ -107,6 +109,24 @@ public class ActionGateway {
         for (ArtifactSet artifact : artifacts) {
             if (artifact instanceof ActionTriggeredArtifactEffect) {
                 ((ActionTriggeredArtifactEffect) artifact).onAction(character, request, sim);
+            }
+        }
+    }
+
+    /** Dispatches post-gate Burst-use capabilities before character Burst logic. */
+    private void dispatchBurstArtifactEffects(
+            Character character,
+            CharacterActionRequest request) {
+        if (request.getKey() != CharacterActionKey.BURST) {
+            return;
+        }
+        ArtifactSet[] artifacts = character.getArtifacts();
+        if (artifacts == null) {
+            return;
+        }
+        for (ArtifactSet artifact : artifacts) {
+            if (artifact instanceof BurstTriggeredArtifactEffect) {
+                ((BurstTriggeredArtifactEffect) artifact).onBurst(sim);
             }
         }
     }

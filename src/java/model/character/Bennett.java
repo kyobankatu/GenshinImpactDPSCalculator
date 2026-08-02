@@ -6,7 +6,6 @@ import model.entity.FormStateProvider;
 import model.entity.Character;
 import model.entity.Weapon;
 import model.entity.ArtifactSet;
-import model.entity.BurstTriggeredArtifactEffect;
 import mechanics.buff.BuffId;
 import model.stats.StatsContainer;
 import model.type.CharacterId;
@@ -144,13 +143,6 @@ public class Bennett extends Character implements FormStateProvider {
                 StatType.BURST_DMG_BONUS, 0.8, ActionType.BURST);
         q.setICD(ICDType.None, ICDTag.ElementalBurst, 2.0);
         sim.performAction(this.characterId, q);
-
-        // Trigger Artifact Buffs
-        for (ArtifactSet a : artifacts) {
-            if (a instanceof BurstTriggeredArtifactEffect) {
-                ((BurstTriggeredArtifactEffect) a).onBurst(sim);
-            }
-        }
 
         // Apply Field Buff
         // Apply Field Buff

@@ -130,6 +130,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_AscendantBlessingExpiryReplacement();
         testAccuracyPhaseF_ArtifactLunarReactionBuffRegression();
         testAccuracyPhaseF_ViridescentVenererRefreshContract();
+        testAccuracyPhaseF_BurstArtifactGatewayContract();
         testAccuracyPhaseF_NoblesseObligeRefreshContract();
         testAccuracyPhaseF_WeaponReactionBonusRegression();
         testAccuracyPhaseF_DragonsBaneTargetAuraContract();
@@ -6997,6 +6998,93 @@ public class ReactionRegressionTest {
                 "Unsupported or non-Swirl reactions should not add a VV buff");
     }
 
+    private static void testAccuracyPhaseF_BurstArtifactGatewayContract() {
+        CountingBurstArtifact[] effects = {
+                new CountingBurstArtifact(),
+                new CountingBurstArtifact(),
+                new CountingBurstArtifact(),
+                new CountingBurstArtifact(),
+                new CountingBurstArtifact(),
+                new CountingBurstArtifact()
+        };
+        Character[] burstUsers = {
+                new model.character.Amber(new TestWeapon(), effects[0]),
+                new model.character.Bennett(new TestWeapon(), effects[1]),
+                new model.character.Kaeya(new TestWeapon(), effects[2]),
+                new model.character.Lisa(new TestWeapon(), effects[3]),
+                new model.character.Xingqiu(new TestWeapon(), effects[4]),
+                new model.character.Columbina(new TestWeapon(), effects[5])
+        };
+        for (int i = 0; i < burstUsers.length; i++) {
+            Character user = burstUsers[i];
+            CombatSimulator sim = simulatorWithExistingCharacter(user);
+            sim.performAction(
+                    user.getCharacterId(),
+                    CharacterActionRequest.of(CharacterActionKey.BURST));
+            assertEquals(1, effects[i].callbackCount,
+                    user.getName() + " Burst should dispatch its artifact callback once");
+        }
+
+        CountingBurstArtifact orderedEffect = new CountingBurstArtifact();
+        BurstDispatchProbeCharacter orderedProbe =
+                new BurstDispatchProbeCharacter(orderedEffect);
+        CombatSimulator orderedSim = simulatorWithExistingCharacter(orderedProbe);
+        orderedSim.performAction(
+                CharacterId.SUCROSE,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        assertEquals(1, orderedEffect.callbackCount,
+                "Burst artifact capability should receive one callback");
+        assertEquals(1, orderedProbe.callbackCountObservedAtBurst,
+                "Burst artifact callback should run before character Burst logic");
+        assertClose(0.0, orderedEffect.lastCallbackTime, EPS,
+                "Burst artifact callback should run before action time advances");
+
+        CountingBurstArtifact energyGatedEffect = new CountingBurstArtifact();
+        BurstDispatchProbeCharacter energyGatedProbe =
+                new BurstDispatchProbeCharacter(energyGatedEffect);
+        CombatSimulator energyGatedSim = simulatorWithExistingCharacter(
+                energyGatedProbe);
+        energyGatedProbe.spendEnergy(energyGatedProbe.getMaxEnergy());
+        energyGatedSim.performAction(
+                CharacterId.SUCROSE,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        assertEquals(0, energyGatedEffect.callbackCount,
+                "Insufficient-Energy Burst should not dispatch artifact capability");
+        assertEquals(0, energyGatedProbe.actionCount,
+                "Insufficient-Energy Burst should not reach character logic");
+
+        CountingBurstArtifact nonBurstEffect = new CountingBurstArtifact();
+        BurstDispatchProbeCharacter nonBurstProbe =
+                new BurstDispatchProbeCharacter(nonBurstEffect);
+        CombatSimulator nonBurstSim = simulatorWithExistingCharacter(nonBurstProbe);
+        nonBurstSim.performAction(
+                CharacterId.SUCROSE,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        nonBurstSim.performAction(
+                CharacterId.SUCROSE,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        assertEquals(0, nonBurstEffect.callbackCount,
+                "Normal and Skill input should not dispatch Burst artifact capability");
+
+        BurstDispatchProbeCharacter plainProbe =
+                new BurstDispatchProbeCharacter(blankArtifact());
+        CombatSimulator plainSim = simulatorWithExistingCharacter(plainProbe);
+        plainSim.performAction(
+                CharacterId.SUCROSE,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        assertEquals(1, plainProbe.actionCount,
+                "Plain artifacts should not block character Burst logic");
+
+        BurstDispatchProbeCharacter nullProbe =
+                new BurstDispatchProbeCharacter((ArtifactSet[]) null);
+        CombatSimulator nullSim = simulatorWithExistingCharacter(nullProbe);
+        nullSim.performAction(
+                CharacterId.SUCROSE,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        assertEquals(1, nullProbe.actionCount,
+                "Null artifact arrays should not block character Burst logic");
+    }
+
     private static void testAccuracyPhaseF_NoblesseObligeRefreshContract() {
         model.artifact.NoblesseOblige equippedSet =
                 new model.artifact.NoblesseOblige(new StatsContainer());
@@ -7013,6 +7101,14 @@ public class ReactionRegressionTest {
                 "An actual Bennett Burst should apply one Noblesse buff to its owner");
         assertClose(0.20, resolvedStat(actualBurstSim, ally, StatType.ATK_PERCENT), EPS,
                 "An actual Bennett Burst should apply one Noblesse buff to its ally");
+        Buff actualBurstBuff = actualBurstSim.getTeamBuffs().stream()
+                .filter(buff -> buff.getId() == BuffId.NOBLESSE_OBLIGE_4PC)
+                .findFirst()
+                .orElseThrow();
+        assertEquals(CharacterId.BENNETT, actualBurstBuff.getSourceCharacterId(),
+                "Gateway-dispatched Noblesse should retain owner source attribution");
+        assertClose(0.0, actualBurstBuff.getStartTime(), EPS,
+                "Noblesse should activate before Bennett Burst damage and animation");
 
         TestCharacter refreshOwner = testCharacter(Element.PYRO, CharacterId.BENNETT);
         CombatSimulator refreshSim = simulatorWith(refreshOwner);
@@ -20964,6 +21060,68 @@ public class ReactionRegressionTest {
     private static final class TestWeapon extends Weapon {
         private TestWeapon() {
             super("Test Weapon", new StatsContainer());
+        }
+    }
+
+    /** Counts post-gate Burst artifact capability dispatches. */
+    private static final class CountingBurstArtifact extends ArtifactSet
+            implements model.entity.BurstTriggeredArtifactEffect {
+        private int callbackCount;
+        private double lastCallbackTime = -1.0;
+
+        private CountingBurstArtifact() {
+            super("Counting Burst Artifact", new StatsContainer());
+        }
+
+        @Override
+        public void onBurst(CombatSimulator sim) {
+            callbackCount++;
+            lastCallbackTime = sim.getCurrentTime();
+        }
+    }
+
+    /** Observes Burst artifact ordering relative to character dispatch. */
+    private static final class BurstDispatchProbeCharacter extends Character {
+        private final CountingBurstArtifact countingArtifact;
+        private int callbackCountObservedAtBurst;
+        private int actionCount;
+
+        private BurstDispatchProbeCharacter(ArtifactSet... artifacts) {
+            this.name = "Burst Dispatch Probe";
+            this.characterId = CharacterId.SUCROSE;
+            this.element = Element.ANEMO;
+            this.weapon = new TestWeapon();
+            this.artifacts = artifacts;
+            this.countingArtifact = artifacts != null
+                    && artifacts.length > 0
+                    && artifacts[0] instanceof CountingBurstArtifact
+                            ? (CountingBurstArtifact) artifacts[0]
+                            : null;
+            this.baseStats.set(StatType.BASE_HP, 10000.0);
+            this.baseStats.set(StatType.BASE_ATK, 1000.0);
+            this.baseStats.set(StatType.BASE_DEF, 700.0);
+            setSkillCD(0.0);
+            setBurstCD(0.0);
+        }
+
+        @Override
+        public void applyPassive(StatsContainer stats) {
+        }
+
+        @Override
+        public double getEnergyCost() {
+            return 60.0;
+        }
+
+        @Override
+        public void onAction(CharacterActionRequest request, CombatSimulator sim) {
+            actionCount++;
+            if (request.getKey() == CharacterActionKey.BURST) {
+                callbackCountObservedAtBurst = countingArtifact == null
+                        ? 0
+                        : countingArtifact.callbackCount;
+                markBurstUsed(sim.getCurrentTime());
+            }
         }
     }
 

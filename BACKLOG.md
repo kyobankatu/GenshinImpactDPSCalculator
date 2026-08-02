@@ -3132,12 +3132,21 @@ experiment record.
 
 ### B-146 — Global Noblesse Oblige Burst dispatch
 
-- **Status:** candidate
+- **Status:** complete
 - **Source:** delegated supported-artifact dispatch audit
 - **Scope/risk:** replace four character-local Burst callbacks with one
   post-gate typed path so every supported character can activate Noblesse once
+- **Evidence:** current KQM artifact page/evidence vault, accessed 2026-08-02,
+  specify activation on Burst use, one shared refreshable duration, and that
+  most triggering Bursts receive the self ATK buff:
+  https://library.keqingmains.com/equipment/artifacts
+  https://library.keqingmains.com/evidence/equipment/artifacts
 - **Boundary:** insufficient Energy, non-Burst, duplicate dispatch, refresh,
   activation ordering, and snapshots
+- **Plan:** one-phase `TASKS.md` Global Noblesse Burst Dispatch
+- **Closure:** all six representative legacy/new character routes, one-callback
+  ordering, Energy/non-Burst/null/plain rejection, typed source, refresh, exact
+  expiry, and full gates pass; Raiden sample reflects corrected cast-time expiry
 
 ### B-147 — Existing physical Charged bonus routing corrections
 

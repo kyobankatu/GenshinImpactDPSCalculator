@@ -13207,6 +13207,72 @@ Completion evidence:
   32,047,365 / 322,084 (`FlinsParty`), and 22,146,093 / 320,493
   (`FlinsParty2`).
 
+## Implementation Order: Global Noblesse Burst Dispatch
+
+Status: Complete. Implemented B-146 as one backward-compatible action-gateway
+phase; character-specific self-snapshot exceptions, new artifact sets, RL, and
+generated docs are excluded.
+
+Evidence:
+
+- Current KQM artifact documentation and evidence vault, accessed 2026-08-02,
+  specify that Noblesse activates on Burst use, shares one refreshable duration,
+  and applies to most triggering Bursts before their damage snapshots:
+  https://library.keqingmains.com/equipment/artifacts
+  https://library.keqingmains.com/evidence/equipment/artifacts
+
+### Phase 1: Route Burst Artifact Effects Through Action Gateway - Done
+
+Target files:
+
+- `src/java/simulation/runtime/ActionGateway.java`
+- `src/java/model/character/Amber.java`
+- `src/java/model/character/Bennett.java`
+- `src/java/model/character/Kaeya.java`
+- `src/java/model/character/Lisa.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- After Burst cooldown and Energy gates pass, every equipped
+  `BurstTriggeredArtifactEffect` receives one callback before character Burst
+  logic, direct damage, snapshots, and animation advancement.
+- Amber, Bennett, Kaeya, and Lisa retain one callback after their manual loops
+  are removed; all other supported characters gain the same route.
+- Insufficient-Energy Burst requests, Skill/Normal input, missing/null artifact
+  arrays, and plain artifacts do not invoke the capability.
+- Noblesse retains one typed nonstacking 20% ATK team buff, refreshes its
+  twelve-second duration, and keeps source ownership through the gateway.
+
+Test cases:
+
+- Normal: legacy four characters plus Xingqiu and Columbina invoke once.
+- Boundary: callback-before-character ordering and 11.999/12.000 refresh.
+- Abnormal: insufficient Energy, non-Burst, null/plain artifacts, and no
+  duplicate callback on Bennett.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `./gradlew PartyCatalogRegressionTest`
+- representative party samples twice
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- The post-gate action gateway now invokes each Burst artifact capability once
+  before character Burst logic; four character-local loops were removed.
+- Focused regression covers Amber, Bennett, Kaeya, Lisa, Xingqiu, Columbina,
+  callback-before-character ordering, Energy rejection, non-Burst input,
+  null/plain artifacts, Noblesse source ownership, refresh, and exact expiry.
+- Reaction regression, build, Javadoc, party catalog, and representative
+  samples pass. Two runs each reproduce 1,273,211 / 60,629 (`RaidenParty`),
+  32,047,365 / 322,084 (`FlinsParty`), and 22,146,093 / 320,493
+  (`FlinsParty2`). Raiden decreases by 1,859 damage because Noblesse now starts
+  at Bennett Burst input rather than after its 0.8-second animation.
+
 ## Implementation Order: Expanded Artifact Coverage Campaign
 
 Status: Complete. This campaign adds six missing four-piece artifact sets

@@ -7,7 +7,6 @@ import mechanics.data.TalentDataManager;
 import mechanics.data.TalentDataSource;
 import mechanics.energy.ParticleType;
 import model.entity.ArtifactSet;
-import model.entity.BurstTriggeredArtifactEffect;
 import model.entity.Character;
 import model.entity.SwitchAwareCharacter;
 import model.entity.Weapon;
@@ -237,11 +236,6 @@ public class Lisa extends Character implements SwitchAwareCharacter {
 
     private void lightningRose(CombatSimulator sim) {
         captureSnapshot(sim.getCurrentTime(), sim.getApplicableBuffs(this));
-        for (ArtifactSet artifact : artifacts) {
-            if (artifact instanceof BurstTriggeredArtifactEffect) {
-                ((BurstTriggeredArtifactEffect) artifact).onBurst(sim);
-            }
-        }
 
         AttackAction summon = new AttackAction(
                 "Lightning Rose Summon",

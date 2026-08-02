@@ -4,7 +4,6 @@ import mechanics.data.TalentDataManager;
 import mechanics.data.TalentDataSource;
 import mechanics.energy.ParticleType;
 import model.entity.ArtifactSet;
-import model.entity.BurstTriggeredArtifactEffect;
 import model.entity.Character;
 import model.entity.FormStateProvider;
 import model.entity.Weapon;
@@ -164,11 +163,6 @@ public class Kaeya extends Character implements FormStateProvider {
 
     private void glacialWaltz(CombatSimulator sim) {
         captureSnapshot(sim.getCurrentTime(), sim.getApplicableBuffs(this));
-        for (ArtifactSet artifact : artifacts) {
-            if (artifact instanceof BurstTriggeredArtifactEffect) {
-                ((BurstTriggeredArtifactEffect) artifact).onBurst(sim);
-            }
-        }
 
         if (constellation >= 6) {
             receiveFlatEnergy(15.0);

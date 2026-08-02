@@ -5,7 +5,6 @@ import mechanics.data.TalentDataManager;
 import mechanics.data.TalentDataSource;
 import mechanics.energy.ParticleType;
 import model.entity.ArtifactSet;
-import model.entity.BurstTriggeredArtifactEffect;
 import model.entity.Character;
 import model.entity.Weapon;
 import model.stats.StatsContainer;
@@ -156,11 +155,6 @@ public class Amber extends Character {
 
     private void fieryRain(CombatSimulator sim) {
         captureSnapshot(sim.getCurrentTime(), sim.getApplicableBuffs(this));
-        for (ArtifactSet artifact : artifacts) {
-            if (artifact instanceof BurstTriggeredArtifactEffect) {
-                ((BurstTriggeredArtifactEffect) artifact).onBurst(sim);
-            }
-        }
         if (constellation >= 6) {
             sim.applyTeamBuff(new SimpleBuff(
                     "Amber C6 Wildfire", 10.0, sim.getCurrentTime(),
