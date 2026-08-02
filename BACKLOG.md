@@ -2127,10 +2127,12 @@ experiment record.
 
 ### B-080 — Legacy weapon refinement coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Alley Flash, Deathmatch, and The Catch R1-R5; RL excluded
 - **Value/risk:** closes fixed-R1/R5 content gaps with local constructor/passive
   changes while preserving all no-argument callers
 - **Evidence boundary:** KQM TCL Lv. 90 metadata/refinement values; incoming
   damage and dynamic enemy-count transitions remain outside simulator state
 - **Plan:** `TASKS.md` Legacy Weapon Refinement Campaign
+- **Completion:** `e587803`, `ca085a2`, and `d29055f` add R1-R5 while preserving
+  defaults; focused/build/Javadoc/leak gates pass

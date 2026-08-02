@@ -27,8 +27,8 @@ The current autonomous session is simulator-only. Python RL training and the
 Java RL bridge are excluded; the retained NCCL/DDP plan below is paused until a
 future explicit user request.
 
-The prior simulator content campaigns are complete. The legacy weapon
-refinement campaign is active; RL and generated docs remain excluded.
+The prior simulator content campaigns, including legacy weapon refinements,
+are complete; RL and generated docs remain excluded.
 
 The B-058 Burning fuel correction is complete. It replaces the fixed
 two-second approximation with typed Dendro-fuel decay and refresh ownership
@@ -12970,7 +12970,7 @@ Verification:
 
 ## Implementation Order: Legacy Weapon Refinement Campaign
 
-Status: In progress. Existing fixed-refinement weapons gain R1-R5 selection
+Status: Complete. Existing fixed-refinement weapons have R1-R5 selection
 without changing their current no-argument behavior.
 
 Scope:
@@ -12984,7 +12984,7 @@ Out of scope for this pass:
 - Incoming-damage disable state for Alley Flash, dynamic enemy-count discovery,
   off-field Deathmatch transition delay, formulas, characters, RL, and docs.
 
-### Phase 1: Complete Existing Weapon Refinement Contracts
+### Phase 1: Complete Existing Weapon Refinement Contracts - Done
 
 Target files:
 
@@ -12995,9 +12995,18 @@ Target files:
 
 | Unit | Compatibility default | Focused verification | Status |
 |---|---|---|---|
-| Alley Flash | R1 | 12-24% all-DMG, metadata, R1/R5, invalid rank | Ready |
-| Deathmatch | R1 | single/multi ATK/DEF R1/R5, invalid rank | Ready |
-| The Catch | R5 | Burst DMG/CRIT R1/R5, metadata, invalid rank | Ready |
+| Alley Flash | R1 | 12-24% all-DMG, metadata, R1/R5, invalid rank | Done (`e587803`) |
+| Deathmatch | R1 | single/multi ATK/DEF R1/R5, invalid rank | Done (`ca085a2`) |
+| The Catch | R5 | Burst DMG/CRIT R1/R5, metadata, invalid rank | Done (`d29055f`) |
+
+Completion evidence:
+
+- All no-argument constructors preserve their former refinement and passive
+  values while explicit R1/R5 and refinement 0/6 regressions pass.
+- Deathmatch covers both battlefield branches and no single-target DEF leak;
+  The Catch remains Burst-only and Alley Flash retains structural all-DMG.
+- Every unit passes reaction regression, build, and preflight; the final public
+  API boundary passes Javadoc with no generated artifact staged.
 
 Acceptance criteria:
 
