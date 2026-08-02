@@ -30,6 +30,10 @@ future explicit user request.
 The prior simulator content campaigns, including Skill-focused event weapons,
 are complete; RL and generated docs remain excluded.
 
+The B-151 target-state and Skill-hit artifact campaign is active. It adds
+Lavawalker, Thundersoother, and Tenacity of the Millelith without entering
+player-damage, shield-absorption, RL, or generated-documentation systems.
+
 The B-128 action-use artifact campaign is complete. Successful typed actions
 now reach equipped artifacts, and Heart of Depth plus Martial Artist use the
 shared callback without changing RL or generated documentation.
@@ -12943,6 +12947,123 @@ Verification for every phase:
 - `./gradlew javadoc`
 - `./gradlew PartyCatalogRegressionTest`
 - representative samples when affected
+- `python scripts/preflight.py --run`
+
+## Implementation Order: Target-State and Skill-Hit Artifact Campaign
+
+Status: In progress. B-151 adds three locally asset-backed sets using one
+per-hit target-state capability and the existing typed damage/team-buff hooks.
+
+Scope:
+
+- Evaluate artifact-owned target Aura conditions against the live enemy state
+  for each impact without mutating character snapshots.
+- Add Lavawalker and Thundersoother's offensive 35% all-DMG conditions.
+- Add Tenacity of the Millelith's HP +20% and non-stacking three-second team
+  ATK window with owner-local 0.5-second trigger CT.
+
+Out of scope for this pass:
+
+- Player elemental RES, Shield Strength, shield absorption, enemy attacks, or
+  other defensive systems listed under Deferred Systems.
+- Piece-count/equipment-removal modeling, formula reordering, RL contracts,
+  reports, generated `docs/`, or party loadout changes.
+
+Definitions:
+
+- `TargetDependentArtifactEffect`: artifact capability that mutates only one
+  per-hit stats copy from the current target and timestamp.
+- `TargetAuraDamageArtifactSet`: shared immutable implementation for one Aura
+  element and one outgoing all-DMG bonus.
+
+### Phase 1: Live-Aura Damage Artifact Sets - Done
+
+Why first:
+
+- Aura conditions must be evaluated outside snapshotted structural stats before
+  the two concrete artifact sets can be represented accurately.
+
+Target files:
+
+- `src/java/model/entity/TargetDependentArtifactEffect.java` (new)
+- `src/java/mechanics/formula/DamageCalculator.java`
+- `src/java/model/artifact/TargetAuraDamageArtifactSet.java` (new)
+- `src/java/model/artifact/Lavawalker.java` (new)
+- `src/java/model/artifact/Thundersoother.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Tasks:
+
+- Extend target-dependent stat resolution to copy once and apply eligible
+  weapon and artifact effects in deterministic equipment order.
+- Add pure Pyro/Electro Aura artifact implementations granting 35% all-DMG.
+- Preserve supplied artifact stats while leaving defensive 2pc RES outside the
+  offensive simulator stat model.
+
+Acceptance criteria:
+
+- Existing Aura grants exactly 35% all-DMG for live and snapshotted actions;
+  the hit that first applies the Aura remains unboosted.
+- Aura expiry, unrelated/coexisting Aura, null target, plain artifacts, and
+  weapon-plus-artifact composition are deterministic and non-mutating.
+
+Test cases to add or update:
+
+- Pyro/Electro active, first-application ordering, exact Aura expiry,
+  snapshot/live parity, unrelated Aura, combined weapon/artifact bonus,
+  supplied/null stats, and independent instances.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build javadoc PartyCatalogRegressionTest`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Target-dependent weapon and artifact effects compose on one per-hit copy;
+  Lavawalker and Thundersoother never mutate effective or snapshot stats.
+- First-application ordering, live/snapshot Aura, coexisting and exact-expiry
+  states, equipment composition, null boundaries, reaction regression, build,
+  Javadoc, party catalog, and preflight pass.
+
+### Phase 2: Tenacity of the Millelith Team Window
+
+Why second:
+
+- Tenacity is independent of the target-state capability and can reuse the
+  established typed damage callback and team no-stack gateway.
+
+Target files:
+
+- `src/java/model/artifact/TenacityOfTheMillelith.java` (new)
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Tasks:
+
+- Add fixed HP +20% and owner-local 0.5-second Skill-hit CT.
+- Apply or refresh one typed three-second team ATK +20% window after an owner
+  Skill hit, including zero damage and off-field hits.
+- Keep Shield Strength explicitly outside the current offensive stat surface.
+
+Acceptance criteria:
+
+- The triggering Skill hit is unbuffed; subsequent owner and ally hits receive
+  20% ATK for `[trigger, trigger + 3)`.
+- 0.499/0.500 CT, refresh/non-stack, exact expiry, multiple wearers, off-field,
+  zero damage, binding, invalid callbacks, and snapshot restore are covered.
+
+Test cases to add or update:
+
+- Real gateway ordering, zero-damage Skill metadata, fallback Skill flag,
+  non-Skill rejection, owner/simulator rejection, team source attribution,
+  CT/expiry boundaries, refresh, snapshot, rollback, and null stats.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build javadoc PartyCatalogRegressionTest`
 - `python scripts/preflight.py --run`
 
 ## Implementation Order: Remaining Basic Action Coverage Campaign

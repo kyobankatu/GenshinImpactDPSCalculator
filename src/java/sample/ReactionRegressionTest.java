@@ -137,6 +137,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_WeaponReactionBonusRegression();
         testAccuracyPhaseF_DragonsBaneTargetAuraContract();
         testAccuracyPhaseF_TargetAuraWeaponMetadata();
+        testAccuracyPhaseF_TargetAuraArtifactSets();
         testAccuracyPhaseF_StaticActionBonusWeaponMetadata();
         testAccuracyPhaseF_LegacyWeaponRefinements();
         testAccuracyPhaseF_SkillUseEventWeapons();
@@ -7529,6 +7530,196 @@ public class ReactionRegressionTest {
         model.weapon.RavenBow r1RavenBow = new model.weapon.RavenBow(1);
         assertTargetAuraWeaponDamage(
                 r1RavenBow, Element.PYRO, Element.ELECTRO, 0.12, "R1 Raven Bow");
+    }
+
+    private static void testAccuracyPhaseF_TargetAuraArtifactSets() {
+        StatsContainer suppliedStats = new StatsContainer();
+        suppliedStats.set(StatType.CRIT_RATE, 0.10);
+        model.artifact.Lavawalker suppliedLavawalker =
+                new model.artifact.Lavawalker(suppliedStats);
+        assertEquals("Lavawalker", suppliedLavawalker.getName(),
+                "Lavawalker display name");
+        assertClose(0.10,
+                suppliedLavawalker.getStats().get(StatType.CRIT_RATE), EPS,
+                "Lavawalker should preserve supplied stats");
+
+        model.artifact.Thundersoother suppliedThundersoother =
+                new model.artifact.Thundersoother(suppliedStats);
+        assertEquals("Thundersoother", suppliedThundersoother.getName(),
+                "Thundersoother display name");
+        assertClose(0.10,
+                suppliedThundersoother.getStats().get(StatType.CRIT_RATE), EPS,
+                "Thundersoother should preserve supplied stats");
+
+        TestCharacter lavaOwner = testCharacter(Element.PHYSICAL);
+        lavaOwner.setArtifacts(new model.artifact.Lavawalker());
+        CombatSimulator lavaSim = simulatorWith(lavaOwner);
+        AttackAction physicalHit = damageHit(
+                "Lavawalker target fixture", Element.PHYSICAL, 1.0);
+        double lavaBaseline = calculateDirectDamage(
+                lavaSim, lavaOwner, physicalHit, 0.0, 1.0);
+        assertClose(0.0,
+                lavaOwner.getEffectiveStats(0.0).get(StatType.DMG_BONUS_ALL),
+                EPS,
+                "Lavawalker target bonus should not enter effective stats");
+        lavaSim.getEnemy().setAura(Element.PYRO, 1.0);
+        assertClose(lavaBaseline * 1.35,
+                calculateDirectDamage(
+                        lavaSim, lavaOwner, physicalHit, 0.0, 1.0),
+                EPS,
+                "Lavawalker live Pyro Aura damage");
+        assertClose(0.0,
+                lavaOwner.getEffectiveStats(0.0).get(StatType.DMG_BONUS_ALL),
+                EPS,
+                "Lavawalker per-hit bonus should not mutate owner stats");
+        lavaSim.getEnemy().setAura(Element.PYRO, 0.0);
+        lavaSim.getEnemy().setAura(Element.HYDRO, 1.0);
+        assertClose(lavaBaseline,
+                calculateDirectDamage(
+                        lavaSim, lavaOwner, physicalHit, 0.0, 1.0),
+                EPS,
+                "Lavawalker should ignore unrelated Aura");
+
+        TestCharacter orderingOwner = testCharacter(
+                Element.PYRO, CharacterId.SUCROSE);
+        orderingOwner.setArtifacts(new model.artifact.Lavawalker());
+        CombatSimulator orderingSim = simulatorWith(orderingOwner);
+        AttackAction pyroApplication = new AttackAction(
+                "Lavawalker first Pyro application",
+                1.0,
+                Element.PYRO,
+                StatType.BASE_ATK,
+                null,
+                0.0,
+                ActionType.SKILL);
+        pyroApplication.setICD(ICDType.None, ICDTag.None, 1.0);
+        double unboostedApplication = calculateDirectDamage(
+                orderingSim,
+                orderingOwner,
+                pyroApplication,
+                orderingSim.getCurrentTime(),
+                1.0);
+        double orderingDamageBefore = orderingSim.getTotalDamage();
+        orderingSim.performActionWithoutTimeAdvance(
+                orderingOwner.getCharacterId(), pyroApplication);
+        assertClose(unboostedApplication,
+                orderingSim.getTotalDamage() - orderingDamageBefore,
+                EPS,
+                "Lavawalker first Aura application should remain unboosted");
+        assertTrue(orderingSim.getEnemy().getAuraUnits(
+                        Element.PYRO, orderingSim.getCurrentTime()) > 0.0,
+                "Lavawalker ordering fixture should establish Pyro Aura");
+        assertClose(lavaBaseline * 1.35,
+                calculateDirectDamage(
+                        orderingSim,
+                        orderingOwner,
+                        physicalHit,
+                        orderingSim.getCurrentTime(),
+                        1.0),
+                EPS,
+                "Lavawalker should boost the hit after Aura application");
+
+        TestCharacter snapshotOwner = testCharacter(Element.PHYSICAL);
+        snapshotOwner.setArtifacts(new model.artifact.Lavawalker());
+        CombatSimulator snapshotSim = simulatorWith(snapshotOwner);
+        snapshotOwner.captureSnapshot(0.0, null);
+        AttackAction snapshotHit = new AttackAction(
+                "Lavawalker snapshot fixture",
+                1.0,
+                Element.PHYSICAL,
+                StatType.BASE_ATK,
+                null,
+                0.0,
+                true,
+                ActionType.OTHER);
+        double snapshotBaseline = calculateDirectDamage(
+                snapshotSim, snapshotOwner, snapshotHit, 0.0, 1.0);
+        snapshotSim.getEnemy().setAura(Element.PYRO, 1.0);
+        assertClose(snapshotBaseline * 1.35,
+                calculateDirectDamage(
+                        snapshotSim, snapshotOwner, snapshotHit, 0.0, 1.0),
+                EPS,
+                "Lavawalker snapshot hit should use impact-time Aura");
+        snapshotSim.getEnemy().setAura(Element.PYRO, 0.0);
+        assertClose(snapshotBaseline,
+                calculateDirectDamage(
+                        snapshotSim, snapshotOwner, snapshotHit, 0.0, 1.0),
+                EPS,
+                "Lavawalker snapshot should not retain stale Aura bonus");
+
+        TestCharacter thunderOwner = testCharacter(Element.PHYSICAL);
+        thunderOwner.setArtifacts(new model.artifact.Thundersoother());
+        CombatSimulator thunderSim = simulatorWith(thunderOwner);
+        AttackAction thunderHit = damageHit(
+                "Thundersoother target fixture", Element.PHYSICAL, 1.0);
+        double thunderBaseline = calculateDirectDamage(
+                thunderSim, thunderOwner, thunderHit, 0.0, 1.0);
+        thunderSim.getEnemy().setAura(Element.ELECTRO, 1.0, 0.0);
+        thunderSim.getEnemy().setAura(Element.HYDRO, 1.0, 0.0);
+        assertClose(thunderBaseline * 1.35,
+                calculateDirectDamage(
+                        thunderSim, thunderOwner, thunderHit, 0.0, 1.0),
+                EPS,
+                "Thundersoother should work with coexisting Electro Aura");
+        double electroExpiry = thunderSim.getEnemy().getAuraExpiryTime(
+                Element.ELECTRO, 0.0);
+        assertClose(thunderBaseline * 1.35,
+                calculateDirectDamage(
+                        thunderSim,
+                        thunderOwner,
+                        thunderHit,
+                        Math.nextDown(electroExpiry),
+                        1.0),
+                EPS,
+                "Thundersoother should remain active before Aura expiry");
+        assertClose(thunderBaseline,
+                calculateDirectDamage(
+                        thunderSim,
+                        thunderOwner,
+                        thunderHit,
+                        electroExpiry,
+                        1.0),
+                EPS,
+                "Thundersoother should expire with Electro Aura");
+
+        TestCharacter combinedOwner = testCharacter(Element.PHYSICAL);
+        combinedOwner.setWeapon(new model.weapon.DragonsBane());
+        combinedOwner.setArtifacts(new model.artifact.Lavawalker());
+        CombatSimulator combinedSim = simulatorWith(combinedOwner);
+        AttackAction combinedHit = damageHit(
+                "Target equipment composition fixture", Element.PHYSICAL, 1.0);
+        double combinedBaseline = calculateDirectDamage(
+                combinedSim, combinedOwner, combinedHit, 0.0, 1.0);
+        combinedSim.getEnemy().setAura(Element.PYRO, 1.0);
+        assertClose(combinedBaseline * 1.71,
+                calculateDirectDamage(
+                        combinedSim, combinedOwner, combinedHit, 0.0, 1.0),
+                EPS,
+                "Target weapon and artifact bonuses should compose additively");
+
+        StatsContainer nullTargetStats = new StatsContainer();
+        suppliedLavawalker.applyTargetDependentStats(
+                nullTargetStats, null, 0.0);
+        assertClose(0.0,
+                nullTargetStats.get(StatType.DMG_BONUS_ALL), EPS,
+                "Target Aura artifact should ignore a missing target");
+
+        boolean nullLavaStatsRejected = false;
+        boolean nullThunderStatsRejected = false;
+        try {
+            new model.artifact.Lavawalker(null);
+        } catch (NullPointerException expected) {
+            nullLavaStatsRejected = true;
+        }
+        try {
+            new model.artifact.Thundersoother(null);
+        } catch (NullPointerException expected) {
+            nullThunderStatsRejected = true;
+        }
+        assertTrue(nullLavaStatsRejected,
+                "Lavawalker should reject null supplied stats");
+        assertTrue(nullThunderStatsRejected,
+                "Thundersoother should reject null supplied stats");
     }
 
     private static void testAccuracyPhaseF_SamuraiConductWeapons() {

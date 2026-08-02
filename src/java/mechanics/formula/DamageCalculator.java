@@ -6,6 +6,7 @@ import model.entity.Character;
 import model.entity.DamageTriggeredArtifactEffect;
 import model.entity.DamageTriggeredWeaponEffect;
 import model.entity.Enemy;
+import model.entity.TargetDependentArtifactEffect;
 import model.entity.TargetDependentWeaponEffect;
 import java.util.List;
 import mechanics.buff.Buff;
@@ -203,7 +204,7 @@ public class DamageCalculator {
     /**
      * Resolves stats for one target before that hit mutates enemy aura state.
      *
-     * <p>Enemy-state-dependent weapon effects are applied to a copy so live
+     * <p>Enemy-state-dependent equipment effects are applied to a copy so live
      * character stats, snapshots, and caller-owned pre-resolved containers are
      * never mutated by a per-hit condition.</p>
      *
@@ -221,13 +222,43 @@ public class DamageCalculator {
             List<Buff> activeBuffs,
             double currentTime) {
         StatsContainer stats = resolveStats(attacker, action, activeBuffs, currentTime);
-        if (!(attacker.getWeapon() instanceof TargetDependentWeaponEffect)) {
+        if (target == null || !hasTargetDependentEffect(attacker)) {
             return stats;
         }
         StatsContainer perHitStats = stats.merge(null);
-        TargetDependentWeaponEffect effect = (TargetDependentWeaponEffect) attacker.getWeapon();
-        effect.applyTargetDependentStats(perHitStats, target, currentTime);
+        if (attacker.getWeapon() instanceof TargetDependentWeaponEffect) {
+            TargetDependentWeaponEffect weaponEffect =
+                    (TargetDependentWeaponEffect) attacker.getWeapon();
+            weaponEffect.applyTargetDependentStats(
+                    perHitStats, target, currentTime);
+        }
+        if (attacker.getArtifacts() != null) {
+            for (model.entity.ArtifactSet artifact : attacker.getArtifacts()) {
+                if (artifact instanceof TargetDependentArtifactEffect) {
+                    TargetDependentArtifactEffect artifactEffect =
+                            (TargetDependentArtifactEffect) artifact;
+                    artifactEffect.applyTargetDependentStats(
+                            perHitStats, target, currentTime);
+                }
+            }
+        }
         return perHitStats;
+    }
+
+    /** Returns whether the attacker has any per-target equipment effect. */
+    private static boolean hasTargetDependentEffect(Character attacker) {
+        if (attacker.getWeapon() instanceof TargetDependentWeaponEffect) {
+            return true;
+        }
+        if (attacker.getArtifacts() == null) {
+            return false;
+        }
+        for (model.entity.ArtifactSet artifact : attacker.getArtifacts()) {
+            if (artifact instanceof TargetDependentArtifactEffect) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

@@ -3213,3 +3213,22 @@ experiment record.
   five-stack cap, off-field behavior, and snapshot representation.
 - **Closure:** staggered stacks now retain separate six-second typed windows;
   exact expiry, cap, post-hit ordering, snapshot, and full gates pass.
+
+### B-151 — Target-state and Skill-hit artifact campaign
+
+- **Status:** in-progress
+- **Source:** explicit broad content coverage plus delegated artifact inventory
+- **Scope/risk:** add Lavawalker, Thundersoother, and Tenacity of the Millelith
+  through a target-dependent artifact capability and existing typed hit hooks;
+  planned
+- **Symptom:** all three local artifact assets lack loadable runtime classes, so
+  their offensive bonuses cannot be selected or regression-tested.
+- **Evidence:** maintained KQM artifact catalog/evidence vault, accessed
+  2026-08-02:
+  https://library.keqingmains.com/equipment/artifacts
+  https://library.keqingmains.com/evidence/equipment/artifacts
+- **Boundary:** per-hit Aura state, snapshot isolation, Skill-hit ordering,
+  team non-stack/refresh, CT/expiry, off-field ownership, and rollback; player
+  elemental RES and Shield Strength remain deferred.
+- **Proof/plan:** two-phase `TASKS.md` Target-State and Skill-Hit Artifact
+  Campaign plus reaction regression, build, Javadoc, party catalog, and preflight.
