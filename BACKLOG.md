@@ -2599,3 +2599,19 @@ experiment record.
 - **Completion:** `ed9d3a8` specializes the injected direct-proc policy with
   exact chance/cooldown boundaries, R1/R5 ratios, and focused abnormal tests;
   build/Javadoc/leak gates pass
+
+### B-119 — One-star weapon series coverage
+
+- **Status:** done
+- **Scope:** Dull Blade, Waster Greatsword, Beginner's Protector, Apprentice's
+  Notes, and Hunter's Bow; RL excluded
+- **Value/risk:** closes five exact passive-free weapon gaps without adding
+  runtime hooks, randomness, or shared behavior
+- **Evidence boundary:** maintained Genshin Impact Wiki 1-Star Series and weapon
+  entries, accessed 2026-08-02, record all five weapon types with maximum-level
+  185 base ATK and no secondary attribute, refinement, or passive:
+  https://genshin-impact.fandom.com/wiki/1-Star_Series
+- **Plan:** `TASKS.md` One-Star Weapon Series Campaign
+- **Completion:** all five classes expose only 185 base ATK and the matching
+  weapon type; the table-driven regression proves the absent substat/passive
+  contract and build/Javadoc/preflight gates pass

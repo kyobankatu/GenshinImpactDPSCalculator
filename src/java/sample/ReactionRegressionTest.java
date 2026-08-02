@@ -144,6 +144,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_AlleyHunter();
         testAccuracyPhaseF_SequenceOfSolitude();
         testAccuracyPhaseF_EyeOfPerception();
+        testAccuracyPhaseF_OneStarWeaponSeries();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -9306,6 +9307,52 @@ public class ReactionRegressionTest {
         }
         assertTrue(highEyeRefinementRejected,
                 "Eye of Perception should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_OneStarWeaponSeries() {
+        Weapon[] weapons = {
+            new model.weapon.DullBlade(),
+            new model.weapon.WasterGreatsword(),
+            new model.weapon.BeginnersProtector(),
+            new model.weapon.ApprenticesNotes(),
+            new model.weapon.HuntersBow()
+        };
+        String[] names = {
+            "Dull Blade",
+            "Waster Greatsword",
+            "Beginner's Protector",
+            "Apprentice's Notes",
+            "Hunter's Bow"
+        };
+        model.type.WeaponType[] weaponTypes = {
+            model.type.WeaponType.SWORD,
+            model.type.WeaponType.CLAYMORE,
+            model.type.WeaponType.POLEARM,
+            model.type.WeaponType.CATALYST,
+            model.type.WeaponType.BOW
+        };
+
+        for (int index = 0; index < weapons.length; index++) {
+            Weapon weapon = weapons[index];
+            assertEquals(names[index], weapon.getName(),
+                    names[index] + " display name");
+            assertEquals(weaponTypes[index], weapon.getWeaponType(),
+                    names[index] + " weapon type");
+            assertClose(185.0, weapon.getBaseAtk(), EPS,
+                    names[index] + " maximum-level base ATK");
+            for (StatType statType : StatType.values()) {
+                double expected = statType == StatType.BASE_ATK ? 185.0 : 0.0;
+                assertClose(expected, weapon.getStats().get(statType), EPS,
+                        names[index] + " flat stat " + statType);
+            }
+
+            StatsContainer passiveStats = new StatsContainer();
+            passiveStats.set(StatType.ATK_PERCENT, 0.25);
+            weapon.applyPassive(passiveStats, -1.0);
+            weapon.applyPassive(passiveStats, 100.0);
+            assertClose(0.25, passiveStats.get(StatType.ATK_PERCENT), EPS,
+                    names[index] + " should not mutate passive stats");
+        }
     }
 
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {
