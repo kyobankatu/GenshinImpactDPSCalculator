@@ -115,6 +115,7 @@ public abstract class GoldenMajestyWeapon extends Weapon
                 || sim != simulator
                 || sim.getActiveCharacter() != owner
                 || action == null
+                || !action.isHitEffectTrigger()
                 || !isEligibleHit(action)
                 || hasActiveBuff(
                         BuffId.GOLDEN_MAJESTY_STACK_COOLDOWN,

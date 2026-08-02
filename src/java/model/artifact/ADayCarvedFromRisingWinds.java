@@ -102,6 +102,7 @@ public class ADayCarvedFromRisingWinds extends ArtifactSet
             Character callbackOwner) {
         if (!matchesBinding(callbackOwner, sim)
                 || action == null
+                || !action.isHitEffectTrigger()
                 || !isEligibleHit(action)) {
             return;
         }

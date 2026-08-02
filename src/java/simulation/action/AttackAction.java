@@ -117,6 +117,7 @@ public class AttackAction {
     private ActionType actionType;
     private boolean countsAsBurstDmg; // New flag for The Catch interaction
     private boolean countsAsSkillDmg; // New flag for Wolf-Fang interaction
+    private boolean hitEffectTrigger;
     private boolean shatterTrigger;
     private double defenseIgnore = 0.0; // Defense Ignore 0.0 - 1.0 (e.g. Raiden C2)
     private double additiveBaseDmgBonus = 0.0;
@@ -222,6 +223,7 @@ public class AttackAction {
         this.animationDuration = duration;
         this.useSnapshot = useSnapshot;
         this.actionType = actionType;
+        this.hitEffectTrigger = damagePercent != 0.0;
         this.icdType = ICDType.Standard; // Default
         this.icdTag = ICDTag.None; // Default (shared)
         this.gaugeUnits = 1.0; // Default 1.0 Global Units (GU)
@@ -287,6 +289,25 @@ public class AttackAction {
      */
     public boolean isCountsAsSkillDmg() {
         return countsAsSkillDmg;
+    }
+
+    /**
+     * Marks whether this resolved action counts as a target hit for post-hit
+     * weapon and artifact effects.
+     *
+     * <p>Non-zero motion values opt in by default. A true zero-damage attack
+     * must opt in explicitly, while animation-only zero-multiplier actions
+     * remain excluded.
+     *
+     * @param hitEffectTrigger {@code true} when post-hit effects may trigger
+     */
+    public void setHitEffectTrigger(boolean hitEffectTrigger) {
+        this.hitEffectTrigger = hitEffectTrigger;
+    }
+
+    /** Returns whether post-hit weapon and artifact effects may trigger. */
+    public boolean isHitEffectTrigger() {
+        return hitEffectTrigger;
     }
 
     /**

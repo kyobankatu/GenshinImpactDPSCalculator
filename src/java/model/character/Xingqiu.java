@@ -177,6 +177,7 @@ public class Xingqiu extends Character implements FormStateProvider {
 
         AttackAction orbital = new AttackAction("Raincutter Orbital", 0.0, Element.HYDRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 0.0, false, ActionType.OTHER);
+        orbital.setHitEffectTrigger(true);
         // The contact pulse's 2.25s event cadence is its ICD; every pulse applies 1U Hydro.
         orbital.setICD(ICDType.None, ICDTag.Xingqiu_Orbital, 1.0);
 

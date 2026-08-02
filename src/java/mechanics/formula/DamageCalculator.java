@@ -325,6 +325,9 @@ public class DamageCalculator {
             double currentTime,
             simulation.CombatSimulator sim,
             double damage) {
+        if (!action.isHitEffectTrigger()) {
+            return;
+        }
         if (attacker.getWeapon() instanceof DamageTriggeredWeaponEffect) {
             ((DamageTriggeredWeaponEffect) attacker.getWeapon()).onDamage(attacker, action, currentTime, sim);
         }

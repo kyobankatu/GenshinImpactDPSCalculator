@@ -133,6 +133,25 @@ public final class GoldenMajestyWeaponRegressionTest {
         assertClose(FIXED_ATTACK_PERCENT + 0.04,
                 effectiveAttackPercent(zeroOwner, zeroSim),
                 "Resolved zero-damage attack should gain one stack");
+
+        SummitShaper castWeapon = new SummitShaper(1);
+        TestCharacter castOwner = character(CharacterId.KAEYA, castWeapon);
+        CombatSimulator castSim = simulatorWith(castOwner);
+        AttackAction animationOnly = new AttackAction(
+                "Animation-Only Burst Cast",
+                0.0,
+                Element.PHYSICAL,
+                StatType.BASE_ATK,
+                null,
+                1.0,
+                ActionType.BURST);
+        DamageCalculator.calculateDamage(
+                castOwner, new Enemy(90), animationOnly,
+                Collections.emptyList(), castSim.getCurrentTime(), 1.0,
+                castSim);
+        assertClose(FIXED_ATTACK_PERCENT,
+                effectiveAttackPercent(castOwner, castSim),
+                "Animation-only zero-multiplier cast should not gain a stack");
     }
 
     /** Verifies eligible action categories, classification, and on-field scope. */
@@ -323,7 +342,7 @@ public final class GoldenMajestyWeaponRegressionTest {
             String name,
             double multiplier,
             ActionType actionType) {
-        return new AttackAction(
+        AttackAction action = new AttackAction(
                 name,
                 multiplier,
                 Element.PHYSICAL,
@@ -331,6 +350,8 @@ public final class GoldenMajestyWeaponRegressionTest {
                 StatType.NORMAL_ATTACK_DMG_BONUS,
                 0.0,
                 actionType);
+        action.setHitEffectTrigger(true);
+        return action;
     }
 
     /** Creates a minimal character carrying the selected weapon. */

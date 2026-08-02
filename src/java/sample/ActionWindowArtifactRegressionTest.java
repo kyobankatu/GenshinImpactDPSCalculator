@@ -163,6 +163,15 @@ public final class ActionWindowArtifactRegressionTest {
                 BuffId.A_DAY_CARVED_FROM_RISING_WINDS_4PC,
                 sim.getCurrentTime(), 0,
                 "Rising Winds should not trigger on non-hitting action use");
+
+        AttackAction animationOnly = new AttackAction(
+                "Animation-Only Burst Cast", 0.0, Element.PHYSICAL,
+                StatType.BASE_ATK, null, 0.0, ActionType.BURST);
+        artifact.onDamage(sim, animationOnly, 0.0, owner);
+        assertActiveBuffCount(owner,
+                BuffId.A_DAY_CARVED_FROM_RISING_WINDS_4PC,
+                sim.getCurrentTime(), 0,
+                "Rising Winds should reject animation-only zero-multiplier casts");
     }
 
     /** Verifies Rising Winds half-open timing, exact refresh, and off-field hits. */
@@ -590,7 +599,7 @@ public final class ActionWindowArtifactRegressionTest {
             String name,
             double multiplier,
             ActionType actionType) {
-        return new AttackAction(
+        AttackAction action = new AttackAction(
                 name,
                 multiplier,
                 Element.PHYSICAL,
@@ -598,6 +607,8 @@ public final class ActionWindowArtifactRegressionTest {
                 null,
                 0.0,
                 actionType);
+        action.setHitEffectTrigger(true);
+        return action;
     }
 
     /** Creates a quiet simulator containing the supplied party in order. */
