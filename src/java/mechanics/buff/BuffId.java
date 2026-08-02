@@ -103,6 +103,8 @@ public enum BuffId {
     ELEGY_FAREWELL_SONG,
     /** 武器「千夜に浮かぶ夢」の味方元素熟知共有。 */
     A_THOUSAND_FLOATING_DREAMS_TEAM_EM,
+    /** 武器「龍殺しの英傑譚」の交代先への攻撃力バフ。 */
+    THRILLING_TALES_LEGACY,
     /** Aubade 系武器ボーナス。 */
     AUBADE_BONUS,
     /** 聖遺物 4 セット「翠緑の影」: 拡散後の炎元素耐性ダウン。 */
