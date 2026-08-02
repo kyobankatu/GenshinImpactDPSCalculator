@@ -4,6 +4,19 @@ Good independent scopes include mechanic-source research, snapshot-state audit, 
 
 Keep tightly coupled edits together: `CombatSimulator` with runtime policies, reaction/aura/ICD state, Java/Python protocol pairs, and party definition plus RL registry changes.
 
+## Session-level parallel lanes
+
+- Treat explicit authorization such as "use sub-agents when useful during this session" as continuing authority
+  until the session's deadline or cancellation. Re-evaluate delegation at queue creation and every checkpoint.
+- Keep the current critical-path unit with the primary. Spawn a sidecar only when its output is independently
+  useful and the primary can proceed without waiting for it.
+- Start with at most two concurrent delegates. Good pairings are one bounded implementation plus one evidence
+  inventory, or two read-only inventories over distinct content families.
+- Central files such as `ReactionRegressionTest`, `TASKS.md`, and `BACKLOG.md` are primary-owned during parallel
+  content work. A coding delegate may change its unique content files and return proposed test cases for the
+  primary, or coding delegates that need the same test file must be serialized.
+- Close completed agents after their handoff is captured. Unverified output never enters the primary branch.
+
 Every assignment states:
 
 - objective and exact working set;

@@ -1,6 +1,6 @@
 ---
 name: run-genshin-autonomous-session
-description: Run long unattended or time-limited implementation sessions on this repository without pausing for approval, including scope-filtered queues, implementation-first content batches, bounded documentation checkpoints, non-blocking external jobs, explicitly authorized branch-isolated sub-agents, backlog replenishment, and deadline wind-down. Use whenever work must proceed for hours while the user is unavailable.
+description: Run long unattended or time-limited implementation sessions on this repository without pausing for approval, including scope-filtered queues, implementation-first content batches, bounded documentation checkpoints, proactively selected branch-isolated sub-agents after explicit authorization, non-blocking external jobs, backlog replenishment, and deadline wind-down. Use whenever work must proceed for hours while the user is unavailable.
 ---
 
 # Run an unattended Genshin session

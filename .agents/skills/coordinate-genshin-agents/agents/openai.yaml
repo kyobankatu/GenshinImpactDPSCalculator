@@ -1,4 +1,4 @@
 interface:
   display_name: "Coordinate Genshin Agents"
-  short_description: "Coordinate isolated agent branches and reviews"
-  default_prompt: "Use $coordinate-genshin-agents for explicitly requested branch-isolated implementation, review, or Codex-Claude work."
+  short_description: "Coordinate useful isolated parallel agent lanes"
+  default_prompt: "Use $coordinate-genshin-agents to select, run, and integrate explicitly authorized isolated implementation, research, or review sidecars without blocking primary work."

@@ -70,9 +70,15 @@ If all readings of a task require a deferred action, the item is blocked. Write 
   phase boundaries or when the scheduler's state is likely to have changed.
 - A mandatory asynchronous result keeps its owning phase in `validating`. Continue only work that does not
   depend on that result, and never claim the phase complete early.
-- Sub-agent authority is never inferred from session length. When the user explicitly grants it, compose
-  `coordinate-genshin-agents` and assign a backlog-gated task to an isolated branch or worktree with a fixed
-  baseline, exact write set, tests, deadline, and no publication authority.
+- Sub-agent authority is never inferred from session length. One explicit session-level authorization grants
+  continuing delegation authority until that session ends; do not ask again per agent. At queue creation and
+  each unit or documentation checkpoint, identify independent sidecars that materially shorten the critical path.
+- Begin with no more than two concurrent delegates. Increase concurrency only when write sets remain disjoint,
+  the primary has integration capacity, and completed output will fit before wind-down. Prefer read-only evidence,
+  inventory, or review lanes when central regression files would make coding branches overlap.
+- Assign every coding task through `coordinate-genshin-agents` to an isolated branch or worktree with a fixed
+  baseline, exact write set, tests, deadline, and no publication authority. If two units both need
+  `ReactionRegressionTest`, keep that file with the primary or serialize those delegates.
 - The primary agent owns conflict resolution, review, integration order, final verification, commits to the
   session branch, pushes, scheduler actions, and user communication. Do not wait for a delegate unless its
   result is the next unavoidable dependency.

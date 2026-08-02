@@ -1,4 +1,4 @@
 interface:
   display_name: "Genshin Autonomous Session"
-  short_description: "Run implementation-first unattended batches"
-  default_prompt: "Use $run-genshin-autonomous-session to run this work queue unattended with bounded documentation checkpoints."
+  short_description: "Run parallel, implementation-first unattended batches"
+  default_prompt: "Use $run-genshin-autonomous-session to run this work queue unattended, proactively delegating safe parallel sidecars when authorized and keeping documentation bounded."
