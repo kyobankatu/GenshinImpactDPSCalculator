@@ -290,6 +290,7 @@ public class Flins extends Character
      *   <li>{@link CharacterActionKey#BURST} — casts the standard burst or Thunderous Symphony.</li>
      *   <li>{@link CharacterActionKey#NORMAL} — advances the normal attack combo.</li>
      *   <li>{@link CharacterActionKey#CHARGE} — casts one Charged Attack.</li>
+     *   <li>{@link CharacterActionKey#PLUNGE} — casts one high Plunging Attack outside Manifest Flame.</li>
      *   <li>{@link CharacterActionKey#DASH} — advances time by 0.4 s.</li>
      *   <li>Any non-{@code NORMAL} action resets the normal attack combo step to 0.</li>
      * </ul>
@@ -300,6 +301,11 @@ public class Flins extends Character
     @Override
     public void onAction(CharacterActionRequest request, CombatSimulator sim) {
         initializeForSimulator(sim);
+        if (request.getKey() == CharacterActionKey.PLUNGE
+                && isManifestFlameActive(sim.getCurrentTime())) {
+            throw new IllegalStateException(
+                    "Flins cannot Plunge during Manifest Flame");
+        }
         // Any non-attack action breaks the normal attack combo
         if (request.getKey() != CharacterActionKey.NORMAL) {
             normalAttackStep = 0;
@@ -327,11 +333,15 @@ public class Flins extends Character
             case CHARGE:
                 chargedAttack(sim);
                 break;
+            case PLUNGE:
+                plungingAttack(sim);
+                break;
             case DASH:
                 sim.advanceTime(0.4);
                 break;
             default:
-                break;
+                throw new IllegalArgumentException(
+                        "Unsupported action for Flins: " + request.getKey());
         }
     }
 
@@ -430,6 +440,24 @@ public class Flins extends Character
                 ActionType.CHARGE);
         charged.setICD(ICDType.Standard, ICDTag.ChargedAttack, 1.0);
         sim.performAction(characterId, charged);
+    }
+
+    /**
+     * Executes one level-9 high Physical Plunging Attack outside Manifest Flame.
+     *
+     * @param sim active simulator
+     */
+    private void plungingAttack(CombatSimulator sim) {
+        AttackAction plunge = new AttackAction(
+                "Flins High Plunge",
+                getTalentValue("Plunge High", 2.9336),
+                Element.PHYSICAL,
+                StatType.BASE_ATK,
+                StatType.PLUNGING_ATTACK_DMG_BONUS,
+                1.0,
+                ActionType.PLUNGE);
+        plunge.setICD(ICDType.None, ICDTag.None, 1.0);
+        sim.performAction(characterId, plunge);
     }
 
     private void triggerC2NormalFollowUp(

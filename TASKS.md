@@ -12850,7 +12850,7 @@ Completion evidence:
 
 ## Implementation Order: Remaining Basic Action Coverage Campaign
 
-Status: In progress. B-148 adds sourced Charged and high-Plunging inputs to
+Status: Complete. B-148 adds sourced Charged and high-Plunging inputs to
 three already-supported characters. Low/collision Plunge hits, stamina,
 measured animation retiming, new rotations, RL, and generated docs are excluded.
 
@@ -12911,7 +12911,7 @@ Completion evidence:
   independent action categories and resets its combo on non-Normal input.
 - Reaction regression, build, Javadoc, party catalog, and preflight pass.
 
-### Phase 3: Flins High Plunge Form Boundary - Pending
+### Phase 3: Flins High Plunge Form Boundary - Done
 
 Target files:
 
@@ -12929,6 +12929,14 @@ Acceptance criteria and tests:
   explicitly while the existing Dash action remains supported.
 - Regressions cover metadata, isolated bonuses, combo interruption, active and
   exact-expiry form boundaries, unsupported input, and CSV/runtime alignment.
+
+Completion evidence:
+
+- Flins dispatches a sourced Physical high Plunge outside Manifest Flame and
+  rejects it during the active half-open form window before damage or time.
+- Reaction regression, build, Javadoc, party catalog, and preflight pass. Two
+  sample runs each reproduce 32,020,327 / 322,136 (`FlinsParty`) and
+  22,174,896 / 320,910 (`FlinsParty2`).
 
 Verification for every phase:
 

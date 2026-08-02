@@ -3169,7 +3169,7 @@ experiment record.
 
 ### B-148 — Remaining supported-character basic action coverage
 
-- **Status:** active
+- **Status:** complete
 - **Source:** local supported-character typed-action inventory
 - **Scope/risk:** add missing sourced Sucrose Plunge, Ineffa Charged/Plunge,
   and Flins Plunge dispatch without changing stamina, low-Plunge, or RL systems
@@ -3178,3 +3178,6 @@ experiment record.
 - **Boundary:** action/element bonuses, ICD/gauge, combo reset, unsupported
   input, Flins Manifest rejection, exact form expiry, and CSV/runtime alignment
 - **Plan:** three-phase `TASKS.md` Remaining Basic Action Coverage Campaign
+- **Closure:** Sucrose high Plunge, Ineffa Charged/high Plunge, and Flins
+  out-of-form high Plunge pass focused and full gates; active Manifest rejection,
+  exact expiry, combo reset, unsupported input, and deterministic samples pass

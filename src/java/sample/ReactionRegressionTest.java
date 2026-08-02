@@ -100,6 +100,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_RaidenC6WishbearerLifecycle();
         testAccuracyPhaseF_RaidenMultiHitAttackContract();
         testAccuracyPhaseF_FlinsChargedAttackCoverage();
+        testAccuracyPhaseF_FlinsHighPlungeCoverage();
         testAccuracyPhaseF_FlinsA1AndC1Lifecycle();
         testAccuracyPhaseF_FlinsC2AndC4();
         testAccuracyPhaseF_FlinsC3C5AndC6();
@@ -3575,6 +3576,93 @@ public class ReactionRegressionTest {
         assertEquals(Element.PHYSICAL,
                 boundaryWeapon.actions.get(0).getElement(),
                 "Flins Charged should become Physical at exact form expiry");
+    }
+
+    private static void testAccuracyPhaseF_FlinsHighPlungeCoverage() {
+        RecordingDamageWeapon weapon = new RecordingDamageWeapon("Flins ");
+        model.character.Flins flins = new model.character.Flins(
+                weapon, blankArtifact(), flinsTalentData(0));
+        CombatSimulator sim = simulatorWithExistingCharacter(flins);
+        sim.performAction(
+                CharacterId.FLINS,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        sim.performAction(
+                CharacterId.FLINS,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        double plungeStart = sim.getCurrentTime();
+        sim.performAction(
+                CharacterId.FLINS,
+                CharacterActionRequest.of(CharacterActionKey.PLUNGE));
+        AttackAction plunge = weapon.actions.stream()
+                .filter(action -> action.getName().equals("Flins High Plunge"))
+                .findFirst()
+                .orElseThrow();
+        assertClose(2.9336, plunge.getDamagePercent(), EPS,
+                "Flins Plunge should use its sourced level-9 multiplier");
+        assertEquals(Element.PHYSICAL, plunge.getElement(),
+                "Flins Plunge should deal Physical damage outside form");
+        assertEquals(ActionType.PLUNGE, plunge.getActionType(),
+                "Flins Plunge should retain typed action metadata");
+        assertEquals(StatType.PLUNGING_ATTACK_DMG_BONUS, plunge.getBonusStat(),
+                "Flins Plunge should use Plunging DMG Bonus");
+        assertEquals(ICDType.None, plunge.getICDType(),
+                "Flins high Plunge should have no ICD");
+        assertEquals(ICDTag.None, plunge.getICDTag(),
+                "Flins high Plunge should not enter an elemental ICD group");
+        assertClose(1.0, plunge.getGaugeUnits(), EPS,
+                "Flins high Plunge should retain 1U metadata");
+        assertClose(plungeStart + 1.0, sim.getCurrentTime(), EPS,
+                "Flins high Plunge should use the one-second approximation");
+        sim.performAction(
+                CharacterId.FLINS,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        assertEquals("Flins N1", weapon.actions.get(weapon.actions.size() - 1).getName(),
+                "Flins Plunge should reset the Normal combo");
+
+        RecordingDamageWeapon formWeapon = new RecordingDamageWeapon("Flins ");
+        model.character.Flins formFlins = new model.character.Flins(
+                formWeapon, blankArtifact(), flinsTalentData(0));
+        CombatSimulator formSim = simulatorWithExistingCharacter(formFlins);
+        formSim.performAction(
+                CharacterId.FLINS,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        int activeActionCount = formWeapon.actions.size();
+        double activeTime = formSim.getCurrentTime();
+        boolean activeRejected = false;
+        try {
+            formSim.performAction(
+                    CharacterId.FLINS,
+                    CharacterActionRequest.of(CharacterActionKey.PLUNGE));
+        } catch (IllegalStateException expected) {
+            activeRejected = true;
+        }
+        assertTrue(activeRejected,
+                "Flins should reject Plunge while Manifest Flame is active");
+        assertEquals(activeActionCount, formWeapon.actions.size(),
+                "Rejected Manifest Plunge should not deal damage");
+        assertClose(activeTime, formSim.getCurrentTime(), EPS,
+                "Rejected Manifest Plunge should not advance simulation time");
+
+        formSim.advanceTime(10.0 - formSim.getCurrentTime());
+        formSim.performAction(
+                CharacterId.FLINS,
+                CharacterActionRequest.of(CharacterActionKey.PLUNGE));
+        AttackAction boundaryPlunge = formWeapon.actions.stream()
+                .filter(action -> action.getName().equals("Flins High Plunge"))
+                .findFirst()
+                .orElseThrow();
+        assertEquals(Element.PHYSICAL, boundaryPlunge.getElement(),
+                "Flins Plunge should become available at exact form expiry");
+
+        double dashStart = formSim.getCurrentTime();
+        int beforeDashActions = formWeapon.actions.size();
+        formSim.performAction(
+                CharacterId.FLINS,
+                CharacterActionRequest.of(CharacterActionKey.DASH));
+        assertClose(dashStart + 0.4, formSim.getCurrentTime(), EPS,
+                "Flins Dash should remain supported after adding Plunge");
+        assertEquals(beforeDashActions, formWeapon.actions.size(),
+                "Flins Dash should not create a damage action");
     }
 
     private static void testAccuracyPhaseF_FlinsA1AndC1Lifecycle() {
