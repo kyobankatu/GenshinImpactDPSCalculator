@@ -141,6 +141,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
         testAccuracyPhaseF_SumeruActionProcBows();
+        testAccuracyPhaseF_TypedFiveStarBows();
         testAccuracyPhaseF_ActionUseWindowWeapons();
         testAccuracyPhaseF_AdditionalSkillUseStatWeapons();
         testAccuracyPhaseF_SamuraiConductWeapons();
@@ -9221,6 +9222,248 @@ public class ReactionRegressionTest {
         }
         assertTrue(highSquireRefinementRejected,
                 "King's Squire should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_TypedFiveStarBows() {
+        model.weapon.PolarStar polarStar = new model.weapon.PolarStar();
+        assertEquals("Polar Star", polarStar.getName(),
+                "Polar Star display name");
+        assertClose(608.0, polarStar.getBaseAtk(), EPS,
+                "Polar Star base ATK");
+        assertClose(0.331,
+                polarStar.getStats().get(StatType.CRIT_RATE), EPS,
+                "Polar Star CRIT Rate");
+        assertClose(0.24,
+                polarStar.getStats().get(StatType.SKILL_DMG_BONUS), EPS,
+                "R5 Polar Star Skill DMG");
+        assertClose(0.24,
+                polarStar.getStats().get(StatType.BURST_DMG_BONUS), EPS,
+                "R5 Polar Star Burst DMG");
+        assertEquals(model.type.WeaponType.BOW, polarStar.getWeaponType(),
+                "Polar Star weapon type");
+        assertEquals(5, polarStar.getRefinement(),
+                "Polar Star default refinement");
+
+        TestCharacter polarOwner = testCharacter(Element.CRYO);
+        polarOwner.setWeapon(polarStar);
+        CombatSimulator polarSim = simulatorWith(polarOwner);
+        AttackAction[] typedHits = {
+                typedDamageHit("Polar Normal", ActionType.NORMAL, 1.0),
+                typedDamageHit("Polar Charged", ActionType.CHARGE, 1.0),
+                typedDamageHit("Polar Skill", ActionType.SKILL, 1.0),
+                typedDamageHit("Polar Burst", ActionType.BURST, 1.0)
+        };
+        polarStar.onDamage(
+                polarOwner,
+                typedDamageHit("Polar zero", ActionType.NORMAL, 0.0),
+                0.0,
+                polarSim);
+        polarStar.onDamage(
+                polarOwner,
+                typedDamageHit("Polar Other", ActionType.OTHER, 1.0),
+                0.0,
+                polarSim);
+        assertClose(0.0,
+                resolvedStat(polarSim, polarOwner, StatType.ATK_PERCENT), EPS,
+                "Zero and wrong hits should not add Polar Star stacks");
+        double[] expectedPolarAtk = {0.20, 0.40, 0.60, 0.96};
+        for (int i = 0; i < typedHits.length; i++) {
+            polarStar.onDamage(polarOwner, typedHits[i], 0.0, polarSim);
+            assertClose(expectedPolarAtk[i],
+                    resolvedStat(polarSim, polarOwner, StatType.ATK_PERCENT), EPS,
+                    "R5 Polar Star stack tier " + (i + 1));
+        }
+
+        polarSim.advanceTime(6.0);
+        polarStar.onDamage(
+                polarOwner, typedHits[0], polarSim.getCurrentTime(), polarSim);
+        polarSim.advanceTime(5.999);
+        assertClose(0.96,
+                resolvedStat(polarSim, polarOwner, StatType.ATK_PERCENT), EPS,
+                "All Polar Star stacks should remain before original expiry");
+        polarSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.20,
+                resolvedStat(polarSim, polarOwner, StatType.ATK_PERCENT), EPS,
+                "Only refreshed Normal Polar Star stack should remain");
+        polarSim.advanceTime(6.0);
+        assertClose(0.0,
+                resolvedStat(polarSim, polarOwner, StatType.ATK_PERCENT), EPS,
+                "Refreshed Polar Star stack should expire at twelve seconds");
+
+        model.weapon.PolarStar r1PolarStar = new model.weapon.PolarStar(1);
+        TestCharacter r1PolarOwner = testCharacter(Element.CRYO);
+        r1PolarOwner.setWeapon(r1PolarStar);
+        CombatSimulator r1PolarSim = simulatorWith(r1PolarOwner);
+        for (AttackAction hit : typedHits) {
+            r1PolarStar.onDamage(r1PolarOwner, hit, 0.0, r1PolarSim);
+        }
+        assertClose(0.48,
+                resolvedStat(r1PolarSim, r1PolarOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "R1 Polar Star four-stack ATK");
+        assertClose(0.12,
+                r1PolarStar.getStats().get(StatType.SKILL_DMG_BONUS), EPS,
+                "R1 Polar Star Skill DMG");
+
+        model.weapon.PolarStar offFieldPolar = new model.weapon.PolarStar();
+        TestCharacter offFieldPolarOwner = testCharacter(
+                Element.CRYO, CharacterId.SUCROSE);
+        offFieldPolarOwner.setWeapon(offFieldPolar);
+        CombatSimulator offFieldPolarSim = simulatorWith(offFieldPolarOwner);
+        offFieldPolarSim.addCharacter(testCharacter(
+                Element.PYRO, CharacterId.AMBER));
+        offFieldPolarSim.setActiveCharacter(CharacterId.AMBER);
+        offFieldPolar.onDamage(
+                offFieldPolarOwner, typedHits[0], 0.0, offFieldPolarSim);
+        assertClose(0.0,
+                resolvedStat(offFieldPolarSim, offFieldPolarOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "Off-field hits should not add Polar Star stacks");
+
+        model.weapon.AstralVulturesCrimsonPlumage astral =
+                new model.weapon.AstralVulturesCrimsonPlumage();
+        assertEquals("Astral Vulture's Crimson Plumage", astral.getName(),
+                "Astral Vulture display name");
+        assertClose(608.0, astral.getBaseAtk(), EPS,
+                "Astral Vulture base ATK");
+        assertClose(0.662,
+                astral.getStats().get(StatType.CRIT_DMG), EPS,
+                "Astral Vulture CRIT DMG");
+        assertEquals(model.type.WeaponType.BOW, astral.getWeaponType(),
+                "Astral Vulture weapon type");
+        assertEquals(5, astral.getRefinement(),
+                "Astral Vulture default refinement");
+
+        TestCharacter astralOwner = testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE);
+        astralOwner.setWeapon(astral);
+        CombatSimulator astralSim = simulatorWith(astralOwner);
+        astralSim.addCharacter(testCharacter(
+                Element.ANEMO, CharacterId.XIANGLING));
+        assertClose(0.0,
+                resolvedStat(astralSim, astralOwner,
+                        StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "Same-element allies should not activate Astral tiers");
+        TestCharacter pyroAlly = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        astralSim.addCharacter(pyroAlly);
+        assertClose(0.40,
+                resolvedStat(astralSim, astralOwner,
+                        StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "R5 Astral one-ally Charged tier");
+        assertClose(0.20,
+                resolvedStat(astralSim, astralOwner,
+                        StatType.BURST_DMG_BONUS), EPS,
+                "R5 Astral one-ally Burst tier");
+        astralSim.addCharacter(testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU));
+        assertClose(0.96,
+                resolvedStat(astralSim, astralOwner,
+                        StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "R5 Astral two-ally Charged tier");
+        assertClose(0.48,
+                resolvedStat(astralSim, astralOwner,
+                        StatType.BURST_DMG_BONUS), EPS,
+                "R5 Astral two-ally Burst tier");
+
+        ReactionResult swirl = ReactionResult.transform(
+                0.0, "Pyro Swirl", ReactionResult.Kind.SWIRL, Element.PYRO);
+        astralSim.notifyReaction(ReactionResult.none(), astralOwner);
+        astralSim.notifyReaction(swirl, pyroAlly);
+        assertClose(0.0,
+                resolvedStat(astralSim, astralOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "NONE and foreign Swirls should not activate Astral ATK");
+        astralSim.notifyReaction(swirl, astralOwner);
+        assertClose(0.48,
+                resolvedStat(astralSim, astralOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "R5 Astral active-owner Swirl ATK window");
+        astralSim.advanceTime(11.999);
+        assertClose(0.48,
+                resolvedStat(astralSim, astralOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "Astral Swirl ATK should remain before expiry");
+        astralSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0,
+                resolvedStat(astralSim, astralOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "Astral Swirl ATK should expire at exactly twelve seconds");
+        astralSim.setActiveCharacter(CharacterId.AMBER);
+        astralSim.notifyReaction(swirl, astralOwner);
+        assertClose(0.0,
+                resolvedStat(astralSim, astralOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "Off-field owner Swirls should not activate Astral ATK");
+
+        model.weapon.AstralVulturesCrimsonPlumage r1Astral =
+                new model.weapon.AstralVulturesCrimsonPlumage(1);
+        TestCharacter r1AstralOwner = testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE);
+        r1AstralOwner.setWeapon(r1Astral);
+        CombatSimulator r1AstralSim = simulatorWith(r1AstralOwner);
+        r1AstralSim.addCharacter(testCharacter(
+                Element.PYRO, CharacterId.AMBER));
+        r1AstralSim.addCharacter(testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU));
+        r1AstralSim.notifyReaction(swirl, r1AstralOwner);
+        assertClose(0.24,
+                resolvedStat(r1AstralSim, r1AstralOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "R1 Astral Swirl ATK window");
+        assertClose(0.48,
+                resolvedStat(r1AstralSim, r1AstralOwner,
+                        StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "R1 Astral two-ally Charged tier");
+        assertClose(0.24,
+                resolvedStat(r1AstralSim, r1AstralOwner,
+                        StatType.BURST_DMG_BONUS), EPS,
+                "R1 Astral two-ally Burst tier");
+
+        boolean crossSimulatorReuseRejected = false;
+        try {
+            astral.initializeForSimulator(astralOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            crossSimulatorReuseRejected = true;
+        }
+        assertTrue(crossSimulatorReuseRejected,
+                "Astral Vulture should reject cross-simulator reuse");
+
+        boolean lowPolarRefinementRejected = false;
+        try {
+            new model.weapon.PolarStar(0);
+        } catch (IllegalArgumentException expected) {
+            lowPolarRefinementRejected = true;
+        }
+        assertTrue(lowPolarRefinementRejected,
+                "Polar Star should reject refinement zero");
+
+        boolean highPolarRefinementRejected = false;
+        try {
+            new model.weapon.PolarStar(6);
+        } catch (IllegalArgumentException expected) {
+            highPolarRefinementRejected = true;
+        }
+        assertTrue(highPolarRefinementRejected,
+                "Polar Star should reject refinement six");
+
+        boolean lowAstralRefinementRejected = false;
+        try {
+            new model.weapon.AstralVulturesCrimsonPlumage(0);
+        } catch (IllegalArgumentException expected) {
+            lowAstralRefinementRejected = true;
+        }
+        assertTrue(lowAstralRefinementRejected,
+                "Astral Vulture should reject refinement zero");
+
+        boolean highAstralRefinementRejected = false;
+        try {
+            new model.weapon.AstralVulturesCrimsonPlumage(6);
+        } catch (IllegalArgumentException expected) {
+            highAstralRefinementRejected = true;
+        }
+        assertTrue(highAstralRefinementRejected,
+                "Astral Vulture should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_OffFieldHitBows() {
