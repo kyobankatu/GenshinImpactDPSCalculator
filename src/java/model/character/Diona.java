@@ -12,6 +12,7 @@ import model.entity.ArtifactSet;
 import model.entity.Character;
 import model.entity.CharacterTeamBuffProvider;
 import model.entity.SimulatorInitializedCharacterEffect;
+import model.entity.SnapshotAwareCharacterEffect;
 import model.entity.Weapon;
 import model.stats.StatsContainer;
 import model.type.ActionType;
@@ -32,15 +33,16 @@ import simulation.event.SimpleTimerEvent;
  * <p>The typed Skill request represents Hold Icy Paws: five independently
  * resolved paws and their deterministic expected particle total. Signature Mix
  * includes its initial hit, six snapshotted field ticks, C1 Energy, C4 aimed
- * shot timing, and the always-full-HP branch of C6.</p>
+ * shot timing, the always-full-HP branch of C6, and snapshot reconstruction
+ * for the Normal chain and future Signature Mix effects.</p>
  *
  * <p>Tap Skill selection, shields, healing, stamina/movement, enemy ATK
- * reduction, projectile geometry, and pending-event snapshot reconstruction
- * are outside this slice.</p>
+ * reduction and projectile geometry are outside this slice.</p>
  */
 public final class Diona extends Character
         implements CharacterTeamBuffProvider,
-        SimulatorInitializedCharacterEffect {
+        SimulatorInitializedCharacterEffect,
+        SnapshotAwareCharacterEffect {
     private static final double FRAME = 1.0 / 60.0;
     private static final double PARTICLE_TRAVEL = 100.0 * FRAME;
     private static final double SKILL_COOLDOWN = 15.0;
@@ -54,6 +56,7 @@ public final class Diona extends Character
     private final Buff c6TeamBuff;
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
+    private PendingSignatureMix pendingSignatureMix;
 
     /** Constructs repository-default C6 Diona. */
     public Diona(Weapon weapon, ArtifactSet artifacts) {
@@ -116,6 +119,44 @@ public final class Diona extends Character
                     "Diona cannot be reused across CombatSimulator instances");
         }
         initializedSimulator = sim;
+    }
+
+    /** Captures Diona's Normal chain and reconstructible Burst progress. */
+    @Override
+    public State captureCharacterState() {
+        return new DionaState(normalAttackStep, pendingSignatureMix);
+    }
+
+    /**
+     * Restores Diona's branch-local state and recreates only future Burst work.
+     *
+     * <p>The simulator restores active buffs before this method, so the
+     * {@link DionaBurstFieldMarker} remains authoritative for field activity.
+     * Tick and refund deadlines at or before the restored clock are considered
+     * consumed and are not scheduled again.</p>
+     *
+     * @param state immutable state captured by this Diona instance
+     * @param simulator restored simulator receiving future Burst events
+     */
+    @Override
+    public void restoreCharacterState(
+            State state,
+            CombatSimulator simulator) {
+        if (!(state instanceof DionaState)) {
+            throw new IllegalArgumentException(
+                    "Unexpected Diona character state");
+        }
+        DionaState restored = (DionaState) state;
+        normalAttackStep = restored.normalAttackStep;
+        pendingSignatureMix = restored.pendingSignatureMix == null
+                ? null
+                : restored.pendingSignatureMix.copy();
+        normalizeSignatureMixProgress(simulator.getCurrentTime());
+        if (pendingSignatureMix != null) {
+            scheduleSignatureMixFutureEffects(
+                    simulator,
+                    pendingSignatureMix);
+        }
     }
 
     /** Returns Diona's 80-Energy Burst cost. */
@@ -336,33 +377,122 @@ public final class Diona extends Character
         schedule(sim, burstFieldStart,
                 activeSim -> activeSim.performActionWithoutTimeAdvance(
                         characterId, initial));
-
-        for (int tick = 1; tick <= BURST_TICK_COUNT; tick++) {
-            AttackAction dot = attack(
-                    "Signature Mix Tick " + tick,
-                    getTalentValue(
-                            c3 ? "Signature Mix Tick C3"
-                                    : "Signature Mix Tick",
-                            c3 ? 1.0528 : 0.89488),
-                    Element.CRYO,
-                    StatType.BURST_DMG_BONUS,
-                    ActionType.BURST,
-                    ICDType.Standard,
-                    ICDTag.ElementalBurst,
-                    1.0,
-                    0.0);
-            dot.setStatSnapshot(burstSnapshot);
-            double tickTime = burstFieldStart
-                    + tick * BURST_TICK_INTERVAL_FRAMES * FRAME;
-            schedule(sim, tickTime,
-                    activeSim -> activeSim.performActionWithoutTimeAdvance(
-                            characterId, dot));
-        }
-        if (constellation >= 1) {
-            schedule(sim, burstFieldEnd,
-                    activeSim -> receiveFlatEnergy(15.0));
-        }
+        pendingSignatureMix = new PendingSignatureMix(
+                burstSnapshot,
+                c3,
+                castTime,
+                burstFieldStart,
+                burstFieldEnd,
+                0,
+                constellation >= 1);
+        scheduleSignatureMixFutureEffects(sim, pendingSignatureMix);
         sim.advanceTime(64.0 * FRAME);
+    }
+
+    private void scheduleSignatureMixFutureEffects(
+            CombatSimulator sim,
+            PendingSignatureMix signatureMix) {
+        double currentTime = sim.getCurrentTime();
+        for (int tick = signatureMix.completedTicks + 1;
+                tick <= BURST_TICK_COUNT;
+                tick++) {
+            double tickTime = signatureMix.getTickTime(tick);
+            if (tickTime > currentTime) {
+                scheduleSignatureMixTick(sim, signatureMix, tick, tickTime);
+            }
+        }
+        if (signatureMix.refundPending
+                && signatureMix.fieldEndTime > currentTime) {
+            schedule(sim, signatureMix.fieldEndTime, activeSim -> {
+                receiveFlatEnergy(15.0);
+                completeSignatureMixRefund(signatureMix);
+            });
+        }
+    }
+
+    private void scheduleSignatureMixTick(
+            CombatSimulator sim,
+            PendingSignatureMix signatureMix,
+            int tick,
+            double tickTime) {
+        AttackAction dot = attack(
+                "Signature Mix Tick " + tick,
+                getTalentValue(
+                        signatureMix.c3
+                                ? "Signature Mix Tick C3"
+                                : "Signature Mix Tick",
+                        signatureMix.c3 ? 1.0528 : 0.89488),
+                Element.CRYO,
+                StatType.BURST_DMG_BONUS,
+                ActionType.BURST,
+                ICDType.Standard,
+                ICDTag.ElementalBurst,
+                1.0,
+                0.0);
+        dot.setStatSnapshot(signatureMix.castSnapshot);
+        schedule(sim, tickTime, activeSim -> {
+            activeSim.performActionWithoutTimeAdvance(characterId, dot);
+            completeSignatureMixTick(signatureMix, tick);
+        });
+    }
+
+    private void completeSignatureMixTick(
+            PendingSignatureMix signatureMix,
+            int tick) {
+        if (!isCurrentSignatureMix(signatureMix)) {
+            return;
+        }
+        pendingSignatureMix = pendingSignatureMix.withProgress(
+                Math.max(pendingSignatureMix.completedTicks, tick),
+                pendingSignatureMix.refundPending);
+        clearCompletedSignatureMix();
+    }
+
+    private void completeSignatureMixRefund(
+            PendingSignatureMix signatureMix) {
+        if (!isCurrentSignatureMix(signatureMix)) {
+            return;
+        }
+        pendingSignatureMix = pendingSignatureMix.withProgress(
+                pendingSignatureMix.completedTicks,
+                false);
+        clearCompletedSignatureMix();
+    }
+
+    private void normalizeSignatureMixProgress(double currentTime) {
+        if (pendingSignatureMix == null) {
+            return;
+        }
+        int completedTicks = pendingSignatureMix.completedTicks;
+        for (int tick = completedTicks + 1;
+                tick <= BURST_TICK_COUNT;
+                tick++) {
+            if (pendingSignatureMix.getTickTime(tick) <= currentTime) {
+                completedTicks = tick;
+            }
+        }
+        boolean refundPending = pendingSignatureMix.refundPending
+                && pendingSignatureMix.fieldEndTime > currentTime;
+        pendingSignatureMix = pendingSignatureMix.withProgress(
+                completedTicks,
+                refundPending);
+        clearCompletedSignatureMix();
+    }
+
+    private boolean isCurrentSignatureMix(
+            PendingSignatureMix signatureMix) {
+        return pendingSignatureMix != null
+                && Double.compare(
+                        pendingSignatureMix.castTime,
+                        signatureMix.castTime) == 0;
+    }
+
+    private void clearCompletedSignatureMix() {
+        if (pendingSignatureMix != null
+                && pendingSignatureMix.completedTicks >= BURST_TICK_COUNT
+                && !pendingSignatureMix.refundPending) {
+            pendingSignatureMix = null;
+        }
     }
 
     private StatsContainer captureActionSnapshot(
@@ -410,6 +540,71 @@ public final class Diona extends Character
                 effect.accept(activeSim);
             }
         });
+    }
+
+    /** Immutable snapshot payload for Diona-owned mutable state. */
+    private static final class DionaState implements State {
+        private final int normalAttackStep;
+        private final PendingSignatureMix pendingSignatureMix;
+
+        private DionaState(
+                int normalAttackStep,
+                PendingSignatureMix pendingSignatureMix) {
+            this.normalAttackStep = normalAttackStep;
+            this.pendingSignatureMix = pendingSignatureMix == null
+                    ? null
+                    : pendingSignatureMix.copy();
+        }
+    }
+
+    /** Immutable Signature Mix cast data and future-event progress. */
+    private static final class PendingSignatureMix {
+        private final StatsContainer castSnapshot;
+        private final boolean c3;
+        private final double castTime;
+        private final double fieldStartTime;
+        private final double fieldEndTime;
+        private final int completedTicks;
+        private final boolean refundPending;
+
+        private PendingSignatureMix(
+                StatsContainer castSnapshot,
+                boolean c3,
+                double castTime,
+                double fieldStartTime,
+                double fieldEndTime,
+                int completedTicks,
+                boolean refundPending) {
+            this.castSnapshot = castSnapshot.merge(null);
+            this.c3 = c3;
+            this.castTime = castTime;
+            this.fieldStartTime = fieldStartTime;
+            this.fieldEndTime = fieldEndTime;
+            this.completedTicks = completedTicks;
+            this.refundPending = refundPending;
+        }
+
+        private double getTickTime(int tick) {
+            return fieldStartTime
+                    + tick * BURST_TICK_INTERVAL_FRAMES * FRAME;
+        }
+
+        private PendingSignatureMix withProgress(
+                int newCompletedTicks,
+                boolean newRefundPending) {
+            return new PendingSignatureMix(
+                    castSnapshot,
+                    c3,
+                    castTime,
+                    fieldStartTime,
+                    fieldEndTime,
+                    newCompletedTicks,
+                    newRefundPending);
+        }
+
+        private PendingSignatureMix copy() {
+            return withProgress(completedTicks, refundPending);
+        }
     }
 
     /** Snapshot-restorable marker for Signature Mix's field window. */

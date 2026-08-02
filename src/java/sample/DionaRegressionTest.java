@@ -28,8 +28,10 @@ public final class DionaRegressionTest {
     public static void main(String[] args) {
         testMetadataAndConstructorGuards();
         testNormalChargeAndPlungeActions();
+        testNormalChainSnapshotRestore();
         testHoldSkillAndC2();
         testBurstTicksC1C4AndC6();
+        testBurstSnapshotRestore();
         testEnergyCooldownAndBindingGuards();
         System.out.println("DionaRegressionTest passed");
     }
@@ -139,6 +141,35 @@ public final class DionaRegressionTest {
                 "Diona C5 raises Skill to level 12");
     }
 
+    private static void testNormalChainSnapshotRestore() {
+        Diona diona = new Diona(null, null, 0);
+        CombatSimulator sim = simulatorWith(diona);
+        List<ActionRecord> normals = captureNamedActions(
+                sim, "Katzlein Style N");
+        perform(sim, CharacterActionKey.NORMAL);
+        perform(sim, CharacterActionKey.NORMAL);
+        SimulatorSnapshot branchSnapshot = sim.saveSnapshot();
+        double branchDamage = sim.getTotalDamage();
+
+        perform(sim, CharacterActionKey.NORMAL);
+        ActionRecord expectedN3 = normals.get(normals.size() - 1);
+        double expectedDamage = sim.getTotalDamage();
+
+        sim.restoreSnapshot(branchSnapshot);
+        perform(sim, CharacterActionKey.NORMAL);
+        ActionRecord restoredN3 = normals.get(normals.size() - 1);
+        assertEquals("Katzlein Style N3", restoredN3.action.getName(),
+                "Diona restored Normal chain resumes at N3");
+        assertClose(expectedN3.time, restoredN3.time,
+                "Diona restored N3 keeps branch timing");
+        assertClose(expectedN3.damage, restoredN3.damage,
+                "Diona restored N3 keeps branch damage");
+        assertClose(expectedDamage, sim.getTotalDamage(),
+                "Diona restored Normal branch keeps total damage");
+        assertTrue(sim.getTotalDamage() > branchDamage,
+                "Diona restored Normal branch resolves its hit");
+    }
+
     private static void testBurstTicksC1C4AndC6() {
         Diona c0 = new Diona(null, null, 0);
         CombatSimulator c0Sim = simulatorWith(c0);
@@ -223,6 +254,138 @@ public final class DionaRegressionTest {
                 "Diona rejects unsupported Dash");
     }
 
+    private static void testBurstSnapshotRestore() {
+        Diona diona = new Diona(null, null, 3);
+        diona.addBuff(new SimpleBuff(
+                "Diona cast-only Burst ATK",
+                90.0 * FRAME,
+                0.0,
+                stats -> stats.add(StatType.ATK_PERCENT, 1.0)));
+        CombatSimulator sim = simulatorWith(diona);
+        List<ActionRecord> ticks = captureNamedActions(
+                sim, "Signature Mix Tick");
+        perform(sim, CharacterActionKey.BURST);
+        SimulatorSnapshot burstSnapshot = sim.saveSnapshot();
+        double savedDamage = sim.getTotalDamage();
+        double refundTime = 58.0 * FRAME + 12.5;
+
+        advanceTo(sim, refundTime - 0.001);
+        assertEquals(6, ticks.size(),
+                "Diona original branch resolves six future Burst ticks");
+        assertClose(0.0, diona.getCurrentEnergy(),
+                "Diona C1 refund waits for field end");
+        advanceTo(sim, refundTime);
+        assertClose(15.0, diona.getCurrentEnergy(),
+                "Diona original branch resolves one C1 refund");
+        List<ActionRecord> expectedTicks = new ArrayList<>(ticks);
+        double expectedDamage = sim.getTotalDamage();
+        assertTrue(expectedDamage > savedDamage,
+                "Diona future Burst ticks add damage");
+        assertBurstTickSequence(expectedTicks);
+
+        sim.restoreSnapshot(burstSnapshot);
+        ticks.clear();
+        assertClose(0.0, diona.getCurrentEnergy(),
+                "Diona Burst restore rewinds C1 Energy");
+        advanceTo(sim, refundTime - 0.001);
+        assertClose(0.0, diona.getCurrentEnergy(),
+                "Diona restored C1 refund keeps exact deadline");
+        advanceTo(sim, refundTime);
+        assertBurstReplay(expectedTicks, ticks);
+        assertClose(15.0, diona.getCurrentEnergy(),
+                "Diona restored branch resolves one C1 refund");
+        assertClose(expectedDamage, sim.getTotalDamage(),
+                "Diona restored Burst branch keeps exact future damage");
+
+        sim.restoreSnapshot(burstSnapshot);
+        ticks.clear();
+        advanceTo(sim, 58.0 * FRAME + 4.0);
+        assertEquals(2, ticks.size(),
+                "Diona progress branch consumes two Burst ticks");
+        SimulatorSnapshot progressSnapshot = sim.saveSnapshot();
+        ticks.clear();
+        advanceTo(sim, refundTime);
+        List<ActionRecord> expectedRemaining = new ArrayList<>(
+                expectedTicks.subList(2, expectedTicks.size()));
+        assertBurstReplay(expectedRemaining, ticks);
+        assertClose(15.0, diona.getCurrentEnergy(),
+                "Diona progress branch resolves one C1 refund");
+
+        sim.restoreSnapshot(progressSnapshot);
+        ticks.clear();
+        advanceTo(sim, refundTime);
+        assertBurstReplay(expectedRemaining, ticks);
+        assertClose(15.0, diona.getCurrentEnergy(),
+                "Diona progress restore resolves one C1 refund");
+        assertClose(expectedDamage, sim.getTotalDamage(),
+                "Diona progress restore replays only remaining damage");
+
+        sim.restoreSnapshot(burstSnapshot);
+        sim.restoreSnapshot(burstSnapshot);
+        ticks.clear();
+        advanceTo(sim, refundTime);
+        assertBurstReplay(expectedTicks, ticks);
+        assertClose(15.0, diona.getCurrentEnergy(),
+                "Diona repeated restore leaves one C1 refund");
+        assertClose(expectedDamage, sim.getTotalDamage(),
+                "Diona repeated restore leaves one future damage sequence");
+
+        SimulatorSnapshot completedSnapshot = sim.saveSnapshot();
+        ticks.clear();
+        sim.restoreSnapshot(completedSnapshot);
+        sim.advanceTime(20.0);
+        assertEquals(0, ticks.size(),
+                "Diona completed Burst restore schedules no expired ticks");
+        assertClose(15.0, diona.getCurrentEnergy(),
+                "Diona completed Burst restore schedules no extra refund");
+    }
+
+    private static void assertBurstTickSequence(List<ActionRecord> ticks) {
+        assertEquals(6, ticks.size(), "Diona Burst future tick count");
+        for (int index = 0; index < ticks.size(); index++) {
+            ActionRecord tick = ticks.get(index);
+            assertEquals("Signature Mix Tick " + (index + 1),
+                    tick.action.getName(),
+                    "Diona Burst tick order");
+            assertClose(1.0528, tick.action.getDamagePercent(),
+                    "Diona restored Burst retains C3 multiplier");
+            assertClose(1.0,
+                    tick.action.getStatSnapshot().get(StatType.ATK_PERCENT),
+                    "Diona Burst tick retains cast-only snapshot");
+            assertClose(58.0 * FRAME + (index + 1) * 2.0,
+                    tick.time,
+                    "Diona Burst tick absolute timing");
+        }
+    }
+
+    private static void assertBurstReplay(
+            List<ActionRecord> expected,
+            List<ActionRecord> actual) {
+        assertEquals(expected.size(), actual.size(),
+                "Diona restored Burst tick count");
+        for (int index = 0; index < expected.size(); index++) {
+            assertEquals(expected.get(index).action.getName(),
+                    actual.get(index).action.getName(),
+                    "Diona restored Burst tick identity");
+            assertClose(expected.get(index).action.getDamagePercent(),
+                    actual.get(index).action.getDamagePercent(),
+                    "Diona restored Burst tick multiplier");
+            assertClose(expected.get(index).action.getStatSnapshot()
+                            .get(StatType.ATK_PERCENT),
+                    actual.get(index).action.getStatSnapshot()
+                            .get(StatType.ATK_PERCENT),
+                    "Diona restored Burst cast snapshot");
+            assertClose(expected.get(index).time, actual.get(index).time,
+                    "Diona restored Burst tick timing");
+            assertClose(expected.get(index).damage, actual.get(index).damage,
+                    "Diona restored Burst tick damage");
+        }
+    }
+
+    private static void advanceTo(CombatSimulator sim, double targetTime) {
+        sim.advanceTime(targetTime - sim.getCurrentTime());
+    }
+
     private static CombatSimulator simulatorWith(Diona diona) {
         CombatSimulator sim = new CombatSimulator();
         sim.setLoggingEnabled(false);
@@ -256,7 +419,7 @@ public final class DionaRegressionTest {
         sim.addDamageListener((actor, action, damage, time) -> {
             if (actor.getCharacterId() == CharacterId.DIONA
                     && action.getName().startsWith(namePrefix)) {
-                records.add(new ActionRecord(action, time));
+                records.add(new ActionRecord(action, damage, time));
             }
         });
         return records;
@@ -308,10 +471,15 @@ public final class DionaRegressionTest {
 
     private static final class ActionRecord {
         private final AttackAction action;
+        private final double damage;
         private final double time;
 
-        private ActionRecord(AttackAction action, double time) {
+        private ActionRecord(
+                AttackAction action,
+                double damage,
+                double time) {
             this.action = action;
+            this.damage = damage;
             this.time = time;
         }
     }
