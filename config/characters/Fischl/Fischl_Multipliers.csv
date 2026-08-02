@@ -1,0 +1,21 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Fischl,NORMAL,N1,9,0.81054,0
+Fischl,NORMAL,N2,9,0.85952,0
+Fischl,NORMAL,N3,9,1.06808,0
+Fischl,NORMAL,N4,9,1.06018,0
+Fischl,NORMAL,N5,9,1.32404,0
+Fischl,CHARGE,Fully Charged Aimed Shot,9,2.108,0
+Fischl,PLUNGE,Plunge High,9,2.6086,0
+Fischl,SKILL,Oz Summon,12,2.3088,0
+Fischl,SKILL,Oz Attack,12,1.776,0
+Fischl,BURST,Midnight Phantasmagoria,12,4.16,0
+Fischl,PASSIVE,Oz Duration,1,10.0,0
+Fischl,PASSIVE,C6 Oz Duration,1,12.0,0
+Fischl,PASSIVE,Oz Tick Interval,1,0.9833333333333333,0
+Fischl,PASSIVE,Oz Expected Particles,1,0.67,0
+Fischl,PASSIVE,A4 Thundering Retribution,1,0.80,0
+Fischl,PASSIVE,A4 Cooldown,1,0.50,0
+Fischl,PASSIVE,C1 Coordinated Attack,1,0.22,0
+Fischl,PASSIVE,C2 Summon Bonus,1,2.0,0
+Fischl,PASSIVE,C4 Burst Damage,1,2.22,0
+Fischl,PASSIVE,C6 Coordinated Attack,1,0.30,0

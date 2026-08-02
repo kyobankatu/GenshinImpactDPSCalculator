@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Fischl,STATS,Base HP,90,9189,0
+Fischl,STATS,Base ATK,90,244,0
+Fischl,STATS,Base DEF,90,594,0
+Fischl,STATS,Ascension ATK,90,0.24,0
+Fischl,STATS,Energy Cost,90,60,0
+Fischl,STATS,Constellation,6,6,0
+Fischl,CONFIG,Character Level,90,90,0
+Fischl,CONFIG,Normal Level,9,9,0
+Fischl,CONFIG,Skill Level,12,12,0
+Fischl,CONFIG,Burst Level,12,12,0

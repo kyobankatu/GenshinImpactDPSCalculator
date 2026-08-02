@@ -41,6 +41,8 @@ public enum CharacterId {
     NOELLE(13, "Noelle"),
     /** Razor (Electro claymore on-field DPS). */
     RAZOR(14, "Razor"),
+    /** Fischl (Electro bow off-field DPS and battery). */
+    FISCHL(15, "Fischl"),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown");
 
