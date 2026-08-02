@@ -27,8 +27,8 @@ The current autonomous session is simulator-only. Python RL training and the
 Java RL bridge are excluded; the retained NCCL/DDP plan below is paused until a
 future explicit user request.
 
-The prior simulator content campaigns, including legacy weapon refinements,
-are complete; RL and generated docs remain excluded.
+The prior simulator content campaigns are complete. The Skill-focused event
+weapon campaign is active; RL and generated docs remain excluded.
 
 The B-058 Burning fuel correction is complete. It replaces the fixed
 two-second approximation with typed Dendro-fuel decay and refresh ownership
@@ -13020,6 +13020,66 @@ Test cases to add or update:
 - Compatibility/static: existing defaults, names, Lv. 90 stats, and categories.
 - Boundary: R1/R5 for every passive branch and unchanged unrelated stats.
 - Abnormal: refinement 0/6 for every weapon.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc` at the batch boundary
+- `python scripts/preflight.py`
+
+## Implementation Order: Skill-Focused Event Weapon Campaign
+
+Status: In progress. Three event weapons will add complete R1-R5 Skill-related
+passives using one shared Skill-use window policy.
+
+Scope:
+
+- Add shared refinement validation and refresh-only Skill-use stat windows.
+- Add Oathsworn Eye, Windblume Ode, and Festering Desire with sourced Lv. 90
+  metadata, R1-R5 values, typed categories, and focused regressions.
+
+Out of scope for this pass:
+
+- Healing, incoming damage, external events, new formulas, characters, parties,
+  RL, and generated docs.
+
+Definitions:
+
+- **Skill-use stat window**: one non-stacking owner bonus activated before the
+  Skill resolves and refreshed to `cast time + duration` on each later cast.
+
+### Phase 1: Add Skill-Focused Event Weapons
+
+Target files:
+
+- `src/java/model/weapon/SkillUseStatWeapon.java` (new)
+- `src/java/model/weapon/OathswornEye.java` (new)
+- `src/java/model/weapon/WindblumeOde.java` (new)
+- `src/java/model/weapon/FesteringDesire.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+| Unit | Passive | Focused verification | Status |
+|---|---|---|---|
+| Shared base + Oathsworn Eye | Skill use: ER +24-48% for 10s | activation, refresh, exact expiry, invalid rank | Ready |
+| Windblume Ode | Skill use: ATK +16-32% for 6s | activation, refresh, exact expiry, metadata | Ready |
+| Festering Desire | Skill DMG +16-32%, CRIT +6-12% | R1/R5, action isolation, metadata | Ready |
+
+Acceptance criteria:
+
+- Oathsworn Eye and Windblume Ode activate from typed Skill use before damage,
+  never stack, refresh exactly, and are inactive at exact expiry.
+- Festering Desire changes only Skill DMG and Skill CRIT Rate; all refinements
+  and static metadata match KQM.
+- Refinements 0/6 fail, no-argument constructors default to R5 for event reward
+  weapons, and existing action dispatch/build regressions remain green.
+
+Test cases to add or update:
+
+- Normal/static: names, base ATK, substats, categories, and R5 bonuses.
+- Boundary: R1 values, pre-trigger state, immediately active state, refresh,
+  immediately before expiry, and exact expiry.
+- Abnormal: refinement 0/6 and non-Skill action/stat non-interference.
 
 Verification:
 

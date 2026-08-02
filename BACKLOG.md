@@ -2136,3 +2136,13 @@ experiment record.
 - **Plan:** `TASKS.md` Legacy Weapon Refinement Campaign
 - **Completion:** `e587803`, `ca085a2`, and `d29055f` add R1-R5 while preserving
   defaults; focused/build/Javadoc/leak gates pass
+
+### B-081 — Skill-focused event weapon coverage
+
+- **Status:** active
+- **Scope:** Oathsworn Eye, Windblume Ode, and Festering Desire; RL excluded
+- **Value/risk:** three complete local weapon additions using existing typed
+  Skill dispatch and action-specific stats
+- **Evidence boundary:** KQM TCL metadata, refinement values, non-stacking
+  refresh, and expiry; no unsupported combat state required
+- **Plan:** `TASKS.md` Skill-Focused Event Weapon Campaign
