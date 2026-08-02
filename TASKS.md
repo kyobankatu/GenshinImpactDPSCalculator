@@ -14356,7 +14356,7 @@ Verification:
 
 ## Implementation Order: Self-Contained Five-Star Weapon Campaign
 
-Status: Active. Add two complete five-star weapons using existing typed Burst,
+Status: Complete. Two complete five-star weapons now use existing typed Burst,
 hit, generated Physical damage, Skill window, and Lunar stat contracts.
 
 Scope:
@@ -14369,13 +14369,20 @@ Out of scope for this pass:
 - Movement speed, multi-target multiplication, visual projectile travel,
   characters, formulas, RL, generated docs, and unrelated five-star weapons.
 
-### Phase 1: Add Skyward Pride and Lightbearing Moonshard
+### Phase 1: Add Skyward Pride and Lightbearing Moonshard - Done (`4130ebc`)
 
 Target files:
 
 - `src/java/model/weapon/SkywardPride.java` (new)
 - `src/java/model/weapon/LightbearingMoonshard.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Pride proves static all-DMG, R1/R5 blade values, typed/active gates, exactly
+  eight nonrecursive blades, and the half-open 20-second state.
+- Moonshard proves static DEF, R1/R5 Lunar-Crystallize values, refresh, and exact
+  five-second expiry; build, reaction regression, Javadoc, and preflight pass.
 
 Acceptance criteria:
 

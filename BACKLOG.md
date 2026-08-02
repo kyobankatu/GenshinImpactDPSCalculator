@@ -2406,10 +2406,12 @@ experiment record.
 
 ### B-103 — Self-contained five-star weapon coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Skyward Pride and Lightbearing Moonshard; RL excluded
 - **Value/risk:** two complete passives reuse verified action/hit/proc/window
   paths with no shared runtime dispatch changes
 - **Evidence boundary:** KQM TCL metadata, R1-R5 all-DMG/proc/DEF/Lunar values,
   eight blades, 20-second state, and five-second Skill window
 - **Plan:** `TASKS.md` Self-Contained Five-Star Weapon Campaign
+- **Completion:** `4130ebc` adds both weapons and focused typed regressions;
+  build/Javadoc/leak gates pass
