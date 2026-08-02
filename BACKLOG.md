@@ -3007,3 +3007,23 @@ experiment record.
 - **Completion:** partial earliest-charge reduction, sourced Charged Attack,
   typed seven-hit/0.1-second state, deterministic party draws, exact bounds,
   invalid inputs, switching, and snapshot replay pass focused and full gates
+
+### B-140 — Desert Pavilion Chronicle artifact coverage
+
+- **Status:** complete
+- **Source:** explicit broad artifact content inventory
+- **Scope/risk:** planned artifact set plus the missing dedicated Plunging DMG
+  stat route needed to represent its full outgoing bonus without double-counting
+  Physical DMG; RL and generated docs excluded
+- **Evidence:** maintained KQM artifact catalog, accessed 2026-08-02, specifies
+  Anemo DMG +15%, positive Charged-hit activation, ATK SPD +10%, Normal/
+  Charged/Plunging DMG +40%, and 15-second duration:
+  https://library.keqingmains.com/equipment/artifacts#desert-pavilion-chronicle
+- **Boundary:** one-time action/element bonus routing, triggering hit ordering,
+  half-open expiry, refresh, wrong owner/category/simulator, non-positive
+  damage, binding, and snapshot rollback
+- **Plan:** one-phase `TASKS.md` Desert Pavilion Chronicle Campaign
+- **Completion:** dedicated Plunging DMG routing, combined Burst-Plunging bonus
+  handling, supplied-stat preservation, resolved Charged-hit activation,
+  timing/refresh/expiry, invalid callback, binding, and snapshot regressions
+  pass focused and full gates; representative party outputs remain stable

@@ -149,6 +149,8 @@ public enum StatType {
     NORMAL_ATTACK_DMG_BONUS,
     /** DMG bonus that applies to Charged Attack hits. */
     CHARGED_ATTACK_DMG_BONUS,
+    /** DMG bonus that applies to Plunging Attack hits. */
+    PLUNGING_ATTACK_DMG_BONUS,
     /** DMG bonus that applies to Elemental Skill hits. */
     SKILL_DMG_BONUS,
     /** Crit rate bonus that applies specifically to Elemental Skill hits. */

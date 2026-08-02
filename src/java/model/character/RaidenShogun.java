@@ -572,7 +572,9 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
         }
 
         AttackAction p = new AttackAction(actionName, mv, dmgElement, StatType.BASE_ATK,
-                countsAsBurst ? StatType.BURST_DMG_BONUS : StatType.PHYSICAL_DMG_BONUS,
+                countsAsBurst
+                        ? StatType.BURST_DMG_BONUS
+                        : StatType.PLUNGING_ATTACK_DMG_BONUS,
                 1.0, false, ActionType.PLUNGE); // Duration arbitrary
 
         if (countsAsBurst) {

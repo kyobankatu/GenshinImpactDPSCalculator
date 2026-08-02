@@ -50,6 +50,10 @@ final class StandardDamageStrategy implements DamageStrategy {
         double dmgBonus = stats.get(StatType.DMG_BONUS_ALL)
                 + stats.get(action.getElement().getBonusStatType())
                 + (action.getBonusStat() != null ? stats.get(action.getBonusStat()) : 0.0);
+        if (action.getActionType() == ActionType.PLUNGE
+                && action.getBonusStat() != StatType.PLUNGING_ATTACK_DMG_BONUS) {
+            dmgBonus += stats.get(StatType.PLUNGING_ATTACK_DMG_BONUS);
+        }
 
         if (action.getExtraBonuses() != null) {
             for (Map.Entry<StatType, Double> entry : action.getExtraBonuses().entrySet()) {

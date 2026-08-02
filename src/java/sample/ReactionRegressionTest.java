@@ -171,6 +171,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ExpandedArtifactSetsPhaseOne();
         testAccuracyPhaseF_ExpandedArtifactSetsPhaseTwo();
         testAccuracyPhaseF_ExpandedArtifactSetsPhaseThree();
+        testAccuracyPhaseF_DesertPavilionChronicleContract();
         testAccuracyPhaseF_ArtifactActionCallbackContract();
         testAccuracyPhaseF_ActionUseArtifactSets();
         testAccuracyPhaseF_HuskCuriosityState();
@@ -7282,8 +7283,9 @@ public class ReactionRegressionTest {
                 "Lisa Plunge should retain Plunge typing");
         assertClose(1.0, plunge.getGaugeUnits(), EPS,
                 "Lisa Plunge should apply 1U Electro");
-        assertTrue(plunge.getBonusStat() == null,
-                "Lisa Plunge should not add an unrelated Physical bonus stat");
+        assertEquals(StatType.PLUNGING_ATTACK_DMG_BONUS,
+                plunge.getBonusStat(),
+                "Lisa Plunge should use the dedicated Plunging bonus stat");
 
         RecordingDamageWeapon chargeWeapon = new RecordingDamageWeapon(
                 "Lisa Charged Attack");
@@ -13565,6 +13567,235 @@ public class ReactionRegressionTest {
                 "Blizzard should reject null supplied stats");
         assertTrue(nullNymphStatsRejected,
                 "Nymph should reject null supplied stats");
+    }
+
+    private static void testAccuracyPhaseF_DesertPavilionChronicleContract() {
+        TestCharacter formulaOwner = testCharacter(Element.PHYSICAL)
+                .withStat(StatType.PHYSICAL_DMG_BONUS, 0.25)
+                .withStat(StatType.PLUNGING_ATTACK_DMG_BONUS, 0.40)
+                .withStat(StatType.ELECTRO_DMG_BONUS, 0.30)
+                .withStat(StatType.BURST_DMG_BONUS, 0.20);
+        CombatSimulator formulaSim = simulatorWith(formulaOwner);
+        AttackAction physicalBaseline = new AttackAction(
+                "Physical baseline",
+                1.0,
+                Element.PHYSICAL,
+                StatType.BASE_ATK,
+                null,
+                0.0,
+                ActionType.OTHER);
+        AttackAction physicalPlunge = new AttackAction(
+                "Physical plunge",
+                1.0,
+                Element.PHYSICAL,
+                StatType.BASE_ATK,
+                StatType.PLUNGING_ATTACK_DMG_BONUS,
+                0.0,
+                ActionType.PLUNGE);
+        double physicalBaselineDamage = calculateDirectDamage(
+                formulaSim, formulaOwner, physicalBaseline, 0.0, 1.0);
+        double physicalPlungeDamage = calculateDirectDamage(
+                formulaSim, formulaOwner, physicalPlunge, 0.0, 1.0);
+        assertClose(
+                1.65 / 1.25,
+                physicalPlungeDamage / physicalBaselineDamage,
+                EPS,
+                "Physical Plunge should add its category without double Physical bonus");
+
+        AttackAction electroBurst = new AttackAction(
+                "Electro burst baseline",
+                1.0,
+                Element.ELECTRO,
+                StatType.BASE_ATK,
+                StatType.BURST_DMG_BONUS,
+                0.0,
+                ActionType.BURST);
+        AttackAction electroBurstPlunge = new AttackAction(
+                "Electro burst plunge",
+                1.0,
+                Element.ELECTRO,
+                StatType.BASE_ATK,
+                StatType.BURST_DMG_BONUS,
+                0.0,
+                ActionType.PLUNGE);
+        double electroBurstDamage = calculateDirectDamage(
+                formulaSim, formulaOwner, electroBurst, 0.0, 1.0);
+        double electroBurstPlungeDamage = calculateDirectDamage(
+                formulaSim, formulaOwner, electroBurstPlunge, 0.0, 1.0);
+        assertClose(
+                1.90 / 1.50,
+                electroBurstPlungeDamage / electroBurstDamage,
+                EPS,
+                "Burst Plunge should combine element, Burst, and Plunging bonuses once");
+
+        StatsContainer suppliedStats = new StatsContainer();
+        suppliedStats.set(StatType.CRIT_RATE, 0.10);
+        model.artifact.DesertPavilionChronicle supplied =
+                new model.artifact.DesertPavilionChronicle(suppliedStats);
+        assertEquals("Desert Pavilion Chronicle", supplied.getName(),
+                "Desert Pavilion Chronicle display name");
+        assertClose(0.15,
+                supplied.getStats().get(StatType.ANEMO_DMG_BONUS), EPS,
+                "Desert Pavilion Chronicle two-piece Anemo bonus");
+        assertClose(0.10,
+                supplied.getStats().get(StatType.CRIT_RATE), EPS,
+                "Desert Pavilion Chronicle should preserve supplied stats");
+
+        model.artifact.DesertPavilionChronicle desert =
+                new model.artifact.DesertPavilionChronicle();
+        TestCharacter owner = testCharacter(Element.ANEMO, CharacterId.SUCROSE);
+        owner.setArtifacts(desert);
+        CombatSimulator sim = simulatorWith(owner);
+        assertClose(0.15,
+                resolvedStat(sim, owner, StatType.ANEMO_DMG_BONUS), EPS,
+                "Desert Pavilion Chronicle fixed bonus before activation");
+        assertClose(0.0,
+                resolvedStat(sim, owner, StatType.ATK_SPD), EPS,
+                "Desert Pavilion Chronicle should start inactive");
+
+        AttackAction charged = new AttackAction(
+                "Desert Pavilion Charged fixture",
+                1.0,
+                Element.ANEMO,
+                StatType.BASE_ATK,
+                StatType.CHARGED_ATTACK_DMG_BONUS,
+                1.1,
+                ActionType.CHARGE);
+        double expectedTriggerDamage = calculateDirectDamage(
+                sim, owner, charged, sim.getCurrentTime(), 1.0);
+        double beforeTriggerDamage = sim.getTotalDamage();
+        sim.performAction(CharacterId.SUCROSE, charged);
+        assertClose(expectedTriggerDamage,
+                sim.getTotalDamage() - beforeTriggerDamage,
+                EPS,
+                "Desert Pavilion triggering Charged hit should remain unbuffed");
+        assertClose(1.1, sim.getCurrentTime(), EPS,
+                "Desert Pavilion should not retroactively speed the triggering action");
+        assertClose(0.10, resolvedStat(sim, owner, StatType.ATK_SPD), EPS,
+                "Desert Pavilion active ATK SPD bonus");
+        assertClose(0.40,
+                resolvedStat(sim, owner, StatType.NORMAL_ATTACK_DMG_BONUS),
+                EPS, "Desert Pavilion active Normal bonus");
+        assertClose(0.40,
+                resolvedStat(sim, owner, StatType.CHARGED_ATTACK_DMG_BONUS),
+                EPS, "Desert Pavilion active Charged bonus");
+        assertClose(0.40,
+                resolvedStat(sim, owner, StatType.PLUNGING_ATTACK_DMG_BONUS),
+                EPS, "Desert Pavilion active Plunging bonus");
+        List<Buff> firstWindows = activeBuffs(
+                owner,
+                BuffId.DESERT_PAVILION_CHRONICLE_4PC,
+                sim.getCurrentTime());
+        assertEquals(1, firstWindows.size(),
+                "Desert Pavilion should create one typed attack window");
+        assertEquals(CharacterId.SUCROSE,
+                firstWindows.get(0).getSourceCharacterId(),
+                "Desert Pavilion window should retain owner attribution");
+        assertClose(15.0, firstWindows.get(0).getExpirationTime(), EPS,
+                "Desert Pavilion expiry should begin at the triggering hit");
+
+        AttackAction normal = new AttackAction(
+                "Desert Pavilion Normal fixture",
+                1.0,
+                Element.ANEMO,
+                StatType.BASE_ATK,
+                StatType.NORMAL_ATTACK_DMG_BONUS,
+                1.1,
+                ActionType.NORMAL);
+        double normalStart = sim.getCurrentTime();
+        sim.performAction(CharacterId.SUCROSE, normal);
+        assertClose(1.0, sim.getCurrentTime() - normalStart, EPS,
+                "Desert Pavilion ATK SPD should scale subsequent Normal timing");
+
+        double refreshTime = sim.getCurrentTime();
+        desert.onDamage(sim, charged, 100.0, owner);
+        List<Buff> refreshedWindows = activeBuffs(
+                owner,
+                BuffId.DESERT_PAVILION_CHRONICLE_4PC,
+                Math.nextUp(refreshTime));
+        assertEquals(1, refreshedWindows.size(),
+                "Desert Pavilion refresh should replace rather than stack");
+        assertClose(refreshTime + 15.0,
+                refreshedWindows.get(0).getExpirationTime(), EPS,
+                "Desert Pavilion refresh should restart the 15-second expiry");
+        assertClose(0.40,
+                effectiveStatAt(
+                        owner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS,
+                        refreshTime + 14.999),
+                EPS, "Desert Pavilion should remain active at 14.999 seconds");
+        assertClose(0.0,
+                effectiveStatAt(
+                        owner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS,
+                        refreshTime + 15.0),
+                EPS, "Desert Pavilion should expire at exactly 15 seconds");
+
+        SimulatorSnapshot activeSnapshot = sim.saveSnapshot();
+        owner.removeBuff(BuffId.DESERT_PAVILION_CHRONICLE_4PC);
+        sim.restoreSnapshot(activeSnapshot);
+        assertEquals(1, activeBuffCount(
+                        owner,
+                        BuffId.DESERT_PAVILION_CHRONICLE_4PC,
+                        Math.nextUp(sim.getCurrentTime())),
+                "Snapshot restore should recover the active Desert window");
+
+        model.artifact.DesertPavilionChronicle rollbackDesert =
+                new model.artifact.DesertPavilionChronicle();
+        TestCharacter rollbackOwner = testCharacter(Element.ANEMO);
+        rollbackOwner.setArtifacts(rollbackDesert);
+        CombatSimulator rollbackSim = simulatorWith(rollbackOwner);
+        SimulatorSnapshot inactiveSnapshot = rollbackSim.saveSnapshot();
+        rollbackDesert.onDamage(
+                rollbackSim, charged, 100.0, rollbackOwner);
+        rollbackSim.restoreSnapshot(inactiveSnapshot);
+        assertEquals(0, activeBuffCount(
+                        rollbackOwner,
+                        BuffId.DESERT_PAVILION_CHRONICLE_4PC,
+                        Math.nextUp(rollbackSim.getCurrentTime())),
+                "Snapshot rollback should remove a divergent Desert window");
+
+        model.artifact.DesertPavilionChronicle rejectedDesert =
+                new model.artifact.DesertPavilionChronicle();
+        TestCharacter rejectedOwner = testCharacter(Element.ANEMO);
+        rejectedOwner.setArtifacts(rejectedDesert);
+        CombatSimulator rejectedSim = simulatorWith(rejectedOwner);
+        TestCharacter foreignOwner = testCharacter(
+                Element.ANEMO, CharacterId.XINGQIU);
+        AttackAction skill = typedDamageHit(
+                "Desert Pavilion Skill fixture", ActionType.SKILL, 1.0);
+        rejectedDesert.onDamage(rejectedSim, skill, 100.0, rejectedOwner);
+        rejectedDesert.onDamage(rejectedSim, charged, 0.0, rejectedOwner);
+        rejectedDesert.onDamage(rejectedSim, charged, -1.0, rejectedOwner);
+        rejectedDesert.onDamage(rejectedSim, charged, 100.0, foreignOwner);
+        rejectedDesert.onDamage(
+                new CombatSimulator(), charged, 100.0, rejectedOwner);
+        rejectedDesert.onDamage(rejectedSim, null, 100.0, rejectedOwner);
+        assertEquals(0, activeBuffCount(
+                        rejectedOwner,
+                        BuffId.DESERT_PAVILION_CHRONICLE_4PC,
+                        rejectedSim.getCurrentTime()),
+                "Invalid Desert callbacks should remain inert");
+        rejectedDesert.initializeForSimulator(
+                rejectedOwner, rejectedSim, true);
+        boolean crossBindingRejected = false;
+        try {
+            rejectedDesert.initializeForSimulator(
+                    rejectedOwner, new CombatSimulator(), true);
+        } catch (IllegalStateException expected) {
+            crossBindingRejected = true;
+        }
+        assertTrue(crossBindingRejected,
+                "Desert Pavilion should reject cross-simulator reuse");
+
+        boolean nullStatsRejected = false;
+        try {
+            new model.artifact.DesertPavilionChronicle(null);
+        } catch (NullPointerException expected) {
+            nullStatsRejected = true;
+        }
+        assertTrue(nullStatsRejected,
+                "Desert Pavilion should reject null supplied stats");
     }
 
     private static void testAccuracyPhaseF_ArtifactActionCallbackContract() {

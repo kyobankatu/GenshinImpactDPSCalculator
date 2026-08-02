@@ -13982,6 +13982,72 @@ Evidence:
 - Reaction regression, party catalog regression, build, Javadoc, samples, and
   preflight pass.
 
+## Implementation Order: Desert Pavilion Chronicle Campaign
+
+Status: Complete. Implemented B-140 as one artifact-owned resolved-hit window
+plus its dedicated Plunging DMG stat prerequisite; RL, generated docs, stamina,
+hitlag, and multi-target behavior are excluded.
+
+Evidence:
+
+- The maintained KQM artifact catalog, accessed 2026-08-02, specifies Anemo
+  DMG +15%, activation after a Charged Attack hits, ATK SPD +10%, Normal/
+  Charged/Plunging DMG +40%, and a 15-second duration:
+  https://library.keqingmains.com/equipment/artifacts#desert-pavilion-chronicle
+
+### Phase 1: Add the Complete Outgoing-Damage Set - Done
+
+Target files:
+
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/model/type/StatType.java`
+- `src/java/mechanics/formula/StandardDamageStrategy.java`
+- supported character files with Plunging actions
+- `src/java/model/artifact/DesertPavilionChronicle.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Plunging DMG Bonus is added once alongside elemental and Burst bonuses;
+  physical Plunging attacks no longer double-count Physical DMG and infused/
+  Burst Plunging attacks retain their independent element/ability bonuses.
+- Supplied artifact stats are preserved and fixed Anemo DMG +15% is always
+  present.
+- A positive resolved Charged hit by the bound owner opens or refreshes one
+  typed, owner-sourced half-open 15-second buff with ATK SPD +10% and Normal,
+  Charged, and Plunging DMG +40%; the triggering hit remains unbuffed.
+- Null/unbound/cross-owner/cross-simulator, Normal/Skill/Burst/Other, and
+  non-positive callbacks are inert or rejected without state mutation.
+- Buff membership/timing and pre-trigger state survive snapshot rollback.
+
+Test cases:
+
+- Normal: metadata/fixed stats, Charged activation, all four dynamic stats,
+  action-duration speed effect, refresh, and source ownership.
+- Boundary: triggering-hit order, 14.999/15.000-second expiry, refresh start,
+  post-trigger and pre-trigger snapshot rollback.
+- Abnormal: null stats, wrong owner/simulator/category, zero/negative damage,
+  duplicate initialization, and cross-binding reuse.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
+
+Completion evidence:
+
+- Dedicated Plunging DMG routing adds the category once for physical attacks
+  and combines it with elemental and Burst bonuses for Raiden's Burst plunge.
+- Desert Pavilion preserves supplied stats, grants fixed Anemo DMG +15%, and
+  opens one owner-sourced post-hit window with the four required dynamic stats.
+- Trigger ordering, subsequent action speed, refresh, 14.999/15.000-second
+  expiry, invalid callbacks, cross-binding, and snapshot rollback pass.
+- Reaction regression, build, Javadoc, representative samples, and preflight
+  pass; two runs each retain 1,275,070 / 60,718 (`RaidenParty`), 31,443,262 /
+  316,013 (`FlinsParty`), and 20,805,520 / 301,093 (`FlinsParty2`).
+
 ### Phase 2: Skill-Activated Damage Sets - Done
 
 Why second:

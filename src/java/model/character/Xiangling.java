@@ -359,7 +359,7 @@ public class Xiangling extends Character implements FormStateProvider {
     private void plunge(CombatSimulator sim) {
         double mv = getTalentValue("Plunge High", 2.93);
         AttackAction p = new AttackAction("Xiangling Plunge", mv, Element.PHYSICAL, StatType.BASE_ATK,
-                StatType.PHYSICAL_DMG_BONUS, 1.0, ActionType.PLUNGE);
+                StatType.PLUNGING_ATTACK_DMG_BONUS, 1.0, ActionType.PLUNGE);
         p.setICD(ICDType.Standard, ICDTag.None, 1.0);
         sim.performAction(this.characterId, p);
     }

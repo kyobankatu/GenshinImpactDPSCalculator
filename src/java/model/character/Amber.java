@@ -253,7 +253,7 @@ public class Amber extends Character {
                 getTalentValue("Plunge High", 2.6086),
                 Element.PHYSICAL,
                 StatType.BASE_ATK,
-                StatType.PHYSICAL_DMG_BONUS,
+                StatType.PLUNGING_ATTACK_DMG_BONUS,
                 1.0,
                 ActionType.PLUNGE);
         plunge.setICD(ICDType.Standard, ICDTag.None, 0.0);

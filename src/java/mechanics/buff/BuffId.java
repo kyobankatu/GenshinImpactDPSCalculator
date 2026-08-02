@@ -118,6 +118,8 @@ public enum BuffId {
     INSTRUCTOR_4PC_TEAM_EM,
     /** 聖遺物 4 セット「深林の記憶」による草元素耐性ダウン。 */
     DEEPWOOD_MEMORIES_4PC_SHRED,
+    /** 聖遺物「砂上の楼閣の史話」の重撃後攻撃強化。 */
+    DESERT_PAVILION_CHRONICLE_4PC,
     SUPERCONDUCT_PHYS_RES_SHRED,
     /** 武器「漂泊の宵星」効果。 */
     WANDERING_EVENSTAR_WILDLING_NIGHTSTAR,

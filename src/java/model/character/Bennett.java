@@ -276,7 +276,7 @@ public class Bennett extends Character implements FormStateProvider {
 
         double mv = getTalentValue("Plunge High", 2.93);
         AttackAction p = new AttackAction("Bennett Plunge", mv, dmgElement, StatType.BASE_ATK,
-                StatType.PHYSICAL_DMG_BONUS, 1.0, ActionType.PLUNGE);
+                StatType.PLUNGING_ATTACK_DMG_BONUS, 1.0, ActionType.PLUNGE);
         p.setICD(ICDType.Standard, ICDTag.None, 1.0);
         sim.performAction(this.characterId, p);
     }

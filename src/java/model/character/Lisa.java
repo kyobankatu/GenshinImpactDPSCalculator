@@ -290,7 +290,7 @@ public class Lisa extends Character implements SwitchAwareCharacter {
                 getTalentValue("Plunge High", 2.6076),
                 Element.ELECTRO,
                 StatType.BASE_ATK,
-                null,
+                StatType.PLUNGING_ATTACK_DMG_BONUS,
                 1.0,
                 ActionType.PLUNGE);
         plunge.setICD(ICDType.Standard, ICDTag.None, 1.0);
