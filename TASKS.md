@@ -27,9 +27,8 @@ The current autonomous session is simulator-only. Python RL training and the
 Java RL bridge are excluded; the retained NCCL/DDP plan below is paused until a
 future explicit user request.
 
-The Favonius and Sacrificial weapon families are complete with shared R1-R5
-passives and all canonical family members. The target-Aura weapon campaign is
-active; RL and generated docs remain excluded.
+The Favonius, Sacrificial, and target-Aura weapon campaigns are complete. The
+Kaeya vertical-slice campaign is active; RL and generated docs remain excluded.
 
 The B-058 Burning fuel correction is complete. It replaces the fixed
 two-second approximation with typed Dendro-fuel decay and refresh ownership
@@ -12625,8 +12624,8 @@ Verification:
 
 ## Implementation Order: Target-Aura Weapon Content Campaign
 
-Status: In progress. One refinement-aware live-Aura base precedes three missing
-weapon variants.
+Status: Complete. The shared live-Aura base, refinement-aware Dragon's Bane,
+Lion's Roar, Rainslasher, and Magic Guide are verified and pushed.
 
 Scope:
 
@@ -12645,7 +12644,7 @@ Definitions:
 - **TargetAuraDamageWeapon**: shared abstract weapon that adds per-hit all-DMG
   bonus only when the current enemy has a live eligible elemental Aura.
 
-### Phase 1: Add Refinement-Aware Target-Aura Weapons
+### Phase 1: Add Refinement-Aware Target-Aura Weapons - Done
 
 Why first:
 
@@ -12663,10 +12662,19 @@ Target files:
 
 | Unit | Eligible Aura | Focused verification | Status |
 |---|---|---|---|
-| Shared base + Dragon's Bane | Hydro/Pyro | R1/R5 metadata, live/expired Aura, invalid refinement | In progress |
-| Lion's Roar | Pyro/Electro | 510 ATK, 41.3% ATK, sword, eligible/ineligible damage | Pending |
-| Rainslasher | Hydro/Electro | 510 ATK, 165 EM, claymore, eligible/ineligible damage | Pending |
-| Magic Guide | Hydro/Electro | 354 ATK, 187 EM, catalyst, R1/R5 damage | Pending |
+| Shared base + Dragon's Bane | Hydro/Pyro | R1/R5 metadata, live/expired Aura, invalid refinement | Done (`10b9db9`) |
+| Lion's Roar | Pyro/Electro | 510 ATK, 41.3% ATK, sword, eligible/ineligible damage | Done (`4c940ef`) |
+| Rainslasher | Hydro/Electro | 510 ATK, 165 EM, claymore, eligible/ineligible damage | Done (`814f2b0`) |
+| Magic Guide | Hydro/Electro | 354 ATK, 187 EM, catalyst, R1/R5 damage | Done (`96f48c7`) |
+
+Completion evidence:
+
+- Dragon's Bane preserves R5, pre-reaction lookup, 11-second Aura expiry,
+  repeated snapshot hits, and snapshot/effective-stat exclusion; R1 20% passes.
+- All new variants expose sourced Lv. 90 metadata and apply only their eligible
+  R1/R5 live-Aura multiplier without mutating owner stats.
+- Every unit passes `ReactionRegressionTest`, `build`, and preflight; shared and
+  final public APIs pass Javadoc with no generated artifact staged.
 
 Acceptance criteria:
 
@@ -12688,4 +12696,70 @@ Verification:
 - `./gradlew ReactionRegressionTest`
 - `./gradlew build`
 - `./gradlew javadoc` at the batch boundary
+- `python scripts/preflight.py`
+
+## Implementation Order: Kaeya Character Vertical Slice
+
+Status: In progress. One independently revertible character/data/regression unit
+will add Kaeya through C6 within the simulator's one-enemy boundary.
+
+Scope:
+
+- Add stable `CharacterId.KAEYA`, Lv. 90 static data, talent-9 normals, and
+  constellation-adjusted Skill/Burst multipliers.
+- Implement typed Normal/Charged/Plunge, 2U no-ICD Frostgnaw with 2.67 expected
+  particles and one single-target Frozen A4 particle, and snapshot Glacial Waltz.
+- Implement C1 conditional Normal/Charged CRIT Rate, C3/C5 talent values, and C6
+  fixed additional-icicle hit count plus 15 flat Energy refund.
+
+Out of scope for this pass:
+
+- C2 defeat-driven extension, C4 low-HP shield, A1 healing, sprint stamina,
+  moving-target/backhanding optimization, multi-target A4, a catalog party, RL,
+  capability profiles, and generated docs.
+
+Definitions:
+
+- **Stationary Burst stand-in**: 13 evenly scheduled hits over eight seconds at
+  C0-C5 and 17 at C6, preserving standard ICD and one immutable stat snapshot.
+
+### Phase 1: Add Kaeya Data, Actions, Constellations, and Regression
+
+Why first:
+
+- Existing typed actions, periodic events, enemy Frozen state, and per-action
+  bonus stats cover the complete allowed slice without a shared runtime change.
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/model/character/Kaeya.java` (new)
+- `config/characters/Kaeya/Kaeya_Status.csv` (new)
+- `config/characters/Kaeya/Kaeya_Multipliers.csv` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Config and Java identity/data agree; existing numeric IDs remain unchanged and
+  Kaeya receives a new stable ID.
+- Frostgnaw deals one 2U/no-ICD Skill hit, produces 2.67 Cryo particles plus one
+  when the one modeled enemy is Frozen, and captures proper cooldown metadata.
+- Glacial Waltz consumes 60 Energy, snapshots once, deals exactly 13 C0 or 17 C6
+  standard-ICD Burst hits in eight seconds, and C6 refunds only Kaeya 15 Energy.
+- C1 adds 15% CRIT Rate only to Normal/Charged actions against Cryo/Frozen state;
+  C3/C5 use level-12 values while C0 uses level-9 defaults.
+
+Test cases to add or update:
+
+- Normal/static: identity round trip, Lv. 90 stats, legal action metadata.
+- Skill: no-Aura particle baseline and Hydro-to-Frozen A4 increment.
+- Burst/snapshot: C0/C6 hit counts, Energy spend/refund, immutable snapshot flag.
+- Constellation boundary: C0/C1 action CRIT bonus and C3/C5 multiplier changes.
+- Abnormal: unsupported action throws; excluded C2/C4 behavior is not fabricated.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
 - `python scripts/preflight.py`

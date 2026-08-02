@@ -2067,10 +2067,22 @@ experiment record.
 
 ### B-075 — Target-Aura weapon content coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** simulator weapon content; live target Aura only
 - **Value/risk:** planned shared extraction of proven Dragon's Bane behavior,
   followed by three independently reversible variants
 - **Evidence boundary:** Lv. 90 metadata, eligible elements, and R1-R5 bonuses
   are sourced; no formula, Aura, RL, or multi-target changes
 - **Plan:** `TASKS.md` Target-Aura Weapon Content Campaign
+- **Completion:** `10b9db9`, `4c940ef`, `814f2b0`, and `96f48c7` add shared
+  live-Aura evaluation and three sourced variants with focused/build/Javadoc gates
+
+### B-076 — Kaeya character and constellation coverage
+
+- **Status:** active
+- **Scope:** one-enemy simulator character vertical slice; RL excluded
+- **Value/risk:** planned content addition using existing typed actions, periodic
+  event, Frozen state, snapshot, and per-action bonus contracts
+- **Evidence boundary:** KQM TCL Lv. 90/talent/gauge/ICD/particle/constellation
+  data; C2/C4, healing, movement, and multi-target behavior remain unsupported
+- **Plan:** `TASKS.md` Kaeya Character Vertical Slice
