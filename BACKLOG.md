@@ -2478,10 +2478,12 @@ experiment record.
 
 ### B-109 — Five-star catalyst stack weapon coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Kagura's Verity and Lost Prayer to the Sacred Winds; RL excluded
 - **Value/risk:** two complete DPS passives reuse typed Skill, periodic timer,
   active-character, and switch contracts without shared runtime changes
 - **Evidence boundary:** KQM TCL metadata, R1-R5 Skill/elemental tiers, shared
   24-second Kagura expiry, fixed four-second Lost Prayer cadence, switch reset
 - **Plan:** `TASKS.md` Five-Star Catalyst Stack Weapon Campaign
+- **Completion:** `ce792c0` adds both stack state machines and focused
+  regressions; build/Javadoc/leak gates pass

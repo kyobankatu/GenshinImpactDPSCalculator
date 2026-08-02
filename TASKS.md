@@ -14685,7 +14685,7 @@ Verification:
 
 ## Implementation Order: Five-Star Catalyst Stack Weapon Campaign
 
-Status: Active. Add two combat-complete five-star catalysts with typed Skill
+Status: Complete. Two combat-complete five-star catalysts now use typed Skill
 input, fixed timer cadence, and switch reset behavior.
 
 Scope:
@@ -14698,7 +14698,7 @@ Out of scope for this pass:
 - Lost Prayer's non-DPS Movement SPD, defeat/combat-exit state, characters,
   formulas, RL, generated docs, and unrelated catalysts.
 
-### Phase 1: Add Kagura's Verity and Lost Prayer to the Sacred Winds
+### Phase 1: Add Kagura's Verity and Lost Prayer to the Sacred Winds - Done (`ce792c0`)
 
 Target files:
 
@@ -14706,12 +14706,19 @@ Target files:
 - `src/java/model/weapon/LostPrayerToTheSacredWinds.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
 
+Completion evidence:
+
+- Kagura proves pre-action R1/R5 Skill tiers, three-stack all-element bonus,
+  shared refresh, exact expiry, cap, invalid actions, and binding rejection.
+- Lost Prayer proves all-element R1/R5 tiers, exact four-second cadence, cap,
+  off-field suppression, cadence-preserving return, and switch reset; all gates pass.
+
 Acceptance criteria:
 
 - Kagura Skill input applies 12-24% Skill DMG per stack before action
   resolution, refreshes one shared half-open 24-second window, caps at three,
   and grants 12-24% all Elemental DMG only while all three stacks remain.
-- Lost Prayer gains one 8-16% owner-element DMG stack at each fixed four-second
+- Lost Prayer gains one 8-16% all Elemental DMG stack at each fixed four-second
   combat tick only while active, caps at four, keeps global cadence while
   off-field, and clears all stacks immediately on switch-out.
 - Metadata, pre-action order, exact expiry/ticks, active/owner/simulator gates,
