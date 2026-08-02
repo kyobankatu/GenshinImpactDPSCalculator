@@ -2689,3 +2689,23 @@ experiment record.
 - **Completion:** both phases pass table-driven metadata, refinement,
   full-HP, immediate-impact, and explicitly inactive boundary regressions;
   reaction regression, build, Javadoc, and preflight gates pass
+
+### B-124 — Stateful craftable weapon coverage
+
+- **Status:** in-progress
+- **Scope:** Ring of Yaxche, Cloudforged, Hakushin Ring, and Crescent Pike; RL
+  excluded
+- **Value/risk:** closes four missing weapons through existing typed hooks;
+  reaction-element filtering and generated follow-up recursion require focused
+  regression coverage
+- **Evidence boundary:** maintained KQM weapon catalogs and evidence vault,
+  accessed 2026-08-02, provide Lv. 90 metadata, R1-R5 values, durations,
+  stack refresh, on-field, reaction-element, and follow-up behavior:
+  https://library.keqingmains.com/equipment/weapons/catalysts#ring-of-yaxche
+  https://library.keqingmains.com/equipment/weapons/bows#cloudforged
+  https://library.keqingmains.com/equipment/weapons/catalysts#hakushin-ring
+  https://library.keqingmains.com/equipment/weapons/polearms#crescent-pike
+- **Boundary:** Cloudforged observes successful Burst requests as the current
+  Energy-decrease path; Crescent Pike observes particle notification while the
+  holder is active as collection
+- **Plan:** `TASKS.md` Stateful Craftable Weapon Campaign

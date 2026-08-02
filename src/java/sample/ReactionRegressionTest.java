@@ -151,6 +151,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_BlackcliffWeaponFamily();
         testAccuracyPhaseF_ThreeStarRuntimeBoundaryPhaseOne();
         testAccuracyPhaseF_ThreeStarRuntimeBoundaryPhaseTwo();
+        testAccuracyPhaseF_StatefulCraftableWeaponPhaseOne();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -10147,6 +10148,236 @@ public class ReactionRegressionTest {
         }
         assertTrue(highSlingshotRefinementRejected,
                 "Slingshot should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_StatefulCraftableWeaponPhaseOne() {
+        model.weapon.RingOfYaxche ring = new model.weapon.RingOfYaxche();
+        assertEquals("Ring of Yaxche", ring.getName(),
+                "Ring of Yaxche display name");
+        assertEquals(model.type.WeaponType.CATALYST, ring.getWeaponType(),
+                "Ring of Yaxche weapon type");
+        assertClose(510.0, ring.getBaseAtk(), EPS,
+                "Ring of Yaxche base ATK");
+        assertClose(0.413, ring.getStats().get(StatType.HP_PERCENT), EPS,
+                "Ring of Yaxche HP percent");
+        assertEquals(5, ring.getRefinement(),
+                "Ring of Yaxche default refinement");
+
+        TestCharacter ringOwner = testCharacter(
+                Element.HYDRO, CharacterId.SUCROSE);
+        ringOwner.setWeapon(ring);
+        CombatSimulator ringSim = simulatorWith(ringOwner);
+        ring.onAction(
+                ringOwner,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL),
+                ringSim);
+        assertClose(0.0,
+                effectiveStatAt(ringOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS, 0.0), EPS,
+                "Ring of Yaxche should reject non-Skill actions");
+        ring.onAction(
+                ringOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                ringSim);
+        assertClose(0.14,
+                effectiveStatAt(ringOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS, 0.0), EPS,
+                "R5 Ring of Yaxche should quantize 14,130 Max HP");
+        assertClose(0.0,
+                effectiveStatAt(ringOwner,
+                        StatType.CHARGED_ATTACK_DMG_BONUS, 0.0), EPS,
+                "Ring of Yaxche should only buff Normal Attack damage");
+        ringSim.advanceTime(9.0);
+        ringOwner.withStat(StatType.BASE_HP, 20000.0);
+        ring.onAction(
+                ringOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                ringSim);
+        assertClose(0.28,
+                effectiveStatAt(ringOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS, 10.0), EPS,
+                "Ring of Yaxche should refresh and resnapshot Max HP");
+        assertClose(0.0,
+                effectiveStatAt(ringOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS, 19.0), EPS,
+                "Ring of Yaxche should expire at exactly ten seconds");
+
+        model.weapon.RingOfYaxche cappedRing =
+                new model.weapon.RingOfYaxche(5);
+        TestCharacter cappedRingOwner = testCharacter(
+                Element.HYDRO, CharacterId.SUCROSE)
+                .withStat(StatType.BASE_HP, 50000.0);
+        cappedRingOwner.setWeapon(cappedRing);
+        CombatSimulator cappedRingSim = simulatorWith(cappedRingOwner);
+        cappedRing.onAction(
+                cappedRingOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                cappedRingSim);
+        assertClose(0.32,
+                effectiveStatAt(cappedRingOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS, 0.0), EPS,
+                "R5 Ring of Yaxche should cap its Normal bonus");
+
+        model.weapon.RingOfYaxche r1Ring =
+                new model.weapon.RingOfYaxche(1);
+        TestCharacter r1RingOwner = testCharacter(
+                Element.HYDRO, CharacterId.SUCROSE);
+        r1RingOwner.setWeapon(r1Ring);
+        CombatSimulator r1RingSim = simulatorWith(r1RingOwner);
+        r1Ring.onAction(
+                r1RingOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                r1RingSim);
+        assertClose(0.084,
+                effectiveStatAt(r1RingOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS, 0.0), EPS,
+                "R1 Ring of Yaxche quantized Normal bonus");
+
+        TestCharacter foreignUser = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        r1Ring.onAction(
+                foreignUser,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                r1RingSim);
+        r1Ring.onAction(
+                r1RingOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                new CombatSimulator());
+        r1Ring.initializeForSimulator(r1RingOwner, r1RingSim);
+        boolean ringReuseRejected = false;
+        try {
+            r1Ring.initializeForSimulator(r1RingOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            ringReuseRejected = true;
+        }
+        assertTrue(ringReuseRejected,
+                "Ring of Yaxche should reject cross-simulator reuse");
+
+        model.weapon.Cloudforged cloudforged =
+                new model.weapon.Cloudforged();
+        assertEquals("Cloudforged", cloudforged.getName(),
+                "Cloudforged display name");
+        assertEquals(model.type.WeaponType.BOW, cloudforged.getWeaponType(),
+                "Cloudforged weapon type");
+        assertClose(510.0, cloudforged.getBaseAtk(), EPS,
+                "Cloudforged base ATK");
+        assertClose(165.0,
+                cloudforged.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Cloudforged Elemental Mastery");
+        assertEquals(5, cloudforged.getRefinement(),
+                "Cloudforged default refinement");
+
+        TestCharacter cloudOwner = testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE);
+        cloudOwner.setWeapon(cloudforged);
+        CombatSimulator cloudSim = simulatorWith(cloudOwner);
+        cloudforged.onAction(
+                cloudOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                cloudSim);
+        assertClose(165.0,
+                effectiveStatAt(cloudOwner,
+                        StatType.ELEMENTAL_MASTERY, 0.0), EPS,
+                "Cloudforged should reject non-Burst actions");
+        cloudforged.onAction(
+                cloudOwner,
+                CharacterActionRequest.of(CharacterActionKey.BURST),
+                cloudSim);
+        assertClose(245.0,
+                effectiveStatAt(cloudOwner,
+                        StatType.ELEMENTAL_MASTERY, 0.0), EPS,
+                "R5 Cloudforged first stack");
+        cloudforged.onAction(
+                cloudOwner,
+                CharacterActionRequest.of(CharacterActionKey.BURST),
+                cloudSim);
+        assertClose(325.0,
+                effectiveStatAt(cloudOwner,
+                        StatType.ELEMENTAL_MASTERY, 0.0), EPS,
+                "R5 Cloudforged second stack");
+        cloudSim.advanceTime(17.0);
+        cloudforged.onAction(
+                cloudOwner,
+                CharacterActionRequest.of(CharacterActionKey.BURST),
+                cloudSim);
+        assertClose(325.0,
+                effectiveStatAt(cloudOwner,
+                        StatType.ELEMENTAL_MASTERY, 18.0), EPS,
+                "Cloudforged stack gain should refresh both stacks");
+        assertClose(165.0,
+                effectiveStatAt(cloudOwner,
+                        StatType.ELEMENTAL_MASTERY, 35.0), EPS,
+                "Cloudforged should expire at exactly eighteen seconds");
+
+        model.weapon.Cloudforged r1Cloudforged =
+                new model.weapon.Cloudforged(1);
+        TestCharacter r1CloudOwner = testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE);
+        r1CloudOwner.setWeapon(r1Cloudforged);
+        CombatSimulator r1CloudSim = simulatorWith(r1CloudOwner);
+        r1Cloudforged.onAction(
+                r1CloudOwner,
+                CharacterActionRequest.of(CharacterActionKey.BURST),
+                r1CloudSim);
+        assertClose(205.0,
+                effectiveStatAt(r1CloudOwner,
+                        StatType.ELEMENTAL_MASTERY, 0.0), EPS,
+                "R1 Cloudforged first stack");
+        r1Cloudforged.onAction(
+                foreignUser,
+                CharacterActionRequest.of(CharacterActionKey.BURST),
+                r1CloudSim);
+        r1Cloudforged.onAction(
+                r1CloudOwner,
+                CharacterActionRequest.of(CharacterActionKey.BURST),
+                new CombatSimulator());
+        assertClose(205.0,
+                effectiveStatAt(r1CloudOwner,
+                        StatType.ELEMENTAL_MASTERY, 0.0), EPS,
+                "Cloudforged should reject foreign dispatch");
+        r1Cloudforged.initializeForSimulator(r1CloudOwner, r1CloudSim);
+        boolean cloudReuseRejected = false;
+        try {
+            r1Cloudforged.initializeForSimulator(
+                    r1CloudOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            cloudReuseRejected = true;
+        }
+        assertTrue(cloudReuseRejected,
+                "Cloudforged should reject cross-simulator reuse");
+
+        boolean lowRingRefinementRejected = false;
+        try {
+            new model.weapon.RingOfYaxche(0);
+        } catch (IllegalArgumentException expected) {
+            lowRingRefinementRejected = true;
+        }
+        assertTrue(lowRingRefinementRejected,
+                "Ring of Yaxche should reject refinement zero");
+        boolean highRingRefinementRejected = false;
+        try {
+            new model.weapon.RingOfYaxche(6);
+        } catch (IllegalArgumentException expected) {
+            highRingRefinementRejected = true;
+        }
+        assertTrue(highRingRefinementRejected,
+                "Ring of Yaxche should reject refinement six");
+        boolean lowCloudRefinementRejected = false;
+        try {
+            new model.weapon.Cloudforged(0);
+        } catch (IllegalArgumentException expected) {
+            lowCloudRefinementRejected = true;
+        }
+        assertTrue(lowCloudRefinementRejected,
+                "Cloudforged should reject refinement zero");
+        boolean highCloudRefinementRejected = false;
+        try {
+            new model.weapon.Cloudforged(6);
+        } catch (IllegalArgumentException expected) {
+            highCloudRefinementRejected = true;
+        }
+        assertTrue(highCloudRefinementRejected,
+                "Cloudforged should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {

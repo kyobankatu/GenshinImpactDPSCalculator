@@ -12773,6 +12773,99 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
 
+## Implementation Order: Stateful Craftable Weapon Campaign
+
+Status: In progress. This campaign adds four missing craftable/event weapons
+whose passives fit existing action, reaction, particle, and damage hooks; RL
+and generated documentation remain excluded.
+
+Scope:
+
+- Add Ring of Yaxche and Cloudforged with refinement-aware timed stat windows.
+- Add Hakushin Ring with reaction-element party buffs and Crescent Pike with
+  active-owner particle collection plus nonrecursive Physical follow-up damage.
+- Reuse existing simulator capabilities without introducing weapon-specific
+  branches into the combat runtime.
+
+Out of scope for this pass:
+
+- Generic energy-decrease and particle-pickup event redesign, enemy targeting,
+  multi-target damage, RL, and generated docs.
+
+### Phase 1: Skill and Energy Windows - Done
+
+Target files:
+
+- `src/java/model/weapon/RingOfYaxche.java` (new)
+- `src/java/model/weapon/Cloudforged.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Branch-isolated source commit `49450dc` adds owner-bound Skill and observable
+  Burst-energy windows without changing shared runtime code.
+- Focused regressions cover metadata, R1/R5, HP quantization and cap,
+  resnapshot/expiry, two-stack refresh, foreign dispatch, rebinding, and invalid
+  refinement; reaction regression, build, Javadoc, and preflight gates pass.
+
+Acceptance criteria:
+
+- Both classes expose exact Lv. 90 metadata, R5 defaults, selected refinement,
+  and reject refinement 0/6.
+- Ring of Yaxche snapshots whole 1,000-Max-HP units on Skill use, grants only
+  the capped R1-R5 Normal Attack bonus for 10 seconds, and refreshes cleanly.
+- Cloudforged treats a successful owner Burst as the currently observable
+  Energy-decrease event, grants up to two R1-R5 EM stacks for 18 seconds, and
+  refreshes the shared duration when another stack is gained.
+
+Test cases to add or update:
+
+- Normal: metadata, Skill/Burst activation, R1/R5 bonus values, and two stacks.
+- Boundary: exact 10/18-second expiry, refresh, HP quantization, and caps.
+- Abnormal: refinement 0/6, wrong action/user, unbound use, and no wrong stat.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
+
+### Phase 2: Reaction and Particle Follow-Ups
+
+Target files:
+
+- `src/java/model/weapon/HakushinRing.java` (new)
+- `src/java/model/weapon/CrescentPike.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Both classes expose exact Lv. 90 metadata, R5 defaults, selected refinement,
+  and reject refinement 0/6.
+- Hakushin Ring activates only for an on-field owner-triggered Electro-related
+  reaction, gives each involved elemental party member the R1-R5 bonus for six
+  seconds, includes the holder, and does not refresh an already-active element.
+- Crescent Pike treats a particle notification while its owner is active as
+  collection, opens a five-second window, and adds one nonrecursive Physical
+  R1-R5 ATK-scaled hit for each positive Normal or Charged hit.
+
+Test cases to add or update:
+
+- Normal: metadata, eligible Electro reactions, party filtering, particle
+  activation, Normal/Charged follow-ups, and R1/R5 values.
+- Boundary: off-field rejection, exact six/five-second expiry, non-refreshing
+  Hakushin elements, and Crescent window refresh.
+- Abnormal: refinement 0/6, NONE/ineligible reactions, zero/wrong/recursive
+  damage, inactive-owner particles, and duplicate binding.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
+
 ## Implementation Order: Five-Star EM Support Weapon Campaign
 
 Status: Complete. Two five-star EM support weapons now use an off-field hit
