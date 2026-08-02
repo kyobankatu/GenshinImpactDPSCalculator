@@ -153,6 +153,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_DamageHooksDispatchOnce();
         testAccuracyPhaseF_SkywardSpineInjectedProcBoundaries();
         testAccuracyPhaseF_FavoniusInjectedProcBoundaries();
+        testAccuracyPhaseF_FavoniusFamilyMetadata();
         testAccuracyPhaseF_SacrificialSwordProcBoundaries();
         testAccuracyPhaseF_WanderingEvenstarTimedSnapshot();
         testAccuracyPhaseF_ColumbinaMoondriftInjectedDrawBoundaries();
@@ -3928,6 +3929,13 @@ public class ReactionRegressionTest {
                 "R1 Windfall should generate particles again at its exact cooldown boundary");
     }
 
+    private static void testAccuracyPhaseF_FavoniusFamilyMetadata() {
+        model.weapon.FavoniusSword sword = new model.weapon.FavoniusSword(5, () -> 0.0);
+        assertWeaponMetadata(
+                sword, "Favonius Sword", 454.0, 0.613, model.type.WeaponType.SWORD);
+        assertFavoniusWindfallGeneratesEnergy(sword, "Favonius Sword");
+    }
+
     private static void testAccuracyPhaseF_SacrificialSwordProcBoundaries() {
         boolean nullRejected = false;
         try {
@@ -5902,6 +5910,33 @@ public class ReactionRegressionTest {
             assertEquals(expected[i], actual.get(i),
                     "Element order mismatch at index " + i);
         }
+    }
+
+    private static void assertWeaponMetadata(
+            Weapon weapon,
+            String expectedName,
+            double expectedBaseAtk,
+            double expectedEnergyRecharge,
+            model.type.WeaponType expectedType) {
+        assertEquals(expectedName, weapon.getName(), expectedName + " display name");
+        assertClose(expectedBaseAtk, weapon.getBaseAtk(), EPS, expectedName + " base ATK");
+        assertClose(expectedEnergyRecharge,
+                weapon.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                expectedName + " Energy Recharge");
+        assertEquals(expectedType, weapon.getWeaponType(), expectedName + " weapon type");
+    }
+
+    private static void assertFavoniusWindfallGeneratesEnergy(
+            model.weapon.FavoniusWeapon weapon,
+            String weaponName) {
+        TestCharacter owner = testCharacter(Element.HYDRO).withStat(StatType.CRIT_RATE, 1.0);
+        owner.setWeapon(weapon);
+        CombatSimulator sim = simulatorWith(owner);
+        owner.restoreCurrentEnergy(0.0);
+        AttackAction hit = damageHit(weaponName + " Windfall fixture", Element.HYDRO, 1.0);
+        captureStandardOutput(() -> weapon.onDamage(owner, hit, 0.0, sim));
+        assertTrue(owner.getCurrentEnergy() > 0.0,
+                weaponName + " should inherit neutral-particle Windfall");
     }
 
     private static void assertClose(double expected, double actual, double tolerance, String message) {
