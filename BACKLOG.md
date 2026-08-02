@@ -2550,10 +2550,13 @@ experiment record.
 
 ### B-115 — Scion of the Blazing Sun coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Scion of the Blazing Sun; RL excluded
 - **Value/risk:** one complete passive reuses typed post-hit and immediate
   nonrecursive Physical action contracts under the single-enemy model
 - **Evidence boundary:** KQM TCL metadata, R1-R5 proc/Charged values, positive
   active Charged gate, ten-second activation CT and Heartsearer duration
 - **Plan:** `TASKS.md` Scion of the Blazing Sun Campaign
+- **Completion:** `a22e1ba` adds the immediate Physical proc, post-hit
+  Heartsearer window, exact CT behavior, and focused abnormal regressions;
+  build/Javadoc/leak gates pass

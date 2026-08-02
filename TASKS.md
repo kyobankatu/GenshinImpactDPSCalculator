@@ -15009,7 +15009,7 @@ Verification:
 
 ## Implementation Order: Scion of the Blazing Sun Campaign
 
-Status: Active. Add Scion of the Blazing Sun with a nonrecursive Physical proc
+Status: Complete. Scion of the Blazing Sun now has a nonrecursive Physical proc
 and single-target Heartsearer window.
 
 Scope:
@@ -15022,12 +15022,19 @@ Out of scope for this pass:
 - Multi-target debuff partitioning, characters, formulas, RL, generated docs,
   and unrelated Battle Pass weapons.
 
-### Phase 1: Add Scion of the Blazing Sun
+### Phase 1: Add Scion of the Blazing Sun - Done (`a22e1ba`)
 
 Target files:
 
 - `src/java/model/weapon/ScionOfTheBlazingSun.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- R1/R5 metadata and proc ratios, immediate nonrecursive Physical damage,
+  post-hit Heartsearer, exact expiry/reactivation, and all invalid gates pass.
+- Single-target mapping and cross-simulator binding are explicit; build,
+  reaction regression, Javadoc, and artifact-leak gates pass.
 
 Acceptance criteria:
 
