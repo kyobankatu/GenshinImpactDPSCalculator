@@ -14017,7 +14017,7 @@ Verification:
 
 ## Implementation Order: Deterministic Physical Proc Weapon Campaign
 
-Status: Active. Add three deterministic proc state machines while reusing the
+Status: Complete. Three deterministic proc state machines now reuse the
 existing generated Physical action pipeline.
 
 Scope:
@@ -14030,7 +14030,7 @@ Out of scope for this pass:
 - Multi-target multiplication, visual projectile delay, healing, characters,
   formulas, RL, generated docs, and unrelated proc weapons.
 
-### Phase 1: Add Three Deterministic Physical Proc Weapons
+### Phase 1: Add Three Deterministic Physical Proc Weapons - Done (`2e69b5f`)
 
 Target files:
 
@@ -14038,6 +14038,15 @@ Target files:
 - `src/java/model/weapon/TheFlute.java` (new)
 - `src/java/model/weapon/DebateClub.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Isshin proves Normal/Charged/Plunge gates, 180% proc, 15% ATK window, and
+  exact shared eight-second CT/refresh.
+- The Flute proves exact 0.5-second Harmonic gains, five-stack consumption,
+  independent exact 30-second expiry, and R1/R5 proc values.
+- Debate proves Skill-only 15-second window, exact three-second proc CT, R1/R5,
+  wrong/zero/off-field exclusions; build/Javadoc/preflight/diff pass.
 
 Acceptance criteria:
 

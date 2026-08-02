@@ -2332,10 +2332,12 @@ experiment record.
 
 ### B-097 — Deterministic physical proc weapon coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Kagotsurube Isshin, The Flute, and Debate Club; RL excluded
 - **Value/risk:** three complete proc passives add bounded local state only and
   reuse the verified generated Physical action pipeline
 - **Evidence boundary:** KQM TCL metadata, typed gates, 180% Isshin proc/window,
   five-Harmonic Flute, and 15-second/three-second Debate policy
 - **Plan:** `TASKS.md` Deterministic Physical Proc Weapon Campaign
+- **Completion:** `2e69b5f` adds all three state machines and focused regressions;
+  build/Javadoc/leak gates pass
