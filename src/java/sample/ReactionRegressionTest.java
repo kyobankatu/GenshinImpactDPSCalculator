@@ -142,6 +142,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_FruitOfFulfillment();
         testAccuracyPhaseF_ScionOfTheBlazingSun();
         testAccuracyPhaseF_AlleyHunter();
+        testAccuracyPhaseF_SequenceOfSolitude();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -9090,6 +9091,113 @@ public class ReactionRegressionTest {
         }
         assertTrue(highAlleyRefinementRejected,
                 "Alley Hunter should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_SequenceOfSolitude() {
+        model.weapon.SequenceOfSolitude sequence =
+                new model.weapon.SequenceOfSolitude();
+        assertEquals("Sequence of Solitude", sequence.getName(),
+                "Sequence display name");
+        assertClose(510.0, sequence.getBaseAtk(), EPS,
+                "Sequence base ATK");
+        assertClose(0.413,
+                sequence.getStats().get(StatType.HP_PERCENT), EPS,
+                "Sequence HP substat");
+        assertEquals(model.type.WeaponType.BOW, sequence.getWeaponType(),
+                "Sequence weapon type");
+        assertEquals(5, sequence.getRefinement(),
+                "Sequence default refinement");
+
+        TestCharacter sequenceOwner = testCharacter(
+                Element.HYDRO, CharacterId.SUCROSE);
+        sequenceOwner.setWeapon(sequence);
+        CombatSimulator sequenceSim = simulatorWith(sequenceOwner);
+        AttackAction zeroHit = typedDamageHit(
+                "Zero", ActionType.NORMAL, 0.0);
+        AttackAction skillHit = typedDamageHit(
+                "Skill", ActionType.SKILL, 1.0);
+        AttackAction generatedProc = new AttackAction(
+                "Sequence of Solitude Silent Trigger",
+                0.8,
+                Element.PHYSICAL,
+                StatType.BASE_HP,
+                StatType.PHYSICAL_DMG_BONUS,
+                0.0,
+                ActionType.OTHER);
+        TestCharacter foreignUser = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+
+        sequence.onDamage(sequenceOwner, zeroHit, 0.0, sequenceSim);
+        sequence.onDamage(foreignUser, skillHit, 0.0, sequenceSim);
+        sequence.onDamage(
+                sequenceOwner, skillHit, 0.0, new CombatSimulator());
+        assertClose(0.0, sequenceSim.getTotalDamage(), EPS,
+                "Zero, foreign, and wrong-simulator hits should not proc Sequence");
+        sequenceSim.addCharacter(foreignUser);
+        sequenceSim.setActiveCharacter(CharacterId.AMBER);
+        sequence.onDamage(sequenceOwner, skillHit, 0.0, sequenceSim);
+        assertClose(0.0, sequenceSim.getTotalDamage(), EPS,
+                "Off-field hits should not proc Sequence");
+
+        sequenceSim.setActiveCharacter(CharacterId.SUCROSE);
+        sequence.onDamage(sequenceOwner, skillHit, 0.0, sequenceSim);
+        double firstProcDamage = sequenceSim.getTotalDamage();
+        assertTrue(firstProcDamage > 0.0,
+                "Sequence should resolve its Max-HP proc immediately");
+        sequence.onDamage(sequenceOwner, generatedProc, 0.0, sequenceSim);
+        assertClose(firstProcDamage, sequenceSim.getTotalDamage(), EPS,
+                "Sequence's generated proc should not recurse");
+        sequenceSim.advanceTime(15.0 - 1e-6);
+        sequence.onDamage(
+                sequenceOwner, skillHit,
+                sequenceSim.getCurrentTime(), sequenceSim);
+        assertClose(firstProcDamage, sequenceSim.getTotalDamage(), EPS,
+                "Sequence should remain on cooldown before 15 seconds");
+        sequenceSim.advanceTime(1e-6 + 1e-9);
+        sequence.onDamage(
+                sequenceOwner, skillHit,
+                sequenceSim.getCurrentTime(), sequenceSim);
+        assertClose(firstProcDamage * 2.0,
+                sequenceSim.getTotalDamage(), EPS,
+                "Sequence should reactivate at exact 15-second CT");
+
+        model.weapon.SequenceOfSolitude r1Sequence =
+                new model.weapon.SequenceOfSolitude(1);
+        TestCharacter r1SequenceOwner = testCharacter(
+                Element.HYDRO, CharacterId.SUCROSE);
+        r1SequenceOwner.setWeapon(r1Sequence);
+        CombatSimulator r1SequenceSim = simulatorWith(r1SequenceOwner);
+        r1Sequence.onDamage(r1SequenceOwner, skillHit, 0.0, r1SequenceSim);
+        assertClose(firstProcDamage * 0.5,
+                r1SequenceSim.getTotalDamage(), EPS,
+                "R1 Sequence proc should scale from 40-percent Max HP");
+
+        boolean sequenceReuseRejected = false;
+        try {
+            sequence.initializeForSimulator(sequenceOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            sequenceReuseRejected = true;
+        }
+        assertTrue(sequenceReuseRejected,
+                "Sequence should reject cross-simulator reuse");
+
+        boolean lowSequenceRefinementRejected = false;
+        try {
+            new model.weapon.SequenceOfSolitude(0);
+        } catch (IllegalArgumentException expected) {
+            lowSequenceRefinementRejected = true;
+        }
+        assertTrue(lowSequenceRefinementRejected,
+                "Sequence should reject refinement zero");
+
+        boolean highSequenceRefinementRejected = false;
+        try {
+            new model.weapon.SequenceOfSolitude(6);
+        } catch (IllegalArgumentException expected) {
+            highSequenceRefinementRejected = true;
+        }
+        assertTrue(highSequenceRefinementRejected,
+                "Sequence should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {
