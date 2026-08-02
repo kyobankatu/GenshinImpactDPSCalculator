@@ -14568,3 +14568,50 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Energy-Conditional Emblem Weapon Campaign
+
+Status: Active. Add two complete five-star emblem weapons using typed actions,
+post-damage stacks, and live Energy fullness.
+
+Scope:
+
+- Add Mistsplitter Reforged and Thundering Pulse with sourced metadata, R1-R5
+  values, R5 defaults, exact independent windows, and focused regressions.
+
+Out of scope for this pass:
+
+- Projectile travel, infusion providers, characters, formulas, RL, generated
+  docs, and unrelated emblem weapons.
+
+### Phase 1: Add Mistsplitter Reforged and Thundering Pulse
+
+Target files:
+
+- `src/java/model/weapon/MistsplitterReforged.java` (new)
+- `src/java/model/weapon/ThunderingPulse.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Mistsplitter always grants 12-24% all Elemental DMG; elemental Normal/Charged
+  damage owns a five-second stack, Burst use owns a ten-second stack, and live
+  Energy below full owns a third, yielding exact 8/16/28%-16/32/56% owner-element tiers.
+- Thundering Pulse always grants 20-40% ATK; positive active-owner Normal damage
+  owns a five-second stack, Skill use owns a ten-second stack, and live Energy
+  below full owns a third, yielding exact 12/24/40%-24/48/80% Normal DMG tiers.
+- Triggering-hit post-order, Burst/Skill pre-order, typed/element/active gates,
+  live Energy transitions, R1-R5 defaults/validation, and binding are explicit.
+
+Test cases to add or update:
+
+- Normal: all metadata/static values, each stack/tier, full-to-low Energy, R5.
+- Boundary: exact five/ten seconds, refresh independence, exact full Energy, R1.
+- Abnormal: Physical/wrong/zero/off-field hits, cross-simulator reuse, refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
