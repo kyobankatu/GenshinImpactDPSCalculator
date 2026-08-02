@@ -3336,3 +3336,19 @@ experiment record.
   Engulfing Lightning, and Noelle are integrated on `dev_0`; final-stat HP/ER
   conversions and typed action/reaction windows are regression-covered, while
   unavailable defensive and player-state branches remain explicitly inactive.
+
+### B-157 — Golden Majesty and Razor content wave
+
+- **Status:** in-progress
+- **Source:** continued explicit broad character, weapon, and artifact coverage
+- **Scope/risk:** four Golden Majesty weapons, six legacy boundary artifacts,
+  and Razor; planned typed weapon state plus isolated content slices
+- **Evidence:** maintained KQM weapon, artifact, and Razor catalogs, accessed
+  2026-08-03:
+  https://library.keqingmains.com/equipment/weapons
+  https://library.keqingmains.com/equipment/artifacts
+  https://library.keqingmains.com/characters/electro/razor
+- **Boundary:** shield/player damage/healing/status, target HP, enemy DEF shred,
+  Witch's Homework, RL, and generated docs remain excluded.
+- **Proof/plan:** three-phase `TASKS.md` Golden Majesty and Razor Content Wave
+  with focused regressions, reaction/build/Javadoc gates, and preflight.

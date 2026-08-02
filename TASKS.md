@@ -45,9 +45,10 @@ The B-154 Millennial Movement campaign is complete. Elegy for the End,
 Freedom-Sworn, and Song of Broken Pines now share typed sigil, same-effect
 replacement, and snapshot-safe weapon state contracts.
 
-The active B-155 parallel foundational content campaign adds four low-rarity
-artifact sets, the five-weapon Royal family, and Barbara through isolated
-implementation lanes; RL and generated documentation remain excluded.
+The B-155 and B-156 parallel content campaigns are complete. The active B-157
+wave adds the Golden Majesty weapon family, six legacy boundary artifact sets,
+and Razor through isolated implementation lanes; RL and generated
+documentation remain excluded.
 
 The B-128 action-use artifact campaign is complete. Successful typed actions
 now reach equipped artifacts, and Heart of Depth plus Martial Artist use the
@@ -13480,6 +13481,154 @@ Completion evidence:
   cross-binding, unrelated stats, and independent instances pass.
 - `./gradlew EngulfingLightningRegressionTest ReactionRegressionTest build
   javadoc` and `python scripts/preflight.py --run` passed on 2026-08-03.
+
+## Implementation Order: Golden Majesty and Razor Content Wave
+
+Status: In progress. Primary owns the shared weapon family and integration;
+legacy artifacts and Razor are isolated, branch-owned implementation units.
+
+Scope:
+
+- Add Summit Shaper, The Unforged, Memory of Dust, and Vortex Vanquisher through
+  one snapshot-safe Golden Majesty stack contract.
+- Add the four Prayers tiaras, Tiny Miracle, and Traveling Doctor at the exact
+  simulator boundary their player-state effects permit.
+- Add Razor's sourced offensive actions, form, Energy state, and representable
+  passives and constellations.
+
+Out of scope:
+
+- Shield strength and shield-presence doubling, player incoming damage and
+  healing, player elemental-status duration, target current HP, enemy DEF
+  shred, Witch's Homework, geometry, RL, and generated docs.
+
+### Phase 1: Golden Majesty Weapon Family
+
+Why first:
+
+- All four weapons share metadata, hit categories, stack cadence, duration,
+  and refinement tables, so one typed owner-buff implementation prevents four
+  divergent state machines.
+
+Target files:
+
+- `src/java/model/weapon/GoldenMajestyWeapon.java` (new)
+- `src/java/model/weapon/SummitShaper.java` (new)
+- `src/java/model/weapon/TheUnforged.java` (new)
+- `src/java/model/weapon/MemoryOfDust.java` (new)
+- `src/java/model/weapon/VortexVanquisher.java` (new)
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/sample/GoldenMajestyWeaponRegressionTest.java` (new)
+
+Tasks:
+
+- Expose exact Lv. 90 metadata and R1-R5 Golden Majesty coefficients.
+- Gain up to five refreshed ATK stacks from Normal, Charged, Skill, or Burst
+  hits, including zero-damage hits, behind the half-open 0.3-second gate.
+- Store stacks and trigger cooldown as typed owner buffs so simulator snapshot
+  restore reconstructs effective state; leave shield-only effects inactive.
+
+Acceptance criteria:
+
+- All four weapon types and refinement tables are exact, R5 is the default,
+  invalid refinement is rejected, and stacks neither leak nor stack past five.
+- Pre-trigger damage excludes the new stack; post-trigger stats include it at
+  exact gate/expiry boundaries and after snapshot rollback.
+
+Test cases to add or update:
+
+- Normal: table-driven metadata, eligible hit classes, zero-damage hits, cap.
+- Boundary: 0.299/0.300 seconds, 7.999/8.000 seconds, refresh, rollback.
+- Abnormal: Plunge/Other, wrong binding, invalid refinement, independent state,
+  and zero fabricated shield doubling.
+
+Verification:
+
+- `./gradlew GoldenMajestyWeaponRegressionTest`
+- `./gradlew ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 2: Legacy Player-State Artifact Boundaries
+
+Why second:
+
+- These six asset-backed sets are independent of shared combat callbacks and
+  can close canonical catalog gaps without inventing player-state mechanics.
+
+Target files:
+
+- `src/java/model/artifact/PrayersForDestiny.java` (new)
+- `src/java/model/artifact/PrayersForIllumination.java` (new)
+- `src/java/model/artifact/PrayersToSpringtime.java` (new)
+- `src/java/model/artifact/PrayersForWisdom.java` (new)
+- `src/java/model/artifact/TinyMiracle.java` (new)
+- `src/java/model/artifact/TravelingDoctor.java` (new)
+- `src/java/sample/LegacyBoundaryArtifactRegressionTest.java` (new)
+
+Tasks:
+
+- Add canonical names and preserve supplied artifact stats.
+- Keep status-duration reduction, player elemental resistance, incoming
+  healing, Burst healing, and incoming-damage triggers explicitly inactive.
+
+Acceptance criteria:
+
+- Every set is loadable, has exact zero representable fixed offensive stats,
+  rejects null stats, and retains supplied main/substats without mutation.
+
+Test cases to add or update:
+
+- Normal: canonical names, fresh/supplied containers, arbitrary times.
+- Boundary: independent instances and no cross-stat mutation.
+- Abnormal: null containers and all unsupported effects remain zero.
+
+Verification:
+
+- `./gradlew LegacyBoundaryArtifactRegressionTest`
+- `./gradlew ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Razor Offensive Vertical Slice
+
+Why third:
+
+- Razor is independent of both equipment batches but requires a complete
+  character/config identity slice and focused form-state validation.
+
+Target files:
+
+- `src/java/model/character/Razor.java` (new)
+- `config/characters/Razor/Razor_Status.csv` (new)
+- `config/characters/Razor/Razor_Multipliers.csv` (new)
+- `src/java/model/type/CharacterId.java`
+- `src/java/sample/RazorRegressionTest.java` (new)
+
+Tasks:
+
+- Add sourced Normal, cyclic Charged, high-Plunge, Press/Hold Skill, Sigils,
+  Burst cast, Normal echoes, attack speed, form duration, and switch expiry.
+- Implement A1/A4 and representable C1/C3/C5/C6 branches through typed events;
+  keep target-HP C2, enemy-DEF C4, and Witch's Homework inactive.
+
+Acceptance criteria:
+
+- Talent data, timing, gauge, ICD, particles, Energy, cooldown, form, echoes,
+  and implemented constellation boundaries are exact and instance-isolated.
+- Unsupported defensive, target-state, and progression effects remain absent.
+
+Test cases to add or update:
+
+- Normal: every action category, Sigil gain/consume, Burst echo and C branches.
+- Boundary: cooldown/Energy gates, 15-second form, switch-out, C6 cadence,
+  snapshot-supported buffs, and attack-speed timing.
+- Abnormal: invalid constellation, unsupported actions, cross-simulator reuse,
+  independent instances, and excluded branches.
+
+Verification:
+
+- `./gradlew RazorRegressionTest PartyCatalogRegressionTest`
+- `./gradlew ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
 
 ## Implementation Order: Black Sword Campaign
 
