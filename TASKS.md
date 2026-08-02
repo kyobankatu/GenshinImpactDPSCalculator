@@ -13227,8 +13227,8 @@ Verification:
 
 ## Implementation Order: Reaction-Window Weapon Campaign
 
-Status: Active. Add three weapons whose owner-triggered reactions open or stack
-refresh-only stat windows through one simulator-initialized listener policy.
+Status: Complete. Three weapons now use one verified simulator-initialized
+listener policy for owner-triggered reaction windows and stacks.
 
 Scope:
 
@@ -13247,7 +13247,7 @@ Definitions:
 - **Shared-duration stacks**: each eligible reaction increments up to the cap
   and refreshes one expiration time for every currently held stack.
 
-### Phase 1: Add Reaction-Window Weapons
+### Phase 1: Add Reaction-Window Weapons - Done
 
 Target files:
 
@@ -13259,9 +13259,18 @@ Target files:
 
 | Unit | Reaction window | Focused verification | Status |
 |---|---|---|---|
-| Shared base + Mappa Mare | any reaction, 1-2 Elemental DMG stacks for 10s | source/field gating, stack cap/refresh/expiry, R1/R5 | Pending |
-| Emerald Orb | Hydro reaction set, ATK for 12s | exact kinds/Swirl element, metadata, R1/R5 | Pending |
-| Dark Iron Sword | Electro reaction set, fixed 20% ATK for 12s | exact kinds/Swirl element, fixed R1, metadata | Pending |
+| Shared base + Mappa Mare | any reaction, 1-2 Elemental DMG stacks for 10s | source/field gating, stack cap/refresh/expiry, R1/R5 | Done (`73a6661`) |
+| Emerald Orb | Hydro reaction set, ATK for 12s | exact kinds/Swirl element, metadata, R1/R5 | Done (`74d3f5d`) |
+| Dark Iron Sword | Electro reaction set, fixed 20% ATK for 12s | exact kinds/Swirl element, fixed R1, metadata | Done (`2f780f8`) |
+
+Completion evidence:
+
+- Mappa Mare applies one/two shared-duration stacks to all seven elemental
+  stats, excludes Physical, caps, refreshes, and resets after exact expiry.
+- Emerald Orb and Dark Iron Sword cover every modeled sourced reaction kind and
+  element-specific Swirl while rejecting wrong kinds/elements and sources.
+- Every unit passes reaction regression, build, and preflight; shared/final
+  public APIs pass Javadoc with no generated artifact staged.
 
 Acceptance criteria:
 

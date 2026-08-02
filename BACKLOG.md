@@ -2175,10 +2175,12 @@ experiment record.
 
 ### B-084 — Reaction-window weapon coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Mappa Mare, Emerald Orb, and Dark Iron Sword; RL excluded
 - **Value/risk:** three complete passives reuse typed reaction attribution and
   add no reaction resolution, formula, random, or target state
 - **Evidence boundary:** KQM TCL current metadata/reaction lists and refinement
   values; shared-duration Mappa stacks; Stellar-Conduct remains unsupported
 - **Plan:** `TASKS.md` Reaction-Window Weapon Campaign
+- **Completion:** `73a6661`, `74d3f5d`, and `2f780f8` add the shared listener and
+  all variants; focused/build/Javadoc/leak gates pass
