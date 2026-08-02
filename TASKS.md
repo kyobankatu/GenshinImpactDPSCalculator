@@ -13473,7 +13473,7 @@ Completion evidence:
 
 ## Implementation Order: Qiqi Offensive Vertical Slice
 
-Status: In progress. B-167 is one implementation-first content unit.
+Status: Complete. B-167 is implemented and independently audited.
 
 Scope:
 
@@ -13487,9 +13487,10 @@ Scope:
 Out of scope for this pass:
 
 - Healing and incoming-healing bonuses, A4's random talisman, C4 enemy ATK
-  reduction, C6 revival, multi-target geometry, RL, and generated docs.
+  reduction, C6 revival, Witch's Revelation/Polestar/Stellar-Conduct,
+  multi-target geometry, RL, and generated docs.
 
-### Phase 1: Add Qiqi Offensive Content Slice
+### Phase 1: Add Qiqi Offensive Content Slice - Done
 
 Why:
 
@@ -13535,6 +13536,16 @@ Verification:
 - `./gradlew QiqiRegressionTest`
 - `./gradlew ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Commit `5dda92f` adds Qiqi identity/data, seven-hit Normal chain, two-hit
+  Charged Attack, Plunge, classic nine-swipe Skill, Burst talisman, and
+  representable C1/C2/C3/C5 behavior.
+- Independent review corrected Herald snapshot ownership from cast time to the
+  frame-32 initial hit and added pending-initial plus repeated-restore proof.
+- `QiqiRegressionTest`, reaction regression, build, Javadoc, and executable
+  preflight pass on 2026-08-03.
 
 ## Implementation Order: Parallel Foundational Content Campaign
 

@@ -3505,7 +3505,7 @@ experiment record.
 
 ### B-167 — Qiqi offensive vertical slice
 
-- **Status:** in-progress
+- **Status:** complete
 - **Source:** explicit broad content-expansion request and post-B-166 missing
   character class inventory
 - **Symptom:** Qiqi has a local image but no typed identity, loadable combat
@@ -3516,5 +3516,8 @@ experiment record.
 - **Scope/risk:** planned one-phase offensive slice with snapshot-safe Skill,
   Burst talisman, and representable C1/C2/C3/C5.
 - **Boundary:** healing, A4 randomness, C4 enemy ATK, C6 revival, geometry, RL,
-  and generated docs remain excluded.
+  generated docs, and deferred Witch's Revelation/Polestar/Stellar-Conduct
+  remain excluded.
 - **Proof:** `TASKS.md` Qiqi Offensive Vertical Slice and focused/full gates.
+- **Completion:** commit `5dda92f` adds the complete bounded slice and resolves
+  independent-review snapshot timing; all planned focused/full gates pass.
