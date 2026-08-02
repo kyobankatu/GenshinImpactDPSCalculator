@@ -27,8 +27,8 @@ The current autonomous session is simulator-only. Python RL training and the
 Java RL bridge are excluded; the retained NCCL/DDP plan below is paused until a
 future explicit user request.
 
-The prior simulator content campaigns are complete. The Amber character
-vertical slice is active; RL and generated docs remain excluded.
+The prior simulator content campaigns, including the Amber character vertical
+slice, are complete; RL and generated docs remain excluded.
 
 The B-058 Burning fuel correction is complete. It replaces the fixed
 two-second approximation with typed Dendro-fuel decay and refresh ownership
@@ -12900,8 +12900,8 @@ Verification:
 
 ## Implementation Order: Amber Character Vertical Slice
 
-Status: In progress. One character/data/regression unit will add Amber through
-C6 within a stationary one-enemy combat boundary.
+Status: Complete. One character/data/regression unit adds Amber through C6
+within a stationary one-enemy combat boundary.
 
 Scope:
 
@@ -12920,7 +12920,7 @@ Definitions:
 - **Center-hit Burst stand-in**: all 18 sourced Fiery Rain waves hit the one
   modeled enemy over two seconds and share standard 1U Burst ICD.
 
-### Phase 1: Add Amber Data, Delayed Actions, Constellations, and Regression
+### Phase 1: Add Amber Data, Delayed Actions, Constellations, and Regression - Done
 
 Target files:
 
@@ -12929,6 +12929,15 @@ Target files:
 - `config/characters/Amber/Amber_Status.csv` (new)
 - `config/characters/Amber/Amber_Multipliers.csv` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Commit `90f7f8c` adds stable ID 10, aligned Lv. 90/talent configuration,
+  typed bow attacks, delayed Baron Bunny, and center-position Fiery Rain.
+- Exact pre-/at-eight-second Skill, fixed 18-wave Burst, C0/C1 Charged, C0/C4
+  charge recovery, C5/C3 multipliers, A1, and C6 buff expiry regressions pass.
+- `ReactionRegressionTest`, build, Javadoc, and preflight pass with no generated
+  or deliberately untracked artifact staged.
 
 Acceptance criteria:
 

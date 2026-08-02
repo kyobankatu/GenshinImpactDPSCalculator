@@ -2115,10 +2115,12 @@ experiment record.
 
 ### B-079 — Amber character and constellation coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** stationary one-enemy Amber vertical slice; RL excluded
 - **Value/risk:** high-value starter character using existing delayed event,
   snapshot, charge, typed action, ICD, particle, and team-buff contracts
 - **Evidence boundary:** KQM TCL stats/talents/frames/gauge/ICD/particles and
   constellations; weak points, C2, summon HP/taunt, and random placement excluded
 - **Plan:** `TASKS.md` Amber Character Vertical Slice
+- **Completion:** `90f7f8c` adds the complete allowed vertical slice with exact
+  delayed/fixed-count events; reaction regression, build, Javadoc, and leaks pass
