@@ -2100,3 +2100,13 @@ experiment record.
 - **Plan:** `TASKS.md` Remaining 3-Star Bane Weapon Campaign
 - **Completion:** `45eae33`, `53abaaf`, and `9749303` add all three supported
   variants with reaction regression, build, Javadoc, and leak gates passing
+
+### B-078 — Static action-bonus weapon coverage
+
+- **Status:** active
+- **Scope:** The Stringless, Rust, and White Tassel; RL excluded
+- **Value/risk:** exact static mappings onto existing action damage stats with
+  no event, formula, or target-state changes
+- **Evidence boundary:** KQM TCL Lv. 90 metadata and R1-R5 passive values;
+  projectile travel and weak-point weapons remain outside this batch
+- **Plan:** `TASKS.md` Static Action-Bonus Weapon Campaign

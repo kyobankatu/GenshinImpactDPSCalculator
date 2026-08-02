@@ -27,9 +27,8 @@ The current autonomous session is simulator-only. Python RL training and the
 Java RL bridge are excluded; the retained NCCL/DDP plan below is paused until a
 future explicit user request.
 
-The Favonius, Sacrificial, target-Aura weapon, Kaeya vertical-slice, and
-remaining 3-star Bane weapon campaigns are complete; RL and generated docs
-remain excluded.
+The prior simulator content campaigns are complete. The static action-bonus
+weapon campaign is active; RL and generated docs remain excluded.
 
 The B-058 Burning fuel correction is complete. It replaces the fixed
 two-second approximation with typed Dendro-fuel decay and refresh ownership
@@ -12829,6 +12828,59 @@ Test cases to add or update:
 - Normal/static: each name, base ATK, substat, category, and R5 eligible Aura.
 - Boundary: each R1 bonus and alternative eligible element.
 - Abnormal: one ineligible Aura per variant and shared invalid refinement.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc` at the batch boundary
+- `python scripts/preflight.py`
+
+## Implementation Order: Static Action-Bonus Weapon Campaign
+
+Status: In progress. Three independently revertible weapons will map sourced
+passives directly onto existing action-specific damage stats.
+
+Scope:
+
+- Add The Stringless, Rust, and White Tassel with Lv. 90 metadata, R1-R5
+  validation, and exact action-specific bonuses.
+- Keep all bonuses additive with existing Skill, Burst, Normal, and Charged
+  damage stats so formula and snapshot behavior remain unchanged.
+
+Out of scope for this pass:
+
+- Projectile travel, weak points, attack speed, new action categories, formula
+  changes, characters, parties, RL, and generated docs.
+
+### Phase 1: Add Static Action-Bonus Weapons
+
+Target files:
+
+- `src/java/model/weapon/TheStringless.java` (new)
+- `src/java/model/weapon/Rust.java` (new)
+- `src/java/model/weapon/WhiteTassel.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+| Unit | Passive | Focused verification | Status |
+|---|---|---|---|
+| The Stringless | Skill/Burst +24-48% | 510 ATK, 165 EM, bow, R1/R5 | Ready |
+| Rust | Normal +40-80%, Charged -10% | 510 ATK, 41.3% ATK, bow, R1/R5 | Ready |
+| White Tassel | Normal +24-48% | 401 ATK, 23.4% CR, polearm, R1/R5 | Ready |
+
+Acceptance criteria:
+
+- Refinements 1-5 produce each sourced action bonus and 0/6 fail fast.
+- Each passive changes only its named action stats; unrelated action categories
+  remain zero and Rust's charged penalty remains -10% at every refinement.
+- Static Lv. 90 stats and typed categories match sources; existing build and
+  combat regressions remain green.
+
+Test cases to add or update:
+
+- Normal/static: names, base ATK, substats, categories, and R5 action bonuses.
+- Boundary: each R1 value and Rust's refinement-independent charged penalty.
+- Abnormal: refinement 0/6 and unrelated action-stat non-interference.
 
 Verification:
 
