@@ -50,9 +50,10 @@ wave added the Golden Majesty weapon family, six legacy boundary artifact sets,
 and Razor through isolated implementation lanes; RL and generated
 documentation remained excluded.
 
-The B-162 through B-166 follow-on content and snapshot campaigns are complete.
-B-167 now adds one bounded Qiqi offensive vertical slice; RL, generated docs,
-and deferred healing, defensive, or geometry systems remain excluded.
+The B-162 through B-167 follow-on content and snapshot campaigns are complete.
+B-168 is the active Mona and Beidou offensive character campaign; RL, generated
+docs, and deferred healing, defensive, player-damage, or geometry systems remain
+excluded.
 
 The B-158 derived-stat equipment and Fischl wave is complete. It adds reusable
 final-DEF/EM conversion, two five-star weapons, four asset-backed artifact sets,
@@ -13546,6 +13547,165 @@ Completion evidence:
   frame-32 initial hit and added pending-initial plus repeated-restore proof.
 - `QiqiRegressionTest`, reaction regression, build, Javadoc, and executable
   preflight pass on 2026-08-03.
+
+## Implementation Order: Legacy Catalyst and Counter Character Campaign
+
+Status: In progress. B-168 has a shared identity prerequisite followed by two
+independently revertible offensive character slices.
+
+Scope:
+
+- Add stable typed identities and aligned Lv. 90 status/talent data for Mona
+  and Beidou.
+- Implement Mona's stationary single-target catalyst actions, Phantom stream,
+  Omen damage window, and representable passives/constellations.
+- Implement Beidou's ordinary Tidecaller hit and single-target Stormbreaker
+  discharge stream with representable passives/constellations.
+
+Out of scope for this pass:
+
+- Alternate sprint/dash, movement, stamina, healing, shields, incoming player
+  damage, Tidecaller perfect-counter activation, multi-target bounce/geometry,
+  enemy defeat, RL, generated docs, and Deferred Systems.
+- Fabricating counter levels, shield state, or additional Stormbreaker bounces
+  through unrelated action or damage callbacks.
+
+Definitions:
+
+- `MONA` and `BEIDOU`: stable typed identities using the next unassigned IDs
+  and their canonical Mondstadt/Liyue regions.
+- An offensive vertical slice consists of aligned CSV data, one character
+  runtime class, representable constellations, and a focused executable.
+
+Campaign inventory:
+
+| Unit | Type | Source readiness | Shared prerequisite | Verification | Status |
+|---|---|---|---|---|---|
+| typed identities | shared | pinned KQM/gcsim | none | `LegacyCharacterIdentityRegressionTest` | pending |
+| Mona | character | pinned KQM/gcsim | typed identity | `MonaRegressionTest` | pending |
+| Beidou | character | pinned KQM/gcsim | typed identity | `BeidouRegressionTest` | pending |
+
+### Phase 1: Reserve Mona and Beidou Identities
+
+Why first:
+
+- Both isolated content slices need one immutable typed identity baseline before
+  their class, CSV, and snapshot state can be reviewed independently.
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+
+Tasks:
+
+- Assign the next stable numeric IDs without renumbering existing characters.
+- Record Mona as Mondstadt and Beidou as Liyue.
+- Extend display-name, numeric-ID, region, null, and unassigned-ID boundaries.
+
+Acceptance criteria:
+
+- Both identities round-trip by exact name and numeric ID while Qiqi and
+  `UNKNOWN` behavior remain unchanged.
+
+Test cases to add or update:
+
+- Normal: name, numeric ID, and region for Mona and Beidou.
+- Boundary: Qiqi remains ID 29 and the adjacent unassigned ID fails closed.
+- Abnormal: null and case-mismatched names return `UNKNOWN`.
+
+Verification:
+
+- `./gradlew LegacyCharacterIdentityRegressionTest build`
+
+### Phase 2: Mona Offensive Vertical Slice
+
+Why second:
+
+- Mona is self-contained after Phase 1 and her Phantom/Omen state can reuse the
+  existing typed action, buff, timer, reaction, and character snapshot APIs.
+
+Target files:
+
+- `config/characters/Mona/Mona_Status.csv` (new)
+- `config/characters/Mona/Mona_Multipliers.csv` (new)
+- `src/java/model/character/Mona.java` (new)
+- `src/java/sample/MonaRegressionTest.java` (new)
+
+Tasks:
+
+- Adapt pinned gcsim `ef41805d` timing/cadence data and pinned KQM TCL
+  `80ba6241` application/talent contracts to stationary single-target combat.
+- Add complete basic attack categories, Phantom damage/particles, Burst impact
+  and Omen behavior, and every representable passive/constellation branch.
+- Persist mutable combo, summon, and Omen state through repeated snapshot
+  restore without duplicating future events.
+
+Acceptance criteria:
+
+- Included actions emit sourced hit counts, multipliers, categories, timing,
+  gauge/ICD, particles, cooldown, and Energy behavior from aligned CSV keys.
+- Phantom recast, Omen trigger/expiry, and repeated restore leave one current
+  state machine; excluded sprint and geometry effects remain inert.
+
+Test cases to add or update:
+
+- Normal: data, attack chain, Charged/Plunge, Skill stream, Burst/Omen, particles,
+  and representable passives/constellations.
+- Boundary: exact summon/Omen deadlines, recast replacement, target-state
+  conditions, and single/double restore.
+- Abnormal: cooldown/Energy rejection, invalid constellation/state payload,
+  cross-simulator reuse, and excluded sprint/geometry behavior.
+
+Verification:
+
+- `./gradlew MonaRegressionTest`
+- `./gradlew ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Beidou Offensive Vertical Slice
+
+Why:
+
+- Beidou is independent of Mona code but shares the identity baseline and the
+  campaign's explicit incoming-damage and multi-target exclusions.
+
+Target files:
+
+- `config/characters/Beidou/Beidou_Status.csv` (new)
+- `config/characters/Beidou/Beidou_Multipliers.csv` (new)
+- `src/java/model/character/Beidou.java` (new)
+- `src/java/sample/BeidouRegressionTest.java` (new)
+
+Tasks:
+
+- Add complete basic attack categories, ordinary zero-counter Tidecaller,
+  particles, and one single-target Stormbreaker discharge per eligible trigger.
+- Add exact gauge/ICD, cadence, cooldown/Energy, snapshot ownership, and every
+  representable passive/constellation without synthesizing incoming hits.
+- Restore mutable combo and Burst state without duplicating discharges.
+
+Acceptance criteria:
+
+- Every included action is data-aligned and deterministic, and Stormbreaker
+  enforces its sourced trigger cadence and owner snapshot in single-target use.
+- Perfect-counter, shield, C2 bounce, and incoming-hit branches remain inactive
+  rather than being approximated through unrelated simulator events.
+
+Test cases to add or update:
+
+- Normal: data, attack chain, Charged/Plunge, ordinary Skill, particles, Burst
+  cast/discharges, and representable passives/constellations.
+- Boundary: exact discharge ICD, Burst expiry, recast, switch, and repeated
+  snapshot restore.
+- Abnormal: cooldown/Energy rejection, invalid constellation/state payload,
+  cross-simulator reuse, and proof excluded counter/shield/bounces do not fire.
+
+Verification:
+
+- `./gradlew BeidouRegressionTest`
+- `./gradlew ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
 
 ## Implementation Order: Parallel Foundational Content Campaign
 

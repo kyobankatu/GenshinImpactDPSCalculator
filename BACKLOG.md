@@ -3521,3 +3521,20 @@ experiment record.
 - **Proof:** `TASKS.md` Qiqi Offensive Vertical Slice and focused/full gates.
 - **Completion:** commit `5dda92f` adds the complete bounded slice and resolves
   independent-review snapshot timing; all planned focused/full gates pass.
+
+### B-168 — Mona and Beidou offensive character campaign
+
+- **Status:** in progress
+- **Source:** explicit broad content-expansion request and post-B-167 missing
+  character class/config inventory
+- **Symptom:** Mona and Beidou have local images but no typed identity, loadable
+  combat class, talent CSV, or focused executable regression.
+- **Evidence:** pinned KQM TCL `80ba6241` and gcsim `ef41805d`, accessed
+  2026-08-03.
+- **Scope/risk:** planned three-phase campaign with a shared identity baseline,
+  one Mona Phantom/Omen slice, and one single-target Beidou Skill/Burst slice.
+- **Boundary:** alternate sprint, movement/stamina, healing, shields, incoming
+  player damage and perfect counters, multi-target bounce/geometry, RL,
+  generated docs, and Deferred Systems remain excluded.
+- **Proof:** `TASKS.md` Legacy Catalyst and Counter Character Campaign plus
+  focused, reaction, build, Javadoc, and executable preflight gates.
