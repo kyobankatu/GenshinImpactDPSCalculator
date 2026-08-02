@@ -881,6 +881,13 @@ public class CombatSimulator {
                 weaponState = ((model.entity.SnapshotAwareWeaponEffect)
                         character.getWeapon()).captureWeaponState();
             }
+            model.entity.SnapshotAwareCharacterEffect.State characterState =
+                    null;
+            if (character
+                    instanceof model.entity.SnapshotAwareCharacterEffect) {
+                characterState = ((model.entity.SnapshotAwareCharacterEffect)
+                        character).captureCharacterState();
+            }
             characters.put(character.getCharacterId(), new SimulatorSnapshot.CharacterSnapshot(
                     character.getCurrentEnergy(),
                     character.getLastSkillTime(),
@@ -891,7 +898,8 @@ public class CombatSimulator {
                     character.getChargeRestoreTimes(),
                     buffRefs,
                     buffTimes,
-                    weaponState));
+                    weaponState,
+                    characterState));
         }
 
         // Team and field buffs
@@ -1052,6 +1060,22 @@ public class CombatSimulator {
             double[] times = snap.fieldBuffTimes.get(i);
             buff.restoreTimes(times[0], times[1]);
             fieldBuffList.add(buff);
+        }
+
+        // Character-owned reconstruction runs after every core/buff restore.
+        for (Character character : party.getMembers()) {
+            SimulatorSnapshot.CharacterSnapshot cs =
+                    snap.characters.get(character.getCharacterId());
+            if (cs == null || cs.characterState == null) {
+                continue;
+            }
+            if (!(character
+                    instanceof model.entity.SnapshotAwareCharacterEffect)) {
+                throw new IllegalStateException(
+                        "Snapshot contains state for a non-snapshot-aware character");
+            }
+            ((model.entity.SnapshotAwareCharacterEffect) character)
+                    .restoreCharacterState(cs.characterState, this);
         }
     }
 

@@ -8,6 +8,7 @@ import java.util.Map;
 
 import mechanics.buff.Buff;
 import model.entity.Enemy;
+import model.entity.SnapshotAwareCharacterEffect;
 import model.entity.SnapshotAwareWeaponEffect;
 import model.type.CharacterId;
 import model.type.Element;
@@ -21,11 +22,9 @@ import simulation.runtime.ReactionState;
  * references to existing {@link Buff} objects (not copies); restoration resets their
  * timing fields in-place and rebuilds the buff lists to exactly the saved membership.
  *
- * <p>The event queue ({@link simulation.runtime.SimulationClock} timer events) is
- * intentionally excluded.  Pending events (e.g. Flins burst delayed hits) are
- * anonymous inner classes that capture local variables and cannot be serialised.
- * The resulting estimation bias approximately cancels in the VinePPO
- * {@code Q_MC - V_MC} advantage difference.
+ * <p>The event queue ({@link simulation.runtime.SimulationClock} timer events)
+ * is intentionally excluded. Snapshot-aware characters may instead retain an
+ * immutable payload and reconstruct only their own future events after restore.
  */
 public class SimulatorSnapshot {
 
@@ -43,6 +42,8 @@ public class SimulatorSnapshot {
         public final List<double[]> activeBuffTimes;
         /** Optional mutable weapon state captured through a focused capability. */
         public final SnapshotAwareWeaponEffect.State weaponState;
+        /** Optional immutable character-owned state for event reconstruction. */
+        public final SnapshotAwareCharacterEffect.State characterState;
 
         /**
          * Constructs a character snapshot without optional weapon state.
@@ -77,6 +78,7 @@ public class SimulatorSnapshot {
                     chargeRestoreTimes,
                     activeBuffRefs,
                     activeBuffTimes,
+                    null,
                     null);
         }
 
@@ -91,6 +93,33 @@ public class SimulatorSnapshot {
                 List<Buff> activeBuffRefs,
                 List<double[]> activeBuffTimes,
                 SnapshotAwareWeaponEffect.State weaponState) {
+            this(
+                    currentEnergy,
+                    lastSkillTime,
+                    lastBurstTime,
+                    skillCooldownEndTime,
+                    burstCooldownEndTime,
+                    activeChargeCooldownDuration,
+                    chargeRestoreTimes,
+                    activeBuffRefs,
+                    activeBuffTimes,
+                    weaponState,
+                    null);
+        }
+
+        /** Constructs a complete character snapshot with optional capabilities. */
+        public CharacterSnapshot(
+                double currentEnergy,
+                double lastSkillTime,
+                double lastBurstTime,
+                double skillCooldownEndTime,
+                double burstCooldownEndTime,
+                double activeChargeCooldownDuration,
+                List<Double> chargeRestoreTimes,
+                List<Buff> activeBuffRefs,
+                List<double[]> activeBuffTimes,
+                SnapshotAwareWeaponEffect.State weaponState,
+                SnapshotAwareCharacterEffect.State characterState) {
             this.currentEnergy = currentEnergy;
             this.lastSkillTime = lastSkillTime;
             this.lastBurstTime = lastBurstTime;
@@ -101,6 +130,7 @@ public class SimulatorSnapshot {
             this.activeBuffRefs = new ArrayList<>(activeBuffRefs);
             this.activeBuffTimes = new ArrayList<>(activeBuffTimes);
             this.weaponState = weaponState;
+            this.characterState = characterState;
         }
     }
 
