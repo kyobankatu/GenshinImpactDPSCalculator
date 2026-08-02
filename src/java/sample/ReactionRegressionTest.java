@@ -6639,6 +6639,68 @@ public class ReactionRegressionTest {
         }
         assertTrue(highWineRefinementRejected,
                 "Wine and Song should reject refinement six");
+
+        model.weapon.SkyriderSword skyriderSword = new model.weapon.SkyriderSword();
+        assertEquals("Skyrider Sword", skyriderSword.getName(),
+                "Skyrider Sword display name");
+        assertClose(354.0, skyriderSword.getBaseAtk(), EPS,
+                "Skyrider Sword base ATK");
+        assertClose(0.521,
+                skyriderSword.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "Skyrider Sword Energy Recharge");
+        assertEquals(model.type.WeaponType.SWORD, skyriderSword.getWeaponType(),
+                "Skyrider Sword weapon type");
+        assertEquals(5, skyriderSword.getRefinement(),
+                "Skyrider Sword default refinement");
+
+        TestCharacter swordOwner = testCharacter(Element.ANEMO);
+        swordOwner.setWeapon(skyriderSword);
+        CombatSimulator swordSim = simulatorWith(swordOwner);
+        skyriderSword.onAction(
+                swordOwner, CharacterActionRequest.of(CharacterActionKey.SKILL), swordSim);
+        assertClose(0.0, resolvedStat(swordSim, swordOwner, StatType.ATK_PERCENT), EPS,
+                "Skill use should not activate Skyrider Sword ATK");
+        skyriderSword.onAction(
+                swordOwner, CharacterActionRequest.of(CharacterActionKey.BURST), swordSim);
+        assertClose(0.24, resolvedStat(swordSim, swordOwner, StatType.ATK_PERCENT), EPS,
+                "R5 Skyrider Sword Burst-use ATK");
+        swordSim.advanceTime(14.999);
+        assertClose(0.24, resolvedStat(swordSim, swordOwner, StatType.ATK_PERCENT), EPS,
+                "Skyrider Sword should remain active before fifteen seconds");
+        swordSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0, resolvedStat(swordSim, swordOwner, StatType.ATK_PERCENT), EPS,
+                "Skyrider Sword should expire at exactly fifteen seconds");
+
+        model.weapon.SkyriderSword r1SkyriderSword =
+                new model.weapon.SkyriderSword(1);
+        TestCharacter r1SwordOwner = testCharacter(Element.ANEMO);
+        r1SwordOwner.setWeapon(r1SkyriderSword);
+        CombatSimulator r1SwordSim = simulatorWith(r1SwordOwner);
+        r1SkyriderSword.onAction(
+                r1SwordOwner,
+                CharacterActionRequest.of(CharacterActionKey.BURST),
+                r1SwordSim);
+        assertClose(0.12,
+                resolvedStat(r1SwordSim, r1SwordOwner, StatType.ATK_PERCENT), EPS,
+                "R1 Skyrider Sword Burst-use ATK");
+
+        boolean lowSwordRefinementRejected = false;
+        try {
+            new model.weapon.SkyriderSword(0);
+        } catch (IllegalArgumentException expected) {
+            lowSwordRefinementRejected = true;
+        }
+        assertTrue(lowSwordRefinementRejected,
+                "Skyrider Sword should reject refinement zero");
+
+        boolean highSwordRefinementRejected = false;
+        try {
+            new model.weapon.SkyriderSword(6);
+        } catch (IllegalArgumentException expected) {
+            highSwordRefinementRejected = true;
+        }
+        assertTrue(highSwordRefinementRejected,
+                "Skyrider Sword should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
