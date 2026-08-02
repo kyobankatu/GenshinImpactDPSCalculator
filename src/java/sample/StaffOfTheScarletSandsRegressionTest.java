@@ -33,6 +33,7 @@ public final class StaffOfTheScarletSandsRegressionTest {
     public static void main(String[] args) {
         testMetadataAndRefinementValues();
         testDynamicLateElementalMastery();
+        testSimulatorManagedElementalMasterySnapshot();
         testPostHitOrderingAndStackSnapshots();
         testCapSharedRefreshAndExactExpiry();
         testTriggerRejectionsAndZeroDamageHit();
@@ -99,6 +100,39 @@ public final class StaffOfTheScarletSandsRegressionTest {
         assertClose(baseAttack() + 100.0 * 0.52,
                 totalAttack(owner, sim),
                 "Scarlet Sands dynamic conversion after EM expiry");
+    }
+
+    /** Verifies that simulator-managed EM is captured once by a new stack. */
+    private static void testSimulatorManagedElementalMasterySnapshot() {
+        StaffOfTheScarletSands weapon = new StaffOfTheScarletSands(1);
+        TestCharacter owner = character(CharacterId.SUCROSE, weapon, 100.0);
+        CombatSimulator sim = simulatorWith(owner);
+        sim.applyTeamBuff(new SimpleBuff(
+                "Team EM",
+                BuffId.CUSTOM,
+                1.0,
+                0.0,
+                stats -> stats.add(StatType.ELEMENTAL_MASTERY, 50.0)));
+        sim.applyFieldBuff(new SimpleBuff(
+                "Field EM",
+                BuffId.CUSTOM,
+                1.0,
+                0.0,
+                stats -> stats.add(StatType.ELEMENTAL_MASTERY, 25.0)));
+
+        weapon.onDamage(
+                owner,
+                hit("Managed EM Skill", 1.0, ActionType.SKILL),
+                0.0,
+                sim);
+        assertClose(baseAttack() + 175.0 * 0.52 + 175.0 * 0.28,
+                totalAttackWithApplicableBuffs(owner, sim),
+                "Scarlet Sands captures team and field EM once");
+
+        sim.advanceTime(1.0);
+        assertClose(baseAttack() + 100.0 * 0.52 + 175.0 * 0.28,
+                totalAttackWithApplicableBuffs(owner, sim),
+                "Scarlet Sands stack retains expired managed EM snapshot");
     }
 
     /** Verifies post-hit activation and per-stack EM snapshots. */
@@ -359,6 +393,16 @@ public final class StaffOfTheScarletSandsRegressionTest {
             TestCharacter character,
             CombatSimulator sim) {
         return character.getEffectiveStats(sim.getCurrentTime()).getTotalAtk();
+    }
+
+    private static double totalAttackWithApplicableBuffs(
+            TestCharacter character,
+            CombatSimulator sim) {
+        StatsContainer stats = character.getEffectiveStats(sim.getCurrentTime());
+        sim.getApplicableBuffs(character).stream()
+                .filter(buff -> !buff.isExpired(sim.getCurrentTime()))
+                .forEach(buff -> buff.apply(stats, sim.getCurrentTime()));
+        return stats.getTotalAtk();
     }
 
     private static double baseAttack() {
