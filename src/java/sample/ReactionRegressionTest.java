@@ -96,6 +96,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseE_LunarCrystallizeHarmonyCadence();
         testAccuracyPhaseF_RaidenResolveAndEnergyRegression();
         testAccuracyPhaseF_RaidenConstellationLifecycle();
+        testAccuracyPhaseF_FlinsA1AndC1Lifecycle();
         testAccuracyPhaseF_FlinsSkillApplicationContract();
         testAccuracyPhaseF_FlinsThundercloudConditionalHits();
         testAccuracyPhaseF_FlinsSymphonyZeroGaugeContract();
@@ -3095,6 +3096,78 @@ public class ReactionRegressionTest {
         assertEquals(CharacterId.RAIDEN_SHOGUN, buffs.get(0).getSourceCharacterId(),
                 "Raiden C4 should retain typed source ownership");
         return buffs.get(0);
+    }
+
+    private static void testAccuracyPhaseF_FlinsA1AndC1Lifecycle() {
+        model.character.Flins c0Flins = new model.character.Flins(
+                new TestWeapon(), blankArtifact(), flinsTalentData(0));
+        CombatSimulator c0Sim = simulatorWithExistingCharacter(c0Flins);
+        c0Flins.spendEnergy(c0Flins.getMaxEnergy());
+        c0Sim.notifyReaction(
+                ReactionResult.lunar(100.0, ReactionResult.LunarType.CHARGED),
+                testCharacter(Element.HYDRO, CharacterId.XINGQIU));
+        assertClose(0.0, c0Flins.getCurrentEnergy(), EPS,
+                "Flins C0 should not restore C1 Energy");
+        assertClose(0.0,
+                resolvedStat(c0Sim, c0Flins, StatType.LUNAR_CHARGED_DMG_BONUS), EPS,
+                "Flins A1 should be absent at Nascent Gleam");
+        assertClose(0.0,
+                resolvedStat(c0Sim, c0Flins, StatType.LUNAR_UNIQUE_BONUS), EPS,
+                "Flins A1 should not use the separate Lunar unique category");
+        c0Sim.setMoonsign(CombatSimulator.Moonsign.ASCENDANT_GLEAM);
+        assertClose(0.20,
+                resolvedStat(c0Sim, c0Flins, StatType.LUNAR_CHARGED_DMG_BONUS), EPS,
+                "Flins A1 should grant Lunar-Charged bonus at Ascendant Gleam");
+        c0Sim.setMoonsign(CombatSimulator.Moonsign.NASCENT_GLEAM);
+        assertClose(0.0,
+                resolvedStat(c0Sim, c0Flins, StatType.LUNAR_CHARGED_DMG_BONUS), EPS,
+                "Flins A1 should follow live Moonsign transitions");
+
+        model.character.Flins c1Flins = new model.character.Flins(
+                new TestWeapon(), blankArtifact(), flinsTalentData(1));
+        CombatSimulator c1Sim = simulatorWithExistingCharacter(c1Flins);
+        c1Flins.initializeForSimulator(c1Sim);
+        c1Flins.spendEnergy(c1Flins.getMaxEnergy());
+        TestCharacter reactionSource =
+                testCharacter(Element.HYDRO, CharacterId.XINGQIU);
+        c1Sim.notifyReaction(
+                ReactionResult.transform(
+                        100.0, "Electro-Charged", ReactionResult.Kind.ELECTRO_CHARGED),
+                reactionSource);
+        c1Sim.notifyReaction(
+                ReactionResult.lunar(0.0, ReactionResult.LunarType.CHARGED),
+                reactionSource);
+        c1Sim.notifyReaction(ReactionResult.none(), reactionSource);
+        assertClose(0.0, c1Flins.getCurrentEnergy(), EPS,
+                "Flins C1 should reject standard, synthetic, and NONE reactions");
+        c1Sim.notifyReaction(
+                ReactionResult.lunar(100.0, ReactionResult.LunarType.CHARGED),
+                reactionSource);
+        assertClose(8.0, c1Flins.getCurrentEnergy(), EPS,
+                "Flins C1 should restore Energy before Flins's first action");
+        c1Sim.advanceTime(5.499);
+        c1Sim.notifyReaction(
+                ReactionResult.lunar(100.0, ReactionResult.LunarType.CHARGED),
+                reactionSource);
+        assertClose(8.0, c1Flins.getCurrentEnergy(), EPS,
+                "Flins C1 should remain gated before 5.5 seconds");
+        c1Sim.advanceTime(0.001);
+        c1Sim.notifyReaction(
+                ReactionResult.lunar(100.0, ReactionResult.LunarType.CHARGED),
+                reactionSource);
+        assertClose(16.0, c1Flins.getCurrentEnergy(), EPS,
+                "Flins C1 should restore Energy at exactly 5.5 seconds");
+
+        boolean crossSimulatorRejected = false;
+        try {
+            CombatSimulator otherSim = new CombatSimulator();
+            otherSim.setLoggingEnabled(false);
+            otherSim.addCharacter(c1Flins);
+        } catch (IllegalStateException expected) {
+            crossSimulatorRejected = true;
+        }
+        assertTrue(crossSimulatorRejected,
+                "Flins should reject cross-simulator listener reuse");
     }
 
     private static void testAccuracyPhaseF_FlinsThundercloudConditionalHits() {
@@ -17726,6 +17799,15 @@ public class ReactionRegressionTest {
     private static mechanics.data.TalentDataSource raidenTalentData(int constellation) {
         return (characterName, key, defaultValue) -> {
             if ("Raiden Shogun".equals(characterName) && "Constellation".equals(key)) {
+                return constellation;
+            }
+            return defaultValue;
+        };
+    }
+
+    private static mechanics.data.TalentDataSource flinsTalentData(int constellation) {
+        return (characterName, key, defaultValue) -> {
+            if ("Flins".equals(characterName) && "Constellation".equals(key)) {
                 return constellation;
             }
             return defaultValue;

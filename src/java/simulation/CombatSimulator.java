@@ -15,6 +15,7 @@ import model.entity.Character;
 import model.entity.Enemy;
 import model.entity.ArtifactSet;
 import model.entity.SimulatorInitializedArtifactEffect;
+import model.entity.SimulatorInitializedCharacterEffect;
 import model.entity.SimulatorInitializedWeaponEffect;
 import model.type.CharacterId;
 import model.type.Element;
@@ -176,6 +177,10 @@ public class CombatSimulator {
     public void addCharacter(Character character) {
         character.resetEnergyStats();
         party.addMember(character);
+        if (character instanceof SimulatorInitializedCharacterEffect) {
+            ((SimulatorInitializedCharacterEffect) character)
+                    .initializeForSimulator(this);
+        }
         if (character.getWeapon() instanceof SimulatorInitializedWeaponEffect) {
             ((SimulatorInitializedWeaponEffect) character.getWeapon())
                     .initializeForSimulator(character, this);

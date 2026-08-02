@@ -4,6 +4,7 @@ import model.entity.FormStateProvider;
 import model.entity.Character;
 import model.entity.CharacterTeamBuffProvider;
 import model.entity.ReactionAwareCharacter;
+import model.entity.SimulatorInitializedCharacterEffect;
 import model.entity.Weapon;
 import model.entity.ArtifactSet;
 import mechanics.buff.BuffId;
@@ -49,7 +50,8 @@ import mechanics.energy.ParticleType;
  * Burst energy cost switches between 80 (standard) and 30 (Thunderous Symphony active).
  */
 public class Flins extends Character
-        implements FormStateProvider, CharacterTeamBuffProvider, ReactionAwareCharacter {
+        implements FormStateProvider, CharacterTeamBuffProvider,
+        ReactionAwareCharacter, SimulatorInitializedCharacterEffect {
 
     private int normalAttackStep = 0;
 
@@ -60,7 +62,7 @@ public class Flins extends Character
     private double normalAttackParticleNextTime = 0; // 2s CD on Manifest Flame NA particle
 
     // C1 state
-    private boolean registeredListener = false;
+    private CombatSimulator initializedSimulator;
     private double lastEnergyRestoreTime = -999.0; // CD tracker for C1 energy restore
 
     /**
@@ -212,8 +214,32 @@ public class Flins extends Character
         double bonusEm = Math.min(160.0, atk * 0.08);
         stats.add(StatType.ELEMENTAL_MASTERY, bonusEm);
 
-        // Unique Bonus (Self)
-        stats.add(StatType.LUNAR_UNIQUE_BONUS, 0.20);
+        if (initializedSimulator != null
+                && initializedSimulator.getMoonsign()
+                        == CombatSimulator.Moonsign.ASCENDANT_GLEAM) {
+            stats.add(StatType.LUNAR_CHARGED_DMG_BONUS, 0.20);
+        }
+    }
+
+    /**
+     * Binds Flins to one simulator and registers C1 before the first action.
+     *
+     * @param sim simulator receiving this character
+     * @throws IllegalStateException if this character is reused across simulators
+     */
+    @Override
+    public void initializeForSimulator(CombatSimulator sim) {
+        if (initializedSimulator != null && initializedSimulator != sim) {
+            throw new IllegalStateException(
+                    "Flins cannot be reused across CombatSimulator instances");
+        }
+        if (initializedSimulator == sim) {
+            return;
+        }
+        initializedSimulator = sim;
+        if (constellation >= 1) {
+            sim.addReactionListener(this);
+        }
     }
 
     /**
@@ -233,10 +259,7 @@ public class Flins extends Character
      */
     @Override
     public void onAction(CharacterActionRequest request, CombatSimulator sim) {
-        if (!registeredListener && constellation >= 1) {
-            sim.addReactionListener(this);
-            registeredListener = true;
-        }
+        initializeForSimulator(sim);
         // Any non-attack action breaks the normal attack combo
         if (request.getKey() != CharacterActionKey.NORMAL) {
             normalAttackStep = 0;
@@ -556,7 +579,10 @@ public class Flins extends Character
     @Override
     public void onReaction(mechanics.reaction.ReactionResult result, model.entity.Character source,
             double time, CombatSimulator sim) {
-        if (!result.isElectroCharged() || sim.getMoonsign() == CombatSimulator.Moonsign.NONE) {
+        if (constellation < 1
+                || result.getKind() != mechanics.reaction.ReactionResult.Kind.LUNAR_CHARGED
+                || result.getTransformDamage() <= 0.0
+                || sim.getMoonsign() == CombatSimulator.Moonsign.NONE) {
             return;
         }
         if (time - lastEnergyRestoreTime < 5.5) {

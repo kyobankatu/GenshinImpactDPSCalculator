@@ -234,8 +234,8 @@ Known simplifications:
   tick's typed owner and EM snapshot without dealing another immediate reaction
   hit. Successful immediate and periodic damage share one 0.5-second target
   cooldown across sequence restarts. Overload damage follows its target and
-  owner damage sequence limits. The accepted set-aware result is 1,304,576
-  damage / 62,123 DPS over 21.0 seconds.
+  owner damage sequence limits. The accepted set-aware result is 1,271,521
+  damage / 60,549 DPS over 21.0 seconds.
 - `FlinsParty2`: defensive shield HP is logged but not consumed by enemy attacks,
   Columbina treats every Lunar reaction during Gravity Ripple as nearby because
   field position is not simulated, and her Thundercloud extra strikes use 33%
@@ -354,7 +354,7 @@ multi-target or per-enemy aura gauges.
 Latest validation baseline from the accuracy pass:
 
 - `./gradlew ReactionRegressionTest`
-- `./gradlew RaidenParty`: 1,304,576 total damage / 62,123 DPS
+- `./gradlew RaidenParty`: 1,271,521 total damage / 60,549 DPS
 - `./gradlew FlinsParty`: 22,639,410 total damage / 227,532 DPS
 - `./gradlew FlinsParty2`: 15,817,125 total damage / 228,902 DPS
 - `./gradlew BenchmarkRLJava`

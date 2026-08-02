@@ -2875,3 +2875,35 @@ experiment record.
 - **Completion:** C1 element multipliers and C4 normal, early, stale, target,
   and expiry contracts pass all planned checks; two post-fix `RaidenParty`
   runs match at 1,271,521 damage / 60,549 DPS
+
+### B-133 — Flins passive and constellation coverage
+
+- **Status:** in-progress
+- **Source:** delegated supported-character inventory under broad coverage
+- **Scope/risk:** planned A1/C1 lifecycle, C2-C6, typed shred, and talent data;
+  RL excluded
+- **Evidence:** maintained KQM Flins reference and Luna VI Quick Guide plus C2
+  advanced properties, accessed 2026-08-02:
+  https://library.keqingmains.com/characters/electro/flins
+  https://keqingmains.com/q/flins-quickguide/
+  https://genshin-impact.fandom.com/wiki/The_Devil%27s_Wall
+- **Boundary:** retain single-target and weighted Lunar ownership assumptions;
+  do not infer ordering absent from the currently empty KQM evidence vault
+- **Proof/plan:** three-phase normal/boundary/abnormal matrix in `TASKS.md`
+  `Flins Constellation Campaign`, plus reaction regression, `FlinsParty2`,
+  build, Javadoc, and preflight
+
+### B-134 — Ineffa offensive constellation coverage
+
+- **Status:** candidate
+- **Source:** delegated supported-character inventory under broad coverage
+- **Scope/risk:** planned C1, C2 offensive activation, C3-C6, and weighted
+  Lunar stat assembly; RL excluded
+- **Evidence:** KQM Ineffa reference and Luna V Quick Guide, accessed
+  2026-08-02; the maintained evidence vault is currently empty:
+  https://library.keqingmains.com/characters/electro/ineffa
+  https://keqingmains.com/q/ineffa-quickguide/
+- **Boundary:** C2 Punishment Edict damage remains blocked because the only
+  maintained timing description is "after a brief delay"; C1 snapshot and C6
+  0U/no-ICD require explicit adaptations
+- **Next gate:** implement only after B-133 or stronger technical evidence

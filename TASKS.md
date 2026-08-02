@@ -44,6 +44,9 @@ excluded.
 The B-132 Raiden constellation pass is complete. It adds C1 Resolve gain
 modifiers and C4's ally-only ATK window at normal or early Musou Isshin end.
 
+The B-133 Flins constellation campaign is in progress. It corrects A1/C1
+lifecycle behavior, adds C2/C4, and then closes representable C3/C5/C6 gaps.
+
 The B-058 Burning fuel correction is complete. It replaces the fixed
 two-second approximation with typed Dendro-fuel decay and refresh ownership
 while retaining the repository's single-target boundary.
@@ -13273,6 +13276,134 @@ Completion evidence:
   at `6f8177c` to 1,227,785 damage / 58,466 DPS. The decrease includes removal
   of the erroneous C6 party-wide Energy that had sustained Xiangling damage.
 - Reaction regression, build, Javadoc, sample simulation, and preflight pass.
+
+## Implementation Order: Flins Constellation Campaign
+
+Status: In progress. This campaign implements sourced, single-target Flins
+passives and constellations while retaining the documented weighted Lunar
+reaction simplification; RL and generated docs remain excluded.
+
+Evidence:
+
+- KQM Flins character reference and Luna VI Quick Guide, accessed 2026-08-02,
+  provide A1/C1-C6 values, trigger categories, windows, caps, and talent tables:
+  https://library.keqingmains.com/characters/electro/flins
+  https://keqingmains.com/q/flins-quickguide/
+- The maintained KQM Flins evidence vault is empty. C2's direct follow-up uses
+  the Genshin Wiki advanced-property 0U/no-ICD record, accessed 2026-08-02:
+  https://genshin-impact.fandom.com/wiki/The_Devil%27s_Wall
+
+Out of scope:
+
+- exact multi-target ownership, positioning, shield/damage intake, RL,
+  generated docs, and unsupported ordering not established by the sources.
+
+### Phase 1: Simulator Binding, A1, and C1 Lifecycle - Done
+
+Target files:
+
+- `src/java/model/entity/SimulatorInitializedCharacterEffect.java` (new)
+- `src/java/simulation/CombatSimulator.java`
+- `src/java/model/character/Flins.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Character initialization binds Flins before any party reaction; duplicate
+  initialization is idempotent and cross-simulator reuse fails explicitly.
+- C1 restores 8 flat Energy for actual Lunar-Charged reactions before Flins's
+  first action at 5.5-second CT; C0, standard Electro-Charged, NONE, and direct
+  synthetic Lunar damage do not trigger it.
+- A1 grants Flins 20% Lunar-Charged reaction bonus only at Ascendant Gleam and
+  no longer uses the separate Lunar base-section unique category.
+
+Test cases:
+
+- Normal: pre-action C1 reaction and A1 direct Lunar stat resolution.
+- Boundary: C1 5.499/5.500, duplicate binding, and Moonsign transitions.
+- Abnormal: C0, standard/synthetic/wrong reactions, foreign simulator reuse.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `./gradlew FlinsParty2`
+- `python scripts/preflight.py`
+
+Completion evidence:
+
+- Pre-action C1 registration, C0 and wrong/synthetic reaction rejection,
+  5.499/5.500-second Energy CT, idempotent binding, cross-simulator rejection,
+  and live Nascent/Ascendant A1 category regressions pass.
+- `FlinsParty2` changed from 15,817,125 damage / 228,902 DPS at `c2f876b`
+  to 15,468,205 / 223,852 after removing the erroneous Nascent unique bonus.
+- Reaction regression, build, Javadoc, sample simulation, and preflight pass.
+
+### Phase 2: C2 Follow-Up and C4 Passive
+
+Target files:
+
+- `src/java/model/character/Flins.java`
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- C2 opens one six-second Normal-hit follow-up per Spearstorm; the 50% ATK
+  direct Lunar-Charged Electro hit is 0U/no-ICD, consumes once, and cannot
+  recurse or change Aura.
+- At Ascendant Gleam, an on-field Flins Electro hit refreshes one seven-second
+  25% Electro RES reduction after that triggering hit; Nascent/off-field/wrong
+  elements never apply it.
+- C4 adds ATK +20% and changes Whispering Flame to 10% ATK capped at 220 EM;
+  C3 retains 8%/160 with no C4 ATK.
+
+Test cases:
+
+- Normal: C2 proc/order/shred and C4 uncapped/capped stats.
+- Boundary: C2 t=5.999/6, shred t=6.999/7, and EM 219.9/220 cap.
+- Abnormal: C0/C1, Physical/non-Normal, off-field/Nascent, zero/reentrant hits.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `./gradlew FlinsParty2`
+- `python scripts/preflight.py`
+
+### Phase 3: C3/C5 Talent Levels and C6 Elevation
+
+Target files:
+
+- `src/java/model/character/Flins.java`
+- `config/characters/Flins/Flins_Multipliers.csv`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- C3 selects level-12 Burst/Symphony values without changing Skill/form values;
+  C5 selects level-12 Skill/form values without changing Burst values.
+- Manifest N4 represents two separate level-table hit multipliers rather than
+  executing a summed two-hit value twice.
+- C6 adds 35% personal Lunar-Charged elevation and, only at Ascendant Gleam,
+  another 10% party elevation through the existing Lunar multiplier model;
+  ordinary Electro damage is unchanged.
+
+Test cases:
+
+- Normal: exact C3/C5 action multipliers and C6 personal/team resolution.
+- Boundary: each constellation threshold and N4 two-hit sum.
+- Abnormal: C3 Skill, C5 Burst, Nascent party C6, and ordinary damage category.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `./gradlew FlinsParty2`
+- `python scripts/preflight.py`
 
 ## Implementation Order: Raiden Constellation Lifecycle
 
