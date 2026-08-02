@@ -136,6 +136,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_DeterministicPhysicalProcWeapons();
         testAccuracyPhaseF_OffFieldHitBows();
         testAccuracyPhaseF_SkillBurstOffensiveWeapons();
+        testAccuracyPhaseF_MoonsignReactionWeapons();
         testAccuracyPhaseF_ActionUseWindowWeapons();
         testAccuracyPhaseF_AdditionalSkillUseStatWeapons();
         testAccuracyPhaseF_SamuraiConductWeapons();
@@ -7926,6 +7927,186 @@ public class ReactionRegressionTest {
         }
         assertTrue(highSeaLordRefinementRejected,
                 "Luxurious Sea-Lord should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_MoonsignReactionWeapons() {
+        ReactionResult overload = ReactionResult.transform(
+                0.0, "Overloaded", ReactionResult.Kind.OVERLOAD);
+
+        model.weapon.MasterKey masterKey = new model.weapon.MasterKey();
+        assertEquals("Master Key", masterKey.getName(),
+                "Master Key display name");
+        assertClose(454.0, masterKey.getBaseAtk(), EPS,
+                "Master Key base ATK");
+        assertClose(0.613,
+                masterKey.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "Master Key Energy Recharge");
+        assertEquals(model.type.WeaponType.CLAYMORE, masterKey.getWeaponType(),
+                "Master Key weapon type");
+        assertEquals(5, masterKey.getRefinement(),
+                "Master Key default refinement");
+
+        TestCharacter masterOwner = testCharacter(
+                Element.ELECTRO, CharacterId.SUCROSE);
+        masterOwner.setWeapon(masterKey);
+        CombatSimulator masterSim = simulatorWith(masterOwner);
+        TestCharacter activeAlly = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        masterSim.addCharacter(activeAlly);
+        masterSim.setActiveCharacter(CharacterId.AMBER);
+        masterSim.setMoonsign(CombatSimulator.Moonsign.NASCENT_GLEAM);
+
+        masterSim.notifyReaction(ReactionResult.none(), masterOwner);
+        masterSim.notifyReaction(overload, activeAlly);
+        assertClose(0.0,
+                resolvedStat(masterSim, masterOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "NONE and foreign reactions should not activate Master Key");
+
+        masterSim.notifyReaction(overload, masterOwner);
+        assertClose(120.0,
+                resolvedStat(masterSim, masterOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "R5 Master Key should activate from an off-field owner reaction");
+        masterSim.setMoonsign(CombatSimulator.Moonsign.ASCENDANT_GLEAM);
+        assertClose(240.0,
+                resolvedStat(masterSim, masterOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Ascendant Gleam should double Master Key live");
+        masterSim.setMoonsign(CombatSimulator.Moonsign.NONE);
+        assertClose(120.0,
+                resolvedStat(masterSim, masterOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Leaving Ascendant Gleam should remove only the doubling");
+
+        masterSim.advanceTime(5.0);
+        masterSim.notifyReaction(overload, masterOwner);
+        masterSim.advanceTime(11.999);
+        assertClose(120.0,
+                resolvedStat(masterSim, masterOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Refreshed Master Key should remain active before expiry");
+        masterSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0,
+                resolvedStat(masterSim, masterOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Master Key should expire at exactly twelve seconds");
+
+        boolean crossSimulatorReuseRejected = false;
+        try {
+            masterKey.initializeForSimulator(masterOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            crossSimulatorReuseRejected = true;
+        }
+        assertTrue(crossSimulatorReuseRejected,
+                "Master Key should reject cross-simulator reuse");
+
+        model.weapon.MasterKey r1MasterKey = new model.weapon.MasterKey(1);
+        TestCharacter r1MasterOwner = testCharacter(Element.ELECTRO);
+        r1MasterOwner.setWeapon(r1MasterKey);
+        CombatSimulator r1MasterSim = simulatorWith(r1MasterOwner);
+        r1MasterSim.notifyReaction(overload, r1MasterOwner);
+        assertClose(60.0,
+                resolvedStat(r1MasterSim, r1MasterOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "R1 Master Key reaction EM");
+        r1MasterSim.setMoonsign(CombatSimulator.Moonsign.ASCENDANT_GLEAM);
+        assertClose(120.0,
+                resolvedStat(r1MasterSim, r1MasterOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "R1 Master Key Ascendant EM");
+
+        model.weapon.SerenitysCall serenity = new model.weapon.SerenitysCall();
+        assertEquals("Serenity's Call", serenity.getName(),
+                "Serenity's Call display name");
+        assertClose(454.0, serenity.getBaseAtk(), EPS,
+                "Serenity's Call base ATK");
+        assertClose(0.613,
+                serenity.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "Serenity's Call Energy Recharge");
+        assertEquals(model.type.WeaponType.SWORD, serenity.getWeaponType(),
+                "Serenity's Call weapon type");
+        assertEquals(5, serenity.getRefinement(),
+                "Serenity's Call default refinement");
+
+        TestCharacter serenityOwner = testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU);
+        serenityOwner.setWeapon(serenity);
+        CombatSimulator serenitySim = simulatorWith(serenityOwner);
+        serenitySim.addCharacter(testCharacter(Element.PYRO, CharacterId.AMBER));
+        serenitySim.setActiveCharacter(CharacterId.AMBER);
+        serenitySim.notifyReaction(overload, serenityOwner);
+        assertClose(0.32,
+                resolvedStat(serenitySim, serenityOwner,
+                        StatType.HP_PERCENT), EPS,
+                "R5 Serenity's Call off-field HP window");
+        serenitySim.setMoonsign(CombatSimulator.Moonsign.ASCENDANT_GLEAM);
+        assertClose(0.64,
+                resolvedStat(serenitySim, serenityOwner,
+                        StatType.HP_PERCENT), EPS,
+                "R5 Serenity's Call Ascendant HP window");
+        serenitySim.advanceTime(11.999);
+        assertClose(0.64,
+                resolvedStat(serenitySim, serenityOwner,
+                        StatType.HP_PERCENT), EPS,
+                "Serenity's Call should remain active before twelve seconds");
+        serenitySim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0,
+                resolvedStat(serenitySim, serenityOwner,
+                        StatType.HP_PERCENT), EPS,
+                "Serenity's Call should expire at exactly twelve seconds");
+
+        model.weapon.SerenitysCall r1Serenity =
+                new model.weapon.SerenitysCall(1);
+        TestCharacter r1SerenityOwner = testCharacter(Element.HYDRO);
+        r1SerenityOwner.setWeapon(r1Serenity);
+        CombatSimulator r1SerenitySim = simulatorWith(r1SerenityOwner);
+        r1SerenitySim.notifyReaction(overload, r1SerenityOwner);
+        assertClose(0.16,
+                resolvedStat(r1SerenitySim, r1SerenityOwner,
+                        StatType.HP_PERCENT), EPS,
+                "R1 Serenity's Call reaction HP");
+        r1SerenitySim.setMoonsign(CombatSimulator.Moonsign.ASCENDANT_GLEAM);
+        assertClose(0.32,
+                resolvedStat(r1SerenitySim, r1SerenityOwner,
+                        StatType.HP_PERCENT), EPS,
+                "R1 Serenity's Call Ascendant HP");
+
+        boolean lowMasterRefinementRejected = false;
+        try {
+            new model.weapon.MasterKey(0);
+        } catch (IllegalArgumentException expected) {
+            lowMasterRefinementRejected = true;
+        }
+        assertTrue(lowMasterRefinementRejected,
+                "Master Key should reject refinement zero");
+
+        boolean highMasterRefinementRejected = false;
+        try {
+            new model.weapon.MasterKey(6);
+        } catch (IllegalArgumentException expected) {
+            highMasterRefinementRejected = true;
+        }
+        assertTrue(highMasterRefinementRejected,
+                "Master Key should reject refinement six");
+
+        boolean lowSerenityRefinementRejected = false;
+        try {
+            new model.weapon.SerenitysCall(0);
+        } catch (IllegalArgumentException expected) {
+            lowSerenityRefinementRejected = true;
+        }
+        assertTrue(lowSerenityRefinementRejected,
+                "Serenity's Call should reject refinement zero");
+
+        boolean highSerenityRefinementRejected = false;
+        try {
+            new model.weapon.SerenitysCall(6);
+        } catch (IllegalArgumentException expected) {
+            highSerenityRefinementRejected = true;
+        }
+        assertTrue(highSerenityRefinementRejected,
+                "Serenity's Call should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_OffFieldHitBows() {
