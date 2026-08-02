@@ -3291,3 +3291,22 @@ experiment record.
   state; Freedom-Sworn and Song of Broken Pines implement their exact R1-R5
   offensive effects, ordering, timing boundaries, and unique-effect
   coexistence with all local gates passing.
+
+### B-155 — Parallel foundational content campaign
+
+- **Status:** active
+- **Source:** explicit broad character, weapon, and artifact coverage request
+  with authorized branch-isolated delegates
+- **Scope/risk:** Adventurer, Lucky Dog, Gambler, Resolution of Sojourner, the
+  five Royal weapons, and Barbara; planned
+- **Evidence:** maintained KQM artifact, weapon, and character catalogs,
+  accessed 2026-08-02:
+  https://library.keqingmains.com/equipment/artifacts
+  https://library.keqingmains.com/equipment/weapons
+  https://library.keqingmains.com/characters/barbara
+- **Boundary:** existing typed offensive hooks only; healing, current HP loss,
+  self Wet, exploration pickups, enemy defeat, stamina, geometry, RL, and
+  generated docs remain excluded.
+- **Proof/plan:** three-phase `TASKS.md` Parallel Foundational Content Campaign
+  with isolated regression executables, reaction regression, build, Javadoc,
+  party catalog, and preflight.

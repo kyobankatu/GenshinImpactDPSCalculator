@@ -45,6 +45,10 @@ The B-154 Millennial Movement campaign is complete. Elegy for the End,
 Freedom-Sworn, and Song of Broken Pines now share typed sigil, same-effect
 replacement, and snapshot-safe weapon state contracts.
 
+The active B-155 parallel foundational content campaign adds four low-rarity
+artifact sets, the five-weapon Royal family, and Barbara through isolated
+implementation lanes; RL and generated documentation remain excluded.
+
 The B-128 action-use artifact campaign is complete. Successful typed actions
 now reach equipped artifacts, and Heart of Depth plus Martial Artist use the
 shared callback without changing RL or generated documentation.
@@ -12862,6 +12866,162 @@ Completion evidence:
   the focused switch contract regression.
 - `./gradlew ReactionRegressionTest`, `./gradlew build`, `./gradlew javadoc`,
   and `python scripts/preflight.py` passed on 2026-08-02.
+
+## Implementation Order: Parallel Foundational Content Campaign
+
+Status: In progress. This campaign uses isolated worktrees for disjoint content
+families while the primary branch retains plan, ledger, integration, and final
+verification ownership.
+
+Scope:
+
+- Add four exact low-rarity artifact sets whose combat-relevant effects fit
+  existing typed stats or whose remaining effects are exploration-only.
+- Add all five Royal weapons with exact Lv. 90 metadata and the narrowest
+  truthful representation of their Focus passive.
+- Add Barbara as a complete representable offensive character slice with CSV
+  alignment and explicit healing/defensive exclusions.
+
+Out of scope for this pass:
+
+- Player healing, current HP loss, incoming damage, self-applied Wet, chest or
+  Mora pickup, enemy defeat state, stamina, multi-target geometry, RL, and
+  generated docs.
+- New shared runtime hooks merely to make an otherwise unsupported passive
+  appear active.
+
+Campaign inventory:
+
+| Unit | Type | Source readiness | Shared prerequisite | Verification | Status |
+|---|---|---|---|---|---|
+| Adventurer | artifact | ready | none | `StaticArtifactRegressionTest` | done |
+| Lucky Dog | artifact | ready | none | `StaticArtifactRegressionTest` | done |
+| Gambler | artifact | ready | none | `StaticArtifactRegressionTest` | done |
+| Resolution of Sojourner | artifact | ready | action CRIT routing audit | `StaticArtifactRegressionTest` | done |
+| Royal family | weapon batch | delegated evidence | isolated family base | `RoyalWeaponRegressionTest` | active |
+| Barbara | character | delegated evidence | typed `CharacterId` and CSV | `BarbaraRegressionTest` | active |
+
+### Phase 1: Low-Rarity Artifact Sets - Done
+
+Why first:
+
+- These independent sets give the primary lane useful work while delegated
+  character and weapon branches proceed without shared-file contention.
+
+Target files:
+
+- `src/java/model/artifact/Adventurer.java` (new)
+- `src/java/model/artifact/LuckyDog.java` (new)
+- `src/java/model/artifact/Gambler.java` (new)
+- `src/java/model/artifact/ResolutionOfSojourner.java` (new)
+- `src/java/model/type/StatType.java`
+- `src/java/mechanics/formula/StandardDamageStrategy.java`
+- `src/java/sample/StaticArtifactRegressionTest.java` (new)
+
+Acceptance criteria:
+
+- Adventurer grants flat HP +1,000 and Lucky Dog grants flat DEF +100 without
+  fabricating exploration-triggered healing.
+- Gambler grants Skill DMG +20% without fabricating enemy-defeat cooldown reset.
+- Resolution grants ATK +18% and Charged Attack CRIT Rate +30% through an
+  action-category stat that does not affect other attacks.
+- Fresh and supplied stat containers, independent instances, canonical names,
+  and unrelated-stat isolation are preserved.
+
+Test cases to add or update:
+
+- Normal: canonical names and exact fixed bonuses for every set.
+- Boundary: arbitrary negative/positive times and supplied-stat preservation.
+- Abnormal: null supplied stats and proof that unsupported exploration/defeat
+  effects do not mutate unrelated combat stats.
+
+Verification:
+
+- `./gradlew StaticArtifactRegressionTest`
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Four canonical sets preserve fresh/supplied stats and expose exact flat HP,
+  flat DEF, Skill DMG, ATK, and Charged-only CRIT values without fabricating
+  exploration healing or enemy-defeat cooldown resets.
+- Resolution's new typed CRIT stat affects only standard Charged Attack damage;
+  Normal, Skill, and Burst formula probes remain unchanged.
+- `./gradlew StaticArtifactRegressionTest`, `./gradlew
+  ReactionRegressionTest build javadoc`, and `python scripts/preflight.py
+  --run` passed on 2026-08-03.
+
+### Phase 2: Royal Weapon Family
+
+Target files:
+
+- `src/java/model/weapon/RoyalWeapon.java` (new)
+- `src/java/model/weapon/RoyalLongsword.java` (new)
+- `src/java/model/weapon/RoyalGreatsword.java` (new)
+- `src/java/model/weapon/RoyalSpear.java` (new)
+- `src/java/model/weapon/RoyalGrimoire.java` (new)
+- `src/java/model/weapon/RoyalBow.java` (new)
+- `src/java/sample/RoyalWeaponRegressionTest.java` (new)
+
+Acceptance criteria:
+
+- All five weapons expose exact names, weapon types, base ATK, ATK secondary
+  stat, R5 defaults, independent instances, and R1-R5 validation.
+- Focus stacking and reset behavior is implemented only if the current damage
+  pipeline exposes the required critical-hit result; otherwise its inactive or
+  expected-value boundary is explicit and regression-tested.
+
+Test cases to add or update:
+
+- Normal: table-driven R1/R5 metadata and any representable Focus state.
+- Boundary: refinement endpoints, stack cap, and snapshot state when active.
+- Abnormal: refinement 0/6, wrong owner/simulator, and unsupported critical-hit
+  observation must not invent deterministic reset behavior.
+
+Verification:
+
+- `./gradlew RoyalWeaponRegressionTest`
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Barbara Offensive Vertical Slice
+
+Target files:
+
+- `src/java/model/character/Barbara.java` (new)
+- `config/characters/Barbara/Barbara_Status.csv` (new)
+- `config/characters/Barbara/Barbara_Multipliers.csv` (new)
+- `src/java/model/type/CharacterId.java`
+- `src/java/sample/BarbaraRegressionTest.java` (new)
+
+Acceptance criteria:
+
+- Barbara loads exact base status/talent data and exposes typed Normal,
+  Charged, Plunging, Skill, and Burst actions to the representable offensive
+  boundary.
+- Representable offensive passives and constellations use exact values,
+  timing, ICD, gauge, and Energy behavior with CSV/runtime alignment.
+- Healing, player damage/Wet state, defensive behavior, stamina, and geometry
+  are explicitly inactive rather than approximated through unrelated state.
+
+Test cases to add or update:
+
+- Normal: metadata, action multipliers, element/category, gauge/ICD, Energy,
+  and every implemented passive/constellation branch.
+- Boundary: cooldown, periodic or duration boundaries, multi-hit ordering, and
+  snapshot replay for any stateful offensive effect.
+- Abnormal: unsupported action, insufficient Energy, excluded healing/self-Wet
+  paths, missing target, and independent instances.
+
+Verification:
+
+- `./gradlew BarbaraRegressionTest`
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build javadoc PartyCatalogRegressionTest`
+- `python scripts/preflight.py --run`
 
 ## Implementation Order: Black Sword Campaign
 

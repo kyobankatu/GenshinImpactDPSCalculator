@@ -155,6 +155,8 @@ public enum StatType {
     SKILL_DMG_BONUS,
     /** Crit rate bonus that applies specifically to Elemental Skill hits. */
     SKILL_CRIT_RATE,
+    /** Crit rate bonus that applies specifically to Charged Attack hits. */
+    CHARGED_ATTACK_CRIT_RATE,
     /** DMG bonus that applies to Elemental Burst hits. */
     BURST_DMG_BONUS,
     /** Crit rate bonus that applies specifically to Elemental Burst hits. */

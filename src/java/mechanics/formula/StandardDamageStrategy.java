@@ -66,6 +66,8 @@ final class StandardDamageStrategy implements DamageStrategy {
             critRate += stats.get(StatType.BURST_CRIT_RATE);
         } else if (action.getActionType() == ActionType.SKILL || action.isCountsAsSkillDmg()) {
             critRate += stats.get(StatType.SKILL_CRIT_RATE);
+        } else if (action.getActionType() == ActionType.CHARGE) {
+            critRate += stats.get(StatType.CHARGED_ATTACK_CRIT_RATE);
         }
         critRate = Math.min(1.0, critRate);
         double critDmg = stats.get(StatType.CRIT_DMG);
