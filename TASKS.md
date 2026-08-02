@@ -12901,7 +12901,7 @@ Campaign inventory:
 | Royal family | weapon batch | delegated evidence | isolated family base | `RoyalWeaponRegressionTest` | done |
 | Barbara | character | delegated evidence | typed `CharacterId` and CSV | `BarbaraRegressionTest` | active |
 | Static combat-boundary sets | artifact batch | ready | none | `StaticArtifactRegressionTest` | done |
-| Static elemental/support sets | artifact batch | ready | none | `StaticArtifactRegressionTest` | active |
+| Static elemental/support sets | artifact batch | ready | none | `StaticArtifactRegressionTest` | done |
 
 ### Phase 1: Low-Rarity Artifact Sets - Done
 
@@ -13090,7 +13090,7 @@ Completion evidence:
   ReactionRegressionTest build javadoc`, and `python scripts/preflight.py
   --run` passed on 2026-08-03.
 
-### Phase 5: Static Elemental and Support Artifact Sets
+### Phase 5: Static Elemental and Support Artifact Sets - Done
 
 Target files:
 
@@ -13124,6 +13124,16 @@ Verification:
 - `./gradlew ReactionRegressionTest`
 - `./gradlew build javadoc`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Five canonical sets expose exact Geo DMG, DEF, Energy Recharge, ATK, and
+  Healing Bonus values while unsupported pickup, resistance, Bond of Life,
+  and incoming-healing branches remain inactive.
+- Fresh, supplied, null, negative/positive-time, and unrelated-stat isolation
+  checks pass in the shared static artifact regression.
+- `./gradlew StaticArtifactRegressionTest ReactionRegressionTest build
+  javadoc` and `python scripts/preflight.py --run` passed on 2026-08-03.
 
 ## Implementation Order: Black Sword Campaign
 

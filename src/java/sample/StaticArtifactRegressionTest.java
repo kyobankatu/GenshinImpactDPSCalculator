@@ -4,11 +4,16 @@ import java.util.Collections;
 
 import mechanics.formula.DamageCalculator;
 import model.artifact.Adventurer;
+import model.artifact.ArchaicPetra;
 import model.artifact.Berserker;
 import model.artifact.BloodstainedChivalry;
 import model.artifact.BraveHeart;
+import model.artifact.CelestialGift;
+import model.artifact.DefendersWill;
+import model.artifact.FragmentOfHarmonicWhimsy;
 import model.artifact.Gambler;
 import model.artifact.LuckyDog;
+import model.artifact.MaidenBeloved;
 import model.artifact.MarechausseeHunter;
 import model.artifact.ResolutionOfSojourner;
 import model.artifact.VourukashasGlow;
@@ -36,6 +41,7 @@ public class StaticArtifactRegressionTest {
         testResolutionOfSojourner();
         testStaticCombatBoundarySets();
         testActionCategorySets();
+        testStaticElementalAndSupportSets();
         testNullStats();
         System.out.println("StaticArtifactRegressionTest passed");
     }
@@ -259,6 +265,66 @@ public class StaticArtifactRegressionTest {
                 "Vourukasha should retain the supplied container");
     }
 
+    /** Verifies fixed stats and unsupported boundaries for five support sets. */
+    private static void testStaticElementalAndSupportSets() {
+        ArchaicPetra archaicPetra = new ArchaicPetra();
+        assertEquals("Archaic Petra", archaicPetra.getName(),
+                "Archaic Petra name");
+        assertClose(0.15,
+                archaicPetra.getStats().get(StatType.GEO_DMG_BONUS),
+                "Archaic Petra Geo DMG");
+        assertClose(0.0,
+                archaicPetra.getStats().get(StatType.DMG_BONUS_ALL),
+                "Archaic Petra should not fabricate shard pickup damage");
+
+        DefendersWill defendersWill = new DefendersWill();
+        assertEquals("Defender's Will", defendersWill.getName(),
+                "Defender's Will name");
+        assertClose(0.30,
+                defendersWill.getStats().get(StatType.DEF_PERCENT),
+                "Defender's Will DEF");
+
+        CelestialGift celestialGift = new CelestialGift();
+        assertEquals("Celestial Gift", celestialGift.getName(),
+                "Celestial Gift name");
+        assertClose(0.20,
+                celestialGift.getStats().get(StatType.ENERGY_RECHARGE),
+                "Celestial Gift Energy Recharge");
+
+        FragmentOfHarmonicWhimsy fragment =
+                new FragmentOfHarmonicWhimsy();
+        assertEquals("Fragment of Harmonic Whimsy", fragment.getName(),
+                "Fragment name");
+        assertClose(0.18, fragment.getStats().get(StatType.ATK_PERCENT),
+                "Fragment ATK");
+        assertClose(0.0, fragment.getStats().get(StatType.DMG_BONUS_ALL),
+                "Fragment should not fabricate Bond-of-Life stacks");
+
+        MaidenBeloved maiden = new MaidenBeloved();
+        assertEquals("Maiden Beloved", maiden.getName(), "Maiden name");
+        assertClose(0.15, maiden.getStats().get(StatType.HEALING_BONUS),
+                "Maiden Healing Bonus");
+
+        StatsContainer supplied = suppliedStats();
+        FragmentOfHarmonicWhimsy preserved =
+                new FragmentOfHarmonicWhimsy(supplied);
+        assertTrue(preserved.getStats() == supplied,
+                "Fragment should retain the supplied container");
+        assertClose(7.0, supplied.get(StatType.ELEMENTAL_MASTERY),
+                "Support set supplied stat preservation");
+        assertClose(0.18, supplied.get(StatType.ATK_PERCENT),
+                "Fragment supplied ATK");
+
+        CombatSimulator sim = simulatorWith(archaicPetra);
+        Character owner = sim.getCharacter(CharacterId.SUCROSE);
+        assertClose(0.15,
+                owner.getEffectiveStats(-5.0).get(StatType.GEO_DMG_BONUS),
+                "Archaic Petra negative-time stability");
+        assertClose(0.15,
+                owner.getEffectiveStats(5000.0).get(StatType.GEO_DMG_BONUS),
+                "Archaic Petra positive-time stability");
+    }
+
     /** Verifies all supplied-stat constructors reject null explicitly. */
     private static void testNullStats() {
         assertNullRejected(() -> new Adventurer(null), "Adventurer null stats");
@@ -278,6 +344,21 @@ public class StaticArtifactRegressionTest {
         assertNullRejected(
                 () -> new VourukashasGlow(null),
                 "Vourukasha null stats");
+        assertNullRejected(
+                () -> new ArchaicPetra(null),
+                "Archaic Petra null stats");
+        assertNullRejected(
+                () -> new DefendersWill(null),
+                "Defender's Will null stats");
+        assertNullRejected(
+                () -> new CelestialGift(null),
+                "Celestial Gift null stats");
+        assertNullRejected(
+                () -> new FragmentOfHarmonicWhimsy(null),
+                "Fragment null stats");
+        assertNullRejected(
+                () -> new MaidenBeloved(null),
+                "Maiden null stats");
     }
 
     /** Creates a simulator containing one deterministic artifact wearer. */
