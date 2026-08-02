@@ -2403,3 +2403,13 @@ experiment record.
 - **Plan:** `TASKS.md` Timed EM Team Weapon Campaign
 - **Completion:** `961825a` adds Makhaira/Xiphos, refines Wandering, and adds a
   typed non-converting ER contract; build/Javadoc/reaction/report/leak gates pass
+
+### B-103 — Self-contained five-star weapon coverage
+
+- **Status:** active
+- **Scope:** Skyward Pride and Lightbearing Moonshard; RL excluded
+- **Value/risk:** two complete passives reuse verified action/hit/proc/window
+  paths with no shared runtime dispatch changes
+- **Evidence boundary:** KQM TCL metadata, R1-R5 all-DMG/proc/DEF/Lunar values,
+  eight blades, 20-second state, and five-second Skill window
+- **Plan:** `TASKS.md` Self-Contained Five-Star Weapon Campaign

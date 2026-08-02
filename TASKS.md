@@ -14353,3 +14353,49 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Self-Contained Five-Star Weapon Campaign
+
+Status: Active. Add two complete five-star weapons using existing typed Burst,
+hit, generated Physical damage, Skill window, and Lunar stat contracts.
+
+Scope:
+
+- Add Skyward Pride and Lightbearing Moonshard with sourced metadata, R1-R5
+  values, R5 defaults, exact limits/durations, and focused regressions.
+
+Out of scope for this pass:
+
+- Movement speed, multi-target multiplication, visual projectile travel,
+  characters, formulas, RL, generated docs, and unrelated five-star weapons.
+
+### Phase 1: Add Skyward Pride and Lightbearing Moonshard
+
+Target files:
+
+- `src/java/model/weapon/SkywardPride.java` (new)
+- `src/java/model/weapon/LightbearingMoonshard.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Skyward Pride always grants 8-16% all DMG; active-owner Burst use opens one
+  half-open 20-second state where up to eight positive Normal/Charged hits each
+  generate one 80-160% ATK Physical blade without recursion.
+- Lightbearing Moonshard always grants 20-40% DEF and opens one refresh-only
+  half-open five-second 64-128% Lunar-Crystallize DMG window on Skill use.
+- Metadata, typed gates, triggering-hit post-order, R1-R5 defaults/validation,
+  exact expiry, wrong/zero/off-field exclusions, and use limits are explicit.
+
+Test cases to add or update:
+
+- Normal: both metadata/static stats, Pride eight blades, Moonshard Skill window, R5.
+- Boundary: Pride ninth hit and exact 20 seconds, Moonshard refresh/exact five seconds, R1.
+- Abnormal: wrong/zero/off-field/recursive Pride hits and refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
