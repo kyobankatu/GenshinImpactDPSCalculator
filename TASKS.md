@@ -12775,8 +12775,8 @@ Verification:
 
 ## Implementation Order: Five-Star EM Support Weapon Campaign
 
-Status: Active. Add two complete five-star EM support weapons using an
-off-field hit state machine and live party composition.
+Status: Complete. Two five-star EM support weapons now use an off-field hit
+state machine and live party composition.
 
 Scope:
 
@@ -12788,7 +12788,7 @@ Out of scope for this pass:
 - Freedom-Sworn's unsupported Plunging DMG stat, characters, formulas, RL,
   generated docs, and unrelated support weapons.
 
-### Phase 1: Add Elegy for the End and A Thousand Floating Dreams
+### Phase 1: Add Elegy for the End and A Thousand Floating Dreams - Done (`47a0650`)
 
 Target files:
 
@@ -12797,6 +12797,13 @@ Target files:
 - `src/java/mechanics/buff/BuffId.java`
 - `src/java/simulation/runtime/BuffManager.java`
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Elegy proves off-field Skill/Burst sigils, exact 0.2/12/20-second boundaries,
+  party-wide R1/R5 values, typed replacement, and invalid-source rejection.
+- Floating Dreams proves live mixed-party tiers, both three-stack caps,
+  owner exclusion, multiple-provider stacking, and binding; all gates pass.
 
 Acceptance criteria:
 
