@@ -4887,6 +4887,16 @@ public class ReactionRegressionTest {
         model.weapon.LionsRoar r1LionsRoar = new model.weapon.LionsRoar(1);
         assertTargetAuraWeaponDamage(
                 r1LionsRoar, Element.ELECTRO, Element.HYDRO, 0.20, "R1 Lion's Roar");
+
+        model.weapon.Rainslasher rainslasher = new model.weapon.Rainslasher();
+        assertEquals("Rainslasher", rainslasher.getName(), "Rainslasher display name");
+        assertClose(510.0, rainslasher.getBaseAtk(), EPS, "Rainslasher base ATK");
+        assertClose(165.0, rainslasher.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Rainslasher Elemental Mastery");
+        assertEquals(model.type.WeaponType.CLAYMORE, rainslasher.getWeaponType(),
+                "Rainslasher weapon type");
+        assertTargetAuraWeaponDamage(
+                rainslasher, Element.HYDRO, Element.PYRO, 0.36, "Rainslasher");
     }
 
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
