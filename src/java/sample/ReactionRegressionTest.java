@@ -160,6 +160,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ExpandedArtifactSetsPhaseOne();
         testAccuracyPhaseF_ExpandedArtifactSetsPhaseTwo();
         testAccuracyPhaseF_ExpandedArtifactSetsPhaseThree();
+        testAccuracyPhaseF_ArtifactActionCallbackContract();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -11862,6 +11863,66 @@ public class ReactionRegressionTest {
                 "Nymph should reject null supplied stats");
     }
 
+    private static void testAccuracyPhaseF_ArtifactActionCallbackContract() {
+        List<String> order = new ArrayList<>();
+        RecordingActionArtifact firstArtifact =
+                new RecordingActionArtifact("artifact-1", order);
+        RecordingActionArtifact secondArtifact =
+                new RecordingActionArtifact("artifact-2", order);
+        RecordingActionCharacter owner = new RecordingActionCharacter(
+                order,
+                new ArtifactSet[] {
+                        firstArtifact,
+                        null,
+                        blankArtifact(),
+                        secondArtifact
+                });
+        CombatSimulator sim = simulatorWithExistingCharacter(owner);
+
+        for (CharacterActionKey key : CharacterActionKey.values()) {
+            order.clear();
+            CharacterActionRequest request = CharacterActionRequest.of(key);
+            sim.performAction(owner.getCharacterId(), request);
+            assertEquals(
+                    List.of("weapon", "artifact-1", "artifact-2", "character"),
+                    order,
+                    "Artifact action dispatch ordering for " + key);
+            assertTrue(firstArtifact.lastOwner == owner,
+                    "Artifact callback should receive the equipping owner");
+            assertTrue(firstArtifact.lastRequest == request,
+                    "Artifact callback should receive the original request");
+            assertTrue(firstArtifact.lastSimulator == sim,
+                    "Artifact callback should receive the active simulator");
+        }
+        assertEquals(CharacterActionKey.values().length,
+                firstArtifact.callbackCount,
+                "Every typed action should dispatch exactly once");
+        assertEquals(firstArtifact.callbackCount, secondArtifact.callbackCount,
+                "Multiple artifact action callbacks should remain aligned");
+
+        owner.restoreCurrentEnergy(0.0);
+        order.clear();
+        sim.performAction(
+                owner.getCharacterId(),
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        assertTrue(order.isEmpty(),
+                "Rejected Bursts should not dispatch any action callback");
+        assertEquals(CharacterActionKey.values().length,
+                firstArtifact.callbackCount,
+                "Rejected Bursts should not increment artifact callbacks");
+
+        RecordingActionCharacter noArtifacts =
+                new RecordingActionCharacter(new ArrayList<>(), null);
+        simulatorWithExistingCharacter(noArtifacts).performAction(
+                noArtifacts.getCharacterId(),
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        RecordingActionCharacter plainArtifact = new RecordingActionCharacter(
+                new ArrayList<>(), new ArtifactSet[] { blankArtifact() });
+        simulatorWithExistingCharacter(plainArtifact).performAction(
+                plainArtifact.getCharacterId(),
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+    }
+
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {
         ReactionResult[] pyroReactions = {
                 ReactionResult.amp(2.0, "Vaporize", ReactionResult.Kind.VAPORIZE),
@@ -16780,6 +16841,91 @@ public class ReactionRegressionTest {
     private static final class TestWeapon extends Weapon {
         private TestWeapon() {
             super("Test Weapon", new StatsContainer());
+        }
+    }
+
+    /** Records weapon/artifact/character ordering for typed action dispatch. */
+    private static final class RecordingActionCharacter extends Character {
+        private final List<String> order;
+
+        private RecordingActionCharacter(
+                List<String> order,
+                ArtifactSet[] equippedArtifacts) {
+            this.name = "Action Callback Tester";
+            this.characterId = CharacterId.SUCROSE;
+            this.element = Element.ANEMO;
+            this.order = order;
+            this.weapon = new RecordingActionWeapon(order);
+            this.artifacts = equippedArtifacts;
+            this.baseStats.set(StatType.BASE_HP, 10000.0);
+            this.baseStats.set(StatType.BASE_ATK, 1000.0);
+            this.baseStats.set(StatType.BASE_DEF, 700.0);
+            setBurstCD(0.0);
+        }
+
+        @Override
+        public void applyPassive(StatsContainer currentStats) {
+        }
+
+        @Override
+        public double getEnergyCost() {
+            return 60.0;
+        }
+
+        @Override
+        public void onAction(CharacterActionRequest request, CombatSimulator sim) {
+            order.add("character");
+            if (request.getKey() == CharacterActionKey.BURST) {
+                markBurstUsed(sim.getCurrentTime());
+            }
+        }
+    }
+
+    /** Records the existing weapon callback's relative dispatch position. */
+    private static final class RecordingActionWeapon extends Weapon
+            implements model.entity.ActionTriggeredWeaponEffect {
+        private final List<String> order;
+
+        private RecordingActionWeapon(List<String> order) {
+            super("Recording Action Weapon", new StatsContainer());
+            this.order = order;
+        }
+
+        @Override
+        public void onAction(
+                Character user,
+                CharacterActionRequest request,
+                CombatSimulator sim) {
+            order.add("weapon");
+        }
+    }
+
+    /** Records artifact callback arguments and relative dispatch position. */
+    private static final class RecordingActionArtifact extends ArtifactSet
+            implements model.entity.ActionTriggeredArtifactEffect {
+        private final String label;
+        private final List<String> order;
+        private int callbackCount;
+        private Character lastOwner;
+        private CharacterActionRequest lastRequest;
+        private CombatSimulator lastSimulator;
+
+        private RecordingActionArtifact(String label, List<String> order) {
+            super("Recording Action Artifact", new StatsContainer());
+            this.label = label;
+            this.order = order;
+        }
+
+        @Override
+        public void onAction(
+                Character user,
+                CharacterActionRequest request,
+                CombatSimulator sim) {
+            callbackCount++;
+            lastOwner = user;
+            lastRequest = request;
+            lastSimulator = sim;
+            order.add(label);
         }
     }
 

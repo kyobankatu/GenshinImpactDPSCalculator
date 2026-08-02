@@ -2772,3 +2772,23 @@ experiment record.
 - **Completion:** all six sets pass focused metadata, supplied-stat, owner,
   field, target-state, energy, reaction, hit-category, exact timing, invalid
   callback, reaction regression, build, Javadoc, and preflight checks
+
+### B-128 — Action-use artifact coverage
+
+- **Status:** in-progress
+- **Source:** explicit broad content-coverage request
+- **Scope:** shared successful-action artifact callback, Heart of Depth, and
+  Martial Artist; RL excluded
+- **Value/risk:** removes a cross-cutting capability gap and adds two complete
+  sets without character-specific dispatch; callback ordering requires a
+  planned contract regression
+- **Evidence boundary:** maintained KQM artifact catalog and evidence vault,
+  accessed 2026-08-02, provide fixed values, Skill-use triggers, durations,
+  refresh behavior, and damage categories:
+  https://library.keqingmains.com/equipment/artifacts
+  https://library.keqingmains.com/evidence/equipment/artifacts
+- **Classification:** adopt successful typed Skill requests as Skill use;
+  rejected Burst requests must not dispatch artifact action callbacks
+- **Risk/proof:** planned; focused dispatch/timing regressions plus reaction
+  regression, build, Javadoc, and preflight
+- **Plan:** `TASKS.md` Action-Use Artifact Campaign

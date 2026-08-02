@@ -30,6 +30,10 @@ future explicit user request.
 The prior simulator content campaigns, including Skill-focused event weapons,
 are complete; RL and generated docs remain excluded.
 
+The B-128 action-use artifact campaign is in progress. It adds one shared
+post-gate artifact action callback, then uses it for Heart of Depth and Martial
+Artist without changing RL or generated documentation.
+
 The B-058 Burning fuel correction is complete. It replaces the fixed
 two-second approximation with typed Dendro-fuel decay and refresh ownership
 while retaining the repository's single-target boundary.
@@ -12996,6 +13000,117 @@ Completion evidence:
   pass; Nymph metadata, all categories, tier cap, same-category refresh,
   staggered exact expiry, invalid callback, and independent-state regressions
   pass with reaction regression, build, Javadoc, and preflight.
+
+## Implementation Order: Action-Use Artifact Campaign
+
+Status: In progress. This campaign adds the missing artifact action-use
+capability and two complete Skill-activated sets; RL and generated docs remain
+excluded.
+
+Scope:
+
+- Dispatch successful typed character actions to equipped artifact sets.
+- Add Heart of Depth and Martial Artist through the shared capability.
+
+Out of scope for this pass:
+
+- Plunging-specific stats, current HP, healing, shields, enemy defeat,
+  Nightsoul, RL, and generated docs.
+
+Definitions:
+
+- `ActionTriggeredArtifactEffect`: owner-local artifact capability called
+  after action gates pass and before the character resolves the action.
+
+### Phase 1: Shared Artifact Action Contract - Done
+
+Why first:
+
+- Skill-use sets need one runtime-owned callback instead of artifact-specific
+  branches in character classes.
+
+Target files:
+
+- `src/java/model/entity/ActionTriggeredArtifactEffect.java` (new)
+- `src/java/model/entity/ArtifactSet.java`
+- `src/java/simulation/runtime/ActionGateway.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Tasks:
+
+- Dispatch every equipped implementing artifact in array order after action
+  cooldown/energy gates and the weapon callback, before character resolution.
+- Preserve no-op behavior for null arrays, null entries, and plain sets.
+
+Acceptance criteria:
+
+- One accepted request produces exactly one owner/request/simulator callback
+  per implementing set; a rejected Burst produces none.
+- Existing weapon-before-character ordering remains intact and artifact
+  callbacks precede character resolution.
+
+Test cases to add or update:
+
+- Normal: owner/request identity, multiple-set order, and weapon/artifact/
+  character ordering.
+- Boundary: all typed action keys dispatch through the same contract.
+- Abnormal: insufficient-Energy Burst, null entry, plain set, and no artifacts.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
+
+Completion evidence:
+
+- Accepted requests dispatch weapon, artifact sets in array order, then the
+  character; all action keys, rejected Burst, null/plain/no-set cases pass.
+- Reaction regression, build, Javadoc, and executable preflight passed on
+  2026-08-02.
+
+### Phase 2: Skill-Activated Damage Sets
+
+Why second:
+
+- Both sets consume the Phase 1 callback and differ only in weapon gating and
+  fixed/dynamic bonus values.
+
+Target files:
+
+- `src/java/model/artifact/HeartOfDepth.java` (new)
+- `src/java/model/artifact/MartialArtist.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Tasks:
+
+- Add canonical metadata, supplied-stat preservation, owner binding, and
+  half-open Skill-use windows.
+- Gate Heart of Depth's four-piece bonus to Normal/Charged stats and Martial
+  Artist's fixed and Skill-activated Normal/Charged bonuses.
+
+Acceptance criteria:
+
+- Heart of Depth grants Hydro DMG +15% and Normal/Charged DMG +30% for 15
+  seconds after the owner uses a Skill.
+- Martial Artist grants Normal/Charged DMG +15%, then a further +25% for eight
+  seconds after the owner uses a Skill.
+
+Test cases to add or update:
+
+- Normal: fixed stats, Skill activation, refresh, off-field owner use, and
+  supplied-stat preservation.
+- Boundary: exact 8/15-second expiry and immediate activation.
+- Abnormal: non-Skill/wrong owner/simulator callbacks, pre-init use, null
+  stats, duplicate binding, and independent instances.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
 
 ### Phase 2: Switch-Activated Weapons - Done
 

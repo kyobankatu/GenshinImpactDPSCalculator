@@ -9,8 +9,9 @@ import model.stats.StatsContainer;
  * <p>An artifact set contributes fixed stats via {@link #getStats()} and may
  * modify stats dynamically through {@link #applyPassive}. Event-driven set
  * bonuses should implement focused capability interfaces such as
- * {@link ReactionAwareArtifact}, {@link DamageTriggeredArtifactEffect},
- * {@link SwitchAwareArtifact}, or {@link BurstTriggeredArtifactEffect}.
+ * {@link ActionTriggeredArtifactEffect}, {@link ReactionAwareArtifact},
+ * {@link DamageTriggeredArtifactEffect}, {@link SwitchAwareArtifact}, or
+ * {@link BurstTriggeredArtifactEffect}.
  */
 public class ArtifactSet {
     private String name; // e.g., "Emblem of Severed Fate (4pc)"

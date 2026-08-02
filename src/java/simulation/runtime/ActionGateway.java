@@ -1,7 +1,9 @@
 package simulation.runtime;
 
-import model.entity.Character;
+import model.entity.ActionTriggeredArtifactEffect;
 import model.entity.ActionTriggeredWeaponEffect;
+import model.entity.ArtifactSet;
+import model.entity.Character;
 import model.type.CharacterId;
 import simulation.CombatSimulator;
 import simulation.action.CharacterActionKey;
@@ -80,6 +82,8 @@ public class ActionGateway {
                 ((ActionTriggeredWeaponEffect) character.getWeapon()).onAction(character, request, sim);
             }
 
+            dispatchArtifactActionEffects(character, request);
+
             sim.beginActionDirectDamageCapture(characterId);
             try {
                 character.onAction(request, sim);
@@ -90,5 +94,20 @@ public class ActionGateway {
             sim.popBuffSource();
         }
         sim.setRotationTime(sim.getCurrentTime());
+    }
+
+    /** Dispatches action-use passives for every equipped artifact set in order. */
+    private void dispatchArtifactActionEffects(
+            Character character,
+            CharacterActionRequest request) {
+        ArtifactSet[] artifacts = character.getArtifacts();
+        if (artifacts == null) {
+            return;
+        }
+        for (ArtifactSet artifact : artifacts) {
+            if (artifact instanceof ActionTriggeredArtifactEffect) {
+                ((ActionTriggeredArtifactEffect) artifact).onAction(character, request, sim);
+            }
+        }
     }
 }
