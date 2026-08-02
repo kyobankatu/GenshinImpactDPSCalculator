@@ -14682,3 +14682,51 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Five-Star Catalyst Stack Weapon Campaign
+
+Status: Active. Add two combat-complete five-star catalysts with typed Skill
+input, fixed timer cadence, and switch reset behavior.
+
+Scope:
+
+- Add Kagura's Verity and Lost Prayer to the Sacred Winds with sourced
+  metadata, R1-R5 values, exact stack timing, and focused regressions.
+
+Out of scope for this pass:
+
+- Lost Prayer's non-DPS Movement SPD, defeat/combat-exit state, characters,
+  formulas, RL, generated docs, and unrelated catalysts.
+
+### Phase 1: Add Kagura's Verity and Lost Prayer to the Sacred Winds
+
+Target files:
+
+- `src/java/model/weapon/KagurasVerity.java` (new)
+- `src/java/model/weapon/LostPrayerToTheSacredWinds.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Kagura Skill input applies 12-24% Skill DMG per stack before action
+  resolution, refreshes one shared half-open 24-second window, caps at three,
+  and grants 12-24% all Elemental DMG only while all three stacks remain.
+- Lost Prayer gains one 8-16% owner-element DMG stack at each fixed four-second
+  combat tick only while active, caps at four, keeps global cadence while
+  off-field, and clears all stacks immediately on switch-out.
+- Metadata, pre-action order, exact expiry/ticks, active/owner/simulator gates,
+  R1-R5 defaults/validation, and cross-simulator binding are explicit.
+
+Test cases to add or update:
+
+- Normal: metadata, all Kagura/Lost Prayer stack tiers and caps, R5.
+- Boundary: exact 4/24 seconds, Skill refresh, off-field cadence and return, R1.
+- Abnormal: wrong/foreign Kagura actions, Lost Prayer off-field ticks, switch
+  reset, cross-simulator reuse, refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
