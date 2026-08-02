@@ -13733,3 +13733,52 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Additional Hit-Stack Weapon Expansion
+
+Status: Active. Add two multi-stat weapons through the verified positive-hit
+stack policy without changing shared runtime behavior.
+
+Scope:
+
+- Add Prototype Rancour and Sacrificer's Staff with sourced metadata, action
+  gates, stack values/caps, R1-R5 values, R5 defaults, and regressions.
+
+Out of scope for this pass:
+
+- Multi-target hit multiplication, characters, formulas, RL, generated docs,
+  and unrelated weapon families.
+
+### Phase 1: Add Two Multi-Stat Hit-Stack Weapons
+
+Target files:
+
+- `src/java/model/weapon/PrototypeRancour.java` (new)
+- `src/java/model/weapon/SacrificersStaff.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+| Unit | Positive-hit stacks | Focused verification | Status |
+|---|---|---|---|
+| Prototype Rancour | Normal/Charged -> ATK and DEF 4-8%, 0.3s, max four | dual stats, CT/cap/expiry, R1/R5 | Pending |
+| Sacrificer's Staff | Skill -> ATK 8-16% and ER 6-12%, max three | Skill isolation, off-field, expiry, R1/R5 | Pending |
+
+Acceptance criteria:
+
+- Rancour accepts only positive Normal/Charged hits at exact 0.3-second CT;
+  Staff accepts only positive Skill hits and remains triggerable off-field.
+- Both cap and refresh one shared half-open six-second duration without state
+  accumulation during repeated reads; wrong/zero hits do not refresh.
+- Metadata, R1-R5 values, R5 defaults, and invalid ranks match KQM TCL.
+
+Test cases to add or update:
+
+- Normal: action triggers, caps, all dynamic stats, metadata, R5.
+- Boundary: exact CT, before/exact expiry, off-field persistence, R1.
+- Abnormal: wrong/zero hits, repeated reads, refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
