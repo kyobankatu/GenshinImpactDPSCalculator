@@ -74,6 +74,11 @@ public class SwitchManager {
             return;
         }
 
+        Character oldChar = party.getActiveCharacter();
+        if (oldChar == target) {
+            return;
+        }
+
         double currentTime = sim.getCurrentTime();
         double cooldownEnd = lastSwapTime + SWAP_COOLDOWN;
         if (currentTime < cooldownEnd) {
@@ -81,7 +86,6 @@ public class SwitchManager {
         }
         lastSwapTime = sim.getCurrentTime();
 
-        Character oldChar = party.getActiveCharacter();
         String oldName = oldChar != null ? oldChar.getName() : "?";
         if (oldChar != null) {
             if (oldChar instanceof SwitchAwareCharacter) {
@@ -103,6 +107,9 @@ public class SwitchManager {
 
         Character newChar = party.getActiveCharacter();
         if (newChar != null) {
+            if (newChar instanceof SwitchAwareCharacter) {
+                ((SwitchAwareCharacter) newChar).onSwitchIn(sim);
+            }
             notifyWeaponSwitchIn(newChar);
             notifyArtifactsSwitchIn(newChar);
         }

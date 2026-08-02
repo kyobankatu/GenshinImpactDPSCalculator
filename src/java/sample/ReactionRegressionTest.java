@@ -12111,6 +12111,51 @@ public class ReactionRegressionTest {
         assertEquals(CharacterId.XINGQIU,
                 sim.getActiveCharacter().getCharacterId(),
                 "Switching to a plain weapon should remain supported");
+
+        List<String> order = new ArrayList<>();
+        RecordingSwitchCharacter outgoing = new RecordingSwitchCharacter(
+                "outgoing", CharacterId.SUCROSE, order);
+        RecordingSwitchCharacter incoming = new RecordingSwitchCharacter(
+                "incoming", CharacterId.AMBER, order);
+        CombatSimulator orderedSim = simulatorWithExistingCharacter(outgoing);
+        orderedSim.addCharacter(incoming);
+        orderedSim.switchCharacter(CharacterId.AMBER);
+        String[] expectedOrder = {
+                "outgoing-character-out",
+                "outgoing-weapon-out",
+                "outgoing-artifact-out",
+                "incoming-character-in",
+                "incoming-weapon-in",
+                "incoming-artifact-in"
+        };
+        assertEquals(expectedOrder.length, order.size(),
+                "Standard switch should dispatch every callback exactly once");
+        for (int i = 0; i < expectedOrder.length; i++) {
+            assertEquals(expectedOrder[i], order.get(i),
+                    "Standard switch callback order at index " + i);
+        }
+        assertEquals(CharacterId.SUCROSE, outgoing.activeAtSwitchOut,
+                "Outgoing character callback should observe the old active member");
+        assertEquals(CharacterId.AMBER, incoming.activeAtSwitchIn,
+                "Incoming character callback should observe the new active member");
+        assertClose(0.0, outgoing.switchOutTime, EPS,
+                "Outgoing character callback should run before switch delay");
+        assertClose(0.0, incoming.switchInTime, EPS,
+                "Incoming character callback should run before switch delay");
+        assertClose(0.1, orderedSim.getCurrentTime(), EPS,
+                "Standard switch should retain its existing delay");
+
+        int callbacksBeforeSameTarget = order.size();
+        double timeBeforeSameTarget = orderedSim.getCurrentTime();
+        orderedSim.switchCharacter(CharacterId.AMBER);
+        assertEquals(callbacksBeforeSameTarget, order.size(),
+                "Same-active switch should not dispatch callbacks");
+        assertClose(timeBeforeSameTarget, orderedSim.getCurrentTime(), EPS,
+                "Same-active switch should not consume cooldown or delay");
+
+        orderedSim.setActiveCharacter(CharacterId.SUCROSE);
+        assertEquals(callbacksBeforeSameTarget, order.size(),
+                "Direct active setter should not dispatch character callbacks");
     }
 
     private static void testAccuracyPhaseF_SwitchActivatedWeapons() {
@@ -19193,6 +19238,104 @@ public class ReactionRegressionTest {
             activeCharacterAtIncoming =
                     sim.getActiveCharacter().getCharacterId();
             incomingTime = sim.getCurrentTime();
+        }
+    }
+
+    /** Records the complete character, weapon, and artifact switch sequence. */
+    private static final class RecordingSwitchCharacter extends Character
+            implements model.entity.SwitchAwareCharacter {
+        private final String label;
+        private final List<String> order;
+        private CharacterId activeAtSwitchOut;
+        private CharacterId activeAtSwitchIn;
+        private double switchOutTime;
+        private double switchInTime;
+
+        private RecordingSwitchCharacter(
+                String label,
+                CharacterId characterId,
+                List<String> order) {
+            this.label = label;
+            this.order = order;
+            this.name = label;
+            this.characterId = characterId;
+            this.element = Element.PHYSICAL;
+            this.weapon = new RecordingSwitchWeapon(label, order);
+            this.artifacts = new ArtifactSet[] {
+                    new RecordingSwitchArtifact(label, order)
+            };
+            this.baseStats.set(StatType.BASE_HP, 10000.0);
+            this.baseStats.set(StatType.BASE_ATK, 1000.0);
+            this.baseStats.set(StatType.BASE_DEF, 700.0);
+        }
+
+        @Override
+        public void applyPassive(StatsContainer stats) {
+        }
+
+        @Override
+        public double getEnergyCost() {
+            return 60.0;
+        }
+
+        @Override
+        public void onSwitchOut(CombatSimulator sim) {
+            order.add(label + "-character-out");
+            activeAtSwitchOut = sim.getActiveCharacter().getCharacterId();
+            switchOutTime = sim.getCurrentTime();
+        }
+
+        @Override
+        public void onSwitchIn(CombatSimulator sim) {
+            order.add(label + "-character-in");
+            activeAtSwitchIn = sim.getActiveCharacter().getCharacterId();
+            switchInTime = sim.getCurrentTime();
+        }
+    }
+
+    /** Records weapon switch callbacks for the complete ordering fixture. */
+    private static final class RecordingSwitchWeapon extends Weapon
+            implements model.entity.SwitchAwareWeaponEffect {
+        private final String label;
+        private final List<String> order;
+
+        private RecordingSwitchWeapon(String label, List<String> order) {
+            super("Recording Switch Weapon", new StatsContainer());
+            this.label = label;
+            this.order = order;
+        }
+
+        @Override
+        public void onSwitchOut(Character user, CombatSimulator sim) {
+            order.add(label + "-weapon-out");
+        }
+
+        @Override
+        public void onSwitchIn(Character user, CombatSimulator sim) {
+            order.add(label + "-weapon-in");
+        }
+    }
+
+    /** Records artifact switch callbacks for the complete ordering fixture. */
+    private static final class RecordingSwitchArtifact extends ArtifactSet
+            implements model.entity.SwitchAwareArtifact {
+        private final String label;
+        private final List<String> order;
+
+        private RecordingSwitchArtifact(String label, List<String> order) {
+            super("Recording Switch Artifact", new StatsContainer());
+            this.label = label;
+            this.order = order;
+        }
+
+        @Override
+        public void onSwitchIn(CombatSimulator sim, Character owner) {
+            order.add(label + "-artifact-in");
+        }
+
+        @Override
+        public void onSwitchOut(CombatSimulator sim, Character owner) {
+            order.add(label + "-artifact-out");
         }
     }
 

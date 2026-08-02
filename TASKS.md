@@ -13763,6 +13763,97 @@ Evidence:
   1,271,521 / 60,549 after per-hit Resolve and trigger resolution.
 - Reaction regression, build, Javadoc, sample simulation, and preflight pass.
 
+## Implementation Order: Lisa C6 Switch-In Lifecycle
+
+Status: In progress. Implement B-138 through a narrow shared switch capability
+followed by Lisa-owned typed state; retain the stationary single-target model
+and exclude co-op, out-of-combat party setup, RL, and generated docs.
+
+Evidence:
+
+- The maintained KQM Lisa page and evidence vault, accessed 2026-08-02, state
+  that C6 switch-in applies three simultaneous Conductive stacks, refreshes all
+  current stacks to 15 seconds, and has a five-second in-combat cooldown:
+  https://library.keqingmains.com/characters/electro/lisa
+  https://library.keqingmains.com/evidence/characters/electro/lisa
+
+### Phase 1: Character Switch-In Capability
+
+Status: Done.
+
+Target files:
+
+- `src/java/model/entity/SwitchAwareCharacter.java`
+- `src/java/simulation/runtime/SwitchManager.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Switch-aware characters receive one default-compatible incoming callback
+  after party mutation and before incoming weapon/artifact callbacks and delay.
+- Existing character, weapon, and artifact outgoing order remains unchanged.
+- Missing targets, same-active targets, and the direct active setter consume no
+  time and emit no character, weapon, or artifact switch callbacks.
+
+Test cases:
+
+- Normal: outgoing character then incoming character/weapon/artifact ordering.
+- Boundary: callbacks observe pre-delay time and correct old/new active member.
+- Abnormal: legacy Raiden out-only implementation, missing/same target, direct
+  setter, and characters without the capability.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `./gradlew RaidenParty`
+- `python scripts/preflight.py`
+
+Evidence:
+
+- Standard switches dispatch character-out, weapon-out, artifact-out, party
+  mutation, character-in, weapon-in, and artifact-in in that exact order;
+  callbacks observe the expected active member at the pre-delay timestamp.
+- The incoming callback is a default no-op for existing out-only characters.
+  Missing targets, same-active targets, and direct active setters remain
+  callback-free and consume no added time.
+- Two `RaidenParty` runs remain 1,275,070 damage / 60,718 DPS.
+- Reaction regression, build, Javadoc, sample simulation, and preflight pass.
+
+### Phase 2: Typed Conductive and Pulsating Witch
+
+Target files:
+
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/model/character/Lisa.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Conductive stacks use three independently expiring typed Lisa-owned markers
+  and retain existing Charged, cap, consume, and exact-expiry behavior.
+- In combat, C6 standard switch-in replaces current stacks with three markers
+  expiring together after 15 seconds and starts one typed five-second cooldown.
+- C5, no enemy, initial active insertion, direct setter, same-target switch,
+  and switch-in before cooldown expiry do not fabricate C6 stacks or cooldown.
+- Conductive membership/times and the C6 cooldown survive snapshot restore.
+
+Test cases:
+
+- Normal: ally-to-C6 switch, existing-stack refresh, and three-stack Hold.
+- Boundary: stack 14.999/15 and C6 4.999/5.000 seconds.
+- Abnormal: C5, no enemy, direct/same switch, pre-CD repeated switch, cap,
+  consumption, and snapshot rollback after divergent state.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `./gradlew RaidenParty`
+- `python scripts/preflight.py`
+
 ### Phase 2: Skill-Activated Damage Sets - Done
 
 Why second:
