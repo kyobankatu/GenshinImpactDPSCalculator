@@ -92,6 +92,10 @@ public enum BuffId {
     XIANGLING_C6,
     /** 聖遺物 4 セット「旧貴族のしつけ」効果。 */
     NOBLESSE_OBLIGE_4PC,
+    /** 聖遺物 4 セット「教官」によるチーム元素熟知バフ。 */
+    INSTRUCTOR_4PC_TEAM_EM,
+    /** 聖遺物 4 セット「深林の記憶」による草元素耐性ダウン。 */
+    DEEPWOOD_MEMORIES_4PC_SHRED,
     SUPERCONDUCT_PHYS_RES_SHRED,
     /** 武器「漂泊の宵星」効果。 */
     WANDERING_EVENSTAR_WILDLING_NIGHTSTAR,
