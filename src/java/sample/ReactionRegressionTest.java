@@ -5793,6 +5793,44 @@ public class ReactionRegressionTest {
         assertTrue(highMouunRefinementRejected,
                 "Mouun's Moon should reject refinement six");
 
+        model.weapon.WavebreakersFin wavebreakersFin =
+                new model.weapon.WavebreakersFin();
+        assertEquals("Wavebreaker's Fin", wavebreakersFin.getName(),
+                "Wavebreaker's Fin display name");
+        assertClose(620.0, wavebreakersFin.getBaseAtk(), EPS,
+                "Wavebreaker's Fin base ATK");
+        assertClose(0.138, wavebreakersFin.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Wavebreaker's Fin ATK substat");
+        assertEquals(model.type.WeaponType.POLEARM, wavebreakersFin.getWeaponType(),
+                "Wavebreaker's Fin weapon type");
+        assertEquals(5, wavebreakersFin.getRefinement(),
+                "Wavebreaker's Fin default refinement");
+
+        TestCharacter finOwner = testCharacter(Element.HYDRO);
+        finOwner.setWeapon(wavebreakersFin);
+        CombatSimulator finSim = simulatorWith(finOwner);
+        assertClose(0.144,
+                resolvedStat(finSim, finOwner, StatType.BURST_DMG_BONUS), EPS,
+                "R5 Wavebreaker's Fin should inherit Watatsumi Wavewalker");
+
+        boolean lowFinRefinementRejected = false;
+        try {
+            new model.weapon.WavebreakersFin(0);
+        } catch (IllegalArgumentException expected) {
+            lowFinRefinementRejected = true;
+        }
+        assertTrue(lowFinRefinementRejected,
+                "Wavebreaker's Fin should reject refinement zero");
+
+        boolean highFinRefinementRejected = false;
+        try {
+            new model.weapon.WavebreakersFin(6);
+        } catch (IllegalArgumentException expected) {
+            highFinRefinementRejected = true;
+        }
+        assertTrue(highFinRefinementRejected,
+                "Wavebreaker's Fin should reject refinement six");
+
         boolean lowRefinementRejected = false;
         try {
             new model.weapon.Akuoumaru(0);
