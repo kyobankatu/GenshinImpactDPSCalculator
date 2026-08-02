@@ -181,12 +181,18 @@ public class Chongyun extends Character implements
                 pendingA4Events);
     }
 
+    /** Reports whether a snapshot payload belongs to Chongyun. */
+    @Override
+    public boolean acceptsCharacterState(State state) {
+        return state instanceof ChongyunState;
+    }
+
     /** Restores Normal-chain state and re-registers future field events. */
     @Override
     public void restoreCharacterState(
             State state,
             CombatSimulator simulator) {
-        if (!(state instanceof ChongyunState)) {
+        if (!acceptsCharacterState(state)) {
             throw new IllegalArgumentException(
                     "Unexpected Chongyun snapshot state");
         }
@@ -196,11 +202,11 @@ public class Chongyun extends Character implements
         pendingParticleTimes = new ArrayList<>(restored.particleTimes);
         pendingA4Events = new ArrayList<>(restored.a4Events);
         double currentTime = simulator.getCurrentTime();
-        pendingParticleTimes.removeIf(time -> time <= currentTime);
+        pendingParticleTimes.removeIf(time -> time < currentTime);
         for (Double time : new ArrayList<>(pendingParticleTimes)) {
             scheduleParticle(simulator, time);
         }
-        pendingA4Events.removeIf(event -> event.time <= currentTime);
+        pendingA4Events.removeIf(event -> event.time < currentTime);
         for (PendingA4 event : new ArrayList<>(pendingA4Events)) {
             schedulePendingA4(simulator, event);
         }
@@ -502,7 +508,7 @@ public class Chongyun extends Character implements
             double currentTime) {
         for (int second = 0; second <= 10; second++) {
             double tickTime = field.getStartTime() + second;
-            if (tickTime <= currentTime
+            if (tickTime < currentTime
                     || tickTime > field.getExpirationTime()) {
                 continue;
             }

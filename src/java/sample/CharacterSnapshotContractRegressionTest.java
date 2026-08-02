@@ -22,12 +22,36 @@ public final class CharacterSnapshotContractRegressionTest {
         sim.addCharacter(character);
         character.counter = 7;
         character.eventTime = 2.0;
+        character.receiveParticleEnergy(2.0, 1.5);
+        character.receiveFlatEnergy(4.0);
+        character.markBurstUsed(0.5);
         SimulatorSnapshot snapshot = sim.saveSnapshot();
 
         character.counter = 9;
+        character.receiveParticleEnergy(5.0, 2.0);
+        character.receiveFlatEnergy(6.0);
+        character.recordMissedBurst();
+        character.getBurstEnergyWindows().get(0)[0] = 99.0;
+        character.getBurstEnergyMarkers().get(0)[0] = 99.0;
         sim.advanceTime(3.0);
         sim.restoreSnapshot(snapshot);
         assertEquals(7, character.counter, "character counter restore");
+        assertClose(2.0, character.getTotalParticleEnergy(),
+                "particle accounting restore");
+        assertClose(4.0, character.getTotalFlatEnergy(),
+                "flat accounting restore");
+        assertClose(7.0, character.getTotalEnergyGained(),
+                "total accounting restore");
+        assertEquals(1, character.getBurstEnergyWindows().size(),
+                "burst window history restore");
+        assertEquals(1, character.getBurstEnergyMarkers().size(),
+                "burst marker history restore");
+        assertClose(2.0, character.getBurstEnergyWindows().get(0)[0],
+                "burst particle window restore");
+        assertClose(4.0, character.getBurstEnergyWindows().get(0)[1],
+                "burst flat window restore");
+        assertClose(0.5, character.getBurstEnergyMarkers().get(0)[0],
+                "burst marker time restore");
         sim.advanceTime(2.0);
         assertEquals(1, character.eventCount, "future event reconstruction");
 
@@ -52,10 +76,45 @@ public final class CharacterSnapshotContractRegressionTest {
                         saved.activeBuffRefs,
                         saved.activeBuffTimes,
                         saved.weaponState,
-                        new WrongState()));
+                        new WrongState(),
+                        saved.energyState));
+        double timeBeforeInvalidRestore = sim.getCurrentTime();
+        int counterBeforeInvalidRestore = character.counter;
         assertThrows(IllegalArgumentException.class,
                 () -> sim.restoreSnapshot(snapshot),
                 "wrong character state type");
+        assertClose(timeBeforeInvalidRestore, sim.getCurrentTime(),
+                "invalid state leaves clock unchanged");
+        assertEquals(counterBeforeInvalidRestore, character.counter,
+                "invalid state leaves character unchanged");
+
+        TestCharacter deadlineCharacter = new TestCharacter();
+        CombatSimulator deadlineSim = new CombatSimulator();
+        deadlineSim.setLoggingEnabled(false);
+        deadlineSim.addCharacter(deadlineCharacter);
+        deadlineCharacter.eventTime = 1.0;
+        SimulatorSnapshot[] deadlineSnapshot = new SimulatorSnapshot[1];
+        deadlineSim.registerEvent(new SimpleTimerEvent(1.0, 1.0) {
+            @Override
+            public void onTick(CombatSimulator activeSim) {
+                finish();
+                deadlineSnapshot[0] = activeSim.saveSnapshot();
+            }
+        });
+        deadlineSim.advanceTime(1.0);
+        deadlineSim.restoreSnapshot(deadlineSnapshot[0]);
+        deadlineSim.advanceTime(0.0);
+        assertEquals(1, deadlineCharacter.eventCount,
+                "exact-deadline event reconstruction");
+
+        TestCharacter nullCharacter = new TestCharacter();
+        CombatSimulator nullSim = new CombatSimulator();
+        nullSim.setLoggingEnabled(false);
+        nullSim.addCharacter(nullCharacter);
+        nullCharacter.returnNullState = true;
+        assertThrows(IllegalStateException.class,
+                nullSim::saveSnapshot,
+                "snapshot-aware character must return explicit state");
         System.out.println("CharacterSnapshotContractRegressionTest passed");
     }
 
@@ -64,6 +123,16 @@ public final class CharacterSnapshotContractRegressionTest {
             int actual,
             String message) {
         if (expected != actual) {
+            throw new AssertionError(message + ": expected " + expected
+                    + " but got " + actual);
+        }
+    }
+
+    private static void assertClose(
+            double expected,
+            double actual,
+            String message) {
+        if (Math.abs(expected - actual) > 1e-9) {
             throw new AssertionError(message + ": expected " + expected
                     + " but got " + actual);
         }
@@ -107,6 +176,7 @@ public final class CharacterSnapshotContractRegressionTest {
         private int counter;
         private int eventCount;
         private double eventTime;
+        private boolean returnNullState;
 
         private TestCharacter() {
             name = "Noelle";
@@ -116,7 +186,15 @@ public final class CharacterSnapshotContractRegressionTest {
 
         @Override
         public State captureCharacterState() {
+            if (returnNullState) {
+                return null;
+            }
             return new TestState(counter, eventTime);
+        }
+
+        @Override
+        public boolean acceptsCharacterState(State state) {
+            return state instanceof TestState;
         }
 
         @Override
@@ -130,7 +208,7 @@ public final class CharacterSnapshotContractRegressionTest {
             TestState restored = (TestState) state;
             counter = restored.counter;
             eventTime = restored.eventTime;
-            if (eventTime <= simulator.getCurrentTime()) {
+            if (eventTime < simulator.getCurrentTime()) {
                 return;
             }
             simulator.registerEvent(new SimpleTimerEvent(eventTime, 1.0) {

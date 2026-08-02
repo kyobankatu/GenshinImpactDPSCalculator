@@ -23,6 +23,7 @@ import simulation.SimulatorSnapshot;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.event.SimpleTimerEvent;
 
 /** Focused regression checks for Jean's stationary offensive slice. */
 public final class JeanRegressionTest {
@@ -37,6 +38,7 @@ public final class JeanRegressionTest {
         testIdentityDataAndConstellationConstruction();
         testNormalChargedAndPlungeTiming();
         testSkillSnapshotTimingParticlesAndC5();
+        testSkillParticleSnapshotReplay();
         testBurstSnapshotTimingA4AndC3();
         testNormalAttackStepSnapshotReplay();
         testBurstExitSnapshotReplay();
@@ -296,6 +298,67 @@ public final class JeanRegressionTest {
                 "Jean C3 initial multiplier");
     }
 
+    private static void testSkillParticleSnapshotReplay() {
+        Jean jean = jeanAtConstellation(0);
+        CombatSimulator sim = simulatorWith(jean);
+        List<Double> particles = new ArrayList<>();
+        sim.addParticleListener((element, count, time) -> particles.add(time));
+        perform(sim, CharacterActionKey.SKILL);
+        jean.resetSkillCooldown(sim.getCurrentTime());
+        perform(sim, CharacterActionKey.SKILL);
+        SimulatorSnapshot snapshot = sim.saveSnapshot();
+
+        advanceTo(sim, 167.0 * FRAME);
+        assertEquals(2, particles.size(),
+                "Jean original branch resolves two particle packets");
+
+        sim.restoreSnapshot(snapshot);
+        particles.clear();
+        advanceTo(sim, 167.0 * FRAME);
+        assertEquals(2, particles.size(),
+                "Jean restore replays two particle packets");
+
+        sim.restoreSnapshot(snapshot);
+        sim.restoreSnapshot(snapshot);
+        particles.clear();
+        advanceTo(sim, 167.0 * FRAME);
+        assertEquals(2, particles.size(),
+                "Jean repeated restore keeps two particle packets");
+
+        Jean exactJean = jeanAtConstellation(0);
+        CombatSimulator exactSim = simulatorWith(exactJean);
+        List<Double> exactParticles = new ArrayList<>();
+        exactSim.addParticleListener((element, count, time) ->
+                exactParticles.add(time));
+        perform(exactSim, CharacterActionKey.SKILL);
+        SnapshotAwareCharacterEffect.State pendingState =
+                exactJean.captureCharacterState();
+        advanceTo(exactSim, 121.0 * FRAME);
+        assertEquals(1, exactParticles.size(),
+                "Jean exact-deadline original particle resolves");
+
+        SimulatorSnapshot[] exactSnapshot = captureSnapshotAt(
+                exactSim, exactSim.getCurrentTime());
+        exactJean.restoreCharacterState(pendingState, exactSim);
+        exactParticles.clear();
+        exactSim.advanceTime(0.0);
+        assertEquals(1, exactParticles.size(),
+                "Jean same-time setup resolves one particle");
+
+        exactSim.restoreSnapshot(exactSnapshot[0]);
+        exactParticles.clear();
+        exactSim.advanceTime(0.0);
+        assertEquals(1, exactParticles.size(),
+                "Jean exact-deadline restore replays particle");
+
+        exactSim.restoreSnapshot(exactSnapshot[0]);
+        exactSim.restoreSnapshot(exactSnapshot[0]);
+        exactParticles.clear();
+        exactSim.advanceTime(0.0);
+        assertEquals(1, exactParticles.size(),
+                "Jean repeated exact-deadline restore keeps one particle");
+    }
+
     private static void testNormalAttackStepSnapshotReplay() {
         Jean jean = jeanAtConstellation(0);
         CombatSimulator sim = simulatorWith(jean);
@@ -358,10 +421,26 @@ public final class JeanRegressionTest {
         assertSameExit(original, exits.get(2),
                 "Jean repeatedly restored Burst exit");
 
+        SimulatorSnapshot[] exactSnapshot = captureSnapshotAt(
+                sim, sim.getCurrentTime());
         jean.restoreCharacterState(pendingState, sim);
-        advanceTo(sim, 641.0 * FRAME);
-        assertEquals(3, exits.size(),
-                "Jean restore at the exit deadline schedules nothing");
+        exits.clear();
+        sim.advanceTime(0.0);
+        assertEquals(1, exits.size(),
+                "Jean same-time setup resolves one Burst exit");
+
+        sim.restoreSnapshot(exactSnapshot[0]);
+        exits.clear();
+        sim.advanceTime(0.0);
+        assertEquals(1, exits.size(),
+                "Jean exact-deadline restore replays Burst exit");
+
+        sim.restoreSnapshot(exactSnapshot[0]);
+        sim.restoreSnapshot(exactSnapshot[0]);
+        exits.clear();
+        sim.advanceTime(0.0);
+        assertEquals(1, exits.size(),
+                "Jean repeated exact-deadline restore keeps one Burst exit");
     }
 
     private static void testC2AttackSpeedAndSnapshotReplay() {
@@ -594,6 +673,20 @@ public final class JeanRegressionTest {
             }
         });
         return records;
+    }
+
+    private static SimulatorSnapshot[] captureSnapshotAt(
+            CombatSimulator sim,
+            double time) {
+        SimulatorSnapshot[] snapshot = new SimulatorSnapshot[1];
+        sim.registerEvent(new SimpleTimerEvent(time, 1.0) {
+            @Override
+            public void onTick(CombatSimulator activeSim) {
+                finish();
+                snapshot[0] = activeSim.saveSnapshot();
+            }
+        });
+        return snapshot;
     }
 
     private static StatsContainer applicableStats(

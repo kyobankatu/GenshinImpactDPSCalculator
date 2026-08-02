@@ -134,13 +134,20 @@ public final class Diona extends Character
                 pendingParticleTimes);
     }
 
+    /** Reports whether a snapshot payload belongs to Diona. */
+    @Override
+    public boolean acceptsCharacterState(State state) {
+        return state instanceof DionaState;
+    }
+
     /**
      * Restores Diona's branch-local state and recreates only future Burst work.
      *
      * <p>The simulator restores active buffs before this method, so the
      * {@link DionaBurstFieldMarker} remains authoritative for field activity.
-     * Tick and refund deadlines at or before the restored clock are considered
-     * consumed and are not scheduled again.</p>
+     * Deadlines before the restored clock are considered consumed. Work at the
+     * exact restored time is replayed because an earlier same-time event may
+     * have captured the snapshot before that work executed.</p>
      *
      * @param state immutable state captured by this Diona instance
      * @param simulator restored simulator receiving future Burst events
@@ -149,7 +156,7 @@ public final class Diona extends Character
     public void restoreCharacterState(
             State state,
             CombatSimulator simulator) {
-        if (!(state instanceof DionaState)) {
+        if (!acceptsCharacterState(state)) {
             throw new IllegalArgumentException(
                     "Unexpected Diona character state");
         }
@@ -171,13 +178,13 @@ public final class Diona extends Character
                     pendingSignatureMix);
         }
         if (pendingChargedImpact != null) {
-            if (pendingChargedImpact.time <= currentTime) {
+            if (pendingChargedImpact.time < currentTime) {
                 pendingChargedImpact = null;
             } else {
                 scheduleChargedImpact(simulator, pendingChargedImpact);
             }
         }
-        pendingParticleTimes.removeIf(time -> time <= currentTime);
+        pendingParticleTimes.removeIf(time -> time < currentTime);
         for (Double time : new ArrayList<>(pendingParticleTimes)) {
             scheduleParticle(simulator, time);
         }
@@ -405,13 +412,16 @@ public final class Diona extends Character
                 tick <= BURST_TICK_COUNT;
                 tick++) {
             double tickTime = signatureMix.getTickTime(tick);
-            if (tickTime > currentTime) {
+            if (tickTime >= currentTime) {
                 scheduleSignatureMixTick(sim, signatureMix, tick, tickTime);
             }
         }
         if (signatureMix.refundPending
-                && signatureMix.fieldEndTime > currentTime) {
+                && signatureMix.fieldEndTime >= currentTime) {
             schedule(sim, signatureMix.fieldEndTime, activeSim -> {
+                if (!isCurrentSignatureMix(signatureMix)) {
+                    return;
+                }
                 receiveFlatEnergy(15.0);
                 completeSignatureMixRefund(signatureMix);
             });
@@ -439,6 +449,9 @@ public final class Diona extends Character
                 0.0);
         dot.setStatSnapshot(signatureMix.castSnapshot);
         schedule(sim, tickTime, activeSim -> {
+            if (!isCurrentSignatureMix(signatureMix)) {
+                return;
+            }
             activeSim.performActionWithoutTimeAdvance(characterId, dot);
             completeSignatureMixTick(signatureMix, tick);
         });
@@ -475,12 +488,12 @@ public final class Diona extends Character
         for (int tick = completedTicks + 1;
                 tick <= BURST_TICK_COUNT;
                 tick++) {
-            if (pendingSignatureMix.getTickTime(tick) <= currentTime) {
+            if (pendingSignatureMix.getTickTime(tick) < currentTime) {
                 completedTicks = tick;
             }
         }
         boolean refundPending = pendingSignatureMix.refundPending
-                && pendingSignatureMix.fieldEndTime > currentTime;
+                && pendingSignatureMix.fieldEndTime >= currentTime;
         pendingSignatureMix = pendingSignatureMix.withProgress(
                 completedTicks,
                 refundPending);

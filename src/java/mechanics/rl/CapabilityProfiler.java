@@ -922,7 +922,10 @@ public class CapabilityProfiler {
                     activeCharacter.activeChargeCooldownDuration,
                     activeCharacter.chargeRestoreTimes,
                     idleCharacter.activeBuffRefs,
-                    idleCharacter.activeBuffTimes));
+                    idleCharacter.activeBuffTimes,
+                    activeCharacter.weaponState,
+                    activeCharacter.characterState,
+                    activeCharacter.energyState));
         }
         return new SimulatorSnapshot(
                 activePostSubject.currentTime,

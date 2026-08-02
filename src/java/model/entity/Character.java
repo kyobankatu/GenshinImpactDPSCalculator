@@ -657,6 +657,16 @@ public abstract class Character {
         energyState.setCurrentEnergy(energy);
     }
 
+    /** Captures runtime and analysis energy state for simulator rollback. */
+    public EnergyState.State captureEnergyState() {
+        return energyState.capture();
+    }
+
+    /** Restores runtime and analysis energy state for simulator rollback. */
+    public void restoreEnergyState(EnergyState.State state) {
+        energyState.restore(state);
+    }
+
     private double getEffectiveCooldownDuration(
             double baseCooldown,
             double currentTime,

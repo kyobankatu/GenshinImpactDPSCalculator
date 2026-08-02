@@ -71,6 +71,7 @@ public class Jean extends Character implements
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
     private PendingBurstExit pendingBurstExit;
+    private List<Double> pendingParticleTimes = new ArrayList<>();
 
     /** Constructs the repository-default C6 Jean. */
     public Jean(Weapon weapon, ArtifactSet artifacts) {
@@ -152,10 +153,19 @@ public class Jean extends Character implements
         }
     }
 
-    /** Captures Jean's Normal chain and pending Burst exit payload. */
+    /** Captures Jean's Normal chain and reconstructible delayed effects. */
     @Override
     public State captureCharacterState() {
-        return new JeanState(normalAttackStep, pendingBurstExit);
+        return new JeanState(
+                normalAttackStep,
+                pendingBurstExit,
+                pendingParticleTimes);
+    }
+
+    /** Reports whether a snapshot payload belongs to Jean. */
+    @Override
+    public boolean acceptsCharacterState(State state) {
+        return state instanceof JeanState;
     }
 
     /**
@@ -168,7 +178,7 @@ public class Jean extends Character implements
     public void restoreCharacterState(
             State state,
             CombatSimulator simulator) {
-        if (!(state instanceof JeanState)) {
+        if (!acceptsCharacterState(state)) {
             throw new IllegalArgumentException(
                     "Unexpected Jean character state");
         }
@@ -177,8 +187,14 @@ public class Jean extends Character implements
         pendingBurstExit = restored.pendingBurstExit == null
                 ? null
                 : restored.pendingBurstExit.copy();
+        pendingParticleTimes = new ArrayList<>(restored.particleTimes);
+        double currentTime = simulator.getCurrentTime();
+        pendingParticleTimes.removeIf(time -> time < currentTime);
+        for (Double time : new ArrayList<>(pendingParticleTimes)) {
+            scheduleParticle(simulator, time);
+        }
         if (pendingBurstExit == null
-                || pendingBurstExit.time <= simulator.getCurrentTime()) {
+                || pendingBurstExit.time < currentTime) {
             pendingBurstExit = null;
             return;
         }
@@ -344,16 +360,24 @@ public class Jean extends Character implements
                 2.0);
         skill.setStatSnapshot(skillSnapshot);
         sim.performActionWithoutTimeAdvance(characterId, skill);
-        schedule(
-                sim,
-                sim.getCurrentTime() + PARTICLE_TRAVEL,
-                activeSim -> activeSim.getEnergyDistributor()
-                        .distributeParticles(
-                                Element.ANEMO,
-                                getTalentValue(
-                                        "Skill Particles",
-                                        2.67),
-                                ParticleType.PARTICLE));
+        queueParticle(sim, sim.getCurrentTime() + PARTICLE_TRAVEL);
+    }
+
+    private void queueParticle(CombatSimulator sim, double time) {
+        pendingParticleTimes.add(time);
+        scheduleParticle(sim, time);
+    }
+
+    private void scheduleParticle(CombatSimulator sim, double time) {
+        schedule(sim, time, activeSim -> {
+            if (!pendingParticleTimes.remove(time)) {
+                return;
+            }
+            activeSim.getEnergyDistributor().distributeParticles(
+                    Element.ANEMO,
+                    getTalentValue("Skill Particles", 2.67),
+                    ParticleType.PARTICLE);
+        });
     }
 
     private void dandelionBreeze(CombatSimulator sim) {
@@ -519,14 +543,17 @@ public class Jean extends Character implements
             implements SnapshotAwareCharacterEffect.State {
         private final int normalAttackStep;
         private final PendingBurstExit pendingBurstExit;
+        private final List<Double> particleTimes;
 
         private JeanState(
                 int normalAttackStep,
-                PendingBurstExit pendingBurstExit) {
+                PendingBurstExit pendingBurstExit,
+                List<Double> particleTimes) {
             this.normalAttackStep = normalAttackStep;
             this.pendingBurstExit = pendingBurstExit == null
                     ? null
                     : pendingBurstExit.copy();
+            this.particleTimes = new ArrayList<>(particleTimes);
         }
     }
 

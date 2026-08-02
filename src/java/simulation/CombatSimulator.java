@@ -887,6 +887,11 @@ public class CombatSimulator {
                     instanceof model.entity.SnapshotAwareCharacterEffect) {
                 characterState = ((model.entity.SnapshotAwareCharacterEffect)
                         character).captureCharacterState();
+                if (characterState == null) {
+                    throw new IllegalStateException(
+                            "Snapshot-aware character returned null state: "
+                                    + character.getCharacterId());
+                }
             }
             characters.put(character.getCharacterId(), new SimulatorSnapshot.CharacterSnapshot(
                     character.getCurrentEnergy(),
@@ -899,7 +904,8 @@ public class CombatSimulator {
                     buffRefs,
                     buffTimes,
                     weaponState,
-                    characterState));
+                    characterState,
+                    character.captureEnergyState()));
         }
 
         // Team and field buffs
@@ -950,6 +956,8 @@ public class CombatSimulator {
      * @param snap snapshot to restore
      */
     public void restoreSnapshot(SimulatorSnapshot snap) {
+        validateSnapshotCapabilities(snap);
+
         // Clock (also clears event queue)
         simulationClock.restoreTime(snap.currentTime, snap.rotationTime);
 
@@ -1018,7 +1026,11 @@ public class CombatSimulator {
             if (cs == null) {
                 continue;
             }
-            character.restoreCurrentEnergy(cs.currentEnergy);
+            if (cs.energyState == null) {
+                character.restoreCurrentEnergy(cs.currentEnergy);
+            } else {
+                character.restoreEnergyState(cs.energyState);
+            }
             character.restoreCooldowns(
                     cs.lastSkillTime,
                     cs.lastBurstTime,
@@ -1027,11 +1039,6 @@ public class CombatSimulator {
                     cs.activeChargeCooldownDuration,
                     cs.chargeRestoreTimes);
             if (cs.weaponState != null) {
-                if (!(character.getWeapon()
-                        instanceof model.entity.SnapshotAwareWeaponEffect)) {
-                    throw new IllegalStateException(
-                            "Snapshot contains state for a non-snapshot-aware weapon");
-                }
                 ((model.entity.SnapshotAwareWeaponEffect) character.getWeapon())
                         .restoreWeaponState(cs.weaponState);
             }
@@ -1069,13 +1076,44 @@ public class CombatSimulator {
             if (cs == null || cs.characterState == null) {
                 continue;
             }
+            ((model.entity.SnapshotAwareCharacterEffect) character)
+                    .restoreCharacterState(cs.characterState, this);
+        }
+    }
+
+    private void validateSnapshotCapabilities(SimulatorSnapshot snap) {
+        for (Character character : party.getMembers()) {
+            SimulatorSnapshot.CharacterSnapshot cs =
+                    snap.characters.get(character.getCharacterId());
+            if (cs == null) {
+                continue;
+            }
+            if (cs.weaponState != null && !(character.getWeapon()
+                    instanceof model.entity.SnapshotAwareWeaponEffect)) {
+                throw new IllegalStateException(
+                        "Snapshot contains state for a non-snapshot-aware weapon");
+            }
+            if (cs.characterState == null) {
+                if (character
+                        instanceof model.entity.SnapshotAwareCharacterEffect) {
+                    throw new IllegalStateException(
+                            "Snapshot omits state for snapshot-aware character: "
+                                    + character.getCharacterId());
+                }
+                continue;
+            }
             if (!(character
                     instanceof model.entity.SnapshotAwareCharacterEffect)) {
                 throw new IllegalStateException(
                         "Snapshot contains state for a non-snapshot-aware character");
             }
-            ((model.entity.SnapshotAwareCharacterEffect) character)
-                    .restoreCharacterState(cs.characterState, this);
+            model.entity.SnapshotAwareCharacterEffect aware =
+                    (model.entity.SnapshotAwareCharacterEffect) character;
+            if (!aware.acceptsCharacterState(cs.characterState)) {
+                throw new IllegalArgumentException(
+                        "Snapshot contains incompatible character state for "
+                                + character.getCharacterId());
+            }
         }
     }
 

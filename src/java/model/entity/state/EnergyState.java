@@ -17,6 +17,34 @@ import java.util.List;
  * requests that runtime energy gating skips.
  */
 public class EnergyState {
+    /** Immutable copy of runtime and analysis energy accounting. */
+    public static final class State {
+        private final double currentEnergy;
+        private final double totalEnergyGained;
+        private final double totalFlatEnergyGained;
+        private final double totalParticleEnergyGained;
+        private final double totalScaledParticleEnergyGained;
+        private final double particleEnergyThisWindow;
+        private final double flatEnergyThisWindow;
+        private final double missedBurstCost;
+        private final List<double[]> burstEnergyWindows;
+        private final List<double[]> burstEnergyMarkers;
+
+        private State(EnergyState source) {
+            currentEnergy = source.currentEnergy;
+            totalEnergyGained = source.totalEnergyGained;
+            totalFlatEnergyGained = source.totalFlatEnergyGained;
+            totalParticleEnergyGained = source.totalParticleEnergyGained;
+            totalScaledParticleEnergyGained =
+                    source.totalScaledParticleEnergyGained;
+            particleEnergyThisWindow = source.particleEnergyThisWindow;
+            flatEnergyThisWindow = source.flatEnergyThisWindow;
+            missedBurstCost = source.missedBurstCost;
+            burstEnergyWindows = copyEntries(source.burstEnergyWindows);
+            burstEnergyMarkers = copyEntries(source.burstEnergyMarkers);
+        }
+    }
+
     private double currentEnergy = 0.0;
     private double totalEnergyGained = 0.0;
     private double totalFlatEnergyGained = 0.0;
@@ -27,6 +55,39 @@ public class EnergyState {
     private double missedBurstCost = 0.0;
     private final List<double[]> burstEnergyWindows = new ArrayList<>();
     private final List<double[]> burstEnergyMarkers = new ArrayList<>();
+
+    /** Captures every runtime and analysis accumulator. */
+    public State capture() {
+        return new State(this);
+    }
+
+    /** Restores every runtime and analysis accumulator. */
+    public void restore(State state) {
+        if (state == null) {
+            throw new IllegalArgumentException("Energy state must not be null");
+        }
+        currentEnergy = state.currentEnergy;
+        totalEnergyGained = state.totalEnergyGained;
+        totalFlatEnergyGained = state.totalFlatEnergyGained;
+        totalParticleEnergyGained = state.totalParticleEnergyGained;
+        totalScaledParticleEnergyGained =
+                state.totalScaledParticleEnergyGained;
+        particleEnergyThisWindow = state.particleEnergyThisWindow;
+        flatEnergyThisWindow = state.flatEnergyThisWindow;
+        missedBurstCost = state.missedBurstCost;
+        burstEnergyWindows.clear();
+        burstEnergyWindows.addAll(copyEntries(state.burstEnergyWindows));
+        burstEnergyMarkers.clear();
+        burstEnergyMarkers.addAll(copyEntries(state.burstEnergyMarkers));
+    }
+
+    private static List<double[]> copyEntries(List<double[]> entries) {
+        List<double[]> result = new ArrayList<>();
+        for (double[] entry : entries) {
+            result.add(entry.clone());
+        }
+        return result;
+    }
 
     /**
      * Adds a generic energy amount, clamped to the maximum.

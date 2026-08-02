@@ -18,9 +18,17 @@ public interface SnapshotAwareCharacterEffect {
     /**
      * Captures immutable character-owned state.
      *
-     * @return state payload, or {@code null} when no state is active
+     * @return non-null state payload; use an explicit empty state when inactive
      */
     State captureCharacterState();
+
+    /**
+     * Checks payload ownership before any simulator state is mutated.
+     *
+     * @param state candidate payload
+     * @return {@code true} when this implementation can restore the payload
+     */
+    boolean acceptsCharacterState(State state);
 
     /**
      * Restores character-owned state and any future events it requires.

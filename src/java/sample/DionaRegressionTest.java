@@ -7,6 +7,7 @@ import mechanics.buff.Buff;
 import mechanics.buff.SimpleBuff;
 import model.character.Diona;
 import model.entity.Enemy;
+import model.entity.SnapshotAwareCharacterEffect;
 import model.stats.StatsContainer;
 import model.type.CharacterId;
 import model.type.StatType;
@@ -15,6 +16,7 @@ import simulation.SimulatorSnapshot;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.event.SimpleTimerEvent;
 
 /** Focused metadata, action, field, constellation, and guard checks. */
 public final class DionaRegressionTest {
@@ -33,6 +35,8 @@ public final class DionaRegressionTest {
         testDelayedProjectileAndParticleSnapshotRestore();
         testBurstTicksC1C4AndC6();
         testBurstSnapshotRestore();
+        testExactDeadlineBurstSnapshotReplay();
+        testSupersededBurstCallbacks();
         testEnergyCooldownAndBindingGuards();
         System.out.println("DionaRegressionTest passed");
     }
@@ -200,6 +204,39 @@ public final class DionaRegressionTest {
         assertEquals(1, charged.size(),
                 "Diona repeated restore keeps one charged impact");
 
+        Diona exactChargedDiona = new Diona(null, null, 0);
+        CombatSimulator exactChargedSim = simulatorWith(exactChargedDiona);
+        List<ActionRecord> exactCharged = captureNamedActions(
+                exactChargedSim, "Katzlein Style Fully Charged");
+        perform(exactChargedSim, CharacterActionKey.CHARGE);
+        SnapshotAwareCharacterEffect.State pendingCharged =
+                exactChargedDiona.captureCharacterState();
+        advanceTo(exactChargedSim, 96.0 * FRAME);
+        assertEquals(1, exactCharged.size(),
+                "Diona exact-deadline original charged impact resolves");
+
+        SimulatorSnapshot[] exactChargedSnapshot = captureSnapshotAt(
+                exactChargedSim, exactChargedSim.getCurrentTime());
+        exactChargedDiona.restoreCharacterState(
+                pendingCharged, exactChargedSim);
+        exactCharged.clear();
+        exactChargedSim.advanceTime(0.0);
+        assertEquals(1, exactCharged.size(),
+                "Diona same-time setup resolves one charged impact");
+
+        exactChargedSim.restoreSnapshot(exactChargedSnapshot[0]);
+        exactCharged.clear();
+        exactChargedSim.advanceTime(0.0);
+        assertEquals(1, exactCharged.size(),
+                "Diona exact-deadline restore replays charged impact");
+
+        exactChargedSim.restoreSnapshot(exactChargedSnapshot[0]);
+        exactChargedSim.restoreSnapshot(exactChargedSnapshot[0]);
+        exactCharged.clear();
+        exactChargedSim.advanceTime(0.0);
+        assertEquals(1, exactCharged.size(),
+                "Diona repeated exact-deadline restore keeps one impact");
+
         Diona particleDiona = new Diona(null, null, 0);
         CombatSimulator particleSim = simulatorWith(particleDiona);
         List<Double> particleTimes = new ArrayList<>();
@@ -225,6 +262,40 @@ public final class DionaRegressionTest {
         particleSim.advanceTime(3.0);
         assertEquals(2, particleTimes.size(),
                 "Diona repeated restore keeps two particle packets");
+
+        Diona exactParticleDiona = new Diona(null, null, 0);
+        CombatSimulator exactParticleSim = simulatorWith(exactParticleDiona);
+        List<Double> exactParticles = new ArrayList<>();
+        exactParticleSim.addParticleListener((element, count, time) ->
+                exactParticles.add(time));
+        perform(exactParticleSim, CharacterActionKey.SKILL);
+        SnapshotAwareCharacterEffect.State pendingParticle =
+                exactParticleDiona.captureCharacterState();
+        advanceTo(exactParticleSim, 134.0 * FRAME);
+        assertEquals(1, exactParticles.size(),
+                "Diona exact-deadline original particle resolves");
+
+        SimulatorSnapshot[] exactParticleSnapshot = captureSnapshotAt(
+                exactParticleSim, exactParticleSim.getCurrentTime());
+        exactParticleDiona.restoreCharacterState(
+                pendingParticle, exactParticleSim);
+        exactParticles.clear();
+        exactParticleSim.advanceTime(0.0);
+        assertEquals(1, exactParticles.size(),
+                "Diona same-time setup resolves one particle");
+
+        exactParticleSim.restoreSnapshot(exactParticleSnapshot[0]);
+        exactParticles.clear();
+        exactParticleSim.advanceTime(0.0);
+        assertEquals(1, exactParticles.size(),
+                "Diona exact-deadline restore replays particle");
+
+        exactParticleSim.restoreSnapshot(exactParticleSnapshot[0]);
+        exactParticleSim.restoreSnapshot(exactParticleSnapshot[0]);
+        exactParticles.clear();
+        exactParticleSim.advanceTime(0.0);
+        assertEquals(1, exactParticles.size(),
+                "Diona repeated exact-deadline restore keeps one particle");
     }
 
     private static void testBurstTicksC1C4AndC6() {
@@ -397,6 +468,95 @@ public final class DionaRegressionTest {
                 "Diona completed Burst restore schedules no extra refund");
     }
 
+    private static void testExactDeadlineBurstSnapshotReplay() {
+        Diona diona = new Diona(null, null, 1);
+        CombatSimulator sim = simulatorWith(diona);
+        List<ActionRecord> ticks = captureNamedActions(
+                sim, "Signature Mix Tick");
+        double firstTickTime = 178.0 * FRAME;
+        double refundTime = 58.0 * FRAME + 12.5;
+        perform(sim, CharacterActionKey.BURST);
+        SnapshotAwareCharacterEffect.State pendingBurst =
+                diona.captureCharacterState();
+        advanceTo(sim, firstTickTime);
+        assertEquals(1, ticks.size(),
+                "Diona exact-deadline original first Burst tick resolves");
+
+        SimulatorSnapshot[] tickSnapshot = captureSnapshotAt(
+                sim, sim.getCurrentTime());
+        diona.restoreCharacterState(pendingBurst, sim);
+        ticks.clear();
+        sim.advanceTime(0.0);
+        assertEquals(1, ticks.size(),
+                "Diona same-time setup resolves one Burst tick");
+
+        sim.restoreSnapshot(tickSnapshot[0]);
+        ticks.clear();
+        sim.advanceTime(0.0);
+        assertEquals(1, ticks.size(),
+                "Diona exact-deadline restore replays first Burst tick");
+
+        sim.restoreSnapshot(tickSnapshot[0]);
+        sim.restoreSnapshot(tickSnapshot[0]);
+        ticks.clear();
+        sim.advanceTime(0.0);
+        assertEquals(1, ticks.size(),
+                "Diona repeated exact-deadline restore keeps one tick");
+
+        Diona refundDiona = new Diona(null, null, 1);
+        CombatSimulator refundSim = simulatorWith(refundDiona);
+        perform(refundSim, CharacterActionKey.BURST);
+        SnapshotAwareCharacterEffect.State pendingRefund =
+                refundDiona.captureCharacterState();
+        advanceTo(refundSim, refundTime);
+        assertClose(15.0, refundDiona.getCurrentEnergy(),
+                "Diona exact-deadline original refund resolves");
+        refundDiona.restoreCurrentEnergy(0.0);
+        SimulatorSnapshot[] refundSnapshot = captureSnapshotAt(
+                refundSim, refundSim.getCurrentTime());
+        refundDiona.restoreCharacterState(pendingRefund, refundSim);
+        refundSim.advanceTime(0.0);
+        assertClose(15.0, refundDiona.getCurrentEnergy(),
+                "Diona same-time setup resolves one refund");
+
+        refundSim.restoreSnapshot(refundSnapshot[0]);
+        assertClose(0.0, refundDiona.getCurrentEnergy(),
+                "Diona exact refund snapshot precedes refund");
+        refundSim.advanceTime(0.0);
+        assertClose(15.0, refundDiona.getCurrentEnergy(),
+                "Diona exact-deadline restore replays refund");
+
+        refundSim.restoreSnapshot(refundSnapshot[0]);
+        refundSim.restoreSnapshot(refundSnapshot[0]);
+        refundSim.advanceTime(0.0);
+        assertClose(15.0, refundDiona.getCurrentEnergy(),
+                "Diona repeated exact-deadline restore keeps one refund");
+    }
+
+    private static void testSupersededBurstCallbacks() {
+        Diona diona = new Diona(null, null, 1);
+        CombatSimulator sim = simulatorWith(diona);
+        List<ActionRecord> ticks = captureNamedActions(
+                sim, "Signature Mix Tick");
+        perform(sim, CharacterActionKey.BURST);
+        diona.reduceBurstCooldown(sim.getCurrentTime(), 20.0);
+        diona.restoreCurrentEnergy(80.0);
+        double recastTime = sim.getCurrentTime();
+        perform(sim, CharacterActionKey.BURST);
+
+        double oldRefundTime = 58.0 * FRAME + 12.5;
+        advanceTo(sim, oldRefundTime);
+        assertClose(0.0, diona.getCurrentEnergy(),
+                "Diona superseded Burst cannot refund Energy");
+
+        double replacementFieldStart = recastTime + 58.0 * FRAME;
+        advanceTo(sim, replacementFieldStart + 12.5);
+        assertEquals(6, ticks.size(),
+                "Diona superseded Burst cannot deal periodic damage");
+        assertClose(15.0, diona.getCurrentEnergy(),
+                "Diona replacement Burst refunds Energy once");
+    }
+
     private static void assertBurstTickSequence(List<ActionRecord> ticks) {
         assertEquals(6, ticks.size(), "Diona Burst future tick count");
         for (int index = 0; index < ticks.size(); index++) {
@@ -480,6 +640,20 @@ public final class DionaRegressionTest {
             }
         });
         return records;
+    }
+
+    private static SimulatorSnapshot[] captureSnapshotAt(
+            CombatSimulator sim,
+            double time) {
+        SimulatorSnapshot[] snapshot = new SimulatorSnapshot[1];
+        sim.registerEvent(new SimpleTimerEvent(time, 1.0) {
+            @Override
+            public void onTick(CombatSimulator activeSim) {
+                finish();
+                snapshot[0] = activeSim.saveSnapshot();
+            }
+        });
+        return snapshot;
     }
 
     private static void assertClose(

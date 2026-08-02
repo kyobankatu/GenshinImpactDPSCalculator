@@ -14,6 +14,7 @@ import model.character.Chongyun;
 import model.entity.ArtifactSet;
 import model.entity.Character;
 import model.entity.Enemy;
+import model.entity.SnapshotAwareCharacterEffect;
 import model.entity.Weapon;
 import model.stats.StatsContainer;
 import model.type.ActionType;
@@ -30,6 +31,7 @@ import simulation.SimulatorSnapshot;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.event.SimpleTimerEvent;
 
 /** Focused regression checks for Chongyun's stationary offensive slice. */
 public final class ChongyunRegressionTest {
@@ -46,6 +48,7 @@ public final class ChongyunRegressionTest {
         testSkillFieldInfusionParticlesAndC5();
         testTeamFieldC2AndSnapshotRestore();
         testCharacterStateSnapshotReplay();
+        testExactDeadlineSnapshotReplay();
         testA4SnapshotResistanceAndBurstConstellations();
         testRecastEarlyA4AndNullWeaponInfusion();
         testC4EnergyAndSimulatorGuard();
@@ -514,6 +517,78 @@ public final class ChongyunRegressionTest {
                 "Chongyun repeated restore keeps one A4 event");
     }
 
+    private static void testExactDeadlineSnapshotReplay() {
+        Chongyun particleChongyun = chongyunAtConstellation(0);
+        CombatSimulator particleSim = simulatorWith(particleChongyun);
+        List<ParticleRecord> particles = new ArrayList<>();
+        particleSim.addParticleListener((element, count, time) ->
+                particles.add(new ParticleRecord(element, count, time)));
+        perform(particleSim, CharacterId.CHONGYUN,
+                CharacterActionKey.SKILL);
+        SnapshotAwareCharacterEffect.State pendingParticles =
+                particleChongyun.captureCharacterState();
+        advanceTo(particleSim, 136.0 * FRAME);
+        assertEquals(1, particles.size(),
+                "Chongyun exact-deadline original particle resolves");
+
+        SimulatorSnapshot[] particleSnapshot = captureSnapshotAt(
+                particleSim, particleSim.getCurrentTime());
+        particleChongyun.restoreCharacterState(
+                pendingParticles, particleSim);
+        particles.clear();
+        particleSim.advanceTime(0.0);
+        assertEquals(1, particles.size(),
+                "Chongyun same-time setup resolves one particle");
+
+        particleSim.restoreSnapshot(particleSnapshot[0]);
+        particles.clear();
+        particleSim.advanceTime(0.0);
+        assertEquals(1, particles.size(),
+                "Chongyun exact-deadline restore replays particle");
+
+        particleSim.restoreSnapshot(particleSnapshot[0]);
+        particleSim.restoreSnapshot(particleSnapshot[0]);
+        particles.clear();
+        particleSim.advanceTime(0.0);
+        assertEquals(1, particles.size(),
+                "Chongyun repeated exact-deadline restore keeps one particle");
+
+        Chongyun a4Chongyun = chongyunAtConstellation(0);
+        CombatSimulator a4Sim = simulatorWith(a4Chongyun);
+        List<ActionRecord> a4 = captureNamedActions(
+                a4Sim, "Rimechaser Blade");
+        perform(a4Sim, CharacterId.CHONGYUN, CharacterActionKey.SKILL);
+        SnapshotAwareCharacterEffect.State pendingA4 =
+                a4Chongyun.captureCharacterState();
+        advanceTo(a4Sim, 655.0 * FRAME);
+        assertEquals(1, a4.size(),
+                "Chongyun exact-deadline original A4 resolves");
+
+        SimulatorSnapshot[] a4Snapshot = captureSnapshotAt(
+                a4Sim, a4Sim.getCurrentTime());
+        a4Chongyun.restoreCharacterState(pendingA4, a4Sim);
+        a4.clear();
+        a4Sim.advanceTime(0.0);
+        assertEquals(1, a4.size(),
+                "Chongyun same-time setup resolves one A4");
+        double expectedDamage = a4.get(0).damage;
+
+        a4Sim.restoreSnapshot(a4Snapshot[0]);
+        a4.clear();
+        a4Sim.advanceTime(0.0);
+        assertEquals(1, a4.size(),
+                "Chongyun exact-deadline restore replays A4");
+        assertClose(expectedDamage, a4.get(0).damage, EPS,
+                "Chongyun exact-deadline A4 keeps damage");
+
+        a4Sim.restoreSnapshot(a4Snapshot[0]);
+        a4Sim.restoreSnapshot(a4Snapshot[0]);
+        a4.clear();
+        a4Sim.advanceTime(0.0);
+        assertEquals(1, a4.size(),
+                "Chongyun repeated exact-deadline restore keeps one A4");
+    }
+
     private static void testRecastEarlyA4AndNullWeaponInfusion() {
         Chongyun recasting = chongyunAtConstellation(0);
         recasting.addBuff(new SimpleBuff(
@@ -696,6 +771,20 @@ public final class ChongyunRegressionTest {
             }
         });
         return records;
+    }
+
+    private static SimulatorSnapshot[] captureSnapshotAt(
+            CombatSimulator sim,
+            double time) {
+        SimulatorSnapshot[] snapshot = new SimulatorSnapshot[1];
+        sim.registerEvent(new SimpleTimerEvent(time, 1.0) {
+            @Override
+            public void onTick(CombatSimulator activeSim) {
+                finish();
+                snapshot[0] = activeSim.saveSnapshot();
+            }
+        });
+        return snapshot;
     }
 
     private static StatsContainer applicableStats(

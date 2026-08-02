@@ -10,6 +10,7 @@ import mechanics.buff.Buff;
 import model.entity.Enemy;
 import model.entity.SnapshotAwareCharacterEffect;
 import model.entity.SnapshotAwareWeaponEffect;
+import model.entity.state.EnergyState;
 import model.type.CharacterId;
 import model.type.Element;
 import simulation.runtime.ReactionState;
@@ -31,6 +32,8 @@ public class SimulatorSnapshot {
     /** Holds per-character mutable state. */
     public static class CharacterSnapshot {
         public final double currentEnergy;
+        /** Complete runtime and analysis energy accounting, when captured. */
+        public final EnergyState.State energyState;
         public final double lastSkillTime;
         public final double lastBurstTime;
         public final double skillCooldownEndTime;
@@ -79,6 +82,7 @@ public class SimulatorSnapshot {
                     activeBuffRefs,
                     activeBuffTimes,
                     null,
+                    null,
                     null);
         }
 
@@ -104,6 +108,7 @@ public class SimulatorSnapshot {
                     activeBuffRefs,
                     activeBuffTimes,
                     weaponState,
+                    null,
                     null);
         }
 
@@ -120,7 +125,37 @@ public class SimulatorSnapshot {
                 List<double[]> activeBuffTimes,
                 SnapshotAwareWeaponEffect.State weaponState,
                 SnapshotAwareCharacterEffect.State characterState) {
+            this(
+                    currentEnergy,
+                    lastSkillTime,
+                    lastBurstTime,
+                    skillCooldownEndTime,
+                    burstCooldownEndTime,
+                    activeChargeCooldownDuration,
+                    chargeRestoreTimes,
+                    activeBuffRefs,
+                    activeBuffTimes,
+                    weaponState,
+                    characterState,
+                    null);
+        }
+
+        /** Constructs a complete character snapshot including energy accounting. */
+        public CharacterSnapshot(
+                double currentEnergy,
+                double lastSkillTime,
+                double lastBurstTime,
+                double skillCooldownEndTime,
+                double burstCooldownEndTime,
+                double activeChargeCooldownDuration,
+                List<Double> chargeRestoreTimes,
+                List<Buff> activeBuffRefs,
+                List<double[]> activeBuffTimes,
+                SnapshotAwareWeaponEffect.State weaponState,
+                SnapshotAwareCharacterEffect.State characterState,
+                EnergyState.State energyState) {
             this.currentEnergy = currentEnergy;
+            this.energyState = energyState;
             this.lastSkillTime = lastSkillTime;
             this.lastBurstTime = lastBurstTime;
             this.skillCooldownEndTime = skillCooldownEndTime;
