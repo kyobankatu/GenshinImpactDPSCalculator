@@ -12773,6 +12773,101 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
 
+## Implementation Order: Switch-Activated Weapon Campaign
+
+Status: In progress. This campaign adds a backward-compatible typed incoming
+weapon-switch callback and uses it to complete three switch-state weapons; RL
+and generated documentation remain excluded.
+
+Scope:
+
+- Extend weapon switch notification with typed outgoing target and incoming
+  owner callbacks while preserving existing two-argument implementations.
+- Add The Widsith, Sacrificial Jade, and Thrilling Tales of Dragon Slayers with
+  refinement-aware timing, deterministic test injection, and nonstacking buffs.
+
+Out of scope for this pass:
+
+- Player healing/current HP, real per-hit CRIT outcomes, shield state, region
+  metadata, other blocked inventory, RL, and generated docs.
+
+### Phase 1: Backward-Compatible Weapon Switch Contract - Done
+
+Target files:
+
+- `src/java/model/entity/SwitchAwareWeaponEffect.java`
+- `src/java/simulation/runtime/SwitchManager.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Existing two-argument outgoing implementations continue to compile and are
+  invoked exactly once through the compatibility default.
+- Outgoing weapons receive the resolved incoming character before the party
+  changes; incoming weapons receive exactly one callback after the party
+  changes and before the swap delay advances.
+- Missing targets and direct `setActiveCharacter` retain existing no-callback
+  behavior.
+
+Test cases to add or update:
+
+- Normal: A-to-B swap records outgoing owner/target and incoming owner.
+- Boundary: callback observes the expected active character before/after swap.
+- Abnormal: missing target, null/no weapon, legacy callback, and direct setter.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
+
+Completion evidence:
+
+- Legacy and target-aware outgoing callbacks, incoming callbacks, active-owner
+  ordering, missing targets, plain weapons, and direct setters are covered by
+  the focused switch contract regression.
+- `./gradlew ReactionRegressionTest`, `./gradlew build`, `./gradlew javadoc`,
+  and `python scripts/preflight.py` passed on 2026-08-02.
+
+### Phase 2: Switch-Activated Weapons
+
+Target files:
+
+- `src/java/model/weapon/TheWidsith.java` (new)
+- `src/java/model/weapon/SacrificialJade.java` (new)
+- `src/java/model/weapon/ThrillingTalesOfDragonSlayers.java` (new)
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- All three expose exact Lv. 90 metadata, supported R1-R5 behavior, defaults,
+  and constructor validation; Widsith accepts injected reproducible draws.
+- Widsith activates one of Recitative/Aria/Interlude for 10 seconds when its
+  owner starts active or switches in, with a 30-second cooldown and exact
+  R1-R5 ATK, all-elemental-DMG, or EM values.
+- Sacrificial Jade grants R1-R5 HP/EM after five seconds off-field, retains it
+  for the first ten seconds after switching in, and removes it at exact expiry.
+- TTDS applies a typed nonstacking R1-R5 ATK buff to the incoming character for
+  10 seconds on eligible owner switch-out, with a 20-second cooldown.
+
+Test cases to add or update:
+
+- Normal: metadata, all three Widsith outcomes, off/on-field Jade timing, and
+  TTDS target buff.
+- Boundary: exact 5/10/20/30-second transitions, re-entry, cooldown retry, and
+  same-effect replacement.
+- Abnormal: refinement 0/6, invalid draw, wrong owner/simulator, missing target,
+  duplicate binding, physical exclusion from Aria, and no callback via setter.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
+
 ## Implementation Order: Stateful Craftable Weapon Campaign
 
 Status: Complete. This campaign adds four missing craftable/event weapons
@@ -15687,6 +15782,91 @@ Test cases to add or update:
 - Boundary: R1/R5 behavior and arbitrary negative/positive times.
 - Abnormal: refinement 0/6 for every class, no Skill/Burst Slingshot bonus,
   and no stat mutation from the inactive family.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
+
+## Implementation Order: Core Artifact Set Expansion Campaign
+
+Status: In progress. This campaign adds four complete, commonly used artifact
+sets through existing initialization, switch, reaction, and damage hooks; RL
+and generated documentation remain excluded.
+
+Scope:
+
+- Add Gladiator's Finale and Golden Troupe with owner/field-aware static
+  contracts.
+- Add Gilded Dreams and Pale Flame with reaction/composition and Skill-hit
+  stack windows.
+
+Out of scope for this pass:
+
+- Artifact piece-count modeling, healing/current HP, shields, Nightsoul,
+  enemy defeat, optimizer defaults, RL, and generated docs.
+
+### Phase 1: Weapon-Type and Field-State Sets
+
+Target files:
+
+- `src/java/model/artifact/GladiatorsFinale.java` (new)
+- `src/java/model/artifact/GoldenTroupe.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Both support empty and supplied main/sub-stat containers without mutating
+  unrelated data and expose canonical names.
+- Gladiator grants ATK +18% and Normal Attack DMG +35% only when the owner uses
+  a Sword, Claymore, or Polearm.
+- Golden Troupe grants Skill DMG +45% generally and an additional +25% while
+  off-field and for the first two seconds after a standard switch-in.
+
+Test cases to add or update:
+
+- Normal: metadata/static values, all eligible Gladiator weapon types, initial
+  active/off-field Golden states, and standard switches.
+- Boundary: Golden exact two-second grace and repeated switch cycles.
+- Abnormal: catalyst/bow/no weapon exclusion, duplicate/cross-simulator init,
+  null stats, and direct setter boundary.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
+
+### Phase 2: Reaction Composition and Skill-Hit Stacks
+
+Target files:
+
+- `src/java/model/artifact/GildedDreams.java` (new)
+- `src/java/model/artifact/PaleFlame.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Gilded grants EM +80 and, once per eight seconds after an owner reaction,
+  snapshots up to three allies as ATK +14% per same-element ally and EM +50 per
+  different-element ally for eight seconds, including off-field triggers.
+- Gilded does not affect an ordinary triggering reaction; Hyperbloom retains
+  its documented immediate seed exception.
+- Pale Flame grants Physical DMG +25%; eligible Skill hits add up to two shared
+  seven-second ATK +9% stacks at 0.3-second CT, and two stacks add another 25%
+  Physical DMG.
+
+Test cases to add or update:
+
+- Normal: composition matrices, off-field reaction, one/two Pale stacks, and
+  two-piece values.
+- Boundary: 0.3/7/8-second CT and expiry, composition snapshot, and Gilded
+  triggering-reaction ordering.
+- Abnormal: wrong trigger, NONE reaction, non-Skill/zero hit, duplicate init,
+  and independent artifact instances.
 
 Verification:
 

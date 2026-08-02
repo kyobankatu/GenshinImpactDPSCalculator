@@ -153,6 +153,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ThreeStarRuntimeBoundaryPhaseTwo();
         testAccuracyPhaseF_StatefulCraftableWeaponPhaseOne();
         testAccuracyPhaseF_StatefulCraftableWeaponPhaseTwo();
+        testAccuracyPhaseF_WeaponSwitchCallbackContract();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -10691,6 +10692,77 @@ public class ReactionRegressionTest {
                 "Crescent Pike should reject refinement six");
     }
 
+    private static void testAccuracyPhaseF_WeaponSwitchCallbackContract() {
+        LegacySwitchRecordingWeapon legacyWeapon =
+                new LegacySwitchRecordingWeapon();
+        TestCharacter legacyOwner = testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE);
+        legacyOwner.setWeapon(legacyWeapon);
+        ModernSwitchRecordingWeapon modernWeapon =
+                new ModernSwitchRecordingWeapon();
+        TestCharacter modernOwner = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        modernOwner.setWeapon(modernWeapon);
+        CombatSimulator sim = simulatorWith(legacyOwner);
+        sim.addCharacter(modernOwner);
+
+        sim.switchCharacter(CharacterId.AMBER);
+        assertEquals(1, legacyWeapon.outgoingCount,
+                "Legacy switch callback should remain compatible");
+        assertEquals(CharacterId.SUCROSE,
+                legacyWeapon.activeCharacterAtOutgoing,
+                "Outgoing callback should run before the party switch");
+        assertEquals(1, modernWeapon.incomingCount,
+                "Incoming weapon should receive one switch callback");
+        assertEquals(CharacterId.AMBER,
+                modernWeapon.activeCharacterAtIncoming,
+                "Incoming callback should run after the party switch");
+        assertClose(0.0, legacyWeapon.outgoingTime, EPS,
+                "Outgoing callback should run before swap delay");
+        assertClose(0.0, modernWeapon.incomingTime, EPS,
+                "Incoming callback should run before swap delay");
+
+        sim.switchCharacter(CharacterId.SUCROSE);
+        assertEquals(1, modernWeapon.targetOutgoingCount,
+                "Modern outgoing callback should run exactly once");
+        assertEquals(1, modernWeapon.legacyOutgoingCount,
+                "Modern callback should deliberately retain legacy behavior once");
+        assertEquals(CharacterId.SUCROSE,
+                modernWeapon.incomingTargetId,
+                "Outgoing weapon should receive the resolved incoming target");
+        assertEquals(CharacterId.AMBER,
+                modernWeapon.activeCharacterAtOutgoing,
+                "Modern outgoing callback should observe the old active owner");
+
+        int callbacksBeforeMissingTarget = legacyWeapon.outgoingCount
+                + modernWeapon.incomingCount
+                + modernWeapon.targetOutgoingCount;
+        double timeBeforeMissingTarget = sim.getCurrentTime();
+        sim.switchCharacter(CharacterId.FLINS);
+        assertEquals(CharacterId.SUCROSE,
+                sim.getActiveCharacter().getCharacterId(),
+                "Missing switch target should preserve active character");
+        assertClose(timeBeforeMissingTarget, sim.getCurrentTime(), EPS,
+                "Missing switch target should not consume cooldown or delay");
+        assertEquals(callbacksBeforeMissingTarget,
+                legacyWeapon.outgoingCount
+                        + modernWeapon.incomingCount
+                        + modernWeapon.targetOutgoingCount,
+                "Missing switch target should not fire weapon callbacks");
+
+        sim.setActiveCharacter(CharacterId.AMBER);
+        assertEquals(1, modernWeapon.incomingCount,
+                "Direct active setter should remain callback-free");
+        sim.setActiveCharacter(CharacterId.SUCROSE);
+        TestCharacter plainTarget = testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU);
+        sim.addCharacter(plainTarget);
+        sim.switchCharacter(CharacterId.XINGQIU);
+        assertEquals(CharacterId.XINGQIU,
+                sim.getActiveCharacter().getCharacterId(),
+                "Switching to a plain weapon should remain supported");
+    }
+
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {
         ReactionResult[] pyroReactions = {
                 ReactionResult.amp(2.0, "Vaporize", ReactionResult.Kind.VAPORIZE),
@@ -15609,6 +15681,65 @@ public class ReactionRegressionTest {
     private static final class TestWeapon extends Weapon {
         private TestWeapon() {
             super("Test Weapon", new StatsContainer());
+        }
+    }
+
+    private static final class LegacySwitchRecordingWeapon extends Weapon
+            implements model.entity.SwitchAwareWeaponEffect {
+        private int outgoingCount;
+        private CharacterId activeCharacterAtOutgoing;
+        private double outgoingTime;
+
+        private LegacySwitchRecordingWeapon() {
+            super("Legacy Switch Recording Weapon", new StatsContainer());
+        }
+
+        @Override
+        public void onSwitchOut(Character user, CombatSimulator sim) {
+            outgoingCount++;
+            activeCharacterAtOutgoing =
+                    sim.getActiveCharacter().getCharacterId();
+            outgoingTime = sim.getCurrentTime();
+        }
+    }
+
+    private static final class ModernSwitchRecordingWeapon extends Weapon
+            implements model.entity.SwitchAwareWeaponEffect {
+        private int legacyOutgoingCount;
+        private int targetOutgoingCount;
+        private int incomingCount;
+        private CharacterId incomingTargetId;
+        private CharacterId activeCharacterAtOutgoing;
+        private CharacterId activeCharacterAtIncoming;
+        private double incomingTime;
+
+        private ModernSwitchRecordingWeapon() {
+            super("Modern Switch Recording Weapon", new StatsContainer());
+        }
+
+        @Override
+        public void onSwitchOut(Character user, CombatSimulator sim) {
+            legacyOutgoingCount++;
+        }
+
+        @Override
+        public void onSwitchOut(
+                Character user,
+                Character incoming,
+                CombatSimulator sim) {
+            targetOutgoingCount++;
+            incomingTargetId = incoming.getCharacterId();
+            activeCharacterAtOutgoing =
+                    sim.getActiveCharacter().getCharacterId();
+            onSwitchOut(user, sim);
+        }
+
+        @Override
+        public void onSwitchIn(Character user, CombatSimulator sim) {
+            incomingCount++;
+            activeCharacterAtIncoming =
+                    sim.getActiveCharacter().getCharacterId();
+            incomingTime = sim.getCurrentTime();
         }
     }
 

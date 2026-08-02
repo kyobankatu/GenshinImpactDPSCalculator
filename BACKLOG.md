@@ -2712,3 +2712,34 @@ experiment record.
 - **Completion:** both isolated source phases were reviewed on the main branch;
   focused metadata, snapshot, stack, element-window, collection, and follow-up
   regressions plus reaction regression, build, Javadoc, and preflight pass
+
+### B-125 — Switch-activated weapon coverage
+
+- **Status:** in-progress
+- **Scope:** backward-compatible incoming/target weapon switch callbacks, The
+  Widsith, Sacrificial Jade, and Thrilling Tales of Dragon Slayers; RL excluded
+- **Value/risk:** closes the known TTDS/Widsith boundary and the last fully
+  representable catalyst while preserving legacy switch-aware weapon behavior
+- **Evidence boundary:** maintained KQM catalyst catalog and weapon evidence,
+  accessed 2026-08-02, provide metadata, R1-R5 values, effect selection,
+  off/on-field thresholds, durations, and cooldowns:
+  https://library.keqingmains.com/equipment/weapons/catalysts#the-widsith
+  https://library.keqingmains.com/equipment/weapons/catalysts#sacrificial-jade
+  https://library.keqingmains.com/equipment/weapons/catalysts#thrilling-tales-of-dragon-slayers
+- **Boundary:** stochastic Widsith selection is injectable for reproducibility;
+  direct active-character setters intentionally remain callback-free fixtures
+- **Plan:** `TASKS.md` Switch-Activated Weapon Campaign
+
+### B-126 — Core artifact set expansion
+
+- **Status:** in-progress
+- **Scope:** Gladiator's Finale, Golden Troupe, Gilded Dreams, and Pale Flame;
+  RL excluded
+- **Value/risk:** adds four broadly useful complete sets through existing
+  capabilities; timing/order and owner binding require focused regressions
+- **Evidence boundary:** maintained KQM artifact catalog, accessed 2026-08-02,
+  provides two-/four-piece values, field grace, reaction ordering, composition,
+  stack cadence, and expiry: https://library.keqingmains.com/equipment/artifacts
+- **Boundary:** each class represents an equipped four-piece set, matching the
+  repository's existing artifact abstraction
+- **Plan:** `TASKS.md` Core Artifact Set Expansion Campaign
