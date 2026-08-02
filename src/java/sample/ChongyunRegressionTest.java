@@ -445,10 +445,15 @@ public final class ChongyunRegressionTest {
                 recastSim, "Rimechaser Blade");
         perform(recastSim, CharacterId.CHONGYUN,
                 CharacterActionKey.SKILL);
+        advanceTo(recastSim, 10.50);
+        assertTrue(recasting.isFormActive(recastSim.getCurrentTime()),
+                "old field is active when the replacement cast starts");
         double recastTime = recastSim.getCurrentTime();
         recasting.resetSkillCooldown(recastTime);
         perform(recastSim, CharacterId.CHONGYUN,
                 CharacterActionKey.SKILL);
+        assertEquals(0, a4.size(),
+                "cast-time invalidation suppresses old natural A4");
         advanceTo(recastSim, recastTime + 81.0 * FRAME);
         assertEquals(1, a4.size(),
                 "Skill recast emits old field A4 early");
@@ -456,9 +461,6 @@ public final class ChongyunRegressionTest {
                 "recast A4 resolves 81 frames after cast");
         assertClose(firstSkills.get(0).damage, a4.get(0).damage, EPS,
                 "recast A4 retains the old field snapshot");
-        advanceTo(recastSim, 655.0 * FRAME);
-        assertEquals(1, a4.size(),
-                "recast invalidates old regular-expiry A4");
         advanceTo(recastSim, recastTime + 655.0 * FRAME);
         assertEquals(2, a4.size(),
                 "new field retains its own regular A4");

@@ -53,7 +53,6 @@ public class Chongyun extends Character implements
     private static final double PARTICLE_TRAVEL = 100.0 * FRAME;
     private static final double FIELD_DURATION = 10.0;
     private static final double A4_DELAY = 655.0 * FRAME;
-    private static final double RECAST_A4_DELAY = 45.0 * FRAME;
     private static final double A4_RES_DURATION = 8.0;
 
     private CombatSimulator initializedSimulator;
@@ -296,7 +295,18 @@ public class Chongyun extends Character implements
         double castTime = sim.getCurrentTime();
         double multiplier = getSkillMultiplier();
         StatsContainer a4Snapshot = captureActionStats(sim, castTime);
-        long[] generation = new long[1];
+        FieldStateBuff replacedField = findActiveBuff(
+                FieldStateBuff.class, castTime);
+        long generation = ++fieldGeneration;
+        if (replacedField != null) {
+            schedule(
+                    sim,
+                    castTime + 81.0 * FRAME,
+                    activeSim -> resolveA4Blade(
+                            activeSim,
+                            replacedField.getMultiplier(),
+                            replacedField.getA4Snapshot()));
+        }
         AttackAction skill = attack(
                 "Spirit Blade: Chonghua's Layered Frost",
                 multiplier,
@@ -315,23 +325,11 @@ public class Chongyun extends Character implements
                         activeSim.getApplicableBuffs(this)));
         schedule(sim, fieldStart, activeSim -> {
             activeSim.performActionWithoutTimeAdvance(characterId, skill);
-            FieldStateBuff oldField = findActiveBuff(
-                    FieldStateBuff.class, activeSim.getCurrentTime());
-            if (oldField != null) {
-                schedule(
-                        activeSim,
-                        activeSim.getCurrentTime() + RECAST_A4_DELAY,
-                        recastSim -> resolveA4Blade(
-                                recastSim,
-                                oldField.getMultiplier(),
-                                oldField.getA4Snapshot()));
-            }
             removeBuffType(FieldStateBuff.class);
-            generation[0] = ++fieldGeneration;
             addBuff(new FieldStateBuff(
                     getTalentValue("Field Duration", FIELD_DURATION),
                     activeSim.getCurrentTime(),
-                    generation[0],
+                    generation,
                     multiplier,
                     a4Snapshot));
             if (activeSim.getEnemy() != null) {
@@ -362,14 +360,13 @@ public class Chongyun extends Character implements
     private void scheduleFieldTicks(
             CombatSimulator sim,
             double fieldStart,
-            long[] generation) {
+            long generation) {
         for (int second = 0; second <= 10; second++) {
             schedule(
                     sim,
                     fieldStart + second,
                     activeSim -> {
-                        if (generation[0] != 0
-                                && generation[0] == fieldGeneration) {
+                        if (generation == fieldGeneration) {
                             applyFieldToActiveCharacter(activeSim);
                         }
                     });
@@ -404,12 +401,11 @@ public class Chongyun extends Character implements
     private void scheduleA4Blade(
             CombatSimulator sim,
             double castTime,
-            long[] generation,
+            long generation,
             double multiplier,
             StatsContainer snapshot) {
         schedule(sim, castTime + A4_DELAY, activeSim -> {
-            if (generation[0] == 0
-                    || generation[0] != fieldGeneration) {
+            if (generation != fieldGeneration) {
                 return;
             }
             resolveA4Blade(activeSim, multiplier, snapshot);
