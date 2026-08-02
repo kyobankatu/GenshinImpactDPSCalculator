@@ -144,13 +144,22 @@ public class CombatActionResolver {
         }
         switch (action.getLunarReactionType()) {
             case CHARGED:
-                sim.notifyReaction(ReactionResult.lunar(0.0, ReactionResult.LunarType.CHARGED), character);
+                sim.notifyDerivedReaction(
+                        ReactionResult.lunar(
+                                0.0, ReactionResult.LunarType.CHARGED),
+                        character);
                 break;
             case BLOOM:
-                sim.notifyReaction(ReactionResult.lunar(0.0, ReactionResult.LunarType.BLOOM), character);
+                sim.notifyDerivedReaction(
+                        ReactionResult.lunar(
+                                0.0, ReactionResult.LunarType.BLOOM),
+                        character);
                 break;
             case CRYSTALLIZE:
-                sim.notifyReaction(ReactionResult.lunar(0.0, ReactionResult.LunarType.CRYSTALLIZE), character);
+                sim.notifyDerivedReaction(
+                        ReactionResult.lunar(
+                                0.0, ReactionResult.LunarType.CRYSTALLIZE),
+                        character);
                 break;
         }
     }
@@ -726,7 +735,7 @@ public class CombatActionResolver {
         sim.getCombatLogSink().log(
                 sim.getCurrentTime(), attacker.getName(), "Moondrift Harmony", damage,
                 result.getName(), damage, sim.getEnemy().getAuraMap(sim.getCurrentTime()));
-        sim.notifyReaction(
+        sim.notifyDerivedReaction(
                 ReactionResult.lunar(
                         damage,
                         ReactionResult.LunarType.CRYSTALLIZE,

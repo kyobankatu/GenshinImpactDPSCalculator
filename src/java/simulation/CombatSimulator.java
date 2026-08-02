@@ -631,6 +631,12 @@ public class CombatSimulator {
         eventDispatcher.addReactionListener(listener);
     }
 
+    /** Registers a weapon callback that receives only actual reactions. */
+    public void addElementalReactionTriggeredWeaponEffect(
+            model.entity.ElementalReactionTriggeredWeaponEffect effect) {
+        eventDispatcher.addElementalReactionTriggeredWeaponEffect(effect);
+    }
+
     /**
      * Dispatches a reaction event and artifact reaction hooks.
      *
@@ -641,6 +647,24 @@ public class CombatSimulator {
         pushBuffSource(trigger != null ? trigger.getCharacterId() : CharacterId.UNKNOWN);
         try {
             eventDispatcher.notifyReaction(result, trigger, getCurrentTime(), this, party.getMembers());
+        } finally {
+            popBuffSource();
+        }
+    }
+
+    /**
+     * Dispatches a derived reaction notification without granting equipment sigils.
+     *
+     * @param result derived reaction result
+     * @param trigger character attributed with the derived event
+     */
+    public void notifyDerivedReaction(
+            mechanics.reaction.ReactionResult result,
+            model.entity.Character trigger) {
+        pushBuffSource(trigger != null ? trigger.getCharacterId() : CharacterId.UNKNOWN);
+        try {
+            eventDispatcher.notifyDerivedReaction(
+                    result, trigger, getCurrentTime(), this, party.getMembers());
         } finally {
             popBuffSource();
         }

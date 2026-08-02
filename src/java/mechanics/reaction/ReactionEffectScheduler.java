@@ -335,7 +335,7 @@ public class ReactionEffectScheduler {
         sim.getCombatLogSink().log(
                 sim.getCurrentTime(), "Thundercloud", label, finalDamage,
                 label, finalDamage, sim.getEnemy().getAuraMap(sim.getCurrentTime()));
-        sim.notifyReaction(
+        sim.notifyDerivedReaction(
                 ReactionResult.transform(
                         finalDamage,
                         "Thundercloud-Strike",

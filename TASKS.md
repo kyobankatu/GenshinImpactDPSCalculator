@@ -12992,12 +12992,18 @@ Completion evidence:
   PartyCatalogRegressionTest`, and `python scripts/preflight.py --run` passed
   on 2026-08-02.
 
-### Phase 2: Add Freedom-Sworn
+### Phase 2: Add Freedom-Sworn - Done
 
 Target files:
 
 - `src/java/model/weapon/FreedomSworn.java` (new)
+- `src/java/model/entity/ElementalReactionTriggeredWeaponEffect.java` (new)
 - `src/java/mechanics/buff/BuffId.java`
+- `src/java/simulation/CombatSimulator.java`
+- `src/java/simulation/SimulationEventBus.java`
+- `src/java/simulation/runtime/SimulationEventDispatcher.java`
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/mechanics/reaction/ReactionEffectScheduler.java`
 - `src/java/sample/ReactionRegressionTest.java`
 
 Acceptance criteria:
@@ -13007,6 +13013,9 @@ Acceptance criteria:
 - Owner-attributed non-NONE reactions, including off-field reactions, gain two
   sigils at 0.5-second CT and grant the 12-second R1-R5 Normal/Charged/Plunging
   DMG and shared ATK movement effects, followed by the 20-second lock.
+- Thundercloud ticks, Aura-independent Lunar action classification, and
+  Moondrift Harmony follow-ups continue reaching existing observers but cannot
+  grant equipment reaction sigils.
 - Its unique action-DMG buff stacks with Elegy's unique EM while the shared ATK
   effect uses latest typed replacement; snapshot restore replays state exactly.
 
@@ -13024,6 +13033,17 @@ Verification:
 - `./gradlew ReactionRegressionTest`
 - `./gradlew build javadoc PartyCatalogRegressionTest`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Focused regressions cover actual versus derived reaction dispatch,
+  off-field ownership, R1/R5 values, exact 0.5/12/20-second boundaries,
+  snapshot replay, invalid inputs, and cross-simulator binding.
+- Elegy and Freedom-Sworn preserve both unique effects while a later lower
+  shared ATK value replaces the earlier higher value.
+- `./gradlew ReactionRegressionTest`, `./gradlew build javadoc
+  PartyCatalogRegressionTest`, and `python scripts/preflight.py --run` passed
+  on 2026-08-02.
 
 ### Phase 3: Add Song of Broken Pines
 

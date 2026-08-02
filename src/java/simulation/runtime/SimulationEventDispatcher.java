@@ -7,6 +7,7 @@ import java.util.List;
 import mechanics.reaction.ReactionResult;
 import model.entity.ArtifactSet;
 import model.entity.Character;
+import model.entity.ElementalReactionTriggeredWeaponEffect;
 import model.entity.ReactionAwareArtifact;
 import model.type.Element;
 import simulation.ActionListener;
@@ -24,6 +25,8 @@ public class SimulationEventDispatcher implements SimulationEventBus {
     private final List<DamageListener> damageListeners = new ArrayList<>();
     private final List<ParticleListener> particleListeners = new ArrayList<>();
     private final List<CombatSimulator.ReactionListener> reactionListeners = new ArrayList<>();
+    private final List<ElementalReactionTriggeredWeaponEffect>
+            elementalReactionWeaponEffects = new ArrayList<>();
 
     /**
      * Registers an action listener that will be notified after attack actions are executed.
@@ -63,6 +66,12 @@ public class SimulationEventDispatcher implements SimulationEventBus {
     @Override
     public void addReactionListener(CombatSimulator.ReactionListener listener) {
         reactionListeners.add(listener);
+    }
+
+    /** Registers a weapon listener for actual elemental reactions only. */
+    public void addElementalReactionTriggeredWeaponEffect(
+            ElementalReactionTriggeredWeaponEffect effect) {
+        elementalReactionWeaponEffects.add(effect);
     }
 
     /**
@@ -120,6 +129,31 @@ public class SimulationEventDispatcher implements SimulationEventBus {
      */
     @Override
     public void notifyReaction(
+            ReactionResult result,
+            Character trigger,
+            double time,
+            CombatSimulator sim,
+            Collection<Character> partyMembers) {
+        for (ElementalReactionTriggeredWeaponEffect effect
+                : elementalReactionWeaponEffects) {
+            effect.onElementalReaction(result, trigger, time, sim);
+        }
+        notifyReactionObservers(result, trigger, time, sim, partyMembers);
+    }
+
+    /**
+     * Notifies existing reaction observers while excluding equipment sigil hooks.
+     */
+    public void notifyDerivedReaction(
+            ReactionResult result,
+            Character trigger,
+            double time,
+            CombatSimulator sim,
+            Collection<Character> partyMembers) {
+        notifyReactionObservers(result, trigger, time, sim, partyMembers);
+    }
+
+    private void notifyReactionObservers(
             ReactionResult result,
             Character trigger,
             double time,

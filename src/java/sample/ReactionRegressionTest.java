@@ -201,6 +201,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_TypedFiveStarBows();
         testAccuracyPhaseF_EnergyConditionalEmblemWeapons();
         testAccuracyPhaseF_FiveStarElementalMasterySupportWeapons();
+        testAccuracyPhaseF_FreedomSwornContract();
         testAccuracyPhaseF_FiveStarCatalystStackWeapons();
         testAccuracyPhaseF_InjectedBowProcWeapons();
         testAccuracyPhaseF_LivePartyFiveStarWeapons();
@@ -18880,6 +18881,210 @@ public class ReactionRegressionTest {
         }
         assertTrue(highDreamsRefinementRejected,
                 "Floating Dreams should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_FreedomSwornContract() {
+        model.weapon.FreedomSworn freedom = new model.weapon.FreedomSworn();
+        assertEquals("Freedom-Sworn", freedom.getName(),
+                "Freedom-Sworn display name");
+        assertClose(608.0, freedom.getBaseAtk(), EPS,
+                "Freedom-Sworn base ATK");
+        assertClose(198.0,
+                freedom.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Freedom-Sworn Elemental Mastery");
+        assertEquals(model.type.WeaponType.SWORD, freedom.getWeaponType(),
+                "Freedom-Sworn weapon type");
+        assertEquals(5, freedom.getRefinement(),
+                "Freedom-Sworn default refinement");
+
+        TestCharacter ally = testCharacter(Element.PYRO, CharacterId.AMBER);
+        TestCharacter owner = testCharacter(Element.ANEMO, CharacterId.SUCROSE);
+        owner.setWeapon(freedom);
+        CombatSimulator sim = simulatorWith(ally);
+        sim.addCharacter(owner);
+        assertClose(0.20,
+                resolvedStat(sim, owner, StatType.DMG_BONUS_ALL), EPS,
+                "R5 Freedom-Sworn unconditional all-DMG bonus");
+        assertClose(0.0,
+                resolvedStat(sim, ally,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Freedom-Sworn should start without Song of Resistance");
+
+        ReactionResult overload = ReactionResult.transform(
+                100.0, "Overloaded", ReactionResult.Kind.OVERLOAD);
+        int[] generalReactionCount = { 0 };
+        sim.addReactionListener((result, source, time, activeSim) ->
+                generalReactionCount[0]++);
+        sim.notifyReaction(ReactionResult.none(), owner);
+        sim.notifyReaction(overload, ally);
+        sim.notifyDerivedReaction(overload, owner);
+        assertEquals(3, generalReactionCount[0],
+                "Derived reactions should continue reaching general observers");
+        assertEquals(0, freedom.getSigilCount(),
+                "NONE, foreign, and derived reactions should not add sigils");
+
+        sim.notifyReaction(overload, owner);
+        assertEquals(1, freedom.getSigilCount(),
+                "Off-field owner reaction should add Freedom-Sworn sigil");
+        SimulatorSnapshot oneSigilSnapshot = sim.saveSnapshot();
+        sim.advanceTime(0.5 - 1e-6);
+        sim.notifyReaction(overload, owner);
+        assertEquals(1, freedom.getSigilCount(),
+                "Freedom-Sworn should reject a sigil before 0.5 seconds");
+        sim.advanceTime(1e-6 + 1e-9);
+        sim.notifyReaction(overload, owner);
+        assertEquals(0, freedom.getSigilCount(),
+                "Second Freedom-Sworn sigil should be consumed");
+        assertClose(0.40,
+                resolvedStat(sim, ally, StatType.ATK_PERCENT), EPS,
+                "R5 Freedom-Sworn shared ATK effect");
+        assertClose(0.32,
+                resolvedStat(sim, ally,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "R5 Freedom-Sworn Normal damage effect");
+        assertClose(0.32,
+                resolvedStat(sim, ally,
+                        StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "R5 Freedom-Sworn Charged damage effect");
+        assertClose(0.32,
+                resolvedStat(sim, ally,
+                        StatType.PLUNGING_ATTACK_DMG_BONUS), EPS,
+                "R5 Freedom-Sworn Plunging damage effect");
+        assertClose(0.0,
+                resolvedStat(sim, ally, StatType.SKILL_DMG_BONUS), EPS,
+                "Freedom-Sworn should not modify Skill damage");
+        assertClose(0.0,
+                resolvedStat(sim, ally, StatType.BURST_DMG_BONUS), EPS,
+                "Freedom-Sworn should not modify Burst damage");
+        SimulatorSnapshot activeSongSnapshot = sim.saveSnapshot();
+
+        sim.advanceTime(12.0);
+        assertClose(0.0,
+                resolvedStat(sim, ally, StatType.ATK_PERCENT), EPS,
+                "Freedom-Sworn song should expire at exactly 12 seconds");
+        sim.restoreSnapshot(activeSongSnapshot);
+        assertClose(0.32,
+                resolvedStat(sim, ally,
+                        StatType.PLUNGING_ATTACK_DMG_BONUS), EPS,
+                "Freedom-Sworn snapshot should restore the active song");
+        sim.advanceTime(20.0 - 1e-6);
+        sim.notifyReaction(overload, owner);
+        assertEquals(0, freedom.getSigilCount(),
+                "Freedom-Sworn should reject sigils before its restored lock ends");
+        sim.advanceTime(1e-6 + 1e-9);
+        sim.notifyReaction(overload, owner);
+        assertEquals(1, freedom.getSigilCount(),
+                "Freedom-Sworn should accept a sigil at exact lock expiry");
+        sim.restoreSnapshot(oneSigilSnapshot);
+        assertEquals(1, freedom.getSigilCount(),
+                "Freedom-Sworn snapshot should restore one retained sigil");
+
+        model.weapon.FreedomSworn r1Freedom =
+                new model.weapon.FreedomSworn(1);
+        TestCharacter r1Owner = testCharacter(Element.ANEMO, CharacterId.SUCROSE);
+        r1Owner.setWeapon(r1Freedom);
+        CombatSimulator r1Sim = simulatorWith(r1Owner);
+        assertClose(0.10,
+                resolvedStat(r1Sim, r1Owner, StatType.DMG_BONUS_ALL), EPS,
+                "R1 Freedom-Sworn unconditional all-DMG bonus");
+        r1Sim.notifyReaction(overload, r1Owner);
+        r1Sim.advanceTime(0.5);
+        r1Sim.notifyReaction(overload, r1Owner);
+        assertClose(0.20,
+                resolvedStat(r1Sim, r1Owner, StatType.ATK_PERCENT), EPS,
+                "R1 Freedom-Sworn shared ATK effect");
+        assertClose(0.16,
+                resolvedStat(r1Sim, r1Owner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "R1 Freedom-Sworn action damage effect");
+
+        model.weapon.ElegyForTheEnd coexistElegy =
+                new model.weapon.ElegyForTheEnd();
+        model.weapon.FreedomSworn coexistFreedom =
+                new model.weapon.FreedomSworn(1);
+        TestCharacter coexistTarget = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        TestCharacter elegyOwner = testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE);
+        TestCharacter freedomOwner = testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU);
+        elegyOwner.setWeapon(coexistElegy);
+        freedomOwner.setWeapon(coexistFreedom);
+        CombatSimulator coexistSim = simulatorWith(coexistTarget);
+        coexistSim.addCharacter(elegyOwner);
+        coexistSim.addCharacter(freedomOwner);
+        AttackAction elegyHit = typedDamageHit(
+                "Coexist Elegy hit", ActionType.SKILL, 1.0);
+        for (int i = 0; i < 4; i++) {
+            if (i > 0) {
+                coexistSim.advanceTime(0.2);
+            }
+            coexistElegy.onDamage(
+                    elegyOwner,
+                    elegyHit,
+                    coexistSim.getCurrentTime(),
+                    coexistSim);
+        }
+        assertClose(0.40,
+                resolvedStat(coexistSim, coexistTarget,
+                        StatType.ATK_PERCENT), EPS,
+                "Elegy should first provide R5 shared ATK");
+        assertClose(200.0,
+                resolvedStat(coexistSim, coexistTarget,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Elegy should provide its unique EM");
+        coexistSim.notifyReaction(overload, freedomOwner);
+        coexistSim.advanceTime(0.5);
+        coexistSim.notifyReaction(overload, freedomOwner);
+        assertClose(0.20,
+                resolvedStat(coexistSim, coexistTarget,
+                        StatType.ATK_PERCENT), EPS,
+                "Later R1 Freedom-Sworn should replace only shared ATK");
+        assertClose(200.0,
+                resolvedStat(coexistSim, coexistTarget,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Freedom-Sworn should preserve Elegy's unique EM");
+        assertClose(0.16,
+                resolvedStat(coexistSim, coexistTarget,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Freedom-Sworn unique action effect should coexist with Elegy");
+
+        boolean mismatchedStateRejected = false;
+        try {
+            coexistElegy.restoreWeaponState(
+                    coexistFreedom.captureWeaponState());
+        } catch (IllegalArgumentException expected) {
+            mismatchedStateRejected = true;
+        }
+        assertTrue(mismatchedStateRejected,
+                "Elegy should reject Freedom-Sworn snapshot state");
+
+        boolean reuseRejected = false;
+        try {
+            freedom.initializeForSimulator(owner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            reuseRejected = true;
+        }
+        assertTrue(reuseRejected,
+                "Freedom-Sworn should reject cross-simulator reuse");
+
+        boolean lowRefinementRejected = false;
+        try {
+            new model.weapon.FreedomSworn(0);
+        } catch (IllegalArgumentException expected) {
+            lowRefinementRejected = true;
+        }
+        assertTrue(lowRefinementRejected,
+                "Freedom-Sworn should reject refinement zero");
+
+        boolean highRefinementRejected = false;
+        try {
+            new model.weapon.FreedomSworn(6);
+        } catch (IllegalArgumentException expected) {
+            highRefinementRejected = true;
+        }
+        assertTrue(highRefinementRejected,
+                "Freedom-Sworn should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_FiveStarCatalystStackWeapons() {

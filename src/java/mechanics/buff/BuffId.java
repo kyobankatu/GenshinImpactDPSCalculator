@@ -153,6 +153,8 @@ public enum BuffId {
     ELEGY_FAREWELL_SONG,
     /** 「千年の大楽章」各武器が共有する攻撃力効果。 */
     MILLENNIAL_MOVEMENT_ATK,
+    /** 武器「蒼古なる自由への誓い」の通常・重撃・落下攻撃強化。 */
+    FREEDOM_SWORN_SONG_OF_RESISTANCE,
     /** 武器「千夜に浮かぶ夢」の味方元素熟知共有。 */
     A_THOUSAND_FLOATING_DREAMS_TEAM_EM,
     /** 武器「龍殺しの英傑譚」の交代先への攻撃力バフ。 */

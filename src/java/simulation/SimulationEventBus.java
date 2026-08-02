@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import mechanics.reaction.ReactionResult;
 import model.entity.Character;
+import model.entity.ElementalReactionTriggeredWeaponEffect;
 import model.type.Element;
 import simulation.action.AttackAction;
 
@@ -41,6 +42,14 @@ public interface SimulationEventBus {
      * @param listener listener to register
      */
     void addReactionListener(CombatSimulator.ReactionListener listener);
+
+    /**
+     * Registers a weapon listener for actual elemental reactions only.
+     *
+     * @param effect weapon reaction capability
+     */
+    void addElementalReactionTriggeredWeaponEffect(
+            ElementalReactionTriggeredWeaponEffect effect);
 
     /**
      * Dispatches an executed action event.
@@ -81,4 +90,17 @@ public interface SimulationEventBus {
      */
     void notifyReaction(ReactionResult result, Character trigger, double time,
             CombatSimulator sim, Collection<Character> partyMembers);
+
+    /**
+     * Dispatches a derived reaction event without equipment sigil callbacks.
+     *
+     * @param result derived reaction result
+     * @param trigger attributed character
+     * @param time simulation time in seconds
+     * @param sim active simulator
+     * @param partyMembers current party members whose observers may react
+     */
+    void notifyDerivedReaction(ReactionResult result, Character trigger,
+            double time, CombatSimulator sim,
+            Collection<Character> partyMembers);
 }
