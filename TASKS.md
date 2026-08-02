@@ -13850,8 +13850,8 @@ Verification:
 
 ## Implementation Order: Self-Contained Four-Star Weapon Expansion
 
-Status: Active. Add three bounded passives driven by Skill use, elemental
-damage, or current party composition without extending simulator contracts.
+Status: Complete. Three bounded passives now use Skill use, elemental damage,
+or current party composition without extending simulator contracts.
 
 Scope:
 
@@ -13863,7 +13863,7 @@ Out of scope for this pass:
 - Enemy-death, healing, shield, or pickup events; characters, formulas, RL,
   generated docs, and unrelated weapon families.
 
-### Phase 1: Add Three Self-Contained Four-Star Weapons
+### Phase 1: Add Three Self-Contained Four-Star Weapons - Done (`e0564b2`)
 
 Target files:
 
@@ -13871,6 +13871,15 @@ Target files:
 - `src/java/model/weapon/IronSting.java` (new)
 - `src/java/model/weapon/BalladOfTheFjords.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Starglitter proves typed Skill-only stacks, cap, shared refresh/expiry, and
+  independent Normal/Charged bonuses at R1/R5.
+- Iron Sting proves positive elemental and active-owner gates, exact one-second
+  CT, two-stack cap, off-field retention without refresh, and exact expiry.
+- Fjords proves live two-to-three-element composition changes; metadata,
+  invalid ranks, reaction regression, build, Javadoc, preflight, and diff pass.
 
 Acceptance criteria:
 

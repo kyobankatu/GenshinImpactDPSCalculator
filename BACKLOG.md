@@ -2296,10 +2296,12 @@ experiment record.
 
 ### B-094 — Self-contained four-star weapon coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Prototype Starglitter, Iron Sting, and Ballad of the Fjords; RL excluded
 - **Value/risk:** three complete passives use existing typed action, damage, and
   simulator-party reads with no new shared runtime dispatch
 - **Evidence boundary:** KQM TCL metadata, R1-R5 values, Starglitter shared
   stack duration, Iron Sting elemental-hit CT, and Fjords element diversity
 - **Plan:** `TASKS.md` Self-Contained Four-Star Weapon Expansion
+- **Completion:** `e0564b2` adds all three weapons and focused regressions;
+  build/Javadoc/leak gates pass
