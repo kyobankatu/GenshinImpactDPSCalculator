@@ -13096,3 +13096,58 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc` at the batch boundary
 - `python scripts/preflight.py`
+
+## Implementation Order: Watatsumi Wavewalker Weapon Campaign
+
+Status: Active. Add the complete three-weapon family through one party-energy
+policy and independently reversible metadata variants.
+
+Scope:
+
+- Add a shared R1-R5 Burst bonus computed from the equipped party's combined
+  maximum Energy and capped at the sourced refinement limit.
+- Add Akuoumaru, Mouun's Moon, and Wavebreaker's Fin with sourced Lv. 90 stats,
+  typed categories, compatibility R5 defaults, and focused regressions.
+
+Out of scope for this pass:
+
+- Party mutation after setup, alternate energy-cost mechanics beyond the
+  existing `getMaxEnergy()` contract, characters, formulas, RL, and docs.
+
+### Phase 1: Add Watatsumi Wavewalker Weapons
+
+Target files:
+
+- `src/java/model/weapon/PartyEnergyBurstWeapon.java` (new)
+- `src/java/model/weapon/Akuoumaru.java` (new)
+- `src/java/model/weapon/MouunsMoon.java` (new)
+- `src/java/model/weapon/WavebreakersFin.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+| Unit | Passive | Focused verification | Status |
+|---|---|---|---|
+| Shared base + Akuoumaru | party max Energy to Burst DMG | pre-init, uncapped/capped, R1/R5, metadata | Pending |
+| Mouun's Moon | inherited Watatsumi Wavewalker | bow metadata and shared behavior | Pending |
+| Wavebreaker's Fin | inherited Watatsumi Wavewalker | polearm metadata and shared behavior | Pending |
+
+Acceptance criteria:
+
+- The passive sums each configured party member's `getMaxEnergy()`, applies
+  0.12-0.24% Burst DMG per point, and caps the result at 40-80% for R1-R5.
+- Applying the passive before simulator initialization is a safe no-op; only
+  Burst DMG changes and repeated stat compilation never accumulates state.
+- Refinements 0/6 fail, no-argument constructors default to R5, and exact names,
+  base ATK, ATK substats, and weapon categories match KQM TCL.
+
+Test cases to add or update:
+
+- Normal/static: full-party uncapped total, every variant's metadata, and R5.
+- Boundary: owner-only party, R1, cap threshold/above-cap, repeated application.
+- Abnormal: pre-initialization use, refinement 0/6, and unrelated stat isolation.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc` at the shared/final API boundary
+- `python scripts/preflight.py`

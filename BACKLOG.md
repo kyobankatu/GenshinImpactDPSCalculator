@@ -2148,3 +2148,13 @@ experiment record.
 - **Plan:** `TASKS.md` Skill-Focused Event Weapon Campaign
 - **Completion:** `139657b`, `340c244`, and `4074bb1` add the shared window and
   all three weapons; focused/build/Javadoc/leak gates pass
+
+### B-082 — Watatsumi Wavewalker weapon coverage
+
+- **Status:** active
+- **Scope:** Akuoumaru, Mouun's Moon, and Wavebreaker's Fin; RL excluded
+- **Value/risk:** complete weapon family with one read-only party aggregate and
+  no formula, event, target-state, or timing changes
+- **Evidence boundary:** KQM TCL Lv. 90 metadata and R1-R5 per-Energy/cap values;
+  the implementation uses the simulator's existing `getMaxEnergy()` contract
+- **Plan:** `TASKS.md` Watatsumi Wavewalker Weapon Campaign
