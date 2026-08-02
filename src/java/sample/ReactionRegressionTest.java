@@ -127,6 +127,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ReactionWindowWeapons();
         testAccuracyPhaseF_HitStackWeapons();
         testAccuracyPhaseF_AdditionalClaymoreHitStackWeapons();
+        testAccuracyPhaseF_AdditionalMultiStatHitStackWeapons();
         testAccuracyPhaseF_DirectPhysicalProcWeapons();
         testAccuracyPhaseF_ActionUseWindowWeapons();
         testAccuracyPhaseF_AdditionalSkillUseStatWeapons();
@@ -7012,6 +7013,144 @@ public class ReactionRegressionTest {
         }
         assertTrue(highWhiteblindRefinementRejected,
                 "Whiteblind should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_AdditionalMultiStatHitStackWeapons() {
+        model.weapon.PrototypeRancour rancour =
+                new model.weapon.PrototypeRancour();
+        assertEquals("Prototype Rancour", rancour.getName(),
+                "Prototype Rancour display name");
+        assertClose(565.0, rancour.getBaseAtk(), EPS,
+                "Prototype Rancour base ATK");
+        assertClose(0.345,
+                rancour.getStats().get(StatType.PHYSICAL_DMG_BONUS), EPS,
+                "Prototype Rancour Physical DMG Bonus");
+        assertEquals(model.type.WeaponType.SWORD, rancour.getWeaponType(),
+                "Prototype Rancour weapon type");
+        assertEquals(5, rancour.getRefinement(),
+                "Prototype Rancour default refinement");
+
+        TestCharacter rancourOwner = testCharacter(Element.PHYSICAL);
+        rancourOwner.setWeapon(rancour);
+        CombatSimulator rancourSim = simulatorWith(rancourOwner);
+        AttackAction normalHit = typedDamageHit(
+                "Prototype Rancour Normal", ActionType.NORMAL, 1.0);
+        AttackAction chargeHit = typedDamageHit(
+                "Prototype Rancour Charge", ActionType.CHARGE, 1.0);
+        AttackAction skillHit = typedDamageHit(
+                "Prototype Rancour Skill", ActionType.SKILL, 1.0);
+        AttackAction zeroNormalHit = typedDamageHit(
+                "Prototype Rancour zero Normal", ActionType.NORMAL, 0.0);
+        rancour.onDamage(rancourOwner, normalHit, 0.0, rancourSim);
+        rancour.onDamage(rancourOwner, chargeHit, 0.299, rancourSim);
+        assertClose(0.08,
+                effectiveStatAt(rancourOwner, StatType.ATK_PERCENT, 0.299), EPS,
+                "Prototype Rancour should reject a hit immediately before CT");
+        rancour.onDamage(rancourOwner, chargeHit, 0.3, rancourSim);
+        rancour.onDamage(rancourOwner, normalHit, 0.6, rancourSim);
+        rancour.onDamage(rancourOwner, chargeHit, 0.9, rancourSim);
+        assertClose(0.32,
+                effectiveStatAt(rancourOwner, StatType.ATK_PERCENT, 0.9), EPS,
+                "R5 Prototype Rancour should cap at four ATK stacks");
+        assertClose(0.32,
+                effectiveStatAt(rancourOwner, StatType.DEF_PERCENT, 0.9), EPS,
+                "R5 Prototype Rancour should cap at four DEF stacks");
+        rancour.onDamage(rancourOwner, skillHit, 1.2, rancourSim);
+        rancour.onDamage(rancourOwner, zeroNormalHit, 1.2, rancourSim);
+        assertClose(0.32,
+                effectiveStatAt(rancourOwner, StatType.ATK_PERCENT, 6.899), EPS,
+                "Wrong hits should not refresh Prototype Rancour");
+        assertClose(0.0,
+                effectiveStatAt(rancourOwner, StatType.ATK_PERCENT, 6.9), EPS,
+                "Prototype Rancour should expire all stacks exactly");
+
+        model.weapon.PrototypeRancour r1Rancour =
+                new model.weapon.PrototypeRancour(1);
+        TestCharacter r1RancourOwner = testCharacter(Element.PHYSICAL);
+        r1RancourOwner.setWeapon(r1Rancour);
+        CombatSimulator r1RancourSim = simulatorWith(r1RancourOwner);
+        r1Rancour.onDamage(r1RancourOwner, normalHit, 0.0, r1RancourSim);
+        assertClose(0.04,
+                resolvedStat(r1RancourSim, r1RancourOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "R1 Prototype Rancour ATK stack");
+        assertClose(0.04,
+                resolvedStat(r1RancourSim, r1RancourOwner,
+                        StatType.DEF_PERCENT), EPS,
+                "R1 Prototype Rancour DEF stack");
+
+        model.weapon.SacrificersStaff staff =
+                new model.weapon.SacrificersStaff();
+        assertEquals("Sacrificer's Staff", staff.getName(),
+                "Sacrificer's Staff display name");
+        assertClose(620.0, staff.getBaseAtk(), EPS,
+                "Sacrificer's Staff base ATK");
+        assertClose(0.092, staff.getStats().get(StatType.CRIT_RATE), EPS,
+                "Sacrificer's Staff CRIT Rate");
+        assertEquals(model.type.WeaponType.POLEARM, staff.getWeaponType(),
+                "Sacrificer's Staff weapon type");
+        assertEquals(5, staff.getRefinement(),
+                "Sacrificer's Staff default refinement");
+
+        TestCharacter staffOwner = testCharacter(Element.ELECTRO, CharacterId.LISA);
+        staffOwner.setWeapon(staff);
+        CombatSimulator staffSim = simulatorWith(staffOwner);
+        AttackAction zeroSkillHit = typedDamageHit(
+                "Sacrificer's Staff zero Skill", ActionType.SKILL, 0.0);
+        staff.onDamage(staffOwner, normalHit, 0.0, staffSim);
+        staff.onDamage(staffOwner, zeroSkillHit, 0.0, staffSim);
+        assertClose(0.0,
+                effectiveStatAt(staffOwner, StatType.ATK_PERCENT, 0.0), EPS,
+                "Wrong hits should not activate Sacrificer's Staff");
+        staff.onDamage(staffOwner, skillHit, 0.0, staffSim);
+        staff.onDamage(staffOwner, skillHit, 0.0, staffSim);
+        staff.onDamage(staffOwner, skillHit, 0.0, staffSim);
+        staff.onDamage(staffOwner, skillHit, 0.0, staffSim);
+        assertClose(0.48,
+                effectiveStatAt(staffOwner, StatType.ATK_PERCENT, 0.0), EPS,
+                "R5 Sacrificer's Staff should cap at three ATK stacks");
+        assertClose(1.36,
+                effectiveStatAt(staffOwner, StatType.ENERGY_RECHARGE, 0.0), EPS,
+                "R5 Sacrificer's Staff should cap at three ER stacks");
+        staffSim.addCharacter(testCharacter(Element.PYRO, CharacterId.AMBER));
+        staffSim.setActiveCharacter(CharacterId.AMBER);
+        assertClose(0.48,
+                effectiveStatAt(staffOwner, StatType.ATK_PERCENT, 5.999), EPS,
+                "Sacrificer's Staff stacks should persist off-field");
+        assertClose(0.0,
+                effectiveStatAt(staffOwner, StatType.ATK_PERCENT, 6.0), EPS,
+                "Sacrificer's Staff should expire all stacks exactly");
+
+        model.weapon.SacrificersStaff r1Staff =
+                new model.weapon.SacrificersStaff(1);
+        TestCharacter r1StaffOwner = testCharacter(Element.ELECTRO);
+        r1StaffOwner.setWeapon(r1Staff);
+        CombatSimulator r1StaffSim = simulatorWith(r1StaffOwner);
+        r1Staff.onDamage(r1StaffOwner, skillHit, 0.0, r1StaffSim);
+        assertClose(0.08,
+                resolvedStat(r1StaffSim, r1StaffOwner, StatType.ATK_PERCENT), EPS,
+                "R1 Sacrificer's Staff ATK stack");
+        assertClose(1.06,
+                resolvedStat(r1StaffSim, r1StaffOwner, StatType.ENERGY_RECHARGE), EPS,
+                "R1 Sacrificer's Staff ER stack");
+
+        boolean lowRefinementRejected = false;
+        try {
+            new model.weapon.PrototypeRancour(0);
+        } catch (IllegalArgumentException expected) {
+            lowRefinementRejected = true;
+        }
+        assertTrue(lowRefinementRejected,
+                "Prototype Rancour should reject refinement zero");
+
+        boolean highRefinementRejected = false;
+        try {
+            new model.weapon.SacrificersStaff(6);
+        } catch (IllegalArgumentException expected) {
+            highRefinementRejected = true;
+        }
+        assertTrue(highRefinementRejected,
+                "Sacrificer's Staff should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_DirectPhysicalProcWeapons() {
