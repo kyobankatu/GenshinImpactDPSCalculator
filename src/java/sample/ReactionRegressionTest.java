@@ -4136,6 +4136,11 @@ public class ReactionRegressionTest {
         assertWeaponMetadata(greatsword, "Sacrificial Greatsword", 565.0, 0.306,
                 model.type.WeaponType.CLAYMORE);
         assertSacrificialResetsSkill(greatsword, "Sacrificial Greatsword");
+
+        model.weapon.SacrificialBow bow = new model.weapon.SacrificialBow(5, () -> 0.0);
+        assertWeaponMetadata(
+                bow, "Sacrificial Bow", 565.0, 0.306, model.type.WeaponType.BOW);
+        assertSacrificialResetsSkill(bow, "Sacrificial Bow");
     }
 
     private static void testAccuracyPhaseF_WanderingEvenstarTimedSnapshot() {
