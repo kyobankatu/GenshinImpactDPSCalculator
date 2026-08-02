@@ -4926,6 +4926,27 @@ public class ReactionRegressionTest {
         model.weapon.CoolSteel r1CoolSteel = new model.weapon.CoolSteel(1);
         assertTargetAuraWeaponDamage(
                 r1CoolSteel, Element.CRYO, Element.PYRO, 0.12, "R1 Cool Steel");
+
+        model.weapon.BloodtaintedGreatsword bloodtaintedGreatsword =
+                new model.weapon.BloodtaintedGreatsword();
+        assertEquals("Bloodtainted Greatsword", bloodtaintedGreatsword.getName(),
+                "Bloodtainted Greatsword display name");
+        assertClose(354.0, bloodtaintedGreatsword.getBaseAtk(), EPS,
+                "Bloodtainted Greatsword base ATK");
+        assertClose(187.0,
+                bloodtaintedGreatsword.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Bloodtainted Greatsword Elemental Mastery");
+        assertEquals(model.type.WeaponType.CLAYMORE, bloodtaintedGreatsword.getWeaponType(),
+                "Bloodtainted Greatsword weapon type");
+        assertTargetAuraWeaponDamage(
+                bloodtaintedGreatsword, Element.PYRO, Element.HYDRO, 0.24,
+                "Bloodtainted Greatsword");
+
+        model.weapon.BloodtaintedGreatsword r1BloodtaintedGreatsword =
+                new model.weapon.BloodtaintedGreatsword(1);
+        assertTargetAuraWeaponDamage(
+                r1BloodtaintedGreatsword, Element.ELECTRO, Element.HYDRO, 0.12,
+                "R1 Bloodtainted Greatsword");
     }
 
     private static void testAccuracyPhaseF_KaeyaCharacterContract() {
