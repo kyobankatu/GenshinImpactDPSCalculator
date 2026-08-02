@@ -2563,10 +2563,13 @@ experiment record.
 
 ### B-116 — Alley Hunter coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Alley Hunter; RL excluded
 - **Value/risk:** one complete passive reuses the simulator's fixed timer and
   live active-character state without extending switch contracts
 - **Evidence boundary:** KQM TCL metadata, R1-R5 growth/decay values, ten-stack
   cap, one-second cadence, and four-second on-field grace
 - **Plan:** `TASKS.md` Alley Hunter Campaign
+- **Completion:** `4aca5e4` adds fixed-cadence off-field growth, delayed
+  on-field decay, grace reset, cap/floor behavior, and focused regressions;
+  build/Javadoc/leak gates pass

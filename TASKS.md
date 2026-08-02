@@ -15062,7 +15062,7 @@ Verification:
 
 ## Implementation Order: Alley Hunter Campaign
 
-Status: Active. Add Alley Hunter with fixed-cadence off-field growth and
+Status: Complete. Alley Hunter now has fixed-cadence off-field growth and
 on-field decay after its four-second grace period.
 
 Scope:
@@ -15075,12 +15075,19 @@ Out of scope for this pass:
 - Other bows, characters, formulas, RL, generated docs, and changes to the
   simulator switch lifecycle.
 
-### Phase 1: Add Alley Hunter
+### Phase 1: Add Alley Hunter - Done (`4aca5e4`)
 
 Target files:
 
 - `src/java/model/weapon/AlleyHunter.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- R1/R5 metadata, exact first tick, ten-stack cap, four-tick active grace,
+  two-stack decay, return-field grace reset, and zero floor pass.
+- Initial active/off-field state and cross-simulator binding are explicit;
+  build, reaction regression, Javadoc, and artifact-leak gates pass.
 
 Acceptance criteria:
 
