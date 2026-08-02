@@ -2535,3 +2535,13 @@ experiment record.
 - **Plan:** `TASKS.md` Catalyst Dual-Window Weapon Campaign
 - **Completion:** `542fceb` adds both dual-window state machines and focused
   regressions; build/Javadoc/leak gates pass
+
+### B-114 — Fruit of Fulfillment coverage
+
+- **Status:** active
+- **Scope:** Fruit of Fulfillment; RL excluded
+- **Value/risk:** one complete passive reuses attributed reaction and bounded
+  timer contracts; generation tokens prevent stale inactivity decay
+- **Evidence boundary:** KQM TCL metadata, R1-R5 EM values, fixed -5% ATK per
+  stack, 0.3-second gain CT, five-stack cap, six-second repeated decay
+- **Plan:** `TASKS.md` Fruit of Fulfillment Campaign

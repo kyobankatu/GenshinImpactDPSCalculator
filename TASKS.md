@@ -14952,3 +14952,50 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Fruit of Fulfillment Campaign
+
+Status: Active. Add Fruit of Fulfillment with off-field reaction stacking and
+generation-safe inactivity decay.
+
+Scope:
+
+- Add Fruit of Fulfillment with sourced metadata, R1-R5 values, exact stack
+  gain/decay timing, stale-timer rejection, and focused regressions.
+
+Out of scope for this pass:
+
+- Hakushin reaction-element distribution, characters, formulas, RL, generated
+  docs, and unrelated catalysts.
+
+### Phase 1: Add Fruit of Fulfillment
+
+Target files:
+
+- `src/java/model/weapon/FruitOfFulfillment.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Any non-NONE owner reaction, including off-field reactions, gains at most one
+  Wax and Wane stack per 0.3 seconds, up to five; each stack grants 24-36 EM and
+  removes exactly 5% ATK.
+- Every owner reaction resets inactivity timing; after six seconds without one,
+  exactly one stack is lost every six seconds until zero, with stale decay
+  events unable to mutate refreshed state.
+- Metadata, source/NONE gates, exact 0.3/6-second boundaries, cap/floor,
+  R1-R5 defaults/validation, and binding are explicit.
+
+Test cases to add or update:
+
+- Normal: metadata, off-field five-stack R5 EM/ATK, R1.
+- Boundary: exact 0.3 seconds, exact repeated six-second decay, cap/floor,
+  reaction refresh invalidating stale timer.
+- Abnormal: NONE/foreign reaction, cross-simulator reuse, refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
