@@ -13296,8 +13296,8 @@ Verification:
 
 ## Implementation Order: Hit-Stack Weapon Campaign
 
-Status: Active. Add three positive-hit stacking weapons through one typed,
-cooldown-aware, shared-duration stack policy.
+Status: Complete. Three positive-hit stacking weapons now use one verified
+typed, cooldown-aware, shared-duration stack policy.
 
 Scope:
 
@@ -13311,7 +13311,7 @@ Out of scope for this pass:
 - Projectile travel, hitlag/ping variation, new action dispatch or formulas,
   characters, RL, and generated docs.
 
-### Phase 1: Add Hit-Stack Weapons
+### Phase 1: Add Hit-Stack Weapons - Done
 
 Target files:
 
@@ -13323,9 +13323,18 @@ Target files:
 
 | Unit | Hit stack | Focused verification | Status |
 |---|---|---|---|
-| Shared base + Ballad | Normal/Charged, 0.3s CT, 3 stacks/6s | dual unequal bonuses, cap/refresh/expiry, R1/R5 | Pending |
-| Compound Bow | Normal/Charged, 0.3s CT, 4 stacks/6s | ATK/Normal SPD, metadata, exclusions | Pending |
-| Ibis Piercer | Charged, 0.5s CT, 2 stacks/6s | EM, Normal exclusion, metadata | Pending |
+| Shared base + Ballad | Normal/Charged, 0.3s CT, 3 stacks/6s | dual unequal bonuses, cap/refresh/expiry, R1/R5 | Done (`10c88a6`) |
+| Compound Bow | Normal/Charged, 0.3s CT, 4 stacks/6s | ATK/Normal SPD, metadata, exclusions | Done (`f0de472`) |
+| Ibis Piercer | Charged, 0.5s CT, 2 stacks/6s | EM, Normal exclusion, metadata | Done (`0185589`) |
+
+Completion evidence:
+
+- Ballad proves just-before/exact 0.3-second CT, unequal dual bonuses, three
+  stacks, cap refresh, exact expiry, and off-field persistence.
+- Compound Bow proves four ATK/Normal-SPD stacks; Ibis proves Charged-only two
+  EM stacks and exact 0.5-second CT while unrelated/zero hits stay inert.
+- Every unit passes reaction regression, build, and preflight; shared/final
+  public APIs pass Javadoc with no generated artifact staged.
 
 Acceptance criteria:
 

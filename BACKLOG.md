@@ -2187,10 +2187,12 @@ experiment record.
 
 ### B-085 — Hit-stack weapon coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Ballad of the Boundless Blue, Compound Bow, and Ibis Piercer; RL excluded
 - **Value/risk:** three full passives share existing typed direct-hit dispatch
   and a bounded deterministic stack state
 - **Evidence boundary:** KQM TCL metadata, R1-R5 values, action gates, 0.3/0.5s
   CTs, stack caps, six-second duration, and off-field stack persistence
 - **Plan:** `TASKS.md` Hit-Stack Weapon Campaign
+- **Completion:** `10c88a6`, `f0de472`, and `0185589` add the shared hit stack
+  policy and all variants; focused/build/Javadoc/leak gates pass
