@@ -1,30 +1,19 @@
 package model.weapon;
 
-import java.util.Objects;
 import java.util.function.DoubleSupplier;
 
-import model.entity.DamageTriggeredWeaponEffect;
-import model.entity.Weapon;
-import model.entity.Character;
-import model.stats.StatsContainer;
-import model.type.StatType;
-import simulation.action.AttackAction;
-import mechanics.energy.EnergyManager;
-import mechanics.energy.ParticleType;
 import model.type.WeaponType;
 
 /**
  * Favonius Codex catalyst with a CRIT-triggered particle generation passive.
  */
-public class FavoniusCodex extends Weapon implements DamageTriggeredWeaponEffect {
-    private final DoubleSupplier procDraw;
-    private double lastProcTime = -10.0;
+public class FavoniusCodex extends FavoniusWeapon {
 
     /**
      * Constructs Favonius Codex with Lv 90 base stats and stochastic proc draws.
      */
     public FavoniusCodex() {
-        this(Math::random);
+        this(5, Math::random);
     }
 
     /**
@@ -35,63 +24,25 @@ public class FavoniusCodex extends Weapon implements DamageTriggeredWeaponEffect
      * @throws NullPointerException if {@code procDraw} is null
      */
     public FavoniusCodex(DoubleSupplier procDraw) {
-        super("Favonius Codex", new StatsContainer());
-        this.procDraw = Objects.requireNonNull(procDraw, "procDraw");
-        StatsContainer s = this.getStats();
-        s.add(StatType.BASE_ATK, 510);
-        s.add(StatType.ENERGY_RECHARGE, 0.459); // 45.9%
-        this.weaponType = WeaponType.CATALYST;
+        this(5, procDraw);
     }
 
     /**
-     * Attempts to trigger Windfall on a damage event and generate neutral
-     * particles when the proc succeeds.
+     * Constructs Favonius Codex at a selected refinement with stochastic draws.
      *
-     * @param user the character who dealt the damage
-     * @param action the triggering attack action
-     * @param currentTime simulation time in seconds at the damage event
-     * @param sim the active combat simulator
+     * @param refinement refinement rank in the inclusive range 1-5
      */
-    @Override
-    public void onDamage(Character user, AttackAction action, double currentTime, simulation.CombatSimulator sim) {
-        // Windfall Passive: R5
-        // CRIT Hits have 100% chance to gen particle. CD 6s.
+    public FavoniusCodex(int refinement) {
+        this(refinement, Math::random);
+    }
 
-        if (currentTime - lastProcTime < 6.0) {
-            return;
-        }
-
-        // Check Crit
-        // Since simulation is average-based, we approximate "CRIT Hit" as event
-        // occurring with P = CritRate.
-        // For accurate energy simulation over time, we roll for it.
-        double cr = user.getEffectiveStats(currentTime).get(StatType.CRIT_RATE);
-
-        // Clamp CR
-        if (cr > 1.0) {
-            cr = 1.0;
-        }
-        if (cr < 0.0) {
-            cr = 0.0;
-        }
-
-        if (procDraw.getAsDouble() < cr) {
-            // Trigger
-            System.out.println(
-                    String.format("   [Favonius] Windfall Triggered by %s (CR: %.1f%%)", user.getName(), cr * 100));
-            // Generate 3 Neutral Particles (Standard Favonius)
-            // Text says "6 Energy for the character".
-            // If we use standard particles: 3 Neutral * 2 Energy = 6 Energy (Base).
-            // But Particles are affected by ER.
-            // Description "regenerate 6 Energy for the character" implies flat energy?
-            // "Generate a small amount of Elemental Particles, which will regenerate 6
-            // Energy..."
-            // Usually this means it generates particles. And particles regenerate energy.
-            // In-game: It generates 3 Clear Orbs/Particles.
-            // We use standard particle distribution.
-            sim.getEnergyDistributor().distributeParticles(model.type.Element.PHYSICAL, 3.0, ParticleType.PARTICLE);
-
-            lastProcTime = currentTime;
-        }
+    /**
+     * Constructs Favonius Codex with selected refinement and draw source.
+     *
+     * @param refinement refinement rank in the inclusive range 1-5
+     * @param procDraw source used for joint CRIT and Windfall proc sampling
+     */
+    public FavoniusCodex(int refinement, DoubleSupplier procDraw) {
+        super("Favonius Codex", WeaponType.CATALYST, 510.0, 0.459, refinement, procDraw);
     }
 }

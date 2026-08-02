@@ -3849,6 +3849,22 @@ public class ReactionRegressionTest {
         }
         assertTrue(nullRejected, "Favonius Codex should reject a null proc draw source");
 
+        boolean lowRefinementRejected = false;
+        try {
+            new model.weapon.FavoniusCodex(0);
+        } catch (IllegalArgumentException expected) {
+            lowRefinementRejected = true;
+        }
+        assertTrue(lowRefinementRejected, "Favonius should reject refinement zero");
+
+        boolean highRefinementRejected = false;
+        try {
+            new model.weapon.FavoniusCodex(6);
+        } catch (IllegalArgumentException expected) {
+            highRefinementRejected = true;
+        }
+        assertTrue(highRefinementRejected, "Favonius should reject refinement six");
+
         double[] draws = { 0.5, 0.499999, 0.0 };
         int[] drawIndex = { 0 };
         model.weapon.FavoniusCodex weapon = new model.weapon.FavoniusCodex(
@@ -3887,6 +3903,29 @@ public class ReactionRegressionTest {
         assertEquals(2, replayDrawIndex[0], "Identical Favonius sequences should consume equal draws");
         assertClose(energyAfterFirstProc, replayOwner.getCurrentEnergy(), EPS,
                 "Identical Favonius sequences should generate equal energy");
+
+        double[] r1Draws = { 0.6, 0.599999, 0.0 };
+        int[] r1DrawIndex = { 0 };
+        model.weapon.FavoniusCodex r1Weapon = new model.weapon.FavoniusCodex(
+                1, () -> r1Draws[r1DrawIndex[0]++]);
+        TestCharacter r1Owner = testCharacter(Element.HYDRO).withStat(StatType.CRIT_RATE, 1.0);
+        r1Owner.setWeapon(r1Weapon);
+        CombatSimulator r1Sim = simulatorWith(r1Owner);
+        r1Owner.restoreCurrentEnergy(0.0);
+
+        r1Weapon.onDamage(r1Owner, hit, 0.0, r1Sim);
+        assertEquals(1, r1DrawIndex[0], "An R1 draw equal to 60% should not trigger Windfall");
+        assertClose(0.0, r1Owner.getCurrentEnergy(), EPS,
+                "A failed R1 Windfall draw should not generate particles");
+        captureStandardOutput(() -> r1Weapon.onDamage(r1Owner, hit, 0.0, r1Sim));
+        double r1Energy = r1Owner.getCurrentEnergy();
+        assertTrue(r1Energy > 0.0, "An R1 draw below 60% should generate neutral particles");
+        r1Weapon.onDamage(r1Owner, hit, 11.999, r1Sim);
+        assertEquals(2, r1DrawIndex[0], "R1 Windfall should not draw before twelve seconds");
+        captureStandardOutput(() -> r1Weapon.onDamage(r1Owner, hit, 12.0, r1Sim));
+        assertEquals(3, r1DrawIndex[0], "R1 Windfall should draw at exactly twelve seconds");
+        assertTrue(r1Owner.getCurrentEnergy() > r1Energy,
+                "R1 Windfall should generate particles again at its exact cooldown boundary");
     }
 
     private static void testAccuracyPhaseF_SacrificialSwordProcBoundaries() {
