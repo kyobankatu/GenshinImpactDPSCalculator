@@ -2511,3 +2511,13 @@ experiment record.
 - **Plan:** `TASKS.md` Live Party Five-Star Weapon Campaign
 - **Completion:** `35c25d2` adds both live-party passives and focused
   regressions; build/Javadoc/leak gates pass
+
+### B-112 — Moonsign EM and Bloom weapon coverage
+
+- **Status:** active
+- **Scope:** Snare Hook and Blackmarrow Lantern; RL excluded
+- **Value/risk:** two complete passives reuse verified Moonsign reaction-window
+  and live-state contracts without shared runtime changes
+- **Evidence boundary:** KQM TCL metadata, R1-R5 EM/Bloom/Lunar-Bloom values,
+  off-field reactions, exact 12-second window, live Ascendant doubling
+- **Plan:** `TASKS.md` Moonsign EM and Bloom Weapon Campaign

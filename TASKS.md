@@ -14848,3 +14848,47 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Moonsign EM and Bloom Weapon Campaign
+
+Status: Active. Add two complete Moonsign weapons through the verified reaction
+window and live Moonsign stat contracts.
+
+Scope:
+
+- Add Snare Hook and Blackmarrow Lantern with sourced metadata, R1-R5 values,
+  exact reaction timing, live Ascendant bonuses, and focused regressions.
+
+Out of scope for this pass:
+
+- Characters, formulas, RL, generated docs, and unrelated Moonsign equipment.
+
+### Phase 1: Add Snare Hook and Blackmarrow Lantern
+
+Target files:
+
+- `src/java/model/weapon/SnareHook.java` (new)
+- `src/java/model/weapon/BlackmarrowLantern.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Snare Hook owner reactions, including off-field reactions, open a half-open
+  12-second 60-120 EM window; live Ascendant Gleam doubles it to 120-240 EM.
+- Blackmarrow Lantern always grants 48-96% Bloom and 12-24% Lunar-Bloom DMG;
+  live Ascendant Gleam adds another 12-24% Lunar-Bloom DMG.
+- Metadata, NONE/foreign reaction gates, exact expiry, live Moonsign changes,
+  R1-R5 defaults/validation, and owner/simulator binding are explicit.
+
+Test cases to add or update:
+
+- Normal: metadata, off-field reaction window, Bloom/Lunar values, R5.
+- Boundary: exact 12 seconds, live Nascent/Ascendant changes, R1.
+- Abnormal: NONE/foreign reactions, cross-simulator reuse, refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
