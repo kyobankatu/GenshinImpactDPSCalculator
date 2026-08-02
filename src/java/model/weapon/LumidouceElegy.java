@@ -2,7 +2,6 @@ package model.weapon;
 
 import mechanics.reaction.ReactionResult;
 import model.entity.Character;
-import model.entity.DamageTriggeredWeaponEffect;
 import model.entity.ElementalReactionTriggeredWeaponEffect;
 import model.entity.SimulatorInitializedWeaponEffect;
 import model.entity.SnapshotAwareWeaponEffect;
@@ -12,18 +11,18 @@ import model.type.Element;
 import model.type.StatType;
 import model.type.WeaponType;
 import simulation.CombatSimulator;
+import simulation.DamageListener;
 import simulation.action.AttackAction;
 
 /** Lumidouce Elegy with shared Burning stacks and Energy cooldown state. */
 public final class LumidouceElegy extends Weapon
-        implements DamageTriggeredWeaponEffect,
+        implements DamageListener,
         ElementalReactionTriggeredWeaponEffect,
         SimulatorInitializedWeaponEffect,
         SnapshotAwareWeaponEffect {
     private static final int MAX_STACKS = 2;
     private static final double STACK_DURATION = 8.0;
     private static final double ENERGY_COOLDOWN = 12.0;
-    private static final double EPSILON = 1e-9;
 
     private final int refinement;
     private final double attackBonus;
@@ -35,7 +34,8 @@ public final class LumidouceElegy extends Weapon
     private int stackCount;
     private double stacksExpireAt = Double.NEGATIVE_INFINITY;
     private double nextEnergyTime = Double.NEGATIVE_INFINITY;
-    private double lastStackTime = Double.NEGATIVE_INFINITY;
+    private boolean pendingReactionHit;
+    private double pendingReactionHitTime = Double.NEGATIVE_INFINITY;
 
     /** Constructs Lumidouce Elegy at refinement rank five. */
     public LumidouceElegy() {
@@ -99,6 +99,7 @@ public final class LumidouceElegy extends Weapon
         owner = equippedOwner;
         simulator = sim;
         sim.addElementalReactionTriggeredWeaponEffect(this);
+        sim.addDamageListener(this);
     }
 
     /** Applies the permanent ATK bonus and active all-damage stacks. */
@@ -112,16 +113,22 @@ public final class LumidouceElegy extends Weapon
     /** Gains a stack from an owner Dendro hit against an active Burning target. */
     @Override
     public void onDamage(
-            Character user,
+            Character actor,
             AttackAction action,
-            double currentTime,
-            CombatSimulator sim) {
-        if (!isBoundCallback(user, sim)
-                || action == null
-                || !action.isHitEffectTrigger()
-                || action.getDamagePercent() <= 0.0
+            double damage,
+            double currentTime) {
+        if (!isBoundActor(actor)
+                || action == null) {
+            return;
+        }
+        boolean duplicateReactionHit = pendingReactionHit
+                && currentTime == pendingReactionHitTime;
+        pendingReactionHit = false;
+        if (!action.isHitEffectTrigger()
+                || damage <= 0.0
                 || action.getElement() != Element.DENDRO
-                || !sim.isBurningActive()) {
+                || !simulator.isBurningActive()
+                || duplicateReactionHit) {
             return;
         }
         gainStack(currentTime);
@@ -140,6 +147,8 @@ public final class LumidouceElegy extends Weapon
             return;
         }
         gainStack(time);
+        pendingReactionHit = true;
+        pendingReactionHitTime = time;
     }
 
     /** Captures stacks, expiry, Energy ICD, and same-hit de-duplication state. */
@@ -150,7 +159,8 @@ public final class LumidouceElegy extends Weapon
                 stackCount,
                 stacksExpireAt,
                 nextEnergyTime,
-                lastStackTime);
+                pendingReactionHit,
+                pendingReactionHitTime);
     }
 
     /** Restores only state captured from this exact weapon instance. */
@@ -168,35 +178,38 @@ public final class LumidouceElegy extends Weapon
         stackCount = elegyState.stackCount;
         stacksExpireAt = elegyState.stacksExpireAt;
         nextEnergyTime = elegyState.nextEnergyTime;
-        lastStackTime = elegyState.lastStackTime;
+        pendingReactionHit = elegyState.pendingReactionHit;
+        pendingReactionHitTime = elegyState.pendingReactionHitTime;
     }
 
     private void gainStack(double currentTime) {
-        if (Math.abs(currentTime - lastStackTime) <= EPSILON) {
-            return;
-        }
         expireStacksAt(currentTime);
         if (stackCount < MAX_STACKS) {
             stackCount++;
         }
         stacksExpireAt = currentTime + STACK_DURATION;
-        lastStackTime = currentTime;
         if (stackCount == MAX_STACKS
-                && currentTime + EPSILON >= nextEnergyTime) {
+                && currentTime >= nextEnergyTime) {
             owner.receiveFlatEnergy(energyRecovery);
             nextEnergyTime = currentTime + ENERGY_COOLDOWN;
         }
     }
 
     private void expireStacksAt(double currentTime) {
-        if (stackCount > 0 && currentTime + EPSILON >= stacksExpireAt) {
+        if (stackCount > 0 && currentTime >= stacksExpireAt) {
             stackCount = 0;
             stacksExpireAt = Double.NEGATIVE_INFINITY;
         }
     }
 
     private boolean isBoundCallback(Character user, CombatSimulator sim) {
-        return simulator != null && user == owner && sim == simulator;
+        return isBoundActor(user) && sim == simulator;
+    }
+
+    private boolean isBoundActor(Character actor) {
+        return simulator != null
+                && actor == owner
+                && owner.getWeapon() == this;
     }
 
     private void validateBinding(Character equippedOwner, CombatSimulator sim) {
@@ -223,19 +236,22 @@ public final class LumidouceElegy extends Weapon
         private final int stackCount;
         private final double stacksExpireAt;
         private final double nextEnergyTime;
-        private final double lastStackTime;
+        private final boolean pendingReactionHit;
+        private final double pendingReactionHitTime;
 
         private ElegyState(
                 LumidouceElegy source,
                 int stackCount,
                 double stacksExpireAt,
                 double nextEnergyTime,
-                double lastStackTime) {
+                boolean pendingReactionHit,
+                double pendingReactionHitTime) {
             this.source = source;
             this.stackCount = stackCount;
             this.stacksExpireAt = stacksExpireAt;
             this.nextEnergyTime = nextEnergyTime;
-            this.lastStackTime = lastStackTime;
+            this.pendingReactionHit = pendingReactionHit;
+            this.pendingReactionHitTime = pendingReactionHitTime;
         }
     }
 }

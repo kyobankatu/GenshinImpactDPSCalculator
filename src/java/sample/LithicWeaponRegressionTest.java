@@ -107,6 +107,16 @@ public final class LithicWeaponRegressionTest {
         StatefulWeaponRegressionSupport.assertEquals(
                 1, first.getLiyueMemberCount(),
                 "UNKNOWN region does not create a Lithic stack");
+        StatsContainer firstStats =
+                StatefulWeaponRegressionSupport.stats(firstOwner, firstSim);
+        StatefulWeaponRegressionSupport.assertClose(
+                0.276 + 0.11,
+                firstStats.get(StatType.ATK_PERCENT),
+                "Lithic Spear R5 one-stack ATK");
+        StatefulWeaponRegressionSupport.assertClose(
+                0.07,
+                firstStats.get(StatType.CRIT_RATE),
+                "Lithic Spear R5 one-stack CRIT Rate");
 
         LithicSpear second = new LithicSpear(5);
         StatefulWeaponRegressionSupport.TestCharacter secondOwner =

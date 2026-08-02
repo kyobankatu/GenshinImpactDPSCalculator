@@ -97,9 +97,27 @@ public final class LumidouceElegyRegressionTest {
                         .get(StatType.ATK_PERCENT),
                 "Lumidouce permanent ATK bonus");
 
+        owner.getBaseStats().set(StatType.FLAT_DMG_BONUS, 100.0);
+        AttackAction zeroMotion = new AttackAction(
+                "Lumidouce same-time zero-motion hit",
+                0.0,
+                Element.DENDRO,
+                StatType.BASE_ATK,
+                StatType.DENDRO_DMG_BONUS,
+                0.0,
+                ActionType.SKILL);
+        zeroMotion.setHitEffectTrigger(true);
+        sim.performActionWithoutTimeAdvance(owner.getCharacterId(), zeroMotion);
+        StatefulWeaponRegressionSupport.assertEquals(
+                2, weapon.getStackCount(sim.getCurrentTime()),
+                "Lumidouce counts a distinct same-time additive-damage hit");
+        StatefulWeaponRegressionSupport.assertClose(
+                12.0, owner.getCurrentEnergy(),
+                "Lumidouce zero-motion additive hit reaches Energy threshold");
+
         sim.notifyDerivedReaction(BURNING, owner);
         StatefulWeaponRegressionSupport.assertEquals(
-                1, weapon.getStackCount(sim.getCurrentTime()),
+                2, weapon.getStackCount(sim.getCurrentTime()),
                 "Lumidouce ignores derived Burning notifications");
     }
 
@@ -112,9 +130,9 @@ public final class LumidouceElegyRegressionTest {
         sim.startBurning(owner.getCharacterId(), 1000.0, 20.0, 0.1);
         AttackAction dendro = hit("Lumidouce Dendro", Element.DENDRO);
 
-        weapon.onDamage(owner, dendro, sim.getCurrentTime(), sim);
+        weapon.onDamage(owner, dendro, 100.0, sim.getCurrentTime());
         sim.advanceTime(1.0);
-        weapon.onDamage(owner, dendro, sim.getCurrentTime(), sim);
+        weapon.onDamage(owner, dendro, 100.0, sim.getCurrentTime());
         StatefulWeaponRegressionSupport.assertEquals(
                 2, weapon.getStackCount(sim.getCurrentTime()),
                 "Lumidouce Dendro hits reach stack cap");
@@ -124,7 +142,7 @@ public final class LumidouceElegyRegressionTest {
 
         owner.spendEnergy(owner.getCurrentEnergy());
         sim.advanceTime(1.0);
-        weapon.onDamage(owner, dendro, sim.getCurrentTime(), sim);
+        weapon.onDamage(owner, dendro, 100.0, sim.getCurrentTime());
         StatefulWeaponRegressionSupport.assertClose(
                 0.0, owner.getCurrentEnergy(),
                 "Lumidouce Energy ICD blocks a two-stack refresh");
@@ -135,12 +153,12 @@ public final class LumidouceElegyRegressionTest {
                 "Lumidouce shared stack duration is half-open before expiry");
         sim.advanceTime(0.001);
         StatefulWeaponRegressionSupport.assertEquals(
-                0, weapon.getStackCount(sim.getCurrentTime()),
+                0, weapon.getStackCount(10.0),
                 "Lumidouce stacks expire at exactly eight seconds");
 
-        weapon.onDamage(owner, dendro, sim.getCurrentTime(), sim);
+        weapon.onDamage(owner, dendro, 100.0, sim.getCurrentTime());
         sim.advanceTime(3.0);
-        weapon.onDamage(owner, dendro, sim.getCurrentTime(), sim);
+        weapon.onDamage(owner, dendro, 100.0, 13.0);
         StatefulWeaponRegressionSupport.assertClose(
                 12.0, owner.getCurrentEnergy(),
                 "Lumidouce Energy ICD reopens at exactly twelve seconds");
@@ -156,18 +174,18 @@ public final class LumidouceElegyRegressionTest {
         sim.startBurning(active.getCharacterId(), 1000.0, 20.0, 0.1);
 
         AttackAction dendro = hit("Off-field Dendro", Element.DENDRO);
-        weapon.onDamage(owner, dendro, sim.getCurrentTime(), sim);
+        weapon.onDamage(owner, dendro, 100.0, sim.getCurrentTime());
         StatefulWeaponRegressionSupport.assertEquals(
                 1, weapon.getStackCount(sim.getCurrentTime()),
                 "Lumidouce can trigger while owner is off field");
 
         sim.advanceTime(1.0);
-        weapon.onDamage(active, dendro, sim.getCurrentTime(), sim);
+        weapon.onDamage(active, dendro, 100.0, sim.getCurrentTime());
         weapon.onDamage(owner, hit("Wrong element", Element.PYRO),
-                sim.getCurrentTime(), sim);
+                100.0, sim.getCurrentTime());
         AttackAction dummy = hit("Dummy Dendro", Element.DENDRO);
         dummy.setHitEffectTrigger(false);
-        weapon.onDamage(owner, dummy, sim.getCurrentTime(), sim);
+        weapon.onDamage(owner, dummy, 100.0, sim.getCurrentTime());
         AttackAction zero = new AttackAction(
                 "Zero Dendro",
                 0.0,
@@ -177,11 +195,10 @@ public final class LumidouceElegyRegressionTest {
                 0.0,
                 ActionType.SKILL);
         zero.setHitEffectTrigger(true);
-        weapon.onDamage(owner, zero, sim.getCurrentTime(), sim);
+        weapon.onDamage(owner, zero, 0.0, sim.getCurrentTime());
         weapon.onElementalReaction(
                 ReactionResult.none(), owner, sim.getCurrentTime(), sim);
         weapon.onElementalReaction(BURNING, active, sim.getCurrentTime(), sim);
-        weapon.onDamage(owner, dendro, sim.getCurrentTime(), new CombatSimulator());
         StatefulWeaponRegressionSupport.assertEquals(
                 1, weapon.getStackCount(sim.getCurrentTime()),
                 "Lumidouce rejects unrelated and foreign callbacks");
@@ -193,6 +210,7 @@ public final class LumidouceElegyRegressionTest {
                 CharacterId.XIANGLING, Element.DENDRO, weapon);
         CombatSimulator sim = simulatorWith(owner);
         owner.spendEnergy(owner.getMaxEnergy());
+        sim.startBurning(owner.getCharacterId(), 1000.0, 20.0, 0.1);
         sim.notifyReaction(BURNING, owner);
         sim.advanceTime(1.0);
         sim.notifyReaction(BURNING, owner);
@@ -210,6 +228,25 @@ public final class LumidouceElegyRegressionTest {
         StatefulWeaponRegressionSupport.assertClose(
                 12.0, owner.getCurrentEnergy(),
                 "Lumidouce rollback restores Energy");
+
+        owner.spendEnergy(owner.getCurrentEnergy());
+        AttackAction dendro = hit("Restored pending Dendro", Element.DENDRO);
+        weapon.onDamage(owner, dendro, 100.0, sim.getCurrentTime());
+        StatefulWeaponRegressionSupport.assertEquals(
+                2, weapon.getStackCount(sim.getCurrentTime()),
+                "Lumidouce rollback restores same-hit reservation");
+        StatefulWeaponRegressionSupport.assertClose(
+                0.0, owner.getCurrentEnergy(),
+                "Lumidouce restored same-hit reservation suppresses duplicate Energy");
+        sim.advanceTime(11.999);
+        weapon.onDamage(owner, dendro, 100.0, 12.999);
+        StatefulWeaponRegressionSupport.assertClose(
+                0.0, owner.getCurrentEnergy(),
+                "Lumidouce rollback restores Energy ICD before boundary");
+        weapon.onDamage(owner, dendro, 100.0, 13.0);
+        StatefulWeaponRegressionSupport.assertClose(
+                12.0, owner.getCurrentEnergy(),
+                "Lumidouce restored Energy ICD opens at exact boundary");
 
         SnapshotAwareWeaponEffect.State state = weapon.captureWeaponState();
         StatefulWeaponRegressionSupport.assertThrows(

@@ -100,6 +100,24 @@ public final class ChainBreakerRegressionTest {
                 24.0, stats.get(StatType.ELEMENTAL_MASTERY),
                 "Chain Breaker three-member EM threshold");
 
+        ChainBreaker r5Weapon = new ChainBreaker(5);
+        TestCharacter r5Owner = character(
+                CharacterId.BENNETT, Element.PYRO, r5Weapon);
+        CombatSimulator r5Sim = simulatorWith(
+                r5Owner,
+                character(CharacterId.GANYU, Element.CRYO, null),
+                character(CharacterId.KEQING, Element.ELECTRO, null),
+                character(CharacterId.XINGQIU, Element.HYDRO, null));
+        StatsContainer r5Stats =
+                r5Owner.getEffectiveStats(r5Sim.getCurrentTime());
+        StatefulWeaponRegressionSupport.assertClose(
+                0.276 + 3.0 * 0.096,
+                r5Stats.get(StatType.ATK_PERCENT),
+                "Chain Breaker R5 three-member ATK");
+        StatefulWeaponRegressionSupport.assertClose(
+                48.0, r5Stats.get(StatType.ELEMENTAL_MASTERY),
+                "Chain Breaker R5 three-member EM");
+
         sim.addCharacter(character(CharacterId.NINGGUANG, Element.GEO, null));
         sim.addCharacter(character(CharacterId.ROSARIA, Element.CRYO, null));
         StatefulWeaponRegressionSupport.assertEquals(

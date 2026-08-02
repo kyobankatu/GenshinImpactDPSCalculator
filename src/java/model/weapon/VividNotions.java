@@ -5,7 +5,6 @@ import java.util.List;
 
 import model.entity.ActionTriggeredWeaponEffect;
 import model.entity.Character;
-import model.entity.DamageTriggeredWeaponEffect;
 import model.entity.SimulatorInitializedWeaponEffect;
 import model.entity.SnapshotAwareWeaponEffect;
 import model.entity.Weapon;
@@ -14,6 +13,7 @@ import model.type.ActionType;
 import model.type.StatType;
 import model.type.WeaponType;
 import simulation.CombatSimulator;
+import simulation.DamageListener;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
@@ -22,7 +22,7 @@ import simulation.event.SimpleTimerEvent;
 /** Vivid Notions with independent Plunging CRIT DMG action windows. */
 public final class VividNotions extends Weapon
         implements ActionTriggeredWeaponEffect,
-        DamageTriggeredWeaponEffect,
+        DamageListener,
         SimulatorInitializedWeaponEffect,
         SnapshotAwareWeaponEffect {
     private static final double WINDOW_DURATION = 15.0;
@@ -98,6 +98,7 @@ public final class VividNotions extends Weapon
         }
         owner = equippedOwner;
         simulator = sim;
+        sim.addDamageListener(this);
     }
 
     /** Opens or refreshes the action-specific fifteen-second window. */
@@ -137,14 +138,14 @@ public final class VividNotions extends Weapon
     /** Schedules generation-safe cancellation after a positive owner Plunge hit. */
     @Override
     public void onDamage(
-            Character user,
+            Character actor,
             AttackAction action,
-            double currentTime,
-            CombatSimulator sim) {
-        if (!isBoundCallback(user, sim)
+            double damage,
+            double currentTime) {
+        if (!isBoundActor(actor)
                 || action == null
                 || !action.isHitEffectTrigger()
-                || action.getDamagePercent() <= 0.0
+                || damage <= 0.0
                 || action.getActionType() != ActionType.PLUNGE) {
             return;
         }
@@ -219,7 +220,13 @@ public final class VividNotions extends Weapon
     }
 
     private boolean isBoundCallback(Character user, CombatSimulator sim) {
-        return simulator != null && user == owner && sim == simulator;
+        return isBoundActor(user) && sim == simulator;
+    }
+
+    private boolean isBoundActor(Character actor) {
+        return simulator != null
+                && actor == owner
+                && owner.getWeapon() == this;
     }
 
     private void validateBinding(Character equippedOwner, CombatSimulator sim) {

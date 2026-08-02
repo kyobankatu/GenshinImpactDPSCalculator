@@ -117,7 +117,7 @@ public final class VividNotionsRegressionTest {
 
         use(weapon, owner, sim, CharacterActionKey.PLUNGE);
         use(weapon, owner, sim, CharacterActionKey.SKILL);
-        weapon.onDamage(owner, plunge, sim.getCurrentTime(), sim);
+        weapon.onDamage(owner, plunge, 100.0, sim.getCurrentTime());
         sim.advanceTime(0.099);
         StatefulWeaponRegressionSupport.assertClose(
                 0.68, plungeCritDamage(owner, sim),
@@ -129,7 +129,7 @@ public final class VividNotionsRegressionTest {
 
         use(weapon, owner, sim, CharacterActionKey.PLUNGE);
         use(weapon, owner, sim, CharacterActionKey.SKILL);
-        weapon.onDamage(owner, plunge, sim.getCurrentTime(), sim);
+        weapon.onDamage(owner, plunge, 100.0, sim.getCurrentTime());
         sim.advanceTime(0.05);
         use(weapon, owner, sim, CharacterActionKey.PLUNGE);
         use(weapon, owner, sim, CharacterActionKey.BURST);
@@ -137,7 +137,7 @@ public final class VividNotionsRegressionTest {
         StatefulWeaponRegressionSupport.assertClose(
                 0.68, plungeCritDamage(owner, sim),
                 "Vivid stale cancellation preserves refreshed generations");
-        weapon.onDamage(owner, plunge, sim.getCurrentTime(), sim);
+        weapon.onDamage(owner, plunge, 100.0, sim.getCurrentTime());
         sim.advanceTime(0.1);
         StatefulWeaponRegressionSupport.assertClose(
                 0.0, plungeCritDamage(owner, sim),
@@ -174,7 +174,7 @@ public final class VividNotionsRegressionTest {
         AttackAction dummy = StatefulWeaponRegressionSupport.hit(
                 "Vivid dummy", ActionType.PLUNGE);
         dummy.setHitEffectTrigger(false);
-        weapon.onDamage(owner, dummy, sim.getCurrentTime(), sim);
+        weapon.onDamage(owner, dummy, 100.0, sim.getCurrentTime());
         AttackAction zero = new AttackAction(
                 "Vivid zero",
                 0.0,
@@ -184,20 +184,24 @@ public final class VividNotionsRegressionTest {
                 0.0,
                 ActionType.PLUNGE);
         zero.setHitEffectTrigger(true);
-        weapon.onDamage(owner, zero, sim.getCurrentTime(), sim);
+        weapon.onDamage(owner, zero, 0.0, sim.getCurrentTime());
         weapon.onDamage(owner,
                 StatefulWeaponRegressionSupport.hit("Vivid Normal", ActionType.NORMAL),
-                sim.getCurrentTime(), sim);
+                100.0, sim.getCurrentTime());
         weapon.onDamage(other,
                 StatefulWeaponRegressionSupport.hit("Other Plunge", ActionType.PLUNGE),
-                sim.getCurrentTime(), sim);
-        weapon.onDamage(owner,
-                StatefulWeaponRegressionSupport.hit("Foreign Plunge", ActionType.PLUNGE),
-                sim.getCurrentTime(), new CombatSimulator());
+                100.0, sim.getCurrentTime());
         sim.advanceTime(0.1);
         StatefulWeaponRegressionSupport.assertClose(
                 0.28, plungeCritDamage(owner, sim),
-                "Vivid rejects dummy, zero, wrong-owner, and foreign hits");
+                "Vivid rejects dummy, zero-damage, and wrong-owner hits");
+
+        owner.getBaseStats().set(StatType.FLAT_DMG_BONUS, 100.0);
+        sim.performActionWithoutTimeAdvance(owner.getCharacterId(), zero);
+        sim.advanceTime(0.1);
+        StatefulWeaponRegressionSupport.assertClose(
+                0.0, plungeCritDamage(owner, sim),
+                "Vivid accepts positive zero-motion additive damage");
     }
 
     private static void testSnapshotRestoresPendingCancellation() {
@@ -209,7 +213,7 @@ public final class VividNotionsRegressionTest {
                 "Vivid snapshot Plunge", ActionType.PLUNGE);
         use(weapon, owner, sim, CharacterActionKey.PLUNGE);
         use(weapon, owner, sim, CharacterActionKey.SKILL);
-        weapon.onDamage(owner, plunge, sim.getCurrentTime(), sim);
+        weapon.onDamage(owner, plunge, 100.0, sim.getCurrentTime());
         sim.advanceTime(0.05);
         SimulatorSnapshot snapshot = sim.saveSnapshot();
 

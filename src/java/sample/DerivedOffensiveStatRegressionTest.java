@@ -27,6 +27,7 @@ public final class DerivedOffensiveStatRegressionTest {
         testFinalDefenseNormalAndChargedDamage();
         testFinalAttackNormalAndPlungingCritDamage();
         testActionExclusionAndSourceImmutability();
+        testNewDerivedStatsExcludeLunarDamage();
         System.out.println("DerivedOffensiveStatRegressionTest passed");
     }
 
@@ -115,6 +116,20 @@ public final class DerivedOffensiveStatRegressionTest {
                 "Normal excludes Plunging CRIT DMG");
     }
 
+    private static void testNewDerivedStatsExcludeLunarDamage() {
+        StatsContainer baseline = new StatsContainer();
+        baseline.set(StatType.BASE_ATK, 100.0);
+        baseline.set(StatType.CRIT_RATE, 1.0);
+        baseline.set(StatType.CRIT_DMG, 0.50);
+        StatsContainer derived = baseline.merge(null);
+        derived.set(StatType.NORMAL_ATTACK_ATK_FLAT_DMG_RATIO, 10.0);
+        derived.set(StatType.PLUNGING_ATTACK_CRIT_DMG, 10.0);
+        assertClose(
+                calculateLunar(baseline),
+                calculateLunar(derived),
+                "standard-only derived stats exclude Lunar damage");
+    }
+
     private static StatsContainer standardDamageStats() {
         StatsContainer stats = new StatsContainer();
         stats.set(StatType.BASE_ATK, 100.0);
@@ -143,6 +158,32 @@ public final class DerivedOffensiveStatRegressionTest {
                 null,
                 0.0,
                 actionType);
+        return DamageCalculator.calculateDamage(
+                attacker,
+                enemy,
+                action,
+                List.of(),
+                stats,
+                0.0,
+                1.0,
+                sim);
+    }
+
+    private static double calculateLunar(StatsContainer stats) {
+        TestCharacter attacker = new TestCharacter();
+        Enemy enemy = new Enemy(90);
+        CombatSimulator sim = new CombatSimulator();
+        sim.setLoggingEnabled(false);
+        sim.setEnemy(enemy);
+        AttackAction action = new AttackAction(
+                "Derived Lunar Isolation Test",
+                1.0,
+                Element.PHYSICAL,
+                StatType.BASE_ATK,
+                null,
+                0.0,
+                ActionType.NORMAL);
+        action.setLunarConsidered(true);
         return DamageCalculator.calculateDamage(
                 attacker,
                 enemy,
