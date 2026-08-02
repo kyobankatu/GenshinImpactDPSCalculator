@@ -6749,6 +6749,91 @@ public class ReactionRegressionTest {
         }
         assertTrue(highRefinementRejected,
                 "Prototype Archaic should reject refinement six");
+
+        double[] filletDraws = { 0.5, 0.0, 0.0 };
+        int[] filletDrawIndex = { 0 };
+        model.weapon.FilletBlade fillet = new model.weapon.FilletBlade(
+                () -> filletDraws[filletDrawIndex[0]++]);
+        assertEquals("Fillet Blade", fillet.getName(),
+                "Fillet Blade display name");
+        assertClose(401.0, fillet.getBaseAtk(), EPS, "Fillet Blade base ATK");
+        assertClose(0.352, fillet.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Fillet Blade ATK substat");
+        assertEquals(model.type.WeaponType.SWORD, fillet.getWeaponType(),
+                "Fillet Blade weapon type");
+        assertEquals(5, fillet.getRefinement(),
+                "Fillet Blade default refinement");
+
+        TestCharacter filletOwner = testCharacter(Element.PHYSICAL);
+        filletOwner.setWeapon(fillet);
+        CombatSimulator filletSim = simulatorWith(filletOwner);
+        AttackAction otherHit = typedDamageHit(
+                "Fillet Blade OTHER source", ActionType.OTHER, 1.0);
+        fillet.onDamage(filletOwner, zeroNormalHit, 0.0, filletSim);
+        assertEquals(0, filletDrawIndex[0],
+                "Zero-damage Fillet Blade hits should not consume draws");
+        fillet.onDamage(filletOwner, otherHit, 0.0, filletSim);
+        assertEquals(1, filletDrawIndex[0],
+                "Fillet Blade should sample on a positive OTHER hit");
+        assertClose(0.0, filletSim.getTotalDamage(), EPS,
+                "A 0.5 Fillet Blade draw should fail");
+        fillet.onDamage(filletOwner, skillHit, 0.1, filletSim);
+        assertEquals(2, filletDrawIndex[0],
+                "A failed Fillet Blade draw should not start cooldown");
+        double filletProcDamage = filletSim.getTotalDamage();
+        assertTrue(filletProcDamage > 0.0,
+                "A Skill hit should trigger Fillet Blade on a successful draw");
+        fillet.onDamage(filletOwner, normalHit, 11.099, filletSim);
+        assertEquals(2, filletDrawIndex[0],
+                "R5 Fillet Blade should not draw immediately before eleven seconds");
+        fillet.onDamage(filletOwner, chargeHit, 11.1, filletSim);
+        assertEquals(3, filletDrawIndex[0],
+                "R5 Fillet Blade should draw at exact cooldown");
+        assertClose(filletProcDamage * 2.0, filletSim.getTotalDamage(), EPS,
+                "Repeated R5 Fillet Blade procs should deal equal damage");
+
+        model.weapon.FilletBlade r1Fillet =
+                new model.weapon.FilletBlade(1, () -> 0.0);
+        TestCharacter r1FilletOwner = testCharacter(Element.PHYSICAL);
+        r1FilletOwner.setWeapon(r1Fillet);
+        CombatSimulator r1FilletSim = simulatorWith(r1FilletOwner);
+        r1Fillet.onDamage(r1FilletOwner, normalHit, 0.0, r1FilletSim);
+        double r1FilletDamage = r1FilletSim.getTotalDamage();
+        assertClose(filletProcDamage * 0.6, r1FilletDamage, EPS,
+                "R1 Fillet Blade should use 240% instead of 400% ATK");
+        r1Fillet.onDamage(r1FilletOwner, normalHit, 14.999, r1FilletSim);
+        assertClose(r1FilletDamage, r1FilletSim.getTotalDamage(), EPS,
+                "R1 Fillet Blade should remain on cooldown before fifteen seconds");
+        r1Fillet.onDamage(r1FilletOwner, normalHit, 15.0, r1FilletSim);
+        assertClose(r1FilletDamage * 2.0, r1FilletSim.getTotalDamage(), EPS,
+                "R1 Fillet Blade should proc at exact fifteen-second cooldown");
+
+        boolean nullFilletDrawRejected = false;
+        try {
+            new model.weapon.FilletBlade(null);
+        } catch (NullPointerException expected) {
+            nullFilletDrawRejected = true;
+        }
+        assertTrue(nullFilletDrawRejected,
+                "Fillet Blade should reject a null draw source");
+
+        boolean lowFilletRefinementRejected = false;
+        try {
+            new model.weapon.FilletBlade(0);
+        } catch (IllegalArgumentException expected) {
+            lowFilletRefinementRejected = true;
+        }
+        assertTrue(lowFilletRefinementRejected,
+                "Fillet Blade should reject refinement zero");
+
+        boolean highFilletRefinementRejected = false;
+        try {
+            new model.weapon.FilletBlade(6);
+        } catch (IllegalArgumentException expected) {
+            highFilletRefinementRejected = true;
+        }
+        assertTrue(highFilletRefinementRejected,
+                "Fillet Blade should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_ActionUseWindowWeapons() {
