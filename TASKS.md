@@ -13212,7 +13212,7 @@ Out of scope:
   stamina, enemy defeat, geometry, exploration, Witch's Homework, RL, and
   generated docs.
 
-### Phase 1: Static Boundary Artifact Batch
+### Phase 1: Static Boundary Artifact Batch - Done
 
 Target files:
 
@@ -13243,6 +13243,16 @@ Verification:
 - `./gradlew StaticArtifactRegressionTest`
 - `./gradlew ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Echoes of an Offering and Unfinished Reverie expose exact ATK +18%; Ocean-
+  Hued Clam and Song of Days Past expose exact Healing Bonus +15%.
+- Probability/ping, healing accumulation, combat departure, and Burning
+  proximity effects remain zero; fresh/supplied/null, isolation, and
+  arbitrary-time checks pass.
+- `./gradlew StaticArtifactRegressionTest ReactionRegressionTest build
+  javadoc` and `python scripts/preflight.py --run` passed on 2026-08-03.
 
 ### Phase 2: HP-Scaling Five-Star Weapons - Done
 

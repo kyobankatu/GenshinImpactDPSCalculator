@@ -10,12 +10,16 @@ import model.artifact.BloodstainedChivalry;
 import model.artifact.BraveHeart;
 import model.artifact.CelestialGift;
 import model.artifact.DefendersWill;
+import model.artifact.EchoesOfAnOffering;
 import model.artifact.FragmentOfHarmonicWhimsy;
 import model.artifact.Gambler;
 import model.artifact.LuckyDog;
 import model.artifact.MaidenBeloved;
 import model.artifact.MarechausseeHunter;
+import model.artifact.OceanHuedClam;
 import model.artifact.ResolutionOfSojourner;
+import model.artifact.SongOfDaysPast;
+import model.artifact.UnfinishedReverie;
 import model.artifact.VourukashasGlow;
 import model.entity.ArtifactSet;
 import model.entity.Character;
@@ -42,6 +46,7 @@ public class StaticArtifactRegressionTest {
         testStaticCombatBoundarySets();
         testActionCategorySets();
         testStaticElementalAndSupportSets();
+        testStaticRuntimeBoundarySets();
         testNullStats();
         System.out.println("StaticArtifactRegressionTest passed");
     }
@@ -325,6 +330,65 @@ public class StaticArtifactRegressionTest {
                 "Archaic Petra positive-time stability");
     }
 
+    /** Verifies exact fixed stats for probability, healing, and proximity boundaries. */
+    private static void testStaticRuntimeBoundarySets() {
+        EchoesOfAnOffering echoes = new EchoesOfAnOffering();
+        assertEquals("Echoes of an Offering", echoes.getName(),
+                "Echoes name");
+        assertClose(0.18, echoes.getStats().get(StatType.ATK_PERCENT),
+                "Echoes ATK");
+        assertClose(0.0, echoes.getStats().get(StatType.FLAT_DMG_BONUS),
+                "Echoes should not fabricate Valley Rite expected damage");
+        assertClose(0.0,
+                echoes.getStats().get(StatType.NORMAL_ATTACK_DMG_BONUS),
+                "Echoes should not replace Valley Rite with Normal DMG");
+
+        OceanHuedClam clam = new OceanHuedClam();
+        assertEquals("Ocean-Hued Clam", clam.getName(), "Clam name");
+        assertClose(0.15, clam.getStats().get(StatType.HEALING_BONUS),
+                "Clam Healing Bonus");
+        assertClose(0.0, clam.getStats().get(StatType.FLAT_DMG_BONUS),
+                "Clam should not fabricate healing-derived damage");
+
+        SongOfDaysPast song = new SongOfDaysPast();
+        assertEquals("Song of Days Past", song.getName(), "Song name");
+        assertClose(0.15, song.getStats().get(StatType.HEALING_BONUS),
+                "Song Healing Bonus");
+        assertClose(0.0, song.getStats().get(StatType.FLAT_DMG_BONUS),
+                "Song should not fabricate Yearning damage");
+
+        UnfinishedReverie reverie = new UnfinishedReverie();
+        assertEquals("Unfinished Reverie", reverie.getName(),
+                "Unfinished Reverie name");
+        assertClose(0.18, reverie.getStats().get(StatType.ATK_PERCENT),
+                "Unfinished Reverie ATK");
+        assertClose(0.0, reverie.getStats().get(StatType.DMG_BONUS_ALL),
+                "Unfinished Reverie should not fabricate proximity damage");
+
+        StatsContainer supplied = suppliedStats();
+        EchoesOfAnOffering preserved = new EchoesOfAnOffering(supplied);
+        assertTrue(preserved.getStats() == supplied,
+                "Echoes should retain the supplied container");
+        assertClose(7.0, supplied.get(StatType.ELEMENTAL_MASTERY),
+                "Boundary set supplied stat preservation");
+        assertClose(0.18, supplied.get(StatType.ATK_PERCENT),
+                "Echoes supplied ATK");
+
+        EchoesOfAnOffering independent = new EchoesOfAnOffering();
+        echoes.getStats().add(StatType.ATK_PERCENT, 1.0);
+        assertClose(0.18, independent.getStats().get(StatType.ATK_PERCENT),
+                "Static boundary instances should be independent");
+
+        CombatSimulator sim = simulatorWith(reverie);
+        Character owner = sim.getCharacter(CharacterId.SUCROSE);
+        assertClose(0.18,
+                owner.getEffectiveStats(-100.0).get(StatType.ATK_PERCENT),
+                "Unfinished Reverie negative-time stability");
+        assertClose(0.18,
+                owner.getEffectiveStats(10000.0).get(StatType.ATK_PERCENT),
+                "Unfinished Reverie positive-time stability");
+    }
+
     /** Verifies all supplied-stat constructors reject null explicitly. */
     private static void testNullStats() {
         assertNullRejected(() -> new Adventurer(null), "Adventurer null stats");
@@ -359,6 +423,18 @@ public class StaticArtifactRegressionTest {
         assertNullRejected(
                 () -> new MaidenBeloved(null),
                 "Maiden null stats");
+        assertNullRejected(
+                () -> new EchoesOfAnOffering(null),
+                "Echoes null stats");
+        assertNullRejected(
+                () -> new OceanHuedClam(null),
+                "Ocean-Hued Clam null stats");
+        assertNullRejected(
+                () -> new SongOfDaysPast(null),
+                "Song of Days Past null stats");
+        assertNullRejected(
+                () -> new UnfinishedReverie(null),
+                "Unfinished Reverie null stats");
     }
 
     /** Creates a simulator containing one deterministic artifact wearer. */
