@@ -165,6 +165,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_HuskCuriosityState();
         testAccuracyPhaseF_ScholarPartyEnergySet();
         testAccuracyPhaseF_BennettAndXianglingPassiveAccuracy();
+        testAccuracyPhaseF_XingqiuConstellationOrdering();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -12515,6 +12516,240 @@ public class ReactionRegressionTest {
                 "Xiangling C0 should never schedule C2 Implode");
     }
 
+    private static void testAccuracyPhaseF_XingqiuConstellationOrdering() {
+        model.character.Xingqiu c0Pattern = new model.character.Xingqiu(
+                new TestWeapon(), blankArtifact(), xingqiuTalentData(0));
+        model.character.Xingqiu c5Pattern = new model.character.Xingqiu(
+                new TestWeapon(), blankArtifact(), xingqiuTalentData(5));
+        model.character.Xingqiu c6Pattern = new model.character.Xingqiu(
+                new TestWeapon(), blankArtifact(), xingqiuTalentData(6));
+        assertEquals(2, c0Pattern.getRaincutterAttack(0).size(),
+                "Xingqiu C0 first wave should contain two swords");
+        assertEquals(3, c0Pattern.getRaincutterAttack(1).size(),
+                "Xingqiu C0 second wave should contain three swords");
+        assertEquals(2, c0Pattern.getRaincutterAttack(2).size(),
+                "Xingqiu C0 third wave should restart the two-three pattern");
+        assertEquals(2, c5Pattern.getRaincutterAttack(2).size(),
+                "Xingqiu C5 should not receive the C6 five-sword wave");
+        assertEquals(5, c6Pattern.getRaincutterAttack(2).size(),
+                "Xingqiu C6 third wave should contain five swords");
+
+        assertXingqiuBurstDuration(0, 15.0);
+        assertXingqiuBurstDuration(1, 15.0);
+        assertXingqiuBurstDuration(2, 18.0);
+
+        RecordingDamageWeapon c3SkillWeapon =
+                new RecordingDamageWeapon("Fatal Rainscreen Hit");
+        model.character.Xingqiu c3Skill = new model.character.Xingqiu(
+                c3SkillWeapon, blankArtifact(), xingqiuTalentData(3));
+        CombatSimulator c3SkillSim = simulatorWithExistingCharacter(c3Skill);
+        c3Skill.onAction(CharacterActionRequest.of(CharacterActionKey.BURST), c3SkillSim);
+        c3Skill.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), c3SkillSim);
+        assertEquals(2, c3SkillWeapon.actions.size(),
+                "Xingqiu Skill should retain two hits during Raincutter");
+        assertClose(2.86, c3SkillWeapon.actions.get(0).getDamagePercent(), EPS,
+                "Xingqiu C3 should not receive the C4 Skill multiplier");
+        assertClose(3.25, c3SkillWeapon.actions.get(1).getDamagePercent(), EPS,
+                "Xingqiu C3 second Skill hit should remain unmultiplied");
+
+        RecordingDamageWeapon c4SkillWeapon =
+                new RecordingDamageWeapon("Fatal Rainscreen Hit");
+        model.character.Xingqiu c4Skill = new model.character.Xingqiu(
+                c4SkillWeapon, blankArtifact(), xingqiuTalentData(4));
+        CombatSimulator c4SkillSim = simulatorWithExistingCharacter(c4Skill);
+        c4Skill.onAction(CharacterActionRequest.of(CharacterActionKey.BURST), c4SkillSim);
+        c4Skill.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), c4SkillSim);
+        assertEquals(2, c4SkillWeapon.actions.size(),
+                "Xingqiu C4 Skill should retain two hits");
+        assertClose(2.86 * 1.5,
+                c4SkillWeapon.actions.get(0).getDamagePercent(), EPS,
+                "Xingqiu C4 should multiply the first Skill hit during Raincutter");
+        assertClose(3.25 * 1.5,
+                c4SkillWeapon.actions.get(1).getDamagePercent(), EPS,
+                "Xingqiu C4 should multiply the second Skill hit during Raincutter");
+
+        RecordingDamageWeapon c4OutsideWeapon =
+                new RecordingDamageWeapon("Fatal Rainscreen Hit");
+        model.character.Xingqiu c4Outside = new model.character.Xingqiu(
+                c4OutsideWeapon, blankArtifact(), xingqiuTalentData(4));
+        CombatSimulator c4OutsideSim = simulatorWithExistingCharacter(c4Outside);
+        c4Outside.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), c4OutsideSim);
+        assertClose(2.86, c4OutsideWeapon.actions.get(0).getDamagePercent(), EPS,
+                "Xingqiu C4 should not multiply Skill outside Raincutter");
+
+        RecordingDamageWeapon c2WaveWeapon =
+                new RecordingDamageWeapon("Raincutter Sword");
+        model.character.Xingqiu c2Wave = new model.character.Xingqiu(
+                c2WaveWeapon, blankArtifact(), xingqiuTalentData(2));
+        CombatSimulator c2WaveSim = simulatorWithExistingCharacter(c2Wave);
+        TestCharacter c2Ally = testCharacter(Element.PYRO, CharacterId.XIANGLING);
+        c2WaveSim.addCharacter(c2Ally);
+        List<Double> firstWaveShred = new ArrayList<>();
+        c2WaveSim.addDamageListener((actor, action, damage, time) -> {
+            if ("Raincutter Sword".equals(action.getName())
+                    && firstWaveShred.size() < 2) {
+                firstWaveShred.add(
+                        resolvedStat(c2WaveSim, c2Wave, StatType.HYDRO_RES_SHRED));
+            }
+        });
+        c2Wave.onAction(CharacterActionRequest.of(CharacterActionKey.BURST), c2WaveSim);
+        assertClose(0.0,
+                resolvedStat(c2WaveSim, c2Wave, StatType.HYDRO_RES_SHRED), EPS,
+                "Xingqiu C2 should not apply Hydro shred on Burst cast");
+        AttackAction nonNormalTrigger = new AttackAction(
+                "C2 non-Normal trigger", 0.0, Element.PHYSICAL,
+                StatType.BASE_ATK, StatType.SKILL_DMG_BONUS, 0.0,
+                ActionType.SKILL);
+        c2WaveSim.performAction(CharacterId.XINGQIU, nonNormalTrigger);
+        assertTrue(c2WaveWeapon.actions.isEmpty(),
+                "Xingqiu Raincutter should ignore non-Normal actions");
+        c2WaveSim.performAction(
+                CharacterId.XINGQIU,
+                xingqiuNormalTrigger("C2 first Normal trigger"));
+        assertEquals(2, firstWaveShred.size(),
+                "Xingqiu C2 first wave should resolve both swords before applying shred");
+        assertClose(0.0, firstWaveShred.get(0), EPS,
+                "Xingqiu C2 triggering wave should not benefit from its own shred");
+        assertClose(0.0, firstWaveShred.get(1), EPS,
+                "Xingqiu C2 shred should apply only after all wave hits");
+        assertClose(0.15,
+                resolvedStat(c2WaveSim, c2Wave, StatType.HYDRO_RES_SHRED), EPS,
+                "Xingqiu C2 should apply Hydro shred after a sword wave");
+        assertClose(0.15,
+                resolvedStat(c2WaveSim, c2Ally, StatType.HYDRO_RES_SHRED), EPS,
+                "Xingqiu C2 Hydro shred should resolve for the whole party");
+        c2WaveSim.advanceTime(3.5);
+        c2WaveSim.performAction(
+                CharacterId.XINGQIU,
+                xingqiuNormalTrigger("C2 refresh Normal trigger"));
+        double refreshedAt = c2WaveSim.getCurrentTime();
+        c2WaveSim.advanceTime(refreshedAt + 3.999 - c2WaveSim.getCurrentTime());
+        assertClose(0.15,
+                resolvedStat(c2WaveSim, c2Wave, StatType.HYDRO_RES_SHRED), EPS,
+                "Xingqiu C2 Hydro shred should remain active before four seconds");
+        c2WaveSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0,
+                resolvedStat(c2WaveSim, c2Wave, StatType.HYDRO_RES_SHRED), EPS,
+                "Xingqiu C2 Hydro shred should expire at four seconds");
+
+        model.character.Xingqiu c0NoShred = new model.character.Xingqiu(
+                new TestWeapon(), blankArtifact(), xingqiuTalentData(0));
+        CombatSimulator c0NoShredSim = simulatorWithExistingCharacter(c0NoShred);
+        c0NoShred.onAction(
+                CharacterActionRequest.of(CharacterActionKey.BURST), c0NoShredSim);
+        c0NoShredSim.performAction(
+                CharacterId.XINGQIU,
+                xingqiuNormalTrigger("C0 Normal trigger"));
+        assertClose(0.0,
+                resolvedStat(c0NoShredSim, c0NoShred, StatType.HYDRO_RES_SHRED), EPS,
+                "Xingqiu C0 should not receive C2 Hydro shred");
+
+        RecordingDamageWeapon c6EnergyWeapon =
+                new RecordingDamageWeapon("Raincutter Sword");
+        model.character.Xingqiu c6Energy = new model.character.Xingqiu(
+                c6EnergyWeapon, blankArtifact(), xingqiuTalentData(6));
+        CombatSimulator c6EnergySim = simulatorWithExistingCharacter(c6Energy);
+        TestCharacter c6Ally = testCharacter(Element.PYRO, CharacterId.XIANGLING);
+        c6EnergySim.addCharacter(c6Ally);
+        c6Energy.onAction(
+                CharacterActionRequest.of(CharacterActionKey.BURST), c6EnergySim);
+        c6Energy.spendEnergy(c6Energy.getMaxEnergy());
+        c6Ally.spendEnergy(c6Ally.getMaxEnergy());
+        double[] ownerEnergyAtLastSword = { -1.0 };
+        int[] c6SwordCount = { 0 };
+        c6EnergySim.addDamageListener((actor, action, damage, time) -> {
+            if ("Raincutter Sword".equals(action.getName())) {
+                c6SwordCount[0]++;
+                if (c6SwordCount[0] == 10) {
+                    ownerEnergyAtLastSword[0] = c6Energy.getCurrentEnergy();
+                }
+            }
+        });
+        for (int wave = 0; wave < 3; wave++) {
+            if (wave > 0) {
+                c6EnergySim.advanceTime(1.0);
+            }
+            c6EnergySim.performAction(
+                    CharacterId.XINGQIU,
+                    xingqiuNormalTrigger("C6 Normal trigger " + wave));
+        }
+        assertEquals(10, c6SwordCount[0],
+                "Xingqiu C6 first cycle should resolve two, three, then five swords");
+        assertClose(0.0, ownerEnergyAtLastSword[0], EPS,
+                "Xingqiu C6 Energy should be granted after the third wave hits");
+        assertClose(3.0, c6Energy.getCurrentEnergy(), EPS,
+                "Xingqiu C6 third wave should grant the owner three flat Energy");
+        assertClose(0.0, c6Ally.getCurrentEnergy(), EPS,
+                "Xingqiu C6 Energy should not be distributed to allies");
+
+        model.character.Xingqiu c5NoEnergy = new model.character.Xingqiu(
+                new TestWeapon(), blankArtifact(), xingqiuTalentData(5));
+        CombatSimulator c5NoEnergySim = simulatorWithExistingCharacter(c5NoEnergy);
+        c5NoEnergy.onAction(
+                CharacterActionRequest.of(CharacterActionKey.BURST), c5NoEnergySim);
+        c5NoEnergy.spendEnergy(c5NoEnergy.getMaxEnergy());
+        for (int wave = 0; wave < 3; wave++) {
+            if (wave > 0) {
+                c5NoEnergySim.advanceTime(1.0);
+            }
+            c5NoEnergySim.performAction(
+                    CharacterId.XINGQIU,
+                    xingqiuNormalTrigger("C5 Normal trigger " + wave));
+        }
+        assertClose(0.0, c5NoEnergy.getCurrentEnergy(), EPS,
+                "Xingqiu C5 should not receive C6 Energy");
+
+        RecordingDamageWeapon recastWeapon =
+                new RecordingDamageWeapon("Raincutter Sword");
+        model.character.Xingqiu recast = new model.character.Xingqiu(
+                recastWeapon, blankArtifact(), xingqiuTalentData(6));
+        CombatSimulator recastSim = simulatorWithExistingCharacter(recast);
+        int[] recastOrbitalCount = { 0 };
+        recastSim.addDamageListener((actor, action, damage, time) -> {
+            if ("Raincutter Orbital".equals(action.getName())) {
+                recastOrbitalCount[0]++;
+            }
+        });
+        recast.onAction(CharacterActionRequest.of(CharacterActionKey.BURST), recastSim);
+        recastSim.performAction(
+                CharacterId.XINGQIU,
+                xingqiuNormalTrigger("First Burst Normal trigger"));
+        assertEquals(2, recastWeapon.actions.size(),
+                "Xingqiu first Burst should begin with two swords");
+        recast.onAction(CharacterActionRequest.of(CharacterActionKey.BURST), recastSim);
+        recastSim.performAction(
+                CharacterId.XINGQIU,
+                xingqiuNormalTrigger("Recast Normal trigger"));
+        assertEquals(4, recastWeapon.actions.size(),
+                "Xingqiu recast should invalidate the old listener and restart at two swords");
+        recastOrbitalCount[0] = 0;
+        recastSim.advanceTime(2.25);
+        assertEquals(1, recastOrbitalCount[0],
+                "Xingqiu recast should cancel the old orbital stream");
+    }
+
+    private static void assertXingqiuBurstDuration(
+            int constellation,
+            double expectedDuration) {
+        model.character.Xingqiu xingqiu = new model.character.Xingqiu(
+                new TestWeapon(), blankArtifact(), xingqiuTalentData(constellation));
+        CombatSimulator sim = simulatorWithExistingCharacter(xingqiu);
+        xingqiu.onAction(CharacterActionRequest.of(CharacterActionKey.BURST), sim);
+        double burstStart = xingqiu.getLastBurstTime();
+        sim.advanceTime(burstStart + expectedDuration - 0.001 - sim.getCurrentTime());
+        assertTrue(xingqiu.isFormActive(sim.getCurrentTime()),
+                "Xingqiu Raincutter should remain active before its constellation duration");
+        sim.advanceTime(0.001 + 1e-9);
+        assertTrue(!xingqiu.isFormActive(sim.getCurrentTime()),
+                "Xingqiu Raincutter should expire at its constellation duration");
+    }
+
+    private static AttackAction xingqiuNormalTrigger(String name) {
+        return new AttackAction(
+                name, 0.0, Element.PHYSICAL, StatType.BASE_ATK,
+                StatType.NORMAL_ATTACK_DMG_BONUS, 0.0, ActionType.NORMAL);
+    }
+
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {
         ReactionResult[] pyroReactions = {
                 ReactionResult.amp(2.0, "Vaporize", ReactionResult.Kind.VAPORIZE),
@@ -17316,6 +17551,15 @@ public class ReactionRegressionTest {
     private static mechanics.data.TalentDataSource kaeyaTalentData(int constellation) {
         return (characterName, key, defaultValue) -> {
             if ("Kaeya".equals(characterName) && "Constellation".equals(key)) {
+                return constellation;
+            }
+            return defaultValue;
+        };
+    }
+
+    private static mechanics.data.TalentDataSource xingqiuTalentData(int constellation) {
+        return (characterName, key, defaultValue) -> {
+            if ("Xingqiu".equals(characterName) && "Constellation".equals(key)) {
                 return constellation;
             }
             return defaultValue;

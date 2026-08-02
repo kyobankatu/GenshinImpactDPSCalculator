@@ -37,7 +37,7 @@ shared callback without changing RL or generated documentation.
 The B-129 Husk of Opulent Dreams campaign is complete. It adds the exact
 field-aware Curiosity gain and decay cadence through existing simulator hooks.
 
-The B-131 supported-character accuracy campaign is in progress. It corrects
+The B-131 supported-character accuracy campaign is complete. It corrects
 Bennett A1, adds Xiangling C2, and fixes Xingqiu C2/C4/C6 behavior; RL remains
 excluded.
 
@@ -13150,7 +13150,7 @@ Completion evidence:
 
 ## Implementation Order: Supported Character Passive Campaign
 
-Status: In progress. This campaign adds or corrects sourced passives and
+Status: Complete. This campaign adds or corrects sourced passives and
 constellations in three already-supported characters; RL and generated docs
 remain excluded.
 
@@ -13218,7 +13218,7 @@ Completion evidence:
   hit+2 seconds; early hits, C0, timing, and repeated strings are covered.
 - Reaction regression, build, Javadoc, and preflight pass.
 
-### Phase 2: Xingqiu Constellation Ordering
+### Phase 2: Xingqiu Constellation Ordering - Done
 
 Why second:
 
@@ -13260,6 +13260,16 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+Completion evidence:
+
+- C0-C6 duration, wave, C2 post-wave shred/refresh, C4 multiplier, C6
+  post-hit owner-only Energy, listener generation, and orbital replacement
+  regressions pass at their normal, exact-boundary, and rejected-trigger cases.
+- `RaidenParty` changed deterministically from 1,272,998 damage / 60,619 DPS
+  at `6f8177c` to 1,227,785 damage / 58,466 DPS. The decrease includes removal
+  of the erroneous C6 party-wide Energy that had sustained Xiangling damage.
+- Reaction regression, build, Javadoc, sample simulation, and preflight pass.
 
 ### Phase 2: Skill-Activated Damage Sets - Done
 

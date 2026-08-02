@@ -2836,7 +2836,7 @@ experiment record.
 
 ### B-131 — Supported character passive and constellation accuracy
 
-- **Status:** in-progress
+- **Status:** done
 - **Source:** read-only supported-character inventory after explicit broad
   content request
 - **Scope:** Bennett A1, Xiangling C2, and Xingqiu C2/C4/C6; RL excluded
@@ -2853,3 +2853,7 @@ experiment record.
 - **Risk/proof:** planned; focused character regressions plus reaction
   regression, build, Javadoc, and preflight
 - **Plan:** `TASKS.md` Supported Character Passive Campaign
+- **Completion:** Bennett A1, Xiangling C2, and Xingqiu C2/C4/C6 duration,
+  ordering, refresh, owner-only Energy, recast listener, and orbital contracts
+  pass focused regression, `RaidenParty` comparison, build, Javadoc, and
+  preflight checks; post-fix sample is 1,227,785 damage / 58,466 DPS
