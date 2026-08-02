@@ -126,6 +126,10 @@ public enum BuffId {
     DESERT_PAVILION_CHRONICLE_4PC,
     /** 聖遺物「追憶のしめ縄」の通常・重撃・落下攻撃強化。 */
     SHIMENAWAS_REMINISCENCE_4PC,
+    /** 聖遺物「楽園の絶花」の開花系ダメージスタック。 */
+    FLOWER_OF_PARADISE_LOST_STACK,
+    /** 聖遺物「楽園の絶花」のスタック獲得クールダウン。 */
+    FLOWER_OF_PARADISE_LOST_TRIGGER_COOLDOWN,
     SUPERCONDUCT_PHYS_RES_SHRED,
     /** 武器「漂泊の宵星」効果。 */
     WANDERING_EVENSTAR_WILDLING_NIGHTSTAR,

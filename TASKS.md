@@ -12885,7 +12885,7 @@ Completion evidence:
 - Threshold, delay, recast, exact expiry, source/binding, post-drain snapshot,
   reaction regression, build, Javadoc, party catalog, and preflight pass.
 
-### Phase 2: Flower of Paradise Lost - Pending
+### Phase 2: Flower of Paradise Lost - Done
 
 Target files:
 
@@ -12902,6 +12902,14 @@ Acceptance criteria and tests:
   callbacks are inert; the triggering reaction does not retroactively gain its stack.
 - Cover all four reactions, 0.999/1.000 CT, cap, independent expiry, trigger
   ordering, invalid callbacks/binding, and snapshot restore.
+
+Completion evidence:
+
+- Fixed EM and four typed reaction bonuses are preserved separately from four
+  independently expiring owner stacks and the snapshot-safe one-second CT.
+- All reaction kinds, off-field ownership, cap/expiry boundaries, invalid
+  callbacks, rollback, real Bloom ordering, reaction regression, build,
+  Javadoc, party catalog, and preflight pass.
 
 ### Phase 3: Long Night's Oath - Pending
 

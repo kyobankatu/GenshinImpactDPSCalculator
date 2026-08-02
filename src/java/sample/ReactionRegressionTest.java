@@ -182,6 +182,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ArtifactActionCallbackContract();
         testAccuracyPhaseF_ActionUseArtifactSets();
         testAccuracyPhaseF_ShimenawasReminiscenceContract();
+        testAccuracyPhaseF_FlowerOfParadiseLostContract();
         testAccuracyPhaseF_HuskCuriosityState();
         testAccuracyPhaseF_ScholarPartyEnergySet();
         testAccuracyPhaseF_BennettAndXianglingPassiveAccuracy();
@@ -15075,6 +15076,262 @@ public class ReactionRegressionTest {
         }
         assertTrue(nullStatsRejected,
                 "Shimenawa should reject null supplied stats");
+    }
+
+    private static void testAccuracyPhaseF_FlowerOfParadiseLostContract() {
+        StatsContainer suppliedStats = new StatsContainer();
+        suppliedStats.set(StatType.CRIT_RATE, 0.10);
+        model.artifact.FlowerOfParadiseLost supplied =
+                new model.artifact.FlowerOfParadiseLost(suppliedStats);
+        assertEquals("Flower of Paradise Lost", supplied.getName(),
+                "Flower of Paradise Lost display name");
+        assertClose(80.0,
+                supplied.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Flower of Paradise Lost two-piece Elemental Mastery");
+        assertClose(0.40,
+                supplied.getStats().get(StatType.BLOOM_DMG_BONUS), EPS,
+                "Flower of Paradise Lost fixed Bloom bonus");
+        assertClose(0.40,
+                supplied.getStats().get(StatType.HYPERBLOOM_DMG_BONUS), EPS,
+                "Flower of Paradise Lost fixed Hyperbloom bonus");
+        assertClose(0.40,
+                supplied.getStats().get(StatType.BURGEON_DMG_BONUS), EPS,
+                "Flower of Paradise Lost fixed Burgeon bonus");
+        assertClose(0.10,
+                supplied.getStats().get(StatType.LUNAR_BLOOM_DMG_BONUS), EPS,
+                "Flower of Paradise Lost fixed Lunar-Bloom bonus");
+        assertClose(0.10,
+                supplied.getStats().get(StatType.CRIT_RATE), EPS,
+                "Flower of Paradise Lost should preserve supplied stats");
+
+        model.artifact.FlowerOfParadiseLost flower =
+                new model.artifact.FlowerOfParadiseLost();
+        TestCharacter owner = testCharacter(Element.HYDRO, CharacterId.SUCROSE);
+        owner.setArtifacts(flower);
+        CombatSimulator sim = simulatorWith(owner);
+        ReactionResult bloom = ReactionResult.transform(
+                0.0, "Bloom", ReactionResult.Kind.BLOOM);
+        ReactionResult hyperbloom = ReactionResult.transform(
+                0.0, "Hyperbloom", ReactionResult.Kind.HYPERBLOOM);
+        ReactionResult burgeon = ReactionResult.transform(
+                0.0, "Burgeon", ReactionResult.Kind.BURGEON);
+        ReactionResult lunarBloom = ReactionResult.lunar(
+                0.0, ReactionResult.LunarType.BLOOM);
+
+        flower.onReaction(sim, bloom, owner, owner);
+        assertEquals(1, activeBuffCount(
+                        owner,
+                        BuffId.FLOWER_OF_PARADISE_LOST_STACK,
+                        sim.getCurrentTime()),
+                "Flower of Paradise Lost first Bloom stack");
+        sim.advanceTime(0.999);
+        flower.onReaction(sim, hyperbloom, owner, owner);
+        assertEquals(1, activeBuffCount(
+                        owner,
+                        BuffId.FLOWER_OF_PARADISE_LOST_STACK,
+                        sim.getCurrentTime()),
+                "Flower of Paradise Lost should enforce 0.999-second CT");
+        sim.advanceTime(0.001);
+        flower.onReaction(sim, hyperbloom, owner, owner);
+        sim.advanceTime(1.0);
+        flower.onReaction(sim, burgeon, owner, owner);
+        sim.advanceTime(1.0);
+        flower.onReaction(sim, lunarBloom, owner, owner);
+        assertEquals(4, activeBuffCount(
+                        owner,
+                        BuffId.FLOWER_OF_PARADISE_LOST_STACK,
+                        sim.getCurrentTime()),
+                "Flower of Paradise Lost should accept all four reaction kinds");
+        assertClose(0.80,
+                resolvedStat(sim, owner, StatType.BLOOM_DMG_BONUS), EPS,
+                "Flower of Paradise Lost four-stack Bloom bonus");
+        assertClose(0.80,
+                resolvedStat(sim, owner, StatType.HYPERBLOOM_DMG_BONUS), EPS,
+                "Flower of Paradise Lost four-stack Hyperbloom bonus");
+        assertClose(0.80,
+                resolvedStat(sim, owner, StatType.BURGEON_DMG_BONUS), EPS,
+                "Flower of Paradise Lost four-stack Burgeon bonus");
+        assertClose(0.20,
+                resolvedStat(sim, owner, StatType.LUNAR_BLOOM_DMG_BONUS), EPS,
+                "Flower of Paradise Lost four-stack Lunar-Bloom bonus");
+        sim.advanceTime(1.0);
+        flower.onReaction(sim, bloom, owner, owner);
+        assertEquals(4, activeBuffCount(
+                        owner,
+                        BuffId.FLOWER_OF_PARADISE_LOST_STACK,
+                        sim.getCurrentTime()),
+                "Flower of Paradise Lost should cap at four stacks");
+
+        sim.advanceTime(5.999);
+        assertEquals(4, activeBuffCount(
+                        owner,
+                        BuffId.FLOWER_OF_PARADISE_LOST_STACK,
+                        sim.getCurrentTime()),
+                "Flower of Paradise Lost first stack before expiry");
+        sim.advanceTime(0.001 + 1e-9);
+        assertEquals(3, activeBuffCount(
+                        owner,
+                        BuffId.FLOWER_OF_PARADISE_LOST_STACK,
+                        sim.getCurrentTime()),
+                "Flower of Paradise Lost first stack exact expiry");
+        sim.advanceTime(1.0);
+        assertEquals(2, activeBuffCount(
+                        owner,
+                        BuffId.FLOWER_OF_PARADISE_LOST_STACK,
+                        sim.getCurrentTime()),
+                "Flower of Paradise Lost second independent expiry");
+        sim.advanceTime(1.0);
+        assertEquals(1, activeBuffCount(
+                        owner,
+                        BuffId.FLOWER_OF_PARADISE_LOST_STACK,
+                        sim.getCurrentTime()),
+                "Flower of Paradise Lost third independent expiry");
+        sim.advanceTime(1.0);
+        assertEquals(0, activeBuffCount(
+                        owner,
+                        BuffId.FLOWER_OF_PARADISE_LOST_STACK,
+                        sim.getCurrentTime()),
+                "Flower of Paradise Lost final independent expiry");
+
+        model.artifact.FlowerOfParadiseLost offFieldFlower =
+                new model.artifact.FlowerOfParadiseLost();
+        TestCharacter offFieldOwner = testCharacter(
+                Element.HYDRO, CharacterId.SUCROSE);
+        offFieldOwner.setArtifacts(offFieldFlower);
+        CombatSimulator offFieldSim = simulatorWith(offFieldOwner);
+        TestCharacter activeCharacter = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        offFieldSim.addCharacter(activeCharacter);
+        offFieldSim.setActiveCharacter(CharacterId.AMBER);
+        offFieldFlower.onReaction(
+                offFieldSim, bloom, offFieldOwner, offFieldOwner);
+        assertEquals(1, activeBuffCount(
+                        offFieldOwner,
+                        BuffId.FLOWER_OF_PARADISE_LOST_STACK,
+                        offFieldSim.getCurrentTime()),
+                "Flower of Paradise Lost should trigger off field");
+
+        SimulatorSnapshot activeSnapshot = offFieldSim.saveSnapshot();
+        offFieldOwner.removeBuff(BuffId.FLOWER_OF_PARADISE_LOST_STACK);
+        offFieldOwner.removeBuff(
+                BuffId.FLOWER_OF_PARADISE_LOST_TRIGGER_COOLDOWN);
+        offFieldSim.restoreSnapshot(activeSnapshot);
+        assertEquals(1, activeBuffCount(
+                        offFieldOwner,
+                        BuffId.FLOWER_OF_PARADISE_LOST_STACK,
+                        offFieldSim.getCurrentTime()),
+                "Snapshot should restore Flower of Paradise Lost stacks");
+        assertEquals(1, activeBuffCount(
+                        offFieldOwner,
+                        BuffId.FLOWER_OF_PARADISE_LOST_TRIGGER_COOLDOWN,
+                        offFieldSim.getCurrentTime()),
+                "Snapshot should restore Flower of Paradise Lost cooldown");
+
+        model.artifact.FlowerOfParadiseLost rollbackFlower =
+                new model.artifact.FlowerOfParadiseLost();
+        TestCharacter rollbackOwner = testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU);
+        rollbackOwner.setArtifacts(rollbackFlower);
+        CombatSimulator rollbackSim = simulatorWith(rollbackOwner);
+        SimulatorSnapshot preTriggerSnapshot = rollbackSim.saveSnapshot();
+        rollbackFlower.onReaction(
+                rollbackSim, bloom, rollbackOwner, rollbackOwner);
+        rollbackSim.restoreSnapshot(preTriggerSnapshot);
+        assertEquals(0, activeBuffCount(
+                        rollbackOwner,
+                        BuffId.FLOWER_OF_PARADISE_LOST_STACK,
+                        rollbackSim.getCurrentTime()),
+                "Rollback should remove divergent Flower stacks");
+
+        model.artifact.FlowerOfParadiseLost orderedFlower =
+                new model.artifact.FlowerOfParadiseLost();
+        TestCharacter orderedOwner = testCharacter(
+                Element.HYDRO, CharacterId.SUCROSE);
+        orderedOwner.setArtifacts(orderedFlower);
+        CombatSimulator orderedSim = simulatorWith(orderedOwner);
+        orderedSim.getEnemy().setAura(Element.DENDRO, 1.0);
+        orderedSim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Flower first Bloom", Element.HYDRO));
+        double firstCoreDamage = ReactionCalculator.calculateTransformativeDamage(
+                90, 80.0, 2.0, 0.40);
+        assertClose(firstCoreDamage,
+                orderedSim.getDendroCores().get(0).preResistanceDamage,
+                0.01,
+                "Flower triggering Bloom should use only fixed bonus");
+        orderedSim.advanceTime(1.0);
+        orderedSim.getEnemy().setAura(Element.DENDRO, 1.0);
+        orderedSim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Flower second Bloom", Element.HYDRO));
+        double secondCoreDamage = ReactionCalculator.calculateTransformativeDamage(
+                90, 80.0, 2.0, 0.50);
+        assertClose(secondCoreDamage,
+                orderedSim.getDendroCores().get(1).preResistanceDamage,
+                0.01,
+                "Flower subsequent Bloom should use the prior stack");
+
+        model.artifact.FlowerOfParadiseLost rejected =
+                new model.artifact.FlowerOfParadiseLost();
+        TestCharacter rejectedOwner = testCharacter(Element.HYDRO);
+        rejected.onReaction(
+                new CombatSimulator(), bloom, rejectedOwner, rejectedOwner);
+        rejectedOwner.setArtifacts(rejected);
+        CombatSimulator rejectedSim = simulatorWith(rejectedOwner);
+        TestCharacter foreignOwner = testCharacter(
+                Element.HYDRO, CharacterId.AMBER);
+        rejected.onReaction(rejectedSim, null, rejectedOwner, rejectedOwner);
+        rejected.onReaction(
+                rejectedSim, ReactionResult.none(), rejectedOwner, rejectedOwner);
+        rejected.onReaction(
+                rejectedSim,
+                new ReactionResult(
+                        ReactionResult.Type.TRANSFORMATIVE,
+                        1.0,
+                        0.0,
+                        "Invalid",
+                        null,
+                        ReactionResult.LunarType.NONE,
+                        null,
+                        null,
+                        false,
+                        false),
+                rejectedOwner,
+                rejectedOwner);
+        rejected.onReaction(
+                rejectedSim,
+                ReactionResult.transform(
+                        0.0, "Overload", ReactionResult.Kind.OVERLOAD),
+                rejectedOwner,
+                rejectedOwner);
+        rejected.onReaction(rejectedSim, bloom, foreignOwner, rejectedOwner);
+        rejected.onReaction(rejectedSim, bloom, rejectedOwner, foreignOwner);
+        rejected.onReaction(
+                new CombatSimulator(), bloom, rejectedOwner, rejectedOwner);
+        assertEquals(0, activeBuffCount(
+                        rejectedOwner,
+                        BuffId.FLOWER_OF_PARADISE_LOST_STACK,
+                        rejectedSim.getCurrentTime()),
+                "Invalid Flower of Paradise Lost callbacks should remain inert");
+
+        boolean crossBindingRejected = false;
+        try {
+            rejected.initializeForSimulator(
+                    rejectedOwner, new CombatSimulator(), true);
+        } catch (IllegalStateException expected) {
+            crossBindingRejected = true;
+        }
+        assertTrue(crossBindingRejected,
+                "Flower of Paradise Lost should reject cross-simulator reuse");
+
+        boolean nullStatsRejected = false;
+        try {
+            new model.artifact.FlowerOfParadiseLost(null);
+        } catch (NullPointerException expected) {
+            nullStatsRejected = true;
+        }
+        assertTrue(nullStatsRejected,
+                "Flower of Paradise Lost should reject null supplied stats");
     }
 
     private static void testAccuracyPhaseF_HuskCuriosityState() {
