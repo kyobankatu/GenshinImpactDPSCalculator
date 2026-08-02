@@ -59,7 +59,8 @@ public class StatsContainer {
     /**
      * Computes and returns the final ATK value using the standard Genshin
      * formula: {@code BASE_ATK * (1 + ATK_PERCENT) + ATK_FLAT}, followed by
-     * any flat ATK derived from final Max HP.
+     * any final Energy-Recharge-derived ATK% and flat ATK derived from final
+     * Max HP.
      *
      * @return total ATK
      */
@@ -67,8 +68,18 @@ public class StatsContainer {
         double base = get(StatType.BASE_ATK);
         double pct = get(StatType.ATK_PERCENT);
         double flat = get(StatType.ATK_FLAT);
+        double energyRechargeRatio = get(
+                StatType.ENERGY_RECHARGE_TO_ATK_PERCENT_RATIO);
+        double energyRechargeCap = get(
+                StatType.ENERGY_RECHARGE_TO_ATK_PERCENT_CAP);
+        double energyRechargeAtk = Math.min(
+                energyRechargeCap,
+                Math.max(0.0, get(StatType.ENERGY_RECHARGE) - 1.0)
+                        * energyRechargeRatio);
         double maxHpConversion = get(StatType.MAX_HP_TO_ATK_FLAT_RATIO);
-        return base * (1.0 + pct) + flat + getTotalHp() * maxHpConversion;
+        return base * (1.0 + pct + energyRechargeAtk)
+                + flat
+                + getTotalHp() * maxHpConversion;
     }
 
     /**

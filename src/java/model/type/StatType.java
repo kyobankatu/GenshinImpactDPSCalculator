@@ -40,6 +40,10 @@ public enum StatType {
      * Resolved lazily so HP sources merged later remain part of the conversion.
      */
     MAX_HP_TO_ATK_FLAT_RATIO,
+    /** ATK% gained per point of ordinary Energy Recharge above base 100%. */
+    ENERGY_RECHARGE_TO_ATK_PERCENT_RATIO,
+    /** Maximum ATK% obtainable from Energy-Recharge-to-ATK conversion. */
+    ENERGY_RECHARGE_TO_ATK_PERCENT_CAP,
 
     /** Character's base DEF from level/ascension. */
     BASE_DEF,

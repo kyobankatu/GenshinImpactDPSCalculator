@@ -157,6 +157,8 @@ public enum BuffId {
     XIPHOS_MOONLIGHT_JINNIS_WHISPER,
     /** 武器「終焉を嘆く詩」の千年の大楽章・別れの歌。 */
     ELEGY_FAREWELL_SONG,
+    /** 武器「草薙の稲光」の元素爆発後元素チャージ効率。 */
+    ENGULFING_LIGHTNING_ER,
     /** 「千年の大楽章」各武器が共有する攻撃力効果。 */
     MILLENNIAL_MOVEMENT_ATK,
     /** 武器「蒼古なる自由への誓い」の通常・重撃・落下攻撃強化。 */

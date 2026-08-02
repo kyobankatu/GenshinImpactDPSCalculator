@@ -3320,7 +3320,7 @@ experiment record.
 - **Status:** active
 - **Source:** continued explicit character, weapon, and artifact expansion
   request with branch-isolated parallel agents
-- **Scope/risk:** nine artifacts, two Max-HP-scaling weapons, and Noelle;
+- **Scope/risk:** nine artifacts, three five-star weapons, and Noelle;
   shared risk is limited to typed final-stat conversion and character identity
 - **Evidence:** maintained KQM artifact, weapon, and Noelle catalogs, accessed
   2026-08-03:

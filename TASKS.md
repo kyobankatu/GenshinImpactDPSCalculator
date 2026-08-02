@@ -13202,8 +13202,8 @@ Scope:
 
 - Add nine artifact sets across static boundaries, action windows, and
   reaction mechanics without inventing unsupported healing or HP state.
-- Add Primordial Jade Cutter and Staff of Homa with late-resolved Max-HP ATK
-  conversion.
+- Add Primordial Jade Cutter, Staff of Homa, and Engulfing Lightning with
+  late-resolved primary-stat conversion.
 - Add Noelle's representable offensive character slice.
 
 Out of scope:
@@ -13408,6 +13408,51 @@ Completion evidence:
   on-field CDR, stack/gate expiry, snapshot rollback, null/wrong binding, and
   independent state pass in `ReactionArtifactRegressionTest`.
 - `./gradlew ReactionArtifactRegressionTest ReactionRegressionTest build
+  javadoc` and `python scripts/preflight.py --run` passed on 2026-08-03.
+
+### Phase 6: Engulfing Lightning ER Conversion - Done
+
+Target files:
+
+- `src/java/model/weapon/EngulfingLightning.java` (new)
+- `src/java/model/type/StatType.java`
+- `src/java/model/stats/StatsContainer.java`
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/sample/EngulfingLightningRegressionTest.java` (new)
+
+Acceptance criteria:
+
+- Exact Lv. 90 metadata, R1-R5 conversion/cap/Burst ER values, R5 default,
+  and invalid-refinement rejection are exposed.
+- ATK% resolves from final ordinary ER above 100%, including ER merged after
+  weapon stats, and respects each refinement cap.
+- Accepted owner Burst grants ordinary ER for half-open 12 seconds, including
+  off-field use and contribution to Emblem/Raiden conversion paths.
+
+Test cases:
+
+- Normal: table-driven metadata, conversion, cap, and accepted Burst ER.
+- Boundary: pre/at 12 seconds, refresh, late-merged ER, snapshot rollback, and
+  off-field persistence.
+- Abnormal: insufficient Burst, refinement 0/6, wrong owner/simulator,
+  cross-binding, unrelated stats, and independent instances.
+
+Verification:
+
+- `./gradlew EngulfingLightningRegressionTest`
+- `./gradlew ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Engulfing Lightning exposes exact Lv. 90 metadata, every R1-R5 conversion,
+  cap, and Burst ER value, R5 default, and invalid-refinement rejection.
+- Final ordinary ER drives capped ATK% after artifact/team merges; accepted
+  Burst ER lasts on the half-open 12-second window and contributes to both
+  Engulfing conversion and Emblem, while non-converting ER remains excluded.
+- Refresh, insufficient gate, snapshot rollback, wrong simulator,
+  cross-binding, unrelated stats, and independent instances pass.
+- `./gradlew EngulfingLightningRegressionTest ReactionRegressionTest build
   javadoc` and `python scripts/preflight.py --run` passed on 2026-08-03.
 
 ## Implementation Order: Black Sword Campaign
