@@ -34,6 +34,9 @@ The B-151 target-state and Skill-hit artifact campaign is complete. It adds
 Lavawalker, Thundersoother, and Tenacity of the Millelith without entering
 player-damage, shield-absorption, RL, or generated-documentation systems.
 
+The B-152 Black Sword campaign is complete. It adds the weapon's full
+outgoing-damage contract while keeping player healing in Deferred Systems.
+
 The B-128 action-use artifact campaign is complete. Successful typed actions
 now reach equipped artifacts, and Heart of Depth plus Martial Artist use the
 shared callback without changing RL or generated documentation.
@@ -12851,6 +12854,60 @@ Completion evidence:
   the focused switch contract regression.
 - `./gradlew ReactionRegressionTest`, `./gradlew build`, `./gradlew javadoc`,
   and `python scripts/preflight.py` passed on 2026-08-02.
+
+## Implementation Order: Black Sword Campaign
+
+Status: Complete. This campaign adds one complete offensive weapon passive
+through existing typed Normal and Charged Attack stats; RL and generated
+documentation remain excluded.
+
+Scope:
+
+- Add The Black Sword with Lv. 90 metadata, refinement-aware Normal and Charged
+  Attack DMG bonuses, and focused regression coverage.
+
+Out of scope for this pass:
+
+- The passive's owner healing, player current HP and damage intake, optimizer
+  defaults, RL, and generated docs.
+
+### Phase 1: Add The Black Sword - Done
+
+Target files:
+
+- `src/java/model/weapon/TheBlackSword.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- The default constructor represents R5 while explicit R1-R5 construction
+  exposes canonical name, Sword type, 510 Base ATK, and 27.6% CRIT Rate.
+- Justice adds 20%/25%/30%/35%/40% to both Normal and Charged Attack DMG and
+  does not alter Skill, Burst, Plunging, all-Damage, or unrelated base stats.
+- Refinement values outside 1-5 fail before creating a usable weapon.
+
+Test cases to add or update:
+
+- Normal: R5 metadata and both typed damage bonuses.
+- Boundary: R1 and R5 refinement values at arbitrary negative and positive
+  simulation times.
+- Abnormal: refinement 0/6, no unrelated stat mutation, and independent
+  instances.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build javadoc PartyCatalogRegressionTest`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Focused regressions cover R1/R5 metadata and bonuses, arbitrary-time
+  behavior, unrelated-stat preservation, independent instances, and invalid
+  refinement.
+- `./gradlew ReactionRegressionTest`, `./gradlew build javadoc
+  PartyCatalogRegressionTest`, and `python scripts/preflight.py --run` passed
+  on 2026-08-02.
 
 ## Implementation Order: Missing Artifact Runtime Coverage Campaign
 

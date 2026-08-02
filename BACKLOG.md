@@ -3235,3 +3235,18 @@ experiment record.
 - **Closure:** Lavawalker/Thundersoother resolve live Aura on isolated per-hit
   stats, while Tenacity provides a typed zero-damage/off-field Skill-hit team
   window; focused and full gates pass.
+
+### B-152 — The Black Sword offensive passive
+
+- **Status:** done
+- **Source:** local missing-weapon inventory after B-151
+- **Scope/risk:** add The Black Sword's static Normal and Charged Attack damage
+  bonuses through existing typed stats; low
+- **Evidence:** maintained KQM sword catalog, accessed 2026-08-02:
+  https://library.keqingmains.com/equipment/weapons/swords
+- **Boundary:** R1/R5 values, arbitrary time, independent instances, unrelated
+  typed stats, and invalid refinement; player healing remains deferred.
+- **Proof/plan:** one-phase `TASKS.md` Black Sword Campaign plus reaction
+  regression, build, Javadoc, party catalog, and preflight.
+- **Closure:** R1-R5 Justice bonuses and Lv. 90 metadata pass focused and full
+  gates without introducing unsupported healing state.

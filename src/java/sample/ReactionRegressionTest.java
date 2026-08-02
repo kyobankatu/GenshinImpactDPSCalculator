@@ -140,6 +140,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_TargetAuraArtifactSets();
         testAccuracyPhaseF_TenacityOfTheMillelithContract();
         testAccuracyPhaseF_StaticActionBonusWeaponMetadata();
+        testAccuracyPhaseF_TheBlackSwordContract();
         testAccuracyPhaseF_LegacyWeaponRefinements();
         testAccuracyPhaseF_SkillUseEventWeapons();
         testAccuracyPhaseF_WatatsumiWavewalkerWeapons();
@@ -8364,6 +8365,78 @@ public class ReactionRegressionTest {
         }
         assertTrue(highWhiteTasselRefinementRejected,
                 "White Tassel should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_TheBlackSwordContract() {
+        model.weapon.TheBlackSword blackSword =
+                new model.weapon.TheBlackSword();
+        assertEquals("The Black Sword", blackSword.getName(),
+                "The Black Sword display name");
+        assertClose(510.0, blackSword.getBaseAtk(), EPS,
+                "The Black Sword base ATK");
+        assertClose(0.276,
+                blackSword.getStats().get(StatType.CRIT_RATE), EPS,
+                "The Black Sword CRIT Rate");
+        assertEquals(model.type.WeaponType.SWORD, blackSword.getWeaponType(),
+                "The Black Sword weapon type");
+        assertEquals(5, blackSword.getRefinement(),
+                "The Black Sword default refinement");
+
+        StatsContainer r5Stats = new StatsContainer();
+        r5Stats.set(StatType.ATK_PERCENT, 0.25);
+        blackSword.applyPassive(r5Stats, -10.0);
+        assertClose(0.40,
+                r5Stats.get(StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "R5 The Black Sword Normal damage bonus");
+        assertClose(0.40,
+                r5Stats.get(StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "R5 The Black Sword Charged damage bonus");
+        assertClose(0.25, r5Stats.get(StatType.ATK_PERCENT), EPS,
+                "The Black Sword should preserve supplied stats");
+        assertClose(0.0, r5Stats.get(StatType.DMG_BONUS_ALL), EPS,
+                "The Black Sword should not modify all damage");
+        assertClose(0.0, r5Stats.get(StatType.SKILL_DMG_BONUS), EPS,
+                "The Black Sword should not modify Skill damage");
+        assertClose(0.0, r5Stats.get(StatType.BURST_DMG_BONUS), EPS,
+                "The Black Sword should not modify Burst damage");
+        assertClose(0.0,
+                r5Stats.get(StatType.PLUNGING_ATTACK_DMG_BONUS), EPS,
+                "The Black Sword should not modify Plunging damage");
+
+        model.weapon.TheBlackSword r1BlackSword =
+                new model.weapon.TheBlackSword(1);
+        StatsContainer r1Stats = new StatsContainer();
+        r1BlackSword.applyPassive(r1Stats, 1000.0);
+        assertClose(0.20,
+                r1Stats.get(StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "R1 The Black Sword Normal damage bonus");
+        assertClose(0.20,
+                r1Stats.get(StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "R1 The Black Sword Charged damage bonus");
+
+        StatsContainer independentStats = new StatsContainer();
+        blackSword.applyPassive(independentStats, 0.0);
+        assertClose(0.40,
+                independentStats.get(StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "The Black Sword instances should retain independent refinement");
+
+        boolean lowRefinementRejected = false;
+        try {
+            new model.weapon.TheBlackSword(0);
+        } catch (IllegalArgumentException expected) {
+            lowRefinementRejected = true;
+        }
+        assertTrue(lowRefinementRejected,
+                "The Black Sword should reject refinement zero");
+
+        boolean highRefinementRejected = false;
+        try {
+            new model.weapon.TheBlackSword(6);
+        } catch (IllegalArgumentException expected) {
+            highRefinementRejected = true;
+        }
+        assertTrue(highRefinementRejected,
+                "The Black Sword should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_AmberCharacterContract() {
