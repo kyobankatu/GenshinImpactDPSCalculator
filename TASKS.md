@@ -14737,3 +14737,51 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Injected Bow Proc Weapon Campaign
+
+Status: Active. Add two complete proc bows with injectable draws, typed hit
+gates, immediate/periodic Physical damage, and exact cooldowns.
+
+Scope:
+
+- Add Skyward Harp and The Viridescent Hunt with sourced metadata, R1-R5
+  values, deterministic constructors, exact proc timing, and regressions.
+
+Out of scope for this pass:
+
+- Multi-target pull/displacement, projectile travel, characters, formulas, RL,
+  generated docs, and unrelated stochastic weapons.
+
+### Phase 1: Add Skyward Harp and The Viridescent Hunt
+
+Target files:
+
+- `src/java/model/weapon/SkywardHarp.java` (new)
+- `src/java/model/weapon/TheViridescentHunt.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Skyward Harp grants 20-40% CRIT DMG; positive hits draw against 60-100%,
+  produce one immediate nonrecursive 125% ATK Physical action, and observe the
+  exact 4-2-second refinement cooldown.
+- Viridescent Hunt positive active-owner Normal/Charged hits draw at 50%; a
+  success schedules exactly eight nonrecursive 40-80% ATK Physical hits at
+  0.5-second cadence over four seconds with exact 14-10-second activation CT.
+- Metadata, draw injection/null rejection, chance thresholds, typed/zero/
+  off-field/recursive gates, R1-R5 defaults, and validation are explicit.
+
+Test cases to add or update:
+
+- Normal: metadata/static CRIT, successful immediate and eight-hit procs, R5.
+- Boundary: exact 0.5/four-second ticks, exact R1/R5 CT, chance threshold, R1.
+- Abnormal: zero/wrong/off-field/recursive hits, failed draw, null draw,
+  refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`

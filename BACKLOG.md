@@ -2487,3 +2487,13 @@ experiment record.
 - **Plan:** `TASKS.md` Five-Star Catalyst Stack Weapon Campaign
 - **Completion:** `ce792c0` adds both stack state machines and focused
   regressions; build/Javadoc/leak gates pass
+
+### B-110 — Injected bow proc weapon coverage
+
+- **Status:** active
+- **Scope:** Skyward Harp and The Viridescent Hunt; RL excluded
+- **Value/risk:** two complete passives reuse injected draws and nonrecursive
+  Physical actions; Cyclone adds only one bounded timer
+- **Evidence boundary:** KQM TCL metadata, R1-R5 CRIT/chance/MV/CT values,
+  immediate Harp proc and eight half-second Cyclone ticks over four seconds
+- **Plan:** `TASKS.md` Injected Bow Proc Weapon Campaign
