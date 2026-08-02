@@ -45,6 +45,7 @@ public final class ChongyunRegressionTest {
         testNormalChargedPlungeAndC1();
         testSkillFieldInfusionParticlesAndC5();
         testTeamFieldC2AndSnapshotRestore();
+        testCharacterStateSnapshotReplay();
         testA4SnapshotResistanceAndBurstConstellations();
         testRecastEarlyA4AndNullWeaponInfusion();
         testC4EnergyAndSimulatorGuard();
@@ -384,13 +385,19 @@ public final class ChongyunRegressionTest {
                 EPS,
                 "snapshot restore recovers field recipient timing");
         sim.advanceTime(8.1);
+        assertClose(0.15,
+                applicableStats(sim, catalyst)
+                        .get(StatType.CD_REDUCTION),
+                EPS,
+                "restored field replays its final recipient refresh");
+        assertFalse(c2.isFormActive(sim.getCurrentTime()),
+                "restored field marker expires normally");
+        sim.advanceTime(2.8);
         assertClose(0.0,
                 applicableStats(sim, catalyst)
                         .get(StatType.CD_REDUCTION),
                 EPS,
-                "restored field recipient buff expires normally");
-        assertFalse(c2.isFormActive(sim.getCurrentTime()),
-                "restored field marker expires normally");
+                "restored final recipient refresh expires normally");
         sim.restoreSnapshot(fieldSnapshot);
         assertClose(0.15,
                 applicableStats(sim, catalyst)
@@ -447,6 +454,64 @@ public final class ChongyunRegressionTest {
         assertBurst(0, 3, 2.4208);
         assertBurst(3, 3, 2.8480);
         assertBurst(6, 4, 2.8480);
+    }
+
+    private static void testCharacterStateSnapshotReplay() {
+        Chongyun chain = chongyunAtConstellation(0);
+        CombatSimulator chainSim = simulatorWith(chain);
+        List<ActionRecord> normals = captureNamedActions(
+                chainSim, "Demonbane N");
+        perform(chainSim, CharacterId.CHONGYUN, CharacterActionKey.NORMAL);
+        SimulatorSnapshot chainSnapshot = chainSim.saveSnapshot();
+        perform(chainSim, CharacterId.CHONGYUN, CharacterActionKey.NORMAL);
+        assertClose(1.15972,
+                normals.get(normals.size() - 1).action.getDamagePercent(),
+                EPS,
+                "Chongyun branch advances to N2");
+        chainSim.restoreSnapshot(chainSnapshot);
+        perform(chainSim, CharacterId.CHONGYUN, CharacterActionKey.NORMAL);
+        assertClose(1.15972,
+                normals.get(normals.size() - 1).action.getDamagePercent(),
+                EPS,
+                "Chongyun restore resumes saved N2");
+
+        Chongyun delayed = chongyunAtConstellation(0);
+        CombatSimulator delayedSim = simulatorWith(delayed);
+        List<ParticleRecord> particles = new ArrayList<>();
+        delayedSim.addParticleListener((element, count, time) ->
+                particles.add(new ParticleRecord(element, count, time)));
+        List<ActionRecord> a4 = captureNamedActions(
+                delayedSim, "Rimechaser Blade");
+        perform(delayedSim, CharacterId.CHONGYUN,
+                CharacterActionKey.SKILL);
+        SimulatorSnapshot delayedSnapshot = delayedSim.saveSnapshot();
+        advanceTo(delayedSim, 655.0 * FRAME);
+        assertEquals(1, particles.size(),
+                "Chongyun branch resolves pending particles");
+        assertEquals(1, a4.size(),
+                "Chongyun branch resolves pending A4");
+        double a4Damage = a4.get(0).damage;
+
+        delayedSim.restoreSnapshot(delayedSnapshot);
+        particles.clear();
+        a4.clear();
+        advanceTo(delayedSim, 655.0 * FRAME);
+        assertEquals(1, particles.size(),
+                "Chongyun restore replays particles once");
+        assertEquals(1, a4.size(),
+                "Chongyun restore replays A4 once");
+        assertClose(a4Damage, a4.get(0).damage, EPS,
+                "Chongyun restored A4 retains snapshot damage");
+
+        delayedSim.restoreSnapshot(delayedSnapshot);
+        delayedSim.restoreSnapshot(delayedSnapshot);
+        particles.clear();
+        a4.clear();
+        advanceTo(delayedSim, 655.0 * FRAME);
+        assertEquals(1, particles.size(),
+                "Chongyun repeated restore keeps one particle event");
+        assertEquals(1, a4.size(),
+                "Chongyun repeated restore keeps one A4 event");
     }
 
     private static void testRecastEarlyA4AndNullWeaponInfusion() {

@@ -1,5 +1,6 @@
 package model.character;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -12,6 +13,7 @@ import model.entity.ArtifactSet;
 import model.entity.Character;
 import model.entity.FormStateProvider;
 import model.entity.SimulatorInitializedCharacterEffect;
+import model.entity.SnapshotAwareCharacterEffect;
 import model.entity.Weapon;
 import model.stats.StatsContainer;
 import model.type.ActionType;
@@ -34,8 +36,7 @@ import simulation.event.SimpleTimerEvent;
  * for B-165. It represents Chongyun's four-hit Normal string, steady claymore
  * Charged hit, high Plunge, Layered Frost, Spirit Blade field, Cloud-Parting
  * Star, deterministic particles, and the representable effects of A1, A4, and
- * C1-C6. The delayed A4 blade owns an independent cast-time snapshot while
- * the initial Skill hit resolves dynamically at impact.
+ * C1-C6. The initial Skill and delayed A4 blade own cast-time snapshots.
  *
  * <p>The shared action model cannot rewrite another character's already-built
  * attack element. The field therefore grants eligible teammates' Normal Attack
@@ -46,7 +47,8 @@ import simulation.event.SimpleTimerEvent;
  */
 public class Chongyun extends Character implements
         FormStateProvider,
-        SimulatorInitializedCharacterEffect {
+        SimulatorInitializedCharacterEffect,
+        SnapshotAwareCharacterEffect {
     private static final double FRAME = 1.0 / 60.0;
     private static final double SKILL_COOLDOWN = 15.0;
     private static final double BURST_COOLDOWN = 12.0;
@@ -58,6 +60,8 @@ public class Chongyun extends Character implements
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
     private long fieldGeneration;
+    private List<Double> pendingParticleTimes = new ArrayList<>();
+    private List<PendingA4> pendingA4Events = new ArrayList<>();
 
     /** Constructs the repository-default C6 Chongyun. */
     public Chongyun(Weapon weapon, ArtifactSet artifacts) {
@@ -165,6 +169,46 @@ public class Chongyun extends Character implements
     @Override
     public boolean isFormActive(double currentTime) {
         return findActiveBuff(FieldStateBuff.class, currentTime) != null;
+    }
+
+    /** Captures Normal-chain and reconstructable future event state. */
+    @Override
+    public State captureCharacterState() {
+        return new ChongyunState(
+                normalAttackStep,
+                fieldGeneration,
+                pendingParticleTimes,
+                pendingA4Events);
+    }
+
+    /** Restores Normal-chain state and re-registers future field events. */
+    @Override
+    public void restoreCharacterState(
+            State state,
+            CombatSimulator simulator) {
+        if (!(state instanceof ChongyunState)) {
+            throw new IllegalArgumentException(
+                    "Unexpected Chongyun snapshot state");
+        }
+        ChongyunState restored = (ChongyunState) state;
+        normalAttackStep = restored.normalAttackStep;
+        fieldGeneration = restored.fieldGeneration;
+        pendingParticleTimes = new ArrayList<>(restored.particleTimes);
+        pendingA4Events = new ArrayList<>(restored.a4Events);
+        double currentTime = simulator.getCurrentTime();
+        pendingParticleTimes.removeIf(time -> time <= currentTime);
+        for (Double time : new ArrayList<>(pendingParticleTimes)) {
+            scheduleParticle(simulator, time);
+        }
+        pendingA4Events.removeIf(event -> event.time <= currentTime);
+        for (PendingA4 event : new ArrayList<>(pendingA4Events)) {
+            schedulePendingA4(simulator, event);
+        }
+        FieldStateBuff field = findActiveBuff(
+                FieldStateBuff.class, currentTime);
+        if (field != null) {
+            scheduleRestoredFieldTicks(simulator, field, currentTime);
+        }
     }
 
     /** Dispatches Chongyun's supported offensive actions. */
@@ -311,13 +355,16 @@ public class Chongyun extends Character implements
                 FieldStateBuff.class, castTime);
         long generation = ++fieldGeneration;
         if (replacedField != null) {
-            schedule(
+            double oldCastTime = replacedField.getStartTime()
+                    - 36.0 * FRAME;
+            double oldNaturalA4Time = oldCastTime + A4_DELAY;
+            pendingA4Events.removeIf(event ->
+                    Math.abs(event.time - oldNaturalA4Time) < 1e-9);
+            queueA4(
                     sim,
                     castTime + 81.0 * FRAME,
-                    activeSim -> resolveA4Blade(
-                            activeSim,
-                            replacedField.getMultiplier(),
-                            replacedField.getA4Snapshot()));
+                    replacedField.getMultiplier(),
+                    replacedField.getA4Snapshot());
         }
         AttackAction skill = attack(
                 "Spirit Blade: Chonghua's Layered Frost",
@@ -346,20 +393,17 @@ public class Chongyun extends Character implements
                     multiplier,
                     a4Snapshot));
             if (activeSim.getEnemy() != null) {
-                schedule(
+                queueParticle(
                         activeSim,
-                        activeSim.getCurrentTime() + PARTICLE_TRAVEL,
-                        particleSim -> particleSim.getEnergyDistributor()
-                                .distributeParticles(
-                                        Element.CRYO,
-                                        getTalentValue(
-                                                "Skill Particles", 4.0),
-                                        ParticleType.PARTICLE));
+                        activeSim.getCurrentTime() + PARTICLE_TRAVEL);
             }
         });
         scheduleFieldTicks(sim, fieldStart, generation);
-        scheduleA4Blade(
-                sim, castTime, generation, multiplier, a4Snapshot);
+        queueA4(
+                sim,
+                castTime + A4_DELAY,
+                multiplier,
+                a4Snapshot);
         sim.advanceTime(52.0 * FRAME);
     }
 
@@ -411,18 +455,63 @@ public class Chongyun extends Character implements
         recipient.addBuff(buff);
     }
 
-    private void scheduleA4Blade(
-            CombatSimulator sim,
-            double castTime,
-            long generation,
-            double multiplier,
-            StatsContainer snapshot) {
-        schedule(sim, castTime + A4_DELAY, activeSim -> {
-            if (generation != fieldGeneration) {
+    private void queueParticle(CombatSimulator sim, double time) {
+        pendingParticleTimes.add(time);
+        scheduleParticle(sim, time);
+    }
+
+    private void scheduleParticle(CombatSimulator sim, double time) {
+        schedule(sim, time, activeSim -> {
+            if (!pendingParticleTimes.remove(time)) {
                 return;
             }
-            resolveA4Blade(activeSim, multiplier, snapshot);
+            activeSim.getEnergyDistributor().distributeParticles(
+                    Element.CRYO,
+                    getTalentValue("Skill Particles", 4.0),
+                    ParticleType.PARTICLE);
         });
+    }
+
+    private void queueA4(
+            CombatSimulator sim,
+            double time,
+            double multiplier,
+            StatsContainer snapshot) {
+        PendingA4 event = new PendingA4(time, multiplier, snapshot);
+        pendingA4Events.add(event);
+        schedulePendingA4(sim, event);
+    }
+
+    private void schedulePendingA4(
+            CombatSimulator sim,
+            PendingA4 event) {
+        schedule(sim, event.time, activeSim -> {
+            if (!pendingA4Events.remove(event)) {
+                return;
+            }
+            resolveA4Blade(
+                    activeSim,
+                    event.multiplier,
+                    event.snapshot);
+        });
+    }
+
+    private void scheduleRestoredFieldTicks(
+            CombatSimulator sim,
+            FieldStateBuff field,
+            double currentTime) {
+        for (int second = 0; second <= 10; second++) {
+            double tickTime = field.getStartTime() + second;
+            if (tickTime <= currentTime
+                    || tickTime > field.getExpirationTime()) {
+                continue;
+            }
+            schedule(sim, tickTime, activeSim -> {
+                if (field.getGeneration() == fieldGeneration) {
+                    applyFieldToActiveCharacter(activeSim);
+                }
+            });
+        }
     }
 
     private void resolveA4Blade(
@@ -705,6 +794,41 @@ public class Chongyun extends Character implements
                     stats -> {
                         // Marker only.
                     });
+        }
+    }
+
+    /** Immutable pending A4 payload with its action-owned stat snapshot. */
+    private static final class PendingA4 {
+        private final double time;
+        private final double multiplier;
+        private final StatsContainer snapshot;
+
+        private PendingA4(
+                double time,
+                double multiplier,
+                StatsContainer snapshot) {
+            this.time = time;
+            this.multiplier = multiplier;
+            this.snapshot = snapshot.merge(null);
+        }
+    }
+
+    /** Immutable Chongyun character snapshot payload. */
+    private static final class ChongyunState implements State {
+        private final int normalAttackStep;
+        private final long fieldGeneration;
+        private final List<Double> particleTimes;
+        private final List<PendingA4> a4Events;
+
+        private ChongyunState(
+                int normalAttackStep,
+                long fieldGeneration,
+                List<Double> particleTimes,
+                List<PendingA4> a4Events) {
+            this.normalAttackStep = normalAttackStep;
+            this.fieldGeneration = fieldGeneration;
+            this.particleTimes = new ArrayList<>(particleTimes);
+            this.a4Events = new ArrayList<>(a4Events);
         }
     }
 }
