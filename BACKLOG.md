@@ -3314,3 +3314,21 @@ experiment record.
   integrated on `dev_0`; unsupported defensive, healing, HP-state,
   exploration, geometry, and realized-CRIT branches remain inactive rather
   than approximated.
+
+### B-156 — Parallel offensive content wave
+
+- **Status:** active
+- **Source:** continued explicit character, weapon, and artifact expansion
+  request with branch-isolated parallel agents
+- **Scope/risk:** nine artifacts, two Max-HP-scaling weapons, and Noelle;
+  shared risk is limited to typed final-stat conversion and character identity
+- **Evidence:** maintained KQM artifact, weapon, and Noelle catalogs, accessed
+  2026-08-03:
+  https://library.keqingmains.com/equipment/artifacts
+  https://library.keqingmains.com/equipment/weapons
+  https://library.keqingmains.com/characters/geo/noelle
+- **Boundary:** current HP, healing, shield durability, incoming damage,
+  stamina, enemy defeat, geometry, Witch's Homework, RL, and generated docs
+  remain excluded.
+- **Proof/plan:** five-phase `TASKS.md` Parallel Offensive Content Wave with
+  focused regressions, full reaction/build/Javadoc gates, and preflight.

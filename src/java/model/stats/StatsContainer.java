@@ -12,7 +12,7 @@ import java.util.EnumMap;
  * default to {@code 0.0} when absent. The container is intentionally simple:
  * no layered base/percent separation is performed here — callers use the
  * composite helper methods ({@link #getTotalAtk()}, etc.) to resolve final
- * values from the stored base, percent, and flat components.
+ * values from the stored base, percent, flat, and typed derived components.
  *
  * <p>
  * Instances are not thread-safe and are expected to be used within a single
@@ -58,7 +58,8 @@ public class StatsContainer {
 
     /**
      * Computes and returns the final ATK value using the standard Genshin
-     * formula: {@code BASE_ATK * (1 + ATK_PERCENT) + ATK_FLAT}.
+     * formula: {@code BASE_ATK * (1 + ATK_PERCENT) + ATK_FLAT}, followed by
+     * any flat ATK derived from final Max HP.
      *
      * @return total ATK
      */
@@ -66,7 +67,8 @@ public class StatsContainer {
         double base = get(StatType.BASE_ATK);
         double pct = get(StatType.ATK_PERCENT);
         double flat = get(StatType.ATK_FLAT);
-        return base * (1.0 + pct) + flat;
+        double maxHpConversion = get(StatType.MAX_HP_TO_ATK_FLAT_RATIO);
+        return base * (1.0 + pct) + flat + getTotalHp() * maxHpConversion;
     }
 
     /**

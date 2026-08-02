@@ -21,6 +21,7 @@ public class MaxHpScalingWeaponRegressionTest {
         testDefaultRefinement();
         testRefinementValuesAndValidation();
         testSuppliedHpConversion();
+        testLateMergedHpConversion();
         testArbitraryTimeAndUnrelatedStats();
         testIndependentInstances();
         testStaffOfHomaLowHpBoundary();
@@ -88,14 +89,38 @@ public class MaxHpScalingWeaponRegressionTest {
 
         PrimordialJadeCutter weapon = new PrimordialJadeCutter(3);
         StatsContainer assembled = supplied.merge(weapon.getStats());
-        weapon.applyPassive(assembled, 17.25);
 
         double expectedMaxHp = 10000.0 * (1.0 + 0.25 + 0.30) + 4780.0;
         assertClose(expectedMaxHp, assembled.getTotalHp(),
                 "supplied Max HP assembly");
-        assertClose(311.0 + expectedMaxHp * 0.018,
-                assembled.get(StatType.ATK_FLAT),
+        assertClose(542.0 + 311.0 + expectedMaxHp * 0.018,
+                assembled.getTotalAtk(),
                 "supplied HP conversion to flat ATK");
+        assertClose(311.0, assembled.get(StatType.ATK_FLAT),
+                "derived conversion should not mutate ordinary flat ATK");
+    }
+
+    /** Verifies artifact and team HP merged after weapon stats still convert. */
+    private static void testLateMergedHpConversion() {
+        PrimordialJadeCutter weapon = new PrimordialJadeCutter(1);
+        StatsContainer base = new StatsContainer();
+        base.set(StatType.BASE_HP, 10000.0);
+        StatsContainer artifact = new StatsContainer();
+        artifact.set(StatType.HP_PERCENT, 0.20);
+        artifact.set(StatType.HP_FLAT, 1000.0);
+        StatsContainer team = new StatsContainer();
+        team.set(StatType.HP_PERCENT, 0.25);
+
+        StatsContainer finalView = base.merge(weapon.getStats())
+                .merge(artifact)
+                .merge(team);
+        double expectedMaxHp = 10000.0 * (1.0 + 0.20 + 0.20 + 0.25)
+                + 1000.0;
+        assertClose(expectedMaxHp, finalView.getTotalHp(),
+                "late-merged artifact and team Max HP");
+        assertClose(542.0 + expectedMaxHp * 0.012,
+                finalView.getTotalAtk(),
+                "late-merged HP conversion");
     }
 
     /** Verifies static timing and preservation of stats outside the passive. */
@@ -104,8 +129,8 @@ public class MaxHpScalingWeaponRegressionTest {
         StatsContainer early = assembledStats(weapon, -123.5);
         StatsContainer late = assembledStats(weapon, 9876.25);
 
-        assertClose(early.get(StatType.ATK_FLAT),
-                late.get(StatType.ATK_FLAT),
+        assertClose(early.getTotalAtk(),
+                late.getTotalAtk(),
                 "arbitrary-time conversion stability");
         assertClose(37.0, early.get(StatType.ELEMENTAL_MASTERY),
                 "unrelated Elemental Mastery preservation");
@@ -124,11 +149,11 @@ public class MaxHpScalingWeaponRegressionTest {
 
         double r1Hp = 12000.0 * (1.0 + 0.10 + 0.20) + 800.0;
         double r5Hp = 12000.0 * (1.0 + 0.10 + 0.40) + 800.0;
-        assertClose(50.0 + r1Hp * 0.012,
-                r1Stats.get(StatType.ATK_FLAT),
+        assertClose(542.0 + 50.0 + r1Hp * 0.012,
+                r1Stats.getTotalAtk(),
                 "R1 independent conversion");
-        assertClose(50.0 + r5Hp * 0.024,
-                r5Stats.get(StatType.ATK_FLAT),
+        assertClose(542.0 + 50.0 + r5Hp * 0.024,
+                r5Stats.getTotalAtk(),
                 "R5 independent conversion");
         assertClose(0.20, r1.getStats().get(StatType.HP_PERCENT),
                 "R1 HP after R5 assembly");
@@ -140,8 +165,8 @@ public class MaxHpScalingWeaponRegressionTest {
         StatsContainer stats = assembledStats(weapon, 42.0);
         double maximumHp = 12000.0 * (1.0 + 0.10 + 0.40) + 800.0;
 
-        assertClose(50.0 + maximumHp * 0.016,
-                stats.get(StatType.ATK_FLAT),
+        assertClose(608.0 + 50.0 + maximumHp * 0.016,
+                stats.getTotalAtk(),
                 "Staff of Homa unconditional conversion only");
         if (weapon.isBelowHalfHpBonusActive()) {
             throw new AssertionError(
@@ -160,9 +185,7 @@ public class MaxHpScalingWeaponRegressionTest {
         supplied.set(StatType.ATK_FLAT, 50.0);
         supplied.set(StatType.ELEMENTAL_MASTERY, 37.0);
         supplied.set(StatType.PYRO_DMG_BONUS, 0.40);
-        StatsContainer assembled = supplied.merge(weapon.getStats());
-        weapon.applyPassive(assembled, currentTime);
-        return assembled;
+        return supplied.merge(weapon.getStats());
     }
 
     /** Checks one weapon's immutable Lv. 90 metadata. */

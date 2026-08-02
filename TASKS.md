@@ -13192,6 +13192,196 @@ Completion evidence:
 - `./gradlew TheExileRegressionTest ReactionRegressionTest build javadoc` and
   `python scripts/preflight.py --run` passed on 2026-08-03.
 
+## Implementation Order: Parallel Offensive Content Wave
+
+Status: In progress. Primary owns plans, artifact batches, shared stat
+integration, and final verification; weapon and character slices remain in
+isolated worktrees until reviewed.
+
+Scope:
+
+- Add nine artifact sets across static boundaries, action windows, and
+  reaction mechanics without inventing unsupported healing or HP state.
+- Add Primordial Jade Cutter and Staff of Homa with late-resolved Max-HP ATK
+  conversion.
+- Add Noelle's representable offensive character slice.
+
+Out of scope:
+
+- Healing events, current/player HP loss, shield durability, incoming damage,
+  stamina, enemy defeat, geometry, exploration, Witch's Homework, RL, and
+  generated docs.
+
+### Phase 1: Static Boundary Artifact Batch
+
+Target files:
+
+- `src/java/model/artifact/EchoesOfAnOffering.java` (new)
+- `src/java/model/artifact/OceanHuedClam.java` (new)
+- `src/java/model/artifact/SongOfDaysPast.java` (new)
+- `src/java/model/artifact/UnfinishedReverie.java` (new)
+- `src/java/sample/StaticArtifactRegressionTest.java`
+
+Acceptance criteria:
+
+- Echoes and Unfinished Reverie grant ATK +18%; Ocean-Hued Clam and Song of
+  Days Past grant Healing Bonus +15%.
+- Echoes probability/ping behavior, healing-derived effects, combat-state
+  ramping, and Burning proximity remain inactive until their required state is
+  modeled; no unrelated bonus is fabricated.
+- Names, fresh/supplied containers, null rejection, independent instances,
+  arbitrary-time stability, and unrelated-stat isolation are exact.
+
+Test cases:
+
+- Normal: canonical names and exact fixed values for all four sets.
+- Boundary: fresh/supplied containers and negative/large simulation times.
+- Abnormal: null stats and zero unsupported conditional bonuses.
+
+Verification:
+
+- `./gradlew StaticArtifactRegressionTest`
+- `./gradlew ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 2: HP-Scaling Five-Star Weapons - Done
+
+Target files:
+
+- `src/java/model/weapon/MaxHpScalingWeapon.java` (new)
+- `src/java/model/weapon/PrimordialJadeCutter.java` (new)
+- `src/java/model/weapon/StaffOfHoma.java` (new)
+- `src/java/model/type/StatType.java`
+- `src/java/model/stats/StatsContainer.java`
+- `src/java/sample/MaxHpScalingWeaponRegressionTest.java` (new)
+
+Acceptance criteria:
+
+- Both weapons expose exact Lv. 90 metadata, R1-R5 HP and conversion values,
+  R5 defaults, and invalid-refinement rejection.
+- Max-HP ATK conversion resolves from the final stat view, including weapon,
+  artifact, flat, and subsequently merged team HP bonuses.
+- Staff of Homa's below-half-HP coefficient remains explicit metadata and
+  inactive while current player HP is unavailable.
+
+Test cases:
+
+- Normal: table-driven metadata/refinement and final Max-HP conversion.
+- Boundary: artifact/team HP merged after weapon stats and arbitrary time.
+- Abnormal: refinement 0/6, unrelated stats, independent instances, and no
+  fabricated low-HP branch.
+
+Verification:
+
+- `./gradlew MaxHpScalingWeaponRegressionTest`
+- `./gradlew ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Primordial Jade Cutter and Staff of Homa expose exact Lv. 90 metadata,
+  R1-R5 HP/conversion coefficients, R5 defaults, and validation.
+- A typed derived ratio is resolved by final `StatsContainer#getTotalAtk`, so
+  weapon, artifact, flat, and later-merged team HP all contribute without
+  ordering-dependent mutation; Homa's current-HP branch remains inactive.
+- `./gradlew MaxHpScalingWeaponRegressionTest ReactionRegressionTest build
+  javadoc` and `python scripts/preflight.py --run` passed on 2026-08-03.
+
+### Phase 3: Noelle Offensive Vertical Slice
+
+Target files:
+
+- `src/java/model/character/Noelle.java` (new)
+- `config/characters/Noelle/Noelle_Status.csv` (new)
+- `config/characters/Noelle/Noelle_Multipliers.csv` (new)
+- `src/java/model/type/CharacterId.java`
+- `src/java/sample/NoelleRegressionTest.java` (new)
+
+Acceptance criteria:
+
+- Noelle loads exact base/talent data and exposes typed Normal, Charged,
+  Plunging, Skill, and Burst actions with sourced timing, gauge, and ICD.
+- Sweeping Time's cast, Geo infusion, duration, and DEF-to-ATK conversion plus
+  representable offensive constellations are exact.
+- Healing, shield durability, incoming damage, stamina, enemy-defeat duration,
+  and geometry remain inactive instead of approximated.
+
+Test cases:
+
+- Normal: metadata, all action categories, Skill/Burst, infusion/conversion,
+  and implemented constellation branches.
+- Boundary: Energy/cooldown gates, exact form expiry, talent-level and snapshot
+  behavior that the current runtime can restore.
+- Abnormal: invalid constellation, unsupported paths, independent instances,
+  and cross-simulator reuse for bound runtime state.
+
+Verification:
+
+- `./gradlew NoelleRegressionTest PartyCatalogRegressionTest`
+- `./gradlew ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 4: Skill and Burst Window Artifact Batch
+
+Target files:
+
+- `src/java/model/artifact/ADayCarvedFromRisingWinds.java` (new)
+- `src/java/model/artifact/NighttimeWhispersInTheEchoingWoods.java` (new)
+- `src/java/model/artifact/VermillionHereafter.java` (new)
+- focused artifact regression executables
+- `src/java/mechanics/buff/BuffId.java` only when typed mutable state is needed
+
+Acceptance criteria:
+
+- Exact two-piece stats and representable owner hit/Skill/Burst windows use
+  post-gate typed callbacks, half-open expiry, refresh, and source isolation.
+- Witch's Homework, Crystallize shielding, current-HP decrease stacks, and
+  other unavailable enhancements remain inactive.
+
+Test cases:
+
+- Normal: accepted triggers and exact values/durations.
+- Boundary: trigger ordering, expiry/refresh, swap behavior, and snapshot state.
+- Abnormal: rejected actions, wrong owner/simulator, unsupported enhancements,
+  and independent instances.
+
+Verification:
+
+- focused artifact regressions
+- `./gradlew ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 5: Reaction Artifact Batch
+
+Target files:
+
+- `src/java/model/artifact/CrimsonWitchOfFlames.java` (new)
+- `src/java/model/artifact/ThunderingFury.java` (new)
+- focused artifact regression executables
+- `src/java/mechanics/buff/BuffId.java`
+
+Acceptance criteria:
+
+- Exact elemental and reaction bonuses are routed to existing typed reaction
+  stats; Crimson Witch Skill stacks and Thundering Fury's 0.8-second cooldown
+  reduction gate are owner/simulator scoped.
+- Post-reaction ordering, off-field eligibility, refresh, and snapshot state
+  match the current reaction callback contract.
+
+Test cases:
+
+- Normal: every supported reaction family and Skill trigger.
+- Boundary: 10-second/0.8-second windows, stack cap/refresh, off-field owner,
+  and exact cooldown reduction.
+- Abnormal: NONE/unrelated reactions, wrong owner/simulator, null callbacks,
+  and independent instances.
+
+Verification:
+
+- focused artifact regressions
+- `./gradlew ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
 ## Implementation Order: Black Sword Campaign
 
 Status: Complete. This campaign adds one complete offensive weapon passive

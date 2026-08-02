@@ -35,6 +35,11 @@ public enum StatType {
     ATK_PERCENT,
     /** Flat ATK bonus added after percent scaling. */
     ATK_FLAT,
+    /**
+     * Flat ATK derived from final Max HP, expressed as an additive ratio.
+     * Resolved lazily so HP sources merged later remain part of the conversion.
+     */
+    MAX_HP_TO_ATK_FLAT_RATIO,
 
     /** Character's base DEF from level/ascension. */
     BASE_DEF,

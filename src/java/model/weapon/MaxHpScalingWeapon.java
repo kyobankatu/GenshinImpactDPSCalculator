@@ -8,10 +8,9 @@ import model.type.WeaponType;
 /**
  * Shared implementation for weapons that convert Max HP into flat ATK.
  *
- * <p>The weapon's HP bonus is part of its ordinary stat container, so
- * {@link StatsContainer#getTotalHp()} resolves the conversion from base HP,
- * every supplied HP percentage, and supplied flat HP. The conversion is
- * unconditional and independent of simulation time.</p>
+ * <p>The conversion ratio is stored as a typed derived stat. Therefore
+ * {@link StatsContainer#getTotalAtk()} resolves it from final Max HP after
+ * artifact and team HP sources have also been merged.</p>
  */
 public abstract class MaxHpScalingWeapon extends Weapon {
     private final int refinement;
@@ -49,6 +48,9 @@ public abstract class MaxHpScalingWeapon extends Weapon {
         getStats().set(StatType.BASE_ATK, baseAtk);
         getStats().set(substatType, substatValue);
         getStats().set(StatType.HP_PERCENT, hpBonus);
+        getStats().set(
+                StatType.MAX_HP_TO_ATK_FLAT_RATIO,
+                maxHpAttackConversion);
     }
 
     /**
@@ -69,15 +71,4 @@ public abstract class MaxHpScalingWeapon extends Weapon {
         return maxHpAttackConversion;
     }
 
-    /**
-     * Applies flat ATK derived from the Max HP in the supplied stat view.
-     *
-     * @param stats assembled stats containing all HP sources to convert
-     * @param currentTime simulation time in seconds; does not affect this passive
-     */
-    @Override
-    public final void applyPassive(StatsContainer stats, double currentTime) {
-        stats.add(StatType.ATK_FLAT,
-                stats.getTotalHp() * maxHpAttackConversion);
-    }
 }
