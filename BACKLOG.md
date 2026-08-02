@@ -3382,7 +3382,7 @@ experiment record.
 
 ### B-159 — Derived-damage weapons and summon characters wave
 
-- **Status:** in-progress
+- **Status:** done
 - **Source:** post-B-158 branch-safe character/weapon/artifact inventory and
   the continued broad simulator-content request
 - **Scope/risk:** four shared derived-damage paths, four weapons, Yae Miko,
@@ -3395,6 +3395,11 @@ experiment record.
 - **Proof/plan:** five-phase `TASKS.md` Derived-Damage Weapons and Summon
   Characters Wave with focused regressions, full local gates, and snapshot/
   owner-isolation checks.
+- **Closure:** derived-action primitives, Cinnabar Spindle, Light of Foliar
+  Incision, Hunter's Path, Key of Khaj-Nisut, Yae Miko, and Albedo are
+  integrated on `dev_0`. Independent review findings for low-constellation
+  talent routing, summon lifetime, buff targeting, indirect reaction damage,
+  Burst exclusions/ICD, and C1/C2 timing were resolved before closure.
 
 ### B-160 — Initiate artifact image without sourced set contract
 

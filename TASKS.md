@@ -13672,9 +13672,9 @@ Completion evidence:
 
 ## Implementation Order: Derived-Damage Weapons and Summon Characters Wave
 
-Status: In progress. Primary owns shared typed formula/identity primitives and
-integration; three disjoint implementation lanes start from the published
-baseline. RL, generated docs, and Deferred Systems remain excluded.
+Status: Complete. Shared typed formula/identity primitives, four weapons, Yae
+Miko, and Albedo are integrated on `dev_0`. RL, generated docs, and Deferred
+Systems remained excluded.
 
 Evidence:
 
@@ -13704,7 +13704,7 @@ Out of scope:
   construct durability, hitlag, projectile/weak-point behavior, placement,
   multi-target geometry, RL, parties, and generated docs.
 
-### Phase 1: Shared Derived-Damage and Identity Baseline
+### Phase 1: Shared Derived-Damage and Identity Baseline - Done
 
 Target files:
 
@@ -13736,7 +13736,7 @@ Verification:
 - `./gradlew DerivedActionDamageRegressionTest ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
 
-### Phase 2: Cinnabar, Foliar, and Hunter Derived-Damage Weapons
+### Phase 2: Cinnabar, Foliar, and Hunter Derived-Damage Weapons - Done
 
 Target files:
 
@@ -13773,7 +13773,7 @@ Verification:
 - `./gradlew ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Key of Khaj-Nisut
+### Phase 3: Key of Khaj-Nisut - Done
 
 Target files:
 
@@ -13787,9 +13787,10 @@ Acceptance criteria:
   coefficients are exposed.
 - On-field true Skill hits gain at most one stack per 0.3 seconds, up to three;
   stacks share one refreshed 20-second expiry and survive switching.
-- Each gained stack stores current final Max HP once. Reaching or refreshing
-  stack three creates one typed, replace-not-stack, 20-second team EM buff from
-  current final Max HP; the owner receives both owner and team portions.
+- Each valid acquisition or cap refresh recalculates all owner-stack EM from
+  current final Max HP. Reaching or refreshing stack three creates one typed,
+  replace-not-stack, 20-second team EM buff from current final Max HP; the
+  owner receives both owner and team portions.
 - Weapon state and team buff behavior are deterministic and snapshot-safe.
 
 Test cases:
@@ -13804,7 +13805,7 @@ Verification:
 - `./gradlew KeyOfKhajNisutRegressionTest ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
 
-### Phase 4: Yae Miko Offensive Vertical Slice
+### Phase 4: Yae Miko Offensive Vertical Slice - Done
 
 Target files:
 
@@ -13838,7 +13839,7 @@ Verification:
 - `./gradlew ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
 
-### Phase 5: Albedo Offensive Vertical Slice
+### Phase 5: Albedo Offensive Vertical Slice - Done
 
 Target files:
 
@@ -13858,6 +13859,8 @@ Acceptance criteria:
   branches are covered while C6 shield and Hexerei additions remain inactive.
 - Any-party damage may trigger one blossom per CT without recursive retrigger;
   state/listeners are owner-local and stale generations are rejected.
+- Periodic reaction damage uses a separate indirect-damage listener contract;
+  Burst/Fatal Blossom remain excluded, and C1/C2 apply at trigger time.
 
 Test cases:
 
@@ -13872,6 +13875,15 @@ Verification:
 - `./gradlew AlbedoRegressionTest PartyCatalogRegressionTest`
 - `./gradlew ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
+
+### B-159 Closure Verification
+
+- Focused derived-action, four-weapon, Yae Miko, and Albedo regressions pass.
+- Party catalog, reaction regression, build, Javadoc, and executable preflight
+  pass on the combined tree.
+- Independent reviews resolved low-constellation Yae CSV routing, C4 target
+  scope, Sakura lifetime, Albedo Burst/Fatal exclusions, indirect reaction
+  triggers, C1/C2 timing, Burst ICD, and exact C2 DEF conversion coverage.
 
 ## Implementation Order: Derived-Stat Equipment and Fischl Content Wave
 
