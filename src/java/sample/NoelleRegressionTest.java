@@ -237,6 +237,19 @@ public final class NoelleRegressionTest {
                 "Noelle Skill cooldown should permit exactly two requested casts");
         assertClose(24.0 + 15.0 / 60.0, gatedHits.get(1).time, EPS,
                 "Noelle second Breastplate should wait for cooldown");
+
+        Noelle persistent = noelleAtConstellation(0);
+        CombatSimulator persistentSim = simulatorWith(persistent);
+        perform(persistentSim, CharacterActionKey.SKILL);
+        for (int i = 0; i < 3; i++) {
+            perform(persistentSim, CharacterActionKey.NORMAL);
+        }
+        perform(persistentSim, CharacterActionKey.SKILL);
+        double recastCooldownEnd = persistent.getSkillCooldownEndTime();
+        perform(persistentSim, CharacterActionKey.NORMAL);
+        assertClose(recastCooldownEnd - 1.0,
+                persistent.getSkillCooldownEndTime(), EPS,
+                "Noelle A4 partial count should persist across Breastplate casts");
     }
 
     private static void testBurstEnergyCooldownAndCastHits() {

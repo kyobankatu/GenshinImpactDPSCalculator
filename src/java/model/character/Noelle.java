@@ -302,8 +302,6 @@ public class Noelle extends Character implements
                 getTalentValue("Breastplate Duration", BREASTPLATE_DURATION),
                 castTime);
         addBuff(breastplate);
-        a4HitCount = 0;
-        lastA4HitTime = Double.NEGATIVE_INFINITY;
 
         double defaultMultiplier = constellation >= 3 ? 2.40 : 2.04;
         AttackAction hit = new AttackAction(
