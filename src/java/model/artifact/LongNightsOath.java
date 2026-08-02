@@ -16,14 +16,14 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 
 /**
- * Long Night's Oath with shared-duration Radiance stacks.
+ * Long Night's Oath with independently expiring Radiance stacks.
  *
  * <p>The fixed two-piece bonus grants 25% Plunging Attack DMG. Positive
  * Plunging, Charged, and Skill hits by the bound owner grant one, two, and two
  * Radiance stacks respectively after the hit. Each stack grants another 15%
  * Plunging Attack DMG, up to five stacks. The three trigger categories have
- * independent one-second cooldowns. Gaining any new stack refreshes every
- * active stack into one shared six-second window.</p>
+ * independent one-second cooldowns. Every stack retains its own six-second
+ * duration from the hit that granted it.</p>
  */
 public class LongNightsOath extends ArtifactSet
         implements SimulatorInitializedArtifactEffect,
@@ -129,7 +129,7 @@ public class LongNightsOath extends ArtifactSet
         if (gainedStacks <= 0) {
             return;
         }
-        replaceRadianceStacks(activeStacks + gainedStacks, currentTime);
+        addRadianceStacks(gainedStacks, currentTime);
     }
 
     /** Returns whether a callback belongs to the initialized artifact binding. */
@@ -181,9 +181,8 @@ public class LongNightsOath extends ArtifactSet
                 }).sourcedBy(owner.getCharacterId()));
     }
 
-    /** Rebuilds every active stack into one shared six-second window. */
-    private void replaceRadianceStacks(int stackCount, double currentTime) {
-        owner.removeBuff(BuffId.LONG_NIGHTS_OATH_RADIANCE_STACK);
+    /** Adds independently expiring Radiance stacks from one accepted hit. */
+    private void addRadianceStacks(int stackCount, double currentTime) {
         for (int i = 0; i < stackCount; i++) {
             owner.addBuff(new SimpleBuff(
                     "Long Night's Oath: Radiance",

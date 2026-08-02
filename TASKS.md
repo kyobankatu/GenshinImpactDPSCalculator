@@ -12923,15 +12923,15 @@ Acceptance criteria and tests:
 
 - Preserve supplied stats and add Plunging DMG +25%; positive owner Plunge,
   Charged, and Skill hits add 1/2/2 Radiance stacks after damage, up to five.
-- Each trigger category has an independent one-second CT; every accepted gain
-  refreshes the shared six-second window and grants 15% Plunging DMG per stack.
-- Cover trigger-hit ordering, all categories, CT independence, cap/refresh,
+- Each trigger category has an independent one-second CT; every stack grants
+  15% Plunging DMG and expires independently six seconds after its gain.
+- Cover trigger-hit ordering, all categories, CT independence, cap/expiry,
   5.999/6.000 expiry, invalid callbacks/binding, and snapshot restore.
 
 Completion evidence:
 
 - Typed owner buffs model independent Plunge/Charged/Skill cooldowns and five
-  Radiance stacks whose shared six-second window refreshes only on a new gain.
+  Radiance stacks with separately retained six-second expiry windows.
 - Post-hit ordering, 1/2/2 category gains, exact CT/expiry, cap behavior,
   off-field and fallback Skill metadata, invalid callbacks, rollback, reaction
   regression, build, Javadoc, party catalog, and preflight pass.

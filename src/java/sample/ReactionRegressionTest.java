@@ -15405,23 +15405,40 @@ public class ReactionRegressionTest {
                 sim.getCurrentTime());
         assertEquals(2, refreshedStacks.size(),
                 "Long Night Plunge should reactivate at one second");
-        for (Buff stack : refreshedStacks) {
-            assertClose(sim.getCurrentTime() + 6.0,
-                    stack.getExpirationTime(), EPS,
-                    "Long Night new gain should refresh shared expiry");
-        }
-        sim.advanceTime(5.999);
+        assertClose(6.0, refreshedStacks.get(0).getExpirationTime(), EPS,
+                "Long Night first stack should retain independent expiry");
+        assertClose(sim.getCurrentTime() + 6.0,
+                refreshedStacks.get(1).getExpirationTime(), EPS,
+                "Long Night second stack should receive a fresh expiry");
+        sim.advanceTime(4.999);
         assertEquals(2, activeBuffCount(
                         owner,
                         BuffId.LONG_NIGHTS_OATH_RADIANCE_STACK,
                         sim.getCurrentTime()),
-                "Long Night Radiance should remain at 5.999 seconds");
+                "Long Night first Radiance should remain at 5.999 seconds");
+        sim.advanceTime(0.001 + 1e-9);
+        assertEquals(1, activeBuffCount(
+                        owner,
+                        BuffId.LONG_NIGHTS_OATH_RADIANCE_STACK,
+                        sim.getCurrentTime()),
+                "Long Night first Radiance should expire at six seconds");
+        assertClose(0.40,
+                resolvedStat(
+                        sim, owner, StatType.PLUNGING_ATTACK_DMG_BONUS),
+                EPS,
+                "Long Night should retain its second independent stack");
+        sim.advanceTime(0.999);
+        assertEquals(1, activeBuffCount(
+                        owner,
+                        BuffId.LONG_NIGHTS_OATH_RADIANCE_STACK,
+                        sim.getCurrentTime()),
+                "Long Night second Radiance should remain at 5.999 seconds");
         sim.advanceTime(0.001 + 1e-9);
         assertEquals(0, activeBuffCount(
                         owner,
                         BuffId.LONG_NIGHTS_OATH_RADIANCE_STACK,
                         sim.getCurrentTime()),
-                "Long Night Radiance should expire at exactly six seconds");
+                "Long Night second Radiance should expire at six seconds");
         assertClose(0.25,
                 resolvedStat(
                         sim, owner, StatType.PLUNGING_ATTACK_DMG_BONUS),

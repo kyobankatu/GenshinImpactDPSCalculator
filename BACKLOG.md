@@ -3196,3 +3196,20 @@ experiment record.
 - **Closure:** Shimenawa's Reminiscence, Flower of Paradise Lost, and Long
   Night's Oath pass focused and full gates with typed, snapshot-safe runtime
   windows, cooldowns, and stack boundaries.
+
+### B-150 — Long Night's Oath independent stack expiry correction
+
+- **Status:** done
+- **Source:** current KQM artifact catalog/evidence reconciliation after B-149
+- **Symptom:** B-149 incorrectly refreshed all Radiance stacks into one shared
+  six-second window, while the maintained description states that each stack's
+  duration is counted independently.
+- **Scope/risk:** `LongNightsOath` and focused artifact regression; local
+- **Proof:** staggered `[0,6)` and `[1,7)` stack expiry plus full Java gates
+- **Evidence:** KQM artifact catalog and evidence vault, accessed 2026-08-02:
+  https://library.keqingmains.com/equipment/artifacts
+  https://library.keqingmains.com/evidence/equipment/artifacts
+- **Boundary:** retain post-hit gain, independent category CTs, 1/2/2 grants,
+  five-stack cap, off-field behavior, and snapshot representation.
+- **Closure:** staggered stacks now retain separate six-second typed windows;
+  exact expiry, cap, post-hit ordering, snapshot, and full gates pass.
