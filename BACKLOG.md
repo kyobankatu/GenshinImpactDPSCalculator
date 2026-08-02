@@ -2454,10 +2454,12 @@ experiment record.
 
 ### B-107 — Energy-conditional emblem weapon coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Mistsplitter Reforged and Thundering Pulse; RL excluded
 - **Value/risk:** two complete passives reuse typed pre/post action ordering and
   live owner Energy without shared dispatch changes
 - **Evidence boundary:** KQM TCL metadata, R1-R5 static/emblem tiers, five/ten-
   second independent stacks, elemental/Normal hit gates, and Energy-full state
 - **Plan:** `TASKS.md` Energy-Conditional Emblem Weapon Campaign
+- **Completion:** `a3935ae` adds both emblem state machines and focused
+  regressions; build/Javadoc/leak gates pass

@@ -14571,7 +14571,7 @@ Verification:
 
 ## Implementation Order: Energy-Conditional Emblem Weapon Campaign
 
-Status: Active. Add two complete five-star emblem weapons using typed actions,
+Status: Complete. Two five-star emblem weapons now use typed actions,
 post-damage stacks, and live Energy fullness.
 
 Scope:
@@ -14584,13 +14584,20 @@ Out of scope for this pass:
 - Projectile travel, infusion providers, characters, formulas, RL, generated
   docs, and unrelated emblem weapons.
 
-### Phase 1: Add Mistsplitter Reforged and Thundering Pulse
+### Phase 1: Add Mistsplitter Reforged and Thundering Pulse - Done (`a3935ae`)
 
 Target files:
 
 - `src/java/model/weapon/MistsplitterReforged.java` (new)
 - `src/java/model/weapon/ThunderingPulse.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Mistsplitter proves every elemental static bonus, all three independent
+  R1/R5 emblem tiers, exact Energy-full removal, expiry, and invalid hit gates.
+- Thundering proves static ATK, Normal-only emblem tiers, Skill pre-order,
+  exact expiry, off-field exclusions, and binding; all project gates pass.
 
 Acceptance criteria:
 
