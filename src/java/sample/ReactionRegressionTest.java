@@ -4772,6 +4772,22 @@ public class ReactionRegressionTest {
     }
 
     private static void testAccuracyPhaseF_DragonsBaneTargetAuraContract() {
+        boolean lowRefinementRejected = false;
+        try {
+            new model.weapon.DragonsBane(0);
+        } catch (IllegalArgumentException expected) {
+            lowRefinementRejected = true;
+        }
+        assertTrue(lowRefinementRejected, "Dragon's Bane should reject refinement zero");
+
+        boolean highRefinementRejected = false;
+        try {
+            new model.weapon.DragonsBane(6);
+        } catch (IllegalArgumentException expected) {
+            highRefinementRejected = true;
+        }
+        assertTrue(highRefinementRejected, "Dragon's Bane should reject refinement six");
+
         TestCharacter owner = testCharacter(Element.PYRO);
         owner.setWeapon(new model.weapon.DragonsBane());
         CombatSimulator sim = simulatorWith(owner);
@@ -4843,6 +4859,17 @@ public class ReactionRegressionTest {
                 "Snapshot hit should lose the bonus when the target aura is removed");
         assertClose(0.0, owner.getSnapshot().get(StatType.DMG_BONUS_ALL), EPS,
                 "Dragon's Bane target bonus should never be stored in the snapshot");
+
+        TestCharacter r1Owner = testCharacter(Element.PYRO);
+        model.weapon.DragonsBane r1Weapon = new model.weapon.DragonsBane(1);
+        r1Owner.setWeapon(r1Weapon);
+        CombatSimulator r1Sim = simulatorWith(r1Owner);
+        double r1BaseDamage = calculateDirectDamage(r1Sim, r1Owner, directHit, 0.0, 1.0);
+        r1Sim.getEnemy().setAura(Element.HYDRO, 1.0);
+        assertClose(r1BaseDamage * 1.20,
+                calculateDirectDamage(r1Sim, r1Owner, directHit, 0.0, 1.0), EPS,
+                "R1 Dragon's Bane should grant 20% damage against Hydro aura");
+        assertEquals(1, r1Weapon.getRefinement(), "Dragon's Bane should expose refinement rank");
     }
 
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
