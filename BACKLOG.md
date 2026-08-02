@@ -2753,7 +2753,7 @@ experiment record.
 
 ### B-127 — Expanded artifact set coverage
 
-- **Status:** in-progress
+- **Status:** done
 - **Source:** explicit broad content-coverage request
 - **Scope:** Wanderer's Troupe, Finale of the Deep Galleries, Instructor,
   Deepwood Memories, Blizzard Strayer, and Nymph's Dream; RL excluded
@@ -2769,3 +2769,6 @@ experiment record.
 - **Risk/proof:** planned; focused regressions plus reaction regression, build,
   Javadoc, and preflight
 - **Plan:** `TASKS.md` Expanded Artifact Coverage Campaign
+- **Completion:** all six sets pass focused metadata, supplied-stat, owner,
+  field, target-state, energy, reaction, hit-category, exact timing, invalid
+  callback, reaction regression, build, Javadoc, and preflight checks

@@ -159,6 +159,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_CoreArtifactSetsPhaseTwo();
         testAccuracyPhaseF_ExpandedArtifactSetsPhaseOne();
         testAccuracyPhaseF_ExpandedArtifactSetsPhaseTwo();
+        testAccuracyPhaseF_ExpandedArtifactSetsPhaseThree();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -11675,6 +11676,190 @@ public class ReactionRegressionTest {
                 "Instructor should reject null supplied stats");
         assertTrue(nullDeepwoodStatsRejected,
                 "Deepwood should reject null supplied stats");
+    }
+
+    private static void testAccuracyPhaseF_ExpandedArtifactSetsPhaseThree() {
+        StatsContainer blizzardStats = new StatsContainer();
+        blizzardStats.set(StatType.CRIT_DMG, 0.20);
+        model.artifact.BlizzardStrayer suppliedBlizzard =
+                new model.artifact.BlizzardStrayer(blizzardStats);
+        assertEquals("Blizzard Strayer", suppliedBlizzard.getName(),
+                "Blizzard Strayer display name");
+        assertClose(0.15,
+                suppliedBlizzard.getStats().get(StatType.CRYO_DMG_BONUS),
+                EPS, "Blizzard Strayer two-piece Cryo bonus");
+        assertClose(0.20,
+                suppliedBlizzard.getStats().get(StatType.CRIT_DMG), EPS,
+                "Blizzard Strayer should preserve supplied stats");
+
+        model.artifact.BlizzardStrayer blizzard =
+                new model.artifact.BlizzardStrayer();
+        TestCharacter blizzardOwner = testCharacter(
+                Element.CRYO, CharacterId.SUCROSE);
+        blizzardOwner.setArtifacts(blizzard);
+        CombatSimulator blizzardSim = simulatorWith(blizzardOwner);
+        assertClose(0.05,
+                resolvedStat(blizzardSim, blizzardOwner, StatType.CRIT_RATE),
+                EPS, "Blizzard clear-target CRIT Rate");
+        blizzardSim.getEnemy().setAura(Element.CRYO, 1.0, 0.0);
+        assertClose(0.25,
+                resolvedStat(blizzardSim, blizzardOwner, StatType.CRIT_RATE),
+                EPS, "Blizzard Cryo-affected CRIT Rate");
+        blizzardSim.getEnemy().setAura(Element.CRYO, 0.0, 0.0);
+        blizzardSim.getEnemy().setFreezeAura(2.0, 0.0);
+        assertClose(0.45,
+                resolvedStat(blizzardSim, blizzardOwner, StatType.CRIT_RATE),
+                EPS, "Blizzard literal-Freeze CRIT Rate");
+        blizzardSim.getEnemy().clearFreezeAura(0.0);
+        blizzardSim.getEnemy().setAura(Element.HYDRO, 1.0, 0.0);
+        AttackAction freezeApplyingHit = reactionHit(
+                "Blizzard Freeze applying fixture", Element.CRYO);
+        assertClose(0.05,
+                resolvedStat(blizzardSim, blizzardOwner, StatType.CRIT_RATE),
+                EPS, "Blizzard should not pre-apply Freeze state");
+        blizzardSim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, freezeApplyingHit);
+        assertClose(0.45,
+                resolvedStat(blizzardSim, blizzardOwner, StatType.CRIT_RATE),
+                EPS, "Blizzard should observe Freeze after the applying hit");
+        blizzardSim.setEnemy(null);
+        assertClose(0.05,
+                effectiveStatAt(blizzardOwner, StatType.CRIT_RATE, 0.0), EPS,
+                "Blizzard should tolerate a null enemy");
+        blizzard.initializeForSimulator(blizzardOwner, blizzardSim, true);
+        boolean blizzardCrossSimulatorRejected = false;
+        try {
+            blizzard.initializeForSimulator(
+                    blizzardOwner, new CombatSimulator(), true);
+        } catch (IllegalStateException expected) {
+            blizzardCrossSimulatorRejected = true;
+        }
+        assertTrue(blizzardCrossSimulatorRejected,
+                "Blizzard should reject cross-simulator reuse");
+
+        StatsContainer nymphStats = new StatsContainer();
+        nymphStats.set(StatType.CRIT_RATE, 0.10);
+        model.artifact.NymphsDream suppliedNymph =
+                new model.artifact.NymphsDream(nymphStats);
+        assertEquals("Nymph's Dream", suppliedNymph.getName(),
+                "Nymph's Dream display name");
+        assertClose(0.15,
+                suppliedNymph.getStats().get(StatType.HYDRO_DMG_BONUS), EPS,
+                "Nymph's Dream two-piece Hydro bonus");
+        assertClose(0.10,
+                suppliedNymph.getStats().get(StatType.CRIT_RATE), EPS,
+                "Nymph's Dream should preserve supplied stats");
+
+        model.artifact.NymphsDream nymph =
+                new model.artifact.NymphsDream();
+        TestCharacter nymphOwner = testCharacter(
+                Element.HYDRO, CharacterId.SUCROSE);
+        nymphOwner.setArtifacts(nymph);
+        CombatSimulator nymphSim = simulatorWith(nymphOwner);
+        AttackAction nymphNormal = typedDamageHit(
+                "Nymph Normal fixture", ActionType.NORMAL, 1.0);
+        AttackAction nymphCharge = typedDamageHit(
+                "Nymph Charge fixture", ActionType.CHARGE, 1.0);
+        AttackAction nymphPlunge = typedDamageHit(
+                "Nymph Plunge fixture", ActionType.PLUNGE, 1.0);
+        AttackAction nymphSkill = typedDamageHit(
+                "Nymph Skill fixture", ActionType.SKILL, 1.0);
+        AttackAction nymphBurst = typedDamageHit(
+                "Nymph Burst fixture", ActionType.BURST, 1.0);
+        AttackAction nymphOther = typedDamageHit(
+                "Nymph Other fixture", ActionType.OTHER, 1.0);
+        nymph.onDamage(nymphSim, nymphOther, 100.0, nymphOwner);
+        nymph.onDamage(nymphSim, nymphNormal, 0.0, nymphOwner);
+        assertClose(0.0,
+                resolvedStat(nymphSim, nymphOwner, StatType.ATK_PERCENT),
+                EPS, "Nymph should reject unclassified and zero-damage hits");
+        nymph.onDamage(nymphSim, nymphNormal, 100.0, nymphOwner);
+        assertClose(0.07,
+                resolvedStat(nymphSim, nymphOwner, StatType.ATK_PERCENT),
+                EPS, "Nymph one-category ATK tier");
+        assertClose(0.19,
+                resolvedStat(nymphSim, nymphOwner,
+                        StatType.HYDRO_DMG_BONUS), EPS,
+                "Nymph one-category Hydro tier plus two-piece");
+        nymphSim.advanceTime(1.0);
+        nymph.onDamage(nymphSim, nymphCharge, 100.0, nymphOwner);
+        assertClose(0.16,
+                resolvedStat(nymphSim, nymphOwner, StatType.ATK_PERCENT),
+                EPS, "Nymph two-category ATK tier");
+        assertClose(0.24,
+                resolvedStat(nymphSim, nymphOwner,
+                        StatType.HYDRO_DMG_BONUS), EPS,
+                "Nymph two-category Hydro tier plus two-piece");
+        nymphSim.advanceTime(1.0);
+        nymph.onDamage(nymphSim, nymphPlunge, 100.0, nymphOwner);
+        assertClose(0.25,
+                resolvedStat(nymphSim, nymphOwner, StatType.ATK_PERCENT),
+                EPS, "Nymph three-category ATK tier");
+        assertClose(0.30,
+                resolvedStat(nymphSim, nymphOwner,
+                        StatType.HYDRO_DMG_BONUS), EPS,
+                "Nymph three-category Hydro tier plus two-piece");
+        nymph.onDamage(nymphSim, nymphSkill, 100.0, nymphOwner);
+        nymph.onDamage(nymphSim, nymphBurst, 100.0, nymphOwner);
+        assertClose(0.25,
+                resolvedStat(nymphSim, nymphOwner, StatType.ATK_PERCENT),
+                EPS, "Nymph should cap at the three-or-more tier");
+        nymphSim.advanceTime(5.999);
+        assertClose(0.25,
+                resolvedStat(nymphSim, nymphOwner, StatType.ATK_PERCENT),
+                EPS, "Nymph before first category expiry");
+        nymphSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.25,
+                resolvedStat(nymphSim, nymphOwner, StatType.ATK_PERCENT),
+                EPS, "Nymph remaining four categories stay capped");
+        nymphSim.advanceTime(1.0);
+        assertClose(0.25,
+                resolvedStat(nymphSim, nymphOwner, StatType.ATK_PERCENT),
+                EPS, "Nymph remaining three categories stay capped");
+        nymphSim.advanceTime(1.0);
+        assertClose(0.0,
+                resolvedStat(nymphSim, nymphOwner, StatType.ATK_PERCENT),
+                EPS, "Nymph simultaneous later categories expire exactly");
+
+        model.artifact.NymphsDream refreshNymph =
+                new model.artifact.NymphsDream();
+        TestCharacter refreshOwner = testCharacter(Element.HYDRO);
+        refreshOwner.setArtifacts(refreshNymph);
+        CombatSimulator refreshSim = simulatorWith(refreshOwner);
+        refreshNymph.onDamage(refreshSim, nymphNormal, 100.0, refreshOwner);
+        refreshSim.advanceTime(4.0);
+        refreshNymph.onDamage(refreshSim, nymphNormal, 100.0, refreshOwner);
+        assertClose(0.07,
+                resolvedStat(refreshSim, refreshOwner, StatType.ATK_PERCENT),
+                EPS, "Nymph same category should refresh without stacking");
+        refreshSim.advanceTime(7.999);
+        assertClose(0.07,
+                resolvedStat(refreshSim, refreshOwner, StatType.ATK_PERCENT),
+                EPS, "Nymph before same-category refreshed expiry");
+        refreshSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0,
+                resolvedStat(refreshSim, refreshOwner, StatType.ATK_PERCENT),
+                EPS, "Nymph at exact same-category refreshed expiry");
+
+        nymph.onDamage(
+                new CombatSimulator(), nymphNormal, 100.0, nymphOwner);
+        nymph.onDamage(nymphSim, nymphNormal, 100.0, refreshOwner);
+        boolean nullBlizzardStatsRejected = false;
+        boolean nullNymphStatsRejected = false;
+        try {
+            new model.artifact.BlizzardStrayer(null);
+        } catch (NullPointerException expected) {
+            nullBlizzardStatsRejected = true;
+        }
+        try {
+            new model.artifact.NymphsDream(null);
+        } catch (NullPointerException expected) {
+            nullNymphStatsRejected = true;
+        }
+        assertTrue(nullBlizzardStatsRejected,
+                "Blizzard should reject null supplied stats");
+        assertTrue(nullNymphStatsRejected,
+                "Nymph should reject null supplied stats");
     }
 
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {

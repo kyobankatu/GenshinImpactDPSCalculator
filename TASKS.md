@@ -12832,7 +12832,7 @@ Completion evidence:
 
 ## Implementation Order: Expanded Artifact Coverage Campaign
 
-Status: In progress. This campaign adds six missing four-piece artifact sets
+Status: Complete. This campaign adds six missing four-piece artifact sets
 whose complete combat effects fit existing stat, energy, reaction, damage,
 party-buff, and enemy-aura contracts; RL and generated docs remain excluded.
 
@@ -12949,7 +12949,7 @@ Completion evidence:
 - Both phases pass `./gradlew ReactionRegressionTest`, `./gradlew build`,
   `./gradlew javadoc`, and `python scripts/preflight.py` on 2026-08-02.
 
-### Phase 3: Target State and Independent Hit Categories
+### Phase 3: Target State and Independent Hit Categories - Done
 
 Why third:
 
@@ -12989,6 +12989,13 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+Completion evidence:
+
+- Blizzard clear/Cryo/Frozen/applying-hit/null-enemy and binding regressions
+  pass; Nymph metadata, all categories, tier cap, same-category refresh,
+  staggered exact expiry, invalid callback, and independent-state regressions
+  pass with reaction regression, build, Javadoc, and preflight.
 
 ### Phase 2: Switch-Activated Weapons - Done
 
