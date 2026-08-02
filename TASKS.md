@@ -13163,8 +13163,8 @@ Verification:
 
 ## Implementation Order: Reciprocal Hit Weapon Campaign
 
-Status: Active. Add three weapons whose direct hits open refresh-only windows
-for a different action or stat group through one typed policy.
+Status: Complete. Three weapons now use one verified typed policy for direct
+hits that open refresh-only windows for a different action or stat group.
 
 Scope:
 
@@ -13178,7 +13178,7 @@ Out of scope for this pass:
 - Indirect reaction hits, charged attacks for Solar Pearl/Mitternachts Waltz,
   new action dispatch, formulas, characters, RL, and generated docs.
 
-### Phase 1: Add Reciprocal Hit Weapons
+### Phase 1: Add Reciprocal Hit Weapons - Done
 
 Target files:
 
@@ -13190,9 +13190,18 @@ Target files:
 
 | Unit | Reciprocal windows | Focused verification | Status |
 |---|---|---|---|
-| Shared base + Solar Pearl | Normal -> Skill/Burst; Skill/Burst -> Normal | ordering, independent refresh/expiry, R1/R5 | Pending |
-| Mitternachts Waltz | Normal -> Skill; Skill -> Normal | bow metadata, 5s windows, exclusions | Pending |
-| Dodoco Tales | Normal -> Charged; Charged -> ATK | catalyst metadata, unequal bonuses, 6s windows | Pending |
+| Shared base + Solar Pearl | Normal -> Skill/Burst; Skill/Burst -> Normal | ordering, independent refresh/expiry, R1/R5 | Done (`a0e1368`) |
+| Mitternachts Waltz | Normal -> Skill; Skill -> Normal | bow metadata, 5s windows, exclusions | Done (`696fb36`) |
+| Dodoco Tales | Normal -> Charged; Charged -> ATK | catalyst metadata, unequal bonuses, 6s windows | Done (`a3fc809`) |
+
+Completion evidence:
+
+- Solar Pearl proves independent six-second bidirectional windows and one-side
+  refresh; Mitternachts Waltz proves its narrower five-second action mapping.
+- Dodoco Tales proves unequal Charged-DMG/ATK values and correct composition
+  with its static ATK substat; unrelated and zero-damage hits remain inert.
+- Every unit passes reaction regression, build, and preflight; shared/final
+  public APIs pass Javadoc with no generated artifact staged.
 
 Acceptance criteria:
 

@@ -2163,10 +2163,12 @@ experiment record.
 
 ### B-083 — Reciprocal hit weapon coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Solar Pearl, Mitternachts Waltz, and Dodoco Tales; RL excluded
 - **Value/risk:** three complete weapon passives share existing typed direct-hit
   dispatch and add no formula, random, target, or party state
 - **Evidence boundary:** KQM TCL Lv. 90 metadata, R1-R5 values, trigger action
   groups, and five-/six-second durations
 - **Plan:** `TASKS.md` Reciprocal Hit Weapon Campaign
+- **Completion:** `a0e1368`, `696fb36`, and `a3fc809` add the shared dual-window
+  policy and all variants; focused/build/Javadoc/leak gates pass
