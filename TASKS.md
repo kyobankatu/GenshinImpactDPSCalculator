@@ -15161,3 +15161,44 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Eye of Perception Campaign
+
+Status: Active. Add Eye of Perception on the deterministic direct-proc policy.
+
+Scope:
+
+- Add Eye of Perception with sourced metadata, R1-R5 values, injectable chance,
+  exact cooldown behavior, single-target Bolt damage, and focused regressions.
+
+Out of scope for this pass:
+
+- Multi-target bounce multiplication, other catalysts, characters, formulas,
+  RL, and generated docs.
+
+### Phase 1: Add Eye of Perception
+
+Target files:
+
+- `src/java/model/weapon/EyeOfPerception.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Positive Normal/Charged hits with a draw below 0.5 produce one immediate
+  nonrecursive 240-360% ATK Physical action at exact 12-8-second CT.
+- Metadata, typed/positive/chance/recursive gates, exact cooldown, R1-R5
+  defaults/validation, and null draw rejection are explicit.
+
+Test cases to add or update:
+
+- Normal: metadata and immediate R5 Normal/Charged proc.
+- Boundary: draw immediately below/at 0.5, before/exact R5 CT, R1 MV/CT.
+- Abnormal: zero/wrong/recursive hits, null draw, refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
