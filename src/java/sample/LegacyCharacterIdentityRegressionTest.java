@@ -6,7 +6,7 @@ import mechanics.buff.BuffId;
 import model.type.CharacterId;
 import model.type.CharacterRegion;
 
-/** Regression checks for the B-161/B-162 character and buff identity baseline. */
+/** Regression checks for the legacy character and buff identity baseline. */
 public final class LegacyCharacterIdentityRegressionTest {
     private LegacyCharacterIdentityRegressionTest() {
     }
@@ -21,6 +21,9 @@ public final class LegacyCharacterIdentityRegressionTest {
         assertIdentity(CharacterId.KEQING, 23, "Keqing");
         assertIdentity(CharacterId.NINGGUANG, 24, "Ningguang");
         assertIdentity(CharacterId.GANYU, 25, "Ganyu");
+        assertIdentity(CharacterId.JEAN, 26, "Jean");
+        assertIdentity(CharacterId.CHONGYUN, 27, "Chongyun");
+        assertIdentity(CharacterId.DIONA, 28, "Diona");
         assertEquals(CharacterId.BENNETT, CharacterId.fromNumericId(1),
                 "first prior numeric ID");
         assertEquals(CharacterId.YANFEI, CharacterId.fromNumericId(20),
@@ -29,7 +32,7 @@ public final class LegacyCharacterIdentityRegressionTest {
                 "negative numeric fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(0),
                 "zero numeric fallback");
-        assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(26),
+        assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(29),
                 "high numeric fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName(null),
                 "null name fallback");
@@ -39,12 +42,18 @@ public final class LegacyCharacterIdentityRegressionTest {
                 "unmatched name fallback");
         assertEquals(CharacterRegion.LIYUE, CharacterId.GANYU.getRegion(),
                 "Liyue region lookup");
+        assertEquals(CharacterRegion.LIYUE, CharacterId.CHONGYUN.getRegion(),
+                "Chongyun Liyue region lookup");
         assertEquals(CharacterRegion.INAZUMA,
                 CharacterId.RAIDEN_SHOGUN.getRegion(),
                 "Inazuma region lookup");
         assertEquals(CharacterRegion.MONDSTADT,
                 CharacterId.DILUC.getRegion(),
                 "Mondstadt region lookup");
+        assertEquals(CharacterRegion.MONDSTADT, CharacterId.JEAN.getRegion(),
+                "Jean Mondstadt region lookup");
+        assertEquals(CharacterRegion.MONDSTADT, CharacterId.DIONA.getRegion(),
+                "Diona Mondstadt region lookup");
         assertEquals(CharacterRegion.UNKNOWN,
                 CharacterId.COLUMBINA.getRegion(),
                 "unverified custom region fails closed");

@@ -63,6 +63,12 @@ public enum CharacterId {
     NINGGUANG(24, "Ningguang", CharacterRegion.LIYUE),
     /** Ganyu (Cryo bow Charged Attack DPS). */
     GANYU(25, "Ganyu", CharacterRegion.LIYUE),
+    /** Jean (Anemo sword support and driver). */
+    JEAN(26, "Jean", CharacterRegion.MONDSTADT),
+    /** Chongyun (Cryo claymore support and burst DPS). */
+    CHONGYUN(27, "Chongyun", CharacterRegion.LIYUE),
+    /** Diona (Cryo bow support). */
+    DIONA(28, "Diona", CharacterRegion.MONDSTADT),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 
