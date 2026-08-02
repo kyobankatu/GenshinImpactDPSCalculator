@@ -14955,7 +14955,7 @@ Verification:
 
 ## Implementation Order: Fruit of Fulfillment Campaign
 
-Status: Active. Add Fruit of Fulfillment with off-field reaction stacking and
+Status: Complete. Fruit of Fulfillment now uses off-field reaction stacking and
 generation-safe inactivity decay.
 
 Scope:
@@ -14968,12 +14968,19 @@ Out of scope for this pass:
 - Hakushin reaction-element distribution, characters, formulas, RL, generated
   docs, and unrelated catalysts.
 
-### Phase 1: Add Fruit of Fulfillment
+### Phase 1: Add Fruit of Fulfillment - Done (`c7ebd3a`)
 
 Target files:
 
 - `src/java/model/weapon/FruitOfFulfillment.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- R1/R5 metadata, EM and fixed ATK penalty, off-field owner attribution,
+  0.3-second gain CT, five-stack cap, and NONE/foreign gates pass.
+- Reaction refresh invalidates stale decay events; exact six-second repeated
+  decay reaches and remains at zero; build/Javadoc/leak gates pass.
 
 Acceptance criteria:
 

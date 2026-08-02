@@ -2538,10 +2538,12 @@ experiment record.
 
 ### B-114 — Fruit of Fulfillment coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Fruit of Fulfillment; RL excluded
 - **Value/risk:** one complete passive reuses attributed reaction and bounded
   timer contracts; generation tokens prevent stale inactivity decay
 - **Evidence boundary:** KQM TCL metadata, R1-R5 EM values, fixed -5% ATK per
   stack, 0.3-second gain CT, five-stack cap, six-second repeated decay
 - **Plan:** `TASKS.md` Fruit of Fulfillment Campaign
+- **Completion:** `c7ebd3a` adds the complete stack/decay state machine and
+  focused regressions; build/Javadoc/leak gates pass
