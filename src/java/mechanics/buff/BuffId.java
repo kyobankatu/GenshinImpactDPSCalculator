@@ -151,6 +151,8 @@ public enum BuffId {
     XIPHOS_MOONLIGHT_JINNIS_WHISPER,
     /** 武器「終焉を嘆く詩」の千年の大楽章・別れの歌。 */
     ELEGY_FAREWELL_SONG,
+    /** 「千年の大楽章」各武器が共有する攻撃力効果。 */
+    MILLENNIAL_MOVEMENT_ATK,
     /** 武器「千夜に浮かぶ夢」の味方元素熟知共有。 */
     A_THOUSAND_FLOATING_DREAMS_TEAM_EM,
     /** 武器「龍殺しの英傑譚」の交代先への攻撃力バフ。 */

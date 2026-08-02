@@ -841,6 +841,12 @@ public class CombatSimulator {
             for (mechanics.buff.Buff buff : buffRefs) {
                 buffTimes.add(new double[] { buff.getStartTime(), buff.getExpirationTime() });
             }
+            model.entity.SnapshotAwareWeaponEffect.State weaponState = null;
+            if (character.getWeapon()
+                    instanceof model.entity.SnapshotAwareWeaponEffect) {
+                weaponState = ((model.entity.SnapshotAwareWeaponEffect)
+                        character.getWeapon()).captureWeaponState();
+            }
             characters.put(character.getCharacterId(), new SimulatorSnapshot.CharacterSnapshot(
                     character.getCurrentEnergy(),
                     character.getLastSkillTime(),
@@ -850,7 +856,8 @@ public class CombatSimulator {
                     character.getActiveChargeCooldownDuration(),
                     character.getChargeRestoreTimes(),
                     buffRefs,
-                    buffTimes));
+                    buffTimes,
+                    weaponState));
         }
 
         // Team and field buffs
@@ -977,6 +984,15 @@ public class CombatSimulator {
                     cs.burstCooldownEndTime,
                     cs.activeChargeCooldownDuration,
                     cs.chargeRestoreTimes);
+            if (cs.weaponState != null) {
+                if (!(character.getWeapon()
+                        instanceof model.entity.SnapshotAwareWeaponEffect)) {
+                    throw new IllegalStateException(
+                            "Snapshot contains state for a non-snapshot-aware weapon");
+                }
+                ((model.entity.SnapshotAwareWeaponEffect) character.getWeapon())
+                        .restoreWeaponState(cs.weaponState);
+            }
             character.clearBuffs();
             for (int i = 0; i < cs.activeBuffRefs.size(); i++) {
                 mechanics.buff.Buff buff = cs.activeBuffRefs.get(i);

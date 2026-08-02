@@ -18603,6 +18603,17 @@ public class ReactionRegressionTest {
         elegy.onDamage(elegyOwner, skillHit, 0.0, elegySim);
         assertEquals(1, elegy.getSigilCount(),
                 "Elegy should reject a second sigil inside 0.2 seconds");
+        SimulatorSnapshot elegySigilSnapshot = elegySim.saveSnapshot();
+        elegySim.advanceTime(0.2);
+        elegy.onDamage(
+                elegyOwner, skillHit, elegySim.getCurrentTime(), elegySim);
+        assertEquals(2, elegy.getSigilCount(),
+                "Elegy should gain a second sigil before rollback");
+        elegySim.restoreSnapshot(elegySigilSnapshot);
+        assertEquals(1, elegy.getSigilCount(),
+                "Elegy snapshot should restore retained sigils");
+        assertClose(0.0, elegySim.getCurrentTime(), EPS,
+                "Elegy snapshot should restore sigil time");
         for (int i = 0; i < 3; i++) {
             elegySim.advanceTime(0.2);
             AttackAction hit = typedDamageHit(
@@ -18626,6 +18637,12 @@ public class ReactionRegressionTest {
                 resolvedStat(elegySim, elegyOwner,
                         StatType.ELEMENTAL_MASTERY), EPS,
                 "Elegy owner should receive passive and Farewell Song EM");
+        assertEquals(1L, elegySim.getTeamBuffList().stream()
+                        .filter(buff -> buff.getId()
+                                == BuffId.MILLENNIAL_MOVEMENT_ATK)
+                        .count(),
+                "Elegy should create one shared Millennial ATK effect");
+        SimulatorSnapshot elegyLockSnapshot = elegySim.saveSnapshot();
 
         elegySim.advanceTime(12.0);
         assertClose(0.0,
@@ -18636,11 +18653,36 @@ public class ReactionRegressionTest {
                 elegyOwner, skillHit, elegySim.getCurrentTime(), elegySim);
         assertEquals(0, elegy.getSigilCount(),
                 "Elegy should reject sigils before its 20-second lock ends");
-        elegySim.advanceTime(8.0);
+        elegySim.restoreSnapshot(elegyLockSnapshot);
+        assertClose(0.40,
+                resolvedStat(elegySim, elegyAlly,
+                        StatType.ATK_PERCENT), EPS,
+                "Elegy snapshot should restore the active shared ATK effect");
+        assertClose(200.0,
+                resolvedStat(elegySim, elegyAlly,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Elegy snapshot should restore the active unique EM effect");
+        elegySim.advanceTime(20.0 - 1e-6);
+        elegy.onDamage(
+                elegyOwner, skillHit, elegySim.getCurrentTime(), elegySim);
+        assertEquals(0, elegy.getSigilCount(),
+                "Elegy restored lock should reject a sigil before 20 seconds");
+        elegySim.advanceTime(1e-6 + 1e-9);
         elegy.onDamage(
                 elegyOwner, skillHit, elegySim.getCurrentTime(), elegySim);
         assertEquals(1, elegy.getSigilCount(),
                 "Elegy should accept a sigil at the exact 20-second boundary");
+
+        boolean wrongElegyStateRejected = false;
+        try {
+            elegy.restoreWeaponState(
+                    new model.entity.SnapshotAwareWeaponEffect.State() {
+                    });
+        } catch (IllegalArgumentException expected) {
+            wrongElegyStateRejected = true;
+        }
+        assertTrue(wrongElegyStateRejected,
+                "Elegy should reject an unrelated weapon snapshot state");
 
         model.weapon.ElegyForTheEnd r1Elegy =
                 new model.weapon.ElegyForTheEnd(1);

@@ -41,6 +41,10 @@ The B-153 static five-star weapon campaign is complete. It adds five exact
 always-on passive branches while preserving explicit unreachable-trigger
 boundaries.
 
+The active B-154 Millennial Movement campaign is consolidating typed sigil,
+same-effect replacement, and snapshot-safe weapon state before adding two
+missing five-star weapons.
+
 The B-128 action-use artifact campaign is complete. Successful typed actions
 now reach equipped artifacts, and Heart of Depth plus Martial Artist use the
 shared callback without changing RL or generated documentation.
@@ -12912,6 +12916,147 @@ Completion evidence:
 - `./gradlew ReactionRegressionTest`, `./gradlew build javadoc
   PartyCatalogRegressionTest`, and `python scripts/preflight.py --run` passed
   on 2026-08-02.
+
+## Implementation Order: Millennial Movement Weapon Campaign
+
+Status: In progress. This campaign replaces one isolated Elegy state machine
+with a snapshot-aware shared contract, then adds Freedom-Sworn and Song of
+Broken Pines; RL and generated documentation remain excluded.
+
+Scope:
+
+- Add generic weapon-state capture/restore to `SimulatorSnapshot` through one
+  narrow optional capability.
+- Share sigil CT/count, 12-second movement window, 20-second acquisition lock,
+  owner binding, and ATK-effect replacement across all three weapons.
+- Add complete Freedom-Sworn and Song of Broken Pines offensive passives.
+
+Out of scope for this pass:
+
+- Timer-event queue snapshots, movement speed, player defensive state,
+  optimizer defaults, RL protocol/training, and generated docs.
+
+Definitions:
+
+- `SnapshotAwareWeaponEffect`: optional weapon capability with an immutable
+  typed state marker used by simulator save/restore.
+- `MillennialMovementWeapon`: package-local abstract weapon base owning sigil
+  acquisition, lockout, owner binding, snapshot state, shared ATK movement
+  buff, and one concrete weapon's unique movement buff.
+- `NORMAL_ATTACK_SPD`: Normal-only animation speed stat used where a passive
+  must not accelerate Charged Attacks.
+
+### Phase 1: Snapshot State and Shared Millennial Contract - Done
+
+Target files:
+
+- `src/java/model/entity/SnapshotAwareWeaponEffect.java` (new)
+- `src/java/simulation/SimulatorSnapshot.java`
+- `src/java/simulation/CombatSimulator.java`
+- `src/java/model/weapon/MillennialMovementWeapon.java` (new)
+- `src/java/model/weapon/ElegyForTheEnd.java`
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Simulator snapshots capture and restore state only for weapons implementing
+  the narrow capability; ordinary weapons remain unchanged and mismatched
+  state types fail clearly.
+- Elegy retains exact 0.2-second CT, four sigils, off-field Skill/Burst hits,
+  12-second R1-R5 EM/ATK song, and 20-second lock through the shared base.
+- Millennial ATK and Elegy's unique EM use separate typed IDs so same-effect
+  replacement does not erase unique effects from a different movement weapon.
+
+Test cases to add or update:
+
+- Normal: existing Elegy metadata/trigger/order/value cases and state capture
+  before activation, during sigils, and during lock.
+- Boundary: exact 0.2/12/20 seconds and restore/replay at each state.
+- Abnormal: ordinary weapon snapshot, foreign owner/simulator, wrong hit,
+  invalid refinement, and wrong concrete state restore.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build javadoc PartyCatalogRegressionTest`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Elegy retains its sourced trigger/value behavior while shared ATK and unique
+  EM now use separate typed replacement identities.
+- Focused regressions restore one-sigil, active-song, and lockout states,
+  replay exact 0.2/12/20-second boundaries, and reject unrelated state types.
+- `./gradlew ReactionRegressionTest`, `./gradlew build javadoc
+  PartyCatalogRegressionTest`, and `python scripts/preflight.py --run` passed
+  on 2026-08-02.
+
+### Phase 2: Add Freedom-Sworn
+
+Target files:
+
+- `src/java/model/weapon/FreedomSworn.java` (new)
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Freedom-Sworn exposes exact Lv. 90 metadata and unconditional
+  10%/12.5%/15%/17.5%/20% all-DMG bonus.
+- Owner-attributed non-NONE reactions, including off-field reactions, gain two
+  sigils at 0.5-second CT and grant the 12-second R1-R5 Normal/Charged/Plunging
+  DMG and shared ATK movement effects, followed by the 20-second lock.
+- Its unique action-DMG buff stacks with Elegy's unique EM while the shared ATK
+  effect uses latest typed replacement; snapshot restore replays state exactly.
+
+Test cases to add or update:
+
+- Normal: metadata, off-field reactions, two-sigil activation, three action
+  bonuses, shared ATK, and coexistence with Elegy.
+- Boundary: exact 0.5/12/20 seconds, post-reaction ordering, and snapshot
+  rollback before/after activation.
+- Abnormal: NONE/foreign reactions, duplicate/cross-simulator init, refinement
+  0/6, Physical inclusion in unconditional all-DMG, and independent instances.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build javadoc PartyCatalogRegressionTest`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Add Song of Broken Pines
+
+Target files:
+
+- `src/java/model/weapon/SongOfBrokenPines.java` (new)
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/model/type/StatType.java`
+- `src/java/simulation/runtime/ActionTimelineExecutor.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Song exposes exact Lv. 90 metadata, unconditional 16%/20%/24%/28%/32% ATK,
+  and four positive Normal/Charged hit sigils at 0.3-second CT.
+- Four sigils grant 12-second R1-R5 Normal-only attack speed and shared ATK,
+  followed by the 20-second acquisition lock; the fourth hit is unbuffed.
+- Normal-only speed shortens Normal actions without changing Charged, Skill,
+  Burst, or Plunging durations, and snapshot restore preserves sigil/lock state.
+
+Test cases to add or update:
+
+- Normal: metadata, Normal/Charged sigils, R1/R5 ATK and speed, action timing,
+  and coexistence with both other Millennial weapons.
+- Boundary: exact 0.3/12/20 seconds, fourth-hit ordering, and snapshot replay.
+- Abnormal: zero/wrong/foreign hits, no Charged speed, invalid refinement,
+  duplicate/cross-simulator init, and independent instances.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build javadoc PartyCatalogRegressionTest`
+- `python scripts/preflight.py --run`
 
 ## Implementation Order: Static Five-Star Weapon Branch Campaign
 

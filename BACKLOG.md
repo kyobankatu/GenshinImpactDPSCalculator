@@ -3272,3 +3272,18 @@ experiment record.
 - **Closure:** five Lv. 90 weapons now expose exact R1-R5 always-on branches;
   seven-element isolation, typed action bonuses, metadata, and all local gates
   pass while absent trigger state remains explicit.
+
+### B-154 — Millennial Movement weapon campaign
+
+- **Status:** active
+- **Source:** missing five-star weapon inventory after B-153
+- **Scope/risk:** snapshot-safe shared movement state, Elegy migration,
+  Freedom-Sworn, Song of Broken Pines, and Normal-only attack speed; medium
+- **Evidence:** maintained KQM sword and claymore catalogs, accessed 2026-08-02:
+  https://library.keqingmains.com/equipment/weapons/swords
+  https://library.keqingmains.com/equipment/weapons/claymores
+- **Boundary:** 0.2/0.3/0.5-second sigil CTs, 12/20-second windows, off-field
+  ownership, same-effect replacement, unique-effect coexistence, Normal-only
+  speed, post-trigger ordering, snapshot rollback, and R1/R5.
+- **Proof/plan:** three-phase `TASKS.md` Millennial Movement Weapon Campaign
+  plus reaction regression, build, Javadoc, party catalog, and preflight.

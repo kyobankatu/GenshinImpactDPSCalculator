@@ -8,6 +8,7 @@ import java.util.Map;
 
 import mechanics.buff.Buff;
 import model.entity.Enemy;
+import model.entity.SnapshotAwareWeaponEffect;
 import model.type.CharacterId;
 import model.type.Element;
 import simulation.runtime.ReactionState;
@@ -40,7 +41,22 @@ public class SimulatorSnapshot {
         /** Active buff references with their timing captured as [startTime, expirationTime]. */
         public final List<Buff> activeBuffRefs;
         public final List<double[]> activeBuffTimes;
+        /** Optional mutable weapon state captured through a focused capability. */
+        public final SnapshotAwareWeaponEffect.State weaponState;
 
+        /**
+         * Constructs a character snapshot without optional weapon state.
+         *
+         * @param currentEnergy current Energy
+         * @param lastSkillTime last Skill time
+         * @param lastBurstTime last Burst time
+         * @param skillCooldownEndTime Skill cooldown end
+         * @param burstCooldownEndTime Burst cooldown end
+         * @param activeChargeCooldownDuration active charge cooldown duration
+         * @param chargeRestoreTimes charge restoration times
+         * @param activeBuffRefs active buff references
+         * @param activeBuffTimes active buff timing pairs
+         */
         public CharacterSnapshot(
                 double currentEnergy,
                 double lastSkillTime,
@@ -51,6 +67,30 @@ public class SimulatorSnapshot {
                 List<Double> chargeRestoreTimes,
                 List<Buff> activeBuffRefs,
                 List<double[]> activeBuffTimes) {
+            this(
+                    currentEnergy,
+                    lastSkillTime,
+                    lastBurstTime,
+                    skillCooldownEndTime,
+                    burstCooldownEndTime,
+                    activeChargeCooldownDuration,
+                    chargeRestoreTimes,
+                    activeBuffRefs,
+                    activeBuffTimes,
+                    null);
+        }
+
+        public CharacterSnapshot(
+                double currentEnergy,
+                double lastSkillTime,
+                double lastBurstTime,
+                double skillCooldownEndTime,
+                double burstCooldownEndTime,
+                double activeChargeCooldownDuration,
+                List<Double> chargeRestoreTimes,
+                List<Buff> activeBuffRefs,
+                List<double[]> activeBuffTimes,
+                SnapshotAwareWeaponEffect.State weaponState) {
             this.currentEnergy = currentEnergy;
             this.lastSkillTime = lastSkillTime;
             this.lastBurstTime = lastBurstTime;
@@ -60,6 +100,7 @@ public class SimulatorSnapshot {
             this.chargeRestoreTimes = new ArrayList<>(chargeRestoreTimes);
             this.activeBuffRefs = new ArrayList<>(activeBuffRefs);
             this.activeBuffTimes = new ArrayList<>(activeBuffTimes);
+            this.weaponState = weaponState;
         }
     }
 
