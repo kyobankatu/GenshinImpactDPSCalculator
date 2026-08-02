@@ -3339,7 +3339,7 @@ experiment record.
 
 ### B-157 — Golden Majesty and Razor content wave
 
-- **Status:** in-progress
+- **Status:** done
 - **Source:** continued explicit broad character, weapon, and artifact coverage
 - **Scope/risk:** four Golden Majesty weapons, six legacy boundary artifacts,
   and Razor; planned typed weapon state plus isolated content slices
@@ -3352,3 +3352,7 @@ experiment record.
   Witch's Homework, RL, and generated docs remain excluded.
 - **Proof/plan:** three-phase `TASKS.md` Golden Majesty and Razor Content Wave
   with focused regressions, reaction/build/Javadoc gates, and preflight.
+- **Closure:** four Golden Majesty weapons, six legacy boundary artifacts, and
+  Razor are integrated on `dev_0`. Typed zero-damage contacts are distinct from
+  dummy casts; unsupported shield, player-state, target-state, Hold-control,
+  and hitlag-extension branches remain explicit rather than approximated.

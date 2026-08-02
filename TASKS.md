@@ -45,10 +45,10 @@ The B-154 Millennial Movement campaign is complete. Elegy for the End,
 Freedom-Sworn, and Song of Broken Pines now share typed sigil, same-effect
 replacement, and snapshot-safe weapon state contracts.
 
-The B-155 and B-156 parallel content campaigns are complete. The active B-157
-wave adds the Golden Majesty weapon family, six legacy boundary artifact sets,
+The B-155 through B-157 parallel content campaigns are complete. The latest
+wave added the Golden Majesty weapon family, six legacy boundary artifact sets,
 and Razor through isolated implementation lanes; RL and generated
-documentation remain excluded.
+documentation remained excluded.
 
 The B-128 action-use artifact campaign is complete. Successful typed actions
 now reach equipped artifacts, and Heart of Depth plus Martial Artist use the
@@ -13484,8 +13484,8 @@ Completion evidence:
 
 ## Implementation Order: Golden Majesty and Razor Content Wave
 
-Status: In progress. Primary owns the shared weapon family and integration;
-legacy artifacts and Razor are isolated, branch-owned implementation units.
+Status: Complete. The shared weapon family, legacy artifact boundaries, and
+Razor offensive slice are integrated and verified.
 
 Scope:
 
@@ -13500,9 +13500,9 @@ Out of scope:
 
 - Shield strength and shield-presence doubling, player incoming damage and
   healing, player elemental-status duration, target current HP, enemy DEF
-  shred, Witch's Homework, geometry, RL, and generated docs.
+  shred, Witch's Homework, geometry, hitlag extension, RL, and generated docs.
 
-### Phase 1: Golden Majesty Weapon Family
+### Phase 1: Golden Majesty Weapon Family - Done (`3f5d5a9`, `3527360`)
 
 Why first:
 
@@ -13557,7 +13557,17 @@ Verification:
 - `./gradlew ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
 
-### Phase 2: Legacy Player-State Artifact Boundaries
+Completion evidence:
+
+- All four weapons share exact R1-R5 metadata, owner-local five-stack state,
+  half-open cadence/expiry boundaries, and snapshot restoration.
+- Typed hit-effect metadata accepts sourced zero-damage contacts while
+  rejecting animation-only zero-multiplier casts; independent audit's only
+  remaining limitation is the repository-wide absence of hitlag extension.
+- Focused weapon/artifact regressions, reaction regression, build, Javadoc,
+  and executable preflight pass on the combined tree.
+
+### Phase 2: Legacy Player-State Artifact Boundaries - Done (`1e0f49e`)
 
 Why second:
 
@@ -13597,7 +13607,14 @@ Verification:
 - `./gradlew ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Razor Offensive Vertical Slice
+Completion evidence:
+
+- Four Prayers tiaras, Tiny Miracle, and Traveling Doctor expose canonical
+  loadable identities without fabricating unavailable player-state effects.
+- Fresh and supplied stat containers, null rejection, arbitrary times, and
+  independent instances pass the focused regression and full local gates.
+
+### Phase 3: Razor Offensive Vertical Slice - Done (`43771dd`, `bd61f12`)
 
 Why third:
 
@@ -13614,8 +13631,9 @@ Target files:
 
 Tasks:
 
-- Add sourced Normal, cyclic Charged, high-Plunge, Press/Hold Skill, Sigils,
-  Burst cast, Normal echoes, attack speed, form duration, and switch expiry.
+- Add sourced Normal, cyclic Charged, high-Plunge, Press Skill, retained Hold
+  data, Sigils, Burst cast, Normal echoes, attack speed, form duration, and
+  switch expiry; the typed request currently has no Press/Hold discriminator.
 - Implement A1/A4 and representable C1/C3/C5/C6 branches through typed events;
   keep target-HP C2, enemy-DEF C4, and Witch's Homework inactive.
 
@@ -13638,6 +13656,15 @@ Verification:
 - `./gradlew RazorRegressionTest PartyCatalogRegressionTest`
 - `./gradlew ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Razor now has typed identity/config, sourced offensive actions, Sigils,
+  Lightning Fang, Normal echoes, A1/A4, and representable C1/C3/C5/C6 effects.
+- Focused tests cover timing, cooldown/Energy gates, particles, ICD/gauge,
+  form/switch boundaries, C6 cadence, invalid inputs, and instance isolation.
+- Razor, party catalog, equipment boundary, reaction, build, Javadoc, and
+  executable preflight checks pass after integration review.
 
 ## Implementation Order: Black Sword Campaign
 
