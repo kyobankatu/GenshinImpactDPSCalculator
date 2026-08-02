@@ -6451,6 +6451,68 @@ public class ReactionRegressionTest {
         }
         assertTrue(highCompoundRefinementRejected,
                 "Compound Bow should reject refinement six");
+
+        model.weapon.IbisPiercer ibisPiercer = new model.weapon.IbisPiercer();
+        assertEquals("Ibis Piercer", ibisPiercer.getName(),
+                "Ibis Piercer display name");
+        assertClose(565.0, ibisPiercer.getBaseAtk(), EPS, "Ibis Piercer base ATK");
+        assertClose(0.276, ibisPiercer.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Ibis Piercer ATK substat");
+        assertEquals(model.type.WeaponType.BOW, ibisPiercer.getWeaponType(),
+                "Ibis Piercer weapon type");
+        assertEquals(5, ibisPiercer.getRefinement(),
+                "Ibis Piercer default refinement");
+
+        TestCharacter ibisOwner = testCharacter(Element.CRYO);
+        ibisOwner.setWeapon(ibisPiercer);
+        CombatSimulator ibisSim = simulatorWith(ibisOwner);
+        ibisPiercer.onDamage(ibisOwner, chargeHit, 0.0, ibisSim);
+        assertClose(80.0,
+                effectiveStatAt(ibisOwner, StatType.ELEMENTAL_MASTERY, 0.0), EPS,
+                "R5 Ibis Piercer first stack");
+        ibisPiercer.onDamage(ibisOwner, chargeHit, 0.499, ibisSim);
+        assertClose(80.0,
+                effectiveStatAt(ibisOwner, StatType.ELEMENTAL_MASTERY, 0.499), EPS,
+                "Ibis Piercer should reject a hit immediately before CT");
+        ibisPiercer.onDamage(ibisOwner, chargeHit, 0.5, ibisSim);
+        assertClose(160.0,
+                effectiveStatAt(ibisOwner, StatType.ELEMENTAL_MASTERY, 0.5), EPS,
+                "Ibis Piercer should allow its second stack at exact CT");
+        ibisPiercer.onDamage(ibisOwner, chargeHit, 1.0, ibisSim);
+        ibisPiercer.onDamage(ibisOwner, normalHit, 1.5, ibisSim);
+        assertClose(160.0,
+                effectiveStatAt(ibisOwner, StatType.ELEMENTAL_MASTERY, 6.999), EPS,
+                "Ibis Piercer cap refresh should remain active before expiry");
+        assertClose(0.0,
+                effectiveStatAt(ibisOwner, StatType.ELEMENTAL_MASTERY, 7.0), EPS,
+                "Ibis Piercer should expire both stacks exactly");
+
+        model.weapon.IbisPiercer r1IbisPiercer = new model.weapon.IbisPiercer(1);
+        TestCharacter r1IbisOwner = testCharacter(Element.CRYO);
+        r1IbisOwner.setWeapon(r1IbisPiercer);
+        CombatSimulator r1IbisSim = simulatorWith(r1IbisOwner);
+        r1IbisPiercer.onDamage(r1IbisOwner, chargeHit, 0.0, r1IbisSim);
+        assertClose(40.0,
+                resolvedStat(r1IbisSim, r1IbisOwner, StatType.ELEMENTAL_MASTERY), EPS,
+                "R1 Ibis Piercer first stack");
+
+        boolean lowIbisRefinementRejected = false;
+        try {
+            new model.weapon.IbisPiercer(0);
+        } catch (IllegalArgumentException expected) {
+            lowIbisRefinementRejected = true;
+        }
+        assertTrue(lowIbisRefinementRejected,
+                "Ibis Piercer should reject refinement zero");
+
+        boolean highIbisRefinementRejected = false;
+        try {
+            new model.weapon.IbisPiercer(6);
+        } catch (IllegalArgumentException expected) {
+            highIbisRefinementRejected = true;
+        }
+        assertTrue(highIbisRefinementRejected,
+                "Ibis Piercer should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
