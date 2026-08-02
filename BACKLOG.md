@@ -2235,10 +2235,12 @@ experiment record.
 
 ### B-089 — Lisa character vertical slice
 
-- **Status:** active
+- **Status:** done
 - **Scope:** stationary single-target Hold Skill/Burst model; RL excluded
 - **Value/risk:** adds a missing starter character with explicit input- and
   target-model limits; no shared runtime contract is changed
 - **Evidence boundary:** KQM TCL Lv. 90 stats, level-9/12 talents, frames, gauges,
   ICD, particles, Conductive timing, Burst count/cadence, and C1/C3/C5
 - **Plan:** `TASKS.md` Lisa Character Vertical Slice
+- **Completion:** `dc358b7` adds Lisa identity, config, combat model, and focused
+  regressions; build/Javadoc/leak gates pass

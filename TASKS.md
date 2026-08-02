@@ -13548,8 +13548,8 @@ Verification:
 
 ## Implementation Order: Lisa Character Vertical Slice
 
-Status: Active. Add a stationary single-target Lisa model centered on Hold
-Violet Arc and Lightning Rose.
+Status: Complete. A stationary single-target Lisa model now covers Hold Violet
+Arc, Conductive, and Lightning Rose within the declared input/state boundary.
 
 Scope:
 
@@ -13565,7 +13565,7 @@ Out of scope for this pass:
   DEF-shred state for A4, incoming damage/interruption for C2, multiple-target
   random bolts for C4, C6 switch-in stacks, crafting, RL, and generated docs.
 
-### Phase 1: Add Lisa Core Combat Model
+### Phase 1: Add Lisa Core Combat Model - Done (`dc358b7`)
 
 Target files:
 
@@ -13574,6 +13574,16 @@ Target files:
 - `config/characters/Lisa/Lisa_Multipliers.csv` (new)
 - `config/characters/Lisa/Lisa_Status.csv` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Lisa has a stable appended id, sourced config, four catalyst Normals, Charged
+  and elemental Plunge attacks, independent Conductive expiry, and Hold consume.
+- Hold Skill proves zero/one/three-stack level-9/12 values, 2U no-ICD damage,
+  five particles, 16-second CD, and the one-target C1 flat-Energy refund.
+- Lightning Rose proves its non-aura 10% summon, 29 half-second snapshot
+  discharges, standard ICD/1U, C3 value, 80 Energy cost, and 20-second CD.
+- Reaction regression, build, Javadoc, preflight, and diff checks pass.
 
 Acceptance criteria:
 
