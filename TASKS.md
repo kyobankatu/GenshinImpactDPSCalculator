@@ -12848,6 +12848,91 @@ Completion evidence:
 - `./gradlew ReactionRegressionTest`, `./gradlew build`, `./gradlew javadoc`,
   and `python scripts/preflight.py` passed on 2026-08-02.
 
+## Implementation Order: Remaining Basic Action Coverage Campaign
+
+Status: In progress. B-148 adds sourced Charged and high-Plunging inputs to
+three already-supported characters. Low/collision Plunge hits, stamina,
+measured animation retiming, new rotations, RL, and generated docs are excluded.
+
+Evidence:
+
+- Maintained KQM talent tables and current combat data, accessed 2026-08-02:
+  https://library.keqingmains.com/characters/anemo/sucrose
+  https://library.keqingmains.com/characters/electro/ineffa
+  https://library.keqingmains.com/characters/electro/flins
+- The current Flins quick guide states that he cannot Plunge during Manifest
+  Flame: https://keqingmains.com/q/flins-quickguide/
+
+### Phase 1: Sucrose High Plunge - Done
+
+Target files:
+
+- `config/characters/Sucrose/Sucrose_Multipliers.csv`
+- `src/java/model/character/Sucrose.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria and tests:
+
+- `PLUNGE` resolves one sourced level-9 2.6076 Anemo high-Plunge hit with
+  Plunging bonus, typed Plunge category, no ICD, 1U, and the existing one-second
+  high-Plunge duration approximation.
+- Plunge and other non-Normal inputs reset the Normal combo; unsupported Dash
+  fails explicitly without damage or time advancement.
+- Regressions cover metadata, category-specific bonuses, combo interruption,
+  unsupported input, and CSV/runtime alignment.
+
+Completion evidence:
+
+- Sucrose now dispatches a sourced high Anemo Plunge and resets its combo on
+  every non-Normal input; unsupported Dash is rejected before time or damage.
+- Reaction regression, build, Javadoc, party catalog, and preflight pass.
+
+### Phase 2: Ineffa Charged and High Plunge - Pending
+
+Target files:
+
+- `config/characters/Ineffa/Ineffa_Multipliers.csv`
+- `src/java/model/character/Ineffa.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria and tests:
+
+- `CHARGE` and `PLUNGE` resolve sourced level-9 1.7440 and 2.9336 Physical hits
+  with their dedicated bonus/action categories, standard Charged 1U metadata,
+  no-ICD Plunge 1U metadata, and established 0.8/1.0-second approximations.
+- Both inputs reset the four-step Normal combo; unsupported Dash fails
+  explicitly without mutating simulation time or damage state.
+- Regressions cover both metadata paths, isolated Physical/action bonuses,
+  combo interruption, unsupported input, and CSV/runtime alignment.
+
+### Phase 3: Flins High Plunge Form Boundary - Pending
+
+Target files:
+
+- `config/characters/Flins/Flins_Multipliers.csv`
+- `src/java/model/character/Flins.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria and tests:
+
+- Outside Manifest Flame, `PLUNGE` resolves one sourced level-9 2.9336 Physical
+  high-Plunge hit with Plunging bonus, typed Plunge category, no ICD, 1U, and
+  one-second duration; it resets the Normal combo.
+- During Manifest Flame, Plunge is rejected before damage or time advancement;
+  it becomes available at exact form expiry. Other unsupported inputs fail
+  explicitly while the existing Dash action remains supported.
+- Regressions cover metadata, isolated bonuses, combo interruption, active and
+  exact-expiry form boundaries, unsupported input, and CSV/runtime alignment.
+
+Verification for every phase:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `./gradlew PartyCatalogRegressionTest`
+- representative party samples when affected
+- `python scripts/preflight.py --run`
+
 ## Implementation Order: Sucrose Reaction Lifecycle Accuracy
 
 Status: Complete. Implemented B-141 as one character-owned reaction-listener

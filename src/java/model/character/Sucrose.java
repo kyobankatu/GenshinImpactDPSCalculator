@@ -274,6 +274,7 @@ public class Sucrose extends Character implements
      *   <li>{@link CharacterActionKey#BURST} — casts the Burst.</li>
      *   <li>{@link CharacterActionKey#NORMAL} — advances the normal attack combo.</li>
      *   <li>{@link CharacterActionKey#CHARGE} — casts one Charged Attack.</li>
+     *   <li>{@link CharacterActionKey#PLUNGE} — casts one high Plunging Attack.</li>
      * </ul>
      *
      * @param request typed action request
@@ -282,6 +283,9 @@ public class Sucrose extends Character implements
     @Override
     public void onAction(CharacterActionRequest request, CombatSimulator sim) {
         initializeForSimulator(sim);
+        if (request.getKey() != CharacterActionKey.NORMAL) {
+            normalAttackStep = 0;
+        }
         switch (request.getKey()) {
             case SKILL:
                 markSkillUsed(sim.getCurrentTime(), sim.getApplicableBuffs(this));
@@ -297,8 +301,12 @@ public class Sucrose extends Character implements
             case CHARGE:
                 chargedAttack(sim);
                 break;
-            default:
+            case PLUNGE:
+                plungingAttack(sim);
                 break;
+            default:
+                throw new IllegalArgumentException(
+                        "Unsupported action for Sucrose: " + request.getKey());
         }
     }
 
@@ -376,7 +384,24 @@ public class Sucrose extends Character implements
                 ActionType.CHARGE);
         charged.setICD(ICDType.Standard, ICDTag.ChargedAttack, 1.0);
         sim.performAction(this.characterId, charged);
-        normalAttackStep = 0;
+    }
+
+    /**
+     * Executes one level-9 high Anemo Plunging Attack.
+     *
+     * @param sim active simulator
+     */
+    private void plungingAttack(CombatSimulator sim) {
+        AttackAction plunge = new AttackAction(
+                "Sucrose High Plunge",
+                getTalentValue("Plunge High", 2.6076),
+                Element.ANEMO,
+                StatType.BASE_ATK,
+                StatType.PLUNGING_ATTACK_DMG_BONUS,
+                1.0,
+                ActionType.PLUNGE);
+        plunge.setICD(ICDType.None, ICDTag.None, 1.0);
+        sim.performAction(characterId, plunge);
     }
 
     /**

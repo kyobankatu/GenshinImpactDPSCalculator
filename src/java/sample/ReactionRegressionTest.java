@@ -208,6 +208,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_SucroseReactionLifecycleAccuracy();
         testAccuracyPhaseF_SucroseBurstAbsorptionOrdering();
         testAccuracyPhaseF_SucroseC4AlchemaniaLifecycle();
+        testAccuracyPhaseF_SucroseHighPlungeCoverage();
         testAccuracyPhaseF_RaidenCastAndMusouIcdContract();
         testAccuracyPhaseF_RaidenEyeBuffRefreshContract();
         testAccuracyPhaseF_LiveResistanceSnapshotContract();
@@ -20017,6 +20018,66 @@ public class ReactionRegressionTest {
         }
         assertTrue(crossSimulatorRejected,
                 "Sucrose listeners should reject cross-simulator reuse");
+    }
+
+    private static void testAccuracyPhaseF_SucroseHighPlungeCoverage() {
+        RecordingDamageWeapon weapon = new RecordingDamageWeapon("Sucrose ");
+        model.character.Sucrose sucrose = new model.character.Sucrose(
+                weapon, blankArtifact());
+        CombatSimulator sim = simulatorWithExistingCharacter(sucrose);
+        sim.performAction(
+                CharacterId.SUCROSE,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        sim.performAction(
+                CharacterId.SUCROSE,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+
+        double plungeStart = sim.getCurrentTime();
+        sim.performAction(
+                CharacterId.SUCROSE,
+                CharacterActionRequest.of(CharacterActionKey.PLUNGE));
+        AttackAction plunge = weapon.actions.stream()
+                .filter(action -> action.getName().equals("Sucrose High Plunge"))
+                .findFirst()
+                .orElseThrow();
+        assertClose(2.6076, plunge.getDamagePercent(), EPS,
+                "Sucrose Plunge should use its sourced level-9 multiplier");
+        assertEquals(Element.ANEMO, plunge.getElement(),
+                "Sucrose catalyst Plunge should deal Anemo damage");
+        assertEquals(ActionType.PLUNGE, plunge.getActionType(),
+                "Sucrose Plunge should retain typed action metadata");
+        assertEquals(StatType.PLUNGING_ATTACK_DMG_BONUS, plunge.getBonusStat(),
+                "Sucrose Plunge should use Plunging DMG Bonus");
+        assertEquals(ICDType.None, plunge.getICDType(),
+                "Sucrose high Plunge should have no ICD");
+        assertEquals(ICDTag.None, plunge.getICDTag(),
+                "Sucrose high Plunge should not enter an elemental ICD group");
+        assertClose(1.0, plunge.getGaugeUnits(), EPS,
+                "Sucrose high Plunge should apply 1U Anemo");
+        assertClose(plungeStart + 1.0, sim.getCurrentTime(), EPS,
+                "Sucrose high Plunge should use the one-second approximation");
+
+        sim.performAction(
+                CharacterId.SUCROSE,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        assertEquals("Sucrose N1", weapon.actions.get(weapon.actions.size() - 1).getName(),
+                "Sucrose Plunge should reset the Normal combo");
+
+        int actionCount = weapon.actions.size();
+        double rejectedTime = sim.getCurrentTime();
+        boolean rejected = false;
+        try {
+            sim.performAction(
+                    CharacterId.SUCROSE,
+                    CharacterActionRequest.of(CharacterActionKey.DASH));
+        } catch (IllegalArgumentException expected) {
+            rejected = true;
+        }
+        assertTrue(rejected, "Sucrose should reject unsupported Dash input");
+        assertEquals(actionCount, weapon.actions.size(),
+                "Rejected Sucrose input should not deal damage");
+        assertClose(rejectedTime, sim.getCurrentTime(), EPS,
+                "Rejected Sucrose input should not advance simulation time");
     }
 
     private static void notifySucroseC4Hits(

@@ -3166,3 +3166,15 @@ experiment record.
 - **Closure:** all residual physical Normal/Charged category misroutes removed;
   four-character metadata, C0/C6 Bennett infusion, two-hit timing/ICD/gauge,
   Raiden Musou exclusion, full gates, and stable representative parties pass
+
+### B-148 — Remaining supported-character basic action coverage
+
+- **Status:** active
+- **Source:** local supported-character typed-action inventory
+- **Scope/risk:** add missing sourced Sucrose Plunge, Ineffa Charged/Plunge,
+  and Flins Plunge dispatch without changing stamina, low-Plunge, or RL systems
+- **Evidence:** maintained KQM Sucrose, Ineffa, and Flins talent tables plus the
+  current Flins quick guide, accessed 2026-08-02
+- **Boundary:** action/element bonuses, ICD/gauge, combo reset, unsupported
+  input, Flins Manifest rejection, exact form expiry, and CSV/runtime alignment
+- **Plan:** three-phase `TASKS.md` Remaining Basic Action Coverage Campaign
