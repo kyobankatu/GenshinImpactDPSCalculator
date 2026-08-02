@@ -124,6 +124,8 @@ public enum BuffId {
     DEEPWOOD_MEMORIES_4PC_SHRED,
     /** 聖遺物「砂上の楼閣の史話」の重撃後攻撃強化。 */
     DESERT_PAVILION_CHRONICLE_4PC,
+    /** 聖遺物「追憶のしめ縄」の通常・重撃・落下攻撃強化。 */
+    SHIMENAWAS_REMINISCENCE_4PC,
     SUPERCONDUCT_PHYS_RES_SHRED,
     /** 武器「漂泊の宵星」効果。 */
     WANDERING_EVENSTAR_WILDLING_NIGHTSTAR,

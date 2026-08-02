@@ -181,6 +181,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_DesertPavilionChronicleContract();
         testAccuracyPhaseF_ArtifactActionCallbackContract();
         testAccuracyPhaseF_ActionUseArtifactSets();
+        testAccuracyPhaseF_ShimenawasReminiscenceContract();
         testAccuracyPhaseF_HuskCuriosityState();
         testAccuracyPhaseF_ScholarPartyEnergySet();
         testAccuracyPhaseF_BennettAndXianglingPassiveAccuracy();
@@ -14915,6 +14916,165 @@ public class ReactionRegressionTest {
                 "Heart of Depth should reject null supplied stats");
         assertTrue(nullMartialStatsRejected,
                 "Martial Artist should reject null supplied stats");
+    }
+
+    private static void testAccuracyPhaseF_ShimenawasReminiscenceContract() {
+        StatsContainer suppliedStats = new StatsContainer();
+        suppliedStats.set(StatType.CRIT_RATE, 0.10);
+        model.artifact.ShimenawasReminiscence supplied =
+                new model.artifact.ShimenawasReminiscence(suppliedStats);
+        assertEquals("Shimenawa's Reminiscence", supplied.getName(),
+                "Shimenawa display name");
+        assertClose(0.18, supplied.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Shimenawa two-piece ATK bonus");
+        assertClose(0.10, supplied.getStats().get(StatType.CRIT_RATE), EPS,
+                "Shimenawa should preserve supplied stats");
+
+        model.artifact.ShimenawasReminiscence shimenawa =
+                new model.artifact.ShimenawasReminiscence();
+        TestCharacter owner = testCharacter(Element.PHYSICAL, CharacterId.SUCROSE);
+        owner.setArtifacts(shimenawa);
+        CombatSimulator sim = simulatorWith(owner);
+        owner.restoreCurrentEnergy(15.0);
+        sim.performAction(
+                owner.getCharacterId(),
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        assertClose(15.0, owner.getCurrentEnergy(), EPS,
+                "Shimenawa should delay its Energy spend");
+        assertClose(0.50,
+                resolvedStat(sim, owner, StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Shimenawa active Normal bonus");
+        assertClose(0.50,
+                resolvedStat(sim, owner, StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "Shimenawa active Charged bonus");
+        assertClose(0.50,
+                resolvedStat(sim, owner, StatType.PLUNGING_ATTACK_DMG_BONUS), EPS,
+                "Shimenawa active Plunging bonus");
+        assertClose(0.0,
+                resolvedStat(sim, owner, StatType.SKILL_DMG_BONUS), EPS,
+                "Shimenawa should not add Skill DMG Bonus");
+        List<Buff> firstWindows = activeBuffs(
+                owner,
+                BuffId.SHIMENAWAS_REMINISCENCE_4PC,
+                sim.getCurrentTime());
+        assertEquals(1, firstWindows.size(),
+                "Shimenawa should create one typed attack window");
+        assertEquals(CharacterId.SUCROSE, firstWindows.get(0).getSourceCharacterId(),
+                "Shimenawa window should retain owner attribution");
+
+        sim.advanceTime(6.0 / 60.0);
+        assertClose(15.0, owner.getCurrentEnergy(), EPS,
+                "Shimenawa should retain Energy through six frames");
+        sim.advanceTime(1.0 / 60.0);
+        assertClose(0.0, owner.getCurrentEnergy(), EPS,
+                "Shimenawa should spend 15 Energy at seven frames");
+
+        owner.restoreCurrentEnergy(15.0);
+        sim.performAction(
+                owner.getCharacterId(),
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        sim.advanceTime(1.0);
+        assertClose(15.0, owner.getCurrentEnergy(), EPS,
+                "Active Shimenawa should not schedule another Energy spend");
+        assertEquals(1, activeBuffCount(
+                        owner,
+                        BuffId.SHIMENAWAS_REMINISCENCE_4PC,
+                        sim.getCurrentTime()),
+                "Active Shimenawa should neither stack nor refresh");
+
+        sim.advanceTime(9.999 - sim.getCurrentTime());
+        assertClose(0.50,
+                resolvedStat(sim, owner, StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Shimenawa should remain active at 9.999 seconds");
+        sim.advanceTime(0.001);
+        assertClose(0.0,
+                resolvedStat(sim, owner, StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Shimenawa should expire at exactly ten seconds");
+        sim.performAction(
+                owner.getCharacterId(),
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        assertEquals(1, activeBuffCount(
+                        owner,
+                        BuffId.SHIMENAWAS_REMINISCENCE_4PC,
+                        sim.getCurrentTime()),
+                "Expired Shimenawa should reactivate as one window");
+        sim.advanceTime(7.0 / 60.0);
+        assertClose(0.0, owner.getCurrentEnergy(), EPS,
+                "Reactivated Shimenawa should schedule a fresh Energy spend");
+
+        SimulatorSnapshot activeSnapshot = sim.saveSnapshot();
+        owner.restoreCurrentEnergy(30.0);
+        owner.removeBuff(BuffId.SHIMENAWAS_REMINISCENCE_4PC);
+        sim.restoreSnapshot(activeSnapshot);
+        assertClose(0.0, owner.getCurrentEnergy(), EPS,
+                "Snapshot restore should recover post-drain Shimenawa Energy");
+        assertEquals(1, activeBuffCount(
+                        owner,
+                        BuffId.SHIMENAWAS_REMINISCENCE_4PC,
+                        sim.getCurrentTime()),
+                "Snapshot restore should recover the active Shimenawa window");
+
+        model.artifact.ShimenawasReminiscence lowEnergy =
+                new model.artifact.ShimenawasReminiscence();
+        TestCharacter lowOwner = testCharacter(Element.PHYSICAL, CharacterId.AMBER);
+        lowOwner.setArtifacts(lowEnergy);
+        CombatSimulator lowSim = simulatorWith(lowOwner);
+        lowOwner.restoreCurrentEnergy(14.999);
+        lowSim.performAction(
+                lowOwner.getCharacterId(),
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        lowSim.advanceTime(1.0);
+        assertClose(14.999, lowOwner.getCurrentEnergy(), EPS,
+                "Shimenawa should not spend Energy below the threshold");
+        assertEquals(0, activeBuffCount(
+                        lowOwner,
+                        BuffId.SHIMENAWAS_REMINISCENCE_4PC,
+                        lowSim.getCurrentTime()),
+                "Shimenawa should remain inactive below 15 Energy");
+
+        model.artifact.ShimenawasReminiscence rejected =
+                new model.artifact.ShimenawasReminiscence();
+        TestCharacter rejectedOwner = testCharacter(Element.PHYSICAL);
+        CharacterActionRequest skillRequest =
+                CharacterActionRequest.of(CharacterActionKey.SKILL);
+        rejected.onAction(rejectedOwner, skillRequest, new CombatSimulator());
+        rejectedOwner.setArtifacts(rejected);
+        CombatSimulator rejectedSim = simulatorWith(rejectedOwner);
+        TestCharacter foreignOwner = testCharacter(Element.PHYSICAL, CharacterId.XINGQIU);
+        rejected.onAction(
+                foreignOwner,
+                skillRequest,
+                rejectedSim);
+        rejected.onAction(
+                rejectedOwner,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL),
+                rejectedSim);
+        rejected.onAction(rejectedOwner, skillRequest, new CombatSimulator());
+        rejected.onAction(rejectedOwner, null, rejectedSim);
+        assertEquals(0, activeBuffCount(
+                        rejectedOwner,
+                        BuffId.SHIMENAWAS_REMINISCENCE_4PC,
+                        rejectedSim.getCurrentTime()),
+                "Invalid Shimenawa callbacks should remain inert");
+
+        boolean crossBindingRejected = false;
+        try {
+            rejected.initializeForSimulator(
+                    rejectedOwner, new CombatSimulator(), true);
+        } catch (IllegalStateException expected) {
+            crossBindingRejected = true;
+        }
+        assertTrue(crossBindingRejected,
+                "Shimenawa should reject cross-simulator reuse");
+
+        boolean nullStatsRejected = false;
+        try {
+            new model.artifact.ShimenawasReminiscence(null);
+        } catch (NullPointerException expected) {
+            nullStatsRejected = true;
+        }
+        assertTrue(nullStatsRejected,
+                "Shimenawa should reject null supplied stats");
     }
 
     private static void testAccuracyPhaseF_HuskCuriosityState() {

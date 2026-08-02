@@ -3181,3 +3181,15 @@ experiment record.
 - **Closure:** Sucrose high Plunge, Ineffa Charged/high Plunge, and Flins
   out-of-form high Plunge pass focused and full gates; active Manifest rejection,
   exact expiry, combo reset, unsupported input, and deterministic samples pass
+
+### B-149 — Missing artifact runtime coverage campaign
+
+- **Status:** active
+- **Source:** delegated asset-backed artifact inventory
+- **Scope/risk:** add Shimenawa's Reminiscence, Flower of Paradise Lost, and
+  Long Night's Oath through existing typed callbacks without new simulator hooks
+- **Evidence:** maintained KQM artifact catalog/evidence vault and local image
+  assets, accessed 2026-08-02
+- **Boundary:** delayed Energy spend, non-refreshable window, reaction ownership,
+  trigger ordering, per-category CT, stack cap/expiry, binding, and snapshots
+- **Plan:** three-phase `TASKS.md` Missing Artifact Runtime Coverage Campaign

@@ -12848,6 +12848,87 @@ Completion evidence:
 - `./gradlew ReactionRegressionTest`, `./gradlew build`, `./gradlew javadoc`,
   and `python scripts/preflight.py` passed on 2026-08-02.
 
+## Implementation Order: Missing Artifact Runtime Coverage Campaign
+
+Status: In progress. B-149 adds three locally asset-backed artifact sets through
+existing action, damage, reaction, buff, and snapshot contracts. Piece-count
+modeling, equipment removal, new simulator hooks, RL, and generated docs are
+excluded.
+
+Evidence:
+
+- Maintained KQM artifact catalog and evidence vault, accessed 2026-08-02:
+  https://library.keqingmains.com/equipment/artifacts
+  https://library.keqingmains.com/evidence/equipment/artifacts
+
+### Phase 1: Shimenawa's Reminiscence - Done
+
+Target files:
+
+- `src/java/model/artifact/ShimenawasReminiscence.java` (new)
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria and tests:
+
+- Preserve supplied stats and add ATK +18%; an owner Skill cast at 15 or more
+  Energy opens one non-refreshable ten-second 50% Normal/Charged/Plunging window.
+- Spend 15 Energy after the sourced seven-frame delay; no Energy or second buff
+  is consumed during the active window, and exact expiry allows reactivation.
+- Cover 14.999/15 Energy, 6/7-frame drain, three isolated categories, active
+  recast, exact expiry, invalid callbacks/binding, and post-drain snapshot restore.
+
+Completion evidence:
+
+- A typed non-refreshable buff provides all three attack bonuses immediately;
+  one seven-frame event spends Energy only after an eligible inactive cast.
+- Threshold, delay, recast, exact expiry, source/binding, post-drain snapshot,
+  reaction regression, build, Javadoc, party catalog, and preflight pass.
+
+### Phase 2: Flower of Paradise Lost - Pending
+
+Target files:
+
+- `src/java/model/artifact/FlowerOfParadiseLost.java` (new)
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria and tests:
+
+- Preserve supplied stats and add EM +80; base bonuses are 40% Bloom/Hyperbloom/
+  Burgeon and 10% Lunar-Bloom, with each eligible owner reaction adding 25% of
+  those effects for ten seconds, up to four stacks at one-second trigger CT.
+- Off-field ownership works; unrelated, NONE, wrong-owner, and wrong-simulator
+  callbacks are inert; the triggering reaction does not retroactively gain its stack.
+- Cover all four reactions, 0.999/1.000 CT, cap, independent expiry, trigger
+  ordering, invalid callbacks/binding, and snapshot restore.
+
+### Phase 3: Long Night's Oath - Pending
+
+Target files:
+
+- `src/java/model/artifact/LongNightsOath.java` (new)
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria and tests:
+
+- Preserve supplied stats and add Plunging DMG +25%; positive owner Plunge,
+  Charged, and Skill hits add 1/2/2 Radiance stacks after damage, up to five.
+- Each trigger category has an independent one-second CT; every accepted gain
+  refreshes the shared six-second window and grants 15% Plunging DMG per stack.
+- Cover trigger-hit ordering, all categories, CT independence, cap/refresh,
+  5.999/6.000 expiry, invalid callbacks/binding, and snapshot restore.
+
+Verification for every phase:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `./gradlew PartyCatalogRegressionTest`
+- representative samples when affected
+- `python scripts/preflight.py --run`
+
 ## Implementation Order: Remaining Basic Action Coverage Campaign
 
 Status: Complete. B-148 adds sourced Charged and high-Plunging inputs to
