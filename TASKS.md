@@ -50,6 +50,10 @@ wave added the Golden Majesty weapon family, six legacy boundary artifact sets,
 and Razor through isolated implementation lanes; RL and generated
 documentation remained excluded.
 
+The active B-158 wave adds reusable final-DEF/EM damage conversion, Redhorn
+Stonethresher, Staff of the Scarlet Sands, four remaining asset-backed artifact
+sets, and Fischl through bounded branch-isolated lanes.
+
 The B-128 action-use artifact campaign is complete. Successful typed actions
 now reach equipped artifacts, and Heart of Depth plus Martial Artist use the
 shared callback without changing RL or generated documentation.
@@ -13665,6 +13669,173 @@ Completion evidence:
   form/switch boundaries, C6 cadence, invalid inputs, and instance isolation.
 - Razor, party catalog, equipment boundary, reaction, build, Javadoc, and
   executable preflight checks pass after integration review.
+
+## Implementation Order: Derived-Stat Equipment and Fischl Content Wave
+
+Status: In progress. Primary owns the two narrow formula primitives and
+integration; concrete equipment and Fischl remain disjoint implementation
+units after the shared baseline is published.
+
+Scope:
+
+- Add typed final-DEF-to-Normal/Charged base damage and dynamic
+  Elemental-Mastery-to-flat-ATK conversion primitives.
+- Add Redhorn Stonethresher and Staff of the Scarlet Sands at exact R1-R5
+  offensive boundaries.
+- Add Disenchantment in Deep Shadow, Scroll of the Hero of Cinder City,
+  Obsidian Codex, and Retracing Bolide without inventing unavailable state.
+- Add Fischl's sourced offensive actions, Oz lifecycle, reactions, and
+  representable passives and constellations.
+
+Out of scope:
+
+- Shield presence/strength, Nightsoul state or points, Stellar-Conduct,
+  healing/current player HP, weak points and geometry, Witch's Homework and
+  Hexerei, hitlag extension, multi-enemy behavior, RL, and generated docs.
+
+### Phase 1: Derived Offensive Stat Primitives
+
+Target files:
+
+- `src/java/model/type/StatType.java`
+- `src/java/model/stats/StatsContainer.java`
+- `src/java/mechanics/formula/StandardDamageStrategy.java`
+- `src/java/sample/DerivedOffensiveStatRegressionTest.java` (new)
+
+Acceptance criteria:
+
+- One typed ratio converts final Elemental Mastery into flat ATK after every
+  ordinary stat source is assembled.
+- One typed ratio adds final DEF to only Normal and Charged base damage before
+  DMG Bonus, CRIT, defense, and resistance multipliers.
+- Zero/negative values, unrelated action types, independent stat containers,
+  and source-container immutability remain exact.
+
+Test cases:
+
+- Normal: late-added EM/DEF, Normal/Charged damage, and combined conversions.
+- Boundary: zero ratio/value and additive ratios from multiple sources.
+- Abnormal: Skill/Burst/Plunge exclusion and unrelated stat preservation.
+
+Verification:
+
+- `./gradlew DerivedOffensiveStatRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 2: Redhorn Stonethresher
+
+Target files:
+
+- `src/java/model/weapon/RedhornStonethresher.java` (new)
+- `src/java/sample/RedhornStonethresherRegressionTest.java` (new)
+
+Acceptance criteria:
+
+- Exact Lv. 90 Claymore metadata, R5 default, R1-R5 DEF%, and final-DEF
+  Normal/Charged additive damage coefficients are exposed.
+- The additive branch uses Phase 1's typed formula path and cannot affect
+  Skill, Burst, Plunge, reactions, or unrelated stats.
+
+Test cases:
+
+- Normal: R1/R5 metadata, late DEF sources, Normal and Charged damage.
+- Boundary: every refinement and arbitrary simulation times.
+- Abnormal: refinement 0/6, unrelated actions, and independent instances.
+
+Verification:
+
+- `./gradlew RedhornStonethresherRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Staff of the Scarlet Sands
+
+Target files:
+
+- `src/java/model/weapon/StaffOfTheScarletSands.java` (new)
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/sample/StaffOfTheScarletSandsRegressionTest.java` (new)
+
+Acceptance criteria:
+
+- Exact Lv. 90 Polearm metadata and R1-R5 dynamic EM-to-ATK conversion apply.
+- On-field Skill hits gain up to three independently expiring ten-second flat
+  ATK stacks, each snapshotting current EM after the triggering hit.
+- Off-field/wrong-owner hits, dummy casts, and non-Skill damage cannot stack;
+  mutable state is owner-local and snapshot-safe.
+
+Test cases:
+
+- Normal: dynamic base conversion, one/three stacks, EM snapshots, retention.
+- Boundary: exact ten-second expiry, refresh/independent expiries, rollback.
+- Abnormal: off-field/wrong hit, invalid refinement/binding, independent state.
+
+Verification:
+
+- `./gradlew StaffOfTheScarletSandsRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 4: Remaining Asset-Backed Artifact Sets
+
+Target files:
+
+- `src/java/model/artifact/DisenchantmentInDeepShadow.java` (new)
+- `src/java/model/artifact/ScrollOfTheHeroOfCinderCity.java` (new)
+- `src/java/model/artifact/ObsidianCodex.java` (new)
+- `src/java/model/artifact/RetracingBolide.java` (new)
+- `src/java/sample/RemainingArtifactSetRegressionTest.java` (new)
+
+Acceptance criteria:
+
+- Disenchantment grants ATK +18%, Superconduct DMG +80%, and live
+  Superconduct-status CRIT Rate +16%; Stellar-Conduct remains inactive.
+- Scroll grants sourced non-Nightsoul reaction-element team bonuses with
+  off-field triggering, exact duration/replacement, and no fabricated
+  Nightsoul Energy or enhanced branch.
+- Obsidian and Bolide remain loadable and stat-preserving while all effects
+  requiring absent Nightsoul or shield state stay inactive.
+
+Test cases:
+
+- Normal: canonical names, representable bonuses, reaction elements/off-field.
+- Boundary: status/buff expiry, same-name replacement, supplied stats.
+- Abnormal: wrong owner/reaction, unavailable state, null/cross binding.
+
+Verification:
+
+- `./gradlew RemainingArtifactSetRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 5: Fischl Offensive Vertical Slice
+
+Target files:
+
+- `src/java/model/character/Fischl.java` (new)
+- `config/characters/Fischl/Fischl_Status.csv` (new)
+- `config/characters/Fischl/Fischl_Multipliers.csv` (new)
+- `src/java/model/type/CharacterId.java`
+- `src/java/sample/FischlRegressionTest.java` (new)
+
+Acceptance criteria:
+
+- Typed Normal/Charged/Plunge, Nightrider, Oz periodic attacks, Burst recast,
+  particle, cooldown, Energy, snapshot, and switch behavior match sourced
+  single-target timing and ICD/gauge contracts.
+- A4 and representable C1-C6 offensive branches use owner-local callbacks;
+  C6 triggers once per Normal action and shares Oz's sourced ICD.
+- Geometry, weak-point A1, healing, Witch/Hexerei, hitlag, and multi-enemy
+  behavior remain explicit exclusions.
+
+Test cases:
+
+- Normal: action metadata, Oz summon/recast/ticks, particles, A4, C branches.
+- Boundary: Oz/Burst duration, cooldown/Energy gates, ICD, switch and snapshot.
+- Abnormal: invalid constellation, unsupported actions, cross reuse/isolation.
+
+Verification:
+
+- `./gradlew FischlRegressionTest PartyCatalogRegressionTest`
+- `./gradlew ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
 
 ## Implementation Order: Black Sword Campaign
 

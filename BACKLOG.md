@@ -3356,3 +3356,22 @@ experiment record.
   Razor are integrated on `dev_0`. Typed zero-damage contacts are distinct from
   dummy casts; unsupported shield, player-state, target-state, Hold-control,
   and hitlag-extension branches remain explicit rather than approximated.
+
+### B-158 — Derived-stat equipment and Fischl content wave
+
+- **Status:** in-progress
+- **Source:** post-B-157 local asset/class inventory and continued explicit
+  broad character, weapon, and artifact coverage request
+- **Scope/risk:** two shared derived-stat primitives, Redhorn Stonethresher,
+  Staff of the Scarlet Sands, four artifact sets, and Fischl; planned
+- **Evidence:** maintained KQM weapon, artifact, and Fischl catalogs/evidence,
+  accessed 2026-08-03:
+  https://library.keqingmains.com/equipment/weapons/claymores
+  https://library.keqingmains.com/equipment/weapons/polearms
+  https://library.keqingmains.com/equipment/artifacts
+  https://library.keqingmains.com/characters/electro/fischl
+- **Boundary:** shield, Nightsoul, Stellar-Conduct, healing/current HP, weak
+  points/geometry, Witch/Hexerei, hitlag, multi-enemy, RL, and generated docs
+  remain excluded.
+- **Proof/plan:** five-phase `TASKS.md` Derived-Stat Equipment and Fischl
+  Content Wave with isolated focused regressions and full local gates.
