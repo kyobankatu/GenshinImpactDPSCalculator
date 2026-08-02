@@ -14899,3 +14899,49 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Catalyst Dual-Window Weapon Campaign
+
+Status: Active. Add two complete catalysts with independent typed action,
+damage, and Lunar-Bloom windows.
+
+Scope:
+
+- Add Dawning Frost and Reliquary of Truth with sourced metadata, R1-R5 values,
+  exact independent windows, intersection scaling, and focused regressions.
+
+Out of scope for this pass:
+
+- Characters, formulas, RL, generated docs, and unrelated catalysts.
+
+### Phase 1: Add Dawning Frost and Reliquary of Truth
+
+Target files:
+
+- `src/java/model/weapon/DawningFrost.java` (new)
+- `src/java/model/weapon/ReliquaryOfTruth.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Positive active-owner Charged/Skill hits independently open half-open
+  ten-second Dawning Frost windows granting 72-144 and 48-96 EM; both add.
+- Reliquary always grants 8-16% CRIT Rate; active-owner Skill use opens a
+  half-open 12-second 80-160 EM window and owner Lunar-Bloom opens a half-open
+  four-second 24-48% CRIT DMG window; while both overlap each result is 1.5x.
+- Metadata, pre-action/post-hit order, typed/positive/active/source gates,
+  exact independent expiry, R1-R5 defaults/validation, and binding are explicit.
+
+Test cases to add or update:
+
+- Normal: metadata, each independent window, overlap totals, R5.
+- Boundary: exact four/ten/12 seconds, one-window expiry while another remains, R1.
+- Abnormal: zero/wrong/off-field/foreign/NONE events, cross-simulator reuse,
+  refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
