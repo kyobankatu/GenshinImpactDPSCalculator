@@ -180,6 +180,8 @@ public enum StatType {
     CHARGED_ATTACK_CRIT_RATE,
     /** Crit rate bonus that applies specifically to Plunging Attack hits. */
     PLUNGING_ATTACK_CRIT_RATE,
+    /** Crit DMG bonus that applies specifically to Plunging Attack hits. */
+    PLUNGING_ATTACK_CRIT_DMG,
     /** DMG bonus that applies to Elemental Burst hits. */
     BURST_DMG_BONUS,
     /** Crit rate bonus that applies specifically to Elemental Burst hits. */
@@ -201,6 +203,8 @@ public enum StatType {
     ELEMENTAL_MASTERY_TO_NORMAL_SKILL_FLAT_DMG_RATIO,
     /** Final-EM ratio added to Charged Attack base damage. */
     ELEMENTAL_MASTERY_TO_CHARGED_FLAT_DMG_RATIO,
+    /** Final-ATK ratio added only to Normal Attack base damage. */
+    NORMAL_ATTACK_ATK_FLAT_DMG_RATIO,
     /** Elemental Skill DMG Bonus gained per point of final Elemental Mastery. */
     ELEMENTAL_MASTERY_TO_SKILL_DMG_BONUS_RATIO,
 

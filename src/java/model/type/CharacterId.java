@@ -14,64 +14,69 @@ package model.type;
  */
 public enum CharacterId {
     /** Bennett (Pyro sword support). */
-    BENNETT(1, "Bennett"),
+    BENNETT(1, "Bennett", CharacterRegion.MONDSTADT),
     /** Columbina (custom Lunar character; carries {@code LUNAR_MULTIPLIER}). */
-    COLUMBINA(2, "Columbina"),
+    COLUMBINA(2, "Columbina", CharacterRegion.UNKNOWN),
     /** Flins (custom Lunar character). */
-    FLINS(3, "Flins"),
+    FLINS(3, "Flins", CharacterRegion.UNKNOWN),
     /** Ineffa (custom Lunar character; carries {@code LUNAR_BASE_BONUS}). */
-    INEFFA(4, "Ineffa"),
+    INEFFA(4, "Ineffa", CharacterRegion.UNKNOWN),
     /** Raiden Shogun (Electro polearm DPS / battery). */
-    RAIDEN_SHOGUN(5, "Raiden Shogun"),
+    RAIDEN_SHOGUN(5, "Raiden Shogun", CharacterRegion.INAZUMA),
     /** Sucrose (Anemo catalyst Moonsign / Ascendant Blessing source). */
-    SUCROSE(6, "Sucrose"),
+    SUCROSE(6, "Sucrose", CharacterRegion.MONDSTADT),
     /** Xiangling (Pyro polearm sub-DPS). */
-    XIANGLING(7, "Xiangling"),
+    XIANGLING(7, "Xiangling", CharacterRegion.LIYUE),
     /** Xingqiu (Hydro sword off-field reaction enabler). */
-    XINGQIU(8, "Xingqiu"),
+    XINGQIU(8, "Xingqiu", CharacterRegion.LIYUE),
     /** Kaeya (Cryo sword DPS and off-field Burst source). */
-    KAEYA(9, "Kaeya"),
+    KAEYA(9, "Kaeya", CharacterRegion.MONDSTADT),
     /** Amber (Pyro bow DPS with delayed Skill and fixed-area Burst). */
-    AMBER(10, "Amber"),
+    AMBER(10, "Amber", CharacterRegion.MONDSTADT),
     /** Lisa (Electro catalyst DPS with Conductive stacks and a periodic Burst). */
-    LISA(11, "Lisa"),
+    LISA(11, "Lisa", CharacterRegion.MONDSTADT),
     /** Barbara (Hydro catalyst healer and driver). */
-    BARBARA(12, "Barbara"),
+    BARBARA(12, "Barbara", CharacterRegion.MONDSTADT),
     /** Noelle (Geo claymore on-field DPS). */
-    NOELLE(13, "Noelle"),
+    NOELLE(13, "Noelle", CharacterRegion.MONDSTADT),
     /** Razor (Electro claymore on-field DPS). */
-    RAZOR(14, "Razor"),
+    RAZOR(14, "Razor", CharacterRegion.MONDSTADT),
     /** Fischl (Electro bow off-field DPS and battery). */
-    FISCHL(15, "Fischl"),
+    FISCHL(15, "Fischl", CharacterRegion.MONDSTADT),
     /** Yae Miko (Electro catalyst off-field Skill DPS). */
-    YAE_MIKO(16, "Yae Miko"),
+    YAE_MIKO(16, "Yae Miko", CharacterRegion.INAZUMA),
     /** Albedo (Geo sword off-field Skill DPS). */
-    ALBEDO(17, "Albedo"),
+    ALBEDO(17, "Albedo", CharacterRegion.MONDSTADT),
     /** Venti (Anemo bow Burst support). */
-    VENTI(18, "Venti"),
+    VENTI(18, "Venti", CharacterRegion.MONDSTADT),
     /** Yoimiya (Pyro bow Normal Attack DPS). */
-    YOIMIYA(19, "Yoimiya"),
+    YOIMIYA(19, "Yoimiya", CharacterRegion.INAZUMA),
     /** Yanfei (Pyro catalyst Charged Attack DPS). */
-    YANFEI(20, "Yanfei"),
+    YANFEI(20, "Yanfei", CharacterRegion.LIYUE),
     /** Rosaria (Cryo polearm DPS and team CRIT support). */
-    ROSARIA(21, "Rosaria"),
+    ROSARIA(21, "Rosaria", CharacterRegion.MONDSTADT),
     /** Diluc (Pyro claymore on-field DPS). */
-    DILUC(22, "Diluc"),
+    DILUC(22, "Diluc", CharacterRegion.MONDSTADT),
     /** Keqing (Electro sword on-field DPS). */
-    KEQING(23, "Keqing"),
+    KEQING(23, "Keqing", CharacterRegion.LIYUE),
     /** Ningguang (Geo catalyst on-field DPS). */
-    NINGGUANG(24, "Ningguang"),
+    NINGGUANG(24, "Ningguang", CharacterRegion.LIYUE),
     /** Ganyu (Cryo bow Charged Attack DPS). */
-    GANYU(25, "Ganyu"),
+    GANYU(25, "Ganyu", CharacterRegion.LIYUE),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
-    UNKNOWN(0, "Unknown");
+    UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 
     private final int numericId;
     private final String displayName;
+    private final CharacterRegion region;
 
-    CharacterId(int numericId, String displayName) {
+    CharacterId(
+            int numericId,
+            String displayName,
+            CharacterRegion region) {
         this.numericId = numericId;
         this.displayName = displayName;
+        this.region = region;
     }
 
     /**
@@ -93,6 +98,11 @@ public enum CharacterId {
      */
     public String getDisplayName() {
         return displayName;
+    }
+
+    /** Returns the typed region used by composition-based equipment. */
+    public CharacterRegion getRegion() {
+        return region;
     }
 
     /**

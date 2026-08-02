@@ -53,6 +53,10 @@ final class StandardDamageStrategy implements DamageStrategy {
         double baseStatValue = action.getScalingStatValue(stats);
         double mv = action.getDamagePercent();
         double flatDmg = stats.get(StatType.FLAT_DMG_BONUS);
+        if (isNormalDamage) {
+            flatDmg += stats.getTotalAtk() * stats.get(
+                    StatType.NORMAL_ATTACK_ATK_FLAT_DMG_RATIO);
+        }
         if (isNormalDamage || isChargedDamage) {
             flatDmg += stats.getTotalDef() * stats.get(
                     StatType.DEF_TO_NORMAL_CHARGED_FLAT_DMG_RATIO);
@@ -102,6 +106,9 @@ final class StandardDamageStrategy implements DamageStrategy {
         }
         critRate = Math.min(1.0, critRate);
         double critDmg = stats.get(StatType.CRIT_DMG);
+        if (action.getActionType() == ActionType.PLUNGE) {
+            critDmg += stats.get(StatType.PLUNGING_ATTACK_CRIT_DMG);
+        }
         double critMulti = 1.0 + (critRate * critDmg);
 
         int attackerLevel = 90;

@@ -25,6 +25,7 @@ public final class DerivedOffensiveStatRegressionTest {
         testElementalMasteryToFlatAttack();
         testLateMergedElementalMasteryAndAdditiveRatios();
         testFinalDefenseNormalAndChargedDamage();
+        testFinalAttackNormalAndPlungingCritDamage();
         testActionExclusionAndSourceImmutability();
         System.out.println("DerivedOffensiveStatRegressionTest passed");
     }
@@ -93,6 +94,25 @@ public final class DerivedOffensiveStatRegressionTest {
                 "damage calculation preserves source ratio");
         assertClose(10.0, stats.get(StatType.FLAT_DMG_BONUS),
                 "damage calculation preserves ordinary flat damage");
+    }
+
+    private static void testFinalAttackNormalAndPlungingCritDamage() {
+        StatsContainer attackRatio = standardDamageStats();
+        attackRatio.set(StatType.NORMAL_ATTACK_ATK_FLAT_DMG_RATIO, 0.20);
+        assertClose(94.5, calculate(attackRatio, ActionType.NORMAL),
+                "Normal final-ATK additive damage");
+        assertClose(85.5, calculate(attackRatio, ActionType.CHARGE),
+                "Charged excludes Normal final-ATK addition");
+
+        StatsContainer plungeCrit = new StatsContainer();
+        plungeCrit.set(StatType.BASE_ATK, 100.0);
+        plungeCrit.set(StatType.CRIT_RATE, 1.0);
+        plungeCrit.set(StatType.CRIT_DMG, 0.50);
+        plungeCrit.set(StatType.PLUNGING_ATTACK_CRIT_DMG, 0.40);
+        assertClose(85.5, calculate(plungeCrit, ActionType.PLUNGE),
+                "Plunging-only CRIT DMG");
+        assertClose(67.5, calculate(plungeCrit, ActionType.NORMAL),
+                "Normal excludes Plunging CRIT DMG");
     }
 
     private static StatsContainer standardDamageStats() {

@@ -4,6 +4,7 @@ import java.util.EnumSet;
 
 import mechanics.buff.BuffId;
 import model.type.CharacterId;
+import model.type.CharacterRegion;
 
 /** Regression checks for the B-161/B-162 character and buff identity baseline. */
 public final class LegacyCharacterIdentityRegressionTest {
@@ -36,6 +37,20 @@ public final class LegacyCharacterIdentityRegressionTest {
                 "case-sensitive name fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("Not A Character"),
                 "unmatched name fallback");
+        assertEquals(CharacterRegion.LIYUE, CharacterId.GANYU.getRegion(),
+                "Liyue region lookup");
+        assertEquals(CharacterRegion.INAZUMA,
+                CharacterId.RAIDEN_SHOGUN.getRegion(),
+                "Inazuma region lookup");
+        assertEquals(CharacterRegion.MONDSTADT,
+                CharacterId.DILUC.getRegion(),
+                "Mondstadt region lookup");
+        assertEquals(CharacterRegion.UNKNOWN,
+                CharacterId.COLUMBINA.getRegion(),
+                "unverified custom region fails closed");
+        assertEquals(CharacterRegion.UNKNOWN,
+                CharacterId.UNKNOWN.getRegion(),
+                "unknown identity region fails closed");
 
         EnumSet<BuffId> reserved = EnumSet.of(
                 BuffId.VENTI_C2_RES_SHRED,
