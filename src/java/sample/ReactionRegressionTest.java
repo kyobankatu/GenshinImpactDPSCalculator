@@ -5145,6 +5145,50 @@ public class ReactionRegressionTest {
         }
         assertTrue(highRefinementRejected,
                 "The Stringless should reject refinement six");
+
+        model.weapon.Rust rust = new model.weapon.Rust();
+        assertEquals("Rust", rust.getName(), "Rust display name");
+        assertClose(510.0, rust.getBaseAtk(), EPS, "Rust base ATK");
+        assertClose(0.413, rust.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Rust ATK substat");
+        assertEquals(model.type.WeaponType.BOW, rust.getWeaponType(),
+                "Rust weapon type");
+        assertEquals(5, rust.getRefinement(), "Rust default refinement");
+
+        StatsContainer r5RustStats = new StatsContainer();
+        rust.applyPassive(r5RustStats, 0.0);
+        assertClose(0.80, r5RustStats.get(StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "R5 Rust Normal damage bonus");
+        assertClose(-0.10, r5RustStats.get(StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "R5 Rust Charged damage penalty");
+        assertClose(0.0, r5RustStats.get(StatType.SKILL_DMG_BONUS), EPS,
+                "Rust should not modify Skill damage");
+        assertClose(0.0, r5RustStats.get(StatType.BURST_DMG_BONUS), EPS,
+                "Rust should not modify Burst damage");
+
+        model.weapon.Rust r1Rust = new model.weapon.Rust(1);
+        StatsContainer r1RustStats = new StatsContainer();
+        r1Rust.applyPassive(r1RustStats, 0.0);
+        assertClose(0.40, r1RustStats.get(StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "R1 Rust Normal damage bonus");
+        assertClose(-0.10, r1RustStats.get(StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "R1 Rust Charged damage penalty should not scale with refinement");
+
+        boolean lowRustRefinementRejected = false;
+        try {
+            new model.weapon.Rust(0);
+        } catch (IllegalArgumentException expected) {
+            lowRustRefinementRejected = true;
+        }
+        assertTrue(lowRustRefinementRejected, "Rust should reject refinement zero");
+
+        boolean highRustRefinementRejected = false;
+        try {
+            new model.weapon.Rust(6);
+        } catch (IllegalArgumentException expected) {
+            highRustRefinementRejected = true;
+        }
+        assertTrue(highRustRefinementRejected, "Rust should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
