@@ -124,6 +124,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_SkillUseEventWeapons();
         testAccuracyPhaseF_WatatsumiWavewalkerWeapons();
         testAccuracyPhaseF_ReciprocalHitWeapons();
+        testAccuracyPhaseF_ReactionWindowWeapons();
         testAccuracyPhaseF_KaeyaCharacterContract();
         testAccuracyPhaseF_AmberCharacterContract();
         testAccuracyPhaseF_DendroResonanceReactionEmContract();
@@ -6078,6 +6079,88 @@ public class ReactionRegressionTest {
         }
         assertTrue(highDodocoRefinementRejected,
                 "Dodoco Tales should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_ReactionWindowWeapons() {
+        model.weapon.MappaMare mappaMare = new model.weapon.MappaMare();
+        assertEquals("Mappa Mare", mappaMare.getName(), "Mappa Mare display name");
+        assertClose(565.0, mappaMare.getBaseAtk(), EPS, "Mappa Mare base ATK");
+        assertClose(110.0, mappaMare.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Mappa Mare Elemental Mastery");
+        assertEquals(model.type.WeaponType.CATALYST, mappaMare.getWeaponType(),
+                "Mappa Mare weapon type");
+        assertEquals(5, mappaMare.getRefinement(), "Mappa Mare default refinement");
+
+        TestCharacter owner = testCharacter(Element.ANEMO);
+        owner.setWeapon(mappaMare);
+        CombatSimulator sim = simulatorWith(owner);
+        ReactionResult overload = ReactionResult.transform(
+                0.0, "Overloaded", ReactionResult.Kind.OVERLOAD);
+        sim.notifyReaction(ReactionResult.none(), owner);
+        assertClose(0.0, resolvedStat(sim, owner, StatType.ANEMO_DMG_BONUS), EPS,
+                "Mappa Mare should ignore a no-reaction event");
+
+        sim.notifyReaction(overload, owner);
+        for (Element element : Element.values()) {
+            double expected = element == Element.PHYSICAL ? 0.0 : 0.16;
+            assertClose(expected,
+                    resolvedStat(sim, owner, element.getBonusStatType()), EPS,
+                    "Mappa Mare first stack for " + element);
+        }
+        sim.notifyReaction(overload, owner);
+        sim.notifyReaction(overload, owner);
+        assertClose(0.32, resolvedStat(sim, owner, StatType.ANEMO_DMG_BONUS), EPS,
+                "Mappa Mare should cap at two R5 stacks");
+
+        sim.advanceTime(9.0);
+        sim.notifyReaction(overload, owner);
+        sim.advanceTime(9.999);
+        assertClose(0.32, resolvedStat(sim, owner, StatType.ANEMO_DMG_BONUS), EPS,
+                "Mappa Mare should refresh both stacks before shared expiry");
+        sim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0, resolvedStat(sim, owner, StatType.ANEMO_DMG_BONUS), EPS,
+                "Mappa Mare should expire both stacks at exactly ten seconds");
+
+        model.weapon.MappaMare r1MappaMare = new model.weapon.MappaMare(1);
+        TestCharacter r1Owner = testCharacter(Element.ANEMO);
+        r1Owner.setWeapon(r1MappaMare);
+        CombatSimulator r1Sim = simulatorWith(r1Owner);
+        r1Sim.notifyReaction(overload, r1Owner);
+        assertClose(0.08, resolvedStat(r1Sim, r1Owner, StatType.ANEMO_DMG_BONUS), EPS,
+                "R1 Mappa Mare first stack");
+
+        TestCharacter allySource = testCharacter(Element.PYRO, CharacterId.XIANGLING);
+        r1Sim.addCharacter(allySource);
+        r1Sim.notifyReaction(overload, allySource);
+        assertClose(0.08, resolvedStat(r1Sim, r1Owner, StatType.ANEMO_DMG_BONUS), EPS,
+                "An ally reaction should not add a Mappa Mare stack");
+
+        model.weapon.MappaMare offFieldMappaMare = new model.weapon.MappaMare();
+        TestCharacter activeAlly = testCharacter(Element.PYRO, CharacterId.SUCROSE);
+        CombatSimulator offFieldSim = simulatorWith(activeAlly);
+        TestCharacter offFieldOwner = testCharacter(Element.ANEMO, CharacterId.XIANGLING);
+        offFieldOwner.setWeapon(offFieldMappaMare);
+        offFieldSim.addCharacter(offFieldOwner);
+        offFieldSim.notifyReaction(overload, offFieldOwner);
+        assertClose(0.0,
+                resolvedStat(offFieldSim, offFieldOwner, StatType.ANEMO_DMG_BONUS), EPS,
+                "An off-field owner reaction should not activate Mappa Mare");
+
+        boolean lowRefinementRejected = false;
+        try {
+            new model.weapon.MappaMare(0);
+        } catch (IllegalArgumentException expected) {
+            lowRefinementRejected = true;
+        }
+        assertTrue(lowRefinementRejected, "Mappa Mare should reject refinement zero");
+
+        boolean highRefinementRejected = false;
+        try {
+            new model.weapon.MappaMare(6);
+        } catch (IllegalArgumentException expected) {
+            highRefinementRejected = true;
+        }
+        assertTrue(highRefinementRejected, "Mappa Mare should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
