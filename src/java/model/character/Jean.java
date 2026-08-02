@@ -12,6 +12,7 @@ import model.entity.ArtifactSet;
 import model.entity.Character;
 import model.entity.CharacterTeamBuffProvider;
 import model.entity.SimulatorInitializedCharacterEffect;
+import model.entity.SnapshotAwareCharacterEffect;
 import model.entity.Weapon;
 import model.stats.StatsContainer;
 import model.type.ActionType;
@@ -43,6 +44,7 @@ import simulation.event.SimpleTimerEvent;
  */
 public class Jean extends Character implements
         SimulatorInitializedCharacterEffect,
+        SnapshotAwareCharacterEffect,
         CharacterTeamBuffProvider {
     private static final double FRAME = 1.0 / 60.0;
     private static final double SKILL_COOLDOWN = 6.0;
@@ -68,6 +70,7 @@ public class Jean extends Character implements
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
+    private PendingBurstExit pendingBurstExit;
 
     /** Constructs the repository-default C6 Jean. */
     public Jean(Weapon weapon, ArtifactSet artifacts) {
@@ -147,6 +150,39 @@ public class Jean extends Character implements
                 }
             });
         }
+    }
+
+    /** Captures Jean's Normal chain and pending Burst exit payload. */
+    @Override
+    public State captureCharacterState() {
+        return new JeanState(normalAttackStep, pendingBurstExit);
+    }
+
+    /**
+     * Restores Jean's Normal chain and reconstructs a future Burst exit hit.
+     *
+     * @param state immutable state produced by this Jean instance
+     * @param simulator restored simulator receiving the pending exit event
+     */
+    @Override
+    public void restoreCharacterState(
+            State state,
+            CombatSimulator simulator) {
+        if (!(state instanceof JeanState)) {
+            throw new IllegalArgumentException(
+                    "Unexpected Jean character state");
+        }
+        JeanState restored = (JeanState) state;
+        normalAttackStep = restored.normalAttackStep;
+        pendingBurstExit = restored.pendingBurstExit == null
+                ? null
+                : restored.pendingBurstExit.copy();
+        if (pendingBurstExit == null
+                || pendingBurstExit.time <= simulator.getCurrentTime()) {
+            pendingBurstExit = null;
+            return;
+        }
+        scheduleBurstExit(simulator, pendingBurstExit);
     }
 
     /** Returns Jean's 80-Energy Burst cost. */
@@ -324,6 +360,13 @@ public class Jean extends Character implements
         double castTime = sim.getCurrentTime();
         StatsContainer burstSnapshot = captureActionSnapshot(sim, castTime);
         boolean c3 = constellation >= 3;
+        double borderMultiplier = getTalentValue(
+                c3 ? "Field Border C3" : "Field Border",
+                c3 ? 1.5680 : 1.3328);
+        pendingBurstExit = new PendingBurstExit(
+                castTime + BURST_FIELD_END_FRAME * FRAME,
+                borderMultiplier,
+                burstSnapshot);
 
         schedule(sim, castTime + 38.0 * FRAME, activeSim ->
                 markBurstCooldownUsed(
@@ -343,9 +386,7 @@ public class Jean extends Character implements
                 activeSim -> resolveBurstHit(
                         activeSim,
                         "Dandelion Breeze Field Entry",
-                        getTalentValue(
-                                c3 ? "Field Border C3" : "Field Border",
-                                c3 ? 1.5680 : 1.3328),
+                        borderMultiplier,
                         burstSnapshot));
         schedule(sim, castTime + BURST_INITIAL_HIT_FRAME * FRAME,
                 activeSim -> resolveBurstHit(
@@ -356,15 +397,29 @@ public class Jean extends Character implements
                                         : "Dandelion Breeze",
                                 c3 ? 8.4960 : 7.2216),
                         burstSnapshot));
-        schedule(sim, castTime + BURST_FIELD_END_FRAME * FRAME,
-                activeSim -> resolveBurstHit(
-                        activeSim,
-                        "Dandelion Breeze Field Exit",
-                        getTalentValue(
-                                c3 ? "Field Border C3" : "Field Border",
-                                c3 ? 1.5680 : 1.3328),
-                        burstSnapshot));
+        scheduleBurstExit(sim, pendingBurstExit);
         sim.advanceTime(90.0 * FRAME);
+    }
+
+    private void scheduleBurstExit(
+            CombatSimulator sim,
+            PendingBurstExit payload) {
+        schedule(sim, payload.time,
+                activeSim -> resolveBurstExit(activeSim, payload));
+    }
+
+    private void resolveBurstExit(
+            CombatSimulator sim,
+            PendingBurstExit payload) {
+        if (pendingBurstExit != payload) {
+            return;
+        }
+        pendingBurstExit = null;
+        resolveBurstHit(
+                sim,
+                "Dandelion Breeze Field Exit",
+                payload.multiplier,
+                payload.copySnapshot());
     }
 
     private void resolveBurstHit(
@@ -457,6 +512,46 @@ public class Jean extends Character implements
                 effect.accept(activeSim);
             }
         });
+    }
+
+    /** Immutable snapshot of Jean-owned action progression and delayed state. */
+    private static final class JeanState
+            implements SnapshotAwareCharacterEffect.State {
+        private final int normalAttackStep;
+        private final PendingBurstExit pendingBurstExit;
+
+        private JeanState(
+                int normalAttackStep,
+                PendingBurstExit pendingBurstExit) {
+            this.normalAttackStep = normalAttackStep;
+            this.pendingBurstExit = pendingBurstExit == null
+                    ? null
+                    : pendingBurstExit.copy();
+        }
+    }
+
+    /** Immutable payload required to replay Dandelion Breeze's exit hit. */
+    private static final class PendingBurstExit {
+        private final double time;
+        private final double multiplier;
+        private final StatsContainer snapshot;
+
+        private PendingBurstExit(
+                double time,
+                double multiplier,
+                StatsContainer snapshot) {
+            this.time = time;
+            this.multiplier = multiplier;
+            this.snapshot = snapshot.merge(null);
+        }
+
+        private PendingBurstExit copy() {
+            return new PendingBurstExit(time, multiplier, snapshot);
+        }
+
+        private StatsContainer copySnapshot() {
+            return snapshot.merge(null);
+        }
     }
 
     /** Snapshot-restorable marker for Jean's C2 team buff. */

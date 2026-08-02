@@ -10,6 +10,7 @@ import mechanics.data.TalentDataSource;
 import model.character.Jean;
 import model.entity.Character;
 import model.entity.Enemy;
+import model.entity.SnapshotAwareCharacterEffect;
 import model.stats.StatsContainer;
 import model.type.ActionType;
 import model.type.CharacterId;
@@ -37,6 +38,8 @@ public final class JeanRegressionTest {
         testNormalChargedAndPlungeTiming();
         testSkillSnapshotTimingParticlesAndC5();
         testBurstSnapshotTimingA4AndC3();
+        testNormalAttackStepSnapshotReplay();
+        testBurstExitSnapshotReplay();
         testC2AttackSpeedAndSnapshotReplay();
         testC4RefreshBoundaryAndSnapshotReplay();
         testCooldownEnergyIsolationAndExcludedInputs();
@@ -293,6 +296,74 @@ public final class JeanRegressionTest {
                 "Jean C3 initial multiplier");
     }
 
+    private static void testNormalAttackStepSnapshotReplay() {
+        Jean jean = jeanAtConstellation(0);
+        CombatSimulator sim = simulatorWith(jean);
+        List<ActionRecord> normals = captureNamedActions(
+                sim, "Favonius Bladework N");
+        perform(sim, CharacterActionKey.NORMAL);
+        SimulatorSnapshot snapshot = sim.saveSnapshot();
+
+        perform(sim, CharacterActionKey.NORMAL);
+        assertEquals("Favonius Bladework N2",
+                normals.get(1).action.getName(),
+                "Jean branched Normal continues with N2");
+
+        sim.restoreSnapshot(snapshot);
+        perform(sim, CharacterActionKey.NORMAL);
+        assertEquals("Favonius Bladework N2",
+                normals.get(2).action.getName(),
+                "Jean restored Normal continues with N2");
+        assertClose(normals.get(1).time, normals.get(2).time, EPS,
+                "Jean restored N2 retains its hit time");
+    }
+
+    private static void testBurstExitSnapshotReplay() {
+        Jean jean = jeanAtConstellation(0);
+        jean.addBuff(new SimpleBuff(
+                "Jean replay-only Burst ATK",
+                30.0 * FRAME,
+                0.0,
+                stats -> stats.add(StatType.ATK_PERCENT, 0.75)));
+        CombatSimulator sim = simulatorWith(jean);
+        List<ActionRecord> exits = captureNamedActions(
+                sim, "Dandelion Breeze Field Exit");
+        perform(sim, CharacterActionKey.BURST);
+        SimulatorSnapshot snapshot = sim.saveSnapshot();
+        SnapshotAwareCharacterEffect.State pendingState =
+                jean.captureCharacterState();
+
+        advanceTo(sim, 640.0 * FRAME);
+        assertEquals(1, exits.size(),
+                "Jean original Burst exit resolves once");
+        ActionRecord original = exits.get(0);
+        assertClose(640.0 * FRAME, original.time, EPS,
+                "Jean original Burst exit time");
+        assertClose(1.3328, original.action.getDamagePercent(), EPS,
+                "Jean original Burst exit multiplier");
+        assertBurstHit(original.action, 0.75);
+
+        sim.restoreSnapshot(snapshot);
+        advanceTo(sim, 640.0 * FRAME);
+        assertEquals(2, exits.size(),
+                "Jean restored Burst exit resolves once");
+        assertSameExit(original, exits.get(1),
+                "Jean restored Burst exit");
+
+        sim.restoreSnapshot(snapshot);
+        sim.restoreSnapshot(snapshot);
+        advanceTo(sim, 640.0 * FRAME);
+        assertEquals(3, exits.size(),
+                "Jean repeated restore leaves one Burst exit");
+        assertSameExit(original, exits.get(2),
+                "Jean repeatedly restored Burst exit");
+
+        jean.restoreCharacterState(pendingState, sim);
+        advanceTo(sim, 641.0 * FRAME);
+        assertEquals(3, exits.size(),
+                "Jean restore at the exit deadline schedules nothing");
+    }
+
     private static void testC2AttackSpeedAndSnapshotReplay() {
         Jean c2 = jeanAtConstellation(2);
         TestCharacter ally = new TestCharacter();
@@ -467,6 +538,24 @@ public final class JeanRegressionTest {
                 "Jean Burst hit retains its cast-time ATK buff");
     }
 
+    private static void assertSameExit(
+            ActionRecord expected,
+            ActionRecord actual,
+            String message) {
+        assertClose(expected.time, actual.time, EPS,
+                message + " time");
+        assertClose(expected.damage, actual.damage, EPS,
+                message + " damage");
+        assertClose(expected.action.getDamagePercent(),
+                actual.action.getDamagePercent(), EPS,
+                message + " multiplier");
+        assertClose(expected.action.getStatSnapshot().get(
+                        StatType.ATK_PERCENT),
+                actual.action.getStatSnapshot().get(
+                        StatType.ATK_PERCENT),
+                EPS, message + " cast snapshot");
+    }
+
     private static Jean jeanAtConstellation(int constellation) {
         TalentDataSource talentData = (character, key, defaultValue) ->
                 defaultValue;
@@ -501,7 +590,7 @@ public final class JeanRegressionTest {
         sim.addDamageListener((actor, action, damage, time) -> {
             if (actor.getCharacterId() == CharacterId.JEAN
                     && action.getName().startsWith(actionNamePrefix)) {
-                records.add(new ActionRecord(action, time));
+                records.add(new ActionRecord(action, damage, time));
             }
         });
         return records;
@@ -571,10 +660,15 @@ public final class JeanRegressionTest {
 
     private static final class ActionRecord {
         private final AttackAction action;
+        private final double damage;
         private final double time;
 
-        private ActionRecord(AttackAction action, double time) {
+        private ActionRecord(
+                AttackAction action,
+                double damage,
+                double time) {
             this.action = action;
+            this.damage = damage;
             this.time = time;
         }
     }
