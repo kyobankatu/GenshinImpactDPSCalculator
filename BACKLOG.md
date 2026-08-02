@@ -2615,3 +2615,18 @@ experiment record.
 - **Completion:** all five classes expose only 185 base ATK and the matching
   weapon type; the table-driven regression proves the absent substat/passive
   contract and build/Javadoc/preflight gates pass
+
+### B-120 — Two-star weapon series coverage
+
+- **Status:** done
+- **Scope:** Silver Sword, Old Merc's Pal, Iron Point, Pocket Grimoire, and
+  Seasoned Hunter's Bow; RL excluded
+- **Value/risk:** closes five exact passive-free weapon gaps without adding
+  runtime hooks, randomness, or shared behavior
+- **Evidence boundary:** maintained Genshin Impact Wiki 2-Star Series and weapon
+  entries, accessed 2026-08-02, record all five weapon types with maximum-level
+  243 base ATK and no secondary attribute, refinement, or passive:
+  https://genshin-impact.fandom.com/wiki/2-Star_Series
+- **Plan:** `TASKS.md` Two-Star Weapon Series Campaign
+- **Completion:** all five classes expose only 243 base ATK and the matching
+  weapon type; shared table-driven regressions and all local gates pass

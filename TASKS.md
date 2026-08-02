@@ -15268,3 +15268,61 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Two-Star Weapon Series Campaign
+
+Status: Complete. The five passive-free two-star weapons are represented as one
+homogeneous content unit; RL and generated documentation remain excluded.
+
+Scope:
+
+- Add Silver Sword, Old Merc's Pal, Iron Point, Pocket Grimoire, and Seasoned
+  Hunter's Bow with their maximum-level base ATK and exact weapon types.
+- Keep the no-substat, no-refinement, and no-passive contract explicit.
+
+Out of scope for this pass:
+
+- Higher-rarity weapons, inventory/equipment acquisition, level progression,
+  characters, shared runtime changes, RL, and generated docs.
+
+### Phase 1: Add the Complete Two-Star Series - Done
+
+Target files:
+
+- `src/java/model/weapon/SilverSword.java` (new)
+- `src/java/model/weapon/OldMercsPal.java` (new)
+- `src/java/model/weapon/IronPoint.java` (new)
+- `src/java/model/weapon/PocketGrimoire.java` (new)
+- `src/java/model/weapon/SeasonedHuntersBow.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- All five maximum-level metadata contracts and every absent secondary stat
+  pass through the shared passive-free weapon regression.
+- Passive application at negative and positive times leaves seeded stats
+  unchanged; reaction regression, build, Javadoc, and preflight gates pass.
+
+Acceptance criteria:
+
+- Each class reports its exact display name, matching weapon type, and 243
+  base ATK at its maximum supported level.
+- Each weapon contributes no secondary stat and applies no passive mutation at
+  arbitrary simulation times.
+- The implementation adds no event interfaces, refinement input, random state,
+  or simulator coupling.
+
+Test cases to add or update:
+
+- Normal: all five names, weapon types, and base ATK values.
+- Boundary: passive application at negative and positive times leaves a seeded
+  stat container unchanged.
+- Abnormal: no event capability is registered and no absent secondary stat is
+  synthesized.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`

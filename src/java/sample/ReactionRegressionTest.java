@@ -145,6 +145,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_SequenceOfSolitude();
         testAccuracyPhaseF_EyeOfPerception();
         testAccuracyPhaseF_OneStarWeaponSeries();
+        testAccuracyPhaseF_TwoStarWeaponSeries();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -9332,16 +9333,55 @@ public class ReactionRegressionTest {
             model.type.WeaponType.BOW
         };
 
+        assertPassiveFreeWeaponSeries(weapons, names, weaponTypes, 185.0);
+    }
+
+    private static void testAccuracyPhaseF_TwoStarWeaponSeries() {
+        Weapon[] weapons = {
+            new model.weapon.SilverSword(),
+            new model.weapon.OldMercsPal(),
+            new model.weapon.IronPoint(),
+            new model.weapon.PocketGrimoire(),
+            new model.weapon.SeasonedHuntersBow()
+        };
+        String[] names = {
+            "Silver Sword",
+            "Old Merc's Pal",
+            "Iron Point",
+            "Pocket Grimoire",
+            "Seasoned Hunter's Bow"
+        };
+        model.type.WeaponType[] weaponTypes = {
+            model.type.WeaponType.SWORD,
+            model.type.WeaponType.CLAYMORE,
+            model.type.WeaponType.POLEARM,
+            model.type.WeaponType.CATALYST,
+            model.type.WeaponType.BOW
+        };
+
+        assertPassiveFreeWeaponSeries(weapons, names, weaponTypes, 243.0);
+    }
+
+    private static void assertPassiveFreeWeaponSeries(
+            Weapon[] weapons,
+            String[] names,
+            model.type.WeaponType[] weaponTypes,
+            double baseAtk) {
+        assertEquals(names.length, weapons.length,
+                "Passive-free weapon name count");
+        assertEquals(weaponTypes.length, weapons.length,
+                "Passive-free weapon type count");
+
         for (int index = 0; index < weapons.length; index++) {
             Weapon weapon = weapons[index];
             assertEquals(names[index], weapon.getName(),
                     names[index] + " display name");
             assertEquals(weaponTypes[index], weapon.getWeaponType(),
                     names[index] + " weapon type");
-            assertClose(185.0, weapon.getBaseAtk(), EPS,
+            assertClose(baseAtk, weapon.getBaseAtk(), EPS,
                     names[index] + " maximum-level base ATK");
             for (StatType statType : StatType.values()) {
-                double expected = statType == StatType.BASE_ATK ? 185.0 : 0.0;
+                double expected = statType == StatType.BASE_ATK ? baseAtk : 0.0;
                 assertClose(expected, weapon.getStats().get(statType), EPS,
                         names[index] + " flat stat " + statType);
             }
