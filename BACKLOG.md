@@ -2353,3 +2353,13 @@ experiment record.
 - **Plan:** `TASKS.md` Off-Field Hit Weapon Campaign
 - **Completion:** `aee7c8b` adds both bows and focused off-field regressions;
   build/Javadoc/leak gates pass
+
+### B-099 — Skill/Burst offensive weapon coverage
+
+- **Status:** active
+- **Scope:** Fleuve Cendre Ferryman and Luxurious Sea-Lord; RL excluded
+- **Value/risk:** two complete passives reuse typed Skill windows and generated
+  Physical Burst procs without changing shared dispatch
+- **Evidence boundary:** KQM TCL metadata, R1-R5 Skill CRIT/ER, Burst DMG/proc,
+  five-second window, active-owner gate, and 15-second CT
+- **Plan:** `TASKS.md` Skill/Burst Offensive Weapon Campaign

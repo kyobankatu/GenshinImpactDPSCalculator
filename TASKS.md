@@ -14125,3 +14125,48 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Skill/Burst Offensive Weapon Campaign
+
+Status: Active. Add one Skill stat-window sword and one active-owner Burst-proc
+claymore through existing typed action and generated damage contracts.
+
+Scope:
+
+- Add Fleuve Cendre Ferryman and Luxurious Sea-Lord with sourced metadata,
+  R1-R5 values, R5 defaults, exact durations/CTs, and focused regressions.
+
+Out of scope for this pass:
+
+- Multi-target multiplication, visual proc delay, characters, formulas, RL,
+  generated docs, and unrelated offensive weapons.
+
+### Phase 1: Add Fleuve Cendre Ferryman and Luxurious Sea-Lord
+
+Target files:
+
+- `src/java/model/weapon/FleuveCendreFerryman.java` (new)
+- `src/java/model/weapon/LuxuriousSeaLord.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Fleuve always grants 8-16% Skill CRIT and opens one refresh-only half-open
+  five-second 16-32% ER window on Skill use only.
+- Sea-Lord always grants 12-24% Burst DMG; positive Burst or counts-as-Burst
+  damage by the active owner deals 100-200% ATK Physical at exact 15-second CT.
+- Generated proc actions cannot recurse; metadata, R1-R5 defaults/validation,
+  wrong/zero/off-field gates, and triggering-hit post-order are explicit.
+
+Test cases to add or update:
+
+- Normal: Fleuve static/window stats, Sea-Lord Burst and classified hit, metadata.
+- Boundary: refresh and exact five-second expiry, exact 15-second CT, R1/R5.
+- Abnormal: wrong/zero/off-field/recursive hits and refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
