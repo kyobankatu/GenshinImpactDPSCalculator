@@ -2196,3 +2196,13 @@ experiment record.
 - **Plan:** `TASKS.md` Hit-Stack Weapon Campaign
 - **Completion:** `10c88a6`, `f0de472`, and `0185589` add the shared hit stack
   policy and all variants; focused/build/Javadoc/leak gates pass
+
+### B-086 — Action-use window weapon coverage
+
+- **Status:** active
+- **Scope:** Etherlight Spindlelute, Wine and Song, and Skyrider Sword; RL excluded
+- **Value/risk:** three local content additions plus a source-compatible
+  generalization of the already verified Skill-use window
+- **Evidence boundary:** KQM TCL metadata, R1-R5 values, typed Skill/Dash/Burst
+  triggers and durations; movement speed/stamina remain unmodeled
+- **Plan:** `TASKS.md` Action-Use Window Weapon Campaign

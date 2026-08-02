@@ -13357,3 +13357,59 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc` at the shared/final API boundary
 - `python scripts/preflight.py`
+
+## Implementation Order: Action-Use Window Weapon Campaign
+
+Status: Active. Generalize the verified Skill-use window without breaking its
+API, then add Skill-, Dash-, and Burst-triggered weapon variants.
+
+Scope:
+
+- Extract a generic typed action-use, refresh-only, half-open stat window and
+  retain `SkillUseStatWeapon` as a source-compatible Skill specialization.
+- Add Etherlight Spindlelute, Wine and Song, and Skyrider Sword with sourced
+  Lv. 90 metadata, R1-R5 values, R5 defaults, and focused regressions.
+
+Out of scope for this pass:
+
+- Stamina consumption and movement speed, which have no simulator combat stat;
+  formulas, characters, RL, and generated docs.
+
+### Phase 1: Add Action-Use Window Weapons
+
+Target files:
+
+- `src/java/model/weapon/ActionUseStatWeapon.java` (new)
+- `src/java/model/weapon/SkillUseStatWeapon.java`
+- `src/java/model/weapon/EtherlightSpindlelute.java` (new)
+- `src/java/model/weapon/WineAndSong.java` (new)
+- `src/java/model/weapon/SkyriderSword.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+| Unit | Action window | Focused verification | Status |
+|---|---|---|---|
+| Generic base + Skill compatibility + Etherlight | Skill -> EM 100-200 for 20s | old event weapons unchanged, refresh/expiry, R1/R5 | Pending |
+| Wine and Song | Dash -> ATK 20-40% for 5s | Normal non-trigger, metadata, exact expiry | Pending |
+| Skyrider Sword | Burst -> ATK 12-24% for 15s | Skill non-trigger, metadata, exact expiry | Pending |
+
+Acceptance criteria:
+
+- Existing Oathsworn Eye and Windblume Ode retain exact source/API behavior and
+  all prior tests while the generic base accepts only configured action keys.
+- New windows activate before the selected action resolves, refresh without
+  stacking, remain half-open, and leave unrelated stats/actions unchanged.
+- Refinement 0/6 fails; all metadata/R1-R5 values match KQM TCL; unsupported
+  movement-only effects remain explicitly outside combat-state scope.
+
+Test cases to add or update:
+
+- Normal: each configured trigger, refresh, metadata, R5 bonus.
+- Boundary: R1, before/exact expiry, old Skill specialization regressions.
+- Abnormal: wrong action keys, repeated reads, refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc` at the shared/final API boundary
+- `python scripts/preflight.py`
