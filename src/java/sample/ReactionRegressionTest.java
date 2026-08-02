@@ -6580,6 +6580,65 @@ public class ReactionRegressionTest {
         }
         assertTrue(highRefinementRejected,
                 "Etherlight Spindlelute should reject refinement six");
+
+        model.weapon.WineAndSong wineAndSong = new model.weapon.WineAndSong();
+        assertEquals("Wine and Song", wineAndSong.getName(),
+                "Wine and Song display name");
+        assertClose(565.0, wineAndSong.getBaseAtk(), EPS,
+                "Wine and Song base ATK");
+        assertClose(0.306,
+                wineAndSong.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "Wine and Song Energy Recharge");
+        assertEquals(model.type.WeaponType.CATALYST, wineAndSong.getWeaponType(),
+                "Wine and Song weapon type");
+        assertEquals(5, wineAndSong.getRefinement(),
+                "Wine and Song default refinement");
+
+        TestCharacter wineOwner = testCharacter(Element.ANEMO);
+        wineOwner.setWeapon(wineAndSong);
+        CombatSimulator wineSim = simulatorWith(wineOwner);
+        wineAndSong.onAction(
+                wineOwner, CharacterActionRequest.of(CharacterActionKey.NORMAL), wineSim);
+        assertClose(0.0, resolvedStat(wineSim, wineOwner, StatType.ATK_PERCENT), EPS,
+                "Normal use should not activate Wine and Song ATK");
+        wineAndSong.onAction(
+                wineOwner, CharacterActionRequest.of(CharacterActionKey.DASH), wineSim);
+        assertClose(0.40, resolvedStat(wineSim, wineOwner, StatType.ATK_PERCENT), EPS,
+                "R5 Wine and Song Dash-use ATK");
+        wineSim.advanceTime(4.999);
+        assertClose(0.40, resolvedStat(wineSim, wineOwner, StatType.ATK_PERCENT), EPS,
+                "Wine and Song should remain active before five seconds");
+        wineSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0, resolvedStat(wineSim, wineOwner, StatType.ATK_PERCENT), EPS,
+                "Wine and Song should expire at exactly five seconds");
+
+        model.weapon.WineAndSong r1WineAndSong = new model.weapon.WineAndSong(1);
+        TestCharacter r1WineOwner = testCharacter(Element.ANEMO);
+        r1WineOwner.setWeapon(r1WineAndSong);
+        CombatSimulator r1WineSim = simulatorWith(r1WineOwner);
+        r1WineAndSong.onAction(
+                r1WineOwner, CharacterActionRequest.of(CharacterActionKey.DASH), r1WineSim);
+        assertClose(0.20,
+                resolvedStat(r1WineSim, r1WineOwner, StatType.ATK_PERCENT), EPS,
+                "R1 Wine and Song Dash-use ATK");
+
+        boolean lowWineRefinementRejected = false;
+        try {
+            new model.weapon.WineAndSong(0);
+        } catch (IllegalArgumentException expected) {
+            lowWineRefinementRejected = true;
+        }
+        assertTrue(lowWineRefinementRejected,
+                "Wine and Song should reject refinement zero");
+
+        boolean highWineRefinementRejected = false;
+        try {
+            new model.weapon.WineAndSong(6);
+        } catch (IllegalArgumentException expected) {
+            highWineRefinementRejected = true;
+        }
+        assertTrue(highWineRefinementRejected,
+                "Wine and Song should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
