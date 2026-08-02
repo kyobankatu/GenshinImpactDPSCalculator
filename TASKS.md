@@ -13518,7 +13518,12 @@ Target files:
 - `src/java/model/weapon/MemoryOfDust.java` (new)
 - `src/java/model/weapon/VortexVanquisher.java` (new)
 - `src/java/mechanics/buff/BuffId.java`
+- `src/java/simulation/action/AttackAction.java`
+- `src/java/mechanics/formula/DamageCalculator.java`
+- `src/java/model/character/Xingqiu.java`
+- `src/java/model/artifact/ADayCarvedFromRisingWinds.java`
 - `src/java/sample/GoldenMajestyWeaponRegressionTest.java` (new)
+- `src/java/sample/ActionWindowArtifactRegressionTest.java`
 
 Tasks:
 
@@ -13527,6 +13532,8 @@ Tasks:
   hits, including zero-damage hits, behind the half-open 0.3-second gate.
 - Store stacks and trigger cooldown as typed owner buffs so simulator snapshot
   restore reconstructs effective state; leave shield-only effects inactive.
+- Distinguish true zero-damage hit events from animation-only zero-multiplier
+  actions so post-hit item callbacks cannot fire from dummy casts.
 
 Acceptance criteria:
 
@@ -13534,6 +13541,8 @@ Acceptance criteria:
   invalid refinement is rejected, and stacks neither leak nor stack past five.
 - Pre-trigger damage excludes the new stack; post-trigger stats include it at
   exact gate/expiry boundaries and after snapshot rollback.
+- Xingqiu's sourced orbital Hydro contact remains a true zero-damage hit, while
+  animation-only character casts do not trigger damage-hit equipment effects.
 
 Test cases to add or update:
 
