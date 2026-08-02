@@ -13736,7 +13736,7 @@ Verification:
 
 ## Implementation Order: Additional Hit-Stack Weapon Expansion
 
-Status: Active. Add two multi-stat weapons through the verified positive-hit
+Status: Complete. Two multi-stat weapons now use the verified positive-hit
 stack policy without changing shared runtime behavior.
 
 Scope:
@@ -13749,7 +13749,7 @@ Out of scope for this pass:
 - Multi-target hit multiplication, characters, formulas, RL, generated docs,
   and unrelated weapon families.
 
-### Phase 1: Add Two Multi-Stat Hit-Stack Weapons
+### Phase 1: Add Two Multi-Stat Hit-Stack Weapons - Done (`bf06373`)
 
 Target files:
 
@@ -13759,8 +13759,16 @@ Target files:
 
 | Unit | Positive-hit stacks | Focused verification | Status |
 |---|---|---|---|
-| Prototype Rancour | Normal/Charged -> ATK and DEF 4-8%, 0.3s, max four | dual stats, CT/cap/expiry, R1/R5 | Pending |
-| Sacrificer's Staff | Skill -> ATK 8-16% and ER 6-12%, max three | Skill isolation, off-field, expiry, R1/R5 | Pending |
+| Prototype Rancour | Normal/Charged -> ATK and DEF 4-8%, 0.3s, max four | dual stats, CT/cap/expiry, R1/R5 | Done |
+| Sacrificer's Staff | Skill -> ATK 8-16% and ER 6-12%, max three | Skill isolation, off-field, expiry, R1/R5 | Done |
+
+Completion evidence:
+
+- Rancour proves exact 0.3-second CT, four ATK/DEF stacks, cap, wrong/zero-hit
+  exclusion, R1/R5 values, and exact shared expiry.
+- Staff proves same-time three-stack Skill hits, ATK/ER composition, off-field
+  persistence, wrong/zero-hit exclusion, R1/R5 values, and exact expiry.
+- Reaction regression, build, Javadoc, preflight, and diff checks pass.
 
 Acceptance criteria:
 

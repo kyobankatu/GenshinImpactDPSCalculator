@@ -2272,10 +2272,12 @@ experiment record.
 
 ### B-092 — Additional hit-stack weapon coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Prototype Rancour and Sacrificer's Staff; RL excluded
 - **Value/risk:** two complete multi-stat passives reuse the verified stack
   policy without shared-code changes
 - **Evidence boundary:** KQM TCL metadata, R1-R5 values, Normal/Charged/Skill
   gates, 0.3-second CT, stack caps, six-second duration, and off-field Staff
 - **Plan:** `TASKS.md` Additional Hit-Stack Weapon Expansion
+- **Completion:** `bf06373` adds both variants and focused regressions;
+  build/Javadoc/leak gates pass
