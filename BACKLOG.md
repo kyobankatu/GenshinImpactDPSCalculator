@@ -3216,7 +3216,7 @@ experiment record.
 
 ### B-151 — Target-state and Skill-hit artifact campaign
 
-- **Status:** in-progress
+- **Status:** done
 - **Source:** explicit broad content coverage plus delegated artifact inventory
 - **Scope/risk:** add Lavawalker, Thundersoother, and Tenacity of the Millelith
   through a target-dependent artifact capability and existing typed hit hooks;
@@ -3232,3 +3232,6 @@ experiment record.
   elemental RES and Shield Strength remain deferred.
 - **Proof/plan:** two-phase `TASKS.md` Target-State and Skill-Hit Artifact
   Campaign plus reaction regression, build, Javadoc, party catalog, and preflight.
+- **Closure:** Lavawalker/Thundersoother resolve live Aura on isolated per-hit
+  stats, while Tenacity provides a typed zero-damage/off-field Skill-hit team
+  window; focused and full gates pass.

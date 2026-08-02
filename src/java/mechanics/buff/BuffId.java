@@ -138,6 +138,10 @@ public enum BuffId {
     LONG_NIGHTS_OATH_CHARGED_COOLDOWN,
     /** 聖遺物「長き夜の誓い」の元素スキルクールダウン。 */
     LONG_NIGHTS_OATH_SKILL_COOLDOWN,
+    /** 聖遺物「千岩牢固」のチーム攻撃力強化。 */
+    TENACITY_OF_THE_MILLELITH_TEAM_ATK,
+    /** 聖遺物「千岩牢固」の元素スキル命中クールダウン。 */
+    TENACITY_OF_THE_MILLELITH_TRIGGER_COOLDOWN,
     SUPERCONDUCT_PHYS_RES_SHRED,
     /** 武器「漂泊の宵星」効果。 */
     WANDERING_EVENSTAR_WILDLING_NIGHTSTAR,

@@ -30,7 +30,7 @@ future explicit user request.
 The prior simulator content campaigns, including Skill-focused event weapons,
 are complete; RL and generated docs remain excluded.
 
-The B-151 target-state and Skill-hit artifact campaign is active. It adds
+The B-151 target-state and Skill-hit artifact campaign is complete. It adds
 Lavawalker, Thundersoother, and Tenacity of the Millelith without entering
 player-damage, shield-absorption, RL, or generated-documentation systems.
 
@@ -12951,7 +12951,7 @@ Verification for every phase:
 
 ## Implementation Order: Target-State and Skill-Hit Artifact Campaign
 
-Status: In progress. B-151 adds three locally asset-backed sets using one
+Status: Complete. B-151 adds three locally asset-backed sets using one
 per-hit target-state capability and the existing typed damage/team-buff hooks.
 
 Scope:
@@ -13027,7 +13027,7 @@ Completion evidence:
   states, equipment composition, null boundaries, reaction regression, build,
   Javadoc, party catalog, and preflight pass.
 
-### Phase 2: Tenacity of the Millelith Team Window
+### Phase 2: Tenacity of the Millelith Team Window - Done
 
 Why second:
 
@@ -13065,6 +13065,14 @@ Verification:
 - `./gradlew ReactionRegressionTest`
 - `./gradlew build javadoc PartyCatalogRegressionTest`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- One owner-local typed CT drives a single team no-stack ATK window while HP
+  remains fixed and defensive Shield Strength stays outside this pass.
+- Trigger ordering, zero damage, fallback metadata, multiple wearers,
+  off-field ownership, CT/expiry, snapshot/rollback, invalid callbacks,
+  reaction regression, build, Javadoc, party catalog, and preflight pass.
 
 ## Implementation Order: Remaining Basic Action Coverage Campaign
 

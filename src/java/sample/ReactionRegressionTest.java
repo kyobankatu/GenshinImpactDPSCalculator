@@ -138,6 +138,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_DragonsBaneTargetAuraContract();
         testAccuracyPhaseF_TargetAuraWeaponMetadata();
         testAccuracyPhaseF_TargetAuraArtifactSets();
+        testAccuracyPhaseF_TenacityOfTheMillelithContract();
         testAccuracyPhaseF_StaticActionBonusWeaponMetadata();
         testAccuracyPhaseF_LegacyWeaponRefinements();
         testAccuracyPhaseF_SkillUseEventWeapons();
@@ -7720,6 +7721,227 @@ public class ReactionRegressionTest {
                 "Lavawalker should reject null supplied stats");
         assertTrue(nullThunderStatsRejected,
                 "Thundersoother should reject null supplied stats");
+    }
+
+    private static void testAccuracyPhaseF_TenacityOfTheMillelithContract() {
+        StatsContainer suppliedStats = new StatsContainer();
+        suppliedStats.set(StatType.CRIT_RATE, 0.10);
+        model.artifact.TenacityOfTheMillelith supplied =
+                new model.artifact.TenacityOfTheMillelith(suppliedStats);
+        assertEquals("Tenacity of the Millelith", supplied.getName(),
+                "Tenacity display name");
+        assertClose(0.20,
+                supplied.getStats().get(StatType.HP_PERCENT), EPS,
+                "Tenacity two-piece HP bonus");
+        assertClose(0.10,
+                supplied.getStats().get(StatType.CRIT_RATE), EPS,
+                "Tenacity should preserve supplied stats");
+
+        model.artifact.TenacityOfTheMillelith tenacity =
+                new model.artifact.TenacityOfTheMillelith();
+        TestCharacter owner = testCharacter(
+                Element.PHYSICAL, CharacterId.SUCROSE);
+        owner.setArtifacts(tenacity);
+        CombatSimulator sim = simulatorWith(owner);
+        TestCharacter ally = testCharacter(
+                Element.PHYSICAL, CharacterId.AMBER);
+        sim.addCharacter(ally);
+        AttackAction skillHit = new AttackAction(
+                "Tenacity Skill fixture",
+                1.0,
+                Element.PHYSICAL,
+                StatType.BASE_ATK,
+                StatType.SKILL_DMG_BONUS,
+                0.0,
+                ActionType.SKILL);
+        SimulatorSnapshot beforeExpectedDamage = sim.saveSnapshot();
+        double expectedTriggerDamage = calculateDirectDamage(
+                sim, owner, skillHit, sim.getCurrentTime(), 1.0);
+        sim.restoreSnapshot(beforeExpectedDamage);
+        double damageBeforeTrigger = sim.getTotalDamage();
+        sim.performActionWithoutTimeAdvance(owner.getCharacterId(), skillHit);
+        assertClose(expectedTriggerDamage,
+                sim.getTotalDamage() - damageBeforeTrigger,
+                EPS,
+                "Tenacity triggering Skill should remain unbuffed");
+        assertClose(0.20,
+                resolvedStat(sim, owner, StatType.ATK_PERCENT), EPS,
+                "Tenacity owner team ATK bonus");
+        assertClose(0.20,
+                resolvedStat(sim, ally, StatType.ATK_PERCENT), EPS,
+                "Tenacity ally team ATK bonus");
+        List<Buff> initialWindows = sim.getTeamBuffList().stream()
+                .filter(buff -> buff.getId()
+                                == BuffId.TENACITY_OF_THE_MILLELITH_TEAM_ATK
+                        && !buff.isExpired(sim.getCurrentTime()))
+                .collect(Collectors.toList());
+        assertEquals(1, initialWindows.size(),
+                "Tenacity should create one typed team window");
+        assertEquals(CharacterId.SUCROSE,
+                initialWindows.get(0).getSourceCharacterId(),
+                "Tenacity team window should retain owner attribution");
+        assertClose(3.0, initialWindows.get(0).getExpirationTime(), EPS,
+                "Tenacity initial three-second expiry");
+
+        sim.advanceTime(0.499);
+        tenacity.onDamage(sim, skillHit, 0.0, owner);
+        List<Buff> blockedWindows = sim.getTeamBuffList().stream()
+                .filter(buff -> buff.getId()
+                        == BuffId.TENACITY_OF_THE_MILLELITH_TEAM_ATK)
+                .collect(Collectors.toList());
+        assertEquals(1, blockedWindows.size(),
+                "Tenacity should remain non-stacking inside CT");
+        assertClose(3.0, blockedWindows.get(0).getExpirationTime(), EPS,
+                "Tenacity 0.499-second hit should not refresh");
+        sim.advanceTime(0.001 + 1e-9);
+        tenacity.onDamage(sim, skillHit, 0.0, owner);
+        List<Buff> refreshedWindows = sim.getTeamBuffList().stream()
+                .filter(buff -> buff.getId()
+                        == BuffId.TENACITY_OF_THE_MILLELITH_TEAM_ATK)
+                .collect(Collectors.toList());
+        assertEquals(1, refreshedWindows.size(),
+                "Tenacity exact-CT hit should replace one team window");
+        assertClose(sim.getCurrentTime() + 3.0,
+                refreshedWindows.get(0).getExpirationTime(), EPS,
+                "Tenacity exact-CT hit should refresh three seconds");
+        assertEquals(1, activeBuffCount(
+                        owner,
+                        BuffId.TENACITY_OF_THE_MILLELITH_TRIGGER_COOLDOWN,
+                        sim.getCurrentTime()),
+                "Tenacity should retain one owner-local cooldown marker");
+
+        SimulatorSnapshot activeSnapshot = sim.saveSnapshot();
+        owner.removeBuff(BuffId.TENACITY_OF_THE_MILLELITH_TRIGGER_COOLDOWN);
+        sim.getTeamBuffList().removeIf(buff -> buff.getId()
+                == BuffId.TENACITY_OF_THE_MILLELITH_TEAM_ATK);
+        sim.restoreSnapshot(activeSnapshot);
+        assertEquals(1, activeBuffCount(
+                        owner,
+                        BuffId.TENACITY_OF_THE_MILLELITH_TRIGGER_COOLDOWN,
+                        sim.getCurrentTime()),
+                "Snapshot should restore Tenacity cooldown");
+        assertEquals(1L, sim.getTeamBuffList().stream()
+                        .filter(buff -> buff.getId()
+                                        == BuffId.TENACITY_OF_THE_MILLELITH_TEAM_ATK
+                                && !buff.isExpired(sim.getCurrentTime()))
+                        .count(),
+                "Snapshot should restore Tenacity team window");
+
+        sim.advanceTime(2.999);
+        assertClose(0.20,
+                resolvedStat(sim, ally, StatType.ATK_PERCENT), EPS,
+                "Tenacity should remain active at 2.999 seconds");
+        sim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0,
+                resolvedStat(sim, ally, StatType.ATK_PERCENT), EPS,
+                "Tenacity should expire at exactly three seconds");
+
+        model.artifact.TenacityOfTheMillelith firstTenacity =
+                new model.artifact.TenacityOfTheMillelith();
+        TestCharacter firstOwner = testCharacter(
+                Element.PHYSICAL, CharacterId.SUCROSE);
+        firstOwner.setArtifacts(firstTenacity);
+        CombatSimulator multiSim = simulatorWith(firstOwner);
+        model.artifact.TenacityOfTheMillelith secondTenacity =
+                new model.artifact.TenacityOfTheMillelith();
+        TestCharacter secondOwner = testCharacter(
+                Element.PHYSICAL, CharacterId.XINGQIU);
+        secondOwner.setArtifacts(secondTenacity);
+        multiSim.addCharacter(secondOwner);
+        multiSim.setActiveCharacter(CharacterId.XINGQIU);
+        AttackAction skillFlag = typedDamageHit(
+                "Tenacity Skill flag fixture", ActionType.OTHER, 1.0);
+        skillFlag.setCountsAsSkillDmg(true);
+        firstTenacity.onDamage(
+                multiSim, skillFlag, 0.0, firstOwner);
+        assertEquals(CharacterId.SUCROSE,
+                multiSim.getTeamBuffList().stream()
+                        .filter(buff -> buff.getId()
+                                == BuffId.TENACITY_OF_THE_MILLELITH_TEAM_ATK)
+                        .findFirst()
+                        .orElseThrow(() -> new AssertionError(
+                                "Off-field Tenacity should create a team window"))
+                        .getSourceCharacterId(),
+                "Off-field Tenacity source attribution");
+        secondTenacity.onDamage(
+                multiSim, skillHit, 0.0, secondOwner);
+        List<Buff> multiWindows = multiSim.getTeamBuffList().stream()
+                .filter(buff -> buff.getId()
+                        == BuffId.TENACITY_OF_THE_MILLELITH_TEAM_ATK)
+                .collect(Collectors.toList());
+        assertEquals(1, multiWindows.size(),
+                "Multiple Tenacity wearers should not stack team ATK");
+        assertEquals(CharacterId.XINGQIU,
+                multiWindows.get(0).getSourceCharacterId(),
+                "Latest Tenacity wearer should own the refreshed team window");
+        assertClose(0.20,
+                resolvedStat(multiSim, firstOwner, StatType.ATK_PERCENT), EPS,
+                "Multiple Tenacity wearers should grant one owner bonus");
+        assertClose(0.20,
+                resolvedStat(multiSim, secondOwner, StatType.ATK_PERCENT), EPS,
+                "Multiple Tenacity wearers should grant one ally bonus");
+
+        model.artifact.TenacityOfTheMillelith rollbackTenacity =
+                new model.artifact.TenacityOfTheMillelith();
+        TestCharacter rollbackOwner = testCharacter(Element.PHYSICAL);
+        rollbackOwner.setArtifacts(rollbackTenacity);
+        CombatSimulator rollbackSim = simulatorWith(rollbackOwner);
+        SimulatorSnapshot preTriggerSnapshot = rollbackSim.saveSnapshot();
+        rollbackTenacity.onDamage(
+                rollbackSim, skillHit, 0.0, rollbackOwner);
+        rollbackSim.restoreSnapshot(preTriggerSnapshot);
+        assertEquals(0, activeBuffCount(
+                        rollbackOwner,
+                        BuffId.TENACITY_OF_THE_MILLELITH_TRIGGER_COOLDOWN,
+                        rollbackSim.getCurrentTime()),
+                "Rollback should remove divergent Tenacity cooldown");
+        assertTrue(rollbackSim.getTeamBuffList().stream().noneMatch(
+                        buff -> buff.getId()
+                                == BuffId.TENACITY_OF_THE_MILLELITH_TEAM_ATK),
+                "Rollback should remove divergent Tenacity team window");
+
+        model.artifact.TenacityOfTheMillelith rejected =
+                new model.artifact.TenacityOfTheMillelith();
+        TestCharacter rejectedOwner = testCharacter(Element.PHYSICAL);
+        rejected.onDamage(
+                new CombatSimulator(), skillHit, 0.0, rejectedOwner);
+        rejectedOwner.setArtifacts(rejected);
+        CombatSimulator rejectedSim = simulatorWith(rejectedOwner);
+        TestCharacter foreignOwner = testCharacter(
+                Element.PHYSICAL, CharacterId.AMBER);
+        rejected.onDamage(rejectedSim, null, 0.0, rejectedOwner);
+        rejected.onDamage(
+                rejectedSim,
+                typedDamageHit(
+                        "Tenacity Normal fixture", ActionType.NORMAL, 1.0),
+                100.0,
+                rejectedOwner);
+        rejected.onDamage(rejectedSim, skillHit, 0.0, foreignOwner);
+        rejected.onDamage(
+                new CombatSimulator(), skillHit, 0.0, rejectedOwner);
+        assertTrue(rejectedSim.getTeamBuffList().stream().noneMatch(
+                        buff -> buff.getId()
+                                == BuffId.TENACITY_OF_THE_MILLELITH_TEAM_ATK),
+                "Invalid Tenacity callbacks should remain inert");
+
+        boolean crossBindingRejected = false;
+        try {
+            rejected.initializeForSimulator(
+                    rejectedOwner, new CombatSimulator(), true);
+        } catch (IllegalStateException expected) {
+            crossBindingRejected = true;
+        }
+        assertTrue(crossBindingRejected,
+                "Tenacity should reject cross-simulator reuse");
+
+        boolean nullStatsRejected = false;
+        try {
+            new model.artifact.TenacityOfTheMillelith(null);
+        } catch (NullPointerException expected) {
+            nullStatsRejected = true;
+        }
+        assertTrue(nullStatsRejected,
+                "Tenacity should reject null supplied stats");
     }
 
     private static void testAccuracyPhaseF_SamuraiConductWeapons() {
