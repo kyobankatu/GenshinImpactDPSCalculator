@@ -13293,3 +13293,58 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc` at the shared/final API boundary
 - `python scripts/preflight.py`
+
+## Implementation Order: Hit-Stack Weapon Campaign
+
+Status: Active. Add three positive-hit stacking weapons through one typed,
+cooldown-aware, shared-duration stack policy.
+
+Scope:
+
+- Add shared action eligibility, positive-hit gating, internal cooldown,
+  shared-duration stack cap/refresh, refinement validation, and exact expiry.
+- Add Ballad of the Boundless Blue, Compound Bow, and Ibis Piercer with sourced
+  Lv. 90 metadata, R1-R5 values, R5 defaults, and focused regressions.
+
+Out of scope for this pass:
+
+- Projectile travel, hitlag/ping variation, new action dispatch or formulas,
+  characters, RL, and generated docs.
+
+### Phase 1: Add Hit-Stack Weapons
+
+Target files:
+
+- `src/java/model/weapon/HitStackStatWeapon.java` (new)
+- `src/java/model/weapon/BalladOfTheBoundlessBlue.java` (new)
+- `src/java/model/weapon/CompoundBow.java` (new)
+- `src/java/model/weapon/IbisPiercer.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+| Unit | Hit stack | Focused verification | Status |
+|---|---|---|---|
+| Shared base + Ballad | Normal/Charged, 0.3s CT, 3 stacks/6s | dual unequal bonuses, cap/refresh/expiry, R1/R5 | Pending |
+| Compound Bow | Normal/Charged, 0.3s CT, 4 stacks/6s | ATK/Normal SPD, metadata, exclusions | Pending |
+| Ibis Piercer | Charged, 0.5s CT, 2 stacks/6s | EM, Normal exclusion, metadata | Pending |
+
+Acceptance criteria:
+
+- Only positive direct hits of configured typed actions gain a stack; hits
+  before exact CT, zero damage, and unrelated action types do nothing.
+- Gaining or refreshing at cap sets one six-second expiration for all stacks;
+  existing stacks remain effective while the owner is off-field.
+- Each weapon's max stacks, R1-R5 values, names, Lv. 90 stats, categories, and
+  no-argument R5 default match KQM TCL.
+
+Test cases to add or update:
+
+- Normal: sequential stack gain, cap refresh, unequal multi-stat values, metadata.
+- Boundary: exact/just-before CT, before/exact expiry, off-field persistence, R1/R5.
+- Abnormal: zero-damage, wrong action types, refinement 0/6, repeated stat reads.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc` at the shared/final API boundary
+- `python scripts/preflight.py`
