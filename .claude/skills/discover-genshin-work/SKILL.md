@@ -1,6 +1,6 @@
 ---
 name: discover-genshin-work
-description: Find, triage, prioritize, and record the next worthwhile simulator or RL work item when the active plan is finished and the work queue is empty, using the tracked BACKLOG.md ledger, the approved discovery sources, a value and risk gate, duplicate suppression, and an explicit convergence condition. Use to replenish an autonomous session's queue, never to justify unrequested scope.
+description: Find, triage, prioritize, and record the next worthwhile simulator, content-coverage, or RL work when the active queue is empty, using the tracked ledger, scope gates, duplicate suppression, batched campaign inventories, and an explicit convergence condition. Use to replenish autonomous sessions without manufacturing unrequested scope or per-item documentation churn.
 ---
 
 # Discover Genshin work

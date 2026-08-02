@@ -1,6 +1,6 @@
 ---
 name: add-genshin-content
-description: Add or modify Genshin characters, weapons, artifacts, party definitions, rotations, configuration data, capability profiles, and custom mechanics while preserving simulator, optimizer, RL, and report contracts. Use for new playable content, equipment, teams, data files, or content-specific triggers.
+description: Add or modify Genshin characters, constellations, weapons, artifacts, party definitions, rotations, configuration data, capability profiles, and custom mechanics, including high-throughput batches, while preserving simulator, optimizer, RL, and report contracts. Use for new playable content, equipment, teams, data files, content-specific triggers, or broad content-expansion sessions.
 ---
 
 # Add Genshin content

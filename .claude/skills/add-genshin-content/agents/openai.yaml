@@ -1,4 +1,4 @@
 interface:
   display_name: "Add Genshin Content"
-  short_description: "Add parties characters and equipment"
-  default_prompt: "Use $add-genshin-content to add a party, character, weapon, artifact, or config-backed mechanic."
+  short_description: "Add content in verified implementation batches"
+  default_prompt: "Use $add-genshin-content to add characters, constellations, equipment, or parties in verified vertical slices."

@@ -1,6 +1,6 @@
 ---
 name: plan-genshin-implementation
-description: Author, extend, and close out `TASKS.md` implementation plans using this repository's phase schema, covering status text, scope and out-of-scope lists, per-phase target files, tasks, acceptance criteria, test cases, verification commands, and cross-cutting rules. Use before implementing any multi-step feature, refactor, accuracy pass, or RL change.
+description: Author, extend, and close out compact `TASKS.md` implementation plans using this repository's phase schema, including implementation-first campaign batches, target files, acceptance criteria, tests, and verification. Use before multi-step features, refactors, accuracy passes, RL changes, or bulk content additions without producing per-item documentation churn.
 ---
 
 # Plan a Genshin implementation

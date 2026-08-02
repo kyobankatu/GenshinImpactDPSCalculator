@@ -1,4 +1,4 @@
 interface:
   display_name: "Genshin Work Discovery"
-  short_description: "Find the next worthwhile in-scope item"
-  default_prompt: "Use $discover-genshin-work to replenish the allowed queue after in-scope work is complete or asynchronously validating."
+  short_description: "Replenish scoped defect or content queues"
+  default_prompt: "Use $discover-genshin-work to replenish the allowed queue with compact defect or requested-content inventories."

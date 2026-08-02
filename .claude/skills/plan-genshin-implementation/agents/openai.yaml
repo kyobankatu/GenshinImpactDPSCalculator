@@ -1,4 +1,4 @@
 interface:
   display_name: "Genshin Implementation Planning"
-  short_description: "Write phased TASKS.md plans"
-  default_prompt: "Use $plan-genshin-implementation to write or update the TASKS.md plan for this work."
+  short_description: "Write compact batched TASKS.md plans"
+  default_prompt: "Use $plan-genshin-implementation to write a compact TASKS.md campaign plan without per-item documentation churn."

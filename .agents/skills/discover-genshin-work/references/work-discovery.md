@@ -21,6 +21,7 @@ user explicitly resumes that subsystem.
 
 | Priority | Source | How to sweep it |
 |---|---|---|
+| 0 | Explicit content-coverage request | inventory missing requested characters, constellations, weapons, artifacts, and parties once; prioritize vertical slices and shared prerequisites |
 | 1 | `README.md` known simplifications | each bullet is a pre-approved, user-authored gap; the highest-confidence backlog in the repository |
 | 2 | Observable output defects | warnings, `WARN`/`ERROR` lines, and implausible values in `ReactionRegressionTest`, `PartyCatalogRegressionTest`, `ReportRegressionTest`, `RaidenParty`, `FlinsParty2`, and generated report HTML |
 | 3 | Game-accuracy divergence | implemented mechanic versus a sourced specification: ICD grouping, gauge consumption, buff snapshot timing, energy particle rules, unimplemented character/weapon/artifact hooks |
@@ -30,6 +31,10 @@ user explicitly resumes that subsystem.
 Sources 1 and 2 come from the repository itself and need no external evidence. Source 3 always needs a
 citation. Sources 4 and 5 need a named symptom, not a preference. Skip any row excluded by the current
 scope filter; in particular, a simulator-only session does not sweep source 5.
+
+Source 0 exists only when the user explicitly asks for broad content expansion. In that mode, missing
+coverage is the requested deliverable and need not be reframed as a defect. Each implementation still needs
+source readiness, a proof command, and a bounded ownership surface.
 
 ## Forbidden zone
 
@@ -65,6 +70,9 @@ Automatic rejections:
 - a performance change with no measurement;
 - anything requiring a new external dependency;
 - anything whose acceptance criteria cannot be checked by a command.
+
+The defect/symptom requirement does not reject an explicit Source 0 coverage unit. Its observable gap is the
+absence of a loadable, executable, tested content slice named by the campaign inventory.
 
 ## Risk gate
 
@@ -115,6 +123,10 @@ provenance can silently break behavior that was already correct, and the sample 
 | Risk | `local` or `planned` |
 | Proof | the command or artifact that settles it |
 | Notes | rationale for a rejection, deferral, or block; plan block name once planned |
+
+For Source 0, use one campaign entry plus a compact unit table instead of one verbose backlog block per
+omission. Update the table at the autonomous documentation checkpoint. The session record tracks completed
+implementation commits between checkpoints.
 
 ## Cycle
 

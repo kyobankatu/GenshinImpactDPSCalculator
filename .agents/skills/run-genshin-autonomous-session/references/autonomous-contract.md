@@ -58,7 +58,7 @@ If all readings of a task require a deferred action, the item is blocked. Write 
 - Build the queue from allowed `TASKS.md` phases plus explicitly requested work. Include spare independent items so
   a block never leaves the session with nothing to do.
 - Order by dependency first, then by risk: land the low-risk verifiable items before speculative ones.
-- Integrate one phase at a time on the primary branch. Delegated branches may be in flight concurrently only
+- Integrate one implementation unit at a time on the primary branch. Delegated branches may be in flight concurrently only
   when the user explicitly authorized sub-agents and their write sets do not overlap.
 - Re-derive the queue from the repository, not from memory, after any interruption.
 
@@ -105,28 +105,33 @@ The loop has two clean endings: convergence, meaning a full sweep produces no it
 time box expiring. Report whichever applies and stop. Manufacturing work to fill remaining time is a failure,
 not diligence.
 
+An explicit broad content-coverage request is already a populated queue. Build a compact inventory and keep
+adding requested characters, constellations, weapons, artifacts, and parties until that inventory converges or
+the time box expires. Do not stop merely because the defect-oriented backlog has no candidate.
+
 Time-limited sessions add a scheduling constraint on top of this loop; see
 [time-box.md](time-box.md) for deadline handling, the fit test before starting work, the reserve, and the
 wind-down procedure.
 
-## Per-phase loop
+## Per-unit loop
 
-1. Restate the phase's acceptance criteria and target files from `TASKS.md`.
+1. Restate the unit's acceptance criteria and target files from the active campaign phase.
 2. Implement the narrowest change that satisfies them.
-3. Run `python scripts/preflight.py --run` and any additional command the phase's Verification section names.
-4. On failure: fix forward if the cause is inside the phase's own change; otherwise revert the phase's edits,
+3. Run the focused checks and `python scripts/preflight.py` as the staging/leak gate. Reserve expensive full-catalog repeated baselines for the batch checkpoint unless this unit affects them directly.
+4. On failure: fix forward if the cause is inside the unit's own change; otherwise revert the unit's edits,
    record the failure and its output, and move to the next queue item. Do not leave a broken tree.
-5. Update the phase heading to ` - Done` and refresh the plan status.
-6. Commit with a conventional subject; push if the branch has an upstream.
-7. Append to the session record.
+5. Commit source, config, and tests with a conventional subject; push if the branch has an upstream.
+6. Append source evidence, commands, observed results, commit, and next unit to the session record.
+7. At four completed units, 60 elapsed minutes since the last tracked update, a contract-changing decision, or wind-down, reconcile `TASKS.md`, `BACKLOG.md`, and user-facing README changes in one concise documentation commit.
 
 ## Session record
 
 Keep one running record so the session is resumable without live context. Put durable plan state in
 `TASKS.md` and volatile run state in an untracked scratch file, not in tracked files.
 
-Each entry: timestamp, phase, action taken, commands run with observed results, decision forks with
-rationale, blocks discovered, next intended item.
+Each entry: timestamp, campaign/unit, action taken, source URLs and assumptions, commands run with observed
+results, implementation commit, decision forks, blocks, and next intended item. This record bridges the bounded
+lag between implementation commits and tracked documentation checkpoints.
 
 ## Honesty rules
 

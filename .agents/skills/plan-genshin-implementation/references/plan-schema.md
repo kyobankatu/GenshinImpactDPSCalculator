@@ -3,6 +3,9 @@
 `TASKS.md` is the single durable implementation plan for this repository. It is not a changelog, not a
 benchmark log, and not a place for chat history.
 
+Inspect active sections with `rg` and bounded reads. Completed plan history is an audit trail, not mandatory
+context for every new plan.
+
 ## Document layout
 
 ```
@@ -53,6 +56,10 @@ Every phase uses these headings, in this order:
 Phase sizing: one phase should be a single commit's worth of coherent change that leaves the tree building.
 If a phase needs more than roughly a dozen target files or mixes unrelated subsystems, split it.
 
+For a homogeneous content campaign, a phase may instead contain several independently committed units that
+share verification and documentation boundaries. Use a compact unit table with target, prerequisite, focused
+check, and status. Keep shared requirements in the phase once rather than repeating the full schema per unit.
+
 ## Verification vocabulary
 
 Use the commands the repository actually exposes:
@@ -69,10 +76,11 @@ Use the commands the repository actually exposes:
 
 ## Closing a phase
 
-1. Append ` - Done` to the phase heading.
-2. Update the plan block Status to name the completed phases.
-3. Update `## Current Status` when the plan block finishes entirely.
-4. Add any newly discovered limitation to `## Deferred Systems` or to the `README.md` accuracy notes rather
+1. At the next tracked documentation checkpoint, append ` - Done` to a fully completed phase or update its compact unit table.
+2. Update the plan block Status to name completed batches and the next unit.
+3. Update `## Current Status` when the plan block finishes entirely or its public scope changes.
+4. Summarize completion evidence in at most three bullets, linking grouped commits/checks instead of copying run logs.
+5. Add any newly discovered limitation to `## Deferred Systems` or to the `README.md` accuracy notes rather
    than leaving it only in the phase text.
 
 ## Anti-patterns
@@ -81,6 +89,8 @@ Use the commands the repository actually exposes:
 - Target files listed as directories or subsystem names instead of paths.
 - Deleting a finished phase to shorten the document.
 - Duplicating the cross-cutting testing rules inside each phase.
+- Creating one plan block or plan/acceptance phase pair per character, constellation, weapon, or artifact in a bulk campaign.
+- Reading the entire completed plan history before every unit.
 - Recording run-by-run measurements, job IDs, or W&B links in the plan; those belong in an experiment record.
 - Recording undiscovered or rejected candidate work in the plan; that belongs in the `BACKLOG.md` ledger
   maintained by `discover-genshin-work`. The plan holds only work that is being done.
