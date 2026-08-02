@@ -2589,10 +2589,13 @@ experiment record.
 
 ### B-118 — Eye of Perception coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Eye of Perception; RL excluded
 - **Value/risk:** one complete passive directly specializes the tested injected
   Physical-proc policy under the single-enemy model
 - **Evidence boundary:** KQM TCL metadata, R1-R5 Bolt values/cooldowns, 50%
   Normal/Charged chance, and four-opponent bounce cap
 - **Plan:** `TASKS.md` Eye of Perception Campaign
+- **Completion:** `ed9d3a8` specializes the injected direct-proc policy with
+  exact chance/cooldown boundaries, R1/R5 ratios, and focused abnormal tests;
+  build/Javadoc/leak gates pass

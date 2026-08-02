@@ -15164,7 +15164,8 @@ Verification:
 
 ## Implementation Order: Eye of Perception Campaign
 
-Status: Active. Add Eye of Perception on the deterministic direct-proc policy.
+Status: Complete. Eye of Perception now uses the deterministic direct-proc
+policy.
 
 Scope:
 
@@ -15176,12 +15177,19 @@ Out of scope for this pass:
 - Multi-target bounce multiplication, other catalysts, characters, formulas,
   RL, and generated docs.
 
-### Phase 1: Add Eye of Perception
+### Phase 1: Add Eye of Perception - Done (`ed9d3a8`)
 
 Target files:
 
 - `src/java/model/weapon/EyeOfPerception.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- R1/R5 metadata and damage ratio, Normal/Charged gates, 0.5 draw boundary,
+  exact eight/12-second CTs, immediate damage, and nonrecursion pass.
+- Zero/wrong/null/refinement rejection is explicit; build, reaction regression,
+  Javadoc, and artifact-leak gates pass.
 
 Acceptance criteria:
 
