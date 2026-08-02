@@ -2377,3 +2377,13 @@ experiment record.
 - **Plan:** `TASKS.md` Moonsign Reaction Weapon Campaign
 - **Completion:** `d0c59b0` adds the shared live-Moonsign window, both weapons,
   and focused regressions; build/Javadoc/leak gates pass
+
+### B-101 — Reaction utility claymore coverage
+
+- **Status:** active
+- **Scope:** Earth Shaker and Flame-Forged Insight; RL excluded
+- **Value/risk:** two complete passives reuse typed reaction attribution, party
+  membership, Skill DMG stats, and flat Energy without runtime dispatch changes
+- **Evidence boundary:** KQM TCL metadata, R1-R5 values, reaction families,
+  off-field behavior, eight/15-second windows, and Flame's 15-second CT
+- **Plan:** `TASKS.md` Reaction Utility Claymore Campaign

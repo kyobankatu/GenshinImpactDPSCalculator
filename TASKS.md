@@ -14233,3 +14233,51 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Reaction Utility Claymore Campaign
+
+Status: Active. Add two complete reaction-driven claymores using existing party,
+reaction attribution, action stat, and flat-Energy contracts.
+
+Scope:
+
+- Add Earth Shaker and Flame-Forged Insight with sourced metadata, R1-R5
+  values, R5 defaults, exact windows/CT, and off-field reaction handling.
+
+Out of scope for this pass:
+
+- Pickup interactions, delayed visual effects, reaction formulas, characters,
+  RL, generated docs, and unrelated weapons.
+
+### Phase 1: Add both reaction utility claymores
+
+Target files:
+
+- `src/java/model/weapon/EarthShaker.java` (new)
+- `src/java/model/weapon/FlameForgedInsight.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Any party member's Pyro-related reaction opens one refresh-only half-open
+  eight-second 16-32% Skill DMG window for Earth Shaker, including off-field.
+- Flame-Forged Insight accepts only its six listed owner-attributed reaction
+  families, restores 12-24 flat Energy, and grants 60-120 EM for 15 seconds at
+  an exact 15-second trigger CT, including while the owner is off-field.
+- Typed reaction/related-element gates, party/source attribution, metadata,
+  R1-R5 defaults, simulator binding, and invalid inputs are explicit.
+
+Test cases to add or update:
+
+- Normal: each eligible reaction family, ally/off-field Earth trigger, owner
+  off-field Flame trigger, Energy restoration, metadata, R5.
+- Boundary: Earth refresh/expiry, Flame exact CT/expiry, Energy cap, R1.
+- Abnormal: unrelated reactions/elements, nonparty Earth source, ally Flame
+  source, cross-simulator reuse, refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
