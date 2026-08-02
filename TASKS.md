@@ -13610,3 +13610,56 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Samurai Conduct Weapon Campaign
+
+Status: Active. Add the two shared Skill-hit energy weapons with sourced drain
+delay and periodic recovery.
+
+Scope:
+
+- Add a clamped runtime Energy spend operation distinct from snapshot restore.
+- Add a shared positive Skill-hit, 10-second CT policy that drains three Energy
+  after 23 frames and restores refinement-scaled flat Energy at 2/4/6 seconds.
+- Add Kitain Cross Spear and Katsuragikiri Nagamasa with sourced metadata,
+  static Skill DMG, R1-R5 values, R5 defaults, and focused regressions.
+
+Out of scope for this pass:
+
+- Latency-dependent variation around the sourced 22-24-frame drain, multi-hit
+  target counts, characters, RL, and generated docs.
+
+### Phase 1: Add Energy Spend and Samurai Conduct Weapons
+
+Target files:
+
+- `src/java/model/entity/state/EnergyState.java`
+- `src/java/model/entity/Character.java`
+- `src/java/model/weapon/SkillHitEnergyWeapon.java` (new)
+- `src/java/model/weapon/KitainCrossSpear.java` (new)
+- `src/java/model/weapon/KatsuragikiriNagamasa.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Runtime Energy spend clamps at zero and does not masquerade as gain or
+  snapshot restoration; existing Burst and energy accounting remain unchanged.
+- Only positive Skill damage starts Samurai Conduct; off-field hits work,
+  wrong/zero hits and pre-10-second hits schedule nothing, exact CT is eligible.
+- Drain occurs at 23/60 seconds without going negative; R1/R5 recovery occurs
+  exactly at 2/4/6 seconds, bypasses ER, and respects the Energy cap.
+- Metadata, static Skill DMG, default R5, refinement 1-5, and invalid ranks
+  match the cited KQM TCL pages.
+
+Test cases to add or update:
+
+- Normal: both metadata sets, Skill bonus, drain and three recovery ticks.
+- Boundary: zero Energy, cap, before/exact drain, before/exact CT, R1/R5.
+- Abnormal: Normal/zero Skill exclusion, off-field owner, refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc` at the shared/final API boundary
+- `python scripts/preflight.py`
