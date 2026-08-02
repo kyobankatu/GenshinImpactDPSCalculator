@@ -6834,6 +6834,60 @@ public class ReactionRegressionTest {
         }
         assertTrue(highFilletRefinementRejected,
                 "Fillet Blade should reject refinement six");
+
+        model.weapon.Halberd halberd = new model.weapon.Halberd();
+        assertEquals("Halberd", halberd.getName(), "Halberd display name");
+        assertClose(448.0, halberd.getBaseAtk(), EPS, "Halberd base ATK");
+        assertClose(0.235, halberd.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Halberd ATK substat");
+        assertEquals(model.type.WeaponType.POLEARM, halberd.getWeaponType(),
+                "Halberd weapon type");
+        assertEquals(5, halberd.getRefinement(),
+                "Halberd default refinement");
+
+        TestCharacter halberdOwner = testCharacter(Element.PHYSICAL);
+        halberdOwner.setWeapon(halberd);
+        CombatSimulator halberdSim = simulatorWith(halberdOwner);
+        halberd.onDamage(halberdOwner, chargeHit, 0.0, halberdSim);
+        halberd.onDamage(halberdOwner, skillHit, 0.0, halberdSim);
+        assertClose(0.0, halberdSim.getTotalDamage(), EPS,
+                "Charged and Skill hits should not trigger Halberd");
+        halberd.onDamage(halberdOwner, normalHit, 0.0, halberdSim);
+        double halberdProcDamage = halberdSim.getTotalDamage();
+        assertTrue(halberdProcDamage > 0.0,
+                "R5 Halberd should proc on a Normal hit");
+        halberd.onDamage(halberdOwner, normalHit, 9.999, halberdSim);
+        assertClose(halberdProcDamage, halberdSim.getTotalDamage(), EPS,
+                "Halberd should remain on cooldown immediately before ten seconds");
+        halberd.onDamage(halberdOwner, normalHit, 10.0, halberdSim);
+        assertClose(halberdProcDamage * 2.0, halberdSim.getTotalDamage(), EPS,
+                "Halberd should proc at exact ten-second cooldown");
+
+        model.weapon.Halberd r1Halberd = new model.weapon.Halberd(1);
+        TestCharacter r1HalberdOwner = testCharacter(Element.PHYSICAL);
+        r1HalberdOwner.setWeapon(r1Halberd);
+        CombatSimulator r1HalberdSim = simulatorWith(r1HalberdOwner);
+        r1Halberd.onDamage(r1HalberdOwner, normalHit, 0.0, r1HalberdSim);
+        assertClose(halberdProcDamage * 0.5, r1HalberdSim.getTotalDamage(), EPS,
+                "R1 Halberd should use half the R5 motion value");
+
+        boolean lowHalberdRefinementRejected = false;
+        try {
+            new model.weapon.Halberd(0);
+        } catch (IllegalArgumentException expected) {
+            lowHalberdRefinementRejected = true;
+        }
+        assertTrue(lowHalberdRefinementRejected,
+                "Halberd should reject refinement zero");
+
+        boolean highHalberdRefinementRejected = false;
+        try {
+            new model.weapon.Halberd(6);
+        } catch (IllegalArgumentException expected) {
+            highHalberdRefinementRejected = true;
+        }
+        assertTrue(highHalberdRefinementRejected,
+                "Halberd should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_ActionUseWindowWeapons() {
