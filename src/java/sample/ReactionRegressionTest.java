@@ -118,6 +118,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_NoblesseObligeRefreshContract();
         testAccuracyPhaseF_WeaponReactionBonusRegression();
         testAccuracyPhaseF_DragonsBaneTargetAuraContract();
+        testAccuracyPhaseF_TargetAuraWeaponMetadata();
         testAccuracyPhaseF_DendroResonanceReactionEmContract();
         testAccuracyPhaseF_CryoResonanceConditionalCritContract();
         testAccuracyPhaseF_ElectroResonanceTypedTriggerContract();
@@ -4872,6 +4873,22 @@ public class ReactionRegressionTest {
         assertEquals(1, r1Weapon.getRefinement(), "Dragon's Bane should expose refinement rank");
     }
 
+    private static void testAccuracyPhaseF_TargetAuraWeaponMetadata() {
+        model.weapon.LionsRoar lionsRoar = new model.weapon.LionsRoar();
+        assertEquals("Lion's Roar", lionsRoar.getName(), "Lion's Roar display name");
+        assertClose(510.0, lionsRoar.getBaseAtk(), EPS, "Lion's Roar base ATK");
+        assertClose(0.413, lionsRoar.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Lion's Roar ATK substat");
+        assertEquals(model.type.WeaponType.SWORD, lionsRoar.getWeaponType(),
+                "Lion's Roar weapon type");
+        assertTargetAuraWeaponDamage(
+                lionsRoar, Element.PYRO, Element.HYDRO, 0.36, "Lion's Roar");
+
+        model.weapon.LionsRoar r1LionsRoar = new model.weapon.LionsRoar(1);
+        assertTargetAuraWeaponDamage(
+                r1LionsRoar, Element.ELECTRO, Element.HYDRO, 0.20, "R1 Lion's Roar");
+    }
+
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
         ReactionResult.Kind[] primaryKinds = {
                 ReactionResult.Kind.BURNING,
@@ -6068,6 +6085,30 @@ public class ReactionRegressionTest {
                 ActionType.SKILL);
         captureStandardOutput(() -> weapon.onDamage(owner, skillHit, 0.0, sim));
         assertTrue(owner.canSkill(0.0), weaponName + " should inherit Composed Skill reset");
+    }
+
+    private static void assertTargetAuraWeaponDamage(
+            model.weapon.TargetAuraDamageWeapon weapon,
+            Element eligibleElement,
+            Element ineligibleElement,
+            double expectedBonus,
+            String weaponName) {
+        TestCharacter owner = testCharacter(Element.PHYSICAL);
+        owner.setWeapon(weapon);
+        CombatSimulator sim = simulatorWith(owner);
+        AttackAction hit = damageHit(weaponName + " target fixture", Element.PHYSICAL, 1.0);
+        double baseDamage = calculateDirectDamage(sim, owner, hit, 0.0, 1.0);
+        assertClose(0.0, owner.getEffectiveStats(0.0).get(StatType.DMG_BONUS_ALL), EPS,
+                weaponName + " target bonus should not enter effective stats");
+
+        sim.getEnemy().setAura(eligibleElement, 1.0);
+        assertClose(baseDamage * (1.0 + expectedBonus),
+                calculateDirectDamage(sim, owner, hit, 0.0, 1.0), EPS,
+                weaponName + " eligible target damage");
+        sim.getEnemy().setAura(eligibleElement, 0.0);
+        sim.getEnemy().setAura(ineligibleElement, 1.0);
+        assertClose(baseDamage, calculateDirectDamage(sim, owner, hit, 0.0, 1.0), EPS,
+                weaponName + " ineligible target damage");
     }
 
     private static void assertClose(double expected, double actual, double tolerance, String message) {
