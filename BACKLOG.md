@@ -2139,10 +2139,12 @@ experiment record.
 
 ### B-081 — Skill-focused event weapon coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Oathsworn Eye, Windblume Ode, and Festering Desire; RL excluded
 - **Value/risk:** three complete local weapon additions using existing typed
   Skill dispatch and action-specific stats
 - **Evidence boundary:** KQM TCL metadata, refinement values, non-stacking
   refresh, and expiry; no unsupported combat state required
 - **Plan:** `TASKS.md` Skill-Focused Event Weapon Campaign
+- **Completion:** `139657b`, `340c244`, and `4074bb1` add the shared window and
+  all three weapons; focused/build/Javadoc/leak gates pass

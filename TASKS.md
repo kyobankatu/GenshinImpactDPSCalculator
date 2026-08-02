@@ -27,8 +27,8 @@ The current autonomous session is simulator-only. Python RL training and the
 Java RL bridge are excluded; the retained NCCL/DDP plan below is paused until a
 future explicit user request.
 
-The prior simulator content campaigns are complete. The Skill-focused event
-weapon campaign is active; RL and generated docs remain excluded.
+The prior simulator content campaigns, including Skill-focused event weapons,
+are complete; RL and generated docs remain excluded.
 
 The B-058 Burning fuel correction is complete. It replaces the fixed
 two-second approximation with typed Dendro-fuel decay and refresh ownership
@@ -13030,8 +13030,8 @@ Verification:
 
 ## Implementation Order: Skill-Focused Event Weapon Campaign
 
-Status: In progress. Three event weapons will add complete R1-R5 Skill-related
-passives using one shared Skill-use window policy.
+Status: Complete. Three event weapons add complete R1-R5 Skill-related passives
+using one shared Skill-use window policy.
 
 Scope:
 
@@ -13049,7 +13049,7 @@ Definitions:
 - **Skill-use stat window**: one non-stacking owner bonus activated before the
   Skill resolves and refreshed to `cast time + duration` on each later cast.
 
-### Phase 1: Add Skill-Focused Event Weapons
+### Phase 1: Add Skill-Focused Event Weapons - Done
 
 Target files:
 
@@ -13061,9 +13061,18 @@ Target files:
 
 | Unit | Passive | Focused verification | Status |
 |---|---|---|---|
-| Shared base + Oathsworn Eye | Skill use: ER +24-48% for 10s | activation, refresh, exact expiry, invalid rank | Ready |
-| Windblume Ode | Skill use: ATK +16-32% for 6s | activation, refresh, exact expiry, metadata | Ready |
-| Festering Desire | Skill DMG +16-32%, CRIT +6-12% | R1/R5, action isolation, metadata | Ready |
+| Shared base + Oathsworn Eye | Skill use: ER +24-48% for 10s | activation, refresh, exact expiry, invalid rank | Done (`139657b`) |
+| Windblume Ode | Skill use: ATK +16-32% for 6s | activation, refresh, exact expiry, metadata | Done (`340c244`) |
+| Festering Desire | Skill DMG +16-32%, CRIT +6-12% | R1/R5, action isolation, metadata | Done (`4074bb1`) |
+
+Completion evidence:
+
+- The shared half-open Skill-use window ignores non-Skill actions, activates
+  before Skill resolution, refreshes without stacking, and expires exactly.
+- All weapons pass sourced metadata, R1/R5 values, refinement 0/6 rejection,
+  and unrelated-stat isolation.
+- Every unit passes reaction regression, build, and preflight; shared/final
+  public APIs pass Javadoc with no generated artifact staged.
 
 Acceptance criteria:
 
