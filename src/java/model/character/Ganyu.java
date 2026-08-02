@@ -343,13 +343,11 @@ public class Ganyu extends Character
     private void celestialShower(CombatSimulator sim) {
         double castTime = sim.getCurrentTime();
         markBurstUsed(castTime, sim.getApplicableBuffs(this));
+        captureSnapshot(castTime, sim.getApplicableBuffs(this));
         burstStartTime = castTime + BURST_FIELD_START_FRAME * FRAME;
         burstExpirationTime = burstStartTime + BURST_DURATION;
         schedule(sim, burstStartTime, activeSim -> {
             replaceA4Field(activeSim, activeSim.getCurrentTime());
-            captureSnapshot(
-                    activeSim.getCurrentTime(),
-                    activeSim.getApplicableBuffs(this));
             if (constellation >= 4) {
                 replaceC4Debuff(activeSim, activeSim.getCurrentTime());
             }

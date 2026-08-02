@@ -5,6 +5,7 @@ import java.util.List;
 
 import mechanics.buff.Buff;
 import mechanics.buff.BuffId;
+import mechanics.buff.SimpleBuff;
 import mechanics.data.TalentDataSource;
 import model.character.Ganyu;
 import model.entity.Character;
@@ -248,6 +249,12 @@ public final class GanyuRegressionTest {
                 CharacterId.NOELLE, Element.CRYO);
         CombatSimulator c0Sim = simulatorWith(c0);
         c0Sim.addCharacter(ally);
+        c0.addBuff(new SimpleBuff(
+                "Cast-only CRIT DMG",
+                BuffId.GANYU_C1_CRYO_RES_SHRED,
+                2.0,
+                0.0,
+                stats -> stats.add(StatType.CRIT_DMG, 0.40)));
         List<ActionRecord> c0Shards = captureNamedActions(
                 c0Sim, "Celestial Shower Shard");
         perform(c0Sim, CharacterActionKey.BURST);
@@ -256,6 +263,9 @@ public final class GanyuRegressionTest {
         advanceTo(c0Sim, 122.0 * FRAME);
         assertTrue(c0.isBurstActive(c0Sim.getCurrentTime()),
                 "Ganyu Burst field starts at frame 122");
+        assertClose(1.284,
+                c0.getSnapshot().get(StatType.CRIT_DMG), EPS,
+                "Ganyu Burst keeps the initial-cast snapshot");
         assertClose(0.20,
                 applicableStats(c0Sim, c0).get(StatType.CRYO_DMG_BONUS),
                 EPS, "Ganyu A4 buffs active Ganyu");
