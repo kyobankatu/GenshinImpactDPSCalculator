@@ -3089,3 +3089,23 @@ experiment record.
   typed one-second/five-trigger markers, actual Musou hit, multi-hit and exact
   interval boundaries, invalid/C5/form-end/recast behavior, and snapshot replay
   pass focused and full gates with stable representative party outputs
+
+### B-144 — Flins Charged Attack input coverage
+
+- **Status:** complete
+- **Source:** delegated supported-character action coverage audit
+- **Scope/risk:** expose the existing sourced Charged multiplier through typed
+  action dispatch, with Physical/Electro form routing and combo/C2 interaction;
+  stamina and Plunging support remain separate
+- **Evidence:** local `Flins_Multipliers.csv` contains level-9 Charge 1.8928;
+  current KQM quick guide and HoYoLAB talent data, accessed 2026-08-02, confirm
+  Charged input and unoverrideable Electro conversion during Manifest Flame:
+  https://keqingmains.com/q/flins-quickguide/
+  https://www.hoyolab.com/article/41458758
+- **Boundary:** out/in form element, typed bonus/ICD/gauge, animation duration,
+  Normal combo reset, C2 next-Normal follow-up preservation, C5, and snapshots
+- **Plan:** one-phase `TASKS.md` Flins Charged Attack Coverage
+- **Closure:** typed Physical/Manifest Electro Charged dispatch, sourced
+  multiplier and metadata, Normal-combo reset, C2 interaction, form boundary,
+  C5, and snapshot replay pass focused and full gates with stable representative
+  party outputs

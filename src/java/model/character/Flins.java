@@ -289,6 +289,7 @@ public class Flins extends Character
      *   <li>{@link CharacterActionKey#SKILL} — enters Manifest Flame or casts Northland Spearstorm.</li>
      *   <li>{@link CharacterActionKey#BURST} — casts the standard burst or Thunderous Symphony.</li>
      *   <li>{@link CharacterActionKey#NORMAL} — advances the normal attack combo.</li>
+     *   <li>{@link CharacterActionKey#CHARGE} — casts one Charged Attack.</li>
      *   <li>{@link CharacterActionKey#DASH} — advances time by 0.4 s.</li>
      *   <li>Any non-{@code NORMAL} action resets the normal attack combo step to 0.</li>
      * </ul>
@@ -322,6 +323,9 @@ public class Flins extends Character
                 break;
             case NORMAL:
                 normalAttack(sim);
+                break;
+            case CHARGE:
+                chargedAttack(sim);
                 break;
             case DASH:
                 sim.advanceTime(0.4);
@@ -407,6 +411,25 @@ public class Flins extends Character
             normalAttackStep = 0;
 
         // sim.advanceTime(0.3); // Handled by hit.setAnimationDuration
+    }
+
+    /**
+     * Executes one Physical or Manifest-infused Electro Charged Attack.
+     *
+     * @param sim active simulator
+     */
+    private void chargedAttack(CombatSimulator sim) {
+        boolean inForm = isManifestFlameActive(sim.getCurrentTime());
+        AttackAction charged = new AttackAction(
+                "Flins Charged Attack" + (inForm ? " (Manifest)" : ""),
+                getTalentValue("Charge", 1.8928),
+                inForm ? Element.ELECTRO : Element.PHYSICAL,
+                StatType.BASE_ATK,
+                StatType.CHARGED_ATTACK_DMG_BONUS,
+                0.8,
+                ActionType.CHARGE);
+        charged.setICD(ICDType.Standard, ICDTag.ChargedAttack, 1.0);
+        sim.performAction(characterId, charged);
     }
 
     private void triggerC2NormalFollowUp(

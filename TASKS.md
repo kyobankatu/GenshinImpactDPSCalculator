@@ -13078,6 +13078,65 @@ Completion evidence:
   32,047,365 / 322,084 (`FlinsParty`), and 22,146,093 / 320,493
   (`FlinsParty2`).
 
+## Implementation Order: Flins Charged Attack Coverage
+
+Status: Complete. Implemented B-144 as one sourced character action; stamina,
+Plunging input, new rotation scripts, RL, and generated docs are excluded.
+
+Evidence:
+
+- `config/characters/Flins/Flins_Multipliers.csv` contains level-9 Charge
+  1.8928. The current KQM quick guide and HoYoLAB talent table, accessed
+  2026-08-02, confirm Physical baseline and unoverrideable Manifest Electro:
+  https://keqingmains.com/q/flins-quickguide/
+  https://www.hoyolab.com/article/41458758
+
+### Phase 1: Add Typed Charged Dispatch - Done
+
+Target files:
+
+- `src/java/model/character/Flins.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- `CHARGE` dispatch resolves one sourced 1.8928 hit, resets the Normal combo,
+  and advances the established polearm approximation by 0.8 seconds.
+- The hit is Physical outside Manifest Flame and unoverrideable Electro inside,
+  with Charged DMG Bonus, typed Charged category, standard Charged ICD, and 1U.
+- A Charged hit does not consume C2's next-Normal follow-up, while an in-form
+  positive hit still participates in existing C2 Electro shred dispatch.
+- C5 does not alter the Normal-talent Charged multiplier, and snapshoted form
+  timing continues to select the same element after rollback.
+
+Test cases:
+
+- Normal: out/in-form metadata, duration, sourced multiplier, and C2 shred.
+- Boundary: form expiry element switch, combo reset, C2 Charge-then-Normal,
+  C5 multiplier, and active-form snapshot rollback.
+- Abnormal: unsupported form-independent stats and null/missing target remain
+  governed by existing combat resolver preconditions.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- representative party samples twice
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Flins now accepts typed `CHARGE` input with sourced Physical/Electro routing,
+  Charged bonus/ICD/gauge metadata, combo reset, and the established 0.8-second
+  polearm action duration.
+- Focused regression covers C2 shred and next-Normal preservation, C5, exact
+  Manifest expiry, and snapshot replay.
+- Reaction regression, build, Javadoc, party catalog, and representative
+  samples pass. Two runs each reproduce 1,275,070 / 60,718 (`RaidenParty`),
+  32,047,365 / 322,084 (`FlinsParty`), and 22,146,093 / 320,493
+  (`FlinsParty2`).
+
 ## Implementation Order: Expanded Artifact Coverage Campaign
 
 Status: Complete. This campaign adds six missing four-piece artifact sets

@@ -99,6 +99,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_RaidenConstellationLifecycle();
         testAccuracyPhaseF_RaidenC6WishbearerLifecycle();
         testAccuracyPhaseF_RaidenMultiHitAttackContract();
+        testAccuracyPhaseF_FlinsChargedAttackCoverage();
         testAccuracyPhaseF_FlinsA1AndC1Lifecycle();
         testAccuracyPhaseF_FlinsC2AndC4();
         testAccuracyPhaseF_FlinsC3C5AndC6();
@@ -3431,6 +3432,144 @@ public class ReactionRegressionTest {
         assertEquals(CharacterId.RAIDEN_SHOGUN, buffs.get(0).getSourceCharacterId(),
                 "Raiden C4 should retain typed source ownership");
         return buffs.get(0);
+    }
+
+    private static void testAccuracyPhaseF_FlinsChargedAttackCoverage() {
+        RecordingDamageWeapon physicalWeapon = new RecordingDamageWeapon(
+                "Flins Charged Attack");
+        model.character.Flins physicalFlins = new model.character.Flins(
+                physicalWeapon, blankArtifact(), flinsTalentData(0));
+        CombatSimulator physicalSim = simulatorWithExistingCharacter(
+                physicalFlins);
+        List<AttackAction> logicalActions = new ArrayList<>();
+        physicalSim.addListener((actor, action, time) ->
+                logicalActions.add(action));
+        physicalSim.performAction(
+                CharacterId.FLINS,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        AttackAction physicalCharged = physicalWeapon.actions.get(0);
+        assertClose(1.8928, physicalCharged.getDamagePercent(), EPS,
+                "Flins Charged should use its sourced level-9 multiplier");
+        assertEquals(Element.PHYSICAL, physicalCharged.getElement(),
+                "Flins Charged should deal Physical damage outside form");
+        assertEquals(ActionType.CHARGE, physicalCharged.getActionType(),
+                "Flins Charged should retain typed action category");
+        assertEquals(StatType.CHARGED_ATTACK_DMG_BONUS,
+                physicalCharged.getBonusStat(),
+                "Flins Charged should use Charged DMG Bonus");
+        assertEquals(ICDType.Standard, physicalCharged.getICDType(),
+                "Flins Charged should use standard ICD");
+        assertEquals(ICDTag.ChargedAttack, physicalCharged.getICDTag(),
+                "Flins Charged should use the Charged ICD group");
+        assertClose(1.0, physicalCharged.getGaugeUnits(), EPS,
+                "Flins Charged should apply 1U when infused");
+        assertClose(0.8, physicalSim.getCurrentTime(), EPS,
+                "Flins Charged should use the polearm action-duration approximation");
+
+        physicalSim.performAction(
+                CharacterId.FLINS,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        physicalSim.performAction(
+                CharacterId.FLINS,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        physicalSim.performAction(
+                CharacterId.FLINS,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        physicalSim.performAction(
+                CharacterId.FLINS,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        assertEquals("Flins N1",
+                logicalActions.get(logicalActions.size() - 1).getName(),
+                "Flins Charged should reset the Normal combo to N1");
+
+        RecordingDamageWeapon manifestWeapon = new RecordingDamageWeapon("");
+        model.character.Flins manifestFlins = new model.character.Flins(
+                manifestWeapon, blankArtifact(), flinsTalentData(2));
+        CombatSimulator manifestSim = simulatorWithExistingCharacter(
+                manifestFlins);
+        manifestSim.setMoonsign(CombatSimulator.Moonsign.ASCENDANT_GLEAM);
+        manifestSim.performAction(
+                CharacterId.FLINS,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        manifestSim.performAction(
+                CharacterId.FLINS,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        manifestSim.performAction(
+                CharacterId.FLINS,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        AttackAction manifestCharged = manifestWeapon.actions.stream()
+                .filter(action -> action.getName().equals(
+                        "Flins Charged Attack (Manifest)"))
+                .findFirst()
+                .orElseThrow();
+        assertEquals(Element.ELECTRO, manifestCharged.getElement(),
+                "Manifest Flame should convert Charged damage to Electro");
+        assertClose(1.8928, manifestCharged.getDamagePercent(), EPS,
+                "Manifest Charged should retain the Normal-talent multiplier");
+        assertClose(0.25,
+                resolvedStat(
+                        manifestSim,
+                        manifestFlins,
+                        StatType.ELECTRO_RES_SHRED),
+                EPS,
+                "In-form Charged damage should run the existing C2 shred hook");
+        assertEquals(0L, manifestWeapon.actions.stream()
+                        .filter(action -> action.getName().equals(
+                                "The Devil's Wall Follow-Up"))
+                        .count(),
+                "Charged should not consume C2's next-Normal follow-up");
+        manifestSim.performAction(
+                CharacterId.FLINS,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        assertEquals(1L, manifestWeapon.actions.stream()
+                        .filter(action -> action.getName().equals(
+                                "The Devil's Wall Follow-Up"))
+                        .count(),
+                "The next in-form Normal should still consume the C2 follow-up");
+
+        RecordingDamageWeapon c5Weapon = new RecordingDamageWeapon(
+                "Flins Charged Attack");
+        model.character.Flins c5Flins = new model.character.Flins(
+                c5Weapon, blankArtifact(), flinsTalentData(5));
+        CombatSimulator c5Sim = simulatorWithExistingCharacter(c5Flins);
+        c5Sim.performAction(
+                CharacterId.FLINS,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        c5Sim.performAction(
+                CharacterId.FLINS,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        assertClose(1.8928,
+                c5Weapon.actions.get(0).getDamagePercent(),
+                EPS,
+                "Flins C5 should not alter the Normal-talent Charged multiplier");
+
+        RecordingDamageWeapon boundaryWeapon = new RecordingDamageWeapon(
+                "Flins Charged Attack");
+        model.character.Flins boundaryFlins = new model.character.Flins(
+                boundaryWeapon, blankArtifact(), flinsTalentData(0));
+        CombatSimulator boundarySim = simulatorWithExistingCharacter(
+                boundaryFlins);
+        boundarySim.performAction(
+                CharacterId.FLINS,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        SimulatorSnapshot activeFormSnapshot = boundarySim.saveSnapshot();
+        boundarySim.advanceTime(
+                9.999 - boundarySim.getCurrentTime());
+        boundarySim.performAction(
+                CharacterId.FLINS,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        assertEquals(Element.ELECTRO,
+                boundaryWeapon.actions.get(0).getElement(),
+                "Flins Charged should remain Electro just before form expiry");
+        boundarySim.restoreSnapshot(activeFormSnapshot);
+        boundaryWeapon.actions.clear();
+        boundarySim.advanceTime(10.0 - boundarySim.getCurrentTime());
+        boundarySim.performAction(
+                CharacterId.FLINS,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        assertEquals(Element.PHYSICAL,
+                boundaryWeapon.actions.get(0).getElement(),
+                "Flins Charged should become Physical at exact form expiry");
     }
 
     private static void testAccuracyPhaseF_FlinsA1AndC1Lifecycle() {
