@@ -143,6 +143,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_SumeruActionProcBows();
         testAccuracyPhaseF_TypedFiveStarBows();
         testAccuracyPhaseF_EnergyConditionalEmblemWeapons();
+        testAccuracyPhaseF_FiveStarElementalMasterySupportWeapons();
         testAccuracyPhaseF_ActionUseWindowWeapons();
         testAccuracyPhaseF_AdditionalSkillUseStatWeapons();
         testAccuracyPhaseF_SamuraiConductWeapons();
@@ -9722,6 +9723,281 @@ public class ReactionRegressionTest {
         }
         assertTrue(highPulseRefinementRejected,
                 "Thundering Pulse should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_FiveStarElementalMasterySupportWeapons() {
+        model.weapon.ElegyForTheEnd elegy = new model.weapon.ElegyForTheEnd();
+        assertEquals("Elegy for the End", elegy.getName(),
+                "Elegy for the End display name");
+        assertClose(608.0, elegy.getBaseAtk(), EPS,
+                "Elegy for the End base ATK");
+        assertClose(0.551,
+                elegy.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "Elegy for the End Energy Recharge");
+        assertEquals(model.type.WeaponType.BOW, elegy.getWeaponType(),
+                "Elegy for the End weapon type");
+        assertEquals(5, elegy.getRefinement(),
+                "Elegy for the End default refinement");
+
+        TestCharacter elegyAlly = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        TestCharacter elegyOwner = testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE);
+        elegyOwner.setWeapon(elegy);
+        CombatSimulator elegySim = simulatorWith(elegyAlly);
+        elegySim.addCharacter(elegyOwner);
+        assertClose(120.0,
+                resolvedStat(elegySim, elegyOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "R5 Elegy unconditional Elemental Mastery");
+        AttackAction skillHit = typedDamageHit(
+                "Elegy Skill hit", ActionType.SKILL, 1.0);
+        AttackAction normalHit = typedDamageHit(
+                "Elegy Normal hit", ActionType.NORMAL, 1.0);
+        elegy.onDamage(elegyOwner, normalHit, 0.0, elegySim);
+        elegy.onDamage(elegyAlly, skillHit, 0.0, elegySim);
+        assertEquals(0, elegy.getSigilCount(),
+                "Normal and foreign-user hits should not add Elegy sigils");
+
+        elegy.onDamage(elegyOwner, skillHit, 0.0, elegySim);
+        elegy.onDamage(elegyOwner, skillHit, 0.0, elegySim);
+        assertEquals(1, elegy.getSigilCount(),
+                "Elegy should reject a second sigil inside 0.2 seconds");
+        for (int i = 0; i < 3; i++) {
+            elegySim.advanceTime(0.2);
+            AttackAction hit = typedDamageHit(
+                    "Elegy alternating hit " + i,
+                    i % 2 == 0 ? ActionType.BURST : ActionType.SKILL,
+                    1.0);
+            elegy.onDamage(
+                    elegyOwner, hit, elegySim.getCurrentTime(), elegySim);
+        }
+        assertEquals(0, elegy.getSigilCount(),
+                "Fourth Elegy sigil should be consumed");
+        assertClose(200.0,
+                resolvedStat(elegySim, elegyAlly,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "R5 Elegy party Elemental Mastery");
+        assertClose(0.40,
+                resolvedStat(elegySim, elegyAlly,
+                        StatType.ATK_PERCENT), EPS,
+                "R5 Elegy party ATK");
+        assertClose(320.0,
+                resolvedStat(elegySim, elegyOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Elegy owner should receive passive and Farewell Song EM");
+
+        elegySim.advanceTime(12.0);
+        assertClose(0.0,
+                resolvedStat(elegySim, elegyAlly,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Elegy song should expire at exactly 12 seconds");
+        elegy.onDamage(
+                elegyOwner, skillHit, elegySim.getCurrentTime(), elegySim);
+        assertEquals(0, elegy.getSigilCount(),
+                "Elegy should reject sigils before its 20-second lock ends");
+        elegySim.advanceTime(8.0);
+        elegy.onDamage(
+                elegyOwner, skillHit, elegySim.getCurrentTime(), elegySim);
+        assertEquals(1, elegy.getSigilCount(),
+                "Elegy should accept a sigil at the exact 20-second boundary");
+
+        model.weapon.ElegyForTheEnd r1Elegy =
+                new model.weapon.ElegyForTheEnd(1);
+        TestCharacter r1ElegyOwner = testCharacter(Element.ANEMO);
+        r1ElegyOwner.setWeapon(r1Elegy);
+        CombatSimulator r1ElegySim = simulatorWith(r1ElegyOwner);
+        assertClose(60.0,
+                resolvedStat(r1ElegySim, r1ElegyOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "R1 Elegy unconditional Elemental Mastery");
+
+        model.weapon.AThousandFloatingDreams dreams =
+                new model.weapon.AThousandFloatingDreams();
+        assertEquals("A Thousand Floating Dreams", dreams.getName(),
+                "A Thousand Floating Dreams display name");
+        assertClose(542.0, dreams.getBaseAtk(), EPS,
+                "A Thousand Floating Dreams base ATK");
+        assertClose(265.0,
+                dreams.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "A Thousand Floating Dreams EM substat");
+        assertEquals(model.type.WeaponType.CATALYST, dreams.getWeaponType(),
+                "A Thousand Floating Dreams weapon type");
+        assertEquals(5, dreams.getRefinement(),
+                "A Thousand Floating Dreams default refinement");
+
+        TestCharacter dreamsOwner = testCharacter(
+                Element.DENDRO, CharacterId.SUCROSE);
+        dreamsOwner.setWeapon(dreams);
+        TestCharacter sameElementAlly = testCharacter(
+                Element.DENDRO, CharacterId.XIANGLING);
+        TestCharacter differentElementAlly = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        CombatSimulator dreamsSim = simulatorWith(dreamsOwner);
+        dreamsSim.addCharacter(sameElementAlly);
+        dreamsSim.addCharacter(differentElementAlly);
+        dreamsSim.addCharacter(testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU));
+        assertClose(265.0 + 64.0,
+                resolvedStat(dreamsSim, dreamsOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Floating Dreams same-element owner EM tier");
+        assertClose(0.52,
+                resolvedStat(dreamsSim, dreamsOwner,
+                        StatType.DENDRO_DMG_BONUS), EPS,
+                "Floating Dreams two different-element DMG stacks");
+        assertClose(48.0,
+                resolvedStat(dreamsSim, sameElementAlly,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Floating Dreams should share EM with same-element allies");
+        assertClose(48.0,
+                resolvedStat(dreamsSim, differentElementAlly,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Floating Dreams should share EM with different-element allies");
+        dreamsSim.addCharacter(testCharacter(Element.CRYO, CharacterId.KAEYA));
+        dreamsSim.addCharacter(testCharacter(Element.ELECTRO, CharacterId.LISA));
+        assertClose(0.78,
+                resolvedStat(dreamsSim, dreamsOwner,
+                        StatType.DENDRO_DMG_BONUS), EPS,
+                "Floating Dreams different-element stacks should cap at three");
+
+        model.weapon.AThousandFloatingDreams sameCapDreams =
+                new model.weapon.AThousandFloatingDreams();
+        TestCharacter sameCapOwner = testCharacter(
+                Element.DENDRO, CharacterId.SUCROSE);
+        sameCapOwner.setWeapon(sameCapDreams);
+        CombatSimulator sameCapSim = simulatorWith(sameCapOwner);
+        sameCapSim.addCharacter(testCharacter(
+                Element.DENDRO, CharacterId.XIANGLING));
+        sameCapSim.addCharacter(testCharacter(
+                Element.DENDRO, CharacterId.AMBER));
+        sameCapSim.addCharacter(testCharacter(
+                Element.DENDRO, CharacterId.XINGQIU));
+        sameCapSim.addCharacter(testCharacter(
+                Element.DENDRO, CharacterId.KAEYA));
+        assertClose(265.0 + 3.0 * 64.0,
+                resolvedStat(sameCapSim, sameCapOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Floating Dreams same-element stacks should cap at three");
+
+        model.weapon.AThousandFloatingDreams firstProvider =
+                new model.weapon.AThousandFloatingDreams();
+        model.weapon.AThousandFloatingDreams secondProvider =
+                new model.weapon.AThousandFloatingDreams();
+        TestCharacter providerTarget = testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU);
+        TestCharacter firstProviderOwner = testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE);
+        TestCharacter secondProviderOwner = testCharacter(
+                Element.PYRO, CharacterId.XIANGLING);
+        firstProviderOwner.setWeapon(firstProvider);
+        secondProviderOwner.setWeapon(secondProvider);
+        CombatSimulator providerSim = simulatorWith(providerTarget);
+        providerSim.addCharacter(firstProviderOwner);
+        providerSim.addCharacter(secondProviderOwner);
+        assertClose(96.0,
+                resolvedStat(providerSim, providerTarget,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Multiple Floating Dreams party shares should stack");
+        assertClose(48.0 + 265.0,
+                resolvedStat(providerSim, firstProviderOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Floating Dreams owner should exclude only its own share");
+
+        model.weapon.AThousandFloatingDreams r1Dreams =
+                new model.weapon.AThousandFloatingDreams(1);
+        TestCharacter r1DreamsOwner = testCharacter(
+                Element.DENDRO, CharacterId.SUCROSE);
+        r1DreamsOwner.setWeapon(r1Dreams);
+        CombatSimulator r1DreamsSim = simulatorWith(r1DreamsOwner);
+        TestCharacter r1DreamsAlly = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        r1DreamsSim.addCharacter(r1DreamsAlly);
+        assertClose(0.10,
+                resolvedStat(r1DreamsSim, r1DreamsOwner,
+                        StatType.DENDRO_DMG_BONUS), EPS,
+                "R1 Floating Dreams different-element DMG stack");
+        assertClose(40.0,
+                resolvedStat(r1DreamsSim, r1DreamsAlly,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "R1 Floating Dreams party EM share");
+
+        SimpleBuff oldElegySong = new SimpleBuff(
+                "Old Elegy Song",
+                BuffId.ELEGY_FAREWELL_SONG,
+                12.0,
+                elegySim.getCurrentTime(),
+                stats -> stats.add(StatType.ATK_PERCENT, 9.0));
+        elegySim.applyTeamBuffNoStack(oldElegySong);
+        SimpleBuff replacementElegySong = new SimpleBuff(
+                "Replacement Elegy Song",
+                BuffId.ELEGY_FAREWELL_SONG,
+                12.0,
+                elegySim.getCurrentTime(),
+                stats -> stats.add(StatType.ATK_PERCENT, 0.40));
+        elegySim.applyTeamBuffNoStack(replacementElegySong);
+        assertEquals(1L, elegySim.getTeamBuffList().stream()
+                        .filter(buff -> buff.getId() == BuffId.ELEGY_FAREWELL_SONG)
+                        .count(),
+                "Elegy songs of the same type should replace rather than stack");
+        assertClose(0.40,
+                resolvedStat(elegySim, elegyAlly,
+                        StatType.ATK_PERCENT), EPS,
+                "Elegy replacement should expose only the newest song value");
+
+        boolean elegyReuseRejected = false;
+        try {
+            elegy.initializeForSimulator(elegyOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            elegyReuseRejected = true;
+        }
+        assertTrue(elegyReuseRejected,
+                "Elegy should reject cross-simulator reuse");
+
+        boolean dreamsReuseRejected = false;
+        try {
+            dreams.initializeForSimulator(dreamsOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            dreamsReuseRejected = true;
+        }
+        assertTrue(dreamsReuseRejected,
+                "Floating Dreams should reject cross-simulator reuse");
+
+        boolean lowElegyRefinementRejected = false;
+        try {
+            new model.weapon.ElegyForTheEnd(0);
+        } catch (IllegalArgumentException expected) {
+            lowElegyRefinementRejected = true;
+        }
+        assertTrue(lowElegyRefinementRejected,
+                "Elegy should reject refinement zero");
+
+        boolean highElegyRefinementRejected = false;
+        try {
+            new model.weapon.ElegyForTheEnd(6);
+        } catch (IllegalArgumentException expected) {
+            highElegyRefinementRejected = true;
+        }
+        assertTrue(highElegyRefinementRejected,
+                "Elegy should reject refinement six");
+
+        boolean lowDreamsRefinementRejected = false;
+        try {
+            new model.weapon.AThousandFloatingDreams(0);
+        } catch (IllegalArgumentException expected) {
+            lowDreamsRefinementRejected = true;
+        }
+        assertTrue(lowDreamsRefinementRejected,
+                "Floating Dreams should reject refinement zero");
+
+        boolean highDreamsRefinementRejected = false;
+        try {
+            new model.weapon.AThousandFloatingDreams(6);
+        } catch (IllegalArgumentException expected) {
+            highDreamsRefinementRejected = true;
+        }
+        assertTrue(highDreamsRefinementRejected,
+                "Floating Dreams should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_OffFieldHitBows() {
