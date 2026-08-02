@@ -142,6 +142,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_StaticActionBonusWeaponMetadata();
         testAccuracyPhaseF_TheBlackSwordContract();
         testAccuracyPhaseF_StaticFiveStarWeaponPhaseOne();
+        testAccuracyPhaseF_StaticFiveStarWeaponPhaseTwo();
         testAccuracyPhaseF_LegacyWeaponRefinements();
         testAccuracyPhaseF_SkillUseEventWeapons();
         testAccuracyPhaseF_WatatsumiWavewalkerWeapons();
@@ -8553,6 +8554,105 @@ public class ReactionRegressionTest {
             }
             assertTrue(highRefinementRejected,
                     "Static five-star weapon should reject refinement six");
+        }
+    }
+
+    private static void testAccuracyPhaseF_StaticFiveStarWeaponPhaseTwo() {
+        model.weapon.HaranGeppakuFutsu haran =
+                new model.weapon.HaranGeppakuFutsu();
+        model.weapon.SkywardAtlas atlas = new model.weapon.SkywardAtlas();
+
+        assertEquals("Haran Geppaku Futsu", haran.getName(),
+                "Haran Geppaku Futsu display name");
+        assertClose(608.0, haran.getBaseAtk(), EPS,
+                "Haran Geppaku Futsu base ATK");
+        assertClose(0.331,
+                haran.getStats().get(StatType.CRIT_RATE), EPS,
+                "Haran Geppaku Futsu CRIT Rate");
+        assertEquals(model.type.WeaponType.SWORD, haran.getWeaponType(),
+                "Haran Geppaku Futsu weapon type");
+        assertEquals(5, haran.getRefinement(),
+                "Haran Geppaku Futsu default refinement");
+
+        assertEquals("Skyward Atlas", atlas.getName(),
+                "Skyward Atlas display name");
+        assertClose(674.0, atlas.getBaseAtk(), EPS,
+                "Skyward Atlas base ATK");
+        assertClose(0.331,
+                atlas.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Skyward Atlas ATK substat");
+        assertEquals(model.type.WeaponType.CATALYST, atlas.getWeaponType(),
+                "Skyward Atlas weapon type");
+        assertEquals(5, atlas.getRefinement(),
+                "Skyward Atlas default refinement");
+
+        StatsContainer haranStats = new StatsContainer();
+        haranStats.set(StatType.PYRO_DMG_BONUS, 0.10);
+        haran.applyPassive(haranStats, -100.0);
+        StatsContainer atlasStats = new StatsContainer();
+        atlas.applyPassive(atlasStats, 1000.0);
+        for (Element element : Element.values()) {
+            if (element == Element.PHYSICAL) {
+                assertClose(0.0,
+                        haranStats.get(element.getBonusStatType()), EPS,
+                        "Haran should exclude Physical damage");
+                assertClose(0.0,
+                        atlasStats.get(element.getBonusStatType()), EPS,
+                        "Skyward Atlas should exclude Physical damage");
+                continue;
+            }
+            double expectedHaran = element == Element.PYRO ? 0.34 : 0.24;
+            assertClose(expectedHaran,
+                    haranStats.get(element.getBonusStatType()), EPS,
+                    "Haran should add every elemental damage bonus");
+            assertClose(0.24,
+                    atlasStats.get(element.getBonusStatType()), EPS,
+                    "Skyward Atlas should add every elemental damage bonus");
+        }
+        assertClose(0.0, haranStats.get(StatType.DMG_BONUS_ALL), EPS,
+                "Haran should not use generic all-damage bonus");
+        assertClose(0.0, atlasStats.get(StatType.DMG_BONUS_ALL), EPS,
+                "Skyward Atlas should not use generic all-damage bonus");
+        assertClose(0.0,
+                haranStats.get(StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Haran should not invent Wavespike state");
+
+        model.weapon.HaranGeppakuFutsu r1Haran =
+                new model.weapon.HaranGeppakuFutsu(1);
+        model.weapon.SkywardAtlas r1Atlas =
+                new model.weapon.SkywardAtlas(1);
+        StatsContainer r1HaranStats = new StatsContainer();
+        StatsContainer r1AtlasStats = new StatsContainer();
+        r1Haran.applyPassive(r1HaranStats, 0.0);
+        r1Atlas.applyPassive(r1AtlasStats, 0.0);
+        assertClose(0.12, r1HaranStats.get(StatType.CRYO_DMG_BONUS), EPS,
+                "R1 Haran elemental damage bonus");
+        assertClose(0.12, r1AtlasStats.get(StatType.GEO_DMG_BONUS), EPS,
+                "R1 Skyward Atlas elemental damage bonus");
+
+        java.util.List<java.util.function.IntFunction<model.entity.Weapon>>
+                constructors = java.util.Arrays.asList(
+                        model.weapon.HaranGeppakuFutsu::new,
+                        model.weapon.SkywardAtlas::new);
+        for (java.util.function.IntFunction<model.entity.Weapon> constructor
+                : constructors) {
+            boolean lowRefinementRejected = false;
+            try {
+                constructor.apply(0);
+            } catch (IllegalArgumentException expected) {
+                lowRefinementRejected = true;
+            }
+            assertTrue(lowRefinementRejected,
+                    "Elemental five-star weapon should reject refinement zero");
+
+            boolean highRefinementRejected = false;
+            try {
+                constructor.apply(6);
+            } catch (IllegalArgumentException expected) {
+                highRefinementRejected = true;
+            }
+            assertTrue(highRefinementRejected,
+                    "Elemental five-star weapon should reject refinement six");
         }
     }
 

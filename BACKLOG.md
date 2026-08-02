@@ -3253,7 +3253,7 @@ experiment record.
 
 ### B-153 — Static five-star weapon branches
 
-- **Status:** active
+- **Status:** done
 - **Source:** local image-backed missing-weapon inventory after B-152
 - **Scope/risk:** add exact always-on branches and Lv. 90 metadata for Aquila
   Favonia, Wolf's Gravestone, Amos' Bow, Haran Geppaku Futsu, and Skyward Atlas;
@@ -3269,3 +3269,6 @@ experiment record.
   isolation.
 - **Proof/plan:** two-phase `TASKS.md` Static Five-Star Weapon Branch Campaign
   plus reaction regression, build, Javadoc, party catalog, and preflight.
+- **Closure:** five Lv. 90 weapons now expose exact R1-R5 always-on branches;
+  seven-element isolation, typed action bonuses, metadata, and all local gates
+  pass while absent trigger state remains explicit.

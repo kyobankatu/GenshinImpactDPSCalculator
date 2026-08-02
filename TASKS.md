@@ -37,7 +37,7 @@ player-damage, shield-absorption, RL, or generated-documentation systems.
 The B-152 Black Sword campaign is complete. It adds the weapon's full
 outgoing-damage contract while keeping player healing in Deferred Systems.
 
-The active B-153 static five-star weapon campaign is adding five exact
+The B-153 static five-star weapon campaign is complete. It adds five exact
 always-on passive branches while preserving explicit unreachable-trigger
 boundaries.
 
@@ -12915,7 +12915,7 @@ Completion evidence:
 
 ## Implementation Order: Static Five-Star Weapon Branch Campaign
 
-Status: In progress. This campaign adds five missing five-star weapons whose
+Status: Complete. This campaign adds five missing five-star weapons whose
 always-on outgoing bonuses are exact in the current simulator boundary; RL and
 generated documentation remain excluded.
 
@@ -12978,7 +12978,7 @@ Completion evidence:
   PartyCatalogRegressionTest`, and `python scripts/preflight.py --run` passed
   on 2026-08-02.
 
-### Phase 2: Add Haran and Skyward Atlas Elemental Branches
+### Phase 2: Add Haran and Skyward Atlas Elemental Branches - Done
 
 Target files:
 
@@ -13008,6 +13008,16 @@ Verification:
 - `./gradlew ReactionRegressionTest`
 - `./gradlew build javadoc PartyCatalogRegressionTest`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Focused regressions cover all seven elemental stats, R1/R5 metadata and
+  values, supplied-stat composition, arbitrary time, Physical/generic
+  exclusion, unreachable branches, independent instances, and invalid
+  refinement.
+- `./gradlew ReactionRegressionTest`, `./gradlew build javadoc
+  PartyCatalogRegressionTest`, and `python scripts/preflight.py --run` passed
+  on 2026-08-02.
 
 ## Implementation Order: Missing Artifact Runtime Coverage Campaign
 
