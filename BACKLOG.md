@@ -3294,7 +3294,7 @@ experiment record.
 
 ### B-155 — Parallel foundational content campaign
 
-- **Status:** active
+- **Status:** done
 - **Source:** explicit broad character, weapon, and artifact coverage request
   with authorized branch-isolated delegates
 - **Scope/risk:** fifteen artifact sets, the five Royal weapons, and Barbara;
@@ -3310,3 +3310,7 @@ experiment record.
 - **Proof/plan:** three-phase `TASKS.md` Parallel Foundational Content Campaign
   with isolated regression executables, reaction regression, build, Javadoc,
   party catalog, and preflight.
+- **Closure:** fifteen artifact sets, all five Royal weapons, and Barbara are
+  integrated on `dev_0`; unsupported defensive, healing, HP-state,
+  exploration, geometry, and realized-CRIT branches remain inactive rather
+  than approximated.

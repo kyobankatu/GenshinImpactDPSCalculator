@@ -12899,7 +12899,7 @@ Campaign inventory:
 | Gambler | artifact | ready | none | `StaticArtifactRegressionTest` | done |
 | Resolution of Sojourner | artifact | ready | action CRIT routing audit | `StaticArtifactRegressionTest` | done |
 | Royal family | weapon batch | delegated evidence | isolated family base | `RoyalWeaponRegressionTest` | done |
-| Barbara | character | delegated evidence | typed `CharacterId` and CSV | `BarbaraRegressionTest` | active |
+| Barbara | character | delegated evidence | typed `CharacterId` and CSV | `BarbaraRegressionTest` | done |
 | Static combat-boundary sets | artifact batch | ready | none | `StaticArtifactRegressionTest` | done |
 | Static elemental/support sets | artifact batch | ready | none | `StaticArtifactRegressionTest` | done |
 | The Exile | artifact | ready | typed sequence marker | `TheExileRegressionTest` | done |
@@ -13000,7 +13000,7 @@ Completion evidence:
 - `./gradlew RoyalWeaponRegressionTest ReactionRegressionTest build javadoc`
   and the delegated executable preflight passed on 2026-08-03.
 
-### Phase 3: Barbara Offensive Vertical Slice
+### Phase 3: Barbara Offensive Vertical Slice - Done
 
 Target files:
 
@@ -13035,6 +13035,19 @@ Verification:
 - `./gradlew ReactionRegressionTest`
 - `./gradlew build javadoc PartyCatalogRegressionTest`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Barbara now has typed identity, aligned Lv. 90/status and talent-level CSV
+  data, four Normal steps, Charged and high Plunge attacks, two shared-ICD
+  Skill droplets, and a zero-damage 80-Energy Burst.
+- C1/C2/C4/C5 and Encore's representable Energy, cooldown, Hydro bonus, and
+  duration branches are covered; healing, stamina, self Wet, incoming damage,
+  C6 revival, proximity contacts, and pending-event snapshot reconstruction
+  remain explicitly outside the current simulator boundary.
+- `./gradlew BarbaraRegressionTest PartyCatalogRegressionTest
+  ReactionRegressionTest build javadoc` passed after integration on
+  2026-08-03; the delegate's `python scripts/preflight.py --run` also passed.
 
 ### Phase 4: Static Combat-Boundary Artifact Sets - Done
 
