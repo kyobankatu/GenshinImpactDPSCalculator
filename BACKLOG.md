@@ -2490,10 +2490,12 @@ experiment record.
 
 ### B-110 — Injected bow proc weapon coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Skyward Harp and The Viridescent Hunt; RL excluded
 - **Value/risk:** two complete passives reuse injected draws and nonrecursive
   Physical actions; Cyclone adds only one bounded timer
 - **Evidence boundary:** KQM TCL metadata, R1-R5 CRIT/chance/MV/CT values,
   immediate Harp proc and eight half-second Cyclone ticks over four seconds
 - **Plan:** `TASKS.md` Injected Bow Proc Weapon Campaign
+- **Completion:** `877a526` adds both injected proc implementations and focused
+  regressions; build/Javadoc/leak gates pass

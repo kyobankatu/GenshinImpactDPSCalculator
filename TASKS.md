@@ -14740,8 +14740,8 @@ Verification:
 
 ## Implementation Order: Injected Bow Proc Weapon Campaign
 
-Status: Active. Add two complete proc bows with injectable draws, typed hit
-gates, immediate/periodic Physical damage, and exact cooldowns.
+Status: Complete. Two proc bows now use injectable draws, typed hit gates,
+immediate/periodic Physical damage, and exact cooldowns.
 
 Scope:
 
@@ -14753,13 +14753,20 @@ Out of scope for this pass:
 - Multi-target pull/displacement, projectile travel, characters, formulas, RL,
   generated docs, and unrelated stochastic weapons.
 
-### Phase 1: Add Skyward Harp and The Viridescent Hunt
+### Phase 1: Add Skyward Harp and The Viridescent Hunt - Done (`877a526`)
 
 Target files:
 
 - `src/java/model/weapon/SkywardHarp.java` (new)
 - `src/java/model/weapon/TheViridescentHunt.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Skyward Harp proves R1/R5 CRIT and chance values, immediate proc damage,
+  exact cooldown, failed/zero draws, and nonrecursive behavior.
+- Viridescent Hunt proves typed active-owner gates, eight equal half-second
+  ticks, exact R1/R5 cooldowns/MVs, failed draws, and binding; all gates pass.
 
 Acceptance criteria:
 
