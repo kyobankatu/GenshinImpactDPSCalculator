@@ -12850,7 +12850,7 @@ Completion evidence:
 
 ## Implementation Order: Missing Artifact Runtime Coverage Campaign
 
-Status: In progress. B-149 adds three locally asset-backed artifact sets through
+Status: Complete. B-149 adds three locally asset-backed artifact sets through
 existing action, damage, reaction, buff, and snapshot contracts. Piece-count
 modeling, equipment removal, new simulator hooks, RL, and generated docs are
 excluded.
@@ -12911,7 +12911,7 @@ Completion evidence:
   callbacks, rollback, real Bloom ordering, reaction regression, build,
   Javadoc, party catalog, and preflight pass.
 
-### Phase 3: Long Night's Oath - Pending
+### Phase 3: Long Night's Oath - Done
 
 Target files:
 
@@ -12927,6 +12927,14 @@ Acceptance criteria and tests:
   refreshes the shared six-second window and grants 15% Plunging DMG per stack.
 - Cover trigger-hit ordering, all categories, CT independence, cap/refresh,
   5.999/6.000 expiry, invalid callbacks/binding, and snapshot restore.
+
+Completion evidence:
+
+- Typed owner buffs model independent Plunge/Charged/Skill cooldowns and five
+  Radiance stacks whose shared six-second window refreshes only on a new gain.
+- Post-hit ordering, 1/2/2 category gains, exact CT/expiry, cap behavior,
+  off-field and fallback Skill metadata, invalid callbacks, rollback, reaction
+  regression, build, Javadoc, party catalog, and preflight pass.
 
 Verification for every phase:
 

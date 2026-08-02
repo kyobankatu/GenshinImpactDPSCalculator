@@ -130,6 +130,14 @@ public enum BuffId {
     FLOWER_OF_PARADISE_LOST_STACK,
     /** 聖遺物「楽園の絶花」のスタック獲得クールダウン。 */
     FLOWER_OF_PARADISE_LOST_TRIGGER_COOLDOWN,
+    /** 聖遺物「長き夜の誓い」の光輝スタック。 */
+    LONG_NIGHTS_OATH_RADIANCE_STACK,
+    /** 聖遺物「長き夜の誓い」の落下攻撃クールダウン。 */
+    LONG_NIGHTS_OATH_PLUNGE_COOLDOWN,
+    /** 聖遺物「長き夜の誓い」の重撃クールダウン。 */
+    LONG_NIGHTS_OATH_CHARGED_COOLDOWN,
+    /** 聖遺物「長き夜の誓い」の元素スキルクールダウン。 */
+    LONG_NIGHTS_OATH_SKILL_COOLDOWN,
     SUPERCONDUCT_PHYS_RES_SHRED,
     /** 武器「漂泊の宵星」効果。 */
     WANDERING_EVENSTAR_WILDLING_NIGHTSTAR,

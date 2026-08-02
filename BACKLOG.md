@@ -3184,7 +3184,7 @@ experiment record.
 
 ### B-149 — Missing artifact runtime coverage campaign
 
-- **Status:** active
+- **Status:** done
 - **Source:** delegated asset-backed artifact inventory
 - **Scope/risk:** add Shimenawa's Reminiscence, Flower of Paradise Lost, and
   Long Night's Oath through existing typed callbacks without new simulator hooks
@@ -3193,3 +3193,6 @@ experiment record.
 - **Boundary:** delayed Energy spend, non-refreshable window, reaction ownership,
   trigger ordering, per-category CT, stack cap/expiry, binding, and snapshots
 - **Plan:** three-phase `TASKS.md` Missing Artifact Runtime Coverage Campaign
+- **Closure:** Shimenawa's Reminiscence, Flower of Paradise Lost, and Long
+  Night's Oath pass focused and full gates with typed, snapshot-safe runtime
+  windows, cooldowns, and stack boundaries.

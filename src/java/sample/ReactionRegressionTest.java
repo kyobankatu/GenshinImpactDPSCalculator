@@ -183,6 +183,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ActionUseArtifactSets();
         testAccuracyPhaseF_ShimenawasReminiscenceContract();
         testAccuracyPhaseF_FlowerOfParadiseLostContract();
+        testAccuracyPhaseF_LongNightsOathContract();
         testAccuracyPhaseF_HuskCuriosityState();
         testAccuracyPhaseF_ScholarPartyEnergySet();
         testAccuracyPhaseF_BennettAndXianglingPassiveAccuracy();
@@ -15332,6 +15333,269 @@ public class ReactionRegressionTest {
         }
         assertTrue(nullStatsRejected,
                 "Flower of Paradise Lost should reject null supplied stats");
+    }
+
+    private static void testAccuracyPhaseF_LongNightsOathContract() {
+        StatsContainer suppliedStats = new StatsContainer();
+        suppliedStats.set(StatType.CRIT_RATE, 0.10);
+        model.artifact.LongNightsOath supplied =
+                new model.artifact.LongNightsOath(suppliedStats);
+        assertEquals("Long Night's Oath", supplied.getName(),
+                "Long Night's Oath display name");
+        assertClose(0.25,
+                supplied.getStats().get(StatType.PLUNGING_ATTACK_DMG_BONUS),
+                EPS,
+                "Long Night's Oath two-piece Plunging bonus");
+        assertClose(0.10,
+                supplied.getStats().get(StatType.CRIT_RATE), EPS,
+                "Long Night's Oath should preserve supplied stats");
+
+        model.artifact.LongNightsOath oath =
+                new model.artifact.LongNightsOath();
+        TestCharacter owner = testCharacter(
+                Element.PHYSICAL, CharacterId.SUCROSE);
+        owner.setArtifacts(oath);
+        CombatSimulator sim = simulatorWith(owner);
+        AttackAction plunge = new AttackAction(
+                "Long Night Plunge fixture",
+                1.0,
+                Element.PHYSICAL,
+                StatType.BASE_ATK,
+                StatType.PLUNGING_ATTACK_DMG_BONUS,
+                0.0,
+                ActionType.PLUNGE);
+        SimulatorSnapshot beforeExpectedDamage = sim.saveSnapshot();
+        double expectedTriggerDamage = calculateDirectDamage(
+                sim, owner, plunge, sim.getCurrentTime(), 1.0);
+        sim.restoreSnapshot(beforeExpectedDamage);
+        double damageBeforeTrigger = sim.getTotalDamage();
+        sim.performActionWithoutTimeAdvance(owner.getCharacterId(), plunge);
+        assertClose(expectedTriggerDamage,
+                sim.getTotalDamage() - damageBeforeTrigger,
+                EPS,
+                "Long Night triggering Plunge should not use its new stack");
+        assertClose(0.40,
+                resolvedStat(
+                        sim, owner, StatType.PLUNGING_ATTACK_DMG_BONUS),
+                EPS,
+                "Long Night first Radiance Plunging bonus");
+        List<Buff> firstStacks = activeBuffs(
+                owner,
+                BuffId.LONG_NIGHTS_OATH_RADIANCE_STACK,
+                sim.getCurrentTime());
+        assertEquals(1, firstStacks.size(),
+                "Long Night Plunge should grant one stack");
+        assertEquals(CharacterId.SUCROSE,
+                firstStacks.get(0).getSourceCharacterId(),
+                "Long Night Radiance should retain owner attribution");
+
+        oath.onDamage(sim, plunge, 100.0, owner);
+        sim.advanceTime(0.999);
+        oath.onDamage(sim, plunge, 100.0, owner);
+        assertEquals(1, activeBuffCount(
+                        owner,
+                        BuffId.LONG_NIGHTS_OATH_RADIANCE_STACK,
+                        sim.getCurrentTime()),
+                "Long Night should enforce the 0.999-second Plunge CT");
+        sim.advanceTime(0.001 + 1e-9);
+        oath.onDamage(sim, plunge, 100.0, owner);
+        List<Buff> refreshedStacks = activeBuffs(
+                owner,
+                BuffId.LONG_NIGHTS_OATH_RADIANCE_STACK,
+                sim.getCurrentTime());
+        assertEquals(2, refreshedStacks.size(),
+                "Long Night Plunge should reactivate at one second");
+        for (Buff stack : refreshedStacks) {
+            assertClose(sim.getCurrentTime() + 6.0,
+                    stack.getExpirationTime(), EPS,
+                    "Long Night new gain should refresh shared expiry");
+        }
+        sim.advanceTime(5.999);
+        assertEquals(2, activeBuffCount(
+                        owner,
+                        BuffId.LONG_NIGHTS_OATH_RADIANCE_STACK,
+                        sim.getCurrentTime()),
+                "Long Night Radiance should remain at 5.999 seconds");
+        sim.advanceTime(0.001 + 1e-9);
+        assertEquals(0, activeBuffCount(
+                        owner,
+                        BuffId.LONG_NIGHTS_OATH_RADIANCE_STACK,
+                        sim.getCurrentTime()),
+                "Long Night Radiance should expire at exactly six seconds");
+        assertClose(0.25,
+                resolvedStat(
+                        sim, owner, StatType.PLUNGING_ATTACK_DMG_BONUS),
+                EPS,
+                "Long Night should retain only its fixed bonus after expiry");
+
+        model.artifact.LongNightsOath categoryOath =
+                new model.artifact.LongNightsOath();
+        TestCharacter categoryOwner = testCharacter(
+                Element.PHYSICAL, CharacterId.XINGQIU);
+        categoryOwner.setArtifacts(categoryOath);
+        CombatSimulator categorySim = simulatorWith(categoryOwner);
+        AttackAction charged = typedDamageHit(
+                "Long Night Charged fixture", ActionType.CHARGE, 1.0);
+        AttackAction skill = typedDamageHit(
+                "Long Night Skill fixture", ActionType.SKILL, 1.0);
+        categoryOath.onDamage(
+                categorySim, charged, 100.0, categoryOwner);
+        categoryOath.onDamage(
+                categorySim, skill, 100.0, categoryOwner);
+        categoryOath.onDamage(
+                categorySim, plunge, 100.0, categoryOwner);
+        assertEquals(5, activeBuffCount(
+                        categoryOwner,
+                        BuffId.LONG_NIGHTS_OATH_RADIANCE_STACK,
+                        categorySim.getCurrentTime()),
+                "Long Night categories should independently grant 2/2/1 stacks");
+        assertEquals(1, activeBuffCount(
+                        categoryOwner,
+                        BuffId.LONG_NIGHTS_OATH_CHARGED_COOLDOWN,
+                        categorySim.getCurrentTime()),
+                "Long Night Charged cooldown marker");
+        assertEquals(1, activeBuffCount(
+                        categoryOwner,
+                        BuffId.LONG_NIGHTS_OATH_SKILL_COOLDOWN,
+                        categorySim.getCurrentTime()),
+                "Long Night Skill cooldown marker");
+        assertEquals(1, activeBuffCount(
+                        categoryOwner,
+                        BuffId.LONG_NIGHTS_OATH_PLUNGE_COOLDOWN,
+                        categorySim.getCurrentTime()),
+                "Long Night Plunge cooldown marker");
+        assertClose(1.0,
+                resolvedStat(
+                        categorySim,
+                        categoryOwner,
+                        StatType.PLUNGING_ATTACK_DMG_BONUS),
+                EPS,
+                "Long Night five-stack Plunging bonus");
+
+        categorySim.advanceTime(1.0);
+        categoryOath.onDamage(
+                categorySim, charged, 100.0, categoryOwner);
+        List<Buff> cappedStacks = activeBuffs(
+                categoryOwner,
+                BuffId.LONG_NIGHTS_OATH_RADIANCE_STACK,
+                categorySim.getCurrentTime());
+        assertEquals(5, cappedStacks.size(),
+                "Long Night should cap at five Radiance stacks");
+        for (Buff stack : cappedStacks) {
+            assertClose(6.0, stack.getExpirationTime(), EPS,
+                    "Long Night at cap should not refresh without a new stack");
+        }
+
+        SimulatorSnapshot activeSnapshot = categorySim.saveSnapshot();
+        categoryOwner.removeBuff(BuffId.LONG_NIGHTS_OATH_RADIANCE_STACK);
+        categoryOwner.removeBuff(BuffId.LONG_NIGHTS_OATH_CHARGED_COOLDOWN);
+        categorySim.restoreSnapshot(activeSnapshot);
+        assertEquals(5, activeBuffCount(
+                        categoryOwner,
+                        BuffId.LONG_NIGHTS_OATH_RADIANCE_STACK,
+                        categorySim.getCurrentTime()),
+                "Snapshot should restore Long Night Radiance stacks");
+        assertEquals(1, activeBuffCount(
+                        categoryOwner,
+                        BuffId.LONG_NIGHTS_OATH_CHARGED_COOLDOWN,
+                        categorySim.getCurrentTime()),
+                "Snapshot should restore Long Night category cooldown");
+
+        model.artifact.LongNightsOath fallbackOath =
+                new model.artifact.LongNightsOath();
+        TestCharacter fallbackOwner = testCharacter(
+                Element.PHYSICAL, CharacterId.AMBER);
+        fallbackOwner.setArtifacts(fallbackOath);
+        CombatSimulator fallbackSim = simulatorWith(fallbackOwner);
+        AttackAction skillFlag = typedDamageHit(
+                "Long Night Skill flag fixture", ActionType.OTHER, 1.0);
+        skillFlag.setCountsAsSkillDmg(true);
+        fallbackOath.onDamage(
+                fallbackSim, skillFlag, 100.0, fallbackOwner);
+        assertEquals(2, activeBuffCount(
+                        fallbackOwner,
+                        BuffId.LONG_NIGHTS_OATH_RADIANCE_STACK,
+                        fallbackSim.getCurrentTime()),
+                "Long Night should honor Skill damage fallback metadata");
+
+        model.artifact.LongNightsOath offFieldOath =
+                new model.artifact.LongNightsOath();
+        TestCharacter offFieldOwner = testCharacter(
+                Element.PHYSICAL, CharacterId.SUCROSE);
+        offFieldOwner.setArtifacts(offFieldOath);
+        CombatSimulator offFieldSim = simulatorWith(offFieldOwner);
+        offFieldSim.addCharacter(testCharacter(
+                Element.PYRO, CharacterId.AMBER));
+        offFieldSim.setActiveCharacter(CharacterId.AMBER);
+        offFieldOath.onDamage(
+                offFieldSim, skill, 100.0, offFieldOwner);
+        assertEquals(2, activeBuffCount(
+                        offFieldOwner,
+                        BuffId.LONG_NIGHTS_OATH_RADIANCE_STACK,
+                        offFieldSim.getCurrentTime()),
+                "Long Night should trigger from owner damage while off field");
+
+        model.artifact.LongNightsOath rollbackOath =
+                new model.artifact.LongNightsOath();
+        TestCharacter rollbackOwner = testCharacter(Element.PHYSICAL);
+        rollbackOwner.setArtifacts(rollbackOath);
+        CombatSimulator rollbackSim = simulatorWith(rollbackOwner);
+        SimulatorSnapshot preTriggerSnapshot = rollbackSim.saveSnapshot();
+        rollbackOath.onDamage(
+                rollbackSim, charged, 100.0, rollbackOwner);
+        rollbackSim.restoreSnapshot(preTriggerSnapshot);
+        assertEquals(0, activeBuffCount(
+                        rollbackOwner,
+                        BuffId.LONG_NIGHTS_OATH_RADIANCE_STACK,
+                        rollbackSim.getCurrentTime()),
+                "Rollback should remove divergent Long Night stacks");
+
+        model.artifact.LongNightsOath rejected =
+                new model.artifact.LongNightsOath();
+        TestCharacter rejectedOwner = testCharacter(Element.PHYSICAL);
+        rejected.onDamage(
+                new CombatSimulator(), plunge, 100.0, rejectedOwner);
+        rejectedOwner.setArtifacts(rejected);
+        CombatSimulator rejectedSim = simulatorWith(rejectedOwner);
+        TestCharacter foreignOwner = testCharacter(
+                Element.PHYSICAL, CharacterId.XINGQIU);
+        rejected.onDamage(rejectedSim, null, 100.0, rejectedOwner);
+        rejected.onDamage(rejectedSim, plunge, 0.0, rejectedOwner);
+        rejected.onDamage(rejectedSim, plunge, -1.0, rejectedOwner);
+        rejected.onDamage(rejectedSim, plunge, Double.NaN, rejectedOwner);
+        rejected.onDamage(
+                rejectedSim,
+                typedDamageHit(
+                        "Long Night Normal fixture", ActionType.NORMAL, 1.0),
+                100.0,
+                rejectedOwner);
+        rejected.onDamage(rejectedSim, plunge, 100.0, foreignOwner);
+        rejected.onDamage(
+                new CombatSimulator(), plunge, 100.0, rejectedOwner);
+        assertEquals(0, activeBuffCount(
+                        rejectedOwner,
+                        BuffId.LONG_NIGHTS_OATH_RADIANCE_STACK,
+                        rejectedSim.getCurrentTime()),
+                "Invalid Long Night callbacks should remain inert");
+
+        boolean crossBindingRejected = false;
+        try {
+            rejected.initializeForSimulator(
+                    rejectedOwner, new CombatSimulator(), true);
+        } catch (IllegalStateException expected) {
+            crossBindingRejected = true;
+        }
+        assertTrue(crossBindingRejected,
+                "Long Night should reject cross-simulator reuse");
+
+        boolean nullStatsRejected = false;
+        try {
+            new model.artifact.LongNightsOath(null);
+        } catch (NullPointerException expected) {
+            nullStatsRejected = true;
+        }
+        assertTrue(nullStatsRejected,
+                "Long Night should reject null supplied stats");
     }
 
     private static void testAccuracyPhaseF_HuskCuriosityState() {
