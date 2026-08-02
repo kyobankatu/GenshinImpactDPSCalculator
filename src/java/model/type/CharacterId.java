@@ -31,6 +31,8 @@ public enum CharacterId {
     XINGQIU(8, "Xingqiu"),
     /** Kaeya (Cryo sword DPS and off-field Burst source). */
     KAEYA(9, "Kaeya"),
+    /** Amber (Pyro bow DPS with delayed Skill and fixed-area Burst). */
+    AMBER(10, "Amber"),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown");
 

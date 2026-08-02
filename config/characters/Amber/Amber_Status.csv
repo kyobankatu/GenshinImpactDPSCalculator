@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Amber,STATS,Base HP,90,9461,0
+Amber,STATS,Base ATK,90,223,0
+Amber,STATS,Base DEF,90,601,0
+Amber,STATS,Ascension ATK,90,0.24,0
+Amber,STATS,Energy Cost,90,40,0
+Amber,STATS,Constellation,6,6,0
+Amber,CONFIG,Character Level,90,90,0
+Amber,CONFIG,Normal Level,9,9,0
+Amber,CONFIG,Skill Level,12,12,0
+Amber,CONFIG,Burst Level,12,12,0

@@ -121,6 +121,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_TargetAuraWeaponMetadata();
         testAccuracyPhaseF_StaticActionBonusWeaponMetadata();
         testAccuracyPhaseF_KaeyaCharacterContract();
+        testAccuracyPhaseF_AmberCharacterContract();
         testAccuracyPhaseF_DendroResonanceReactionEmContract();
         testAccuracyPhaseF_CryoResonanceConditionalCritContract();
         testAccuracyPhaseF_ElectroResonanceTypedTriggerContract();
@@ -5241,6 +5242,158 @@ public class ReactionRegressionTest {
                 "White Tassel should reject refinement six");
     }
 
+    private static void testAccuracyPhaseF_AmberCharacterContract() {
+        assertEquals(CharacterId.AMBER, CharacterId.fromName("Amber"),
+                "Amber display name should resolve to a typed id");
+        assertEquals(CharacterId.AMBER, CharacterId.fromNumericId(10),
+                "Amber numeric id should round trip");
+
+        model.character.Amber configured = new model.character.Amber(
+                new TestWeapon(), blankArtifact());
+        assertClose(9461.0, configured.getBaseStats().get(StatType.BASE_HP), EPS,
+                "Amber Lv90 base HP");
+        assertClose(223.0, configured.getBaseStats().get(StatType.BASE_ATK), EPS,
+                "Amber Lv90 base ATK");
+        assertClose(601.0, configured.getBaseStats().get(StatType.BASE_DEF), EPS,
+                "Amber Lv90 base DEF");
+        assertClose(0.24, configured.getBaseStats().get(StatType.ATK_PERCENT), EPS,
+                "Amber Lv90 ascension ATK");
+
+        RecordingDamageWeapon c0ChargedWeapon = new RecordingDamageWeapon("Amber Charged");
+        model.character.Amber c0ChargedAmber = new model.character.Amber(
+                c0ChargedWeapon, blankArtifact(), amberTalentData(0));
+        CombatSimulator c0ChargedSim = simulatorWithExistingCharacter(c0ChargedAmber);
+        c0ChargedSim.performAction(
+                CharacterId.AMBER, CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        assertEquals(1, c0ChargedWeapon.actions.size(),
+                "C0 Amber should fire one fully Charged arrow");
+        AttackAction c0Charged = c0ChargedWeapon.actions.get(0);
+        assertEquals(ActionType.CHARGE, c0Charged.getActionType(),
+                "Amber aimed shot should retain Charged typing");
+        assertEquals(ICDType.Standard, c0Charged.getICDType(),
+                "Amber aimed shot should use shared Charged ICD");
+        assertClose(2.0, c0Charged.getGaugeUnits(), EPS,
+                "Amber fully Charged aimed shot should apply 2U Pyro");
+
+        RecordingDamageWeapon c1ChargedWeapon = new RecordingDamageWeapon("Amber Charged");
+        model.character.Amber c1ChargedAmber = new model.character.Amber(
+                c1ChargedWeapon, blankArtifact(), amberTalentData(1));
+        CombatSimulator c1ChargedSim = simulatorWithExistingCharacter(c1ChargedAmber);
+        c1ChargedSim.performAction(
+                CharacterId.AMBER, CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        assertEquals(2, c1ChargedWeapon.actions.size(),
+                "C1 Amber should fire a second fully Charged arrow");
+        assertClose(c1ChargedWeapon.actions.get(0).getDamagePercent() * 0.20,
+                c1ChargedWeapon.actions.get(1).getDamagePercent(), EPS,
+                "C1 second arrow should deal 20% of the primary multiplier");
+        assertEquals(ICDTag.ChargedAttack, c1ChargedWeapon.actions.get(1).getICDTag(),
+                "C1 second arrow should share Charged ICD");
+
+        RecordingDamageWeapon c0SkillWeapon = new RecordingDamageWeapon("Baron Bunny Explosion");
+        model.character.Amber c0SkillAmber = new model.character.Amber(
+                c0SkillWeapon, blankArtifact(), amberTalentData(0));
+        CombatSimulator c0SkillSim = simulatorWithExistingCharacter(c0SkillAmber);
+        c0SkillAmber.restoreCurrentEnergy(0.0);
+        c0SkillSim.performAction(
+                CharacterId.AMBER, CharacterActionRequest.of(CharacterActionKey.SKILL));
+        assertEquals(0, c0SkillWeapon.actions.size(),
+                "Baron Bunny should not explode during its cast animation");
+        assertClose(0.0, c0SkillAmber.getTotalParticleEnergy(), EPS,
+                "Baron Bunny should not generate particles before exploding");
+        c0SkillSim.advanceTime(8.0 - c0SkillSim.getCurrentTime() - 0.001);
+        assertEquals(0, c0SkillWeapon.actions.size(),
+                "Baron Bunny should remain pending immediately before eight seconds");
+        c0SkillSim.advanceTime(0.001);
+        assertEquals(1, c0SkillWeapon.actions.size(),
+                "Baron Bunny should explode exactly once at eight seconds");
+        AttackAction c0Explosion = c0SkillWeapon.actions.get(0);
+        assertTrue(c0Explosion.isUseSnapshot(), "Baron Bunny should use its cast snapshot");
+        assertEquals(ICDType.None, c0Explosion.getICDType(),
+                "Baron Bunny should have no elemental ICD");
+        assertClose(2.0, c0Explosion.getGaugeUnits(), EPS,
+                "Baron Bunny should apply 2U Pyro");
+        assertClose(2.0944, c0Explosion.getDamagePercent(), EPS,
+                "C0 Baron Bunny should use talent-9 damage");
+        assertClose(12.0, c0SkillAmber.getTotalParticleEnergy(), EPS,
+                "Baron Bunny should generate four on-field Pyro particles");
+
+        model.character.Amber c0CooldownAmber = new model.character.Amber(
+                new TestWeapon(), blankArtifact(), amberTalentData(0));
+        c0CooldownAmber.markSkillUsed(0.0);
+        assertTrue(!c0CooldownAmber.canSkill(14.999),
+                "C0 Baron Bunny should remain unavailable before fifteen seconds");
+        assertTrue(c0CooldownAmber.canSkill(15.0),
+                "C0 Baron Bunny should return at fifteen seconds");
+
+        model.character.Amber c4CooldownAmber = new model.character.Amber(
+                new TestWeapon(), blankArtifact(), amberTalentData(4));
+        c4CooldownAmber.markSkillUsed(0.0);
+        assertTrue(c4CooldownAmber.canSkill(0.0),
+                "C4 Amber should retain a second Baron Bunny charge");
+        c4CooldownAmber.markSkillUsed(0.0);
+        assertTrue(!c4CooldownAmber.canSkill(11.999),
+                "C4 Baron Bunny charges should remain empty before twelve seconds");
+        assertTrue(c4CooldownAmber.canSkill(12.0),
+                "C4 Baron Bunny should restore a charge at twelve seconds");
+
+        RecordingDamageWeapon c5SkillWeapon = new RecordingDamageWeapon("Baron Bunny Explosion");
+        model.character.Amber c5SkillAmber = new model.character.Amber(
+                c5SkillWeapon, blankArtifact(), amberTalentData(5));
+        CombatSimulator c5SkillSim = simulatorWithExistingCharacter(c5SkillAmber);
+        c5SkillSim.performAction(
+                CharacterId.AMBER, CharacterActionRequest.of(CharacterActionKey.SKILL));
+        c5SkillSim.advanceTime(8.0);
+        assertClose(2.4640, c5SkillWeapon.actions.get(0).getDamagePercent(), EPS,
+                "C5 should raise Baron Bunny to its level-12 multiplier");
+
+        RecordingDamageWeapon c0BurstWeapon = new RecordingDamageWeapon("Fiery Rain Wave");
+        model.character.Amber c0BurstAmber = new model.character.Amber(
+                c0BurstWeapon, blankArtifact(), amberTalentData(0));
+        CombatSimulator c0BurstSim = simulatorWithExistingCharacter(c0BurstAmber);
+        c0BurstAmber.restoreCurrentEnergy(40.0);
+        c0BurstSim.performAction(
+                CharacterId.AMBER, CharacterActionRequest.of(CharacterActionKey.BURST));
+        assertClose(0.0, c0BurstAmber.getCurrentEnergy(), EPS,
+                "Fiery Rain should consume 40 Energy");
+        c0BurstSim.advanceTime(2.0);
+        assertEquals(18, c0BurstWeapon.actions.size(),
+                "A centered enemy should receive all eighteen Fiery Rain waves");
+        AttackAction c0Wave = c0BurstWeapon.actions.get(0);
+        assertTrue(c0Wave.isUseSnapshot(), "Fiery Rain should use its cast snapshot");
+        assertEquals(ICDType.Standard, c0Wave.getICDType(),
+                "Fiery Rain should use standard ICD");
+        assertClose(1.0, c0Wave.getGaugeUnits(), EPS,
+                "Fiery Rain should apply 1U on eligible waves");
+        assertClose(0.10,
+                c0Wave.getExtraBonuses().getOrDefault(StatType.BURST_CRIT_RATE, 0.0), EPS,
+                "Fiery Rain should receive A1 CRIT Rate");
+        assertClose(0.4774, c0Wave.getDamagePercent(), EPS,
+                "C0 Fiery Rain should use talent-9 damage");
+
+        RecordingDamageWeapon c6BurstWeapon = new RecordingDamageWeapon("Fiery Rain Wave");
+        model.character.Amber c6BurstAmber = new model.character.Amber(
+                c6BurstWeapon, blankArtifact(), amberTalentData(6));
+        TestCharacter c6BurstAlly = testCharacter(Element.CRYO, CharacterId.KAEYA);
+        CombatSimulator c6BurstSim = simulatorWithExistingCharacter(c6BurstAmber);
+        c6BurstSim.addCharacter(c6BurstAlly);
+        c6BurstAmber.restoreCurrentEnergy(40.0);
+        double c6BurstStart = c6BurstSim.getCurrentTime();
+        c6BurstSim.performAction(
+                CharacterId.AMBER, CharacterActionRequest.of(CharacterActionKey.BURST));
+        assertClose(0.39, resolvedStat(c6BurstSim, c6BurstAmber, StatType.ATK_PERCENT), EPS,
+                "C6 Wildfire should add 15% ATK to Amber");
+        assertClose(0.15, resolvedStat(c6BurstSim, c6BurstAlly, StatType.ATK_PERCENT), EPS,
+                "C6 Wildfire should add 15% ATK to allies");
+        assertClose(0.5617, c6BurstWeapon.actions.get(0).getDamagePercent(), EPS,
+                "C3 should raise Fiery Rain to its level-12 multiplier");
+        c6BurstSim.advanceTime(c6BurstStart + 9.999 - c6BurstSim.getCurrentTime());
+        assertClose(0.15, resolvedStat(c6BurstSim, c6BurstAlly, StatType.ATK_PERCENT), EPS,
+                "C6 Wildfire should remain active immediately before ten seconds");
+        c6BurstSim.advanceTime(0.001);
+        assertClose(0.0, resolvedStat(c6BurstSim, c6BurstAlly, StatType.ATK_PERCENT), EPS,
+                "C6 Wildfire should expire at exactly ten seconds");
+    }
+
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
         ReactionResult.Kind[] primaryKinds = {
                 ReactionResult.Kind.BURNING,
@@ -6472,6 +6625,15 @@ public class ReactionRegressionTest {
     private static mechanics.data.TalentDataSource kaeyaTalentData(int constellation) {
         return (characterName, key, defaultValue) -> {
             if ("Kaeya".equals(characterName) && "Constellation".equals(key)) {
+                return constellation;
+            }
+            return defaultValue;
+        };
+    }
+
+    private static mechanics.data.TalentDataSource amberTalentData(int constellation) {
+        return (characterName, key, defaultValue) -> {
+            if ("Amber".equals(characterName) && "Constellation".equals(key)) {
                 return constellation;
             }
             return defaultValue;
