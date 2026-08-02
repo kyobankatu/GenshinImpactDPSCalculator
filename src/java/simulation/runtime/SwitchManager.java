@@ -69,6 +69,11 @@ public class SwitchManager {
      * @param id target character id
      */
     public void switchCharacter(CharacterId id) {
+        Character target = party.getMember(id);
+        if (target == null) {
+            return;
+        }
+
         double currentTime = sim.getCurrentTime();
         double cooldownEnd = lastSwapTime + SWAP_COOLDOWN;
         if (currentTime < cooldownEnd) {
@@ -78,17 +83,11 @@ public class SwitchManager {
 
         Character oldChar = party.getActiveCharacter();
         String oldName = oldChar != null ? oldChar.getName() : "?";
-        Character target = party.getMember(id);
-        if (target == null) {
-            return;
-        }
         if (oldChar != null) {
             if (oldChar instanceof SwitchAwareCharacter) {
                 ((SwitchAwareCharacter) oldChar).onSwitchOut(sim);
             }
-            if (oldChar.getWeapon() instanceof SwitchAwareWeaponEffect) {
-                ((SwitchAwareWeaponEffect) oldChar.getWeapon()).onSwitchOut(oldChar, sim);
-            }
+            notifyWeaponSwitchOut(oldChar, target);
             notifyArtifactsSwitchOut(oldChar);
         }
 
@@ -104,6 +103,7 @@ public class SwitchManager {
 
         Character newChar = party.getActiveCharacter();
         if (newChar != null) {
+            notifyWeaponSwitchIn(newChar);
             notifyArtifactsSwitchIn(newChar);
         }
 
@@ -117,6 +117,29 @@ public class SwitchManager {
      */
     public void setActiveCharacter(CharacterId id) {
         party.switchCharacter(id);
+    }
+
+    /**
+     * Notifies the outgoing character's switch-aware weapon before party mutation.
+     *
+     * @param character outgoing active character
+     * @param incoming resolved incoming party member
+     */
+    private void notifyWeaponSwitchOut(Character character, Character incoming) {
+        if (character.getWeapon() instanceof SwitchAwareWeaponEffect) {
+            ((SwitchAwareWeaponEffect) character.getWeapon()).onSwitchOut(character, incoming, sim);
+        }
+    }
+
+    /**
+     * Notifies the incoming character's switch-aware weapon after party mutation.
+     *
+     * @param character incoming character that is already active
+     */
+    private void notifyWeaponSwitchIn(Character character) {
+        if (character.getWeapon() instanceof SwitchAwareWeaponEffect) {
+            ((SwitchAwareWeaponEffect) character.getWeapon()).onSwitchIn(character, sim);
+        }
     }
 
     /**
