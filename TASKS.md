@@ -13672,10 +13672,9 @@ Completion evidence:
 
 ## Implementation Order: Legacy Reaction Characters and Stateful Weapons Wave
 
-Status: In progress. Primary owns typed identity/buff reservations and the
-weapon batch; Venti and Yoimiya start in physical branch-isolated worktrees,
-then Yanfei reuses the first available lane. RL, generated docs, and Deferred
-Systems remain excluded.
+Status: Complete. Typed identities, four stateful weapons, Venti, Yoimiya, and
+Yanfei are integrated on `dev_0`; RL, generated docs, and Deferred Systems
+remained excluded.
 
 Evidence:
 
@@ -13698,7 +13697,7 @@ Out of scope:
   outcomes, stamina, incoming player damage, enemy defeats, shields, Hexerei,
   RL, parties, and generated docs.
 
-### Phase 1: Reserve Character and Buff Identities
+### Phase 1: Reserve Character and Buff Identities - Done
 
 Target files:
 
@@ -13723,7 +13722,7 @@ Verification:
 - `./gradlew LegacyCharacterIdentityRegressionTest ReactionRegressionTest build`
 - `python scripts/preflight.py --run`
 
-### Phase 2: Four Stateful Weapons
+### Phase 2: Four Stateful Weapons - Done
 
 Target files:
 
@@ -13761,7 +13760,7 @@ Verification:
 - `./gradlew ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Venti Offensive Vertical Slice
+### Phase 3: Venti Offensive Vertical Slice - Done
 
 Target files:
 
@@ -13792,7 +13791,7 @@ Verification:
 - `./gradlew ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
 
-### Phase 4: Yoimiya Offensive Vertical Slice
+### Phase 4: Yoimiya Offensive Vertical Slice - Done
 
 Target files:
 
@@ -13823,7 +13822,7 @@ Verification:
 - `./gradlew ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
 
-### Phase 5: Yanfei Offensive Vertical Slice
+### Phase 5: Yanfei Offensive Vertical Slice - Done
 
 Target files:
 
@@ -13853,6 +13852,24 @@ Verification:
 - `./gradlew YanfeiRegressionTest PartyCatalogRegressionTest`
 - `./gradlew ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Stable IDs 18-20 and typed buff identities support Venti, Yoimiya, and
+  Yanfei without display-string dispatch or prior-ID movement.
+- Fruitful Hook, Serpent Spine, Tulaytullah's Remembrance, and Fang of the
+  Mountain King cover R1-R5 metadata, exact stack windows, switch behavior,
+  and snapshot-safe mutable state; incoming player damage remains excluded.
+- Venti, Yoimiya, and Yanfei cover sourced single-target offensive actions,
+  projectiles, delayed particle pickup, Energy, ICD/gauge, cooldowns,
+  owner-local periodic state, and representable constellations.
+- Independent review corrections added Venti bow release/travel timing,
+  100-frame particle travel for all three characters, Tulaytullah's persistent
+  hit cooldown, and Yoimiya's standard Burst-initial ICD. Action-specific
+  cancel windows remain outside the current request payload contract.
+- All seven focused content regressions, PartyCatalogRegressionTest,
+  ReactionRegressionTest, build, Javadoc, and executable preflight pass on the
+  combined tree with no staged-artifact leakage.
 
 ## Implementation Order: Derived-Damage Weapons and Summon Characters Wave
 

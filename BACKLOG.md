@@ -3414,7 +3414,7 @@ experiment record.
 
 ### B-161 — Legacy reaction characters and stateful weapons wave
 
-- **Status:** in-progress
+- **Status:** complete
 - **Source:** explicit broad content-expansion request and post-B-159 normalized
   character/weapon asset inventory
 - **Scope/risk:** Venti, Yoimiya, Yanfei, Fruitful Hook, Serpent Spine,
@@ -3427,6 +3427,10 @@ experiment record.
   docs remain excluded.
 - **Proof/plan:** five-phase `TASKS.md` Legacy Reaction Characters and Stateful
   Weapons Wave with focused regressions and combined local gates.
+- **Completion:** commits `ab0aede` through `b85f792` add the typed baseline,
+  four weapons, three character slices, and independent-review timing fixes;
+  all focused, catalog, reaction, build, Javadoc, and executable preflight
+  gates pass on the combined tree.
 
 ### B-162 — Follow-on legacy character inventory
 
