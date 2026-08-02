@@ -5759,6 +5759,40 @@ public class ReactionRegressionTest {
                 resolvedStat(cappedSim, cappedOwner, StatType.BURST_DMG_BONUS), EPS,
                 "R1 Akuoumaru should cap Burst damage at 40%");
 
+        model.weapon.MouunsMoon mouunsMoon = new model.weapon.MouunsMoon();
+        assertEquals("Mouun's Moon", mouunsMoon.getName(), "Mouun's Moon display name");
+        assertClose(565.0, mouunsMoon.getBaseAtk(), EPS, "Mouun's Moon base ATK");
+        assertClose(0.276, mouunsMoon.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Mouun's Moon ATK substat");
+        assertEquals(model.type.WeaponType.BOW, mouunsMoon.getWeaponType(),
+                "Mouun's Moon weapon type");
+        assertEquals(5, mouunsMoon.getRefinement(), "Mouun's Moon default refinement");
+
+        TestCharacter mouunOwner = testCharacter(Element.HYDRO);
+        mouunOwner.setWeapon(mouunsMoon);
+        CombatSimulator mouunSim = simulatorWith(mouunOwner);
+        assertClose(0.144,
+                resolvedStat(mouunSim, mouunOwner, StatType.BURST_DMG_BONUS), EPS,
+                "R5 Mouun's Moon should inherit Watatsumi Wavewalker");
+
+        boolean lowMouunRefinementRejected = false;
+        try {
+            new model.weapon.MouunsMoon(0);
+        } catch (IllegalArgumentException expected) {
+            lowMouunRefinementRejected = true;
+        }
+        assertTrue(lowMouunRefinementRejected,
+                "Mouun's Moon should reject refinement zero");
+
+        boolean highMouunRefinementRejected = false;
+        try {
+            new model.weapon.MouunsMoon(6);
+        } catch (IllegalArgumentException expected) {
+            highMouunRefinementRejected = true;
+        }
+        assertTrue(highMouunRefinementRejected,
+                "Mouun's Moon should reject refinement six");
+
         boolean lowRefinementRejected = false;
         try {
             new model.weapon.Akuoumaru(0);
