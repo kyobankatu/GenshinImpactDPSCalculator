@@ -27,8 +27,8 @@ The current autonomous session is simulator-only. Python RL training and the
 Java RL bridge are excluded; the retained NCCL/DDP plan below is paused until a
 future explicit user request.
 
-The prior simulator content campaigns, including the Amber character vertical
-slice, are complete; RL and generated docs remain excluded.
+The prior simulator content campaigns are complete. The legacy weapon
+refinement campaign is active; RL and generated docs remain excluded.
 
 The B-058 Burning fuel correction is complete. It replaces the fixed
 two-second approximation with typed Dendro-fuel decay and refresh ownership
@@ -12966,4 +12966,55 @@ Verification:
 - `./gradlew ReactionRegressionTest`
 - `./gradlew build`
 - `./gradlew javadoc`
+- `python scripts/preflight.py`
+
+## Implementation Order: Legacy Weapon Refinement Campaign
+
+Status: In progress. Existing fixed-refinement weapons gain R1-R5 selection
+without changing their current no-argument behavior.
+
+Scope:
+
+- Add refinement-aware Alley Flash, Deathmatch, and The Catch constructors,
+  exact sourced passive scaling, exposed refinement rank, and regressions.
+- Preserve Alley Flash/Deathmatch default R1 and The Catch default R5.
+
+Out of scope for this pass:
+
+- Incoming-damage disable state for Alley Flash, dynamic enemy-count discovery,
+  off-field Deathmatch transition delay, formulas, characters, RL, and docs.
+
+### Phase 1: Complete Existing Weapon Refinement Contracts
+
+Target files:
+
+- `src/java/model/weapon/AlleyFlash.java`
+- `src/java/model/weapon/Deathmatch.java`
+- `src/java/model/weapon/TheCatch.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+| Unit | Compatibility default | Focused verification | Status |
+|---|---|---|---|
+| Alley Flash | R1 | 12-24% all-DMG, metadata, R1/R5, invalid rank | Ready |
+| Deathmatch | R1 | single/multi ATK/DEF R1/R5, invalid rank | Ready |
+| The Catch | R5 | Burst DMG/CRIT R1/R5, metadata, invalid rank | Ready |
+
+Acceptance criteria:
+
+- No-argument constructors retain exact current output and source compatibility.
+- R1-R5 values match KQM; refinement 0/6 fails before mutable state is exposed.
+- Deathmatch changes only its selected enemy-count branch, Alley Flash remains
+  always active under no incoming damage, and The Catch modifies Burst only.
+
+Test cases to add or update:
+
+- Compatibility/static: existing defaults, names, Lv. 90 stats, and categories.
+- Boundary: R1/R5 for every passive branch and unchanged unrelated stats.
+- Abnormal: refinement 0/6 for every weapon.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc` at the batch boundary
 - `python scripts/preflight.py`
