@@ -140,6 +140,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_MoonsignEmAndBloomWeapons();
         testAccuracyPhaseF_CatalystDualWindowWeapons();
         testAccuracyPhaseF_FruitOfFulfillment();
+        testAccuracyPhaseF_ScionOfTheBlazingSun();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -8843,6 +8844,136 @@ public class ReactionRegressionTest {
         }
         assertTrue(highFruitRefinementRejected,
                 "Fruit should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_ScionOfTheBlazingSun() {
+        model.weapon.ScionOfTheBlazingSun scion =
+                new model.weapon.ScionOfTheBlazingSun();
+        assertEquals("Scion of the Blazing Sun", scion.getName(),
+                "Scion display name");
+        assertClose(565.0, scion.getBaseAtk(), EPS,
+                "Scion base ATK");
+        assertClose(0.184, scion.getStats().get(StatType.CRIT_RATE), EPS,
+                "Scion CRIT Rate");
+        assertEquals(model.type.WeaponType.BOW, scion.getWeaponType(),
+                "Scion weapon type");
+        assertEquals(5, scion.getRefinement(),
+                "Scion default refinement");
+
+        TestCharacter scionOwner = testCharacter(
+                Element.PYRO, CharacterId.SUCROSE);
+        scionOwner.setWeapon(scion);
+        CombatSimulator scionSim = simulatorWith(scionOwner);
+        AttackAction zeroCharge = typedDamageHit(
+                "Zero Charged", ActionType.CHARGE, 0.0);
+        AttackAction skillHit = typedDamageHit(
+                "Skill", ActionType.SKILL, 1.0);
+        AttackAction chargedHit = typedDamageHit(
+                "Charged", ActionType.CHARGE, 1.0);
+        AttackAction generatedProc = typedDamageHit(
+                "Scion of the Blazing Sun Sunfire Arrow",
+                ActionType.OTHER,
+                1.2);
+        TestCharacter foreignUser = testCharacter(
+                Element.CRYO, CharacterId.KAEYA);
+
+        scion.onDamage(scionOwner, zeroCharge, 0.0, scionSim);
+        scion.onDamage(scionOwner, skillHit, 0.0, scionSim);
+        scion.onDamage(foreignUser, chargedHit, 0.0, scionSim);
+        assertClose(0.0, scionSim.getTotalDamage(), EPS,
+                "Zero, wrong-type, and foreign hits should not activate Scion");
+        assertClose(0.0,
+                resolvedStat(scionSim, scionOwner,
+                        StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "Rejected Scion hits should not open Heartsearer");
+
+        scion.onDamage(scionOwner, chargedHit, 0.0, scionSim);
+        double firstProcDamage = scionSim.getTotalDamage();
+        assertTrue(firstProcDamage > 0.0,
+                "Scion should resolve its Physical proc immediately");
+        assertClose(0.56,
+                resolvedStat(scionSim, scionOwner,
+                        StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "R5 Scion Heartsearer Charged bonus");
+        scion.onDamage(scionOwner, generatedProc, 0.0, scionSim);
+        assertClose(firstProcDamage, scionSim.getTotalDamage(), EPS,
+                "Scion's generated proc should not recurse");
+
+        scionSim.advanceTime(10.0 - 1e-6);
+        scion.onDamage(
+                scionOwner, chargedHit, scionSim.getCurrentTime(), scionSim);
+        assertClose(firstProcDamage, scionSim.getTotalDamage(), EPS,
+                "Scion should remain on cooldown before ten seconds");
+        assertClose(0.56,
+                resolvedStat(scionSim, scionOwner,
+                        StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "Heartsearer should remain active before ten seconds");
+        scionSim.advanceTime(1e-6 + 1e-9);
+        assertClose(0.0,
+                resolvedStat(scionSim, scionOwner,
+                        StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "Heartsearer should expire at exactly ten seconds");
+        scion.onDamage(
+                scionOwner, chargedHit, scionSim.getCurrentTime(), scionSim);
+        assertClose(firstProcDamage * 2.0, scionSim.getTotalDamage(), EPS,
+                "Scion should reactivate at exact ten-second CT");
+        assertClose(0.56,
+                resolvedStat(scionSim, scionOwner,
+                        StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "Exact-CT Scion activation should refresh Heartsearer");
+
+        scionSim.addCharacter(foreignUser);
+        scionSim.setActiveCharacter(CharacterId.KAEYA);
+        scionSim.advanceTime(10.0);
+        scion.onDamage(
+                scionOwner, chargedHit, scionSim.getCurrentTime(), scionSim);
+        assertClose(firstProcDamage * 2.0, scionSim.getTotalDamage(), EPS,
+                "Off-field Charged hits should not activate Scion");
+        assertClose(0.0,
+                resolvedStat(scionSim, scionOwner,
+                        StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "Expired Heartsearer should not refresh off-field");
+
+        model.weapon.ScionOfTheBlazingSun r1Scion =
+                new model.weapon.ScionOfTheBlazingSun(1);
+        TestCharacter r1ScionOwner = testCharacter(
+                Element.PYRO, CharacterId.SUCROSE);
+        r1ScionOwner.setWeapon(r1Scion);
+        CombatSimulator r1ScionSim = simulatorWith(r1ScionOwner);
+        r1Scion.onDamage(r1ScionOwner, chargedHit, 0.0, r1ScionSim);
+        assertClose(firstProcDamage * 0.5, r1ScionSim.getTotalDamage(), EPS,
+                "R1 Scion proc should use 60-percent ATK");
+        assertClose(0.28,
+                resolvedStat(r1ScionSim, r1ScionOwner,
+                        StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "R1 Scion Heartsearer Charged bonus");
+
+        boolean scionReuseRejected = false;
+        try {
+            scion.initializeForSimulator(scionOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            scionReuseRejected = true;
+        }
+        assertTrue(scionReuseRejected,
+                "Scion should reject cross-simulator reuse");
+
+        boolean lowScionRefinementRejected = false;
+        try {
+            new model.weapon.ScionOfTheBlazingSun(0);
+        } catch (IllegalArgumentException expected) {
+            lowScionRefinementRejected = true;
+        }
+        assertTrue(lowScionRefinementRejected,
+                "Scion should reject refinement zero");
+
+        boolean highScionRefinementRejected = false;
+        try {
+            new model.weapon.ScionOfTheBlazingSun(6);
+        } catch (IllegalArgumentException expected) {
+            highScionRefinementRejected = true;
+        }
+        assertTrue(highScionRefinementRejected,
+                "Scion should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {
