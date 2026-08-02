@@ -2103,10 +2103,12 @@ experiment record.
 
 ### B-078 — Static action-bonus weapon coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** The Stringless, Rust, and White Tassel; RL excluded
 - **Value/risk:** exact static mappings onto existing action damage stats with
   no event, formula, or target-state changes
 - **Evidence boundary:** KQM TCL Lv. 90 metadata and R1-R5 passive values;
   projectile travel and weak-point weapons remain outside this batch
 - **Plan:** `TASKS.md` Static Action-Bonus Weapon Campaign
+- **Completion:** `e65e673`, `31fd61e`, and `b814dd2` add all three weapons with
+  action isolation, refinement boundaries, build, Javadoc, and leak gates passing

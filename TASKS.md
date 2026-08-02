@@ -27,8 +27,8 @@ The current autonomous session is simulator-only. Python RL training and the
 Java RL bridge are excluded; the retained NCCL/DDP plan below is paused until a
 future explicit user request.
 
-The prior simulator content campaigns are complete. The static action-bonus
-weapon campaign is active; RL and generated docs remain excluded.
+The prior simulator content campaigns, including static action-bonus weapons,
+are complete; RL and generated docs remain excluded.
 
 The B-058 Burning fuel correction is complete. It replaces the fixed
 two-second approximation with typed Dendro-fuel decay and refresh ownership
@@ -12838,8 +12838,8 @@ Verification:
 
 ## Implementation Order: Static Action-Bonus Weapon Campaign
 
-Status: In progress. Three independently revertible weapons will map sourced
-passives directly onto existing action-specific damage stats.
+Status: Complete. Three independently revertible weapons map sourced passives
+directly onto existing action-specific damage stats.
 
 Scope:
 
@@ -12853,7 +12853,7 @@ Out of scope for this pass:
 - Projectile travel, weak points, attack speed, new action categories, formula
   changes, characters, parties, RL, and generated docs.
 
-### Phase 1: Add Static Action-Bonus Weapons
+### Phase 1: Add Static Action-Bonus Weapons - Done
 
 Target files:
 
@@ -12864,9 +12864,18 @@ Target files:
 
 | Unit | Passive | Focused verification | Status |
 |---|---|---|---|
-| The Stringless | Skill/Burst +24-48% | 510 ATK, 165 EM, bow, R1/R5 | Ready |
-| Rust | Normal +40-80%, Charged -10% | 510 ATK, 41.3% ATK, bow, R1/R5 | Ready |
-| White Tassel | Normal +24-48% | 401 ATK, 23.4% CR, polearm, R1/R5 | Ready |
+| The Stringless | Skill/Burst +24-48% | 510 ATK, 165 EM, bow, R1/R5 | Done (`e65e673`) |
+| Rust | Normal +40-80%, Charged -10% | 510 ATK, 41.3% ATK, bow, R1/R5 | Done (`31fd61e`) |
+| White Tassel | Normal +24-48% | 401 ATK, 23.4% CR, polearm, R1/R5 | Done (`b814dd2`) |
+
+Completion evidence:
+
+- Each weapon passes sourced R1/R5 action bonuses, Lv. 90 metadata, typed
+  category, unrelated-action non-interference, and refinement 0/6 rejection.
+- Rust preserves the additive -10% Charged damage modifier at both refinement
+  boundaries while only its Normal bonus scales.
+- Every unit passes reaction regression, build, and preflight; the final public
+  API boundary passes Javadoc with no generated artifact staged.
 
 Acceptance criteria:
 
