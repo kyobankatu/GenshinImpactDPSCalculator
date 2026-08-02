@@ -2048,3 +2048,5 @@ experiment record.
 - **Evidence boundary:** canonical Lv. 90 stats and R1-R5 Windfall values must be
   recorded; no unsupported enemy or incoming-damage behavior is required
 - **Plan:** `TASKS.md` Favonius Weapon Family Content Campaign
+- **Checkpoint 1:** shared Windfall, Codex compatibility, Sword, Greatsword, and
+  Lance are verified and pushed; Warbow remains ready

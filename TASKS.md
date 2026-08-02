@@ -27,6 +27,10 @@ The current autonomous session is simulator-only. Python RL training and the
 Java RL bridge are excluded; the retained NCCL/DDP plan below is paused until a
 future explicit user request.
 
+The Favonius content campaign is active. Shared R1-R5 Windfall behavior,
+Favonius Codex compatibility, Favonius Sword, Favonius Greatsword, and Favonius
+Lance are complete; Favonius Warbow is next.
+
 The B-058 Burning fuel correction is complete. It replaces the fixed
 two-second approximation with typed Dendro-fuel decay and refresh ownership
 while retaining the repository's single-target boundary.
@@ -12498,11 +12502,20 @@ Tasks:
 
 | Unit | Prerequisite | Focused verification | Status |
 |---|---|---|---|
-| Shared Windfall + Favonius Codex | Existing damage hook and energy distributor | Codex replay, null/refinement, R1/R5 cooldown | In progress |
-| Favonius Sword | Shared Windfall | Lv. 90 stats, sword type, R1/R5 trigger | Pending |
-| Favonius Greatsword | Shared Windfall | Lv. 90 stats, claymore type, inherited trigger | Pending |
-| Favonius Lance | Shared Windfall | Lv. 90 stats, polearm type, inherited trigger | Pending |
+| Shared Windfall + Favonius Codex | Existing damage hook and energy distributor | Codex replay, null/refinement, R1/R5 cooldown | Done (`0b1bbd2`) |
+| Favonius Sword | Shared Windfall | Lv. 90 stats, sword type, R1/R5 trigger | Done (`0b5167a`) |
+| Favonius Greatsword | Shared Windfall | Lv. 90 stats, claymore type, inherited trigger | Done (`63f5802`) |
+| Favonius Lance | Shared Windfall | Lv. 90 stats, polearm type, inherited trigger | Done (`5a4ef84`) |
 | Favonius Warbow | Shared Windfall | Lv. 90 stats, bow type, inherited trigger | Pending |
+
+Checkpoint 1 evidence:
+
+- Shared refinement validation covers ranks 1-5, rejects 0/6 and null draws,
+  and preserves deterministic R5 Codex replay.
+- R1 equality/failure, success, pre-12-second suppression, and exact cooldown
+  expiry pass alongside inherited Windfall checks for all three new weapons.
+- `./gradlew ReactionRegressionTest`, `./gradlew build`, and explicit preflight
+  pass for every implementation commit; shared public Javadoc also passes.
 
 Acceptance criteria:
 
