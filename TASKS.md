@@ -12440,3 +12440,91 @@ Completion evidence:
   Shatter and warning/error/failed-action/insufficient-energy matches.
 - README documents damage-only sequence behavior. The tracked generated report
   was restored and no generated output is staged.
+
+## Implementation Order: Favonius Weapon Family Content Campaign
+
+Status: In progress. The shared R1-R5 Windfall implementation is first, followed
+by four independently verified weapon additions. RL and generated docs remain
+excluded from this campaign.
+
+Scope:
+
+- Preserve `FavoniusCodex` behavior while moving its duplicated Windfall state
+  and proc policy into one weapon-owned base class.
+- Add Lv. 90 Favonius Sword, Greatsword, Lance, and Warbow with typed weapon
+  categories, R1-R5 passive values, injectable random draws, and focused tests.
+- Use the existing one-enemy, expected-damage simulator and neutral-particle
+  distribution contract without changing energy formulas.
+
+Out of scope for this pass:
+
+- New characters or parties solely to equip every weapon category.
+- Incoming-damage, multi-target, report, optimizer, capability-profile, and RL
+  contract changes.
+- Generated `docs/` output.
+
+Definitions:
+
+- **FavoniusWeapon**: shared abstract weapon implementation that owns validated
+  refinement scaling, deterministic-testable CRIT draws, Windfall cooldown, and
+  neutral particle generation.
+- **Content unit**: one independently revertible weapon class plus its focused
+  static-stat and passive-boundary regression.
+
+### Phase 1: Add the Complete Favonius Weapon Family
+
+Why first:
+
+- Existing Codex behavior provides a proven runtime hook, and extracting it
+  before adding variants prevents four copies of mutable cooldown logic.
+
+Target files:
+
+- `src/java/model/weapon/FavoniusWeapon.java` (new)
+- `src/java/model/weapon/FavoniusCodex.java`
+- `src/java/model/weapon/FavoniusSword.java` (new)
+- `src/java/model/weapon/FavoniusGreatsword.java` (new)
+- `src/java/model/weapon/FavoniusLance.java` (new)
+- `src/java/model/weapon/FavoniusWarbow.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Tasks:
+
+- Extract Codex Windfall behavior without changing its default R5 contract.
+- Add refinement validation and R1/R5 chance/cooldown boundary coverage.
+- Add each missing weapon with its canonical Lv. 90 stats and category.
+- Verify every unit before its own implementation commit and reconcile this
+  table after four completed content units or 60 minutes.
+
+| Unit | Prerequisite | Focused verification | Status |
+|---|---|---|---|
+| Shared Windfall + Favonius Codex | Existing damage hook and energy distributor | Codex replay, null/refinement, R1/R5 cooldown | In progress |
+| Favonius Sword | Shared Windfall | Lv. 90 stats, sword type, R1/R5 trigger | Pending |
+| Favonius Greatsword | Shared Windfall | Lv. 90 stats, claymore type, inherited trigger | Pending |
+| Favonius Lance | Shared Windfall | Lv. 90 stats, polearm type, inherited trigger | Pending |
+| Favonius Warbow | Shared Windfall | Lv. 90 stats, bow type, inherited trigger | Pending |
+
+Acceptance criteria:
+
+- Existing no-argument and injected-draw Codex construction remains compatible.
+- Refinements 1-5 map to 60-100% proc chance and 12-6 second cooldown; values
+  outside that range and null draw sources are rejected.
+- Every variant exposes its canonical Lv. 90 base ATK, Energy Recharge, display
+  name, and `WeaponType`, and shares one Windfall implementation.
+- Failed draws permit immediate retry, successful draws enforce the exact
+  refinement cooldown, and identical injected sequences reproduce energy.
+- No generated artifact is staged and the Java build remains green.
+
+Test cases to add or update:
+
+- Normal: successful R1/R5 CRIT draw generates neutral particles.
+- Boundary: draw equality fails and exact cooldown expiry succeeds.
+- Abnormal: null draw and refinement 0/6 are rejected.
+- Static data: all five family members expose expected stats and weapon types.
+- Regression: existing injected Codex sequence remains deterministic.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `python scripts/preflight.py`

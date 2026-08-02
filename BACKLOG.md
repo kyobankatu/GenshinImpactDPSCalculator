@@ -2038,3 +2038,13 @@ experiment record.
 - Result: no unblocked simulator candidate passes both value and risk gates.
   The autonomous queue is exhausted; do not manufacture further work without
   new evidence or user scope.
+
+### B-073 — Favonius weapon family content coverage
+
+- **Status:** active
+- **Scope:** simulator content; RL and generated docs excluded
+- **Value/risk:** high-value local expansion using the existing Codex hook;
+  shared extraction is planned before four independent weapon slices
+- **Evidence boundary:** canonical Lv. 90 stats and R1-R5 Windfall values must be
+  recorded; no unsupported enemy or incoming-damage behavior is required
+- **Plan:** `TASKS.md` Favonius Weapon Family Content Campaign
