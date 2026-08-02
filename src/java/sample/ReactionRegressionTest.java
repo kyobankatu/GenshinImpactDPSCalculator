@@ -121,6 +121,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_TargetAuraWeaponMetadata();
         testAccuracyPhaseF_StaticActionBonusWeaponMetadata();
         testAccuracyPhaseF_LegacyWeaponRefinements();
+        testAccuracyPhaseF_SkillUseEventWeapons();
         testAccuracyPhaseF_KaeyaCharacterContract();
         testAccuracyPhaseF_AmberCharacterContract();
         testAccuracyPhaseF_DendroResonanceReactionEmContract();
@@ -5531,6 +5532,71 @@ public class ReactionRegressionTest {
         }
         assertTrue(highCatchRefinementRejected,
                 "The Catch should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_SkillUseEventWeapons() {
+        model.weapon.OathswornEye oathswornEye = new model.weapon.OathswornEye();
+        assertEquals("Oathsworn Eye", oathswornEye.getName(),
+                "Oathsworn Eye display name");
+        assertClose(565.0, oathswornEye.getBaseAtk(), EPS,
+                "Oathsworn Eye base ATK");
+        assertClose(0.276, oathswornEye.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Oathsworn Eye ATK substat");
+        assertEquals(model.type.WeaponType.CATALYST, oathswornEye.getWeaponType(),
+                "Oathsworn Eye weapon type");
+        assertEquals(5, oathswornEye.getRefinement(),
+                "Oathsworn Eye default refinement");
+
+        TestCharacter oathOwner = testCharacter(Element.HYDRO);
+        oathOwner.setWeapon(oathswornEye);
+        CombatSimulator oathSim = simulatorWith(oathOwner);
+        assertClose(1.0, resolvedStat(oathSim, oathOwner, StatType.ENERGY_RECHARGE), EPS,
+                "Oathsworn Eye should be inactive before Skill use");
+        captureStandardOutput(() -> oathSim.performAction(
+                CharacterId.SUCROSE, CharacterActionRequest.of(CharacterActionKey.NORMAL)));
+        assertClose(1.0, resolvedStat(oathSim, oathOwner, StatType.ENERGY_RECHARGE), EPS,
+                "Non-Skill actions should not activate Oathsworn Eye");
+        captureStandardOutput(() -> oathSim.performAction(
+                CharacterId.SUCROSE, CharacterActionRequest.of(CharacterActionKey.SKILL)));
+        assertClose(1.48, resolvedStat(oathSim, oathOwner, StatType.ENERGY_RECHARGE), EPS,
+                "R5 Oathsworn Eye should activate immediately on Skill use");
+        oathSim.advanceTime(5.0);
+        captureStandardOutput(() -> oathSim.performAction(
+                CharacterId.SUCROSE, CharacterActionRequest.of(CharacterActionKey.SKILL)));
+        oathSim.advanceTime(9.999);
+        assertClose(1.48, resolvedStat(oathSim, oathOwner, StatType.ENERGY_RECHARGE), EPS,
+                "Refreshed Oathsworn Eye should remain active before expiry");
+        oathSim.advanceTime(0.001);
+        assertClose(1.0, resolvedStat(oathSim, oathOwner, StatType.ENERGY_RECHARGE), EPS,
+                "Oathsworn Eye should be inactive at exact expiry");
+
+        model.weapon.OathswornEye r1OathswornEye = new model.weapon.OathswornEye(1);
+        TestCharacter r1OathOwner = testCharacter(Element.HYDRO);
+        r1OathOwner.setWeapon(r1OathswornEye);
+        CombatSimulator r1OathSim = simulatorWith(r1OathOwner);
+        captureStandardOutput(() -> r1OathSim.performAction(
+                CharacterId.SUCROSE, CharacterActionRequest.of(CharacterActionKey.SKILL)));
+        assertClose(1.24,
+                resolvedStat(r1OathSim, r1OathOwner, StatType.ENERGY_RECHARGE), EPS,
+                "R1 Oathsworn Eye Energy Recharge");
+
+        boolean lowOathswornRefinementRejected = false;
+        try {
+            new model.weapon.OathswornEye(0);
+        } catch (IllegalArgumentException expected) {
+            lowOathswornRefinementRejected = true;
+        }
+        assertTrue(lowOathswornRefinementRejected,
+                "Oathsworn Eye should reject refinement zero");
+
+        boolean highOathswornRefinementRejected = false;
+        try {
+            new model.weapon.OathswornEye(6);
+        } catch (IllegalArgumentException expected) {
+            highOathswornRefinementRejected = true;
+        }
+        assertTrue(highOathswornRefinementRejected,
+                "Oathsworn Eye should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
