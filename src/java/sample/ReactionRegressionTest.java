@@ -145,6 +145,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_EnergyConditionalEmblemWeapons();
         testAccuracyPhaseF_FiveStarElementalMasterySupportWeapons();
         testAccuracyPhaseF_FiveStarCatalystStackWeapons();
+        testAccuracyPhaseF_InjectedBowProcWeapons();
         testAccuracyPhaseF_ActionUseWindowWeapons();
         testAccuracyPhaseF_AdditionalSkillUseStatWeapons();
         testAccuracyPhaseF_SamuraiConductWeapons();
@@ -10241,6 +10242,224 @@ public class ReactionRegressionTest {
         }
         assertTrue(highPrayerRefinementRejected,
                 "Lost Prayer should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_InjectedBowProcWeapons() {
+        model.weapon.SkywardHarp skywardHarp =
+                new model.weapon.SkywardHarp(() -> 0.999);
+        assertEquals("Skyward Harp", skywardHarp.getName(),
+                "Skyward Harp display name");
+        assertClose(674.0, skywardHarp.getBaseAtk(), EPS,
+                "Skyward Harp base ATK");
+        assertClose(0.221,
+                skywardHarp.getStats().get(StatType.CRIT_RATE), EPS,
+                "Skyward Harp CRIT Rate");
+        assertEquals(model.type.WeaponType.BOW, skywardHarp.getWeaponType(),
+                "Skyward Harp weapon type");
+        assertEquals(5, skywardHarp.getRefinement(),
+                "Skyward Harp default refinement");
+        TestCharacter harpOwner = testCharacter(Element.ANEMO);
+        harpOwner.setWeapon(skywardHarp);
+        CombatSimulator harpSim = simulatorWith(harpOwner);
+        assertClose(0.90,
+                resolvedStat(harpSim, harpOwner, StatType.CRIT_DMG), EPS,
+                "R5 Skyward Harp CRIT DMG passive");
+        AttackAction genericHit = typedDamageHit(
+                "Skyward Harp triggering hit", ActionType.SKILL, 1.0);
+        skywardHarp.onDamage(harpOwner, genericHit, 0.0, harpSim);
+        double firstHarpProc = harpSim.getTotalDamage();
+        assertTrue(firstHarpProc > 0.0,
+                "R5 Skyward Harp should proc below its 100% threshold");
+        harpSim.advanceTime(2.0 - 1e-9);
+        skywardHarp.onDamage(
+                harpOwner, genericHit, harpSim.getCurrentTime(), harpSim);
+        assertClose(firstHarpProc, harpSim.getTotalDamage(), EPS,
+                "Skyward Harp should reject hits before its two-second CT");
+        harpSim.advanceTime(1e-9);
+        skywardHarp.onDamage(
+                harpOwner, genericHit, harpSim.getCurrentTime(), harpSim);
+        assertClose(firstHarpProc * 2.0, harpSim.getTotalDamage(), 0.01,
+                "Skyward Harp should proc at its exact R5 CT");
+        skywardHarp.onDamage(
+                harpOwner,
+                typedDamageHit("Skyward Harp zero", ActionType.NORMAL, 0.0),
+                harpSim.getCurrentTime() + 2.0,
+                harpSim);
+        assertClose(firstHarpProc * 2.0, harpSim.getTotalDamage(), 0.01,
+                "Zero hits should not trigger Skyward Harp");
+
+        model.weapon.SkywardHarp failedHarp =
+                new model.weapon.SkywardHarp(1, () -> 0.60);
+        TestCharacter failedHarpOwner = testCharacter(Element.ANEMO);
+        failedHarpOwner.setWeapon(failedHarp);
+        CombatSimulator failedHarpSim = simulatorWith(failedHarpOwner);
+        failedHarp.onDamage(failedHarpOwner, genericHit, 0.0, failedHarpSim);
+        assertClose(0.0, failedHarpSim.getTotalDamage(), EPS,
+                "R1 Skyward Harp should reject a draw at its 60% threshold");
+        assertClose(0.70,
+                resolvedStat(failedHarpSim, failedHarpOwner,
+                        StatType.CRIT_DMG), EPS,
+                "R1 Skyward Harp CRIT DMG passive");
+        model.weapon.SkywardHarp successfulR1Harp =
+                new model.weapon.SkywardHarp(1, () -> 0.599);
+        TestCharacter successfulR1HarpOwner = testCharacter(Element.ANEMO);
+        successfulR1HarpOwner.setWeapon(successfulR1Harp);
+        CombatSimulator successfulR1HarpSim =
+                simulatorWith(successfulR1HarpOwner);
+        successfulR1Harp.onDamage(
+                successfulR1HarpOwner, genericHit, 0.0, successfulR1HarpSim);
+        assertTrue(successfulR1HarpSim.getTotalDamage() > 0.0,
+                "R1 Skyward Harp should accept a draw below 60%");
+
+        model.weapon.TheViridescentHunt viridescent =
+                new model.weapon.TheViridescentHunt(() -> 0.0);
+        assertEquals("The Viridescent Hunt", viridescent.getName(),
+                "The Viridescent Hunt display name");
+        assertClose(510.0, viridescent.getBaseAtk(), EPS,
+                "The Viridescent Hunt base ATK");
+        assertClose(0.276,
+                viridescent.getStats().get(StatType.CRIT_RATE), EPS,
+                "The Viridescent Hunt CRIT Rate");
+        assertEquals(model.type.WeaponType.BOW, viridescent.getWeaponType(),
+                "The Viridescent Hunt weapon type");
+        assertEquals(5, viridescent.getRefinement(),
+                "The Viridescent Hunt default refinement");
+
+        TestCharacter huntOwner = testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE);
+        huntOwner.setWeapon(viridescent);
+        CombatSimulator huntSim = simulatorWith(huntOwner);
+        AttackAction normalHit = typedDamageHit(
+                "Viridescent Hunt Normal", ActionType.NORMAL, 1.0);
+        viridescent.onDamage(
+                huntOwner,
+                typedDamageHit("Viridescent zero", ActionType.NORMAL, 0.0),
+                0.0,
+                huntSim);
+        viridescent.onDamage(
+                huntOwner,
+                typedDamageHit("Viridescent Skill", ActionType.SKILL, 1.0),
+                0.0,
+                huntSim);
+        huntSim.addCharacter(testCharacter(Element.PYRO, CharacterId.AMBER));
+        huntSim.setActiveCharacter(CharacterId.AMBER);
+        viridescent.onDamage(huntOwner, normalHit, 0.0, huntSim);
+        huntSim.advanceTime(0.5);
+        assertClose(0.0, huntSim.getTotalDamage(), EPS,
+                "Invalid and off-field hits should not schedule a Cyclone");
+        huntSim.setActiveCharacter(CharacterId.SUCROSE);
+        viridescent.onDamage(
+                huntOwner, normalHit, huntSim.getCurrentTime(), huntSim);
+        huntSim.advanceTime(0.5 - 1e-6);
+        assertClose(0.0, huntSim.getTotalDamage(), EPS,
+                "Cyclone should not hit before 0.5 seconds");
+        huntSim.advanceTime(1e-6 + 1e-9);
+        double firstCycloneTick = huntSim.getTotalDamage();
+        assertTrue(firstCycloneTick > 0.0,
+                "Cyclone should deal its first hit at exactly 0.5 seconds");
+        huntSim.advanceTime(3.5);
+        assertClose(firstCycloneTick * 8.0, huntSim.getTotalDamage(), 0.01,
+                "Cyclone should deal exactly eight equal hits over four seconds");
+        viridescent.onDamage(
+                huntOwner, normalHit, huntSim.getCurrentTime(), huntSim);
+        huntSim.advanceTime(6.0);
+        assertClose(firstCycloneTick * 8.0, huntSim.getTotalDamage(), 0.01,
+                "Viridescent Hunt should reject activation before R5 CT");
+        viridescent.onDamage(
+                huntOwner, normalHit, huntSim.getCurrentTime(), huntSim);
+        huntSim.advanceTime(0.5);
+        assertClose(firstCycloneTick * 9.0, huntSim.getTotalDamage(), 0.01,
+                "Viridescent Hunt should reactivate at exact ten-second CT");
+
+        model.weapon.TheViridescentHunt failedHunt =
+                new model.weapon.TheViridescentHunt(() -> 0.50);
+        TestCharacter failedHuntOwner = testCharacter(Element.ANEMO);
+        failedHuntOwner.setWeapon(failedHunt);
+        CombatSimulator failedHuntSim = simulatorWith(failedHuntOwner);
+        failedHunt.onDamage(failedHuntOwner, normalHit, 0.0, failedHuntSim);
+        failedHuntSim.advanceTime(4.0);
+        assertClose(0.0, failedHuntSim.getTotalDamage(), EPS,
+                "Viridescent Hunt should reject a draw at its 50% threshold");
+
+        model.weapon.TheViridescentHunt r1Hunt =
+                new model.weapon.TheViridescentHunt(1, () -> 0.0);
+        TestCharacter r1HuntOwner = testCharacter(Element.ANEMO);
+        r1HuntOwner.setWeapon(r1Hunt);
+        CombatSimulator r1HuntSim = simulatorWith(r1HuntOwner);
+        r1Hunt.onDamage(r1HuntOwner, normalHit, 0.0, r1HuntSim);
+        r1HuntSim.advanceTime(0.5);
+        double r1CycloneTick = r1HuntSim.getTotalDamage();
+        assertClose(firstCycloneTick * 0.5, r1CycloneTick, 0.01,
+                "R1 Cyclone motion value should be half the R5 value");
+        r1HuntSim.advanceTime(13.5);
+        r1Hunt.onDamage(
+                r1HuntOwner, normalHit, r1HuntSim.getCurrentTime(), r1HuntSim);
+        r1HuntSim.advanceTime(0.5);
+        assertClose(r1CycloneTick * 9.0, r1HuntSim.getTotalDamage(), 0.01,
+                "R1 Viridescent Hunt should reactivate at exact 14-second CT");
+
+        boolean huntReuseRejected = false;
+        try {
+            viridescent.initializeForSimulator(huntOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            huntReuseRejected = true;
+        }
+        assertTrue(huntReuseRejected,
+                "Viridescent Hunt should reject cross-simulator reuse");
+
+        boolean nullHarpDrawRejected = false;
+        try {
+            new model.weapon.SkywardHarp((DoubleSupplier) null);
+        } catch (NullPointerException expected) {
+            nullHarpDrawRejected = true;
+        }
+        assertTrue(nullHarpDrawRejected,
+                "Skyward Harp should reject a null draw source");
+
+        boolean nullHuntDrawRejected = false;
+        try {
+            new model.weapon.TheViridescentHunt((DoubleSupplier) null);
+        } catch (NullPointerException expected) {
+            nullHuntDrawRejected = true;
+        }
+        assertTrue(nullHuntDrawRejected,
+                "Viridescent Hunt should reject a null draw source");
+
+        boolean lowHarpRefinementRejected = false;
+        try {
+            new model.weapon.SkywardHarp(0);
+        } catch (IllegalArgumentException expected) {
+            lowHarpRefinementRejected = true;
+        }
+        assertTrue(lowHarpRefinementRejected,
+                "Skyward Harp should reject refinement zero");
+
+        boolean highHarpRefinementRejected = false;
+        try {
+            new model.weapon.SkywardHarp(6);
+        } catch (IllegalArgumentException expected) {
+            highHarpRefinementRejected = true;
+        }
+        assertTrue(highHarpRefinementRejected,
+                "Skyward Harp should reject refinement six");
+
+        boolean lowHuntRefinementRejected = false;
+        try {
+            new model.weapon.TheViridescentHunt(0);
+        } catch (IllegalArgumentException expected) {
+            lowHuntRefinementRejected = true;
+        }
+        assertTrue(lowHuntRefinementRejected,
+                "Viridescent Hunt should reject refinement zero");
+
+        boolean highHuntRefinementRejected = false;
+        try {
+            new model.weapon.TheViridescentHunt(6);
+        } catch (IllegalArgumentException expected) {
+            highHuntRefinementRejected = true;
+        }
+        assertTrue(highHuntRefinementRejected,
+                "Viridescent Hunt should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_OffFieldHitBows() {
