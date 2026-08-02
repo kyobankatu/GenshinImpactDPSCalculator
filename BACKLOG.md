@@ -2633,7 +2633,7 @@ experiment record.
 
 ### B-121 — Isolated runtime weapon expansion
 
-- **Status:** in-progress
+- **Status:** done
 - **Scope:** "Ultimate Overlord's Mega Magic Sword", Ash-Graven Drinking Horn,
   Toukabou Shigure, and Waveriding Whirl; RL excluded
 - **Value/risk:** four complete passives fit existing static, action-triggered,
@@ -2648,3 +2648,6 @@ experiment record.
 - **Boundary:** enemy-defeat cooldown reset, multi-target proc multiplication,
   and swimming stamina remain outside the current simulator
 - **Plan:** `TASKS.md` Isolated Runtime Weapon Expansion Campaign
+- **Completion:** two isolated branch commits were reviewed and integrated;
+  focused regressions cover all four metadata/passive contracts and abnormal
+  boundaries, and reaction regression/build/Javadoc/preflight gates pass

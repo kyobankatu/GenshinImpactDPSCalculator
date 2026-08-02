@@ -147,6 +147,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_OneStarWeaponSeries();
         testAccuracyPhaseF_TwoStarWeaponSeries();
         testAccuracyPhaseF_IsolatedRuntimeWeaponPhaseOne();
+        testAccuracyPhaseF_IsolatedRuntimeWeaponPhaseTwo();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -9566,6 +9567,259 @@ public class ReactionRegressionTest {
         }
         assertTrue(highAshRefinementRejected,
                 "Ash-Graven should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_IsolatedRuntimeWeaponPhaseTwo() {
+        model.weapon.ToukabouShigure toukabou =
+                new model.weapon.ToukabouShigure();
+        assertEquals("Toukabou Shigure", toukabou.getName(),
+                "Toukabou display name");
+        assertClose(510.0, toukabou.getBaseAtk(), EPS,
+                "Toukabou base ATK");
+        assertClose(165.0,
+                toukabou.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Toukabou Elemental Mastery");
+        assertEquals(model.type.WeaponType.SWORD, toukabou.getWeaponType(),
+                "Toukabou weapon type");
+        assertEquals(5, toukabou.getRefinement(),
+                "Toukabou default refinement");
+
+        TestCharacter toukabouOwner = testCharacter(
+                Element.PHYSICAL, CharacterId.SUCROSE);
+        toukabouOwner.setWeapon(toukabou);
+        CombatSimulator toukabouSim = simulatorWith(toukabouOwner);
+        AttackAction toukabouHit = damageHit(
+                "Toukabou mark fixture", Element.PHYSICAL, 1.0);
+        toukabouSim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, toukabouHit);
+        double triggeringHitDamage = toukabouSim.getTotalDamage();
+        assertTrue(triggeringHitDamage > 0.0,
+                "Toukabou triggering hit should resolve damage");
+        toukabouSim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, toukabouHit);
+        assertClose(triggeringHitDamage * 1.32,
+                toukabouSim.getTotalDamage() - triggeringHitDamage, EPS,
+                "R5 Toukabou should buff subsequent marked-target damage");
+        toukabouSim.advanceTime(10.0);
+        assertClose(0.0,
+                resolvedStat(toukabouSim, toukabouOwner,
+                        StatType.DMG_BONUS_ALL), EPS,
+                "Toukabou mark should expire at exactly ten seconds");
+        toukabouSim.advanceTime(5.0 - 1e-6);
+        toukabou.onDamage(
+                toukabouOwner, toukabouHit,
+                toukabouSim.getCurrentTime(), toukabouSim);
+        assertClose(0.0,
+                resolvedStat(toukabouSim, toukabouOwner,
+                        StatType.DMG_BONUS_ALL), EPS,
+                "Toukabou should remain on cooldown before 15 seconds");
+        toukabouSim.advanceTime(1e-6 + 1e-9);
+        toukabou.onDamage(
+                toukabouOwner, toukabouHit,
+                toukabouSim.getCurrentTime(), toukabouSim);
+        assertClose(0.32,
+                resolvedStat(toukabouSim, toukabouOwner,
+                        StatType.DMG_BONUS_ALL), EPS,
+                "Toukabou should reactivate at exact 15-second CT");
+
+        model.weapon.ToukabouShigure guardedToukabou =
+                new model.weapon.ToukabouShigure(1);
+        TestCharacter guardedOwner = testCharacter(
+                Element.PHYSICAL, CharacterId.SUCROSE);
+        guardedOwner.setWeapon(guardedToukabou);
+        CombatSimulator guardedSim = simulatorWith(guardedOwner);
+        TestCharacter foreignUser = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        guardedToukabou.onDamage(
+                guardedOwner,
+                typedDamageHit("Zero", ActionType.NORMAL, 0.0),
+                0.0, guardedSim);
+        guardedToukabou.onDamage(
+                foreignUser, toukabouHit, 0.0, guardedSim);
+        guardedToukabou.onDamage(
+                guardedOwner, toukabouHit, 0.0, new CombatSimulator());
+        guardedSim.addCharacter(foreignUser);
+        guardedSim.setActiveCharacter(CharacterId.AMBER);
+        guardedToukabou.onDamage(
+                guardedOwner, toukabouHit, 0.0, guardedSim);
+        assertClose(0.0,
+                resolvedStat(guardedSim, guardedOwner,
+                        StatType.DMG_BONUS_ALL), EPS,
+                "Invalid Toukabou hits should not apply a mark");
+        guardedSim.setActiveCharacter(CharacterId.SUCROSE);
+        guardedToukabou.onDamage(
+                guardedOwner, toukabouHit, 0.0, guardedSim);
+        assertClose(0.16,
+                resolvedStat(guardedSim, guardedOwner,
+                        StatType.DMG_BONUS_ALL), EPS,
+                "R1 Toukabou marked-target bonus");
+
+        boolean toukabouReuseRejected = false;
+        try {
+            toukabou.initializeForSimulator(
+                    toukabouOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            toukabouReuseRejected = true;
+        }
+        assertTrue(toukabouReuseRejected,
+                "Toukabou should reject cross-simulator reuse");
+        boolean lowToukabouRefinementRejected = false;
+        try {
+            new model.weapon.ToukabouShigure(0);
+        } catch (IllegalArgumentException expected) {
+            lowToukabouRefinementRejected = true;
+        }
+        assertTrue(lowToukabouRefinementRejected,
+                "Toukabou should reject refinement zero");
+        boolean highToukabouRefinementRejected = false;
+        try {
+            new model.weapon.ToukabouShigure(6);
+        } catch (IllegalArgumentException expected) {
+            highToukabouRefinementRejected = true;
+        }
+        assertTrue(highToukabouRefinementRejected,
+                "Toukabou should reject refinement six");
+
+        model.weapon.WaveridingWhirl waveriding =
+                new model.weapon.WaveridingWhirl();
+        assertEquals("Waveriding Whirl", waveriding.getName(),
+                "Waveriding display name");
+        assertClose(454.0, waveriding.getBaseAtk(), EPS,
+                "Waveriding base ATK");
+        assertClose(0.613,
+                waveriding.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "Waveriding Energy Recharge");
+        assertEquals(model.type.WeaponType.CATALYST,
+                waveriding.getWeaponType(), "Waveriding weapon type");
+        assertEquals(5, waveriding.getRefinement(),
+                "Waveriding default refinement");
+
+        TestCharacter waveridingOwner = testCharacter(
+                Element.PYRO, CharacterId.SUCROSE);
+        waveridingOwner.setWeapon(waveriding);
+        CombatSimulator waveridingSim = simulatorWith(waveridingOwner);
+        waveriding.onAction(
+                waveridingOwner,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL),
+                waveridingSim);
+        assertClose(0.0,
+                resolvedStat(waveridingSim, waveridingOwner,
+                        StatType.HP_PERCENT), EPS,
+                "Non-Skill use should not activate Waveriding");
+        waveriding.onAction(
+                waveridingOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                waveridingSim);
+        assertClose(0.40,
+                resolvedStat(waveridingSim, waveridingOwner,
+                        StatType.HP_PERCENT), EPS,
+                "R5 Waveriding zero-Hydro base HP bonus");
+        waveridingSim.addCharacter(testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU));
+        assertClose(0.64,
+                resolvedStat(waveridingSim, waveridingOwner,
+                        StatType.HP_PERCENT), EPS,
+                "R5 Waveriding one-Hydro HP bonus");
+        waveridingSim.addCharacter(testCharacter(
+                Element.HYDRO, CharacterId.KAEYA));
+        assertClose(0.88,
+                resolvedStat(waveridingSim, waveridingOwner,
+                        StatType.HP_PERCENT), EPS,
+                "R5 Waveriding two-Hydro HP bonus");
+        waveridingSim.addCharacter(testCharacter(
+                Element.HYDRO, CharacterId.AMBER));
+        assertClose(0.88,
+                resolvedStat(waveridingSim, waveridingOwner,
+                        StatType.HP_PERCENT), EPS,
+                "Waveriding Hydro additions should cap at two");
+        waveridingSim.advanceTime(10.0);
+        assertClose(0.0,
+                resolvedStat(waveridingSim, waveridingOwner,
+                        StatType.HP_PERCENT), EPS,
+                "Waveriding should expire at exactly ten seconds");
+        waveridingSim.advanceTime(5.0 - 1e-6);
+        waveriding.onAction(
+                waveridingOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                waveridingSim);
+        assertClose(0.0,
+                resolvedStat(waveridingSim, waveridingOwner,
+                        StatType.HP_PERCENT), EPS,
+                "Waveriding should remain on cooldown before 15 seconds");
+        waveridingSim.advanceTime(1e-6 + 1e-9);
+        waveriding.onAction(
+                waveridingOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                waveridingSim);
+        assertClose(0.88,
+                resolvedStat(waveridingSim, waveridingOwner,
+                        StatType.HP_PERCENT), EPS,
+                "Waveriding should reactivate at exact 15-second CT");
+
+        model.weapon.WaveridingWhirl guardedWaveriding =
+                new model.weapon.WaveridingWhirl(1);
+        TestCharacter guardedWaveridingOwner = testCharacter(
+                Element.PYRO, CharacterId.SUCROSE);
+        guardedWaveridingOwner.setWeapon(guardedWaveriding);
+        CombatSimulator guardedWaveridingSim =
+                simulatorWith(guardedWaveridingOwner);
+        guardedWaveriding.onAction(
+                foreignUser,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                guardedWaveridingSim);
+        guardedWaveriding.onAction(
+                guardedWaveridingOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                new CombatSimulator());
+        guardedWaveridingSim.addCharacter(foreignUser);
+        guardedWaveridingSim.setActiveCharacter(CharacterId.AMBER);
+        guardedWaveriding.onAction(
+                guardedWaveridingOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                guardedWaveridingSim);
+        assertClose(0.0,
+                resolvedStat(guardedWaveridingSim,
+                        guardedWaveridingOwner, StatType.HP_PERCENT), EPS,
+                "Invalid Waveriding actions should not activate its window");
+        guardedWaveridingSim.addCharacter(testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU));
+        guardedWaveridingSim.addCharacter(testCharacter(
+                Element.HYDRO, CharacterId.KAEYA));
+        guardedWaveridingSim.setActiveCharacter(CharacterId.SUCROSE);
+        guardedWaveriding.onAction(
+                guardedWaveridingOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                guardedWaveridingSim);
+        assertClose(0.44,
+                resolvedStat(guardedWaveridingSim,
+                        guardedWaveridingOwner, StatType.HP_PERCENT), EPS,
+                "R1 Waveriding two-Hydro HP bonus");
+
+        boolean waveridingReuseRejected = false;
+        try {
+            waveriding.initializeForSimulator(
+                    waveridingOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            waveridingReuseRejected = true;
+        }
+        assertTrue(waveridingReuseRejected,
+                "Waveriding should reject cross-simulator reuse");
+        boolean lowWaveridingRefinementRejected = false;
+        try {
+            new model.weapon.WaveridingWhirl(0);
+        } catch (IllegalArgumentException expected) {
+            lowWaveridingRefinementRejected = true;
+        }
+        assertTrue(lowWaveridingRefinementRejected,
+                "Waveriding should reject refinement zero");
+        boolean highWaveridingRefinementRejected = false;
+        try {
+            new model.weapon.WaveridingWhirl(6);
+        } catch (IllegalArgumentException expected) {
+            highWaveridingRefinementRejected = true;
+        }
+        assertTrue(highWaveridingRefinementRejected,
+                "Waveriding should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {

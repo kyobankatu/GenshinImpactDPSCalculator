@@ -15329,7 +15329,7 @@ Verification:
 
 ## Implementation Order: Isolated Runtime Weapon Expansion Campaign
 
-Status: In progress. Two branch-isolated implementation lanes add four weapons
+Status: Complete. Two branch-isolated implementation lanes added four weapons
 whose complete combat contracts fit existing narrow capability interfaces; RL
 and generated documentation remain excluded.
 
@@ -15386,13 +15386,22 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
 
-### Phase 2: Single-Target Mark and Hydro-Party HP Window
+### Phase 2: Single-Target Mark and Hydro-Party HP Window - Done
 
 Target files:
 
 - `src/java/model/weapon/ToukabouShigure.java` (new)
 - `src/java/model/weapon/WaveridingWhirl.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Toukabou metadata, unbuffed triggering hit, R1/R5 marked-target bonuses,
+  half-open mark duration, activation CT, owner gates, and binding pass.
+- Waveriding metadata, zero-through-three Hydro counts, two-addition cap,
+  R1/R5 bonuses, half-open duration, activation CT, action/owner gates, and
+  binding pass.
+- Reaction regression, build, Javadoc, and preflight gates pass.
 
 Acceptance criteria:
 
