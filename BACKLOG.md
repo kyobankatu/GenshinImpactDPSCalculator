@@ -2736,7 +2736,7 @@ experiment record.
 
 ### B-126 — Core artifact set expansion
 
-- **Status:** in-progress
+- **Status:** done
 - **Scope:** Gladiator's Finale, Golden Troupe, Gilded Dreams, and Pale Flame;
   RL excluded
 - **Value/risk:** adds four broadly useful complete sets through existing
@@ -2747,3 +2747,6 @@ experiment record.
 - **Boundary:** each class represents an equipped four-piece set, matching the
   repository's existing artifact abstraction
 - **Plan:** `TASKS.md` Core Artifact Set Expansion Campaign
+- **Completion:** Gladiator's Finale, Golden Troupe, Gilded Dreams, and Pale
+  Flame passed focused metadata, field, composition, timing, trigger, binding,
+  independence, reaction regression, build, Javadoc, and preflight checks

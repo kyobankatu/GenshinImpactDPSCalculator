@@ -156,6 +156,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_WeaponSwitchCallbackContract();
         testAccuracyPhaseF_SwitchActivatedWeapons();
         testAccuracyPhaseF_CoreArtifactSetsPhaseOne();
+        testAccuracyPhaseF_CoreArtifactSetsPhaseTwo();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -11153,6 +11154,185 @@ public class ReactionRegressionTest {
         }
         assertTrue(nullGladiatorStatsRejected,
                 "Gladiator should reject null supplied stats");
+    }
+
+    private static void testAccuracyPhaseF_CoreArtifactSetsPhaseTwo() {
+        StatsContainer gildedStats = new StatsContainer();
+        gildedStats.set(StatType.CRIT_RATE, 0.25);
+        model.artifact.GildedDreams suppliedGilded =
+                new model.artifact.GildedDreams(gildedStats);
+        assertEquals("Gilded Dreams", suppliedGilded.getName(),
+                "Gilded Dreams display name");
+        assertClose(80.0,
+                suppliedGilded.getStats().get(StatType.ELEMENTAL_MASTERY),
+                EPS, "Gilded Dreams two-piece EM");
+        assertClose(0.25,
+                suppliedGilded.getStats().get(StatType.CRIT_RATE), EPS,
+                "Gilded Dreams should preserve supplied stats");
+
+        model.artifact.GildedDreams gilded =
+                new model.artifact.GildedDreams();
+        TestCharacter gildedOwner = testCharacter(
+                Element.DENDRO, CharacterId.SUCROSE);
+        gildedOwner.setArtifacts(gilded);
+        TestCharacter sameElementAlly = testCharacter(
+                Element.DENDRO, CharacterId.FLINS);
+        TestCharacter differentElementAlly = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        CombatSimulator gildedSim = simulatorWith(gildedOwner);
+        gildedSim.addCharacter(sameElementAlly);
+        gildedSim.addCharacter(differentElementAlly);
+        gildedSim.setActiveCharacter(CharacterId.AMBER);
+        ReactionResult gildedReaction = ReactionResult.transform(
+                0.0, "Gilded Bloom", ReactionResult.Kind.BLOOM);
+        gildedSim.notifyReaction(ReactionResult.none(), gildedOwner);
+        gildedSim.notifyReaction(gildedReaction, differentElementAlly);
+        assertClose(0.0,
+                resolvedStat(gildedSim, gildedOwner, StatType.ATK_PERCENT),
+                EPS, "Invalid Gilded triggers should not grant ATK");
+        assertClose(80.0,
+                resolvedStat(gildedSim, gildedOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Invalid Gilded triggers should retain only two-piece EM");
+        gildedSim.notifyReaction(gildedReaction, gildedOwner);
+        assertClose(0.14,
+                resolvedStat(gildedSim, gildedOwner, StatType.ATK_PERCENT),
+                EPS, "Gilded same-element composition snapshot");
+        assertClose(130.0,
+                resolvedStat(gildedSim, gildedOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Off-field Gilded different-element snapshot");
+
+        TestCharacter laterDifferentAlly = testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU);
+        gildedSim.addCharacter(laterDifferentAlly);
+        assertClose(130.0,
+                resolvedStat(gildedSim, gildedOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Gilded should retain its composition snapshot");
+        gildedSim.advanceTime(7.999);
+        gildedSim.notifyReaction(gildedReaction, gildedOwner);
+        assertClose(130.0,
+                resolvedStat(gildedSim, gildedOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Gilded should not refresh before eight seconds");
+        gildedSim.advanceTime(0.001 + 1e-9);
+        gildedSim.notifyReaction(gildedReaction, gildedOwner);
+        assertClose(180.0,
+                resolvedStat(gildedSim, gildedOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Gilded should resnapshot at exact eight-second boundary");
+        gilded.initializeForSimulator(gildedOwner, gildedSim, true);
+        boolean gildedCrossSimulatorRejected = false;
+        try {
+            gilded.initializeForSimulator(
+                    gildedOwner, new CombatSimulator(), true);
+        } catch (IllegalStateException expected) {
+            gildedCrossSimulatorRejected = true;
+        }
+        assertTrue(gildedCrossSimulatorRejected,
+                "Gilded Dreams should reject cross-simulator reuse");
+
+        StatsContainer paleStats = new StatsContainer();
+        paleStats.set(StatType.CRIT_DMG, 0.30);
+        model.artifact.PaleFlame suppliedPale =
+                new model.artifact.PaleFlame(paleStats);
+        assertEquals("Pale Flame", suppliedPale.getName(),
+                "Pale Flame display name");
+        assertClose(0.25,
+                suppliedPale.getStats().get(StatType.PHYSICAL_DMG_BONUS),
+                EPS, "Pale Flame two-piece Physical bonus");
+        assertClose(0.30,
+                suppliedPale.getStats().get(StatType.CRIT_DMG), EPS,
+                "Pale Flame should preserve supplied stats");
+
+        model.artifact.PaleFlame paleFlame =
+                new model.artifact.PaleFlame();
+        TestCharacter paleOwner = testCharacter(
+                Element.PHYSICAL, CharacterId.SUCROSE);
+        paleOwner.setArtifacts(paleFlame);
+        CombatSimulator paleSim = simulatorWith(paleOwner);
+        AttackAction skillHit = typedDamageHit(
+                "Pale Flame Skill fixture", ActionType.SKILL, 1.0);
+        AttackAction normalHit = typedDamageHit(
+                "Pale Flame Normal fixture", ActionType.NORMAL, 1.0);
+        assertClose(0.25,
+                resolvedStat(paleSim, paleOwner,
+                        StatType.PHYSICAL_DMG_BONUS), EPS,
+                "Pale Flame initial Physical bonus");
+        paleFlame.onDamage(paleSim, normalHit, 100.0, paleOwner);
+        paleFlame.onDamage(paleSim, skillHit, 0.0, paleOwner);
+        assertClose(0.0,
+                resolvedStat(paleSim, paleOwner, StatType.ATK_PERCENT),
+                EPS, "Pale Flame should reject non-Skill and zero damage");
+        paleFlame.onDamage(paleSim, skillHit, 100.0, paleOwner);
+        assertClose(0.09,
+                resolvedStat(paleSim, paleOwner, StatType.ATK_PERCENT),
+                EPS, "Pale Flame first stack");
+        assertClose(0.25,
+                resolvedStat(paleSim, paleOwner,
+                        StatType.PHYSICAL_DMG_BONUS), EPS,
+                "One Pale Flame stack should not double Physical bonus");
+        paleSim.advanceTime(0.299);
+        paleFlame.onDamage(paleSim, skillHit, 100.0, paleOwner);
+        assertClose(0.09,
+                resolvedStat(paleSim, paleOwner, StatType.ATK_PERCENT),
+                EPS, "Pale Flame stack CT before 0.3 seconds");
+        paleSim.advanceTime(0.001 + 1e-9);
+        paleFlame.onDamage(paleSim, skillHit, 100.0, paleOwner);
+        assertClose(0.18,
+                resolvedStat(paleSim, paleOwner, StatType.ATK_PERCENT),
+                EPS, "Pale Flame second stack at exact CT");
+        assertClose(0.50,
+                resolvedStat(paleSim, paleOwner,
+                        StatType.PHYSICAL_DMG_BONUS), EPS,
+                "Pale Flame doubled Physical bonus at two stacks");
+        paleSim.advanceTime(6.999);
+        assertClose(0.18,
+                resolvedStat(paleSim, paleOwner, StatType.ATK_PERCENT),
+                EPS, "Pale Flame before shared expiry");
+        paleSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0,
+                resolvedStat(paleSim, paleOwner, StatType.ATK_PERCENT),
+                EPS, "Pale Flame at exact seven-second expiry");
+        assertClose(0.25,
+                resolvedStat(paleSim, paleOwner,
+                        StatType.PHYSICAL_DMG_BONUS), EPS,
+                "Expired Pale stacks should retain only two-piece Physical bonus");
+
+        model.artifact.PaleFlame independentPale =
+                new model.artifact.PaleFlame();
+        TestCharacter independentOwner = testCharacter(Element.PHYSICAL);
+        independentOwner.setArtifacts(independentPale);
+        CombatSimulator independentSim = simulatorWith(independentOwner);
+        assertClose(0.0,
+                resolvedStat(independentSim, independentOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "Pale Flame instances should keep independent stacks");
+        paleFlame.onDamage(
+                new CombatSimulator(), skillHit, 100.0, paleOwner);
+        paleFlame.onDamage(paleSim, skillHit, 100.0, independentOwner);
+        assertClose(0.0,
+                resolvedStat(independentSim, independentOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "Pale Flame should reject wrong callback bindings");
+
+        boolean nullGildedStatsRejected = false;
+        boolean nullPaleStatsRejected = false;
+        try {
+            new model.artifact.GildedDreams(null);
+        } catch (NullPointerException expected) {
+            nullGildedStatsRejected = true;
+        }
+        try {
+            new model.artifact.PaleFlame(null);
+        } catch (NullPointerException expected) {
+            nullPaleStatsRejected = true;
+        }
+        assertTrue(nullGildedStatsRejected,
+                "Gilded Dreams should reject null supplied stats");
+        assertTrue(nullPaleStatsRejected,
+                "Pale Flame should reject null supplied stats");
     }
 
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {

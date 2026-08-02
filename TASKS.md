@@ -15801,7 +15801,7 @@ Verification:
 
 ## Implementation Order: Core Artifact Set Expansion Campaign
 
-Status: In progress. This campaign adds four complete, commonly used artifact
+Status: Complete. This campaign adds four complete, commonly used artifact
 sets through existing initialization, switch, reaction, and damage hooks; RL
 and generated documentation remain excluded.
 
@@ -15857,7 +15857,7 @@ Completion evidence:
 - `./gradlew ReactionRegressionTest`, `./gradlew build`, `./gradlew javadoc`,
   and `python scripts/preflight.py` passed on 2026-08-02.
 
-### Phase 2: Reaction Composition and Skill-Hit Stacks
+### Phase 2: Reaction Composition and Skill-Hit Stacks - Done
 
 Target files:
 
@@ -15891,3 +15891,13 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+Completion evidence:
+
+- Focused regressions cover Gilded Dreams static stats, off-field owner
+  reactions, same/different composition snapshots, invalid triggers, exact
+  eight-second resnapshot, and binding; Pale Flame covers trigger rejection,
+  0.3-second CT, one/two stacks, exact seven-second expiry, supplied stats,
+  wrong callbacks, and independent instances.
+- `./gradlew ReactionRegressionTest`, `./gradlew build`, `./gradlew javadoc`,
+  and `python scripts/preflight.py` passed on 2026-08-02.
