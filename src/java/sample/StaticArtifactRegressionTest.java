@@ -4,9 +4,14 @@ import java.util.Collections;
 
 import mechanics.formula.DamageCalculator;
 import model.artifact.Adventurer;
+import model.artifact.Berserker;
+import model.artifact.BloodstainedChivalry;
+import model.artifact.BraveHeart;
 import model.artifact.Gambler;
 import model.artifact.LuckyDog;
+import model.artifact.MarechausseeHunter;
 import model.artifact.ResolutionOfSojourner;
+import model.artifact.VourukashasGlow;
 import model.entity.ArtifactSet;
 import model.entity.Character;
 import model.entity.Enemy;
@@ -29,6 +34,8 @@ public class StaticArtifactRegressionTest {
         testLuckyDog();
         testGambler();
         testResolutionOfSojourner();
+        testStaticCombatBoundarySets();
+        testActionCategorySets();
         testNullStats();
         System.out.println("StaticArtifactRegressionTest passed");
     }
@@ -132,6 +139,126 @@ public class StaticArtifactRegressionTest {
                 "Resolution supplied ATK");
     }
 
+    /** Verifies exact static values for inactive conditional sets. */
+    private static void testStaticCombatBoundarySets() {
+        Berserker berserker = new Berserker();
+        assertEquals("Berserker", berserker.getName(), "Berserker name");
+        assertClose(0.12, berserker.getStats().get(StatType.CRIT_RATE),
+                "Berserker CRIT Rate");
+        assertClose(0.0,
+                berserker.getStats().get(StatType.CHARGED_ATTACK_CRIT_RATE),
+                "Berserker should not fabricate low-HP CRIT Rate");
+
+        BraveHeart braveHeart = new BraveHeart();
+        assertEquals("Brave Heart", braveHeart.getName(), "Brave Heart name");
+        assertClose(0.18, braveHeart.getStats().get(StatType.ATK_PERCENT),
+                "Brave Heart ATK");
+        assertClose(0.0, braveHeart.getStats().get(StatType.DMG_BONUS_ALL),
+                "Brave Heart should not fabricate enemy-HP damage");
+
+        BloodstainedChivalry bloodstained = new BloodstainedChivalry();
+        assertEquals("Bloodstained Chivalry", bloodstained.getName(),
+                "Bloodstained name");
+        assertClose(0.25,
+                bloodstained.getStats().get(StatType.PHYSICAL_DMG_BONUS),
+                "Bloodstained Physical DMG");
+        assertClose(0.0,
+                bloodstained.getStats().get(StatType.CHARGED_ATTACK_DMG_BONUS),
+                "Bloodstained should not fabricate defeat-window damage");
+
+        StatsContainer supplied = suppliedStats();
+        Berserker preserved = new Berserker(supplied);
+        assertTrue(preserved.getStats() == supplied,
+                "Berserker should retain the supplied container");
+        assertClose(7.0, supplied.get(StatType.ELEMENTAL_MASTERY),
+                "Static set supplied stat preservation");
+        assertClose(0.12, supplied.get(StatType.CRIT_RATE),
+                "Berserker supplied CRIT Rate");
+    }
+
+    /** Verifies Marechaussee and Vourukasha action-category isolation. */
+    private static void testActionCategorySets() {
+        MarechausseeHunter marechaussee = new MarechausseeHunter();
+        assertEquals("Marechaussee Hunter", marechaussee.getName(),
+                "Marechaussee name");
+        assertClose(0.15,
+                marechaussee.getStats().get(StatType.NORMAL_ATTACK_DMG_BONUS),
+                "Marechaussee Normal DMG");
+        assertClose(0.15,
+                marechaussee.getStats().get(StatType.CHARGED_ATTACK_DMG_BONUS),
+                "Marechaussee Charged DMG");
+        assertClose(0.0, marechaussee.getStats().get(StatType.CRIT_RATE),
+                "Marechaussee should not fabricate HP-change CRIT stacks");
+
+        CombatSimulator blankSim = simulatorWith(
+                new ArtifactSet("Blank", new StatsContainer()));
+        Character blankOwner = blankSim.getCharacter(CharacterId.SUCROSE);
+        double baseNormal = directDamage(blankSim, blankOwner,
+                ActionType.NORMAL, StatType.NORMAL_ATTACK_DMG_BONUS);
+        double baseCharged = directDamage(blankSim, blankOwner,
+                ActionType.CHARGE, StatType.CHARGED_ATTACK_DMG_BONUS);
+        double baseSkill = directDamage(blankSim, blankOwner,
+                ActionType.SKILL, StatType.SKILL_DMG_BONUS);
+        double baseBurst = directDamage(blankSim, blankOwner,
+                ActionType.BURST, StatType.BURST_DMG_BONUS);
+
+        CombatSimulator marechausseeSim = simulatorWith(marechaussee);
+        Character marechausseeOwner = marechausseeSim.getCharacter(
+                CharacterId.SUCROSE);
+        assertClose(baseNormal * 1.15,
+                directDamage(marechausseeSim, marechausseeOwner,
+                        ActionType.NORMAL, StatType.NORMAL_ATTACK_DMG_BONUS),
+                "Marechaussee Normal damage routing");
+        assertClose(baseCharged * 1.15,
+                directDamage(marechausseeSim, marechausseeOwner,
+                        ActionType.CHARGE, StatType.CHARGED_ATTACK_DMG_BONUS),
+                "Marechaussee Charged damage routing");
+        assertClose(baseSkill,
+                directDamage(marechausseeSim, marechausseeOwner,
+                        ActionType.SKILL, StatType.SKILL_DMG_BONUS),
+                "Marechaussee Skill isolation");
+
+        VourukashasGlow vourukasha = new VourukashasGlow();
+        assertEquals("Vourukasha's Glow", vourukasha.getName(),
+                "Vourukasha name");
+        assertClose(0.20, vourukasha.getStats().get(StatType.HP_PERCENT),
+                "Vourukasha HP");
+        assertClose(0.10,
+                vourukasha.getStats().get(StatType.SKILL_DMG_BONUS),
+                "Vourukasha Skill DMG");
+        assertClose(0.10,
+                vourukasha.getStats().get(StatType.BURST_DMG_BONUS),
+                "Vourukasha Burst DMG");
+        CombatSimulator vourukashaSim = simulatorWith(vourukasha);
+        Character vourukashaOwner = vourukashaSim.getCharacter(
+                CharacterId.SUCROSE);
+        assertClose(baseSkill * 1.10,
+                directDamage(vourukashaSim, vourukashaOwner,
+                        ActionType.SKILL, StatType.SKILL_DMG_BONUS),
+                "Vourukasha Skill damage routing");
+        assertClose(baseBurst * 1.10,
+                directDamage(vourukashaSim, vourukashaOwner,
+                        ActionType.BURST, StatType.BURST_DMG_BONUS),
+                "Vourukasha Burst damage routing");
+        assertClose(baseNormal,
+                directDamage(vourukashaSim, vourukashaOwner,
+                        ActionType.NORMAL, StatType.NORMAL_ATTACK_DMG_BONUS),
+                "Vourukasha Normal isolation");
+        assertClose(0.10,
+                vourukashaOwner.getEffectiveStats(-1.0).get(
+                        StatType.SKILL_DMG_BONUS),
+                "Vourukasha negative-time stability");
+        assertClose(0.10,
+                vourukashaOwner.getEffectiveStats(1000.0).get(
+                        StatType.BURST_DMG_BONUS),
+                "Vourukasha positive-time stability");
+
+        StatsContainer supplied = suppliedStats();
+        VourukashasGlow preserved = new VourukashasGlow(supplied);
+        assertTrue(preserved.getStats() == supplied,
+                "Vourukasha should retain the supplied container");
+    }
+
     /** Verifies all supplied-stat constructors reject null explicitly. */
     private static void testNullStats() {
         assertNullRejected(() -> new Adventurer(null), "Adventurer null stats");
@@ -140,6 +267,17 @@ public class StaticArtifactRegressionTest {
         assertNullRejected(
                 () -> new ResolutionOfSojourner(null),
                 "Resolution null stats");
+        assertNullRejected(() -> new Berserker(null), "Berserker null stats");
+        assertNullRejected(() -> new BraveHeart(null), "Brave Heart null stats");
+        assertNullRejected(
+                () -> new BloodstainedChivalry(null),
+                "Bloodstained null stats");
+        assertNullRejected(
+                () -> new MarechausseeHunter(null),
+                "Marechaussee null stats");
+        assertNullRejected(
+                () -> new VourukashasGlow(null),
+                "Vourukasha null stats");
     }
 
     /** Creates a simulator containing one deterministic artifact wearer. */

@@ -3297,8 +3297,8 @@ experiment record.
 - **Status:** active
 - **Source:** explicit broad character, weapon, and artifact coverage request
   with authorized branch-isolated delegates
-- **Scope/risk:** Adventurer, Lucky Dog, Gambler, Resolution of Sojourner, the
-  five Royal weapons, and Barbara; planned
+- **Scope/risk:** nine low-risk artifact sets, the five Royal weapons, and
+  Barbara; planned
 - **Evidence:** maintained KQM artifact, weapon, and character catalogs,
   accessed 2026-08-02:
   https://library.keqingmains.com/equipment/artifacts

@@ -12900,6 +12900,7 @@ Campaign inventory:
 | Resolution of Sojourner | artifact | ready | action CRIT routing audit | `StaticArtifactRegressionTest` | done |
 | Royal family | weapon batch | delegated evidence | isolated family base | `RoyalWeaponRegressionTest` | active |
 | Barbara | character | delegated evidence | typed `CharacterId` and CSV | `BarbaraRegressionTest` | active |
+| Static combat-boundary sets | artifact batch | ready | none | `StaticArtifactRegressionTest` | done |
 
 ### Phase 1: Low-Rarity Artifact Sets - Done
 
@@ -13022,6 +13023,61 @@ Verification:
 - `./gradlew ReactionRegressionTest`
 - `./gradlew build javadoc PartyCatalogRegressionTest`
 - `python scripts/preflight.py --run`
+
+### Phase 4: Static Combat-Boundary Artifact Sets - Done
+
+Why now:
+
+- These five sets are independent of delegated write sets and their active
+  combat bonuses require no new runtime callback or mutable state.
+
+Target files:
+
+- `src/java/model/artifact/Berserker.java` (new)
+- `src/java/model/artifact/BraveHeart.java` (new)
+- `src/java/model/artifact/BloodstainedChivalry.java` (new)
+- `src/java/model/artifact/MarechausseeHunter.java` (new)
+- `src/java/model/artifact/VourukashasGlow.java` (new)
+- `src/java/sample/StaticArtifactRegressionTest.java`
+
+Acceptance criteria:
+
+- Berserker grants CRIT Rate +12%, Brave Heart grants ATK +18%, and
+  Bloodstained grants Physical DMG +25% without inventing player-HP,
+  enemy-HP, or defeat state.
+- Marechaussee grants Normal and Charged Attack DMG +15% without fabricating
+  HP-change CRIT stacks.
+- Vourukasha grants HP +20% plus Skill/Burst DMG +10% without fabricating
+  incoming-damage stacks.
+- Canonical names, supplied-stat preservation, independent instances, and
+  unrelated-stat isolation remain exact.
+
+Test cases to add or update:
+
+- Normal: all exact fixed bonuses and canonical names.
+- Boundary: arbitrary time, fresh/supplied containers, and action-category
+  isolation for Marechaussee and Vourukasha.
+- Abnormal: null supplied stats and proof that unsupported conditional bonuses
+  remain zero.
+
+Verification:
+
+- `./gradlew StaticArtifactRegressionTest`
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Five canonical sets expose exact CRIT, ATK, Physical, action-DMG, and HP
+  branches while unsupported player-HP, enemy-HP, defeat, stamina, and incoming
+  damage conditions remain inactive.
+- Formula probes prove Marechaussee affects only Normal/Charged damage and
+  Vourukasha affects only Skill/Burst damage; fresh/supplied/null and
+  arbitrary-time cases pass.
+- `./gradlew StaticArtifactRegressionTest`, `./gradlew
+  ReactionRegressionTest build javadoc`, and `python scripts/preflight.py
+  --run` passed on 2026-08-03.
 
 ## Implementation Order: Black Sword Campaign
 
