@@ -3934,6 +3934,12 @@ public class ReactionRegressionTest {
         assertWeaponMetadata(
                 sword, "Favonius Sword", 454.0, 0.613, model.type.WeaponType.SWORD);
         assertFavoniusWindfallGeneratesEnergy(sword, "Favonius Sword");
+
+        model.weapon.FavoniusGreatsword greatsword =
+                new model.weapon.FavoniusGreatsword(5, () -> 0.0);
+        assertWeaponMetadata(greatsword, "Favonius Greatsword", 454.0, 0.613,
+                model.type.WeaponType.CLAYMORE);
+        assertFavoniusWindfallGeneratesEnergy(greatsword, "Favonius Greatsword");
     }
 
     private static void testAccuracyPhaseF_SacrificialSwordProcBoundaries() {
