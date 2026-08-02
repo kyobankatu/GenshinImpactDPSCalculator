@@ -257,9 +257,9 @@ public class Razor extends Character implements
                 ActionType.NORMAL);
         normal.setICD(ICDType.Standard, ICDTag.NormalAttack, 0.0);
         normal.setShatterTrigger(true);
-        // Resolve the physical hit and its same-hit follow-ups before advancing.
-        sim.performAction(characterId, normal);
         normal.setAnimationDuration(duration);
+        // Resolve the physical hit and its same-hit follow-ups before advancing.
+        sim.performActionWithoutTimeAdvance(characterId, normal);
 
         triggerC6(sim);
         if (isFormActive(sim.getCurrentTime())) {
