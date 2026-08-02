@@ -2715,7 +2715,7 @@ experiment record.
 
 ### B-125 — Switch-activated weapon coverage
 
-- **Status:** in-progress
+- **Status:** done
 - **Scope:** backward-compatible incoming/target weapon switch callbacks, The
   Widsith, Sacrificial Jade, and Thrilling Tales of Dragon Slayers; RL excluded
 - **Value/risk:** closes the known TTDS/Widsith boundary and the last fully
@@ -2729,6 +2729,10 @@ experiment record.
 - **Boundary:** stochastic Widsith selection is injectable for reproducibility;
   direct active-character setters intentionally remain callback-free fixtures
 - **Plan:** `TASKS.md` Switch-Activated Weapon Campaign
+- **Completion:** backward-compatible incoming/target callbacks plus The
+  Widsith, Sacrificial Jade, and Thrilling Tales of Dragon Slayers are covered
+  by focused timing, refinement, replacement, and abnormal regressions; all
+  local gates passed on 2026-08-02
 
 ### B-126 — Core artifact set expansion
 

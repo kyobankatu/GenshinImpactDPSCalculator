@@ -154,6 +154,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_StatefulCraftableWeaponPhaseOne();
         testAccuracyPhaseF_StatefulCraftableWeaponPhaseTwo();
         testAccuracyPhaseF_WeaponSwitchCallbackContract();
+        testAccuracyPhaseF_SwitchActivatedWeapons();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -10761,6 +10762,267 @@ public class ReactionRegressionTest {
         assertEquals(CharacterId.XINGQIU,
                 sim.getActiveCharacter().getCharacterId(),
                 "Switching to a plain weapon should remain supported");
+    }
+
+    private static void testAccuracyPhaseF_SwitchActivatedWeapons() {
+        model.weapon.TheWidsith recitative =
+                new model.weapon.TheWidsith(5, () -> 0.0);
+        assertEquals("The Widsith", recitative.getName(),
+                "The Widsith display name");
+        assertEquals(model.type.WeaponType.CATALYST,
+                recitative.getWeaponType(), "The Widsith weapon type");
+        assertClose(510.0, recitative.getBaseAtk(), EPS,
+                "The Widsith base ATK");
+        assertClose(0.551,
+                recitative.getStats().get(StatType.CRIT_DMG), EPS,
+                "The Widsith CRIT DMG");
+        assertEquals(5, recitative.getRefinement(),
+                "The Widsith default refinement contract");
+        TestCharacter recitativeOwner = testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE);
+        recitativeOwner.setWeapon(recitative);
+        CombatSimulator recitativeSim = simulatorWith(recitativeOwner);
+        assertClose(1.20,
+                effectiveStatAt(recitativeOwner, StatType.ATK_PERCENT, 0.0),
+                EPS, "R5 Widsith Recitative");
+        assertClose(0.0,
+                effectiveStatAt(recitativeOwner, StatType.ATK_PERCENT, 10.0),
+                EPS, "Widsith should expire at exactly ten seconds");
+
+        model.weapon.TheWidsith aria =
+                new model.weapon.TheWidsith(5, () -> 0.34);
+        TestCharacter ariaOwner = testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE);
+        ariaOwner.setWeapon(aria);
+        simulatorWith(ariaOwner);
+        for (Element element : Element.values()) {
+            double expectedBonus = element == Element.PHYSICAL ? 0.0 : 0.96;
+            assertClose(expectedBonus,
+                    effectiveStatAt(
+                            ariaOwner, element.getBonusStatType(), 0.0),
+                    EPS, "Widsith Aria element boundary " + element);
+        }
+
+        model.weapon.TheWidsith interlude =
+                new model.weapon.TheWidsith(5, () -> 0.80);
+        TestCharacter interludeOwner = testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE);
+        interludeOwner.setWeapon(interlude);
+        simulatorWith(interludeOwner);
+        assertClose(480.0,
+                effectiveStatAt(
+                        interludeOwner, StatType.ELEMENTAL_MASTERY, 0.0),
+                EPS, "R5 Widsith Interlude");
+
+        int[] drawCount = {0};
+        model.weapon.TheWidsith cooldownWidsith =
+                new model.weapon.TheWidsith(1, () -> {
+                    drawCount[0]++;
+                    return drawCount[0] == 1 ? 0.0 : 0.80;
+                });
+        TestCharacter cooldownOwner = testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE);
+        cooldownOwner.setWeapon(cooldownWidsith);
+        CombatSimulator cooldownSim = simulatorWith(cooldownOwner);
+        cooldownSim.addCharacter(testCharacter(
+                Element.PYRO, CharacterId.AMBER));
+        cooldownSim.setActiveCharacter(CharacterId.AMBER);
+        cooldownSim.setActiveCharacter(CharacterId.SUCROSE);
+        assertEquals(1, drawCount[0],
+                "Direct setters should not activate Widsith");
+        cooldownSim.advanceTime(29.999);
+        cooldownWidsith.onSwitchIn(cooldownOwner, cooldownSim);
+        assertEquals(1, drawCount[0],
+                "Widsith should not draw while on cooldown");
+        cooldownSim.advanceTime(0.001 + 1e-9);
+        cooldownWidsith.onSwitchIn(cooldownOwner, cooldownSim);
+        assertEquals(2, drawCount[0],
+                "Widsith should draw at the exact cooldown boundary");
+        assertClose(240.0,
+                resolvedStat(cooldownSim, cooldownOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "R1 Widsith Interlude after cooldown");
+
+        boolean invalidDrawRejected = false;
+        try {
+            model.weapon.TheWidsith invalid =
+                    new model.weapon.TheWidsith(5, () -> 1.0);
+            TestCharacter invalidOwner = testCharacter(Element.ANEMO);
+            invalidOwner.setWeapon(invalid);
+            simulatorWith(invalidOwner);
+        } catch (IllegalArgumentException expected) {
+            invalidDrawRejected = true;
+        }
+        assertTrue(invalidDrawRejected,
+                "Widsith should reject draws outside [0, 1)");
+        cooldownWidsith.initializeForSimulator(cooldownOwner, cooldownSim);
+        boolean crossSimulatorWidsithRejected = false;
+        try {
+            cooldownWidsith.initializeForSimulator(
+                    cooldownOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            crossSimulatorWidsithRejected = true;
+        }
+        assertTrue(crossSimulatorWidsithRejected,
+                "Widsith should reject cross-simulator reuse");
+
+        model.weapon.SacrificialJade jade =
+                new model.weapon.SacrificialJade();
+        assertEquals("Sacrificial Jade", jade.getName(),
+                "Sacrificial Jade display name");
+        assertEquals(model.type.WeaponType.CATALYST,
+                jade.getWeaponType(), "Sacrificial Jade weapon type");
+        assertClose(454.0, jade.getBaseAtk(), EPS,
+                "Sacrificial Jade base ATK");
+        assertClose(0.368,
+                jade.getStats().get(StatType.CRIT_RATE), EPS,
+                "Sacrificial Jade CRIT Rate");
+        assertEquals(5, jade.getRefinement(),
+                "Sacrificial Jade default refinement");
+        TestCharacter jadeOwner = testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE);
+        jadeOwner.setWeapon(jade);
+        TestCharacter jadeAlly = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        CombatSimulator jadeSim = simulatorWith(jadeOwner);
+        jadeSim.addCharacter(jadeAlly);
+        jadeSim.switchCharacter(CharacterId.AMBER);
+        assertClose(0.0,
+                effectiveStatAt(jadeOwner, StatType.HP_PERCENT, 4.999), EPS,
+                "Sacrificial Jade before five off-field seconds");
+        assertClose(0.64,
+                effectiveStatAt(jadeOwner, StatType.HP_PERCENT, 5.0), EPS,
+                "R5 Sacrificial Jade at five off-field seconds");
+        assertClose(80.0,
+                effectiveStatAt(
+                        jadeOwner, StatType.ELEMENTAL_MASTERY, 5.0), EPS,
+                "R5 Sacrificial Jade EM");
+        jadeSim.advanceTime(4.9);
+        jadeSim.switchCharacter(CharacterId.SUCROSE);
+        assertClose(0.64,
+                effectiveStatAt(jadeOwner, StatType.HP_PERCENT, 14.999), EPS,
+                "Sacrificial Jade should retain its on-field grace");
+        assertClose(0.0,
+                effectiveStatAt(jadeOwner, StatType.HP_PERCENT, 15.0), EPS,
+                "Sacrificial Jade should expire at exact on-field ten seconds");
+
+        model.weapon.SacrificialJade directJade =
+                new model.weapon.SacrificialJade(1);
+        TestCharacter directLead = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        TestCharacter directJadeOwner = testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE);
+        directJadeOwner.setWeapon(directJade);
+        CombatSimulator directJadeSim = simulatorWith(directLead);
+        directJadeSim.addCharacter(directJadeOwner);
+        directJadeSim.advanceTime(5.0);
+        assertClose(0.32,
+                resolvedStat(directJadeSim, directJadeOwner,
+                        StatType.HP_PERCENT), EPS,
+                "Initially off-field R1 Sacrificial Jade");
+        directJadeSim.setActiveCharacter(CharacterId.SUCROSE);
+        assertClose(40.0,
+                resolvedStat(directJadeSim, directJadeOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Direct setter should preserve active Jade grace coherently");
+
+        model.weapon.ThrillingTalesOfDragonSlayers thrillingTales =
+                new model.weapon.ThrillingTalesOfDragonSlayers();
+        assertEquals("Thrilling Tales of Dragon Slayers",
+                thrillingTales.getName(), "TTDS display name");
+        assertEquals(model.type.WeaponType.CATALYST,
+                thrillingTales.getWeaponType(), "TTDS weapon type");
+        assertClose(401.0, thrillingTales.getBaseAtk(), EPS,
+                "TTDS base ATK");
+        assertClose(0.352,
+                thrillingTales.getStats().get(StatType.HP_PERCENT), EPS,
+                "TTDS HP percent");
+        assertEquals(5, thrillingTales.getRefinement(),
+                "TTDS default refinement");
+        TestCharacter talesOwner = testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE);
+        talesOwner.setWeapon(thrillingTales);
+        TestCharacter talesTarget = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        CombatSimulator talesSim = simulatorWith(talesOwner);
+        talesSim.addCharacter(talesTarget);
+        talesSim.switchCharacter(CharacterId.AMBER);
+        assertClose(0.48,
+                resolvedStat(talesSim, talesTarget, StatType.ATK_PERCENT),
+                EPS, "R5 TTDS incoming target buff");
+        assertEquals(1,
+                (int) talesTarget.getActiveBuffs().stream()
+                        .filter(buff -> buff.getId()
+                                == BuffId.THRILLING_TALES_LEGACY)
+                        .count(),
+                "TTDS should apply one typed buff");
+        assertClose(0.0,
+                effectiveStatAt(talesTarget, StatType.ATK_PERCENT, 10.0),
+                EPS, "TTDS should expire at exactly ten seconds");
+        talesSim.setActiveCharacter(CharacterId.SUCROSE);
+        talesSim.advanceTime(19.899);
+        thrillingTales.onSwitchOut(talesOwner, talesTarget, talesSim);
+        assertClose(0.0,
+                resolvedStat(talesSim, talesTarget, StatType.ATK_PERCENT),
+                EPS, "TTDS should reject retry before twenty seconds");
+        talesSim.advanceTime(0.001 + 1e-9);
+        thrillingTales.onSwitchOut(talesOwner, talesTarget, talesSim);
+        assertClose(0.48,
+                resolvedStat(talesSim, talesTarget, StatType.ATK_PERCENT),
+                EPS, "TTDS should reactivate at twenty seconds");
+        assertEquals(1,
+                (int) talesTarget.getActiveBuffs().stream()
+                        .filter(buff -> buff.getId()
+                                == BuffId.THRILLING_TALES_LEGACY)
+                        .count(),
+                "TTDS should replace rather than stack its typed buff");
+        int talesBuffCount = talesTarget.getActiveBuffs().size();
+        thrillingTales.onSwitchOut(talesOwner, null, talesSim);
+        thrillingTales.onSwitchOut(talesTarget, talesOwner, talesSim);
+        thrillingTales.onSwitchOut(
+                talesOwner, talesTarget, new CombatSimulator());
+        assertEquals(talesBuffCount, talesTarget.getActiveBuffs().size(),
+                "TTDS should ignore invalid callback contexts");
+
+        model.weapon.ThrillingTalesOfDragonSlayers r1Tales =
+                new model.weapon.ThrillingTalesOfDragonSlayers(1);
+        TestCharacter r1TalesOwner = testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU);
+        r1TalesOwner.setWeapon(r1Tales);
+        TestCharacter r1TalesTarget = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        CombatSimulator r1TalesSim = simulatorWith(r1TalesOwner);
+        r1TalesSim.addCharacter(r1TalesTarget);
+        r1TalesSim.switchCharacter(CharacterId.AMBER);
+        assertClose(0.24,
+                resolvedStat(r1TalesSim, r1TalesTarget,
+                        StatType.ATK_PERCENT), EPS,
+                "R1 TTDS incoming target buff");
+
+        boolean lowWidsithRejected = false;
+        boolean highJadeRejected = false;
+        boolean lowTalesRejected = false;
+        try {
+            new model.weapon.TheWidsith(0);
+        } catch (IllegalArgumentException expected) {
+            lowWidsithRejected = true;
+        }
+        try {
+            new model.weapon.SacrificialJade(6);
+        } catch (IllegalArgumentException expected) {
+            highJadeRejected = true;
+        }
+        try {
+            new model.weapon.ThrillingTalesOfDragonSlayers(0);
+        } catch (IllegalArgumentException expected) {
+            lowTalesRejected = true;
+        }
+        assertTrue(lowWidsithRejected,
+                "Widsith should reject refinement zero");
+        assertTrue(highJadeRejected,
+                "Sacrificial Jade should reject refinement six");
+        assertTrue(lowTalesRejected,
+                "TTDS should reject refinement zero");
     }
 
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {

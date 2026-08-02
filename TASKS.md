@@ -12775,7 +12775,7 @@ Verification:
 
 ## Implementation Order: Switch-Activated Weapon Campaign
 
-Status: In progress. This campaign adds a backward-compatible typed incoming
+Status: Complete. This campaign adds a backward-compatible typed incoming
 weapon-switch callback and uses it to complete three switch-state weapons; RL
 and generated documentation remain excluded.
 
@@ -12830,7 +12830,7 @@ Completion evidence:
 - `./gradlew ReactionRegressionTest`, `./gradlew build`, `./gradlew javadoc`,
   and `python scripts/preflight.py` passed on 2026-08-02.
 
-### Phase 2: Switch-Activated Weapons
+### Phase 2: Switch-Activated Weapons - Done
 
 Target files:
 
@@ -12867,6 +12867,15 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+Completion evidence:
+
+- Focused regressions cover all three Widsith themes, physical exclusion,
+  injected-draw rejection, exact effect/cooldown boundaries, Sacrificial Jade
+  off-/on-field timing and direct setters, and TTDS target, expiry, cooldown,
+  replacement, metadata, and refinement behavior.
+- `./gradlew ReactionRegressionTest`, `./gradlew build`, `./gradlew javadoc`,
+  and `python scripts/preflight.py` passed on 2026-08-02.
 
 ## Implementation Order: Stateful Craftable Weapon Campaign
 
