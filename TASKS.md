@@ -13498,6 +13498,8 @@ Evidence:
 
 ### Phase 2: C3/C5 Talent Levels
 
+Status: Done.
+
 Target files:
 
 - `config/characters/Ineffa/Ineffa_Multipliers.csv`
@@ -13525,6 +13527,15 @@ Verification:
 - `./gradlew javadoc`
 - `./gradlew FlinsParty2`
 - `python scripts/preflight.py`
+
+Evidence:
+
+- Exact C2/C3 Skill, shield, and Birgitta values plus C3/C4/C5 Burst threshold
+  regressions pass; C3 preserves ten Birgitta hits at two-second cadence and C5
+  does not raise Skill beyond C3.
+- Two C0 `FlinsParty2` runs match at 20,805,520 damage / 301,093 DPS; the
+  six-damage change is the sourced Lv9 decimal correction.
+- Reaction regression, build, Javadoc, sample simulation, and preflight pass.
 
 ### Phase 3: C6 Thundercloud Follow-Up
 

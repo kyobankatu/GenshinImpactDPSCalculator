@@ -230,7 +230,10 @@ public class Ineffa extends Character
     private void skill(CombatSimulator sim) {
         // Reduced Cleaning Module
         // Skill DMG: 146.88% (Lv9)
-        double mv = getTalentValue("Skill DMG", 1.4688);
+        String skillSuffix = constellation >= 3 ? " C3" : "";
+        double mv = getTalentValue(
+                "Skill DMG" + skillSuffix,
+                constellation >= 3 ? 1.7280 : 1.4688);
 
         AttackAction hit = new AttackAction("Enhanced Cleaning Module", mv, Element.ELECTRO, StatType.BASE_ATK,
                 StatType.SKILL_DMG_BONUS, 0.0, false, ActionType.SKILL);
@@ -252,8 +255,13 @@ public class Ineffa extends Character
                 sourceAction,
                 sim.getApplicableBuffs(this),
                 currentTime).getTotalAtk();
-        double shieldRatio = getTalentValue("Shield Ratio", 3.76);
-        double shieldFlat = getTalentValue("Shield Flat", 2820);
+        String skillSuffix = constellation >= 3 ? " C3" : "";
+        double shieldRatio = getTalentValue(
+                "Shield Ratio" + skillSuffix,
+                constellation >= 3 ? 4.423680 : 3.760128);
+        double shieldFlat = getTalentValue(
+                "Shield Flat" + skillSuffix,
+                constellation >= 3 ? 3547.8796 : 2819.7734);
         shieldHealth = atk * shieldRatio + shieldFlat;
         if (constellation >= 1) {
             double lunarChargedBonus = Math.min(0.50, (atk / 100.0) * 0.025);
@@ -287,7 +295,10 @@ public class Ineffa extends Character
      * @param sim active combat simulator
      */
     private void refreshBirgitta(CombatSimulator sim) {
-        double birgittaMv = getTalentValue("Birgitta DMG", 1.632);
+        String skillSuffix = constellation >= 3 ? " C3" : "";
+        double birgittaMv = getTalentValue(
+                "Birgitta DMG" + skillSuffix,
+                constellation >= 3 ? 1.9200 : 1.6320);
 
         AttackAction birgittaDischarge = new AttackAction("Birgitta Discharge", birgittaMv, Element.ELECTRO,
                 StatType.BASE_ATK, StatType.SKILL_DMG_BONUS, 0.0, false, ActionType.SKILL);
@@ -335,7 +346,10 @@ public class Ineffa extends Character
      */
     private void burst(CombatSimulator sim) {
         // Supreme Instruction
-        double mv = getTalentValue("Burst DMG", 11.506); // Lv9
+        String burstKey = constellation >= 5 ? "Burst DMG C5" : "Burst DMG";
+        double mv = getTalentValue(
+                burstKey,
+                constellation >= 5 ? 13.5360 : 11.5056);
 
         AttackAction hit = new AttackAction("Supreme Instruction", mv, Element.ELECTRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 0.0, false, ActionType.BURST);

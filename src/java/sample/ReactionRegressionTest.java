@@ -107,6 +107,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_IneffaSkillNoIcdApplicationContract();
         testAccuracyPhaseF_IneffaBirgittaSummonLifecycle();
         testAccuracyPhaseF_IneffaC1C2AndC4Lifecycle();
+        testAccuracyPhaseF_IneffaC3AndC5TalentLevels();
         testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost();
         testAccuracyPhaseF_PartySizeParticleEnergyMultipliers();
         testAccuracyPhaseF_ImpetuousWindsCooldownSnapshot();
@@ -4158,6 +4159,117 @@ public class ReactionRegressionTest {
         assertEquals(CharacterId.INEFFA, buffs.get(0).getSourceCharacterId(),
                 "Carrier Flow Composite should retain Ineffa source ownership");
         return buffs.get(0);
+    }
+
+    private static void testAccuracyPhaseF_IneffaC3AndC5TalentLevels() {
+        RecordingDamageWeapon c2Weapon = new RecordingDamageWeapon("");
+        model.character.Ineffa c2Ineffa = new model.character.Ineffa(
+                c2Weapon, blankArtifact(), ineffaTalentData(2));
+        CombatSimulator c2Sim = simulatorWithExistingCharacter(c2Ineffa);
+        c2Ineffa.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), c2Sim);
+        c2Sim.advanceTime(2.01);
+        assertClose(1.4688,
+                findAction(c2Weapon.actions, "Enhanced Cleaning Module")
+                        .getDamagePercent(),
+                EPS,
+                "Ineffa C2 should retain level-nine Skill damage");
+        assertClose(330.0 * 3.760128 + 2819.7734,
+                c2Ineffa.getShieldHealth(), EPS,
+                "Ineffa C2 should retain level-nine shield scaling");
+        assertClose(1.6320,
+                findAction(c2Weapon.actions, "Birgitta Discharge")
+                        .getDamagePercent(),
+                EPS,
+                "Ineffa C2 should retain level-nine Birgitta damage");
+
+        RecordingDamageWeapon c3Weapon = new RecordingDamageWeapon("");
+        model.character.Ineffa c3Ineffa = new model.character.Ineffa(
+                c3Weapon, blankArtifact(), ineffaTalentData(3));
+        CombatSimulator c3Sim = simulatorWithExistingCharacter(c3Ineffa);
+        c3Ineffa.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), c3Sim);
+        c3Sim.advanceTime(22.01);
+        assertClose(1.7280,
+                findAction(c3Weapon.actions, "Enhanced Cleaning Module")
+                        .getDamagePercent(),
+                EPS,
+                "Ineffa C3 should select level-twelve Skill damage");
+        assertClose(330.0 * 4.423680 + 3547.8796,
+                c3Ineffa.getShieldHealth(), EPS,
+                "Ineffa C3 should select level-twelve shield scaling");
+        List<AttackAction> c3BirgittaActions = c3Weapon.actions.stream()
+                .filter(action -> "Birgitta Discharge".equals(action.getName()))
+                .collect(Collectors.toList());
+        assertEquals(10, c3BirgittaActions.size(),
+                "Ineffa C3 Birgitta should retain its ten-hit lifetime");
+        assertTrue(c3BirgittaActions.stream().allMatch(
+                        action -> Math.abs(action.getDamagePercent() - 1.9200) < EPS),
+                "Ineffa C3 should select level-twelve Birgitta damage");
+        int birgittaIndex = 0;
+        for (int i = 0; i < c3Weapon.times.size(); i++) {
+            if (!"Birgitta Discharge".equals(c3Weapon.actions.get(i).getName())) {
+                continue;
+            }
+            assertClose(2.6 + birgittaIndex * 2.0,
+                    c3Weapon.times.get(i), EPS,
+                    "Ineffa C3 should preserve Birgitta's two-second cadence");
+            birgittaIndex++;
+        }
+
+        RecordingDamageWeapon c3BurstWeapon =
+                new RecordingDamageWeapon("Supreme Instruction");
+        model.character.Ineffa c3BurstIneffa = new model.character.Ineffa(
+                c3BurstWeapon, blankArtifact(), ineffaTalentData(3));
+        CombatSimulator c3BurstSim =
+                simulatorWithExistingCharacter(c3BurstIneffa);
+        c3BurstIneffa.onAction(
+                CharacterActionRequest.of(CharacterActionKey.BURST), c3BurstSim);
+        assertClose(11.5056,
+                findAction(c3BurstWeapon.actions, "Supreme Instruction")
+                        .getDamagePercent(),
+                EPS,
+                "Ineffa C3 should retain level-nine Burst damage");
+
+        RecordingDamageWeapon c4BurstWeapon =
+                new RecordingDamageWeapon("Supreme Instruction");
+        model.character.Ineffa c4BurstIneffa = new model.character.Ineffa(
+                c4BurstWeapon, blankArtifact(), ineffaTalentData(4));
+        CombatSimulator c4BurstSim =
+                simulatorWithExistingCharacter(c4BurstIneffa);
+        c4BurstIneffa.onAction(
+                CharacterActionRequest.of(CharacterActionKey.BURST), c4BurstSim);
+        assertClose(11.5056,
+                findAction(c4BurstWeapon.actions, "Supreme Instruction")
+                        .getDamagePercent(),
+                EPS,
+                "Ineffa C4 should retain level-nine Burst damage");
+
+        RecordingDamageWeapon c5BurstWeapon =
+                new RecordingDamageWeapon("Supreme Instruction");
+        model.character.Ineffa c5BurstIneffa = new model.character.Ineffa(
+                c5BurstWeapon, blankArtifact(), ineffaTalentData(5));
+        CombatSimulator c5BurstSim =
+                simulatorWithExistingCharacter(c5BurstIneffa);
+        c5BurstIneffa.onAction(
+                CharacterActionRequest.of(CharacterActionKey.BURST), c5BurstSim);
+        assertClose(13.5360,
+                findAction(c5BurstWeapon.actions, "Supreme Instruction")
+                        .getDamagePercent(),
+                EPS,
+                "Ineffa C5 should select level-twelve Burst damage");
+
+        RecordingDamageWeapon c5SkillWeapon =
+                new RecordingDamageWeapon("Enhanced Cleaning Module");
+        model.character.Ineffa c5SkillIneffa = new model.character.Ineffa(
+                c5SkillWeapon, blankArtifact(), ineffaTalentData(5));
+        CombatSimulator c5SkillSim =
+                simulatorWithExistingCharacter(c5SkillIneffa);
+        c5SkillIneffa.onAction(
+                CharacterActionRequest.of(CharacterActionKey.SKILL), c5SkillSim);
+        assertClose(1.7280,
+                findAction(c5SkillWeapon.actions, "Enhanced Cleaning Module")
+                        .getDamagePercent(),
+                EPS,
+                "Ineffa C5 should not raise Skill above its C3 level");
     }
 
     private static void testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost() {
