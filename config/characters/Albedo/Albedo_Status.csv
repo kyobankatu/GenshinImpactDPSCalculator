@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Albedo,STATS,Base HP,90,13226,0
+Albedo,STATS,Base ATK,90,251,0
+Albedo,STATS,Base DEF,90,876,0
+Albedo,STATS,Ascension Geo DMG,90,0.288,0
+Albedo,STATS,Energy Cost,90,40,0
+Albedo,STATS,Constellation,6,6,0
+Albedo,CONFIG,Character Level,90,90,0
+Albedo,CONFIG,Normal Level,9,9,0
+Albedo,CONFIG,Skill Level,12,12,0
+Albedo,CONFIG,Burst Level,12,12,0

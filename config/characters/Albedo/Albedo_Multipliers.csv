@@ -1,0 +1,19 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Albedo,NORMAL,N1,9,0.674976,0
+Albedo,NORMAL,N2,9,0.674976,0
+Albedo,NORMAL,N3,9,0.871844,0
+Albedo,NORMAL,N4,9,0.914030,0
+Albedo,NORMAL,N5,9,1.140428,0
+Albedo,CHARGE,Charged 1,9,0.869,0
+Albedo,CHARGE,Charged 2,9,1.106,0
+Albedo,PLUNGE,Plunge High,9,2.933586,0
+Albedo,SKILL,Solar Isotoma Cast,9,2.2168,0
+Albedo,SKILL,Solar Isotoma Cast C3,12,2.608,0
+Albedo,SKILL,Transient Blossom,9,2.2712,0
+Albedo,SKILL,Transient Blossom C3,12,2.672,0
+Albedo,BURST,Tectonic Tide,9,6.2424,0
+Albedo,BURST,Tectonic Tide C5,12,7.344,0
+Albedo,BURST,Fatal Blossom,9,1.224,0
+Albedo,BURST,Fatal Blossom C5,12,1.44,0
+Albedo,PASSIVE,Expected Particles,1,0.67,0
+Albedo,PASSIVE,C1 Flat Energy,1,1.2,0
