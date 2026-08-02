@@ -126,6 +126,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ReciprocalHitWeapons();
         testAccuracyPhaseF_ReactionWindowWeapons();
         testAccuracyPhaseF_HybridReactionWindowWeapons();
+        testAccuracyPhaseF_SelfContainedFourStarWeapons();
         testAccuracyPhaseF_HitStackWeapons();
         testAccuracyPhaseF_AdditionalClaymoreHitStackWeapons();
         testAccuracyPhaseF_AdditionalMultiStatHitStackWeapons();
@@ -7549,6 +7550,253 @@ public class ReactionRegressionTest {
         }
         assertTrue(highHalberdRefinementRejected,
                 "Halberd should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_SelfContainedFourStarWeapons() {
+        model.weapon.PrototypeStarglitter starglitter =
+                new model.weapon.PrototypeStarglitter();
+        assertEquals("Prototype Starglitter", starglitter.getName(),
+                "Prototype Starglitter display name");
+        assertClose(510.0, starglitter.getBaseAtk(), EPS,
+                "Prototype Starglitter base ATK");
+        assertClose(0.459,
+                starglitter.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "Prototype Starglitter Energy Recharge");
+        assertEquals(model.type.WeaponType.POLEARM, starglitter.getWeaponType(),
+                "Prototype Starglitter weapon type");
+        assertEquals(5, starglitter.getRefinement(),
+                "Prototype Starglitter default refinement");
+
+        TestCharacter starglitterOwner = testCharacter(Element.PYRO);
+        starglitterOwner.setWeapon(starglitter);
+        CombatSimulator starglitterSim = simulatorWith(starglitterOwner);
+        starglitter.onAction(
+                starglitterOwner,
+                CharacterActionRequest.of(CharacterActionKey.BURST),
+                starglitterSim);
+        assertClose(0.0,
+                resolvedStat(starglitterSim, starglitterOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS),
+                EPS,
+                "Burst use should not activate Prototype Starglitter");
+        starglitter.onAction(
+                starglitterOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                starglitterSim);
+        assertClose(0.16,
+                resolvedStat(starglitterSim, starglitterOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS),
+                EPS,
+                "R5 Prototype Starglitter first Normal stack");
+        assertClose(0.16,
+                resolvedStat(starglitterSim, starglitterOwner,
+                        StatType.CHARGED_ATTACK_DMG_BONUS),
+                EPS,
+                "R5 Prototype Starglitter first Charged stack");
+        starglitterSim.advanceTime(1.0);
+        starglitter.onAction(
+                starglitterOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                starglitterSim);
+        starglitter.onAction(
+                starglitterOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                starglitterSim);
+        assertClose(0.32,
+                resolvedStat(starglitterSim, starglitterOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS),
+                EPS,
+                "Prototype Starglitter should cap at two stacks");
+        starglitterSim.advanceTime(11.999);
+        assertClose(0.32,
+                resolvedStat(starglitterSim, starglitterOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS),
+                EPS,
+                "Prototype Starglitter should remain active before shared expiry");
+        starglitterSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0,
+                resolvedStat(starglitterSim, starglitterOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS),
+                EPS,
+                "Prototype Starglitter should expire at exactly twelve seconds");
+
+        model.weapon.PrototypeStarglitter r1Starglitter =
+                new model.weapon.PrototypeStarglitter(1);
+        TestCharacter r1StarglitterOwner = testCharacter(Element.PYRO);
+        r1StarglitterOwner.setWeapon(r1Starglitter);
+        CombatSimulator r1StarglitterSim = simulatorWith(r1StarglitterOwner);
+        r1Starglitter.onAction(
+                r1StarglitterOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                r1StarglitterSim);
+        assertClose(0.08,
+                resolvedStat(r1StarglitterSim, r1StarglitterOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS),
+                EPS,
+                "R1 Prototype Starglitter stack value");
+
+        AttackAction physicalHit = new AttackAction(
+                "Physical", 1.0, Element.PHYSICAL, StatType.BASE_ATK,
+                StatType.PHYSICAL_DMG_BONUS, 0.0, ActionType.NORMAL);
+        AttackAction zeroElementalHit = new AttackAction(
+                "Zero Pyro", 0.0, Element.PYRO, StatType.BASE_ATK,
+                StatType.PYRO_DMG_BONUS, 0.0, ActionType.SKILL);
+        AttackAction elementalHit = new AttackAction(
+                "Pyro", 1.0, Element.PYRO, StatType.BASE_ATK,
+                StatType.PYRO_DMG_BONUS, 0.0, ActionType.SKILL);
+
+        model.weapon.IronSting ironSting = new model.weapon.IronSting();
+        assertEquals("Iron Sting", ironSting.getName(), "Iron Sting display name");
+        assertClose(510.0, ironSting.getBaseAtk(), EPS, "Iron Sting base ATK");
+        assertClose(165.0,
+                ironSting.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Iron Sting Elemental Mastery");
+        assertEquals(model.type.WeaponType.SWORD, ironSting.getWeaponType(),
+                "Iron Sting weapon type");
+        assertEquals(5, ironSting.getRefinement(),
+                "Iron Sting default refinement");
+
+        TestCharacter ironOwner = testCharacter(Element.PYRO, CharacterId.SUCROSE);
+        ironOwner.setWeapon(ironSting);
+        CombatSimulator ironSim = simulatorWith(ironOwner);
+        ironSting.onDamage(ironOwner, physicalHit, 0.0, ironSim);
+        ironSting.onDamage(ironOwner, zeroElementalHit, 0.0, ironSim);
+        assertClose(0.0,
+                resolvedStat(ironSim, ironOwner, StatType.DMG_BONUS_ALL), EPS,
+                "Physical and zero damage should not activate Iron Sting");
+        ironSting.onDamage(ironOwner, elementalHit, 0.0, ironSim);
+        assertClose(0.12,
+                resolvedStat(ironSim, ironOwner, StatType.DMG_BONUS_ALL), EPS,
+                "R5 Iron Sting first stack");
+        ironSim.advanceTime(0.999);
+        ironSting.onDamage(ironOwner, elementalHit, ironSim.getCurrentTime(), ironSim);
+        assertClose(0.12,
+                resolvedStat(ironSim, ironOwner, StatType.DMG_BONUS_ALL), EPS,
+                "Iron Sting should reject a stack before exact CT");
+        ironSim.advanceTime(0.001 + 1e-9);
+        ironSting.onDamage(ironOwner, elementalHit, ironSim.getCurrentTime(), ironSim);
+        assertClose(0.24,
+                resolvedStat(ironSim, ironOwner, StatType.DMG_BONUS_ALL), EPS,
+                "Iron Sting should gain a second stack at exact CT");
+        ironSim.advanceTime(1.0);
+        ironSting.onDamage(ironOwner, elementalHit, ironSim.getCurrentTime(), ironSim);
+        assertClose(0.24,
+                resolvedStat(ironSim, ironOwner, StatType.DMG_BONUS_ALL), EPS,
+                "Iron Sting should cap at two stacks and refresh duration");
+
+        TestCharacter fieldCharacter = testCharacter(Element.CRYO, CharacterId.KAEYA);
+        ironSim.addCharacter(fieldCharacter);
+        ironSim.setActiveCharacter(CharacterId.KAEYA);
+        ironSim.advanceTime(5.999);
+        ironSting.onDamage(ironOwner, elementalHit, ironSim.getCurrentTime(), ironSim);
+        assertClose(0.24,
+                resolvedStat(ironSim, ironOwner, StatType.DMG_BONUS_ALL), EPS,
+                "Iron Sting should retain stacks off-field before expiry");
+        ironSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0,
+                resolvedStat(ironSim, ironOwner, StatType.DMG_BONUS_ALL), EPS,
+                "Off-field damage should not refresh Iron Sting at exact expiry");
+
+        model.weapon.IronSting r1IronSting = new model.weapon.IronSting(1);
+        TestCharacter r1IronOwner = testCharacter(Element.PYRO);
+        r1IronOwner.setWeapon(r1IronSting);
+        CombatSimulator r1IronSim = simulatorWith(r1IronOwner);
+        r1IronSting.onDamage(r1IronOwner, elementalHit, 0.0, r1IronSim);
+        assertClose(0.06,
+                resolvedStat(r1IronSim, r1IronOwner, StatType.DMG_BONUS_ALL), EPS,
+                "R1 Iron Sting stack value");
+
+        model.weapon.BalladOfTheFjords fjords =
+                new model.weapon.BalladOfTheFjords();
+        assertEquals("Ballad of the Fjords", fjords.getName(),
+                "Ballad of the Fjords display name");
+        assertClose(510.0, fjords.getBaseAtk(), EPS,
+                "Ballad of the Fjords base ATK");
+        assertClose(0.276, fjords.getStats().get(StatType.CRIT_RATE), EPS,
+                "Ballad of the Fjords CRIT Rate");
+        assertEquals(model.type.WeaponType.POLEARM, fjords.getWeaponType(),
+                "Ballad of the Fjords weapon type");
+        assertEquals(5, fjords.getRefinement(),
+                "Ballad of the Fjords default refinement");
+
+        TestCharacter fjordsOwner = testCharacter(Element.ANEMO, CharacterId.SUCROSE);
+        fjordsOwner.setWeapon(fjords);
+        CombatSimulator fjordsSim = simulatorWith(fjordsOwner);
+        fjordsSim.addCharacter(testCharacter(Element.CRYO, CharacterId.KAEYA));
+        assertClose(0.0,
+                resolvedStat(fjordsSim, fjordsOwner, StatType.ELEMENTAL_MASTERY), EPS,
+                "Two party elements should not activate Ballad of the Fjords");
+        fjordsSim.addCharacter(testCharacter(Element.PYRO, CharacterId.AMBER));
+        assertClose(240.0,
+                resolvedStat(fjordsSim, fjordsOwner, StatType.ELEMENTAL_MASTERY), EPS,
+                "R5 Ballad of the Fjords three-element bonus");
+
+        model.weapon.BalladOfTheFjords r1Fjords =
+                new model.weapon.BalladOfTheFjords(1);
+        TestCharacter r1FjordsOwner = testCharacter(Element.ANEMO, CharacterId.SUCROSE);
+        r1FjordsOwner.setWeapon(r1Fjords);
+        CombatSimulator r1FjordsSim = simulatorWith(r1FjordsOwner);
+        r1FjordsSim.addCharacter(testCharacter(Element.CRYO, CharacterId.KAEYA));
+        r1FjordsSim.addCharacter(testCharacter(Element.PYRO, CharacterId.AMBER));
+        assertClose(120.0,
+                resolvedStat(r1FjordsSim, r1FjordsOwner,
+                        StatType.ELEMENTAL_MASTERY),
+                EPS,
+                "R1 Ballad of the Fjords three-element bonus");
+
+        boolean lowStarglitterRefinementRejected = false;
+        try {
+            new model.weapon.PrototypeStarglitter(0);
+        } catch (IllegalArgumentException expected) {
+            lowStarglitterRefinementRejected = true;
+        }
+        assertTrue(lowStarglitterRefinementRejected,
+                "Prototype Starglitter should reject refinement zero");
+
+        boolean highStarglitterRefinementRejected = false;
+        try {
+            new model.weapon.PrototypeStarglitter(6);
+        } catch (IllegalArgumentException expected) {
+            highStarglitterRefinementRejected = true;
+        }
+        assertTrue(highStarglitterRefinementRejected,
+                "Prototype Starglitter should reject refinement six");
+
+        boolean lowIronRefinementRejected = false;
+        try {
+            new model.weapon.IronSting(0);
+        } catch (IllegalArgumentException expected) {
+            lowIronRefinementRejected = true;
+        }
+        assertTrue(lowIronRefinementRejected,
+                "Iron Sting should reject refinement zero");
+
+        boolean highIronRefinementRejected = false;
+        try {
+            new model.weapon.IronSting(6);
+        } catch (IllegalArgumentException expected) {
+            highIronRefinementRejected = true;
+        }
+        assertTrue(highIronRefinementRejected,
+                "Iron Sting should reject refinement six");
+
+        boolean lowFjordsRefinementRejected = false;
+        try {
+            new model.weapon.BalladOfTheFjords(0);
+        } catch (IllegalArgumentException expected) {
+            lowFjordsRefinementRejected = true;
+        }
+        assertTrue(lowFjordsRefinementRejected,
+                "Ballad of the Fjords should reject refinement zero");
+
+        boolean highFjordsRefinementRejected = false;
+        try {
+            new model.weapon.BalladOfTheFjords(6);
+        } catch (IllegalArgumentException expected) {
+            highFjordsRefinementRejected = true;
+        }
+        assertTrue(highFjordsRefinementRejected,
+                "Ballad of the Fjords should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_ActionUseWindowWeapons() {
