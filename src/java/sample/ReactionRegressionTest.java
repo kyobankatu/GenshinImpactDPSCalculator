@@ -109,6 +109,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_IneffaC1C2AndC4Lifecycle();
         testAccuracyPhaseF_IneffaC3AndC5TalentLevels();
         testAccuracyPhaseF_IneffaC6ThundercloudFollowUp();
+        testAccuracyPhaseF_IneffaNormalAttack3MultiHit();
         testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost();
         testAccuracyPhaseF_PartySizeParticleEnergyMultipliers();
         testAccuracyPhaseF_ImpetuousWindsCooldownSnapshot();
@@ -4416,6 +4417,68 @@ public class ReactionRegressionTest {
         realTickSim.advanceTime(2.01);
         assertEquals(1, realTickWeapon.actions.size(),
                 "A real Thundercloud tick should trigger off-field Ineffa C6 once");
+    }
+
+    private static void testAccuracyPhaseF_IneffaNormalAttack3MultiHit() {
+        RecordingDamageWeapon weapon = new RecordingDamageWeapon("Ineffa N");
+        model.character.Ineffa ineffa = new model.character.Ineffa(
+                weapon, blankArtifact());
+        CombatSimulator sim = simulatorWithExistingCharacter(ineffa);
+        List<AttackAction> logicalActions = new ArrayList<>();
+        sim.addListener((actor, action, time) -> logicalActions.add(action));
+
+        for (int i = 0; i < 4; i++) {
+            sim.performAction(
+                    CharacterId.INEFFA,
+                    CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        }
+
+        String[] expectedNames = {
+                "Ineffa N1",
+                "Ineffa N2",
+                "Ineffa N3 Hit 1",
+                "Ineffa N3 Hit 2",
+                "Ineffa N4"
+        };
+        double[] expectedMultipliers = {0.640, 0.629, 0.418, 0.418, 1.030};
+        assertEquals(expectedNames.length, weapon.actions.size(),
+                "Ineffa four-step combo should resolve five damage hits");
+        for (int i = 0; i < expectedNames.length; i++) {
+            AttackAction action = weapon.actions.get(i);
+            assertEquals(expectedNames[i], action.getName(),
+                    "Ineffa normal hit order at index " + i);
+            assertClose(expectedMultipliers[i], action.getDamagePercent(), EPS,
+                    "Ineffa normal multiplier at index " + i);
+            assertEquals(Element.PHYSICAL, action.getElement(),
+                    "Ineffa normal element at index " + i);
+            assertEquals(ActionType.NORMAL, action.getActionType(),
+                    "Ineffa normal action type at index " + i);
+            assertEquals(ICDType.Standard, action.getICDType(),
+                    "Ineffa normal ICD type at index " + i);
+            assertEquals(ICDTag.NormalAttack, action.getICDTag(),
+                    "Ineffa normal ICD tag at index " + i);
+            assertClose(1.0, action.getGaugeUnits(), EPS,
+                    "Ineffa normal gauge at index " + i);
+        }
+        assertClose(0.6, weapon.times.get(2), EPS,
+                "Ineffa N3 first hit should resolve at the action start");
+        assertClose(0.6, weapon.times.get(3), EPS,
+                "Ineffa N3 second hit should share the action timestamp");
+        assertClose(1.2, sim.getCurrentTime(), EPS,
+                "Ineffa four-step combo should advance four action durations");
+
+        assertEquals(4, logicalActions.size(),
+                "Ineffa multi-hit combo should emit one logical event per action");
+        assertEquals("Ineffa N3 Hit 2", logicalActions.get(2).getName(),
+                "Ineffa N3 final hit should own the logical normal event");
+
+        sim.performAction(
+                CharacterId.INEFFA,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        assertEquals("Ineffa N1", weapon.actions.get(5).getName(),
+                "Ineffa combo should wrap to N1 after N4");
+        assertClose(1.5, sim.getCurrentTime(), EPS,
+                "Wrapped Ineffa N1 should advance one additional action duration");
     }
 
     private static void testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost() {

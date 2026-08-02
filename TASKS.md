@@ -13582,6 +13582,55 @@ Evidence:
 - Two C0 `FlinsParty2` runs match at 20,805,520 damage / 301,093 DPS.
 - Reaction regression, build, Javadoc, sample simulation, and preflight pass.
 
+## Implementation Order: Ineffa Normal Attack 3 Multi-Hit Accuracy
+
+Status: Complete. Corrected B-136 as one content-local phase without changing
+shared action, ICD, rotation, RL, or report contracts.
+
+### Phase 1: Split N3 Damage Events
+
+Status: Done.
+
+Target files:
+
+- `config/characters/Ineffa/Ineffa_Multipliers.csv`
+- `src/java/model/character/Ineffa.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Ineffa normal attack 3 resolves two independently named 41.8% Physical
+  normal hits while other combo steps retain one hit each.
+- Both hits retain standard normal-attack ICD metadata and 1U application;
+  only the second hit advances the timeline and emits the logical normal-action
+  notification, preserving one 0.3-second action duration.
+- The combo advances to N4 once after the pair and wraps normally after N4.
+
+Test cases:
+
+- Normal: exact N1/N2/N3x2/N4 hit names, multipliers, elements, and sequence.
+- Boundary: N3 advances 0.3 seconds once and then selects N4 exactly once.
+- Abnormal: N1, N2, and N4 are not duplicated; both N3 hits preserve the
+  shared standard NormalAttack ICD contract.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `./gradlew FlinsParty2`
+- `python scripts/preflight.py`
+
+Evidence:
+
+- The four-step combo now resolves N1, N2, two independently named 41.8% N3
+  hits, and N4 in order, then wraps exactly to N1.
+- Both N3 hits resolve at the same action-start timestamp with Physical normal,
+  standard NormalAttack ICD, and 1U metadata; only the second emits the logical
+  action event and advances the timeline, preserving one 0.3-second duration.
+- Two `FlinsParty2` runs remain 20,805,520 damage / 301,093 DPS.
+- Reaction regression, build, Javadoc, sample simulation, and preflight pass.
+
 ## Implementation Order: Raiden Constellation Lifecycle
 
 Status: Complete. This pass implements sourced, representable C1 and C4

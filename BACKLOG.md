@@ -2931,7 +2931,7 @@ experiment record.
 
 ### B-136 — Ineffa normal attack 3 two-hit correction
 
-- **Status:** candidate
+- **Status:** complete
 - **Source:** delegated B-134 character audit
 - **Scope/risk:** replace the single 41.8% normal attack 3 action with its two
   41.8% hits while preserving total action timing, Electro infusion, gauge,
@@ -2944,3 +2944,7 @@ experiment record.
   verify shared ICD state and the physical/infused element paths
 - **Test:** exact two-hit count and multiplier, one action-duration advance,
   Aura/ICD behavior, and unchanged non-N3 normal attacks
+- **Plan:** one-phase `TASKS.md` Ineffa Normal Attack 3 Multi-Hit Accuracy
+- **Completion:** N3 resolves two sourced 41.8% hits with one logical action
+  notification and one 0.3-second duration; combo, metadata, full regression,
+  and two unchanged `FlinsParty2` runs pass

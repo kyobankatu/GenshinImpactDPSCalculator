@@ -189,6 +189,21 @@ public class Ineffa extends Character
         String key = "N" + (normalAttackStep + 1);
         String name = "Ineffa " + key;
 
+        if (normalAttackStep == 2) {
+            AttackAction firstHit = createNormalAttackHit(
+                    name + " Hit 1",
+                    getTalentValue("N3 Hit 1", 0.418),
+                    0.0);
+            AttackAction secondHit = createNormalAttackHit(
+                    name + " Hit 2",
+                    getTalentValue("N3 Hit 2", 0.418),
+                    0.3);
+            sim.performActionWithoutTimeAdvance(characterId, firstHit);
+            sim.performAction(characterId, secondHit);
+            advanceNormalAttackStep();
+            return;
+        }
+
         double defaultMv = 0.5;
         switch (normalAttackStep) {
             case 0:
@@ -197,9 +212,6 @@ public class Ineffa extends Character
             case 1:
                 defaultMv = 0.629;
                 break; // N2
-            case 2:
-                defaultMv = 0.418;
-                break; // N3
             case 3:
                 defaultMv = 1.030;
                 break; // N4
@@ -207,16 +219,34 @@ public class Ineffa extends Character
 
         double mv = getTalentValue(key, defaultMv);
 
-        AttackAction hit = new AttackAction(name, mv, Element.PHYSICAL, StatType.BASE_ATK,
-                StatType.NORMAL_ATTACK_DMG_BONUS, 0.0, ActionType.NORMAL);
-
-        hit.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
-        hit.setAnimationDuration(0.3);
+        AttackAction hit = createNormalAttackHit(name, mv, 0.3);
         sim.performAction(this.characterId, hit);
 
+        advanceNormalAttackStep();
+    }
+
+    private AttackAction createNormalAttackHit(
+            String name,
+            double multiplier,
+            double animationDuration) {
+        AttackAction hit = new AttackAction(
+                name,
+                multiplier,
+                Element.PHYSICAL,
+                StatType.BASE_ATK,
+                StatType.NORMAL_ATTACK_DMG_BONUS,
+                0.0,
+                ActionType.NORMAL);
+        hit.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
+        hit.setAnimationDuration(animationDuration);
+        return hit;
+    }
+
+    private void advanceNormalAttackStep() {
         normalAttackStep++;
-        if (normalAttackStep >= 4)
+        if (normalAttackStep >= 4) {
             normalAttackStep = 0;
+        }
     }
 
     /**

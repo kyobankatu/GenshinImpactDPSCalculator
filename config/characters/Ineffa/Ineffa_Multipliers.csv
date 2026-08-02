@@ -1,7 +1,8 @@
 Character,AbilityType,Key,Level,Value1,Value2
 Ineffa,NORMAL,N1,9,0.640,0
 Ineffa,NORMAL,N2,9,0.629,0
-Ineffa,NORMAL,N3,9,0.418,0
+Ineffa,NORMAL,N3 Hit 1,9,0.418,0
+Ineffa,NORMAL,N3 Hit 2,9,0.418,0
 Ineffa,NORMAL,N4,9,1.030,0
 Ineffa,SKILL,Skill DMG,9,1.4688,0
 Ineffa,SKILL,Shield Ratio,9,3.760128,0
