@@ -4947,6 +4947,20 @@ public class ReactionRegressionTest {
         assertTargetAuraWeaponDamage(
                 r1BloodtaintedGreatsword, Element.ELECTRO, Element.HYDRO, 0.12,
                 "R1 Bloodtainted Greatsword");
+
+        model.weapon.RavenBow ravenBow = new model.weapon.RavenBow();
+        assertEquals("Raven Bow", ravenBow.getName(), "Raven Bow display name");
+        assertClose(448.0, ravenBow.getBaseAtk(), EPS, "Raven Bow base ATK");
+        assertClose(94.0, ravenBow.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Raven Bow Elemental Mastery");
+        assertEquals(model.type.WeaponType.BOW, ravenBow.getWeaponType(),
+                "Raven Bow weapon type");
+        assertTargetAuraWeaponDamage(
+                ravenBow, Element.HYDRO, Element.ELECTRO, 0.24, "Raven Bow");
+
+        model.weapon.RavenBow r1RavenBow = new model.weapon.RavenBow(1);
+        assertTargetAuraWeaponDamage(
+                r1RavenBow, Element.PYRO, Element.ELECTRO, 0.12, "R1 Raven Bow");
     }
 
     private static void testAccuracyPhaseF_KaeyaCharacterContract() {
