@@ -6386,6 +6386,71 @@ public class ReactionRegressionTest {
             highRefinementRejected = true;
         }
         assertTrue(highRefinementRejected, "Ballad should reject refinement six");
+
+        model.weapon.CompoundBow compoundBow = new model.weapon.CompoundBow();
+        assertEquals("Compound Bow", compoundBow.getName(),
+                "Compound Bow display name");
+        assertClose(454.0, compoundBow.getBaseAtk(), EPS, "Compound Bow base ATK");
+        assertClose(0.690,
+                compoundBow.getStats().get(StatType.PHYSICAL_DMG_BONUS), EPS,
+                "Compound Bow Physical DMG Bonus");
+        assertEquals(model.type.WeaponType.BOW, compoundBow.getWeaponType(),
+                "Compound Bow weapon type");
+        assertEquals(5, compoundBow.getRefinement(),
+                "Compound Bow default refinement");
+
+        TestCharacter compoundOwner = testCharacter(Element.PHYSICAL);
+        compoundOwner.setWeapon(compoundBow);
+        CombatSimulator compoundSim = simulatorWith(compoundOwner);
+        AttackAction chargeHit = typedDamageHit(
+                "Compound Bow Charge", ActionType.CHARGE, 1.0);
+        compoundBow.onDamage(compoundOwner, normalHit, 0.0, compoundSim);
+        compoundBow.onDamage(compoundOwner, chargeHit, 0.3, compoundSim);
+        compoundBow.onDamage(compoundOwner, normalHit, 0.6, compoundSim);
+        compoundBow.onDamage(compoundOwner, chargeHit, 0.9, compoundSim);
+        assertClose(0.32,
+                effectiveStatAt(compoundOwner, StatType.ATK_PERCENT, 0.9), EPS,
+                "R5 Compound Bow should cap at four ATK stacks");
+        assertClose(0.096,
+                effectiveStatAt(compoundOwner, StatType.ATK_SPD, 0.9), EPS,
+                "R5 Compound Bow should cap at four Normal SPD stacks");
+        compoundBow.onDamage(compoundOwner, skillHit, 1.2, compoundSim);
+        assertClose(0.32,
+                effectiveStatAt(compoundOwner, StatType.ATK_PERCENT, 6.899), EPS,
+                "Skill hits should not refresh Compound Bow");
+        assertClose(0.0,
+                effectiveStatAt(compoundOwner, StatType.ATK_PERCENT, 6.9), EPS,
+                "Compound Bow should expire all stacks exactly");
+
+        model.weapon.CompoundBow r1CompoundBow = new model.weapon.CompoundBow(1);
+        TestCharacter r1CompoundOwner = testCharacter(Element.PHYSICAL);
+        r1CompoundOwner.setWeapon(r1CompoundBow);
+        CombatSimulator r1CompoundSim = simulatorWith(r1CompoundOwner);
+        r1CompoundBow.onDamage(r1CompoundOwner, normalHit, 0.0, r1CompoundSim);
+        assertClose(0.04,
+                resolvedStat(r1CompoundSim, r1CompoundOwner, StatType.ATK_PERCENT), EPS,
+                "R1 Compound Bow ATK stack");
+        assertClose(0.012,
+                resolvedStat(r1CompoundSim, r1CompoundOwner, StatType.ATK_SPD), EPS,
+                "R1 Compound Bow Normal SPD stack");
+
+        boolean lowCompoundRefinementRejected = false;
+        try {
+            new model.weapon.CompoundBow(0);
+        } catch (IllegalArgumentException expected) {
+            lowCompoundRefinementRejected = true;
+        }
+        assertTrue(lowCompoundRefinementRejected,
+                "Compound Bow should reject refinement zero");
+
+        boolean highCompoundRefinementRejected = false;
+        try {
+            new model.weapon.CompoundBow(6);
+        } catch (IllegalArgumentException expected) {
+            highCompoundRefinementRejected = true;
+        }
+        assertTrue(highCompoundRefinementRejected,
+                "Compound Bow should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
