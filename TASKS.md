@@ -15489,7 +15489,7 @@ Verification:
 
 ## Implementation Order: Three-Star Runtime-Boundary Weapon Campaign
 
-Status: In progress. This campaign adds all eleven representable missing
+Status: Complete. This campaign adds all eleven representable missing
 three-star weapons while leaving the unsupported incoming-switch TTDS contract
 explicitly unimplemented; RL and generated documentation remain excluded.
 
@@ -15545,7 +15545,7 @@ Verification:
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
 
-### Phase 2: Immediate-Impact and Boundary-Inactive Weapons
+### Phase 2: Immediate-Impact and Boundary-Inactive Weapons - Done
 
 Target files:
 
@@ -15560,6 +15560,14 @@ Target files:
 - `src/java/model/weapon/TwinNephrite.java` (new)
 - `src/java/model/weapon/Slingshot.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Branch-isolated source commit `d304855` adds the shared inactive boundary,
+  eight metadata-complete weapons, and Slingshot's immediate-impact bonus.
+- Table-driven R1/R5 metadata, no-op boundary, Slingshot category, and invalid
+  refinement regressions pass together with reaction regression, build,
+  Javadoc, and preflight gates.
 
 Acceptance criteria:
 

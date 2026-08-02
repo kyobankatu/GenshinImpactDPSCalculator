@@ -2672,7 +2672,7 @@ experiment record.
 
 ### B-123 — Three-star runtime-boundary weapon coverage
 
-- **Status:** in-progress
+- **Status:** done
 - **Scope:** Harbinger of Dawn, Traveler's Handy Sword, Ferrous Shadow, White
   Iron Greatsword, Black Tassel, Messenger, Recurve Bow, Sharpshooter's Oath,
   Slingshot, Otherworldly Story, and Twin Nephrite; RL excluded
@@ -2686,3 +2686,6 @@ experiment record.
   weapons receive no incoming-character callback; representing it as no-op
   would be observably incomplete
 - **Plan:** `TASKS.md` Three-Star Runtime-Boundary Weapon Campaign
+- **Completion:** both phases pass table-driven metadata, refinement,
+  full-HP, immediate-impact, and explicitly inactive boundary regressions;
+  reaction regression, build, Javadoc, and preflight gates pass

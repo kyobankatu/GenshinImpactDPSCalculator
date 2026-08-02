@@ -150,6 +150,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_IsolatedRuntimeWeaponPhaseTwo();
         testAccuracyPhaseF_BlackcliffWeaponFamily();
         testAccuracyPhaseF_ThreeStarRuntimeBoundaryPhaseOne();
+        testAccuracyPhaseF_ThreeStarRuntimeBoundaryPhaseTwo();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -9989,6 +9990,163 @@ public class ReactionRegressionTest {
         }
         assertTrue(highFerrousRefinementRejected,
                 "Ferrous Shadow should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_ThreeStarRuntimeBoundaryPhaseTwo() {
+        model.weapon.BoundaryInactiveWeapon[] weapons = {
+            new model.weapon.TravelersHandySword(),
+            new model.weapon.WhiteIronGreatsword(),
+            new model.weapon.BlackTassel(),
+            new model.weapon.Messenger(),
+            new model.weapon.RecurveBow(),
+            new model.weapon.SharpshootersOath(),
+            new model.weapon.OtherworldlyStory(),
+            new model.weapon.TwinNephrite()
+        };
+        String[] names = {
+            "Traveler's Handy Sword",
+            "White Iron Greatsword",
+            "Black Tassel",
+            "Messenger",
+            "Recurve Bow",
+            "Sharpshooter's Oath",
+            "Otherworldly Story",
+            "Twin Nephrite"
+        };
+        model.type.WeaponType[] weaponTypes = {
+            model.type.WeaponType.SWORD,
+            model.type.WeaponType.CLAYMORE,
+            model.type.WeaponType.POLEARM,
+            model.type.WeaponType.BOW,
+            model.type.WeaponType.BOW,
+            model.type.WeaponType.BOW,
+            model.type.WeaponType.CATALYST,
+            model.type.WeaponType.CATALYST
+        };
+        double[] baseAttack = {
+            448.0, 401.0, 354.0, 448.0, 354.0, 401.0, 401.0, 448.0
+        };
+        StatType[] secondaryTypes = {
+            StatType.DEF_PERCENT,
+            StatType.DEF_PERCENT,
+            StatType.HP_PERCENT,
+            StatType.CRIT_DMG,
+            StatType.HP_PERCENT,
+            StatType.CRIT_DMG,
+            StatType.ENERGY_RECHARGE,
+            StatType.CRIT_RATE
+        };
+        double[] secondaryValues = {
+            0.293, 0.439, 0.469, 0.312, 0.469, 0.469, 0.390, 0.156
+        };
+        List<java.util.function.IntFunction<model.weapon.BoundaryInactiveWeapon>>
+                factories = List.of(
+                        model.weapon.TravelersHandySword::new,
+                        model.weapon.WhiteIronGreatsword::new,
+                        model.weapon.BlackTassel::new,
+                        model.weapon.Messenger::new,
+                        model.weapon.RecurveBow::new,
+                        model.weapon.SharpshootersOath::new,
+                        model.weapon.OtherworldlyStory::new,
+                        model.weapon.TwinNephrite::new);
+
+        for (int index = 0; index < weapons.length; index++) {
+            model.weapon.BoundaryInactiveWeapon weapon = weapons[index];
+            assertEquals(names[index], weapon.getName(),
+                    names[index] + " display name");
+            assertEquals(weaponTypes[index], weapon.getWeaponType(),
+                    names[index] + " weapon type");
+            assertClose(baseAttack[index], weapon.getBaseAtk(), EPS,
+                    names[index] + " base ATK");
+            assertClose(secondaryValues[index],
+                    weapon.getStats().get(secondaryTypes[index]), EPS,
+                    names[index] + " secondary stat");
+            assertEquals(5, weapon.getRefinement(),
+                    names[index] + " default refinement");
+
+            StatsContainer passiveStats = new StatsContainer();
+            passiveStats.set(StatType.ATK_PERCENT, 0.25);
+            weapon.applyPassive(passiveStats, -1.0);
+            weapon.applyPassive(passiveStats, 100.0);
+            assertClose(0.25,
+                    passiveStats.get(StatType.ATK_PERCENT), EPS,
+                    names[index] + " should not fabricate unavailable state");
+
+            model.weapon.BoundaryInactiveWeapon r1Weapon =
+                    factories.get(index).apply(1);
+            assertEquals(1, r1Weapon.getRefinement(),
+                    names[index] + " selected R1");
+            boolean lowRefinementRejected = false;
+            try {
+                factories.get(index).apply(0);
+            } catch (IllegalArgumentException expected) {
+                lowRefinementRejected = true;
+            }
+            assertTrue(lowRefinementRejected,
+                    names[index] + " should reject refinement zero");
+            boolean highRefinementRejected = false;
+            try {
+                factories.get(index).apply(6);
+            } catch (IllegalArgumentException expected) {
+                highRefinementRejected = true;
+            }
+            assertTrue(highRefinementRejected,
+                    names[index] + " should reject refinement six");
+        }
+
+        model.weapon.Slingshot slingshot = new model.weapon.Slingshot();
+        assertEquals("Slingshot", slingshot.getName(),
+                "Slingshot display name");
+        assertClose(354.0, slingshot.getBaseAtk(), EPS,
+                "Slingshot base ATK");
+        assertClose(0.312,
+                slingshot.getStats().get(StatType.CRIT_RATE), EPS,
+                "Slingshot CRIT Rate");
+        assertEquals(model.type.WeaponType.BOW,
+                slingshot.getWeaponType(), "Slingshot weapon type");
+        assertEquals(5, slingshot.getRefinement(),
+                "Slingshot default refinement");
+        StatsContainer slingshotStats = new StatsContainer();
+        slingshot.applyPassive(slingshotStats, -1.0);
+        assertClose(0.60,
+                slingshotStats.get(StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "R5 Slingshot immediate Normal bonus");
+        assertClose(0.60,
+                slingshotStats.get(StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "R5 Slingshot immediate Charged bonus");
+        assertClose(0.0,
+                slingshotStats.get(StatType.SKILL_DMG_BONUS), EPS,
+                "Slingshot should not buff Skill damage");
+        assertClose(0.0,
+                slingshotStats.get(StatType.BURST_DMG_BONUS), EPS,
+                "Slingshot should not buff Burst damage");
+        model.weapon.Slingshot r1Slingshot =
+                new model.weapon.Slingshot(1);
+        StatsContainer r1SlingshotStats = new StatsContainer();
+        r1Slingshot.applyPassive(r1SlingshotStats, 100.0);
+        assertClose(0.36,
+                r1SlingshotStats.get(StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "R1 Slingshot immediate Normal bonus");
+        assertClose(0.36,
+                r1SlingshotStats.get(StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "R1 Slingshot immediate Charged bonus");
+
+        boolean lowSlingshotRefinementRejected = false;
+        try {
+            new model.weapon.Slingshot(0);
+        } catch (IllegalArgumentException expected) {
+            lowSlingshotRefinementRejected = true;
+        }
+        assertTrue(lowSlingshotRefinementRejected,
+                "Slingshot should reject refinement zero");
+        boolean highSlingshotRefinementRejected = false;
+        try {
+            new model.weapon.Slingshot(6);
+        } catch (IllegalArgumentException expected) {
+            highSlingshotRefinementRejected = true;
+        }
+        assertTrue(highSlingshotRefinementRejected,
+                "Slingshot should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {
