@@ -2389,3 +2389,14 @@ experiment record.
 - **Plan:** `TASKS.md` Reaction Utility Claymore Campaign
 - **Completion:** `8fbad3a` adds both typed reaction listeners and focused
   regressions; build/Javadoc/leak gates pass
+
+### B-102 — Timed EM team-stat weapon coverage
+
+- **Status:** active
+- **Scope:** Wandering Evenstar refinement support, Makhaira Aquamarine, and
+  Xiphos' Moonlight; RL excluded
+- **Value/risk:** two additions reuse and consolidate an already-regressed timer,
+  snapshot, source attribution, and stacking policy
+- **Evidence boundary:** KQM TCL metadata, R1-R5 conversion ratios, 64-frame
+  first trigger, ten-second cadence, 12-second duration, and 30% ally share
+- **Plan:** `TASKS.md` Timed EM Team Weapon Campaign

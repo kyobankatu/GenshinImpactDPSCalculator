@@ -14288,3 +14288,52 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Timed EM Team Weapon Campaign
+
+Status: Active. Generalize one verified periodic EM snapshot and add its two
+missing weapon-family variants without changing timer or buff dispatch.
+
+Scope:
+
+- Preserve and refine Wandering Evenstar, then add Makhaira Aquamarine and
+  Xiphos' Moonlight with sourced metadata, R1-R5 values, and R5 defaults.
+
+Out of scope for this pass:
+
+- Runtime equipment swaps, report assets, characters, formulas, RL, generated
+  docs, and unrelated periodic effects.
+
+### Phase 1: Generalize and complete the timed EM team-stat family
+
+Target files:
+
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/model/weapon/TimedElementalMasteryTeamStatWeapon.java` (new)
+- `src/java/model/weapon/WanderingEvenstar.java`
+- `src/java/model/weapon/MakhairaAquamarine.java` (new)
+- `src/java/model/weapon/XiphosMoonlight.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Every weapon snapshots the owner's complete effective EM at 64 frames and
+  every ten seconds thereafter into one refresh-only half-open 12-second buff.
+- Wandering and Makhaira grant 24-48% of EM as flat ATK; Xiphos grants
+  0.036-0.072% ER per EM; allies receive exactly 30% and the owner is excluded
+  from that share.
+- Independent instances stack, snapshots remain fixed between ticks, metadata
+  and R1-R5 values/defaults are correct, and cross-simulator reuse is rejected.
+
+Test cases to add or update:
+
+- Normal: all three metadata/effects, owner versus ally share, R5, multiple stack.
+- Boundary: before/exact 64 frames, ten-second resnapshot, 12-second duration, R1.
+- Abnormal: owner ally-share exclusion, cross-simulator reuse, refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
