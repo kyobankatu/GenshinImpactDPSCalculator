@@ -122,6 +122,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_StaticActionBonusWeaponMetadata();
         testAccuracyPhaseF_LegacyWeaponRefinements();
         testAccuracyPhaseF_SkillUseEventWeapons();
+        testAccuracyPhaseF_WatatsumiWavewalkerWeapons();
         testAccuracyPhaseF_KaeyaCharacterContract();
         testAccuracyPhaseF_AmberCharacterContract();
         testAccuracyPhaseF_DendroResonanceReactionEmContract();
@@ -5710,6 +5711,69 @@ public class ReactionRegressionTest {
         }
         assertTrue(highFesteringRefinementRejected,
                 "Festering Desire should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_WatatsumiWavewalkerWeapons() {
+        model.weapon.Akuoumaru akuoumaru = new model.weapon.Akuoumaru();
+        assertEquals("Akuoumaru", akuoumaru.getName(), "Akuoumaru display name");
+        assertClose(510.0, akuoumaru.getBaseAtk(), EPS, "Akuoumaru base ATK");
+        assertClose(0.413, akuoumaru.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Akuoumaru ATK substat");
+        assertEquals(model.type.WeaponType.CLAYMORE, akuoumaru.getWeaponType(),
+                "Akuoumaru weapon type");
+        assertEquals(5, akuoumaru.getRefinement(), "Akuoumaru default refinement");
+
+        StatsContainer uninitializedStats = new StatsContainer();
+        akuoumaru.applyPassive(uninitializedStats, 0.0);
+        assertClose(0.0, uninitializedStats.get(StatType.BURST_DMG_BONUS), EPS,
+                "Watatsumi Wavewalker should be inactive before simulator initialization");
+
+        TestCharacter owner = testCharacter(Element.HYDRO, CharacterId.SUCROSE);
+        owner.setWeapon(akuoumaru);
+        CombatSimulator sim = simulatorWith(owner);
+        sim.addCharacter(testCharacter(Element.PYRO, CharacterId.XIANGLING));
+        sim.addCharacter(testCharacter(Element.HYDRO, CharacterId.XINGQIU));
+        sim.addCharacter(testCharacter(Element.PYRO, CharacterId.BENNETT));
+        assertClose(0.576, resolvedStat(sim, owner, StatType.BURST_DMG_BONUS), EPS,
+                "R5 Akuoumaru should use all four party members' maximum Energy");
+        assertClose(0.576, resolvedStat(sim, owner, StatType.BURST_DMG_BONUS), EPS,
+                "Repeated Watatsumi Wavewalker evaluation should not accumulate");
+        assertClose(0.0, resolvedStat(sim, owner, StatType.SKILL_DMG_BONUS), EPS,
+                "Watatsumi Wavewalker should not change Skill damage");
+        assertClose(0.0, resolvedStat(sim, owner, StatType.DMG_BONUS_ALL), EPS,
+                "Watatsumi Wavewalker should not change all damage");
+
+        model.weapon.Akuoumaru r1Akuoumaru = new model.weapon.Akuoumaru(1);
+        TestCharacter r1Owner = testCharacter(Element.HYDRO);
+        r1Owner.setWeapon(r1Akuoumaru);
+        CombatSimulator r1Sim = simulatorWith(r1Owner);
+        assertClose(0.072, resolvedStat(r1Sim, r1Owner, StatType.BURST_DMG_BONUS), EPS,
+                "R1 Akuoumaru should grant 0.12% per owner maximum Energy point");
+        assertEquals(1, r1Akuoumaru.getRefinement(), "Akuoumaru R1 refinement");
+
+        model.weapon.Akuoumaru cappedAkuoumaru = new model.weapon.Akuoumaru(1);
+        TestBurstCharacter cappedOwner = new TestBurstCharacter(400.0);
+        cappedOwner.setWeapon(cappedAkuoumaru);
+        CombatSimulator cappedSim = simulatorWithExistingCharacter(cappedOwner);
+        assertClose(0.40,
+                resolvedStat(cappedSim, cappedOwner, StatType.BURST_DMG_BONUS), EPS,
+                "R1 Akuoumaru should cap Burst damage at 40%");
+
+        boolean lowRefinementRejected = false;
+        try {
+            new model.weapon.Akuoumaru(0);
+        } catch (IllegalArgumentException expected) {
+            lowRefinementRejected = true;
+        }
+        assertTrue(lowRefinementRejected, "Akuoumaru should reject refinement zero");
+
+        boolean highRefinementRejected = false;
+        try {
+            new model.weapon.Akuoumaru(6);
+        } catch (IllegalArgumentException expected) {
+            highRefinementRejected = true;
+        }
+        assertTrue(highRefinementRejected, "Akuoumaru should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
