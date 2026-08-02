@@ -1,14 +1,10 @@
 package model.weapon;
 
-import model.entity.ActionTriggeredWeaponEffect;
-import model.entity.Character;
-import model.entity.Weapon;
-import model.stats.StatsContainer;
+import java.util.EnumSet;
+
 import model.type.StatType;
 import model.type.WeaponType;
-import simulation.CombatSimulator;
 import simulation.action.CharacterActionKey;
-import simulation.action.CharacterActionRequest;
 
 /**
  * Shared refinement-aware owner stat window activated by Elemental Skill use.
@@ -18,13 +14,7 @@ import simulation.action.CharacterActionRequest;
  * bonus. The effect is active in the half-open interval from cast time through
  * immediately before {@code cast time + duration}.
  */
-public abstract class SkillUseStatWeapon extends Weapon
-        implements ActionTriggeredWeaponEffect {
-    private final int refinement;
-    private final StatType passiveStat;
-    private final double passiveValue;
-    private final double duration;
-    private double activeUntil = Double.NEGATIVE_INFINITY;
+public abstract class SkillUseStatWeapon extends ActionUseStatWeapon {
 
     /**
      * Constructs a Skill-use stat weapon.
@@ -51,55 +41,8 @@ public abstract class SkillUseStatWeapon extends Weapon
             double baseBonus,
             double bonusPerRefinement,
             double duration) {
-        super(name, new StatsContainer());
-        if (refinement < 1 || refinement > 5) {
-            throw new IllegalArgumentException("Weapon refinement must be between 1 and 5");
-        }
-        this.refinement = refinement;
-        this.passiveStat = passiveStat;
-        this.passiveValue = baseBonus + bonusPerRefinement * refinement;
-        this.duration = duration;
-        this.weaponType = weaponType;
-        getStats().set(StatType.BASE_ATK, baseAtk);
-        getStats().set(secondaryStat, secondaryValue);
-    }
-
-    /**
-     * Returns this weapon's refinement rank.
-     *
-     * @return refinement in the inclusive range 1-5
-     */
-    public final int getRefinement() {
-        return refinement;
-    }
-
-    /**
-     * Refreshes the owner stat window on typed Elemental Skill use.
-     *
-     * @param user weapon owner
-     * @param request requested action
-     * @param sim active combat simulator
-     */
-    @Override
-    public final void onAction(
-            Character user,
-            CharacterActionRequest request,
-            CombatSimulator sim) {
-        if (request.getKey() == CharacterActionKey.SKILL) {
-            activeUntil = sim.getCurrentTime() + duration;
-        }
-    }
-
-    /**
-     * Applies the active Skill-use bonus before its exact expiry.
-     *
-     * @param stats stats container to mutate
-     * @param currentTime simulation time in seconds
-     */
-    @Override
-    public final void applyPassive(StatsContainer stats, double currentTime) {
-        if (currentTime < activeUntil) {
-            stats.add(passiveStat, passiveValue);
-        }
+        super(name, weaponType, baseAtk, secondaryStat, secondaryValue,
+                refinement, EnumSet.of(CharacterActionKey.SKILL),
+                passiveStat, baseBonus, bonusPerRefinement, duration);
     }
 }

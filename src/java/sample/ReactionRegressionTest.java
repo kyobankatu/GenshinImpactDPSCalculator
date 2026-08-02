@@ -126,6 +126,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ReciprocalHitWeapons();
         testAccuracyPhaseF_ReactionWindowWeapons();
         testAccuracyPhaseF_HitStackWeapons();
+        testAccuracyPhaseF_ActionUseWindowWeapons();
         testAccuracyPhaseF_KaeyaCharacterContract();
         testAccuracyPhaseF_AmberCharacterContract();
         testAccuracyPhaseF_DendroResonanceReactionEmContract();
@@ -6513,6 +6514,72 @@ public class ReactionRegressionTest {
         }
         assertTrue(highIbisRefinementRejected,
                 "Ibis Piercer should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_ActionUseWindowWeapons() {
+        model.weapon.EtherlightSpindlelute etherlight =
+                new model.weapon.EtherlightSpindlelute();
+        assertEquals("Etherlight Spindlelute", etherlight.getName(),
+                "Etherlight Spindlelute display name");
+        assertClose(510.0, etherlight.getBaseAtk(), EPS,
+                "Etherlight Spindlelute base ATK");
+        assertClose(0.459,
+                etherlight.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "Etherlight Spindlelute Energy Recharge");
+        assertEquals(model.type.WeaponType.CATALYST, etherlight.getWeaponType(),
+                "Etherlight Spindlelute weapon type");
+        assertEquals(5, etherlight.getRefinement(),
+                "Etherlight Spindlelute default refinement");
+
+        TestCharacter owner = testCharacter(Element.ANEMO);
+        owner.setWeapon(etherlight);
+        CombatSimulator sim = simulatorWith(owner);
+        etherlight.onAction(
+                owner, CharacterActionRequest.of(CharacterActionKey.NORMAL), sim);
+        assertClose(0.0, resolvedStat(sim, owner, StatType.ELEMENTAL_MASTERY), EPS,
+                "Normal use should not activate Etherlight Spindlelute");
+        etherlight.onAction(
+                owner, CharacterActionRequest.of(CharacterActionKey.SKILL), sim);
+        assertClose(200.0, resolvedStat(sim, owner, StatType.ELEMENTAL_MASTERY), EPS,
+                "R5 Etherlight Spindlelute Skill-use EM");
+        sim.advanceTime(10.0);
+        etherlight.onAction(
+                owner, CharacterActionRequest.of(CharacterActionKey.SKILL), sim);
+        sim.advanceTime(19.999);
+        assertClose(200.0, resolvedStat(sim, owner, StatType.ELEMENTAL_MASTERY), EPS,
+                "Refreshed Etherlight Spindlelute should remain active before expiry");
+        sim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0, resolvedStat(sim, owner, StatType.ELEMENTAL_MASTERY), EPS,
+                "Etherlight Spindlelute should expire at exactly twenty seconds");
+
+        model.weapon.EtherlightSpindlelute r1Etherlight =
+                new model.weapon.EtherlightSpindlelute(1);
+        TestCharacter r1Owner = testCharacter(Element.ANEMO);
+        r1Owner.setWeapon(r1Etherlight);
+        CombatSimulator r1Sim = simulatorWith(r1Owner);
+        r1Etherlight.onAction(
+                r1Owner, CharacterActionRequest.of(CharacterActionKey.SKILL), r1Sim);
+        assertClose(100.0,
+                resolvedStat(r1Sim, r1Owner, StatType.ELEMENTAL_MASTERY), EPS,
+                "R1 Etherlight Spindlelute Skill-use EM");
+
+        boolean lowRefinementRejected = false;
+        try {
+            new model.weapon.EtherlightSpindlelute(0);
+        } catch (IllegalArgumentException expected) {
+            lowRefinementRejected = true;
+        }
+        assertTrue(lowRefinementRejected,
+                "Etherlight Spindlelute should reject refinement zero");
+
+        boolean highRefinementRejected = false;
+        try {
+            new model.weapon.EtherlightSpindlelute(6);
+        } catch (IllegalArgumentException expected) {
+            highRefinementRejected = true;
+        }
+        assertTrue(highRefinementRejected,
+                "Etherlight Spindlelute should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
