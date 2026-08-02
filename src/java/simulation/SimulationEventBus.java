@@ -70,6 +70,12 @@ public interface SimulationEventBus {
      */
     void notifyDamage(Character actor, AttackAction action, double damage, double time);
 
+    /** Registers an indirect enemy-damage listener. */
+    void addIndirectDamageListener(IndirectDamageListener listener);
+
+    /** Dispatches a resolved indirect enemy-damage event. */
+    void notifyIndirectDamage(Character owner, double damage, double time);
+
     /**
      * Dispatches a particle-generation event.
      *

@@ -317,6 +317,7 @@ public class ReactionEffectScheduler {
         }
 
         sim.recordDamage(state.ownerId, finalDamage);
+        sim.notifyIndirectDamage(owner, finalDamage);
         sim.getCombatLogSink().log(
                 sim.getCurrentTime(), ownerName, label, finalDamage,
                 label, finalDamage, sim.getEnemy().getAuraMap(sim.getCurrentTime()));
@@ -332,6 +333,7 @@ public class ReactionEffectScheduler {
         }
 
         sim.recordDamage("Thundercloud", finalDamage);
+        sim.notifyIndirectDamage(null, finalDamage);
         sim.getCombatLogSink().log(
                 sim.getCurrentTime(), "Thundercloud", label, finalDamage,
                 label, finalDamage, sim.getEnemy().getAuraMap(sim.getCurrentTime()));
@@ -443,6 +445,7 @@ public class ReactionEffectScheduler {
             System.out.println(String.format("   [DoT] Burning Damage: %,.0f", tickDamage));
         }
         sim.recordDamage(state.ownerId, tickDamage);
+        sim.notifyIndirectDamage(sim.getCharacter(state.ownerId), tickDamage);
         sim.getCombatLogSink().log(
                 sim.getCurrentTime(), state.ownerId.getDisplayName(), "Burning", tickDamage,
                 "Burning", tickDamage, sim.getEnemy().getAuraMap(sim.getCurrentTime()));
@@ -507,6 +510,7 @@ public class ReactionEffectScheduler {
             System.out.println(String.format("   [Reaction] %s Damage: %,.0f", label, damage));
         }
         sim.recordDamage(ownerId, damage);
+        sim.notifyIndirectDamage(sim.getCharacter(ownerId), damage);
         sim.getCombatLogSink().log(
                 sim.getCurrentTime(), ownerId.getDisplayName(), label, damage,
                 label, damage, sim.getEnemy().getAuraMap(sim.getCurrentTime()));

@@ -39,6 +39,7 @@ public final class AlbedoRegressionTest {
         testNormalChargedAndPlungeActions();
         testSolarIsotomaCadenceParticlesAndSwitch();
         testTrueDamageFiltersAndSnapshotRefresh();
+        testIndirectDamageTrigger();
         testBurstFatalBlossomAndA4();
         testConstellationsOneThroughFive();
         testReplacementAndStaleGeneration();
@@ -305,6 +306,18 @@ public final class AlbedoRegressionTest {
                 EPSILON, "Albedo recast refreshes field snapshot");
     }
 
+    private static void testIndirectDamageTrigger() {
+        Albedo albedo = albedoAtConstellation(0);
+        CombatSimulator sim = simulatorWith(albedo, true);
+        List<ActionRecord> blossoms = captureNamedActions(
+                sim, "Transient Blossom");
+        perform(sim, CharacterActionKey.SKILL);
+        sim.notifyIndirectDamage(null, 100.0);
+        sim.advanceTime(1.0 / 60.0);
+        assertEquals(1, blossoms.size(),
+                "Albedo periodic reaction damage triggers Transient Blossom");
+    }
+
     private static void testBurstFatalBlossomAndA4() {
         Albedo albedo = albedoAtConstellation(0);
         CombatSimulator sim = simulatorWith(albedo, true);
@@ -332,7 +345,7 @@ public final class AlbedoRegressionTest {
         assertTrue(!burst.get(0).action.isUseSnapshot(),
                 "Albedo Burst initial hit uses live stats");
         assertClose(0.0, albedo.getCurrentEnergy(), EPSILON,
-                "Albedo Burst Energy spend");
+                "Albedo Burst spends Energy without triggering a Blossom");
         assertClose(burstCast + 12.0,
                 albedo.getBurstCooldownEndTime(), EPSILON,
                 "Albedo Burst cooldown");
@@ -344,6 +357,8 @@ public final class AlbedoRegressionTest {
                 "Albedo Fatal Blossom occurs after animation");
         assertEquals(0, transientBlossoms.size(),
                 "Albedo Burst cannot trigger Transient Blossom");
+        assertEquals(ICDType.None, burst.get(0).action.getICDType(),
+                "Albedo Burst initial hit has no ICD");
 
         advanceTo(sim, burstCast + 145.0 / 60.0);
         assertEquals(1, fatal.size(),
@@ -355,8 +370,10 @@ public final class AlbedoRegressionTest {
         assertEquals(ActionType.BURST,
                 fatal.get(0).action.getActionType(),
                 "Albedo Fatal Blossom Burst classification");
+        assertEquals(ICDType.Standard, fatal.get(0).action.getICDType(),
+                "Albedo Fatal Blossom uses standard Burst ICD");
         assertEquals(0, transientBlossoms.size(),
-                "Albedo Fatal Blossom cannot recursively trigger field");
+                "Albedo Fatal Blossom cannot trigger Transient Blossom");
 
         double a4Expiry = burst.get(0).time + 10.0;
         advanceTo(sim, a4Expiry);
@@ -380,9 +397,11 @@ public final class AlbedoRegressionTest {
         CombatSimulator c1Sim = simulatorWith(c1, true);
         c1.spendEnergy(40.0);
         perform(c1Sim, CharacterActionKey.SKILL);
-        triggerAndResolve(c1Sim, CharacterId.NOELLE, "C1 trigger");
+        c1Sim.performActionWithoutTimeAdvance(
+                CharacterId.NOELLE, trueHit("C1 trigger"));
         assertClose(1.2, c1.getTotalFlatEnergy(), EPSILON,
-                "Albedo C1 flat Energy per Blossom");
+                "Albedo C1 flat Energy is granted at trigger time");
+        c1Sim.advanceTime(1.0 / 60.0);
 
         Albedo c2 = albedoAtConstellation(2);
         CombatSimulator c2Sim = simulatorWith(c2, true);
@@ -393,19 +412,20 @@ public final class AlbedoRegressionTest {
         perform(c2Sim, CharacterActionKey.SKILL);
         for (int i = 0; i < 5; i++) {
             double triggerTime = c2Sim.getCurrentTime();
-            triggerAndResolve(c2Sim, CharacterId.NOELLE,
-                    "C2 trigger " + i);
+            c2Sim.performActionWithoutTimeAdvance(
+                    CharacterId.NOELLE, trueHit("C2 trigger " + i));
             if (i < 4) {
                 assertEquals(i + 1,
                         c2.getFatalReckoningStacks(
                                 c2Sim.getCurrentTime()),
-                        "Albedo C2 stack acquisition " + i);
+                        "Albedo C2 immediate stack acquisition " + i);
             } else {
                 assertEquals(4,
                         c2.getFatalReckoningStacks(
-                                c2Sim.getCurrentTime()),
+                        c2Sim.getCurrentTime()),
                         "Albedo C2 four-stack cap");
             }
+            c2Sim.advanceTime(1.0 / 60.0);
             if (i < 4) {
                 advanceTo(c2Sim, triggerTime + 2.0);
             }
@@ -433,8 +453,13 @@ public final class AlbedoRegressionTest {
                 "Albedo C2 adds consumed DEF to initial Burst");
         assertTrue(c2Fatal.get(0).damage > baselineFatal.get(0).damage,
                 "Albedo C2 adds consumed DEF to Fatal Blossom");
-        assertTrue(expectedC2Flat > 0.0,
-                "Albedo C2 sourced four-stack flat damage is positive");
+        double expectedC2Damage = expectedC2Flat * 1.288 * 1.025 * 0.45;
+        assertClose(expectedC2Damage,
+                c2Burst.get(0).damage - baselineBurst.get(0).damage,
+                EPSILON, "Albedo C2 initial Burst uses 30% DEF per stack");
+        assertClose(expectedC2Damage,
+                c2Fatal.get(0).damage - baselineFatal.get(0).damage,
+                EPSILON, "Albedo C2 Fatal Blossom uses 30% DEF per stack");
         assertClose(0.0,
                 c2.getSnapshot().get(StatType.FLAT_DMG_BONUS),
                 EPSILON, "Albedo C2 restores field snapshot after Fatal");

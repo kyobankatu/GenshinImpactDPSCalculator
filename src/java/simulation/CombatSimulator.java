@@ -576,6 +576,11 @@ public class CombatSimulator {
         eventDispatcher.addDamageListener(listener);
     }
 
+    /** Adds a resolved indirect-damage listener. */
+    public void addIndirectDamageListener(IndirectDamageListener listener) {
+        eventDispatcher.addIndirectDamageListener(listener);
+    }
+
     /**
      * Dispatches one resolved direct-damage event.
      *
@@ -585,6 +590,11 @@ public class CombatSimulator {
      */
     public void notifyDamage(Character actor, AttackAction action, double damage) {
         eventDispatcher.notifyDamage(actor, action, damage, getCurrentTime());
+    }
+
+    /** Dispatches one resolved indirect-damage event. */
+    public void notifyIndirectDamage(Character owner, double damage) {
+        eventDispatcher.notifyIndirectDamage(owner, damage, getCurrentTime());
     }
 
     /**

@@ -62,7 +62,7 @@ public class Albedo extends Character implements
     private long solarIsotomaGeneration;
     private int fatalReckoningStacks;
     private double fatalReckoningExpiresAt = Double.NEGATIVE_INFINITY;
-    private boolean resolvingNonTriggerDamage;
+    private boolean suppressTransientBlossomTrigger;
 
     /**
      * Constructs Albedo with the shared talent data source.
@@ -121,7 +121,9 @@ public class Albedo extends Character implements
         }
         initializedSimulator = sim;
         sim.addDamageListener((actor, action, damage, time) ->
-                handlePartyDamage(action, damage, time, sim));
+                handlePartyDamage(actor, action, damage, time, sim));
+        sim.addIndirectDamageListener((owner, damage, time) ->
+                handlePartyDamage(owner, null, damage, time, sim));
     }
 
     /** Returns Albedo's 40-Energy Burst cost. */
@@ -268,7 +270,7 @@ public class Albedo extends Character implements
                     true,
                     ActionType.SKILL);
             cast.setICD(ICDType.Standard, ICDTag.None, 1.0);
-            performNonTriggerDamage(activeSim, cast);
+            activeSim.performActionWithoutTimeAdvance(characterId, cast);
             deploySolarIsotoma(activeSim, activeSim.getCurrentTime());
         });
         sim.advanceTime(33.0 / 60.0);
@@ -302,19 +304,28 @@ public class Albedo extends Character implements
     }
 
     private void handlePartyDamage(
+            Character actor,
             AttackAction action,
             double damage,
             double time,
             CombatSimulator sim) {
-        if (resolvingNonTriggerDamage
-                || action == null
-                || !action.isHitEffectTrigger()
+        if (suppressTransientBlossomTrigger
+                || (action != null && !action.isHitEffectTrigger())
+                || (actor == this
+                        && action != null
+                        && action.getActionType() == ActionType.BURST)
                 || damage <= 0.0
                 || !isSolarIsotomaActive(time)
                 || time + EPSILON < nextTransientBlossomTime) {
             return;
         }
         nextTransientBlossomTime = time + BLOSSOM_COOLDOWN;
+        if (constellation >= 1) {
+            receiveFlatEnergy(getTalentValue("C1 Flat Energy", 1.2));
+        }
+        if (constellation >= 2) {
+            acquireFatalReckoning(time);
+        }
         long generation = solarIsotomaGeneration;
         schedule(sim, time + BLOSSOM_DELAY, activeSim ->
                 resolveTransientBlossom(activeSim, generation));
@@ -341,18 +352,12 @@ public class Albedo extends Character implements
                 ActionType.SKILL);
         blossom.setICD(
                 ICDType.Standard, ICDTag.ElementalSkill, 1.0);
-        performNonTriggerDamage(sim, blossom);
+        performSuppressedDamage(sim, blossom);
         sim.getEnergyDistributor().distributeParticles(
                 Element.GEO,
                 getTalentValue("Expected Particles", EXPECTED_PARTICLES),
                 ParticleType.PARTICLE);
 
-        if (constellation >= 1) {
-            receiveFlatEnergy(getTalentValue("C1 Flat Energy", 1.2));
-        }
-        if (constellation >= 2) {
-            acquireFatalReckoning(sim.getCurrentTime());
-        }
     }
 
     private void acquireFatalReckoning(double currentTime) {
@@ -389,8 +394,7 @@ public class Albedo extends Character implements
                     StatType.BURST_DMG_BONUS,
                     0.0,
                     ActionType.BURST);
-            burst.setICD(
-                    ICDType.Standard, ICDTag.ElementalBurst, 1.0);
+            burst.setICD(ICDType.None, ICDTag.ElementalBurst, 1.0);
             performLiveFlatDamage(activeSim, burst, initialC2Damage);
             applyHomuncularNature(activeSim);
 
@@ -451,14 +455,14 @@ public class Albedo extends Character implements
         return stats.getTotalDef();
     }
 
-    private void performNonTriggerDamage(
+    private void performSuppressedDamage(
             CombatSimulator sim,
             AttackAction action) {
-        resolvingNonTriggerDamage = true;
+        suppressTransientBlossomTrigger = true;
         try {
             sim.performActionWithoutTimeAdvance(characterId, action);
         } finally {
-            resolvingNonTriggerDamage = false;
+            suppressTransientBlossomTrigger = false;
         }
     }
 
@@ -467,7 +471,7 @@ public class Albedo extends Character implements
             AttackAction action,
             double flatDamage) {
         if (flatDamage == 0.0) {
-            performNonTriggerDamage(sim, action);
+            performSuppressedDamage(sim, action);
             return;
         }
         Buff c2Damage = new SimpleBuff(
@@ -477,7 +481,7 @@ public class Albedo extends Character implements
                 stats -> stats.add(StatType.FLAT_DMG_BONUS, flatDamage));
         getActiveBuffs().add(c2Damage);
         try {
-            performNonTriggerDamage(sim, action);
+            performSuppressedDamage(sim, action);
         } finally {
             getActiveBuffs().remove(c2Damage);
         }
@@ -488,13 +492,13 @@ public class Albedo extends Character implements
             AttackAction action,
             double flatDamage) {
         if (flatDamage == 0.0) {
-            performNonTriggerDamage(sim, action);
+            performSuppressedDamage(sim, action);
             return;
         }
         StatsContainer snapshot = getSnapshot();
         snapshot.add(StatType.FLAT_DMG_BONUS, flatDamage);
         try {
-            performNonTriggerDamage(sim, action);
+            performSuppressedDamage(sim, action);
         } finally {
             snapshot.add(StatType.FLAT_DMG_BONUS, -flatDamage);
         }

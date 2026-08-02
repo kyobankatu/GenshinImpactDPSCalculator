@@ -36,6 +36,7 @@ public final class YaeMikoRegressionTest {
     /** Runs data, action, summon, Burst, constellation, and isolation checks. */
     public static void main(String[] args) throws Exception {
         testIdentityStatsAndCsvShape();
+        testSharedTalentDataConstellationRouting();
         testNormalChargedAndPlungeActions();
         testSakuraTimingLevelsParticlesAndDuration();
         testSkillChargeBoundaryReplacementAndSwitch();
@@ -81,7 +82,31 @@ public final class YaeMikoRegressionTest {
         assertCsvShape(
                 Paths.get(
                         "config/characters/YaeMiko/YaeMiko_Multipliers.csv"),
-                21);
+                27);
+    }
+
+    private static void testSharedTalentDataConstellationRouting() {
+        YaeMiko c0 = new YaeMiko(null, null, 0);
+        CombatSimulator c0Sim = simulatorWith(c0);
+        List<ActionRecord> c0Sakura = captureNamedActions(
+                c0Sim, "Sesshou Sakura");
+        List<ActionRecord> c0Burst = captureNamedActions(
+                c0Sim, "Tenko Kenshin");
+        perform(c0Sim, CharacterActionKey.SKILL);
+        advanceTo(c0Sim, 120.0 / 60.0);
+        assertClose(1.031424, c0Sakura.get(0).action.getDamagePercent(), EPS,
+                "Yae shared CSV preserves C0 Sakura talent level");
+        perform(c0Sim, CharacterActionKey.BURST);
+        assertClose(4.42, c0Burst.get(0).action.getDamagePercent(), EPS,
+                "Yae shared CSV preserves C0 Burst talent level");
+
+        YaeMiko c5 = new YaeMiko(null, null, 5);
+        CombatSimulator c5Sim = simulatorWith(c5);
+        List<ActionRecord> c5Burst = captureNamedActions(
+                c5Sim, "Tenko Kenshin");
+        perform(c5Sim, CharacterActionKey.BURST);
+        assertClose(5.20, c5Burst.get(0).action.getDamagePercent(), EPS,
+                "Yae shared CSV selects C5 Burst talent level");
     }
 
     private static void testNormalChargedAndPlungeActions() {
@@ -175,10 +200,10 @@ public final class YaeMikoRegressionTest {
         assertClose(6.0, yae.getTotalParticleEnergy(), EPS,
                 "Yae particle ICD permits next 176-frame strike");
 
-        double expiry = (34.0 + 840.0) / 60.0;
+        double expiry = 900.0 / 60.0;
         advanceTo(sim, expiry - 0.001);
         assertEquals(1, yae.getSakuraCount(sim.getCurrentTime()),
-                "Yae Sakura active before 14-second expiry");
+                "Yae Sakura active before frame-900 expiry");
         sim.advanceTime(0.002);
         assertEquals(0, yae.getSakuraCount(sim.getCurrentTime()),
                 "Yae Sakura expires at half-open boundary");
@@ -340,10 +365,10 @@ public final class YaeMikoRegressionTest {
                         StatType.ELECTRO_DMG_BONUS),
                 EPS,
                 "Yae C4 buffs Electro teammate");
-        assertClose(0.0,
+        assertClose(0.20,
                 applicableStats(c4Sim, geo).get(StatType.ELECTRO_DMG_BONUS),
                 EPS,
-                "Yae C4 excludes non-Electro teammate");
+                "Yae C4 grants Electro DMG Bonus to non-Electro teammate");
         double c4Start = c4Sim.getCurrentTime();
         perform(c4Sim, CharacterActionKey.BURST);
         advanceTo(c4Sim, c4Start + 5.0 - 0.001);

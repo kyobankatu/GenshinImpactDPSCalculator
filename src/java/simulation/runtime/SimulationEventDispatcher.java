@@ -13,6 +13,7 @@ import model.type.Element;
 import simulation.ActionListener;
 import simulation.CombatSimulator;
 import simulation.DamageListener;
+import simulation.IndirectDamageListener;
 import simulation.ParticleListener;
 import simulation.SimulationEventBus;
 import simulation.action.AttackAction;
@@ -23,6 +24,8 @@ import simulation.action.AttackAction;
 public class SimulationEventDispatcher implements SimulationEventBus {
     private final List<ActionListener> actionListeners = new ArrayList<>();
     private final List<DamageListener> damageListeners = new ArrayList<>();
+    private final List<IndirectDamageListener> indirectDamageListeners =
+            new ArrayList<>();
     private final List<ParticleListener> particleListeners = new ArrayList<>();
     private final List<CombatSimulator.ReactionListener> reactionListeners = new ArrayList<>();
     private final List<ElementalReactionTriggeredWeaponEffect>
@@ -46,6 +49,12 @@ public class SimulationEventDispatcher implements SimulationEventBus {
     @Override
     public void addDamageListener(DamageListener listener) {
         damageListeners.add(listener);
+    }
+
+    /** Registers a listener for resolved indirect damage. */
+    @Override
+    public void addIndirectDamageListener(IndirectDamageListener listener) {
+        indirectDamageListeners.add(listener);
     }
 
     /**
@@ -100,6 +109,15 @@ public class SimulationEventDispatcher implements SimulationEventBus {
     public void notifyDamage(Character actor, AttackAction action, double damage, double time) {
         for (DamageListener listener : new ArrayList<>(damageListeners)) {
             listener.onDamage(actor, action, damage, time);
+        }
+    }
+
+    /** Notifies all registered listeners of resolved indirect damage. */
+    @Override
+    public void notifyIndirectDamage(Character owner, double damage, double time) {
+        for (IndirectDamageListener listener
+                : new ArrayList<>(indirectDamageListeners)) {
+            listener.onIndirectDamage(owner, damage, time);
         }
     }
 

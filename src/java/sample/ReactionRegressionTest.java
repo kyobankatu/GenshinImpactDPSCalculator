@@ -22760,6 +22760,12 @@ public class ReactionRegressionTest {
 
         TestCharacter burningOwner = testCharacter(Element.PYRO, CharacterId.XIANGLING);
         CombatSimulator burningSim = simulatorWith(burningOwner);
+        int[] burningIndirectDamageEvents = {0};
+        Character[] burningDamageOwner = {null};
+        burningSim.addIndirectDamageListener((owner, damage, time) -> {
+            burningIndirectDamageEvents[0]++;
+            burningDamageOwner[0] = owner;
+        });
         ReactionEffectScheduler burningScheduler = new ReactionEffectScheduler(burningSim);
         burningSim.getEnemy().applyAura(
                 Element.DENDRO, 1.0, burningSim.getCurrentTime());
@@ -22776,6 +22782,10 @@ public class ReactionRegressionTest {
         burningSim.advanceTime(0.25);
         assertClose(900.0 + 1025.0 + 900.0, burningSim.getTotalDamage(), EPS,
                 "Burning tick should drop reduction at exact expiry");
+        assertEquals(3, burningIndirectDamageEvents[0],
+                "Burning ticks should publish indirect enemy damage");
+        assertTrue(burningDamageOwner[0] == burningOwner,
+                "Burning indirect damage should retain its owner");
 
         TestCharacter bloomOwner = testCharacter(Element.HYDRO, CharacterId.SUCROSE);
         CombatSimulator bloomSim = simulatorWith(bloomOwner);

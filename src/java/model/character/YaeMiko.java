@@ -38,7 +38,7 @@ import simulation.event.SimpleTimerEvent;
 public class YaeMiko extends Character implements SimulatorInitializedCharacterEffect {
     private static final double SKILL_COOLDOWN = 4.0;
     private static final double BURST_COOLDOWN = 22.0;
-    private static final double SAKURA_DURATION = 14.0;
+    private static final double SAKURA_DURATION = 866.0 / 60.0;
     private static final double SAKURA_TICK_INTERVAL = 176.0 / 60.0;
     private static final double PARTICLE_COOLDOWN = 2.5;
     private static final double EPSILON = 1e-9;
@@ -315,7 +315,9 @@ public class YaeMiko extends Character implements SimulatorInitializedCharacterE
         double defaultValue = constellation >= 3
                 ? talentTwelve[level - 1]
                 : talentNine[level - 1];
-        return getTalentValue("Sakura Level " + level, defaultValue);
+        String key = "Sakura Level " + level
+                + (constellation >= 3 ? " C3" : "");
+        return getTalentValue(key, defaultValue);
     }
 
     private void applyC4Buff(CombatSimulator sim, double time) {
@@ -326,7 +328,6 @@ public class YaeMiko extends Character implements SimulatorInitializedCharacterE
                 getTalentValue("C4 Duration", 5.0),
                 time,
                 stats -> stats.add(StatType.ELECTRO_DMG_BONUS, bonus))
-                .forElement(Element.ELECTRO)
                 .sourcedBy(characterId));
     }
 
@@ -356,6 +357,9 @@ public class YaeMiko extends Character implements SimulatorInitializedCharacterE
 
     private void resolveBurstHit(CombatSimulator sim, boolean tenko) {
         String key = tenko ? "Tenko Thunderbolt" : "Tenko Kenshin";
+        if (constellation >= 5) {
+            key += " C5";
+        }
         double defaultValue;
         if (tenko) {
             defaultValue = constellation >= 5 ? 6.67632 : 5.674872;
