@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Chongyun,STATS,Base HP,90,10984,0
+Chongyun,STATS,Base ATK,90,223,0
+Chongyun,STATS,Base DEF,90,648,0
+Chongyun,STATS,Ascension ATK,90,0.24,0
+Chongyun,STATS,Energy Cost,90,40,0
+Chongyun,STATS,Constellation,6,6,0
+Chongyun,CONFIG,Character Level,90,90,0
+Chongyun,CONFIG,Normal Level,9,9,0
+Chongyun,CONFIG,Skill Level,12,12,0
+Chongyun,CONFIG,Burst Level,12,12,0

@@ -1,0 +1,22 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Chongyun,NORMAL,N1,9,1.2861,0
+Chongyun,NORMAL,N2,9,1.1597,0
+Chongyun,NORMAL,N3,9,1.4757,0
+Chongyun,NORMAL,N4,9,1.8597,0
+Chongyun,CHARGE,Charged Spin,9,1.0341,0
+Chongyun,PLUNGE,Plunge High,9,3.422517,0
+Chongyun,SKILL,Layered Frost,9,2.92468,0
+Chongyun,SKILL,Layered Frost C5,12,3.4408,0
+Chongyun,BURST,Cloud-Parting Star,9,2.4208,0
+Chongyun,BURST,Cloud-Parting Star C3,12,2.848,0
+Chongyun,PASSIVE,Field Duration,1,10,0
+Chongyun,PASSIVE,Infusion Duration,9,2.8,0
+Chongyun,PASSIVE,Infusion Duration C5,12,3.0,0
+Chongyun,PASSIVE,Skill Particles,1,4,0
+Chongyun,PASSIVE,A1 Normal Attack Speed,1,0.08,0
+Chongyun,PASSIVE,A4 Cryo RES Shred,1,0.10,0
+Chongyun,PASSIVE,A4 RES Shred Duration,1,8,0
+Chongyun,PASSIVE,C1 Ice Blade,1,0.50,0
+Chongyun,PASSIVE,C2 Cooldown Reduction,1,0.15,0
+Chongyun,PASSIVE,C4 Energy,1,2,0
+Chongyun,PASSIVE,C4 Cooldown,1,2,0
