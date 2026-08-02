@@ -14409,8 +14409,8 @@ Verification:
 
 ## Implementation Order: Energy and Proximity Five-Star Weapon Campaign
 
-Status: Active. Add one live-Energy Skill-window sword and one single-enemy
-proximity bow without extending simulator dispatch.
+Status: Complete. One live-Energy Skill-window sword and one single-enemy
+proximity bow now work without extending simulator dispatch.
 
 Scope:
 
@@ -14422,13 +14422,20 @@ Out of scope for this pass:
 - Multi-target distance modeling, overworld no-enemy states, characters,
   formulas, RL, generated docs, and unrelated weapons.
 
-### Phase 1: Add Azurelight and Aqua Simulacra
+### Phase 1: Add Azurelight and Aqua Simulacra - Done (`ab98b46`)
 
 Target files:
 
 - `src/java/model/weapon/Azurelight.java` (new)
 - `src/java/model/weapon/AquaSimulacra.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Azure proves live positive/zero Energy transitions, both R1/R5 branches,
+  active-owner gates, refresh, exact expiry, and simulator reuse rejection.
+- Aqua proves the explicit nearby-enemy static HP/all-DMG model and R1/R5
+  metadata; build, reaction regression, Javadoc, preflight, and diff checks pass.
 
 Acceptance criteria:
 
