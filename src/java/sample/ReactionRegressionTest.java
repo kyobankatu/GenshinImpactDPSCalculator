@@ -148,6 +148,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_TwoStarWeaponSeries();
         testAccuracyPhaseF_IsolatedRuntimeWeaponPhaseOne();
         testAccuracyPhaseF_IsolatedRuntimeWeaponPhaseTwo();
+        testAccuracyPhaseF_BlackcliffWeaponFamily();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -9820,6 +9821,89 @@ public class ReactionRegressionTest {
         }
         assertTrue(highWaveridingRefinementRejected,
                 "Waveriding should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_BlackcliffWeaponFamily() {
+        model.weapon.BlackcliffWeapon[] weapons = {
+            new model.weapon.BlackcliffLongsword(),
+            new model.weapon.BlackcliffSlasher(),
+            new model.weapon.BlackcliffPole(),
+            new model.weapon.BlackcliffAgate(),
+            new model.weapon.BlackcliffWarbow()
+        };
+        String[] names = {
+            "Blackcliff Longsword",
+            "Blackcliff Slasher",
+            "Blackcliff Pole",
+            "Blackcliff Agate",
+            "Blackcliff Warbow"
+        };
+        model.type.WeaponType[] weaponTypes = {
+            model.type.WeaponType.SWORD,
+            model.type.WeaponType.CLAYMORE,
+            model.type.WeaponType.POLEARM,
+            model.type.WeaponType.CATALYST,
+            model.type.WeaponType.BOW
+        };
+        double[] baseAttack = {565.0, 510.0, 510.0, 510.0, 565.0};
+        double[] critDamage = {0.368, 0.551, 0.551, 0.551, 0.368};
+        List<java.util.function.IntFunction<model.weapon.BlackcliffWeapon>> factories =
+                List.of(
+                        model.weapon.BlackcliffLongsword::new,
+                        model.weapon.BlackcliffSlasher::new,
+                        model.weapon.BlackcliffPole::new,
+                        model.weapon.BlackcliffAgate::new,
+                        model.weapon.BlackcliffWarbow::new);
+
+        for (int index = 0; index < weapons.length; index++) {
+            model.weapon.BlackcliffWeapon weapon = weapons[index];
+            assertEquals(names[index], weapon.getName(),
+                    names[index] + " display name");
+            assertEquals(weaponTypes[index], weapon.getWeaponType(),
+                    names[index] + " weapon type");
+            assertClose(baseAttack[index], weapon.getBaseAtk(), EPS,
+                    names[index] + " base ATK");
+            assertClose(critDamage[index],
+                    weapon.getStats().get(StatType.CRIT_DMG), EPS,
+                    names[index] + " CRIT DMG");
+            assertEquals(5, weapon.getRefinement(),
+                    names[index] + " default refinement");
+
+            StatsContainer passiveStats = new StatsContainer();
+            passiveStats.set(StatType.ATK_PERCENT, 0.25);
+            weapon.applyPassive(passiveStats, -1.0);
+            weapon.applyPassive(passiveStats, 100.0);
+            assertClose(0.25,
+                    passiveStats.get(StatType.ATK_PERCENT), EPS,
+                    names[index] + " should not fabricate defeat stacks");
+
+            model.weapon.BlackcliffWeapon r1Weapon =
+                    factories.get(index).apply(1);
+            assertEquals(1, r1Weapon.getRefinement(),
+                    names[index] + " selected R1");
+            assertClose(baseAttack[index], r1Weapon.getBaseAtk(), EPS,
+                    names[index] + " R1 static base ATK");
+            assertClose(critDamage[index],
+                    r1Weapon.getStats().get(StatType.CRIT_DMG), EPS,
+                    names[index] + " R1 static CRIT DMG");
+
+            boolean lowRefinementRejected = false;
+            try {
+                factories.get(index).apply(0);
+            } catch (IllegalArgumentException expected) {
+                lowRefinementRejected = true;
+            }
+            assertTrue(lowRefinementRejected,
+                    names[index] + " should reject refinement zero");
+            boolean highRefinementRejected = false;
+            try {
+                factories.get(index).apply(6);
+            } catch (IllegalArgumentException expected) {
+                highRefinementRejected = true;
+            }
+            assertTrue(highRefinementRejected,
+                    names[index] + " should reject refinement six");
+        }
     }
 
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {

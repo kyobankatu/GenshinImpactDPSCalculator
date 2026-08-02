@@ -2651,3 +2651,21 @@ experiment record.
 - **Completion:** two isolated branch commits were reviewed and integrated;
   focused regressions cover all four metadata/passive contracts and abnormal
   boundaries, and reaction regression/build/Javadoc/preflight gates pass
+
+### B-122 — Blackcliff weapon family coverage
+
+- **Status:** done
+- **Scope:** Blackcliff Longsword, Slasher, Pole, Agate, and Warbow; RL excluded
+- **Value/risk:** closes five canonical weapon gaps through one family boundary
+  without pretending the current immortal-enemy simulator emits defeat events
+- **Evidence boundary:** maintained KQM Sword, Claymore, Polearm, Catalyst, Bow,
+  and weapon-evidence catalogs, accessed 2026-08-02, record Lv. 90 metadata,
+  R1-R5 ATK stacks, 30-second independent durations, and on-field kill
+  attribution; representative evidence:
+  https://library.keqingmains.com/evidence/equipment/weapons#blackcliff-series
+- **Boundary:** Press the Advantage cannot activate until enemy defeat and kill
+  attribution become modeled runtime events
+- **Plan:** `TASKS.md` Blackcliff Weapon Family Campaign
+- **Completion:** branch-isolated family implementation `ace27be` centralizes
+  the defeat boundary; table-driven regressions and reaction regression,
+  build, Javadoc, and preflight gates pass

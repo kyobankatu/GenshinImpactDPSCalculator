@@ -15429,3 +15429,60 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Blackcliff Weapon Family Campaign
+
+Status: Complete. This campaign adds all five Blackcliff weapons behind one
+family metadata boundary; RL and generated documentation remain excluded.
+
+Scope:
+
+- Add Blackcliff Longsword, Slasher, Pole, Agate, and Warbow with exact Lv. 90
+  metadata and R1-R5 validation.
+- Centralize the shared Press the Advantage boundary in one family base.
+
+Out of scope for this pass:
+
+- Enemy defeat and kill attribution, multi-enemy combat, other weapon series,
+  shared runtime changes, characters, RL, and generated docs.
+
+### Phase 1: Add the Complete Blackcliff Family - Done
+
+Target files:
+
+- `src/java/model/weapon/BlackcliffWeapon.java` (new)
+- `src/java/model/weapon/BlackcliffLongsword.java` (new)
+- `src/java/model/weapon/BlackcliffSlasher.java` (new)
+- `src/java/model/weapon/BlackcliffPole.java` (new)
+- `src/java/model/weapon/BlackcliffAgate.java` (new)
+- `src/java/model/weapon/BlackcliffWarbow.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- A shared constructor-factory regression covers all five R5 metadata records,
+  R1 static boundaries, and every refinement 0/6 rejection.
+- Passive application at negative and positive times preserves seeded ATK
+  because no defeat event exists; all local verification gates pass.
+
+Acceptance criteria:
+
+- All five classes expose exact display names, weapon types, base ATK, CRIT
+  DMG, R5 defaults, and R1-R5 validation.
+- Shared family code documents and enforces that Press the Advantage remains
+  inactive because the simulator has no enemy defeat or kill-attribution event.
+- Passive application at arbitrary times must not fabricate ATK stacks.
+
+Test cases to add or update:
+
+- Normal: all five R5 metadata records and no passive ATK mutation.
+- Boundary: R1 and R5 retain identical static metadata while exposing the
+  selected refinement.
+- Abnormal: refinement 0/6 rejection for every concrete class.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
