@@ -131,6 +131,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_AdditionalClaymoreHitStackWeapons();
         testAccuracyPhaseF_AdditionalMultiStatHitStackWeapons();
         testAccuracyPhaseF_DirectPhysicalProcWeapons();
+        testAccuracyPhaseF_FrostBurialWeapons();
         testAccuracyPhaseF_ActionUseWindowWeapons();
         testAccuracyPhaseF_AdditionalSkillUseStatWeapons();
         testAccuracyPhaseF_SamuraiConductWeapons();
@@ -7550,6 +7551,191 @@ public class ReactionRegressionTest {
         }
         assertTrue(highHalberdRefinementRejected,
                 "Halberd should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_FrostBurialWeapons() {
+        model.weapon.DragonspineSpear dragonspine =
+                new model.weapon.DragonspineSpear(() -> 0.0);
+        assertEquals("Dragonspine Spear", dragonspine.getName(),
+                "Dragonspine Spear display name");
+        assertClose(454.0, dragonspine.getBaseAtk(), EPS,
+                "Dragonspine Spear base ATK");
+        assertClose(0.690,
+                dragonspine.getStats().get(StatType.PHYSICAL_DMG_BONUS), EPS,
+                "Dragonspine Spear Physical DMG Bonus");
+        assertEquals(model.type.WeaponType.POLEARM, dragonspine.getWeaponType(),
+                "Dragonspine Spear weapon type");
+        assertEquals(5, dragonspine.getRefinement(),
+                "Dragonspine Spear default refinement");
+
+        model.weapon.SnowTombedStarsilver starsilver =
+                new model.weapon.SnowTombedStarsilver(() -> 0.0);
+        assertEquals("Snow-Tombed Starsilver", starsilver.getName(),
+                "Snow-Tombed Starsilver display name");
+        assertClose(565.0, starsilver.getBaseAtk(), EPS,
+                "Snow-Tombed Starsilver base ATK");
+        assertClose(0.345,
+                starsilver.getStats().get(StatType.PHYSICAL_DMG_BONUS), EPS,
+                "Snow-Tombed Starsilver Physical DMG Bonus");
+        assertEquals(model.type.WeaponType.CLAYMORE, starsilver.getWeaponType(),
+                "Snow-Tombed Starsilver weapon type");
+        assertEquals(5, starsilver.getRefinement(),
+                "Snow-Tombed Starsilver default refinement");
+
+        model.weapon.Frostbearer frostbearer =
+                new model.weapon.Frostbearer(() -> 0.0);
+        assertEquals("Frostbearer", frostbearer.getName(),
+                "Frostbearer display name");
+        assertClose(510.0, frostbearer.getBaseAtk(), EPS,
+                "Frostbearer base ATK");
+        assertClose(0.413,
+                frostbearer.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Frostbearer ATK substat");
+        assertEquals(model.type.WeaponType.CATALYST, frostbearer.getWeaponType(),
+                "Frostbearer weapon type");
+        assertEquals(5, frostbearer.getRefinement(),
+                "Frostbearer default refinement");
+
+        AttackAction normalHit = typedDamageHit(
+                "Frost Burial Normal", ActionType.NORMAL, 1.0);
+        AttackAction chargedHit = typedDamageHit(
+                "Frost Burial Charged", ActionType.CHARGE, 1.0);
+        AttackAction skillHit = typedDamageHit(
+                "Frost Burial Skill", ActionType.SKILL, 1.0);
+        AttackAction zeroNormalHit = typedDamageHit(
+                "Frost Burial zero Normal", ActionType.NORMAL, 0.0);
+
+        TestCharacter starsilverOwner = testCharacter(Element.CRYO);
+        starsilverOwner.setWeapon(starsilver);
+        CombatSimulator starsilverSim = simulatorWith(starsilverOwner);
+        starsilver.onDamage(starsilverOwner, chargedHit, 0.0, starsilverSim);
+        assertTrue(starsilverSim.getTotalDamage() > 0.0,
+                "R5 Snow-Tombed Starsilver should proc from Charged damage");
+
+        TestCharacter frostbearerOwner = testCharacter(Element.CRYO);
+        frostbearerOwner.setWeapon(frostbearer);
+        CombatSimulator frostbearerSim = simulatorWith(frostbearerOwner);
+        frostbearer.onDamage(frostbearerOwner, normalHit, 0.0, frostbearerSim);
+        assertTrue(frostbearerSim.getTotalDamage() > 0.0,
+                "R5 Frostbearer should proc from Normal damage");
+
+        double[] draws = {0.99, 0.0, 0.0};
+        int[] drawIndex = {0};
+        model.weapon.DragonspineSpear r1Dragonspine =
+                new model.weapon.DragonspineSpear(
+                        1, () -> draws[Math.min(drawIndex[0]++, draws.length - 1)]);
+        TestCharacter dragonspineOwner = testCharacter(
+                Element.CRYO, CharacterId.SUCROSE);
+        dragonspineOwner.setWeapon(r1Dragonspine);
+        CombatSimulator dragonspineSim = simulatorWith(dragonspineOwner);
+        r1Dragonspine.onDamage(
+                dragonspineOwner, normalHit, 0.0, dragonspineSim);
+        assertClose(0.0, dragonspineSim.getTotalDamage(), EPS,
+                "Failed Frost Burial draw should not deal damage");
+        r1Dragonspine.onDamage(
+                dragonspineOwner, normalHit, 0.0, dragonspineSim);
+        double normalProcDamage = dragonspineSim.getTotalDamage();
+        assertTrue(normalProcDamage > 0.0,
+                "A successful draw after failure should proc immediately");
+        dragonspineSim.advanceTime(9.999);
+        r1Dragonspine.onDamage(
+                dragonspineOwner,
+                normalHit,
+                dragonspineSim.getCurrentTime(),
+                dragonspineSim);
+        assertClose(normalProcDamage, dragonspineSim.getTotalDamage(), EPS,
+                "Frost Burial should remain on CT immediately before ten seconds");
+        dragonspineSim.advanceTime(0.001 + 1e-9);
+        dragonspineSim.getEnemy().setAura(Element.CRYO, 1.0);
+        r1Dragonspine.onDamage(
+                dragonspineOwner,
+                normalHit,
+                dragonspineSim.getCurrentTime(),
+                dragonspineSim);
+        double cryoProcDamage = dragonspineSim.getTotalDamage() - normalProcDamage;
+        assertClose(normalProcDamage * 2.5, cryoProcDamage, EPS,
+                "R1 Cryo-affected Frost Burial should use 200% instead of 80% ATK");
+
+        model.weapon.DragonspineSpear gatedDragonspine =
+                new model.weapon.DragonspineSpear(() -> 0.0);
+        TestCharacter gatedOwner = testCharacter(Element.CRYO, CharacterId.SUCROSE);
+        gatedOwner.setWeapon(gatedDragonspine);
+        CombatSimulator gatedSim = simulatorWith(gatedOwner);
+        gatedDragonspine.onDamage(gatedOwner, skillHit, 0.0, gatedSim);
+        gatedDragonspine.onDamage(gatedOwner, zeroNormalHit, 0.0, gatedSim);
+        AttackAction recursiveName = typedDamageHit(
+                "Dragonspine Spear Frost Burial", ActionType.NORMAL, 1.0);
+        gatedDragonspine.onDamage(gatedOwner, recursiveName, 0.0, gatedSim);
+        assertClose(0.0, gatedSim.getTotalDamage(), EPS,
+                "Wrong, zero, and recursive hits should not trigger Frost Burial");
+        gatedSim.addCharacter(testCharacter(Element.PYRO, CharacterId.AMBER));
+        gatedSim.setActiveCharacter(CharacterId.AMBER);
+        gatedDragonspine.onDamage(gatedOwner, normalHit, 0.0, gatedSim);
+        assertClose(0.0, gatedSim.getTotalDamage(), EPS,
+                "Off-field hits should not trigger Frost Burial");
+
+        boolean lowDragonspineRefinementRejected = false;
+        try {
+            new model.weapon.DragonspineSpear(0);
+        } catch (IllegalArgumentException expected) {
+            lowDragonspineRefinementRejected = true;
+        }
+        assertTrue(lowDragonspineRefinementRejected,
+                "Dragonspine Spear should reject refinement zero");
+
+        boolean highDragonspineRefinementRejected = false;
+        try {
+            new model.weapon.DragonspineSpear(6);
+        } catch (IllegalArgumentException expected) {
+            highDragonspineRefinementRejected = true;
+        }
+        assertTrue(highDragonspineRefinementRejected,
+                "Dragonspine Spear should reject refinement six");
+
+        boolean lowStarsilverRefinementRejected = false;
+        try {
+            new model.weapon.SnowTombedStarsilver(0);
+        } catch (IllegalArgumentException expected) {
+            lowStarsilverRefinementRejected = true;
+        }
+        assertTrue(lowStarsilverRefinementRejected,
+                "Snow-Tombed Starsilver should reject refinement zero");
+
+        boolean highStarsilverRefinementRejected = false;
+        try {
+            new model.weapon.SnowTombedStarsilver(6);
+        } catch (IllegalArgumentException expected) {
+            highStarsilverRefinementRejected = true;
+        }
+        assertTrue(highStarsilverRefinementRejected,
+                "Snow-Tombed Starsilver should reject refinement six");
+
+        boolean lowFrostbearerRefinementRejected = false;
+        try {
+            new model.weapon.Frostbearer(0);
+        } catch (IllegalArgumentException expected) {
+            lowFrostbearerRefinementRejected = true;
+        }
+        assertTrue(lowFrostbearerRefinementRejected,
+                "Frostbearer should reject refinement zero");
+
+        boolean highFrostbearerRefinementRejected = false;
+        try {
+            new model.weapon.Frostbearer(6);
+        } catch (IllegalArgumentException expected) {
+            highFrostbearerRefinementRejected = true;
+        }
+        assertTrue(highFrostbearerRefinementRejected,
+                "Frostbearer should reject refinement six");
+
+        boolean nullDrawRejected = false;
+        try {
+            new model.weapon.Frostbearer(1, null);
+        } catch (NullPointerException expected) {
+            nullDrawRejected = true;
+        }
+        assertTrue(nullDrawRejected,
+                "Frost Burial weapons should reject null draw sources");
     }
 
     private static void testAccuracyPhaseF_SelfContainedFourStarWeapons() {
