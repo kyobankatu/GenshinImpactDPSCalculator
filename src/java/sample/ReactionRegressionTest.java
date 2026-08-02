@@ -119,6 +119,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_WeaponReactionBonusRegression();
         testAccuracyPhaseF_DragonsBaneTargetAuraContract();
         testAccuracyPhaseF_TargetAuraWeaponMetadata();
+        testAccuracyPhaseF_StaticActionBonusWeaponMetadata();
         testAccuracyPhaseF_KaeyaCharacterContract();
         testAccuracyPhaseF_DendroResonanceReactionEmContract();
         testAccuracyPhaseF_CryoResonanceConditionalCritContract();
@@ -5093,6 +5094,57 @@ public class ReactionRegressionTest {
                 CharacterId.KAEYA, CharacterActionRequest.of(CharacterActionKey.SKILL));
         assertClose(3.82, c6SkillWeapon.actions.get(0).getDamagePercent(), EPS,
                 "C3 should raise Frostgnaw to its level-12 multiplier");
+    }
+
+    private static void testAccuracyPhaseF_StaticActionBonusWeaponMetadata() {
+        model.weapon.TheStringless stringless = new model.weapon.TheStringless();
+        assertEquals("The Stringless", stringless.getName(),
+                "The Stringless display name");
+        assertClose(510.0, stringless.getBaseAtk(), EPS,
+                "The Stringless base ATK");
+        assertClose(165.0, stringless.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "The Stringless Elemental Mastery");
+        assertEquals(model.type.WeaponType.BOW, stringless.getWeaponType(),
+                "The Stringless weapon type");
+        assertEquals(5, stringless.getRefinement(),
+                "The Stringless default refinement");
+
+        StatsContainer r5Stats = new StatsContainer();
+        stringless.applyPassive(r5Stats, 0.0);
+        assertClose(0.48, r5Stats.get(StatType.SKILL_DMG_BONUS), EPS,
+                "R5 The Stringless Skill damage bonus");
+        assertClose(0.48, r5Stats.get(StatType.BURST_DMG_BONUS), EPS,
+                "R5 The Stringless Burst damage bonus");
+        assertClose(0.0, r5Stats.get(StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "The Stringless should not modify Normal damage");
+        assertClose(0.0, r5Stats.get(StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "The Stringless should not modify Charged damage");
+
+        model.weapon.TheStringless r1Stringless = new model.weapon.TheStringless(1);
+        StatsContainer r1Stats = new StatsContainer();
+        r1Stringless.applyPassive(r1Stats, 0.0);
+        assertClose(0.24, r1Stats.get(StatType.SKILL_DMG_BONUS), EPS,
+                "R1 The Stringless Skill damage bonus");
+        assertClose(0.24, r1Stats.get(StatType.BURST_DMG_BONUS), EPS,
+                "R1 The Stringless Burst damage bonus");
+
+        boolean lowRefinementRejected = false;
+        try {
+            new model.weapon.TheStringless(0);
+        } catch (IllegalArgumentException expected) {
+            lowRefinementRejected = true;
+        }
+        assertTrue(lowRefinementRejected,
+                "The Stringless should reject refinement zero");
+
+        boolean highRefinementRejected = false;
+        try {
+            new model.weapon.TheStringless(6);
+        } catch (IllegalArgumentException expected) {
+            highRefinementRejected = true;
+        }
+        assertTrue(highRefinementRejected,
+                "The Stringless should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
