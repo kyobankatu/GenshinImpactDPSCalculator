@@ -2172,3 +2172,13 @@ experiment record.
 - **Plan:** `TASKS.md` Reciprocal Hit Weapon Campaign
 - **Completion:** `a0e1368`, `696fb36`, and `a3fc809` add the shared dual-window
   policy and all variants; focused/build/Javadoc/leak gates pass
+
+### B-084 — Reaction-window weapon coverage
+
+- **Status:** active
+- **Scope:** Mappa Mare, Emerald Orb, and Dark Iron Sword; RL excluded
+- **Value/risk:** three complete passives reuse typed reaction attribution and
+  add no reaction resolution, formula, random, or target state
+- **Evidence boundary:** KQM TCL current metadata/reaction lists and refinement
+  values; shared-duration Mappa stacks; Stellar-Conduct remains unsupported
+- **Plan:** `TASKS.md` Reaction-Window Weapon Campaign

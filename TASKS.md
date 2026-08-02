@@ -13224,3 +13224,63 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc` at the shared/final API boundary
 - `python scripts/preflight.py`
+
+## Implementation Order: Reaction-Window Weapon Campaign
+
+Status: Active. Add three weapons whose owner-triggered reactions open or stack
+refresh-only stat windows through one simulator-initialized listener policy.
+
+Scope:
+
+- Add shared source/on-field gating, reaction predicates, shared-duration stack
+  handling, refinement validation, and exact expiry.
+- Add Mappa Mare, Emerald Orb, and Dark Iron Sword with sourced Lv. 90 metadata,
+  current reaction lists, refinement contracts, and focused regressions.
+
+Out of scope for this pass:
+
+- Stellar-Conduct, which has no simulator reaction kind; off-field activation,
+  new reactions/formulas, characters, RL, and generated docs.
+
+Definitions:
+
+- **Shared-duration stacks**: each eligible reaction increments up to the cap
+  and refreshes one expiration time for every currently held stack.
+
+### Phase 1: Add Reaction-Window Weapons
+
+Target files:
+
+- `src/java/model/weapon/ReactionWindowWeapon.java` (new)
+- `src/java/model/weapon/MappaMare.java` (new)
+- `src/java/model/weapon/EmeraldOrb.java` (new)
+- `src/java/model/weapon/DarkIronSword.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+| Unit | Reaction window | Focused verification | Status |
+|---|---|---|---|
+| Shared base + Mappa Mare | any reaction, 1-2 Elemental DMG stacks for 10s | source/field gating, stack cap/refresh/expiry, R1/R5 | Pending |
+| Emerald Orb | Hydro reaction set, ATK for 12s | exact kinds/Swirl element, metadata, R1/R5 | Pending |
+| Dark Iron Sword | Electro reaction set, fixed 20% ATK for 12s | exact kinds/Swirl element, fixed R1, metadata | Pending |
+
+Acceptance criteria:
+
+- Only an eligible reaction attributed to the active weapon owner activates the
+  passive; ally, off-field owner, `NONE`, and wrong-element Swirl events do not.
+- Mappa Mare grants 8-16% to all seven elemental DMG stats per stack, caps at
+  two stacks, refreshes their shared ten-second duration, and never buffs Physical.
+- Emerald Orb scales 20-40% at R1-R5; Dark Iron Sword remains its sourced fixed
+  R1 20%; all windows are half-open and metadata is exact.
+
+Test cases to add or update:
+
+- Normal: each eligible reaction family, Mappa one/two stacks, refresh, metadata.
+- Boundary: R1/R5, before/exact expiry, stack cap, Hydro/Electro Swirl relation.
+- Abnormal: `NONE`, wrong reaction/Swirl element, ally/off-field source, rank 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc` at the shared/final API boundary
+- `python scripts/preflight.py`
