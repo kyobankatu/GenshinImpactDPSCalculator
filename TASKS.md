@@ -13868,6 +13868,102 @@ Evidence:
 - Two `RaidenParty` runs remain 1,275,070 damage / 60,718 DPS. Reaction
   regression, build, Javadoc, sample simulation, and preflight pass.
 
+## Implementation Order: Sucrose C4 Alchemania Lifecycle
+
+Status: In progress. Implement B-139 through one bounded shared cooldown
+operation followed by Sucrose-owned typed counter state; RL, generated docs,
+stamina, multi-target hits, and the unknown counter inactivity cap are excluded.
+
+Evidence:
+
+- The maintained KQM Sucrose page and cooldown reference, accessed 2026-08-02,
+  specify one counted Normal/Charged hit per 0.1 seconds, a seven-hit threshold,
+  an injected 1-7-second reduction, persistent counter state, and a hard cap at
+  the currently earliest Skill charge:
+  https://library.keqingmains.com/characters/anemo/sucrose
+  https://library.keqingmains.com/combat-mechanics/cooldowns
+
+### Phase 1: Partial Earliest-Charge Cooldown API - Done
+
+Target files:
+
+- `src/java/model/entity/state/CooldownState.java`
+- `src/java/model/entity/Character.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- A finite non-negative reduction shortens only the earliest pending Skill
+  charge, clamps at current time, returns the amount applied, and never carries
+  excess into a later charge.
+- Single-charge and multi-charge schedules preserve last-use metadata, captured
+  cooldown duration, later charge times, readiness ordering, and snapshots.
+- Negative, NaN, and infinite reductions are rejected without state mutation;
+  zero and ready-state reductions are inert.
+
+Test cases:
+
+- Normal: partial single-charge and earliest two-charge reductions.
+- Boundary: exact-ready clamp, reduction larger than remaining cooldown, and
+  reduction after one queued charge naturally restores.
+- Abnormal: zero/ready state, negative/NaN/infinite input, later-charge
+  non-carry, and snapshot restore after divergent reduction.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `./gradlew RaidenParty`
+- `python scripts/preflight.py`
+
+Evidence:
+
+- The shared operation applies and reports a bounded flat reduction to only
+  the earliest single- or multi-charge cooldown while preserving last-use,
+  captured duration, and all later restore times.
+- Exact/full/oversized reductions, natural restore pruning, ready and zero
+  no-ops, invalid finite bounds, and divergent snapshot rollback pass focused
+  regression coverage.
+- Two `RaidenParty` runs remain 1,275,070 damage / 60,718 DPS. Reaction
+  regression, build, Javadoc, sample simulation, and preflight pass.
+
+### Phase 2: Typed Alchemania Counter and Charged Attack
+
+Target files:
+
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/model/character/Sucrose.java`
+- `config/characters/Sucrose/Sucrose_Multipliers.csv`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Sucrose supports the sourced level-9 Charged Attack as one 204.27% Anemo
+  Charged hit with standard Normal/Charged ICD, 1U gauge, and 69-frame action.
+- C4 counts only accepted Sucrose Normal/Charged hits, at most one per 0.1
+  seconds; the seventh removes the counter and applies an injected inclusive
+  1-7-second reduction to only the earliest pending Skill charge.
+- Counter and 0.1-second gate use typed Sucrose-owned markers and survive snapshot
+  rollback; C0-C3, Skill/Burst/Plunge, and invalid draws do not alter cooldowns.
+
+Test cases:
+
+- Normal: seven Normals, mixed Normal/Charged, reductions of one/four/seven,
+  and counting while both Skill charges are ready.
+- Boundary: 0.099/0.100 seconds, six/seven hits, partial/full charge clamp,
+  no overflow into charge two, persistent counter across switch, and snapshot.
+- Abnormal: C3, wrong categories/owner, rejected draw below one/above seven/
+  non-finite, and divergent post-snapshot counter/cooldown state.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `./gradlew RaidenParty`
+- `python scripts/preflight.py`
+
 ### Phase 2: Skill-Activated Damage Sets - Done
 
 Why second:

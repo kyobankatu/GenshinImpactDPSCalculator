@@ -481,6 +481,18 @@ public abstract class Character {
     }
 
     /**
+     * Shortens only the earliest pending Skill cooldown by a flat amount.
+     * Excess reduction is discarded at the current readiness boundary.
+     *
+     * @param currentTime current simulation time
+     * @param reduction non-negative finite reduction in seconds
+     * @return actual reduction applied in seconds
+     */
+    public double reduceSkillCooldown(double currentTime, double reduction) {
+        return cooldownState.reduceSkillCooldown(currentTime, reduction);
+    }
+
+    /**
      * Records that the rotation requested a burst but current energy was
      * insufficient. This feeds ER calibration without executing the action.
      */

@@ -159,6 +159,50 @@ public class CooldownState {
     }
 
     /**
+     * Shortens only the earliest pending Skill cooldown by a flat amount.
+     *
+     * <p>For multi-charge Skills, excess reduction is discarded when the
+     * earliest charge reaches {@code currentTime}; it never carries into a
+     * later pending charge. Last-use and captured cooldown-duration metadata
+     * are preserved.
+     *
+     * @param currentTime current simulation time in seconds
+     * @param reduction non-negative finite reduction in seconds
+     * @return actual reduction applied in seconds
+     * @throws IllegalArgumentException if {@code reduction} is negative or not finite
+     */
+    public double reduceSkillCooldown(double currentTime, double reduction) {
+        if (!Double.isFinite(reduction) || reduction < 0.0) {
+            throw new IllegalArgumentException(
+                    "Skill cooldown reduction must be finite and non-negative");
+        }
+        if (reduction == 0.0) {
+            return 0.0;
+        }
+
+        if (skillMaxCharges > 1) {
+            removeRestoredCharges(currentTime);
+            if (chargeRestoreTimes.isEmpty()) {
+                return 0.0;
+            }
+            double previousRestoreTime = chargeRestoreTimes.get(0);
+            double reducedRestoreTime = Math.max(
+                    currentTime, previousRestoreTime - reduction);
+            chargeRestoreTimes.set(0, reducedRestoreTime);
+            removeRestoredCharges(currentTime);
+            return previousRestoreTime - reducedRestoreTime;
+        }
+
+        double previousEndTime = skillCooldownEndTime;
+        double reducedEndTime = Math.max(currentTime, previousEndTime - reduction);
+        if (previousEndTime <= currentTime) {
+            return 0.0;
+        }
+        skillCooldownEndTime = reducedEndTime;
+        return previousEndTime - reducedEndTime;
+    }
+
+    /**
      * Clears all pending skill charge restore timestamps. Used when resetting
      * the simulation state.
      */

@@ -114,6 +114,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_BurstEnergyGateAndFlinsSpecialCost();
         testAccuracyPhaseF_PartySizeParticleEnergyMultipliers();
         testAccuracyPhaseF_ImpetuousWindsCooldownSnapshot();
+        testAccuracyPhaseF_PartialSkillCooldownReductionContract();
         testAccuracyPhaseF_TimingAwareEnergyAnalysis();
         testAccuracyPhaseF_ArtifactOptimizerRejectsUnreachableEr();
         testAccuracyPhaseF_ArtifactOptimizerStableResultOrder();
@@ -4834,6 +4835,83 @@ public class ReactionRegressionTest {
         cappedOwner.markSkillUsed(0.0);
         assertTrue(cappedOwner.canSkill(0.0),
                 "Cooldown reduction above 100% should clamp to a non-negative duration");
+    }
+
+    private static void testAccuracyPhaseF_PartialSkillCooldownReductionContract() {
+        TestCharacter singleOwner = testCharacter(Element.ANEMO, CharacterId.SUCROSE);
+        singleOwner.setSkillCD(15.0);
+        singleOwner.markSkillUsed(0.0);
+        assertClose(4.0, singleOwner.reduceSkillCooldown(2.0, 4.0), EPS,
+                "Flat reduction should shorten a pending single-charge cooldown");
+        assertClose(9.0, singleOwner.getSkillCDRemaining(2.0), EPS,
+                "Single-charge reduction should preserve the remaining boundary");
+        assertClose(0.0, singleOwner.reduceSkillCooldown(20.0, 4.0), EPS,
+                "A ready single-charge Skill should ignore flat reduction");
+        assertClose(0.0, singleOwner.reduceSkillCooldown(20.0, 0.0), EPS,
+                "Zero reduction should be inert");
+        assertClose(0.0, singleOwner.getLastSkillTime(), EPS,
+                "Flat reduction should preserve last Skill-use metadata");
+
+        TestCharacter chargeOwner = testCharacter(Element.ANEMO, CharacterId.SUCROSE);
+        chargeOwner.setSkillCD(15.0);
+        chargeOwner.setSkillMaxCharges(2);
+        CombatSimulator chargeSim = simulatorWith(chargeOwner);
+        chargeOwner.markSkillUsed(0.0);
+        chargeOwner.markSkillUsed(1.0);
+        assertClose(4.0, chargeOwner.reduceSkillCooldown(2.0, 4.0), EPS,
+                "Multi-charge reduction should shorten the earliest restore");
+        assertEquals(java.util.List.of(11.0, 16.0),
+                chargeOwner.getChargeRestoreTimes(),
+                "Later charge restores should retain their captured schedule");
+        assertClose(15.0, chargeOwner.getActiveChargeCooldownDuration(), EPS,
+                "Partial reduction should preserve the shared captured duration");
+        assertClose(9.0, chargeOwner.reduceSkillCooldown(2.0, 20.0), EPS,
+                "Excess reduction should clamp at the current readiness boundary");
+        assertEquals(java.util.List.of(16.0), chargeOwner.getChargeRestoreTimes(),
+                "Excess reduction must not carry into the later charge");
+        assertClose(0.0, chargeOwner.getSkillCDRemaining(2.0), EPS,
+                "A fully reduced earliest charge should be immediately ready");
+        chargeOwner.markSkillUsed(2.0);
+        assertEquals(java.util.List.of(16.0, 17.0),
+                chargeOwner.getChargeRestoreTimes(),
+                "Using the restored charge should rejoin the existing queue");
+        chargeSim.advanceTime(16.0);
+        assertClose(1.0, chargeOwner.reduceSkillCooldown(16.0, 7.0), EPS,
+                "Natural restore pruning should expose the next pending charge");
+        assertEquals(java.util.List.of(), chargeOwner.getChargeRestoreTimes(),
+                "Exact clamp should remove only the newly earliest charge");
+
+        TestCharacter snapshotOwner = testCharacter(Element.ANEMO, CharacterId.SUCROSE);
+        snapshotOwner.setSkillCD(15.0);
+        snapshotOwner.setSkillMaxCharges(2);
+        CombatSimulator snapshotSim = simulatorWith(snapshotOwner);
+        snapshotOwner.markSkillUsed(0.0);
+        snapshotOwner.markSkillUsed(1.0);
+        SimulatorSnapshot beforeReduction = snapshotSim.saveSnapshot();
+        snapshotOwner.reduceSkillCooldown(0.0, 7.0);
+        snapshotSim.restoreSnapshot(beforeReduction);
+        assertEquals(java.util.List.of(15.0, 16.0),
+                snapshotOwner.getChargeRestoreTimes(),
+                "Snapshot rollback should restore a divergent charge reduction");
+
+        List<Double> beforeInvalid = snapshotOwner.getChargeRestoreTimes();
+        double[] invalidReductions = {
+                -1.0, Double.NaN, Double.POSITIVE_INFINITY,
+                Double.NEGATIVE_INFINITY
+        };
+        for (double invalidReduction : invalidReductions) {
+            boolean rejected = false;
+            try {
+                snapshotOwner.reduceSkillCooldown(0.0, invalidReduction);
+            } catch (IllegalArgumentException expected) {
+                rejected = true;
+            }
+            assertTrue(rejected,
+                    "Invalid flat Skill reduction should be rejected: "
+                            + invalidReduction);
+            assertEquals(beforeInvalid, snapshotOwner.getChargeRestoreTimes(),
+                    "Rejected flat reduction should preserve charge state");
+        }
     }
 
     private static void testAccuracyPhaseF_TimingAwareEnergyAnalysis() {

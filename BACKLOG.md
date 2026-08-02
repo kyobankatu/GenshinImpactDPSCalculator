@@ -2991,7 +2991,7 @@ experiment record.
 
 ### B-139 — Sucrose C4 Alchemania cooldown reduction
 
-- **Status:** candidate
+- **Status:** in-progress
 - **Source:** delegated supported-character constellation audit
 - **Scope/risk:** add injected 1-7-second draw, seven-hit counter, partial
   earliest-charge cooldown reduction, and Charged support; shared cooldown API
@@ -3003,3 +3003,4 @@ experiment record.
 - **Boundary:** 0.1-second hit counting, 6/7 hits, injected draw bounds,
   remaining-CD clamp, no overflow into the next charge, wrong owner/category,
   and snapshot restore require explicit regressions
+- **Plan:** two-phase `TASKS.md` Sucrose C4 Alchemania Lifecycle
