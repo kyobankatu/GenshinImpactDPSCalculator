@@ -14128,8 +14128,8 @@ Verification:
 
 ## Implementation Order: Skill/Burst Offensive Weapon Campaign
 
-Status: Active. Add one Skill stat-window sword and one active-owner Burst-proc
-claymore through existing typed action and generated damage contracts.
+Status: Complete. One Skill stat-window sword and one active-owner Burst-proc
+claymore now use existing typed action and generated damage contracts.
 
 Scope:
 
@@ -14141,13 +14141,22 @@ Out of scope for this pass:
 - Multi-target multiplication, visual proc delay, characters, formulas, RL,
   generated docs, and unrelated offensive weapons.
 
-### Phase 1: Add Fleuve Cendre Ferryman and Luxurious Sea-Lord
+### Phase 1: Add Fleuve Cendre Ferryman and Luxurious Sea-Lord - Done (`7e88815`)
 
 Target files:
 
 - `src/java/model/weapon/FleuveCendreFerryman.java` (new)
 - `src/java/model/weapon/LuxuriousSeaLord.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Fleuve proves static Skill CRIT, Skill-only refresh, exact five-second ER
+  expiry, base-ER composition, and R1/R5 values.
+- Sea-Lord proves Burst and counts-as-Burst classification, active-owner and
+  zero/wrong-hit gates, exact 15-second CT, and R1/R5 proc/static values.
+- Metadata, invalid ranks, reaction regression, build, Javadoc, preflight, and
+  diff checks pass.
 
 Acceptance criteria:
 
