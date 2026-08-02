@@ -3445,7 +3445,7 @@ experiment record.
 
 ### B-163 — Follow-on stateful weapon inventory
 
-- **Status:** in progress
+- **Status:** complete
 - **Source:** B-161 normalized weapon asset/class inventory
 - **Units:** Crane's Echoing Call, Lumidouce Elegy, Peak Patrol Song, Sturdy
   Bone, Vivid Notions, Lithic Blade, Lithic Spear, and Chain Breaker
@@ -3454,6 +3454,10 @@ experiment record.
 - **Plan:** four-phase `TASKS.md` stateful weapon campaign; Phase 1 supplies
   typed region and derived-damage primitives before three isolated weapon
   batches.
+- **Completion:** commits `c68df45` through `4c6df27` implement all eight
+  weapons and resolve independent-review findings for same-time hit identity,
+  final-damage gating, exact timing, restored mutable state, R5 composition,
+  and Lunar isolation; focused and full local gates pass.
 
 ### B-164 — Unmatched weapon assets behind deferred systems
 

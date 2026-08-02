@@ -13076,7 +13076,7 @@ Completion evidence:
 
 ## Implementation Order: Follow-on Stateful Weapon Campaign
 
-Status: In progress. Phase 1 is pending.
+Status: Complete. All four phases and independent review are verified.
 
 Scope:
 
@@ -13095,7 +13095,7 @@ Out of scope:
   damage, RL, generated docs, and Deferred Systems. Sturdy Bone's Sprint
   stamina reduction remains excluded because no stamina model exists.
 
-### Phase 1: Region and Derived-Damage Primitives
+### Phase 1: Region and Derived-Damage Primitives - Done
 
 Requirements:
 
@@ -13119,7 +13119,7 @@ Tests:
 - Abnormal: unknown identities fail closed and negative/invalid IDs retain the
   UNKNOWN contract.
 
-### Phase 2: Crane's Echoing Call and Peak Patrol Song
+### Phase 2: Crane's Echoing Call and Peak Patrol Song - Done
 
 Requirements:
 
@@ -13140,7 +13140,7 @@ Tests:
 - Abnormal: wrong owner/category, zero-damage contact, duplicate binding,
   cross-instance state, and foreign snapshot restore.
 
-### Phase 3: Lumidouce Elegy and Vivid Notions
+### Phase 3: Lumidouce Elegy and Vivid Notions - Done
 
 Requirements:
 
@@ -13163,7 +13163,7 @@ Tests:
 - Abnormal: duplicate same-hit trigger, derived reaction, wrong owner/element,
   irrelevant action, foreign simulator, and foreign snapshot state.
 
-### Phase 4: Sturdy Bone and Region-Composition Weapons
+### Phase 4: Sturdy Bone and Region-Composition Weapons - Done
 
 Requirements:
 
@@ -13192,11 +13192,20 @@ Campaign verification:
 - `./gradlew ReactionRegressionTest PartyCatalogRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
 
+Completion evidence:
+
+- Commits `c68df45` through `4c6df27` add the typed region/formula baseline,
+  all eight weapons, exact R1-R5 state, and focused regression executables.
+- Independent review corrections use final resolved damage, distinguish a
+  reaction's direct hit from separate same-time hits, enforce exact half-open
+  boundaries, and cover restored ICD/de-duplication state, R5 composition
+  values, and Lunar isolation.
+- All ten focused regressions, party catalog, reaction regression, build,
+  Javadoc, and executable preflight pass on the pushed combined tree.
+
 ## Implementation Order: Parallel Foundational Content Campaign
 
-Status: In progress. This campaign uses isolated worktrees for disjoint content
-families while the primary branch retains plan, ledger, integration, and final
-verification ownership.
+Status: Complete. All inventory units and campaign verification are done.
 
 Scope:
 
