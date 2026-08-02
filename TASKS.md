@@ -14309,6 +14309,11 @@ Out of scope for this pass:
 Target files:
 
 - `src/java/mechanics/buff/BuffId.java`
+- `src/java/model/type/StatType.java`
+- `src/java/model/stats/StatsContainer.java`
+- `src/java/mechanics/energy/EnergyDistributor.java`
+- `src/java/mechanics/analysis/StatsRecorder.java`
+- `src/java/visualization/ReportViewAdapter.java`
 - `src/java/model/weapon/TimedElementalMasteryTeamStatWeapon.java` (new)
 - `src/java/model/weapon/WanderingEvenstar.java`
 - `src/java/model/weapon/MakhairaAquamarine.java` (new)
@@ -14322,6 +14327,8 @@ Acceptance criteria:
 - Wandering and Makhaira grant 24-48% of EM as flat ATK; Xiphos grants
   0.036-0.072% ER per EM; allies receive exactly 30% and the owner is excluded
   from that share.
+- Xiphos ER contributes to particle recovery and displayed total ER but remains
+  excluded from Raiden A4 and Emblem damage conversion for owner and allies.
 - Independent instances stack, snapshots remain fixed between ticks, metadata
   and R1-R5 values/defaults are correct, and cross-simulator reuse is rejected.
 
@@ -14329,7 +14336,8 @@ Test cases to add or update:
 
 - Normal: all three metadata/effects, owner versus ally share, R5, multiple stack.
 - Boundary: before/exact 64 frames, ten-second resnapshot, 12-second duration, R1.
-- Abnormal: owner ally-share exclusion, cross-simulator reuse, refinement 0/6.
+- Abnormal: owner ally-share exclusion, non-converting ER leakage into Raiden
+  A4/Emblem, cross-simulator reuse, refinement 0/6.
 
 Verification:
 

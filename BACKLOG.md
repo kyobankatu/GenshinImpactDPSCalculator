@@ -2398,5 +2398,6 @@ experiment record.
 - **Value/risk:** two additions reuse and consolidate an already-regressed timer,
   snapshot, source attribution, and stacking policy
 - **Evidence boundary:** KQM TCL metadata, R1-R5 conversion ratios, 64-frame
-  first trigger, ten-second cadence, 12-second duration, and 30% ally share
+  first trigger, ten-second cadence, 12-second duration, 30% ally share, and
+  Xiphos exclusion from Raiden A4/Emblem conversion
 - **Plan:** `TASKS.md` Timed EM Team Weapon Campaign
