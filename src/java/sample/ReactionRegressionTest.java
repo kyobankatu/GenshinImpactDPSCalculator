@@ -4141,6 +4141,20 @@ public class ReactionRegressionTest {
         assertWeaponMetadata(
                 bow, "Sacrificial Bow", 565.0, 0.306, model.type.WeaponType.BOW);
         assertSacrificialResetsSkill(bow, "Sacrificial Bow");
+
+        model.weapon.SacrificialFragments fragments =
+                new model.weapon.SacrificialFragments(5, () -> 0.0);
+        assertEquals("Sacrificial Fragments", fragments.getName(),
+                "Sacrificial Fragments display name");
+        assertClose(454.0, fragments.getBaseAtk(), EPS,
+                "Sacrificial Fragments base ATK");
+        assertClose(221.0, fragments.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Sacrificial Fragments Elemental Mastery");
+        assertClose(0.0, fragments.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "Sacrificial Fragments should not add Energy Recharge");
+        assertEquals(model.type.WeaponType.CATALYST, fragments.getWeaponType(),
+                "Sacrificial Fragments weapon type");
+        assertSacrificialResetsSkill(fragments, "Sacrificial Fragments");
     }
 
     private static void testAccuracyPhaseF_WanderingEvenstarTimedSnapshot() {
