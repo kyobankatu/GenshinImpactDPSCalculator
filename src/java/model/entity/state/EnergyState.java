@@ -66,6 +66,19 @@ public class EnergyState {
     }
 
     /**
+     * Spends runtime Energy without changing gain or Burst-window accounting.
+     *
+     * @param amount non-negative Energy amount to spend
+     * @throws IllegalArgumentException when {@code amount} is negative or non-finite
+     */
+    public void spendEnergy(double amount) {
+        if (!Double.isFinite(amount) || amount < 0.0) {
+            throw new IllegalArgumentException("Energy spend must be finite and non-negative");
+        }
+        currentEnergy = Math.max(0.0, currentEnergy - amount);
+    }
+
+    /**
      * Resets all energy accumulators and clears window history.
      *
      * @param initialEnergy starting energy after reset

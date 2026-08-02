@@ -306,6 +306,15 @@ public abstract class Character {
         energyState.receiveFlatEnergy(amount, getMaxEnergy());
     }
 
+    /**
+     * Spends runtime Energy, clamping the bar at zero without recording a gain.
+     *
+     * @param amount non-negative Energy amount to spend
+     */
+    public void spendEnergy(double amount) {
+        energyState.spendEnergy(amount);
+    }
+
     /** @return cumulative particle energy received before ER scaling */
     public double getTotalParticleEnergy() {
         return energyState.getTotalParticleEnergy();

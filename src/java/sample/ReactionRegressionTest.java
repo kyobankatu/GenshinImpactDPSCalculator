@@ -129,6 +129,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_AdditionalClaymoreHitStackWeapons();
         testAccuracyPhaseF_DirectPhysicalProcWeapons();
         testAccuracyPhaseF_ActionUseWindowWeapons();
+        testAccuracyPhaseF_SamuraiConductWeapons();
         testAccuracyPhaseF_KaeyaCharacterContract();
         testAccuracyPhaseF_AmberCharacterContract();
         testAccuracyPhaseF_LisaCharacterContract();
@@ -4973,6 +4974,151 @@ public class ReactionRegressionTest {
         model.weapon.RavenBow r1RavenBow = new model.weapon.RavenBow(1);
         assertTargetAuraWeaponDamage(
                 r1RavenBow, Element.PYRO, Element.ELECTRO, 0.12, "R1 Raven Bow");
+    }
+
+    private static void testAccuracyPhaseF_SamuraiConductWeapons() {
+        model.weapon.KitainCrossSpear kitain = new model.weapon.KitainCrossSpear();
+        assertEquals("Kitain Cross Spear", kitain.getName(),
+                "Kitain Cross Spear display name");
+        assertClose(565.0, kitain.getBaseAtk(), EPS,
+                "Kitain Cross Spear base ATK");
+        assertClose(110.0,
+                kitain.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Kitain Cross Spear Elemental Mastery");
+        assertClose(0.12,
+                kitain.getStats().get(StatType.SKILL_DMG_BONUS), EPS,
+                "R5 Kitain Cross Spear Skill DMG Bonus");
+        assertEquals(model.type.WeaponType.POLEARM, kitain.getWeaponType(),
+                "Kitain Cross Spear weapon type");
+        assertEquals(5, kitain.getRefinement(),
+                "Kitain Cross Spear default refinement");
+
+        TestCharacter owner = testCharacter(Element.PYRO);
+        owner.setWeapon(kitain);
+        CombatSimulator sim = simulatorWith(owner);
+        owner.restoreCurrentEnergy(30.0);
+        AttackAction skillHit = typedDamageHit(
+                "Samurai Conduct Skill", ActionType.SKILL, 1.0);
+        AttackAction normalHit = typedDamageHit(
+                "Samurai Conduct Normal", ActionType.NORMAL, 1.0);
+        AttackAction zeroSkillHit = typedDamageHit(
+                "Samurai Conduct zero Skill", ActionType.SKILL, 0.0);
+        kitain.onDamage(owner, normalHit, 0.0, sim);
+        kitain.onDamage(owner, zeroSkillHit, 0.0, sim);
+        sim.advanceTime(1.0);
+        assertClose(30.0, owner.getCurrentEnergy(), EPS,
+                "Wrong and zero hits should not schedule Samurai Conduct");
+
+        kitain.onDamage(owner, skillHit, 1.0, sim);
+        double drainTime = 1.0 + 23.0 / 60.0;
+        sim.advanceTime(drainTime - sim.getCurrentTime() - 0.001);
+        assertClose(30.0, owner.getCurrentEnergy(), EPS,
+                "Samurai Conduct should not drain before 23 frames");
+        sim.advanceTime(0.001);
+        assertClose(27.0, owner.getCurrentEnergy(), EPS,
+                "Samurai Conduct should drain three Energy at 23 frames");
+        assertClose(0.0, owner.getTotalEnergyGained(), EPS,
+                "Samurai Conduct drain should not enter gain accounting");
+        sim.advanceTime(3.0 - sim.getCurrentTime());
+        assertClose(32.0, owner.getCurrentEnergy(), EPS,
+                "R5 Samurai Conduct should restore five Energy at two seconds");
+        sim.advanceTime(2.0);
+        assertClose(37.0, owner.getCurrentEnergy(), EPS,
+                "R5 Samurai Conduct should restore again at four seconds");
+        sim.advanceTime(2.0);
+        assertClose(42.0, owner.getCurrentEnergy(), EPS,
+                "R5 Samurai Conduct should restore three exact ticks");
+        assertClose(15.0, owner.getTotalFlatEnergy(), EPS,
+                "R5 Samurai Conduct should record fifteen flat Energy");
+
+        kitain.onDamage(owner, skillHit, 10.999, sim);
+        sim.advanceTime(11.0 - sim.getCurrentTime());
+        assertClose(42.0, owner.getCurrentEnergy(), EPS,
+                "Samurai Conduct should reject a hit immediately before CT");
+        kitain.onDamage(owner, skillHit, 11.0, sim);
+        sim.advanceTime(11.0 + 23.0 / 60.0 - sim.getCurrentTime());
+        assertClose(39.0, owner.getCurrentEnergy(), EPS,
+                "Samurai Conduct should retrigger at exact ten-second CT");
+
+        model.weapon.KitainCrossSpear r1Kitain =
+                new model.weapon.KitainCrossSpear(1);
+        assertClose(0.06,
+                r1Kitain.getStats().get(StatType.SKILL_DMG_BONUS), EPS,
+                "R1 Kitain Cross Spear Skill DMG Bonus");
+        TestCharacter r1Owner = testCharacter(Element.PYRO);
+        r1Owner.setWeapon(r1Kitain);
+        CombatSimulator r1Sim = simulatorWith(r1Owner);
+        r1Owner.restoreCurrentEnergy(30.0);
+        r1Kitain.onDamage(r1Owner, skillHit, 0.0, r1Sim);
+        r1Sim.advanceTime(6.0);
+        assertClose(36.0, r1Owner.getCurrentEnergy(), EPS,
+                "R1 Samurai Conduct should net six Energy after drain and recovery");
+        assertClose(9.0, r1Owner.getTotalFlatEnergy(), EPS,
+                "R1 Samurai Conduct should restore three Energy per tick");
+
+        model.weapon.KatsuragikiriNagamasa katsuragikiri =
+                new model.weapon.KatsuragikiriNagamasa();
+        assertEquals("Katsuragikiri Nagamasa", katsuragikiri.getName(),
+                "Katsuragikiri Nagamasa display name");
+        assertClose(510.0, katsuragikiri.getBaseAtk(), EPS,
+                "Katsuragikiri Nagamasa base ATK");
+        assertClose(0.459,
+                katsuragikiri.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "Katsuragikiri Nagamasa Energy Recharge");
+        assertClose(0.12,
+                katsuragikiri.getStats().get(StatType.SKILL_DMG_BONUS), EPS,
+                "R5 Katsuragikiri Nagamasa Skill DMG Bonus");
+        assertEquals(model.type.WeaponType.CLAYMORE, katsuragikiri.getWeaponType(),
+                "Katsuragikiri Nagamasa weapon type");
+        assertEquals(5, katsuragikiri.getRefinement(),
+                "Katsuragikiri Nagamasa default refinement");
+
+        TestCharacter offFieldOwner = testCharacter(Element.CRYO, CharacterId.KAEYA);
+        offFieldOwner.setWeapon(katsuragikiri);
+        CombatSimulator offFieldSim = simulatorWith(offFieldOwner);
+        offFieldSim.addCharacter(testCharacter(Element.PYRO, CharacterId.AMBER));
+        offFieldSim.setActiveCharacter(CharacterId.AMBER);
+        offFieldOwner.restoreCurrentEnergy(0.0);
+        katsuragikiri.onDamage(offFieldOwner, skillHit, 0.0, offFieldSim);
+        offFieldSim.advanceTime(2.0);
+        assertClose(5.0, offFieldOwner.getCurrentEnergy(), EPS,
+                "Off-field Samurai Conduct should drain safely at zero and recover");
+        offFieldSim.advanceTime(4.0);
+        assertClose(15.0, offFieldOwner.getCurrentEnergy(), EPS,
+                "Off-field Samurai Conduct should complete all recovery ticks");
+
+        model.weapon.KatsuragikiriNagamasa r1Katsuragikiri =
+                new model.weapon.KatsuragikiriNagamasa(1);
+        assertClose(0.06,
+                r1Katsuragikiri.getStats().get(StatType.SKILL_DMG_BONUS), EPS,
+                "R1 Katsuragikiri Nagamasa Skill DMG Bonus");
+
+        boolean lowRefinementRejected = false;
+        try {
+            new model.weapon.KitainCrossSpear(0);
+        } catch (IllegalArgumentException expected) {
+            lowRefinementRejected = true;
+        }
+        assertTrue(lowRefinementRejected,
+                "Kitain Cross Spear should reject refinement zero");
+
+        boolean highRefinementRejected = false;
+        try {
+            new model.weapon.KatsuragikiriNagamasa(6);
+        } catch (IllegalArgumentException expected) {
+            highRefinementRejected = true;
+        }
+        assertTrue(highRefinementRejected,
+                "Katsuragikiri Nagamasa should reject refinement six");
+
+        boolean negativeSpendRejected = false;
+        try {
+            owner.spendEnergy(-1.0);
+        } catch (IllegalArgumentException expected) {
+            negativeSpendRejected = true;
+        }
+        assertTrue(negativeSpendRejected,
+                "Runtime Energy spend should reject negative amounts");
     }
 
     private static void testAccuracyPhaseF_KaeyaCharacterContract() {
