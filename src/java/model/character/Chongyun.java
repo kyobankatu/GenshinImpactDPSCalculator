@@ -141,7 +141,7 @@ public class Chongyun extends Character implements
                     && sim.getEnemy() != null
                     && sim.getEnemy().getAuraUnits(Element.CRYO, time) > 0.0
                     && findActiveBuff(C4CooldownBuff.class, time) == null) {
-                receiveFlatEnergy(getTalentValue("C4 Energy", 2.0));
+                receiveFlatEnergy(getTalentValue("C4 Energy", 1.0));
                 removeBuffType(C4CooldownBuff.class);
                 addBuff(new C4CooldownBuff(
                         getTalentValue("C4 Cooldown", 2.0), time));
@@ -202,34 +202,40 @@ public class Chongyun extends Character implements
 
     private void normalAttack(CombatSimulator sim) {
         double castTime = sim.getCurrentTime();
-        double[] defaults = { 1.2861, 1.1597, 1.4757, 1.8597 };
+        double[] defaults = { 1.28612, 1.15972, 1.47572, 1.85966 };
         int[] hitmarks = { 26, 24, 41, 53 };
         int[] durations = { 30, 36, 57, 101 };
         int step = normalAttackStep;
-        double speedScale = normalAttackSpeedScale(sim, castTime);
-        Element attackElement = infusedElement(castTime);
-        AttackAction normal = attack(
-                "Demonbane N" + (step + 1),
-                getTalentValue("N" + (step + 1), defaults[step]),
-                attackElement,
-                StatType.NORMAL_ATTACK_DMG_BONUS,
-                ActionType.NORMAL,
-                ICDType.Standard,
-                ICDTag.NormalAttack,
-                attackElement == Element.CRYO ? 1.0 : 0.0,
-                true);
+        double attackSpeed = normalAttackSpeed(sim, castTime);
         schedule(
                 sim,
-                castTime + hitmarks[step] * FRAME / speedScale,
+                castTime + hitmarks[step] * FRAME,
                 activeSim -> {
+                    Element attackElement = infusedElement(
+                            activeSim.getCurrentTime());
+                    AttackAction normal = attack(
+                            "Demonbane N" + (step + 1),
+                            getTalentValue(
+                                    "N" + (step + 1), defaults[step]),
+                            attackElement,
+                            StatType.NORMAL_ATTACK_DMG_BONUS,
+                            ActionType.NORMAL,
+                            ICDType.Standard,
+                            ICDTag.NormalAttack,
+                            attackElement == Element.CRYO ? 1.0 : 0.0,
+                            true);
+                    normal.setStatSnapshot(captureActionStats(
+                            activeSim,
+                            activeSim.getCurrentTime()));
                     activeSim.performActionWithoutTimeAdvance(
                             characterId, normal);
                     if (step == 3 && constellation >= 1) {
                         scheduleC1Blades(activeSim);
                     }
-                });
+        });
         normalAttackStep = (normalAttackStep + 1) % defaults.length;
-        sim.advanceTime(durations[step] * FRAME / speedScale);
+        sim.advanceTime(adjustAttackFrames(
+                durations[step], attackSpeed) * FRAME);
     }
 
     private void scheduleC1Blades(CombatSimulator sim) {
@@ -272,22 +278,28 @@ public class Chongyun extends Character implements
 
     private void highPlunge(CombatSimulator sim) {
         double castTime = sim.getCurrentTime();
-        Element attackElement = infusedElement(castTime);
-        AttackAction plunge = attack(
-                "Demonbane High Plunge",
-                getTalentValue("Plunge High", 3.422517),
-                attackElement,
-                StatType.PLUNGING_ATTACK_DMG_BONUS,
-                ActionType.PLUNGE,
-                ICDType.None,
-                ICDTag.PlungeAttack,
-                attackElement == Element.CRYO ? 1.0 : 0.0,
-                true);
         schedule(
                 sim,
                 castTime + 47.0 * FRAME,
-                activeSim -> activeSim.performActionWithoutTimeAdvance(
-                        characterId, plunge));
+                activeSim -> {
+                    Element attackElement = infusedElement(
+                            activeSim.getCurrentTime());
+                    AttackAction plunge = attack(
+                            "Demonbane High Plunge",
+                            getTalentValue("Plunge High", 3.422517),
+                            attackElement,
+                            StatType.PLUNGING_ATTACK_DMG_BONUS,
+                            ActionType.PLUNGE,
+                            ICDType.None,
+                            ICDTag.PlungeAttack,
+                            attackElement == Element.CRYO ? 1.0 : 0.0,
+                            true);
+                    plunge.setStatSnapshot(captureActionStats(
+                            activeSim,
+                            activeSim.getCurrentTime()));
+                    activeSim.performActionWithoutTimeAdvance(
+                            characterId, plunge);
+                });
         sim.advanceTime(87.0 * FRAME);
     }
 
@@ -317,6 +329,7 @@ public class Chongyun extends Character implements
                 ICDTag.ElementalSkill,
                 2.0,
                 true);
+        skill.setStatSnapshot(a4Snapshot);
 
         double fieldStart = castTime + 36.0 * FRAME;
         schedule(sim, castTime + 34.0 * FRAME, activeSim ->
@@ -447,10 +460,9 @@ public class Chongyun extends Character implements
 
     private void cloudPartingStar(CombatSimulator sim) {
         double castTime = sim.getCurrentTime();
+        markBurstCooldownUsed(castTime, sim.getApplicableBuffs(this));
         schedule(sim, castTime + 6.0 * FRAME, activeSim ->
-                markBurstUsed(
-                        activeSim.getCurrentTime(),
-                        activeSim.getApplicableBuffs(this)));
+                spendBurstEnergy(activeSim.getCurrentTime()));
         int[] hitmarks = constellation >= 6
                 ? new int[] { 50, 59, 67, 77 }
                 : new int[] { 50, 59, 67 };
@@ -521,7 +533,7 @@ public class Chongyun extends Character implements
         getActiveBuffs().removeIf(buffType::isInstance);
     }
 
-    private double normalAttackSpeedScale(
+    private double normalAttackSpeed(
             CombatSimulator sim,
             double currentTime) {
         StatsContainer stats = captureActionStats(sim, currentTime);
@@ -529,7 +541,16 @@ public class Chongyun extends Character implements
                 0.60,
                 stats.get(StatType.ATK_SPD)
                         + stats.get(StatType.NORMAL_ATTACK_SPD));
-        return 1.0 + Math.max(0.0, speed);
+        return Math.max(0.0, speed);
+    }
+
+    private static int adjustAttackFrames(
+            int frames,
+            double attackSpeed) {
+        double effectiveSpeed = Math.min(
+                attackSpeed,
+                0.1 + (attackSpeed - 0.1) / 2.0);
+        return frames - (int) (effectiveSpeed * frames);
     }
 
     private StatsContainer captureActionStats(

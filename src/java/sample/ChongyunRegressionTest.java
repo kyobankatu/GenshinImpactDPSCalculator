@@ -114,7 +114,9 @@ public final class ChongyunRegressionTest {
         Chongyun c0 = chongyunAtConstellation(0);
         CombatSimulator sim = simulatorWith(c0);
         List<ActionRecord> normals = captureNamedActions(sim, "Demonbane N");
-        double[] multipliers = { 1.2861, 1.1597, 1.4757, 1.8597 };
+        double[] multipliers = {
+                1.28612, 1.15972, 1.47572, 1.85966
+        };
         int[] hitmarks = { 26, 24, 41, 53 };
         int[] durations = { 30, 36, 57, 101 };
         for (int step = 0; step < multipliers.length; step++) {
@@ -226,6 +228,11 @@ public final class ChongyunRegressionTest {
 
     private static void testSkillFieldInfusionParticlesAndC5() {
         Chongyun c0 = chongyunAtConstellation(0);
+        c0.addBuff(new SimpleBuff(
+                "Chongyun cast-only Skill ATK",
+                20.0 * FRAME,
+                0.0,
+                stats -> stats.add(StatType.ATK_PERCENT, 1.0)));
         CombatSimulator sim = simulatorWith(c0);
         List<ActionRecord> skillRecords = captureNamedActions(
                 sim, "Spirit Blade: Chonghua");
@@ -240,8 +247,12 @@ public final class ChongyunRegressionTest {
                 "Layered Frost duration");
         assertClose(2.92468, skill.action.getDamagePercent(), EPS,
                 "Layered Frost talent-9 multiplier");
-        assertFalse(skill.action.hasStatSnapshot(),
-                "Layered Frost resolves dynamically at impact");
+        assertTrue(skill.action.hasStatSnapshot(),
+                "Layered Frost owns a cast-time snapshot");
+        assertClose(1.24,
+                skill.action.getStatSnapshot().get(StatType.ATK_PERCENT),
+                EPS,
+                "Layered Frost retains cast-only ATK");
         assertAttack(
                 skill.action,
                 Element.CRYO,
@@ -257,12 +268,12 @@ public final class ChongyunRegressionTest {
         double normalCast = sim.getCurrentTime();
         List<ActionRecord> normals = captureNamedActions(sim, "Demonbane N");
         perform(sim, CharacterId.CHONGYUN, CharacterActionKey.NORMAL);
-        assertClose(normalCast + 26.0 * FRAME / 1.08,
+        assertClose(normalCast + 26.0 * FRAME,
                 normals.get(0).time, EPS,
-                "A1 scales Chongyun N1 hitmark");
-        assertClose(normalCast + 30.0 * FRAME / 1.08,
+                "A1 leaves Chongyun N1 hitmark unchanged");
+        assertClose(normalCast + 28.0 * FRAME,
                 sim.getCurrentTime(), EPS,
-                "A1 scales Chongyun N1 duration");
+                "A1 applies integer frame adjustment to N1 duration");
         assertAttack(
                 normals.get(0).action,
                 Element.CRYO,
@@ -306,6 +317,13 @@ public final class ChongyunRegressionTest {
                         .get(StatType.NORMAL_ATTACK_SPD),
                 EPS,
                 "C5 infusion and speed expire after three seconds");
+        advanceTo(c5Sim, 13.30);
+        List<ActionRecord> expiryNormals = captureNamedActions(
+                c5Sim, "Demonbane N");
+        perform(c5Sim, CharacterId.CHONGYUN, CharacterActionKey.NORMAL);
+        assertEquals(Element.PHYSICAL,
+                expiryNormals.get(0).action.getElement(),
+                "Chongyun infusion is resolved at hit after field expiry");
     }
 
     private static void testTeamFieldC2AndSnapshotRestore() {
@@ -478,7 +496,7 @@ public final class ChongyunRegressionTest {
                 CharacterActionKey.NORMAL);
         assertEquals(Element.CRYO, normals.get(0).action.getElement(),
                 "weaponless Chongyun retains intrinsic claymore infusion");
-        assertClose(castTime + 30.0 * FRAME / 1.08,
+        assertClose(castTime + 28.0 * FRAME,
                 nullWeaponSim.getCurrentTime(), EPS,
                 "weaponless Chongyun remains eligible for A1 speed");
     }
@@ -522,9 +540,9 @@ public final class ChongyunRegressionTest {
         assertClose(castTime + 79.0 * FRAME,
                 sim.getCurrentTime(), EPS,
                 "Cloud-Parting Star animation duration");
-        assertClose(12.0 - 73.0 * FRAME,
+        assertClose(12.0 - 79.0 * FRAME,
                 chongyun.getBurstCDRemaining(sim.getCurrentTime()), EPS,
-                "Cloud-Parting Star cooldown starts at frame six");
+                "Cloud-Parting Star cooldown starts at cast");
     }
 
     private static void testC4EnergyAndSimulatorGuard() {
@@ -537,8 +555,8 @@ public final class ChongyunRegressionTest {
         SimulatorSnapshot cooldownSnapshot = sim.saveSnapshot();
         perform(sim, CharacterId.CHONGYUN, CharacterActionKey.NORMAL);
         double second = c4.getTotalFlatEnergy() - before - first;
-        assertClose(2.0, first - second, EPS,
-                "C4 grants two Energy on first eligible hit");
+        assertClose(1.0, first - second, EPS,
+                "C4 grants one Energy on first eligible hit");
         sim.advanceTime(2.0);
         double priorThird = c4.getTotalFlatEnergy();
         perform(sim, CharacterId.CHONGYUN, CharacterActionKey.NORMAL);

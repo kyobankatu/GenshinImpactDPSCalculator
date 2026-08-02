@@ -1,8 +1,8 @@
 Character,AbilityType,Key,Level,Value1,Value2
-Chongyun,NORMAL,N1,9,1.2861,0
-Chongyun,NORMAL,N2,9,1.1597,0
-Chongyun,NORMAL,N3,9,1.4757,0
-Chongyun,NORMAL,N4,9,1.8597,0
+Chongyun,NORMAL,N1,9,1.28612,0
+Chongyun,NORMAL,N2,9,1.15972,0
+Chongyun,NORMAL,N3,9,1.47572,0
+Chongyun,NORMAL,N4,9,1.85966,0
 Chongyun,CHARGE,Charged Spin,9,1.0341,0
 Chongyun,PLUNGE,Plunge High,9,3.422517,0
 Chongyun,SKILL,Layered Frost,9,2.92468,0
@@ -18,5 +18,5 @@ Chongyun,PASSIVE,A4 Cryo RES Shred,1,0.10,0
 Chongyun,PASSIVE,A4 RES Shred Duration,1,8,0
 Chongyun,PASSIVE,C1 Ice Blade,1,0.50,0
 Chongyun,PASSIVE,C2 Cooldown Reduction,1,0.15,0
-Chongyun,PASSIVE,C4 Energy,1,2,0
+Chongyun,PASSIVE,C4 Energy,1,1,0
 Chongyun,PASSIVE,C4 Cooldown,1,2,0
