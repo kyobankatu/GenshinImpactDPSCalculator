@@ -144,6 +144,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_TypedFiveStarBows();
         testAccuracyPhaseF_EnergyConditionalEmblemWeapons();
         testAccuracyPhaseF_FiveStarElementalMasterySupportWeapons();
+        testAccuracyPhaseF_FiveStarCatalystStackWeapons();
         testAccuracyPhaseF_ActionUseWindowWeapons();
         testAccuracyPhaseF_AdditionalSkillUseStatWeapons();
         testAccuracyPhaseF_SamuraiConductWeapons();
@@ -9998,6 +9999,248 @@ public class ReactionRegressionTest {
         }
         assertTrue(highDreamsRefinementRejected,
                 "Floating Dreams should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_FiveStarCatalystStackWeapons() {
+        model.weapon.KagurasVerity kagura = new model.weapon.KagurasVerity();
+        assertEquals("Kagura's Verity", kagura.getName(),
+                "Kagura's Verity display name");
+        assertClose(608.0, kagura.getBaseAtk(), EPS,
+                "Kagura's Verity base ATK");
+        assertClose(0.662,
+                kagura.getStats().get(StatType.CRIT_DMG), EPS,
+                "Kagura's Verity CRIT DMG");
+        assertEquals(model.type.WeaponType.CATALYST, kagura.getWeaponType(),
+                "Kagura's Verity weapon type");
+        assertEquals(5, kagura.getRefinement(),
+                "Kagura's Verity default refinement");
+
+        TestCharacter kaguraOwner = testCharacter(
+                Element.ELECTRO, CharacterId.SUCROSE);
+        kaguraOwner.setWeapon(kagura);
+        CombatSimulator kaguraSim = simulatorWith(kaguraOwner);
+        TestCharacter foreignUser = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        kagura.onAction(
+                foreignUser,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                kaguraSim);
+        kagura.onAction(
+                kaguraOwner,
+                CharacterActionRequest.of(CharacterActionKey.BURST),
+                kaguraSim);
+        assertEquals(0, kagura.getStackCount(),
+                "Foreign and non-Skill actions should not add Kagura stacks");
+
+        for (int stack = 1; stack <= 3; stack++) {
+            kagura.onAction(
+                    kaguraOwner,
+                    CharacterActionRequest.of(CharacterActionKey.SKILL),
+                    kaguraSim);
+            assertEquals(stack, kagura.getStackCount(),
+                    "Kagura stack count after Skill " + stack);
+            assertClose(0.24 * stack,
+                    resolvedStat(kaguraSim, kaguraOwner,
+                            StatType.SKILL_DMG_BONUS), EPS,
+                    "R5 Kagura Skill DMG tier " + stack);
+        }
+        for (Element element : Element.values()) {
+            double expected = element == Element.PHYSICAL ? 0.0 : 0.24;
+            assertClose(expected,
+                    resolvedStat(kaguraSim, kaguraOwner,
+                            element.getBonusStatType()), EPS,
+                    "Kagura three-stack elemental bonus for " + element);
+        }
+        kagura.onAction(
+                kaguraOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                kaguraSim);
+        assertEquals(3, kagura.getStackCount(),
+                "Kagura stacks should cap at three");
+        kaguraSim.advanceTime(24.0);
+        assertClose(0.0,
+                resolvedStat(kaguraSim, kaguraOwner,
+                        StatType.SKILL_DMG_BONUS), EPS,
+                "Kagura stacks should expire at exactly 24 seconds");
+        kagura.onAction(
+                kaguraOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                kaguraSim);
+        assertEquals(1, kagura.getStackCount(),
+                "Kagura should restart at one stack after expiry");
+        kaguraSim.advanceTime(23.0);
+        kagura.onAction(
+                kaguraOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                kaguraSim);
+        kaguraSim.advanceTime(1.0 + 1e-9);
+        assertClose(0.48,
+                resolvedStat(kaguraSim, kaguraOwner,
+                        StatType.SKILL_DMG_BONUS), EPS,
+                "Kagura Skill use should refresh the shared 24-second window");
+
+        model.weapon.KagurasVerity r1Kagura =
+                new model.weapon.KagurasVerity(1);
+        TestCharacter r1KaguraOwner = testCharacter(Element.ELECTRO);
+        r1KaguraOwner.setWeapon(r1Kagura);
+        CombatSimulator r1KaguraSim = simulatorWith(r1KaguraOwner);
+        for (int i = 0; i < 3; i++) {
+            r1Kagura.onAction(
+                    r1KaguraOwner,
+                    CharacterActionRequest.of(CharacterActionKey.SKILL),
+                    r1KaguraSim);
+        }
+        assertClose(0.36,
+                resolvedStat(r1KaguraSim, r1KaguraOwner,
+                        StatType.SKILL_DMG_BONUS), EPS,
+                "R1 Kagura three-stack Skill DMG");
+        assertClose(0.12,
+                resolvedStat(r1KaguraSim, r1KaguraOwner,
+                        StatType.ELECTRO_DMG_BONUS), EPS,
+                "R1 Kagura three-stack Elemental DMG");
+
+        model.weapon.LostPrayerToTheSacredWinds lostPrayer =
+                new model.weapon.LostPrayerToTheSacredWinds();
+        assertEquals("Lost Prayer to the Sacred Winds", lostPrayer.getName(),
+                "Lost Prayer display name");
+        assertClose(608.0, lostPrayer.getBaseAtk(), EPS,
+                "Lost Prayer base ATK");
+        assertClose(0.331,
+                lostPrayer.getStats().get(StatType.CRIT_RATE), EPS,
+                "Lost Prayer CRIT Rate");
+        assertEquals(model.type.WeaponType.CATALYST, lostPrayer.getWeaponType(),
+                "Lost Prayer weapon type");
+        assertEquals(5, lostPrayer.getRefinement(),
+                "Lost Prayer default refinement");
+
+        TestCharacter prayerOwner = testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE);
+        prayerOwner.setWeapon(lostPrayer);
+        CombatSimulator prayerSim = simulatorWith(prayerOwner);
+        prayerSim.addCharacter(testCharacter(
+                Element.PYRO, CharacterId.AMBER));
+        prayerSim.advanceTime(4.0 - 1e-9);
+        assertEquals(0, lostPrayer.getStackCount(),
+                "Lost Prayer should not stack before four seconds");
+        prayerSim.advanceTime(1e-9);
+        assertEquals(1, lostPrayer.getStackCount(),
+                "Lost Prayer should stack at exactly four seconds");
+        assertClose(0.16,
+                resolvedStat(prayerSim, prayerOwner,
+                        StatType.ANEMO_DMG_BONUS), EPS,
+                "R5 Lost Prayer one-stack bonus");
+        for (Element element : Element.values()) {
+            double expected = element == Element.PHYSICAL ? 0.0 : 0.16;
+            assertClose(expected,
+                    resolvedStat(prayerSim, prayerOwner,
+                            element.getBonusStatType()), EPS,
+                    "Lost Prayer one-stack elemental bonus for " + element);
+        }
+        prayerSim.advanceTime(12.0);
+        assertEquals(4, lostPrayer.getStackCount(),
+                "Lost Prayer should reach four stacks at 16 seconds");
+        assertClose(0.64,
+                resolvedStat(prayerSim, prayerOwner,
+                        StatType.ANEMO_DMG_BONUS), EPS,
+                "R5 Lost Prayer four-stack bonus");
+        prayerSim.advanceTime(4.0);
+        assertEquals(4, lostPrayer.getStackCount(),
+                "Lost Prayer should remain capped at four stacks");
+
+        prayerSim.switchCharacter(CharacterId.AMBER);
+        assertEquals(0, lostPrayer.getStackCount(),
+                "Lost Prayer should reset through the switch-out callback");
+        double nextTick = 24.0;
+        prayerSim.advanceTime(nextTick - prayerSim.getCurrentTime());
+        assertEquals(0, lostPrayer.getStackCount(),
+                "Lost Prayer should not gain stacks while off-field");
+        prayerSim.switchCharacter(CharacterId.SUCROSE);
+        prayerSim.advanceTime(28.0 - prayerSim.getCurrentTime());
+        assertEquals(1, lostPrayer.getStackCount(),
+                "Lost Prayer should resume on the unchanged global cadence");
+
+        model.weapon.LostPrayerToTheSacredWinds offFieldPrayer =
+                new model.weapon.LostPrayerToTheSacredWinds();
+        TestCharacter offFieldActive = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        TestCharacter offFieldPrayerOwner = testCharacter(
+                Element.ANEMO, CharacterId.SUCROSE);
+        offFieldPrayerOwner.setWeapon(offFieldPrayer);
+        CombatSimulator offFieldPrayerSim = simulatorWith(offFieldActive);
+        offFieldPrayerSim.addCharacter(offFieldPrayerOwner);
+        offFieldPrayerSim.advanceTime(8.0);
+        assertEquals(0, offFieldPrayer.getStackCount(),
+                "Lost Prayer initial off-field ticks should not grant stacks");
+        offFieldPrayerSim.setActiveCharacter(CharacterId.SUCROSE);
+        offFieldPrayerSim.advanceTime(4.0);
+        assertEquals(1, offFieldPrayer.getStackCount(),
+                "Lost Prayer should use the existing cadence after direct return");
+
+        model.weapon.LostPrayerToTheSacredWinds r1Prayer =
+                new model.weapon.LostPrayerToTheSacredWinds(1);
+        TestCharacter r1PrayerOwner = testCharacter(Element.ANEMO);
+        r1PrayerOwner.setWeapon(r1Prayer);
+        CombatSimulator r1PrayerSim = simulatorWith(r1PrayerOwner);
+        r1PrayerSim.advanceTime(4.0);
+        assertClose(0.08,
+                resolvedStat(r1PrayerSim, r1PrayerOwner,
+                        StatType.ANEMO_DMG_BONUS), EPS,
+                "R1 Lost Prayer one-stack bonus");
+
+        boolean kaguraReuseRejected = false;
+        try {
+            kagura.initializeForSimulator(kaguraOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            kaguraReuseRejected = true;
+        }
+        assertTrue(kaguraReuseRejected,
+                "Kagura should reject cross-simulator reuse");
+
+        boolean prayerReuseRejected = false;
+        try {
+            lostPrayer.initializeForSimulator(
+                    prayerOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            prayerReuseRejected = true;
+        }
+        assertTrue(prayerReuseRejected,
+                "Lost Prayer should reject cross-simulator reuse");
+
+        boolean lowKaguraRefinementRejected = false;
+        try {
+            new model.weapon.KagurasVerity(0);
+        } catch (IllegalArgumentException expected) {
+            lowKaguraRefinementRejected = true;
+        }
+        assertTrue(lowKaguraRefinementRejected,
+                "Kagura should reject refinement zero");
+
+        boolean highKaguraRefinementRejected = false;
+        try {
+            new model.weapon.KagurasVerity(6);
+        } catch (IllegalArgumentException expected) {
+            highKaguraRefinementRejected = true;
+        }
+        assertTrue(highKaguraRefinementRejected,
+                "Kagura should reject refinement six");
+
+        boolean lowPrayerRefinementRejected = false;
+        try {
+            new model.weapon.LostPrayerToTheSacredWinds(0);
+        } catch (IllegalArgumentException expected) {
+            lowPrayerRefinementRejected = true;
+        }
+        assertTrue(lowPrayerRefinementRejected,
+                "Lost Prayer should reject refinement zero");
+
+        boolean highPrayerRefinementRejected = false;
+        try {
+            new model.weapon.LostPrayerToTheSacredWinds(6);
+        } catch (IllegalArgumentException expected) {
+            highPrayerRefinementRejected = true;
+        }
+        assertTrue(highPrayerRefinementRejected,
+                "Lost Prayer should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_OffFieldHitBows() {
