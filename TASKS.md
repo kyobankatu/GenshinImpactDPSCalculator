@@ -13422,3 +13422,53 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc` at the shared/final API boundary
 - `python scripts/preflight.py`
+
+## Implementation Order: Claymore Hit-Stack Weapon Campaign
+
+Status: Active. Extend the verified typed hit-stack policy with two claymores
+whose complete damage-relevant passives require no new runtime abstraction.
+
+Scope:
+
+- Add Skyrider Greatsword and Whiteblind with sourced Lv. 90 metadata,
+  R1-R5 values, R5 defaults, and focused regressions.
+- Reuse `HitStackStatWeapon` for positive Normal/Charged hits, exact 0.5-second
+  CT, a four-stack cap, and a shared six-second duration.
+
+Out of scope for this pass:
+
+- Characters, formulas, RL, generated docs, and unrelated weapon families.
+
+### Phase 1: Add Claymore Hit-Stack Weapons
+
+Target files:
+
+- `src/java/model/weapon/SkyriderGreatsword.java` (new)
+- `src/java/model/weapon/Whiteblind.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+| Unit | Passive | Focused verification | Status |
+|---|---|---|---|
+| Skyrider Greatsword | Normal/Charged hit -> ATK 6-10%, max four | CT, cap/refresh, metadata, R1/R5 | Pending |
+| Whiteblind | Normal/Charged hit -> ATK and DEF 6-12%, max four | dual stats, action gate, expiry, R1/R5 | Pending |
+
+Acceptance criteria:
+
+- Only positive Normal/Charged direct hits gain stacks, exact 0.5-second CT is
+  eligible, and wrong action or zero-damage events do not refresh the window.
+- Every accepted hit refreshes the shared six-second half-open duration while
+  preserving the four-stack cap.
+- Refinement 0/6 fails; metadata and R1-R5 values match the cited KQM TCL pages.
+
+Test cases to add or update:
+
+- Normal: Normal/Charged triggers, four-stack cap, dual ATK/DEF application.
+- Boundary: exact CT, before/exact expiry, R1 and R5 values.
+- Abnormal: Skill and zero-damage exclusion, repeated reads, refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc` at the final public-class boundary
+- `python scripts/preflight.py`

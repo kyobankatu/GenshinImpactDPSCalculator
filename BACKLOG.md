@@ -2208,3 +2208,13 @@ experiment record.
 - **Plan:** `TASKS.md` Action-Use Window Weapon Campaign
 - **Completion:** `c672bbf`, `a59b00c`, and `dbf3b15` preserve the Skill API and
   add all variants; focused/build/Javadoc/leak gates pass
+
+### B-087 — Claymore hit-stack weapon coverage
+
+- **Status:** active
+- **Scope:** Skyrider Greatsword and Whiteblind; RL excluded
+- **Value/risk:** two complete passives reuse the verified typed hit-stack
+  policy without extending simulator state or trigger dispatch
+- **Evidence boundary:** KQM TCL metadata, R1-R5 values, Normal/Charged action
+  gates, 0.5-second CT, four-stack cap, and shared six-second duration
+- **Plan:** `TASKS.md` Claymore Hit-Stack Weapon Campaign
