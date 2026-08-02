@@ -148,6 +148,12 @@ public enum BuffId {
     TENACITY_OF_THE_MILLELITH_TEAM_ATK,
     /** 聖遺物「千岩牢固」の元素スキル命中クールダウン。 */
     TENACITY_OF_THE_MILLELITH_TRIGGER_COOLDOWN,
+    /** 聖遺物「風立ちの日」の牧歌の風の祝福。 */
+    A_DAY_CARVED_FROM_RISING_WINDS_4PC,
+    /** 聖遺物「残響の森で囁かれる夜話」の岩元素ダメージ強化。 */
+    NIGHTTIME_WHISPERS_IN_THE_ECHOING_WOODS_4PC,
+    /** 聖遺物「辰砂往生録」の潜光。 */
+    VERMILLION_HEREAFTER_NASCENT_LIGHT,
     SUPERCONDUCT_PHYS_RES_SHRED,
     /** 武器「漂泊の宵星」効果。 */
     WANDERING_EVENSTAR_WILDLING_NIGHTSTAR,
