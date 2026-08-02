@@ -1,33 +1,20 @@
 package model.weapon;
 
-import java.util.Objects;
 import java.util.function.DoubleSupplier;
 
-import model.entity.Character;
-import model.entity.DamageTriggeredWeaponEffect;
-import model.entity.Weapon;
-import model.stats.StatsContainer;
-import model.type.ActionType;
 import model.type.StatType;
 import model.type.WeaponType;
-import simulation.CombatSimulator;
-import simulation.action.AttackAction;
 
 /**
- * R5 Sacrificial Sword with Lv 90 stats and the Composed Skill-reset passive.
+ * Sacrificial Sword with Lv. 90 stats and the shared Composed passive.
  */
-public class SacrificialSword extends Weapon implements DamageTriggeredWeaponEffect {
-    private static final double PROC_CHANCE = 0.8;
-    private static final double PROC_COOLDOWN = 16.0;
-
-    private final DoubleSupplier procDraw;
-    private double nextProcTime = Double.NEGATIVE_INFINITY;
+public class SacrificialSword extends SacrificialWeapon {
 
     /**
      * Constructs R5 Sacrificial Sword with stochastic Composed draws.
      */
     public SacrificialSword() {
-        this(Math::random);
+        this(5, Math::random);
     }
 
     /**
@@ -37,41 +24,26 @@ public class SacrificialSword extends Weapon implements DamageTriggeredWeaponEff
      * @throws NullPointerException if {@code procDraw} is null
      */
     public SacrificialSword(DoubleSupplier procDraw) {
-        super("Sacrificial Sword", new StatsContainer());
-        this.procDraw = Objects.requireNonNull(procDraw, "procDraw");
-        StatsContainer s = this.getStats();
-        s.add(StatType.BASE_ATK, 454);
-        s.add(StatType.ENERGY_RECHARGE, 0.613);
-        this.weaponType = WeaponType.SWORD;
+        this(5, procDraw);
     }
 
     /**
-     * Attempts R5 Composed after positive direct Elemental Skill damage.
+     * Constructs Sacrificial Sword at a selected refinement with stochastic draws.
      *
-     * @param user        weapon owner who dealt the Skill damage
-     * @param action      resolved damage action
-     * @param currentTime damage time in simulation seconds
-     * @param sim         active combat simulator
+     * @param refinement refinement rank in the inclusive range 1-5
      */
-    @Override
-    public void onDamage(
-            Character user,
-            AttackAction action,
-            double currentTime,
-            CombatSimulator sim) {
-        if (action.getActionType() != ActionType.SKILL
-                || action.getDamagePercent() <= 0.0
-                || currentTime < nextProcTime) {
-            return;
-        }
-        if (procDraw.getAsDouble() >= PROC_CHANCE) {
-            return;
-        }
+    public SacrificialSword(int refinement) {
+        this(refinement, Math::random);
+    }
 
-        user.resetSkillCooldown(currentTime);
-        nextProcTime = currentTime + PROC_COOLDOWN;
-        if (sim.isLoggingEnabled()) {
-            System.out.println("   [Weapon] Sacrificial Sword reset Skill cooldown");
-        }
+    /**
+     * Constructs Sacrificial Sword with selected refinement and draw source.
+     *
+     * @param refinement refinement rank in the inclusive range 1-5
+     * @param procDraw source used for Composed proc sampling
+     */
+    public SacrificialSword(int refinement, DoubleSupplier procDraw) {
+        super("Sacrificial Sword", WeaponType.SWORD, 454.0,
+                StatType.ENERGY_RECHARGE, 0.613, refinement, procDraw);
     }
 }

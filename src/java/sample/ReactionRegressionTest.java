@@ -3961,6 +3961,22 @@ public class ReactionRegressionTest {
         }
         assertTrue(nullRejected, "Sacrificial Sword should reject a null proc draw source");
 
+        boolean lowRefinementRejected = false;
+        try {
+            new model.weapon.SacrificialSword(0);
+        } catch (IllegalArgumentException expected) {
+            lowRefinementRejected = true;
+        }
+        assertTrue(lowRefinementRejected, "Sacrificial should reject refinement zero");
+
+        boolean highRefinementRejected = false;
+        try {
+            new model.weapon.SacrificialSword(6);
+        } catch (IllegalArgumentException expected) {
+            highRefinementRejected = true;
+        }
+        assertTrue(highRefinementRejected, "Sacrificial should reject refinement six");
+
         AttackAction skillHit = new AttackAction(
                 "Sacrificial Skill Hit",
                 1.0,
@@ -4087,6 +4103,30 @@ public class ReactionRegressionTest {
                 "Composed should remove only the earliest pending charge restore");
         assertClose(10.0, chargeOwner.getActiveChargeCooldownDuration(), EPS,
                 "A remaining charge should retain the captured restore duration");
+
+        double[] r1Draws = { 0.4, 0.399999, 0.0 };
+        int[] r1DrawIndex = { 0 };
+        model.weapon.SacrificialSword r1Weapon = new model.weapon.SacrificialSword(
+                1, () -> r1Draws[r1DrawIndex[0]++]);
+        TestCharacter r1Owner = testCharacter(Element.HYDRO);
+        r1Owner.setSkillCD(60.0);
+        CombatSimulator r1Sim = simulatorWith(r1Owner);
+        r1Owner.markSkillUsed(0.0);
+        r1Weapon.onDamage(r1Owner, skillHit, 0.0, r1Sim);
+        assertEquals(1, r1DrawIndex[0], "An R1 draw equal to 40% should fail Composed");
+        assertTrue(!r1Owner.canSkill(0.0), "A failed R1 draw should preserve Skill cooldown");
+        r1Weapon.onDamage(r1Owner, skillHit, 0.0, r1Sim);
+        assertEquals(2, r1DrawIndex[0], "A failed R1 draw should permit an immediate retry");
+        assertTrue(r1Owner.canSkill(0.0), "An R1 draw below 40% should reset Skill cooldown");
+        r1Owner.markSkillUsed(1.0);
+        r1Weapon.onDamage(r1Owner, skillHit, 29.999, r1Sim);
+        assertEquals(2, r1DrawIndex[0], "R1 Composed should not draw before thirty seconds");
+        assertTrue(!r1Owner.canSkill(29.999),
+                "A pre-boundary R1 hit should preserve Skill cooldown");
+        r1Weapon.onDamage(r1Owner, skillHit, 30.0, r1Sim);
+        assertEquals(3, r1DrawIndex[0], "R1 Composed should draw at exactly thirty seconds");
+        assertTrue(r1Owner.canSkill(30.0),
+                "An exact-boundary R1 success should reset Skill cooldown");
     }
 
     private static void testAccuracyPhaseF_WanderingEvenstarTimedSnapshot() {
