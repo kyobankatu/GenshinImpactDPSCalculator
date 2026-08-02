@@ -1,0 +1,14 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Jean,NORMAL,N1,9,0.88796,0
+Jean,NORMAL,N2,9,0.83740,0
+Jean,NORMAL,N3,9,1.10758,0
+Jean,NORMAL,N4,9,1.21028,0
+Jean,NORMAL,N5,9,1.45518,0
+Jean,CHARGED,Charged Attack,9,2.97672,0
+Jean,PLUNGE,High Plunge,9,2.933586,0
+Jean,SKILL,Gale Blade,9,4.9640,0
+Jean,SKILL,Gale Blade C5,12,5.8400,0
+Jean,BURST,Dandelion Breeze,9,7.2216,0
+Jean,BURST,Field Border,9,1.3328,0
+Jean,BURST,Dandelion Breeze C3,12,8.4960,0
+Jean,BURST,Field Border C3,12,1.5680,0

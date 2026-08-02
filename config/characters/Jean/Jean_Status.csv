@@ -1,0 +1,13 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Jean,STATS,Base HP,90,14695,0
+Jean,STATS,Base ATK,90,239,0
+Jean,STATS,Base DEF,90,769,0
+Jean,STATS,Ascension Healing Bonus,90,0.2215,0
+Jean,STATS,Energy Cost,90,80,0
+Jean,CONFIG,Character Level,90,90,0
+Jean,CONFIG,Normal Level,9,9,0
+Jean,CONFIG,Skill Level,12,12,0
+Jean,CONFIG,Burst Level,12,12,0
+Jean,CONFIG,Constellation,6,6,0
+Jean,PASSIVE,Skill Particles,1,2.6666666666666665,0
+Jean,PASSIVE,A4 Energy,1,16,0
