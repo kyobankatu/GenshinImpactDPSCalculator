@@ -138,6 +138,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_SkillBurstOffensiveWeapons();
         testAccuracyPhaseF_MoonsignReactionWeapons();
         testAccuracyPhaseF_MoonsignEmAndBloomWeapons();
+        testAccuracyPhaseF_CatalystDualWindowWeapons();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -8500,6 +8501,240 @@ public class ReactionRegressionTest {
         }
         assertTrue(highLanternRefinementRejected,
                 "Blackmarrow Lantern should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_CatalystDualWindowWeapons() {
+        model.weapon.DawningFrost dawningFrost =
+                new model.weapon.DawningFrost();
+        assertEquals("Dawning Frost", dawningFrost.getName(),
+                "Dawning Frost display name");
+        assertClose(510.0, dawningFrost.getBaseAtk(), EPS,
+                "Dawning Frost base ATK");
+        assertClose(0.551,
+                dawningFrost.getStats().get(StatType.CRIT_DMG), EPS,
+                "Dawning Frost CRIT DMG");
+        assertEquals(model.type.WeaponType.CATALYST,
+                dawningFrost.getWeaponType(), "Dawning Frost weapon type");
+        assertEquals(5, dawningFrost.getRefinement(),
+                "Dawning Frost default refinement");
+
+        TestCharacter frostOwner = testCharacter(
+                Element.CRYO, CharacterId.SUCROSE);
+        frostOwner.setWeapon(dawningFrost);
+        CombatSimulator frostSim = simulatorWith(frostOwner);
+        AttackAction chargedHit = typedDamageHit(
+                "Dawning Charged", ActionType.CHARGE, 1.0);
+        AttackAction skillHit = typedDamageHit(
+                "Dawning Skill", ActionType.SKILL, 1.0);
+        dawningFrost.onDamage(
+                frostOwner,
+                typedDamageHit("Dawning zero", ActionType.CHARGE, 0.0),
+                0.0,
+                frostSim);
+        dawningFrost.onDamage(
+                frostOwner,
+                typedDamageHit("Dawning Normal", ActionType.NORMAL, 1.0),
+                0.0,
+                frostSim);
+        assertClose(0.0,
+                resolvedStat(frostSim, frostOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Zero and wrong hits should not open Dawning Frost");
+        dawningFrost.onDamage(frostOwner, chargedHit, 0.0, frostSim);
+        assertClose(144.0,
+                resolvedStat(frostSim, frostOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "R5 Dawning Frost Charged EM window");
+        frostSim.advanceTime(5.0);
+        dawningFrost.onDamage(
+                frostOwner, skillHit, frostSim.getCurrentTime(), frostSim);
+        assertClose(240.0,
+                resolvedStat(frostSim, frostOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Dawning Frost independent windows should add");
+        frostSim.advanceTime(5.0);
+        assertClose(96.0,
+                resolvedStat(frostSim, frostOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Dawning Charged window should expire while Skill remains");
+        frostSim.advanceTime(5.0);
+        assertClose(0.0,
+                resolvedStat(frostSim, frostOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Dawning Skill window should expire at exactly ten seconds");
+        frostSim.addCharacter(testCharacter(
+                Element.PYRO, CharacterId.AMBER));
+        frostSim.setActiveCharacter(CharacterId.AMBER);
+        dawningFrost.onDamage(
+                frostOwner, chargedHit, frostSim.getCurrentTime(), frostSim);
+        assertClose(0.0,
+                resolvedStat(frostSim, frostOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Off-field hits should not open Dawning Frost");
+
+        model.weapon.DawningFrost r1Frost =
+                new model.weapon.DawningFrost(1);
+        TestCharacter r1FrostOwner = testCharacter(Element.CRYO);
+        r1FrostOwner.setWeapon(r1Frost);
+        CombatSimulator r1FrostSim = simulatorWith(r1FrostOwner);
+        r1Frost.onDamage(r1FrostOwner, chargedHit, 0.0, r1FrostSim);
+        r1Frost.onDamage(r1FrostOwner, skillHit, 0.0, r1FrostSim);
+        assertClose(120.0,
+                resolvedStat(r1FrostSim, r1FrostOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "R1 Dawning Frost combined EM");
+
+        model.weapon.ReliquaryOfTruth reliquary =
+                new model.weapon.ReliquaryOfTruth();
+        assertEquals("Reliquary of Truth", reliquary.getName(),
+                "Reliquary of Truth display name");
+        assertClose(542.0, reliquary.getBaseAtk(), EPS,
+                "Reliquary of Truth base ATK");
+        assertClose(0.882,
+                reliquary.getStats().get(StatType.CRIT_DMG), EPS,
+                "Reliquary of Truth CRIT DMG");
+        assertClose(0.16,
+                reliquary.getStats().get(StatType.CRIT_RATE), EPS,
+                "R5 Reliquary CRIT Rate passive");
+        assertEquals(model.type.WeaponType.CATALYST, reliquary.getWeaponType(),
+                "Reliquary of Truth weapon type");
+        assertEquals(5, reliquary.getRefinement(),
+                "Reliquary of Truth default refinement");
+
+        TestCharacter truthOwner = testCharacter(
+                Element.DENDRO, CharacterId.SUCROSE);
+        truthOwner.setWeapon(reliquary);
+        CombatSimulator truthSim = simulatorWith(truthOwner);
+        TestCharacter truthAlly = testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU);
+        truthSim.addCharacter(truthAlly);
+        ReactionResult lunarBloom = ReactionResult.transform(
+                0.0, "Lunar-Bloom", ReactionResult.Kind.LUNAR_BLOOM);
+        reliquary.onAction(
+                truthOwner,
+                CharacterActionRequest.of(CharacterActionKey.BURST),
+                truthSim);
+        truthSim.notifyReaction(ReactionResult.none(), truthOwner);
+        truthSim.notifyReaction(lunarBloom, truthAlly);
+        assertClose(0.0,
+                resolvedStat(truthSim, truthOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Wrong action and foreign/NONE reactions should not open Reliquary");
+        reliquary.onAction(
+                truthOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                truthSim);
+        assertClose(160.0,
+                resolvedStat(truthSim, truthOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "R5 Reliquary Skill EM window");
+        truthSim.notifyReaction(lunarBloom, truthOwner);
+        assertClose(240.0,
+                resolvedStat(truthSim, truthOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Reliquary overlap should multiply Skill EM by 1.5");
+        assertClose(0.50 + 0.882 + 0.72,
+                resolvedStat(truthSim, truthOwner,
+                        StatType.CRIT_DMG), EPS,
+                "Reliquary overlap should multiply Lunar CRIT DMG by 1.5");
+        truthSim.advanceTime(4.0);
+        assertClose(160.0,
+                resolvedStat(truthSim, truthOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Reliquary Skill EM should remain after Lunar expiry");
+        assertClose(0.50 + 0.882,
+                resolvedStat(truthSim, truthOwner,
+                        StatType.CRIT_DMG), EPS,
+                "Reliquary Lunar CRIT DMG should expire at four seconds");
+        truthSim.advanceTime(8.0);
+        assertClose(0.0,
+                resolvedStat(truthSim, truthOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "Reliquary Skill EM should expire at twelve seconds");
+        truthSim.setActiveCharacter(CharacterId.XINGQIU);
+        truthSim.notifyReaction(lunarBloom, truthOwner);
+        assertClose(0.50 + 0.882,
+                resolvedStat(truthSim, truthOwner,
+                        StatType.CRIT_DMG), EPS,
+                "Off-field owner Lunar-Bloom should not open Reliquary");
+
+        model.weapon.ReliquaryOfTruth r1Reliquary =
+                new model.weapon.ReliquaryOfTruth(1);
+        TestCharacter r1TruthOwner = testCharacter(Element.DENDRO);
+        r1TruthOwner.setWeapon(r1Reliquary);
+        CombatSimulator r1TruthSim = simulatorWith(r1TruthOwner);
+        r1Reliquary.onAction(
+                r1TruthOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                r1TruthSim);
+        r1TruthSim.notifyReaction(lunarBloom, r1TruthOwner);
+        assertClose(120.0,
+                resolvedStat(r1TruthSim, r1TruthOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "R1 Reliquary overlap EM");
+        assertClose(0.50 + 0.882 + 0.36,
+                resolvedStat(r1TruthSim, r1TruthOwner,
+                        StatType.CRIT_DMG), EPS,
+                "R1 Reliquary overlap CRIT DMG");
+        assertClose(0.08,
+                r1Reliquary.getStats().get(StatType.CRIT_RATE), EPS,
+                "R1 Reliquary CRIT Rate passive");
+
+        boolean frostReuseRejected = false;
+        try {
+            dawningFrost.initializeForSimulator(
+                    frostOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            frostReuseRejected = true;
+        }
+        assertTrue(frostReuseRejected,
+                "Dawning Frost should reject cross-simulator reuse");
+
+        boolean truthReuseRejected = false;
+        try {
+            reliquary.initializeForSimulator(
+                    truthOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            truthReuseRejected = true;
+        }
+        assertTrue(truthReuseRejected,
+                "Reliquary should reject cross-simulator reuse");
+
+        boolean lowFrostRefinementRejected = false;
+        try {
+            new model.weapon.DawningFrost(0);
+        } catch (IllegalArgumentException expected) {
+            lowFrostRefinementRejected = true;
+        }
+        assertTrue(lowFrostRefinementRejected,
+                "Dawning Frost should reject refinement zero");
+
+        boolean highFrostRefinementRejected = false;
+        try {
+            new model.weapon.DawningFrost(6);
+        } catch (IllegalArgumentException expected) {
+            highFrostRefinementRejected = true;
+        }
+        assertTrue(highFrostRefinementRejected,
+                "Dawning Frost should reject refinement six");
+
+        boolean lowTruthRefinementRejected = false;
+        try {
+            new model.weapon.ReliquaryOfTruth(0);
+        } catch (IllegalArgumentException expected) {
+            lowTruthRefinementRejected = true;
+        }
+        assertTrue(lowTruthRefinementRejected,
+                "Reliquary should reject refinement zero");
+
+        boolean highTruthRefinementRejected = false;
+        try {
+            new model.weapon.ReliquaryOfTruth(6);
+        } catch (IllegalArgumentException expected) {
+            highTruthRefinementRejected = true;
+        }
+        assertTrue(highTruthRefinementRejected,
+                "Reliquary should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {
