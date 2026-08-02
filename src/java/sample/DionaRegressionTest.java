@@ -7,6 +7,7 @@ import model.stats.StatsContainer;
 import model.type.CharacterId;
 import model.type.StatType;
 import simulation.CombatSimulator;
+import simulation.SimulatorSnapshot;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
 
@@ -95,6 +96,7 @@ public final class DionaRegressionTest {
         StatsContainer fieldStats = resolvedStats(diona, sim);
         assertClose(200.0, fieldStats.get(StatType.ELEMENTAL_MASTERY),
                 "Diona C6 grants field EM at full HP boundary");
+        SimulatorSnapshot fieldSnapshot = sim.saveSnapshot();
 
         double chargeStart = sim.getCurrentTime();
         perform(sim, CharacterActionKey.CHARGE);
@@ -111,6 +113,16 @@ public final class DionaRegressionTest {
         assertClose(0.0,
                 resolvedStats(diona, sim).get(StatType.ELEMENTAL_MASTERY),
                 "Diona C6 EM expires with field");
+
+        sim.restoreSnapshot(fieldSnapshot);
+        assertTrue(diona.isBurstFieldActive(sim.getCurrentTime()),
+                "Diona restored Burst field remains active");
+        assertClose(200.0,
+                resolvedStats(diona, sim).get(StatType.ELEMENTAL_MASTERY),
+                "Diona restored C6 field retains EM");
+        sim.advanceTime(12.4);
+        assertTrue(!diona.isBurstFieldActive(sim.getCurrentTime()),
+                "Diona restored Burst field keeps exact expiry");
     }
 
     private static void testEnergyCooldownAndBindingGuards() {

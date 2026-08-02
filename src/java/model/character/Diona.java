@@ -30,7 +30,7 @@ import simulation.event.SimpleTimerEvent;
  * Diona's offensive kit for stationary single-target combat.
  *
  * <p>The typed Skill request represents Hold Icy Paws: five independently
- * resolved paws and one deterministic expected particle roll. Signature Mix
+ * resolved paws and their deterministic expected particle total. Signature Mix
  * includes its initial hit, six snapshotted field ticks, C1 Energy, C4 aimed
  * shot timing, and the always-full-HP branch of C6.</p>
  *
@@ -53,8 +53,6 @@ public final class Diona extends Character
     private final Buff c6TeamBuff;
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
-    private double burstFieldStart = Double.POSITIVE_INFINITY;
-    private double burstFieldEnd = Double.NEGATIVE_INFINITY;
 
     /** Constructs repository-default C6 Diona. */
     public Diona(Weapon weapon, ArtifactSet artifacts) {
@@ -133,7 +131,14 @@ public final class Diona extends Character
 
     /** Returns whether Signature Mix's field is active. */
     public boolean isBurstFieldActive(double currentTime) {
-        return currentTime >= burstFieldStart && currentTime < burstFieldEnd;
+        for (Buff buff : getActiveBuffs()) {
+            if (buff instanceof DionaBurstFieldMarker
+                    && currentTime >= buff.getStartTime()
+                    && currentTime < buff.getExpirationTime()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** Returns C6's dynamic team EM provider at C6. */
@@ -263,8 +268,13 @@ public final class Diona extends Character
         markBurstUsed(castTime, sim.getApplicableBuffs(this));
         captureSnapshot(castTime, sim.getApplicableBuffs(this));
         StatsContainer burstSnapshot = getSnapshot().merge(null);
-        burstFieldStart = castTime + BURST_START_FRAME * FRAME;
-        burstFieldEnd = burstFieldStart + BURST_FIELD_DURATION;
+        double burstFieldStart = castTime + BURST_START_FRAME * FRAME;
+        double burstFieldEnd = burstFieldStart + BURST_FIELD_DURATION;
+        getActiveBuffs().removeIf(
+                buff -> buff instanceof DionaBurstFieldMarker);
+        addBuff(new DionaBurstFieldMarker(
+                burstFieldStart,
+                BURST_FIELD_DURATION));
 
         AttackAction initial = attack(
                 "Signature Mix Initial",
@@ -338,5 +348,21 @@ public final class Diona extends Character
                 effect.accept(activeSim);
             }
         });
+    }
+
+    /** Snapshot-restorable marker for Signature Mix's field window. */
+    private static final class DionaBurstFieldMarker extends Buff {
+        private DionaBurstFieldMarker(
+                double startTime,
+                double duration) {
+            super("Diona Signature Mix Field Marker", duration, startTime);
+        }
+
+        @Override
+        protected void applyStats(
+                StatsContainer stats,
+                double currentTime) {
+            // Team effects are projected by CharacterTeamBuffProvider.
+        }
     }
 }
