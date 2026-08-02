@@ -5,6 +5,7 @@ Diona,STATS,Base DEF,90,601,0
 Diona,STATS,Ascension Cryo DMG,90,0.24,0
 Diona,STATS,Energy Cost,90,80,0
 Diona,STATS,Constellation,6,6,0
+Diona,CONFIG,Hold Skill Particles,90,4.0,0
 Diona,CONFIG,Character Level,90,90,0
 Diona,CONFIG,Normal Level,9,9,0
 Diona,CONFIG,Skill Level,12,12,0

@@ -68,12 +68,15 @@ public final class DionaRegressionTest {
     private static void testHoldSkillAndC2() {
         Diona c0 = new Diona(null, null, 0);
         CombatSimulator c0Sim = simulatorWith(c0);
+        c0.restoreCurrentEnergy(0.0);
         perform(c0Sim, CharacterActionKey.SKILL);
         c0Sim.advanceTime(2.5);
         double c0Damage = c0Sim.getTotalDamage();
         assertTrue(c0Damage > 0.0, "Diona Hold Skill resolves five paws");
         assertClose(15.0, c0.getSkillCooldownEndTime(),
                 "Diona Hold Skill starts 15-second cooldown");
+        assertClose(12.0, c0.getCurrentEnergy(),
+                "Diona Hold Skill resolves four expected Cryo particles");
 
         Diona c2 = new Diona(null, null, 2);
         CombatSimulator c2Sim = simulatorWith(c2);

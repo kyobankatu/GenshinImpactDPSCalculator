@@ -250,7 +250,7 @@ public final class Diona extends Character
                                     .distributeParticles(
                                             Element.CRYO,
                                             getTalentValue(
-                                                    "Hold Skill Particles", 0.8),
+                                                    "Hold Skill Particles", 4.0),
                                             ParticleType.PARTICLE));
                 }
             });
