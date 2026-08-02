@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Yae Miko,STATS,Base HP,90,10372,0
+Yae Miko,STATS,Base ATK,90,340,0
+Yae Miko,STATS,Base DEF,90,569,0
+Yae Miko,STATS,Ascension CRIT Rate,90,0.192,0
+Yae Miko,STATS,Energy Cost,90,90,0
+Yae Miko,STATS,Constellation,6,6,0
+Yae Miko,CONFIG,Character Level,90,90,0
+Yae Miko,CONFIG,Normal Level,9,9,0
+Yae Miko,CONFIG,Skill Level,12,12,0
+Yae Miko,CONFIG,Burst Level,12,12,0

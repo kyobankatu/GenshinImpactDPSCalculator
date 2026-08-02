@@ -1,0 +1,22 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Yae Miko,NORMAL,N1,9,0.674193,0
+Yae Miko,NORMAL,N2,9,0.654826,0
+Yae Miko,NORMAL,N3,9,0.967110,0
+Yae Miko,CHARGED,Charged Attack,9,2.429212,0
+Yae Miko,PLUNGE,High Plunge,9,2.607632,0
+Yae Miko,SKILL,Sakura Level 1,12,1.21344,0
+Yae Miko,SKILL,Sakura Level 2,12,1.5168,0
+Yae Miko,SKILL,Sakura Level 3,12,1.896,0
+Yae Miko,SKILL,Sakura Level 4,12,2.37,0
+Yae Miko,BURST,Tenko Kenshin,12,5.20,0
+Yae Miko,BURST,Tenko Thunderbolt,12,6.67632,0
+Yae Miko,PASSIVE,Sakura Duration,1,14.0,0
+Yae Miko,PASSIVE,Sakura First Tick Delay,1,1.4333333333333333,0
+Yae Miko,PASSIVE,Sakura Tick Interval,1,2.9333333333333333,0
+Yae Miko,PASSIVE,Sakura Particles,1,1.0,0
+Yae Miko,PASSIVE,Particle Cooldown,1,2.5,0
+Yae Miko,PASSIVE,A4 EM Skill DMG Ratio,1,0.0015,0
+Yae Miko,PASSIVE,C1 Flat Energy,1,8.0,0
+Yae Miko,PASSIVE,C4 Electro DMG Bonus,1,0.20,0
+Yae Miko,PASSIVE,C4 Duration,1,5.0,0
+Yae Miko,PASSIVE,C6 Sakura DEF Ignore,1,0.60,0
