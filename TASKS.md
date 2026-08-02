@@ -13545,3 +13545,58 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc` at the shared/final API boundary
 - `python scripts/preflight.py`
+
+## Implementation Order: Lisa Character Vertical Slice
+
+Status: Active. Add a stationary single-target Lisa model centered on Hold
+Violet Arc and Lightning Rose.
+
+Scope:
+
+- Add typed identity, Lv. 90 stats, EM ascension, catalyst attacks, Conductive
+  stacks from Charged attacks, Hold Skill consumption, particles, and C1 energy.
+- Add the 10% Burst summon hit and 29 half-second discharges over 15 seconds,
+  with C3/C5 talent values represented through config.
+- Add source/config alignment and focused character regressions.
+
+Out of scope for this pass:
+
+- Press/Hold input selection (typed input currently has one Skill key), enemy
+  DEF-shred state for A4, incoming damage/interruption for C2, multiple-target
+  random bolts for C4, C6 switch-in stacks, crafting, RL, and generated docs.
+
+### Phase 1: Add Lisa Core Combat Model
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/model/character/Lisa.java` (new)
+- `config/characters/Lisa/Lisa_Multipliers.csv` (new)
+- `config/characters/Lisa/Lisa_Status.csv` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- The stable Lisa id appends without changing prior numeric ids; configured Lv.
+  90 stats, EM ascension, 80 Energy cost, 16/20-second cooldowns load correctly.
+- Catalyst Normal/Charged/Plunge attacks retain Electro typing and sourced ICD,
+  gauge, frame, and level-9 values; Charged stacks expire independently at 15s.
+- Hold Skill consumes up to three live stacks, applies 2U without ICD, emits
+  five particles, and C1 refunds two flat Energy in this one-target model.
+- Burst snapshots one non-aura 10% cast hit and 29 standard-ICD 1U discharges;
+  C3/C5 use level-12 values and unsupported effects are documented in source.
+
+Test cases to add or update:
+
+- Normal: identity/stats, four-hit chain, three Charged stacks, Skill scaling,
+  five particles, Burst summon plus 29 discharges.
+- Boundary: independent Conductive expiry/refresh, Skill/Burst cooldowns, C1,
+  C3/C5 values, exact 15-second Burst cadence.
+- Abnormal: stack cap and consumption, expired stacks, summon aura exclusion.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`

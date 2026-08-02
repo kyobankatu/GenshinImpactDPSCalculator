@@ -2232,3 +2232,13 @@ experiment record.
 - **Plan:** `TASKS.md` Direct Physical Proc Weapon Campaign
 - **Completion:** `9833fa3`, `20cfb49`, and `7695dde` add the shared proc policy
   and all variants; focused/build/Javadoc/leak gates pass
+
+### B-089 — Lisa character vertical slice
+
+- **Status:** active
+- **Scope:** stationary single-target Hold Skill/Burst model; RL excluded
+- **Value/risk:** adds a missing starter character with explicit input- and
+  target-model limits; no shared runtime contract is changed
+- **Evidence boundary:** KQM TCL Lv. 90 stats, level-9/12 talents, frames, gauges,
+  ICD, particles, Conductive timing, Burst count/cadence, and C1/C3/C5
+- **Plan:** `TASKS.md` Lisa Character Vertical Slice
