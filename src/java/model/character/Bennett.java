@@ -57,7 +57,7 @@ public class Bennett extends Character implements FormStateProvider {
         this.artifacts = new ArtifactSet[] { artifacts };
         this.element = Element.PYRO;
         this.constellation = (int) getTalentValue("Constellation", 6.0);
-        setSkillCD(5.0); // Tap E Short CD
+        setSkillCD(4.0); // Rekindle reduces the Tap Skill cooldown by 20%.
         setBurstCD(15.0);
     }
 
