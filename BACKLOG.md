@@ -3317,7 +3317,7 @@ experiment record.
 
 ### B-156 — Parallel offensive content wave
 
-- **Status:** active
+- **Status:** done
 - **Source:** continued explicit character, weapon, and artifact expansion
   request with branch-isolated parallel agents
 - **Scope/risk:** nine artifacts, three five-star weapons, and Noelle;
@@ -3330,5 +3330,9 @@ experiment record.
 - **Boundary:** current HP, healing, shield durability, incoming damage,
   stamina, enemy defeat, geometry, Witch's Homework, RL, and generated docs
   remain excluded.
-- **Proof/plan:** five-phase `TASKS.md` Parallel Offensive Content Wave with
+- **Proof/plan:** six-phase `TASKS.md` Parallel Offensive Content Wave with
   focused regressions, full reaction/build/Javadoc gates, and preflight.
+- **Closure:** all nine artifact sets, Primordial Jade Cutter, Staff of Homa,
+  Engulfing Lightning, and Noelle are integrated on `dev_0`; final-stat HP/ER
+  conversions and typed action/reaction windows are regression-covered, while
+  unavailable defensive and player-state branches remain explicitly inactive.

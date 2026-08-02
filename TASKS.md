@@ -13194,9 +13194,8 @@ Completion evidence:
 
 ## Implementation Order: Parallel Offensive Content Wave
 
-Status: In progress. Primary owns plans, artifact batches, shared stat
-integration, and final verification; weapon and character slices remain in
-isolated worktrees until reviewed.
+Status: Complete. Nine artifact sets, three five-star weapons, and Noelle are
+integrated on `dev_0` with focused and cross-system verification.
 
 Scope:
 
@@ -13297,7 +13296,7 @@ Completion evidence:
 - `./gradlew MaxHpScalingWeaponRegressionTest ReactionRegressionTest build
   javadoc` and `python scripts/preflight.py --run` passed on 2026-08-03.
 
-### Phase 3: Noelle Offensive Vertical Slice
+### Phase 3: Noelle Offensive Vertical Slice - Done
 
 Target files:
 
@@ -13331,7 +13330,21 @@ Verification:
 - `./gradlew ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
 
-### Phase 4: Skill and Burst Window Artifact Batch
+Completion evidence:
+
+- Noelle exposes sourced Normal, Charged, high-Plunge, Breastplate, and both
+  Sweeping Time cast hits with exact offensive talent data, timing, gauge,
+  ICD, Energy, and cooldown boundaries.
+- Sweeping Time snapshots final DEF into its timed ATK conversion and grants
+  unoverrideable Geo infusion; C2-C6 representable offensive branches and the
+  persistent A4 four-hit cooldown counter are covered.
+- Healing, shield absorption/destruction, incoming damage, stamina, enemy-
+  defeat extension, and geometry remain inactive.
+- `./gradlew NoelleRegressionTest PartyCatalogRegressionTest
+  ReactionRegressionTest build javadoc` and `python scripts/preflight.py
+  --run` passed after integration on 2026-08-03.
+
+### Phase 4: Skill and Burst Window Artifact Batch - Done
 
 Target files:
 
@@ -13357,9 +13370,22 @@ Test cases:
 
 Verification:
 
-- focused artifact regressions
+- `./gradlew ActionWindowArtifactRegressionTest`
 - `./gradlew ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- A Day Carved From Rising Winds, Nighttime Whispers in the Echoing Woods,
+  and Vermillion Hereafter expose exact fixed ATK and representable owner hit,
+  Skill-use, and Burst-use windows through typed non-stacking buffs.
+- Trigger ordering, half-open expiry, refresh, off-field ownership, switch-out
+  dispel, snapshot rollback, rejected callbacks, binding, and independent
+  instances pass; unavailable progression, shield, Moondrift, and HP-loss
+  enhancements remain inactive.
+- `./gradlew ActionWindowArtifactRegressionTest ReactionRegressionTest build
+  javadoc` passed after integration on 2026-08-03; the delegated executable
+  preflight also passed before the clean cherry-pick.
 
 ### Phase 5: Reaction Artifact Batch - Done
 
