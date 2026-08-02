@@ -236,13 +236,16 @@ public final class YanfeiRegressionTest {
                 "Yanfei Skill is blunt");
         assertEquals(3, yanfei.getScarletSealCount(sim.getCurrentTime()),
                 "Yanfei Skill grants maximum Seals");
-        assertClose(9.0, yanfei.getTotalParticleEnergy(), EPS,
-                "Yanfei Skill creates three Pyro particles");
+        assertClose(0.0, yanfei.getTotalParticleEnergy(), EPS,
+                "Yanfei Skill particles remain in flight");
         assertClose(28.0 / 60.0, yanfei.getLastSkillTime(), EPS,
                 "Yanfei Skill cooldown starts at sourced frame");
         assertClose(8.7,
                 yanfei.getSkillCDRemaining(sim.getCurrentTime()), EPS,
                 "Yanfei Skill remaining cooldown after action");
+        sim.advanceTime(132.0 / 60.0 - sim.getCurrentTime());
+        assertClose(9.0, yanfei.getTotalParticleEnergy(), EPS,
+                "Yanfei receives three particles after 100 frames");
     }
 
     private static void testBurstBrillianceCadenceAndExpiry() {

@@ -122,7 +122,6 @@ public final class TulaytullahsRemembrance extends Weapon
                 && request.getKey() == CharacterActionKey.SKILL) {
             activeFrom = sim.getCurrentTime();
             activeUntil = activeFrom + DURATION;
-            nextHitStackAt = activeFrom;
             hitStacks = 0;
         }
     }
@@ -196,7 +195,6 @@ public final class TulaytullahsRemembrance extends Weapon
     private void clearWindow() {
         activeFrom = Double.NEGATIVE_INFINITY;
         activeUntil = Double.NEGATIVE_INFINITY;
-        nextHitStackAt = Double.NEGATIVE_INFINITY;
         hitStacks = 0;
     }
 

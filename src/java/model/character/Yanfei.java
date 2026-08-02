@@ -47,6 +47,7 @@ public class Yanfei extends Character implements
     private static final double BRILLIANCE_DURATION = 15.0;
     private static final double BRILLIANCE_INTERVAL = 1.0;
     private static final double A1_DURATION = 6.0;
+    private static final double PARTICLE_TRAVEL = 100.0 / 60.0;
     private static final double EPSILON = 1e-9;
 
     private CombatSimulator initializedSimulator;
@@ -314,10 +315,14 @@ public class Yanfei extends Character implements
             activeSim.performActionWithoutTimeAdvance(characterId, skill);
             grantScarletSeals(
                     getScarletSealLimit(), activeSim.getCurrentTime());
-            activeSim.getEnergyDistributor().distributeParticles(
-                    Element.PYRO,
-                    getTalentValue("Skill Particles", 3.0),
-                    ParticleType.PARTICLE);
+            schedule(
+                    activeSim,
+                    activeSim.getCurrentTime() + PARTICLE_TRAVEL,
+                    particleSim -> particleSim.getEnergyDistributor()
+                            .distributeParticles(
+                                    Element.PYRO,
+                                    getTalentValue("Skill Particles", 3.0),
+                                    ParticleType.PARTICLE));
         });
         sim.advanceTime(46.0 / 60.0);
     }

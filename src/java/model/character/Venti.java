@@ -45,6 +45,8 @@ public class Venti extends Character
     private static final double SKILL_COOLDOWN = 6.0;
     private static final double BURST_COOLDOWN = 15.0;
     private static final double BURST_TICK_INTERVAL = 24.0 * FRAME;
+    private static final double PROJECTILE_TRAVEL = 10.0 * FRAME;
+    private static final double PARTICLE_TRAVEL = 100.0 * FRAME;
     private static final int BURST_TICK_COUNT = 20;
     private static final int ABSORBED_TICK_COUNT = 15;
     private static final double RESISTANCE_DURATION = 10.0;
@@ -192,10 +194,14 @@ public class Venti extends Character
     }
 
     private void normalAttack(CombatSimulator sim) {
+        double castTime = sim.getCurrentTime();
         double[] multipliers = {
                 0.3745, 0.8153, 0.9622, 0.4787, 0.9306, 1.3035
         };
         int[] hitCounts = { 2, 1, 1, 2, 1, 1 };
+        int[][] releaseFrames = {
+                { 17, 27 }, { 19 }, { 28 }, { 15, 28 }, { 17 }, { 49 }
+        };
         double[] durations = {
                 30.0 * FRAME,
                 38.0 * FRAME,
@@ -208,22 +214,25 @@ public class Venti extends Character
         String key = "N" + (step + 1);
         double multiplier = getTalentValue(key, multipliers[step]);
         for (int hit = 0; hit < hitCounts[step]; hit++) {
+            int hitIndex = hit;
             AttackAction normal = new AttackAction(
-                    "Divine Marksmanship " + key + " Hit " + (hit + 1),
+                    "Divine Marksmanship " + key + " Hit " + (hitIndex + 1),
                     multiplier,
                     Element.PHYSICAL,
                     StatType.BASE_ATK,
                     StatType.NORMAL_ATTACK_DMG_BONUS,
-                    hit + 1 == hitCounts[step] ? durations[step] : 0.0,
+                    0.0,
                     ActionType.NORMAL);
             normal.setICD(ICDType.Standard, ICDTag.NormalAttack, 0.0);
-            if (hit + 1 == hitCounts[step]) {
-                sim.performAction(characterId, normal);
-            } else {
-                sim.performActionWithoutTimeAdvance(characterId, normal);
-            }
+            schedule(
+                    sim,
+                    castTime + releaseFrames[step][hitIndex] * FRAME
+                            + PROJECTILE_TRAVEL,
+                    activeSim -> activeSim.performActionWithoutTimeAdvance(
+                            characterId, normal));
         }
         normalAttackStep = (normalAttackStep + 1) % multipliers.length;
+        sim.advanceTime(durations[step]);
     }
 
     private void fullyChargedAimedShot(CombatSimulator sim) {
@@ -279,8 +288,14 @@ public class Venti extends Character
             if (constellation >= 2) {
                 applyC2ResistanceShred(sim, sim.getCurrentTime());
             }
-            sim.getEnergyDistributor().distributeParticles(
-                    Element.ANEMO, 3.0, ParticleType.PARTICLE);
+            schedule(
+                    sim,
+                    sim.getCurrentTime() + PARTICLE_TRAVEL,
+                    activeSim -> activeSim.getEnergyDistributor()
+                            .distributeParticles(
+                                    Element.ANEMO,
+                                    3.0,
+                                    ParticleType.PARTICLE));
         }
     }
 

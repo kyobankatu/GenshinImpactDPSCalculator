@@ -121,10 +121,17 @@ public final class VentiRegressionTest {
                 22.0 * FRAME,
                 98.0 * FRAME
         };
+        int[][] releaseFrames = {
+                { 17, 27 }, { 19 }, { 28 }, { 15, 28 }, { 17 }, { 49 }
+        };
+        double[] castTimes = new double[multipliers.length];
+        for (int step = 0; step < multipliers.length; step++) {
+            castTimes[step] = sim.getCurrentTime();
+            perform(sim, CharacterActionKey.NORMAL);
+        }
         int recordIndex = 0;
         double expectedTime = 0.0;
         for (int step = 0; step < multipliers.length; step++) {
-            perform(sim, CharacterActionKey.NORMAL);
             for (int hit = 0; hit < hitCounts[step]; hit++) {
                 ActionRecord record = records.get(recordIndex++);
                 assertEquals("Divine Marksmanship N" + (step + 1)
@@ -141,13 +148,17 @@ public final class VentiRegressionTest {
                         "Venti Normal category");
                 assertClose(0.0, record.action.getGaugeUnits(), EPS,
                         "Venti Physical Normal gauge");
-                assertClose(expectedTime, record.time, EPS,
-                        "Venti multi-hit Normal timestamp");
+                assertClose(
+                        castTimes[step]
+                                + (releaseFrames[step][hit] + 10.0) * FRAME,
+                        record.time,
+                        EPS,
+                        "Venti projectile Normal timestamp");
             }
             expectedTime += durations[step];
-            assertClose(expectedTime, sim.getCurrentTime(), EPS,
-                    "Venti Normal step duration");
         }
+        assertClose(expectedTime, sim.getCurrentTime(), EPS,
+                "Venti full Normal sequence duration");
         perform(sim, CharacterActionKey.NORMAL);
         assertTrue(records.get(recordIndex).action.getName().contains("N1"),
                 "Venti Normal chain wraps after N6");
@@ -210,8 +221,11 @@ public final class VentiRegressionTest {
         assertClose(283.0 * FRAME,
                 c0.getSkillCDRemaining(c0Sim.getCurrentTime()), EPS,
                 "Venti Skill remaining cooldown after animation");
+        assertClose(0.0, c0.getTotalParticleEnergy(), EPS,
+                "Venti particles remain in flight after Skill animation");
+        advanceTo(c0Sim, 151.0 * FRAME);
         assertClose(9.0, c0.getTotalParticleEnergy(), EPS,
-                "Venti press Skill emits three same-element particles");
+                "Venti receives three particles after travel");
         assertClose(0.0,
                 applicableStats(c0Sim, c0).get(StatType.ANEMO_RES_SHRED),
                 EPS, "Venti C0 has no C2 shred");
@@ -407,11 +421,16 @@ public final class VentiRegressionTest {
         Venti c4 = ventiAtConstellation(4);
         CombatSimulator c4Sim = simulatorWith(c4);
         perform(c4Sim, CharacterActionKey.SKILL);
+        assertClose(0.0,
+                c4.getEffectiveStats(c4Sim.getCurrentTime()).get(
+                        StatType.ANEMO_DMG_BONUS),
+                EPS, "Venti C4 waits for particle travel");
+        advanceTo(c4Sim, 151.0 * FRAME);
         assertClose(0.25,
                 c4.getEffectiveStats(c4Sim.getCurrentTime()).get(
                         StatType.ANEMO_DMG_BONUS),
                 EPS, "Venti C4 triggers on an active-field particle pickup");
-        advanceTo(c4Sim, 51.0 * FRAME + 10.0);
+        advanceTo(c4Sim, 151.0 * FRAME + 10.0);
         assertClose(0.0,
                 c4.getEffectiveStats(c4Sim.getCurrentTime()).get(
                         StatType.ANEMO_DMG_BONUS),

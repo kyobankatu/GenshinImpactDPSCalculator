@@ -58,6 +58,7 @@ public class Yoimiya extends Character implements
     private static final double MARK_TRIGGER_COOLDOWN = 2.0;
     private static final double PARTICLE_COOLDOWN = 2.0;
     private static final double PROJECTILE_TRAVEL = 10.0 / 60.0;
+    private static final double PARTICLE_TRAVEL = 100.0 / 60.0;
     private static final double EPSILON = 1e-9;
 
     private static final double[][] NORMAL_MULTIPLIERS = {
@@ -391,8 +392,9 @@ public class Yoimiya extends Character implements
 
         if (time + EPSILON >= nextParticleTime) {
             nextParticleTime = time + PARTICLE_COOLDOWN;
-            sim.getEnergyDistributor().distributeParticles(
-                    Element.PYRO, 1.0, ParticleType.PARTICLE);
+            schedule(sim, time + PARTICLE_TRAVEL, activeSim ->
+                    activeSim.getEnergyDistributor().distributeParticles(
+                            Element.PYRO, 1.0, ParticleType.PARTICLE));
         }
 
         if (sim.getActiveCharacter() == this && isNiwabiActive(time)) {

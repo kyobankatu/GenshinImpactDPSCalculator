@@ -224,8 +224,12 @@ public final class YoimiyaRegressionTest {
                         .get(StatType.PYRO_DMG_BONUS),
                 EPS,
                 "A1 current Pyro DMG bonus");
+        assertClose(0.0, yoimiya.getTotalParticleEnergy(), EPS,
+                "Niwabi particle remains in flight after N1");
+        sim.advanceTime(records.get(0).time + 100.0 / 60.0
+                - sim.getCurrentTime());
         assertClose(3.0, yoimiya.getTotalParticleEnergy(), EPS,
-                "Niwabi first arrow emits one same-element particle");
+                "Niwabi particle arrives after 100 frames");
 
         double a1Expiry = records.get(1).time + 3.0;
         sim.advanceTime(a1Expiry - sim.getCurrentTime() - 0.001);
@@ -281,8 +285,8 @@ public final class YoimiyaRegressionTest {
         double burstCast = sim.getCurrentTime();
 
         perform(sim, CharacterActionKey.BURST);
-        assertClose(0.0, yoimiya.getCurrentEnergy(), EPS,
-                "Yoimiya Burst spends 60 Energy");
+        assertClose(3.0, yoimiya.getCurrentEnergy(), EPS,
+                "Yoimiya delayed Skill particle arrives during Burst");
         assertEquals(1, records.size(),
                 "Yoimiya Burst initial hit count");
         ActionRecord initial = records.get(0);

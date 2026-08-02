@@ -20,6 +20,7 @@ public final class TulaytullahsRemembranceRegressionTest {
     public static void main(String[] args) {
         testMetadataAndRefinementValues();
         testPassiveAndHitStackBoundaries();
+        testHitCooldownSurvivesResetAndSwitch();
         testSwitchExpiryAndSnapshot();
         System.out.println("TulaytullahsRemembranceRegressionTest passed");
     }
@@ -133,5 +134,55 @@ public final class TulaytullahsRemembranceRegressionTest {
                 IllegalStateException.class,
                 () -> weapon.initializeForSimulator(owner, new CombatSimulator()),
                 "Tulaytullah rejects cross-simulator reuse");
+    }
+
+    private static void testHitCooldownSurvivesResetAndSwitch() {
+        TulaytullahsRemembrance weapon = new TulaytullahsRemembrance(1);
+        StatefulWeaponRegressionSupport.TestCharacter owner =
+                StatefulWeaponRegressionSupport.character(CharacterId.SUCROSE, weapon);
+        StatefulWeaponRegressionSupport.TestCharacter ally =
+                StatefulWeaponRegressionSupport.character(CharacterId.AMBER, null);
+        CombatSimulator sim = StatefulWeaponRegressionSupport.simulatorWith(owner, ally);
+        CharacterActionRequest skill = CharacterActionRequest.of(
+                CharacterActionKey.SKILL);
+        weapon.onAction(owner, skill, sim);
+        weapon.onDamage(
+                owner,
+                StatefulWeaponRegressionSupport.hit("First Normal", ActionType.NORMAL),
+                0.0,
+                sim);
+        sim.advanceTime(0.1);
+        weapon.onAction(owner, skill, sim);
+        weapon.onDamage(
+                owner,
+                StatefulWeaponRegressionSupport.hit("Recast Normal", ActionType.NORMAL),
+                sim.getCurrentTime(),
+                sim);
+        StatefulWeaponRegressionSupport.assertEquals(
+                0, weapon.getStackCount(sim.getCurrentTime()),
+                "Tulaytullah Skill reset preserves hit cooldown");
+
+        weapon.onSwitchOut(owner, sim);
+        sim.setActiveCharacter(CharacterId.AMBER);
+        sim.advanceTime(0.1);
+        sim.setActiveCharacter(CharacterId.SUCROSE);
+        weapon.onAction(owner, skill, sim);
+        weapon.onDamage(
+                owner,
+                StatefulWeaponRegressionSupport.hit("Post-Switch Normal", ActionType.NORMAL),
+                sim.getCurrentTime(),
+                sim);
+        StatefulWeaponRegressionSupport.assertEquals(
+                0, weapon.getStackCount(sim.getCurrentTime()),
+                "Tulaytullah switch cancellation preserves hit cooldown");
+        sim.advanceTime(0.1);
+        weapon.onDamage(
+                owner,
+                StatefulWeaponRegressionSupport.hit("Ready Normal", ActionType.NORMAL),
+                sim.getCurrentTime(),
+                sim);
+        StatefulWeaponRegressionSupport.assertEquals(
+                2, weapon.getStackCount(sim.getCurrentTime()),
+                "Tulaytullah accepts hit at original 0.3 boundary");
     }
 }
