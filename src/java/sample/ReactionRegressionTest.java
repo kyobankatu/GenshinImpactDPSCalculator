@@ -5659,6 +5659,57 @@ public class ReactionRegressionTest {
         }
         assertTrue(highWindblumeRefinementRejected,
                 "Windblume Ode should reject refinement six");
+
+        model.weapon.FesteringDesire festeringDesire = new model.weapon.FesteringDesire();
+        assertEquals("Festering Desire", festeringDesire.getName(),
+                "Festering Desire display name");
+        assertClose(510.0, festeringDesire.getBaseAtk(), EPS,
+                "Festering Desire base ATK");
+        assertClose(0.459,
+                festeringDesire.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "Festering Desire Energy Recharge");
+        assertEquals(model.type.WeaponType.SWORD, festeringDesire.getWeaponType(),
+                "Festering Desire weapon type");
+        assertEquals(5, festeringDesire.getRefinement(),
+                "Festering Desire default refinement");
+
+        StatsContainer r5FesteringStats = new StatsContainer();
+        festeringDesire.applyPassive(r5FesteringStats, 0.0);
+        assertClose(0.32, r5FesteringStats.get(StatType.SKILL_DMG_BONUS), EPS,
+                "R5 Festering Desire Skill damage bonus");
+        assertClose(0.12, r5FesteringStats.get(StatType.SKILL_CRIT_RATE), EPS,
+                "R5 Festering Desire Skill CRIT Rate");
+        assertClose(0.0, r5FesteringStats.get(StatType.BURST_DMG_BONUS), EPS,
+                "Festering Desire should not modify Burst damage");
+        assertClose(0.0, r5FesteringStats.get(StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Festering Desire should not modify Normal damage");
+
+        model.weapon.FesteringDesire r1FesteringDesire =
+                new model.weapon.FesteringDesire(1);
+        StatsContainer r1FesteringStats = new StatsContainer();
+        r1FesteringDesire.applyPassive(r1FesteringStats, 0.0);
+        assertClose(0.16, r1FesteringStats.get(StatType.SKILL_DMG_BONUS), EPS,
+                "R1 Festering Desire Skill damage bonus");
+        assertClose(0.06, r1FesteringStats.get(StatType.SKILL_CRIT_RATE), EPS,
+                "R1 Festering Desire Skill CRIT Rate");
+
+        boolean lowFesteringRefinementRejected = false;
+        try {
+            new model.weapon.FesteringDesire(0);
+        } catch (IllegalArgumentException expected) {
+            lowFesteringRefinementRejected = true;
+        }
+        assertTrue(lowFesteringRefinementRejected,
+                "Festering Desire should reject refinement zero");
+
+        boolean highFesteringRefinementRejected = false;
+        try {
+            new model.weapon.FesteringDesire(6);
+        } catch (IllegalArgumentException expected) {
+            highFesteringRefinementRejected = true;
+        }
+        assertTrue(highFesteringRefinementRejected,
+                "Festering Desire should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
