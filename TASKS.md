@@ -13670,6 +13670,209 @@ Completion evidence:
 - Razor, party catalog, equipment boundary, reaction, build, Javadoc, and
   executable preflight checks pass after integration review.
 
+## Implementation Order: Derived-Damage Weapons and Summon Characters Wave
+
+Status: In progress. Primary owns shared typed formula/identity primitives and
+integration; three disjoint implementation lanes start from the published
+baseline. RL, generated docs, and Deferred Systems remain excluded.
+
+Evidence:
+
+- Maintained KQM sword and bow catalogs, accessed 2026-08-03:
+  https://library.keqingmains.com/equipment/weapons/swords
+  https://library.keqingmains.com/equipment/weapons/bows
+- Maintained KQM character and evidence pages, accessed 2026-08-03:
+  https://library.keqingmains.com/characters/electro/yae-miko
+  https://library.keqingmains.com/evidence/characters/electro/yae-miko
+  https://library.keqingmains.com/characters/geo/albedo
+  https://library.keqingmains.com/evidence/characters/geo/albedo
+- Current `genshinsim/gcsim` character and weapon implementations are the
+  timing/state cross-check before each production edit.
+
+Scope:
+
+- Add reusable true-hit derived damage for final DEF/EM and Yae's dynamic
+  EM-to-Skill-DMG conversion.
+- Add Cinnabar Spindle, Light of Foliar Incision, Hunter's Path, and Key of
+  Khaj-Nisut with exact R1-R5 single-target state contracts.
+- Add Yae Miko and Albedo offensive vertical slices with owner-local summon,
+  periodic, snapshot, Energy, and representable constellation behavior.
+
+Out of scope:
+
+- Witch/Hexerei/Stellar-Conduct additions, enemy/player HP, shields, healing,
+  construct durability, hitlag, projectile/weak-point behavior, placement,
+  multi-target geometry, RL, parties, and generated docs.
+
+### Phase 1: Shared Derived-Damage and Identity Baseline
+
+Target files:
+
+- `src/java/model/type/StatType.java`
+- `src/java/model/stats/StatsContainer.java`
+- `src/java/mechanics/formula/StandardDamageStrategy.java`
+- `src/java/model/type/CharacterId.java`
+- `src/java/sample/DerivedActionDamageRegressionTest.java` (new)
+
+Acceptance criteria:
+
+- Typed ratios add final DEF to Skill base damage, final EM to Normal/Skill or
+  Charged base damage, and final EM to Skill DMG Bonus at formula time.
+- Every additive base branch requires a true hit, runs before DMG Bonus/CRIT/
+  defense/resistance, and cannot mutate source stat containers.
+- `YAE_MIKO` and `ALBEDO` receive stable numeric IDs 16 and 17 before branch
+  isolation; lookup behavior and existing IDs remain unchanged.
+
+Test cases:
+
+- Normal: late team/field-like DEF/EM, Normal/Skill/Charged routing, combined
+  additive and percentage conversions.
+- Boundary: zero/negative inputs, explicit zero-multiplier hits, ratio sums.
+- Abnormal: dummy casts, unrelated action types/stats, copied-container and ID
+  isolation.
+
+Verification:
+
+- `./gradlew DerivedActionDamageRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 2: Cinnabar, Foliar, and Hunter Derived-Damage Weapons
+
+Target files:
+
+- `src/java/model/weapon/CinnabarSpindle.java` (new)
+- `src/java/model/weapon/LightOfFoliarIncision.java` (new)
+- `src/java/model/weapon/HuntersPath.java` (new)
+- `src/java/sample/CinnabarSpindleRegressionTest.java` (new)
+- `src/java/sample/LightOfFoliarIncisionRegressionTest.java` (new)
+- `src/java/sample/HuntersPathRegressionTest.java` (new)
+
+Acceptance criteria:
+
+- All three expose exact Lv. 90 metadata, R5 defaults, and R1-R5 coefficients.
+- Cinnabar applies dynamic final-DEF Skill additive damage with sourced
+  1.5-second readiness and 0.1-second post-hit clearing behavior.
+- Foliar activates after an Elemental Normal hit, snapshots no EM, buffs only
+  true Normal/Skill damage, and expires at 28 damage instances or 12 seconds
+  with a 12-second acquisition cooldown.
+- Hunter grants all-element damage and a post-Charged-hit dynamic EM additive
+  window that expires at 12 Charged instances or ten seconds; reacquisition
+  has the sourced 12-second cooldown.
+- Mutable state is owner/simulator-local and round-trips through snapshots.
+
+Test cases:
+
+- Normal: R1/R5 metadata, trigger ordering, late EM/DEF, eligible damage, cap.
+- Boundary: same-time/0.1/1.5/10/12-second edges and exact instance exhaustion.
+- Abnormal: dummy/wrong/off-field hits, unrelated actions, invalid refinement,
+  cross binding, independent instances, mismatched snapshot state.
+
+Verification:
+
+- `./gradlew CinnabarSpindleRegressionTest LightOfFoliarIncisionRegressionTest HuntersPathRegressionTest`
+- `./gradlew ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Key of Khaj-Nisut
+
+Target files:
+
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/model/weapon/KeyOfKhajNisut.java` (new)
+- `src/java/sample/KeyOfKhajNisutRegressionTest.java` (new)
+
+Acceptance criteria:
+
+- Exact Lv. 90 Sword metadata, R5 default, R1-R5 HP, owner EM, and team EM
+  coefficients are exposed.
+- On-field true Skill hits gain at most one stack per 0.3 seconds, up to three;
+  stacks share one refreshed 20-second expiry and survive switching.
+- Each gained stack stores current final Max HP once. Reaching or refreshing
+  stack three creates one typed, replace-not-stack, 20-second team EM buff from
+  current final Max HP; the owner receives both owner and team portions.
+- Weapon state and team buff behavior are deterministic and snapshot-safe.
+
+Test cases:
+
+- Normal: R1/R5 metadata, one/three stacks, owner/team EM, off-field retention.
+- Boundary: 0.3/20-second half-open edges, cap refresh, late Max HP, rollback.
+- Abnormal: off-field/dummy/wrong hits, duplicate weapon owners, invalid
+  refinement/binding/state, independent instances.
+
+Verification:
+
+- `./gradlew KeyOfKhajNisutRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 4: Yae Miko Offensive Vertical Slice
+
+Target files:
+
+- `src/java/model/character/YaeMiko.java` (new)
+- `config/characters/YaeMiko/YaeMiko_Status.csv` (new)
+- `config/characters/YaeMiko/YaeMiko_Multipliers.csv` (new)
+- `src/java/sample/YaeMikoRegressionTest.java` (new)
+
+Acceptance criteria:
+
+- Typed Normal/Charged/Plunge, three-charge Sesshou Sakura placement,
+  generation-safe periodic strikes, Burst cast/Tenko consumption, cooldown,
+  Energy, ICD/gauge, and switch behavior follow maintained single-target data.
+- Base A4 uses Phase 1's live final-EM Skill-DMG ratio. C1-C6 old-base-kit
+  offensive branches cover Energy, Sakura level, team Electro bonus, talent
+  levels, and Sakura DEF ignore without Witch/Stellar additions.
+- State/listeners are owner-local; stale timers cannot survive replacement,
+  Burst consumption, or independent simulator construction.
+
+Test cases:
+
+- Normal: action metadata, one/three Sakura cadence/levels, Burst sequence,
+  particles, A4, and representable C1-C6 branches.
+- Boundary: Skill charges, summon/Burst timing, duration, Energy, ICD, switch.
+- Abnormal: placement/multi-target exclusions, invalid constellation/action,
+  cross-simulator reuse, stale generation and independent instances.
+
+Verification:
+
+- `./gradlew YaeMikoRegressionTest PartyCatalogRegressionTest`
+- `./gradlew ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 5: Albedo Offensive Vertical Slice
+
+Target files:
+
+- `src/java/model/character/Albedo.java` (new)
+- `config/characters/Albedo/Albedo_Status.csv` (new)
+- `config/characters/Albedo/Albedo_Multipliers.csv` (new)
+- `src/java/sample/AlbedoRegressionTest.java` (new)
+
+Acceptance criteria:
+
+- Typed Normal/Charged/Plunge, Solar Isotoma cast, generation-safe 30-second
+  field, two-second Transient Blossom trigger, expected particles, Burst/Fatal
+  Blossom sequence, cooldown, Energy, ICD/gauge, and switch behavior follow
+  maintained single-target policy.
+- Isotoma-derived damage uses its cast snapshot. Base A4 applies one sourced
+  team EM window; representable old-base-kit C1-C5 Energy/DEF/plunge/talent
+  branches are covered while C6 shield and Hexerei additions remain inactive.
+- Any-party damage may trigger one blossom per CT without recursive retrigger;
+  state/listeners are owner-local and stale generations are rejected.
+
+Test cases:
+
+- Normal: actions, field cast/trigger cadence, snapshot, particles, Burst,
+  team EM, and representable constellations.
+- Boundary: exact 2/30-second edges, replacement, switch, Energy/cooldowns.
+- Abnormal: recursive/wrong/stale triggers, geometry/construct exclusions,
+  invalid constellation/action, cross reuse and independent instances.
+
+Verification:
+
+- `./gradlew AlbedoRegressionTest PartyCatalogRegressionTest`
+- `./gradlew ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
 ## Implementation Order: Derived-Stat Equipment and Fischl Content Wave
 
 Status: Complete. Shared formula primitives, equipment, artifact sets, and

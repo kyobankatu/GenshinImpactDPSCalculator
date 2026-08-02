@@ -3379,3 +3379,30 @@ experiment record.
   artifact sets, and Fischl are integrated on `dev_0`. Independent review
   findings for true-hit gating, shared stack expiry documentation, and
   simulator-managed EM coverage were resolved before closure.
+
+### B-159 — Derived-damage weapons and summon characters wave
+
+- **Status:** in-progress
+- **Source:** post-B-158 branch-safe character/weapon/artifact inventory and
+  the continued broad simulator-content request
+- **Scope/risk:** four shared derived-damage paths, four weapons, Yae Miko,
+  and Albedo; planned and split into disjoint implementation lanes
+- **Evidence:** maintained KQM sword/bow catalogs and Yae Miko/Albedo character
+  and evidence pages, plus current `genshinsim/gcsim`, accessed 2026-08-03
+- **Boundary:** Witch/Hexerei/Stellar-Conduct, enemy/player HP, shield/healing,
+  construct durability, hitlag, placement, multi-target, RL, and generated docs
+  remain excluded.
+- **Proof/plan:** five-phase `TASKS.md` Derived-Damage Weapons and Summon
+  Characters Wave with focused regressions, full local gates, and snapshot/
+  owner-isolation checks.
+
+### B-160 — Initiate artifact image without sourced set contract
+
+- **Status:** rejected
+- **Source:** post-B-158 local artifact asset/class inventory
+- **Scope/risk:** `config/artifacts/Initiate/flower.png` is the only unmatched
+  artifact image after name normalization
+- **Evidence:** no local stats/effect contract or existing plan/ledger evidence
+- **Decision:** do not create a no-op or inferred artifact class solely to
+  eliminate an image/class count difference. All 61 sourced asset-backed sets
+  already have concrete classes; future external evidence may create a new ID.
