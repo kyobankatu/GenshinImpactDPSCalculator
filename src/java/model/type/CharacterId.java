@@ -37,6 +37,8 @@ public enum CharacterId {
     LISA(11, "Lisa"),
     /** Barbara (Hydro catalyst healer and driver). */
     BARBARA(12, "Barbara"),
+    /** Noelle (Geo claymore on-field DPS). */
+    NOELLE(13, "Noelle"),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown");
 

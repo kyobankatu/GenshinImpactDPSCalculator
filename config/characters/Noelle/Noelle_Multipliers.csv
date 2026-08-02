@@ -1,0 +1,17 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Noelle,NORMAL,N1,9,1.4536,0
+Noelle,NORMAL,N2,9,1.34774,0
+Noelle,NORMAL,N3,9,1.58474,0
+Noelle,NORMAL,N4,9,2.08402,0
+Noelle,CHARGE,Charged Spin,9,0.9322,0
+Noelle,PLUNGE,Plunge High,9,3.422517,0
+Noelle,SKILL,Breastplate,12,2.40,0
+Noelle,BURST,Sweeping Time Burst Hit,12,1.344,0
+Noelle,BURST,Sweeping Time Skill Hit,12,1.856,0
+Noelle,BURST,Burst DEF Conversion,12,0.80,0
+Noelle,PASSIVE,Breastplate Duration,1,12.0,0
+Noelle,PASSIVE,Sweeping Time Duration,1,15.0,0
+Noelle,PASSIVE,A4 Skill CD Reduction,1,1.0,0
+Noelle,PASSIVE,C2 Charged DMG Bonus,1,0.15,0
+Noelle,PASSIVE,C4 Breastplate Explosion,1,4.0,0
+Noelle,PASSIVE,C6 DEF Conversion Bonus,1,0.50,0
