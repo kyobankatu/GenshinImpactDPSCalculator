@@ -333,6 +333,21 @@ public class CombatActionResolver {
     }
 
     private double getReactionBonus(Element trigger, Element aura, StatsContainer stats) {
+        if (isElementPair(trigger, aura, Element.PYRO, Element.HYDRO)) {
+            return stats.get(StatType.VAPORIZE_DMG_BONUS);
+        }
+        if (isElementPair(trigger, aura, Element.PYRO, Element.CRYO)) {
+            return stats.get(StatType.MELT_DMG_BONUS);
+        }
+        if (isElementPair(trigger, aura, Element.PYRO, Element.ELECTRO)) {
+            return stats.get(StatType.OVERLOAD_DMG_BONUS);
+        }
+        if (isElementPair(trigger, aura, Element.CRYO, Element.ELECTRO)) {
+            return stats.get(StatType.SUPERCONDUCT_DMG_BONUS);
+        }
+        if (isElementPair(trigger, aura, Element.PYRO, Element.DENDRO)) {
+            return stats.get(StatType.BURNING_DMG_BONUS);
+        }
         if (trigger == Element.ANEMO
                 && (aura == Element.PYRO || aura == Element.HYDRO || aura == Element.ELECTRO || aura == Element.CRYO)) {
             return stats.get(StatType.SWIRL_DMG_BONUS);
@@ -342,6 +357,16 @@ public class CombatActionResolver {
             return stats.get(StatType.BLOOM_DMG_BONUS);
         }
         return 0.0;
+    }
+
+    /** Returns whether two elements match an unordered reaction pair. */
+    private boolean isElementPair(
+            Element trigger,
+            Element aura,
+            Element first,
+            Element second) {
+        return (trigger == first && aura == second)
+                || (trigger == second && aura == first);
     }
 
     private void tryTriggerDendroCoreReaction(

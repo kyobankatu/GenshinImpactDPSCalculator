@@ -13361,14 +13361,17 @@ Verification:
 - `./gradlew ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
 
-### Phase 5: Reaction Artifact Batch
+### Phase 5: Reaction Artifact Batch - Done
 
 Target files:
 
 - `src/java/model/artifact/CrimsonWitchOfFlames.java` (new)
 - `src/java/model/artifact/ThunderingFury.java` (new)
-- focused artifact regression executables
+- `src/java/sample/ReactionArtifactRegressionTest.java` (new)
 - `src/java/mechanics/buff/BuffId.java`
+- `src/java/model/type/StatType.java`
+- `src/java/mechanics/reaction/ReactionCalculator.java`
+- `src/java/simulation/runtime/CombatActionResolver.java`
 
 Acceptance criteria:
 
@@ -13391,6 +13394,21 @@ Verification:
 - focused artifact regressions
 - `./gradlew ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Crimson Witch exposes exact Pyro/Overload/Burning/Burgeon/Vaporize/Melt
+  bonuses and three refreshed 10-second Skill stacks; Thundering Fury exposes
+  exact Electro/reaction bonuses and on-field one-second Skill reduction behind
+  a half-open 0.8-second gate.
+- The shared resolver now routes typed amp and transformative bonuses, and the
+  calculator consumes them for Vaporize, Melt, Burning, Overload, and
+  Superconduct instead of discarding its existing bonus argument.
+- Formula ratios, full Overload resolution, off-field damage eligibility,
+  on-field CDR, stack/gate expiry, snapshot rollback, null/wrong binding, and
+  independent state pass in `ReactionArtifactRegressionTest`.
+- `./gradlew ReactionArtifactRegressionTest ReactionRegressionTest build
+  javadoc` and `python scripts/preflight.py --run` passed on 2026-08-03.
 
 ## Implementation Order: Black Sword Campaign
 

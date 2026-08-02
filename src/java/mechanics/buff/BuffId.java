@@ -122,6 +122,10 @@ public enum BuffId {
     INSTRUCTOR_4PC_TEAM_EM,
     /** 聖遺物 4 セット「亡命者」の非重複エネルギー回復シーケンス。 */
     THE_EXILE_4PC_SEQUENCE,
+    /** 聖遺物「燃え盛る炎の魔女」の元素スキル使用スタック。 */
+    CRIMSON_WITCH_4PC_PYRO_STACK,
+    /** 聖遺物「雷のような怒り」のクールダウン短縮発動間隔。 */
+    THUNDERING_FURY_4PC_TRIGGER_COOLDOWN,
     /** 聖遺物 4 セット「深林の記憶」による草元素耐性ダウン。 */
     DEEPWOOD_MEMORIES_4PC_SHRED,
     /** 聖遺物「砂上の楼閣の史話」の重撃後攻撃強化。 */

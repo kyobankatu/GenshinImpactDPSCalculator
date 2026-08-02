@@ -59,12 +59,6 @@ public class ReactionCalculator {
             return ReactionResult.none();
         }
 
-        // Amplifying Reactions (No change, reactionBonus usually for Transformative
-        // here, or specific amp logic)
-        // ... (Keep existing Amp logic if possible, or copy it)
-        // For brevity in this tool call, I will include the full method body to ensure
-        // correctness.
-
         // Amplifying Reactions
         if ((trigger == Element.HYDRO && aura == Element.PYRO) ||
                 (trigger == Element.PYRO && aura == Element.HYDRO) ||
@@ -72,25 +66,19 @@ public class ReactionCalculator {
                 (trigger == Element.CRYO && aura == Element.PYRO)) {
 
             double baseMulti = 1.0;
-            if (trigger == Element.HYDRO && aura == Element.PYRO)
+            if (trigger == Element.HYDRO && aura == Element.PYRO) {
                 baseMulti = 2.0;
-            else if (trigger == Element.PYRO && aura == Element.HYDRO)
+            } else if (trigger == Element.PYRO && aura == Element.HYDRO) {
                 baseMulti = 1.5;
-            else if (trigger == Element.PYRO && aura == Element.CRYO)
+            } else if (trigger == Element.PYRO && aura == Element.CRYO) {
                 baseMulti = 2.0;
-            else if (trigger == Element.CRYO && aura == Element.PYRO)
+            } else if (trigger == Element.CRYO && aura == Element.PYRO) {
                 baseMulti = 1.5;
+            }
 
             double emBonus = (2.78 * em) / (em + 1400.0);
-            double totalMulti = baseMulti * (1.0 + emBonus); // Amp reaction bonus from artifacts usually handled in
-                                                             // logic usually?
-            // Stats like "Vaporize DMG Bonus" exist.
-            // For now, we ignore reactionBonus for Amp as header implies strictly
-            // Swirl/Transformative context?
-            // Or we should apply it? `Crimson Witch` gives +15% Melt/Vape.
-            // Let's assume reactionBonus passed here is relevant to the reaction type
-            // triggered.
-            // But caller passes `swirlBonus`. So only apply if Swirl.
+            double totalMulti = baseMulti
+                    * (1.0 + emBonus + reactionBonus);
 
             boolean vaporize = (trigger == Element.HYDRO && aura == Element.PYRO)
                     || (trigger == Element.PYRO && aura == Element.HYDRO);
@@ -121,7 +109,8 @@ public class ReactionCalculator {
         // Pyro ticks are scheduled by the simulator.
         if ((trigger == Element.PYRO && aura == Element.DENDRO) ||
                 (trigger == Element.DENDRO && aura == Element.PYRO)) {
-            double dmg = calculateTransformativeDamage(level, em, BURNING_MULTIPLIER, 0.0);
+            double dmg = calculateTransformativeDamage(
+                    level, em, BURNING_MULTIPLIER, reactionBonus);
             return ReactionResult.stateDamage(dmg, "Burning", ReactionResult.Kind.BURNING, null, Element.PYRO);
         }
 
@@ -154,14 +143,16 @@ public class ReactionCalculator {
         // Overload (Pyro + Electro)
         if ((trigger == Element.PYRO && aura == Element.ELECTRO) ||
                 (trigger == Element.ELECTRO && aura == Element.PYRO)) {
-            double dmg = calculateTransformativeDamage(level, em, OVERLOADED_MULTIPLIER, 0.0);
+            double dmg = calculateTransformativeDamage(
+                    level, em, OVERLOADED_MULTIPLIER, reactionBonus);
             return ReactionResult.transform(dmg, "Overloaded", ReactionResult.Kind.OVERLOAD, null, Element.PYRO);
         }
 
         // Superconduct (Cryo + Electro)
         if ((trigger == Element.CRYO && aura == Element.ELECTRO) ||
                 (trigger == Element.ELECTRO && aura == Element.CRYO)) {
-            double dmg = calculateTransformativeDamage(level, em, SUPERCONDUCT_MULTIPLIER, 0.0);
+            double dmg = calculateTransformativeDamage(
+                    level, em, SUPERCONDUCT_MULTIPLIER, reactionBonus);
             return ReactionResult.transform(dmg, "Superconduct", ReactionResult.Kind.SUPERCONDUCT,
                     null, Element.CRYO);
         }

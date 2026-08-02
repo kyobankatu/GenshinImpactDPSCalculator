@@ -98,6 +98,16 @@ public enum StatType {
 
     /** DMG bonus that applies specifically to Electro-Charged hits. */
     ELECTRO_CHARGED_DMG_BONUS,
+    /** DMG bonus that applies specifically to Overloaded hits. */
+    OVERLOAD_DMG_BONUS,
+    /** DMG bonus that applies specifically to Superconduct hits. */
+    SUPERCONDUCT_DMG_BONUS,
+    /** DMG bonus that applies specifically to Burning ticks. */
+    BURNING_DMG_BONUS,
+    /** DMG bonus that applies specifically to Vaporize multipliers. */
+    VAPORIZE_DMG_BONUS,
+    /** DMG bonus that applies specifically to Melt multipliers. */
+    MELT_DMG_BONUS,
     /** DMG bonus that applies specifically to Bloom core explosions. */
     BLOOM_DMG_BONUS,
     /** DMG bonus that applies specifically to Hyperbloom hits. */
