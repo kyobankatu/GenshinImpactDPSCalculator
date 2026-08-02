@@ -12875,7 +12875,7 @@ verification ownership.
 
 Scope:
 
-- Add fourteen exact artifact sets whose combat-relevant effects fit
+- Add fifteen exact artifact sets whose combat-relevant effects fit
   existing typed stats or whose remaining effects are exploration-only.
 - Add all five Royal weapons with exact Lv. 90 metadata and the narrowest
   truthful representation of their Focus passive.
@@ -12902,6 +12902,7 @@ Campaign inventory:
 | Barbara | character | delegated evidence | typed `CharacterId` and CSV | `BarbaraRegressionTest` | active |
 | Static combat-boundary sets | artifact batch | ready | none | `StaticArtifactRegressionTest` | done |
 | Static elemental/support sets | artifact batch | ready | none | `StaticArtifactRegressionTest` | done |
+| The Exile | artifact | ready | typed sequence marker | `TheExileRegressionTest` | done |
 
 ### Phase 1: Low-Rarity Artifact Sets - Done
 
@@ -13134,6 +13135,49 @@ Completion evidence:
   checks pass in the shared static artifact regression.
 - `./gradlew StaticArtifactRegressionTest ReactionRegressionTest build
   javadoc` and `python scripts/preflight.py --run` passed on 2026-08-03.
+
+### Phase 6: The Exile Energy Sequence - Done
+
+Target files:
+
+- `src/java/model/artifact/TheExile.java` (new)
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/sample/TheExileRegressionTest.java` (new)
+
+Acceptance criteria:
+
+- The Exile grants Energy Recharge +20%; an accepted owner Burst schedules
+  exactly three flat-Energy ticks at two, four, and six seconds.
+- Every tick grants two Energy to each current party member except the
+  equipping owner, bypassing Energy Recharge and respecting Energy caps.
+- One typed latest-source marker plus exact sequence-marker identity prevents
+  overlapping ticks across refreshes and multiple set holders.
+
+Test cases to add or update:
+
+- Normal: one owner, multiple allies, exact tick values, and owner exclusion.
+- Boundary: immediately before/at 2/4/6 seconds, Energy cap, and same-owner
+  refresh invalidating old ticks.
+- Abnormal: insufficient-Energy Burst, direct unbound/wrong simulator callback,
+  multiple wearers, supplied/null stats, and no unrelated particle accounting.
+
+Verification:
+
+- `./gradlew TheExileRegressionTest`
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Accepted Bursts schedule exact two, four, and six-second flat-Energy ticks;
+  the owner is excluded, allies respect their Energy caps, and no particle
+  Energy accounting is fabricated.
+- Exact typed-marker identity invalidates stale ticks after same-owner refresh
+  or replacement by another wearer, while unbound, wrong-simulator, and
+  insufficient-Energy callbacks remain inert.
+- `./gradlew TheExileRegressionTest ReactionRegressionTest build javadoc` and
+  `python scripts/preflight.py --run` passed on 2026-08-03.
 
 ## Implementation Order: Black Sword Campaign
 

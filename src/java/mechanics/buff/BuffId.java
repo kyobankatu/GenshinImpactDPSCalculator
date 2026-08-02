@@ -120,6 +120,8 @@ public enum BuffId {
     NOBLESSE_OBLIGE_4PC,
     /** 聖遺物 4 セット「教官」によるチーム元素熟知バフ。 */
     INSTRUCTOR_4PC_TEAM_EM,
+    /** 聖遺物 4 セット「亡命者」の非重複エネルギー回復シーケンス。 */
+    THE_EXILE_4PC_SEQUENCE,
     /** 聖遺物 4 セット「深林の記憶」による草元素耐性ダウン。 */
     DEEPWOOD_MEMORIES_4PC_SHRED,
     /** 聖遺物「砂上の楼閣の史話」の重撃後攻撃強化。 */
