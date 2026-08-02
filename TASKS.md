@@ -41,6 +41,9 @@ The B-131 supported-character accuracy campaign is complete. It corrects
 Bennett A1, adds Xiangling C2, and fixes Xingqiu C2/C4/C6 behavior; RL remains
 excluded.
 
+The B-132 Raiden constellation pass is complete. It adds C1 Resolve gain
+modifiers and C4's ally-only ATK window at normal or early Musou Isshin end.
+
 The B-058 Burning fuel correction is complete. It replaces the fixed
 two-second approximation with typed Dendro-fuel decay and refresh ownership
 while retaining the repository's single-target boundary.
@@ -13269,6 +13272,76 @@ Completion evidence:
 - `RaidenParty` changed deterministically from 1,272,998 damage / 60,619 DPS
   at `6f8177c` to 1,227,785 damage / 58,466 DPS. The decrease includes removal
   of the erroneous C6 party-wide Energy that had sustained Xiangling damage.
+- Reaction regression, build, Javadoc, sample simulation, and preflight pass.
+
+## Implementation Order: Raiden Constellation Lifecycle
+
+Status: Complete. This pass implements sourced, representable C1 and C4
+behavior without changing RL or generated documentation.
+
+Scope:
+
+- Multiply Chakra Desiderata Resolve from Electro ally Bursts by 1.8 and all
+  other elements by 1.2 at C1+ without rounding fractional stacks.
+- At C4+, apply one typed, nonstacking 10-second ATK +30% team buff excluding
+  Raiden when Musou Isshin ends normally or through a standard switch.
+- Start Musou Isshin's sourced seven-second duration after the Burst cast
+  animation resolves, so normal-end C4 timing shares the same lifecycle.
+
+Out of scope:
+
+- C6 Burst cooldown reduction, interruption resistance, immunity, player
+  damage, direct active-character setters, RL, and generated docs.
+
+Evidence:
+
+- KQM Raiden Shogun character reference and evidence vault, accessed
+  2026-08-02, specify C1's 80% Electro/20% other Resolve increases, decimal
+  stack preservation, and C4's 30% ATK for other party members for 10 seconds
+  when Musou Isshin expires:
+  https://library.keqingmains.com/characters/electro/raiden-shogun
+  https://library.keqingmains.com/evidence/characters/electro/raiden-shogun
+
+### Phase 1: C1 Resolve and C4 End-State Buff - Done
+
+Target files:
+
+- `src/java/model/character/RaidenShogun.java`
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- C0 gains the existing base Resolve; C1+ gains x1.8 from Electro and x1.2
+  from non-Electro ally Burst casts, preserving decimals and the 60-stack cap.
+- C4 applies exactly once on normal expiry or early standard switch, excludes
+  Raiden, refreshes rather than stacks, remains active before 10 seconds, and
+  is absent at exact expiry; C3 never applies it.
+- Normal Musou Isshin expiry occurs seven seconds after the initial Burst
+  action finishes; a stale timer from a replaced or early-ended state is inert.
+
+Test cases:
+
+- Normal: C0/C1 elemental Resolve matrix and post-cast C4 normal expiry.
+- Boundary: fractional Resolve, 60-stack cap, and C4 t=9.999/10.
+- Abnormal: own Burst ignored, multi-hit Burst credited once, C3, early switch,
+  stale timer after early end, exclusion, and repeated windows.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `./gradlew RaidenParty`
+- `python scripts/preflight.py`
+
+Completion evidence:
+
+- C0/C1 element multipliers, decimal preservation, 60-stack cap, own and
+  repeated-hit rejection, C3 exclusion, C4 normal/early/replacement end paths,
+  ally targeting, one typed window, and exact expiry regressions pass.
+- Two post-fix `RaidenParty` runs both produced 1,271,521 damage / 60,549 DPS,
+  versus 1,227,785 / 58,466 before the sourced post-cast timer correction.
 - Reaction regression, build, Javadoc, sample simulation, and preflight pass.
 
 ### Phase 2: Skill-Activated Damage Sets - Done

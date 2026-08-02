@@ -2857,3 +2857,21 @@ experiment record.
   ordering, refresh, owner-only Energy, recast listener, and orbital contracts
   pass focused regression, `RaidenParty` comparison, build, Javadoc, and
   preflight checks; post-fix sample is 1,227,785 damage / 58,466 DPS
+
+### B-132 — Raiden C1 Resolve and C4 lifecycle
+
+- **Status:** done
+- **Source:** supported-character inventory under broad content coverage
+- **Scope/risk:** planned character/buff lifecycle change; RL excluded
+- **Evidence:** maintained KQM Raiden character reference and evidence vault,
+  accessed 2026-08-02, specify C1 element multipliers, decimal stacks, and C4
+  value, target exclusion, trigger, duration, and post-animation timer start:
+  https://library.keqingmains.com/characters/electro/raiden-shogun
+  https://library.keqingmains.com/evidence/characters/electro/raiden-shogun
+- **Proof:** focused C0/C1/C3/C4 normal, boundary, switch, cap, and refresh
+  regressions plus reaction regression, `RaidenParty`, build, Javadoc, and
+  preflight
+- **Plan:** `TASKS.md` Raiden Constellation Lifecycle
+- **Completion:** C1 element multipliers and C4 normal, early, stale, target,
+  and expiry contracts pass all planned checks; two post-fix `RaidenParty`
+  runs match at 1,271,521 damage / 60,549 DPS

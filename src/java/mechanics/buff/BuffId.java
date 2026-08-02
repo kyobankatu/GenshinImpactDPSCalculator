@@ -86,6 +86,8 @@ public enum BuffId {
     INEFFA_LUNAR_BASE_BONUS,
     /** 雷電将軍「諸願百日の儀」: 諸願スタックによる元素爆発 DMG ボーナス。 */
     RAIDEN_EYE_OF_STORMY_JUDGMENT,
+    /** 雷電将軍 命ノ星座 4「常道への誓い」による味方攻撃力ボーナス。 */
+    RAIDEN_C4_PLEDGE_OF_PROPRIETY,
     /** 香菱 グゥオパァー C1: 防御力減少効果。 */
     XIANGLING_GUOBA_C1_SHRED,
     /** 香菱 元素爆発「ピリ辛」状態 (Chili)。 */

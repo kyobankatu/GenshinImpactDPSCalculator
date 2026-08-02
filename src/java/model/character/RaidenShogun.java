@@ -33,6 +33,7 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
     private double activeResolveBonus = 0; // Stacks captured at Burst cast
     private boolean listenerRegistered = false;
     private final Map<CharacterId, Double> creditedBurstCastTimes = new EnumMap<>(CharacterId.class);
+    private int musouGeneration = 0;
 
     /**
      * Constructs Raiden Shogun with the shared talent data source.
@@ -104,9 +105,7 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
     public void onSwitchOut(CombatSimulator sim) {
         if (musouActive) {
             System.out.println("   [Raiden] Swapped out! Musou Shinsetsu ends early.");
-            musouActive = false;
-            // Note: The TimerEvent will still fire but musouActive is false, so it's fine.
-            // Ideally we should cancel the timer, but setting boolean is sufficient.
+            endMusouIsshin(sim);
         }
     }
 
@@ -177,6 +176,9 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
 
                     double cost = actor.getEnergyCost();
                     double gain = cost * 0.2;
+                    if (constellation >= 1) {
+                        gain *= actor.getElement() == Element.ELECTRO ? 1.8 : 1.2;
+                    }
                     resolveStacks += gain;
                     if (resolveStacks > 60)
                         resolveStacks = 60;
@@ -288,30 +290,9 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
 
         // Reset Energy Restoration State
         musouActive = true;
+        int activeGeneration = ++musouGeneration;
         musouEnergyCount = 0;
         nextEnergyRestoreTime = sim.getCurrentTime(); // Ready immediately
-
-        // Burst End Timer (7s)
-        sim.registerEvent(new simulation.event.TimerEvent() {
-            private double endTime = sim.getCurrentTime() + 7.0;
-            private boolean done = false;
-
-            @Override
-            public void tick(CombatSimulator s) {
-                musouActive = false;
-                done = true;
-            }
-
-            @Override
-            public boolean isFinished(double t) {
-                return done;
-            }
-
-            @Override
-            public double getNextTickTime() {
-                return done ? -1 : endTime;
-            }
-        });
 
         double baseMv = getTalentValue("Musou Shinsetsu", 6.81);
         double stackScale = getTalentValue("Musou Shinsetsu.2", 0.0661);
@@ -325,6 +306,48 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
             q.setDefenseIgnore(0.60);
         }
         sim.performAction(this.characterId, q);
+
+        // KQM records the seven-second Musou Isshin timer from cast-animation end.
+        sim.registerEvent(new simulation.event.TimerEvent() {
+            private final double endTime = sim.getCurrentTime() + 7.0;
+            private boolean done = false;
+
+            @Override
+            public void tick(CombatSimulator activeSim) {
+                if (activeGeneration == musouGeneration) {
+                    endMusouIsshin(activeSim);
+                }
+                done = true;
+            }
+
+            @Override
+            public boolean isFinished(double currentTime) {
+                return done;
+            }
+
+            @Override
+            public double getNextTickTime() {
+                return done ? -1.0 : endTime;
+            }
+        });
+    }
+
+    private void endMusouIsshin(CombatSimulator sim) {
+        if (!musouActive) {
+            return;
+        }
+        musouActive = false;
+        if (constellation < 4) {
+            return;
+        }
+        sim.applyTeamBuffNoStack(new mechanics.buff.SimpleBuff(
+                "Pledge of Propriety",
+                BuffId.RAIDEN_C4_PLEDGE_OF_PROPRIETY,
+                10.0,
+                sim.getCurrentTime(),
+                stats -> stats.add(StatType.ATK_PERCENT, 0.30))
+                .exclude(characterId)
+                .sourcedBy(characterId));
     }
 
     // Helper to trigger Energy Restoration on hits

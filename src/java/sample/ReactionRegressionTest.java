@@ -95,6 +95,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseE_LunarBloomDewState();
         testAccuracyPhaseE_LunarCrystallizeHarmonyCadence();
         testAccuracyPhaseF_RaidenResolveAndEnergyRegression();
+        testAccuracyPhaseF_RaidenConstellationLifecycle();
         testAccuracyPhaseF_FlinsSkillApplicationContract();
         testAccuracyPhaseF_FlinsThundercloudConditionalHits();
         testAccuracyPhaseF_FlinsSymphonyZeroGaugeContract();
@@ -2938,6 +2939,162 @@ public class ReactionRegressionTest {
         assertClose(18.0, raiden.getResolveStacks(), EPS,
                 "Raiden Resolve should count Xiangling's multi-hit burst cast once"
                         + " plus one Wishes Unnumbered particle trigger");
+    }
+
+    private static void testAccuracyPhaseF_RaidenConstellationLifecycle() {
+        model.character.RaidenShogun c0Raiden = new model.character.RaidenShogun(
+                new TestWeapon(), blankArtifact(), raidenTalentData(0));
+        CombatSimulator c0Sim = simulatorWithExistingCharacter(c0Raiden);
+        TestCharacter c0Electro = testCharacter(Element.ELECTRO, CharacterId.XIANGLING);
+        c0Sim.addCharacter(c0Electro);
+        c0Raiden.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), c0Sim);
+        c0Electro.markBurstUsed(c0Sim.getCurrentTime());
+        c0Sim.performAction(
+                CharacterId.XIANGLING,
+                raidenResolveSourceBurst("C0 Electro Resolve source"));
+        assertClose(12.0, c0Raiden.getResolveStacks(), EPS,
+                "Raiden C0 should retain base Resolve gain");
+
+        model.character.RaidenShogun c1Raiden = new model.character.RaidenShogun(
+                new TestWeapon(), blankArtifact(), raidenTalentData(1));
+        CombatSimulator c1Sim = simulatorWithExistingCharacter(c1Raiden);
+        TestCharacter c1Electro = testCharacter(Element.ELECTRO, CharacterId.XIANGLING);
+        TestCharacter c1Pyro = testCharacter(Element.PYRO, CharacterId.BENNETT);
+        c1Sim.addCharacter(c1Electro);
+        c1Sim.addCharacter(c1Pyro);
+        c1Raiden.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), c1Sim);
+        c1Sim.performAction(
+                CharacterId.RAIDEN_SHOGUN,
+                raidenResolveSourceBurst("Raiden own Burst damage"));
+        assertClose(0.0, c1Raiden.getResolveStacks(), EPS,
+                "Raiden should not gain Resolve from her own Burst damage");
+        c1Electro.markBurstUsed(c1Sim.getCurrentTime());
+        c1Sim.performAction(
+                CharacterId.XIANGLING,
+                raidenResolveSourceBurst("C1 Electro Resolve source hit 1"));
+        c1Sim.performAction(
+                CharacterId.XIANGLING,
+                raidenResolveSourceBurst("C1 Electro Resolve source hit 2"));
+        assertClose(21.6, c1Raiden.getResolveStacks(), EPS,
+                "Raiden C1 should multiply one Electro Burst cast by 1.8 without rounding");
+        c1Sim.advanceTime(0.1);
+        c1Pyro.markBurstUsed(c1Sim.getCurrentTime());
+        c1Sim.performAction(
+                CharacterId.BENNETT,
+                raidenResolveSourceBurst("C1 Pyro Resolve source"));
+        assertClose(36.0, c1Raiden.getResolveStacks(), EPS,
+                "Raiden C1 should multiply a non-Electro Burst cast by 1.2");
+        for (int i = 0; i < 2; i++) {
+            c1Sim.advanceTime(0.1);
+            c1Electro.markBurstUsed(c1Sim.getCurrentTime());
+            c1Sim.performAction(
+                    CharacterId.XIANGLING,
+                    raidenResolveSourceBurst("C1 capped Electro source " + i));
+        }
+        assertClose(60.0, c1Raiden.getResolveStacks(), EPS,
+                "Raiden C1 Resolve should remain capped at sixty");
+
+        model.character.RaidenShogun c3Raiden = new model.character.RaidenShogun(
+                new TestWeapon(), blankArtifact(), raidenTalentData(3));
+        CombatSimulator c3Sim = simulatorWithExistingCharacter(c3Raiden);
+        c3Raiden.onAction(CharacterActionRequest.of(CharacterActionKey.BURST), c3Sim);
+        c3Sim.advanceTime(7.01);
+        assertTrue(c3Sim.getTeamBuffList().stream().noneMatch(
+                        buff -> buff.getId() == BuffId.RAIDEN_C4_PLEDGE_OF_PROPRIETY),
+                "Raiden C3 should not apply the C4 end-state buff");
+
+        model.character.RaidenShogun c4Raiden = new model.character.RaidenShogun(
+                new TestWeapon(), blankArtifact(), raidenTalentData(4));
+        CombatSimulator c4Sim = simulatorWithExistingCharacter(c4Raiden);
+        TestCharacter c4Ally = testCharacter(Element.PYRO, CharacterId.BENNETT);
+        c4Sim.addCharacter(c4Ally);
+        c4Raiden.onAction(CharacterActionRequest.of(CharacterActionKey.BURST), c4Sim);
+        double c4CastEnd = c4Sim.getCurrentTime();
+        c4Sim.advanceTime(6.999);
+        assertTrue(c4Raiden.isFormActive(c4Sim.getCurrentTime()),
+                "Raiden Musou Isshin should remain active before seven post-cast seconds");
+        assertClose(0.0, resolvedStat(c4Sim, c4Ally, StatType.ATK_PERCENT), EPS,
+                "Raiden C4 should not apply before Musou Isshin ends");
+        c4Sim.advanceTime(0.001 + 1e-9);
+        assertTrue(!c4Raiden.isFormActive(c4Sim.getCurrentTime()),
+                "Raiden Musou Isshin should end seven seconds after cast resolution");
+        Buff normalEndBuff = requireRaidenC4Buff(c4Sim);
+        assertClose(c4CastEnd + 7.0, normalEndBuff.getStartTime(), EPS,
+                "Raiden C4 normal window should start at post-cast Musou expiry");
+        assertClose(0.30, resolvedStat(c4Sim, c4Ally, StatType.ATK_PERCENT), EPS,
+                "Raiden C4 should grant allies thirty percent ATK");
+        assertClose(0.0, resolvedStat(c4Sim, c4Raiden, StatType.ATK_PERCENT), EPS,
+                "Raiden C4 should exclude Raiden herself");
+        c4Sim.advanceTime(9.999 - 1e-9);
+        assertClose(0.30, resolvedStat(c4Sim, c4Ally, StatType.ATK_PERCENT), EPS,
+                "Raiden C4 should remain active before ten seconds");
+        c4Sim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0, resolvedStat(c4Sim, c4Ally, StatType.ATK_PERCENT), EPS,
+                "Raiden C4 should be absent at its exact ten-second expiry");
+
+        model.character.RaidenShogun earlyRaiden = new model.character.RaidenShogun(
+                new TestWeapon(), blankArtifact(), raidenTalentData(4));
+        CombatSimulator earlySim = simulatorWithExistingCharacter(earlyRaiden);
+        TestCharacter earlyAlly = testCharacter(Element.PYRO, CharacterId.BENNETT);
+        earlySim.addCharacter(earlyAlly);
+        earlyRaiden.onAction(CharacterActionRequest.of(CharacterActionKey.BURST), earlySim);
+        double earlyCastEnd = earlySim.getCurrentTime();
+        earlySim.advanceTime(2.0);
+        double switchTime = earlySim.getCurrentTime();
+        earlySim.switchCharacter(CharacterId.BENNETT);
+        Buff earlyBuff = requireRaidenC4Buff(earlySim);
+        assertClose(switchTime, earlyBuff.getStartTime(), EPS,
+                "Raiden C4 should start when a standard switch ends Musou early");
+        earlySim.advanceTime(earlyCastEnd + 7.001 - earlySim.getCurrentTime());
+        Buff afterStaleTimer = requireRaidenC4Buff(earlySim);
+        assertClose(switchTime, afterStaleTimer.getStartTime(), EPS,
+                "Raiden's stale normal-end timer should not refresh an early C4 window");
+        earlySim.advanceTime(switchTime + 9.999 - earlySim.getCurrentTime());
+        assertClose(0.30, resolvedStat(earlySim, earlyAlly, StatType.ATK_PERCENT), EPS,
+                "Early Raiden C4 should remain active before ten seconds");
+        earlySim.advanceTime(0.001 + 1e-9);
+        assertClose(0.0, resolvedStat(earlySim, earlyAlly, StatType.ATK_PERCENT), EPS,
+                "Early Raiden C4 should expire at ten seconds");
+
+        model.character.RaidenShogun replacedRaiden = new model.character.RaidenShogun(
+                new TestWeapon(), blankArtifact(), raidenTalentData(4));
+        CombatSimulator replacedSim = simulatorWithExistingCharacter(replacedRaiden);
+        replacedRaiden.onAction(CharacterActionRequest.of(CharacterActionKey.BURST), replacedSim);
+        double firstCastEnd = replacedSim.getCurrentTime();
+        replacedSim.advanceTime(1.0);
+        replacedRaiden.onAction(CharacterActionRequest.of(CharacterActionKey.BURST), replacedSim);
+        double replacementCastEnd = replacedSim.getCurrentTime();
+        replacedSim.advanceTime(firstCastEnd + 7.001 - replacedSim.getCurrentTime());
+        assertTrue(replacedRaiden.isFormActive(replacedSim.getCurrentTime()),
+                "A stale timer should not end a replacement Musou Isshin state");
+        assertTrue(replacedSim.getTeamBuffList().stream().noneMatch(
+                        buff -> buff.getId() == BuffId.RAIDEN_C4_PLEDGE_OF_PROPRIETY),
+                "A stale timer should not create a C4 buff for the replacement state");
+        replacedSim.advanceTime(
+                replacementCastEnd + 7.0 - replacedSim.getCurrentTime() + 1e-9);
+        assertTrue(!replacedRaiden.isFormActive(replacedSim.getCurrentTime()),
+                "The replacement Musou state should end on its own timer");
+        requireRaidenC4Buff(replacedSim);
+    }
+
+    private static AttackAction raidenResolveSourceBurst(String name) {
+        return new AttackAction(
+                name, 0.0, Element.PHYSICAL, StatType.BASE_ATK,
+                null, 0.0, false, ActionType.BURST);
+    }
+
+    private static Buff requireRaidenC4Buff(CombatSimulator sim) {
+        List<Buff> buffs = new ArrayList<>();
+        for (Buff buff : sim.getTeamBuffList()) {
+            if (buff.getId() == BuffId.RAIDEN_C4_PLEDGE_OF_PROPRIETY) {
+                buffs.add(buff);
+            }
+        }
+        assertEquals(1, buffs.size(),
+                "Raiden C4 should retain exactly one typed team buff");
+        assertEquals(CharacterId.RAIDEN_SHOGUN, buffs.get(0).getSourceCharacterId(),
+                "Raiden C4 should retain typed source ownership");
+        return buffs.get(0);
     }
 
     private static void testAccuracyPhaseF_FlinsThundercloudConditionalHits() {
@@ -17560,6 +17717,15 @@ public class ReactionRegressionTest {
     private static mechanics.data.TalentDataSource xingqiuTalentData(int constellation) {
         return (characterName, key, defaultValue) -> {
             if ("Xingqiu".equals(characterName) && "Constellation".equals(key)) {
+                return constellation;
+            }
+            return defaultValue;
+        };
+    }
+
+    private static mechanics.data.TalentDataSource raidenTalentData(int constellation) {
+        return (characterName, key, defaultValue) -> {
+            if ("Raiden Shogun".equals(characterName) && "Constellation".equals(key)) {
                 return constellation;
             }
             return defaultValue;
