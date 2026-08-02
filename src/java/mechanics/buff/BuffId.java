@@ -171,6 +171,10 @@ public enum BuffId {
     FREEDOM_SWORN_SONG_OF_RESISTANCE,
     /** 武器「松籟の響く頃」の通常攻撃速度強化。 */
     SONG_OF_BROKEN_PINES_BANNER_HYMN,
+    /** Golden Majesty 武器シリーズの共有攻撃力スタック。 */
+    GOLDEN_MAJESTY_ATK_STACKS,
+    /** Golden Majesty 武器シリーズの 0.3 秒スタック獲得間隔。 */
+    GOLDEN_MAJESTY_STACK_COOLDOWN,
     /** 武器「千夜に浮かぶ夢」の味方元素熟知共有。 */
     A_THOUSAND_FLOATING_DREAMS_TEAM_EM,
     /** 武器「龍殺しの英傑譚」の交代先への攻撃力バフ。 */
