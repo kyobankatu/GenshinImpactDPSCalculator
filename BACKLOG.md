@@ -3471,7 +3471,7 @@ experiment record.
 
 ### B-165 — Legacy support character campaign
 
-- **Status:** in progress
+- **Status:** complete
 - **Source:** explicit broad content-expansion request and post-B-163 missing
   character class/config inventory
 - **Units:** Jean, Chongyun, and Diona offensive vertical slices
@@ -3482,3 +3482,20 @@ experiment record.
   Deferred Systems remain excluded.
 - **Plan:** three-phase `TASKS.md` Legacy Support Character Campaign with a
   shared typed-identity baseline and branch-isolated implementation lanes.
+- **Completion:** commits `1fbe410` through `3633f1d` add Jean, Chongyun, and
+  Diona and correct both independent audits' character-local findings. All
+  focused/full gates pass; shared pending-event and Normal-counter snapshot
+  continuity is promoted to B-166.
+
+### B-166 — Character snapshot continuity
+
+- **Status:** planned
+- **Source:** independent B-165 Jean/Diona and Chongyun audits
+- **Scope:** opaque snapshot-aware character state plus exact re-registration
+  of B-165 future offensive events and Normal-chain counters
+- **Reason:** `SimulatorSnapshot` intentionally clears arbitrary timer events;
+  character marker windows alone cannot replay Burst ticks, exit hits,
+  particles, A4, or mutable attack chains.
+- **Boundary:** no generic event-object cloning, RL changes, generated docs, or
+  migration of unrelated characters in this pass.
+- **Plan:** two-phase `TASKS.md` Character Snapshot Continuity plan.

@@ -13205,8 +13205,8 @@ Completion evidence:
 
 ## Implementation Order: Legacy Support Character Campaign
 
-Status: In progress. Phase 1 is pending; three offensive vertical slices are
-bounded for branch-isolated implementation.
+Status: Complete. All three offensive vertical slices and both independent
+review correction passes are pushed; B-166 owns the shared snapshot follow-up.
 
 Scope:
 
@@ -13236,11 +13236,13 @@ Campaign inventory:
 
 | Unit | Type | Source readiness | Shared prerequisite | Verification | Status |
 |---|---|---|---|---|---|
-| Jean | character | pinned KQM/gcsim | typed identity | `JeanRegressionTest` | pending |
-| Chongyun | character | pinned KQM/gcsim | typed identity | `ChongyunRegressionTest` | pending |
-| Diona | character | pinned KQM/gcsim | typed identity | `DionaRegressionTest` | pending |
+| Jean | character | pinned KQM/gcsim | typed identity | `JeanRegressionTest` | complete |
+| Chongyun | character | pinned KQM/gcsim | typed identity | `ChongyunRegressionTest` | complete |
+| Diona | character | pinned KQM/gcsim | typed identity | `DionaRegressionTest` | complete |
 
 ### Phase 1: Reserve Typed Identities
+
+Status: Done.
 
 Why first:
 
@@ -13274,6 +13276,8 @@ Verification:
 - `./gradlew LegacyCharacterIdentityRegressionTest build`
 
 ### Phase 2: Jean and Chongyun Isolated Vertical Slices
+
+Status: Done.
 
 Why second:
 
@@ -13325,6 +13329,8 @@ Verification:
 
 ### Phase 3: Diona Offensive Vertical Slice
 
+Status: Done.
+
 Why:
 
 - Diona is independent of Phase 2 code but shares the published identity and
@@ -13367,6 +13373,88 @@ Test cases to add or update:
 Verification:
 
 - `./gradlew DionaRegressionTest`
+- `./gradlew ReactionRegressionTest PartyCatalogRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Commits `1fbe410` through `3633f1d` add all three identities and offensive
+  slices, then correct sourced talent levels, projectile/hitmark timing,
+  cast snapshots, particles, Energy/cooldown frames, infusion-at-hit, A1
+  integer frame adjustment, exact multipliers, and field recast boundaries.
+- Both independent audits converge on one shared limitation: simulator
+  snapshot restore clears pending timer events and does not capture mutable
+  Normal-chain counters. That cross-character contract is promoted as B-166
+  rather than hidden behind character-local marker tests.
+- All three focused regressions, identity, party catalog, reaction regression,
+  build, Javadoc, and executable preflight pass on the pushed combined tree.
+
+## Implementation Order: Character Snapshot Continuity
+
+Status: Planned. B-166 is the active simulator follow-up.
+
+Scope:
+
+- Add one narrow character-state snapshot contract without serializing or
+  cloning arbitrary timer-event objects.
+- Restore Jean, Chongyun, and Diona Normal-chain counters and reconstruct only
+  their sourced future offensive events from immutable character-owned state.
+- Keep weapon, reaction, RL, generated docs, and unrelated character behavior
+  unchanged.
+
+### Phase 1: Publish Character Snapshot State Contract
+
+Status: Pending.
+
+Target files:
+
+- `src/java/model/entity/SnapshotAwareCharacterEffect.java` (new)
+- `src/java/simulation/SimulatorSnapshot.java`
+- `src/java/simulation/CombatSimulator.java`
+- focused simulator snapshot regression executable
+
+Acceptance criteria:
+
+- Snapshot-aware characters capture immutable opaque state and receive it only
+  after clock, cooldown, Energy, and buff windows are restored.
+- Non-participating characters retain byte-for-byte behavior and null state
+  fails closed.
+
+Tests:
+
+- Normal: one test character round-trips a counter and re-registers one future
+  event.
+- Boundary: restore before and at event expiry does not duplicate damage.
+- Abnormal: state/type mismatch throws instead of silently corrupting state.
+
+### Phase 2: Migrate B-165 Character State
+
+Status: Pending.
+
+Target files:
+
+- `src/java/model/character/Jean.java`
+- `src/java/model/character/Chongyun.java`
+- `src/java/model/character/Diona.java`
+- their three focused regression executables
+
+Acceptance criteria:
+
+- Saving after a Normal and restoring after another branch resumes the saved
+  next Normal for all three characters.
+- Future Jean exit damage, Diona Burst ticks/C1 refund, and Chongyun particles,
+  field refreshes/A4 resume exactly once from the restored time.
+- Restoring expired state schedules nothing and repeated restore is idempotent.
+
+Tests:
+
+- Normal: replay each pending event family and compare damage/Energy/timing.
+- Boundary: exact half-open field/tick/A4 deadlines and snapshot at deadline.
+- Abnormal: independent instances and cross-simulator reuse remain rejected.
+
+Verification:
+
+- `./gradlew JeanRegressionTest ChongyunRegressionTest DionaRegressionTest`
 - `./gradlew ReactionRegressionTest PartyCatalogRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
 
