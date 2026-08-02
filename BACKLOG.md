@@ -2442,10 +2442,12 @@ experiment record.
 
 ### B-106 — Typed five-star bow coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Polar Star and Astral Vulture's Crimson Plumage; RL excluded
 - **Value/risk:** two complete passives reuse typed hit/reaction and live party
   reads without simulator dispatch changes
 - **Evidence boundary:** KQM TCL metadata, R1-R5 stack/ATK/Charged/Burst values,
   independent 12-second hit stacks, Swirl attribution, and one/two ally tiers
 - **Plan:** `TASKS.md` Typed Five-Star Bow Campaign
+- **Completion:** `08637ba` adds both typed state machines and focused
+  regressions; build/Javadoc/leak gates pass

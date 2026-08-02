@@ -14516,8 +14516,8 @@ Verification:
 
 ## Implementation Order: Typed Five-Star Bow Campaign
 
-Status: Active. Add two complete five-star bows using typed hit stacks, owner
-Swirl attribution, and live party element composition.
+Status: Complete. Two five-star bows now use typed hit stacks, owner Swirl
+attribution, and live party element composition.
 
 Scope:
 
@@ -14529,13 +14529,20 @@ Out of scope for this pass:
 - Movement speed, Hexerei effects, multi-target multiplication, characters,
   formulas, RL, generated docs, and unrelated five-star bows.
 
-### Phase 1: Add Polar Star and Astral Vulture's Crimson Plumage
+### Phase 1: Add Polar Star and Astral Vulture's Crimson Plumage - Done (`08637ba`)
 
 Target files:
 
 - `src/java/model/weapon/PolarStar.java` (new)
 - `src/java/model/weapon/AstralVulturesCrimsonPlumage.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Polar proves static action bonuses, all four R1/R5 ATK tiers, independent
+  refresh/expiry, and zero/wrong/off-field exclusions.
+- Astral proves attributed active-owner Swirl, exact expiry, live same/one/two
+  ally composition, R1/R5 tiers, and reuse rejection; all project gates pass.
 
 Acceptance criteria:
 
