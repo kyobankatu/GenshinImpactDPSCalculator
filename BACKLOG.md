@@ -3359,7 +3359,7 @@ experiment record.
 
 ### B-158 — Derived-stat equipment and Fischl content wave
 
-- **Status:** in-progress
+- **Status:** done
 - **Source:** post-B-157 local asset/class inventory and continued explicit
   broad character, weapon, and artifact coverage request
 - **Scope/risk:** two shared derived-stat primitives, Redhorn Stonethresher,
@@ -3375,3 +3375,7 @@ experiment record.
   remain excluded.
 - **Proof/plan:** five-phase `TASKS.md` Derived-Stat Equipment and Fischl
   Content Wave with isolated focused regressions and full local gates.
+- **Closure:** final-DEF/EM primitives, Redhorn, Scarlet Sands, all four
+  artifact sets, and Fischl are integrated on `dev_0`. Independent review
+  findings for true-hit gating, shared stack expiry documentation, and
+  simulator-managed EM coverage were resolved before closure.

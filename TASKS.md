@@ -50,9 +50,9 @@ wave added the Golden Majesty weapon family, six legacy boundary artifact sets,
 and Razor through isolated implementation lanes; RL and generated
 documentation remained excluded.
 
-The active B-158 wave adds reusable final-DEF/EM damage conversion, Redhorn
-Stonethresher, Staff of the Scarlet Sands, four remaining asset-backed artifact
-sets, and Fischl through bounded branch-isolated lanes.
+The B-158 derived-stat equipment and Fischl wave is complete. It adds reusable
+final-DEF/EM conversion, two five-star weapons, four asset-backed artifact sets,
+and Fischl through bounded branch-isolated lanes.
 
 The B-128 action-use artifact campaign is complete. Successful typed actions
 now reach equipped artifacts, and Heart of Depth plus Martial Artist use the
@@ -13672,9 +13672,8 @@ Completion evidence:
 
 ## Implementation Order: Derived-Stat Equipment and Fischl Content Wave
 
-Status: In progress. Primary owns the two narrow formula primitives and
-integration; concrete equipment and Fischl remain disjoint implementation
-units after the shared baseline is published.
+Status: Complete. Shared formula primitives, equipment, artifact sets, and
+Fischl are integrated; RL and generated documentation remained excluded.
 
 Scope:
 
@@ -13693,7 +13692,7 @@ Out of scope:
   healing/current player HP, weak points and geometry, Witch's Homework and
   Hexerei, hitlag extension, multi-enemy behavior, RL, and generated docs.
 
-### Phase 1: Derived Offensive Stat Primitives
+### Phase 1: Derived Offensive Stat Primitives - Done
 
 Target files:
 
@@ -13722,7 +13721,14 @@ Verification:
 - `./gradlew DerivedOffensiveStatRegressionTest ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
 
-### Phase 2: Redhorn Stonethresher
+Completion evidence:
+
+- Commit `a2db2cb` added both typed derived-stat paths; `b637a84` restricted
+  final-DEF additive damage to true Normal/Charged hits.
+- Focused regression, reaction regression, build, Javadoc, and executable
+  preflight passed on 2026-08-03.
+
+### Phase 2: Redhorn Stonethresher - Done
 
 Target files:
 
@@ -13747,7 +13753,14 @@ Verification:
 - `./gradlew RedhornStonethresherRegressionTest ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Staff of the Scarlet Sands
+Completion evidence:
+
+- Commit `fc95433` added exact R1-R5 metadata and final-DEF conversion;
+  `b637a84` added explicit dummy-cast and zero-multiplier-hit boundaries.
+- Focused regression, reaction regression, build, Javadoc, and executable
+  preflight passed on 2026-08-03.
+
+### Phase 3: Staff of the Scarlet Sands - Done
 
 Target files:
 
@@ -13758,15 +13771,16 @@ Target files:
 Acceptance criteria:
 
 - Exact Lv. 90 Polearm metadata and R1-R5 dynamic EM-to-ATK conversion apply.
-- On-field Skill hits gain up to three independently expiring ten-second flat
-  ATK stacks, each snapshotting current EM after the triggering hit.
+- On-field Skill hits gain up to three flat ATK stacks, each snapshotting
+  current EM after the triggering hit; all stacks share one refreshed
+  ten-second expiry.
 - Off-field/wrong-owner hits, dummy casts, and non-Skill damage cannot stack;
   mutable state is owner-local and snapshot-safe.
 
 Test cases:
 
 - Normal: dynamic base conversion, one/three stacks, EM snapshots, retention.
-- Boundary: exact ten-second expiry, refresh/independent expiries, rollback.
+- Boundary: exact ten-second expiry, shared refresh at/below cap, rollback.
 - Abnormal: off-field/wrong hit, invalid refinement/binding, independent state.
 
 Verification:
@@ -13774,10 +13788,18 @@ Verification:
 - `./gradlew StaffOfTheScarletSandsRegressionTest ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
 
-### Phase 4: Remaining Asset-Backed Artifact Sets
+Completion evidence:
+
+- Commit `13304a4` added exact R1-R5 conversion, post-hit EM snapshots, shared
+  refresh, owner binding, and snapshot restore.
+- Commit `dee8812` covers simulator-managed team/field EM without double
+  application; all local gates passed on 2026-08-03.
+
+### Phase 4: Remaining Asset-Backed Artifact Sets - Done
 
 Target files:
 
+- `src/java/mechanics/buff/BuffId.java`
 - `src/java/model/artifact/DisenchantmentInDeepShadow.java` (new)
 - `src/java/model/artifact/ScrollOfTheHeroOfCinderCity.java` (new)
 - `src/java/model/artifact/ObsidianCodex.java` (new)
@@ -13805,7 +13827,14 @@ Verification:
 - `./gradlew RemainingArtifactSetRegressionTest ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
 
-### Phase 5: Fischl Offensive Vertical Slice
+Completion evidence:
+
+- Commit `a5f39ae` added all four sets, typed Scroll per-element team buffs,
+  and explicit inactive Nightsoul/shield/Stellar-Conduct boundaries.
+- Focused regression, reaction regression, build, Javadoc, and executable
+  preflight passed on 2026-08-03.
+
+### Phase 5: Fischl Offensive Vertical Slice - Done
 
 Target files:
 
@@ -13836,6 +13865,13 @@ Verification:
 - `./gradlew FischlRegressionTest PartyCatalogRegressionTest`
 - `./gradlew ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Commits `3970d39` and `5dd0b34` added Fischl's typed actions, Oz lifecycle,
+  sourced initial-recast delay, A4, C1-C6, shared ICD, and focused data/tests.
+- Fischl, party catalog, reaction regression, build, Javadoc, and executable
+  preflight passed on 2026-08-03.
 
 ## Implementation Order: Black Sword Campaign
 
