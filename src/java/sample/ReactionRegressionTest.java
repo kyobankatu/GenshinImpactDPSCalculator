@@ -125,6 +125,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_WatatsumiWavewalkerWeapons();
         testAccuracyPhaseF_ReciprocalHitWeapons();
         testAccuracyPhaseF_ReactionWindowWeapons();
+        testAccuracyPhaseF_HybridReactionWindowWeapons();
         testAccuracyPhaseF_HitStackWeapons();
         testAccuracyPhaseF_AdditionalClaymoreHitStackWeapons();
         testAccuracyPhaseF_AdditionalMultiStatHitStackWeapons();
@@ -6651,6 +6652,174 @@ public class ReactionRegressionTest {
         swordSim.advanceTime(0.001 + 1e-9);
         assertClose(0.0, resolvedStat(swordSim, swordOwner, StatType.ATK_PERCENT), EPS,
                 "Dark Iron Sword should expire at exactly twelve seconds");
+    }
+
+    private static void testAccuracyPhaseF_HybridReactionWindowWeapons() {
+        model.weapon.MissiveWindspear missive =
+                new model.weapon.MissiveWindspear();
+        assertEquals("Missive Windspear", missive.getName(),
+                "Missive Windspear display name");
+        assertClose(510.0, missive.getBaseAtk(), EPS,
+                "Missive Windspear base ATK");
+        assertClose(0.413, missive.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Missive Windspear ATK substat");
+        assertEquals(model.type.WeaponType.POLEARM, missive.getWeaponType(),
+                "Missive Windspear weapon type");
+        assertEquals(5, missive.getRefinement(),
+                "Missive Windspear default refinement");
+
+        TestCharacter missiveOwner = testCharacter(Element.PYRO, CharacterId.XIANGLING);
+        missiveOwner.setWeapon(missive);
+        CombatSimulator missiveSim = simulatorWith(missiveOwner);
+        AttackAction skillHit = typedDamageHit(
+                "Missive Skill", ActionType.SKILL, 1.0);
+        missive.onDamage(missiveOwner, skillHit, 0.0, missiveSim);
+        assertClose(0.413,
+                resolvedStat(missiveSim, missiveOwner, StatType.ATK_PERCENT), EPS,
+                "Skill hits should not activate Missive Windspear");
+        missiveSim.notifyReaction(
+                ReactionResult.state("None", ReactionResult.Kind.NONE, null),
+                missiveOwner);
+        assertClose(0.0,
+                resolvedStat(missiveSim, missiveOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "NONE should not activate Missive Windspear");
+        missiveSim.notifyReaction(
+                ReactionResult.transform(
+                        0.0, "Overload", ReactionResult.Kind.OVERLOAD),
+                missiveOwner);
+        assertClose(0.653,
+                resolvedStat(missiveSim, missiveOwner, StatType.ATK_PERCENT), EPS,
+                "R5 Missive Windspear ATK window");
+        assertClose(96.0,
+                resolvedStat(missiveSim, missiveOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "R5 Missive Windspear EM window");
+        missiveSim.advanceTime(5.0);
+        missiveSim.notifyReaction(
+                ReactionResult.transform(
+                        0.0, "Vaporize", ReactionResult.Kind.VAPORIZE),
+                missiveOwner);
+        missiveSim.advanceTime(9.999);
+        assertClose(0.653,
+                resolvedStat(missiveSim, missiveOwner, StatType.ATK_PERCENT), EPS,
+                "Refreshed Missive Windspear should remain active before expiry");
+        missiveSim.advanceTime(0.001 + 1e-9);
+        assertClose(0.413,
+                resolvedStat(missiveSim, missiveOwner, StatType.ATK_PERCENT), EPS,
+                "Missive Windspear should expire exactly at ten seconds");
+
+        model.weapon.MissiveWindspear r1Missive =
+                new model.weapon.MissiveWindspear(1);
+        TestCharacter r1MissiveOwner = testCharacter(Element.PYRO);
+        r1MissiveOwner.setWeapon(r1Missive);
+        CombatSimulator r1MissiveSim = simulatorWith(r1MissiveOwner);
+        r1MissiveSim.notifyReaction(
+                ReactionResult.transform(
+                        0.0, "Melt", ReactionResult.Kind.MELT),
+                r1MissiveOwner);
+        assertClose(0.533,
+                resolvedStat(r1MissiveSim, r1MissiveOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "R1 Missive Windspear ATK window");
+        assertClose(48.0,
+                resolvedStat(r1MissiveSim, r1MissiveOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "R1 Missive Windspear EM window");
+
+        model.weapon.MailedFlower mailed = new model.weapon.MailedFlower();
+        assertEquals("Mailed Flower", mailed.getName(),
+                "Mailed Flower display name");
+        assertClose(565.0, mailed.getBaseAtk(), EPS,
+                "Mailed Flower base ATK");
+        assertClose(110.0,
+                mailed.getStats().get(StatType.ELEMENTAL_MASTERY), EPS,
+                "Mailed Flower Elemental Mastery");
+        assertEquals(model.type.WeaponType.CLAYMORE, mailed.getWeaponType(),
+                "Mailed Flower weapon type");
+        assertEquals(5, mailed.getRefinement(),
+                "Mailed Flower default refinement");
+
+        TestCharacter mailedOwner = testCharacter(Element.ANEMO, CharacterId.SUCROSE);
+        mailedOwner.setWeapon(mailed);
+        CombatSimulator mailedSim = simulatorWith(mailedOwner);
+        AttackAction normalHit = typedDamageHit(
+                "Mailed Flower Normal", ActionType.NORMAL, 1.0);
+        AttackAction zeroSkillHit = typedDamageHit(
+                "Mailed Flower zero Skill", ActionType.SKILL, 0.0);
+        mailed.onDamage(mailedOwner, normalHit, 0.0, mailedSim);
+        mailed.onDamage(mailedOwner, zeroSkillHit, 0.0, mailedSim);
+        assertClose(0.0,
+                resolvedStat(mailedSim, mailedOwner, StatType.ATK_PERCENT), EPS,
+                "Wrong and zero hits should not activate Mailed Flower");
+        mailed.onDamage(mailedOwner, skillHit, 0.0, mailedSim);
+        assertClose(0.24,
+                resolvedStat(mailedSim, mailedOwner, StatType.ATK_PERCENT), EPS,
+                "R5 Mailed Flower Skill-hit ATK window");
+        assertClose(206.0,
+                resolvedStat(mailedSim, mailedOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "R5 Mailed Flower should combine static and window EM");
+        mailedSim.addCharacter(testCharacter(Element.PYRO, CharacterId.AMBER));
+        mailedSim.setActiveCharacter(CharacterId.AMBER);
+        assertClose(0.24,
+                effectiveStatAt(mailedOwner, StatType.ATK_PERCENT, 7.999), EPS,
+                "Mailed Flower should persist after switching out");
+        mailed.onDamage(mailedOwner, skillHit, 7.999, mailedSim);
+        mailedSim.notifyReaction(
+                ReactionResult.transform(
+                        0.0, "Swirl", ReactionResult.Kind.SWIRL),
+                mailedOwner);
+        assertClose(0.0,
+                effectiveStatAt(mailedOwner, StatType.ATK_PERCENT, 8.0), EPS,
+                "Off-field events should not refresh Mailed Flower at expiry");
+
+        model.weapon.MailedFlower r1Mailed = new model.weapon.MailedFlower(1);
+        TestCharacter r1MailedOwner = testCharacter(Element.ANEMO);
+        r1MailedOwner.setWeapon(r1Mailed);
+        CombatSimulator r1MailedSim = simulatorWith(r1MailedOwner);
+        r1MailedSim.notifyReaction(
+                ReactionResult.transform(
+                        0.0, "Swirl", ReactionResult.Kind.SWIRL),
+                r1MailedOwner);
+        assertClose(0.12,
+                resolvedStat(r1MailedSim, r1MailedOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "R1 Mailed Flower reaction ATK window");
+        assertClose(158.0,
+                resolvedStat(r1MailedSim, r1MailedOwner,
+                        StatType.ELEMENTAL_MASTERY), EPS,
+                "R1 Mailed Flower static and window EM");
+
+        TestCharacter foreignSource = testCharacter(Element.HYDRO, CharacterId.XINGQIU);
+        r1MailedSim.addCharacter(foreignSource);
+        r1MailedSim.advanceTime(8.0 + 1e-9);
+        r1MailedSim.notifyReaction(
+                ReactionResult.transform(
+                        0.0, "Electro-Charged", ReactionResult.Kind.ELECTRO_CHARGED),
+                foreignSource);
+        assertClose(0.0,
+                resolvedStat(r1MailedSim, r1MailedOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "Foreign reactions should not activate Mailed Flower");
+
+        boolean lowRefinementRejected = false;
+        try {
+            new model.weapon.MissiveWindspear(0);
+        } catch (IllegalArgumentException expected) {
+            lowRefinementRejected = true;
+        }
+        assertTrue(lowRefinementRejected,
+                "Missive Windspear should reject refinement zero");
+
+        boolean highRefinementRejected = false;
+        try {
+            new model.weapon.MailedFlower(6);
+        } catch (IllegalArgumentException expected) {
+            highRefinementRejected = true;
+        }
+        assertTrue(highRefinementRejected,
+                "Mailed Flower should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_HitStackWeapons() {
