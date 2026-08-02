@@ -27,9 +27,9 @@ The current autonomous session is simulator-only. Python RL training and the
 Java RL bridge are excluded; the retained NCCL/DDP plan below is paused until a
 future explicit user request.
 
-The Favonius content campaign is active. Shared R1-R5 Windfall behavior,
-Favonius Codex compatibility, Favonius Sword, Favonius Greatsword, and Favonius
-Lance are complete; Favonius Warbow is next.
+The Favonius weapon family is complete with shared R1-R5 Windfall behavior and
+all five weapon categories. The Sacrificial family content campaign is active;
+RL and generated docs remain excluded.
 
 The B-058 Burning fuel correction is complete. It replaces the fixed
 two-second approximation with typed Dendro-fuel decay and refresh ownership
@@ -12447,9 +12447,8 @@ Completion evidence:
 
 ## Implementation Order: Favonius Weapon Family Content Campaign
 
-Status: In progress. The shared R1-R5 Windfall implementation is first, followed
-by four independently verified weapon additions. RL and generated docs remain
-excluded from this campaign.
+Status: Complete. Shared R1-R5 Windfall and all five Favonius family members are
+verified and pushed.
 
 Scope:
 
@@ -12475,7 +12474,7 @@ Definitions:
 - **Content unit**: one independently revertible weapon class plus its focused
   static-stat and passive-boundary regression.
 
-### Phase 1: Add the Complete Favonius Weapon Family
+### Phase 1: Add the Complete Favonius Weapon Family - Done
 
 Why first:
 
@@ -12506,7 +12505,7 @@ Tasks:
 | Favonius Sword | Shared Windfall | Lv. 90 stats, sword type, R1/R5 trigger | Done (`0b5167a`) |
 | Favonius Greatsword | Shared Windfall | Lv. 90 stats, claymore type, inherited trigger | Done (`63f5802`) |
 | Favonius Lance | Shared Windfall | Lv. 90 stats, polearm type, inherited trigger | Done (`5a4ef84`) |
-| Favonius Warbow | Shared Windfall | Lv. 90 stats, bow type, inherited trigger | Pending |
+| Favonius Warbow | Shared Windfall | Lv. 90 stats, bow type, inherited trigger | Done (`9d6d1e5`) |
 
 Checkpoint 1 evidence:
 
@@ -12515,7 +12514,80 @@ Checkpoint 1 evidence:
 - R1 equality/failure, success, pre-12-second suppression, and exact cooldown
   expiry pass alongside inherited Windfall checks for all three new weapons.
 - `./gradlew ReactionRegressionTest`, `./gradlew build`, and explicit preflight
-  pass for every implementation commit; shared public Javadoc also passes.
+  pass for every implementation commit; shared and Warbow public Javadoc also
+  passes.
+
+## Implementation Order: Sacrificial Weapon Family Content Campaign
+
+Status: In progress. Shared R1-R5 Composed behavior precedes three missing
+weapon variants.
+
+Scope:
+
+- Preserve existing R5 `SacrificialSword` constructors and reset behavior while
+  extracting one validated refinement-aware Composed implementation.
+- Add Lv. 90 Sacrificial Greatsword, Bow, and Fragments with typed categories,
+  canonical substats, injectable draws, and focused regressions.
+
+Out of scope for this pass:
+
+- Multi-target hit ordering, non-damaging Skills, charges beyond the existing
+  whole-Skill cooldown reset, new characters/parties, RL, and generated docs.
+
+Definitions:
+
+- **SacrificialWeapon**: shared abstract owner of refinement scaling, eligible
+  Skill-damage filtering, cooldown-reset draws, and Composed internal cooldown.
+
+### Phase 1: Add the Complete Sacrificial Weapon Family
+
+Why first:
+
+- Existing Sword behavior is already routed through the correct damage hook;
+  extraction avoids duplicating mutable cooldown state across three variants.
+
+Target files:
+
+- `src/java/model/weapon/SacrificialWeapon.java` (new)
+- `src/java/model/weapon/SacrificialSword.java`
+- `src/java/model/weapon/SacrificialGreatsword.java` (new)
+- `src/java/model/weapon/SacrificialBow.java` (new)
+- `src/java/model/weapon/SacrificialFragments.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Tasks:
+
+- Extract Composed and add refinement 1-5 validation without changing R5 Sword.
+- Add each missing variant and verify it in an independent implementation commit.
+
+| Unit | Prerequisite | Focused verification | Status |
+|---|---|---|---|
+| Shared Composed + Sacrificial Sword | Existing damage hook and cooldown state | eligibility, null/refinement, R1/R5 chance and CT | In progress |
+| Sacrificial Greatsword | Shared Composed | 565 ATK, 30.6% ER, claymore, inherited reset | Pending |
+| Sacrificial Bow | Shared Composed | 565 ATK, 30.6% ER, bow, inherited reset | Pending |
+| Sacrificial Fragments | Shared Composed | 454 ATK, 221 EM, catalyst, inherited reset | Pending |
+
+Acceptance criteria:
+
+- R1-R5 map to 40-80% reset chance and 30/26/22/19/16-second cooldowns;
+  invalid refinements and null draws fail fast.
+- Only positive Elemental Skill damage may reset the owner's applicable Skill
+  cooldown; failed draws permit retry and exact cooldown expiry succeeds.
+- All four family members expose canonical Lv. 90 metadata and one shared
+  implementation; existing Sword callers remain source-compatible.
+
+Test cases to add or update:
+
+- Normal/boundary: R1 and R5 success, equality failure, pre-CT block, exact CT.
+- Abnormal: non-Skill, zero damage, null draw, and refinement 0/6.
+- Static/integration: each variant's metadata and inherited cooldown reset.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc` at the batch boundary
+- `python scripts/preflight.py`
 
 Acceptance criteria:
 

@@ -2041,7 +2041,7 @@ experiment record.
 
 ### B-073 — Favonius weapon family content coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** simulator content; RL and generated docs excluded
 - **Value/risk:** high-value local expansion using the existing Codex hook;
   shared extraction is planned before four independent weapon slices
@@ -2049,4 +2049,16 @@ experiment record.
   recorded; no unsupported enemy or incoming-damage behavior is required
 - **Plan:** `TASKS.md` Favonius Weapon Family Content Campaign
 - **Checkpoint 1:** shared Windfall, Codex compatibility, Sword, Greatsword, and
-  Lance are verified and pushed; Warbow remains ready
+  Lance were verified and pushed; Warbow remained ready
+- **Completion:** `9d6d1e5` adds Warbow; all family variants pass metadata,
+  inherited Windfall, reaction regression, build, Javadoc, and leak gates
+
+### B-074 — Sacrificial weapon family content coverage
+
+- **Status:** active
+- **Scope:** simulator weapon content; RL and generated docs excluded
+- **Value/risk:** high-value planned extraction of proven Sword behavior followed
+  by three local content variants
+- **Evidence boundary:** Lv. 90 stats and R1-R5 Composed chance/cooldowns are
+  sourced; unsupported multi-target and non-damaging behavior remains explicit
+- **Plan:** `TASKS.md` Sacrificial Weapon Family Content Campaign
