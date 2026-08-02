@@ -2499,3 +2499,13 @@ experiment record.
 - **Plan:** `TASKS.md` Injected Bow Proc Weapon Campaign
 - **Completion:** `877a526` adds both injected proc implementations and focused
   regressions; build/Javadoc/leak gates pass
+
+### B-111 — Live-party five-star weapon coverage
+
+- **Status:** active
+- **Scope:** The First Great Magic and Uraku Misugiri; RL excluded
+- **Value/risk:** two complete DPS passives reuse live party reads and the
+  attributed global damage listener without shared runtime changes
+- **Evidence boundary:** KQM TCL metadata, R1-R5 Charged/ATK/Normal/Skill/DEF
+  values, same-element tiers, positive active-character Geo, 15-second window
+- **Plan:** `TASKS.md` Live Party Five-Star Weapon Campaign

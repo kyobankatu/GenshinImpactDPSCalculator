@@ -14792,3 +14792,52 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Live Party Five-Star Weapon Campaign
+
+Status: Active. Add two combat-complete five-star weapons using live party
+composition and attributed active-character Geo damage.
+
+Scope:
+
+- Add The First Great Magic and Uraku Misugiri with sourced metadata, R1-R5
+  values, exact live tiers/windows, and focused regressions.
+
+Out of scope for this pass:
+
+- First Great Magic's non-DPS Movement SPD, characters, formulas, RL,
+  generated docs, and unrelated party-state weapons.
+
+### Phase 1: Add The First Great Magic and Uraku Misugiri
+
+Target files:
+
+- `src/java/model/weapon/TheFirstGreatMagic.java` (new)
+- `src/java/model/weapon/UrakuMisugiri.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- First Great Magic always grants 16-32% Charged DMG and dynamically grants
+  16/32/48%-32/64/96% ATK for one/two/three-or-more same-element party members,
+  including the owner, with a strict three-stack cap.
+- Uraku always grants 16-32% Normal DMG, 24-48% Skill DMG, and 20-40% DEF;
+  positive Geo damage by the active party member doubles both action bonuses
+  for a half-open 15-second window without changing DEF.
+- Metadata, post-damage order, live party changes, positive/Geo/active/source
+  gates, exact expiry, R1-R5 defaults/validation, and binding are explicit.
+
+Test cases to add or update:
+
+- Normal: metadata/static values, all First Magic tiers, ally/owner Uraku Geo,
+  R5.
+- Boundary: three-stack cap, live member addition, exact 15 seconds, R1.
+- Abnormal: zero/non-Geo/off-field Uraku damage, cross-simulator reuse,
+  refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
