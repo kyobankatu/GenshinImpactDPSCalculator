@@ -13676,8 +13676,8 @@ Verification:
 
 ## Implementation Order: Skill-Use Stat Weapon Expansion
 
-Status: Active. Add three complete damage-relevant Skill-use windows through
-the existing verified action-use policy.
+Status: Complete. Three complete damage-relevant Skill-use windows now use the
+existing verified action-use policy.
 
 Scope:
 
@@ -13689,7 +13689,7 @@ Out of scope for this pass:
 - Tamayuratei's Movement SPD, which has no combat stat or timing path;
   characters, formulas, RL, generated docs, and unrelated weapon families.
 
-### Phase 1: Add Three Skill-Use Stat Weapons
+### Phase 1: Add Three Skill-Use Stat Weapons - Done (`9232f8d`)
 
 Target files:
 
@@ -13700,9 +13700,17 @@ Target files:
 
 | Unit | Skill-use window | Focused verification | Status |
 |---|---|---|---|
-| Flute of Ezpitzal | DEF 16-32% for 15s | sword metadata, refresh/expiry, R1/R5 | Pending |
-| Footprint of the Rainbow | DEF 16-32% for 15s | polearm metadata, action isolation, R1/R5 | Pending |
-| Tamayuratei no Ohanashi | ATK 20-40% for 10s | unequal formula/duration, refresh/expiry | Pending |
+| Flute of Ezpitzal | DEF 16-32% for 15s | sword metadata, refresh/expiry, R1/R5 | Done |
+| Footprint of the Rainbow | DEF 16-32% for 15s | polearm metadata, action isolation, R1/R5 | Done |
+| Tamayuratei no Ohanashi | ATK 20-40% for 10s | unequal formula/duration, refresh/expiry | Done |
+
+Completion evidence:
+
+- Both DEF weapons prove distinct sword/polearm metadata, equal 16/32% values,
+  Skill-only refresh, static-substat composition, and exact 15-second expiry.
+- Tamayuratei proves its 20/40% ATK values and exact ten-second window; Movement
+  SPD remains explicitly excluded.
+- Reaction regression, build, Javadoc, preflight, and diff checks pass.
 
 Acceptance criteria:
 

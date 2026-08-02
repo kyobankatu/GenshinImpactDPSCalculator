@@ -2259,7 +2259,7 @@ experiment record.
 
 ### B-091 — Skill-use stat weapon expansion
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Flute of Ezpitzal, Footprint of the Rainbow, and Tamayuratei no
   Ohanashi; RL excluded
 - **Value/risk:** three complete combat-stat windows reuse a verified typed
@@ -2267,3 +2267,5 @@ experiment record.
 - **Evidence boundary:** KQM TCL metadata, R1-R5 values, Skill use, refresh-only
   15/10-second windows; Movement SPD remains unmodeled
 - **Plan:** `TASKS.md` Skill-Use Stat Weapon Expansion
+- **Completion:** `9232f8d` adds all three variants and focused regressions;
+  build/Javadoc/leak gates pass
