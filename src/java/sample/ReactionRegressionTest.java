@@ -142,6 +142,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
         testAccuracyPhaseF_SumeruActionProcBows();
         testAccuracyPhaseF_TypedFiveStarBows();
+        testAccuracyPhaseF_EnergyConditionalEmblemWeapons();
         testAccuracyPhaseF_ActionUseWindowWeapons();
         testAccuracyPhaseF_AdditionalSkillUseStatWeapons();
         testAccuracyPhaseF_SamuraiConductWeapons();
@@ -9464,6 +9465,263 @@ public class ReactionRegressionTest {
         }
         assertTrue(highAstralRefinementRejected,
                 "Astral Vulture should reject refinement six");
+    }
+
+    private static void testAccuracyPhaseF_EnergyConditionalEmblemWeapons() {
+        model.weapon.MistsplitterReforged mistsplitter =
+                new model.weapon.MistsplitterReforged();
+        assertEquals("Mistsplitter Reforged", mistsplitter.getName(),
+                "Mistsplitter Reforged display name");
+        assertClose(674.0, mistsplitter.getBaseAtk(), EPS,
+                "Mistsplitter Reforged base ATK");
+        assertClose(0.441,
+                mistsplitter.getStats().get(StatType.CRIT_DMG), EPS,
+                "Mistsplitter Reforged CRIT DMG");
+        assertEquals(model.type.WeaponType.SWORD, mistsplitter.getWeaponType(),
+                "Mistsplitter Reforged weapon type");
+        assertEquals(5, mistsplitter.getRefinement(),
+                "Mistsplitter Reforged default refinement");
+        for (Element element : Element.values()) {
+            double expected = element == Element.PHYSICAL ? 0.0 : 0.24;
+            assertClose(expected,
+                    mistsplitter.getStats().get(element.getBonusStatType()), EPS,
+                    "Mistsplitter static Elemental DMG for " + element);
+        }
+
+        TestCharacter mistOwner = testCharacter(Element.ELECTRO);
+        mistOwner.setWeapon(mistsplitter);
+        CombatSimulator mistSim = simulatorWith(mistOwner);
+        mistOwner.restoreCurrentEnergy(mistOwner.getMaxEnergy());
+        AttackAction electroNormal = new AttackAction(
+                "Mistsplitter Electro Normal", 1.0, Element.ELECTRO,
+                StatType.BASE_ATK, StatType.DMG_BONUS_ALL, 0.0,
+                ActionType.NORMAL);
+        AttackAction physicalNormal = typedDamageHit(
+                "Mistsplitter Physical Normal", ActionType.NORMAL, 1.0);
+        AttackAction zeroElectroNormal = new AttackAction(
+                "Mistsplitter zero Electro Normal", 0.0, Element.ELECTRO,
+                StatType.BASE_ATK, StatType.DMG_BONUS_ALL, 0.0,
+                ActionType.NORMAL);
+        mistsplitter.onDamage(mistOwner, physicalNormal, 0.0, mistSim);
+        mistsplitter.onDamage(mistOwner, zeroElectroNormal, 0.0, mistSim);
+        assertClose(0.24,
+                resolvedStat(mistSim, mistOwner,
+                        StatType.ELECTRO_DMG_BONUS), EPS,
+                "Physical and zero hits should not add Mistsplitter stacks");
+        mistsplitter.onDamage(mistOwner, electroNormal, 0.0, mistSim);
+        assertClose(0.40,
+                resolvedStat(mistSim, mistOwner,
+                        StatType.ELECTRO_DMG_BONUS), EPS,
+                "R5 Mistsplitter one-stack tier");
+        mistsplitter.onAction(
+                mistOwner,
+                CharacterActionRequest.of(CharacterActionKey.BURST),
+                mistSim);
+        assertClose(0.56,
+                resolvedStat(mistSim, mistOwner,
+                        StatType.ELECTRO_DMG_BONUS), EPS,
+                "R5 Mistsplitter two-stack tier");
+        mistOwner.restoreCurrentEnergy(mistOwner.getMaxEnergy() - 1.0);
+        assertClose(0.80,
+                resolvedStat(mistSim, mistOwner,
+                        StatType.ELECTRO_DMG_BONUS), EPS,
+                "R5 Mistsplitter three-stack tier");
+        mistOwner.restoreCurrentEnergy(mistOwner.getMaxEnergy());
+        assertClose(0.56,
+                resolvedStat(mistSim, mistOwner,
+                        StatType.ELECTRO_DMG_BONUS), EPS,
+                "Full Energy should remove only Mistsplitter's live stack");
+        mistSim.advanceTime(5.0 + 1e-9);
+        assertClose(0.40,
+                resolvedStat(mistSim, mistOwner,
+                        StatType.ELECTRO_DMG_BONUS), EPS,
+                "Mistsplitter hit stack should expire at five seconds");
+        mistSim.advanceTime(5.0);
+        assertClose(0.24,
+                resolvedStat(mistSim, mistOwner,
+                        StatType.ELECTRO_DMG_BONUS), EPS,
+                "Mistsplitter Burst stack should expire at ten seconds");
+        mistSim.addCharacter(testCharacter(Element.PYRO, CharacterId.AMBER));
+        mistSim.setActiveCharacter(CharacterId.AMBER);
+        mistsplitter.onDamage(
+                mistOwner, electroNormal, mistSim.getCurrentTime(), mistSim);
+        mistsplitter.onAction(
+                mistOwner,
+                CharacterActionRequest.of(CharacterActionKey.BURST),
+                mistSim);
+        assertClose(0.24,
+                resolvedStat(mistSim, mistOwner,
+                        StatType.ELECTRO_DMG_BONUS), EPS,
+                "Off-field events should not add Mistsplitter stacks");
+
+        model.weapon.MistsplitterReforged r1Mistsplitter =
+                new model.weapon.MistsplitterReforged(1);
+        TestCharacter r1MistOwner = testCharacter(Element.ELECTRO);
+        r1MistOwner.setWeapon(r1Mistsplitter);
+        CombatSimulator r1MistSim = simulatorWith(r1MistOwner);
+        r1MistOwner.restoreCurrentEnergy(0.0);
+        r1Mistsplitter.onDamage(r1MistOwner, electroNormal, 0.0, r1MistSim);
+        r1Mistsplitter.onAction(
+                r1MistOwner,
+                CharacterActionRequest.of(CharacterActionKey.BURST),
+                r1MistSim);
+        assertClose(0.40,
+                resolvedStat(r1MistSim, r1MistOwner,
+                        StatType.ELECTRO_DMG_BONUS), EPS,
+                "R1 Mistsplitter static plus three-stack tier");
+
+        model.weapon.ThunderingPulse thunderingPulse =
+                new model.weapon.ThunderingPulse();
+        assertEquals("Thundering Pulse", thunderingPulse.getName(),
+                "Thundering Pulse display name");
+        assertClose(608.0, thunderingPulse.getBaseAtk(), EPS,
+                "Thundering Pulse base ATK");
+        assertClose(0.662,
+                thunderingPulse.getStats().get(StatType.CRIT_DMG), EPS,
+                "Thundering Pulse CRIT DMG");
+        assertClose(0.40,
+                thunderingPulse.getStats().get(StatType.ATK_PERCENT), EPS,
+                "R5 Thundering Pulse ATK");
+        assertEquals(model.type.WeaponType.BOW, thunderingPulse.getWeaponType(),
+                "Thundering Pulse weapon type");
+        assertEquals(5, thunderingPulse.getRefinement(),
+                "Thundering Pulse default refinement");
+
+        TestCharacter pulseOwner = testCharacter(Element.PYRO);
+        pulseOwner.setWeapon(thunderingPulse);
+        CombatSimulator pulseSim = simulatorWith(pulseOwner);
+        pulseOwner.restoreCurrentEnergy(pulseOwner.getMaxEnergy());
+        AttackAction normalHit = typedDamageHit(
+                "Thundering Pulse Normal", ActionType.NORMAL, 1.0);
+        thunderingPulse.onDamage(
+                pulseOwner,
+                typedDamageHit("Pulse zero", ActionType.NORMAL, 0.0),
+                0.0,
+                pulseSim);
+        thunderingPulse.onDamage(
+                pulseOwner,
+                typedDamageHit("Pulse Charged", ActionType.CHARGE, 1.0),
+                0.0,
+                pulseSim);
+        assertClose(0.0,
+                resolvedStat(pulseSim, pulseOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Zero and wrong hits should not add Thundering Pulse stacks");
+        thunderingPulse.onDamage(pulseOwner, normalHit, 0.0, pulseSim);
+        assertClose(0.24,
+                resolvedStat(pulseSim, pulseOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "R5 Thundering Pulse one-stack tier");
+        thunderingPulse.onAction(
+                pulseOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                pulseSim);
+        assertClose(0.48,
+                resolvedStat(pulseSim, pulseOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "R5 Thundering Pulse two-stack tier");
+        pulseOwner.restoreCurrentEnergy(pulseOwner.getMaxEnergy() - 1.0);
+        assertClose(0.80,
+                resolvedStat(pulseSim, pulseOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "R5 Thundering Pulse three-stack tier");
+        pulseOwner.restoreCurrentEnergy(pulseOwner.getMaxEnergy());
+        pulseSim.advanceTime(5.0 + 1e-9);
+        assertClose(0.24,
+                resolvedStat(pulseSim, pulseOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Thundering Pulse Normal stack should expire at five seconds");
+        pulseSim.advanceTime(5.0);
+        assertClose(0.0,
+                resolvedStat(pulseSim, pulseOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Thundering Pulse Skill stack should expire at ten seconds");
+        pulseSim.addCharacter(testCharacter(Element.HYDRO, CharacterId.AMBER));
+        pulseSim.setActiveCharacter(CharacterId.AMBER);
+        thunderingPulse.onDamage(
+                pulseOwner, normalHit, pulseSim.getCurrentTime(), pulseSim);
+        thunderingPulse.onAction(
+                pulseOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                pulseSim);
+        assertClose(0.0,
+                resolvedStat(pulseSim, pulseOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "Off-field events should not add Thundering Pulse stacks");
+
+        model.weapon.ThunderingPulse r1Pulse =
+                new model.weapon.ThunderingPulse(1);
+        TestCharacter r1PulseOwner = testCharacter(Element.PYRO);
+        r1PulseOwner.setWeapon(r1Pulse);
+        CombatSimulator r1PulseSim = simulatorWith(r1PulseOwner);
+        r1PulseOwner.restoreCurrentEnergy(0.0);
+        r1Pulse.onDamage(r1PulseOwner, normalHit, 0.0, r1PulseSim);
+        r1Pulse.onAction(
+                r1PulseOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                r1PulseSim);
+        assertClose(0.40,
+                resolvedStat(r1PulseSim, r1PulseOwner,
+                        StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "R1 Thundering Pulse three-stack tier");
+        assertClose(0.20,
+                r1Pulse.getStats().get(StatType.ATK_PERCENT), EPS,
+                "R1 Thundering Pulse ATK");
+
+        boolean mistReuseRejected = false;
+        try {
+            mistsplitter.initializeForSimulator(mistOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            mistReuseRejected = true;
+        }
+        assertTrue(mistReuseRejected,
+                "Mistsplitter should reject cross-simulator reuse");
+
+        boolean pulseReuseRejected = false;
+        try {
+            thunderingPulse.initializeForSimulator(
+                    pulseOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            pulseReuseRejected = true;
+        }
+        assertTrue(pulseReuseRejected,
+                "Thundering Pulse should reject cross-simulator reuse");
+
+        boolean lowMistRefinementRejected = false;
+        try {
+            new model.weapon.MistsplitterReforged(0);
+        } catch (IllegalArgumentException expected) {
+            lowMistRefinementRejected = true;
+        }
+        assertTrue(lowMistRefinementRejected,
+                "Mistsplitter should reject refinement zero");
+
+        boolean highMistRefinementRejected = false;
+        try {
+            new model.weapon.MistsplitterReforged(6);
+        } catch (IllegalArgumentException expected) {
+            highMistRefinementRejected = true;
+        }
+        assertTrue(highMistRefinementRejected,
+                "Mistsplitter should reject refinement six");
+
+        boolean lowPulseRefinementRejected = false;
+        try {
+            new model.weapon.ThunderingPulse(0);
+        } catch (IllegalArgumentException expected) {
+            lowPulseRefinementRejected = true;
+        }
+        assertTrue(lowPulseRefinementRejected,
+                "Thundering Pulse should reject refinement zero");
+
+        boolean highPulseRefinementRejected = false;
+        try {
+            new model.weapon.ThunderingPulse(6);
+        } catch (IllegalArgumentException expected) {
+            highPulseRefinementRejected = true;
+        }
+        assertTrue(highPulseRefinementRejected,
+                "Thundering Pulse should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_OffFieldHitBows() {
