@@ -6591,6 +6591,73 @@ public class ReactionRegressionTest {
         }
         assertTrue(highRefinementRejected,
                 "Skyrider Greatsword should reject refinement six");
+
+        model.weapon.Whiteblind whiteblind = new model.weapon.Whiteblind();
+        assertEquals("Whiteblind", whiteblind.getName(),
+                "Whiteblind display name");
+        assertClose(510.0, whiteblind.getBaseAtk(), EPS, "Whiteblind base ATK");
+        assertClose(0.517, whiteblind.getStats().get(StatType.DEF_PERCENT), EPS,
+                "Whiteblind DEF substat");
+        assertEquals(model.type.WeaponType.CLAYMORE, whiteblind.getWeaponType(),
+                "Whiteblind weapon type");
+        assertEquals(5, whiteblind.getRefinement(),
+                "Whiteblind default refinement");
+
+        TestCharacter whiteblindOwner = testCharacter(Element.GEO);
+        whiteblindOwner.setWeapon(whiteblind);
+        CombatSimulator whiteblindSim = simulatorWith(whiteblindOwner);
+        whiteblind.onDamage(whiteblindOwner, normalHit, 0.0, whiteblindSim);
+        whiteblind.onDamage(whiteblindOwner, chargeHit, 0.5, whiteblindSim);
+        whiteblind.onDamage(whiteblindOwner, normalHit, 1.0, whiteblindSim);
+        whiteblind.onDamage(whiteblindOwner, chargeHit, 1.5, whiteblindSim);
+        assertClose(0.48,
+                effectiveStatAt(whiteblindOwner, StatType.ATK_PERCENT, 1.5), EPS,
+                "R5 Whiteblind should cap at four ATK stacks");
+        assertClose(0.997,
+                effectiveStatAt(whiteblindOwner, StatType.DEF_PERCENT, 1.5), EPS,
+                "R5 Whiteblind should combine its substat and four DEF stacks");
+        whiteblind.onDamage(whiteblindOwner, skillHit, 2.0, whiteblindSim);
+        assertClose(0.48,
+                effectiveStatAt(whiteblindOwner, StatType.ATK_PERCENT, 7.499), EPS,
+                "Skill hits should not refresh Whiteblind");
+        assertClose(0.0,
+                effectiveStatAt(whiteblindOwner, StatType.ATK_PERCENT, 7.5), EPS,
+                "Whiteblind should expire its ATK stacks exactly");
+        assertClose(0.517,
+                effectiveStatAt(whiteblindOwner, StatType.DEF_PERCENT, 7.5), EPS,
+                "Whiteblind should retain only its DEF substat after expiry");
+
+        model.weapon.Whiteblind r1Whiteblind = new model.weapon.Whiteblind(1);
+        TestCharacter r1WhiteblindOwner = testCharacter(Element.GEO);
+        r1WhiteblindOwner.setWeapon(r1Whiteblind);
+        CombatSimulator r1WhiteblindSim = simulatorWith(r1WhiteblindOwner);
+        r1Whiteblind.onDamage(r1WhiteblindOwner, normalHit, 0.0, r1WhiteblindSim);
+        assertClose(0.06,
+                resolvedStat(r1WhiteblindSim, r1WhiteblindOwner,
+                        StatType.ATK_PERCENT), EPS,
+                "R1 Whiteblind first ATK stack");
+        assertClose(0.577,
+                resolvedStat(r1WhiteblindSim, r1WhiteblindOwner,
+                        StatType.DEF_PERCENT), EPS,
+                "R1 Whiteblind substat and first DEF stack");
+
+        boolean lowWhiteblindRefinementRejected = false;
+        try {
+            new model.weapon.Whiteblind(0);
+        } catch (IllegalArgumentException expected) {
+            lowWhiteblindRefinementRejected = true;
+        }
+        assertTrue(lowWhiteblindRefinementRejected,
+                "Whiteblind should reject refinement zero");
+
+        boolean highWhiteblindRefinementRejected = false;
+        try {
+            new model.weapon.Whiteblind(6);
+        } catch (IllegalArgumentException expected) {
+            highWhiteblindRefinementRejected = true;
+        }
+        assertTrue(highWhiteblindRefinementRejected,
+                "Whiteblind should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_ActionUseWindowWeapons() {
