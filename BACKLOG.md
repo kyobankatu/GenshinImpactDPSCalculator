@@ -2368,10 +2368,12 @@ experiment record.
 
 ### B-100 — Moonsign reaction weapon coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Master Key and Serenity's Call; RL excluded
 - **Value/risk:** two complete off-field passives share one bounded reaction
   listener and consume the existing live Moonsign API without dispatch changes
 - **Evidence boundary:** KQM TCL metadata, R1-R5 EM/HP values, attributed
   off-field reactions, 12-second duration, and Ascendant Gleam doubling
 - **Plan:** `TASKS.md` Moonsign Reaction Weapon Campaign
+- **Completion:** `d0c59b0` adds the shared live-Moonsign window, both weapons,
+  and focused regressions; build/Javadoc/leak gates pass

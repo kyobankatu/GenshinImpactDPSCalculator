@@ -14182,8 +14182,8 @@ Verification:
 
 ## Implementation Order: Moonsign Reaction Weapon Campaign
 
-Status: Active. Add one shared off-field reaction window and two complete
-Moonsign-sensitive weapons without changing the simulator reaction contract.
+Status: Complete. One shared off-field reaction window and two complete
+Moonsign-sensitive weapons now use the existing simulator reaction contract.
 
 Scope:
 
@@ -14196,7 +14196,7 @@ Out of scope for this pass:
 - Reaction damage formulas, characters, shields, Plunging-only stats, RL,
   generated docs, and unrelated weapons.
 
-### Phase 1: Add the shared window and both weapons
+### Phase 1: Add the shared window and both weapons - Done (`d0c59b0`)
 
 Target files:
 
@@ -14204,6 +14204,13 @@ Target files:
 - `src/java/model/weapon/MasterKey.java` (new)
 - `src/java/model/weapon/SerenitysCall.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Both weapons prove attributed off-field activation, live Ascendant doubling,
+  exact refresh/expiry boundaries, and R1/R5 values.
+- NONE and foreign reactions, cross-simulator reuse, and invalid refinements are
+  rejected; reaction regression, build, Javadoc, preflight, and diff checks pass.
 
 Acceptance criteria:
 
