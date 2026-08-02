@@ -2630,3 +2630,21 @@ experiment record.
 - **Plan:** `TASKS.md` Two-Star Weapon Series Campaign
 - **Completion:** all five classes expose only 243 base ATK and the matching
   weapon type; shared table-driven regressions and all local gates pass
+
+### B-121 — Isolated runtime weapon expansion
+
+- **Status:** in-progress
+- **Scope:** "Ultimate Overlord's Mega Magic Sword", Ash-Graven Drinking Horn,
+  Toukabou Shigure, and Waveriding Whirl; RL excluded
+- **Value/risk:** four complete passives fit existing static, action-triggered,
+  damage-triggered, simulator-binding, live-party, and Max-HP contracts without
+  a shared runtime change
+- **Evidence boundary:** maintained KQM weapon catalogs, accessed 2026-08-02,
+  provide Lv. 90 metadata, R1-R5 values, durations, cooldowns, and trigger text:
+  https://library.keqingmains.com/equipment/weapons/claymores#ultimate-overlords-mega-magic-sword
+  https://library.keqingmains.com/equipment/weapons/catalysts#ash-graven-drinking-horn
+  https://library.keqingmains.com/equipment/weapons/swords#toukabou-shigure
+  https://library.keqingmains.com/equipment/weapons/catalysts#waveriding-whirl
+- **Boundary:** enemy-defeat cooldown reset, multi-target proc multiplication,
+  and swimming stamina remain outside the current simulator
+- **Plan:** `TASKS.md` Isolated Runtime Weapon Expansion Campaign

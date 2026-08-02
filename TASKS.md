@@ -15326,3 +15326,97 @@ Verification:
 - `./gradlew build`
 - `./gradlew javadoc`
 - `python scripts/preflight.py`
+
+## Implementation Order: Isolated Runtime Weapon Expansion Campaign
+
+Status: In progress. Two branch-isolated implementation lanes add four weapons
+whose complete combat contracts fit existing narrow capability interfaces; RL
+and generated documentation remain excluded.
+
+Scope:
+
+- Add "Ultimate Overlord's Mega Magic Sword" and Ash-Graven Drinking Horn in
+  the first isolated integration phase.
+- Add Toukabou Shigure and Waveriding Whirl in the second isolated integration
+  phase.
+- Keep quest assistance explicit, and preserve the simulator's immortal
+  single-enemy and no-swimming boundaries.
+
+Out of scope for this pass:
+
+- Enemy defeat callbacks, multi-target proc multiplication, swimming stamina,
+  shared runtime changes, characters, RL, and generated docs.
+
+### Phase 1: Static Assistance and Max-HP Proc Weapons - Done
+
+Target files:
+
+- `src/java/model/weapon/UltimateOverlordsMegaMagicSword.java` (new)
+- `src/java/model/weapon/AshGravenDrinkingHorn.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Ultimate Overlord metadata, 0/3/6 assistance, R1/R5 scaling, and invalid
+  refinement/assistance boundaries pass.
+- Ash-Graven metadata, immediate Max-HP damage, R1/R5 ratio, nonrecursion,
+  ownership gates, exact cooldown, and binding rejection pass.
+- Reaction regression, build, Javadoc, and preflight gates pass.
+
+Acceptance criteria:
+
+- Ultimate Overlord exposes Lv. 90 metadata, R1-R5 validation, and explicit
+  zero-through-six Melusine assistance with linear additional ATK.
+- Ash-Graven exposes Lv. 90 metadata and an immediate nonrecursive Max-HP
+  Physical proc on any positive active-owner hit at the exact 15-second CT.
+- Cross-simulator reuse, invalid refinement/assistance, zero/foreign/off-field
+  hits, recursive hits, and cooldown boundaries are rejected or inert.
+
+Test cases to add or update:
+
+- Normal: metadata, R5/full assistance, and immediate R5 Max-HP proc.
+- Boundary: zero/six assistance, R1/R5 ratios, and before/exact 15-second CT.
+- Abnormal: assistance -1/7, refinement 0/6, zero/off-field/foreign/recursive
+  hits, wrong simulator, and cross-simulator binding.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`
+
+### Phase 2: Single-Target Mark and Hydro-Party HP Window
+
+Target files:
+
+- `src/java/model/weapon/ToukabouShigure.java` (new)
+- `src/java/model/weapon/WaveridingWhirl.java` (new)
+- `src/java/sample/ReactionRegressionTest.java`
+
+Acceptance criteria:
+
+- Toukabou exposes Lv. 90 metadata; its triggering hit remains unbuffed and
+  subsequent owner damage receives the R1-R5 bonus during the half-open
+  ten-second target window, with a 15-second activation CT.
+- Waveriding exposes Lv. 90 metadata; eligible Skill use grants the R1-R5 base
+  Max-HP bonus plus up to two live Hydro-party additions for ten seconds, with
+  a 15-second activation CT.
+- Foreign/off-field/zero/wrong-action/wrong-simulator triggers and
+  cross-simulator reuse are inert or rejected; exact expiry and CT boundaries
+  are explicit.
+
+Test cases to add or update:
+
+- Normal: metadata, R1/R5 target bonus, and zero/one/two/three Hydro counts.
+- Boundary: triggering-hit order, exact ten-second expiry, and before/exact
+  15-second reactivation.
+- Abnormal: zero/off-field/foreign/wrong-action/wrong-simulator triggers,
+  binding reuse, and refinement 0/6.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py`

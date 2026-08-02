@@ -146,6 +146,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_EyeOfPerception();
         testAccuracyPhaseF_OneStarWeaponSeries();
         testAccuracyPhaseF_TwoStarWeaponSeries();
+        testAccuracyPhaseF_IsolatedRuntimeWeaponPhaseOne();
         testAccuracyPhaseF_ReactionUtilityClaymores();
         testAccuracyPhaseF_SelfContainedFiveStarWeapons();
         testAccuracyPhaseF_EnergyProximityFiveStarWeapons();
@@ -9393,6 +9394,178 @@ public class ReactionRegressionTest {
             assertClose(0.25, passiveStats.get(StatType.ATK_PERCENT), EPS,
                     names[index] + " should not mutate passive stats");
         }
+    }
+
+    private static void testAccuracyPhaseF_IsolatedRuntimeWeaponPhaseOne() {
+        model.weapon.UltimateOverlordsMegaMagicSword ultimate =
+                new model.weapon.UltimateOverlordsMegaMagicSword();
+        assertEquals("\"Ultimate Overlord's Mega Magic Sword\"",
+                ultimate.getName(), "Ultimate Overlord display name");
+        assertClose(565.0, ultimate.getBaseAtk(), EPS,
+                "Ultimate Overlord base ATK");
+        assertClose(0.306,
+                ultimate.getStats().get(StatType.ENERGY_RECHARGE), EPS,
+                "Ultimate Overlord Energy Recharge");
+        assertEquals(model.type.WeaponType.CLAYMORE,
+                ultimate.getWeaponType(), "Ultimate Overlord weapon type");
+        assertEquals(5, ultimate.getRefinement(),
+                "Ultimate Overlord default refinement");
+        assertEquals(6, ultimate.getAssistedMelusines(),
+                "Ultimate Overlord default assistance");
+        StatsContainer ultimateStats = new StatsContainer();
+        ultimate.applyPassive(ultimateStats, -1.0);
+        assertClose(0.48, ultimateStats.get(StatType.ATK_PERCENT), EPS,
+                "R5 Ultimate Overlord full assistance ATK");
+
+        model.weapon.UltimateOverlordsMegaMagicSword zeroAssistance =
+                new model.weapon.UltimateOverlordsMegaMagicSword(1, 0);
+        StatsContainer zeroAssistanceStats = new StatsContainer();
+        zeroAssistance.applyPassive(zeroAssistanceStats, 100.0);
+        assertClose(0.12,
+                zeroAssistanceStats.get(StatType.ATK_PERCENT), EPS,
+                "R1 Ultimate Overlord zero assistance ATK");
+        model.weapon.UltimateOverlordsMegaMagicSword halfAssistance =
+                new model.weapon.UltimateOverlordsMegaMagicSword(1, 3);
+        StatsContainer halfAssistanceStats = new StatsContainer();
+        halfAssistance.applyPassive(halfAssistanceStats, 0.0);
+        assertClose(0.18,
+                halfAssistanceStats.get(StatType.ATK_PERCENT), EPS,
+                "Ultimate Overlord assistance should scale linearly");
+        model.weapon.UltimateOverlordsMegaMagicSword fullAssistance =
+                new model.weapon.UltimateOverlordsMegaMagicSword(1, 6);
+        StatsContainer fullAssistanceStats = new StatsContainer();
+        fullAssistance.applyPassive(fullAssistanceStats, 0.0);
+        assertClose(0.24,
+                fullAssistanceStats.get(StatType.ATK_PERCENT), EPS,
+                "R1 Ultimate Overlord full assistance ATK");
+
+        boolean lowUltimateRefinementRejected = false;
+        try {
+            new model.weapon.UltimateOverlordsMegaMagicSword(0, 0);
+        } catch (IllegalArgumentException expected) {
+            lowUltimateRefinementRejected = true;
+        }
+        assertTrue(lowUltimateRefinementRejected,
+                "Ultimate Overlord should reject refinement zero");
+        boolean highUltimateRefinementRejected = false;
+        try {
+            new model.weapon.UltimateOverlordsMegaMagicSword(6, 0);
+        } catch (IllegalArgumentException expected) {
+            highUltimateRefinementRejected = true;
+        }
+        assertTrue(highUltimateRefinementRejected,
+                "Ultimate Overlord should reject refinement six");
+        boolean lowAssistanceRejected = false;
+        try {
+            new model.weapon.UltimateOverlordsMegaMagicSword(1, -1);
+        } catch (IllegalArgumentException expected) {
+            lowAssistanceRejected = true;
+        }
+        assertTrue(lowAssistanceRejected,
+                "Ultimate Overlord should reject negative assistance");
+        boolean highAssistanceRejected = false;
+        try {
+            new model.weapon.UltimateOverlordsMegaMagicSword(1, 7);
+        } catch (IllegalArgumentException expected) {
+            highAssistanceRejected = true;
+        }
+        assertTrue(highAssistanceRejected,
+                "Ultimate Overlord should reject assistance above six");
+
+        model.weapon.AshGravenDrinkingHorn ash =
+                new model.weapon.AshGravenDrinkingHorn();
+        assertEquals("Ash-Graven Drinking Horn", ash.getName(),
+                "Ash-Graven display name");
+        assertClose(510.0, ash.getBaseAtk(), EPS,
+                "Ash-Graven base ATK");
+        assertClose(0.413, ash.getStats().get(StatType.HP_PERCENT), EPS,
+                "Ash-Graven HP substat");
+        assertEquals(model.type.WeaponType.CATALYST, ash.getWeaponType(),
+                "Ash-Graven weapon type");
+        assertEquals(5, ash.getRefinement(),
+                "Ash-Graven default refinement");
+
+        TestCharacter ashOwner = testCharacter(
+                Element.HYDRO, CharacterId.SUCROSE);
+        ashOwner.setWeapon(ash);
+        CombatSimulator ashSim = simulatorWith(ashOwner);
+        AttackAction zeroHit = typedDamageHit(
+                "Zero", ActionType.NORMAL, 0.0);
+        AttackAction skillHit = typedDamageHit(
+                "Skill", ActionType.SKILL, 1.0);
+        AttackAction generatedProc = new AttackAction(
+                "Ash-Graven Drinking Horn Gurgling Gulp",
+                0.8,
+                Element.PHYSICAL,
+                StatType.BASE_HP,
+                StatType.PHYSICAL_DMG_BONUS,
+                0.0,
+                ActionType.OTHER);
+        TestCharacter foreignUser = testCharacter(
+                Element.PYRO, CharacterId.AMBER);
+        ash.onDamage(ashOwner, zeroHit, 0.0, ashSim);
+        ash.onDamage(foreignUser, skillHit, 0.0, ashSim);
+        ash.onDamage(ashOwner, skillHit, 0.0, new CombatSimulator());
+        assertClose(0.0, ashSim.getTotalDamage(), EPS,
+                "Zero, foreign, and wrong-simulator hits should not proc Ash-Graven");
+        ashSim.addCharacter(foreignUser);
+        ashSim.setActiveCharacter(CharacterId.AMBER);
+        ash.onDamage(ashOwner, skillHit, 0.0, ashSim);
+        assertClose(0.0, ashSim.getTotalDamage(), EPS,
+                "Off-field hits should not proc Ash-Graven");
+
+        ashSim.setActiveCharacter(CharacterId.SUCROSE);
+        ash.onDamage(ashOwner, skillHit, 0.0, ashSim);
+        double firstAshDamage = ashSim.getTotalDamage();
+        assertTrue(firstAshDamage > 0.0,
+                "Ash-Graven should resolve its Max-HP proc immediately");
+        ash.onDamage(ashOwner, generatedProc, 0.0, ashSim);
+        assertClose(firstAshDamage, ashSim.getTotalDamage(), EPS,
+                "Ash-Graven's generated proc should not recurse");
+        ashSim.advanceTime(15.0 - 1e-6);
+        ash.onDamage(ashOwner, skillHit, ashSim.getCurrentTime(), ashSim);
+        assertClose(firstAshDamage, ashSim.getTotalDamage(), EPS,
+                "Ash-Graven should remain on cooldown before 15 seconds");
+        ashSim.advanceTime(1e-6 + 1e-9);
+        ash.onDamage(ashOwner, skillHit, ashSim.getCurrentTime(), ashSim);
+        assertClose(firstAshDamage * 2.0, ashSim.getTotalDamage(), EPS,
+                "Ash-Graven should reactivate at exact 15-second CT");
+
+        model.weapon.AshGravenDrinkingHorn r1Ash =
+                new model.weapon.AshGravenDrinkingHorn(1);
+        TestCharacter r1AshOwner = testCharacter(
+                Element.HYDRO, CharacterId.SUCROSE);
+        r1AshOwner.setWeapon(r1Ash);
+        CombatSimulator r1AshSim = simulatorWith(r1AshOwner);
+        r1Ash.onDamage(r1AshOwner, skillHit, 0.0, r1AshSim);
+        assertClose(firstAshDamage * 0.5,
+                r1AshSim.getTotalDamage(), EPS,
+                "R1 Ash-Graven proc should scale from 40-percent Max HP");
+
+        boolean ashReuseRejected = false;
+        try {
+            ash.initializeForSimulator(ashOwner, new CombatSimulator());
+        } catch (IllegalStateException expected) {
+            ashReuseRejected = true;
+        }
+        assertTrue(ashReuseRejected,
+                "Ash-Graven should reject cross-simulator reuse");
+        boolean lowAshRefinementRejected = false;
+        try {
+            new model.weapon.AshGravenDrinkingHorn(0);
+        } catch (IllegalArgumentException expected) {
+            lowAshRefinementRejected = true;
+        }
+        assertTrue(lowAshRefinementRejected,
+                "Ash-Graven should reject refinement zero");
+        boolean highAshRefinementRejected = false;
+        try {
+            new model.weapon.AshGravenDrinkingHorn(6);
+        } catch (IllegalArgumentException expected) {
+            highAshRefinementRejected = true;
+        }
+        assertTrue(highAshRefinementRejected,
+                "Ash-Graven should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_ReactionUtilityClaymores() {
