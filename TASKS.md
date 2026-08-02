@@ -13391,7 +13391,7 @@ Completion evidence:
 
 ## Implementation Order: Character Snapshot Continuity
 
-Status: Planned. B-166 is the active simulator follow-up.
+Status: Complete. B-166 is implemented and independently audited.
 
 Scope:
 
@@ -13402,16 +13402,17 @@ Scope:
 - Keep weapon, reaction, RL, generated docs, and unrelated character behavior
   unchanged.
 
-### Phase 1: Publish Character Snapshot State Contract
+### Phase 1: Publish Character Snapshot State Contract - Done
 
-Status: Pending.
+Status: Done.
 
 Target files:
 
 - `src/java/model/entity/SnapshotAwareCharacterEffect.java` (new)
 - `src/java/simulation/SimulatorSnapshot.java`
 - `src/java/simulation/CombatSimulator.java`
-- focused simulator snapshot regression executable
+- `src/java/model/entity/state/EnergyState.java`
+- `src/java/sample/CharacterSnapshotContractRegressionTest.java`
 
 Acceptance criteria:
 
@@ -13419,6 +13420,8 @@ Acceptance criteria:
   after clock, cooldown, Energy, and buff windows are restored.
 - Non-participating characters retain byte-for-byte behavior and null state
   fails closed.
+- Runtime and analyzer Energy totals, windows, and markers roll back with the
+  current Energy bar; incompatible payloads fail before destructive restore.
 
 Tests:
 
@@ -13427,9 +13430,9 @@ Tests:
 - Boundary: restore before and at event expiry does not duplicate damage.
 - Abnormal: state/type mismatch throws instead of silently corrupting state.
 
-### Phase 2: Migrate B-165 Character State
+### Phase 2: Migrate B-165 Character State - Done
 
-Status: Pending.
+Status: Done.
 
 Target files:
 
@@ -13457,6 +13460,17 @@ Verification:
 - `./gradlew JeanRegressionTest ChongyunRegressionTest DionaRegressionTest`
 - `./gradlew ReactionRegressionTest PartyCatalogRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Commits `b6b8f52` through `db603ba` add the opaque state contract, migrate
+  all three characters, and resolve two independent audits covering delayed
+  projectiles, multiple particle packets, Energy accounting, superseded Burst
+  callbacks, exact-deadline events, explicit empty state, and pre-mutation
+  payload validation.
+- Character contract and all three focused regressions, reaction regression,
+  party catalog, build, Javadoc, executable preflight, and the routed Java
+  rollout benchmark pass on 2026-08-03.
 
 ## Implementation Order: Parallel Foundational Content Campaign
 

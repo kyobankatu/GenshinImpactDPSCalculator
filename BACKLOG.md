@@ -3489,7 +3489,7 @@ experiment record.
 
 ### B-166 — Character snapshot continuity
 
-- **Status:** planned
+- **Status:** complete
 - **Source:** independent B-165 Jean/Diona and Chongyun audits
 - **Scope:** opaque snapshot-aware character state plus exact re-registration
   of B-165 future offensive events and Normal-chain counters
@@ -3499,3 +3499,6 @@ experiment record.
 - **Boundary:** no generic event-object cloning, RL changes, generated docs, or
   migration of unrelated characters in this pass.
 - **Plan:** two-phase `TASKS.md` Character Snapshot Continuity plan.
+- **Completion:** commits `b6b8f52` through `db603ba` add the shared contract,
+  complete Jean/Chongyun/Diona reconstruction, and close both independent
+  audits; all focused/full gates and the routed rollout benchmark pass.
