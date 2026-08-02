@@ -13099,8 +13099,8 @@ Verification:
 
 ## Implementation Order: Watatsumi Wavewalker Weapon Campaign
 
-Status: Active. Add the complete three-weapon family through one party-energy
-policy and independently reversible metadata variants.
+Status: Complete. The complete three-weapon family shares one verified
+party-energy policy and independently reversible metadata variants.
 
 Scope:
 
@@ -13114,7 +13114,7 @@ Out of scope for this pass:
 - Party mutation after setup, alternate energy-cost mechanics beyond the
   existing `getMaxEnergy()` contract, characters, formulas, RL, and docs.
 
-### Phase 1: Add Watatsumi Wavewalker Weapons
+### Phase 1: Add Watatsumi Wavewalker Weapons - Done
 
 Target files:
 
@@ -13126,9 +13126,18 @@ Target files:
 
 | Unit | Passive | Focused verification | Status |
 |---|---|---|---|
-| Shared base + Akuoumaru | party max Energy to Burst DMG | pre-init, uncapped/capped, R1/R5, metadata | Pending |
-| Mouun's Moon | inherited Watatsumi Wavewalker | bow metadata and shared behavior | Pending |
-| Wavebreaker's Fin | inherited Watatsumi Wavewalker | polearm metadata and shared behavior | Pending |
+| Shared base + Akuoumaru | party max Energy to Burst DMG | pre-init, uncapped/capped, R1/R5, metadata | Done (`f111166`) |
+| Mouun's Moon | inherited Watatsumi Wavewalker | bow metadata and shared behavior | Done (`3951ccc`) |
+| Wavebreaker's Fin | inherited Watatsumi Wavewalker | polearm metadata and shared behavior | Done (`3c562e6`) |
+
+Completion evidence:
+
+- A four-member 240-Energy party produces the uncapped R5 57.6% bonus, an
+  owner-only 60-Energy party produces R1 7.2%, and R1 caps at 40% above 333.3.
+- Pre-initialization and unrelated stats remain unchanged; repeated effective
+  stat compilation is stable and all three variants reject refinement 0/6.
+- Every unit passes reaction regression, build, and preflight; the shared/final
+  public API boundaries pass Javadoc with no generated artifact staged.
 
 Acceptance criteria:
 

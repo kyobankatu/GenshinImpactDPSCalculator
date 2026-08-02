@@ -2151,10 +2151,12 @@ experiment record.
 
 ### B-082 — Watatsumi Wavewalker weapon coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Akuoumaru, Mouun's Moon, and Wavebreaker's Fin; RL excluded
 - **Value/risk:** complete weapon family with one read-only party aggregate and
   no formula, event, target-state, or timing changes
 - **Evidence boundary:** KQM TCL Lv. 90 metadata and R1-R5 per-Energy/cap values;
   the implementation uses the simulator's existing `getMaxEnergy()` contract
 - **Plan:** `TASKS.md` Watatsumi Wavewalker Weapon Campaign
+- **Completion:** `f111166`, `3951ccc`, and `3c562e6` add the shared party
+  aggregate and all variants; focused/build/Javadoc/leak gates pass
