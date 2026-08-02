@@ -5189,6 +5189,56 @@ public class ReactionRegressionTest {
             highRustRefinementRejected = true;
         }
         assertTrue(highRustRefinementRejected, "Rust should reject refinement six");
+
+        model.weapon.WhiteTassel whiteTassel = new model.weapon.WhiteTassel();
+        assertEquals("White Tassel", whiteTassel.getName(),
+                "White Tassel display name");
+        assertClose(401.0, whiteTassel.getBaseAtk(), EPS,
+                "White Tassel base ATK");
+        assertClose(0.234, whiteTassel.getStats().get(StatType.CRIT_RATE), EPS,
+                "White Tassel CRIT Rate");
+        assertEquals(model.type.WeaponType.POLEARM, whiteTassel.getWeaponType(),
+                "White Tassel weapon type");
+        assertEquals(5, whiteTassel.getRefinement(),
+                "White Tassel default refinement");
+
+        StatsContainer r5WhiteTasselStats = new StatsContainer();
+        whiteTassel.applyPassive(r5WhiteTasselStats, 0.0);
+        assertClose(0.48,
+                r5WhiteTasselStats.get(StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "R5 White Tassel Normal damage bonus");
+        assertClose(0.0,
+                r5WhiteTasselStats.get(StatType.CHARGED_ATTACK_DMG_BONUS), EPS,
+                "White Tassel should not modify Charged damage");
+        assertClose(0.0, r5WhiteTasselStats.get(StatType.SKILL_DMG_BONUS), EPS,
+                "White Tassel should not modify Skill damage");
+        assertClose(0.0, r5WhiteTasselStats.get(StatType.BURST_DMG_BONUS), EPS,
+                "White Tassel should not modify Burst damage");
+
+        model.weapon.WhiteTassel r1WhiteTassel = new model.weapon.WhiteTassel(1);
+        StatsContainer r1WhiteTasselStats = new StatsContainer();
+        r1WhiteTassel.applyPassive(r1WhiteTasselStats, 0.0);
+        assertClose(0.24,
+                r1WhiteTasselStats.get(StatType.NORMAL_ATTACK_DMG_BONUS), EPS,
+                "R1 White Tassel Normal damage bonus");
+
+        boolean lowWhiteTasselRefinementRejected = false;
+        try {
+            new model.weapon.WhiteTassel(0);
+        } catch (IllegalArgumentException expected) {
+            lowWhiteTasselRefinementRejected = true;
+        }
+        assertTrue(lowWhiteTasselRefinementRejected,
+                "White Tassel should reject refinement zero");
+
+        boolean highWhiteTasselRefinementRejected = false;
+        try {
+            new model.weapon.WhiteTassel(6);
+        } catch (IllegalArgumentException expected) {
+            highWhiteTasselRefinementRejected = true;
+        }
+        assertTrue(highWhiteTasselRefinementRejected,
+                "White Tassel should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_DendroResonanceReactionEmContract() {
