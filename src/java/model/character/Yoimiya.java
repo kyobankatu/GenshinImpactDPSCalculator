@@ -438,7 +438,7 @@ public class Yoimiya extends Character implements
                     0.0,
                     ActionType.BURST);
             initial.setICD(
-                    ICDType.None, ICDTag.ElementalBurst, 2.0);
+                    ICDType.Standard, ICDTag.ElementalBurst, 2.0);
             performAurousBlazeSafe(activeSim, initial);
             applyAurousBlaze(activeSim, generation);
             applyA4(activeSim);

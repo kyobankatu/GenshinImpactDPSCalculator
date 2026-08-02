@@ -290,8 +290,8 @@ public final class YoimiyaRegressionTest {
                 "Yoimiya Burst initial hitmark");
         assertClose(2.1624, initial.action.getDamagePercent(), EPS,
                 "Yoimiya C0 Burst initial multiplier");
-        assertEquals(ICDType.None, initial.action.getICDType(),
-                "Yoimiya Burst initial no ICD");
+        assertEquals(ICDType.Standard, initial.action.getICDType(),
+                "Yoimiya Burst initial standard ICD");
         assertClose(2.0, initial.action.getGaugeUnits(), EPS,
                 "Yoimiya Burst initial 2U gauge");
         assertTrue(yoimiya.isAurousBlazeActive(sim.getCurrentTime()),
