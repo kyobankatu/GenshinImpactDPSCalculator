@@ -3071,7 +3071,7 @@ experiment record.
 
 ### B-143 — Raiden Shogun C6 Wishbearer cooldown lifecycle
 
-- **Status:** in-progress
+- **Status:** complete
 - **Source:** delegated supported-character constellation audit
 - **Scope/risk:** add clamped flat Burst cooldown reduction and apply it to all
   non-Raiden party members at one-second intervals, at most five times per
@@ -3085,3 +3085,7 @@ experiment record.
   cast, C5, positive resolved damage, multi-hit same timestamp, 0.999/1.000
   trigger interval, five/six hits, switch end, recast reset, and snapshot restore
 - **Plan:** two-phase `TASKS.md` Raiden C6 Wishbearer Lifecycle
+- **Completion:** clamped Burst cooldown reduction, ally-only C6 dispatch,
+  typed one-second/five-trigger markers, actual Musou hit, multi-hit and exact
+  interval boundaries, invalid/C5/form-end/recast behavior, and snapshot replay
+  pass focused and full gates with stable representative party outputs

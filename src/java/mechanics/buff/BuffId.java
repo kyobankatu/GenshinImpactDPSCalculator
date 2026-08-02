@@ -102,6 +102,10 @@ public enum BuffId {
     RAIDEN_EYE_OF_STORMY_JUDGMENT,
     /** 雷電将軍 命ノ星座 4「常道への誓い」による味方攻撃力ボーナス。 */
     RAIDEN_C4_PLEDGE_OF_PROPRIETY,
+    /** 雷電将軍 命ノ星座 6「願いの代行人」の発動回数。 */
+    RAIDEN_C6_WISHBEARER_TRIGGER,
+    /** 雷電将軍 命ノ星座 6「願いの代行人」の 1 秒クールダウン。 */
+    RAIDEN_C6_WISHBEARER_COOLDOWN,
     /** リサ「誘雷」スタックの独立した有効期限マーカー。 */
     LISA_CONDUCTIVE_STACK,
     /** リサ命ノ星座 6「パルスの魔女」の戦闘中クールダウン。 */

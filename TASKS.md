@@ -12980,7 +12980,7 @@ Completion evidence:
 
 ## Implementation Order: Raiden C6 Wishbearer Lifecycle
 
-Status: In progress. Implement B-143 as a shared flat Burst cooldown operation
+Status: Complete. Implemented B-143 as a shared flat Burst cooldown operation
 followed by character-owned hit markers; cooldown carries, non-Burst cooldowns,
 enemy-count geometry, RL, and generated docs are excluded.
 
@@ -13028,7 +13028,7 @@ Completion evidence:
 - Ready/zero inputs, invalid values with state retention, and divergent
   snapshot rollback pass the focused regression, build, and Javadoc gates.
 
-### Phase 2: Add Wishbearer Hit Lifecycle
+### Phase 2: Add Wishbearer Hit Lifecycle - Done
 
 Target files:
 
@@ -13063,6 +13063,20 @@ Verification:
 - `./gradlew javadoc`
 - representative party samples twice
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- C6 registers one resolved-damage listener and accepts only positive Raiden
+  hits carrying Musou Burst classification while the form and enemy are active.
+- Typed character markers enforce the half-open one-second interval and five-hit
+  state cap, survive in-form snapshot rollback, and clear on end/switch/recast.
+- Regressions cover multiple pending/ready allies, Raiden exclusion, an actual
+  Musou Normal, all three input categories, same-time multi-hit, 0.999/1.000
+  seconds, five/six triggers, snapshot replay, invalid callbacks, and C5.
+- Reaction regression, build, Javadoc, party catalog, and representative
+  samples pass. Two runs each reproduce 1,275,070 / 60,718 (`RaidenParty`),
+  32,047,365 / 322,084 (`FlinsParty`), and 22,146,093 / 320,493
+  (`FlinsParty2`).
 
 ## Implementation Order: Expanded Artifact Coverage Campaign
 

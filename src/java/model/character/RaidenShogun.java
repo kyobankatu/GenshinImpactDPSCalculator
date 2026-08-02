@@ -3,21 +3,22 @@ package model.character;
 import java.util.EnumMap;
 import java.util.Map;
 
+import mechanics.buff.BuffId;
+import mechanics.buff.SimpleBuff;
 import mechanics.data.TalentDataManager;
 import mechanics.data.TalentDataSource;
-import model.entity.FormStateProvider;
+import model.entity.ArtifactSet;
 import model.entity.Character;
+import model.entity.FormStateProvider;
 import model.entity.SwitchAwareCharacter;
 import model.entity.Weapon;
-import model.entity.ArtifactSet;
-import mechanics.buff.BuffId;
 import model.stats.StatsContainer;
+import model.type.ActionType;
 import model.type.CharacterId;
 import model.type.Element;
-import model.type.StatType;
-import model.type.ICDType;
 import model.type.ICDTag;
-import model.type.ActionType;
+import model.type.ICDType;
+import model.type.StatType;
 import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionRequest;
@@ -27,6 +28,10 @@ import simulation.event.SimpleTimerEvent;
  * Raiden Shogun character implementation with Resolve stacking and Musou Isshin form logic.
  */
 public class RaidenShogun extends Character implements FormStateProvider, SwitchAwareCharacter {
+
+    private static final double WISHBEARER_TRIGGER_COOLDOWN = 1.0;
+    private static final double WISHBEARER_MARKER_DURATION = 8.0;
+    private static final int WISHBEARER_MAX_TRIGGERS = 5;
 
     private int normalAttackStep = 0;
     private double resolveStacks = 0;
@@ -199,6 +204,11 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
                 }
             });
 
+            if (constellation >= 6) {
+                sim.addDamageListener((actor, action, damage, time) ->
+                        triggerWishbearer(sim, actor, action, damage, time));
+            }
+
             listenerRegistered = true;
             System.out.println("   [Raiden] Resolve Listeners Registered.");
         }
@@ -282,6 +292,7 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
 
     private void burst(CombatSimulator sim) {
         registerResolveListener(sim);
+        resetWishbearerState();
 
         // Capture Resolve
         activeResolveBonus = resolveStacks;
@@ -337,10 +348,11 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
             return;
         }
         musouActive = false;
+        resetWishbearerState();
         if (constellation < 4) {
             return;
         }
-        sim.applyTeamBuffNoStack(new mechanics.buff.SimpleBuff(
+        sim.applyTeamBuffNoStack(new SimpleBuff(
                 "Pledge of Propriety",
                 BuffId.RAIDEN_C4_PLEDGE_OF_PROPRIETY,
                 10.0,
@@ -348,6 +360,72 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
                 stats -> stats.add(StatType.ATK_PERCENT, 0.30))
                 .exclude(characterId)
                 .sourcedBy(characterId));
+    }
+
+    /**
+     * Applies one C6 trigger after an eligible resolved Musou hit.
+     *
+     * @param sim active simulator
+     * @param actor resolved-hit owner
+     * @param action resolved attack
+     * @param damage final direct damage
+     * @param time hit time
+     */
+    private void triggerWishbearer(
+            CombatSimulator sim,
+            Character actor,
+            AttackAction action,
+            double damage,
+            double time) {
+        if (!musouActive
+                || actor != this
+                || action == null
+                || !action.isCountsAsBurstDmg()
+                || !(damage > 0.0)
+                || sim.getEnemy() == null
+                || hasActiveWishbearerMarker(
+                        BuffId.RAIDEN_C6_WISHBEARER_COOLDOWN, time)) {
+            return;
+        }
+        long triggerCount = getActiveBuffs().stream()
+                .filter(buff -> buff.getId()
+                        == BuffId.RAIDEN_C6_WISHBEARER_TRIGGER)
+                .filter(buff -> !buff.isExpired(time))
+                .count();
+        if (triggerCount >= WISHBEARER_MAX_TRIGGERS) {
+            return;
+        }
+
+        for (Character member : sim.getPartyMembers()) {
+            if (member != this) {
+                member.reduceBurstCooldown(time, 1.0);
+            }
+        }
+        addBuff(new SimpleBuff(
+                "Wishbearer Trigger",
+                BuffId.RAIDEN_C6_WISHBEARER_TRIGGER,
+                WISHBEARER_MARKER_DURATION,
+                time,
+                stats -> {
+                }).sourcedBy(characterId));
+        removeBuff(BuffId.RAIDEN_C6_WISHBEARER_COOLDOWN);
+        addBuff(new SimpleBuff(
+                "Wishbearer Cooldown",
+                BuffId.RAIDEN_C6_WISHBEARER_COOLDOWN,
+                WISHBEARER_TRIGGER_COOLDOWN,
+                time,
+                stats -> {
+                }).sourcedBy(characterId));
+    }
+
+    private boolean hasActiveWishbearerMarker(BuffId id, double time) {
+        return getActiveBuffs().stream()
+                .anyMatch(buff -> buff.getId() == id && !buff.isExpired(time));
+    }
+
+    private void resetWishbearerState() {
+        removeBuff(BuffId.RAIDEN_C6_WISHBEARER_TRIGGER);
+        removeBuff(BuffId.RAIDEN_C6_WISHBEARER_COOLDOWN);
     }
 
     // Helper to trigger Energy Restoration on hits

@@ -97,6 +97,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseE_LunarCrystallizeHarmonyCadence();
         testAccuracyPhaseF_RaidenResolveAndEnergyRegression();
         testAccuracyPhaseF_RaidenConstellationLifecycle();
+        testAccuracyPhaseF_RaidenC6WishbearerLifecycle();
         testAccuracyPhaseF_RaidenMultiHitAttackContract();
         testAccuracyPhaseF_FlinsA1AndC1Lifecycle();
         testAccuracyPhaseF_FlinsC2AndC4();
@@ -3097,6 +3098,187 @@ public class ReactionRegressionTest {
         return new AttackAction(
                 name, 0.0, Element.PHYSICAL, StatType.BASE_ATK,
                 null, 0.0, false, ActionType.BURST);
+    }
+
+    private static void testAccuracyPhaseF_RaidenC6WishbearerLifecycle() {
+        model.character.RaidenShogun raiden = new model.character.RaidenShogun(
+                new TestWeapon(), blankArtifact(), raidenTalentData(6));
+        CombatSimulator sim = simulatorWithExistingCharacter(raiden);
+        TestCharacter firstAlly = testCharacter(
+                Element.PYRO, CharacterId.XIANGLING);
+        TestCharacter secondAlly = testCharacter(
+                Element.PYRO, CharacterId.BENNETT);
+        TestCharacter readyAlly = testCharacter(
+                Element.HYDRO, CharacterId.XINGQIU);
+        firstAlly.setBurstCD(20.0);
+        secondAlly.setBurstCD(10.0);
+        readyAlly.setBurstCD(20.0);
+        firstAlly.markBurstUsed(0.0);
+        secondAlly.markBurstUsed(0.0);
+        sim.addCharacter(firstAlly);
+        sim.addCharacter(secondAlly);
+        sim.addCharacter(readyAlly);
+
+        raiden.onAction(
+                CharacterActionRequest.of(CharacterActionKey.BURST), sim);
+        assertClose(20.0, firstAlly.getBurstCooldownEndTime(), EPS,
+                "Raiden's initial Burst cast should not trigger Wishbearer");
+        assertClose(18.0, raiden.getBurstCooldownEndTime(), EPS,
+                "Raiden should start and retain her own Burst cooldown");
+
+        AttackAction normal = wishbearerHit(
+                "Wishbearer Normal fixture", ActionType.NORMAL);
+        AttackAction charged = wishbearerHit(
+                "Wishbearer Charged fixture", ActionType.CHARGE);
+        AttackAction plunge = wishbearerHit(
+                "Wishbearer Plunging fixture", ActionType.PLUNGE);
+        sim.notifyDamage(raiden, normal, 100.0);
+        assertClose(19.0, firstAlly.getBurstCooldownEndTime(), EPS,
+                "First Wishbearer hit should reduce the first ally by one second");
+        assertClose(9.0, secondAlly.getBurstCooldownEndTime(), EPS,
+                "Wishbearer should reduce every other pending Burst cooldown");
+        assertClose(-999.0, readyAlly.getBurstCooldownEndTime(), EPS,
+                "Wishbearer should leave a ready ally cooldown unchanged");
+        assertClose(18.0, raiden.getBurstCooldownEndTime(), EPS,
+                "Wishbearer should exclude Raiden's own Burst cooldown");
+        assertEquals(1, activeBuffCount(
+                        raiden,
+                        BuffId.RAIDEN_C6_WISHBEARER_TRIGGER,
+                        sim.getCurrentTime()),
+                "First Wishbearer hit should create one trigger marker");
+
+        SimulatorSnapshot firstTriggerSnapshot = sim.saveSnapshot();
+        sim.notifyDamage(raiden, charged, 100.0);
+        assertClose(19.0, firstAlly.getBurstCooldownEndTime(), EPS,
+                "Same-time multi-hits should share the C6 trigger cooldown");
+        sim.advanceTime(0.999);
+        sim.notifyDamage(raiden, plunge, 100.0);
+        assertClose(19.0, firstAlly.getBurstCooldownEndTime(), EPS,
+                "Wishbearer should remain blocked at 0.999 seconds");
+        sim.advanceTime(0.001);
+        sim.notifyDamage(raiden, plunge, 100.0);
+        assertClose(18.0, firstAlly.getBurstCooldownEndTime(), EPS,
+                "Wishbearer should reactivate at exactly one second");
+
+        sim.restoreSnapshot(firstTriggerSnapshot);
+        assertClose(19.0, firstAlly.getBurstCooldownEndTime(), EPS,
+                "Snapshot restore should recover the first C6 reduction");
+        assertEquals(1, activeBuffCount(
+                        raiden,
+                        BuffId.RAIDEN_C6_WISHBEARER_TRIGGER,
+                        sim.getCurrentTime()),
+                "Snapshot restore should recover one C6 trigger marker");
+        sim.advanceTime(1.0);
+        sim.notifyDamage(raiden, plunge, 100.0);
+        assertClose(18.0, firstAlly.getBurstCooldownEndTime(), EPS,
+                "Snapshot replay should reproduce the second C6 reduction");
+
+        AttackAction[] laterHits = { charged, normal, plunge };
+        for (AttackAction laterHit : laterHits) {
+            sim.advanceTime(1.0);
+            sim.notifyDamage(raiden, laterHit, 100.0);
+        }
+        assertClose(15.0, firstAlly.getBurstCooldownEndTime(), EPS,
+                "Five Wishbearer triggers should reduce five seconds total");
+        assertEquals(5, activeBuffCount(
+                        raiden,
+                        BuffId.RAIDEN_C6_WISHBEARER_TRIGGER,
+                        sim.getCurrentTime()),
+                "Wishbearer should retain five per-state trigger markers");
+        sim.advanceTime(1.0);
+        sim.notifyDamage(raiden, normal, 100.0);
+        assertClose(15.0, firstAlly.getBurstCooldownEndTime(), EPS,
+                "A sixth Musou hit should not exceed the five-trigger cap");
+
+        raiden.onAction(
+                CharacterActionRequest.of(CharacterActionKey.BURST), sim);
+        sim.notifyDamage(raiden, charged, 100.0);
+        assertClose(14.0, firstAlly.getBurstCooldownEndTime(), EPS,
+                "A replacement Musou state should receive a fresh trigger budget");
+        assertEquals(1, activeBuffCount(
+                        raiden,
+                        BuffId.RAIDEN_C6_WISHBEARER_TRIGGER,
+                        sim.getCurrentTime()),
+                "Replacement Musou should reset prior trigger markers");
+
+        model.character.RaidenShogun switchRaiden =
+                new model.character.RaidenShogun(
+                        new TestWeapon(), blankArtifact(), raidenTalentData(6));
+        CombatSimulator switchSim = simulatorWithExistingCharacter(switchRaiden);
+        TestCharacter switchAlly = testCharacter(
+                Element.PYRO, CharacterId.BENNETT);
+        switchAlly.setBurstCD(20.0);
+        switchAlly.markBurstUsed(0.0);
+        switchSim.addCharacter(switchAlly);
+        switchRaiden.onAction(
+                CharacterActionRequest.of(CharacterActionKey.BURST), switchSim);
+        switchRaiden.onAction(
+                CharacterActionRequest.of(CharacterActionKey.NORMAL), switchSim);
+        assertClose(19.0, switchAlly.getBurstCooldownEndTime(), EPS,
+                "An actual Musou Normal hit should trigger Wishbearer");
+        switchSim.switchCharacter(CharacterId.BENNETT);
+        assertTrue(!switchRaiden.isFormActive(switchSim.getCurrentTime()),
+                "Switching should end Musou before later C6 callbacks");
+        assertEquals(0, activeBuffCount(
+                        switchRaiden,
+                        BuffId.RAIDEN_C6_WISHBEARER_TRIGGER,
+                        switchSim.getCurrentTime()),
+                "Switching should clear Wishbearer trigger markers");
+        double switchEndCooldown = switchAlly.getBurstCooldownEndTime();
+        switchSim.notifyDamage(switchRaiden, normal, 100.0);
+        assertClose(switchEndCooldown,
+                switchAlly.getBurstCooldownEndTime(),
+                EPS,
+                "Post-form hits should not trigger Wishbearer");
+
+        model.character.RaidenShogun rejectedRaiden =
+                new model.character.RaidenShogun(
+                        new TestWeapon(), blankArtifact(), raidenTalentData(6));
+        CombatSimulator rejectedSim = simulatorWithExistingCharacter(
+                rejectedRaiden);
+        TestCharacter rejectedAlly = testCharacter(
+                Element.PYRO, CharacterId.BENNETT);
+        TestCharacter foreignActor = testCharacter(
+                Element.ELECTRO, CharacterId.XIANGLING);
+        rejectedAlly.setBurstCD(20.0);
+        rejectedAlly.markBurstUsed(0.0);
+        rejectedSim.addCharacter(rejectedAlly);
+        rejectedSim.addCharacter(foreignActor);
+        rejectedRaiden.onAction(
+                CharacterActionRequest.of(CharacterActionKey.BURST), rejectedSim);
+        rejectedSim.notifyDamage(
+                rejectedRaiden,
+                typedDamageHit(
+                        "Wishbearer Physical fixture", ActionType.NORMAL, 1.0),
+                100.0);
+        rejectedSim.notifyDamage(foreignActor, normal, 100.0);
+        rejectedSim.notifyDamage(rejectedRaiden, normal, 0.0);
+        rejectedSim.notifyDamage(rejectedRaiden, normal, -1.0);
+        rejectedSim.setEnemy(null);
+        rejectedSim.notifyDamage(rejectedRaiden, normal, 100.0);
+        assertClose(20.0, rejectedAlly.getBurstCooldownEndTime(), EPS,
+                "Invalid Wishbearer callbacks should preserve ally cooldowns");
+
+        model.character.RaidenShogun c5Raiden = new model.character.RaidenShogun(
+                new TestWeapon(), blankArtifact(), raidenTalentData(5));
+        CombatSimulator c5Sim = simulatorWithExistingCharacter(c5Raiden);
+        TestCharacter c5Ally = testCharacter(
+                Element.PYRO, CharacterId.BENNETT);
+        c5Ally.setBurstCD(20.0);
+        c5Ally.markBurstUsed(0.0);
+        c5Sim.addCharacter(c5Ally);
+        c5Raiden.onAction(
+                CharacterActionRequest.of(CharacterActionKey.BURST), c5Sim);
+        c5Sim.notifyDamage(c5Raiden, normal, 100.0);
+        assertClose(20.0, c5Ally.getBurstCooldownEndTime(), EPS,
+                "C5 Raiden should not run Wishbearer cooldown reduction");
+    }
+
+    private static AttackAction wishbearerHit(
+            String name, ActionType actionType) {
+        AttackAction action = typedDamageHit(name, actionType, 1.0);
+        action.setCountsAsBurstDmg(true);
+        return action;
     }
 
     private static void testAccuracyPhaseF_RaidenMultiHitAttackContract() {
