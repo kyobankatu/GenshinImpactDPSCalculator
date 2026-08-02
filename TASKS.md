@@ -14902,8 +14902,8 @@ Verification:
 
 ## Implementation Order: Catalyst Dual-Window Weapon Campaign
 
-Status: Active. Add two complete catalysts with independent typed action,
-damage, and Lunar-Bloom windows.
+Status: Complete. Two catalysts now use independent typed action, damage, and
+Lunar-Bloom windows.
 
 Scope:
 
@@ -14914,13 +14914,20 @@ Out of scope for this pass:
 
 - Characters, formulas, RL, generated docs, and unrelated catalysts.
 
-### Phase 1: Add Dawning Frost and Reliquary of Truth
+### Phase 1: Add Dawning Frost and Reliquary of Truth - Done (`542fceb`)
 
 Target files:
 
 - `src/java/model/weapon/DawningFrost.java` (new)
 - `src/java/model/weapon/ReliquaryOfTruth.java` (new)
 - `src/java/sample/ReactionRegressionTest.java`
+
+Completion evidence:
+
+- Dawning proves R1/R5 Charged/Skill windows, overlap addition, staggered exact
+  expiry, typed/zero/off-field gates, metadata, and binding rejection.
+- Reliquary proves static CRIT, pre-Skill EM, attributed Lunar-Bloom CRIT DMG,
+  live 1.5x overlap, independent exact expiry, and abnormal gates; all gates pass.
 
 Acceptance criteria:
 

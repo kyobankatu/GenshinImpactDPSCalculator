@@ -2526,10 +2526,12 @@ experiment record.
 
 ### B-113 — Catalyst dual-window weapon coverage
 
-- **Status:** active
+- **Status:** done
 - **Scope:** Dawning Frost and Reliquary of Truth; RL excluded
 - **Value/risk:** two complete passives reuse typed hit/action/reaction hooks
   and independent windows without shared runtime changes
 - **Evidence boundary:** KQM TCL metadata, R1-R5 EM/CRIT values, Dawning
   ten-second windows, Reliquary four/12-second windows and 1.5x intersection
 - **Plan:** `TASKS.md` Catalyst Dual-Window Weapon Campaign
+- **Completion:** `542fceb` adds both dual-window state machines and focused
+  regressions; build/Javadoc/leak gates pass
