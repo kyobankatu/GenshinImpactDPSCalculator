@@ -133,6 +133,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_AdditionalMultiStatHitStackWeapons();
         testAccuracyPhaseF_DirectPhysicalProcWeapons();
         testAccuracyPhaseF_FrostBurialWeapons();
+        testAccuracyPhaseF_DeterministicPhysicalProcWeapons();
         testAccuracyPhaseF_ActionUseWindowWeapons();
         testAccuracyPhaseF_AdditionalSkillUseStatWeapons();
         testAccuracyPhaseF_SamuraiConductWeapons();
@@ -7737,6 +7738,227 @@ public class ReactionRegressionTest {
         }
         assertTrue(nullDrawRejected,
                 "Frost Burial weapons should reject null draw sources");
+    }
+
+    private static void testAccuracyPhaseF_DeterministicPhysicalProcWeapons() {
+        AttackAction normalHit = typedDamageHit(
+                "Deterministic proc Normal", ActionType.NORMAL, 1.0);
+        AttackAction chargedHit = typedDamageHit(
+                "Deterministic proc Charged", ActionType.CHARGE, 1.0);
+        AttackAction plungeHit = typedDamageHit(
+                "Deterministic proc Plunge", ActionType.PLUNGE, 1.0);
+        AttackAction skillHit = typedDamageHit(
+                "Deterministic proc Skill", ActionType.SKILL, 1.0);
+        AttackAction zeroNormalHit = typedDamageHit(
+                "Deterministic proc zero Normal", ActionType.NORMAL, 0.0);
+
+        model.weapon.KagotsurubeIsshin isshin =
+                new model.weapon.KagotsurubeIsshin();
+        assertEquals("Kagotsurube Isshin", isshin.getName(),
+                "Kagotsurube Isshin display name");
+        assertClose(510.0, isshin.getBaseAtk(), EPS,
+                "Kagotsurube Isshin base ATK");
+        assertClose(0.413, isshin.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Kagotsurube Isshin ATK substat");
+        assertEquals(model.type.WeaponType.SWORD, isshin.getWeaponType(),
+                "Kagotsurube Isshin weapon type");
+        assertEquals(1, isshin.getRefinement(),
+                "Kagotsurube Isshin fixed refinement");
+
+        TestCharacter isshinOwner = testCharacter(Element.ANEMO);
+        isshinOwner.setWeapon(isshin);
+        CombatSimulator isshinSim = simulatorWith(isshinOwner);
+        isshin.onDamage(isshinOwner, skillHit, 0.0, isshinSim);
+        isshin.onDamage(isshinOwner, zeroNormalHit, 0.0, isshinSim);
+        assertClose(0.0, isshinSim.getTotalDamage(), EPS,
+                "Wrong and zero hits should not trigger Kagotsurube Isshin");
+        isshin.onDamage(isshinOwner, plungeHit, 0.0, isshinSim);
+        double firstIsshinProc = isshinSim.getTotalDamage();
+        assertTrue(firstIsshinProc > 0.0,
+                "Kagotsurube Isshin should proc from positive Plunge damage");
+        assertClose(0.563,
+                resolvedStat(isshinSim, isshinOwner, StatType.ATK_PERCENT), EPS,
+                "Kagotsurube Isshin active ATK window");
+        isshinSim.advanceTime(7.999);
+        isshin.onDamage(
+                isshinOwner, normalHit, isshinSim.getCurrentTime(), isshinSim);
+        assertClose(firstIsshinProc, isshinSim.getTotalDamage(), EPS,
+                "Kagotsurube Isshin should remain on CT before eight seconds");
+        assertClose(0.563,
+                resolvedStat(isshinSim, isshinOwner, StatType.ATK_PERCENT), EPS,
+                "Kagotsurube Isshin ATK should remain before expiry");
+        isshinSim.advanceTime(0.001 + 1e-9);
+        isshin.onDamage(
+                isshinOwner, chargedHit, isshinSim.getCurrentTime(), isshinSim);
+        assertClose(firstIsshinProc * 2.0, isshinSim.getTotalDamage(), EPS,
+                "Kagotsurube Isshin should proc at exact eight-second CT");
+        assertClose(0.563,
+                resolvedStat(isshinSim, isshinOwner, StatType.ATK_PERCENT), EPS,
+                "Exact-CT proc should refresh Kagotsurube Isshin ATK");
+
+        model.weapon.TheFlute flute = new model.weapon.TheFlute();
+        assertEquals("The Flute", flute.getName(), "The Flute display name");
+        assertClose(510.0, flute.getBaseAtk(), EPS, "The Flute base ATK");
+        assertClose(0.413, flute.getStats().get(StatType.ATK_PERCENT), EPS,
+                "The Flute ATK substat");
+        assertEquals(model.type.WeaponType.SWORD, flute.getWeaponType(),
+                "The Flute weapon type");
+        assertEquals(5, flute.getRefinement(), "The Flute default refinement");
+
+        TestCharacter fluteOwner = testCharacter(Element.CRYO);
+        fluteOwner.setWeapon(flute);
+        CombatSimulator fluteSim = simulatorWith(fluteOwner);
+        for (int i = 0; i < 4; i++) {
+            flute.onDamage(
+                    fluteOwner, normalHit, fluteSim.getCurrentTime(), fluteSim);
+            fluteSim.advanceTime(0.5);
+        }
+        assertClose(0.0, fluteSim.getTotalDamage(), EPS,
+                "Four Harmonics should not trigger The Flute");
+        flute.onDamage(
+                fluteOwner, chargedHit, fluteSim.getCurrentTime(), fluteSim);
+        double r5FluteProc = fluteSim.getTotalDamage();
+        assertTrue(r5FluteProc > 0.0,
+                "Five Harmonics should trigger The Flute");
+
+        model.weapon.TheFlute r1Flute = new model.weapon.TheFlute(1);
+        TestCharacter r1FluteOwner = testCharacter(Element.CRYO);
+        r1FluteOwner.setWeapon(r1Flute);
+        CombatSimulator r1FluteSim = simulatorWith(r1FluteOwner);
+        for (int i = 0; i < 5; i++) {
+            r1Flute.onDamage(
+                    r1FluteOwner, normalHit, r1FluteSim.getCurrentTime(), r1FluteSim);
+            r1FluteSim.advanceTime(0.5);
+        }
+        assertClose(r5FluteProc * 0.5, r1FluteSim.getTotalDamage(), EPS,
+                "R1 The Flute should use 100% instead of 200% ATK");
+
+        model.weapon.TheFlute expiringFlute = new model.weapon.TheFlute();
+        TestCharacter expiringFluteOwner = testCharacter(Element.CRYO);
+        expiringFluteOwner.setWeapon(expiringFlute);
+        CombatSimulator expiringFluteSim = simulatorWith(expiringFluteOwner);
+        expiringFlute.onDamage(
+                expiringFluteOwner, normalHit, 0.0, expiringFluteSim);
+        expiringFluteSim.advanceTime(30.0);
+        for (int i = 0; i < 4; i++) {
+            expiringFlute.onDamage(
+                    expiringFluteOwner,
+                    normalHit,
+                    expiringFluteSim.getCurrentTime(),
+                    expiringFluteSim);
+            expiringFluteSim.advanceTime(0.5);
+        }
+        assertClose(0.0, expiringFluteSim.getTotalDamage(), EPS,
+                "A Harmonic should expire at exactly thirty seconds");
+        expiringFlute.onDamage(
+                expiringFluteOwner,
+                normalHit,
+                expiringFluteSim.getCurrentTime(),
+                expiringFluteSim);
+        assertTrue(expiringFluteSim.getTotalDamage() > 0.0,
+                "A fifth live Harmonic should proc after stale removal");
+
+        model.weapon.DebateClub debateClub = new model.weapon.DebateClub();
+        assertEquals("Debate Club", debateClub.getName(),
+                "Debate Club display name");
+        assertClose(401.0, debateClub.getBaseAtk(), EPS,
+                "Debate Club base ATK");
+        assertClose(0.352, debateClub.getStats().get(StatType.ATK_PERCENT), EPS,
+                "Debate Club ATK substat");
+        assertEquals(model.type.WeaponType.CLAYMORE, debateClub.getWeaponType(),
+                "Debate Club weapon type");
+        assertEquals(5, debateClub.getRefinement(),
+                "Debate Club default refinement");
+
+        TestCharacter debateOwner = testCharacter(Element.PYRO);
+        debateOwner.setWeapon(debateClub);
+        CombatSimulator debateSim = simulatorWith(debateOwner);
+        debateClub.onDamage(debateOwner, normalHit, 0.0, debateSim);
+        assertClose(0.0, debateSim.getTotalDamage(), EPS,
+                "Debate Club should not proc before Skill use");
+        debateClub.onAction(
+                debateOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                debateSim);
+        debateClub.onDamage(debateOwner, normalHit, 0.0, debateSim);
+        double r5DebateProc = debateSim.getTotalDamage();
+        assertTrue(r5DebateProc > 0.0,
+                "Debate Club should proc during its Skill window");
+        debateSim.advanceTime(2.999);
+        debateClub.onDamage(
+                debateOwner, chargedHit, debateSim.getCurrentTime(), debateSim);
+        assertClose(r5DebateProc, debateSim.getTotalDamage(), EPS,
+                "Debate Club should remain on CT before three seconds");
+        debateSim.advanceTime(0.001 + 1e-9);
+        debateClub.onDamage(
+                debateOwner, chargedHit, debateSim.getCurrentTime(), debateSim);
+        assertClose(r5DebateProc * 2.0, debateSim.getTotalDamage(), EPS,
+                "Debate Club should proc at exact three-second CT");
+        debateSim.advanceTime(12.0);
+        debateClub.onDamage(
+                debateOwner, normalHit, debateSim.getCurrentTime(), debateSim);
+        assertClose(r5DebateProc * 2.0, debateSim.getTotalDamage(), EPS,
+                "Debate Club window should expire at exactly fifteen seconds");
+
+        model.weapon.DebateClub r1DebateClub = new model.weapon.DebateClub(1);
+        TestCharacter r1DebateOwner = testCharacter(Element.PYRO);
+        r1DebateOwner.setWeapon(r1DebateClub);
+        CombatSimulator r1DebateSim = simulatorWith(r1DebateOwner);
+        r1DebateClub.onAction(
+                r1DebateOwner,
+                CharacterActionRequest.of(CharacterActionKey.SKILL),
+                r1DebateSim);
+        r1DebateClub.onDamage(r1DebateOwner, normalHit, 0.0, r1DebateSim);
+        assertClose(r5DebateProc * 0.5, r1DebateSim.getTotalDamage(), EPS,
+                "R1 Debate Club should use 60% instead of 120% ATK");
+
+        TestCharacter offField = testCharacter(Element.HYDRO, CharacterId.AMBER);
+        r1DebateSim.addCharacter(offField);
+        r1DebateSim.setActiveCharacter(CharacterId.AMBER);
+        r1DebateSim.advanceTime(3.0);
+        r1DebateClub.onDamage(
+                r1DebateOwner,
+                normalHit,
+                r1DebateSim.getCurrentTime(),
+                r1DebateSim);
+        assertClose(r5DebateProc * 0.5, r1DebateSim.getTotalDamage(), EPS,
+                "Off-field hits should not trigger deterministic procs");
+
+        boolean lowFluteRefinementRejected = false;
+        try {
+            new model.weapon.TheFlute(0);
+        } catch (IllegalArgumentException expected) {
+            lowFluteRefinementRejected = true;
+        }
+        assertTrue(lowFluteRefinementRejected,
+                "The Flute should reject refinement zero");
+
+        boolean highFluteRefinementRejected = false;
+        try {
+            new model.weapon.TheFlute(6);
+        } catch (IllegalArgumentException expected) {
+            highFluteRefinementRejected = true;
+        }
+        assertTrue(highFluteRefinementRejected,
+                "The Flute should reject refinement six");
+
+        boolean lowDebateRefinementRejected = false;
+        try {
+            new model.weapon.DebateClub(0);
+        } catch (IllegalArgumentException expected) {
+            lowDebateRefinementRejected = true;
+        }
+        assertTrue(lowDebateRefinementRejected,
+                "Debate Club should reject refinement zero");
+
+        boolean highDebateRefinementRejected = false;
+        try {
+            new model.weapon.DebateClub(6);
+        } catch (IllegalArgumentException expected) {
+            highDebateRefinementRejected = true;
+        }
+        assertTrue(highDebateRefinementRejected,
+                "Debate Club should reject refinement six");
     }
 
     private static void testAccuracyPhaseF_EnergyAwareActionWeapons() {
