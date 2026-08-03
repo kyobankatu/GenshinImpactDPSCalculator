@@ -55,6 +55,10 @@ The latest campaign adds Collei's stationary single-target reaction slice; RL,
 generated docs, and deferred healing, defensive, player-damage, or geometry
 systems remain excluded.
 
+B-172 is the active Gorou and Yelan campaign. It first reserves shared typed
+identities, buff IDs, and Geo-only CRIT DMG, then adds two branch-isolated
+stationary single-target support/offensive slices.
+
 B-171 is the completed Eula campaign. It adds a backward-compatible typed
 Press/Hold Skill request, Eula's identity, and a bounded physical Burst slice;
 RL, generated docs, enemy-HP state, and Deferred Systems remain excluded.
@@ -14100,6 +14104,135 @@ Completion evidence:
   `0bd4568` directly pins A4's refreshed exact 18-second Grimheart expiry.
 - Request, identity, Eula, reaction, build, Javadoc, and executable preflight
   gates pass on 2026-08-03. Independent review found no correctness issue.
+
+## Implementation Order: Legacy Geo And Hydro Support Character Campaign
+
+Status: In progress. B-172 has one shared identity/formula prerequisite and two
+branch-isolated character phases.
+
+Scope:
+
+- Reserve stable identities for Gorou and Yelan without renumbering existing
+  content, and add a narrowly typed Geo-only CRIT DMG formula path for Gorou C6.
+- Add Gorou's stationary field support and Crystal Collapse slice plus Yelan's
+  stationary single-target Skill, Exquisite Throw, and ramping support slice.
+
+Out of scope for this pass:
+
+- Healing, shields, Crystallize shard pulling, interruption resistance,
+  movement/path/aiming geometry, multi-target selection, actual enemy HP,
+  hitlag, RL, generated docs, and Deferred Systems.
+
+Definitions:
+
+- `GOROU` and `YELAN`: stable typed identities using numeric IDs 35 and 36.
+- `GEO_CRIT_DMG`: CRIT DMG applied only when the resolved action deals Geo
+  damage; it must not affect Physical attacks by a Geo character.
+- Character fields are stationary single-target approximations with exact
+  source-derived temporal windows and reconstructible owned delayed events.
+
+### Phase 1: Reserve Shared Identities And Geo CRIT DMG
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/model/type/StatType.java`
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/mechanics/formula/StandardDamageStrategy.java`
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+- `src/java/sample/ElementSpecificCritDamageRegressionTest.java` (new)
+
+Requirements:
+
+- Assign Gorou ID 35/Inazuma and Yelan ID 36/Liyue, move the unassigned
+  boundary to 37, and preserve every existing identity and exact-name lookup.
+- Add typed Gorou field/A1/C6 and Yelan A4/C4 buff IDs before branch isolation.
+- Add Geo-only CRIT DMG to the expected-crit step without changing generic,
+  Plunging, Lunar, reaction, DEF, RES, or non-Geo damage behavior.
+
+Tests:
+
+- Normal: both identities round-trip and Geo damage receives Geo CRIT DMG.
+- Boundary: Eula ID 34 remains stable, ID 37 fails closed, and the new stat
+  composes additively with generic CRIT DMG at the existing CRIT Rate cap.
+- Abnormal: null/case-mismatched names fail closed; Physical damage from a Geo
+  character and every non-Geo action ignore Geo CRIT DMG.
+
+Verification:
+
+- `./gradlew LegacyCharacterIdentityRegressionTest ElementSpecificCritDamageRegressionTest`
+- `./gradlew ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 2: Gorou Field Support Vertical Slice
+
+Target files:
+
+- `config/characters/Gorou/Gorou_Status.csv` (new)
+- `config/characters/Gorou/Gorou_Multipliers.csv` (new)
+- `src/java/model/character/Gorou.java` (new)
+- `src/java/sample/GorouRegressionTest.java` (new)
+
+Requirements:
+
+- Adapt pinned gcsim `ef41805d` and KQM TCL `80ba6241` Lv. 90 data,
+  multipliers, frames, gauge/ICD, particles, cooldown/Energy timing, and
+  snapshot behavior for Normal/High Plunge, Skill, and Burst.
+- Model one-target Skill/Burst fields, Geo-party-count DEF/Geo bonuses, Burst
+  Crystal Collapse cadence, A1/A4, replacement, switch persistence, and exact
+  field plus two-second linger boundaries.
+- Implement representable C1-C3/C5-C6 behavior, including Geo-only C6 CRIT DMG,
+  while excluding C4 healing and shard/shield behavior; reconstruct future
+  owned events exactly once after repeated restore and suppress stale work.
+
+Tests:
+
+- Normal: data, attacks, Skill/Burst damage, particles, party-count buffs,
+  Crystal Collapse, A1/A4, switch persistence, and representable constellations.
+- Boundary: one/two/three Geo members, field replacement/linger, exact cadence,
+  C1 cooldown gate, C2 extension cap, C6 tier/expiry, and repeated restore.
+- Abnormal: invalid constellation/state payload, unsupported action,
+  cross-simulator reuse, cooldown/Energy rejection, and stale generations.
+
+Verification:
+
+- `./gradlew GorouRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Yelan Exquisite Throw Vertical Slice
+
+Target files:
+
+- `config/characters/Yelan/Yelan_Status.csv` (new)
+- `config/characters/Yelan/Yelan_Multipliers.csv` (new)
+- `src/java/model/character/Yelan.java` (new)
+- `src/java/sample/YelanRegressionTest.java` (new)
+
+Requirements:
+
+- Adapt pinned gcsim `ef41805d` and KQM TCL `80ba6241` Lv. 90 data,
+  HP-scaled multipliers, frames, gauge/ICD, particles, cooldown/Energy timing,
+  and source-defined snapshot behavior for Normal/High Plunge, Skill, and Burst.
+- Model one-target Lifeline, Burst initial hit, three-hit Exquisite Throw waves,
+  its one-second action trigger gate, Skill coordination, A1 party-element Max
+  HP scaling, and A4's live active-character damage ramp.
+- Implement representable C1-C6 behavior within the stationary single-target
+  boundary, reconstruct future owned events exactly once after repeated
+  restore, and suppress stale generations, waves, Energy, and particles.
+
+Tests:
+
+- Normal: data, attacks, Skill/particles, Burst/waves, HP scaling, A1/A4,
+  Skill coordination, switch behavior, and representable constellations.
+- Boundary: action-instance wave gating, exact one-second gate, 15-second Burst
+  and A4 ramp/expiry, Skill charges, C2 gate, C4 cap, C6 count, and restore.
+- Abnormal: invalid constellation/state payload, unsupported action,
+  cross-simulator reuse, cooldown/Energy rejection, and stale generations.
+
+Verification:
+
+- `./gradlew YelanRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
 
 ## Implementation Order: Parallel Foundational Content Campaign
 
