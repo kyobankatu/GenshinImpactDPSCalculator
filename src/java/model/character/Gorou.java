@@ -656,7 +656,7 @@ public final class Gorou extends Character implements
             }
         }
         fieldBuff.exclude(excluded.toArray(new CharacterId[0]));
-        simulator.applyFieldBuff(fieldBuff.sourcedBy(characterId));
+        simulator.applyTeamBuff(fieldBuff.sourcedBy(characterId));
     }
 
     private void applyA1(

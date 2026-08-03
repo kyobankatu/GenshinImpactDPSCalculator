@@ -483,6 +483,10 @@ public final class GorouRegressionTest {
                 applicableStat(switchSim, switchAlly,
                         StatType.DEF_FLAT, switchSim.getCurrentTime()),
                 "switched character waits for the next field update");
+        assertClose(350.472,
+                applicableStat(switchSim, switchGorou,
+                        StatType.DEF_FLAT, switchSim.getCurrentTime()),
+                "departed recipient retains its off-field linger");
         advanceTo(switchSim, 69.0 * FRAME);
         assertClose(350.472,
                 applicableStat(switchSim, switchAlly,
