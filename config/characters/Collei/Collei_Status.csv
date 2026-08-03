@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Collei,STATS,Base HP,90,9787,0
+Collei,STATS,Base ATK,90,200,0
+Collei,STATS,Base DEF,90,601,0
+Collei,STATS,Ascension ATK,90,0.24,0
+Collei,STATS,Energy Cost,90,60,0
+Collei,STATS,Constellation,6,6,0
+Collei,CONFIG,Character Level,90,90,0
+Collei,CONFIG,Normal Level,9,9,0
+Collei,CONFIG,Skill Level,12,12,0
+Collei,CONFIG,Burst Level,12,12,0

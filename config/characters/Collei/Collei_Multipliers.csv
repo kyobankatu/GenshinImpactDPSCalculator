@@ -1,0 +1,17 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Collei,NORMAL,N1,9,0.80106,0
+Collei,NORMAL,N2,9,0.78368,0
+Collei,NORMAL,N3,9,0.99382,0
+Collei,NORMAL,N4,9,1.24978,0
+Collei,CHARGE,Fully Charged Aimed Shot,9,2.108,0
+Collei,PLUNGE,High Plunge,9,2.6076,0
+Collei,SKILL,Floral Brush,9,2.5704,0
+Collei,SKILL,Floral Brush C3,12,3.024,0
+Collei,BURST,Explosion,9,3.431008,0
+Collei,BURST,Leap,9,0.735216,0
+Collei,BURST,Explosion C5,12,4.03648,0
+Collei,BURST,Leap C5,12,0.86496,0
+Collei,PASSIVE,Sprout,1,0.40,0
+Collei,PASSIVE,C1 Energy Recharge,1,0.20,0
+Collei,PASSIVE,C4 Elemental Mastery,4,60.0,0
+Collei,PASSIVE,C6 Follow-Up,6,2.0,0
