@@ -154,6 +154,7 @@ public class NymphsDream extends ArtifactSet
                 case NORMAL:
                     return HitCategory.NORMAL;
                 case CHARGE:
+                case EXTRA:
                     return HitCategory.CHARGED;
                 case PLUNGE:
                     return HitCategory.PLUNGING;

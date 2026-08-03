@@ -32,6 +32,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -338,6 +339,10 @@ public final class Gorou extends Character implements
                 highPlunge(simulator);
                 break;
             case SKILL:
+                if (request.getSkillMode() != SkillActionMode.PRESS) {
+                    throw new IllegalArgumentException(
+                            "Gorou Hold Skill is outside this slice");
+                }
                 inuzakaAllRoundDefense(simulator);
                 break;
             case BURST:

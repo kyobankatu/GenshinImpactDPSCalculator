@@ -10,6 +10,7 @@ import java.util.function.DoubleSupplier;
 
 import mechanics.buff.Buff;
 import mechanics.buff.BuffId;
+import model.artifact.CrimsonWitchOfFlames;
 import model.character.Collei;
 import model.character.Klee;
 import model.entity.Character;
@@ -24,6 +25,7 @@ import simulation.SimulatorSnapshot;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
 /** Focused regression checks for Klee's classic stationary one-target slice. */
@@ -426,6 +428,25 @@ public final class KleeRegressionTest {
         assertThrows(IllegalArgumentException.class,
                 () -> perform(unsupportedSim, CharacterActionKey.DASH),
                 "Klee rejects unsupported Dash");
+        assertThrows(IllegalArgumentException.class,
+                () -> unsupportedSim.performAction(
+                        CharacterId.KLEE,
+                        CharacterActionRequest.skill(SkillActionMode.HOLD)),
+                "Klee rejects unsupported Hold Skill");
+
+        CrimsonWitchOfFlames crimsonWitch = new CrimsonWitchOfFlames();
+        Klee holdWithArtifact = new Klee(
+                null, crimsonWitch, 0,
+                () -> 1.0, () -> 1.0, () -> 1.0);
+        CombatSimulator holdWithArtifactSim = simulatorWith(
+                holdWithArtifact);
+        assertThrows(IllegalArgumentException.class,
+                () -> holdWithArtifactSim.performAction(
+                        CharacterId.KLEE,
+                        CharacterActionRequest.skill(SkillActionMode.HOLD)),
+                "Klee rejects Hold before artifact dispatch");
+        assertEquals(0, holdWithArtifact.getActiveBuffs().size(),
+                "rejected Hold produces no Crimson Witch stack");
 
         CountingSupplier skippedBurstDraws = new CountingSupplier(0.0);
         Klee insufficientEnergy = new Klee(

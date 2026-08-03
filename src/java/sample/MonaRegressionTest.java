@@ -24,6 +24,7 @@ import simulation.SimulatorSnapshot;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
 /** Focused regression checks for Mona's classic offensive vertical slice. */
@@ -633,6 +634,11 @@ public final class MonaRegressionTest {
                         CharacterActionRequest.of(CharacterActionKey.DASH),
                         rejectedSim),
                 "Mona rejects unsupported alternate sprint");
+        assertThrows(IllegalArgumentException.class,
+                () -> rejectedSim.performAction(
+                        CharacterId.MONA,
+                        CharacterActionRequest.skill(SkillActionMode.HOLD)),
+                "Mona rejects unsupported Hold Skill");
 
         Mona bubble = new Mona(null, null, 0);
         CombatSimulator bubbleSim = simulatorWith(bubble);
@@ -646,6 +652,13 @@ public final class MonaRegressionTest {
         bubbleSim.notifyDamage(bubble, indirect, 100.0);
         assertTrue(bubble.isBubbleActive(bubbleSim.getCurrentTime()),
                 "Mona Bubble ignores indirect OTHER damage");
+        AttackAction extra = new AttackAction(
+                "Extra Attack probe", 1.0, Element.HYDRO,
+                StatType.BASE_HP, StatType.CHARGED_ATTACK_DMG_BONUS,
+                0.0, ActionType.EXTRA);
+        bubbleSim.notifyDamage(bubble, extra, 100.0);
+        assertTrue(!bubble.isBubbleActive(bubbleSim.getCurrentTime()),
+                "Mona Bubble accepts direct Extra Attack damage");
     }
 
     private static StatsContainer targetStats(

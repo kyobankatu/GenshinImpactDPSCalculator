@@ -532,6 +532,7 @@ public class Yoimiya extends Character implements
             case PLUNGE:
             case SKILL:
             case BURST:
+            case EXTRA:
                 return true;
             default:
                 return false;

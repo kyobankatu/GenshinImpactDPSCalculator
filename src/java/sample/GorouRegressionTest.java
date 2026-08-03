@@ -24,6 +24,7 @@ import simulation.SimulatorSnapshot;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.SkillActionMode;
 
 /** Focused regression checks for Gorou's stationary field-support slice. */
 public final class GorouRegressionTest {
@@ -621,6 +622,11 @@ public final class GorouRegressionTest {
         assertThrows(IllegalArgumentException.class,
                 () -> perform(unsupportedSim, CharacterActionKey.DASH),
                 "Gorou rejects unsupported Dash");
+        assertThrows(IllegalArgumentException.class,
+                () -> unsupportedSim.performAction(
+                        CharacterId.GOROU,
+                        CharacterActionRequest.skill(SkillActionMode.HOLD)),
+                "Gorou rejects unsupported Hold Skill");
 
         Gorou insufficient = new Gorou(null, null, 0);
         CombatSimulator insufficientSim = simulatorWith(insufficient);

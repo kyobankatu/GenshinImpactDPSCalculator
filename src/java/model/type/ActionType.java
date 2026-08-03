@@ -22,6 +22,8 @@ public enum ActionType {
     SKILL,
     /** Elemental Burst (Q key). */
     BURST,
+    /** Extra attack that can trigger coordinated attacks but is not Normal Attack damage. */
+    EXTRA,
     /** Dash / sprint action; does not deal damage. */
     DASH,
     /** Catch-all for actions that do not fit the above categories. */

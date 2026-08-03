@@ -26,6 +26,7 @@ import simulation.SimulatorSnapshot;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.SkillActionMode;
 
 /** Focused regression checks for Beidou's offensive single-target slice. */
 public final class BeidouRegressionTest {
@@ -42,6 +43,7 @@ public final class BeidouRegressionTest {
         testTidecallerTimingParticlesAndConstellation();
         testStormbreakerInitialAndConstellation();
         testDischargeTriggerGatesAndBoundaries();
+        testExtraAttackTrigger();
         testC6ResistanceWindow();
         testSnapshotRestore();
         testAbnormalCases();
@@ -341,6 +343,21 @@ public final class BeidouRegressionTest {
                 "Beidou C5 raises Discharge to level 12");
     }
 
+    private static void testExtraAttackTrigger() {
+        Beidou beidou = new Beidou(null, null, 0);
+        Noelle noelle = new Noelle(null, null);
+        CombatSimulator simulator = simulatorWith(beidou, noelle);
+        List<ActionRecord> discharges = captureNamedActions(
+                simulator, "Stormbreaker Lightning Discharge");
+        perform(simulator, CharacterActionKey.BURST);
+        simulator.setActiveCharacter(CharacterId.NOELLE);
+        directHit(simulator, CharacterId.NOELLE,
+                ActionType.EXTRA, 1.0, "Extra Attack trigger");
+        simulator.advanceTime(FRAME);
+        assertEquals(1, discharges.size(),
+                "Extra Attack triggers Stormbreaker Discharge");
+    }
+
     private static void testC6ResistanceWindow() {
         Beidou c5 = new Beidou(null, null, 5);
         CombatSimulator c5Sim = simulatorWith(c5);
@@ -449,6 +466,11 @@ public final class BeidouRegressionTest {
                                 CharacterActionKey.PLUNGE),
                         simulator),
                 "Beidou explicitly excludes Plunging Attack");
+        assertThrows(IllegalArgumentException.class,
+                () -> simulator.performAction(
+                        CharacterId.BEIDOU,
+                        CharacterActionRequest.skill(SkillActionMode.HOLD)),
+                "Beidou explicitly excludes Hold Skill");
 
         Beidou insufficient = new Beidou(null, null, 0);
         CombatSimulator insufficientSim = simulatorWith(insufficient);

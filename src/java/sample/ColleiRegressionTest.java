@@ -25,6 +25,7 @@ import simulation.SimulatorSnapshot;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
 /** Focused regression checks for Collei's reaction character slice. */
@@ -552,6 +553,11 @@ public final class ColleiRegressionTest {
                         CharacterActionRequest.of(CharacterActionKey.DASH),
                         simulator),
                 "Collei rejects unsupported Dash");
+        assertThrows(IllegalArgumentException.class,
+                () -> simulator.performAction(
+                        CharacterId.COLLEI,
+                        CharacterActionRequest.skill(SkillActionMode.HOLD)),
+                "Collei rejects unsupported Hold Skill");
         collei.restoreCurrentEnergy(0.0);
         perform(simulator, CharacterActionKey.BURST);
         assertClose(60.0, collei.getMissedBurstCost(),

@@ -37,6 +37,7 @@ public class ActionGateway {
         if (character == null) {
             throw new RuntimeException("Character not found: " + characterId);
         }
+        character.validateActionRequest(request);
         String charName = character.getName();
 
         if (request.getKey() == CharacterActionKey.SKILL) {

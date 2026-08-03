@@ -28,6 +28,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -269,6 +270,10 @@ public final class Collei extends Character implements
                 highPlunge(simulator);
                 break;
             case SKILL:
+                if (request.getSkillMode() != SkillActionMode.PRESS) {
+                    throw new IllegalArgumentException(
+                            "Collei Hold Skill is outside this slice");
+                }
                 floralBrush(simulator);
                 break;
             case BURST:

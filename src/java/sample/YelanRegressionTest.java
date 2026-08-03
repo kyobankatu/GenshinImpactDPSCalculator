@@ -9,6 +9,7 @@ import java.util.List;
 
 import mechanics.buff.Buff;
 import mechanics.element.ICDManager;
+import model.character.Beidou;
 import model.character.Yelan;
 import model.entity.Character;
 import model.entity.Enemy;
@@ -19,11 +20,13 @@ import model.type.Element;
 import model.type.ICDTag;
 import model.type.ICDType;
 import model.type.StatType;
+import model.weapon.MitternachtsWaltz;
 import simulation.CombatSimulator;
 import simulation.SimulatorSnapshot;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
 /** Focused regression checks for Yelan's Exquisite Throw vertical slice. */
@@ -42,6 +45,7 @@ public final class YelanRegressionTest {
         testBurstInitialA4AndWaveGate();
         testSkillCoordinationAndProjectileMicrosnapshots();
         testA1C3C4C5AndC6();
+        testC6IntegratedTriggerClassification();
         testYelanSpecificIcdGroups();
         testRepeatedRestoreAndStaleWork();
         testInvalidInputsCooldownEnergyAndOwnership();
@@ -381,13 +385,54 @@ public final class YelanRegressionTest {
             assertEquals(StatType.CHARGED_ATTACK_DMG_BONUS,
                     barb.action.getBonusStat(),
                     "C6 Barb receives Charged DMG Bonus");
-            assertEquals(ActionType.NORMAL, barb.action.getActionType(),
-                    "C6 input remains a Normal trigger");
+            assertEquals(ActionType.EXTRA, barb.action.getActionType(),
+                    "C6 Barb is Extra rather than Normal Attack damage");
             assertEquals(ICDType.YelanBreakthrough,
                     barb.action.getICDType(), "C6 Barb Yelan-specific ICD");
             assertEquals(ICDTag.Yelan_Breakthrough,
                     barb.action.getICDTag(), "C6 Barb independent ICD group");
         }
+    }
+
+    private static void testC6IntegratedTriggerClassification() {
+        MitternachtsWaltz weapon = new MitternachtsWaltz(5);
+        Yelan yelan = new Yelan(weapon, null, 6);
+        Beidou beidou = new Beidou(null, null, 0);
+        CombatSimulator simulator = simulatorWith(yelan, beidou);
+        List<ActionRecord> yelanRecords = captureYelanActions(simulator);
+        List<ActionRecord> beidouRecords = new ArrayList<>();
+        simulator.addDamageListener((actor, action, damage, time) -> {
+            if (actor.getCharacterId() == CharacterId.BEIDOU) {
+                beidouRecords.add(new ActionRecord(action, damage, time));
+            }
+        });
+
+        simulator.performAction(
+                CharacterId.BEIDOU,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        perform(simulator, CharacterActionKey.BURST);
+        perform(simulator, CharacterActionKey.NORMAL);
+        simulator.advanceTime(1.0);
+
+        ActionRecord barb = named(
+                yelanRecords,
+                "Winner Takes All Breakthrough Barb").get(0);
+        assertEquals(ActionType.EXTRA, barb.action.getActionType(),
+                "resolved C6 Barb retains Extra Attack classification");
+        assertEquals(StatType.CHARGED_ATTACK_DMG_BONUS,
+                barb.action.getBonusStat(),
+                "resolved C6 Barb retains Charged DMG scaling");
+        assertEquals(1, named(
+                beidouRecords,
+                "Stormbreaker Lightning Discharge").size(),
+                "resolved C6 Barb triggers Beidou Stormbreaker");
+        assertClose(0.0,
+                applicableStat(
+                        simulator,
+                        yelan,
+                        StatType.SKILL_DMG_BONUS,
+                        simulator.getCurrentTime()),
+                "resolved C6 Barb does not trigger Mitternachts Waltz");
     }
 
     private static void testRepeatedRestoreAndStaleWork() {
@@ -504,6 +549,11 @@ public final class YelanRegressionTest {
         assertThrows(IllegalArgumentException.class,
                 () -> perform(unsupportedSim, CharacterActionKey.DASH),
                 "unsupported Dash rejected");
+        assertThrows(IllegalArgumentException.class,
+                () -> unsupportedSim.performAction(
+                        CharacterId.YELAN,
+                        CharacterActionRequest.skill(SkillActionMode.HOLD)),
+                "unsupported Hold Skill rejected");
         assertThrows(IllegalArgumentException.class,
                 () -> unsupported.onAction(null, unsupportedSim),
                 "null action rejected");

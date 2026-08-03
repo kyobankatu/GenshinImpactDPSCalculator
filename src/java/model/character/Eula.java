@@ -63,6 +63,13 @@ public final class Eula extends Character implements
             { 1.319735, 1.319735 }
     };
 
+    /** Eula implements both Press and Hold Skill branches. */
+    @Override
+    protected boolean supportsSkillActionMode(SkillActionMode mode) {
+        return mode == SkillActionMode.PRESS
+                || mode == SkillActionMode.HOLD;
+    }
+
     private final DoubleSupplier particleDrawSource;
     private final DoubleSupplier c6DrawSource;
     private CombatSimulator initializedSimulator;

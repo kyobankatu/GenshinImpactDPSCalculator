@@ -41,6 +41,7 @@ public final class YoimiyaRegressionTest {
         testNormalSequenceChargedAndPlunge();
         testNiwabiInfusionParticlesA1AndSwitch();
         testAurousBlazeA4AndCooldownBoundary();
+        testExtraAttackAurousBlazeTrigger();
         testConstellationBranchesAndExplicitExclusions();
         testInvalidTriggersGenerationAndOwnership();
         testInvalidActionAndSimulatorBinding();
@@ -353,6 +354,20 @@ public final class YoimiyaRegressionTest {
         assertClose(cooldownBefore - 1.2,
                 c4.getSkillCooldownEndTime(), EPS,
                 "C4 mark trigger reduces pending Skill cooldown");
+    }
+
+    private static void testExtraAttackAurousBlazeTrigger() {
+        Yoimiya yoimiya = new Yoimiya(null, null, 0);
+        CombatSimulator simulator = simulatorWith(yoimiya, true);
+        List<ActionRecord> records = captureYoimiyaActions(simulator);
+        perform(simulator, CharacterActionKey.BURST);
+        records.clear();
+        partyHit(simulator, CharacterId.NOELLE,
+                ActionType.EXTRA, 1.0, true);
+        simulator.advanceTime(1.0 / 60.0);
+        assertEquals(1, records.size(),
+                "Extra Attack detonates Aurous Blaze");
+        assertAurousExplosion(records.get(0).action, 2.074);
     }
 
     private static void testConstellationBranchesAndExplicitExclusions() {

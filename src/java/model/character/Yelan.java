@@ -29,6 +29,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -298,6 +299,10 @@ public final class Yelan extends Character implements
                 highPlunge(simulator);
                 break;
             case SKILL:
+                if (request.getSkillMode() != SkillActionMode.PRESS) {
+                    throw new IllegalArgumentException(
+                            "Yelan Hold Skill is outside this slice");
+                }
                 lingeringLifeline(simulator);
                 break;
             case BURST:
@@ -541,7 +546,7 @@ public final class Yelan extends Character implements
                     Element.HYDRO,
                     StatType.BASE_HP,
                     StatType.CHARGED_ATTACK_DMG_BONUS,
-                    ActionType.NORMAL,
+                    ActionType.EXTRA,
                     ICDType.YelanBreakthrough,
                     ICDTag.Yelan_Breakthrough,
                     1.0,

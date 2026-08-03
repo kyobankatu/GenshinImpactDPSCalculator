@@ -27,6 +27,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -337,6 +338,10 @@ public class Mona extends Character implements
                 highPlunge(simulator);
                 break;
             case SKILL:
+                if (request.getSkillMode() != SkillActionMode.PRESS) {
+                    throw new IllegalArgumentException(
+                            "Mona Hold Skill is outside this slice");
+                }
                 mirrorReflectionOfDoom(simulator);
                 break;
             case BURST:
@@ -575,6 +580,7 @@ public class Mona extends Character implements
             case PLUNGE:
             case SKILL:
             case BURST:
+            case EXTRA:
                 return true;
             default:
                 return false;

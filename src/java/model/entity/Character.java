@@ -9,7 +9,9 @@ import model.entity.state.SnapshotState;
 import model.stats.StatsContainer;
 import model.type.CharacterId;
 import model.type.StatType;
+import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.SkillActionMode;
 
 /**
  * Abstract base class for all playable characters in the simulation.
@@ -241,6 +243,30 @@ public abstract class Character {
     /** @return last captured stats snapshot (empty container if none) */
     public StatsContainer getSnapshot() {
         return snapshotState.getSnapshot();
+    }
+
+    /**
+     * Validates an action before the simulator notifies action-use effects.
+     *
+     * @param request typed action request
+     * @throws IllegalArgumentException when the request is null or its Skill
+     *         mode is unsupported
+     */
+    public void validateActionRequest(CharacterActionRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException(name + " action is required");
+        }
+        if (request.getKey() == CharacterActionKey.SKILL
+                && !supportsSkillActionMode(request.getSkillMode())) {
+            throw new IllegalArgumentException(
+                    name + " " + request.getSkillMode()
+                            + " Skill is unsupported");
+        }
+    }
+
+    /** Returns whether this character supports the requested Skill mode. */
+    protected boolean supportsSkillActionMode(SkillActionMode mode) {
+        return mode == SkillActionMode.PRESS;
     }
 
     /**

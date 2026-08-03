@@ -27,6 +27,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -243,6 +244,10 @@ public final class Beidou extends Character
                 normalAttack(simulator);
                 break;
             case SKILL:
+                if (request.getSkillMode() != SkillActionMode.PRESS) {
+                    throw new IllegalArgumentException(
+                            "Beidou Hold Skill is outside this slice");
+                }
                 tidecaller(simulator);
                 break;
             case BURST:
@@ -334,7 +339,8 @@ public final class Beidou extends Character
                 || action == null
                 || !action.isHitEffectTrigger()
                 || (action.getActionType() != ActionType.NORMAL
-                        && action.getActionType() != ActionType.CHARGE)
+                        && action.getActionType() != ActionType.CHARGE
+                        && action.getActionType() != ActionType.EXTRA)
                 || time + EVENT_EPSILON
                         < nextDischargeAllowedTime) {
             return;

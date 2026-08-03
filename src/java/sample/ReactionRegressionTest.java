@@ -9825,11 +9825,17 @@ public class ReactionRegressionTest {
 
         AttackAction burstHit = typedDamageHit(
                 "Mitternachts Waltz Burst", ActionType.BURST, 1.0);
+        AttackAction extraHit = typedDamageHit(
+                "Mitternachts Waltz Extra Attack", ActionType.EXTRA, 1.0);
         mitternachtsWaltz.onDamage(waltzOwner, burstHit, 6.0, waltzSim);
         mitternachtsWaltz.onDamage(waltzOwner, chargedHit, 6.0, waltzSim);
+        mitternachtsWaltz.onDamage(waltzOwner, extraHit, 6.0, waltzSim);
         assertClose(0.0,
                 effectiveStatAt(waltzOwner, StatType.NORMAL_ATTACK_DMG_BONUS, 6.0), EPS,
-                "Burst and Charged hits should not activate Mitternachts Waltz");
+                "Burst, Charged, and Extra hits should not activate Mitternachts Waltz");
+        assertClose(0.0,
+                effectiveStatAt(waltzOwner, StatType.SKILL_DMG_BONUS, 6.0), EPS,
+                "Extra Attack should not count as Normal damage for Mitternachts Waltz");
 
         model.weapon.MitternachtsWaltz r1Waltz =
                 new model.weapon.MitternachtsWaltz(1);
@@ -15051,6 +15057,8 @@ public class ReactionRegressionTest {
                 "Nymph Normal fixture", ActionType.NORMAL, 1.0);
         AttackAction nymphCharge = typedDamageHit(
                 "Nymph Charge fixture", ActionType.CHARGE, 1.0);
+        AttackAction nymphExtra = typedDamageHit(
+                "Nymph Extra fixture", ActionType.EXTRA, 1.0);
         AttackAction nymphPlunge = typedDamageHit(
                 "Nymph Plunge fixture", ActionType.PLUNGE, 1.0);
         AttackAction nymphSkill = typedDamageHit(
@@ -15073,6 +15081,10 @@ public class ReactionRegressionTest {
                         StatType.HYDRO_DMG_BONUS), EPS,
                 "Nymph one-category Hydro tier plus two-piece");
         nymphSim.advanceTime(1.0);
+        nymph.onDamage(nymphSim, nymphExtra, 100.0, nymphOwner);
+        assertClose(0.16,
+                resolvedStat(nymphSim, nymphOwner, StatType.ATK_PERCENT),
+                EPS, "Nymph Extra Attack uses the Charged category");
         nymph.onDamage(nymphSim, nymphCharge, 100.0, nymphOwner);
         assertClose(0.16,
                 resolvedStat(nymphSim, nymphOwner, StatType.ATK_PERCENT),
