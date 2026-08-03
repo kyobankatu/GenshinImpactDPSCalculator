@@ -623,8 +623,7 @@ public final class Gorou extends Character implements
                 FIELD_LINGER,
                 currentTime,
                 stats -> {
-                    if (generation != fieldGeneration
-                            || serial != latestFieldTickSerial) {
+                    if (serial != latestFieldTickSerial) {
                         return;
                     }
                     stats.add(StatType.DEF_FLAT, fieldDefBonus);

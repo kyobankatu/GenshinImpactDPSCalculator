@@ -447,6 +447,7 @@ public final class GorouRegressionTest {
         TestCharacter ally = new TestCharacter(
                 CharacterId.NOELLE, Element.GEO);
         CombatSimulator simulator = simulatorWith(gorou, ally);
+        List<ActionRecord> records = captureGorouActions(simulator);
         perform(simulator, CharacterActionKey.SKILL);
         long skillFieldEndFrames = Math.round(
                 gorou.getFieldEndTime() / FRAME);
@@ -454,6 +455,10 @@ public final class GorouRegressionTest {
         assertTrue(gorou.getFieldEndTime()
                         < skillFieldEndFrames * FRAME,
                 "Gorou Burst replaces the existing Skill field");
+        assertClose((648.0 * 1.25 + 350.472) * 0.156,
+                named(records, "Juuga").get(0)
+                        .action.getAdditiveBaseDmgBonus(),
+                "replaced Skill field buff lingers through Burst hitmark");
         simulator.switchCharacter(CharacterId.NOELLE);
         advanceTo(simulator, 113.0 * FRAME);
         assertClose(350.472,
