@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Gorou,STATS,Base HP,90,9570,0
+Gorou,STATS,Base ATK,90,183,0
+Gorou,STATS,Base DEF,90,648,0
+Gorou,STATS,Ascension Geo DMG,90,0.24,0
+Gorou,STATS,Energy Cost,90,80,0
+Gorou,STATS,Constellation,6,6,0
+Gorou,CONFIG,Character Level,90,90,0
+Gorou,CONFIG,Normal Level,9,9,0
+Gorou,CONFIG,Skill Level,12,12,0
+Gorou,CONFIG,Burst Level,12,12,0

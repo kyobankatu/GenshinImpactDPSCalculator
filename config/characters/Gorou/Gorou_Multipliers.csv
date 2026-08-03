@@ -1,0 +1,20 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Gorou,NORMAL,N1,9,0.69362,0
+Gorou,NORMAL,N2,9,0.68256,0
+Gorou,NORMAL,N3,9,0.9085,0
+Gorou,NORMAL,N4,9,1.08388,0
+Gorou,PLUNGE,High Plunge,9,2.607632,0
+Gorou,SKILL,Skill DMG,9,1.8224,0
+Gorou,SKILL,Skill DMG C3,12,2.144,0
+Gorou,SKILL,DEF Increase,9,350.472,0
+Gorou,SKILL,DEF Increase C3,12,412.32,0
+Gorou,BURST,Burst Initial,9,1.669672,0
+Gorou,BURST,Burst Initial C5,12,1.96432,0
+Gorou,BURST,Crystal Collapse,9,1.0421,0
+Gorou,BURST,Crystal Collapse C5,12,1.226,0
+Gorou,PASSIVE,A1 DEF Bonus,1,0.25,0
+Gorou,PASSIVE,A4 Skill DEF Ratio,1,1.56,0
+Gorou,PASSIVE,A4 Burst DEF Ratio,1,0.156,0
+Gorou,PASSIVE,C6 Standing Firm,6,0.10,0
+Gorou,PASSIVE,C6 Impregnable,6,0.20,0
+Gorou,PASSIVE,C6 Crunch,6,0.40,0
