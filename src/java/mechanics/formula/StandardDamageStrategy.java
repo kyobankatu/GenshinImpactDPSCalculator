@@ -8,6 +8,7 @@ import model.entity.Character;
 import model.entity.Enemy;
 import model.stats.StatsContainer;
 import model.type.ActionType;
+import model.type.Element;
 import model.type.StatType;
 import simulation.CombatSimulator;
 import simulation.action.AttackAction;
@@ -107,6 +108,9 @@ final class StandardDamageStrategy implements DamageStrategy {
         }
         critRate = Math.min(1.0, critRate);
         double critDmg = stats.get(StatType.CRIT_DMG);
+        if (action.getElement() == Element.GEO) {
+            critDmg += stats.get(StatType.GEO_CRIT_DMG);
+        }
         if (action.getActionType() == ActionType.PLUNGE) {
             critDmg += stats.get(StatType.PLUNGING_ATTACK_CRIT_DMG);
         }

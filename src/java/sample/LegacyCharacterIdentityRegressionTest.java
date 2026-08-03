@@ -30,6 +30,8 @@ public final class LegacyCharacterIdentityRegressionTest {
         assertIdentity(CharacterId.COLLEI, 32, "Collei");
         assertIdentity(CharacterId.KLEE, 33, "Klee");
         assertIdentity(CharacterId.EULA, 34, "Eula");
+        assertIdentity(CharacterId.GOROU, 35, "Gorou");
+        assertIdentity(CharacterId.YELAN, 36, "Yelan");
         assertEquals(CharacterId.BENNETT, CharacterId.fromNumericId(1),
                 "first prior numeric ID");
         assertEquals(CharacterId.YANFEI, CharacterId.fromNumericId(20),
@@ -38,7 +40,7 @@ public final class LegacyCharacterIdentityRegressionTest {
                 "negative numeric fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(0),
                 "zero numeric fallback");
-        assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(35),
+        assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(37),
                 "high numeric fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName(null),
                 "null name fallback");
@@ -52,6 +54,10 @@ public final class LegacyCharacterIdentityRegressionTest {
                 "Klee identity case-sensitive fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("eula"),
                 "Eula identity case-sensitive fallback");
+        assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("gorou"),
+                "Gorou identity case-sensitive fallback");
+        assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("yelan"),
+                "Yelan identity case-sensitive fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("Not A Character"),
                 "unmatched name fallback");
         assertEquals(CharacterRegion.LIYUE, CharacterId.GANYU.getRegion(),
@@ -78,6 +84,10 @@ public final class LegacyCharacterIdentityRegressionTest {
                 "Klee Mondstadt region lookup");
         assertEquals(CharacterRegion.MONDSTADT, CharacterId.EULA.getRegion(),
                 "Eula Mondstadt region lookup");
+        assertEquals(CharacterRegion.INAZUMA, CharacterId.GOROU.getRegion(),
+                "Gorou Inazuma region lookup");
+        assertEquals(CharacterRegion.LIYUE, CharacterId.YELAN.getRegion(),
+                "Yelan Liyue region lookup");
         assertEquals(CharacterRegion.UNKNOWN,
                 CharacterId.COLUMBINA.getRegion(),
                 "unverified custom region fails closed");
@@ -102,8 +112,13 @@ public final class LegacyCharacterIdentityRegressionTest {
                 BuffId.GANYU_A1_FROSTFLAKE_CRIT_RATE,
                 BuffId.GANYU_A4_CRYO_DMG_BONUS,
                 BuffId.GANYU_C1_CRYO_RES_SHRED,
-                BuffId.GANYU_C4_CELESTIAL_SHOWER_DMG_BONUS);
-        assertEquals(17, reserved.size(), "reserved typed buff identities");
+                BuffId.GANYU_C4_CELESTIAL_SHOWER_DMG_BONUS,
+                BuffId.GOROU_GENERAL_WAR_BANNER,
+                BuffId.GOROU_A1_DEF_BONUS,
+                BuffId.GOROU_C6_GEO_CRIT_DMG,
+                BuffId.YELAN_ADAPT_WITH_EASE,
+                BuffId.YELAN_C4_MAX_HP);
+        assertEquals(22, reserved.size(), "reserved typed buff identities");
         System.out.println("LegacyCharacterIdentityRegressionTest passed");
     }
 

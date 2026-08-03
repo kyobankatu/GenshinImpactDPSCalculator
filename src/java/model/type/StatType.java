@@ -62,6 +62,8 @@ public enum StatType {
     CRIT_RATE,
     /** Crit DMG as a decimal (e.g. 0.50 = 50 %). */
     CRIT_DMG,
+    /** Additional CRIT DMG applied only to Geo damage instances. */
+    GEO_CRIT_DMG,
     /** Elemental Mastery flat value; amplifies reactions. */
     ELEMENTAL_MASTERY,
     /** Energy Recharge as a decimal (e.g. 1.0 = 100 %). */

@@ -241,6 +241,16 @@ public enum BuffId {
     EULA_ICEWHIRL_RES_SHRED,
     /** Eula C1 owner-only Physical DMG bonus. */
     EULA_C1_PHYSICAL_DMG_BONUS,
+    /** Gorou General's War Banner active-character field bonuses. */
+    GOROU_GENERAL_WAR_BANNER,
+    /** Gorou A1 team DEF bonus after Burst activation. */
+    GOROU_A1_DEF_BONUS,
+    /** Gorou C6 Geo-only CRIT DMG bonus. */
+    GOROU_C6_GEO_CRIT_DMG,
+    /** Yelan A4 active-character ramping all-damage bonus. */
+    YELAN_ADAPT_WITH_EASE,
+    /** Yelan C4 team Max HP bonus from Lifeline marks. */
+    YELAN_C4_MAX_HP,
     /** 武器「千夜に浮かぶ夢」の味方元素熟知共有。 */
     A_THOUSAND_FLOATING_DREAMS_TEAM_EM,
     /** 武器「龍殺しの英傑譚」の交代先への攻撃力バフ。 */

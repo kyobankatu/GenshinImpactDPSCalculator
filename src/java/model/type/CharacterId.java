@@ -81,6 +81,10 @@ public enum CharacterId {
     KLEE(33, "Klee", CharacterRegion.MONDSTADT),
     /** Eula (Cryo claymore physical Burst attacker). */
     EULA(34, "Eula", CharacterRegion.MONDSTADT),
+    /** Gorou (Geo bow field support). */
+    GOROU(35, "Gorou", CharacterRegion.INAZUMA),
+    /** Yelan (Hydro bow off-field attacker and support). */
+    YELAN(36, "Yelan", CharacterRegion.LIYUE),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 
