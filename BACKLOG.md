@@ -3562,3 +3562,20 @@ experiment record.
   and bounded character slice, then resolve independent-review timing,
   concurrent-cast, ICD, replacement, and snapshot findings; all planned gates
   and final independent re-review pass on 2026-08-03.
+
+### B-170 — Classic Klee character and enemy DEF reduction
+
+- **Status:** in progress
+- **Source:** explicit broad content-expansion request and post-B-169 missing
+  character inventory.
+- **Symptom:** Klee has pinned classic-kit evidence but no typed identity,
+  loadable class, talent CSV, focused regression, or enemy DEF-reduction stat.
+- **Evidence:** pinned KQM TCL `80ba6241` and gcsim `ef41805d`, accessed
+  2026-08-03; KQM standard formula caps additive DEF reduction at 90% and
+  multiplies its remaining factor with DEF ignore.
+- **Scope/risk:** planned identity, high-risk shared formula prerequisite, then
+  bounded classic stationary single-target Klee implementation.
+- **Boundary:** Hexerei, actual-CRIT A4, stamina, blunt/geometry behavior,
+  multi-target selection, RL, generated docs, and Deferred Systems are excluded.
+- **Proof:** `TASKS.md` Classic Klee Character Campaign plus identity, formula,
+  focused character, reaction, build, Javadoc, and executable preflight gates.

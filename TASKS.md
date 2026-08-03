@@ -55,6 +55,10 @@ The latest campaign adds Collei's stationary single-target reaction slice; RL,
 generated docs, and deferred healing, defensive, player-damage, or geometry
 systems remain excluded.
 
+B-170 is the active classic Klee campaign. It first adds the shared enemy DEF
+reduction formula, then a bounded stationary single-target character slice;
+RL, generated docs, Hexerei, and Deferred Systems remain excluded.
+
 The B-158 derived-stat equipment and Fischl wave is complete. It adds reusable
 final-DEF/EM conversion, two five-star weapons, four asset-backed artifact sets,
 and Fischl through bounded branch-isolated lanes.
@@ -13843,6 +13847,119 @@ Completion evidence:
 - `LegacyCharacterIdentityRegressionTest`, `ColleiRegressionTest`,
   `ReactionRegressionTest`, build, Javadoc, and executable preflight pass on
   2026-08-03; final independent re-review reports no correctness findings.
+
+## Implementation Order: Classic Klee Character Campaign
+
+Status: In progress. B-170 has typed-identity and shared DEF-reduction
+prerequisites followed by one bounded classic Klee slice.
+
+Scope:
+
+- Add Klee's stable typed identity and aligned Lv. 90/talent data.
+- Add sourced enemy DEF reduction, capped at 90% and multiplicative with DEF
+  ignore, without changing the existing resistance path.
+- Implement Klee's classic stationary single-target attacks, A1, Burst, and
+  representable C1-C6 effects with deterministic injected random draws.
+
+Out of scope for this pass:
+
+- Hexerei/Witch's Homework changes, actual-CRIT A4 Energy, stamina, blunt
+  poise/shatter, projectile/mine geometry, enemy grouping, RL, generated docs,
+  and Deferred Systems.
+- More than the fixed one-bounce/two-mine target model or unsupported action
+  cancel inputs.
+
+Definitions:
+
+- `KLEE`: stable Mondstadt character identity using numeric ID 33.
+- `ENEMY_DEF_REDUCTION`: additive enemy DEF reduction clamped to `[0, 0.90]`
+  before multiplying the remaining DEF by `(1 - DEF_IGNORE)`.
+- `Klee`: snapshot-aware classic kit with injectable random draws and fixed
+  stationary one-target Skill/Burst hit selection.
+
+### Phase 1: Reserve Klee Identity
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+
+Requirements:
+
+- Assign numeric ID 33/Mondstadt without renumbering existing identities.
+- Move the adjacent unassigned boundary to ID 34 and preserve exact-name lookup.
+
+Tests:
+
+- Normal: exact name, ID, display name, and region round-trip.
+- Boundary: Collei ID 32 remains stable and ID 34 fails closed.
+- Abnormal: null and case-mismatched names return `UNKNOWN`.
+
+Verification:
+
+- `./gradlew LegacyCharacterIdentityRegressionTest build`
+
+### Phase 2: Add Enemy DEF Reduction Formula
+
+Target files:
+
+- `src/java/model/type/StatType.java`
+- `src/java/mechanics/formula/DamageCalculator.java`
+- `src/java/mechanics/formula/StandardDamageStrategy.java`
+- `src/java/sample/DefenseReductionRegressionTest.java` (new)
+
+Requirements:
+
+- Apply the sourced standard-defense formula with independent DEF reduction and
+  DEF ignore factors; clamp reduction to 90% and ignore to 100%.
+- Keep zero-reduction outputs bit-for-bit compatible with the existing path and
+  do not apply standard DEF to custom Lunar damage.
+
+Tests:
+
+- Normal: 23.3% reduction increases standard damage by the exact formula.
+- Boundary: 90% cap, zero reduction, and 60% ignore multiplied by 23.3% reduction.
+- Abnormal: negative reduction cannot increase enemy DEF and excessive values
+  cannot exceed the cap.
+
+Verification:
+
+- `./gradlew DefenseReductionRegressionTest ReactionRegressionTest build`
+
+### Phase 3: Klee Offensive And Constellation Vertical Slice
+
+Target files:
+
+- `config/characters/Klee/Klee_Status.csv` (new)
+- `config/characters/Klee/Klee_Multipliers.csv` (new)
+- `src/java/model/character/Klee.java` (new)
+- `src/java/sample/KleeRegressionTest.java` (new)
+
+Requirements:
+
+- Adapt pinned gcsim `ef41805d` and KQM TCL `80ba6241` multipliers, release and
+  hit frames, gauge/ICD, snapshots, cooldown/Energy timing, and particles.
+- Model N1-N3, Charged, High Plunge, two-charge Skill with one bounce/two mines,
+  six Burst waves with deterministic injected 30%/50% extra-hit draws, A1's
+  four-second Spark gate, and representable C1-C6 effects.
+- Apply C2's 23.3% target DEF reduction for ten seconds, stop Burst on switch,
+  reconstruct future owned events once after repeated restore, and prevent
+  stale generations from emitting damage or Energy.
+
+Tests:
+
+- Normal: data, attacks, Skill charges/particles, Burst distribution, A1, and
+  C1-C6 categories, multipliers, buffs, debuff, Energy, and timing.
+- Boundary: release snapshots, A1 gate/consumption, C1 pity reset, C2 exact
+  expiry, C4 switch, C6 cadence, Burst termination, and repeated restore.
+- Abnormal: invalid constellation/random source/state payload, unsupported
+  action, cross-simulator reuse, cooldown/Energy rejection, and stale events.
+
+Verification:
+
+- `./gradlew KleeRegressionTest`
+- `./gradlew DefenseReductionRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
 
 ## Implementation Order: Parallel Foundational Content Campaign
 
