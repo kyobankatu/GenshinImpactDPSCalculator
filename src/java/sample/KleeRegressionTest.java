@@ -137,6 +137,15 @@ public final class KleeRegressionTest {
                         .get(StatType.CHARGED_ATTACK_DMG_BONUS),
                 "Klee A1 Spark is consumed once");
 
+        CountingSupplier skillA1Draws = new CountingSupplier(1.0);
+        Klee skillA1 = new Klee(
+                null, null, 0, skillA1Draws, () -> 1.0, () -> 1.0);
+        CombatSimulator skillA1Sim = simulatorWith(skillA1);
+        perform(skillA1Sim, CharacterActionKey.SKILL);
+        advanceTo(skillA1Sim, 5.0);
+        assertEquals(1, skillA1Draws.getCount(),
+                "Klee Skill mines do not perform A1 draws");
+
         records.clear();
         double plungeStart = simulator.getCurrentTime();
         perform(simulator, CharacterActionKey.PLUNGE);

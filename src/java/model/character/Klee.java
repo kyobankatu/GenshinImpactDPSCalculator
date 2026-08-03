@@ -550,8 +550,10 @@ public final class Klee extends Character implements
             c2ExpirationTime = time
                     + getTalentValue("C2 Duration", 10.0);
         }
-        if (action.getActionType() != ActionType.NORMAL
-                && action.getActionType() != ActionType.SKILL) {
+        boolean a1Eligible = action.getActionType() == ActionType.NORMAL
+                || (action.getActionType() == ActionType.SKILL
+                        && !resolvingSkillMine);
+        if (!a1Eligible) {
             return;
         }
         if (time + EPSILON < nextA1ProcTime) {
