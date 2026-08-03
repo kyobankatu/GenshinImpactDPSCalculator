@@ -55,8 +55,8 @@ The latest campaign adds Collei's stationary single-target reaction slice; RL,
 generated docs, and deferred healing, defensive, player-damage, or geometry
 systems remain excluded.
 
-B-171 is the active Eula campaign. It first adds a backward-compatible typed
-Press/Hold Skill request, then Eula's identity and bounded physical Burst slice;
+B-171 is the completed Eula campaign. It adds a backward-compatible typed
+Press/Hold Skill request, Eula's identity, and a bounded physical Burst slice;
 RL, generated docs, enemy-HP state, and Deferred Systems remain excluded.
 
 B-170 is the completed classic Klee campaign. It adds the shared enemy DEF
@@ -13979,7 +13979,7 @@ Completion evidence:
 
 ## Implementation Order: Eula Physical Burst Character Campaign
 
-Status: In progress. B-171 has one backward-compatible action-request
+Status: Complete. B-171 delivers one backward-compatible action-request
 prerequisite, one stable identity phase, and one bounded character slice.
 
 Scope:
@@ -14090,6 +14090,16 @@ Verification:
 - `./gradlew EulaRegressionTest`
 - `./gradlew ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Commits `3885bd4`, `a8c8937`, and `13d8a65` add typed Press/Hold requests,
+  stable Eula identity 34, aligned data, attacks, Grimheart, A1/A4, dynamic
+  Lightfall, representable constellations, and snapshot-safe delayed work.
+- Commit `9c4962b` aligns every no-ICD attack with the `None` tag; commit
+  `0bd4568` directly pins A4's refreshed exact 18-second Grimheart expiry.
+- Request, identity, Eula, reaction, build, Javadoc, and executable preflight
+  gates pass on 2026-08-03. Independent review found no correctness issue.
 
 ## Implementation Order: Parallel Foundational Content Campaign
 

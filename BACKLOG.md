@@ -3586,7 +3586,7 @@ experiment record.
 
 ### B-171 — Eula physical Burst character
 
-- **Status:** in progress
+- **Status:** done
 - **Source:** explicit broad content-expansion request and post-B-170 missing
   character inventory.
 - **Symptom:** Eula has pinned source-ready mechanics and an image asset but no
@@ -3599,3 +3599,7 @@ experiment record.
   hitlag, RL, generated docs, and Deferred Systems are excluded.
 - **Proof:** `TASKS.md` Eula Physical Burst Character Campaign plus request,
   identity, focused character, reaction, build, Javadoc, and preflight gates.
+- **Completion:** commits `3885bd4`, `a8c8937`, `13d8a65`, `9c4962b`, and
+  `0bd4568` deliver the request extension, identity, bounded character slice,
+  metadata correction, and review-driven boundary coverage. All planned gates
+  pass on 2026-08-03 and independent review found no correctness issue.
