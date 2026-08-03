@@ -624,7 +624,6 @@ public final class Klee extends Character implements
                         ICDType.Standard,
                         ICDTag.NormalAttack,
                         1.0);
-                action.setShatterTrigger(true);
                 break;
             case CHARGED:
                 action = attack(
@@ -636,7 +635,6 @@ public final class Klee extends Character implements
                         ICDType.None,
                         ICDTag.ChargedAttack,
                         1.0);
-                action.setShatterTrigger(true);
                 break;
             case SKILL_BOUNCE:
                 action = attack(
@@ -652,7 +650,6 @@ public final class Klee extends Character implements
                         ICDType.Standard,
                         ICDTag.NormalAttack,
                         1.0);
-                action.setShatterTrigger(true);
                 break;
             case SKILL_MINE:
                 action = attack(

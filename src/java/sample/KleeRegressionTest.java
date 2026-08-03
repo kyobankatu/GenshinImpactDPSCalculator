@@ -101,6 +101,8 @@ public final class KleeRegressionTest {
                     "Klee N" + (index + 1) + " multiplier");
             assertEquals(ActionType.NORMAL, record.action.getActionType(),
                     "Klee Normal category");
+            assertTrue(!record.action.isShatterTrigger(),
+                    "Klee bounded Normal excludes Shatter");
         }
         assertClose(0.0,
                 records.get(0).action.getStatSnapshot()
@@ -121,6 +123,8 @@ public final class KleeRegressionTest {
                 "Klee Charged impact frame");
         assertClose(2.67512, charged.action.getDamagePercent(),
                 "Klee Charged multiplier");
+        assertTrue(!charged.action.isShatterTrigger(),
+                "Klee bounded Charged Attack excludes Shatter");
         assertClose(0.50,
                 charged.action.getStatSnapshot()
                         .get(StatType.CHARGED_ATTACK_DMG_BONUS),
@@ -164,6 +168,8 @@ public final class KleeRegressionTest {
         List<ActionRecord> mines = named(records, "Jumpy Dumpty (Mine)");
         assertEquals(2, bounces.size(), "Klee recast preserves both bounces");
         assertEquals(4, mines.size(), "Klee recast preserves all four mines");
+        assertTrue(!bounces.get(0).action.isShatterTrigger(),
+                "Klee bounded Skill excludes Shatter");
         assertEquals(2, particles.size(), "Klee recast particle count");
         assertClose(4.0, particles.get(0).count,
                 "Klee Skill particles per cast");
