@@ -821,7 +821,7 @@ public final class Klee extends Character implements
     private boolean isBurstActive(double currentTime) {
         return burstInstance != null
                 && burstInstance.active
-                && currentTime <= burstInstance.expirationTime + EPSILON;
+                && currentTime < burstInstance.expirationTime - EPSILON;
     }
 
     private boolean isCurrentBurstGeneration(long generation) {

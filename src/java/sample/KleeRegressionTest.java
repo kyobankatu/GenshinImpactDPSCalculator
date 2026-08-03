@@ -336,6 +336,18 @@ public final class KleeRegressionTest {
                 "Klee switch suppresses stale Burst hits");
         assertClose(0.0, ally.getTotalFlatEnergy(),
                 "Klee switch suppresses stale C6 Energy");
+
+        Klee expiredKlee = deterministicKlee(4);
+        TestCharacter expiredAlly = new TestCharacter(
+                CharacterId.NOELLE, Element.GEO, 100.0);
+        CombatSimulator expiredSim = simulatorWith(expiredKlee, expiredAlly);
+        List<ActionRecord> expiredRecords = captureKleeActions(expiredSim);
+        perform(expiredSim, CharacterActionKey.BURST);
+        advanceTo(expiredSim, 746.0 * FRAME);
+        expiredSim.switchCharacter(CharacterId.NOELLE);
+        assertEquals(0,
+                named(expiredRecords, "Sparkly Explosion (C4)").size(),
+                "Klee C4 does not trigger at exact Burst expiration");
     }
 
     private static void testC2LiveTargetDefenseReductionAndExpiry() {
