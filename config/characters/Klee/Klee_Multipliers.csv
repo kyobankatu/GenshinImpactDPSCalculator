@@ -1,0 +1,22 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Klee,NORMAL,N1,9,1.22672,0
+Klee,NORMAL,N2,9,1.0608,0
+Klee,NORMAL,N3,9,1.52864,0
+Klee,CHARGED,Charged Attack,9,2.67512,0
+Klee,PLUNGE,High Plunge,9,2.607632,0
+Klee,SKILL,Jumpy Dumpty,9,1.6184,0
+Klee,SKILL,Jumpy Dumpty Mine,9,0.5576,0
+Klee,SKILL,Jumpy Dumpty C3,12,1.904,0
+Klee,SKILL,Jumpy Dumpty Mine C3,12,0.656,0
+Klee,BURST,Sparks n Splash,9,0.72488,0
+Klee,BURST,Sparks n Splash C5,12,0.8528,0
+Klee,PASSIVE,A1 Charged DMG Bonus,1,0.50,0
+Klee,PASSIVE,A1 Gate,1,4.0,0
+Klee,PASSIVE,A1 Spark Duration,1,30.0,0
+Klee,PASSIVE,C1 Burst Factor,1,1.20,0
+Klee,PASSIVE,C2 DEF Reduction,2,0.233,0
+Klee,PASSIVE,C2 Duration,2,10.0,0
+Klee,PASSIVE,C4 Explosion,4,5.55,0
+Klee,PASSIVE,C6 Pyro DMG Bonus,6,0.10,0
+Klee,PASSIVE,C6 Buff Duration,6,25.0,0
+Klee,PASSIVE,C6 Flat Energy,6,3.0,0

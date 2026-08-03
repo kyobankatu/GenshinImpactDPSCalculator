@@ -235,6 +235,8 @@ public enum BuffId {
     GANYU_C4_CELESTIAL_SHOWER_DMG_BONUS,
     /** Beidou C6 Electro resistance reduction. */
     BEIDOU_C6_ELECTRO_RES_SHRED,
+    /** Klee C6 non-stacking team Pyro DMG bonus. */
+    KLEE_C6_PYRO_DMG_BONUS,
     /** 武器「千夜に浮かぶ夢」の味方元素熟知共有。 */
     A_THOUSAND_FLOATING_DREAMS_TEAM_EM,
     /** 武器「龍殺しの英傑譚」の交代先への攻撃力バフ。 */

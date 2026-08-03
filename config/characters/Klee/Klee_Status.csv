@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Klee,STATS,Base HP,90,10287,0
+Klee,STATS,Base ATK,90,311,0
+Klee,STATS,Base DEF,90,615,0
+Klee,STATS,Ascension Pyro DMG,90,0.288,0
+Klee,STATS,Energy Cost,90,60,0
+Klee,STATS,Constellation,6,6,0
+Klee,CONFIG,Character Level,90,90,0
+Klee,CONFIG,Normal Level,9,9,0
+Klee,CONFIG,Skill Level,12,12,0
+Klee,CONFIG,Burst Level,12,12,0
