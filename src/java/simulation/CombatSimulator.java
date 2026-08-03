@@ -567,6 +567,19 @@ public class CombatSimulator {
         eventDispatcher.addActionListener(listener);
     }
 
+    /** Adds a listener for accepted typed character inputs. */
+    public void addActionRequestListener(ActionRequestListener listener) {
+        eventDispatcher.addActionRequestListener(listener);
+    }
+
+    /** Dispatches an accepted typed input before character action logic. */
+    public void notifyActionRequest(
+            Character actor,
+            CharacterActionRequest request) {
+        eventDispatcher.notifyActionRequest(
+                actor, request, getCurrentTime());
+    }
+
     /**
      * Adds a resolved direct-damage listener.
      *

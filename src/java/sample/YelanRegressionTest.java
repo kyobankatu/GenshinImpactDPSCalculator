@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import mechanics.buff.Buff;
+import mechanics.element.ICDManager;
 import model.character.Yelan;
 import model.entity.Character;
 import model.entity.Enemy;
@@ -41,6 +42,7 @@ public final class YelanRegressionTest {
         testBurstInitialA4AndWaveGate();
         testSkillCoordinationAndProjectileMicrosnapshots();
         testA1C3C4C5AndC6();
+        testYelanSpecificIcdGroups();
         testRepeatedRestoreAndStaleWork();
         testInvalidInputsCooldownEnergyAndOwnership();
         System.out.println("YelanRegressionTest passed");
@@ -205,6 +207,9 @@ public final class YelanRegressionTest {
                 "Burst spends Energy at frame 6");
         assertTrue(yelan.isExquisiteThrowActive(73.0 * FRAME),
                 "Burst starts exactly at frame 73");
+        assertTrue(yelan.isExquisiteThrowActive(
+                73.0 * FRAME + 15.0 - EPSILON),
+                "Burst remains active immediately before expiry");
         assertTrue(!yelan.isExquisiteThrowActive(
                 73.0 * FRAME + 15.0),
                 "Burst expires at exact 15-second boundary");
@@ -223,12 +228,12 @@ public final class YelanRegressionTest {
 
         simulator.setActiveCharacter(CharacterId.NOELLE);
         double firstTrigger = simulator.getCurrentTime();
-        resolveNormalProbe(simulator, CharacterId.NOELLE, "first");
-        resolveNormalProbe(simulator, CharacterId.NOELLE, "same-instance");
+        requestNormal(simulator, CharacterId.NOELLE);
+        requestNormal(simulator, CharacterId.NOELLE);
         advanceTo(simulator, firstTrigger + 1.0 - FRAME);
-        resolveNormalProbe(simulator, CharacterId.NOELLE, "before-boundary");
+        requestNormal(simulator, CharacterId.NOELLE);
         advanceTo(simulator, firstTrigger + 1.0);
-        resolveNormalProbe(simulator, CharacterId.NOELLE, "exact-boundary");
+        requestNormal(simulator, CharacterId.NOELLE);
         advanceTo(simulator, firstTrigger + 1.0 + 40.0 * FRAME);
         assertEquals(6, named(records, "Exquisite Throw Projectile").size(),
                 "same-time and before-gate hits do not duplicate waves");
@@ -242,10 +247,10 @@ public final class YelanRegressionTest {
             assertEquals(ActionType.BURST,
                     projectile.action.getActionType(),
                     "Throw counts as Burst damage");
-            assertEquals(ICDType.Standard,
+            assertEquals(ICDType.YelanBurst,
                     projectile.action.getICDType(),
-                    "Throw standard ICD");
-            assertEquals(ICDTag.ElementalBurst,
+                    "Throw Yelan-specific ICD");
+            assertEquals(ICDTag.Yelan_ExquisiteThrow,
                     projectile.action.getICDTag(),
                     "Throw independent Burst ICD group");
             assertTrue(projectile.action.hasStatSnapshot(),
@@ -378,6 +383,10 @@ public final class YelanRegressionTest {
                     "C6 Barb receives Charged DMG Bonus");
             assertEquals(ActionType.NORMAL, barb.action.getActionType(),
                     "C6 input remains a Normal trigger");
+            assertEquals(ICDType.YelanBreakthrough,
+                    barb.action.getICDType(), "C6 Barb Yelan-specific ICD");
+            assertEquals(ICDTag.Yelan_Breakthrough,
+                    barb.action.getICDTag(), "C6 Barb independent ICD group");
         }
     }
 
@@ -386,7 +395,7 @@ public final class YelanRegressionTest {
         CombatSimulator simulator = simulatorWith(yelan);
         List<ActionRecord> records = captureYelanActions(simulator);
         perform(simulator, CharacterActionKey.BURST);
-        resolveNormalProbe(simulator, CharacterId.YELAN, "restore-wave");
+        requestNormal(simulator, CharacterId.YELAN);
         SimulatorSnapshot snapshot = simulator.saveSnapshot();
         double finish = simulator.getCurrentTime() + 40.0 * FRAME;
         advanceTo(simulator, finish);
@@ -420,7 +429,7 @@ public final class YelanRegressionTest {
         CombatSimulator staleSim = simulatorWith(stale);
         List<ActionRecord> staleRecords = captureYelanActions(staleSim);
         perform(staleSim, CharacterActionKey.BURST);
-        resolveNormalProbe(staleSim, CharacterId.YELAN, "stale-wave");
+        requestNormal(staleSim, CharacterId.YELAN);
         stale.restoreCooldowns(
                 stale.getLastSkillTime(),
                 stale.getLastBurstTime(),
@@ -433,6 +442,51 @@ public final class YelanRegressionTest {
         assertEquals(0,
                 named(staleRecords, "Exquisite Throw Projectile").size(),
                 "new Burst generation suppresses stale queued wave");
+
+        Yelan cutoff = new Yelan(null, null, 0);
+        CombatSimulator cutoffSim = simulatorWith(cutoff);
+        List<ActionRecord> cutoffRecords = captureYelanActions(cutoffSim);
+        perform(cutoffSim, CharacterActionKey.BURST);
+        double expiration = 73.0 * FRAME + 15.0;
+        advanceTo(cutoffSim, expiration - 6.0 * FRAME);
+        requestNormal(cutoffSim, CharacterId.YELAN);
+        advanceTo(cutoffSim, expiration + 1.0);
+        assertEquals(1,
+                named(cutoffRecords, "Exquisite Throw Projectile").size(),
+                "Burst expiry cuts off projectiles not yet generated");
+    }
+
+    private static void testYelanSpecificIcdGroups() {
+        ICDManager burst = new ICDManager();
+        assertTrue(burst.checkApplication("Yelan",
+                ICDTag.Yelan_ExquisiteThrow, ICDType.YelanBurst, 0.0),
+                "Throw first hit applies");
+        assertTrue(!burst.checkApplication("Yelan",
+                ICDTag.Yelan_ExquisiteThrow, ICDType.YelanBurst, 0.1),
+                "Throw second hit is suppressed");
+        assertTrue(!burst.checkApplication("Yelan",
+                ICDTag.Yelan_ExquisiteThrow, ICDType.YelanBurst, 0.2),
+                "Throw third hit is suppressed");
+        assertTrue(burst.checkApplication("Yelan",
+                ICDTag.Yelan_ExquisiteThrow, ICDType.YelanBurst, 0.3),
+                "Throw fourth hit applies by hit count");
+        assertTrue(burst.checkApplication("Yelan",
+                ICDTag.Yelan_ExquisiteThrow, ICDType.YelanBurst, 2.3),
+                "Throw applies at exact two-second reset");
+
+        ICDManager breakthrough = new ICDManager();
+        assertTrue(breakthrough.checkApplication("Yelan",
+                ICDTag.Yelan_Breakthrough,
+                ICDType.YelanBreakthrough, 0.0),
+                "Breakthrough first hit applies");
+        assertTrue(!breakthrough.checkApplication("Yelan",
+                ICDTag.Yelan_Breakthrough,
+                ICDType.YelanBreakthrough, 0.2),
+                "Breakthrough remains suppressed before reset");
+        assertTrue(breakthrough.checkApplication("Yelan",
+                ICDTag.Yelan_Breakthrough,
+                ICDType.YelanBreakthrough, 0.3),
+                "Breakthrough applies at exact reset");
     }
 
     private static void testInvalidInputsCooldownEnergyAndOwnership() {
@@ -478,14 +532,12 @@ public final class YelanRegressionTest {
         offFieldSim.setActiveCharacter(CharacterId.NOELLE);
         AttackAction zero = normalProbe("zero", 0.0);
         offFieldSim.performActionWithoutTimeAdvance(CharacterId.NOELLE, zero);
-        AttackAction wrong = normalProbe("wrong", 1.0);
-        wrong.setAnimationDuration(0.0);
         offFieldSim.setActiveCharacter(CharacterId.YELAN);
-        offFieldSim.performActionWithoutTimeAdvance(CharacterId.NOELLE, wrong);
+        requestNormal(offFieldSim, CharacterId.NOELLE);
         advanceTo(offFieldSim, offFieldSim.getCurrentTime() + 1.0);
         assertEquals(0,
                 named(offFieldRecords, "Exquisite Throw Projectile").size(),
-                "zero and off-field Normal hits do not trigger waves");
+                "resolved-only and off-field Normal actions do not trigger waves");
 
         Yelan reusable = new Yelan(null, null, 0);
         simulatorWith(reusable);
@@ -518,12 +570,11 @@ public final class YelanRegressionTest {
                 CharacterId.YELAN, CharacterActionRequest.of(key));
     }
 
-    private static void resolveNormalProbe(
+    private static void requestNormal(
             CombatSimulator simulator,
-            CharacterId actor,
-            String name) {
-        simulator.performActionWithoutTimeAdvance(
-                actor, normalProbe(name, 1.0));
+            CharacterId actor) {
+        simulator.performAction(
+                actor, CharacterActionRequest.of(CharacterActionKey.NORMAL));
     }
 
     private static AttackAction normalProbe(String name, double multiplier) {

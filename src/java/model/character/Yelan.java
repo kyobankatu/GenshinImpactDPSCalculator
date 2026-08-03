@@ -141,8 +141,8 @@ public final class Yelan extends Character implements
             return;
         }
         initializedSimulator = simulator;
-        simulator.addDamageListener((actor, action, damage, time) ->
-                onResolvedDamage(simulator, actor, action, damage, time));
+        simulator.addActionRequestListener((actor, request, time) ->
+                onActionRequest(simulator, actor, request, time));
     }
 
     /** Captures all Yelan-owned progression and future work. */
@@ -252,7 +252,7 @@ public final class Yelan extends Character implements
     public boolean isExquisiteThrowActive(double currentTime) {
         return burstGeneration > 0
                 && currentTime + EPSILON >= burstStartTime
-                && currentTime < burstExpirationTime - EPSILON;
+                && currentTime < burstExpirationTime;
     }
 
     /** Returns C4's active single-target stack count. */
@@ -406,18 +406,15 @@ public final class Yelan extends Character implements
         simulator.advanceTime(93.0 * FRAME);
     }
 
-    private void onResolvedDamage(
+    private void onActionRequest(
             CombatSimulator simulator,
             Character actor,
-            AttackAction action,
-            double damage,
+            CharacterActionRequest request,
             double time) {
         if (simulator != initializedSimulator
                 || simulator.getActiveCharacter() != actor
-                || action == null
-                || damage <= 0.0
-                || action.getActionType() != ActionType.NORMAL
-                || !action.isHitEffectTrigger()
+                || request == null
+                || request.getKey() != CharacterActionKey.NORMAL
                 || !isExquisiteThrowActive(time)
                 || time + EPSILON < nextNormalWaveTime) {
             return;
@@ -545,8 +542,8 @@ public final class Yelan extends Character implements
                     StatType.BASE_HP,
                     StatType.CHARGED_ATTACK_DMG_BONUS,
                     ActionType.NORMAL,
-                    ICDType.Standard,
-                    ICDTag.ChargedAttack,
+                    ICDType.YelanBreakthrough,
+                    ICDTag.Yelan_Breakthrough,
                     1.0,
                     false);
         } else {
@@ -665,8 +662,8 @@ public final class Yelan extends Character implements
                 StatType.BASE_HP,
                 StatType.BURST_DMG_BONUS,
                 ActionType.BURST,
-                ICDType.Standard,
-                ICDTag.ElementalBurst,
+                ICDType.YelanBurst,
+                ICDTag.Yelan_ExquisiteThrow,
                 1.0,
                 false);
         projectile.setStatSnapshot(event.snapshot);
@@ -740,10 +737,12 @@ public final class Yelan extends Character implements
             case BURST_ENERGY:
             case BURST_ACTIVATE:
             case BURST_INITIAL:
-            case WAVE_SNAPSHOT:
             case WAVE_HIT:
             case C2_HIT:
                 return !isCurrentBurstGeneration(event.generation);
+            case WAVE_SNAPSHOT:
+                return !isCurrentBurstGeneration(event.generation)
+                        || !isExquisiteThrowActive(event.time);
             default:
                 return false;
         }

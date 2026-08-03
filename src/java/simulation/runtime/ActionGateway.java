@@ -77,6 +77,8 @@ public class ActionGateway {
                     sim.getCurrentTime(), charName, request.getLogLabel()));
         }
 
+        sim.notifyActionRequest(character, request);
+
         sim.pushBuffSource(characterId);
         try {
             if (character.getWeapon() instanceof ActionTriggeredWeaponEffect) {

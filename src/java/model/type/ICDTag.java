@@ -51,5 +51,9 @@ public enum ICDTag {
     /** Columbina's Moonreel follow-up hits. */
     Columbina_Moonreel,
     /** Collei's Floral Sidewinder Sprout ticks. */
-    Collei_Sprout
+    Collei_Sprout,
+    /** Yelan's Exquisite Throw projectiles. */
+    Yelan_ExquisiteThrow,
+    /** Yelan's Breakthrough Barb projectiles. */
+    Yelan_Breakthrough
 }

@@ -77,6 +77,10 @@ public class ICDManager {
      *       modified (no ICD).</li>
      *   <li>{@link ICDType#Standard} – applies the standard 2.5s / 3-hit rule
      *       described in the class documentation.</li>
+     *   <li>{@link ICDType#YelanBurst} – applies after 2 seconds or three
+     *       suppressed hits.</li>
+     *   <li>{@link ICDType#YelanBreakthrough} – applies after 0.3 seconds or
+     *       four suppressed hits.</li>
      * </ul>
      *
      * <p>{@code null} values for {@code type} or {@code tag} are silently
@@ -125,8 +129,31 @@ public class ICDManager {
                     state.hitCount = 0;
                 }
             }
+        } else if (type == ICDType.YelanBurst) {
+            apply = checkCustomApplication(state, currentTime, 2.0, 3);
+        } else if (type == ICDType.YelanBreakthrough) {
+            apply = checkCustomApplication(state, currentTime, 0.3, 4);
         }
 
         return apply;
+    }
+
+    private boolean checkCustomApplication(
+            ICDState state,
+            double currentTime,
+            double resetInterval,
+            int suppressedHitThreshold) {
+        if (currentTime - state.lastAppTime + 1e-9 >= resetInterval) {
+            state.lastAppTime = currentTime;
+            state.hitCount = 0;
+            return true;
+        }
+        state.hitCount++;
+        if (state.hitCount >= suppressedHitThreshold) {
+            state.lastAppTime = currentTime;
+            state.hitCount = 0;
+            return true;
+        }
+        return false;
     }
 }

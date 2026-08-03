@@ -18,6 +18,10 @@ public enum ICDType {
      * same ICD group have been recorded, whichever comes first.
      */
     Standard, // 2.5s or 3 hits
+    /** Yelan's Exquisite Throw rule: 2 seconds or three suppressed hits. */
+    YelanBurst,
+    /** Yelan's Breakthrough Barb rule: 0.3 seconds or four suppressed hits. */
+    YelanBreakthrough,
     /** Reserved for custom ICD rules not yet implemented. */
     Special // Custom rules (not implemented yet)
 }

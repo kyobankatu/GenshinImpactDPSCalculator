@@ -11,18 +11,22 @@ import model.entity.ElementalReactionTriggeredWeaponEffect;
 import model.entity.ReactionAwareArtifact;
 import model.type.Element;
 import simulation.ActionListener;
+import simulation.ActionRequestListener;
 import simulation.CombatSimulator;
 import simulation.DamageListener;
 import simulation.IndirectDamageListener;
 import simulation.ParticleListener;
 import simulation.SimulationEventBus;
 import simulation.action.AttackAction;
+import simulation.action.CharacterActionRequest;
 
 /**
  * Owns listener registration and notification for simulation-side events.
  */
 public class SimulationEventDispatcher implements SimulationEventBus {
     private final List<ActionListener> actionListeners = new ArrayList<>();
+    private final List<ActionRequestListener> actionRequestListeners =
+            new ArrayList<>();
     private final List<DamageListener> damageListeners = new ArrayList<>();
     private final List<IndirectDamageListener> indirectDamageListeners =
             new ArrayList<>();
@@ -39,6 +43,12 @@ public class SimulationEventDispatcher implements SimulationEventBus {
     @Override
     public void addActionListener(ActionListener listener) {
         actionListeners.add(listener);
+    }
+
+    /** Registers an accepted typed-input listener. */
+    @Override
+    public void addActionRequestListener(ActionRequestListener listener) {
+        actionRequestListeners.add(listener);
     }
 
     /**
@@ -94,6 +104,18 @@ public class SimulationEventDispatcher implements SimulationEventBus {
     public void notifyAction(Character actor, AttackAction action, double time) {
         for (ActionListener listener : new ArrayList<>(actionListeners)) {
             listener.onAction(actor, action, time);
+        }
+    }
+
+    /** Notifies listeners once for each accepted typed character input. */
+    @Override
+    public void notifyActionRequest(
+            Character actor,
+            CharacterActionRequest request,
+            double time) {
+        for (ActionRequestListener listener
+                : new ArrayList<>(actionRequestListeners)) {
+            listener.onActionRequest(actor, request, time);
         }
     }
 

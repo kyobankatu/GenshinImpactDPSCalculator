@@ -7,6 +7,7 @@ import model.entity.Character;
 import model.entity.ElementalReactionTriggeredWeaponEffect;
 import model.type.Element;
 import simulation.action.AttackAction;
+import simulation.action.CharacterActionRequest;
 
 /**
  * Abstraction for simulation event subscription and dispatch.
@@ -21,6 +22,9 @@ public interface SimulationEventBus {
      * @param listener listener to register
      */
     void addActionListener(ActionListener listener);
+
+    /** Registers a listener for accepted typed character inputs. */
+    void addActionRequestListener(ActionRequestListener listener);
 
     /**
      * Registers a resolved-damage listener.
@@ -59,6 +63,12 @@ public interface SimulationEventBus {
      * @param time      simulation time in seconds
      */
     void notifyAction(Character actor, AttackAction action, double time);
+
+    /** Dispatches one accepted typed character input. */
+    void notifyActionRequest(
+            Character actor,
+            CharacterActionRequest request,
+            double time);
 
     /**
      * Dispatches a resolved direct-damage event.
