@@ -3545,7 +3545,7 @@ experiment record.
 
 ### B-169 — Collei reaction-character vertical slice
 
-- **Status:** in progress
+- **Status:** complete
 - **Source:** explicit broad content-expansion request and post-B-168 missing
   character class/config inventory
 - **Symptom:** Collei has a local image and complete pinned evidence but no
@@ -3558,3 +3558,7 @@ experiment record.
   selection, RL, generated docs, and Deferred Systems remain excluded.
 - **Proof:** `TASKS.md` Collei Reaction Character Campaign plus identity,
   focused, reaction, build, Javadoc, and executable preflight gates.
+- **Completion:** commits `ab6684f`, `a15a31e`, and `9c9f732` add the identity
+  and bounded character slice, then resolve independent-review timing,
+  concurrent-cast, ICD, replacement, and snapshot findings; all planned gates
+  and final independent re-review pass on 2026-08-03.

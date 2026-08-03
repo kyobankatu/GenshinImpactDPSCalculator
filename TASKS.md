@@ -50,10 +50,10 @@ wave added the Golden Majesty weapon family, six legacy boundary artifact sets,
 and Razor through isolated implementation lanes; RL and generated
 documentation remained excluded.
 
-The B-162 through B-168 follow-on content and snapshot campaigns are complete.
-B-169 is the active Collei reaction-character campaign; RL, generated docs,
-and deferred healing, defensive, player-damage, or geometry systems remain
-excluded.
+The B-162 through B-169 follow-on content and snapshot campaigns are complete.
+The latest campaign adds Collei's stationary single-target reaction slice; RL,
+generated docs, and deferred healing, defensive, player-damage, or geometry
+systems remain excluded.
 
 The B-158 derived-stat equipment and Fischl wave is complete. It adds reusable
 final-DEF/EM conversion, two five-star weapons, four asset-backed artifact sets,
@@ -13727,8 +13727,8 @@ Completion evidence:
 
 ## Implementation Order: Collei Reaction Character Campaign
 
-Status: In progress. B-169 has one typed-identity prerequisite followed by a
-bounded stationary single-target Collei slice.
+Status: Complete. Both the typed-identity prerequisite and bounded stationary
+single-target Collei slice are verified and pushed.
 
 Scope:
 
@@ -13752,7 +13752,7 @@ Definitions:
 - `Collei`: snapshot-aware reaction character whose fixed target model treats
   the active character as inside Cuilein-Anbar and Sprout areas.
 
-### Phase 1: Reserve Collei Identity
+### Phase 1: Reserve Collei Identity (Done)
 
 Why first:
 
@@ -13786,7 +13786,7 @@ Verification:
 
 - `./gradlew LegacyCharacterIdentityRegressionTest build`
 
-### Phase 2: Collei Offensive And Reaction Vertical Slice
+### Phase 2: Collei Offensive And Reaction Vertical Slice (Done)
 
 Why second:
 
@@ -13831,6 +13831,18 @@ Verification:
 - `./gradlew ColleiRegressionTest`
 - `./gradlew ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Commits `ab6684f` and `a15a31e` add Collei ID 32/Sumeru, aligned talent
+  data, the four-shot bow string, fixed two-pass Skill, particles, Burst field,
+  Sprout, and representable C1-C6 effects.
+- Independent review fix `9c9f732` aligns release-time snapshots, concurrent
+  Skill casts, Sprout replacement/ICD, Burst activation order, listener-time
+  restore, delayed C6 capture, exact Plunge data, and completed-state cleanup.
+- `LegacyCharacterIdentityRegressionTest`, `ColleiRegressionTest`,
+  `ReactionRegressionTest`, build, Javadoc, and executable preflight pass on
+  2026-08-03; final independent re-review reports no correctness findings.
 
 ## Implementation Order: Parallel Foundational Content Campaign
 
