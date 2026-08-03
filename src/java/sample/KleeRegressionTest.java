@@ -137,14 +137,21 @@ public final class KleeRegressionTest {
                         .get(StatType.CHARGED_ATTACK_DMG_BONUS),
                 "Klee A1 Spark is consumed once");
 
-        CountingSupplier skillA1Draws = new CountingSupplier(1.0);
-        Klee skillA1 = new Klee(
-                null, null, 0, skillA1Draws, () -> 1.0, () -> 1.0);
-        CombatSimulator skillA1Sim = simulatorWith(skillA1);
-        perform(skillA1Sim, CharacterActionKey.SKILL);
-        advanceTo(skillA1Sim, 5.0);
-        assertEquals(1, skillA1Draws.getCount(),
-                "Klee Skill mines do not perform A1 draws");
+        CountingSupplier mineA1Draws = new CountingSupplier(1.0, 0.0, 1.0);
+        Klee mineA1 = new Klee(
+                null, null, 0, mineA1Draws, () -> 1.0, () -> 1.0);
+        CombatSimulator mineA1Sim = simulatorWith(mineA1);
+        List<ActionRecord> mineA1Records = captureKleeActions(mineA1Sim);
+        perform(mineA1Sim, CharacterActionKey.SKILL);
+        advanceTo(mineA1Sim, 5.0);
+        assertEquals(2, mineA1Draws.getCount(),
+                "Klee mine can grant A1 Spark before the gate suppresses peers");
+        perform(mineA1Sim, CharacterActionKey.CHARGE);
+        assertClose(0.50,
+                named(mineA1Records, "Kaboom Charged Attack").get(0).action
+                        .getStatSnapshot()
+                        .get(StatType.CHARGED_ATTACK_DMG_BONUS),
+                "Klee consumes mine-generated A1 Spark");
 
         records.clear();
         double plungeStart = simulator.getCurrentTime();
