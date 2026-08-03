@@ -3542,3 +3542,19 @@ experiment record.
   both identities and bounded character slices, then resolve independent-review
   target-state, event-restore, switch, and zero-damage trigger findings; all
   planned gates pass on 2026-08-03.
+
+### B-169 — Collei reaction-character vertical slice
+
+- **Status:** in progress
+- **Source:** explicit broad content-expansion request and post-B-168 missing
+  character class/config inventory
+- **Symptom:** Collei has a local image and complete pinned evidence but no
+  typed identity, loadable class, talent CSV, or focused executable regression.
+- **Evidence:** pinned KQM TCL `80ba6241` and gcsim `ef41805d`, accessed
+  2026-08-03.
+- **Scope/risk:** planned two-phase identity plus stationary single-target
+  offensive/reaction slice using existing reaction and snapshot capabilities.
+- **Boundary:** projectile/area geometry, weak points, movement, multi-target
+  selection, RL, generated docs, and Deferred Systems remain excluded.
+- **Proof:** `TASKS.md` Collei Reaction Character Campaign plus identity,
+  focused, reaction, build, Javadoc, and executable preflight gates.

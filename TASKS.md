@@ -51,7 +51,7 @@ and Razor through isolated implementation lanes; RL and generated
 documentation remained excluded.
 
 The B-162 through B-168 follow-on content and snapshot campaigns are complete.
-The latest campaign adds Mona and Beidou offensive slices; RL, generated docs,
+B-169 is the active Collei reaction-character campaign; RL, generated docs,
 and deferred healing, defensive, player-damage, or geometry systems remain
 excluded.
 
@@ -13724,6 +13724,113 @@ Completion evidence:
 - `LegacyCharacterIdentityRegressionTest`, `MonaRegressionTest`,
   `BeidouRegressionTest`, `ReactionRegressionTest`, build, Javadoc, and
   executable preflight pass on 2026-08-03.
+
+## Implementation Order: Collei Reaction Character Campaign
+
+Status: In progress. B-169 has one typed-identity prerequisite followed by a
+bounded stationary single-target Collei slice.
+
+Scope:
+
+- Add Collei's stable typed identity and aligned Lv. 90/talent data.
+- Implement the four-shot Normal string, fully charged shot, Plunge, two-pass
+  Floral Ring, Cuilein-Anbar field, reaction-driven A1/A4, and representable
+  constellations.
+- Preserve Skill/Burst snapshots, reaction windows, extension counters, and
+  pending damage/particle events across repeated simulator restore.
+
+Out of scope for this pass:
+
+- Projectile travel and collision geometry, weak points, movement, enemy
+  grouping, multi-target selection, RL, generated docs, and Deferred Systems.
+- Extending typed action inputs, formulas, or ICD runtime contracts when the
+  fixed single-target cadence can express the sourced application sequence.
+
+Definitions:
+
+- `COLLEI`: stable Sumeru character identity using numeric ID 32.
+- `Collei`: snapshot-aware reaction character whose fixed target model treats
+  the active character as inside Cuilein-Anbar and Sprout areas.
+
+### Phase 1: Reserve Collei Identity
+
+Why first:
+
+- The character class, CSV lookup, event attribution, and regressions require
+  one stable identity before the content slice can compile independently.
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+
+Tasks:
+
+- Assign numeric ID 32 without renumbering existing identities and record
+  Collei's Sumeru region.
+- Extend exact display-name, numeric-ID, region, case, and adjacent-unassigned
+  boundaries.
+
+Acceptance criteria:
+
+- Collei round-trips through exact name and numeric ID while Beidou remains ID
+  31 and ID 33 still fails closed.
+
+Test cases to add or update:
+
+- Normal: exact name, ID, and Sumeru region.
+- Boundary: Beidou ID 31 and unassigned ID 33.
+- Abnormal: null and case-mismatched names return `UNKNOWN`.
+
+Verification:
+
+- `./gradlew LegacyCharacterIdentityRegressionTest build`
+
+### Phase 2: Collei Offensive And Reaction Vertical Slice
+
+Why second:
+
+- Collei can use the Phase 1 identity with existing action, reaction-listener,
+  team-buff, timer, particle, ICD metadata, and character-state contracts.
+
+Target files:
+
+- `config/characters/Collei/Collei_Status.csv` (new)
+- `config/characters/Collei/Collei_Multipliers.csv` (new)
+- `src/java/model/character/Collei.java` (new)
+- `src/java/sample/ColleiRegressionTest.java` (new)
+
+Tasks:
+
+- Adapt pinned gcsim `ef41805d` timing/cadence and pinned KQM TCL `80ba6241`
+  multiplier, gauge, ICD, snapshot, particle, passive, and constellation data.
+- Model the two Skill passes, one particle packet, twelve base Burst leaps,
+  exact shared Burst application cadence, A1/C2 Sprout, A4 extension cap, C1
+  off-field ER, C3/C5 talent levels, C4 team EM, and one C6 follow-up per cast.
+- Advance each pending state before observer notification and reconstruct all
+  future Collei-owned events exactly once after repeated restore.
+
+Acceptance criteria:
+
+- Included attacks emit sourced categories, multipliers, hitmarks, durations,
+  cooldown/Energy timing, particles, gauge/ICD sequence, and snapshots.
+- Reaction-driven Sprout and field extension observe exact window/cap
+  boundaries, and excluded geometry does not create extra hits.
+
+Test cases to add or update:
+
+- Normal: data, four-shot chain, Charged/Plunge, two-pass Skill, Burst cadence,
+  particles, A1/A4, and C1-C6 representable effects.
+- Boundary: shared Burst application sequence, reaction windows, three-second
+  extension cap, off-field C1, switch reset, and repeated mid-event restore.
+- Abnormal: cooldown/Energy rejection, invalid constellation/state payload,
+  cross-simulator reuse, unsupported action, and unrelated reactions.
+
+Verification:
+
+- `./gradlew ColleiRegressionTest`
+- `./gradlew ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
 
 ## Implementation Order: Parallel Foundational Content Campaign
 
