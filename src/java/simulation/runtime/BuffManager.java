@@ -136,7 +136,11 @@ public class BuffManager {
         }
 
         if (character == sim.getActiveCharacter()) {
-            buffs.addAll(fieldBuffs);
+            for (Buff buff : fieldBuffs) {
+                if (buff.appliesToCharacter(character)) {
+                    buffs.add(buff);
+                }
+            }
         }
         return buffs;
     }

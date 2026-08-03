@@ -1,7 +1,9 @@
 package model.character;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import mechanics.buff.Buff;
@@ -44,9 +46,11 @@ import simulation.event.SimpleTimerEvent;
  *
  * <p>C4 healing, shields, shard pulling, interruption resistance, geometry,
  * hitlag, multi-target selection, and aimed attacks are intentionally
- * excluded. Standard Crystallize pickup is exposed as an explicit notification
- * because the simulator has no shard-pickup event; Lunar-Crystallize can extend
- * C2 directly from its sourced reaction event.</p>
+ * excluded. C1 requires the active attacker to have received a field update;
+ * off-field deployable eligibility snapshots are not represented. Standard
+ * Crystallize pickup is exposed as an explicit notification because the
+ * simulator has no shard-pickup event; Lunar-Crystallize can extend C2 directly
+ * from its sourced reaction event.</p>
  */
 public final class Gorou extends Character implements
         ReactionAwareCharacter,
@@ -76,6 +80,8 @@ public final class Gorou extends Character implements
     private long burstGeneration;
     private long fieldGeneration;
     private long latestFieldTickSerial;
+    private final Map<CharacterId, Long> latestFieldTickSerials =
+            new HashMap<>();
     private FieldKind fieldKind = FieldKind.NONE;
     private double fieldEndTime = Double.NEGATIVE_INFINITY;
     private int fieldGeoCount;
@@ -157,6 +163,7 @@ public final class Gorou extends Character implements
                 burstGeneration,
                 fieldGeneration,
                 latestFieldTickSerial,
+                latestFieldTickSerials,
                 fieldKind,
                 fieldEndTime,
                 fieldGeoCount,
@@ -193,6 +200,8 @@ public final class Gorou extends Character implements
         burstGeneration = restored.burstGeneration;
         fieldGeneration = restored.fieldGeneration;
         latestFieldTickSerial = restored.latestFieldTickSerial;
+        latestFieldTickSerials.clear();
+        latestFieldTickSerials.putAll(restored.latestFieldTickSerials);
         fieldKind = restored.fieldKind;
         fieldEndTime = restored.fieldEndTime;
         fieldGeoCount = restored.fieldGeoCount;
@@ -616,21 +625,38 @@ public final class Gorou extends Character implements
                 || !isFieldActive(currentTime)) {
             return;
         }
+        Character recipient = simulator.getActiveCharacter();
+        if (recipient == null) {
+            return;
+        }
+        CharacterId recipientId = recipient.getCharacterId();
         long serial = ++latestFieldTickSerial;
-        simulator.applyFieldBuff(new SimpleBuff(
+        latestFieldTickSerials.put(recipientId, serial);
+        SimpleBuff fieldBuff = new SimpleBuff(
                 "Gorou General's War Banner",
                 BuffId.GOROU_GENERAL_WAR_BANNER,
                 FIELD_LINGER,
                 currentTime,
                 stats -> {
-                    if (serial != latestFieldTickSerial) {
+                    Long currentSerial =
+                            latestFieldTickSerials.get(recipientId);
+                    if (currentSerial == null
+                            || currentSerial.longValue() != serial) {
                         return;
                     }
                     stats.add(StatType.DEF_FLAT, fieldDefBonus);
                     if (fieldGeoCount >= 3) {
                         stats.add(StatType.GEO_DMG_BONUS, 0.15);
                     }
-                }).sourcedBy(characterId));
+                });
+        List<CharacterId> excluded = new ArrayList<>();
+        for (Character member : simulator.getPartyMembers()) {
+            if (member.getCharacterId() != recipientId) {
+                excluded.add(member.getCharacterId());
+            }
+        }
+        fieldBuff.exclude(excluded.toArray(new CharacterId[0]));
+        simulator.applyFieldBuff(fieldBuff.sourcedBy(characterId));
     }
 
     private void applyA1(
@@ -677,6 +703,8 @@ public final class Gorou extends Character implements
                 || actor == null
                 || actor == this
                 || !simulator.getPartyMembers().contains(actor)
+                || actor != simulator.getActiveCharacter()
+                || !hasCurrentFieldBuff(simulator, actor, time)
                 || action == null
                 || action.getElement() != Element.GEO
                 || damage <= 0.0
@@ -686,6 +714,19 @@ public final class Gorou extends Character implements
         }
         reduceSkillCooldown(time, 2.0);
         nextC1Time = time + 600.0 * FRAME;
+    }
+
+    private boolean hasCurrentFieldBuff(
+            CombatSimulator simulator,
+            Character actor,
+            double currentTime) {
+        for (Buff buff : simulator.getApplicableBuffs(actor)) {
+            if (buff.getId() == BuffId.GOROU_GENERAL_WAR_BANNER
+                    && !buff.isExpired(currentTime)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean tryExtendC2(double time) {
@@ -1026,6 +1067,7 @@ public final class Gorou extends Character implements
         private final long burstGeneration;
         private final long fieldGeneration;
         private final long latestFieldTickSerial;
+        private final Map<CharacterId, Long> latestFieldTickSerials;
         private final FieldKind fieldKind;
         private final double fieldEndTime;
         private final int fieldGeoCount;
@@ -1045,6 +1087,7 @@ public final class Gorou extends Character implements
                 long burstGeneration,
                 long fieldGeneration,
                 long latestFieldTickSerial,
+                Map<CharacterId, Long> latestFieldTickSerials,
                 FieldKind fieldKind,
                 double fieldEndTime,
                 int fieldGeoCount,
@@ -1062,6 +1105,8 @@ public final class Gorou extends Character implements
             this.burstGeneration = burstGeneration;
             this.fieldGeneration = fieldGeneration;
             this.latestFieldTickSerial = latestFieldTickSerial;
+            this.latestFieldTickSerials =
+                    new HashMap<>(latestFieldTickSerials);
             this.fieldKind = fieldKind;
             this.fieldEndTime = fieldEndTime;
             this.fieldGeoCount = fieldGeoCount;

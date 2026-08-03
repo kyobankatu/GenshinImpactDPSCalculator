@@ -383,6 +383,29 @@ public final class GorouRegressionTest {
     }
 
     private static void testC1AndC2Boundaries() {
+        Gorou rejectedC1 = new Gorou(null, null, 1);
+        TestCharacter rejectedAlly = new TestCharacter(
+                CharacterId.NOELLE, Element.GEO);
+        CombatSimulator rejectedSim = simulatorWith(
+                rejectedC1, rejectedAlly);
+        perform(rejectedSim, CharacterActionKey.SKILL);
+        double originalCooldownEnd = rejectedC1.getSkillCooldownEndTime();
+        rejectedSim.performActionWithoutTimeAdvance(
+                CharacterId.NOELLE, geoProbe("Gorou C1 off-field"));
+        assertClose(originalCooldownEnd,
+                rejectedC1.getSkillCooldownEndTime(),
+                "Gorou C1 rejects off-field damage before any field update");
+        rejectedSim.setActiveCharacter(CharacterId.NOELLE);
+        assertClose(0.0,
+                applicableStat(rejectedSim, rejectedAlly,
+                        StatType.DEF_FLAT, rejectedSim.getCurrentTime()),
+                "Gorou C1 fixture has no inherited field update");
+        rejectedSim.performActionWithoutTimeAdvance(
+                CharacterId.NOELLE, geoProbe("Gorou C1 before tick"));
+        assertClose(originalCooldownEnd,
+                rejectedC1.getSkillCooldownEndTime(),
+                "Gorou C1 rejects active damage before the next field update");
+
         Gorou gorou = new Gorou(null, null, 2);
         TestCharacter ally = new TestCharacter(
                 CharacterId.NOELLE, Element.GEO);
@@ -423,6 +446,8 @@ public final class GorouRegressionTest {
         c1.notifyCrystallizeShardObtained(c1Sim);
         c1Sim.advanceTime(6.0 * FRAME);
         c1.notifyCrystallizeShardObtained(c1Sim);
+        c1Sim.setActiveCharacter(CharacterId.NOELLE);
+        advanceTo(c1Sim, 131.0 * FRAME);
         double firstC1Time = c1Sim.getCurrentTime();
         c1Sim.performActionWithoutTimeAdvance(
                 CharacterId.NOELLE, geoProbe("Gorou C1 first"));
@@ -443,6 +468,32 @@ public final class GorouRegressionTest {
     }
 
     private static void testSwitchPersistenceReplacementAndLunarC2() {
+        Gorou switchGorou = new Gorou(null, null, 0);
+        TestCharacter switchAlly = new TestCharacter(
+                CharacterId.NOELLE, Element.GEO);
+        CombatSimulator switchSim = simulatorWith(switchGorou, switchAlly);
+        perform(switchSim, CharacterActionKey.SKILL);
+        advanceTo(switchSim, 51.0 * FRAME);
+        assertClose(350.472,
+                applicableStat(switchSim, switchGorou,
+                        StatType.DEF_FLAT, switchSim.getCurrentTime()),
+                "Gorou receives the first field update");
+        switchSim.switchCharacter(CharacterId.NOELLE);
+        assertClose(0.0,
+                applicableStat(switchSim, switchAlly,
+                        StatType.DEF_FLAT, switchSim.getCurrentTime()),
+                "switched character waits for the next field update");
+        advanceTo(switchSim, 69.0 * FRAME);
+        assertClose(350.472,
+                applicableStat(switchSim, switchAlly,
+                        StatType.DEF_FLAT, switchSim.getCurrentTime()),
+                "next field update reaches the switched character");
+        switchSim.setActiveCharacter(CharacterId.GOROU);
+        assertClose(350.472,
+                applicableStat(switchSim, switchGorou,
+                        StatType.DEF_FLAT, switchSim.getCurrentTime()),
+                "previous recipient retains its independent linger");
+
         Gorou gorou = new Gorou(null, null, 2);
         TestCharacter ally = new TestCharacter(
                 CharacterId.NOELLE, Element.GEO);
