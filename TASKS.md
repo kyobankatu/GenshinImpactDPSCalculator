@@ -55,9 +55,8 @@ The latest campaign adds Collei's stationary single-target reaction slice; RL,
 generated docs, and deferred healing, defensive, player-damage, or geometry
 systems remain excluded.
 
-B-172 is the active Gorou and Yelan campaign. It first reserves shared typed
-identities, buff IDs, and Geo-only CRIT DMG, then adds two branch-isolated
-stationary single-target support/offensive slices.
+B-172 is complete. Gorou and Yelan now have stable typed identities, shared
+buff/formula support, and bounded stationary single-target character slices.
 
 B-171 is the completed Eula campaign. It adds a backward-compatible typed
 Press/Hold Skill request, Eula's identity, and a bounded physical Burst slice;
@@ -14107,8 +14106,7 @@ Completion evidence:
 
 ## Implementation Order: Legacy Geo And Hydro Support Character Campaign
 
-Status: In progress. B-172 has one shared identity/formula prerequisite and two
-branch-isolated character phases.
+Status: Complete. All three phases and independent review are done.
 
 Scope:
 
@@ -14131,7 +14129,7 @@ Definitions:
 - Character fields are stationary single-target approximations with exact
   source-derived temporal windows and reconstructible owned delayed events.
 
-### Phase 1: Reserve Shared Identities And Geo CRIT DMG
+### Phase 1: Reserve Shared Identities And Geo CRIT DMG - Done
 
 Target files:
 
@@ -14164,7 +14162,7 @@ Verification:
 - `./gradlew ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
 
-### Phase 2: Gorou Field Support Vertical Slice
+### Phase 2: Gorou Field Support Vertical Slice - Done
 
 Target files:
 
@@ -14199,7 +14197,7 @@ Verification:
 - `./gradlew GorouRegressionTest ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Yelan Exquisite Throw Vertical Slice
+### Phase 3: Yelan Exquisite Throw Vertical Slice - Done
 
 Target files:
 
@@ -14233,6 +14231,16 @@ Verification:
 
 - `./gradlew YelanRegressionTest ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Commits `558e3a9`, `758aa7a`, and `0bdbf0c` add the shared identities and
+  formula path plus complete bounded Yelan and Gorou slices.
+- Commits `b631c17`, `603cc91`, `53bf661`, and `649532a` resolve review-driven
+  typed-input, ICD, field-recipient, replacement, and off-field linger defects.
+- Identity, formula, request, Gorou, Yelan, reaction, build, Javadoc, routed
+  validation, and executable preflight gates pass on 2026-08-03; final
+  independent review found no remaining issue.
 
 ## Implementation Order: Parallel Foundational Content Campaign
 

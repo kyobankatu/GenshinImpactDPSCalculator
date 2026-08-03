@@ -3606,7 +3606,7 @@ experiment record.
 
 ### B-172 — Gorou and Yelan support character campaign
 
-- **Status:** in progress
+- **Status:** done
 - **Source:** explicit broad content-expansion request and post-B-171 normalized
   character asset/class inventory.
 - **Units:** Gorou and Yelan stationary single-target vertical slices.
@@ -3615,8 +3615,11 @@ experiment record.
 - **Scope/risk:** planned shared identities, typed buff IDs, Geo-only CRIT DMG,
   then two branch-isolated snapshot-aware character implementations.
 - **Boundary:** healing, shields, shard pulling, movement/aiming/geometry,
-  multi-target selection, actual enemy HP, hitlag, RL, generated docs, and
-  Deferred Systems are excluded.
+  multi-target selection, actual enemy HP, hitlag, off-field C1 deployable
+  eligibility snapshots, RL, generated docs, and Deferred Systems are excluded.
 - **Proof/plan:** three-phase `TASKS.md` Legacy Geo And Hydro Support Character
   Campaign with identity/formula, focused character, reaction, build, Javadoc,
   and executable preflight gates.
+- **Completion:** commits `558e3a9` through `649532a` deliver both identities,
+  Geo-only CRIT DMG, typed-input/ICD support, both character slices, and all
+  review corrections. Final focused and combined gates pass on 2026-08-03.
