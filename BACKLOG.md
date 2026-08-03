@@ -3626,7 +3626,7 @@ experiment record.
 
 ### B-173 — Sayu Press and Daruma character campaign
 
-- **Status:** in progress
+- **Status:** done
 - **Source:** explicit broad content-expansion request and post-B-172 missing
   character inventory.
 - **Symptom:** Sayu has pinned evidence and a local image but no typed identity,
@@ -3639,6 +3639,10 @@ experiment record.
   geometry, RL, generated docs, and Deferred Systems are excluded.
 - **Proof/plan:** two-phase `TASKS.md` Sayu Press And Daruma Character Campaign
   with identity, focused character, reaction, build, Javadoc, and preflight.
+- **Completion:** commits `26ca842`, `8d084da`, and `3483507` deliver the typed
+  identity, exact Press/Daruma slice, and review-driven C4/C6 integration
+  coverage. All planned gates pass on 2026-08-03 and final re-review found no
+  remaining issue.
 
 ### B-174 — Kujou Sara support character candidate
 

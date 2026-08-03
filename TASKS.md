@@ -14247,8 +14247,8 @@ Completion evidence:
 
 ## Implementation Order: Sayu Press And Daruma Character Campaign
 
-Status: In progress. B-173 has an identity prerequisite followed by one
-snapshot-aware character phase.
+Status: Complete. B-173 reserved the identity and delivered the bounded
+snapshot-aware character slice.
 
 Scope:
 
@@ -14268,7 +14268,7 @@ Definitions:
 - Press-only Skill: one snapshotted Windwheel hit plus one independent kick;
   Hold requests fail closed rather than approximating movement or absorption.
 
-### Phase 1: Reserve Sayu Identity
+### Phase 1: Reserve Sayu Identity - Done
 
 Target files:
 
@@ -14291,7 +14291,7 @@ Verification:
 - `./gradlew LegacyCharacterIdentityRegressionTest build`
 - `python scripts/preflight.py --run`
 
-### Phase 2: Sayu Press Skill And Daruma Slice
+### Phase 2: Sayu Press Skill And Daruma Slice - Done
 
 Target files:
 
@@ -14322,6 +14322,15 @@ Verification:
 
 - `./gradlew SayuRegressionTest ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Commits `26ca842` and `8d084da` reserve Sayu ID 37 and add exact source-data
+  multipliers, Press Skill, seven offensive Daruma ticks, and C2-C6 behavior.
+- Commit `3483507` records the unresolved KQM 114f/gcsim 145f conflict and
+  deliberately follows gcsim's executable attack schedule for this slice.
+- Identity, Sayu, reaction, build, Javadoc, routed validation, and executable
+  preflight pass on 2026-08-03; focused re-review found no remaining issue.
 
 ## Implementation Order: Parallel Foundational Content Campaign
 
