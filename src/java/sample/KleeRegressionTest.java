@@ -393,6 +393,34 @@ public final class KleeRegressionTest {
                 () -> perform(invalidA1Sim, CharacterActionKey.NORMAL),
                 "Klee rejects out-of-range A1 draw at consumption");
 
+        Klee unsupported = deterministicKlee(0);
+        CombatSimulator unsupportedSim = simulatorWith(unsupported);
+        assertThrows(IllegalArgumentException.class,
+                () -> perform(unsupportedSim, CharacterActionKey.DASH),
+                "Klee rejects unsupported Dash");
+
+        CountingSupplier skippedBurstDraws = new CountingSupplier(0.0);
+        Klee insufficientEnergy = new Klee(
+                null, null, 6, () -> 1.0, () -> 1.0,
+                skippedBurstDraws);
+        CombatSimulator insufficientEnergySim = simulatorWith(
+                insufficientEnergy);
+        insufficientEnergy.restoreCurrentEnergy(0.0);
+        perform(insufficientEnergySim, CharacterActionKey.BURST);
+        assertClose(60.0, insufficientEnergy.getMissedBurstCost(),
+                "Klee rejects Burst with insufficient Energy");
+        assertEquals(0, skippedBurstDraws.getCount(),
+                "Klee skipped Burst consumes no random draws");
+
+        Klee skillCooldown = deterministicKlee(0);
+        CombatSimulator skillCooldownSim = simulatorWith(skillCooldown);
+        perform(skillCooldownSim, CharacterActionKey.SKILL);
+        perform(skillCooldownSim, CharacterActionKey.SKILL);
+        perform(skillCooldownSim, CharacterActionKey.SKILL);
+        assertClose(20.0 + 33.0 * FRAME + 75.0 * FRAME,
+                skillCooldownSim.getCurrentTime(),
+                "Klee serializes Skill after both charges are spent");
+
         Klee reusable = deterministicKlee(0);
         simulatorWith(reusable);
         assertThrows(IllegalStateException.class,
