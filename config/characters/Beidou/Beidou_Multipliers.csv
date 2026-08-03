@@ -1,0 +1,13 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Beidou,NORMAL,N1,9,1.30666,0
+Beidou,NORMAL,N2,9,1.30192,0
+Beidou,NORMAL,N3,9,1.62266,0
+Beidou,NORMAL,N4,9,1.58948,0
+Beidou,NORMAL,N5,9,2.06032,0
+Beidou,SKILL,Tidecaller,9,2.0672,0
+Beidou,SKILL,Tidecaller C3,12,2.432,0
+Beidou,SKILL,Skill Particles,1,2.0,0
+Beidou,BURST,Stormbreaker Initial,9,2.0672,0
+Beidou,BURST,Stormbreaker Initial C5,12,2.432,0
+Beidou,BURST,Lightning Discharge,9,1.632,0
+Beidou,BURST,Lightning Discharge C5,12,1.92,0

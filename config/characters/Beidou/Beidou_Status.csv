@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Beidou,STATS,Base HP,90,13050,0
+Beidou,STATS,Base ATK,90,225,0
+Beidou,STATS,Base DEF,90,648,0
+Beidou,STATS,Ascension Electro DMG Bonus,90,0.24,0
+Beidou,STATS,Energy Cost,90,80,0
+Beidou,STATS,Constellation,6,6,0
+Beidou,CONFIG,Character Level,90,90,0
+Beidou,CONFIG,Normal Level,9,9,0
+Beidou,CONFIG,Skill Level,12,12,0
+Beidou,CONFIG,Burst Level,12,12,0
