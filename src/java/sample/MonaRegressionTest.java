@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import mechanics.buff.Buff;
 import mechanics.buff.SimpleBuff;
+import mechanics.formula.DamageCalculator;
 import model.character.Mona;
 import model.entity.Enemy;
 import model.entity.SnapshotAwareCharacterEffect;
@@ -41,8 +41,11 @@ public final class MonaRegressionTest {
         testNormalChainSnapshotRestore();
         testPressSkillSnapshotParticlesAndRecast();
         testPressSkillSnapshotRestore();
+        testSkillEventProgressAndDelayedCooldownRestore();
         testBubbleOmenTriggerAndForcedPop();
+        testOmenImpactResolutionAndExactBubbleBoundary();
         testBurstConstellationsAndSnapshotRestore();
+        testBurstEnergyTimingAndRestore();
         testC2ProbabilityCooldownAndSnapshot();
         testBoundaryAndAbnormalCases();
         System.out.println("MonaRegressionTest passed");
@@ -280,6 +283,64 @@ public final class MonaRegressionTest {
                 "Mona mid-stream restore resumes remaining Skill events");
     }
 
+    private static void testSkillEventProgressAndDelayedCooldownRestore() {
+        Mona mona = new Mona(null, null, 0);
+        CombatSimulator simulator = simulatorWith(mona);
+        SimulatorSnapshot[] cooldownSnapshot = captureSnapshotAt(
+                simulator, 10.0 * FRAME);
+        perform(simulator, CharacterActionKey.SKILL);
+        assertTrue(cooldownSnapshot[0] != null,
+                "Mona captures pending Skill cooldown start");
+        simulator.restoreSnapshot(cooldownSnapshot[0]);
+        advanceTo(simulator, 24.0 * FRAME);
+        assertClose(12.4, mona.getSkillCooldownEndTime(),
+                "Mona restore reconstructs frame-24 Skill cooldown start");
+
+        Mona hitMona = new Mona(null, null, 0);
+        CombatSimulator hitSim = simulatorWith(hitMona);
+        List<ActionRecord> hits = captureNamedActions(
+                hitSim, "Mirror Reflection of Doom");
+        SimulatorSnapshot[] duringFirstHit = new SimulatorSnapshot[1];
+        hitSim.addDamageListener((actor, action, damage, time) -> {
+            if (duringFirstHit[0] == null
+                    && action.getName().equals(
+                            "Mirror Reflection of Doom Tick 1")) {
+                duringFirstHit[0] = hitSim.saveSnapshot();
+            }
+        });
+        perform(hitSim, CharacterActionKey.SKILL);
+        advanceTo(hitSim, 330.0 * FRAME);
+        hitSim.restoreSnapshot(duringFirstHit[0]);
+        hits.clear();
+        advanceTo(hitSim, 330.0 * FRAME);
+        assertEquals(4, hits.size(),
+                "Mona hit-listener snapshot resumes after current Skill hit");
+
+        Mona explosionMona = new Mona(null, null, 0);
+        CombatSimulator explosionSim = simulatorWith(explosionMona);
+        List<ActionRecord> explosions = captureNamedActions(
+                explosionSim, "Mirror Reflection of Doom Explosion");
+        List<ParticleRecord> particles = captureParticles(explosionSim);
+        SimulatorSnapshot[] duringExplosion = new SimulatorSnapshot[1];
+        explosionSim.addDamageListener((actor, action, damage, time) -> {
+            if (duringExplosion[0] == null
+                    && action.getName().equals(
+                            "Mirror Reflection of Doom Explosion")) {
+                duringExplosion[0] = explosionSim.saveSnapshot();
+            }
+        });
+        perform(explosionSim, CharacterActionKey.SKILL);
+        advanceTo(explosionSim, 430.0 * FRAME);
+        explosionSim.restoreSnapshot(duringExplosion[0]);
+        explosions.clear();
+        particles.clear();
+        advanceTo(explosionSim, 430.0 * FRAME);
+        assertEquals(0, explosions.size(),
+                "Mona explosion-listener snapshot does not repeat explosion");
+        assertEquals(1, particles.size(),
+                "Mona explosion-listener snapshot retains pending particles");
+    }
+
     private static void testBubbleOmenTriggerAndForcedPop() {
         Mona baseline = new Mona(null, null, 0);
         CombatSimulator baselineSim = simulatorWith(baseline);
@@ -335,6 +396,65 @@ public final class MonaRegressionTest {
                 "Mona Omen uses half-open expiry");
     }
 
+    private static void testOmenImpactResolutionAndExactBubbleBoundary() {
+        Mona baseline = new Mona(null, null, 0);
+        CombatSimulator baselineSim = simulatorWith(baseline);
+        AttackAction baselineSnapshot = directNormalProbe();
+        baselineSnapshot.setStatSnapshot(baseline.getEffectiveStats(0.0));
+        double baselineBefore = baselineSim.getTotalDamage();
+        baselineSim.performActionWithoutTimeAdvance(
+                CharacterId.MONA, baselineSnapshot);
+        double baselineDamage = baselineSim.getTotalDamage()
+                - baselineBefore;
+
+        Mona live = new Mona(null, null, 0);
+        CombatSimulator liveSim = simulatorWith(live);
+        AttackAction oldSnapshot = directNormalProbe();
+        oldSnapshot.setStatSnapshot(live.getEffectiveStats(0.0));
+        perform(liveSim, CharacterActionKey.BURST);
+        double liveBefore = liveSim.getTotalDamage();
+        liveSim.performActionWithoutTimeAdvance(
+                CharacterId.MONA, oldSnapshot);
+        double liveDamage = liveSim.getTotalDamage() - liveBefore;
+        assertTrue(liveDamage > baselineDamage,
+                "Mona Omen applies live to pre-Bubble snapshots");
+
+        Mona expired = new Mona(null, null, 0);
+        CombatSimulator expiredSim = simulatorWith(expired);
+        perform(expiredSim, CharacterActionKey.BURST);
+        AttackAction capturedUnderOmen = directNormalProbe();
+        capturedUnderOmen.setStatSnapshot(
+                expired.getEffectiveStats(expiredSim.getCurrentTime()));
+        expiredSim.notifyDamage(expired, directNormalProbe(), 100.0);
+        advanceTo(expiredSim, expired.getOmenExpirationTime());
+        double expiredBefore = expiredSim.getTotalDamage();
+        expiredSim.performActionWithoutTimeAdvance(
+                CharacterId.MONA, capturedUnderOmen);
+        assertClose(baselineDamage,
+                expiredSim.getTotalDamage() - expiredBefore,
+                "Mona Omen does not bake into snapshots captured during Omen");
+
+        Mona boundary = new Mona(null, null, 0);
+        CombatSimulator boundarySim = simulatorWith(boundary);
+        double forcedPopTime = (107.0 + 480.0) * FRAME;
+        double[] boundaryDamage = new double[1];
+        boundarySim.registerEvent(new SimpleTimerEvent(
+                forcedPopTime, 1.0) {
+            @Override
+            public void onTick(CombatSimulator activeSim) {
+                finish();
+                double before = activeSim.getTotalDamage();
+                activeSim.performActionWithoutTimeAdvance(
+                        CharacterId.MONA, directNormalProbe());
+                boundaryDamage[0] = activeSim.getTotalDamage() - before;
+            }
+        });
+        perform(boundarySim, CharacterActionKey.BURST);
+        advanceTo(boundarySim, forcedPopTime + FRAME);
+        assertTrue(boundaryDamage[0] > baselineDamage,
+                "Mona Bubble applies Omen at the exact forced-pop boundary");
+    }
+
     private static void testBurstConstellationsAndSnapshotRestore() {
         Mona c3 = new Mona(null, null, 3);
         CombatSimulator c3Sim = simulatorWith(c3);
@@ -346,14 +466,14 @@ public final class MonaRegressionTest {
                 c3Bursts.get(0).action.getDamagePercent(),
                 "Mona C3 Bubble talent level");
         assertClose(0.60,
-                effectiveStatsWithTeam(c3Sim, c3).get(
+                targetStats(c3Sim, c3).get(
                         StatType.DMG_BONUS_ALL),
                 "Mona C3 Omen bonus");
 
         Mona c4 = new Mona(null, null, 4);
         CombatSimulator c4Sim = simulatorWith(c4);
         perform(c4Sim, CharacterActionKey.BURST);
-        StatsContainer bubbleStats = effectiveStatsWithTeam(c4Sim, c4);
+        StatsContainer bubbleStats = targetStats(c4Sim, c4);
         assertClose(0.60,
                 bubbleStats.get(StatType.DMG_BONUS_ALL),
                 "Mona Bubble projects C3 Omen value");
@@ -386,6 +506,41 @@ public final class MonaRegressionTest {
         pendingSim.restoreSnapshot(bubbleSnapshot);
         assertTrue(pending.isBubbleActive(pendingSim.getCurrentTime()),
                 "Mona restores Bubble before its trigger");
+    }
+
+    private static void testBurstEnergyTimingAndRestore() {
+        Mona mona = new Mona(null, null, 0);
+        CombatSimulator simulator = simulatorWith(mona);
+        SimulatorSnapshot[] beforeSpend = captureSnapshotAt(
+                simulator, 4.0 * FRAME);
+        double[] energyAtFourFrames = new double[1];
+        double[] energyAfterFiveFrames = new double[1];
+        simulator.registerEvent(new SimpleTimerEvent(4.0 * FRAME, 1.0) {
+            @Override
+            public void onTick(CombatSimulator activeSim) {
+                finish();
+                energyAtFourFrames[0] = mona.getCurrentEnergy();
+            }
+        });
+        simulator.registerEvent(new SimpleTimerEvent(
+                5.0 * FRAME + EPSILON, 1.0) {
+            @Override
+            public void onTick(CombatSimulator activeSim) {
+                finish();
+                energyAfterFiveFrames[0] = mona.getCurrentEnergy();
+            }
+        });
+        perform(simulator, CharacterActionKey.BURST);
+        assertClose(60.0, energyAtFourFrames[0],
+                "Mona Burst retains Energy before frame 5");
+        assertClose(0.0, energyAfterFiveFrames[0],
+                "Mona Burst spends Energy at frame 5");
+        simulator.restoreSnapshot(beforeSpend[0]);
+        assertClose(60.0, mona.getCurrentEnergy(),
+                "Mona restore retains pre-spend Burst Energy");
+        advanceTo(simulator, 5.0 * FRAME);
+        assertClose(0.0, mona.getCurrentEnergy(),
+                "Mona restore reconstructs frame-5 Energy spend");
     }
 
     private static void testC2ProbabilityCooldownAndSnapshot() {
@@ -493,17 +648,17 @@ public final class MonaRegressionTest {
                 "Mona Bubble ignores indirect OTHER damage");
     }
 
-    private static StatsContainer effectiveStatsWithTeam(
+    private static StatsContainer targetStats(
             CombatSimulator simulator,
             Mona mona) {
         double time = simulator.getCurrentTime();
-        StatsContainer stats = mona.getEffectiveStats(time);
-        for (Buff buff : simulator.getApplicableBuffs(mona)) {
-            if (!buff.isExpired(time)) {
-                buff.apply(stats, time);
-            }
-        }
-        return stats;
+        return DamageCalculator.resolveTargetStats(
+                mona,
+                simulator.getEnemy(),
+                directNormalProbe(),
+                simulator.getApplicableBuffs(mona),
+                time,
+                simulator);
     }
 
     private static AttackAction directNormalProbe() {

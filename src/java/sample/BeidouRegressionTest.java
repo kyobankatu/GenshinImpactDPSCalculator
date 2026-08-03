@@ -123,6 +123,18 @@ public final class BeidouRegressionTest {
         perform(resetSim, CharacterActionKey.NORMAL);
         assertTrue(resetRecords.get(1).action.getName().endsWith("N1"),
                 "Beidou non-Normal action resets chain");
+
+        Beidou switched = new Beidou(null, null, 0);
+        Noelle ally = new Noelle(null, null);
+        CombatSimulator switchSim = simulatorWith(switched, ally);
+        List<ActionRecord> switchRecords = captureNamedActions(
+                switchSim, "Oceanborne N");
+        perform(switchSim, CharacterActionKey.NORMAL);
+        switchSim.switchCharacter(CharacterId.NOELLE);
+        switchSim.switchCharacter(CharacterId.BEIDOU);
+        perform(switchSim, CharacterActionKey.NORMAL);
+        assertTrue(switchRecords.get(1).action.getName().endsWith("N1"),
+                "Beidou switch-out resets Normal chain");
     }
 
     private static void testTidecallerTimingParticlesAndConstellation() {
@@ -265,18 +277,32 @@ public final class BeidouRegressionTest {
         assertEquals(2, discharges.size(),
                 "Discharge accepts exact one-second boundary");
 
+        advanceTo(simulator, firstTrigger + 2.0);
         directHit(simulator, CharacterId.NOELLE,
                 ActionType.SKILL, 1.0, "Skill gate");
         directHit(simulator, CharacterId.NOELLE,
                 ActionType.BURST, 1.0, "Burst gate");
         directHit(simulator, CharacterId.NOELLE,
                 ActionType.PLUNGE, 1.0, "Plunge gate");
-        directHit(simulator, CharacterId.NOELLE,
-                ActionType.NORMAL, 0.0, "Zero damage gate");
-        simulator.advanceTime(1.1);
+        simulator.advanceTime(FRAME);
         assertEquals(2, discharges.size(),
-                "Only positive Normal and Charged hits trigger");
+                "Skill, Burst, and Plunge do not trigger Discharge");
 
+        Beidou zeroDamage = new Beidou(null, null, 0);
+        Noelle zeroDamageAlly = new Noelle(null, null);
+        CombatSimulator zeroDamageSim = simulatorWith(
+                zeroDamage, zeroDamageAlly);
+        List<ActionRecord> zeroDamageDischarges = captureNamedActions(
+                zeroDamageSim, "Stormbreaker Lightning Discharge");
+        perform(zeroDamageSim, CharacterActionKey.BURST);
+        zeroDamageSim.setActiveCharacter(CharacterId.NOELLE);
+        directHit(zeroDamageSim, CharacterId.NOELLE,
+                ActionType.NORMAL, 0.0, "Shielded zero-damage Normal");
+        zeroDamageSim.advanceTime(FRAME);
+        assertEquals(1, zeroDamageDischarges.size(),
+                "Zero-damage Normal hit triggers Discharge");
+
+        advanceTo(simulator, firstTrigger + 3.0);
         simulator.setActiveCharacter(CharacterId.NOELLE);
         directHit(simulator, CharacterId.BEIDOU,
                 ActionType.NORMAL, 1.0, "Off-field owner");
@@ -470,6 +496,7 @@ public final class BeidouRegressionTest {
                 null,
                 0.0,
                 actionType);
+        action.setHitEffectTrigger(true);
         action.setICD(ICDType.None, ICDTag.None, 0.0);
         simulator.performActionWithoutTimeAdvance(actor, action);
     }

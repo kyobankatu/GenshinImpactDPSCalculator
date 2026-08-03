@@ -111,7 +111,8 @@ public class CombatActionResolver {
         applicableBuffBuffer.clear();
         applicableBuffBuffer.addAll(sim.getApplicableBuffs(attacker));
         StatsContainer resolvedStats = DamageCalculator.resolveTargetStats(
-                attacker, sim.getEnemy(), action, applicableBuffBuffer, sim.getCurrentTime());
+                attacker, sim.getEnemy(), action, applicableBuffBuffer,
+                sim.getCurrentTime(), sim);
         return new ActionResolutionContext(
                 new ArrayList<>(applicableBuffBuffer),
                 new ArrayList<>(sim.getTeamBuffList()),

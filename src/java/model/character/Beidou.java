@@ -14,6 +14,7 @@ import model.entity.ArtifactSet;
 import model.entity.Character;
 import model.entity.SimulatorInitializedCharacterEffect;
 import model.entity.SnapshotAwareCharacterEffect;
+import model.entity.SwitchAwareCharacter;
 import model.entity.Weapon;
 import model.stats.StatsContainer;
 import model.type.ActionType;
@@ -42,7 +43,8 @@ import simulation.event.SimpleTimerEvent;
  */
 public final class Beidou extends Character
         implements SimulatorInitializedCharacterEffect,
-        SnapshotAwareCharacterEffect {
+        SnapshotAwareCharacterEffect,
+        SwitchAwareCharacter {
     private static final double FRAME = 1.0 / 60.0;
     private static final double EVENT_EPSILON = 1e-9;
     private static final double SKILL_COOLDOWN = 7.5;
@@ -221,6 +223,12 @@ public final class Beidou extends Character
         }
     }
 
+    /** Resets Oceanborne progression when Beidou leaves the field. */
+    @Override
+    public void onSwitchOut(CombatSimulator simulator) {
+        normalAttackStep = 0;
+    }
+
     /** Dispatches Beidou's supported typed actions. */
     @Override
     public void onAction(
@@ -321,9 +329,10 @@ public final class Beidou extends Character
             AttackAction action,
             double damage,
             double time) {
-        if (damage <= 0.0
-                || simulator.getActiveCharacter() != actor
+        if (simulator.getActiveCharacter() != actor
                 || !isStormbreakerActive(time)
+                || action == null
+                || !action.isHitEffectTrigger()
                 || (action.getActionType() != ActionType.NORMAL
                         && action.getActionType() != ActionType.CHARGE)
                 || time + EVENT_EPSILON

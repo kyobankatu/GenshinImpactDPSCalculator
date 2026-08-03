@@ -44,7 +44,8 @@ final class StandardDamageStrategy implements DamageStrategy {
         }
 
         StatsContainer stats = DamageCalculator.resolveTargetStats(
-                attacker, target, action, activeBuffs, preResolvedStats, currentTime);
+                attacker, target, action, activeBuffs, preResolvedStats,
+                currentTime, sim);
 
         boolean isNormalDamage = action.getActionType() == ActionType.NORMAL;
         boolean isChargedDamage = action.getActionType() == ActionType.CHARGE;

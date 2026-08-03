@@ -7,6 +7,7 @@ import model.entity.DamageTriggeredArtifactEffect;
 import model.entity.DamageTriggeredWeaponEffect;
 import model.entity.Enemy;
 import model.entity.TargetDependentArtifactEffect;
+import model.entity.TargetDependentTeamEffect;
 import model.entity.TargetDependentWeaponEffect;
 import java.util.List;
 import mechanics.buff.Buff;
@@ -226,8 +227,32 @@ public class DamageCalculator {
             simulation.action.AttackAction action,
             List<Buff> activeBuffs,
             double currentTime) {
+        return resolveTargetStats(
+                attacker, target, action, activeBuffs, currentTime, null);
+    }
+
+    /**
+     * Resolves per-hit equipment and party effects against the live target.
+     *
+     * @param attacker attacking character
+     * @param target enemy being hit
+     * @param action attack action whose snapshot policy is honored
+     * @param activeBuffs currently active buffs (may be {@code null})
+     * @param currentTime current simulation time in seconds
+     * @param simulator simulator supplying party-scoped target effects, or
+     *        {@code null} when only attacker equipment should be resolved
+     * @return resolved per-hit stats
+     */
+    public static StatsContainer resolveTargetStats(
+            Character attacker,
+            Enemy target,
+            simulation.action.AttackAction action,
+            List<Buff> activeBuffs,
+            double currentTime,
+            simulation.CombatSimulator simulator) {
         StatsContainer stats = resolveStats(attacker, action, activeBuffs, currentTime);
-        if (target == null || !hasTargetDependentEffect(attacker)) {
+        if (target == null
+                || !hasTargetDependentEffect(attacker, simulator)) {
             return stats;
         }
         StatsContainer perHitStats = stats.merge(null);
@@ -247,20 +272,42 @@ public class DamageCalculator {
                 }
             }
         }
+        if (simulator != null) {
+            for (Character member : simulator.getPartyMembers()) {
+                if (member instanceof TargetDependentTeamEffect) {
+                    TargetDependentTeamEffect teamEffect =
+                            (TargetDependentTeamEffect) member;
+                    teamEffect.applyTargetDependentTeamStats(
+                            perHitStats,
+                            attacker,
+                            target,
+                            action,
+                            currentTime);
+                }
+            }
+        }
         return perHitStats;
     }
 
-    /** Returns whether the attacker has any per-target equipment effect. */
-    private static boolean hasTargetDependentEffect(Character attacker) {
+    /** Returns whether this hit has any per-target equipment or party effect. */
+    private static boolean hasTargetDependentEffect(
+            Character attacker,
+            simulation.CombatSimulator simulator) {
         if (attacker.getWeapon() instanceof TargetDependentWeaponEffect) {
             return true;
         }
-        if (attacker.getArtifacts() == null) {
-            return false;
+        if (attacker.getArtifacts() != null) {
+            for (model.entity.ArtifactSet artifact : attacker.getArtifacts()) {
+                if (artifact instanceof TargetDependentArtifactEffect) {
+                    return true;
+                }
+            }
         }
-        for (model.entity.ArtifactSet artifact : attacker.getArtifacts()) {
-            if (artifact instanceof TargetDependentArtifactEffect) {
-                return true;
+        if (simulator != null) {
+            for (Character member : simulator.getPartyMembers()) {
+                if (member instanceof TargetDependentTeamEffect) {
+                    return true;
+                }
             }
         }
         return false;
@@ -283,11 +330,13 @@ public class DamageCalculator {
             simulation.action.AttackAction action,
             List<Buff> activeBuffs,
             StatsContainer preResolvedStats,
-            double currentTime) {
+            double currentTime,
+            simulation.CombatSimulator simulator) {
         if (preResolvedStats != null) {
             return preResolvedStats;
         }
-        return resolveTargetStats(attacker, target, action, activeBuffs, currentTime);
+        return resolveTargetStats(
+                attacker, target, action, activeBuffs, currentTime, simulator);
     }
 
     /**

@@ -1,7 +1,6 @@
 package model.character;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.DoubleSupplier;
@@ -12,9 +11,10 @@ import mechanics.data.TalentDataSource;
 import mechanics.energy.ParticleType;
 import model.entity.ArtifactSet;
 import model.entity.Character;
-import model.entity.CharacterTeamBuffProvider;
+import model.entity.Enemy;
 import model.entity.SimulatorInitializedCharacterEffect;
 import model.entity.SnapshotAwareCharacterEffect;
+import model.entity.TargetDependentTeamEffect;
 import model.entity.Weapon;
 import model.stats.StatsContainer;
 import model.type.ActionType;
@@ -43,9 +43,9 @@ import simulation.event.SimpleTimerEvent;
  * intentionally excluded.</p>
  */
 public class Mona extends Character implements
-        CharacterTeamBuffProvider,
         SimulatorInitializedCharacterEffect,
-        SnapshotAwareCharacterEffect {
+        SnapshotAwareCharacterEffect,
+        TargetDependentTeamEffect {
     private static final double FRAME = 1.0 / 60.0;
     private static final double EVENT_EPSILON = 1e-9;
     private static final double SKILL_COOLDOWN = 12.0;
@@ -65,13 +65,14 @@ public class Mona extends Character implements
     };
 
     private final DoubleSupplier c2ProcDraw;
-    private final Buff omenTeamBuff;
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
     private long skillGeneration;
     private PendingSkill pendingSkill;
+    private double pendingSkillCooldownTime = Double.NEGATIVE_INFINITY;
     private List<Double> pendingParticleTimes = new ArrayList<>();
     private long burstGeneration;
+    private double pendingBurstEnergyTime = Double.NEGATIVE_INFINITY;
     private PendingBurstApplication pendingBurstApplication;
     private boolean bubbleActive;
     private double bubbleExpirationTime = Double.NEGATIVE_INFINITY;
@@ -152,20 +153,6 @@ public class Mona extends Character implements
         setSkillCD(SKILL_COOLDOWN);
         setBurstCD(BURST_COOLDOWN);
 
-        omenTeamBuff = new Buff("Mona Omen") {
-            @Override
-            protected void applyStats(
-                    StatsContainer stats,
-                    double currentTime) {
-                if (!isOmenAmplified(currentTime)) {
-                    return;
-                }
-                stats.add(StatType.DMG_BONUS_ALL, omenDamageBonus());
-                if (Mona.this.constellation >= 4) {
-                    stats.add(StatType.CRIT_RATE, 0.15);
-                }
-            }
-        }.sourcedBy(characterId);
     }
 
     /** Binds Mona's listeners and mutable event state to one simulator. */
@@ -196,8 +183,10 @@ public class Mona extends Character implements
                 normalAttackStep,
                 skillGeneration,
                 pendingSkill,
+                pendingSkillCooldownTime,
                 pendingParticleTimes,
                 burstGeneration,
+                pendingBurstEnergyTime,
                 pendingBurstApplication,
                 bubbleActive,
                 bubbleExpirationTime,
@@ -233,8 +222,10 @@ public class Mona extends Character implements
         skillGeneration = restored.skillGeneration;
         pendingSkill = restored.pendingSkill == null
                 ? null : restored.pendingSkill.copy();
+        pendingSkillCooldownTime = restored.pendingSkillCooldownTime;
         pendingParticleTimes = new ArrayList<>(restored.pendingParticleTimes);
         burstGeneration = restored.burstGeneration;
+        pendingBurstEnergyTime = restored.pendingBurstEnergyTime;
         pendingBurstApplication = restored.pendingBurstApplication == null
                 ? null : restored.pendingBurstApplication.copy();
         bubbleActive = restored.bubbleActive;
@@ -251,11 +242,19 @@ public class Mona extends Character implements
         if (pendingSkill != null) {
             scheduleNextSkillEvent(simulator, pendingSkill);
         }
+        if (Double.isFinite(pendingSkillCooldownTime)) {
+            scheduleSkillCooldown(
+                    simulator, skillGeneration, pendingSkillCooldownTime);
+        }
         for (double particleTime : pendingParticleTimes) {
             scheduleParticle(simulator, particleTime);
         }
         if (pendingBurstApplication != null) {
             scheduleBurstApplication(simulator, pendingBurstApplication);
+        }
+        if (Double.isFinite(pendingBurstEnergyTime)) {
+            scheduleBurstEnergy(
+                    simulator, burstGeneration, pendingBurstEnergyTime);
         }
         if (bubbleActive) {
             scheduleForcedBubblePop(
@@ -284,16 +283,27 @@ public class Mona extends Character implements
                         * getTalentValue("A4 ER Conversion", 0.20));
     }
 
-    /** Exposes Bubble/Omen and C4 as one target-bound team projection. */
+    /** Applies Bubble/Omen and C4 against the live target at impact time. */
     @Override
-    public List<Buff> getTeamBuffs() {
-        return Collections.singletonList(omenTeamBuff);
+    public void applyTargetDependentTeamStats(
+            StatsContainer stats,
+            Character attacker,
+            Enemy target,
+            AttackAction action,
+            double currentTime) {
+        if (!isOmenAmplified(currentTime)) {
+            return;
+        }
+        stats.add(StatType.DMG_BONUS_ALL, omenDamageBonus());
+        if (constellation >= 4) {
+            stats.add(StatType.CRIT_RATE, 0.15);
+        }
     }
 
     /** Returns whether the modeled target currently carries Bubble. */
     public boolean isBubbleActive(double currentTime) {
         return bubbleActive
-                && currentTime + EVENT_EPSILON < bubbleExpirationTime;
+                && currentTime <= bubbleExpirationTime + EVENT_EPSILON;
     }
 
     /** Returns whether Bubble or Omen amplifies hits at this time. */
@@ -395,14 +405,27 @@ public class Mona extends Character implements
         StatsContainer snapshot = captureActionSnapshot(simulator, castTime);
         pendingSkill = new PendingSkill(
                 generation, castTime, snapshot, 0, constellation >= 5);
-        schedule(simulator, castTime + 24.0 * FRAME, activeSim -> {
-            if (generation == skillGeneration) {
-                markSkillUsed(activeSim.getCurrentTime(),
-                        activeSim.getApplicableBuffs(this));
-            }
-        });
+        pendingSkillCooldownTime = castTime + 24.0 * FRAME;
+        scheduleSkillCooldown(
+                simulator, generation, pendingSkillCooldownTime);
         scheduleNextSkillEvent(simulator, pendingSkill);
         simulator.advanceTime(50.0 * FRAME);
+    }
+
+    private void scheduleSkillCooldown(
+            CombatSimulator simulator,
+            long generation,
+            double cooldownTime) {
+        schedule(simulator, cooldownTime, activeSim -> {
+            if (generation != skillGeneration
+                    || Math.abs(pendingSkillCooldownTime - cooldownTime)
+                            > EVENT_EPSILON) {
+                return;
+            }
+            pendingSkillCooldownTime = Double.NEGATIVE_INFINITY;
+            markSkillUsed(activeSim.getCurrentTime(),
+                    activeSim.getApplicableBuffs(this));
+        });
     }
 
     private void scheduleNextSkillEvent(
@@ -432,7 +455,6 @@ public class Mona extends Character implements
                     explosion ? ICDTag.None : ICDTag.ElementalSkill,
                     1.0);
             action.setStatSnapshot(skill.snapshot);
-            activeSim.performActionWithoutTimeAdvance(characterId, action);
             if (explosion) {
                 pendingSkill = null;
                 queueParticle(activeSim,
@@ -441,6 +463,7 @@ public class Mona extends Character implements
                 pendingSkill = skill.withNextEvent(eventIndex + 1);
                 scheduleNextSkillEvent(activeSim, pendingSkill);
             }
+            activeSim.performActionWithoutTimeAdvance(characterId, action);
         });
     }
 
@@ -457,8 +480,12 @@ public class Mona extends Character implements
 
     private void stellarisPhantasm(CombatSimulator simulator) {
         double castTime = simulator.getCurrentTime();
-        markBurstUsed(castTime, simulator.getApplicableBuffs(this));
+        markBurstCooldownUsed(
+                castTime, simulator.getApplicableBuffs(this));
         long generation = ++burstGeneration;
+        pendingBurstEnergyTime = castTime + 5.0 * FRAME;
+        scheduleBurstEnergy(
+                simulator, generation, pendingBurstEnergyTime);
         bubbleActive = false;
         bubbleExpirationTime = Double.NEGATIVE_INFINITY;
         omenExpirationTime = Double.NEGATIVE_INFINITY;
@@ -467,6 +494,21 @@ public class Mona extends Character implements
                 generation, castTime + 107.0 * FRAME);
         scheduleBurstApplication(simulator, pendingBurstApplication);
         simulator.advanceTime(127.0 * FRAME);
+    }
+
+    private void scheduleBurstEnergy(
+            CombatSimulator simulator,
+            long generation,
+            double energyTime) {
+        schedule(simulator, energyTime, activeSim -> {
+            if (generation != burstGeneration
+                    || Math.abs(pendingBurstEnergyTime - energyTime)
+                            > EVENT_EPSILON) {
+                return;
+            }
+            pendingBurstEnergyTime = Double.NEGATIVE_INFINITY;
+            spendBurstEnergy(activeSim.getCurrentTime());
+        });
     }
 
     private void scheduleBurstApplication(
@@ -650,6 +692,10 @@ public class Mona extends Character implements
     }
 
     private void normalizePendingState(double currentTime) {
+        if (pendingSkillCooldownTime
+                < currentTime - EVENT_EPSILON) {
+            pendingSkillCooldownTime = Double.NEGATIVE_INFINITY;
+        }
         if (pendingSkill != null) {
             int next = pendingSkill.nextEventIndex;
             while (next < SKILL_EVENT_FRAMES.length
@@ -663,6 +709,10 @@ public class Mona extends Character implements
         }
         pendingParticleTimes.removeIf(time ->
                 time < currentTime - EVENT_EPSILON);
+        if (pendingBurstEnergyTime
+                < currentTime - EVENT_EPSILON) {
+            pendingBurstEnergyTime = Double.NEGATIVE_INFINITY;
+        }
         if (pendingBurstApplication != null
                 && pendingBurstApplication.time
                         < currentTime - EVENT_EPSILON) {
@@ -741,8 +791,10 @@ public class Mona extends Character implements
         private final int normalAttackStep;
         private final long skillGeneration;
         private final PendingSkill pendingSkill;
+        private final double pendingSkillCooldownTime;
         private final List<Double> pendingParticleTimes;
         private final long burstGeneration;
+        private final double pendingBurstEnergyTime;
         private final PendingBurstApplication pendingBurstApplication;
         private final boolean bubbleActive;
         private final double bubbleExpirationTime;
@@ -755,8 +807,10 @@ public class Mona extends Character implements
                 int normalAttackStep,
                 long skillGeneration,
                 PendingSkill pendingSkill,
+                double pendingSkillCooldownTime,
                 List<Double> pendingParticleTimes,
                 long burstGeneration,
+                double pendingBurstEnergyTime,
                 PendingBurstApplication pendingBurstApplication,
                 boolean bubbleActive,
                 double bubbleExpirationTime,
@@ -768,8 +822,10 @@ public class Mona extends Character implements
             this.skillGeneration = skillGeneration;
             this.pendingSkill = pendingSkill == null
                     ? null : pendingSkill.copy();
+            this.pendingSkillCooldownTime = pendingSkillCooldownTime;
             this.pendingParticleTimes = new ArrayList<>(pendingParticleTimes);
             this.burstGeneration = burstGeneration;
+            this.pendingBurstEnergyTime = pendingBurstEnergyTime;
             this.pendingBurstApplication = pendingBurstApplication == null
                     ? null : pendingBurstApplication.copy();
             this.bubbleActive = bubbleActive;
