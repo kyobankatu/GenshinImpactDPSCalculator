@@ -49,5 +49,7 @@ public enum ICDTag {
     /** Columbina's initial cast hit. */
     Columbina_Cast,
     /** Columbina's Moonreel follow-up hits. */
-    Columbina_Moonreel
+    Columbina_Moonreel,
+    /** Collei's Floral Sidewinder Sprout ticks. */
+    Collei_Sprout
 }

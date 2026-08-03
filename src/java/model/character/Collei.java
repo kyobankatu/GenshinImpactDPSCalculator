@@ -65,13 +65,11 @@ public final class Collei extends Character implements
     private long burstGeneration;
     private List<PendingHit> pendingHits = new ArrayList<>();
     private List<PendingCommand> pendingCommands = new ArrayList<>();
-    private double skillReactionWindowEnd = Double.NEGATIVE_INFINITY;
-    private boolean skillReactionObserved;
-    private boolean sproutReactionExtensionObserved;
-    private long sproutGeneration;
-    private double sproutExpirationTime = Double.NEGATIVE_INFINITY;
+    private List<SkillInstance> skillInstances = new ArrayList<>();
+    private long activeSproutGeneration;
     private double burstExpirationTime = Double.NEGATIVE_INFINITY;
     private int burstExtensionCount;
+    private boolean burstExtensionActive;
 
     /** Constructs repository-default C6 Collei. */
     public Collei(Weapon weapon, ArtifactSet artifacts) {
@@ -139,13 +137,11 @@ public final class Collei extends Character implements
                 burstGeneration,
                 pendingHits,
                 pendingCommands,
-                skillReactionWindowEnd,
-                skillReactionObserved,
-                sproutReactionExtensionObserved,
-                sproutGeneration,
-                sproutExpirationTime,
+                skillInstances,
+                activeSproutGeneration,
                 burstExpirationTime,
-                burstExtensionCount);
+                burstExtensionCount,
+                burstExtensionActive);
     }
 
     /** Reports whether a payload belongs to Collei. */
@@ -168,14 +164,11 @@ public final class Collei extends Character implements
         burstGeneration = restored.burstGeneration;
         pendingHits = copyHits(restored.pendingHits);
         pendingCommands = copyCommands(restored.pendingCommands);
-        skillReactionWindowEnd = restored.skillReactionWindowEnd;
-        skillReactionObserved = restored.skillReactionObserved;
-        sproutReactionExtensionObserved =
-                restored.sproutReactionExtensionObserved;
-        sproutGeneration = restored.sproutGeneration;
-        sproutExpirationTime = restored.sproutExpirationTime;
+        skillInstances = copySkillInstances(restored.skillInstances);
+        activeSproutGeneration = restored.activeSproutGeneration;
         burstExpirationTime = restored.burstExpirationTime;
         burstExtensionCount = restored.burstExtensionCount;
+        burstExtensionActive = restored.burstExtensionActive;
         double currentTime = simulator.getCurrentTime();
         pendingHits.removeIf(hit -> hit.time < currentTime - EPSILON);
         pendingCommands.removeIf(command ->
@@ -226,19 +219,26 @@ public final class Collei extends Character implements
                 || !simulator.getPartyMembers().contains(source)) {
             return;
         }
-        if (time <= skillReactionWindowEnd + EPSILON) {
-            skillReactionObserved = true;
-        }
-        if (constellation >= 2
-                && !sproutReactionExtensionObserved
-                && (time <= skillReactionWindowEnd + EPSILON
-                        || time <= sproutExpirationTime + EPSILON)) {
-            sproutReactionExtensionObserved = true;
-            if (Double.isFinite(sproutExpirationTime)) {
-                sproutExpirationTime += 180.0 * FRAME;
+        for (SkillInstance skill : skillInstances) {
+            boolean inReactionWindow =
+                    time <= skill.reactionWindowEnd + EPSILON;
+            boolean inActiveSprout =
+                    skill.generation == activeSproutGeneration
+                    && time <= skill.sproutExpirationTime + EPSILON;
+            if (inReactionWindow) {
+                skill.reactionObserved = true;
+            }
+            if (constellation >= 2
+                    && !skill.reactionExtensionObserved
+                    && (inReactionWindow || inActiveSprout)) {
+                skill.reactionExtensionObserved = true;
+                if (Double.isFinite(skill.sproutExpirationTime)) {
+                    skill.sproutExpirationTime += 180.0 * FRAME;
+                }
             }
         }
-        if (time + EPSILON >= burstExpirationTime
+        if (!burstExtensionActive
+                || time + EPSILON >= burstExpirationTime
                 || burstExtensionCount >= 3) {
             return;
         }
@@ -283,85 +283,56 @@ public final class Collei extends Character implements
     private void normalAttack(CombatSimulator simulator) {
         double castTime = simulator.getCurrentTime();
         int step = normalAttackStep;
-        queueHit(simulator, new PendingHit(
-                castTime + NORMAL_HITMARKS[step] * FRAME,
-                HitKind.NORMAL,
-                step,
-                0L,
-                null));
+        queueCommand(simulator, new PendingCommand(
+                castTime + (NORMAL_HITMARKS[step] - 10.0) * FRAME,
+                CommandKind.NORMAL_RELEASE,
+                step));
         normalAttackStep = (normalAttackStep + 1)
                 % NORMAL_MULTIPLIERS.length;
         simulator.advanceTime(NORMAL_DURATIONS[step] * FRAME);
     }
 
     private void fullyChargedShot(CombatSimulator simulator) {
-        queueHit(simulator, new PendingHit(
-                simulator.getCurrentTime() + 96.0 * FRAME,
-                HitKind.CHARGED,
-                0,
-                0L,
-                captureActionSnapshot(simulator)));
+        queueCommand(simulator, new PendingCommand(
+                simulator.getCurrentTime() + 86.0 * FRAME,
+                CommandKind.CHARGED_SNAPSHOT,
+                0L));
         simulator.advanceTime(96.0 * FRAME);
     }
 
     private void highPlunge(CombatSimulator simulator) {
         AttackAction plunge = attack(
                 "Supplicant's Bowmanship High Plunge",
-                getTalentValue("High Plunge", 2.6076),
+                getTalentValue("High Plunge", 2.607632),
                 Element.PHYSICAL,
                 StatType.PLUNGING_ATTACK_DMG_BONUS,
                 ActionType.PLUNGE,
                 ICDType.None,
                 ICDTag.PlungeAttack,
                 0.0);
-        plunge.setAnimationDuration(75.0 * FRAME);
+        // No pinned Collei plunge frames exist; use the repository's 1 s bow policy.
+        plunge.setAnimationDuration(1.0);
         simulator.performAction(characterId, plunge);
     }
 
     private void floralBrush(CombatSimulator simulator) {
         double castTime = simulator.getCurrentTime();
+        pruneSkillInstances(castTime);
         long generation = ++skillGeneration;
-        StatsContainer snapshot = captureActionSnapshot(simulator);
-        skillReactionWindowEnd = castTime + 157.0 * FRAME;
-        skillReactionObserved = constellation >= 2;
-        sproutReactionExtensionObserved = false;
-        sproutExpirationTime = Double.NEGATIVE_INFINITY;
-        for (int hitmark : SKILL_HITMARKS) {
-            queueHit(simulator, new PendingHit(
-                    castTime + hitmark * FRAME,
-                    HitKind.SKILL,
-                    0,
-                    generation,
-                    snapshot));
-        }
+        skillInstances.add(new SkillInstance(generation));
         queueCommand(simulator, new PendingCommand(
                 castTime + 20.0 * FRAME,
-                CommandKind.SKILL_COOLDOWN,
+                CommandKind.SKILL_RELEASE,
                 generation));
-        queueCommand(simulator, new PendingCommand(
-                castTime + 34.0 * FRAME + PARTICLE_TRAVEL,
-                CommandKind.PARTICLE,
-                generation));
-        queueCommand(simulator, new PendingCommand(
-                skillReactionWindowEnd,
-                CommandKind.SKILL_RETURN,
-                generation));
-        if (constellation >= 6) {
-            queueHit(simulator, new PendingHit(
-                    castTime + 56.0 * FRAME,
-                    HitKind.C6,
-                    0,
-                    generation,
-                    snapshot));
-        }
         simulator.advanceTime(68.0 * FRAME);
     }
 
     private void trumpCardKitty(CombatSimulator simulator) {
         double castTime = simulator.getCurrentTime();
         long generation = ++burstGeneration;
-        burstExpirationTime = castTime + 403.0 * FRAME;
+        burstExpirationTime = Double.NEGATIVE_INFINITY;
         burstExtensionCount = 0;
+        burstExtensionActive = false;
         if (constellation >= 4) {
             simulator.applyTeamBuff(new SimpleBuff(
                     "Collei C4 Gift of the Woods",
@@ -394,13 +365,8 @@ public final class Collei extends Character implements
             return;
         }
         StatsContainer snapshot = captureActionSnapshot(simulator);
-        resolveHit(simulator, new PendingHit(
-                simulator.getCurrentTime(),
-                HitKind.BURST_EXPLOSION,
-                0,
-                generation,
-                snapshot));
         double castTime = simulator.getCurrentTime() - 25.0 * FRAME;
+        burstExpirationTime = simulator.getCurrentTime() + 378.0 * FRAME;
         for (int leap = 0; leap < BURST_MAX_LEAPS; leap++) {
             queueHit(simulator, new PendingHit(
                     castTime + (68.0 + 30.0 * leap) * FRAME,
@@ -409,25 +375,40 @@ public final class Collei extends Character implements
                     generation,
                     snapshot));
         }
+        queueCommand(simulator, new PendingCommand(
+                simulator.getCurrentTime(),
+                CommandKind.BURST_ACTIVATE,
+                generation));
+        resolveHit(simulator, new PendingHit(
+                simulator.getCurrentTime(),
+                HitKind.BURST_EXPLOSION,
+                0,
+                generation,
+                snapshot));
     }
 
     private void createSprout(
             CombatSimulator simulator,
             long generation) {
-        if (generation != skillGeneration || !skillReactionObserved) {
+        SkillInstance skill = findSkillInstance(generation);
+        if (skill == null || !skill.reactionObserved) {
             return;
         }
-        long activeSprout = ++sproutGeneration;
+        SkillInstance previous = findSkillInstance(activeSproutGeneration);
+        if (previous != null) {
+            previous.sproutExpirationTime = Double.NEGATIVE_INFINITY;
+        }
+        activeSproutGeneration = generation;
         double startTime = simulator.getCurrentTime();
-        sproutExpirationTime = startTime
-                + (sproutReactionExtensionObserved ? 360.0 : 180.0) * FRAME;
+        skill.sproutExpirationTime = startTime
+                + (skill.reactionExtensionObserved ? 360.0 : 180.0) * FRAME;
         StatsContainer snapshot = captureActionSnapshot(simulator);
         for (int tick = 0; tick < SPROUT_MAX_TICKS; tick++) {
             queueHit(simulator, new PendingHit(
                     startTime + (86.0 + 89.0 * tick) * FRAME,
                     HitKind.SPROUT,
                     tick,
-                    activeSprout,
+                    generation,
                     snapshot));
         }
     }
@@ -443,6 +424,7 @@ public final class Collei extends Character implements
                 return;
             }
             resolveHit(activeSim, hit);
+            pruneSkillInstances(activeSim.getCurrentTime());
         });
     }
 
@@ -473,8 +455,14 @@ public final class Collei extends Character implements
                         1.0);
                 break;
             case SKILL:
-                if (hit.generation != skillGeneration) {
+                if (findSkillInstance(hit.generation) == null) {
                     return;
+                }
+                if (hit.index == 0 && constellation >= 6) {
+                    queueCommand(simulator, new PendingCommand(
+                            simulator.getCurrentTime(),
+                            CommandKind.C6_CAPTURE,
+                            hit.generation));
                 }
                 action = attack(
                         "Floral Brush",
@@ -491,7 +479,7 @@ public final class Collei extends Character implements
                         1.0);
                 break;
             case C6:
-                if (hit.generation != skillGeneration) {
+                if (findSkillInstance(hit.generation) == null) {
                     return;
                 }
                 action = attack(
@@ -515,8 +503,10 @@ public final class Collei extends Character implements
                 action = burstAttack("Trump-Card Kitty Leap", hit, false);
                 break;
             case SPROUT:
-                if (hit.generation != sproutGeneration
-                        || hit.time > sproutExpirationTime + EPSILON) {
+                SkillInstance skill = findSkillInstance(hit.generation);
+                if (skill == null
+                        || hit.generation != activeSproutGeneration
+                        || hit.time > skill.sproutExpirationTime + EPSILON) {
                     return;
                 }
                 action = attack(
@@ -525,9 +515,9 @@ public final class Collei extends Character implements
                         Element.DENDRO,
                         StatType.SKILL_DMG_BONUS,
                         ActionType.SKILL,
-                        ICDType.None,
-                        ICDTag.ElementalSkill,
-                        hit.index == 0 ? 1.0 : 0.0);
+                        ICDType.Standard,
+                        ICDTag.Collei_Sprout,
+                        1.0);
                 break;
             default:
                 throw new IllegalStateException("Unknown Collei hit kind");
@@ -581,20 +571,43 @@ public final class Collei extends Character implements
                 return;
             }
             switch (command.kind) {
-                case SKILL_COOLDOWN:
-                    if (command.generation == skillGeneration) {
-                        markSkillUsed(activeSim.getCurrentTime(),
-                                activeSim.getApplicableBuffs(this));
-                    }
+                case NORMAL_RELEASE:
+                    queueHit(activeSim, new PendingHit(
+                            activeSim.getCurrentTime() + 10.0 * FRAME,
+                            HitKind.NORMAL,
+                            (int) command.generation,
+                            0L,
+                            captureActionSnapshot(activeSim)));
+                    break;
+                case CHARGED_SNAPSHOT:
+                    queueHit(activeSim, new PendingHit(
+                            activeSim.getCurrentTime() + 10.0 * FRAME,
+                            HitKind.CHARGED,
+                            0,
+                            0L,
+                            captureActionSnapshot(activeSim)));
+                    break;
+                case SKILL_RELEASE:
+                    releaseFloralBrush(activeSim, command.generation);
                     break;
                 case PARTICLE:
-                    if (command.generation == skillGeneration) {
+                    if (findSkillInstance(command.generation) != null) {
                         activeSim.getEnergyDistributor().distributeParticles(
                                 Element.DENDRO, 3.0, ParticleType.PARTICLE);
                     }
                     break;
                 case SKILL_RETURN:
                     createSprout(activeSim, command.generation);
+                    break;
+                case C6_CAPTURE:
+                    if (findSkillInstance(command.generation) != null) {
+                        queueHit(activeSim, new PendingHit(
+                                activeSim.getCurrentTime() + 22.0 * FRAME,
+                                HitKind.C6,
+                                0,
+                                command.generation,
+                                captureActionSnapshot(activeSim)));
+                    }
                     break;
                 case BURST_ENERGY:
                     if (command.generation == burstGeneration) {
@@ -604,11 +617,90 @@ public final class Collei extends Character implements
                 case BURST_FIELD:
                     createBurstField(activeSim, command.generation);
                     break;
+                case BURST_ACTIVATE:
+                    if (command.generation == burstGeneration) {
+                        burstExtensionActive = true;
+                    }
+                    break;
                 default:
                     throw new IllegalStateException(
                             "Unknown Collei command kind");
             }
+            pruneSkillInstances(activeSim.getCurrentTime());
         });
+    }
+
+    private void releaseFloralBrush(
+            CombatSimulator simulator,
+            long generation) {
+        SkillInstance skill = findSkillInstance(generation);
+        if (skill == null) {
+            return;
+        }
+        double releaseTime = simulator.getCurrentTime();
+        skill.reactionWindowEnd = releaseTime + 137.0 * FRAME;
+        skill.reactionObserved = constellation >= 2;
+        StatsContainer snapshot = captureActionSnapshot(simulator);
+        markSkillUsed(
+                releaseTime, simulator.getApplicableBuffs(this));
+        for (int index = 0; index < SKILL_HITMARKS.length; index++) {
+            int hitmark = SKILL_HITMARKS[index];
+            queueHit(simulator, new PendingHit(
+                    releaseTime + (hitmark - 20.0) * FRAME,
+                    HitKind.SKILL,
+                    index,
+                    generation,
+                    snapshot));
+        }
+        queueCommand(simulator, new PendingCommand(
+                releaseTime + (SKILL_HITMARKS[0] - 20.0) * FRAME
+                        + PARTICLE_TRAVEL,
+                CommandKind.PARTICLE,
+                generation));
+        queueCommand(simulator, new PendingCommand(
+                skill.reactionWindowEnd,
+                CommandKind.SKILL_RETURN,
+                generation));
+    }
+
+    private SkillInstance findSkillInstance(long generation) {
+        for (SkillInstance skill : skillInstances) {
+            if (skill.generation == generation) {
+                return skill;
+            }
+        }
+        return null;
+    }
+
+    private void pruneSkillInstances(double currentTime) {
+        skillInstances.removeIf(skill ->
+                currentTime > skill.reactionWindowEnd + EPSILON
+                && currentTime > skill.sproutExpirationTime + EPSILON
+                && !hasPendingSkillWork(skill.generation));
+        if (findSkillInstance(activeSproutGeneration) == null) {
+            activeSproutGeneration = 0L;
+        }
+    }
+
+    private boolean hasPendingSkillWork(long generation) {
+        for (PendingHit hit : pendingHits) {
+            if (hit.generation == generation
+                    && (hit.kind == HitKind.SKILL
+                            || hit.kind == HitKind.C6
+                            || hit.kind == HitKind.SPROUT)) {
+                return true;
+            }
+        }
+        for (PendingCommand command : pendingCommands) {
+            if (command.generation == generation
+                    && (command.kind == CommandKind.SKILL_RELEASE
+                            || command.kind == CommandKind.PARTICLE
+                            || command.kind == CommandKind.SKILL_RETURN
+                            || command.kind == CommandKind.C6_CAPTURE)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private StatsContainer captureActionSnapshot(CombatSimulator simulator) {
@@ -689,6 +781,15 @@ public final class Collei extends Character implements
         return copy;
     }
 
+    private static List<SkillInstance> copySkillInstances(
+            List<SkillInstance> source) {
+        List<SkillInstance> copy = new ArrayList<>();
+        for (SkillInstance skill : source) {
+            copy.add(skill.copy());
+        }
+        return copy;
+    }
+
     private enum HitKind {
         NORMAL,
         CHARGED,
@@ -700,11 +801,37 @@ public final class Collei extends Character implements
     }
 
     private enum CommandKind {
-        SKILL_COOLDOWN,
+        NORMAL_RELEASE,
+        CHARGED_SNAPSHOT,
+        SKILL_RELEASE,
         PARTICLE,
         SKILL_RETURN,
+        C6_CAPTURE,
         BURST_ENERGY,
-        BURST_FIELD
+        BURST_FIELD,
+        BURST_ACTIVATE
+    }
+
+    /** Mutable state owned by one independently resolving Floral Brush cast. */
+    private static final class SkillInstance {
+        private final long generation;
+        private double reactionWindowEnd = Double.NEGATIVE_INFINITY;
+        private boolean reactionObserved;
+        private boolean reactionExtensionObserved;
+        private double sproutExpirationTime = Double.NEGATIVE_INFINITY;
+
+        private SkillInstance(long generation) {
+            this.generation = generation;
+        }
+
+        private SkillInstance copy() {
+            SkillInstance copy = new SkillInstance(generation);
+            copy.reactionWindowEnd = reactionWindowEnd;
+            copy.reactionObserved = reactionObserved;
+            copy.reactionExtensionObserved = reactionExtensionObserved;
+            copy.sproutExpirationTime = sproutExpirationTime;
+            return copy;
+        }
     }
 
     /** Immutable delayed hit description. */
@@ -760,13 +887,11 @@ public final class Collei extends Character implements
         private final long burstGeneration;
         private final List<PendingHit> pendingHits;
         private final List<PendingCommand> pendingCommands;
-        private final double skillReactionWindowEnd;
-        private final boolean skillReactionObserved;
-        private final boolean sproutReactionExtensionObserved;
-        private final long sproutGeneration;
-        private final double sproutExpirationTime;
+        private final List<SkillInstance> skillInstances;
+        private final long activeSproutGeneration;
         private final double burstExpirationTime;
         private final int burstExtensionCount;
+        private final boolean burstExtensionActive;
 
         private ColleiState(
                 int normalAttackStep,
@@ -774,26 +899,21 @@ public final class Collei extends Character implements
                 long burstGeneration,
                 List<PendingHit> pendingHits,
                 List<PendingCommand> pendingCommands,
-                double skillReactionWindowEnd,
-                boolean skillReactionObserved,
-                boolean sproutReactionExtensionObserved,
-                long sproutGeneration,
-                double sproutExpirationTime,
+                List<SkillInstance> skillInstances,
+                long activeSproutGeneration,
                 double burstExpirationTime,
-                int burstExtensionCount) {
+                int burstExtensionCount,
+                boolean burstExtensionActive) {
             this.normalAttackStep = normalAttackStep;
             this.skillGeneration = skillGeneration;
             this.burstGeneration = burstGeneration;
             this.pendingHits = copyHits(pendingHits);
             this.pendingCommands = copyCommands(pendingCommands);
-            this.skillReactionWindowEnd = skillReactionWindowEnd;
-            this.skillReactionObserved = skillReactionObserved;
-            this.sproutReactionExtensionObserved =
-                    sproutReactionExtensionObserved;
-            this.sproutGeneration = sproutGeneration;
-            this.sproutExpirationTime = sproutExpirationTime;
+            this.skillInstances = copySkillInstances(skillInstances);
+            this.activeSproutGeneration = activeSproutGeneration;
             this.burstExpirationTime = burstExpirationTime;
             this.burstExtensionCount = burstExtensionCount;
+            this.burstExtensionActive = burstExtensionActive;
         }
     }
 }

@@ -40,7 +40,9 @@ public final class ColleiRegressionTest {
         testIdentityStatsDataAndConstellations();
         testBasicAttackCategoriesAndSwitchReset();
         testSkillTimingSnapshotParticlesAndC6();
+        testOverlappingSkillCasts();
         testBurstCadenceGaugeEnergyAndTalentLevels();
+        testBurstExplosionSnapshotAndActivationOrder();
         testSproutAndFinalTickExtensions();
         testC1AndC4Windows();
         testRepeatedMidEventRestore();
@@ -114,6 +116,11 @@ public final class ColleiRegressionTest {
         Collei charged = new Collei(null, null, 0);
         CombatSimulator chargedSim = simulatorWith(charged);
         List<ActionRecord> chargedRecords = captureColleiActions(chargedSim);
+        addBuffAt(chargedSim, charged, 80.0 * FRAME,
+                new TestBuff(
+                        100.0 * FRAME,
+                        StatType.ATK_PERCENT,
+                        1.0));
         perform(chargedSim, CharacterActionKey.CHARGE);
         AttackAction aimed = chargedRecords.get(0).action;
         assertClose(2.108, aimed.getDamagePercent(),
@@ -124,7 +131,11 @@ public final class ColleiRegressionTest {
                 "Collei fully charged category");
         assertClose(1.0, aimed.getGaugeUnits(),
                 "Collei fully charged gauge");
+        assertClose(1.24,
+                aimed.getStatSnapshot().get(StatType.ATK_PERCENT),
+                "Collei Charged Attack snapshots at frame 86");
         chargedRecords.clear();
+        double plungeStart = chargedSim.getCurrentTime();
         perform(chargedSim, CharacterActionKey.PLUNGE);
         assertEquals(ActionType.PLUNGE,
                 chargedRecords.get(0).action.getActionType(),
@@ -132,15 +143,55 @@ public final class ColleiRegressionTest {
         assertEquals(Element.PHYSICAL,
                 chargedRecords.get(0).action.getElement(),
                 "Collei high Plunge element");
+        assertClose(plungeStart + 1.0, chargedSim.getCurrentTime(),
+                "Collei uses fixed one-second Plunge policy");
+        assertClose(2.607632,
+                chargedRecords.get(0).action.getDamagePercent(),
+                "Collei high Plunge exact multiplier");
+
+        Collei normalSnapshot = new Collei(null, null, 0);
+        CombatSimulator normalSnapshotSim = simulatorWith(normalSnapshot);
+        List<ActionRecord> normalSnapshotRecords = captureColleiActions(
+                normalSnapshotSim);
+        addBuffAt(normalSnapshotSim, normalSnapshot, 10.0 * FRAME,
+                new TestBuff(
+                        100.0 * FRAME,
+                        StatType.ATK_PERCENT,
+                        1.0));
+        perform(normalSnapshotSim, CharacterActionKey.NORMAL);
+        advanceTo(normalSnapshotSim, 30.0 * FRAME);
+        assertClose(1.24,
+                normalSnapshotRecords.get(0).action.getStatSnapshot()
+                        .get(StatType.ATK_PERCENT),
+                "Collei Normal snapshots at projectile release");
     }
 
     private static void testSkillTimingSnapshotParticlesAndC6() {
         Collei c6 = new Collei(null, null, 6);
-        c6.addBuff(new TestBuff(
-                20.0 * FRAME, StatType.ATK_PERCENT, 1.0));
         CombatSimulator simulator = simulatorWith(c6);
+        addBuffAt(simulator, c6, 10.0 * FRAME,
+                new TestBuff(
+                        30.0 * FRAME,
+                        StatType.ATK_PERCENT,
+                        1.0));
+        addBuffAt(simulator, c6, 30.0 * FRAME,
+                new TestBuff(
+                        100.0 * FRAME,
+                        StatType.CRIT_RATE,
+                        1.0));
         List<ActionRecord> records = captureColleiActions(simulator);
         List<ParticleRecord> particles = captureParticles(simulator);
+        boolean[] reactionBuffApplied = { false };
+        simulator.addDamageListener((actor, action, damage, time) -> {
+            if (!reactionBuffApplied[0]
+                    && action.getName().equals("Floral Brush")) {
+                reactionBuffApplied[0] = true;
+                c6.addBuff(new TestBuff(
+                        100.0 * FRAME,
+                        StatType.CRIT_DMG,
+                        1.0));
+            }
+        });
         perform(simulator, CharacterActionKey.SKILL);
         advanceTo(simulator, 3.0);
         List<ActionRecord> skill = named(records, "Floral Brush");
@@ -157,7 +208,7 @@ public final class ColleiRegressionTest {
             assertClose(1.24,
                     record.action.getStatSnapshot().get(
                             StatType.ATK_PERCENT),
-                    "Collei Skill retains cast snapshot");
+                    "Collei Skill snapshots at frame 20 release");
         }
         assertEquals(1, named(records, "Forest of Falling Arrows").size(),
                 "Collei C6 triggers once per Skill cast");
@@ -165,6 +216,16 @@ public final class ColleiRegressionTest {
                 named(records, "Forest of Falling Arrows")
                         .get(0).action.getActionType(),
                 "Collei C6 is OTHER damage");
+        assertClose(1.05,
+                named(records, "Forest of Falling Arrows")
+                        .get(0).action.getStatSnapshot()
+                        .get(StatType.CRIT_RATE),
+                "Collei C6 snapshots when the outbound hit resolves");
+        assertClose(1.50,
+                named(records, "Forest of Falling Arrows")
+                        .get(0).action.getStatSnapshot()
+                        .get(StatType.CRIT_DMG),
+                "Collei C6 includes buffs triggered by the outbound hit");
         assertEquals(1, particles.size(), "Collei one particle packet");
         assertClose(3.0, particles.get(0).count,
                 "Collei deterministic particle count");
@@ -181,6 +242,27 @@ public final class ColleiRegressionTest {
         assertEquals(0,
                 named(c5Records, "Forest of Falling Arrows").size(),
                 "Collei C6 does not leak into C5");
+    }
+
+    private static void testOverlappingSkillCasts() {
+        Collei collei = new Collei(null, null, 6);
+        CombatSimulator simulator = simulatorWith(collei);
+        List<ActionRecord> records = captureColleiActions(simulator);
+        List<ParticleRecord> particles = captureParticles(simulator);
+        perform(simulator, CharacterActionKey.SKILL);
+        collei.resetSkillCooldown(simulator.getCurrentTime());
+        perform(simulator, CharacterActionKey.SKILL);
+        advanceTo(simulator, 10.0);
+        assertEquals(4, named(records, "Floral Brush").size(),
+                "Collei overlapping Skill casts retain both passes");
+        assertEquals(2,
+                named(records, "Forest of Falling Arrows").size(),
+                "Collei overlapping Skill casts retain both C6 hits");
+        assertEquals(2, particles.size(),
+                "Collei overlapping Skill casts retain both particle packets");
+        assertEquals(2,
+                named(records, "Floral Sidewinder Sprout").size(),
+                "Collei recast replaces the earlier Sprout field");
     }
 
     private static void testBurstCadenceGaugeEnergyAndTalentLevels() {
@@ -224,6 +306,51 @@ public final class ColleiRegressionTest {
                 "Collei spends Energy at frame 7");
         assertClose(0.0, c5.getLastBurstTime(),
                 "Collei Burst cooldown starts at cast");
+
+        Collei beforeField = new Collei(null, null, 0);
+        CombatSimulator beforeFieldSim = simulatorWith(beforeField);
+        List<ActionRecord> beforeFieldRecords = captureColleiActions(
+                beforeFieldSim);
+        beforeFieldSim.registerEvent(new SimpleTimerEvent(
+                10.0 * FRAME, 1.0) {
+            @Override
+            public void onTick(CombatSimulator activeSim) {
+                finish();
+                beforeField.onReaction(
+                        dendroReaction(), beforeField,
+                        activeSim.getCurrentTime(), activeSim);
+            }
+        });
+        perform(beforeFieldSim, CharacterActionKey.BURST);
+        advanceTo(beforeFieldSim, 7.0);
+        assertEquals(12,
+                named(beforeFieldRecords, "Trump-Card Kitty Leap").size(),
+                "Collei A4 ignores reactions before field creation");
+    }
+
+    private static void testBurstExplosionSnapshotAndActivationOrder() {
+        Collei collei = new Collei(null, null, 0);
+        CombatSimulator simulator = simulatorWith(collei);
+        List<ActionRecord> records = captureColleiActions(simulator);
+        SimulatorSnapshot[] explosionSnapshot = new SimulatorSnapshot[1];
+        simulator.addDamageListener((actor, action, damage, time) -> {
+            if (action.getName().equals("Trump-Card Kitty Explosion")) {
+                explosionSnapshot[0] = simulator.saveSnapshot();
+                collei.onReaction(
+                        dendroReaction(), collei, time, simulator);
+            }
+        });
+        perform(simulator, CharacterActionKey.BURST);
+        advanceTo(simulator, 7.0);
+        assertEquals(12,
+                named(records, "Trump-Card Kitty Leap").size(),
+                "Collei explosion reaction cannot extend its own field");
+        simulator.restoreSnapshot(explosionSnapshot[0]);
+        records.clear();
+        advanceTo(simulator, 7.0);
+        assertEquals(12,
+                named(records, "Trump-Card Kitty Leap").size(),
+                "Collei explosion-listener snapshot retains future leaps");
     }
 
     private static void testSproutAndFinalTickExtensions() {
@@ -239,8 +366,14 @@ public final class ColleiRegressionTest {
         assertEquals(2, c0Sprout.size(), "Collei A1 two Sprout ticks");
         assertClose(1.0, c0Sprout.get(0).action.getGaugeUnits(),
                 "Collei first Sprout applies Dendro");
-        assertClose(0.0, c0Sprout.get(1).action.getGaugeUnits(),
-                "Collei second Sprout shares application cadence");
+        for (ActionRecord record : c0Sprout) {
+            assertClose(1.0, record.action.getGaugeUnits(),
+                    "Collei Sprout carries one gauge unit");
+            assertEquals(ICDType.Standard, record.action.getICDType(),
+                    "Collei Sprout uses standard ICD");
+            assertEquals(ICDTag.Collei_Sprout, record.action.getICDTag(),
+                    "Collei Sprout uses an isolated ICD group");
+        }
 
         Collei c2 = new Collei(null, null, 2);
         CombatSimulator c2Sim = simulatorWith(c2);
@@ -257,6 +390,12 @@ public final class ColleiRegressionTest {
         assertEquals(4,
                 named(c2Records, "Floral Sidewinder Sprout").size(),
                 "Collei C2 final base tick can extend Sprout");
+        List<ActionRecord> extendedSprout = named(
+                c2Records, "Floral Sidewinder Sprout");
+        for (ActionRecord record : extendedSprout) {
+            assertClose(1.0, record.action.getGaugeUnits(),
+                    "Collei C2 Sprout lets standard ICD select applications");
+        }
 
         Collei a4 = new Collei(null, null, 0);
         CombatSimulator a4Sim = simulatorWith(a4);
@@ -310,6 +449,30 @@ public final class ColleiRegressionTest {
     }
 
     private static void testRepeatedMidEventRestore() {
+        Collei preRelease = new Collei(null, null, 6);
+        CombatSimulator preReleaseSim = simulatorWith(preRelease);
+        List<ActionRecord> preReleaseRecords = captureColleiActions(
+                preReleaseSim);
+        List<ParticleRecord> preReleaseParticles = captureParticles(
+                preReleaseSim);
+        SimulatorSnapshot[] releaseSnapshot = captureSnapshotAt(
+                preReleaseSim, 10.0 * FRAME);
+        perform(preReleaseSim, CharacterActionKey.SKILL);
+        preReleaseSim.restoreSnapshot(releaseSnapshot[0]);
+        preReleaseSim.restoreSnapshot(releaseSnapshot[0]);
+        preReleaseRecords.clear();
+        preReleaseParticles.clear();
+        advanceTo(preReleaseSim, 3.0);
+        assertEquals(2, named(preReleaseRecords, "Floral Brush").size(),
+                "Collei pre-release restore reconstructs two Skill hits");
+        assertEquals(1,
+                named(preReleaseRecords, "Forest of Falling Arrows").size(),
+                "Collei pre-release restore reconstructs one C6 hit");
+        assertEquals(1, preReleaseParticles.size(),
+                "Collei pre-release restore reconstructs one particle packet");
+        assertClose(20.0 * FRAME, preRelease.getLastSkillTime(),
+                "Collei pre-release restore reconstructs cooldown start");
+
         Collei skillCollei = new Collei(null, null, 2);
         CombatSimulator skillSim = simulatorWith(skillCollei);
         List<ActionRecord> skillRecords = captureColleiActions(skillSim);
@@ -332,17 +495,38 @@ public final class ColleiRegressionTest {
         Collei burstCollei = new Collei(null, null, 0);
         CombatSimulator burstSim = simulatorWith(burstCollei);
         List<ActionRecord> burstRecords = captureColleiActions(burstSim);
+        SimulatorSnapshot[] fieldSnapshot = captureSnapshotAt(
+                burstSim, 6.0 * FRAME);
         perform(burstSim, CharacterActionKey.BURST);
-        SimulatorSnapshot burstSnapshot = burstSim.saveSnapshot();
-        advanceTo(burstSim, 7.0);
-        int expectedLeaps = named(
-                burstRecords, "Trump-Card Kitty Leap").size();
-        burstSim.restoreSnapshot(burstSnapshot);
-        burstSim.restoreSnapshot(burstSnapshot);
+        burstSim.restoreSnapshot(fieldSnapshot[0]);
+        burstSim.restoreSnapshot(fieldSnapshot[0]);
         burstRecords.clear();
         advanceTo(burstSim, 7.0);
-        assertEquals(expectedLeaps,
+        assertEquals(1,
+                named(burstRecords, "Trump-Card Kitty Explosion").size(),
+                "Collei pre-field restore reconstructs one explosion");
+        assertEquals(12,
                 named(burstRecords, "Trump-Card Kitty Leap").size(),
+                "Collei pre-field restore reconstructs twelve leaps");
+        assertClose(0.0, burstCollei.getCurrentEnergy(),
+                "Collei pre-field restore reconstructs Energy spend");
+
+        Collei pendingBurst = new Collei(null, null, 0);
+        CombatSimulator pendingBurstSim = simulatorWith(pendingBurst);
+        List<ActionRecord> pendingBurstRecords = captureColleiActions(
+                pendingBurstSim);
+        perform(pendingBurstSim, CharacterActionKey.BURST);
+        SimulatorSnapshot burstSnapshot = pendingBurstSim.saveSnapshot();
+        advanceTo(pendingBurstSim, 7.0);
+        int expectedLeaps = named(
+                pendingBurstRecords, "Trump-Card Kitty Leap").size();
+        pendingBurstSim.restoreSnapshot(burstSnapshot);
+        pendingBurstSim.restoreSnapshot(burstSnapshot);
+        pendingBurstRecords.clear();
+        advanceTo(pendingBurstSim, 7.0);
+        assertEquals(expectedLeaps,
+                named(pendingBurstRecords,
+                        "Trump-Card Kitty Leap").size(),
                 "Collei repeated Burst restore keeps each leap once");
     }
 
@@ -464,6 +648,34 @@ public final class ColleiRegressionTest {
                 values[index] = collei.getCurrentEnergy();
             }
         });
+    }
+
+    private static void addBuffAt(
+            CombatSimulator simulator,
+            Character character,
+            double time,
+            Buff buff) {
+        simulator.registerEvent(new SimpleTimerEvent(time, 1.0) {
+            @Override
+            public void onTick(CombatSimulator activeSim) {
+                finish();
+                character.addBuff(buff);
+            }
+        });
+    }
+
+    private static SimulatorSnapshot[] captureSnapshotAt(
+            CombatSimulator simulator,
+            double time) {
+        SimulatorSnapshot[] snapshot = new SimulatorSnapshot[1];
+        simulator.registerEvent(new SimpleTimerEvent(time, 1.0) {
+            @Override
+            public void onTick(CombatSimulator activeSim) {
+                finish();
+                snapshot[0] = activeSim.saveSnapshot();
+            }
+        });
+        return snapshot;
     }
 
     private static void advanceTo(
