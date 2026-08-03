@@ -85,6 +85,8 @@ public enum CharacterId {
     GOROU(35, "Gorou", CharacterRegion.INAZUMA),
     /** Yelan (Hydro bow off-field attacker and support). */
     YELAN(36, "Yelan", CharacterRegion.LIYUE),
+    /** Sayu (Anemo claymore driver and deployable attacker). */
+    SAYU(37, "Sayu", CharacterRegion.INAZUMA),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 
