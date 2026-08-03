@@ -79,6 +79,8 @@ public enum CharacterId {
     COLLEI(32, "Collei", CharacterRegion.SUMERU),
     /** Klee (Pyro catalyst on-field attacker). */
     KLEE(33, "Klee", CharacterRegion.MONDSTADT),
+    /** Eula (Cryo claymore physical Burst attacker). */
+    EULA(34, "Eula", CharacterRegion.MONDSTADT),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 
