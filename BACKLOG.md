@@ -3623,3 +3623,31 @@ experiment record.
 - **Completion:** commits `558e3a9` through `649532a` deliver both identities,
   Geo-only CRIT DMG, typed-input/ICD support, both character slices, and all
   review corrections. Final focused and combined gates pass on 2026-08-03.
+
+### B-173 — Sayu Press and Daruma character campaign
+
+- **Status:** in progress
+- **Source:** explicit broad content-expansion request and post-B-172 missing
+  character inventory.
+- **Symptom:** Sayu has pinned evidence and a local image but no typed identity,
+  loadable class, aligned talent CSV, or focused executable regression.
+- **Evidence:** pinned KQM TCL `80ba6241` and gcsim `ef41805d`, accessed
+  2026-08-03.
+- **Scope/risk:** planned identity plus Press-only Skill and snapshot-aware
+  offensive Burst vertical slice.
+- **Boundary:** Hold movement/absorption, Charged, healing, HP decisions,
+  geometry, RL, generated docs, and Deferred Systems are excluded.
+- **Proof/plan:** two-phase `TASKS.md` Sayu Press And Daruma Character Campaign
+  with identity, focused character, reaction, build, Javadoc, and preflight.
+
+### B-174 — Kujou Sara support character candidate
+
+- **Status:** candidate
+- **Source:** explicit broad content-expansion request and post-B-172 missing
+  character inventory.
+- **Symptom:** Kujou Sara has pinned evidence and a local image but no typed
+  identity, class, aligned talent CSV, or regression.
+- **Scope/risk:** planned; Crowfeather Cover and C6 require typed charged-shot,
+  active-recipient buff, and Electro-only CRIT DMG contracts.
+- **Decision:** retain after B-173 rather than start a second partial campaign;
+  it does not fit the current session's remaining implementation/review window.

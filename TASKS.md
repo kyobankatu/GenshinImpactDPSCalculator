@@ -58,6 +58,9 @@ systems remain excluded.
 B-172 is complete. Gorou and Yelan now have stable typed identities, shared
 buff/formula support, and bounded stationary single-target character slices.
 
+B-173 is the active Sayu campaign. It reserves one stable identity and adds a
+Press-only offensive slice without entering movement, absorption, or healing.
+
 B-171 is the completed Eula campaign. It adds a backward-compatible typed
 Press/Hold Skill request, Eula's identity, and a bounded physical Burst slice;
 RL, generated docs, enemy-HP state, and Deferred Systems remain excluded.
@@ -14241,6 +14244,84 @@ Completion evidence:
 - Identity, formula, request, Gorou, Yelan, reaction, build, Javadoc, routed
   validation, and executable preflight gates pass on 2026-08-03; final
   independent review found no remaining issue.
+
+## Implementation Order: Sayu Press And Daruma Character Campaign
+
+Status: In progress. B-173 has an identity prerequisite followed by one
+snapshot-aware character phase.
+
+Scope:
+
+- Reserve Sayu ID 37/Inazuma without renumbering existing content.
+- Add a stationary single-target Press Skill and offensive Burst slice using
+  pinned gcsim `ef41805d` and KQM TCL `80ba6241` evidence.
+
+Out of scope for this pass:
+
+- Hold Skill movement, elemental absorption, Charged attacks, healing, player
+  HP decisions, multi-target geometry, hitlag, RL, generated docs, and Deferred
+  Systems.
+
+Definitions:
+
+- `SAYU`: stable typed identity using numeric ID 37.
+- Press-only Skill: one snapshotted Windwheel hit plus one independent kick;
+  Hold requests fail closed rather than approximating movement or absorption.
+
+### Phase 1: Reserve Sayu Identity
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+
+Requirements:
+
+- Assign Sayu ID 37/Inazuma, move the unassigned boundary to 38, and preserve
+  all IDs 0-36 and exact-name behavior.
+
+Tests:
+
+- Normal: Sayu exact-name and numeric round trips.
+- Boundary: Yelan remains ID 36 and ID 38 fails closed.
+- Abnormal: case-mismatched and null names fail closed.
+
+Verification:
+
+- `./gradlew LegacyCharacterIdentityRegressionTest build`
+- `python scripts/preflight.py --run`
+
+### Phase 2: Sayu Press Skill And Daruma Slice
+
+Target files:
+
+- `config/characters/Sayu/Sayu_Status.csv` (new)
+- `config/characters/Sayu/Sayu_Multipliers.csv` (new)
+- `src/java/model/character/Sayu.java` (new)
+- `src/java/sample/SayuRegressionTest.java` (new)
+
+Requirements:
+
+- Align Lv. 90 stats, Talent 9/12 multipliers, Normal/High Plunge, Press Skill
+  frames, separate ICD groups, two particles, cooldown, and Burst Energy timing.
+- Snapshot the two Press hits and Burst once at source-defined times; emit the
+  initial Burst hit and seven 1.5-second Daruma attacks with independent ICD.
+- Implement representable C2-C6 offense and C4 active-Swirl Energy while
+  reconstructing future events exactly once after repeated restore.
+
+Tests:
+
+- Normal: data, N1-N4, High Plunge, Press hits, particles, Burst initial/ticks,
+  snapshots, Energy, and representable constellations.
+- Boundary: hitmarks, 6/20-second cooldowns, 80 Energy, seven-tick cadence,
+  C2/C4 gates, C3/C5 talents, C6 EM cap, and repeated restore.
+- Abnormal: invalid constellation/state, Hold/Charged rejection,
+  cross-simulator reuse, cooldown/Energy rejection, and stale generations.
+
+Verification:
+
+- `./gradlew SayuRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
 
 ## Implementation Order: Parallel Foundational Content Campaign
 
