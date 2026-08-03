@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Yelan,STATS,Base HP,90,14450,0
+Yelan,STATS,Base ATK,90,244,0
+Yelan,STATS,Base DEF,90,548,0
+Yelan,STATS,Ascension CRIT Rate,90,0.192,0
+Yelan,STATS,Energy Cost,90,70,0
+Yelan,STATS,Constellation,6,6,0
+Yelan,CONFIG,Character Level,90,90,0
+Yelan,CONFIG,Normal Level,9,9,0
+Yelan,CONFIG,Skill Level,12,12,0
+Yelan,CONFIG,Burst Level,12,12,0

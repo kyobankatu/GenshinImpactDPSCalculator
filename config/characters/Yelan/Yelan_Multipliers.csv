@@ -1,0 +1,24 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Yelan,NORMAL,N1,9,0.74734,0
+Yelan,NORMAL,N2,9,0.71732,0
+Yelan,NORMAL,N3,9,0.948,0
+Yelan,NORMAL,N4 Hit 1,9,0.59724,0
+Yelan,NORMAL,N4 Hit 2,9,0.59724,0
+Yelan,PLUNGE,High Plunge,9,2.6076,0
+Yelan,SKILL,Lifeline,9,0.384431,0
+Yelan,SKILL,Lifeline C5,12,0.452272,0
+Yelan,BURST,Burst Initial,9,0.124236,0
+Yelan,BURST,Burst Initial C3,12,0.14616,0
+Yelan,BURST,Exquisite Throw,9,0.082824,0
+Yelan,BURST,Exquisite Throw C3,12,0.09744,0
+Yelan,BURST,C2 Arrow,1,0.14,0
+Yelan,NORMAL,Breakthrough Barb,9,0.196792,0
+Yelan,PASSIVE,C6 Barb Factor,1,1.56,0
+Yelan,PASSIVE,A1 One Element,1,0.06,0
+Yelan,PASSIVE,A1 Two Elements,1,0.12,0
+Yelan,PASSIVE,A1 Three Elements,1,0.18,0
+Yelan,PASSIVE,A1 Four Elements,1,0.30,0
+Yelan,PASSIVE,A4 Initial DMG Bonus,1,0.01,0
+Yelan,PASSIVE,A4 Per Second DMG Bonus,1,0.035,0
+Yelan,PASSIVE,A4 Maximum DMG Bonus,1,0.50,0
+Yelan,PASSIVE,C4 Max HP Per Stack,1,0.10,0
