@@ -3583,3 +3583,19 @@ experiment record.
   `d2697ed`, `9a9229e`, and `05e9474` deliver the planned identity, formula,
   bounded character slice, review corrections, and all final gates on
   2026-08-03.
+
+### B-171 — Eula physical Burst character
+
+- **Status:** in progress
+- **Source:** explicit broad content-expansion request and post-B-170 missing
+  character inventory.
+- **Symptom:** Eula has pinned source-ready mechanics and an image asset but no
+  typed identity, Press/Hold request, loadable class, talent CSV, or regression.
+- **Evidence:** pinned KQM TCL `80ba6241` and gcsim `ef41805d`, accessed
+  2026-08-03; both support a bounded single-target physical Burst slice.
+- **Scope/risk:** one backward-compatible request extension and one complex
+  snapshot-aware character with dynamic delayed damage.
+- **Boundary:** enemy-HP C4, defensive state, Charged, geometry, shields,
+  hitlag, RL, generated docs, and Deferred Systems are excluded.
+- **Proof:** `TASKS.md` Eula Physical Burst Character Campaign plus request,
+  identity, focused character, reaction, build, Javadoc, and preflight gates.

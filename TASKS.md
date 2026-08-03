@@ -55,6 +55,10 @@ The latest campaign adds Collei's stationary single-target reaction slice; RL,
 generated docs, and deferred healing, defensive, player-damage, or geometry
 systems remain excluded.
 
+B-171 is the active Eula campaign. It first adds a backward-compatible typed
+Press/Hold Skill request, then Eula's identity and bounded physical Burst slice;
+RL, generated docs, enemy-HP state, and Deferred Systems remain excluded.
+
 B-170 is the completed classic Klee campaign. It adds the shared enemy DEF
 reduction formula and a bounded stationary single-target character slice;
 RL, generated docs, Hexerei, and Deferred Systems remain excluded.
@@ -13972,6 +13976,120 @@ Completion evidence:
 - Identity, Klee, DEF-reduction, reaction, build, Javadoc, and executable
   preflight gates pass on 2026-08-03; independent review found no remaining
   concrete issue after its exact-expiration finding was resolved.
+
+## Implementation Order: Eula Physical Burst Character Campaign
+
+Status: In progress. B-171 has one backward-compatible action-request
+prerequisite, one stable identity phase, and one bounded character slice.
+
+Scope:
+
+- Add an optional typed Press/Hold discriminator while preserving every
+  existing `CharacterActionRequest.of(SKILL)` call as Press.
+- Add Eula's stable identity, aligned Lv. 90/talent data, physical Normal string,
+  Press/Hold Skill, Grimheart, A1/A4, dynamic Lightfall Sword, and representable
+  C1-C3/C5-C6 behavior.
+
+Out of scope for this pass:
+
+- Charged Attack, defensive Grimheart stats, interruption resistance, C4's
+  enemy-HP predicate, geometry, shields, hitlag, action cancels, multi-target
+  selection, RL, generated docs, and Deferred Systems.
+
+Definitions:
+
+- `SkillActionMode`: typed `PRESS`/`HOLD` request metadata; the default is
+  always `PRESS` for source and binary compatibility.
+- `EULA`: stable Mondstadt character identity using numeric ID 34.
+- `Eula`: snapshot-aware single-target character whose Lightfall explosion
+  reads live impact-time stats and whose owned delayed events are reconstructible.
+
+### Phase 1: Add Typed Skill Press/Hold Requests
+
+Target files:
+
+- `src/java/simulation/action/SkillActionMode.java` (new)
+- `src/java/simulation/action/CharacterActionRequest.java`
+- `src/java/sample/CharacterActionRequestRegressionTest.java` (new)
+
+Requirements:
+
+- Keep `of(SKILL)` and every non-Skill request behavior unchanged, defaulting
+  the Skill mode to `PRESS` without touching RL or optimizer call sites.
+- Expose one explicit Hold factory and immutable mode accessor; reject null keys
+  and modes before dispatch.
+
+Tests:
+
+- Normal: legacy Skill request is Press and explicit Hold round-trips.
+- Boundary: Normal/Burst labels and keys remain unchanged; Press logging remains
+  the legacy `skill` label while Hold is distinguishable.
+- Abnormal: null key and null mode fail closed.
+
+Verification:
+
+- `./gradlew CharacterActionRequestRegressionTest build`
+- `python scripts/preflight.py --run`
+
+### Phase 2: Reserve Eula Identity
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+
+Requirements:
+
+- Assign numeric ID 34/Mondstadt without renumbering existing identities.
+- Move the adjacent unassigned boundary to ID 35 and preserve exact-name lookup.
+
+Tests:
+
+- Normal: exact name, ID, display name, and region round-trip.
+- Boundary: Klee ID 33 remains stable and ID 35 fails closed.
+- Abnormal: null and case-mismatched names return `UNKNOWN`.
+
+Verification:
+
+- `./gradlew LegacyCharacterIdentityRegressionTest build`
+
+### Phase 3: Eula Offensive And Lightfall Vertical Slice
+
+Target files:
+
+- `config/characters/Eula/Eula_Status.csv` (new)
+- `config/characters/Eula/Eula_Multipliers.csv` (new)
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/model/character/Eula.java` (new)
+- `src/java/sample/EulaRegressionTest.java` (new)
+
+Requirements:
+
+- Adapt pinned gcsim `ef41805d` and KQM TCL `80ba6241` multipliers, frames,
+  gauge/ICD, particles, cooldown/Energy timing, and non-snapshot Lightfall.
+- Model N1-N5 multi-hits, fixed High Plunge, Press/Hold Skill, two 18-second
+  Grimheart stacks, Icewhirl hits and seven-seconds-per-stack Cryo/Physical RES
+  shred, A1 remnant, A4 reset/stack, and C1/C2/C3/C5 effects.
+- Accumulate one Lightfall stack per qualifying damage instance no more than
+  once per 0.1 seconds, start C6 at five stacks, use injected 50% C6 and
+  particle draws, cap at 30, and explode dynamically at natural end or switch.
+- Reconstruct future owned events once after repeated restore and suppress stale
+  generation damage, Energy, particles, stacks, or explosions.
+
+Tests:
+
+- Normal: data, N1-N5, Plunge, both Skill modes/particles, Grimheart, shred,
+  Burst timing/stacks, dynamic stats, switch explosion, A1/A4, and C1-C3/C5-C6.
+- Boundary: 18-second Grimheart, 0.1-second stack gate, 30-stack cap, exact
+  shred/buff/Burst expiry, initial-hit exclusion, C2 cooldown, and repeated restore.
+- Abnormal: invalid constellation/random source/state payload, unsupported
+  action, cross-simulator reuse, cooldown/Energy rejection, and stale events.
+
+Verification:
+
+- `./gradlew EulaRegressionTest`
+- `./gradlew ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
 
 ## Implementation Order: Parallel Foundational Content Campaign
 
