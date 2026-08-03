@@ -3524,7 +3524,7 @@ experiment record.
 
 ### B-168 — Mona and Beidou offensive character campaign
 
-- **Status:** in progress
+- **Status:** complete
 - **Source:** explicit broad content-expansion request and post-B-167 missing
   character class/config inventory
 - **Symptom:** Mona and Beidou have local images but no typed identity, loadable
@@ -3538,3 +3538,7 @@ experiment record.
   generated docs, and Deferred Systems remain excluded.
 - **Proof:** `TASKS.md` Legacy Catalyst and Counter Character Campaign plus
   focused, reaction, build, Javadoc, and executable preflight gates.
+- **Completion:** commits `117d62b`, `1cc6ec7`, `d4e0efb`, and `457b3e3` add
+  both identities and bounded character slices, then resolve independent-review
+  target-state, event-restore, switch, and zero-damage trigger findings; all
+  planned gates pass on 2026-08-03.

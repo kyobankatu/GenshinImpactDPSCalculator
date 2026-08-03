@@ -50,9 +50,9 @@ wave added the Golden Majesty weapon family, six legacy boundary artifact sets,
 and Razor through isolated implementation lanes; RL and generated
 documentation remained excluded.
 
-The B-162 through B-167 follow-on content and snapshot campaigns are complete.
-B-168 is the active Mona and Beidou offensive character campaign; RL, generated
-docs, and deferred healing, defensive, player-damage, or geometry systems remain
+The B-162 through B-168 follow-on content and snapshot campaigns are complete.
+The latest campaign adds Mona and Beidou offensive slices; RL, generated docs,
+and deferred healing, defensive, player-damage, or geometry systems remain
 excluded.
 
 The B-158 derived-stat equipment and Fischl wave is complete. It adds reusable
@@ -13550,8 +13550,8 @@ Completion evidence:
 
 ## Implementation Order: Legacy Catalyst and Counter Character Campaign
 
-Status: In progress. B-168 has a shared identity prerequisite followed by two
-independently revertible offensive character slices.
+Status: Complete. B-168 delivered the shared identities and both independently
+revertible offensive character slices.
 
 Scope:
 
@@ -13581,11 +13581,11 @@ Campaign inventory:
 
 | Unit | Type | Source readiness | Shared prerequisite | Verification | Status |
 |---|---|---|---|---|---|
-| typed identities | shared | pinned KQM/gcsim | none | `LegacyCharacterIdentityRegressionTest` | pending |
-| Mona | character | pinned KQM/gcsim | typed identity | `MonaRegressionTest` | pending |
-| Beidou | character | pinned KQM/gcsim | typed identity | `BeidouRegressionTest` | pending |
+| typed identities | shared | pinned KQM/gcsim | none | `LegacyCharacterIdentityRegressionTest` | done |
+| Mona | character | pinned KQM/gcsim | typed identity | `MonaRegressionTest` | done |
+| Beidou | character | pinned KQM/gcsim | typed identity | `BeidouRegressionTest` | done |
 
-### Phase 1: Reserve Mona and Beidou Identities
+### Phase 1: Reserve Mona and Beidou Identities - Done
 
 Why first:
 
@@ -13618,7 +13618,7 @@ Verification:
 
 - `./gradlew LegacyCharacterIdentityRegressionTest build`
 
-### Phase 2: Mona Offensive Vertical Slice
+### Phase 2: Mona Offensive Vertical Slice - Done
 
 Why second:
 
@@ -13631,6 +13631,11 @@ Target files:
 - `config/characters/Mona/Mona_Multipliers.csv` (new)
 - `src/java/model/character/Mona.java` (new)
 - `src/java/sample/MonaRegressionTest.java` (new)
+- `src/java/model/entity/TargetDependentTeamEffect.java` (new)
+- `src/java/mechanics/formula/DamageCalculator.java`
+- `src/java/mechanics/formula/StandardDamageStrategy.java`
+- `src/java/mechanics/formula/LunarDamageStrategy.java`
+- `src/java/simulation/runtime/CombatActionResolver.java`
 
 Tasks:
 
@@ -13663,7 +13668,7 @@ Verification:
 - `./gradlew ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Beidou Offensive Vertical Slice
+### Phase 3: Beidou Offensive Vertical Slice - Done
 
 Why:
 
@@ -13679,7 +13684,7 @@ Target files:
 
 Tasks:
 
-- Add complete basic attack categories, ordinary zero-counter Tidecaller,
+- Add the complete N1-N5 Normal string, ordinary zero-counter Tidecaller,
   particles, and one single-target Stormbreaker discharge per eligible trigger.
 - Add exact gauge/ICD, cadence, cooldown/Energy, snapshot ownership, and every
   representable passive/constellation without synthesizing incoming hits.
@@ -13694,7 +13699,7 @@ Acceptance criteria:
 
 Test cases to add or update:
 
-- Normal: data, attack chain, Charged/Plunge, ordinary Skill, particles, Burst
+- Normal: data, N1-N5 attack chain, ordinary Skill, particles, Burst
   cast/discharges, and representable passives/constellations.
 - Boundary: exact discharge ICD, Burst expiry, recast, switch, and repeated
   snapshot restore.
@@ -13706,6 +13711,19 @@ Verification:
 - `./gradlew BeidouRegressionTest`
 - `./gradlew ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Commits `117d62b`, `1cc6ec7`, and `d4e0efb` add stable identities, aligned
+  data, Mona's bounded catalyst/Omen slice, and Beidou's bounded
+  single-target counter-character slice.
+- Independent review commit `457b3e3` resolves Omen at live impact time for
+  snapshot and non-snapshot attacks, reconstructs Mona's delayed cooldown and
+  Energy events, advances Skill event state before listeners, resets Beidou's
+  Normal chain on switch-out, and accepts valid zero-damage discharge hits.
+- `LegacyCharacterIdentityRegressionTest`, `MonaRegressionTest`,
+  `BeidouRegressionTest`, `ReactionRegressionTest`, build, Javadoc, and
+  executable preflight pass on 2026-08-03.
 
 ## Implementation Order: Parallel Foundational Content Campaign
 
