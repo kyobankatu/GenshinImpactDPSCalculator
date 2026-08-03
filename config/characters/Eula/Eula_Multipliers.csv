@@ -1,0 +1,25 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Eula,NORMAL,N1,9,1.648572,0
+Eula,NORMAL,N2,9,1.718724,0
+Eula,NORMAL,N3 Hit 1,9,1.043511,0
+Eula,NORMAL,N3 Hit 2,9,1.043511,0
+Eula,NORMAL,N4,9,2.069484,0
+Eula,NORMAL,N5 Hit 1,9,1.319735,0
+Eula,NORMAL,N5 Hit 2,9,1.319735,0
+Eula,PLUNGE,High Plunge,9,3.422517,0
+Eula,SKILL,Press Skill,9,2.4888,0
+Eula,SKILL,Press Skill C5,12,2.928,0
+Eula,SKILL,Hold Skill,9,4.1752,0
+Eula,SKILL,Hold Skill C5,12,4.912,0
+Eula,SKILL,Icewhirl,9,1.632,0
+Eula,SKILL,Icewhirl C5,12,1.92,0
+Eula,SKILL,RES Shred,9,0.24,0
+Eula,SKILL,RES Shred C5,12,0.25,0
+Eula,BURST,Burst Initial,9,4.1752,0
+Eula,BURST,Burst Initial C3,12,4.912,0
+Eula,BURST,Lightfall Base,9,6.74344,0
+Eula,BURST,Lightfall Base C3,12,8.532586,0
+Eula,BURST,Lightfall Per Stack,9,1.37776,0
+Eula,BURST,Lightfall Per Stack C3,12,1.743302,0
+Eula,PASSIVE,A1 Lightfall Factor,1,0.50,0
+Eula,PASSIVE,C1 Physical DMG Bonus,1,0.30,0

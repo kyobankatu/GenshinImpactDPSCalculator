@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Eula,STATS,Base HP,90,13226,0
+Eula,STATS,Base ATK,90,342,0
+Eula,STATS,Base DEF,90,751,0
+Eula,STATS,Ascension CRIT DMG,90,0.384,0
+Eula,STATS,Energy Cost,90,80,0
+Eula,STATS,Constellation,6,6,0
+Eula,CONFIG,Character Level,90,90,0
+Eula,CONFIG,Normal Level,9,9,0
+Eula,CONFIG,Skill Level,12,12,0
+Eula,CONFIG,Burst Level,12,12,0

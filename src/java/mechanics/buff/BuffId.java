@@ -237,6 +237,10 @@ public enum BuffId {
     BEIDOU_C6_ELECTRO_RES_SHRED,
     /** Klee C6 non-stacking team Pyro DMG bonus. */
     KLEE_C6_PYRO_DMG_BONUS,
+    /** Eula Icewhirl Cryo and Physical resistance reduction. */
+    EULA_ICEWHIRL_RES_SHRED,
+    /** Eula C1 owner-only Physical DMG bonus. */
+    EULA_C1_PHYSICAL_DMG_BONUS,
     /** 武器「千夜に浮かぶ夢」の味方元素熟知共有。 */
     A_THOUSAND_FLOATING_DREAMS_TEAM_EM,
     /** 武器「龍殺しの英傑譚」の交代先への攻撃力バフ。 */
