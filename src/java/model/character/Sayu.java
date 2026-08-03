@@ -52,6 +52,8 @@ public final class Sayu extends Character implements
     private static final int[] NORMAL_HITMARKS = { 23, 29, 26, 35 };
     private static final int[] NORMAL_DURATIONS = { 36, 48, 52, 71 };
     private static final int BURST_TICK_COUNT = 7;
+    // KQM lists 114f; this offensive slice follows gcsim's executable
+    // attack-event schedule at 145f because the two sources remain unresolved.
     private static final int BURST_FIRST_TICK_FRAME = 145;
     private static final int BURST_TICK_INTERVAL_FRAMES = 90;
 

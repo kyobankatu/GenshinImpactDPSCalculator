@@ -41,6 +41,7 @@ public final class SayuRegressionTest {
         testNormalChainAndHighPlunge();
         testPressSkillTimingSnapshotParticlesAndConstellations();
         testBurstCadenceEnergySnapshotAndConstellations();
+        testC6EndToEndDamageAndRestore();
         testC4ActiveSwirlEnergyGate();
         testSnapshotRestoreAndStaleGenerations();
         testInvalidInputsCooldownAndBindingGuards();
@@ -285,21 +286,24 @@ public final class SayuRegressionTest {
         Noelle ally = new Noelle(null, null);
         CombatSimulator simulator = simulatorWith(c4, ally);
         c4.spendEnergy(80.0);
-        c4.onReaction(swirl, c4, 0.0, simulator);
+        simulator.getEnemy().setAura(Element.PYRO, 2.0);
+        perform(simulator, CharacterActionKey.SKILL);
         assertClose(1.2, c4.getCurrentEnergy(),
-                "Sayu C4 active Swirl restores Energy");
-        c4.onReaction(swirl, c4, 2.0 - 2.0 * EPSILON, simulator);
+                "Sayu C4 receives a real Skill Swirl notification");
+        double c4Boundary = 7.0 * FRAME + 2.0;
+        c4.onReaction(
+                swirl, c4, c4Boundary - 2.0 * EPSILON, simulator);
         assertClose(1.2, c4.getCurrentEnergy(),
                 "Sayu C4 rejects before two-second boundary");
-        c4.onReaction(swirl, c4, 2.0, simulator);
+        c4.onReaction(swirl, c4, c4Boundary, simulator);
         assertClose(2.4, c4.getCurrentEnergy(),
                 "Sayu C4 accepts exact two-second boundary");
         simulator.setActiveCharacter(CharacterId.NOELLE);
-        c4.onReaction(swirl, c4, 4.0, simulator);
+        c4.onReaction(swirl, c4, c4Boundary + 2.0, simulator);
         assertClose(2.4, c4.getCurrentEnergy(),
                 "Sayu C4 rejects off-field Swirl");
         simulator.setActiveCharacter(CharacterId.SAYU);
-        c4.onReaction(swirl, ally, 4.0, simulator);
+        c4.onReaction(swirl, ally, c4Boundary + 2.0, simulator);
         assertClose(2.4, c4.getCurrentEnergy(),
                 "Sayu C4 rejects ally-triggered Swirl");
 
@@ -309,6 +313,62 @@ public final class SayuRegressionTest {
         c3.onReaction(swirl, c3, 0.0, c3Simulator);
         assertClose(0.0, c3.getCurrentEnergy(),
                 "Sayu C4 Energy does not leak into C3");
+    }
+
+    private static void testC6EndToEndDamageAndRestore() {
+        Sayu c5 = new Sayu(null, null, 5);
+        c5.addBuff(elementalMasteryBuff("Sayu C5 EM probe"));
+        CombatSimulator c5Simulator = simulatorWith(c5);
+        List<ActionRecord> c5Records = captureSayuActions(c5Simulator);
+        perform(c5Simulator, CharacterActionKey.BURST);
+        advanceTo(c5Simulator, 12.0);
+        List<ActionRecord> c5Daruma = named(
+                c5Records, "Muji-Muji Daruma");
+
+        Sayu c6 = new Sayu(null, null, 6);
+        c6.addBuff(elementalMasteryBuff("Sayu C6 EM probe"));
+        CombatSimulator c6Simulator = simulatorWith(c6);
+        List<ActionRecord> c6Records = captureSayuActions(c6Simulator);
+        perform(c6Simulator, CharacterActionKey.BURST);
+        SimulatorSnapshot snapshot = c6Simulator.saveSnapshot();
+        advanceTo(c6Simulator, 12.0);
+        List<ActionRecord> firstBranch = named(
+                c6Records, "Muji-Muji Daruma");
+        assertEquals(7, firstBranch.size(),
+                "Sayu C6 first branch tick count");
+        assertClose(244.0 * 196.0 * 0.002,
+                firstBranch.get(0).action.getStatSnapshot()
+                        .get(StatType.FLAT_DMG_BONUS),
+                "Sayu C6 uncapped EM flat damage");
+        double c6DamageGain = firstBranch.get(0).damage
+                - c5Daruma.get(0).damage;
+        assertTrue(c6DamageGain > 0.0,
+                "Sayu C6 increases resolved Daruma damage");
+        for (int tick = 1; tick < firstBranch.size(); tick++) {
+            assertClose(c6DamageGain,
+                    firstBranch.get(tick).damage - c5Daruma.get(tick).damage,
+                    "Sayu C6 constant additive damage tick " + tick);
+        }
+
+        c6Simulator.restoreSnapshot(snapshot);
+        advanceTo(c6Simulator, 12.0);
+        List<ActionRecord> bothBranches = named(
+                c6Records, "Muji-Muji Daruma");
+        assertEquals(14, bothBranches.size(),
+                "Sayu C6 restored branch tick count");
+        for (int tick = 0; tick < 7; tick++) {
+            assertClose(firstBranch.get(tick).damage,
+                    bothBranches.get(tick + 7).damage,
+                    "Sayu C6 restored damage tick " + tick);
+        }
+    }
+
+    private static SimpleBuff elementalMasteryBuff(String name) {
+        return new SimpleBuff(
+                name,
+                20.0,
+                0.0,
+                stats -> stats.add(StatType.ELEMENTAL_MASTERY, 100.0));
     }
 
     private static void testSnapshotRestoreAndStaleGenerations() {
