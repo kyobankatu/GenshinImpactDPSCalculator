@@ -611,7 +611,7 @@ public final class Eula extends Character implements
                         StatType.PLUNGING_ATTACK_DMG_BONUS,
                         ActionType.PLUNGE,
                         ICDType.None,
-                        ICDTag.PlungeAttack,
+                        ICDTag.None,
                         0.0,
                         true);
                 break;
@@ -742,7 +742,8 @@ public final class Eula extends Character implements
                 StatType.SKILL_DMG_BONUS,
                 ActionType.SKILL,
                 icdType,
-                ICDTag.ElementalSkill,
+                icdType == ICDType.Standard
+                        ? ICDTag.ElementalSkill : ICDTag.None,
                 1.0,
                 blunt);
     }
@@ -760,7 +761,7 @@ public final class Eula extends Character implements
                 StatType.BURST_DMG_BONUS,
                 ActionType.BURST,
                 ICDType.None,
-                ICDTag.ElementalBurst,
+                ICDTag.None,
                 gaugeUnits,
                 blunt);
     }

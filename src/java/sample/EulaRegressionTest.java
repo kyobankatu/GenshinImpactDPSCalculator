@@ -133,6 +133,8 @@ public final class EulaRegressionTest {
                 "Eula High Plunge category");
         assertEquals(ICDType.None, plunge.action.getICDType(),
                 "Eula High Plunge ICD");
+        assertEquals(ICDTag.None, plunge.action.getICDTag(),
+                "Eula High Plunge has no ICD tag");
         assertTrue(plunge.action.isShatterTrigger(),
                 "Eula High Plunge is blunt");
     }
@@ -155,6 +157,8 @@ public final class EulaRegressionTest {
                 "Eula Press multiplier");
         assertEquals(ICDType.None, press.action.getICDType(),
                 "Eula Press no ICD");
+        assertEquals(ICDTag.None, press.action.getICDTag(),
+                "Eula Press has no ICD tag");
         assertClose(1.0, press.action.getGaugeUnits(),
                 "Eula Press 1U gauge");
         assertTrue(press.action.isShatterTrigger(),
@@ -181,6 +185,8 @@ public final class EulaRegressionTest {
                 "Eula Hold multiplier");
         assertEquals(ICDType.None, hold.action.getICDType(),
                 "Eula Hold no ICD");
+        assertEquals(ICDTag.None, hold.action.getICDTag(),
+                "Eula Hold has no ICD tag");
         assertTrue(hold.action.isShatterTrigger(), "Eula Hold is blunt");
         advanceTo(holdSim, 149.0 * FRAME);
         assertClose(2.0, holdParticles.get(0).count,
@@ -241,6 +247,8 @@ public final class EulaRegressionTest {
                 "Eula A1 uses half Lightfall base");
         assertEquals(ActionType.BURST, a1.action.getActionType(),
                 "Eula A1 is Burst damage");
+        assertEquals(ICDTag.None, a1.action.getICDTag(),
+                "Eula A1 has no ICD tag");
         assertTrue(a1.action.isShatterTrigger(), "Eula A1 is blunt");
         assertEquals(0, eula.getGrimheartStacks(simulator.getCurrentTime()),
                 "Eula Hold consumes Grimheart");
@@ -300,6 +308,8 @@ public final class EulaRegressionTest {
                 "Eula Burst initial 2U gauge");
         assertEquals(ICDType.None, initial.action.getICDType(),
                 "Eula Burst initial no ICD");
+        assertEquals(ICDTag.None, initial.action.getICDTag(),
+                "Eula Burst initial has no ICD tag");
         assertTrue(initial.action.isShatterTrigger(),
                 "Eula Burst initial is blunt");
         assertClose(burstStart + 123.0 * FRAME,
@@ -349,6 +359,8 @@ public final class EulaRegressionTest {
                 "Lightfall uses locked stack multiplier");
         assertTrue(!lightfall.action.hasStatSnapshot(),
                 "Lightfall does not snapshot stats");
+        assertEquals(ICDTag.None, lightfall.action.getICDTag(),
+                "Lightfall has no ICD tag");
         assertEquals(0, gateEula.getLightfallStacks(),
                 "Lightfall impact cannot grant itself a stack");
 
