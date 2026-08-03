@@ -75,6 +75,8 @@ public enum CharacterId {
     MONA(30, "Mona", CharacterRegion.MONDSTADT),
     /** Beidou (Electro claymore counter attacker and off-field DPS). */
     BEIDOU(31, "Beidou", CharacterRegion.LIYUE),
+    /** Collei (Dendro bow sub-DPS and reaction support). */
+    COLLEI(32, "Collei", CharacterRegion.SUMERU),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 
