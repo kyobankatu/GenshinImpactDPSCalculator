@@ -59,7 +59,8 @@ public class DamageCalculator {
      * added before
      * clamping.</li>
      * <li>Reaction multiplier passed in from {@code CombatSimulator}.</li>
-     * <li>Defense: via {@link #calculateDefMulti} at attacker level 90.</li>
+     * <li>Defense: enemy DEF reduction and attacker DEF ignore are applied as
+     * independent remaining-DEF factors at attacker level 90.</li>
      * <li>Resistance: via {@link #calculateResMulti} after resolving live
      * enemy-facing element-specific reduction at impact.</li>
      * </ol>
@@ -150,6 +151,40 @@ public class DamageCalculator {
     static double calculateDefMulti(int attackerLevel, int enemyLevel, double defIgnore) {
         double charFactor = attackerLevel + 100.0;
         double enemyFactor = (enemyLevel + 100.0) * (1.0 - defIgnore);
+        return charFactor / (charFactor + enemyFactor);
+    }
+
+    /**
+     * Computes the standard enemy defense multiplier with independent DEF
+     * reduction and DEF ignore factors.
+     *
+     * <p>Enemy DEF reduction stacks additively and is clamped to 90%, while DEF
+     * ignore is clamped to 100%. The remaining factors multiply according to
+     * {@code (attackerLevel + 100) / [(attackerLevel + 100)
+     * + (enemyLevel + 100) * (1 - defReduction) * (1 - defIgnore)]}. A zero
+     * reduction delegates to the compatibility overload so existing valid-input
+     * results retain their prior arithmetic path.</p>
+     *
+     * @param attackerLevel character level (typically 90)
+     * @param enemyLevel enemy level
+     * @param defReduction total additive enemy DEF reduction ratio
+     * @param defIgnore total DEF ignore ratio
+     * @return defense multiplier in the range (0, 1]
+     */
+    static double calculateDefMulti(
+            int attackerLevel,
+            int enemyLevel,
+            double defReduction,
+            double defIgnore) {
+        double clampedDefReduction = Math.max(0.0, Math.min(0.90, defReduction));
+        double clampedDefIgnore = Math.max(0.0, Math.min(1.0, defIgnore));
+        if (clampedDefReduction == 0.0) {
+            return calculateDefMulti(attackerLevel, enemyLevel, clampedDefIgnore);
+        }
+        double charFactor = attackerLevel + 100.0;
+        double enemyFactor = (enemyLevel + 100.0)
+                * (1.0 - clampedDefReduction)
+                * (1.0 - clampedDefIgnore);
         return charFactor / (charFactor + enemyFactor);
     }
 

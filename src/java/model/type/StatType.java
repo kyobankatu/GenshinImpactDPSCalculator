@@ -212,9 +212,11 @@ public enum StatType {
     // Debuffs / Enemy mitigation reduction stats
     // -----------------------------------------------------------------------
 
+    /** Additive enemy DEF reduction, capped at 90% by the damage formula. */
+    ENEMY_DEF_REDUCTION,
     /**
      * DEF Ignore%; removes a portion of the enemy's effective DEF
-     * independently of DEF Shred (see DamageCalculator DEF formula).
+     * independently of enemy DEF reduction (see DamageCalculator DEF formula).
      */
     DEF_IGNORE,
     /** Generic RES Shred% applied to the enemy's current element resistance. */

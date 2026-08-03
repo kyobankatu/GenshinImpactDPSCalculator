@@ -113,11 +113,13 @@ final class StandardDamageStrategy implements DamageStrategy {
         double critMulti = 1.0 + (critRate * critDmg);
 
         int attackerLevel = 90;
+        double defReduction = stats.get(StatType.ENEMY_DEF_REDUCTION);
         double totalDefIgnore = stats.get(StatType.DEF_IGNORE) + action.getDefenseIgnore();
-        if (totalDefIgnore > 1.0) {
-            totalDefIgnore = 1.0;
-        }
-        double defMulti = DamageCalculator.calculateDefMulti(attackerLevel, target.getLevel(), totalDefIgnore);
+        double defMulti = DamageCalculator.calculateDefMulti(
+                attackerLevel,
+                target.getLevel(),
+                defReduction,
+                totalDefIgnore);
         double resMulti = ResistanceCalculator.calculateMultiplier(
                 target, activeBuffs, currentTime, action.getElement());
 
