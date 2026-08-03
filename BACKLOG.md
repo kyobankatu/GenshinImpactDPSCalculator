@@ -3565,7 +3565,7 @@ experiment record.
 
 ### B-170 — Classic Klee character and enemy DEF reduction
 
-- **Status:** in progress
+- **Status:** complete
 - **Source:** explicit broad content-expansion request and post-B-169 missing
   character inventory.
 - **Symptom:** Klee has pinned classic-kit evidence but no typed identity,
@@ -3579,3 +3579,7 @@ experiment record.
   multi-target selection, RL, generated docs, and Deferred Systems are excluded.
 - **Proof:** `TASKS.md` Classic Klee Character Campaign plus identity, formula,
   focused character, reaction, build, Javadoc, and executable preflight gates.
+- **Completion:** commits `c8a6d90`, `48acc48`, `0b3e923`, `d10539b`,
+  `d2697ed`, `9a9229e`, and `05e9474` deliver the planned identity, formula,
+  bounded character slice, review corrections, and all final gates on
+  2026-08-03.

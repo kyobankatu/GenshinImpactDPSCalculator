@@ -55,8 +55,8 @@ The latest campaign adds Collei's stationary single-target reaction slice; RL,
 generated docs, and deferred healing, defensive, player-damage, or geometry
 systems remain excluded.
 
-B-170 is the active classic Klee campaign. It first adds the shared enemy DEF
-reduction formula, then a bounded stationary single-target character slice;
+B-170 is the completed classic Klee campaign. It adds the shared enemy DEF
+reduction formula and a bounded stationary single-target character slice;
 RL, generated docs, Hexerei, and Deferred Systems remain excluded.
 
 The B-158 derived-stat equipment and Fischl wave is complete. It adds reusable
@@ -13850,7 +13850,7 @@ Completion evidence:
 
 ## Implementation Order: Classic Klee Character Campaign
 
-Status: In progress. B-170 has typed-identity and shared DEF-reduction
+Status: Complete. B-170 delivers typed-identity and shared DEF-reduction
 prerequisites followed by one bounded classic Klee slice.
 
 Scope:
@@ -13877,7 +13877,7 @@ Definitions:
 - `Klee`: snapshot-aware classic kit with injectable random draws and fixed
   stationary one-target Skill/Burst hit selection.
 
-### Phase 1: Reserve Klee Identity
+### Phase 1: Reserve Klee Identity (Done)
 
 Target files:
 
@@ -13899,7 +13899,7 @@ Verification:
 
 - `./gradlew LegacyCharacterIdentityRegressionTest build`
 
-### Phase 2: Add Enemy DEF Reduction Formula
+### Phase 2: Add Enemy DEF Reduction Formula (Done)
 
 Target files:
 
@@ -13926,7 +13926,7 @@ Verification:
 
 - `./gradlew DefenseReductionRegressionTest ReactionRegressionTest build`
 
-### Phase 3: Klee Offensive And Constellation Vertical Slice
+### Phase 3: Klee Offensive And Constellation Vertical Slice (Done)
 
 Target files:
 
@@ -13960,6 +13960,18 @@ Verification:
 - `./gradlew KleeRegressionTest`
 - `./gradlew DefenseReductionRegressionTest ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Commits `c8a6d90`, `48acc48`, and `0b3e923` add Klee ID 33, independent
+  capped enemy DEF reduction, aligned character data, classic attacks, A1, and
+  representable C1-C6 effects.
+- Review fixes `d10539b`, `d2697ed`, `9a9229e`, and `05e9474` enforce the
+  Shatter exclusion, action rejection boundaries, KQM mine-generated Sparks,
+  and the exact non-inclusive C4 Burst-expiration boundary.
+- Identity, Klee, DEF-reduction, reaction, build, Javadoc, and executable
+  preflight gates pass on 2026-08-03; independent review found no remaining
+  concrete issue after its exact-expiration finding was resolved.
 
 ## Implementation Order: Parallel Foundational Content Campaign
 
