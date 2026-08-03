@@ -298,6 +298,11 @@ public final class EulaRegressionTest {
                 "Eula A4 resets Skill cooldown");
         assertEquals(2, eula.getGrimheartStacks(simulator.getCurrentTime()),
                 "Eula A4 grants and refreshes Grimheart");
+        assertEquals(2, eula.getGrimheartStacks(
+                burstStart + 18.0 - EPSILON),
+                "Eula A4 Grimheart survives immediately before 18 seconds");
+        assertEquals(0, eula.getGrimheartStacks(burstStart + 18.0),
+                "Eula A4 Grimheart expires exactly at 18 seconds");
         ActionRecord initial = named(
                 records, "Glacial Illumination (Initial)").get(0);
         assertClose(burstStart + 100.0 * FRAME, initial.time,
