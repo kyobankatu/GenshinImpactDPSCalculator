@@ -77,6 +77,8 @@ public enum CharacterId {
     BEIDOU(31, "Beidou", CharacterRegion.LIYUE),
     /** Collei (Dendro bow sub-DPS and reaction support). */
     COLLEI(32, "Collei", CharacterRegion.SUMERU),
+    /** Klee (Pyro catalyst on-field attacker). */
+    KLEE(33, "Klee", CharacterRegion.MONDSTADT),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 

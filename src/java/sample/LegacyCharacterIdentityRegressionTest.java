@@ -28,6 +28,7 @@ public final class LegacyCharacterIdentityRegressionTest {
         assertIdentity(CharacterId.MONA, 30, "Mona");
         assertIdentity(CharacterId.BEIDOU, 31, "Beidou");
         assertIdentity(CharacterId.COLLEI, 32, "Collei");
+        assertIdentity(CharacterId.KLEE, 33, "Klee");
         assertEquals(CharacterId.BENNETT, CharacterId.fromNumericId(1),
                 "first prior numeric ID");
         assertEquals(CharacterId.YANFEI, CharacterId.fromNumericId(20),
@@ -36,7 +37,7 @@ public final class LegacyCharacterIdentityRegressionTest {
                 "negative numeric fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(0),
                 "zero numeric fallback");
-        assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(33),
+        assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(34),
                 "high numeric fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName(null),
                 "null name fallback");
@@ -46,6 +47,8 @@ public final class LegacyCharacterIdentityRegressionTest {
                 "new identity case-sensitive fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("collei"),
                 "latest identity case-sensitive fallback");
+        assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("klee"),
+                "Klee identity case-sensitive fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("Not A Character"),
                 "unmatched name fallback");
         assertEquals(CharacterRegion.LIYUE, CharacterId.GANYU.getRegion(),
@@ -68,6 +71,8 @@ public final class LegacyCharacterIdentityRegressionTest {
                 "Beidou Liyue region lookup");
         assertEquals(CharacterRegion.SUMERU, CharacterId.COLLEI.getRegion(),
                 "Collei Sumeru region lookup");
+        assertEquals(CharacterRegion.MONDSTADT, CharacterId.KLEE.getRegion(),
+                "Klee Mondstadt region lookup");
         assertEquals(CharacterRegion.UNKNOWN,
                 CharacterId.COLUMBINA.getRegion(),
                 "unverified custom region fails closed");
