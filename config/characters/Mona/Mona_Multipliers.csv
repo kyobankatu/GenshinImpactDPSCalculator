@@ -1,0 +1,18 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Mona,NORMAL,N1,9,0.6392,0
+Mona,NORMAL,N2,9,0.6120,0
+Mona,NORMAL,N3,9,0.7616,0
+Mona,NORMAL,N4,9,0.95472,0
+Mona,CHARGE,Charged Attack,9,2.54524,0
+Mona,PLUNGE,High Plunge,9,2.6076,0
+Mona,SKILL,Skill DoT,9,0.544,0
+Mona,SKILL,Skill Explosion,9,2.2576,0
+Mona,SKILL,Skill DoT C5,12,0.640,0
+Mona,SKILL,Skill Explosion C5,12,2.656,0
+Mona,BURST,Bubble Explosion,9,7.5208,0
+Mona,BURST,Bubble Explosion C3,12,8.848,0
+Mona,BURST,Omen DMG Bonus,9,0.58,0
+Mona,BURST,Omen DMG Bonus C3,12,0.60,0
+Mona,PASSIVE,A4 ER Conversion,1,0.20,0
+Mona,PASSIVE,C2 Proc Chance,2,0.20,0
+Mona,PASSIVE,C2 Cooldown,2,5.0,0

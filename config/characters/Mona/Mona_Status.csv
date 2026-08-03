@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Mona,STATS,Base HP,90,10409,0
+Mona,STATS,Base ATK,90,287,0
+Mona,STATS,Base DEF,90,653,0
+Mona,STATS,Ascension Energy Recharge,90,0.32,0
+Mona,STATS,Energy Cost,90,60,0
+Mona,STATS,Constellation,6,6,0
+Mona,CONFIG,Character Level,90,90,0
+Mona,CONFIG,Normal Level,9,9,0
+Mona,CONFIG,Skill Level,12,12,0
+Mona,CONFIG,Burst Level,12,12,0
