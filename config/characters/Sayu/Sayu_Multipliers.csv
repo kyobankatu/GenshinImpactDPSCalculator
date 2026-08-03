@@ -1,0 +1,18 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Sayu,NORMAL,N1,9,1.3272,0
+Sayu,NORMAL,N2,9,1.3114,0
+Sayu,NORMAL,N3,9,0.7979,0
+Sayu,NORMAL,N4,9,1.80278,0
+Sayu,PLUNGE,High Plunge,9,3.422517,0
+Sayu,SKILL,Windwheel,9,0.612,0
+Sayu,SKILL,Press Kick,9,2.6928,0
+Sayu,SKILL,Windwheel C5,12,0.720,0
+Sayu,SKILL,Press Kick C5,12,3.168,0
+Sayu,BURST,Initial,9,1.9856,0
+Sayu,BURST,Daruma,9,0.884,0
+Sayu,BURST,Initial C3,12,2.336,0
+Sayu,BURST,Daruma C3,12,1.04,0
+Sayu,PASSIVE,C2 Press Kick DMG Bonus,2,0.033,0
+Sayu,PASSIVE,C4 Energy,4,1.2,0
+Sayu,PASSIVE,C6 EM Damage Ratio,6,0.002,0
+Sayu,PASSIVE,C6 ATK Cap,6,4.0,0

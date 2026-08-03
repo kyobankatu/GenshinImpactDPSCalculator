@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Sayu,STATS,Base HP,90,11854,0
+Sayu,STATS,Base ATK,90,244,0
+Sayu,STATS,Base DEF,90,745,0
+Sayu,STATS,Ascension Elemental Mastery,90,96,0
+Sayu,STATS,Energy Cost,90,80,0
+Sayu,STATS,Constellation,6,6,0
+Sayu,CONFIG,Character Level,90,90,0
+Sayu,CONFIG,Normal Level,9,9,0
+Sayu,CONFIG,Skill Level,12,12,0
+Sayu,CONFIG,Burst Level,12,12,0
