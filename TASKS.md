@@ -23646,10 +23646,15 @@ Campaign inventory:
 | Wriothesley | character | fixed-target basics, enhanced Rebuke, Skill normal scaling, Burst, particles, representable constellations | `WriothesleyRegressionTest` | complete (`976f1e1`) |
 | Emilie | character | fixed-target basics, Lumidouce Case cadence/levels, Burning scent, Burst replacements, particles, representable constellations | `EmilieRegressionTest` | complete (`f56c4ae`) |
 | Chiori | character | fixed-target basics, Tamoto cadence, Skill follow-up state, Burst, particles, representable passives/constellations | `ChioriRegressionTest` | complete (`fd0f113`) |
-| Lan Yan | character | fixed-target basics, Feathermoon ring attacks, Burst, particles, representable passives/constellations | `LanYanRegressionTest` | delegated (ID 81) |
+| Lan Yan | character | fixed-target basics, Feathermoon ring attacks, Burst, particles, representable passives/constellations | `LanYanRegressionTest` | complete (`8c620c2`) |
 | Lyney | character | fixed-target bow basics, Prop Arrow/hat flow, Skill stack detonation, Burst, particles, representable constellations | `LyneyRegressionTest` | complete (`695425e`) |
-| Xianyun | character | fixed-target basics, Driftcloud Wave Skill, Starwicker Burst attacks, particles, representable passives/constellations | `XianyunRegressionTest` | delegated (ID 83) |
-| Sigewinne | character | fixed-target basics, Rebound Hydrotherapy Skill attacks, Burst pulses, particles, representable passives/constellations | `SigewinneRegressionTest` | delegated (ID 84) |
+| Xianyun | character | fixed-target basics, Driftcloud Wave Skill, Starwicker Burst attacks, particles, representable passives/constellations | `XianyunRegressionTest` | complete (`9669ede`) |
+| Sigewinne | character | fixed-target basics, Rebound Hydrotherapy Skill attacks, Burst pulses, particles, representable passives/constellations | `SigewinneRegressionTest` | complete (`c28c7c0`) |
+| Ororon | character | fixed-target basics, Spirit Orb, Supersonic Oculus pulses, particles, representable Hypersense/passive/constellation branches | `OroronRegressionTest` | complete (`fcdd1e1`) |
+| Aino | character | fixed-target basics, two-hit Musecatcher Skill, Cool Your Jets Ducky cadence, particles, representable passives/constellations | `AinoRegressionTest` | delegated (ID 86) |
+| Dahlia | character | fixed-target basics, Immersive Ordinance, Radiant Psalter hit/Favonian Favor, particles, representable support/constellation branches | `DahliaRegressionTest` | delegated (ID 87) |
+| Escoffier | character | fixed-target basics, Cooking Mek Skill cadence, Burst initial hit, particles, representable Cryo/Hydro support and constellations | `EscoffierRegressionTest` | delegated (ID 88) |
+| Citlali | character | fixed-target basics, Itzpapa Skill cadence, Burst/Skull attacks, particles, representable Cryo/Hydro support and constellations | `CitlaliRegressionTest` | delegated (ID 89) |
 
 Requirements and tests remain the Phase 1 acceptance and abnormal-path matrix;
 each replenished unit receives a source-backed focused regression and an
@@ -23703,3 +23708,11 @@ the reaction suite, build, Javadoc, and preflight pass together. Lan Yan,
 Xianyun, and Sigewinne continue in isolated lanes; healing, player HP,
 movement, geometry, random targeting, and multi-target behavior remain
 explicit boundaries.
+
+Checkpoint 2026-08-05 14:53 JST: Lan Yan, Sigewinne, Xianyun, and Ororon are
+complete and pushed through integration fix `a373854`. Their focused
+regressions, the legacy identity regression, reaction suite, build, Javadoc,
+and preflight pass together. Aino, Dahlia, Escoffier, and Citlali continue in
+isolated lanes; shield, healing, player HP, movement, geometry, Nightsoul team
+plumbing, random targeting, and multi-target behavior remain explicit
+boundaries.
