@@ -4350,3 +4350,7 @@ experiment record.
   preflight gates passing. Layla and Sangonomiya Kokomi are the active
   character units; no unavailable HP, healing, shield, geometry, or
   multi-target state is synthesized.
+- **Checkpoint 2026-08-05 13:40 JST:** Kokomi, Layla, Itto, Ayaka, and Nilou
+  are integrated and pushed through `d4a6ffe`; Kirara, Dehya, and Tartaglia
+  continue as isolated sidecars while Baizhu is primary. Weapon replenishment
+  remains converged except blocked B-187.

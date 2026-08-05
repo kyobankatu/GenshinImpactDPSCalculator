@@ -23632,8 +23632,15 @@ Campaign inventory:
 | Sethos | character | fixed-target basics, Shadowpiercing, Skill Energy interaction, Burst state, representable passives/constellations | `SethosRegressionTest` | complete (`95446b6`) |
 | Nahida | character | fixed-target basics, Seed of Skandha trigger, Shrine of Maya buffs, representable passives/constellations | `NahidaRegressionTest` | complete (`319b012`) |
 | Zhongli | character | fixed-target basics, Stone Stele pulses/particles, Planet Befall, A4 Max-HP additions, representable constellations | `ZhongliRegressionTest` | complete (`f65f179`) |
-| Layla | character | fixed-target basics, Skill/Burst damage, Night Star cadence, particles, representable passives/constellations | `LaylaRegressionTest` | delegated (ID 67) |
-| Sangonomiya Kokomi | character | fixed-target basics, Bake-Kurage pulses, Burst HP additions/infusion, particles, representable constellations | `SangonomiyaKokomiRegressionTest` | in progress (primary, ID 68) |
+| Layla | character | fixed-target basics, Skill/Burst damage, Night Star cadence, particles, representable passives/constellations | `LaylaRegressionTest` | complete (`94e6fac`) |
+| Sangonomiya Kokomi | character | fixed-target basics, Bake-Kurage pulses, Burst HP additions/infusion, particles, representable constellations | `SangonomiyaKokomiRegressionTest` | complete (`3fe52c7`) |
+| Kamisato Ayaka | character | fixed-target basics, Skill, Burst storm cadence, representable infusion/passives/constellations | `KamisatoAyakaRegressionTest` | complete (`0110f2b`) |
+| Arataki Itto | character | fixed-target basics, Superlative Strength, Burst conversion/infusion, Ushi, representable passives/constellations | `AratakiIttoRegressionTest` | complete (`b3d5bba`) |
+| Nilou | character | fixed-target basics, Skill stance, Hydro aura, representable Bloom/passive/constellation branches | `NilouRegressionTest` | complete (`d4a6ffe`) |
+| Kirara | character | fixed-target basics, Skill Press, Burst and cardamom hits, particles, representable passives/constellations | `KiraraRegressionTest` | delegated (ID 72) |
+| Baizhu | character | fixed-target basics, Skill/Burst offensive hits, particles, representable Dendro support/constellations | `BaizhuRegressionTest` | in progress (primary, ID 73) |
+| Dehya | character | fixed-target basics, Fiery Sanctum coordinated attacks, Burst sequence, particles, representable constellations | `DehyaRegressionTest` | delegated (ID 74) |
+| Tartaglia | character | fixed-target bow basics, melee stance, Riptide, ranged/melee Burst, particles, representable constellations | `TartagliaRegressionTest` | delegated (ID 75) |
 
 Requirements and tests remain the Phase 1 acceptance and abnormal-path matrix;
 each replenished unit receives a source-backed focused regression and an
@@ -23667,3 +23674,9 @@ build, Javadoc, and executable preflight pass together. Layla continues in an
 isolated lane while Sangonomiya Kokomi is the primary unit; HP change,
 healing, shields, target geometry, and multi-enemy propagation remain explicit
 boundaries.
+
+Checkpoint 2026-08-05 13:40 JST: Kokomi, Layla, Itto, Ayaka, and Nilou are
+complete and pushed through `d4a6ffe`. Focused character tests, the reaction
+suite, build, Javadoc, and executable preflight pass across the integrated
+branch. Kirara, Dehya, and Tartaglia continue in isolated lanes while Baizhu is
+the primary unit; weapon inventory remains converged except blocked B-187.
