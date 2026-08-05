@@ -117,5 +117,9 @@ public enum ICDTag {
     /** Kinich's Scalespiker Cannon and C6 rebound share one private group. */
     Kinich_ScalespikerCannon,
     /** Xilonen's Blade Roller Normals use an independent standard group. */
-    Xilonen_BladeRoller
+    Xilonen_BladeRoller,
+    /** Arlecchino's Charged Attack uses the polearm extra-attack group. */
+    Arlecchino_Charged,
+    /** Arlecchino's Skill spike and Directive ticks share one private group. */
+    Arlecchino_ElementalArt
 }

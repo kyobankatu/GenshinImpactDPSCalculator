@@ -52,6 +52,10 @@ public enum ICDType {
     KinichLoopShot,
     /** Kinich Scalespiker rule: 1.2 seconds or four hits. */
     KinichScalespikerCannon,
+    /** Arlecchino's Charged Attack: 0.5-second time gate only. */
+    ArlecchinoCharged,
+    /** Arlecchino's Skill group: ten seconds or every third hit. */
+    ArlecchinoElementalArt,
     /** Reserved for custom ICD rules not yet implemented. */
     Special // Custom rules (not implemented yet)
 }

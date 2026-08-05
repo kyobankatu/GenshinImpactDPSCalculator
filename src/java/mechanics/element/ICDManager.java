@@ -111,6 +111,10 @@ public class ICDManager {
      *       after four hits in its private group.</li>
      *   <li>{@link ICDType#KinichScalespikerCannon} – applies after 1.2 seconds
      *       or after four hits in its private group.</li>
+     *   <li>{@link ICDType#ArlecchinoCharged} – applies after 0.5 seconds;
+     *       hit count never bypasses the time gate.</li>
+     *   <li>{@link ICDType#ArlecchinoElementalArt} – applies after ten
+     *       seconds or after two suppressed hits.</li>
      * </ul>
      *
      * <p>{@code null} values for {@code type} or {@code tag} are silently
@@ -193,6 +197,10 @@ public class ICDManager {
             apply = checkCustomApplication(state, currentTime, 2.0, 4);
         } else if (type == ICDType.KinichScalespikerCannon) {
             apply = checkCustomApplication(state, currentTime, 1.2, 4);
+        } else if (type == ICDType.ArlecchinoCharged) {
+            apply = checkTimeOnlyApplication(state, currentTime, 0.5);
+        } else if (type == ICDType.ArlecchinoElementalArt) {
+            apply = checkCustomApplication(state, currentTime, 10.0, 2);
         }
 
         return apply;

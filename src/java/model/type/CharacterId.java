@@ -201,6 +201,8 @@ public enum CharacterId {
     KINICH(93, "Kinich", CharacterRegion.NATLAN),
     /** Xilonen (Geo sword Source Sampler support). */
     XILONEN(94, "Xilonen", CharacterRegion.NATLAN),
+    /** Arlecchino (Pyro polearm Bond of Life attacker). */
+    ARLECCHINO(95, "Arlecchino", CharacterRegion.SNEZHNAYA),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 

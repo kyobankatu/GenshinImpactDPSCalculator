@@ -1,0 +1,51 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Arlecchino,NORMAL,N1,9,0.872681,0
+Arlecchino,NORMAL,N2,9,0.957290,0
+Arlecchino,NORMAL,N3,9,1.201274,0
+Arlecchino,NORMAL,N4 Hit 1,9,0.682434,0
+Arlecchino,NORMAL,N4 Hit 2,9,0.682434,0
+Arlecchino,NORMAL,N5,9,1.285709,0
+Arlecchino,NORMAL,N6,9,1.568577,0
+Arlecchino,NORMAL,N1 C3,12,1.071520,0
+Arlecchino,NORMAL,N2 C3,12,1.175407,0
+Arlecchino,NORMAL,N3 C3,12,1.474982,0
+Arlecchino,NORMAL,N4 Hit 1 C3,12,0.837925,0
+Arlecchino,NORMAL,N4 Hit 2 C3,12,0.837925,0
+Arlecchino,NORMAL,N5 C3,12,1.578656,0
+Arlecchino,NORMAL,N6 C3,12,1.925974,0
+Arlecchino,CHARGED,Charged Attack,9,1.668480,0
+Arlecchino,CHARGED,Charged Attack C3,12,2.048640,0
+Arlecchino,PLUNGE,High Plunge,9,2.933586,0
+Arlecchino,PLUNGE,High Plunge C3,12,3.601998,0
+Arlecchino,PASSIVE,Masque Increase,9,2.212000,0
+Arlecchino,PASSIVE,Masque Increase C3,12,2.716000,0
+Arlecchino,SKILL,All Is Ash Spike,9,0.252280,0
+Arlecchino,SKILL,All Is Ash Cleave,9,2.270520,0
+Arlecchino,SKILL,Blood-Debt Directive,9,0.540600,0
+Arlecchino,BURST,Balemoon Rising,9,6.296800,0
+Arlecchino,BURST,Balemoon Rising C5,12,7.408000,0
+Arlecchino,PASSIVE,Combat Pyro DMG Bonus,1,0.400000,0
+Arlecchino,PASSIVE,Directive Ordinal Bond,1,0.650000,0
+Arlecchino,PASSIVE,Directive Due Bond,1,1.300000,0
+Arlecchino,PASSIVE,Directive Duration,1,30.000000,0
+Arlecchino,PASSIVE,Directive Upgrade Delay,1,5.000000,0
+Arlecchino,PASSIVE,Directive Collection Cap,1,1.450000,0
+Arlecchino,PASSIVE,Directive Cap Duration,1,35.000000,0
+Arlecchino,PASSIVE,Masque Bond Threshold,1,0.300000,0
+Arlecchino,PASSIVE,Normal Bond Consumption,1,0.075000,0
+Arlecchino,PASSIVE,Normal Skill CD Reduction,1,0.800000,0
+Arlecchino,PASSIVE,Skill Particle Count,1,5.000000,0
+Arlecchino,PASSIVE,Particle Travel Frames,1,100.000000,0
+Arlecchino,PASSIVE,Particle Gate,1,0.300000,0
+Arlecchino,PASSIVE,C1 Masque Increase,1,1.000000,0
+Arlecchino,PASSIVE,C2 Bloodfire,2,9.000000,0
+Arlecchino,PASSIVE,C2 Impact Delay Frames,2,50.000000,0
+Arlecchino,PASSIVE,C2 Trigger Gate,2,10.000000,0
+Arlecchino,PASSIVE,C4 Burst CD Reduction,4,2.000000,0
+Arlecchino,PASSIVE,C4 Flat Energy,4,15.000000,0
+Arlecchino,PASSIVE,C4 Trigger Gate,4,10.000000,0
+Arlecchino,PASSIVE,C6 Burst ATK Bond Ratio,6,7.000000,0
+Arlecchino,PASSIVE,C6 CRIT Rate,6,0.100000,0
+Arlecchino,PASSIVE,C6 CRIT DMG,6,0.700000,0
+Arlecchino,PASSIVE,C6 Duration,6,20.000000,0
+Arlecchino,PASSIVE,C6 Trigger Gate,6,15.000000,0
