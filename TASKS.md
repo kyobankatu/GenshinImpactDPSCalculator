@@ -23637,10 +23637,15 @@ Campaign inventory:
 | Kamisato Ayaka | character | fixed-target basics, Skill, Burst storm cadence, representable infusion/passives/constellations | `KamisatoAyakaRegressionTest` | complete (`0110f2b`) |
 | Arataki Itto | character | fixed-target basics, Superlative Strength, Burst conversion/infusion, Ushi, representable passives/constellations | `AratakiIttoRegressionTest` | complete (`b3d5bba`) |
 | Nilou | character | fixed-target basics, Skill stance, Hydro aura, representable Bloom/passive/constellation branches | `NilouRegressionTest` | complete (`d4a6ffe`) |
-| Kirara | character | fixed-target basics, Skill Press, Burst and cardamom hits, particles, representable passives/constellations | `KiraraRegressionTest` | delegated (ID 72) |
-| Baizhu | character | fixed-target basics, Skill/Burst offensive hits, particles, representable Dendro support/constellations | `BaizhuRegressionTest` | in progress (primary, ID 73) |
-| Dehya | character | fixed-target basics, Fiery Sanctum coordinated attacks, Burst sequence, particles, representable constellations | `DehyaRegressionTest` | delegated (ID 74) |
-| Tartaglia | character | fixed-target bow basics, melee stance, Riptide, ranged/melee Burst, particles, representable constellations | `TartagliaRegressionTest` | delegated (ID 75) |
+| Kirara | character | fixed-target basics, Skill Press, Burst and cardamom hits, particles, representable passives/constellations | `KiraraRegressionTest` | complete (`05bdb21`) |
+| Baizhu | character | fixed-target basics, Skill/Burst offensive hits, particles, representable Dendro support/constellations | `BaizhuRegressionTest` | complete (`f55f7b1`) |
+| Dehya | character | fixed-target basics, Fiery Sanctum coordinated attacks, Burst sequence, particles, representable constellations | `DehyaRegressionTest` | complete (`6d944d6`) |
+| Tartaglia | character | fixed-target bow basics, melee stance, Riptide, ranged/melee Burst, particles, representable constellations | `TartagliaRegressionTest` | complete (`36377d6`) |
+| Wanderer | character | fixed-target basics, Windfavored normals/charged attacks, Burst, particles, representable passives/constellations | `WandererRegressionTest` | delegated (ID 76) |
+| Navia | character | fixed-target basics, Crystal Shrapnel Skill, Burst support fire, particles, representable passives/constellations | `NaviaRegressionTest` | complete (`2af59f9`) |
+| Wriothesley | character | fixed-target basics, enhanced Rebuke, Skill normal scaling, Burst, particles, representable constellations | `WriothesleyRegressionTest` | delegated (ID 78) |
+| Emilie | character | fixed-target basics, Lumidouce Case cadence/levels, Burning scent, Burst replacements, particles, representable constellations | `EmilieRegressionTest` | delegated (ID 79) |
+| Chiori | character | fixed-target basics, Tamoto cadence, Skill follow-up state, Burst, particles, representable passives/constellations | `ChioriRegressionTest` | complete (`fd0f113`) |
 
 Requirements and tests remain the Phase 1 acceptance and abnormal-path matrix;
 each replenished unit receives a source-backed focused regression and an
@@ -23680,3 +23685,10 @@ complete and pushed through `d4a6ffe`. Focused character tests, the reaction
 suite, build, Javadoc, and executable preflight pass across the integrated
 branch. Kirara, Dehya, and Tartaglia continue in isolated lanes while Baizhu is
 the primary unit; weapon inventory remains converged except blocked B-187.
+
+Checkpoint 2026-08-05 14:09 JST: Kirara, Baizhu, Dehya, Tartaglia, Chiori,
+and Navia are complete and pushed through `2af59f9`. Integrated focused tests,
+the reaction suite, build, Javadoc, and executable preflight pass. Wanderer,
+Wriothesley, and Emilie continue in isolated lanes; construct geometry,
+movement, shields, healing, player HP, and multi-target behavior remain
+explicit boundaries.
