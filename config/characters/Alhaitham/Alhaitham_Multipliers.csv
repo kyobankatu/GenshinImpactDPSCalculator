@@ -1,0 +1,49 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Alhaitham,NORMAL,N1,9,0.90989,0
+Alhaitham,NORMAL,N2,9,0.932374,0
+Alhaitham,NORMAL,N3-1,9,0.627931,0
+Alhaitham,NORMAL,N3-2,9,0.627931,0
+Alhaitham,NORMAL,N4,9,1.226665,0
+Alhaitham,NORMAL,N5,9,1.540516,0
+Alhaitham,CHARGED,Charged Attack 1,9,1.01515,0
+Alhaitham,CHARGED,Charged Attack 2,9,1.01515,0
+Alhaitham,PLUNGE,High Plunge,9,2.933586,0
+Alhaitham,SKILL,Rush ATK,9,3.2912,0
+Alhaitham,SKILL,Rush EM,9,2.63296,0
+Alhaitham,SKILL,Rush ATK C3,12,3.872,0
+Alhaitham,SKILL,Rush EM C3,12,3.0976,0
+Alhaitham,SKILL,Projection ATK,9,1.1424,0
+Alhaitham,SKILL,Projection EM,9,2.2848,0
+Alhaitham,SKILL,Projection ATK C3,12,1.344,0
+Alhaitham,SKILL,Projection EM C3,12,2.688,0
+Alhaitham,BURST,Burst ATK,9,2.0672,0
+Alhaitham,BURST,Burst EM,9,1.65376,0
+Alhaitham,BURST,Burst ATK C5,12,2.432,0
+Alhaitham,BURST,Burst EM C3,12,1.9456,0
+Alhaitham,PASSIVE,Mirror Interval Frames,1,233,0
+Alhaitham,PASSIVE,Mirror Maximum,1,3,0
+Alhaitham,PASSIVE,Projection Cooldown,1,1.6,0
+Alhaitham,PASSIVE,Projection Particle Cooldown,1,1.5,0
+Alhaitham,PASSIVE,Projection Particle Travel Frames,1,100,0
+Alhaitham,PASSIVE,Skill Mirror Gain Frames,1,15,0
+Alhaitham,PASSIVE,Skill Hit Frames,1,19,0
+Alhaitham,PASSIVE,Skill Cooldown,1,18,0
+Alhaitham,PASSIVE,Burst Snapshot Frames,1,67,0
+Alhaitham,PASSIVE,Burst First Hit Frames,1,94,0
+Alhaitham,PASSIVE,Burst Hit Interval Frames,1,21,0
+Alhaitham,PASSIVE,Burst Mirror Command Frames,1,184,0
+Alhaitham,PASSIVE,A1 Cooldown,1,12,0
+Alhaitham,PASSIVE,A4 EM DMG Bonus Ratio,1,0.001,0
+Alhaitham,PASSIVE,A4 Maximum DMG Bonus,1,1,0
+Alhaitham,PASSIVE,C1 Skill Cooldown Reduction,1,1.2,0
+Alhaitham,PASSIVE,C1 Trigger Cooldown,1,1,0
+Alhaitham,PASSIVE,C2 Elemental Mastery Per Stack,2,50,0
+Alhaitham,PASSIVE,C2 Maximum Stacks,2,4,0
+Alhaitham,PASSIVE,C2 Duration,2,8,0
+Alhaitham,PASSIVE,C4 Party EM Per Consumed Mirror,4,30,0
+Alhaitham,PASSIVE,C4 Dendro DMG Per Generated Mirror,4,0.1,0
+Alhaitham,PASSIVE,C4 Duration,4,15,0
+Alhaitham,PASSIVE,C6 CRIT Rate,6,0.1,0
+Alhaitham,PASSIVE,C6 CRIT DMG,6,0.7,0
+Alhaitham,PASSIVE,C6 Duration,6,6,0
+Alhaitham,PASSIVE,C6 Extension Per Overflow,6,6,0

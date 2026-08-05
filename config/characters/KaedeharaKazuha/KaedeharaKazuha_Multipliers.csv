@@ -1,0 +1,89 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Kaedehara Kazuha,NORMAL,N1,9,0.82634,0
+Kaedehara Kazuha,NORMAL,N1 Talent 12,12,1.045582,0
+Kaedehara Kazuha,NORMAL,N2,9,0.83108,0
+Kaedehara Kazuha,NORMAL,N2 Talent 12,12,1.051579,0
+Kaedehara Kazuha,NORMAL,N3-1,9,0.474,0
+Kaedehara Kazuha,NORMAL,N3-1 Talent 12,12,0.59976,0
+Kaedehara Kazuha,NORMAL,N3-2,9,0.5688,0
+Kaedehara Kazuha,NORMAL,N3-2 Talent 12,12,0.719712,0
+Kaedehara Kazuha,NORMAL,N4,9,1.11548,0
+Kaedehara Kazuha,NORMAL,N4 Talent 12,12,1.411435,0
+Kaedehara Kazuha,NORMAL,N5-1,9,0.4661,0
+Kaedehara Kazuha,NORMAL,N5-1 Talent 12,12,0.589764,0
+Kaedehara Kazuha,NORMAL,N5-2,9,0.4661,0
+Kaedehara Kazuha,NORMAL,N5-2 Talent 12,12,0.589764,0
+Kaedehara Kazuha,NORMAL,N5-3,9,0.4661,0
+Kaedehara Kazuha,NORMAL,N5-3 Talent 12,12,0.589764,0
+Kaedehara Kazuha,CHARGED,Charged-1,9,0.79,0
+Kaedehara Kazuha,CHARGED,Charged-1 Talent 12,12,0.9996,0
+Kaedehara Kazuha,CHARGED,Charged-2,9,1.37144,0
+Kaedehara Kazuha,CHARGED,Charged-2 Talent 12,12,1.735306,0
+Kaedehara Kazuha,PLUNGE,Collision,9,1.503452,0
+Kaedehara Kazuha,PLUNGE,Collision Talent 12,12,1.846011,0
+Kaedehara Kazuha,PLUNGE,Low Plunge,9,3.006267,0
+Kaedehara Kazuha,PLUNGE,Low Plunge Talent 12,12,3.69124,0
+Kaedehara Kazuha,PLUNGE,High Plunge,9,3.75499,0
+Kaedehara Kazuha,PLUNGE,High Plunge Talent 12,12,4.610557,0
+Kaedehara Kazuha,SKILL,Press,9,3.264,0
+Kaedehara Kazuha,SKILL,Press C3,12,3.84,0
+Kaedehara Kazuha,SKILL,Hold,9,4.4336,0
+Kaedehara Kazuha,SKILL,Hold C3,12,5.216,0
+Kaedehara Kazuha,BURST,Burst Initial,9,4.4608,0
+Kaedehara Kazuha,BURST,Burst Initial C5,12,5.248,0
+Kaedehara Kazuha,BURST,Burst DoT,9,2.04,0
+Kaedehara Kazuha,BURST,Burst DoT C5,12,2.4,0
+Kaedehara Kazuha,BURST,Burst Absorbed DoT,9,0.612,0
+Kaedehara Kazuha,BURST,Burst Absorbed DoT C5,12,0.72,0
+Kaedehara Kazuha,PASSIVE,N1 Hit Frame,1,13,0
+Kaedehara Kazuha,PASSIVE,N2 Hit Frame,1,11,0
+Kaedehara Kazuha,PASSIVE,N3 First Hit Frame,1,16,0
+Kaedehara Kazuha,PASSIVE,N3 Second Hit Frame,1,26,0
+Kaedehara Kazuha,PASSIVE,N4 Hit Frame,1,16,0
+Kaedehara Kazuha,PASSIVE,N5 First Hit Frame,1,15,0
+Kaedehara Kazuha,PASSIVE,N5 Second Hit Frame,1,19,0
+Kaedehara Kazuha,PASSIVE,N5 Third Hit Frame,1,28,0
+Kaedehara Kazuha,PASSIVE,Charged Hit Frame,1,20,0
+Kaedehara Kazuha,PASSIVE,Charged Recovery Frames,1,55,0
+Kaedehara Kazuha,PASSIVE,Press Skill Hit Frame,1,10,0
+Kaedehara Kazuha,PASSIVE,Press Skill Cooldown Start Frame,1,8,0
+Kaedehara Kazuha,PASSIVE,Press Skill Cooldown,1,6.0,0
+Kaedehara Kazuha,PASSIVE,Press Skill Particles,1,3,0
+Kaedehara Kazuha,PASSIVE,Press Skill Gauge Units,1,1,0
+Kaedehara Kazuha,PASSIVE,Hold Skill Hit Frame,1,33,0
+Kaedehara Kazuha,PASSIVE,Hold Skill Cooldown Start Frame,1,31,0
+Kaedehara Kazuha,PASSIVE,Hold Skill Cooldown,1,9.0,0
+Kaedehara Kazuha,PASSIVE,Hold Skill Particles,1,4,0
+Kaedehara Kazuha,PASSIVE,Hold Skill Gauge Units,1,2,0
+Kaedehara Kazuha,PASSIVE,Burst Snapshot Frame,1,81,0
+Kaedehara Kazuha,PASSIVE,Burst Initial Hit Frame,1,82,0
+Kaedehara Kazuha,PASSIVE,Burst Initial Gauge Units,1,2,0
+Kaedehara Kazuha,PASSIVE,Burst First DoT Frame,1,140,0
+Kaedehara Kazuha,PASSIVE,Burst DoT Interval Frames,1,117,0
+Kaedehara Kazuha,PASSIVE,Burst DoT Tick Count,1,5,0
+Kaedehara Kazuha,PASSIVE,Burst DoT Gauge Units,1,1,0
+Kaedehara Kazuha,PASSIVE,Burst Duration,1,8.0,0
+Kaedehara Kazuha,PASSIVE,Burst Cooldown,1,15.0,0
+Kaedehara Kazuha,PASSIVE,A1 Additional Elemental DMG,1,2.0,0
+Kaedehara Kazuha,PASSIVE,A1 Additional Gauge Units,1,1,0
+Kaedehara Kazuha,PASSIVE,A1 Midare Ranzan Window,1,10.0,0
+Kaedehara Kazuha,PASSIVE,A1 Press Additional Hit Frame,1,36,0
+Kaedehara Kazuha,PASSIVE,A1 Press High Plunge Hit Frame,1,37,0
+Kaedehara Kazuha,PASSIVE,A1 Hold Additional Hit Frame,1,40,0
+Kaedehara Kazuha,PASSIVE,A1 Hold High Plunge Hit Frame,1,41,0
+Kaedehara Kazuha,PASSIVE,A4 Elemental DMG Bonus Per EM,1,0.0004,0
+Kaedehara Kazuha,PASSIVE,A4 Duration,1,8.0,0
+Kaedehara Kazuha,PASSIVE,C1 Skill Cooldown Ratio,1,0.9,0
+Kaedehara Kazuha,PASSIVE,C1 Burst Skill Cooldown Reset,1,1,0
+Kaedehara Kazuha,PASSIVE,C2 Elemental Mastery,2,200,0
+Kaedehara Kazuha,PASSIVE,C2 Field Duration,2,8.0,0
+Kaedehara Kazuha,PASSIVE,C2 Refresh Interval,2,0.5,0
+Kaedehara Kazuha,PASSIVE,C3 Skill Talent Increase,3,3,0
+Kaedehara Kazuha,PASSIVE,C4 Energy Threshold,4,45,0
+Kaedehara Kazuha,PASSIVE,C4 Press Flat Energy,4,3,0
+Kaedehara Kazuha,PASSIVE,C4 Hold Flat Energy,4,4,0
+Kaedehara Kazuha,PASSIVE,C4 Gliding Flat Energy,4,2,0
+Kaedehara Kazuha,PASSIVE,C4 Gliding Interval,4,1.0,0
+Kaedehara Kazuha,PASSIVE,C5 Burst Talent Increase,5,3,0
+Kaedehara Kazuha,PASSIVE,C6 Infusion Duration,6,5.0,0
+Kaedehara Kazuha,PASSIVE,C6 Normal Charged Plunge DMG Bonus Per EM,6,0.002,0

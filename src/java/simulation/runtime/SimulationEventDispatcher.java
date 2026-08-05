@@ -14,6 +14,7 @@ import simulation.ActionListener;
 import simulation.ActionRequestListener;
 import simulation.CombatSimulator;
 import simulation.DamageListener;
+import simulation.ElementalIndirectDamageListener;
 import simulation.IndirectDamageListener;
 import simulation.ParticleListener;
 import simulation.SimulationEventBus;
@@ -30,6 +31,8 @@ public class SimulationEventDispatcher implements SimulationEventBus {
     private final List<DamageListener> damageListeners = new ArrayList<>();
     private final List<IndirectDamageListener> indirectDamageListeners =
             new ArrayList<>();
+    private final List<ElementalIndirectDamageListener>
+            elementalIndirectDamageListeners = new ArrayList<>();
     private final List<ParticleListener> particleListeners = new ArrayList<>();
     private final List<CombatSimulator.ReactionListener> reactionListeners = new ArrayList<>();
     private final List<ElementalReactionTriggeredWeaponEffect>
@@ -65,6 +68,13 @@ public class SimulationEventDispatcher implements SimulationEventBus {
     @Override
     public void addIndirectDamageListener(IndirectDamageListener listener) {
         indirectDamageListeners.add(listener);
+    }
+
+    /** Registers a listener for accepted elemental indirect damage. */
+    @Override
+    public void addElementalIndirectDamageListener(
+            ElementalIndirectDamageListener listener) {
+        elementalIndirectDamageListeners.add(listener);
     }
 
     /**
@@ -140,6 +150,19 @@ public class SimulationEventDispatcher implements SimulationEventBus {
         for (IndirectDamageListener listener
                 : new ArrayList<>(indirectDamageListeners)) {
             listener.onIndirectDamage(owner, damage, time);
+        }
+    }
+
+    /** Notifies only the additive typed elemental indirect-damage observers. */
+    @Override
+    public void notifyElementalIndirectDamage(
+            Character owner,
+            Element element,
+            double damage,
+            double time) {
+        for (ElementalIndirectDamageListener listener
+                : new ArrayList<>(elementalIndirectDamageListeners)) {
+            listener.onElementalIndirectDamage(owner, element, damage, time);
         }
     }
 

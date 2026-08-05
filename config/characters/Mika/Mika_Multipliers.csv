@@ -1,0 +1,16 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Mika,NORMAL,N1,9,0.794835,0
+Mika,NORMAL,N2,9,0.762476,0
+Mika,NORMAL,N3,9,1.001341,0
+Mika,NORMAL,N4 Hit 1,9,0.507338,0
+Mika,NORMAL,N4 Hit 2,9,0.507338,0
+Mika,NORMAL,N5,9,1.302110,0
+Mika,CHARGE,Charged Attack,9,2.071380,0
+Mika,SKILL,Flowfrost Arrow,9,1.142400,0
+Mika,SKILL,Rimestar Flare,9,1.428000,0
+Mika,SKILL,Rimestar Shard,9,0.428400,0
+Mika,SKILL,ATK Speed,9,0.210000,0
+Mika,SKILL,Flowfrost Arrow C5,12,1.344000,0
+Mika,SKILL,Rimestar Flare C5,12,1.680000,0
+Mika,SKILL,Rimestar Shard C5,12,0.504000,0
+Mika,SKILL,ATK Speed C5,12,0.240000,0

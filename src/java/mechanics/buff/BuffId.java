@@ -251,6 +251,86 @@ public enum BuffId {
     YELAN_ADAPT_WITH_EASE,
     /** Yelan C4 team Max HP bonus from Lifeline marks. */
     YELAN_C4_MAX_HP,
+    /** Kujou Sara's Crowfeather Cover charged-shot state. */
+    KUJOU_SARA_CROWFEATHER_COVER,
+    /** Kujou Sara's active-recipient Tengu Juurai ATK and C6 bonus. */
+    KUJOU_SARA_TENGU_JUURAI,
+    /** Yun Jin's per-recipient Flying Cloud Flag Formation quota. */
+    YUN_JIN_FLYING_CLOUD_FORMATION,
+    /** Yun Jin C2 team Normal Attack damage bonus. */
+    YUN_JIN_C2_NORMAL_DMG,
+    /** Yun Jin C4 owner DEF bonus after Crystallize. */
+    YUN_JIN_C4_DEF,
+    /** Yun Jin C6 quota-aware team Normal Attack speed bonus. */
+    YUN_JIN_C6_NORMAL_SPEED,
+    /** Faruzan's team Anemo DMG and C6 CRIT DMG support window. */
+    FARUZAN_PRAYERFUL_WIND,
+    /** Faruzan's Anemo resistance reduction window. */
+    FARUZAN_PERFIDIOUS_WIND,
+    /** Shenhe A4 Press Skill and Burst damage bonus. */
+    SHENHE_A4_SKILL_BURST_DMG,
+    /** Shenhe A4 Hold Normal, Charged, and Plunging damage bonus. */
+    SHENHE_A4_NORMAL_CHARGED_PLUNGE_DMG,
+    /** Shenhe Burst Cryo and Physical resistance reduction. */
+    SHENHE_BURST_RES_SHRED,
+    /** Shenhe Burst active-character A1 and C2 Cryo bonuses. */
+    SHENHE_BURST_ACTIVE_BONUS,
+    /** Tighnari A1 owner Elemental Mastery bonus. */
+    TIGHNARI_A1_ELEMENTAL_MASTERY,
+    /** Tighnari C2 owner Dendro damage bonus. */
+    TIGHNARI_C2_DENDRO_DMG_BONUS,
+    /** Tighnari C4 party Elemental Mastery bonus. */
+    TIGHNARI_C4_PARTY_ELEMENTAL_MASTERY,
+    /** Alhaitham C4 non-owner party Elemental Mastery bonus. */
+    ALHAITHAM_C4_PARTY_ELEMENTAL_MASTERY,
+    /** Alhaitham C4 owner Dendro damage bonus. */
+    ALHAITHAM_C4_DENDRO_DMG_BONUS,
+    /** Ayato Burst party Normal Attack damage bonus. */
+    AYATO_BURST_NORMAL_DMG,
+    /** Ayato C4 party Normal Attack speed bonus. */
+    AYATO_C4_NORMAL_SPEED,
+    /** Heizou A4 non-owner party Elemental Mastery bonus. */
+    HEIZOU_A4_PARTY_ELEMENTAL_MASTERY,
+    /** Heizou C1 owner Normal Attack speed bonus. */
+    HEIZOU_C1_NORMAL_ATTACK_SPEED,
+    /** Freminet C4 stacking owner ATK bonus. */
+    FREMINET_C4_ATK,
+    /** Freminet C6 stacking owner CRIT DMG bonus. */
+    FREMINET_C6_CRIT_DMG,
+    /** Candace C2 owner Max HP bonus after Skill damage. */
+    CANDACE_C2_MAX_HP,
+    /** Candace Crimson Crown elemental Normal Attack support. */
+    CANDACE_CRIMSON_CROWN_NORMAL_DMG,
+    /** Lynette A1 party ATK bonus after Burst use. */
+    LYNETTE_A1_PARTY_ATK,
+    /** Lynette C6 owner Anemo damage window. */
+    LYNETTE_C6_ANEMO_DMG,
+    /** Mika's 12-second party Soulwind attack-speed window. */
+    MIKA_SOULWIND_ATTACK_SPEED,
+    /** Charlotte C2 owner ATK window after Skill damage. */
+    CHARLOTTE_C2_ATK,
+    /** Kazuha A4 team Pyro damage bonus. */
+    KAZUHA_A4_PYRO_DMG_BONUS,
+    /** Kazuha A4 team Hydro damage bonus. */
+    KAZUHA_A4_HYDRO_DMG_BONUS,
+    /** Kazuha A4 team Electro damage bonus. */
+    KAZUHA_A4_ELECTRO_DMG_BONUS,
+    /** Kazuha A4 team Cryo damage bonus. */
+    KAZUHA_A4_CRYO_DMG_BONUS,
+    /** Kazuha C2 owner Elemental Mastery field bonus. */
+    KAZUHA_C2_OWNER_ELEMENTAL_MASTERY,
+    /** Kazuha C2 active-character Elemental Mastery field bonus. */
+    KAZUHA_C2_ACTIVE_ELEMENTAL_MASTERY,
+    /** Kazuha C6 owner Anemo infusion window. */
+    KAZUHA_C6_INFUSION,
+    /** Aloy A1 owner ATK window. */
+    ALOY_A1_OWNER_ATK,
+    /** Aloy A1 non-owner party ATK window. */
+    ALOY_A1_TEAM_ATK,
+    /** Aloy A4 stacking Cryo damage window. */
+    ALOY_A4_CRYO_DMG_BONUS,
+    /** Nightweaver's Looking Glass simultaneous-window team reaction bonus. */
+    NIGHTWEAVERS_LOOKING_GLASS_TEAM_REACTION_DMG,
     /** 武器「千夜に浮かぶ夢」の味方元素熟知共有。 */
     A_THOUSAND_FLOATING_DREAMS_TEAM_EM,
     /** 武器「龍殺しの英傑譚」の交代先への攻撃力バフ。 */

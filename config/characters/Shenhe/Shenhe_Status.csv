@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Shenhe,STATS,Base HP,90,12993,0
+Shenhe,STATS,Base ATK,90,304,0
+Shenhe,STATS,Base DEF,90,830,0
+Shenhe,STATS,Ascension ATK Percent,90,0.288,0
+Shenhe,STATS,Energy Cost,90,80,0
+Shenhe,STATS,Constellation,6,6,0
+Shenhe,CONFIG,Character Level,90,90,0
+Shenhe,CONFIG,Normal Level,9,9,0
+Shenhe,CONFIG,Skill Level,12,12,0
+Shenhe,CONFIG,Burst Level,12,12,0

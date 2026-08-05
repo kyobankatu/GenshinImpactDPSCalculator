@@ -62,8 +62,16 @@ public enum StatType {
     CRIT_RATE,
     /** Crit DMG as a decimal (e.g. 0.50 = 50 %). */
     CRIT_DMG,
+    /** Additional CRIT DMG applied only to Electro damage instances. */
+    ELECTRO_CRIT_DMG,
+    /** Additional CRIT DMG applied only to Anemo damage instances. */
+    ANEMO_CRIT_DMG,
     /** Additional CRIT DMG applied only to Geo damage instances. */
     GEO_CRIT_DMG,
+    /** Additional CRIT DMG applied only to Cryo damage instances. */
+    CRYO_CRIT_DMG,
+    /** Additional CRIT DMG applied only to Physical damage instances. */
+    PHYSICAL_CRIT_DMG,
     /** Elemental Mastery flat value; amplifies reactions. */
     ELEMENTAL_MASTERY,
     /** Energy Recharge as a decimal (e.g. 1.0 = 100 %). */
@@ -170,6 +178,8 @@ public enum StatType {
 
     /** DMG bonus that applies to Normal Attack hits. */
     NORMAL_ATTACK_DMG_BONUS,
+    /** DMG bonus that applies only to non-Physical Normal Attack hits. */
+    ELEMENTAL_NORMAL_ATTACK_DMG_BONUS,
     /** DMG bonus that applies to Charged Attack hits. */
     CHARGED_ATTACK_DMG_BONUS,
     /** DMG bonus that applies to Plunging Attack hits. */
@@ -207,6 +217,8 @@ public enum StatType {
     ELEMENTAL_MASTERY_TO_CHARGED_FLAT_DMG_RATIO,
     /** Final-ATK ratio added only to Normal Attack base damage. */
     NORMAL_ATTACK_ATK_FLAT_DMG_RATIO,
+    /** Final-Max-HP ratio added only to Normal Attack base damage. */
+    MAX_HP_TO_NORMAL_FLAT_DMG_RATIO,
     /** Elemental Skill DMG Bonus gained per point of final Elemental Mastery. */
     ELEMENTAL_MASTERY_TO_SKILL_DMG_BONUS_RATIO,
 

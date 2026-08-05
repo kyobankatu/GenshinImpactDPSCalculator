@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Shikanoin Heizou,STATS,Base HP,90,10657,0
+Shikanoin Heizou,STATS,Base ATK,90,225,0
+Shikanoin Heizou,STATS,Base DEF,90,684,0
+Shikanoin Heizou,STATS,Ascension Anemo DMG Bonus,90,0.24,0
+Shikanoin Heizou,STATS,Energy Cost,90,40,0
+Shikanoin Heizou,STATS,Constellation,6,6,0
+Shikanoin Heizou,CONFIG,Character Level,90,90,0
+Shikanoin Heizou,CONFIG,Normal Level,9,9,0
+Shikanoin Heizou,CONFIG,Skill Level,12,12,0
+Shikanoin Heizou,CONFIG,Burst Level,12,12,0

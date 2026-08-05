@@ -1,55 +1,117 @@
 package model.weapon;
 
-import model.entity.ActionTriggeredWeaponEffect;
-import model.entity.Weapon;
 import model.entity.Character;
+import model.entity.SimulatorInitializedWeaponEffect;
+import model.entity.Weapon;
 import model.stats.StatsContainer;
 import model.type.StatType;
 import model.type.WeaponType;
-import simulation.action.CharacterActionRequest;
+import simulation.CombatSimulator;
 
 /**
- * Prospector's Shovel (custom weapon).
+ * Prospector's Shovel with separate standard and Lunar reaction bonuses.
  *
- * <p><b>Base stats (Lv 90):</b> 510 Base ATK, 41.3% ATK (substat).
- *
- * <p><b>Swift and Sure (R5):</b>
- * <ul>
- *   <li>Electro-Charged DMG +96% (always active).</li>
- *   <li>Lunar-Charged DMG +48% — only active when Moonsign is
- *       {@link simulation.CombatSimulator.Moonsign#ASCENDANT_GLEAM}.</li>
- * </ul>
+ * <p>Lv. 90 metadata and R1-R5 values follow pinned KQM TCL
+ * {@code 80ba6241} and gcsim {@code ef41805d}. The base Electro-Charged and
+ * Lunar-Charged bonuses are unconditional. Ascendant Gleam adds one more copy
+ * of the refinement-scaled Lunar-Charged bonus.</p>
  */
-public class ProspectorShovel extends Weapon implements ActionTriggeredWeaponEffect {
+public final class ProspectorShovel extends Weapon
+        implements SimulatorInitializedWeaponEffect {
+    private final int refinement;
+    private final double electroChargedDamageBonus;
+    private final double lunarChargedDamageBonus;
+    private Character owner;
+    private CombatSimulator simulator;
 
-    /** Cached simulator reference used to check the current Moonsign state. */
-    private simulation.CombatSimulator simRef = null;
-
+    /** Constructs Prospector's Shovel at refinement rank five. */
     public ProspectorShovel() {
-        super("Prospector's Shovel", new StatsContainer());
-        StatsContainer s = this.getStats();
-        s.add(StatType.BASE_ATK, 510);
-        s.add(StatType.ATK_PERCENT, 0.413);
-        this.weaponType = WeaponType.POLEARM;
+        this(5);
     }
 
-    /** Caches the simulator reference on first action for Moonsign checks. */
+    /**
+     * Constructs Prospector's Shovel at the selected refinement.
+     *
+     * @param refinement refinement rank in the inclusive range 1-5
+     */
+    public ProspectorShovel(int refinement) {
+        super("Prospector's Shovel", new StatsContainer());
+        if (refinement < 1 || refinement > 5) {
+            throw new IllegalArgumentException(
+                    "Prospector's Shovel refinement must be between 1 and 5");
+        }
+        this.refinement = refinement;
+        lunarChargedDamageBonus = 0.09 + 0.03 * refinement;
+        electroChargedDamageBonus = lunarChargedDamageBonus * 4.0;
+        weaponType = WeaponType.POLEARM;
+        getStats().set(StatType.BASE_ATK, 510.0);
+        getStats().set(StatType.ATK_PERCENT, 0.413);
+    }
+
+    /** Returns this weapon's refinement rank. */
+    public int getRefinement() {
+        return refinement;
+    }
+
+    /** Returns the unconditional Electro-Charged DMG bonus. */
+    public double getElectroChargedDamageBonus() {
+        return electroChargedDamageBonus;
+    }
+
+    /** Returns each base or Ascendant Lunar-Charged DMG copy. */
+    public double getLunarChargedDamageBonus() {
+        return lunarChargedDamageBonus;
+    }
+
+    /** Applies both base bonuses and the conditional Ascendant Lunar copy. */
     @Override
-    public void onAction(Character user, CharacterActionRequest request, simulation.CombatSimulator sim) {
-        if (simRef == null) {
-            simRef = sim;
+    public void applyPassive(StatsContainer stats, double currentTime) {
+        stats.add(
+                StatType.ELECTRO_CHARGED_DMG_BONUS,
+                electroChargedDamageBonus);
+        stats.add(
+                StatType.LUNAR_CHARGED_DMG_BONUS,
+                lunarChargedDamageBonus);
+        if (simulator != null
+                && simulator.getMoonsign()
+                        == CombatSimulator.Moonsign.ASCENDANT_GLEAM) {
+            stats.add(
+                    StatType.LUNAR_CHARGED_DMG_BONUS,
+                    lunarChargedDamageBonus);
         }
     }
 
+    /** Binds the Ascendant condition to one equipped owner and simulator. */
     @Override
-    public void applyPassive(StatsContainer stats, double currentTime) {
-        // R5: Electro-Charged DMG +96% (unconditional)
-        stats.add(StatType.ELECTRO_CHARGED_DMG_BONUS, 0.96);
+    public void initializeForSimulator(
+            Character equippedOwner,
+            CombatSimulator activeSimulator) {
+        if (equippedOwner == null || activeSimulator == null) {
+            throw new IllegalArgumentException(
+                    "Prospector's Shovel owner and simulator are required");
+        }
+        if (simulator != null) {
+            if (owner != equippedOwner || simulator != activeSimulator) {
+                throw new IllegalStateException(
+                        "Prospector's Shovel is already bound elsewhere");
+            }
+            return;
+        }
+        validateBinding(equippedOwner, activeSimulator);
+        owner = equippedOwner;
+        simulator = activeSimulator;
+    }
 
-        // R5: Lunar-Charged DMG +48% — only when Moonsign is Ascendant Gleam
-        if (simRef != null
-                && simRef.getMoonsign() == simulation.CombatSimulator.Moonsign.ASCENDANT_GLEAM) {
-            stats.add(StatType.LUNAR_CHARGED_DMG_BONUS, 0.48);
+    private void validateBinding(
+            Character equippedOwner,
+            CombatSimulator activeSimulator) {
+        if (equippedOwner.getWeapon() != this) {
+            throw new IllegalArgumentException(
+                    "Owner must have this Prospector's Shovel equipped");
+        }
+        if (!activeSimulator.getPartyMembers().contains(equippedOwner)) {
+            throw new IllegalArgumentException(
+                    "Owner must belong to the target simulator party");
         }
     }
 }

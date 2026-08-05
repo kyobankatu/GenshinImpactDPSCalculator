@@ -1,0 +1,53 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Cyno,NORMAL,N1,9,0.904961,0
+Cyno,NORMAL,N2,9,0.880408,0
+Cyno,NORMAL,N3-1,9,0.538417,0
+Cyno,NORMAL,N3-2,9,0.538417,0
+Cyno,NORMAL,N4,9,1.394271,0
+Cyno,CHARGED,Charged Attack,9,2.24834,0
+Cyno,PLUNGE,High Plunge,9,2.933586,0
+Cyno,BURST,Pactsworn High Plunge,9,2.933586,0
+Cyno,BURST,Pactsworn High Plunge C3,12,3.601998,0
+Cyno,SKILL,Skill,9,2.2168,0
+Cyno,SKILL,Skill C5,12,2.608,0
+Cyno,SKILL,Mortuary Rite,9,2.6656,0
+Cyno,SKILL,Mortuary Rite C5,12,3.136,0
+Cyno,BURST,Pactsworn N1,9,1.438227,0
+Cyno,BURST,Pactsworn N2,9,1.515125,0
+Cyno,BURST,Pactsworn N3,9,1.922339,0
+Cyno,BURST,Pactsworn N4-1,9,0.94973,0
+Cyno,BURST,Pactsworn N4-2,9,0.94973,0
+Cyno,BURST,Pactsworn N5,9,2.403891,0
+Cyno,BURST,Pactsworn Charged,9,1.8565,0
+Cyno,BURST,Pactsworn N1 C3,12,1.765924,0
+Cyno,BURST,Pactsworn N2 C3,12,1.860344,0
+Cyno,BURST,Pactsworn N3 C3,12,2.36034,0
+Cyno,BURST,Pactsworn N4-1 C3,12,1.166124,0
+Cyno,BURST,Pactsworn N4-2 C3,12,1.166124,0
+Cyno,BURST,Pactsworn N5 C3,12,2.951613,0
+Cyno,BURST,Pactsworn Charged C3,12,2.2795,0
+Cyno,PASSIVE,Skill Expected Particles,1,3.0,0
+Cyno,PASSIVE,Mortuary Expected Particles,1,1.33,0
+Cyno,PASSIVE,Burst Form Duration,1,10.0,0
+Cyno,PASSIVE,Burst Form Extension,1,4.0,0
+Cyno,PASSIVE,Burst Form Max Duration,1,18.0,0
+Cyno,PASSIVE,Burst Elemental Mastery,1,100.0,0
+Cyno,PASSIVE,Endseer First Delay Frames,1,328.0,0
+Cyno,PASSIVE,Endseer Interval Frames,1,234.0,0
+Cyno,PASSIVE,Endseer Duration Frames,1,84.0,0
+Cyno,PASSIVE,A1 Skill DMG Bonus,1,0.35,0
+Cyno,PASSIVE,Duststalker Bolt ATK Ratio,1,1.0,0
+Cyno,PASSIVE,A4 Pactsworn Normal EM Ratio,1,1.5,0
+Cyno,PASSIVE,A4 Duststalker Bolt EM Ratio,1,2.5,0
+Cyno,PASSIVE,C1 Normal Attack Speed,1,0.20,0
+Cyno,PASSIVE,C1 Duration,1,10.0,0
+Cyno,PASSIVE,C2 Electro DMG Per Stack,2,0.10,0
+Cyno,PASSIVE,C2 Max Stacks,2,5.0,0
+Cyno,PASSIVE,C2 Duration,2,4.0,0
+Cyno,PASSIVE,C2 Trigger Cooldown,2,0.10,0
+Cyno,PASSIVE,C4 Team Energy,4,3.0,0
+Cyno,PASSIVE,C4 Max Triggers,4,5.0,0
+Cyno,PASSIVE,C6 Stacks Per Activation,6,4.0,0
+Cyno,PASSIVE,C6 Max Stacks,6,8.0,0
+Cyno,PASSIVE,C6 Duration,6,8.0,0
+Cyno,PASSIVE,C6 Trigger Cooldown,6,0.40,0

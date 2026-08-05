@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Faruzan,STATS,Base HP,90,9570,0
+Faruzan,STATS,Base ATK,90,196,0
+Faruzan,STATS,Base DEF,90,628,0
+Faruzan,STATS,Ascension ATK Percent,90,0.24,0
+Faruzan,STATS,Energy Cost,90,80,0
+Faruzan,STATS,Constellation,6,6,0
+Faruzan,CONFIG,Character Level,90,90,0
+Faruzan,CONFIG,Normal Level,9,9,0
+Faruzan,CONFIG,Skill Level,12,12,0
+Faruzan,CONFIG,Burst Level,12,12,0

@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Yun Jin,STATS,Base HP,90,10657,0
+Yun Jin,STATS,Base ATK,90,191,0
+Yun Jin,STATS,Base DEF,90,734,0
+Yun Jin,STATS,Ascension Energy Recharge,90,0.2667,0
+Yun Jin,STATS,Energy Cost,90,60,0
+Yun Jin,STATS,Constellation,6,6,0
+Yun Jin,CONFIG,Character Level,90,90,0
+Yun Jin,CONFIG,Normal Level,9,9,0
+Yun Jin,CONFIG,Skill Level,12,12,0
+Yun Jin,CONFIG,Burst Level,12,12,0

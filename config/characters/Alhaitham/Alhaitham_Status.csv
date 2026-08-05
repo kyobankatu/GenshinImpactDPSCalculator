@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Alhaitham,STATS,Base HP,90,13348,0
+Alhaitham,STATS,Base ATK,90,313,0
+Alhaitham,STATS,Base DEF,90,782,0
+Alhaitham,STATS,Ascension Dendro DMG Bonus,90,0.288,0
+Alhaitham,STATS,Energy Cost,90,70,0
+Alhaitham,STATS,Constellation,6,6,0
+Alhaitham,CONFIG,Character Level,90,90,0
+Alhaitham,CONFIG,Normal Level,9,9,0
+Alhaitham,CONFIG,Skill Level,12,12,0
+Alhaitham,CONFIG,Burst Level,12,12,0

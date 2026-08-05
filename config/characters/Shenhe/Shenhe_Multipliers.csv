@@ -1,0 +1,29 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Shenhe,NORMAL,N1,9,0.79474,0
+Shenhe,NORMAL,N2,9,0.73944,0
+Shenhe,NORMAL,N3,9,0.9796,0
+Shenhe,NORMAL,N4-1,9,0.48348,0
+Shenhe,NORMAL,N4-2,9,0.48348,0
+Shenhe,NORMAL,N5,9,1.20554,0
+Shenhe,CHARGED,Charged,9,2.033302,0
+Shenhe,SKILL,Press,9,2.3664,0
+Shenhe,SKILL,Press C3,12,2.784,0
+Shenhe,SKILL,Hold,9,3.2096,0
+Shenhe,SKILL,Hold C3,12,3.776,0
+Shenhe,SKILL,Quill ATK Ratio,9,0.776152,0
+Shenhe,SKILL,Quill ATK Ratio C3,12,0.91312,0
+Shenhe,BURST,Burst Initial,9,1.7136,0
+Shenhe,BURST,Burst Initial C5,12,2.016,0
+Shenhe,BURST,Burst DoT,9,0.56304,0
+Shenhe,BURST,Burst DoT C5,12,0.6624,0
+Shenhe,BURST,RES Shred,9,0.14,0
+Shenhe,BURST,RES Shred C5,12,0.15,0
+Shenhe,PASSIVE,A1 Cryo DMG Bonus,1,0.15,0
+Shenhe,PASSIVE,A4 Press Skill Burst DMG Bonus,1,0.15,0
+Shenhe,PASSIVE,A4 Hold Normal Charged Plunge DMG Bonus,1,0.15,0
+Shenhe,PASSIVE,C2 Burst Duration Extension,2,6.0,0
+Shenhe,PASSIVE,C2 Cryo CRIT DMG,2,0.15,0
+Shenhe,PASSIVE,C4 Skill DMG Bonus Per Stack,4,0.05,0
+Shenhe,PASSIVE,C4 Max Stacks,4,50,0
+Shenhe,PASSIVE,C4 Stack Duration,4,60.0,0
+Shenhe,PASSIVE,C6 Normal Charged Quill Quota Cost,6,0,0

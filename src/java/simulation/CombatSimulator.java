@@ -594,6 +594,12 @@ public class CombatSimulator {
         eventDispatcher.addIndirectDamageListener(listener);
     }
 
+    /** Adds an observer for accepted indirect damage with a known element. */
+    public void addElementalIndirectDamageListener(
+            ElementalIndirectDamageListener listener) {
+        eventDispatcher.addElementalIndirectDamageListener(listener);
+    }
+
     /**
      * Dispatches one resolved direct-damage event.
      *
@@ -608,6 +614,15 @@ public class CombatSimulator {
     /** Dispatches one resolved indirect-damage event. */
     public void notifyIndirectDamage(Character owner, double damage) {
         eventDispatcher.notifyIndirectDamage(owner, damage, getCurrentTime());
+    }
+
+    /** Dispatches accepted indirect damage to typed elemental observers. */
+    public void notifyElementalIndirectDamage(
+            Character owner,
+            model.type.Element element,
+            double damage) {
+        eventDispatcher.notifyElementalIndirectDamage(
+                owner, element, damage, getCurrentTime());
     }
 
     /**

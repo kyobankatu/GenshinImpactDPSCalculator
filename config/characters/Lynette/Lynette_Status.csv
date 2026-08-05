@@ -1,0 +1,14 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Lynette,PASSIVE,Base HP,1,12397,0
+Lynette,PASSIVE,Base ATK,1,232,0
+Lynette,PASSIVE,Base DEF,1,712,0
+Lynette,PASSIVE,Ascension Anemo DMG,1,0.24,0
+Lynette,PASSIVE,Energy Cost,1,70,0
+Lynette,PASSIVE,Skill Cooldown,1,12,0
+Lynette,PASSIVE,Burst Cooldown,1,18,0
+Lynette,PASSIVE,A1 Base ATK,1,0.08,0
+Lynette,PASSIVE,A1 ATK Per Extra Element,1,0.04,0
+Lynette,PASSIVE,A1 Duration,1,10,0
+Lynette,PASSIVE,C6 Anemo DMG,1,0.20,0
+Lynette,PASSIVE,C6 Duration,1,6.4,0
+Lynette,PASSIVE,Arkhe Cooldown,1,10,0

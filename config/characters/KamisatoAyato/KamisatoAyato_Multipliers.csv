@@ -1,0 +1,43 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Kamisato Ayato,NORMAL,N1,9,0.826040,0
+Kamisato Ayato,NORMAL,N2,9,0.866377,0
+Kamisato Ayato,NORMAL,N3,9,1.076833,0
+Kamisato Ayato,NORMAL,N4-1,9,0.541031,0
+Kamisato Ayato,NORMAL,N4-2,9,0.541031,0
+Kamisato Ayato,NORMAL,N5,9,1.389010,0
+Kamisato Ayato,CHARGED,Charged Attack,9,2.379731,0
+Kamisato Ayato,PLUNGE,High Plunge,9,2.933586,0
+Kamisato Ayato,SKILL,Shunsuiken N1,9,0.9717,0
+Kamisato Ayato,SKILL,Shunsuiken N2,9,1.0823,0
+Kamisato Ayato,SKILL,Shunsuiken N3,9,1.1929,0
+Kamisato Ayato,SKILL,Namisen Per Stack,9,0.010308,0
+Kamisato Ayato,SKILL,Water Illusion,9,1.8644,0
+Kamisato Ayato,SKILL,Shunsuiken N1 C3,12,1.1931,0
+Kamisato Ayato,SKILL,Shunsuiken N2 C3,12,1.3289,0
+Kamisato Ayato,SKILL,Shunsuiken N3 C3,12,1.4647,0
+Kamisato Ayato,SKILL,Namisen Per Stack C3,12,0.012657,0
+Kamisato Ayato,SKILL,Water Illusion C3,12,2.2892,0
+Kamisato Ayato,BURST,Bloomwater Blade,9,1.129752,0
+Kamisato Ayato,BURST,Normal DMG Bonus,9,0.19,0
+Kamisato Ayato,BURST,Bloomwater Blade C5,12,1.32912,0
+Kamisato Ayato,BURST,Normal DMG Bonus C5,12,0.20,0
+Kamisato Ayato,PASSIVE,Skill Duration,1,6,0
+Kamisato Ayato,PASSIVE,Skill Cooldown,1,12,0
+Kamisato Ayato,PASSIVE,Illusion Hit Frames,1,35,0
+Kamisato Ayato,PASSIVE,Shunsuiken Hit Frames,1,5,0
+Kamisato Ayato,PASSIVE,Shunsuiken Duration Frames,1,23,0
+Kamisato Ayato,PASSIVE,Particle Cooldown,1,1.9,0
+Kamisato Ayato,PASSIVE,Particle Travel Frames,1,80,0
+Kamisato Ayato,PASSIVE,Burst Snapshot Frames,1,101,0
+Kamisato Ayato,PASSIVE,Burst First Impact Frames,1,139,0
+Kamisato Ayato,PASSIVE,Burst Impact Interval Frames,1,90,0
+Kamisato Ayato,PASSIVE,Burst Hit Count,1,12,0
+Kamisato Ayato,PASSIVE,Burst Duration,1,18,0
+Kamisato Ayato,PASSIVE,A4 Energy Threshold,1,40,0
+Kamisato Ayato,PASSIVE,A4 Energy,1,2,0
+Kamisato Ayato,PASSIVE,C1 Low HP Normal DMG Bonus,1,0.40,0
+Kamisato Ayato,PASSIVE,C2 Maximum Stacks,2,5,0
+Kamisato Ayato,PASSIVE,C2 HP Bonus,2,0.50,0
+Kamisato Ayato,PASSIVE,C4 Normal Attack Speed,4,0.15,0
+Kamisato Ayato,PASSIVE,C4 Duration,4,15,0
+Kamisato Ayato,PASSIVE,C6 Multiplier,6,4.5,0

@@ -1,0 +1,65 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Aloy,NORMAL,N1-1,9,0.3552,0
+Aloy,NORMAL,N1-2,9,0.3996,0
+Aloy,NORMAL,N2,9,0.7252,0
+Aloy,NORMAL,N3,9,0.888,0
+Aloy,NORMAL,N4,9,1.10408,0
+Aloy,CHARGED,Aimed Shot,9,0.8058,0
+Aloy,CHARGED,Fully Charged Aimed Shot,9,2.108,0
+Aloy,SKILL,Freeze Bomb,9,3.0192,0
+Aloy,SKILL,Chillwater Bomblet,9,0.68,0
+Aloy,SKILL,ATK Decrease,9,0.14,0
+Aloy,SKILL,Coil Stack 1 Normal Attack DMG Bonus,9,0.09065,0
+Aloy,SKILL,Coil Stack 2 Normal Attack DMG Bonus,9,0.1813,0
+Aloy,SKILL,Coil Stack 3 Normal Attack DMG Bonus,9,0.27195,0
+Aloy,SKILL,Rushing Ice Normal Attack DMG Bonus,9,0.45325,0
+Aloy,BURST,Prophecies of Dawn,9,6.1064,0
+Aloy,PASSIVE,N1 First Release Frame,1,11,0
+Aloy,PASSIVE,N1 Second Release Frame,1,24,0
+Aloy,PASSIVE,N1 Recovery Frames,1,31,0
+Aloy,PASSIVE,N2 Release Frame,1,16,0
+Aloy,PASSIVE,N2 Recovery Frames,1,28,0
+Aloy,PASSIVE,N3 Release Frame,1,23,0
+Aloy,PASSIVE,N3 Recovery Frames,1,38,0
+Aloy,PASSIVE,N4 Release Frame,1,30,0
+Aloy,PASSIVE,N4 Recovery Frames,1,61,0
+Aloy,PASSIVE,Normal Projectile Travel Frames,1,10,0
+Aloy,PASSIVE,Aimed Shot Release Frame,1,15,0
+Aloy,PASSIVE,Aimed Shot Recovery Frames,1,25,0
+Aloy,PASSIVE,Fully Charged Aimed Shot Release Frame,1,86,0
+Aloy,PASSIVE,Fully Charged Aimed Shot Recovery Frames,1,96,0
+Aloy,PASSIVE,Aimed Shot Projectile Travel Frames,1,10,0
+Aloy,PASSIVE,Fully Charged Aimed Shot Gauge Units,1,1,0
+Aloy,PASSIVE,Skill Snapshot Frame,1,0,0
+Aloy,PASSIVE,Bomblet Snapshot Frame,1,0,0
+Aloy,PASSIVE,Skill Release Frame,1,20,0
+Aloy,PASSIVE,Skill Projectile Travel Frames,1,4,0
+Aloy,PASSIVE,Skill Impact Frame,1,24,0
+Aloy,PASSIVE,Skill Recovery Frames,1,70,0
+Aloy,PASSIVE,Skill Cooldown Start Frame,1,19,0
+Aloy,PASSIVE,Skill Cooldown,1,20.0,0
+Aloy,PASSIVE,Skill Gauge Units,1,1,0
+Aloy,PASSIVE,Skill Particles,1,5,0
+Aloy,PASSIVE,Fixed Bomblet Count,1,2,0
+Aloy,PASSIVE,First Bomblet Delay Frames,1,6,0
+Aloy,PASSIVE,Bomblet Interval Frames,1,6,0
+Aloy,PASSIVE,Bomblet Gauge Units,1,1,0
+Aloy,PASSIVE,Coil Gain Cooldown,1,0.1,0
+Aloy,PASSIVE,Coil Maximum Stacks,1,4,0
+Aloy,PASSIVE,Coil Field Exit Clear Delay,1,30.0,0
+Aloy,PASSIVE,Rushing Ice Duration,1,10.0,0
+Aloy,PASSIVE,Enemy ATK Decrease Duration,1,6.0,0
+Aloy,PASSIVE,Burst Snapshot Frame,1,0,0
+Aloy,PASSIVE,Burst Hit Frame,1,100,0
+Aloy,PASSIVE,Burst Recovery Frames,1,117,0
+Aloy,PASSIVE,Burst Energy Consumption Frame,1,2,0
+Aloy,PASSIVE,Burst Cooldown,1,12.0,0
+Aloy,PASSIVE,Burst Gauge Units,1,2,0
+Aloy,PASSIVE,A1 Owner ATK Bonus,1,0.16,0
+Aloy,PASSIVE,A1 Team ATK Bonus,1,0.08,0
+Aloy,PASSIVE,A1 Duration,1,10.0,0
+Aloy,PASSIVE,A4 Cryo DMG Bonus Per Stack,1,0.035,0
+Aloy,PASSIVE,A4 Stack Interval,1,1.0,0
+Aloy,PASSIVE,A4 Maximum Stacks,1,10,0
+Aloy,PASSIVE,A4 Maximum Cryo DMG Bonus,1,0.35,0
+Aloy,PASSIVE,A4 Duration,1,10.0,0

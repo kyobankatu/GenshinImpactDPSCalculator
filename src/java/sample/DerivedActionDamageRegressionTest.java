@@ -23,6 +23,7 @@ public final class DerivedActionDamageRegressionTest {
     /** Runs formula ordering, routing, hit-boundary, and identity checks. */
     public static void main(String[] args) {
         testActionRoutingAndFormulaOrder();
+        testMaxHpNormalRouting();
         testLateMergedStatsAndAdditiveRatios();
         testTrueHitAndNegativeBoundaries();
         testReservedCharacterIdentities();
@@ -73,6 +74,24 @@ public final class DerivedActionDamageRegressionTest {
                 "merge preserves source EM");
         assertClose(0.10, base.get(StatType.DEF_TO_SKILL_FLAT_DMG_RATIO),
                 "merge preserves source ratio");
+    }
+
+    private static void testMaxHpNormalRouting() {
+        StatsContainer stats = new StatsContainer();
+        stats.set(StatType.BASE_ATK, 100.0);
+        stats.set(StatType.BASE_HP, 100.0);
+        stats.set(StatType.HP_PERCENT, 0.50);
+        stats.set(StatType.HP_FLAT, 50.0);
+        stats.set(StatType.MAX_HP_TO_NORMAL_FLAT_DMG_RATIO, 0.10);
+        assertClose(54.0,
+                calculate(stats, ActionType.NORMAL, 1.0, true, false),
+                "final Max HP Normal additive damage");
+        assertClose(45.0,
+                calculate(stats, ActionType.CHARGE, 1.0, true, false),
+                "Max HP ratio excludes Charged damage");
+        assertClose(45.0,
+                calculate(stats, ActionType.SKILL, 1.0, true, false),
+                "Max HP ratio excludes Skill damage");
     }
 
     private static void testTrueHitAndNegativeBoundaries() {

@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Freminet,STATS,Base HP,90,12071,0
+Freminet,STATS,Base ATK,90,255,0
+Freminet,STATS,Base DEF,90,708,0
+Freminet,STATS,Ascension ATK,90,0.24,0
+Freminet,STATS,Energy Cost,90,60,0
+Freminet,STATS,Constellation,6,6,0
+Freminet,CONFIG,Character Level,90,90,0
+Freminet,CONFIG,Normal Level,12,12,0
+Freminet,CONFIG,Skill Level,12,12,0
+Freminet,CONFIG,Burst Level,9,9,0

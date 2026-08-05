@@ -1,0 +1,40 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Freminet,NORMAL,N1,9,1.547626,0
+Freminet,NORMAL,N2,9,1.482182,0
+Freminet,NORMAL,N3,9,1.872189,0
+Freminet,NORMAL,N4,9,2.274552,0
+Freminet,NORMAL,N1 C3,12,1.900249,0
+Freminet,NORMAL,N2 C3,12,1.819895,0
+Freminet,NORMAL,N3 C3,12,2.298764,0
+Freminet,NORMAL,N4 C3,12,2.792805,0
+Freminet,PLUNGE,Collision,9,1.370334,0
+Freminet,PLUNGE,Low Plunge,9,2.740087,0
+Freminet,PLUNGE,High Plunge,9,3.422517,0
+Freminet,PLUNGE,Collision C3,12,1.682562,0
+Freminet,PLUNGE,Low Plunge C3,12,3.364411,0
+Freminet,PLUNGE,High Plunge C3,12,4.202331,0
+Freminet,SKILL,Upward Thrust,9,1.411680,0
+Freminet,SKILL,Spiritbreath Thorn,9,0.244800,0
+Freminet,SKILL,Frost,9,0.121720,0
+Freminet,SKILL,Pressure Cryo Level 0,9,3.408160,0
+Freminet,SKILL,Pressure Cryo Level 1,9,1.704080,0
+Freminet,SKILL,Pressure Cryo Level 2,9,1.192856,0
+Freminet,SKILL,Pressure Cryo Level 3,9,0.681632,0
+Freminet,SKILL,Pressure Physical Level 1,9,0.827696,0
+Freminet,SKILL,Pressure Physical Level 2,9,1.448468,0
+Freminet,SKILL,Pressure Physical Level 3,9,2.069240,0
+Freminet,SKILL,Pressure Physical Level 4,9,4.138480,0
+Freminet,SKILL,Upward Thrust C5,12,1.660800,0
+Freminet,SKILL,Spiritbreath Thorn C5,12,0.288000,0
+Freminet,SKILL,Frost C5,12,0.143200,0
+Freminet,SKILL,Pressure Cryo Level 0 C5,12,4.009600,0
+Freminet,SKILL,Pressure Cryo Level 1 C5,12,2.004800,0
+Freminet,SKILL,Pressure Cryo Level 2 C5,12,1.403360,0
+Freminet,SKILL,Pressure Cryo Level 3 C5,12,0.801920,0
+Freminet,SKILL,Pressure Physical Level 1 C5,12,0.973760,0
+Freminet,SKILL,Pressure Physical Level 2 C5,12,1.704080,0
+Freminet,SKILL,Pressure Physical Level 3 C5,12,2.434400,0
+Freminet,SKILL,Pressure Physical Level 4 C5,12,4.868800,0
+Freminet,BURST,Shadowhunter's Ambush,9,5.412800,0
+Freminet,PASSIVE,Skill Cooldown,1,10,0
+Freminet,PASSIVE,Burst Cooldown,1,15,0

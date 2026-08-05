@@ -1,0 +1,24 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Shikanoin Heizou,NORMAL,N1,9,0.637051,0
+Shikanoin Heizou,NORMAL,N2,9,0.626484,0
+Shikanoin Heizou,NORMAL,N3,9,0.868020,0
+Shikanoin Heizou,NORMAL,N4-1,9,0.251301,0
+Shikanoin Heizou,NORMAL,N4-2,9,0.276434,0
+Shikanoin Heizou,NORMAL,N4-3,9,0.326699,0
+Shikanoin Heizou,NORMAL,N5,9,1.044643,0
+Shikanoin Heizou,CHARGED,Charged Attack,9,1.241000,0
+Shikanoin Heizou,PLUNGE,Collision,9,1.044064,0
+Shikanoin Heizou,PLUNGE,Low Plunge,9,2.087686,0
+Shikanoin Heizou,PLUNGE,High Plunge,9,2.607632,0
+Shikanoin Heizou,SKILL,Skill,9,3.867840,0
+Shikanoin Heizou,SKILL,Declension Per Stack,9,0.966960,0
+Shikanoin Heizou,SKILL,Conviction Bonus,9,1.933920,0
+Shikanoin Heizou,SKILL,Skill C3,12,4.550400,0
+Shikanoin Heizou,SKILL,Declension Per Stack C3,12,1.137600,0
+Shikanoin Heizou,SKILL,Conviction Bonus C3,12,2.275200,0
+Shikanoin Heizou,BURST,Windmuster Kick,9,5.349696,0
+Shikanoin Heizou,BURST,Windmuster Iris,9,0.364752,0
+Shikanoin Heizou,BURST,Windmuster Kick C5,12,6.293760,0
+Shikanoin Heizou,BURST,Windmuster Iris C5,12,0.429120,0
+Shikanoin Heizou,PASSIVE,Skill Cooldown,1,10,0
+Shikanoin Heizou,PASSIVE,Burst Cooldown,1,12,0

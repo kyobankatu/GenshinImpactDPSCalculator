@@ -355,9 +355,17 @@ public class CombatActionResolver {
         }
         if ((trigger == Element.HYDRO && aura == Element.DENDRO)
                 || (trigger == Element.DENDRO && aura == Element.HYDRO)) {
-            return stats.get(StatType.BLOOM_DMG_BONUS);
+            return getBloomReactionBonus(stats);
         }
         return 0.0;
+    }
+
+    /** Selects the bonus for the result that the current party will produce. */
+    private double getBloomReactionBonus(StatsContainer stats) {
+        StatType bonusType = sim.hasLunarReactionConversion()
+                ? StatType.LUNAR_BLOOM_DMG_BONUS
+                : StatType.BLOOM_DMG_BONUS;
+        return stats.get(bonusType);
     }
 
     /** Returns whether two elements match an unordered reaction pair. */
@@ -564,6 +572,8 @@ public class CombatActionResolver {
         }
 
         sim.recordDamage(characterId, triggerDmg);
+        sim.notifyElementalIndirectDamage(
+                attacker, reactionElement, triggerDmg);
         if (sim.isLoggingEnabled()) {
             sim.getCombatLogSink().log(
                     sim.getCurrentTime(), attacker.getName(), reactionLabel, triggerDmg,
@@ -663,7 +673,7 @@ public class CombatActionResolver {
                 Element.DENDRO,
                 stats.get(StatType.ELEMENTAL_MASTERY),
                 90,
-                stats.get(StatType.BLOOM_DMG_BONUS));
+                getBloomReactionBonus(stats));
         result = convertToLunarIfEligible(result);
         sim.notifyReaction(result, attacker);
         handleBloomReaction(

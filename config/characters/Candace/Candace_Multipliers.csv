@@ -1,0 +1,16 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Candace,NORMAL,N1,9,1.117060,0
+Candace,NORMAL,N2,9,1.123380,0
+Candace,NORMAL,N3 Hit 1,9,0.651987,0
+Candace,NORMAL,N3 Hit 2,9,0.796873,0
+Candace,NORMAL,N4,9,1.744320,0
+Candace,CHARGED,Charged Attack,9,2.281520,0
+Candace,PLUNGE,High Plunge,9,2.933586,0
+Candace,SKILL,Heron's Sanctum Press,9,0.204000,0
+Candace,SKILL,Heron's Sanctum Hold,9,0.323680,0
+Candace,SKILL,Heron's Sanctum Press C5,12,0.240000,0
+Candace,SKILL,Heron's Sanctum Hold C5,12,0.380800,0
+Candace,BURST,Wagtail Initial,9,0.112377,0
+Candace,BURST,Wagtail Wave,9,0.112377,0
+Candace,BURST,Wagtail Initial C3,12,0.132208,0
+Candace,BURST,Wagtail Wave C3,12,0.132208,0

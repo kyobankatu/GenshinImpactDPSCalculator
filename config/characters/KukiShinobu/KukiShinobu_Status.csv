@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Kuki Shinobu,STATS,Base HP,90,12289,0
+Kuki Shinobu,STATS,Base ATK,90,212,0
+Kuki Shinobu,STATS,Base DEF,90,751,0
+Kuki Shinobu,STATS,Ascension HP Percent,90,0.24,0
+Kuki Shinobu,STATS,Energy Cost,90,60,0
+Kuki Shinobu,STATS,Constellation,6,6,0
+Kuki Shinobu,CONFIG,Character Level,90,90,0
+Kuki Shinobu,CONFIG,Normal Level,9,9,0
+Kuki Shinobu,CONFIG,Skill Level,12,12,0
+Kuki Shinobu,CONFIG,Burst Level,12,12,0

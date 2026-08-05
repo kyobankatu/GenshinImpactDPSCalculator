@@ -14,6 +14,7 @@ import mechanics.buff.Buff;
 import mechanics.buff.BuffId;
 import mechanics.buff.SimpleBuff;
 import mechanics.element.ResonanceManager;
+import mechanics.element.ICDManager;
 import mechanics.energy.EnergyManager;
 import mechanics.energy.ParticleType;
 import mechanics.formula.DamageCalculator;
@@ -78,6 +79,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseB_StandardIcdTimeRule();
         testAccuracyPhaseB_NoIcdAppliesEveryHit();
         testAccuracyPhaseB_SharedIcdBlocksRelatedHits();
+        testAccuracyPhaseB_AlhaithamCustomIcdRules();
         testAccuracyPhaseB_DamageStillOccursWhenApplicationBlocked();
         testAccuracyPhaseB_IcdLoggingMatchesApplicationDecision();
         testAccuracyPhaseC_CoreOverflowExplodesOldest();
@@ -2605,8 +2607,27 @@ public class ReactionRegressionTest {
 
         sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
                 standardIcdHit("Standard ICD hit 3", Element.PYRO, ICDTag.ElementalSkill, 0.0));
+        assertClose(0.0, sim.getEnemy().getAuraUnits(Element.PYRO), EPS,
+                "Third quick same-group hit should remain ICD-blocked");
+
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                standardIcdHit("Standard ICD hit 4", Element.PYRO, ICDTag.ElementalSkill, 0.0));
         assertClose(0.8, sim.getEnemy().getAuraUnits(Element.PYRO), EPS,
-                "Third quick same-group hit should apply by the 3-hit ICD rule");
+                "Fourth same-group hit should apply after three suppressed hits");
+
+        sim.getEnemy().setAura(Element.PYRO, 0.0);
+        sim.advanceTime(2.49);
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                standardIcdHit("Standard ICD hit 5", Element.PYRO,
+                        ICDTag.ElementalSkill, 0.0));
+        assertClose(0.0, sim.getEnemy().getAuraUnits(Element.PYRO), EPS,
+                "Hit-count application should reset the time gate");
+        sim.advanceTime(0.01);
+        sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
+                standardIcdHit("Standard ICD hit 6", Element.PYRO,
+                        ICDTag.ElementalSkill, 0.0));
+        assertClose(0.8, sim.getEnemy().getAuraUnits(Element.PYRO), EPS,
+                "Time gate should reopen 2.5s after hit-count application");
     }
 
     private static void testAccuracyPhaseB_StandardIcdTimeRule() {
@@ -2653,6 +2674,54 @@ public class ReactionRegressionTest {
                 "Different action names in the same ICD group should share the block");
         assertTrue(sim.getTotalDamage() > afterFirst,
                 "ICD-blocked related action should still deal direct damage");
+    }
+
+    private static void testAccuracyPhaseB_AlhaithamCustomIcdRules() {
+        ICDManager manager = new ICDManager();
+        assertTrue(manager.checkApplication(
+                "Alhaitham",
+                ICDTag.Alhaitham_Projection,
+                ICDType.AlhaithamProjection,
+                0.0),
+                "Alhaitham first Projection hit should apply");
+        assertTrue(!manager.checkApplication(
+                "Alhaitham",
+                ICDTag.Alhaitham_Projection,
+                ICDType.AlhaithamProjection,
+                0.1),
+                "Alhaitham second Projection hit should be blocked");
+        assertTrue(manager.checkApplication(
+                "Alhaitham",
+                ICDTag.Alhaitham_Projection,
+                ICDType.AlhaithamProjection,
+                0.2),
+                "Alhaitham third Projection hit should pass hit-count rule");
+        assertTrue(manager.checkApplication(
+                "Alhaitham",
+                ICDTag.Alhaitham_Charged,
+                ICDType.AlhaithamCharged,
+                0.2),
+                "Alhaitham Charged tag should remain independent");
+        for (int hit = 0; hit < 4; hit++) {
+            assertTrue(!manager.checkApplication(
+                    "Alhaitham",
+                    ICDTag.Alhaitham_Charged,
+                    ICDType.AlhaithamCharged,
+                    2.2 - EPS),
+                    "Alhaitham Charged hit count must not bypass time gate");
+        }
+        assertTrue(manager.checkApplication(
+                "Alhaitham",
+                ICDTag.Alhaitham_Charged,
+                ICDType.AlhaithamCharged,
+                2.2),
+                "Alhaitham Charged should apply at exact two-second boundary");
+        assertTrue(manager.checkApplication(
+                "Alhaitham",
+                ICDTag.Alhaitham_Projection,
+                ICDType.AlhaithamProjection,
+                12.2),
+                "Alhaitham Projection should apply after twelve seconds");
     }
 
     private static void testAccuracyPhaseB_DamageStillOccursWhenApplicationBlocked() {
@@ -22512,6 +22581,9 @@ public class ReactionRegressionTest {
         burstSim.getEnemy().setAura(Element.PYRO, 4.0, burstSim.getCurrentTime());
         captureStandardOutput(() -> burstSim.performAction(CharacterId.RAIDEN_SHOGUN,
                 CharacterActionRequest.of(CharacterActionKey.CHARGE)));
+        burstSim.getEnemy().setAura(Element.PYRO, 4.0, burstSim.getCurrentTime());
+        captureStandardOutput(() -> burstSim.performAction(CharacterId.RAIDEN_SHOGUN,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL)));
 
         AttackAction burstNormal = findAction(burstWeapon.actions, "Raiden Burst N1");
         AttackAction burstChargeFirst = findAction(
@@ -22531,7 +22603,7 @@ public class ReactionRegressionTest {
         assertEquals(ICDType.Standard, burstChargeSecond.getICDType(),
                 "Raiden Burst Charged second hit should use standard ICD");
         assertEquals(2, countReactions(burstKinds, ReactionResult.Kind.OVERLOAD),
-                "Raiden N1 plus two Charged hits should satisfy shared third-hit ICD");
+                "Raiden N1, two Charged hits, and N2 should satisfy shared ICD");
 
         RecordingDamageWeapon physicalWeapon = new RecordingDamageWeapon("Raiden ");
         model.character.RaidenShogun physicalRaiden = new model.character.RaidenShogun(

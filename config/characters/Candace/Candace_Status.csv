@@ -1,0 +1,17 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Candace,PASSIVE,Base HP,1,10875,0
+Candace,PASSIVE,Base ATK,1,212,0
+Candace,PASSIVE,Base DEF,1,682,0
+Candace,PASSIVE,Ascension HP,1,0.24,0
+Candace,PASSIVE,Energy Cost,1,60,0
+Candace,PASSIVE,Skill Press Cooldown,1,6,0
+Candace,PASSIVE,Skill Hold Cooldown,1,9,0
+Candace,PASSIVE,Burst Cooldown,1,15,0
+Candace,PASSIVE,Burst Duration,1,9,0
+Candace,PASSIVE,Burst Duration C1,1,12,0
+Candace,PASSIVE,Base Normal DMG Bonus,1,0.20,0
+Candace,PASSIVE,A4 Bonus Per 1000 HP,1,0.005,0
+Candace,PASSIVE,C2 Max HP,1,0.20,0
+Candace,PASSIVE,C2 Duration,1,15,0
+Candace,PASSIVE,C6 Wave,1,0.15,0
+Candace,PASSIVE,C6 Cooldown,1,2.3,0

@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Kaedehara Kazuha,STATS,Base HP,90,13348,0
+Kaedehara Kazuha,STATS,Base ATK,90,297,0
+Kaedehara Kazuha,STATS,Base DEF,90,807,0
+Kaedehara Kazuha,STATS,Ascension Elemental Mastery,90,115,0
+Kaedehara Kazuha,STATS,Energy Cost,90,60,0
+Kaedehara Kazuha,STATS,Constellation,6,6,0
+Kaedehara Kazuha,CONFIG,Character Level,90,90,0
+Kaedehara Kazuha,CONFIG,Normal Level,9,9,0
+Kaedehara Kazuha,CONFIG,Skill Level,12,12,0
+Kaedehara Kazuha,CONFIG,Burst Level,12,12,0

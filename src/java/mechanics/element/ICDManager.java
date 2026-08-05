@@ -28,8 +28,8 @@ public class ICDManager {
      * Mutable ICD tracking state for one (character, tag) group.
      */
     private static class ICDState {
-        /** Simulation time of the last successful element application. Initialised to {@code -10.0} to allow immediate first application. */
-        double lastAppTime = -10.0;
+        /** Last successful application; negative infinity admits every first hit. */
+        double lastAppTime = Double.NEGATIVE_INFINITY;
 
         /** Number of hits counted since the last successful element application. */
         int hitCount = 0;
@@ -81,6 +81,12 @@ public class ICDManager {
      *       suppressed hits.</li>
      *   <li>{@link ICDType#YelanBreakthrough} – applies after 0.3 seconds or
      *       four suppressed hits.</li>
+     *   <li>{@link ICDType#TighnariClusterbloom} – applies after 2.5 seconds
+     *       or four suppressed hits.</li>
+     *   <li>{@link ICDType#AlhaithamProjection} – applies after 12 seconds
+     *       or two suppressed hits.</li>
+     *   <li>{@link ICDType#AlhaithamCharged} – applies after two seconds;
+     *       hit count never bypasses the time gate.</li>
      * </ul>
      *
      * <p>{@code null} values for {@code type} or {@code tag} are silently
@@ -121,11 +127,11 @@ public class ICDManager {
                 apply = true;
                 state.lastAppTime = currentTime;
                 state.hitCount = 0;
-                state.hitCount++;
             } else {
                 state.hitCount++;
                 if (state.hitCount >= 3) {
                     apply = true;
+                    state.lastAppTime = currentTime;
                     state.hitCount = 0;
                 }
             }
@@ -133,6 +139,12 @@ public class ICDManager {
             apply = checkCustomApplication(state, currentTime, 2.0, 3);
         } else if (type == ICDType.YelanBreakthrough) {
             apply = checkCustomApplication(state, currentTime, 0.3, 4);
+        } else if (type == ICDType.TighnariClusterbloom) {
+            apply = checkCustomApplication(state, currentTime, 2.5, 4);
+        } else if (type == ICDType.AlhaithamProjection) {
+            apply = checkCustomApplication(state, currentTime, 12.0, 2);
+        } else if (type == ICDType.AlhaithamCharged) {
+            apply = checkTimeOnlyApplication(state, currentTime, 2.0);
         }
 
         return apply;
@@ -155,5 +167,17 @@ public class ICDManager {
             return true;
         }
         return false;
+    }
+
+    private boolean checkTimeOnlyApplication(
+            ICDState state,
+            double currentTime,
+            double resetInterval) {
+        if (currentTime - state.lastAppTime + 1e-9 < resetInterval) {
+            return false;
+        }
+        state.lastAppTime = currentTime;
+        state.hitCount = 0;
+        return true;
     }
 }

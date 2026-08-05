@@ -1,0 +1,35 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Tighnari,NORMAL,N1,9,0.82002,0
+Tighnari,NORMAL,N2,9,0.77104,0
+Tighnari,NORMAL,N3-1,9,0.48585,0
+Tighnari,NORMAL,N3-2,9,0.48585,0
+Tighnari,NORMAL,N4,9,1.26084,0
+Tighnari,CHARGED,Aimed Shot,9,0.8058,0
+Tighnari,CHARGED,Fully Charged,9,2.108,0
+Tighnari,CHARGED,Wreath Arrow,9,1.4824,0
+Tighnari,CHARGED,Clusterbloom Arrow,9,0.6562,0
+Tighnari,CHARGED,C6 Additional Clusterbloom Arrow,6,1.5,0
+Tighnari,PLUNGE,High Plunge,9,2.607632,0
+Tighnari,SKILL,Skill,9,2.5432,0
+Tighnari,SKILL,Skill C5,12,2.992,0
+Tighnari,BURST,Tanglevine Shaft,9,0.94554,0
+Tighnari,BURST,Tanglevine Shaft C3,12,1.1124,0
+Tighnari,BURST,Secondary Tanglevine Shaft,9,1.15566,0
+Tighnari,BURST,Secondary Tanglevine Shaft C3,12,1.3596,0
+Tighnari,PASSIVE,Skill Field Duration,1,8.0,0
+Tighnari,PASSIVE,Vijnana Suffusion Duration,1,12.0,0
+Tighnari,PASSIVE,Vijnana Suffusion Charge Time Reduction,1,2.4,0
+Tighnari,PASSIVE,Vijnana Suffusion Wreath Arrow Count,1,3,0
+Tighnari,PASSIVE,Skill Expected Particles,1,3.5,0
+Tighnari,PASSIVE,A1 Elemental Mastery,1,50,0
+Tighnari,PASSIVE,A1 Duration,1,4.0,0
+Tighnari,PASSIVE,A4 EM DMG Bonus Ratio,1,0.0006,0
+Tighnari,PASSIVE,A4 Max DMG Bonus,1,0.60,0
+Tighnari,PASSIVE,C1 Charged CRIT Rate,1,0.15,0
+Tighnari,PASSIVE,C2 Dendro DMG Bonus,2,0.20,0
+Tighnari,PASSIVE,C2 Linger Duration,2,6.0,0
+Tighnari,PASSIVE,C4 Base Elemental Mastery,4,60,0
+Tighnari,PASSIVE,C4 Reaction Additional Elemental Mastery,4,60,0
+Tighnari,PASSIVE,C4 Duration,4,8.0,0
+Tighnari,PASSIVE,C6 Wreath Charge Time Reduction,6,0.9,0
+Tighnari,PASSIVE,C6 Additional Clusterbloom Arrow Count,6,1,0

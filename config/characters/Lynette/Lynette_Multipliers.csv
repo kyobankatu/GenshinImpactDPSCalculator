@@ -1,0 +1,17 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Lynette,NORMAL,N1,9,0.791501,0
+Lynette,NORMAL,N2,9,0.691013,0
+Lynette,NORMAL,N3 Hit 1,9,0.511920,0
+Lynette,NORMAL,N3 Hit 2,9,0.396706,0
+Lynette,NORMAL,N4,9,1.160273,0
+Lynette,CHARGED,Charged Hit 1,9,0.812120,0
+Lynette,CHARGED,Charged Hit 2,9,1.128120,0
+Lynette,PLUNGE,High Plunge,9,2.933586,0
+Lynette,SKILL,Enigma Thrust,9,4.556000,0
+Lynette,SKILL,Surging Blade,9,0.530400,0
+Lynette,SKILL,Enigma Thrust C5,12,5.360000,0
+Lynette,SKILL,Surging Blade C5,12,0.624000,0
+Lynette,BURST,Magic Trick Initial,9,1.414400,0
+Lynette,BURST,Bogglecat Box,9,0.870400,0
+Lynette,BURST,Magic Trick Initial C3,12,1.664000,0
+Lynette,BURST,Bogglecat Box C3,12,1.024000,0

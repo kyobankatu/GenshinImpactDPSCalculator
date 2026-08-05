@@ -318,6 +318,7 @@ public class ReactionEffectScheduler {
 
         sim.recordDamage(state.ownerId, finalDamage);
         sim.notifyIndirectDamage(owner, finalDamage);
+        sim.notifyElementalIndirectDamage(owner, Element.ELECTRO, finalDamage);
         sim.getCombatLogSink().log(
                 sim.getCurrentTime(), ownerName, label, finalDamage,
                 label, finalDamage, sim.getEnemy().getAuraMap(sim.getCurrentTime()));
@@ -334,6 +335,7 @@ public class ReactionEffectScheduler {
 
         sim.recordDamage("Thundercloud", finalDamage);
         sim.notifyIndirectDamage(null, finalDamage);
+        sim.notifyElementalIndirectDamage(null, Element.ELECTRO, finalDamage);
         sim.getCombatLogSink().log(
                 sim.getCurrentTime(), "Thundercloud", label, finalDamage,
                 label, finalDamage, sim.getEnemy().getAuraMap(sim.getCurrentTime()));
@@ -445,7 +447,9 @@ public class ReactionEffectScheduler {
             System.out.println(String.format("   [DoT] Burning Damage: %,.0f", tickDamage));
         }
         sim.recordDamage(state.ownerId, tickDamage);
-        sim.notifyIndirectDamage(sim.getCharacter(state.ownerId), tickDamage);
+        Character owner = sim.getCharacter(state.ownerId);
+        sim.notifyIndirectDamage(owner, tickDamage);
+        sim.notifyElementalIndirectDamage(owner, Element.PYRO, tickDamage);
         sim.getCombatLogSink().log(
                 sim.getCurrentTime(), state.ownerId.getDisplayName(), "Burning", tickDamage,
                 "Burning", tickDamage, sim.getEnemy().getAuraMap(sim.getCurrentTime()));
@@ -510,7 +514,9 @@ public class ReactionEffectScheduler {
             System.out.println(String.format("   [Reaction] %s Damage: %,.0f", label, damage));
         }
         sim.recordDamage(ownerId, damage);
-        sim.notifyIndirectDamage(sim.getCharacter(ownerId), damage);
+        Character owner = sim.getCharacter(ownerId);
+        sim.notifyIndirectDamage(owner, damage);
+        sim.notifyElementalIndirectDamage(owner, Element.DENDRO, damage);
         sim.getCombatLogSink().log(
                 sim.getCurrentTime(), ownerId.getDisplayName(), label, damage,
                 label, damage, sim.getEnemy().getAuraMap(sim.getCurrentTime()));
@@ -529,9 +535,6 @@ public class ReactionEffectScheduler {
             double uniqueBonus = stats.get(StatType.LUNAR_UNIQUE_BONUS)
                     + stats.get(reactionBonusStat)
                     + stats.get(StatType.LUNAR_REACTION_DMG_BONUS_ALL);
-            if (reactionBonusStat == StatType.LUNAR_CHARGED_DMG_BONUS) {
-                uniqueBonus += stats.get(StatType.ELECTRO_CHARGED_DMG_BONUS);
-            }
             double lunarMultiplier = 1.0 + stats.get(StatType.LUNAR_MULTIPLIER);
             double em = stats.get(StatType.ELEMENTAL_MASTERY);
             double emBonus = (2.78 * em) / (em + 1400.0);

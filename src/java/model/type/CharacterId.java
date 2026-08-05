@@ -87,6 +87,40 @@ public enum CharacterId {
     YELAN(36, "Yelan", CharacterRegion.LIYUE),
     /** Sayu (Anemo claymore driver and deployable attacker). */
     SAYU(37, "Sayu", CharacterRegion.INAZUMA),
+    /** Kujou Sara (Electro bow support). */
+    KUJOU_SARA(38, "Kujou Sara", CharacterRegion.INAZUMA),
+    /** Yun Jin (Geo polearm Normal Attack support). */
+    YUN_JIN(39, "Yun Jin", CharacterRegion.LIYUE),
+    /** Faruzan (Anemo bow support). */
+    FARUZAN(40, "Faruzan", CharacterRegion.SUMERU),
+    /** Shenhe (Cryo polearm Icy Quill support). */
+    SHENHE(41, "Shenhe", CharacterRegion.LIYUE),
+    /** Tighnari (Dendro bow Charged Attack DPS). */
+    TIGHNARI(42, "Tighnari", CharacterRegion.SUMERU),
+    /** Kaedehara Kazuha (Anemo sword Swirl support). */
+    KAEDEHARA_KAZUHA(43, "Kaedehara Kazuha", CharacterRegion.INAZUMA),
+    /** Aloy (Cryo bow Coil attacker; crossover region is unverified). */
+    ALOY(44, "Aloy", CharacterRegion.UNKNOWN),
+    /** Kuki Shinobu (Electro sword healer and reaction support). */
+    KUKI_SHINOBU(45, "Kuki Shinobu", CharacterRegion.INAZUMA),
+    /** Cyno (Electro polearm Pactsworn Pathclearer attacker). */
+    CYNO(46, "Cyno", CharacterRegion.SUMERU),
+    /** Alhaitham (Dendro sword Chisel-Light Mirror attacker). */
+    ALHAITHAM(47, "Alhaitham", CharacterRegion.SUMERU),
+    /** Kamisato Ayato (Hydro sword Namisen attacker). */
+    KAMISATO_AYATO(48, "Kamisato Ayato", CharacterRegion.INAZUMA),
+    /** Shikanoin Heizou (Anemo catalyst martial artist). */
+    SHIKANOIN_HEIZOU(49, "Shikanoin Heizou", CharacterRegion.INAZUMA),
+    /** Freminet (Cryo claymore Pressure attacker). */
+    FREMINET(50, "Freminet", CharacterRegion.FONTAINE),
+    /** Candace (Hydro polearm Normal Attack support). */
+    CANDACE(51, "Candace", CharacterRegion.SUMERU),
+    /** Lynette (Anemo sword Bogglecat attacker). */
+    LYNETTE(52, "Lynette", CharacterRegion.FONTAINE),
+    /** Mika (Cryo polearm physical support). */
+    MIKA(53, "Mika", CharacterRegion.MONDSTADT),
+    /** Charlotte (Cryo catalyst Kamera attacker). */
+    CHARLOTTE(54, "Charlotte", CharacterRegion.FONTAINE),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 

@@ -1,0 +1,18 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Charlotte,NORMAL,N1,9,0.847375,0
+Charlotte,NORMAL,N2,9,0.737378,0
+Charlotte,NORMAL,N3,9,1.098214,0
+Charlotte,CHARGE,Charged Attack,9,1.708704,0
+Charlotte,CHARGE,Spiritbreath Thorn,9,0.189856,0
+Charlotte,SKILL,Press Photo,9,1.142400,0
+Charlotte,SKILL,Hold Photo,9,2.366400,0
+Charlotte,SKILL,Snappy Mark,9,0.666400,0
+Charlotte,SKILL,Focused Mark,9,0.690200,0
+Charlotte,SKILL,Press Photo C5,12,1.344000,0
+Charlotte,SKILL,Hold Photo C5,12,2.784000,0
+Charlotte,SKILL,Snappy Mark C5,12,0.784000,0
+Charlotte,SKILL,Focused Mark C5,12,0.812000,0
+Charlotte,BURST,Still Photo Initial,9,1.319472,0
+Charlotte,BURST,Kamera Tick,9,0.109956,0
+Charlotte,BURST,Still Photo Initial C3,12,1.552320,0
+Charlotte,BURST,Kamera Tick C3,12,0.129360,0

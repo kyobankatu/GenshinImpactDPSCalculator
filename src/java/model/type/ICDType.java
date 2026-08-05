@@ -22,6 +22,12 @@ public enum ICDType {
     YelanBurst,
     /** Yelan's Breakthrough Barb rule: 0.3 seconds or four suppressed hits. */
     YelanBreakthrough,
+    /** Tighnari Clusterbloom rule: 2.5 seconds or four suppressed hits. */
+    TighnariClusterbloom,
+    /** Alhaitham Projection rule: 12 seconds or two suppressed hits. */
+    AlhaithamProjection,
+    /** Alhaitham infused Charged rule: two-second time gate only. */
+    AlhaithamCharged,
     /** Reserved for custom ICD rules not yet implemented. */
     Special // Custom rules (not implemented yet)
 }

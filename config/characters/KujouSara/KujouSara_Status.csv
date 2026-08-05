@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Kujou Sara,STATS,Base HP,90,9570,0
+Kujou Sara,STATS,Base ATK,90,195,0
+Kujou Sara,STATS,Base DEF,90,628,0
+Kujou Sara,STATS,Ascension ATK,90,0.24,0
+Kujou Sara,STATS,Energy Cost,90,80,0
+Kujou Sara,STATS,Constellation,6,6,0
+Kujou Sara,CONFIG,Character Level,90,90,0
+Kujou Sara,CONFIG,Normal Level,9,9,0
+Kujou Sara,CONFIG,Skill Level,12,12,0
+Kujou Sara,CONFIG,Burst Level,12,12,0

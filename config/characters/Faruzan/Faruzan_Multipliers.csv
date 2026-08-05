@@ -1,0 +1,17 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Faruzan,NORMAL,N1,9,0.821774,0
+Faruzan,NORMAL,N2,9,0.775053,0
+Faruzan,NORMAL,N3,9,0.976724,0
+Faruzan,NORMAL,N4,9,1.297449,0
+Faruzan,CHARGED,Fully Charged,9,2.108,0
+Faruzan,SKILL,Skill,9,2.5296,0
+Faruzan,SKILL,Skill C3,12,2.976,0
+Faruzan,SKILL,Collapse,9,1.836,0
+Faruzan,SKILL,Collapse C3,12,2.16,0
+Faruzan,BURST,Burst,9,6.4192,0
+Faruzan,BURST,Burst C5,12,7.552,0
+Faruzan,BURST,Anemo DMG Bonus,9,0.306,0
+Faruzan,BURST,Anemo DMG Bonus C5,12,0.36,0
+Faruzan,PASSIVE,A4 Base ATK Ratio,1,0.32,0
+Faruzan,PASSIVE,C4 Energy,4,2,0
+Faruzan,PASSIVE,C6 Anemo CRIT DMG,6,0.40,0

@@ -55,5 +55,21 @@ public enum ICDTag {
     /** Yelan's Exquisite Throw projectiles. */
     Yelan_ExquisiteThrow,
     /** Yelan's Breakthrough Barb projectiles. */
-    Yelan_Breakthrough
+    Yelan_Breakthrough,
+    /** Tighnari's four shared-ICD Clusterbloom projectiles. */
+    Tighnari_Clusterbloom,
+    /** Cyno A1 Duststalker Bolts share one dedicated application group. */
+    Cyno_DuststalkerBolt,
+    /** Cyno C6 Duststalker Bolts use a separate standard application group. */
+    Cyno_C6_DuststalkerBolt,
+    /** Alhaitham Projection Attacks share their dedicated application group. */
+    Alhaitham_Projection,
+    /** Alhaitham's infused Charged hits share their time-only group. */
+    Alhaitham_Charged,
+    /** Kazuha's C6-infused Normal and Charged Attacks. */
+    Kazuha_C6_Infusion,
+    /** Charlotte's Snappy/Focused mark ticks. */
+    Charlotte_Mark,
+    /** Charlotte's Kamera Burst field ticks. */
+    Charlotte_Kamera
 }

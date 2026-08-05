@@ -1,0 +1,19 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Kujou Sara,NORMAL,N1,9,0.67782,0
+Kujou Sara,NORMAL,N2,9,0.711,0
+Kujou Sara,NORMAL,N3,9,0.89112,0
+Kujou Sara,NORMAL,N4,9,0.92588,0
+Kujou Sara,NORMAL,N5,9,1.0665,0
+Kujou Sara,CHARGED,Fully Charged,9,2.108,0
+Kujou Sara,SKILL,Ambush,9,2.13792,0
+Kujou Sara,SKILL,Ambush C5,12,2.5152,0
+Kujou Sara,SKILL,ATK Bonus Ratio,9,0.73032,0
+Kujou Sara,SKILL,ATK Bonus Ratio C5,12,0.8592,0
+Kujou Sara,BURST,Titanbreaker,9,6.9632,0
+Kujou Sara,BURST,Stormcluster,9,0.58004,0
+Kujou Sara,BURST,Titanbreaker C3,12,8.192,0
+Kujou Sara,BURST,Stormcluster C3,12,0.6824,0
+Kujou Sara,PASSIVE,A4 Energy Per ER,1,1.2,0
+Kujou Sara,PASSIVE,C1 Cooldown Reduction,1,1.0,0
+Kujou Sara,PASSIVE,C2 Ambush Ratio,2,0.30,0
+Kujou Sara,PASSIVE,C6 Electro CRIT DMG,6,0.60,0

@@ -58,6 +58,8 @@ final class StandardDamageStrategy implements DamageStrategy {
         if (isNormalDamage) {
             flatDmg += stats.getTotalAtk() * stats.get(
                     StatType.NORMAL_ATTACK_ATK_FLAT_DMG_RATIO);
+            flatDmg += stats.getTotalHp() * stats.get(
+                    StatType.MAX_HP_TO_NORMAL_FLAT_DMG_RATIO);
         }
         if (isNormalDamage || isChargedDamage) {
             flatDmg += stats.getTotalDef() * stats.get(
@@ -81,6 +83,10 @@ final class StandardDamageStrategy implements DamageStrategy {
         double dmgBonus = stats.get(StatType.DMG_BONUS_ALL)
                 + stats.get(action.getElement().getBonusStatType())
                 + (action.getBonusStat() != null ? stats.get(action.getBonusStat()) : 0.0);
+        if (isNormalDamage && action.getElement() != Element.PHYSICAL) {
+            dmgBonus += stats.get(
+                    StatType.ELEMENTAL_NORMAL_ATTACK_DMG_BONUS);
+        }
         if (isSkillDamage) {
             dmgBonus += elementalMastery * stats.get(
                     StatType.ELEMENTAL_MASTERY_TO_SKILL_DMG_BONUS_RATIO);
@@ -108,8 +114,16 @@ final class StandardDamageStrategy implements DamageStrategy {
         }
         critRate = Math.min(1.0, critRate);
         double critDmg = stats.get(StatType.CRIT_DMG);
-        if (action.getElement() == Element.GEO) {
+        if (action.getElement() == Element.ANEMO) {
+            critDmg += stats.get(StatType.ANEMO_CRIT_DMG);
+        } else if (action.getElement() == Element.ELECTRO) {
+            critDmg += stats.get(StatType.ELECTRO_CRIT_DMG);
+        } else if (action.getElement() == Element.GEO) {
             critDmg += stats.get(StatType.GEO_CRIT_DMG);
+        } else if (action.getElement() == Element.CRYO) {
+            critDmg += stats.get(StatType.CRYO_CRIT_DMG);
+        } else if (action.getElement() == Element.PHYSICAL) {
+            critDmg += stats.get(StatType.PHYSICAL_CRIT_DMG);
         }
         if (action.getActionType() == ActionType.PLUNGE) {
             critDmg += stats.get(StatType.PLUNGING_ATTACK_CRIT_DMG);

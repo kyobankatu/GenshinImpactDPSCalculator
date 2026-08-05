@@ -20,7 +20,7 @@ public final class ElementSpecificCritDamageRegressionTest {
     private ElementSpecificCritDamageRegressionTest() {
     }
 
-    /** Runs Geo inclusion, non-Geo isolation, composition, and Lunar checks. */
+    /** Runs element inclusion, isolation, composition, and Lunar checks. */
     public static void main(String[] args) {
         StatsContainer stats = baseStats();
         assertClose(62.5, calculate(stats, Element.PHYSICAL, false),
@@ -34,9 +34,39 @@ public final class ElementSpecificCritDamageRegressionTest {
         assertClose(62.5, calculate(stats, Element.HYDRO, false),
                 "non-Geo elemental damage ignores Geo-only CRIT DMG");
 
+        stats.set(StatType.ELECTRO_CRIT_DMG, 0.60);
+        assertClose(77.5, calculate(stats, Element.ELECTRO, false),
+                "Electro damage receives Electro-only CRIT DMG");
+        assertClose(72.5, calculate(stats, Element.GEO, false),
+                "Geo damage ignores Electro-only CRIT DMG");
+        assertClose(62.5, calculate(stats, Element.HYDRO, false),
+                "other elements ignore Electro-only CRIT DMG");
+
+        stats.set(StatType.ANEMO_CRIT_DMG, 0.40);
+        assertClose(72.5, calculate(stats, Element.ANEMO, false),
+                "Anemo damage receives Anemo-only CRIT DMG");
+        assertClose(77.5, calculate(stats, Element.ELECTRO, false),
+                "Electro damage ignores Anemo-only CRIT DMG");
+        assertClose(62.5, calculate(stats, Element.PHYSICAL, false),
+                "Physical damage ignores Anemo-only CRIT DMG");
+
+        stats.set(StatType.CRYO_CRIT_DMG, 0.30);
+        assertClose(70.0, calculate(stats, Element.CRYO, false),
+                "Cryo damage receives Cryo-only CRIT DMG");
+        assertClose(77.5, calculate(stats, Element.ELECTRO, false),
+                "Electro damage ignores Cryo-only CRIT DMG");
+        assertClose(62.5, calculate(stats, Element.PHYSICAL, false),
+                "Physical damage ignores Cryo-only CRIT DMG");
+
+        stats.set(StatType.PHYSICAL_CRIT_DMG, 0.60);
+        assertClose(77.5, calculate(stats, Element.PHYSICAL, false),
+                "Physical damage receives Physical-only CRIT DMG");
+        assertClose(70.0, calculate(stats, Element.CRYO, false),
+                "Cryo damage ignores Physical-only CRIT DMG");
+
         stats.set(StatType.CRIT_RATE, 1.25);
-        assertClose(95.0, calculate(stats, Element.GEO, false),
-                "Geo and generic CRIT DMG compose at the CRIT Rate cap");
+        assertClose(105.0, calculate(stats, Element.ELECTRO, false),
+                "Electro and generic CRIT DMG compose at the CRIT Rate cap");
 
         StatsContainer lunarBaseline = baseStats();
         StatsContainer lunarGeoCrit = baseStats();
@@ -45,6 +75,30 @@ public final class ElementSpecificCritDamageRegressionTest {
                 calculate(lunarBaseline, Element.GEO, true),
                 calculate(lunarGeoCrit, Element.GEO, true),
                 "standard Geo CRIT DMG does not affect Lunar damage");
+        StatsContainer lunarElectroCrit = baseStats();
+        lunarElectroCrit.set(StatType.ELECTRO_CRIT_DMG, 5.0);
+        assertSameBits(
+                calculate(lunarBaseline, Element.ELECTRO, true),
+                calculate(lunarElectroCrit, Element.ELECTRO, true),
+                "standard Electro CRIT DMG does not affect Lunar damage");
+        StatsContainer lunarAnemoCrit = baseStats();
+        lunarAnemoCrit.set(StatType.ANEMO_CRIT_DMG, 5.0);
+        assertSameBits(
+                calculate(lunarBaseline, Element.ANEMO, true),
+                calculate(lunarAnemoCrit, Element.ANEMO, true),
+                "standard Anemo CRIT DMG does not affect Lunar damage");
+        StatsContainer lunarCryoCrit = baseStats();
+        lunarCryoCrit.set(StatType.CRYO_CRIT_DMG, 5.0);
+        assertSameBits(
+                calculate(lunarBaseline, Element.CRYO, true),
+                calculate(lunarCryoCrit, Element.CRYO, true),
+                "standard Cryo CRIT DMG does not affect Lunar damage");
+        StatsContainer lunarPhysicalCrit = baseStats();
+        lunarPhysicalCrit.set(StatType.PHYSICAL_CRIT_DMG, 5.0);
+        assertSameBits(
+                calculate(lunarBaseline, Element.PHYSICAL, true),
+                calculate(lunarPhysicalCrit, Element.PHYSICAL, true),
+                "standard Physical CRIT DMG does not affect Lunar damage");
         System.out.println("ElementSpecificCritDamageRegressionTest passed");
     }
 

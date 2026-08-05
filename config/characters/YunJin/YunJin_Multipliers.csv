@@ -1,0 +1,26 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Yun Jin,NORMAL,N1,9,0.74418,0
+Yun Jin,NORMAL,N2,9,0.73944,0
+Yun Jin,NORMAL,N3-1,9,0.42186,0
+Yun Jin,NORMAL,N3-2,9,0.5056,0
+Yun Jin,NORMAL,N4-1,9,0.44082,0
+Yun Jin,NORMAL,N4-2,9,0.5293,0
+Yun Jin,NORMAL,N5,9,1.23714,0
+Yun Jin,CHARGED,Charged,9,2.2357,0
+Yun Jin,PLUNGE,High Plunge,9,2.933586,0
+Yun Jin,SKILL,Press,9,2.53504,0
+Yun Jin,SKILL,Press C5,12,2.9824,0
+Yun Jin,SKILL,Hold Level 2,9,6.3376,0
+Yun Jin,SKILL,Hold Level 2 C5,12,7.456,0
+Yun Jin,BURST,Burst DMG,9,4.148,0
+Yun Jin,BURST,Burst DMG C3,12,4.88,0
+Yun Jin,BURST,Formation DEF Ratio,9,0.54672,0
+Yun Jin,BURST,Formation DEF Ratio C3,12,0.6432,0
+Yun Jin,PASSIVE,A4 One Element,1,0.025,0
+Yun Jin,PASSIVE,A4 Two Elements,1,0.05,0
+Yun Jin,PASSIVE,A4 Three Elements,1,0.075,0
+Yun Jin,PASSIVE,A4 Four Elements,1,0.115,0
+Yun Jin,PASSIVE,C1 Skill Cooldown Ratio,1,0.82,0
+Yun Jin,PASSIVE,C2 Normal DMG Bonus,2,0.15,0
+Yun Jin,PASSIVE,C4 DEF Bonus,4,0.20,0
+Yun Jin,PASSIVE,C6 Normal ATK SPD,6,0.12,0

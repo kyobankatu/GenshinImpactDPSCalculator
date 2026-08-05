@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Cyno,STATS,Base HP,90,12491,0
+Cyno,STATS,Base ATK,90,318,0
+Cyno,STATS,Base DEF,90,859,0
+Cyno,STATS,Ascension CRIT DMG,90,0.384,0
+Cyno,STATS,Energy Cost,90,80,0
+Cyno,STATS,Constellation,6,6,0
+Cyno,CONFIG,Character Level,90,90,0
+Cyno,CONFIG,Normal Level,9,9,0
+Cyno,CONFIG,Skill Level,12,12,0
+Cyno,CONFIG,Burst Level,12,12,0

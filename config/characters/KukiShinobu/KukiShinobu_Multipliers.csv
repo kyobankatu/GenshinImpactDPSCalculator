@@ -1,0 +1,70 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Kuki Shinobu,NORMAL,N1,9,0.89586,0
+Kuki Shinobu,NORMAL,N2,9,0.81844,0
+Kuki Shinobu,NORMAL,N3,9,1.0902,0
+Kuki Shinobu,NORMAL,N4,9,1.3983,0
+Kuki Shinobu,CHARGED,Charged-1,9,1.022102,0
+Kuki Shinobu,CHARGED,Charged-2,9,1.226617,0
+Kuki Shinobu,SKILL,Skill Initial,9,1.287104,0
+Kuki Shinobu,SKILL,Skill Initial C3,12,1.51424,0
+Kuki Shinobu,SKILL,Grass Ring,9,0.42908,0
+Kuki Shinobu,SKILL,Grass Ring C3,12,0.5048,0
+Kuki Shinobu,SKILL,Grass Ring Healing Max HP,9,0.051,0
+Kuki Shinobu,SKILL,Grass Ring Healing Max HP C3,12,0.06,0
+Kuki Shinobu,SKILL,Grass Ring Healing Flat,9,587.4528,0
+Kuki Shinobu,SKILL,Grass Ring Healing Flat C3,12,739.14154,0
+Kuki Shinobu,BURST,Single Instance Max HP,9,0.061282,0
+Kuki Shinobu,BURST,Single Instance Max HP C5,12,0.072096,0
+Kuki Shinobu,PASSIVE,N1 Hit Frame,1,12,0
+Kuki Shinobu,PASSIVE,N1 Next Normal Frames,1,19,0
+Kuki Shinobu,PASSIVE,N1 Recovery Frames,1,23,0
+Kuki Shinobu,PASSIVE,N2 Hit Frame,1,13,0
+Kuki Shinobu,PASSIVE,N2 Next Normal Frames,1,17,0
+Kuki Shinobu,PASSIVE,N2 Recovery Frames,1,27,0
+Kuki Shinobu,PASSIVE,N3 Hit Frame,1,13,0
+Kuki Shinobu,PASSIVE,N3 Next Normal Frames,1,42,0
+Kuki Shinobu,PASSIVE,N3 Recovery Frames,1,50,0
+Kuki Shinobu,PASSIVE,N4 Hit Frame,1,23,0
+Kuki Shinobu,PASSIVE,N4 Next Normal Frames,1,57,0
+Kuki Shinobu,PASSIVE,N4 Recovery Frames,1,57,0
+Kuki Shinobu,PASSIVE,Charged First Hit Frame,1,14,0
+Kuki Shinobu,PASSIVE,Charged Second Hit Frame,1,25,0
+Kuki Shinobu,PASSIVE,Charged Recovery Frames,1,35,0
+Kuki Shinobu,PASSIVE,Skill Initial Hit Frame,1,11,0
+Kuki Shinobu,PASSIVE,Skill Ring Activation Frame,1,23,0
+Kuki Shinobu,PASSIVE,Skill Recovery Frames,1,52,0
+Kuki Shinobu,PASSIVE,Skill Cooldown Start Frame,1,7,0
+Kuki Shinobu,PASSIVE,Skill Cooldown,1,15.0,0
+Kuki Shinobu,PASSIVE,Skill Initial Gauge Units,1,1,0
+Kuki Shinobu,PASSIVE,Grass Ring Gauge Units,1,1,0
+Kuki Shinobu,PASSIVE,Grass Ring Duration,1,12.0,0
+Kuki Shinobu,PASSIVE,Grass Ring First Tick Delay Frames,1,90,0
+Kuki Shinobu,PASSIVE,Grass Ring Tick Hit Delay Frames,1,2,0
+Kuki Shinobu,PASSIVE,Grass Ring Tick Interval Frames,1,90,0
+Kuki Shinobu,PASSIVE,Grass Ring C0 Tick Count,1,8,0
+Kuki Shinobu,PASSIVE,Grass Ring C2 Tick Count,2,10,0
+Kuki Shinobu,PASSIVE,Particle Chance,1,0.45,0
+Kuki Shinobu,PASSIVE,Particle Cooldown,1,0.2,0
+Kuki Shinobu,PASSIVE,Particle Count,1,1,0
+Kuki Shinobu,PASSIVE,Particle Travel Frames,1,100,0
+Kuki Shinobu,PASSIVE,Burst Snapshot Frame,1,0,0
+Kuki Shinobu,PASSIVE,Burst First Hit Frame,1,50,0
+Kuki Shinobu,PASSIVE,Burst Hit Interval Frames,1,17,0
+Kuki Shinobu,PASSIVE,Burst Full HP Hit Count,1,7,0
+Kuki Shinobu,PASSIVE,Burst Full HP Last Hit Frame,1,152,0
+Kuki Shinobu,PASSIVE,Burst Extended Hit HP Threshold,1,0.5,0
+Kuki Shinobu,PASSIVE,Burst Duration,1,2.0,0
+Kuki Shinobu,PASSIVE,Burst Recovery Frames,1,63,0
+Kuki Shinobu,PASSIVE,Burst Energy Consumption Frame,1,4,0
+Kuki Shinobu,PASSIVE,Burst Cooldown,1,15.0,0
+Kuki Shinobu,PASSIVE,Burst Gauge Units,1,1,0
+Kuki Shinobu,PASSIVE,A4 Damage Per Elemental Mastery,1,0.25,0
+Kuki Shinobu,PASSIVE,A4 Healing Per Elemental Mastery,1,0.75,0
+Kuki Shinobu,PASSIVE,C2 Grass Ring Duration Extension,2,3.0,0
+Kuki Shinobu,PASSIVE,C2 Grass Ring Duration,2,15.0,0
+Kuki Shinobu,PASSIVE,C3 Skill Talent Increase,3,3,0
+Kuki Shinobu,PASSIVE,C4 Thundergrass Mark Max HP,4,0.097,0
+Kuki Shinobu,PASSIVE,C4 Hit Delay Frames,4,5,0
+Kuki Shinobu,PASSIVE,C4 Cooldown,4,5.0,0
+Kuki Shinobu,PASSIVE,C4 Gauge Units,4,1,0
+Kuki Shinobu,PASSIVE,C5 Burst Talent Increase,5,3,0

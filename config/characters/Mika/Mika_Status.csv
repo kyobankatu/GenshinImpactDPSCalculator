@@ -1,0 +1,14 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Mika,STATS,Base HP,90,12506,0
+Mika,STATS,Base ATK,90,223,0
+Mika,STATS,Base DEF,90,713,0
+Mika,STATS,Ascension HP Percent,90,0.24,0
+Mika,STATS,Energy Cost,90,70,0
+Mika,STATS,Constellation,6,6,0
+Mika,CONFIG,Character Level,90,90,0
+Mika,CONFIG,Normal Level,9,9,0
+Mika,CONFIG,Skill Level,12,12,0
+Mika,CONFIG,Burst Level,9,9,0
+Mika,PASSIVE,Skill Cooldown,1,15,0
+Mika,PASSIVE,Soulwind Duration,1,12,0
+Mika,PASSIVE,Particle Count,1,4,0

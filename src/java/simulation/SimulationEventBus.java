@@ -86,6 +86,17 @@ public interface SimulationEventBus {
     /** Dispatches a resolved indirect enemy-damage event. */
     void notifyIndirectDamage(Character owner, double damage, double time);
 
+    /** Registers an elemental indirect enemy-damage listener. */
+    void addElementalIndirectDamageListener(
+            ElementalIndirectDamageListener listener);
+
+    /** Dispatches accepted indirect enemy damage with a known element. */
+    void notifyElementalIndirectDamage(
+            Character owner,
+            Element element,
+            double damage,
+            double time);
+
     /**
      * Dispatches a particle-generation event.
      *
