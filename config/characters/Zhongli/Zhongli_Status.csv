@@ -1,0 +1,23 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Zhongli,STATS,Base HP,90,14695,0
+Zhongli,STATS,Base ATK,90,251,0
+Zhongli,STATS,Base DEF,90,738,0
+Zhongli,STATS,Ascension Geo DMG Bonus,90,0.288,0
+Zhongli,STATS,Energy Cost,90,40,0
+Zhongli,STATS,Constellation,6,6,0
+Zhongli,CONFIG,Character Level,90,90,0
+Zhongli,CONFIG,Normal Level,9,9,0
+Zhongli,CONFIG,Skill Level,12,12,0
+Zhongli,CONFIG,Burst Level,12,12,0
+Zhongli,PASSIVE,Press Skill Cooldown,1,4,0
+Zhongli,PASSIVE,Hold Skill Cooldown,1,12,0
+Zhongli,PASSIVE,Burst Cooldown,1,12,0
+Zhongli,PASSIVE,Stone Stele Duration,1,31,0
+Zhongli,PASSIVE,Stone Stele Interval,1,2,0
+Zhongli,PASSIVE,Particle Cooldown,1,1.5,0
+Zhongli,PASSIVE,Particle Chance,1,0.5,0
+Zhongli,PASSIVE,Particle Count,1,1,0
+Zhongli,PASSIVE,Particle Travel Frames,1,100,0
+Zhongli,PASSIVE,A4 Attack Max HP Ratio,1,0.0139,0
+Zhongli,PASSIVE,A4 Skill Max HP Ratio,1,0.019,0
+Zhongli,PASSIVE,A4 Burst Max HP Ratio,1,0.33,0

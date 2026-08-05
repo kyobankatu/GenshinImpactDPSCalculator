@@ -1,0 +1,17 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Zhongli,NORMAL,N1,9,0.565292,0
+Zhongli,NORMAL,N2,9,0.572323,0
+Zhongli,NORMAL,N3,9,0.708725,0
+Zhongli,NORMAL,N4,9,0.788878,0
+Zhongli,NORMAL,N5,9,0.197500,0
+Zhongli,NORMAL,N6,9,1.001214,0
+Zhongli,CHARGED,Charged Attack,9,2.039780,0
+Zhongli,PLUNGE,High Plunge,9,2.747916,0
+Zhongli,SKILL,Stone Stele Initial,9,0.272000,0
+Zhongli,SKILL,Stone Stele Initial C3,12,0.320000,0
+Zhongli,SKILL,Stone Stele Pulse,9,0.544000,0
+Zhongli,SKILL,Stone Stele Pulse C3,12,0.640000,0
+Zhongli,SKILL,Hold Damage,9,1.360000,0
+Zhongli,SKILL,Hold Damage C3,12,1.600000,0
+Zhongli,BURST,Planet Befall,9,8.346800,0
+Zhongli,BURST,Planet Befall C5,12,10.298000,0
