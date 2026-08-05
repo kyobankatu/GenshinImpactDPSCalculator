@@ -23548,11 +23548,11 @@ Campaign inventory:
 
 | Unit | Type | Represented scope | Focused check | Status |
 |---|---|---|---|---|
-| Dori | character | fixed-target basics, Skill rounds, particles, Burst connector/Energy, representable constellations | `DoriRegressionTest` | in progress |
-| Verdict | weapon | metadata, permanent ATK, representable Lunar-Crystallize Seals | `VerdictRegressionTest` | delegated |
-| Beacon of the Reed Sea | weapon | metadata, Skill-hit ATK and no-shield HP boundary | `BeaconOfTheReedSeaRegressionTest` | delegated |
-| Jadefall's Splendor | weapon | metadata and active-owner Burst Regalia branch | `JadefallsSplendorRegressionTest` | queued |
-| Kaveh | character | fixed-target basics, Skill/Burst Dendro slice | `KavehRegressionTest` | queued |
+| Dori | character | fixed-target basics, Skill rounds, particles, Burst connector/Energy, representable constellations | `DoriRegressionTest` | complete (`06650bf`) |
+| Verdict | weapon | metadata, permanent ATK, representable Lunar-Crystallize Seals | `VerdictRegressionTest` | complete (`66dd488`) |
+| Beacon of the Reed Sea | weapon | metadata, Skill-hit ATK and no-shield HP boundary | `BeaconOfTheReedSeaRegressionTest` | complete (`17c871f`) |
+| Jadefall's Splendor | weapon | metadata and active-owner Burst Regalia branch | `JadefallsSplendorRegressionTest` | complete (`f01f945`) |
+| Kaveh | character | fixed-target basics, Skill/Burst Dendro slice | `KavehRegressionTest` | complete (`bb4b681`) |
 
 Target files:
 
@@ -23561,6 +23561,11 @@ Target files:
 - `config/characters/Dori/Dori_Multipliers.csv` (new)
 - `src/java/model/character/Dori.java` (new)
 - `src/java/sample/DoriRegressionTest.java` (new)
+- `config/characters/Kaveh/Kaveh_Status.csv` (new)
+- `config/characters/Kaveh/Kaveh_Multipliers.csv` (new)
+- `src/java/model/character/Kaveh.java` (new)
+- `src/java/sample/KavehRegressionTest.java` (new)
+- `src/java/mechanics/buff/BuffId.java`
 - one new `src/java/model/weapon/<Weapon>.java` and matching focused
   `src/java/sample/<Weapon>RegressionTest.java` per weapon unit
 
@@ -23591,3 +23596,21 @@ Verification:
 
 - `./gradlew <FocusedRegressionTest> ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
+
+Status: Complete. All five initial units pass focused, reaction, build,
+Javadoc, and executable preflight gates and are pushed on `dev_0`. Unsupported
+healing, shield, player-damage, forced-Core-rupture, geometry, and hitlag
+branches remain explicit rather than approximated.
+
+### Phase 2: Replenished Source-Ready Units
+
+Campaign inventory:
+
+| Unit | Type | Represented scope | Focused check | Status |
+|---|---|---|---|---|
+| Chevreuse | character | fixed-target Pyro/Electro support, actions, particles, Overcharged state, representable constellations | `ChevreuseRegressionTest` | delegated |
+| Sword of Narzissenkreuz | weapon | metadata, non-Arkhe Normal/Charged/Plunge blast, cooldown and rollback | `SwordOfNarzissenkreuzRegressionTest` | delegated |
+
+Requirements and tests remain the Phase 1 acceptance and abnormal-path matrix;
+each replenished unit receives a source-backed focused regression and an
+independent commit before the shared gates and push.

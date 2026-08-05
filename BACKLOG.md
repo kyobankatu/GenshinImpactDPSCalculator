@@ -4321,3 +4321,7 @@ experiment record.
 - **Proof/plan:** compact B-207 campaign inventory in `TASKS.md`, focused tests,
   shared regression/build/Javadoc gates, executable preflight, and per-unit
   implementation commits.
+- **Checkpoint 2026-08-05:** initial Dori, Verdict, Beacon, Jadefall, and Kaveh
+  units are complete and pushed. The source-ready queue is replenished with
+  Chevreuse and Sword of Narzissenkreuz; unavailable healing, shield, damage
+  intake, forced Core rupture, geometry, and hitlag branches stay excluded.
