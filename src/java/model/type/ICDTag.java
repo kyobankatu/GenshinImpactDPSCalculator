@@ -127,5 +127,7 @@ public enum ICDTag {
     /** Furina's Gentilhomme Usher application group. */
     Furina_Usher,
     /** Varesa's Charged, Skill, and Volcano Kablam hits share one group. */
-    Varesa_CombatCycle
+    Varesa_CombatCycle,
+    /** Mizuki's Dreamdrifter continuous attacks share one private group. */
+    YumemizukiMizuki_Dreamdrifter
 }

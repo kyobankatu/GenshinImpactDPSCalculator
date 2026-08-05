@@ -391,6 +391,8 @@ public enum BuffId {
     AINO_C1_ELEMENTAL_MASTERY,
     /** Aino C6 active-character reaction damage bonus. */
     AINO_C6_REACTION_DMG_BONUS,
+    /** Yumemizuki Mizuki A4 owner Elemental Mastery window. */
+    YUMEMIZUKI_MIZUKI_A4_ELEMENTAL_MASTERY,
     /** Nightweaver's Looking Glass simultaneous-window team reaction bonus. */
     NIGHTWEAVERS_LOOKING_GLASS_TEAM_REACTION_DMG,
     /** 武器「千夜に浮かぶ夢」の味方元素熟知共有。 */

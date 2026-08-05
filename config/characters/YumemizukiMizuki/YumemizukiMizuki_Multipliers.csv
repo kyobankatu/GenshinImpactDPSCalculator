@@ -1,0 +1,49 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Yumemizuki Mizuki,NORMAL,N1,9,0.888706,0
+Yumemizuki Mizuki,NORMAL,N2,9,0.797545,0
+Yumemizuki Mizuki,NORMAL,N3,9,1.213270,0
+Yumemizuki Mizuki,CHARGED,Charged Attack,9,2.210000,0
+Yumemizuki Mizuki,PLUNGE,High Plunge,9,2.607632,0
+Yumemizuki Mizuki,SKILL,Skill Activation Damage,9,0.981648,0
+Yumemizuki Mizuki,SKILL,Skill Activation Damage C3,12,1.154880,0
+Yumemizuki Mizuki,SKILL,Dreamdrifter Continuous Damage,9,0.763504,0
+Yumemizuki Mizuki,SKILL,Dreamdrifter Continuous Damage C3,12,0.898240,0
+Yumemizuki Mizuki,SKILL,Dreamdrifter Swirl Bonus,9,0.004200,0
+Yumemizuki Mizuki,SKILL,Dreamdrifter Swirl Bonus C3,12,0.005100,0
+Yumemizuki Mizuki,BURST,Burst Activation Damage,9,1.599360,0
+Yumemizuki Mizuki,BURST,Burst Activation Damage C5,12,1.881600,0
+Yumemizuki Mizuki,PASSIVE,N1 Impact Frames,1,17,0
+Yumemizuki Mizuki,PASSIVE,N2 Impact Frames,1,29,0
+Yumemizuki Mizuki,PASSIVE,N3 Impact Frames,1,47,0
+Yumemizuki Mizuki,PASSIVE,N1 Duration Frames,1,34,0
+Yumemizuki Mizuki,PASSIVE,N2 Duration Frames,1,38,0
+Yumemizuki Mizuki,PASSIVE,N3 Duration Frames,1,98,0
+Yumemizuki Mizuki,PASSIVE,Charged Hit Frames,1,39,0
+Yumemizuki Mizuki,PASSIVE,Charged Duration Frames,1,81,0
+Yumemizuki Mizuki,PASSIVE,High Plunge Duration Frames,1,60,0
+Yumemizuki Mizuki,PASSIVE,Skill Activation Hit Frames,1,2,0
+Yumemizuki Mizuki,PASSIVE,Skill Duration Frames,1,50,0
+Yumemizuki Mizuki,PASSIVE,Skill Cancel Duration Frames,1,50,0
+Yumemizuki Mizuki,PASSIVE,Skill Cooldown Delay Frames,1,23,0
+Yumemizuki Mizuki,PASSIVE,Dreamdrifter Duration,1,5,0
+Yumemizuki Mizuki,PASSIVE,Cloud First Launch Frames,1,18,0
+Yumemizuki Mizuki,PASSIVE,Cloud Launch Interval Frames,1,45,0
+Yumemizuki Mizuki,PASSIVE,Cloud Travel Frames,1,30,0
+Yumemizuki Mizuki,PASSIVE,Particle Generation Limit,1,4,0
+Yumemizuki Mizuki,PASSIVE,Particle Generation ICD,1,0.5,0
+Yumemizuki Mizuki,PASSIVE,Particle Travel Frames,1,100,0
+Yumemizuki Mizuki,PASSIVE,A1 Extension ICD,1,0.3,0
+Yumemizuki Mizuki,PASSIVE,A1 Duration Extension,1,2.5,0
+Yumemizuki Mizuki,PASSIVE,A4 Trigger ICD,1,0.3,0
+Yumemizuki Mizuki,PASSIVE,A4 Duration,1,4,0
+Yumemizuki Mizuki,PASSIVE,A4 Elemental Mastery,1,100,0
+Yumemizuki Mizuki,PASSIVE,C1 Initial Delay Frames,1,4,0
+Yumemizuki Mizuki,PASSIVE,C1 Application Interval,1,3.5,0
+Yumemizuki Mizuki,PASSIVE,C1 Awaiting Duration,1,3,0
+Yumemizuki Mizuki,PASSIVE,C1 EM Flat Multiplier,1,11,0
+Yumemizuki Mizuki,PASSIVE,C2 EM Ratio,2,0.0004,0
+Yumemizuki Mizuki,PASSIVE,C6 Expected Swirl Bonus,6,0.30,0
+Yumemizuki Mizuki,PASSIVE,Burst Hit Frames,1,93,0
+Yumemizuki Mizuki,PASSIVE,Burst Duration Frames,1,94,0
+Yumemizuki Mizuki,PASSIVE,Burst Cooldown Delay Frames,1,1,0
+Yumemizuki Mizuki,PASSIVE,Burst Energy Delay Frames,1,4,0

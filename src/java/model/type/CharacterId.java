@@ -205,6 +205,8 @@ public enum CharacterId {
     ARLECCHINO(95, "Arlecchino", CharacterRegion.SNEZHNAYA),
     /** Furina (Hydro sword Salon Solitaire support). */
     FURINA(96, "Furina", CharacterRegion.FONTAINE),
+    /** Yumemizuki Mizuki (Anemo catalyst Dreamdrifter support). */
+    YUMEMIZUKI_MIZUKI(97, "Yumemizuki Mizuki", CharacterRegion.INAZUMA),
     /** Varesa (Electro catalyst Fiery Passion plunging attacker). */
     VARESA(98, "Varesa", CharacterRegion.NATLAN),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */

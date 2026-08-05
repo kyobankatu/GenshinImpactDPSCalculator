@@ -58,6 +58,8 @@ public enum ICDType {
     ArlecchinoElementalArt,
     /** Furina Salon rule: 30 seconds or first and every other tagged hit. */
     FurinaSalonSolitaire,
+    /** Mizuki Dreamdrifter rule: 1.2-second time gate only. */
+    YumemizukiMizukiDreamdrifter,
     /** Reserved for custom ICD rules not yet implemented. */
     Special // Custom rules (not implemented yet)
 }
