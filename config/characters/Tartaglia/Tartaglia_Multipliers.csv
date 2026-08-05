@@ -1,0 +1,44 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Tartaglia,NORMAL,Ranged N1,9,0.758400,0
+Tartaglia,NORMAL,Ranged N2,9,0.850040,0
+Tartaglia,NORMAL,Ranged N3,9,1.017520,0
+Tartaglia,NORMAL,Ranged N4,9,1.047540,0
+Tartaglia,NORMAL,Ranged N5,9,1.118640,0
+Tartaglia,NORMAL,Ranged N6,9,1.336680,0
+Tartaglia,CHARGED,Fully-Charged Aimed Shot,9,2.108000,0
+Tartaglia,NORMAL,Riptide Flash,9,0.210800,0
+Tartaglia,SKILL,Stance Change,9,1.224000,0
+Tartaglia,SKILL,Melee N1,9,0.714160,0
+Tartaglia,SKILL,Melee N2,9,0.764720,0
+Tartaglia,SKILL,Melee N3,9,1.034900,0
+Tartaglia,SKILL,Melee N4,9,1.101260,0
+Tartaglia,SKILL,Melee N5,9,1.015940,0
+Tartaglia,SKILL,Melee N6-1,9,0.650960,0
+Tartaglia,SKILL,Melee N6-2,9,0.692040,0
+Tartaglia,CHARGED,Melee Charged 1,9,1.106000,0
+Tartaglia,CHARGED,Melee Charged 2,9,1.322460,0
+Tartaglia,SKILL,Riptide Slash,9,1.106000,0
+Tartaglia,SKILL,Stance Change C3,12,1.440000,0
+Tartaglia,SKILL,Melee N1 C3,12,0.876880,0
+Tartaglia,SKILL,Melee N2 C3,12,0.938960,0
+Tartaglia,SKILL,Melee N3 C3,12,1.270700,0
+Tartaglia,SKILL,Melee N4 C3,12,1.352180,0
+Tartaglia,SKILL,Melee N5 C3,12,1.247420,0
+Tartaglia,SKILL,Melee N6-1 C3,12,0.799280,0
+Tartaglia,SKILL,Melee N6-2 C3,12,0.849720,0
+Tartaglia,CHARGED,Melee Charged 1 C3,12,1.358000,0
+Tartaglia,CHARGED,Melee Charged 2 C3,12,1.623780,0
+Tartaglia,SKILL,Riptide Slash C3,12,1.358000,0
+Tartaglia,BURST,Ranged Burst,9,6.432800,0
+Tartaglia,BURST,Melee Burst,9,7.888000,0
+Tartaglia,BURST,Riptide Blast,9,2.040000,0
+Tartaglia,BURST,Ranged Burst C5,12,7.568000,0
+Tartaglia,BURST,Melee Burst C5,12,9.280000,0
+Tartaglia,BURST,Riptide Blast C5,12,2.400000,0
+Tartaglia,PASSIVE,Riptide Duration,1,10,0
+Tartaglia,PASSIVE,A1 Riptide Extension,1,8,0
+Tartaglia,PASSIVE,Melee Stance Maximum Duration,1,30,0
+Tartaglia,PASSIVE,Particle Cooldown,1,3,0
+Tartaglia,PASSIVE,Particle Travel Frames,1,80,0
+Tartaglia,PASSIVE,C4 Interval,4,3.9,0
+Tartaglia,PASSIVE,Burst Cooldown,1,15,0

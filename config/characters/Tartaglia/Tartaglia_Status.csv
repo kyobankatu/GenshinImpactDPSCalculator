@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Tartaglia,STATS,Base HP,90,13103,0
+Tartaglia,STATS,Base ATK,90,301,0
+Tartaglia,STATS,Base DEF,90,815,0
+Tartaglia,STATS,Ascension Hydro DMG,90,0.288,0
+Tartaglia,STATS,Energy Cost,90,60,0
+Tartaglia,STATS,Constellation,6,6,0
+Tartaglia,CONFIG,Character Level,90,90,0
+Tartaglia,CONFIG,Normal Level,9,9,0
+Tartaglia,CONFIG,Skill Level,12,12,0
+Tartaglia,CONFIG,Burst Level,12,12,0
