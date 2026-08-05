@@ -1,0 +1,51 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Varesa,NORMAL,N1,9,0.795233,0
+Varesa,NORMAL,N2,9,0.680476,0
+Varesa,NORMAL,N3,9,0.957318,0
+Varesa,NORMAL,N1 C5,12,0.935568,0
+Varesa,NORMAL,N2 C5,12,0.800560,0
+Varesa,NORMAL,N3 C5,12,1.126256,0
+Varesa,CHARGED,Charged Attack,9,1.517760,0
+Varesa,CHARGED,Charged Attack C5,12,1.785600,0
+Varesa,PLUNGE,High Plunge,9,3.422517,0
+Varesa,PLUNGE,High Plunge C5,12,4.202331,0
+Varesa,NORMAL,Fiery Passion N1,9,0.924922,0
+Varesa,NORMAL,Fiery Passion N2,9,0.884490,0
+Varesa,NORMAL,Fiery Passion N3,9,1.250969,0
+Varesa,NORMAL,Fiery Passion N1 C5,12,1.088144,0
+Varesa,NORMAL,Fiery Passion N2 C5,12,1.040576,0
+Varesa,NORMAL,Fiery Passion N3 C5,12,1.471728,0
+Varesa,CHARGED,Fiery Passion Charged Attack,9,1.574880,0
+Varesa,CHARGED,Fiery Passion Charged Attack C5,12,1.852800,0
+Varesa,PLUNGE,Fiery Passion High Plunge,9,5.133776,0
+Varesa,PLUNGE,Fiery Passion High Plunge C5,12,6.303497,0
+Varesa,SKILL,Rush,9,1.266160,0
+Varesa,SKILL,Fiery Passion Rush,9,1.808800,0
+Varesa,BURST,Flying Kick,9,5.867040,0
+Varesa,BURST,Fiery Passion Flying Kick,9,9.778400,0
+Varesa,BURST,Volcano Kablam,9,6.844880,0
+Varesa,BURST,Flying Kick C3,12,6.902400,0
+Varesa,BURST,Fiery Passion Flying Kick C3,12,11.504000,0
+Varesa,BURST,Volcano Kablam C3,12,8.052800,0
+Varesa,PASSIVE,Maximum Nightsoul Points,1,40,0
+Varesa,PASSIVE,Skill Nightsoul Points,1,20,0
+Varesa,PASSIVE,Plunge Nightsoul Points,1,25,0
+Varesa,PASSIVE,Nightsoul Duration,1,15,0
+Varesa,PASSIVE,Particle Count Low,1,2,0
+Varesa,PASSIVE,Particle Count High,1,3,0
+Varesa,PASSIVE,Particle Travel Frames,1,100,0
+Varesa,PASSIVE,Apex Drive Frames,1,140,0
+Varesa,PASSIVE,A1 Duration,1,5,0
+Varesa,PASSIVE,A1 ATK Ratio,1,0.50,0
+Varesa,PASSIVE,A1 Enhanced ATK Ratio,1,1.80,0
+Varesa,PASSIVE,A4 ATK Per Stack,1,0.35,0
+Varesa,PASSIVE,A4 Stack Duration,1,12,0
+Varesa,PASSIVE,A4 Maximum Stacks,1,2,0
+Varesa,PASSIVE,C2 Energy,2,11.5,0
+Varesa,PASSIVE,C4 Burst DMG Bonus,4,1.0,0
+Varesa,PASSIVE,C4 Plunge ATK Ratio,4,5.0,0
+Varesa,PASSIVE,C4 Plunge Flat Cap,4,20000,0
+Varesa,PASSIVE,C4 Duration,4,15,0
+Varesa,PASSIVE,C6 Apex Energy,6,30,0
+Varesa,PASSIVE,C6 CRIT Rate,6,0.10,0
+Varesa,PASSIVE,C6 CRIT DMG,6,1.00,0

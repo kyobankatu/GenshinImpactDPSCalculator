@@ -125,5 +125,7 @@ public enum ICDTag {
     /** Furina's Surintendante Chevalmarin application group. */
     Furina_Chevalmarin,
     /** Furina's Gentilhomme Usher application group. */
-    Furina_Usher
+    Furina_Usher,
+    /** Varesa's Charged, Skill, and Volcano Kablam hits share one group. */
+    Varesa_CombatCycle
 }

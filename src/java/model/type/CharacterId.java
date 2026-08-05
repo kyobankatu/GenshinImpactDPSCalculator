@@ -205,6 +205,8 @@ public enum CharacterId {
     ARLECCHINO(95, "Arlecchino", CharacterRegion.SNEZHNAYA),
     /** Furina (Hydro sword Salon Solitaire support). */
     FURINA(96, "Furina", CharacterRegion.FONTAINE),
+    /** Varesa (Electro catalyst Fiery Passion plunging attacker). */
+    VARESA(98, "Varesa", CharacterRegion.NATLAN),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 
