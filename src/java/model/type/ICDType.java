@@ -48,6 +48,10 @@ public enum ICDType {
     ESCOFFIER_SKILL,
     /** Citlali's Frostfall Storm rule: 1.5-second time gate only. */
     CitlaliFrostfallStorm,
+    /** Kinich Loop Shot rule: two seconds or four hits. */
+    KinichLoopShot,
+    /** Kinich Scalespiker rule: 1.2 seconds or four hits. */
+    KinichScalespikerCannon,
     /** Reserved for custom ICD rules not yet implemented. */
     Special // Custom rules (not implemented yet)
 }

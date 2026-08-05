@@ -107,6 +107,10 @@ public class ICDManager {
      *       hit count never bypasses the time gate.</li>
      *   <li>{@link ICDType#CitlaliFrostfallStorm} – applies after 1.5 seconds;
      *       hit count never bypasses the time gate.</li>
+     *   <li>{@link ICDType#KinichLoopShot} – applies after two seconds or
+     *       after four hits in its private group.</li>
+     *   <li>{@link ICDType#KinichScalespikerCannon} – applies after 1.2 seconds
+     *       or after four hits in its private group.</li>
      * </ul>
      *
      * <p>{@code null} values for {@code type} or {@code tag} are silently
@@ -185,6 +189,10 @@ public class ICDManager {
             apply = checkTimeOnlyApplication(state, currentTime, 1.5);
         } else if (type == ICDType.CitlaliFrostfallStorm) {
             apply = checkTimeOnlyApplication(state, currentTime, 1.5);
+        } else if (type == ICDType.KinichLoopShot) {
+            apply = checkCustomApplication(state, currentTime, 2.0, 4);
+        } else if (type == ICDType.KinichScalespikerCannon) {
+            apply = checkCustomApplication(state, currentTime, 1.2, 4);
         }
 
         return apply;

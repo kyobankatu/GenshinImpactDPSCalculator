@@ -48,6 +48,8 @@ public enum BuffId {
     NICOLE_C2_GRACE_ATK,
     /** Nicole A1/A4's per-character Guidance of Theosis ATK upgrade. */
     NICOLE_GUIDANCE_OF_THEOSIS,
+    /** Kinich C2 fixed-target Dendro resistance reduction. */
+    KINICH_C2_DENDRO_RES_SHRED,
     /** Lunar 拡張: コロンビーナの「皓月の意志」。 */
     GLEAMING_MOON_INTENT,
     /** Lunar 拡張: コロンビーナの「皓月の献身」。 */

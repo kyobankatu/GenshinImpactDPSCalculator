@@ -111,5 +111,9 @@ public enum ICDTag {
     /** Citlali's Frostfall Storm attacks share a private application group. */
     Citlali_FrostfallStorm,
     /** Citlali's Spiritvessel Skull attacks share a private application group. */
-    Citlali_SpiritVessel
+    Citlali_SpiritVessel,
+    /** Kinich's two-hit Loop Shots share a private application group. */
+    Kinich_LoopShot,
+    /** Kinich's Scalespiker Cannon and C6 rebound share one private group. */
+    Kinich_ScalespikerCannon
 }

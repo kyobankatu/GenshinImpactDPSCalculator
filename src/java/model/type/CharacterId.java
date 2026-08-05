@@ -197,6 +197,8 @@ public enum CharacterId {
     MUALANI(91, "Mualani", CharacterRegion.NATLAN),
     /** Nicole (Pyro catalyst Arcane Projection support). */
     NICOLE(92, "Nicole", CharacterRegion.UNKNOWN),
+    /** Kinich (Dendro claymore Scalespiker attacker). */
+    KINICH(93, "Kinich", CharacterRegion.NATLAN),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 

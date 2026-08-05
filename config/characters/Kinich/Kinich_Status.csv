@@ -1,0 +1,13 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Kinich,STATS,Base HP,90,10875,0
+Kinich,STATS,Base ATK,90,332,0
+Kinich,STATS,Base DEF,90,692,0
+Kinich,STATS,Ascension CRIT DMG,90,0.384,0
+Kinich,STATS,Energy Cost,90,70,0
+Kinich,STATS,Constellation,6,6,0
+Kinich,CONFIG,Character Level,90,90,0
+Kinich,CONFIG,Normal Level,9,9,0
+Kinich,CONFIG,Skill Level,12,12,0
+Kinich,CONFIG,Burst Level,12,12,0
+Kinich,CONFIG,Skill Cooldown,1,18,0
+Kinich,CONFIG,Burst Cooldown,1,18,0
