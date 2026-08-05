@@ -1,0 +1,28 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Neuvillette,NORMAL,N1,9,0.927806,0
+Neuvillette,NORMAL,N2,9,0.786175,0
+Neuvillette,NORMAL,N3,9,1.229739,0
+Neuvillette,NORMAL,N1 C3,12,1.091536,0
+Neuvillette,NORMAL,N2 C3,12,0.924912,0
+Neuvillette,NORMAL,N3 C3,12,1.446752,0
+Neuvillette,CHARGED,Equitable Judgment,9,0.134458,0
+Neuvillette,CHARGED,Equitable Judgment C3,12,0.165094,0
+Neuvillette,SKILL,O Tears I Shall Repay,9,0.218688,0
+Neuvillette,SKILL,Spiritbreath Thorn,9,0.3536,0
+Neuvillette,BURST,O Tides I Have Returned,9,0.378383,0
+Neuvillette,BURST,Waterfall,9,0.154793,0
+Neuvillette,BURST,O Tides I Have Returned C5,12,0.445157,0
+Neuvillette,BURST,Waterfall C5,12,0.182109,0
+Neuvillette,PASSIVE,A1 Duration,1,30,0
+Neuvillette,PASSIVE,A1 One Stack Multiplier,1,1.1,0
+Neuvillette,PASSIVE,A1 Two Stack Multiplier,1,1.25,0
+Neuvillette,PASSIVE,A1 Three Stack Multiplier,1,1.6,0
+Neuvillette,PASSIVE,A4 Full HP Hydro DMG Bonus,1,0.3,0
+Neuvillette,PASSIVE,Skill Particle Count,1,4,0
+Neuvillette,PASSIVE,Particle Travel Frames,1,100,0
+Neuvillette,PASSIVE,Particle Gate,1,0.3,0
+Neuvillette,PASSIVE,Spiritbreath Thorn Gate,1,10,0
+Neuvillette,PASSIVE,C2 CRIT DMG Per Stack,2,0.14,0
+Neuvillette,PASSIVE,C6 Max HP Ratio,6,0.1,0
+Neuvillette,PASSIVE,C6 Trigger Gate,6,2,0
+Neuvillette,PASSIVE,C6 Impact Delay Frames,6,29,0

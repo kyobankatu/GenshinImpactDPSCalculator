@@ -103,5 +103,9 @@ public enum ICDTag {
     /** Aino's Ascendant-Gleam Ducky attacks share a private group. */
     Aino_Ducky,
     /** Escoffier's initial, periodic, and C6 Skill hits share one group. */
-    ESCOFFIER_SKILL
+    ESCOFFIER_SKILL,
+    /** Neuvillette's Equitable Judgment beam has an independent group. */
+    Neuvillette_Judgment,
+    /** Neuvillette C6 currents have an independent application group. */
+    Neuvillette_C6
 }
