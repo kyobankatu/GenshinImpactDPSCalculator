@@ -1,0 +1,21 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Lyney,STATS,Base HP,90,11021,0
+Lyney,STATS,Base ATK,90,318,0
+Lyney,STATS,Base DEF,90,538,0
+Lyney,STATS,Ascension CRIT Rate,90,0.192,0
+Lyney,STATS,Energy Cost,90,60,0
+Lyney,STATS,Constellation,6,6,0
+Lyney,CONFIG,Character Level,90,90,0
+Lyney,CONFIG,Normal Level,9,9,0
+Lyney,CONFIG,Skill Level,9,9,0
+Lyney,CONFIG,Burst Level,9,9,0
+Lyney,PASSIVE,Skill Cooldown,1,15,0
+Lyney,PASSIVE,Burst Cooldown,1,15,0
+Lyney,PASSIVE,Hat Duration Frames,1,238,0
+Lyney,PASSIVE,Burst Hat Duration Frames,1,245,0
+Lyney,PASSIVE,Pyrotechnic Travel Frames,1,36,0
+Lyney,PASSIVE,Prop Surplus Cap,1,5,0
+Lyney,PASSIVE,C1 Gate,1,15,0
+Lyney,PASSIVE,C2 Interval,1,2,0
+Lyney,PASSIVE,C4 Pyro RES Shred,1,0.2,0
+Lyney,PASSIVE,C4 Duration,1,6,0

@@ -1,0 +1,23 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Lyney,NORMAL,N1,9,0.712580,0
+Lyney,NORMAL,N2,9,0.698360,0
+Lyney,NORMAL,N3 Hit 1,9,0.500860,0
+Lyney,NORMAL,N3 Hit 2,9,0.500860,0
+Lyney,NORMAL,N4,9,1.045960,0
+Lyney,CHARGED,Prop Arrow,9,2.937600,0
+Lyney,CHARGED,Pyrotechnic Strike,9,3.604000,0
+Lyney,CHARGED,Spiritbreath Thorn,9,0.468384,0
+Lyney,NORMAL,N1 C3,12,0.874940,0
+Lyney,NORMAL,N2 C3,12,0.857480,0
+Lyney,NORMAL,N3 Hit 1 C3,12,0.614980,0
+Lyney,NORMAL,N3 Hit 2 C3,12,0.614980,0
+Lyney,NORMAL,N4 C3,12,1.284280,0
+Lyney,CHARGED,Prop Arrow C3,12,3.456000,0
+Lyney,CHARGED,Pyrotechnic Strike C3,12,4.240000,0
+Lyney,CHARGED,Spiritbreath Thorn C3,12,0.551040,0
+Lyney,SKILL,Bewildering Lights,9,2.842400,0
+Lyney,SKILL,Stack Bonus,9,0.904400,0
+Lyney,BURST,Miracle Parade,9,2.618000,0
+Lyney,BURST,Explosive Firework,9,7.038000,0
+Lyney,BURST,Miracle Parade C5,12,3.080000,0
+Lyney,BURST,Explosive Firework C5,12,8.280000,0

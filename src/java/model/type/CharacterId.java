@@ -167,6 +167,8 @@ public enum CharacterId {
     NAVIA(77, "Navia", CharacterRegion.FONTAINE),
     /** Chiori (Geo sword dual-scaling automaton attacker). */
     CHIORI(80, "Chiori", CharacterRegion.INAZUMA),
+    /** Lyney (Pyro bow Prop Arrow and Grin-Malkin attacker). */
+    LYNEY(82, "Lyney", CharacterRegion.FONTAINE),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 
