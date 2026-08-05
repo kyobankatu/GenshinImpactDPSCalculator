@@ -23654,11 +23654,13 @@ Campaign inventory:
 | Aino | character | fixed-target basics, two-hit Musecatcher Skill, Cool Your Jets Ducky cadence, particles, representable passives/constellations | `AinoRegressionTest` | complete (`8ca28af`) |
 | Dahlia | character | fixed-target basics, Immersive Ordinance, Radiant Psalter hit/Favonian Favor, particles, representable support/constellation branches | `DahliaRegressionTest` | complete (`5e936c8`) |
 | Escoffier | character | fixed-target basics, Cooking Mek Skill cadence, Burst initial hit, particles, representable Cryo/Hydro support and constellations | `EscoffierRegressionTest` | complete (`c7cb8fd`) |
-| Citlali | character | fixed-target basics, Itzpapa Skill cadence, Burst/Skull attacks, particles, representable Cryo/Hydro support and constellations | `CitlaliRegressionTest` | delegated (ID 89) |
+| Citlali | character | fixed-target basics, Itzpapa Skill cadence, Burst/Skull attacks, particles, representable Cryo/Hydro support and constellations | `CitlaliRegressionTest` | complete (`23ac20f`) |
 | Neuvillette | character | fixed-target basics, charged Equitable Judgment cadence, Skill/Burst, particles, representable HP scaling/passives/constellations | `NeuvilletteRegressionTest` | complete (`5304f26`) |
-| Mualani | character | fixed-target basics, Nightsoul Sharky's Surging Bite, Burst, particles, representable HP scaling/passives/constellations | `MualaniRegressionTest` | delegated (ID 91) |
-| Nicole | character | fixed-target basics, Revelation Skill ATK support, Burst/Arcane Projection cadence, particles, representable passives/constellations | `NicoleRegressionTest` | delegated (ID 92) |
-| Kinich | character | fixed-target basics, Nightsoul Loop Shot/Scalespiker Cannon, Burst cadence, particles, representable passives/constellations | `KinichRegressionTest` | delegated (ID 93) |
+| Mualani | character | fixed-target basics, Nightsoul Sharky's Surging Bite, Burst, particles, representable HP scaling/passives/constellations | `MualaniRegressionTest` | complete (`baad46b`) |
+| Nicole | character | fixed-target basics, Revelation Skill ATK support, Burst/Arcane Projection cadence, particles, representable passives/constellations | `NicoleRegressionTest` | complete (`a1e0db9`) |
+| Kinich | character | fixed-target basics, Nightsoul Loop Shot/Scalespiker Cannon, Burst cadence, particles, representable passives/constellations | `KinichRegressionTest` | complete (`0238eb2`) |
+| Xilonen | character | fixed-target basics, Nightsoul Blade Roller normals, Sampler resistance support, Burst, particles, representable passives/constellations | `XilonenRegressionTest` | delegated (ID 94) |
+| Arlecchino | character | fixed-target basics, Directive/Bond collection, Masque of the Red Death normals, Skill/Burst, particles, representable passives/constellations | `ArlecchinoRegressionTest` | delegated (ID 95) |
 
 Requirements and tests remain the Phase 1 acceptance and abnormal-path matrix;
 each replenished unit receives a source-backed focused regression and an
@@ -23728,3 +23730,10 @@ together. Citlali, Mualani, Nicole, and Kinich continue in isolated lanes;
 shields, healing, player HP changes, movement, geometry, team-wide Nightsoul
 plumbing, random targeting, and multi-target behavior remain explicit
 boundaries.
+
+Checkpoint 2026-08-05 15:40 JST: Citlali, Mualani, Nicole, and Kinich are
+complete and pushed through `0238eb2`. Their focused regressions, the legacy
+identity regression, reaction suite, build, Javadoc, and preflight pass
+together. Xilonen and Arlecchino continue in isolated lanes; shields, healing,
+player HP changes, movement, geometry, team-wide Nightsoul plumbing, Hexerei,
+random targeting, and multi-target behavior remain explicit boundaries.
