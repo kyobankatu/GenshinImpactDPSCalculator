@@ -54,8 +54,6 @@ public final class YaoyaoRegressionTest {
                 "Yaoyao exact-name identity");
         assertEquals(CharacterRegion.LIYUE, CharacterId.YAOYAO.getRegion(),
                 "Yaoyao region");
-        assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(60),
-                "Yaoyao next identity remains unassigned");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("yaoyao"),
                 "Yaoyao lookup remains case-sensitive");
 

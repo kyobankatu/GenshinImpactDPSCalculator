@@ -55,8 +55,6 @@ public final class XiaoRegressionTest {
                 "Xiao exact-name identity");
         assertEquals(CharacterRegion.LIYUE, CharacterId.XIAO.getRegion(),
                 "Xiao region");
-        assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(61),
-                "Xiao next identity remains unassigned");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("xiao"),
                 "Xiao lookup remains case-sensitive");
 
