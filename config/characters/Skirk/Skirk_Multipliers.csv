@@ -1,0 +1,73 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Skirk,NORMAL,N1,9,1.001720,0
+Skirk,NORMAL,N2,9,0.914820,0
+Skirk,NORMAL,N3 Hit,9,0.595660,0
+Skirk,NORMAL,N4,9,1.117060,0
+Skirk,NORMAL,N5,9,1.523120,0
+Skirk,CHARGED,Charged Attack Hit,9,1.227660,0
+Skirk,PLUNGE,High Plunge,9,2.933586,0
+Skirk,SKILL,Flash N1,9,2.440263,0
+Skirk,SKILL,Flash N2,9,2.200972,0
+Skirk,SKILL,Flash N3 Hit,9,1.391190,0
+Skirk,SKILL,Flash N4 Hit,9,1.479670,0
+Skirk,SKILL,Flash N5,9,3.612401,0
+Skirk,SKILL,Flash Charged Hit,9,0.818440,0
+Skirk,SKILL,Flash High Plunge,9,2.933586,0
+Skirk,SKILL,Flash N1 Passive,10,2.625599,0
+Skirk,SKILL,Flash N2 Passive,10,2.368134,0
+Skirk,SKILL,Flash N3 Hit Passive,10,1.496850,0
+Skirk,SKILL,Flash N4 Hit Passive,10,1.592050,0
+Skirk,SKILL,Flash N5 Passive,10,3.886761,0
+Skirk,SKILL,Flash Charged Hit Passive,10,0.880600,0
+Skirk,SKILL,Flash High Plunge Passive,10,3.156390,0
+Skirk,SKILL,Flash N1 C3,12,2.996272,0
+Skirk,SKILL,Flash N2 C3,12,2.702459,0
+Skirk,SKILL,Flash N3 Hit C3,12,1.708170,0
+Skirk,SKILL,Flash N4 Hit C3,12,1.816810,0
+Skirk,SKILL,Flash N5 C3,12,4.435480,0
+Skirk,SKILL,Flash Charged Hit C3,12,1.004920,0
+Skirk,SKILL,Flash High Plunge C3,12,3.601998,0
+Skirk,SKILL,Flash N1 C3 Passive,13,3.181608,0
+Skirk,SKILL,Flash N2 C3 Passive,13,2.869621,0
+Skirk,SKILL,Flash N3 Hit C3 Passive,13,1.813830,0
+Skirk,SKILL,Flash N4 Hit C3 Passive,13,1.929190,0
+Skirk,SKILL,Flash N5 C3 Passive,13,4.709840,0
+Skirk,SKILL,Flash Charged Hit C3 Passive,13,1.067080,0
+Skirk,SKILL,Flash High Plunge C3 Passive,13,3.824802,0
+Skirk,BURST,Ruin Slash,9,2.086920,0
+Skirk,BURST,Ruin Final,9,3.478200,0
+Skirk,BURST,Ruin Point Bonus,9,0.328497,0
+Skirk,BURST,Extinction Bonus 0,9,0.075000,0
+Skirk,BURST,Extinction Bonus 1,9,0.114000,0
+Skirk,BURST,Extinction Bonus 2,9,0.152000,0
+Skirk,BURST,Extinction Bonus 3,9,0.190000,0
+Skirk,BURST,Ruin Slash C5,12,2.455200,0
+Skirk,BURST,Ruin Final C5,12,4.092000,0
+Skirk,BURST,Ruin Point Bonus C5,12,0.386467,0
+Skirk,BURST,Extinction Bonus 0 C5,12,0.090000,0
+Skirk,BURST,Extinction Bonus 1 C5,12,0.132000,0
+Skirk,BURST,Extinction Bonus 2 C5,12,0.176000,0
+Skirk,BURST,Extinction Bonus 3 C5,12,0.220000,0
+Skirk,PASSIVE,Initial Serpents Subtlety,1,100,0
+Skirk,PASSIVE,Maximum Serpents Subtlety,1,100,0
+Skirk,PASSIVE,Skill Entry Frames,1,19,0
+Skirk,PASSIVE,Skill Duration Frames,1,754,0
+Skirk,PASSIVE,Skill Serpents Subtlety,1,45,0
+Skirk,PASSIVE,Drain Tick Frames,1,12,0
+Skirk,PASSIVE,Drain Per Tick,1,1.4,0
+Skirk,PASSIVE,Particle Count,1,4,0
+Skirk,PASSIVE,Particle Cooldown,1,15,0
+Skirk,PASSIVE,Particle Travel Frames,1,100,0
+Skirk,PASSIVE,A1 Rift Duration Frames,1,1054,0
+Skirk,PASSIVE,A1 Serpents Subtlety Per Rift,1,8,0
+Skirk,PASSIVE,A1 Drain Pause Per Rift,1,0.3,0
+Skirk,PASSIVE,A4 Duration,1,20,0
+Skirk,PASSIVE,C1 Far to Fall,1,5,0
+Skirk,PASSIVE,C2 Skill Serpents Subtlety,2,10,0
+Skirk,PASSIVE,C2 Extinction ATK,2,0.7,0
+Skirk,PASSIVE,C4 ATK Stack 1,4,0.1,0
+Skirk,PASSIVE,C4 ATK Stack 2,4,0.2,0
+Skirk,PASSIVE,C4 ATK Stack 3,4,0.4,0
+Skirk,PASSIVE,C6 Stack Duration,6,15,0
+Skirk,PASSIVE,C6 Burst Multiplier,6,7.5,0
+Skirk,PASSIVE,C6 Normal Multiplier,6,1.8,0

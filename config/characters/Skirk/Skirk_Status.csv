@@ -1,0 +1,13 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Skirk,STATS,Base HP,90,12417,0
+Skirk,STATS,Base ATK,90,359,0
+Skirk,STATS,Base DEF,90,806,0
+Skirk,STATS,Ascension CRIT DMG,90,0.384,0
+Skirk,STATS,Energy Cost,90,0,0
+Skirk,STATS,Constellation,6,6,0
+Skirk,CONFIG,Character Level,90,90,0
+Skirk,CONFIG,Normal Level,9,9,0
+Skirk,CONFIG,Skill Level,12,12,0
+Skirk,CONFIG,Burst Level,12,12,0
+Skirk,CONFIG,Skill Cooldown,1,8,0
+Skirk,CONFIG,Burst Cooldown,1,15,0

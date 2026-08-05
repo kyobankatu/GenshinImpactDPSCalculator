@@ -131,5 +131,7 @@ public enum ICDTag {
     /** Mizuki's Dreamdrifter continuous attacks share one private group. */
     YumemizukiMizuki_Dreamdrifter,
     /** Clorinde's Shade attacks share one private application group. */
-    Clorinde_ElementalArt
+    Clorinde_ElementalArt,
+    /** Skirk's Far to Fall constellation attack application group. */
+    Skirk_Constellation
 }

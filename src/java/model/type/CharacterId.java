@@ -211,6 +211,8 @@ public enum CharacterId {
     VARESA(98, "Varesa", CharacterRegion.NATLAN),
     /** Clorinde (Electro sword Night Vigil attacker). */
     CLORINDE(99, "Clorinde", CharacterRegion.FONTAINE),
+    /** Skirk (Cryo sword Seven-Phase Flash carry). */
+    SKIRK(100, "Skirk", CharacterRegion.UNKNOWN),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 
