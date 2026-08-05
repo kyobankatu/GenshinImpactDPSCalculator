@@ -52,6 +52,7 @@ public final class LegacyCharacterIdentityRegressionTest {
         assertIdentity(CharacterId.LYNETTE, 52, "Lynette");
         assertIdentity(CharacterId.MIKA, 53, "Mika");
         assertIdentity(CharacterId.CHARLOTTE, 54, "Charlotte");
+        assertIdentity(CharacterId.DORI, 55, "Dori");
         assertEquals(CharacterId.BENNETT, CharacterId.fromNumericId(1),
                 "first prior numeric ID");
         assertEquals(CharacterId.YANFEI, CharacterId.fromNumericId(20),
@@ -60,7 +61,7 @@ public final class LegacyCharacterIdentityRegressionTest {
                 "negative numeric fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(0),
                 "zero numeric fallback");
-        assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(55),
+        assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(56),
                 "high numeric fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName(null),
                 "null name fallback");
@@ -113,6 +114,8 @@ public final class LegacyCharacterIdentityRegressionTest {
                 "Candace identity case-sensitive fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("lynette"),
                 "Lynette identity case-sensitive fallback");
+        assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("dori"),
+                "Dori identity case-sensitive fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("Not A Character"),
                 "unmatched name fallback");
         assertEquals(CharacterRegion.LIYUE, CharacterId.GANYU.getRegion(),
@@ -182,6 +185,8 @@ public final class LegacyCharacterIdentityRegressionTest {
                 "Candace Sumeru region lookup");
         assertEquals(CharacterRegion.FONTAINE, CharacterId.LYNETTE.getRegion(),
                 "Lynette Fontaine region lookup");
+        assertEquals(CharacterRegion.SUMERU, CharacterId.DORI.getRegion(),
+                "Dori Sumeru region lookup");
         assertEquals(CharacterRegion.UNKNOWN,
                 CharacterId.COLUMBINA.getRegion(),
                 "unverified custom region fails closed");

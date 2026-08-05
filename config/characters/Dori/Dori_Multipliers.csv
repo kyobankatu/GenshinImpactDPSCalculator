@@ -1,0 +1,13 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Dori,NORMAL,N1,9,1.657420,0
+Dori,NORMAL,N2 Hit 1,9,0.754608,0
+Dori,NORMAL,N2 Hit 2,9,0.792212,0
+Dori,NORMAL,N3,9,2.358940,0
+Dori,SKILL,Troubleshooter Shot,9,2.503760,0
+Dori,SKILL,After-Sales Service Round,9,0.536520,0
+Dori,SKILL,Troubleshooter Shot C5,12,2.945600,0
+Dori,SKILL,After-Sales Service Round C5,12,0.631200,0
+Dori,BURST,Connector DMG,9,0.270001,0
+Dori,BURST,Connector DMG C3,12,0.317648,0
+Dori,BURST,Energy Regeneration,9,2.400000,0
+Dori,BURST,Energy Regeneration C3,12,2.500000,0

@@ -121,6 +121,8 @@ public enum CharacterId {
     MIKA(53, "Mika", CharacterRegion.MONDSTADT),
     /** Charlotte (Cryo catalyst Kamera attacker). */
     CHARLOTTE(54, "Charlotte", CharacterRegion.FONTAINE),
+    /** Dori (Electro claymore Energy support). */
+    DORI(55, "Dori", CharacterRegion.SUMERU),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 
