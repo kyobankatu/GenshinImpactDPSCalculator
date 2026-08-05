@@ -165,6 +165,8 @@ public enum CharacterId {
     TARTAGLIA(75, "Tartaglia", CharacterRegion.SNEZHNAYA),
     /** Navia (Geo claymore Crystal Shrapnel attacker). */
     NAVIA(77, "Navia", CharacterRegion.FONTAINE),
+    /** Wriothesley (Cryo catalyst Normal Attack brawler). */
+    WRIOTHESLEY(78, "Wriothesley", CharacterRegion.FONTAINE),
     /** Chiori (Geo sword dual-scaling automaton attacker). */
     CHIORI(80, "Chiori", CharacterRegion.INAZUMA),
     /** Lyney (Pyro bow Prop Arrow and Grin-Malkin attacker). */

@@ -1,0 +1,25 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Wriothesley,NORMAL,N1,9,0.980327,0
+Wriothesley,NORMAL,N2,9,0.951650,0
+Wriothesley,NORMAL,N3,9,1.235023,0
+Wriothesley,NORMAL,N4-1,9,0.696377,0
+Wriothesley,NORMAL,N4-2,9,0.696377,0
+Wriothesley,NORMAL,N5,9,1.667121,0
+Wriothesley,NORMAL,N1 C3,12,1.203692,0
+Wriothesley,NORMAL,N2 C3,12,1.168481,0
+Wriothesley,NORMAL,N3 C3,12,1.516420,0
+Wriothesley,NORMAL,N4-1 C3,12,0.855045,0
+Wriothesley,NORMAL,N4-2 C3,12,0.855045,0
+Wriothesley,NORMAL,N5 C3,12,2.046972,0
+Wriothesley,CHARGE,Charged Attack,9,2.600320,0
+Wriothesley,CHARGE,Charged Attack C3,12,3.059200,0
+Wriothesley,PLUNGE,High Plunge,9,2.607632,0
+Wriothesley,PLUNGE,High Plunge C3,12,3.201776,0
+Wriothesley,SKILL,Enhanced Repelling Fist Scaling,9,1.669515,0
+Wriothesley,BURST,Darkgold Wolfbite,9,2.162400,0
+Wriothesley,BURST,Surging Blade,9,0.720800,0
+Wriothesley,BURST,Darkgold Wolfbite C5,12,2.544000,0
+Wriothesley,BURST,Surging Blade C5,12,0.848000,0
+Wriothesley,PASSIVE,C1 Rebuke DMG Bonus,1,2.0,0
+Wriothesley,PASSIVE,C6 Rebuke CRIT Rate,6,0.10,0
+Wriothesley,PASSIVE,C6 Rebuke CRIT DMG,6,0.80,0
