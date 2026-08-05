@@ -1,0 +1,27 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Yaoyao,NORMAL,N1,9,0.937003,0
+Yaoyao,NORMAL,N2,9,0.871623,0
+Yaoyao,NORMAL,N3 Hit 1,9,0.576463,0
+Yaoyao,NORMAL,N3 Hit 2,9,0.605282,0
+Yaoyao,NORMAL,N4,9,1.431764,0
+Yaoyao,CHARGE,Charged Attack,9,2.069800,0
+Yaoyao,PLUNGE,High Plunge,9,2.933586,0
+Yaoyao,SKILL,White Jade Radish,9,0.508640,0
+Yaoyao,SKILL,White Jade Radish C3,12,0.598400,0
+Yaoyao,BURST,Moonjade Descent,9,1.947520,0
+Yaoyao,BURST,Moonjade Descent C5,12,2.291200,0
+Yaoyao,BURST,Adeptal Legacy Radish,9,1.226720,0
+Yaoyao,BURST,Adeptal Legacy Radish C5,12,1.443200,0
+Yaoyao,PASSIVE,Skill Spawn Delay Frames,1,63,0
+Yaoyao,PASSIVE,Radish First Hit Frames,1,42,0
+Yaoyao,PASSIVE,Radish Interval Frames,1,60,0
+Yaoyao,PASSIVE,Skill Radish Count,1,10,0
+Yaoyao,PASSIVE,Skill Elemental ICD,1,2.5,0
+Yaoyao,PASSIVE,Skill Particle ICD,1,1.5,0
+Yaoyao,PASSIVE,Particle Travel Frames,1,100,0
+Yaoyao,PASSIVE,Burst Duration Frames,1,360,0
+Yaoyao,PASSIVE,C2 Energy,1,3,0
+Yaoyao,PASSIVE,C2 Energy ICD,1,0.8,0
+Yaoyao,PASSIVE,C4 Max HP Conversion,1,0.003,0
+Yaoyao,PASSIVE,C4 EM Cap,1,120,0
+Yaoyao,PASSIVE,C4 Duration,1,8.8,0

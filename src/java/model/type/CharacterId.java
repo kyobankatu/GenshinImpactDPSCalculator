@@ -129,6 +129,8 @@ public enum CharacterId {
     CHEVREUSE(57, "Chevreuse", CharacterRegion.FONTAINE),
     /** Thoma (Pyro polearm off-field Normal Attack support). */
     THOMA(58, "Thoma", CharacterRegion.INAZUMA),
+    /** Yaoyao (Dendro polearm deployable attacker). */
+    YAOYAO(59, "Yaoyao", CharacterRegion.LIYUE),
     /** Gaming (Pyro claymore Charmed Cloudstrider attacker). */
     GAMING(61, "Gaming", CharacterRegion.LIYUE),
     /** Xinyan (Pyro claymore physical Burst attacker). */

@@ -1,0 +1,13 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Yaoyao,STATS,Base HP,90,12289,0
+Yaoyao,STATS,Base ATK,90,212,0
+Yaoyao,STATS,Base DEF,90,751,0
+Yaoyao,STATS,Ascension HP Percent,90,0.24,0
+Yaoyao,STATS,Energy Cost,90,80,0
+Yaoyao,STATS,Constellation,6,6,0
+Yaoyao,CONFIG,Character Level,90,90,0
+Yaoyao,CONFIG,Normal Level,9,9,0
+Yaoyao,CONFIG,Skill Level,12,12,0
+Yaoyao,CONFIG,Burst Level,12,12,0
+Yaoyao,CONFIG,Skill Cooldown,1,15,0
+Yaoyao,CONFIG,Burst Cooldown,1,20,0
