@@ -293,6 +293,8 @@ public enum BuffId {
     CHEVREUSE_A1_COORDINATED_TACTICS,
     /** Chevreuse A4 Pyro/Electro party ATK bonus. */
     CHEVREUSE_A4_VERTICAL_FORCE_COORDINATION,
+    /** Xinyan C4 Physical resistance reduction after Skill damage. */
+    XINYAN_C4_PHYSICAL_RES_SHRED,
     /** Ayato C4 party Normal Attack speed bonus. */
     AYATO_C4_NORMAL_SPEED,
     /** Heizou A4 non-owner party Elemental Mastery bonus. */

@@ -131,6 +131,8 @@ public enum CharacterId {
     THOMA(58, "Thoma", CharacterRegion.INAZUMA),
     /** Gaming (Pyro claymore Charmed Cloudstrider attacker). */
     GAMING(61, "Gaming", CharacterRegion.LIYUE),
+    /** Xinyan (Pyro claymore physical Burst attacker). */
+    XINYAN(62, "Xinyan", CharacterRegion.LIYUE),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 

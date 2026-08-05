@@ -1,0 +1,18 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Xinyan,STATS,Base HP,90,11201,0
+Xinyan,STATS,Base ATK,90,249,0
+Xinyan,STATS,Base DEF,90,799,0
+Xinyan,STATS,Ascension ATK Percent,90,0.24,0
+Xinyan,STATS,Energy Cost,90,60,0
+Xinyan,STATS,Constellation,6,6,0
+Xinyan,CONFIG,Character Level,90,90,0
+Xinyan,CONFIG,Normal Level,9,9,0
+Xinyan,CONFIG,Skill Level,12,12,0
+Xinyan,CONFIG,Burst Level,12,12,0
+Xinyan,PASSIVE,Skill Cooldown,1,18,0
+Xinyan,PASSIVE,Burst Cooldown,1,15,0
+Xinyan,PASSIVE,Particle Count,1,4,0
+Xinyan,PASSIVE,Particle Cooldown,1,0.2,0
+Xinyan,PASSIVE,C2 Physical Burst Critical Rate,1,1.0,0
+Xinyan,PASSIVE,C4 Physical Resistance Shred,1,0.15,0
+Xinyan,PASSIVE,C4 Duration,1,12,0

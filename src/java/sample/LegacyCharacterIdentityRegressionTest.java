@@ -57,6 +57,7 @@ public final class LegacyCharacterIdentityRegressionTest {
         assertIdentity(CharacterId.CHEVREUSE, 57, "Chevreuse");
         assertIdentity(CharacterId.THOMA, 58, "Thoma");
         assertIdentity(CharacterId.GAMING, 61, "Gaming");
+        assertIdentity(CharacterId.XINYAN, 62, "Xinyan");
         assertEquals(CharacterId.BENNETT, CharacterId.fromNumericId(1),
                 "first prior numeric ID");
         assertEquals(CharacterId.YANFEI, CharacterId.fromNumericId(20),
@@ -65,7 +66,7 @@ public final class LegacyCharacterIdentityRegressionTest {
                 "negative numeric fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(0),
                 "zero numeric fallback");
-        assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(62),
+        assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(63),
                 "high numeric fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName(null),
                 "null name fallback");
@@ -128,6 +129,8 @@ public final class LegacyCharacterIdentityRegressionTest {
                 "Thoma identity case-sensitive fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("gaming"),
                 "Gaming identity case-sensitive fallback");
+        assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("xinyan"),
+                "Xinyan identity case-sensitive fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("Not A Character"),
                 "unmatched name fallback");
         assertEquals(CharacterRegion.LIYUE, CharacterId.GANYU.getRegion(),
@@ -208,6 +211,8 @@ public final class LegacyCharacterIdentityRegressionTest {
                 "Thoma Inazuma region lookup");
         assertEquals(CharacterRegion.LIYUE, CharacterId.GAMING.getRegion(),
                 "Gaming Liyue region lookup");
+        assertEquals(CharacterRegion.LIYUE, CharacterId.XINYAN.getRegion(),
+                "Xinyan Liyue region lookup");
         assertEquals(CharacterRegion.UNKNOWN,
                 CharacterId.COLUMBINA.getRegion(),
                 "unverified custom region fails closed");
@@ -274,8 +279,9 @@ public final class LegacyCharacterIdentityRegressionTest {
                 BuffId.MIKA_SOULWIND_ATTACK_SPEED,
                 BuffId.CHARLOTTE_C2_ATK,
                 BuffId.CHEVREUSE_A1_COORDINATED_TACTICS,
-                BuffId.CHEVREUSE_A4_VERTICAL_FORCE_COORDINATION);
-        assertEquals(59, reserved.size(), "reserved typed buff identities");
+                BuffId.CHEVREUSE_A4_VERTICAL_FORCE_COORDINATION,
+                BuffId.XINYAN_C4_PHYSICAL_RES_SHRED);
+        assertEquals(60, reserved.size(), "reserved typed buff identities");
         System.out.println("LegacyCharacterIdentityRegressionTest passed");
     }
 
