@@ -187,6 +187,8 @@ public enum CharacterId {
     AINO(86, "Aino", CharacterRegion.NOD_KRAI),
     /** Dahlia (Hydro sword Favonian Favor support). */
     DAHLIA(87, "Dahlia", CharacterRegion.MONDSTADT),
+    /** Escoffier (Cryo polearm Cooking Mek attacker and support). */
+    ESCOFFIER(88, "Escoffier", CharacterRegion.FONTAINE),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 

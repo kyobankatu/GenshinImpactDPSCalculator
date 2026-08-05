@@ -36,6 +36,10 @@ public enum BuffId {
     XIANYUN_C2_ATK,
     /** Ororon C6 active-character stacking ATK bonus. */
     ORORON_C6_ACTIVE_ATK,
+    /** Escoffier A4 fixed-target Cryo/Hydro resistance reduction. */
+    ESCOFFIER_A4_CRYO_HYDRO_RES_SHRED,
+    /** Escoffier C1 all-Cryo/Hydro party Cryo CRIT DMG support. */
+    ESCOFFIER_C1_CRYO_CRIT_DMG,
     /** Lunar 拡張: コロンビーナの「皓月の意志」。 */
     GLEAMING_MOON_INTENT,
     /** Lunar 拡張: コロンビーナの「皓月の献身」。 */

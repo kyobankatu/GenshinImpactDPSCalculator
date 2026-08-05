@@ -1,0 +1,35 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Escoffier,NORMAL,N1,9,0.947099,0
+Escoffier,NORMAL,N2,9,0.874388,0
+Escoffier,NORMAL,N3-1,9,0.606270,0
+Escoffier,NORMAL,N3-2,9,0.740996,0
+Escoffier,CHARGED,Charged Attack,9,2.120360,0
+Escoffier,PLUNGE,High Plunge,9,2.933586,0
+Escoffier,SKILL,Low-Temperature Cooking,9,0.856800,0
+Escoffier,SKILL,Low-Temperature Cooking C3,12,1.008000,0
+Escoffier,SKILL,Frosty Parfait,9,2.040000,0
+Escoffier,SKILL,Frosty Parfait C3,12,2.400000,0
+Escoffier,SKILL,Surging Blade,9,0.571200,0
+Escoffier,SKILL,Surging Blade C3,12,0.672000,0
+Escoffier,BURST,Scoring Cuts,9,10.077600,0
+Escoffier,BURST,Scoring Cuts C5,12,11.856000,0
+Escoffier,PASSIVE,Skill Tick Count,1,21,0
+Escoffier,PASSIVE,Skill First Tick Frames,1,148,0
+Escoffier,PASSIVE,Skill Tick Interval Frames,1,58.5,0
+Escoffier,PASSIVE,Skill Travel Frames,1,5,0
+Escoffier,PASSIVE,Particle Count,1,4,0
+Escoffier,PASSIVE,Particle Travel Frames,1,100,0
+Escoffier,PASSIVE,Surging Blade Cooldown,1,10,0
+Escoffier,PASSIVE,A4 Duration,1,12,0
+Escoffier,PASSIVE,A4 One Member Shred,1,0.05,0
+Escoffier,PASSIVE,A4 Two Member Shred,1,0.10,0
+Escoffier,PASSIVE,A4 Three Member Shred,1,0.15,0
+Escoffier,PASSIVE,A4 Four Member Shred,1,0.55,0
+Escoffier,PASSIVE,C1 Cryo CRIT DMG,1,0.60,0
+Escoffier,PASSIVE,C1 Duration,1,15,0
+Escoffier,PASSIVE,C2 ATK Ratio,2,2.40,0
+Escoffier,PASSIVE,C2 Stack Count,2,5,0
+Escoffier,PASSIVE,C2 Duration,2,15,0
+Escoffier,PASSIVE,C6 ATK Ratio,6,5.00,0
+Escoffier,PASSIVE,C6 Trigger Count,6,6,0
+Escoffier,PASSIVE,C6 Trigger Cooldown,6,0.50,0

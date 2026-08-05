@@ -44,6 +44,8 @@ public enum ICDType {
     OroronSoundwave,
     /** Aino's enhanced Ducky rule: 1.8-second time gate only. */
     AinoDucky,
+    /** Escoffier's Skill attacks: 1.5-second time gate only. */
+    ESCOFFIER_SKILL,
     /** Reserved for custom ICD rules not yet implemented. */
     Special // Custom rules (not implemented yet)
 }

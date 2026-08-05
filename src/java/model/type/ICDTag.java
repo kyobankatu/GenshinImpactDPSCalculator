@@ -101,5 +101,7 @@ public enum ICDTag {
     /** Ororon's Soundwave collisions share a private application group. */
     Ororon_Soundwave,
     /** Aino's Ascendant-Gleam Ducky attacks share a private group. */
-    Aino_Ducky
+    Aino_Ducky,
+    /** Escoffier's initial, periodic, and C6 Skill hits share one group. */
+    ESCOFFIER_SKILL
 }
