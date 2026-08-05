@@ -185,6 +185,8 @@ public enum CharacterId {
     ORORON(85, "Ororon", CharacterRegion.NATLAN),
     /** Aino (Hydro claymore Ducky support). */
     AINO(86, "Aino", CharacterRegion.NOD_KRAI),
+    /** Dahlia (Hydro sword Favonian Favor support). */
+    DAHLIA(87, "Dahlia", CharacterRegion.MONDSTADT),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 

@@ -1,0 +1,25 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Dahlia,STATS,Base HP,90,12506,0
+Dahlia,STATS,Base ATK,90,189,0
+Dahlia,STATS,Base DEF,90,560,0
+Dahlia,STATS,Ascension HP Percent,90,0.24,0
+Dahlia,STATS,Energy Cost,90,60,0
+Dahlia,STATS,Constellation,6,6,0
+Dahlia,CONFIG,Character Level,90,90,0
+Dahlia,CONFIG,Normal Level,9,9,0
+Dahlia,CONFIG,Skill Level,12,12,0
+Dahlia,CONFIG,Burst Level,12,12,0
+Dahlia,PASSIVE,Skill Cooldown,1,9,0
+Dahlia,PASSIVE,Burst Cooldown,1,15,0
+Dahlia,PASSIVE,Particle Count,1,3,0
+Dahlia,PASSIVE,Favonian Favor Duration,1,12,0
+Dahlia,PASSIVE,C4 Favonian Favor Duration,1,15,0
+Dahlia,PASSIVE,Benison Generation Cap,1,4,0
+Dahlia,PASSIVE,Normal Hits Per Benison,1,4,0
+Dahlia,PASSIVE,Normal Hit Gate,1,0.05,0
+Dahlia,PASSIVE,A1 Benison Stacks,1,2,0
+Dahlia,PASSIVE,A1 Cooldown,1,8,0
+Dahlia,PASSIVE,A4 Speed Per HP,1,0.000005,0
+Dahlia,PASSIVE,A4 Speed Cap,1,0.20,0
+Dahlia,PASSIVE,C1 Energy Per Stack,1,2.5,0
+Dahlia,PASSIVE,C6 Attack Speed,1,0.10,0

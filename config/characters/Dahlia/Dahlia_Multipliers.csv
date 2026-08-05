@@ -1,0 +1,13 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Dahlia,NORMAL,N1,9,0.800049,0
+Dahlia,NORMAL,N2,9,0.736722,0
+Dahlia,NORMAL,N3 Hit 1,9,0.436238,0
+Dahlia,NORMAL,N3 Hit 2,9,0.533092,0
+Dahlia,NORMAL,N4,9,1.206267,0
+Dahlia,CHARGE,Charged Hit 1,9,0.732614,0
+Dahlia,CHARGE,Charged Hit 2,9,1.011706,0
+Dahlia,PLUNGE,High Plunge,9,2.933586,0
+Dahlia,SKILL,Immersive Ordinance,9,3.957600,0
+Dahlia,SKILL,Immersive Ordinance C5,12,4.656000,0
+Dahlia,BURST,Radiant Psalter,9,6.908800,0
+Dahlia,BURST,Radiant Psalter C3,12,8.128000,0

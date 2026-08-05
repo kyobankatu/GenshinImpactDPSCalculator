@@ -339,6 +339,8 @@ public enum BuffId {
     LYNETTE_C6_ANEMO_DMG,
     /** Mika's 12-second party Soulwind attack-speed window. */
     MIKA_SOULWIND_ATTACK_SPEED,
+    /** Dahlia's Favonian Favor party Normal Attack speed window. */
+    DAHLIA_FAVONIAN_FAVOR_ATTACK_SPEED,
     /** Charlotte C2 owner ATK window after Skill damage. */
     CHARLOTTE_C2_ATK,
     /** Kazuha A4 team Pyro damage bonus. */
