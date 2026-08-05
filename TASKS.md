@@ -23516,3 +23516,78 @@ Completion evidence:
   wrong callbacks, and independent instances.
 - `./gradlew ReactionRegressionTest`, `./gradlew build`, `./gradlew javadoc`,
   and `python scripts/preflight.py` passed on 2026-08-02.
+
+## Implementation Order: Character And Weapon Coverage Campaign B-207
+
+Status: In progress. This time-boxed campaign adds source-ready missing
+characters and weapons as independently verified vertical slices through
+2026-08-05 17:00 JST.
+
+Scope:
+
+- Add typed single-target offensive character slices with aligned CSV data,
+  identity, timing, Energy, representable passives/constellations, and rollback.
+- Add exact Lv. 90/R1-R5 weapon metadata and every passive branch supported by
+  existing action, damage, reaction, stat, and snapshot contracts.
+- Commit and push each verified unit independently; reconcile this inventory
+  after four units or 60 minutes and at wind-down.
+
+Out of scope for this pass:
+
+- RL, generated `docs/`, player healing/current HP/damage intake, shields,
+  multi-target geometry, movement, hitlag, exploration, and Deferred Systems.
+
+### Phase 1: Source-Ready Character And Weapon Units
+
+Why:
+
+- The units are independent after keeping shared character identity changes on
+  the primary branch; weapon sidecars use disjoint source and regression files.
+
+Campaign inventory:
+
+| Unit | Type | Represented scope | Focused check | Status |
+|---|---|---|---|---|
+| Dori | character | fixed-target basics, Skill rounds, particles, Burst connector/Energy, representable constellations | `DoriRegressionTest` | in progress |
+| Verdict | weapon | metadata, permanent ATK, representable Lunar-Crystallize Seals | `VerdictRegressionTest` | delegated |
+| Beacon of the Reed Sea | weapon | metadata, Skill-hit ATK and no-shield HP boundary | `BeaconOfTheReedSeaRegressionTest` | delegated |
+| Jadefall's Splendor | weapon | metadata and active-owner Burst Regalia branch | `JadefallsSplendorRegressionTest` | queued |
+| Kaveh | character | fixed-target basics, Skill/Burst Dendro slice | `KavehRegressionTest` | queued |
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `config/characters/Dori/Dori_Status.csv` (new)
+- `config/characters/Dori/Dori_Multipliers.csv` (new)
+- `src/java/model/character/Dori.java` (new)
+- `src/java/sample/DoriRegressionTest.java` (new)
+- one new `src/java/model/weapon/<Weapon>.java` and matching focused
+  `src/java/sample/<Weapon>RegressionTest.java` per weapon unit
+
+Tasks:
+
+- Preserve typed identity and exact source-backed metadata without renumbering
+  existing content.
+- Fail closed on excluded runtime state rather than approximating triggers.
+- Keep mutable unit state owner-bound, independent, and snapshot-safe.
+
+Acceptance criteria:
+
+- Character data and runtime keys load together; actions enforce cooldown,
+  Energy, timing, element/gauge/ICD, and unsupported-action boundaries.
+- Weapons expose exact metadata/refinement and isolate eligible triggers and
+  stats from unavailable branches.
+- Every unit passes its focused regression, `ReactionRegressionTest`, `build`,
+  Javadoc, and executable preflight before its implementation commit.
+
+Test cases to add or update:
+
+- Normal: source-backed action/passive/refinement behavior.
+- Boundary: exact cooldown/window/expiry/cap and snapshot restore.
+- Abnormal: invalid rank/constellation, wrong owner/field/simulator, null or
+  unsupported input, and independent-instance isolation.
+
+Verification:
+
+- `./gradlew <FocusedRegressionTest> ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`

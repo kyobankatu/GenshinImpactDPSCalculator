@@ -4306,3 +4306,18 @@ experiment record.
 - **Completion:** exact metadata and the unconditional R1-R5 CRIT DMG branch
   pass focused/shared/build/Javadoc/preflight gates; Bond-derived stacks remain
   explicit. Commit/push is blocked by read-only `.git`.
+
+### B-207 — Character and weapon coverage campaign
+
+- **Status:** in-progress
+- **Source:** explicit 2026-08-05 autonomous character/weapon expansion request
+  and normalized pinned gcsim `ef41805d` catalog gap.
+- **Initial units:** Dori, Verdict, Beacon of the Reed Sea, Jadefall's Splendor,
+  and Kaveh; replenish from the same missing-content inventory as units close.
+- **Scope/risk:** independently verified fixed-target character slices and
+  representable weapon branches; medium for characters, low/medium for weapons.
+- **Boundary:** RL, generated docs, healing/current HP/player damage, shields,
+  geometry, movement, hitlag, exploration, and Deferred Systems remain excluded.
+- **Proof/plan:** compact B-207 campaign inventory in `TASKS.md`, focused tests,
+  shared regression/build/Javadoc gates, executable preflight, and per-unit
+  implementation commits.
