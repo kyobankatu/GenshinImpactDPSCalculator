@@ -1,0 +1,16 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Hu Tao,NORMAL,N1,9,0.788544,0
+Hu Tao,NORMAL,N2,9,0.811543,0
+Hu Tao,NORMAL,N3,9,1.026750,0
+Hu Tao,NORMAL,N4,9,1.103962,0
+Hu Tao,NORMAL,N5 Hit 1,9,0.559603,0
+Hu Tao,NORMAL,N5 Hit 2,9,0.592000,0
+Hu Tao,NORMAL,N6,9,1.445664,0
+Hu Tao,CHARGED,Charged Attack,9,2.286600,0
+Hu Tao,PLUNGE,High Plunge,9,2.747916,0
+Hu Tao,SKILL,Paramita ATK Ratio,9,0.059570,0
+Hu Tao,SKILL,Paramita ATK Ratio C3,12,0.068540,0
+Hu Tao,SKILL,Blood Blossom,9,1.088000,0
+Hu Tao,SKILL,Blood Blossom C3,12,1.280000,0
+Hu Tao,BURST,Spirit Soother,9,4.703440,0
+Hu Tao,BURST,Spirit Soother C5,12,5.411680,0

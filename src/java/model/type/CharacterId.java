@@ -137,6 +137,8 @@ public enum CharacterId {
     GAMING(61, "Gaming", CharacterRegion.LIYUE),
     /** Xinyan (Pyro claymore physical Burst attacker). */
     XINYAN(62, "Xinyan", CharacterRegion.LIYUE),
+    /** Hu Tao (Pyro polearm Paramita attacker). */
+    HU_TAO(63, "Hu Tao", CharacterRegion.LIYUE),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 

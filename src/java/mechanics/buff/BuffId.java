@@ -295,6 +295,8 @@ public enum BuffId {
     CHEVREUSE_A4_VERTICAL_FORCE_COORDINATION,
     /** Xinyan C4 Physical resistance reduction after Skill damage. */
     XINYAN_C4_PHYSICAL_RES_SHRED,
+    /** Hu Tao A1 non-owner party CRIT Rate bonus. */
+    HU_TAO_A1_PARTY_CRIT,
     /** Ayato C4 party Normal Attack speed bonus. */
     AYATO_C4_NORMAL_SPEED,
     /** Heizou A4 non-owner party Elemental Mastery bonus. */
