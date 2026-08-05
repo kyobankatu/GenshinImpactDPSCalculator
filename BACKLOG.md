@@ -4335,3 +4335,8 @@ experiment record.
   an isolated implementation lane. Burst-only CRIT DMG, shield state,
   Moondrift geometry, and Hexerei stay inactive where no exact typed contract
   exists.
+- **Checkpoint 2026-08-05 12:24 JST:** Symphonist of Scents plus Cashflow
+  Supervision, Crimson Moon's Semblance, Calamity of Eshu, Splendor of Tranquil
+  Waters, and Flower-Wreathed Feathers are complete and pushed. Thoma and
+  Silvershower Heartstrings continue in isolated lanes. Sword of Descension
+  remains governed by the B-187 typed-Traveler blocker.

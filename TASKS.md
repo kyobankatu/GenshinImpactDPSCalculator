@@ -23616,6 +23616,13 @@ Campaign inventory:
 | Athame Artis | weapon | metadata, retained Burst-only CRIT DMG value, Burst-hit owner/active-ally ATK windows | `AthameArtisRegressionTest` | complete (`b95eb71`) |
 | The Daybreak Chronicles | weapon | metadata, independent Normal/Skill/Burst damage stacks and exact decay | `TheDaybreakChroniclesRegressionTest` | complete (`7dbc661`) |
 | Golden Frostbound Oath | weapon | metadata, permanent DEF, owner Skill/Lunar-Crystallize window | `GoldenFrostboundOathRegressionTest` | complete (`3c2404e`) |
+| Symphonist of Scents | weapon | metadata, permanent and off-field ATK tiers, explicit inactive healing branch | `SymphonistOfScentsRegressionTest` | complete (`f515398`) |
+| Cashflow Supervision | weapon | metadata, permanent ATK, explicit inactive HP-change stacks | `RecentBoundaryWeaponRegressionTest` | complete (`ac5fe53`) |
+| Crimson Moon's Semblance | weapon | metadata and explicit inactive Bond of Life branches | `RecentBoundaryWeaponRegressionTest` | complete (`ac5fe53`) |
+| Calamity of Eshu | weapon | metadata and explicit inactive shield branch | `RecentBoundaryWeaponRegressionTest` | complete (`ac5fe53`) |
+| Splendor of Tranquil Waters | weapon | metadata and explicit inactive HP-change branches | `RecentBoundaryWeaponRegressionTest` | complete (`ac5fe53`) |
+| Flower-Wreathed Feathers | weapon | metadata and explicit inactive aim/exploration branches | `RecentBoundaryWeaponRegressionTest` | complete (`ac5fe53`) |
+| Silvershower Heartstrings | weapon | metadata and active-owner Skill Remedy stack; unavailable HP/healing branches fail closed | `SilvershowerHeartstringsRegressionTest` | delegated |
 | Thoma | character | fixed-target attacks, Skill/particles, Burst follow-up, representable constellations | `ThomaRegressionTest` | delegated |
 
 Requirements and tests remain the Phase 1 acceptance and abnormal-path matrix;
@@ -23631,3 +23638,8 @@ Chronicles, and Golden Frostbound Oath are complete and pushed. Thoma is the
 next isolated character unit. Athame's Burst-only CRIT DMG remains retained but
 inactive because no action-specific CRIT DMG stat exists; shield, construct
 geometry, and Hexerei branches remain explicit boundaries.
+
+Checkpoint 2026-08-05 12:24 JST: Symphonist of Scents and five recent
+boundary weapons are complete and pushed. Silvershower Heartstrings and Thoma
+continue in isolated lanes. Sword of Descension remains blocked by B-187 until
+a typed Traveler identity exists; display-name control flow will not be added.
