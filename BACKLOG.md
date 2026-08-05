@@ -4325,3 +4325,8 @@ experiment record.
   units are complete and pushed. The source-ready queue is replenished with
   Chevreuse and Sword of Narzissenkreuz; unavailable healing, shield, damage
   intake, forced Core rupture, geometry, and hitlag branches stay excluded.
+- **Checkpoint 2026-08-05 12:03 JST:** Starcaller's Watch, Fractured Halo,
+  Sword of Narzissenkreuz, and Angelos Heptades are complete and pushed.
+  Chevreuse and Athame Artis remain active isolated units; shield-created and
+  Hexerei branches continue to fail closed where their typed runtime state is
+  unavailable.

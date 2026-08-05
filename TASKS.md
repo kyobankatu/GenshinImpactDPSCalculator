@@ -23609,8 +23609,16 @@ Campaign inventory:
 | Unit | Type | Represented scope | Focused check | Status |
 |---|---|---|---|---|
 | Chevreuse | character | fixed-target Pyro/Electro support, actions, particles, Overcharged state, representable constellations | `ChevreuseRegressionTest` | delegated |
-| Sword of Narzissenkreuz | weapon | metadata, non-Arkhe Normal/Charged/Plunge blast, cooldown and rollback | `SwordOfNarzissenkreuzRegressionTest` | delegated |
+| Sword of Narzissenkreuz | weapon | metadata, non-Arkhe Normal/Charged/Plunge blast, cooldown and rollback | `SwordOfNarzissenkreuzRegressionTest` | complete (`957e88f`) |
+| Starcaller's Watch | weapon | metadata, permanent EM, explicit inactive shield-created Mirror branch | `StarcallersWatchRegressionTest` | complete (`d7dd116`) |
+| Fractured Halo | weapon | metadata, active-owner Skill/Burst ATK window, explicit inactive shield branch | `FracturedHaloRegressionTest` | complete (`e50f0b4`) |
+| Angelos Heptades | weapon | metadata, permanent ATK, explicit inactive shield Energy/team-damage branches | `AngelosHeptadesRegressionTest` | complete (`0615c96`) |
+| Athame Artis | weapon | metadata, Burst CRIT DMG, Burst-hit owner/active-ally ATK windows | `AthameArtisRegressionTest` | delegated |
 
 Requirements and tests remain the Phase 1 acceptance and abnormal-path matrix;
 each replenished unit receives a source-backed focused regression and an
 independent commit before the shared gates and push.
+
+Checkpoint 2026-08-05 12:03 JST: four replenished weapon units are complete
+and pushed. Chevreuse and Athame Artis continue in isolated worktrees; no
+excluded shield or Hexerei state is synthesized.
