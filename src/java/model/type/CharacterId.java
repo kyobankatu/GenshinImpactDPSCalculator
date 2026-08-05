@@ -127,6 +127,8 @@ public enum CharacterId {
     KAVEH(56, "Kaveh", CharacterRegion.SUMERU),
     /** Chevreuse (Pyro polearm Overload support). */
     CHEVREUSE(57, "Chevreuse", CharacterRegion.FONTAINE),
+    /** Thoma (Pyro polearm off-field Normal Attack support). */
+    THOMA(58, "Thoma", CharacterRegion.INAZUMA),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 

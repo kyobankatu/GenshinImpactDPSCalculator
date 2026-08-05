@@ -1,0 +1,14 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Thoma,NORMAL,N1,9,0.815596,0
+Thoma,NORMAL,N2,9,0.801534,0
+Thoma,NORMAL,N3 Hit 1,9,0.492170,0
+Thoma,NORMAL,N3 Hit 2,9,0.492170,0
+Thoma,NORMAL,N4,9,1.237456,0
+Thoma,CHARGED,Charged Attack,9,2.071380,0
+Thoma,PLUNGE,High Plunge,9,2.933586,0
+Thoma,SKILL,Blazing Blessing,9,2.488800,0
+Thoma,SKILL,Blazing Blessing C3,12,2.928000,0
+Thoma,BURST,Crimson Ooyoroi Initial,9,1.496000,0
+Thoma,BURST,Crimson Ooyoroi Initial C5,12,1.760000,0
+Thoma,BURST,Fiery Collapse,9,0.986000,0
+Thoma,BURST,Fiery Collapse C5,12,1.160000,0
