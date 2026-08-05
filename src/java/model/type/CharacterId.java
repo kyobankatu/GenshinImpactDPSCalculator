@@ -139,6 +139,8 @@ public enum CharacterId {
     XINYAN(62, "Xinyan", CharacterRegion.LIYUE),
     /** Hu Tao (Pyro polearm Paramita attacker). */
     HU_TAO(63, "Hu Tao", CharacterRegion.LIYUE),
+    /** Sethos (Electro bow Shadowpiercing attacker). */
+    SETHOS(64, "Sethos", CharacterRegion.SUMERU),
     /** Zhongli (Geo polearm construct attacker). */
     ZHONGLI(66, "Zhongli", CharacterRegion.LIYUE),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */

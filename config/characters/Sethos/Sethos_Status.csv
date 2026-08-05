@@ -1,0 +1,30 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Sethos,STATS,Base HP,90,9787,0
+Sethos,STATS,Base ATK,90,227,0
+Sethos,STATS,Base DEF,90,560,0
+Sethos,STATS,Ascension Elemental Mastery,90,96,0
+Sethos,STATS,Energy Cost,90,60,0
+Sethos,STATS,Constellation,6,6,0
+Sethos,CONFIG,Character Level,90,90,0
+Sethos,CONFIG,Normal Level,12,12,0
+Sethos,CONFIG,Skill Level,9,9,0
+Sethos,CONFIG,Burst Level,12,12,0
+Sethos,PASSIVE,Skill Cooldown,1,8,0
+Sethos,PASSIVE,Burst Cooldown,1,15,0
+Sethos,PASSIVE,Burst Duration,1,8,0
+Sethos,PASSIVE,Skill Energy Regeneration,1,12,0
+Sethos,PASSIVE,Skill Particle Count,1,2,0
+Sethos,PASSIVE,Particle Travel Frames,1,100,0
+Sethos,PASSIVE,A1 Energy Cap,1,20,0
+Sethos,PASSIVE,A1 Charge Reduction Per Energy,1,0.285,0
+Sethos,PASSIVE,A1 Fully Charged Energy Ratio,1,0.5,0
+Sethos,PASSIVE,A1 Shadowpiercing Energy Ratio,1,1.0,0
+Sethos,PASSIVE,A4 Elemental Mastery Ratio,1,7.0,0
+Sethos,PASSIVE,A4 Shot Count,1,4,0
+Sethos,PASSIVE,A4 Window Duration,1,5,0
+Sethos,PASSIVE,A4 Refresh Cooldown,1,15,0
+Sethos,PASSIVE,C1 Shadowpiercing CRIT Rate,1,0.15,0
+Sethos,PASSIVE,C2 Electro DMG Per Stack,2,0.15,0
+Sethos,PASSIVE,C2 Maximum Stacks,2,2,0
+Sethos,PASSIVE,C2 Stack Duration,2,10,0
+Sethos,PASSIVE,C6 Energy Restore Cooldown,6,15,0

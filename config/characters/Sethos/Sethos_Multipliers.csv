@@ -1,0 +1,18 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Sethos,NORMAL,N1,9,0.966628,0
+Sethos,NORMAL,N2 Hit 1,9,0.437186,0
+Sethos,NORMAL,N2 Hit 2,9,0.488852,0
+Sethos,NORMAL,N3,9,1.359290,0
+Sethos,NORMAL,N1 C3,12,1.186873,0
+Sethos,NORMAL,N2 Hit 1 C3,12,0.536798,0
+Sethos,NORMAL,N2 Hit 2 C3,12,0.600236,0
+Sethos,NORMAL,N3 C3,12,1.669001,0
+Sethos,CHARGED,Fully Charged Aimed Shot,9,2.108000,0
+Sethos,CHARGED,Fully Charged Aimed Shot C3,12,2.480000,0
+Sethos,CHARGED,Shadowpiercing ATK,9,2.380000,0
+Sethos,CHARGED,Shadowpiercing ATK C3,12,2.800000,0
+Sethos,CHARGED,Shadowpiercing Elemental Mastery,9,2.287520,0
+Sethos,CHARGED,Shadowpiercing Elemental Mastery C3,12,2.691200,0
+Sethos,SKILL,Ancient Rite,9,1.965200,0
+Sethos,BURST,Dusk Bolt Elemental Mastery,9,3.334720,0
+Sethos,BURST,Dusk Bolt Elemental Mastery C5,12,3.923200,0
