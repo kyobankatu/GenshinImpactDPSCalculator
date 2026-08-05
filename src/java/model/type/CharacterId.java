@@ -193,6 +193,8 @@ public enum CharacterId {
     CITLALI(89, "Citlali", CharacterRegion.NATLAN),
     /** Neuvillette (Hydro catalyst Equitable Judgment attacker). */
     NEUVILLETTE(90, "Neuvillette", CharacterRegion.FONTAINE),
+    /** Mualani (Hydro catalyst Nightsoul and Surging Bite attacker). */
+    MUALANI(91, "Mualani", CharacterRegion.NATLAN),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 

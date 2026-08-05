@@ -1,0 +1,53 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Mualani,NORMAL,N1,9,0.873732,0
+Mualani,NORMAL,N2,9,0.758635,0
+Mualani,NORMAL,N3,9,1.190585,0
+Mualani,CHARGED,Charged Attack,9,2.42896,0
+Mualani,PLUNGE,High Plunge,9,2.607632,0
+Mualani,SKILL,Sharky's Bite,9,0.14756,0
+Mualani,SKILL,Wave Momentum,9,0.07378,0
+Mualani,SKILL,Surging Bite Additional,9,0.3689,0
+Mualani,SKILL,Sharky's Bite C3,12,0.1736,0
+Mualani,SKILL,Wave Momentum C3,12,0.0868,0
+Mualani,SKILL,Surging Bite Additional C3,12,0.434,0
+Mualani,BURST,Boomsharka-laka,9,0.993466,0
+Mualani,BURST,Boomsharka-laka C5,12,1.168784,0
+Mualani,PASSIVE,N1 Hit Frames,1,11,0
+Mualani,PASSIVE,N2 Hit Frames,1,9,0
+Mualani,PASSIVE,N3 Hit Frames,1,31,0
+Mualani,PASSIVE,N1 Duration Frames,1,33,0
+Mualani,PASSIVE,N2 Duration Frames,1,32,0
+Mualani,PASSIVE,N3 Duration Frames,1,67,0
+Mualani,PASSIVE,Charged Hit Frames,1,71,0
+Mualani,PASSIVE,Charged Duration Frames,1,100,0
+Mualani,PASSIVE,High Plunge Hit Frames,1,45,0
+Mualani,PASSIVE,High Plunge Duration Frames,1,68,0
+Mualani,PASSIVE,Skill Entry Frames,1,2,0
+Mualani,PASSIVE,Skill Duration Frames,1,69,0
+Mualani,PASSIVE,Skill Cancel Duration Frames,1,17,0
+Mualani,PASSIVE,Nightsoul Maximum Points,1,60,0
+Mualani,PASSIVE,Nightsoul Drain Interval Frames,1,6,0
+Mualani,PASSIVE,Wave Momentum Cooldown,1,0.7,0
+Mualani,PASSIVE,Bite Hit Frames,1,7,0
+Mualani,PASSIVE,Surging Bite Hit Frames,1,42,0
+Mualani,PASSIVE,Bite Duration Frames,1,215,0
+Mualani,PASSIVE,Surging Bite Duration Frames,1,258,0
+Mualani,PASSIVE,Bite Cooldown,1,1.8,0
+Mualani,PASSIVE,Particle Count Min,1,4,0
+Mualani,PASSIVE,Particle Count Max,1,5,0
+Mualani,PASSIVE,Particle Travel Frames,1,100,0
+Mualani,PASSIVE,A1 Puffer Delay Frames,1,20,0
+Mualani,PASSIVE,A1 Puffer Nightsoul Points,1,20,0
+Mualani,PASSIVE,A1 Puffer Limit,1,2,0
+Mualani,PASSIVE,C1 Max HP Bonus,1,0.66,0
+Mualani,PASSIVE,C2 Initial Momentum,2,2,0
+Mualani,PASSIVE,C2 Delayed Nightsoul Points,2,12,0
+Mualani,PASSIVE,C2 Point Interval Frames,2,10,0
+Mualani,PASSIVE,A4 Max HP Per Stack,1,0.15,0
+Mualani,PASSIVE,A4 Stack Limit,1,3,0
+Mualani,PASSIVE,C4 Puffer Energy,4,8,0
+Mualani,PASSIVE,C4 Burst DMG Bonus,4,0.75,0
+Mualani,PASSIVE,Burst Energy Frame,1,11,0
+Mualani,PASSIVE,Burst Snapshot Frame,1,108,0
+Mualani,PASSIVE,Burst Travel Frames,1,70,0
+Mualani,PASSIVE,Burst Duration Frames,1,180,0
