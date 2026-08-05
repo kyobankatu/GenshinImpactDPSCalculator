@@ -287,6 +287,8 @@ public enum BuffId {
     ALHAITHAM_C4_DENDRO_DMG_BONUS,
     /** Ayato Burst party Normal Attack damage bonus. */
     AYATO_BURST_NORMAL_DMG,
+    /** Kaveh's Painted Dome party Bloom damage bonus. */
+    KAVEH_PAINTED_DOME_BLOOM_DMG,
     /** Ayato C4 party Normal Attack speed bonus. */
     AYATO_C4_NORMAL_SPEED,
     /** Heizou A4 non-owner party Elemental Mastery bonus. */

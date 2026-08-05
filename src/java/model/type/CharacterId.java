@@ -123,6 +123,8 @@ public enum CharacterId {
     CHARLOTTE(54, "Charlotte", CharacterRegion.FONTAINE),
     /** Dori (Electro claymore Energy support). */
     DORI(55, "Dori", CharacterRegion.SUMERU),
+    /** Kaveh (Dendro claymore Bloom driver). */
+    KAVEH(56, "Kaveh", CharacterRegion.SUMERU),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 
