@@ -23622,8 +23622,12 @@ Campaign inventory:
 | Calamity of Eshu | weapon | metadata and explicit inactive shield branch | `RecentBoundaryWeaponRegressionTest` | complete (`ac5fe53`) |
 | Splendor of Tranquil Waters | weapon | metadata and explicit inactive HP-change branches | `RecentBoundaryWeaponRegressionTest` | complete (`ac5fe53`) |
 | Flower-Wreathed Feathers | weapon | metadata and explicit inactive aim/exploration branches | `RecentBoundaryWeaponRegressionTest` | complete (`ac5fe53`) |
-| Silvershower Heartstrings | weapon | metadata and active-owner Skill Remedy stack; unavailable HP/healing branches fail closed | `SilvershowerHeartstringsRegressionTest` | delegated |
-| Thoma | character | fixed-target attacks, Skill/particles, Burst follow-up, representable constellations | `ThomaRegressionTest` | delegated |
+| Silvershower Heartstrings | weapon | metadata and active-owner Skill Remedy stack; unavailable HP/healing branches fail closed | `SilvershowerHeartstringsRegressionTest` | complete (`87a3fa7`) |
+| Thoma | character | fixed-target attacks, Skill/particles, Burst follow-up, representable constellations | `ThomaRegressionTest` | complete (`610dc69`) |
+| Gaming | character | Normal/Plunge, Charmed Cloudstrider, particles, initial Man Chai reset, C3-C6 offensive branches | `GamingRegressionTest` | complete (`e13a651`) |
+| Xinyan | character | Normal/Plunge, Skill initial/particles/C4, Physical Burst and seven Pyro pulses, C2-C5 | `XinyanRegressionTest` | complete (`cb56864`) |
+| Yaoyao | character | fixed-target basics, replaceable Skill Yuegui, Burst Yuegui/radishes, C2/C4 | `YaoyaoRegressionTest` | complete (`4fef93a`) |
+| Xiao | character | fixed-target basics, Skill charges/particles, Burst infusion, A1/A4, C1-C3/C5 | `XiaoRegressionTest` | complete (`860d8d8`) |
 
 Requirements and tests remain the Phase 1 acceptance and abnormal-path matrix;
 each replenished unit receives a source-backed focused regression and an
@@ -23643,3 +23647,10 @@ Checkpoint 2026-08-05 12:24 JST: Symphonist of Scents and five recent
 boundary weapons are complete and pushed. Silvershower Heartstrings and Thoma
 continue in isolated lanes. Sword of Descension remains blocked by B-187 until
 a typed Traveler identity exists; display-name control flow will not be added.
+
+Checkpoint 2026-08-05 12:49 JST: Heartstrings, Thoma, Gaming, Xinyan,
+Yaoyao, and Xiao are complete and pushed through integration gate `a7dae1c`.
+The normalized weapon inventory now contains only two implemented aliases and
+B-187's blocked Sword of Descension; subsequent replenishment is character-only.
+Healing, player HP, shields, geometry, movement, and hitlag remain explicit
+boundaries for the new character slices.

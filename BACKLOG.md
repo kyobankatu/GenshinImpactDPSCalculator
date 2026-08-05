@@ -4340,3 +4340,8 @@ experiment record.
   Waters, and Flower-Wreathed Feathers are complete and pushed. Thoma and
   Silvershower Heartstrings continue in isolated lanes. Sword of Descension
   remains governed by the B-187 typed-Traveler blocker.
+- **Checkpoint 2026-08-05 12:49 JST:** Silvershower Heartstrings, Thoma,
+  Gaming, Xinyan, Yaoyao, and Xiao are complete and pushed. A normalized
+  gcsim-key audit confirms no further source-ready weapon gap beyond B-187;
+  `ProspectorsShovel` and `TheAlleyFlash` map to existing Java aliases. The
+  campaign continues with source-ready character slices only.
