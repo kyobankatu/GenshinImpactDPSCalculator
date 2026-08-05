@@ -23641,11 +23641,15 @@ Campaign inventory:
 | Baizhu | character | fixed-target basics, Skill/Burst offensive hits, particles, representable Dendro support/constellations | `BaizhuRegressionTest` | complete (`f55f7b1`) |
 | Dehya | character | fixed-target basics, Fiery Sanctum coordinated attacks, Burst sequence, particles, representable constellations | `DehyaRegressionTest` | complete (`6d944d6`) |
 | Tartaglia | character | fixed-target bow basics, melee stance, Riptide, ranged/melee Burst, particles, representable constellations | `TartagliaRegressionTest` | complete (`36377d6`) |
-| Wanderer | character | fixed-target basics, Windfavored normals/charged attacks, Burst, particles, representable passives/constellations | `WandererRegressionTest` | delegated (ID 76) |
+| Wanderer | character | fixed-target basics, Windfavored normals/charged attacks, Burst, particles, representable passives/constellations | `WandererRegressionTest` | complete (`e63cbcf`) |
 | Navia | character | fixed-target basics, Crystal Shrapnel Skill, Burst support fire, particles, representable passives/constellations | `NaviaRegressionTest` | complete (`2af59f9`) |
-| Wriothesley | character | fixed-target basics, enhanced Rebuke, Skill normal scaling, Burst, particles, representable constellations | `WriothesleyRegressionTest` | delegated (ID 78) |
-| Emilie | character | fixed-target basics, Lumidouce Case cadence/levels, Burning scent, Burst replacements, particles, representable constellations | `EmilieRegressionTest` | delegated (ID 79) |
+| Wriothesley | character | fixed-target basics, enhanced Rebuke, Skill normal scaling, Burst, particles, representable constellations | `WriothesleyRegressionTest` | complete (`976f1e1`) |
+| Emilie | character | fixed-target basics, Lumidouce Case cadence/levels, Burning scent, Burst replacements, particles, representable constellations | `EmilieRegressionTest` | complete (`f56c4ae`) |
 | Chiori | character | fixed-target basics, Tamoto cadence, Skill follow-up state, Burst, particles, representable passives/constellations | `ChioriRegressionTest` | complete (`fd0f113`) |
+| Lan Yan | character | fixed-target basics, Feathermoon ring attacks, Burst, particles, representable passives/constellations | `LanYanRegressionTest` | delegated (ID 81) |
+| Lyney | character | fixed-target bow basics, Prop Arrow/hat flow, Skill stack detonation, Burst, particles, representable constellations | `LyneyRegressionTest` | complete (`695425e`) |
+| Xianyun | character | fixed-target basics, Driftcloud Wave Skill, Starwicker Burst attacks, particles, representable passives/constellations | `XianyunRegressionTest` | delegated (ID 83) |
+| Sigewinne | character | fixed-target basics, Rebound Hydrotherapy Skill attacks, Burst pulses, particles, representable passives/constellations | `SigewinneRegressionTest` | delegated (ID 84) |
 
 Requirements and tests remain the Phase 1 acceptance and abnormal-path matrix;
 each replenished unit receives a source-backed focused regression and an
@@ -23691,4 +23695,11 @@ and Navia are complete and pushed through `2af59f9`. Integrated focused tests,
 the reaction suite, build, Javadoc, and executable preflight pass. Wanderer,
 Wriothesley, and Emilie continue in isolated lanes; construct geometry,
 movement, shields, healing, player HP, and multi-target behavior remain
+explicit boundaries.
+
+Checkpoint 2026-08-05 14:25 JST: Lyney, Wriothesley, Wanderer, and Emilie are
+complete and pushed through `f56c4ae`. Their integrated focused regressions,
+the reaction suite, build, Javadoc, and preflight pass together. Lan Yan,
+Xianyun, and Sigewinne continue in isolated lanes; healing, player HP,
+movement, geometry, random targeting, and multi-target behavior remain
 explicit boundaries.
