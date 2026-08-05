@@ -1,0 +1,19 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Gaming,STATS,Base HP,90,11419,0
+Gaming,STATS,Base ATK,90,302,0
+Gaming,STATS,Base DEF,90,703,0
+Gaming,STATS,Ascension ATK Percent,90,0.24,0
+Gaming,STATS,Energy Cost,90,60,0
+Gaming,STATS,Constellation,6,6,0
+Gaming,CONFIG,Character Level,90,90,0
+Gaming,CONFIG,Normal Level,9,9,0
+Gaming,CONFIG,Skill Level,12,12,0
+Gaming,CONFIG,Burst Level,12,12,0
+Gaming,PASSIVE,Skill Cooldown,1,6,0
+Gaming,PASSIVE,Burst Cooldown,1,15,0
+Gaming,PASSIVE,Burst Duration,1,12,0
+Gaming,PASSIVE,Particle Count,1,2,0
+Gaming,PASSIVE,Particle Cooldown,1,3,0
+Gaming,PASSIVE,C4 Energy,1,2,0
+Gaming,PASSIVE,C6 Critical Rate,1,0.20,0
+Gaming,PASSIVE,C6 Critical Damage,1,0.40,0
