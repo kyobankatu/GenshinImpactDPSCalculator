@@ -32,6 +32,8 @@ public enum ICDType {
     NahidaTriKarma,
     /** Nilou's Tranquility Aura rule: 1.9-second time gate only. */
     NilouTranquility,
+    /** Wanderer's C6 follow-up rule: two-second time gate only. */
+    WandererC6,
     /** Reserved for custom ICD rules not yet implemented. */
     Special // Custom rules (not implemented yet)
 }

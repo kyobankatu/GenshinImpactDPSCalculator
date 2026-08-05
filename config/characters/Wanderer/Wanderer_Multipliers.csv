@@ -1,0 +1,29 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Wanderer,NORMAL,N1,9,1.262420,0
+Wanderer,NORMAL,N2,9,1.194480,0
+Wanderer,NORMAL,N3-1,9,0.875320,0
+Wanderer,NORMAL,N3-2,9,0.875320,0
+Wanderer,CHARGED,Charged,9,2.245360,0
+Wanderer,PLUNGE,High Plunge,9,2.607632,0
+Wanderer,SKILL,Skill,9,1.618400,0
+Wanderer,SKILL,Skill C5,12,1.904000,0
+Wanderer,SKILL,Windfavored Normal Modifier,9,1.511525,0
+Wanderer,SKILL,Windfavored Normal Modifier C5,12,1.588550,0
+Wanderer,SKILL,Windfavored Charged Modifier,9,1.409220,0
+Wanderer,SKILL,Windfavored Charged Modifier C5,12,1.470840,0
+Wanderer,BURST,Burst Hit,9,2.502400,0
+Wanderer,BURST,Burst Hit C3,12,2.944000,0
+Wanderer,PASSIVE,Windfavored Points,1,100,0
+Wanderer,PASSIVE,Point Depletion Frames,1,6,0
+Wanderer,PASSIVE,Windfavored Skill Cooldown,1,6,0
+Wanderer,PASSIVE,Particle Cooldown,1,2,0
+Wanderer,PASSIVE,Particle Travel Frames,1,100,0
+Wanderer,PASSIVE,Burst Cooldown,1,15,0
+Wanderer,PASSIVE,C1 Attack Speed,1,0.10,0
+Wanderer,PASSIVE,C2 Bonus Per Spent Point,2,0.04,0
+Wanderer,PASSIVE,C2 Burst Bonus Cap,2,2.0,0
+Wanderer,PASSIVE,C6 Extra Normal Ratio,6,0.40,0
+Wanderer,PASSIVE,C6 Restore Threshold,6,40,0
+Wanderer,PASSIVE,C6 Restore Amount,6,4,0
+Wanderer,PASSIVE,C6 Restore Limit,6,5,0
+Wanderer,PASSIVE,C6 Restore Cooldown,6,0.2,0

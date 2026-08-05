@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Wanderer,STATS,Base HP,90,10164,0
+Wanderer,STATS,Base ATK,90,328,0
+Wanderer,STATS,Base DEF,90,607,0
+Wanderer,STATS,Ascension CRIT Rate,90,0.192,0
+Wanderer,STATS,Energy Cost,90,60,0
+Wanderer,STATS,Constellation,6,6,0
+Wanderer,CONFIG,Character Level,90,90,0
+Wanderer,CONFIG,Normal Level,9,9,0
+Wanderer,CONFIG,Skill Level,12,12,0
+Wanderer,CONFIG,Burst Level,12,12,0

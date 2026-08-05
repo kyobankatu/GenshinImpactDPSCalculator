@@ -163,6 +163,8 @@ public enum CharacterId {
     DEHYA(74, "Dehya", CharacterRegion.SUMERU),
     /** Tartaglia (Hydro bow attacker with a melee stance). */
     TARTAGLIA(75, "Tartaglia", CharacterRegion.SNEZHNAYA),
+    /** Wanderer (Anemo catalyst attacker with the Windfavored state). */
+    WANDERER(76, "Wanderer", CharacterRegion.SUMERU),
     /** Navia (Geo claymore Crystal Shrapnel attacker). */
     NAVIA(77, "Navia", CharacterRegion.FONTAINE),
     /** Wriothesley (Cryo catalyst Normal Attack brawler). */
