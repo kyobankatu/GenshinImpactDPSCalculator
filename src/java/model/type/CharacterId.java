@@ -199,6 +199,8 @@ public enum CharacterId {
     NICOLE(92, "Nicole", CharacterRegion.UNKNOWN),
     /** Kinich (Dendro claymore Scalespiker attacker). */
     KINICH(93, "Kinich", CharacterRegion.NATLAN),
+    /** Xilonen (Geo sword Source Sampler support). */
+    XILONEN(94, "Xilonen", CharacterRegion.NATLAN),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 

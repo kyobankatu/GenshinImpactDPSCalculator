@@ -115,5 +115,7 @@ public enum ICDTag {
     /** Kinich's two-hit Loop Shots share a private application group. */
     Kinich_LoopShot,
     /** Kinich's Scalespiker Cannon and C6 rebound share one private group. */
-    Kinich_ScalespikerCannon
+    Kinich_ScalespikerCannon,
+    /** Xilonen's Blade Roller Normals use an independent standard group. */
+    Xilonen_BladeRoller
 }

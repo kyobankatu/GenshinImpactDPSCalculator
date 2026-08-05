@@ -1,0 +1,48 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Xilonen,NORMAL,N1,9,0.951523,0
+Xilonen,NORMAL,N2-1,9,0.502914,0
+Xilonen,NORMAL,N2-2,9,0.502914,0
+Xilonen,NORMAL,N3,9,1.340235,0
+Xilonen,CHARGED,Charged Attack,9,1.677960,0
+Xilonen,PLUNGE,High Plunge,9,2.933586,0
+Xilonen,NORMAL,Blade Roller N1,9,1.029244,0
+Xilonen,NORMAL,Blade Roller N2,9,1.011342,0
+Xilonen,NORMAL,Blade Roller N3,9,1.209174,0
+Xilonen,NORMAL,Blade Roller N4,9,1.580506,0
+Xilonen,SKILL,Yohual's Scratch,9,3.046400,0
+Xilonen,SKILL,Yohual's Scratch C3,12,3.584000,0
+Xilonen,SKILL,Source Sampler RES Shred,9,0.330000,0
+Xilonen,SKILL,Source Sampler RES Shred C3,12,0.420000,0
+Xilonen,BURST,Ocelotlicue Point,9,4.781760,0
+Xilonen,BURST,Ocelotlicue Point C5,12,5.625600,0
+Xilonen,BURST,Follow-Up Beat,9,4.781760,0
+Xilonen,BURST,Follow-Up Beat C5,12,5.625600,0
+Xilonen,PASSIVE,Particle Count,1,4,0
+Xilonen,PASSIVE,Particle Travel Frames,1,100,0
+Xilonen,PASSIVE,Initial Nightsoul Points,1,45,0
+Xilonen,PASSIVE,Maximum Nightsoul Points,1,90,0
+Xilonen,PASSIVE,Nightsoul Duration,1,9,0
+Xilonen,PASSIVE,Nightsoul Drain Tick,1,0.1,0
+Xilonen,PASSIVE,Nightsoul Drain Per Tick,1,0.5,0
+Xilonen,PASSIVE,Skill Recast Lock,1,1,0
+Xilonen,PASSIVE,Sampler Duration,1,15,0
+Xilonen,PASSIVE,A1 Nightsoul DMG Bonus,1,0.30,0
+Xilonen,PASSIVE,A1 Point Gain,1,35,0
+Xilonen,PASSIVE,A1 Point Gain Cooldown,1,0.1,0
+Xilonen,PASSIVE,A4 DEF,1,0.20,0
+Xilonen,PASSIVE,A4 Duration,1,15,0
+Xilonen,PASSIVE,A4 Trigger Cooldown,1,14,0
+Xilonen,PASSIVE,C1 Duration Multiplier,1,1.45,0
+Xilonen,PASSIVE,C1 Consumption Multiplier,1,0.70,0
+Xilonen,PASSIVE,C2 Duration,2,15,0
+Xilonen,PASSIVE,C2 Geo DMG,2,0.50,0
+Xilonen,PASSIVE,C2 Pyro ATK,2,0.45,0
+Xilonen,PASSIVE,C2 Cryo CRIT DMG,2,0.60,0
+Xilonen,PASSIVE,C2 Electro Energy,2,25,0
+Xilonen,PASSIVE,C2 Electro Burst Cooldown Reduction,2,6,0
+Xilonen,PASSIVE,C4 DEF Ratio,4,0.65,0
+Xilonen,PASSIVE,C4 Stack Count,4,6,0
+Xilonen,PASSIVE,C4 Duration,4,15,0
+Xilonen,PASSIVE,C6 Trigger Cooldown,6,15,0
+Xilonen,PASSIVE,C6 Duration,6,5,0
+Xilonen,PASSIVE,C6 DEF Ratio,6,3,0

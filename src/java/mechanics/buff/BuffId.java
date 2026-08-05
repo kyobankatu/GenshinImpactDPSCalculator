@@ -50,6 +50,14 @@ public enum BuffId {
     NICOLE_GUIDANCE_OF_THEOSIS,
     /** Kinich C2 fixed-target Dendro resistance reduction. */
     KINICH_C2_DENDRO_RES_SHRED,
+    /** Xilonen A4 owner DEF bonus from reaching maximum Nightsoul points. */
+    XILONEN_A4_DEF,
+    /** Xilonen C2 permanent Geo damage support. */
+    XILONEN_C2_GEO_DMG,
+    /** Xilonen C2 active Pyro ATK support. */
+    XILONEN_C2_PYRO_ATK,
+    /** Xilonen C2 active Cryo CRIT DMG support. */
+    XILONEN_C2_CRYO_CRIT_DMG,
     /** Lunar 拡張: コロンビーナの「皓月の意志」。 */
     GLEAMING_MOON_INTENT,
     /** Lunar 拡張: コロンビーナの「皓月の献身」。 */
