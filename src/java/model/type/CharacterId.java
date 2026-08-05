@@ -177,6 +177,8 @@ public enum CharacterId {
     LAN_YAN(81, "Lan Yan", CharacterRegion.LIYUE),
     /** Lyney (Pyro bow Prop Arrow and Grin-Malkin attacker). */
     LYNEY(82, "Lyney", CharacterRegion.FONTAINE),
+    /** Sigewinne (Hydro bow fixed-target Bubblebalm attacker). */
+    SIGEWINNE(84, "Sigewinne", CharacterRegion.FONTAINE),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 

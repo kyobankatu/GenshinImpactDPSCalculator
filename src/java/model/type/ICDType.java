@@ -36,6 +36,10 @@ public enum ICDType {
     WandererC6,
     /** Emilie's Lumidouce Case rule: two-second time gate only. */
     EmilieLumidouce,
+    /** Sigewinne's Bubblebalm rule: two-second time gate only. */
+    SigewinneBubblebalm,
+    /** Sigewinne's Burst pulse rule: 1.9-second time gate only. */
+    SigewinneBurst,
     /** Reserved for custom ICD rules not yet implemented. */
     Special // Custom rules (not implemented yet)
 }

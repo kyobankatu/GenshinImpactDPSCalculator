@@ -1,0 +1,13 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Sigewinne,STATS,Base HP,90,13348,0
+Sigewinne,STATS,Base ATK,90,193,0
+Sigewinne,STATS,Base DEF,90,500,0
+Sigewinne,STATS,Ascension HP Percent,90,0.288,0
+Sigewinne,STATS,Energy Cost,90,70,0
+Sigewinne,STATS,Constellation,6,6,0
+Sigewinne,CONFIG,Character Level,90,90,0
+Sigewinne,CONFIG,Normal Level,9,9,0
+Sigewinne,CONFIG,Skill Level,12,12,0
+Sigewinne,CONFIG,Burst Level,12,12,0
+Sigewinne,CONFIG,Skill Cooldown,1,18,0
+Sigewinne,CONFIG,Burst Cooldown,1,18,0

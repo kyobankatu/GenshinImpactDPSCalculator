@@ -1,0 +1,25 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Sigewinne,NORMAL,N1,9,0.966628,0
+Sigewinne,NORMAL,N2,9,0.938283,0
+Sigewinne,NORMAL,N3,9,1.438369,0
+Sigewinne,SKILL,Bubblebalm,9,0.03876,0
+Sigewinne,SKILL,Bubblebalm C3,12,0.0456,0
+Sigewinne,SKILL,Surging Blade,9,0.011628,0
+Sigewinne,SKILL,Surging Blade C3,12,0.01368,0
+Sigewinne,BURST,Super Saturated Syringing,9,0.200104,0
+Sigewinne,BURST,Super Saturated Syringing C5,12,0.235416,0
+Sigewinne,PASSIVE,Skill Duration,1,18,0
+Sigewinne,PASSIVE,Bubble Interval Frames,1,107,0
+Sigewinne,PASSIVE,Particle Count,1,4,0
+Sigewinne,PASSIVE,Particle Travel Frames,1,100,0
+Sigewinne,PASSIVE,Surging Blade Interval,1,10,0
+Sigewinne,PASSIVE,A1 Hydro DMG Bonus,1,0.08,0
+Sigewinne,PASSIVE,A1 Base Stacks,1,10,0
+Sigewinne,PASSIVE,A1 Base HP Threshold,1,30000,0
+Sigewinne,PASSIVE,A1 Flat DMG Per HP,1,0.08,0
+Sigewinne,PASSIVE,A1 Flat DMG Cap,1,2800,0
+Sigewinne,PASSIVE,C1 Flat DMG Per HP,1,0.1,0
+Sigewinne,PASSIVE,C1 Flat DMG Cap,1,3500,0
+Sigewinne,PASSIVE,C2 Hydro RES Shred,2,0.35,0
+Sigewinne,PASSIVE,C2 Duration,2,8,0
+Sigewinne,PASSIVE,Hold Tier DMG Bonus,1,0.05,0

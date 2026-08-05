@@ -95,6 +95,10 @@ public class ICDManager {
      *       hit count never bypasses the time gate.</li>
      *   <li>{@link ICDType#EmilieLumidouce} – applies after two seconds;
      *       hit count never bypasses the time gate.</li>
+     *   <li>{@link ICDType#SigewinneBubblebalm} – applies after two seconds;
+     *       hit count never bypasses the time gate.</li>
+     *   <li>{@link ICDType#SigewinneBurst} – applies after 1.9 seconds;
+     *       hit count never bypasses the time gate.</li>
      * </ul>
      *
      * <p>{@code null} values for {@code type} or {@code tag} are silently
@@ -161,6 +165,10 @@ public class ICDManager {
             apply = checkTimeOnlyApplication(state, currentTime, 2.0);
         } else if (type == ICDType.EmilieLumidouce) {
             apply = checkTimeOnlyApplication(state, currentTime, 2.0);
+        } else if (type == ICDType.SigewinneBubblebalm) {
+            apply = checkTimeOnlyApplication(state, currentTime, 2.0);
+        } else if (type == ICDType.SigewinneBurst) {
+            apply = checkTimeOnlyApplication(state, currentTime, 1.9);
         }
 
         return apply;

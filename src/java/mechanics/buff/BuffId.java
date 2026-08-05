@@ -28,6 +28,10 @@ public enum BuffId {
     XINGQIU_C2_HYDRO_SHRED,
     /** Emilie C2 fixed-target Dendro resistance reduction. */
     EMILIE_C2_DENDRO_RES_SHRED,
+    /** Sigewinne A1 owner Hydro damage bonus after Skill use. */
+    SIGEWINNE_A1_HYDRO_DMG_BONUS,
+    /** Sigewinne C2 fixed-target Hydro resistance reduction. */
+    SIGEWINNE_C2_HYDRO_RES_SHRED,
     /** Lunar 拡張: コロンビーナの「皓月の意志」。 */
     GLEAMING_MOON_INTENT,
     /** Lunar 拡張: コロンビーナの「皓月の献身」。 */

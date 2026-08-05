@@ -93,5 +93,9 @@ public enum ICDTag {
     /** Wanderer's C6 follow-up Normal Attacks use an independent group. */
     Wanderer_C6,
     /** Emilie's Lumidouce Case attacks share a private application group. */
-    Emilie_Lumidouce
+    Emilie_Lumidouce,
+    /** Sigewinne's Bubblebalm attacks share a private application group. */
+    Sigewinne_Bubblebalm,
+    /** Sigewinne's Burst pulses share a private application group. */
+    Sigewinne_Burst
 }
