@@ -153,6 +153,8 @@ public enum CharacterId {
     KAMISATO_AYAKA(69, "Kamisato Ayaka", CharacterRegion.INAZUMA),
     /** Arataki Itto (Geo claymore Superlative Superstrength attacker). */
     ARATAKI_ITTO(70, "Arataki Itto", CharacterRegion.INAZUMA),
+    /** Nilou (Hydro sword Bloom support and dancer). */
+    NILOU(71, "Nilou", CharacterRegion.SUMERU),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 

@@ -89,6 +89,8 @@ public class ICDManager {
      *       hit count never bypasses the time gate.</li>
      *   <li>{@link ICDType#NahidaTriKarma} – applies after one second;
      *       hit count never bypasses the time gate.</li>
+     *   <li>{@link ICDType#NilouTranquility} – applies after 1.9 seconds;
+     *       hit count never bypasses the time gate.</li>
      * </ul>
      *
      * <p>{@code null} values for {@code type} or {@code tag} are silently
@@ -149,6 +151,8 @@ public class ICDManager {
             apply = checkTimeOnlyApplication(state, currentTime, 2.0);
         } else if (type == ICDType.NahidaTriKarma) {
             apply = checkTimeOnlyApplication(state, currentTime, 1.0);
+        } else if (type == ICDType.NilouTranquility) {
+            apply = checkTimeOnlyApplication(state, currentTime, 1.9);
         }
 
         return apply;

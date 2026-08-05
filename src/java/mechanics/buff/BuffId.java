@@ -301,6 +301,8 @@ public enum BuffId {
     ITTO_C4_PARTY_ATK_DEF,
     /** Nahida A1 active-character Elemental Mastery field bonus. */
     NAHIDA_A1_ACTIVE_ELEMENTAL_MASTERY,
+    /** Nilou C2 Hydro resistance reduction during Golden Chalice's Bounty. */
+    NILOU_C2_HYDRO_RES_SHRED,
     /** Ayato C4 party Normal Attack speed bonus. */
     AYATO_C4_NORMAL_SPEED,
     /** Heizou A4 non-owner party Elemental Mastery bonus. */

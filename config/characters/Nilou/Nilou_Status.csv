@@ -1,0 +1,28 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Nilou,STATS,Base HP,90,15185,0
+Nilou,STATS,Base ATK,90,230,0
+Nilou,STATS,Base DEF,90,729,0
+Nilou,STATS,Ascension HP Percent,90,0.288,0
+Nilou,STATS,Energy Cost,90,70,0
+Nilou,STATS,Constellation,6,6,0
+Nilou,CONFIG,Character Level,90,90,0
+Nilou,CONFIG,Normal Level,9,9,0
+Nilou,CONFIG,Skill Level,12,12,0
+Nilou,CONFIG,Burst Level,12,12,0
+Nilou,PASSIVE,Skill Cooldown,1,18,0
+Nilou,PASSIVE,Burst Cooldown,1,18,0
+Nilou,PASSIVE,Pirouette Duration,1,10,0
+Nilou,PASSIVE,Lunar Prayer Duration,1,8,0
+Nilou,PASSIVE,Tranquility Aura Duration,1,12,0
+Nilou,PASSIVE,C1 Tranquility Extension,1,6,0
+Nilou,PASSIVE,Golden Chalice Duration,1,30,0
+Nilou,PASSIVE,Particle Travel Frames,1,100,0
+Nilou,PASSIVE,C4 Energy,1,15,0
+Nilou,PASSIVE,C4 Burst DMG Bonus,1,0.50,0
+Nilou,PASSIVE,C4 Duration,1,8,0
+Nilou,PASSIVE,C6 CRIT Rate Per 1000 HP,1,0.006,0
+Nilou,PASSIVE,C6 CRIT DMG Per 1000 HP,1,0.012,0
+Nilou,PASSIVE,C6 CRIT Rate Cap,1,0.30,0
+Nilou,PASSIVE,C6 CRIT DMG Cap,1,0.60,0
+Nilou,PASSIVE,C2 Hydro RES Shred,1,0.35,0
+Nilou,PASSIVE,C2 Duration,1,10,0

@@ -81,5 +81,7 @@ public enum ICDTag {
     /** Ayaka's three Charged Attack hits share a dedicated group. */
     Ayaka_Charged,
     /** Ayaka's Senho exit application uses a dedicated group. */
-    Ayaka_Dash
+    Ayaka_Dash,
+    /** Nilou's Tranquility Aura application group. */
+    Nilou_TranquilityAura
 }

@@ -30,6 +30,8 @@ public enum ICDType {
     AlhaithamCharged,
     /** Nahida Tri-Karma Purification rule: one-second time gate only. */
     NahidaTriKarma,
+    /** Nilou's Tranquility Aura rule: 1.9-second time gate only. */
+    NilouTranquility,
     /** Reserved for custom ICD rules not yet implemented. */
     Special // Custom rules (not implemented yet)
 }

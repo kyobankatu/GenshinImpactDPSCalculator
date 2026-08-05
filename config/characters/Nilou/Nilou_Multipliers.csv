@@ -1,0 +1,24 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Nilou,NORMAL,N1,9,0.924253,0
+Nilou,NORMAL,N2,9,0.834809,0
+Nilou,NORMAL,N3,9,1.292551,0
+Nilou,CHARGED,Charged Hit 1,9,0.922720,0
+Nilou,CHARGED,Charged Hit 2,9,1.000140,0
+Nilou,SKILL,Skill Initial,9,0.056761,0
+Nilou,SKILL,Skill Initial C5,12,0.066778,0
+Nilou,SKILL,Sword Dance 1,9,0.077392,0
+Nilou,SKILL,Sword Dance 2,9,0.087456,0
+Nilou,SKILL,Luminous Illusion,9,0.121870,0
+Nilou,SKILL,Sword Dance 1 C5,12,0.091050,0
+Nilou,SKILL,Sword Dance 2 C5,12,0.102890,0
+Nilou,SKILL,Luminous Illusion C5,12,0.143376,0
+Nilou,SKILL,Whirling Step 1,9,0.055453,0
+Nilou,SKILL,Whirling Step 2,9,0.067328,0
+Nilou,SKILL,Water Wheel,9,0.086047,0
+Nilou,SKILL,Whirling Step 1 C5,12,0.065238,0
+Nilou,SKILL,Whirling Step 2 C5,12,0.079210,0
+Nilou,SKILL,Water Wheel C5,12,0.101232,0
+Nilou,BURST,Dance of Abzendegi,9,0.313344,0
+Nilou,BURST,Lingering Aeon,9,0.382976,0
+Nilou,BURST,Dance of Abzendegi C3,12,0.368640,0
+Nilou,BURST,Lingering Aeon C3,12,0.450560,0
