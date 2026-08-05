@@ -23651,10 +23651,14 @@ Campaign inventory:
 | Xianyun | character | fixed-target basics, Driftcloud Wave Skill, Starwicker Burst attacks, particles, representable passives/constellations | `XianyunRegressionTest` | complete (`9669ede`) |
 | Sigewinne | character | fixed-target basics, Rebound Hydrotherapy Skill attacks, Burst pulses, particles, representable passives/constellations | `SigewinneRegressionTest` | complete (`c28c7c0`) |
 | Ororon | character | fixed-target basics, Spirit Orb, Supersonic Oculus pulses, particles, representable Hypersense/passive/constellation branches | `OroronRegressionTest` | complete (`fcdd1e1`) |
-| Aino | character | fixed-target basics, two-hit Musecatcher Skill, Cool Your Jets Ducky cadence, particles, representable passives/constellations | `AinoRegressionTest` | delegated (ID 86) |
-| Dahlia | character | fixed-target basics, Immersive Ordinance, Radiant Psalter hit/Favonian Favor, particles, representable support/constellation branches | `DahliaRegressionTest` | delegated (ID 87) |
-| Escoffier | character | fixed-target basics, Cooking Mek Skill cadence, Burst initial hit, particles, representable Cryo/Hydro support and constellations | `EscoffierRegressionTest` | delegated (ID 88) |
+| Aino | character | fixed-target basics, two-hit Musecatcher Skill, Cool Your Jets Ducky cadence, particles, representable passives/constellations | `AinoRegressionTest` | complete (`8ca28af`) |
+| Dahlia | character | fixed-target basics, Immersive Ordinance, Radiant Psalter hit/Favonian Favor, particles, representable support/constellation branches | `DahliaRegressionTest` | complete (`5e936c8`) |
+| Escoffier | character | fixed-target basics, Cooking Mek Skill cadence, Burst initial hit, particles, representable Cryo/Hydro support and constellations | `EscoffierRegressionTest` | complete (`c7cb8fd`) |
 | Citlali | character | fixed-target basics, Itzpapa Skill cadence, Burst/Skull attacks, particles, representable Cryo/Hydro support and constellations | `CitlaliRegressionTest` | delegated (ID 89) |
+| Neuvillette | character | fixed-target basics, charged Equitable Judgment cadence, Skill/Burst, particles, representable HP scaling/passives/constellations | `NeuvilletteRegressionTest` | complete (`5304f26`) |
+| Mualani | character | fixed-target basics, Nightsoul Sharky's Surging Bite, Burst, particles, representable HP scaling/passives/constellations | `MualaniRegressionTest` | delegated (ID 91) |
+| Nicole | character | fixed-target basics, Revelation Skill ATK support, Burst/Arcane Projection cadence, particles, representable passives/constellations | `NicoleRegressionTest` | delegated (ID 92) |
+| Kinich | character | fixed-target basics, Nightsoul Loop Shot/Scalespiker Cannon, Burst cadence, particles, representable passives/constellations | `KinichRegressionTest` | delegated (ID 93) |
 
 Requirements and tests remain the Phase 1 acceptance and abnormal-path matrix;
 each replenished unit receives a source-backed focused regression and an
@@ -23714,5 +23718,13 @@ complete and pushed through integration fix `a373854`. Their focused
 regressions, the legacy identity regression, reaction suite, build, Javadoc,
 and preflight pass together. Aino, Dahlia, Escoffier, and Citlali continue in
 isolated lanes; shield, healing, player HP, movement, geometry, Nightsoul team
+plumbing, random targeting, and multi-target behavior remain explicit
+boundaries.
+
+Checkpoint 2026-08-05 15:15 JST: Aino, Dahlia, Escoffier, and Neuvillette are
+complete and pushed through `5304f26`. Their focused regressions, the legacy
+identity regression, reaction suite, build, Javadoc, and preflight pass
+together. Citlali, Mualani, Nicole, and Kinich continue in isolated lanes;
+shields, healing, player HP changes, movement, geometry, team-wide Nightsoul
 plumbing, random targeting, and multi-target behavior remain explicit
 boundaries.
