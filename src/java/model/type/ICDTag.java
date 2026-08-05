@@ -83,5 +83,7 @@ public enum ICDTag {
     /** Ayaka's Senho exit application uses a dedicated group. */
     Ayaka_Dash,
     /** Nilou's Tranquility Aura application group. */
-    Nilou_TranquilityAura
+    Nilou_TranquilityAura,
+    /** Baizhu C2 Gossamer Sprite uses an independent application group. */
+    Baizhu_C2
 }

@@ -1,0 +1,28 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Baizhu,STATS,Base HP,90,13348,0
+Baizhu,STATS,Base ATK,90,193,0
+Baizhu,STATS,Base DEF,90,500,0
+Baizhu,STATS,Ascension HP Percent,90,0.288,0
+Baizhu,STATS,Energy Cost,90,80,0
+Baizhu,STATS,Constellation,6,6,0
+Baizhu,CONFIG,Character Level,90,90,0
+Baizhu,CONFIG,Normal Level,9,9,0
+Baizhu,CONFIG,Skill Level,12,12,0
+Baizhu,CONFIG,Burst Level,12,12,0
+Baizhu,PASSIVE,Skill Cooldown,1,10,0
+Baizhu,PASSIVE,Burst Cooldown,1,20,0
+Baizhu,PASSIVE,Particle Chance Four,1,0.5,0
+Baizhu,PASSIVE,Particle Travel Frames,1,100,0
+Baizhu,PASSIVE,C2 Cooldown,1,5,0
+Baizhu,PASSIVE,C2 Multiplier,1,2.5,0
+Baizhu,PASSIVE,C2 Travel Frames,1,13,0
+Baizhu,PASSIVE,C4 Elemental Mastery,1,80,0
+Baizhu,PASSIVE,C4 Duration,1,15,0
+Baizhu,PASSIVE,A4 Duration,1,6,0
+Baizhu,PASSIVE,A4 HP Cap Thousands,1,50,0
+Baizhu,PASSIVE,A4 Burning Bloom Bonus Per 1000 HP,1,0.02,0
+Baizhu,PASSIVE,A4 Aggravate Spread Bonus Per 1000 HP,1,0.008,0
+Baizhu,PASSIVE,A4 Lunar Bloom Bonus Per 1000 HP,1,0.007,0
+Baizhu,PASSIVE,C6 Max HP Flat DMG Ratio,1,0.08,0
+Baizhu,PASSIVE,Spiritvein Release Travel Frames,1,29,0
+Baizhu,PASSIVE,Natural Shield Lifetime Frames,1,152,0

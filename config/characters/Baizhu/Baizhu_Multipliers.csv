@@ -1,0 +1,11 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Baizhu,NORMAL,N1,9,0.635297,0
+Baizhu,NORMAL,N2,9,0.619222,0
+Baizhu,NORMAL,N3 Hit 1,9,0.383207,0
+Baizhu,NORMAL,N3 Hit 2,9,0.383207,0
+Baizhu,NORMAL,N4,9,0.920339,0
+Baizhu,CHARGED,Charged Attack,9,2.057680,0
+Baizhu,SKILL,Universal Diagnosis,9,1.346400,0
+Baizhu,SKILL,Universal Diagnosis C5,12,1.584000,0
+Baizhu,BURST,Spiritvein,9,1.650088,0
+Baizhu,BURST,Spiritvein C3,12,1.941280,0

@@ -303,6 +303,10 @@ public enum BuffId {
     NAHIDA_A1_ACTIVE_ELEMENTAL_MASTERY,
     /** Nilou C2 Hydro resistance reduction during Golden Chalice's Bounty. */
     NILOU_C2_HYDRO_RES_SHRED,
+    /** Baizhu A4 active-character reaction bonus after a natural refresh. */
+    BAIZHU_A4_VERDANT_FAVOR,
+    /** Baizhu C4 party Elemental Mastery bonus after Burst use. */
+    BAIZHU_C4_PARTY_ELEMENTAL_MASTERY,
     /** Ayato C4 party Normal Attack speed bonus. */
     AYATO_C4_NORMAL_SPEED,
     /** Heizou A4 non-owner party Elemental Mastery bonus. */
