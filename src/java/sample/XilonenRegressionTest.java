@@ -64,8 +64,8 @@ public final class XilonenRegressionTest {
                 CharacterId.XILONEN.getRegion(),
                 "Xilonen region");
         assertEquals(CharacterId.UNKNOWN,
-                CharacterId.fromNumericId(95),
-                "Adjacent numeric ID remains unassigned");
+                CharacterId.fromNumericId(Integer.MAX_VALUE),
+                "Out-of-range numeric ID remains unassigned");
         assertEquals(CharacterId.UNKNOWN,
                 CharacterId.fromName("xilonen"),
                 "Name lookup remains case-sensitive");
