@@ -4345,3 +4345,8 @@ experiment record.
   gcsim-key audit confirms no further source-ready weapon gap beyond B-187;
   `ProspectorsShovel` and `TheAlleyFlash` map to existing Java aliases. The
   campaign continues with source-ready character slices only.
+- **Checkpoint 2026-08-05 13:14 JST:** Hu Tao, Zhongli, Sethos, and Nahida are
+  complete and pushed with integrated focused, reaction, build, Javadoc, and
+  preflight gates passing. Layla and Sangonomiya Kokomi are the active
+  character units; no unavailable HP, healing, shield, geometry, or
+  multi-target state is synthesized.

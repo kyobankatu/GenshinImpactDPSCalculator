@@ -23628,6 +23628,12 @@ Campaign inventory:
 | Xinyan | character | Normal/Plunge, Skill initial/particles/C4, Physical Burst and seven Pyro pulses, C2-C5 | `XinyanRegressionTest` | complete (`cb56864`) |
 | Yaoyao | character | fixed-target basics, replaceable Skill Yuegui, Burst Yuegui/radishes, C2/C4 | `YaoyaoRegressionTest` | complete (`4fef93a`) |
 | Xiao | character | fixed-target basics, Skill charges/particles, Burst infusion, A1/A4, C1-C3/C5 | `XiaoRegressionTest` | complete (`860d8d8`) |
+| Hu Tao | character | fixed-target basics, Paramita ATK conversion/infusion, particles, Blood Blossom, representable passives/constellations | `HuTaoRegressionTest` | complete (`151e5ef`) |
+| Sethos | character | fixed-target basics, Shadowpiercing, Skill Energy interaction, Burst state, representable passives/constellations | `SethosRegressionTest` | complete (`95446b6`) |
+| Nahida | character | fixed-target basics, Seed of Skandha trigger, Shrine of Maya buffs, representable passives/constellations | `NahidaRegressionTest` | complete (`319b012`) |
+| Zhongli | character | fixed-target basics, Stone Stele pulses/particles, Planet Befall, A4 Max-HP additions, representable constellations | `ZhongliRegressionTest` | complete (`f65f179`) |
+| Layla | character | fixed-target basics, Skill/Burst damage, Night Star cadence, particles, representable passives/constellations | `LaylaRegressionTest` | delegated (ID 67) |
+| Sangonomiya Kokomi | character | fixed-target basics, Bake-Kurage pulses, Burst HP additions/infusion, particles, representable constellations | `SangonomiyaKokomiRegressionTest` | in progress (primary, ID 68) |
 
 Requirements and tests remain the Phase 1 acceptance and abnormal-path matrix;
 each replenished unit receives a source-backed focused regression and an
@@ -23654,3 +23660,10 @@ The normalized weapon inventory now contains only two implemented aliases and
 B-187's blocked Sword of Descension; subsequent replenishment is character-only.
 Healing, player HP, shields, geometry, movement, and hitlag remain explicit
 boundaries for the new character slices.
+
+Checkpoint 2026-08-05 13:14 JST: Hu Tao, Zhongli, Sethos, and Nahida are
+complete and pushed. Their integrated focused regressions, reaction suite,
+build, Javadoc, and executable preflight pass together. Layla continues in an
+isolated lane while Sangonomiya Kokomi is the primary unit; HP change,
+healing, shields, target geometry, and multi-enemy propagation remain explicit
+boundaries.
