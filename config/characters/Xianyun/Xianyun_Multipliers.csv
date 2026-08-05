@@ -1,0 +1,43 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Xianyun,NORMAL,N1,9,0.685141,0
+Xianyun,NORMAL,N2,9,0.660538,0
+Xianyun,NORMAL,N3,9,0.830919,0
+Xianyun,NORMAL,N4,9,1.103586,0
+Xianyun,CHARGED,Charged Attack,9,2.09304,0
+Xianyun,PLUNGE,High Plunge,9,2.607632,0
+Xianyun,SKILL,Skyladder,9,0.4216,0
+Xianyun,SKILL,Skyladder C5,12,0.496,0
+Xianyun,SKILL,Driftcloud Wave 1,9,1.972,0
+Xianyun,SKILL,Driftcloud Wave 1 C5,12,2.32,0
+Xianyun,SKILL,Driftcloud Wave 2,9,2.516,0
+Xianyun,SKILL,Driftcloud Wave 2 C5,12,2.96,0
+Xianyun,SKILL,Driftcloud Wave 3,9,5.7392,0
+Xianyun,SKILL,Driftcloud Wave 3 C5,12,6.752,0
+Xianyun,BURST,Stars Gather at Dusk,9,1.836,0
+Xianyun,BURST,Stars Gather at Dusk C3,12,2.16,0
+Xianyun,BURST,Starwicker,9,0.6664,0
+Xianyun,BURST,Starwicker C3,12,0.784,0
+Xianyun,PASSIVE,Skill State 1 Frames,1,220,0
+Xianyun,PASSIVE,Skill State 2 Frames,1,238,0
+Xianyun,PASSIVE,Skill State 3 Frames,1,179,0
+Xianyun,PASSIVE,Unused Skill Cooldown Reduction,1,3,0
+Xianyun,PASSIVE,Particle Count,1,5,0
+Xianyun,PASSIVE,Particle Travel Frames,1,100,0
+Xianyun,PASSIVE,Burst Duration,1,16,0
+Xianyun,PASSIVE,Adeptal Assistance Stacks,1,8,0
+Xianyun,PASSIVE,A1 Stack Duration,1,20,0
+Xianyun,PASSIVE,A1 Stack 1 CRIT Rate,1,0.04,0
+Xianyun,PASSIVE,A1 Stack 2 CRIT Rate,1,0.06,0
+Xianyun,PASSIVE,A1 Stack 3 CRIT Rate,1,0.08,0
+Xianyun,PASSIVE,A1 Stack 4 CRIT Rate,1,0.10,0
+Xianyun,PASSIVE,A4 ATK Ratio,1,2,0
+Xianyun,PASSIVE,A4 Flat DMG Cap,1,9000,0
+Xianyun,PASSIVE,C2 ATK Percent,2,0.20,0
+Xianyun,PASSIVE,C2 Duration,2,15,0
+Xianyun,PASSIVE,C2 A4 ATK Ratio,2,4,0
+Xianyun,PASSIVE,C2 A4 Flat DMG Cap,2,18000,0
+Xianyun,PASSIVE,C6 Duration,6,16,0
+Xianyun,PASSIVE,C6 Free Skill Uses,6,8,0
+Xianyun,PASSIVE,C6 Wave 1 CRIT DMG,6,0.15,0
+Xianyun,PASSIVE,C6 Wave 2 CRIT DMG,6,0.35,0
+Xianyun,PASSIVE,C6 Wave 3 CRIT DMG,6,0.70,0
