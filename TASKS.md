@@ -23659,8 +23659,13 @@ Campaign inventory:
 | Mualani | character | fixed-target basics, Nightsoul Sharky's Surging Bite, Burst, particles, representable HP scaling/passives/constellations | `MualaniRegressionTest` | complete (`baad46b`) |
 | Nicole | character | fixed-target basics, Revelation Skill ATK support, Burst/Arcane Projection cadence, particles, representable passives/constellations | `NicoleRegressionTest` | complete (`a1e0db9`) |
 | Kinich | character | fixed-target basics, Nightsoul Loop Shot/Scalespiker Cannon, Burst cadence, particles, representable passives/constellations | `KinichRegressionTest` | complete (`0238eb2`) |
-| Xilonen | character | fixed-target basics, Nightsoul Blade Roller normals, Sampler resistance support, Burst, particles, representable passives/constellations | `XilonenRegressionTest` | delegated (ID 94) |
-| Arlecchino | character | fixed-target basics, Directive/Bond collection, Masque of the Red Death normals, Skill/Burst, particles, representable passives/constellations | `ArlecchinoRegressionTest` | delegated (ID 95) |
+| Xilonen | character | fixed-target basics, Nightsoul Blade Roller normals, Sampler resistance support, Burst, particles, representable passives/constellations | `XilonenRegressionTest` | complete (`e38a496`) |
+| Arlecchino | character | fixed-target basics, Directive/Bond collection, Masque of the Red Death normals, Skill/Burst, particles, representable passives/constellations | `ArlecchinoRegressionTest` | complete (`d38838f`) |
+| Furina | character | fixed-target basics, Salon Member cadence, Burst initial hit, particles, representable fixed-state passives/constellations | `FurinaRegressionTest` | complete (`d82135c`) |
+| Yumemizuki Mizuki | character | fixed-target basics, Dreamdrifter state, coordinated Anemo attacks, Burst initial hit, representable passives/constellations | `YumemizukiMizukiRegressionTest` | complete (`3860214`) |
+| Varesa | character | fixed-target basics, Nightsoul Plunging attacks, Fiery Passion state, Skill/Burst, particles, representable passives/constellations | `VaresaRegressionTest` | complete (`1985002`) |
+| Clorinde | character | fixed-target basics, Night Vigil state, local Bond of Life, Swift Hunt/Impale the Night, Burst, representable passives/constellations | `ClorindeRegressionTest` | delegated (ID 99) |
+| Skirk | character | fixed-target basics, Seven-Phase Flash state, Serpent's Subtlety resource, Skill/Burst, representable passives/constellations | `SkirkRegressionTest` | delegated (ID 100) |
 
 Requirements and tests remain the Phase 1 acceptance and abnormal-path matrix;
 each replenished unit receives a source-backed focused regression and an
@@ -23737,3 +23742,12 @@ identity regression, reaction suite, build, Javadoc, and preflight pass
 together. Xilonen and Arlecchino continue in isolated lanes; shields, healing,
 player HP changes, movement, geometry, team-wide Nightsoul plumbing, Hexerei,
 random targeting, and multi-target behavior remain explicit boundaries.
+
+Checkpoint 2026-08-05 16:07 JST: Xilonen, Arlecchino, Furina, Yumemizuki
+Mizuki, and Varesa are complete and pushed through integration test fix
+`5ec19b7`. Their focused regressions, the legacy identity regression, reaction
+suite, build, Javadoc, and preflight pass together. Sequential identity checks
+now use an actual out-of-range value instead of assuming the next planned ID is
+unused. Clorinde and Skirk continue in isolated lanes; player HP and healing,
+movement, geometry, random/multi-target selection, dynamic Fanfare, and team
+Nightsoul plumbing remain explicit boundaries.
