@@ -1,0 +1,25 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Chevreuse,STATS,Base HP,90,11962,0
+Chevreuse,STATS,Base ATK,90,193,0
+Chevreuse,STATS,Base DEF,90,605,0
+Chevreuse,STATS,Ascension HP Percent,90,0.24,0
+Chevreuse,STATS,Energy Cost,90,60,0
+Chevreuse,STATS,Constellation,6,6,0
+Chevreuse,CONFIG,Character Level,90,90,0
+Chevreuse,CONFIG,Normal Level,9,9,0
+Chevreuse,CONFIG,Skill Level,12,12,0
+Chevreuse,CONFIG,Burst Level,12,12,0
+Chevreuse,PASSIVE,Skill Cooldown,1,15,0
+Chevreuse,PASSIVE,Burst Cooldown,1,15,0
+Chevreuse,PASSIVE,Particle Count,1,4,0
+Chevreuse,PASSIVE,Particle ICD,1,10,0
+Chevreuse,PASSIVE,Arkhe ICD,1,10,0
+Chevreuse,PASSIVE,A1 RES Shred,1,0.40,0
+Chevreuse,PASSIVE,A1 Duration,1,6,0
+Chevreuse,PASSIVE,C1 Energy,1,6,0
+Chevreuse,PASSIVE,C1 ICD,1,10,0
+Chevreuse,PASSIVE,A4 Duration,1,30,0
+Chevreuse,PASSIVE,A4 ATK Cap,1,0.40,0
+Chevreuse,PASSIVE,C2 ICD,1,10,0
+Chevreuse,PASSIVE,C4 Duration,1,6,0
+Chevreuse,PASSIVE,C4 Free Hold Shots,1,2,0

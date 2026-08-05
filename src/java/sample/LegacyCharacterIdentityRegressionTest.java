@@ -54,6 +54,7 @@ public final class LegacyCharacterIdentityRegressionTest {
         assertIdentity(CharacterId.CHARLOTTE, 54, "Charlotte");
         assertIdentity(CharacterId.DORI, 55, "Dori");
         assertIdentity(CharacterId.KAVEH, 56, "Kaveh");
+        assertIdentity(CharacterId.CHEVREUSE, 57, "Chevreuse");
         assertEquals(CharacterId.BENNETT, CharacterId.fromNumericId(1),
                 "first prior numeric ID");
         assertEquals(CharacterId.YANFEI, CharacterId.fromNumericId(20),
@@ -62,7 +63,7 @@ public final class LegacyCharacterIdentityRegressionTest {
                 "negative numeric fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(0),
                 "zero numeric fallback");
-        assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(57),
+        assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(58),
                 "high numeric fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName(null),
                 "null name fallback");
@@ -119,6 +120,8 @@ public final class LegacyCharacterIdentityRegressionTest {
                 "Dori identity case-sensitive fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("kaveh"),
                 "Kaveh identity case-sensitive fallback");
+        assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("chevreuse"),
+                "Chevreuse identity case-sensitive fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("Not A Character"),
                 "unmatched name fallback");
         assertEquals(CharacterRegion.LIYUE, CharacterId.GANYU.getRegion(),
@@ -192,6 +195,9 @@ public final class LegacyCharacterIdentityRegressionTest {
                 "Dori Sumeru region lookup");
         assertEquals(CharacterRegion.SUMERU, CharacterId.KAVEH.getRegion(),
                 "Kaveh Sumeru region lookup");
+        assertEquals(CharacterRegion.FONTAINE,
+                CharacterId.CHEVREUSE.getRegion(),
+                "Chevreuse Fontaine region lookup");
         assertEquals(CharacterRegion.UNKNOWN,
                 CharacterId.COLUMBINA.getRegion(),
                 "unverified custom region fails closed");
@@ -256,8 +262,10 @@ public final class LegacyCharacterIdentityRegressionTest {
                 BuffId.LYNETTE_A1_PARTY_ATK,
                 BuffId.LYNETTE_C6_ANEMO_DMG,
                 BuffId.MIKA_SOULWIND_ATTACK_SPEED,
-                BuffId.CHARLOTTE_C2_ATK);
-        assertEquals(57, reserved.size(), "reserved typed buff identities");
+                BuffId.CHARLOTTE_C2_ATK,
+                BuffId.CHEVREUSE_A1_COORDINATED_TACTICS,
+                BuffId.CHEVREUSE_A4_VERTICAL_FORCE_COORDINATION);
+        assertEquals(59, reserved.size(), "reserved typed buff identities");
         System.out.println("LegacyCharacterIdentityRegressionTest passed");
     }
 

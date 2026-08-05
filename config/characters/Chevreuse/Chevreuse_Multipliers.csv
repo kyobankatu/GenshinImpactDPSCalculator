@@ -1,0 +1,17 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Chevreuse,NORMAL,N1,9,0.976108,0
+Chevreuse,NORMAL,N2,9,0.905940,0
+Chevreuse,NORMAL,N3 Hit 1,9,0.507895,0
+Chevreuse,NORMAL,N3 Hit 2,9,0.596225,0
+Chevreuse,NORMAL,N4,9,1.419456,0
+Chevreuse,SKILL,Press DMG,9,1.958400,0
+Chevreuse,SKILL,Hold DMG,9,2.937600,0
+Chevreuse,SKILL,Overcharged Ball DMG,9,4.800800,0
+Chevreuse,SKILL,Surging Blade DMG,9,0.489600,0
+Chevreuse,SKILL,Press DMG C5,12,2.304000,0
+Chevreuse,SKILL,Hold DMG C5,12,3.456000,0
+Chevreuse,SKILL,Overcharged Ball DMG C5,12,5.648000,0
+Chevreuse,SKILL,Surging Blade DMG C5,12,0.576000,0
+Chevreuse,SKILL,Sniper Induced Explosion C2,1,1.200000,0
+Chevreuse,BURST,Explosive Grenade,9,6.258720,0
+Chevreuse,BURST,Explosive Grenade C3,12,7.363200,0

@@ -289,6 +289,10 @@ public enum BuffId {
     AYATO_BURST_NORMAL_DMG,
     /** Kaveh's Painted Dome party Bloom damage bonus. */
     KAVEH_PAINTED_DOME_BLOOM_DMG,
+    /** Chevreuse A1 Pyro and Electro resistance reduction. */
+    CHEVREUSE_A1_COORDINATED_TACTICS,
+    /** Chevreuse A4 Pyro/Electro party ATK bonus. */
+    CHEVREUSE_A4_VERTICAL_FORCE_COORDINATION,
     /** Ayato C4 party Normal Attack speed bonus. */
     AYATO_C4_NORMAL_SPEED,
     /** Heizou A4 non-owner party Elemental Mastery bonus. */
