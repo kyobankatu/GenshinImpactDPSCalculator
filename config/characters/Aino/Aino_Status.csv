@@ -1,0 +1,13 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Aino,STATS,Base HP,90,11201,0
+Aino,STATS,Base ATK,90,242,0
+Aino,STATS,Base DEF,90,607,0
+Aino,STATS,Ascension Elemental Mastery,90,96,0
+Aino,STATS,Energy Cost,90,50,0
+Aino,STATS,Constellation,6,6,0
+Aino,CONFIG,Character Level,90,90,0
+Aino,CONFIG,Normal Level,9,9,0
+Aino,CONFIG,Skill Level,12,12,0
+Aino,CONFIG,Burst Level,12,12,0
+Aino,CONFIG,Skill Cooldown,1,10,0
+Aino,CONFIG,Burst Cooldown,1,13.5,0

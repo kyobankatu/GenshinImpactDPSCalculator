@@ -361,6 +361,10 @@ public enum BuffId {
     ALOY_A1_TEAM_ATK,
     /** Aloy A4 stacking Cryo damage window. */
     ALOY_A4_CRYO_DMG_BONUS,
+    /** Aino C1 owner and active-character Elemental Mastery bonus. */
+    AINO_C1_ELEMENTAL_MASTERY,
+    /** Aino C6 active-character reaction damage bonus. */
+    AINO_C6_REACTION_DMG_BONUS,
     /** Nightweaver's Looking Glass simultaneous-window team reaction bonus. */
     NIGHTWEAVERS_LOOKING_GLASS_TEAM_REACTION_DMG,
     /** 武器「千夜に浮かぶ夢」の味方元素熟知共有。 */

@@ -1,0 +1,34 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Aino,NORMAL,N1,9,1.221719,0
+Aino,NORMAL,N2,9,1.216079,0
+Aino,NORMAL,N3 Hit 1,9,0.904210,0
+Aino,NORMAL,N3 Hit 2,9,0.904210,0
+Aino,SKILL,Musecatcher Stage 1,9,1.115200,0
+Aino,SKILL,Musecatcher Stage 2,9,3.209600,0
+Aino,SKILL,Musecatcher Stage 1 C5,12,1.312000,0
+Aino,SKILL,Musecatcher Stage 2 C5,12,3.776000,0
+Aino,BURST,Ducky Water Ball,9,0.341904,0
+Aino,BURST,Ducky Water Ball C3,12,0.402240,0
+Aino,PASSIVE,Particle Count,1,3,0
+Aino,PASSIVE,Particle Cooldown,1,0.6,0
+Aino,PASSIVE,Particle Travel Frames,1,100,0
+Aino,PASSIVE,Skill Cooldown Start Frame,1,13,0
+Aino,PASSIVE,Burst Energy Spend Frame,1,5,0
+Aino,PASSIVE,Ducky Start Frame,1,123,0
+Aino,PASSIVE,Ducky Attack Delay Frames,1,10,0
+Aino,PASSIVE,Ducky Duration,1,14.2,0
+Aino,PASSIVE,Ducky Active Duration,1,14,0
+Aino,PASSIVE,Ducky Interval,1,1.5,0
+Aino,PASSIVE,A1 Ducky Interval,1,0.7,0
+Aino,PASSIVE,A4 EM Flat Damage Ratio,1,0.5,0
+Aino,PASSIVE,C1 Elemental Mastery,1,80,0
+Aino,PASSIVE,C1 Duration,1,15,0
+Aino,PASSIVE,C2 ATK Ratio,2,0.25,0
+Aino,PASSIVE,C2 EM Flat Damage Ratio,2,1,0
+Aino,PASSIVE,C2 Cooldown,2,5,0
+Aino,PASSIVE,C2 Attack Delay Frames,2,10,0
+Aino,PASSIVE,C4 Flat Energy,4,10,0
+Aino,PASSIVE,C4 Cooldown,4,10,0
+Aino,PASSIVE,C6 Reaction DMG Bonus,6,0.15,0
+Aino,PASSIVE,C6 Ascendant Bonus,6,0.20,0
+Aino,PASSIVE,C6 Duration,6,15,0

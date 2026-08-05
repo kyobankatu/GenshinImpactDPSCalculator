@@ -183,6 +183,8 @@ public enum CharacterId {
     SIGEWINNE(84, "Sigewinne", CharacterRegion.FONTAINE),
     /** Ororon (Electro bow Hypersense and Supersonic Oculus attacker). */
     ORORON(85, "Ororon", CharacterRegion.NATLAN),
+    /** Aino (Hydro claymore Ducky support). */
+    AINO(86, "Aino", CharacterRegion.NOD_KRAI),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 

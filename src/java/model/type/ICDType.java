@@ -42,6 +42,8 @@ public enum ICDType {
     SigewinneBurst,
     /** Ororon's Soundwave rule: three-second time gate only. */
     OroronSoundwave,
+    /** Aino's enhanced Ducky rule: 1.8-second time gate only. */
+    AinoDucky,
     /** Reserved for custom ICD rules not yet implemented. */
     Special // Custom rules (not implemented yet)
 }
