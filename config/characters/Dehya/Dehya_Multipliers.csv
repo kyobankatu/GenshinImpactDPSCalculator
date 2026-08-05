@@ -1,0 +1,22 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Dehya,NORMAL,N1,9,1.141234,0
+Dehya,NORMAL,N2,9,1.133745,0
+Dehya,NORMAL,N3,9,1.407875,0
+Dehya,NORMAL,N4,9,1.750703,0
+Dehya,PLUNGE,High Plunge,9,3.422517,0
+Dehya,SKILL,Indomitable Flame,9,1.918960,0
+Dehya,SKILL,Indomitable Flame C5,12,2.257600,0
+Dehya,SKILL,Ranging Flame,9,2.257600,0
+Dehya,SKILL,Ranging Flame C5,12,2.656000,0
+Dehya,SKILL,Fiery Sanctum ATK,9,1.023400,0
+Dehya,SKILL,Fiery Sanctum ATK C5,12,1.204000,0
+Dehya,SKILL,Fiery Sanctum Max HP,9,0.017544,0
+Dehya,SKILL,Fiery Sanctum Max HP C5,12,0.020640,0
+Dehya,BURST,Flame-Mane's Fist ATK,9,1.677900,0
+Dehya,BURST,Flame-Mane's Fist ATK C3,12,1.974000,0
+Dehya,BURST,Flame-Mane's Fist Max HP,9,0.028764,0
+Dehya,BURST,Flame-Mane's Fist Max HP C3,12,0.033840,0
+Dehya,BURST,Incineration Drive ATK,9,2.368100,0
+Dehya,BURST,Incineration Drive ATK C3,12,2.786000,0
+Dehya,BURST,Incineration Drive Max HP,9,0.040596,0
+Dehya,BURST,Incineration Drive Max HP C3,12,0.047760,0

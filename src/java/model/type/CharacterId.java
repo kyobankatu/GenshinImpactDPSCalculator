@@ -159,6 +159,8 @@ public enum CharacterId {
     KIRARA(72, "Kirara", CharacterRegion.INAZUMA),
     /** Baizhu (Dendro catalyst healer and reaction support). */
     BAIZHU(73, "Baizhu", CharacterRegion.LIYUE),
+    /** Dehya (Pyro claymore Fiery Sanctum attacker). */
+    DEHYA(74, "Dehya", CharacterRegion.SUMERU),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 
