@@ -131,6 +131,8 @@ public enum CharacterId {
     THOMA(58, "Thoma", CharacterRegion.INAZUMA),
     /** Yaoyao (Dendro polearm deployable attacker). */
     YAOYAO(59, "Yaoyao", CharacterRegion.LIYUE),
+    /** Xiao (Anemo polearm plunging attacker). */
+    XIAO(60, "Xiao", CharacterRegion.LIYUE),
     /** Gaming (Pyro claymore Charmed Cloudstrider attacker). */
     GAMING(61, "Gaming", CharacterRegion.LIYUE),
     /** Xinyan (Pyro claymore physical Burst attacker). */

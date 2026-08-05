@@ -56,6 +56,8 @@ public final class LegacyCharacterIdentityRegressionTest {
         assertIdentity(CharacterId.KAVEH, 56, "Kaveh");
         assertIdentity(CharacterId.CHEVREUSE, 57, "Chevreuse");
         assertIdentity(CharacterId.THOMA, 58, "Thoma");
+        assertIdentity(CharacterId.YAOYAO, 59, "Yaoyao");
+        assertIdentity(CharacterId.XIAO, 60, "Xiao");
         assertIdentity(CharacterId.GAMING, 61, "Gaming");
         assertIdentity(CharacterId.XINYAN, 62, "Xinyan");
         assertEquals(CharacterId.BENNETT, CharacterId.fromNumericId(1),
@@ -127,6 +129,10 @@ public final class LegacyCharacterIdentityRegressionTest {
                 "Chevreuse identity case-sensitive fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("thoma"),
                 "Thoma identity case-sensitive fallback");
+        assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("yaoyao"),
+                "Yaoyao identity case-sensitive fallback");
+        assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("xiao"),
+                "Xiao identity case-sensitive fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("gaming"),
                 "Gaming identity case-sensitive fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("xinyan"),
@@ -209,6 +215,10 @@ public final class LegacyCharacterIdentityRegressionTest {
                 "Chevreuse Fontaine region lookup");
         assertEquals(CharacterRegion.INAZUMA, CharacterId.THOMA.getRegion(),
                 "Thoma Inazuma region lookup");
+        assertEquals(CharacterRegion.LIYUE, CharacterId.YAOYAO.getRegion(),
+                "Yaoyao Liyue region lookup");
+        assertEquals(CharacterRegion.LIYUE, CharacterId.XIAO.getRegion(),
+                "Xiao Liyue region lookup");
         assertEquals(CharacterRegion.LIYUE, CharacterId.GAMING.getRegion(),
                 "Gaming Liyue region lookup");
         assertEquals(CharacterRegion.LIYUE, CharacterId.XINYAN.getRegion(),

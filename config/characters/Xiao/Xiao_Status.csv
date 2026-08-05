@@ -1,0 +1,24 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Xiao,STATS,Base HP,90,12736,0
+Xiao,STATS,Base ATK,90,349,0
+Xiao,STATS,Base DEF,90,799,0
+Xiao,STATS,Ascension CRIT Rate,90,0.192,0
+Xiao,STATS,Energy Cost,90,70,0
+Xiao,STATS,Constellation,6,6,0
+Xiao,CONFIG,Character Level,90,90,0
+Xiao,CONFIG,Normal Level,9,9,0
+Xiao,CONFIG,Skill Level,12,12,0
+Xiao,CONFIG,Burst Level,12,12,0
+Xiao,PASSIVE,Skill Cooldown,1,10,0
+Xiao,PASSIVE,Burst Cooldown,1,18,0
+Xiao,PASSIVE,Burst Duration,1,15.95,0
+Xiao,PASSIVE,Particle Count,1,3,0
+Xiao,PASSIVE,Particle Travel Frames,1,100,0
+Xiao,PASSIVE,A1 Initial DMG Bonus,1,0.05,0
+Xiao,PASSIVE,A1 Stack Interval,1,3,0
+Xiao,PASSIVE,A1 Max DMG Bonus,1,0.25,0
+Xiao,PASSIVE,A4 Skill DMG Per Stack,1,0.15,0
+Xiao,PASSIVE,A4 Max Stacks,1,3,0
+Xiao,PASSIVE,A4 Duration,1,7,0
+Xiao,PASSIVE,A4 Activation Frames,1,15,0
+Xiao,PASSIVE,C2 Off-Field Energy Recharge,1,0.25,0

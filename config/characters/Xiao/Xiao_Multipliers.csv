@@ -1,0 +1,15 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Xiao,NORMAL,N1 Hit 1,9,0.463240,0
+Xiao,NORMAL,N1 Hit 2,9,0.463240,0
+Xiao,NORMAL,N2,9,0.957560,0
+Xiao,NORMAL,N3,9,1.152920,0
+Xiao,NORMAL,N4 Hit 1,9,0.633440,0
+Xiao,NORMAL,N4 Hit 2,9,0.633440,0
+Xiao,NORMAL,N5,9,1.203240,0
+Xiao,NORMAL,N6,9,1.611720,0
+Xiao,CHARGED,Charged Attack,9,2.036480,0
+Xiao,PLUNGE,High Plunge,9,3.754990,0
+Xiao,SKILL,Lemniscatic Wind Cycling,9,4.297600,0
+Xiao,SKILL,Lemniscatic Wind Cycling C3,12,5.056000,0
+Xiao,BURST,Bane of All Evil Bonus,9,0.906500,0
+Xiao,BURST,Bane of All Evil Bonus C5,12,1.043000,0
