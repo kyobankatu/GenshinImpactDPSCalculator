@@ -58,8 +58,16 @@ systems remain excluded.
 B-172 is complete. Gorou and Yelan now have stable typed identities, shared
 buff/formula support, and bounded stationary single-target character slices.
 
-B-173 is the active Sayu campaign. It reserves one stable identity and adds a
-Press-only offensive slice without entering movement, absorption, or healing.
+B-173 is complete. Sayu has a stable identity and a Press-only offensive slice
+without entering movement, absorption, or healing.
+
+B-185 and B-186 are complete. Predator now has fixed R1 metadata, direct and
+accepted indirect Cryo-damage stacks, Aloy-only flat ATK after automatic
+simulator binding, exact rollback, and typed post-gate reaction integration.
+
+B-174 is complete. Kujou Sara now has typed Electro-only CRIT DMG support and
+a bounded Crowfeather support slice without approximating aiming, movement, or
+Burst geometry.
 
 B-171 is the completed Eula campaign. It adds a backward-compatible typed
 Press/Hold Skill request, Eula's identity, and a bounded physical Burst slice;
@@ -12794,6 +12802,9 @@ Why first:
 Target files:
 
 - `src/java/model/type/CharacterId.java`
+- `src/java/model/type/StatType.java`
+- `src/java/mechanics/formula/StandardDamageStrategy.java`
+- `src/java/model/type/ICDTag.java`
 - `src/java/model/character/Kaeya.java` (new)
 - `config/characters/Kaeya/Kaeya_Status.csv` (new)
 - `config/characters/Kaeya/Kaeya_Multipliers.csv` (new)
@@ -12890,6 +12901,2292 @@ Completion evidence:
   the focused switch contract regression.
 - `./gradlew ReactionRegressionTest`, `./gradlew build`, `./gradlew javadoc`,
   and `python scripts/preflight.py` passed on 2026-08-02.
+
+## Implementation Order: Predator Cryo-Hit Bow Campaign
+
+Status: Complete. This campaign adds Predator through existing direct-damage
+and weapon snapshot contracts; RL and generated documentation remain excluded.
+
+Scope:
+
+- Add fixed R1 Lv. 90 weapon metadata and model its PlayStation-only passive as
+  enabled in the simulator.
+- Track up to two owner Cryo-damage stacks on one refreshable six-second window
+  and apply the resulting Normal/Charged DMG bonus.
+- Apply the weapon's fixed flat ATK only when the equipped owner is Aloy.
+
+Out of scope for this pass:
+
+- Runtime platform detection, projectile travel, hitlag extension, geometry,
+  RL, generated docs, and Deferred Systems. B-186 subsequently adds accepted
+  indirect Cryo reaction damage through a typed event.
+
+Definitions:
+
+- `Predator`: fixed-R1 Bow whose owner-local mutable stack state is bound to
+  one simulator and included in simulator snapshots.
+
+### Phase 1: Metadata, Cryo Stacks, and Aloy Affinity - Done
+
+Why:
+
+- The complete passive fits existing weapon-local damage-listener and snapshot
+  capabilities and needs no shared prerequisite.
+
+Target files:
+
+- `src/java/model/weapon/Predator.java` (new)
+- `src/java/sample/PredatorRegressionTest.java` (new)
+
+Tasks:
+
+- Add exact Lv. 90 fixed-R1 metadata and the explicit enabled-platform
+  simulation boundary.
+- Gain or refresh one stack after each positive direct Cryo hit by the active
+  equipped owner, cap at two, and expire the shared stack count at six seconds.
+- Apply 10% Normal and Charged DMG per active stack plus Aloy-only flat ATK 66.
+- Capture and restore all mutable window state and enforce one owner/simulator
+  binding.
+
+Acceptance criteria:
+
+- Metadata, weapon type, fixed refinement behavior, and Aloy-only flat ATK
+  match pinned evidence.
+- Eligible Cryo hits produce 0/1/2-stack Normal and Charged bonuses, refresh the
+  shared half-open six-second window, and never exceed two stacks.
+- Off-field, non-Cryo, zero-damage, foreign-actor, stale, cross-simulator, and
+  foreign-state paths do not mutate valid state; direct Cryo damage does not
+  depend on the hit-effect flag.
+- Simulator rollback restores the exact stack count and expiry boundary.
+
+Test cases to add or update:
+
+- Normal: metadata, Aloy affinity, first/second Cryo hit, cap, both action
+  bonuses, refresh, and rollback.
+- Boundary: exact six-second expiry and independent instances.
+- Abnormal: inactive owner, non-Cryo, zero damage, foreign actor, invalid
+  binding, duplicate initialization, and foreign snapshot state; a direct
+  Cryo event with hit effects disabled remains eligible.
+
+Verification:
+
+- `./gradlew PredatorRegressionTest`
+- `./gradlew ReactionRegressionTest`
+- `./gradlew build`
+- `./gradlew javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Focused coverage verifies fixed R1 metadata, the enabled-platform boundary,
+  direct Cryo events with and without hit effects, rejection paths, 0/1/2
+  stacks, cap/refresh/exact expiry, Aloy affinity, binding, and rollback.
+- `PredatorRegressionTest`, `ReactionRegressionTest`, `build`, `javadoc`, and
+  executable preflight pass on 2026-08-04. The independent review's untyped
+  indirect-reaction finding is retained as B-186 instead of approximated from
+  pre-damage reaction notifications.
+
+## Implementation Order: Typed Elemental Indirect-Damage Event Campaign
+
+Status: Complete. B-186 adds an interface-segregated accepted-damage event
+without changing the existing untyped indirect listener contract.
+
+Scope:
+
+- Add an elemental indirect-damage observer carrying typed owner, element,
+  positive final damage, and impact time.
+- Dispatch it only after immediate or scheduled reaction damage is accepted and
+  recorded; preserve existing untyped listener count and ordering.
+- Extend Predator to consume accepted Cryo indirect damage under the same
+  active-owner stack rules as direct damage.
+
+Out of scope for this pass:
+
+- Replacing or changing `IndirectDamageListener`, non-reaction environmental
+  damage without a known element, formula changes, RL, generated docs, and
+  Deferred Systems.
+
+Definitions:
+
+- `ElementalIndirectDamageListener`: additive narrow observer for resolved
+  indirect enemy damage whose element is known.
+
+### Phase 1: Accepted Elemental Damage Dispatch and Predator Integration - Done
+
+Why:
+
+- Reaction notifications precede damage-sequence rejection, so only the
+  post-acceptance resolver/scheduler path can identify real trigger damage.
+
+Target files:
+
+- `src/java/simulation/ElementalIndirectDamageListener.java` (new)
+- `src/java/simulation/SimulationEventBus.java`
+- `src/java/simulation/runtime/SimulationEventDispatcher.java`
+- `src/java/simulation/CombatSimulator.java`
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/mechanics/reaction/ReactionEffectScheduler.java`
+- `src/java/model/weapon/Predator.java`
+- `src/java/sample/PredatorRegressionTest.java`
+
+Tasks:
+
+- Add registration and typed dispatch without altering legacy untyped fan-out.
+- Emit typed events after accepted immediate reaction damage and alongside each
+  existing scheduled reaction-damage notification using the canonical element.
+- Gain Predator stacks from positive active-owner Cryo typed events and preserve
+  exact direct/indirect shared cap, refresh, expiry, and rollback.
+
+Acceptance criteria:
+
+- Accepted Cryo Swirl and Superconduct damage gains or refreshes one Predator
+  stack; blocked reaction damage and non-Cryo/zero/foreign/off-field events do
+  not.
+- Immediate typed dispatch does not newly invoke legacy indirect listeners;
+  migrated scheduled paths invoke legacy listeners exactly once.
+- Direct and indirect events share one two-stack six-second window, including
+  exact snapshot restore.
+
+Test cases to add or update:
+
+- Normal: accepted Cryo Swirl/Superconduct, direct+indirect cap, scheduled typed
+  element dispatch, and rollback.
+- Boundary: the blocked third same-owner Superconduct inside its two-hit
+  0.5-second sequence does not refresh Predator; the exact reset boundary does.
+- Abnormal: Pyro/Electro/zero/null/foreign/off-field typed events and duplicate
+  initialization.
+
+Verification:
+
+- `./gradlew PredatorRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- The resolver emits typed events only after immediate reaction damage passes
+  target/owner sequence gates; the scheduler pairs canonical Electro/Pyro/
+  Dendro events with each existing one-time legacy notification.
+- Predator shares direct, Cryo Swirl, Superconduct, and typed scheduled/manual
+  events across one cap/window/snapshot. Tests cover two accepted Superconduct
+  hits, blocked third hit, exact sequence reset, and listener segregation.
+- Focused/shared regressions, build, Javadoc, executable preflight, and
+  independent re-review pass on 2026-08-04 with zero artifact leaks.
+
+## Implementation Order: Prospector's Shovel Accuracy Campaign
+
+Status: Complete. B-188 corrects one existing weapon passive and the shared
+standard-EC bonus leakage exposed by its end-to-end Lunar regression.
+
+Scope:
+
+- Add R1-R5 metadata behavior with an R5 default and validation.
+- Apply the base Electro-Charged and Lunar-Charged bonuses at all times, then
+  add the equal Lunar copy only under Ascendant Gleam.
+- Replace action-dependent lazy simulator discovery with exact equipment/party
+  lifecycle binding.
+
+Out of scope for this pass:
+
+- Moonsign derivation, unrelated reaction formula order, generated docs, RL,
+  and Deferred Systems.
+
+### Phase 1: Refinement, Split Lunar Bonus, and Binding - Done
+
+Target files:
+
+- `src/java/model/weapon/ProspectorShovel.java`
+- `src/java/mechanics/reaction/ReactionEffectScheduler.java`
+- `src/java/sample/ProspectorShovelRegressionTest.java` (new)
+
+Acceptance criteria:
+
+- R1-R5 grant EC 48/60/72/84/96%, Lunar 12/15/18/21/24%, and exactly one equal
+  additional Lunar copy under Ascendant Gleam.
+- Metadata remains Base ATK 510, ATK 41.3%, Polearm; default is R5 and 0/6 fail.
+- Binding is idempotent for one equipped owner/simulator and rejects null,
+  foreign owner, party, simulator, and equipment cases.
+- Weighted Lunar-Charged damage reads only Lunar-specific and all-Lunar bonuses;
+  standard Electro-Charged bonus does not leak into the Lunar result.
+
+Test cases to add or update:
+
+- Normal: full refinement table, base and Ascendant stats, arbitrary time.
+- Boundary: Moonsign NONE/NASCENT/ASCENDANT transitions without an owner action.
+- Abnormal: invalid refinement, unrelated stat isolation, duplicate/cross
+  binding, unequipped and outside-party owner.
+
+Verification:
+
+- `./gradlew ProspectorShovelRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Refinement-aware static bonuses and eager lifecycle binding now match the
+  pinned R1-R5 Prospector's Shovel contract.
+- End-to-end R1 NONE/ASCENDANT assertions prove 12%/24% Lunar-Charged scaling
+  without standard Electro-Charged bonus leakage.
+- Focused/shared regressions, build, Javadoc, and independent re-review pass.
+
+## Implementation Order: Follow-on Offensive Character Campaign
+
+Status: Complete. B-189 adds three source-backed stationary single-target
+vertical slices in independent phases: Cyno, Alhaitham, then Kamisato Ayato.
+
+Scope:
+
+- Add stable typed identities, talent/status CSV data, offensive action state,
+  representable passives/constellations, and rollback-safe pending work.
+- Use maintained KQM character/evidence pages accessed 2026-08-04 and pin
+  gcsim revision `ef41805d855a60b9e1035293584b85c085dc69e7`.
+- Keep each character's state, scheduling, and additive scaling character-local.
+
+Out of scope for this pass:
+
+- RL, generated docs, multi-target selection, geometry/pathing, hitlag,
+  interruption resistance, player damage, shields, healing, and stamina.
+- Cyno Witch's Revelation/Stellar-Conduct behavior, Alhaitham projection
+  positioning, and Ayato C1's actual enemy-HP condition.
+
+### Phase 1: Cyno Pactsworn Pathclearer Slice - Done
+
+Why first:
+
+- Cyno reuses existing form, switch, buff, action, reaction, energy, and
+  snapshot contracts without requiring a new shared formula category.
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/model/type/ICDTag.java`
+- `config/characters/Cyno/Cyno_Status.csv` (new)
+- `config/characters/Cyno/Cyno_Multipliers.csv` (new)
+- `src/java/model/character/Cyno.java` (new)
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+- `src/java/sample/CynoRegressionTest.java` (new)
+
+Tasks:
+
+- Add Sumeru identity 46 and exact Lv90/Talent 9/12 data.
+- Implement physical N1-N4/Charged, Skill, Burst form, Electro N1-N5/Charged,
+  Endseer/Judication, Duststalker Bolts, duration extensions, A4, and C1-C6
+  branches that do not require Deferred Systems.
+- Preserve form cancellation, cooldowns, ICD/gauge, particles, delayed work,
+  action ordering, and complete character-owned snapshot state.
+
+Acceptance criteria:
+
+- Burst consumes 80 Energy, starts a ten-second form, adds 100 EM, converts the
+  alternate attack string to Electro, ends on switch, and extends by four
+  seconds per Mortuary Rite up to eighteen seconds.
+- Endseer Skill applies only its sourced 35% Skill increase and three
+  owner-attributed 100% ATK plus 250% EM Bolts with their dedicated ICD group.
+- C1-C6 timing, caps, owner/reaction gates, talent levels, and snapshot replay
+  match the pinned base-kit branch without reporting Witch/Stellar behavior.
+
+Test cases to add or update:
+
+- Normal: both attack strings, Skill/form Skill, Burst, A1/A4, and C1-C6.
+- Boundary: Endseer/duration/extension, C2/C6 stacks and cooldowns, exact form
+  expiry, switch cancellation, and particle draw endpoints.
+- Abnormal: invalid constellation/draw/state/simulator, insufficient Energy,
+  wrong reaction/owner/action, stale generation, and snapshot divergence.
+
+Verification:
+
+- `./gradlew LegacyCharacterIdentityRegressionTest CynoRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Cyno's physical and Pactsworn strings, cast-relative Endseer cadence,
+  Judication Bolts, rollback-safe particle draws, form extension/cancellation,
+  A4, C1-C6, and Pactsworn Plunge are covered by focused regression.
+- Focused/identity/reaction regressions, build, Javadoc, executable preflight,
+  and independent review pass with the pinned base-kit exclusions preserved.
+
+### Phase 2: Alhaitham Chisel-Light Mirror Slice - Done
+
+Why second:
+
+- Alhaitham exercises existing ATK/EM additive damage and pending-event state
+  after Phase 1 establishes the next typed identity/data pattern.
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/model/type/ICDType.java`
+- `src/java/model/type/ICDTag.java`
+- `src/java/mechanics/element/ICDManager.java`
+- `src/java/mechanics/buff/BuffId.java`
+- `config/characters/Alhaitham/Alhaitham_Status.csv` (new)
+- `config/characters/Alhaitham/Alhaitham_Multipliers.csv` (new)
+- `src/java/model/character/Alhaitham.java` (new)
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `src/java/sample/AlhaithamRegressionTest.java` (new)
+
+Tasks:
+
+- Add Sumeru identity 47 and exact Lv90/Talent 9/12 data.
+- Implement N1-N5/Charged, Dendro infusion, one-to-three independently decaying
+  Mirrors, 1.6-second projections, Skill, delayed Burst mirror conversion,
+  A1/A4, and representable C1-C6 behavior.
+- Adapt projection geometry to the fixed target while preserving hit counts,
+  snapshots, independent ICD, ordering, and rollback reconstruction.
+
+Acceptance criteria:
+
+- Mirror generation/cap/decay, A1's twelve-second gate, projection count and
+  ATK+EM scaling, Burst's 4/6/8/10 hits, and two-second replacement are exact.
+- A4 caps at 100%, C2 stacks expire independently, C4 targets the correct party
+  members, and C6 overflow/extension state is owner-isolated and replayable.
+
+Test cases to add or update:
+
+- Normal: attack string, infusion, every mirror count, Skill/Burst, A1/A4,
+  and C1-C6.
+- Boundary: 1.6/4/12-second gates, three-Mirror cap, two-second Burst command,
+  C2/C6 independent expiry, and snapshot branches.
+- Abnormal: no mirror/no infusion, wrong action/owner, stale commands, invalid
+  constellation/state/simulator, and excluded geometry.
+
+Verification:
+
+- `./gradlew LegacyCharacterIdentityRegressionTest AlhaithamRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Alhaitham's dynamic infusion, independently decaying Mirrors, fixed-target
+  projections, delayed Burst conversion, cast/trigger-time EM snapshots, A1/A4,
+  C1-C6, custom ICD boundaries, particles, and rollback state are covered by
+  focused and shared regressions.
+- Identity/focused/reaction regressions, build, Javadoc, executable preflight,
+  and independent review pass; standard ICD hit-count application now also
+  resets its time gate.
+
+### Phase 3: Kamisato Ayato Namisen Slice - Done
+
+Why third:
+
+- Ayato can then reuse the established identity/snapshot pattern while keeping
+  his HP-additive Normal conversion and long periodic Burst character-local.
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/mechanics/buff/BuffId.java`
+- `config/characters/KamisatoAyato/KamisatoAyato_Status.csv` (new)
+- `config/characters/KamisatoAyato/KamisatoAyato_Multipliers.csv` (new)
+- `src/java/model/character/KamisatoAyato.java` (new)
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+- `src/java/sample/KamisatoAyatoRegressionTest.java` (new)
+
+Tasks:
+
+- Add Inazuma identity 48 and exact Lv90/Talent 9/12 data.
+- Implement N1-N5/Charged, Skill explosion/state, Shunsuiken N1-N3, Namisen,
+  fixed-target Burst cadence/team Normal bonus, A1/A4, and representable C2-C6.
+- Preserve cast-time Shunsuiken stats, Burst snapshots, ICD/gauge, particles,
+  switch cancellation, pending hits, and rollback reconstruction.
+
+Acceptance criteria:
+
+- Skill grants/refreshes the six-second converted string and Namisen stacks;
+  each Shunsuiken snapshots its cast-time Max-HP additive damage before its
+  accepted hit increments Namisen.
+- Burst resolves the sourced single-target cadence for eighteen seconds from
+  one snapshot and applies one typed Normal damage bonus to party members.
+- C2-C6 caps, windows, talent levels, attack-speed buff, and separate C6 hits
+  are exact; C1 remains explicitly inactive without actual target HP.
+
+Test cases to add or update:
+
+- Normal: physical/converted strings, Skill explosion, Namisen, Burst, A1/A4,
+  and C2-C6.
+- Boundary: one stack per accepted Shunsuiken, six/eighteen-second expiry, off-field A4
+  threshold, periodic hit cadence, C4/C6 windows, and snapshot branches.
+- Abnormal: C1 inactivity, wrong action/owner, stale events, invalid
+  constellation/draw/state/simulator, and excluded multi-target behavior.
+
+Verification:
+
+- `./gradlew LegacyCharacterIdentityRegressionTest KamisatoAyatoRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Ayato's physical and Shunsuiken strings, cast-time Namisen/infusion snapshot,
+  Skill Illusion, rollback-safe particles, twelve-hit fixed-target Burst,
+  party Normal bonus, A1/A4, and representable C2-C6 are covered by focused
+  regression; C1 remains explicitly inactive without target HP.
+- Identity/focused/reaction regressions, build, Javadoc, executable preflight,
+  and independent review pass after correcting the Shunsuiken snapshot boundary
+  against pinned gcsim core `QueueAttack` semantics.
+
+## Implementation Order: HP-Scaling Catalyst Campaign
+
+Status: Complete. B-190 adds two source-backed catalyst vertical slices in
+independent phases.
+
+Scope:
+
+- Use pinned gcsim revision
+  `ef41805d855a60b9e1035293584b85c085dc69e7`, inspected 2026-08-04.
+- Add the smallest typed formula primitive required by Everlasting Moonglow,
+  then keep mutable weapon state owner-bound and rollback-safe.
+- Implement exact R1-R5 metadata, half-open windows, cooldowns, and stack order.
+
+Out of scope:
+
+- Healing resolution, player HP change triggers, hitlag extension, geometry,
+  RL, generated docs, and Prototype Amber's delayed-event reconstruction gap.
+
+### Phase 1: Everlasting Moonglow Max-HP Normal Scaling - Done
+
+Target files:
+
+- `src/java/model/type/StatType.java`
+- `src/java/mechanics/formula/StandardDamageStrategy.java`
+- `src/java/model/weapon/EverlastingMoonglow.java` (new)
+- `src/java/sample/DerivedActionDamageRegressionTest.java`
+- `src/java/sample/HpScalingCatalystRegressionTest.java` (new)
+
+Requirements:
+
+- Add a typed final-Max-HP ratio applied only to true Normal Attack base damage.
+- Add Lv90 R1-R5 metadata, Healing Bonus, and the R1-R5 Max-HP Normal ratio.
+- On active-owner Burst use, open a twelve-second window; accepted owner Normal
+  hits restore 0.6 Energy on an exact 0.1-second gate.
+- Bind to one equipped owner/simulator and snapshot both mutable timestamps.
+
+Test cases:
+
+- Normal: formula isolation, metadata, Healing Bonus, HP-derived Normal flat
+  damage, Burst window, and Energy restoration.
+- Boundary: exact 0.1/12-second gates and changed live Max HP.
+- Abnormal: non-Normal, off-field/foreign/wrong-simulator triggers, zero hit,
+  duplicate binding, foreign state, and refinement 0/6.
+
+Verification:
+
+- `./gradlew DerivedActionDamageRegressionTest HpScalingCatalystRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Final-Max-HP additive damage is isolated to true Normal hits; Moonglow R1-R5
+  metadata, Healing Bonus, live HP scaling, Burst window, Energy gate, owner
+  guards, and snapshot restore pass focused regression.
+- Derived formula, focused catalyst, shared reaction, build, Javadoc, and
+  executable preflight gates pass.
+
+### Phase 2: Surf's Up Scorching Summer Stacks - Done
+
+Target files:
+
+- `src/java/model/weapon/SurfsUp.java` (new)
+- `src/java/sample/HpScalingCatalystRegressionTest.java`
+
+Requirements:
+
+- Add Lv90 R1-R5 metadata and unconditional R1-R5 Max HP.
+- Active-owner Skill use opens four stacks for fourteen seconds on a
+  fifteen-second activation cooldown; each stack grants the exact R1-R5 Normal
+  damage bonus.
+- Accepted active-owner Normal hits lose one stack at most every 1.5 seconds;
+  owner Vaporize reactions gain one at most every 1.5 seconds.
+- Preserve gcsim's temporary fifth stack so same-hit Vaporize gain precedes
+  Normal-hit loss without reducing the displayed four-stack bonus.
+- Snapshot all windows, gates, stacks, and temporary-overcap state.
+
+Test cases:
+
+- Normal: metadata, Skill activation, four stack bonus, Normal loss, Vaporize
+  gain, and same-hit gain-before-loss carryover.
+- Boundary: exact 1.5/14/15-second gates and temporary fifth-stack normalization.
+- Abnormal: wrong action/reaction/owner/simulator, off-field callbacks, inactive
+  window, duplicate binding, foreign state, and refinement 0/6.
+
+Verification:
+
+- `./gradlew HpScalingCatalystRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Surf's Up R1-R5 metadata, Max HP, four-stack Normal bonus, independent gain
+  and loss gates, temporary fifth-stack ordering, fourteen-second window,
+  owner/party guards, and complete rollback state pass focused regression.
+- Independent review prompted explicit verification that both 1.5-second gates
+  persist across a fifteen-second Skill reactivation; focused/derived/reaction
+  regressions, build, Javadoc, and executable preflight pass.
+
+## Implementation Order: Shikanoin Heizou Offensive Character Campaign
+
+Status: Complete. B-191 adds one fixed-target Heizou vertical slice from
+pinned source without introducing geometry or defensive systems.
+
+Scope:
+
+- Use pinned gcsim revision
+  `ef41805d855a60b9e1035293584b85c085dc69e7`, inspected 2026-08-04.
+- Add stable typed identity, Talent 9/12 data, Anemo basic attacks, Press/Hold
+  Heartstopper Strike, Windmuster Kick/Iris, A1/A4, and C1/C3-C6.
+- Keep all counters, windows, delayed Iris work, and particle draws rollback-
+  safe and bound to one simulator.
+
+Out of scope:
+
+- C2 suction, multiple Iris targets, stamina, movement, geometry, hitlag,
+  airborne Plunge validation, RL, generated docs, and Deferred Systems.
+
+### Phase 1: Heizou Fixed-Target Kit - Done
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/mechanics/buff/BuffId.java`
+- `config/characters/ShikanoinHeizou/ShikanoinHeizou_Status.csv` (new)
+- `config/characters/ShikanoinHeizou/ShikanoinHeizou_Multipliers.csv` (new)
+- `src/java/model/character/ShikanoinHeizou.java` (new)
+- `src/java/sample/ShikanoinHeizouRegressionTest.java` (new)
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+
+Requirements:
+
+- Add Lv. 90 identity/stats and Talent 9 Normal/Charged/Plunge, Skill, and Burst
+  values, with C3/C5 selecting Talent 12 Skill/Burst values.
+- Model the five-step Anemo Normal string including N4's three hits; Press
+  consumes live Declension while Hold reaches four stacks before release.
+- Actual active-owner Swirls grant one Declension on an exact 0.1-second gate;
+  max stacks add Conviction, and C6 modifies only the Skill snapshot.
+- A landed Skill grants other party members 80 EM for ten seconds; C1 grants
+  one stack and 15% Normal speed for five seconds on a ten-second switch gate.
+- Burst consumes 40 Energy, deals Anemo damage, and schedules one live-aura
+  Iris follow-up for the fixed target; C4 restores nine Energy for that first
+  Iris. Snapshot all mutable state and reconstruct pending work once.
+
+Test cases:
+
+- Normal: metadata, N1-N5 hit sequence, Press/Hold Skill scaling and particles,
+  Swirl stacks, A4 recipient isolation, Burst/Iris element, and C1/C3-C6.
+- Boundary: exact 0.1/5/10-second gates, four-stack cap/consumption, Skill/Burst
+  cooldowns, Iris delay, and snapshot restore before pending work.
+- Abnormal: wrong reaction/source/simulator, off-field Swirl, invalid
+  constellation, insufficient Energy, foreign state, party-external binding,
+  missing supported Iris aura, and C2 remaining damage-neutral.
+
+Verification:
+
+- `./gradlew ShikanoinHeizouRegressionTest LegacyCharacterIdentityRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Identity/data, seven-hit Normal string, Charged/Plunge, exact Press/Hold
+  release frames, Declension/Conviction, particles, A1/A4, single-target
+  Burst/Iris, C1/C3-C6, binding guards, and pending-Iris restore pass focused
+  regression.
+- Independent review corrected the four-stack Hold release penalty and pinned
+  Skill callback ordering; Burst/Iris snapshot moments were confirmed against
+  core `QueueAttack`. Focused/identity/reaction regressions, build, Javadoc,
+  diff check, and executable preflight pass.
+
+## Implementation Order: Freminet Pressure Character Campaign
+
+Status: Complete. B-192 adds one fixed-target Freminet vertical slice from
+pinned source through existing cooldown and reaction contracts.
+
+Scope:
+
+- Use pinned gcsim revision
+  `ef41805d855a60b9e1035293584b85c085dc69e7`, inspected 2026-08-04.
+- Add stable identity, Talent 9/12 data, four-step physical basics, Pressure
+  level 0-4, Pers Time Frost, Burst state, A1/A4, and C1-C6.
+- Keep Pressure, reaction windows/stacks, Burst state, particle gates, Arkhe
+  gate, and delayed hits rollback-safe and simulator-bound.
+
+Out of scope:
+
+- Underwater utility, Arkhe alignment beyond the sourced 0U direct hit,
+  geometry, hitlag, airborne validation, defensive systems, RL, generated
+  docs, and Deferred Systems.
+
+### Phase 1: Freminet Fixed-Target Pressure Kit - Done
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/mechanics/buff/BuffId.java`
+- `config/characters/Freminet/Freminet_Status.csv` (new)
+- `config/characters/Freminet/Freminet_Multipliers.csv` (new)
+- `src/java/model/character/Freminet.java` (new)
+- `src/java/sample/FreminetRegressionTest.java` (new)
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+
+Requirements:
+
+- Add Lv. 90 identity/stats, Talent 9/12 attack and Skill/Pressure values, and
+  Talent 9 Burst, with C3 raising Normal and C5 raising Skill.
+- Initial Skill opens ten-second Pers Time, queues Upward Thrust and a gated 0U
+  Spiritbreath Thorn, and starts cooldown after 35 frames; a Skill recast or a
+  Normal at level four detonates the current Pressure branch.
+- Pers Time Normals queue physical and delayed Cryo Frost hits, gaining one
+  Pressure or two during Burst; Burst resets Skill cooldown, lasts ten seconds,
+  doubles Frost damage, and ends on switch-out.
+- Model A1 cooldown reduction below level four, Shatter-only A4 Pressure bonus,
+  C1 Pressure CRIT Rate, C2 detonation Energy, C4/C6 reaction stacks on a
+  0.3-second gate, and Talent-level C3/C5.
+
+Test cases:
+
+- Normal: identity/data, N1-N4, Skill open/recast, Pressure 0-4 Cryo/Physical
+  composition, Normal-built stacks, Burst acceleration, particles, A1/A4, and
+  C1-C6.
+- Boundary: exact hitmarks, 0.3/5/6/9/10-second gates, delayed Frost, level-four
+  Normal replacement, cooldown reset/reduction, Burst switch cancellation,
+  and pending-hit restore.
+- Abnormal: invalid constellation, null/wrong reaction/source/simulator,
+  insufficient Energy, foreign state, party-external/cross-simulator binding,
+  unsupported actions, and stale Pers Time recast.
+
+Verification:
+
+- `./gradlew FreminetRegressionTest LegacyCharacterIdentityRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion:
+
+- Added stable identity/data and a rollback-safe fixed-target Pressure kit
+  covering N1-N4, high plunge, Skill/Burst timing, particles, A1/A4, and C1-C6.
+- Fixed gateway-visible Pressure recasts, source-aligned hit snapshots, and the
+  level-four Normal replacement's N1 reset; exact 5/6/9/10-second boundaries
+  are regression-covered.
+- Focused, identity, reaction, build, Javadoc, and executable preflight gates
+  pass. Independent review's sole Energy-timing concern was rejected because
+  pinned gcsim `ConsumeEnergy(4)` also schedules consumption at frame four.
+
+## Implementation Order: Candace Crimson Crown Campaign
+
+Status: Complete. B-193 adds a fixed-target Candace offensive/support slice
+through existing HP-scaling, team-buff, switch, and damage-listener contracts.
+
+Scope:
+
+- Use pinned gcsim revision
+  `ef41805d855a60b9e1035293584b85c085dc69e7`, inspected 2026-08-04.
+- Add stable identity/data, physical basics, Press/Hold Skill, Burst initial,
+  first outgoing switch wave, elemental Normal support, particles, A4, and
+  representable C1-C6.
+- Keep Burst, C2/C6 gates, delayed hits/commands, and particles rollback-safe
+  and simulator-bound.
+
+Out of scope:
+
+- Defensive shield absorption and A1 perfect-counter response, generic
+  cross-character Hydro infusion, later third-party switch waves, geometry,
+  hitlag, RL, generated docs, and Deferred Systems.
+
+### Phase 1: Candace Fixed-Target Crimson Crown Kit - Done
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/mechanics/buff/BuffId.java`
+- `config/characters/Candace/Candace_Status.csv` (new)
+- `config/characters/Candace/Candace_Multipliers.csv` (new)
+- `src/java/model/character/Candace.java` (new)
+- `src/java/sample/CandaceRegressionTest.java` (new)
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+
+Requirements:
+
+- Add Lv. 90 identity/stats and Talent 9/12 data, with C3 raising Burst and C5
+  raising Skill.
+- Model four-step physical basics, Press and Hold Skill HP-scaling damage,
+  2/3 Hydro particles, delayed cooldown starts, and C2/C4 behavior.
+- Model Burst frame-four Energy, frame-33 HP-scaling initial damage, 9/12-second
+  Crimson Crown, the first Candace switch-out wave, and elemental Normal bonus
+  from the base 20% plus A4 Max-HP scaling.
+- Add a typed elemental-Normal-only bonus so Crimson Crown cannot buff Physical
+  Normal hits through the generic stat pipeline.
+- Model C6 active non-Candace elemental Normal waves with a 2.3-second gate;
+  preserve delayed work and gates through snapshot restore.
+
+Test cases:
+
+- Normal: identity/data, N1-N4/charged/high plunge, Press/Hold Skill damage,
+  particles/CDs, Burst initial/support, switch wave, A4, and C1-C6.
+- Boundary: exact hitmarks, 0.5/2.3/9/12/15-second gates, Hold C4 cooldown,
+  C6 owner/physical rejection, and pending-hit/command restore.
+- Abnormal: invalid constellation, null/unsupported action, insufficient Energy,
+  foreign state, party-external/cross-simulator binding, and non-active C6 hit.
+
+Verification:
+
+- `./gradlew CandaceRegressionTest LegacyCharacterIdentityRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion:
+
+- Added stable identity/data and a rollback-safe fixed-target kit covering
+  physical basics, Press/Hold Skill, particles, Burst support/switch wave,
+  A4, and C1-C6.
+- Added a reusable elemental-Normal-only bonus and split HP-scaling snapshot
+  semantics so Max HP is fixed at cast while other outgoing stats resolve at
+  impact; independent review verified the represented frames and gates.
+- Focused, identity, reaction, build, Javadoc, and executable preflight gates
+  pass.
+
+## Implementation Order: Lynette Bogglecat Campaign
+
+Status: Complete. B-194 adds a fixed-target Lynette offensive/support slice
+through existing delayed-hit, charge, infusion, and team-buff contracts.
+
+Scope:
+
+- Use pinned gcsim revision
+  `ef41805d855a60b9e1035293584b85c085dc69e7`, inspected 2026-08-04.
+- Add stable identity/data, physical basics, Press and deterministic minimum
+  Hold Skill, 0U Arkhe damage, particles, Burst initial/Anemo box ticks, A1,
+  C3/C4/C5/C6, and rollback.
+
+Out of scope:
+
+- Healing/HP drain, C1 pull, absorbed-element Vivid Shots and dependent C2/A4,
+  variable Hold length, geometry, hitlag, RL, generated docs, and Deferred
+  Systems.
+
+### Phase 1: Lynette Fixed-Target Bogglecat Kit
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/mechanics/buff/BuffId.java`
+- `config/characters/Lynette/Lynette_Status.csv` (new)
+- `config/characters/Lynette/Lynette_Multipliers.csv` (new)
+- `src/java/model/character/Lynette.java` (new)
+- `src/java/sample/LynetteRegressionTest.java` (new)
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+
+Requirements:
+
+- Add Lv. 90 identity/stats and Talent 9/12 data, with C3 raising Burst and C5
+  raising Skill.
+- Model four-step physical basics, Press and minimum-Hold Skill timing, gated
+  0U Surging Blade, four Anemo particles, delayed 12-second cooldown starts,
+  and C4's second charge.
+- Model frame-six Burst Energy, frame-18 initial damage, eleven Anemo box ticks
+  from frame 136 at 59-frame intervals, and A1's 8-20% party ATK by unique
+  party element count.
+- Model C6's 6.4-second Anemo infusion and 20% Anemo bonus from Skill use;
+  preserve delayed work, charge cooldowns, and gates through snapshot restore.
+
+Test cases:
+
+- Normal: identity/data, N1-N4/charged/high plunge, Press/minimum-Hold Skill,
+  Arkhe, particles, Burst initial/ticks, A1, and C3-C6 represented effects.
+- Boundary: exact hitmarks, 0.6/6.4/10/12-second gates, 11-tick count/interval,
+  C4 two-charge exhaustion/restoration, switch cancellation, and restore.
+- Abnormal: invalid constellation, null/unsupported action, insufficient Energy,
+  foreign state, party-external/cross-simulator binding, and stale Arkhe gate.
+
+Verification:
+
+- `./gradlew LynetteRegressionTest LegacyCharacterIdentityRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion:
+
+- Added stable identity/Talent 9/12 data and a rollback-safe fixed-target kit
+  covering physical basics, Press/minimum-Hold Skill, four particles, 0U Arkhe,
+  Burst initial/eleven ticks, A1, and C3-C6 represented effects.
+- Direct source reinspection confirmed the Arkhe gate starts at the Skill
+  hitmark; regression now covers immediately before and exactly at its
+  ten-second boundary.
+- Focused, identity, reaction, build, Javadoc, and executable preflight gates
+  pass.
+
+## Implementation Order: Mika Soulwind Campaign
+
+Status: Complete. B-195 adds a source-backed fixed-target offensive and
+Soulwind support slice without approximating the deferred healing subsystem.
+
+Scope:
+
+- Use pinned gcsim revision
+  `ef41805d855a60b9e1035293584b85c085dc69e7`, inspected 2026-08-04.
+- Add identity/data, physical Normal/Charged basics, Press/Hold Skill, four Cryo particles,
+  12-second Soulwind, C2 Detector, C5 Skill levels, C6 Physical CRIT DMG, and
+  rollback.
+
+Out of scope:
+
+- Burst healing/Eagleplume, C1/C3/C4, A4's Burst-plus-CRIT trigger, multi-target
+  Press/Shard stacks, shields, geometry, hitlag, RL, and generated docs.
+
+### Phase 1: Mika Fixed-Target Soulwind Kit
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/model/type/StatType.java`
+- `src/java/mechanics/formula/StandardDamageStrategy.java`
+- `src/java/mechanics/buff/BuffId.java`
+- `config/characters/Mika/Mika_Status.csv` (new)
+- `config/characters/Mika/Mika_Multipliers.csv` (new)
+- `src/java/model/character/Mika.java` (new)
+- `src/java/sample/MikaRegressionTest.java` (new)
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+
+Requirements:
+
+- Add Lv. 90 identity/stats and Talent 9/12 data with C5 raising Skill.
+- Model five-step physical Normals, Charged Attack, Press/Hold Skill impact
+  and delayed 15-second cooldown, plus one four-particle packet per Skill hit.
+- Apply team ATK speed for 12 seconds at frame 16/12; model fixed-target C2 as
+  one Detector stack granting 10% Physical DMG to the active attacker.
+- Add typed Physical-only CRIT DMG and C6's 60% bonus without affecting Cryo or
+  other elemental hits; preserve mutable gates and delayed work on restore.
+
+Test cases:
+
+- Normal: identity/data, Normal/Charged basics, Press/Hold frames and Talent 9/12 values,
+  particles, Soulwind, C2 Detector, C5, C6, and rollback.
+- Boundary: buff `[start,start+12)`, delayed cooldown start, particle arrival,
+  physical-only CRIT DMG isolation, and Normal-string reset on switch.
+- Abnormal: invalid constellation, null/unsupported action, foreign state,
+  party-external and cross-simulator binding.
+
+Verification:
+
+- `./gradlew MikaRegressionTest LegacyCharacterIdentityRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion:
+
+- Added Mika identity/data, physical Normal/Charged attacks, Press/Hold Skill,
+  particles, Soulwind ATK speed, fixed-target C2 Detector, C5, and C6 with
+  rollback-safe delayed work.
+- Added reusable Physical-only CRIT DMG routing with elemental and Lunar
+  isolation; focused coverage verifies active teammate and off-field guards.
+- Focused/shared/identity/reaction/build/Javadoc and executable preflight gates
+  pass; independent review reported no concrete defect in the inspected scope.
+
+## Implementation Order: A Thousand Blazing Suns Campaign
+
+Status: Complete. B-196 adds the complete non-Nightsoul Scorching
+Brilliance contract from pinned gcsim.
+
+Scope:
+
+- Add Lv. 90/R1-R5 metadata, active-owner Skill/Burst activation, 6-second
+  ATK/CRIT DMG, 10-second trigger cooldown, and elemental Normal/Charged
+  duration extension with one-second gate and three-trigger cap.
+- Preserve all mutable weapon windows, gates, and counters on snapshot restore.
+
+Out of scope:
+
+- Nightsoul's 75% amplification and off-field duration pause, hitlag extension,
+  RL, generated docs, and unrelated weapon catalog wiring.
+
+### Phase 1: Scorching Brilliance Weapon
+
+Target files:
+
+- `src/java/model/weapon/AThousandBlazingSuns.java` (new)
+- `src/java/sample/AThousandBlazingSunsRegressionTest.java` (new)
+
+Requirements:
+
+- Trigger only from accepted active equipped-owner Skill/Burst actions; enforce
+  the exact half-open 6/10-second windows and R1-R5 values.
+- Extend the active window by two seconds only for active-owner elemental
+  Normal/Charged damage, once per second, at most three times per activation.
+- Reject foreign binding/state and preserve independent instances/rollback.
+
+Test cases:
+
+- Normal: metadata/refinement, Skill/Burst trigger, ATK/CRIT DMG, three valid
+  extensions, refresh after cooldown, and snapshot restore.
+- Boundary: 6/10-second windows, one-second extension gate, six-second cap.
+- Abnormal: R0/R6, physical/Skill/off-field/foreign hit exclusion, unequipped
+  binding, cross-simulator reuse, and foreign state.
+
+Verification:
+
+- `./gradlew AThousandBlazingSunsRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion:
+
+- Added Lv. 90/R1-R5 metadata, active-owner Skill/Burst activation, 6/10-second
+  windows, and three gated elemental Normal/Charged extensions with rollback.
+- Independent review caught that reactivation resets the extension count but
+  not a still-live one-second extension gate; source-aligned boundary coverage
+  now preserves that gate through refresh.
+- Focused/reaction/build/Javadoc and executable preflight gates pass.
+
+## Implementation Order: Prototype Amber Energy Campaign
+
+Status: Complete. B-197 adds Prototype Amber's complete owner-Energy branch.
+
+Scope:
+
+- Add Lv. 90/R1-R5 metadata and active-owner Burst scheduling at 2/4/6 seconds.
+- Restore each 4-6 flat-Energy pulse off field and through snapshot rollback.
+
+Out of scope:
+
+- Party percentage healing, Healing Bonus interaction, RL, generated docs, and
+  weapon catalog wiring.
+
+### Phase 1: Prototype Amber Energy Pulses
+
+Target files:
+
+- `src/java/model/weapon/PrototypeAmber.java` (new)
+- `src/java/sample/PrototypeAmberRegressionTest.java` (new)
+
+Requirements:
+
+- Trigger only from accepted active equipped-owner Burst use and queue exactly
+  three R1-R5 flat-Energy pulses at 2/4/6 seconds.
+- Preserve pending pulses and owner state through switch and snapshot restore;
+  reject foreign binding/state.
+
+Test cases:
+
+- Normal: metadata/refinement, pulse timestamps/amounts, off-field persistence,
+  cap behavior, snapshot restore, and independent instances.
+- Boundary/abnormal: just-before/exact pulse times, non-Burst/off-field/foreign
+  trigger rejection, R0/R6, unequipped/cross-simulator binding, foreign state.
+
+Verification:
+
+- `./gradlew PrototypeAmberRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion:
+
+- Added Lv. 90/R1-R5 metadata and exactly three active-owner Burst Energy
+  pulses at 2/4/6 seconds, including cap/off-field behavior and rollback-safe
+  stale-event suppression.
+- Focused/reaction/build/Javadoc and executable preflight gates pass;
+  independent review found no concrete defect in the represented branch.
+
+## Implementation Order: Charlotte Kamera Campaign
+
+Status: Complete. B-198 adds a pinned fixed-target Charlotte offensive slice.
+
+Scope:
+
+- Add identity/data, three Cryo Normals, Charged plus 0U Arkhe, Press/minimum-
+  Hold Skill, one-target marks, 3/5 particles, Burst initial/eight ticks, C2,
+  C3, C5, and rollback.
+
+Out of scope:
+
+- Healing, A1/A4, C1/C4/C6, multi-target marks, variable Hold, geometry,
+  hitlag, RL, and generated docs.
+
+### Phase 1: Charlotte Fixed-Target Kamera Kit - Done
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/model/type/ICDTag.java`
+- `config/characters/Charlotte/*` (new CSVs)
+- `src/java/model/character/Charlotte.java` (new)
+- `src/java/sample/CharlotteRegressionTest.java` (new)
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+
+Requirements and tests:
+
+- Source-align Lv. 90/Talent 9/12 values, action/impact/CD/Energy frames,
+  mark/tick counts and intervals, Arkhe six-second gate, particles, C2/C3/C5,
+  exact expiries, switch reset, rollback, and standard guards.
+- Verify with `./gradlew CharlotteRegressionTest LegacyCharacterIdentityRegressionTest ReactionRegressionTest build javadoc`
+  and `python scripts/preflight.py --run`.
+
+Completion evidence:
+
+- Stable ID 54/Fontaine, source-aligned data, Cryo basics, 0U Arkhe,
+  Press/minimum-Hold Skill, one-target marks, particles, Burst damage, and
+  C2/C3/C5 are implemented with rollback-safe delayed work.
+- Focused coverage fixes exact Normal, Skill, mark, particle, Arkhe, Burst,
+  cooldown, and Energy frames, including the six-second Arkhe boundary and
+  one-time pending-event replay after restore.
+- `CharlotteRegressionTest`, `LegacyCharacterIdentityRegressionTest`,
+  `ReactionRegressionTest`, build, Javadoc, executable preflight, and diff
+  checks pass on 2026-08-04 with zero artifact leaks.
+
+## Implementation Order: Gest of the Mighty Wolf Campaign
+
+Status: Complete. B-199 adds the complete non-Hexerei Four Winds' Hymn
+weapon branch from pinned gcsim `ef41805d`.
+
+Scope:
+
+- Add Lv. 90/R1-R5 metadata, permanent 10% ATK SPD, active-owner Normal-hit
+  one-stack triggers, Charged/Skill two-stack triggers, the shared four-stack
+  four-second window, owner/simulator binding, and rollback.
+
+Out of scope:
+
+- Hexerei: Secret Rite detection and its per-stack CRIT DMG copy, hitlag,
+  generated docs, RL, and Deferred Systems.
+
+### Phase 1: Non-Hexerei Four Winds' Hymn - Done
+
+Target files:
+
+- `src/java/model/weapon/GestOfTheMightyWolf.java` (new)
+- `src/java/sample/GestOfTheMightyWolfRegressionTest.java` (new)
+
+Requirements and tests:
+
+- Source-align 608 ATK, 33.1% CRIT Rate, R1-R5 7.5-15.5% generic DMG per
+  stack, exact accepted trigger amounts, cap, refresh, expiry, and rollback.
+- Reject null/foreign/off-field/unequipped/cross-simulator triggers and foreign
+  snapshot state without mutating valid state.
+- Verify with `./gradlew GestOfTheMightyWolfRegressionTest ReactionRegressionTest build javadoc`
+  and `python scripts/preflight.py --run`.
+
+Completion evidence:
+
+- Exact Lv. 90/R1-R5 metadata, permanent ATK SPD, owner Normal-hit and active
+  Charged/Skill trigger routes, four-stack cap, shared refresh, half-open expiry,
+  binding, and rollback are implemented.
+- Focused coverage includes capped refresh, exact four-second reset, zero-damage
+  hit identity, an in-flight owner Normal after switch, action/off-field guards,
+  independent state, and foreign payload rejection.
+- Focused/reaction/build/Javadoc and executable preflight gates pass on
+  2026-08-04 with 106 changed paths, two routed checks, and zero leaks.
+
+## Implementation Order: HP-State Boundary Weapon Campaign
+
+Status: Complete. B-200 adds three source-ready weapons without fabricating
+missing player HP, healing, incoming-damage, or shield events.
+
+Scope:
+
+- Add The Bell and Rightful Reward as exact metadata/refinement entries whose
+  unsupported passives remain explicitly inactive.
+- Add Tome of the Eternal Flow with exact metadata and its unconditional
+  R1-R5 Max HP increase.
+
+Out of scope:
+
+- Incoming-damage shield generation, shield-state damage bonus, healing-event
+  Energy, HP-change Charged stacks/Energy, RL, generated docs, and Deferred
+  Systems.
+
+### Phase 1: Metadata and Representable Static Passive - Done
+
+Target files:
+
+- `src/java/model/weapon/TheBell.java` (new)
+- `src/java/model/weapon/RightfulReward.java` (new)
+- `src/java/model/weapon/TomeOfTheEternalFlow.java` (new)
+- `src/java/sample/HpStateBoundaryWeaponRegressionTest.java` (new)
+
+Requirements and tests:
+
+- Verify exact Lv. 90 metadata, weapon types, R5 defaults, R1-R5 identity,
+  refinement 0/6 rejection, arbitrary-time no-op boundaries, and Tome's
+  16/20/24/28/32% HP passive with unrelated-stat isolation.
+- Verify with `./gradlew HpStateBoundaryWeaponRegressionTest ReactionRegressionTest build javadoc`
+  and `python scripts/preflight.py --run`.
+
+Completion evidence:
+
+- The Bell and Rightful Reward expose exact metadata/refinement through the
+  existing explicit inactive-boundary abstraction; Tome exposes exact metadata
+  plus unconditional R1-R5 Max HP.
+- Table-driven regressions cover every refinement, arbitrary negative/zero/
+  positive times, no-op state preservation, Tome unrelated-stat isolation,
+  and refinement 0/6 rejection.
+- Focused/reaction/build/Javadoc and executable preflight gates pass on
+  2026-08-04 with 110 changed paths, two routed checks, and zero leaks.
+
+## Implementation Order: Healing-Event Boundary Weapon Campaign
+
+Status: Complete. B-201 adds five source-ready weapons whose runtime
+passives require a resolved player-healing event that is not yet available.
+
+Scope:
+
+- Add Dialogues of the Desert Sages, Range Gauge, Portable Power Saw, Song of
+  Stillness, and Tidal Shadow with exact Lv. 90 metadata and refinement.
+- Keep healing-derived Energy, Symbol, damage, ATK, and EM effects explicitly
+  inactive through the shared boundary abstraction.
+
+Out of scope:
+
+- Introducing player HP/healing events, approximating heals from metadata,
+  RL, generated docs, and Deferred Systems.
+
+### Phase 1: Five Healing-Boundary Weapons - Done
+
+Target files:
+
+- five new classes under `src/java/model/weapon/`
+- `src/java/sample/HealingBoundaryWeaponRegressionTest.java` (new)
+
+Requirements and tests:
+
+- Table-verify names, types, Lv. 90 stats, R5 defaults, every selected
+  refinement, arbitrary-time no-op preservation, and refinement 0/6 rejection.
+- Verify with `./gradlew HealingBoundaryWeaponRegressionTest ReactionRegressionTest build javadoc`
+  and `python scripts/preflight.py --run`.
+
+Completion evidence:
+
+- All five weapons expose exact name/type/Lv. 90 stat/refinement metadata and
+  reuse the explicit inactive boundary without adding fake healing triggers.
+- Table-driven coverage verifies R1-R5 identity, negative/zero/positive-time
+  no-op behavior, unrelated-stat preservation, and refinement 0/6 rejection.
+- Focused/reaction/build/Javadoc and executable preflight gates pass on
+  2026-08-04 with 116 changed paths, two routed checks, and zero leaks.
+
+## Implementation Order: Unavailable Trigger-State Weapon Campaign
+
+Status: Complete. B-202 adds four exact weapons whose entire passives depend
+on unavailable healing, weak-point, or player-elemental-status events.
+
+Scope:
+
+- Add The Dockhand's Assistant, Prospector's Drill, Prototype Crescent, and
+  Talking Stick with exact Lv. 90 metadata/refinement and explicit no-op
+  passive boundaries.
+
+Out of scope:
+
+- Player healing, weak-point detection, aiming/movement, player elemental
+  application, RL, generated docs, and Deferred Systems.
+
+### Phase 1: Four Unavailable-State Weapons - Done
+
+Target files:
+
+- four new classes under `src/java/model/weapon/`
+- `src/java/sample/UnavailableStateWeaponRegressionTest.java` (new)
+
+Requirements and tests:
+
+- Table-verify exact names, types, stats, R1-R5 identity, arbitrary-time no-op
+  behavior, unrelated-stat preservation, and refinement 0/6 rejection.
+- Verify with `./gradlew UnavailableStateWeaponRegressionTest ReactionRegressionTest build javadoc`
+  and `python scripts/preflight.py --run`.
+
+Completion evidence:
+
+- All four exact metadata/refinement classes use the established inactive
+  boundary and introduce no inferred heal, weak-point, or player-aura trigger.
+- Table-driven regression covers R1-R5, arbitrary time, unrelated-stat
+  preservation, and refinement 0/6 rejection.
+- Focused/reaction/build/Javadoc and executable preflight gates pass on
+  2026-08-04 with 121 changed paths, two routed checks, and zero leaks.
+
+## Implementation Order: Flowing Purity Static Window Campaign
+
+Status: Complete. B-203 adds Flowing Purity's complete representable
+pre-Bond elemental-damage branch from pinned gcsim `ef41805d`.
+
+Scope:
+
+- Add Lv. 90/R1-R5 metadata and the active-owner Skill-triggered 8-16% all
+  elemental damage window for 15 seconds with a 10-second trigger cooldown,
+  binding, exact boundaries, and rollback.
+
+Out of scope:
+
+- Bond of Life creation/clear, HP-cleared scaling, healing, hitlag, RL,
+  generated docs, and Deferred Systems.
+
+### Phase 1: Pre-Bond Elemental Damage Window - Done
+
+Target files:
+
+- `src/java/model/weapon/FlowingPurity.java` (new)
+- `src/java/sample/FlowingPurityRegressionTest.java` (new)
+
+Requirements and tests:
+
+- Verify metadata/refinement, seven elemental bonuses with Physical/generic
+  isolation, activation, 10/15-second boundaries, refresh, owner/field/binding
+  guards, rollback, independent instances, and foreign state rejection.
+- Verify with `./gradlew FlowingPurityRegressionTest ReactionRegressionTest build javadoc`
+  and `python scripts/preflight.py --run`.
+
+Completion evidence:
+
+- Exact metadata, R1-R5 all-element bonus, active-owner Skill trigger,
+  10-second cooldown, 15-second half-open window, binding, and rollback are
+  implemented without fabricating Bond of Life state.
+- Focused coverage verifies all seven elements, Physical/generic isolation,
+  exact trigger/expiry boundaries, off-field/foreign guards, independent
+  instances, and foreign snapshot rejection.
+- Focused/reaction/build/Javadoc and executable preflight gates pass on
+  2026-08-04 with 123 changed paths, two routed checks, and zero leaks.
+
+## Implementation Order: Finale of the Deep Static Window Campaign
+
+Status: Complete. B-204 adds Finale of the Deep's complete representable
+pre-Bond Skill ATK branch from pinned gcsim `ef41805d`.
+
+Scope:
+
+- Add exact Lv. 90/R1-R5 metadata and active-owner Skill-triggered 12-24% ATK
+  for 15 seconds on a 10-second cooldown, with binding and rollback.
+
+Out of scope:
+
+- Bond of Life creation/clear, debt-derived flat ATK, HP/healing, RL,
+  generated docs, and Deferred Systems.
+
+### Phase 1: Pre-Bond ATK Window - Done
+
+Target files:
+
+- `src/java/model/weapon/FinaleOfTheDeep.java` (new)
+- `src/java/sample/FinaleOfTheDeepRegressionTest.java` (new)
+
+Requirements and tests:
+
+- Verify metadata/refinement, ATK-only isolation, exact 10/15-second
+  boundaries, refresh, owner/field/binding guards, rollback, and foreign state.
+- Verify with `./gradlew FinaleOfTheDeepRegressionTest ReactionRegressionTest build javadoc`
+  and `python scripts/preflight.py --run`.
+
+Completion evidence:
+
+- Exact metadata, R1-R5 ATK window, active-owner Skill trigger, 10-second
+  cooldown, 15-second half-open window, binding, and rollback are implemented
+  without fabricating Bond of Life state.
+- Focused coverage verifies ATK-only behavior, exact trigger/expiry boundaries,
+  off-field/foreign guards, independent instances, and foreign snapshot
+  rejection.
+- Focused/reaction/build/Javadoc and executable preflight gates pass on
+  2026-08-04 with 125 changed paths, two routed checks, and zero leaks.
+
+## Implementation Order: Sumeru Leaf Pickup Boundary Campaign
+
+Status: Complete. B-205 adds exact metadata and explicit inactive pickup
+boundaries for three Sumeru forgeable weapons from pinned gcsim `ef41805d`.
+
+Scope:
+
+- Add Sapwood Blade, Forest Regalia, and Moonpiercer with exact Lv. 90/R1-R5
+  identity and metadata through the existing unavailable-state abstraction.
+
+Out of scope:
+
+- World pickup objects, pickup delay/recipient selection, Leaf buffs, RL,
+  generated docs, and Deferred Systems.
+
+### Phase 1: Metadata And Pickup Boundary - Done
+
+Target files:
+
+- `src/java/model/weapon/SapwoodBlade.java` (new)
+- `src/java/model/weapon/ForestRegalia.java` (new)
+- `src/java/model/weapon/Moonpiercer.java` (new)
+- `src/java/sample/LeafPickupBoundaryWeaponRegressionTest.java` (new)
+
+Requirements and tests:
+
+- Verify display names, categories, base/substats, every refinement, arbitrary
+  time no-op behavior, unrelated-stat preservation, and R0/R6 rejection.
+- Verify with `./gradlew LeafPickupBoundaryWeaponRegressionTest ReactionRegressionTest build javadoc`
+  and `python scripts/preflight.py --run`.
+
+Completion evidence:
+
+- Sapwood Blade, Forest Regalia, and Moonpiercer expose exact Lv. 90 metadata
+  and R1-R5 identity while failing closed on absent world-pickup state.
+- Table-driven focused coverage verifies metadata, all refinements,
+  arbitrary-time no-op behavior, unrelated-stat preservation, and guards.
+- Focused/reaction/build/Javadoc and executable preflight gates pass on
+  2026-08-04 with 129 changed paths, two routed checks, and zero leaks.
+
+## Implementation Order: Absolution Static CRIT DMG Campaign
+
+Status: Complete. B-206 adds Absolution's complete representable permanent
+CRIT DMG branch from pinned gcsim `ef41805d`.
+
+Scope:
+
+- Add exact Lv. 90/R1-R5 metadata and permanent 20-40% CRIT DMG.
+
+Out of scope:
+
+- Bond of Life change events, six-second generic-DMG stacks, hitlag, RL,
+  generated docs, and Deferred Systems.
+
+### Phase 1: Permanent CRIT DMG - Done
+
+Target files:
+
+- `src/java/model/weapon/Absolution.java` (new)
+- `src/java/sample/AbsolutionRegressionTest.java` (new)
+
+Requirements and tests:
+
+- Verify metadata, every refinement, permanent arbitrary-time CRIT DMG,
+  unrelated-stat isolation, independent instances, and R0/R6 rejection.
+- Verify with `./gradlew AbsolutionRegressionTest ReactionRegressionTest build javadoc`
+  and `python scripts/preflight.py --run`.
+
+Completion evidence:
+
+- Exact Lv. 90/R1-R5 metadata and permanent 20-40% CRIT DMG are implemented
+  without fabricating Bond of Life state.
+- Focused coverage verifies all refinements, arbitrary-time behavior,
+  unrelated-stat isolation, independent instances, and refinement guards.
+- Focused/reaction/build/Javadoc and executable preflight gates pass on
+  2026-08-04 with 131 changed paths, two routed checks, and zero leaks.
+
+## Implementation Order: Kujou Sara Crowfeather Support Campaign
+
+Status: Complete. B-174 adds the smallest source-backed stationary
+single-target slice that exercises Kujou Sara's defining charged-shot and
+ally-buff contract.
+
+Scope:
+
+- Reserve Kujou Sara ID 38/Inazuma without renumbering existing content.
+- Add Talent 9/12 Normal, fully charged, Press Skill, and Burst behavior from
+  pinned gcsim `ef41805d` and KQM TCL `80ba6241` evidence.
+- Model Crowfeather Cover, delayed Ambush, active-recipient ATK/C6 buffs, A4
+  flat party Energy, and representable constellations with snapshot restore.
+
+Out of scope for this pass:
+
+- Physical aimed shots, weak points, manual aiming, movement, taunt behavior,
+  multi-target geometry, exact Stormcluster branch travel, hitlag, defensive or
+  healing systems, RL, generated docs, and Deferred Systems.
+- Burst uses one representative stationary-target Stormcluster hit; it does not
+  multiply every radial branch into guaranteed single-target damage.
+
+### Phase 1: Identity And Electro CRIT DMG Primitive - Done
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/model/type/StatType.java`
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/mechanics/formula/StandardDamageStrategy.java`
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+- `src/java/sample/ElementSpecificCritDamageRegressionTest.java`
+
+Requirements:
+
+- Assign Kujou Sara ID 38/Inazuma, move the unassigned boundary to 39, and
+  preserve every existing identity and exact-name lookup.
+- Add a typed Electro-only CRIT DMG stat that composes with generic CRIT DMG
+  only for direct Electro damage and remains isolated from other elements and
+  Lunar reaction formulas.
+- Reserve typed Sara buff identities for Crowfeather Cover and Tengu Juurai.
+
+Tests:
+
+- Normal: Sara exact-name/numeric round trips and Electro CRIT DMG composition.
+- Boundary: Sayu remains ID 37, ID 39 fails closed, and capped CRIT Rate uses
+  the combined generic plus Electro CRIT DMG value.
+- Abnormal: case mismatch/null name and non-Electro/Lunar leakage fail closed.
+
+Verification:
+
+- `./gradlew LegacyCharacterIdentityRegressionTest ElementSpecificCritDamageRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Identity and formula regressions, Reaction regression, build, Javadoc, and
+  executable preflight passed on 2026-08-04 using a writable temporary Gradle
+  user home. Commit/push remains pending because `.git` is read-only.
+
+### Phase 2: Crowfeather And Tengu Juurai Character Slice - Done
+
+Target files:
+
+- `config/characters/KujouSara/KujouSara_Status.csv` (new)
+- `config/characters/KujouSara/KujouSara_Multipliers.csv` (new)
+- `src/java/model/character/KujouSara.java` (new)
+- `src/java/sample/KujouSaraRegressionTest.java` (new)
+
+Requirements:
+
+- Align Lv. 90 stats, Talent 9/12 multipliers, N1-N5, fully charged shot,
+  animation/hitmarks, gauge/ICD, particles, cooldowns, and Burst Energy timing.
+- Consume the 18-second Crowfeather Cover on a fully charged shot, then schedule
+  one snapshotted Ambush with three particles and a six-second active-recipient
+  ATK buff based on Sara's character plus weapon Base ATK.
+- Implement A1, A4's three-second gate and non-extra ER basis, C1-C3/C5-C6,
+  one representative Burst Stormcluster hit, and stale-event suppression.
+- Capture and restore owned cover, cooldown-gate, buff, and pending-event state
+  so repeated snapshot restore reconstructs each future effect exactly once.
+
+Tests:
+
+- Normal: data, N1-N5, charged/A1 timing, Skill/C2 feathers, particles, ATK
+  recipient/base-ATK basis, A4 party Energy, Burst hits, and constellations.
+- Boundary: exact 18/6/3/10/20-second windows, C1 gate, C2 no particles,
+  C3/C5 talent levels, C4 representative-hit policy, C6 Electro-only/live
+  behavior, recipient switching, and repeated restore.
+- Abnormal: invalid constellation/state, unsupported action mode,
+  cross-simulator reuse, cooldown/Energy rejection, stale generations, and a
+  charged shot without Cover producing no feather.
+
+Verification:
+
+- `./gradlew KujouSaraRegressionTest ElementSpecificCritDamageRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- The focused regression covers data, N1-N5, charged/Cover timing, Skill/C2,
+  particles, recipient-fixed Base-ATK buffs, A4, Burst timing and snapshot,
+  C1-C6 boundaries, Lunar subtype isolation, and repeated restore.
+- Independent review found and closed Lunar-Bloom/Crystallize C6 leakage,
+  Titanbreaker self-C6 ordering, and Ambush recipient selection at the
+  one-frame pre-hit command boundary. Focused and shared regressions, build,
+  Javadoc, and executable preflight pass on 2026-08-04.
+- Commit/push remains pending because the managed sandbox exposes `.git` as
+  read-only; all source and plan changes remain in the working tree.
+
+## Implementation Order: Yun Jin Flying Cloud Support Campaign
+
+Status: Complete. B-175 adds a complete bounded Normal Attack support contract
+using live DEF and recipient-specific hit quotas. Both phases are implemented
+and verified.
+
+Scope:
+
+- Reserve Yun Jin ID 39/Liyue without renumbering existing content.
+- Add Talent 9/12 Normal, Charged, Press/full-Hold Skill, and Burst behavior
+  from pinned gcsim `ef41805d` and KQM TCL `80ba6241` evidence.
+- Model Flying Cloud Flag Formation's per-recipient 30-hit quota, live Yun Jin
+  DEF scaling, elemental-diversity A4, and representable C1-C6 support.
+
+Out of scope for this pass:
+
+- Skill shield absorption, incoming-hit perfect counters, intermediate Hold
+  level, hitlag extension, multi-target quota consumption, geometry, RL,
+  generated docs, and Deferred Systems.
+- Hold requests deterministically mean full Charge Level 2; Press remains
+  Charge Level 0 and unsupported intermediate input is not approximated.
+
+### Phase 1: Yun Jin Identity And Buff Keys - Done
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+
+Requirements:
+
+- Assign Yun Jin ID 39/Liyue, move the unknown numeric boundary to 40, preserve
+  IDs 0-38, and reserve typed Formation/C2/C4/C6 buff identities.
+
+Tests:
+
+- Normal: exact-name/numeric/region round trips and typed buff uniqueness.
+- Boundary: Kujou Sara remains ID 38 and ID 40 fails closed.
+- Abnormal: null and case-mismatched names fail closed.
+
+Verification:
+
+- `./gradlew LegacyCharacterIdentityRegressionTest build`
+- `python scripts/preflight.py --run`
+
+### Phase 2: Flying Cloud Character Slice - Done
+
+Target files:
+
+- `config/characters/YunJin/YunJin_Status.csv` (new)
+- `config/characters/YunJin/YunJin_Multipliers.csv` (new)
+- `src/java/model/character/YunJin.java` (new)
+- `src/java/sample/YunJinRegressionTest.java` (new)
+
+Requirements:
+
+- Align Lv. 90 stats, T9/T12 multipliers, multi-hit Normal timing, Charged,
+  Press/full-Hold Skill DEF scaling, gauge, particles, cooldown, and Burst
+  Energy/damage timing.
+- Start Formation after Burst damage, grant each party member 30 Normal-tag
+  hits for 12 seconds, add live Yun Jin DEF times Talent/A4 ratio before each
+  fixed-target hit, and consume exactly one quota after successful resolution.
+- Implement C1 cooldown, C2 Normal DMG, C3/C5 levels, C4 post-Crystallize DEF,
+  C6 recipient quota-aware Normal speed, recast replacement, and exact restore.
+
+Tests:
+
+- Normal: data, N1-N5 multi-hits, Charged, Skill modes/particles, Burst damage,
+  Formation bonus, elemental-diversity A4, and C1-C6.
+- Boundary: 30/31st hits, recipient independence, 12-second expiry, Burst
+  activation order, live DEF/C4 changes, multi-hit quota, and repeated restore.
+- Abnormal: invalid constellation/state/action, unsupported input, no-target
+  quota preservation, insufficient Energy, cross-simulator reuse, and stale
+  pending events.
+
+Verification:
+
+- `./gradlew YunJinRegressionTest LegacyCharacterIdentityRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Identity 39, four typed buff keys, aligned T9/T12 CSVs, and the bounded
+  snapshot-aware character slice are present in the working tree.
+- Focused coverage proves public Press/Hold routing, live direct-hit stats,
+  Skill and Burst timing, dynamic DEF, elemental-diversity A4, per-recipient
+  30-hit quotas, C1-C6, exact expiry, particles, and repeated restore.
+- Independent review found and closed public Hold rejection, C6 recipient and
+  Normal-timeline speed handling, and accidental direct-attack snapshots.
+  Focused/shared regressions, build, Javadoc, and executable preflight pass on
+  2026-08-04. Commit/push remains blocked by read-only `.git`.
+
+## Implementation Order: Faruzan Prayerful Wind Support Campaign
+
+Status: Complete. B-177 adds a complete stationary single-target Anemo support
+contract from pinned gcsim `ef41805d` and KQM TCL `80ba6241` evidence. Both
+phases are implemented and verified.
+
+Scope:
+
+- Reserve Faruzan ID 40/Sumeru without renumbering existing identities.
+- Add exact Talent 9/12 data, N1-N4, fully charged/Hurricane Arrow, Press
+  Skill, Collapse, Burst field pulses, A1/A4, and representable C1-C6.
+- Preserve Manifest Gale charges, field generations, shared proc gates,
+  Collapse snapshots, particles, support windows, and pending events across
+  simulator snapshots.
+
+Out of scope for this pass:
+
+- Physical aimed shots, Plunge timing, weak points, projectile travel-distance
+  variation, suction, Burst triangle movement, geometry, multi-target C4,
+  co-op-specific C6 gates, RL, generated docs, and Deferred Systems.
+- `CHARGE` means a fully charged Anemo arrow, shortened to the sourced A1
+  Hurricane timeline while Manifest Gale has charges.
+
+### Phase 1: Faruzan Identity And Anemo Support Stats - Done
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/model/type/StatType.java`
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/mechanics/formula/StandardDamageStrategy.java`
+- `src/java/sample/ElementSpecificCritDamageRegressionTest.java`
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+
+Requirements:
+
+- Assign ID 40/Sumeru, move the unknown numeric boundary to 41, reserve typed
+  Prayerful Wind and Perfidious Wind identities, and add Anemo-only CRIT DMG
+  without leaking into Physical, Geo, other elements, or Lunar subtypes.
+
+Tests:
+
+- Normal: identity/name/region round trips and Anemo CRIT DMG contribution.
+- Boundary: Yun Jin remains 39, numeric 41 fails closed, and zero Anemo bonus
+  preserves the standard formula.
+- Abnormal: null/case-mismatched identity and non-Anemo actions fail closed.
+
+Verification:
+
+- `./gradlew LegacyCharacterIdentityRegressionTest ElementSpecificCritDamageRegressionTest build`
+
+### Phase 2: Manifest Gale And Prayerful Wind Slice - Done
+
+Target files:
+
+- `config/characters/Faruzan/Faruzan_Status.csv` (new)
+- `config/characters/Faruzan/Faruzan_Multipliers.csv` (new)
+- `src/java/model/character/Faruzan.java` (new)
+- `src/java/sample/FaruzanRegressionTest.java` (new)
+
+Requirements:
+
+- Align Lv. 90 stats, attacks, Skill state at frame 12, Skill hit at 14,
+  Hurricane/Collapse timing, gauges, 330-frame particle gate, and C4 Energy.
+- Reproduce Burst Energy frame 3, buff frame 43, damage then shred frame 54,
+  sourced C0/C2 refresh schedules, exact four-second windows, and stale-field
+  suppression on recast.
+- Apply A4's 32% Faruzan Base-ATK additive damage to eligible Anemo direct hits
+  on a shared 48-frame gate; apply C6 Anemo CRIT DMG and active-attacker
+  Collapse on a non-resetting 180-frame gate.
+
+Tests:
+
+- Normal: data, N1-N4, full charge, Skill/Manifest/Collapse, particles, Burst
+  schedules, Prayerful/Perfidious support, A1/A4, and C1-C6.
+- Boundary: charge expiry/count, 48/180/330-frame gates, hit-before-shred order,
+  all final half-open expiries, field recast, active recipient, and no-target
+  particle/quota behavior.
+- Abnormal: invalid constellation/state/action, insufficient Energy, expired
+  Manifest, stale events, repeated restore, and cross-simulator reuse.
+
+Verification:
+
+- `./gradlew FaruzanRegressionTest LegacyCharacterIdentityRegressionTest ElementSpecificCritDamageRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Identity 40, Anemo-only CRIT DMG, typed support windows, aligned data, and the
+  complete bounded character slice are present in the working tree.
+- Focused coverage proves bow release/impact timing, Manifest/Collapse,
+  48/180/330-frame gates, Burst hit-before-shred, C0/C2 pulse windows, 60-frame
+  swap cancel, direct/indirect C6, recast preservation, and exact restore.
+- Focused/shared regressions, build, Javadoc, and executable preflight pass on
+  2026-08-04. Independent re-review found no remaining High/Medium issue;
+  commit/push remains blocked by read-only `.git`.
+
+## Implementation Order: Mountain-Bracing Bolt Weapon Campaign
+
+Status: Complete. B-178 adds the weapon's complete combat-facing owner contract
+from pinned gcsim `ef41805d` and KQM TCL `80ba6241` evidence. The single phase
+is implemented and verified.
+
+Scope:
+
+- Add Lv. 90 Polearm metadata, R1-R5 permanent Skill DMG, and one refreshable
+  eight-second additional Skill DMG window after another active party member's
+  accepted Skill input.
+- Preserve the mutable window through simulator snapshots without adding a
+  shared BuffId or duplicate team-buff representation.
+
+Out of scope for this pass:
+
+- Climbing stamina reduction, hitlag extension, distance/nearby geometry, RL,
+  generated docs, and Deferred Systems. All fixed-party members count as
+  nearby for the combat trigger.
+
+### Phase 1: Weapon Runtime And Focused Regression - Done
+
+Target files:
+
+- `src/java/model/weapon/MountainBracingBolt.java` (new)
+- `src/java/sample/MountainBracingBoltRegressionTest.java` (new)
+
+Requirements:
+
+- Provide Base ATK 565, ER 30.6%, default R5, R1-R5 values
+  `0.09 + 0.03R`, exact binding validation, idempotent listener registration,
+  active non-owner Skill trigger, non-stacking refresh, and exact restore.
+
+Tests:
+
+- Normal: metadata/refinement table, permanent/active totals, other-member
+  Press/Hold Skill, off-field owner, and independent instances.
+- Boundary: activation, 8-second half-open expiry, refresh, cooldown auto-wait,
+  active/inactive snapshots, and no third stack.
+- Abnormal: invalid refinement/binding/state, owner/off-field actor/wrong input,
+  direct AttackAction, unsupported mode, null, cross-owner, and cross-simulator.
+
+Verification:
+
+- `./gradlew MountainBracingBoltRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- R1-R5 metadata/passives, exact owner binding, active non-owner Skill trigger,
+  half-open refreshable window, and snapshot state are implemented without a
+  shared BuffId.
+- Focused regression, shared Reaction regression, build, Javadoc, and
+  executable preflight pass on 2026-08-04. Independent review found no
+  High/Medium issue; commit/push remains blocked by read-only `.git`.
+
+## Implementation Order: Bloodsoaked Ruins Weapon Campaign
+
+Status: Complete. B-179 adds the complete combat-facing passive from pinned
+gcsim `ef41805d` and KQM TCL `80ba6241` evidence.
+
+Scope:
+
+- Add Lv. 90 Polearm metadata and R1-R5 Burst-window Lunar-Charged DMG,
+  reaction-triggered generic CRIT DMG, and flat Energy recovery.
+- Keep Burst/CRIT half-open windows and the 14-second Energy gate independent
+  and exactly snapshot-restorable.
+
+Out of scope for this pass:
+
+- Hitlag extension, named report buff uptime, RL, generated docs, and Deferred
+  Systems. Exact simulation-time windows replace hitlag-extended durations.
+
+### Phase 1: Weapon Runtime And Focused Regression - Done
+
+Target files:
+
+- `src/java/model/weapon/BloodsoakedRuins.java` (new)
+- `src/java/sample/BloodsoakedRuinsRegressionTest.java` (new)
+
+Requirements:
+
+- Provide Base ATK 674, CRIT Rate 22.1%, default R5, exact R1-R5 values,
+  accepted on-field owner Burst activation, actual on-field owner
+  Lunar-Charged reaction activation, CRIT refresh independent of Energy ICD,
+  exact binding, and five-boundary restore without a BuffId.
+
+Tests:
+
+- Normal: metadata/table, direct/legacy/periodic Lunar-Charged bonus, generic
+  CRIT DMG, Energy, owner off-field contribution, and independent instances.
+- Boundary: 210/360/840-frame expiry and gate, cooldown wait, refresh/no-stack,
+  full-Energy gate consumption, and active/inactive snapshots.
+- Abnormal: subtype isolation, standard EC/ordinary damage, ally/off-field
+  reaction, derived reaction, insufficient Energy, invalid binding/refinement,
+  cross-simulator, and foreign state.
+
+Verification:
+
+- `./gradlew BloodsoakedRuinsRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- R1-R5 metadata, accepted Burst and actual-reaction timing, generic CRIT DMG,
+  independent Energy ICD, subtype/source exclusions, binding, and exact
+  snapshot restore are implemented without a shared BuffId.
+- Focused regression, shared Reaction regression, build, Javadoc, and
+  executable preflight pass on 2026-08-04. Independent review identified one
+  missing subtype-isolation regression, which was added and passes; no
+  High/Medium implementation issue remains. Commit/push is blocked by the
+  managed sandbox's read-only `.git` directory.
+
+## Implementation Order: Shenhe Icy Quill Support Campaign
+
+Status: Complete. B-181 implements a stationary single-target Shenhe support
+slice from pinned gcsim `ef41805d` and maintained KQM character/evidence pages.
+
+Scope:
+
+- Add typed Shenhe identity/data and Cryo-only C2 CRIT DMG routing.
+- Implement Normal/Charged actions, Press/Hold Skill, dynamic-ATK Icy Quill,
+  Burst field/ticks, particles, A1/A4, and representable C1-C6 behavior.
+- Preserve per-recipient quotas, dynamic Quill ATK, snapshot attacks, and all
+  Shenhe-owned pending events across simulator rollback.
+
+Out of scope for this pass:
+
+- Hitlag extension, movement/lunge, stamina, field geometry, multi-target quota
+  consumption, shields, RL, generated docs, and Deferred Systems.
+
+### Phase 1: Typed Identity, Formula, And Talent Data - Done
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/model/type/StatType.java`
+- `src/java/mechanics/formula/StandardDamageStrategy.java`
+- `src/java/mechanics/buff/BuffId.java`
+- `config/characters/Shenhe/Shenhe_Status.csv` (new)
+- `config/characters/Shenhe/Shenhe_Multipliers.csv` (new)
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+- `src/java/sample/ElementSpecificCritDamageRegressionTest.java`
+
+Requirements:
+
+- Reserve stable Liyue identity 41, four Shenhe-owned buff IDs, and
+  `CRYO_CRIT_DMG` that affects only Cryo direct damage.
+- Align Lv. 90 base/ascension values and Talent 9/12 multipliers for C0-C6.
+
+Tests:
+
+- Normal: identity/name/region/round-trip, exact data keys, Cryo C2 expected
+  CRIT multiplier.
+- Abnormal: duplicate IDs/names and Physical/other-element/Lunar isolation.
+
+### Phase 2: Character Runtime And Snapshot State - Done
+
+Target files:
+
+- `src/java/model/character/Shenhe.java` (new)
+
+Requirements:
+
+- Provide five-hit Normal and Charged actions, Press/Hold Skill timing,
+  1U/2U application, 3/4 particles, 10/15-second Quill windows, and C1 charges.
+- Add dynamic live-ATK Quill base damage to eligible direct Cryo attacks with
+  independent 5/7 quotas; C6 Normal/Charged procs do not consume quota.
+- Implement 80-Energy Burst initial/twelve periodic hits, 12-second field,
+  Cryo/Physical shred plus two-second linger, A1 active Cryo bonus, A4
+  independent action bonuses, and C2 eighteen-second/Cryo-CRIT field.
+- Implement C3/C5 talent routing, C4 post-proc 60-second/50-stack Skill bonus,
+  exact binding, generation cancellation, and rollback of quotas/stacks/events.
+
+Tests:
+
+- Normal: action timings/multipliers/ICD/gauge/particles, Quill dynamic ATK and
+  all eligible categories, A1/A4, Burst ticks/shred, C1-C6.
+- Boundary: 5/7 quota, C6 preservation, 10/15/12/18/14/20-second windows,
+  50-stack cap/60-second expiry, recast generations, and active snapshots.
+- Abnormal: non-Cryo/transformative/zero/foreign hits, expired quotas, invalid
+  constellation/simulator/state, insufficient Energy, and inactive field.
+
+### Phase 3: Focused Regression And Integration Review - Done
+
+Target files:
+
+- `src/java/sample/ShenheRegressionTest.java` (new)
+
+Requirements:
+
+- Cover all normal, boundary, abnormal, ordering, owner-isolation, and snapshot
+  contracts without expanding the shared reaction regression.
+- Resolve independent review findings before marking the campaign complete.
+
+Verification:
+
+- `./gradlew LegacyCharacterIdentityRegressionTest ElementSpecificCritDamageRegressionTest ShenheRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Added stable Shenhe identity/data, Cryo-only CRIT DMG routing, Press/Hold
+  Skill, live-ATK per-recipient Icy Quill, Burst field/ticks, A1/A4, and the
+  representable C1-C6 contracts with rollback-safe pending state.
+- Focused coverage fixes exact 10/15-second cooldowns, CSV/runtime key binding,
+  Quill category and ownership gates, 5/7 quotas, 50-stack C4, C6 free hits,
+  active-recipient fields, Burst ICD/timing, and snapshot reconstruction.
+- The planned focused/shared regressions, build, Javadoc, and executable
+  preflight pass. Independent review's two Medium findings were corrected and
+  re-review found no remaining High/Medium issue; commit/push remains blocked
+  by read-only `.git`.
+
+## Implementation Order: Tighnari Wreath Arrow Campaign
+
+Status: Complete. B-182 implements a stationary single-target Tighnari offense
+slice from pinned gcsim `ef41805d` and maintained KQM character/evidence pages.
+
+Scope:
+
+- Add typed Tighnari identity/data and character-owned buff identities.
+- Implement the four-hit Normal string, Wreath Arrow and Clusterblooms, Skill
+  damage/particles/three-shot acceleration, and twelve-hit Burst.
+- Implement A1/A4, C1-C6, reaction-aware C4, exact event ownership, and
+  projectile snapshots across simulator rollback.
+
+Out of scope for this pass:
+
+- Physical aimed/level-one aimed shots, aiming input, weak points, projectile
+  pathing/obstacles/range, taunt behavior, geometry, multi-target selection,
+  RL, generated docs, and Deferred Systems.
+
+### Phase 1: Typed Identity And Talent Data - Done
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/mechanics/buff/BuffId.java`
+- `config/characters/Tighnari/Tighnari_Status.csv` (new)
+- `config/characters/Tighnari/Tighnari_Multipliers.csv` (new)
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+
+Requirements:
+
+- Reserve stable Sumeru identity 42 and typed A1/C2/C4 buff IDs.
+- Align Lv. 90 base/Dendro ascension values, Talent 9/12 multipliers, and all
+  represented passive/constellation constants with the pinned source.
+
+Tests:
+
+- Normal: identity/name/region/round-trip and exact CSV keys/values.
+- Abnormal: duplicate IDs/names, malformed rows, and invalid constellation.
+
+### Phase 2: Character Runtime And Snapshot State - Done
+
+Target files:
+
+- `src/java/model/character/Tighnari.java` (new)
+
+Requirements:
+
+- Implement exact Normal, enhanced Wreath, four 35-frame delayed
+  Clusterblooms, Skill, and six primary/six secondary Burst hitmarks.
+- Model Skill's 12-second/three-Wreath acceleration, deterministic injectable
+  3/4 particles, A1 four-second EM, and EM-scaled A4 Charged/Burst bonus.
+- Implement C1 Charged CRIT, stationary-target C2 field plus six-second linger,
+  C3/C5 talent routing, C4 60/120 party EM and reaction refresh, and C6 charge
+  acceleration plus a separate no-ICD 150%-ATK arrow.
+- Preserve action snapshots, shared Clusterbloom/Burst ICD groups, generation
+  cancellation, reaction state, quotas, buffs, and pending projectiles across
+  rollback.
+
+Tests:
+
+- Normal: exact names, multipliers, hitmarks, recovery, ICD/gauge, particles,
+  Skill quota, Burst ordering, A1/A4, and C1-C6 behavior.
+- Boundary: three-shot/12-second acceleration, 4/8/14-second buff windows,
+  A4 60% cap, C4 reaction upgrade/refresh, and final projectile timestamps.
+- Abnormal: invalid random draws/actions/state/simulator, missing target,
+  insufficient Energy, excluded reactions, stale generations, and expiry.
+
+### Phase 3: Focused Regression And Integration Review - Done
+
+Target files:
+
+- `src/java/sample/TighnariRegressionTest.java` (new)
+
+Requirements:
+
+- Cover normal, boundary, abnormal, ordering, owner-isolation, and rollback
+  contracts without expanding the shared reaction regression.
+- Resolve independent review findings before marking the campaign complete.
+
+Verification:
+
+- `./gradlew LegacyCharacterIdentityRegressionTest TighnariRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Added exact four-step Normal, Wreath/Clusterbloom, Skill/Suffusion/particles,
+  twelve-hit Burst, A1/A4, C1-C6, reaction-aware C4, and rollback-safe pending
+  projectile state for the stationary target contract.
+- Review corrections split Skill's 13/15/20-frame state transitions, move A1
+  to release plus one frame, snapshot each secondary at its primary, start C4
+  at Burst input, preserve selected particles, and add dedicated Clusterbloom
+  ICD. The audit also exposed and fixed shared Standard ICD's hit-count
+  off-by-one, with Raiden and direct ICD regressions updated to hit four.
+- Identity/focused/Reaction regressions, build, Javadoc, and executable
+  preflight pass. Final independent re-review found no remaining High/Medium
+  issue; commit/push remains blocked by read-only `.git`.
+
+## Implementation Order: Kaedehara Kazuha Swirl Support Campaign
+
+Status: Complete. B-183 implements a stationary single-target Kazuha offense and
+Swirl-support slice from pinned gcsim `ef41805d` and maintained KQM evidence.
+
+Scope:
+
+- Add typed Kazuha identity/data and coexisting per-element A4 buff identities.
+- Implement Normal/Charged, Press/Hold Skill followed by immediate High
+  Plunge, A1 absorption, Burst slash/five ticks/absorption, and particles.
+- Implement A4, C1-C6 representable combat behavior and rollback-safe events.
+
+Out of scope:
+
+- Self/environment aura absorption, suction, position, weight, fall damage,
+  gliding, stamina, incoming damage, special Plunge skips, multi-target
+  selection, RL, generated docs, and Deferred Systems.
+
+### Phase 1: Typed Identity And Talent Data - Done
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/model/type/ICDTag.java`
+- `src/java/mechanics/buff/BuffId.java`
+- `config/characters/KaedeharaKazuha/KaedeharaKazuha_Status.csv` (new)
+- `config/characters/KaedeharaKazuha/KaedeharaKazuha_Multipliers.csv` (new)
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+
+Requirements:
+
+- Reserve stable Inazuma identity 43 and typed coexisting A4/C2/C6 buffs.
+- Align Lv. 90 EM ascension, Talent 9/12 multipliers, and represented C1-C6.
+
+Tests:
+
+- Normal: identity/name/region/round-trip and exact CSV keys/values.
+- Abnormal: duplicate IDs/names, malformed rows, invalid constellation.
+
+### Phase 2: Character Runtime And Snapshot State - Done
+
+Target files:
+
+- `src/java/model/character/KaedeharaKazuha.java` (new)
+
+Requirements:
+
+- Implement exact basic attacks, Press/Hold Skill gauges/particles/cooldowns,
+  immediate Midare Ranzan, 200%-ATK absorbed A1, and Burst's slash/five ticks.
+- Absorb enemy aura by Pyro/Hydro/Electro/Cryo priority and preserve frame-81
+  DoT snapshots before C2.
+- Implement Swirl-time EM-captured per-element A4, C1 cooldown/reset, C2 field
+  recipients, C3/C5 talent routing, C4 Skill Energy, and C6 infusion/live-EM
+  Normal/Charged/Plunge bonus.
+- Preserve pending hits, absorption, field/C6 windows, and action snapshots
+  across rollback.
+
+Tests:
+
+- Normal: exact timings/multipliers/ICD/gauge/particles, absorption priority,
+  Burst ordering/snapshots, A4, and C1-C6.
+- Boundary: 6/9/15-second cooldowns, 5/8-second buffs, C1 reset, C2 active
+  recipients, C4 threshold, C6 live EM, and final tick timestamps.
+- Abnormal: null/unsupported actions/state/simulator, no aura, excluded aura,
+  insufficient Energy, stale generation, and expired fields.
+
+### Phase 3: Focused Regression And Integration Review - Done
+
+Target files:
+
+- `src/java/sample/KaedeharaKazuhaRegressionTest.java` (new)
+
+Requirements:
+
+- Cover normal, boundary, abnormal, ordering, absorption, owner isolation, and
+  rollback without expanding shared reaction coverage unnecessarily.
+- Resolve independent review findings before completion.
+
+Verification:
+
+- `./gradlew LegacyCharacterIdentityRegressionTest KaedeharaKazuhaRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Stable identity/data, maintained basic-attack timings, cast-time Skill and
+  repeated Burst absorption, A1/Midare, particles, five field ticks, A4, C1-C6,
+  and exact rollback pass focused and shared gates on 2026-08-04.
+- Review corrections keep C2 active through the final field tick, apply live-EM
+  C6 bonus to every represented Plunge component, and preserve no-ICD external
+  Plunges; final independent re-review found no High/Medium issue.
+- Commit/push remains blocked by the managed sandbox's read-only `.git`.
+
+## Implementation Order: Kuki Shinobu Offensive Ring Campaign
+
+Status: Complete. B-176 adds a fixed-full-HP offensive Kuki Shinobu slice from
+pinned gcsim `ef41805d` evidence.
+
+Scope:
+
+- Add typed identity/data, four-step Normal and two-hit Charged attacks, Skill
+  initial damage, live periodic ring damage, injectable particles, A4 damage,
+  high-HP Burst, C2 duration, C3/C5 levels, and C4 Thundergrass Mark.
+- Preserve exact event ordering, Standard Skill/Burst ICD, off-field ring
+  ownership, cast-snapshot Burst, C4 cooldown, and rollback.
+
+Out of scope:
+
+- Player HP consumption/healing, low-HP Burst, A1, C1 radius, C6, Plunge,
+  geometry, hitlag, movement, RL, generated docs, and Deferred Systems. The
+  current simulator's fixed-full-HP boundary selects the seven-hit Burst.
+
+### Phase 1: Identity And Talent Data - Done
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `config/characters/KukiShinobu/KukiShinobu_Status.csv` (new)
+- `config/characters/KukiShinobu/KukiShinobu_Multipliers.csv` (new)
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+
+Requirements:
+
+- Reserve stable ID 45 with Inazuma region and align Lv. 90/Talent 9/12/13
+  values, frames, durations, Energy, ICD/gauge, A4, particles, and C4.
+
+Tests:
+
+- Normal: identity/name/round-trip and exact six-column data shape/keys.
+- Abnormal: numeric/name fallback, malformed rows, and constellation range.
+
+### Phase 2: Runtime And Focused Regression - Done
+
+Target files:
+
+- `src/java/model/character/KukiShinobu.java` (new)
+- `src/java/sample/KukiShinobuRegressionTest.java` (new)
+
+Requirements:
+
+- Resolve Normal/Charged frames, frame-11 Skill, frame-23 ring activation,
+  1.5-second live ticks, 45% injectable particles, A4 flat damage, and exact
+  C0/C2 tick counts.
+- Resolve seven cast-snapshot Burst hits and C4 active-character N/C trigger,
+  five-frame delay, five-second gate, particles, and C3/C5 scaling.
+- Restore ring generations, pending hits/commands, RNG state, and C4 cooldown
+  without duplicated damage or particles.
+
+Tests:
+
+- Normal: attack multipliers/timing, Skill/ticks/particles/A4, Burst, C2-C5.
+- Boundary: 0.2/1.5/5/12/15-second gates, final ring tick, Burst frame series.
+- Abnormal: bad actions/constellation/RNG, no enemy, foreign simulator/state,
+  stale generation, wrong C4 categories, and repeated restore.
+
+Verification:
+
+- `./gradlew LegacyCharacterIdentityRegressionTest KukiShinobuRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Identity/data, chained Normal/Charged timing, live ring, hit-order injectable
+  particles, A4, high-HP Burst, C2-C5 offense, and exact rollback pass focused
+  and shared gates on 2026-08-04.
+- Independent review corrections use next-Normal frames, replay particle draws
+  from a snapshot cursor, fix Skill/ring A4 capture times, and separate C4's
+  trigger-time HP base from hit-time stats. Final review found no High/Medium.
+- Commit/push remains blocked by the managed sandbox's read-only `.git`.
+
+## Implementation Order: Aloy Coil Attacker Campaign
+
+Status: Complete. B-184 adds a stationary fixed-target Aloy slice from maintained
+KQM evidence and pinned gcsim `ef41805d`.
+
+Scope:
+
+- Add Aloy identity/data, Normal/fully charged attacks, Freeze Bomb, two fixed
+  Bomblet hits, Coil, Rushing Ice, A1/A4, Burst, particles, and rollback.
+- Preserve the 0.1-second Coil gate, 30-second post-switch clearing, ten-second
+  infusion, and cast snapshots.
+
+Out of scope:
+
+- Projectile geometry, variable Bomblet contact, weak points, manual aiming,
+  enemy ATK reduction, movement, hitlag extension, RL, generated docs, and
+  Deferred Systems. Exactly two Bomblets hit the represented fixed target.
+
+### Phase 1: Identity And Talent Data - Done
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/mechanics/buff/BuffId.java`
+- `config/characters/Aloy/Aloy_Status.csv` (new)
+- `config/characters/Aloy/Aloy_Multipliers.csv` (new)
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+
+Requirements:
+
+- Reserve stable ID 44 and fail the crossover region closed to UNKNOWN.
+- Align Lv. 90 stats, Talent 9 values, timings, Coil/Rushing, A1, and A4.
+
+Tests:
+
+- Normal: identity/name/round-trip, exact data keys and six-column shape.
+- Abnormal: numeric/name fallback, malformed rows, and nonzero constellation.
+
+### Phase 2: Runtime And Focused Regression - Done
+
+Target files:
+
+- `src/java/model/character/Aloy.java` (new)
+- `src/java/sample/AloyRegressionTest.java` (new)
+
+Requirements:
+
+- Resolve maintained Normal and charged timing, cast-snapshot Skill/Bomblets,
+  five particles, fixed two-Coil sequence, Rushing infusion, and Burst.
+- Apply Coil/Rushing Normal bonuses, A1 owner/team ATK, A4 one-second stacking,
+  exact half-open windows, switch clearing, and rollback-safe pending work.
+
+Tests:
+
+- Normal: multipliers/timing/gauge/ICD, two Bomblets, particles, A1/A4, Burst.
+- Boundary: 0.1/10/20/30-second gates, four-Coil transition, and final A4 stack.
+- Abnormal: unsupported actions, no enemy, nonzero constellation, foreign
+  simulator/state, stale generation, and repeated restore.
+
+Verification:
+
+- `./gradlew LegacyCharacterIdentityRegressionTest AloyRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Identity/data, exact fixed-target Skill and Burst timelines, two-Coil casts,
+  Rushing Ice, A1/A4, particles, switch clearing, and rollback pass the focused
+  and shared gates on 2026-08-04.
+- Independent review corrections preserve Normal arrows' release-time state
+  through flight and keep the last field-exit Coil clear active across return;
+  final re-review found no High/Medium issue.
+- Commit/push remains blocked by the managed sandbox's read-only `.git`.
+
+## Implementation Order: Nightweaver's Looking Glass Weapon Campaign
+
+Status: Complete. B-180 adds the complete combat-facing passive from pinned
+gcsim `ef41805d` and KQM TCL `80ba6241` evidence.
+
+Scope:
+
+- Correct converted Lunar-Bloom to consume Lunar-Bloom rather than ordinary
+  Bloom DMG Bonus in both normal-aura and Quicken-only Bloom paths.
+- Add Lv. 90 Catalyst metadata, R1-R5 owner EM windows, their simultaneous
+  party reaction bonus, deterministic multi-copy nonstack, and snapshot state.
+
+Out of scope for this pass:
+
+- Hitlag extension, geometry, generated docs, RL, and Deferred Systems. Exact
+  simulation-time windows replace hitlag-extended durations.
+
+### Phase 1: Converted Lunar-Bloom Bonus Routing - Done
+
+Target files:
+
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/sample/NightweaversLookingGlassRegressionTest.java` (new)
+
+Requirements:
+
+- Select `LUNAR_BLOOM_DMG_BONUS` before calculating a Bloom result whenever
+  party conversion will make that result Lunar-Bloom.
+- Preserve ordinary Bloom routing without conversion and cover normal-aura
+  plus Quicken-only entry paths without changing reaction notification order.
+
+Tests:
+
+- Normal: converted Hydro-on-Dendro and Dendro-on-Hydro use Lunar-Bloom bonus.
+- Boundary: Quicken-only Hydro Bloom uses the same converted bonus.
+- Abnormal: ordinary Bloom ignores Lunar-Bloom bonus and converted Bloom
+  ignores ordinary Bloom bonus.
+
+### Phase 2: Weapon Runtime And Multi-Copy Policy - Done
+
+Target files:
+
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/model/weapon/NightweaversLookingGlass.java` (new)
+- `src/java/sample/NightweaversLookingGlassRegressionTest.java` (extend)
+
+Requirements:
+
+- Provide Base ATK 542, EM 265, default R5, exact R1-R5 values, a 4.5-second
+  owner Hydro/Dendro Skill-hit EM window, and a 10-second party Lunar-Bloom EM
+  window; both owner EM copies stack only with each other.
+- While both windows on one weapon are active, expose Bloom, Hyperbloom,
+  Burgeon, and Lunar-Bloom bonuses to the party. Across copies, select the
+  highest-refinement active provider and break ties by party order; never
+  combine windows from different weapons.
+- Bind exact owner/simulator/equipment and restore all four window boundaries.
+
+Tests:
+
+- Normal: metadata/table, off-field Skill and party reaction triggers, one/two
+  EM copies, all four team bonuses, refresh, and independent instances.
+- Boundary: exact 270/600-frame expiry, active/inactive snapshots, highest-R
+  provider, tie order, and no cross-copy window combination.
+- Abnormal: wrong element/action/source/simulator, derived and non-Lunar-Bloom
+  reactions, zero/non-hit damage, invalid refinement/binding/state.
+
+Verification:
+
+- `./gradlew NightweaversLookingGlassRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- Converted normal-aura and Quicken-only Bloom now select the bonus matching
+  the resulting ordinary or Lunar reaction before calculation.
+- R1-R5 metadata, off-field dual EM windows, four simultaneous-window team
+  bonuses, deterministic active-copy selection, no cross-copy combination,
+  exact boundaries, binding, and snapshot restore are implemented.
+- Focused/shared regressions, build, Javadoc, and executable preflight pass on
+  2026-08-04. Independent review found no High/Medium source issue and both of
+  its test-coverage findings were closed. Commit/push remains blocked by the
+  managed sandbox's read-only `.git` directory.
 
 ## Implementation Order: Follow-on Legacy Character Campaign
 

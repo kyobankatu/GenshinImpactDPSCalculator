@@ -3646,12 +3646,663 @@ experiment record.
 
 ### B-174 — Kujou Sara support character candidate
 
-- **Status:** candidate
+- **Status:** done
 - **Source:** explicit broad content-expansion request and post-B-172 missing
   character inventory.
 - **Symptom:** Kujou Sara has pinned evidence and a local image but no typed
   identity, class, aligned talent CSV, or regression.
-- **Scope/risk:** planned; Crowfeather Cover and C6 require typed charged-shot,
-  active-recipient buff, and Electro-only CRIT DMG contracts.
-- **Decision:** retain after B-173 rather than start a second partial campaign;
-  it does not fit the current session's remaining implementation/review window.
+- **Scope/risk:** two-phase implementation; Crowfeather Cover and C6 require
+  typed charged-shot, active-recipient buff, and Electro-only CRIT DMG
+  contracts.
+- **Boundary:** physical aimed shots, aiming/movement, taunt behavior, exact
+  Stormcluster geometry, hitlag, RL, generated docs, and Deferred Systems are
+  excluded.
+- **Proof/plan:** two-phase `TASKS.md` Kujou Sara Crowfeather Support Campaign
+  with identity/formula and focused character/regression gates.
+- **Completion:** the typed identity/formula and full bounded character slice
+  pass focused, reaction, build, Javadoc, and executable preflight gates on
+  2026-08-04. Independent review corrections cover Lunar subtype isolation and
+  post-hit Burst buff ordering; commit/push is blocked by read-only `.git`.
+
+### B-175 — Yun Jin Flying Cloud support campaign
+
+- **Status:** done
+- **Source:** post-B-174 content inventory and explicit broad content-expansion
+  request.
+- **Symptom:** Yun Jin has pinned evidence and a local face asset but no typed
+  identity, class, aligned talent CSV, or focused regression.
+- **Evidence:** pinned KQM TCL `80ba6241` and gcsim `ef41805d`, accessed
+  2026-08-04.
+- **Scope/risk:** two-phase identity plus live-DEF, per-recipient 30-hit Normal
+  Attack support slice using existing target-dependent and snapshot contracts.
+- **Boundary:** shields, incoming-hit perfect counters, intermediate Hold,
+  hitlag extension, multi-target geometry, RL, generated docs, and Deferred
+  Systems are excluded.
+- **Proof/plan:** two-phase `TASKS.md` Yun Jin Flying Cloud Support Campaign.
+- **Completion:** identity/data, Press/full-Hold Skill, Burst, live-DEF
+  Formation, per-recipient quota, A4, C1-C6, and exact restore pass focused,
+  shared reaction, build, Javadoc, and executable preflight gates on
+  2026-08-04. Independent review corrections cover public Hold routing, C6
+  recipient/timeline behavior, and live direct-hit stat resolution; commit/push
+  is blocked by read-only `.git`.
+
+### B-176 — Kuki Shinobu offensive ring candidate
+
+- **Status:** done
+- **Source:** post-B-174 content inventory and pinned evidence audit.
+- **Symptom:** Kuki Shinobu has a local asset and source-ready offensive ring
+  mechanics but no typed identity, class, aligned CSV, or regression.
+- **Scope/risk:** Normal/Charged attacks, Skill initial plus dynamic periodic
+  Electro hits, injectable particles, seven-hit high-HP Burst, A4 damage, and
+  C2-C5 offense; bounded medium risk.
+- **Boundary:** player HP consumption, healing, low-HP Burst, A1, C6, geometry,
+  RL, generated docs, and Deferred Systems are excluded.
+- **Decision:** promoted after B-184 under the simulator's explicit fixed-full-
+  HP boundary; exact HP-dependent behavior remains excluded rather than
+  fabricated. Two-phase plan is recorded in `TASKS.md`.
+- **Completion:** stable identity/data, Normal/Charged, C0/C2 live ring,
+  hit-order particle RNG with rollback tape, cast-snapshot seven-hit Burst,
+  A4, and C3-C5 offense pass focused/shared/build/Javadoc/preflight gates on
+  2026-08-04. Independent review corrections cover next-Normal frames, A4/C4
+  capture points, and RNG replay; final review found no High/Medium issue.
+  Commit/push is blocked by read-only `.git`.
+
+### B-177 — Faruzan Prayerful Wind support campaign
+
+- **Status:** done
+- **Source:** post-B-175 in-scope discovery and explicit broad content request.
+- **Symptom:** Faruzan has pinned evidence and a local face asset but no typed
+  identity, aligned data, character class, Anemo-specific support stat, or
+  focused regression.
+- **Evidence:** pinned KQM TCL `80ba6241` and gcsim `ef41805d`, accessed
+  2026-08-04.
+- **Scope/risk:** two-phase identity/formula plus snapshot-aware Manifest Gale,
+  Collapse, periodic Burst support, A4, and representable C1-C6 campaign.
+- **Boundary:** physical aimed shots, Plunge timing, suction, triangle movement,
+  geometry, multi-target C4, co-op C6, RL, generated docs, and Deferred Systems
+  are excluded.
+- **Proof/plan:** two-phase `TASKS.md` Faruzan Prayerful Wind Support Campaign.
+- **Completion:** identity/formula, data, Manifest/Collapse, periodic Burst
+  support, A4, C1-C6, direct/indirect gates, and exact restore pass focused,
+  shared reaction, build, Javadoc, and executable preflight gates on
+  2026-08-04. Review corrections cover deterministic hit-before-shred,
+  recast window preservation, indirect C6, and the 60-frame swap cancel;
+  re-review found no remaining High/Medium issue. Commit/push is blocked by
+  read-only `.git`.
+
+### B-178 — Mountain-Bracing Bolt weapon campaign
+
+- **Status:** done
+- **Source:** post-B-177 weapon inventory and explicit broad content request.
+- **Symptom:** the source-ready Polearm is absent despite requiring no new
+  shared simulator contract.
+- **Evidence:** pinned KQM TCL `80ba6241` and gcsim `ef41805d`, accessed
+  2026-08-04.
+- **Scope/risk:** local owner-only permanent plus refreshable Skill DMG window,
+  exact binding, and snapshot state; low risk.
+- **Boundary:** climbing stamina, hitlag extension, geometry, RL, generated
+  docs, and Deferred Systems are excluded.
+- **Proof/plan:** one-phase `TASKS.md` Mountain-Bracing Bolt Weapon Campaign.
+- **Completion:** R1-R5 metadata, permanent/triggered Skill DMG, accepted-input
+  semantics, binding, exact window boundaries, and snapshot restore pass
+  focused/shared/build/Javadoc/preflight gates on 2026-08-04. Independent
+  review found no High/Medium issue; commit/push is blocked by read-only `.git`.
+
+### B-179 — Bloodsoaked Ruins weapon campaign
+
+- **Status:** done
+- **Source:** post-B-178 weapon inventory and explicit broad content request.
+- **Symptom:** the source-ready Polearm is absent despite requiring no shared
+  formula, reaction, scheduler, stat, or event changes.
+- **Evidence:** pinned KQM TCL `80ba6241` and gcsim `ef41805d`, accessed
+  2026-08-04.
+- **Scope/risk:** local Burst/CRIT windows, Energy ICD, binding, and snapshot;
+  low-to-medium risk.
+- **Boundary:** hitlag extension, report-only named uptime, RL, generated docs,
+  and Deferred Systems are excluded.
+- **Proof/plan:** one-phase `TASKS.md` Bloodsoaked Ruins Weapon Campaign.
+- **Completion:** R1-R5 metadata, accepted Burst and actual Lunar-Charged
+  windows, generic CRIT DMG, independent Energy gate, exact binding/snapshot,
+  and subtype exclusions pass focused/shared/build/Javadoc/preflight gates on
+  2026-08-04. Independent review found no remaining High/Medium issue;
+  commit/push is blocked by read-only `.git`.
+
+### B-180 — Nightweaver's Looking Glass weapon campaign
+
+- **Status:** done
+- **Source:** post-B-178 weapon inventory and pinned evidence audit.
+- **Symptom:** the Catalyst is absent and its dual owner/team windows are
+  representable, but converted Lunar-Bloom currently reads standard Bloom
+  bonus before conversion.
+- **Scope/risk:** owner Hydro/Dendro Skill and Lunar-Bloom EM windows, four team
+  reaction bonuses, deterministic multi-copy nonstack, plus shared converted
+  Lunar-Bloom bonus routing; planned risk.
+- **Boundary:** hitlag extension, geometry, RL, generated docs, and Deferred
+  Systems are excluded.
+- **Decision:** promoted after B-179 as a two-phase shared-routing and weapon
+  campaign; `TASKS.md` fixes both Bloom entry paths before weapon integration.
+- **Completion:** converted normal/Quicken Bloom routing, R1-R5 dual owner EM
+  windows, simultaneous team reaction bonuses, deterministic multi-copy
+  nonstack/fallback, exact binding/snapshot, and abnormal cases pass
+  focused/shared/build/Javadoc/preflight gates on 2026-08-04. Independent
+  review found no remaining High/Medium issue; commit/push is blocked by
+  read-only `.git`.
+
+### B-181 — Shenhe Icy Quill support campaign
+
+- **Status:** done
+- **Source:** explicit broad content-expansion request and post-B-180 missing
+  character inventory.
+- **Symptom:** Shenhe has a local face asset and maintained source contract but
+  no typed identity, aligned data, class, Cryo-specific C2 stat, or regression.
+- **Evidence:** KQM Shenhe character/evidence pages and pinned gcsim
+  `ef41805d`, accessed 2026-08-04.
+- **Scope/risk:** three-phase identity, per-recipient dynamic-ATK Quill,
+  Press/Hold Skill, stationary Burst field, A1/A4, and C1-C6 support slice;
+  planned risk.
+- **Boundary:** hitlag extension, movement, stamina, geometry, multi-target
+  quota use, shields, RL, generated docs, and Deferred Systems are excluded.
+- **Proof/plan:** three-phase `TASKS.md` Shenhe Icy Quill Support Campaign.
+- **Completion:** stable identity/data, Cryo-specific CRIT routing, complete
+  bounded support runtime, C1-C6, exact cooldown/key binding, rollback, and
+  focused/full gates pass on 2026-08-04. Independent re-review found no
+  remaining High/Medium issue; commit/push is blocked by read-only `.git`.
+
+### B-182 — Tighnari Wreath Arrow campaign
+
+- **Status:** done
+- **Source:** post-B-181 missing-character inventory and explicit broad
+  content-expansion request.
+- **Symptom:** Tighnari has a local face asset and complete pinned evidence but
+  no typed identity, aligned data, class, or executable regression.
+- **Evidence:** maintained KQM Tighnari character/evidence pages and pinned
+  gcsim `ef41805d`, accessed 2026-08-04.
+- **Scope/risk:** three-phase stationary single-target Wreath/Clusterbloom,
+  Skill, Burst, A1/A4, C1-C6, reaction, and rollback campaign; planned risk.
+- **Boundary:** aimed level-one shots, aiming, weak points, pathing, obstacles,
+  range, taunts, geometry, multi-target selection, RL, generated docs, and
+  Deferred Systems are excluded.
+- **Proof/plan:** three-phase `TASKS.md` Tighnari Wreath Arrow Campaign.
+- **Completion:** stable identity/data, complete bounded offense, dedicated
+  Clusterbloom ICD, C1-C6, reaction-aware C4, exact projectile rollback, and
+  all focused/full gates pass on 2026-08-04. Independent review corrections
+  also fixed shared Standard ICD's hit-four boundary; final re-review found no
+  remaining High/Medium issue. Commit/push is blocked by read-only `.git`.
+
+### B-183 — Kaedehara Kazuha Swirl support campaign
+
+- **Status:** done
+- **Source:** post-B-182 missing-character inventory and explicit broad
+  content-expansion request.
+- **Symptom:** Kazuha has a local face asset and complete pinned evidence but no
+  typed identity, aligned data, class, or focused regression.
+- **Evidence:** maintained KQM Kazuha character/evidence pages and pinned gcsim
+  `ef41805d`, accessed 2026-08-04.
+- **Scope/risk:** stationary single-target attack, absorption, A4 support,
+  C1-C6, and rollback campaign; planned risk.
+- **Boundary:** self/environment aura, suction, position/weight, fall damage,
+  gliding, stamina, incoming damage, special Plunge skips, multi-target, RL,
+  generated docs, and Deferred Systems are excluded.
+- **Proof/plan:** three-phase `TASKS.md` Kazuha Swirl Support Campaign.
+- **Completion:** stable identity/data, full bounded offense/support runtime,
+  cast-time and repeated absorption, A4, C1-C6, maintained attack timings, and
+  exact delayed-event restore pass focused/shared/build/Javadoc/preflight gates
+  on 2026-08-04. Final independent re-review found no High/Medium issue;
+  commit/push is blocked by read-only `.git`.
+
+### B-184 — Aloy Coil attacker campaign
+
+- **Status:** done
+- **Source:** post-B-183 missing-character inventory and explicit broad content
+  expansion request.
+- **Symptom:** Aloy has a local face asset and source-ready fixed-target kit but
+  no typed identity, aligned data, class, or focused regression.
+- **Evidence:** maintained KQM Aloy pages and pinned gcsim `ef41805d`, accessed
+  2026-08-04.
+- **Scope/risk:** two-phase identity/data plus fixed two-Bomblet Coil, Rushing
+  Ice, A1/A4, Burst, and rollback campaign; bounded medium risk.
+- **Boundary:** projectile geometry, variable Bomblet contact, weak points,
+  aiming, enemy ATK reduction, movement, RL, generated docs, and Deferred
+  Systems are excluded.
+- **Proof/plan:** two-phase `TASKS.md` Aloy Coil Attacker Campaign.
+- **Completion:** stable identity/data, fixed two-Bomblet Skill, two-cast Coil
+  transition, Rushing infusion, A1/A4, Burst, particles, exact switch clearing,
+  release-time projectile state, and rollback pass focused/shared/build/
+  Javadoc/preflight gates on 2026-08-04. Independent review corrections cover
+  return-safe Coil clearing and in-flight Normal state; final re-review found
+  no remaining High/Medium issue. Commit/push is blocked by read-only `.git`.
+
+### B-185 — Predator Cryo-hit bow campaign
+
+- **Status:** done
+- **Source:** explicit broad content-expansion request and post-B-176 normalized
+  weapon asset/class inventory.
+- **Symptom:** Predator has a local icon and complete pinned evidence but no
+  loadable weapon class or executable focused regression.
+- **Evidence:** pinned KQM TCL `80ba6241` and gcsim `ef41805d`, accessed
+  2026-08-04; both define fixed R1 metadata, two six-second Cryo-hit stacks,
+  and Aloy-only flat ATK.
+- **Scope/risk:** one-phase owner-local damage-listener and snapshot-aware bow;
+  planned but isolated risk.
+- **Boundary:** the simulator models the PlayStation-only passive as enabled;
+  B-186 supplies accepted indirect Cryo reaction damage. Platform detection,
+  projectile travel, hitlag extension, RL, generated docs, and Deferred Systems
+  are excluded.
+- **Proof/plan:** one-phase `TASKS.md` Predator Cryo-Hit Bow Campaign plus
+  focused, reaction, build, Javadoc, and executable preflight gates.
+- **Completion:** fixed R1 metadata, positive active-owner direct Cryo stacks,
+  shared six-second refresh/expiry, Aloy-only flat ATK after automatic simulator
+  binding, rollback, and binding guards pass all planned gates on 2026-08-04.
+  B-186 then closes the independent review's typed indirect-damage gap without
+  approximating accepted damage from pre-gate reaction notifications.
+
+### B-186 — Typed elemental indirect-damage event contract
+
+- **Status:** done
+- **Source:** independent B-185 Predator review against pinned gcsim
+  `ef41805d`.
+- **Symptom:** owner-attributed Cryo transformative damage cannot trigger
+  Predator accurately because `IndirectDamageListener` carries no element,
+  while `ReactionListener` fires before reaction-damage cooldown rejection.
+- **Scope/risk:** planned shared event contract across simulator dispatcher,
+  immediate and scheduled reaction damage, listeners, snapshots if needed, and
+  focused regressions.
+- **Boundary:** do not infer accepted damage from reaction notifications; retain
+  all existing listener behavior and direct-damage ordering.
+- **Proof:** focused accepted/blocked Cryo Swirl and Superconduct cases plus
+  `ReactionRegressionTest`, `build`, Javadoc, and executable preflight.
+- **Completion:** an additive typed observer now receives only accepted
+  immediate and scheduled elemental indirect damage. Predator consumes Cryo
+  Swirl/Superconduct through its existing shared stack state; legacy indirect
+  fan-out remains segregated and scheduled paths still emit it once. Focused,
+  shared, build, Javadoc, preflight, and independent re-review pass on
+  2026-08-04.
+
+### B-187 — Sword of Descension needs typed Traveler identity
+
+- **Status:** blocked
+- **Source:** post-B-185 unmatched weapon inventory and pinned KQM/gcsim
+  evidence.
+- **Symptom:** the fixed-R1 proc is representable, but the canonical Traveler-
+  only flat ATK cannot use a typed owner condition because no Traveler identity
+  exists in `CharacterId` or the supported character catalog.
+- **Scope/risk:** defer the weapon until a source-ready Traveler vertical slice
+  defines stable Aether/Lumine/element identity policy; do not use display-name
+  control flow or grant the affinity to every sword owner.
+- **Proof:** future focused metadata/proc/10-second ICD/platform/Traveler tests.
+
+### B-188 — Prospector's Shovel base Lunar bonus and lifecycle
+
+- **Status:** done (2026-08-04)
+- **Source:** post-B-186 weapon inventory audit against pinned KQM TCL
+  `80ba6241` and gcsim `ef41805d`.
+- **Symptom:** the existing R5 class grants zero base Lunar-Charged bonus and
+  folds both 24% copies into an Ascendant-only 48%; it also learns the simulator
+  only after an arbitrary owner action and exposes no refinement table.
+- **Scope/risk:** one-phase weapon-local refinement, static/base passive,
+  simulator binding, and a narrow shared Lunar-Charged bonus correction.
+- **Proof:** focused R1-R5 metadata/base/Ascendant/binding cases plus
+  `ReactionRegressionTest`, build, Javadoc, and executable preflight.
+- **Completion:** R1-R5 values, unconditional base bonuses, Ascendant's second
+  Lunar copy, and eager simulator binding are covered by focused regression.
+  Weighted Lunar-Charged damage no longer also consumes the standard
+  Electro-Charged bonus; focused/shared regressions, build, Javadoc, preflight,
+  and independent review pass.
+
+### B-189 — Follow-on offensive character campaign
+
+- **Status:** complete
+- **Source:** end-of-session normalized character asset/class inventory under
+  the explicit broad content-expansion request.
+- **Units:** Alhaitham, Cyno, and Kamisato Ayato.
+- **Resolved:** all three now have stable typed identities, loadable combat
+  classes, talent/status CSV pairs, and focused executable regressions.
+- **Scope/risk:** planned single-target offensive vertical slices using the
+  maintained KQM pages and a gcsim revision pinned during promotion; exclude
+  pathing, geometry, interruption resistance,
+  multi-target selection, defensive systems, RL, and generated docs. Cyno's
+  current KQM page separates the representable base kit from Witch's Revelation
+  and Stellar-Conduct additions; those additions remain explicitly deferred and
+  must not be reported as implemented by the base-kit slice. Adapt Alhaitham's
+  position-dependent projections to the fixed target, and exclude Ayato C1's
+  actual enemy-HP condition while retaining representable Namisen and fixed
+  single-target Burst cadence.
+- **Evidence:** maintained KQM character pages and evidence vaults, including
+  `https://library.keqingmains.com/characters/dendro/alhaitham`,
+  `https://library.keqingmains.com/characters/electro/cyno`, and
+  `https://library.keqingmains.com/characters/hydro/kamisato-ayato`, accessed
+  2026-08-04; refresh and pin gcsim revisions during plan promotion.
+- **Proof:** one focused regression per character plus
+  `LegacyCharacterIdentityRegressionTest`, `ReactionRegressionTest`, build,
+  Javadoc, and executable preflight.
+- **Plan:** three-phase `TASKS.md` Follow-on Offensive Character Campaign;
+  integrate Cyno, Alhaitham, and Kamisato Ayato as independent vertical slices.
+- **Completion:** Cyno's Pactsworn form, Alhaitham's Mirror/projection cycle,
+  and Ayato's Namisen/Burst cycle are implemented through representable C6
+  branches with pending-work rollback. Focused/identity/reaction regressions,
+  build, Javadoc, executable preflight, and independent review pass; declared
+  Witch/Stellar, geometry, multi-target, and target-HP exclusions remain.
+
+### B-190 — HP-scaling catalyst campaign
+
+- **Status:** complete
+- **Source:** post-B-189 normalized weapon asset/class inventory under the
+  explicit broad content-expansion request.
+- **Units:** Everlasting Moonglow and Surf's Up.
+- **Gap:** both have local assets and complete pinned gcsim contracts but no
+  loadable weapon class or executable regression; Max-HP-based Normal flat
+  damage also lacks a typed formula stat.
+- **Scope/risk:** planned two-phase catalyst campaign. Add one generic final
+  Max-HP-to-Normal flat-damage ratio, then keep each weapon's windows, gates,
+  stacks, and rollback state weapon-local. Healing itself remains excluded.
+- **Evidence:** gcsim revision
+  `ef41805d855a60b9e1035293584b85c085dc69e7`, weapon packages
+  `catalyst/moonglow` and `catalyst/surfsup`, inspected 2026-08-04.
+- **Proof:** focused catalyst regression, derived-damage regression,
+  `ReactionRegressionTest`, build, Javadoc, and executable preflight.
+- **Plan:** two-phase `TASKS.md` HP-Scaling Catalyst Campaign.
+- **Completion:** Everlasting Moonglow and Surf's Up now have exact R1-R5
+  metadata, owner-bound mutable contracts, rollback coverage, and focused
+  regression. The generic final-Max-HP Normal additive stat is formula-tested;
+  derived/focused/reaction regressions, build, Javadoc, executable preflight,
+  and independent review pass.
+
+### B-191 — Shikanoin Heizou offensive vertical slice
+
+- **Status:** complete
+- **Source:** post-B-190 character asset/class inventory under the explicit
+  broad content-expansion request.
+- **Gap:** Shikanoin Heizou has a local asset and complete pinned gcsim
+  implementation but no typed identity, data, loadable class, or regression.
+- **Scope/risk:** one-phase fixed-target vertical slice covering his Anemo
+  attack string, Declension/Conviction Skill, Burst/Iris, A1/A4, and
+  representable C1/C3-C6 with owner-bound rollback state.
+- **Evidence:** gcsim revision
+  `ef41805d855a60b9e1035293584b85c085dc69e7`, character package
+  `internal/characters/heizou`, inspected 2026-08-04.
+- **Boundary:** C2 suction, multiple Iris targets, stamina, geometry, hitlag,
+  airborne Plunge validation, RL, and generated docs remain excluded.
+- **Proof:** focused/identity/reaction regressions, build, Javadoc, executable
+  preflight, and independent review.
+- **Plan:** one-phase `TASKS.md` Shikanoin Heizou Offensive Character Campaign.
+- **Completion:** stable identity/data and Heizou's fixed-target kit now cover
+  Anemo basics, Declension/Conviction, Press/Hold release timing, A1/A4,
+  one-target Iris, particles, C1/C3-C6, and rollback. Independent review fixed
+  the full-stack Hold penalty and confirmed callback ordering; all planned
+  focused/full gates pass.
+
+### B-192 — Freminet Pressure offensive vertical slice
+
+- **Status:** done
+- **Source:** B-191 follow-on character inventory under the explicit broad
+  content-expansion request.
+- **Gap:** Freminet has a local asset and complete pinned gcsim implementation
+  but no typed identity, data, loadable class, or regression.
+- **Scope/risk:** one-phase fixed-target Pressure vertical slice covering
+  physical basics, Upward Thrust, Pers Time Frost, level 0-4 Shattering
+  Pressure, Burst state, A1/A4, and representable C1-C6.
+- **Evidence:** gcsim revision
+  `ef41805d855a60b9e1035293584b85c085dc69e7`, character package
+  `internal/characters/freminet`, inspected 2026-08-04.
+- **Boundary:** underwater utility, Arkhe alignment semantics beyond the sourced
+  0U hit, geometry, hitlag, airborne validation, defensive systems, RL, and
+  generated docs remain excluded.
+- **Proof:** focused/identity/reaction regressions, build, Javadoc, executable
+  preflight, and independent review.
+- **Plan:** one-phase `TASKS.md` Freminet Pressure Character Campaign.
+- **Completion:** stable identity/data and a rollback-safe fixed-target kit now
+  cover N1-N4, high plunge, Pressure 0-4, Frost, Burst acceleration, particles,
+  A1/A4, and C1-C6. Review and self-audit aligned hit snapshots, Pressure
+  recast cooldown visibility, exact windows, and the level-four N1 reset;
+  focused/full gates and executable preflight pass.
+
+### B-193 — Candace Crimson Crown offensive support vertical slice
+
+- **Status:** done
+- **Source:** explicit broad content-expansion inventory after B-192.
+- **Gap:** Candace has a local asset and complete pinned gcsim implementation
+  but no typed identity, data, loadable class, or regression.
+- **Scope/risk:** one planned fixed-target slice covering physical basics,
+  Press/Hold Skill, Burst initial and first outgoing switch wave, elemental
+  Normal support, A4, particles, and representable C1-C6.
+- **Evidence:** gcsim revision
+  `ef41805d855a60b9e1035293584b85c085dc69e7`, package
+  `internal/characters/candace`, inspected 2026-08-04.
+- **Boundary:** defensive shield absorption/A1 perfect-counter response,
+  generic cross-character Hydro infusion, later third-party switch waves,
+  geometry, hitlag, RL, and generated docs remain excluded.
+- **Proof:** focused/identity/reaction regressions, build, Javadoc, executable
+  preflight, and independent review.
+- **Plan:** one-phase `TASKS.md` Candace Crimson Crown Campaign.
+- **Completion:** stable identity/data and a rollback-safe fixed-target kit now
+  cover physical basics, Press/Hold Skill, particles, Burst support and first
+  switch wave, A4, and C1-C6. Independent review corrected split Max-HP
+  snapshot timing and prevented Crimson Crown from buffing Physical Normals;
+  focused/full gates and executable preflight pass.
+
+### B-194 — Lynette Bogglecat offensive vertical slice
+
+- **Status:** complete
+- **Source:** explicit broad content-expansion inventory after B-193.
+- **Gap:** Lynette has a local asset and complete pinned gcsim implementation
+  but no typed identity, data, loadable class, or regression.
+- **Scope/risk:** one planned fixed-target slice covering physical basics,
+  Press/minimum-Hold Skill, Arkhe direct damage, particles, Burst initial/Anemo
+  box ticks, A1, C3-C6 representable effects, and rollback.
+- **Evidence:** gcsim revision
+  `ef41805d855a60b9e1035293584b85c085dc69e7`, package
+  `internal/characters/lynette`, inspected 2026-08-04.
+- **Boundary:** healing/HP drain, C1 pull, absorbed-element Vivid Shots and
+  dependent C2/A4, variable Hold length, geometry, hitlag, RL, and generated
+  docs remain excluded.
+- **Proof:** focused/identity/reaction regressions, build, Javadoc, executable
+  preflight, and independent review.
+- **Plan:** one-phase `TASKS.md` Lynette Bogglecat Campaign.
+- **Completion:** stable identity/data and rollback-safe fixed-target behavior
+  now cover physical basics, Press/minimum-Hold Skill, particles, Arkhe, Burst
+  initial/eleven ticks, A1, and C3-C6. Source reinspection rejected a review
+  false positive about Arkhe gate timing and added an exact ten-second boundary
+  regression; all planned gates pass.
+
+### B-195 — Mika fixed-target Soulwind support slice
+
+- **Status:** complete
+- **Source:** explicit content expansion and delegated post-B-194 feasibility
+  comparison.
+- **Gap:** Mika has a local face asset and complete pinned gcsim package but no
+  typed identity, data, runtime class, or regression.
+- **Scope/risk:** physical Normal/Charged basics, Press/Hold Skill, particles, Soulwind ATK
+  speed, fixed-target C2 Detector, C5, C6, Physical-only CRIT DMG, and rollback.
+- **Evidence:** gcsim revision
+  `ef41805d855a60b9e1035293584b85c085dc69e7`, package
+  `internal/characters/mika`, inspected 2026-08-04.
+- **Boundary:** Burst healing/Eagleplume, C1/C3/C4, A4, multi-target stacks,
+  geometry, hitlag, RL, and generated docs remain excluded.
+- **Proof/plan:** one-phase `TASKS.md` Mika Soulwind Campaign with focused,
+  identity, reaction, build, Javadoc, and executable preflight gates.
+- **Completion:** identity/data and rollback-safe fixed-target behavior cover
+  physical Normal/Charged attacks, Press/Hold Skill, particles, Soulwind, C2,
+  C5, and C6. Physical-only CRIT DMG is isolated from elemental and Lunar
+  damage; all planned gates pass and review found no concrete defect.
+
+### B-196 — A Thousand Blazing Suns non-Nightsoul contract
+
+- **Status:** complete
+- **Source:** post-B-195 local missing-weapon inventory.
+- **Gap:** the local weapon asset and pinned gcsim implementation have no Java
+  runtime class or focused regression.
+- **Scope/risk:** Lv. 90/R1-R5 metadata, Scorching Brilliance activation and
+  cooldown, elemental Normal/Charged extensions, binding, and rollback.
+- **Evidence:** gcsim revision
+  `ef41805d855a60b9e1035293584b85c085dc69e7`, package
+  `internal/weapons/claymore/athousandblazingsuns`, inspected 2026-08-04.
+- **Boundary:** Nightsoul amplification/off-field pause, hitlag, RL, generated
+  docs, and catalog wiring remain excluded.
+- **Proof/plan:** one-phase `TASKS.md` A Thousand Blazing Suns Campaign.
+- **Completion:** the complete non-Nightsoul window, trigger cooldown, elemental
+  Normal/Charged extension contract, refinement table, binding, and rollback
+  now pass focused/full gates. Review corrected extension-gate persistence
+  across a new activation.
+
+### B-197 — Prototype Amber owner-Energy branch
+
+- **Status:** complete
+- **Source:** post-B-196 local missing-weapon inventory.
+- **Gap:** Prototype Amber has a local asset and pinned implementation but no
+  Java class or focused regression.
+- **Scope/risk:** metadata, active-owner Burst trigger, three delayed Energy
+  pulses, off-field persistence, binding, and rollback; low.
+- **Evidence:** gcsim revision
+  `ef41805d855a60b9e1035293584b85c085dc69e7`, package
+  `internal/weapons/catalyst/prototype`, inspected 2026-08-04.
+- **Boundary:** party percentage healing, RL, generated docs, and catalog wiring
+  remain excluded.
+- **Proof/plan:** one-phase `TASKS.md` Prototype Amber Energy Campaign.
+- **Completion:** Lv. 90/R1-R5 metadata and the complete owner-Energy branch now
+  cover active-owner Burst trigger, exact 2/4/6-second pulses, cap/off-field
+  behavior, binding, and rollback; all planned gates pass.
+
+### B-198 — Charlotte fixed-target Kamera offensive slice
+
+- **Status:** complete
+- **Source:** explicit expansion plus post-B-197 character feasibility sweep.
+- **Gap/scope:** local asset and pinned package exist without identity/data/class;
+  add basics, Arkhe, Press/minimum-Hold marks, particles, Burst damage, C2/C3/C5,
+  and rollback.
+- **Evidence:** gcsim `ef41805d`, `internal/characters/charlotte`, inspected
+  2026-08-04.
+- **Boundary:** healing, A1/A4, C1/C4/C6, multi-target/variable Hold, geometry,
+  hitlag, RL, and generated docs remain excluded.
+- **Proof/plan:** one-phase `TASKS.md` Charlotte Kamera Campaign.
+- **Completion:** stable identity/data and rollback-safe fixed-target behavior
+  now cover Cryo basics, Charged plus 0U Arkhe, Press/minimum-Hold Skill,
+  one-target marks, particles, Burst initial/eight ticks, and C2/C3/C5. Exact
+  timing, Arkhe boundary, identity/reaction, build, Javadoc, and executable
+  preflight gates pass on 2026-08-04; commit/push remains blocked by read-only
+  `.git`.
+
+### B-199 — Gest of the Mighty Wolf non-Hexerei branch
+
+- **Status:** complete
+- **Source:** explicit content expansion and post-B-198 missing-weapon sweep.
+- **Gap/scope:** local icon and pinned implementation exist without a Java
+  class; add exact metadata, permanent ATK SPD, three owner trigger routes,
+  four-stack/four-second generic DMG, binding, and rollback.
+- **Evidence:** gcsim `ef41805d`,
+  `internal/weapons/claymore/gestofthemightywolf`, inspected 2026-08-04.
+- **Boundary:** Hexerei CRIT DMG, hitlag, RL, generated docs, and Deferred
+  Systems remain excluded.
+- **Proof/plan:** one-phase `TASKS.md` Gest of the Mighty Wolf Campaign.
+- **Completion:** metadata, permanent ATK SPD, all three owner trigger routes,
+  four-stack/four-second state, post-switch in-flight Normal hits, binding, and
+  rollback pass focused/shared/build/Javadoc/preflight gates on 2026-08-04;
+  commit/push remains blocked by read-only `.git`.
+
+### B-200 — HP-state boundary weapon campaign
+
+- **Status:** complete
+- **Source:** explicit expansion and post-B-199 missing-weapon sweep.
+- **Units:** The Bell, Rightful Reward, and Tome of the Eternal Flow.
+- **Scope/risk:** exact metadata/refinement, explicit inactive boundaries for
+  incoming-damage/healing passives, and Tome's unconditional HP%; low.
+- **Evidence:** gcsim `ef41805d` packages `bell`, `rightfulreward`, and
+  `eternalflow`, inspected 2026-08-04.
+- **Boundary:** player HP change, healing, shields, RL, generated docs, and
+  Deferred Systems remain excluded.
+- **Proof/plan:** one-phase `TASKS.md` HP-State Boundary Weapon Campaign.
+- **Completion:** all three weapons now expose exact Lv. 90/R1-R5 metadata;
+  The Bell and Rightful Reward fail closed on absent runtime state while Tome
+  applies its unconditional 16-32% HP. Focused/shared/build/Javadoc/preflight
+  gates pass on 2026-08-04; commit/push remains blocked by read-only `.git`.
+
+### B-201 — Healing-event boundary weapon campaign
+
+- **Status:** complete
+- **Source:** explicit expansion and post-B-200 normalized missing-weapon sweep.
+- **Units:** Dialogues of the Desert Sages, Range Gauge, Portable Power Saw,
+  Song of Stillness, and Tidal Shadow.
+- **Scope/risk:** exact metadata/refinement and explicit inactive healing-event
+  passives through an existing abstraction; low.
+- **Evidence:** pinned gcsim `ef41805d` weapon packages inspected 2026-08-04.
+- **Boundary:** no player-heal event approximation, RL, generated docs, or
+  Deferred Systems.
+- **Proof/plan:** one-phase `TASKS.md` Healing-Event Boundary Weapon Campaign.
+- **Completion:** all five exact metadata/refinement classes now fail closed on
+  the absent healing event. Table-driven focused/shared/build/Javadoc/preflight
+  gates pass on 2026-08-04; commit/push remains blocked by read-only `.git`.
+
+### B-202 — Unavailable trigger-state weapon campaign
+
+- **Status:** complete
+- **Source:** explicit expansion and post-B-201 normalized missing-weapon sweep.
+- **Units:** The Dockhand's Assistant, Prospector's Drill, Prototype Crescent,
+  and Talking Stick.
+- **Scope/risk:** exact metadata/refinement plus existing inactive boundary;
+  low.
+- **Evidence:** pinned gcsim `ef41805d` catalog/packages, inspected 2026-08-04.
+- **Boundary:** healing, weak points, aiming/movement, player elemental status,
+  RL, generated docs, and Deferred Systems.
+- **Proof/plan:** one-phase `TASKS.md` Unavailable Trigger-State Weapon Campaign.
+- **Completion:** all four exact metadata/refinement classes fail closed on
+  their unavailable triggers; focused/shared/build/Javadoc/preflight gates pass
+  on 2026-08-04. Commit/push remains blocked by read-only `.git`.
+
+### B-203 — Flowing Purity representable static window
+
+- **Status:** complete
+- **Source:** explicit expansion and post-B-202 representable-branch sweep.
+- **Scope/risk:** metadata plus active-owner Skill elemental-damage window,
+  binding, and rollback; low.
+- **Evidence:** gcsim `ef41805d`, `internal/weapons/catalyst/flowingpurity`,
+  inspected 2026-08-04.
+- **Boundary:** Bond of Life/HP/healing branch, RL, generated docs, and Deferred
+  Systems remain excluded.
+- **Proof/plan:** one-phase `TASKS.md` Flowing Purity Static Window Campaign.
+- **Completion:** exact metadata and the complete pre-Bond R1-R5 elemental
+  window now pass focused/shared/build/Javadoc/preflight gates; Bond behavior
+  remains explicit. Commit/push is blocked by read-only `.git`.
+
+### B-204 — Finale of the Deep representable static window
+
+- **Status:** complete
+- **Source:** explicit expansion and post-B-203 representable-branch sweep.
+- **Scope/risk:** metadata plus active-owner Skill ATK window, binding, and
+  rollback; low.
+- **Evidence:** gcsim `ef41805d`, `internal/weapons/sword/finaleofthedeep`,
+  inspected 2026-08-04.
+- **Boundary:** Bond of Life/HP/healing branch, RL, generated docs, and Deferred
+  Systems remain excluded.
+- **Proof/plan:** one-phase `TASKS.md` Finale of the Deep Static Window Campaign.
+- **Completion:** exact metadata and the complete pre-Bond R1-R5 ATK window now
+  pass focused/shared/build/Javadoc/preflight gates; Bond behavior remains
+  explicit. Commit/push is blocked by read-only `.git`.
+
+### B-205 — Sumeru leaf-pickup boundary weapon campaign
+
+- **Status:** complete
+- **Source:** explicit expansion and post-B-204 normalized missing-weapon sweep.
+- **Units:** Sapwood Blade, Forest Regalia, and Moonpiercer.
+- **Scope/risk:** exact metadata/refinement plus existing inactive pickup
+  boundary; low.
+- **Evidence:** pinned gcsim `ef41805d` catalog and weapon packages, inspected
+  2026-08-04.
+- **Boundary:** world pickup objects, delayed/selected pickup recipients, Leaf
+  buffs, RL, generated docs, and Deferred Systems remain excluded.
+- **Proof/plan:** one-phase `TASKS.md` Sumeru Leaf Pickup Boundary Campaign.
+- **Completion:** all three exact metadata/refinement classes now fail closed
+  on the unavailable world-pickup state. Focused/shared/build/Javadoc/preflight
+  gates pass on 2026-08-04; commit/push remains blocked by read-only `.git`.
+
+### B-206 — Absolution representable static branch
+
+- **Status:** complete
+- **Source:** explicit expansion and post-B-205 representable-branch sweep.
+- **Scope/risk:** exact metadata/refinement plus unconditional CRIT DMG; low.
+- **Evidence:** pinned gcsim `ef41805d` catalog and
+  `internal/weapons/sword/absolution`, inspected 2026-08-04.
+- **Boundary:** Bond of Life changes, generic-DMG stacks, hitlag, RL, generated
+  docs, and Deferred Systems remain excluded.
+- **Proof/plan:** one-phase `TASKS.md` Absolution Static CRIT DMG Campaign.
+- **Completion:** exact metadata and the unconditional R1-R5 CRIT DMG branch
+  pass focused/shared/build/Javadoc/preflight gates; Bond-derived stacks remain
+  explicit. Commit/push is blocked by read-only `.git`.
