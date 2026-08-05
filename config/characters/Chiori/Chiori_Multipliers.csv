@@ -1,0 +1,21 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Chiori,NORMAL,N1,9,0.907773,0
+Chiori,NORMAL,N2,9,0.860436,0
+Chiori,NORMAL,N3 Hit 1,9,0.558814,0
+Chiori,NORMAL,N3 Hit 2,9,0.558814,0
+Chiori,NORMAL,N4,9,1.380162,0
+Chiori,CHARGED,Charged Hit 1,9,0.997770,0
+Chiori,CHARGED,Charged Hit 2,9,0.997770,0
+Chiori,PLUNGE,High Plunge,9,2.933586,0
+Chiori,SKILL,Tamoto ATK,9,1.395360,0
+Chiori,SKILL,Tamoto DEF,9,1.744200,0
+Chiori,SKILL,Upward Sweep ATK,9,2.537760,0
+Chiori,SKILL,Upward Sweep DEF,9,3.172200,0
+Chiori,SKILL,Tamoto ATK C3,12,1.641600,0
+Chiori,SKILL,Tamoto DEF C3,12,2.052000,0
+Chiori,SKILL,Upward Sweep ATK C3,12,2.985600,0
+Chiori,SKILL,Upward Sweep DEF C3,12,3.732000,0
+Chiori,BURST,Hiyoku ATK,9,4.357440,0
+Chiori,BURST,Hiyoku DEF,9,5.446800,0
+Chiori,BURST,Hiyoku ATK C5,12,5.126400,0
+Chiori,BURST,Hiyoku DEF C5,12,6.408000,0

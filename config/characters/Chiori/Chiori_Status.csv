@@ -1,0 +1,21 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Chiori,STATS,Base HP,90,11438,0
+Chiori,STATS,Base ATK,90,323,0
+Chiori,STATS,Base DEF,90,953,0
+Chiori,STATS,Ascension CRIT Rate,90,0.192,0
+Chiori,STATS,Energy Cost,90,50,0
+Chiori,STATS,Constellation,6,6,0
+Chiori,CONFIG,Character Level,90,90,0
+Chiori,CONFIG,Normal Level,9,9,0
+Chiori,CONFIG,Skill Level,12,12,0
+Chiori,CONFIG,Burst Level,12,12,0
+Chiori,PASSIVE,Skill Cooldown,1,16,0
+Chiori,PASSIVE,Burst Cooldown,1,13.5,0
+Chiori,PASSIVE,Tamoto Duration,1,17.5,0
+Chiori,PASSIVE,Tamoto Interval,1,3.6,0
+Chiori,PASSIVE,Particle Gate,1,3,0
+Chiori,PASSIVE,A1 Infusion Duration,1,5,0
+Chiori,PASSIVE,C2 Kinu Ratio,1,1.7,0
+Chiori,PASSIVE,C4 Duration,1,8,0
+Chiori,PASSIVE,C6 DEF Flat Ratio,1,2.35,0
+Chiori,PASSIVE,C6 Cooldown Reduction,1,12,0
