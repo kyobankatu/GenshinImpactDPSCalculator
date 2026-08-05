@@ -1,0 +1,16 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Navia,NORMAL,N1,9,1.718139,0
+Navia,NORMAL,N2,9,1.589306,0
+Navia,NORMAL,N3-1,9,0.640927,0
+Navia,NORMAL,N3-2,9,0.640927,0
+Navia,NORMAL,N3-3,9,0.640927,0
+Navia,NORMAL,N4,9,2.451417,0
+Navia,PLUNGE,High Plunge,9,3.422517,0
+Navia,SKILL,Rosula Shardshot Base,9,6.711600,0
+Navia,SKILL,Rosula Shardshot Base C3,12,7.896000,0
+Navia,SKILL,Surging Blade,9,0.612000,0
+Navia,SKILL,Surging Blade C3,12,0.720000,0
+Navia,BURST,Sunlit Sky Initial,9,1.278400,0
+Navia,BURST,Sunlit Sky Initial C5,12,1.504000,0
+Navia,BURST,Cannon Fire Support,9,0.733550,0
+Navia,BURST,Cannon Fire Support C5,12,0.863000,0

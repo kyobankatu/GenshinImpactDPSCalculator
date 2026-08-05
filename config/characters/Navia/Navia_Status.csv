@@ -1,0 +1,32 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Navia,STATS,Base HP,90,12650,0
+Navia,STATS,Base ATK,90,352,0
+Navia,STATS,Base DEF,90,793,0
+Navia,STATS,Ascension CRIT DMG,90,0.384,0
+Navia,STATS,Energy Cost,90,60,0
+Navia,STATS,Constellation,6,6,0
+Navia,CONFIG,Character Level,90,90,0
+Navia,CONFIG,Normal Level,9,9,0
+Navia,CONFIG,Skill Level,12,12,0
+Navia,CONFIG,Burst Level,12,12,0
+Navia,PASSIVE,Skill Cooldown,1,9,0
+Navia,PASSIVE,Burst Cooldown,1,15,0
+Navia,PASSIVE,Particle Chance Four,1,0.5,0
+Navia,PASSIVE,Particle Travel Frames,1,100,0
+Navia,PASSIVE,A1 Duration,1,4,0
+Navia,PASSIVE,A1 Basic DMG Bonus,1,0.4,0
+Navia,PASSIVE,A4 ATK Per Eligible Member,1,0.2,0
+Navia,PASSIVE,A4 Eligible Member Cap,1,2,0
+Navia,PASSIVE,Crystal Shrapnel Cap,1,6,0
+Navia,PASSIVE,Burst Shrapnel Cooldown,1,2.4,0
+Navia,PASSIVE,Surging Blade Cooldown,1,7,0
+Navia,PASSIVE,Skill Excess DMG Bonus,1,0.15,0
+Navia,PASSIVE,C1 Energy Per Stack,1,3,0
+Navia,PASSIVE,C1 Stack Cap,1,3,0
+Navia,PASSIVE,C2 CRIT Rate Per Stack,1,0.12,0
+Navia,PASSIVE,C2 Stack Cap,1,3,0
+Navia,PASSIVE,C2 Support Fire Delay Frames,1,30,0
+Navia,PASSIVE,C4 Geo RES Shred,1,0.2,0
+Navia,PASSIVE,C4 Duration,1,8,0
+Navia,PASSIVE,C6 CRIT DMG Per Excess Stack,1,0.45,0
+Navia,PASSIVE,C6 Retained Stack Threshold,1,3,0

@@ -163,6 +163,8 @@ public enum CharacterId {
     DEHYA(74, "Dehya", CharacterRegion.SUMERU),
     /** Tartaglia (Hydro bow attacker with a melee stance). */
     TARTAGLIA(75, "Tartaglia", CharacterRegion.SNEZHNAYA),
+    /** Navia (Geo claymore Crystal Shrapnel attacker). */
+    NAVIA(77, "Navia", CharacterRegion.FONTAINE),
     /** Chiori (Geo sword dual-scaling automaton attacker). */
     CHIORI(80, "Chiori", CharacterRegion.INAZUMA),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
