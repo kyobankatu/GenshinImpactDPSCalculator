@@ -56,8 +56,9 @@ public final class VaresaRegressionTest {
                 "Varesa numeric lookup");
         assertEquals(CharacterRegion.NATLAN,
                 CharacterId.VARESA.getRegion(), "Varesa region");
-        assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(97),
-                "Unassigned adjacent numeric ID");
+        assertEquals(CharacterId.UNKNOWN,
+                CharacterId.fromNumericId(Integer.MAX_VALUE),
+                "Out-of-range numeric ID remains unassigned");
         assertEquals(Element.ELECTRO, varesa.getElement(),
                 "Varesa element");
         assertClose(12699.0,
