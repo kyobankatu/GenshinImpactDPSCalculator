@@ -71,5 +71,9 @@ public enum ICDTag {
     /** Charlotte's Snappy/Focused mark ticks. */
     Charlotte_Mark,
     /** Charlotte's Kamera Burst field ticks. */
-    Charlotte_Kamera
+    Charlotte_Kamera,
+    /** Nahida's Tri-Karma Purification application group. */
+    Nahida_TriKarma,
+    /** Nahida C6 Karmic Oblivion application group. */
+    Nahida_C6
 }

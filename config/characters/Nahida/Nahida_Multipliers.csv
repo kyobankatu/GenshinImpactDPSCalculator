@@ -1,0 +1,44 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Nahida,NORMAL,N1,9,0.685182,0
+Nahida,NORMAL,N2,9,0.628565,0
+Nahida,NORMAL,N3,9,0.779865,0
+Nahida,NORMAL,N4,9,0.992909,0
+Nahida,CHARGED,Charged Attack,9,2.244,0
+Nahida,PLUNGE,High Plunge,9,2.607632,0
+Nahida,SKILL,All Schemes to Know Press,9,1.6728,0
+Nahida,SKILL,All Schemes to Know Press C3,12,1.968,0
+Nahida,SKILL,Tri-Karma ATK,9,1.7544,0
+Nahida,SKILL,Tri-Karma ATK C3,12,2.064,0
+Nahida,SKILL,Tri-Karma EM,9,3.5088,0
+Nahida,SKILL,Tri-Karma EM C3,12,4.128,0
+Nahida,BURST,Pyro Bonus 1,9,0.25296,0
+Nahida,BURST,Pyro Bonus 2,9,0.37944,0
+Nahida,BURST,Pyro Bonus 1 C5,12,0.2976,0
+Nahida,BURST,Pyro Bonus 2 C5,12,0.4464,0
+Nahida,BURST,Electro Reduction 1,9,0.4216,0
+Nahida,BURST,Electro Reduction 2,9,0.6324,0
+Nahida,BURST,Electro Reduction 1 C5,12,0.496,0
+Nahida,BURST,Electro Reduction 2 C5,12,0.744,0
+Nahida,BURST,Hydro Extension 1,9,5.6848,0
+Nahida,BURST,Hydro Extension 2,9,8.5272,0
+Nahida,BURST,Hydro Extension 1 C5,12,6.688,0
+Nahida,BURST,Hydro Extension 2 C5,12,10.032,0
+Nahida,PASSIVE,Seed Duration,1,25,0
+Nahida,PASSIVE,Tri-Karma Delay Frames,1,3,0
+Nahida,PASSIVE,Tri-Karma Base Interval,1,2.5,0
+Nahida,PASSIVE,Particle Count,1,3,0
+Nahida,PASSIVE,Particle ICD,1,7,0
+Nahida,PASSIVE,Particle Travel Frames,1,100,0
+Nahida,PASSIVE,A1 EM Share Ratio,1,0.25,0
+Nahida,PASSIVE,A1 EM Share Cap,1,250,0
+Nahida,PASSIVE,A4 EM Threshold,1,200,0
+Nahida,PASSIVE,A4 DMG Per EM,1,0.001,0
+Nahida,PASSIVE,A4 DMG Cap,1,0.8,0
+Nahida,PASSIVE,A4 CRIT Per EM,1,0.0003,0
+Nahida,PASSIVE,A4 CRIT Cap,1,0.24,0
+Nahida,PASSIVE,C4 Elemental Mastery,4,100,0
+Nahida,PASSIVE,C6 Duration,6,10,0
+Nahida,PASSIVE,C6 Trigger Interval,6,0.2,0
+Nahida,PASSIVE,C6 Trigger Count,6,6,0
+Nahida,PASSIVE,C6 ATK Ratio,6,2,0
+Nahida,PASSIVE,C6 EM Ratio,6,4,0

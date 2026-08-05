@@ -1,0 +1,13 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Nahida,STATS,Base HP,90,10360,0
+Nahida,STATS,Base ATK,90,299,0
+Nahida,STATS,Base DEF,90,630,0
+Nahida,STATS,Ascension Elemental Mastery,90,115.2,0
+Nahida,STATS,Energy Cost,90,50,0
+Nahida,STATS,Constellation,6,6,0
+Nahida,CONFIG,Character Level,90,90,0
+Nahida,CONFIG,Normal Level,9,9,0
+Nahida,CONFIG,Skill Level,12,12,0
+Nahida,CONFIG,Burst Level,12,12,0
+Nahida,CONFIG,Skill Cooldown,1,5,0
+Nahida,CONFIG,Burst Cooldown,1,13.5,0

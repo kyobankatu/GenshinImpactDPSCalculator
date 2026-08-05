@@ -28,6 +28,8 @@ public enum ICDType {
     AlhaithamProjection,
     /** Alhaitham infused Charged rule: two-second time gate only. */
     AlhaithamCharged,
+    /** Nahida Tri-Karma Purification rule: one-second time gate only. */
+    NahidaTriKarma,
     /** Reserved for custom ICD rules not yet implemented. */
     Special // Custom rules (not implemented yet)
 }
