@@ -23608,12 +23608,15 @@ Campaign inventory:
 
 | Unit | Type | Represented scope | Focused check | Status |
 |---|---|---|---|---|
-| Chevreuse | character | fixed-target Pyro/Electro support, actions, particles, Overcharged state, representable constellations | `ChevreuseRegressionTest` | delegated |
+| Chevreuse | character | fixed-target Pyro/Electro support, actions, particles, Overcharged state, representable constellations | `ChevreuseRegressionTest` | complete (`5fe800c`) |
 | Sword of Narzissenkreuz | weapon | metadata, non-Arkhe Normal/Charged/Plunge blast, cooldown and rollback | `SwordOfNarzissenkreuzRegressionTest` | complete (`957e88f`) |
 | Starcaller's Watch | weapon | metadata, permanent EM, explicit inactive shield-created Mirror branch | `StarcallersWatchRegressionTest` | complete (`d7dd116`) |
 | Fractured Halo | weapon | metadata, active-owner Skill/Burst ATK window, explicit inactive shield branch | `FracturedHaloRegressionTest` | complete (`e50f0b4`) |
 | Angelos Heptades | weapon | metadata, permanent ATK, explicit inactive shield Energy/team-damage branches | `AngelosHeptadesRegressionTest` | complete (`0615c96`) |
-| Athame Artis | weapon | metadata, Burst CRIT DMG, Burst-hit owner/active-ally ATK windows | `AthameArtisRegressionTest` | delegated |
+| Athame Artis | weapon | metadata, retained Burst-only CRIT DMG value, Burst-hit owner/active-ally ATK windows | `AthameArtisRegressionTest` | complete (`b95eb71`) |
+| The Daybreak Chronicles | weapon | metadata, independent Normal/Skill/Burst damage stacks and exact decay | `TheDaybreakChroniclesRegressionTest` | complete (`7dbc661`) |
+| Golden Frostbound Oath | weapon | metadata, permanent DEF, owner Skill/Lunar-Crystallize window | `GoldenFrostboundOathRegressionTest` | complete (`3c2404e`) |
+| Thoma | character | fixed-target attacks, Skill/particles, Burst follow-up, representable constellations | `ThomaRegressionTest` | delegated |
 
 Requirements and tests remain the Phase 1 acceptance and abnormal-path matrix;
 each replenished unit receives a source-backed focused regression and an
@@ -23622,3 +23625,9 @@ independent commit before the shared gates and push.
 Checkpoint 2026-08-05 12:03 JST: four replenished weapon units are complete
 and pushed. Chevreuse and Athame Artis continue in isolated worktrees; no
 excluded shield or Hexerei state is synthesized.
+
+Checkpoint 2026-08-05 12:15 JST: Chevreuse, Athame Artis, The Daybreak
+Chronicles, and Golden Frostbound Oath are complete and pushed. Thoma is the
+next isolated character unit. Athame's Burst-only CRIT DMG remains retained but
+inactive because no action-specific CRIT DMG stat exists; shield, construct
+geometry, and Hexerei branches remain explicit boundaries.

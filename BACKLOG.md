@@ -4330,3 +4330,8 @@ experiment record.
   Chevreuse and Athame Artis remain active isolated units; shield-created and
   Hexerei branches continue to fail closed where their typed runtime state is
   unavailable.
+- **Checkpoint 2026-08-05 12:15 JST:** Chevreuse, Athame Artis, The Daybreak
+  Chronicles, and Golden Frostbound Oath are complete and pushed. Thoma is in
+  an isolated implementation lane. Burst-only CRIT DMG, shield state,
+  Moondrift geometry, and Hexerei stay inactive where no exact typed contract
+  exists.
