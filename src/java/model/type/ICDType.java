@@ -40,6 +40,8 @@ public enum ICDType {
     SigewinneBubblebalm,
     /** Sigewinne's Burst pulse rule: 1.9-second time gate only. */
     SigewinneBurst,
+    /** Ororon's Soundwave rule: three-second time gate only. */
+    OroronSoundwave,
     /** Reserved for custom ICD rules not yet implemented. */
     Special // Custom rules (not implemented yet)
 }

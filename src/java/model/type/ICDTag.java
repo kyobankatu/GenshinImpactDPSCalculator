@@ -97,5 +97,7 @@ public enum ICDTag {
     /** Sigewinne's Bubblebalm attacks share a private application group. */
     Sigewinne_Bubblebalm,
     /** Sigewinne's Burst pulses share a private application group. */
-    Sigewinne_Burst
+    Sigewinne_Burst,
+    /** Ororon's Soundwave collisions share a private application group. */
+    Ororon_Soundwave
 }

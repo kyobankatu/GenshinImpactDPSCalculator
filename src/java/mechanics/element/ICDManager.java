@@ -99,6 +99,8 @@ public class ICDManager {
      *       hit count never bypasses the time gate.</li>
      *   <li>{@link ICDType#SigewinneBurst} – applies after 1.9 seconds;
      *       hit count never bypasses the time gate.</li>
+     *   <li>{@link ICDType#OroronSoundwave} – applies after three seconds;
+     *       hit count never bypasses the time gate.</li>
      * </ul>
      *
      * <p>{@code null} values for {@code type} or {@code tag} are silently
@@ -169,6 +171,8 @@ public class ICDManager {
             apply = checkTimeOnlyApplication(state, currentTime, 2.0);
         } else if (type == ICDType.SigewinneBurst) {
             apply = checkTimeOnlyApplication(state, currentTime, 1.9);
+        } else if (type == ICDType.OroronSoundwave) {
+            apply = checkTimeOnlyApplication(state, currentTime, 3.0);
         }
 
         return apply;

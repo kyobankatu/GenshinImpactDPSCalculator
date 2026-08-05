@@ -1,0 +1,40 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Ororon,NORMAL,N1,9,0.930399,0
+Ororon,NORMAL,N2,9,0.815233,0
+Ororon,NORMAL,N3,9,1.282755,0
+Ororon,CHARGED,Fully Charged Aimed Shot,9,2.108000,0
+Ororon,PLUNGE,High Plunge,9,2.608600,0
+Ororon,SKILL,Spirit Orb,9,3.359200,0
+Ororon,SKILL,Spirit Orb C3,12,3.952000,0
+Ororon,BURST,Ritual,9,2.964528,0
+Ororon,BURST,Ritual C5,12,3.487680,0
+Ororon,BURST,Soundwave Collision,9,0.564400,0
+Ororon,BURST,Soundwave Collision C5,12,0.664000,0
+Ororon,PASSIVE,Particle Count,1,3,0
+Ororon,PASSIVE,Particle Travel Frames,1,100,0
+Ororon,PASSIVE,Burst Duration,1,9,0
+Ororon,PASSIVE,Soundwave Interval,1,1,0
+Ororon,PASSIVE,A1 Maximum Nightsoul Points,1,80,0
+Ororon,PASSIVE,A1 Skill Point Window,1,15,0
+Ororon,PASSIVE,A1 Point Gain Cooldown,1,0.3,0
+Ororon,PASSIVE,A1 Point Gain Hit Cap,1,10,0
+Ororon,PASSIVE,A1 Points Per Hit,1,5,0
+Ororon,PASSIVE,A1 Hypersense Cost,1,10,0
+Ororon,PASSIVE,A1 Hypersense Cooldown,1,1.8,0
+Ororon,PASSIVE,A1 Hypersense Delay Frames,1,12,0
+Ororon,PASSIVE,A1 Hypersense Multiplier,1,1.6,0
+Ororon,PASSIVE,A4 Energy Window,1,15,0
+Ororon,PASSIVE,A4 Trigger Cooldown,1,1,0
+Ororon,PASSIVE,A4 Trigger Cap,1,3,0
+Ororon,PASSIVE,A4 Energy,1,3,0
+Ororon,PASSIVE,C1 Mark Duration,1,12,0
+Ororon,PASSIVE,C1 Hypersense DMG Bonus,1,0.5,0
+Ororon,PASSIVE,C2 Electro DMG Per Stack,2,0.08,0
+Ororon,PASSIVE,C2 Maximum Stacks,2,4,0
+Ororon,PASSIVE,C2 Duration,2,9,0
+Ororon,PASSIVE,C4 Soundwave Interval,4,0.75,0
+Ororon,PASSIVE,C4 Energy,4,8,0
+Ororon,PASSIVE,C6 Hypersense Multiplier,6,3.2,0
+Ororon,PASSIVE,C6 ATK Per Stack,6,0.1,0
+Ororon,PASSIVE,C6 Maximum Stacks,6,3,0
+Ororon,PASSIVE,C6 Stack Duration,6,9,0

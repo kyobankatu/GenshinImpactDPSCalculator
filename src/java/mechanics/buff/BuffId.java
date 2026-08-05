@@ -34,6 +34,8 @@ public enum BuffId {
     SIGEWINNE_C2_HYDRO_RES_SHRED,
     /** Xianyun C2 self ATK increase after White Clouds at Dawn. */
     XIANYUN_C2_ATK,
+    /** Ororon C6 active-character stacking ATK bonus. */
+    ORORON_C6_ACTIVE_ATK,
     /** Lunar 拡張: コロンビーナの「皓月の意志」。 */
     GLEAMING_MOON_INTENT,
     /** Lunar 拡張: コロンビーナの「皓月の献身」。 */

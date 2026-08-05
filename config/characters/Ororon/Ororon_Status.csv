@@ -1,0 +1,13 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Ororon,STATS,Base HP,90,9244,0
+Ororon,STATS,Base ATK,90,244,0
+Ororon,STATS,Base DEF,90,587,0
+Ororon,STATS,Ascension ATK,90,0.24,0
+Ororon,STATS,Energy Cost,90,60,0
+Ororon,STATS,Constellation,6,6,0
+Ororon,CONFIG,Character Level,90,90,0
+Ororon,CONFIG,Normal Level,9,9,0
+Ororon,CONFIG,Skill Level,12,12,0
+Ororon,CONFIG,Burst Level,12,12,0
+Ororon,CONFIG,Skill Cooldown,1,15,0
+Ororon,CONFIG,Burst Cooldown,1,15,0
