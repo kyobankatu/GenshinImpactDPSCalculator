@@ -23664,8 +23664,8 @@ Campaign inventory:
 | Furina | character | fixed-target basics, Salon Member cadence, Burst initial hit, particles, representable fixed-state passives/constellations | `FurinaRegressionTest` | complete (`d82135c`) |
 | Yumemizuki Mizuki | character | fixed-target basics, Dreamdrifter state, coordinated Anemo attacks, Burst initial hit, representable passives/constellations | `YumemizukiMizukiRegressionTest` | complete (`3860214`) |
 | Varesa | character | fixed-target basics, Nightsoul Plunging attacks, Fiery Passion state, Skill/Burst, particles, representable passives/constellations | `VaresaRegressionTest` | complete (`1985002`) |
-| Clorinde | character | fixed-target basics, Night Vigil state, local Bond of Life, Swift Hunt/Impale the Night, Burst, representable passives/constellations | `ClorindeRegressionTest` | delegated (ID 99) |
-| Skirk | character | fixed-target basics, Seven-Phase Flash state, Serpent's Subtlety resource, Skill/Burst, representable passives/constellations | `SkirkRegressionTest` | delegated (ID 100) |
+| Clorinde | character | fixed-target basics, Night Vigil state, local Bond of Life, Swift Hunt/Impale the Night, Burst, representable passives/constellations | `ClorindeRegressionTest` | complete (`89e435e`) |
+| Skirk | character | fixed-target basics, Seven-Phase Flash state, Serpent's Subtlety resource, Skill/Burst, representable passives/constellations | `SkirkRegressionTest` | complete (`f05a3e9`) |
 
 Requirements and tests remain the Phase 1 acceptance and abnormal-path matrix;
 each replenished unit receives a source-backed focused regression and an
@@ -23751,3 +23751,10 @@ now use an actual out-of-range value instead of assuming the next planned ID is
 unused. Clorinde and Skirk continue in isolated lanes; player HP and healing,
 movement, geometry, random/multi-target selection, dynamic Fanfare, and team
 Nightsoul plumbing remain explicit boundaries.
+
+Checkpoint 2026-08-05 16:27 JST: Clorinde and Skirk are complete and pushed
+through `f05a3e9`. Their focused regressions, the recent character integration
+set, legacy identity regression, reaction suite, build, Javadoc, and preflight
+pass together. The pinned source inventory leaves Chasca, Durin, Lauma,
+Mavuika, and Varka as substantial future character slices; Traveler remains
+governed by B-187. Weapon coverage remains converged except that blocker.
