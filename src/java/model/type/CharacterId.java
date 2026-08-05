@@ -169,6 +169,8 @@ public enum CharacterId {
     NAVIA(77, "Navia", CharacterRegion.FONTAINE),
     /** Wriothesley (Cryo catalyst Normal Attack brawler). */
     WRIOTHESLEY(78, "Wriothesley", CharacterRegion.FONTAINE),
+    /** Emilie (Dendro polearm Lumidouce Case attacker). */
+    EMILIE(79, "Emilie", CharacterRegion.FONTAINE),
     /** Chiori (Geo sword dual-scaling automaton attacker). */
     CHIORI(80, "Chiori", CharacterRegion.INAZUMA),
     /** Lyney (Pyro bow Prop Arrow and Grin-Malkin attacker). */

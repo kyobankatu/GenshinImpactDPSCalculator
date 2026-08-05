@@ -26,6 +26,8 @@ public enum BuffId {
     RAINCUTTER,
     /** 行秋 命ノ星座 2 による水元素耐性低下。 */
     XINGQIU_C2_HYDRO_SHRED,
+    /** Emilie C2 fixed-target Dendro resistance reduction. */
+    EMILIE_C2_DENDRO_RES_SHRED,
     /** Lunar 拡張: コロンビーナの「皓月の意志」。 */
     GLEAMING_MOON_INTENT,
     /** Lunar 拡張: コロンビーナの「皓月の献身」。 */

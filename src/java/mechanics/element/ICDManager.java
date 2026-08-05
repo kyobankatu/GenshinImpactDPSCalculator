@@ -93,6 +93,8 @@ public class ICDManager {
      *       hit count never bypasses the time gate.</li>
      *   <li>{@link ICDType#WandererC6} – applies after two seconds;
      *       hit count never bypasses the time gate.</li>
+     *   <li>{@link ICDType#EmilieLumidouce} – applies after two seconds;
+     *       hit count never bypasses the time gate.</li>
      * </ul>
      *
      * <p>{@code null} values for {@code type} or {@code tag} are silently
@@ -156,6 +158,8 @@ public class ICDManager {
         } else if (type == ICDType.NilouTranquility) {
             apply = checkTimeOnlyApplication(state, currentTime, 1.9);
         } else if (type == ICDType.WandererC6) {
+            apply = checkTimeOnlyApplication(state, currentTime, 2.0);
+        } else if (type == ICDType.EmilieLumidouce) {
             apply = checkTimeOnlyApplication(state, currentTime, 2.0);
         }
 

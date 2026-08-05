@@ -1,0 +1,36 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Emilie,NORMAL,N1,9,0.892163,0
+Emilie,NORMAL,N2,9,0.824823,0
+Emilie,NORMAL,N3,9,1.089473,0
+Emilie,NORMAL,N4,9,1.379798,0
+Emilie,CHARGED,Charged Attack,9,1.67796,0
+Emilie,PLUNGE,High Plunge,9,2.933586,0
+Emilie,SKILL,Lumidouce Case Summon,9,0.80036,0
+Emilie,SKILL,Lumidouce Case Summon C3,12,0.9416,0
+Emilie,SKILL,Lumidouce Case Level 1,9,0.6732,0
+Emilie,SKILL,Lumidouce Case Level 1 C3,12,0.792,0
+Emilie,SKILL,Lumidouce Case Level 2,9,1.428,0
+Emilie,SKILL,Lumidouce Case Level 2 C3,12,1.68,0
+Emilie,BURST,Lumidouce Case Level 3,9,3.6924,0
+Emilie,BURST,Lumidouce Case Level 3 C5,12,4.344,0
+Emilie,PASSIVE,Cleardew Cologne,1,6,0
+Emilie,PASSIVE,Case Duration,1,22,0
+Emilie,PASSIVE,Case Attack Interval,1,1.5,0
+Emilie,PASSIVE,Scent Generation Cooldown,1,2,0
+Emilie,PASSIVE,Scent Reset Interval,1,8,0
+Emilie,PASSIVE,Particle Count,1,1,0
+Emilie,PASSIVE,Particle Cooldown,1,2.5,0
+Emilie,PASSIVE,Particle Travel Frames,1,100,0
+Emilie,PASSIVE,Burst Case Duration,1,2.8,0
+Emilie,PASSIVE,C1 Skill DMG Bonus,1,0.2,0
+Emilie,PASSIVE,C1 Scent Cooldown,1,2.9,0
+Emilie,PASSIVE,C2 Dendro RES Shred,2,0.3,0
+Emilie,PASSIVE,C2 Duration,2,10,0
+Emilie,PASSIVE,A4 DMG Per 1000 ATK,1,0.15,0
+Emilie,PASSIVE,A4 DMG Cap,1,0.36,0
+Emilie,PASSIVE,C4 Burst Duration Extension,4,2,0
+Emilie,PASSIVE,C4 Burst Target Gate,4,0.4,0
+Emilie,PASSIVE,C6 Duration,6,5,0
+Emilie,PASSIVE,C6 Cooldown,6,12,0
+Emilie,PASSIVE,C6 ATK Ratio,6,3,0
+Emilie,PASSIVE,C6 Scent Cap,6,4,0

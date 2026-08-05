@@ -87,5 +87,7 @@ public enum ICDTag {
     /** Baizhu C2 Gossamer Sprite uses an independent application group. */
     Baizhu_C2,
     /** Wanderer's C6 follow-up Normal Attacks use an independent group. */
-    Wanderer_C6
+    Wanderer_C6,
+    /** Emilie's Lumidouce Case attacks share a private application group. */
+    Emilie_Lumidouce
 }

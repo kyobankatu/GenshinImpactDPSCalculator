@@ -34,6 +34,8 @@ public enum ICDType {
     NilouTranquility,
     /** Wanderer's C6 follow-up rule: two-second time gate only. */
     WandererC6,
+    /** Emilie's Lumidouce Case rule: two-second time gate only. */
+    EmilieLumidouce,
     /** Reserved for custom ICD rules not yet implemented. */
     Special // Custom rules (not implemented yet)
 }
