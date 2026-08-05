@@ -145,6 +145,8 @@ public enum CharacterId {
     NAHIDA(65, "Nahida", CharacterRegion.SUMERU),
     /** Zhongli (Geo polearm construct attacker). */
     ZHONGLI(66, "Zhongli", CharacterRegion.LIYUE),
+    /** Layla (Cryo sword off-field attacker). */
+    LAYLA(67, "Layla", CharacterRegion.SUMERU),
     /** Sangonomiya Kokomi (Hydro catalyst deployable attacker). */
     SANGONOMIYA_KOKOMI(68, "Sangonomiya Kokomi", CharacterRegion.INAZUMA),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */

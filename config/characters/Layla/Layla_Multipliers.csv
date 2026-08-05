@@ -1,0 +1,13 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Layla,NORMAL,N1,9,0.940969,0
+Layla,NORMAL,N2,9,0.890741,0
+Layla,NORMAL,N3,9,1.340677,0
+Layla,CHARGED,Charged Hit 1,9,0.876900,0
+Layla,CHARGED,Charged Hit 2,9,0.965380,0
+Layla,PLUNGE,High Plunge,9,2.933586,0
+Layla,SKILL,Nights of Formal Focus,9,0.217600,0
+Layla,SKILL,Nights of Formal Focus C3,12,0.256000,0
+Layla,SKILL,Shooting Star,9,0.250240,0
+Layla,SKILL,Shooting Star C3,12,0.294400,0
+Layla,BURST,Starlight Slug,9,0.079030,0
+Layla,BURST,Starlight Slug C5,12,0.092976,0

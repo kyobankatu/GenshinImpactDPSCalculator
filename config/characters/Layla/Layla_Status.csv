@@ -1,0 +1,24 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Layla,STATS,Base HP,90,11092,0
+Layla,STATS,Base ATK,90,217,0
+Layla,STATS,Base DEF,90,655,0
+Layla,STATS,Ascension HP,90,0.24,0
+Layla,STATS,Energy Cost,90,40,0
+Layla,STATS,Constellation,6,6,0
+Layla,CONFIG,Character Level,90,90,0
+Layla,CONFIG,Normal Level,9,9,0
+Layla,CONFIG,Skill Level,12,12,0
+Layla,CONFIG,Burst Level,12,12,0
+Layla,PASSIVE,Skill Cooldown,1,12,0
+Layla,PASSIVE,Burst Cooldown,1,12,0
+Layla,PASSIVE,Curtain Duration,1,12,0
+Layla,PASSIVE,Night Star Interval,1,1.5,0
+Layla,PASSIVE,C6 Night Star Interval,1,1.2,0
+Layla,PASSIVE,Skill Night Star ICD,1,0.3,0
+Layla,PASSIVE,Burst Night Star ICD,1,0.5,0
+Layla,PASSIVE,Particle Chance Two,1,0.33,0
+Layla,PASSIVE,Particle Travel Frames,1,100,0
+Layla,PASSIVE,A4 Max HP Ratio,1,0.015,0
+Layla,PASSIVE,C2 Energy Per Star,1,1,0
+Layla,PASSIVE,C6 Shooting Star DMG Bonus,1,0.4,0
+Layla,PASSIVE,C6 Starlight Slug DMG Bonus,1,0.4,0
