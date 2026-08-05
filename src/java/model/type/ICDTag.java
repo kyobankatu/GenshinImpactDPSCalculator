@@ -107,5 +107,9 @@ public enum ICDTag {
     /** Neuvillette's Equitable Judgment beam has an independent group. */
     Neuvillette_Judgment,
     /** Neuvillette C6 currents have an independent application group. */
-    Neuvillette_C6
+    Neuvillette_C6,
+    /** Citlali's Frostfall Storm attacks share a private application group. */
+    Citlali_FrostfallStorm,
+    /** Citlali's Spiritvessel Skull attacks share a private application group. */
+    Citlali_SpiritVessel
 }

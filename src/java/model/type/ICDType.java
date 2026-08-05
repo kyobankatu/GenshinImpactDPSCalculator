@@ -46,6 +46,8 @@ public enum ICDType {
     AinoDucky,
     /** Escoffier's Skill attacks: 1.5-second time gate only. */
     ESCOFFIER_SKILL,
+    /** Citlali's Frostfall Storm rule: 1.5-second time gate only. */
+    CitlaliFrostfallStorm,
     /** Reserved for custom ICD rules not yet implemented. */
     Special // Custom rules (not implemented yet)
 }

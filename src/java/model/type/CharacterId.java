@@ -189,6 +189,8 @@ public enum CharacterId {
     DAHLIA(87, "Dahlia", CharacterRegion.MONDSTADT),
     /** Escoffier (Cryo polearm Cooking Mek attacker and support). */
     ESCOFFIER(88, "Escoffier", CharacterRegion.FONTAINE),
+    /** Citlali (Cryo catalyst Itzpapa support and attacker). */
+    CITLALI(89, "Citlali", CharacterRegion.NATLAN),
     /** Neuvillette (Hydro catalyst Equitable Judgment attacker). */
     NEUVILLETTE(90, "Neuvillette", CharacterRegion.FONTAINE),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */

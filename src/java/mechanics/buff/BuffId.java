@@ -40,6 +40,8 @@ public enum BuffId {
     ESCOFFIER_A4_CRYO_HYDRO_RES_SHRED,
     /** Escoffier C1 all-Cryo/Hydro party Cryo CRIT DMG support. */
     ESCOFFIER_C1_CRYO_CRIT_DMG,
+    /** Citlali A1 fixed-target Pyro and Hydro resistance reduction. */
+    CITLALI_A1_PYRO_HYDRO_RES_SHRED,
     /** Lunar 拡張: コロンビーナの「皓月の意志」。 */
     GLEAMING_MOON_INTENT,
     /** Lunar 拡張: コロンビーナの「皓月の献身」。 */

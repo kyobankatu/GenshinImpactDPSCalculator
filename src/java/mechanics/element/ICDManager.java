@@ -105,6 +105,8 @@ public class ICDManager {
      *       hit count never bypasses the time gate.</li>
      *   <li>{@link ICDType#ESCOFFIER_SKILL} – applies after 1.5 seconds;
      *       hit count never bypasses the time gate.</li>
+     *   <li>{@link ICDType#CitlaliFrostfallStorm} – applies after 1.5 seconds;
+     *       hit count never bypasses the time gate.</li>
      * </ul>
      *
      * <p>{@code null} values for {@code type} or {@code tag} are silently
@@ -180,6 +182,8 @@ public class ICDManager {
         } else if (type == ICDType.AinoDucky) {
             apply = checkTimeOnlyApplication(state, currentTime, 1.8);
         } else if (type == ICDType.ESCOFFIER_SKILL) {
+            apply = checkTimeOnlyApplication(state, currentTime, 1.5);
+        } else if (type == ICDType.CitlaliFrostfallStorm) {
             apply = checkTimeOnlyApplication(state, currentTime, 1.5);
         }
 

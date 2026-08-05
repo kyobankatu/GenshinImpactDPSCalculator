@@ -1,0 +1,46 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Citlali,NORMAL,N1,9,0.737922,0
+Citlali,NORMAL,N2,9,0.659831,0
+Citlali,NORMAL,N3,9,0.91411,0
+Citlali,CHARGED,Charged Attack,9,1.6864,0
+Citlali,PLUNGE,High Plunge,9,2.607632,0
+Citlali,SKILL,Obsidian Tzitzimitl,9,1.24032,0
+Citlali,SKILL,Obsidian Tzitzimitl C3,12,1.4592,0
+Citlali,SKILL,Frostfall Storm,9,0.289408,0
+Citlali,SKILL,Frostfall Storm C3,12,0.34048,0
+Citlali,BURST,Ice Storm,9,9.1392,0
+Citlali,BURST,Ice Storm C5,12,10.752,0
+Citlali,BURST,Spiritvessel Skull,9,2.2848,0
+Citlali,BURST,Spiritvessel Skull C5,12,2.688,0
+Citlali,PASSIVE,Particle Count,1,5,0
+Citlali,PASSIVE,Particle ICD,1,0.3,0
+Citlali,PASSIVE,Particle Travel Frames,1,100,0
+Citlali,PASSIVE,Nightsoul Maximum,1,100,0
+Citlali,PASSIVE,Nightsoul Skill Points,1,24,0
+Citlali,PASSIVE,Nightsoul Duration,1,20,0
+Citlali,PASSIVE,Opal Fire Threshold,1,50,0
+Citlali,PASSIVE,Opal Fire Attack Frames,1,59,0
+Citlali,PASSIVE,Opal Fire Drain Interval,1,0.1,0
+Citlali,PASSIVE,Opal Fire Drain Amount,1,0.8,0
+Citlali,PASSIVE,Burst Initial Nightsoul Points,1,24,0
+Citlali,PASSIVE,Burst Skull Nightsoul Points,1,3,0
+Citlali,PASSIVE,A1 Nightsoul Points,1,16,0
+Citlali,PASSIVE,A1 Nightsoul ICD,1,8,0
+Citlali,PASSIVE,A1 RES Shred,1,0.2,0
+Citlali,PASSIVE,A1 C2 RES Shred,2,0.4,0
+Citlali,PASSIVE,A1 Duration,1,12,0
+Citlali,PASSIVE,A4 Frostfall EM Ratio,1,0.9,0
+Citlali,PASSIVE,A4 Ice Storm EM Ratio,1,12,0
+Citlali,PASSIVE,C1 Initial Stellar Blades,1,10,0
+Citlali,PASSIVE,C1 A1 Stellar Blades,1,3,0
+Citlali,PASSIVE,C1 EM Ratio,1,2,0
+Citlali,PASSIVE,C2 Self Elemental Mastery,2,125,0
+Citlali,PASSIVE,C2 Active Elemental Mastery,2,250,0
+Citlali,PASSIVE,C4 Nightsoul Points,4,16,0
+Citlali,PASSIVE,C4 Energy,4,8,0
+Citlali,PASSIVE,C4 Cooldown,4,8,0
+Citlali,PASSIVE,C4 Skull Delay Frames,4,92,0
+Citlali,PASSIVE,C4 Skull EM Ratio,4,18,0
+Citlali,PASSIVE,C6 Maximum Points,6,40,0
+Citlali,PASSIVE,C6 Self DMG Per Point,6,0.025,0
+Citlali,PASSIVE,C6 Pyro Hydro DMG Per Point,6,0.015,0
