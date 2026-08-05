@@ -75,5 +75,11 @@ public enum ICDTag {
     /** Nahida's Tri-Karma Purification application group. */
     Nahida_TriKarma,
     /** Nahida C6 Karmic Oblivion application group. */
-    Nahida_C6
+    Nahida_C6,
+    /** Ayaka's fifth Normal uses a separate application group. */
+    Ayaka_NormalFive,
+    /** Ayaka's three Charged Attack hits share a dedicated group. */
+    Ayaka_Charged,
+    /** Ayaka's Senho exit application uses a dedicated group. */
+    Ayaka_Dash
 }

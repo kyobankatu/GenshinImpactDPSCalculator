@@ -149,6 +149,8 @@ public enum CharacterId {
     LAYLA(67, "Layla", CharacterRegion.SUMERU),
     /** Sangonomiya Kokomi (Hydro catalyst deployable attacker). */
     SANGONOMIYA_KOKOMI(68, "Sangonomiya Kokomi", CharacterRegion.INAZUMA),
+    /** Kamisato Ayaka (Cryo sword Frostflake attacker). */
+    KAMISATO_AYAKA(69, "Kamisato Ayaka", CharacterRegion.INAZUMA),
     /** Arataki Itto (Geo claymore Superlative Superstrength attacker). */
     ARATAKI_ITTO(70, "Arataki Itto", CharacterRegion.INAZUMA),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
