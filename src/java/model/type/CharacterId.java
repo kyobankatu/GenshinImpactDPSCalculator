@@ -209,6 +209,8 @@ public enum CharacterId {
     YUMEMIZUKI_MIZUKI(97, "Yumemizuki Mizuki", CharacterRegion.INAZUMA),
     /** Varesa (Electro catalyst Fiery Passion plunging attacker). */
     VARESA(98, "Varesa", CharacterRegion.NATLAN),
+    /** Clorinde (Electro sword Night Vigil attacker). */
+    CLORINDE(99, "Clorinde", CharacterRegion.FONTAINE),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 

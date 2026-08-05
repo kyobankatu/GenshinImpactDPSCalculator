@@ -129,5 +129,7 @@ public enum ICDTag {
     /** Varesa's Charged, Skill, and Volcano Kablam hits share one group. */
     Varesa_CombatCycle,
     /** Mizuki's Dreamdrifter continuous attacks share one private group. */
-    YumemizukiMizuki_Dreamdrifter
+    YumemizukiMizuki_Dreamdrifter,
+    /** Clorinde's Shade attacks share one private application group. */
+    Clorinde_ElementalArt
 }

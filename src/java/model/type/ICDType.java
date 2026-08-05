@@ -60,6 +60,8 @@ public enum ICDType {
     FurinaSalonSolitaire,
     /** Mizuki Dreamdrifter rule: 1.2-second time gate only. */
     YumemizukiMizukiDreamdrifter,
+    /** Clorinde's coordinated Shade attacks: one-second time gate only. */
+    ClorindeElementalArt,
     /** Reserved for custom ICD rules not yet implemented. */
     Special // Custom rules (not implemented yet)
 }

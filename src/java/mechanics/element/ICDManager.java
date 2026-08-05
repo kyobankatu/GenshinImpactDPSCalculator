@@ -119,6 +119,8 @@ public class ICDManager {
      *       on the first and every other hit in each Salon Member tag.</li>
      *   <li>{@link ICDType#YumemizukiMizukiDreamdrifter} – applies after
      *       1.2 seconds; hit count never bypasses the time gate.</li>
+     *   <li>{@link ICDType#ClorindeElementalArt} – applies after one second;
+     *       hit count never bypasses the time gate.</li>
      * </ul>
      *
      * <p>{@code null} values for {@code type} or {@code tag} are silently
@@ -209,6 +211,8 @@ public class ICDManager {
             apply = checkCustomApplication(state, currentTime, 30.0, 2);
         } else if (type == ICDType.YumemizukiMizukiDreamdrifter) {
             apply = checkTimeOnlyApplication(state, currentTime, 1.2);
+        } else if (type == ICDType.ClorindeElementalArt) {
+            apply = checkTimeOnlyApplication(state, currentTime, 1.0);
         }
 
         return apply;

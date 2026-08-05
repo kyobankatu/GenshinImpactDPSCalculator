@@ -1,0 +1,50 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Clorinde,NORMAL,N1,9,0.993188,0
+Clorinde,NORMAL,N2,9,0.948521,0
+Clorinde,NORMAL,N3 Hit 1,9,0.628050,0
+Clorinde,NORMAL,N3 Hit 2,9,0.628050,0
+Clorinde,NORMAL,N4 Hit 1,9,0.425020,0
+Clorinde,NORMAL,N4 Hit 2,9,0.425020,0
+Clorinde,NORMAL,N4 Hit 3,9,0.425020,0
+Clorinde,NORMAL,N5,9,1.653675,0
+Clorinde,CHARGED,Charged Attack,9,2.354200,0
+Clorinde,PLUNGE,High Plunge,9,2.933586,0
+Clorinde,SKILL,Swift Hunt,9,0.491696,0
+Clorinde,SKILL,Swift Hunt Enhanced,9,0.712580,0
+Clorinde,SKILL,Impale No Bond,9,0.605772,0
+Clorinde,SKILL,Impale Low Bond,9,0.807696,0
+Clorinde,SKILL,Impale Full Bond,9,0.461360,0
+Clorinde,SKILL,Surging Blade,9,0.734400,0
+Clorinde,SKILL,Swift Hunt C3,12,0.603728,0
+Clorinde,SKILL,Swift Hunt Enhanced C3,12,0.874940,0
+Clorinde,SKILL,Impale No Bond C3,12,0.743796,0
+Clorinde,SKILL,Impale Low Bond C3,12,0.991728,0
+Clorinde,SKILL,Impale Full Bond C3,12,0.566480,0
+Clorinde,SKILL,Surging Blade C3,12,0.864000,0
+Clorinde,BURST,Last Lightfall,9,2.156960,0
+Clorinde,BURST,Bond Gain,9,1.140000,0
+Clorinde,BURST,Last Lightfall C5,12,2.537600,0
+Clorinde,BURST,Bond Gain C5,12,1.320000,0
+Clorinde,PASSIVE,Night Vigil Duration,1,7.500000,0
+Clorinde,PASSIVE,Swift Hunt Bond Gain,1,0.350000,0
+Clorinde,PASSIVE,Particle Count,1,1.000000,0
+Clorinde,PASSIVE,Particle Gate,1,2.000000,0
+Clorinde,PASSIVE,Particle Travel Frames,1,100.000000,0
+Clorinde,PASSIVE,Surging Blade Interval,1,10.000000,0
+Clorinde,PASSIVE,A1 Duration,1,15.000000,0
+Clorinde,PASSIVE,A1 ATK Ratio,1,0.200000,0
+Clorinde,PASSIVE,A1 Flat Cap,1,1800.000000,0
+Clorinde,PASSIVE,A4 CRIT Rate,1,0.100000,0
+Clorinde,PASSIVE,A4 Duration,1,15.000000,0
+Clorinde,PASSIVE,C1 Shade Multiplier,1,0.300000,0
+Clorinde,PASSIVE,C1 Trigger Gate,1,1.200000,0
+Clorinde,PASSIVE,C2 A1 ATK Ratio,2,0.300000,0
+Clorinde,PASSIVE,C2 A1 Flat Cap,2,2700.000000,0
+Clorinde,PASSIVE,C4 Burst Bonus Per Bond Ratio,4,2.000000,0
+Clorinde,PASSIVE,C4 Burst Bonus Cap,4,2.000000,0
+Clorinde,PASSIVE,C6 CRIT Rate,6,0.100000,0
+Clorinde,PASSIVE,C6 CRIT DMG,6,0.700000,0
+Clorinde,PASSIVE,C6 Duration,6,12.000000,0
+Clorinde,PASSIVE,C6 Shade Multiplier,6,2.000000,0
+Clorinde,PASSIVE,C6 Shade Count,6,6.000000,0
+Clorinde,PASSIVE,C6 Shade Gate,6,1.000000,0
