@@ -1,0 +1,54 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Nicole,NORMAL,N1,9,0.598046,0
+Nicole,NORMAL,N2,9,0.503771,0
+Nicole,NORMAL,N3,9,0.785196,0
+Nicole,CHARGED,Charged Attack,9,1.90944,0
+Nicole,PLUNGE,High Plunge,9,2.607632,0
+Nicole,SKILL,Uncreated Light,9,2.3528,0
+Nicole,SKILL,Uncreated Light C3,12,2.768,0
+Nicole,SKILL,Grace ATK Ratio,9,0.1425,0
+Nicole,SKILL,Grace ATK Ratio C3,12,0.168,0
+Nicole,SKILL,Grace ATK Cap,9,570,0
+Nicole,SKILL,Grace ATK Cap C3,12,672,0
+Nicole,BURST,Ladder Initial,9,5.3856,0
+Nicole,BURST,Ladder Initial C5,12,6.336,0
+Nicole,BURST,Arcane Projection,9,1.71,0
+Nicole,BURST,Arcane Projection C5,12,2.016,0
+Nicole,PASSIVE,N1 Hit Frame,1,17,0
+Nicole,PASSIVE,N2 Hit Frame,1,8,0
+Nicole,PASSIVE,N3 Hit Frame,1,38,0
+Nicole,PASSIVE,N1 Recovery Frames,1,25,0
+Nicole,PASSIVE,N2 Recovery Frames,1,22,0
+Nicole,PASSIVE,N3 Recovery Frames,1,52,0
+Nicole,PASSIVE,Charged Hit Frame,1,66,0
+Nicole,PASSIVE,Charged Recovery Frames,1,64,0
+Nicole,PASSIVE,High Plunge Hit Frame,1,46,0
+Nicole,PASSIVE,High Plunge Recovery Frames,1,67,0
+Nicole,PASSIVE,Skill Buff Frame,1,8,0
+Nicole,PASSIVE,Skill Hit Frame,1,9,0
+Nicole,PASSIVE,Skill Recovery Frames,1,31,0
+Nicole,PASSIVE,Particle Count,1,5,0
+Nicole,PASSIVE,Particle Travel Frames,1,100,0
+Nicole,PASSIVE,Grace Duration,1,20,0
+Nicole,PASSIVE,Burst Energy Frame,1,12,0
+Nicole,PASSIVE,Burst Hit Frame,1,108,0
+Nicole,PASSIVE,Burst Activation Frame,1,109,0
+Nicole,PASSIVE,Burst Recovery Frames,1,113,0
+Nicole,PASSIVE,Burst Duration,1,20,0
+Nicole,PASSIVE,Projection Delay Frames,1,30,0
+Nicole,PASSIVE,Projection Trigger Cooldown,1,3,0
+Nicole,PASSIVE,Projection Cap,1,4,0
+Nicole,PASSIVE,A1 ATK Flat,1,300,0
+Nicole,PASSIVE,A1 Switch Delay,1,3,0
+Nicole,PASSIVE,A4 Self Duration,1,8,0
+Nicole,PASSIVE,C1 Projection Multiplier,1,6,0
+Nicole,PASSIVE,C1 Trigger Cooldown,1,6,0
+Nicole,PASSIVE,C2 Team ATK Flat,2,300,0
+Nicole,PASSIVE,C2 Resistance Reduction,2,0.25,0
+Nicole,PASSIVE,C2 Refresh Interval,2,0.3,0
+Nicole,PASSIVE,C2 Resistance Duration,2,1,0
+Nicole,PASSIVE,C4 Flat ATK Ratio,4,0.7,0
+Nicole,PASSIVE,C4 Stack Count,4,8,0
+Nicole,PASSIVE,C4 Trigger Cooldown,4,16,0
+Nicole,PASSIVE,C4 Duration,4,20,0
+Nicole,PASSIVE,C6 DEF Ignore,6,0.4,0

@@ -42,6 +42,12 @@ public enum BuffId {
     ESCOFFIER_C1_CRYO_CRIT_DMG,
     /** Citlali A1 fixed-target Pyro and Hydro resistance reduction. */
     CITLALI_A1_PYRO_HYDRO_RES_SHRED,
+    /** Nicole Skill's snapshotted team ATK bonus. */
+    NICOLE_GRACE_OF_KENOSIS,
+    /** Nicole C2's additional team ATK bonus during Grace of Kenosis. */
+    NICOLE_C2_GRACE_ATK,
+    /** Nicole A1/A4's per-character Guidance of Theosis ATK upgrade. */
+    NICOLE_GUIDANCE_OF_THEOSIS,
     /** Lunar 拡張: コロンビーナの「皓月の意志」。 */
     GLEAMING_MOON_INTENT,
     /** Lunar 拡張: コロンビーナの「皓月の献身」。 */

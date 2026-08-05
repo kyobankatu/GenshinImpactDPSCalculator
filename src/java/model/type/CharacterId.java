@@ -195,6 +195,8 @@ public enum CharacterId {
     NEUVILLETTE(90, "Neuvillette", CharacterRegion.FONTAINE),
     /** Mualani (Hydro catalyst Nightsoul and Surging Bite attacker). */
     MUALANI(91, "Mualani", CharacterRegion.NATLAN),
+    /** Nicole (Pyro catalyst Arcane Projection support). */
+    NICOLE(92, "Nicole", CharacterRegion.UNKNOWN),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 
