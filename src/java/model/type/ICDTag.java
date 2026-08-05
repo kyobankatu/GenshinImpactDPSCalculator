@@ -121,5 +121,9 @@ public enum ICDTag {
     /** Arlecchino's Charged Attack uses the polearm extra-attack group. */
     Arlecchino_Charged,
     /** Arlecchino's Skill spike and Directive ticks share one private group. */
-    Arlecchino_ElementalArt
+    Arlecchino_ElementalArt,
+    /** Furina's Surintendante Chevalmarin application group. */
+    Furina_Chevalmarin,
+    /** Furina's Gentilhomme Usher application group. */
+    Furina_Usher
 }

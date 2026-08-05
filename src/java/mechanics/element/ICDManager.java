@@ -115,6 +115,8 @@ public class ICDManager {
      *       hit count never bypasses the time gate.</li>
      *   <li>{@link ICDType#ArlecchinoElementalArt} – applies after ten
      *       seconds or after two suppressed hits.</li>
+     *   <li>{@link ICDType#FurinaSalonSolitaire} – applies after 30 seconds or
+     *       on the first and every other hit in each Salon Member tag.</li>
      * </ul>
      *
      * <p>{@code null} values for {@code type} or {@code tag} are silently
@@ -201,6 +203,8 @@ public class ICDManager {
             apply = checkTimeOnlyApplication(state, currentTime, 0.5);
         } else if (type == ICDType.ArlecchinoElementalArt) {
             apply = checkCustomApplication(state, currentTime, 10.0, 2);
+        } else if (type == ICDType.FurinaSalonSolitaire) {
+            apply = checkCustomApplication(state, currentTime, 30.0, 2);
         }
 
         return apply;

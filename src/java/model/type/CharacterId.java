@@ -203,6 +203,8 @@ public enum CharacterId {
     XILONEN(94, "Xilonen", CharacterRegion.NATLAN),
     /** Arlecchino (Pyro polearm Bond of Life attacker). */
     ARLECCHINO(95, "Arlecchino", CharacterRegion.SNEZHNAYA),
+    /** Furina (Hydro sword Salon Solitaire support). */
+    FURINA(96, "Furina", CharacterRegion.FONTAINE),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 

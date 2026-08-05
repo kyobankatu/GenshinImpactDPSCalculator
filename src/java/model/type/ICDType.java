@@ -56,6 +56,8 @@ public enum ICDType {
     ArlecchinoCharged,
     /** Arlecchino's Skill group: ten seconds or every third hit. */
     ArlecchinoElementalArt,
+    /** Furina Salon rule: 30 seconds or first and every other tagged hit. */
+    FurinaSalonSolitaire,
     /** Reserved for custom ICD rules not yet implemented. */
     Special // Custom rules (not implemented yet)
 }

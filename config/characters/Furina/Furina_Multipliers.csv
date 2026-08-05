@@ -1,0 +1,42 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Furina,NORMAL,N1,9,0.888955,0
+Furina,NORMAL,N2,9,0.803398,0
+Furina,NORMAL,N3,9,1.012669,0
+Furina,NORMAL,N4,9,1.346634,0
+Furina,CHARGED,Soloist's Solicitation Charged,9,1.36354,0
+Furina,PLUNGE,High Plunge,9,2.933586,0
+Furina,SKILL,Ousia Bubble,9,0.133688,0
+Furina,SKILL,Ousia Bubble C5,12,0.15728,0
+Furina,SKILL,Surintendante Chevalmarin,9,0.054944,0
+Furina,SKILL,Surintendante Chevalmarin C5,12,0.06464,0
+Furina,SKILL,Gentilhomme Usher,9,0.10132,0
+Furina,SKILL,Gentilhomme Usher C5,12,0.1192,0
+Furina,SKILL,Mademoiselle Crabaletta,9,0.140896,0
+Furina,SKILL,Mademoiselle Crabaletta C5,12,0.16576,0
+Furina,BURST,Let the People Rejoice,9,0.193909,0
+Furina,BURST,Let the People Rejoice C3,12,0.228128,0
+Furina,PASSIVE,Fanfare DMG Ratio,9,0.0023,0
+Furina,PASSIVE,Fanfare DMG Ratio C3,12,0.0029,0
+Furina,PASSIVE,A4 DMG Per 1000 HP,1,0.007,0
+Furina,PASSIVE,A4 DMG Cap,1,0.28,0
+Furina,PASSIVE,Fixed Full HP Ally Bonus,1,0.1,0
+Furina,PASSIVE,Salon Duration Frames,1,1754,0
+Furina,PASSIVE,Particle Count,1,1,0
+Furina,PASSIVE,Particle Cooldown,1,2.5,0
+Furina,PASSIVE,Particle Travel Frames,1,100,0
+Furina,PASSIVE,Chevalmarin Initial Frames,1,72.3333,0
+Furina,PASSIVE,Chevalmarin Interval Frames,1,97.5858,0
+Furina,PASSIVE,Chevalmarin Travel Frames,1,20,0
+Furina,PASSIVE,Usher Initial Frames,1,74.5,0
+Furina,PASSIVE,Usher Interval Frames,1,202.138,0
+Furina,PASSIVE,Usher Travel Frames,1,40,0
+Furina,PASSIVE,Crabaletta Initial Frames,1,71.5926,0
+Furina,PASSIVE,Crabaletta Interval Frames,1,313.859,0
+Furina,PASSIVE,Crabaletta Travel Frames,1,41,0
+Furina,PASSIVE,C1 Initial Fanfare,1,150,0
+Furina,PASSIVE,Burst Duration,1,18.2,0
+Furina,PASSIVE,C4 Energy,4,4,0
+Furina,PASSIVE,C4 Energy Cooldown,4,5,0
+Furina,PASSIVE,C6 Duration,6,10,0
+Furina,PASSIVE,C6 Max HP Ratio,6,0.18,0
+Furina,PASSIVE,C6 Hit Cap,6,6,0

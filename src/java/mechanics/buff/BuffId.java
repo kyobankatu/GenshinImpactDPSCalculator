@@ -58,6 +58,8 @@ public enum BuffId {
     XILONEN_C2_PYRO_ATK,
     /** Xilonen C2 active Cryo CRIT DMG support. */
     XILONEN_C2_CRYO_CRIT_DMG,
+    /** Furina C1's fixed-HP initial Fanfare damage window. */
+    FURINA_C1_FANFARE_DMG,
     /** Lunar 拡張: コロンビーナの「皓月の意志」。 */
     GLEAMING_MOON_INTENT,
     /** Lunar 拡張: コロンビーナの「皓月の献身」。 */

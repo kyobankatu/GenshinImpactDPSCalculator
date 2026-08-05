@@ -1,0 +1,13 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Furina,STATS,Base HP,90,15307,0
+Furina,STATS,Base ATK,90,244,0
+Furina,STATS,Base DEF,90,696,0
+Furina,STATS,Ascension CRIT Rate,90,0.192,0
+Furina,STATS,Energy Cost,90,60,0
+Furina,STATS,Constellation,6,6,0
+Furina,CONFIG,Character Level,90,90,0
+Furina,CONFIG,Normal Level,9,9,0
+Furina,CONFIG,Skill Level,12,12,0
+Furina,CONFIG,Burst Level,12,12,0
+Furina,CONFIG,Skill Cooldown,1,20,0
+Furina,CONFIG,Burst Cooldown,1,15,0
