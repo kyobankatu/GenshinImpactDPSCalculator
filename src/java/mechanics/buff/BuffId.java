@@ -283,6 +283,8 @@ public enum BuffId {
     TIGHNARI_C2_DENDRO_DMG_BONUS,
     /** Tighnari C4 party Elemental Mastery bonus. */
     TIGHNARI_C4_PARTY_ELEMENTAL_MASTERY,
+    /** Lan Yan C4 party Elemental Mastery bonus. */
+    LAN_YAN_C4_PARTY_ELEMENTAL_MASTERY,
     /** Alhaitham C4 non-owner party Elemental Mastery bonus. */
     ALHAITHAM_C4_PARTY_ELEMENTAL_MASTERY,
     /** Alhaitham C4 owner Dendro damage bonus. */

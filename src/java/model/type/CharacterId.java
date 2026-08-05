@@ -173,6 +173,8 @@ public enum CharacterId {
     EMILIE(79, "Emilie", CharacterRegion.FONTAINE),
     /** Chiori (Geo sword dual-scaling automaton attacker). */
     CHIORI(80, "Chiori", CharacterRegion.INAZUMA),
+    /** Lan Yan (Anemo catalyst Feathermoon Ring attacker). */
+    LAN_YAN(81, "Lan Yan", CharacterRegion.LIYUE),
     /** Lyney (Pyro bow Prop Arrow and Grin-Malkin attacker). */
     LYNEY(82, "Lyney", CharacterRegion.FONTAINE),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */

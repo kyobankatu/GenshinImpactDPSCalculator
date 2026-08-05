@@ -58,6 +58,10 @@ public enum ICDTag {
     Yelan_Breakthrough,
     /** Tighnari's four shared-ICD Clusterbloom projectiles. */
     Tighnari_Clusterbloom,
+    /** Lan Yan's Anemo Feathermoon Rings share one application group. */
+    LanYan_FeathermoonRing,
+    /** Lan Yan's converted Feathermoon Rings share a separate group. */
+    LanYan_FeathermoonRingMix,
     /** Cyno A1 Duststalker Bolts share one dedicated application group. */
     Cyno_DuststalkerBolt,
     /** Cyno C6 Duststalker Bolts use a separate standard application group. */
