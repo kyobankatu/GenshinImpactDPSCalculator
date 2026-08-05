@@ -297,6 +297,8 @@ public enum BuffId {
     XINYAN_C4_PHYSICAL_RES_SHRED,
     /** Hu Tao A1 non-owner party CRIT Rate bonus. */
     HU_TAO_A1_PARTY_CRIT,
+    /** Itto C4 party ATK and DEF bonus after Burst ends. */
+    ITTO_C4_PARTY_ATK_DEF,
     /** Nahida A1 active-character Elemental Mastery field bonus. */
     NAHIDA_A1_ACTIVE_ELEMENTAL_MASTERY,
     /** Ayato C4 party Normal Attack speed bonus. */

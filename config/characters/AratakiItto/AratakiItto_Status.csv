@@ -1,0 +1,29 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Arataki Itto,STATS,Base HP,90,12858,0
+Arataki Itto,STATS,Base ATK,90,227,0
+Arataki Itto,STATS,Base DEF,90,959,0
+Arataki Itto,STATS,Ascension CRIT Rate,90,0.192,0
+Arataki Itto,STATS,Energy Cost,90,70,0
+Arataki Itto,STATS,Constellation,6,6,0
+Arataki Itto,CONFIG,Character Level,90,90,0
+Arataki Itto,CONFIG,Normal Level,9,9,0
+Arataki Itto,CONFIG,Skill Level,12,12,0
+Arataki Itto,CONFIG,Burst Level,12,12,0
+Arataki Itto,PASSIVE,Skill Cooldown,1,10,0
+Arataki Itto,PASSIVE,Burst Cooldown,1,18,0
+Arataki Itto,PASSIVE,Ushi Duration,1,6,0
+Arataki Itto,PASSIVE,Particle Chance Four,1,0.5,0
+Arataki Itto,PASSIVE,Particle Travel Frames,1,100,0
+Arataki Itto,PASSIVE,Burst Duration Frames,1,795,0
+Arataki Itto,PASSIVE,Burst Normal Attack Speed,1,0.1,0
+Arataki Itto,PASSIVE,A1 Slash Speed Per Stack,1,0.1,0
+Arataki Itto,PASSIVE,A1 Slash Speed Cap,1,0.3,0
+Arataki Itto,PASSIVE,A4 DEF Flat DMG Ratio,1,0.35,0
+Arataki Itto,PASSIVE,C1 Initial Stacks,1,2,0
+Arataki Itto,PASSIVE,C2 Energy Per Geo,1,6,0
+Arataki Itto,PASSIVE,C2 Cooldown Reduction Per Geo,1,1.5,0
+Arataki Itto,PASSIVE,C4 Party ATK,1,0.2,0
+Arataki Itto,PASSIVE,C4 Party DEF,1,0.2,0
+Arataki Itto,PASSIVE,C4 Duration,1,10,0
+Arataki Itto,PASSIVE,C6 Charged CRIT DMG,1,0.7,0
+Arataki Itto,PASSIVE,C6 Preserve Stack Chance,1,0.5,0
