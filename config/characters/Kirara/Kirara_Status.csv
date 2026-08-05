@@ -1,0 +1,29 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Kirara,STATS,Base HP,90,12180,0
+Kirara,STATS,Base ATK,90,223,0
+Kirara,STATS,Base DEF,90,546,0
+Kirara,STATS,Ascension HP Percent,90,0.24,0
+Kirara,STATS,Energy Cost,90,60,0
+Kirara,STATS,Constellation,6,6,0
+Kirara,CONFIG,Character Level,90,90,0
+Kirara,CONFIG,Normal Level,9,9,0
+Kirara,CONFIG,Skill Level,12,12,0
+Kirara,CONFIG,Burst Level,12,12,0
+Kirara,PASSIVE,Skill Cooldown,1,8,0
+Kirara,PASSIVE,Burst Cooldown,1,15,0
+Kirara,PASSIVE,Nominal Shield Duration,1,12,0
+Kirara,PASSIVE,Skill Particle Count,1,3,0
+Kirara,PASSIVE,A4 Skill DMG Per Max HP,1,0.000004,0
+Kirara,PASSIVE,A4 Burst DMG Per Max HP,1,0.000003,0
+Kirara,PASSIVE,C1 Base Cardamoms,1,6,0
+Kirara,PASSIVE,C1 Max HP Per Cardamom,1,8000,0
+Kirara,PASSIVE,C1 Bonus Cardamom Cap,1,4,0
+Kirara,PASSIVE,C4 Coordinated Multiplier,1,2,0
+Kirara,PASSIVE,C4 Cooldown,1,3.8,0
+Kirara,PASSIVE,C6 Team DMG Bonus,1,0.12,0
+Kirara,PASSIVE,C6 Duration,1,15,0
+Kirara,PASSIVE,Cardamom Default Early Hits,1,2,0
+Kirara,PASSIVE,Cardamom Early Hit Frames,1,180,0
+Kirara,PASSIVE,Cardamom Expiration Frames,1,800,0
+Kirara,PASSIVE,Cardamom Expiration Spacing Frames,1,18,0
+Kirara,PASSIVE,Cardamom Snapshot Frames,1,34,0

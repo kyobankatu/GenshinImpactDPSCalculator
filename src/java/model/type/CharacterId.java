@@ -155,6 +155,8 @@ public enum CharacterId {
     ARATAKI_ITTO(70, "Arataki Itto", CharacterRegion.INAZUMA),
     /** Nilou (Hydro sword Bloom support and dancer). */
     NILOU(71, "Nilou", CharacterRegion.SUMERU),
+    /** Kirara (Dendro sword Cardamom attacker). */
+    KIRARA(72, "Kirara", CharacterRegion.INAZUMA),
     /** Baizhu (Dendro catalyst healer and reaction support). */
     BAIZHU(73, "Baizhu", CharacterRegion.LIYUE),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */

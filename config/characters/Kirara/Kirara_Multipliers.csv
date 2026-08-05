@@ -1,0 +1,15 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Kirara,NORMAL,N1,9,0.880060,0
+Kirara,NORMAL,N2,9,0.851620,0
+Kirara,NORMAL,N3-1,9,0.467048,0
+Kirara,NORMAL,N3-2,9,0.700572,0
+Kirara,NORMAL,N4,9,1.346160,0
+Kirara,CHARGED,Charged-1,9,0.411116,0
+Kirara,CHARGED,Charged-2,9,0.822232,0
+Kirara,CHARGED,Charged-3,9,0.822232,0
+Kirara,SKILL,Tail-Flicking Flying Kick,9,1.768000,0
+Kirara,SKILL,Tail-Flicking Flying Kick C3,12,2.080000,0
+Kirara,BURST,Secret Art Surprise Dispatch,9,9.694080,0
+Kirara,BURST,Secret Art Surprise Dispatch C5,12,11.404800,0
+Kirara,BURST,Cat Grass Cardamom,9,0.605880,0
+Kirara,BURST,Cat Grass Cardamom C5,12,0.712800,0
