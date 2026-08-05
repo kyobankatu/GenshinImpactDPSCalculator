@@ -68,7 +68,8 @@ public final class LegacyCharacterIdentityRegressionTest {
                 "negative numeric fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(0),
                 "zero numeric fallback");
-        assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(63),
+        assertEquals(CharacterId.UNKNOWN,
+                CharacterId.fromNumericId(Integer.MAX_VALUE),
                 "high numeric fallback");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName(null),
                 "null name fallback");
