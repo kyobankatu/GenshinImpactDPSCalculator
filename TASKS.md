@@ -23521,7 +23521,7 @@ Completion evidence:
 
 Status: In progress. This time-boxed campaign adds source-ready missing
 characters and weapons as independently verified vertical slices through
-2026-08-05 17:00 JST.
+2026-08-07 22:00 JST.
 
 Scope:
 
@@ -23666,6 +23666,11 @@ Campaign inventory:
 | Varesa | character | fixed-target basics, Nightsoul Plunging attacks, Fiery Passion state, Skill/Burst, particles, representable passives/constellations | `VaresaRegressionTest` | complete (`1985002`) |
 | Clorinde | character | fixed-target basics, Night Vigil state, local Bond of Life, Swift Hunt/Impale the Night, Burst, representable passives/constellations | `ClorindeRegressionTest` | complete (`89e435e`) |
 | Skirk | character | fixed-target basics, Seven-Phase Flash state, Serpent's Subtlety resource, Skill/Burst, representable passives/constellations | `SkirkRegressionTest` | complete (`f05a3e9`) |
+| Chasca | character | fixed-target basics, Nightsoul Multitarget Fire, converted Shadowhunt Shells, Burst, representable passives/constellations | `ChascaRegressionTest` | primary (ID 101) |
+| Durin | character | fixed-target basics, dual-form Skill/Burst attacks, particles, representable passives/constellations | `DurinRegressionTest` | delegated (ID 102) |
+| Lauma | character | fixed-target basics, Verdant Dew, Lunar-Bloom support, Skill/Burst, representable passives/constellations | `LaumaRegressionTest` | pending (ID 103) |
+| Mavuika | character | fixed-target basics, Nightsoul Flamestrider attacks, Fighting Spirit Burst, representable passives/constellations | `MavuikaRegressionTest` | pending (ID 104) |
+| Varka | character | fixed-target basics, Favonian Banner stance attacks, Skill/Burst, representable passives/constellations | `VarkaRegressionTest` | delegated (ID 105) |
 
 Requirements and tests remain the Phase 1 acceptance and abnormal-path matrix;
 each replenished unit receives a source-backed focused regression and an
@@ -23758,3 +23763,10 @@ set, legacy identity regression, reaction suite, build, Javadoc, and preflight
 pass together. The pinned source inventory leaves Chasca, Durin, Lauma,
 Mavuika, and Varka as substantial future character slices; Traveler remains
 governed by B-187. Weapon coverage remains converged except that blocker.
+
+Checkpoint 2026-08-07 16:04 JST: campaign execution resumes through 22:00
+JST against pinned gcsim `ef41805d`. Chasca is the primary unit; Durin and
+Varka start in isolated lanes, while Lauma and Mavuika remain the ordered
+follow-up queue. Traveler and Sword of Descension remain blocked by B-187;
+RL, generated docs, defensive runtime state, geometry, and multi-target
+selection remain outside this pass.
