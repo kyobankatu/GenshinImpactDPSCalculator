@@ -60,6 +60,10 @@ public enum BuffId {
     XILONEN_C2_CRYO_CRIT_DMG,
     /** Furina C1's fixed-HP initial Fanfare damage window. */
     FURINA_C1_FANFARE_DMG,
+    /** Durin's live A1/C2/C6 dual-form team support state. */
+    DURIN_DUAL_FORM_SUPPORT,
+    /** Durin C1's active-character flat-damage stacks. */
+    DURIN_C1_WHITE_FLAT_DMG,
     /** Lunar 拡張: コロンビーナの「皓月の意志」。 */
     GLEAMING_MOON_INTENT,
     /** Lunar 拡張: コロンビーナの「皓月の献身」。 */

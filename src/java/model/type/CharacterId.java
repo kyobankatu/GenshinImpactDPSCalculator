@@ -213,6 +213,8 @@ public enum CharacterId {
     CLORINDE(99, "Clorinde", CharacterRegion.FONTAINE),
     /** Skirk (Cryo sword Seven-Phase Flash carry). */
     SKIRK(100, "Skirk", CharacterRegion.UNKNOWN),
+    /** Durin (Pyro sword dual-form attacker and support). */
+    DURIN(102, "Durin", CharacterRegion.MONDSTADT),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 

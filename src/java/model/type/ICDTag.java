@@ -133,5 +133,13 @@ public enum ICDTag {
     /** Clorinde's Shade attacks share one private application group. */
     Clorinde_ElementalArt,
     /** Skirk's Far to Fall constellation attack application group. */
-    Skirk_Constellation
+    Skirk_Constellation,
+    /** Durin's three-hit black-form Skill recast group. */
+    Durin_BlackSkill,
+    /** Durin's white-form Burst dragon-fire group. */
+    Durin_WhiteBurst,
+    /** Durin's black-form Burst projectile group. */
+    Durin_BlackBurst,
+    /** Durin's shared three-hit Burst opening group. */
+    Durin_BurstOpening
 }

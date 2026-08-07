@@ -62,6 +62,12 @@ public enum ICDType {
     YumemizukiMizukiDreamdrifter,
     /** Clorinde's coordinated Shade attacks: one-second time gate only. */
     ClorindeElementalArt,
+    /** Durin's black Skill recast: 0.3-second time gate only. */
+    DurinBlackSkill,
+    /** Durin's white Burst ticks: 1.5-second time gate only. */
+    DurinWhiteBurst,
+    /** Durin's black Burst ticks: two-second time gate only. */
+    DurinBlackBurst,
     /** Reserved for custom ICD rules not yet implemented. */
     Special // Custom rules (not implemented yet)
 }

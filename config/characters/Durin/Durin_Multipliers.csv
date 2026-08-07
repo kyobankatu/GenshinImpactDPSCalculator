@@ -1,0 +1,48 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Durin,NORMAL,N1,9,0.838696,0
+Durin,NORMAL,N2,9,0.753344,0
+Durin,NORMAL,N3 Hit,9,0.535762,0
+Durin,NORMAL,N4,9,1.307213,0
+Durin,CHARGED,Charged Attack,9,2.084020,0
+Durin,PLUNGE,High Plunge,9,2.933586,0
+Durin,SKILL,Confirmation of Purity,9,1.795200,0
+Durin,SKILL,Denial of Darkness Hit 1,9,1.228080,0
+Durin,SKILL,Denial of Darkness Hit 2,9,0.904400,0
+Durin,SKILL,Denial of Darkness Hit 3,9,1.098880,0
+Durin,SKILL,Energy Regeneration,9,30.000000,0
+Durin,SKILL,Confirmation of Purity C5,12,2.112000,0
+Durin,SKILL,Denial of Darkness Hit 1 C5,12,1.444800,0
+Durin,SKILL,Denial of Darkness Hit 2 C5,12,1.064000,0
+Durin,SKILL,Denial of Darkness Hit 3 C5,12,1.292800,0
+Durin,SKILL,Energy Regeneration C5,12,39.000000,0
+Durin,BURST,White Opening Hit 1,9,2.022320,0
+Durin,BURST,White Opening Hit 2,9,1.638800,0
+Durin,BURST,White Opening Hit 3,9,1.901280,0
+Durin,BURST,Black Opening Hit 1,9,2.132480,0
+Durin,BURST,Black Opening Hit 2,9,1.729920,0
+Durin,BURST,Black Opening Hit 3,9,1.901280,0
+Durin,BURST,Dragon of White Flame,9,1.608880,0
+Durin,BURST,Dragon of Dark Decay,9,2.207280,0
+Durin,BURST,White Opening Hit 1 C3,12,2.379200,0
+Durin,BURST,White Opening Hit 2 C3,12,1.928000,0
+Durin,BURST,White Opening Hit 3 C3,12,2.236800,0
+Durin,BURST,Black Opening Hit 1 C3,12,2.508800,0
+Durin,BURST,Black Opening Hit 2 C3,12,2.035200,0
+Durin,BURST,Black Opening Hit 3 C3,12,2.236800,0
+Durin,BURST,Dragon of White Flame C3,12,1.892800,0
+Durin,BURST,Dragon of Dark Decay C3,12,2.596800,0
+Durin,PASSIVE,A1 RES Shred,1,0.200000,0
+Durin,PASSIVE,A1 Amplifying Bonus,1,0.400000,0
+Durin,PASSIVE,A1 Duration,1,6.000000,0
+Durin,PASSIVE,A4 ATK Ratio,1,0.000300,0
+Durin,PASSIVE,A4 Maximum Bonus,1,0.750000,0
+Durin,PASSIVE,A4 Stack Count,1,10.000000,0
+Durin,PASSIVE,C1 White Flat ATK Ratio,1,0.600000,0
+Durin,PASSIVE,C1 Black Flat ATK Ratio,1,1.500000,0
+Durin,PASSIVE,C1 Stack Count,1,20.000000,0
+Durin,PASSIVE,C2 Elemental DMG Bonus,2,0.500000,0
+Durin,PASSIVE,C2 Duration,2,6.000000,0
+Durin,PASSIVE,C4 Burst DMG Bonus,4,0.400000,0
+Durin,PASSIVE,C6 White DEF Ignore,6,0.300000,0
+Durin,PASSIVE,C6 White DEF Reduction,6,0.300000,0
+Durin,PASSIVE,C6 Black DEF Ignore,6,0.700000,0

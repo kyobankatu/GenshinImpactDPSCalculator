@@ -121,6 +121,12 @@ public class ICDManager {
      *       1.2 seconds; hit count never bypasses the time gate.</li>
      *   <li>{@link ICDType#ClorindeElementalArt} – applies after one second;
      *       hit count never bypasses the time gate.</li>
+     *   <li>{@link ICDType#DurinBlackSkill} – applies after 0.3 seconds;
+     *       hit count never bypasses the time gate.</li>
+     *   <li>{@link ICDType#DurinWhiteBurst} – applies after 1.5 seconds;
+     *       hit count never bypasses the time gate.</li>
+     *   <li>{@link ICDType#DurinBlackBurst} – applies after two seconds;
+     *       hit count never bypasses the time gate.</li>
      * </ul>
      *
      * <p>{@code null} values for {@code type} or {@code tag} are silently
@@ -213,6 +219,12 @@ public class ICDManager {
             apply = checkTimeOnlyApplication(state, currentTime, 1.2);
         } else if (type == ICDType.ClorindeElementalArt) {
             apply = checkTimeOnlyApplication(state, currentTime, 1.0);
+        } else if (type == ICDType.DurinBlackSkill) {
+            apply = checkTimeOnlyApplication(state, currentTime, 0.3);
+        } else if (type == ICDType.DurinWhiteBurst) {
+            apply = checkTimeOnlyApplication(state, currentTime, 1.5);
+        } else if (type == ICDType.DurinBlackBurst) {
+            apply = checkTimeOnlyApplication(state, currentTime, 2.0);
         }
 
         return apply;
