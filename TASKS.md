@@ -23519,9 +23519,9 @@ Completion evidence:
 
 ## Implementation Order: Character And Weapon Coverage Campaign B-207
 
-Status: In progress. This time-boxed campaign adds source-ready missing
-characters and weapons as independently verified vertical slices through
-2026-08-07 22:00 JST.
+Status: Complete. This time-boxed campaign added every source-ready missing
+character and weapon as independently verified vertical slices and converged
+on 2026-08-07.
 
 Scope:
 
@@ -23537,7 +23537,7 @@ Out of scope for this pass:
 - RL, generated `docs/`, player healing/current HP/damage intake, shields,
   multi-target geometry, movement, hitlag, exploration, and Deferred Systems.
 
-### Phase 1: Source-Ready Character And Weapon Units
+### Phase 1: Source-Ready Character And Weapon Units - Done
 
 Why:
 
@@ -23602,7 +23602,7 @@ Javadoc, and executable preflight gates and are pushed on `dev_0`. Unsupported
 healing, shield, player-damage, forced-Core-rupture, geometry, and hitlag
 branches remain explicit rather than approximated.
 
-### Phase 2: Replenished Source-Ready Units
+### Phase 2: Replenished Source-Ready Units - Done
 
 Campaign inventory:
 
@@ -23668,7 +23668,7 @@ Campaign inventory:
 | Skirk | character | fixed-target basics, Seven-Phase Flash state, Serpent's Subtlety resource, Skill/Burst, representable passives/constellations | `SkirkRegressionTest` | complete (`f05a3e9`) |
 | Chasca | character | fixed-target basics, Nightsoul Multitarget Fire, converted Shadowhunt Shells, Burst, representable passives/constellations | `ChascaRegressionTest` | complete (`6bd2ab3`, ID 101) |
 | Durin | character | fixed-target basics, dual-form Skill/Burst attacks, particles, representable passives/constellations | `DurinRegressionTest` | complete (`aff3b07`, ID 102) |
-| Lauma | character | fixed-target basics, Verdant Dew, Lunar-Bloom support, Skill/Burst, representable passives/constellations | `LaumaRegressionTest` | delegated (ID 103) |
+| Lauma | character | fixed-target basics, Verdant Dew, Lunar-Bloom support, Skill/Burst, representable passives/constellations | `LaumaRegressionTest` | complete (`8ebbd1b`, ID 103) |
 | Mavuika | character | fixed-target basics, Nightsoul Flamestrider attacks, Fighting Spirit Burst, representable passives/constellations | `MavuikaRegressionTest` | complete (`8d7429b`, ID 104) |
 | Varka | character | fixed-target basics, Favonian Banner stance attacks, Skill/Burst, representable passives/constellations | `VarkaRegressionTest` | complete (`4e8148f`, ID 105) |
 
@@ -23778,3 +23778,12 @@ in `5c9d15d`. The four completed focused regressions, legacy identity,
 reaction, build, Javadoc, and executable preflight gates pass; Lauma remains
 active in its isolated lane. Traveler and Sword of Descension remain blocked
 by B-187, and no excluded runtime state is approximated.
+
+Completion 2026-08-07 17:03 JST: Lauma is integrated and pushed as
+`8ebbd1b`. All five final character regressions, legacy identity, reaction,
+build, Javadoc, and executable preflight pass on `dev_0`. The pinned character
+inventory now contains only implemented aliases and Traveler, while the weapon
+inventory contains only implemented aliases and B-187's blocked Sword of
+Descension. Image-only character directories without pinned mechanics or data
+remain source-unready and were not implemented by inference. No source-ready
+character or weapon unit remains, so the campaign is complete.

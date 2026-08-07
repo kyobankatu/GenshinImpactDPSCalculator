@@ -4309,7 +4309,7 @@ experiment record.
 
 ### B-207 — Character and weapon coverage campaign
 
-- **Status:** in-progress
+- **Status:** done (2026-08-07)
 - **Source:** explicit 2026-08-05 autonomous character/weapon expansion request
   and normalized pinned gcsim `ef41805d` catalog gap.
 - **Initial units:** Dori, Verdict, Beacon of the Reed Sea, Jadefall's Splendor,
@@ -4361,3 +4361,10 @@ experiment record.
   executable preflight pass together. The weapon inventory remains converged
   except blocked B-187, and unavailable defensive, geometry, random-target,
   and multi-target state remains explicit.
+- **Completion 2026-08-07 17:03 JST:** Lauma is integrated and pushed as
+  `8ebbd1b`; the five final focused regressions, legacy identity, reaction,
+  build, Javadoc, and executable preflight pass together. Normalized pinned
+  character and weapon sweeps produce no source-ready unit: Traveler and Sword
+  of Descension remain blocked by B-187, aliases are already implemented, and
+  image-only character directories without pinned mechanics/data are not
+  implemented from inference. The requested source-ready queue is exhausted.
