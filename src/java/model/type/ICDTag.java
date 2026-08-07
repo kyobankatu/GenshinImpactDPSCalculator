@@ -141,5 +141,13 @@ public enum ICDTag {
     /** Durin's black-form Burst projectile group. */
     Durin_BlackBurst,
     /** Durin's shared three-hit Burst opening group. */
-    Durin_BurstOpening
+    Durin_BurstOpening,
+    /** Varka's converted Normal hits share this elemental group. */
+    Varka_NormalElement,
+    /** Varka's Anemo Normal hits share this wind group. */
+    Varka_NormalWind,
+    /** Varka's converted Charged hits share this elemental group. */
+    Varka_ExtraElement,
+    /** Varka's Anemo Charged hits share this wind group. */
+    Varka_ExtraWind
 }

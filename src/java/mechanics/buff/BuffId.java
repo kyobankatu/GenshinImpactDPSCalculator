@@ -429,6 +429,16 @@ public enum BuffId {
     SPRAWLING_GREENERY_PRIMARY_REACTION,
     /** 繁茂の草: 超激化・草激化・超開花・烈開花による 6 秒間の元素熟知 +20。 */
     SPRAWLING_GREENERY_SECONDARY_REACTION,
+    /** Varka C4 team Anemo damage bonus. */
+    VARKA_C4_ANEMO_DMG,
+    /** Varka C4 team Pyro damage bonus. */
+    VARKA_C4_PYRO_DMG,
+    /** Varka C4 team Hydro damage bonus. */
+    VARKA_C4_HYDRO_DMG,
+    /** Varka C4 team Electro damage bonus. */
+    VARKA_C4_ELECTRO_DMG,
+    /** Varka C4 team Cryo damage bonus. */
+    VARKA_C4_CRYO_DMG,
     /** 元素共鳴「迅速の風」(風風): 移動速度+, スタミナ消費 -15%, クールタイム短縮。 */
     IMPETUOUS_WINDS
 }

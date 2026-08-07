@@ -1,0 +1,69 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Varka,NORMAL,N1,9,1.202633,0
+Varka,NORMAL,N2-1,9,0.440719,0
+Varka,NORMAL,N2-2,9,0.818478,0
+Varka,NORMAL,N3-1,9,0.595924,0
+Varka,NORMAL,N3-2,9,1.106716,0
+Varka,NORMAL,N4-1,9,1.018394,0
+Varka,NORMAL,N4-2,9,0.548366,0
+Varka,NORMAL,N5-1,9,1.281450,0
+Varka,NORMAL,N5-2,9,0.690011,0
+Varka,CHARGED,Charged Hit 1,9,1.573364,0
+Varka,CHARGED,Charged Hit 2,9,0.847196,0
+Varka,PLUNGE,High Plunge,9,2.933586,0
+Varka,SKILL,Windbound Execution,9,4.732800,0
+Varka,SKILL,Windbound Execution C3,12,5.568000,0
+Varka,NORMAL,Sturm N1,9,1.503291,0
+Varka,NORMAL,Sturm N2-1,9,0.550899,0
+Varka,NORMAL,Sturm N2-2,9,1.023097,0
+Varka,NORMAL,Sturm N3-1,9,0.744905,0
+Varka,NORMAL,Sturm N3-2,9,1.383395,0
+Varka,NORMAL,Sturm N4-1,9,1.272992,0
+Varka,NORMAL,Sturm N4-2,9,0.685457,0
+Varka,NORMAL,Sturm N5-1,9,1.601812,0
+Varka,NORMAL,Sturm N5-2,9,0.862514,0
+Varka,NORMAL,Sturm N1 C3,12,1.845813,0
+Varka,NORMAL,Sturm N2-1 C3,12,0.676420,0
+Varka,NORMAL,Sturm N2-2 C3,12,1.256208,0
+Varka,NORMAL,Sturm N3-1 C3,12,0.914630,0
+Varka,NORMAL,Sturm N3-2 C3,12,1.698599,0
+Varka,NORMAL,Sturm N4-1 C3,12,1.563041,0
+Varka,NORMAL,Sturm N4-2 C3,12,0.841637,0
+Varka,NORMAL,Sturm N5-1 C3,12,1.966782,0
+Varka,NORMAL,Sturm N5-2 C3,12,1.059036,0
+Varka,CHARGED,Sturm Charged Hit 1,9,1.966705,0
+Varka,CHARGED,Sturm Charged Hit 2,9,1.058995,0
+Varka,CHARGED,Sturm Charged Hit 1 C3,12,2.414815,0
+Varka,CHARGED,Sturm Charged Hit 2 C3,12,1.300285,0
+Varka,SKILL,Four Winds Element Hit,9,2.987920,0
+Varka,SKILL,Four Winds Anemo Hit,9,1.608880,0
+Varka,SKILL,Four Winds Element Hit C3,12,3.515200,0
+Varka,SKILL,Four Winds Anemo Hit C3,12,1.892800,0
+Varka,CHARGED,Azure Devour Element Hit,9,1.591200,0
+Varka,CHARGED,Azure Devour Anemo Hit,9,0.856800,0
+Varka,CHARGED,Azure Devour Element Hit C3,12,1.872000,0
+Varka,CHARGED,Azure Devour Anemo Hit C3,12,1.008000,0
+Varka,BURST,Northwind Avatar Hit 1,9,5.728320,0
+Varka,BURST,Northwind Avatar Hit 2,9,3.084480,0
+Varka,BURST,Northwind Avatar Hit 1 C5,12,6.739200,0
+Varka,BURST,Northwind Avatar Hit 2 C5,12,3.628800,0
+Varka,PASSIVE,Particle Count,1,6,0
+Varka,PASSIVE,Particle Travel Frames,1,100,0
+Varka,PASSIVE,Stance Duration,1,12,0
+Varka,PASSIVE,Burst Stance Extension,1,2.3,0
+Varka,PASSIVE,Four Winds Charge Cooldown,1,11,0
+Varka,PASSIVE,Four Winds Recharge Count,1,2,0
+Varka,PASSIVE,Normal Charge Reduction,1,0.5,0
+Varka,PASSIVE,Normal Charge Reduction Cap,1,15,0
+Varka,PASSIVE,A1 ATK Conversion,1,0.0001,0
+Varka,PASSIVE,A1 Maximum DMG Bonus,1,0.25,0
+Varka,PASSIVE,A4 Stack DMG Bonus,1,0.075,0
+Varka,PASSIVE,A4 Maximum Stacks,1,4,0
+Varka,PASSIVE,A4 Duration,1,8,0
+Varka,PASSIVE,A4 Source Cooldown,1,1,0
+Varka,PASSIVE,C1 First Special Multiplier,1,2,0
+Varka,PASSIVE,C2 Northwind Multiplier,2,8,0
+Varka,PASSIVE,C4 Elemental DMG Bonus,4,0.20,0
+Varka,PASSIVE,C4 Duration,4,10,0
+Varka,PASSIVE,C6 Stack CRIT DMG,6,0.20,0
+Varka,PASSIVE,C6 Free Action Duration,6,3,0
