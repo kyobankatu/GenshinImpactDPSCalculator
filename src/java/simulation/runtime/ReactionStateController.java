@@ -28,6 +28,16 @@ public class ReactionStateController {
     }
 
     /**
+     * Atomically consumes up to the requested number of Verdant Dew stacks.
+     *
+     * @param requested non-negative maximum stack count to consume
+     * @return actual consumed stack count
+     */
+    public int consumeVerdantDewCount(int requested) {
+        return reactionState.consumeVerdantDewCount(requested);
+    }
+
+    /**
      * Attempts to accept Overload reaction damage at the current simulator time.
      *
      * @param ownerId character that owns the Overload reaction

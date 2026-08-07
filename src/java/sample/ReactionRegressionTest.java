@@ -2981,6 +2981,25 @@ public class ReactionRegressionTest {
         assertEquals(1, sim.getVerdantDewCount(), "Lunar-Bloom should increment Verdant Dew state");
         assertEquals(1, sim.getMoonridgeDewCount(), "Lunar-Bloom should increment Moonridge Dew state");
         SimulatorSnapshot snapshot = sim.saveSnapshot();
+        assertEquals(1, sim.consumeVerdantDewCount(3),
+                "Verdant Dew consumption should clamp to available stacks");
+        assertEquals(0, sim.getVerdantDewCount(),
+                "Verdant Dew consumption should update runtime state");
+        assertEquals(1, sim.getMoonridgeDewCount(),
+                "Verdant Dew consumption should not affect Moonridge Dew");
+        assertEquals(0, sim.consumeVerdantDewCount(0),
+                "zero Verdant Dew consumption should be a no-op");
+        boolean rejectedNegative = false;
+        try {
+            sim.consumeVerdantDewCount(-1);
+        } catch (IllegalArgumentException expected) {
+            rejectedNegative = true;
+        }
+        assertTrue(rejectedNegative,
+                "negative Verdant Dew consumption should fail closed");
+        sim.restoreSnapshot(snapshot);
+        assertEquals(1, sim.getVerdantDewCount(),
+                "Verdant Dew consumption should be snapshot-safe");
         sim.performActionWithoutTimeAdvance(CharacterId.SUCROSE,
                 reactionHit("Second Dew Lunar-Bloom", Element.HYDRO));
         sim.restoreSnapshot(snapshot);

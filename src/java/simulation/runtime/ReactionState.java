@@ -937,6 +937,22 @@ public class ReactionState {
         return verdantDewCount;
     }
 
+    /**
+     * Atomically consumes up to the requested number of Verdant Dew stacks.
+     *
+     * @param requested non-negative maximum stack count to consume
+     * @return actual consumed stack count
+     */
+    public int consumeVerdantDewCount(int requested) {
+        if (requested < 0) {
+            throw new IllegalArgumentException(
+                    "Verdant Dew consumption must be non-negative");
+        }
+        int consumed = Math.min(requested, verdantDewCount);
+        verdantDewCount -= consumed;
+        return consumed;
+    }
+
     public int getMoonridgeDewCount() {
         return moonridgeDewCount;
     }

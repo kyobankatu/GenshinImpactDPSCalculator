@@ -1411,6 +1411,16 @@ public class CombatSimulator {
         return reactionState.incrementVerdantDewCount();
     }
 
+    /**
+     * Atomically consumes up to the requested number of Verdant Dew stacks.
+     *
+     * @param requested non-negative maximum stack count to consume
+     * @return actual consumed stack count
+     */
+    public int consumeVerdantDewCount(int requested) {
+        return reactionStateController.consumeVerdantDewCount(requested);
+    }
+
     public int getMoonridgeDewCount() {
         return reactionState.getMoonridgeDewCount();
     }
