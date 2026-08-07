@@ -1,0 +1,75 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Mavuika,NORMAL,N1,9,1.470411,0
+Mavuika,NORMAL,N2 Hit,9,0.670212,0
+Mavuika,NORMAL,N3 Hit,9,0.610380,0
+Mavuika,NORMAL,N4,9,2.134706,0
+Mavuika,CHARGED,Charged Attack,9,3.561320,0
+Mavuika,PLUNGE,High Plunge,9,3.422517,0
+Mavuika,SKILL,The Named Moment,9,1.264800,0
+Mavuika,SKILL,The Named Moment C5,12,1.488000,0
+Mavuika,SKILL,Ring of Searing Radiance,9,2.176000,0
+Mavuika,SKILL,Ring of Searing Radiance C5,12,2.560000,0
+Mavuika,NORMAL,Flamestrider N1,9,1.052075,0
+Mavuika,NORMAL,Flamestrider N2,9,1.086392,0
+Mavuika,NORMAL,Flamestrider N3,9,1.285804,0
+Mavuika,NORMAL,Flamestrider N4,9,1.280622,0
+Mavuika,NORMAL,Flamestrider N5,9,1.671924,0
+Mavuika,NORMAL,Flamestrider N1 C5,12,1.291788,0
+Mavuika,NORMAL,Flamestrider N2 C5,12,1.333925,0
+Mavuika,NORMAL,Flamestrider N3 C5,12,1.578772,0
+Mavuika,NORMAL,Flamestrider N4 C5,12,1.572409,0
+Mavuika,NORMAL,Flamestrider N5 C5,12,2.052869,0
+Mavuika,CHARGED,Flamestrider Charged Cyclic,9,1.817000,0
+Mavuika,CHARGED,Flamestrider Charged Cyclic C5,12,2.231000,0
+Mavuika,CHARGED,Flamestrider Charged Final,9,2.528000,0
+Mavuika,CHARGED,Flamestrider Charged Final C5,12,3.104000,0
+Mavuika,PLUNGE,Flamestrider High Plunge,9,2.938800,0
+Mavuika,PLUNGE,Flamestrider High Plunge C5,12,3.608400,0
+Mavuika,BURST,Sunfell Slice,9,7.561600,0
+Mavuika,BURST,Sunfell Slice C3,12,8.896000,0
+Mavuika,BURST,Sunfell Slice Spirit Ratio,9,0.027200,0
+Mavuika,BURST,Sunfell Slice Spirit Ratio C3,12,0.032000,0
+Mavuika,BURST,Flamestrider Normal Spirit Ratio,9,0.004740,0
+Mavuika,BURST,Flamestrider Normal Spirit Ratio C3,12,0.005820,0
+Mavuika,BURST,Flamestrider Charged Spirit Ratio,9,0.009480,0
+Mavuika,BURST,Flamestrider Charged Spirit Ratio C3,12,0.011640,0
+Mavuika,PASSIVE,Particle Count,1,5,0
+Mavuika,PASSIVE,Particle Travel Frames,1,100,0
+Mavuika,PASSIVE,Skill Hit Frames,1,16,0
+Mavuika,PASSIVE,Skill Cooldown Start Frames,1,18,0
+Mavuika,PASSIVE,Maximum Nightsoul Points,1,80,0
+Mavuika,PASSIVE,C1 Maximum Nightsoul Points,1,120,0
+Mavuika,PASSIVE,Nightsoul Drain Interval,1,0.1,0
+Mavuika,PASSIVE,Ring Drain Per Tick,1,0.5,0
+Mavuika,PASSIVE,Flamestrider Drain Per Tick,1,0.9,0
+Mavuika,PASSIVE,Flamestrider Charged Extra Drain,1,0.2,0
+Mavuika,PASSIVE,Ring Attack Interval,1,2,0
+Mavuika,PASSIVE,Ring Attack Consumption,1,3,0
+Mavuika,PASSIVE,Flamestrider Normal Consumption,1,1,0
+Mavuika,PASSIVE,Skill Recast Lock,1,1,0
+Mavuika,PASSIVE,Maximum Fighting Spirit,1,200,0
+Mavuika,PASSIVE,Burst Fighting Spirit Threshold,1,100,0
+Mavuika,PASSIVE,Normal Hit Fighting Spirit,1,1.5,0
+Mavuika,PASSIVE,Normal Hit Spirit Cooldown,1,0.1,0
+Mavuika,PASSIVE,C1 Fighting Spirit Multiplier,1,1.25,0
+Mavuika,PASSIVE,Burst Nightsoul Entry Frames,1,87,0
+Mavuika,PASSIVE,Crucible Start Frames,1,105,0
+Mavuika,PASSIVE,Sunfell Slice Hit Frames,1,106,0
+Mavuika,PASSIVE,Crucible Duration,1,7,0
+Mavuika,PASSIVE,A1 ATK,1,0.30,0
+Mavuika,PASSIVE,A1 Duration,1,10,0
+Mavuika,PASSIVE,A4 Spirit DMG Ratio,1,0.002,0
+Mavuika,PASSIVE,A4 Duration,1,20,0
+Mavuika,PASSIVE,A4 Decay Interval,1,1,0
+Mavuika,PASSIVE,C1 ATK,1,0.40,0
+Mavuika,PASSIVE,C1 Duration,1,10,0
+Mavuika,PASSIVE,C2 Base ATK,2,200,0
+Mavuika,PASSIVE,C2 Ring DEF Reduction,2,0.20,0
+Mavuika,PASSIVE,C2 Flamestrider Normal ATK Ratio,2,0.60,0
+Mavuika,PASSIVE,C2 Flamestrider Charged ATK Ratio,2,0.90,0
+Mavuika,PASSIVE,C2 Sunfell ATK Ratio,2,1.20,0
+Mavuika,PASSIVE,C4 A4 DMG Bonus,4,0.10,0
+Mavuika,PASSIVE,C6 Ring Follow-Up,6,2.0,0
+Mavuika,PASSIVE,C6 Ring Follow-Up ICD,6,0.5,0
+Mavuika,PASSIVE,C6 Flamestrider Ring,6,4.0,0
+Mavuika,PASSIVE,C6 Flamestrider Ring Interval,6,3.0,0
