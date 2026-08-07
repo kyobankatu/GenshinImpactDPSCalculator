@@ -149,5 +149,7 @@ public enum ICDTag {
     /** Varka's converted Charged hits share this elemental group. */
     Varka_ExtraElement,
     /** Varka's Anemo Charged hits share this wind group. */
-    Varka_ExtraWind
+    Varka_ExtraWind,
+    /** Mavuika's Flamestrider attacks share a private application group. */
+    Mavuika_Flamestrider
 }

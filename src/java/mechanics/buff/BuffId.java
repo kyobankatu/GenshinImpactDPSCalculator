@@ -439,6 +439,12 @@ public enum BuffId {
     VARKA_C4_ELECTRO_DMG,
     /** Varka C4 team Cryo damage bonus. */
     VARKA_C4_CRYO_DMG,
+    /** Lauma's source-backed Pale Hymn reaction support. */
+    LAUMA_PALE_HYMN,
+    /** Lauma's persistent Lunar-Bloom support contract. */
+    LAUMA_LUNAR_SUPPORT,
+    /** Mavuika's decaying Burst damage bonus window. */
+    MAVUIKA_A4_KINDLED_INSPIRATION,
     /** 元素共鳴「迅速の風」(風風): 移動速度+, スタミナ消費 -15%, クールタイム短縮。 */
     IMPETUOUS_WINDS
 }

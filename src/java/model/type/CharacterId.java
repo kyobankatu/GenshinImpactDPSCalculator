@@ -215,6 +215,10 @@ public enum CharacterId {
     SKIRK(100, "Skirk", CharacterRegion.UNKNOWN),
     /** Durin (Pyro sword dual-form attacker and support). */
     DURIN(102, "Durin", CharacterRegion.MONDSTADT),
+    /** Lauma (Dendro catalyst Lunar-Bloom support). */
+    LAUMA(103, "Lauma", CharacterRegion.NOD_KRAI),
+    /** Mavuika (Pyro claymore Nightsoul and Fighting Spirit attacker). */
+    MAVUIKA(104, "Mavuika", CharacterRegion.NATLAN),
     /** Varka (Anemo claymore Sturm und Drang attacker). */
     VARKA(105, "Varka", CharacterRegion.MONDSTADT),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
