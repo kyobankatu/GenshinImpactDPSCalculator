@@ -68,6 +68,8 @@ public enum ICDType {
     DurinWhiteBurst,
     /** Durin's black Burst ticks: two-second time gate only. */
     DurinBlackBurst,
+    /** Chasca shell groups apply on alternating hits or after 1.5 seconds. */
+    ChascaAlternating,
     /** Reserved for custom ICD rules not yet implemented. */
     Special // Custom rules (not implemented yet)
 }

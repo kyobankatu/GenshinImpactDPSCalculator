@@ -1,0 +1,75 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Chasca,NORMAL,N1,9,0.882003,0
+Chasca,NORMAL,N2,9,0.819183,0
+Chasca,NORMAL,N3 Hit,9,0.545606,0
+Chasca,NORMAL,N4,9,0.467885,0
+Chasca,CHARGED,Fully-Charged Aimed Shot,9,2.108,0
+Chasca,PLUNGE,High Plunge,9,2.607632,0
+Chasca,SKILL,Resonance,9,1.02,0
+Chasca,SKILL,Multitarget Fire,9,0.612,0
+Chasca,SKILL,Shadowhunt Shell,9,0.8296,0
+Chasca,SKILL,Shining Shadowhunt Shell,9,2.831724,0
+Chasca,SKILL,Resonance C3,12,1.2,0
+Chasca,SKILL,Multitarget Fire C3,12,0.72,0
+Chasca,SKILL,Shadowhunt Shell C3,12,0.976,0
+Chasca,SKILL,Shining Shadowhunt Shell C3,12,3.33144,0
+Chasca,BURST,Galesplitting Soulseeker Shell,9,1.496,0
+Chasca,BURST,Soulseeker Shell,9,1.7578,0
+Chasca,BURST,Radiant Soulseeker Shell,9,3.5156,0
+Chasca,BURST,Galesplitting Soulseeker Shell C5,12,1.76,0
+Chasca,BURST,Soulseeker Shell C5,12,2.068,0
+Chasca,BURST,Radiant Soulseeker Shell C5,12,4.136,0
+Chasca,PASSIVE,N1 Hit Frames,1,15,0
+Chasca,PASSIVE,N2 Hit Frames,1,8,0
+Chasca,PASSIVE,N3 Hit 1 Frames,1,14,0
+Chasca,PASSIVE,N3 Hit 2 Frames,1,20,0
+Chasca,PASSIVE,N4 Hit Frames,1,39,0
+Chasca,PASSIVE,N1 Duration Frames,1,32,0
+Chasca,PASSIVE,N2 Duration Frames,1,29,0
+Chasca,PASSIVE,N3 Duration Frames,1,53,0
+Chasca,PASSIVE,N4 Duration Frames,1,62,0
+Chasca,PASSIVE,Charged Hit Frames,1,86,0
+Chasca,PASSIVE,Charged Duration Frames,1,96,0
+Chasca,PASSIVE,High Plunge Hit Frames,1,45,0
+Chasca,PASSIVE,High Plunge Duration Frames,1,68,0
+Chasca,PASSIVE,Skill Hit Frames,1,3,0
+Chasca,PASSIVE,Skill Duration Frames,1,27,0
+Chasca,PASSIVE,Skill Cancel Duration Frames,1,40,0
+Chasca,PASSIVE,Nightsoul Maximum Points,1,80,0
+Chasca,PASSIVE,Nightsoul Drain Interval Frames,1,6,0
+Chasca,PASSIVE,Nightsoul Drain Per Tick,1,0.8,0
+Chasca,PASSIVE,Nightsoul Normal Hit Frames,1,11,0
+Chasca,PASSIVE,Nightsoul Normal Duration Frames,1,39,0
+Chasca,PASSIVE,Volley Load 1 Frames,1,21,0
+Chasca,PASSIVE,Volley Load 2 Frames,1,38,0
+Chasca,PASSIVE,Volley Load 3 Frames,1,56,0
+Chasca,PASSIVE,Volley Load 4 Frames,1,70,0
+Chasca,PASSIVE,Volley Load 5 Frames,1,91,0
+Chasca,PASSIVE,Volley Load 6 Frames,1,108,0
+Chasca,PASSIVE,Volley Windup Frames,1,11,0
+Chasca,PASSIVE,Volley Hit 1 Frames,1,4,0
+Chasca,PASSIVE,Volley Hit 2 Frames,1,7,0
+Chasca,PASSIVE,Volley Hit 3 Frames,1,10,0
+Chasca,PASSIVE,Volley Hit 4 Frames,1,13,0
+Chasca,PASSIVE,Volley Hit 5 Frames,1,16,0
+Chasca,PASSIVE,Volley Hit 6 Frames,1,19,0
+Chasca,PASSIVE,Volley Recovery Frames,1,19,0
+Chasca,PASSIVE,Particle Count,1,5,0
+Chasca,PASSIVE,Particle Travel Frames,1,100,0
+Chasca,PASSIVE,A1 Shining Bonus 1,1,0.15,0
+Chasca,PASSIVE,A1 Shining Bonus 2,1,0.35,0
+Chasca,PASSIVE,A1 Shining Bonus 3,1,0.65,0
+Chasca,PASSIVE,C2 Additional Multiplier,2,4,0
+Chasca,PASSIVE,C4 Energy Per Radiant Shell,4,1.5,0
+Chasca,PASSIVE,C4 Additional Multiplier,4,4,0
+Chasca,PASSIVE,C6 CRIT DMG,6,1.2,0
+Chasca,PASSIVE,C6 Window,6,3,0
+Chasca,PASSIVE,Burst Energy Frames,1,3,0
+Chasca,PASSIVE,Burst Initial Hit Frames,1,96,0
+Chasca,PASSIVE,Burst Shell 1 Frames,1,103,0
+Chasca,PASSIVE,Burst Shell 2 Frames,1,139,0
+Chasca,PASSIVE,Burst Shell 3 Frames,1,147,0
+Chasca,PASSIVE,Burst Shell 4 Frames,1,153,0
+Chasca,PASSIVE,Burst Shell 5 Frames,1,157,0
+Chasca,PASSIVE,Burst Shell 6 Frames,1,160,0
+Chasca,PASSIVE,Burst Duration Frames,1,114,0

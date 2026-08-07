@@ -151,5 +151,13 @@ public enum ICDTag {
     /** Varka's Anemo Charged hits share this wind group. */
     Varka_ExtraWind,
     /** Mavuika's Flamestrider attacks share a private application group. */
-    Mavuika_Flamestrider
+    Mavuika_Flamestrider,
+    /** Chasca's Nightsoul Normal fire application group. */
+    Chasca_Tap,
+    /** Chasca's Anemo Shadowhunt Shell application group. */
+    Chasca_Shadowhunt,
+    /** Chasca's converted Shining Shadowhunt Shell application group. */
+    Chasca_Shining,
+    /** Chasca's Soulseeker Shell application group. */
+    Chasca_Burst
 }

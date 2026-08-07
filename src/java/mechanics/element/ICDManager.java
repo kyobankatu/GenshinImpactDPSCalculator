@@ -127,6 +127,8 @@ public class ICDManager {
      *       hit count never bypasses the time gate.</li>
      *   <li>{@link ICDType#DurinBlackBurst} – applies after two seconds;
      *       hit count never bypasses the time gate.</li>
+     *   <li>{@link ICDType#ChascaAlternating} – applies after 1.5 seconds or
+     *       after two hits in its private shell group.</li>
      * </ul>
      *
      * <p>{@code null} values for {@code type} or {@code tag} are silently
@@ -225,6 +227,8 @@ public class ICDManager {
             apply = checkTimeOnlyApplication(state, currentTime, 1.5);
         } else if (type == ICDType.DurinBlackBurst) {
             apply = checkTimeOnlyApplication(state, currentTime, 2.0);
+        } else if (type == ICDType.ChascaAlternating) {
+            apply = checkCustomApplication(state, currentTime, 1.5, 2);
         }
 
         return apply;
