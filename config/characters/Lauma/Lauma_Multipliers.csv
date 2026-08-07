@@ -1,0 +1,71 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Lauma,NORMAL,N1,9,0.572941,0
+Lauma,NORMAL,N2,9,0.540682,0
+Lauma,NORMAL,N3,9,0.756446,0
+Lauma,CHARGED,Spiritcall Prayer,9,2.193680,0
+Lauma,PLUNGE,High Plunge,9,2.607632,0
+Lauma,SKILL,Press DMG,9,2.067200,0
+Lauma,SKILL,Hold DMG,9,2.687360,0
+Lauma,SKILL,Hold Lunar-Bloom Per Dew,9,2.584000,0
+Lauma,SKILL,Frostgrove Sanctuary ATK,9,1.632000,0
+Lauma,SKILL,Frostgrove Sanctuary EM,9,3.264000,0
+Lauma,SKILL,RES Shred,9,0.225000,0
+Lauma,SKILL,Press DMG C5,12,2.432000,0
+Lauma,SKILL,Hold DMG C5,12,3.161600,0
+Lauma,SKILL,Hold Lunar-Bloom Per Dew C5,12,3.040000,0
+Lauma,SKILL,Frostgrove Sanctuary ATK C5,12,1.920000,0
+Lauma,SKILL,Frostgrove Sanctuary EM C5,12,3.840000,0
+Lauma,SKILL,RES Shred C5,12,0.310000,0
+Lauma,BURST,Bloom Family EM Ratio,9,4.721920,0
+Lauma,BURST,Lunar-Bloom EM Ratio,9,3.778080,0
+Lauma,BURST,Bloom Family EM Ratio C3,12,5.555200,0
+Lauma,BURST,Lunar-Bloom EM Ratio C3,12,4.444800,0
+Lauma,PASSIVE,Normal N1 Hit Frames,1,14,0
+Lauma,PASSIVE,Normal N2 Hit Frames,1,11,0
+Lauma,PASSIVE,Normal N3 Hit Frames,1,16,0
+Lauma,PASSIVE,Normal N1 Duration Frames,1,29,0
+Lauma,PASSIVE,Normal N2 Duration Frames,1,33,0
+Lauma,PASSIVE,Normal N3 Duration Frames,1,38,0
+Lauma,PASSIVE,Charged Hit Frames,1,73,0
+Lauma,PASSIVE,Charged Duration Frames,1,68,0
+Lauma,PASSIVE,High Plunge Duration Frames,1,60,0
+Lauma,PASSIVE,Press Hit Frames,1,16,0
+Lauma,PASSIVE,Press Duration Frames,1,36,0
+Lauma,PASSIVE,Hold Consume Dew Frames,1,29,0
+Lauma,PASSIVE,Hold Hit Frames,1,45,0
+Lauma,PASSIVE,Hold Duration Frames,1,56,0
+Lauma,PASSIVE,Skill Cooldown Start Frames,1,13,0
+Lauma,PASSIVE,Sanctuary First Tick Frames,1,62,0
+Lauma,PASSIVE,Sanctuary Interval Frames,1,117,0
+Lauma,PASSIVE,Sanctuary Tick Count,1,8,0
+Lauma,PASSIVE,Sanctuary Duration,1,15,0
+Lauma,PASSIVE,Particle Count Expected,1,1.3,0
+Lauma,PASSIVE,Particle Cooldown,1,3.3,0
+Lauma,PASSIVE,Particle Travel Frames,1,100,0
+Lauma,PASSIVE,Skill Shred Duration,1,10,0
+Lauma,PASSIVE,Burst Energy Spend Frames,1,8,0
+Lauma,PASSIVE,Pale Hymn Gain Frames,1,96,0
+Lauma,PASSIVE,Pale Hymn Initial Stacks,1,18,0
+Lauma,PASSIVE,Pale Hymn Duration,1,15,0
+Lauma,PASSIVE,Burst Duration Frames,1,109,0
+Lauma,PASSIVE,Moonsong Duration,1,15,0
+Lauma,PASSIVE,Moonsong Pale Hymn Per Dew,1,6,0
+Lauma,PASSIVE,A1 Nascent Expected Crit Bonus,1,0.15,0
+Lauma,PASSIVE,A1 Ascendant Crit Rate,1,0.10,0
+Lauma,PASSIVE,A1 Ascendant Crit DMG,1,0.20,0
+Lauma,PASSIVE,A1 Duration,1,20,0
+Lauma,PASSIVE,A4 Skill DMG Per EM,1,0.004,0
+Lauma,PASSIVE,A4 Skill DMG Cap,1,0.32,0
+Lauma,PASSIVE,Lunar-Bloom Base Bonus Per EM,1,0.000175,0
+Lauma,PASSIVE,Lunar-Bloom Base Bonus Cap,1,0.14,0
+Lauma,PASSIVE,C2 Bloom Family EM Ratio,2,5,0
+Lauma,PASSIVE,C2 Lunar-Bloom EM Ratio,2,4,0
+Lauma,PASSIVE,C2 Ascendant Lunar-Bloom Bonus,2,0.40,0
+Lauma,PASSIVE,C4 Flat Energy,4,5,0
+Lauma,PASSIVE,C4 Cooldown,4,5,0
+Lauma,PASSIVE,C6 Frostgrove Delay Frames,6,16,0
+Lauma,PASSIVE,C6 Frostgrove Lunar-Bloom Ratio,6,1.85,0
+Lauma,PASSIVE,C6 Pale Hymn Stacks,6,2,0
+Lauma,PASSIVE,C6 Maximum Frostgrove Hits,6,8,0
+Lauma,PASSIVE,C6 Normal Lunar-Bloom Ratio,6,1.50,0
+Lauma,PASSIVE,C6 Ascendant Elevation,6,0.25,0

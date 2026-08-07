@@ -1,0 +1,14 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Lauma,STATS,Base HP,90,10654,0
+Lauma,STATS,Base ATK,90,255,0
+Lauma,STATS,Base DEF,90,669,0
+Lauma,STATS,Base Elemental Mastery,90,200,0
+Lauma,STATS,Ascension Elemental Mastery,90,115.2,0
+Lauma,STATS,Energy Cost,90,60,0
+Lauma,STATS,Constellation,6,6,0
+Lauma,CONFIG,Character Level,90,90,0
+Lauma,CONFIG,Normal Level,9,9,0
+Lauma,CONFIG,Skill Level,12,12,0
+Lauma,CONFIG,Burst Level,12,12,0
+Lauma,CONFIG,Skill Cooldown,1,12,0
+Lauma,CONFIG,Burst Cooldown,1,15,0
