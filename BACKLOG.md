@@ -4354,3 +4354,10 @@ experiment record.
   are integrated and pushed through `d4a6ffe`; Kirara, Dehya, and Tartaglia
   continue as isolated sidecars while Baizhu is primary. Weapon replenishment
   remains converged except blocked B-187.
+- **Checkpoint 2026-08-07 16:56 JST:** Chasca, Durin, Mavuika, and Varka are
+  complete and pushed through `8d7429b`; Lauma remains active in an isolated
+  lane on top of the atomic Verdant Dew consumption contract in `5c9d15d`.
+  Focused character checks, legacy identity, reaction, build, Javadoc, and
+  executable preflight pass together. The weapon inventory remains converged
+  except blocked B-187, and unavailable defensive, geometry, random-target,
+  and multi-target state remains explicit.

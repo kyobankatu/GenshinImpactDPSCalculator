@@ -23666,11 +23666,11 @@ Campaign inventory:
 | Varesa | character | fixed-target basics, Nightsoul Plunging attacks, Fiery Passion state, Skill/Burst, particles, representable passives/constellations | `VaresaRegressionTest` | complete (`1985002`) |
 | Clorinde | character | fixed-target basics, Night Vigil state, local Bond of Life, Swift Hunt/Impale the Night, Burst, representable passives/constellations | `ClorindeRegressionTest` | complete (`89e435e`) |
 | Skirk | character | fixed-target basics, Seven-Phase Flash state, Serpent's Subtlety resource, Skill/Burst, representable passives/constellations | `SkirkRegressionTest` | complete (`f05a3e9`) |
-| Chasca | character | fixed-target basics, Nightsoul Multitarget Fire, converted Shadowhunt Shells, Burst, representable passives/constellations | `ChascaRegressionTest` | primary (ID 101) |
-| Durin | character | fixed-target basics, dual-form Skill/Burst attacks, particles, representable passives/constellations | `DurinRegressionTest` | delegated (ID 102) |
-| Lauma | character | fixed-target basics, Verdant Dew, Lunar-Bloom support, Skill/Burst, representable passives/constellations | `LaumaRegressionTest` | pending (ID 103) |
-| Mavuika | character | fixed-target basics, Nightsoul Flamestrider attacks, Fighting Spirit Burst, representable passives/constellations | `MavuikaRegressionTest` | pending (ID 104) |
-| Varka | character | fixed-target basics, Favonian Banner stance attacks, Skill/Burst, representable passives/constellations | `VarkaRegressionTest` | delegated (ID 105) |
+| Chasca | character | fixed-target basics, Nightsoul Multitarget Fire, converted Shadowhunt Shells, Burst, representable passives/constellations | `ChascaRegressionTest` | complete (`6bd2ab3`, ID 101) |
+| Durin | character | fixed-target basics, dual-form Skill/Burst attacks, particles, representable passives/constellations | `DurinRegressionTest` | complete (`aff3b07`, ID 102) |
+| Lauma | character | fixed-target basics, Verdant Dew, Lunar-Bloom support, Skill/Burst, representable passives/constellations | `LaumaRegressionTest` | delegated (ID 103) |
+| Mavuika | character | fixed-target basics, Nightsoul Flamestrider attacks, Fighting Spirit Burst, representable passives/constellations | `MavuikaRegressionTest` | complete (`8d7429b`, ID 104) |
+| Varka | character | fixed-target basics, Favonian Banner stance attacks, Skill/Burst, representable passives/constellations | `VarkaRegressionTest` | complete (`4e8148f`, ID 105) |
 
 Requirements and tests remain the Phase 1 acceptance and abnormal-path matrix;
 each replenished unit receives a source-backed focused regression and an
@@ -23770,3 +23770,11 @@ Varka start in isolated lanes, while Lauma and Mavuika remain the ordered
 follow-up queue. Traveler and Sword of Descension remain blocked by B-187;
 RL, generated docs, defensive runtime state, geometry, and multi-target
 selection remain outside this pass.
+
+Checkpoint 2026-08-07 16:56 JST: Chasca, Durin, Mavuika, and Varka are
+complete and pushed through `8d7429b`. Shared typed identities are integrated
+in `ad0a676`, and atomic capped Verdant Dew consumption for Lauma is integrated
+in `5c9d15d`. The four completed focused regressions, legacy identity,
+reaction, build, Javadoc, and executable preflight gates pass; Lauma remains
+active in its isolated lane. Traveler and Sword of Descension remain blocked
+by B-187, and no excluded runtime state is approximated.
