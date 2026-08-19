@@ -1,0 +1,43 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Jahoda,NORMAL,N1,9,0.765636,0
+Jahoda,NORMAL,N2 Hit,9,0.353320,0
+Jahoda,NORMAL,N3,9,0.940606,0
+Jahoda,CHARGED,Fully-Charged Aimed Shot,9,2.108000,0
+Jahoda,SKILL,Smoke Bomb,9,2.703000,0
+Jahoda,SKILL,Unfilled Treasure Flask,9,3.243600,0
+Jahoda,SKILL,Unfilled Treasure Flask C5,12,3.816000,0
+Jahoda,SKILL,Filled Treasure Flask,9,3.604000,0
+Jahoda,SKILL,Filled Treasure Flask C5,12,4.240000,0
+Jahoda,SKILL,Meowball,9,2.176000,0
+Jahoda,SKILL,Meowball C5,12,2.560000,0
+Jahoda,BURST,Hidden Aces,9,3.522400,0
+Jahoda,BURST,Hidden Aces C3,12,4.144000,0
+Jahoda,BURST,Robot,9,0.293529,0
+Jahoda,BURST,Robot C3,12,0.345328,0
+Jahoda,PASSIVE,Skill Windup Frames,1,30,0
+Jahoda,PASSIVE,Shadow Pursuit Duration Frames,1,334,0
+Jahoda,PASSIVE,First Flask Fill Frames,1,7,0
+Jahoda,PASSIVE,Flask Fill Interval Frames,1,30,0
+Jahoda,PASSIVE,Flask Fill Strong,1,20,0
+Jahoda,PASSIVE,Flask Fill Weak,1,10,0
+Jahoda,PASSIVE,Flask Gauge Maximum,1,100,0
+Jahoda,PASSIVE,Particle Count,1,4,0
+Jahoda,PASSIVE,Particle Travel Frames,1,100,0
+Jahoda,PASSIVE,Meowball First Frames,1,129,0
+Jahoda,PASSIVE,Meowball Interval Frames,1,116,0
+Jahoda,PASSIVE,Meowball Travel Frames,1,13,0
+Jahoda,PASSIVE,Meowball Flat Energy,1,2,0
+Jahoda,PASSIVE,Meowball Energy Cooldown,1,3.5,0
+Jahoda,PASSIVE,Burst Duration Frames,1,790,0
+Jahoda,PASSIVE,Robot First Absorb Frames,1,6,0
+Jahoda,PASSIVE,Robot Absorb Interval Frames,1,41,0
+Jahoda,PASSIVE,Robot First Hit Frames,1,41,0
+Jahoda,PASSIVE,Robot Attack Interval Frames,1,140,0
+Jahoda,PASSIVE,A1 Pyro Multiplier,1,1.3,0
+Jahoda,PASSIVE,A1 Cryo Interval Multiplier,1,0.9,0
+Jahoda,PASSIVE,C1 Bounce Chance,1,0.5,0
+Jahoda,PASSIVE,C1 Bounce Frames,1,32,0
+Jahoda,PASSIVE,C4 Flat Energy,4,4,0
+Jahoda,PASSIVE,C6 Crit Rate,6,0.05,0
+Jahoda,PASSIVE,C6 Crit Damage,6,0.40,0
+Jahoda,PASSIVE,C6 Duration,6,20,0
