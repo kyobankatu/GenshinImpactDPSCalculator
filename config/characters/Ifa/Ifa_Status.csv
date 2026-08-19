@@ -1,0 +1,13 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Ifa,STATS,Base HP,90,10081,0
+Ifa,STATS,Base ATK,90,178,0
+Ifa,STATS,Base DEF,90,605,0
+Ifa,STATS,Ascension Elemental Mastery,90,96,0
+Ifa,STATS,Energy Cost,90,60,0
+Ifa,STATS,Constellation,6,6,0
+Ifa,CONFIG,Character Level,90,90,0
+Ifa,CONFIG,Normal Level,9,9,0
+Ifa,CONFIG,Skill Level,12,12,0
+Ifa,CONFIG,Burst Level,12,12,0
+Ifa,CONFIG,Skill Cooldown,1,7.5,0
+Ifa,CONFIG,Burst Cooldown,1,15,0

@@ -1,0 +1,35 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Ifa,NORMAL,N1,9,0.911322,0
+Ifa,NORMAL,N2,9,0.806942,0
+Ifa,NORMAL,N3,9,1.270893,0
+Ifa,CHARGED,Charged Attack,9,2.499680,0
+Ifa,PLUNGE,Low Plunge,9,2.087686,0
+Ifa,SKILL,Tonic Shot,9,2.267120,0
+Ifa,SKILL,Tonic Shot C3,12,2.667200,0
+Ifa,BURST,Compound Sedation Field,9,8.644160,0
+Ifa,BURST,Compound Sedation Field C5,12,10.169600,0
+Ifa,BURST,Sedation Mark,9,1.852320,0
+Ifa,BURST,Sedation Mark C5,12,2.179200,0
+Ifa,PASSIVE,Maximum Nightsoul Points,1,80,0
+Ifa,PASSIVE,First Nightsoul Drain Frames,1,4,0
+Ifa,PASSIVE,Nightsoul Drain Interval Frames,1,6,0
+Ifa,PASSIVE,Nightsoul Drain Per Tick,1,0.8,0
+Ifa,PASSIVE,Particle Count,1,4,0
+Ifa,PASSIVE,Particle Bonus Count,1,1,0
+Ifa,PASSIVE,Particle Bonus Chance,1,0.3,0
+Ifa,PASSIVE,Particle Travel Frames,1,100,0
+Ifa,PASSIVE,Tonic ICD Reset,1,12,0
+Ifa,PASSIVE,C1 Flat Energy,1,6,0
+Ifa,PASSIVE,C1 Cooldown,1,8,0
+Ifa,PASSIVE,A1 Reaction Bonus Per Point,1,0.015,0
+Ifa,PASSIVE,A1 Lunar-Charged Bonus Per Point,1,0.002,0
+Ifa,PASSIVE,A1 Point Cap,1,150,0
+Ifa,PASSIVE,A4 Elemental Mastery,1,80,0
+Ifa,PASSIVE,A4 Duration,1,10,0
+Ifa,PASSIVE,C2 Nightsoul Threshold,2,60,0
+Ifa,PASSIVE,C2 Point Multiplier,2,4,0
+Ifa,PASSIVE,C2 Point Cap Increase,2,50,0
+Ifa,PASSIVE,C4 Elemental Mastery,4,100,0
+Ifa,PASSIVE,C4 Duration,4,15,0
+Ifa,PASSIVE,C6 Extra Shot,6,1.2,0
+Ifa,PASSIVE,C6 Extra Shot Chance,6,0.5,0
