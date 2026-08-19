@@ -1,0 +1,13 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Illuga,STATS,Base HP,90,11962,0
+Illuga,STATS,Base ATK,90,191,0
+Illuga,STATS,Base DEF,90,813,0
+Illuga,STATS,Ascension Elemental Mastery,90,96,0
+Illuga,STATS,Energy Cost,90,60,0
+Illuga,STATS,Constellation,6,6,0
+Illuga,CONFIG,Character Level,90,90,0
+Illuga,CONFIG,Normal Level,9,9,0
+Illuga,CONFIG,Skill Level,12,12,0
+Illuga,CONFIG,Burst Level,12,12,0
+Illuga,CONFIG,Skill Cooldown,1,15,0
+Illuga,CONFIG,Burst Cooldown,1,15,0

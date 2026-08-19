@@ -1,0 +1,48 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Illuga,NORMAL,N1,9,0.870217,0
+Illuga,NORMAL,N2,9,0.891515,0
+Illuga,NORMAL,N3 Hit 1,9,0.577490,0
+Illuga,NORMAL,N3 Hit 2,9,0.577490,0
+Illuga,NORMAL,N4,9,1.401397,0
+Illuga,CHARGED,Charged Attack,9,2.039780,0
+Illuga,SKILL,Press EM Ratio,9,8.203520,0
+Illuga,SKILL,Press DEF Ratio,9,4.101760,0
+Illuga,SKILL,Press EM Ratio C5,12,9.651200,0
+Illuga,SKILL,Press DEF Ratio C5,12,4.825600,0
+Illuga,SKILL,Hold EM Ratio,9,10.254400,0
+Illuga,SKILL,Hold DEF Ratio,9,5.127200,0
+Illuga,SKILL,Hold EM Ratio C5,12,12.064000,0
+Illuga,SKILL,Hold DEF Ratio C5,12,6.032000,0
+Illuga,BURST,Burst EM Ratio,9,14.062400,0
+Illuga,BURST,Burst DEF Ratio,9,7.031200,0
+Illuga,BURST,Burst EM Ratio C3,12,16.544000,0
+Illuga,BURST,Burst DEF Ratio C3,12,8.272000,0
+Illuga,BURST,Geo Flat Bonus Ratio,9,0.571200,0
+Illuga,BURST,Geo Flat Bonus Ratio C3,12,0.672000,0
+Illuga,BURST,Lunar Crystallize Flat Bonus Ratio,9,3.840640,0
+Illuga,BURST,Lunar Crystallize Flat Bonus Ratio C3,12,4.518400,0
+Illuga,PASSIVE,Particle Expected Count,1,4.5,0
+Illuga,PASSIVE,Particle Travel Frames,1,100,0
+Illuga,PASSIVE,Particle ICD,1,0.5,0
+Illuga,PASSIVE,A1 CRIT Rate,1,0.05,0
+Illuga,PASSIVE,A1 CRIT DMG,1,0.10,0
+Illuga,PASSIVE,A1 Ascendant Elemental Mastery,1,50,0
+Illuga,PASSIVE,A1 Duration,1,20,0
+Illuga,PASSIVE,A4 One Geo Hydro Ratio,1,0.07,0
+Illuga,PASSIVE,A4 Two Geo Hydro Ratio,1,0.14,0
+Illuga,PASSIVE,A4 Three Geo Hydro Ratio,1,0.24,0
+Illuga,PASSIVE,A4 One Lunar Ratio,1,0.48,0
+Illuga,PASSIVE,A4 Two Lunar Ratio,1,0.96,0
+Illuga,PASSIVE,A4 Three Lunar Ratio,1,1.60,0
+Illuga,PASSIVE,Burst Initial Stacks,1,21,0
+Illuga,PASSIVE,Burst Duration,1,20,0
+Illuga,PASSIVE,C1 Flat Energy,1,12,0
+Illuga,PASSIVE,C1 Cooldown,1,15,0
+Illuga,PASSIVE,C2 Stack Threshold,2,7,0
+Illuga,PASSIVE,C2 EM Ratio,2,4,0
+Illuga,PASSIVE,C2 DEF Ratio,2,2,0
+Illuga,PASSIVE,C2 Delay Frames,2,50,0
+Illuga,PASSIVE,C4 Active DEF,4,200,0
+Illuga,PASSIVE,C6 CRIT Rate,6,0.10,0
+Illuga,PASSIVE,C6 CRIT DMG,6,0.30,0
+Illuga,PASSIVE,C6 Ascendant Elemental Mastery,6,80,0
