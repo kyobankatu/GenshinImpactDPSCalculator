@@ -4375,7 +4375,7 @@ experiment record.
 - **Source:** explicit 2026-08-19 request to update the stale inventory and
   complete the remaining character/equipment work.
 - **Units:** Prune, Iansan, Ifa, Kachina, Nefer, Jahoda, Zibai, Illuga, Lohen,
-  Linnea, A Teaspoon of Transcendence, and Disaster and Remorse.
+  Linnea, Sandrone, A Teaspoon of Transcendence, and Disaster and Remorse.
 - **Scope/risk:** stable typed identities, independently tested fixed-target
   character slices, and exact stateful weapon passives; medium/high.
 - **Evidence:** Genshin Optimizer
@@ -4389,3 +4389,13 @@ experiment record.
 - **Proof/plan:** compact three-phase B-208 campaign in `TASKS.md`; each unit
   receives a focused regression, shared reaction/build/Javadoc/preflight gate,
   independent commit, and final normalized catalog reconciliation.
+- **Checkpoint 2026-08-19:** identities 106-115 (`495a97f`), both current
+  weapons (`bf82059`), and Prune (`4c45c74`) are verified and pushed. Kachina
+  is blocked because gcsim PR #2697 still has disputed Normal, mount/dismount,
+  Nightsoul-consumption, and Burst-Energy timing. A normalized Optimizer sweep
+  added playable Sandrone to the queue; its source audit remains pending.
+  `Somnia` and `QuantumCatalyst` are explicitly hidden test entries in
+  Optimizer UI/database code and are rejected as playable/obtainable content.
+  Iansan is blocked because Draft gcsim PR #2374 leaves frame/ICD checks and
+  timing TODOs open, while its primary Burst buff requires the excluded
+  per-character movement-distance runtime; its A4 healing is also deferred.

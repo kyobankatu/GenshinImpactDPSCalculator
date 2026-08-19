@@ -70,6 +70,7 @@ public final class LegacyCharacterIdentityRegressionTest {
         assertIdentity(CharacterId.ILLUGA, 113, "Illuga");
         assertIdentity(CharacterId.LOHEN, 114, "Lohen");
         assertIdentity(CharacterId.LINNEA, 115, "Linnea");
+        assertIdentity(CharacterId.SANDRONE, 116, "Sandrone");
         assertEquals(CharacterId.BENNETT, CharacterId.fromNumericId(1),
                 "first prior numeric ID");
         assertEquals(CharacterId.YANFEI, CharacterId.fromNumericId(20),
@@ -254,6 +255,9 @@ public final class LegacyCharacterIdentityRegressionTest {
                 "Lohen Mondstadt region lookup");
         assertEquals(CharacterRegion.NOD_KRAI, CharacterId.LINNEA.getRegion(),
                 "Linnea Nod-Krai region lookup");
+        assertEquals(CharacterRegion.SNEZHNAYA,
+                CharacterId.SANDRONE.getRegion(),
+                "Sandrone Snezhnaya region lookup");
         assertEquals(CharacterRegion.UNKNOWN,
                 CharacterId.COLUMBINA.getRegion(),
                 "unverified custom region fails closed");

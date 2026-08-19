@@ -23796,14 +23796,15 @@ character or weapon unit remains, so the campaign is complete.
 
 ## Implementation Order: Current-Version Content Catch-Up Campaign B-208
 
-Status: In progress. The stale B-207 inventory has been replaced with a
-fixed-revision 2026-08-19 catalog; the shared identity prerequisite and Prune
-are first, followed by independent character and weapon units.
+Status: In progress. Phase 1 is integrated on `dev_0`; the remaining
+source-backed characters are being implemented independently while disputed
+timing sources are retained as blockers instead of accepted as estimates.
 
 Scope:
 
 - Add stable typed identities for Prune, Iansan, Ifa, Kachina, Nefer, Jahoda,
-  Zibai, Illuga, Lohen, and Linnea without renumbering existing values.
+  Zibai, Illuga, Lohen, Linnea, and Sandrone without renumbering existing
+  values.
 - Add source-backed, fixed-target character slices with exact static data and
   explicit unsupported-system boundaries.
 - Add A Teaspoon of Transcendence and Disaster and Remorse with exact Lv. 90
@@ -23818,7 +23819,7 @@ Out of scope for this pass:
 - Stellar-Conduct simulation until its reaction and field contract is planned
   as a dedicated shared-mechanics campaign; related bonuses remain explicit.
 
-### Phase 1: Shared Identities, Prune, And Current Weapons
+### Phase 1: Shared Identities, Prune, And Current Weapons - Done
 
 Why first:
 
@@ -23829,10 +23830,10 @@ Campaign inventory:
 
 | Unit | Type | Represented scope | Focused check | Status |
 |---|---|---|---|---|
-| Typed identities 106-115 | prerequisite | stable IDs and legacy lookup | `LegacyCharacterIdentityRegressionTest` | in progress |
-| Prune | character | fixed-target catalyst attacks, converted Skill, Burst bell cadence, particles, Tolling Rally, representable constellations | `PruneRegressionTest` | queued |
-| A Teaspoon of Transcendence | weapon | metadata, permanent ATK, Charged-hit Stellar-Conduct stacks and rollback | `CurrentVersionWeaponRegressionTest` | queued |
-| Disaster and Remorse | weapon | metadata, Skill-use windows, cross-category hit extensions, field exit and rollback | `CurrentVersionWeaponRegressionTest` | queued |
+| Typed identities 106-115 | prerequisite | stable IDs and legacy lookup | `LegacyCharacterIdentityRegressionTest` | done (`495a97f`) |
+| Prune | character | fixed-target catalyst attacks, converted Skill, Burst bell cadence, particles, Tolling Rally, representable constellations | `PruneRegressionTest` | done (`4c45c74`) |
+| A Teaspoon of Transcendence | weapon | metadata, permanent ATK, Charged-hit Stellar-Conduct stacks and rollback | `CurrentVersionWeaponRegressionTest` | done (`bf82059`) |
+| Disaster and Remorse | weapon | metadata, Skill-use windows, cross-category hit extensions, field exit and rollback | `CurrentVersionWeaponRegressionTest` | done (`bf82059`) |
 
 Target files:
 
@@ -23874,6 +23875,10 @@ Verification:
 - `./gradlew LegacyCharacterIdentityRegressionTest PruneRegressionTest CurrentVersionWeaponRegressionTest ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
 
+Phase result: the focused identity, Prune, and weapon regressions plus
+`ReactionRegressionTest`, build, Javadoc, and executable preflight passed on
+`dev_0`; commits through `4c45c74` were pushed to `origin/dev_0`.
+
 ### Phase 2: Remaining Playable Character Units
 
 Why second:
@@ -23885,15 +23890,16 @@ Campaign inventory:
 
 | Unit | Element / weapon | Focused check | Status |
 |---|---|---|---|
-| Kachina | Geo / polearm | `KachinaRegressionTest` | queued |
-| Iansan | Electro / polearm | `IansanRegressionTest` | queued |
-| Ifa | Anemo / catalyst | `IfaRegressionTest` | queued |
+| Kachina | Geo / polearm | `KachinaRegressionTest` | blocked: PR #2697 timing review unresolved |
+| Iansan | Electro / polearm | `IansanRegressionTest` | blocked: Draft PR #2374 lacks completed frame/ICD review and requires movement state |
+| Ifa | Anemo / catalyst | `IfaRegressionTest` | in progress |
 | Nefer | Dendro / catalyst | `NeferRegressionTest` | queued |
 | Jahoda | Anemo / bow | `JahodaRegressionTest` | queued |
 | Zibai | Geo / sword | `ZibaiRegressionTest` | queued |
 | Illuga | Geo / polearm | `IllugaRegressionTest` | queued |
 | Lohen | Cryo / polearm | `LohenRegressionTest` | queued |
 | Linnea | Geo / bow | `LinneaRegressionTest` | queued |
+| Sandrone | Cryo / claymore | `SandroneRegressionTest` | queued; source audit required |
 
 Target files:
 
@@ -23901,6 +23907,9 @@ Target files:
 - one new `config/characters/<Character>/<Character>_Multipliers.csv` per unit
 - one new `src/java/model/character/<Character>.java` per unit
 - one new `src/java/sample/<Character>RegressionTest.java` per unit
+- `src/java/model/type/CharacterId.java` and
+  `src/java/sample/LegacyCharacterIdentityRegressionTest.java` for Sandrone's
+  newly discovered typed identity
 
 Tasks:
 
@@ -23953,6 +23962,8 @@ Tasks:
 - Re-evaluate Traveler/Sword of Descension against typed identity contracts.
 - Record aliases, non-playable variants, unavailable mechanics, and rejected
   candidates in `BACKLOG.md` rather than manufacturing no-op content.
+- Treat Optimizer's explicitly hidden `Somnia` and `QuantumCatalyst` test
+  entries as non-playable/non-obtainable catalog exclusions.
 
 Acceptance criteria:
 
