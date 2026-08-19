@@ -30,6 +30,11 @@ future explicit user request.
 The prior simulator content campaigns, including Skill-focused event weapons,
 are complete; RL and generated docs remain excluded.
 
+B-209 is active. Version 7.0 adds two playable characters, Cryo Traveler,
+twelve weapons, two artifact sets, and the shared Stellar Swirl contract from
+Genshin Optimizer `d791814a`; implementation is ordered by shared reaction
+prerequisites, equipment batches, then fixed-target character slices.
+
 B-208 is complete. The current-version catch-up replaced B-207's stale pinned
 catalog conclusion with the playable-character and weapon data present in
 Genshin Optimizer `61c5556a`. Four source-ready characters and three weapons
@@ -24001,3 +24006,273 @@ Final verification passed:
 
 - `./gradlew PruneRegressionTest IfaRegressionTest IllugaRegressionTest JahodaRegressionTest CurrentVersionWeaponRegressionTest SwordOfDescensionRegressionTest LegacyCharacterIdentityRegressionTest ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
+
+## Implementation Order: Version 7.0 Snezhnaya Content Campaign B-209
+
+Status: In progress. The source catalog is pinned; shared reaction support is
+the critical path and all equipment/character units are pending.
+
+Scope:
+
+- Add stable typed identities for Alyosha and Odette and reuse the canonical
+  Traveler identity for the Cryo variant.
+- Add typed Stellar-Conduct and Stellar Swirl reaction results, bonuses,
+  conversion eligibility, damage attribution, and snapshot-safe runtime state.
+- Add all twelve Version 7.0 weapons and both artifact sets with exact metadata,
+  refinement/set scaling, trigger windows, ownership, and rollback.
+- Add source-backed fixed-target Alyosha, Odette, and Cryo Traveler slices with
+  aligned status/talent data and explicit unsupported-system boundaries.
+
+Out of scope for this pass:
+
+- RL, generated `docs/`, exploration, movement, hitlag, player current HP,
+  healing realization, shields, and multi-target geometry.
+- Timing, gauge, ICD, particles, or targeting behavior that cannot be proven
+  from game data, reviewed implementation, or reproducible evidence.
+
+Definitions:
+
+- `StellarReactionProvider`: a narrow party capability that enables typed
+  Superconduct/Cryo-Swirl conversion and supplies source-attributed base bonus.
+- `STELLAR_CONDUCT` / `STELLAR_SWIRL`: typed reaction kinds used by runtime,
+  equipment, characters, logging, and regression checks.
+
+### Phase 1: Typed Identities And Stellar Reaction Contract
+
+Why first:
+
+- Both artifact sets, several weapons, and all three character units depend on
+  reaction identity and stat routing that the simulator does not yet expose.
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/model/type/StatType.java`
+- `src/java/model/entity/StellarReactionProvider.java` (new)
+- `src/java/mechanics/reaction/ReactionResult.java`
+- `src/java/simulation/runtime/CombatActionResolver.java`
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Tasks:
+
+- Reserve sequential identities without renumbering any existing value.
+- Convert eligible Superconduct and Cryo Swirl results into typed Stellar
+  results before listener dispatch and damage resolution.
+- Route base, additive, multiplier, CRIT, and damage-bonus stats independently
+  for Stellar-Conduct and Stellar Swirl.
+- Preserve standard aura consumption and physical RES behavior only where the
+  converted reaction contract requires it.
+
+Acceptance criteria:
+
+- Existing identity numeric values and non-Stellar reaction results are stable.
+- Typed conversion has deterministic trigger/no-trigger behavior, source
+  ownership, elemental variant, CRIT, resistance, logging, and snapshot parity.
+- Equipment can observe Stellar kinds without parsing display labels.
+
+Test cases to add or update:
+
+- Normal: Electro/Cryo conversion and Anemo-on-Cryo conversion with exact typed
+  kinds, damage elements, and bonus channels.
+- Boundary: absent provider, non-Cryo Swirl, duplicate providers, zero base
+  bonus, resistance, and exact conversion lifetime.
+- Abnormal: null/foreign provider state and snapshot restore do not leak
+  conversion or bonus state.
+
+Verification:
+
+- `./gradlew LegacyCharacterIdentityRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 2: Version 7.0 Artifact Sets
+
+Why second:
+
+- Both sets are compact consumers of Phase 1 and exercise team ownership,
+  trigger windows, and reaction-specific stat routing before characters do.
+
+Campaign inventory:
+
+| Unit | Shared prerequisite | Focused check | Status |
+|---|---|---|---|
+| Scarlet Proof | Stellar Swirl kind/stat | `VersionSevenArtifactRegressionTest` | pending |
+| Heart of the Furnace | both Stellar kinds/team non-stack | `VersionSevenArtifactRegressionTest` | pending |
+
+Target files:
+
+- `src/java/model/artifact/ScarletProof.java` (new)
+- `src/java/model/artifact/HeartOfTheFurnace.java` (new)
+- `src/java/mechanics/buff/BuffId.java`
+- `src/java/sample/VersionSevenArtifactRegressionTest.java` (new)
+
+Tasks:
+
+- Implement both 2-piece ATK bonuses and exact 4-piece trigger durations.
+- Enforce owner, team non-stacking, refresh, expiry, and snapshot boundaries.
+
+Acceptance criteria:
+
+- Each set activates only from its typed Stellar trigger and contributes the
+  exact self/team stats represented by the pinned source.
+- Duplicate sets cannot multiply a source-defined non-stacking team effect.
+
+Test cases to add or update:
+
+- Normal: 2-piece values, trigger values, team scope, and expiry.
+- Boundary: exact trigger timestamp, refresh, duplicate owners, and rollback.
+- Abnormal: standard reactions and foreign-owner triggers produce no 4-piece
+  effect.
+
+Verification:
+
+- `./gradlew VersionSevenArtifactRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Version 7.0 Weapon Catalog
+
+Why third:
+
+- Weapon-local units can consume the verified Stellar contract independently
+  and establish complete equipment coverage before character timing work.
+
+Campaign inventory:
+
+| Unit | Type / rarity | Focused check | Status |
+|---|---|---|---|
+| Emberwell | sword / 4-star | `VersionSevenWeaponRegressionTest` | pending |
+| Blade of Atonement | claymore / 4-star | `VersionSevenWeaponRegressionTest` | pending |
+| Frostbreath | polearm / 4-star | `VersionSevenWeaponRegressionTest` | pending |
+| Echoes of the Heart | catalyst / 4-star | `VersionSevenWeaponRegressionTest` | pending |
+| Covenant of Frost and Snow | bow / 4-star | `VersionSevenWeaponRegressionTest` | pending |
+| Heretic's Molten Blade | sword / 4-star | `VersionSevenWeaponRegressionTest` | pending |
+| Forged by the Golden Melody | claymore / 4-star | `VersionSevenWeaponRegressionTest` | pending |
+| Song of the Vigil | polearm / 4-star | `VersionSevenWeaponRegressionTest` | pending |
+| Clash of Kings | catalyst / 4-star | `VersionSevenWeaponRegressionTest` | pending |
+| Jade Vista | bow / 4-star | `VersionSevenWeaponRegressionTest` | pending |
+| Exaiphanes Blade | sword / 5-star | `VersionSevenWeaponRegressionTest` | pending |
+| Whitelake Frostfeather | sword / 5-star | `VersionSevenWeaponRegressionTest` | pending |
+
+Target files:
+
+- one new `src/java/model/weapon/<Weapon>.java` per inventory row
+- `src/java/sample/VersionSevenWeaponRegressionTest.java` (new)
+
+Tasks:
+
+- Implement exact Lv. 90 metadata, R1-R5 values where refinable, trigger
+  categories, cooldowns, field/owner restrictions, caps, and expiry.
+- Use existing narrow action, damage, reaction, switch, and team-buff
+  capability interfaces; add no display-name runtime branches.
+
+Acceptance criteria:
+
+- All twelve normalized Optimizer keys have independently constructible Java
+  implementations and exact metadata/passive behavior.
+- Stateful passives isolate instances and restore their mutable state.
+
+Test cases to add or update:
+
+- Normal: metadata, R1/R5 scaling, trigger gain, and passive value.
+- Boundary: cooldown, stack cap, refresh, switch/off-field, expiry, and snapshot.
+- Abnormal: invalid refinement, null simulator/owner, wrong action/reaction,
+  non-owner hit, and duplicate instance isolation.
+
+Verification:
+
+- `./gradlew VersionSevenWeaponRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 4: Alyosha, Odette, And Cryo Traveler
+
+Why fourth:
+
+- Character slices depend on the complete Stellar and equipment contracts and
+  carry the highest timing, periodic-event, and snapshot risk.
+
+Campaign inventory:
+
+| Unit | Element / weapon | Focused check | Status |
+|---|---|---|---|
+| Alyosha | Electro / polearm | `AlyoshaRegressionTest` | pending |
+| Odette | Cryo / sword | `OdetteRegressionTest` | pending |
+| Cryo Traveler | Cryo / sword | `TravelerCryoRegressionTest` | pending |
+
+Target files:
+
+- `config/characters/Alyosha/Alyosha_Status.csv` (new)
+- `config/characters/Alyosha/Alyosha_Multipliers.csv` (new)
+- `config/characters/Odette/Odette_Status.csv` (new)
+- `config/characters/Odette/Odette_Multipliers.csv` (new)
+- `config/characters/TravelerCryo/TravelerCryo_Status.csv` (new)
+- `config/characters/TravelerCryo/TravelerCryo_Multipliers.csv` (new)
+- `src/java/model/character/Alyosha.java` (new)
+- `src/java/model/character/Odette.java` (new)
+- `src/java/model/character/TravelerCryo.java` (new)
+- `src/java/sample/AlyoshaRegressionTest.java` (new)
+- `src/java/sample/OdetteRegressionTest.java` (new)
+- `src/java/sample/TravelerCryoRegressionTest.java` (new)
+
+Tasks:
+
+- Align exact level-90 stats, talent multipliers, cooldowns, Energy costs,
+  representable passives/constellations, and fixed-target periodic work.
+- Implement character-owned Stellar base bonuses and radiance state without
+  synthesizing unavailable movement, healing, geometry, or target selection.
+- Make mutable marks, summons, stacks, coordinated attacks, cooldowns, and
+  pending generations snapshot-safe and cross-instance isolated.
+
+Acceptance criteria:
+
+- Each unit loads aligned CSV data and executes every source-ready fixed-target
+  action without unavailable systems.
+- Unsupported branches are queryable and contribute no hidden damage or stats.
+
+Test cases to add or update:
+
+- Normal: action multipliers, cadence, particles, buffs, Stellar conversion,
+  and representable constellation behavior.
+- Boundary: cooldown/Energy rejection, exact expiry/cap, event replacement,
+  off-field behavior, and snapshot restoration.
+- Abnormal: invalid constellation/mode, null/foreign simulator, cross-instance
+  reuse, and unsupported-system guards.
+
+Verification:
+
+- `./gradlew AlyoshaRegressionTest OdetteRegressionTest TravelerCryoRegressionTest LegacyCharacterIdentityRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 5: Catalog Reconciliation And Campaign Closure
+
+Why last:
+
+- Final normalization can only prove coverage after all implementation units
+  and source blockers have settled.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Recompare normalized character, weapon, and artifact keys against Optimizer
+  `d791814a` and record every alias, implemented unit, or blocker.
+- Run the complete focused/shared gate, inspect staged artifacts, commit, and
+  push the final documentation checkpoint.
+
+Acceptance criteria:
+
+- No source-ready Version 7.0 catalog key remains unimplemented.
+- B-209 records exact verification and any evidence-bound unsupported branch.
+
+Test cases to add or update:
+
+- No new code test; this phase executes every focused regression from Phases
+  1-4 plus normalized catalog comparison and leak checks.
+
+Verification:
+
+- `./gradlew VersionSevenArtifactRegressionTest VersionSevenWeaponRegressionTest AlyoshaRegressionTest OdetteRegressionTest TravelerCryoRegressionTest LegacyCharacterIdentityRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+- `git status --short`

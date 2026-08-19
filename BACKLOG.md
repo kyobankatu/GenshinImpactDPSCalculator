@@ -4423,3 +4423,23 @@ experiment record.
   legacy identity, reaction regression, build, Javadoc, and executable
   preflight pass together; all implementation commits are pushed to
   `origin/dev_0`.
+
+### B-209 — Version 7.0 Snezhnaya content campaign
+
+- **Status:** active
+- **Source:** explicit 2026-08-20 request to implement every new Version 7.0
+  character, weapon, and artifact difference.
+- **Units:** Alyosha, Odette, Cryo Traveler, Scarlet Proof, Heart of the
+  Furnace, and twelve weapons listed in the compact `TASKS.md` campaign.
+- **Evidence:** Genshin Optimizer `10.38.0` at
+  `d791814a2ef418d2bf773a91926b29b8f7210671`, whose 7.0 content commit
+  `cf769c73` adds generated game data, sheets, localized names, and assets;
+  inspected 2026-08-20.
+- **Scope/risk:** typed Stellar conversion and damage routing are shared
+  high-risk prerequisites; equipment is low/medium risk and the three
+  fixed-target character slices are medium/high risk.
+- **Boundary:** no inferred frame, ICD, gauge, particle, geometry, movement,
+  hitlag, healing-realization, shield, RL, or generated-document behavior.
+- **Proof/plan:** five-phase B-209 plan in `TASKS.md`, focused regression per
+  family/unit, shared reaction/build/Javadoc/preflight gates, independent
+  implementation commits, and final normalized catalog reconciliation.
