@@ -245,6 +245,8 @@ public enum CharacterId {
     LINNEA(115, "Linnea", CharacterRegion.NOD_KRAI),
     /** Sandrone (Cryo claymore attacker and support). */
     SANDRONE(116, "Sandrone", CharacterRegion.SNEZHNAYA),
+    /** Canonical combat identity shared by all Traveler elements and twins. */
+    TRAVELER(117, "Traveler", CharacterRegion.UNKNOWN),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 
