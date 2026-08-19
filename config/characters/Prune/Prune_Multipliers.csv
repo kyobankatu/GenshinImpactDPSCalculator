@@ -1,0 +1,33 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Prune,NORMAL,N1,9,0.826554,0
+Prune,NORMAL,N2,9,0.820774,0
+Prune,NORMAL,N3,9,1.155606,0
+Prune,CHARGED,Charged Attack,9,2.269840,0
+Prune,SKILL,Hexhunter Chime,9,2.846480,0
+Prune,SKILL,Hexhunter Chime C5,12,3.348800,0
+Prune,SKILL,Witch-tribution,9,3.477520,0
+Prune,SKILL,Witch-tribution C5,12,4.091200,0
+Prune,BURST,Bell Cast,9,1.648320,0
+Prune,BURST,Bell Cast C3,12,1.939200,0
+Prune,BURST,Witchlure Bell,9,1.197480,0
+Prune,BURST,Witchlure Bell C3,12,1.408800,0
+Prune,PASSIVE,Particle Count,1,5,0
+Prune,PASSIVE,Particle Travel Frames,1,100,0
+Prune,PASSIVE,Skill Recast Window Frames,1,364,0
+Prune,PASSIVE,A1 ATK Ratio,1,1.5,0
+Prune,PASSIVE,A1 Cooldown,1,1.2,0
+Prune,PASSIVE,A1 Delay Frames,1,45,0
+Prune,PASSIVE,A4 ATK Threshold,1,2000,0
+Prune,PASSIVE,A4 Bonus Per ATK,1,0.00025,0
+Prune,PASSIVE,A4 Maximum Bonus,1,0.5,0
+Prune,PASSIVE,A4 Duration,1,5,0
+Prune,PASSIVE,C1 Flat Energy,1,2,0
+Prune,PASSIVE,C1 Cooldown,1,1.8,0
+Prune,PASSIVE,C2 Initial ATK Percent,2,0.1,0
+Prune,PASSIVE,C2 ATK Percent Per Hit,2,0.05,0
+Prune,PASSIVE,C2 Maximum ATK Percent,2,0.4,0
+Prune,PASSIVE,C4 ATK Ratio,4,0.8,0
+Prune,PASSIVE,C4 Delay Frames,4,63,0
+Prune,PASSIVE,C4 Cooldown,4,0.1,0
+Prune,PASSIVE,C6 Flat ATK,6,350,0
+Prune,PASSIVE,C6 Duration,6,5,0

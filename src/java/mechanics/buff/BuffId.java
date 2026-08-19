@@ -445,6 +445,10 @@ public enum BuffId {
     LAUMA_LUNAR_SUPPORT,
     /** Mavuika's decaying Burst damage bonus window. */
     MAVUIKA_A4_KINDLED_INSPIRATION,
+    /** Prune's five-second attack damage support window. */
+    PRUNE_TOLLING_RALLY,
+    /** Prune C6 flat ATK reaction window. */
+    PRUNE_C6_ATK,
     /** 元素共鳴「迅速の風」(風風): 移動速度+, スタミナ消費 -15%, クールタイム短縮。 */
     IMPETUOUS_WINDS
 }

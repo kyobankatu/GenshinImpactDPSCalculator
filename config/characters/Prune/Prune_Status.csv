@@ -1,0 +1,13 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Prune,STATS,Base HP,90,9679,0
+Prune,STATS,Base ATK,90,221,0
+Prune,STATS,Base DEF,90,580,0
+Prune,STATS,Ascension ATK Percent,90,0.24,0
+Prune,STATS,Energy Cost,90,70,0
+Prune,STATS,Constellation,6,6,0
+Prune,CONFIG,Character Level,90,90,0
+Prune,CONFIG,Normal Level,9,9,0
+Prune,CONFIG,Skill Level,12,12,0
+Prune,CONFIG,Burst Level,12,12,0
+Prune,CONFIG,Skill Cooldown,1,15,0
+Prune,CONFIG,Burst Cooldown,1,18,0
