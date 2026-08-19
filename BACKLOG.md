@@ -3920,7 +3920,7 @@ experiment record.
 
 ### B-187 — Sword of Descension needs typed Traveler identity
 
-- **Status:** blocked
+- **Status:** done (2026-08-19)
 - **Source:** post-B-185 unmatched weapon inventory and pinned KQM/gcsim
   evidence.
 - **Symptom:** the fixed-R1 proc is representable, but the canonical Traveler-
@@ -3930,6 +3930,12 @@ experiment record.
   defines stable Aether/Lumine/element identity policy; do not use display-name
   control flow or grant the affinity to every sword owner.
 - **Proof:** future focused metadata/proc/10-second ICD/platform/Traveler tests.
+- **Completion:** canonical `CharacterId.TRAVELER` was added as ID 117 without
+  renumbering existing identities. Sword of Descension now enforces fixed R1
+  metadata, its Normal/Charged physical proc and 10-second cooldown, explicit
+  platform support, Traveler-only flat ATK, owner binding, rollback, and
+  snapshot isolation. `SwordOfDescensionRegressionTest`, legacy identity,
+  reaction, build, Javadoc, and executable preflight pass in `60f01ea`.
 
 ### B-188 — Prospector's Shovel base Lunar bonus and lifecycle
 
@@ -4371,7 +4377,7 @@ experiment record.
 
 ### B-208 — Current-version content catch-up campaign
 
-- **Status:** active
+- **Status:** complete (2026-08-19)
 - **Source:** explicit 2026-08-19 request to update the stale inventory and
   complete the remaining character/equipment work.
 - **Units:** Prune, Iansan, Ifa, Kachina, Nefer, Jahoda, Zibai, Illuga, Lohen,
@@ -4394,8 +4400,26 @@ experiment record.
   is blocked because gcsim PR #2697 still has disputed Normal, mount/dismount,
   Nightsoul-consumption, and Burst-Energy timing. A normalized Optimizer sweep
   added playable Sandrone to the queue; its source audit remains pending.
-  `Somnia` and `QuantumCatalyst` are explicitly hidden test entries in
-  Optimizer UI/database code and are rejected as playable/obtainable content.
+  `Somnia` and `QuantumCatalyst` are manually added, non-obtainable custom test
+  entries rather than game content; they are rejected without claiming every
+  Optimizer selection path hides them.
   Iansan is blocked because Draft gcsim PR #2374 leaves frame/ICD checks and
   timing TODOs open, while its primary Burst buff requires the excluded
   per-character movement-distance runtime; its A4 healing is also deferred.
+- **Completion 2026-08-19:** Ifa (`925d03c`), Illuga (`5a79aad`), and Jahoda
+  (`44a361c`) joined Prune as independently verified fixed-target character
+  slices. Sword of Descension and canonical Traveler identity closed B-187 in
+  `60f01ea`. The final source gate retained seven playable-character blockers:
+  Kachina has requested timing changes on PR #2697; Iansan, Nefer, and Linnea
+  remain draft or unreviewed with unfinished timing and unavailable movement,
+  target, or pickup contracts; Zibai and Lohen have no reviewed timing source;
+  Sandrone has neither a character implementation nor the required
+  Stellar-Conduct/Stellar-Swirl runtime and timing evidence.
+- **Catalog result:** all 61 Optimizer artifact keys have local Java classes.
+  `ProspectorsShovel` and `TheAlleyFlash` normalize to existing aliases, and
+  `QuantumCatalyst` is excluded as a non-game test weapon. No source-ready
+  fixed-revision character, weapon, or artifact unit remains.
+- **Proof:** the four focused character checks, both focused weapon checks,
+  legacy identity, reaction regression, build, Javadoc, and executable
+  preflight pass together; all implementation commits are pushed to
+  `origin/dev_0`.

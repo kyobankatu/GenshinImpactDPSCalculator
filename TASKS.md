@@ -30,11 +30,11 @@ future explicit user request.
 The prior simulator content campaigns, including Skill-focused event weapons,
 are complete; RL and generated docs remain excluded.
 
-B-208 is active. The current-version catch-up replaces B-207's stale pinned
+B-208 is complete. The current-version catch-up replaced B-207's stale pinned
 catalog conclusion with the playable-character and weapon data present in
-Genshin Optimizer `61c5556a`; Prune is the first character unit, and the two
-new source-ready weapons are independent sidecars. Existing artifact coverage
-already matches that catalog.
+Genshin Optimizer `61c5556a`. Four source-ready characters and three weapons
+were integrated; the remaining seven playable characters have durable source
+or runtime blockers. Existing artifact coverage matches the catalog 61/61.
 
 The B-151 target-state and Skill-hit artifact campaign is complete. It adds
 Lavawalker, Thundersoother, and Tenacity of the Millelith without entering
@@ -23796,9 +23796,9 @@ character or weapon unit remains, so the campaign is complete.
 
 ## Implementation Order: Current-Version Content Catch-Up Campaign B-208
 
-Status: In progress. Phase 1 is integrated on `dev_0`; the remaining
-source-backed characters are being implemented independently while disputed
-timing sources are retained as blockers instead of accepted as estimates.
+Status: Complete. All source-ready units are integrated on `dev_0`; disputed
+timing sources and unavailable runtime contracts are retained as blockers
+instead of accepted as estimates.
 
 Scope:
 
@@ -23879,7 +23879,7 @@ Phase result: the focused identity, Prune, and weapon regressions plus
 `ReactionRegressionTest`, build, Javadoc, and executable preflight passed on
 `dev_0`; commits through `4c45c74` were pushed to `origin/dev_0`.
 
-### Phase 2: Remaining Playable Character Units
+### Phase 2: Remaining Playable Character Units - Complete With Blockers
 
 Why second:
 
@@ -23890,16 +23890,16 @@ Campaign inventory:
 
 | Unit | Element / weapon | Focused check | Status |
 |---|---|---|---|
-| Kachina | Geo / polearm | `KachinaRegressionTest` | blocked: PR #2697 timing review unresolved |
-| Iansan | Electro / polearm | `IansanRegressionTest` | blocked: Draft PR #2374 lacks completed frame/ICD review and requires movement state |
-| Ifa | Anemo / catalyst | `IfaRegressionTest` | in progress |
-| Nefer | Dendro / catalyst | `NeferRegressionTest` | queued |
-| Jahoda | Anemo / bow | `JahodaRegressionTest` | queued |
-| Zibai | Geo / sword | `ZibaiRegressionTest` | queued |
-| Illuga | Geo / polearm | `IllugaRegressionTest` | queued |
-| Lohen | Cryo / polearm | `LohenRegressionTest` | queued |
-| Linnea | Geo / bow | `LinneaRegressionTest` | queued |
-| Sandrone | Cryo / claymore | `SandroneRegressionTest` | queued; source audit required |
+| Kachina | Geo / polearm | `KachinaRegressionTest` | blocked: PR #2697 still has requested timing changes and unresolved Nightsoul/Energy behavior |
+| Iansan | Electro / polearm | `IansanRegressionTest` | blocked: Draft PR #2374 has unfinished frames/ICD and requires movement-distance state |
+| Ifa | Anemo / catalyst | `IfaRegressionTest` | done (`925d03c`) |
+| Nefer | Dendro / catalyst | `NeferRegressionTest` | blocked: Draft PR #2587 is review-unready and requires movement, seed pickup, and multi-target state |
+| Jahoda | Anemo / bow | `JahodaRegressionTest` | done (`44a361c`) |
+| Zibai | Geo / sword | `ZibaiRegressionTest` | blocked: no reviewed frame/timing implementation or populated KQM frame evidence |
+| Illuga | Geo / polearm | `IllugaRegressionTest` | done (`5a79aad`) |
+| Lohen | Cryo / polearm | `LohenRegressionTest` | blocked: no reviewed frame/timing implementation or populated KQM frame evidence |
+| Linnea | Geo / bow | `LinneaRegressionTest` | blocked: Draft PR #2596 marks frames untested and requires summon positioning |
+| Sandrone | Cryo / claymore | `SandroneRegressionTest` | blocked: no character implementation or timing evidence; Stellar-Conduct/Stellar-Swirl runtime absent |
 
 Target files:
 
@@ -23940,7 +23940,12 @@ Verification:
 - `./gradlew <Character>RegressionTest LegacyCharacterIdentityRegressionTest ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
 
-### Phase 3: Catalog Reconciliation And Blocker Closure
+Phase result: Ifa, Illuga, and Jahoda are integrated with exact fixed-target
+slices and focused regressions. The other seven units fail the source-ready
+gate above; no timing, movement, geometry, target, or shared-reaction state was
+inferred to manufacture a partial implementation.
+
+### Phase 3: Catalog Reconciliation And Blocker Closure - Done
 
 Why third:
 
@@ -23962,8 +23967,9 @@ Tasks:
 - Re-evaluate Traveler/Sword of Descension against typed identity contracts.
 - Record aliases, non-playable variants, unavailable mechanics, and rejected
   candidates in `BACKLOG.md` rather than manufacturing no-op content.
-- Treat Optimizer's explicitly hidden `Somnia` and `QuantumCatalyst` test
-  entries as non-playable/non-obtainable catalog exclusions.
+- Treat Optimizer's manually added `Somnia` and `QuantumCatalyst` custom test
+  entries as non-game/non-obtainable catalog exclusions; they are not assumed
+  to be fully hidden from every Optimizer selection path.
 
 Acceptance criteria:
 
@@ -23981,3 +23987,17 @@ Verification:
 
 - `python scripts/preflight.py --run`
 - `git status --short`
+
+Phase result: canonical `CharacterId.TRAVELER` was added without renumbering
+existing values, and Sword of Descension was integrated in `60f01ea` with its
+fixed R1 metadata, proc ICD, platform boundary, owner restriction, rollback,
+and snapshot behavior. Normalized reconciliation found all 61 Optimizer
+artifact keys implemented. The remaining normalized weapon names are existing
+aliases (`ProspectorsShovel` and `TheAlleyFlash`) or the non-game
+`QuantumCatalyst` test entry. Traveler element variants remain aliases of the
+canonical identity rather than duplicate character units.
+
+Final verification passed:
+
+- `./gradlew PruneRegressionTest IfaRegressionTest IllugaRegressionTest JahodaRegressionTest CurrentVersionWeaponRegressionTest SwordOfDescensionRegressionTest LegacyCharacterIdentityRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
