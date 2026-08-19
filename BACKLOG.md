@@ -4368,3 +4368,24 @@ experiment record.
   of Descension remain blocked by B-187, aliases are already implemented, and
   image-only character directories without pinned mechanics/data are not
   implemented from inference. The requested source-ready queue is exhausted.
+
+### B-208 — Current-version content catch-up campaign
+
+- **Status:** active
+- **Source:** explicit 2026-08-19 request to update the stale inventory and
+  complete the remaining character/equipment work.
+- **Units:** Prune, Iansan, Ifa, Kachina, Nefer, Jahoda, Zibai, Illuga, Lohen,
+  Linnea, A Teaspoon of Transcendence, and Disaster and Remorse.
+- **Scope/risk:** stable typed identities, independently tested fixed-target
+  character slices, and exact stateful weapon passives; medium/high.
+- **Evidence:** Genshin Optimizer
+  `61c5556a55f79a08520dda95cb128aeac3588908`, including generated character
+  and weapon data plus calculation sheets, inspected 2026-08-19. Current gcsim
+  `3647a07a7cc3004bc1e79d9bb5f7444de20dceaa` remains useful for its covered
+  catalog but does not contain these newer units.
+- **Boundary:** Stellar-Conduct shared mechanics, RL, generated docs, player
+  HP/healing/damage intake, shields, geometry, movement, hitlag, exploration,
+  and Deferred Systems remain excluded.
+- **Proof/plan:** compact three-phase B-208 campaign in `TASKS.md`; each unit
+  receives a focused regression, shared reaction/build/Javadoc/preflight gate,
+  independent commit, and final normalized catalog reconciliation.

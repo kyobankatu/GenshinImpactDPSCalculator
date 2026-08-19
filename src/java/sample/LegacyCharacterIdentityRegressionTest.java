@@ -60,6 +60,16 @@ public final class LegacyCharacterIdentityRegressionTest {
         assertIdentity(CharacterId.XIAO, 60, "Xiao");
         assertIdentity(CharacterId.GAMING, 61, "Gaming");
         assertIdentity(CharacterId.XINYAN, 62, "Xinyan");
+        assertIdentity(CharacterId.PRUNE, 106, "Prune");
+        assertIdentity(CharacterId.IANSAN, 107, "Iansan");
+        assertIdentity(CharacterId.IFA, 108, "Ifa");
+        assertIdentity(CharacterId.KACHINA, 109, "Kachina");
+        assertIdentity(CharacterId.NEFER, 110, "Nefer");
+        assertIdentity(CharacterId.JAHODA, 111, "Jahoda");
+        assertIdentity(CharacterId.ZIBAI, 112, "Zibai");
+        assertIdentity(CharacterId.ILLUGA, 113, "Illuga");
+        assertIdentity(CharacterId.LOHEN, 114, "Lohen");
+        assertIdentity(CharacterId.LINNEA, 115, "Linnea");
         assertEquals(CharacterId.BENNETT, CharacterId.fromNumericId(1),
                 "first prior numeric ID");
         assertEquals(CharacterId.YANFEI, CharacterId.fromNumericId(20),
@@ -224,6 +234,26 @@ public final class LegacyCharacterIdentityRegressionTest {
                 "Gaming Liyue region lookup");
         assertEquals(CharacterRegion.LIYUE, CharacterId.XINYAN.getRegion(),
                 "Xinyan Liyue region lookup");
+        assertEquals(CharacterRegion.MONDSTADT, CharacterId.PRUNE.getRegion(),
+                "Prune Mondstadt region lookup");
+        assertEquals(CharacterRegion.NATLAN, CharacterId.IANSAN.getRegion(),
+                "Iansan Natlan region lookup");
+        assertEquals(CharacterRegion.NATLAN, CharacterId.IFA.getRegion(),
+                "Ifa Natlan region lookup");
+        assertEquals(CharacterRegion.NATLAN, CharacterId.KACHINA.getRegion(),
+                "Kachina Natlan region lookup");
+        assertEquals(CharacterRegion.NOD_KRAI, CharacterId.NEFER.getRegion(),
+                "Nefer Nod-Krai region lookup");
+        assertEquals(CharacterRegion.NOD_KRAI, CharacterId.JAHODA.getRegion(),
+                "Jahoda Nod-Krai region lookup");
+        assertEquals(CharacterRegion.NOD_KRAI, CharacterId.ZIBAI.getRegion(),
+                "Zibai Nod-Krai region lookup");
+        assertEquals(CharacterRegion.NOD_KRAI, CharacterId.ILLUGA.getRegion(),
+                "Illuga Nod-Krai region lookup");
+        assertEquals(CharacterRegion.MONDSTADT, CharacterId.LOHEN.getRegion(),
+                "Lohen Mondstadt region lookup");
+        assertEquals(CharacterRegion.NOD_KRAI, CharacterId.LINNEA.getRegion(),
+                "Linnea Nod-Krai region lookup");
         assertEquals(CharacterRegion.UNKNOWN,
                 CharacterId.COLUMBINA.getRegion(),
                 "unverified custom region fails closed");

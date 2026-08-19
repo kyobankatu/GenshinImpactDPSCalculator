@@ -223,6 +223,26 @@ public enum CharacterId {
     MAVUIKA(104, "Mavuika", CharacterRegion.NATLAN),
     /** Varka (Anemo claymore Sturm und Drang attacker). */
     VARKA(105, "Varka", CharacterRegion.MONDSTADT),
+    /** Prune (Anemo catalyst support). */
+    PRUNE(106, "Prune", CharacterRegion.MONDSTADT),
+    /** Iansan (Electro polearm support). */
+    IANSAN(107, "Iansan", CharacterRegion.NATLAN),
+    /** Ifa (Anemo catalyst attacker and support). */
+    IFA(108, "Ifa", CharacterRegion.NATLAN),
+    /** Kachina (Geo polearm Nightsoul attacker). */
+    KACHINA(109, "Kachina", CharacterRegion.NATLAN),
+    /** Nefer (Dendro catalyst Lunar-Bloom attacker). */
+    NEFER(110, "Nefer", CharacterRegion.NOD_KRAI),
+    /** Jahoda (Anemo bow support). */
+    JAHODA(111, "Jahoda", CharacterRegion.NOD_KRAI),
+    /** Zibai (Geo sword Lunar-Crystallize attacker). */
+    ZIBAI(112, "Zibai", CharacterRegion.NOD_KRAI),
+    /** Illuga (Geo polearm Lunar-Crystallize support). */
+    ILLUGA(113, "Illuga", CharacterRegion.NOD_KRAI),
+    /** Lohen (Cryo polearm attacker). */
+    LOHEN(114, "Lohen", CharacterRegion.MONDSTADT),
+    /** Linnea (Geo bow attacker). */
+    LINNEA(115, "Linnea", CharacterRegion.NOD_KRAI),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 

@@ -30,6 +30,12 @@ future explicit user request.
 The prior simulator content campaigns, including Skill-focused event weapons,
 are complete; RL and generated docs remain excluded.
 
+B-208 is active. The current-version catch-up replaces B-207's stale pinned
+catalog conclusion with the playable-character and weapon data present in
+Genshin Optimizer `61c5556a`; Prune is the first character unit, and the two
+new source-ready weapons are independent sidecars. Existing artifact coverage
+already matches that catalog.
+
 The B-151 target-state and Skill-hit artifact campaign is complete. It adds
 Lavawalker, Thundersoother, and Tenacity of the Millelith without entering
 player-damage, shield-absorption, RL, or generated-documentation systems.
@@ -23787,3 +23793,180 @@ inventory contains only implemented aliases and B-187's blocked Sword of
 Descension. Image-only character directories without pinned mechanics or data
 remain source-unready and were not implemented by inference. No source-ready
 character or weapon unit remains, so the campaign is complete.
+
+## Implementation Order: Current-Version Content Catch-Up Campaign B-208
+
+Status: In progress. The stale B-207 inventory has been replaced with a
+fixed-revision 2026-08-19 catalog; the shared identity prerequisite and Prune
+are first, followed by independent character and weapon units.
+
+Scope:
+
+- Add stable typed identities for Prune, Iansan, Ifa, Kachina, Nefer, Jahoda,
+  Zibai, Illuga, Lohen, and Linnea without renumbering existing values.
+- Add source-backed, fixed-target character slices with exact static data and
+  explicit unsupported-system boundaries.
+- Add A Teaspoon of Transcendence and Disaster and Remorse with exact Lv. 90
+  metadata, refinement scaling, trigger windows, ownership, and rollback.
+- Reconcile the final normalized character, weapon, and artifact catalogs
+  against Genshin Optimizer `61c5556a55f79a08520dda95cb128aeac3588908`.
+
+Out of scope for this pass:
+
+- RL, generated `docs/`, player healing/current HP/damage intake, shields,
+  multi-target geometry, movement, hitlag, exploration, and Deferred Systems.
+- Stellar-Conduct simulation until its reaction and field contract is planned
+  as a dedicated shared-mechanics campaign; related bonuses remain explicit.
+
+### Phase 1: Shared Identities, Prune, And Current Weapons
+
+Why first:
+
+- Every character unit requires a stable identity, while Prune and both weapon
+  passives are independently useful without adding a new shared reaction.
+
+Campaign inventory:
+
+| Unit | Type | Represented scope | Focused check | Status |
+|---|---|---|---|---|
+| Typed identities 106-115 | prerequisite | stable IDs and legacy lookup | `LegacyCharacterIdentityRegressionTest` | in progress |
+| Prune | character | fixed-target catalyst attacks, converted Skill, Burst bell cadence, particles, Tolling Rally, representable constellations | `PruneRegressionTest` | queued |
+| A Teaspoon of Transcendence | weapon | metadata, permanent ATK, Charged-hit Stellar-Conduct stacks and rollback | `CurrentVersionWeaponRegressionTest` | queued |
+| Disaster and Remorse | weapon | metadata, Skill-use windows, cross-category hit extensions, field exit and rollback | `CurrentVersionWeaponRegressionTest` | queued |
+
+Target files:
+
+- `src/java/model/type/CharacterId.java`
+- `src/java/sample/LegacyCharacterIdentityRegressionTest.java`
+- `config/characters/Prune/Prune_Status.csv` (new)
+- `config/characters/Prune/Prune_Multipliers.csv` (new)
+- `src/java/model/character/Prune.java` (new)
+- `src/java/sample/PruneRegressionTest.java` (new)
+- `src/java/model/weapon/ATeaspoonOfTranscendence.java` (new)
+- `src/java/model/weapon/DisasterAndRemorse.java` (new)
+- `src/java/sample/CurrentVersionWeaponRegressionTest.java` (new)
+
+Tasks:
+
+- Reserve IDs 106-115 and extend sequential/round-trip regression coverage.
+- Implement each unit from fixed source data without display-name control flow.
+- Keep mutable timers, stack pools, owner binding, and snapshots independent.
+- Fail closed where Hexerei or Stellar-Conduct shared runtime state is absent.
+
+Acceptance criteria:
+
+- Existing numeric IDs remain unchanged and all ten new names round-trip.
+- Prune's supported actions enforce exact cooldown, Energy, timing, elemental
+  application, damage cadence, and support expiry.
+- Both weapons enforce refinement, owner, hit-category, cooldown, extension,
+  switch-out, expiry, and snapshot contracts.
+
+Test cases to add or update:
+
+- Normal: exact metadata, action multipliers, periodic cadence, buff values,
+  weapon gains/extensions, expiry, and refinement scaling.
+- Boundary: exact hit/cooldown timestamps, stack caps, switch-out, and rollback.
+- Abnormal: invalid constellation/refinement, unsupported action mode, null or
+  foreign owner/simulator/state, zero/non-trigger hits, and instance isolation.
+
+Verification:
+
+- `./gradlew LegacyCharacterIdentityRegressionTest PruneRegressionTest CurrentVersionWeaponRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 2: Remaining Playable Character Units
+
+Why second:
+
+- These units depend on Phase 1's stable identities and can then be integrated
+  as independent fixed-target slices without shared-file conflicts.
+
+Campaign inventory:
+
+| Unit | Element / weapon | Focused check | Status |
+|---|---|---|---|
+| Kachina | Geo / polearm | `KachinaRegressionTest` | queued |
+| Iansan | Electro / polearm | `IansanRegressionTest` | queued |
+| Ifa | Anemo / catalyst | `IfaRegressionTest` | queued |
+| Nefer | Dendro / catalyst | `NeferRegressionTest` | queued |
+| Jahoda | Anemo / bow | `JahodaRegressionTest` | queued |
+| Zibai | Geo / sword | `ZibaiRegressionTest` | queued |
+| Illuga | Geo / polearm | `IllugaRegressionTest` | queued |
+| Lohen | Cryo / polearm | `LohenRegressionTest` | queued |
+| Linnea | Geo / bow | `LinneaRegressionTest` | queued |
+
+Target files:
+
+- one new `config/characters/<Character>/<Character>_Status.csv` per unit
+- one new `config/characters/<Character>/<Character>_Multipliers.csv` per unit
+- one new `src/java/model/character/<Character>.java` per unit
+- one new `src/java/sample/<Character>RegressionTest.java` per unit
+
+Tasks:
+
+- Implement exact static stats, talents, cooldowns, Energy costs, gauges, ICD,
+  particle behavior, and source-backed action timing for each supported slice.
+- Include representable offensive passives and constellations; expose excluded
+  healing, shield, movement, geometry, and new-reaction branches explicitly.
+- Keep each unit independently buildable, testable, and commit-ready.
+
+Acceptance criteria:
+
+- Every unit loads aligned CSV data and executes supported actions without
+  requiring unavailable runtime systems.
+- Delayed and periodic work is generation-safe and snapshot-safe.
+- Unsupported branches cannot silently contribute stats, damage, or Energy.
+
+Test cases to add or update:
+
+- Normal: sourced action sequence, multipliers, particles, support, and
+  representable constellation behavior for each character.
+- Boundary: cooldown/Energy rejection, event replacement, exact expiry, and
+  snapshot restore around one pending hit or state transition.
+- Abnormal: invalid constellation/mode, cross-simulator reuse, null state, and
+  excluded-system guard behavior.
+
+Verification:
+
+- `./gradlew <Character>RegressionTest LegacyCharacterIdentityRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Catalog Reconciliation And Blocker Closure
+
+Why third:
+
+- A final normalized sweep is meaningful only after all fixed-revision units
+  are integrated and reveals whether B-187 can be closed without inference.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+- `src/java/model/type/CharacterId.java` only if typed Traveler identity is
+  proven necessary and can be added without changing existing IDs
+- `src/java/model/weapon/SwordOfDescension.java` only if B-187 is unblocked
+- `src/java/sample/SwordOfDescensionRegressionTest.java` only if unblocked
+
+Tasks:
+
+- Compare normalized source and local character, weapon, and artifact keys.
+- Re-evaluate Traveler/Sword of Descension against typed identity contracts.
+- Record aliases, non-playable variants, unavailable mechanics, and rejected
+  candidates in `BACKLOG.md` rather than manufacturing no-op content.
+
+Acceptance criteria:
+
+- No source-ready fixed-revision character, weapon, or artifact unit remains.
+- Every non-implemented key has a durable alias, blocker, or rejection reason.
+- B-208 is marked done only after focused/shared gates and push succeed.
+
+Test cases to add or update:
+
+- Normal: normalized catalog comparison has an empty actionable difference.
+- Boundary: aliases and Traveler variants do not produce duplicate content.
+- Abnormal: unknown display names still resolve to `CharacterId.UNKNOWN`.
+
+Verification:
+
+- `python scripts/preflight.py --run`
+- `git status --short`
