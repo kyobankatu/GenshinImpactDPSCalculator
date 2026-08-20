@@ -25,8 +25,9 @@ import simulation.runtime.StellarReactionManager;
  * timing fields in-place and rebuilds the buff lists to exactly the saved membership.
  *
  * <p>The event queue ({@link simulation.runtime.SimulationClock} timer events)
- * is intentionally excluded. Snapshot-aware characters may instead retain an
- * immutable payload and reconstruct only their own future events after restore.
+     * is intentionally excluded. Typed simulator state and snapshot-aware characters
+     * retain immutable scheduling payloads and reconstruct only their own future
+     * events after restore.
  */
 public class SimulatorSnapshot {
 
@@ -186,8 +187,10 @@ public class SimulatorSnapshot {
     public final double thundercloudEndTime;
     public final boolean burningTimerRunning;
     public final double burningEndTime;
+    public final double burningNextTickTime;
     public final ReactionState.BurningState burningState;
     public final int nextBurningGeneration;
+    public final double burningPyroApplicationCooldownEndTime;
     public final double quickenEndTime;
     public final ReactionState.QuickenState quickenState;
     public final double overloadTargetDamageCooldownEndTime;
@@ -249,8 +252,10 @@ public class SimulatorSnapshot {
      * @param thundercloudEndTime thundercloud expiry time
      * @param burningTimerRunning Burning timer flag
      * @param burningEndTime compatibility Burning expiry time
+     * @param burningNextTickTime absolute next Burning damage tick
      * @param burningState typed Burning fuel and damage payload
      * @param nextBurningGeneration next Burning event generation
+     * @param burningPyroApplicationCooldownEndTime target-wide Burning Pyro ICD end
      * @param quickenEndTime Quicken expiry time
      * @param quickenState typed consumable Quicken Aura payload
      * @param overloadTargetDamageCooldownEndTime target-wide Overload damage cooldown end
@@ -294,8 +299,10 @@ public class SimulatorSnapshot {
             double thundercloudEndTime,
             boolean burningTimerRunning,
             double burningEndTime,
+            double burningNextTickTime,
             ReactionState.BurningState burningState,
             int nextBurningGeneration,
+            double burningPyroApplicationCooldownEndTime,
             double quickenEndTime,
             ReactionState.QuickenState quickenState,
             double overloadTargetDamageCooldownEndTime,
@@ -342,8 +349,11 @@ public class SimulatorSnapshot {
         this.thundercloudEndTime = thundercloudEndTime;
         this.burningTimerRunning = burningTimerRunning;
         this.burningEndTime = burningEndTime;
+        this.burningNextTickTime = burningNextTickTime;
         this.burningState = burningState;
         this.nextBurningGeneration = nextBurningGeneration;
+        this.burningPyroApplicationCooldownEndTime =
+                burningPyroApplicationCooldownEndTime;
         this.quickenEndTime = quickenEndTime;
         this.quickenState = quickenState;
         this.overloadTargetDamageCooldownEndTime =

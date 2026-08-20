@@ -81,7 +81,7 @@ public class ReactionEffectScheduler {
      * @param preResistanceDamage damage per 0.25 s Burning tick before RES
      */
     public void scheduleBurning(CharacterId ownerId, double preResistanceDamage) {
-        scheduleBurning(ownerId, preResistanceDamage, false);
+        scheduleBurning(ownerId, preResistanceDamage, false, null);
     }
 
     /**
@@ -95,7 +95,27 @@ public class ReactionEffectScheduler {
             CharacterId ownerId,
             double preResistanceDamage,
             boolean replaceFuel) {
+        scheduleBurning(ownerId, preResistanceDamage, replaceFuel, null);
+    }
+
+    /**
+     * Starts or refreshes Burning with the latest applier's reaction snapshot.
+     *
+     * @param ownerId character credited with Burning damage
+     * @param preResistanceDamage damage per 0.25 s tick before RES
+     * @param replaceFuel whether this application is a Dendro fuel overwrite
+     * @param reactionStats reaction stats captured by the applier, or {@code null}
+     */
+    public void scheduleBurning(
+            CharacterId ownerId,
+            double preResistanceDamage,
+            boolean replaceFuel,
+            StatsContainer reactionStats) {
         double currentTime = sim.getCurrentTime();
+        if (sim.getBurningState() != null) {
+            sim.synchronizeBurningFuel();
+            sim.advanceBurning();
+        }
         double dendroUnits = sim.getEnemy().getAuraUnits(Element.DENDRO, currentTime);
         ReactionState.QuickenState quickenState = sim.getQuickenState();
         double quickenUnits = quickenState != null
@@ -121,13 +141,15 @@ public class ReactionEffectScheduler {
                 || state.remainingFuelAt(currentTime) <= TIMING_EPSILON;
         if (startsNewGeneration) {
             state = sim.startBurning(
-                    ownerId, preResistanceDamage, fuelUnits, fuelDecayRate);
+                    ownerId, preResistanceDamage, fuelUnits, fuelDecayRate,
+                    reactionStats);
         } else {
             if (replaceFuel) {
                 state = sim.replaceBurningFuel(fuelUnits, fuelDecayRate);
             }
             if (state != null) {
-                state = sim.refreshBurningDamage(ownerId, preResistanceDamage);
+                state = sim.refreshBurningDamage(
+                        ownerId, preResistanceDamage, reactionStats);
             }
         }
         if (state == null) {
@@ -135,8 +157,26 @@ public class ReactionEffectScheduler {
         }
         if (!sim.isBurningTimerRunning()) {
             sim.setBurningTimerRunning(true);
-            sim.registerEvent(createBurningTickEvent(state.generation));
+            double nextTickTime = sim.getCurrentTime() + BURNING_TICK_INTERVAL;
+            sim.setBurningNextTickTime(nextTickTime);
+            sim.registerEvent(createBurningTickEvent(
+                    state.generation, nextTickTime));
         }
+    }
+
+    /** Reconstructs the simulator-owned Burning timer after snapshot restore. */
+    public void restoreBurningTimer(double nextTickTime) {
+        ReactionState.BurningState state = sim.getBurningState();
+        if (state == null || !sim.isBurningActive()) {
+            sim.setBurningTimerRunning(false);
+            sim.setBurningNextTickTime(-1.0);
+            return;
+        }
+        double restoredTickTime = Math.max(sim.getCurrentTime(), nextTickTime);
+        sim.setBurningTimerRunning(true);
+        sim.setBurningNextTickTime(restoredTickTime);
+        sim.registerEvent(createBurningTickEvent(
+                state.generation, restoredTickTime));
     }
 
     /**
@@ -347,9 +387,10 @@ public class ReactionEffectScheduler {
                 sim.getActiveCharacter());
     }
 
-    private TimerEvent createBurningTickEvent(int generation) {
+    private TimerEvent createBurningTickEvent(
+            int generation, double firstDamageTime) {
         return new TimerEvent() {
-            private double nextDamageTime = sim.getCurrentTime() + BURNING_TICK_INTERVAL;
+            private double nextDamageTime = firstDamageTime;
             private boolean finished = false;
 
             @Override
@@ -365,11 +406,16 @@ public class ReactionEffectScheduler {
                 boolean damageTick = currentTime + TIMING_EPSILON >= nextDamageTime
                         && currentTime <= state.getEndTime() + TIMING_EPSILON;
                 if (damageTick) {
-                    recordBurningTick(state);
+                    double reactionMultiplier = 1.0;
+                    if (simContext.tryStartBurningPyroApplication()) {
+                        reactionMultiplier = simContext.resolveBurningTickReactions(state);
+                    }
+                    recordBurningTick(state, reactionMultiplier);
                     nextDamageTime += BURNING_TICK_INTERVAL;
+                    simContext.setBurningNextTickTime(nextDamageTime);
                 }
 
-                synchronizeBurningFuel(simContext, state, currentTime);
+                simContext.synchronizeBurningFuel();
 
                 if (remainingFuel <= TIMING_EPSILON) {
                     simContext.clearBurning();
@@ -400,49 +446,11 @@ public class ReactionEffectScheduler {
         };
     }
 
-    private void synchronizeBurningFuel(
-            CombatSimulator simContext,
-            ReactionState.BurningState state,
-            double currentTime) {
-        double elapsed = Math.max(0.0, currentTime - state.lastUpdateTime);
-        if (elapsed <= 0.0) {
-            return;
-        }
-
-        double dendroNaturalRate = simContext.getEnemy().getAuraDecayRate(
-                Element.DENDRO, currentTime);
-        double dendroExtraDecay = Math.max(
-                0.0, state.fuelDecayRate - dendroNaturalRate) * elapsed;
-        if (dendroExtraDecay > TIMING_EPSILON) {
-            simContext.getEnemy().reduceAura(
-                    Element.DENDRO, dendroExtraDecay, currentTime);
-        }
-        double remainingDendro = simContext.getEnemy().getAuraUnits(
-                Element.DENDRO, currentTime);
-        if (remainingDendro > 0.0 && remainingDendro <= TIMING_EPSILON) {
-            simContext.getEnemy().reduceAura(
-                    Element.DENDRO, remainingDendro, currentTime);
-        }
-
-        ReactionState.QuickenState quickenState = simContext.getQuickenState();
-        if (quickenState == null) {
-            return;
-        }
-        double quickenExtraDecay = Math.max(
-                0.0, state.fuelDecayRate - quickenState.decayRate) * elapsed;
-        if (quickenExtraDecay > TIMING_EPSILON) {
-            simContext.consumeQuicken(quickenExtraDecay);
-        }
-        ReactionState.QuickenState remainingQuicken = simContext.getQuickenState();
-        if (remainingQuicken != null
-                && remainingQuicken.remainingUnitsAt(currentTime) <= TIMING_EPSILON) {
-            simContext.clearQuicken();
-        }
-    }
-
-    private void recordBurningTick(ReactionState.BurningState state) {
+    private void recordBurningTick(
+            ReactionState.BurningState state, double reactionMultiplier) {
         double tickDamage = applyCurrentResistance(
-                state.preResistanceDamage, Element.PYRO, sim);
+                state.preResistanceDamage * reactionMultiplier,
+                Element.PYRO, sim);
         if (sim.isLoggingEnabled()) {
             System.out.println(String.format("   [DoT] Burning Damage: %,.0f", tickDamage));
         }

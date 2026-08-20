@@ -361,6 +361,38 @@ public class Enemy {
     }
 
     /**
+     * Consumes an Aura with a directional reaction modifier and returns the
+     * source gauge spent by the trigger.
+     *
+     * <p>The target loses at most {@code sourceGaugeUnits * modifier}. When the
+     * Aura has less gauge than that cap, only the proportional source amount is
+     * spent so a later coexisting Aura can receive the trigger remainder.</p>
+     *
+     * @param element Aura element to consume
+     * @param sourceGaugeUnits trigger gauge available before this reaction
+     * @param modifier target-Aura consumption per source gauge unit
+     * @param currentTime simulator time in seconds
+     * @return source gauge consumed by this Aura, never negative
+     */
+    public double consumeAura(
+            model.type.Element element,
+            double sourceGaugeUnits,
+            double modifier,
+            double currentTime) {
+        if (sourceGaugeUnits <= 0.0 || modifier <= 0.0) {
+            return 0.0;
+        }
+        double currentUnits = getAuraUnits(element, currentTime);
+        double auraConsumption = Math.min(
+                currentUnits, sourceGaugeUnits * modifier);
+        if (auraConsumption <= 0.0) {
+            return 0.0;
+        }
+        reduceAura(element, auraConsumption, currentTime);
+        return auraConsumption / modifier;
+    }
+
+    /**
      * Returns the stored gauge units for the given element without applying
      * natural decay, or {@code 0.0} if no aura of that element is applied.
      *

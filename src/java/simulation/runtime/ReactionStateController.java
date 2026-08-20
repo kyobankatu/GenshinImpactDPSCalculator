@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import model.stats.StatsContainer;
 import model.type.CharacterId;
 import model.type.Element;
 import simulation.CombatSimulator;
@@ -267,7 +268,8 @@ public class ReactionStateController {
     public boolean isBurningActive() {
         ReactionState.BurningState state = reactionState.getBurningState();
         if (state != null) {
-            return state.remainingFuelAt(sim.getCurrentTime()) > 0.0;
+            return state.remainingFuelAt(sim.getCurrentTime()) > 0.0
+                    && state.burningAuraUnits > 0.0;
         }
         return sim.getCurrentTime() < reactionState.getBurningEndTime();
     }
@@ -280,18 +282,30 @@ public class ReactionStateController {
         reactionState.setBurningEndTime(endTime);
     }
 
+    /** Returns the absolute time of the next Burning damage tick. */
+    public double getBurningNextTickTime() {
+        return reactionState.getBurningNextTickTime();
+    }
+
+    /** Records the absolute time of the next Burning damage tick. */
+    public void setBurningNextTickTime(double nextTickTime) {
+        reactionState.setBurningNextTickTime(nextTickTime);
+    }
+
     /** Starts a typed Burning generation at the current simulator time. */
     public ReactionState.BurningState startBurning(
             CharacterId ownerId,
             double preResistanceDamage,
             double fuelUnits,
-            double fuelDecayRate) {
+            double fuelDecayRate,
+            StatsContainer reactionStats) {
         return reactionState.startBurning(
                 ownerId,
                 preResistanceDamage,
                 fuelUnits,
                 fuelDecayRate,
-                sim.getCurrentTime());
+                sim.getCurrentTime(),
+                reactionStats);
     }
 
     /** Replaces active Burning fuel at the current simulator time. */
@@ -303,9 +317,11 @@ public class ReactionStateController {
 
     /** Refreshes active Burning damage ownership at the current simulator time. */
     public ReactionState.BurningState refreshBurningDamage(
-            CharacterId ownerId, double preResistanceDamage) {
+            CharacterId ownerId,
+            double preResistanceDamage,
+            StatsContainer reactionStats) {
         return reactionState.refreshBurningDamage(
-                ownerId, preResistanceDamage, sim.getCurrentTime());
+                ownerId, preResistanceDamage, sim.getCurrentTime(), reactionStats);
     }
 
     /** Rebases active Burning fuel at the current simulator time. */
@@ -321,6 +337,68 @@ public class ReactionStateController {
     /** Clears typed Burning fuel, damage, and timer state. */
     public void clearBurning() {
         reactionState.clearBurning();
+    }
+
+    /** Consumes independent Burning Aura at the requested directional modifier. */
+    public double consumeBurningAura(
+            double sourceGaugeUnits, double modifier) {
+        synchronizeBurningFuel();
+        reactionState.advanceBurning(sim.getCurrentTime());
+        return reactionState.consumeBurningAura(sourceGaugeUnits, modifier);
+    }
+
+    /**
+     * Applies elapsed Burning special decay to coexisting Dendro and Quicken.
+     *
+     * <p>This is required before an off-tick reaction can remove Burning Aura;
+     * otherwise clearing the Burning state would discard decay accrued since the
+     * previous 0.25-second damage tick.</p>
+     */
+    public void synchronizeBurningFuel() {
+        ReactionState.BurningState state = reactionState.getBurningState();
+        if (state == null) {
+            return;
+        }
+        double currentTime = sim.getCurrentTime();
+        double elapsed = Math.max(0.0, currentTime - state.lastUpdateTime);
+        if (elapsed <= 0.0) {
+            return;
+        }
+
+        double dendroNaturalRate = sim.getEnemy().getAuraDecayRate(
+                Element.DENDRO, currentTime);
+        double dendroExtraDecay = Math.max(
+                0.0, state.fuelDecayRate - dendroNaturalRate) * elapsed;
+        if (dendroExtraDecay > 0.0) {
+            sim.getEnemy().reduceAura(
+                    Element.DENDRO, dendroExtraDecay, currentTime);
+        }
+        double remainingDendro = sim.getEnemy().getAuraUnits(
+                Element.DENDRO, currentTime);
+        if (remainingDendro > 0.0 && remainingDendro <= 1e-9) {
+            sim.getEnemy().reduceAura(
+                    Element.DENDRO, remainingDendro, currentTime);
+        }
+
+        ReactionState.QuickenState quickenState = reactionState.getQuickenState();
+        if (quickenState == null) {
+            return;
+        }
+        double quickenExtraDecay = Math.max(
+                0.0, state.fuelDecayRate - quickenState.decayRate) * elapsed;
+        if (quickenExtraDecay > 0.0) {
+            reactionState.consumeQuicken(quickenExtraDecay, currentTime);
+        }
+        ReactionState.QuickenState remainingQuicken = reactionState.getQuickenState();
+        if (remainingQuicken != null
+                && remainingQuicken.remainingUnitsAt(currentTime) <= 1e-9) {
+            reactionState.clearQuicken();
+        }
+    }
+
+    /** Attempts the target-wide 2-second Burning Pyro application gate. */
+    public boolean tryStartBurningPyroApplication() {
+        return reactionState.tryStartBurningPyroApplication(sim.getCurrentTime());
     }
 
     public boolean isQuickenActive() {

@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import model.stats.StatsContainer;
 import model.type.CharacterId;
 import model.type.Element;
 
@@ -68,6 +69,10 @@ public class ReactionState {
         public final double lastUpdateTime;
         /** Event generation used to reject superseded timer events. */
         public final int generation;
+        /** Independent non-decaying Burning Aura gauge. */
+        public final double burningAuraUnits;
+        /** Reaction stats snapshotted by the latest Burning applier. */
+        private final StatsContainer reactionStats;
 
         private BurningState(
                 CharacterId ownerId,
@@ -75,13 +80,19 @@ public class ReactionState {
                 double fuelUnits,
                 double fuelDecayRate,
                 double lastUpdateTime,
-                int generation) {
+                int generation,
+                double burningAuraUnits,
+                StatsContainer reactionStats) {
             this.ownerId = ownerId;
             this.preResistanceDamage = preResistanceDamage;
             this.fuelUnits = fuelUnits;
             this.fuelDecayRate = fuelDecayRate;
             this.lastUpdateTime = lastUpdateTime;
             this.generation = generation;
+            this.burningAuraUnits = burningAuraUnits;
+            this.reactionStats = reactionStats == null
+                    ? null
+                    : reactionStats.merge(null);
         }
 
         /**
@@ -102,6 +113,11 @@ public class ReactionState {
          */
         public double getEndTime() {
             return lastUpdateTime + fuelUnits / fuelDecayRate;
+        }
+
+        /** Returns a defensive copy of the latest applier's reaction stats. */
+        public StatsContainer getReactionStats() {
+            return reactionStats == null ? null : reactionStats.merge(null);
         }
     }
 
@@ -176,8 +192,10 @@ public class ReactionState {
     private double thundercloudEndTime = -1.0;
     private boolean burningTimerRunning = false;
     private double burningEndTime = -1.0;
+    private double burningNextTickTime = -1.0;
     private BurningState burningState;
     private int nextBurningGeneration = 1;
+    private double burningPyroApplicationCooldownEndTime = -1.0;
     private double quickenEndTime = -1.0;
     private QuickenState quickenState;
     private double overloadTargetDamageCooldownEndTime = -1.0;
@@ -649,6 +667,16 @@ public class ReactionState {
         this.burningEndTime = burningEndTime;
     }
 
+    /** Returns the absolute time of the next scheduled Burning damage tick. */
+    public double getBurningNextTickTime() {
+        return burningNextTickTime;
+    }
+
+    /** Records the absolute time of the next scheduled Burning damage tick. */
+    public void setBurningNextTickTime(double burningNextTickTime) {
+        this.burningNextTickTime = burningNextTickTime;
+    }
+
     /**
      * Starts a new typed Burning generation.
      *
@@ -657,6 +685,7 @@ public class ReactionState {
      * @param fuelUnits current Dendro fuel units
      * @param fuelDecayRate special fuel decay in units per second
      * @param currentTime simulator time in seconds
+     * @param reactionStats latest applier's reaction-stat snapshot
      * @return immutable state, or {@code null} when the payload is invalid
      */
     public BurningState startBurning(
@@ -664,7 +693,8 @@ public class ReactionState {
             double preResistanceDamage,
             double fuelUnits,
             double fuelDecayRate,
-            double currentTime) {
+            double currentTime,
+            StatsContainer reactionStats) {
         if (!isValidBurningPayload(
                 ownerId, preResistanceDamage, fuelUnits, fuelDecayRate, currentTime)) {
             clearBurning();
@@ -676,7 +706,9 @@ public class ReactionState {
                 fuelUnits,
                 fuelDecayRate,
                 currentTime,
-                nextBurningGeneration++);
+                nextBurningGeneration++,
+                2.0,
+                reactionStats);
         burningEndTime = burningState.getEndTime();
         return burningState;
     }
@@ -706,7 +738,9 @@ public class ReactionState {
                 fuelUnits,
                 fuelDecayRate,
                 currentTime,
-                burningState.generation);
+                burningState.generation,
+                burningState.burningAuraUnits,
+                burningState.reactionStats);
         burningEndTime = burningState.getEndTime();
         return burningState;
     }
@@ -717,10 +751,14 @@ public class ReactionState {
      * @param ownerId new damage owner
      * @param preResistanceDamage new damage before impact-time resistance
      * @param currentTime simulator refresh time
+     * @param reactionStats latest applier's reaction-stat snapshot
      * @return refreshed state, or {@code null} when no valid state remains
      */
     public BurningState refreshBurningDamage(
-            CharacterId ownerId, double preResistanceDamage, double currentTime) {
+            CharacterId ownerId,
+            double preResistanceDamage,
+            double currentTime,
+            StatsContainer reactionStats) {
         if (burningState == null) {
             return null;
         }
@@ -740,7 +778,9 @@ public class ReactionState {
                 remainingFuel,
                 burningState.fuelDecayRate,
                 currentTime,
-                burningState.generation);
+                burningState.generation,
+                burningState.burningAuraUnits,
+                reactionStats);
         burningEndTime = burningState.getEndTime();
         return burningState;
     }
@@ -766,7 +806,9 @@ public class ReactionState {
                 remainingFuel,
                 burningState.fuelDecayRate,
                 currentTime,
-                burningState.generation);
+                burningState.generation,
+                burningState.burningAuraUnits,
+                burningState.reactionStats);
         burningEndTime = burningState.getEndTime();
         return burningState;
     }
@@ -774,6 +816,64 @@ public class ReactionState {
     /** Returns the immutable current Burning payload. */
     public BurningState getBurningState() {
         return burningState;
+    }
+
+    /**
+     * Consumes the independent Burning Aura and returns trigger source gauge spent.
+     *
+     * @param sourceGaugeUnits available trigger gauge
+     * @param modifier target-Aura consumption per source unit
+     * @return consumed trigger source gauge
+     */
+    public double consumeBurningAura(
+            double sourceGaugeUnits, double modifier) {
+        if (burningState == null
+                || sourceGaugeUnits <= 0.0
+                || modifier <= 0.0) {
+            return 0.0;
+        }
+        double auraConsumption = Math.min(
+                burningState.burningAuraUnits,
+                sourceGaugeUnits * modifier);
+        double remainingAuraUnits = burningState.burningAuraUnits - auraConsumption;
+        if (remainingAuraUnits <= 0.0) {
+            clearBurning();
+        } else {
+            burningState = new BurningState(
+                    burningState.ownerId,
+                    burningState.preResistanceDamage,
+                    burningState.fuelUnits,
+                    burningState.fuelDecayRate,
+                    burningState.lastUpdateTime,
+                    burningState.generation,
+                    remainingAuraUnits,
+                    burningState.reactionStats);
+        }
+        return auraConsumption / modifier;
+    }
+
+    /**
+     * Accepts one target-wide Burning Pyro application at the 2-second boundary.
+     *
+     * @param currentTime simulator time in seconds
+     * @return {@code true} when this tick may apply Pyro
+     */
+    public boolean tryStartBurningPyroApplication(double currentTime) {
+        if (currentTime < burningPyroApplicationCooldownEndTime) {
+            return false;
+        }
+        burningPyroApplicationCooldownEndTime = currentTime + 2.0;
+        return true;
+    }
+
+    /** Returns the target-wide Burning Pyro application cooldown end. */
+    public double getBurningPyroApplicationCooldownEndTime() {
+        return burningPyroApplicationCooldownEndTime;
+    }
+
+    /** Restores the target-wide Burning Pyro application cooldown end. */
+    public void restoreBurningPyroApplicationCooldown(double endTime) {
+        burningPyroApplicationCooldownEndTime = endTime;
     }
 
     /** Returns the next timer generation identifier. */
@@ -785,6 +885,7 @@ public class ReactionState {
     public void clearBurning() {
         burningState = null;
         burningEndTime = -1.0;
+        burningNextTickTime = -1.0;
         burningTimerRunning = false;
         nextBurningGeneration++;
     }
@@ -804,7 +905,9 @@ public class ReactionState {
                         state.fuelUnits,
                         state.fuelDecayRate,
                         state.lastUpdateTime,
-                        state.generation);
+                        state.generation,
+                        state.burningAuraUnits,
+                        state.reactionStats);
         nextBurningGeneration = Math.max(1, nextGeneration);
         burningEndTime = burningState != null ? burningState.getEndTime() : -1.0;
     }

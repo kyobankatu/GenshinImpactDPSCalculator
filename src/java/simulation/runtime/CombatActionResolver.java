@@ -40,6 +40,8 @@ public class CombatActionResolver {
     private final ReactionEffectScheduler reactionEffectScheduler;
     /** Reusable buffer for the list of buffs applicable to the resolving action. */
     private final List<Buff> applicableBuffBuffer = new ArrayList<>();
+    /** Whether gauge resolution is processing Burning's own periodic Pyro packet. */
+    private boolean resolvingBurningTickApplication;
 
     /**
      * Creates a resolver bound to the given simulator instance.
@@ -49,6 +51,11 @@ public class CombatActionResolver {
     public CombatActionResolver(CombatSimulator sim) {
         this.sim = sim;
         this.reactionEffectScheduler = new ReactionEffectScheduler(sim);
+    }
+
+    /** Reconstructs the simulator-owned Burning timer after snapshot restore. */
+    public void restoreBurningTimer(double nextTickTime) {
+        reactionEffectScheduler.restoreBurningTimer(nextTickTime);
     }
 
     /**
@@ -98,6 +105,56 @@ public class CombatActionResolver {
             }
 
             finalizeActionDamage(c, charName, action, reactionMulti, context);
+        } finally {
+            sim.popBuffSource();
+        }
+    }
+
+    /**
+     * Resolves the 1U Pyro application carried by an accepted Burning tick.
+     *
+     * <p>Damage remains owned by {@link ReactionEffectScheduler}; this path only
+     * applies reaction and Aura effects with the Burning applier's saved stats.
+     * The target-wide 2-second ICD is checked by the caller.</p>
+     *
+     * @param state immutable Burning payload used by this tick
+     * @return amplifying multiplier for the Burning damage packet
+     */
+    public double resolveBurningTickReactions(ReactionState.BurningState state) {
+        if (state == null) {
+            return 1.0;
+        }
+        Character attacker = sim.getCharacter(state.ownerId);
+        if (attacker == null) {
+            return 1.0;
+        }
+        AttackAction action = new AttackAction(
+                "Burning Pyro Application",
+                0.0,
+                Element.PYRO,
+                StatType.BASE_ATK);
+        action.setICD(ICDType.None, ICDTag.None, 1.0);
+        StatsContainer reactionStats = state.getReactionStats();
+        if (reactionStats != null) {
+            action.setStatSnapshot(reactionStats);
+        }
+
+        sim.pushBuffSource(state.ownerId);
+        try {
+            ActionResolutionContext context = createContext(attacker, action);
+            tryTriggerDendroCoreReaction(
+                    attacker, state.ownerId, action, context);
+            resolvingBurningTickApplication = true;
+            double multiplier;
+            try {
+                multiplier = resolveGaugeAndReactions(
+                        attacker, state.ownerId, action, context);
+            } finally {
+                resolvingBurningTickApplication = false;
+            }
+            sim.getStellarReactionManager().recordElementApplication(
+                    state.ownerId, Element.PYRO, sim.getCurrentTime());
+            return multiplier;
         } finally {
             sim.popBuffSource();
         }
@@ -199,38 +256,59 @@ public class CombatActionResolver {
             ActionResolutionContext context) {
         Element trigger = action.getElement();
         Set<Element> currentAuras = sim.getEnemy().getActiveAuras(sim.getCurrentTime());
-        boolean reactionTriggered = false;
+        if (isBurningAuraReactiveTrigger(trigger) && sim.isBurningActive()) {
+            currentAuras.add(Element.PYRO);
+        }
+        boolean frozenAtStart = sim.getEnemy().isFrozen(sim.getCurrentTime());
+        if (trigger == Element.PYRO && frozenAtStart) {
+            currentAuras.add(Element.CRYO);
+        }
         double reactionMulti = 1.0;
+        double remainingGaugeUnits = action.getGaugeUnits();
+        boolean preventsTriggerAttachment = false;
+        boolean suppressElectroCharged = trigger == Element.ELECTRO
+                && frozenAtStart;
 
         StatsContainer stats = getReactionStats(attacker, action, context);
         double em = stats.get(StatType.ELEMENTAL_MASTERY);
 
-        if (tryTriggerQuickenOnlyBloom(
-                attacker, characterId, action, context, stats, currentAuras)) {
-            reactionTriggered = true;
+        double quickenBloomConsumption = tryTriggerQuickenOnlyBloom(
+                attacker, characterId, action, context, stats, currentAuras,
+                remainingGaugeUnits);
+        if (quickenBloomConsumption > 0.0) {
+            remainingGaugeUnits -= quickenBloomConsumption;
+            preventsTriggerAttachment = true;
         }
-        Double frozenMeltMultiplier = tryTriggerPyroMeltOnFrozen(
-                attacker, action, stats);
-        if (frozenMeltMultiplier != null) {
-            return frozenMeltMultiplier;
-        }
-        if (tryTriggerQuickenOnlyBurning(
-                attacker, characterId, action, context, stats, currentAuras)) {
-            reactionTriggered = true;
-        }
+        tryTriggerQuickenOnlyBurning(
+                attacker, characterId, action, context, stats, currentAuras);
 
         boolean frozenReactionChecked = false;
         for (Element aura : ReactionPriority.orderAuras(trigger, currentAuras)) {
+            if (remainingGaugeUnits <= 0.0) {
+                break;
+            }
             if (trigger == Element.ELECTRO
                     && !frozenReactionChecked
-                    && aura != Element.PYRO
-                    && aura != Element.HYDRO) {
+                    && aura != Element.PYRO) {
                 frozenReactionChecked = true;
-                if (tryTriggerFrozenGaugeReaction(
-                        attacker, characterId, action, context, stats)) {
-                    reactionTriggered = true;
-                    break;
+                double frozenConsumption = tryTriggerFrozenGaugeReaction(
+                        attacker, characterId, action, context, stats,
+                        remainingGaugeUnits);
+                if (frozenConsumption > 0.0) {
+                    remainingGaugeUnits -= frozenConsumption;
+                    preventsTriggerAttachment = true;
+                    if (remainingGaugeUnits <= 0.0) {
+                        break;
+                    }
                 }
+            }
+            if (suppressElectroCharged && aura == Element.HYDRO) {
+                continue;
+            }
+            if (trigger == Element.PYRO
+                    && frozenAtStart
+                    && aura == Element.HYDRO) {
+                continue;
             }
             ReactionResult result = ReactionCalculator.calculate(
                     trigger, aura, em, 90, getReactionBonus(trigger, aura, stats));
@@ -248,30 +326,75 @@ public class CombatActionResolver {
                 }
                 continue;
             }
+            if (result.getKind() == ReactionResult.Kind.BURNING
+                    && sim.isBurningActive()) {
+                if (!resolvingBurningTickApplication) {
+                    boolean replacesFuel = trigger == Element.DENDRO;
+                    if (replacesFuel) {
+                        sim.synchronizeBurningFuel();
+                        sim.advanceBurning();
+                        sim.getEnemy().replaceAuraFromSource(
+                                Element.DENDRO,
+                                remainingGaugeUnits,
+                                sim.getCurrentTime());
+                    }
+                    reactionEffectScheduler.scheduleBurning(
+                            characterId, result.getTransformDamage(),
+                            replacesFuel, stats);
+                }
+                continue;
+            }
 
-            reactionTriggered = true;
+            boolean triggerWasUnreacted = !preventsTriggerAttachment;
+            if (result.getKind() != ReactionResult.Kind.BURNING) {
+                preventsTriggerAttachment = true;
+            }
             sim.notifyReaction(result, attacker);
 
             if (result.getType() == ReactionResult.Type.AMP) {
-                reactionMulti = handleAmplifyingReaction(trigger, aura, action, result);
+                AmpReactionResolution resolution = handleAmplifyingReaction(
+                        trigger, aura, remainingGaugeUnits, result);
+                reactionMulti = resolution.multiplier;
+                remainingGaugeUnits -= resolution.consumedGaugeUnits;
             } else if (result.isStateful()) {
-                handleStatefulReaction(attacker, characterId, trigger, aura, action, result, stats, context);
+                remainingGaugeUnits -= handleStatefulReaction(
+                        attacker, characterId, trigger, aura, action, result,
+                        stats, context, remainingGaugeUnits);
             } else if (result.getType() == ReactionResult.Type.TRANSFORMATIVE) {
-                handleTransformativeReaction(attacker, characterId, action, trigger, aura, result, stats, context);
+                remainingGaugeUnits -= handleTransformativeReaction(
+                        attacker, characterId, action, trigger, aura, result,
+                        stats, context, remainingGaugeUnits,
+                        triggerWasUnreacted);
             }
         }
 
-        if (!frozenReactionChecked
-                && tryTriggerFrozenGaugeReaction(
-                        attacker, characterId, action, context, stats)) {
-            reactionTriggered = true;
+        if (!frozenReactionChecked && remainingGaugeUnits > 0.0) {
+            double frozenConsumption = tryTriggerFrozenGaugeReaction(
+                    attacker, characterId, action, context, stats,
+                    remainingGaugeUnits);
+            if (frozenConsumption > 0.0) {
+                remainingGaugeUnits -= frozenConsumption;
+                preventsTriggerAttachment = true;
+            }
         }
 
-        if (!reactionTriggered) {
-            applyTriggerAuraIfPersistent(trigger, action.getGaugeUnits());
+        if (!preventsTriggerAttachment && remainingGaugeUnits > 0.0) {
+            applyTriggerAuraIfPersistent(trigger, remainingGaugeUnits);
         }
 
         return reactionMulti;
+    }
+
+    /** Result of one amplifying reaction including consumed source gauge. */
+    private static final class AmpReactionResolution {
+        private final double multiplier;
+        private final double consumedGaugeUnits;
+
+        private AmpReactionResolution(
+                double multiplier, double consumedGaugeUnits) {
+            this.multiplier = multiplier;
+            this.consumedGaugeUnits = consumedGaugeUnits;
+        }
     }
 
     private ReactionResult convertToLunarIfEligible(ReactionResult result) {
@@ -331,33 +454,6 @@ public class CombatActionResolver {
         return result;
     }
 
-    /**
-     * Resolves non-shattered Frozen gauge as Cryo for an incoming Pyro hit.
-     *
-     * @return the Melt multiplier, or {@code null} when Frozen Melt does not apply
-     */
-    private Double tryTriggerPyroMeltOnFrozen(
-            Character attacker,
-            AttackAction action,
-            StatsContainer stats) {
-        if (action.getElement() != Element.PYRO
-                || !sim.getEnemy().isFrozen(sim.getCurrentTime())) {
-            return null;
-        }
-        ReactionResult result = ReactionCalculator.calculate(
-                Element.PYRO,
-                Element.CRYO,
-                stats.get(StatType.ELEMENTAL_MASTERY),
-                90,
-                getReactionBonus(Element.PYRO, Element.CRYO, stats));
-        sim.notifyReaction(result, attacker);
-        double multiplier = handleAmplifyingReaction(
-                Element.PYRO, Element.CRYO, action, result);
-        sim.getEnemy().reduceFreezeAura(
-                action.getGaugeUnits() * 2.0, sim.getCurrentTime());
-        return multiplier;
-    }
-
     private void tryTriggerShatter(
             Character attacker,
             CharacterId characterId,
@@ -396,22 +492,24 @@ public class CombatActionResolver {
     /**
      * Resolves reactions that treat the synthetic Frozen gauge as Cryo.
      *
-     * <p>Electro consumes any coexisting Cryo before Frozen and produces one
-     * Superconduct. Anemo and Geo consume Frozen at the 0.5 gauge modifier used
-     * by Swirl and Crystallize. Pyro-on-Frozen Melt has its own amplifying path.
+     * <p>Electro consumes coexisting Cryo before Frozen, then exhausts its trigger
+     * while producing one Superconduct. Anemo and Geo reach Frozen after their
+     * ordinary Aura attempts and consume it at the 0.5 gauge modifier used by
+     * Swirl and Crystallize.
      */
-    private boolean tryTriggerFrozenGaugeReaction(
+    private double tryTriggerFrozenGaugeReaction(
             Character attacker,
             CharacterId characterId,
             AttackAction action,
             ActionResolutionContext context,
-            StatsContainer stats) {
+            StatsContainer stats,
+            double availableGaugeUnits) {
         Element trigger = action.getElement();
         if (!sim.getEnemy().isFrozen(sim.getCurrentTime())
                 || (trigger != Element.ELECTRO
                         && trigger != Element.ANEMO
                         && trigger != Element.GEO)) {
-            return false;
+            return 0.0;
         }
 
         ReactionResult result = ReactionCalculator.calculate(
@@ -422,28 +520,33 @@ public class CombatActionResolver {
                 getReactionBonus(trigger, Element.CRYO, stats));
         result = convertToStellarIfEligible(result);
         if (result.getType() == ReactionResult.Type.NONE) {
-            return false;
+            return 0.0;
         }
         if (result.getKind() == ReactionResult.Kind.CRYSTALLIZE
                 && !sim.tryStartStandardCrystallizeCooldown()) {
-            return false;
+            return 0.0;
         }
 
         sim.notifyReaction(result, attacker);
+        double modifier = trigger == Element.ELECTRO ? 1.0 : 0.5;
+        double ordinaryConsumption = 0.0;
+        double frozenSourceGaugeUnits = availableGaugeUnits;
         if (trigger == Element.ELECTRO) {
-            double cryoUnits = sim.getEnemy().getAuraUnits(
-                    Element.CRYO, sim.getCurrentTime());
-            double cryoConsumption = Math.min(action.getGaugeUnits(), cryoUnits);
-            sim.getEnemy().reduceAura(
-                    Element.CRYO, cryoConsumption, sim.getCurrentTime());
-            sim.getEnemy().reduceFreezeAura(
-                    action.getGaugeUnits() - cryoConsumption,
+            ordinaryConsumption = sim.getEnemy().consumeAura(
+                    Element.CRYO, availableGaugeUnits, modifier,
                     sim.getCurrentTime());
-        } else {
-            sim.getEnemy().reduceFreezeAura(
-                    action.getGaugeUnits() * 0.5,
-                    sim.getCurrentTime());
+            frozenSourceGaugeUnits = Math.max(
+                    0.0, availableGaugeUnits - ordinaryConsumption);
         }
+        double frozenUnits = sim.getEnemy().getFreezeAuraUnits(
+                sim.getCurrentTime());
+        double frozenAuraConsumption = Math.min(
+                frozenUnits, frozenSourceGaugeUnits * modifier);
+        sim.getEnemy().reduceFreezeAura(
+                frozenAuraConsumption, sim.getCurrentTime());
+        double consumedGaugeUnits = trigger == Element.ELECTRO
+                ? availableGaugeUnits
+                : frozenAuraConsumption / modifier;
 
         if (result.isStateful()) {
             if (result.getKind() == ReactionResult.Kind.STELLAR_CONDUCT) {
@@ -465,9 +568,11 @@ public class CombatActionResolver {
                     result,
                     stats,
                     context,
+                    availableGaugeUnits,
+                    false,
                     false);
         }
-        return true;
+        return consumedGaugeUnits;
     }
 
     private double getReactionBonus(Element trigger, Element aura, StatsContainer stats) {
@@ -558,6 +663,9 @@ public class CombatActionResolver {
      * @return stats container to read EM / reaction bonuses from
      */
     private StatsContainer getReactionStats(Character attacker, AttackAction action, ActionResolutionContext context) {
+        if (action.hasStatSnapshot()) {
+            return action.getStatSnapshot();
+        }
         if (action.isUseSnapshot()) {
             return attacker.getSnapshot();
         }
@@ -569,14 +677,14 @@ public class CombatActionResolver {
      *
      * @param trigger trigger element
      * @param aura    consumed aura element
-     * @param action  source action
+     * @param availableGaugeUnits trigger gauge available to this reaction
      * @param result  resolved reaction result
-     * @return amplifying damage multiplier
+     * @return multiplier and consumed trigger gauge
      */
-    private double handleAmplifyingReaction(
+    private AmpReactionResolution handleAmplifyingReaction(
             Element trigger,
             Element aura,
-            AttackAction action,
+            double availableGaugeUnits,
             ReactionResult result) {
         double reactionMulti = result.getAmpMultiplier();
         if (sim.isLoggingEnabled()) {
@@ -585,12 +693,26 @@ public class CombatActionResolver {
                     trigger, aura, result.getName(), reactionMulti));
         }
 
-        double consumption = action.getGaugeUnits();
         boolean isReverse = (trigger == Element.PYRO && aura == Element.HYDRO)
                 || (trigger == Element.CRYO && aura == Element.PYRO);
         double modifier = isReverse ? 0.5 : 2.0;
-        sim.getEnemy().reduceAura(aura, consumption * modifier, sim.getCurrentTime());
-        return reactionMulti;
+        double consumedGaugeUnits;
+        if (trigger == Element.PYRO && aura == Element.CRYO) {
+            double ordinaryConsumption = sim.getEnemy().consumeAura(
+                    Element.CRYO, availableGaugeUnits, modifier,
+                    sim.getCurrentTime());
+            double frozenAuraConsumption = Math.min(
+                    sim.getEnemy().getFreezeAuraUnits(sim.getCurrentTime()),
+                    availableGaugeUnits * modifier);
+            sim.getEnemy().reduceFreezeAura(
+                    frozenAuraConsumption, sim.getCurrentTime());
+            consumedGaugeUnits = Math.max(
+                    ordinaryConsumption, frozenAuraConsumption / modifier);
+        } else {
+            consumedGaugeUnits = consumeReactiveAura(
+                    aura, availableGaugeUnits, modifier);
+        }
+        return new AmpReactionResolution(reactionMulti, consumedGaugeUnits);
     }
 
     /**
@@ -605,29 +727,11 @@ public class CombatActionResolver {
      * @param result      resolved reaction result
      * @param stats       stats used for reaction bonuses
      * @param context     start-of-hit buffs used for impact resistance
+     * @param availableGaugeUnits trigger gauge available to this reaction
+     * @param triggerWasUnreacted whether earlier reactions already claimed the trigger
+     * @return trigger gauge consumed by this reaction
      */
-    private void handleTransformativeReaction(
-            Character attacker,
-            CharacterId characterId,
-            AttackAction action,
-            Element trigger,
-            Element aura,
-            ReactionResult result,
-            StatsContainer stats,
-            ActionResolutionContext context) {
-        handleTransformativeReaction(
-                attacker,
-                characterId,
-                action,
-                trigger,
-                aura,
-                result,
-                stats,
-                context,
-                true);
-    }
-
-    private void handleTransformativeReaction(
+    private double handleTransformativeReaction(
             Character attacker,
             CharacterId characterId,
             AttackAction action,
@@ -636,12 +740,41 @@ public class CombatActionResolver {
             ReactionResult result,
             StatsContainer stats,
             ActionResolutionContext context,
+            double availableGaugeUnits,
+            boolean triggerWasUnreacted) {
+        return handleTransformativeReaction(
+                attacker,
+                characterId,
+                action,
+                trigger,
+                aura,
+                result,
+                stats,
+                context,
+                availableGaugeUnits,
+                triggerWasUnreacted,
+                true);
+    }
+
+    private double handleTransformativeReaction(
+            Character attacker,
+            CharacterId characterId,
+            AttackAction action,
+            Element trigger,
+            Element aura,
+            ReactionResult result,
+            StatsContainer stats,
+            ActionResolutionContext context,
+            double availableGaugeUnits,
+            boolean triggerWasUnreacted,
             boolean consumeOrdinaryAura) {
         Element reactionElement = getTransformativeReactionElement(result);
+        double consumedGaugeUnits = 0.0;
 
         if (!result.isElectroCharged() && consumeOrdinaryAura) {
-            sim.getEnemy().reduceAura(
-                    aura, getAuraConsumption(action, result, trigger, aura), sim.getCurrentTime());
+            double modifier = getAuraConsumptionModifier(result, trigger, aura);
+            consumedGaugeUnits = consumeReactiveAura(
+                    aura, availableGaugeUnits, modifier);
         }
         if (result.getKind() == ReactionResult.Kind.STELLAR_SWIRL) {
             sim.getStellarReactionManager().triggerStellarSwirl(sim.getCurrentTime());
@@ -659,7 +792,7 @@ public class CombatActionResolver {
                         "   [Reaction] %s on %s -> %s Damage blocked (damage sequence)",
                         trigger, aura, result.getName()));
             }
-            return;
+            return consumedGaugeUnits;
         }
 
         if (isOverload(result)
@@ -669,7 +802,7 @@ public class CombatActionResolver {
                         "   [Reaction] %s on %s -> %s Damage blocked (damage sequence)",
                         trigger, aura, result.getName()));
             }
-            return;
+            return consumedGaugeUnits;
         }
         if (result.getKind() == ReactionResult.Kind.SUPERCONDUCT
                 && !sim.tryStartSuperconductDamageSequence(characterId)) {
@@ -678,7 +811,7 @@ public class CombatActionResolver {
                         "   [Reaction] %s on %s -> %s Damage blocked (damage sequence)",
                         trigger, aura, result.getName()));
             }
-            return;
+            return consumedGaugeUnits;
         }
 
         double resFactor = resolveImpactResistance(context, reactionElement);
@@ -702,7 +835,7 @@ public class CombatActionResolver {
             reactionEffectScheduler.scheduleElectroCharged(
                     characterId,
                     trigger,
-                    action.getGaugeUnits(),
+                    triggerWasUnreacted ? availableGaugeUnits : 0.0,
                     preResistanceDamage,
                     false);
             if (sim.isLoggingEnabled()) {
@@ -710,7 +843,7 @@ public class CombatActionResolver {
                         "   [Reaction] %s on %s -> %s Damage deferred (active sequence)",
                         trigger, aura, reactionLabel));
             }
-            return;
+            return consumedGaugeUnits;
         }
 
         if (result.getKind() == ReactionResult.Kind.ELECTRO_CHARGED) {
@@ -719,7 +852,7 @@ public class CombatActionResolver {
             reactionEffectScheduler.scheduleElectroCharged(
                     characterId,
                     trigger,
-                    action.getGaugeUnits(),
+                    triggerWasUnreacted ? availableGaugeUnits : 0.0,
                     preResistanceDamage,
                     false);
             if (!damageAccepted) {
@@ -728,7 +861,7 @@ public class CombatActionResolver {
                             "   [Reaction] %s on %s -> %s Damage blocked (target cooldown)",
                             trigger, aura, reactionLabel));
                 }
-                return;
+                return consumedGaugeUnits;
             }
         }
 
@@ -751,10 +884,11 @@ public class CombatActionResolver {
             reactionEffectScheduler.scheduleElectroCharged(
                     characterId,
                     trigger,
-                    action.getGaugeUnits(),
+                    triggerWasUnreacted ? availableGaugeUnits : 0.0,
                     preResistanceDamage,
                     true);
         }
+        return consumedGaugeUnits;
     }
 
     private boolean isOverload(ReactionResult result) {
@@ -762,11 +896,21 @@ public class CombatActionResolver {
                 || result.getKind() == ReactionResult.Kind.OVERLOADED;
     }
 
-    private void handleStatefulReaction(Character attacker, CharacterId characterId, Element trigger, Element aura,
-            AttackAction action, ReactionResult result, StatsContainer stats, ActionResolutionContext context) {
+    private double handleStatefulReaction(
+            Character attacker,
+            CharacterId characterId,
+            Element trigger,
+            Element aura,
+            AttackAction action,
+            ReactionResult result,
+            StatsContainer stats,
+            ActionResolutionContext context,
+            double availableGaugeUnits) {
+        double consumedGaugeUnits = 0.0;
         if (result.getKind() == ReactionResult.Kind.STELLAR_CONDUCT) {
-            sim.getEnemy().reduceAura(
-                    aura, getAuraConsumption(action, result, trigger, aura), sim.getCurrentTime());
+            consumedGaugeUnits = consumeReactiveAura(
+                    aura, availableGaugeUnits,
+                    getAuraConsumptionModifier(result, trigger, aura));
             sim.getStellarReactionManager().triggerStellarConduct(sim.getCurrentTime());
             if (sim.isLoggingEnabled()) {
                 System.out.println(String.format(
@@ -774,27 +918,28 @@ public class CombatActionResolver {
                         trigger, aura));
             }
         } else if (result.getKind() == ReactionResult.Kind.FROZEN) {
-            double freezeUnits = 2.0 * Math.min(
-                    action.getGaugeUnits(),
-                    sim.getEnemy().getAuraUnits(aura, sim.getCurrentTime()));
+            consumedGaugeUnits = sim.getEnemy().consumeAura(
+                    aura, availableGaugeUnits, 1.0, sim.getCurrentTime());
+            double freezeUnits = 2.0 * consumedGaugeUnits;
             sim.getEnemy().applyFreezeAura(freezeUnits, sim.getCurrentTime());
-            sim.getEnemy().reduceAura(aura, action.getGaugeUnits(), sim.getCurrentTime());
             if (sim.isLoggingEnabled()) {
                 System.out.println(String.format(
                         "   [Reaction] %s on %s -> Frozen (%.1f U)",
                         trigger, aura, freezeUnits));
             }
         } else if (result.getKind() == ReactionResult.Kind.CRYSTALLIZE) {
-            sim.getEnemy().reduceAura(
-                    aura, getAuraConsumption(action, result, trigger, aura), sim.getCurrentTime());
+            consumedGaugeUnits = consumeReactiveAura(
+                    aura, availableGaugeUnits,
+                    getAuraConsumptionModifier(result, trigger, aura));
             if (sim.isLoggingEnabled()) {
                 System.out.println(String.format(
                         "   [Reaction] %s on %s -> %s",
                         trigger, aura, result.getName()));
             }
         } else if (result.getKind() == ReactionResult.Kind.LUNAR_CRYSTALLIZE) {
-            sim.getEnemy().reduceAura(
-                    aura, getAuraConsumption(action, result, trigger, aura), sim.getCurrentTime());
+            consumedGaugeUnits = consumeReactiveAura(
+                    aura, availableGaugeUnits,
+                    getAuraConsumptionModifier(result, trigger, aura));
             handleLunarCrystallize(attacker, characterId, trigger, aura, result);
         } else if (result.getKind() == ReactionResult.Kind.BURNING) {
             double resFactor = resolveImpactResistance(context, Element.PYRO);
@@ -805,7 +950,7 @@ public class CombatActionResolver {
                         Element.DENDRO, action.getGaugeUnits(), sim.getCurrentTime());
             }
             reactionEffectScheduler.scheduleBurning(
-                    characterId, result.getTransformDamage(), replacesFuel);
+                    characterId, result.getTransformDamage(), replacesFuel, stats);
             if (sim.isLoggingEnabled()) {
                 System.out.println(String.format(
                         "   [Reaction] %s on %s -> Burning Tick Damage: %,.0f",
@@ -813,13 +958,14 @@ public class CombatActionResolver {
             }
         } else if (result.getKind() == ReactionResult.Kind.BLOOM
                 || result.getKind() == ReactionResult.Kind.LUNAR_BLOOM) {
-            handleBloomReaction(
-                    characterId, action, trigger, aura, result, context, true);
+            consumedGaugeUnits = handleBloomReaction(
+                    characterId, trigger, aura, result, context,
+                    availableGaugeUnits, true);
         } else if (result.getKind() == ReactionResult.Kind.QUICKEN) {
-            double quickenGauge = Math.min(
-                    sim.getEnemy().getAuraUnits(aura, sim.getCurrentTime()), action.getGaugeUnits());
+            consumedGaugeUnits = sim.getEnemy().consumeAura(
+                    aura, availableGaugeUnits, 1.0, sim.getCurrentTime());
+            double quickenGauge = consumedGaugeUnits;
             ReactionState.QuickenState quickenState = sim.applyQuicken(quickenGauge);
-            sim.getEnemy().reduceAura(aura, action.getGaugeUnits(), sim.getCurrentTime());
             if (sim.isLoggingEnabled()) {
                 double duration = quickenState != null
                         ? Math.max(0.0, quickenState.getEndTime() - sim.getCurrentTime())
@@ -829,20 +975,22 @@ public class CombatActionResolver {
                         trigger, aura, duration));
             }
         }
+        return consumedGaugeUnits;
     }
 
-    private boolean tryTriggerQuickenOnlyBloom(
+    private double tryTriggerQuickenOnlyBloom(
             Character attacker,
             CharacterId characterId,
             AttackAction action,
             ActionResolutionContext context,
             StatsContainer stats,
-            Set<Element> currentAuras) {
+            Set<Element> currentAuras,
+            double availableGaugeUnits) {
         if (action.getElement() != Element.HYDRO
                 || currentAuras.contains(Element.DENDRO)
                 || !sim.isQuickenActive()
                 || sim.getQuickenState() == null) {
-            return false;
+            return 0.0;
         }
         ReactionResult result = ReactionCalculator.calculate(
                 Element.HYDRO,
@@ -852,15 +1000,14 @@ public class CombatActionResolver {
                 getBloomReactionBonus(stats));
         result = convertToLunarIfEligible(result);
         sim.notifyReaction(result, attacker);
-        handleBloomReaction(
+        return handleBloomReaction(
                 characterId,
-                action,
                 Element.HYDRO,
                 Element.DENDRO,
                 result,
                 context,
+                availableGaugeUnits,
                 false);
-        return true;
     }
 
     private boolean tryTriggerQuickenOnlyBurning(
@@ -891,24 +1038,33 @@ public class CombatActionResolver {
                 action,
                 result,
                 stats,
-                context);
+                context,
+                action.getGaugeUnits());
         return true;
     }
 
-    private void handleBloomReaction(
+    private double handleBloomReaction(
             CharacterId characterId,
-            AttackAction action,
             Element trigger,
             Element aura,
             ReactionResult result,
             ActionResolutionContext context,
+            double availableGaugeUnits,
             boolean consumeEnemyAura) {
-        double consumption = getAuraConsumption(action, result, trigger, aura);
+        double consumedGaugeUnits = 0.0;
+        double modifier = getAuraConsumptionModifier(result, trigger, aura);
         if (consumeEnemyAura) {
-            sim.getEnemy().reduceAura(aura, consumption, sim.getCurrentTime());
+            consumedGaugeUnits = sim.getEnemy().consumeAura(
+                    aura, availableGaugeUnits, modifier, sim.getCurrentTime());
         }
         if (trigger == Element.HYDRO && sim.getQuickenState() != null) {
-            sim.consumeQuicken(consumption);
+            double quickenUnits = sim.getQuickenState().remainingUnitsAt(
+                    sim.getCurrentTime());
+            double quickenAuraConsumption = Math.min(
+                    quickenUnits, availableGaugeUnits * modifier);
+            sim.consumeQuicken(quickenAuraConsumption);
+            consumedGaugeUnits = Math.max(
+                    consumedGaugeUnits, quickenAuraConsumption / modifier);
         }
         double resFactor = resolveImpactResistance(context, Element.DENDRO);
         double coreDamage = result.getTransformDamage() * resFactor;
@@ -922,6 +1078,7 @@ public class CombatActionResolver {
                     "   [Reaction] %s on %s -> %s Core Damage: %,.0f",
                     trigger, aura, result.getName(), coreDamage));
         }
+        return consumedGaugeUnits;
     }
 
     private void handleLunarCrystallize(
@@ -1052,23 +1209,45 @@ public class CombatActionResolver {
         return Element.PYRO;
     }
 
+    /** Returns whether the synthetic Burning Aura is eligible for this trigger. */
+    private boolean isBurningAuraReactiveTrigger(Element trigger) {
+        return trigger == Element.HYDRO
+                || trigger == Element.CRYO
+                || trigger == Element.ELECTRO
+                || trigger == Element.GEO
+                || trigger == Element.DENDRO;
+    }
+
     /**
-     * Returns the source-gauge amount consumed from an existing aura.
+     * Consumes ordinary and synthetic Auras of one element in parallel.
      *
-     * <p>Anemo and Geo triggers use the sourced 0.5 unit modifier for Swirl and
-     * both Crystallize variants. Bloom uses its directional ratio: Hydro on
-     * Dendro consumes 0.5 times the source gauge, while Dendro on Hydro consumes
-     * 2.0 times the source gauge. Other reaction families retain their existing
-     * source-gauge consumption policy.
+     * <p>Burning Aura is Pyro but is not stored in {@link model.entity.Enemy}'s
+     * ordinary Aura map. Both payloads lose the same target amount and the
+     * trigger spends only the larger proportional consumption.</p>
+     */
+    private double consumeReactiveAura(
+            Element aura, double sourceGaugeUnits, double modifier) {
+        double ordinaryConsumption = sim.getEnemy().consumeAura(
+                aura, sourceGaugeUnits, modifier, sim.getCurrentTime());
+        double burningConsumption = aura == Element.PYRO
+                ? sim.consumeBurningAura(sourceGaugeUnits, modifier)
+                : 0.0;
+        return Math.max(ordinaryConsumption, burningConsumption);
+    }
+
+    /**
+     * Returns the target-Aura consumption modifier for a reaction.
      *
-     * @param action source action carrying pre-tax gauge units
+     * <p>Anemo and Geo use 0.5 for Swirl and Crystallize. Bloom uses its
+     * directional 0.5/2.0 ratio. Other families consume one Aura unit per
+     * source unit.</p>
+     *
      * @param result typed reaction outcome
      * @param trigger trigger element
      * @param aura existing aura element
-     * @return aura gauge units to subtract
+     * @return target-Aura units consumed per source gauge unit
      */
-    private double getAuraConsumption(
-            AttackAction action,
+    private double getAuraConsumptionModifier(
             ReactionResult result,
             Element trigger,
             Element aura) {
@@ -1077,18 +1256,18 @@ public class CombatActionResolver {
             case STELLAR_SWIRL:
             case CRYSTALLIZE:
             case LUNAR_CRYSTALLIZE:
-                return action.getGaugeUnits() * 0.5;
+                return 0.5;
             case BLOOM:
             case LUNAR_BLOOM:
                 if (trigger == Element.HYDRO && aura == Element.DENDRO) {
-                    return action.getGaugeUnits() * 0.5;
+                    return 0.5;
                 }
                 if (trigger == Element.DENDRO && aura == Element.HYDRO) {
-                    return action.getGaugeUnits() * 2.0;
+                    return 2.0;
                 }
-                return action.getGaugeUnits();
+                return 1.0;
             default:
-                return action.getGaugeUnits();
+                return 1.0;
         }
     }
 

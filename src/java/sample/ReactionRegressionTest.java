@@ -56,10 +56,12 @@ public class ReactionRegressionTest {
         testAccuracyPhaseG_FreezeResolverContract();
         testAccuracyPhaseG_PyroFrozenMeltContract();
         testAccuracyPhaseG_FrozenElementalReactionContract();
+        testAccuracyPhaseG_FrozenSuppressesElectroChargedContract();
         testPhase4Crystallize();
         testPhase5Burning();
         testAccuracyPhaseG_BurningRefreshAndGenerationContract();
         testAccuracyPhaseG_QuickenBurningFuelContract();
+        testAccuracyPhaseG_BurningAuraAndPyroApplicationContract();
         testPhase6BloomCores();
         testPhase7HyperbloomAndBurgeon();
         testPhase8QuickenAggravateSpread();
@@ -360,8 +362,8 @@ public class ReactionRegressionTest {
 
         CombatSimulator pyro = simulatorWith(testCharacter(Element.PYRO));
         List<ReactionResult.Kind> pyroKinds = captureReactionKinds(pyro);
-        pyro.getEnemy().setAura(Element.HYDRO, 1.0);
-        pyro.getEnemy().setAura(Element.ELECTRO, 1.0);
+        pyro.getEnemy().setAura(Element.HYDRO, 2.0);
+        pyro.getEnemy().setAura(Element.ELECTRO, 0.25);
         pyro.performActionWithoutTimeAdvance(
                 CharacterId.SUCROSE,
                 reactionHit("Pyro simultaneous priority fixture", Element.PYRO));
@@ -369,6 +371,8 @@ public class ReactionRegressionTest {
                 "Pyro should notify Overloaded before Vaporize");
         assertEquals(ReactionResult.Kind.VAPORIZE, pyroKinds.get(1),
                 "Pyro should notify Vaporize after Overloaded");
+        assertClose(1.625, pyro.getEnemy().getAuraUnits(Element.HYDRO), EPS,
+                "Vaporize should receive only the 0.75U remaining after Overloaded");
 
         CombatSimulator anemo = simulatorWith(testCharacter(Element.ANEMO));
         List<Element> swirlElements = new ArrayList<>();
@@ -378,11 +382,13 @@ public class ReactionRegressionTest {
             }
         });
         anemo.getEnemy().setAura(Element.HYDRO, 1.0);
-        anemo.getEnemy().setAura(Element.ELECTRO, 1.0);
+        anemo.getEnemy().setAura(Element.ELECTRO, 0.1);
         anemo.performActionWithoutTimeAdvance(
                 CharacterId.SUCROSE,
                 reactionHit("Anemo simultaneous priority fixture", Element.ANEMO));
         assertElementOrder(swirlElements, Element.ELECTRO, Element.HYDRO);
+        assertClose(0.6, anemo.getEnemy().getAuraUnits(Element.HYDRO), EPS,
+                "Hydro Swirl should receive the 0.8U remaining after Electro Swirl");
     }
 
     private static void testPhase2Superconduct() {
@@ -573,6 +579,24 @@ public class ReactionRegressionTest {
                 Element.HYDRO, blunt.getCurrentTime()), EPS,
                 "Reverse Vaporize should consume half of a 1U Pyro trigger");
 
+        CombatSimulator ordered = simulatorWith(testCharacter(Element.PYRO));
+        ordered.getEnemy().setAura(
+                Element.ELECTRO, 0.25, ordered.getCurrentTime());
+        ordered.getEnemy().applyFreezeAura(1.6, ordered.getCurrentTime());
+        List<ReactionResult.Kind> orderedKinds = captureReactionKinds(ordered);
+        ordered.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Frozen Pyro priority fixture", Element.PYRO));
+        assertEquals(2, orderedKinds.size(),
+                "Pyro should resolve both prior Electro and Frozen with residual gauge");
+        assertEquals(ReactionResult.Kind.OVERLOAD, orderedKinds.get(0),
+                "Pyro should attempt Overload before Frozen Melt");
+        assertEquals(ReactionResult.Kind.MELT, orderedKinds.get(1),
+                "Residual Pyro should Melt Frozen after Overload");
+        assertClose(0.1, ordered.getEnemy().getFreezeAuraUnits(
+                ordered.getCurrentTime()), EPS,
+                "Frozen Melt should consume only the residual 0.75U Pyro source");
+
         CombatSimulator expired = simulatorWith(testCharacter(Element.PYRO));
         expired.getEnemy().setAura(Element.HYDRO, 1.0, expired.getCurrentTime());
         expired.getEnemy().applyFreezeAura(1.6, expired.getCurrentTime());
@@ -605,7 +629,7 @@ public class ReactionRegressionTest {
                 "Frozen Superconduct should consume coexisting Cryo first");
         assertClose(1.0, electro.getEnemy().getFreezeAuraUnits(
                 electro.getCurrentTime()), EPS,
-                "Frozen Superconduct should spend remaining source gauge on Frozen");
+                "Frozen Superconduct should pass only residual Electro to Frozen");
         assertClose(expectedTransformative(1.5, Element.CRYO, 0.0),
                 electro.getTotalDamage(), 0.5,
                 "Frozen Superconduct damage after RES");
@@ -658,6 +682,28 @@ public class ReactionRegressionTest {
                 "Weak Frozen Geo fixture should only Shatter");
         assertTrue(!weakGeo.getEnemy().isFrozen(weakGeo.getCurrentTime()),
                 "Sub-2U Frozen gauge should be exhausted by Shatter");
+    }
+
+    private static void testAccuracyPhaseG_FrozenSuppressesElectroChargedContract() {
+        CombatSimulator sim = simulatorWith(testCharacter(Element.ELECTRO));
+        sim.getEnemy().setAura(Element.HYDRO, 1.0, sim.getCurrentTime());
+        sim.getEnemy().applyFreezeAura(1.6, sim.getCurrentTime());
+        List<ReactionResult.Kind> kinds = captureReactionKinds(sim);
+
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Frozen Electro-Charged suppression fixture", Element.ELECTRO));
+
+        assertEquals(0, countReactions(kinds, ReactionResult.Kind.ELECTRO_CHARGED),
+                "Frozen should reject Electro-Charged before Frozen Superconduct");
+        assertEquals(1, countReactions(kinds, ReactionResult.Kind.SUPERCONDUCT),
+                "Electro on Frozen should emit exactly one Superconduct");
+        assertClose(1.0, sim.getEnemy().getAuraUnits(
+                Element.HYDRO, sim.getCurrentTime()), EPS,
+                "Rejected Electro-Charged should preserve hidden Hydro");
+        assertClose(0.0, sim.getEnemy().getAuraUnits(
+                Element.ELECTRO, sim.getCurrentTime()), EPS,
+                "Fully consumed Electro trigger should not attach an Aura");
     }
 
     private static void testPhase4Crystallize() {
@@ -880,6 +926,129 @@ public class ReactionRegressionTest {
                 "Expired Quicken should not create Burning state");
         assertClose(0.8, expired.getEnemy().getAuraUnits(Element.PYRO), EPS,
                 "Pyro should apply normally after exact Quicken expiry");
+    }
+
+    private static void testAccuracyPhaseG_BurningAuraAndPyroApplicationContract() {
+        CombatSimulator consumed = simulatorWith(testCharacter(
+                Element.PYRO, CharacterId.SUCROSE));
+        consumed.addCharacter(testCharacter(
+                Element.HYDRO, CharacterId.XIANGLING));
+        consumed.getEnemy().applyAura(
+                Element.DENDRO, 1.0, consumed.getCurrentTime());
+        consumed.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Burning Aura start fixture", Element.PYRO));
+        assertClose(2.0, consumed.getBurningState().burningAuraUnits, EPS,
+                "A new Burning generation should create an independent 2U Aura");
+        assertClose(0.8, consumed.getEnemy().getAuraUnits(
+                Element.PYRO, consumed.getCurrentTime()), EPS,
+                "Unconsumed Burning trigger gauge should attach ordinary Pyro");
+
+        consumed.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING,
+                reactionHit("Burning Aura Vaporize fixture", Element.HYDRO));
+        assertTrue(consumed.getBurningState() == null,
+                "Forward Vaporize should consume the complete 2U Burning Aura");
+        assertClose(0.0, consumed.getEnemy().getAuraUnits(
+                Element.PYRO, consumed.getCurrentTime()), EPS,
+                "One reaction should consume ordinary and Burning Pyro in parallel");
+
+        CombatSimulator dendroRefresh = simulatorWith(testCharacter(
+                Element.PYRO, CharacterId.SUCROSE));
+        dendroRefresh.addCharacter(testCharacter(
+                Element.DENDRO, CharacterId.XIANGLING));
+        dendroRefresh.getEnemy().applyAura(
+                Element.DENDRO, 2.0, dendroRefresh.getCurrentTime());
+        dendroRefresh.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Burning Dendro refresh start fixture", Element.PYRO));
+        dendroRefresh.getEnemy().setAura(Element.PYRO, 0.0);
+        dendroRefresh.getEnemy().setAura(Element.DENDRO, 0.0);
+        dendroRefresh.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING,
+                reactionHit("Burning-only Dendro refresh fixture", Element.DENDRO));
+        assertEquals(CharacterId.XIANGLING,
+                dendroRefresh.getBurningState().ownerId,
+                "Dendro should refresh Burning ownership through synthetic Aura");
+        assertClose(0.8, dendroRefresh.getBurningState().fuelUnits, EPS,
+                "Dendro should overwrite Burning fuel after ordinary Pyro is gone");
+        assertClose(2.0, dendroRefresh.getBurningState().burningAuraUnits, EPS,
+                "An active Dendro refresh should not refill or consume Burning Aura");
+
+        CombatSimulator pyroRefresh = simulatorWith(testCharacter(
+                Element.PYRO, CharacterId.SUCROSE));
+        pyroRefresh.getEnemy().applyAura(
+                Element.DENDRO, 1.0, pyroRefresh.getCurrentTime());
+        pyroRefresh.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Off-tick Pyro refresh start fixture", Element.PYRO));
+        pyroRefresh.advanceTime(0.125);
+        pyroRefresh.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Off-tick Pyro refresh fixture", Element.PYRO));
+        assertClose(0.75, pyroRefresh.getEnemy().getAuraUnits(
+                Element.DENDRO, pyroRefresh.getCurrentTime()), EPS,
+                "Refreshing Burning between ticks should first apply accrued fuel decay");
+
+        CombatSimulator offTickConsumption = simulatorWith(testCharacter(
+                Element.PYRO, CharacterId.SUCROSE));
+        offTickConsumption.addCharacter(testCharacter(
+                Element.HYDRO, CharacterId.XIANGLING));
+        offTickConsumption.getEnemy().applyAura(
+                Element.DENDRO, 1.0, offTickConsumption.getCurrentTime());
+        offTickConsumption.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Off-tick Burning start fixture", Element.PYRO));
+        offTickConsumption.advanceTime(0.125);
+        offTickConsumption.performActionWithoutTimeAdvance(
+                CharacterId.XIANGLING,
+                reactionHit("Off-tick Burning consume fixture", Element.HYDRO));
+        assertClose(0.75, offTickConsumption.getEnemy().getAuraUnits(
+                Element.DENDRO, offTickConsumption.getCurrentTime()), EPS,
+                "Removing Burning Aura between ticks should first apply accrued fuel decay");
+
+        CombatSimulator tick = simulatorWith(testCharacter(
+                Element.PYRO, CharacterId.SUCROSE));
+        tick.addCharacter(testCharacter(
+                Element.PYRO, CharacterId.XIANGLING));
+        tick.getEnemy().setAura(Element.DENDRO, 4.0, tick.getCurrentTime());
+        tick.getEnemy().setAura(Element.HYDRO, 1.0, tick.getCurrentTime());
+        ReactionEffectScheduler scheduler = new ReactionEffectScheduler(tick);
+        scheduler.scheduleBurning(CharacterId.SUCROSE, 1000.0);
+        double hydroAtFirstTick = tick.getEnemy().getAuraUnits(Element.HYDRO, 0.25);
+        tick.advanceTime(0.25);
+        assertClose(1350.0, tick.getTotalDamage(), EPS,
+                "The first accepted 1U Pyro application should Vaporize Burning damage");
+        assertClose(hydroAtFirstTick - 0.5, tick.getEnemy().getAuraUnits(
+                Element.HYDRO, tick.getCurrentTime()), EPS,
+                "Burning Vaporize should consume Hydro at the reverse 0.5 modifier");
+
+        tick.getEnemy().setAura(Element.PYRO, 0.0);
+        tick.getEnemy().setAura(Element.HYDRO, 0.0);
+        scheduler.scheduleBurning(CharacterId.XIANGLING, 1000.0);
+        tick.advanceTime(0.25);
+        assertClose(0.0, tick.getEnemy().getAuraUnits(
+                Element.PYRO, tick.getCurrentTime()), EPS,
+                "A new owner should remain blocked by target-wide Burning ICD");
+        SimulatorSnapshot snapshot = tick.saveSnapshot();
+        assertClose(2.25, snapshot.burningPyroApplicationCooldownEndTime, EPS,
+                "Burning Pyro ICD should survive snapshot capture");
+        tick.advanceTime(1.75);
+        assertClose(0.8, tick.getEnemy().getAuraUnits(
+                Element.PYRO, tick.getCurrentTime()), EPS,
+                "Burning should reapply 1U Pyro at the exact 2-second boundary");
+        tick.restoreSnapshot(snapshot);
+        assertClose(2.25, tick.saveSnapshot().burningPyroApplicationCooldownEndTime, EPS,
+                "Snapshot restore should recover the shared Burning Pyro ICD boundary");
+        assertClose(0.75, tick.saveSnapshot().burningNextTickTime, EPS,
+                "Snapshot restore should recover the next Burning tick boundary");
+        double damageAfterRestore = tick.getTotalDamage();
+        tick.advanceTime(0.24);
+        assertClose(damageAfterRestore, tick.getTotalDamage(), EPS,
+                "Restored Burning should remain silent before its captured boundary");
+        tick.advanceTime(0.01);
+        assertClose(damageAfterRestore + 900.0, tick.getTotalDamage(), EPS,
+                "Restored Burning should resume damage at its captured boundary");
     }
 
     private static void testPhase6BloomCores() {
@@ -1820,6 +1989,7 @@ public class ReactionRegressionTest {
         assertClose(1.5, sim.getEnemy().getAuraUnits(Element.PYRO), EPS,
                 "Target-blocked Swirl should still consume half source gauge");
 
+        sim.getEnemy().setAura(Element.PYRO, 0.0);
         sim.getEnemy().setAura(Element.HYDRO, 2.0);
         sim.performActionWithoutTimeAdvance(
                 CharacterId.XIANGLING,
@@ -1886,7 +2056,7 @@ public class ReactionRegressionTest {
                 reactionHit("Exact owner-reset Pyro Swirl fixture", Element.ANEMO));
         assertClose(swirlDamage * 5.0, sim.getTotalDamage(), 0.5,
                 "The original owner should deal damage at exactly 0.5 seconds");
-        assertEquals(9, countReactions(kinds, ReactionResult.Kind.SWIRL),
+        assertEquals(8, countReactions(kinds, ReactionResult.Kind.SWIRL),
                 "Every damage-blocked Swirl should retain reaction notification");
 
         sim.restoreSnapshot(snapshot);

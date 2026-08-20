@@ -882,8 +882,11 @@ public class CombatSimulator {
         double thundercloudEndTime = reactionState.getThundercloudEndTime();
         boolean burningTimerRunning = reactionState.isBurningTimerRunning();
         double burningEndTime = reactionState.getBurningEndTime();
+        double burningNextTickTime = reactionState.getBurningNextTickTime();
         simulation.runtime.ReactionState.BurningState burningState = reactionState.getBurningState();
         int nextBurningGeneration = reactionState.getNextBurningGeneration();
+        double burningPyroApplicationCooldownEndTime =
+                reactionState.getBurningPyroApplicationCooldownEndTime();
         double quickenEndTime = reactionState.getQuickenEndTime();
         simulation.runtime.ReactionState.QuickenState quickenState = reactionState.getQuickenState();
         double overloadTargetDamageCooldownEndTime =
@@ -987,7 +990,9 @@ public class CombatSimulator {
                 standardElectroChargedDamageCooldownEndTime,
                 standardElectroChargedLastDamageTime,
                 thundercloudEndTime, burningTimerRunning, burningEndTime,
+                burningNextTickTime,
                 burningState, nextBurningGeneration,
+                burningPyroApplicationCooldownEndTime,
                 quickenEndTime, quickenState,
                 overloadTargetDamageCooldownEndTime,
                 overloadOwnerDamageCooldownEndTimes,
@@ -1047,10 +1052,13 @@ public class CombatSimulator {
                 snap.standardElectroChargedLastDamageTime);
         reactionState.setThundercloudEndTime(snap.thundercloudEndTime);
         reactionState.restoreBurning(snap.burningState, snap.nextBurningGeneration);
+        reactionState.restoreBurningPyroApplicationCooldown(
+                snap.burningPyroApplicationCooldownEndTime);
         if (snap.burningState == null) {
             reactionState.setBurningEndTime(snap.burningEndTime);
         }
-        reactionState.setBurningTimerRunning(snap.burningTimerRunning);
+        reactionState.setBurningTimerRunning(false);
+        reactionState.setBurningNextTickTime(snap.burningNextTickTime);
         reactionState.restoreQuicken(snap.quickenState, snap.quickenEndTime);
         reactionStateController.restoreOverloadDamageCooldowns(
                 snap.overloadTargetDamageCooldownEndTime,
@@ -1078,6 +1086,9 @@ public class CombatSimulator {
         if (enemy != null) {
             enemy.restoreAuraState(snap.enemyAura);
             enemy.restoreFreezeAuraState(snap.enemyFreezeAura);
+        }
+        if (snap.burningTimerRunning) {
+            actionResolver.restoreBurningTimer(snap.burningNextTickTime);
         }
 
         // ICD
@@ -1341,14 +1352,41 @@ public class CombatSimulator {
         reactionStateController.setBurningEndTime(endTime);
     }
 
+    /** Returns the absolute boundary of the next Burning damage tick. */
+    public double getBurningNextTickTime() {
+        return reactionStateController.getBurningNextTickTime();
+    }
+
+    /** Records the absolute boundary of the next Burning damage tick. */
+    public void setBurningNextTickTime(double nextTickTime) {
+        reactionStateController.setBurningNextTickTime(nextTickTime);
+    }
+
     /** Starts a typed Burning state at the current simulator time. */
     public simulation.runtime.ReactionState.BurningState startBurning(
             CharacterId ownerId,
             double preResistanceDamage,
             double fuelUnits,
             double fuelDecayRate) {
+        Character owner = getCharacter(ownerId);
+        model.stats.StatsContainer reactionStats = owner == null
+                ? null
+                : owner.getEffectiveStats(getCurrentTime());
+        return startBurning(
+                ownerId, preResistanceDamage, fuelUnits, fuelDecayRate,
+                reactionStats);
+    }
+
+    /** Starts typed Burning with an explicit reaction-stat snapshot. */
+    public simulation.runtime.ReactionState.BurningState startBurning(
+            CharacterId ownerId,
+            double preResistanceDamage,
+            double fuelUnits,
+            double fuelDecayRate,
+            model.stats.StatsContainer reactionStats) {
         return reactionStateController.startBurning(
-                ownerId, preResistanceDamage, fuelUnits, fuelDecayRate);
+                ownerId, preResistanceDamage, fuelUnits, fuelDecayRate,
+                reactionStats);
     }
 
     /** Replaces active Burning fuel at the current simulator time. */
@@ -1360,12 +1398,31 @@ public class CombatSimulator {
     /** Refreshes Burning damage ownership without replacing fuel. */
     public simulation.runtime.ReactionState.BurningState refreshBurningDamage(
             CharacterId ownerId, double preResistanceDamage) {
-        return reactionStateController.refreshBurningDamage(ownerId, preResistanceDamage);
+        Character owner = getCharacter(ownerId);
+        model.stats.StatsContainer reactionStats = owner == null
+                ? null
+                : owner.getEffectiveStats(getCurrentTime());
+        return refreshBurningDamage(
+                ownerId, preResistanceDamage, reactionStats);
+    }
+
+    /** Refreshes Burning ownership and its reaction-stat snapshot. */
+    public simulation.runtime.ReactionState.BurningState refreshBurningDamage(
+            CharacterId ownerId,
+            double preResistanceDamage,
+            model.stats.StatsContainer reactionStats) {
+        return reactionStateController.refreshBurningDamage(
+                ownerId, preResistanceDamage, reactionStats);
     }
 
     /** Rebases active Burning fuel at the current simulator time. */
     public simulation.runtime.ReactionState.BurningState advanceBurning() {
         return reactionStateController.advanceBurning();
+    }
+
+    /** Applies elapsed Burning special decay to coexisting fuel Auras. */
+    public void synchronizeBurningFuel() {
+        reactionStateController.synchronizeBurningFuel();
     }
 
     /** Returns the immutable current Burning payload. */
@@ -1376,6 +1433,24 @@ public class CombatSimulator {
     /** Clears typed Burning fuel, damage, and timer state. */
     public void clearBurning() {
         reactionStateController.clearBurning();
+    }
+
+    /** Consumes the independent Burning Aura and returns spent trigger gauge. */
+    public double consumeBurningAura(
+            double sourceGaugeUnits, double modifier) {
+        return reactionStateController.consumeBurningAura(
+                sourceGaugeUnits, modifier);
+    }
+
+    /** Attempts the target-wide 2-second Burning Pyro application gate. */
+    public boolean tryStartBurningPyroApplication() {
+        return reactionStateController.tryStartBurningPyroApplication();
+    }
+
+    /** Resolves one accepted Burning tick's 1U Pyro application. */
+    public double resolveBurningTickReactions(
+            simulation.runtime.ReactionState.BurningState state) {
+        return actionResolver.resolveBurningTickReactions(state);
     }
 
     public boolean isQuickenActive() {
