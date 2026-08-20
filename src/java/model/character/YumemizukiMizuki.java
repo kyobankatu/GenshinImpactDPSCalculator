@@ -44,10 +44,12 @@ import simulation.event.SimpleTimerEvent;
  * continuous attacks launch first at frame 18, repeat every 45 frames, travel
  * for 30 frames, and share a typed 1.2-second time-only ICD.</p>
  *
- * <p>C1's flat Swirl addition is converted exactly into the equivalent
- * level-90 {@link StatType#SWIRL_DMG_BONUS} contribution. C6 uses the
- * deterministic expected value of its fixed 30% CRIT Rate and 100% CRIT DMG,
- * adding 30% Swirl damage while Dreamdrifter is active. Healing, current HP,
+ * <p>Dreamdrifter's ordinary and Stellar-Swirl bonuses, C1's separate flat
+ * additions, and C6's reaction-specific CRIT values follow Genshin Optimizer
+ * {@code d791814a}. Flat additions are converted into equivalent typed reaction
+ * bonuses at level 90 without crossing the ordinary and Stellar channels. C6's
+ * ordinary 30% expected Swirl bonus remains deterministic, while Stellar-Swirl
+ * uses its dedicated CRIT Rate and CRIT DMG channels. Healing, current HP,
  * Snack pickup or selection, C4's Snack effects, multi-target geometry,
  * movement, random targeting, hitlag, stamina, low Plunge, and exploration
  * state are excluded instead of being approximated.</p>
@@ -61,6 +63,7 @@ public final class YumemizukiMizuki extends Character implements
     private static final double FRAME = 1.0 / 60.0;
     private static final double EPSILON = 1e-9;
     private static final double LEVEL_90_SWIRL_BASE = 1446.85 * 0.6;
+    private static final double LEVEL_90_STELLAR_SWIRL_BASE = 1446.85 * 0.75;
     private static final int[] NORMAL_IMPACT_FRAMES = { 17, 29, 47 };
     private static final int[] NORMAL_DURATION_FRAMES = { 34, 38, 98 };
     private static final double[] NORMAL_T9 = {
@@ -395,7 +398,7 @@ public final class YumemizukiMizuki extends Character implements
         }
     }
 
-    /** Extends A1, consumes C1, and ignores every non-Swirl notification. */
+    /** Extends A1 and consumes C1 for ordinary or typed Stellar-Swirl only. */
     @Override
     public void onReaction(
             ReactionResult result,
@@ -404,10 +407,13 @@ public final class YumemizukiMizuki extends Character implements
             CombatSimulator simulator) {
         if (simulator != initializedSimulator
                 || result == null
-                || result.getKind() != ReactionResult.Kind.SWIRL) {
+                || !isSupportedSwirl(result.getKind())) {
             return;
         }
-        if (isC1AwaitingActive(time)
+        boolean partySource = source != null
+                && initializedSimulator.getPartyMembers().contains(source);
+        if (partySource
+                && isC1AwaitingActive(time)
                 && result.getTransformDamage() > 0.0) {
             c1AwaitingExpirationTime = Double.NEGATIVE_INFINITY;
         }
@@ -450,34 +456,63 @@ public final class YumemizukiMizuki extends Character implements
                 || !initializedSimulator.getPartyMembers().contains(attacker)) {
             return;
         }
+        if (isDreamDrifterActive(currentTime)) {
+            double mizukiEm = captureLiveStats(currentTime).get(
+                    StatType.ELEMENTAL_MASTERY);
+            stats.add(StatType.SWIRL_DMG_BONUS,
+                    skillValue(
+                            "Dreamdrifter Swirl Bonus",
+                            "Dreamdrifter Swirl Bonus C3",
+                            0.0042,
+                            0.0051) * mizukiEm);
+            stats.add(StatType.STELLAR_SWIRL_DMG_BONUS,
+                    skillValue(
+                            "Dreamdrifter Stellar-Swirl Bonus",
+                            "Dreamdrifter Stellar-Swirl Bonus C3",
+                            0.00042,
+                            0.00051) * mizukiEm);
+            if (constellation >= 2 && attacker != this) {
+                stats.add(StatType.PYRO_DMG_BONUS,
+                        c2ElementalDamageBonus);
+                stats.add(StatType.HYDRO_DMG_BONUS,
+                        c2ElementalDamageBonus);
+                stats.add(StatType.ELECTRO_DMG_BONUS,
+                        c2ElementalDamageBonus);
+                stats.add(StatType.CRYO_DMG_BONUS,
+                        c2ElementalDamageBonus);
+            }
+            if (constellation >= 6) {
+                stats.add(StatType.SWIRL_DMG_BONUS,
+                        getTalentValue("C6 Expected Swirl Bonus", 0.30));
+                stats.add(StatType.STELLAR_SWIRL_CRIT_RATE,
+                        getTalentValue(
+                                "C6 Stellar-Swirl CRIT Rate", 0.10));
+                stats.add(StatType.STELLAR_SWIRL_CRIT_DMG,
+                        getTalentValue(
+                                "C6 Stellar-Swirl CRIT DMG", 0.20));
+            }
+        }
         if (constellation >= 1 && isC1AwaitingActive(currentTime)) {
             stats.add(StatType.SWIRL_DMG_BONUS,
                     getTalentValue("C1 EM Flat Multiplier", 11.0)
                             * c1ElementalMastery
                             / LEVEL_90_SWIRL_BASE);
+            double stellarBaseSection = Math.max(
+                    EPSILON,
+                    1.0 + stats.get(
+                            StatType.STELLAR_SWIRL_BASE_DMG_BONUS));
+            stats.add(StatType.STELLAR_SWIRL_DMG_BONUS,
+                    getTalentValue(
+                            "C1 Stellar-Swirl EM Flat Multiplier", 5.5)
+                            * c1ElementalMastery
+                            / (LEVEL_90_STELLAR_SWIRL_BASE
+                                    * stellarBaseSection));
         }
-        if (!isDreamDrifterActive(currentTime)) {
-            return;
-        }
-        double mizukiEm = captureLiveStats(currentTime).get(
-                StatType.ELEMENTAL_MASTERY);
-        stats.add(StatType.SWIRL_DMG_BONUS,
-                skillValue(
-                        "Dreamdrifter Swirl Bonus",
-                        "Dreamdrifter Swirl Bonus C3",
-                        0.0042,
-                        0.0051) * mizukiEm);
-        if (constellation >= 2 && attacker != this) {
-            stats.add(StatType.PYRO_DMG_BONUS, c2ElementalDamageBonus);
-            stats.add(StatType.HYDRO_DMG_BONUS, c2ElementalDamageBonus);
-            stats.add(StatType.ELECTRO_DMG_BONUS,
-                    c2ElementalDamageBonus);
-            stats.add(StatType.CRYO_DMG_BONUS, c2ElementalDamageBonus);
-        }
-        if (constellation >= 6) {
-            stats.add(StatType.SWIRL_DMG_BONUS,
-                    getTalentValue("C6 Expected Swirl Bonus", 0.30));
-        }
+    }
+
+    private static boolean isSupportedSwirl(ReactionResult.Kind kind) {
+        return kind == ReactionResult.Kind.SWIRL
+                || kind == ReactionResult.Kind.STELLAR_SWIRL;
     }
 
     private void normalAttack(CombatSimulator simulator) {
