@@ -75,6 +75,8 @@ public final class Frostbreath extends Weapon
             CombatSimulator activeSimulator) {
         if (activeSimulator != simulator
                 || source != owner
+                || simulator.getActiveCharacter() != owner
+                || owner.getWeapon() != this
                 || result == null
                 || time < nextTriggerAt
                 || !involvesCryoOrHydro(result)) {

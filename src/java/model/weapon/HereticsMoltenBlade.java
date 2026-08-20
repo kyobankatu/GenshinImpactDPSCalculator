@@ -35,7 +35,7 @@ public final class HereticsMoltenBlade extends Weapon
     private final List<MovementSample> movementSamples = new ArrayList<>();
     private Character owner;
     private CombatSimulator simulator;
-    private double activeAttackBonus;
+    private double effectStartTime = Double.NEGATIVE_INFINITY;
     private double effectUntil = Double.NEGATIVE_INFINITY;
     private double nextActivationAt = Double.NEGATIVE_INFINITY;
 
@@ -91,8 +91,11 @@ public final class HereticsMoltenBlade extends Weapon
         if (movingOwner != owner || activeSimulator != simulator) {
             return;
         }
+        if (currentTime + 1e-9 < effectStartTime
+                || currentTime >= effectUntil) {
+            return;
+        }
         movementSamples.add(new MovementSample(currentTime, distanceMeters));
-        pruneMovement(currentTime);
     }
 
     /** Opens the distance-scaled ATK window on an accepted Skill use. */
@@ -111,29 +114,31 @@ public final class HereticsMoltenBlade extends Weapon
         if (currentTime < nextActivationAt) {
             return;
         }
-        double distance = getRecentMovementDistance(currentTime);
-        double ratio = Math.min(1.0, distance / MAX_DISTANCE);
-        activeAttackBonus = minimumAttackBonus
-                + (maximumAttackBonus - minimumAttackBonus) * ratio;
+        movementSamples.clear();
+        effectStartTime = currentTime;
         effectUntil = currentTime + EFFECT_DURATION;
         nextActivationAt = currentTime + ACTIVATION_COOLDOWN;
     }
 
-    /** Returns movement recorded in the preceding one-second half-open window. */
+    /** Returns movement recorded in the preceding rolling one-second window. */
     public double getRecentMovementDistance(double currentTime) {
-        pruneMovement(currentTime);
         double distance = 0.0;
         for (MovementSample sample : movementSamples) {
-            distance += sample.distanceMeters;
+            if (sample.time > currentTime - LOOKBACK_DURATION + 1e-9
+                    && sample.time <= currentTime + 1e-9) {
+                distance += sample.distanceMeters;
+            }
         }
         return distance;
     }
 
-    /** Applies the sampled ATK bonus while the owner remains on field. */
+    /** Applies the most recent completed one-second movement sample. */
     @Override
     public void applyPassive(StatsContainer stats, double currentTime) {
-        if (currentTime < effectUntil) {
-            stats.add(StatType.ATK_PERCENT, activeAttackBonus);
+        if (currentTime < effectUntil
+                && currentTime + 1e-9 >= effectStartTime + LOOKBACK_DURATION) {
+            stats.add(StatType.ATK_PERCENT,
+                    calculateAttackBonus(currentTime));
         }
     }
 
@@ -142,7 +147,8 @@ public final class HereticsMoltenBlade extends Weapon
     public void onSwitchOut(Character user, CombatSimulator activeSimulator) {
         if (user == owner && activeSimulator == simulator) {
             effectUntil = Double.NEGATIVE_INFINITY;
-            activeAttackBonus = 0.0;
+            effectStartTime = Double.NEGATIVE_INFINITY;
+            movementSamples.clear();
         }
     }
 
@@ -152,7 +158,7 @@ public final class HereticsMoltenBlade extends Weapon
         return new HereticState(
                 this,
                 movementSamples,
-                activeAttackBonus,
+                effectStartTime,
                 effectUntil,
                 nextActivationAt);
     }
@@ -170,14 +176,26 @@ public final class HereticsMoltenBlade extends Weapon
         }
         movementSamples.clear();
         movementSamples.addAll(restored.movementSamples);
-        activeAttackBonus = restored.activeAttackBonus;
+        effectStartTime = restored.effectStartTime;
         effectUntil = restored.effectUntil;
         nextActivationAt = restored.nextActivationAt;
     }
 
-    private void pruneMovement(double currentTime) {
-        double earliest = currentTime - LOOKBACK_DURATION;
-        movementSamples.removeIf(sample -> sample.time + 1e-9 < earliest);
+    private double calculateAttackBonus(double currentTime) {
+        double completedSeconds = Math.floor(
+                currentTime - effectStartTime + 1e-9);
+        double sampleEnd = effectStartTime + completedSeconds;
+        double sampleStart = sampleEnd - LOOKBACK_DURATION;
+        double distance = 0.0;
+        for (MovementSample sample : movementSamples) {
+            if (sample.time > sampleStart + 1e-9
+                    && sample.time <= sampleEnd + 1e-9) {
+                distance += sample.distanceMeters;
+            }
+        }
+        double ratio = Math.min(1.0, distance / MAX_DISTANCE);
+        return minimumAttackBonus
+                + (maximumAttackBonus - minimumAttackBonus) * ratio;
     }
 
     private static void validateRefinement(int refinement) {
@@ -202,19 +220,19 @@ public final class HereticsMoltenBlade extends Weapon
     private static final class HereticState implements State {
         private final HereticsMoltenBlade source;
         private final List<MovementSample> movementSamples;
-        private final double activeAttackBonus;
+        private final double effectStartTime;
         private final double effectUntil;
         private final double nextActivationAt;
 
         private HereticState(
                 HereticsMoltenBlade source,
                 List<MovementSample> movementSamples,
-                double activeAttackBonus,
+                double effectStartTime,
                 double effectUntil,
                 double nextActivationAt) {
             this.source = source;
             this.movementSamples = new ArrayList<>(movementSamples);
-            this.activeAttackBonus = activeAttackBonus;
+            this.effectStartTime = effectStartTime;
             this.effectUntil = effectUntil;
             this.nextActivationAt = nextActivationAt;
         }

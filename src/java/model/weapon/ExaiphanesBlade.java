@@ -17,13 +17,20 @@ import model.type.WeaponType;
 import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 
-/** Exaiphanes Blade with explicit Traveler resonance history. */
+/**
+ * Exaiphanes Blade with explicit Traveler resonance history.
+ *
+ * <p>R4/R5 ATK use the official English localization's 32%/40%. The pinned
+ * Optimizer sheet lists 28%/32%, so this implementation deliberately gives
+ * the source-facing localization precedence over that conflicting sheet
+ * array.</p>
+ */
 public final class ExaiphanesBlade extends Weapon
         implements DamageTriggeredWeaponEffect,
         SimulatorInitializedWeaponEffect,
         SnapshotAwareWeaponEffect {
     private static final double ATTACK_WINDOW_DURATION = 8.0;
-    private static final double ENERGY_COOLDOWN = 5.0;
+    private static final double EFFECT_COOLDOWN = 5.0;
     private static final double CRIT_DAMAGE_PER_RESONATED_ELEMENT = 0.06;
     private static final double[] ATTACK_BONUS = {0.16, 0.20, 0.24, 0.32, 0.40};
     private static final double[] ENERGY_RECOVERY = {3.0, 3.0, 5.0, 5.0, 5.0};
@@ -33,7 +40,7 @@ public final class ExaiphanesBlade extends Weapon
     private Character owner;
     private CombatSimulator simulator;
     private double attackWindowUntil = Double.NEGATIVE_INFINITY;
-    private double nextEnergyRecoveryAt = Double.NEGATIVE_INFINITY;
+    private double nextEffectAt = Double.NEGATIVE_INFINITY;
 
     /** Constructs an R5 blade with no declared resonance history. */
     public ExaiphanesBlade() {
@@ -99,7 +106,7 @@ public final class ExaiphanesBlade extends Weapon
         simulator = sim;
     }
 
-    /** Refreshes ATK and conditionally restores Energy after an owner hit. */
+    /** Grants the combined ATK and Energy effect after an eligible owner hit. */
     @Override
     public void onDamage(
             Character user,
@@ -108,15 +115,15 @@ public final class ExaiphanesBlade extends Weapon
             CombatSimulator activeSimulator) {
         if (activeSimulator != simulator
                 || user != owner
+                || owner.getWeapon() != this
                 || action == null
-                || !action.isHitEffectTrigger()) {
+                || !action.isHitEffectTrigger()
+                || currentTime < nextEffectAt) {
             return;
         }
         attackWindowUntil = currentTime + ATTACK_WINDOW_DURATION;
-        if (currentTime >= nextEnergyRecoveryAt) {
-            owner.receiveFlatEnergy(ENERGY_RECOVERY[refinement - 1]);
-            nextEnergyRecoveryAt = currentTime + ENERGY_COOLDOWN;
-        }
+        owner.receiveFlatEnergy(ENERGY_RECOVERY[refinement - 1]);
+        nextEffectAt = currentTime + EFFECT_COOLDOWN;
     }
 
     /** Applies the hit window and R2+ resonance-history CRIT DMG. */
@@ -136,7 +143,7 @@ public final class ExaiphanesBlade extends Weapon
     @Override
     public State captureWeaponState() {
         return new ExaiphanesState(
-                this, attackWindowUntil, nextEnergyRecoveryAt);
+                this, attackWindowUntil, nextEffectAt);
     }
 
     /** Restores state captured from this exact blade instance. */
@@ -151,7 +158,7 @@ public final class ExaiphanesBlade extends Weapon
                     "Exaiphanes state belongs to another weapon instance");
         }
         attackWindowUntil = restored.attackWindowUntil;
-        nextEnergyRecoveryAt = restored.nextEnergyRecoveryAt;
+        nextEffectAt = restored.nextEffectAt;
     }
 
     private static void validateRefinement(int refinement) {
@@ -165,15 +172,15 @@ public final class ExaiphanesBlade extends Weapon
     private static final class ExaiphanesState implements State {
         private final ExaiphanesBlade source;
         private final double attackWindowUntil;
-        private final double nextEnergyRecoveryAt;
+        private final double nextEffectAt;
 
         private ExaiphanesState(
                 ExaiphanesBlade source,
                 double attackWindowUntil,
-                double nextEnergyRecoveryAt) {
+                double nextEffectAt) {
             this.source = source;
             this.attackWindowUntil = attackWindowUntil;
-            this.nextEnergyRecoveryAt = nextEnergyRecoveryAt;
+            this.nextEffectAt = nextEffectAt;
         }
     }
 }

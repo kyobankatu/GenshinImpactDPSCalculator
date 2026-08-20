@@ -139,6 +139,7 @@ public final class WhitelakeFrostfeather extends Weapon
         }
         if ((action.getActionType() == ActionType.SKILL
                 || action.isCountsAsSkillDmg())
+                && simulator.getActiveCharacter() == owner
                 && currentTime >= nextStackAt) {
             addStack(currentTime);
             nextStackAt = currentTime + STACK_COOLDOWN;
@@ -207,8 +208,6 @@ public final class WhitelakeFrostfeather extends Weapon
         double expiration = currentTime + STACK_DURATION;
         if (stackExpirations.size() < MAX_STACKS) {
             stackExpirations.add(expiration);
-        } else {
-            stackExpirations.set(0, expiration);
         }
         Collections.sort(stackExpirations);
     }

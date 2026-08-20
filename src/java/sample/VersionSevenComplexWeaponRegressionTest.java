@@ -110,17 +110,22 @@ public final class VersionSevenComplexWeaponRegressionTest {
         sim.advanceTime(0.1);
         calculate(owner, skillHit(), sim);
         assertEquals(3, weapon.getStackCount(0.3),
-                "Whitelake refreshes the earliest stack at the cap");
-        assertEquals(3, weapon.getStackCount(8.1 - EPSILON),
-                "Whitelake keeps all refreshed stacks before the first expiry");
-        assertEquals(2, weapon.getStackCount(8.1),
+                "Whitelake fails closed instead of inferring cap refresh");
+        assertEquals(3, weapon.getStackCount(8.0 - EPSILON),
+                "Whitelake keeps all independent stacks before first expiry");
+        assertEquals(2, weapon.getStackCount(8.0),
                 "Whitelake expires each stack at its independent boundary");
-        StatsContainer partialStacks = owner.getEffectiveStats(8.1);
+        StatsContainer partialStacks = owner.getEffectiveStats(8.0);
         assertClose(0.16, partialStacks.get(StatType.ATK_PERCENT),
                 "Whitelake retains only two ATK stacks after expiry");
         assertClose(0.0,
                 partialStacks.get(StatType.STELLAR_CONDUCT_CRIT_DMG),
                 "Whitelake removes Stellar CRIT DMG below three stacks");
+
+        sim.setActiveCharacter(CharacterId.AMBER);
+        calculate(owner, skillHit(), sim);
+        assertEquals(2, weapon.getStackCount(8.0),
+                "Whitelake Skill stacks require the owner on field");
     }
 
     private static void testWhitelakeStellarEnergyAndSnapshot() {

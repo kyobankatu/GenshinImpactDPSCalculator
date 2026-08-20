@@ -30,6 +30,7 @@ public final class VersionSevenSpecialWeaponRegressionTest {
     /** Runs all special Version 7.0 weapon regression cases. */
     public static void main(String[] args) {
         testFrostbreathTypedTriggerAndCooldown();
+        testFrostbreathFieldAndEquipmentGuards();
         testFrostbreathSnapshot();
         testExaiphanesTravelerContractAndHitWindow();
         testExaiphanesRefinementAndResonanceHistory();
@@ -37,6 +38,33 @@ public final class VersionSevenSpecialWeaponRegressionTest {
         testHereticMovementValidationAndSnapshot();
         testInvalidRefinements();
         System.out.println("VersionSevenSpecialWeaponRegressionTest passed");
+    }
+
+    private static void testFrostbreathFieldAndEquipmentGuards() {
+        Frostbreath weapon = new Frostbreath(1);
+        TestCharacter owner = character(
+                CharacterId.ALYOSHA, Element.ELECTRO, weapon);
+        TestCharacter ally = character(
+                CharacterId.ODETTE, Element.CRYO, null);
+        CombatSimulator simulator = simulator(owner, ally);
+        ally.restoreCurrentEnergy(0.0);
+        simulator.switchCharacter(CharacterId.ODETTE);
+        simulator.notifyReaction(
+                ReactionResult.amp(2.0, "Melt", ReactionResult.Kind.MELT),
+                owner);
+        assertEquals(0.0, ally.getCurrentEnergy(), EPS,
+                "Frostbreath does not trigger while owner is off-field");
+        assertEquals(0.0,
+                passive(weapon, 0.0).get(StatType.ATK_PERCENT), EPS,
+                "off-field Frostbreath does not open ATK window");
+
+        owner.setWeapon(null);
+        simulator.setActiveCharacter(CharacterId.ALYOSHA);
+        simulator.notifyReaction(
+                ReactionResult.amp(2.0, "Melt", ReactionResult.Kind.MELT),
+                owner);
+        assertEquals(0.0, ally.getCurrentEnergy(), EPS,
+                "unequipped Frostbreath callback is inert");
     }
 
     private static void testFrostbreathTypedTriggerAndCooldown() {
@@ -109,10 +137,15 @@ public final class VersionSevenSpecialWeaponRegressionTest {
                 CharacterId.TRAVELER, positiveHit("Traveler second hit"));
         assertEquals(3.0, traveler.getCurrentEnergy(), EPS,
                 "Exaiphanes Energy observes five-second cooldown");
-        sim.advanceTime(8.0);
+        sim.advanceTime(4.0);
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.TRAVELER, positiveHit("Traveler gated hit"));
+        assertEquals(3.0, traveler.getCurrentEnergy(), EPS,
+                "Exaiphanes gates the combined effect before five seconds");
+        sim.advanceTime(4.0);
         assertEquals(0.0, passive(weapon, sim.getCurrentTime())
                 .get(StatType.ATK_PERCENT), EPS,
-                "Exaiphanes ATK window expires at eight seconds");
+                "gated hit does not refresh Exaiphanes ATK window");
 
         boolean rejected = false;
         try {
@@ -125,6 +158,23 @@ public final class VersionSevenSpecialWeaponRegressionTest {
     }
 
     private static void testExaiphanesRefinementAndResonanceHistory() {
+        double[] attack = { 0.16, 0.20, 0.24, 0.32, 0.40 };
+        double[] energy = { 3.0, 3.0, 5.0, 5.0, 5.0 };
+        for (int refinement = 1; refinement <= 5; refinement++) {
+            ExaiphanesBlade weapon = new ExaiphanesBlade(refinement);
+            TestCharacter owner = character(
+                    CharacterId.TRAVELER, Element.CRYO, weapon);
+            CombatSimulator simulator = simulator(owner);
+            owner.restoreCurrentEnergy(0.0);
+            simulator.performActionWithoutTimeAdvance(
+                    CharacterId.TRAVELER, positiveHit("Refinement hit"));
+            assertEquals(attack[refinement - 1],
+                    passive(weapon, 0.0).get(StatType.ATK_PERCENT), EPS,
+                    "Exaiphanes localized ATK R" + refinement);
+            assertEquals(energy[refinement - 1],
+                    owner.getCurrentEnergy(), EPS,
+                    "Exaiphanes Energy R" + refinement);
+        }
         ExaiphanesBlade r2 = new ExaiphanesBlade(
                 2,
                 EnumSet.of(Element.ANEMO, Element.GEO, Element.CRYO));
@@ -142,13 +192,31 @@ public final class VersionSevenSpecialWeaponRegressionTest {
         TestCharacter owner = character(CharacterId.ODETTE, Element.CRYO, weapon);
         TestCharacter ally = character(CharacterId.ALYOSHA, Element.ELECTRO, null);
         CombatSimulator sim = simulator(owner, ally);
-        sim.recordMovement(CharacterId.ODETTE, 9.0);
         sim.performAction(
                 CharacterId.ODETTE,
                 CharacterActionRequest.of(CharacterActionKey.SKILL));
+        sim.advanceTime(0.5);
+        sim.recordMovement(CharacterId.ODETTE, 9.0);
+        assertEquals(0.0, passive(weapon, sim.getCurrentTime())
+                .get(StatType.ATK_PERCENT), EPS,
+                "Heretic waits for the first one-second update");
+        sim.advanceTime(0.5);
         assertEquals(0.27, passive(weapon, sim.getCurrentTime())
                 .get(StatType.ATK_PERCENT), EPS,
-                "Heretic linearly interpolates halfway movement");
+                "Heretic samples movement from the preceding second");
+        sim.advanceTime(0.5);
+        sim.recordMovement(CharacterId.ODETTE, 18.0);
+        assertEquals(0.27, passive(weapon, sim.getCurrentTime())
+                .get(StatType.ATK_PERCENT), EPS,
+                "Heretic does not update between one-second boundaries");
+        sim.advanceTime(0.5);
+        assertEquals(0.36, passive(weapon, sim.getCurrentTime())
+                .get(StatType.ATK_PERCENT), EPS,
+                "Heretic recalculates from the next preceding second");
+        sim.advanceTime(1.0);
+        assertEquals(0.18, passive(weapon, sim.getCurrentTime())
+                .get(StatType.ATK_PERCENT), EPS,
+                "Heretic falls back to minimum ATK without movement");
         sim.switchCharacter(CharacterId.ALYOSHA);
         assertEquals(0.0, passive(weapon, sim.getCurrentTime())
                 .get(StatType.ATK_PERCENT), EPS,
@@ -163,15 +231,18 @@ public final class VersionSevenSpecialWeaponRegressionTest {
         sim.performAction(
                 CharacterId.ODETTE,
                 CharacterActionRequest.of(CharacterActionKey.SKILL));
+        sim.advanceTime(0.5);
+        sim.recordMovement(CharacterId.ODETTE, 30.0);
+        SimulatorSnapshot snapshot = sim.saveSnapshot();
+        sim.advanceTime(0.5);
         assertEquals(0.72, passive(weapon, sim.getCurrentTime())
                 .get(StatType.ATK_PERCENT), EPS,
                 "Heretic caps movement at eighteen meters");
-        SimulatorSnapshot snapshot = sim.saveSnapshot();
-        sim.advanceTime(14.0);
         sim.restoreSnapshot(snapshot);
+        sim.advanceTime(0.5);
         assertEquals(0.72, passive(weapon, sim.getCurrentTime())
                 .get(StatType.ATK_PERCENT), EPS,
-                "snapshot restores Heretic sampled bonus");
+                "snapshot restores Heretic movement pending next update");
 
         boolean rejected = false;
         try {
