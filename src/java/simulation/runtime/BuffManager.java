@@ -130,7 +130,9 @@ public class BuffManager {
                     if (buff.getSourceCharacterId() == model.type.CharacterId.UNKNOWN) {
                         buff.sourcedBy(member.getCharacterId());
                     }
-                    buffs.add(buff);
+                    if (buff.appliesToCharacter(character)) {
+                        buffs.add(buff);
+                    }
                 }
             }
         }
