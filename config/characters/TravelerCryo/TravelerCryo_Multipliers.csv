@@ -1,0 +1,30 @@
+Character,AbilityType,Key,Level,Value1,Value2
+TravelerCryo,NORMAL,N1,9,0.816860,0
+TravelerCryo,NORMAL,N2,9,0.797900,0
+TravelerCryo,NORMAL,N3,9,0.973280,0
+TravelerCryo,NORMAL,N4,9,1.071240,0
+TravelerCryo,NORMAL,N5,9,1.300340,0
+TravelerCryo,CHARGED,Charged Attack Hit 1,9,1.027000,0
+TravelerCryo,CHARGED,Charged Attack Hit 2 Female,9,1.327200,0
+TravelerCryo,CHARGED,Charged Attack Hit 2 Male,9,1.115480,0
+TravelerCryo,SKILL,Skill DMG,9,1.558560,0
+TravelerCryo,SKILL,Ice Crystal DMG,9,0.363664,0
+TravelerCryo,SKILL,Frostpierce Star Duration,9,12,0
+TravelerCryo,BURST,Burst DMG,9,0.937227,0
+TravelerCryo,BURST,Burst Frostglow Bonus,9,0.046861,0
+TravelerCryo,BURST,Burst Stellar Conduct DMG,9,0.624818,0
+TravelerCryo,BURST,Burst Stellar Conduct Frostglow Bonus,9,0.031241,0
+TravelerCryo,BURST,Burst Stellar Swirl DMG,9,0.937227,0
+TravelerCryo,BURST,Burst Stellar Swirl Frostglow Bonus,9,0.046861,0
+TravelerCryo,PASSIVE,A4 ATK to EM Ratio,1,0.08,0
+TravelerCryo,PASSIVE,A4 Maximum EM,1,160,0
+TravelerCryo,PASSIVE,Stellar Base DMG Per ATK,1,0.000035,0
+TravelerCryo,PASSIVE,Stellar Base DMG Cap,1,0.07,0
+TravelerCryo,PASSIVE,Icepoint Cooldown,1,2,0
+TravelerCryo,PASSIVE,Freezing Ice ATK Bonus,1,1.40,0
+TravelerCryo,PASSIVE,Freezing Ice Cooldown,1,15,0
+TravelerCryo,CONSTELLATION,C1 Flat Energy,1,5,0
+TravelerCryo,CONSTELLATION,C1 Cooldown,1,0.5,0
+TravelerCryo,CONSTELLATION,C2 Duration,2,5,0
+TravelerCryo,CONSTELLATION,C6 Stellar DMG Per Stack,6,0.05,0
+TravelerCryo,CONSTELLATION,C6 Duration,6,15,0

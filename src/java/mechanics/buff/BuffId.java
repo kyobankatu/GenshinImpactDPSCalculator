@@ -64,6 +64,12 @@ public enum BuffId {
     DURIN_DUAL_FORM_SUPPORT,
     /** Durin C1's active-character flat-damage stacks. */
     DURIN_C1_WHITE_FLAT_DMG,
+    /** Cryo Traveler's permanent Stellar base-damage support. */
+    TRAVELER_CRYO_STELLAR_SUPPORT,
+    /** Cryo Traveler C2's current active-character EM state. */
+    TRAVELER_CRYO_C2_EM,
+    /** Cryo Traveler C6's Stellar damage support for other members. */
+    TRAVELER_CRYO_C6_STELLAR_DMG,
     /** Lunar 拡張: コロンビーナの「皓月の意志」。 */
     GLEAMING_MOON_INTENT,
     /** Lunar 拡張: コロンビーナの「皓月の献身」。 */

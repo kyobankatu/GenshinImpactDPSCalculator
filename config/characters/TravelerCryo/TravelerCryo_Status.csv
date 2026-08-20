@@ -1,0 +1,8 @@
+Character,AbilityType,Key,Level,Value1,Value2
+TravelerCryo,STATS,Base HP,90,10874.9149,0
+TravelerCryo,STATS,Base ATK,90,212.3972,0
+TravelerCryo,STATS,Base DEF,90,682.5215,0
+TravelerCryo,STATS,Ascension ATK Percent,90,0.24,0
+TravelerCryo,STATS,Energy Cost,90,60,0
+TravelerCryo,CONFIG,Skill Cooldown,1,15,0
+TravelerCryo,CONFIG,Burst Cooldown,1,15,0
