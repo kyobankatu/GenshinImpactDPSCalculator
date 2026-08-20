@@ -449,6 +449,12 @@ public enum BuffId {
     PRUNE_TOLLING_RALLY,
     /** Prune C6 flat ATK reaction window. */
     PRUNE_C6_ATK,
+    /** Scarlet Proof owner CRIT and Stellar-Swirl damage window. */
+    SCARLET_PROOF_STELLAR_SWIRL,
+    /** Heart of the Furnace owner ATK window. */
+    HEART_OF_THE_FURNACE_OWNER_ATK,
+    /** Non-stacking Heart of the Furnace party Stellar damage window. */
+    HEART_OF_THE_FURNACE_TEAM_STELLAR_DMG,
     /** 元素共鳴「迅速の風」(風風): 移動速度+, スタミナ消費 -15%, クールタイム短縮。 */
     IMPETUOUS_WINDS
 }
