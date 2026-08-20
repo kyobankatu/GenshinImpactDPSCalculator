@@ -42,6 +42,10 @@ public class ReactionResult {
         OVERLOAD,
         /** 超電導反応。 */
         SUPERCONDUCT,
+        /** Cryo/Electro replacement reaction that creates a Polestar Field. */
+        STELLAR_CONDUCT,
+        /** Cryo Swirl replacement reaction that can critically strike. */
+        STELLAR_SWIRL,
         /** 過負荷反応 (旧表記)。 */
         OVERLOADED,
         /** 草元素付着 (原激化) 状態。 */
@@ -266,6 +270,32 @@ public class ReactionResult {
                 inferLunarType(kind), null, damageElement, false, true);
     }
 
+    /** Creates a typed Stellar reaction result. */
+    public static ReactionResult stellar(
+            double damage,
+            Kind kind,
+            Element relatedElement,
+            Element damageElement,
+            boolean stateful) {
+        if (kind != Kind.STELLAR_CONDUCT && kind != Kind.STELLAR_SWIRL) {
+            throw new IllegalArgumentException("Stellar factory requires a Stellar reaction kind");
+        }
+        String name = kind == Kind.STELLAR_CONDUCT
+                ? "Stellar-Conduct"
+                : "Stellar-Swirl";
+        return new ReactionResult(
+                Type.TRANSFORMATIVE,
+                1.0,
+                damage,
+                name,
+                kind,
+                LunarType.NONE,
+                relatedElement,
+                damageElement,
+                stateful,
+                true);
+    }
+
     /**
      * Lunar 反応の結果を生成する。
      *
@@ -379,7 +409,12 @@ public class ReactionResult {
      * @return 拡散反応であれば {@code true}
      */
     public boolean isSwirl() {
-        return kind == Kind.SWIRL;
+        return kind == Kind.SWIRL || kind == Kind.STELLAR_SWIRL;
+    }
+
+    /** Returns whether this result belongs to either Stellar reaction family. */
+    public boolean isStellarReaction() {
+        return kind == Kind.STELLAR_CONDUCT || kind == Kind.STELLAR_SWIRL;
     }
 
     /**
@@ -451,6 +486,7 @@ public class ReactionResult {
             return true;
         }
         return kind == Kind.SUPERCONDUCT
+                || kind == Kind.STELLAR_CONDUCT
                 || kind == Kind.OVERLOADED
                 || kind == Kind.OVERLOAD
                 || kind == Kind.QUICKEN

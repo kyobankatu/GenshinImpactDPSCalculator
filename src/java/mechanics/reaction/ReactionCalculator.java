@@ -15,6 +15,7 @@ public class ReactionCalculator {
     private static final double LEVEL_90_MULTIPLIER = 1446.85;
     private static final double BURNING_MULTIPLIER = 0.25;
     private static final double SWIRL_MULTIPLIER = 0.6;
+    private static final double STELLAR_SWIRL_MULTIPLIER = 0.75;
     private static final double SUPERCONDUCT_MULTIPLIER = 1.5;
     private static final double ELECTRO_CHARGED_MULTIPLIER = 2.0;
     private static final double BLOOM_MULTIPLIER = 2.0;
@@ -226,6 +227,16 @@ public class ReactionCalculator {
         double dmg = levelBase * reactionMulti * (1.0 + emBonus + bonusPct);
 
         return dmg;
+    }
+
+    /**
+     * Returns the pre-EM base damage for a generic Stellar-Swirl instance.
+     *
+     * <p>Stellar reactions use their separate six-EM formula and can crit, so
+     * this method intentionally excludes EM and damage bonuses.</p>
+     */
+    public static double calculateStellarSwirlBaseDamage(int level) {
+        return levelMultiplier(level) * STELLAR_SWIRL_MULTIPLIER;
     }
 
     public static double calculateAdditiveReactionDamage(int level, double em, double reactionMulti, double bonusPct) {

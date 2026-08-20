@@ -171,6 +171,30 @@ public enum StatType {
 
     /** DMG bonus that applies to Swirl damage instances. */
     SWIRL_DMG_BONUS,
+    /** Additive damage bonus for Stellar-Conduct damage instances. */
+    STELLAR_CONDUCT_DMG_BONUS,
+    /** Additive damage bonus for Stellar-Swirl damage instances. */
+    STELLAR_SWIRL_DMG_BONUS,
+    /** Base-damage bonus for Stellar-Conduct before the reaction section. */
+    STELLAR_CONDUCT_BASE_DMG_BONUS,
+    /** Base-damage bonus for Stellar-Swirl before the reaction section. */
+    STELLAR_SWIRL_BASE_DMG_BONUS,
+    /** Independent final multiplier for Stellar-Conduct damage. */
+    STELLAR_CONDUCT_MULTIPLIER,
+    /** Independent final multiplier for Stellar-Swirl damage. */
+    STELLAR_SWIRL_MULTIPLIER,
+    /** CRIT Rate applying only to Stellar-Conduct damage. */
+    STELLAR_CONDUCT_CRIT_RATE,
+    /** CRIT Rate applying only to Stellar-Swirl damage. */
+    STELLAR_SWIRL_CRIT_RATE,
+    /** CRIT DMG applying only to Stellar-Conduct damage. */
+    STELLAR_CONDUCT_CRIT_DMG,
+    /** CRIT DMG applying only to Stellar-Swirl damage. */
+    STELLAR_SWIRL_CRIT_DMG,
+    /** Independent special damage bonus for Stellar-Conduct damage. */
+    STELLAR_CONDUCT_SPECIAL_DMG_BONUS,
+    /** Independent special damage bonus for Stellar-Swirl damage. */
+    STELLAR_SWIRL_SPECIAL_DMG_BONUS,
 
     // -----------------------------------------------------------------------
     // Attack-type and ability-specific DMG Bonus / Crit stats

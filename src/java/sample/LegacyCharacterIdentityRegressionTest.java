@@ -72,6 +72,8 @@ public final class LegacyCharacterIdentityRegressionTest {
         assertIdentity(CharacterId.LINNEA, 115, "Linnea");
         assertIdentity(CharacterId.SANDRONE, 116, "Sandrone");
         assertIdentity(CharacterId.TRAVELER, 117, "Traveler");
+        assertIdentity(CharacterId.ALYOSHA, 118, "Alyosha");
+        assertIdentity(CharacterId.ODETTE, 119, "Odette");
         assertEquals(CharacterId.BENNETT, CharacterId.fromNumericId(1),
                 "first prior numeric ID");
         assertEquals(CharacterId.YANFEI, CharacterId.fromNumericId(20),

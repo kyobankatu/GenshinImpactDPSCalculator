@@ -14,6 +14,7 @@ import model.entity.state.EnergyState;
 import model.type.CharacterId;
 import model.type.Element;
 import simulation.runtime.ReactionState;
+import simulation.runtime.StellarReactionManager;
 
 /**
  * Immutable capture of all mutable {@link CombatSimulator} state at a point in time.
@@ -201,6 +202,8 @@ public class SimulatorSnapshot {
     public final Map<Element, Double> swirlTargetDamageCooldownEndTimes;
     public final Map<Element, Map<CharacterId, ReactionState.FixedDamageSequenceState>>
             swirlOwnerDamageSequenceStates;
+    /** Complete Polestar Field and Stellar Radiance payload. */
+    public final StellarReactionManager.State stellarReactionState;
     public final int moondriftCount;
     public final int lunarCrystallizeTriggerCount;
     public final int verdantDewCount;
@@ -259,6 +262,7 @@ public class SimulatorSnapshot {
      * @param standardCrystallizeCooldownEndTime standard Crystallize cooldown end
      * @param swirlTargetDamageCooldownEndTimes per-element Swirl target cooldown ends
      * @param swirlOwnerDamageSequenceStates per-element and owner Swirl sequence states
+     * @param stellarReactionState Polestar Field and Stellar Radiance state
      * @param moondriftCount active Moondrift count
      * @param lunarCrystallizeTriggerCount Lunar-Crystallize trigger count
      * @param verdantDewCount Verdant Dew count
@@ -306,6 +310,7 @@ public class SimulatorSnapshot {
             Map<Element, Double> swirlTargetDamageCooldownEndTimes,
             Map<Element, Map<CharacterId, ReactionState.FixedDamageSequenceState>>
                     swirlOwnerDamageSequenceStates,
+            StellarReactionManager.State stellarReactionState,
             int moondriftCount,
             int lunarCrystallizeTriggerCount,
             int verdantDewCount,
@@ -372,6 +377,7 @@ public class SimulatorSnapshot {
             this.swirlOwnerDamageSequenceStates.put(
                     entry.getKey(), new EnumMap<>(entry.getValue()));
         }
+        this.stellarReactionState = stellarReactionState;
         this.moondriftCount = moondriftCount;
         this.lunarCrystallizeTriggerCount = lunarCrystallizeTriggerCount;
         this.verdantDewCount = verdantDewCount;

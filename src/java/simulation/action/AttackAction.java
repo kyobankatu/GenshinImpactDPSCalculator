@@ -27,6 +27,14 @@ import java.util.HashMap;
  * </ul>
  */
 public class AttackAction {
+    /** Stellar family used by direct damage actions. */
+    public enum StellarReactionType {
+        /** Direct Stellar-Conduct damage. */
+        CONDUCT,
+        /** Direct Stellar-Swirl damage. */
+        SWIRL
+    }
+
     public enum LunarReactionType {
         CHARGED("Charged"),
         BLOOM("Bloom"),
@@ -71,6 +79,22 @@ public class AttackAction {
 
     private boolean isLunarConsidered = false;
     private LunarReactionType lunarReactionType = null;
+    private StellarReactionType stellarReactionType = null;
+
+    /** Marks this action as direct damage belonging to a Stellar reaction family. */
+    public void setStellarReactionType(StellarReactionType type) {
+        this.stellarReactionType = type;
+    }
+
+    /** Returns the direct Stellar damage family, or {@code null}. */
+    public StellarReactionType getStellarReactionType() {
+        return stellarReactionType;
+    }
+
+    /** Returns whether the action uses the direct Stellar damage formula. */
+    public boolean isStellarConsidered() {
+        return stellarReactionType != null;
+    }
 
     /**
      * Marks whether this action participates in the custom Lunar damage system.

@@ -142,6 +142,11 @@ public class BuffManager {
                 }
             }
         }
+        Buff stellarFieldBuff = sim.getStellarReactionManager()
+                .createFieldBuff(sim.getCurrentTime());
+        if (stellarFieldBuff != null) {
+            buffs.add(stellarFieldBuff);
+        }
         return buffs;
     }
 

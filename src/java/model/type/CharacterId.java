@@ -247,6 +247,10 @@ public enum CharacterId {
     SANDRONE(116, "Sandrone", CharacterRegion.SNEZHNAYA),
     /** Canonical combat identity shared by all Traveler elements and twins. */
     TRAVELER(117, "Traveler", CharacterRegion.UNKNOWN),
+    /** Alyosha (Electro polearm Stellar-Conduct support). */
+    ALYOSHA(118, "Alyosha", CharacterRegion.SNEZHNAYA),
+    /** Odette (Cryo sword Stellar reaction support). */
+    ODETTE(119, "Odette", CharacterRegion.SNEZHNAYA),
     /** Fallback value returned by {@link #fromName(String)} for unmatched names. */
     UNKNOWN(0, "Unknown", CharacterRegion.UNKNOWN);
 

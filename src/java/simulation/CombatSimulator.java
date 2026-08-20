@@ -17,6 +17,7 @@ import model.entity.ArtifactSet;
 import model.entity.SimulatorInitializedArtifactEffect;
 import model.entity.SimulatorInitializedCharacterEffect;
 import model.entity.SimulatorInitializedWeaponEffect;
+import model.entity.StellarReactionProvider;
 import model.type.CharacterId;
 import model.type.Element;
 import simulation.action.AttackAction;
@@ -33,6 +34,7 @@ import simulation.runtime.ReactionStateController;
 import simulation.runtime.SimulationClock;
 import simulation.runtime.SimulationEventDispatcher;
 import simulation.runtime.SwitchManager;
+import simulation.runtime.StellarReactionManager;
 import simulation.runtime.VisualLoggerSink;
 
 /**
@@ -68,6 +70,8 @@ public class CombatSimulator {
     private final ReactionState reactionState;
     /** Controller exposing {@link #reactionState} via legacy APIs. */
     private final ReactionStateController reactionStateController;
+    /** Owns Polestar Field and Stellar Radiance state. */
+    private final StellarReactionManager stellarReactionManager;
     /** Particle-to-energy distribution helper. */
     private final EnergyDistributor energyDistributor;
     /** Internal Cooldown manager for element application. */
@@ -120,6 +124,7 @@ public class CombatSimulator {
         this.eventDispatcher = Objects.requireNonNull(eventBus, "eventBus");
         this.combatLogSink = Objects.requireNonNull(combatLogSink, "combatLogSink");
         this.reactionState = new ReactionState();
+        this.stellarReactionManager = new StellarReactionManager();
         this.simulationClock = new SimulationClock(this);
         this.buffManager = new BuffManager(this);
         this.actionResolver = new CombatActionResolver(this);
@@ -967,6 +972,7 @@ public class CombatSimulator {
                 standardCrystallizeCooldownEndTime,
                 swirlTargetDamageCooldownEndTimes,
                 swirlOwnerDamageSequenceStates,
+                stellarReactionManager.captureState(),
                 moondriftCount, lunarCrystallizeTriggerCount,
                 verdantDewCount, moonridgeDewCount,
                 dendroCores, recentDendroCoreDamageTimes,
@@ -1002,6 +1008,9 @@ public class CombatSimulator {
 
         // Moonsign
         currentMoonsign = snap.moonsign;
+
+        // Stellar reaction state
+        stellarReactionManager.restoreState(snap.stellarReactionState);
 
         // Reaction state
         reactionState.setEcTimerRunning(snap.ecTimerRunning);
@@ -1385,6 +1394,33 @@ public class CombatSimulator {
             }
         }
         return false;
+    }
+
+    /** Returns whether a party capability converts Superconduct into Stellar-Conduct. */
+    public boolean hasStellarConductConversion() {
+        for (Character character : party.getMembers()) {
+            if (character instanceof StellarReactionProvider
+                    && ((StellarReactionProvider) character).enablesStellarConduct()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Returns whether a party capability converts Cryo Swirl into Stellar-Swirl. */
+    public boolean hasStellarSwirlConversion() {
+        for (Character character : party.getMembers()) {
+            if (character instanceof StellarReactionProvider
+                    && ((StellarReactionProvider) character).enablesStellarSwirl()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Returns the simulator-owned Stellar reaction state manager. */
+    public StellarReactionManager getStellarReactionManager() {
+        return stellarReactionManager;
     }
 
     public int getMoondriftCount() {

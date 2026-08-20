@@ -80,6 +80,7 @@ public class CombatActionResolver {
                     characterId.name(), action.getICDTag(), action.getICDType(), sim.getCurrentTime());
 
             notifyLunarAction(action, c);
+            notifyStellarAction(action, c);
 
             double reactionMulti = 1.0;
             sim.getEnemy().updateAuras(sim.getCurrentTime());
@@ -90,6 +91,8 @@ public class CombatActionResolver {
             }
             if (applied && action.getGaugeUnits() > 0) {
                 reactionMulti = resolveGaugeAndReactions(c, characterId, action, context);
+                sim.getStellarReactionManager().recordElementApplication(
+                        characterId, action.getElement(), sim.getCurrentTime());
             } else if (!applied && action.getGaugeUnits() > 0 && sim.isLoggingEnabled()) {
                 System.out.println(String.format("   [ICD] Applied blocked (%s)", action.getICDTag()));
             }
@@ -165,6 +168,21 @@ public class CombatActionResolver {
         }
     }
 
+    /** Emits a typed reaction notification for direct Stellar damage. */
+    private void notifyStellarAction(AttackAction action, Character character) {
+        if (!action.isStellarConsidered()) {
+            return;
+        }
+        ReactionResult.Kind kind = action.getStellarReactionType()
+                == AttackAction.StellarReactionType.CONDUCT
+                ? ReactionResult.Kind.STELLAR_CONDUCT
+                : ReactionResult.Kind.STELLAR_SWIRL;
+        sim.notifyDerivedReaction(
+                ReactionResult.stellar(
+                        0.0, kind, action.getElement(), action.getElement(), false),
+                character);
+    }
+
     /**
      * Drives gauge consumption and reaction resolution across currently active enemy auras.
      *
@@ -207,6 +225,7 @@ public class CombatActionResolver {
             if (result.getType() == ReactionResult.Type.NONE) {
                 continue;
             }
+            result = convertToStellarIfEligible(result);
             result = convertToLunarIfEligible(result);
             if (result.getKind() == ReactionResult.Kind.CRYSTALLIZE
                     && !sim.tryStartStandardCrystallizeCooldown()) {
@@ -266,6 +285,29 @@ public class CombatActionResolver {
                     result.getRelatedElement(),
                     Element.GEO,
                     true,
+                    false);
+        }
+        return result;
+    }
+
+    private ReactionResult convertToStellarIfEligible(ReactionResult result) {
+        if (result.getKind() == ReactionResult.Kind.SUPERCONDUCT
+                && sim.hasStellarConductConversion()) {
+            return ReactionResult.stellar(
+                    0.0,
+                    ReactionResult.Kind.STELLAR_CONDUCT,
+                    Element.CRYO,
+                    Element.CRYO,
+                    true);
+        }
+        if (result.getKind() == ReactionResult.Kind.SWIRL
+                && result.getRelatedElement() == Element.CRYO
+                && sim.hasStellarSwirlConversion()) {
+            return ReactionResult.stellar(
+                    ReactionCalculator.calculateStellarSwirlBaseDamage(90),
+                    ReactionResult.Kind.STELLAR_SWIRL,
+                    Element.CRYO,
+                    Element.ANEMO,
                     false);
         }
         return result;
@@ -484,14 +526,17 @@ public class CombatActionResolver {
             sim.getEnemy().reduceAura(
                     aura, getAuraConsumption(action, result, trigger, aura), sim.getCurrentTime());
         }
+        if (result.getKind() == ReactionResult.Kind.STELLAR_SWIRL) {
+            sim.getStellarReactionManager().triggerStellarSwirl(sim.getCurrentTime());
+        }
 
         if (result.getKind() == ReactionResult.Kind.SUPERCONDUCT) {
             applySuperconductPhysicalResShred();
         }
 
-        if (result.getKind() == ReactionResult.Kind.SWIRL
+        if (result.isSwirl()
                 && !sim.tryStartSwirlDamageSequence(
-                        characterId, reactionElement)) {
+                        characterId, result.getRelatedElement())) {
             if (sim.isLoggingEnabled()) {
                 System.out.println(String.format(
                         "   [Reaction] %s on %s -> %s Damage blocked (damage sequence)",
@@ -524,6 +569,11 @@ public class CombatActionResolver {
                 ? stats.get(StatType.ELECTRO_CHARGED_DMG_BONUS)
                 : 0.0;
         double preResistanceDamage = result.getTransformDamage() * (1.0 + reactBonus);
+        if (result.getKind() == ReactionResult.Kind.STELLAR_SWIRL) {
+            preResistanceDamage = calculateStellarSwirlDamageBeforeResistance(
+                    result.getTransformDamage(), stats);
+            resFactor = resolveImpactResistance(context, Element.ANEMO);
+        }
         double transDmg = preResistanceDamage * resFactor;
 
         boolean isLunar = result.getKind() == ReactionResult.Kind.LUNAR_CHARGED;
@@ -597,7 +647,16 @@ public class CombatActionResolver {
 
     private void handleStatefulReaction(Character attacker, CharacterId characterId, Element trigger, Element aura,
             AttackAction action, ReactionResult result, StatsContainer stats, ActionResolutionContext context) {
-        if (result.getKind() == ReactionResult.Kind.FROZEN) {
+        if (result.getKind() == ReactionResult.Kind.STELLAR_CONDUCT) {
+            sim.getEnemy().reduceAura(
+                    aura, getAuraConsumption(action, result, trigger, aura), sim.getCurrentTime());
+            sim.getStellarReactionManager().triggerStellarConduct(sim.getCurrentTime());
+            if (sim.isLoggingEnabled()) {
+                System.out.println(String.format(
+                        "   [Reaction] %s on %s -> Stellar-Conduct (Polestar Field)",
+                        trigger, aura));
+            }
+        } else if (result.getKind() == ReactionResult.Kind.FROZEN) {
             double freezeUnits = 2.0 * Math.min(
                     action.getGaugeUnits(),
                     sim.getEnemy().getAuraUnits(aura, sim.getCurrentTime()));
@@ -817,6 +876,39 @@ public class CombatActionResolver {
                 stats -> stats.add(StatType.PHYS_RES_SHRED, 0.40)));
     }
 
+    private double calculateStellarSwirlDamageBeforeResistance(
+            double baseDamage,
+            StatsContainer stats) {
+        double em = stats.get(StatType.ELEMENTAL_MASTERY);
+        double damageSection = 1.0
+                + (6.0 * em) / (2000.0 + em)
+                + stats.get(StatType.STELLAR_SWIRL_DMG_BONUS);
+        double baseSection = 1.0 + stats.get(StatType.STELLAR_SWIRL_BASE_DMG_BONUS);
+        double critRate = Math.min(
+                1.0,
+                stats.get(StatType.CRIT_RATE)
+                        + stats.get(StatType.STELLAR_SWIRL_CRIT_RATE));
+        double critDamage = stats.get(StatType.CRIT_DMG)
+                + stats.get(StatType.STELLAR_SWIRL_CRIT_DMG)
+                + stats.get(StatType.ANEMO_CRIT_DMG);
+        double critMultiplier = 1.0 + critRate * critDamage;
+        double defenseMultiplier = DamageCalculator.calculateDefMulti(
+                90,
+                sim.getEnemy().getLevel(),
+                stats.get(StatType.ENEMY_DEF_REDUCTION),
+                stats.get(StatType.DEF_IGNORE));
+        double specialMultiplier = 1.0
+                + stats.get(StatType.STELLAR_SWIRL_SPECIAL_DMG_BONUS);
+        double finalMultiplier = 1.0 + stats.get(StatType.STELLAR_SWIRL_MULTIPLIER);
+        return baseDamage
+                * damageSection
+                * baseSection
+                * critMultiplier
+                * defenseMultiplier
+                * specialMultiplier
+                * finalMultiplier;
+    }
+
     /**
      * Resolves enemy resistance from the immutable team-buff list captured before
      * reaction callbacks for the current hit.
@@ -865,6 +957,7 @@ public class CombatActionResolver {
             Element aura) {
         switch (result.getKind()) {
             case SWIRL:
+            case STELLAR_SWIRL:
             case CRYSTALLIZE:
             case LUNAR_CRYSTALLIZE:
                 return action.getGaugeUnits() * 0.5;

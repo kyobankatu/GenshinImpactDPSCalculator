@@ -11,6 +11,7 @@ import model.entity.TargetDependentTeamEffect;
 import model.entity.TargetDependentWeaponEffect;
 import java.util.List;
 import mechanics.buff.Buff;
+import simulation.action.AttackAction;
 
 /**
  * Computes outgoing damage for a single attack action.
@@ -28,6 +29,7 @@ import mechanics.buff.Buff;
 public class DamageCalculator {
     private static final DamageStrategy STANDARD_STRATEGY = new StandardDamageStrategy();
     private static final DamageStrategy LUNAR_STRATEGY = new LunarDamageStrategy();
+    private static final DamageStrategy STELLAR_STRATEGY = new StellarDamageStrategy();
 
     /**
      * Calculates the final damage dealt by {@code action}.
@@ -91,7 +93,7 @@ public class DamageCalculator {
             double currentTime,
             double reactionMultiplier,
             simulation.CombatSimulator sim) {
-        DamageStrategy strategy = action.isLunarConsidered() ? LUNAR_STRATEGY : STANDARD_STRATEGY;
+        DamageStrategy strategy = selectStrategy(action);
         double damage = strategy.calculate(
                 attacker, target, action, activeBuffs, currentTime, reactionMultiplier, sim);
         notifyDamageHooks(attacker, action, currentTime, sim, damage);
@@ -128,11 +130,18 @@ public class DamageCalculator {
             double currentTime,
             double reactionMultiplier,
             simulation.CombatSimulator sim) {
-        DamageStrategy strategy = action.isLunarConsidered() ? LUNAR_STRATEGY : STANDARD_STRATEGY;
+        DamageStrategy strategy = selectStrategy(action);
         double damage = strategy.calculate(
                 attacker, target, action, activeBuffs, preResolvedStats, currentTime, reactionMultiplier, sim);
         notifyDamageHooks(attacker, action, currentTime, sim, damage);
         return damage;
+    }
+
+    private static DamageStrategy selectStrategy(AttackAction action) {
+        if (action.isStellarConsidered()) {
+            return STELLAR_STRATEGY;
+        }
+        return action.isLunarConsidered() ? LUNAR_STRATEGY : STANDARD_STRATEGY;
     }
 
     /**
@@ -171,7 +180,7 @@ public class DamageCalculator {
      * @param defIgnore total DEF ignore ratio
      * @return defense multiplier in the range (0, 1]
      */
-    static double calculateDefMulti(
+    public static double calculateDefMulti(
             int attackerLevel,
             int enemyLevel,
             double defReduction,
