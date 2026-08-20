@@ -12,12 +12,13 @@ import model.type.StatType;
 import simulation.CombatSimulator;
 
 /**
- * Disenchantment in Deep Shadow with its supported Superconduct effects.
+ * Disenchantment in Deep Shadow with Superconduct and Stellar-Conduct effects.
  *
  * <p>The two-piece ATK bonus and four-piece Superconduct reaction bonus are
- * fixed stats. The 16% CRIT Rate is evaluated live from the simulator's
- * existing Superconduct Physical RES shred window. Stellar-Conduct is outside
- * the current reaction model and therefore remains inactive.</p>
+ * fixed stats. The 16% CRIT Rate is evaluated live from the configured enemy's
+ * Superconduct status or active Polestar Field. In this fixed-target simulator,
+ * the configured enemy is always inside the field, so field activity is the
+ * typed Stellar-Conduct target-state marker.</p>
  */
 public class DisenchantmentInDeepShadow extends ArtifactSet
         implements SimulatorInitializedArtifactEffect {
@@ -41,6 +42,7 @@ public class DisenchantmentInDeepShadow extends ArtifactSet
                 Objects.requireNonNull(stats, "stats"));
         getStats().add(StatType.ATK_PERCENT, 0.18);
         getStats().add(StatType.SUPERCONDUCT_DMG_BONUS, 0.80);
+        getStats().add(StatType.STELLAR_CONDUCT_DMG_BONUS, 0.40);
     }
 
     /**
@@ -77,7 +79,7 @@ public class DisenchantmentInDeepShadow extends ArtifactSet
                 .sourcedBy(owner.getCharacterId()));
     }
 
-    /** Owner-only live CRIT modifier backed by the Superconduct status buff. */
+    /** Owner-only live CRIT modifier backed by typed target-state owners. */
     private static final class SuperconductCritRateBuff extends Buff {
         private final CombatSimulator simulator;
 
@@ -87,9 +89,14 @@ public class DisenchantmentInDeepShadow extends ArtifactSet
             this.simulator = simulator;
         }
 
-        /** Adds CRIT Rate only while the shared Superconduct status is active. */
+        /** Adds CRIT Rate while Superconduct or Stellar-Conduct affects the target. */
         @Override
         protected void applyStats(StatsContainer stats, double currentTime) {
+            if (simulator.getStellarReactionManager()
+                    .isFieldActive(currentTime)) {
+                stats.add(StatType.CRIT_RATE, CRIT_RATE_BONUS);
+                return;
+            }
             for (Buff buff : simulator.getTeamBuffList()) {
                 if (buff.getId() == BuffId.SUPERCONDUCT_PHYS_RES_SHRED
                         && currentTime >= buff.getStartTime()

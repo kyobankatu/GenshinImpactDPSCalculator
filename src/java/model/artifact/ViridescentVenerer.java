@@ -21,6 +21,7 @@ public class ViridescentVenerer extends model.entity.ArtifactSet implements Reac
         this.getStats().add(StatType.ANEMO_DMG_BONUS, 0.15);
         // 4-Piece Passive: Swirl DMG +60%
         this.getStats().add(StatType.SWIRL_DMG_BONUS, 0.60);
+        this.getStats().add(StatType.STELLAR_SWIRL_DMG_BONUS, 0.20);
     }
 
     /**
@@ -34,6 +35,7 @@ public class ViridescentVenerer extends model.entity.ArtifactSet implements Reac
         this.getStats().add(StatType.ANEMO_DMG_BONUS, 0.15);
         // 4-Piece Passive: Swirl DMG +60%
         this.getStats().add(StatType.SWIRL_DMG_BONUS, 0.60);
+        this.getStats().add(StatType.STELLAR_SWIRL_DMG_BONUS, 0.20);
     }
 
     /**

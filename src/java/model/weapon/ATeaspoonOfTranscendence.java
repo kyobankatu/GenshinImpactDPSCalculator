@@ -16,14 +16,13 @@ import simulation.action.AttackAction;
  * A Teaspoon of Transcendence claymore with owner-bound Transcendence stacks.
  *
  * <p>Lv. 90 metadata and R1-R5 values follow Genshin Optimizer commit
- * {@code 61c5556a}. The unconditional ATK bonus is fully represented. Positive
+ * {@code d791814a}. The unconditional ATK bonus is fully represented. Positive
  * owner Charged Attack hits gain up to three stacks, refresh their shared
  * five-second duration, and observe the source's {@code 0.2}-second trigger
  * interval.</p>
  *
- * <p>The source-backed Stellar-Conduct DMG bonus is retained as typed weapon
- * data but intentionally does not leak into generic damage stats: this
- * baseline has no Stellar-Conduct-specific {@link StatType}.</p>
+ * <p>Each stack grants the same typed Stellar-Conduct and Stellar-Swirl damage
+ * bonus. Neither bonus leaks into generic damage stats.</p>
  */
 public final class ATeaspoonOfTranscendence extends Weapon implements
         DamageListener,
@@ -78,9 +77,9 @@ public final class ATeaspoonOfTranscendence extends Weapon implements
         return stellarConductBonusPerStack;
     }
 
-    /** Returns whether a typed Stellar-Conduct damage stat is represented. */
+    /** Returns whether dedicated Stellar damage stats are represented. */
     public boolean isStellarConductDamageRepresented() {
-        return false;
+        return true;
     }
 
     /** Returns the active stack count at the supplied timestamp. */
@@ -89,10 +88,17 @@ public final class ATeaspoonOfTranscendence extends Weapon implements
         return stackCount;
     }
 
-    /** Applies only the representable unconditional ATK bonus. */
+    /** Applies unconditional ATK and both active typed Stellar bonuses. */
     @Override
     public void applyPassive(StatsContainer stats, double currentTime) {
         stats.add(StatType.ATK_PERCENT, attackBonus);
+        expireStacks(currentTime);
+        if (stackCount == 0) {
+            return;
+        }
+        double stellarBonus = stellarConductBonusPerStack * stackCount;
+        stats.add(StatType.STELLAR_CONDUCT_DMG_BONUS, stellarBonus);
+        stats.add(StatType.STELLAR_SWIRL_DMG_BONUS, stellarBonus);
     }
 
     /** Binds the mutable stack state to exactly one equipped owner. */

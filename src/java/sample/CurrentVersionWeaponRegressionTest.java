@@ -24,7 +24,7 @@ public final class CurrentVersionWeaponRegressionTest {
     /** Runs both current-version weapon contracts and their failure boundaries. */
     public static void main(String[] args) {
         testTeaspoonMetadataAndRefinement();
-        testTeaspoonStacksAndUnsupportedDamageStat();
+        testTeaspoonStacksAndStellarDamageStats();
         testTeaspoonSnapshotAndGuards();
         testDisasterMetadataAndRefinement();
         testDisasterActivationExtensionAndCooldown();
@@ -57,8 +57,8 @@ public final class CurrentVersionWeaponRegressionTest {
             assertClose(0.12 + 0.04 * refinement,
                     weapon.getStellarConductBonusPerStack(),
                     "Teaspoon Stellar-Conduct R" + refinement);
-            assertTrue(!weapon.isStellarConductDamageRepresented(),
-                    "Teaspoon Stellar-Conduct fails closed at R" + refinement);
+            assertTrue(weapon.isStellarConductDamageRepresented(),
+                    "Teaspoon Stellar damage is represented at R" + refinement);
         }
 
         assertThrows(IllegalArgumentException.class,
@@ -69,7 +69,7 @@ public final class CurrentVersionWeaponRegressionTest {
                 "Teaspoon rejects refinement six");
     }
 
-    private static void testTeaspoonStacksAndUnsupportedDamageStat() {
+    private static void testTeaspoonStacksAndStellarDamageStats() {
         ATeaspoonOfTranscendence weapon =
                 new ATeaspoonOfTranscendence(1);
         StatefulWeaponRegressionSupport.TestCharacter owner = owner(weapon);
@@ -95,6 +95,13 @@ public final class CurrentVersionWeaponRegressionTest {
         simulator.notifyDamage(owner, hit(ActionType.CHARGE), 1.0);
         assertEquals(1, weapon.getStackCount(0.0),
                 "Teaspoon enforces the 0.2-second trigger gate");
+        StatsContainer oneStack = stats(owner, simulator);
+        assertClose(0.16,
+                oneStack.get(StatType.STELLAR_CONDUCT_DMG_BONUS),
+                "Teaspoon routes one stack to Stellar-Conduct");
+        assertClose(0.16,
+                oneStack.get(StatType.STELLAR_SWIRL_DMG_BONUS),
+                "Teaspoon routes one stack to Stellar-Swirl");
 
         simulator.advanceTime(0.2 - EPSILON);
         simulator.notifyDamage(owner, hit(ActionType.CHARGE), 1.0);

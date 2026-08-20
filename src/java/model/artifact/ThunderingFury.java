@@ -42,6 +42,7 @@ public class ThunderingFury extends ArtifactSet
         getStats().add(StatType.HYPERBLOOM_DMG_BONUS, 0.40);
         getStats().add(StatType.AGGRAVATE_DMG_BONUS, 0.20);
         getStats().add(StatType.LUNAR_CHARGED_DMG_BONUS, 0.20);
+        getStats().add(StatType.STELLAR_CONDUCT_DMG_BONUS, 0.20);
     }
 
     /** Binds this mutable set to exactly one owner and simulator. */
@@ -107,6 +108,7 @@ public class ThunderingFury extends ArtifactSet
             case AGGRAVATE:
             case QUICKEN:
             case LUNAR_CHARGED:
+            case STELLAR_CONDUCT:
                 return true;
             default:
                 return false;

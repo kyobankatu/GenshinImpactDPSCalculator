@@ -3,6 +3,7 @@ package model.weapon;
 import model.entity.ActionTriggeredWeaponEffect;
 import model.entity.Character;
 import model.entity.SimulatorInitializedWeaponEffect;
+import model.entity.SnapshotAwareWeaponEffect;
 import model.entity.Weapon;
 import model.stats.StatsContainer;
 import model.type.Element;
@@ -12,9 +13,17 @@ import simulation.CombatSimulator;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
 
-/** Kagura's Verity catalyst with shared-duration Skill damage stacks. */
+/**
+ * Kagura's Verity catalyst with shared-duration Skill and Stellar-Conduct stacks.
+ *
+ * <p>R1-R5 values and the 24-second shared duration follow Genshin Optimizer
+ * commit {@code d791814a}. Each Skill use adds one Kagura Dance stack to both
+ * typed damage channels; three stacks additionally grant All Elemental DMG.</p>
+ */
 public class KagurasVerity extends Weapon
-        implements ActionTriggeredWeaponEffect, SimulatorInitializedWeaponEffect {
+        implements ActionTriggeredWeaponEffect,
+        SimulatorInitializedWeaponEffect,
+        SnapshotAwareWeaponEffect {
     private static final int MAX_STACKS = 3;
     private static final double STACK_DURATION = 24.0;
 
@@ -63,12 +72,21 @@ public class KagurasVerity extends Weapon
     /** Binds the owner whose typed Skill input drives the passive. */
     @Override
     public void initializeForSimulator(Character equippedOwner, CombatSimulator sim) {
+        if (equippedOwner == null || sim == null) {
+            throw new IllegalArgumentException(
+                    "Kagura's Verity owner and simulator are required");
+        }
         if (simulator != null) {
             if (owner != equippedOwner || simulator != sim) {
                 throw new IllegalStateException(
                         "Kagura's Verity is already bound to another simulator");
             }
             return;
+        }
+        if (equippedOwner.getWeapon() != this
+                || !sim.getPartyMembers().contains(equippedOwner)) {
+            throw new IllegalArgumentException(
+                    "Kagura's Verity owner must equip this weapon in the simulator party");
         }
         owner = equippedOwner;
         simulator = sim;
@@ -82,6 +100,7 @@ public class KagurasVerity extends Weapon
             CombatSimulator sim) {
         if (sim != simulator
                 || user != owner
+                || request == null
                 || sim.getActiveCharacter() != owner
                 || request.getKey() != CharacterActionKey.SKILL) {
             return;
@@ -101,12 +120,51 @@ public class KagurasVerity extends Weapon
             return;
         }
         stats.add(StatType.SKILL_DMG_BONUS, bonusPerStack * stackCount);
+        stats.add(StatType.STELLAR_CONDUCT_DMG_BONUS,
+                bonusPerStack * stackCount);
         if (stackCount == MAX_STACKS) {
             for (Element element : Element.values()) {
                 if (element != Element.PHYSICAL) {
                     stats.add(element.getBonusStatType(), bonusPerStack);
                 }
             }
+        }
+    }
+
+    /** Captures the stack count and shared expiry for simulator branching. */
+    @Override
+    public State captureWeaponState() {
+        return new KaguraState(this, stackCount, activeUntil);
+    }
+
+    /** Restores state captured from this exact weapon instance. */
+    @Override
+    public void restoreWeaponState(State state) {
+        if (!(state instanceof KaguraState)) {
+            throw new IllegalArgumentException("Kagura's Verity state type is invalid");
+        }
+        KaguraState restored = (KaguraState) state;
+        if (restored.source != this) {
+            throw new IllegalArgumentException(
+                    "Kagura's Verity state belongs to another instance");
+        }
+        stackCount = restored.stackCount;
+        activeUntil = restored.activeUntil;
+    }
+
+    /** Immutable Kagura Dance state tied to one weapon instance. */
+    private static final class KaguraState implements State {
+        private final KagurasVerity source;
+        private final int stackCount;
+        private final double activeUntil;
+
+        private KaguraState(
+                KagurasVerity source,
+                int stackCount,
+                double activeUntil) {
+            this.source = source;
+            this.stackCount = stackCount;
+            this.activeUntil = activeUntil;
         }
     }
 }
