@@ -304,7 +304,11 @@ public final class TravelerCryo extends Character implements
         }
         AttackAction action = createAction(
                 "Frostpierce Star Ice Crystal",
-                getTalentValue("Ice Crystal DMG", 0.363664),
+                getTalentValue(
+                        constellation >= 5
+                                ? "Ice Crystal DMG C5"
+                                : "Ice Crystal DMG",
+                        constellation >= 5 ? 0.427840 : 0.363664),
                 Element.CRYO,
                 StatType.SKILL_DMG_BONUS,
                 ActionType.SKILL,
@@ -380,7 +384,9 @@ public final class TravelerCryo extends Character implements
         performHit(
                 simulator,
                 "Ice Fog Piercer",
-                getTalentValue("Skill DMG", 1.558560),
+                getTalentValue(
+                        constellation >= 5 ? "Skill DMG C5" : "Skill DMG",
+                        constellation >= 5 ? 1.833600 : 1.558560),
                 Element.CRYO,
                 StatType.SKILL_DMG_BONUS,
                 ActionType.SKILL,
@@ -399,19 +405,36 @@ public final class TravelerCryo extends Character implements
         double stackMultiplier;
         if (stellarType == AttackAction.StellarReactionType.CONDUCT) {
             baseMultiplier = getTalentValue(
-                    "Burst Stellar Conduct DMG", 0.624818);
+                    constellation >= 3
+                            ? "Burst Stellar Conduct DMG C3"
+                            : "Burst Stellar Conduct DMG",
+                    constellation >= 3 ? 0.735080 : 0.624818);
             stackMultiplier = getTalentValue(
-                    "Burst Stellar Conduct Frostglow Bonus", 0.031241);
+                    constellation >= 3
+                            ? "Burst Stellar Conduct Frostglow Bonus C3"
+                            : "Burst Stellar Conduct Frostglow Bonus",
+                    constellation >= 3 ? 0.036754 : 0.031241);
         } else {
-            baseMultiplier = getTalentValue("Burst DMG", 0.937227);
+            baseMultiplier = getTalentValue(
+                    constellation >= 3 ? "Burst DMG C3" : "Burst DMG",
+                    constellation >= 3 ? 1.102620 : 0.937227);
             stackMultiplier = getTalentValue(
-                    "Burst Frostglow Bonus", 0.046861);
+                    constellation >= 3
+                            ? "Burst Frostglow Bonus C3"
+                            : "Burst Frostglow Bonus",
+                    constellation >= 3 ? 0.055131 : 0.046861);
         }
         if (stellarType == AttackAction.StellarReactionType.SWIRL) {
             baseMultiplier = getTalentValue(
-                    "Burst Stellar Swirl DMG", 0.937227);
+                    constellation >= 3
+                            ? "Burst Stellar Swirl DMG C3"
+                            : "Burst Stellar Swirl DMG",
+                    constellation >= 3 ? 1.102620 : 0.937227);
             stackMultiplier = getTalentValue(
-                    "Burst Stellar Swirl Frostglow Bonus", 0.046861);
+                    constellation >= 3
+                            ? "Burst Stellar Swirl Frostglow Bonus C3"
+                            : "Burst Stellar Swirl Frostglow Bonus",
+                    constellation >= 3 ? 0.055131 : 0.046861);
         }
         if (constellation >= 6) {
             c6StellarDamageBonus = consumed

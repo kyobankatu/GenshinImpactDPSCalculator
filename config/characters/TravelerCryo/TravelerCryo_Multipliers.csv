@@ -10,12 +10,20 @@ TravelerCryo,CHARGED,Charged Attack Hit 2 Male,9,1.115480,0
 TravelerCryo,SKILL,Skill DMG,9,1.558560,0
 TravelerCryo,SKILL,Ice Crystal DMG,9,0.363664,0
 TravelerCryo,SKILL,Frostpierce Star Duration,9,12,0
+TravelerCryo,SKILL,Skill DMG C5,12,1.833600,0
+TravelerCryo,SKILL,Ice Crystal DMG C5,12,0.427840,0
 TravelerCryo,BURST,Burst DMG,9,0.937227,0
 TravelerCryo,BURST,Burst Frostglow Bonus,9,0.046861,0
 TravelerCryo,BURST,Burst Stellar Conduct DMG,9,0.624818,0
 TravelerCryo,BURST,Burst Stellar Conduct Frostglow Bonus,9,0.031241,0
 TravelerCryo,BURST,Burst Stellar Swirl DMG,9,0.937227,0
 TravelerCryo,BURST,Burst Stellar Swirl Frostglow Bonus,9,0.046861,0
+TravelerCryo,BURST,Burst DMG C3,12,1.102620,0
+TravelerCryo,BURST,Burst Frostglow Bonus C3,12,0.055131,0
+TravelerCryo,BURST,Burst Stellar Conduct DMG C3,12,0.735080,0
+TravelerCryo,BURST,Burst Stellar Conduct Frostglow Bonus C3,12,0.036754,0
+TravelerCryo,BURST,Burst Stellar Swirl DMG C3,12,1.102620,0
+TravelerCryo,BURST,Burst Stellar Swirl Frostglow Bonus C3,12,0.055131,0
 TravelerCryo,PASSIVE,A4 ATK to EM Ratio,1,0.08,0
 TravelerCryo,PASSIVE,A4 Maximum EM,1,160,0
 TravelerCryo,PASSIVE,Stellar Base DMG Per ATK,1,0.000035,0

@@ -32,6 +32,7 @@ public final class TravelerCryoRegressionTest {
     public static void main(String[] args) throws Exception {
         testIdentityDataAndValidation();
         testSwordMultipliersAndGender();
+        testTalentConstellations();
         testStarFrostglowAndSnapshot();
         testRadianceBurstIcepointAndConstellations();
         System.out.println("TravelerCryoRegressionTest passed");
@@ -77,7 +78,31 @@ public final class TravelerCryoRegressionTest {
                 7);
         assertCsvShape(Path.of(
                 "config/characters/TravelerCryo/TravelerCryo_Multipliers.csv"),
-                29);
+                37);
+    }
+
+    private static void testTalentConstellations() {
+        TravelerCryo c3 = new TravelerCryo(
+                null, null, TravelerCryo.Gender.FEMALE, 3);
+        CombatSimulator burstSimulator = simulatorWith(c3);
+        List<AttackAction> burstActions = captureActions(burstSimulator);
+        perform(burstSimulator, CharacterActionKey.BURST);
+        assertClose(1.102620,
+                burstActions.get(0).getDamagePercent(),
+                "C3 uses level-12 Burst multiplier");
+
+        TravelerCryo c5 = new TravelerCryo(
+                null, null, TravelerCryo.Gender.FEMALE, 5);
+        CombatSimulator skillSimulator = simulatorWith(c5);
+        List<AttackAction> skillActions = captureActions(skillSimulator);
+        perform(skillSimulator, CharacterActionKey.SKILL);
+        assertClose(1.833600,
+                skillActions.get(0).getDamagePercent(),
+                "C5 uses level-12 Skill multiplier");
+        c5.fireIceCrystal(skillSimulator);
+        assertClose(0.427840,
+                skillActions.get(1).getDamagePercent(),
+                "C5 uses level-12 ice crystal multiplier");
     }
 
     private static void testSwordMultipliersAndGender() {
@@ -170,9 +195,9 @@ public final class TravelerCryoRegressionTest {
         List<AttackAction> javelins = named(actions, "Frostbound Javelin");
         assertEquals(5, javelins.size(),
                 "eight Frostglow adds two Burst strikes");
-        assertClose(0.624818 + 8.0 * 0.031241,
+        assertClose(0.735080 + 8.0 * 0.036754,
                 javelins.get(0).getDamagePercent(),
-                "Conduct Burst consumes Frostglow multiplier");
+                "C3 Conduct Burst consumes Frostglow multiplier");
         assertEquals(AttackAction.StellarReactionType.CONDUCT,
                 javelins.get(0).getStellarReactionType(),
                 "Conduct has priority over Swirl radiance");
