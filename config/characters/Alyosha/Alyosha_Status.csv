@@ -1,0 +1,13 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Alyosha,STATS,Base HP,90,11962.4065,0
+Alyosha,STATS,Base ATK,90,265.4965,0
+Alyosha,STATS,Base DEF,90,702.9972,0
+Alyosha,STATS,Ascension Energy Recharge,90,0.2667,0
+Alyosha,STATS,Energy Cost,90,70,0
+Alyosha,STATS,Constellation,0,0,0
+Alyosha,CONFIG,Character Level,90,90,0
+Alyosha,CONFIG,Normal Level,9,9,0
+Alyosha,CONFIG,Skill Level,9,9,0
+Alyosha,CONFIG,Burst Level,9,9,0
+Alyosha,CONFIG,Skill Cooldown,1,15,0
+Alyosha,CONFIG,Burst Cooldown,1,18,0

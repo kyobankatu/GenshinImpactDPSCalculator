@@ -1,0 +1,27 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Alyosha,NORMAL,N1,9,0.87848,0
+Alyosha,NORMAL,N2,9,0.8848,0
+Alyosha,NORMAL,N3 Hit 1,9,0.62884,0
+Alyosha,NORMAL,N3 Hit 2,9,0.5846,0
+Alyosha,NORMAL,N4,9,1.39356,0
+Alyosha,CHARGED,Charged Attack,9,2.03978,0
+Alyosha,SKILL,Press Skill,9,4.87424,0
+Alyosha,SKILL,Hold Skill,9,6.0928,0
+Alyosha,SKILL,Hunter's Precision ATK Bonus,9,0.2014,0
+Alyosha,SKILL,Press Skill C3,12,5.7344,0
+Alyosha,SKILL,Hold Skill C3,12,7.168,0
+Alyosha,SKILL,Hunter's Precision ATK Bonus C3,12,0.23744,0
+Alyosha,BURST,Fulgurite Hunting Field,9,1.27432,0
+Alyosha,BURST,Tugarin,9,0.853794,0
+Alyosha,BURST,Fulgurite Hunting Field C5,12,1.4992,0
+Alyosha,BURST,Tugarin C5,12,1.004464,0
+Alyosha,PASSIVE,Hunter's Mark Duration,1,15,0
+Alyosha,PASSIVE,Hunter's Precision Duration,1,15,0
+Alyosha,PASSIVE,Burst Duration,1,14,0
+Alyosha,PASSIVE,C2 Burst Duration Bonus,2,6,0
+Alyosha,PASSIVE,A4 Skill Burst Bonus Per ER,1,0.35,0
+Alyosha,PASSIVE,A4 Maximum DMG Bonus,1,0.70,0
+Alyosha,PASSIVE,Precision Stellar-Conduct DMG Bonus,1,0.20,0
+Alyosha,PASSIVE,C1 Flat Energy,1,15,0
+Alyosha,PASSIVE,C1 Energy Cooldown,1,18,0
+Alyosha,PASSIVE,C6 Precision EM,6,100,0
