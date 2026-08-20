@@ -55,6 +55,7 @@ public class ReactionRegressionTest {
         testPhase3FreezeAndShatter();
         testAccuracyPhaseG_FreezeResolverContract();
         testAccuracyPhaseG_PyroFrozenMeltContract();
+        testAccuracyPhaseG_FrozenElementalReactionContract();
         testPhase4Crystallize();
         testPhase5Burning();
         testAccuracyPhaseG_BurningRefreshAndGenerationContract();
@@ -585,6 +586,78 @@ public class ReactionRegressionTest {
                 "Pyro at exact Frozen expiry should not Melt");
         assertEquals(1, countReactions(expiredKinds, ReactionResult.Kind.VAPORIZE),
                 "Pyro at exact Frozen expiry should react with exposed Hydro");
+    }
+
+    private static void testAccuracyPhaseG_FrozenElementalReactionContract() {
+        CombatSimulator electro = simulatorWith(testCharacter(Element.ELECTRO));
+        electro.getEnemy().setAura(Element.CRYO, 0.4, electro.getCurrentTime());
+        electro.getEnemy().applyFreezeAura(1.6, electro.getCurrentTime());
+        List<ReactionResult.Kind> electroKinds = captureReactionKinds(electro);
+        electro.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Electro-on-Frozen fixture", Element.ELECTRO));
+        assertEquals(1, electroKinds.size(),
+                "Electro on Frozen should notify exactly one reaction");
+        assertEquals(ReactionResult.Kind.SUPERCONDUCT, electroKinds.get(0),
+                "Electro on Frozen should trigger Superconduct");
+        assertClose(0.0, electro.getEnemy().getAuraUnits(
+                Element.CRYO, electro.getCurrentTime()), EPS,
+                "Frozen Superconduct should consume coexisting Cryo first");
+        assertClose(1.0, electro.getEnemy().getFreezeAuraUnits(
+                electro.getCurrentTime()), EPS,
+                "Frozen Superconduct should spend remaining source gauge on Frozen");
+        assertClose(expectedTransformative(1.5, Element.CRYO, 0.0),
+                electro.getTotalDamage(), 0.5,
+                "Frozen Superconduct damage after RES");
+
+        CombatSimulator anemo = simulatorWith(testCharacter(Element.ANEMO));
+        anemo.getEnemy().applyFreezeAura(1.6, anemo.getCurrentTime());
+        List<ReactionResult.Kind> anemoKinds = captureReactionKinds(anemo);
+        anemo.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Anemo-on-Frozen fixture", Element.ANEMO));
+        assertEquals(1, anemoKinds.size(),
+                "Anemo on isolated Frozen should notify exactly one reaction");
+        assertEquals(ReactionResult.Kind.SWIRL, anemoKinds.get(0),
+                "Anemo on Frozen should trigger Cryo Swirl");
+        assertClose(1.1, anemo.getEnemy().getFreezeAuraUnits(
+                anemo.getCurrentTime()), EPS,
+                "Frozen Swirl should consume half the source gauge");
+        assertClose(expectedTransformative(0.6, Element.CRYO, 0.0),
+                anemo.getTotalDamage(), 0.5,
+                "Frozen Cryo Swirl damage after RES");
+
+        CombatSimulator strongGeo = simulatorWith(testCharacter(Element.GEO));
+        strongGeo.getEnemy().applyFreezeAura(3.0, strongGeo.getCurrentTime());
+        List<ReactionResult.Kind> strongGeoKinds = captureReactionKinds(strongGeo);
+        strongGeo.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Geo-on-strong-Frozen fixture", Element.GEO));
+        assertEquals(2, strongGeoKinds.size(),
+                "Geo on strong Frozen should notify Shatter and Crystallize");
+        assertEquals(ReactionResult.Kind.SHATTER, strongGeoKinds.get(0),
+                "Geo should Shatter before reacting with remaining Frozen");
+        assertEquals(ReactionResult.Kind.CRYSTALLIZE, strongGeoKinds.get(1),
+                "Geo should Crystallize remaining Frozen as Cryo");
+        assertClose(0.5, strongGeo.getEnemy().getFreezeAuraUnits(
+                strongGeo.getCurrentTime()), EPS,
+                "Shatter and Crystallize should consume 2U and 0.5U Frozen");
+        assertClose(expectedTransformative(3.0, Element.PHYSICAL, 0.0),
+                strongGeo.getTotalDamage(), 0.5,
+                "Frozen Crystallize should add no offensive damage after Shatter");
+
+        CombatSimulator weakGeo = simulatorWith(testCharacter(Element.GEO));
+        weakGeo.getEnemy().applyFreezeAura(1.6, weakGeo.getCurrentTime());
+        List<ReactionResult.Kind> weakGeoKinds = captureReactionKinds(weakGeo);
+        weakGeo.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Geo-on-weak-Frozen fixture", Element.GEO));
+        assertEquals(1, weakGeoKinds.size(),
+                "Geo should not Crystallize when Shatter exhausts Frozen");
+        assertEquals(ReactionResult.Kind.SHATTER, weakGeoKinds.get(0),
+                "Weak Frozen Geo fixture should only Shatter");
+        assertTrue(!weakGeo.getEnemy().isFrozen(weakGeo.getCurrentTime()),
+                "Sub-2U Frozen gauge should be exhausted by Shatter");
     }
 
     private static void testPhase4Crystallize() {

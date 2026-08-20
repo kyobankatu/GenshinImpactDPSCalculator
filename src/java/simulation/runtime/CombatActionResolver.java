@@ -219,7 +219,19 @@ public class CombatActionResolver {
             reactionTriggered = true;
         }
 
+        boolean frozenReactionChecked = false;
         for (Element aura : ReactionPriority.orderAuras(trigger, currentAuras)) {
+            if (trigger == Element.ELECTRO
+                    && !frozenReactionChecked
+                    && aura != Element.PYRO
+                    && aura != Element.HYDRO) {
+                frozenReactionChecked = true;
+                if (tryTriggerFrozenGaugeReaction(
+                        attacker, characterId, action, context, stats)) {
+                    reactionTriggered = true;
+                    break;
+                }
+            }
             ReactionResult result = ReactionCalculator.calculate(
                     trigger, aura, em, 90, getReactionBonus(trigger, aura, stats));
             if (result.getType() == ReactionResult.Type.NONE) {
@@ -247,6 +259,12 @@ public class CombatActionResolver {
             } else if (result.getType() == ReactionResult.Type.TRANSFORMATIVE) {
                 handleTransformativeReaction(attacker, characterId, action, trigger, aura, result, stats, context);
             }
+        }
+
+        if (!frozenReactionChecked
+                && tryTriggerFrozenGaugeReaction(
+                        attacker, characterId, action, context, stats)) {
+            reactionTriggered = true;
         }
 
         if (!reactionTriggered) {
@@ -354,7 +372,7 @@ public class CombatActionResolver {
         ReactionResult result = ReactionCalculator.calculateShatter(
                 stats.get(StatType.ELEMENTAL_MASTERY), 90, 0.0);
         sim.notifyReaction(result, attacker);
-        sim.getEnemy().clearFreezeAura(sim.getCurrentTime());
+        sim.getEnemy().reduceFreezeAura(2.0, sim.getCurrentTime());
         if (!sim.tryStartShatterDamageSequence(characterId)) {
             if (sim.isLoggingEnabled()) {
                 System.out.println(
@@ -373,6 +391,83 @@ public class CombatActionResolver {
                     sim.getCurrentTime(), attacker.getName(), "Shatter", damage,
                     "Shatter", damage, sim.getEnemy().getAuraMap(sim.getCurrentTime()));
         }
+    }
+
+    /**
+     * Resolves reactions that treat the synthetic Frozen gauge as Cryo.
+     *
+     * <p>Electro consumes any coexisting Cryo before Frozen and produces one
+     * Superconduct. Anemo and Geo consume Frozen at the 0.5 gauge modifier used
+     * by Swirl and Crystallize. Pyro-on-Frozen Melt has its own amplifying path.
+     */
+    private boolean tryTriggerFrozenGaugeReaction(
+            Character attacker,
+            CharacterId characterId,
+            AttackAction action,
+            ActionResolutionContext context,
+            StatsContainer stats) {
+        Element trigger = action.getElement();
+        if (!sim.getEnemy().isFrozen(sim.getCurrentTime())
+                || (trigger != Element.ELECTRO
+                        && trigger != Element.ANEMO
+                        && trigger != Element.GEO)) {
+            return false;
+        }
+
+        ReactionResult result = ReactionCalculator.calculate(
+                trigger,
+                Element.CRYO,
+                stats.get(StatType.ELEMENTAL_MASTERY),
+                90,
+                getReactionBonus(trigger, Element.CRYO, stats));
+        result = convertToStellarIfEligible(result);
+        if (result.getType() == ReactionResult.Type.NONE) {
+            return false;
+        }
+        if (result.getKind() == ReactionResult.Kind.CRYSTALLIZE
+                && !sim.tryStartStandardCrystallizeCooldown()) {
+            return false;
+        }
+
+        sim.notifyReaction(result, attacker);
+        if (trigger == Element.ELECTRO) {
+            double cryoUnits = sim.getEnemy().getAuraUnits(
+                    Element.CRYO, sim.getCurrentTime());
+            double cryoConsumption = Math.min(action.getGaugeUnits(), cryoUnits);
+            sim.getEnemy().reduceAura(
+                    Element.CRYO, cryoConsumption, sim.getCurrentTime());
+            sim.getEnemy().reduceFreezeAura(
+                    action.getGaugeUnits() - cryoConsumption,
+                    sim.getCurrentTime());
+        } else {
+            sim.getEnemy().reduceFreezeAura(
+                    action.getGaugeUnits() * 0.5,
+                    sim.getCurrentTime());
+        }
+
+        if (result.isStateful()) {
+            if (result.getKind() == ReactionResult.Kind.STELLAR_CONDUCT) {
+                sim.getStellarReactionManager().triggerStellarConduct(
+                        sim.getCurrentTime());
+            }
+            if (sim.isLoggingEnabled()) {
+                System.out.println(String.format(
+                        "   [Reaction] %s on Frozen -> %s",
+                        trigger, result.getName()));
+            }
+        } else {
+            handleTransformativeReaction(
+                    attacker,
+                    characterId,
+                    action,
+                    trigger,
+                    Element.CRYO,
+                    result,
+                    stats,
+                    context,
+                    false);
+        }
+        return true;
     }
 
     private double getReactionBonus(Element trigger, Element aura, StatsContainer stats) {
@@ -520,9 +615,31 @@ public class CombatActionResolver {
             ReactionResult result,
             StatsContainer stats,
             ActionResolutionContext context) {
+        handleTransformativeReaction(
+                attacker,
+                characterId,
+                action,
+                trigger,
+                aura,
+                result,
+                stats,
+                context,
+                true);
+    }
+
+    private void handleTransformativeReaction(
+            Character attacker,
+            CharacterId characterId,
+            AttackAction action,
+            Element trigger,
+            Element aura,
+            ReactionResult result,
+            StatsContainer stats,
+            ActionResolutionContext context,
+            boolean consumeOrdinaryAura) {
         Element reactionElement = getTransformativeReactionElement(result);
 
-        if (!result.isElectroCharged()) {
+        if (!result.isElectroCharged() && consumeOrdinaryAura) {
             sim.getEnemy().reduceAura(
                     aura, getAuraConsumption(action, result, trigger, aura), sim.getCurrentTime());
         }
