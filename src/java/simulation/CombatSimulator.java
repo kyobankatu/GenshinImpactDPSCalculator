@@ -18,6 +18,7 @@ import model.entity.SimulatorInitializedArtifactEffect;
 import model.entity.SimulatorInitializedCharacterEffect;
 import model.entity.SimulatorInitializedWeaponEffect;
 import model.entity.StellarReactionProvider;
+import model.entity.MovementAwareWeaponEffect;
 import model.type.CharacterId;
 import model.type.Element;
 import simulation.action.AttackAction;
@@ -560,6 +561,31 @@ public class CombatSimulator {
         simulationClock.advanceTime(duration);
         if (enemy != null) {
             enemy.updateAuras(getCurrentTime());
+        }
+    }
+
+    /**
+     * Records explicit movement for mechanics that inspect recent distance.
+     *
+     * <p>The simulator has no positional model, so rotations must call this
+     * boundary when movement distance is known. No distance is inferred from
+     * Dash duration or animation time.</p>
+     *
+     * @param characterId moving character
+     * @param distanceMeters non-negative distance in meters
+     */
+    public void recordMovement(CharacterId characterId, double distanceMeters) {
+        if (!Double.isFinite(distanceMeters) || distanceMeters < 0.0) {
+            throw new IllegalArgumentException(
+                    "Movement distance must be finite and non-negative");
+        }
+        Character character = getCharacter(characterId);
+        if (character == null) {
+            throw new IllegalArgumentException("Character not found: " + characterId);
+        }
+        if (character.getWeapon() instanceof MovementAwareWeaponEffect) {
+            ((MovementAwareWeaponEffect) character.getWeapon()).onMovement(
+                    character, distanceMeters, getCurrentTime(), this);
         }
     }
 
