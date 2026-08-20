@@ -1532,7 +1532,7 @@ experiment record.
 - Scope: typed single-target Burning fuel state, source-direction setup,
   0.25-second special Dendro consumption, refresh ownership/damage, snapshot
   payload, focused regressions, and unaffected catalog-party controls
-- Risk: `planned`
+- Risk: `validated`
 - Proof: 1U/2U fuel durations, exact depletion, Dendro overwrite, Pyro refresh
   without fuel replacement, live-resistance ticks, snapshot payload continuity,
   and repeated deterministic party baselines
@@ -1548,9 +1548,12 @@ experiment record.
   https://library.keqingmains.com/combat-mechanics/elemental-effects/transformative-reactions,
   https://genshin-impact.fandom.com/wiki/Elemental_Gauge_Theory/Advanced_Mechanics,
   and https://github.com/genshinsim/gcsim/blob/main/pkg/reactable/burning.go.
-  This pass models uninterrupted single-target fuel and refresh behavior.
-  Burning Aura consumption by Hydro/Cryo/Electro/Anemo/Geo, the separate Pyro
-  application ICD, Quicken fuel, AoE, and hitlag remain out of scope. See
+  The original pass models uninterrupted single-target fuel and refresh
+  behavior. B-210 follow-up `bb1af05` adds the independent 2U Burning Aura,
+  Hydro/Cryo/Electro/Geo consumption, target-wide 1U Pyro reapplication ICD,
+  Dendro refresh through Burning Aura, Quicken synchronization, off-tick decay,
+  and exact snapshot timer reconstruction. Isolated Anemo-on-Burning, the ninth
+  tick skip, AoE, and hitlag remain evidence or Deferred-System boundaries. See
   `TASKS.md` implementation block `Burning Fuel and Refresh State`.
   Completed with an immutable simulator-owned fuel/damage payload, exact
   `max(0.4 U/s, 2 * natural rate)` depletion, source-direction Aura setup,
@@ -1691,6 +1694,9 @@ experiment record.
   lists, stable Physical/same-element fallback, Pyro Overload-before-Vaporize,
   and Anemo Electro-before-Hydro Swirl. Six fresh-JVM controls are pairwise
   exact, retain every B-061 value/ER/count, and contain zero warning lines.
+  B-210 follow-up `bb1af05` carries residual trigger gauge between accepted
+  attempts and prevents final attachment after a reaction claims the source;
+  Frozen and Burning synthetic paths have focused ordering regressions.
 
 ### B-063 — Pyro Vaporizes hidden Hydro instead of Melting Frozen Aura
 
@@ -1754,22 +1760,25 @@ experiment record.
 
 ### B-065 — Remaining Frozen dual-Aura reactions need trigger-residual policy
 
-- Status: `blocked`
+- Status: `done`
 - Source: 1/3 (README known difference plus KQM/gcsim audit)
 - Symptom: Electro and Anemo cannot react with typed Frozen, while Geo always
   clears it through Shatter before ordinary Aura resolution.
 - Scope: Electro/Frozen, Anemo/Frozen, Geo/Shatter residual, hidden-Aura priority,
   and trigger-gauge carry between multiple reactions
-- Risk: `blocked`
+- Risk: `validated`
 - Proof: sourced directional gauge matrices for Frozen-only and hidden
   Hydro/Cryo cases plus focused reaction-order/consumption regressions
 - Notes: the KQM Evidence Vault marks its original Freeze table inaccurate and
   records gauge-dependent exceptions for Electro, Anemo, Geo, and heavy hits.
-  Maintained gcsim models these with residual trigger durability and separate
-  reaction attempts, but this simulator intentionally lacks trigger carry and
-  poise-aware Shatter durability. A narrow change would encode known-wrong dual
-  reactions. Keep blocked until a trigger-residual plan or explicit
-  simplification decision is authorized.
+  Pinned gcsim revision `3647a07a7cc3004bc1e79d9bb5f7444de20dceaa`
+  supplies explicit residual durability and synthetic Frozen attempts. B-210
+  commits `a4d515c` and `bb1af05` implement Electro-Charged suppression,
+  sequential Cryo-then-Frozen Superconduct consumption, residual Anemo/Geo
+  Swirl/Crystallize, Pyro's Overload-before-Melt path, parallel Cryo/Frozen Melt
+  consumption, and snapshot-safe state. Freeze resistance, poise-scaled
+  Shatter, hitlag, and multi-target behavior remain outside this single-target
+  item rather than blocking its sourced gauge contract.
 
 ### B-066 — Standard Crystallize has no one-second global cooldown
 
@@ -4450,7 +4459,7 @@ experiment record.
 
 ### B-210 — Stellar legacy and reaction accuracy campaign
 
-- **Status:** active
+- **Status:** done
 - **Source:** explicit 2026-08-20 request following the B-209 reconciliation.
 - **Scope:** five legacy equipment classes, Yumemizuki Mizuki, Stellar report
   attribution, Kachina/Sandrone source re-audit, and source-ready single-target
@@ -4461,7 +4470,14 @@ experiment record.
 - **Boundary:** RL, generated docs, player damage/HP/healing, shields, movement,
   positioning, pickups, hitlag, poise, enemy attacks, exploration, and
   multi-target reaction spread remain excluded under Deferred Systems.
-- **Proof/plan:** six-phase compact campaign in `TASKS.md`, one verified
-  implementation commit per independent unit or homogeneous batch, current
-  evidence blockers recorded without inferred mechanics, and a final combined
-  build/Javadoc/preflight gate.
+- **Proof:** commits `2a98c2e`, `769f9aa`, and `72565c9` complete report
+  attribution, five legacy equipment updates, and Mizuki's typed Stellar-Swirl
+  follow-up. Commits `a4d515c` and `bb1af05` complete the source-ready Frozen,
+  residual-gauge, and Burning corrections. Kachina remains evidence-blocked by
+  gcsim PR 2697's requested changes and unresolved mechanics/timing review
+  (https://github.com/genshinsim/gcsim/pull/2697); Sandrone has no maintained
+  character implementation or fixed-target timing source beyond shared Stellar
+  PR 2711 (https://github.com/genshinsim/gcsim/pull/2711) at the pinned revision,
+  so neither is inferred. The complete focused gate, build, Javadoc, three
+  party samples, rollout benchmark, and executable preflight pass with zero leaks on
+  2026-08-21; every implementation commit is pushed to `origin/dev_0`.

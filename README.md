@@ -234,8 +234,8 @@ Known simplifications:
   tick's typed owner and EM snapshot without dealing another immediate reaction
   hit. Successful immediate and periodic damage share one 0.5-second target
   cooldown across sequence restarts. Overload damage follows its target and
-  owner damage sequence limits. The accepted set-aware result is 1,271,521
-  damage / 60,549 DPS over 21.0 seconds.
+  owner damage sequence limits. The accepted set-aware result is 1,226,807
+  damage / 58,419 DPS over 21.0 seconds.
 - `FlinsParty2`: defensive shield HP is logged but not consumed by enemy attacks,
   Columbina treats every Lunar reaction during Gravity Ripple as nearby because
   field position is not simulated, and her Thundercloud extra strikes use 33%
@@ -249,7 +249,7 @@ Known simplifications:
   Swirl consumes half its source gauge, preserving sourced residual auras.
   Aubade of Morningstar and Moon grants its sourced 80 EM and initializes its
   owner-only off-field Lunar bonus before the first swap. The accepted result is
-  15,817,125 damage / 228,902 DPS over 69.1 seconds.
+  20,727,902 damage / 299,970 DPS over 69.1 seconds.
 - `FlinsParty`: generic Favonius Codex and Columbina construction remains
   stochastic, while this optimizer-driven sample injects independent fixed
   Windfall and Moondrift streams so every candidate and final run uses the same
@@ -263,8 +263,8 @@ Known simplifications:
   reduction at impact. Swirl uses its sourced half-gauge consumption and
   per-element target/owner damage sequences. Ineffa's
   Aubade set uses 80 EM and initializes its owner-only off-field state. The
-  accepted result is 22,639,410 damage / 227,532 DPS
-  over 99.5 seconds with three successful Sucrose Bursts.
+  accepted result is 26,517,846 damage / 266,779 DPS
+  over 99.4 seconds with three successful Sucrose Bursts.
 
 ### Continuous Aura Decay Model
 
@@ -293,7 +293,8 @@ Elemental Gauge Theory contract:
 - **Simultaneous priority**: ordinary coexisting Auras use an explicit
   trigger-specific reaction order rather than target-map iteration. For example,
   Pyro attempts Overload before Vaporize and Anemo attempts Electro Swirl before
-  Hydro Swirl.
+  Hydro Swirl. Each accepted reaction passes only its unconsumed source gauge to
+  the next attempt; a reaction-consumed trigger does not attach a final Aura.
 - **Overload damage sequence**: every valid reaction still notifies and consumes
   Aura, but damage is limited to one accepted instance per target every 0.1
   seconds and per `CharacterId` every 0.5 seconds. Snapshot rollback preserves
@@ -319,7 +320,11 @@ Elemental Gauge Theory contract:
   without consuming underlying Pyro. Burning replaces natural decay for both
   coexisting Dendro and Quicken with `max(0.4 U/s, 2 * natural rate)`, Dendro
   reapplication overwrites the shared fuel, and the latest Pyro/Dendro applier
-  owns the continuing 0.25-second damage ticks.
+  owns the continuing 0.25-second damage ticks. A separate non-decaying 2U
+  Burning Aura reacts in parallel with ordinary Pyro; accepted Burning ticks
+  apply 1U Pyro on one target-wide two-second ICD. Updates and off-tick Aura
+  consumption first synchronize elapsed fuel decay, and snapshots reconstruct
+  the exact next damage-tick and Pyro-ICD boundaries.
 - **Quicken Aura**: Quicken stores the smaller Dendro/Electro gauge and decays
   over `gauge * 5 + 6` seconds. Weaker retriggers leave the current Aura
   unchanged, stronger/equal gauges replace it, Aggravate/Spread do not consume
@@ -331,11 +336,14 @@ Elemental Gauge Theory contract:
   decisions; capped hits still consume their configured cores.
 - **Frozen Aura**: Freeze stores twice the smaller current origin/trigger gauge,
   decays as `F(t) = F0 - 0.4t - 0.05t^2`, and extends without resetting its
-  instantaneous decay rate. Non-blunt Pyro resolves one forward Melt against
-  Frozen before hidden ordinary Auras, consumes Frozen and coexisting Cryo at
-  2x gauge, and preserves hidden Hydro. Blunt hits Shatter first and then react
-  with the exposed ordinary Aura. Inactive decay rate recovers toward 0.4 U/s,
-  and snapshots preserve the complete payload.
+  instantaneous decay rate. Non-blunt Pyro follows ordinary priority, rejects
+  hidden-Hydro Vaporize while Frozen remains, then consumes Frozen and
+  coexisting Cryo in parallel at the 2x Melt modifier. Electro suppresses
+  Electro-Charged, consumes ordinary Cryo before Frozen, and exhausts its source
+  after one Superconduct; residual Anemo and Geo can Swirl or Crystallize
+  remaining Frozen as Cryo. Blunt hits Shatter first and then react with the
+  exposed ordinary Aura. Inactive decay rate recovers toward 0.4 U/s, and
+  snapshots preserve the complete payload.
 - **Single source of truth**: reaction eligibility/consumption, combat logs, the
   HTML Aura Timeline, RL observations, and snapshot save/restore all read the same
   current-time-aware aura value. Snapshots preserve application time and decay
@@ -343,10 +351,9 @@ Elemental Gauge Theory contract:
 - **Aura Timeline**: rendered as continuous (non-stepped) lines that slope down to
   zero at expiry, matching the per-event aura bars in the Timeline view.
 
-Known differences from exact game internals: Frozen interactions for Electro,
-Anemo, and Geo plus unrelated coexisting-Aura priority, trigger residuals,
-resistance, hitlag, and poise; a separately reactable 2U
-Burning Aura and Burning's 1U Pyro reapplication ICD; Swirl spread;
+Known differences from exact game internals: Frozen resistance, hitlag, poise,
+and broader multi-synthetic-state ordering; the upstream-ambiguous isolated
+Anemo-on-Burning path and Burning's ninth-tick skip; Swirl spread;
 Electro-Charged multi-target damage-ICD/hitlag interactions; and some reaction
 gauge modifiers remain simplified. The simulator also does not model
 multi-target or per-enemy aura gauges.
@@ -354,8 +361,8 @@ multi-target or per-enemy aura gauges.
 Latest validation baseline from the accuracy pass:
 
 - `./gradlew ReactionRegressionTest`
-- `./gradlew RaidenParty`: 1,271,521 total damage / 60,549 DPS
-- `./gradlew FlinsParty`: 22,639,410 total damage / 227,532 DPS
-- `./gradlew FlinsParty2`: 15,817,125 total damage / 228,902 DPS
+- `./gradlew RaidenParty`: 1,226,807 total damage / 58,419 DPS
+- `./gradlew FlinsParty`: 26,517,846 total damage / 266,779 DPS
+- `./gradlew FlinsParty2`: 20,727,902 total damage / 299,970 DPS
 - `./gradlew BenchmarkRLJava`
 - `./gradlew ProfileCapabilities`

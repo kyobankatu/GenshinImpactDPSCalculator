@@ -24295,8 +24295,8 @@ Completion evidence:
 
 ## Implementation Order: Stellar Legacy And Reaction Accuracy Campaign B-210
 
-Status: In progress. Version 7.0 legacy-sheet deltas are pinned; character and
-reaction evidence gates remain under audit.
+Status: Complete (2026-08-21). Every source-ready unit is implemented and
+verified; Kachina and Sandrone remain evidence-blocked without inferred timing.
 
 Scope:
 
@@ -24326,6 +24326,8 @@ Definitions:
 
 ### Phase 1: Legacy Stellar Equipment
 
+Status: Done (`769f9aa`).
+
 Why first:
 
 - These are bounded consumers of the complete B-209 stat/reaction contract and
@@ -24335,11 +24337,11 @@ Campaign inventory:
 
 | Unit | Required delta | Focused check | Status |
 |---|---|---|---|
-| A Teaspoon of Transcendence | stack-based Conduct and Swirl DMG | `LegacyStellarContentRegressionTest` | pending |
-| Disenchantment in Deep Shadow | Conduct DMG and affected-target CRIT | `LegacyStellarContentRegressionTest` | pending |
-| Viridescent Venerer | Stellar-Swirl DMG | `LegacyStellarContentRegressionTest` | pending |
-| Thundering Fury | Conduct DMG and trigger eligibility | `LegacyStellarContentRegressionTest` | pending |
-| Kagura's Verity | stack-based Conduct DMG | `LegacyStellarContentRegressionTest` | pending |
+| A Teaspoon of Transcendence | stack-based Conduct and Swirl DMG | `LegacyStellarContentRegressionTest` | done (`769f9aa`) |
+| Disenchantment in Deep Shadow | Conduct DMG and affected-target CRIT | `LegacyStellarContentRegressionTest` | done (`769f9aa`) |
+| Viridescent Venerer | Stellar-Swirl DMG | `LegacyStellarContentRegressionTest` | done (`769f9aa`) |
+| Thundering Fury | Conduct DMG and trigger eligibility | `LegacyStellarContentRegressionTest` | done (`769f9aa`) |
+| Kagura's Verity | stack-based Conduct DMG | `LegacyStellarContentRegressionTest` | done (`769f9aa`) |
 
 Target files:
 
@@ -24383,6 +24385,8 @@ Verification:
 
 ### Phase 2: Yumemizuki Mizuki Stellar-Swirl Follow-Up
 
+Status: Done (`72565c9`).
+
 Why second:
 
 - Mizuki consumes the same stat contract but has character-owned windows,
@@ -24421,6 +24425,8 @@ Verification:
 
 ### Phase 3: Stellar HTML Report Attribution
 
+Status: Done (`2a98c2e`).
+
 Why third:
 
 - Runtime and content values must be settled before the downstream-only report
@@ -24456,6 +24462,8 @@ Verification:
 - `python scripts/preflight.py --run`
 
 ### Phase 4: Kachina And Sandrone Evidence Re-Audit
+
+Status: Done (evidence-blocked, 2026-08-21).
 
 Why fourth:
 
@@ -24500,7 +24508,20 @@ Verification:
 - `./gradlew <ImplementedCharacter>RegressionTest LegacyCharacterIdentityRegressionTest ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
 
+Audit result:
+
+- Kachina: gcsim PR 2697
+  (https://github.com/genshinsim/gcsim/pull/2697) remains open with requested
+  changes and unresolved mechanic/timing review, so no source-ready fixed-target
+  slice was admitted.
+- Sandrone: pinned gcsim has shared Stellar PR 2711
+  (https://github.com/genshinsim/gcsim/pull/2711) but no maintained character
+  implementation or action/summon timing source, so no character code was
+  inferred.
+
 ### Phase 5: Source-Ready Single-Target Reaction Accuracy
+
+Status: Done (`a4d515c`, `bb1af05`).
 
 Why fifth:
 
@@ -24549,6 +24570,8 @@ Verification:
 
 ### Phase 6: Reconciliation And Closure
 
+Status: Done (2026-08-21).
+
 Why last:
 
 - Final status can be accurate only after implementation and evidence-blocked
@@ -24580,3 +24603,13 @@ Verification:
 
 - `python scripts/preflight.py --run`
 - `git status --short`
+
+Completion evidence:
+
+- Focused Stellar equipment, Mizuki, report, character identity, reaction, and
+  party-catalog regressions pass together with `build` and `javadoc`.
+- Final samples: `RaidenParty` 1,226,807 / 58,419 DPS, `FlinsParty`
+  26,517,846 / 266,779 DPS, and `FlinsParty2` 20,727,902 / 299,970 DPS.
+- `BenchmarkRLJava` completes 512 environment steps after the snapshot schema
+  extension; executable preflight reports four passed checks and zero leaks.
+- Generated report output remains untracked from the campaign commits.
