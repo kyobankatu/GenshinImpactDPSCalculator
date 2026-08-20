@@ -46,6 +46,12 @@ public class ReportRegressionTest {
                 "Electro-Charged Tick", 999.0, aura, null));
         records.add(new SimulationRecord(1.5, "Thundercloud", "Lunar-Charged Tick", 3000.0,
                 "Lunar-Charged", 3000.0, aura, null));
+        records.add(new SimulationRecord(1.7, "Polestar Field", "Stellar-Conduct", 4000.0,
+                "Stellar-Conduct", 4000.0, aura, null));
+        records.add(new SimulationRecord(1.8, "Tester <Actor>", "Stellar-Swirl", 3500.0,
+                "Stellar-Swirl", 3500.0, aura, null));
+        records.add(new SimulationRecord(1.9, "Tester <Actor>", "Direct Stellar-Swirl", 777.0,
+                "None", 0.0, aura, null));
 
         Map<CharacterId, Map<StatType, Double>> statMap = new HashMap<>();
         Map<StatType, Double> sucroseStats = new EnumMap<>(StatType.class);
@@ -86,8 +92,13 @@ public class ReportRegressionTest {
         assertContains(html, "Only separately recorded elemental reaction damage is included",
                 "reaction chart scope note");
         assertContains(html, "Lunar-Charged", "explicit reaction damage label");
-        assertContains(html, "createPieChart('reactionPie', ['Lunar-Charged','Electro-Charged']",
+        assertContains(html,
+                "createPieChart('reactionPie', ['Stellar-Conduct','Stellar-Swirl','Lunar-Charged','Electro-Charged']",
                 "unified reaction chart labels");
+        assertContains(html, "Direct Stellar-Swirl", "direct Stellar action remains in action damage");
+        assertNotContains(html,
+                "createPieChart('reactionPie', ['Stellar-Conduct','Stellar-Swirl','Lunar-Charged','Direct Stellar-Swirl'",
+                "direct Stellar action excluded from reaction chart");
         assertNotContains(html, "Reaction-labeled Direct Damage", "removed reaction-labeled direct damage section");
         assertNotContains(html, "Reaction-labeled Damage", "removed reaction-labeled direct damage chart script");
         assertNotContains(html, "createPieChart('reactionPie', ['Lunar-Charged','Electro-Charged','Aggravate'",

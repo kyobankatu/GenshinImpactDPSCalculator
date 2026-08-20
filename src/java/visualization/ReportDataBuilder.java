@@ -35,6 +35,8 @@ final class ReportDataBuilder {
             "Burgeon",
             "Aggravate",
             "Spread",
+            "Stellar-Conduct",
+            "Stellar-Swirl",
             "Lunar-Charged",
             "Lunar-Bloom",
             "Lunar-Crystallize");
