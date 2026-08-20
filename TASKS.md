@@ -30,6 +30,11 @@ future explicit user request.
 The prior simulator content campaigns, including Skill-focused event weapons,
 are complete; RL and generated docs remain excluded.
 
+B-210 is active. It reconciles Version 7.0 Stellar additions on legacy
+equipment and Yumemizuki Mizuki, adds report attribution, re-audits the two
+highest-value blocked characters, and then closes every sourced single-target
+reaction-accuracy item that does not require a Deferred System.
+
 B-209 is complete. Version 7.0's two playable characters, Cryo Traveler,
 twelve weapons, two artifact sets, and shared Stellar Swirl contract are
 implemented against Genshin Optimizer `d791814a` and pass the complete focused
@@ -24287,3 +24292,291 @@ Completion evidence:
   preflight reported zero leaks. Source-unknown frames, gauge, ICD, particles,
   geometry, movement realization, healing realization, and target selection
   remain explicit unsupported/manual boundaries rather than inferred behavior.
+
+## Implementation Order: Stellar Legacy And Reaction Accuracy Campaign B-210
+
+Status: In progress. Version 7.0 legacy-sheet deltas are pinned; character and
+reaction evidence gates remain under audit.
+
+Scope:
+
+- Apply typed Stellar-Conduct and Stellar-Swirl stats to five legacy equipment
+  classes whose passives previously failed closed before the shared contract.
+- Extend Yumemizuki Mizuki's existing fixed-target slice with source-backed
+  Stellar-Swirl behavior and route Stellar reactions into HTML aggregates.
+- Re-audit Kachina and Sandrone against current game data and reviewed simulator
+  evidence, implementing only fixed-target behavior with reliable timing.
+- Implement every sourced single-target reaction correction found in the
+  README accuracy inventory that does not require a Deferred System.
+
+Out of scope for this pass:
+
+- RL, generated `docs/`, player HP/healing/damage intake, shields, movement,
+  hitlag, poise, enemy attacks, multi-target spread, positioning, pickups, and
+  exploration state.
+- Frame, gauge, ICD, target, or random behavior supported only by translated
+  prose or an unreviewed/draft implementation.
+
+Definitions:
+
+- `LegacyStellarContentRegressionTest`: focused equipment regression covering
+  static and stack-based Stellar routes unlocked by the B-209 contract.
+- A source-ready reaction item has a stable rule, a single-target runtime owner,
+  and a failing regression that can be fixed without Deferred Systems.
+
+### Phase 1: Legacy Stellar Equipment
+
+Why first:
+
+- These are bounded consumers of the complete B-209 stat/reaction contract and
+  provide the lowest-risk proof that legacy content can use it correctly.
+
+Campaign inventory:
+
+| Unit | Required delta | Focused check | Status |
+|---|---|---|---|
+| A Teaspoon of Transcendence | stack-based Conduct and Swirl DMG | `LegacyStellarContentRegressionTest` | pending |
+| Disenchantment in Deep Shadow | Conduct DMG and affected-target CRIT | `LegacyStellarContentRegressionTest` | pending |
+| Viridescent Venerer | Stellar-Swirl DMG | `LegacyStellarContentRegressionTest` | pending |
+| Thundering Fury | Conduct DMG and trigger eligibility | `LegacyStellarContentRegressionTest` | pending |
+| Kagura's Verity | stack-based Conduct DMG | `LegacyStellarContentRegressionTest` | pending |
+
+Target files:
+
+- `src/java/model/weapon/ATeaspoonOfTranscendence.java`
+- `src/java/model/weapon/KagurasVerity.java`
+- `src/java/model/artifact/DisenchantmentInDeepShadow.java`
+- `src/java/model/artifact/ViridescentVenerer.java`
+- `src/java/model/artifact/ThunderingFury.java`
+- `src/java/sample/LegacyStellarContentRegressionTest.java` (new)
+- existing focused item regressions only when their prior unsupported assertion
+  must be replaced
+
+Tasks:
+
+- Apply the exact Optimizer `d791814a` Stellar channels without leaking into
+  generic or ordinary-reaction stats.
+- Preserve refinement, stack, owner, field, cooldown, expiry, and snapshot
+  behavior already established by each content class.
+- Reconcile source-condition conflicts explicitly rather than inferring target
+  status from display labels.
+
+Acceptance criteria:
+
+- All five classes expose their exact source-backed Stellar stats at R1-R5 or
+  set thresholds and remain inert for wrong reactions, owners, or timestamps.
+- Existing ordinary damage, reaction, stack, and resistance-shred behavior is
+  unchanged.
+
+Test cases to add or update:
+
+- Normal: exact R1/R5 or set values on the correct Stellar channel.
+- Boundary: stack cap, refresh/expiry, on-field trigger, and affected-target
+  condition at exact timestamps.
+- Abnormal: ordinary reaction, foreign owner, unequipped instance, and generic
+  DMG stats receive no Stellar-only value.
+
+Verification:
+
+- `./gradlew LegacyStellarContentRegressionTest CurrentVersionWeaponRegressionTest RemainingArtifactSetRegressionTest ReactionArtifactRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 2: Yumemizuki Mizuki Stellar-Swirl Follow-Up
+
+Why second:
+
+- Mizuki consumes the same stat contract but has character-owned windows,
+  listener state, and constellation routing that need an isolated snapshot gate.
+
+Target files:
+
+- `src/java/model/character/YumemizukiMizuki.java`
+- `config/characters/YumemizukiMizuki/YumemizukiMizuki_Multipliers.csv`
+- `config/characters/YumemizukiMizuki/YumemizukiMizuki_Status.csv` if required
+- `src/java/sample/YumemizukiMizukiRegressionTest.java`
+
+Tasks:
+
+- Add Dreamdrifter, C1, and C6 Stellar-Swirl values from Optimizer
+  `d791814a` while preserving existing ordinary Swirl behavior.
+- Accept only typed Stellar-Swirl events and preserve all fixed-target timing,
+  instance isolation, and snapshot state.
+
+Acceptance criteria:
+
+- Ordinary Swirl and Stellar-Swirl bonuses route independently at C0/C1/C6.
+- Unsupported healing, pickup, geometry, and multi-target branches remain inert.
+
+Test cases to add or update:
+
+- Normal: Dreamdrifter bonus and typed A1/C1/C6 paths.
+- Boundary: exact window expiry, C1 consumption, and snapshot restore.
+- Abnormal: Conduct, ordinary non-Swirl, inactive Dreamdrifter, and foreign
+  events do not trigger Stellar-Swirl behavior.
+
+Verification:
+
+- `./gradlew YumemizukiMizukiRegressionTest StellarReactionRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 3: Stellar HTML Report Attribution
+
+Why third:
+
+- Runtime and content values must be settled before the downstream-only report
+  aggregate receives the final typed reaction labels.
+
+Target files:
+
+- `src/java/visualization/ReportDataBuilder.java`
+- `src/java/sample/ReportRegressionTest.java`
+
+Tasks:
+
+- Include Stellar-Conduct and Stellar-Swirl in elemental-reaction recognition
+  without classifying direct Stellar-labeled actions as reaction damage.
+- Preserve action damage, reaction damage, timeline, and rolling-DPS totals.
+
+Acceptance criteria:
+
+- Positive Stellar reaction damage appears once in the elemental-reaction view.
+- Direct Stellar actions remain in Timeline and Action Damage only.
+
+Test cases to add or update:
+
+- Normal: both Stellar labels normalize and aggregate.
+- Boundary: zero reaction damage and direct action labels do not enter the
+  reaction-damage series.
+- Abnormal: null, empty, and unrelated labels preserve existing behavior.
+
+Verification:
+
+- `./gradlew ReportRegressionTest build`
+- inspect one generated report fixture for the populated Stellar series
+- `python scripts/preflight.py --run`
+
+### Phase 4: Kachina And Sandrone Evidence Re-Audit
+
+Why fourth:
+
+- B-209 removed Sandrone's missing-Stellar prerequisite, while Kachina's
+  upstream implementation has received recent review activity; timing and
+  unavailable-system gates must be re-evaluated before code is admitted.
+
+Target files:
+
+- `config/characters/Kachina/Kachina_Status.csv` (new, only if source-ready)
+- `config/characters/Kachina/Kachina_Multipliers.csv` (new, only if source-ready)
+- `config/characters/Sandrone/Sandrone_Status.csv` (new, only if source-ready)
+- `config/characters/Sandrone/Sandrone_Multipliers.csv` (new, only if source-ready)
+- `src/java/model/character/Kachina.java` (new, only if source-ready)
+- `src/java/model/character/Sandrone.java` (new, only if source-ready)
+- `src/java/sample/KachinaRegressionTest.java` (new, only if source-ready)
+- `src/java/sample/SandroneRegressionTest.java` (new, only if source-ready)
+- `BACKLOG.md` for durable blockers or completion evidence
+
+Tasks:
+
+- Reconcile Optimizer `d791814a`, current gcsim branches/PRs, and maintained
+  technical evidence for stats, multipliers, frames, ICD, gauge, particles,
+  summon cadence, and source-owned Stellar state.
+- Implement each independently source-ready fixed-target slice; otherwise
+  record the exact unresolved rule and reopen gate, then continue.
+
+Acceptance criteria:
+
+- Every implemented action has reliable timing and typed mechanics, or the
+  character remains blocked with a current, reproducible evidence reason.
+- No Nightsoul, movement, geometry, targeting, or random behavior is inferred.
+
+Test cases to add or update:
+
+- Implemented unit: normal action sequence, cooldown/Energy, periodic state,
+  constellation boundaries, snapshot, and invalid input.
+- Blocked unit: no code test; record the searched sources and missing contract.
+
+Verification:
+
+- `./gradlew <ImplementedCharacter>RegressionTest LegacyCharacterIdentityRegressionTest ReactionRegressionTest build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 5: Source-Ready Single-Target Reaction Accuracy
+
+Why fifth:
+
+- Reaction changes have the broadest blast radius and must start only after the
+  content/report consumers and evidence inventory are stable.
+
+Target files:
+
+- `src/java/mechanics/reaction/ReactionCalculator.java` as required
+- `src/java/mechanics/reaction/ReactionResult.java` as required
+- `src/java/model/entity/Enemy.java` as required
+- `src/java/simulation/runtime/CombatActionResolver.java` as required
+- `src/java/simulation/runtime/ReactionState.java` as required
+- `src/java/sample/ReactionRegressionTest.java`
+- `README.md` accuracy notes only when an existing statement becomes false
+- `BACKLOG.md` for every deferred or unresolved inventory item
+
+Tasks:
+
+- Audit Frozen Electro/Anemo/Geo interactions, Burning Aura and Pyro
+  reapplication, coexisting-aura priority, and remaining gauge modifiers.
+- Implement only rules corroborated by stable technical evidence and representable
+  in the single-target engine; reject hitlag, poise, spread, and multi-target
+  work into Deferred Systems.
+- Preserve attribution, exact consumption, listener order, report labels, and
+  snapshot replay for every accepted correction.
+
+Acceptance criteria:
+
+- Every accepted item has a before-failing bounded regression and a documented
+  source; every other README inventory item has a precise blocker or deferral.
+- RaidenParty and FlinsParty2 changes are either zero or explained by the
+  accepted mechanic with before/after totals.
+
+Test cases to add or update:
+
+- Normal: one sourced reaction path for each accepted correction.
+- Boundary: exact aura/ICD/expiry/cooldown timestamp and snapshot restore.
+- Abnormal: unsupported multi-target/hitlag/poise inputs do not create inferred
+  effects.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest RaidenParty FlinsParty2 build javadoc`
+- `python scripts/preflight.py --run`
+
+### Phase 6: Reconciliation And Closure
+
+Why last:
+
+- Final status can be accurate only after implementation and evidence-blocked
+  branches are settled.
+
+Target files:
+
+- `TASKS.md`
+- `BACKLOG.md`
+- `README.md` only for changed public accuracy notes or baselines
+
+Tasks:
+
+- Reconcile all six legacy content units, report attribution, both character
+  audits, and the reaction inventory against their pinned evidence.
+- Run the complete focused/shared gate, inspect staged artifacts, commit, and
+  push the final documentation checkpoint.
+
+Acceptance criteria:
+
+- No source-ready in-scope B-210 unit remains unimplemented.
+- All blockers and Deferred System boundaries are durable and current.
+
+Test cases to add or update:
+
+- No new code test; execute every focused check selected by Phases 1-5.
+
+Verification:
+
+- `python scripts/preflight.py --run`
+- `git status --short`

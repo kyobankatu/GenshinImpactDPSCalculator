@@ -4447,3 +4447,21 @@ experiment record.
   reaction, and party-catalog checks pass together with build and Javadoc;
   executable preflight reports zero leaks. All implementation commits are
   pushed to `origin/dev_0`.
+
+### B-210 — Stellar legacy and reaction accuracy campaign
+
+- **Status:** active
+- **Source:** explicit 2026-08-20 request following the B-209 reconciliation.
+- **Scope:** five legacy equipment classes, Yumemizuki Mizuki, Stellar report
+  attribution, Kachina/Sandrone source re-audit, and source-ready single-target
+  reaction corrections from the README accuracy inventory.
+- **Evidence:** Genshin Optimizer `d791814a2ef418d2bf773a91926b29b8f7210671`,
+  Version 7.0 commit `cf769c73`, current gcsim PRs/branches, and maintained
+  technical reaction sources; accessed 2026-08-20.
+- **Boundary:** RL, generated docs, player damage/HP/healing, shields, movement,
+  positioning, pickups, hitlag, poise, enemy attacks, exploration, and
+  multi-target reaction spread remain excluded under Deferred Systems.
+- **Proof/plan:** six-phase compact campaign in `TASKS.md`, one verified
+  implementation commit per independent unit or homogeneous batch, current
+  evidence blockers recorded without inferred mechanics, and a final combined
+  build/Javadoc/preflight gate.
