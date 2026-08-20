@@ -4426,7 +4426,7 @@ experiment record.
 
 ### B-209 — Version 7.0 Snezhnaya content campaign
 
-- **Status:** active
+- **Status:** complete
 - **Source:** explicit 2026-08-20 request to implement every new Version 7.0
   character, weapon, and artifact difference.
 - **Units:** Alyosha, Odette, Cryo Traveler, Scarlet Proof, Heart of the
@@ -4440,6 +4440,10 @@ experiment record.
   fixed-target character slices are medium/high risk.
 - **Boundary:** no inferred frame, ICD, gauge, particle, geometry, movement,
   hitlag, healing-realization, shield, RL, or generated-document behavior.
-- **Proof/plan:** five-phase B-209 plan in `TASKS.md`, focused regression per
-  family/unit, shared reaction/build/Javadoc/preflight gates, independent
-  implementation commits, and final normalized catalog reconciliation.
+- **Proof:** Genshin Optimizer `cf769c73` reconciles to 3/3 character units,
+  12/12 weapons, and 2/2 artifact sets. Commits `79120dd` through `5396f02`
+  implement the Stellar foundation and all content units. The focused Stellar,
+  artifact, four weapon-family, Alyosha, Odette, Cryo Traveler, legacy identity,
+  reaction, and party-catalog checks pass together with build and Javadoc;
+  executable preflight reports zero leaks. All implementation commits are
+  pushed to `origin/dev_0`.

@@ -30,10 +30,10 @@ future explicit user request.
 The prior simulator content campaigns, including Skill-focused event weapons,
 are complete; RL and generated docs remain excluded.
 
-B-209 is active. Version 7.0 adds two playable characters, Cryo Traveler,
-twelve weapons, two artifact sets, and the shared Stellar Swirl contract from
-Genshin Optimizer `d791814a`; implementation is ordered by shared reaction
-prerequisites, equipment batches, then fixed-target character slices.
+B-209 is complete. Version 7.0's two playable characters, Cryo Traveler,
+twelve weapons, two artifact sets, and shared Stellar Swirl contract are
+implemented against Genshin Optimizer `d791814a` and pass the complete focused
+and shared regression gate.
 
 B-208 is complete. The current-version catch-up replaced B-207's stale pinned
 catalog conclusion with the playable-character and weapon data present in
@@ -24009,8 +24009,9 @@ Final verification passed:
 
 ## Implementation Order: Version 7.0 Snezhnaya Content Campaign B-209
 
-Status: In progress. The source catalog is pinned; shared reaction support is
-the critical path and all equipment/character units are pending.
+Status: Complete. The pinned catalog is reconciled 3/3 characters, 12/12
+weapons, and 2/2 artifact sets; all implementation commits are pushed to
+`origin/dev_0`.
 
 Scope:
 
@@ -24096,8 +24097,8 @@ Campaign inventory:
 
 | Unit | Shared prerequisite | Focused check | Status |
 |---|---|---|---|
-| Scarlet Proof | Stellar Swirl kind/stat | `VersionSevenArtifactRegressionTest` | pending |
-| Heart of the Furnace | both Stellar kinds/team non-stack | `VersionSevenArtifactRegressionTest` | pending |
+| Scarlet Proof | Stellar Swirl kind/stat | `VersionSevenArtifactRegressionTest` | complete |
+| Heart of the Furnace | both Stellar kinds/team non-stack | `VersionSevenArtifactRegressionTest` | complete |
 
 Target files:
 
@@ -24140,18 +24141,18 @@ Campaign inventory:
 
 | Unit | Type / rarity | Focused check | Status |
 |---|---|---|---|
-| Emberwell | sword / 4-star | `VersionSevenWeaponRegressionTest` | pending |
-| Blade of Atonement | claymore / 4-star | `VersionSevenWeaponRegressionTest` | pending |
-| Frostbreath | polearm / 4-star | `VersionSevenWeaponRegressionTest` | pending |
-| Echoes of the Heart | catalyst / 4-star | `VersionSevenWeaponRegressionTest` | pending |
-| Covenant of Frost and Snow | bow / 4-star | `VersionSevenWeaponRegressionTest` | pending |
-| Heretic's Molten Blade | sword / 4-star | `VersionSevenWeaponRegressionTest` | pending |
-| Forged by the Golden Melody | claymore / 4-star | `VersionSevenWeaponRegressionTest` | pending |
-| Song of the Vigil | polearm / 4-star | `VersionSevenWeaponRegressionTest` | pending |
-| Clash of Kings | catalyst / 4-star | `VersionSevenWeaponRegressionTest` | pending |
-| Jade Vista | bow / 4-star | `VersionSevenWeaponRegressionTest` | pending |
-| Exaiphanes Blade | sword / 5-star | `VersionSevenWeaponRegressionTest` | pending |
-| Whitelake Frostfeather | sword / 5-star | `VersionSevenWeaponRegressionTest` | pending |
+| Emberwell | sword / 4-star | `VersionSevenReactionWeaponRegressionTest` | complete |
+| Blade of Atonement | claymore / 4-star | `VersionSevenReactionWeaponRegressionTest` | complete |
+| Frostbreath | polearm / 4-star | `VersionSevenSpecialWeaponRegressionTest` | complete |
+| Echoes of the Heart | catalyst / 4-star | `VersionSevenReactionWeaponRegressionTest` | complete |
+| Covenant of Frost and Snow | bow / 4-star | `VersionSevenSimpleWeaponRegressionTest` | complete |
+| Heretic's Molten Blade | sword / 4-star | `VersionSevenSpecialWeaponRegressionTest` | complete |
+| Forged by the Golden Melody | claymore / 4-star | `VersionSevenComplexWeaponRegressionTest` | complete |
+| Song of the Vigil | polearm / 4-star | `VersionSevenReactionWeaponRegressionTest` | complete |
+| Clash of Kings | catalyst / 4-star | `VersionSevenSimpleWeaponRegressionTest` | complete |
+| Jade Vista | bow / 4-star | `VersionSevenSimpleWeaponRegressionTest` | complete |
+| Exaiphanes Blade | sword / 5-star | `VersionSevenSpecialWeaponRegressionTest` | complete |
+| Whitelake Frostfeather | sword / 5-star | `VersionSevenComplexWeaponRegressionTest` | complete |
 
 Target files:
 
@@ -24180,7 +24181,7 @@ Test cases to add or update:
 
 Verification:
 
-- `./gradlew VersionSevenWeaponRegressionTest ReactionRegressionTest build javadoc`
+- `./gradlew VersionSevenSpecialWeaponRegressionTest VersionSevenSimpleWeaponRegressionTest VersionSevenReactionWeaponRegressionTest VersionSevenComplexWeaponRegressionTest ReactionRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
 
 ### Phase 4: Alyosha, Odette, And Cryo Traveler
@@ -24194,9 +24195,9 @@ Campaign inventory:
 
 | Unit | Element / weapon | Focused check | Status |
 |---|---|---|---|
-| Alyosha | Electro / polearm | `AlyoshaRegressionTest` | pending |
-| Odette | Cryo / sword | `OdetteRegressionTest` | pending |
-| Cryo Traveler | Cryo / sword | `TravelerCryoRegressionTest` | pending |
+| Alyosha | Electro / polearm | `AlyoshaRegressionTest` | complete |
+| Odette | Cryo / sword | `OdetteRegressionTest` | complete |
+| Cryo Traveler | Cryo / sword | `TravelerCryoRegressionTest` | complete |
 
 Target files:
 
@@ -24273,6 +24274,16 @@ Test cases to add or update:
 
 Verification:
 
-- `./gradlew VersionSevenArtifactRegressionTest VersionSevenWeaponRegressionTest AlyoshaRegressionTest OdetteRegressionTest TravelerCryoRegressionTest LegacyCharacterIdentityRegressionTest ReactionRegressionTest build javadoc`
+- `./gradlew StellarReactionRegressionTest VersionSevenArtifactRegressionTest VersionSevenSpecialWeaponRegressionTest VersionSevenSimpleWeaponRegressionTest VersionSevenReactionWeaponRegressionTest VersionSevenComplexWeaponRegressionTest AlyoshaRegressionTest OdetteRegressionTest TravelerCryoRegressionTest LegacyCharacterIdentityRegressionTest ReactionRegressionTest PartyCatalogRegressionTest build javadoc`
 - `python scripts/preflight.py --run`
 - `git status --short`
+
+Completion evidence:
+
+- Genshin Optimizer 7.0 commit `cf769c73` at revision `d791814a` reconciles to
+  Alyosha, Odette, both Cryo Traveler variants under the canonical Traveler
+  identity, all twelve listed weapons, and both listed artifact sets.
+- The complete Gradle gate above passed together on 2026-08-20; executable
+  preflight reported zero leaks. Source-unknown frames, gauge, ICD, particles,
+  geometry, movement realization, healing realization, and target selection
+  remain explicit unsupported/manual boundaries rather than inferred behavior.
