@@ -1,0 +1,58 @@
+Character,AbilityType,Key,Level,Value1,Value2
+Odette,NORMAL,N1,9,0.952724,0
+Odette,NORMAL,N2,9,0.946357,0
+Odette,NORMAL,N3 Hit 1,9,0.599136,0
+Odette,NORMAL,N3 Hit 2,9,0.703258,0
+Odette,NORMAL,N4,9,1.370065,0
+Odette,NORMAL,N5,9,1.657388,0
+Odette,CHARGED,Charged Attack,9,1.97342,0
+Odette,SKILL,Skill Cast,9,1.83736,0
+Odette,SKILL,Coda DoT,9,1.62928,0
+Odette,SKILL,Coda Conduct,9,5.19792,0
+Odette,SKILL,Coda Swirl,9,7.79688,0
+Odette,SKILL,Plume Normal,9,0.73168,0
+Odette,SKILL,Plume Conduct,9,0.459408,0
+Odette,SKILL,Plume Swirl,9,0.688976,0
+Odette,SKILL,Wing Normal,9,0.874888,0
+Odette,SKILL,Wing Conduct,9,0.549304,0
+Odette,SKILL,Wing Swirl,9,0.823888,0
+Odette,SKILL,C3 Skill Cast,12,2.1616,0
+Odette,SKILL,C3 Coda DoT,12,1.9168,0
+Odette,SKILL,C3 Coda Conduct,12,6.1152,0
+Odette,SKILL,C3 Coda Swirl,12,9.1728,0
+Odette,SKILL,C3 Plume Normal,12,0.8608,0
+Odette,SKILL,C3 Plume Conduct,12,0.54048,0
+Odette,SKILL,C3 Plume Swirl,12,0.81056,0
+Odette,SKILL,C3 Wing Normal,12,1.02928,0
+Odette,SKILL,C3 Wing Conduct,12,0.64624,0
+Odette,SKILL,C3 Wing Swirl,12,0.96928,0
+Odette,BURST,Burst Slash,9,1.872992,0
+Odette,BURST,Burst Final,9,2.894624,0
+Odette,BURST,Burst Stellar DMG Bonus,9,0.46,0
+Odette,BURST,C5 Burst Slash,12,2.20352,0
+Odette,BURST,C5 Burst Final,12,3.40544,0
+Odette,BURST,C5 Burst Stellar DMG Bonus,12,0.58,0
+Odette,PASSIVE,Dance Double Duration,1,20,0
+Odette,PASSIVE,Coda Availability Duration,1,6,0
+Odette,PASSIVE,Coda Cooldown,1,15,0
+Odette,PASSIVE,Burst Stellar Bonus Duration,1,20,0
+Odette,PASSIVE,A1 Initial Splendor Stacks,1,4,0
+Odette,PASSIVE,A1 Off-Field Transfer Per Second,1,1,0
+Odette,PASSIVE,A1 Stellar DMG Bonus Per Stack,1,0.15,0
+Odette,PASSIVE,A4 ATK Threshold,1,1000,0
+Odette,PASSIVE,A4 Stellar Special Bonus Per ATK,1,0.00015,0
+Odette,PASSIVE,A4 Stellar Special Bonus Cap,1,0.30,0
+Odette,PASSIVE,Stellar Base DMG Bonus Per ATK,1,0.00007,0
+Odette,PASSIVE,Stellar Base DMG Bonus Cap,1,0.14,0
+Odette,PASSIVE,C1 Initial Splendor Stacks,1,6,0
+Odette,PASSIVE,C1 Off-Field Transfer Per Second,1,2,0
+Odette,PASSIVE,C1 Coda Conduct,1,3.0,0
+Odette,PASSIVE,C1 Coda Swirl,1,4.5,0
+Odette,PASSIVE,C2 ATK Per Stack,2,0.07,0
+Odette,PASSIVE,C2 RES Shred,2,0.20,0
+Odette,PASSIVE,C4 Team Burst Bonus Ratio,4,0.50,0
+Odette,PASSIVE,C4 Coordinated Conduct,4,0.66,0
+Odette,PASSIVE,C4 Coordinated Swirl,4,0.99,0
+Odette,PASSIVE,C4 Coordinated Cooldown,4,3.5,0
+Odette,PASSIVE,C6 Team Stellar Special Bonus,6,0.25,0
+Odette,PASSIVE,C6 Odette Stellar Special Bonus,6,0.20,0
