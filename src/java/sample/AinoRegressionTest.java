@@ -134,6 +134,7 @@ public final class AinoRegressionTest {
         };
         int[][] hitFrames = { { 23 }, { 20 }, { 35, 43 } };
         int[] durations = { 48, 75, 93 };
+        int[] hitlagFrames = { 10, 10, 9 };
         for (int step = 0; step < normalValues.length; step++) {
             double castTime = simulator.getCurrentTime();
             perform(simulator, CharacterActionKey.NORMAL);
@@ -153,7 +154,20 @@ public final class AinoRegressionTest {
                 assertTrue(stage.get(hit).action.isShatterTrigger(),
                         "Aino claymore Normal is blunt");
             }
-            assertClose(castTime + durations[step] * FRAME,
+            if (step == 0) {
+                assertHitlagProfile(stage.get(0).action,
+                        0.10, 0.01, true, false, false,
+                        "Aino N1 hitlag");
+            } else if (step == 2) {
+                assertHitlagProfile(stage.get(0).action,
+                        0.0, 1.0, false, false, false,
+                        "Aino N3 first-hit hitlag");
+                assertHitlagProfile(stage.get(1).action,
+                        0.08, 0.01, true, false, false,
+                        "Aino N3 second-hit hitlag");
+            }
+            assertClose(castTime
+                            + (durations[step] + hitlagFrames[step]) * FRAME,
                     simulator.getCurrentTime(),
                     "Aino N" + (step + 1) + " recovery");
         }
@@ -187,20 +201,22 @@ public final class AinoRegressionTest {
                 "Musecatcher stage one is not blunt");
         assertTrue(stageTwo.get(0).action.isShatterTrigger(),
                 "Musecatcher stage two is blunt");
-        assertClose(52.0 * FRAME, skillSimulator.getCurrentTime(),
+        assertClose((52.0 + 2.0) * FRAME,
+                skillSimulator.getCurrentTime(),
                 "Musecatcher recovery");
-        assertClose(10.0 - 39.0 * FRAME,
+        assertClose(10.0 - (39.0 + 2.0) * FRAME,
                 skillAino.getSkillCDRemaining(
                         skillSimulator.getCurrentTime()),
                 "Skill cooldown starts at frame 13");
         assertEquals(0, particles.size(),
                 "Particles remain in flight after Skill recovery");
-        advanceTo(skillSimulator, 15.0 * FRAME + 100.0 * FRAME);
+        advanceTo(skillSimulator,
+                (15.0 + 100.0) * FRAME + EPSILON);
         assertEquals(1, particles.size(),
                 "Two Skill hits share one particle packet");
         assertClose(3.0, particles.get(0).count,
                 "Musecatcher particle count");
-        assertClose(15.0 * FRAME + 100.0 * FRAME,
+        assertClose((15.0 + 100.0) * FRAME,
                 particles.get(0).time,
                 "Musecatcher particle travel time");
 
@@ -616,6 +632,30 @@ public final class AinoRegressionTest {
             throw new AssertionError(message + ": expected=" + expected
                     + " actual=" + actual);
         }
+    }
+
+    private static void assertHitlagProfile(
+            AttackAction action,
+            double haltTime,
+            double factor,
+            boolean defenseHalt,
+            boolean deployable,
+            boolean headshotOnly,
+            String message) {
+        assertClose(haltTime,
+                action.getHitlagProfile().getHaltTimeSeconds(),
+                message + " halt time");
+        assertClose(factor, action.getHitlagProfile().getFactor(),
+                message + " factor");
+        assertEquals(defenseHalt,
+                action.getHitlagProfile().canDefenseHalt(),
+                message + " Defense Halt");
+        assertEquals(deployable,
+                action.getHitlagProfile().isDeployable(),
+                message + " deployable");
+        assertEquals(headshotOnly,
+                action.getHitlagProfile().isHeadshotOnly(),
+                message + " headshot-only");
     }
 
     private static void assertEquals(

@@ -28,6 +28,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -53,6 +54,21 @@ public final class Skirk extends Character implements
         SwitchAwareCharacter {
     private static final double FRAME = 1.0 / 60.0;
     private static final double EPSILON = 1e-9;
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile[][] NORMAL_HITLAG = {
+        { new HitlagProfile(0.02, 0.01, false, false, false) },
+        { new HitlagProfile(0.03, 0.01, false, false, false) },
+        { new HitlagProfile(0.03, 0.01, false, false, false), HitlagProfile.none() },
+        { new HitlagProfile(0.05, 0.01, false, false, false) },
+        { new HitlagProfile(0.06, 0.01, false, false, false) }
+    };
+    private static final HitlagProfile[][] FLASH_NORMAL_HITLAG = {
+        { new HitlagProfile(0.02, 0.01, false, false, false) },
+        { new HitlagProfile(0.03, 0.01, false, false, false) },
+        { new HitlagProfile(0.03, 0.01, false, false, false), HitlagProfile.none() },
+        { new HitlagProfile(0.03, 0.01, false, false, false), HitlagProfile.none() },
+        { new HitlagProfile(0.06, 0.01, false, false, false) }
+    };
     private static final int[] NORMAL_DURATIONS = { 27, 25, 43, 23, 72 };
     private static final int[][] NORMAL_HIT_FRAMES = {
         { 13 }, { 7 }, { 8, 22 }, { 11 }, { 35 }
@@ -358,7 +374,7 @@ public final class Skirk extends Character implements
         return false;
     }
 
-    /** Reports that movement, hitlag, and stamina are excluded. */
+    /** Reports that movement, complete hitlag coverage, and stamina are excluded. */
     public boolean isMovementHitlagStaminaRepresented() {
         return false;
     }
@@ -865,6 +881,7 @@ public final class Skirk extends Character implements
                     extinctionDamageBonus);
         }
         action.setICD(icdType, icdTag, gauge);
+        action.setHitlagProfile(hitlagProfile(hit));
         action.setShatterTrigger(shatter);
         if (actionType == ActionType.BURST) {
             action.setCountsAsBurstDmg(true);
@@ -886,6 +903,16 @@ public final class Skirk extends Character implements
             resolvingC6Eligible = false;
             resolvingRiftAbsorption = false;
         }
+    }
+
+    private static HitlagProfile hitlagProfile(PendingHit hit) {
+        if (hit.kind == HitKind.NORMAL) {
+            return NORMAL_HITLAG[hit.step][hit.hit];
+        }
+        if (hit.kind == HitKind.FLASH_NORMAL) {
+            return FLASH_NORMAL_HITLAG[hit.step][hit.hit];
+        }
+        return HitlagProfile.none();
     }
 
     private void handleAcceptedDamage(

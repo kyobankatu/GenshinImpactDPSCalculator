@@ -21,6 +21,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -36,7 +37,7 @@ import simulation.event.SimpleTimerEvent;
  * generation rejects stale one-second Seal timers after recast or switch.
  * C3, C5, and C6 offensive branches are represented. Stamina and interruption
  * resistance from C1, enemy-HP-dependent C2, the C4 shield, actual-crit A4,
- * hitlag, geometry, and multi-target behavior are intentionally excluded.</p>
+ * geometry and multi-target behavior are intentionally excluded.</p>
  */
 public class Yanfei extends Character implements
         SimulatorInitializedCharacterEffect,
@@ -49,6 +50,9 @@ public class Yanfei extends Character implements
     private static final double A1_DURATION = 6.0;
     private static final double PARTICLE_TRAVEL = 100.0 / 60.0;
     private static final double EPSILON = 1e-9;
+    /** Burst hitlag pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile BURST_HITLAG =
+            new HitlagProfile(0.0, 0.01, true, false, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -349,6 +353,7 @@ public class Yanfei extends Character implements
                     ActionType.BURST);
             burst.setICD(
                     ICDType.Standard, ICDTag.ElementalBurst, 2.0);
+            burst.setHitlagProfile(BURST_HITLAG);
             burst.setShatterTrigger(true);
             activeSim.performActionWithoutTimeAdvance(characterId, burst);
             grantScarletSeals(

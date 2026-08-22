@@ -23,6 +23,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -59,6 +60,9 @@ public class Ganyu extends Character
     private static final int BURST_FIELD_START_FRAME = 122;
     private static final int FIRST_BURST_SHARD_FRAME = 148;
     private static final int BURST_SHARD_INTERVAL_FRAMES = 90;
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile FROSTFLAKE_HEADSHOT_HITLAG =
+            new HitlagProfile(0.12, 0.01, false, true, true);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -252,6 +256,7 @@ public class Ganyu extends Character
                 ICDTag.ChargedAttack,
                 1.0,
                 true);
+        arrow.setHitlagProfile(FROSTFLAKE_HEADSHOT_HITLAG);
         replaceA1Buff(releaseTime);
         double arrowImpactTime = releaseTime + PROJECTILE_TRAVEL;
         schedule(sim, arrowImpactTime, activeSim -> {

@@ -25,6 +25,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -39,7 +40,7 @@ import simulation.event.SimpleTimerEvent;
  * <p>
  * Charged Attack is intentionally unavailable because its complete release
  * and ending timing is not established for this campaign. A1 stamina, C1
- * enemy-HP checks, C2 incoming-hit stacks, moving-Burst geometry, hitlag, and
+ * enemy-HP checks, C2 incoming-hit stacks, moving-Burst geometry, hitlag extension, and
  * defensive behavior remain outside this stationary offensive slice.
  */
 public class Diluc extends Character implements
@@ -74,6 +75,24 @@ public class Diluc extends Character implements
     private static final int[] BURST_HIT_FRAMES = {
             100, 112, 124, 136, 148, 160, 172, 184, 196, 202
     };
+
+    /**
+     * Per-hit hitlag from gcsim pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile[] NORMAL_HITLAG = {
+        new HitlagProfile(0.10, 0.01, true, false, false),
+        new HitlagProfile(0.09, 0.01, true, false, false),
+        new HitlagProfile(0.09, 0.01, true, false, false),
+        new HitlagProfile(0.12, 0.01, true, false, false)
+    };
+    private static final HitlagProfile[] SKILL_HITLAG = {
+        new HitlagProfile(0.12, 0.01, true, false, false),
+        new HitlagProfile(0.12, 0.01, true, false, false),
+        new HitlagProfile(0.16, 0.01, true, false, false)
+    };
+    private static final HitlagProfile BURST_INITIAL_HITLAG =
+            new HitlagProfile(0.09, 0.01, true, false, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -277,6 +296,7 @@ public class Diluc extends Character implements
                 ICDTag.NormalAttack,
                 infused ? 1.0 : 0.0);
         normal.setShatterTrigger(true);
+        normal.setHitlagProfile(NORMAL_HITLAG[step]);
         if (c6Empowered) {
             normal.addBonusStat(StatType.NORMAL_ATTACK_DMG_BONUS, 0.30);
             c6NormalUsesRemaining--;
@@ -342,6 +362,7 @@ public class Diluc extends Character implements
                 ActionType.SKILL);
         skill.setICD(ICDType.None, ICDTag.ElementalSkill, 1.0);
         skill.setShatterTrigger(true);
+        skill.setHitlagProfile(SKILL_HITLAG[stage]);
         double hitTime = castTime + SKILL_HIT_FRAMES[stage] * FRAME;
         schedule(sim, hitTime, activeSim -> {
             activeSim.performActionWithoutTimeAdvance(characterId, skill);
@@ -434,6 +455,9 @@ public class Diluc extends Character implements
         double gauge = hitIndex == 0 || hitIndex == 5 ? 2.0 : 0.0;
         burst.setICD(ICDType.None, ICDTag.ElementalBurst, gauge);
         burst.setShatterTrigger(hitIndex == 0);
+        if (hitIndex == 0) {
+            burst.setHitlagProfile(BURST_INITIAL_HITLAG);
+        }
         sim.performActionWithoutTimeAdvance(characterId, burst);
         if (hitIndex == 0) {
             captureSnapshot(

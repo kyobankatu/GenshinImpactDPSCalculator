@@ -23,6 +23,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -37,7 +38,7 @@ import simulation.event.SimpleTimerEvent;
  * other party member. C2, C3, C5, and C6 are represented.
  *
  * <p>
- * Enemy facing and large-target geometry, hitlag, movement, multi-target
+ * Enemy facing and large-target geometry, movement, multi-target
  * selection, and actual CRIT outcomes are outside the current simulator. C1
  * and C4 therefore remain intentionally inactive instead of deriving procs
  * from expected CRIT damage.
@@ -54,6 +55,26 @@ public class Rosaria extends Character
     private static final double BURST_TICK_INTERVAL = 120.0 * FRAME;
     private static final int BASE_BURST_TICKS = 4;
     private static final int C2_BURST_TICKS = 6;
+
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile[][] NORMAL_HITLAG = {
+        { new HitlagProfile(0.06, 0.01, true, false, false) },
+        { new HitlagProfile(0.06, 0.01, true, false, false) },
+        { HitlagProfile.none(), new HitlagProfile(0.03, 0.01, true, false, false) },
+        { new HitlagProfile(0.09, 0.01, true, false, false) },
+        {
+            new HitlagProfile(0.06, 0.01, false, false, false),
+            new HitlagProfile(0.06, 0.01, true, false, false)
+        }
+    };
+    private static final HitlagProfile CHARGED_HITLAG =
+            new HitlagProfile(0.0, 0.01, true, true, false);
+    private static final HitlagProfile SKILL_FIRST_HITLAG =
+            new HitlagProfile(0.06, 0.01, false, false, false);
+    private static final HitlagProfile SKILL_SECOND_HITLAG =
+            new HitlagProfile(0.09, 0.01, true, false, false);
+    private static final HitlagProfile BURST_FIRST_HITLAG =
+            new HitlagProfile(0.06, 0.01, false, false, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -214,6 +235,7 @@ public class Rosaria extends Character
                     ActionType.NORMAL);
             normal.setICD(
                     ICDType.Standard, ICDTag.NormalAttack, 0.0);
+            normal.setHitlagProfile(NORMAL_HITLAG[step][hitIndex]);
             schedule(
                     sim,
                     castTime + hitmarks[step][hitIndex] * FRAME,
@@ -243,6 +265,7 @@ public class Rosaria extends Character
                 ActionType.CHARGE);
         charged.setICD(
                 ICDType.Standard, ICDTag.ChargedAttack, 0.0);
+        charged.setHitlagProfile(CHARGED_HITLAG);
         schedule(
                 sim,
                 castTime + 22.0 * FRAME,
@@ -295,6 +318,7 @@ public class Rosaria extends Character
                 0.0,
                 ActionType.SKILL);
         first.setICD(ICDType.None, ICDTag.ElementalSkill, 1.0);
+        first.setHitlagProfile(SKILL_FIRST_HITLAG);
         sim.performActionWithoutTimeAdvance(characterId, first);
     }
 
@@ -308,6 +332,7 @@ public class Rosaria extends Character
                 0.0,
                 ActionType.SKILL);
         second.setICD(ICDType.None, ICDTag.ElementalSkill, 1.0);
+        second.setHitlagProfile(SKILL_SECOND_HITLAG);
         second.setShatterTrigger(true);
         sim.performActionWithoutTimeAdvance(characterId, second);
         if (sim.getEnemy() != null) {
@@ -356,7 +381,8 @@ public class Rosaria extends Character
                         activeSim,
                         "Rites of Termination Initial 1",
                         getBurstInitialMultiplier(0),
-                        initialSnapshot[0]);
+                        initialSnapshot[0],
+                        BURST_FIRST_HITLAG);
             }
         });
         schedule(sim, castTime + 56.0 * FRAME, activeSim -> {
@@ -371,7 +397,8 @@ public class Rosaria extends Character
                     activeSim,
                     "Rites of Termination Initial 2",
                     getBurstInitialMultiplier(1),
-                    lanceSnapshot[0]);
+                    lanceSnapshot[0],
+                    HitlagProfile.none());
         });
         scheduleBurstTicks(
                 sim, castTime, generation, tickCount, lanceSnapshot);
@@ -400,7 +427,8 @@ public class Rosaria extends Character
                         activeSim,
                         "Rites of Termination Ice Lance DoT",
                         getBurstDotMultiplier(),
-                        lanceSnapshot[0]);
+                        lanceSnapshot[0],
+                        HitlagProfile.none());
                 resolvedTicks++;
                 if (resolvedTicks == tickCount) {
                     finish();
@@ -413,7 +441,8 @@ public class Rosaria extends Character
             CombatSimulator sim,
             String actionName,
             double multiplier,
-            StatsContainer snapshot) {
+            StatsContainer snapshot,
+            HitlagProfile hitlagProfile) {
         AttackAction burst = new AttackAction(
                 actionName,
                 multiplier,
@@ -425,6 +454,7 @@ public class Rosaria extends Character
                 ActionType.BURST);
         burst.setStatSnapshot(snapshot);
         burst.setICD(ICDType.None, ICDTag.ElementalBurst, 1.0);
+        burst.setHitlagProfile(hitlagProfile);
         sim.performActionWithoutTimeAdvance(characterId, burst);
         if (constellation >= 6 && sim.getEnemy() != null) {
             refreshC6PhysicalShred(sim, sim.getCurrentTime());

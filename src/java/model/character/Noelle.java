@@ -20,6 +20,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -53,6 +54,22 @@ public class Noelle extends Character implements
     private static final double C2_CHARGED_DMG_BONUS = 0.15;
     private static final double C4_DAMAGE_MULTIPLIER = 4.0;
     private static final double C6_DEF_CONVERSION_BONUS = 0.50;
+
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile PHYSICAL_N3_HITLAG =
+            new HitlagProfile(0.09, 0.01, true, false, false);
+    private static final HitlagProfile[] SWEEPING_NORMAL_HITLAG = {
+        new HitlagProfile(0.10, 0.01, true, false, false),
+        new HitlagProfile(0.10, 0.01, true, false, false),
+        new HitlagProfile(0.10, 0.01, true, false, false),
+        new HitlagProfile(0.15, 0.01, true, false, false)
+    };
+    private static final HitlagProfile PHYSICAL_CHARGED_HITLAG =
+            new HitlagProfile(0.03, 0.01, true, false, false);
+    private static final HitlagProfile BREASTPLATE_HITLAG =
+            new HitlagProfile(0.0, 0.0, true, false, false);
+    private static final HitlagProfile CAST_HITLAG =
+            new HitlagProfile(0.15, 0.01, true, false, false);
 
     private int normalAttackStep;
     private int a4HitCount;
@@ -193,6 +210,7 @@ public class Noelle extends Character implements
     }
 
     private void normalAttack(CombatSimulator sim) {
+        int step = normalAttackStep;
         String key = "N" + (normalAttackStep + 1);
         double[] defaults = { 1.4536, 1.34774, 1.58474, 2.08402 };
         double[] durations = {
@@ -209,6 +227,11 @@ public class Noelle extends Character implements
                 ActionType.NORMAL,
                 ICDTag.NormalAttack,
                 sim.getCurrentTime());
+        if (normal.getElement() == Element.GEO) {
+            normal.setHitlagProfile(SWEEPING_NORMAL_HITLAG[step]);
+        } else if (step == 2) {
+            normal.setHitlagProfile(PHYSICAL_N3_HITLAG);
+        }
         sim.performAction(characterId, normal);
 
         normalAttackStep++;
@@ -241,6 +264,9 @@ public class Noelle extends Character implements
                     getTalentValue(
                             "C2 Charged DMG Bonus",
                             C2_CHARGED_DMG_BONUS));
+        }
+        if (charged.getElement() == Element.PHYSICAL) {
+            charged.setHitlagProfile(PHYSICAL_CHARGED_HITLAG);
         }
         sim.performAction(characterId, charged);
     }
@@ -313,6 +339,7 @@ public class Noelle extends Character implements
                 0.0,
                 ActionType.SKILL);
         hit.setICD(ICDType.Standard, ICDTag.ElementalSkill, 2.0);
+        hit.setHitlagProfile(BREASTPLATE_HITLAG);
         hit.setShatterTrigger(true);
         scheduleSingleHit(sim, castTime + 15.0 / 60.0, hit);
 
@@ -354,6 +381,7 @@ public class Noelle extends Character implements
                 0.0,
                 ActionType.SKILL);
         explosion.setICD(ICDType.Standard, ICDTag.ElementalSkill, 0.0);
+        explosion.setHitlagProfile(CAST_HITLAG);
         explosion.setShatterTrigger(true);
         sim.performActionWithoutTimeAdvance(characterId, explosion);
     }
@@ -400,6 +428,7 @@ public class Noelle extends Character implements
                 0.0,
                 ActionType.BURST);
         burstHit.setICD(ICDType.Standard, ICDTag.ElementalBurst, 1.0);
+        burstHit.setHitlagProfile(CAST_HITLAG);
         burstHit.setShatterTrigger(true);
 
         double defaultSkillHit = constellation >= 5 ? 1.856 : 1.5776;
@@ -412,6 +441,7 @@ public class Noelle extends Character implements
                 0.0,
                 ActionType.BURST);
         skillHit.setICD(ICDType.Standard, ICDTag.ElementalBurst, 1.0);
+        skillHit.setHitlagProfile(CAST_HITLAG);
         skillHit.setShatterTrigger(true);
 
         scheduleSingleHit(sim, castTime + 24.0 / 60.0, burstHit);

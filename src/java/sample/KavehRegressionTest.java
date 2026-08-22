@@ -51,8 +51,8 @@ public final class KavehRegressionTest {
                 "Kaveh exact-name identity");
         assertEquals(CharacterRegion.SUMERU, CharacterId.KAVEH.getRegion(),
                 "Kaveh region");
-        assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(57),
-                "Kaveh next identity remains unassigned");
+        assertEquals(CharacterId.CHEVREUSE, CharacterId.fromNumericId(57),
+                "Kaveh next numeric identity");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("kaveh"),
                 "Kaveh lookup remains case-sensitive");
 
@@ -108,7 +108,7 @@ public final class KavehRegressionTest {
         }
         assertClose(27.0 * FRAME, normals.get(0).time,
                 "Kaveh N1 impact frame");
-        assertClose((44.0 + 22.0) * FRAME, normals.get(1).time,
+        assertClose((44.0 + 10.0 + 22.0) * FRAME, normals.get(1).time,
                 "Kaveh N2 impact frame");
 
         simulator.switchCharacter(CharacterId.NOELLE);
@@ -221,7 +221,7 @@ public final class KavehRegressionTest {
                         .get(StatType.ELEMENTAL_MASTERY),
                 "Kaveh A4 adds one hundred EM");
         double expectedC2String = (44.0 + 45.0 + 56.0 + 81.0)
-                * FRAME / 1.15;
+                * FRAME / 1.15 + 44.0 * FRAME;
         assertClose(expectedC2String,
                 simulator.getCurrentTime() - beforeNormal,
                 "Kaveh C2 accelerates the Normal string");
@@ -242,13 +242,21 @@ public final class KavehRegressionTest {
         Kaveh kaveh = new Kaveh(null, null, 6);
         CombatSimulator simulator = simulatorWith(kaveh);
         List<ActionRecord> records = captureActions(simulator);
+        SimulatorSnapshot[] captured = {null};
+        simulator.addDamageListener((actor, action, damage, time) -> {
+            if (captured[0] == null
+                    && actor.getCharacterId() == CharacterId.KAVEH
+                    && "Schematic Setup N1".equals(action.getName())) {
+                captured[0] = simulator.saveSnapshot();
+            }
+        });
         perform(simulator, CharacterActionKey.BURST);
         perform(simulator, CharacterActionKey.NORMAL);
-        SimulatorSnapshot snapshot = simulator.saveSnapshot();
-        advanceTo(simulator, simulator.getCurrentTime() + 0.4);
+        assertTrue(captured[0] != null,
+                "Kaveh should capture the queued C6 hit at N1 impact");
         assertEquals(1, named(records, "Pairidaeza's Dreams").size(),
                 "Kaveh live branch resolves pending C6 hit");
-        simulator.restoreSnapshot(snapshot);
+        simulator.restoreSnapshot(captured[0]);
         advanceTo(simulator, simulator.getCurrentTime() + 0.4);
         assertEquals(2, named(records, "Pairidaeza's Dreams").size(),
                 "Kaveh restore replays the pending C6 hit once");

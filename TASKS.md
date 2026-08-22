@@ -30,10 +30,10 @@ future explicit user request.
 The prior simulator content campaigns, including Skill-focused event weapons,
 are complete; RL and generated docs remain excluded.
 
-B-211 is active. Its user-confirmed decision phase is complete: Thundercloud
-Strike refreshes Night Intent, Burning retains its ninth tick, and Ineffa C2
-Punishment Edict resolves once exactly one second after Burst damage. The next
-phase adds the pinned-gcsim generic hitlag runtime.
+B-211 is complete. Thundercloud Strike refreshes Night Intent, Burning retains
+its ninth tick, Ineffa C2 Punishment Edict resolves once exactly one second
+after Burst damage, and source-ready hitlag is implemented against pinned
+gcsim commit `3647a07a7cc3004bc1e79d9bb5f7444de20dceaa`.
 
 B-210 is active. It reconciles Version 7.0 Stellar additions on legacy
 equipment and Yumemizuki Mizuki, adds report attribution, re-audits the two
@@ -24621,8 +24621,8 @@ Completion evidence:
 
 ## Implementation Order: Confirmed Accuracy And gcsim Hitlag Campaign B-211
 
-Status: In progress. The three previously unresolved single-target decisions are
-now user-confirmed, and gcsim main commit `3647a07a7cc3004bc1e79d9bb5f7444de20dceaa`
+Status: Complete. The three previously unresolved single-target decisions are
+user-confirmed, and gcsim main commit `3647a07a7cc3004bc1e79d9bb5f7444de20dceaa`
 is the pinned reference for hitlag runtime semantics and per-attack values.
 
 Scope:
@@ -24804,7 +24804,7 @@ Completion evidence:
   and `FlinsParty2` 20,592,361 / 280,933 DPS after the expected hitlag-derived
   duration and timer-boundary changes.
 
-### Phase 4: Source-Ready Coverage Audit And Closure
+### Phase 4: Source-Ready Coverage Audit And Closure - Done
 
 Why last:
 
@@ -24842,3 +24842,17 @@ Verification:
 - `./gradlew ReactionRegressionTest RaidenParty FlinsParty FlinsParty2 build javadoc`
 - `python scripts/preflight.py --run`
 - `git status --short`
+
+Completion evidence:
+
+- The audit adds pinned profiles across 80 additional implemented character
+  files; together with Phase 3, 86 character files now cite the exact gcsim
+  revision. All 80 corresponding available character regression executables
+  pass in one 81-task Gradle invocation.
+- Post-damage observers now see target and owner hitlag before taking snapshots,
+  while direct `DamageCalculator` callers retain their previous hook contract.
+  Varka's two source-marked C6 windows use a narrow owner-hitlag callback rather
+  than a global modifier-duration approximation.
+- Upstream/local conflicts and absent local branches remain profile-free and are
+  recorded in B-211 rather than inferred. Generated report output remains
+  outside the committed change set.

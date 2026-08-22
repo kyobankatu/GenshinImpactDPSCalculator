@@ -102,12 +102,17 @@ public final class VaresaRegressionTest {
         double[] multipliers = { 0.795233, 0.680476, 0.957318 };
         double[] hitFrames = { 17.0, 50.0, 106.0 };
         double[] endFrames = { 43.0, 73.0, 132.0 };
+        double[] priorHitlagFrames = { 0.0, 4.0, 8.0 };
+        double[] cumulativeHitlagFrames = { 4.0, 8.0, 14.0 };
         for (int index = 0; index < multipliers.length; index++) {
             perform(simulator, CharacterActionKey.NORMAL);
             ActionRecord record = records.get(index);
-            assertClose(hitFrames[index] * FRAME, record.time,
+            assertClose((hitFrames[index] + priorHitlagFrames[index])
+                            * FRAME,
+                    record.time,
                     "Varesa N" + (index + 1) + " impact frame");
-            assertClose(endFrames[index] * FRAME,
+            assertClose((endFrames[index]
+                            + cumulativeHitlagFrames[index]) * FRAME,
                     simulator.getCurrentTime(),
                     "Varesa N" + (index + 1) + " duration");
             assertClose(multipliers[index],

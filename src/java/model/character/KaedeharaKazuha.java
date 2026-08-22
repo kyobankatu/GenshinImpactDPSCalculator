@@ -30,6 +30,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -71,6 +72,22 @@ public final class KaedeharaKazuha extends Character implements
     private static final Element[] ABSORPTION_PRIORITY = {
         Element.PYRO, Element.HYDRO, Element.ELECTRO, Element.CRYO
     };
+    /**
+     * Per-hit metadata from gcsim pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_HITLAG_SHORT =
+            new HitlagProfile(0.03, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_N3_FIRST =
+            new HitlagProfile(0.01, 0.01, false, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_N3_SECOND =
+            new HitlagProfile(0.05, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_N4 =
+            new HitlagProfile(0.06, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_N5_EDGE =
+            new HitlagProfile(0.0, 0.05, true, false, false);
+    private static final HitlagProfile BURST_INITIAL_HITLAG =
+            new HitlagProfile(0.05, 0.05, false, false, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -459,6 +476,10 @@ public final class KaedeharaKazuha extends Character implements
                 getTalentValue(key, NORMAL_MULTIPLIERS[step][hit]),
                 StatType.NORMAL_ATTACK_DMG_BONUS,
                 ActionType.NORMAL);
+        HitlagProfile hitlagProfile = normalHitlag(step, hit);
+        if (hitlagProfile != null) {
+            action.setHitlagProfile(hitlagProfile);
+        }
         resolvingC6BasicHit = action.getElement() == Element.ANEMO;
         try {
             simulator.performActionWithoutTimeAdvance(characterId, action);
@@ -671,7 +692,23 @@ public final class KaedeharaKazuha extends Character implements
                 ICDTag.None,
                 getTalentValue("Burst Initial Gauge Units", 2.0));
         action.setStatSnapshot(hit.snapshot);
+        action.setHitlagProfile(BURST_INITIAL_HITLAG);
         simulator.performActionWithoutTimeAdvance(characterId, action);
+    }
+
+    private static HitlagProfile normalHitlag(int step, int hit) {
+        if (step <= 1) {
+            return NORMAL_HITLAG_SHORT;
+        }
+        if (step == 2) {
+            return hit == 0
+                    ? NORMAL_HITLAG_N3_FIRST
+                    : NORMAL_HITLAG_N3_SECOND;
+        }
+        if (step == 3) {
+            return NORMAL_HITLAG_N4;
+        }
+        return hit == 1 ? null : NORMAL_HITLAG_N5_EDGE;
     }
 
     private void resolveBurstDot(

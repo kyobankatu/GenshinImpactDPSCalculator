@@ -114,6 +114,7 @@ public final class WriothesleyRegressionTest {
             { 12 }, { 10 }, { 18 }, { 25, 35 }, { 39 }
         };
         int[] recoveryFrames = { 27, 25, 41, 56, 59 };
+        int[] hitlagFrames = { 4, 4, 6, 8, 8 };
         double[][] multipliers = {
             { 0.980327 },
             { 0.951650 },
@@ -150,7 +151,9 @@ public final class WriothesleyRegressionTest {
                         record.action.getICDTag(),
                         "Wriothesley Normal ICD tag");
             }
-            assertClose(castTime + recoveryFrames[step] * FRAME,
+            assertClose(castTime
+                            + (recoveryFrames[step] + hitlagFrames[step])
+                                    * FRAME,
                     simulator.getCurrentTime(),
                     "Wriothesley N" + (step + 1) + " recovery");
         }

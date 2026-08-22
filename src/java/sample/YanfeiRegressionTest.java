@@ -281,9 +281,12 @@ public final class YanfeiRegressionTest {
                 "Yanfei Brilliance Charged bonus");
 
         perform(sim, CharacterActionKey.CHARGE);
-        assertEquals(2, yanfei.getScarletSealCount(sim.getCurrentTime()),
-                "Yanfei Brilliance grants at one-second cadence");
+        assertEquals(1, yanfei.getScarletSealCount(sim.getCurrentTime()),
+                "Yanfei Brilliance grants once after hitlag-shifted consume");
         sim.advanceTime(3.0 - sim.getCurrentTime());
+        assertEquals(2, yanfei.getScarletSealCount(sim.getCurrentTime()),
+                "Yanfei Brilliance retains one-second cadence");
+        sim.advanceTime(4.0 - sim.getCurrentTime());
         assertEquals(3, yanfei.getScarletSealCount(sim.getCurrentTime()),
                 "Yanfei Brilliance respects Seal cap");
 

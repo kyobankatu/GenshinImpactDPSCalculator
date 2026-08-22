@@ -26,6 +26,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -40,7 +41,7 @@ import simulation.event.SimpleTimerEvent;
  *
  * <p>
  * A1, A4, C1, C3, C4, C5, and C6 are represented. Charged Attack stamina,
- * hitlag, C2's random particle, geometry, and pending-event snapshot restore
+ * C2's random particle, geometry, and pending-event snapshot restore
  * are intentionally excluded. Character-local timers and listeners bind to one
  * simulator instance.
  */
@@ -73,6 +74,16 @@ public class Keqing extends Character implements
             1.41094, 1.58000
     };
     private static final int[] CHARGED_HIT_FRAMES = { 21, 24 };
+    /**
+     * Per-hit metadata from gcsim pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_HITLAG_SHORT =
+            new HitlagProfile(0.03, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_N3 =
+            new HitlagProfile(0.06, 0.01, true, false, false);
+    private static final HitlagProfile SKILL_SLASH_HITLAG =
+            new HitlagProfile(0.09, 0.01, false, false, false);
 
     private final Map<String, Double> c6Expirations = new HashMap<>();
     private CombatSimulator initializedSimulator;
@@ -230,6 +241,10 @@ public class Keqing extends Character implements
                     ICDType.Standard,
                     ICDTag.NormalAttack,
                     attackElement == Element.ELECTRO ? 1.0 : 0.0);
+            HitlagProfile hitlagProfile = normalHitlag(step, hitIndex);
+            if (hitlagProfile != null) {
+                normal.setHitlagProfile(hitlagProfile);
+            }
             schedule(sim, castTime + NORMAL_HIT_FRAMES[step][hit] * FRAME,
                     activeSim -> activeSim.performActionWithoutTimeAdvance(
                             characterId, normal));
@@ -357,6 +372,7 @@ public class Keqing extends Character implements
                 constellation >= 5 ? 3.360 : 2.856),
                 2.0);
         slash.setICD(ICDType.Standard, ICDTag.ElementalSkill, 2.0);
+        slash.setHitlagProfile(SKILL_SLASH_HITLAG);
         schedule(sim, castTime + 16.0 * FRAME, activeSim -> {
             activeSim.performActionWithoutTimeAdvance(characterId, slash);
             scheduleParticles(activeSim);
@@ -442,6 +458,19 @@ public class Keqing extends Character implements
                 actionType);
         action.setICD(icdType, icdTag, gaugeUnits);
         return action;
+    }
+
+    private static HitlagProfile normalHitlag(int step, int hit) {
+        if (step <= 1) {
+            return NORMAL_HITLAG_SHORT;
+        }
+        if (step == 2) {
+            return NORMAL_HITLAG_N3;
+        }
+        if (step == 3 && hit == 1) {
+            return NORMAL_HITLAG_SHORT;
+        }
+        return null;
     }
 
     private void consumeStiletto(CombatSimulator sim) {

@@ -26,6 +26,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -40,7 +41,7 @@ import simulation.event.SimpleTimerEvent;
  * <p>The C4 gate tracks only the source-defined twelve-second nominal shield
  * window. Shield absorption and strength, Hold movement and collision, A1,
  * co-op-only C2, player HP and healing, plunge data absent from the pinned
- * source, geometry, multi-target behavior, stamina, and hitlag are excluded
+ * source, geometry, multi-target behavior, and stamina are excluded
  * rather than approximated.</p>
  */
 public final class Kirara extends Character implements
@@ -63,6 +64,26 @@ public final class Kirara extends Character implements
     private static final double[] CHARGED_T9 = {
         0.411116, 0.822232, 0.822232
     };
+    /**
+     * Per-hit metadata from gcsim pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_HITLAG_SHORT =
+            new HitlagProfile(0.03, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_N3_FIRST =
+            new HitlagProfile(0.01, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_N3_SECOND =
+            new HitlagProfile(0.05, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_N4 =
+            new HitlagProfile(0.06, 0.01, true, false, false);
+    private static final HitlagProfile CHARGED_FINAL_HITLAG =
+            new HitlagProfile(0.10, 0.01, true, false, false);
+    private static final HitlagProfile SKILL_HITLAG =
+            new HitlagProfile(0.0, 0.01, true, false, false);
+    private static final HitlagProfile DEPLOYABLE_DEFENSE_HITLAG =
+            new HitlagProfile(0.0, 0.0, true, true, false);
+    private static final HitlagProfile C4_HITLAG =
+            new HitlagProfile(0.0, 0.0, true, false, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -431,7 +452,8 @@ public final class Kirara extends Character implements
                 ICDType.Standard,
                 ICDTag.ElementalBurst,
                 1.0,
-                null);
+                null,
+                C4_HITLAG);
     }
 
     private void applyC6(
@@ -484,7 +506,8 @@ public final class Kirara extends Character implements
                         ICDType.Standard,
                         ICDTag.NormalAttack,
                         0.0,
-                        event.snapshot);
+                        event.snapshot,
+                        normalHitlag(event.index, event.subIndex));
                 break;
             case CHARGED_HIT:
                 performHit(
@@ -500,7 +523,8 @@ public final class Kirara extends Character implements
                         ICDType.Standard,
                         ICDTag.NormalAttack,
                         0.0,
-                        event.snapshot);
+                        event.snapshot,
+                        event.index == 2 ? CHARGED_FINAL_HITLAG : null);
                 break;
             case SKILL_COOLDOWN:
                 markSkillUsed(
@@ -562,7 +586,8 @@ public final class Kirara extends Character implements
                 ICDType.None,
                 ICDTag.None,
                 1.0,
-                snapshot);
+                snapshot,
+                SKILL_HITLAG);
         simulator.getEnergyDistributor().distributeParticles(
                 Element.DENDRO,
                 getTalentValue("Skill Particle Count", 3.0),
@@ -603,7 +628,8 @@ public final class Kirara extends Character implements
                 cardamom ? ICDType.Standard : ICDType.None,
                 cardamom ? ICDTag.ElementalBurst : ICDTag.None,
                 cardamom ? 1.0 : 2.0,
-                snapshot);
+                snapshot,
+                cardamom ? DEPLOYABLE_DEFENSE_HITLAG : null);
     }
 
     private void performHit(
@@ -617,7 +643,8 @@ public final class Kirara extends Character implements
             ICDType icdType,
             ICDTag icdTag,
             double gaugeUnits,
-            StatsContainer requestedSnapshot) {
+            StatsContainer requestedSnapshot,
+            HitlagProfile hitlagProfile) {
         StatsContainer snapshot = requestedSnapshot == null
                 ? captureLiveStats(simulator.getCurrentTime())
                 : copyStats(requestedSnapshot);
@@ -632,6 +659,9 @@ public final class Kirara extends Character implements
         action.setICD(icdType, icdTag, gaugeUnits);
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
+        if (hitlagProfile != null) {
+            action.setHitlagProfile(hitlagProfile);
+        }
         if (actionType == ActionType.SKILL) {
             action.addBonusStat(
                     StatType.DMG_BONUS_ALL,
@@ -645,6 +675,18 @@ public final class Kirara extends Character implements
         }
         action.setStatSnapshot(snapshot);
         simulator.performActionWithoutTimeAdvance(characterId, action);
+    }
+
+    private static HitlagProfile normalHitlag(int step, int hit) {
+        if (step <= 1) {
+            return NORMAL_HITLAG_SHORT;
+        }
+        if (step == 2) {
+            return hit == 0
+                    ? NORMAL_HITLAG_N3_FIRST
+                    : NORMAL_HITLAG_N3_SECOND;
+        }
+        return NORMAL_HITLAG_N4;
     }
 
     private StatsContainer captureLiveStats(double currentTime) {

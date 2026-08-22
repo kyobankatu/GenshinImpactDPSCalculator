@@ -26,6 +26,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -53,6 +54,13 @@ public final class Diona extends Character
     private static final int BURST_TICK_INTERVAL_FRAMES = 120;
     private static final int BURST_TICK_COUNT = 6;
     private static final int PROJECTILE_TRAVEL_FRAMES = 10;
+
+    /**
+     * Aimed-shot hitlag from gcsim config YAML pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile AIMED_HEADSHOT_HITLAG =
+            new HitlagProfile(0.12, 0.01, false, true, true);
 
     private final Buff c6TeamBuff;
     private CombatSimulator initializedSimulator;
@@ -547,6 +555,7 @@ public final class Diona extends Character
                     1.0,
                     0.0);
             charged.setStatSnapshot(payload.snapshot);
+            charged.setHitlagProfile(AIMED_HEADSHOT_HITLAG);
             activeSim.performActionWithoutTimeAdvance(
                     characterId, charged);
         });

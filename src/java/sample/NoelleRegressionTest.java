@@ -119,6 +119,7 @@ public final class NoelleRegressionTest {
                 41.0 / 60.0,
                 120.0 / 60.0
         };
+        int[] normalHitlagFrames = { 0, 0, 9, 0 };
         double expectedTime = 0.0;
         assertEquals(4, records.size(), "Noelle four-hit Normal action count");
         for (int i = 0; i < 4; i++) {
@@ -142,6 +143,7 @@ public final class NoelleRegressionTest {
             assertTrue(action.isShatterTrigger(),
                     "Noelle Normal should be blunt");
             expectedTime += normalDurations[i];
+            expectedTime += normalHitlagFrames[i] / 60.0;
         }
 
         records.clear();
@@ -208,7 +210,7 @@ public final class NoelleRegressionTest {
                 "Noelle Breastplate ICD tag");
         assertClose(2.0, hit.getGaugeUnits(), EPS,
                 "Noelle Breastplate gauge");
-        assertClose(43.0 / 60.0, sim.getCurrentTime(), EPS,
+        assertClose((43.0 + 4.0) / 60.0, sim.getCurrentTime(), EPS,
                 "Noelle Breastplate action interval");
         assertClose(energyBefore, noelle.getCurrentEnergy(), EPS,
                 "Noelle Breastplate should not change Energy");
@@ -293,7 +295,7 @@ public final class NoelleRegressionTest {
         }
         assertClose(0.0, noelle.getCurrentEnergy(), EPS,
                 "Noelle Burst should spend 60 Energy");
-        assertClose(89.0 / 60.0, sim.getCurrentTime(), EPS,
+        assertClose((89.0 + 26.0) / 60.0, sim.getCurrentTime(), EPS,
                 "Noelle Burst action interval");
         assertClose(15.0, noelle.getBurstCooldownEndTime(), EPS,
                 "Noelle Burst cooldown boundary");
@@ -303,8 +305,8 @@ public final class NoelleRegressionTest {
                 "Noelle Burst should create a typed ICD state");
         assertClose(24.0 / 60.0, icdState[0], EPS,
                 "Noelle first Burst application time");
-        assertClose(2.0, icdState[1], EPS,
-                "Noelle second Burst hit should be ICD-blocked");
+        assertClose(1.0, icdState[1], EPS,
+                "Noelle second Burst hit should increment the ICD counter once");
 
         perform(sim, CharacterActionKey.BURST);
         assertClose(15.0, sim.getCurrentTime(), EPS,

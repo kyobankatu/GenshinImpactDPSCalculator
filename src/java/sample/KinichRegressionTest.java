@@ -100,8 +100,16 @@ public final class KinichRegressionTest {
         CombatSimulator simulator = simulatorWith(kinich);
         List<ActionRecord> records = captureKinichActions(simulator);
         double[] multipliers = { 1.81858, 1.52312, 2.26888 };
-        double[] hitFrames = { 21.0, 69.0, 139.0 };
-        double[] endFrames = { 47.0, 95.0, 174.0 };
+        double[] hitFrames = {
+            21.0,
+            69.0 + 8.0,
+            139.0 + 17.0
+        };
+        double[] endFrames = {
+            47.0 + 8.0,
+            95.0 + 17.0,
+            174.0 + 28.0
+        };
         for (int index = 0; index < multipliers.length; index++) {
             perform(simulator, CharacterActionKey.NORMAL);
             ActionRecord record = records.get(index);
@@ -153,7 +161,7 @@ public final class KinichRegressionTest {
         double plungeCast = simulator.getCurrentTime();
         perform(simulator, CharacterActionKey.PLUNGE);
         ActionRecord plunge = records.get(records.size() - 1);
-        assertClose(plungeCast, plunge.time,
+        assertClose(plungeCast + FRAME, plunge.time,
                 "Kinich high Plunge resolves at impact input");
         assertClose(3.422517,
                 plunge.action.getDamagePercent(),
@@ -161,7 +169,7 @@ public final class KinichRegressionTest {
         assertEquals(ActionType.PLUNGE,
                 plunge.action.getActionType(),
                 "Kinich high Plunge type");
-        assertClose(plungeCast + 58.0 * FRAME,
+        assertClose(plungeCast + (1.0 + 58.0) * FRAME,
                 simulator.getCurrentTime(),
                 "Kinich high Plunge duration");
     }

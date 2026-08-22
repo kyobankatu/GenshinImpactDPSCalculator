@@ -15,6 +15,7 @@ import mechanics.energy.ParticleType;
 import mechanics.reaction.ReactionResult;
 import model.entity.ArtifactSet;
 import model.entity.Character;
+import model.entity.OwnerHitlagAwareCharacter;
 import model.entity.SimulatorInitializedCharacterEffect;
 import model.entity.SnapshotAwareCharacterEffect;
 import model.entity.SwitchAwareCharacter;
@@ -30,6 +31,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -44,7 +46,7 @@ import simulation.event.SimpleTimerEvent;
  * Pyro, Hydro, Electro, then Cryo from the live party composition.</p>
  *
  * <p>Player HP, healing, defense, movement and geometry, multi-target and
- * random selection, hitlag, stamina, low Plunge, exploration, and unsupported
+ * random selection, complete hitlag coverage, stamina, low Plunge, exploration, and unsupported
  * Hexerei team state fail closed. Hexerei cooldown acceleration therefore
  * uses the source-backed non-team fallback of 0.5 seconds per accepted Normal
  * action.</p>
@@ -53,9 +55,24 @@ public final class Varka extends Character implements
         SimulatorInitializedCharacterEffect,
         SnapshotAwareCharacterEffect,
         SwitchAwareCharacter,
-        CombatSimulator.ReactionListener {
+        CombatSimulator.ReactionListener,
+        OwnerHitlagAwareCharacter {
     private static final double FRAME = 1.0 / 60.0;
     private static final double EPSILON = 1e-9;
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile[][] NORMAL_HITLAG = {
+        { new HitlagProfile(0.03, 0.01, true, false, false) },
+        { HitlagProfile.none(), new HitlagProfile(0.06, 0.01, true, false, false) },
+        { HitlagProfile.none(), new HitlagProfile(0.06, 0.01, true, false, false) },
+        { HitlagProfile.none(), new HitlagProfile(0.09, 0.01, true, false, false) },
+        { HitlagProfile.none(), new HitlagProfile(0.10, 0.01, true, false, false) }
+    };
+    private static final HitlagProfile CHARGED_SECOND_HITLAG =
+            new HitlagProfile(0.09, 0.01, true, false, false);
+    private static final HitlagProfile AZURE_ANEMO_HITLAG =
+            new HitlagProfile(0.90, 0.01, true, false, false);
+    private static final HitlagProfile SKILL_HITLAG =
+            new HitlagProfile(0.09, 0.01, true, false, false);
     private static final int[] NORMAL_DURATIONS = { 46, 46, 60, 47, 82 };
     private static final int[][] NORMAL_HIT_FRAMES = {
         { 19 }, { 18, 28 }, { 27, 43 }, { 19, 24 }, { 44, 45 }
@@ -434,7 +451,8 @@ public final class Varka extends Character implements
                             : ICDTag.NormalAttack,
                     hitElement == Element.PHYSICAL ? 0.0 : 1.0,
                     true,
-                    sturm && hit == 0));
+                    sturm && hit == 0,
+                    NORMAL_HITLAG[step][hit]));
         }
         normalAttackStep = (normalAttackStep + 1)
                 % NORMAL_HIT_FRAMES.length;
@@ -467,7 +485,9 @@ public final class Varka extends Character implements
                     ICDTag.NormalAttack,
                     0.0,
                     true,
-                    false));
+                    false,
+                    hit == 1 ? CHARGED_SECOND_HITLAG
+                            : HitlagProfile.none()));
         }
         simulator.advanceTime(67.0 * FRAME);
     }
@@ -493,7 +513,9 @@ public final class Varka extends Character implements
                     extraIcdTag(elements[hit]),
                     1.0,
                     true,
-                    false));
+                    false,
+                    hit == 1 ? CHARGED_SECOND_HITLAG
+                            : HitlagProfile.none()));
         }
         simulator.advanceTime(67.0 * FRAME);
     }
@@ -533,7 +555,9 @@ public final class Varka extends Character implements
                     extraIcdTag(hitElement),
                     1.0,
                     true,
-                    false));
+                    false,
+                    hit % 2 == 1 ? AZURE_ANEMO_HITLAG
+                            : HitlagProfile.none()));
         }
         if (!free) {
             consumeFourWindsCharge();
@@ -577,7 +601,8 @@ public final class Varka extends Character implements
                 ICDTag.ElementalSkill,
                 1.0,
                 false,
-                false));
+                false,
+                SKILL_HITLAG));
         queueCommand(simulator, new PendingCommand(
                 castTime + 39.0 * FRAME,
                 CommandKind.SKILL_COOLDOWN,
@@ -622,7 +647,8 @@ public final class Varka extends Character implements
                     ICDTag.ElementalSkill,
                     1.0,
                     true,
-                    false));
+                    false,
+                    hit == 0 ? SKILL_HITLAG : HitlagProfile.none()));
         }
         if (!free) {
             consumeFourWindsCharge();
@@ -823,6 +849,26 @@ public final class Varka extends Character implements
         }
     }
 
+    /** Extends the two C6 statuses marked hitlag-affected in pinned gcsim. */
+    @Override
+    public void onOwnerHitlag(double currentTime, double duration) {
+        c6FreeSkillUntil = extendActiveBoundary(
+                c6FreeSkillUntil, currentTime, duration);
+        c6FreeChargeUntil = extendActiveBoundary(
+                c6FreeChargeUntil, currentTime, duration);
+    }
+
+    private static double extendActiveBoundary(
+            double boundary, double currentTime, double duration) {
+        if (!Double.isFinite(boundary)
+                || boundary <= currentTime
+                || !Double.isFinite(duration)
+                || duration <= 0.0) {
+            return boundary;
+        }
+        return boundary + duration;
+    }
+
     private void resolveHit(
             CombatSimulator simulator,
             PendingHit hit) {
@@ -835,6 +881,7 @@ public final class Varka extends Character implements
                 0.0,
                 hit.actionType);
         action.setICD(hit.icdType, hit.icdTag, hit.gauge);
+        action.setHitlagProfile(hit.hitlagProfile);
         action.setCountsAsSkillDmg(hit.actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(hit.actionType == ActionType.BURST);
         double currentTime = simulator.getCurrentTime();
@@ -1183,6 +1230,7 @@ public final class Varka extends Character implements
         private final double gauge;
         private final boolean a4Eligible;
         private final boolean reduceCharge;
+        private final HitlagProfile hitlagProfile;
 
         private PendingHit(
                 double time,
@@ -1196,6 +1244,25 @@ public final class Varka extends Character implements
                 double gauge,
                 boolean a4Eligible,
                 boolean reduceCharge) {
+            this(
+                    time, displayName, multiplier, element, bonusStat,
+                    actionType, icdType, icdTag, gauge, a4Eligible,
+                    reduceCharge, HitlagProfile.none());
+        }
+
+        private PendingHit(
+                double time,
+                String displayName,
+                double multiplier,
+                Element element,
+                StatType bonusStat,
+                ActionType actionType,
+                ICDType icdType,
+                ICDTag icdTag,
+                double gauge,
+                boolean a4Eligible,
+                boolean reduceCharge,
+                HitlagProfile hitlagProfile) {
             this.time = time;
             this.displayName = displayName;
             this.multiplier = multiplier;
@@ -1207,6 +1274,7 @@ public final class Varka extends Character implements
             this.gauge = gauge;
             this.a4Eligible = a4Eligible;
             this.reduceCharge = reduceCharge;
+            this.hitlagProfile = hitlagProfile;
         }
 
         private PendingHit copy() {
@@ -1221,7 +1289,8 @@ public final class Varka extends Character implements
                     icdTag,
                     gauge,
                     a4Eligible,
-                    reduceCharge);
+                    reduceCharge,
+                    hitlagProfile);
         }
     }
 

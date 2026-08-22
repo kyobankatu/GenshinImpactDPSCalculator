@@ -50,8 +50,8 @@ public final class DoriRegressionTest {
                 "Dori exact-name identity");
         assertEquals(CharacterRegion.SUMERU, CharacterId.DORI.getRegion(),
                 "Dori region");
-        assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(56),
-                "Dori next identity remains unassigned");
+        assertEquals(CharacterId.KAVEH, CharacterId.fromNumericId(56),
+                "Dori next numeric identity");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("dori"),
                 "Dori lookup remains case-sensitive");
 
@@ -108,9 +108,11 @@ public final class DoriRegressionTest {
         }
         assertClose(27.0 * FRAME, normals.get(0).time,
                 "Dori N1 impact frame");
-        assertClose((44.0 + 19.0) * FRAME, normals.get(1).time,
+        assertClose((44.0 + 10.0 + 19.0) * FRAME,
+                normals.get(1).time,
                 "Dori N2 first impact frame");
-        assertClose((44.0 + 33.0) * FRAME, normals.get(2).time,
+        assertClose((44.0 + 10.0 + 33.0) * FRAME,
+                normals.get(2).time,
                 "Dori N2 second impact frame");
 
         simulator.switchCharacter(CharacterId.NOELLE);

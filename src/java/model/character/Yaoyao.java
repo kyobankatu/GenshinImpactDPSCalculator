@@ -25,6 +25,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -47,6 +48,19 @@ public final class Yaoyao extends Character implements
         SwitchAwareCharacter {
     private static final double FRAME = 1.0 / 60.0;
     private static final double EPSILON = 1e-9;
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile[][] NORMAL_HITLAG = {
+        { new HitlagProfile(0.06, 0.01, true, false, false) },
+        { new HitlagProfile(0.06, 0.01, true, false, false) },
+        { HitlagProfile.none(), new HitlagProfile(0.01, 0.01, true, false, false) },
+        { new HitlagProfile(0.09, 0.01, true, false, false) }
+    };
+    private static final HitlagProfile CHARGED_HITLAG =
+            new HitlagProfile(0.0, 0.01, true, true, false);
+    private static final HitlagProfile RADISH_HITLAG =
+            new HitlagProfile(0.0, 0.0, true, true, false);
+    private static final HitlagProfile BURST_INITIAL_HITLAG =
+            new HitlagProfile(0.02, 0.05, false, false, false);
     private static final int[][] NORMAL_HIT_FRAMES = {
         { 13 }, { 16 }, { 12, 31 }, { 21 }
     };
@@ -629,12 +643,30 @@ public final class Yaoyao extends Character implements
                 actionType);
         // Character-local gates preserve Yaoyao's non-generic time-only ICDs.
         action.setICD(ICDType.None, icdTag, gaugeUnits);
+        action.setHitlagProfile(hitlagProfile(hit));
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
         action.setStatSnapshot(hit.snapshot == null
                 ? captureLiveStats(simulator.getCurrentTime())
                 : hit.snapshot);
         simulator.performActionWithoutTimeAdvance(characterId, action);
+    }
+
+    private static HitlagProfile hitlagProfile(PendingHit hit) {
+        if (hit.kind == HitKind.NORMAL) {
+            return NORMAL_HITLAG[hit.index][hit.variant];
+        }
+        if (hit.kind == HitKind.CHARGED) {
+            return CHARGED_HITLAG;
+        }
+        if (hit.kind == HitKind.SKILL_RADISH
+                || hit.kind == HitKind.BURST_RADISH) {
+            return RADISH_HITLAG;
+        }
+        if (hit.kind == HitKind.BURST_INITIAL) {
+            return BURST_INITIAL_HITLAG;
+        }
+        return HitlagProfile.none();
     }
 
     private double normalValue(int step, int variant) {

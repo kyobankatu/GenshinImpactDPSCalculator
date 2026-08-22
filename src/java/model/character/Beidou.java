@@ -27,6 +27,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -39,7 +40,7 @@ import simulation.event.SimpleTimerEvent;
  * one-second trigger cooldown measured from the triggering direct hit.</p>
  *
  * <p>Hold and counter levels, defensive effects, A1/A4, C1/C4, Charged and
- * Plunging Attacks, multi-target C2 bounces, geometry, and hitlag are excluded.
+ * Plunging Attacks, multi-target C2 bounces, geometry, and hitlag extension are excluded.
  * C6 assumes the single stationary target remains within five metres.</p>
  */
 public final class Beidou extends Character
@@ -71,6 +72,22 @@ public final class Beidou extends Character
     private static final int[] NORMAL_DURATION_FRAMES = {
             31, 36, 54, 36, 96
     };
+
+    /**
+     * Per-hit hitlag from gcsim config YAML pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile[] NORMAL_HITLAG = {
+        new HitlagProfile(0.09, 0.01, true, false, false),
+        new HitlagProfile(0.12, 0.01, true, false, false),
+        new HitlagProfile(0.09, 0.01, true, false, false),
+        new HitlagProfile(0.09, 0.01, true, false, false),
+        new HitlagProfile(0.12, 0.01, true, false, false)
+    };
+    private static final HitlagProfile SKILL_HITLAG =
+            new HitlagProfile(0.09, 0.01, true, false, false);
+    private static final HitlagProfile BURST_INITIAL_HITLAG =
+            new HitlagProfile(0.10, 0.01, false, false, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -274,6 +291,7 @@ public final class Beidou extends Character
                 ICDType.Standard,
                 ICDTag.NormalAttack,
                 0.0);
+        normal.setHitlagProfile(NORMAL_HITLAG[step]);
         schedule(
                 simulator,
                 castTime + NORMAL_HITMARK_FRAMES[step] * FRAME,
@@ -421,6 +439,7 @@ public final class Beidou extends Character
                 ICDType.None,
                 ICDTag.ElementalSkill,
                 2.0);
+        skill.setHitlagProfile(SKILL_HITLAG);
         simulator.performActionWithoutTimeAdvance(characterId, skill);
         if (simulator.getEnemy() != null) {
             queueEvent(simulator, new PendingEvent(
@@ -445,6 +464,7 @@ public final class Beidou extends Character
                 ICDType.None,
                 ICDTag.ElementalBurst,
                 4.0);
+        initial.setHitlagProfile(BURST_INITIAL_HITLAG);
         simulator.performActionWithoutTimeAdvance(characterId, initial);
     }
 

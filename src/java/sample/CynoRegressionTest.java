@@ -97,6 +97,7 @@ public final class CynoRegressionTest {
             { 0.538417, 0.538417 }, { 1.394271 }
         };
         int[] durations = { 15, 22, 27, 58 };
+        int[] hitlagFrames = { 1, 8, 5, 6 };
         int recordIndex = 0;
         for (int step = 0; step < multipliers.length; step++) {
             double castTime = simulator.getCurrentTime();
@@ -115,7 +116,8 @@ public final class CynoRegressionTest {
                         record.action.getICDTag(),
                         "Cyno physical Normal ICD tag");
             }
-            assertClose(castTime + durations[step] * FRAME,
+            assertClose(castTime
+                            + (durations[step] + hitlagFrames[step]) * FRAME,
                     simulator.getCurrentTime(),
                     "Cyno physical Normal recovery");
         }

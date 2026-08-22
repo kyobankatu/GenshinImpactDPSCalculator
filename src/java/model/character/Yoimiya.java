@@ -26,6 +26,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -40,7 +41,7 @@ import simulation.event.SimpleTimerEvent;
  *
  * <p>
  * A1, A4, C1, C3, C4, and C5 are represented. Fully charged aimed geometry,
- * projectile misses, hitlag, actual-CRIT C2, random C6 arrows, enemy-defeat
+ * projectile misses, actual-CRIT C2, random C6 arrows, enemy-defeat
  * mark transfer and C1 ATK, player defeat, and multi-target behavior are
  * intentionally excluded. Pending character timer events are not reconstructed
  * by global simulator snapshots.
@@ -53,6 +54,9 @@ public class Yoimiya extends Character implements
     private static final double NIWABI_DURATION = 10.0;
     private static final double A1_DURATION = 3.0;
     private static final double A4_DURATION = 15.0;
+    /** Weak-point hitlag pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile AIMED_HEADSHOT_HITLAG =
+            new HitlagProfile(0.12, 0.01, false, true, true);
     private static final double BASE_MARK_DURATION = 10.0;
     private static final double C1_MARK_DURATION = 14.0;
     private static final double MARK_TRIGGER_COOLDOWN = 2.0;
@@ -331,6 +335,7 @@ public class Yoimiya extends Character implements
                 97.0 / 60.0,
                 ActionType.CHARGE);
         action.setICD(ICDType.None, ICDTag.ChargedAttack, 1.0);
+        action.setHitlagProfile(AIMED_HEADSHOT_HITLAG);
         sim.performAction(characterId, action);
     }
 

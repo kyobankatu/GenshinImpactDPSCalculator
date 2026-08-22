@@ -132,6 +132,19 @@ public final class GanyuRegressionTest {
         assertClose(3.6992,
                 frostflakes.get(1).action.getDamagePercent(), EPS,
                 "Ganyu Frostflake Bloom multiplier");
+        AttackAction frostflakeArrow = frostflakes.get(0).action;
+        assertClose(0.12,
+                frostflakeArrow.getHitlagProfile().getHaltTimeSeconds(),
+                EPS, "Ganyu Frostflake headshot hitlag halt time");
+        assertClose(0.01,
+                frostflakeArrow.getHitlagProfile().getFactor(), EPS,
+                "Ganyu Frostflake headshot hitlag factor");
+        assertTrue(!frostflakeArrow.getHitlagProfile().canDefenseHalt(),
+                "Ganyu Frostflake headshot excludes Defense Halt");
+        assertTrue(frostflakeArrow.getHitlagProfile().isDeployable(),
+                "Ganyu Frostflake headshot hitlag is deployable");
+        assertTrue(frostflakeArrow.getHitlagProfile().isHeadshotOnly(),
+                "Ganyu Frostflake hitlag requires a weak-point hit");
         for (ActionRecord record : frostflakes) {
             assertEquals(ICDType.None, record.action.getICDType(),
                     "Ganyu Frostflake has no ICD");

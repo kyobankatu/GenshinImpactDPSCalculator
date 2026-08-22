@@ -119,6 +119,18 @@ public final class LyneyRegressionTest {
                 "Lyney Prop Arrow impact timing");
         assertClose(2.937600, prop.action.getDamagePercent(),
                 "Lyney Prop Arrow multiplier");
+        assertClose(0.12,
+                prop.action.getHitlagProfile().getHaltTimeSeconds(),
+                "Lyney Prop Arrow headshot hitlag halt time");
+        assertClose(0.01,
+                prop.action.getHitlagProfile().getFactor(),
+                "Lyney Prop Arrow headshot hitlag factor");
+        assertTrue(!prop.action.getHitlagProfile().canDefenseHalt(),
+                "Lyney Prop Arrow headshot omits Defense Halt");
+        assertTrue(prop.action.getHitlagProfile().isDeployable(),
+                "Lyney Prop Arrow headshot hitlag is deployable");
+        assertTrue(prop.action.getHitlagProfile().isHeadshotOnly(),
+                "Lyney Prop Arrow metadata is headshot-only");
         assertEquals(1, lyney.getActiveHatCount(),
                 "Lyney C0 Prop Arrow creates one Hat");
         assertEquals(0, lyney.getPropSurplusStacks(),

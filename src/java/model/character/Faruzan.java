@@ -28,6 +28,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -73,6 +74,13 @@ public final class Faruzan extends Character implements
     private static final int[] SHRED_FRAMES_C2 = {
         180, 300, 420, 540, 660, 780, 900, 1020, 1140
     };
+
+    /**
+     * Aimed-shot hitlag from gcsim config YAML pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile AIMED_HEADSHOT_HITLAG =
+            new HitlagProfile(0.12, 0.01, false, true, true);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -486,6 +494,10 @@ public final class Faruzan extends Character implements
                 break;
             default:
                 throw new IllegalStateException("Unknown Faruzan hit kind");
+        }
+        if (hit.kind == HitKind.CHARGED
+                || hit.kind == HitKind.HURRICANE) {
+            action.setHitlagProfile(AIMED_HEADSHOT_HITLAG);
         }
         action.setStatSnapshot(hit.snapshot);
         simulator.performActionWithoutTimeAdvance(characterId, action);

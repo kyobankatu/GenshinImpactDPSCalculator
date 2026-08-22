@@ -21,6 +21,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -54,6 +55,14 @@ public class Ningguang extends Character implements
     private static final double C2_RESET_COOLDOWN = 6.0;
     private static final int MAX_STAR_JADES = 3;
     private static final int C6_STAR_JADES = 7;
+
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile STAR_JADE_HITLAG =
+            new HitlagProfile(0.0, 0.0, true, true, false);
+    private static final HitlagProfile SKILL_HITLAG =
+            new HitlagProfile(0.05, 0.05, true, true, false);
+    private static final HitlagProfile BURST_GEM_HITLAG =
+            new HitlagProfile(0.0, 0.0, true, true, false);
 
     private static final int[] NORMAL_RELEASE_FRAMES = { 29, 19, 27 };
     private static final int[] NORMAL_ACTION_FRAMES = { 61, 56, 66 };
@@ -257,6 +266,7 @@ public class Ningguang extends Character implements
                     ICDTag.ChargedAttack,
                     2.0,
                     false);
+            starJade.setHitlagProfile(STAR_JADE_HITLAG);
             schedule(sim,
                     castTime + jadeFrame * FRAME + PROJECTILE_TRAVEL,
                     activeSim -> activeSim.performActionWithoutTimeAdvance(
@@ -299,6 +309,7 @@ public class Ningguang extends Character implements
                 ICDTag.ElementalSkill,
                 1.0,
                 true);
+        screen.setHitlagProfile(SKILL_HITLAG);
         schedule(sim, castTime + 17.0 * FRAME, activeSim -> {
             captureSnapshot(
                     activeSim.getCurrentTime(),
@@ -348,6 +359,7 @@ public class Ningguang extends Character implements
                     2.0,
                     true);
             burstGem.setStatSnapshot(burstSnapshot);
+            burstGem.setHitlagProfile(BURST_GEM_HITLAG);
             schedule(sim,
                     castTime + BURST_HIT_FRAMES[gem] * FRAME,
                     activeSim -> activeSim.performActionWithoutTimeAdvance(
@@ -365,6 +377,7 @@ public class Ningguang extends Character implements
                         2.0,
                         true);
                 screenGem.setStatSnapshot(consumedScreenSnapshot);
+                screenGem.setHitlagProfile(BURST_GEM_HITLAG);
                 schedule(sim, castTime + 154.0 * FRAME,
                         activeSim -> activeSim.performActionWithoutTimeAdvance(
                                 characterId, screenGem));

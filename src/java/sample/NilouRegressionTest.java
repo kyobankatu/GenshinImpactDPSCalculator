@@ -142,7 +142,7 @@ public final class NilouRegressionTest {
         }
         assertClose(12.0 * FRAME, normals.get(0).time,
                 "Nilou N1 hit frame");
-        assertClose((24.0 + 9.0) * FRAME, normals.get(1).time,
+        assertClose((24.0 + 6.0 + 9.0) * FRAME, normals.get(1).time,
                 "Nilou N2 hit frame");
 
         records.clear();

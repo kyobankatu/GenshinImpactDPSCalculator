@@ -29,6 +29,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -41,7 +42,7 @@ import simulation.event.SimpleTimerEvent;
  * {@code ef41805d}. The only enemy is selected deterministically, so C4 adapts
  * the Burst target gate without introducing geometry or random targeting.</p>
  *
- * <p>Healing and player HP, movement and geometry, hitlag and stamina, low
+ * <p>Healing and player HP, movement and geometry, hitlag extension and stamina, low
  * Plunge, Arkhe/Pneuma, and unsupported target state are excluded instead of
  * being approximated. Lumidouce damage is live-stat damage; each queued impact
  * still owns the exact stats captured when that attack was emitted.</p>
@@ -58,6 +59,17 @@ public final class Emilie extends Character implements
     private static final double[] NORMAL_T9 = {
         0.892163, 0.824823, 1.089473, 1.379798
     };
+
+    /**
+     * Basic-attack hitlag from gcsim pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_HITLAG =
+            new HitlagProfile(0.06, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_FINAL_HITLAG =
+            new HitlagProfile(0.09, 0.01, true, false, false);
+    private static final HitlagProfile CHARGED_HITLAG =
+            new HitlagProfile(0.09, 0.01, true, false, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -865,6 +877,12 @@ public final class Emilie extends Character implements
         action.setICD(icdType, icdTag, gauge);
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
+        if (hit.kind == HitKind.NORMAL) {
+            action.setHitlagProfile(hit.index == 3
+                    ? NORMAL_FINAL_HITLAG : NORMAL_HITLAG);
+        } else if (hit.kind == HitKind.CHARGED) {
+            action.setHitlagProfile(CHARGED_HITLAG);
+        }
         StatsContainer snapshot = hit.snapshot == null
                 ? captureLiveStats(simulator.getCurrentTime())
                 : hit.snapshot.merge(null);

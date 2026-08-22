@@ -86,18 +86,32 @@ public final class SayuRegressionTest {
         assertEquals(5, normals.size(), "Sayu Normal hit count");
         assertClose(23.0 * FRAME, normals.get(0).time,
                 "Sayu N1 hitmark");
-        assertClose(65.0 * FRAME, normals.get(1).time,
+        assertClose((65.0 + 10.0) * FRAME, normals.get(1).time,
                 "Sayu N2 hitmark");
-        assertClose(98.0 * FRAME, normals.get(2).time,
+        assertClose((98.0 + 20.0) * FRAME, normals.get(2).time,
                 "Sayu N3 first hitmark");
-        assertClose(110.0 * FRAME, normals.get(3).time,
+        assertClose((110.0 + 20.0) * FRAME, normals.get(3).time,
                 "Sayu N3 second hitmark");
-        assertClose(171.0 * FRAME, normals.get(4).time,
+        assertClose((171.0 + 29.0) * FRAME, normals.get(4).time,
                 "Sayu N4 hitmark");
         assertClose(1.3272, normals.get(0).action.getDamagePercent(),
                 "Sayu N1 Talent 9 multiplier");
         assertClose(0.7979, normals.get(2).action.getDamagePercent(),
                 "Sayu N3 per-hit multiplier");
+        assertClose(0.0,
+                normals.get(2).action.getHitlagProfile()
+                        .getHaltTimeSeconds(),
+                "Sayu N3 first hit has no hitlag");
+        assertClose(0.08,
+                normals.get(3).action.getHitlagProfile()
+                        .getHaltTimeSeconds(),
+                "Sayu N3 second hit halt time");
+        assertClose(0.01,
+                normals.get(3).action.getHitlagProfile().getFactor(),
+                "Sayu N3 second hit factor");
+        assertTrue(normals.get(3).action.getHitlagProfile()
+                        .canDefenseHalt(),
+                "Sayu N3 second hit permits Defense Halt");
 
         double plungeStart = simulator.getCurrentTime();
         perform(simulator, CharacterActionKey.PLUNGE);
@@ -475,7 +489,8 @@ public final class SayuRegressionTest {
         CombatSimulator cooldownSimulator = simulatorWith(cooldown);
         perform(cooldownSimulator, CharacterActionKey.SKILL);
         perform(cooldownSimulator, CharacterActionKey.SKILL);
-        assertClose(418.0 * FRAME, cooldownSimulator.getCurrentTime(),
+        assertClose((418.0 + 2.0) * FRAME,
+                cooldownSimulator.getCurrentTime(),
                 "Sayu serializes Press Skill at cooldown boundary");
 
         Sayu reusable = new Sayu(null, null, 0);

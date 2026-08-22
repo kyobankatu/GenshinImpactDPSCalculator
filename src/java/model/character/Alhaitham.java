@@ -28,6 +28,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -39,7 +40,7 @@ import simulation.event.SimpleTimerEvent;
  * pinned gcsim {@code ef41805d} and maintained KQM evidence.</p>
  *
  * <p>Projection positioning, multi-target selection, hold-Skill movement,
- * hitlag, stamina, interruption, and plunge pathing are excluded.</p>
+ * hitlag extension, stamina, interruption, and plunge pathing are excluded.</p>
  */
 public final class Alhaitham extends Character implements
         SimulatorInitializedCharacterEffect,
@@ -63,6 +64,15 @@ public final class Alhaitham extends Character implements
     private static final int[][] PROJECTION_HIT_FRAMES = {
         { 39 }, { 28, 37 }, { 32, 41, 51 }
     };
+
+    /**
+     * Per-hit hitlag from gcsim config YAML pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_HITLAG =
+            new HitlagProfile(0.02, 0.01, true, false, false);
+    private static final HitlagProfile SKILL_HITLAG =
+            new HitlagProfile(0.04, 0.01, true, false, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -470,6 +480,10 @@ public final class Alhaitham extends Character implements
                 ICDTag.NormalAttack,
                 infused ? 1.0 : 0.0);
         action.setStatSnapshot(captureLiveStats(simulator.getCurrentTime()));
+        if (hit.index == 0 || hit.index == 1 || hit.index == 4
+                || (hit.index == 2 && hit.subIndex == 1)) {
+            action.setHitlagProfile(NORMAL_HITLAG);
+        }
         simulator.performActionWithoutTimeAdvance(characterId, action);
     }
 
@@ -529,6 +543,7 @@ public final class Alhaitham extends Character implements
                 ICDTag.ElementalSkill,
                 1.0);
         action.setStatSnapshot(snapshot);
+        action.setHitlagProfile(SKILL_HITLAG);
         simulator.performActionWithoutTimeAdvance(characterId, action);
     }
 

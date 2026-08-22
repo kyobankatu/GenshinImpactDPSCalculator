@@ -102,7 +102,13 @@ public final class DurinRegressionTest {
         double[] multipliers = {
             0.838696, 0.753344, 0.535762, 0.535762, 1.307213
         };
-        double[] frames = { 11.0, 38.0, 73.0, 96.0, 152.0 };
+        double[] frames = {
+            11.0,
+            38.0 + 2.0,
+            73.0 + 4.0,
+            96.0 + 4.0,
+            152.0 + 6.0
+        };
         for (int step = 0; step < 4; step++) {
             perform(simulator, CharacterId.DURIN,
                     CharacterActionKey.NORMAL);

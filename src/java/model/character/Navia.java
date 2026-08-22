@@ -29,6 +29,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -44,7 +45,7 @@ import simulation.event.SimpleTimerEvent;
  * <p>Standard Crystallize grants a stack only through the explicit shard
  * pickup hook because the runtime has no typed pickup event. Hold aiming,
  * shard suction and pickup geometry, shields, player HP and healing,
- * movement, multi-target behavior, stamina, hitlag, and unsupported enemy
+ * movement, multi-target behavior, stamina, and unsupported enemy
  * state branches are excluded rather than approximated.</p>
  */
 public final class Navia extends Character implements
@@ -63,6 +64,17 @@ public final class Navia extends Character implements
         { 1.589306 },
         { 0.640927, 0.640927, 0.640927 },
         { 2.451417 }
+    };
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile[][] NORMAL_HITLAG = {
+        { new HitlagProfile(0.06, 0.01, true, false, false) },
+        { new HitlagProfile(0.06, 0.01, true, false, false) },
+        {
+            new HitlagProfile(0.01, 0.01, false, true, false),
+            new HitlagProfile(0.01, 0.01, false, true, false),
+            new HitlagProfile(0.01, 0.01, false, true, false)
+        },
+        { new HitlagProfile(0.06, 0.01, true, false, false) }
     };
     private static final double[] SHARDSHOT_HIT_FACTORS = {
         1.2000000029802322,
@@ -706,6 +718,10 @@ public final class Navia extends Character implements
                 0.0,
                 actionType);
         action.setICD(icdType, icdTag, gaugeUnits);
+        if (event.kind == EventKind.NORMAL_HIT) {
+            action.setHitlagProfile(
+                    NORMAL_HITLAG[event.index][event.subIndex]);
+        }
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
         action.setShatterTrigger(true);

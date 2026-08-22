@@ -26,6 +26,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -39,7 +40,7 @@ import simulation.event.SimpleTimerEvent;
  *
  * <p>Shield creation, absorption, and refresh, A1, shield-hit C1 cooldown
  * reduction, shield-gated C6, geometry, multi-target behavior, stamina, and
- * hitlag are intentionally excluded. No offensive approximation is created
+ * complete hitlag coverage is intentionally excluded. No offensive approximation is created
  * for those defensive branches.</p>
  */
 public final class Thoma extends Character implements
@@ -48,6 +49,15 @@ public final class Thoma extends Character implements
         SwitchAwareCharacter {
     private static final double FRAME = 1.0 / 60.0;
     private static final double EPSILON = 1e-9;
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile NORMAL_ONE_HITLAG =
+            new HitlagProfile(0.06, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_TWO_HITLAG =
+            new HitlagProfile(0.09, 0.01, true, false, false);
+    private static final HitlagProfile CHARGED_HITLAG =
+            new HitlagProfile(0.0, 0.01, true, true, false);
+    private static final HitlagProfile SKILL_HITLAG =
+            new HitlagProfile(0.06, 0.01, true, false, false);
     private static final double PARTICLE_TRAVEL = 100.0 * FRAME;
     private static final int[][] NORMAL_HIT_FRAMES = {
         { 13 }, { 18 }, { 10, 23 }, { 20 }
@@ -518,12 +528,29 @@ public final class Thoma extends Character implements
                         actionType,
                         hit.flatDamage);
         action.setICD(icdType, icdTag, gaugeUnits);
+        action.setHitlagProfile(hitlagProfile(hit));
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
         action.setStatSnapshot(hit.snapshot == null
                 ? captureLiveStats(simulator.getCurrentTime())
                 : hit.snapshot);
         simulator.performActionWithoutTimeAdvance(characterId, action);
+    }
+
+    private static HitlagProfile hitlagProfile(PendingHit hit) {
+        if (hit.kind == HitKind.CHARGED) {
+            return CHARGED_HITLAG;
+        }
+        if (hit.kind == HitKind.SKILL) {
+            return SKILL_HITLAG;
+        }
+        if (hit.kind == HitKind.NORMAL && hit.index == 0) {
+            return NORMAL_ONE_HITLAG;
+        }
+        if (hit.kind == HitKind.NORMAL && hit.index == 1) {
+            return NORMAL_TWO_HITLAG;
+        }
+        return HitlagProfile.none();
     }
 
     private double normalValue(int step, int variant) {

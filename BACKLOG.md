@@ -4487,7 +4487,7 @@ experiment record.
 
 ### B-211 — Confirmed accuracy decisions and gcsim hitlag
 
-- **Status:** in-progress
+- **Status:** done
 - **Source:** explicit 2026-08-22 user decisions and gcsim main commit
   `3647a07a7cc3004bc1e79d9bb5f7444de20dceaa`.
 - **Symptom:** Ineffa C2 omitted Punishment Edict because its automatic delay was
@@ -4509,3 +4509,17 @@ experiment record.
   excluded. Phase 3 maps and regresses the pinned source-ready actions used by
   all three representative parties; their accepted totals are `RaidenParty`
   1,200,940, `FlinsParty` 25,904,560, and `FlinsParty2` 20,592,361.
+  Phase 4 audits 80 additional character implementations and adds every
+  unambiguous local counterpart from the pinned source. The full 80-character
+  regression invocation passes. Damage observers now capture already-applied
+  hitlag, and Varka's two source-marked C6 windows extend through owner hitlag.
+- **Recorded boundaries:** no value is inferred where pinned gcsim disagrees
+  internally or the local simulator has no equivalent action. The quarantined
+  branches include Ineffa/Arlecchino/Escoffier Charged and Clorinde Burst unit
+  conflicts; Varesa Fiery Passion, Mavuika Flamestrider/N3, Noelle infused
+  Charged, Razor spinning Charged, and Sayu rolling-Skill decomposition;
+  Ganyu Bloom's source-profile-free hit; Mualani Surfing Hit and other absent
+  local actions; and source-marked hitlag extension for modifier classes not
+  represented by a character-local callback. Executable Go overrides are used
+  where unambiguous; explicit config-only profiles are used only when no
+  contradictory executable assignment exists.

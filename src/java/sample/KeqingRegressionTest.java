@@ -85,6 +85,7 @@ public final class KeqingRegressionTest {
         };
         int[][] frames = { { 10 }, { 10 }, { 14 }, { 11, 21 }, { 22 } };
         int[] durations = { 19, 24, 36, 58, 66 };
+        int[] hitlagFrames = { 6, 6, 8, 6, 0 };
         double castTime = 0.0;
         int recordIndex = 0;
         for (int step = 0; step < multipliers.length; step++) {
@@ -107,7 +108,7 @@ public final class KeqingRegressionTest {
                         record.time, EPS,
                         "Keqing Normal hitmark");
             }
-            castTime += durations[step] * FRAME;
+            castTime += (durations[step] + hitlagFrames[step]) * FRAME;
         }
         assertClose(castTime, sim.getCurrentTime(), EPS,
                 "Keqing full Normal duration");

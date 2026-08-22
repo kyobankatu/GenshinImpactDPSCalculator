@@ -29,6 +29,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -42,7 +43,7 @@ import simulation.event.SimpleTimerEvent;
  * that follows the active character.</p>
  *
  * <p>Movement, path and aiming geometry, multi-target selection, actual enemy
- * HP, hitlag, ordinary aimed shots, Breakthrough acquisition, healing, and
+ * HP, ordinary aimed shots, Breakthrough acquisition, healing, and
  * defensive behavior are intentionally excluded.</p>
  */
 public final class Yelan extends Character implements
@@ -51,6 +52,9 @@ public final class Yelan extends Character implements
         SwitchAwareCharacter {
     private static final double FRAME = 1.0 / 60.0;
     private static final double EPSILON = 1e-9;
+    /** Burst hitlag pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile BURST_INITIAL_HITLAG =
+            new HitlagProfile(0.05, 0.05, false, true, false);
     private static final double PARTICLE_TRAVEL = 100.0 * FRAME;
     private static final int[] NORMAL_DURATIONS = { 15, 21, 38, 67 };
     private static final int[][] NORMAL_HITMARKS = {
@@ -637,6 +641,7 @@ public final class Yelan extends Character implements
                 ICDTag.None,
                 2.0,
                 false);
+        initial.setHitlagProfile(BURST_INITIAL_HITLAG);
         simulator.performActionWithoutTimeAdvance(characterId, initial);
     }
 

@@ -29,6 +29,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -43,8 +44,9 @@ import simulation.event.SimpleTimerEvent;
  * through explicit externally-confirmed methods rather than global hooks.</p>
  *
  * <p>Player HP, healing, damage intake, shields, defense, movement, terrain,
- * geometry, random or multi-target selection, hitlag, stamina, low Plunge,
- * exploration, and automatic team Nightsoul plumbing are excluded. The
+ * geometry, random or multi-target selection, complete hitlag coverage,
+ * stamina, low Plunge, exploration, and automatic team Nightsoul plumbing
+ * are excluded. The
  * Flamestrider Charged action is the source-backed fixed-target minimum cycle:
  * one startup cyclic hit followed by the earliest final hit.</p>
  */
@@ -73,6 +75,16 @@ public final class Mavuika extends Character implements
     private static final double[] BIKE_C5 = {
         1.291788, 1.333925, 1.578772, 1.572409, 2.052869
     };
+
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile[] NORMAL_HITLAG = {
+        new HitlagProfile(0.09, 0.01, true, false, false),
+        new HitlagProfile(0.05, 0.01, true, false, false),
+        HitlagProfile.none(),
+        new HitlagProfile(0.10, 0.01, true, false, false)
+    };
+    private static final HitlagProfile CHARGED_HITLAG =
+            new HitlagProfile(0.15, 0.01, true, false, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -480,7 +492,7 @@ public final class Mavuika extends Character implements
         return false;
     }
 
-    /** Reports that hitlag and stamina are excluded. */
+    /** Reports that complete hitlag coverage and stamina are excluded. */
     public boolean isHitlagStaminaRepresented() {
         return false;
     }
@@ -908,7 +920,8 @@ public final class Mavuika extends Character implements
                         ICDType.Standard,
                         ICDTag.NormalAttack,
                         0.0,
-                        FlatBonusKind.NONE);
+                        FlatBonusKind.NONE,
+                        NORMAL_HITLAG[hit.index]);
                 acceptNormalHit(simulator.getCurrentTime());
                 break;
             case CHARGED:
@@ -922,7 +935,8 @@ public final class Mavuika extends Character implements
                         ICDType.Standard,
                         ICDTag.NormalAttack,
                         0.0,
-                        FlatBonusKind.NONE);
+                        FlatBonusKind.NONE,
+                        CHARGED_HITLAG);
                 break;
             case HIGH_PLUNGE:
                 performHit(
@@ -1067,6 +1081,32 @@ public final class Mavuika extends Character implements
             ICDTag icdTag,
             double gauge,
             FlatBonusKind flatBonusKind) {
+        performHit(
+                simulator,
+                displayName,
+                multiplier,
+                hitElement,
+                bonusStat,
+                actionType,
+                icdType,
+                icdTag,
+                gauge,
+                flatBonusKind,
+                HitlagProfile.none());
+    }
+
+    private void performHit(
+            CombatSimulator simulator,
+            String displayName,
+            double multiplier,
+            Element hitElement,
+            StatType bonusStat,
+            ActionType actionType,
+            ICDType icdType,
+            ICDTag icdTag,
+            double gauge,
+            FlatBonusKind flatBonusKind,
+            HitlagProfile hitlagProfile) {
         AttackAction action = new AttackAction(
                 displayName,
                 multiplier,
@@ -1076,6 +1116,7 @@ public final class Mavuika extends Character implements
                 0.0,
                 actionType);
         action.setICD(icdType, icdTag, gauge);
+        action.setHitlagProfile(hitlagProfile);
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
         double currentTime = simulator.getCurrentTime();

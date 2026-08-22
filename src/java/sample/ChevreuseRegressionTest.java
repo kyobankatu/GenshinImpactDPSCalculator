@@ -61,9 +61,9 @@ public final class ChevreuseRegressionTest {
         assertEquals(CharacterRegion.FONTAINE,
                 CharacterId.CHEVREUSE.getRegion(),
                 "Chevreuse region");
-        assertEquals(CharacterId.UNKNOWN,
+        assertEquals(CharacterId.THOMA,
                 CharacterId.fromNumericId(58),
-                "Chevreuse next identity remains unassigned");
+                "Chevreuse next numeric identity");
         assertEquals(CharacterId.UNKNOWN,
                 CharacterId.fromName("chevreuse"),
                 "Chevreuse lookup remains case-sensitive");
@@ -128,9 +128,11 @@ public final class ChevreuseRegressionTest {
         }
         assertClose(11.0 * FRAME, normals.get(0).time,
                 "Chevreuse N1 impact frame");
-        assertClose((33.0 + 12.0) * FRAME, normals.get(1).time,
+        assertClose((33.0 + 8.0 + 12.0) * FRAME,
+                normals.get(1).time,
                 "Chevreuse N2 impact frame");
-        assertClose((66.0 + 15.0) * FRAME, normals.get(2).time,
+        assertClose((66.0 + 16.0 + 15.0) * FRAME,
+                normals.get(2).time,
                 "Chevreuse N3 first impact frame");
 
         simulator.switchCharacter(CharacterId.NOELLE);

@@ -24,6 +24,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -39,7 +40,7 @@ import simulation.event.SimpleTimerEvent;
  *
  * <p>The old base-kit A4 and representable C1-C5 effects are included. Enemy
  * HP-dependent A1, C6 shield checks, Hexerei and Silver Isotoma additions,
- * placement, construct durability, multi-target geometry, and hitlag are
+ * placement, construct durability, multi-target geometry, and hitlag extension are
  * intentionally excluded.</p>
  */
 public class Albedo extends Character implements
@@ -53,6 +54,18 @@ public class Albedo extends Character implements
     private static final double FATAL_RECKONING_DURATION = 30.0;
     private static final int MAX_FATAL_RECKONING_STACKS = 4;
     private static final double EPSILON = 1e-9;
+
+    /**
+     * Normal-attack hitlag from gcsim config YAML pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile[] NORMAL_HITLAG = {
+        new HitlagProfile(0.03, 0.01, true, false, false),
+        new HitlagProfile(0.03, 0.01, true, false, false),
+        new HitlagProfile(0.06, 0.01, true, false, false),
+        new HitlagProfile(0.09, 0.01, true, false, false),
+        new HitlagProfile(0.12, 0.01, true, false, false)
+    };
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -216,6 +229,7 @@ public class Albedo extends Character implements
                 durations[normalAttackStep],
                 ActionType.NORMAL);
         action.setICD(ICDType.Standard, ICDTag.NormalAttack, 0.0);
+        action.setHitlagProfile(NORMAL_HITLAG[normalAttackStep]);
         sim.performAction(characterId, action);
         normalAttackStep = (normalAttackStep + 1) % multipliers.length;
     }

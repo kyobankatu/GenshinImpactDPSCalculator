@@ -26,6 +26,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -39,7 +40,7 @@ import simulation.event.SimpleTimerEvent;
  *
  * <p>Jade Shield, shield resistance reduction, A1, C1's second geometric
  * construct, C2 shield creation, C4 area/petrification, C6 healing, construct
- * resonance geometry, collision, and hitlag are excluded without
+ * resonance geometry, collision, and complete hitlag coverage are excluded without
  * approximation.</p>
  */
 public final class Zhongli extends Character implements
@@ -48,6 +49,11 @@ public final class Zhongli extends Character implements
         SwitchAwareCharacter {
     private static final double FRAME = 1.0 / 60.0;
     private static final double EPSILON = 1e-9;
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile NORMAL_HITLAG =
+            new HitlagProfile(0.02, 0.01, true, false, false);
+    private static final HitlagProfile CHARGED_HITLAG =
+            new HitlagProfile(0.06, 0.01, true, true, false);
     private static final int[][] NORMAL_HIT_FRAMES = {
         { 11 }, { 9 }, { 8 }, { 16 }, { 11, 18, 23, 29 }, { 29 }
     };
@@ -580,6 +586,11 @@ public final class Zhongli extends Character implements
                         actionType,
                         hit.flatDamage);
         action.setICD(icdType, icdTag, gaugeUnits);
+        if (hit.kind == HitKind.CHARGED) {
+            action.setHitlagProfile(CHARGED_HITLAG);
+        } else if (hit.kind == HitKind.NORMAL && hit.index != 4) {
+            action.setHitlagProfile(NORMAL_HITLAG);
+        }
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
         action.setStatSnapshot(hit.snapshot == null

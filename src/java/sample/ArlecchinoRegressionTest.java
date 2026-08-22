@@ -128,6 +128,7 @@ public final class ArlecchinoRegressionTest {
         };
         int[] firstHitFrames = { 11, 16, 17, 24, 21, 44 };
         int[] durations = { 24, 31, 39, 55, 43, 59 };
+        int[] hitlagFrames = { 5, 5, 5, 4, 0, 5 };
         for (int step = 0; step < multipliers.length; step++) {
             double castTime = simulator.getCurrentTime();
             perform(simulator, CharacterActionKey.NORMAL);
@@ -139,7 +140,8 @@ public final class ArlecchinoRegressionTest {
             assertClose(castTime + firstHitFrames[step] * FRAME,
                     hits.get(0).time,
                     "Arlecchino N" + (step + 1) + " hitmark");
-            assertClose(castTime + durations[step] * FRAME,
+            assertClose(castTime
+                            + (durations[step] + hitlagFrames[step]) * FRAME,
                     simulator.getCurrentTime(),
                     "Arlecchino N" + (step + 1) + " recovery");
             assertClose(multipliers[step],
@@ -211,11 +213,12 @@ public final class ArlecchinoRegressionTest {
         List<ActionRecord> records = captureActions(simulator);
         List<ParticleRecord> particles = capturePyroParticles(simulator);
         perform(simulator, CharacterActionKey.SKILL);
-        assertClose(77.0 * FRAME, simulator.getCurrentTime(),
+        assertClose((77.0 + 4.0) * FRAME,
+                simulator.getCurrentTime(),
                 "All Is Ash fixed recovery");
         assertClose(16.0 * FRAME, arlecchino.getLastSkillTime(),
                 "All Is Ash cooldown starts at frame sixteen");
-        assertClose(30.0 - 61.0 * FRAME,
+        assertClose(30.0 - (61.0 + 4.0) * FRAME,
                 arlecchino.getSkillCDRemaining(
                         simulator.getCurrentTime()),
                 "All Is Ash retains thirty-second cooldown");
@@ -554,7 +557,7 @@ public final class ArlecchinoRegressionTest {
                 "Burst collection invalidates the first Directive");
         perform(simulator, CharacterActionKey.SKILL);
         double secondApplication = 38.0 * FRAME
-                + 77.0 * FRAME + 146.0 * FRAME;
+                + (77.0 + 4.0) * FRAME + 146.0 * FRAME;
         advanceTo(simulator, secondApplication + 5.0 - EPSILON);
         assertEquals(0, named(records, "Blood-Debt Directive").size(),
                 "Collected generation cannot emit stale Directive ticks");

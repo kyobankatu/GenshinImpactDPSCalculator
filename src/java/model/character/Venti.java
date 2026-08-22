@@ -25,6 +25,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 import simulation.event.TimerEvent;
 
@@ -42,6 +43,9 @@ import simulation.event.TimerEvent;
 public class Venti extends Character
         implements SimulatorInitializedCharacterEffect {
     private static final double FRAME = 1.0 / 60.0;
+    /** Weak-point hitlag pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile AIMED_HEADSHOT_HITLAG =
+            new HitlagProfile(0.12, 0.01, false, true, true);
     private static final double SKILL_COOLDOWN = 6.0;
     private static final double BURST_COOLDOWN = 15.0;
     private static final double BURST_TICK_INTERVAL = 24.0 * FRAME;
@@ -245,6 +249,7 @@ public class Venti extends Character
                 94.0 * FRAME,
                 ActionType.CHARGE);
         charged.setICD(ICDType.Standard, ICDTag.ChargedAttack, 1.0);
+        charged.setHitlagProfile(AIMED_HEADSHOT_HITLAG);
         sim.performAction(characterId, charged);
     }
 

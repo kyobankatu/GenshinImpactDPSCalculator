@@ -109,6 +109,7 @@ public final class LanYanRegressionTest {
             { 11 }, { 17, 37 }, { 15, 21 }, { 40 }
         };
         int[] durations = { 30, 46, 53, 63 };
+        int[] hitlagFrames = { 6, 10, 2, 8 };
         double[][] multipliers = {
             { 0.70448 }, { 0.347004, 0.424116 },
             { 0.45764, 0.45764 }, { 1.09752 }
@@ -134,7 +135,8 @@ public final class LanYanRegressionTest {
                 assertTrue(record.action.hasStatSnapshot(),
                         "Lan Yan Normal owns its cast snapshot");
             }
-            assertClose(castTime + durations[step] * FRAME,
+            assertClose(castTime
+                            + (durations[step] + hitlagFrames[step]) * FRAME,
                     normalSimulator.getCurrentTime(),
                     "Lan Yan Normal recovery");
         }
@@ -204,7 +206,7 @@ public final class LanYanRegressionTest {
                 "Lan Yan Feathermoon window active at cancel");
 
         perform(simulator, CharacterActionKey.NORMAL);
-        assertClose(74.0 * FRAME, simulator.getCurrentTime(),
+        assertClose((74.0 + 4.0) * FRAME, simulator.getCurrentTime(),
                 "Lan Yan Ring launch recovery");
         assertEquals(1, records.size(),
                 "Lan Yan first Ring lands during launch recovery");
@@ -411,13 +413,13 @@ public final class LanYanRegressionTest {
         List<ParticleRecord> particles = captureAnemoParticles(simulator);
         performSkill(simulator);
         perform(simulator, CharacterActionKey.NORMAL);
-        assertClose(74.0 * FRAME, simulator.getCurrentTime(),
+        assertClose((74.0 + 4.0) * FRAME, simulator.getCurrentTime(),
                 "Lan Yan first Skill sequence ends at frame 74");
 
         performSkill(simulator);
-        assertClose(107.0 * FRAME, simulator.getCurrentTime(),
+        assertClose((107.0 + 8.0) * FRAME, simulator.getCurrentTime(),
                 "Lan Yan C6 consumes the second Skill charge immediately");
-        assertClose(78.0 * FRAME, c6.getLastSkillTime(),
+        assertClose((78.0 + 4.0) * FRAME, c6.getLastSkillTime(),
                 "Lan Yan second Skill cooldown starts four frames later");
         performSkill(simulator);
         advanceTo(simulator, 196.0 * FRAME);

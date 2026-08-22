@@ -27,6 +27,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -42,7 +43,7 @@ import simulation.event.SimpleTimerEvent;
  * attack element. The field therefore grants eligible teammates' Normal Attack
  * speed and C2 cooldown reduction, while exact Cryo infusion is applied to
  * Chongyun's own eligible attacks. Geometry, displacement, healing, stamina,
- * hitlag, and C6's target-versus-player HP comparison are intentionally out of
+ * hitlag extension, and C6's target-versus-player HP comparison are intentionally out of
  * scope.
  */
 public class Chongyun extends Character implements
@@ -56,6 +57,21 @@ public class Chongyun extends Character implements
     private static final double FIELD_DURATION = 10.0;
     private static final double A4_DELAY = 655.0 * FRAME;
     private static final double A4_RES_DURATION = 8.0;
+
+    /**
+     * Per-hit hitlag from gcsim config YAML pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile[] NORMAL_HITLAG = {
+        new HitlagProfile(0.10, 0.01, true, false, false),
+        new HitlagProfile(0.09, 0.01, true, false, false),
+        new HitlagProfile(0.12, 0.01, true, false, false),
+        new HitlagProfile(0.12, 0.01, true, false, false)
+    };
+    private static final HitlagProfile CHARGED_SPIN_HITLAG =
+            new HitlagProfile(0.03, 0.01, true, true, false);
+    private static final HitlagProfile SKILL_HITLAG =
+            new HitlagProfile(0.09, 0.01, false, false, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -277,6 +293,7 @@ public class Chongyun extends Character implements
                     normal.setStatSnapshot(captureActionStats(
                             activeSim,
                             activeSim.getCurrentTime()));
+                    normal.setHitlagProfile(NORMAL_HITLAG[step]);
                     activeSim.performActionWithoutTimeAdvance(
                             characterId, normal);
                     if (step == 3 && constellation >= 1) {
@@ -323,6 +340,7 @@ public class Chongyun extends Character implements
                 attackElement == Element.CRYO ? 1.0 : 0.0,
                 true);
         charged.setAnimationDuration(23.0 * FRAME);
+        charged.setHitlagProfile(CHARGED_SPIN_HITLAG);
         sim.performAction(characterId, charged);
     }
 
@@ -383,6 +401,7 @@ public class Chongyun extends Character implements
                 2.0,
                 true);
         skill.setStatSnapshot(a4Snapshot);
+        skill.setHitlagProfile(SKILL_HITLAG);
 
         double fieldStart = castTime + 36.0 * FRAME;
         schedule(sim, castTime + 34.0 * FRAME, activeSim ->

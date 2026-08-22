@@ -29,6 +29,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -60,6 +61,15 @@ public final class Chevreuse extends Character implements
         { 0.976108 }, { 0.905940 }, { 0.507895, 0.596225 },
         { 1.419456 }
     };
+
+    /**
+     * Normal-attack hitlag from gcsim config YAML pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_SHORT_HITLAG =
+            new HitlagProfile(0.06, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_FINAL_HITLAG =
+            new HitlagProfile(0.10, 0.01, true, false, false);
 
     private final DoubleSupplier c2Random;
     private CombatSimulator initializedSimulator;
@@ -584,6 +594,14 @@ public final class Chevreuse extends Character implements
         action.setICD(icdType, icdTag, gauge);
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
+        if (hit.kind == HitKind.NORMAL) {
+            if (hit.index < 2
+                    || (hit.index == 2 && hit.variant == 1)) {
+                action.setHitlagProfile(NORMAL_SHORT_HITLAG);
+            } else if (hit.index == 3) {
+                action.setHitlagProfile(NORMAL_FINAL_HITLAG);
+            }
+        }
         action.setStatSnapshot(hit.snapshot == null
                 ? captureLiveStats(simulator.getCurrentTime())
                 : hit.snapshot);

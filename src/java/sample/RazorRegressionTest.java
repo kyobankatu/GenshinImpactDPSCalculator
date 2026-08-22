@@ -30,6 +30,7 @@ import simulation.action.CharacterActionRequest;
  */
 public final class RazorRegressionTest {
     private static final double EPS = 1e-9;
+    private static final double FRAME = 1.0 / 60.0;
 
     private RazorRegressionTest() {
     }
@@ -130,6 +131,9 @@ public final class RazorRegressionTest {
                 57.0 / 60.0,
                 129.0 / 60.0
         };
+        int[] hitlagFrames = { 10, 10, 10, 13 };
+        double[] haltTimes = { 0.10, 0.10, 0.10, 0.15 };
+        double[] factors = { 0.01, 0.01, 0.05, 0.01 };
         double expectedTime = 0.0;
         assertEquals(4, records.size(),
                 "Razor four-hit Normal action count");
@@ -154,7 +158,15 @@ public final class RazorRegressionTest {
                     "Razor Physical Normal gauge");
             assertTrue(action.isShatterTrigger(),
                     "Razor Normal should be blunt");
-            expectedTime += durations[i];
+            assertClose(haltTimes[i],
+                    action.getHitlagProfile().getHaltTimeSeconds(), EPS,
+                    "Razor N" + (i + 1) + " hitlag halt time");
+            assertClose(factors[i],
+                    action.getHitlagProfile().getFactor(), EPS,
+                    "Razor N" + (i + 1) + " hitlag factor");
+            assertTrue(action.getHitlagProfile().canDefenseHalt(),
+                    "Razor Normal permits Defense Halt");
+            expectedTime += durations[i] + hitlagFrames[i] * FRAME;
         }
 
         records.clear();
@@ -220,7 +232,8 @@ public final class RazorRegressionTest {
                 "Razor Press ICD tag");
         assertClose(2.0, press.getGaugeUnits(), EPS,
                 "Razor Press gauge");
-        assertClose(80.0 / 60.0, sim.getCurrentTime(), EPS,
+        assertClose((80.0 + 10.0) * FRAME,
+                sim.getCurrentTime(), EPS,
                 "Razor Press action interval outside Burst");
         assertClose(30.0 / 60.0 + 4.92,
                 razor.getSkillCooldownEndTime(), EPS,
@@ -268,7 +281,7 @@ public final class RazorRegressionTest {
         assertClose(burstSkillStart + 33.0 / 60.0,
                 burstPressHits.get(0).time, EPS,
                 "Razor Press Burst-form hitmark");
-        assertClose(burstSkillStart + 85.0 / 60.0,
+        assertClose(burstSkillStart + (85.0 + 10.0) * FRAME,
                 burstSim.getCurrentTime(), EPS,
                 "Razor Press Burst-form action interval");
         assertClose(particleBase,
@@ -357,7 +370,8 @@ public final class RazorRegressionTest {
                 "Razor echo ICD tag");
         assertClose(1.0, echo.getGaugeUnits(), EPS,
                 "Razor echo gauge");
-        assertClose(normalStart + (54.0 / 60.0) / 1.39,
+        assertClose(normalStart + (54.0 * FRAME) / 1.39
+                        + 10.0 * FRAME,
                 sim.getCurrentTime(), EPS,
                 "Razor Lightning Fang attack-speed timeline");
 

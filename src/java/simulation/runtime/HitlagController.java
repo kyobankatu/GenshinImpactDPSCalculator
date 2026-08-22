@@ -3,6 +3,8 @@ package simulation.runtime;
 import java.util.EnumMap;
 import java.util.Map;
 
+import model.entity.Character;
+import model.entity.OwnerHitlagAwareCharacter;
 import model.type.CharacterId;
 import simulation.CombatSimulator;
 import simulation.action.AttackAction;
@@ -44,6 +46,7 @@ public final class HitlagController {
             sim.applyTargetHitlagToRuntime(duration);
         }
         int ownerFreezeFrames = resolveOwnerFreezeFrames(actorId, action);
+        notifyOwnerHitlag(actorId, ownerFreezeFrames);
         if (ownerActionId == actorId) {
             pendingOwnerFreezeFrames += ownerFreezeFrames;
         } else if (ownerFreezeFrames > 0) {
@@ -54,6 +57,19 @@ public final class HitlagController {
                     actorId,
                     Math.max(currentTime, currentEnd)
                             + ownerFreezeFrames / FRAMES_PER_SECOND);
+        }
+    }
+
+    private void notifyOwnerHitlag(
+            CharacterId actorId, int ownerFreezeFrames) {
+        if (ownerFreezeFrames <= 0) {
+            return;
+        }
+        Character actor = sim.getCharacter(actorId);
+        if (actor instanceof OwnerHitlagAwareCharacter) {
+            ((OwnerHitlagAwareCharacter) actor).onOwnerHitlag(
+                    sim.getCurrentTime(),
+                    ownerFreezeFrames / FRAMES_PER_SECOND);
         }
     }
 

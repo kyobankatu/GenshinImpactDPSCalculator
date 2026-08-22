@@ -25,6 +25,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -36,9 +37,9 @@ import simulation.event.SimpleTimerEvent;
  *
  * <p>Player HP loss and healing, overheal-triggered C2, current-HP A4, the
  * HP-gated repeated Man Chai loop, Charged Attack movement, low Plunge,
- * collision, geometry, stamina, and hitlag are intentionally excluded. The
- * initial Burst Man Chai return is independent of those unavailable systems
- * and therefore remains represented.</p>
+ * collision, geometry, stamina, and hitlag-based modifier extension are
+ * intentionally excluded. The initial Burst Man Chai return is independent
+ * of those unavailable systems and therefore remains represented.</p>
  */
 public final class Gaming extends Character implements
         SimulatorInitializedCharacterEffect,
@@ -51,6 +52,13 @@ public final class Gaming extends Character implements
     private static final int[] NORMAL_DURATIONS = { 30, 32, 79, 87 };
     private static final double[] NORMAL_T9 = {
         1.540611, 1.452210, 1.959311, 2.350692
+    };
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile[] NORMAL_HITLAG = {
+        new HitlagProfile(0.10, 0.01, true, false, false),
+        new HitlagProfile(0.09, 0.01, true, false, false),
+        new HitlagProfile(0.12, 0.01, true, false, false),
+        new HitlagProfile(0.12, 0.01, true, false, false)
     };
 
     private CombatSimulator initializedSimulator;
@@ -443,6 +451,9 @@ public final class Gaming extends Character implements
         action.setICD(icdType, icdTag, gaugeUnits);
         action.setCountsAsSkillDmg(false);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
+        if (hit.kind == HitKind.NORMAL) {
+            action.setHitlagProfile(NORMAL_HITLAG[hit.index]);
+        }
         action.setStatSnapshot(hit.snapshot == null
                 ? captureLiveStats(simulator.getCurrentTime())
                 : hit.snapshot);

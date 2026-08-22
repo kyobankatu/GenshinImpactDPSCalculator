@@ -29,6 +29,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -44,8 +45,9 @@ import simulation.event.SimpleTimerEvent;
  *
  * <p>Nightsoul Burst team plumbing and generic Nightsoul-aligned hit tags are
  * absent from this simulator and fail closed. Movement, geometry, bounces and
- * multi-target selection, taunt, hitlag, stamina, low Plunge, aim weakspots,
- * and target-position selection are excluded instead of approximated.</p>
+ * multi-target selection, taunt, complete hitlag coverage, stamina, low
+ * Plunge, aim weakspots, and target-position selection are excluded instead
+ * of approximated.</p>
  */
 public final class Ororon extends Character implements
         ReactionAwareCharacter,
@@ -59,6 +61,11 @@ public final class Ororon extends Character implements
     private static final double[] NORMAL_T9 = {
         0.930399, 0.815233, 1.282755
     };
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile AIMED_HEADSHOT_HITLAG =
+            new HitlagProfile(0.12, 0.01, false, true, true);
+    private static final HitlagProfile HYPERSENSE_HITLAG =
+            new HitlagProfile(0.0, 0.01, true, false, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -329,7 +336,7 @@ public final class Ororon extends Character implements
         return false;
     }
 
-    /** Reports that hitlag is excluded. */
+    /** Reports that full hitlag coverage remains excluded. */
     public boolean isHitlagRepresented() {
         return false;
     }
@@ -774,6 +781,12 @@ public final class Ororon extends Character implements
                 icdTag,
                 gauge,
                 0.0);
+        if (hit.kind == HitKind.CHARGED) {
+            action.setHitlagProfile(AIMED_HEADSHOT_HITLAG);
+        } else if (hit.kind == HitKind.HYPERSENSE
+                || hit.kind == HitKind.C6_HYPERSENSE) {
+            action.setHitlagProfile(HYPERSENSE_HITLAG);
+        }
         if (getC2Stacks(hit.time) > 0) {
             action.addBonusStat(
                     StatType.ELECTRO_DMG_BONUS,

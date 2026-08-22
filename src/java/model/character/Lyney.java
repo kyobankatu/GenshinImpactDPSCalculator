@@ -25,6 +25,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -37,8 +38,8 @@ import simulation.event.SimpleTimerEvent;
  *
  * <p>Player HP is unavailable, so ordinary Prop Arrows do not create the
  * HP-consumption stack or A1 bonus. C1 and Burst stacks remain active. Aimed
- * levels, weak points, Arkhe, gadget durability, movement, geometry,
- * multi-target selection, stamina, hitlag, and Plunge are excluded.</p>
+ * levels, weak-point activation, Arkhe, gadget durability, movement, geometry,
+ * multi-target selection, stamina, and Plunge are excluded.</p>
  */
 public final class Lyney extends Character implements
         SimulatorInitializedCharacterEffect,
@@ -61,6 +62,12 @@ public final class Lyney extends Character implements
     private static final double[] NORMAL_C3 = {
         0.874940, 0.857480, 0.614980, 0.614980, 1.284280
     };
+    /**
+     * Prop Arrow weak-point hitlag from gcsim pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile PROP_ARROW_HEADSHOT_HITLAG =
+            new HitlagProfile(0.12, 0.01, false, true, true);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -493,7 +500,8 @@ public final class Lyney extends Character implements
                 ActionType.CHARGE,
                 ICDTag.ChargedAttack,
                 1.0,
-                null);
+                null,
+                PROP_ARROW_HEADSHOT_HITLAG);
         applyC4(simulator);
         if (constellation >= 6) {
             resolveSimpleAttack(
@@ -679,6 +687,28 @@ public final class Lyney extends Character implements
             ICDTag icdTag,
             double gauge,
             StatsContainer snapshot) {
+        resolveSimpleAttack(
+                simulator,
+                actionName,
+                multiplier,
+                bonusStat,
+                actionType,
+                icdTag,
+                gauge,
+                snapshot,
+                null);
+    }
+
+    private void resolveSimpleAttack(
+            CombatSimulator simulator,
+            String actionName,
+            double multiplier,
+            StatType bonusStat,
+            ActionType actionType,
+            ICDTag icdTag,
+            double gauge,
+            StatsContainer snapshot,
+            HitlagProfile hitlagProfile) {
         AttackAction action = new AttackAction(
                 actionName,
                 multiplier,
@@ -694,6 +724,9 @@ public final class Lyney extends Character implements
                 gauge);
         if (snapshot != null) {
             action.setStatSnapshot(snapshot);
+        }
+        if (hitlagProfile != null) {
+            action.setHitlagProfile(hitlagProfile);
         }
         action.addBonusStat(StatType.CRIT_DMG, c2Stacks * 0.2);
         applyA4(action, simulator);

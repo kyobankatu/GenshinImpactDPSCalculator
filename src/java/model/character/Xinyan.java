@@ -27,6 +27,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -39,7 +40,7 @@ import simulation.event.SimpleTimerEvent;
  *
  * <p>Shield creation and absorption, shield DoT and C2 shield pulses, A1/A4,
  * C1 CRIT-driven attack speed, C6 Charged scaling, Charged Attack movement,
- * low Plunge, geometry, stamina, and hitlag are intentionally excluded.</p>
+ * low Plunge, geometry, stamina, and complete hitlag coverage are intentionally excluded.</p>
  */
 public final class Xinyan extends Character implements
         SimulatorInitializedCharacterEffect,
@@ -47,6 +48,17 @@ public final class Xinyan extends Character implements
         SwitchAwareCharacter {
     private static final double FRAME = 1.0 / 60.0;
     private static final double EPSILON = 1e-9;
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile[] NORMAL_HITLAG = {
+        new HitlagProfile(0.10, 0.01, true, false, false),
+        new HitlagProfile(0.10, 0.01, true, false, false),
+        new HitlagProfile(0.12, 0.01, true, false, false),
+        new HitlagProfile(0.12, 0.01, true, false, false)
+    };
+    private static final HitlagProfile SKILL_HITLAG =
+            new HitlagProfile(0.09, 0.01, true, false, false);
+    private static final HitlagProfile DEFENSE_ONLY_HITLAG =
+            new HitlagProfile(0.0, 0.0, true, false, false);
     private static final double PARTICLE_TRAVEL = 100.0 * FRAME;
     private static final int[] NORMAL_HIT_FRAMES = { 25, 27, 47, 35 };
     private static final int[] NORMAL_DURATIONS = { 33, 39, 64, 94 };
@@ -432,12 +444,27 @@ public final class Xinyan extends Character implements
                 0.0,
                 actionType);
         action.setICD(icdType, icdTag, gaugeUnits);
+        action.setHitlagProfile(hitlagProfile(hit));
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
         action.setStatSnapshot(hit.snapshot == null
                 ? captureLiveStats(simulator.getCurrentTime())
                 : hit.snapshot);
         simulator.performActionWithoutTimeAdvance(characterId, action);
+    }
+
+    private static HitlagProfile hitlagProfile(PendingHit hit) {
+        if (hit.kind == HitKind.NORMAL) {
+            return NORMAL_HITLAG[hit.index];
+        }
+        if (hit.kind == HitKind.SKILL) {
+            return SKILL_HITLAG;
+        }
+        if (hit.kind == HitKind.BURST_INITIAL
+                || (hit.kind == HitKind.BURST_DOT && hit.index == 0)) {
+            return DEFENSE_ONLY_HITLAG;
+        }
+        return HitlagProfile.none();
     }
 
     private StatsContainer captureLiveStats(double currentTime) {

@@ -25,6 +25,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -38,7 +39,7 @@ import simulation.event.SimpleTimerEvent;
  *
  * <p>Player HP drain and healing, C4, C6's multi-target plunge reset,
  * collision damage, geometry, stamina, jump height, low-plunge selection,
- * and hitlag are intentionally excluded without approximation.</p>
+ * and complete hitlag coverage are intentionally excluded without approximation.</p>
  */
 public final class Xiao extends Character implements
         SimulatorInitializedCharacterEffect,
@@ -46,6 +47,39 @@ public final class Xiao extends Character implements
         SwitchAwareCharacter {
     private static final double FRAME = 1.0 / 60.0;
     private static final double EPSILON = 1e-9;
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile[][] BURST_NORMAL_HITLAG = {
+        {
+            new HitlagProfile(0.01, 0.01, false, false, false),
+            new HitlagProfile(0.01, 0.01, true, false, false)
+        },
+        { new HitlagProfile(0.01, 0.01, true, false, false) },
+        { new HitlagProfile(0.01, 0.01, true, false, false) },
+        {
+            new HitlagProfile(0.02, 0.01, false, false, false),
+            new HitlagProfile(0.02, 0.01, true, false, false)
+        },
+        { new HitlagProfile(0.02, 0.01, true, false, false) },
+        { new HitlagProfile(0.04, 0.01, true, false, false) }
+    };
+    private static final HitlagProfile[][] NORMAL_HITLAG = {
+        {
+            new HitlagProfile(0.0, 0.01, false, false, false),
+            new HitlagProfile(0.01, 0.01, true, false, false)
+        },
+        { new HitlagProfile(0.01, 0.01, true, false, false) },
+        { new HitlagProfile(0.01, 0.01, true, false, false) },
+        {
+            new HitlagProfile(0.02, 0.01, false, false, false),
+            new HitlagProfile(0.02, 0.01, true, false, false)
+        },
+        { new HitlagProfile(0.02, 0.01, true, false, false) },
+        { new HitlagProfile(0.04, 0.01, true, false, false) }
+    };
+    private static final HitlagProfile CHARGED_HITLAG =
+            new HitlagProfile(0.02, 0.01, true, false, false);
+    private static final HitlagProfile BURST_CHARGED_HITLAG =
+            new HitlagProfile(0.04, 0.01, true, false, false);
     private static final int[][] NORMAL_HIT_FRAMES = {
         { 4, 17 }, { 15 }, { 15 }, { 14, 31 }, { 16 }, { 39 }
     };
@@ -466,9 +500,23 @@ public final class Xiao extends Character implements
                 0.0,
                 actionType);
         action.setICD(icdType, icdTag, gaugeUnits);
+        action.setHitlagProfile(hitlagProfile(hit));
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setStatSnapshot(hit.snapshot);
         simulator.performActionWithoutTimeAdvance(characterId, action);
+    }
+
+    private static HitlagProfile hitlagProfile(PendingHit hit) {
+        if (hit.kind == HitKind.CHARGED) {
+            return hit.burstEnhanced
+                    ? BURST_CHARGED_HITLAG : CHARGED_HITLAG;
+        }
+        if (hit.kind == HitKind.NORMAL) {
+            HitlagProfile[][] profiles = hit.burstEnhanced
+                    ? BURST_NORMAL_HITLAG : NORMAL_HITLAG;
+            return profiles[hit.index][hit.variant];
+        }
+        return HitlagProfile.none();
     }
 
     private double normalValue(int step, int variant) {

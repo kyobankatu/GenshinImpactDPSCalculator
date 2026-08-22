@@ -28,6 +28,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -39,7 +40,7 @@ import simulation.event.SimpleTimerEvent;
  * {@code ef41805d}. Aino contributes typed Lunar membership, and A1/C6 use the
  * simulator's existing Moonsign and reaction-bonus stats.</p>
  *
- * <p>Random and multi-target placement, geometry, movement, hitlag, stamina,
+ * <p>Random and multi-target placement, geometry, movement, hitlag extension, stamina,
  * Charged and Plunging attacks absent from the pinned implementation, Hold
  * Skill, unsupported defensive state, and untyped Lunar target behavior fail
  * closed. Every Ducky ball deterministically addresses the simulator's single
@@ -62,6 +63,17 @@ public final class Aino extends Character implements
     private static final int[] SKILL_HIT_FRAMES = { 15, 33 };
     private static final double[] SKILL_T9 = { 1.115200, 3.209600 };
     private static final double[] SKILL_C5 = { 1.312000, 3.776000 };
+
+    /**
+     * Per-hit hitlag from gcsim config YAML pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_HEAVY_HITLAG =
+            new HitlagProfile(0.10, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_N3_SECOND_HITLAG =
+            new HitlagProfile(0.08, 0.01, true, false, false);
+    private static final HitlagProfile SKILL_SECOND_HITLAG =
+            new HitlagProfile(0.03, 0.01, false, false, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -631,6 +643,7 @@ public final class Aino extends Character implements
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
         action.setShatterTrigger(shatter);
+        action.setHitlagProfile(hitlagProfile(hit));
         StatsContainer snapshot = hit.snapshot == null
                 ? captureLiveStats(simulator.getCurrentTime())
                 : hit.snapshot.merge(null);
@@ -643,6 +656,21 @@ public final class Aino extends Character implements
             resolvingAction = null;
             resolvingSkillImpact = false;
         }
+    }
+
+    private static HitlagProfile hitlagProfile(PendingHit hit) {
+        if (hit.kind == HitKind.NORMAL) {
+            if (hit.index < 2) {
+                return NORMAL_HEAVY_HITLAG;
+            }
+            if (hit.index == 2 && hit.variant == 1) {
+                return NORMAL_N3_SECOND_HITLAG;
+            }
+        }
+        if (hit.kind == HitKind.SKILL && hit.index == 1) {
+            return SKILL_SECOND_HITLAG;
+        }
+        return HitlagProfile.none();
     }
 
     private double skillValue(int index) {

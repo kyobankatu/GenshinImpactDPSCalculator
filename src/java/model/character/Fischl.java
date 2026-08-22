@@ -23,6 +23,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -41,9 +42,9 @@ import simulation.event.SimpleTimerEvent;
  * no separate Skill press/hold/recast parameter, so a Skill request while Oz
  * is active deterministically selects the sourced recast. Weak-point A1,
  * geometry and multi-enemy targeting, C4 healing, Witch/Hexerei effects,
- * hitlag extension, and pending timer reconstruction in simulator snapshots
- * are intentionally excluded. Oz particle RNG is represented by its sourced
- * 0.67 expected particles per periodic attack.
+ * hitlag-based modifier extension, and pending timer reconstruction in
+ * simulator snapshots are intentionally excluded. Oz particle RNG is
+ * represented by its sourced 0.67 expected particles per periodic attack.
  */
 public class Fischl extends Character implements
         FormStateProvider,
@@ -59,6 +60,9 @@ public class Fischl extends Character implements
     private static final double SHARED_ICD_DURATION = 5.0;
     private static final int SHARED_ICD_HIT_COUNT = 4;
     private static final double EPSILON = 1e-9;
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile AIMED_HEADSHOT_HITLAG =
+            new HitlagProfile(0.12, 0.01, false, true, true);
     private static final Set<ReactionResult.Kind> ELECTRO_REACTIONS =
             EnumSet.of(
                     ReactionResult.Kind.OVERLOAD,
@@ -293,6 +297,7 @@ public class Fischl extends Character implements
                 96.0 / 60.0,
                 ActionType.CHARGE);
         charged.setICD(ICDType.None, ICDTag.ChargedAttack, 1.0);
+        charged.setHitlagProfile(AIMED_HEADSHOT_HITLAG);
         sim.performAction(characterId, charged);
     }
 

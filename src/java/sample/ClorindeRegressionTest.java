@@ -118,6 +118,7 @@ public final class ClorindeRegressionTest {
         };
         int[] firstHitFrames = { 18, 12, 23, 12, 21 };
         int[] durations = { 24, 27, 42, 35, 60 };
+        int[] hitlagFrames = { 6, 6, 12, 15, 6 };
         int[] hitCounts = { 1, 1, 2, 3, 1 };
         for (int step = 0; step < multipliers.length; step++) {
             double castTime = simulator.getCurrentTime();
@@ -130,7 +131,8 @@ public final class ClorindeRegressionTest {
             assertClose(castTime + firstHitFrames[step] * FRAME,
                     hits.get(0).time,
                     "Clorinde N" + (step + 1) + " first hitmark");
-            assertClose(castTime + durations[step] * FRAME,
+            assertClose(castTime
+                            + (durations[step] + hitlagFrames[step]) * FRAME,
                     simulator.getCurrentTime(),
                     "Clorinde N" + (step + 1) + " recovery");
             assertClose(multipliers[step],
@@ -229,7 +231,7 @@ public final class ClorindeRegressionTest {
                 records, "Impale the Night (<100% Bond)");
         assertClose(impaleCast + 11.0 * FRAME, impale.time,
                 "Low-Bond Impale hitmark");
-        assertClose(impaleCast + 43.0 * FRAME,
+        assertClose(impaleCast + (43.0 + 4.0) * FRAME,
                 simulator.getCurrentTime(),
                 "Impale recovery does not wait for base Skill CD");
         assertClose(0.807696, impale.action.getDamagePercent(),

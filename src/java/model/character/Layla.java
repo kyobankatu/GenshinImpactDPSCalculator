@@ -26,6 +26,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -39,7 +40,7 @@ import simulation.event.SimpleTimerEvent;
  * delayed work is reconstructable after simulator rollback.</p>
  *
  * <p>Curtain of Slumber absorption and strength, A1, C1, C4's one-hit team
- * flat-damage state, geometry, target selection, stamina, and hitlag are
+ * flat-damage state, geometry, target selection, and stamina are
  * excluded rather than approximated. The Curtain timestamp below represents
  * only the offensive Night Star lifecycle, not a defensive shield.</p>
  */
@@ -54,6 +55,17 @@ public final class Layla extends Character implements
     private static final double[] NORMAL_T9 = {
         0.940969, 0.890741, 1.340677
     };
+    /**
+     * Basic-attack hitlag from gcsim pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile[] NORMAL_HITLAG = {
+        new HitlagProfile(0.03, 0.01, true, false, false),
+        new HitlagProfile(0.03, 0.01, true, false, false),
+        new HitlagProfile(0.06, 0.01, true, false, false)
+    };
+    private static final HitlagProfile CHARGED_SECOND_HITLAG =
+            new HitlagProfile(0.06, 0.01, true, false, false);
     private static final int[] SHOOTING_STAR_TRAVEL_FRAMES = {
         35, 33, 30, 28
     };
@@ -552,7 +564,8 @@ public final class Layla extends Character implements
                         ICDTag.NormalAttack,
                         0.0,
                         0.0,
-                        false);
+                        false,
+                        NORMAL_HITLAG[event.index]);
                 break;
             case CHARGED_HIT:
                 performHit(
@@ -570,7 +583,8 @@ public final class Layla extends Character implements
                         ICDTag.ChargedAttack,
                         0.0,
                         0.0,
-                        false);
+                        false,
+                        event.index == 1 ? CHARGED_SECOND_HITLAG : null);
                 break;
             case HIGH_PLUNGE:
                 performHit(
@@ -723,6 +737,36 @@ public final class Layla extends Character implements
             double gaugeUnits,
             double fixedBaseDamage,
             boolean c6Bonus) {
+        performHit(
+                simulator,
+                displayName,
+                multiplier,
+                hitElement,
+                scalingStat,
+                bonusStat,
+                actionType,
+                icdType,
+                icdTag,
+                gaugeUnits,
+                fixedBaseDamage,
+                c6Bonus,
+                null);
+    }
+
+    private void performHit(
+            CombatSimulator simulator,
+            String displayName,
+            double multiplier,
+            Element hitElement,
+            StatType scalingStat,
+            StatType bonusStat,
+            ActionType actionType,
+            ICDType icdType,
+            ICDTag icdTag,
+            double gaugeUnits,
+            double fixedBaseDamage,
+            boolean c6Bonus,
+            HitlagProfile hitlagProfile) {
         AttackAction action = fixedBaseDamage == 0.0
                 ? new AttackAction(
                         displayName,
@@ -743,6 +787,9 @@ public final class Layla extends Character implements
         action.setICD(icdType, icdTag, gaugeUnits);
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
+        if (hitlagProfile != null) {
+            action.setHitlagProfile(hitlagProfile);
+        }
         if (c6Bonus) {
             action.addBonusStat(
                     StatType.DMG_BONUS_ALL,

@@ -234,8 +234,8 @@ Known simplifications:
   tick's typed owner and EM snapshot without dealing another immediate reaction
   hit. Successful immediate and periodic damage share one 0.5-second target
   cooldown across sequence restarts. Overload damage follows its target and
-  owner damage sequence limits. The accepted set-aware result is 1,226,807
-  damage / 58,419 DPS over 21.0 seconds.
+  owner damage sequence limits. The accepted set-aware result is 1,200,940
+  damage / 54,525 DPS over 22.0 seconds.
 - `FlinsParty2`: defensive shield HP is logged but not consumed by enemy attacks,
   Columbina treats every Lunar reaction during Gravity Ripple as nearby because
   field position is not simulated, and her Thundercloud extra strikes use 33%
@@ -249,7 +249,7 @@ Known simplifications:
   Swirl consumes half its source gauge, preserving sourced residual auras.
   Aubade of Morningstar and Moon grants its sourced 80 EM and initializes its
   owner-only off-field Lunar bonus before the first swap. The accepted result is
-  20,727,902 damage / 299,970 DPS over 69.1 seconds.
+  20,592,361 damage / 280,933 DPS over 73.3 seconds.
 - `FlinsParty`: generic Favonius Codex and Columbina construction remains
   stochastic, while this optimizer-driven sample injects independent fixed
   Windfall and Moondrift streams so every candidate and final run uses the same
@@ -263,8 +263,8 @@ Known simplifications:
   reduction at impact. Swirl uses its sourced half-gauge consumption and
   per-element target/owner damage sequences. Ineffa's
   Aubade set uses 80 EM and initializes its owner-only off-field state. The
-  accepted result is 26,517,846 damage / 266,779 DPS
-  over 99.4 seconds with three successful Sucrose Bursts.
+  accepted result is 25,904,560 damage / 257,160 DPS
+  over 100.7 seconds with three successful Sucrose Bursts.
 
 ### Continuous Aura Decay Model
 
@@ -351,9 +351,10 @@ Elemental Gauge Theory contract:
 - **Aura Timeline**: rendered as continuous (non-stepped) lines that slope down to
   zero at expiry, matching the per-event aura bars in the Timeline view.
 
-Known differences from exact game internals: Frozen resistance, hitlag, poise,
-and broader multi-synthetic-state ordering; the upstream-ambiguous isolated
-Anemo-on-Burning path; Swirl spread;
+Known differences from exact game internals: Frozen resistance, poise, broader
+multi-synthetic-state ordering, source-conflicting or locally absent hitlag
+branches, and hitlag extension for modifier classes without an explicit local
+callback; the upstream-ambiguous isolated Anemo-on-Burning path; Swirl spread;
 Electro-Charged multi-target damage-ICD/hitlag interactions; and some reaction
 gauge modifiers remain simplified. The simulator also does not model
 multi-target or per-enemy aura gauges.
@@ -361,8 +362,8 @@ multi-target or per-enemy aura gauges.
 Latest validation baseline from the accuracy pass:
 
 - `./gradlew ReactionRegressionTest`
-- `./gradlew RaidenParty`: 1,226,807 total damage / 58,419 DPS
-- `./gradlew FlinsParty`: 26,517,846 total damage / 266,779 DPS
-- `./gradlew FlinsParty2`: 20,727,902 total damage / 299,970 DPS
+- `./gradlew RaidenParty`: 1,200,940 total damage / 54,525 DPS
+- `./gradlew FlinsParty`: 25,904,560 total damage / 257,160 DPS
+- `./gradlew FlinsParty2`: 20,592,361 total damage / 280,933 DPS
 - `./gradlew BenchmarkRLJava`
 - `./gradlew ProfileCapabilities`

@@ -137,6 +137,45 @@ public class DamageCalculator {
         return damage;
     }
 
+    /**
+     * Computes direct damage for the simulator resolver without dispatching
+     * post-damage equipment hooks.
+     *
+     * <p>The resolver applies landed-hit timing first, then calls
+     * {@link #notifyPostDamageHooks}; direct formula callers retain the legacy
+     * calculate-and-notify behavior of {@link #calculateDamage}.
+     */
+    public static double calculateDamageWithoutPostDamageHooks(
+            model.entity.Character attacker,
+            model.entity.Enemy target,
+            simulation.action.AttackAction action,
+            java.util.List<mechanics.buff.Buff> activeBuffs,
+            model.stats.StatsContainer preResolvedStats,
+            double currentTime,
+            double reactionMultiplier,
+            simulation.CombatSimulator sim) {
+        DamageStrategy strategy = selectStrategy(action);
+        return strategy.calculate(
+                attacker,
+                target,
+                action,
+                activeBuffs,
+                preResolvedStats,
+                currentTime,
+                reactionMultiplier,
+                sim);
+    }
+
+    /** Dispatches weapon and artifact hooks after landed-hit timing is applied. */
+    public static void notifyPostDamageHooks(
+            model.entity.Character attacker,
+            simulation.action.AttackAction action,
+            double currentTime,
+            simulation.CombatSimulator sim,
+            double damage) {
+        notifyDamageHooks(attacker, action, currentTime, sim, damage);
+    }
+
     private static DamageStrategy selectStrategy(AttackAction action) {
         if (action.isStellarConsidered()) {
             return STELLAR_STRATEGY;

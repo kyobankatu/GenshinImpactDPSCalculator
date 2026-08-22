@@ -1305,7 +1305,7 @@ public class CombatActionResolver {
                     sim.getCurrentTime(), charName, action.getName()));
         }
 
-        double damage = DamageCalculator.calculateDamage(
+        double damage = DamageCalculator.calculateDamageWithoutPostDamageHooks(
                 attacker, sim.getEnemy(), action, context.applicableBuffs, context.resolvedStats,
                 sim.getCurrentTime(), reactionMulti, sim);
 
@@ -1318,6 +1318,9 @@ public class CombatActionResolver {
         }
         sim.recordDamage(attacker.getCharacterId(), damage);
         sim.captureResolvedActionDamage(attacker.getCharacterId(), damage);
+        sim.applyResolvedHitlag(attacker.getCharacterId(), action);
+        DamageCalculator.notifyPostDamageHooks(
+                attacker, action, sim.getCurrentTime(), sim, damage);
         sim.notifyDamage(attacker, action, damage);
 
         if (sim.isLoggingEnabled()) {

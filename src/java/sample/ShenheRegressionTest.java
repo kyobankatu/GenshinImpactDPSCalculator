@@ -113,6 +113,7 @@ public final class ShenheRegressionTest {
             { 14 }, { 17 }, { 19 }, { 14, 18 }, { 26 }
         };
         int[] durations = { 29, 23, 38, 30, 59 };
+        int[] hitlagFrames = { 5, 5, 5, 5, 10 };
         double[][] multipliers = {
             { 0.79474 }, { 0.73944 }, { 0.9796 },
             { 0.48348, 0.48348 }, { 1.20554 }
@@ -135,7 +136,8 @@ public final class ShenheRegressionTest {
                         record.action.getElement(),
                         "Shenhe Normal element");
             }
-            assertClose(castTime + durations[step] * FRAME,
+            assertClose(castTime
+                            + (durations[step] + hitlagFrames[step]) * FRAME,
                     simulator.getCurrentTime(),
                     "Shenhe Normal animation duration");
         }

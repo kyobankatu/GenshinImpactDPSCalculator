@@ -33,6 +33,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -58,6 +59,23 @@ public final class Xilonen extends Character implements
         TargetDependentTeamEffect {
     private static final double FRAME = 1.0 / 60.0;
     private static final double EPSILON = 1e-9;
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile[][] NORMAL_HITLAG = {
+        { new HitlagProfile(0.03, 0.01, true, false, false) },
+        {
+            new HitlagProfile(0.03, 0.01, true, false, false),
+            new HitlagProfile(0.03, 0.01, true, false, false)
+        },
+        { new HitlagProfile(0.06, 0.01, true, false, false) }
+    };
+    private static final HitlagProfile[] ROLLER_HITLAG = {
+        new HitlagProfile(0.03, 0.01, true, false, false),
+        new HitlagProfile(0.03, 0.01, false, false, false),
+        new HitlagProfile(0.03, 0.01, false, false, false),
+        new HitlagProfile(0.06, 0.01, false, false, false)
+    };
+    private static final HitlagProfile SKILL_HITLAG =
+            new HitlagProfile(0.0, 0.01, true, true, false);
     private static final int[][] NORMAL_HIT_FRAMES = {
         { 18 }, { 16, 32 }, { 22 }
     };
@@ -376,7 +394,7 @@ public final class Xilonen extends Character implements
         return false;
     }
 
-    /** Reports that hitlag and stamina are excluded. */
+    /** Reports that complete hitlag coverage and stamina are excluded. */
     public boolean isHitlagStaminaRepresented() {
         return false;
     }
@@ -884,6 +902,7 @@ public final class Xilonen extends Character implements
                 0.0,
                 actionType);
         action.setICD(icdType, icdTag, gauge);
+        action.setHitlagProfile(hitlagProfile(hit));
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
         if (hit.nightsoul
@@ -902,6 +921,19 @@ public final class Xilonen extends Character implements
             resolvingAction = null;
             resolvingHitKind = null;
         }
+    }
+
+    private static HitlagProfile hitlagProfile(PendingHit hit) {
+        if (hit.kind == HitKind.NORMAL) {
+            return NORMAL_HITLAG[hit.index][hit.subIndex];
+        }
+        if (hit.kind == HitKind.BLADE_ROLLER) {
+            return ROLLER_HITLAG[hit.index];
+        }
+        if (hit.kind == HitKind.SKILL) {
+            return SKILL_HITLAG;
+        }
+        return HitlagProfile.none();
     }
 
     private void handleA1NightsoulHit(

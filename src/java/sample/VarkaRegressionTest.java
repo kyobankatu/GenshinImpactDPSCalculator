@@ -115,7 +115,7 @@ public final class VarkaRegressionTest {
         ActionRecord n1 = onlyNamed(records, "Favonius Bladework N1");
         assertClose(castTime + 19.0 * FRAME, n1.time,
                 "Varka N1 hitmark");
-        assertClose(castTime + 46.0 * FRAME,
+        assertClose(castTime + (46.0 + 6.0) * FRAME,
                 simulator.getCurrentTime(),
                 "Varka N1 recovery");
         assertClose(1.202633, n1.action.getDamagePercent(),
@@ -150,7 +150,7 @@ public final class VarkaRegressionTest {
                 "Varka physical Charged hit count");
         assertClose(41.0 * FRAME, charged.get(0).time,
                 "Varka physical Charged hitmark");
-        assertClose(67.0 * FRAME,
+        assertClose((67.0 + 9.0) * FRAME,
                 basicsSimulator.getCurrentTime(),
                 "Varka physical Charged recovery");
         assertClose(1.573364,
@@ -183,7 +183,8 @@ public final class VarkaRegressionTest {
         List<ActionRecord> records = captureVarkaActions(simulator);
         List<ParticleRecord> particles = captureAnemoParticles(simulator);
         performSkill(simulator);
-        assertClose(55.0 * FRAME, simulator.getCurrentTime(),
+        assertClose((55.0 + 9.0) * FRAME,
+                simulator.getCurrentTime(),
                 "Varka initial Skill recovery");
         ActionRecord skill = onlyNamed(records, "Windbound Execution");
         assertClose(40.0 * FRAME, skill.time,

@@ -117,13 +117,21 @@ public final class KukiShinobuRegressionTest {
         List<ActionRecord> records = captureKukiActions(simulator);
         int[] hitFrames = { 12, 13, 13, 23 };
         int[] recoveryFrames = { 19, 17, 42, 57 };
-        int[] absoluteHitFrames = { 12, 32, 49, 101 };
+        int[] hitlagFrames = { 6, 6, 8, 10 };
+        int[] absoluteHitFrames = {
+            12,
+            32 + 6,
+            49 + 12,
+            101 + 20
+        };
         double[] multipliers = { 0.89586, 0.81844, 1.0902, 1.3983 };
         double[] castTimes = new double[4];
         for (int step = 0; step < 4; step++) {
             castTimes[step] = simulator.getCurrentTime();
             perform(simulator, CharacterActionKey.NORMAL);
-            assertClose(castTimes[step] + recoveryFrames[step] * FRAME,
+            assertClose(castTimes[step]
+                            + (recoveryFrames[step] + hitlagFrames[step])
+                                    * FRAME,
                     simulator.getCurrentTime(),
                     "Kuki Normal recovery " + (step + 1));
             ActionRecord record = onlyNamed(records,
@@ -152,7 +160,8 @@ public final class KukiShinobuRegressionTest {
         List<ActionRecord> chargedRecords = captureKukiActions(
                 chargedSimulator);
         perform(chargedSimulator, CharacterActionKey.CHARGE);
-        assertClose(35.0 * FRAME, chargedSimulator.getCurrentTime(),
+        assertClose((35.0 + 10.0) * FRAME,
+                chargedSimulator.getCurrentTime(),
                 "Kuki Charged recovery");
         double[] chargedMultipliers = { 1.022102, 1.226617 };
         int[] chargedFrames = { 14, 25 };

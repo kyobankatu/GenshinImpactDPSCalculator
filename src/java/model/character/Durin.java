@@ -30,6 +30,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -44,7 +45,7 @@ import simulation.event.SimpleTimerEvent;
  * owner-bound snapshots.</p>
  *
  * <p>Player HP, healing, defense and interruption state, movement and target
- * geometry, multi-target or random selection, hitlag, stamina, low Plunge,
+ * geometry, multi-target or random selection, hitlag extension, stamina, low Plunge,
  * exploration, Hexerei party-count amplification, continuing Burning-hit
  * observation, and C4's random C1-stack preservation fail closed. The slice
  * uses the source-backed base A1 values and explicit fixed-target reactions.</p>
@@ -75,6 +76,17 @@ public final class Durin extends Character implements
     private static final double[] BLACK_OPENING_C3 = {
         2.508800, 2.035200, 2.236800
     };
+
+    /**
+     * Normal-attack hitlag from gcsim config YAML pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_FIRST_HITLAG =
+            new HitlagProfile(0.02, 0.01, false, false, false);
+    private static final HitlagProfile NORMAL_MIDDLE_HITLAG =
+            new HitlagProfile(0.03, 0.01, false, false, false);
+    private static final HitlagProfile NORMAL_FINAL_HITLAG =
+            new HitlagProfile(0.05, 0.01, false, false, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -342,7 +354,7 @@ public final class Durin extends Character implements
         return false;
     }
 
-    /** Reports excluded hitlag and stamina. */
+    /** Reports excluded complete hitlag coverage and stamina. */
     public boolean isHitlagStaminaRepresented() {
         return false;
     }
@@ -780,6 +792,16 @@ public final class Durin extends Character implements
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
         action.setHitEffectTrigger(true);
+        if (hit.kind == HitKind.NORMAL) {
+            if (hit.index == 0) {
+                action.setHitlagProfile(NORMAL_FIRST_HITLAG);
+            } else if (hit.index == 1
+                    || (hit.index == 2 && hit.variant == 1)) {
+                action.setHitlagProfile(NORMAL_MIDDLE_HITLAG);
+            } else if (hit.index == 3) {
+                action.setHitlagProfile(NORMAL_FINAL_HITLAG);
+            }
+        }
         if (actionType == ActionType.CHARGE
                 || actionType == ActionType.PLUNGE) {
             action.setShatterTrigger(true);

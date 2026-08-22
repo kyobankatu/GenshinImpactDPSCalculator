@@ -131,6 +131,21 @@ public final class HuTaoRegressionTest {
         assertEquals(Element.PHYSICAL,
                 records.get(0).action.getElement(),
                 "Hu Tao uninfused Charged element");
+        assertClose(0.0,
+                records.get(0).action.getHitlagProfile()
+                        .getHaltTimeSeconds(),
+                "Hu Tao Charged hitlag halt time");
+        assertClose(0.01,
+                records.get(0).action.getHitlagProfile().getFactor(),
+                "Hu Tao Charged hitlag factor");
+        assertTrue(records.get(0).action.getHitlagProfile()
+                        .canDefenseHalt(),
+                "Hu Tao Charged enables Defense Halt");
+        assertTrue(records.get(0).action.getHitlagProfile().isDeployable(),
+                "Hu Tao Charged hitlag is deployable");
+        assertTrue(!records.get(0).action.getHitlagProfile()
+                        .isHeadshotOnly(),
+                "Hu Tao Charged hitlag is not headshot-only");
         assertClose(62.0 * FRAME,
                 simulator.getCurrentTime() - records.get(0).time
                         + 19.0 * FRAME,

@@ -109,16 +109,25 @@ public final class EscoffierRegressionTest {
         perform(simulator, CharacterActionKey.NORMAL);
         perform(simulator, CharacterActionKey.NORMAL);
         perform(simulator, CharacterActionKey.NORMAL);
-        assertClose(108.0 * FRAME, simulator.getCurrentTime(),
+        assertClose((108.0 + 32.0) * FRAME,
+                simulator.getCurrentTime(),
                 "Three-step Normal string duration");
         assertAction(records, "Kitchen Skills N1", 0.947099,
                 7.0 * FRAME, Element.PHYSICAL);
         assertAction(records, "Kitchen Skills N2", 0.874388,
-                33.0 * FRAME, Element.PHYSICAL);
+                (33.0 + 8.0) * FRAME, Element.PHYSICAL);
         assertAction(records, "Kitchen Skills N3-1", 0.606270,
-                73.0 * FRAME, Element.PHYSICAL);
+                (73.0 + 16.0) * FRAME, Element.PHYSICAL);
         assertAction(records, "Kitchen Skills N3-2", 0.740996,
-                86.0 * FRAME, Element.PHYSICAL);
+                (86.0 + 16.0) * FRAME, Element.PHYSICAL);
+        assertHitlagProfile(named(records, "Kitchen Skills N3-1")
+                        .get(0).action,
+                0.06, 0.01, true, false, false,
+                "Kitchen Skills N3-1");
+        assertHitlagProfile(named(records, "Kitchen Skills N3-2")
+                        .get(0).action,
+                0.06, 0.01, true, false, false,
+                "Kitchen Skills N3-2");
 
         double chargedCast = simulator.getCurrentTime();
         perform(simulator, CharacterActionKey.CHARGE);
@@ -709,6 +718,30 @@ public final class EscoffierRegressionTest {
             throw new AssertionError(message + ": expected=" + expected
                     + " actual=" + actual);
         }
+    }
+
+    private static void assertHitlagProfile(
+            AttackAction action,
+            double haltTime,
+            double factor,
+            boolean defenseHalt,
+            boolean deployable,
+            boolean headshotOnly,
+            String message) {
+        assertClose(haltTime,
+                action.getHitlagProfile().getHaltTimeSeconds(),
+                message + " hitlag halt time");
+        assertClose(factor, action.getHitlagProfile().getFactor(),
+                message + " hitlag factor");
+        assertEquals(defenseHalt,
+                action.getHitlagProfile().canDefenseHalt(),
+                message + " hitlag Defense Halt");
+        assertEquals(deployable,
+                action.getHitlagProfile().isDeployable(),
+                message + " hitlag deployable");
+        assertEquals(headshotOnly,
+                action.getHitlagProfile().isHeadshotOnly(),
+                message + " hitlag headshot-only");
     }
 
     private static void assertEquals(

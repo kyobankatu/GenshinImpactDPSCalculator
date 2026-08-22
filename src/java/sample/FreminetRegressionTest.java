@@ -98,6 +98,7 @@ public final class FreminetRegressionTest {
         List<ActionRecord> c0Records = captureActions(c0Simulator);
         double[] t9 = { 1.547626, 1.482182, 1.872189, 2.274552 };
         int[] durations = { 47, 49, 65, 86 };
+        int[] hitlagFrames = { 8, 8, 8, 9 };
         for (int index = 0; index < t9.length; index++) {
             double castTime = c0Simulator.getCurrentTime();
             perform(c0Simulator, CharacterActionKey.NORMAL);
@@ -107,7 +108,8 @@ public final class FreminetRegressionTest {
             assertEquals(Element.PHYSICAL,
                     c0Records.get(index).action.getElement(),
                     "Freminet physical Normal element");
-            assertClose(castTime + durations[index] * FRAME,
+            assertClose(castTime
+                            + (durations[index] + hitlagFrames[index]) * FRAME,
                     c0Simulator.getCurrentTime(),
                     "Freminet Normal recovery");
         }
@@ -216,7 +218,7 @@ public final class FreminetRegressionTest {
                 "Freminet A4 applies Pressure-only DMG bonus");
         assertClose(2.0, freminet.getCurrentEnergy(),
                 "Freminet C2 restores two Energy below level four");
-        assertClose(391.0 * FRAME - EPSILON,
+        assertClose((391.0 - 6.0) * FRAME - EPSILON,
                 freminet.getSkillCDRemaining(simulator.getCurrentTime()),
                 "Freminet A1 reduces the remaining cooldown below level four");
     }

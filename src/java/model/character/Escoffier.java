@@ -28,6 +28,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -40,7 +41,7 @@ import simulation.event.SimpleTimerEvent;
  * application group, while delayed travel hits own emission-time stats.</p>
  *
  * <p>Healing and player HP, Hold Skill collection and movement, geometry,
- * multi-target and random targeting, stamina, hitlag, low Plunge, and defensive
+ * multi-target and random targeting, stamina, hitlag extension, low Plunge, and defensive
  * state are excluded. C4 is inactive because its Energy branch is reached only
  * through the excluded healing sequence.</p>
  */
@@ -64,6 +65,13 @@ public final class Escoffier extends Character implements
     private static final double[] A4_SHRED = {
         0.0, 0.05, 0.10, 0.15, 0.55
     };
+
+    /**
+     * Normal-attack hitlag from gcsim Go data pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_HITLAG =
+            new HitlagProfile(0.06, 0.01, true, false, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -745,6 +753,9 @@ public final class Escoffier extends Character implements
         action.setICD(icdType, icdTag, gauge);
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
+        if (hit.kind == HitKind.NORMAL) {
+            action.setHitlagProfile(NORMAL_HITLAG);
+        }
         if (hit.snapshot != null) {
             action.setStatSnapshot(hit.snapshot);
         }

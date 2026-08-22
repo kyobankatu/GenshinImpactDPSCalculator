@@ -57,8 +57,8 @@ public final class ThomaRegressionTest {
                 "Thoma exact-name identity");
         assertEquals(CharacterRegion.INAZUMA, CharacterId.THOMA.getRegion(),
                 "Thoma region");
-        assertEquals(CharacterId.UNKNOWN, CharacterId.fromNumericId(59),
-                "Thoma next identity remains unassigned");
+        assertEquals(CharacterId.YAOYAO, CharacterId.fromNumericId(59),
+                "Thoma next numeric identity");
         assertEquals(CharacterId.UNKNOWN, CharacterId.fromName("thoma"),
                 "Thoma lookup remains case-sensitive");
 
@@ -126,8 +126,8 @@ public final class ThomaRegressionTest {
             0.815596, 0.801534, 0.492170, 0.492170, 1.237456
         };
         double[] times = {
-            13.0, 21.0 + 18.0, 48.0 + 10.0,
-            48.0 + 23.0, 80.0 + 20.0
+            13.0, 29.0 + 18.0, 65.0 + 10.0,
+            65.0 + 23.0, 97.0 + 20.0
         };
         for (int index = 0; index < normals.size(); index++) {
             ActionRecord record = normals.get(index);
@@ -145,7 +145,7 @@ public final class ThomaRegressionTest {
                     record.action.getICDTag(),
                     "Thoma Normal ICD tag " + index);
         }
-        assertClose(138.0 * FRAME, simulator.getCurrentTime(),
+        assertClose(155.0 * FRAME, simulator.getCurrentTime(),
                 "Thoma Normal string duration");
 
         simulator.switchCharacter(CharacterId.NOELLE);
@@ -209,7 +209,7 @@ public final class ThomaRegressionTest {
         assertClose(9.0 * FRAME + 15.0,
                 c0.getSkillCooldownEndTime(),
                 "Thoma Skill cooldown duration");
-        assertClose(46.0 * FRAME, simulator.getCurrentTime(),
+        assertClose(54.0 * FRAME, simulator.getCurrentTime(),
                 "Thoma Skill action duration");
         advanceTo(simulator, 112.0 * FRAME);
         assertEquals(1, particles.size(),

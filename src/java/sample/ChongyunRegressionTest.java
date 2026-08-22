@@ -123,6 +123,7 @@ public final class ChongyunRegressionTest {
         };
         int[] hitmarks = { 26, 24, 41, 53 };
         int[] durations = { 30, 36, 57, 101 };
+        int[] hitlagFrames = { 10, 9, 11, 11 };
         for (int step = 0; step < multipliers.length; step++) {
             double castTime = sim.getCurrentTime();
             perform(sim, CharacterId.CHONGYUN, CharacterActionKey.NORMAL);
@@ -133,7 +134,8 @@ public final class ChongyunRegressionTest {
             assertClose(castTime + hitmarks[step] * FRAME,
                     record.time, EPS,
                     "Chongyun N" + (step + 1) + " hitmark");
-            assertClose(castTime + durations[step] * FRAME,
+            assertClose(castTime
+                            + (durations[step] + hitlagFrames[step]) * FRAME,
                     sim.getCurrentTime(), EPS,
                     "Chongyun N" + (step + 1) + " duration");
             assertAttack(
@@ -247,7 +249,8 @@ public final class ChongyunRegressionTest {
         ActionRecord skill = skillRecords.get(0);
         assertClose(36.0 * FRAME, skill.time, EPS,
                 "Layered Frost hitmark");
-        assertClose(52.0 * FRAME, sim.getCurrentTime(), EPS,
+        assertClose((52.0 + 6.0) * FRAME,
+                sim.getCurrentTime(), EPS,
                 "Layered Frost duration");
         assertClose(2.92468, skill.action.getDamagePercent(), EPS,
                 "Layered Frost talent-9 multiplier");
@@ -275,7 +278,7 @@ public final class ChongyunRegressionTest {
         assertClose(normalCast + 26.0 * FRAME,
                 normals.get(0).time, EPS,
                 "A1 leaves Chongyun N1 hitmark unchanged");
-        assertClose(normalCast + 28.0 * FRAME,
+        assertClose(normalCast + (28.0 + 10.0) * FRAME,
                 sim.getCurrentTime(), EPS,
                 "A1 applies integer frame adjustment to N1 duration");
         assertAttack(
@@ -636,7 +639,7 @@ public final class ChongyunRegressionTest {
                 CharacterActionKey.NORMAL);
         assertEquals(Element.CRYO, normals.get(0).action.getElement(),
                 "weaponless Chongyun retains intrinsic claymore infusion");
-        assertClose(castTime + 28.0 * FRAME,
+        assertClose(castTime + (28.0 + 10.0) * FRAME,
                 nullWeaponSim.getCurrentTime(), EPS,
                 "weaponless Chongyun remains eligible for A1 speed");
     }

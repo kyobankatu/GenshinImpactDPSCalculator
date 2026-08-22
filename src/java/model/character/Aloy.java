@@ -27,6 +27,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -58,6 +59,15 @@ public final class Aloy extends Character implements
     private static final double[][] NORMAL_MULTIPLIERS = {
         { 0.3552, 0.3996 }, { 0.7252 }, { 0.888 }, { 1.10408 }
     };
+
+    /**
+     * Hitlag from gcsim config YAML pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile AIMED_HEADSHOT_HITLAG =
+            new HitlagProfile(0.12, 0.01, false, true, true);
+    private static final HitlagProfile BOMBLET_HITLAG =
+            new HitlagProfile(0.0, 0.0, true, true, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -443,6 +453,7 @@ public final class Aloy extends Character implements
                 ICDTag.None,
                 1.0);
         action.setStatSnapshot(hit.snapshot);
+        action.setHitlagProfile(AIMED_HEADSHOT_HITLAG);
         simulator.performActionWithoutTimeAdvance(characterId, action);
     }
 
@@ -483,6 +494,7 @@ public final class Aloy extends Character implements
                 ICDTag.ElementalSkill,
                 1.0);
         action.setStatSnapshot(hit.snapshot);
+        action.setHitlagProfile(BOMBLET_HITLAG);
         simulator.performActionWithoutTimeAdvance(characterId, action);
         if (simulator.getEnemy() != null) {
             gainCoil(simulator);

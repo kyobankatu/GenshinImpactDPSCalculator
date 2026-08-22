@@ -29,6 +29,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -39,8 +40,8 @@ import simulation.event.SimpleTimerEvent;
  * {@code ef41805d}. The sourced 0U Spiritbreath hit is represented as direct
  * Cryo damage without adding a separate Arkhe aura system.</p>
  *
- * <p>Underwater utility, geometry, hitlag, airborne validation, and defensive
- * behavior are outside this vertical slice.</p>
+ * <p>Underwater utility, geometry, hitlag-based modifier extension, airborne
+ * validation, and defensive behavior are outside this vertical slice.</p>
  */
 public final class Freminet extends Character implements
         ReactionAwareCharacter,
@@ -72,6 +73,19 @@ public final class Freminet extends Character implements
     private static final double[] PRESSURE_PHYSICAL_T12 = {
         0.973760, 1.704080, 2.434400, 4.868800
     };
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile[] NORMAL_HITLAG = {
+        new HitlagProfile(0.06, 0.01, true, false, false),
+        new HitlagProfile(0.06, 0.01, true, false, false),
+        new HitlagProfile(0.06, 0.01, true, false, false),
+        new HitlagProfile(0.09, 0.01, true, false, false)
+    };
+    private static final HitlagProfile THRUST_HITLAG =
+            new HitlagProfile(0.08, 0.01, false, false, false);
+    private static final HitlagProfile PRESSURE_CRYO_HITLAG =
+            new HitlagProfile(0.10, 0.01, false, false, false);
+    private static final HitlagProfile PRESSURE_LEVEL_FOUR_HITLAG =
+            new HitlagProfile(0.09, 0.01, false, false, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -646,10 +660,28 @@ public final class Freminet extends Character implements
         action.setICD(icdType, icdTag, gauge);
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
+        action.setHitlagProfile(hitlagProfile(hit));
         action.setStatSnapshot(hit.snapshot == null
                 ? captureLiveStats(simulator.getCurrentTime())
                 : hit.snapshot);
         simulator.performActionWithoutTimeAdvance(characterId, action);
+    }
+
+    private static HitlagProfile hitlagProfile(PendingHit hit) {
+        switch (hit.kind) {
+            case NORMAL:
+                return NORMAL_HITLAG[hit.index];
+            case THRUST:
+                return THRUST_HITLAG;
+            case PRESSURE_CRYO:
+                return PRESSURE_CRYO_HITLAG;
+            case PRESSURE_PHYSICAL:
+                return hit.index == 4
+                        ? PRESSURE_LEVEL_FOUR_HITLAG
+                        : HitlagProfile.none();
+            default:
+                return HitlagProfile.none();
+        }
     }
 
     private double skillValue(

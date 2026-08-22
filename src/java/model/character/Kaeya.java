@@ -17,6 +17,7 @@ import model.type.StatType;
 import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -37,6 +38,17 @@ public class Kaeya extends Character implements FormStateProvider {
     private static final double BURST_DURATION = 8.0;
     private static final int BASE_BURST_HITS = 13;
     private static final int C6_BURST_HITS = 17;
+    /**
+     * Normal hitlag from gcsim pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile[] NORMAL_HITLAG = {
+        new HitlagProfile(0.03, 0.01, true, false, false),
+        new HitlagProfile(0.03, 0.01, true, false, false),
+        new HitlagProfile(0.06, 0.01, true, false, false),
+        new HitlagProfile(0.06, 0.01, true, false, false),
+        new HitlagProfile(0.10, 0.01, true, false, false)
+    };
 
     private int normalAttackStep;
 
@@ -211,6 +223,7 @@ public class Kaeya extends Character implements FormStateProvider {
                 durations[normalAttackStep],
                 ActionType.NORMAL);
         normal.setICD(ICDType.Standard, ICDTag.NormalAttack, 0.0);
+        normal.setHitlagProfile(NORMAL_HITLAG[normalAttackStep]);
         addC1CritBonus(normal, sim);
         sim.performAction(characterId, normal);
 

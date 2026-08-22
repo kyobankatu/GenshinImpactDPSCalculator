@@ -103,6 +103,7 @@ public final class ShikanoinHeizouRegressionTest {
             { 0.251301, 0.276434, 0.326699 }, { 1.044643 }
         };
         int[] durations = { 21, 21, 46, 38, 66 };
+        int[] hitlagFrames = { 6, 6, 8, 9, 11 };
         int recordIndex = 0;
         for (int step = 0; step < multipliers.length; step++) {
             double castTime = simulator.getCurrentTime();
@@ -120,7 +121,8 @@ public final class ShikanoinHeizouRegressionTest {
                         record.action.getICDType(),
                         "Heizou Normal standard ICD");
             }
-            assertClose(castTime + durations[step] * FRAME,
+            assertClose(castTime
+                            + (durations[step] + hitlagFrames[step]) * FRAME,
                     simulator.getCurrentTime(),
                     "Heizou Normal recovery");
         }
@@ -179,7 +181,7 @@ public final class ShikanoinHeizouRegressionTest {
                 effectiveStats(simulator, heizou).get(
                         StatType.ELEMENTAL_MASTERY),
                 "Heizou A4 excludes its owner");
-        assertClose(10.0 - 21.0 * FRAME,
+        assertClose(10.0 - (21.0 + 6.0) * FRAME,
                 heizou.getSkillCDRemaining(simulator.getCurrentTime()),
                 "Heizou Skill cooldown starts at release frame");
     }
@@ -231,7 +233,7 @@ public final class ShikanoinHeizouRegressionTest {
                 "Heartstopper Strike (Max Stacks)").get(0);
         assertClose(fullStackCast + 37.0 * FRAME, penalized.time,
                 "Heizou full-stack Hold retains 17-frame release penalty");
-        assertClose(fullStackCast + 56.0 * FRAME,
+        assertClose(fullStackCast + (56.0 + 8.0) * FRAME,
                 fullStackSimulator.getCurrentTime(),
                 "Heizou full-stack Hold recovery includes release penalty");
     }

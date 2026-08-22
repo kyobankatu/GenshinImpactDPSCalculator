@@ -25,6 +25,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -41,7 +42,7 @@ import simulation.event.SimpleTimerEvent;
  * <p>Actual player HP, healing, damage intake, resistance and interruption
  * resistance effects, movement and geometry, multi-target or random target
  * selection, target-death collection, external Bond of Life integrations,
- * hitlag, stamina, low Plunge, and optional plunge collision selection are
+ * hitlag extension, stamina, low Plunge, and optional plunge collision selection are
  * excluded. Fixed-target collection and high-Plunge landing damage remain
  * deterministic.</p>
  */
@@ -73,6 +74,17 @@ public final class Arlecchino extends Character implements
         { 1.578656 },
         { 1.925974 }
     };
+
+    /**
+     * Unambiguous hitlag from gcsim pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_HITLAG =
+            new HitlagProfile(0.02, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_N4_FIRST_HITLAG =
+            new HitlagProfile(0.0, 0.0, true, false, false);
+    private static final HitlagProfile SKILL_CLEAVE_HITLAG =
+            new HitlagProfile(0.0, 0.01, true, false, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -340,7 +352,7 @@ public final class Arlecchino extends Character implements
         return false;
     }
 
-    /** Reports that stamina and hitlag are excluded. */
+    /** Reports that stamina and complete hitlag coverage are excluded. */
     public boolean isStaminaHitlagRepresented() {
         return false;
     }
@@ -660,6 +672,11 @@ public final class Arlecchino extends Character implements
                 masque ? 1.0 : 0.0,
                 snapshot,
                 additiveDamage);
+        if (event.index <= 2 || event.index == 5) {
+            action.setHitlagProfile(NORMAL_HITLAG);
+        } else if (event.index == 3 && event.variant == 0) {
+            action.setHitlagProfile(NORMAL_N4_FIRST_HITLAG);
+        }
         resolvingMasqueNormal = masque;
         try {
             simulator.performActionWithoutTimeAdvance(characterId, action);
@@ -747,6 +764,9 @@ public final class Arlecchino extends Character implements
                 captureLiveStats(event.time, ActionType.SKILL),
                 0.0);
         action.setCountsAsSkillDmg(true);
+        if (cleave) {
+            action.setHitlagProfile(SKILL_CLEAVE_HITLAG);
+        }
         resolvingSkillCleave = cleave;
         resolvingGeneration = event.generation;
         try {

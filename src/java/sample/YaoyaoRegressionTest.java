@@ -119,8 +119,8 @@ public final class YaoyaoRegressionTest {
             0.937003, 0.871623, 0.576463, 0.605282, 1.431764
         };
         double[] frames = {
-            13.0, 28.0 + 16.0, 59.0 + 12.0,
-            59.0 + 31.0, 110.0 + 21.0
+            13.0, 28.0 + 16.0 + 8.0, 59.0 + 12.0 + 16.0,
+            59.0 + 31.0 + 16.0, 110.0 + 21.0 + 21.0
         };
         for (int index = 0; index < normals.size(); index++) {
             ActionRecord record = normals.get(index);
@@ -133,7 +133,8 @@ public final class YaoyaoRegressionTest {
                     record.action.getActionType(),
                     "Yaoyao Normal action type " + index);
         }
-        assertClose(169.0 * FRAME, simulator.getCurrentTime(),
+        assertClose((169.0 + 30.0) * FRAME,
+                simulator.getCurrentTime(),
                 "Yaoyao Normal string duration");
         simulator.switchCharacter(CharacterId.NOELLE);
         simulator.switchCharacter(CharacterId.YAOYAO);
@@ -154,6 +155,18 @@ public final class YaoyaoRegressionTest {
                 "Yaoyao Charged hitmark");
         assertClose(55.0 * FRAME, chargedSim.getCurrentTime(),
                 "Yaoyao Charged duration");
+        assertTrue(charged.action.getHitlagProfile().isDeployable(),
+                "Yaoyao Charged hitlag is target-only");
+        assertClose(0.0,
+                charged.action.getHitlagProfile().getHaltTimeSeconds(),
+                "Yaoyao Charged base halt time");
+        assertClose(0.01,
+                charged.action.getHitlagProfile().getFactor(),
+                "Yaoyao Charged hitlag factor");
+        assertTrue(charged.action.getHitlagProfile().canDefenseHalt(),
+                "Yaoyao Charged permits target Defense Halt");
+        assertTrue(!charged.action.getHitlagProfile().isHeadshotOnly(),
+                "Yaoyao Charged hitlag is not weak-point gated");
 
         Yaoyao plungeOwner = yaoyao(0);
         CombatSimulator plungeSim = simulatorWith(plungeOwner);
@@ -237,7 +250,8 @@ public final class YaoyaoRegressionTest {
         CombatSimulator simulator = simulatorWith(owner);
         List<ActionRecord> records = captureActions(simulator);
         perform(simulator, CharacterActionKey.BURST);
-        assertClose(63.0 * FRAME, simulator.getCurrentTime(),
+        assertClose((63.0 + 2.0) * FRAME,
+                simulator.getCurrentTime(),
                 "Yaoyao Burst action duration");
         assertClose(20.0, owner.getBurstCooldownEndTime(),
                 "Yaoyao Burst cooldown starts at cast");

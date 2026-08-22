@@ -28,6 +28,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -38,7 +39,7 @@ import simulation.event.SimpleTimerEvent;
  * snapshots, A1/A4, and representable constellations follow pinned gcsim
  * {@code ef41805d} and maintained KQM evidence.</p>
  *
- * <p>Enemy-HP-dependent C1, multi-target Burst selection, geometry, hitlag,
+ * <p>Enemy-HP-dependent C1, multi-target Burst selection, geometry,
  * stamina, interruption, and player-damage behavior are excluded.</p>
  */
 public final class KamisatoAyato extends Character implements
@@ -65,6 +66,20 @@ public final class KamisatoAyato extends Character implements
     private static final double[] SHUNSUIKEN_C3_MULTIPLIERS = {
         1.1931, 1.3289, 1.4647
     };
+    /**
+     * Per-hit metadata from gcsim pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_HITLAG_SHORT =
+            new HitlagProfile(0.03, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_N3 =
+            new HitlagProfile(0.06, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_N5 =
+            new HitlagProfile(0.08, 0.01, true, false, false);
+    private static final HitlagProfile SHUNSUIKEN_HITLAG =
+            new HitlagProfile(0.03, 0.01, false, false, false);
+    private static final HitlagProfile C6_HITLAG =
+            new HitlagProfile(0.03, 0.01, false, true, false);
 
     private final DoubleSupplier particleDrawSource;
     private final List<Double> particleDrawTape = new ArrayList<>();
@@ -479,6 +494,10 @@ public final class KamisatoAyato extends Character implements
                 ICDTag.NormalAttack,
                 0.0);
         action.setStatSnapshot(captureLiveStats(simulator.getCurrentTime()));
+        HitlagProfile hitlagProfile = normalHitlag(hit.index);
+        if (hitlagProfile != null) {
+            action.setHitlagProfile(hitlagProfile);
+        }
         simulator.performActionWithoutTimeAdvance(characterId, action);
     }
 
@@ -529,6 +548,7 @@ public final class KamisatoAyato extends Character implements
                 ICDTag.NormalAttack,
                 1.0);
         action.setStatSnapshot(hit.snapshot);
+        action.setHitlagProfile(SHUNSUIKEN_HITLAG);
         resolvingShunsuikenAction = action;
         try {
             simulator.performActionWithoutTimeAdvance(characterId, action);
@@ -565,7 +585,21 @@ public final class KamisatoAyato extends Character implements
                 ICDTag.NormalAttack,
                 1.0);
         action.setStatSnapshot(captureLiveStats(simulator.getCurrentTime()));
+        action.setHitlagProfile(C6_HITLAG);
         simulator.performActionWithoutTimeAdvance(characterId, action);
+    }
+
+    private static HitlagProfile normalHitlag(int step) {
+        if (step <= 1) {
+            return NORMAL_HITLAG_SHORT;
+        }
+        if (step == 2) {
+            return NORMAL_HITLAG_N3;
+        }
+        if (step == 4) {
+            return NORMAL_HITLAG_N5;
+        }
+        return null;
     }
 
     private void resolveBurst(

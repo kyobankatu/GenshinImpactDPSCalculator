@@ -58,6 +58,7 @@ public final class KaedeharaKazuhaRegressionTest {
             { 13 }, { 11 }, { 16, 26 }, { 16 }, { 15, 19, 28 }
         };
         int[] durations = { 22, 26, 41, 46, 80 };
+        int[] hitlagFrames = { 6, 6, 8, 8, 8 };
         double[][] multipliers = {
             { 0.82634 }, { 0.83108 }, { 0.474, 0.5688 },
             { 1.11548 }, { 0.4661, 0.4661, 0.4661 }
@@ -79,7 +80,8 @@ public final class KaedeharaKazuhaRegressionTest {
                         record.action.getActionType(),
                         "Kazuha Normal category");
             }
-            assertClose(castTime + durations[step] * FRAME,
+            assertClose(castTime
+                            + (durations[step] + hitlagFrames[step]) * FRAME,
                     simulator.getCurrentTime(),
                     "Kazuha Normal recovery");
         }

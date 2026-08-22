@@ -107,7 +107,10 @@ public final class YunJinRegressionTest {
             0.74418, 0.73944, 0.42186, 0.5056,
             0.44082, 0.5293, 1.23714
         };
-        double[] hitFrames = { 15, 33, 50, 65, 84, 96, 133 };
+        double[] hitFrames = {
+            15, 33 + 6, 50 + 12, 65 + 12,
+            84 + 18, 96 + 18, 133 + 20
+        };
         assertEquals(7, records.size(),
                 "Yun Jin N1-N5 damage instances");
         for (int index = 0; index < records.size(); index++) {
@@ -132,7 +135,8 @@ public final class YunJinRegressionTest {
             assertTrue(!record.action.hasStatSnapshot(),
                     "Yun Jin Normal resolves live stats");
         }
-        assertClose(185.0 * FRAME, simulator.getCurrentTime(),
+        assertClose((185.0 + 26.0) * FRAME,
+                simulator.getCurrentTime(),
                 "Yun Jin N1-N5 duration");
 
         YunJin chargedYunJin = new YunJin(null, null, 0);
@@ -189,7 +193,8 @@ public final class YunJinRegressionTest {
         ActionRecord pressHit = pressRecords.get(0);
         assertClose(13.0 * FRAME, pressHit.time,
                 "Yun Jin Press hitmark");
-        assertClose(62.0 * FRAME, pressSimulator.getCurrentTime(),
+        assertClose((62.0 + 8.0) * FRAME,
+                pressSimulator.getCurrentTime(),
                 "Yun Jin Press duration");
         assertClose(2.53504, pressHit.action.getDamagePercent(),
                 "Yun Jin Press multiplier");
@@ -253,7 +258,8 @@ public final class YunJinRegressionTest {
         ActionRecord holdHit = holdRecords.get(0);
         assertClose(93.0 * FRAME, holdHit.time,
                 "Yun Jin Hold Level 2 hitmark");
-        assertClose(141.0 * FRAME, holdSimulator.getCurrentTime(),
+        assertClose((141.0 + 11.0) * FRAME,
+                holdSimulator.getCurrentTime(),
                 "Yun Jin Hold Level 2 duration");
         assertClose(6.3376, holdHit.action.getDamagePercent(),
                 "Yun Jin Hold Level 2 multiplier");
@@ -416,7 +422,7 @@ public final class YunJinRegressionTest {
         assertClose(c5CastTime + 15.0 * FRAME,
                 c5Records.get(0).time,
                 "Yun Jin C5 N1 baseline hitmark");
-        assertClose(c5CastTime + 20.0 * FRAME,
+        assertClose(c5CastTime + (20.0 + 6.0) * FRAME,
                 c5Simulator.getCurrentTime(),
                 "Yun Jin C5 N1 baseline duration");
 
@@ -430,7 +436,8 @@ public final class YunJinRegressionTest {
         assertClose(activeC6CastTime + 15.0 * FRAME / 1.12,
                 activeC6Records.get(0).time,
                 "Yun Jin C6 scales N1 hitmark by 12 percent");
-        assertClose(activeC6CastTime + 20.0 * FRAME / 1.12,
+        assertClose(activeC6CastTime + 20.0 * FRAME / 1.12
+                        + 6.0 * FRAME,
                 activeC6Simulator.getCurrentTime(),
                 "Yun Jin C6 scales N1 duration by 12 percent");
 
@@ -454,7 +461,7 @@ public final class YunJinRegressionTest {
         assertClose(exhaustedC6CastTime + 15.0 * FRAME,
                 exhaustedC6Records.get(0).time,
                 "Yun Jin exhausted C6 restores N1 hitmark baseline");
-        assertClose(exhaustedC6CastTime + 20.0 * FRAME,
+        assertClose(exhaustedC6CastTime + (20.0 + 6.0) * FRAME,
                 exhaustedC6Simulator.getCurrentTime(),
                 "Yun Jin exhausted C6 restores N1 duration baseline");
     }

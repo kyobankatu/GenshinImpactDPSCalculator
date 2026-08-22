@@ -21,6 +21,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -64,6 +65,24 @@ public final class Qiqi extends Character
     private static final int[] NORMAL_DURATION_FRAMES = {
             21, 22, 33, 28, 53
     };
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile[][] NORMAL_HITLAG = {
+        { new HitlagProfile(0.03, 0.01, true, false, false) },
+        { new HitlagProfile(0.03, 0.01, true, false, false) },
+        {
+            new HitlagProfile(0.03, 0.05, true, false, false),
+            new HitlagProfile(0.03, 0.05, true, false, false)
+        },
+        {
+            new HitlagProfile(0.03, 0.05, true, false, false),
+            new HitlagProfile(0.03, 0.05, true, false, false)
+        },
+        { new HitlagProfile(0.12, 0.01, true, false, false) }
+    };
+    private static final HitlagProfile HERALD_INITIAL_HITLAG =
+            new HitlagProfile(0.05, 0.05, true, false, false);
+    private static final HitlagProfile HERALD_SWIPE_HITLAG =
+            new HitlagProfile(0.05, 0.05, true, true, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -266,6 +285,7 @@ public final class Qiqi extends Character
                     ICDTag.NormalAttack,
                     0.0,
                     false);
+            action.setHitlagProfile(NORMAL_HITLAG[step][hit]);
             schedule(
                     simulator,
                     castTime + NORMAL_HITMARK_FRAMES[step][hit] * FRAME,
@@ -372,6 +392,7 @@ public final class Qiqi extends Character
                     1.0,
                     false);
             initial.setStatSnapshot(snapshot);
+            initial.setHitlagProfile(HERALD_INITIAL_HITLAG);
             activeSim.performActionWithoutTimeAdvance(
                     characterId, initial);
             pendingHerald = herald.withSnapshot(snapshot);
@@ -407,6 +428,7 @@ public final class Qiqi extends Character
                     1.0,
                     false);
             swipe.setStatSnapshot(herald.snapshot);
+            swipe.setHitlagProfile(HERALD_SWIPE_HITLAG);
             activeSim.performActionWithoutTimeAdvance(characterId, swipe);
             if (constellation >= 1
                     && isTalismanActive(activeSim.getCurrentTime())) {

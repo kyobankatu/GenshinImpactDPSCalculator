@@ -84,6 +84,7 @@ public final class QiqiRegressionTest {
                 { 11 }, { 10 }, { 9, 20 }, { 8, 18 }, { 16 }
         };
         int[] durations = { 21, 22, 33, 28, 53 };
+        int[] hitlagFrames = { 6, 6, 12, 12, 11 };
         double[] multipliers = {
                 0.69362, 0.71416, 0.44398, 0.45346, 1.15814
         };
@@ -100,7 +101,8 @@ public final class QiqiRegressionTest {
                         record.action.getDamagePercent(),
                         "Qiqi N" + (step + 1) + " multiplier");
             }
-            assertClose(castTime + durations[step] * FRAME,
+            assertClose(castTime
+                            + (durations[step] + hitlagFrames[step]) * FRAME,
                     simulator.getCurrentTime(),
                     "Qiqi N" + (step + 1) + " duration");
         }
@@ -165,7 +167,7 @@ public final class QiqiRegressionTest {
                 initial.get(0).action.getStatSnapshot()
                         .get(StatType.ATK_PERCENT),
                 "Qiqi Skill initial snapshots frame-32 stats");
-        assertClose(57.0 * FRAME, simulator.getCurrentTime(),
+        assertClose((57.0 + 7.0) * FRAME, simulator.getCurrentTime(),
                 "Qiqi Skill duration");
         assertClose(30.0 + 3.0 * FRAME,
                 qiqi.getSkillCooldownEndTime(),

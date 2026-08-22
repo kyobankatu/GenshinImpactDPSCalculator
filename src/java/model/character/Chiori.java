@@ -25,6 +25,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -36,7 +37,7 @@ import simulation.event.SimpleTimerEvent;
  * sourced hit. Tamoto replacement and all delayed work survive rollback.</p>
  *
  * <p>Hold movement, the second Skill press and forced swap, Geo-construct
- * discovery, target geometry, hitlag, stamina, and low Plunge are excluded.
+ * discovery, target geometry, hitlag extension, stamina, and low Plunge are excluded.
  * C1's second Tamoto therefore requires another Geo party member, while the
  * construct alternative and A4 construct trigger fail closed.</p>
  */
@@ -62,6 +63,19 @@ public final class Chiori extends Character implements
     private static final double TAMOTO_FIRST_DELAY = 0.6;
     private static final double TAMOTO_SECOND_DELAY = 1.2;
     private static final double KINU_DELAY = 41.0 * FRAME;
+
+    /**
+     * Per-hit hitlag from gcsim pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_SHORT_HITLAG =
+            new HitlagProfile(0.03, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_N3_FIRST_HITLAG =
+            new HitlagProfile(0.06, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_N4_HITLAG =
+            new HitlagProfile(0.0, 0.05, true, false, false);
+    private static final HitlagProfile CHARGED_SECOND_HITLAG =
+            new HitlagProfile(0.06, 0.01, true, false, false);
 
     private final DoubleSupplier random;
     private CombatSimulator initializedSimulator;
@@ -573,6 +587,13 @@ public final class Chiori extends Character implements
                 ICDType.Standard,
                 ICDTag.NormalAttack,
                 event.element == Element.GEO ? 1.0 : 0.0);
+        if (event.index < 2) {
+            action.setHitlagProfile(NORMAL_SHORT_HITLAG);
+        } else if (event.index == 2 && event.subIndex == 0) {
+            action.setHitlagProfile(NORMAL_N3_FIRST_HITLAG);
+        } else if (event.index == 3) {
+            action.setHitlagProfile(NORMAL_N4_HITLAG);
+        }
         simulator.performActionWithoutTimeAdvance(characterId, action);
     }
 
@@ -591,6 +612,9 @@ public final class Chiori extends Character implements
                 ActionType.CHARGE);
         action.setICD(
                 ICDType.Standard, ICDTag.NormalAttack, 0.0);
+        if (event.subIndex == 1) {
+            action.setHitlagProfile(CHARGED_SECOND_HITLAG);
+        }
         simulator.performActionWithoutTimeAdvance(characterId, action);
     }
 

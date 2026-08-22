@@ -89,6 +89,7 @@ public final class BeidouRegressionTest {
                 simulator, "Oceanborne N");
         int[] hitmarks = { 23, 22, 45, 25, 43 };
         int[] durations = { 31, 36, 54, 36, 96 };
+        int[] hitlagFrames = { 9, 11, 9, 9, 11 };
         double[] multipliers = {
                 1.30666, 1.30192, 1.62266, 1.58948, 2.06032
         };
@@ -102,7 +103,8 @@ public final class BeidouRegressionTest {
             assertClose(multipliers[step],
                     record.action.getDamagePercent(),
                     "Beidou N" + (step + 1) + " multiplier");
-            assertClose(castTime + durations[step] * FRAME,
+            assertClose(castTime
+                            + (durations[step] + hitlagFrames[step]) * FRAME,
                     simulator.getCurrentTime(),
                     "Beidou N" + (step + 1) + " duration");
             assertEquals(ActionType.NORMAL,
@@ -163,7 +165,7 @@ public final class BeidouRegressionTest {
                 "Tidecaller Electro gauge");
         assertTrue(!skill.hasStatSnapshot(),
                 "Tidecaller evaluates stats dynamically");
-        assertClose(45.0 * FRAME, simulator.getCurrentTime(),
+        assertClose((45.0 + 9.0) * FRAME, simulator.getCurrentTime(),
                 "Tidecaller action duration");
         assertClose(4.0 * FRAME + 7.5,
                 c0.getSkillCooldownEndTime(),
@@ -214,7 +216,8 @@ public final class BeidouRegressionTest {
                 "Stormbreaker initial Electro gauge");
         assertTrue(!initial.get(0).action.hasStatSnapshot(),
                 "Stormbreaker initial evaluates stats dynamically");
-        assertClose(58.0 * FRAME, simulator.getCurrentTime(),
+        assertClose((58.0 + 6.0) * FRAME,
+                simulator.getCurrentTime(),
                 "Stormbreaker action duration");
         assertClose(0.0, c0.getCurrentEnergy(),
                 "Stormbreaker spends 80 Energy at frame 6");

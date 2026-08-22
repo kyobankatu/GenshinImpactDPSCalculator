@@ -140,6 +140,17 @@ public final class FischlRegressionTest {
                 "Fischl fully charged gauge");
         assertClose(96.0 / 60.0, charged.getAnimationDuration(), EPS,
                 "Fischl fully charged duration");
+        assertClose(0.12,
+                charged.getHitlagProfile().getHaltTimeSeconds(), EPS,
+                "Fischl aimed headshot hitlag halt time");
+        assertClose(0.01, charged.getHitlagProfile().getFactor(), EPS,
+                "Fischl aimed headshot hitlag factor");
+        assertTrue(!charged.getHitlagProfile().canDefenseHalt(),
+                "Fischl aimed headshot excludes Defense Halt");
+        assertTrue(charged.getHitlagProfile().isDeployable(),
+                "Fischl aimed headshot hitlag is deployable");
+        assertTrue(charged.getHitlagProfile().isHeadshotOnly(),
+                "Fischl aimed hitlag requires a weak-point hit");
 
         records.clear();
         perform(sim, CharacterActionKey.PLUNGE);

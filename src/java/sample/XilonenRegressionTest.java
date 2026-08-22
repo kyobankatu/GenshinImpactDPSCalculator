@@ -114,12 +114,15 @@ public final class XilonenRegressionTest {
         };
         double[][] hitFrames = { { 18 }, { 50, 66 }, { 113 } };
         double[] endFrames = { 34, 91, 161 };
+        double[] priorHitlagFrames = { 0, 6, 18 };
+        double[] cumulativeHitlagFrames = { 6, 18, 26 };
         int recordIndex = 0;
         for (int step = 0; step < multipliers.length; step++) {
             perform(simulator, CharacterActionKey.NORMAL);
             for (int hit = 0; hit < multipliers[step].length; hit++) {
                 ActionRecord record = records.get(recordIndex++);
-                assertClose(hitFrames[step][hit] * FRAME,
+                assertClose((hitFrames[step][hit]
+                                + priorHitlagFrames[step]) * FRAME,
                         record.time,
                         "Xilonen Normal impact frame");
                 assertClose(multipliers[step][hit],
@@ -132,7 +135,8 @@ public final class XilonenRegressionTest {
                         record.action.getScalingStat(),
                         "Xilonen Normal ATK scaling");
             }
-            assertClose(endFrames[step] * FRAME,
+            assertClose((endFrames[step]
+                            + cumulativeHitlagFrames[step]) * FRAME,
                     simulator.getCurrentTime(),
                     "Xilonen Normal action duration");
         }
@@ -201,6 +205,11 @@ public final class XilonenRegressionTest {
                 "A1 low-conversion Nightsoul damage bonus");
         assertEquals(Element.GEO, roller.action.getElement(),
                 "Blade Roller Geo element");
+        assertClose(0.03,
+                roller.action.getHitlagProfile().getHaltTimeSeconds(),
+                "Blade Roller N1 halt time");
+        assertTrue(roller.action.getHitlagProfile().canDefenseHalt(),
+                "Blade Roller N1 permits Defense Halt");
 
         ICDManager manager = new ICDManager();
         assertTrue(manager.checkApplication(
@@ -251,7 +260,7 @@ public final class XilonenRegressionTest {
         assertTrue(xilonen.getNightsoulPoints() > 70.0,
                 "First A1 hit adds 35 points after drain");
         perform(simulator, CharacterActionKey.NORMAL);
-        double activationTime = 81.0 * FRAME;
+        double activationTime = (81.0 + 6.0) * FRAME;
         assertTrue(!xilonen.isNightsoulBlessingActive(),
                 "Maximum points exit Blessing after Roller action");
         assertTrue(xilonen.isSamplerActive(Element.PYRO,

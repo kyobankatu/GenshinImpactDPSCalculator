@@ -96,6 +96,7 @@ public final class DilucRegressionTest {
         };
         int[] hitFrames = { 24, 39, 26, 49 };
         int[] actionFrames = { 42, 56, 44, 111 };
+        int[] hitlagFrames = { 10, 9, 9, 11 };
 
         double castTime = 0.0;
         for (int step = 0; step < multipliers.length; step++) {
@@ -126,7 +127,7 @@ public final class DilucRegressionTest {
                     "Diluc physical Normal has no gauge");
             assertTrue(record.action.isShatterTrigger(),
                     "Diluc claymore Normal is blunt");
-            castTime += actionFrames[step] * FRAME;
+            castTime += (actionFrames[step] + hitlagFrames[step]) * FRAME;
             assertClose(castTime, sim.getCurrentTime(), EPS,
                     "Diluc Normal action duration");
         }
@@ -160,7 +161,8 @@ public final class DilucRegressionTest {
         assertEquals(1, skills.size(), "Diluc first Skill hit");
         assertClose(24.0 * FRAME, skills.get(0).time, EPS,
                 "Diluc first Skill hitmark");
-        assertClose(43.0 * FRAME, sim.getCurrentTime(), EPS,
+        assertClose((43.0 + 11.0) * FRAME,
+                sim.getCurrentTime(), EPS,
                 "Diluc first Skill duration");
         assertEquals(1, diluc.getSkillStage(sim.getCurrentTime()),
                 "Diluc exposes second Skill stage");
@@ -174,7 +176,7 @@ public final class DilucRegressionTest {
 
         perform(sim, CharacterActionKey.SKILL);
         assertEquals(2, skills.size(), "Diluc second Skill hit");
-        assertClose((43.0 + 28.0) * FRAME,
+        assertClose((43.0 + 11.0 + 28.0) * FRAME,
                 skills.get(1).time, EPS,
                 "Diluc second Skill hitmark");
         assertSkill(skills.get(1).action, 1.6592,
@@ -184,22 +186,23 @@ public final class DilucRegressionTest {
 
         perform(sim, CharacterActionKey.SKILL);
         assertEquals(3, skills.size(), "Diluc third Skill hit");
-        assertClose((43.0 + 49.0 + 46.0) * FRAME,
+        assertClose((43.0 + 11.0 + 49.0 + 11.0 + 46.0) * FRAME,
                 skills.get(2).time, EPS,
                 "Diluc third Skill hitmark");
         assertSkill(skills.get(2).action, 2.1896,
                 "Diluc third Skill");
         assertEquals(0, diluc.getSkillStage(sim.getCurrentTime()),
                 "Diluc third Skill closes chain");
-        assertClose(163.0 * FRAME, sim.getCurrentTime(), EPS,
+        assertClose((163.0 + 36.0) * FRAME,
+                sim.getCurrentTime(), EPS,
                 "Diluc three-stage action duration");
-        assertClose(10.0 - 163.0 * FRAME,
+        assertClose(10.0 - (163.0 + 36.0) * FRAME,
                 diluc.getSkillCDRemaining(sim.getCurrentTime()), EPS,
                 "Diluc cooldown remains anchored to first cast");
-        assertClose(3.75, diluc.getTotalParticleEnergy(), EPS,
-                "Diluc first deterministic particle packet arrives");
+        assertClose(7.5, diluc.getTotalParticleEnergy(), EPS,
+                "Diluc first two deterministic particle packets arrive");
 
-        advanceTo(sim, 238.0 * FRAME);
+        advanceTo(sim, 260.0 * FRAME + EPS);
         assertClose(11.25, diluc.getTotalParticleEnergy(), EPS,
                 "Diluc all Skill particles arrive after 100 frames");
 
@@ -207,7 +210,7 @@ public final class DilucRegressionTest {
         perform(sim, CharacterActionKey.SKILL);
         assertTrue(beforeGateway < 10.0,
                 "Diluc follow-up request starts before cooldown end");
-        assertClose(10.0 + 43.0 * FRAME,
+        assertClose(10.0 + (43.0 + 11.0) * FRAME,
                 sim.getCurrentTime(), EPS,
                 "Diluc gateway waits to first-cast cooldown end");
         assertClose(10.0 + 24.0 * FRAME,
@@ -314,10 +317,11 @@ public final class DilucRegressionTest {
         perform(sim, CharacterActionKey.BURST);
         assertClose(0.0, c0.getCurrentEnergy(), EPS,
                 "Diluc Dawn consumes 40 Energy");
-        assertClose(140.0 * FRAME, sim.getCurrentTime(), EPS,
+        assertClose((140.0 + 9.0) * FRAME,
+                sim.getCurrentTime(), EPS,
                 "Diluc Dawn action duration");
-        assertEquals(4, burst.size(),
-                "Diluc first four Dawn hits resolve during animation");
+        assertEquals(5, burst.size(),
+                "Diluc first five Dawn hits resolve during extended animation");
         assertTrue(c0.isPyroInfusionActive(sim.getCurrentTime()),
                 "Diluc Dawn infusion active after cast");
         assertClose(12.0, c0.getInfusionExpiresAt(), EPS,
@@ -325,7 +329,7 @@ public final class DilucRegressionTest {
         assertClose(0.20,
                 effectiveStats(sim, c0).get(StatType.PYRO_DMG_BONUS), EPS,
                 "Diluc A4 Pyro bonus");
-        assertClose(12.0 - 140.0 * FRAME,
+        assertClose(12.0 - (140.0 + 9.0) * FRAME,
                 c0.getBurstCDRemaining(sim.getCurrentTime()), EPS,
                 "Diluc Burst cooldown starts on cast");
 

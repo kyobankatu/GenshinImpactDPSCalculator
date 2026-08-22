@@ -29,6 +29,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -42,7 +43,7 @@ import simulation.event.SimpleTimerEvent;
  * delayed attacks are owner-bound and reconstructable after rollback.</p>
  *
  * <p>Player current HP and actual healing, external Bond integrations,
- * movement and geometry, multi-target or random selection, hitlag, stamina,
+ * movement and geometry, multi-target or random selection, hitlag extension, stamina,
  * low Plunge, exploration, interruption resistance, damage reduction, and
  * reactive defensive C6 Shades are excluded. Impale clears the local Bond
  * deterministically without fabricating player healing.</p>
@@ -78,6 +79,19 @@ public final class Clorinde extends Character implements
                     ReactionResult.Kind.QUICKEN,
                     ReactionResult.Kind.AGGRAVATE,
                     ReactionResult.Kind.HYPERBLOOM);
+
+    /**
+     * Unambiguous hitlag from gcsim pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_SHORT_HITLAG =
+            new HitlagProfile(0.03, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_RAPID_HITLAG =
+            new HitlagProfile(0.02, 0.05, true, false, false);
+    private static final HitlagProfile NORMAL_FINAL_HITLAG =
+            new HitlagProfile(0.03, 0.05, true, false, false);
+    private static final HitlagProfile SURGING_BLADE_HITLAG =
+            new HitlagProfile(0.0, 0.01, true, false, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -326,7 +340,7 @@ public final class Clorinde extends Character implements
         return false;
     }
 
-    /** Reports that hitlag is excluded. */
+    /** Reports that complete hitlag coverage is excluded. */
     public boolean isHitlagRepresented() {
         return false;
     }
@@ -876,10 +890,25 @@ public final class Clorinde extends Character implements
                 gauge,
                 snapshot,
                 additiveDamage);
+        action.setHitlagProfile(hitlagProfile(event));
         if (actionType == ActionType.SKILL) {
             action.setCountsAsSkillDmg(true);
         }
         performResolvedAction(simulator, action, particleEligible);
+    }
+
+    private static HitlagProfile hitlagProfile(PendingEvent event) {
+        if (event.kind == EventKind.NORMAL) {
+            if (event.index <= 2) {
+                return NORMAL_SHORT_HITLAG;
+            }
+            return event.index == 3
+                    ? NORMAL_RAPID_HITLAG : NORMAL_FINAL_HITLAG;
+        }
+        if (event.kind == EventKind.SURGING_BLADE) {
+            return SURGING_BLADE_HITLAG;
+        }
+        return HitlagProfile.none();
     }
 
     private void performResolvedAction(

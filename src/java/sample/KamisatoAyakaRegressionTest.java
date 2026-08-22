@@ -138,12 +138,12 @@ public final class KamisatoAyakaRegressionTest {
         };
         double[] times = {
             8.0 * FRAME,
-            32.0 * FRAME,
-            58.0 * FRAME,
-            82.0 * FRAME,
-            89.0 * FRAME,
-            96.0 * FRAME,
-            124.0 * FRAME
+            (32.0 + 6.0) * FRAME,
+            (58.0 + 12.0) * FRAME,
+            (82.0 + 20.0) * FRAME,
+            (89.0 + 20.0) * FRAME,
+            (96.0 + 20.0) * FRAME,
+            (124.0 + 26.0) * FRAME
         };
         for (int index = 0; index < records.size(); index++) {
             ActionRecord record = records.get(index);

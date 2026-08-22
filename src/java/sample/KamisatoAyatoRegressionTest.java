@@ -103,6 +103,7 @@ public final class KamisatoAyatoRegressionTest {
             { 0.541031, 0.541031 }, { 1.389010 }
         };
         int[] durations = { 15, 27, 30, 27, 63 };
+        int[] hitlagFrames = { 6, 6, 8, 0, 9 };
         int recordIndex = 0;
         for (int step = 0; step < multipliers.length; step++) {
             double castTime = simulator.getCurrentTime();
@@ -117,7 +118,8 @@ public final class KamisatoAyatoRegressionTest {
                         record.action.getActionType(),
                         "Ayato physical Normal category");
             }
-            assertClose(castTime + durations[step] * FRAME,
+            assertClose(castTime
+                            + (durations[step] + hitlagFrames[step]) * FRAME,
                     simulator.getCurrentTime(),
                     "Ayato physical Normal recovery");
         }
@@ -217,7 +219,7 @@ public final class KamisatoAyatoRegressionTest {
                 "Ayato C5 Burst grants Talent 12 Normal bonus");
         double normalStart = simulator.getCurrentTime();
         perform(simulator, CharacterActionKey.NORMAL);
-        assertClose(normalStart + 15.0 * FRAME / 1.15,
+        assertClose(normalStart + 15.0 * FRAME / 1.15 + 6.0 * FRAME,
                 simulator.getCurrentTime(),
                 "Ayato C4 accelerates owner Normal recovery");
         advanceTo(simulator, castTime + 139.0 * FRAME + EPSILON);

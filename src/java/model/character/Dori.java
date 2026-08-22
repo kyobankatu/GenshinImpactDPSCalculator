@@ -25,6 +25,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -35,7 +36,7 @@ import simulation.event.SimpleTimerEvent;
  * C1/C3/C5, and C6 Electro infusion follow pinned gcsim {@code ef41805d}.
  * A1 connected-character reaction cooldown reduction, healing-triggered C2,
  * C4's HP/healing branches, C6 healing, Charged/Plunge attacks, geometry, and
- * hitlag remain excluded.</p>
+ * hitlag extension remains excluded.</p>
  */
 public final class Dori extends Character implements
         SimulatorInitializedCharacterEffect,
@@ -53,6 +54,15 @@ public final class Dori extends Character implements
     };
     private static final int[] AFTER_SALES_FRAMES = { 72, 85, 85 };
     private static final int BURST_TICK_COUNT = 32;
+
+    /**
+     * Normal-attack hitlag from gcsim config YAML pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_FIRST_HITLAG =
+            new HitlagProfile(0.10, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_FINAL_HITLAG =
+            new HitlagProfile(0.08, 0.01, true, false, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -393,6 +403,13 @@ public final class Dori extends Character implements
         action.setICD(icdType, icdTag, gauge);
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
+        if (hit.kind == HitKind.NORMAL) {
+            if (hit.index == 0) {
+                action.setHitlagProfile(NORMAL_FIRST_HITLAG);
+            } else if (hit.index == 2) {
+                action.setHitlagProfile(NORMAL_FINAL_HITLAG);
+            }
+        }
         action.setStatSnapshot(hit.snapshot == null
                 ? captureLiveStats(simulator.getCurrentTime())
                 : hit.snapshot);

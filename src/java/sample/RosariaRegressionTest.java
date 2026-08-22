@@ -95,6 +95,7 @@ public final class RosariaRegressionTest {
                 { 9 }, { 13 }, { 19, 28 }, { 32 }, { 26, 40 }
         };
         int[] durations = { 24, 27, 34, 52, 66 };
+        int[] hitlagFrames = { 8, 8, 6, 9, 12 };
         int recordIndex = 0;
         for (int step = 0; step < multipliers.length; step++) {
             double castTime = sim.getCurrentTime();
@@ -116,7 +117,8 @@ public final class RosariaRegressionTest {
                 assertClose(0.0, record.action.getGaugeUnits(), EPS,
                         "Rosaria Normal has no aura");
             }
-            assertClose(castTime + durations[step] * FRAME,
+            assertClose(castTime
+                            + (durations[step] + hitlagFrames[step]) * FRAME,
                     sim.getCurrentTime(), EPS,
                     "Rosaria Normal animation length");
         }
@@ -180,11 +182,12 @@ public final class RosariaRegressionTest {
             assertClose(1.0, record.action.getGaugeUnits(), EPS,
                     "Rosaria Skill applies 1U");
         }
-        assertClose(51.0 * FRAME, c0Sim.getCurrentTime(), EPS,
+        assertClose((51.0 + 4.0 + 9.0) * FRAME,
+                c0Sim.getCurrentTime(), EPS,
                 "Rosaria Skill animation length");
         assertClose(23.0 * FRAME, c0.getLastSkillTime(), EPS,
                 "Rosaria Skill cooldown start");
-        assertClose(332.0 * FRAME,
+        assertClose((332.0 - 4.0 - 9.0) * FRAME,
                 c0.getSkillCDRemaining(c0Sim.getCurrentTime()), EPS,
                 "Rosaria Skill remaining cooldown");
         assertClose(0.17,
@@ -252,7 +255,8 @@ public final class RosariaRegressionTest {
                 "Rosaria Burst first hitmark");
         assertClose(56.0 * FRAME, c0Hits.get(1).time, EPS,
                 "Rosaria Burst second hitmark");
-        assertClose(70.0 * FRAME, c0Sim.getCurrentTime(), EPS,
+        assertClose((70.0 + 4.0) * FRAME,
+                c0Sim.getCurrentTime(), EPS,
                 "Rosaria Burst animation length");
         assertTrue(c0Hits.get(0).action.isUseSnapshot(),
                 "Rosaria Burst initial hit is snapshotted");
@@ -381,7 +385,8 @@ public final class RosariaRegressionTest {
                 cooldownSim, "Ravaging Confession");
         perform(cooldownSim, CharacterActionKey.SKILL);
         perform(cooldownSim, CharacterActionKey.SKILL);
-        assertClose(434.0 * FRAME, cooldownSim.getCurrentTime(), EPS,
+        assertClose((434.0 + 4.0 + 9.0) * FRAME,
+                cooldownSim.getCurrentTime(), EPS,
                 "Rosaria repeated Skill waits for cooldown");
         assertClose(407.0 * FRAME, skillHits.get(2).time, EPS,
                 "Rosaria repeated Skill first hit timing");

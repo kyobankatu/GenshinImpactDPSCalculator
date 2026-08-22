@@ -140,7 +140,8 @@ public final class DehyaRegressionTest {
         }
         assertClose(22.0 * FRAME, normals.get(0).time,
                 "Dehya N1 hit frame");
-        assertClose((31.0 + 26.0) * FRAME, normals.get(1).time,
+        assertClose((31.0 + 9.0 + 26.0) * FRAME,
+                normals.get(1).time,
                 "Dehya N2 hit frame");
 
         records.clear();

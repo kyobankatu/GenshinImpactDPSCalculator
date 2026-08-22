@@ -29,6 +29,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -45,7 +46,7 @@ import simulation.event.SimpleTimerEvent;
  *
  * <p>Player HP change, drain, and healing; Sourcewater Droplet creation,
  * pickup, and geometry; hover and movement; random or multi-target selection;
- * stamina, hitlag, low Plunge; and dynamic HP-ratio branches are excluded.
+ * stamina, low Plunge; and dynamic HP-ratio branches are excluded.
  * A4 therefore represents only the deterministic full-HP 30% Hydro bonus,
  * while C4 and droplet-driven C6 duration extension remain inactive.</p>
  */
@@ -70,6 +71,9 @@ public final class Neuvillette extends Character implements
     private static final double[] A1_MULTIPLIERS = {
         1.0, 1.1, 1.25, 1.6
     };
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile THORN_HITLAG =
+            new HitlagProfile(0.0, 0.01, true, false, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -320,7 +324,7 @@ public final class Neuvillette extends Character implements
         return false;
     }
 
-    /** Reports that stamina and hitlag are excluded. */
+    /** Reports that stamina remains excluded; the legacy method name is retained. */
     public boolean isStaminaHitlagRepresented() {
         return false;
     }
@@ -630,6 +634,7 @@ public final class Neuvillette extends Character implements
                 0.0,
                 event.time,
                 false);
+        action.setHitlagProfile(THORN_HITLAG);
         action.setCountsAsSkillDmg(true);
         simulator.performActionWithoutTimeAdvance(characterId, action);
     }

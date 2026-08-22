@@ -31,6 +31,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -52,6 +53,23 @@ public final class ShikanoinHeizou extends Character implements
         SwitchAwareCharacter {
     private static final double FRAME = 1.0 / 60.0;
     private static final double EPSILON = 1e-9;
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile[][] NORMAL_HITLAG = {
+        { new HitlagProfile(0.03, 0.01, true, false, false) },
+        { new HitlagProfile(0.03, 0.01, true, false, false) },
+        { new HitlagProfile(0.06, 0.01, true, false, false) },
+        {
+            HitlagProfile.none(), HitlagProfile.none(),
+            new HitlagProfile(0.09, 0.01, true, false, false)
+        },
+        { new HitlagProfile(0.12, 0.01, true, false, false) }
+    };
+    private static final HitlagProfile CHARGED_HITLAG =
+            new HitlagProfile(0.09, 0.01, false, false, false);
+    private static final HitlagProfile SKILL_HITLAG =
+            new HitlagProfile(0.09, 0.01, false, false, false);
+    private static final HitlagProfile MAX_SKILL_HITLAG =
+            new HitlagProfile(0.12, 0.01, false, false, false);
     private static final double PARTICLE_TRAVEL = 100.0 * FRAME;
     private static final int[][] NORMAL_HIT_FRAMES = {
         { 12 }, { 13 }, { 21 }, { 13, 19, 27 }, { 31 }
@@ -461,7 +479,8 @@ public final class ShikanoinHeizou extends Character implements
                         StatType.CHARGED_ATTACK_DMG_BONUS,
                         ActionType.CHARGE,
                         ICDType.None,
-                        ICDTag.ChargedAttack);
+                        ICDTag.ChargedAttack,
+                        CHARGED_HITLAG);
                 break;
             case PLUNGE:
                 performBasicHit(simulator, "High Plunge",
@@ -469,7 +488,8 @@ public final class ShikanoinHeizou extends Character implements
                         StatType.PLUNGING_ATTACK_DMG_BONUS,
                         ActionType.PLUNGE,
                         ICDType.None,
-                        ICDTag.PlungeAttack);
+                        ICDTag.PlungeAttack,
+                        HitlagProfile.none());
                 break;
             case SKILL:
                 resolveSkill(simulator, hit);
@@ -495,7 +515,8 @@ public final class ShikanoinHeizou extends Character implements
                 StatType.NORMAL_ATTACK_DMG_BONUS,
                 ActionType.NORMAL,
                 ICDType.Standard,
-                ICDTag.NormalAttack);
+                ICDTag.NormalAttack,
+                NORMAL_HITLAG[hit.index][hit.subIndex]);
     }
 
     private void performBasicHit(
@@ -505,7 +526,8 @@ public final class ShikanoinHeizou extends Character implements
             StatType bonusStat,
             ActionType actionType,
             ICDType icdType,
-            ICDTag icdTag) {
+            ICDTag icdTag,
+            HitlagProfile hitlagProfile) {
         AttackAction action = attack(
                 "Fudou Style Martial Arts " + key,
                 multiplier,
@@ -516,6 +538,7 @@ public final class ShikanoinHeizou extends Character implements
                 icdTag,
                 actionType == ActionType.PLUNGE ? 0.0 : 1.0);
         action.setStatSnapshot(captureLiveStats(simulator.getCurrentTime()));
+        action.setHitlagProfile(hitlagProfile);
         simulator.performActionWithoutTimeAdvance(characterId, action);
     }
 
@@ -544,6 +567,8 @@ public final class ShikanoinHeizou extends Character implements
                 ICDTag.ElementalSkill,
                 2.0);
         action.setStatSnapshot(hit.snapshot);
+        action.setHitlagProfile(
+                hit.stacks == 4 ? MAX_SKILL_HITLAG : SKILL_HITLAG);
         resolvingSkillAction = action;
         try {
             simulator.performActionWithoutTimeAdvance(characterId, action);

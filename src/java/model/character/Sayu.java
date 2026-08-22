@@ -26,6 +26,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -40,7 +41,7 @@ import simulation.event.SimpleTimerEvent;
  * damage to Daruma attacks.</p>
  *
  * <p>Hold movement and absorption, Charged attacks, healing, player HP,
- * geometry, hitlag, and multi-target selection are intentionally excluded.</p>
+ * geometry, complete hitlag coverage, and multi-target selection are intentionally excluded.</p>
  */
 public final class Sayu extends Character implements
         ReactionAwareCharacter,
@@ -49,6 +50,19 @@ public final class Sayu extends Character implements
     private static final double FRAME = 1.0 / 60.0;
     private static final double EPSILON = 1e-9;
     private static final double PARTICLE_TRAVEL = 100.0 * FRAME;
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile[] NORMAL_HITLAG = {
+        new HitlagProfile(0.10, 0.01, true, false, false),
+        new HitlagProfile(0.10, 0.01, true, false, false),
+        HitlagProfile.none(),
+        new HitlagProfile(0.08, 0.01, true, false, false)
+    };
+    private static final HitlagProfile N3_SECOND_HITLAG =
+            new HitlagProfile(0.08, 0.01, true, false, false);
+    private static final HitlagProfile TAP_KICK_HITLAG =
+            new HitlagProfile(0.02, 0.05, false, false, false);
+    private static final HitlagProfile BURST_INITIAL_HITLAG =
+            new HitlagProfile(0.02, 0.05, false, false, false);
     private static final int[] NORMAL_HITMARKS = { 23, 29, 26, 35 };
     private static final int[] NORMAL_DURATIONS = { 36, 48, 52, 71 };
     private static final int BURST_TICK_COUNT = 7;
@@ -248,6 +262,7 @@ public final class Sayu extends Character implements
                     castTime + 14.0 * FRAME,
                     HitKind.NORMAL,
                     step,
+                    0,
                     0L,
                     snapshot));
         }
@@ -255,6 +270,7 @@ public final class Sayu extends Character implements
                 castTime + NORMAL_HITMARKS[step] * FRAME,
                 HitKind.NORMAL,
                 step,
+                step == 2 ? 1 : 0,
                 0L,
                 snapshot));
         normalAttackStep = (normalAttackStep + 1) % 4;
@@ -373,6 +389,8 @@ public final class Sayu extends Character implements
                 0.0,
                 true);
         normal.setStatSnapshot(hit.snapshot);
+        normal.setHitlagProfile(step == 2 && hit.variant == 1
+                ? N3_SECOND_HITLAG : NORMAL_HITLAG[step]);
         simulator.performActionWithoutTimeAdvance(characterId, normal);
     }
 
@@ -416,6 +434,7 @@ public final class Sayu extends Character implements
                     getTalentValue("C2 Press Kick DMG Bonus", 0.033));
         }
         kick.setStatSnapshot(hit.snapshot);
+        kick.setHitlagProfile(TAP_KICK_HITLAG);
         simulator.performActionWithoutTimeAdvance(characterId, kick);
         if (simulator.getEnemy() != null) {
             queueCommand(simulator, new PendingCommand(
@@ -442,6 +461,7 @@ public final class Sayu extends Character implements
                 1.0,
                 false);
         initial.setStatSnapshot(hit.snapshot);
+        initial.setHitlagProfile(BURST_INITIAL_HITLAG);
         simulator.performActionWithoutTimeAdvance(characterId, initial);
     }
 
@@ -633,6 +653,7 @@ public final class Sayu extends Character implements
         private final double time;
         private final HitKind kind;
         private final int index;
+        private final int variant;
         private final long generation;
         private final StatsContainer snapshot;
 
@@ -642,9 +663,20 @@ public final class Sayu extends Character implements
                 int index,
                 long generation,
                 StatsContainer snapshot) {
+            this(time, kind, index, 0, generation, snapshot);
+        }
+
+        private PendingHit(
+                double time,
+                HitKind kind,
+                int index,
+                int variant,
+                long generation,
+                StatsContainer snapshot) {
             this.time = time;
             this.kind = kind;
             this.index = index;
+            this.variant = variant;
             this.generation = generation;
             this.snapshot = snapshot == null
                     ? null : snapshot.merge(null);
@@ -652,7 +684,7 @@ public final class Sayu extends Character implements
 
         private PendingHit copy() {
             return new PendingHit(
-                    time, kind, index, generation, snapshot);
+                    time, kind, index, variant, generation, snapshot);
         }
     }
 

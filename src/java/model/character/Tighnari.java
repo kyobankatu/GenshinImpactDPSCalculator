@@ -30,6 +30,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -51,6 +52,9 @@ public final class Tighnari extends Character implements
         SwitchAwareCharacter {
     private static final double FRAME = 1.0 / 60.0;
     private static final double EPSILON = 1e-9;
+    /** Weak-point hitlag pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile WREATH_HEADSHOT_HITLAG =
+            new HitlagProfile(0.12, 0.01, false, true, true);
     private static final double PROJECTILE_TRAVEL = 10.0 * FRAME;
     private static final double CLUSTER_TRAVEL = 35.0 * FRAME;
     private static final double PARTICLE_TRAVEL = 100.0 * FRAME;
@@ -553,6 +557,7 @@ public final class Tighnari extends Character implements
                 ICDTag.None,
                 1.0);
         prepareChargedOrBurst(action, hit.snapshot, true);
+        action.setHitlagProfile(WREATH_HEADSHOT_HITLAG);
         simulator.performActionWithoutTimeAdvance(characterId, action);
 
         StatsContainer clusterSnapshot = captureLiveStats(

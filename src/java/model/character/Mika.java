@@ -29,6 +29,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -60,6 +61,22 @@ public final class Mika extends Character implements
         { 0.794835 }, { 0.762476 }, { 1.001341 },
         { 0.507338, 0.507338 }, { 1.302110 }
     };
+    /**
+     * Per-hit metadata from gcsim pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_HITLAG_SHORT_NO_DEFENSE =
+            new HitlagProfile(0.02, 0.01, false, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_SHORT =
+            new HitlagProfile(0.02, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_DEFENSE_ONLY =
+            new HitlagProfile(0.0, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_LONG =
+            new HitlagProfile(0.04, 0.01, true, false, false);
+    private static final HitlagProfile CHARGED_HITLAG =
+            new HitlagProfile(0.0, 0.01, true, true, false);
+    private static final HitlagProfile PRESS_SKILL_HITLAG =
+            new HitlagProfile(0.0, 0.01, true, false, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -305,7 +322,8 @@ public final class Mika extends Character implements
                         ActionType.NORMAL,
                         ICDType.Standard,
                         ICDTag.NormalAttack,
-                        1.0);
+                        1.0,
+                        normalHitlag(hit.index));
                 break;
             case CHARGED:
                 performHit(simulator,
@@ -316,7 +334,8 @@ public final class Mika extends Character implements
                         ActionType.CHARGE,
                         ICDType.Standard,
                         ICDTag.ChargedAttack,
-                        1.0);
+                        1.0,
+                        CHARGED_HITLAG);
                 break;
             case SKILL:
                 resolveSkill(simulator, hit.variant == 1);
@@ -340,7 +359,8 @@ public final class Mika extends Character implements
                 ActionType.SKILL,
                 hold ? ICDType.Standard : ICDType.None,
                 ICDTag.ElementalSkill,
-                1.0);
+                1.0,
+                hold ? null : PRESS_SKILL_HITLAG);
         if (constellation >= 2) {
             detectorStacks = 1;
         }
@@ -389,6 +409,30 @@ public final class Mika extends Character implements
             ICDType icdType,
             ICDTag icdTag,
             double gauge) {
+        performHit(
+                simulator,
+                displayName,
+                multiplier,
+                hitElement,
+                bonusStat,
+                actionType,
+                icdType,
+                icdTag,
+                gauge,
+                null);
+    }
+
+    private void performHit(
+            CombatSimulator simulator,
+            String displayName,
+            double multiplier,
+            Element hitElement,
+            StatType bonusStat,
+            ActionType actionType,
+            ICDType icdType,
+            ICDTag icdTag,
+            double gauge,
+            HitlagProfile hitlagProfile) {
         AttackAction action = new AttackAction(
                 displayName,
                 multiplier,
@@ -399,8 +443,24 @@ public final class Mika extends Character implements
                 actionType);
         action.setICD(icdType, icdTag, gauge);
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
+        if (hitlagProfile != null) {
+            action.setHitlagProfile(hitlagProfile);
+        }
         action.setStatSnapshot(captureLiveStats(simulator.getCurrentTime()));
         simulator.performActionWithoutTimeAdvance(characterId, action);
+    }
+
+    private static HitlagProfile normalHitlag(int step) {
+        if (step == 0 || step == 2) {
+            return NORMAL_HITLAG_SHORT_NO_DEFENSE;
+        }
+        if (step == 1) {
+            return NORMAL_HITLAG_SHORT;
+        }
+        if (step == 3) {
+            return NORMAL_HITLAG_DEFENSE_ONLY;
+        }
+        return NORMAL_HITLAG_LONG;
     }
 
     private double resolveNormalDuration(

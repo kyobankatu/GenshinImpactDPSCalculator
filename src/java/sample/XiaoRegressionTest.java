@@ -148,11 +148,11 @@ public final class XiaoRegressionTest {
         };
         double[] hitFrames = {
             4.0, 17.0,
-            26.0 + 15.0,
-            53.0 + 15.0,
-            91.0 + 14.0, 91.0 + 31.0,
-            133.0 + 16.0,
-            163.0 + 39.0
+            26.0 + 15.0 + 5.0,
+            53.0 + 15.0 + 10.0,
+            91.0 + 14.0 + 15.0, 91.0 + 31.0 + 15.0,
+            133.0 + 16.0 + 22.0,
+            163.0 + 39.0 + 27.0
         };
         for (int index = 0; index < normals.size(); index++) {
             assertClose(multipliers[index],
@@ -168,7 +168,7 @@ public final class XiaoRegressionTest {
                     normals.get(index).action.getICDTag(),
                     "Xiao Normal ICD tag " + index);
         }
-        assertClose(242.0 * FRAME, simulator.getCurrentTime(),
+        assertClose((242.0 + 33.0) * FRAME, simulator.getCurrentTime(),
                 "Xiao Normal string duration");
 
         simulator.switchCharacter(CharacterId.NOELLE);
@@ -187,7 +187,8 @@ public final class XiaoRegressionTest {
                 "Xiao Charged multiplier");
         assertClose(16.0 * FRAME, charged.time,
                 "Xiao Charged hitmark");
-        assertClose(45.0 * FRAME, chargedSimulator.getCurrentTime(),
+        assertClose((45.0 + 5.0) * FRAME,
+                chargedSimulator.getCurrentTime(),
                 "Xiao Charged duration");
         assertEquals(ActionType.CHARGE, charged.action.getActionType(),
                 "Xiao Charged category");

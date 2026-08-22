@@ -28,6 +28,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -44,7 +45,7 @@ import simulation.event.SimpleTimerEvent;
  * reconstructable after simulator rollback.</p>
  *
  * <p>Shield absorption, shield regeneration, C2, player HP, C6 revival, Hold
- * Skill movement, geometry, multi-target behavior, hitlag, stamina, and low
+ * Skill movement, geometry, multi-target behavior, hitlag extension, stamina, and low
  * Plunge are excluded. Benison is therefore retained as a capped support
  * resource and is never consumed by an approximated shield.</p>
  */
@@ -72,6 +73,17 @@ public final class Dahlia extends Character implements
     private static final int[] CHARGED_HIT_FRAMES = { 10, 10 };
     private static final double[] CHARGED_T9 = {
         0.732614, 1.011706
+    };
+
+    /**
+     * Normal-attack hitlag from gcsim config YAML pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile[] NORMAL_HITLAG = {
+        new HitlagProfile(0.03, 0.01, true, false, false),
+        new HitlagProfile(0.03, 0.01, true, false, false),
+        new HitlagProfile(0.06, 0.01, true, false, false),
+        new HitlagProfile(0.09, 0.01, true, false, false)
     };
 
     private CombatSimulator initializedSimulator;
@@ -473,7 +485,8 @@ public final class Dahlia extends Character implements
                 ICDType.Standard,
                 ICDTag.NormalAttack,
                 0.0,
-                false);
+                false,
+                NORMAL_HITLAG[event.index]);
     }
 
     private void resolveChargedHit(
@@ -490,7 +503,8 @@ public final class Dahlia extends Character implements
                 ICDType.Standard,
                 ICDTag.NormalAttack,
                 0.0,
-                false);
+                false,
+                HitlagProfile.none());
     }
 
     private void resolveHighPlunge(CombatSimulator simulator) {
@@ -504,7 +518,8 @@ public final class Dahlia extends Character implements
                 ICDType.None,
                 ICDTag.PlungeAttack,
                 0.0,
-                true);
+                true,
+                HitlagProfile.none());
     }
 
     private void resolveSkillHit(
@@ -520,7 +535,8 @@ public final class Dahlia extends Character implements
                 ICDType.None,
                 ICDTag.None,
                 1.0,
-                false);
+                false,
+                HitlagProfile.none());
         queueEvent(simulator, new PendingEvent(
                 simulator.getCurrentTime() + PARTICLE_TRAVEL,
                 EventKind.SKILL_PARTICLES,
@@ -540,7 +556,8 @@ public final class Dahlia extends Character implements
                 ICDType.None,
                 ICDTag.None,
                 2.0,
-                false);
+                false,
+                HitlagProfile.none());
     }
 
     private void performHit(
@@ -553,7 +570,8 @@ public final class Dahlia extends Character implements
             ICDType icdType,
             ICDTag icdTag,
             double gauge,
-            boolean shatter) {
+            boolean shatter,
+            HitlagProfile hitlagProfile) {
         AttackAction action = new AttackAction(
                 displayName,
                 multiplier,
@@ -565,6 +583,7 @@ public final class Dahlia extends Character implements
         action.setICD(icdType, icdTag, gauge);
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setShatterTrigger(shatter);
+        action.setHitlagProfile(hitlagProfile);
         action.setStatSnapshot(captureLiveStats(
                 simulator.getCurrentTime()));
         simulator.performActionWithoutTimeAdvance(characterId, action);

@@ -103,6 +103,7 @@ public final class JeanRegressionTest {
         };
         int[] hitmarks = { 13, 6, 17, 37, 25 };
         int[] durations = { 22, 14, 28, 44, 68 };
+        int[] hitlagFrames = { 6, 6, 8, 8, 10 };
         double castTime = 0.0;
         for (int step = 0; step < multipliers.length; step++) {
             perform(sim, CharacterActionKey.NORMAL);
@@ -126,7 +127,7 @@ public final class JeanRegressionTest {
                     "Jean Normal ICD group");
             assertClose(0.0, record.action.getGaugeUnits(), EPS,
                     "Jean Physical Normal gauge");
-            castTime += durations[step] * FRAME;
+            castTime += (durations[step] + hitlagFrames[step]) * FRAME;
             assertClose(castTime, sim.getCurrentTime(), EPS,
                     "Jean Normal animation length");
         }
@@ -465,7 +466,7 @@ public final class JeanRegressionTest {
         assertClose(castTime + 13.0 * FRAME / 1.15,
                 normals.get(0).time, EPS,
                 "Jean C2 scales Normal hitmark");
-        assertClose(castTime + 22.0 * FRAME / 1.15,
+        assertClose(castTime + 22.0 * FRAME / 1.15 + 6.0 * FRAME,
                 sim.getCurrentTime(), EPS,
                 "Jean C2 scales Normal animation");
         advanceTo(sim, 121.0 * FRAME + 15.0);

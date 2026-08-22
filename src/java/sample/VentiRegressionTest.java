@@ -182,6 +182,16 @@ public final class VentiRegressionTest {
                 "Venti charged ICD group");
         assertClose(1.0, charged.getGaugeUnits(), EPS,
                 "Venti charged gauge");
+        assertClose(0.12,
+                charged.getHitlagProfile().getHaltTimeSeconds(), EPS,
+                "Venti aimed-shot headshot halt time");
+        assertClose(0.01,
+                charged.getHitlagProfile().getFactor(), EPS,
+                "Venti aimed-shot headshot factor");
+        assertTrue(charged.getHitlagProfile().isDeployable(),
+                "Venti aimed-shot hitlag is target-only");
+        assertTrue(charged.getHitlagProfile().isHeadshotOnly(),
+                "Venti aimed-shot hitlag requires a weak-point hit");
         assertClose(94.0 * FRAME, chargedSim.getCurrentTime(), EPS,
                 "Venti charged duration");
 

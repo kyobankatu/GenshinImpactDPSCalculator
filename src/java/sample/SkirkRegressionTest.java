@@ -116,6 +116,7 @@ public final class SkirkRegressionTest {
         };
         int[] hitFrames = { 13, 7, 8, 11, 35 };
         int[] durations = { 27, 25, 43, 23, 72 };
+        int[] hitlagFrames = { 2, 2, 2, 3, 4 };
         for (int step = 0; step < multipliers.length; step++) {
             double castTime = simulator.getCurrentTime();
             perform(simulator, CharacterActionKey.NORMAL);
@@ -126,7 +127,8 @@ public final class SkirkRegressionTest {
             assertClose(castTime + hitFrames[step] * FRAME,
                     hits.get(0).time,
                     "Skirk N" + (step + 1) + " first hitmark");
-            assertClose(castTime + durations[step] * FRAME,
+            assertClose(castTime
+                            + (durations[step] + hitlagFrames[step]) * FRAME,
                     simulator.getCurrentTime(),
                     "Skirk N" + (step + 1) + " recovery");
             assertClose(multipliers[step],

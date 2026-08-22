@@ -119,10 +119,10 @@ public final class DahliaRegressionTest {
         };
         double[] expectedTimes = {
             15.0 * FRAME,
-            45.0 * FRAME,
-            80.0 * FRAME,
-            81.0 * FRAME,
-            134.0 * FRAME
+            (45.0 + 6.0) * FRAME,
+            (80.0 + 12.0) * FRAME,
+            (81.0 + 12.0) * FRAME,
+            (134.0 + 28.0) * FRAME
         };
         for (int index = 0; index < expectedMultipliers.length; index++) {
             ActionRecord record = records.get(index);
@@ -137,6 +137,11 @@ public final class DahliaRegressionTest {
             assertEquals(Element.PHYSICAL,
                     record.action.getElement(),
                     "Dahlia Normal element");
+            if (index == 2 || index == 3) {
+                assertHitlagProfile(record.action,
+                        0.06, 0.01, true, false, false,
+                        "Dahlia N3 hit " + (index - 1));
+            }
         }
 
         double chargeStart = simulator.getCurrentTime();
@@ -604,6 +609,30 @@ public final class DahliaRegressionTest {
             throw new AssertionError(message + ": expected "
                     + expected + " but got " + actual);
         }
+    }
+
+    private static void assertHitlagProfile(
+            AttackAction action,
+            double haltTime,
+            double factor,
+            boolean defenseHalt,
+            boolean deployable,
+            boolean headshotOnly,
+            String message) {
+        assertClose(haltTime,
+                action.getHitlagProfile().getHaltTimeSeconds(),
+                message + " halt time");
+        assertClose(factor, action.getHitlagProfile().getFactor(),
+                message + " factor");
+        assertEquals(defenseHalt,
+                action.getHitlagProfile().canDefenseHalt(),
+                message + " Defense Halt");
+        assertEquals(deployable,
+                action.getHitlagProfile().isDeployable(),
+                message + " deployable");
+        assertEquals(headshotOnly,
+                action.getHitlagProfile().isHeadshotOnly(),
+                message + " headshot-only");
     }
 
     private static void assertTrue(

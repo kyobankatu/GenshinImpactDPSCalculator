@@ -28,6 +28,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -40,7 +41,7 @@ import simulation.event.SimpleTimerEvent;
  * exact 400% base-ATK cap.</p>
  *
  * <p>Player HP drain/healing and low-HP branches, stamina-only C1, enemy-death
- * C4, C6 survival, low Plunge, collision, geometry, and hitlag are excluded
+ * C4, C6 survival, low Plunge, collision, and geometry are excluded
  * without approximation.</p>
  */
 public final class HuTao extends Character implements
@@ -59,6 +60,21 @@ public final class HuTao extends Character implements
         { 0.788544 }, { 0.811543 }, { 1.026750 }, { 1.103962 },
         { 0.559603, 0.592000 }, { 1.445664 }
     };
+
+    /**
+     * Per-hit metadata from gcsim pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_HITLAG_SHORT =
+            new HitlagProfile(0.01, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_MEDIUM =
+            new HitlagProfile(0.02, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_MEDIUM_NO_DEFENSE =
+            new HitlagProfile(0.02, 0.01, false, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_LONG =
+            new HitlagProfile(0.04, 0.01, true, false, false);
+    private static final HitlagProfile CHARGED_HITLAG =
+            new HitlagProfile(0.0, 0.01, true, true, false);
 
     private final DoubleSupplier particleRandom;
     private CombatSimulator initializedSimulator;
@@ -588,12 +604,32 @@ public final class HuTao extends Character implements
         action.setICD(icdType, icdTag, gaugeUnits);
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
+        if (hit.kind == HitKind.NORMAL) {
+            action.setHitlagProfile(normalHitlag(hit.index, hit.variant));
+        } else if (hit.kind == HitKind.CHARGED) {
+            action.setHitlagProfile(CHARGED_HITLAG);
+        }
         action.setStatSnapshot(hit.snapshot == null
                 ? captureLiveStats(
                         simulator.getCurrentTime(),
                         isParamitaActive(simulator.getCurrentTime()))
                 : hit.snapshot);
         simulator.performActionWithoutTimeAdvance(characterId, action);
+    }
+
+    private static HitlagProfile normalHitlag(int step, int variant) {
+        if (step <= 2) {
+            return NORMAL_HITLAG_SHORT;
+        }
+        if (step == 3) {
+            return NORMAL_HITLAG_MEDIUM;
+        }
+        if (step == 4) {
+            return variant == 0
+                    ? NORMAL_HITLAG_MEDIUM_NO_DEFENSE
+                    : NORMAL_HITLAG_MEDIUM;
+        }
+        return NORMAL_HITLAG_LONG;
     }
 
     private double normalValue(int step, int variant) {

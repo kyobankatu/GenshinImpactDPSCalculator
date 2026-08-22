@@ -34,6 +34,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -58,6 +59,20 @@ public final class YunJin extends Character implements
         TargetDependentTeamEffect {
     private static final double FRAME = 1.0 / 60.0;
     private static final double EPSILON = 1e-9;
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile[][] NORMAL_HITLAG = {
+        { new HitlagProfile(0.03, 0.01, true, false, false) },
+        { new HitlagProfile(0.03, 0.01, true, false, false) },
+        { HitlagProfile.none(), new HitlagProfile(0.03, 0.01, true, false, false) },
+        { HitlagProfile.none(), new HitlagProfile(0.03, 0.01, false, false, false) },
+        { new HitlagProfile(0.04, 0.01, true, false, false) }
+    };
+    private static final HitlagProfile CHARGED_HITLAG =
+            new HitlagProfile(0.0, 0.01, true, true, false);
+    private static final HitlagProfile PRESS_SKILL_HITLAG =
+            new HitlagProfile(0.06, 0.01, true, false, false);
+    private static final HitlagProfile HOLD_SKILL_HITLAG =
+            new HitlagProfile(0.12, 0.01, true, false, false);
     private static final double PARTICLE_TRAVEL = 100.0 * FRAME;
     private static final double FORMATION_DURATION = 12.0;
     private static final int FORMATION_QUOTA = 30;
@@ -446,6 +461,7 @@ public final class YunJin extends Character implements
                 ICDTag.NormalAttack,
                 0.0,
                 false);
+        normal.setHitlagProfile(NORMAL_HITLAG[hit.index][hit.subIndex]);
         simulator.performActionWithoutTimeAdvance(characterId, normal);
     }
 
@@ -463,6 +479,7 @@ public final class YunJin extends Character implements
                 ICDTag.ChargedAttack,
                 0.0,
                 false);
+        charged.setHitlagProfile(CHARGED_HITLAG);
         simulator.performActionWithoutTimeAdvance(characterId, charged);
     }
 
@@ -506,6 +523,8 @@ public final class YunJin extends Character implements
                 ICDTag.None,
                 hold ? 4.0 : 2.0,
                 true);
+        skill.setHitlagProfile(
+                hold ? HOLD_SKILL_HITLAG : PRESS_SKILL_HITLAG);
         simulator.performActionWithoutTimeAdvance(characterId, skill);
         if (simulator.getEnemy() != null) {
             queueCommand(simulator, new PendingCommand(

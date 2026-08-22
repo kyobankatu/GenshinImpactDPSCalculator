@@ -28,6 +28,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -60,6 +61,12 @@ public final class Nilou extends Character implements
     private static final int[] WHIRLING_DURATIONS = { 33, 62, 63 };
     private static final double[] NORMAL_T9 = {
         0.924253, 0.834809, 1.292551
+    };
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile[] NORMAL_HITLAG = {
+        new HitlagProfile(0.03, 0.01, true, false, false),
+        new HitlagProfile(0.03, 0.01, true, false, false),
+        new HitlagProfile(0.06, 0.01, true, false, false)
     };
     private static final double[] SWORD_T9 = {
         0.077392, 0.087456, 0.121870
@@ -807,6 +814,9 @@ public final class Nilou extends Character implements
                 0.0,
                 actionType);
         action.setICD(icdType, icdTag, 1.0);
+        if (hit.kind == HitKind.NORMAL) {
+            action.setHitlagProfile(NORMAL_HITLAG[hit.index]);
+        }
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
         if (c1Illusion) {

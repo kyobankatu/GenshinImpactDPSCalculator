@@ -27,6 +27,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -52,6 +53,12 @@ public final class Varesa extends Character implements
         SwitchAwareCharacter {
     private static final double FRAME = 1.0 / 60.0;
     private static final double EPSILON = 1e-9;
+    /** Unambiguous base-normal hitlag pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile[] NORMAL_HITLAG = {
+        new HitlagProfile(0.0, 0.0, true, false, false),
+        new HitlagProfile(0.0, 0.0, true, false, false),
+        new HitlagProfile(0.03, 0.01, true, false, false)
+    };
     private static final double[] NORMAL_T9 = {
         0.795233, 0.680476, 0.957318
     };
@@ -341,7 +348,7 @@ public final class Varesa extends Character implements
         return false;
     }
 
-    /** Reports that hitlag and stamina are excluded. */
+    /** Reports that complete hitlag coverage and stamina are excluded. */
     public boolean isHitlagStaminaRepresented() {
         return false;
     }
@@ -682,6 +689,9 @@ public final class Varesa extends Character implements
                 0.0,
                 actionType);
         action.setICD(icdType, icdTag, 1.0);
+        if (hit.kind == HitKind.NORMAL && !hit.fiery) {
+            action.setHitlagProfile(NORMAL_HITLAG[hit.index]);
+        }
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
         action.setHitEffectTrigger(true);

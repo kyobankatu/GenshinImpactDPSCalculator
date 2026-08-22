@@ -30,6 +30,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -43,7 +44,7 @@ import simulation.event.SimpleTimerEvent;
  * character-owned resource needed to gate Itzpapa and C6.</p>
  *
  * <p>Shield durability and absorption, team Nightsoul Burst plumbing,
- * movement and geometry, multi-target and random targeting, hitlag, stamina,
+ * movement and geometry, multi-target and random targeting, hitlag extension, stamina,
  * Low Plunge, and defensive state are excluded rather than approximated.
  * Consequently, C2 ally Elemental Mastery uses the represented Blessing
  * condition only and does not synthesize the alternative shield condition.
@@ -63,6 +64,13 @@ public final class Citlali extends Character implements
     private static final double[] NORMAL_T9 = {
         0.737922, 0.659831, 0.914110
     };
+
+    /**
+     * Catalyst hitlag semantics from gcsim pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile CATALYST_HITLAG =
+            new HitlagProfile(0.0, 0.05, false, true, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -832,6 +840,9 @@ public final class Citlali extends Character implements
         action.setICD(icdType, icdTag, gauge);
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
+        if (hit.kind == HitKind.NORMAL || hit.kind == HitKind.CHARGED) {
+            action.setHitlagProfile(CATALYST_HITLAG);
+        }
         StatsContainer snapshot = hit.snapshot == null
                 ? captureLiveStats(simulator.getCurrentTime())
                 : hit.snapshot.merge(null);

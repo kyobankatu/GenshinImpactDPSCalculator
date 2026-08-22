@@ -1010,6 +1010,39 @@ public class ReactionRegressionTest {
         assertClose(3.0 / 60.0, delayedOwner.getCurrentTime(), EPS,
                 "Out-of-action owner hitlag should delay the next input after restore");
 
+        CombatSimulator listenerSnapshot = simulatorWith(
+                testCharacter(Element.PHYSICAL));
+        SimulatorSnapshot[] capturedDuringDamage = {null};
+        listenerSnapshot.addDamageListener((actor, action, damage, time) -> {
+            if ("Listener snapshot hitlag fixture".equals(action.getName())) {
+                capturedDuringDamage[0] = listenerSnapshot.saveSnapshot();
+            }
+        });
+        AttackAction listenerSnapshotHit = hitlagFixtureAction(
+                "Listener snapshot hitlag fixture", 0.0);
+        listenerSnapshotHit.setHitlagProfile(new HitlagProfile(
+                0.06, 0.01, true, false, false));
+        listenerSnapshot.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, listenerSnapshotHit);
+        assertTrue(capturedDuringDamage[0] != null,
+                "Damage listener should capture its hit snapshot");
+        assertClose(8.0 / 60.0,
+                capturedDuringDamage[0].enemyHitlagResumeTime,
+                EPS,
+                "Damage-listener snapshot should include target hitlag");
+        assertClose(8.0 / 60.0,
+                capturedDuringDamage[0].ownerHitlagEndTimes.get(
+                        CharacterId.SUCROSE),
+                EPS,
+                "Damage-listener snapshot should include pending owner hitlag");
+        listenerSnapshot.advanceTime(1.0);
+        listenerSnapshot.restoreSnapshot(capturedDuringDamage[0]);
+        listenerSnapshot.performAction(
+                CharacterId.SUCROSE,
+                hitlagFixtureAction("Listener snapshot resume fixture", 0.0));
+        assertClose(8.0 / 60.0, listenerSnapshot.getCurrentTime(), EPS,
+                "Restored listener snapshot should drain captured owner hitlag");
+
         CombatSimulator scopedSnapshot = simulatorWith(
                 testCharacter(Element.PHYSICAL));
         assertTrue(scopedSnapshot.beginOwnerHitlagAction(CharacterId.SUCROSE),

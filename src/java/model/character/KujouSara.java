@@ -30,6 +30,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -42,8 +43,8 @@ import simulation.event.SimpleTimerEvent;
  * at frame 47. Tengu Juurai grants one six-second recipient-fixed ATK buff;
  * C6 is resolved live per hit so deployable snapshots cannot retain it.</p>
  *
- * <p>Physical aimed shots, weak points, aiming, movement, taunt behavior,
- * hitlag, multi-target geometry, and exact Stormcluster branch travel are
+ * <p>Physical aimed shots, weak-point activation, aiming, movement, taunt
+ * behavior, multi-target geometry, and exact Stormcluster branch travel are
  * outside this slice. One representative Stormcluster hit is resolved for the
  * stationary target, so C4 does not manufacture geometry-dependent damage.</p>
  */
@@ -64,6 +65,12 @@ public final class KujouSara extends Character implements
     private static final double TENGU_BUFF_DURATION = 6.0;
     private static final double A4_COOLDOWN = 3.0;
     private static final double C1_COOLDOWN = 3.0;
+    /**
+     * Full-aim weak-point hitlag from gcsim pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile AIMED_HEADSHOT_HITLAG =
+            new HitlagProfile(0.12, 0.01, false, true, true);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -456,6 +463,7 @@ public final class KujouSara extends Character implements
                 ICDTag.ChargedAttack,
                 1.0);
         charged.setStatSnapshot(hit.snapshot);
+        charged.setHitlagProfile(AIMED_HEADSHOT_HITLAG);
         simulator.performActionWithoutTimeAdvance(characterId, charged);
     }
 

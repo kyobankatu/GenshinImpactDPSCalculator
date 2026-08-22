@@ -795,6 +795,10 @@ public class CombatSimulator {
      */
     public void performActionWithoutTimeAdvance(CharacterId characterId, AttackAction action) {
         actionResolver.resolveWithoutTimeAdvance(characterId, action);
+    }
+
+    /** Applies landed-hit timing before post-damage observers run. */
+    public void applyResolvedHitlag(CharacterId characterId, AttackAction action) {
         hitlagController.applyHitlag(characterId, action);
     }
 

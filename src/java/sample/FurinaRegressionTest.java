@@ -120,6 +120,7 @@ public final class FurinaRegressionTest {
         };
         int[] hitFrames = { 15, 12, 21, 27 };
         int[] durations = { 34, 28, 48, 58 };
+        int[] hitlagFrames = { 5, 5, 5, 5 };
         for (int index = 0; index < multipliers.length; index++) {
             double castTime = simulator.getCurrentTime();
             perform(simulator, CharacterActionKey.NORMAL);
@@ -127,7 +128,8 @@ public final class FurinaRegressionTest {
                     "Soloist's Solicitation N" + (index + 1)).get(0);
             assertClose(castTime + hitFrames[index] * FRAME,
                     normal.time, "Furina Normal hitmark " + index);
-            assertClose(castTime + durations[index] * FRAME,
+            assertClose(castTime
+                            + (durations[index] + hitlagFrames[index]) * FRAME,
                     simulator.getCurrentTime(),
                     "Furina Normal duration " + index);
             assertClose(multipliers[index],

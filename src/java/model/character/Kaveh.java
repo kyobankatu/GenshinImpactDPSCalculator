@@ -27,6 +27,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -38,7 +39,7 @@ import simulation.event.SimpleTimerEvent;
  * rollback-safe.</p>
  *
  * <p>Dendro Core forced rupture, A1 Bloom self-healing, C1 Dendro resistance,
- * C6 Core rupture, Charged/Plunge attacks, geometry, hitlag, and interruption
+ * C6 Core rupture, Charged/Plunge attacks, geometry, and interruption
  * resistance are excluded because their required runtime contracts are not
  * available in this bounded content slice.</p>
  */
@@ -54,6 +55,18 @@ public final class Kaveh extends Character implements
     private static final double[] NORMAL_T9 = {
         1.399690, 1.279405, 1.548052, 1.886599
     };
+    /**
+     * Burst-infused Normal and C6 hitlag from gcsim pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile[] BURST_NORMAL_HITLAG = {
+        new HitlagProfile(0.10, 0.01, true, false, false),
+        new HitlagProfile(0.09, 0.01, true, false, false),
+        new HitlagProfile(0.09, 0.01, true, false, false),
+        new HitlagProfile(0.10, 0.01, true, false, false)
+    };
+    private static final HitlagProfile C6_HITLAG =
+            new HitlagProfile(0.09, 0.01, false, false, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -499,6 +512,11 @@ public final class Kaveh extends Character implements
         action.setICD(icdType, icdTag, gauge);
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
+        if (hit.kind == HitKind.NORMAL) {
+            action.setHitlagProfile(BURST_NORMAL_HITLAG[hit.index]);
+        } else if (hit.kind == HitKind.C6) {
+            action.setHitlagProfile(C6_HITLAG);
+        }
         action.setStatSnapshot(hit.snapshot == null
                 ? captureLiveStats(simulator.getCurrentTime())
                 : hit.snapshot);

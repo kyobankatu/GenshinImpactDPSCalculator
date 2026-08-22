@@ -25,6 +25,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -54,6 +55,20 @@ public final class Wriothesley extends Character implements
         SwitchAwareCharacter {
     private static final double FRAME = 1.0 / 60.0;
     private static final double EPSILON = 1e-9;
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile[] NORMAL_HITLAG = {
+        new HitlagProfile(0.0, 0.0, true, false, false),
+        new HitlagProfile(0.0, 0.0, true, false, false),
+        new HitlagProfile(0.03, 0.01, true, false, false),
+        new HitlagProfile(0.0, 0.0, true, false, false),
+        new HitlagProfile(0.06, 0.01, true, false, false)
+    };
+    private static final HitlagProfile CHARGED_HITLAG =
+            new HitlagProfile(0.09, 0.01, false, false, false);
+    private static final HitlagProfile REBUKE_HITLAG =
+            new HitlagProfile(0.12, 0.03, false, false, false);
+    private static final HitlagProfile BURST_HITLAG =
+            new HitlagProfile(0.03, 0.01, false, false, false);
     private static final int[][] NORMAL_HIT_FRAMES = {
         { 12 }, { 10 }, { 18 }, { 25, 35 }, { 39 }
     };
@@ -588,11 +603,25 @@ public final class Wriothesley extends Character implements
                 0.0,
                 actionType);
         action.setICD(icdType, icdTag, gauge);
+        action.setHitlagProfile(hitlagProfile(hit));
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
         action.setStatSnapshot(hit.snapshot == null
                 ? captureLiveStats(simulator.getCurrentTime())
                 : hit.snapshot);
         simulator.performActionWithoutTimeAdvance(characterId, action);
+    }
+
+    private HitlagProfile hitlagProfile(PendingHit hit) {
+        if (hit.kind == HitKind.CHARGED) {
+            return hit.rebuke ? REBUKE_HITLAG : CHARGED_HITLAG;
+        }
+        if (hit.kind == HitKind.OUSIA) {
+            return BURST_HITLAG;
+        }
+        if (hit.kind == HitKind.NORMAL) {
+            return NORMAL_HITLAG[hit.index];
+        }
+        return HitlagProfile.none();
     }
 
     private StatsContainer captureLiveStats(double currentTime) {

@@ -148,6 +148,21 @@ public final class NaviaRegressionTest {
                     records.get(index).action.getElement(),
                     "Navia uninfused Normal element " + index);
         }
+        for (int index = 2; index <= 4; index++) {
+            AttackAction n3 = records.get(index).action;
+            assertClose(0.01,
+                    n3.getHitlagProfile().getHaltTimeSeconds(),
+                    "Navia N3 multi-hit halt time " + index);
+            assertClose(0.01,
+                    n3.getHitlagProfile().getFactor(),
+                    "Navia N3 multi-hit factor " + index);
+            assertTrue(!n3.getHitlagProfile().canDefenseHalt(),
+                    "Navia N3 multi-hit omits Defense Halt " + index);
+            assertTrue(n3.getHitlagProfile().isDeployable(),
+                    "Navia N3 multi-hit is deployable " + index);
+            assertTrue(!n3.getHitlagProfile().isHeadshotOnly(),
+                    "Navia N3 multi-hit is not headshot-only " + index);
+        }
 
         records.clear();
         perform(simulator, CharacterActionKey.PLUNGE);

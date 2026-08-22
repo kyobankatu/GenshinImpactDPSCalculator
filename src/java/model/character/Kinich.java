@@ -27,6 +27,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -42,7 +43,7 @@ import simulation.event.SimpleTimerEvent;
  *
  * <p>Grappling, movement, Blind Spot geometry, random or multi-target
  * selection, Nightsoul Burst team plumbing, A1 Burning/Burgeon generation,
- * hitlag, stamina, low Plunge, and exploration state fail closed. A4 is exposed
+ * stamina, low Plunge, and exploration state fail closed. A4 is exposed
  * through an explicit local trigger because the simulator has no team-wide
  * Nightsoul Burst event.</p>
  */
@@ -65,6 +66,25 @@ public final class Kinich extends Character implements
     private static final double[] NORMAL_T9 = {
         1.818580, 1.523120, 2.268880
     };
+    /**
+     * Per-hit metadata from gcsim pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile[] NORMAL_HITLAG = {
+        new HitlagProfile(0.06, 0.01, true, false, false),
+        new HitlagProfile(0.09, 0.01, true, false, false),
+        new HitlagProfile(0.12, 0.01, true, false, false)
+    };
+    private static final HitlagProfile CHARGED_HITLAG =
+            new HitlagProfile(0.01, 0.01, false, false, false);
+    private static final HitlagProfile CANNON_HITLAG =
+            new HitlagProfile(0.0, 0.01, true, true, false);
+    private static final HitlagProfile C6_REBOUND_HITLAG =
+            new HitlagProfile(0.0, 0.0, true, true, false);
+    private static final HitlagProfile BURST_INITIAL_HITLAG =
+            new HitlagProfile(0.0, 0.01, true, false, false);
+    private static final HitlagProfile AJAW_BREATH_HITLAG =
+            new HitlagProfile(0.0, 0.05, false, true, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -326,7 +346,7 @@ public final class Kinich extends Character implements
         return false;
     }
 
-    /** Reports that hitlag and stamina are excluded. */
+    /** Reports that complete hitlag coverage and stamina are excluded. */
     public boolean isHitlagStaminaRepresented() {
         return false;
     }
@@ -772,6 +792,10 @@ public final class Kinich extends Character implements
                 actionType);
         action.setICD(icdType, icdTag, gauge);
         action.setShatterTrigger(shatter);
+        HitlagProfile hitlagProfile = hitlagProfile(hit);
+        if (hitlagProfile != null) {
+            action.setHitlagProfile(hitlagProfile);
+        }
         if (actionType == ActionType.SKILL) {
             action.setCountsAsSkillDmg(true);
             if (constellation >= 1
@@ -818,6 +842,25 @@ public final class Kinich extends Character implements
             resolvingAction = null;
             resolvingParticleEligible = false;
             resolvingC2Eligible = false;
+        }
+    }
+
+    private static HitlagProfile hitlagProfile(PendingHit hit) {
+        switch (hit.kind) {
+            case NORMAL:
+                return NORMAL_HITLAG[hit.index];
+            case CHARGED:
+                return CHARGED_HITLAG;
+            case CANNON:
+                return CANNON_HITLAG;
+            case C6_REBOUND:
+                return C6_REBOUND_HITLAG;
+            case BURST_INITIAL:
+                return BURST_INITIAL_HITLAG;
+            case AJAW_BREATH:
+                return AJAW_BREATH_HITLAG;
+            default:
+                return null;
         }
     }
 

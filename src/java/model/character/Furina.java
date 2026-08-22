@@ -27,6 +27,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -43,10 +44,10 @@ import simulation.event.SimpleTimerEvent;
  *
  * <p>Current HP and HP changes, healing, Fanfare gained from HP changes, A1,
  * C2's dynamic Fanfare branch, Pneuma and Arkhe switching, multi-target and
- * geometry, random targeting, hitlag, stamina, low Plunge, underwater, and
- * exploration behavior fail closed. C1 therefore supplies only its initial
- * 150 Fanfare, while C6 supplies its Hydro conversion and Max-HP damage but
- * never its Ousia healing.</p>
+ * geometry, random targeting, hitlag-based modifier extension, stamina, low
+ * Plunge, underwater, and exploration behavior fail closed. C1 therefore
+ * supplies only its initial 150 Fanfare, while C6 supplies its Hydro
+ * conversion and Max-HP damage but never its Ousia healing.</p>
  */
 public final class Furina extends Character implements
         SimulatorInitializedCharacterEffect,
@@ -59,6 +60,15 @@ public final class Furina extends Character implements
     private static final double[] NORMAL_T9 = {
         0.888955, 0.803398, 1.012669, 1.346634
     };
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile[] NORMAL_HITLAG = {
+        new HitlagProfile(0.01, 0.01, true, false, false),
+        new HitlagProfile(0.01, 0.01, true, false, false),
+        new HitlagProfile(0.02, 0.01, true, false, false),
+        new HitlagProfile(0.02, 0.01, true, false, false)
+    };
+    private static final HitlagProfile CHARGED_HITLAG =
+            new HitlagProfile(0.02, 0.01, false, false, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -639,6 +649,11 @@ public final class Furina extends Character implements
         action.setICD(icdType, icdTag, hitElement == Element.HYDRO ? 1.0 : 0.0);
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
+        if (hit.kind == HitKind.NORMAL) {
+            action.setHitlagProfile(NORMAL_HITLAG[hit.index]);
+        } else if (hit.kind == HitKind.CHARGED) {
+            action.setHitlagProfile(CHARGED_HITLAG);
+        }
         StatsContainer snapshot = hit.snapshot == null
                 ? captureLiveStats(hit.time) : hit.snapshot.merge(null);
         if (salonHit) {

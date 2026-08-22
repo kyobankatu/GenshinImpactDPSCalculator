@@ -26,6 +26,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -60,6 +61,18 @@ public final class KukiShinobu extends Character implements
     private static final int[] BURST_HIT_FRAMES = {
         50, 67, 84, 101, 118, 135, 152
     };
+    /**
+     * Basic-attack hitlag from gcsim pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile[] NORMAL_HITLAG = {
+        new HitlagProfile(0.03, 0.01, true, false, false),
+        new HitlagProfile(0.03, 0.01, true, false, false),
+        new HitlagProfile(0.06, 0.01, true, false, false),
+        new HitlagProfile(0.10, 0.01, true, false, false)
+    };
+    private static final HitlagProfile CHARGED_SECOND_HITLAG =
+            new HitlagProfile(0.10, 0.01, true, false, false);
 
     private final DoubleSupplier particleDrawSource;
     private CombatSimulator initializedSimulator;
@@ -491,6 +504,7 @@ public final class KukiShinobu extends Character implements
                 ICDTag.None,
                 0.0);
         action.setStatSnapshot(captureLiveStats(simulator.getCurrentTime()));
+        action.setHitlagProfile(NORMAL_HITLAG[hit.index]);
         simulator.performActionWithoutTimeAdvance(characterId, action);
     }
 
@@ -508,6 +522,9 @@ public final class KukiShinobu extends Character implements
                 ICDTag.None,
                 0.0);
         action.setStatSnapshot(captureLiveStats(simulator.getCurrentTime()));
+        if (hit.index == 1) {
+            action.setHitlagProfile(CHARGED_SECOND_HITLAG);
+        }
         simulator.performActionWithoutTimeAdvance(characterId, action);
     }
 

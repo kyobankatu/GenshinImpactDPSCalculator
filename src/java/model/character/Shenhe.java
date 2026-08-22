@@ -30,6 +30,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -53,6 +54,18 @@ public final class Shenhe extends Character implements
         TargetDependentTeamEffect {
     private static final double FRAME = 1.0 / 60.0;
     private static final double EPSILON = 1e-9;
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile[][] NORMAL_HITLAG = {
+        { new HitlagProfile(0.02, 0.01, true, false, false) },
+        { new HitlagProfile(0.02, 0.01, true, false, false) },
+        { new HitlagProfile(0.02, 0.01, true, false, false) },
+        { HitlagProfile.none(), new HitlagProfile(0.02, 0.01, true, false, false) },
+        { new HitlagProfile(0.10, 0.01, true, false, false) }
+    };
+    private static final HitlagProfile CHARGED_HITLAG =
+            new HitlagProfile(0.0, 0.01, true, true, false);
+    private static final HitlagProfile PRESS_SKILL_HITLAG =
+            new HitlagProfile(0.0, 0.01, true, true, false);
     private static final double PARTICLE_TRAVEL = 100.0 * FRAME;
     private static final int[][] NORMAL_HITMARKS = {
         { 14 }, { 17 }, { 19 }, { 14, 18 }, { 26 }
@@ -426,7 +439,7 @@ public final class Shenhe extends Character implements
 
     private void resolveNormal(CombatSimulator simulator, PendingHit hit) {
         String key = NORMAL_KEYS[hit.index][hit.subIndex];
-        simulator.performActionWithoutTimeAdvance(characterId, attack(
+        AttackAction action = attack(
                 "Dawnstar Piercer " + key,
                 getTalentValue(
                         key, NORMAL_MULTIPLIERS[hit.index][hit.subIndex]),
@@ -435,11 +448,13 @@ public final class Shenhe extends Character implements
                 ActionType.NORMAL,
                 ICDType.Standard,
                 ICDTag.NormalAttack,
-                0.0));
+                0.0);
+        action.setHitlagProfile(NORMAL_HITLAG[hit.index][hit.subIndex]);
+        simulator.performActionWithoutTimeAdvance(characterId, action);
     }
 
     private void resolveCharged(CombatSimulator simulator) {
-        simulator.performActionWithoutTimeAdvance(characterId, attack(
+        AttackAction action = attack(
                 "Dawnstar Piercer Charged",
                 getTalentValue("Charged", 2.033302),
                 Element.PHYSICAL,
@@ -447,7 +462,9 @@ public final class Shenhe extends Character implements
                 ActionType.CHARGE,
                 ICDType.Standard,
                 ICDTag.ChargedAttack,
-                0.0));
+                0.0);
+        action.setHitlagProfile(CHARGED_HITLAG);
+        simulator.performActionWithoutTimeAdvance(characterId, action);
     }
 
     private void resolveSkill(CombatSimulator simulator, PendingHit hit) {
@@ -472,6 +489,9 @@ public final class Shenhe extends Character implements
                 ICDType.None,
                 ICDTag.None,
                 hold ? 2.0 : 1.0);
+        if (!hold) {
+            action.setHitlagProfile(PRESS_SKILL_HITLAG);
+        }
         int stacks = consumeC4Stacks(simulator.getCurrentTime());
         if (stacks > 0) {
             action.addBonusStat(

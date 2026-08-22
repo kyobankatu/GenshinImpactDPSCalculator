@@ -28,6 +28,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -39,7 +40,7 @@ import simulation.event.SimpleTimerEvent;
  * delayed owner work is reconstructable after simulator rollback.</p>
  *
  * <p>Ushi damage-taking stacks, taunt and construct geometry, stamina,
- * movement, resistance reduction, hitlag, and multi-target behavior are
+ * movement, resistance reduction, hitlag extension, and multi-target behavior are
  * excluded rather than approximated.</p>
  */
 public final class AratakiItto extends Character implements
@@ -55,6 +56,27 @@ public final class AratakiItto extends Character implements
     private static final double[] NORMAL_T9 = {
         1.455654, 1.403040, 1.683648, 2.153666
     };
+
+    /**
+     * Per-hit hitlag from gcsim config YAML pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile[] NORMAL_HITLAG = {
+        new HitlagProfile(0.08, 0.01, true, false, false),
+        new HitlagProfile(0.08, 0.01, true, false, false),
+        new HitlagProfile(0.10, 0.01, true, false, false),
+        new HitlagProfile(0.10, 0.01, true, false, false)
+    };
+    private static final HitlagProfile CHARGED_DEFAULT_HITLAG =
+            new HitlagProfile(0.10, 0.01, true, false, false);
+    private static final HitlagProfile KESAGIRI_FIRST_HITLAG =
+            new HitlagProfile(0.07, 0.01, true, false, false);
+    private static final HitlagProfile KESAGIRI_SECOND_HITLAG =
+            new HitlagProfile(0.05, 0.01, true, false, false);
+    private static final HitlagProfile KESAGIRI_LATER_HITLAG =
+            new HitlagProfile(0.03, 0.01, true, false, false);
+    private static final HitlagProfile SKILL_HITLAG =
+            new HitlagProfile(0.02, 0.01, false, true, false);
 
     private final DoubleSupplier random;
     private CombatSimulator initializedSimulator;
@@ -347,7 +369,8 @@ public final class AratakiItto extends Character implements
         queueEvent(simulator, new PendingEvent(
                 castTime + hitFrame * FRAME / speed,
                 kind,
-                0,
+                kind == EventKind.KESAGIRI_COMBO
+                        ? consecutiveKesagiri : 0,
                 burstGeneration,
                 snapshot,
                 flatDamage));
@@ -660,6 +683,7 @@ public final class AratakiItto extends Character implements
                 elementalSkill ? 2.0 : infused ? 1.0 : 0.0);
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setShatterTrigger(true);
+        action.setHitlagProfile(hitlagProfile(event));
         if (kesagiri && constellation >= 6) {
             action.addBonusStat(
                     StatType.CRIT_DMG,
@@ -669,6 +693,28 @@ public final class AratakiItto extends Character implements
             action.setStatSnapshot(event.snapshot);
         }
         simulator.performActionWithoutTimeAdvance(characterId, action);
+    }
+
+    private static HitlagProfile hitlagProfile(PendingEvent event) {
+        switch (event.kind) {
+            case NORMAL_HIT:
+                return NORMAL_HITLAG[event.index];
+            case SAICHIMONJI:
+            case KESAGIRI_FINAL:
+                return CHARGED_DEFAULT_HITLAG;
+            case KESAGIRI_COMBO:
+                if (event.index == 0) {
+                    return KESAGIRI_FIRST_HITLAG;
+                }
+                if (event.index == 1) {
+                    return KESAGIRI_SECOND_HITLAG;
+                }
+                return KESAGIRI_LATER_HITLAG;
+            case SKILL_HIT:
+                return SKILL_HITLAG;
+            default:
+                return HitlagProfile.none();
+        }
     }
 
     private static ICDTag icdTag(ActionType actionType) {

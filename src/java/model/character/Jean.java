@@ -25,6 +25,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -66,6 +67,17 @@ public class Jean extends Character implements
     };
     private static final int[] NORMAL_ACTION_FRAMES = {
             22, 14, 28, 44, 68
+    };
+    /**
+     * Normal hitlag from gcsim pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile[] NORMAL_HITLAG = {
+        new HitlagProfile(0.03, 0.01, true, false, false),
+        new HitlagProfile(0.03, 0.01, true, false, false),
+        new HitlagProfile(0.06, 0.01, true, false, false),
+        new HitlagProfile(0.06, 0.01, true, false, false),
+        new HitlagProfile(0.10, 0.01, true, false, false)
     };
 
     private CombatSimulator initializedSimulator;
@@ -275,6 +287,7 @@ public class Jean extends Character implements
                 ICDType.Standard,
                 ICDTag.NormalAttack,
                 0.0);
+        normal.setHitlagProfile(NORMAL_HITLAG[step]);
         schedule(
                 sim,
                 castTime + NORMAL_HIT_FRAMES[step] * FRAME / speedScale,

@@ -25,6 +25,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -38,7 +39,7 @@ import simulation.event.SimpleTimerEvent;
  *
  * <p>Riptide is deliberately one fixed-target status. Weak points, enemy
  * defeat propagation and C2, movement, geometry, multi-target selection,
- * stamina, hitlag, player HP, the crit-gated A4 application, the party talent
+ * stamina, player HP, the crit-gated A4 application, the party talent
  * level passive, and Riptide Flash's private aura ICD are excluded instead of
  * being approximated through shared runtime APIs.</p>
  */
@@ -48,6 +49,20 @@ public final class Tartaglia extends Character implements
         SwitchAwareCharacter {
     private static final double FRAME = 1.0 / 60.0;
     private static final double EPSILON = 1e-9;
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile[][] MELEE_NORMAL_HITLAG = {
+        { new HitlagProfile(0.03, 0.01, true, false, false) },
+        { new HitlagProfile(0.03, 0.01, true, false, false) },
+        { new HitlagProfile(0.06, 0.01, true, false, false) },
+        { new HitlagProfile(0.06, 0.01, true, false, false) },
+        { new HitlagProfile(0.06, 0.01, true, false, false) },
+        {
+            new HitlagProfile(0.03, 0.01, true, false, false),
+            new HitlagProfile(0.12, 0.01, true, false, false)
+        }
+    };
+    private static final HitlagProfile RANGED_HEADSHOT_HITLAG =
+            new HitlagProfile(0.12, 0.01, false, true, true);
     private static final int[] RANGED_HIT_FRAMES = { 27, 18, 25, 29, 21, 24 };
     private static final int[] RANGED_DURATIONS = { 26, 27, 33, 32, 33, 66 };
     private static final int[][] MELEE_HIT_FRAMES = {
@@ -800,6 +815,7 @@ public final class Tartaglia extends Character implements
                 0.0,
                 actionType);
         action.setICD(icdType, icdTag, gauge);
+        action.setHitlagProfile(hitlagProfile(hit));
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
         action.setStatSnapshot(hit.snapshot == null
@@ -813,6 +829,16 @@ public final class Tartaglia extends Character implements
             resolvingAction = null;
             resolvingTrigger = TriggerKind.NONE;
         }
+    }
+
+    private static HitlagProfile hitlagProfile(PendingHit hit) {
+        if (hit.kind == HitKind.RANGED_CHARGED) {
+            return RANGED_HEADSHOT_HITLAG;
+        }
+        if (hit.kind == HitKind.MELEE_NORMAL) {
+            return MELEE_NORMAL_HITLAG[hit.index][hit.variant];
+        }
+        return HitlagProfile.none();
     }
 
     private double stanceValue() {

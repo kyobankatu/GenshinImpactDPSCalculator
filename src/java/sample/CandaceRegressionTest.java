@@ -115,6 +115,19 @@ public final class CandaceRegressionTest {
                 "Gleaming Spear Charged Attack").get(0)
                         .action.getDamagePercent(),
                 "Candace Charged multiplier");
+        AttackAction charged = named(records,
+                "Gleaming Spear Charged Attack").get(0).action;
+        assertClose(0.0,
+                charged.getHitlagProfile().getHaltTimeSeconds(),
+                "Candace Charged hitlag halt time");
+        assertClose(0.01, charged.getHitlagProfile().getFactor(),
+                "Candace Charged hitlag factor");
+        assertTrue(charged.getHitlagProfile().canDefenseHalt(),
+                "Candace Charged hitlag includes Defense Halt");
+        assertTrue(charged.getHitlagProfile().isDeployable(),
+                "Candace Charged hitlag is deployable");
+        assertTrue(!charged.getHitlagProfile().isHeadshotOnly(),
+                "Candace Charged hitlag is not headshot-only");
         perform(simulator, CharacterActionRequest.of(
                 CharacterActionKey.PLUNGE));
         assertClose(2.933586, named(records,
@@ -138,7 +151,7 @@ public final class CandaceRegressionTest {
                 "Candace Press hitmark");
         assertClose(0.204000, pressHit.action.getDamagePercent(),
                 "Candace Press Talent 9");
-        assertClose(5.8,
+        assertClose(5.8 - 7.0 * FRAME,
                 press.getSkillCDRemaining(pressSimulator.getCurrentTime()),
                 "Candace Press CD starts at frame 14");
         SimulatorSnapshot pendingParticle = pressSimulator.saveSnapshot();
@@ -161,7 +174,7 @@ public final class CandaceRegressionTest {
                 "Sacred Rite: Heron's Sanctum (Charged)").get(0);
         assertClose(0.380800, holdHit.action.getDamagePercent(),
                 "Candace C5 Hold Talent 12");
-        assertClose(5.6,
+        assertClose(5.6 - 7.0 * FRAME,
                 hold.getSkillCDRemaining(holdSimulator.getCurrentTime()),
                 "Candace C4 reduces Hold CD to six seconds");
         assertClose(0.44,
@@ -176,7 +189,7 @@ public final class CandaceRegressionTest {
         CombatSimulator c0HoldSimulator = simulatorWith(c0Hold);
         perform(c0HoldSimulator, CharacterActionRequest.skill(
                 SkillActionMode.HOLD));
-        assertClose(8.6,
+        assertClose(8.6 - 7.0 * FRAME,
                 c0Hold.getSkillCDRemaining(
                         c0HoldSimulator.getCurrentTime()),
                 "Candace C0 Hold keeps nine-second CD");

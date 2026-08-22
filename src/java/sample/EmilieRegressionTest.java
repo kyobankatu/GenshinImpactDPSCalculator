@@ -128,6 +128,7 @@ public final class EmilieRegressionTest {
         };
         int[] hitFrames = { 11, 16, 33, 34 };
         int[] durations = { 20, 19, 40, 70 };
+        int[] hitlagFrames = { 8, 8, 8, 9 };
         for (int step = 0; step < normalValues.length; step++) {
             double castTime = simulator.getCurrentTime();
             perform(simulator, CharacterActionKey.NORMAL);
@@ -136,7 +137,8 @@ public final class EmilieRegressionTest {
             assertClose(castTime + hitFrames[step] * FRAME,
                     normal.time,
                     "Emilie N" + (step + 1) + " hitmark");
-            assertClose(castTime + durations[step] * FRAME,
+            assertClose(castTime
+                            + (durations[step] + hitlagFrames[step]) * FRAME,
                     simulator.getCurrentTime(),
                     "Emilie N" + (step + 1) + " recovery");
             assertClose(normalValues[step],
@@ -225,9 +227,13 @@ public final class EmilieRegressionTest {
         advanceTo(simulator, 2.8);
         assertEquals(2, emilie.getCaseLevel(simulator.getCurrentTime()),
                 "Two Burning scents promote Case to level 2");
+        advanceTo(simulator, 4.7);
+        startLongBurning(simulator, CharacterId.EMILIE);
+        advanceTo(simulator, 6.7);
+        startLongBurning(simulator, CharacterId.EMILIE);
         advanceTo(simulator, 7.2);
         assertEquals(1, named(records, "Cleardew Cologne").size(),
-                "Two more scents trigger one Cleardew proc");
+                "Two more scents under refreshed Burning trigger one Cleardew proc");
         ActionRecord cleardew = named(records, "Cleardew Cologne").get(0);
         assertClose(6.0, cleardew.action.getDamagePercent(),
                 "Cleardew has 600 percent ATK multiplier");

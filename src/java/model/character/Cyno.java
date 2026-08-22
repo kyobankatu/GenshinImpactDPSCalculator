@@ -29,6 +29,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -39,7 +40,7 @@ import simulation.event.SimpleTimerEvent;
  * KQM Cyno evidence. Endseer timing, Judication, Duststalker Bolts, form
  * extension, and C1-C6 are represented with character-owned rollback state.</p>
  *
- * <p>Target geometry, hitlag, interruption resistance, player damage,
+ * <p>Target geometry, hitlag extension, interruption resistance, player damage,
  * charged-attack stamina, and the Witch/Stellar variants are outside this
  * fixed-target slice.</p>
  */
@@ -78,6 +79,33 @@ public final class Cyno extends Character implements
         { 1.438227 }, { 1.515125 }, { 1.922339 },
         { 0.94973, 0.94973 }, { 2.403891 }
     };
+
+    /**
+     * Per-hit hitlag from gcsim config YAML pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile[][] NORMAL_HITLAG = {
+        { new HitlagProfile(0.01, 0.01, false, false, false) },
+        { new HitlagProfile(0.06, 0.01, true, false, false) },
+        { HitlagProfile.none(), new HitlagProfile(0.02, 0.01, true, false, false) },
+        { new HitlagProfile(0.04, 0.01, true, false, false) }
+    };
+    private static final HitlagProfile[][] FORM_NORMAL_HITLAG = {
+        { new HitlagProfile(0.01, 0.01, false, false, false) },
+        { new HitlagProfile(0.01, 0.01, false, false, false) },
+        { new HitlagProfile(0.03, 0.01, false, false, false) },
+        {
+            new HitlagProfile(0.01, 0.01, false, false, false),
+            new HitlagProfile(0.03, 0.01, false, false, false)
+        },
+        { new HitlagProfile(0.05, 0.01, true, false, false) }
+    };
+    private static final HitlagProfile CHARGED_HITLAG =
+            new HitlagProfile(0.0, 0.01, true, true, false);
+    private static final HitlagProfile SKILL_HITLAG =
+            new HitlagProfile(0.0, 0.01, false, true, false);
+    private static final HitlagProfile FORM_SKILL_HITLAG =
+            new HitlagProfile(0.03, 0.01, false, false, false);
 
     private final DoubleSupplier particleDrawSource;
     private CombatSimulator initializedSimulator;
@@ -578,6 +606,9 @@ public final class Cyno extends Character implements
                                     "A4 Pactsworn Normal EM Ratio", 1.5));
         }
         action.setStatSnapshot(stats);
+        action.setHitlagProfile((form
+                ? FORM_NORMAL_HITLAG : NORMAL_HITLAG)
+                [hit.index][hit.subIndex]);
         simulator.performActionWithoutTimeAdvance(characterId, action);
     }
 
@@ -601,6 +632,7 @@ public final class Cyno extends Character implements
                 ICDTag.ChargedAttack,
                 form ? 1.0 : 0.0);
         action.setStatSnapshot(captureLiveStats(simulator.getCurrentTime()));
+        action.setHitlagProfile(CHARGED_HITLAG);
         simulator.performActionWithoutTimeAdvance(characterId, action);
     }
 
@@ -634,6 +666,8 @@ public final class Cyno extends Character implements
                     getTalentValue("A1 Skill DMG Bonus", 0.35));
         }
         action.setStatSnapshot(captureLiveStats(simulator.getCurrentTime()));
+        action.setHitlagProfile(form
+                ? FORM_SKILL_HITLAG : SKILL_HITLAG);
         simulator.performActionWithoutTimeAdvance(characterId, action);
         double particleCount = form
                 ? nextParticleDraw() < 0.33 ? 2.0 : 1.0

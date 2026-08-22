@@ -27,6 +27,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -40,7 +41,7 @@ import simulation.event.SimpleTimerEvent;
  * elemental.</p>
  *
  * <p>Shield absorption, A1's incoming-hit response, generic cross-character
- * Hydro infusion, later third-party switch waves, geometry, and hitlag are
+ * Hydro infusion, later third-party switch waves, geometry, and hitlag extension are
  * outside this vertical slice.</p>
  */
 public final class Candace extends Character implements
@@ -60,6 +61,21 @@ public final class Candace extends Character implements
     private static final double[][] NORMAL_T9 = {
         { 1.117060 }, { 1.123380 }, { 0.651987, 0.796873 }, { 1.744320 }
     };
+
+    /**
+     * Per-hit hitlag from gcsim config YAML pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_SHORT_HITLAG =
+            new HitlagProfile(0.03, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_FINAL_HITLAG =
+            new HitlagProfile(0.04, 0.01, true, false, false);
+    private static final HitlagProfile CHARGED_HITLAG =
+            new HitlagProfile(0.0, 0.01, true, true, false);
+    private static final HitlagProfile SKILL_HITLAG =
+            new HitlagProfile(0.05, 0.01, true, false, false);
+    private static final HitlagProfile BURST_HITLAG =
+            new HitlagProfile(0.0, 0.01, true, false, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -583,6 +599,7 @@ public final class Candace extends Character implements
         action.setICD(icdType, icdTag, gauge);
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
+        action.setHitlagProfile(hitlagProfile(hit));
         StatsContainer snapshot = hit.snapshot == null
                 ? captureLiveStats(simulator.getCurrentTime())
                 : hit.snapshot.merge(null);
@@ -593,6 +610,29 @@ public final class Candace extends Character implements
         }
         action.setStatSnapshot(snapshot);
         simulator.performActionWithoutTimeAdvance(characterId, action);
+    }
+
+    private static HitlagProfile hitlagProfile(PendingHit hit) {
+        switch (hit.kind) {
+            case NORMAL:
+                if (hit.index < 2
+                        || (hit.index == 2 && hit.variant == 1)) {
+                    return NORMAL_SHORT_HITLAG;
+                }
+                return hit.index == 3
+                        ? NORMAL_FINAL_HITLAG : HitlagProfile.none();
+            case CHARGED:
+                return CHARGED_HITLAG;
+            case SKILL_PRESS:
+            case SKILL_HOLD:
+                return SKILL_HITLAG;
+            case BURST_INITIAL:
+            case BURST_WAVE:
+            case C6_WAVE:
+                return BURST_HITLAG;
+            default:
+                return HitlagProfile.none();
+        }
     }
 
     private StatsContainer captureLiveStats(double currentTime) {

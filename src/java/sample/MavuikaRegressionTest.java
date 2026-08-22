@@ -116,9 +116,9 @@ public final class MavuikaRegressionTest {
         };
         double[] expectedFrames = {
             21.0,
-            45.0, 57.0,
-            101.0, 106.0, 112.0,
-            149.0
+            45.0 + 9.0, 57.0 + 9.0,
+            101.0 + 23.0, 106.0 + 23.0, 112.0 + 23.0,
+            149.0 + 23.0
         };
         for (int step = 0; step < 4; step++) {
             perform(simulator, CharacterActionKey.NORMAL);

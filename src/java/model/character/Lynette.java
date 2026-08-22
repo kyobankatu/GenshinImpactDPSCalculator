@@ -29,6 +29,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -40,7 +41,7 @@ import simulation.event.SimpleTimerEvent;
  * follow pinned gcsim {@code ef41805d}.</p>
  *
  * <p>Healing and HP drain, C1 pull, absorbed-element Vivid Shots and dependent
- * C2/A4, variable Hold duration, geometry, and hitlag are outside this vertical
+ * C2/A4, variable Hold duration, and geometry are outside this vertical
  * slice.</p>
  */
 public final class Lynette extends Character implements
@@ -63,6 +64,16 @@ public final class Lynette extends Character implements
     private static final int[] BURST_TICK_FRAMES = {
         136, 195, 254, 313, 372, 431, 490, 549, 608, 667, 726
     };
+    /**
+     * Per-hit metadata from gcsim pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_HITLAG_SHORT =
+            new HitlagProfile(0.03, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_N3_FIRST =
+            new HitlagProfile(0.06, 0.01, true, false, false);
+    private static final HitlagProfile SKILL_HITLAG =
+            new HitlagProfile(0.0, 0.01, true, false, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -531,10 +542,30 @@ public final class Lynette extends Character implements
         action.setICD(icdType, icdTag, gauge);
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
+        HitlagProfile hitlagProfile = hitlagProfile(hit);
+        if (hitlagProfile != null) {
+            action.setHitlagProfile(hitlagProfile);
+        }
         action.setStatSnapshot(hit.snapshot == null
                 ? captureLiveStats(simulator.getCurrentTime())
                 : hit.snapshot);
         simulator.performActionWithoutTimeAdvance(characterId, action);
+    }
+
+    private static HitlagProfile hitlagProfile(PendingHit hit) {
+        if (hit.kind == HitKind.SKILL || hit.kind == HitKind.ARKHE) {
+            return SKILL_HITLAG;
+        }
+        if (hit.kind != HitKind.NORMAL) {
+            return null;
+        }
+        if (hit.index <= 1) {
+            return NORMAL_HITLAG_SHORT;
+        }
+        if (hit.index == 2 && hit.variant == 0) {
+            return NORMAL_HITLAG_N3_FIRST;
+        }
+        return null;
     }
 
     private StatsContainer captureLiveStats(double currentTime) {

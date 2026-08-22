@@ -27,6 +27,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -40,7 +41,7 @@ import simulation.event.SimpleTimerEvent;
  * simulator snapshot restoration.</p>
  *
  * <p>Charged Attack, defensive Grimheart effects, C4, geometry, shields,
- * hitlag, cancels, and multi-target behavior are intentionally excluded.</p>
+ * hitlag extension, cancels, and multi-target behavior are intentionally excluded.</p>
  */
 public final class Eula extends Character implements
         SimulatorInitializedCharacterEffect,
@@ -62,6 +63,19 @@ public final class Eula extends Character implements
             { 2.069484 },
             { 1.319735, 1.319735 }
     };
+
+    /**
+     * Per-hit hitlag from gcsim config YAML pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_SHORT_HITLAG =
+            new HitlagProfile(0.09, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_LONG_HITLAG =
+            new HitlagProfile(0.12, 0.01, true, false, false);
+    private static final HitlagProfile SKILL_PRESS_HITLAG =
+            new HitlagProfile(0.09, 0.01, true, false, false);
+    private static final HitlagProfile SKILL_HOLD_HITLAG =
+            new HitlagProfile(0.12, 0.01, true, false, false);
 
     /** Eula implements both Press and Hold Skill branches. */
     @Override
@@ -683,6 +697,7 @@ public final class Eula extends Character implements
             default:
                 throw new IllegalStateException("Unknown Eula hit kind");
         }
+        action.setHitlagProfile(hitlagProfile(hit));
         if (hit.kind == HitKind.SKILL_PRESS
                 || hit.kind == HitKind.SKILL_HOLD) {
             double draw = consumeDraw(
@@ -708,6 +723,24 @@ public final class Eula extends Character implements
             burstInstance = null;
             nextLightfallStackTime = Double.NEGATIVE_INFINITY;
         }
+    }
+
+    private static HitlagProfile hitlagProfile(PendingHit hit) {
+        if (hit.kind == HitKind.NORMAL) {
+            if (hit.index == 0 || hit.index == 3
+                    || (hit.index == 2 && hit.subIndex == 1)) {
+                return NORMAL_SHORT_HITLAG;
+            }
+            if (hit.index == 1
+                    || (hit.index == 4 && hit.subIndex == 1)) {
+                return NORMAL_LONG_HITLAG;
+            }
+        } else if (hit.kind == HitKind.SKILL_PRESS) {
+            return SKILL_PRESS_HITLAG;
+        } else if (hit.kind == HitKind.SKILL_HOLD) {
+            return SKILL_HOLD_HITLAG;
+        }
+        return HitlagProfile.none();
     }
 
     private boolean isStale(PendingHit hit) {

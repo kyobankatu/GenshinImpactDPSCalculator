@@ -28,6 +28,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -59,6 +60,15 @@ public final class Collei extends Character implements
     private static final int[] SKILL_HITMARKS = { 34, 138 };
     private static final int BURST_MAX_LEAPS = 18;
     private static final int SPROUT_MAX_TICKS = 4;
+
+    /**
+     * Hitlag from gcsim config YAML pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile AIMED_HEADSHOT_HITLAG =
+            new HitlagProfile(0.12, 0.01, false, true, true);
+    private static final HitlagProfile BOOMERANG_HITLAG =
+            new HitlagProfile(0.0, 0.01, true, true, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -529,6 +539,11 @@ public final class Collei extends Character implements
         }
         if (hit.snapshot != null) {
             action.setStatSnapshot(hit.snapshot);
+        }
+        if (hit.kind == HitKind.CHARGED) {
+            action.setHitlagProfile(AIMED_HEADSHOT_HITLAG);
+        } else if (hit.kind == HitKind.SKILL) {
+            action.setHitlagProfile(BOOMERANG_HITLAG);
         }
         simulator.performActionWithoutTimeAdvance(characterId, action);
     }

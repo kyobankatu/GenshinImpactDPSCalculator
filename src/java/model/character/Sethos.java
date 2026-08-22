@@ -29,6 +29,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -52,6 +53,9 @@ public final class Sethos extends Character implements
     private static final double FRAME = 1.0 / 60.0;
     private static final double EPSILON = 1e-9;
     private static final double PROJECTILE_TRAVEL = 10.0 * FRAME;
+    /** Weak-point hitlag pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile AIMED_HEADSHOT_HITLAG =
+            new HitlagProfile(0.12, 0.01, false, true, true);
     private static final int[][] NORMAL_RELEASE_FRAMES = {
         { 10 }, { 12, 15 }, { 39 }
     };
@@ -564,6 +568,9 @@ public final class Sethos extends Character implements
                         "Unknown Sethos hit kind " + hit.kind);
         }
         action.setStatSnapshot(hit.snapshot);
+        if (hit.kind == HitKind.CHARGED || hit.kind == HitKind.SHADOW) {
+            action.setHitlagProfile(AIMED_HEADSHOT_HITLAG);
+        }
         if (hit.kind == HitKind.SKILL) {
             resolvingSkillHit = true;
         }

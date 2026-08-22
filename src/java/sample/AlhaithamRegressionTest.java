@@ -108,6 +108,7 @@ public final class AlhaithamRegressionTest {
             { 1.226665 }, { 1.540516 }
         };
         int[] durations = { 15, 22, 44, 30, 67 };
+        int[] hitlagFrames = { 5, 5, 5, 0, 5 };
         int recordIndex = 0;
         for (int step = 0; step < multipliers.length; step++) {
             double castTime = simulator.getCurrentTime();
@@ -123,7 +124,8 @@ public final class AlhaithamRegressionTest {
                         record.action.getActionType(),
                         "Alhaitham Normal category");
             }
-            assertClose(castTime + durations[step] * FRAME,
+            assertClose(castTime
+                            + (durations[step] + hitlagFrames[step]) * FRAME,
                     simulator.getCurrentTime(),
                     "Alhaitham Normal recovery");
         }
@@ -165,7 +167,7 @@ public final class AlhaithamRegressionTest {
                 "Alhaitham Skill hitmark");
         assertClose(3.2912, skill.action.getDamagePercent(),
                 "Alhaitham Skill ATK ratio");
-        assertClose(18.0 - 12.0 * FRAME,
+        assertClose(18.0 - (12.0 + 6.0) * FRAME,
                 alhaitham.getSkillCDRemaining(simulator.getCurrentTime()),
                 "Alhaitham Skill cooldown starts at mirror gain frame");
 
@@ -338,7 +340,7 @@ public final class AlhaithamRegressionTest {
         assertClose(11.0 * FRAME / 1.20,
                 named(speedRecords, "Abductive Reasoning N1").get(0).time,
                 "Alhaitham Normal speed adjusts hitmark");
-        assertClose(15.0 * FRAME / 1.20,
+        assertClose(15.0 * FRAME / 1.20 + 5.0 * FRAME,
                 speedSimulator.getCurrentTime(),
                 "Alhaitham Normal speed adjusts recovery");
 

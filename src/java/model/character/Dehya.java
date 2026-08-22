@@ -26,6 +26,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -40,7 +41,7 @@ import simulation.event.SimpleTimerEvent;
  *
  * <p>Player damage intake, mitigation and redirection, healing and current HP,
  * interruption resistance, movement and auto-targeting, geometry and
- * multi-target behavior, stamina, hitlag, Charged Attack, low Plunge, C2's
+ * multi-target behavior, stamina, hitlag extension, Charged Attack, low Plunge, C2's
  * incoming-hit damage branch, and unsupported Burst input acceleration are
  * excluded rather than approximated.</p>
  */
@@ -56,6 +57,21 @@ public final class Dehya extends Character implements
     private static final double[] NORMAL_T9 = {
         1.141234, 1.133745, 1.407875, 1.750703
     };
+
+    /**
+     * Per-hit hitlag from gcsim pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile[] NORMAL_HITLAG = {
+        new HitlagProfile(0.09, 0.01, true, false, false),
+        new HitlagProfile(0.10, 0.01, true, false, false),
+        new HitlagProfile(0.08, 0.01, true, false, false),
+        new HitlagProfile(0.12, 0.01, true, false, false)
+    };
+    private static final HitlagProfile RECAST_HITLAG =
+            new HitlagProfile(0.02, 0.01, false, false, false);
+    private static final HitlagProfile COORDINATED_HITLAG =
+            new HitlagProfile(0.02, 0.01, false, true, false);
 
     private final DoubleSupplier criticalRandom;
     private CombatSimulator initializedSimulator;
@@ -730,10 +746,24 @@ public final class Dehya extends Character implements
         action.setICD(icdType, icdTag, hitElement == Element.PYRO ? 1.0 : 0.0);
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setShatterTrigger(shatterTrigger);
+        action.setHitlagProfile(hitlagProfile(hit));
         action.setStatSnapshot(hit.snapshot == null
                 ? captureLiveStats(simulator.getCurrentTime())
                 : hit.snapshot);
         simulator.performActionWithoutTimeAdvance(characterId, action);
+    }
+
+    private static HitlagProfile hitlagProfile(PendingHit hit) {
+        switch (hit.kind) {
+            case NORMAL:
+                return NORMAL_HITLAG[hit.index];
+            case SKILL_RECAST:
+                return RECAST_HITLAG;
+            case SKILL_COORDINATED:
+                return COORDINATED_HITLAG;
+            default:
+                return HitlagProfile.none();
+        }
     }
 
     private AttackAction createAttackAction(

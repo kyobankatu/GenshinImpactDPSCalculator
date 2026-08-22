@@ -94,7 +94,15 @@ public final class EulaRegressionTest {
                 1.648572, 1.718724, 1.043511, 1.043511,
                 2.069484, 1.319735, 1.319735
         };
-        double[] frames = { 30, 53, 95, 112, 143, 199, 226 };
+        double[] frames = {
+            30,
+            53 + 9,
+            95 + 20,
+            112 + 20,
+            143 + 29,
+            199 + 38,
+            226 + 38
+        };
         assertEquals(7, records.size(), "Eula N1-N5 damage instances");
         for (int index = 0; index < records.size(); index++) {
             ActionRecord record = records.get(index);
@@ -115,7 +123,8 @@ public final class EulaRegressionTest {
             assertTrue(record.action.isShatterTrigger(),
                     "Eula claymore Normal is blunt");
         }
-        assertClose(275.0 * FRAME, simulator.getCurrentTime(),
+        assertClose((275.0 + 49.0) * FRAME,
+                simulator.getCurrentTime(),
                 "Eula N1-N5 animation durations");
 
         Eula plungeEula = deterministicEula(0);
@@ -650,7 +659,8 @@ public final class EulaRegressionTest {
         CombatSimulator cooldownSim = simulatorWith(cooldown);
         perform(cooldownSim, CharacterActionKey.SKILL);
         perform(cooldownSim, CharacterActionKey.SKILL);
-        assertClose(304.0 * FRAME, cooldownSim.getCurrentTime(),
+        assertClose((304.0 + 9.0) * FRAME,
+                cooldownSim.getCurrentTime(),
                 "Eula serializes Skill at cooldown boundary");
 
         Eula reusable = deterministicEula(0);

@@ -30,6 +30,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -42,7 +43,7 @@ import simulation.event.SimpleTimerEvent;
  * reduction, C4 switch detonation, and C6 party effects are represented.</p>
  *
  * <p>Actual-crit A4, stamina, animation cancels, collision geometry, mine
- * scattering, multi-target behavior, defensive behavior, hitlag, and Hexerei
+ * scattering, multi-target behavior, defensive behavior, and Hexerei
  * are intentionally excluded. High Plunge uses the repository's fixed
  * one-second catalyst policy.</p>
  */
@@ -62,6 +63,12 @@ public final class Klee extends Character implements
             186, 294, 401, 503, 610, 718
     };
     private static final int[] C6_ENERGY_FRAMES = { 326, 506, 686 };
+    /**
+     * Deployable Defense Halt metadata from gcsim pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile DEPLOYABLE_DEFENSE_HITLAG =
+            new HitlagProfile(0.0, 0.0, true, true, false);
 
     private final DoubleSupplier a1DrawSource;
     private final DoubleSupplier c1DrawSource;
@@ -296,6 +303,7 @@ public final class Klee extends Character implements
                 ICDType.None,
                 ICDTag.None,
                 2.0);
+        explosion.setHitlagProfile(DEPLOYABLE_DEFENSE_HITLAG);
         simulator.performActionWithoutTimeAdvance(characterId, explosion);
     }
 
@@ -700,6 +708,11 @@ public final class Klee extends Character implements
         }
         if (hit.snapshot != null) {
             action.setStatSnapshot(hit.snapshot);
+        }
+        if (hit.kind == HitKind.SKILL_MINE
+                || hit.kind == HitKind.BURST
+                || hit.kind == HitKind.C1) {
+            action.setHitlagProfile(DEPLOYABLE_DEFENSE_HITLAG);
         }
         resolvingSkillMine = hit.kind == HitKind.SKILL_MINE;
         try {

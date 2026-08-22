@@ -27,6 +27,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -42,7 +43,7 @@ import simulation.event.SimpleTimerEvent;
  * Aura fails closed to Anemo.</p>
  *
  * <p>Shield absorption and durability, player HP, movement and leap behavior,
- * target geometry, multi-target Ring retargeting, stamina, hitlag, low plunge,
+ * target geometry, multi-target Ring retargeting, stamina, low plunge,
  * and Burst grouping are outside this bounded slice. High plunge is represented
  * as one stationary fixed-target impact. Unsupported grouping has no synthetic
  * damage or crowd-control effect.</p>
@@ -75,6 +76,20 @@ public final class LanYan extends Character implements
         Element.ELECTRO,
         Element.CRYO
     };
+    /**
+     * Per-hit metadata from gcsim pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_HITLAG_SHORT =
+            new HitlagProfile(0.03, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_DEFENSE_ONLY =
+            new HitlagProfile(0.0, 0.0, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_N3_FIRST =
+            new HitlagProfile(0.03, 0.01, false, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_N4 =
+            new HitlagProfile(0.06, 0.01, true, false, false);
+    private static final HitlagProfile RING_HITLAG =
+            new HitlagProfile(0.0, 0.01, true, false, false);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -539,6 +554,10 @@ public final class LanYan extends Character implements
                 ICDType.Standard,
                 ICDTag.NormalAttack,
                 hit.snapshot);
+        HitlagProfile hitlagProfile = normalHitlag(hit.index, hit.subIndex);
+        if (hitlagProfile != null) {
+            action.setHitlagProfile(hitlagProfile);
+        }
         simulator.performActionWithoutTimeAdvance(characterId, action);
     }
 
@@ -604,6 +623,7 @@ public final class LanYan extends Character implements
                         ? ICDTag.LanYan_FeathermoonRingMix
                         : ICDTag.LanYan_FeathermoonRing,
                 actionSnapshot);
+        action.setHitlagProfile(RING_HITLAG);
         simulator.performActionWithoutTimeAdvance(characterId, action);
         if (!particleGenerated && simulator.getEnemy() != null) {
             particleGenerated = true;
@@ -745,6 +765,21 @@ public final class LanYan extends Character implements
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
         action.setStatSnapshot(snapshot);
         return action;
+    }
+
+    private static HitlagProfile normalHitlag(int step, int hit) {
+        if (step == 0) {
+            return NORMAL_HITLAG_SHORT;
+        }
+        if (step == 1) {
+            return hit == 0
+                    ? NORMAL_HITLAG_SHORT
+                    : NORMAL_HITLAG_DEFENSE_ONLY;
+        }
+        if (step == 2) {
+            return hit == 0 ? NORMAL_HITLAG_N3_FIRST : null;
+        }
+        return NORMAL_HITLAG_N4;
     }
 
     private static List<PendingHit> copyHits(List<PendingHit> source) {

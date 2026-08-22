@@ -27,6 +27,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -41,7 +42,7 @@ import simulation.event.SimpleTimerEvent;
  * shell selection follows stable party order.</p>
  *
  * <p>Flight and movement, aim geometry, random targets, multi-target
- * distribution, automatic Nightsoul Burst team plumbing, hitlag, stamina,
+ * distribution, automatic Nightsoul Burst team plumbing, hitlag extension, stamina,
  * weak points, and low Plunge are excluded rather than approximated.</p>
  */
 public final class Chasca extends Character implements
@@ -66,6 +67,13 @@ public final class Chasca extends Character implements
     private static final int[] BURST_SHELL_FRAMES = {
         103, 139, 147, 153, 157, 160
     };
+
+    /**
+     * Aimed-shot hitlag from gcsim config YAML pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile AIMED_HEADSHOT_HITLAG =
+            new HitlagProfile(0.12, 0.01, false, true, true);
 
     private CombatSimulator initializedSimulator;
     private int normalAttackStep;
@@ -800,6 +808,9 @@ public final class Chasca extends Character implements
                 actionType);
         action.setICD(icdType, icdTag, 1.0);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
+        if (hit.kind == HitKind.CHARGED) {
+            action.setHitlagProfile(AIMED_HEADSHOT_HITLAG);
+        }
         if (hit.element != Element.ANEMO
                 && hit.kind == HitKind.SHADOWHUNT) {
             action.addBonusStat(

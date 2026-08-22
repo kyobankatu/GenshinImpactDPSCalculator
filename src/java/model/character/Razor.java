@@ -25,6 +25,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -63,6 +64,16 @@ public class Razor extends Character implements
     private static final double C1_DURATION = 8.0;
     private static final double C6_COOLDOWN = 10.0;
     private static final double C6_DAMAGE_MULTIPLIER = 1.0;
+
+    /** Hitlag data pinned to gcsim {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}. */
+    private static final HitlagProfile[] NORMAL_HITLAG = {
+        new HitlagProfile(0.10, 0.01, true, false, false),
+        new HitlagProfile(0.10, 0.01, true, false, false),
+        new HitlagProfile(0.10, 0.05, true, false, false),
+        new HitlagProfile(0.15, 0.01, true, false, false)
+    };
+    private static final HitlagProfile PRESS_SKILL_HITLAG =
+            new HitlagProfile(0.10, 0.03, true, false, false);
 
     private int normalAttackStep;
     private CombatSimulator initializedSimulator;
@@ -255,6 +266,7 @@ public class Razor extends Character implements
                 StatType.NORMAL_ATTACK_DMG_BONUS,
                 0.0,
                 ActionType.NORMAL);
+        normal.setHitlagProfile(NORMAL_HITLAG[normalAttackStep]);
         normal.setICD(ICDType.Standard, ICDTag.NormalAttack, 0.0);
         normal.setShatterTrigger(true);
         normal.setAnimationDuration(duration);
@@ -327,6 +339,7 @@ public class Razor extends Character implements
                     StatType.SKILL_DMG_BONUS,
                     0.0,
                     ActionType.SKILL);
+            press.setHitlagProfile(PRESS_SKILL_HITLAG);
             press.setICD(ICDType.None, ICDTag.ElementalSkill, 2.0);
             activeSim.performActionWithoutTimeAdvance(characterId, press);
             addElectroSigil(activeSim.getCurrentTime(), 1);

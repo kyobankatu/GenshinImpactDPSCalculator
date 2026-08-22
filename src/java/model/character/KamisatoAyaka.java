@@ -28,6 +28,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.action.SkillActionMode;
 import simulation.event.SimpleTimerEvent;
 
@@ -41,7 +42,7 @@ import simulation.event.SimpleTimerEvent;
  * simulator rollback.</p>
  *
  * <p>Movement, stamina, geometry, multi-target selection, weak points,
- * low Plunge, hitlag, and defensive behavior are intentionally excluded.
+ * low Plunge and defensive behavior are intentionally excluded.
  * C4 owns one expiration because this simulator has one fixed enemy.</p>
  */
 public final class KamisatoAyaka extends Character implements
@@ -68,6 +69,16 @@ public final class KamisatoAyaka extends Character implements
     private static final int BURST_INTERVAL_FRAMES = 15;
     private static final int BURST_CUT_COUNT = 19;
     private static final int BURST_BLOOM_FRAME = 404;
+    /**
+     * Per-hit metadata from gcsim pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_HITLAG_SHORT =
+            new HitlagProfile(0.03, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_N3 =
+            new HitlagProfile(0.06, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_N4_THIRD =
+            new HitlagProfile(0.03, 0.05, true, false, false);
 
     private final DoubleSupplier particleDrawSource;
     private final DoubleSupplier c1DrawSource;
@@ -681,6 +692,10 @@ public final class KamisatoAyaka extends Character implements
         action.setICD(icdType, icdTag, gaugeUnits);
         action.setCountsAsSkillDmg(actionType == ActionType.SKILL);
         action.setCountsAsBurstDmg(actionType == ActionType.BURST);
+        HitlagProfile hitlagProfile = normalHitlag(hit);
+        if (hitlagProfile != null) {
+            action.setHitlagProfile(hitlagProfile);
+        }
         if (hit.snapshot != null) {
             action.setStatSnapshot(hit.snapshot);
         }
@@ -691,6 +706,22 @@ public final class KamisatoAyaka extends Character implements
         }
         simulator.performActionWithoutTimeAdvance(characterId, action);
         return action;
+    }
+
+    private static HitlagProfile normalHitlag(PendingHit hit) {
+        if (hit.kind != HitKind.NORMAL) {
+            return null;
+        }
+        if (hit.index <= 1) {
+            return NORMAL_HITLAG_SHORT;
+        }
+        if (hit.index == 2) {
+            return NORMAL_HITLAG_N3;
+        }
+        if (hit.index == 3 && hit.subIndex == 2) {
+            return NORMAL_HITLAG_N4_THIRD;
+        }
+        return null;
     }
 
     private Element infusedElement(double currentTime) {
