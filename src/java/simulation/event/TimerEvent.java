@@ -37,4 +37,13 @@ public interface TimerEvent {
      * @return {@code true} if the event is finished and should not be re-queued
      */
     boolean isFinished(double currentTime);
+
+    /**
+     * Shifts an enemy-owned timer when target hitlag pauses local target time.
+     * Character, gadget, and global events retain the default no-op behavior.
+     *
+     * @param duration effective target freeze duration in seconds
+     */
+    default void applyTargetHitlag(double duration) {
+    }
 }

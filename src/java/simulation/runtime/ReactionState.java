@@ -223,6 +223,96 @@ public class ReactionState {
     private int nextDendroCoreId = 1;
 
     /**
+     * Pauses target-local reaction gauges and target-wide cooldown boundaries.
+     *
+     * <p>Owner-specific hit counters, Dendro Core gadgets, and global party
+     * state intentionally remain on global time.
+     *
+     * @param currentTime hit time in global simulator seconds
+     * @param duration effective target freeze duration in seconds
+     */
+    public void applyTargetHitlag(double currentTime, double duration) {
+        if (!Double.isFinite(currentTime)
+                || !Double.isFinite(duration)
+                || duration <= 0.0) {
+            return;
+        }
+
+        if (quickenState != null) {
+            double remaining = quickenState.remainingUnitsAt(currentTime);
+            double resumeTime = Math.max(
+                    currentTime, quickenState.lastUpdateTime) + duration;
+            quickenState = new QuickenState(
+                    remaining, quickenState.decayRate, resumeTime);
+            quickenEndTime = quickenState.getEndTime();
+        } else {
+            quickenEndTime = shiftActiveBoundary(
+                    quickenEndTime, currentTime, duration);
+        }
+
+        if (burningState != null) {
+            double remaining = burningState.remainingFuelAt(currentTime);
+            double resumeTime = Math.max(
+                    currentTime, burningState.lastUpdateTime) + duration;
+            burningState = new BurningState(
+                    burningState.ownerId,
+                    burningState.preResistanceDamage,
+                    remaining,
+                    burningState.fuelDecayRate,
+                    resumeTime,
+                    burningState.generation,
+                    burningState.burningAuraUnits,
+                    burningState.reactionStats);
+            burningEndTime = burningState.getEndTime();
+        } else {
+            burningEndTime = shiftActiveBoundary(
+                    burningEndTime, currentTime, duration);
+        }
+        burningNextTickTime = shiftPendingBoundary(
+                burningNextTickTime, currentTime, duration);
+        burningPyroApplicationCooldownEndTime = shiftActiveBoundary(
+                burningPyroApplicationCooldownEndTime, currentTime, duration);
+
+        if (standardElectroChargedState != null
+                && standardElectroChargedLastDamageTime >= 0.0) {
+            standardElectroChargedLastDamageTime += duration;
+        }
+        standardElectroChargedDamageCooldownEndTime = shiftActiveBoundary(
+                standardElectroChargedDamageCooldownEndTime,
+                currentTime,
+                duration);
+        thundercloudEndTime = shiftPendingBoundary(
+                thundercloudEndTime, currentTime, duration);
+        overloadTargetDamageCooldownEndTime = shiftActiveBoundary(
+                overloadTargetDamageCooldownEndTime, currentTime, duration);
+        superconductTargetDamageCooldownEndTime = shiftActiveBoundary(
+                superconductTargetDamageCooldownEndTime, currentTime, duration);
+        shatterTargetDamageCooldownEndTime = shiftActiveBoundary(
+                shatterTargetDamageCooldownEndTime, currentTime, duration);
+        standardCrystallizeCooldownEndTime = shiftActiveBoundary(
+                standardCrystallizeCooldownEndTime, currentTime, duration);
+        for (Map.Entry<Element, Double> entry
+                : swirlTargetDamageCooldownEndTimes.entrySet()) {
+            entry.setValue(shiftActiveBoundary(
+                    entry.getValue(), currentTime, duration));
+        }
+    }
+
+    private double shiftActiveBoundary(
+            double boundary, double currentTime, double duration) {
+        return boundary > currentTime + TIMING_EPSILON
+                ? boundary + duration
+                : boundary;
+    }
+
+    private double shiftPendingBoundary(
+            double boundary, double currentTime, double duration) {
+        return boundary >= currentTime - TIMING_EPSILON
+                ? boundary + duration
+                : boundary;
+    }
+
+    /**
      * Attempts to start both Overload damage-sequence cooldowns.
      *
      * <p>The one-enemy simulator applies a 0.1-second target-wide gate before

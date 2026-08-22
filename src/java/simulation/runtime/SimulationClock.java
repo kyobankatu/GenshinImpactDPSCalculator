@@ -1,6 +1,8 @@
 package simulation.runtime;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.PriorityQueue;
 
 import simulation.CombatSimulator;
@@ -18,6 +20,8 @@ public class SimulationClock {
             Comparator.comparingDouble(TimerEvent::getNextTickTime));
     private double currentTime = 0.0;
     private double rotationTime = 0.0;
+    private TimerEvent executingEvent;
+    private double executingTargetHitlagDuration;
 
     /**
      * Creates a clock bound to the given simulator.
@@ -65,6 +69,29 @@ public class SimulationClock {
     }
 
     /**
+     * Shifts only timer events that declare target-local hitlag behavior.
+     *
+     * <p>The queue is rebuilt because mutating an event's next tick invalidates
+     * the priority heap ordering.
+     *
+     * @param duration effective target freeze duration in seconds
+     */
+    public void applyTargetHitlag(double duration) {
+        if (!Double.isFinite(duration) || duration <= 0.0) {
+            return;
+        }
+        if (executingEvent != null) {
+            executingTargetHitlagDuration += duration;
+        }
+        List<TimerEvent> queuedEvents = new ArrayList<>(events);
+        events.clear();
+        for (TimerEvent event : queuedEvents) {
+            event.applyTargetHitlag(duration);
+            events.add(event);
+        }
+    }
+
+    /**
      * Restores the clock to a previously captured time pair and drops all pending events.
      *
      * @param currentTime  time to restore
@@ -73,6 +100,8 @@ public class SimulationClock {
     public void restoreTime(double currentTime, double rotationTime) {
         this.currentTime = currentTime;
         this.rotationTime = rotationTime;
+        executingEvent = null;
+        executingTargetHitlagDuration = 0.0;
         events.clear();
     }
 
@@ -95,7 +124,15 @@ public class SimulationClock {
             if (sim.getEnemy() != null) {
                 sim.getEnemy().updateAuras(currentTime);
             }
-            event.tick(sim);
+            executingEvent = event;
+            executingTargetHitlagDuration = 0.0;
+            try {
+                event.tick(sim);
+                event.applyTargetHitlag(executingTargetHitlagDuration);
+            } finally {
+                executingEvent = null;
+                executingTargetHitlagDuration = 0.0;
+            }
 
             if (!event.isFinished(currentTime)) {
                 events.add(event);

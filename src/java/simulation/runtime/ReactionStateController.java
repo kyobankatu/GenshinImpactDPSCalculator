@@ -28,6 +28,11 @@ public class ReactionStateController {
         this.reactionState = reactionState;
     }
 
+    /** Pauses target-local reaction clocks for effective enemy hitlag. */
+    public void applyTargetHitlag(double currentTime, double duration) {
+        reactionState.applyTargetHitlag(currentTime, duration);
+    }
+
     /**
      * Atomically consumes up to the requested number of Verdant Dew stacks.
      *

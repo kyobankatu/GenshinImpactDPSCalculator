@@ -57,6 +57,8 @@ public class AttackAction {
     private StatType scalingStat; // BASE_ATK usually
     private StatType bonusStat; // e.g. BURST_DMG_BONUS // Formerly bonusStatType
     private double animationDuration; // Default
+    /** Per-hit hitlag metadata; absent content remains explicitly inert. */
+    private HitlagProfile hitlagProfile = HitlagProfile.none();
 
     /**
      * Overrides the animation duration for this action.
@@ -67,6 +69,22 @@ public class AttackAction {
      */
     public void setAnimationDuration(double duration) {
         this.animationDuration = duration;
+    }
+
+    /**
+     * Sets source-backed hitlag metadata for this hit.
+     *
+     * @param profile immutable hitlag profile
+     * @throws NullPointerException if {@code profile} is {@code null}
+     */
+    public void setHitlagProfile(HitlagProfile profile) {
+        this.hitlagProfile = java.util.Objects.requireNonNull(
+                profile, "profile");
+    }
+
+    /** Returns this hit's hitlag metadata, never {@code null}. */
+    public HitlagProfile getHitlagProfile() {
+        return hitlagProfile;
     }
 
     private boolean useSnapshot;

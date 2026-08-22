@@ -81,6 +81,7 @@ public class ActionGateway {
         sim.notifyActionRequest(character, request);
 
         sim.pushBuffSource(characterId);
+        boolean ownsHitlagScope = sim.beginOwnerHitlagAction(characterId);
         try {
             if (character.getWeapon() instanceof ActionTriggeredWeaponEffect) {
                 ((ActionTriggeredWeaponEffect) character.getWeapon()).onAction(character, request, sim);
@@ -96,7 +97,13 @@ public class ActionGateway {
                 sim.endActionDirectDamageCapture();
             }
         } finally {
-            sim.popBuffSource();
+            try {
+                if (ownsHitlagScope) {
+                    sim.finishOwnerHitlagAction(characterId);
+                }
+            } finally {
+                sim.popBuffSource();
+            }
         }
         sim.setRotationTime(sim.getCurrentTime());
     }

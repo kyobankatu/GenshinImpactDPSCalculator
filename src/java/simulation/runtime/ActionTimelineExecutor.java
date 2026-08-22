@@ -42,12 +42,19 @@ public class ActionTimelineExecutor {
     public void execute(CharacterId characterId, AttackAction action) {
         Character character = requireCharacter(characterId);
         double animationDuration = resolveAnimationDuration(character, action);
-        sim.performActionWithoutTimeAdvance(characterId, action);
+        boolean ownsHitlagScope = sim.beginOwnerHitlagAction(characterId);
+        try {
+            sim.performActionWithoutTimeAdvance(characterId, action);
 
-        applyAscendantBlessingIfNeeded(character, action);
-        eventBus.notifyAction(character, action, sim.getCurrentTime());
+            applyAscendantBlessingIfNeeded(character, action);
+            eventBus.notifyAction(character, action, sim.getCurrentTime());
 
-        sim.advanceTime(animationDuration);
+            sim.advanceTime(animationDuration);
+        } finally {
+            if (ownsHitlagScope) {
+                sim.finishOwnerHitlagAction(characterId);
+            }
+        }
     }
 
     /**

@@ -24693,7 +24693,7 @@ Verification:
 
 - `./gradlew ReactionRegressionTest build`
 
-### Phase 2: Generic Hitlag Runtime Contract
+### Phase 2: Generic Hitlag Runtime Contract - Done
 
 Why second:
 
@@ -24705,34 +24705,50 @@ Target files:
 - `src/java/simulation/action/HitlagProfile.java` (new)
 - `src/java/simulation/action/AttackAction.java`
 - `src/java/simulation/runtime/HitlagController.java` (new)
+- `src/java/simulation/runtime/ActionGateway.java`
 - `src/java/simulation/runtime/ActionTimelineExecutor.java`
+- `src/java/simulation/runtime/SimulationClock.java`
+- `src/java/simulation/runtime/ReactionState.java`
+- `src/java/simulation/runtime/ReactionStateController.java`
 - `src/java/simulation/CombatSimulator.java`
+- `src/java/simulation/SimulatorSnapshot.java`
+- `src/java/simulation/event/TimerEvent.java`
+- `src/java/mechanics/reaction/ReactionEffectScheduler.java`
+- `src/java/mechanics/rl/CapabilityProfiler.java`
 - `src/java/model/entity/Enemy.java`
 - `src/java/sample/ReactionRegressionTest.java`
 
 Tasks:
 
-- Encode gcsim's `ceil((base + defenseHalt) * 60)` halt and
-  `ceil(haltFrames * (1 - factor))` freeze policy with Defense Halt fixed on for
-  the repository's unbroken stationary target.
-- Extend the active actor's post-hit action lock unless the hit is deployable.
-- Pause target Aura decay for every landed hit without pausing unrelated global
-  cooldowns or deployable timers.
-- Reject invalid, negative, non-finite, and headshot-only profiles in the current
-  no-headshot target mode.
+- Encode gcsim's distinct owner
+  `ceil((baseSeconds * 60 + defenseFrames) * (1 - factor))` and target
+  `ceil(ceil(baseSeconds * 60 + defenseFrames) * (1 - factor))` policies with
+  Defense Halt fixed on for the repository's unbroken stationary target.
+- Accumulate every active-owner hit inside a typed action, and retain an
+  out-of-action delayed hit until its remaining freeze is consumed by the next
+  input; deployable and off-field owners remain excluded.
+- Pause and stack target ordinary/Freeze Aura clocks, Quicken/Burning state,
+  and explicitly target-owned EC/Burning timers without shifting character,
+  gadget, or unrelated global timers.
+- Persist target and out-of-action owner hitlag state across snapshot restore.
+- Reject invalid, negative, and non-finite profiles; headshot-only hits retain
+  owner halt while target halt fails closed in the current no-headshot mode.
 
 Acceptance criteria:
 
-- Frame rounding, factor, Defense Halt, deployable owner exclusion, zero profile,
-  and target Aura extension match the pinned gcsim contract.
+- Frame rounding, factor, Defense Halt, deployable/off-field owner exclusion,
+  multi-hit stacking, target reaction-clock extension, and snapshot restore
+  match the pinned gcsim contract.
 - Actions without a profile retain byte-for-byte timing behavior.
 
 Test cases to add or update:
 
 - Normal: 0.06-second sword hit with Defense Halt and 0.01 factor.
 - Boundary: fractional-frame ceil, zero halt, and factor 1.0.
-- Abnormal: invalid profile and headshot-only no-trigger.
+- Abnormal: invalid profile, headshot-only target no-trigger, and queue reorder.
 - Deployable: target pauses while the owner action lock does not grow.
+- Multi-hit/snapshot: same-frame owner and target stacking, delayed follow-up
+  carry, Aura applied during a pause, and in-flight restore.
 
 Verification:
 

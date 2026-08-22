@@ -25,6 +25,8 @@ public class Enemy {
     private java.util.Map<model.type.Element, AuraState> auraGauge = new HashMap<>();
     private FreezeAuraState freezeAuraState = new FreezeAuraState(
             0.0, FREEZE_BASE_DECAY_RATE, 0.0);
+    /** Global time at which target-local Aura clocks resume after hitlag. */
+    private double hitlagResumeTime;
 
     private static final double INFINITE_EXPIRY = Double.POSITIVE_INFINITY;
 
@@ -223,7 +225,9 @@ public class Enemy {
             auraGauge.remove(element);
         } else {
             double duration = auraDuration(units);
-            auraGauge.put(element, new AuraState(element, units, currentTime, units / duration));
+            auraGauge.put(element, new AuraState(
+                    element, units, targetLocalResumeTime(currentTime),
+                    units / duration));
         }
     }
 
@@ -261,7 +265,9 @@ public class Enemy {
         double sourceDecayRate = taxedUnits / sourceDuration;
         AuraState state = auraGauge.get(element);
         if (state == null || state.currentUnitsAt(currentTime) <= 0.0) {
-            auraGauge.put(element, new AuraState(element, taxedUnits, currentTime, sourceDecayRate));
+            auraGauge.put(element, new AuraState(
+                    element, taxedUnits, targetLocalResumeTime(currentTime),
+                    sourceDecayRate));
             return true;
         }
 
@@ -270,9 +276,9 @@ public class Enemy {
             return true;
         }
         if (element == model.type.Element.PYRO) {
-            state.rebase(taxedUnits, currentTime, sourceDecayRate);
+            state.rebase(taxedUnits, targetLocalResumeTime(currentTime), sourceDecayRate);
         } else {
-            state.rebase(taxedUnits, currentTime);
+            state.rebase(taxedUnits, targetLocalResumeTime(currentTime));
         }
         return true;
     }
@@ -303,7 +309,8 @@ public class Enemy {
         double sourceDuration = 2.5 * sourceGaugeUnits + 7.0;
         double sourceDecayRate = taxedUnits / sourceDuration;
         auraGauge.put(element, new AuraState(
-                element, taxedUnits, currentTime, sourceDecayRate));
+                element, taxedUnits, targetLocalResumeTime(currentTime),
+                sourceDecayRate));
         return true;
     }
 
@@ -356,7 +363,7 @@ public class Enemy {
         if (next <= 0.0) {
             auraGauge.remove(element);
         } else {
-            state.rebase(next, currentTime);
+            state.rebase(next, targetLocalResumeTime(currentTime));
         }
     }
 
@@ -479,6 +486,53 @@ public class Enemy {
             AuraState state = entry.getValue();
             return state.expiryTime <= currentTime || state.currentUnitsAt(currentTime) <= 0.0;
         });
+    }
+
+    /**
+     * Pauses target-local Aura decay for a landed hit.
+     *
+     * <p>Elapsed decay is first materialized at {@code currentTime}; remaining
+     * Aura and Frozen gauge then resume from {@code currentTime + duration}.
+     * Infinite fixture Auras remain unchanged.
+     *
+     * @param currentTime hit time in global simulator seconds
+     * @param duration effective target freeze duration in seconds
+     */
+    public void applyHitlag(double currentTime, double duration) {
+        if (!Double.isFinite(currentTime)
+                || !Double.isFinite(duration)
+                || duration <= 0.0) {
+            return;
+        }
+        double resumeTime = targetLocalResumeTime(currentTime) + duration;
+        hitlagResumeTime = resumeTime;
+        for (AuraState state : auraGauge.values()) {
+            if (state.decayRate <= 0.0) {
+                continue;
+            }
+            state.rebase(state.currentUnitsAt(currentTime), resumeTime);
+        }
+        double frozenUnits = freezeAuraState.remainingUnitsAt(currentTime);
+        double frozenDecayRate = freezeAuraState.decayRateAt(currentTime);
+        freezeAuraState = new FreezeAuraState(
+                frozenUnits, frozenDecayRate, resumeTime);
+    }
+
+    /** Returns the target-local resume boundary at the requested global time. */
+    private double targetLocalResumeTime(double currentTime) {
+        return Math.max(currentTime, hitlagResumeTime);
+    }
+
+    /** Returns the target hitlag resume boundary for snapshot persistence. */
+    public double captureHitlagResumeTime() {
+        return hitlagResumeTime;
+    }
+
+    /** Restores the target hitlag resume boundary after rollback. */
+    public void restoreHitlagResumeTime(double resumeTime) {
+        hitlagResumeTime = Double.isFinite(resumeTime)
+                ? Math.max(0.0, resumeTime)
+                : 0.0;
     }
 
     /**
@@ -655,7 +709,8 @@ public class Enemy {
         }
         double currentRate = freezeAuraState.decayRateAt(currentTime);
         freezeAuraState = new FreezeAuraState(
-                Math.max(0.0, units), currentRate, currentTime);
+                Math.max(0.0, units), currentRate,
+                targetLocalResumeTime(currentTime));
         return freezeAuraState;
     }
 
@@ -674,7 +729,8 @@ public class Enemy {
         double remaining = freezeAuraState.remainingUnitsAt(currentTime);
         double currentRate = freezeAuraState.decayRateAt(currentTime);
         freezeAuraState = new FreezeAuraState(
-                remaining + units, currentRate, currentTime);
+                remaining + units, currentRate,
+                targetLocalResumeTime(currentTime));
         return freezeAuraState;
     }
 
@@ -688,7 +744,8 @@ public class Enemy {
         double remaining = Math.max(
                 0.0, freezeAuraState.remainingUnitsAt(currentTime) - units);
         freezeAuraState = new FreezeAuraState(
-                remaining, freezeAuraState.decayRateAt(currentTime), currentTime);
+                remaining, freezeAuraState.decayRateAt(currentTime),
+                targetLocalResumeTime(currentTime));
         return freezeAuraState;
     }
 
@@ -703,7 +760,8 @@ public class Enemy {
             return;
         }
         freezeAuraState = new FreezeAuraState(
-                0.0, freezeAuraState.decayRateAt(currentTime), currentTime);
+                0.0, freezeAuraState.decayRateAt(currentTime),
+                targetLocalResumeTime(currentTime));
     }
 
     /** Compatibility wrapper that clears gauge at its last update time. */

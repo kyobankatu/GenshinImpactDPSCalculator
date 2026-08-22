@@ -967,6 +967,8 @@ public class CapabilityProfiler {
                 activePostSubject.recentDendroCoreDamageTimes,
                 activePostSubject.nextDendroCoreId,
                 activePostSubject.enemyFreezeAura,
+                activePostSubject.enemyHitlagResumeTime,
+                activePostSubject.ownerHitlagEndTimes,
                 activePostSubject.enemyAura,
                 mergedCharacters,
                 idlePreSubject.teamBuffRefs,

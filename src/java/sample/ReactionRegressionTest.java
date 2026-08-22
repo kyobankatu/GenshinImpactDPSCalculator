@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.DoubleSupplier;
@@ -39,7 +40,9 @@ import simulation.SimulatorSnapshot;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.PeriodicDamageEvent;
+import simulation.event.TimerEvent;
 import simulation.runtime.ReactionState;
 
 /**
@@ -63,6 +66,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseG_QuickenBurningFuelContract();
         testAccuracyPhaseG_BurningAuraAndPyroApplicationContract();
         testAccuracyPhaseG_BurningNinthTickContract();
+        testAccuracyPhaseG_HitlagRuntimeContract();
         testPhase6BloomCores();
         testPhase7HyperbloomAndBurgeon();
         testPhase8QuickenAggravateSpread();
@@ -851,6 +855,229 @@ public class ReactionRegressionTest {
         sim.advanceTime(0.249);
         assertClose(tickDamage * 9.0, sim.getTotalDamage(), 1.0,
                 "Burning should remain silent before the tenth-tick boundary");
+    }
+
+    private static void testAccuracyPhaseG_HitlagRuntimeContract() {
+        CombatSimulator noProfile = simulatorWith(testCharacter(Element.PHYSICAL));
+        AttackAction plainHit = hitlagFixtureAction("No hitlag fixture", 1.0);
+        noProfile.performAction(CharacterId.SUCROSE, plainHit);
+        assertClose(1.0, noProfile.getCurrentTime(), EPS,
+                "An action without a profile should preserve its animation time");
+
+        HitlagProfile swordHitlag = new HitlagProfile(
+                0.06, 0.01, true, false, false);
+        CombatSimulator profiled = simulatorWith(testCharacter(Element.PHYSICAL));
+        profiled.getEnemy().applyAura(Element.DENDRO, 1.0, 0.0);
+        AttackAction profiledHit = hitlagFixtureAction("Profiled hitlag fixture", 1.0);
+        profiledHit.setHitlagProfile(swordHitlag);
+        profiled.performAction(CharacterId.SUCROSE, profiledHit);
+        assertClose(1.0 + 8.0 / 60.0, profiled.getCurrentTime(), EPS,
+                "0.06-second Defense Halt should produce eight effective frames");
+
+        CombatSimulator auraBaseline = simulatorWith(testCharacter(Element.PHYSICAL));
+        auraBaseline.getEnemy().applyAura(Element.DENDRO, 1.0, 0.0);
+        auraBaseline.performAction(
+                CharacterId.SUCROSE,
+                hitlagFixtureAction("Aura baseline fixture", 1.0));
+        assertClose(
+                auraBaseline.getEnemy().getAuraUnits(
+                        Element.DENDRO, auraBaseline.getCurrentTime()),
+                profiled.getEnemy().getAuraUnits(
+                        Element.DENDRO, profiled.getCurrentTime()),
+                EPS,
+                "Target hitlag should pause Aura decay while owner time advances");
+        SimulatorSnapshot profiledSnapshot = profiled.saveSnapshot();
+        double auraAtSnapshot = profiled.getEnemy().getAuraUnits(
+                Element.DENDRO, profiled.getCurrentTime());
+        profiled.advanceTime(1.0);
+        profiled.restoreSnapshot(profiledSnapshot);
+        assertClose(auraAtSnapshot,
+                profiled.getEnemy().getAuraUnits(
+                        Element.DENDRO, profiled.getCurrentTime()),
+                EPS,
+                "Snapshot restore should preserve a hitlag-extended Aura boundary");
+
+        CombatSimulator deployable = simulatorWith(testCharacter(Element.PHYSICAL));
+        deployable.getEnemy().applyAura(Element.DENDRO, 1.0, 0.0);
+        AttackAction deployableHit = hitlagFixtureAction(
+                "Deployable hitlag fixture", 1.0);
+        deployableHit.setHitlagProfile(new HitlagProfile(
+                0.06, 0.01, true, true, false));
+        deployable.performAction(CharacterId.SUCROSE, deployableHit);
+        assertClose(1.0, deployable.getCurrentTime(), EPS,
+                "Deployable hitlag should not extend the owner's action lock");
+        double deployableAura = deployable.getEnemy().getAuraUnits(
+                Element.DENDRO, deployable.getCurrentTime());
+        assertTrue(deployableAura > auraBaseline.getEnemy().getAuraUnits(
+                        Element.DENDRO, auraBaseline.getCurrentTime()),
+                "Deployable hits should still pause target Aura decay");
+
+        TestCharacter activeOwner = testCharacter(
+                Element.PHYSICAL, CharacterId.SUCROSE);
+        TestCharacter offFieldActor = testCharacter(
+                Element.PHYSICAL, CharacterId.XINGQIU);
+        CombatSimulator offField = simulatorWith(activeOwner);
+        offField.addCharacter(offFieldActor);
+        AttackAction offFieldHit = hitlagFixtureAction(
+                "Off-field owner hitlag fixture", 0.0);
+        offFieldHit.setHitlagProfile(swordHitlag);
+        offField.performAction(CharacterId.XINGQIU, offFieldHit);
+        assertClose(0.0, offField.getCurrentTime(), EPS,
+                "Hitlag should not halt an off-field attack owner");
+
+        CombatSimulator fractional = simulatorWith(testCharacter(Element.PHYSICAL));
+        AttackAction fractionalHit = hitlagFixtureAction(
+                "Fractional hitlag fixture", 0.0);
+        fractionalHit.setHitlagProfile(new HitlagProfile(
+                0.001, 0.0, false, false, false));
+        fractional.performAction(CharacterId.SUCROSE, fractionalHit);
+        assertClose(1.0 / 60.0, fractional.getCurrentTime(), EPS,
+                "Positive fractional halt should ceil to one frame");
+
+        CombatSimulator asymmetric = simulatorWith(testCharacter(Element.PHYSICAL));
+        asymmetric.getEnemy().applyAura(Element.DENDRO, 1.0, 0.0);
+        AttackAction asymmetricHit = hitlagFixtureAction(
+                "Asymmetric hitlag rounding fixture", 0.0);
+        asymmetricHit.setHitlagProfile(new HitlagProfile(
+                0.06, 0.20, false, false, false));
+        asymmetric.performAction(CharacterId.SUCROSE, asymmetricHit);
+        assertClose(3.0 / 60.0, asymmetric.getCurrentTime(), EPS,
+                "Owner hitlag should ceil raw 3.6-frame halt to three frames");
+        assertClose(0.8,
+                asymmetric.getEnemy().getAuraUnits(
+                        Element.DENDRO, asymmetric.getCurrentTime()),
+                EPS,
+                "Target hitlag should pre-ceil halt and pause for four frames");
+
+        CombatSimulator stackedTarget = simulatorWith(
+                testCharacter(Element.PHYSICAL));
+        stackedTarget.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, asymmetricHit);
+        stackedTarget.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, asymmetricHit);
+        assertClose(8.0 / 60.0,
+                stackedTarget.getEnemy().captureHitlagResumeTime(), EPS,
+                "Same-frame target hitlag should accumulate per landed hit");
+        stackedTarget.getEnemy().applyAura(Element.DENDRO, 1.0, 0.0);
+        SimulatorSnapshot stackedSnapshot = stackedTarget.saveSnapshot();
+        stackedTarget.advanceTime(1.0);
+        stackedTarget.restoreSnapshot(stackedSnapshot);
+        assertClose(8.0 / 60.0,
+                stackedTarget.getEnemy().captureHitlagResumeTime(), EPS,
+                "Snapshot restore should preserve in-flight target hitlag");
+        stackedTarget.advanceTime(8.0 / 60.0);
+        assertClose(0.8,
+                stackedTarget.getEnemy().getAuraUnits(
+                        Element.DENDRO, stackedTarget.getCurrentTime()),
+                EPS,
+                "Aura applied during target hitlag should inherit its remaining pause");
+
+        HitlagMultiHitCharacter multiHitCharacter =
+                new HitlagMultiHitCharacter(asymmetricHit.getHitlagProfile());
+        CombatSimulator cumulativeOwner = simulatorWithExistingCharacter(
+                multiHitCharacter);
+        cumulativeOwner.performAction(
+                CharacterId.SUCROSE,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        assertClose(6.0 / 60.0, cumulativeOwner.getCurrentTime(), EPS,
+                "Typed multi-hit actions should add owner hitlag for every hit");
+
+        CombatSimulator delayedOwner = simulatorWith(
+                testCharacter(Element.PHYSICAL));
+        delayedOwner.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, asymmetricHit);
+        SimulatorSnapshot delayedOwnerSnapshot = delayedOwner.saveSnapshot();
+        delayedOwner.advanceTime(1.0);
+        delayedOwner.restoreSnapshot(delayedOwnerSnapshot);
+        delayedOwner.performAction(
+                CharacterId.SUCROSE,
+                hitlagFixtureAction("Post-follow-up action fixture", 0.0));
+        assertClose(3.0 / 60.0, delayedOwner.getCurrentTime(), EPS,
+                "Out-of-action owner hitlag should delay the next input after restore");
+
+        CombatSimulator fullFactor = simulatorWith(testCharacter(Element.PHYSICAL));
+        AttackAction fullFactorHit = hitlagFixtureAction(
+                "Full-factor hitlag fixture", 0.0);
+        fullFactorHit.setHitlagProfile(new HitlagProfile(
+                0.10, 1.0, true, false, false));
+        fullFactor.performAction(CharacterId.SUCROSE, fullFactorHit);
+        assertClose(0.0, fullFactor.getCurrentTime(), EPS,
+                "A factor of one should produce no effective freeze frames");
+
+        CombatSimulator headshotOnly = simulatorWith(testCharacter(Element.PHYSICAL));
+        headshotOnly.getEnemy().applyAura(Element.DENDRO, 1.0, 0.0);
+        AttackAction headshotOnlyHit = hitlagFixtureAction(
+                "Headshot-only hitlag fixture", 0.0);
+        headshotOnlyHit.setHitlagProfile(new HitlagProfile(
+                0.10, 0.0, true, false, true));
+        headshotOnly.performAction(CharacterId.SUCROSE, headshotOnlyHit);
+        assertClose(10.0 / 60.0, headshotOnly.getCurrentTime(), EPS,
+                "Headshot-only metadata should still halt the attack owner");
+        assertTrue(headshotOnly.getEnemy().getAuraUnits(
+                        Element.DENDRO, headshotOnly.getCurrentTime()) < 0.8,
+                "A no-weak-point target should not receive headshot-only hitlag");
+
+        CombatSimulator targetReactionClock = simulatorWith(
+                testCharacter(Element.PHYSICAL));
+        targetReactionClock.applyQuicken(1.0);
+        double quickenEndBeforeHitlag = targetReactionClock.getQuickenEndTime();
+        targetReactionClock.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, asymmetricHit);
+        assertClose(quickenEndBeforeHitlag + 4.0 / 60.0,
+                targetReactionClock.getQuickenEndTime(), EPS,
+                "Target hitlag should pause Quicken gauge decay");
+
+        List<String> timerOrder = new ArrayList<>();
+        CombatSimulator targetTimer = simulatorWith(
+                testCharacter(Element.PHYSICAL));
+        targetTimer.registerEvent(new TargetLocalTimerFixture(
+                0.50, timerOrder, "target"));
+        targetTimer.registerEvent(new GlobalTimerFixture(
+                0.52, timerOrder, "global"));
+        targetTimer.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, asymmetricHit);
+        targetTimer.advanceTime(0.53);
+        assertEquals(Arrays.asList("global"), timerOrder,
+                "Queue rebuild should let an earlier global timer pass a shifted target timer");
+        targetTimer.advanceTime(0.04);
+        assertEquals(Arrays.asList("global", "target"), timerOrder,
+                "Target-owned timer should resume after effective target hitlag");
+
+        assertInvalidHitlagProfile(-0.01, 0.0,
+                "Negative halt time should be rejected");
+        assertInvalidHitlagProfile(Double.NaN, 0.0,
+                "Non-finite halt time should be rejected");
+        assertInvalidHitlagProfile(0.01, -0.01,
+                "Negative factor should be rejected");
+        assertInvalidHitlagProfile(0.01, 1.01,
+                "Factor above one should be rejected");
+    }
+
+    private static AttackAction hitlagFixtureAction(String name, double duration) {
+        AttackAction action = new AttackAction(
+                name,
+                1.0,
+                Element.PHYSICAL,
+                StatType.BASE_ATK,
+                null,
+                duration,
+                false,
+                ActionType.OTHER);
+        action.setICD(ICDType.None, ICDTag.None, 0.0);
+        return action;
+    }
+
+    private static void assertInvalidHitlagProfile(
+            double haltTime,
+            double factor,
+            String message) {
+        boolean rejected = false;
+        try {
+            new HitlagProfile(haltTime, factor, false, false, false);
+        } catch (IllegalArgumentException expected) {
+            rejected = true;
+        }
+        assertTrue(rejected, message);
     }
 
     private static void testAccuracyPhaseG_QuickenBurningFuelContract() {
@@ -23888,6 +24115,112 @@ public class ReactionRegressionTest {
         @Override
         public boolean isLunarCharacter() {
             return lunar;
+        }
+    }
+
+    /** Emits two simultaneous profiled hits through the typed action gateway. */
+    private static final class HitlagMultiHitCharacter extends Character {
+        private final HitlagProfile profile;
+
+        private HitlagMultiHitCharacter(HitlagProfile profile) {
+            this.name = "Hitlag Multi-Hit Tester";
+            this.characterId = CharacterId.SUCROSE;
+            this.element = Element.PHYSICAL;
+            this.weapon = new TestWeapon();
+            this.artifacts = new ArtifactSet[0];
+            this.profile = profile;
+            this.baseStats.set(StatType.BASE_HP, 10000.0);
+            this.baseStats.set(StatType.BASE_ATK, 1000.0);
+            this.baseStats.set(StatType.BASE_DEF, 700.0);
+        }
+
+        @Override
+        public void applyPassive(StatsContainer currentStats) {
+        }
+
+        @Override
+        public double getEnergyCost() {
+            return 60.0;
+        }
+
+        @Override
+        public void onAction(
+                CharacterActionRequest request, CombatSimulator sim) {
+            AttackAction first = hitlagFixtureAction(
+                    "Multi-hit fixture 1", 0.0);
+            first.setHitlagProfile(profile);
+            AttackAction second = hitlagFixtureAction(
+                    "Multi-hit fixture 2", 0.0);
+            second.setHitlagProfile(profile);
+            sim.performActionWithoutTimeAdvance(characterId, first);
+            sim.performAction(characterId, second);
+        }
+    }
+
+    /** One-shot timer whose schedule follows target-local hitlag. */
+    private static final class TargetLocalTimerFixture implements TimerEvent {
+        private double nextTickTime;
+        private final List<String> order;
+        private final String label;
+        private boolean finished;
+
+        private TargetLocalTimerFixture(
+                double nextTickTime, List<String> order, String label) {
+            this.nextTickTime = nextTickTime;
+            this.order = order;
+            this.label = label;
+        }
+
+        @Override
+        public double getNextTickTime() {
+            return nextTickTime;
+        }
+
+        @Override
+        public void tick(CombatSimulator sim) {
+            order.add(label);
+            finished = true;
+        }
+
+        @Override
+        public boolean isFinished(double currentTime) {
+            return finished;
+        }
+
+        @Override
+        public void applyTargetHitlag(double duration) {
+            nextTickTime += duration;
+        }
+    }
+
+    /** One-shot timer that remains on global simulator time. */
+    private static final class GlobalTimerFixture implements TimerEvent {
+        private final double nextTickTime;
+        private final List<String> order;
+        private final String label;
+        private boolean finished;
+
+        private GlobalTimerFixture(
+                double nextTickTime, List<String> order, String label) {
+            this.nextTickTime = nextTickTime;
+            this.order = order;
+            this.label = label;
+        }
+
+        @Override
+        public double getNextTickTime() {
+            return nextTickTime;
+        }
+
+        @Override
+        public void tick(CombatSimulator sim) {
+            order.add(label);
+            finished = true;
+        }
+
+        @Override
+        public boolean isFinished(double currentTime) {
+            return finished;
         }
     }
 

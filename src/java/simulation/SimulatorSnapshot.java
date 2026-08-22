@@ -216,6 +216,10 @@ public class SimulatorSnapshot {
     public final int nextDendroCoreId;
     /** Complete accelerating Frozen Aura payload. */
     public final Enemy.FreezeAuraState enemyFreezeAura;
+    /** Global boundary at which target-local clocks resume after hitlag. */
+    public final double enemyHitlagResumeTime;
+    /** Out-of-action active-owner hitlag boundaries keyed by character. */
+    public final Map<CharacterId, Double> ownerHitlagEndTimes;
     /**
      * Full enemy aura state keyed by element, each value holding
      * {@code {units, applicationTime, duration}} so continuous natural decay is
@@ -276,6 +280,8 @@ public class SimulatorSnapshot {
      * @param recentDendroCoreDamageTimes active target damage-cap timestamps
      * @param nextDendroCoreId next Dendro Core identifier
      * @param enemyFreezeAura complete Frozen Aura gauge and decay payload
+     * @param enemyHitlagResumeTime target-local clock resume boundary
+     * @param ownerHitlagEndTimes out-of-action owner freeze boundaries
      * @param enemyAura          enemy aura state map ({units, applicationTime, duration} per element)
      * @param characters         per-character snapshots
      * @param teamBuffRefs       team buff object references
@@ -326,6 +332,8 @@ public class SimulatorSnapshot {
             List<Double> recentDendroCoreDamageTimes,
             int nextDendroCoreId,
             Enemy.FreezeAuraState enemyFreezeAura,
+            double enemyHitlagResumeTime,
+            Map<CharacterId, Double> ownerHitlagEndTimes,
             Map<Element, double[]> enemyAura,
             Map<CharacterId, CharacterSnapshot> characters,
             List<Buff> teamBuffRefs,
@@ -397,6 +405,9 @@ public class SimulatorSnapshot {
                 new ArrayList<>(recentDendroCoreDamageTimes);
         this.nextDendroCoreId = nextDendroCoreId;
         this.enemyFreezeAura = enemyFreezeAura;
+        this.enemyHitlagResumeTime = enemyHitlagResumeTime;
+        this.ownerHitlagEndTimes = new EnumMap<>(CharacterId.class);
+        this.ownerHitlagEndTimes.putAll(ownerHitlagEndTimes);
         this.enemyAura = new HashMap<>(enemyAura);
         this.characters = characters;
         this.teamBuffRefs = new ArrayList<>(teamBuffRefs);

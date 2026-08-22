@@ -29,6 +29,7 @@ import simulation.runtime.ActionTimelineExecutor;
 import simulation.runtime.BuffManager;
 import simulation.runtime.CombatActionResolver;
 import simulation.runtime.DamageReport;
+import simulation.runtime.HitlagController;
 import simulation.runtime.MoonsignManager;
 import simulation.runtime.ReactionState;
 import simulation.runtime.ReactionStateController;
@@ -77,6 +78,8 @@ public class CombatSimulator {
     private final EnergyDistributor energyDistributor;
     /** Internal Cooldown manager for element application. */
     private final mechanics.element.ICDManager icdManager;
+    /** Applies per-hit owner and target hitlag timing. */
+    private final HitlagController hitlagController;
     /** Toggle for per-action console logging. */
     private boolean enableLogging = true;
     /** Whether direct-damage capture is active for the in-progress action. */
@@ -136,6 +139,7 @@ public class CombatSimulator {
         this.reactionStateController = new ReactionStateController(this, reactionState);
         this.energyDistributor = new EnergyDistributor(this);
         this.icdManager = new mechanics.element.ICDManager();
+        this.hitlagController = new HitlagController(this);
     }
 
     /**
@@ -791,6 +795,47 @@ public class CombatSimulator {
      */
     public void performActionWithoutTimeAdvance(CharacterId characterId, AttackAction action) {
         actionResolver.resolveWithoutTimeAdvance(characterId, action);
+        hitlagController.applyHitlag(characterId, action);
+    }
+
+    /**
+     * Opens a scoped owner action for cumulative hitlag accounting.
+     *
+     * @param actorId top-level acting character
+     * @return whether this call owns the newly opened scope
+     */
+    public boolean beginOwnerHitlagAction(CharacterId actorId) {
+        return hitlagController.beginOwnerAction(actorId);
+    }
+
+    /**
+     * Advances all cumulative hitlag produced by a scoped owner action.
+     *
+     * <p>Timed follow-up hits may add more owner hitlag during the advance, so
+     * draining repeats until the scope has no remaining frozen frames.
+     *
+     * @param actorId top-level acting character
+     */
+    public void finishOwnerHitlagAction(CharacterId actorId) {
+        try {
+            double duration = hitlagController.drainOwnerHitlagDuration(actorId);
+            while (duration > 0.0) {
+                advanceTime(duration);
+                duration = hitlagController.drainOwnerHitlagDuration(actorId);
+            }
+        } finally {
+            hitlagController.endOwnerAction(actorId);
+        }
+    }
+
+    /**
+     * Pauses simulator-owned target-local reaction state and timer events.
+     *
+     * @param duration effective target freeze duration in seconds
+     */
+    public void applyTargetHitlagToRuntime(double duration) {
+        reactionStateController.applyTargetHitlag(getCurrentTime(), duration);
+        simulationClock.applyTargetHitlag(duration);
     }
 
     /**
@@ -925,6 +970,11 @@ public class CombatSimulator {
         model.entity.Enemy.FreezeAuraState enemyFreezeAura = enemy != null
                 ? enemy.captureFreezeAuraState()
                 : null;
+        double enemyHitlagResumeTime = enemy != null
+                ? enemy.captureHitlagResumeTime()
+                : 0.0;
+        Map<CharacterId, Double> ownerHitlagEndTimes =
+                hitlagController.copyIdleOwnerFreezeEndTimes();
 
         // ICD
         Map<String, double[]> icdStates = icdManager.saveStates();
@@ -1007,7 +1057,8 @@ public class CombatSimulator {
                 moondriftCount, lunarCrystallizeTriggerCount,
                 verdantDewCount, moonridgeDewCount,
                 dendroCores, recentDendroCoreDamageTimes,
-                nextDendroCoreId, enemyFreezeAura, enemyAura,
+                nextDendroCoreId, enemyFreezeAura,
+                enemyHitlagResumeTime, ownerHitlagEndTimes, enemyAura,
                 characters,
                 teamBuffRefs, teamBuffTimes,
                 fieldBuffRefs, fieldBuffTimes);
@@ -1025,6 +1076,8 @@ public class CombatSimulator {
 
         // Clock (also clears event queue)
         simulationClock.restoreTime(snap.currentTime, snap.rotationTime);
+        hitlagController.restoreIdleOwnerFreezeEndTimes(
+                snap.ownerHitlagEndTimes);
 
         // Damage
         ((simulation.runtime.DamageReport) damageReport).restore(snap.totalDamage, snap.damageBySource);
@@ -1086,6 +1139,7 @@ public class CombatSimulator {
         if (enemy != null) {
             enemy.restoreAuraState(snap.enemyAura);
             enemy.restoreFreezeAuraState(snap.enemyFreezeAura);
+            enemy.restoreHitlagResumeTime(snap.enemyHitlagResumeTime);
         }
         if (snap.burningTimerRunning) {
             actionResolver.restoreBurningTimer(snap.burningNextTickTime);

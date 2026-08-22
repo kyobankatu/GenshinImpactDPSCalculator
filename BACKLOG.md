@@ -4499,6 +4499,10 @@ experiment record.
 - **Checkpoint:** Phase 1 retains the already-correct typed Night/Burning
   behavior and adds their missing boundary tests. Ineffa C2 now deals one 300%
   ATK direct Lunar-Charged hit with 0U, no ICD, and complete DEF ignore exactly
-  one second after Burst damage. Enemy attacks, poise depletion, geometry,
+  one second after Burst damage. Phase 2 adds a pinned-gcsim 60 FPS runtime with
+  distinct owner/target rounding, Defense Halt, deployable/headshot rules,
+  same-frame stacking, typed-action and delayed-follow-up owner locks,
+  target-local Aura/Quicken/Burning/EC timer pause, queue reordering, and
+  snapshot persistence. Enemy attacks, poise depletion, geometry,
   headshots, multiple targets, RL learner changes, and generated docs remain
   excluded.

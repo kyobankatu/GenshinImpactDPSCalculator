@@ -299,6 +299,13 @@ public class ReactionEffectScheduler {
             }
 
             @Override
+            public void applyTargetHitlag(double duration) {
+                lastDamageTime += duration;
+                nominalTickTime += duration;
+                nextTick += duration;
+            }
+
+            @Override
             public boolean isFinished(double time) {
                 return finished;
             }
@@ -326,6 +333,13 @@ public class ReactionEffectScheduler {
             @Override
             public double getNextTickTime() {
                 return nextTick;
+            }
+
+            @Override
+            public void applyTargetHitlag(double duration) {
+                if (nextTick != Double.MAX_VALUE) {
+                    nextTick += duration;
+                }
             }
 
             @Override
@@ -432,6 +446,13 @@ public class ReactionEffectScheduler {
                     return nextDamageTime;
                 }
                 return Math.min(nextDamageTime, state.getEndTime());
+            }
+
+            @Override
+            public void applyTargetHitlag(double duration) {
+                if (nextDamageTime != Double.MAX_VALUE) {
+                    nextDamageTime += duration;
+                }
             }
 
             @Override
