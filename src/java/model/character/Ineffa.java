@@ -19,6 +19,7 @@ import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
 import simulation.event.PeriodicDamageEvent;
+import simulation.event.SimpleTimerEvent;
 import mechanics.buff.SimpleBuff;
 import mechanics.buff.Buff;
 import mechanics.buff.ActiveCharacterBuff;
@@ -433,10 +434,12 @@ public class Ineffa extends Character
                 StatType.BURST_DMG_BONUS, 0.0, false, ActionType.BURST);
         hit.setICD(ICDType.None, ICDTag.ElementalBurst, 2.0); // 2U usually
         hit.setAnimationDuration(1.7);
+        if (constellation >= 2) {
+            schedulePunishmentEdict(sim);
+        }
         sim.performAction(this.characterId, hit);
 
         if (constellation >= 2) {
-            // Punishment Edict damage remains blocked until its delay is sourced.
             activateOpticalFlowShield(sim, hit);
         }
 
@@ -468,6 +471,41 @@ public class Ineffa extends Character
             }
             m.addBuff(buffToApply);
         }
+    }
+
+    /**
+     * Schedules C2 Punishment Edict one second after Supreme Instruction hits.
+     *
+     * <p>The one-enemy simulator uses the user-confirmed automatic delay and
+     * does not model gcsim's optional earlier trigger on another hit. The attack
+     * is direct Lunar-Charged damage, applies no elemental gauge, and ignores
+     * all enemy DEF.
+     *
+     * @param sim active combat simulator
+     */
+    private void schedulePunishmentEdict(CombatSimulator sim) {
+        double triggerTime = sim.getCurrentTime() + 1.0;
+        sim.registerEvent(new SimpleTimerEvent(triggerTime, 1.0) {
+            @Override
+            public void onTick(CombatSimulator activeSim) {
+                AttackAction punishmentEdict = new AttackAction(
+                        "Punishment Edict (C2)",
+                        3.0,
+                        Element.ELECTRO,
+                        StatType.BASE_ATK,
+                        null,
+                        0.0,
+                        false,
+                        ActionType.OTHER);
+                punishmentEdict.setICD(ICDType.None, ICDTag.None, 0.0);
+                punishmentEdict.setLunarReactionType(
+                        AttackAction.LunarReactionType.CHARGED);
+                punishmentEdict.setDefenseIgnore(1.0);
+                activeSim.performActionWithoutTimeAdvance(
+                        characterId, punishmentEdict);
+                finish();
+            }
+        });
     }
 
     /**

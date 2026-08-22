@@ -353,7 +353,7 @@ Elemental Gauge Theory contract:
 
 Known differences from exact game internals: Frozen resistance, hitlag, poise,
 and broader multi-synthetic-state ordering; the upstream-ambiguous isolated
-Anemo-on-Burning path and Burning's ninth-tick skip; Swirl spread;
+Anemo-on-Burning path; Swirl spread;
 Electro-Charged multi-target damage-ICD/hitlag interactions; and some reaction
 gauge modifiers remain simplified. The simulator also does not model
 multi-target or per-enemy aura gauges.

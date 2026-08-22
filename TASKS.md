@@ -30,6 +30,11 @@ future explicit user request.
 The prior simulator content campaigns, including Skill-focused event weapons,
 are complete; RL and generated docs remain excluded.
 
+B-211 is active. Its user-confirmed decision phase is complete: Thundercloud
+Strike refreshes Night Intent, Burning retains its ninth tick, and Ineffa C2
+Punishment Edict resolves once exactly one second after Burst damage. The next
+phase adds the pinned-gcsim generic hitlag runtime.
+
 B-210 is active. It reconciles Version 7.0 Stellar additions on legacy
 equipment and Yumemizuki Mizuki, adds report attribution, re-audits the two
 highest-value blocked characters, and then closes every sourced single-target
@@ -24613,3 +24618,199 @@ Completion evidence:
 - `BenchmarkRLJava` completes 512 environment steps after the snapshot schema
   extension; executable preflight reports four passed checks and zero leaks.
 - Generated report output remains untracked from the campaign commits.
+
+## Implementation Order: Confirmed Accuracy And gcsim Hitlag Campaign B-211
+
+Status: In progress. The three previously unresolved single-target decisions are
+now user-confirmed, and gcsim main commit `3647a07a7cc3004bc1e79d9bb5f7444de20dceaa`
+is the pinned reference for hitlag runtime semantics and per-attack values.
+
+Scope:
+
+- Close the confirmed Thundercloud Strike, Ineffa delayed follow-up, and Burning
+  terminal-tick contracts without introducing enemy attacks or multiple targets.
+- Add a typed per-hit hitlag profile and one simulator-owned runtime policy using
+  gcsim's 60 FPS rounding, Defense Halt, factor, and deployable semantics.
+- Apply source-backed hitlag data to the actions used by `RaidenParty`,
+  `FlinsParty`, and `FlinsParty2`, then audit remaining source-ready character
+  actions without inferring missing mappings.
+- Preserve hitlag state and affected target timing across snapshot restore.
+
+Out of scope for this pass:
+
+- Enemy attacks, player damage intake, poise depletion, geometry, headshot
+  targeting, multiple enemies, RL learner changes, and generated `docs/` output.
+- Importing gcsim as a runtime dependency or silently defaulting an unmapped
+  attack to a guessed weapon-class value.
+
+Definitions:
+
+- `HitlagProfile`: immutable per-hit base halt, factor, Defense Halt, deployable,
+  and headshot-only metadata carried by `AttackAction`.
+- `HitlagController`: simulator runtime owner that converts a landed hit profile
+  to integer 60 FPS freeze frames and applies actor/target-local effects.
+- Source-ready mapping: a local action with an unambiguous corresponding gcsim
+  hit at the pinned revision.
+
+### Phase 1: User-Confirmed Accuracy Decisions - Done
+
+Why first:
+
+- These rules no longer need external evidence and provide bounded regressions
+  independent of the new hitlag runtime.
+
+Target files:
+
+- `src/java/model/artifact/NightOfTheSkysUnveiling.java`
+- `src/java/model/character/Ineffa.java`
+- `src/java/mechanics/reaction/ReactionEffectScheduler.java`
+- `src/java/sample/ReactionRegressionTest.java`
+- `BACKLOG.md`
+
+Tasks:
+
+- Preserve and explicitly regress Thundercloud Strike activation and refresh of
+  Gleaming Moon: Intent.
+- Schedule Ineffa C2 Punishment Edict exactly one second after Burst damage,
+  preserving its direct Lunar-Charged classification and complete DEF ignore.
+- Allow Burning damage at the exact terminal fuel boundary, including the ninth
+  tick when the current 2.0-second fixture reaches that boundary.
+
+Acceptance criteria:
+
+- Intent activates and refreshes to four seconds from Thundercloud Strike.
+- Punishment Edict is absent before one second, resolves once at one second for
+  300% ATK, and remains absent at C0-C1.
+- Burning deals the terminal tick and then clears without a tenth tick.
+
+Test cases to add or update:
+
+- Normal and refresh: Thundercloud Strike starts and refreshes Intent.
+- Timing/no-trigger: delayed C2 Punishment Edict at +1.0 second and C1 rejection.
+- Boundary: Burning ninth tick at exact depletion and silence afterward.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest build`
+
+### Phase 2: Generic Hitlag Runtime Contract
+
+Why second:
+
+- Per-character data must target one tested runtime definition rather than
+  reimplementing timing policy in each character.
+
+Target files:
+
+- `src/java/simulation/action/HitlagProfile.java` (new)
+- `src/java/simulation/action/AttackAction.java`
+- `src/java/simulation/runtime/HitlagController.java` (new)
+- `src/java/simulation/runtime/ActionTimelineExecutor.java`
+- `src/java/simulation/CombatSimulator.java`
+- `src/java/model/entity/Enemy.java`
+- `src/java/sample/ReactionRegressionTest.java`
+
+Tasks:
+
+- Encode gcsim's `ceil((base + defenseHalt) * 60)` halt and
+  `ceil(haltFrames * (1 - factor))` freeze policy with Defense Halt fixed on for
+  the repository's unbroken stationary target.
+- Extend the active actor's post-hit action lock unless the hit is deployable.
+- Pause target Aura decay for every landed hit without pausing unrelated global
+  cooldowns or deployable timers.
+- Reject invalid, negative, non-finite, and headshot-only profiles in the current
+  no-headshot target mode.
+
+Acceptance criteria:
+
+- Frame rounding, factor, Defense Halt, deployable owner exclusion, zero profile,
+  and target Aura extension match the pinned gcsim contract.
+- Actions without a profile retain byte-for-byte timing behavior.
+
+Test cases to add or update:
+
+- Normal: 0.06-second sword hit with Defense Halt and 0.01 factor.
+- Boundary: fractional-frame ceil, zero halt, and factor 1.0.
+- Abnormal: invalid profile and headshot-only no-trigger.
+- Deployable: target pauses while the owner action lock does not grow.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest build`
+
+### Phase 3: Pinned gcsim Party Hitlag Data
+
+Why third:
+
+- Runtime behavior and no-profile compatibility must pass before source data can
+  change representative rotations.
+
+Target files:
+
+- affected files under `src/java/model/character/`
+- affected focused character regressions under `src/java/sample/`
+- `src/java/sample/ReactionRegressionTest.java` only for shared runtime coverage
+
+Tasks:
+
+- Map every source-ready direct hit used by `RaidenParty`, `FlinsParty`, and
+  `FlinsParty2` from pinned gcsim `config.yml` and explicit Go overrides.
+- Keep deployable hits target-only and leave absent or ambiguous upstream data
+  explicitly profile-free.
+- Audit existing local action durations against gcsim base action frames to
+  prevent double-counting measured hitlag.
+
+Acceptance criteria:
+
+- Every mapped hit records its exact gcsim source and values in code or Javadoc.
+- Representative rotations gain only the expected hitlag-derived duration and
+  any resulting timer/aura changes are deterministic and explained.
+
+Test cases to add or update:
+
+- Per-character profile assertions for normal, skill, burst, and deployable
+  branches actually used by the three party definitions.
+- No-profile assertions for ambiguous custom or unsupported hits.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest RaidenParty FlinsParty FlinsParty2 build`
+
+### Phase 4: Source-Ready Coverage Audit And Closure
+
+Why last:
+
+- Broader mappings and public baselines are valid only after the shared contract
+  and priority parties are stable.
+
+Target files:
+
+- remaining source-ready files under `src/java/model/character/`
+- corresponding focused regressions under `src/java/sample/`
+- `README.md`
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Reconcile all implemented character actions against pinned gcsim hitlag data,
+  implementing unambiguous mappings and recording exact unresolved mappings.
+- Run routed regression, sample, build, Javadoc, and preflight gates.
+- Replace obsolete known-difference text and update deterministic sample totals.
+
+Acceptance criteria:
+
+- No unrecorded source-ready hitlag mapping remains for implemented character
+  actions, and no guessed value is admitted.
+- B-057 and the confirmed Burning/Ineffa decisions are closed in the ledger.
+
+Test cases to add or update:
+
+- Focused profile assertions accompany each mapped character batch; no new test
+  is required for a documented upstream/local mapping ambiguity.
+
+Verification:
+
+- `./gradlew ReactionRegressionTest RaidenParty FlinsParty FlinsParty2 build javadoc`
+- `python scripts/preflight.py --run`
+- `git status --short`

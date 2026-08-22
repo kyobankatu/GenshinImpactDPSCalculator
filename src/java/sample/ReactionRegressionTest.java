@@ -62,6 +62,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseG_BurningRefreshAndGenerationContract();
         testAccuracyPhaseG_QuickenBurningFuelContract();
         testAccuracyPhaseG_BurningAuraAndPyroApplicationContract();
+        testAccuracyPhaseG_BurningNinthTickContract();
         testPhase6BloomCores();
         testPhase7HyperbloomAndBurgeon();
         testPhase8QuickenAggravateSpread();
@@ -136,6 +137,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_SilkenMoonsSerenadeDynamicBonus();
         testAccuracyPhaseF_AscendantBlessingExpiryReplacement();
         testAccuracyPhaseF_ArtifactLunarReactionBuffRegression();
+        testAccuracyPhaseF_ThundercloudNightIntentContract();
         testAccuracyPhaseF_ViridescentVenererRefreshContract();
         testAccuracyPhaseF_BurstArtifactGatewayContract();
         testAccuracyPhaseF_NoblesseObligeRefreshContract();
@@ -823,6 +825,32 @@ public class ReactionRegressionTest {
         stale.advanceTime(0.25);
         assertClose(900.0, stale.getTotalDamage(), EPS,
                 "A superseded Burning event should terminate without duplicating damage");
+    }
+
+    private static void testAccuracyPhaseG_BurningNinthTickContract() {
+        CombatSimulator sim = simulatorWith(testCharacter(Element.PYRO));
+        sim.getEnemy().applyAura(Element.DENDRO, 2.0, sim.getCurrentTime());
+        sim.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE,
+                reactionHit("Burning ninth-tick fixture", Element.PYRO));
+
+        double tickDamage = expectedTransformative(0.25, Element.PYRO, 0.0);
+        sim.advanceTime(2.249);
+        assertClose(tickDamage * 8.0, sim.getTotalDamage(), 1.0,
+                "Burning should deal eight ticks immediately before 2.25 seconds");
+
+        SimulatorSnapshot beforeNinthTick = sim.saveSnapshot();
+        sim.advanceTime(0.001 + 1e-9);
+        assertClose(tickDamage * 9.0, sim.getTotalDamage(), 1.0,
+                "Burning should not skip its ninth tick at 2.25 seconds");
+
+        sim.restoreSnapshot(beforeNinthTick);
+        sim.advanceTime(0.001 + 1e-9);
+        assertClose(tickDamage * 9.0, sim.getTotalDamage(), 1.0,
+                "Snapshot restore should replay the ninth Burning tick once");
+        sim.advanceTime(0.249);
+        assertClose(tickDamage * 9.0, sim.getTotalDamage(), 1.0,
+                "Burning should remain silent before the tenth-tick boundary");
     }
 
     private static void testAccuracyPhaseG_QuickenBurningFuelContract() {
@@ -4964,8 +4992,9 @@ public class ReactionRegressionTest {
                 EPS,
                 "Ineffa C1 should cap Carrier Flow Composite at 50 percent");
 
+        RecordingDamageWeapon c1BurstWeapon = new RecordingDamageWeapon("");
         model.character.Ineffa c1BurstIneffa = new model.character.Ineffa(
-                new TestWeapon(), blankArtifact(), ineffaTalentData(1));
+                c1BurstWeapon, blankArtifact(), ineffaTalentData(1));
         CombatSimulator c1BurstSim = simulatorWithExistingCharacter(c1BurstIneffa);
         c1BurstIneffa.onAction(
                 CharacterActionRequest.of(CharacterActionKey.BURST), c1BurstSim);
@@ -4975,15 +5004,44 @@ public class ReactionRegressionTest {
                         buff -> buff.getId()
                                 == BuffId.INEFFA_C1_CARRIER_FLOW_COMPOSITE),
                 "Ineffa C1 Burst should not activate Carrier Flow Composite");
+        assertTrue(c1BurstWeapon.actions.stream().noneMatch(
+                        action -> "Punishment Edict (C2)".equals(action.getName())),
+                "Ineffa C1 Burst should not schedule Punishment Edict");
 
+        RecordingDamageWeapon c2BurstWeapon = new RecordingDamageWeapon("");
         model.character.Ineffa c2BurstIneffa = new model.character.Ineffa(
-                new TestWeapon(), blankArtifact(), ineffaTalentData(2));
+                c2BurstWeapon, blankArtifact(), ineffaTalentData(2));
         CombatSimulator c2BurstSim = simulatorWithExistingCharacter(c2BurstIneffa);
         c2BurstIneffa.onAction(
                 CharacterActionRequest.of(CharacterActionKey.BURST), c2BurstSim);
         assertTrue(c2BurstIneffa.getShieldHealth() > 0.0,
                 "Ineffa C2 Burst should activate Optical Flow Shield Barrier");
         requireIneffaCarrier(c2BurstSim);
+        List<AttackAction> punishmentEdicts = c2BurstWeapon.actions.stream()
+                .filter(action -> "Punishment Edict (C2)".equals(action.getName()))
+                .collect(Collectors.toList());
+        assertEquals(1, punishmentEdicts.size(),
+                "Ineffa C2 Burst should schedule one Punishment Edict");
+        AttackAction punishmentEdict = punishmentEdicts.get(0);
+        int burstIndex = c2BurstWeapon.actions.indexOf(
+                findAction(c2BurstWeapon.actions, "Supreme Instruction"));
+        int edictIndex = c2BurstWeapon.actions.indexOf(punishmentEdict);
+        assertClose(1.0,
+                c2BurstWeapon.times.get(edictIndex)
+                        - c2BurstWeapon.times.get(burstIndex),
+                EPS,
+                "Ineffa C2 Punishment Edict should resolve one second after Burst damage");
+        assertClose(3.0, punishmentEdict.getDamagePercent(), EPS,
+                "Ineffa C2 Punishment Edict should deal 300 percent ATK damage");
+        assertEquals(AttackAction.LunarReactionType.CHARGED,
+                punishmentEdict.getLunarReactionType(),
+                "Ineffa C2 Punishment Edict should be direct Lunar-Charged damage");
+        assertEquals(ICDType.None, punishmentEdict.getICDType(),
+                "Ineffa C2 Punishment Edict should use no ICD");
+        assertClose(0.0, punishmentEdict.getGaugeUnits(), EPS,
+                "Ineffa C2 Punishment Edict should apply no Electro gauge");
+        assertClose(1.0, punishmentEdict.getDefenseIgnore(), EPS,
+                "Ineffa C2 Punishment Edict should ignore all enemy DEF");
 
         model.character.Ineffa c3Ineffa = new model.character.Ineffa(
                 new TestWeapon(), blankArtifact(), ineffaTalentData(3));
@@ -7123,6 +7181,58 @@ public class ReactionRegressionTest {
                 "Duplicate Night sets should expose one canonical synergy provider");
         assertEquals(CharacterId.FLINS, duplicateSynergies.get(0).getSourceCharacterId(),
                 "The first Night wearer should source a Night-only duplicate party");
+    }
+
+    private static void testAccuracyPhaseF_ThundercloudNightIntentContract() {
+        TestCharacter owner = testCharacter(
+                Element.ELECTRO, CharacterId.FLINS).asLunar();
+        owner.setArtifacts(new model.artifact.NightOfTheSkysUnveiling());
+        TestCharacter ally = testCharacter(
+                Element.HYDRO, CharacterId.COLUMBINA).asLunar();
+        CombatSimulator sim = simulatorWith(owner);
+        sim.addCharacter(ally);
+
+        ReactionResult strike = ReactionResult.transform(
+                100.0,
+                "Thundercloud Strike Intent fixture",
+                ReactionResult.Kind.THUNDERCLOUD_STRIKE);
+        sim.notifyDerivedReaction(strike, ally);
+        Buff firstIntent = owner.getActiveBuffs().stream()
+                .filter(buff -> buff.getId() == BuffId.GLEAMING_MOON_INTENT)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError(
+                        "Thundercloud Strike should activate Night Intent"));
+        assertClose(4.0, firstIntent.getExpirationTime(), EPS,
+                "Thundercloud Strike should activate Intent for four seconds");
+
+        sim.advanceTime(2.0);
+        sim.notifyDerivedReaction(strike, ally);
+        List<Buff> refreshedIntents = owner.getActiveBuffs().stream()
+                .filter(buff -> buff.getId() == BuffId.GLEAMING_MOON_INTENT)
+                .collect(Collectors.toList());
+        assertEquals(1, refreshedIntents.size(),
+                "Repeated Thundercloud Strikes should refresh rather than stack Intent");
+        assertClose(6.0, refreshedIntents.get(0).getExpirationTime(), EPS,
+                "Repeated Thundercloud Strike should refresh Intent from trigger time");
+
+        SimulatorSnapshot intentSnapshot = sim.saveSnapshot();
+        sim.setActiveCharacter(CharacterId.COLUMBINA);
+        sim.advanceTime(1.0);
+        sim.notifyDerivedReaction(strike, ally);
+        assertClose(6.0, refreshedIntents.get(0).getExpirationTime(), EPS,
+                "Off-field Night wearer should not refresh Intent");
+        sim.advanceTime(3.001);
+        assertTrue(refreshedIntents.get(0).isExpired(sim.getCurrentTime()),
+                "Thundercloud-triggered Intent should expire at its refreshed boundary");
+
+        sim.restoreSnapshot(intentSnapshot);
+        Buff restoredIntent = owner.getActiveBuffs().stream()
+                .filter(buff -> buff.getId() == BuffId.GLEAMING_MOON_INTENT)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError(
+                        "Snapshot restore should recover Thundercloud-triggered Intent"));
+        assertClose(6.0, restoredIntent.getExpirationTime(), EPS,
+                "Snapshot restore should preserve Thundercloud Intent expiry");
     }
 
     private static void testAccuracyPhaseF_ArtifactTeamBuffProviderRouting() {

@@ -1504,21 +1504,22 @@ experiment record.
 
 ### B-057 — Night Intent accepts Thundercloud Strike as a Lunar Reaction trigger
 
-- Status: `blocked`
-- Source: 3 (B-054 artifact trigger audit)
+- Status: `done`
+- Source: 1/3 (B-054 artifact trigger audit plus explicit user decision)
 - Symptom: `NightOfTheSkysUnveiling` explicitly refreshes Intent for
   `THUNDERCLOUD_STRIKE` in addition to typed Lunar Reactions, but the set wording
   requires party members to trigger Lunar Reactions and the strike is modeled as
   a separate follow-up kind.
 - Scope: Night trigger classification and exact four-second uptime regression
-- Risk: `blocked`
-- Proof: maintained in-game experiment or technical finding that explicitly
-  states whether Thundercloud Strike does or does not activate/refresh Intent
+- Risk: `validated`
+- Proof: explicit trigger, four-second expiry, refresh without stacking,
+  off-field rejection, and snapshot restoration regressions
 - Notes: official-description mirrors, KQM's artifact catalog, and current
   guides repeat only the generic "trigger Lunar Reactions" wording. No maintained
-  source found on 2026-08-02 resolves Thundercloud Strike specifically. Do not
-  infer behavior from the repository enum name; leave current behavior unchanged
-  until direct evidence is available.
+  source found on 2026-08-02 resolved Thundercloud Strike specifically. The user
+  confirmed on 2026-08-22 that it activates Intent. The existing typed trigger
+  was retained and focused regression now proves four-second activation,
+  refresh, off-field rejection, and snapshot continuity.
 
 ### B-058 — Burning discards its Dendro fuel and uses a fixed lifetime
 
@@ -1552,8 +1553,10 @@ experiment record.
   behavior. B-210 follow-up `bb1af05` adds the independent 2U Burning Aura,
   Hydro/Cryo/Electro/Geo consumption, target-wide 1U Pyro reapplication ICD,
   Dendro refresh through Burning Aura, Quicken synchronization, off-tick decay,
-  and exact snapshot timer reconstruction. Isolated Anemo-on-Burning, the ninth
-  tick skip, AoE, and hitlag remain evidence or Deferred-System boundaries. See
+  and exact snapshot timer reconstruction. Isolated Anemo-on-Burning, AoE, and
+  hitlag remain evidence or Deferred-System boundaries. The user confirmed on
+  2026-08-22 that active Burning does not skip its ninth tick; focused regression
+  proves the 2.25-second tick and replay from a pre-tick snapshot. See
   `TASKS.md` implementation block `Burning Fuel and Refresh State`.
   Completed with an immutable simulator-owned fuel/damage payload, exact
   `max(0.4 U/s, 2 * natural rate)` depletion, source-direction Aura setup,
@@ -4481,3 +4484,21 @@ experiment record.
   so neither is inferred. The complete focused gate, build, Javadoc, three
   party samples, rollout benchmark, and executable preflight pass with zero leaks on
   2026-08-21; every implementation commit is pushed to `origin/dev_0`.
+
+### B-211 — Confirmed accuracy decisions and gcsim hitlag
+
+- **Status:** in-progress
+- **Source:** explicit 2026-08-22 user decisions and gcsim main commit
+  `3647a07a7cc3004bc1e79d9bb5f7444de20dceaa`.
+- **Symptom:** Ineffa C2 omitted Punishment Edict because its automatic delay was
+  unresolved, while hitlag is absent from the simulator and its action data.
+- **Scope/risk:** confirmed single-target decisions, generic 60 FPS hitlag
+  runtime, source-ready character hit mappings, regressions, and deterministic
+  samples; high.
+- **Proof/plan:** `TASKS.md` B-211 phase gates.
+- **Checkpoint:** Phase 1 retains the already-correct typed Night/Burning
+  behavior and adds their missing boundary tests. Ineffa C2 now deals one 300%
+  ATK direct Lunar-Charged hit with 0U, no ICD, and complete DEF ignore exactly
+  one second after Burst damage. Enemy attacks, poise depletion, geometry,
+  headshots, multiple targets, RL learner changes, and generated docs remain
+  excluded.
