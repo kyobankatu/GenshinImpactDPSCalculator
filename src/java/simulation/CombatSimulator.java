@@ -818,14 +818,15 @@ public class CombatSimulator {
      */
     public void finishOwnerHitlagAction(CharacterId actorId) {
         try {
-            double duration = hitlagController.drainOwnerHitlagDuration(actorId);
-            while (duration > 0.0) {
-                advanceTime(duration);
-                duration = hitlagController.drainOwnerHitlagDuration(actorId);
-            }
+            hitlagController.awaitOwnerUnlock(actorId);
         } finally {
             hitlagController.endOwnerAction(actorId);
         }
+    }
+
+    /** Waits until the active actor's pending owner hitlag has elapsed. */
+    public void awaitOwnerHitlag(CharacterId actorId) {
+        hitlagController.awaitOwnerUnlock(actorId);
     }
 
     /**
@@ -1322,6 +1323,11 @@ public class CombatSimulator {
      */
     public boolean tryStartOverloadDamageCooldown(CharacterId ownerId) {
         return reactionStateController.tryStartOverloadDamageCooldown(ownerId);
+    }
+
+    /** Returns the current target-wide Overload damage cooldown boundary. */
+    public double getOverloadTargetDamageCooldownEndTime() {
+        return reactionStateController.getOverloadTargetDamageCooldownEndTime();
     }
 
     /**

@@ -4502,7 +4502,8 @@ experiment record.
   one second after Burst damage. Phase 2 adds a pinned-gcsim 60 FPS runtime with
   distinct owner/target rounding, Defense Halt, deployable/headshot rules,
   same-frame stacking, typed-action and delayed-follow-up owner locks,
-  target-local Aura/Quicken/Burning/EC timer pause, queue reordering, and
-  snapshot persistence. Enemy attacks, poise depletion, geometry,
+  target-local Aura/Quicken/Burning pause, global EC/Lunar/ICD timing, queue
+  reordering, switch blocking, and snapshot persistence. Enemy attacks, poise
+  depletion, geometry,
   headshots, multiple targets, RL learner changes, and generated docs remain
   excluded.

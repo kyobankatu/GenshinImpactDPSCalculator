@@ -1,7 +1,9 @@
 package simulation.runtime;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Deque;
 import java.util.List;
 import java.util.PriorityQueue;
 
@@ -20,8 +22,17 @@ public class SimulationClock {
             Comparator.comparingDouble(TimerEvent::getNextTickTime));
     private double currentTime = 0.0;
     private double rotationTime = 0.0;
-    private TimerEvent executingEvent;
-    private double executingTargetHitlagDuration;
+    private final Deque<ExecutingEvent> executingEvents = new ArrayDeque<>();
+
+    /** One re-entrant timer callback and its deferred target-local pause. */
+    private static final class ExecutingEvent {
+        private final TimerEvent event;
+        private double targetHitlagDuration;
+
+        private ExecutingEvent(TimerEvent event) {
+            this.event = event;
+        }
+    }
 
     /**
      * Creates a clock bound to the given simulator.
@@ -80,8 +91,8 @@ public class SimulationClock {
         if (!Double.isFinite(duration) || duration <= 0.0) {
             return;
         }
-        if (executingEvent != null) {
-            executingTargetHitlagDuration += duration;
+        for (ExecutingEvent executing : executingEvents) {
+            executing.targetHitlagDuration += duration;
         }
         List<TimerEvent> queuedEvents = new ArrayList<>(events);
         events.clear();
@@ -100,8 +111,7 @@ public class SimulationClock {
     public void restoreTime(double currentTime, double rotationTime) {
         this.currentTime = currentTime;
         this.rotationTime = rotationTime;
-        executingEvent = null;
-        executingTargetHitlagDuration = 0.0;
+        executingEvents.clear();
         events.clear();
     }
 
@@ -124,14 +134,13 @@ public class SimulationClock {
             if (sim.getEnemy() != null) {
                 sim.getEnemy().updateAuras(currentTime);
             }
-            executingEvent = event;
-            executingTargetHitlagDuration = 0.0;
+            ExecutingEvent executing = new ExecutingEvent(event);
+            executingEvents.push(executing);
             try {
                 event.tick(sim);
-                event.applyTargetHitlag(executingTargetHitlagDuration);
+                event.applyTargetHitlag(executing.targetHitlagDuration);
             } finally {
-                executingEvent = null;
-                executingTargetHitlagDuration = 0.0;
+                executingEvents.pop();
             }
 
             if (!event.isFinished(currentTime)) {

@@ -78,6 +78,9 @@ public class SwitchManager {
         if (oldChar == target) {
             return;
         }
+        if (oldChar != null) {
+            sim.awaitOwnerHitlag(oldChar.getCharacterId());
+        }
 
         double currentTime = sim.getCurrentTime();
         double cooldownEnd = lastSwapTime + SWAP_COOLDOWN;

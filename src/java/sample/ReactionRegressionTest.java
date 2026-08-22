@@ -982,6 +982,20 @@ public class ReactionRegressionTest {
         assertClose(6.0 / 60.0, cumulativeOwner.getCurrentTime(), EPS,
                 "Typed multi-hit actions should add owner hitlag for every hit");
 
+        SequentialHitlagCharacter sequentialCharacter =
+                new SequentialHitlagCharacter(asymmetricHit.getHitlagProfile());
+        CombatSimulator sequentialOwner = simulatorWithExistingCharacter(
+                sequentialCharacter);
+        sequentialOwner.performAction(
+                CharacterId.SUCROSE,
+                CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        assertClose(0.20 + 3.0 / 60.0,
+                sequentialCharacter.secondHitTime, EPS,
+                "Owner hitlag should delay a later hit in the same typed action");
+        assertClose(0.20 + 6.0 / 60.0,
+                sequentialOwner.getCurrentTime(), EPS,
+                "Sequential hits should retain both owner freeze intervals");
+
         CombatSimulator delayedOwner = simulatorWith(
                 testCharacter(Element.PHYSICAL));
         delayedOwner.performActionWithoutTimeAdvance(
@@ -994,6 +1008,34 @@ public class ReactionRegressionTest {
                 hitlagFixtureAction("Post-follow-up action fixture", 0.0));
         assertClose(3.0 / 60.0, delayedOwner.getCurrentTime(), EPS,
                 "Out-of-action owner hitlag should delay the next input after restore");
+
+        CombatSimulator scopedSnapshot = simulatorWith(
+                testCharacter(Element.PHYSICAL));
+        assertTrue(scopedSnapshot.beginOwnerHitlagAction(CharacterId.SUCROSE),
+                "Scoped snapshot fixture should open its owner action");
+        scopedSnapshot.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, asymmetricHit);
+        SimulatorSnapshot activeScopeSnapshot = scopedSnapshot.saveSnapshot();
+        scopedSnapshot.finishOwnerHitlagAction(CharacterId.SUCROSE);
+        scopedSnapshot.restoreSnapshot(activeScopeSnapshot);
+        scopedSnapshot.performAction(
+                CharacterId.SUCROSE,
+                hitlagFixtureAction("Post-scoped-snapshot fixture", 0.0));
+        assertClose(3.0 / 60.0, scopedSnapshot.getCurrentTime(), EPS,
+                "Snapshot should convert scoped owner hitlag into next-input delay");
+
+        TestCharacter switchSource = testCharacter(
+                Element.PHYSICAL, CharacterId.SUCROSE);
+        TestCharacter switchTarget = testCharacter(
+                Element.PHYSICAL, CharacterId.XINGQIU);
+        CombatSimulator switchBlocked = simulatorWith(switchSource);
+        switchBlocked.addCharacter(switchTarget);
+        switchBlocked.performActionWithoutTimeAdvance(
+                CharacterId.SUCROSE, asymmetricHit);
+        switchBlocked.switchCharacter(CharacterId.XINGQIU);
+        assertClose(3.0 / 60.0 + 0.10,
+                switchBlocked.getCurrentTime(), EPS,
+                "Active-owner hitlag should delay an immediate character switch");
 
         CombatSimulator fullFactor = simulatorWith(testCharacter(Element.PHYSICAL));
         AttackAction fullFactorHit = hitlagFixtureAction(
@@ -1021,11 +1063,22 @@ public class ReactionRegressionTest {
                 testCharacter(Element.PHYSICAL));
         targetReactionClock.applyQuicken(1.0);
         double quickenEndBeforeHitlag = targetReactionClock.getQuickenEndTime();
+        targetReactionClock.setThundercloudEndTime(4.0);
+        targetReactionClock.tryStartOverloadDamageCooldown(
+                CharacterId.SUCROSE);
+        double overloadEndBeforeHitlag =
+                targetReactionClock.getOverloadTargetDamageCooldownEndTime();
         targetReactionClock.performActionWithoutTimeAdvance(
                 CharacterId.SUCROSE, asymmetricHit);
         assertClose(quickenEndBeforeHitlag + 4.0 / 60.0,
                 targetReactionClock.getQuickenEndTime(), EPS,
                 "Target hitlag should pause Quicken gauge decay");
+        assertClose(4.0, targetReactionClock.getThundercloudEndTime(), EPS,
+                "Thundercloud lifetime should remain on gcsim global time");
+        assertClose(overloadEndBeforeHitlag,
+                targetReactionClock.getOverloadTargetDamageCooldownEndTime(),
+                EPS,
+                "Reaction damage ICD should remain on gcsim global time");
 
         List<String> timerOrder = new ArrayList<>();
         CombatSimulator targetTimer = simulatorWith(
@@ -24153,6 +24206,47 @@ public class ReactionRegressionTest {
                     "Multi-hit fixture 2", 0.0);
             second.setHitlagProfile(profile);
             sim.performActionWithoutTimeAdvance(characterId, first);
+            sim.performAction(characterId, second);
+        }
+    }
+
+    /** Emits two profiled hits separated by owner-local animation time. */
+    private static final class SequentialHitlagCharacter extends Character {
+        private final HitlagProfile profile;
+        private double secondHitTime = -1.0;
+
+        private SequentialHitlagCharacter(HitlagProfile profile) {
+            this.name = "Sequential Hitlag Tester";
+            this.characterId = CharacterId.SUCROSE;
+            this.element = Element.PHYSICAL;
+            this.weapon = new TestWeapon();
+            this.artifacts = new ArtifactSet[0];
+            this.profile = profile;
+            this.baseStats.set(StatType.BASE_HP, 10000.0);
+            this.baseStats.set(StatType.BASE_ATK, 1000.0);
+            this.baseStats.set(StatType.BASE_DEF, 700.0);
+        }
+
+        @Override
+        public void applyPassive(StatsContainer currentStats) {
+        }
+
+        @Override
+        public double getEnergyCost() {
+            return 60.0;
+        }
+
+        @Override
+        public void onAction(
+                CharacterActionRequest request, CombatSimulator sim) {
+            AttackAction first = hitlagFixtureAction(
+                    "Sequential fixture 1", 0.20);
+            first.setHitlagProfile(profile);
+            sim.performAction(characterId, first);
+            secondHitTime = sim.getCurrentTime();
+            AttackAction second = hitlagFixtureAction(
+                    "Sequential fixture 2", 0.0);
+            second.setHitlagProfile(profile);
             sim.performAction(characterId, second);
         }
     }

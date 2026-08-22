@@ -50,6 +50,7 @@ public class ActionTimelineExecutor {
             eventBus.notifyAction(character, action, sim.getCurrentTime());
 
             sim.advanceTime(animationDuration);
+            sim.awaitOwnerHitlag(characterId);
         } finally {
             if (ownsHitlagScope) {
                 sim.finishOwnerHitlagAction(characterId);

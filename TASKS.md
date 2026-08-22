@@ -24708,6 +24708,7 @@ Target files:
 - `src/java/simulation/runtime/ActionGateway.java`
 - `src/java/simulation/runtime/ActionTimelineExecutor.java`
 - `src/java/simulation/runtime/SimulationClock.java`
+- `src/java/simulation/runtime/SwitchManager.java`
 - `src/java/simulation/runtime/ReactionState.java`
 - `src/java/simulation/runtime/ReactionStateController.java`
 - `src/java/simulation/CombatSimulator.java`
@@ -24728,8 +24729,8 @@ Tasks:
   out-of-action delayed hit until its remaining freeze is consumed by the next
   input; deployable and off-field owners remain excluded.
 - Pause and stack target ordinary/Freeze Aura clocks, Quicken/Burning state,
-  and explicitly target-owned EC/Burning timers without shifting character,
-  gadget, or unrelated global timers.
+  and the enemy-queued Burning timer without shifting gcsim-global EC/Lunar
+  ticks, reaction ICDs, character events, or gadget timers.
 - Persist target and out-of-action owner hitlag state across snapshot restore.
 - Reject invalid, negative, and non-finite profiles; headshot-only hits retain
   owner halt while target halt fails closed in the current no-headshot mode.
@@ -24748,7 +24749,8 @@ Test cases to add or update:
 - Abnormal: invalid profile, headshot-only target no-trigger, and queue reorder.
 - Deployable: target pauses while the owner action lock does not grow.
 - Multi-hit/snapshot: same-frame owner and target stacking, delayed follow-up
-  carry, Aura applied during a pause, and in-flight restore.
+  carry, sequential-hit timing, switch blocking, Aura applied during a pause,
+  and in-flight restore.
 
 Verification:
 

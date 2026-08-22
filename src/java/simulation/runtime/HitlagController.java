@@ -67,7 +67,7 @@ public final class HitlagController {
         if (ownerActionId != null) {
             return false;
         }
-        drainIdleOwnerHitlag(actorId);
+        awaitOwnerUnlock(actorId);
         ownerActionId = actorId;
         pendingOwnerFreezeFrames = 0;
         return true;
@@ -97,9 +97,29 @@ public final class HitlagController {
         pendingOwnerFreezeFrames = 0;
     }
 
+    /** Advances until the active actor has no pending owner-local hitlag. */
+    public void awaitOwnerUnlock(CharacterId actorId) {
+        if (sim.getActiveCharacter() == null
+                || sim.getActiveCharacter().getCharacterId() != actorId) {
+            return;
+        }
+        drainIdleOwnerHitlag(actorId);
+        double duration = drainOwnerHitlagDuration(actorId);
+        while (duration > 0.0) {
+            sim.advanceTime(duration);
+            duration = drainOwnerHitlagDuration(actorId);
+        }
+    }
+
     /** Returns a snapshot copy of out-of-action owner freeze boundaries. */
     public Map<CharacterId, Double> copyIdleOwnerFreezeEndTimes() {
-        return new EnumMap<>(idleOwnerFreezeEndTimes);
+        Map<CharacterId, Double> copy = new EnumMap<>(idleOwnerFreezeEndTimes);
+        if (ownerActionId != null && pendingOwnerFreezeFrames > 0) {
+            double pendingEnd = sim.getCurrentTime()
+                    + pendingOwnerFreezeFrames / FRAMES_PER_SECOND;
+            copy.merge(ownerActionId, pendingEnd, Math::max);
+        }
+        return copy;
     }
 
     /** Restores out-of-action owner freeze boundaries after rollback. */
@@ -123,10 +143,6 @@ public final class HitlagController {
     }
 
     private void drainIdleOwnerHitlag(CharacterId actorId) {
-        if (sim.getActiveCharacter() == null
-                || sim.getActiveCharacter().getCharacterId() != actorId) {
-            return;
-        }
         double endTime = idleOwnerFreezeEndTimes.getOrDefault(
                 actorId, sim.getCurrentTime());
         while (endTime > sim.getCurrentTime()) {

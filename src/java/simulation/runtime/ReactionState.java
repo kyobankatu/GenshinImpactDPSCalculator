@@ -270,44 +270,18 @@ public class ReactionState {
         }
         burningNextTickTime = shiftPendingBoundary(
                 burningNextTickTime, currentTime, duration);
-        burningPyroApplicationCooldownEndTime = shiftActiveBoundary(
-                burningPyroApplicationCooldownEndTime, currentTime, duration);
-
-        if (standardElectroChargedState != null
-                && standardElectroChargedLastDamageTime >= 0.0) {
-            standardElectroChargedLastDamageTime += duration;
-        }
-        standardElectroChargedDamageCooldownEndTime = shiftActiveBoundary(
-                standardElectroChargedDamageCooldownEndTime,
-                currentTime,
-                duration);
-        thundercloudEndTime = shiftPendingBoundary(
-                thundercloudEndTime, currentTime, duration);
-        overloadTargetDamageCooldownEndTime = shiftActiveBoundary(
-                overloadTargetDamageCooldownEndTime, currentTime, duration);
-        superconductTargetDamageCooldownEndTime = shiftActiveBoundary(
-                superconductTargetDamageCooldownEndTime, currentTime, duration);
-        shatterTargetDamageCooldownEndTime = shiftActiveBoundary(
-                shatterTargetDamageCooldownEndTime, currentTime, duration);
-        standardCrystallizeCooldownEndTime = shiftActiveBoundary(
-                standardCrystallizeCooldownEndTime, currentTime, duration);
-        for (Map.Entry<Element, Double> entry
-                : swirlTargetDamageCooldownEndTimes.entrySet()) {
-            entry.setValue(shiftActiveBoundary(
-                    entry.getValue(), currentTime, duration));
-        }
-    }
-
-    private double shiftActiveBoundary(
-            double boundary, double currentTime, double duration) {
-        return boundary > currentTime + TIMING_EPSILON
-                ? boundary + duration
-                : boundary;
     }
 
     private double shiftPendingBoundary(
             double boundary, double currentTime, double duration) {
         return boundary >= currentTime - TIMING_EPSILON
+                ? boundary + duration
+                : boundary;
+    }
+
+    private double shiftActiveBoundary(
+            double boundary, double currentTime, double duration) {
+        return boundary > currentTime + TIMING_EPSILON
                 ? boundary + duration
                 : boundary;
     }
