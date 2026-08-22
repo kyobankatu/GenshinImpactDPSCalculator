@@ -17,6 +17,7 @@ import model.type.ActionType;
 import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.PeriodicDamageEvent;
 
 /**
@@ -28,6 +29,19 @@ public class Xingqiu extends Character implements FormStateProvider {
     private static final double RAINCUTTER_C2_DURATION = 18.0;
     private static final double RAINCUTTER_TRIGGER_COOLDOWN = 1.0;
     private static final double C2_HYDRO_SHRED_DURATION = 4.0;
+
+    /**
+     * Hitlag from gcsim config YAML pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_HITLAG_SHORT =
+            new HitlagProfile(0.03, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_MEDIUM =
+            new HitlagProfile(0.06, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_LONG =
+            new HitlagProfile(0.10, 0.01, true, false, false);
+    private static final HitlagProfile SKILL_HITLAG =
+            new HitlagProfile(0.02, 0.01, true, false, false);
 
     private int normalAttackStep = 0;
     private final java.util.Map<BuffId, Double> triggerCooldowns = new java.util.HashMap<>();
@@ -148,12 +162,14 @@ public class Xingqiu extends Character implements FormStateProvider {
         AttackAction hit1 = new AttackAction("Fatal Rainscreen Hit 1", mv1 * mvMulti, Element.HYDRO, StatType.BASE_ATK,
                 StatType.SKILL_DMG_BONUS, 0.5, ActionType.SKILL);
         hit1.setICD(ICDType.None, ICDTag.ElementalSkill, 1.0);
+        hit1.setHitlagProfile(SKILL_HITLAG);
         sim.performAction(this.characterId, hit1);
 
         double mv2 = getTalentValue("Rain Screen Hit 2", 3.25);
         AttackAction hit2 = new AttackAction("Fatal Rainscreen Hit 2", mv2 * mvMulti, Element.HYDRO, StatType.BASE_ATK,
                 StatType.SKILL_DMG_BONUS, 0.5, ActionType.SKILL);
         hit2.setICD(ICDType.None, ICDTag.ElementalSkill, 1.0);
+        hit2.setHitlagProfile(SKILL_HITLAG);
         sim.performAction(this.characterId, hit2);
 
         // Generate 5 Hydro Particles
@@ -266,6 +282,7 @@ public class Xingqiu extends Character implements FormStateProvider {
             AttackAction sword = new AttackAction("Raincutter Sword", mvPerSword, Element.HYDRO,
                     StatType.BASE_ATK, StatType.BURST_DMG_BONUS, 0.0, false, ActionType.BURST);
             sword.setICD(ICDType.Standard, ICDTag.Xingqiu_Raincutter, 1.0);
+            sword.setHitlagProfile(HitlagProfile.none());
             actions.add(sword);
         }
         return actions;
@@ -302,11 +319,13 @@ public class Xingqiu extends Character implements FormStateProvider {
             AttackAction hit1 = new AttackAction(name + "_1", mv1, Element.PHYSICAL, StatType.BASE_ATK,
                     StatType.NORMAL_ATTACK_DMG_BONUS, 0.15, ActionType.NORMAL);
             hit1.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
+            hit1.setHitlagProfile(NORMAL_HITLAG_MEDIUM);
             sim.performActionWithoutTimeAdvance(this.name, hit1);
 
             AttackAction hit2 = new AttackAction(name + "_2", mv2, Element.PHYSICAL, StatType.BASE_ATK,
                     StatType.NORMAL_ATTACK_DMG_BONUS, 0.2, ActionType.NORMAL);
             hit2.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
+            hit2.setHitlagProfile(NORMAL_HITLAG_MEDIUM);
             sim.performAction(this.characterId, hit2);
 
         } else if (normalAttackStep == 4) { // N5
@@ -316,11 +335,13 @@ public class Xingqiu extends Character implements FormStateProvider {
             AttackAction hit1 = new AttackAction(name + "_1", mv1, Element.PHYSICAL, StatType.BASE_ATK,
                     StatType.NORMAL_ATTACK_DMG_BONUS, 0.2, ActionType.NORMAL);
             hit1.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
+            hit1.setHitlagProfile(NORMAL_HITLAG_LONG);
             sim.performActionWithoutTimeAdvance(this.name, hit1);
 
             AttackAction hit2 = new AttackAction(name + "_2", mv2, Element.PHYSICAL, StatType.BASE_ATK,
                     StatType.NORMAL_ATTACK_DMG_BONUS, 0.3, ActionType.NORMAL);
             hit2.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
+            hit2.setHitlagProfile(NORMAL_HITLAG_LONG);
             sim.performAction(this.characterId, hit2);
 
         } else {
@@ -329,12 +350,28 @@ public class Xingqiu extends Character implements FormStateProvider {
             AttackAction hit = new AttackAction(name, mv, Element.PHYSICAL, StatType.BASE_ATK,
                     StatType.NORMAL_ATTACK_DMG_BONUS, dur, ActionType.NORMAL);
             hit.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
+            hit.setHitlagProfile(getNormalHitlagProfile(normalAttackStep));
             sim.performAction(this.characterId, hit);
         }
 
         normalAttackStep++;
         if (normalAttackStep >= 5)
             normalAttackStep = 0;
+    }
+
+    private HitlagProfile getNormalHitlagProfile(int attackStep) {
+        switch (attackStep) {
+            case 0:
+            case 1:
+                return NORMAL_HITLAG_SHORT;
+            case 2:
+            case 3:
+                return NORMAL_HITLAG_MEDIUM;
+            case 4:
+                return NORMAL_HITLAG_LONG;
+            default:
+                return HitlagProfile.none();
+        }
     }
 
     private void chargeAttack(CombatSimulator sim) {

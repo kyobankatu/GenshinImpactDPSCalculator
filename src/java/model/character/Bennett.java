@@ -17,11 +17,25 @@ import model.type.ActionType;
 import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 
 /**
  * Bennett character implementation with Fantastic Voyage field buff handling.
  */
 public class Bennett extends Character implements FormStateProvider {
+
+    /**
+     * Hitlag from gcsim config YAML pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_HITLAG_SHORT =
+            new HitlagProfile(0.03, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_MEDIUM =
+            new HitlagProfile(0.06, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_LONG =
+            new HitlagProfile(0.09, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_LONGEST =
+            new HitlagProfile(0.12, 0.01, true, false, false);
 
     private int normalAttackStep = 0;
 
@@ -131,6 +145,7 @@ public class Bennett extends Character implements FormStateProvider {
         AttackAction hit = new AttackAction("Passion Overload (Tap)", mv, Element.PYRO, StatType.BASE_ATK,
                 StatType.SKILL_DMG_BONUS, 0.0, false, ActionType.SKILL);
         hit.setICD(ICDType.None, ICDTag.ElementalSkill, 2.0);
+        hit.setHitlagProfile(NORMAL_HITLAG_LONG);
         sim.performAction(this.characterId, hit);
 
         // Generate 2 Pyro Particles (Tap)
@@ -142,6 +157,7 @@ public class Bennett extends Character implements FormStateProvider {
         AttackAction q = new AttackAction("Fantastic Voyage Hit", mv, Element.PYRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 0.8, ActionType.BURST);
         q.setICD(ICDType.None, ICDTag.ElementalBurst, 2.0);
+        q.setHitlagProfile(HitlagProfile.none());
         sim.performAction(this.characterId, q);
 
         // Apply Field Buff
@@ -212,11 +228,28 @@ public class Bennett extends Character implements FormStateProvider {
                 ActionType.NORMAL);
 
         hit.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
+        hit.setHitlagProfile(getNormalHitlagProfile(normalAttackStep));
         sim.performAction(this.characterId, hit);
 
         normalAttackStep++;
         if (normalAttackStep >= 5) {
             normalAttackStep = 0;
+        }
+    }
+
+    private HitlagProfile getNormalHitlagProfile(int attackStep) {
+        switch (attackStep) {
+            case 0:
+            case 1:
+                return NORMAL_HITLAG_SHORT;
+            case 2:
+                return NORMAL_HITLAG_MEDIUM;
+            case 3:
+                return NORMAL_HITLAG_LONG;
+            case 4:
+                return NORMAL_HITLAG_LONGEST;
+            default:
+                return HitlagProfile.none();
         }
     }
 

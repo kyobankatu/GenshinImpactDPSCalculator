@@ -22,6 +22,7 @@ import model.type.StatType;
 import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.SimpleTimerEvent;
 
 /**
@@ -32,6 +33,13 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
     private static final double WISHBEARER_TRIGGER_COOLDOWN = 1.0;
     private static final double WISHBEARER_MARKER_DURATION = 8.0;
     private static final int WISHBEARER_MAX_TRIGGERS = 5;
+
+    /**
+     * Hitlag from gcsim config YAML pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_HITLAG =
+            new HitlagProfile(0.02, 0.01, true, false, false);
 
     private int normalAttackStep = 0;
     private double resolveStacks = 0;
@@ -265,6 +273,7 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
         AttackAction e = new AttackAction("Raiden E Cast", mv, Element.ELECTRO, StatType.BASE_ATK,
                 StatType.SKILL_DMG_BONUS, 0.5, false, ActionType.SKILL); // Dynamic
         e.setICD(ICDType.None, ICDTag.ElementalSkill, 1.0);
+        e.setHitlagProfile(HitlagProfile.none());
         sim.performAction(this.characterId, e);
 
         // Team Buff Logic (Eye of Stormy Judgment)
@@ -283,6 +292,7 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
         AttackAction coordAttack = new AttackAction("Eye of Stormy Judgment", coordMv, Element.ELECTRO,
                 StatType.BASE_ATK, StatType.SKILL_DMG_BONUS, 0.0, false, ActionType.SKILL); // Dynamic
         coordAttack.setICD(ICDType.Standard, ICDTag.ElementalSkill, 1.0); // 1U
+        coordAttack.setHitlagProfile(HitlagProfile.none());
 
         registerEyeDamageListener(sim);
         eyeCoordinatedAttack = coordAttack;
@@ -313,6 +323,7 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
         AttackAction q = new AttackAction("Musou Shinsetsu", mv, Element.ELECTRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 1.5, false, ActionType.BURST); // Raiden dynamic stats (No Snapshot)
         q.setICD(ICDType.None, ICDTag.ElementalBurst, 2.0);
+        q.setHitlagProfile(HitlagProfile.none());
         if (this.constellation >= 2) {
             q.setDefenseIgnore(0.60);
         }
@@ -515,6 +526,8 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
                     countsAsBurst,
                     ActionType.NORMAL,
                     dur);
+            firstHit.setHitlagProfile(HitlagProfile.none());
+            secondHit.setHitlagProfile(HitlagProfile.none());
             sim.performActionWithoutTimeAdvance(characterId, firstHit);
             sim.performAction(characterId, secondHit);
         } else {
@@ -526,6 +539,7 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
                     countsAsBurst,
                     ActionType.NORMAL,
                     dur);
+            hit.setHitlagProfile(NORMAL_HITLAG);
             sim.performAction(characterId, hit);
         }
 
@@ -550,6 +564,7 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
                     true,
                     ActionType.CHARGE,
                     0.0);
+            firstHit.setHitlagProfile(HitlagProfile.none());
             AttackAction secondHit = createRaidenAttack(
                     "Raiden Burst CA Hit 2",
                     base2 + bonus,
@@ -557,6 +572,7 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
                     true,
                     ActionType.CHARGE,
                     0.8);
+            secondHit.setHitlagProfile(NORMAL_HITLAG);
             sim.performActionWithoutTimeAdvance(characterId, firstHit);
             sim.performAction(characterId, secondHit);
         } else {
@@ -567,6 +583,7 @@ public class RaidenShogun extends Character implements FormStateProvider, Switch
                     false,
                     ActionType.CHARGE,
                     0.8);
+            physicalHit.setHitlagProfile(NORMAL_HITLAG);
             sim.performAction(characterId, physicalHit);
         }
         normalAttackStep = 0;

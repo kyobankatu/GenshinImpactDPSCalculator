@@ -4506,4 +4506,6 @@ experiment record.
   reordering, switch blocking, and snapshot persistence. Enemy attacks, poise
   depletion, geometry,
   headshots, multiple targets, RL learner changes, and generated docs remain
-  excluded.
+  excluded. Phase 3 maps and regresses the pinned source-ready actions used by
+  all three representative parties; their accepted totals are `RaidenParty`
+  1,200,940, `FlinsParty` 25,904,560, and `FlinsParty2` 20,592,361.

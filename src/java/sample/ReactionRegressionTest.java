@@ -67,6 +67,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseG_BurningAuraAndPyroApplicationContract();
         testAccuracyPhaseG_BurningNinthTickContract();
         testAccuracyPhaseG_HitlagRuntimeContract();
+        testAccuracyPhaseG_PinnedPartyHitlagProfiles();
         testPhase6BloomCores();
         testPhase7HyperbloomAndBurgeon();
         testPhase8QuickenAggravateSpread();
@@ -1131,6 +1132,185 @@ public class ReactionRegressionTest {
             rejected = true;
         }
         assertTrue(rejected, message);
+    }
+
+    private static void assertHitlagProfile(
+            AttackAction action,
+            double haltTime,
+            double factor,
+            boolean defenseHalt,
+            boolean deployable,
+            String message) {
+        HitlagProfile profile = action.getHitlagProfile();
+        assertClose(haltTime, profile.getHaltTimeSeconds(), EPS,
+                message + " halt time");
+        assertClose(factor, profile.getFactor(), EPS,
+                message + " factor");
+        assertEquals(defenseHalt, profile.canDefenseHalt(),
+                message + " Defense Halt");
+        assertEquals(deployable, profile.isDeployable(),
+                message + " deployable");
+        assertTrue(!profile.isHeadshotOnly(),
+                message + " should not be headshot-only");
+    }
+
+    private static void assertNoHitlagProfile(
+            AttackAction action, String message) {
+        HitlagProfile profile = action.getHitlagProfile();
+        assertClose(0.0, profile.getHaltTimeSeconds(), EPS,
+                message + " halt time");
+        assertClose(1.0, profile.getFactor(), EPS,
+                message + " factor");
+        assertTrue(!profile.canDefenseHalt(),
+                message + " Defense Halt");
+        assertTrue(!profile.isDeployable(),
+                message + " deployable");
+        assertTrue(!profile.isHeadshotOnly(),
+                message + " headshot-only");
+    }
+
+    private static void testAccuracyPhaseG_PinnedPartyHitlagProfiles() {
+        assertBennettHitlagProfiles();
+        assertXianglingHitlagProfiles();
+        assertXingqiuHitlagProfiles();
+    }
+
+    private static void assertBennettHitlagProfiles() {
+        RecordingDamageWeapon weapon = new RecordingDamageWeapon("");
+        model.character.Bennett bennett = new model.character.Bennett(
+                weapon, blankArtifact());
+        CombatSimulator sim = simulatorWithExistingCharacter(bennett);
+        for (int i = 0; i < 5; i++) {
+            sim.performAction(
+                    CharacterId.BENNETT,
+                    CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        }
+        double[] normalHaltTimes = {0.03, 0.03, 0.06, 0.09, 0.12};
+        for (int i = 0; i < normalHaltTimes.length; i++) {
+            assertHitlagProfile(
+                    weapon.actions.get(i),
+                    normalHaltTimes[i],
+                    0.01,
+                    true,
+                    false,
+                    "Bennett N" + (i + 1));
+        }
+
+        sim.performAction(
+                CharacterId.BENNETT,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        assertHitlagProfile(
+                findAction(weapon.actions, "Passion Overload (Tap)"),
+                0.09,
+                0.01,
+                true,
+                false,
+                "Bennett Tap Skill");
+        sim.performAction(
+                CharacterId.BENNETT,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        assertNoHitlagProfile(
+                findAction(weapon.actions, "Fantastic Voyage Hit"),
+                "Bennett Burst");
+    }
+
+    private static void assertXianglingHitlagProfiles() {
+        RecordingDamageWeapon weapon = new RecordingDamageWeapon("");
+        model.character.Xiangling xiangling = new model.character.Xiangling(
+                weapon, blankArtifact());
+        CombatSimulator sim = simulatorWithExistingCharacter(xiangling);
+        for (int i = 0; i < 5; i++) {
+            sim.performAction(
+                    CharacterId.XIANGLING,
+                    CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        }
+        double[] normalHaltTimes = {
+                0.03, 0.03, 0.03, 0.0, 0.0, 0.0, 0.0, 0.03, 0.09
+        };
+        assertEquals(normalHaltTimes.length, weapon.actions.size(),
+                "Xiangling normal chain hit count");
+        for (int i = 0; i < normalHaltTimes.length; i++) {
+            assertHitlagProfile(
+                    weapon.actions.get(i),
+                    normalHaltTimes[i],
+                    0.01,
+                    true,
+                    false,
+                    "Xiangling normal hit at index " + i);
+        }
+
+        sim.performAction(
+                CharacterId.XIANGLING,
+                CharacterActionRequest.of(CharacterActionKey.CHARGE));
+        assertHitlagProfile(
+                findAction(weapon.actions, "Xiangling CA"),
+                0.0,
+                0.01,
+                true,
+                true,
+                "Xiangling Charged Attack");
+
+        RecordingDamageWeapon burstWeapon = new RecordingDamageWeapon("");
+        model.character.Xiangling burstXiangling = new model.character.Xiangling(
+                burstWeapon, blankArtifact());
+        CombatSimulator burstSim = simulatorWithExistingCharacter(burstXiangling);
+        burstSim.performAction(
+                CharacterId.XIANGLING,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        for (int i = 1; i <= 3; i++) {
+            assertHitlagProfile(
+                    findAction(burstWeapon.actions, "Pyronado Cast " + i),
+                    0.03,
+                    0.01,
+                    true,
+                    false,
+                    "Xiangling Pyronado cast " + i);
+        }
+    }
+
+    private static void assertXingqiuHitlagProfiles() {
+        RecordingDamageWeapon weapon = new RecordingDamageWeapon("");
+        model.character.Xingqiu xingqiu = new model.character.Xingqiu(
+                weapon, blankArtifact());
+        CombatSimulator sim = simulatorWithExistingCharacter(xingqiu);
+        for (int i = 0; i < 5; i++) {
+            sim.performAction(
+                    CharacterId.XINGQIU,
+                    CharacterActionRequest.of(CharacterActionKey.NORMAL));
+        }
+        double[] normalHaltTimes = {0.03, 0.03, 0.06, 0.06, 0.06, 0.10, 0.10};
+        assertEquals(normalHaltTimes.length, weapon.actions.size(),
+                "Xingqiu normal chain hit count");
+        for (int i = 0; i < normalHaltTimes.length; i++) {
+            assertHitlagProfile(
+                    weapon.actions.get(i),
+                    normalHaltTimes[i],
+                    0.01,
+                    true,
+                    false,
+                    "Xingqiu normal hit at index " + i);
+        }
+
+        sim.performAction(
+                CharacterId.XINGQIU,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        assertHitlagProfile(
+                findAction(weapon.actions, "Fatal Rainscreen Hit 1"),
+                0.02,
+                0.01,
+                true,
+                false,
+                "Xingqiu Skill first hit");
+        assertHitlagProfile(
+                findAction(weapon.actions, "Fatal Rainscreen Hit 2"),
+                0.02,
+                0.01,
+                true,
+                false,
+                "Xingqiu Skill second hit");
+        for (AttackAction sword : xingqiu.getRaincutterAttack(0)) {
+            assertNoHitlagProfile(sword, "Xingqiu Raincutter sword");
+        }
     }
 
     private static void testAccuracyPhaseG_QuickenBurningFuelContract() {
@@ -3969,12 +4149,12 @@ public class ReactionRegressionTest {
                 "Raiden physical N4 first multiplier");
         assertClose(0.5325, physicalN4.get(1).getDamagePercent(), EPS,
                 "Raiden physical N4 second multiplier");
-        assertClose(0.95, physicalWeapon.times.get(3), EPS,
+        assertClose(0.95 + 15.0 / 60.0, physicalWeapon.times.get(3), EPS,
                 "Raiden physical N4 first hit timestamp");
-        assertClose(0.95, physicalWeapon.times.get(4), EPS,
+        assertClose(0.95 + 15.0 / 60.0, physicalWeapon.times.get(4), EPS,
                 "Raiden physical N4 second hit timestamp");
-        assertClose(2.85, physicalSim.getCurrentTime(), EPS,
-                "Raiden physical combo and Charged should advance six actions");
+        assertClose(2.85 + 25.0 / 60.0, physicalSim.getCurrentTime(), EPS,
+                "Raiden physical combo and Charged should include owner hitlag");
         assertEquals(7, physicalWeapon.actions.size(),
                 "Only Raiden physical N4 should add one extra damage event");
         assertEquals(6, physicalLogicalActions.size(),
@@ -3985,6 +4165,19 @@ public class ReactionRegressionTest {
                 "Raiden N5 should remain one hit after split N4");
         assertEquals("Raiden CA", physicalWeapon.actions.get(6).getName(),
                 "Raiden physical Charged should remain one hit");
+        for (int index : new int[] { 0, 1, 2, 5, 6 }) {
+            assertHitlagProfile(
+                    physicalWeapon.actions.get(index),
+                    0.02,
+                    0.01,
+                    true,
+                    false,
+                    "Raiden physical profile at index " + index);
+        }
+        assertNoHitlagProfile(physicalN4.get(0),
+                "Raiden physical N4 first hit should have no hitlag");
+        assertNoHitlagProfile(physicalN4.get(1),
+                "Raiden physical N4 second hit should have no hitlag");
 
         RecordingDamageWeapon musouWeapon = new RecordingDamageWeapon("Raiden ");
         model.character.RaidenShogun musouRaiden =
@@ -4035,9 +4228,12 @@ public class ReactionRegressionTest {
                     "Every Raiden Musou N4 hit should use standard ICD");
             assertEquals(ICDTag.Raiden_MusouIsshin, hit.getICDTag(),
                     "Every Raiden Musou N4 hit should share the Musou ICD tag");
+            assertNoHitlagProfile(hit,
+                    "Every Raiden Musou N4 hit should have no hitlag");
         }
-        assertClose(musouNormalStart + 1.4, musouSim.getCurrentTime(), EPS,
-                "Raiden Musou N1-N4 should advance four action durations");
+        assertClose(musouNormalStart + 1.4 + 15.0 / 60.0,
+                musouSim.getCurrentTime(), EPS,
+                "Raiden Musou N1-N4 should include three hitlag intervals");
 
         double musouChargeStart = musouSim.getCurrentTime();
         musouSim.performAction(
@@ -4065,14 +4261,20 @@ public class ReactionRegressionTest {
             assertEquals(ICDTag.Raiden_MusouIsshin, hit.getICDTag(),
                     "Every Raiden Musou Charged hit should share the Musou ICD tag");
         }
+        assertNoHitlagProfile(musouCharge.get(0),
+                "Raiden Musou Charged first hit should have no hitlag");
+        assertHitlagProfile(
+                musouCharge.get(1), 0.02, 0.01, true, false,
+                "Raiden Musou Charged second hit profile");
         int chargeStartIndex = musouWeapon.actions.indexOf(musouCharge.get(0));
         assertClose(musouChargeStart, musouWeapon.times.get(chargeStartIndex), EPS,
                 "Raiden Musou Charged first hit timestamp");
         assertClose(musouChargeStart,
                 musouWeapon.times.get(chargeStartIndex + 1), EPS,
                 "Raiden Musou Charged second hit timestamp");
-        assertClose(musouChargeStart + 0.8, musouSim.getCurrentTime(), EPS,
-                "Raiden Musou Charged should advance one action duration");
+        assertClose(musouChargeStart + 0.8 + 5.0 / 60.0,
+                musouSim.getCurrentTime(), EPS,
+                "Raiden Musou Charged should include second-hit owner hitlag");
     }
 
     private static Buff requireRaidenC4Buff(CombatSimulator sim) {
@@ -4700,6 +4902,28 @@ public class ReactionRegressionTest {
         assertTrue(physicalN4.stream().allMatch(
                         action -> Math.abs(action.getDamagePercent() - 0.5886) < EPS),
                 "Flins physical N4 should use the per-hit level-nine multiplier");
+        assertHitlagProfile(
+                findAction(physicalActions, "Flins N1"),
+                0.02, 0.01, true, false,
+                "Flins physical N1");
+        assertHitlagProfile(
+                findAction(physicalActions, "Flins N2"),
+                0.02, 0.01, true, false,
+                "Flins physical N2");
+        assertHitlagProfile(
+                findAction(physicalActions, "Flins N3"),
+                0.03, 0.01, true, false,
+                "Flins physical N3");
+        for (AttackAction hit : physicalN4) {
+            assertNoHitlagProfile(hit,
+                    "Flins physical N4 should remain hitlag-free");
+        }
+        physicalFlins.onAction(
+                CharacterActionRequest.of(CharacterActionKey.NORMAL), physicalSim);
+        assertHitlagProfile(
+                findAction(physicalActions, "Flins N5"),
+                0.06, 0.01, true, false,
+                "Flins physical N5");
 
         List<AttackAction> c4SkillActions = new ArrayList<>();
         model.character.Flins c4SkillFlins = new model.character.Flins(
@@ -5680,6 +5904,7 @@ public class ReactionRegressionTest {
                 "Ineffa N4"
         };
         double[] expectedMultipliers = {0.640, 0.629, 0.418, 0.418, 1.030};
+        double[] expectedHitlagSeconds = {0.06, 0.06, 0.0, 0.06, 0.10};
         assertEquals(expectedNames.length, weapon.actions.size(),
                 "Ineffa four-step combo should resolve five damage hits");
         for (int i = 0; i < expectedNames.length; i++) {
@@ -5698,13 +5923,25 @@ public class ReactionRegressionTest {
                     "Ineffa normal ICD tag at index " + i);
             assertClose(1.0, action.getGaugeUnits(), EPS,
                     "Ineffa normal gauge at index " + i);
+            if (expectedHitlagSeconds[i] > 0.0) {
+                assertHitlagProfile(
+                        action,
+                        expectedHitlagSeconds[i],
+                        0.01,
+                        true,
+                        false,
+                        "Ineffa normal hitlag at index " + i);
+            } else {
+                assertNoHitlagProfile(
+                        action, "Ineffa N3 first hit should remain hitlag-free");
+            }
         }
-        assertClose(0.6, weapon.times.get(2), EPS,
+        assertClose(0.6 + 16.0 / 60.0, weapon.times.get(2), EPS,
                 "Ineffa N3 first hit should resolve at the action start");
-        assertClose(0.6, weapon.times.get(3), EPS,
+        assertClose(0.6 + 16.0 / 60.0, weapon.times.get(3), EPS,
                 "Ineffa N3 second hit should share the action timestamp");
-        assertClose(1.2, sim.getCurrentTime(), EPS,
-                "Ineffa four-step combo should advance four action durations");
+        assertClose(1.2 + 34.0 / 60.0, sim.getCurrentTime(), EPS,
+                "Ineffa combo should include pinned-gcsim owner hitlag");
 
         assertEquals(4, logicalActions.size(),
                 "Ineffa multi-hit combo should emit one logical event per action");
@@ -5716,7 +5953,7 @@ public class ReactionRegressionTest {
                 CharacterActionRequest.of(CharacterActionKey.NORMAL));
         assertEquals("Ineffa N1", weapon.actions.get(5).getName(),
                 "Ineffa combo should wrap to N1 after N4");
-        assertClose(1.5, sim.getCurrentTime(), EPS,
+        assertClose(1.5 + 42.0 / 60.0, sim.getCurrentTime(), EPS,
                 "Wrapped Ineffa N1 should advance one additional action duration");
     }
 
@@ -17348,10 +17585,15 @@ public class ReactionRegressionTest {
         bennettSim.performAction(
                 CharacterId.BENNETT,
                 CharacterActionRequest.of(CharacterActionKey.SKILL));
-        assertClose(4.0,
+        assertClose(4.0, bennett.getSkillCooldownEndTime(), EPS,
+                "Bennett Rekindle should set the Tap Skill cooldown boundary");
+        assertClose(9.0 / 60.0, bennettSim.getCurrentTime(), EPS,
+                "Bennett Tap Skill should apply its pinned owner hitlag");
+        assertClose(4.0 - 9.0 / 60.0,
                 bennett.getSkillCDRemaining(bennettSim.getCurrentTime()), EPS,
-                "Bennett Rekindle should set the Tap Skill cooldown to four seconds");
-        bennettSim.advanceTime(3.999);
+                "Bennett Skill cooldown should continue during owner hitlag");
+        bennettSim.advanceTime(
+                bennett.getSkillCDRemaining(bennettSim.getCurrentTime()) - 0.001);
         assertClose(0.001,
                 bennett.getSkillCDRemaining(bennettSim.getCurrentTime()), EPS,
                 "Bennett Skill should remain gated before four seconds");

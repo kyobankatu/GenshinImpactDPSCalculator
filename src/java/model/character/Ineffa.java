@@ -18,6 +18,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.PeriodicDamageEvent;
 import simulation.event.SimpleTimerEvent;
 import mechanics.buff.SimpleBuff;
@@ -53,6 +54,18 @@ import mechanics.reaction.ReactionResult;
 public class Ineffa extends Character
         implements FormStateProvider, CharacterTeamBuffProvider,
         ReactionAwareCharacter, SimulatorInitializedCharacterEffect {
+
+    /**
+     * Normal-attack hitlag from gcsim config YAML pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     *
+     * <p>The Charged Attack remains profile-free because the YAML's intended
+     * {@code 0.06} seconds conflicts with the pinned Go value of {@code 0.06} frames.
+     */
+    private static final HitlagProfile NORMAL_HITLAG =
+            new HitlagProfile(0.06, 0.01, true, false, false);
+    private static final HitlagProfile N4_HITLAG =
+            new HitlagProfile(0.10, 0.01, true, false, false);
 
     private int normalAttackStep = 0;
     private double shieldHealth = 0;
@@ -206,11 +219,13 @@ public class Ineffa extends Character
             AttackAction firstHit = createNormalAttackHit(
                     name + " Hit 1",
                     getTalentValue("N3 Hit 1", 0.418),
-                    0.0);
+                    0.0,
+                    HitlagProfile.none());
             AttackAction secondHit = createNormalAttackHit(
                     name + " Hit 2",
                     getTalentValue("N3 Hit 2", 0.418),
-                    0.3);
+                    0.3,
+                    NORMAL_HITLAG);
             sim.performActionWithoutTimeAdvance(characterId, firstHit);
             sim.performAction(characterId, secondHit);
             advanceNormalAttackStep();
@@ -232,7 +247,11 @@ public class Ineffa extends Character
 
         double mv = getTalentValue(key, defaultMv);
 
-        AttackAction hit = createNormalAttackHit(name, mv, 0.3);
+        HitlagProfile hitlagProfile = normalAttackStep == 3
+                ? N4_HITLAG
+                : NORMAL_HITLAG;
+        AttackAction hit = createNormalAttackHit(
+                name, mv, 0.3, hitlagProfile);
         sim.performAction(this.characterId, hit);
 
         advanceNormalAttackStep();
@@ -241,7 +260,8 @@ public class Ineffa extends Character
     private AttackAction createNormalAttackHit(
             String name,
             double multiplier,
-            double animationDuration) {
+            double animationDuration,
+            HitlagProfile hitlagProfile) {
         AttackAction hit = new AttackAction(
                 name,
                 multiplier,
@@ -251,6 +271,7 @@ public class Ineffa extends Character
                 0.0,
                 ActionType.NORMAL);
         hit.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
+        hit.setHitlagProfile(hitlagProfile);
         hit.setAnimationDuration(animationDuration);
         return hit;
     }

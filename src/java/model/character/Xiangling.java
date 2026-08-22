@@ -17,6 +17,7 @@ import model.type.ActionType;
 import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.PeriodicDamageEvent;
 import simulation.event.TimerEvent;
 
@@ -24,6 +25,19 @@ import simulation.event.TimerEvent;
  * Xiangling character implementation with Guoba and Pyronado scheduling.
  */
 public class Xiangling extends Character implements FormStateProvider {
+
+    /**
+     * Hitlag from gcsim config YAML pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_HITLAG_SHORT =
+            new HitlagProfile(0.03, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_DEFENSE_ONLY =
+            new HitlagProfile(0.0, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_LONG =
+            new HitlagProfile(0.09, 0.01, true, false, false);
+    private static final HitlagProfile CHARGED_HITLAG =
+            new HitlagProfile(0.0, 0.01, true, true, false);
 
     private int normalAttackStep = 0;
     private boolean chiliPickupAssumed = false;
@@ -160,6 +174,7 @@ public class Xiangling extends Character implements FormStateProvider {
         AttackAction guobaHit = new AttackAction("Guoba Attack", mv, Element.PYRO, StatType.BASE_ATK,
                 StatType.SKILL_DMG_BONUS, 0.0, true, ActionType.SKILL);
         guobaHit.setICD(ICDType.None, ICDTag.ElementalSkill, 1.0);
+        guobaHit.setHitlagProfile(HitlagProfile.none());
 
         // Guoba duration 7s approx, 4 hits.
         // Drops chili at end (approx t+7s).
@@ -203,24 +218,28 @@ public class Xiangling extends Character implements FormStateProvider {
         AttackAction cast1 = new AttackAction("Pyronado Cast 1", castMv1, Element.PYRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 0.5, true, ActionType.BURST);
         cast1.setICD(ICDType.Standard, ICDTag.ElementalBurst, 1.0);
+        cast1.setHitlagProfile(NORMAL_HITLAG_SHORT);
         sim.performAction(this.characterId, cast1);
 
         double castMv2 = getTalentValue("Pyronado Cast 2", 1.76);
         AttackAction cast2 = new AttackAction("Pyronado Cast 2", castMv2, Element.PYRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 0.5, true, ActionType.BURST);
         cast2.setICD(ICDType.Standard, ICDTag.ElementalBurst, 1.0);
+        cast2.setHitlagProfile(NORMAL_HITLAG_SHORT);
         sim.performAction(this.characterId, cast2);
 
         double castMv3 = getTalentValue("Pyronado Cast 3", 2.19);
         AttackAction cast3 = new AttackAction("Pyronado Cast 3", castMv3, Element.PYRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 0.6, true, ActionType.BURST);
         cast3.setICD(ICDType.Standard, ICDTag.ElementalBurst, 1.0);
+        cast3.setHitlagProfile(NORMAL_HITLAG_SHORT);
         sim.performAction(this.characterId, cast3);
 
         double hitMv = getTalentValue("Pyronado Hit", 2.24);
         AttackAction hit = new AttackAction("Pyronado Hit", hitMv, Element.PYRO, StatType.BASE_ATK,
                 StatType.BURST_DMG_BONUS, 0.0, true, ActionType.BURST);
         hit.setICD(ICDType.None, ICDTag.Xiangling_Pyronado, 1.0);
+        hit.setHitlagProfile(HitlagProfile.none());
 
         // C4 Duration (10s -> 14s)
         double pyronadoDuration = (this.constellation >= 4) ? 14.0 : 10.0;
@@ -269,11 +288,13 @@ public class Xiangling extends Character implements FormStateProvider {
             AttackAction hit1 = new AttackAction(name + "_1", mv1, Element.PHYSICAL, StatType.BASE_ATK,
                     StatType.NORMAL_ATTACK_DMG_BONUS, 0.1, ActionType.NORMAL);
             hit1.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
+            hit1.setHitlagProfile(NORMAL_HITLAG_SHORT);
             sim.performActionWithoutTimeAdvance(this.name, hit1);
 
             AttackAction hit2 = new AttackAction(name + "_2", mv2, Element.PHYSICAL, StatType.BASE_ATK,
                     StatType.NORMAL_ATTACK_DMG_BONUS, 0.2, ActionType.NORMAL);
             hit2.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
+            hit2.setHitlagProfile(NORMAL_HITLAG_DEFENSE_ONLY);
             sim.performAction(this.characterId, hit2);
 
         } else if (normalAttackStep == 3) { // N4 (4 Hits)
@@ -282,6 +303,9 @@ public class Xiangling extends Character implements FormStateProvider {
                 AttackAction hit = new AttackAction(name + "_" + i, mv, Element.PHYSICAL, StatType.BASE_ATK,
                         StatType.NORMAL_ATTACK_DMG_BONUS, (i == 4) ? dur : 0.1, ActionType.NORMAL);
                 hit.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
+                hit.setHitlagProfile(i == 4
+                        ? NORMAL_HITLAG_SHORT
+                        : NORMAL_HITLAG_DEFENSE_ONLY);
                 if (i < 4)
                     sim.performActionWithoutTimeAdvance(this.name, hit);
                 else
@@ -294,6 +318,9 @@ public class Xiangling extends Character implements FormStateProvider {
             AttackAction hit = new AttackAction(name, mv, Element.PHYSICAL, StatType.BASE_ATK,
                     StatType.NORMAL_ATTACK_DMG_BONUS, dur, ActionType.NORMAL);
             hit.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
+            hit.setHitlagProfile(normalAttackStep == 4
+                    ? NORMAL_HITLAG_LONG
+                    : NORMAL_HITLAG_SHORT);
             double hitTime = sim.getCurrentTime();
             sim.performAction(this.characterId, hit);
             if (normalAttackStep == 4 && constellation >= 2) {
@@ -351,6 +378,7 @@ public class Xiangling extends Character implements FormStateProvider {
         AttackAction hit = new AttackAction("Xiangling CA", mv, Element.PHYSICAL, StatType.BASE_ATK,
                 StatType.CHARGED_ATTACK_DMG_BONUS, 0.8, ActionType.CHARGE);
         hit.setICD(ICDType.Standard, ICDTag.ChargedAttack, 1.0);
+        hit.setHitlagProfile(CHARGED_HITLAG);
         sim.performAction(this.characterId, hit);
 
         normalAttackStep = 0;

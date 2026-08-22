@@ -19,6 +19,7 @@ import simulation.CombatSimulator;
 import simulation.action.AttackAction;
 import simulation.action.CharacterActionKey;
 import simulation.action.CharacterActionRequest;
+import simulation.action.HitlagProfile;
 import simulation.event.PeriodicDamageEvent;
 import mechanics.buff.SimpleBuff;
 import mechanics.data.TalentDataManager;
@@ -62,6 +63,17 @@ public class Flins extends Character
     private static final double[] C5_MANIFEST_NORMAL_DEFAULTS = {
         1.1650, 1.1760, 1.4565, 0.8345, 2.0002
     };
+
+    /**
+     * Normal-attack hitlag from gcsim config YAML pinned at
+     * {@code 3647a07a7cc3004bc1e79d9bb5f7444de20dceaa}.
+     */
+    private static final HitlagProfile NORMAL_HITLAG_SHORT =
+            new HitlagProfile(0.02, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_MEDIUM =
+            new HitlagProfile(0.03, 0.01, true, false, false);
+    private static final HitlagProfile NORMAL_HITLAG_LONG =
+            new HitlagProfile(0.06, 0.01, true, false, false);
 
     private int normalAttackStep = 0;
 
@@ -396,6 +408,7 @@ public class Flins extends Character
         AttackAction hit = new AttackAction(name, mv, dmgElement, StatType.BASE_ATK,
                 StatType.NORMAL_ATTACK_DMG_BONUS, 0.0, ActionType.NORMAL);
         hit.setICD(ICDType.Standard, ICDTag.NormalAttack, 1.0);
+        hit.setHitlagProfile(getNormalHitlagProfile(normalAttackStep));
         hit.setAnimationDuration(dur);
 
         double attackTime = sim.getCurrentTime();
@@ -421,6 +434,20 @@ public class Flins extends Character
             normalAttackStep = 0;
 
         // sim.advanceTime(0.3); // Handled by hit.setAnimationDuration
+    }
+
+    private HitlagProfile getNormalHitlagProfile(int attackStep) {
+        switch (attackStep) {
+            case 0:
+            case 1:
+                return NORMAL_HITLAG_SHORT;
+            case 2:
+                return NORMAL_HITLAG_MEDIUM;
+            case 4:
+                return NORMAL_HITLAG_LONG;
+            default:
+                return HitlagProfile.none();
+        }
     }
 
     /**

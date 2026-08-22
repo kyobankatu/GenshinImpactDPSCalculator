@@ -24756,7 +24756,7 @@ Verification:
 
 - `./gradlew ReactionRegressionTest build`
 
-### Phase 3: Pinned gcsim Party Hitlag Data
+### Phase 3: Pinned gcsim Party Hitlag Data - Done
 
 Why third:
 
@@ -24793,6 +24793,16 @@ Test cases to add or update:
 Verification:
 
 - `./gradlew ReactionRegressionTest RaidenParty FlinsParty FlinsParty2 build`
+
+Completion evidence:
+
+- Pinned profiles cover the source-ready normal, Skill, Burst, multi-hit, and
+  deployable branches used by Raiden, Flins, Ineffa, Bennett, Xiangling, and
+  Xingqiu. Ineffa's conflicting Charged Attack mapping remains profile-free.
+- The shared regression and build pass. Deterministic samples now report
+  `RaidenParty` 1,200,940 / 54,525 DPS, `FlinsParty` 25,904,560 / 257,160 DPS,
+  and `FlinsParty2` 20,592,361 / 280,933 DPS after the expected hitlag-derived
+  duration and timer-boundary changes.
 
 ### Phase 4: Source-Ready Coverage Audit And Closure
 
