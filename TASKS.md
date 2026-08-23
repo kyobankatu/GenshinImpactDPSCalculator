@@ -25399,6 +25399,8 @@ Completion evidence:
 
 ### Phase 8: Expert Iteration, DAgger Recovery, And PPO/SIL Integration
 
+Status: Done (2026-08-24).
+
 Why eighth:
 
 - Pure cloning only imitates the current dataset. Iterative search and recovery
@@ -25449,6 +25451,28 @@ Verification:
 - Start a local rollout service and run the bounded debug expert-iteration and
   evaluation commands recorded by `manage-genshin-experiments`; do not use an
   unbounded foreground service in the verification script.
+
+Completion evidence:
+
+- Python exports revisioned, state-hash policy priors atomically; Java validates
+  and consumes known-state model weights while unknown states use uniform legal
+  fallback. A monotonic scenario archive prevents later generations from
+  replacing a better expert trajectory.
+- Low-confidence/disagreement selection, all-legal Q response validation, and
+  an atomic recovery-label sidecar cover DAgger queries without mutating a valid
+  dataset on timeout, stale response, cancellation, or corrupt append.
+- The existing v12 branch command was sufficient, so no protocol migration was
+  needed. Vine mode now snapshots every selected action, bounds handles with
+  deterministic eviction, releases handles after queries, and closes every
+  client-owned runner and snapshot on disconnect.
+- Persistent train-split-only expert top-K and online top-K episodes now drive a
+  decaying masked SIL auxiliary update. Buffer contents and dataset provenance
+  survive PPO checkpoints and resume; validation/holdout records are excluded.
+- The Java expert-iteration/cleanup regression, rollout benchmark, Java build,
+  and all 39 Python tests pass. A bounded live expert-initialized Vine/SIL PPO
+  update and both evaluations completed with zero invalid actions; all runners
+  closed and the local service shut down. Offline iteration exported policy
+  prior hash `91b7d30b0d37173301a825c2c7c4f02778adfea030637d8a9bf679c3f48fd74c`.
 
 ### Phase 9: Archetype-Diverse Party And Loadout Campaign
 

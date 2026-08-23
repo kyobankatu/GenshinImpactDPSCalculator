@@ -93,6 +93,21 @@ public final class RotationSearchConfig {
                 seeds);
     }
 
+    /** Returns a copy using a validated model or recorded policy prior. */
+    public RotationSearchConfig withPrior(ExpertPolicyPrior policyPrior) {
+        return new RotationSearchConfig(
+                simulatorCallBudget,
+                maxActions,
+                archiveSize,
+                populationSize,
+                eliteCount,
+                explorationConstant,
+                seed,
+                policyPrior,
+                cancellation,
+                initialSeeds);
+    }
+
     /** Returns defensive copies of optional human or prior-search seeds. */
     public List<int[]> getInitialSeeds() {
         return copySeeds(initialSeeds);

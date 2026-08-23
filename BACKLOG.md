@@ -4526,7 +4526,7 @@ experiment record.
 
 ### B-212 — Expert-iteration rotation optimization model
 
-- **Status:** in progress; Phase 7 complete
+- **Status:** in progress; Phase 8 complete
 - **Source:** explicit 2026-08-24 request to plan a model that optimizes
   rotations for arbitrary supported parties without requiring a human rotation.
 - **Symptom:** the current RL registry exposes only two parties, the seven-action
@@ -4584,3 +4584,9 @@ experiment record.
   resumes bitwise identically with complete RNG/provenance state, and emits a
   checkpoint accepted by inference or PPO weight-only initialization. The tiny
   fixture reaches 100% teacher-action accuracy.
+- **Checkpoint:** Phase 8 is complete. Revisioned model-prior artifacts guide
+  Java search with uniform fallback, generation archives never regress, and
+  transactional recovery labels validate all legal branches. Persistent
+  train-only expert/online SIL uses a decaying PPO auxiliary loss. Snapshot
+  handles and disconnect-owned runners are bounded and cleaned; the live
+  Vine/SIL update and evaluations finish with zero invalid actions.

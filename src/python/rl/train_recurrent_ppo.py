@@ -29,6 +29,7 @@ from recurrent_ppo import (
     validate_checkpoint_payload,
 )
 from rollout_service_client import build_rollout_client
+from sil_buffer import SILBuffer
 
 
 class RNDModule(nn.Module):
@@ -94,6 +95,7 @@ PRESETS = {
         "evaluation_interval": 2,
         "auxiliary_prediction_weight": 0.05,
         "sil_loss_weight": 0.0,
+        "sil_final_loss_weight": 0.0,
         "sil_buffer_size_per_party": 16,
         "sil_min_episodes_before_ready": 8,
         "rnd_intrinsic_weight": 0.0,
@@ -183,6 +185,18 @@ def run_training(args, run=None):
             )
         load_expert_initialization(policy, initialize_from_expert, device)
     optimizer = torch.optim.Adam(policy.parameters(), lr=config["learning_rate"])
+    sil_buffer = SILBuffer(
+        max_per_party=config["sil_buffer_size_per_party"],
+        min_episodes_before_ready=config["sil_min_episodes_before_ready"],
+    )
+    expert_dataset_hash = None
+    expert_dataset_path = getattr(args, "expert_dataset", None)
+    if expert_dataset_path:
+        expert_dataset_hash = sil_buffer.load_expert_dataset(
+            expert_dataset_path,
+            config["sequence_length"],
+            config["hidden_size"],
+        )
     rnd_module = None
     rnd_optimizer = None
     rnd_intrinsic_weight = config.get("rnd_intrinsic_weight", 0.0)
@@ -279,6 +293,14 @@ def run_training(args, run=None):
         if optimizer_state_dict is not None:
             optimizer.load_state_dict(optimizer_state_dict)
         start_update = int(checkpoint_payload.get("update", 0))
+        if "sil_buffer_state" in checkpoint_payload:
+            sil_buffer.load_state_dict(checkpoint_payload["sil_buffer_state"])
+        checkpoint_dataset_hash = checkpoint_payload.get("expert_dataset_hash")
+        if checkpoint_dataset_hash != expert_dataset_hash:
+            raise ValueError(
+                "Resume checkpoint expert dataset hash mismatch: "
+                f"checkpoint={checkpoint_dataset_hash} current={expert_dataset_hash}"
+            )
         print(f"Resuming training from {args.resume_from} at update {start_update}")
     hidden_states = torch.zeros(config["envs"], config["hidden_size"], dtype=torch.float32, device=device)
     owns_run = run is None
@@ -408,6 +430,13 @@ def run_training(args, run=None):
                     )
 
             segments = compute_advantages(completed_segments, config["gamma"], config["gae_lambda"])
+            for segment in segments:
+                if segment.get("is_complete_episode"):
+                    sil_buffer.try_insert(
+                        segment["party_id"],
+                        segment["episode_return"],
+                        build_sequence_chunks([segment], config["sequence_length"]),
+                    )
             vine_metrics = apply_vine_ppo_advantages(segments, config, client, runner_id)
             # Release any vine snapshots that were saved during the rollout but
             # not consumed by branch_rollout_multi (avoids unbounded heap growth
@@ -417,6 +446,12 @@ def run_training(args, run=None):
             except Exception as e:
                 print(f"[VinePPO] release_snapshots failed: {e}", flush=True)
             sequence_chunks = build_sequence_chunks(segments, config["sequence_length"])
+            sil_chunks = (
+                sil_buffer.sample_sequence_chunks(max(1, len(sequence_chunks)))
+                if sil_buffer.is_ready()
+                else []
+            )
+            sil_weight = scheduled_sil_weight(config, update)
             optimization_start = time.time()
             optimization_metrics = train_epoch(
                 policy,
@@ -427,6 +462,8 @@ def run_training(args, run=None):
                 entropy_coefficient,
                 rnd_module=rnd_module,
                 rnd_optimizer=rnd_optimizer,
+                sil_chunks=sil_chunks,
+                sil_weight=sil_weight,
             )
             optimization_duration = max(1e-6, time.time() - optimization_start)
 
@@ -477,6 +514,8 @@ def run_training(args, run=None):
                 "padding_fraction": optimization_metrics["padding_fraction"],
                 "auxiliary_loss": optimization_metrics["auxiliary_loss"],
                 "sil_loss": optimization_metrics["sil_loss"],
+                "sil_loss_weight": sil_weight,
+                "sil_buffer_size": sil_buffer.size(),
                 "policy_loss": optimization_metrics["policy_loss"],
                 "value_loss": optimization_metrics["value_loss"],
                 "entropy": optimization_metrics["entropy"],
@@ -526,6 +565,8 @@ def run_training(args, run=None):
                     "train/padding_fraction": optimization_metrics["padding_fraction"],
                     "train/auxiliary_loss": optimization_metrics["auxiliary_loss"],
                     "train/sil_loss": optimization_metrics["sil_loss"],
+                    "train/sil_loss_weight": sil_weight,
+                    "train/sil_buffer_size": sil_buffer.size(),
                     "train/policy_loss": optimization_metrics["policy_loss"],
                     "train/value_loss": optimization_metrics["value_loss"],
                     "train/entropy": optimization_metrics["entropy"],
@@ -598,7 +639,15 @@ def run_training(args, run=None):
                 )
 
             if update % config["checkpoint_interval"] == 0 or update == config["updates"]:
-                policy.save(MODEL_PATH, optimizer, extra_state={"update": update})
+                policy.save(
+                    MODEL_PATH,
+                    optimizer,
+                    extra_state={
+                        "update": update,
+                        "sil_buffer_state": sil_buffer.state_dict(),
+                        "expert_dataset_hash": expert_dataset_hash,
+                    },
+                )
             append_log(log_row)
     finally:
         client.close_runner(runner_id)
@@ -646,8 +695,10 @@ def parse_args():
     parser.add_argument("--evaluation-interval", type=int, help="evaluation interval in updates")
     parser.add_argument("--auxiliary-prediction-weight", type=float, help="weight for auxiliary privileged-state prediction loss")
     parser.add_argument("--sil-loss-weight", type=float, default=None, help="weight for self-imitation learning loss")
+    parser.add_argument("--sil-final-loss-weight", type=float, default=None, help="final decayed expert/SIL loss weight")
     parser.add_argument("--sil-buffer-size-per-party", type=int, default=None, help="top-K episodes to keep per party in SIL buffer")
     parser.add_argument("--sil-min-episodes-before-ready", type=int, default=None, help="minimum episode inserts before SIL activates")
+    parser.add_argument("--expert-dataset", default=None, help="persistent expert dataset loaded into party-local SIL")
     parser.add_argument("--rnd-intrinsic-weight", type=float, default=None, help="weight for RND intrinsic reward (0.0 disables RND)")
     parser.add_argument("--rnd-embedding-size", type=int, default=None, help="embedding size for RND target/predictor networks")
     parser.add_argument("--use-vine-ppo", action="store_true", default=False, help="enable VinePPO Monte Carlo credit assignment")
@@ -693,6 +744,7 @@ def resolve_config(args):
         "evaluation_interval": args.evaluation_interval,
         "auxiliary_prediction_weight": args.auxiliary_prediction_weight,
         "sil_loss_weight": args.sil_loss_weight,
+        "sil_final_loss_weight": args.sil_final_loss_weight,
         "sil_buffer_size_per_party": args.sil_buffer_size_per_party,
         "sil_min_episodes_before_ready": args.sil_min_episodes_before_ready,
         "rnd_intrinsic_weight": args.rnd_intrinsic_weight,
@@ -724,6 +776,17 @@ def scheduled_entropy_coefficient(config, update):
     start = config["entropy_coefficient"]
     end = config.get("entropy_final_coefficient", start)
     total_updates = max(1, config["updates"])
+    progress = 0.0 if total_updates <= 1 else (update - 1) / (total_updates - 1)
+    return start + (end - start) * progress
+
+
+def scheduled_sil_weight(config, update):
+    """Linearly decay persistent expert/self-imitation supervision."""
+    start = float(config.get("sil_loss_weight", 0.0))
+    end = float(config.get("sil_final_loss_weight", 0.0))
+    if start < 0.0 or end < 0.0:
+        raise ValueError("SIL loss weights must be non-negative")
+    total_updates = max(1, int(config["updates"]))
     progress = 0.0 if total_updates <= 1 else (update - 1) / (total_updates - 1)
     return start + (end - start) * progress
 
@@ -954,8 +1017,27 @@ def apply_vine_ppo_advantages(segments, config, client, runner_id):
     return metrics
 
 
-def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coefficient, rnd_module=None, rnd_optimizer=None):
+def train_epoch(
+    policy,
+    optimizer,
+    sequence_chunks,
+    config,
+    device,
+    entropy_coefficient,
+    rnd_module=None,
+    rnd_optimizer=None,
+    sil_chunks=None,
+    sil_weight=0.0,
+):
     if not sequence_chunks:
+        sil_loss = train_sil_auxiliary(
+            policy,
+            optimizer,
+            sil_chunks or [],
+            device,
+            sil_weight,
+            config["max_grad_norm"],
+        )
         return {
             "policy_loss": 0.0,
             "value_loss": 0.0,
@@ -966,7 +1048,7 @@ def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coef
             "log_prob_mean": 0.0,
             "padding_fraction": 0.0,
             "auxiliary_loss": 0.0,
-            "sil_loss": 0.0,
+            "sil_loss": sil_loss,
         }
 
     total_policy_loss = 0.0
@@ -1069,6 +1151,14 @@ def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coef
         rnd_loss.backward()
         rnd_optimizer.step()
 
+    sil_loss = train_sil_auxiliary(
+        policy,
+        optimizer,
+        sil_chunks or [],
+        device,
+        sil_weight,
+        config["max_grad_norm"],
+    )
     total_positions = total_valid_steps + total_padded_steps
     return {
         "policy_loss": total_policy_loss / updates,
@@ -1080,8 +1170,50 @@ def train_epoch(policy, optimizer, sequence_chunks, config, device, entropy_coef
         "log_prob_mean": total_log_prob_mean / updates,
         "padding_fraction": 0.0 if total_positions == 0 else total_padded_steps / total_positions,
         "auxiliary_loss": total_auxiliary_loss / updates,
-        "sil_loss": 0.0,
+        "sil_loss": sil_loss,
     }
+
+
+def train_sil_auxiliary(
+    policy,
+    optimizer,
+    chunks,
+    device,
+    loss_weight,
+    max_grad_norm,
+):
+    """Apply one masked supervised update from persistent/online top-K episodes."""
+    if not chunks or loss_weight <= 0.0:
+        return 0.0
+    minibatch = build_sequence_minibatch(chunks, policy, device)
+    logits, _, _, _, _ = policy.forward_sequence(
+        minibatch["observations"],
+        minibatch["initial_hidden"],
+        minibatch["action_masks"],
+        privileged_observations=minibatch["privileged_observations"],
+        sequence_mask=minibatch["loss_mask"],
+    )
+    targets = torch.zeros_like(logits)
+    for batch_index, chunk in enumerate(chunks):
+        for step_index, step in enumerate(chunk["steps"]):
+            target = step.get("expert_policy_target")
+            if target is None:
+                targets[batch_index, step_index, step["action"]] = 1.0
+            else:
+                targets[batch_index, step_index] = torch.tensor(
+                    target, dtype=torch.float32, device=device
+                )
+    valid = minibatch["loss_mask"]
+    valid_count = valid.sum().clamp_min(1.0)
+    supervised_loss = -(
+        targets * torch.log_softmax(logits, dim=-1)
+    ).sum(dim=-1)
+    supervised_loss = (supervised_loss * valid).sum() / valid_count
+    optimizer.zero_grad()
+    (loss_weight * supervised_loss).backward()
+    torch.nn.utils.clip_grad_norm_(policy.parameters(), max_grad_norm)
+    optimizer.step()
+    return float(supervised_loss.detach())
 
 
 def flatten_eval_metrics(prefix, summary):
@@ -1147,6 +1279,7 @@ def append_log(row):
                 "padding_fraction",
                 "auxiliary_loss",
                 "sil_loss",
+                "sil_loss_weight",
                 "sil_buffer_size",
                 "policy_loss",
                 "value_loss",

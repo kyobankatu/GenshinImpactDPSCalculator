@@ -17,7 +17,6 @@ import mechanics.rl.EpisodeConfig;
 import mechanics.rl.ObservationEncoder;
 import mechanics.rl.PrivilegedStateEncoder;
 import mechanics.rl.QuietExecution;
-import mechanics.rl.RLAction;
 import mechanics.rl.RLEpisodeFactory;
 import mechanics.rl.RewardFunction;
 import mechanics.rl.EpisodeRoleSummary;
@@ -28,6 +27,7 @@ import simulation.SimulatorSnapshot;
  * Manages many independent battle environments behind one runner id.
  */
 public class VectorizedEnvironment {
+    public static final int DEFAULT_MAX_SNAPSHOT_HANDLES = 4096;
     private final List<BattleEnvironment> environments = new ArrayList<>();
     private final double[] episodeRewards;
     private final double[] episodeDamages;
@@ -36,6 +36,7 @@ public class VectorizedEnvironment {
     private final ConcurrentHashMap<Integer, SnapshotEntry> snapshotStore = new ConcurrentHashMap<>();
     private final AtomicInteger nextSnapshotId = new AtomicInteger(1);
     private final boolean vineEnabled;
+    private final int maxSnapshotHandles;
     private BattleEnvironment branchEnv;
     private long resetCalls;
     private long resetNanos;
@@ -113,6 +114,7 @@ public class VectorizedEnvironment {
         this.episodeRewards = new double[count];
         this.episodeDamages = new double[count];
         this.vineEnabled = vineEnabled;
+        this.maxSnapshotHandles = configuredSnapshotLimit();
         int autoWorkers = Math.max(1, Math.min(count, Runtime.getRuntime().availableProcessors()));
         this.workerCount = requestedWorkers > 0 ? Math.max(1, Math.min(count, requestedWorkers)) : autoWorkers;
         this.executor = workerCount > 1 ? Executors.newFixedThreadPool(workerCount) : null;
@@ -171,6 +173,7 @@ public class VectorizedEnvironment {
         this.episodeRewards = new double[count];
         this.episodeDamages = new double[count];
         this.vineEnabled = vineEnabled;
+        this.maxSnapshotHandles = configuredSnapshotLimit();
         int autoWorkers = Math.max(1, Math.min(count, Runtime.getRuntime().availableProcessors()));
         this.workerCount = requestedWorkers > 0 ? Math.max(1, Math.min(count, requestedWorkers)) : autoWorkers;
         this.executor = workerCount > 1 ? Executors.newFixedThreadPool(workerCount) : null;
@@ -275,11 +278,10 @@ public class VectorizedEnvironment {
         java.util.Arrays.fill(vineSnapshotIds, -1);
 
         ParallelTiming timing = parallelForEach(index -> {
-            if (vineEnabled && isVineSampleAction(actions[index])) {
+            if (vineEnabled) {
                 BattleEnvironment env = environments.get(index);
                 SimulatorSnapshot snap = env.saveSnapshot();
-                int snapId = nextSnapshotId.getAndIncrement();
-                snapshotStore.put(snapId, new SnapshotEntry(
+                int snapId = storeSnapshot(new SnapshotEntry(
                         snap,
                         env.saveBranchState(),
                         env.getCurrentPartyId()));
@@ -369,6 +371,15 @@ public class VectorizedEnvironment {
         snapshotStore.clear();
     }
 
+    /** Returns the bounded number of live branch handles for regression checks. */
+    public int snapshotCount() {
+        return snapshotStore.size();
+    }
+
+    public int maxSnapshotHandles() {
+        return maxSnapshotHandles;
+    }
+
     /**
      * Runs VinePPO branch rollouts for every valid action at a saved snapshot state.
      *
@@ -387,18 +398,33 @@ public class VectorizedEnvironment {
         return branchEnv.branchRolloutMultiAction(entry.snapshot, entry.branchState, K, H, gamma);
     }
 
-    private static boolean isVineSampleAction(int actionId) {
-        RLAction action = RLAction.fromId(actionId);
-        return action == RLAction.SKILL_PRESS
-                || action == RLAction.SKILL_HOLD
-                || action == RLAction.BURST
-                || action.isSwap();
+    private void evictSnapshotsAtLimit() {
+        while (snapshotStore.size() >= maxSnapshotHandles) {
+            Integer oldest = snapshotStore.keySet().stream().min(Integer::compareTo).orElse(null);
+            if (oldest == null) {
+                return;
+            }
+            snapshotStore.remove(oldest);
+        }
+    }
+
+    private synchronized int storeSnapshot(SnapshotEntry entry) {
+        evictSnapshotsAtLimit();
+        int snapshotId = nextSnapshotId.getAndIncrement();
+        snapshotStore.put(snapshotId, entry);
+        return snapshotId;
+    }
+
+    private static int configuredSnapshotLimit() {
+        return Math.max(1, Integer.getInteger(
+                "rotation.snapshot.limit", DEFAULT_MAX_SNAPSHOT_HANDLES));
     }
 
     /**
      * Shuts down worker threads owned by this vectorized environment.
      */
     public void close() {
+        snapshotStore.clear();
         if (executor != null) {
             executor.shutdown();
         }

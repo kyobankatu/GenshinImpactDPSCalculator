@@ -7,6 +7,7 @@ import mechanics.rotation.BattleRotationEnvironment;
 import mechanics.rotation.EvolutionaryRotationSearcher;
 import mechanics.rotation.MctsRotationSearcher;
 import mechanics.rotation.RotationObjective;
+import mechanics.rotation.RecordedExpertPolicyPrior;
 import mechanics.rotation.RotationScenario;
 import mechanics.rotation.RotationSearchConfig;
 import mechanics.rotation.RotationSearchStrategy;
@@ -14,7 +15,7 @@ import simulation.party.PartyCatalog;
 
 /** Runs one bounded expert rotation search from the command line. */
 public class SearchRotationJava {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         String partyName = args.length > 0 ? args[0] : "RaidenParty";
         String strategyName = args.length > 1 ? args[1] : "evolution";
         int callBudget = args.length > 2 ? Integer.parseInt(args[2]) : 2000;
@@ -27,9 +28,14 @@ public class SearchRotationJava {
                 1,
                 seed,
                 RotationObjective.cyclicDamage());
+        RotationSearchConfig config = RotationSearchConfig.defaults(seed, callBudget);
+        if (args.length > 4) {
+            config = config.withPrior(new RecordedExpertPolicyPrior(
+                    java.nio.file.Path.of(args[4]), scenario.getFingerprint()));
+        }
         RotationSearchStrategy.Result result = strategy.search(
                 () -> new BattleRotationEnvironment(scenario),
-                RotationSearchConfig.defaults(seed, callBudget));
+                config);
         System.out.println("strategy=" + strategyName);
         System.out.println("party=" + partyName);
         System.out.println("simulatorCalls=" + result.simulatorCalls);

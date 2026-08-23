@@ -9,8 +9,10 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import mechanics.rl.ActionSpace;
 import mechanics.rl.BattleEnvironment;
@@ -35,7 +37,7 @@ public class RolloutService {
     private final PrivilegedStateEncoder privilegedStateEncoder;
     private final RLEpisodeFactory episodeFactory;
     private final String[] partyNames;
-    private final Map<Integer, VectorizedEnvironment> runners = new HashMap<>();
+    private final Map<Integer, VectorizedEnvironment> runners = new ConcurrentHashMap<>();
     private int nextRunnerId = 1;
     private volatile boolean vineSnapshotLogged = false;
     private long runnerCreateCalls;
@@ -135,6 +137,23 @@ public class RolloutService {
     }
 
     private boolean handleClient(DataInputStream in, DataOutputStream out) throws IOException {
+        Set<Integer> clientRunnerIds = new HashSet<>();
+        try {
+            return handleClientCommands(in, out, clientRunnerIds);
+        } finally {
+            for (int runnerId : clientRunnerIds) {
+                VectorizedEnvironment abandoned = runners.remove(runnerId);
+                if (abandoned != null) {
+                    abandoned.close();
+                }
+            }
+        }
+    }
+
+    private boolean handleClientCommands(
+            DataInputStream in,
+            DataOutputStream out,
+            Set<Integer> clientRunnerIds) throws IOException {
         while (true) {
             int command;
             try {
@@ -169,6 +188,7 @@ public class RolloutService {
                     runners.put(runnerId, new VectorizedEnvironment(
                             count, episodeFactory, rolloutWorkers,
                             observationEncoder, privilegedStateEncoder, vineEnabled));
+                    clientRunnerIds.add(runnerId);
                     runnerCreateCalls++;
                     runnerCreateNanos += System.nanoTime() - createStart;
                     out.writeInt(runnerId);
@@ -211,6 +231,7 @@ public class RolloutService {
                 case BatchProtocol.CMD_CLOSE_RUNNER:
                     int closeRunnerId = in.readInt();
                     VectorizedEnvironment closed = runners.remove(closeRunnerId);
+                    clientRunnerIds.remove(closeRunnerId);
                     if (closed != null) {
                         System.out.printf("Closed runner %d: %s%n", closeRunnerId,
                                 closed.metricsSnapshot().toSummaryString());
@@ -277,6 +298,11 @@ public class RolloutService {
             throw new IllegalArgumentException("Unknown runner id: " + runnerId);
         }
         return runner;
+    }
+
+    /** Returns live runners, including any awaiting disconnect cleanup. */
+    public synchronized int activeRunnerCount() {
+        return runners.size();
     }
 
     private void writeReset(DataOutputStream out, VectorizedEnvironment.RunnerResetResult result) throws IOException {
