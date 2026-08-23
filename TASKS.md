@@ -25201,6 +25201,8 @@ Completion evidence:
 
 ### Phase 5: Deterministic Diverse Expert Search
 
+Status: Done (2026-08-24).
+
 Why fifth:
 
 - The current coarse macro `RotationSearcher` cannot label the expanded action
@@ -25245,6 +25247,22 @@ Test cases:
 Verification:
 
 - `./gradlew RotationSearchRegressionTest RaidenParty FlinsParty2 build`
+
+Completion evidence:
+
+- Evolutionary and snapshot-backed MCTS strategies share an exact simulator
+  step/replay budget, strict legal-action sampling, deterministic seed handling,
+  optional initial sequences, cancellation, and a score-ordered top-K archive
+  with exact duplicate suppression.
+- Evolutionary search includes all five planned sequence mutations plus regular
+  random immigrants. MCTS uses validated policy priors, uniform fallback for
+  zero-prior unexplored subsets, snapshot hash checks, and normalized sibling
+  values so delayed setup branches remain reachable.
+- The focused fixture deterministically finds the unseeded setup-then-burst
+  optimum with both strategies. Equal-score diversity, WAIT-only legality,
+  malformed priors/configuration, cancellation, duplicate entries, null
+  factories, and corrupted snapshots are covered. The focused regression,
+  both requested party samples, and Java build pass.
 
 ### Phase 6: Versioned Expert Dataset And Exact Replay
 

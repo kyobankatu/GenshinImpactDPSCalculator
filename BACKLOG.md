@@ -4526,7 +4526,7 @@ experiment record.
 
 ### B-212 — Expert-iteration rotation optimization model
 
-- **Status:** in progress; Phase 4 complete
+- **Status:** in progress; Phase 5 complete
 - **Source:** explicit 2026-08-24 request to plan a model that optimizes
   rotations for arbitrary supported parties without requiring a human rotation.
 - **Symptom:** the current RL registry exposes only two parties, the seven-action
@@ -4569,3 +4569,8 @@ experiment record.
   and auxiliary heads now obey exact slot permutation contracts under shared
   architecture revision 2. Twenty-two Python tests and a bounded live PPO
   save/evaluate/reload smoke pass with zero invalid actions.
+- **Checkpoint:** Phase 5 is complete. Deterministic evolutionary and
+  snapshot-backed MCTS teachers enforce legal actions and exact simulator-call
+  budgets, retain diverse top trajectories, accept optional sequence seeds,
+  and find the delayed-reward fixture optimum without a seed. Focused search,
+  party sample, and Java build gates pass.
