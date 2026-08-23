@@ -23,9 +23,10 @@ Generic simulation and RL launch paths backed by shared party definitions are
 now implemented. Party-specific sample wrappers and party-specific RL simulator
 factories have been removed for the migrated parties.
 
-The current autonomous session is simulator-only. Python RL training and the
-Java RL bridge are excluded; the retained NCCL/DDP plan below is paused until a
-future explicit user request.
+The simulator-only autonomous campaign is complete. B-212 now plans a local
+expert-iteration rotation optimizer across the Java environment, search, and
+Python learner. The retained NCCL/DDP plan remains paused until B-212 proves
+the action, dataset, model, and evaluation contracts locally.
 
 The prior simulator content campaigns, including Skill-focused event weapons,
 are complete; RL and generated docs remain excluded.
@@ -35,9 +36,9 @@ its ninth tick, Ineffa C2 Punishment Edict resolves once exactly one second
 after Burst damage, and source-ready hitlag is implemented against pinned
 gcsim commit `3647a07a7cc3004bc1e79d9bb5f7444de20dceaa`.
 
-B-210 is active. It reconciles Version 7.0 Stellar additions on legacy
+B-210 is complete. It reconciles Version 7.0 Stellar additions on legacy
 equipment and Yumemizuki Mizuki, adds report attribution, re-audits the two
-highest-value blocked characters, and then closes every sourced single-target
+highest-value blocked characters, and closes every sourced single-target
 reaction-accuracy item that does not require a Deferred System.
 
 B-209 is complete. Version 7.0's two playable characters, Cryo Traveler,
@@ -24856,3 +24857,593 @@ Completion evidence:
 - Upstream/local conflicts and absent local branches remain profile-free and are
   recorded in B-211 rather than inferred. Generated report output remains
   outside the committed change set.
+
+## Implementation Order: Expert-Iteration Rotation Optimization Model B-212
+
+Status: In progress (2026-08-24). Phase 1 is the active implementation unit.
+
+Goal:
+
+- Build a model that proposes high-quality cyclic rotations for any explicitly
+  registered and simulator-supported `PartyDefinition` and loadout.
+- Use deterministic simulator search as the teacher and keep improving that
+  teacher with the learned policy/value model. Human rotations are optional
+  seeds and baselines, never a prerequisite for a new party.
+- Produce reproducible best-found rotations and expert datasets. This project
+  does not claim a proof of the global optimum for the non-convex search space.
+
+Scope:
+
+- A complete legal-action vocabulary for Normal, Charged, Plunging, Skill
+  Press/Hold, Burst, short Wait, and four party-slot swaps.
+- A loadout-aware observation contract, a slot-equivariant recurrent
+  policy/value model, deterministic expert search, a persistent replayable
+  dataset, behavior-cloning pretraining, and iterative search/policy updates.
+- A curated archetype-diverse party campaign and party-disjoint train,
+  validation, and holdout evaluation under equal simulator-call budgets.
+
+Out of scope:
+
+- Automatically constructing every theoretical character, weapon, artifact,
+  and party combination without an exact `PartyDefinition` and supported
+  simulator mechanics.
+- Multi-target geometry, enemy attacks, player damage/HP/healing, shields,
+  movement, pickups, and other `BACKLOG.md` Deferred Systems.
+- Quantization, UI/report generation, game-formula changes, and content guesses.
+- NCCL/DDP and long GPU/HPC training before the local Phase 10 quality gate.
+  Distributed execution remains a separate paused plan.
+- Silent migration of protocol-incompatible checkpoints. Every incompatible
+  action, observation, or architecture revision must fail with a useful error.
+
+Definitions and ownership:
+
+- `RotationScenario` owns one party/loadout fingerprint, seed, horizon,
+  objective, and dataset split. It does not implement search or learning.
+- `RotationEnvironment` is the only reset/step/mask/snapshot/restore interface
+  consumed by search. `BattleRotationEnvironment` adapts the existing
+  `BattleEnvironment`; search implementations do not depend on simulator
+  internals.
+- `PolicyAction` is the versioned, stable action vocabulary shared by Java,
+  Python, datasets, and checkpoints.
+- `RotationObjective` scores terminal fixed-horizon damage and cyclic energy
+  feasibility. Search must not discard setup actions because their immediate
+  reward is zero.
+- `RotationSearchStrategy` accepts a scenario, budget, and optional
+  `ExpertPolicyPrior`. Uniform/random search remains available when no model is
+  loaded.
+- `ExpertTrajectory` contains observations, legal masks, actions, search visit
+  targets/Q estimates, terminal return, and complete provenance.
+- `ExpertDatasetV1` is a manifest plus compressed JSONL shards. The schema is
+  tracked; generated shards live under `output/rotation_dataset/` and are not.
+- `ExpertIterationRunner` alternates search, dataset aggregation, supervised
+  policy/value updates, and bounded RL fine-tuning. Each component is
+  replaceable behind its interface rather than combined into one trainer.
+- "Arbitrary party" means any exact, registered, simulator-supported scenario.
+  Generalization to a party omitted from training is measured, not assumed.
+
+SOLID phase rule:
+
+- Each phase introduces one primary responsibility and depends on the narrow
+  interfaces above. Java/Python wire formats are versioned at their boundary,
+  implementations are substitutable in focused tests, and optional policy
+  guidance always has a deterministic uniform fallback.
+- A phase is one focused commit after its acceptance and verification gates
+  pass. A failed phase is recorded in `BACKLOG.md`; later independent phases may
+  continue, but no dependent phase may bypass its contract.
+
+Scheduler identity rule:
+
+- Slurm job names, scheduler log stems, and submitted run names must not contain
+  the project/game name or character names. Use neutral technical names such as
+  `sequence_policy_train`, `trajectory_search`, `policy_evaluation`, and
+  `rollout_worker`. This rule applies to every B-212 `ybatch` submission.
+
+### Phase 1: Rotation Environment And Objective Contract
+
+Why first:
+
+- Search, labels, and evaluation must score exactly the same deterministic
+  simulator trajectory before model or protocol work begins.
+
+Target files:
+
+- `src/java/mechanics/rotation/RotationScenario.java`
+- `src/java/mechanics/rotation/RotationObjective.java`
+- `src/java/mechanics/rotation/RotationEnvironment.java`
+- `src/java/mechanics/rotation/BattleRotationEnvironment.java`
+- `src/java/mechanics/rotation/RotationStep.java`
+- `src/java/mechanics/rl/BattleEnvironment.java`
+- `src/java/mechanics/rl/EpisodeConfig.java`
+- `src/java/sample/RotationEnvironmentRegressionTest.java`
+
+Tasks:
+
+- Add deterministic reset, legal mask, step, snapshot, restore, and close
+  contracts over the existing simulator without duplicating combat logic.
+- Define a configurable fixed horizon and cycle count. Record raw damage, DPS,
+  end energy, illegal actions, and cyclic-energy deficit separately; combine
+  them only in `RotationObjective`.
+- Preserve the current RL environment behavior through an adapter and reject
+  snapshots restored into a different scenario fingerprint.
+
+Acceptance criteria:
+
+- Replaying the same scenario, seed, and actions yields identical steps,
+  terminal score, and simulator snapshot hash.
+- A delayed setup action can improve terminal score even when its immediate
+  damage is zero. Objective components are inspectable and finite.
+
+Test cases:
+
+- Normal: reset/step/snapshot/branch/restore/replay matches an uninterrupted
+  reference trajectory for both registered RL parties.
+- Normal: a fixture with a zero-damage setup action beats its attack-only path
+  over the complete horizon.
+- Abnormal: non-finite horizon/penalty, restore fingerprint mismatch, action
+  after terminal state, and closed-environment access fail explicitly.
+
+Verification:
+
+- `./gradlew RotationEnvironmentRegressionTest PartyCatalogRegressionTest BenchmarkRLJava build`
+
+### Phase 2: Complete Versioned Action Vocabulary
+
+Why second:
+
+- Expert labels are unusable if search, Java rollout, Python policy, and saved
+  data disagree about action IDs or omit important combat actions.
+
+Target files:
+
+- `src/java/mechanics/rotation/PolicyAction.java`
+- `src/java/mechanics/rotation/ActionCapabilityStore.java`
+- `config/action_capabilities.json`
+- `src/java/mechanics/rl/RLAction.java`
+- `src/java/mechanics/rl/ActionSpace.java`
+- `src/java/mechanics/rl/BattleEnvironment.java`
+- `src/java/mechanics/rl/bridge/BatchProtocol.java`
+- `src/python/rl/binary_protocol.py`
+- `src/python/rl/rollout_service_client.py`
+- `src/python/rl/recurrent_ppo.py`
+- `src/python/rl/tests/test_action_contract.py`
+- `src/java/sample/RotationActionRegressionTest.java`
+
+Tasks:
+
+- Assign stable IDs to Normal, Charged, Plunging, Skill Press, Skill Hold,
+  Burst, short Wait, and Swap 0-3. Keep display labels outside the identity.
+- Add strict per-character capabilities and runtime masks for unsupported
+  actions, cooldown, energy, current slot, and swap availability.
+- Migrate Java/Python together to protocol v11. Record action-layout revision
+  in checkpoints and datasets and reject legacy layouts rather than remapping.
+
+Acceptance criteria:
+
+- Every legal simulator action has one stable ID and one execution path; every
+  unavailable action is masked before sampling and rejected if forced.
+- Existing Normal/Skill Press/Burst/Swap behavior is unchanged for legacy
+  callers, while Wait advances the exact configured duration without damage.
+
+Test cases:
+
+- Normal: supported Charged, Plunging, and Skill Hold actions execute and
+  expose the expected mask transitions; Wait and all valid swaps are stable.
+- Abnormal: unsupported Hold/Plunge, insufficient-energy Burst, current-slot
+  swap, unknown capability entry, invalid ID, and v10 peer fail closed.
+
+Verification:
+
+- `./gradlew RotationActionRegressionTest PartyCatalogRegressionTest BenchmarkRLJava build`
+- `python -m pytest src/python/rl/tests`
+
+### Phase 3: Loadout-Aware Observation Contract
+
+Why third:
+
+- A policy cannot optimize arbitrary supported loadouts if distinct weapons,
+  refinements, constellations, artifacts, and key stats look identical.
+
+Target files:
+
+- `src/java/mechanics/rl/LoadoutFeatureEncoder.java`
+- `src/java/mechanics/rl/ObservationEncoder.java`
+- `src/java/mechanics/rl/PrivilegedStateEncoder.java`
+- `src/java/mechanics/rl/CapabilityProfile.java`
+- `src/java/mechanics/rl/bridge/BatchProtocol.java`
+- `src/python/rl/binary_protocol.py`
+- `src/python/rl/recurrent_ppo.py`
+- `src/python/rl/train_recurrent_ppo.py`
+- `src/python/rl/evaluation.py`
+- `src/python/rl/tests/test_observation_contract.py`
+- `config/capability_profiles/profiles.json`
+
+Tasks:
+
+- Encode typed character/loadout features: constellation, weapon/refinement,
+  artifact set/piece state, relevant static/effective stats, energy cost,
+  cooldowns, elements, and action capabilities. Avoid display-string features.
+- Separate static loadout features from dynamic combat state and expose an
+  explicit schema/revision descriptor at service handshake and checkpoint load.
+- Migrate to protocol v12 and refresh capability profiles only after the new
+  semantics and regressions pass.
+
+Acceptance criteria:
+
+- Two scenarios differing only by weapon, refinement, constellation, or
+  artifact setup have distinct, documented observations of equal shape.
+- Java handshake, Python model, capability profile, dataset, and checkpoint all
+  agree on observation dimensions and revisions.
+
+Test cases:
+
+- Normal: controlled loadout deltas change only their assigned feature blocks;
+  snapshot restore reproduces dynamic and static features exactly.
+- Abnormal: missing capability profile, unknown typed ID, malformed dimensions,
+  stale schema, and non-finite feature values are rejected with context.
+
+Verification:
+
+- `./gradlew ProfileCapabilities PartyCatalogRegressionTest BenchmarkRLJava build`
+- `python -m pytest src/python/rl/tests`
+
+### Phase 4: Slot-Equivariant Recurrent Policy And Value Model
+
+Why fourth:
+
+- The existing shared character encoder still has a slot-sensitive joint head.
+  Party-order generalization requires the whole action mapping to respect slot
+  permutations, especially swap logits.
+
+Target files:
+
+- `src/python/rl/recurrent_ppo.py`
+- `src/python/rl/train_recurrent_ppo.py`
+- `src/python/rl/evaluate_policy.py`
+- `src/python/rl/tests/test_permutation_invariance.py`
+- `src/python/rl/tests/test_policy_action_mask.py`
+- `src/python/rl/tests/test_checkpoint_contract.py`
+
+Tasks:
+
+- Produce slot-specific swap logits from each slot embedding and global combat
+  logits from permutation-invariant pooled context plus active-character state.
+- Keep recurrent temporal context while making party-slot permutation and
+  inverse action permutation an exact model contract.
+- Add an architecture revision to checkpoints and reject incompatible models.
+
+Acceptance criteria:
+
+- Permuting party slots and their feature/mask blocks permutes only the four
+  swap logits; global action logits and value agree within test tolerance.
+- Masked action probability is zero and no all-masked distribution reaches the
+  sampler; Wait provides the legal fallback when combat actions are blocked.
+
+Test cases:
+
+- Normal: all 24 slot permutations, recurrent hidden-state reuse, and duplicate
+  character-role fixtures satisfy equivariance and finite-gradient checks.
+- Abnormal: wrong observation/action dimensions, all-false mask, NaN hidden
+  state, and old architecture checkpoint fail before inference.
+
+Verification:
+
+- `python -m pytest src/python/rl/tests`
+- `./gradlew build`
+
+### Phase 5: Deterministic Diverse Expert Search
+
+Why fifth:
+
+- The current coarse macro `RotationSearcher` cannot label the expanded action
+  space or preserve delayed setup paths. A model-independent teacher is needed
+  before collecting training data.
+
+Target files:
+
+- `src/java/mechanics/rotation/RotationSearchStrategy.java`
+- `src/java/mechanics/rotation/RotationSearchConfig.java`
+- `src/java/mechanics/rotation/ExpertTrajectory.java`
+- `src/java/mechanics/rotation/TopKTrajectoryArchive.java`
+- `src/java/mechanics/rotation/EvolutionaryRotationSearcher.java`
+- `src/java/mechanics/rotation/MctsRotationSearcher.java`
+- `src/java/mechanics/rotation/ExpertPolicyPrior.java`
+- `src/java/sample/RotationSearchRegressionTest.java`
+- `src/java/sample/SearchRotationJava.java`
+
+Tasks:
+
+- Implement bounded evolutionary sequence search and snapshot-backed MCTS
+  behind one strategy interface. Both accept uniform/random priors.
+- Support insert, delete, replace, move, and subsequence mutations; optional
+  human rotations seed the archive but an unseeded run is mandatory.
+- Rank complete or sufficiently long continuations by `RotationObjective`,
+  retain diverse top-K trajectories, and expose deterministic seed/budget data.
+
+Acceptance criteria:
+
+- With a fixed simulator-call budget and seed, results and archive order are
+  reproducible. No search path executes an illegal action.
+- The delayed-setup fixture's best path is retained, and unseeded search finds
+  its known best action sequence within the regression budget.
+
+Test cases:
+
+- Normal: uniform-prior evolutionary and MCTS runs improve over deterministic
+  random on fixtures and preserve diverse equal-score sequences.
+- Abnormal: zero/negative budget, invalid prior, corrupted snapshot, no legal
+  action except Wait, duplicate archive entry, and cancellation are bounded.
+
+Verification:
+
+- `./gradlew RotationSearchRegressionTest RaidenParty FlinsParty2 build`
+
+### Phase 6: Versioned Expert Dataset And Exact Replay
+
+Why sixth:
+
+- Search output must survive processes and sessions with enough provenance to
+  detect stale labels and replay every training example against the simulator.
+
+Target files:
+
+- `config/rotation_dataset/schema_v1.json`
+- `src/java/mechanics/rotation/ExpertDatasetRecord.java`
+- `src/java/mechanics/rotation/ExpertDatasetWriter.java`
+- `src/java/mechanics/rotation/ExpertDatasetReader.java`
+- `src/java/mechanics/rotation/DatasetManifest.java`
+- `src/java/sample/GenerateRotationDataset.java`
+- `src/java/sample/ReplayRotationDataset.java`
+- `src/java/sample/RotationDatasetRegressionTest.java`
+- `src/python/rl/expert_dataset.py`
+- `src/python/rl/tests/test_expert_dataset.py`
+- `src/python/rl/tests/fixtures/expert_dataset_v1.jsonl`
+
+Tasks:
+
+- Write atomic compressed JSONL shards and a manifest containing schema,
+  simulator revision, scenario/loadout fingerprint, split, seed, horizon,
+  action/observation revisions, search budget, trajectory rank, and hashes.
+- Store observation, legal mask, action, visit-policy target or Q estimates,
+  terminal return, and recurrent boundaries for each decision.
+- Add Java and Python readers with the same validation rules and exact simulator
+  replay. Keep generated shards under `output/rotation_dataset/` untracked.
+
+Acceptance criteria:
+
+- Java-write/Python-read and Python-read/Java-replay round trips preserve every
+  typed field and reproduce terminal objective components exactly.
+- Partial writes never replace a valid manifest, and stale/corrupt shards
+  cannot enter training.
+
+Test cases:
+
+- Normal: deterministic tiny fixture, compressed multi-shard round trip,
+  manifest hashing, snapshot branch records, and exact replay all pass.
+- Abnormal: truncation, wrong hash/schema/action ID/fingerprint, duplicate
+  record ID, non-finite value, and train/holdout split collision fail closed.
+
+Verification:
+
+- `./gradlew RotationDatasetRegressionTest build`
+- `python -m pytest src/python/rl/tests`
+- `python scripts/preflight.py`
+
+### Phase 7: Behavior-Cloning And Value Pretraining
+
+Why seventh:
+
+- Supervised expert fitting gives the policy useful sparse-reward behavior
+  before PPO exploration and provides a cheap model/data contract test.
+
+Target files:
+
+- `src/python/rl/pretrain_expert_policy.py`
+- `src/python/rl/expert_dataset.py`
+- `src/python/rl/recurrent_ppo.py`
+- `src/python/rl/train_recurrent_ppo.py`
+- `src/python/rl/tests/test_behavior_cloning.py`
+- `src/python/rl/tests/test_checkpoint_contract.py`
+- `src/python/rl/tests/fixtures/expert_dataset_v1.jsonl`
+
+Tasks:
+
+- Train masked policy targets from search visit distributions and a value head
+  from normalized terminal/Q targets over recurrent sequence chunks.
+- Use party-balanced sampling, validation splits by scenario, deterministic
+  seeds, and resumable optimizer/scheduler/RNG state.
+- Save dataset manifest hashes and all protocol/model revisions in checkpoints
+  consumable by inference and later PPO fine-tuning.
+
+Acceptance criteria:
+
+- A tiny fixture is deliberately overfit: every fixture state's teacher action
+  is selected, policy/value losses decrease, and masked actions remain zero.
+- Interrupted/resumed training follows the same deterministic metric sequence
+  as uninterrupted training for the bounded regression fixture.
+
+Test cases:
+
+- Normal: hard and soft policy targets, recurrent padding masks, party-balanced
+  batches, validation-only scenario, save/load, and resume all pass.
+- Abnormal: empty dataset, mixed schema/revision, holdout leakage, invalid
+  probability target, missing manifest hash, and incompatible checkpoint fail.
+
+Verification:
+
+- `python -m pytest src/python/rl/tests`
+- `python3 src/python/rl/pretrain_expert_policy.py --preset debug --dataset src/python/rl/tests/fixtures/expert_dataset_v1.jsonl`
+
+### Phase 8: Expert Iteration, DAgger Recovery, And PPO/SIL Integration
+
+Why eighth:
+
+- Pure cloning only imitates the current dataset. Iterative search and recovery
+  queries are required to improve labels and handle states reached by the model.
+
+Target files:
+
+- `src/python/rl/expert_iteration.py`
+- `src/python/rl/train_recurrent_ppo.py`
+- `src/python/rl/sil_buffer.py`
+- `src/python/rl/rollout_service_client.py`
+- `src/python/rl/binary_protocol.py`
+- `src/java/mechanics/rl/bridge/BatchProtocol.java`
+- `src/java/mechanics/rl/bridge/VectorizedEnvironment.java`
+- `src/java/mechanics/rl/bridge/RolloutService.java`
+- `src/java/sample/RotationExpertIterationRegressionTest.java`
+- `src/python/rl/tests/test_expert_iteration.py`
+
+Tasks:
+
+- Feed policy/value priors into search while preserving a uniform fallback and
+  archive the best result across generations so a new model cannot erase it.
+- Sample disagreement and low-confidence model states, branch all legal actions
+  through existing snapshots, and append expert recovery labels transactionally.
+- Load persistent top-K expert trajectories into SIL, use a decaying supervised
+  auxiliary loss, then fine-tune with bounded recurrent PPO.
+- If bridge commands change, migrate Java/Python atomically to protocol v13 and
+  bound snapshot handles, memory, cancellation, and disconnect cleanup.
+
+Acceptance criteria:
+
+- On fixed fixtures, generation N+1 preserves or improves archive best under
+  the same simulator budget and appends replayable model-recovery states.
+- Repeated expert queries and disconnects do not leak snapshots or grow service
+  memory without bound; uniform fallback works without a model process.
+
+Test cases:
+
+- Normal: one complete search-data-pretrain-search cycle, policy-prior fallback,
+  all-legal-action branch query, SIL load, PPO auxiliary decay, and resume pass.
+- Abnormal: stale policy response, protocol mismatch, timeout/disconnect,
+  cancelled generation, corrupt appended shard, and snapshot limit recover.
+
+Verification:
+
+- `./gradlew RotationExpertIterationRegressionTest BenchmarkRLJava build`
+- `python -m pytest src/python/rl/tests`
+- Start a local rollout service and run the bounded debug expert-iteration and
+  evaluation commands recorded by `manage-genshin-experiments`; do not use an
+  unbounded foreground service in the verification script.
+
+### Phase 9: Archetype-Diverse Party And Loadout Campaign
+
+Why ninth:
+
+- Two trainable parties cannot establish arbitrary-party behavior. The complete
+  contracts above must first make each new scenario a data addition instead of
+  another learner special case.
+
+Target files:
+
+- `src/java/simulation/party/PartyDefinition.java`
+- `src/java/simulation/party/PartyCatalog.java`
+- `src/java/simulation/party/AbstractPartyDefinition.java`
+- new definitions under `src/java/simulation/party/`
+- `src/java/mechanics/rl/RLPartyRegistry.java`
+- `src/java/sample/PartyCatalogRegressionTest.java`
+- `config/action_capabilities.json`
+- `config/capability_profiles/profiles.json`
+
+Campaign inventory:
+
+| Split | Scenario definition | Required action/archetype proof |
+|---|---|---|
+| train | `HuTaoVaporizePartyDefinition` | Charged, cancel-safe Wait, Vaporize |
+| train | `AyakaFreezePartyDefinition` | alternate sprint setup, Burst window |
+| train | `AlhaithamHyperbloomPartyDefinition` | Dendro setup, reaction driver |
+| train | `AratakiIttoMonoGeoPartyDefinition` | Charged sequence, Geo support |
+| train | `XiaoPlungePartyDefinition` | Plunging and Burst uptime |
+| train | `ArlecchinoOverloadPartyDefinition` | infusion and Overloaded timing |
+| validation | `NeuvilletteHypercarryPartyDefinition` | sustained Charged sequence |
+| validation | `MavuikaMeltPartyDefinition` | resource/Burst and Melt setup |
+| holdout | `NaviaDoubleGeoPartyDefinition` | Crystallize-fed Skill windows |
+| holdout | `TighnariSpreadPartyDefinition` | quick Charged and Spread |
+
+Tasks:
+
+- Add explicit dataset split and loadout fingerprint metadata to party
+  definitions, register source-ready scenarios, and profile all participants.
+- Give each scenario a deterministic executable human rotation only as a
+  baseline/optional seed. Search must also run with that seed disabled.
+- Audit each required action against current simulator support. If exact
+  offensive behavior is unavailable, record the scenario as blocked in
+  `BACKLOG.md`; do not approximate it or move it into train silently.
+
+Acceptance criteria:
+
+- At least ten total exact RL-enabled scenarios span the listed action and
+  reaction archetypes, with no party identity conditionals in model or trainer.
+- Validation and holdout party fingerprints are absent from training shards,
+  normalization fitting, SIL, and supervised sampling.
+
+Test cases:
+
+- Normal: every accepted scenario constructs, profiles, masks all actions,
+  runs its baseline, searches unseeded, snapshots, and replays a dataset shard.
+- Abnormal: duplicate name/fingerprint, missing profile/capability, cross-split
+  duplicate loadout, unsupported required mechanic, and disabled party reject.
+
+Verification:
+
+- `./gradlew PartyCatalogRegressionTest ProfileCapabilities BenchmarkRLJava build`
+- Run each accepted party's dynamic Gradle sample task and its focused character,
+  weapon, artifact, and reaction regressions selected by `agent_validate.py`.
+- `python -m pytest src/python/rl/tests`
+
+### Phase 10: Equal-Budget Generalization Evaluation And Closure
+
+Why last:
+
+- The model is useful only if it accelerates or improves search on parties not
+  used to fit it, under a reproducible and honest simulator budget.
+
+Target files:
+
+- `src/java/sample/BenchmarkRotationSearch.java`
+- `src/python/rl/evaluate_rotation_optimizer.py`
+- `src/python/rl/evaluation.py`
+- `src/python/rl/evaluate_policy.py`
+- `src/python/rl/tests/test_rotation_generalization.py`
+- `README.md`
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Compare deterministic random, unguided expert search, model-only inference,
+  policy-guided search, and optional PPO-fine-tuned inference on party-disjoint
+  train/validation/holdout scenarios.
+- Enforce equal simulator calls for search comparisons and report wall time,
+  seed, horizon, terminal damage/DPS, cyclic-energy deficit, archive diversity,
+  invalid-action rate, and dataset/checkpoint revisions.
+- Re-run every stored expert trajectory against the final simulator revision.
+  Call outputs "best-found" rotations and list unsupported scenario boundaries.
+- Resume the separate NCCL/DDP plan only if local correctness and quality gates
+  pass and distributed throughput is still a measured bottleneck.
+
+Acceptance criteria:
+
+- Dataset replay is 100%; invalid-action rate is zero; no train fingerprint or
+  normalization statistic leaks into the party-disjoint holdout.
+- Model-only median holdout score exceeds deterministic random under the fixed
+  benchmark, and policy-guided search median score is no worse than unguided
+  search under equal simulator calls. The retained archive never regresses.
+- The report includes failures and variance across fixed seeds. If any quality
+  criterion fails, B-212 remains open rather than declaring a completed model.
+
+Test cases:
+
+- Normal: deterministic fixture, complete train/validation/holdout benchmark,
+  equal-budget accounting, report serialization, and final checkpoint reload.
+- Abnormal: leaked party fingerprint, unequal call budget, stale simulator
+  revision, missing seed, partial dataset replay, NaN metric, and unsupported
+  scenario make the evaluation fail closed.
+
+Verification:
+
+- `./gradlew BenchmarkRotationSearch PartyCatalogRegressionTest BenchmarkRLJava ReactionRegressionTest build javadoc`
+- `python -m pytest src/python/rl/tests`
+- `python3 src/python/rl/evaluate_rotation_optimizer.py --preset benchmark`
+- `python scripts/preflight.py --run`
+- `git status --short`

@@ -4523,3 +4523,30 @@ experiment record.
   represented by a character-local callback. Executable Go overrides are used
   where unambiguous; explicit config-only profiles are used only when no
   contradictory executable assignment exists.
+
+### B-212 — Expert-iteration rotation optimization model
+
+- **Status:** in progress; Phase 1 active
+- **Source:** explicit 2026-08-24 request to plan a model that optimizes
+  rotations for arbitrary supported parties without requiring a human rotation.
+- **Symptom:** the current RL registry exposes only two parties, the seven-action
+  policy omits Charged/Plunging/Hold/Wait actions, observations do not identify
+  complete loadouts, the policy head is slot-sensitive, `RotationSearcher` is a
+  coarse fixed macro search, and SIL has no persistent expert dataset.
+- **Scope/risk:** versioned rotation environment/action/observation contracts,
+  slot-equivariant recurrent policy/value model, deterministic evolutionary and
+  MCTS teachers, replayable expert data, behavior cloning, Expert Iteration,
+  DAgger recovery, bounded PPO/SIL fine-tuning, and party-disjoint evaluation;
+  high and cross-language.
+- **Boundary:** "arbitrary" means an exact registered `PartyDefinition` with
+  supported simulator mechanics and loadout metadata. No global-optimum claim,
+  content/mechanic guessing, Deferred System, generated docs, quantization, UI,
+  or automatic construction of every theoretical party. Human rotations are
+  optional seeds only. NCCL/DDP remains paused until the local quality gate.
+- **Scheduler identity:** every submitted job and scheduler log uses a neutral
+  academic or ordinary-noun name; project/game and character names are
+  forbidden in scheduler-visible identifiers.
+- **Proof/plan:** `TASKS.md` B-212 Phases 1-10. Completion requires exact dataset
+  replay, zero invalid actions, party-disjoint holdout, model-only improvement
+  over deterministic random, and non-inferior policy-guided search under equal
+  simulator-call budgets.
