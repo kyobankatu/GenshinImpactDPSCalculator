@@ -94,7 +94,7 @@ public final class RotationScenario {
                 .withMaxEpisodeTime(horizon);
         RLEpisodeFactory factory = new SinglePartyRLEpisodeFactory(
                 GenericRLSimulatorFactory.spec(definition), scenarioConfig);
-        String fingerprint = definition.name() + ":cycles=" + cycleCount
+        String fingerprint = definition.loadoutFingerprint() + ":cycles=" + cycleCount
                 + ":cycleSeconds=" + Double.toHexString(cycleDurationSeconds);
         return new RotationScenario(
                 fingerprint,

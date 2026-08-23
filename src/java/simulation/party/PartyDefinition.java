@@ -2,7 +2,9 @@ package simulation.party;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import mechanics.rotation.PolicyAction;
 import model.type.CharacterId;
 import model.type.StatType;
 import simulation.CombatSimulator;
@@ -16,6 +18,21 @@ public interface PartyDefinition {
     String displayName();
 
     CharacterId[] partyOrder();
+
+    /** Returns the immutable dataset partition for this exact scenario. */
+    DatasetSplit datasetSplit();
+
+    /** Returns a stable identity for character, constellation, weapon, and artifact choices. */
+    String loadoutFingerprint();
+
+    /** Returns the intended duration of one repeatable rotation cycle. */
+    double rotationCycleSeconds();
+
+    /** Returns an optional deterministic seed rotation in policy-action IDs. */
+    int[] baselinePolicyActions();
+
+    /** Returns actions whose exact support is required for this scenario. */
+    Map<CharacterId, Set<PolicyAction>> requiredActionCapabilities();
 
     Map<CharacterId, List<StatType>> optimizationTargets();
 

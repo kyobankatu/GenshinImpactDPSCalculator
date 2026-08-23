@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import mechanics.buff.Buff;
@@ -79,10 +80,13 @@ public class CapabilityProfiler {
      */
     public void runAll() {
         System.out.println("[CapabilityProfiler] Starting profiling run (N=" + N_RUNS + " per template)");
-        for (CharacterId subjectId : config.partyOrder) {
+        Map<CharacterId, double[]> computed = new ConcurrentHashMap<>();
+        Arrays.stream(config.partyOrder).parallel().forEach(subjectId -> {
             System.out.println("[CapabilityProfiler] Profiling: " + subjectId.name());
-            double[] scores = profileCharacter(subjectId);
-            results.put(subjectId, scores);
+            computed.put(subjectId, profileCharacter(subjectId));
+        });
+        for (CharacterId subjectId : config.partyOrder) {
+            results.put(subjectId, computed.get(subjectId));
         }
         normalizeTeamBuffScores();
         System.out.println("[CapabilityProfiler] Done.");
@@ -487,10 +491,7 @@ public class CapabilityProfiler {
         return QuietExecution.call(run::execute);
     }
 
-    /**
-     * Chooses the best action for the subject: burst (if allowed and ready),
-     * then skill (if allowed and ready), then normal attack.
-     */
+    /** Chooses the first currently valid action in deterministic priority order. */
     private CharacterActionRequest chooseBestAction(
             CombatSimulator sim, CharacterId subjectId, boolean allowBurst, boolean allowSkill) {
         double now = sim.getCurrentTime();
@@ -498,13 +499,23 @@ public class CapabilityProfiler {
         if (c == null) {
             return CharacterActionRequest.of(CharacterActionKey.NORMAL);
         }
-        if (allowBurst && c.canBurst(now)) {
-            return CharacterActionRequest.of(CharacterActionKey.BURST);
+        List<CharacterActionKey> candidates = new ArrayList<>();
+        if (allowBurst) {
+            candidates.add(CharacterActionKey.BURST);
         }
-        if (allowSkill && c.canSkill(now)) {
-            return CharacterActionRequest.of(CharacterActionKey.SKILL);
+        if (allowSkill) {
+            candidates.add(CharacterActionKey.SKILL);
         }
-        return CharacterActionRequest.of(CharacterActionKey.NORMAL);
+        candidates.add(CharacterActionKey.NORMAL);
+        candidates.add(CharacterActionKey.PLUNGE);
+        candidates.add(CharacterActionKey.CHARGE);
+        for (CharacterActionKey candidate : candidates) {
+            CharacterActionRequest request = CharacterActionRequest.of(candidate);
+            if (c.canPerformAction(request, now)) {
+                return request;
+            }
+        }
+        throw new IllegalStateException("No executable profiling action for " + subjectId);
     }
 
     private void useSkillIfReady(CombatSimulator sim, CharacterId id) {
@@ -867,19 +878,25 @@ public class CapabilityProfiler {
             CharacterActionRequest request,
             boolean idleActor,
             CharacterId excludedId) {
+        CharacterActionRequest executableRequest = resolveExecutablePairRequest(
+                activeSim,
+                idleSim,
+                actorId,
+                request,
+                idleActor);
         double before = activeSim.getCurrentTime();
         double teamBeforeActive = getTeamDamageExcluding(activeSim, excludedId);
         double teamBeforeIdle = getTeamDamageExcluding(idleSim, excludedId);
         double[] charBeforeActive = getPerCharacterDamageExcluding(activeSim, excludedId);
         double[] charBeforeIdle = getPerCharacterDamageExcluding(idleSim, excludedId);
-        activeSim.performAction(actorId, request);
+        activeSim.performAction(actorId, executableRequest);
         double delta = Math.max(0.0, activeSim.getCurrentTime() - before);
         if (delta > 0.0) {
             if (idleActor) {
                 idleSim.advanceTime(delta);
             } else {
                 double idleBefore = idleSim.getCurrentTime();
-                idleSim.performAction(actorId, request);
+                idleSim.performAction(actorId, executableRequest);
                 double idleDelta = Math.max(0.0, idleSim.getCurrentTime() - idleBefore);
                 if (idleDelta + 1e-9 < delta) {
                     idleSim.advanceTime(delta - idleDelta);
@@ -893,12 +910,45 @@ public class CapabilityProfiler {
                 activeSim,
                 idleSim,
                 actorId,
-                request.getKey(),
+                executableRequest.getKey(),
                 excludedId,
                 teamBeforeActive,
                 teamBeforeIdle,
                 charBeforeActive,
                 charBeforeIdle);
+    }
+
+    private CharacterActionRequest resolveExecutablePairRequest(
+            CombatSimulator activeSim,
+            CombatSimulator idleSim,
+            CharacterId actorId,
+            CharacterActionRequest preferred,
+            boolean idleActor) {
+        List<CharacterActionKey> candidates = Arrays.asList(
+                preferred.getKey(),
+                CharacterActionKey.PLUNGE,
+                CharacterActionKey.NORMAL,
+                CharacterActionKey.CHARGE,
+                CharacterActionKey.SKILL,
+                CharacterActionKey.BURST);
+        for (CharacterActionKey candidate : candidates) {
+            CharacterActionRequest request = CharacterActionRequest.of(candidate);
+            Character activeCharacter = activeSim.getCharacter(actorId);
+            Character idleCharacter = idleSim.getCharacter(actorId);
+            boolean activeValid = activeCharacter != null
+                    && activeCharacter.canPerformAction(
+                            request,
+                            activeSim.getCurrentTime());
+            boolean idleValid = idleActor || (idleCharacter != null
+                    && idleCharacter.canPerformAction(
+                            request,
+                            idleSim.getCurrentTime()));
+            if (activeValid && idleValid) {
+                return request;
+            }
+        }
+        throw new IllegalStateException(
+                "No paired profiling action for " + actorId);
     }
 
     private SimulatorSnapshot buildPostSubjectAlignedSnapshot(
@@ -923,9 +973,9 @@ public class CapabilityProfiler {
                     activeCharacter.chargeRestoreTimes,
                     idleCharacter.activeBuffRefs,
                     idleCharacter.activeBuffTimes,
-                    activeCharacter.weaponState,
-                    activeCharacter.characterState,
-                    activeCharacter.energyState));
+                    idleCharacter.weaponState,
+                    idleCharacter.characterState,
+                    idleCharacter.energyState));
         }
         return new SimulatorSnapshot(
                 activePostSubject.currentTime,

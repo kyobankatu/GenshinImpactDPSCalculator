@@ -1,0 +1,147 @@
+package simulation.party;
+
+import mechanics.data.TalentDataManager;
+import model.character.Alhaitham;
+import model.character.Arlecchino;
+import model.character.Bennett;
+import model.character.Chevreuse;
+import model.character.Faruzan;
+import model.character.Fischl;
+import model.character.Gaming;
+import model.character.Ganyu;
+import model.character.KukiShinobu;
+import model.character.KaedeharaKazuha;
+import model.character.Kirara;
+import model.character.Layla;
+import model.character.Nahida;
+import model.character.Ningguang;
+import model.character.Ororon;
+import model.character.Rosaria;
+import model.character.SangonomiyaKokomi;
+import model.character.Shenhe;
+import model.character.Tighnari;
+import model.character.Xiao;
+import model.character.Xianyun;
+import model.character.Xingqiu;
+import model.character.YaeMiko;
+import model.character.Zhongli;
+import model.entity.Character;
+import model.weapon.Deathmatch;
+import model.weapon.FavoniusWarbow;
+import model.weapon.SkywardBlade;
+import model.weapon.TheStringless;
+import model.weapon.WanderingEvenstar;
+import model.weapon.Whiteblind;
+import model.weapon.WolfFang;
+
+/** Deterministic C0/base-loadout factories for the curated rotation campaign. */
+final class CuratedCharacters {
+    private static final double FIXED_RANDOM_DRAW = 0.5;
+
+    private CuratedCharacters() {
+    }
+
+    static Character alhaitham() {
+        return new Alhaitham(new WolfFang(), null, 0);
+    }
+
+    static Character xiao() {
+        return new Xiao(new Deathmatch(1), null, 0);
+    }
+
+    static Character arlecchino() {
+        return new Arlecchino(new Deathmatch(1), null, 0);
+    }
+
+    static Character tighnari() {
+        return new Tighnari(new TheStringless(), null, TalentDataManager.getInstance(), 0,
+                () -> FIXED_RANDOM_DRAW);
+    }
+
+    static Character ganyu() {
+        return new Ganyu(new TheStringless(5), null, 0);
+    }
+
+    static Character shenhe() {
+        return new Shenhe(new Deathmatch(1), null, 0);
+    }
+
+    static Character sangonomiyaKokomi() {
+        return new SangonomiyaKokomi(
+                new WanderingEvenstar(5), null, TalentDataManager.getInstance(), 0,
+                () -> FIXED_RANDOM_DRAW);
+    }
+
+    static Character kaedeharaKazuha() {
+        return new KaedeharaKazuha(new SkywardBlade(), null, 0);
+    }
+
+    static Character gaming() {
+        return new Gaming(new Whiteblind(5), null, 0);
+    }
+
+    static Character rosaria() {
+        return new Rosaria(new Deathmatch(1), null, 0);
+    }
+
+    static Character xianyun() {
+        return new Xianyun(new WanderingEvenstar(5), null, 0);
+    }
+
+    static Character layla() {
+        return new Layla(
+                new WolfFang(), null, TalentDataManager.getInstance(), 0,
+                () -> FIXED_RANDOM_DRAW);
+    }
+
+    static Character ningguang() {
+        return new Ningguang(new WanderingEvenstar(5), null, 0);
+    }
+
+    static Character ororon() {
+        return new Ororon(new TheStringless(5), null, 0);
+    }
+
+    static Character kirara() {
+        return new Kirara(new WolfFang(), null, 0);
+    }
+
+    static Character xingqiu() {
+        return new Xingqiu(new WolfFang(), null);
+    }
+
+    static Character zhongli() {
+        return new Zhongli(new Deathmatch(1), null, TalentDataManager.getInstance(), 0,
+                () -> FIXED_RANDOM_DRAW);
+    }
+
+    static Character nahida() {
+        return new Nahida(new WanderingEvenstar(5), null, 0);
+    }
+
+    static Character kukiShinobu() {
+        return new KukiShinobu(new WolfFang(), null, TalentDataManager.getInstance(), 0,
+                () -> FIXED_RANDOM_DRAW);
+    }
+
+    static Character faruzan() {
+        return new Faruzan(new FavoniusWarbow(5, () -> FIXED_RANDOM_DRAW), null, 0);
+    }
+
+    static Character bennett() {
+        return new Bennett(new SkywardBlade(), null);
+    }
+
+    static Character fischl() {
+        return new Fischl(new TheStringless(), null);
+    }
+
+    static Character chevreuse() {
+        return new Chevreuse(new Deathmatch(1), null, TalentDataManager.getInstance(), 0,
+                () -> FIXED_RANDOM_DRAW);
+    }
+
+    static Character yaeMiko() {
+        return new YaeMiko(new WanderingEvenstar(5), null, 0);
+    }
+}

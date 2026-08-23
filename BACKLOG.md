@@ -4526,7 +4526,7 @@ experiment record.
 
 ### B-212 — Expert-iteration rotation optimization model
 
-- **Status:** in progress; Phase 8 complete
+- **Status:** in progress; Phase 9 complete
 - **Source:** explicit 2026-08-24 request to plan a model that optimizes
   rotations for arbitrary supported parties without requiring a human rotation.
 - **Symptom:** the current RL registry exposes only two parties, the seven-action
@@ -4590,3 +4590,15 @@ experiment record.
   train-only expert/online SIL uses a decaying PPO auxiliary loss. Snapshot
   handles and disconnect-owned runners are bounded and cleaned; the live
   Vine/SIL update and evaluations finish with zero invalid actions.
+- **Phase 9 blocked scenarios:** Hu Tao requires player HP/low-HP state, Ayaka
+  requires a typed alternate sprint, Itto requires shield-aware Geo resonance,
+  Neuvillette requires Sourcewater Droplet collection, Mavuika requires
+  automatic team Fighting Spirit/Nightsoul events, and Navia requires ordinary
+  Crystallize shard pickup. These candidates remain outside every dataset split
+  until their prerequisites are exact; no substitute mechanic is accepted.
+- **Checkpoint:** Phase 9 is complete. Six train, two validation, and two
+  holdout scenarios now carry definition-owned split/loadout/baseline metadata;
+  character identities are disjoint across splits. All thirty participants
+  have matching strict action capabilities and refreshed profiles. Every
+  scenario passes legal baseline, snapshot, unseeded exact-budget search,
+  sharded dataset replay, sample execution, and routed Java/Python gates.

@@ -8,6 +8,7 @@ import java.util.Random;
 
 import mechanics.element.ResonanceManager;
 import mechanics.optimization.ArtifactOptimizer;
+import mechanics.rotation.PolicyAction;
 import model.artifact.EmblemOfSeveredFate;
 import model.artifact.NoblesseOblige;
 import model.character.Bennett;
@@ -49,6 +50,34 @@ public final class RaidenPartyDefinition extends AbstractPartyDefinition {
     @Override
     public CharacterId[] partyOrder() {
         return PARTY_ORDER.clone();
+    }
+
+    @Override
+    public String loadoutFingerprint() {
+        return "loadout-v1:RAIDEN_SHOGUN-c6-SkywardSpine-EmblemOfSeveredFate"
+                + ":XINGQIU-c6-WolfFang-EmblemOfSeveredFate"
+                + ":XIANGLING-c6-TheCatch-EmblemOfSeveredFate"
+                + ":BENNETT-c6-SkywardBlade-NoblesseOblige";
+    }
+
+    @Override
+    public double rotationCycleSeconds() {
+        return 21.0;
+    }
+
+    @Override
+    public int[] baselinePolicyActions() {
+        return policyActions(
+                PolicyAction.SKILL_PRESS,
+                PolicyAction.SWAP_SLOT_1, PolicyAction.BURST,
+                PolicyAction.SKILL_PRESS, PolicyAction.NORMAL,
+                PolicyAction.SWAP_SLOT_3, PolicyAction.BURST,
+                PolicyAction.SKILL_PRESS, PolicyAction.NORMAL,
+                PolicyAction.SWAP_SLOT_2, PolicyAction.BURST,
+                PolicyAction.SKILL_PRESS, PolicyAction.NORMAL,
+                PolicyAction.SWAP_SLOT_0, PolicyAction.BURST,
+                PolicyAction.NORMAL, PolicyAction.NORMAL,
+                PolicyAction.CHARGE);
     }
 
     @Override

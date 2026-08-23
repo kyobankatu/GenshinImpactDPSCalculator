@@ -25476,6 +25476,8 @@ Completion evidence:
 
 ### Phase 9: Archetype-Diverse Party And Loadout Campaign
 
+Status: Done (2026-08-24).
+
 Why ninth:
 
 - Two trainable parties cannot establish arbitrary-party behavior. The complete
@@ -25489,6 +25491,11 @@ Target files:
 - `src/java/simulation/party/AbstractPartyDefinition.java`
 - new definitions under `src/java/simulation/party/`
 - `src/java/mechanics/rl/RLPartyRegistry.java`
+- `src/java/mechanics/rl/CapabilityProfiler.java`
+- `src/java/model/entity/Character.java`
+- `src/java/model/character/Xianyun.java`
+- `src/java/sample/GenerateRotationDataset.java`
+- `src/java/sample/ProfileCharacterCapabilities.java`
 - `src/java/sample/PartyCatalogRegressionTest.java`
 - `config/action_capabilities.json`
 - `config/capability_profiles/profiles.json`
@@ -25497,16 +25504,24 @@ Campaign inventory:
 
 | Split | Scenario definition | Required action/archetype proof |
 |---|---|---|
-| train | `HuTaoVaporizePartyDefinition` | Charged, cancel-safe Wait, Vaporize |
-| train | `AyakaFreezePartyDefinition` | alternate sprint setup, Burst window |
-| train | `AlhaithamHyperbloomPartyDefinition` | Dendro setup, reaction driver |
-| train | `AratakiIttoMonoGeoPartyDefinition` | Charged sequence, Geo support |
+| train | `FlinsParty2Definition` | Lunar-Charged driver and swap windows |
+| train | `RaidenPartyDefinition` | Burst sequence and team Energy |
+| train | `FlinsPartyDefinition` | Lunar-Charged alternate loadout |
+| train | `AlhaithamHyperbloomPartyDefinition` | Dendro setup and Hyperbloom driver |
 | train | `XiaoPlungePartyDefinition` | Plunging and Burst uptime |
 | train | `ArlecchinoOverloadPartyDefinition` | infusion and Overloaded timing |
-| validation | `NeuvilletteHypercarryPartyDefinition` | sustained Charged sequence |
-| validation | `MavuikaMeltPartyDefinition` | resource/Burst and Melt setup |
-| holdout | `NaviaDoubleGeoPartyDefinition` | Crystallize-fed Skill windows |
+| validation | `GanyuFreezePartyDefinition` | Charged, Burst, and Freeze |
+| validation | `GamingMeltPartyDefinition` | initial Burst, Plunging, and Melt |
 | holdout | `TighnariSpreadPartyDefinition` | quick Charged and Spread |
+| holdout | `NingguangCrystallizePartyDefinition` | Geo Charged and Crystallize damage |
+
+Blocked audited candidates:
+
+- Hu Tao needs represented player HP and low-HP effects; Ayaka needs a typed
+  alternate sprint action; Itto needs shield-aware Geo resonance.
+- Neuvillette needs Sourcewater Droplet collection; Mavuika needs automatic
+  team Fighting Spirit/Nightsoul plumbing; Navia needs ordinary Crystallize
+  shard pickup. None is approximated or registered in another split.
 
 Tasks:
 
@@ -25538,6 +25553,26 @@ Verification:
 - Run each accepted party's dynamic Gradle sample task and its focused character,
   weapon, artifact, and reaction regressions selected by `agent_validate.py`.
 - `python -m pytest src/python/rl/tests`
+
+Completion evidence:
+
+- The catalog contains six train, two validation, and two holdout scenarios.
+  Stable loadout fingerprints, explicit split metadata, deterministic baseline
+  actions, and required typed capabilities are definition-owned. Character IDs
+  do not cross splits, and registry selections derive from catalog metadata.
+- Every accepted scenario constructs fresh equivalent simulators, executes a
+  legal baseline, restores snapshots, completes an unseeded exact-budget
+  search, writes one content-addressed shard, and exactly replays it. Duplicate
+  names/fingerprints, cross-split reuse, missing capability data, and unsupported
+  required actions fail closed.
+- Thirty action-capability entries match thirty refreshed capability profiles.
+  Slurm job `103932` completed on `rtx6000-ada2_2` under the neutral scheduler
+  name/log stem `capability_profile`; no project/game or character name was
+  exposed through the scheduler identity.
+- `PartyCatalogRegressionTest`, `BenchmarkRLJava`, Java build/Javadoc, eight
+  focused character/reaction regressions, all ten dynamic party samples, and
+  all 39 Python RL tests pass. The rollout benchmark measured 2,599.0
+  environment steps/s with four environments.
 
 ### Phase 10: Equal-Budget Generalization Evaluation And Closure
 

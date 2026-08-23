@@ -7,6 +7,7 @@ import java.util.Map;
 
 import mechanics.element.ResonanceManager;
 import mechanics.optimization.ArtifactOptimizer;
+import mechanics.rotation.PolicyAction;
 import model.artifact.AubadeOfMorningstarAndMoon;
 import model.artifact.NightOfTheSkysUnveiling;
 import model.artifact.SilkenMoonsSerenade;
@@ -48,6 +49,37 @@ public final class FlinsParty2Definition extends AbstractPartyDefinition {
     @Override
     public CharacterId[] partyOrder() {
         return PARTY_ORDER.clone();
+    }
+
+    @Override
+    public String loadoutFingerprint() {
+        return "loadout-v1:FLINS-c6-PrimordialJadeWingedSpear-NightOfTheSkysUnveiling"
+                + ":INEFFA-c6-CalamityQueller-AubadeOfMorningstarAndMoon"
+                + ":COLUMBINA-c6-NocturnesCurtainCall-SilkenMoonsSerenade"
+                + ":SUCROSE-c6-SunnyMorningSleepIn-ViridescentVenerer";
+    }
+
+    @Override
+    public double rotationCycleSeconds() {
+        return 30.0;
+    }
+
+    @Override
+    public int[] baselinePolicyActions() {
+        return lunarBaselinePolicyActions();
+    }
+
+    private static int[] lunarBaselinePolicyActions() {
+        return policyActions(
+                PolicyAction.SWAP_SLOT_1, PolicyAction.SKILL_PRESS,
+                PolicyAction.BURST, PolicyAction.SWAP_SLOT_2,
+                PolicyAction.SKILL_PRESS, PolicyAction.BURST,
+                PolicyAction.SWAP_SLOT_3, PolicyAction.SKILL_PRESS,
+                PolicyAction.BURST, PolicyAction.SWAP_SLOT_0,
+                PolicyAction.SKILL_PRESS, PolicyAction.NORMAL,
+                PolicyAction.NORMAL, PolicyAction.NORMAL,
+                PolicyAction.BURST, PolicyAction.NORMAL,
+                PolicyAction.NORMAL, PolicyAction.NORMAL);
     }
 
     @Override

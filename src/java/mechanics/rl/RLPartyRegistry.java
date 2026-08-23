@@ -8,6 +8,7 @@ import java.util.Map;
 
 import simulation.party.PartyCatalog;
 import simulation.party.PartyDefinition;
+import simulation.party.DatasetSplit;
 
 /**
  * Central registry for RL-available party variants.
@@ -18,10 +19,6 @@ public final class RLPartyRegistry {
     public static final String ALL_PARTIES_SELECTION = "all";
 
     private static final Map<String, RLPartySpec> SPECS = new LinkedHashMap<>();
-    private static final List<String> DEFAULT_TRAINING_PARTIES = List.of(
-            "FlinsParty2",
-            "RaidenParty");
-
     static {
         for (PartyDefinition definition : PartyCatalog.rlEnabled()) {
             register(GenericRLSimulatorFactory.spec(definition));
@@ -58,7 +55,12 @@ public final class RLPartyRegistry {
                 : selection.trim();
         String lower = normalized.toLowerCase(Locale.ROOT);
         if (DEFAULT_TRAINING_SELECTION.equals(lower)) {
-            return resolveNamedList(DEFAULT_TRAINING_PARTIES);
+            return specsForSplit(DatasetSplit.TRAIN);
+        }
+        for (DatasetSplit split : DatasetSplit.values()) {
+            if (split.getWireName().equals(lower)) {
+                return specsForSplit(split);
+            }
         }
         if (ALL_PARTIES_SELECTION.equals(lower)) {
             return allSpecs();
@@ -81,7 +83,7 @@ public final class RLPartyRegistry {
      * Returns the specs used by the default multi-party training selection.
      */
     public static List<RLPartySpec> defaultTrainingSpecs() {
-        return resolveNamedList(DEFAULT_TRAINING_PARTIES);
+        return specsForSplit(DatasetSplit.TRAIN);
     }
 
     /**
@@ -119,6 +121,17 @@ public final class RLPartyRegistry {
         List<RLPartySpec> specs = new ArrayList<>();
         for (String name : names) {
             specs.add(require(name));
+        }
+        return specs;
+    }
+
+    private static List<RLPartySpec> specsForSplit(DatasetSplit split) {
+        List<RLPartySpec> specs = new ArrayList<>();
+        for (PartyDefinition definition : PartyCatalog.rlEnabled(split)) {
+            specs.add(require(definition.name()));
+        }
+        if (specs.isEmpty()) {
+            throw new IllegalStateException("No RL parties registered for split " + split.getWireName());
         }
         return specs;
     }

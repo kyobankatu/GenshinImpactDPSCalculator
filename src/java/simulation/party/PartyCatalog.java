@@ -6,25 +6,54 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import mechanics.rotation.ActionCapabilityStore;
+import mechanics.rotation.PolicyAction;
+import model.type.CharacterId;
 
 /**
  * Registry of simulator party definitions shared by sample runners and RL.
  */
 public final class PartyCatalog {
     private static final Map<String, PartyDefinition> DEFINITIONS = new LinkedHashMap<>();
+    private static final Map<String, DatasetSplit> FINGERPRINT_SPLITS = new HashMap<>();
+    private static final ActionCapabilityStore ACTION_CAPABILITIES = new ActionCapabilityStore();
 
     static {
         register(new FlinsParty2Definition());
         register(new RaidenPartyDefinition());
         register(new FlinsPartyDefinition());
+        register(new AlhaithamHyperbloomPartyDefinition());
+        register(new XiaoPlungePartyDefinition());
+        register(new ArlecchinoOverloadPartyDefinition());
+        register(new GanyuFreezePartyDefinition());
+        register(new GamingMeltPartyDefinition());
+        register(new TighnariSpreadPartyDefinition());
+        register(new NingguangCrystallizePartyDefinition());
     }
 
     private PartyCatalog() {
     }
 
     public static void register(PartyDefinition definition) {
-        DEFINITIONS.put(normalize(definition.name()), definition);
+        validate(definition);
+        String key = normalize(definition.name());
+        if (DEFINITIONS.containsKey(key)) {
+            throw new IllegalArgumentException("Duplicate party name: " + definition.name());
+        }
+        DatasetSplit previous = FINGERPRINT_SPLITS.putIfAbsent(
+                definition.loadoutFingerprint(), definition.datasetSplit());
+        if (previous != null) {
+            String detail = previous == definition.datasetSplit()
+                    ? "Duplicate loadout fingerprint: "
+                    : "Cross-split loadout fingerprint: ";
+            throw new IllegalArgumentException(detail + definition.loadoutFingerprint());
+        }
+        DEFINITIONS.put(key, definition);
     }
 
     public static PartyDefinition require(String partyName) {
@@ -53,6 +82,17 @@ public final class PartyCatalog {
                 .collect(Collectors.toList());
     }
 
+    /** Returns RL-enabled definitions assigned to one immutable dataset split. */
+    public static List<PartyDefinition> rlEnabled(DatasetSplit split) {
+        if (split == null) {
+            throw new IllegalArgumentException("Dataset split must not be null");
+        }
+        return DEFINITIONS.values().stream()
+                .filter(PartyDefinition::rlEnabled)
+                .filter(definition -> definition.datasetSplit() == split)
+                .collect(Collectors.toList());
+    }
+
     public static String availablePartyNames() {
         return DEFINITIONS.values().stream()
                 .map(PartyDefinition::name)
@@ -61,5 +101,58 @@ public final class PartyCatalog {
 
     private static String normalize(String value) {
         return value.toLowerCase(Locale.ROOT);
+    }
+
+    private static void validate(PartyDefinition definition) {
+        if (definition == null || definition.name() == null || definition.name().isBlank()
+                || definition.displayName() == null || definition.displayName().isBlank()
+                || definition.datasetSplit() == null
+                || definition.loadoutFingerprint() == null
+                || definition.loadoutFingerprint().isBlank()
+                || !Double.isFinite(definition.rotationCycleSeconds())
+                || definition.rotationCycleSeconds() <= 0.0) {
+            throw new IllegalArgumentException("Invalid party definition metadata");
+        }
+        CharacterId[] order = definition.partyOrder();
+        if (order == null || order.length != 4) {
+            throw new IllegalArgumentException("Party must contain exactly four slots: " + definition.name());
+        }
+        Set<CharacterId> unique = new HashSet<>();
+        for (CharacterId characterId : order) {
+            if (characterId == null || !unique.add(characterId)) {
+                throw new IllegalArgumentException("Party slots must be non-null and unique: " + definition.name());
+            }
+            if (!ACTION_CAPABILITIES.contains(characterId)) {
+                throw new IllegalArgumentException(
+                        "Missing action capabilities for " + characterId + " in " + definition.name());
+            }
+        }
+        Map<CharacterId, Set<PolicyAction>> required = definition.requiredActionCapabilities();
+        if (required == null || !unique.containsAll(required.keySet())) {
+            throw new IllegalArgumentException("Required actions reference a non-party character: " + definition.name());
+        }
+        for (Map.Entry<CharacterId, Set<PolicyAction>> entry : required.entrySet()) {
+            if (entry.getValue() == null || entry.getValue().isEmpty()) {
+                throw new IllegalArgumentException("Required action set must not be empty: " + entry.getKey());
+            }
+            for (PolicyAction action : entry.getValue()) {
+                if (action == null || !action.requiresCharacterCapability()
+                        || !ACTION_CAPABILITIES.supports(entry.getKey(), action)) {
+                    throw new IllegalArgumentException(
+                            "Unsupported required action " + action + " for " + entry.getKey());
+                }
+            }
+        }
+        int activeSlot = 0;
+        for (int actionId : definition.baselinePolicyActions()) {
+            PolicyAction action = PolicyAction.fromId(actionId);
+            if (action.isSwap()) {
+                activeSlot = action.getTargetSlot();
+            } else if (action.requiresCharacterCapability()
+                    && !ACTION_CAPABILITIES.supports(order[activeSlot], action)) {
+                throw new IllegalArgumentException(
+                        "Baseline action " + action + " is unsupported for " + order[activeSlot]);
+            }
+        }
     }
 }

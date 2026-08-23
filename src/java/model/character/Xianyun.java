@@ -270,6 +270,23 @@ public final class Xianyun extends Character implements
         return getSkillCDRemaining(currentTime) <= EPSILON;
     }
 
+    /** Rejects ground attacks while a Skyladder sequence requires a Plunge. */
+    @Override
+    public boolean canPerformAction(
+            CharacterActionRequest request,
+            double currentTime) {
+        if (request == null) {
+            throw new IllegalArgumentException("Xianyun action is required");
+        }
+        refreshTimedState(currentTime);
+        if (skillLeapCount > 0
+                && (request.getKey() == CharacterActionKey.NORMAL
+                        || request.getKey() == CharacterActionKey.CHARGE)) {
+            return false;
+        }
+        return super.canPerformAction(request, currentTime);
+    }
+
     /** Returns the active Skyladder count after applying lazy expiry. */
     public int getSkillLeapCount(double currentTime) {
         refreshTimedState(currentTime);

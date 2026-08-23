@@ -433,6 +433,27 @@ public abstract class Character {
     }
 
     /**
+     * Returns whether a typed action is currently valid for this character.
+     * Character-specific transient states may override this advisory gate;
+     * {@code onAction} remains responsible for enforcing the same invariant.
+     */
+    public boolean canPerformAction(
+            CharacterActionRequest request,
+            double currentTime) {
+        if (request == null) {
+            throw new IllegalArgumentException("Character action is required");
+        }
+        switch (request.getKey()) {
+            case SKILL:
+                return canSkill(currentTime);
+            case BURST:
+                return canBurst(currentTime);
+            default:
+                return true;
+        }
+    }
+
+    /**
      * @param currentTime current simulation time
      * @return remaining skill cooldown in seconds (0 if ready)
      */
