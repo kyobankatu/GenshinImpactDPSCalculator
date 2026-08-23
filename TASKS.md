@@ -25266,6 +25266,8 @@ Completion evidence:
 
 ### Phase 6: Versioned Expert Dataset And Exact Replay
 
+Status: Done (2026-08-24).
+
 Why sixth:
 
 - Search output must survive processes and sessions with enough provenance to
@@ -25314,6 +25316,22 @@ Verification:
 - `./gradlew RotationDatasetRegressionTest build`
 - `python -m pytest src/python/rl/tests`
 - `python scripts/preflight.py`
+
+Completion evidence:
+
+- Schema v1 records simulator/scenario/split/seed/horizon/revision/search/rank
+  provenance, recurrent observations, masks, chosen actions, policy and Q
+  targets, state hashes, boundaries, and exact terminal objective components.
+- Java publishes deterministic gzip JSONL shards under content-addressed names
+  and replaces the manifest atomically only after all shards are durable. Java
+  and Python reject stale revisions, unsafe or corrupt shards, duplicate IDs,
+  split collisions, invalid/masked actions, malformed targets, and non-finite
+  values.
+- A real Java-generated record was hash-validated by Python and replayed exactly
+  by Java against the current simulator. The Java compressed multi-shard,
+  atomic-manifest, corruption, and replay regression passes; all 29 Python RL
+  tests and the Java build pass. Generated campaign shards remain untracked
+  under `output/rotation_dataset*/`.
 
 ### Phase 7: Behavior-Cloning And Value Pretraining
 

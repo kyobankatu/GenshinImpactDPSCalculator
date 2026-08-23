@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "format": "gzip-jsonl",
+  "simulatorRevision": "rotation-simulator-v1",
+  "requiredRecordFields": [
+    "recordId",
+    "recordHash",
+    "scenarioFingerprint",
+    "partyName",
+    "split",
+    "seed",
+    "cycleDurationSeconds",
+    "cycleCount",
+    "searchBudget",
+    "trajectoryRank",
+    "decisions",
+    "terminalObjective"
+  ],
+  "decisionFields": [
+    "observation",
+    "legalActionMask",
+    "actionId",
+    "visitPolicyTarget",
+    "qEstimates",
+    "stateHash",
+    "recurrentBoundary"
+  ]
+}

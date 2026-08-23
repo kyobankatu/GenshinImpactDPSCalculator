@@ -1,6 +1,7 @@
 package sample;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 import simulation.party.PartyCatalog;
 import simulation.party.PartyDefinition;
@@ -22,17 +23,17 @@ public final class SampleLauncher {
             RunPartySimulation.run(definition.name());
             return;
         }
-        if (runLegacySample(name)) {
+        if (runLegacySample(name, Arrays.copyOfRange(args, 1, args.length))) {
             return;
         }
         fail("Unknown sample or party: " + name + ".");
     }
 
-    private static boolean runLegacySample(String name) {
+    private static boolean runLegacySample(String name, String[] sampleArgs) {
         try {
             Class<?> clazz = Class.forName("sample." + name);
             Method main = clazz.getMethod("main", String[].class);
-            main.invoke(null, (Object) new String[0]);
+            main.invoke(null, (Object) sampleArgs);
             return true;
         } catch (ClassNotFoundException e) {
             return false;
