@@ -25136,6 +25136,8 @@ Completion evidence:
 
 ### Phase 4: Slot-Equivariant Recurrent Policy And Value Model
 
+Status: Done (2026-08-24).
+
 Why fourth:
 
 - The existing shared character encoder still has a slot-sensitive joint head.
@@ -25177,6 +25179,25 @@ Verification:
 
 - `python -m pytest src/python/rl/tests`
 - `./gradlew build`
+
+Completion evidence:
+
+- GRU and Transformer policies share one slot-equivariant backbone. Combat
+  logits and recurrent state use permutation-invariant pooled/active/global
+  context; shared per-slot heads emit swap logits and auxiliary character
+  targets. The privileged critic uses shared slot encoding plus invariant
+  pooling, so value is invariant as well.
+- Architecture revision 2 is required in checkpoints. Observation, hidden,
+  privileged-state, action-mask, and sequence dimensions are checked before
+  inference; NaN state and active all-masked rows fail, while padded rows use
+  only an internal Wait fallback.
+- Twenty-two Python tests cover all 24 slot permutations for both policy types,
+  duplicate slot features, non-zero recurrent state, finite gradients, exact
+  masked probabilities, malformed inputs, checkpoint round trips, and legacy
+  architecture rejection. The Java build passes.
+- A bounded live Transformer PPO smoke completed one update, deterministic and
+  stochastic evaluation with zero invalid actions, checkpoint save, and final
+  checkpoint reload against a local rollout service; the service was stopped.
 
 ### Phase 5: Deterministic Diverse Expert Search
 

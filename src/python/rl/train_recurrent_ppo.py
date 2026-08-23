@@ -22,7 +22,12 @@ from binary_protocol import (
     OBSERVATION_SCHEMA_REVISION,
     PRIVILEGED_SCHEMA_REVISION,
 )
-from recurrent_ppo import build_policy, compute_advantages, validate_checkpoint_payload
+from recurrent_ppo import (
+    ARCHITECTURE_REVISION,
+    build_policy,
+    compute_advantages,
+    validate_checkpoint_payload,
+)
 from rollout_service_client import build_rollout_client
 
 
@@ -698,6 +703,7 @@ def init_wandb(args, config, client, device, existing_run=None):
         "observation_size": client.observation_size,
         "action_size": client.action_size,
         "action_layout_revision": ACTION_LAYOUT_REVISION,
+        "architecture_revision": ARCHITECTURE_REVISION,
         "observation_schema_revision": OBSERVATION_SCHEMA_REVISION,
         "privileged_schema_revision": PRIVILEGED_SCHEMA_REVISION,
         "loadout_schema_revision": LOADOUT_SCHEMA_REVISION,

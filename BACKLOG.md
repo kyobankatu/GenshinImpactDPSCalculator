@@ -4526,7 +4526,7 @@ experiment record.
 
 ### B-212 — Expert-iteration rotation optimization model
 
-- **Status:** in progress; Phase 3 complete
+- **Status:** in progress; Phase 4 complete
 - **Source:** explicit 2026-08-24 request to plan a model that optimizes
   rotations for arbitrary supported parties without requiring a human rotation.
 - **Symptom:** the current RL registry exposes only two parties, the seven-action
@@ -4565,3 +4565,7 @@ experiment record.
   critic observations include typed loadout/fixed-stat blocks and reject stale
   dimensions or non-finite data. All eight registered capability profiles were
   refreshed and the live Java/Python handshake passes.
+- **Checkpoint:** Phase 4 is complete. GRU and Transformer actor, critic, swap,
+  and auxiliary heads now obey exact slot permutation contracts under shared
+  architecture revision 2. Twenty-two Python tests and a bounded live PPO
+  save/evaluate/reload smoke pass with zero invalid actions.

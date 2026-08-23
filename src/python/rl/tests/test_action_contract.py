@@ -16,6 +16,7 @@ from binary_protocol import (
     VERSION,
 )
 from recurrent_ppo import (
+    ARCHITECTURE_REVISION,
     CHAR_FEATURE_SIZE,
     GLOBAL_FEATURE_SIZE,
     NUM_CHARS,
@@ -79,6 +80,7 @@ def test_stale_action_layout_revision_is_rejected():
         "hidden_size": 16,
         "action_size": 7,
         "action_layout_revision": 1,
+        "architecture_revision": ARCHITECTURE_REVISION,
         "observation_schema_revision": OBSERVATION_SCHEMA_REVISION,
         "privileged_schema_revision": PRIVILEGED_SCHEMA_REVISION,
         "loadout_schema_revision": LOADOUT_SCHEMA_REVISION,
