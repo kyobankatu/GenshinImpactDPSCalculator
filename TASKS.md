@@ -24940,6 +24940,8 @@ Scheduler identity rule:
 
 ### Phase 1: Rotation Environment And Objective Contract
 
+Status: Done (2026-08-24).
+
 Why first:
 
 - Search, labels, and evaluation must score exactly the same deterministic
@@ -24985,6 +24987,19 @@ Test cases:
 Verification:
 
 - `./gradlew RotationEnvironmentRegressionTest PartyCatalogRegressionTest BenchmarkRLJava build`
+
+Completion evidence:
+
+- The search-facing interface owns reset, step, current state, objective
+  decomposition, snapshot identity, restore, and close without exposing core
+  simulator control flow.
+- Existing native snapshots omit combo state for several legacy characters.
+  Branch restore therefore uses deterministic reset plus exact action-history
+  replay; representative FlinsParty2 and RaidenParty branches reproduce state
+  hashes, damage, masks, and objective values after a non-root snapshot.
+- The focused regression, party catalog regression, Java rollout benchmark, and
+  build pass. The existing rollout benchmark reports 3,555.6 environment
+  steps/second for its four-environment bounded run.
 
 ### Phase 2: Complete Versioned Action Vocabulary
 

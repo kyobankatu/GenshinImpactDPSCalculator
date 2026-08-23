@@ -4550,3 +4550,8 @@ experiment record.
   replay, zero invalid actions, party-disjoint holdout, model-only improvement
   over deterministic random, and non-inferior policy-guided search under equal
   simulator-call budgets.
+- **Checkpoint:** Phase 1 is complete. The terminal objective exposes raw
+  damage, DPS, cyclic-energy deficit, invalid actions, feasibility, and combined
+  score. Search snapshots reject cross-environment/reset misuse and restore by
+  deterministic action-history replay because native legacy-character
+  snapshots do not yet include every combo index.
