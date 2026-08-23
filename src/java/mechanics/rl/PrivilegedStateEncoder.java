@@ -13,7 +13,10 @@ import simulation.CombatSimulator;
  * prediction targets.
  */
 public class PrivilegedStateEncoder {
-    public static final int FEATURES_PER_CHARACTER = 5;
+    /** Revision of the ordered privileged-state layout. */
+    public static final int SCHEMA_REVISION = 2;
+    public static final int DYNAMIC_FEATURES_PER_CHARACTER = 5;
+    public static final int FEATURES_PER_CHARACTER = DYNAMIC_FEATURES_PER_CHARACTER + LoadoutFeatureEncoder.SIZE;
     public static final int GLOBAL_FEATURES = 3;
     public static final int NUM_CHARS = 4;
     public static final int STATE_SIZE = FEATURES_PER_CHARACTER * NUM_CHARS + GLOBAL_FEATURES;
@@ -21,13 +24,25 @@ public class PrivilegedStateEncoder {
     private static final String DEFAULT_PROFILES_PATH = "config/capability_profiles/profiles.json";
 
     private final CapabilityProfileStore profileStore;
+    private final LoadoutFeatureEncoder loadoutFeatureEncoder;
 
     public PrivilegedStateEncoder() {
         this(new CapabilityProfileStore(DEFAULT_PROFILES_PATH));
     }
 
     public PrivilegedStateEncoder(CapabilityProfileStore profileStore) {
+        this(profileStore, new LoadoutFeatureEncoder());
+    }
+
+    /** Constructs an encoder with explicit profile and static-loadout encoders. */
+    public PrivilegedStateEncoder(
+            CapabilityProfileStore profileStore,
+            LoadoutFeatureEncoder loadoutFeatureEncoder) {
         this.profileStore = profileStore != null ? profileStore : CapabilityProfileStore.empty();
+        if (loadoutFeatureEncoder == null) {
+            throw new IllegalArgumentException("loadoutFeatureEncoder must not be null");
+        }
+        this.loadoutFeatureEncoder = loadoutFeatureEncoder;
     }
 
     public double[] encode(CombatSimulator sim, EpisodeConfig config) {
@@ -37,6 +52,10 @@ public class PrivilegedStateEncoder {
     }
 
     public void fillState(CombatSimulator sim, EpisodeConfig config, double[] state) {
+        if (state == null || state.length != STATE_SIZE) {
+            throw new IllegalArgumentException(
+                    "Privileged-state target length must be " + STATE_SIZE);
+        }
         double now = sim.getCurrentTime();
         Character active = sim.getActiveCharacter();
         int index = 0;
@@ -101,6 +120,7 @@ public class PrivilegedStateEncoder {
             state[index++] = followUpOpportunity;
             state[index++] = swapInValue;
             state[index++] = setupAmortization;
+            index = loadoutFeatureEncoder.fill(character, state, index);
 
             commitments[slot] = commitment;
             payloads[slot] = offFieldPayload;
@@ -125,7 +145,8 @@ public class PrivilegedStateEncoder {
 
         state[index++] = teamSetupValue;
         state[index++] = reactionPotential;
-        state[index] = activeSwapOpportunity;
+        state[index++] = activeSwapOpportunity;
+        validateState(state, index);
     }
 
     private int findSlot(CharacterId[] partyOrder, CharacterId target) {
@@ -180,5 +201,18 @@ public class PrivilegedStateEncoder {
 
     private double clamp01(double value) {
         return Math.max(0.0, Math.min(1.0, value));
+    }
+
+    private void validateState(double[] state, int written) {
+        if (state.length != STATE_SIZE || written != STATE_SIZE) {
+            throw new IllegalArgumentException(
+                    "Privileged-state dimension mismatch: expected=" + STATE_SIZE
+                            + " target=" + state.length + " written=" + written);
+        }
+        for (int index = 0; index < state.length; index++) {
+            if (!Double.isFinite(state[index])) {
+                throw new IllegalStateException("Non-finite privileged-state feature at index " + index);
+            }
+        }
     }
 }

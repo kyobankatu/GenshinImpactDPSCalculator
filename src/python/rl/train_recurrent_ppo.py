@@ -15,7 +15,13 @@ except ImportError:
     wandb = None
 
 from evaluation import assert_policy_client_compatible, evaluate_policy
-from binary_protocol import ACTION_LAYOUT_REVISION
+from binary_protocol import (
+    ACTION_LAYOUT_REVISION,
+    CAPABILITY_SCHEMA_REVISION,
+    LOADOUT_SCHEMA_REVISION,
+    OBSERVATION_SCHEMA_REVISION,
+    PRIVILEGED_SCHEMA_REVISION,
+)
 from recurrent_ppo import build_policy, compute_advantages, validate_checkpoint_payload
 from rollout_service_client import build_rollout_client
 
@@ -165,6 +171,12 @@ def run_training(args, run=None):
         checkpoint_observation_size = checkpoint_payload["observation_size"]
         checkpoint_action_size = checkpoint_payload["action_size"]
         checkpoint_action_layout_revision = checkpoint_payload["action_layout_revision"]
+        checkpoint_schemas = (
+            checkpoint_payload["observation_schema_revision"],
+            checkpoint_payload["privileged_schema_revision"],
+            checkpoint_payload["loadout_schema_revision"],
+            checkpoint_payload["capability_schema_revision"],
+        )
         checkpoint_char_feature_size = checkpoint_payload.get("char_feature_size")
         checkpoint_global_feature_size = checkpoint_payload.get("global_feature_size")
         checkpoint_num_chars = checkpoint_payload.get("num_chars")
@@ -188,6 +200,17 @@ def run_training(args, run=None):
                 "Resume checkpoint action layout mismatch: "
                 f"checkpoint={checkpoint_action_layout_revision} "
                 f"service={client.action_layout_revision}"
+            )
+        client_schemas = (
+            client.observation_schema_revision,
+            client.privileged_schema_revision,
+            client.loadout_schema_revision,
+            client.capability_schema_revision,
+        )
+        if checkpoint_schemas != client_schemas:
+            raise ValueError(
+                "Resume checkpoint observation schema mismatch: "
+                f"checkpoint={checkpoint_schemas} service={client_schemas}"
             )
         if checkpoint_char_feature_size is not None and checkpoint_char_feature_size != policy.char_feature_size:
             raise ValueError(
@@ -675,6 +698,10 @@ def init_wandb(args, config, client, device, existing_run=None):
         "observation_size": client.observation_size,
         "action_size": client.action_size,
         "action_layout_revision": ACTION_LAYOUT_REVISION,
+        "observation_schema_revision": OBSERVATION_SCHEMA_REVISION,
+        "privileged_schema_revision": PRIVILEGED_SCHEMA_REVISION,
+        "loadout_schema_revision": LOADOUT_SCHEMA_REVISION,
+        "capability_schema_revision": CAPABILITY_SCHEMA_REVISION,
         "privileged_observation_size": client.privileged_observation_size,
     }
     run_config.update(config)

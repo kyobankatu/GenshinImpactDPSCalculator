@@ -25066,6 +25066,8 @@ Completion evidence:
 
 ### Phase 3: Loadout-Aware Observation Contract
 
+Status: Done (2026-08-24).
+
 Why third:
 
 - A policy cannot optimize arbitrary supported loadouts if distinct weapons,
@@ -25113,6 +25115,24 @@ Verification:
 
 - `./gradlew ProfileCapabilities PartyCatalogRegressionTest BenchmarkRLJava build`
 - `python -m pytest src/python/rl/tests`
+
+Completion evidence:
+
+- Each character observation now contains a 41-feature typed loadout block for
+  constellation, cooldown/energy metadata, weapon type/refinement/fixed stats,
+  artifact fixed state/capabilities, and assembled fixed stats. Display names
+  and implementation class names are not model inputs.
+- Protocol v12 handshakes observation, privileged-state, loadout, capability,
+  and action revisions. Checkpoints record and strictly validate the same
+  revisions and dimensions: 70 features per slot, 287 actor observations, and
+  187 privileged features.
+- Controlled weapon, refinement, constellation, and artifact deltas remain in
+  their assigned loadout block; snapshot restore reproduces both encodings.
+  Missing typed metadata/profile, malformed dimensions, non-finite stats, and
+  stale schemas fail closed in Java/Python regressions.
+- All eight registered capability profiles were regenerated. The full Java
+  profile/regression/benchmark/build/Javadoc gate, eight Python tests, and a
+  bounded live Java/Python v12 smoke pass; the service was terminated.
 
 ### Phase 4: Slot-Equivariant Recurrent Policy And Value Model
 

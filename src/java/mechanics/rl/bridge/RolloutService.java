@@ -14,10 +14,12 @@ import java.util.Map;
 
 import mechanics.rl.ActionSpace;
 import mechanics.rl.BattleEnvironment;
+import mechanics.rl.CapabilityProfile;
 import mechanics.rl.EpisodeConfig;
-import mechanics.rl.RLEpisodeFactory;
+import mechanics.rl.LoadoutFeatureEncoder;
 import mechanics.rl.ObservationEncoder;
 import mechanics.rl.PrivilegedStateEncoder;
+import mechanics.rl.RLEpisodeFactory;
 import mechanics.rl.RLPartyRegistry;
 import mechanics.rotation.PolicyAction;
 
@@ -146,6 +148,10 @@ public class RolloutService {
                     out.writeInt(ObservationEncoder.OBSERVATION_SIZE);
                     out.writeInt(ActionSpace.SIZE);
                     out.writeInt(PolicyAction.LAYOUT_REVISION);
+                    out.writeInt(ObservationEncoder.SCHEMA_REVISION);
+                    out.writeInt(PrivilegedStateEncoder.SCHEMA_REVISION);
+                    out.writeInt(LoadoutFeatureEncoder.SCHEMA_REVISION);
+                    out.writeInt(CapabilityProfile.SCHEMA_REVISION);
                     out.writeInt(PrivilegedStateEncoder.STATE_SIZE);
                     out.writeInt(ObservationEncoder.FEATURES_PER_CHARACTER);
                     out.writeInt(ObservationEncoder.GLOBAL_FEATURES);

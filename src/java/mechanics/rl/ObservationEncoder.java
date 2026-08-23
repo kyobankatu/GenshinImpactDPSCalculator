@@ -27,24 +27,27 @@ import simulation.CombatSimulator;
  * <p>Layout: {@code NUM_CHARS} blocks of {@link #FEATURES_PER_CHARACTER} features
  * followed by {@link #GLOBAL_FEATURES} global features.
  *
- * <p>Per-character block (29 dims):
+ * <p>Per-character block (70 dims):
  * <ul>
  *   <li>[0–9] dynamic: energy ratio, isActive, skill readiness, burst readiness,
  *       isFormActive, active-buff ratio, max-buff-remaining, time-since-last-active,
  *       on-field fraction, cumulative damage share</li>
  *   <li>[10–17] static: element one-hot (8 dims, {@link Element#values()} order)</li>
  *   <li>[18–28] static: capability and value-curve profile scores</li>
+ *   <li>[29–69] static: typed loadout and fixed-stat features</li>
  * </ul>
  *
  * <p>Global block (7 dims): swap readiness, time remaining, PYRO/HYDRO/ELECTRO/ANEMO
  * aura, thundercloud active.
  */
 public class ObservationEncoder {
+    /** Revision of the ordered observation layout. */
+    public static final int SCHEMA_REVISION = 2;
     public static final int NUM_CHARS = 4;
     /** Number of dynamic features per character slot. */
     public static final int CHAR_DYNAMIC_FEATURES = 10;
-    /** Number of static features per character slot (8 element one-hot + capability scores). */
-    public static final int CHAR_STATIC_FEATURES = 8 + CapabilityProfile.SIZE;
+    /** Number of static features per character slot. */
+    public static final int CHAR_STATIC_FEATURES = 8 + CapabilityProfile.SIZE + LoadoutFeatureEncoder.SIZE;
     /** Total features per character slot. */
     public static final int FEATURES_PER_CHARACTER = CHAR_DYNAMIC_FEATURES + CHAR_STATIC_FEATURES;
     /** Number of global features appended after all character blocks. */
@@ -55,6 +58,7 @@ public class ObservationEncoder {
     private static final String DEFAULT_PROFILES_PATH = "config/capability_profiles/profiles.json";
 
     private final CapabilityProfileStore profileStore;
+    private final LoadoutFeatureEncoder loadoutFeatureEncoder;
 
     /**
      * Constructs an encoder that loads capability profiles from the default path
@@ -70,7 +74,18 @@ public class ObservationEncoder {
      * @param profileStore capability profile store; must not be null
      */
     public ObservationEncoder(CapabilityProfileStore profileStore) {
+        this(profileStore, new LoadoutFeatureEncoder());
+    }
+
+    /** Constructs an encoder with explicit static-profile and loadout encoders. */
+    public ObservationEncoder(
+            CapabilityProfileStore profileStore,
+            LoadoutFeatureEncoder loadoutFeatureEncoder) {
         this.profileStore = profileStore != null ? profileStore : CapabilityProfileStore.empty();
+        if (loadoutFeatureEncoder == null) {
+            throw new IllegalArgumentException("loadoutFeatureEncoder must not be null");
+        }
+        this.loadoutFeatureEncoder = loadoutFeatureEncoder;
     }
 
     /**
@@ -111,6 +126,10 @@ public class ObservationEncoder {
      */
     public void fillObservation(CombatSimulator sim, EpisodeConfig config, double lastSwapTime,
             double[] slotLastActiveTime, double[] slotOnFieldTime, double[] observation) {
+        if (observation == null || observation.length != OBSERVATION_SIZE) {
+            throw new IllegalArgumentException(
+                    "Observation target length must be " + OBSERVATION_SIZE);
+        }
         double now = sim.getCurrentTime();
         double totalDamage = sim.getTotalDamage();
         int index = 0;
@@ -155,6 +174,9 @@ public class ObservationEncoder {
             for (int profileIndex = 0; profileIndex < CapabilityProfile.SIZE; profileIndex++) {
                 observation[index++] = profile[profileIndex];
             }
+
+            // --- Static features: typed loadout and fixed stats ---
+            index = loadoutFeatureEncoder.fill(character, observation, index);
         }
 
         Enemy enemy = sim.getEnemy();
@@ -164,7 +186,8 @@ public class ObservationEncoder {
         observation[index++] = normalizedAura(enemy, Element.HYDRO, now);
         observation[index++] = normalizedAura(enemy, Element.ELECTRO, now);
         observation[index++] = normalizedAura(enemy, Element.ANEMO, now);
-        observation[index] = sim.getThundercloudEndTime() > now ? 1.0 : 0.0;
+        observation[index++] = sim.getThundercloudEndTime() > now ? 1.0 : 0.0;
+        validateObservation(observation, index);
     }
 
     private boolean isFormActive(Character character, double currentTime) {
@@ -201,6 +224,19 @@ public class ObservationEncoder {
 
     private double clamp01(double value) {
         return Math.max(0.0, Math.min(1.0, value));
+    }
+
+    private void validateObservation(double[] observation, int written) {
+        if (observation.length != OBSERVATION_SIZE || written != OBSERVATION_SIZE) {
+            throw new IllegalArgumentException(
+                    "Observation dimension mismatch: expected=" + OBSERVATION_SIZE
+                            + " target=" + observation.length + " written=" + written);
+        }
+        for (int index = 0; index < observation.length; index++) {
+            if (!Double.isFinite(observation[index])) {
+                throw new IllegalStateException("Non-finite observation feature at index " + index);
+            }
+        }
     }
 
     /**

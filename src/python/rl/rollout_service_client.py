@@ -3,6 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from binary_protocol import (
     ACTION_LAYOUT_REVISION,
+    CAPABILITY_SCHEMA_REVISION,
     CMD_BRANCH_ROLLOUT,
     CMD_CLOSE_RUNNER,
     CMD_CREATE_RUNNER,
@@ -11,6 +12,9 @@ from binary_protocol import (
     CMD_RESET_RUNNER,
     CMD_SHUTDOWN,
     CMD_STEP_RUNNER,
+    LOADOUT_SCHEMA_REVISION,
+    OBSERVATION_SCHEMA_REVISION,
+    PRIVILEGED_SCHEMA_REVISION,
     VERSION,
     recv_bool,
     recv_bools,
@@ -32,6 +36,10 @@ class RolloutServiceClient:
         self.observation_size = None
         self.action_size = None
         self.action_layout_revision = None
+        self.observation_schema_revision = None
+        self.privileged_schema_revision = None
+        self.loadout_schema_revision = None
+        self.capability_schema_revision = None
         self.privileged_observation_size = None
         self.char_feature_size = None
         self.global_feature_size = None
@@ -45,6 +53,10 @@ class RolloutServiceClient:
         self.observation_size = recv_int(self.sock)
         self.action_size = recv_int(self.sock)
         self.action_layout_revision = recv_int(self.sock)
+        self.observation_schema_revision = recv_int(self.sock)
+        self.privileged_schema_revision = recv_int(self.sock)
+        self.loadout_schema_revision = recv_int(self.sock)
+        self.capability_schema_revision = recv_int(self.sock)
         self.privileged_observation_size = recv_int(self.sock)
         self.char_feature_size = recv_int(self.sock)
         self.global_feature_size = recv_int(self.sock)
@@ -57,6 +69,23 @@ class RolloutServiceClient:
             raise RuntimeError(
                 "Action layout revision mismatch: "
                 f"java={self.action_layout_revision} python={ACTION_LAYOUT_REVISION}"
+            )
+        expected_revisions = (
+            OBSERVATION_SCHEMA_REVISION,
+            PRIVILEGED_SCHEMA_REVISION,
+            LOADOUT_SCHEMA_REVISION,
+            CAPABILITY_SCHEMA_REVISION,
+        )
+        actual_revisions = (
+            self.observation_schema_revision,
+            self.privileged_schema_revision,
+            self.loadout_schema_revision,
+            self.capability_schema_revision,
+        )
+        if actual_revisions != expected_revisions:
+            raise RuntimeError(
+                "Observation schema revision mismatch: "
+                f"java={actual_revisions} python={expected_revisions}"
             )
 
     def create_runner(self, env_count: int) -> int:
@@ -197,6 +226,10 @@ class MultiRolloutServiceClient:
         self.observation_size = self.clients[0].observation_size
         self.action_size = self.clients[0].action_size
         self.action_layout_revision = self.clients[0].action_layout_revision
+        self.observation_schema_revision = self.clients[0].observation_schema_revision
+        self.privileged_schema_revision = self.clients[0].privileged_schema_revision
+        self.loadout_schema_revision = self.clients[0].loadout_schema_revision
+        self.capability_schema_revision = self.clients[0].capability_schema_revision
         self.privileged_observation_size = self.clients[0].privileged_observation_size
         self.char_feature_size = self.clients[0].char_feature_size
         self.global_feature_size = self.clients[0].global_feature_size
@@ -210,6 +243,10 @@ class MultiRolloutServiceClient:
                 client.observation_size != self.observation_size
                 or client.action_size != self.action_size
                 or client.action_layout_revision != self.action_layout_revision
+                or client.observation_schema_revision != self.observation_schema_revision
+                or client.privileged_schema_revision != self.privileged_schema_revision
+                or client.loadout_schema_revision != self.loadout_schema_revision
+                or client.capability_schema_revision != self.capability_schema_revision
             ):
                 raise RuntimeError("Observation/action space mismatch across rollout services")
             if client.privileged_observation_size != self.privileged_observation_size:

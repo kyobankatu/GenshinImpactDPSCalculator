@@ -85,6 +85,19 @@ public class Weapon {
     }
 
     /**
+     * Returns the weapon refinement rank used by loadout-aware consumers.
+     *
+     * <p>Weapons without an explicit refinement implementation represent R1.
+     * Existing refinement-aware subclasses override this method through their
+     * established {@code getRefinement()} accessors.</p>
+     *
+     * @return refinement rank in the inclusive range 1-5
+     */
+    public int getRefinement() {
+        return 1;
+    }
+
+    /**
      * Returns the expected flat energy generated per Normal or Charged Attack hit
      * based on the weapon type's probability table.
      *

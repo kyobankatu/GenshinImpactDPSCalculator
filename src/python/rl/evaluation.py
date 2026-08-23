@@ -1,6 +1,12 @@
 import torch
 
-from binary_protocol import ACTION_LAYOUT_REVISION
+from binary_protocol import (
+    ACTION_LAYOUT_REVISION,
+    CAPABILITY_SCHEMA_REVISION,
+    LOADOUT_SCHEMA_REVISION,
+    OBSERVATION_SCHEMA_REVISION,
+    PRIVILEGED_SCHEMA_REVISION,
+)
 
 ROLE_FEATURES_PER_SLOT = 5
 ROLE_ON_FIELD_SHARE = 0
@@ -16,6 +22,22 @@ def assert_policy_client_compatible(policy, client, context):
         mismatches.append(
             "action_layout_revision "
             f"policy={ACTION_LAYOUT_REVISION} service={client.action_layout_revision}"
+        )
+    expected_schemas = (
+        OBSERVATION_SCHEMA_REVISION,
+        PRIVILEGED_SCHEMA_REVISION,
+        LOADOUT_SCHEMA_REVISION,
+        CAPABILITY_SCHEMA_REVISION,
+    )
+    client_schemas = (
+        client.observation_schema_revision,
+        client.privileged_schema_revision,
+        client.loadout_schema_revision,
+        client.capability_schema_revision,
+    )
+    if client_schemas != expected_schemas:
+        mismatches.append(
+            f"schema_revisions policy={expected_schemas} service={client_schemas}"
         )
     if policy.observation_size != client.observation_size:
         mismatches.append(

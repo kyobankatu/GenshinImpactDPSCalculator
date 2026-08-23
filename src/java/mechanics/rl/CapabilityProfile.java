@@ -5,6 +5,8 @@ package mechanics.rl;
  * privileged-state encoding.
  */
 public final class CapabilityProfile {
+    /** Revision of the ordered capability-profile vector. */
+    public static final int SCHEMA_REVISION = 1;
     /** Index for off-field DPS ratio score. */
     public static final int OFF_FIELD_DPS_RATIO = 0;
     /** Index for team buff contribution score. */

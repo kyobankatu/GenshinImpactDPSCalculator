@@ -1,13 +1,19 @@
 import torch
 from torch import nn
 
-from binary_protocol import ACTION_LAYOUT_REVISION
+from binary_protocol import (
+    ACTION_LAYOUT_REVISION,
+    CAPABILITY_SCHEMA_REVISION,
+    LOADOUT_SCHEMA_REVISION,
+    OBSERVATION_SCHEMA_REVISION,
+    PRIVILEGED_SCHEMA_REVISION,
+)
 
 
-CHAR_FEATURE_SIZE = 29
+CHAR_FEATURE_SIZE = 70
 GLOBAL_FEATURE_SIZE = 7
 NUM_CHARS = 4
-PRIVILEGED_OBSERVATION_SIZE = 23
+PRIVILEGED_OBSERVATION_SIZE = 187
 
 
 class RecurrentPolicy(nn.Module):
@@ -187,6 +193,10 @@ class RecurrentPolicy(nn.Module):
             "hidden_size": self.hidden_size,
             "action_size": self.action_size,
             "action_layout_revision": ACTION_LAYOUT_REVISION,
+            "observation_schema_revision": OBSERVATION_SCHEMA_REVISION,
+            "privileged_schema_revision": PRIVILEGED_SCHEMA_REVISION,
+            "loadout_schema_revision": LOADOUT_SCHEMA_REVISION,
+            "capability_schema_revision": CAPABILITY_SCHEMA_REVISION,
             "char_feature_size": self.char_feature_size,
             "global_feature_size": self.global_feature_size,
             "num_chars": self.num_chars,
@@ -196,6 +206,9 @@ class RecurrentPolicy(nn.Module):
         if optimizer is not None:
             payload["optimizer_state_dict"] = optimizer.state_dict()
         if extra_state:
+            conflicts = sorted(set(payload).intersection(extra_state))
+            if conflicts:
+                raise ValueError(f"extra_state may not replace checkpoint contract fields: {conflicts}")
             payload.update(extra_state)
         torch.save(payload, path)
 
@@ -458,6 +471,10 @@ class TransformerPolicy(nn.Module):
             "hidden_size": self.hidden_size,
             "action_size": self.action_size,
             "action_layout_revision": ACTION_LAYOUT_REVISION,
+            "observation_schema_revision": OBSERVATION_SCHEMA_REVISION,
+            "privileged_schema_revision": PRIVILEGED_SCHEMA_REVISION,
+            "loadout_schema_revision": LOADOUT_SCHEMA_REVISION,
+            "capability_schema_revision": CAPABILITY_SCHEMA_REVISION,
             "char_feature_size": self.char_feature_size,
             "global_feature_size": self.global_feature_size,
             "num_chars": self.num_chars,
@@ -469,6 +486,9 @@ class TransformerPolicy(nn.Module):
         if optimizer is not None:
             payload["optimizer_state_dict"] = optimizer.state_dict()
         if extra_state:
+            conflicts = sorted(set(payload).intersection(extra_state))
+            if conflicts:
+                raise ValueError(f"extra_state may not replace checkpoint contract fields: {conflicts}")
             payload.update(extra_state)
         torch.save(payload, path)
 
@@ -508,6 +528,10 @@ def validate_checkpoint_payload(payload, path=None):
         "hidden_size",
         "action_size",
         "action_layout_revision",
+        "observation_schema_revision",
+        "privileged_schema_revision",
+        "loadout_schema_revision",
+        "capability_schema_revision",
         "char_feature_size",
         "global_feature_size",
         "num_chars",
@@ -525,6 +549,29 @@ def validate_checkpoint_payload(payload, path=None):
             "Unsupported action layout revision in checkpoint: "
             f"expected={ACTION_LAYOUT_REVISION} got={payload['action_layout_revision']}"
         )
+    expected_schemas = {
+        "observation_schema_revision": OBSERVATION_SCHEMA_REVISION,
+        "privileged_schema_revision": PRIVILEGED_SCHEMA_REVISION,
+        "loadout_schema_revision": LOADOUT_SCHEMA_REVISION,
+        "capability_schema_revision": CAPABILITY_SCHEMA_REVISION,
+    }
+    for field, expected in expected_schemas.items():
+        if payload[field] != expected:
+            raise ValueError(
+                f"Unsupported {field} in checkpoint: expected={expected} got={payload[field]}"
+            )
+    expected_dimensions = {
+        "observation_size": CHAR_FEATURE_SIZE * NUM_CHARS + GLOBAL_FEATURE_SIZE,
+        "char_feature_size": CHAR_FEATURE_SIZE,
+        "global_feature_size": GLOBAL_FEATURE_SIZE,
+        "num_chars": NUM_CHARS,
+        "privileged_observation_size": PRIVILEGED_OBSERVATION_SIZE,
+    }
+    for field, expected in expected_dimensions.items():
+        if payload[field] != expected:
+            raise ValueError(
+                f"Unsupported {field} for observation schema: expected={expected} got={payload[field]}"
+            )
 
 
 def build_policy(policy_type, *args, **kwargs):

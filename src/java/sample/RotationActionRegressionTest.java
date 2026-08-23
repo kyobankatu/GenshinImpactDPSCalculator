@@ -45,7 +45,7 @@ public class RotationActionRegressionTest {
         assertEquals(11, PolicyAction.SIZE, "policy action size");
         assertEquals(PolicyAction.SIZE, RLAction.SIZE, "RL alias size");
         assertEquals(2, PolicyAction.LAYOUT_REVISION, "action layout revision");
-        assertEquals(11, BatchProtocol.VERSION, "batch protocol version");
+        assertEquals(12, BatchProtocol.VERSION, "batch protocol version");
         for (int id = 0; id < expected.length; id++) {
             assertEquals(id, expected[id].getId(), expected[id] + " id");
             assertEquals(id, RLAction.fromId(id).getId(), "RL alias id " + id);
