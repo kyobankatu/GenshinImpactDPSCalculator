@@ -2,7 +2,21 @@ import socket
 import struct
 
 
-VERSION = 10
+VERSION = 11
+ACTION_LAYOUT_REVISION = 2
+ACTION_NAMES = (
+    "NORMAL",
+    "CHARGE",
+    "PLUNGE",
+    "SKILL_PRESS",
+    "SKILL_HOLD",
+    "BURST",
+    "WAIT_SHORT",
+    "SWAP_SLOT_0",
+    "SWAP_SLOT_1",
+    "SWAP_SLOT_2",
+    "SWAP_SLOT_3",
+)
 
 CMD_HELLO = 1
 CMD_CREATE_RUNNER = 2

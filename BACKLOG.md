@@ -4526,7 +4526,7 @@ experiment record.
 
 ### B-212 — Expert-iteration rotation optimization model
 
-- **Status:** in progress; Phase 1 active
+- **Status:** in progress; Phase 2 complete
 - **Source:** explicit 2026-08-24 request to plan a model that optimizes
   rotations for arbitrary supported parties without requiring a human rotation.
 - **Symptom:** the current RL registry exposes only two parties, the seven-action
@@ -4555,3 +4555,8 @@ experiment record.
   score. Search snapshots reject cross-environment/reset misuse and restore by
   deterministic action-history replay because native legacy-character
   snapshots do not yet include every combo index.
+- **Checkpoint:** Phase 2 is complete. Java and Python now share eleven stable
+  action IDs, strict tracked character capabilities, an explicit short-Wait
+  action, binary protocol v11, and action-layout revision 2. Legacy checkpoints
+  and mismatched rollout peers fail closed; Java/Python live protocol smoke and
+  focused regression gates pass.

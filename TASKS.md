@@ -25003,6 +25003,8 @@ Completion evidence:
 
 ### Phase 2: Complete Versioned Action Vocabulary
 
+Status: Done (2026-08-24).
+
 Why second:
 
 - Expert labels are unusable if search, Java rollout, Python policy, and saved
@@ -25050,6 +25052,17 @@ Verification:
 
 - `./gradlew RotationActionRegressionTest PartyCatalogRegressionTest BenchmarkRLJava build`
 - `python -m pytest src/python/rl/tests`
+
+Completion evidence:
+
+- Java, Python, checkpoints, and the live rollout handshake share the eleven
+  stable action IDs and action-layout revision 2 under binary protocol v11.
+- Strict tracked capabilities fail closed for missing or malformed character
+  entries. Runtime masks cover capability, cooldown, energy, active slot, and
+  swap cooldown; short Wait advances only its configured simulator duration.
+- The Java verification gate, Javadoc, and all five Python RL tests pass. A
+  bounded live Java/Python smoke completed 16 environment steps through the
+  new handshake, and its rollout service was terminated afterward.
 
 ### Phase 3: Loadout-Aware Observation Contract
 

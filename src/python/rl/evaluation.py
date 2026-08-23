@@ -1,5 +1,7 @@
 import torch
 
+from binary_protocol import ACTION_LAYOUT_REVISION
+
 ROLE_FEATURES_PER_SLOT = 5
 ROLE_ON_FIELD_SHARE = 0
 ROLE_DAMAGE_SHARE = 1
@@ -10,6 +12,11 @@ ROLE_STAY_SHARE = 4
 
 def assert_policy_client_compatible(policy, client, context):
     mismatches = []
+    if client.action_layout_revision != ACTION_LAYOUT_REVISION:
+        mismatches.append(
+            "action_layout_revision "
+            f"policy={ACTION_LAYOUT_REVISION} service={client.action_layout_revision}"
+        )
     if policy.observation_size != client.observation_size:
         mismatches.append(
             f"observation_size policy={policy.observation_size} service={client.observation_size}"

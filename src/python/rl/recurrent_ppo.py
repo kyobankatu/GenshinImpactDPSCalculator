@@ -1,6 +1,8 @@
 import torch
 from torch import nn
 
+from binary_protocol import ACTION_LAYOUT_REVISION
+
 
 CHAR_FEATURE_SIZE = 29
 GLOBAL_FEATURE_SIZE = 7
@@ -184,6 +186,7 @@ class RecurrentPolicy(nn.Module):
             "observation_size": self.observation_size,
             "hidden_size": self.hidden_size,
             "action_size": self.action_size,
+            "action_layout_revision": ACTION_LAYOUT_REVISION,
             "char_feature_size": self.char_feature_size,
             "global_feature_size": self.global_feature_size,
             "num_chars": self.num_chars,
@@ -454,6 +457,7 @@ class TransformerPolicy(nn.Module):
             "observation_size": self.observation_size,
             "hidden_size": self.hidden_size,
             "action_size": self.action_size,
+            "action_layout_revision": ACTION_LAYOUT_REVISION,
             "char_feature_size": self.char_feature_size,
             "global_feature_size": self.global_feature_size,
             "num_chars": self.num_chars,
@@ -503,6 +507,7 @@ def validate_checkpoint_payload(payload, path=None):
         "observation_size",
         "hidden_size",
         "action_size",
+        "action_layout_revision",
         "char_feature_size",
         "global_feature_size",
         "num_chars",
@@ -515,6 +520,11 @@ def validate_checkpoint_payload(payload, path=None):
         raise ValueError(f"Missing required metadata in{location}: {missing}")
     if payload["policy_type"] not in ("gru", "transformer"):
         raise ValueError(f"Unsupported policy_type in checkpoint: {payload['policy_type']!r}")
+    if payload["action_layout_revision"] != ACTION_LAYOUT_REVISION:
+        raise ValueError(
+            "Unsupported action layout revision in checkpoint: "
+            f"expected={ACTION_LAYOUT_REVISION} got={payload['action_layout_revision']}"
+        )
 
 
 def build_policy(policy_type, *args, **kwargs):

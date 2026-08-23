@@ -15,6 +15,7 @@ except ImportError:
     wandb = None
 
 from evaluation import assert_policy_client_compatible, evaluate_policy
+from binary_protocol import ACTION_LAYOUT_REVISION
 from recurrent_ppo import build_policy, compute_advantages, validate_checkpoint_payload
 from rollout_service_client import build_rollout_client
 
@@ -163,6 +164,7 @@ def run_training(args, run=None):
         checkpoint_hidden_size = checkpoint_payload["hidden_size"]
         checkpoint_observation_size = checkpoint_payload["observation_size"]
         checkpoint_action_size = checkpoint_payload["action_size"]
+        checkpoint_action_layout_revision = checkpoint_payload["action_layout_revision"]
         checkpoint_char_feature_size = checkpoint_payload.get("char_feature_size")
         checkpoint_global_feature_size = checkpoint_payload.get("global_feature_size")
         checkpoint_num_chars = checkpoint_payload.get("num_chars")
@@ -180,6 +182,12 @@ def run_training(args, run=None):
             raise ValueError(
                 "Resume checkpoint action size mismatch: "
                 f"checkpoint={checkpoint_action_size} service={client.action_size}"
+            )
+        if checkpoint_action_layout_revision != client.action_layout_revision:
+            raise ValueError(
+                "Resume checkpoint action layout mismatch: "
+                f"checkpoint={checkpoint_action_layout_revision} "
+                f"service={client.action_layout_revision}"
             )
         if checkpoint_char_feature_size is not None and checkpoint_char_feature_size != policy.char_feature_size:
             raise ValueError(
@@ -666,6 +674,7 @@ def init_wandb(args, config, client, device, existing_run=None):
         "device": device.type,
         "observation_size": client.observation_size,
         "action_size": client.action_size,
+        "action_layout_revision": ACTION_LAYOUT_REVISION,
         "privileged_observation_size": client.privileged_observation_size,
     }
     run_config.update(config)

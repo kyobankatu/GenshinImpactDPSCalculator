@@ -2,6 +2,7 @@ import socket
 from concurrent.futures import ThreadPoolExecutor
 
 from binary_protocol import (
+    ACTION_LAYOUT_REVISION,
     CMD_BRANCH_ROLLOUT,
     CMD_CLOSE_RUNNER,
     CMD_CREATE_RUNNER,
@@ -30,6 +31,7 @@ class RolloutServiceClient:
         self.version = None
         self.observation_size = None
         self.action_size = None
+        self.action_layout_revision = None
         self.privileged_observation_size = None
         self.char_feature_size = None
         self.global_feature_size = None
@@ -42,6 +44,7 @@ class RolloutServiceClient:
         self.version = recv_int(self.sock)
         self.observation_size = recv_int(self.sock)
         self.action_size = recv_int(self.sock)
+        self.action_layout_revision = recv_int(self.sock)
         self.privileged_observation_size = recv_int(self.sock)
         self.char_feature_size = recv_int(self.sock)
         self.global_feature_size = recv_int(self.sock)
@@ -50,6 +53,11 @@ class RolloutServiceClient:
         self.party_names = [recv_string(self.sock) for _ in range(party_count)]
         if self.version != VERSION:
             raise RuntimeError(f"Protocol version mismatch: java={self.version} python={VERSION}")
+        if self.action_layout_revision != ACTION_LAYOUT_REVISION:
+            raise RuntimeError(
+                "Action layout revision mismatch: "
+                f"java={self.action_layout_revision} python={ACTION_LAYOUT_REVISION}"
+            )
 
     def create_runner(self, env_count: int) -> int:
         send_int(self.sock, CMD_CREATE_RUNNER)
@@ -188,6 +196,7 @@ class MultiRolloutServiceClient:
         self.version = self.clients[0].version
         self.observation_size = self.clients[0].observation_size
         self.action_size = self.clients[0].action_size
+        self.action_layout_revision = self.clients[0].action_layout_revision
         self.privileged_observation_size = self.clients[0].privileged_observation_size
         self.char_feature_size = self.clients[0].char_feature_size
         self.global_feature_size = self.clients[0].global_feature_size
@@ -197,7 +206,11 @@ class MultiRolloutServiceClient:
         for client in self.clients[1:]:
             if client.version != self.version:
                 raise RuntimeError("Protocol version mismatch across rollout services")
-            if client.observation_size != self.observation_size or client.action_size != self.action_size:
+            if (
+                client.observation_size != self.observation_size
+                or client.action_size != self.action_size
+                or client.action_layout_revision != self.action_layout_revision
+            ):
                 raise RuntimeError("Observation/action space mismatch across rollout services")
             if client.privileged_observation_size != self.privileged_observation_size:
                 raise RuntimeError("Privileged observation size mismatch across rollout services")

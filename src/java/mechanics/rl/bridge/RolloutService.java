@@ -19,6 +19,7 @@ import mechanics.rl.RLEpisodeFactory;
 import mechanics.rl.ObservationEncoder;
 import mechanics.rl.PrivilegedStateEncoder;
 import mechanics.rl.RLPartyRegistry;
+import mechanics.rotation.PolicyAction;
 
 /**
  * Local-only binary rollout service used by the Python learner.
@@ -144,6 +145,7 @@ public class RolloutService {
                     out.writeInt(BatchProtocol.VERSION);
                     out.writeInt(ObservationEncoder.OBSERVATION_SIZE);
                     out.writeInt(ActionSpace.SIZE);
+                    out.writeInt(PolicyAction.LAYOUT_REVISION);
                     out.writeInt(PrivilegedStateEncoder.STATE_SIZE);
                     out.writeInt(ObservationEncoder.FEATURES_PER_CHARACTER);
                     out.writeInt(ObservationEncoder.GLOBAL_FEATURES);

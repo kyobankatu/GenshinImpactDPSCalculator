@@ -6,7 +6,6 @@ import java.util.function.Supplier;
 import mechanics.analysis.StatsRecorder;
 import model.entity.Character;
 import simulation.CombatSimulator;
-import simulation.action.CharacterActionRequest;
 import visualization.HtmlReportGenerator;
 import visualization.VisualLogger;
 
@@ -515,6 +514,10 @@ public class BattleEnvironment {
 
     private void execute(int actionId) {
         RLAction action = RLAction.fromId(actionId);
+        if (action.isWait()) {
+            simulator.advanceTime(config.waitActionTime);
+            return;
+        }
         if (action.isSwap()) {
             int slot = action.getTargetSlot();
             model.type.CharacterId targetId = config.partyOrder[slot];
@@ -527,7 +530,7 @@ public class BattleEnvironment {
             simulator.advanceTime(config.failedActionTimeCost);
             return;
         }
-        simulator.performAction(active.getCharacterId(), CharacterActionRequest.of(action.getActionKey()));
+        simulator.performAction(active.getCharacterId(), action.getActionRequest());
     }
 
     private void ensureReset() {

@@ -1,5 +1,7 @@
 package mechanics.rl;
 
+import mechanics.rotation.ActionCapabilityStore;
+import mechanics.rotation.PolicyAction;
 import model.entity.Character;
 import model.type.CharacterId;
 import simulation.CombatSimulator;
@@ -10,6 +12,21 @@ import simulation.CombatSimulator;
 public class ActionSpace {
     /** Total number of discrete actions exposed to the policy. */
     public static final int SIZE = RLAction.SIZE;
+    private static final ActionCapabilityStore DEFAULT_CAPABILITIES = new ActionCapabilityStore();
+    private final ActionCapabilityStore capabilityStore;
+
+    /** Creates an action space backed by the tracked strict capability store. */
+    public ActionSpace() {
+        this(DEFAULT_CAPABILITIES);
+    }
+
+    /** Creates an action space with an explicit capability store for tests/tools. */
+    public ActionSpace(ActionCapabilityStore capabilityStore) {
+        if (capabilityStore == null) {
+            throw new IllegalArgumentException("capabilityStore must not be null");
+        }
+        this.capabilityStore = capabilityStore;
+    }
 
     /**
      * Allocates and returns a freshly built action mask for the current simulator state.
@@ -37,9 +54,20 @@ public class ActionSpace {
         Character active = sim.getActiveCharacter();
         double now = sim.getCurrentTime();
 
-        mask[RLAction.ATTACK.getId()] = active != null ? 1.0 : 0.0;
-        mask[RLAction.SKILL.getId()] = active != null && active.canSkill(now) ? 1.0 : 0.0;
-        mask[RLAction.BURST.getId()] = active != null && active.canBurst(now) ? 1.0 : 0.0;
+        java.util.Arrays.fill(mask, 0.0);
+        if (active != null) {
+            CharacterId activeId = active.getCharacterId();
+            mask[RLAction.NORMAL.getId()] = supported(activeId, PolicyAction.NORMAL);
+            mask[RLAction.CHARGE.getId()] = supported(activeId, PolicyAction.CHARGE);
+            mask[RLAction.PLUNGE.getId()] = supported(activeId, PolicyAction.PLUNGE);
+            mask[RLAction.SKILL_PRESS.getId()] = active.canSkill(now)
+                    ? supported(activeId, PolicyAction.SKILL_PRESS) : 0.0;
+            mask[RLAction.SKILL_HOLD.getId()] = active.canSkill(now)
+                    ? supported(activeId, PolicyAction.SKILL_HOLD) : 0.0;
+            mask[RLAction.BURST.getId()] = active.canBurst(now)
+                    ? supported(activeId, PolicyAction.BURST) : 0.0;
+        }
+        mask[RLAction.WAIT_SHORT.getId()] = 1.0;
 
         for (RLAction action : RLAction.values()) {
             if (!action.isSwap()) {
@@ -65,5 +93,9 @@ public class ActionSpace {
      */
     public boolean isValid(int actionId, double[] mask) {
         return actionId >= 0 && actionId < mask.length && mask[actionId] > 0.5;
+    }
+
+    private double supported(CharacterId characterId, PolicyAction action) {
+        return capabilityStore.supports(characterId, action) ? 1.0 : 0.0;
     }
 }

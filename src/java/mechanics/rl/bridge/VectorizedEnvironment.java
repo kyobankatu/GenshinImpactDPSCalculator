@@ -389,7 +389,10 @@ public class VectorizedEnvironment {
 
     private static boolean isVineSampleAction(int actionId) {
         RLAction action = RLAction.fromId(actionId);
-        return action == RLAction.SKILL || action == RLAction.BURST || action.isSwap();
+        return action == RLAction.SKILL_PRESS
+                || action == RLAction.SKILL_HOLD
+                || action == RLAction.BURST
+                || action.isSwap();
     }
 
     /**

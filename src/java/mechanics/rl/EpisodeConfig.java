@@ -20,6 +20,8 @@ public class EpisodeConfig {
     public final double maxEpisodeTime;
     /** Simulator time advanced when an illegal action is selected. */
     public final double failedActionTimeCost;
+    /** Simulator time advanced by the explicit short-Wait action. */
+    public final double waitActionTime;
     /** Minimum interval (seconds) between consecutive swaps. */
     public final double swapCooldown;
     /** Reward scale applied to per-step damage. */
@@ -41,7 +43,8 @@ public class EpisodeConfig {
 
     /** Constructs the default episode configuration with the default party. */
     public EpisodeConfig() {
-        this(DEFAULT_PARTY, 20.0, 0.1, 1.0, 1000.0, 0.35, 0.10, 0.03, 25000.0, true, false, 0.0);
+        this(DEFAULT_PARTY, 20.0, 0.1, 0.1, 1.0, 1000.0, 0.35, 0.10, 0.03, 25000.0,
+                true, false, 0.0);
     }
 
     /**
@@ -73,9 +76,44 @@ public class EpisodeConfig {
             boolean fillEnergyOnReset,
             boolean enableRoleAlignmentBonus,
             double roleAlignmentBonusWeight) {
+        this(
+                partyOrder,
+                maxEpisodeTime,
+                failedActionTimeCost,
+                0.1,
+                swapCooldown,
+                damageRewardScale,
+                invalidActionPenalty,
+                repeatedSwapPenalty,
+                idleTimePenaltyPerSecond,
+                terminalDamageScale,
+                fillEnergyOnReset,
+                enableRoleAlignmentBonus,
+                roleAlignmentBonusWeight);
+    }
+
+    /** Constructs an episode configuration including explicit Wait duration. */
+    public EpisodeConfig(
+            CharacterId[] partyOrder,
+            double maxEpisodeTime,
+            double failedActionTimeCost,
+            double waitActionTime,
+            double swapCooldown,
+            double damageRewardScale,
+            double invalidActionPenalty,
+            double repeatedSwapPenalty,
+            double idleTimePenaltyPerSecond,
+            double terminalDamageScale,
+            boolean fillEnergyOnReset,
+            boolean enableRoleAlignmentBonus,
+            double roleAlignmentBonusWeight) {
+        if (!Double.isFinite(waitActionTime) || waitActionTime <= 0.0) {
+            throw new IllegalArgumentException("waitActionTime must be finite and positive");
+        }
         this.partyOrder = partyOrder.clone();
         this.maxEpisodeTime = maxEpisodeTime;
         this.failedActionTimeCost = failedActionTimeCost;
+        this.waitActionTime = waitActionTime;
         this.swapCooldown = swapCooldown;
         this.damageRewardScale = damageRewardScale;
         this.invalidActionPenalty = invalidActionPenalty;
@@ -98,6 +136,7 @@ public class EpisodeConfig {
                 nextPartyOrder,
                 maxEpisodeTime,
                 failedActionTimeCost,
+                waitActionTime,
                 swapCooldown,
                 damageRewardScale,
                 invalidActionPenalty,
@@ -120,6 +159,7 @@ public class EpisodeConfig {
                 partyOrder,
                 nextMaxEpisodeTime,
                 failedActionTimeCost,
+                waitActionTime,
                 swapCooldown,
                 damageRewardScale,
                 invalidActionPenalty,
@@ -143,6 +183,7 @@ public class EpisodeConfig {
                 partyOrder,
                 maxEpisodeTime,
                 failedActionTimeCost,
+                waitActionTime,
                 swapCooldown,
                 damageRewardScale,
                 invalidActionPenalty,
@@ -152,5 +193,23 @@ public class EpisodeConfig {
                 fillEnergyOnReset,
                 nextEnableRoleAlignmentBonus,
                 nextRoleAlignmentBonusWeight);
+    }
+
+    /** Returns a copy with the explicit short-Wait duration replaced. */
+    public EpisodeConfig withWaitActionTime(double nextWaitActionTime) {
+        return new EpisodeConfig(
+                partyOrder,
+                maxEpisodeTime,
+                failedActionTimeCost,
+                nextWaitActionTime,
+                swapCooldown,
+                damageRewardScale,
+                invalidActionPenalty,
+                repeatedSwapPenalty,
+                idleTimePenaltyPerSecond,
+                terminalDamageScale,
+                fillEnergyOnReset,
+                enableRoleAlignmentBonus,
+                roleAlignmentBonusWeight);
     }
 }
