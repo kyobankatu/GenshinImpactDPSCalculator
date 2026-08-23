@@ -25335,6 +25335,8 @@ Completion evidence:
 
 ### Phase 7: Behavior-Cloning And Value Pretraining
 
+Status: Done (2026-08-24).
+
 Why seventh:
 
 - Supervised expert fitting gives the policy useful sparse-reward behavior
@@ -25377,6 +25379,23 @@ Verification:
 
 - `python -m pytest src/python/rl/tests`
 - `python3 src/python/rl/pretrain_expert_policy.py --preset debug --dataset src/python/rl/tests/fixtures/expert_dataset_v1.jsonl`
+
+Completion evidence:
+
+- The shared GRU/Transformer policy trains from hard or soft masked teacher
+  distributions and normalized terminal or selected-Q value targets over
+  padded recurrent chunks with bounded burn-in. Party-balanced epoch-local
+  sampling is deterministic and value normalization fits the train split only.
+- Checkpoints preserve dataset/record hashes, model/protocol revisions, epoch,
+  optimizer, scheduler, primitive-safe Python/NumPy/Torch RNG state, value
+  normalization, and metrics. Interrupted/resumed training is bitwise identical
+  to uninterrupted training on the fixture.
+- Inference loads the checkpoint under PyTorch's safe weights-only default.
+  PPO exposes `--initialize-from-expert`, validates complete provenance, and
+  imports weights without inheriting the BC optimizer/update state.
+- All 34 Python RL tests pass. The required debug run deliberately overfits the
+  fixture with policy loss 0.016092, value loss 0.000017, teacher-action
+  accuracy 1.0, and exactly zero probability on masked actions.
 
 ### Phase 8: Expert Iteration, DAgger Recovery, And PPO/SIL Integration
 

@@ -114,6 +114,37 @@ def main():
     run_training(args)
 
 
+def load_expert_initialization(policy, checkpoint_path, device="cpu"):
+    """Load only model weights from a provenance-complete BC checkpoint."""
+    if not os.path.isfile(checkpoint_path):
+        raise ValueError(f"Expert initialization checkpoint not found: {checkpoint_path}")
+    payload = torch.load(checkpoint_path, map_location=device)
+    validate_checkpoint_payload(payload, checkpoint_path)
+    required = (
+        "pretraining_revision",
+        "dataset_source_hash",
+        "dataset_record_hashes",
+        "value_normalization",
+    )
+    missing = [field for field in required if field not in payload]
+    if missing:
+        raise ValueError(
+            f"Expert initialization checkpoint is missing provenance: {missing}"
+        )
+    if payload["pretraining_revision"] != 1:
+        raise ValueError("Expert initialization revision mismatch")
+    if not payload["dataset_source_hash"] or not payload["dataset_record_hashes"]:
+        raise ValueError("Expert initialization dataset provenance is empty")
+    if payload["policy_type"] != (
+        "transformer" if policy.__class__.__name__ == "TransformerPolicy" else "gru"
+    ):
+        raise ValueError("Expert initialization policy type mismatch")
+    if payload["hidden_size"] != policy.hidden_size:
+        raise ValueError("Expert initialization hidden size mismatch")
+    policy.load_state_dict(payload["state_dict"])
+    return payload
+
+
 def run_training(args, run=None):
     preset = args.preset
     seed = args.seed
@@ -144,6 +175,13 @@ def run_training(args, run=None):
         privileged_observation_size=client.privileged_observation_size,
     ).to(device)
     assert_policy_client_compatible(policy, client, "Training")
+    initialize_from_expert = getattr(args, "initialize_from_expert", None)
+    if initialize_from_expert:
+        if args.resume_from:
+            raise ValueError(
+                "--initialize-from-expert and --resume-from are mutually exclusive"
+            )
+        load_expert_initialization(policy, initialize_from_expert, device)
     optimizer = torch.optim.Adam(policy.parameters(), lr=config["learning_rate"])
     rnd_module = None
     rnd_optimizer = None
@@ -617,6 +655,10 @@ def parse_args():
     parser.add_argument("--vine-horizon", type=int, default=None, help="horizon steps per vine branch H")
     parser.add_argument("--vine-max-points", type=int, default=None, help="max vine sample points per update (sub-sampling limit)")
     parser.add_argument("--value-quantile", type=float, default=None, help="expectile quantile for value loss (0.5=MSE, 0.9=risk-seeking upper tail)")
+    parser.add_argument(
+        "--initialize-from-expert",
+        help="load a validated expert-pretraining checkpoint's model weights only",
+    )
     parser.add_argument("--policy-type", type=str, default=None, choices=["gru", "transformer"], help="policy architecture: gru (recurrent) or transformer")
     parser.add_argument("--rollout-workers", type=int, default=None, help="Java rollout worker override used for this run")
     parser.add_argument("--resume-from", default=None, help="path to a saved .pt checkpoint to resume from")

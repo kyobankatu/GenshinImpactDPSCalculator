@@ -4526,7 +4526,7 @@ experiment record.
 
 ### B-212 — Expert-iteration rotation optimization model
 
-- **Status:** in progress; Phase 6 complete
+- **Status:** in progress; Phase 7 complete
 - **Source:** explicit 2026-08-24 request to plan a model that optimizes
   rotations for arbitrary supported parties without requiring a human rotation.
 - **Symptom:** the current RL registry exposes only two parties, the seven-action
@@ -4579,3 +4579,8 @@ experiment record.
   Java and Python enforce matching hashes, dimensions, action masks, unique IDs,
   and split isolation; a Java-generated record passes Python loading and exact
   Java simulator replay.
+- **Checkpoint:** Phase 7 is complete. Deterministic party-balanced behavior
+  cloning fits hard/soft legal policy labels and normalized value targets,
+  resumes bitwise identically with complete RNG/provenance state, and emits a
+  checkpoint accepted by inference or PPO weight-only initialization. The tiny
+  fixture reaches 100% teacher-action accuracy.

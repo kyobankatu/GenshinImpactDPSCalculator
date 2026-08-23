@@ -7,6 +7,7 @@ import hashlib
 import json
 import math
 import re
+import random
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
@@ -60,6 +61,17 @@ class ExpertDataset:
     source_hash: str
 
 
+@dataclass(frozen=True)
+class ExpertSequenceChunk:
+    """One bounded recurrent chunk with optional burn-in decisions."""
+
+    party_name: str
+    scenario_fingerprint: str
+    decisions: tuple[ExpertDecision, ...]
+    loss_start: int
+    value_targets: tuple[float, ...]
+
+
 def load_expert_dataset(path: str | Path) -> ExpertDataset:
     """Load either a manifest or an uncompressed JSONL regression fixture."""
     source = Path(path)
@@ -107,6 +119,86 @@ def load_expert_dataset(path: str | Path) -> ExpertDataset:
     return ExpertDataset(
         tuple(records), hashlib.sha256(manifest_bytes).hexdigest()
     )
+
+
+def training_records(dataset: ExpertDataset) -> tuple[ExpertRecord, ...]:
+    """Return train-only records after requiring disjoint validation/holdout."""
+    train = tuple(record for record in dataset.records if record.split == "train")
+    if not train:
+        raise ValueError("Expert dataset has no training records")
+    return train
+
+
+def value_normalization(
+    records: Iterable[ExpertRecord],
+) -> tuple[float, float]:
+    """Fit terminal-value normalization from training records only."""
+    values = [float(record.terminal_objective["objectiveScore"]) for record in records]
+    if not values:
+        raise ValueError("Cannot fit value normalization on an empty training split")
+    mean = sum(values) / len(values)
+    variance = sum((value - mean) ** 2 for value in values) / len(values)
+    return mean, max(math.sqrt(variance), 1.0)
+
+
+def build_party_balanced_order(
+    records: Iterable[ExpertRecord], seed: int, epoch: int
+) -> tuple[ExpertRecord, ...]:
+    """Oversample parties equally with a deterministic epoch-local RNG."""
+    groups: dict[str, list[ExpertRecord]] = {}
+    for record in records:
+        groups.setdefault(record.party_name, []).append(record)
+    if not groups:
+        raise ValueError("Cannot sample an empty expert dataset")
+    generator = random.Random((seed << 32) ^ epoch)
+    for group in groups.values():
+        generator.shuffle(group)
+    target = max(len(group) for group in groups.values())
+    order: list[ExpertRecord] = []
+    for index in range(target):
+        party_names = sorted(groups)
+        generator.shuffle(party_names)
+        for party_name in party_names:
+            group = groups[party_name]
+            order.append(group[index % len(group)])
+    return tuple(order)
+
+
+def build_sequence_chunks(
+    records: Iterable[ExpertRecord],
+    sequence_length: int,
+    value_mean: float,
+    value_scale: float,
+) -> tuple[ExpertSequenceChunk, ...]:
+    """Build bounded-loss chunks with one preceding chunk of recurrent burn-in."""
+    if sequence_length <= 0 or not _positive_finite(value_scale):
+        raise ValueError("sequence_length and value_scale must be positive")
+    chunks: list[ExpertSequenceChunk] = []
+    for record in records:
+        terminal_score = float(record.terminal_objective["objectiveScore"])
+        decisions = record.decisions
+        for start in range(0, len(decisions), sequence_length):
+            context_start = max(0, start - sequence_length)
+            end = min(len(decisions), start + sequence_length)
+            chunks.append(
+                ExpertSequenceChunk(
+                    party_name=record.party_name,
+                    scenario_fingerprint=record.scenario_fingerprint,
+                    decisions=decisions[context_start:end],
+                    loss_start=start - context_start,
+                    value_targets=tuple(
+                        (
+                            decision.q_estimates[decision.action_id]
+                            if any(abs(value) > 0.0 for value in decision.q_estimates)
+                            else terminal_score
+                        )
+                        / value_scale
+                        - value_mean / value_scale
+                        for decision in decisions[context_start:end]
+                    ),
+                )
+            )
+    return tuple(chunks)
 
 
 def _parse_lines(lines: Iterable[str], source: Path) -> list[ExpertRecord]:
