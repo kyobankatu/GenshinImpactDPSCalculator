@@ -1,10 +1,18 @@
 import argparse
+import hashlib
 import json
 import os
+from pathlib import Path
 
 import torch
 
 from evaluation import assert_policy_client_compatible, evaluate_policy
+from evaluate_rotation_optimizer import atomic_write_json
+from expert_dataset import (
+    SIMULATOR_REVISION,
+    fingerprints_by_split,
+    load_expert_dataset,
+)
 from recurrent_ppo import load_policy
 from rollout_service_client import build_rollout_client
 
@@ -23,6 +31,14 @@ def main():
     mode = args.mode
     show_summary = args.summary
 
+    if args.generalization_traces and not args.dataset:
+        raise SystemExit("--generalization-traces requires --dataset")
+    if args.generalization_traces and mode not in ("deterministic", "both"):
+        raise SystemExit("generalization traces require deterministic evaluation")
+
+    if args.seed is not None:
+        torch.manual_seed(args.seed)
+
     if not os.path.exists(checkpoint):
         raise SystemExit(f"Checkpoint not found: {checkpoint}")
 
@@ -33,7 +49,17 @@ def main():
     assert_policy_client_compatible(policy, client, "Evaluation")
     try:
         if mode in ("deterministic", "both"):
-            summary = evaluate_policy(policy, client, device, deterministic=True, generate_report=True)
+            summary = evaluate_policy(
+                policy,
+                client,
+                device,
+                deterministic=True,
+                generate_report=True,
+                include_action_trace=(
+                    args.action_traces or bool(args.generalization_traces)
+                ),
+                seed=args.seed,
+            )
             print(
                 f"Python PPO deterministic evaluation ({summary.get('aggregate_type', 'single_episode')}): reward={summary['reward']:.3f} damage={summary['damage']:,.0f} steps={summary['steps']} invalid={summary['invalid_actions']} topProb={summary['mean_top_probability']:.3f}"
             )
@@ -45,8 +71,23 @@ def main():
             if show_summary and "per_party" in summary:
                 print_summary_table("deterministic", summary)
                 save_eval_summary("deterministic", summary)
+            if args.generalization_traces:
+                save_generalization_traces(
+                    summary,
+                    checkpoint,
+                    args.dataset,
+                    args.generalization_traces,
+                )
         if mode in ("stochastic", "both"):
-            summary = evaluate_policy(policy, client, device, deterministic=False, generate_report=False)
+            summary = evaluate_policy(
+                policy,
+                client,
+                device,
+                deterministic=False,
+                generate_report=False,
+                include_action_trace=args.action_traces,
+                seed=args.seed,
+            )
             print(
                 f"Python PPO stochastic evaluation ({summary.get('aggregate_type', 'single_episode')}): reward={summary['reward']:.3f} damage={summary['damage']:,.0f} steps={summary['steps']} invalid={summary['invalid_actions']} topProb={summary['mean_top_probability']:.3f}"
             )
@@ -70,6 +111,25 @@ def parse_args():
     parser.add_argument("--endpoints", default=None, help="comma-separated rollout service host:port endpoints for multi-node fan-out")
     parser.add_argument("--mode", choices=("deterministic", "stochastic", "both"), default="both", help="evaluation mode")
     parser.add_argument("--summary", action="store_true", help="print per-party comparison table and save output/eval_summary.json")
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=None,
+        help="record and apply an explicit PyTorch evaluation seed",
+    )
+    parser.add_argument(
+        "--action-traces",
+        action="store_true",
+        help="include action traces and objective metadata in saved summaries",
+    )
+    parser.add_argument(
+        "--dataset",
+        help="expert dataset manifest used to validate checkpoint provenance",
+    )
+    parser.add_argument(
+        "--generalization-traces",
+        help="write strict model-only trace input for the Java benchmark",
+    )
     return parser.parse_args()
 
 
@@ -176,28 +236,30 @@ def save_eval_summary(label, summary):
     results = []
     for party_name, party_summary in per_party.items():
         steps = max(1, party_summary["steps"])
-        results.append(
-            {
-                "label": label,
-                "party_name": party_name,
-                "party_id": party_summary.get("party_id", -1),
-                "reward": party_summary["reward"],
-                "damage": party_summary["damage"],
-                "steps": party_summary["steps"],
-                "invalid_actions": party_summary["invalid_actions"],
-                "invalid_action_rate": party_summary["invalid_actions"] / steps,
-                "action_fractions": party_summary.get("action_fractions", []),
-                "mean_attention_scores": party_summary.get("mean_attention_scores", []),
-                "mean_top_probability": party_summary.get("mean_top_probability", 0.0),
-                "role_alignment_score": party_summary.get("role_alignment_score", 0.0),
-                "carry_alignment_score": party_summary.get("carry_alignment_score", 0.0),
-                "off_field_alignment_score": party_summary.get("off_field_alignment_score", 0.0),
-                "entry_alignment_score": party_summary.get("entry_alignment_score", 0.0),
-                "stay_alignment_score": party_summary.get("stay_alignment_score", 0.0),
-                "expected_on_field_shares": party_summary.get("expected_on_field_shares", []),
-                "realized_on_field_shares": party_summary.get("realized_on_field_shares", []),
-            }
-        )
+        result = {
+            "label": label,
+            "party_name": party_name,
+            "party_id": party_summary.get("party_id", -1),
+            "reward": party_summary["reward"],
+            "damage": party_summary["damage"],
+            "steps": party_summary["steps"],
+            "invalid_actions": party_summary["invalid_actions"],
+            "invalid_action_rate": party_summary["invalid_actions"] / steps,
+            "action_fractions": party_summary.get("action_fractions", []),
+            "mean_attention_scores": party_summary.get("mean_attention_scores", []),
+            "mean_top_probability": party_summary.get("mean_top_probability", 0.0),
+            "role_alignment_score": party_summary.get("role_alignment_score", 0.0),
+            "carry_alignment_score": party_summary.get("carry_alignment_score", 0.0),
+            "off_field_alignment_score": party_summary.get("off_field_alignment_score", 0.0),
+            "entry_alignment_score": party_summary.get("entry_alignment_score", 0.0),
+            "stay_alignment_score": party_summary.get("stay_alignment_score", 0.0),
+            "expected_on_field_shares": party_summary.get("expected_on_field_shares", []),
+            "realized_on_field_shares": party_summary.get("realized_on_field_shares", []),
+        }
+        for field in ("seed", "action_trace", "objective"):
+            if field in party_summary:
+                result[field] = party_summary[field]
+        results.append(result)
     existing = []
     if os.path.exists(EVAL_SUMMARY_PATH):
         try:
@@ -211,6 +273,76 @@ def save_eval_summary(label, summary):
     with open(EVAL_SUMMARY_PATH, "w", encoding="utf-8") as handle:
         json.dump(existing, handle, indent=2)
     print(f"  Saved eval summary to {EVAL_SUMMARY_PATH}")
+
+
+def save_generalization_traces(summary, checkpoint_path, dataset_path, output):
+    """Write deterministic model traces with complete train-only provenance."""
+    per_party = summary.get("per_party")
+    if not isinstance(per_party, dict) or not per_party:
+        raise ValueError("Generalization traces require a multi-party evaluation")
+    dataset = load_expert_dataset(dataset_path)
+    split_fingerprints = fingerprints_by_split(dataset)
+    training_fingerprints = list(split_fingerprints["train"])
+    payload = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
+    if payload.get("simulator_revision") != SIMULATOR_REVISION:
+        raise ValueError("Generalization checkpoint simulator revision mismatch")
+    if payload.get("dataset_source_hash") != dataset.source_hash:
+        raise ValueError("Generalization checkpoint dataset provenance mismatch")
+    if payload.get("training_fingerprints") != training_fingerprints:
+        raise ValueError("Generalization checkpoint training fingerprints mismatch")
+    if payload.get("normalization_fingerprints") != training_fingerprints:
+        raise ValueError("Generalization checkpoint normalization fingerprints mismatch")
+
+    party_fingerprints = {}
+    for record in dataset.records:
+        previous = party_fingerprints.setdefault(
+            record.party_name, record.scenario_fingerprint
+        )
+        if previous != record.scenario_fingerprint:
+            raise ValueError(
+                f"Party has multiple scenario fingerprints: {record.party_name}"
+            )
+    if set(per_party) != set(party_fingerprints):
+        raise ValueError("Evaluation parties do not match the dataset campaign")
+
+    traces = []
+    for party_name in sorted(per_party):
+        party_summary = per_party[party_name]
+        trace = party_summary.get("action_trace")
+        if (
+            not isinstance(trace, list)
+            or not trace
+            or any(
+                not isinstance(action, int)
+                or isinstance(action, bool)
+                or action < 0
+                for action in trace
+            )
+        ):
+            raise ValueError(f"Invalid action trace for party: {party_name}")
+        if party_summary.get("invalid_actions") != 0:
+            raise ValueError(f"Model trace contains invalid actions: {party_name}")
+        traces.append(
+            {
+                "partyName": party_name,
+                "scenarioFingerprint": party_fingerprints[party_name],
+                "actionTrace": trace,
+            }
+        )
+
+    checkpoint_bytes = Path(checkpoint_path).read_bytes()
+    artifact = {
+        "schemaVersion": 1,
+        "simulatorRevision": SIMULATOR_REVISION,
+        "checkpointRevision": "sha256:"
+        + hashlib.sha256(checkpoint_bytes).hexdigest(),
+        "datasetSourceHash": dataset.source_hash,
+        "trainingFingerprints": training_fingerprints,
+        "normalizationFingerprints": training_fingerprints,
+        "traces": traces,
+    }
+    atomic_write_json(output, artifact)
+    print(f"  Saved generalization traces to {output}")
 
 
 if __name__ == "__main__":

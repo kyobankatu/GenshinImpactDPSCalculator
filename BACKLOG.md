@@ -4526,7 +4526,7 @@ experiment record.
 
 ### B-212 — Expert-iteration rotation optimization model
 
-- **Status:** in progress; Phase 9 complete
+- **Status:** in progress; Phases 1-10 implemented, local quality gate failed
 - **Source:** explicit 2026-08-24 request to plan a model that optimizes
   rotations for arbitrary supported parties without requiring a human rotation.
 - **Symptom:** the current RL registry exposes only two parties, the seven-action
@@ -4602,3 +4602,11 @@ experiment record.
   have matching strict action capabilities and refreshed profiles. Every
   scenario passes legal baseline, snapshot, unseeded exact-budget search,
   sharded dataset replay, sample execution, and routed Java/Python gates.
+- **Checkpoint:** Phase 10 implementation is complete. A revision-2 campaign
+  replayed all 32 trajectories, evaluated 120 fixed-seed runs with zero invalid
+  actions and no split/provenance leakage, and found guided holdout search
+  non-inferior to unguided (`52,663.62` versus `46,501.19`). Model-only holdout
+  remained below deterministic random (`41,711.66` versus `60,265.34`), so the
+  fail-closed report rejected completion. B-212 remains open for dataset/model
+  quality improvement; NCCL/DDP stays paused because local quality, not
+  distributed throughput, is the measured blocker.

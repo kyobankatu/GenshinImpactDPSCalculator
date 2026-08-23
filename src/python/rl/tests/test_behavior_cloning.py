@@ -10,6 +10,7 @@ import torch
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from expert_dataset import (
+    SIMULATOR_REVISION,
     build_party_balanced_order,
     build_sequence_chunks,
     load_expert_dataset,
@@ -55,6 +56,13 @@ def test_tiny_fixture_overfits_policy_and_value(tmp_path):
     load_expert_initialization(initialized, output)
     for name, value in policy.state_dict().items():
         assert torch.equal(value, initialized.state_dict()[name])
+    payload = torch.load(output, weights_only=False)
+    assert payload["pretraining_revision"] == 2
+    assert payload["simulator_revision"] == SIMULATOR_REVISION
+    assert payload["training_fingerprints"] == [record.scenario_fingerprint]
+    assert payload["normalization_fingerprints"] == [
+        record.scenario_fingerprint
+    ]
 
 
 def test_soft_policy_target_and_recurrent_padding(tmp_path):
@@ -176,6 +184,17 @@ def test_empty_dataset_and_incomplete_resume_fail_closed(tmp_path):
         )
     policy = build_policy("gru", 287, 8, 11)
     with pytest.raises(ValueError, match="missing provenance"):
+        load_expert_initialization(policy, checkpoint)
+
+
+def test_checkpoint_fingerprint_provenance_fails_closed(tmp_path):
+    checkpoint = tmp_path / "checkpoint.pt"
+    run_pretraining(_config(checkpoint, epochs=1))
+    payload = torch.load(checkpoint, weights_only=False)
+    payload["normalization_fingerprints"] = ["holdout-leak"]
+    torch.save(payload, checkpoint)
+    policy = build_policy("gru", 287, 8, 11)
+    with pytest.raises(ValueError, match="normalization fingerprints"):
         load_expert_initialization(policy, checkpoint)
 
 

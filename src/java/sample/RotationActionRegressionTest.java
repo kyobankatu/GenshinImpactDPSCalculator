@@ -24,6 +24,7 @@ public class RotationActionRegressionTest {
         assertCurrentPartyMasksAndActions();
         assertWaitDuration();
         assertUnavailableActionsMaskedAndRejected();
+        assertTransientCharacterStateMask();
         assertCapabilityJsonValidation();
         System.out.println("RotationActionRegressionTest passed");
     }
@@ -116,6 +117,21 @@ public class RotationActionRegressionTest {
         double[] emptyMask = emptyBurst.getActionSpace().createMask(
                 emptyBurst.getSimulator(), emptyBurst.getLastSwapTime(), emptyBurst.getConfig());
         assertMasked(emptyMask, PolicyAction.BURST, "insufficient-energy Burst");
+    }
+
+    private static void assertTransientCharacterStateMask() {
+        BattleEnvironment environment = environment("FlinsParty2", new EpisodeConfig());
+        environment.reset(false);
+        mechanics.rl.ActionResult skill = environment.step(
+                PolicyAction.SKILL_PRESS.getId());
+        assertMasked(skill.actionMask, PolicyAction.PLUNGE,
+                "Manifest Flame Plunge");
+        mechanics.rl.ActionResult forced = environment.step(
+                PolicyAction.PLUNGE.getId());
+        if (forced.validAction) {
+            throw new AssertionError(
+                    "Manifest Flame accepted a forced Plunging Attack");
+        }
     }
 
     private static void assertCapabilityJsonValidation() throws IOException {

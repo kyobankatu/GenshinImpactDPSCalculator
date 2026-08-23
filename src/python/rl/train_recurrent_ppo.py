@@ -15,6 +15,11 @@ except ImportError:
     wandb = None
 
 from evaluation import assert_policy_client_compatible, evaluate_policy
+from expert_dataset import (
+    SIMULATOR_REVISION,
+    fingerprints_by_split,
+    load_expert_dataset,
+)
 from binary_protocol import (
     ACTION_LAYOUT_REVISION,
     CAPABILITY_SCHEMA_REVISION,
@@ -127,13 +132,16 @@ def load_expert_initialization(policy, checkpoint_path, device="cpu"):
         "dataset_source_hash",
         "dataset_record_hashes",
         "value_normalization",
+        "simulator_revision",
+        "training_fingerprints",
+        "normalization_fingerprints",
     )
     missing = [field for field in required if field not in payload]
     if missing:
         raise ValueError(
             f"Expert initialization checkpoint is missing provenance: {missing}"
         )
-    if payload["pretraining_revision"] != 1:
+    if payload["pretraining_revision"] != 2:
         raise ValueError("Expert initialization revision mismatch")
     if not payload["dataset_source_hash"] or not payload["dataset_record_hashes"]:
         raise ValueError("Expert initialization dataset provenance is empty")
@@ -143,8 +151,40 @@ def load_expert_initialization(policy, checkpoint_path, device="cpu"):
         raise ValueError("Expert initialization policy type mismatch")
     if payload["hidden_size"] != policy.hidden_size:
         raise ValueError("Expert initialization hidden size mismatch")
+    validate_fingerprint_provenance(payload, require_training=True)
     policy.load_state_dict(payload["state_dict"])
     return payload
+
+
+def validate_fingerprint_provenance(payload, require_training):
+    """Validate train/normalization/SIL fingerprint ownership in a checkpoint."""
+    if payload.get("simulator_revision") != SIMULATOR_REVISION:
+        raise ValueError("Checkpoint simulator revision mismatch")
+    required = ("training_fingerprints", "normalization_fingerprints")
+    missing = [field for field in required if field not in payload]
+    if missing:
+        raise ValueError(f"Checkpoint fingerprint provenance is missing: {missing}")
+    training = payload["training_fingerprints"]
+    normalization = payload["normalization_fingerprints"]
+    sil = payload.get("sil_fingerprints", [])
+    for name, values in (
+        ("training", training),
+        ("normalization", normalization),
+        ("SIL", sil),
+    ):
+        if not isinstance(values, list) or any(
+            not isinstance(value, str) or not value for value in values
+        ):
+            raise ValueError(f"Checkpoint {name} fingerprints are malformed")
+        if values != sorted(set(values)):
+            raise ValueError(f"Checkpoint {name} fingerprints are not canonical")
+    if require_training and not training:
+        raise ValueError("Checkpoint training fingerprints are empty")
+    if normalization != training:
+        raise ValueError("Checkpoint normalization fingerprints differ from training")
+    if not set(sil).issubset(training):
+        raise ValueError("Checkpoint SIL fingerprints are outside training")
+    return tuple(training), tuple(normalization), tuple(sil)
 
 
 def run_training(args, run=None):
@@ -178,20 +218,65 @@ def run_training(args, run=None):
     ).to(device)
     assert_policy_client_compatible(policy, client, "Training")
     initialize_from_expert = getattr(args, "initialize_from_expert", None)
+    initialization_payload = None
     if initialize_from_expert:
         if args.resume_from:
             raise ValueError(
                 "--initialize-from-expert and --resume-from are mutually exclusive"
             )
-        load_expert_initialization(policy, initialize_from_expert, device)
+        initialization_payload = load_expert_initialization(
+            policy, initialize_from_expert, device
+        )
     optimizer = torch.optim.Adam(policy.parameters(), lr=config["learning_rate"])
     sil_buffer = SILBuffer(
         max_per_party=config["sil_buffer_size_per_party"],
         min_episodes_before_ready=config["sil_min_episodes_before_ready"],
     )
     expert_dataset_hash = None
+    dataset_source_hash = (
+        initialization_payload.get("dataset_source_hash")
+        if initialization_payload else None
+    )
+    dataset_record_hashes = list(
+        initialization_payload.get("dataset_record_hashes", [])
+        if initialization_payload else []
+    )
+    training_fingerprints = list(
+        initialization_payload.get("training_fingerprints", [])
+        if initialization_payload else []
+    )
+    normalization_fingerprints = list(
+        initialization_payload.get("normalization_fingerprints", [])
+        if initialization_payload else []
+    )
+    sil_fingerprints = []
     expert_dataset_path = getattr(args, "expert_dataset", None)
     if expert_dataset_path:
+        expert_dataset = load_expert_dataset(expert_dataset_path)
+        if (
+            dataset_source_hash is not None
+            and dataset_source_hash != expert_dataset.source_hash
+        ):
+            raise ValueError(
+                "Expert initialization and SIL dataset source hashes mismatch"
+            )
+        dataset_source_hash = expert_dataset.source_hash
+        dataset_record_hashes = [
+            record.record_hash for record in expert_dataset.records
+        ]
+        dataset_training_fingerprints = list(
+            fingerprints_by_split(expert_dataset)["train"]
+        )
+        if (
+            training_fingerprints
+            and training_fingerprints != dataset_training_fingerprints
+        ):
+            raise ValueError(
+                "Expert initialization and SIL dataset fingerprints mismatch"
+            )
+        training_fingerprints = dataset_training_fingerprints
+        normalization_fingerprints = dataset_training_fingerprints
+        sil_fingerprints = dataset_training_fingerprints
         expert_dataset_hash = sil_buffer.load_expert_dataset(
             expert_dataset_path,
             config["sequence_length"],
@@ -301,6 +386,21 @@ def run_training(args, run=None):
                 "Resume checkpoint expert dataset hash mismatch: "
                 f"checkpoint={checkpoint_dataset_hash} current={expert_dataset_hash}"
             )
+        if checkpoint_payload.get("dataset_source_hash") != dataset_source_hash:
+            raise ValueError("Resume checkpoint dataset source hash mismatch")
+        if checkpoint_payload.get("dataset_record_hashes", []) != dataset_record_hashes:
+            raise ValueError("Resume checkpoint dataset record hashes mismatch")
+        checkpoint_fingerprints = validate_fingerprint_provenance(
+            checkpoint_payload,
+            require_training=bool(training_fingerprints),
+        )
+        expected_fingerprints = (
+            tuple(training_fingerprints),
+            tuple(normalization_fingerprints),
+            tuple(sil_fingerprints),
+        )
+        if checkpoint_fingerprints != expected_fingerprints:
+            raise ValueError("Resume checkpoint fingerprint provenance mismatch")
         print(f"Resuming training from {args.resume_from} at update {start_update}")
     hidden_states = torch.zeros(config["envs"], config["hidden_size"], dtype=torch.float32, device=device)
     owns_run = run is None
@@ -646,6 +746,12 @@ def run_training(args, run=None):
                         "update": update,
                         "sil_buffer_state": sil_buffer.state_dict(),
                         "expert_dataset_hash": expert_dataset_hash,
+                        "dataset_source_hash": dataset_source_hash,
+                        "dataset_record_hashes": dataset_record_hashes,
+                        "simulator_revision": SIMULATOR_REVISION,
+                        "training_fingerprints": training_fingerprints,
+                        "normalization_fingerprints": normalization_fingerprints,
+                        "sil_fingerprints": sil_fingerprints,
                     },
                 )
             append_log(log_row)

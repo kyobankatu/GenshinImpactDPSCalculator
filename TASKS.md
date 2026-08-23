@@ -24860,7 +24860,8 @@ Completion evidence:
 
 ## Implementation Order: Expert-Iteration Rotation Optimization Model B-212
 
-Status: In progress (2026-08-24). Phase 1 is the active implementation unit.
+Status: In progress (2026-08-24). Phases 1-10 are implemented; the local
+quality gate failed, so model-quality remediation remains open in B-212.
 
 Goal:
 
@@ -25576,6 +25577,8 @@ Completion evidence:
 
 ### Phase 10: Equal-Budget Generalization Evaluation And Closure
 
+Status: Done (2026-08-24); quality gate failed, so B-212 remains open.
+
 Why last:
 
 - The model is useful only if it accelerates or improves search on parties not
@@ -25625,8 +25628,33 @@ Test cases:
 
 Verification:
 
-- `./gradlew BenchmarkRotationSearch PartyCatalogRegressionTest BenchmarkRLJava ReactionRegressionTest build javadoc`
+- Run `BenchmarkRotationSearch` with explicit dataset, training-prior,
+  evaluation-prior, and model-trace arguments.
+- `./gradlew RotationActionRegressionTest RotationExpertIterationRegressionTest PartyCatalogRegressionTest BenchmarkRLJava ReactionRegressionTest build javadoc`
 - `python -m pytest src/python/rl/tests`
 - `python3 src/python/rl/evaluate_rotation_optimizer.py --preset benchmark`
 - `python scripts/preflight.py --run`
 - `git status --short`
+
+Completion evidence:
+
+- The Java benchmark atomically records deterministic random, unguided,
+  policy-guided, and Java-replayed model-only results for every catalog
+  scenario under seeds `104729`, `130363`, and `155921`. Search methods each
+  consume exactly 128 simulator steps; model inference is one complete trace.
+- Revision-2 datasets/checkpoints preserve exact train and normalization
+  fingerprints. Training priors contain only train states; evaluation priors
+  contain only validation/holdout model probes. Model traces carry the same
+  dataset hash and are rescored by the authoritative Java simulator.
+- The generated campaign contains 32 trajectories. Replay is 32/32, all 120
+  evaluation runs have zero invalid actions, archives are monotonic, and no
+  holdout fingerprint enters training or normalization provenance.
+- Holdout median objective was `60,265.34` for deterministic random,
+  `46,501.19` for unguided search, `52,663.62` for guided search, and
+  `41,711.66` for model-only. Guided search passed its non-inferiority gate,
+  but model-only failed to exceed random. The validator therefore emitted a
+  failed report, B-212 stays open, and NCCL/DDP remains paused.
+- Dataset generation exposed a transient action-mask defect: Plunging was
+  advertised during Flins's Manifest Flame despite runtime rejection. Typed
+  character advisories now drive every character-action mask, with a focused
+  regression for this state.

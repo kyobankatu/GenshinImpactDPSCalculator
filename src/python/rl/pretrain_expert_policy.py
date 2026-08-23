@@ -16,10 +16,12 @@ import torch.nn.functional as functional
 from expert_dataset import (
     ACTION_SIZE,
     OBSERVATION_SIZE,
+    SIMULATOR_REVISION,
     ExpertDataset,
     ExpertSequenceChunk,
     build_party_balanced_order,
     build_sequence_chunks,
+    fingerprints_by_split,
     load_expert_dataset,
     training_records,
     value_normalization,
@@ -31,7 +33,7 @@ from recurrent_ppo import (
 )
 
 
-PRETRAINING_REVISION = 1
+PRETRAINING_REVISION = 2
 DEFAULT_OUTPUT = "output/expert_pretrain/latest-model.pt"
 PRESETS = {
     "debug": {
@@ -276,6 +278,8 @@ def _save_checkpoint(
 ):
     output = Path(config.output_path)
     output.parent.mkdir(parents=True, exist_ok=True)
+    split_fingerprints = fingerprints_by_split(dataset)
+    training_fingerprints = list(split_fingerprints["train"])
     policy.save(
         output,
         optimizer,
@@ -286,6 +290,9 @@ def _save_checkpoint(
             "dataset_record_hashes": [
                 record.record_hash for record in dataset.records
             ],
+            "simulator_revision": SIMULATOR_REVISION,
+            "training_fingerprints": training_fingerprints,
+            "normalization_fingerprints": training_fingerprints,
             "scheduler_state_dict": scheduler.state_dict(),
             "python_random_state": random.getstate(),
             "numpy_random_state": _serialize_numpy_random_state(),
@@ -307,6 +314,9 @@ def _restore_checkpoint(config, dataset, policy, optimizer, scheduler, device):
         "pretraining_epoch",
         "dataset_source_hash",
         "dataset_record_hashes",
+        "simulator_revision",
+        "training_fingerprints",
+        "normalization_fingerprints",
         "optimizer_state_dict",
         "scheduler_state_dict",
         "python_random_state",
@@ -320,11 +330,18 @@ def _restore_checkpoint(config, dataset, policy, optimizer, scheduler, device):
         raise ValueError(f"Pretraining checkpoint is missing metadata: {missing}")
     if payload["pretraining_revision"] != PRETRAINING_REVISION:
         raise ValueError("Pretraining checkpoint revision mismatch")
+    if payload["simulator_revision"] != SIMULATOR_REVISION:
+        raise ValueError("Pretraining checkpoint simulator revision mismatch")
     if payload["dataset_source_hash"] != dataset.source_hash:
         raise ValueError("Pretraining checkpoint dataset manifest hash mismatch")
     hashes = [record.record_hash for record in dataset.records]
     if payload["dataset_record_hashes"] != hashes:
         raise ValueError("Pretraining checkpoint dataset record hash mismatch")
+    expected_fingerprints = list(fingerprints_by_split(dataset)["train"])
+    if payload["training_fingerprints"] != expected_fingerprints:
+        raise ValueError("Pretraining checkpoint training fingerprints mismatch")
+    if payload["normalization_fingerprints"] != expected_fingerprints:
+        raise ValueError("Pretraining checkpoint normalization fingerprints mismatch")
     if payload["policy_type"] != config.policy_type:
         raise ValueError("Pretraining checkpoint policy type mismatch")
     if payload["hidden_size"] != config.hidden_size:

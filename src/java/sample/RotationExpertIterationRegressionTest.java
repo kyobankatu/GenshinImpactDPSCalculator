@@ -13,6 +13,7 @@ import mechanics.rl.bridge.BatchProtocol;
 import mechanics.rl.bridge.RolloutService;
 import mechanics.rl.bridge.RunnerStepResult;
 import mechanics.rl.bridge.VectorizedEnvironment;
+import mechanics.rotation.ExpertDatasetRecord;
 import mechanics.rotation.PolicyAction;
 import mechanics.rotation.RecordedExpertPolicyPrior;
 import mechanics.rotation.RotationObjective;
@@ -129,9 +130,14 @@ public class RotationExpertIterationRegressionTest {
         java.nio.file.Path priorPath = java.nio.file.Files.createTempFile(
                 "recorded-policy-prior-", ".json");
         String hash = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
-        String json = "{\"schemaVersion\":1,\"actionLayoutRevision\":2,"
-                + "\"observationSchemaRevision\":2,\"datasetSourceHash\":\"" + hash
-                + "\",\"entries\":[{\"scenarioFingerprint\":\"fixture\","
+        String json = "{\"schemaVersion\":2,\"simulatorRevision\":\""
+                + ExpertDatasetRecord.SIMULATOR_REVISION
+                + "\",\"actionLayoutRevision\":2,"
+                + "\"observationSchemaRevision\":2,"
+                + "\"sourceKind\":\"training-dataset-states\","
+                + "\"datasetSourceHash\":\"" + hash
+                + "\",\"trainingFingerprints\":[\"fixture\"],"
+                + "\"entries\":[{\"scenarioFingerprint\":\"fixture\","
                 + "\"stateHash\":\"42\",\"weights\":[1,0,0,0,0,0,0,0,0,0,0]}]}";
         java.nio.file.Files.writeString(priorPath, json);
         RecordedExpertPolicyPrior prior = new RecordedExpertPolicyPrior(priorPath, "fixture");
@@ -144,9 +150,25 @@ public class RotationExpertIterationRegressionTest {
                 || fallback[PolicyAction.WAIT_SHORT.getId()] != 1.0) {
             throw new AssertionError("Unknown policy state did not use uniform legal fallback");
         }
+        if (prior.getKnownStateCount() != 1 || prior.getHitCount() != 1L
+                || prior.getFallbackCount() != 1L
+                || !RecordedExpertPolicyPrior.TRAINING_DATASET_STATES.equals(
+                        prior.getSourceKind())
+                || !hash.equals(prior.getDatasetSourceHash())) {
+            throw new AssertionError("Recorded model prior diagnostics mismatch");
+        }
         java.nio.file.Files.writeString(priorPath, json.replace(
                 "\"actionLayoutRevision\":2", "\"actionLayoutRevision\":99"));
         expectFailure(() -> loadPriorUnchecked(priorPath), "stale recorded prior");
+        java.nio.file.Files.writeString(priorPath, json.replace(
+                "training-dataset-states", "evaluation-probe-states"));
+        expectFailure(() -> loadPriorUnchecked(priorPath), "training split leak");
+        java.nio.file.Files.writeString(priorPath, json.replace(
+                ExpertDatasetRecord.SIMULATOR_REVISION, "rotation-simulator-stale"));
+        expectFailure(() -> loadPriorUnchecked(priorPath), "stale simulator revision");
+        java.nio.file.Files.writeString(priorPath, json);
+        expectFailure(() -> loadPriorUnchecked(priorPath, "holdout"),
+                "missing selected scenario states");
     }
 
     private static RotationStep priorStep(long stateHash) {
@@ -172,8 +194,12 @@ public class RotationExpertIterationRegressionTest {
     }
 
     private static void loadPriorUnchecked(java.nio.file.Path path) {
+        loadPriorUnchecked(path, "fixture");
+    }
+
+    private static void loadPriorUnchecked(java.nio.file.Path path, String fingerprint) {
         try {
-            new RecordedExpertPolicyPrior(path, "fixture");
+            new RecordedExpertPolicyPrior(path, fingerprint);
         } catch (java.io.IOException exception) {
             throw new IllegalStateException(exception);
         }

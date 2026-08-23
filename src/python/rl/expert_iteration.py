@@ -14,11 +14,21 @@ from typing import Any
 
 import torch
 
-from expert_dataset import ExpertDataset, ExpertRecord, load_expert_dataset
+from expert_dataset import (
+    SIMULATOR_REVISION,
+    ExpertDataset,
+    ExpertRecord,
+    fingerprints_by_split,
+    load_expert_dataset,
+    training_records,
+)
 from recurrent_ppo import load_policy
 
 
 RECOVERY_SCHEMA_VERSION = 1
+POLICY_PRIOR_SCHEMA_VERSION = 2
+TRAINING_PRIOR_SOURCE = "training-dataset-states"
+EVALUATION_PRIOR_SOURCE = "evaluation-probe-states"
 
 
 def uniform_legal_prior(action_mask) -> tuple[float, ...]:
@@ -45,6 +55,20 @@ class PolicyPriorProvider:
             )
             if checkpoint_dataset_hash != dataset_source_hash:
                 raise ValueError("Policy prior dataset provenance is stale")
+            if payload.get("simulator_revision") != SIMULATOR_REVISION:
+                raise ValueError("Policy prior simulator revision is stale")
+            training_fingerprints = payload.get("training_fingerprints")
+            normalization_fingerprints = payload.get(
+                "normalization_fingerprints"
+            )
+            if (
+                not isinstance(training_fingerprints, list)
+                or not training_fingerprints
+                or training_fingerprints != sorted(set(training_fingerprints))
+                or normalization_fingerprints != training_fingerprints
+            ):
+                raise ValueError("Policy prior fingerprint provenance is invalid")
+            self.training_fingerprints = tuple(training_fingerprints)
             self.policy, _ = load_policy(checkpoint_path)
             self.policy.eval()
             self.hidden_size = self.policy.hidden_size
@@ -171,11 +195,25 @@ def export_recorded_policy_prior(
     dataset: ExpertDataset,
     checkpoint_path: str | Path,
     output_path: str | Path,
+    source_kind: str = TRAINING_PRIOR_SOURCE,
 ) -> str:
     """Atomically export model probabilities for replayable dataset states."""
+    if source_kind not in (TRAINING_PRIOR_SOURCE, EVALUATION_PRIOR_SOURCE):
+        raise ValueError(f"Unsupported policy prior source: {source_kind}")
     provider = PolicyPriorProvider(checkpoint_path, dataset.source_hash, False)
-    entries = []
-    for record in dataset.records:
+    expected_fingerprints = fingerprints_by_split(dataset)["train"]
+    if provider.training_fingerprints != expected_fingerprints:
+        raise ValueError("Policy prior training fingerprints are stale")
+    selected_records = (
+        training_records(dataset)
+        if source_kind == TRAINING_PRIOR_SOURCE
+        else tuple(record for record in dataset.records if record.split != "train")
+    )
+    if not selected_records:
+        raise ValueError(f"Policy prior has no records for source: {source_kind}")
+    weights_by_state = {}
+    counts_by_state = {}
+    for record in selected_records:
         hidden = torch.zeros(1, provider.hidden_size)
         for decision in record.decisions:
             weights = provider.weights(
@@ -183,13 +221,13 @@ def export_recorded_policy_prior(
                 decision.legal_action_mask,
                 hidden,
             )
-            entries.append(
-                {
-                    "scenarioFingerprint": record.scenario_fingerprint,
-                    "stateHash": str(decision.state_hash),
-                    "weights": list(weights),
-                }
+            key = (record.scenario_fingerprint, decision.state_hash)
+            totals = weights_by_state.setdefault(
+                key, [0.0 for _ in range(len(weights))]
             )
+            for index, weight in enumerate(weights):
+                totals[index] += weight
+            counts_by_state[key] = counts_by_state.get(key, 0) + 1
             with torch.no_grad():
                 hidden = provider.policy.act(
                     torch.tensor([decision.observation], dtype=torch.float32),
@@ -197,11 +235,24 @@ def export_recorded_policy_prior(
                     torch.tensor([decision.legal_action_mask], dtype=torch.float32),
                 )["hidden"]
     payload = {
-        "schemaVersion": 1,
+        "schemaVersion": POLICY_PRIOR_SCHEMA_VERSION,
+        "simulatorRevision": SIMULATOR_REVISION,
         "actionLayoutRevision": 2,
         "observationSchemaRevision": 2,
+        "sourceKind": source_kind,
         "datasetSourceHash": dataset.source_hash,
-        "entries": entries,
+        "trainingFingerprints": list(expected_fingerprints),
+        "entries": [
+            {
+                "scenarioFingerprint": key[0],
+                "stateHash": str(key[1]),
+                "weights": [
+                    weight / counts_by_state[key]
+                    for weight in weights_by_state[key]
+                ],
+            }
+            for key in sorted(weights_by_state)
+        ],
     }
     encoded = (json.dumps(payload, separators=(",", ":")) + "\n").encode()
     destination = Path(output_path)
@@ -344,6 +395,10 @@ def main() -> None:
     parser.add_argument(
         "--prior-output", default="output/expert_iteration/policy_prior.json"
     )
+    parser.add_argument(
+        "--evaluation-prior-output",
+        help="optional validation/holdout model-probe prior output",
+    )
     args = parser.parse_args()
     summary = run_offline_iteration(
         args.dataset, args.checkpoint, args.confidence_threshold
@@ -352,6 +407,13 @@ def main() -> None:
     summary["policyPriorHash"] = export_recorded_policy_prior(
         dataset, args.checkpoint, args.prior_output
     )
+    if args.evaluation_prior_output:
+        summary["evaluationPolicyPriorHash"] = export_recorded_policy_prior(
+            dataset,
+            args.checkpoint,
+            args.evaluation_prior_output,
+            EVALUATION_PRIOR_SOURCE,
+        )
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")

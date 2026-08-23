@@ -293,6 +293,21 @@ public class Flins extends Character
         }
     }
 
+    /** Rejects Plunging Attacks while Manifest Flame replaces the moveset. */
+    @Override
+    public boolean canPerformAction(
+            CharacterActionRequest request,
+            double currentTime) {
+        if (request == null) {
+            throw new IllegalArgumentException("Flins action is required");
+        }
+        if (request.getKey() == CharacterActionKey.PLUNGE
+                && isManifestFlameActive(currentTime)) {
+            return false;
+        }
+        return super.canPerformAction(request, currentTime);
+    }
+
     /**
      * Handles typed action requests dispatched by the combat simulator.
      *

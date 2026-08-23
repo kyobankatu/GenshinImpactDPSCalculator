@@ -18,7 +18,7 @@ from binary_protocol import (
     PRIVILEGED_SCHEMA_REVISION,
 )
 SCHEMA_VERSION = 1
-SIMULATOR_REVISION = "rotation-simulator-v1"
+SIMULATOR_REVISION = "rotation-simulator-v2"
 ACTION_SIZE = 11
 OBSERVATION_SIZE = 287
 VALID_SPLITS = frozenset(("train", "validation", "holdout"))
@@ -127,6 +127,34 @@ def training_records(dataset: ExpertDataset) -> tuple[ExpertRecord, ...]:
     if not train:
         raise ValueError("Expert dataset has no training records")
     return train
+
+
+def fingerprints_by_split(dataset: ExpertDataset) -> dict[str, tuple[str, ...]]:
+    """Return deterministic scenario fingerprints for every exclusive split."""
+    if not isinstance(dataset, ExpertDataset):
+        raise ValueError("Expert dataset is required for fingerprint provenance")
+    result = {
+        split: tuple(
+            sorted(
+                {
+                    record.scenario_fingerprint
+                    for record in dataset.records
+                    if record.split == split
+                }
+            )
+        )
+        for split in sorted(VALID_SPLITS)
+    }
+    owners: dict[str, str] = {}
+    for split, fingerprints in result.items():
+        for fingerprint in fingerprints:
+            previous = owners.setdefault(fingerprint, split)
+            if previous != split:
+                raise ValueError(
+                    "Scenario fingerprint appears in multiple splits: "
+                    f"{fingerprint}"
+                )
+    return result
 
 
 def value_normalization(

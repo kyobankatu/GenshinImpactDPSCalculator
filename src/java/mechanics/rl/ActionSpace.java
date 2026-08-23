@@ -57,15 +57,12 @@ public class ActionSpace {
         java.util.Arrays.fill(mask, 0.0);
         if (active != null) {
             CharacterId activeId = active.getCharacterId();
-            mask[RLAction.NORMAL.getId()] = supported(activeId, PolicyAction.NORMAL);
-            mask[RLAction.CHARGE.getId()] = supported(activeId, PolicyAction.CHARGE);
-            mask[RLAction.PLUNGE.getId()] = supported(activeId, PolicyAction.PLUNGE);
-            mask[RLAction.SKILL_PRESS.getId()] = active.canSkill(now)
-                    ? supported(activeId, PolicyAction.SKILL_PRESS) : 0.0;
-            mask[RLAction.SKILL_HOLD.getId()] = active.canSkill(now)
-                    ? supported(activeId, PolicyAction.SKILL_HOLD) : 0.0;
-            mask[RLAction.BURST.getId()] = active.canBurst(now)
-                    ? supported(activeId, PolicyAction.BURST) : 0.0;
+            for (RLAction action : RLAction.values()) {
+                if (action.isSwap() || action.isWait()) {
+                    continue;
+                }
+                mask[action.getId()] = supported(active, activeId, action, now);
+            }
         }
         mask[RLAction.WAIT_SHORT.getId()] = 1.0;
 
@@ -95,7 +92,15 @@ public class ActionSpace {
         return actionId >= 0 && actionId < mask.length && mask[actionId] > 0.5;
     }
 
-    private double supported(CharacterId characterId, PolicyAction action) {
-        return capabilityStore.supports(characterId, action) ? 1.0 : 0.0;
+    private double supported(
+            Character active,
+            CharacterId characterId,
+            RLAction action,
+            double currentTime) {
+        PolicyAction policyAction = PolicyAction.fromId(action.getId());
+        return capabilityStore.supports(characterId, policyAction)
+                && active.canPerformAction(
+                        action.getActionRequest(), currentTime)
+                ? 1.0 : 0.0;
     }
 }

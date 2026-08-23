@@ -37,7 +37,7 @@ def test_compressed_multi_shard_manifest_round_trip(tmp_path):
     shards = [_write_shard(tmp_path, [first]), _write_shard(tmp_path, [second])]
     manifest = {
         "schemaVersion": 1,
-        "simulatorRevision": "rotation-simulator-v1",
+        "simulatorRevision": "rotation-simulator-v2",
         "totalRecords": 2,
         "shards": shards,
     }
@@ -92,7 +92,7 @@ def test_record_hash_and_truncated_shard_fail_closed(tmp_path):
     shard_path.write_bytes(shard_path.read_bytes()[:8])
     manifest = {
         "schemaVersion": 1,
-        "simulatorRevision": "rotation-simulator-v1",
+        "simulatorRevision": "rotation-simulator-v2",
         "totalRecords": 1,
         "shards": [shard],
     }

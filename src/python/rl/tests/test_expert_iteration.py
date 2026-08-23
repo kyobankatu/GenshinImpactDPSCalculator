@@ -9,8 +9,9 @@ import torch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from expert_dataset import load_expert_dataset
+from expert_dataset import SIMULATOR_REVISION, load_expert_dataset
 from expert_iteration import (
+    EVALUATION_PRIOR_SOURCE,
     MonotonicExpertArchive,
     PolicyPriorProvider,
     RecoveryLabelStore,
@@ -179,4 +180,33 @@ def test_persistent_sil_load_resume_auxiliary_decay_and_offline_cycle(
     )
     prior = json.loads(prior_path.read_text(encoding="utf-8"))
     assert len(prior_hash) == 64
+    assert prior["schemaVersion"] == 2
+    assert prior["simulatorRevision"] == SIMULATOR_REVISION
+    assert prior["sourceKind"] == "training-dataset-states"
+    assert prior["trainingFingerprints"] == [
+        load_expert_dataset(FIXTURE).records[0].scenario_fingerprint
+    ]
     assert prior["entries"][0]["stateHash"] == "42"
+
+    validation = dataclasses.replace(
+        load_expert_dataset(FIXTURE).records[0],
+        record_id="fixture-validation-0",
+        scenario_fingerprint="validation-fingerprint",
+        split="validation",
+    )
+    mixed_dataset = dataclasses.replace(
+        load_expert_dataset(FIXTURE),
+        records=(load_expert_dataset(FIXTURE).records[0], validation),
+    )
+    evaluation_path = tmp_path / "evaluation-prior.json"
+    export_recorded_policy_prior(
+        mixed_dataset,
+        expert_checkpoint,
+        evaluation_path,
+        EVALUATION_PRIOR_SOURCE,
+    )
+    evaluation_prior = json.loads(evaluation_path.read_text(encoding="utf-8"))
+    assert evaluation_prior["sourceKind"] == EVALUATION_PRIOR_SOURCE
+    assert {
+        entry["scenarioFingerprint"] for entry in evaluation_prior["entries"]
+    } == {"validation-fingerprint"}

@@ -129,6 +129,25 @@ Training writes `output/recurrent_ppo_py/latest-model.pt` and `output/recurrent_
 If `.venv` includes `wandb`, training can also stream metrics to Weights & Biases with `--wandb`.
 Evaluation supports `--mode deterministic|stochastic|both`. Deterministic evaluation generates `output/rl_report.html` plus party-specific files such as `output/rl_report_flinsparty2.html` when party names are available.
 
+#### Rotation generalization gate
+
+The rotation optimizer has a fail-closed, party-disjoint evaluation path. It
+replays the complete expert dataset, validates train-only checkpoint
+provenance, compares fixed-seed random/unguided/guided search with equal
+simulator-call budgets, and replays deterministic model traces in Java. The
+final validator writes its report even when a quality criterion fails:
+
+```bash
+python3 src/python/rl/evaluate_rotation_optimizer.py \
+  --preset benchmark \
+  --java-report output/rotation_generalization/java-benchmark.json
+```
+
+`BenchmarkRotationSearch` requires explicit dataset, train prior, evaluation
+probe prior, and model-trace artifacts. Outputs are best-found rotations, not
+claims of global optimality. A failed holdout criterion keeps the optimizer
+backlog item open.
+
 #### Manual multi-process or remote rollout setups
 
 Shell scripts and sweep definitions are intentionally not documented here because
