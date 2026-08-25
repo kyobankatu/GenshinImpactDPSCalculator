@@ -171,6 +171,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["Arlecchino, Bennett, C6 Lan Yan, Kachina", "Kachina Skill-only C0 option", "single target"]
+    },
+    {
+      "sourceId": "kqm-arlecchino-quick-guide-yelan-lan-yan-vape",
+      "title": "Arlecchino Quick Guide: Yelan Bennett Lan Yan Vaporize",
+      "url": "https://keqingmains.com/q/arlecchino-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Luna VIII; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["Arlecchino, C0 Yelan, Bennett, C6 Lan Yan", "Favonius Warbow Yelan", "TTDS Lan Yan", "single target"]
     }
   ],
   "seeds": [
@@ -414,6 +424,20 @@
       "sourceAssumptions": ["C6 Lan Yan 2[E]", "Kachina C0 Skill-only option", "single target"],
       "simulatorAssumptions": ["review only; absent Kachina runtime is not approximated"],
       "contentHash": "689d803feb673206cd8a31ad7333a498c335ea6f4622a90277e1988608236074"
+    },
+    {
+      "seedId": "kqm-arlecchino-yelan-lan-yan-vape-adapted-v1",
+      "partyName": "ArlecchinoYelanVaporize",
+      "scenarioFingerprint": "loadout-v1:ARLECCHINO-c0-Deathmatch-r1-artifact-kqms-generic-v1:YELAN-c0-FavoniusWarbow-r5-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:LAN_YAN-c6-ThrillingTalesOfDragonSlayers-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-arlecchino-quick-guide-yelan-lan-yan-vape"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because exact three-cycle source replay requires 281.617% Yelan ER, above the 268.200% KQMS artifact ceiling even with deterministic Favonius Warbow R5.",
+      "openerActions": [],
+      "cycleActions": [[3, 8, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0]],
+      "erTargets": {"ARLECCHINO": 1.0, "YELAN": 2.81617, "BENNETT": 1.7857142856845238, "LAN_YAN": 1.0},
+      "sourceAssumptions": ["C0 Yelan", "C6 Lan Yan 2[E]", "5[N3C] N1 field combo", "single target"],
+      "simulatorAssumptions": ["C0-only Lan Yan follow-up is omitted", "Favonius Warbow R5 uses a deterministic proc draw", "the field combo is expanded to 16 Normal and five Charged actions", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "8bd493b682d02fedc68251ab66bb10e060e6fa6fd7c8430008b9af857cb53fd4"
     }
   ]
 }

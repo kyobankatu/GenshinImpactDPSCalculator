@@ -26075,6 +26075,11 @@ Celestial Gift effects explicitly absent from the local character slices.
 Arlecchino/Bennett/Lan Yan/Kachina cannot be constructed because Kachina's
 runtime remains evidence-blocked; both reviewed action sequences stay rejected.
 
+Rejected from batch 6: Arlecchino/Yelan/Bennett/Lan Yan requires 281.617%
+Yelan ER in exact three-cycle source replay, above the 268.200% KQMS ceiling
+with deterministic Favonius Warbow R5. The source and expanded `N3C` sequence
+remain reviewable, but no infeasible party definition is registered.
+
 Batch 1 checkpoint:
 
 - 7 candidates researched: 2 retained, 5 rejected, 0 duplicates.
@@ -26119,6 +26124,14 @@ Batch 5 checkpoint:
 - Mona's measured 211.244% ER and Bennett's 165.746% target fit the KQMS
   allocation. The exact two-part Arlecchino field sequence preserves Omen and
   Phantom setup without optional Sucrose Burst or dash actions.
+
+Batch 6 checkpoint:
+
+- Arlecchino/Yelan Vaporize was researched and rejected. Campaign total: 16
+  researched, 7 retained, 9 rejected.
+- Definition-only profiling suggested 189.785% Yelan ER, but authoritative
+  source-action calibration required 281.617%. The latter fail-closed result is
+  retained, and no preliminary profile or train scenario is exposed.
 
 Acceptance criteria:
 
