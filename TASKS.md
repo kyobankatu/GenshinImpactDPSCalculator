@@ -26,7 +26,7 @@ factories have been removed for the migrated parties.
 The simulator-only autonomous campaign is complete. B-212 Phases 1-10 built the
 local expert-iteration rotation-optimizer pipeline, but the local quality gate
 failed. Phases 11-14 established sourced human-rotation catalog, replay, import,
-and pilot contracts. Phase 15 is active with 54 researched candidates and 24
+and pilot contracts. Phase 15 is active with 58 researched candidates and 26
 newly retained source-matched train scenarios; it continues before Phase 16
 changes teacher search or Phase 17 regenerates the quality-gated dataset.
 
@@ -26012,7 +26012,7 @@ Completion evidence:
 
 ### Phase 15: Source-Matched Bulk Human Rotation Campaign
 
-Status: In progress; batches 1-32 retained twenty-four new source-matched train scenarios.
+Status: In progress; batches 1-36 retained twenty-six new source-matched train scenarios.
 
 Active execution window:
 
@@ -26092,6 +26092,8 @@ Accepted-unit table (batch 1, researched 2026-08-25):
 | KQM Lan Yan and Wanderer Quick Guides: C0 Wanderer, C6 Faruzan, C6 Bennett, C6 Lan Yan field rotation | `src/java/simulation/party/WandererLanYanPartyDefinition.java` | Existing rollback-safe support actions and Wanderer Skill/Normal actions; omit dash cancels and fix Tulaytullah's N3 spam to six strings | `TRAIN`; exact support order, eighteen Normals, cyclic Energy, and baseline equality |
 | KQM Lan Yan Quick Guide: C6 Faruzan, C0 Furina, C6 Bennett, C6 Lan Yan quickswap rotation | `src/java/simulation/party/FaruzanLanYanQuickswapPartyDefinition.java` | Existing rollback-safe support actions, C6 Lan Yan's second Skill charge, and deterministic Sacrificial Fragments; omit Furina's dash and preserve Faruzan's second-Skill cooldown | `TRAIN`; complete two-branch action trace, cyclic Energy, and baseline equality |
 | KQM Wanderer Quick Guide: C0 Wanderer, C6 Faruzan, C6 Xingqiu, C0 Yelan double-Hydro rotation | `src/java/simulation/party/WandererDoubleHydroPartyDefinition.java` | Existing rollback-safe support actions and Wanderer field actions; use guide-supported Favonius Sword Xingqiu, omit optional Faruzan Charged Shot and Wanderer Burst, and fix N3 spam to six strings | `TRAIN`; exact support order, eighteen Normals, cyclic Energy, and baseline equality |
+| KQM Wanderer Quick Guide: C0 Wanderer, C6 Faruzan, C0 Layla, C6 Bennett shielded rotation | `src/java/simulation/party/WandererLaylaPartyDefinition.java` | Existing rollback-safe support actions and Wanderer field actions; omit optional Faruzan Charged Shot and Wanderer Burst, and fix N3 spam to six strings | `TRAIN`; exact support order, final Bennett Skill, cyclic Energy, and baseline equality |
+| KQM Wanderer Quick Guide: C0 Wanderer, C6 Faruzan, C6 Bennett, C0 Zhongli shielded rotation | `src/java/simulation/party/WandererZhongliPartyDefinition.java` | Existing rollback-safe support actions and Wanderer field actions; map Zhongli Hold Skill to Press, omit dash cancels and optional actions, and fix N3 spam to six strings | `TRAIN`; exact support order, final Bennett Skill, cyclic Energy, and baseline equality |
 
 Rejected from batch 1: Ganyu Melt, Gaming Mono Pyro, and
 Ningguang/Yae/Fischl/Zhongli mix characters already assigned to different
@@ -26422,6 +26424,22 @@ Batches 29-32 checkpoint:
   No unsourced battery action was added and no party definition was registered.
 - The tracked catalog now contains 46 sources and 44 seeds. Its 27 usable seeds
   comprise 26 train and one validation seed; holdout remains source-isolated.
+
+Batches 33-36 checkpoint:
+
+- Four candidates were researched: Wanderer/Layla and Wanderer/Zhongli were
+  retained; Wanderer/Xiangling and Wanderer/Mika were rejected. Campaign total:
+  58 researched, 26 retained, and 32 rejected or blocked.
+- The retained shielded variants preserve their sourced support order and final
+  Bennett Skill, fix the field combo to six Tulaytullah N3 strings, and pass
+  exact three-cycle replay. Their highest calibrated ER is Faruzan's 166.667%
+  in the Zhongli variant.
+- Xiangling's ending Energy decays by 0.576 across equivalent 31s cycle phases.
+  Mika's Burst is source-optional, but the capability profiler invokes it
+  unconditionally and fails instead of respecting the tracked action surface.
+  No unsourced battery action, Burst capability, or fabricated profile was used.
+- The tracked catalog now contains 50 sources and 48 seeds. Its 29 usable seeds
+  comprise 28 train and one validation seed; holdout remains source-isolated.
 
 Acceptance criteria:
 

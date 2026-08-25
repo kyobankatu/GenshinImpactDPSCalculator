@@ -4627,12 +4627,13 @@ experiment record.
   | `GamingMelt` | KQM [Xianyun Quick Guide](https://keqingmains.com/q/xianyun-quickguide/), exact listed team | Blocked: the guide marks the exact Gaming rotation as testing in progress and publishes no sequence. |
   | `TighnariSpread` | KQM [Kirara Guide](https://keqingmains.com/kirara/) and [Tighnari Guide](https://keqingmains.com/tighnari/) | Blocked: nearby teams replace Ororon with Nahida, Fischl, or Zhongli; cross-party transplantation is forbidden. |
   | `NingguangCrystallize` | KQM [Ningguang Quick Guide](https://keqingmains.com/q/ningguang-quickguide/) and [Ningguang Guide](https://keqingmains.com/ningguang/) | Blocked: the nearby Yae team uses Zhongli and Fischl, not Ororon and Kirara. |
-- **Human-seed campaign checkpoint (2026-08-25):** 54 candidates have been
-  researched; 24 source-matched train scenarios are newly retained and 30 are
-  rejected or blocked. The tracked catalog contains 46 sources, 44 seeds, and
-  27 usable seeds (26 train, one validation, zero holdout). The latest batch
-  retains Wanderer/Lan Yan, Faruzan/Lan Yan quickswap, and Wanderer double
-  Hydro. Wanderer Freeze remains rejected because Xingqiu's Energy decays
-  across equivalent cycle phases under the exact source trace. Phase 15 remains
+- **Human-seed campaign checkpoint (2026-08-25):** 58 candidates have been
+  researched; 26 source-matched train scenarios are newly retained and 32 are
+  rejected or blocked. The tracked catalog contains 50 sources, 48 seeds, and
+  29 usable seeds (28 train, one validation, zero holdout). The latest batch
+  retains Wanderer/Layla and Wanderer/Zhongli. Wanderer/Xiangling remains
+  Energy-infeasible, while Wanderer/Mika exposes a profiler defect: capability
+  profiling invokes Mika's unsupported, source-optional Burst instead of
+  respecting tracked actions. Phase 15 remains
   active until the 100-candidate and 40-accepted-seed breadth gates or source
   convergence; Phase 16 remains ordered after it.
