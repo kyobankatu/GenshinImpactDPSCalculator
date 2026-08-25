@@ -14,8 +14,10 @@ import model.character.Diluc;
 import model.character.Emilie;
 import model.character.Faruzan;
 import model.character.Fischl;
+import model.character.Furina;
 import model.character.Gaming;
 import model.character.Ganyu;
+import model.character.HuTao;
 import model.character.Ineffa;
 import model.character.Keqing;
 import model.character.KukiShinobu;
@@ -39,6 +41,7 @@ import model.character.Xingqiu;
 import model.character.Xiangling;
 import model.character.Xilonen;
 import model.character.YaeMiko;
+import model.character.Yelan;
 import model.character.Yoimiya;
 import model.character.Zhongli;
 import model.entity.Character;
@@ -55,6 +58,7 @@ import model.weapon.PeakPatrolSong;
 import model.weapon.Rust;
 import model.weapon.SacrificialSword;
 import model.weapon.SkywardBlade;
+import model.weapon.StaffOfHoma;
 import model.weapon.TheStringless;
 import model.weapon.ThrillingTalesOfDragonSlayers;
 import model.weapon.UrakuMisugiri;
@@ -80,6 +84,20 @@ final class CuratedCharacters {
 
     static Character diluc() {
         return new Diluc(new WolfsGravestone(1), null, 0);
+    }
+
+    static Character huTao() {
+        return new HuTao(
+                new StaffOfHoma(1), null, TalentDataManager.getInstance(), 0,
+                () -> FIXED_RANDOM_DRAW);
+    }
+
+    static Character furina() {
+        return new Furina(new WolfFang(), null, 0);
+    }
+
+    static Character yelan() {
+        return new Yelan(new FavoniusWarbow(5, () -> FIXED_RANDOM_DRAW), null, 0);
     }
 
     static Character arlecchino() {

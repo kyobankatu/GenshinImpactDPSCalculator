@@ -544,5 +544,44 @@
     "reentry_cost_score": 0.000000,
     "on_field_dps_score": 0.365070,
     "burst_window_score": 0.353710
+  },
+  "HU_TAO": {
+    "off_field_dps_ratio": 0.000000,
+    "team_buff_score": 0.090197,
+    "self_enhancement_score": 0.000000,
+    "energy_generation_score": 0.000000,
+    "entry_value_score": 0.112754,
+    "sustain_value_3_actions": 0.050386,
+    "sustain_value_6_actions": 0.049075,
+    "exit_cost_score": 0.486646,
+    "reentry_cost_score": 0.340764,
+    "on_field_dps_score": 0.236063,
+    "burst_window_score": 0.143174
+  },
+  "FURINA": {
+    "off_field_dps_ratio": 0.785462,
+    "team_buff_score": 0.500000,
+    "self_enhancement_score": 0.000000,
+    "energy_generation_score": 0.047580,
+    "entry_value_score": 0.052367,
+    "sustain_value_3_actions": 0.032252,
+    "sustain_value_6_actions": 0.045482,
+    "exit_cost_score": 0.108026,
+    "reentry_cost_score": 0.000000,
+    "on_field_dps_score": 0.354249,
+    "burst_window_score": 0.098821
+  },
+  "YELAN": {
+    "off_field_dps_ratio": 0.430988,
+    "team_buff_score": 0.561188,
+    "self_enhancement_score": 1.000000,
+    "energy_generation_score": 0.443109,
+    "entry_value_score": 0.019724,
+    "sustain_value_3_actions": 0.031302,
+    "sustain_value_6_actions": 0.037545,
+    "exit_cost_score": 0.206761,
+    "reentry_cost_score": 0.000000,
+    "on_field_dps_score": 0.491323,
+    "burst_window_score": 0.404147
   }
 }

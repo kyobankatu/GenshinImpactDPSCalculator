@@ -26011,7 +26011,7 @@ Completion evidence:
 
 ### Phase 15: Source-Matched Bulk Human Rotation Campaign
 
-Status: In progress; batches 1-21 retained eighteen new source-matched train scenarios.
+Status: In progress; batches 1-22 retained nineteen new source-matched train scenarios.
 
 Why:
 
@@ -26066,6 +26066,7 @@ Accepted-unit table (batch 1, researched 2026-08-25):
 | KQM Chiori Quick Guide: C0 Navia, C0 Chiori, C0 Xianyun, C6 Bennett Plunge rotation | `src/java/simulation/party/NaviaChioriPlungePartyDefinition.java` | Existing rollback-safe Navia high Plunge/artillery, Chiori Tamoto, Xianyun plunge support, Bennett field, and Crystallize; Chiori's second Skill input maps to the requested Xianyun swap, optional Chiori Burst is omitted, jump inputs map to high Plunge, and the existing Xianyun-only `GamingMelt` validation scenario moves to train to preserve character-disjoint splits | `TRAIN`; six Navia Plunges, two Skill charges, plunge buff consumption, cyclic replay, and cross-split identity audit |
 | KQM Xianyun Quick Guide: C0 Xianyun, C0 Xiao, C0 Faruzan, C6 Bennett Plunge rotation | `src/java/simulation/party/XiaoXianyunPartyDefinition.java` | Existing rollback-safe Xiao Burst/high Plunge, Xianyun Starwicker, Bennett field, and Faruzan Hurricane Arrow; add an exact C0 Faruzan factory and expose her represented Charged action, map jump inputs to high Plunge, and use the linked Xiao guide's twelve-high-Plunge benchmark without collision damage | `TRAIN`; complete `EP/EQ/ECQ/2EQ/12HP` source trace, Faruzan C0 charge, twelve Burst Plunges, cyclic Energy, and baseline non-inferiority |
 | KQM Xianyun Quick Guide: C0 Xianyun, C0 Diluc, C6 Xingqiu, C6 Bennett VV Vaporize Plunge rotation | `src/java/simulation/party/DilucXianyunVaporizePartyDefinition.java` | Existing rollback-safe Diluc high Plunge/three-stage Skill, Raincutter Normal triggers, Xianyun Starwicker, Bennett C6 field infusion, Vaporize, and deterministic weapon effects; omit optional Diluc Burst because Bennett is C6, omit dash inputs, and map jump inputs to high Plunge | `TRAIN`; eight `N1JP` strings, three `N1E` strings, Raincutter/Vaporize trace, C6 infusion, cyclic Energy, and baseline non-inferiority |
+| KQM Xianyun Quick Guide: C0 Hu Tao, C0 Furina, C0 Yelan, C0 Xianyun Double Hydro Vaporize Plunge rotation | `src/java/simulation/party/HuTaoXianyunVaporizePartyDefinition.java` | Existing rollback-safe Paramita Papilio/Blood Blossom, Salon Members/Fanfare, Exquisite Throw, Xianyun Starwicker, and Vaporize; omit Furina's dash, optional timing-tight final `N2C`, and optional Hu Tao Burst, and map jump inputs to high Plunge | `TRAIN`; five complete `N2CJP` strings, coordinated Hydro/Vaporize trace, cyclic Energy, and baseline non-inferiority |
 
 Rejected from batch 1: Ganyu Melt, Gaming Mono Pyro, and
 Ningguang/Yae/Fischl/Zhongli mix characters already assigned to different
@@ -26333,6 +26334,18 @@ Batch 21 checkpoint:
 - The full `ED Q / hEQ / EP Q / E N3C 8[N1JP]` typed trace is retained with
   optional Wriothesley Burst omitted. Reconsider only with an explicit split
   migration that preserves an independent validation cohort.
+
+Batch 22 checkpoint:
+
+- Hu Tao/Furina/Yelan/Xianyun Double Hydro Vaporize Plunge is retained from the
+  current KQM Xianyun Quick Guide. Campaign total: 44 researched, 19 retained,
+  25 rejected.
+- Furina's dash and all jump inputs are removed, jumps map to supported high
+  Plunges, and the optional timing-tight final `N2C` and Hu Tao Burst are
+  omitted. All five primary `N2CJP` strings remain in source order.
+- Exact three-cycle calibration requires 100.000% Hu Tao, 114.943% Furina,
+  115.249% Yelan, and 125.513% Xianyun ER. The complete trace uses a 30s
+  boundary and preserves coordinated Hydro application and Vaporize ownership.
 
 Acceptance criteria:
 

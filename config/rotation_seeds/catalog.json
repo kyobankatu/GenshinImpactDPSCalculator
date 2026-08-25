@@ -331,6 +331,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Xianyun, Wriothesley, Shenhe, Furina", "eight N1JP strings", "optional Wriothesley Burst is omitted", "single target"]
+    },
+    {
+      "sourceId": "kqm-xianyun-quick-guide-hu-tao-furina-yelan",
+      "title": "Xianyun Quick Guide: Hu Tao Furina Yelan Double Hydro Vaporize",
+      "url": "https://keqingmains.com/q/xianyun-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Hu Tao, C0 Xianyun, C0 Furina, C0 Yelan", "five N2CJP strings", "optional final N2C and Burst are omitted", "single target"]
     }
   ],
   "seeds": [
@@ -804,6 +814,20 @@
       "sourceAssumptions": ["Furina uses Skill then Burst", "Shenhe uses Hold Skill then Burst", "Wriothesley uses N3C then eight N1JP strings", "optional Wriothesley Burst is omitted", "single target"],
       "simulatorAssumptions": ["Furina's dash input is unsupported and removed", "jump inputs would map to supported high Plunges", "the exact party is withheld solely to preserve character-disjoint dataset splits"],
       "contentHash": "774c8c5099d5c0a77b2ffaf030d765f857c0c6077db2ef7b75fc486dba21bed7"
+    },
+    {
+      "seedId": "kqm-xianyun-hu-tao-furina-yelan-adapted-v1",
+      "partyName": "HuTaoXianyunVaporize",
+      "scenarioFingerprint": "loadout-v1:HU_TAO-c0-StaffOfHoma-r1-artifact-kqms-generic-v1:FURINA-c0-WolfFang-r1-artifact-kqms-generic-v1:YELAN-c0-FavoniusWarbow-r5-artifact-kqms-generic-v1:XIANYUN-c0-FavoniusCodex-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-xianyun-quick-guide-hu-tao-furina-yelan"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Furina's dash cancel and jump inputs are removed, jumps map to supported high Plunges, and the optional timing-tight final N2C and Hu Tao Burst are omitted while all five primary N2CJP strings replay in a 30s cycle.",
+      "openerActions": [],
+      "cycleActions": [[8, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 5, 9, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 5, 0, 10, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 2, 5, 0, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 0, 0, 1, 2, 0, 0, 1, 2, 0, 0, 1, 2, 0, 0, 1, 2, 0, 0, 1, 2]],
+      "erTargets": {"HU_TAO": 1.0, "FURINA": 1.1494252873371653, "YELAN": 1.1524920377405337, "XIANYUN": 1.2551332324518323},
+      "sourceAssumptions": ["Furina uses Skill then Burst", "Yelan uses Skill, Burst, then N1", "Xianyun uses EP Q N1", "Hu Tao uses Skill then five N2CJP strings", "optional final N2C and Burst are omitted", "single target"],
+      "simulatorAssumptions": ["dash and jump inputs are unsupported and removed", "jump inputs map directly to supported high Plunge actions", "explicit one-second waits preserve each simulator swap lock", "the steady-state trace uses a 30s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "57441736211ab63d2a76f8757129039f0c6c30e8fda31ea07c1422413f594937"
     }
   ]
 }
