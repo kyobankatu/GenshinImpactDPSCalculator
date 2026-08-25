@@ -56,6 +56,7 @@ public final class PartyCatalog {
         register(new YoimiyaChevreuseOverloadPartyDefinition());
         register(new YoimiyaDoubleHydroPartyDefinition());
         register(new YoimiyaIneffaVaporizePartyDefinition());
+        register(new YoimiyaChioriPartyDefinition());
         register(new SucroseElectroChargedPartyDefinition());
         register(new ColleiSucroseHyperbloomPartyDefinition());
         register(new NahidaBeidouHyperbloomPartyDefinition());

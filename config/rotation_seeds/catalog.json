@@ -701,6 +701,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Yoimiya, C0 Ineffa, C0 Yelan, C6 Bennett", "Rust R1", "three complete N5 strings", "single target"]
+    },
+    {
+      "sourceId": "kqm-yoimiya-quick-guide-bennett-zhongli-chiori",
+      "title": "Yoimiya Quick Guide: Bennett Zhongli Chiori Mono Pyro",
+      "url": "https://keqingmains.com/q/yoimiya-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Luna I; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Yoimiya, C6 Bennett, C0 Zhongli, C0 Chiori", "Rust R1", "three complete N5 strings", "single target"]
     }
   ],
   "seeds": [
@@ -1664,6 +1674,20 @@
       "sourceAssumptions": ["Ineffa uses Skill and may optionally Burst", "Yelan uses Skill-Burst-N1", "Bennett uses Skill-Burst, then a later Skill", "Yoimiya uses Skill and three complete N5 strings", "single target"],
       "simulatorAssumptions": ["Ineffa's optional Burst is omitted", "the guide-defined combo maps to fifteen typed Normal actions", "the cycle uses definition-normalized swap waits", "the unchanged trace uses a timing-adapted 30s cycle", "Favonius Warbow R5 uses deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "aec5f6ce9fa2cc46e0cdfcd22e52e9f00a22d30f4a861bcfd183d8c9eb3af7a4"
+    },
+    {
+      "seedId": "kqm-yoimiya-bennett-zhongli-chiori-adapted-v1",
+      "partyName": "YoimiyaChiori",
+      "scenarioFingerprint": "loadout-v1:YOIMIYA-c0-Rust-r1-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:ZHONGLI-c0-Deathmatch-r1-artifact-kqms-generic-v1:CHIORI-c0-UrakuMisugiri-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-yoimiya-quick-guide-bennett-zhongli-chiori"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Zhongli's Hold Skill maps to Press, Chiori's second Skill input maps to its requested Bennett swap, the optional Yoimiya or Chiori Burst is omitted, and the guide-defined combo is expanded to three complete N5 strings in a 25s cycle.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 5, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"YOIMIYA": 1.0, "BENNETT": 2.222222222209878, "ZHONGLI": 1.0, "CHIORI": 1.0},
+      "sourceAssumptions": ["Bennett uses an opening Skill, then later Burst-Skill", "Zhongli uses Hold Skill", "Chiori uses two linked Skill inputs to swap to Bennett", "Yoimiya uses Skill and three complete N5 strings", "Yoimiya or Chiori Burst is optional", "single target"],
+      "simulatorAssumptions": ["Zhongli's Hold Skill maps to Press Skill", "Chiori's second Skill input maps to an explicit Bennett swap", "the optional Yoimiya or Chiori Burst is omitted", "the guide-defined combo maps to fifteen typed Normal actions", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 25s cycle", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "2d3c727b98943bbecd417e19ee1c20b7f4ed3c85274e0edecafd548b3108a552"
     }
   ]
 }
