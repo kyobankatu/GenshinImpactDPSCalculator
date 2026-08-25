@@ -117,6 +117,10 @@ final class CuratedCharacters {
         return new Furina(new WolfFang(), null, 0);
     }
 
+    static Character furinaFavonius() {
+        return new Furina(new FavoniusSword(5, () -> FIXED_RANDOM_DRAW), null, 0);
+    }
+
     static Character yelan() {
         return new Yelan(new FavoniusWarbow(5, () -> FIXED_RANDOM_DRAW), null, 0);
     }

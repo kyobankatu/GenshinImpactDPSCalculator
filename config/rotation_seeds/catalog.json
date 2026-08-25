@@ -971,6 +971,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Gaming, C6 Bennett, C6 Sucrose, C0 Citlali", "Favonius Greatsword R5 Gaming", "Skyward Blade R1 Bennett", "Thrilling Tales R5 Sucrose", "Favonius Codex R5 Citlali", "single target"]
+    },
+    {
+      "sourceId": "kqm-gaming-quick-guide-furina-bennett-fischl",
+      "title": "Gaming Quick Guide: Furina Bennett Fischl Vaporize",
+      "url": "https://keqingmains.com/q/gaming-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.5; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Gaming, C0 Furina, C6 Bennett, C6 Fischl", "Favonius Greatsword R5 Gaming", "Favonius Sword R5 Furina", "Skyward Blade R1 Bennett", "The Stringless R5 Fischl", "single target"]
     }
   ],
   "seeds": [
@@ -2270,6 +2280,20 @@
       "sourceAssumptions": ["Bennett uses Skill-Burst", "Sucrose uses Skill", "Citlali uses Skill-Burst", "C0 Gaming selects five enhanced Plunges from the documented 5-6 range", "single target"],
       "simulatorAssumptions": ["Gaming's healer-backed field time remains above the repeated-return HP gate", "the first Man Chai wait is 0.4s and later waits are 1.3s from pinned gcsim frame timing", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 25s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "0ae270810eca5634f2caaa0263e6364c3f283bf1e607469dda1ca4d8aa046fc3"
+    },
+    {
+      "seedId": "kqm-gaming-furina-bennett-fischl-adapted-v1",
+      "partyName": "GamingFischlVaporize",
+      "scenarioFingerprint": "loadout-v1:GAMING-c0-FavoniusGreatsword-r5-artifact-kqms-generic-v1:FURINA-c0-FavoniusSword-r5-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:FISCHL-c6-TheStringless-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-gaming-quick-guide-furina-bennett-fischl"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Furina's dash cancel is omitted, Gaming uses six enhanced Plunges within the guide's documented 5-8 range for deterministic Man Chai travel, and Fischl alternates Skill and Burst across the retained two-cycle trace.",
+      "openerActions": [],
+      "cycleActions": [[8,3,5,6,6,6,6,6,6,6,6,6,6,9,3,5,6,6,6,6,6,6,6,6,6,6,10,3,6,6,6,6,6,6,6,6,6,6,7,5,3,2,6,6,6,6,3,2,6,6,6,6,6,6,6,6,6,6,6,6,6,3,2,6,6,6,6,6,6,6,6,6,6,6,6,6,3,2,6,6,6,6,6,6,6,6,6,6,6,6,6,3,2,6,6,6,6,6,6,6,6,6,6,6,6,6,3,2,6,6,6,6,6,6,6,6,6,6,9,3,6,6,6,6,6,6,6,6,6,6,7,0,0], [8,3,5,6,6,6,6,6,6,6,6,6,6,9,3,5,6,6,6,6,6,6,6,6,6,6,10,5,6,6,6,6,6,6,6,6,6,6,7,5,3,2,6,6,6,6,3,2,6,6,6,6,6,6,6,6,6,6,6,6,6,3,2,6,6,6,6,6,6,6,6,6,6,6,6,6,3,2,6,6,6,6,6,6,6,6,6,6,6,6,6,3,2,6,6,6,6,6,6,6,6,6,6,6,6,6,3,2,6,6,6,6,6,6,6,6,6,6,9,3,6,6,6,6,6,6,6,6,6,6,7,0,0]],
+      "erTargets": {"GAMING": 1.0, "FURINA": 1.0, "BENNETT": 1.0, "FISCHL": 1.0},
+      "sourceAssumptions": ["Furina uses Skill-dash-Burst", "Bennett uses Skill-Burst", "Fischl alternates Skill and Burst", "Gaming can use five to eight enhanced Plunges depending on Man Chai travel", "Bennett uses a second Skill before Gaming N2", "single target"],
+      "simulatorAssumptions": ["Furina's dash cancel is unsupported and removed", "Gaming's healer-backed field time remains above the repeated-return HP gate", "the first Man Chai wait is 0.4s and later waits are 1.3s from pinned gcsim frame timing", "the cycle uses definition-normalized swap waits", "the reviewed alternating trace uses a 35s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "53e3641b5c2b867055679f75c7f6fc1a32560960fe7c22dd2d408136b8c5b330"
     }
   ]
 }
