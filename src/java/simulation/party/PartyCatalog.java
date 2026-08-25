@@ -50,6 +50,7 @@ public final class PartyCatalog {
         register(new AyatoOvervapePartyDefinition());
         register(new AyatoBennettBurgeonPartyDefinition());
         register(new AyatoSucroseVaporizePartyDefinition());
+        register(new AyatoXilonenMonoHydroPartyDefinition());
         register(new FurinaXilonenMonoHydroPartyDefinition());
         register(new YelanXingqiuNationalPartyDefinition());
         register(new BennettReverseMeltPartyDefinition());

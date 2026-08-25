@@ -1121,6 +1121,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C6 Sucrose, C6 Xingqiu, C0 Ororon, C6 Beidou", "single target"]
+    },
+    {
+      "sourceId": "kqm-yelan-quick-guide-furina-xilonen-ayato",
+      "title": "Yelan Quick Guide: Furina Xilonen Ayato Mono Hydro",
+      "url": "https://keqingmains.com/q/yelan-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.4; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Furina, C0 Xilonen, C0 Yelan, C0 Kamisato Ayato", "Wolf-Fang R1 Furina", "Peak Patrol Song R1 Xilonen", "Favonius Warbow R5 Yelan", "Haran Geppaku Futsu R1 Ayato", "single target"]
     }
   ],
   "seeds": [
@@ -2630,6 +2640,20 @@
       "sourceAssumptions": ["Beidou uses a first-cycle-only Skill, then Skill-N1-Burst-N1 and a later Skill-N2", "Sucrose uses Skill-Burst, then N1-Skill-N2-an optional second Skill-N2C-N3-N2C-N3", "Xingqiu uses Skill-Burst-N1", "Ororon uses Skill-Burst-N1", "single target"],
       "simulatorAssumptions": ["dash cancels are unsupported and removed", "Sucrose's optional Burst and second Skill are selected", "the complete first and later normalized action traces are retained for review", "Ororon belongs to holdout", "Sucrose, Xingqiu, and Beidou belong to train", "no cross-split party is published"],
       "contentHash": "73376e3a78889180f11947bd481d5f27839cd4ef0f82e2e14718a042389d1cdf"
+    },
+    {
+      "seedId": "kqm-yelan-furina-xilonen-ayato-adapted-v1",
+      "partyName": "AyatoXilonenMonoHydro",
+      "scenarioFingerprint": "loadout-v1:FURINA-c0-WolfFang-r1-artifact-kqms-generic-v1:XILONEN-c0-PeakPatrolSong-r1-artifact-kqms-generic-v1:YELAN-c0-FavoniusWarbow-r5-artifact-kqms-generic-v1:KAMISATO_AYATO-c0-HaranGeppakuFutsu-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-yelan-quick-guide-furina-xilonen-ayato"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Furina's dash cancel is omitted while both complete Ayato Skill-N15 field times and every support action remain in source order.",
+      "openerActions": [],
+      "cycleActions": [[3, 8, 3, 5, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 5, 0, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7]],
+      "erTargets": {"FURINA": 1.0, "XILONEN": 1.0444354107324085, "YELAN": 1.0, "KAMISATO_AYATO": 1.0},
+      "sourceAssumptions": ["Furina uses Skill with a dash cancel then Burst", "Xilonen uses Skill-Burst-N2 and a later Skill-N2", "Yelan uses Burst-N1-Skill-N1 and a later Skill-N2", "Ayato uses two Skill-N15 field times and places Burst after the first", "single target"],
+      "simulatorAssumptions": ["Furina's dash cancel is unsupported and removed", "all thirty Ayato Normal attacks are retained", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 40s cycle", "Favonius Warbow R5 uses deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "3edda8a39a7798da63117af994ce246d8530c146df695c56a15c4075ad14698f"
     }
   ]
 }
