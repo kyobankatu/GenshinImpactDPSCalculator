@@ -711,6 +711,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Yoimiya, C6 Bennett, C0 Zhongli, C0 Chiori", "Rust R1", "three complete N5 strings", "single target"]
+    },
+    {
+      "sourceId": "kqm-yoimiya-quick-guide-xingqiu-bennett-fischl",
+      "title": "Yoimiya Quick Guide: Xingqiu Bennett Fischl Vaporize",
+      "url": "https://keqingmains.com/q/yoimiya-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Luna I; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Yoimiya, C6 Xingqiu, C6 Bennett, C6 Fischl", "Rust R1", "Favonius Sword R5 Xingqiu", "Favonius Warbow R5 Fischl", "three complete N5 strings", "single target"]
     }
   ],
   "seeds": [
@@ -1688,6 +1698,20 @@
       "sourceAssumptions": ["Bennett uses an opening Skill, then later Burst-Skill", "Zhongli uses Hold Skill", "Chiori uses two linked Skill inputs to swap to Bennett", "Yoimiya uses Skill and three complete N5 strings", "Yoimiya or Chiori Burst is optional", "single target"],
       "simulatorAssumptions": ["Zhongli's Hold Skill maps to Press Skill", "Chiori's second Skill input maps to an explicit Bennett swap", "the optional Yoimiya or Chiori Burst is omitted", "the guide-defined combo maps to fifteen typed Normal actions", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 25s cycle", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "2d3c727b98943bbecd417e19ee1c20b7f4ed3c85274e0edecafd548b3108a552"
+    },
+    {
+      "seedId": "kqm-yoimiya-xingqiu-bennett-fischl-adapted-v1",
+      "partyName": "YoimiyaFischlVaporize",
+      "scenarioFingerprint": "loadout-v1:YOIMIYA-c0-Rust-r1-artifact-kqms-generic-v1:XINGQIU-c6-FavoniusSword-r5-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:FISCHL-c6-FavoniusWarbow-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-yoimiya-quick-guide-xingqiu-bennett-fischl"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Xingqiu's dash and Yoimiya's optional Burst are omitted, Fischl alternates Skill and Burst, the guide-defined combo is expanded to three complete N5 strings, and the definition-normalized two-cycle trace uses a 25s cycle.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 0, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3], [8, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 0, 0, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3]],
+      "erTargets": {"YOIMIYA": 1.0, "XINGQIU": 1.553534075127411, "BENNETT": 1.102481669081681, "FISCHL": 1.0},
+      "sourceAssumptions": ["Xingqiu uses Skill-Burst-N1", "Bennett uses Skill-Burst-N1, then a later Skill", "Fischl uses N2 and alternates Skill and Burst", "Yoimiya uses Skill and three complete N5 strings", "Yoimiya's Burst is optional", "single target"],
+      "simulatorAssumptions": ["Xingqiu's dash is unsupported and removed", "Yoimiya's optional Burst is omitted", "the guide-defined combo maps to fifteen typed Normal actions", "the cycles use definition-normalized swap waits", "the reviewed trace uses a 25s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "c7643a8d4fbf94a2679dd1f8ae8832553fc92fa170acd120d8dd478886f3539d"
     }
   ]
 }
