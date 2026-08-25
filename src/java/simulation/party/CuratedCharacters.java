@@ -14,6 +14,7 @@ import model.character.Diluc;
 import model.character.Emilie;
 import model.character.Faruzan;
 import model.character.Fischl;
+import model.character.Flins;
 import model.character.Furina;
 import model.character.Gaming;
 import model.character.Ganyu;
@@ -61,6 +62,7 @@ import model.weapon.HaranGeppakuFutsu;
 import model.weapon.LumidouceElegy;
 import model.weapon.NocturnesCurtainCall;
 import model.weapon.PeakPatrolSong;
+import model.weapon.ProspectorShovel;
 import model.weapon.Rust;
 import model.weapon.SacrificialFragments;
 import model.weapon.SacrificialSword;
@@ -119,6 +121,10 @@ final class CuratedCharacters {
 
     static Character arlecchino() {
         return new Arlecchino(new Deathmatch(1), null, 0);
+    }
+
+    static Character flins() {
+        return new Flins(new ProspectorShovel(), null);
     }
 
     static Character citlali() {

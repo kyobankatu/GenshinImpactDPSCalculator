@@ -861,6 +861,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C1 or higher Flins", "three special Skills and short Bursts", "five particle-generation strings", "single target"]
+    },
+    {
+      "sourceId": "kqm-flins-quick-guide-yelan-ineffa-sucrose",
+      "title": "Flins Quick Guide: Yelan Ineffa Sucrose Lunar-Charged",
+      "url": "https://keqingmains.com/q/flins-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Luna VI; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C1 Flins, C0 Ineffa, C0 Yelan, C6 Sucrose", "Prospector's Shovel R5 Flins", "Calamity Queller R1 Ineffa", "Favonius Warbow R5 Yelan", "Thrilling Tales R5 Sucrose", "single target"]
     }
   ],
   "seeds": [
@@ -2006,6 +2016,20 @@
       "sourceAssumptions": ["Ineffa and Columbina alternate Bursts, with no first-rotation Ineffa Burst", "Sucrose may use Skill or Burst before Flins", "C1+ Flins uses E-N2-E-short Burst-N4-N3-E-short Burst-N4-N2-E-short Burst-N4", "Sucrose finishes with optional Skill and N3", "single target"],
       "simulatorAssumptions": ["Sucrose selects the Skill branch every cycle", "the second Flins dash boundary maps to a 0.3s local cooldown wait", "other dash cancels are unsupported and removed", "Flins's special Skill and short Burst share their typed Skill and Burst actions", "Sucrose's optional terminal N3C is omitted", "the cycles use definition-normalized swap waits", "the reviewed trace uses a 30s cycle", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "97a119c143c8c66fe659ed378d7e9c43871abc262092a48d5ecb098f7c007db1"
+    },
+    {
+      "seedId": "kqm-flins-ineffa-yelan-sucrose-adapted-v1",
+      "partyName": "FlinsYelanLunarCharged",
+      "scenarioFingerprint": "loadout-v1:FLINS-c1-ProspectorShovel-r5-artifact-kqms-generic-v1:INEFFA-c0-CalamityQueller-r1-artifact-kqms-generic-v1:YELAN-c0-FavoniusWarbow-r5-artifact-kqms-generic-v1:SUCROSE-c6-ThrillingTalesOfDragonSlayers-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-flins-quick-guide-yelan-ineffa-sucrose", "kqm-flins-quick-guide-c1-plus-combo"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Ineffa's and Sucrose's optional Bursts are omitted, Flins uses the C1+ combo with a 0.3s local wait at its second dash boundary, and remaining dash cancels are removed.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 3, 5, 0, 0, 0, 0, 0, 0, 0, 3, 5, 0, 0, 0, 0, 6, 6, 6, 0, 0, 3, 5, 0, 0, 0, 0]],
+      "erTargets": {"FLINS": 1.0, "INEFFA": 1.0, "YELAN": 1.7314981675676833, "SUCROSE": 1.0},
+      "sourceAssumptions": ["Ineffa uses Skill and may Burst", "Yelan uses Skill-Burst-N1", "Sucrose uses Skill and may Burst, then N1", "C1+ Flins uses E-N2-E-short Burst-N4-N3-E-short Burst-N4-N2-E-short Burst-N4", "single target"],
+      "simulatorAssumptions": ["Ineffa's and Sucrose's optional Bursts are omitted", "the second Flins dash boundary maps to a 0.3s local cooldown wait", "other dash cancels are unsupported and removed", "Flins's special Skill and short Burst share their typed Skill and Burst actions", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 25s cycle", "Favonius Warbow R5 uses deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "a808e270074aab3f2360b3f899b5c1720613adca91276e3655054037fca028f8"
     }
   ]
 }
