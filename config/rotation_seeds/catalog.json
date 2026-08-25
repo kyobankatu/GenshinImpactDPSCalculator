@@ -641,6 +641,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Navia, C6 Bennett, C0 Zhongli, C0 Furina", "Verdict R1", "single target"]
+    },
+    {
+      "sourceId": "kqm-navia-quick-guide-bennett-fischl-chiori",
+      "title": "Navia Quick Guide: Bennett Fischl Chiori",
+      "url": "https://keqingmains.com/q/navia-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Navia, C6 Bennett, C6 Fischl, C0 Chiori", "Verdict R1", "Favonius Warbow R5 Fischl", "single target"]
     }
   ],
   "seeds": [
@@ -1520,6 +1530,20 @@
       "sourceAssumptions": ["Bennett uses an opening Skill, then later Burst-Skill", "Zhongli uses Hold Skill, then later N2-Tap Skill", "Furina uses Skill then Burst", "Navia uses Burst and two Hold Skills", "single target"],
       "simulatorAssumptions": ["Furina's dash input is unsupported and removed", "Zhongli's Hold and Tap Skills and Navia's Hold Skills map to Press Skill", "the cycle uses the definition-normalized swap waits", "both 30s and 35s boundaries were reviewed", "full first-cycle Energy is explicit in the scenario fingerprint", "no reviewed timing satisfies every KQMS ER ceiling"],
       "contentHash": "acf2f41d678585fe9143011dbf7d9eff6a06d41daa90e4e108a02c8673332012"
+    },
+    {
+      "seedId": "kqm-navia-bennett-fischl-chiori-adapted-v1",
+      "partyName": "NaviaChioriQuick",
+      "scenarioFingerprint": "loadout-v1:NAVIA-c0-Verdict-r1-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:FISCHL-c6-FavoniusWarbow-r5-artifact-kqms-generic-v1:CHIORI-c0-UrakuMisugiri-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-navia-quick-guide-bennett-fischl-chiori"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Fischl alternates Skill and Burst, Chiori's second Skill input maps to its requested Navia swap, Navia's Hold Skills map to Press, and the definition-normalized two-cycle trace uses a 25s cycle.",
+      "openerActions": [],
+      "cycleActions": [[5, 8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3], [5, 8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3]],
+      "erTargets": {"NAVIA": 1.1992804317209684, "BENNETT": 1.6969285592793737, "FISCHL": 1.0, "CHIORI": 1.0},
+      "sourceAssumptions": ["Navia opens with Burst and uses two Hold Skills", "Bennett uses Skill-Burst, then later Skill", "Fischl alternates Skill and Burst", "Chiori uses two linked Skill inputs to swap to Navia", "single target"],
+      "simulatorAssumptions": ["Chiori's second Skill input maps to an explicit Navia swap", "Navia's Hold Skills map to Press Skill", "the cycles use definition-normalized swap waits", "the reviewed trace uses a 25s cycle", "Favonius Warbow R5 uses deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "a19bd96ee9a3f60c281ff7f53a3e9bb70a08d79b81dabbc6acdf6bbfb4ff0cb4"
     }
   ]
 }
