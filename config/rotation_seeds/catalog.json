@@ -631,6 +631,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Navia, C0 Furina, C0 Xilonen, C6 Bennett", "Verdict R1", "single target"]
+    },
+    {
+      "sourceId": "kqm-navia-quick-guide-bennett-zhongli-furina",
+      "title": "Navia Quick Guide: Bennett Zhongli Furina",
+      "url": "https://keqingmains.com/q/navia-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Navia, C6 Bennett, C0 Zhongli, C0 Furina", "Verdict R1", "single target"]
     }
   ],
   "seeds": [
@@ -1496,6 +1506,20 @@
       "sourceAssumptions": ["Furina uses Skill then Burst", "Xilonen uses Skill-Burst-N2, then later Skill-N2", "Navia uses Burst and two Hold Skills", "Bennett uses Skill then Burst", "single target"],
       "simulatorAssumptions": ["Furina's dash input is unsupported and removed", "Navia's Hold Skills map to Press Skill", "the cycle uses the definition-normalized swap waits", "the complete trace uses a timing-adapted 30s cycle", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "7d84127a470d1fd39ff6a7adbaea40c51adfa977942d8e06050df0287b4e684e"
+    },
+    {
+      "seedId": "kqm-navia-bennett-zhongli-furina-adapted-v1",
+      "partyName": "NaviaZhongliFurina",
+      "scenarioFingerprint": "loadout-v1:NAVIA-c0-Verdict-r1-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:ZHONGLI-c0-Deathmatch-r1-artifact-kqms-generic-v1:FURINA-c0-WolfFang-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-navia-quick-guide-bennett-zhongli-furina"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because a 30s boundary requires 217.391% Navia ER while a 35s boundary requires 227.273% Furina ER, both above their 206.900% KQMS ceilings; no unsourced battery action was added.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 5, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 5, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3]],
+      "erTargets": {"NAVIA": 2.17391, "BENNETT": 1.0, "ZHONGLI": 1.0, "FURINA": 2.27273},
+      "sourceAssumptions": ["Bennett uses an opening Skill, then later Burst-Skill", "Zhongli uses Hold Skill, then later N2-Tap Skill", "Furina uses Skill then Burst", "Navia uses Burst and two Hold Skills", "single target"],
+      "simulatorAssumptions": ["Furina's dash input is unsupported and removed", "Zhongli's Hold and Tap Skills and Navia's Hold Skills map to Press Skill", "the cycle uses the definition-normalized swap waits", "both 30s and 35s boundaries were reviewed", "full first-cycle Energy is explicit in the scenario fingerprint", "no reviewed timing satisfies every KQMS ER ceiling"],
+      "contentHash": "acf2f41d678585fe9143011dbf7d9eff6a06d41daa90e4e108a02c8673332012"
     }
   ]
 }
