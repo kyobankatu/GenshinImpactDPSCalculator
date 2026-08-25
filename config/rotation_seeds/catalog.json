@@ -611,6 +611,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Kamisato Ayato, C0 Furina, C6 Fischl, C4 Jean", "Haran Geppaku Futsu R1", "single target"]
+    },
+    {
+      "sourceId": "kqm-ayato-quick-guide-bennett-fischl-xiangling",
+      "title": "Kamisato Ayato Quick Guide: Bennett Fischl Xiangling Overvape",
+      "url": "https://keqingmains.com/q/ayato-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Kamisato Ayato, C6 Bennett, C6 Fischl, C6 Xiangling", "Haran Geppaku Futsu R1", "single target"]
     }
   ],
   "seeds": [
@@ -1448,6 +1458,20 @@
       "sourceAssumptions": ["Furina uses Skill then Burst", "Fischl alternates Skill then Burst", "Jean uses Skill-Burst, then later Skill-N2", "Ayato uses two Skill-N15 fields and Burst after the first field", "single target"],
       "simulatorAssumptions": ["Furina's dash input is unsupported and removed", "the local Jean loadout is explicitly C4", "each N15 field maps to fifteen typed Normal actions", "explicit one-second waits preserve each simulator swap lock", "the reviewed trace uses a 40s cycle", "Fischl C6 Oz and Ayato particle draws use deterministic sources", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "030286f102fccb94479099a3bb9e52c75da2a88fa04bec01ddc493476870f3ea"
+    },
+    {
+      "seedId": "kqm-ayato-bennett-fischl-xiangling-adapted-v1",
+      "partyName": "AyatoOvervape",
+      "scenarioFingerprint": "loadout-v1:KAMISATO_AYATO-c0-HaranGeppakuFutsu-r1-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:FISCHL-c6-TheStringless-r5-artifact-kqms-generic-v1:XIANGLING-c6-FavoniusLance-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-ayato-quick-guide-bennett-fischl-xiangling"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Each Ayato N15 field is fixed to fifteen typed Normals, the sourced Fischl and Xiangling Normal counts are preserved, and the complete two-field trace uses a 40s cycle.",
+      "openerActions": [],
+      "cycleActions": [[5, 8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 5, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 0, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 0, 0, 0, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"KAMISATO_AYATO": 1.1821274872286083, "BENNETT": 1.025153674397155, "FISCHL": 1.0, "XIANGLING": 1.3847651704493873},
+      "sourceAssumptions": ["Ayato opens with Burst and uses two Skill-N15 fields", "Bennett uses Skill-Burst, then later N1-Skill", "Fischl uses N1-Skill, then later N2-Burst", "Xiangling uses Burst-Skill, then later N4-Skill", "single target"],
+      "simulatorAssumptions": ["each N15 field maps to fifteen typed Normal actions", "the sourced support Normal counts are preserved", "explicit one-second waits preserve each simulator swap lock", "the reviewed trace uses a 40s cycle", "Favonius Lance, Fischl C6 Oz, and Ayato particle draws use deterministic sources", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "324aca5f67459e864773fde5948aaf374569a0bbf582aeddcc358d81815e62a8"
     }
   ]
 }

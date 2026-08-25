@@ -43,6 +43,7 @@ public final class PartyCatalog {
         register(new AyatoFurinaTaserPartyDefinition());
         register(new AyatoDoubleHydroPartyDefinition());
         register(new AyatoJeanTaserPartyDefinition());
+        register(new AyatoOvervapePartyDefinition());
         register(new DilucXianyunVaporizePartyDefinition());
         register(new HuTaoXianyunVaporizePartyDefinition());
         register(new ArlecchinoOverloadPartyDefinition());
