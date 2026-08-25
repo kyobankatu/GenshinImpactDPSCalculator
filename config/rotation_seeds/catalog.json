@@ -771,6 +771,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Ayaka, C0 Shenhe, C0 Xilonen, C0 Chiori", "Finale of the Deep R5 Ayaka", "Favonius Lance R5 Shenhe", "Peak Patrol Song R1 Xilonen", "Uraku Misugiri R1 Chiori", "single target"]
+    },
+    {
+      "sourceId": "kqm-nahida-quick-guide-keqing-fischl-lan-yan",
+      "title": "Nahida Quick Guide: Keqing Fischl Lan Yan Aggravate",
+      "url": "https://keqingmains.com/q/nahida-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.6; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Keqing, C6 Lan Yan, C0 Nahida, C6 Fischl", "Wolf-Fang R1 Keqing", "Thrilling Tales R5 Lan Yan", "Wandering Evenstar R5 Nahida", "The Stringless R5 Fischl", "single target"]
     }
   ],
   "seeds": [
@@ -1818,6 +1828,20 @@
       "sourceAssumptions": ["Xilonen Bursts for the Finale of the Deep loadout", "Shenhe uses Tap Skill-Burst and later N1-Tap Skill", "Xilonen uses two Skill-N2 strings", "Chiori's linked Skill swaps to Ayaka and Chiori Bursts at the end", "Ayaka omits the Mistsplitter-only Normal", "single target"],
       "simulatorAssumptions": ["Ayaka's dash cancels are unsupported and removed", "Shenhe Tap Skill maps to Press", "Chiori's second Skill maps to an explicit Ayaka swap", "the complete definition-normalized trace exceeds both 35s and 40s review boundaries", "no further timing dilation or action omission is allowed"],
       "contentHash": "6c1153e437f1da574a489df91b47539f9e13a1a5fa2949a8779a1877c8b84420"
+    },
+    {
+      "seedId": "kqm-keqing-nahida-fischl-lan-yan-adapted-v1",
+      "partyName": "KeqingLanYanAggravate",
+      "scenarioFingerprint": "loadout-v1:KEQING-c0-WolfFang-r1-artifact-kqms-generic-v1:LAN_YAN-c6-ThrillingTalesOfDragonSlayers-r5-artifact-kqms-generic-v1:NAHIDA-c0-WanderingEvenstar-r5-artifact-kqms-generic-v1:FISCHL-c6-TheStringless-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-nahida-quick-guide-keqing-fischl-lan-yan"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Keqing's first-rotation Skill and a 0.8s local cooldown wait are separated into the opener, C6 Lan Yan retains both Skills, Nahida's optional Burst is omitted, Fischl alternates Skill and Burst, and a 2.7s wait replaces the unavailable Thundering Fury cooldown reduction before Keqing's third Skill.",
+      "openerActions": [3, 6, 6, 6, 6, 6, 6, 6, 6],
+      "cycleActions": [[8, 3, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 5, 3, 0, 1, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 0, 1, 0, 1, 0, 1], [8, 3, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 5, 3, 0, 1, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 0, 1, 0, 1, 0, 1]],
+      "erTargets": {"KEQING": 1.0, "LAN_YAN": 1.0, "NAHIDA": 1.0, "FISCHL": 1.0},
+      "sourceAssumptions": ["Keqing uses one first-rotation setup Skill", "C6 Lan Yan uses two Skills", "Nahida's Burst is optional", "Fischl alternates Skill and Burst", "Keqing uses Skill-Burst-Skill-N1C-N1-Skill-3[N1C]", "single target"],
+      "simulatorAssumptions": ["the first-rotation Keqing Skill and a 0.8s cooldown wait are an explicit opener", "Nahida's optional Burst is omitted", "a 2.7s cooldown wait replaces the unavailable Thundering Fury reduction before Keqing's third Skill", "the cycles use definition-normalized swap waits", "the reviewed trace uses a 25s cycle", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "4744f5d7eb83e51a0284d8dfb6dd6a4428ed48f0593b609338d17ed0a5a1397a"
     }
   ]
 }
