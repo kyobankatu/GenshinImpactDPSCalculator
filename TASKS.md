@@ -26012,7 +26012,7 @@ Completion evidence:
 
 ### Phase 15: Source-Matched Bulk Human Rotation Campaign
 
-Status: In progress; batches 1-48 retained thirty-three new source-matched train scenarios.
+Status: In progress; batches 1-52 retained thirty-six new source-matched train scenarios.
 
 Active execution window:
 
@@ -26488,6 +26488,21 @@ Batches 45-48 checkpoint:
   206.900% TTDS KQMS ceiling. No loadout or battery substitution was made.
 - The tracked catalog now contains 62 sources and 60 seeds. Its 36 usable seeds
   comprise 35 train and one validation seed; holdout remains source-isolated.
+
+Batches 49-52 checkpoint:
+
+- Four Navia candidates were researched. Furina/Xilonen/Bennett,
+  Bennett/Fischl/Chiori, and Xilonen/Furina/Yelan were retained;
+  Bennett/Zhongli/Furina was rejected. Campaign total: 74 researched, 36
+  retained, and 38 rejected or blocked.
+- The retained set adds a timing-adapted Furina support trace, an explicit
+  Fischl Skill/Burst alternating quickswap trace, and a Normal-preserving
+  double-Hydro trace. All use definition-normalized swap waits.
+- The Zhongli/Furina candidate has no common feasible timing: 30s exceeds
+  Navia's KQMS ER ceiling, while 35s exceeds Furina's. No battery action or
+  loadout was substituted.
+- The tracked catalog now contains 66 sources and 64 seeds. Its 39 usable seeds
+  comprise 38 train and one validation seed; holdout remains source-isolated.
 
 Acceptance criteria:
 
