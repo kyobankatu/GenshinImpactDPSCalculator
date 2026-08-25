@@ -26057,6 +26057,7 @@ Accepted-unit table (batch 1, researched 2026-08-25):
 | KQM Arlecchino Quick Guide: Arlecchino, C0 Mona, Bennett, Sucrose split-field Vape rotation | `src/java/simulation/party/ArlecchinoMonaVaporizePartyDefinition.java` | Existing Bond of Life persistence, C0 Omen/Phantom, Bennett buff, Sucrose Swirl, and Vaporize; dash cancel and optional Sucrose Burst are omitted | `TRAIN`; Omen/Vape split-field trace and 30s cyclic replay |
 | KQM Arlecchino Quick Guide: Arlecchino, C0 Mona, Bennett, C6 Fischl split-field Overvape rotation | `src/java/simulation/party/ArlecchinoMonaOvervapePartyDefinition.java` | Existing Bond of Life persistence, C0 Omen/Phantom, Bennett buff, C6 Oz, Electro-Charged/Overloaded/Vaporize; Fischl alternates Skill and Burst and dash cancels are omitted | `TRAIN`; two-cycle alternation, reaction trace, and 30s cyclic replay |
 | KQM Keqing Quick Guide: C0 Keqing, C0 Chevreuse, C6 Xiangling, C6 Fischl two-part Overloaded rotation | `src/java/simulation/party/KeqingChevreuseOverloadPartyDefinition.java` | Existing Stiletto recast, Electro infusion, Pyronado, Oz alternation, and Overloaded/Chevreuse support; Hold Skill maps to Press, C0 Chevreuse skips the optional mid-cycle Hold Skill, and dash cancels are omitted | `TRAIN`; two-part action trace, Overloaded ownership, and 40s cyclic replay |
+| KQM Yoimiya Quick Guide: C0 Yoimiya, C0 Chevreuse, C6 Bennett, C6 Fischl support-build Overloaded rotation | `src/java/simulation/party/YoimiyaChevreuseOverloadPartyDefinition.java` | Existing Niwabi infusion, complete N5 string, C6 Oz, Bennett field, and Overloaded/Chevreuse support; Hold Skill maps to Press, optional Yoimiya Burst is omitted, and dash cancels are removed | `TRAIN`; two-cycle Fischl alternation, 16-arrow field trace, and 25s cyclic replay |
 
 Rejected from batch 1: Ganyu Melt, Gaming Mono Pyro, and
 Ningguang/Yae/Fischl/Zhongli mix characters already assigned to different
@@ -26162,6 +26163,19 @@ Batch 8 checkpoint:
   100% Fischl, and 127.559% Xiangling ER. The source seed passes legal,
   deterministic replay and definition-baseline non-inferiority.
 
+Batch 9 checkpoint:
+
+- Yoimiya/Chevreuse/Fischl/Bennett Overloaded is retained from one exact current
+  KQM rotation. Campaign total: 31 researched, 10 retained, 21 rejected.
+- Fischl's first-rotation Skill is an opener and her steady cycles alternate
+  Burst and Skill. Yoimiya's optional Burst and dash cancels are omitted, while
+  `3[N5D] N1` is represented by the complete fixed 16-Normal field string.
+- Deterministic Favonius Lance R5 keeps the source rotation within the KQMS
+  allocation: exact three-cycle calibration requires 100% Yoimiya, 162.946%
+  Chevreuse, 179.905% Bennett, and 163.468% Fischl ER. The 25-second source
+  replay is legal, deterministic, cyclically feasible, and no worse than its
+  registered definition baseline.
+
 Acceptance criteria:
 
 - Every retained seed has an exact constructible scenario, complete provenance,
@@ -26208,6 +26222,11 @@ Target files:
 
 Tasks:
 
+- Before teacher search, audit every RL-enabled party member that schedules
+  owner-scoped delayed effects. Such a character must either implement complete
+  `SnapshotAwareCharacterEffect` capture/restore or make the scenario fail
+  closed during catalog/search setup; a locally replayable first cycle is not
+  sufficient evidence for branch-safe search.
 - Report step budget, completed trajectory count, complete populations, and
   complete generations separately. A production evolutionary run must finish
   at least one population and one mutation generation.
@@ -26232,6 +26251,12 @@ Acceptance criteria:
 
 Test cases to add or update:
 
+- Normal: snapshot and restore a seeded scenario with pending owner events and
+  obtain the same action legality, event trace, Energy, and score as uninterrupted
+  execution.
+- Abnormal: reject a trainable scenario whose character schedules a pending
+  owner event without complete snapshot support before any teacher trajectory
+  is archived.
 - Normal: full population/generation accounting, seed retention, feasible child
   replacement, multi-seed determinism, and rank-qualified publication.
 - Abnormal: 128-step budget that cannot complete a generation, incomplete high-

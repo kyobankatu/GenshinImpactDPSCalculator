@@ -466,5 +466,18 @@
     "reentry_cost_score": 0.000000,
     "on_field_dps_score": 0.292682,
     "burst_window_score": 0.184536
+  },
+  "YOIMIYA": {
+    "off_field_dps_ratio": 0.124388,
+    "team_buff_score": 0.454194,
+    "self_enhancement_score": 0.000000,
+    "energy_generation_score": 0.000000,
+    "entry_value_score": 0.032422,
+    "sustain_value_3_actions": 0.022982,
+    "sustain_value_6_actions": 0.033484,
+    "exit_cost_score": 0.497813,
+    "reentry_cost_score": 0.223871,
+    "on_field_dps_score": 0.415143,
+    "burst_window_score": 0.259156
   }
 }

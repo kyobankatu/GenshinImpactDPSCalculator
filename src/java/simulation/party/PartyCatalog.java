@@ -36,6 +36,7 @@ public final class PartyCatalog {
         register(new ArlecchinoMonaVaporizePartyDefinition());
         register(new ArlecchinoMonaOvervapePartyDefinition());
         register(new KeqingChevreuseOverloadPartyDefinition());
+        register(new YoimiyaChevreuseOverloadPartyDefinition());
         register(new ArlecchinoLunarChargedPartyDefinition());
         register(new ArlecchinoIneffaOverloadPartyDefinition());
         register(new AlhaithamSpreadPartyDefinition());

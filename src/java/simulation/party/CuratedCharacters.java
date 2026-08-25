@@ -34,20 +34,22 @@ import model.character.Xingqiu;
 import model.character.Xiangling;
 import model.character.Xilonen;
 import model.character.YaeMiko;
+import model.character.Yoimiya;
 import model.character.Zhongli;
 import model.entity.Character;
-import model.weapon.Deathmatch;
 import model.weapon.CalamityQueller;
-import model.weapon.FavoniusWarbow;
-import model.weapon.FavoniusSword;
-import model.weapon.FavoniusLance;
-import model.weapon.FavoniusGreatsword;
+import model.weapon.Deathmatch;
 import model.weapon.FavoniusCodex;
+import model.weapon.FavoniusGreatsword;
+import model.weapon.FavoniusLance;
+import model.weapon.FavoniusSword;
+import model.weapon.FavoniusWarbow;
 import model.weapon.LumidouceElegy;
 import model.weapon.NocturnesCurtainCall;
 import model.weapon.PeakPatrolSong;
-import model.weapon.SkywardBlade;
+import model.weapon.Rust;
 import model.weapon.SacrificialSword;
+import model.weapon.SkywardBlade;
 import model.weapon.TheStringless;
 import model.weapon.ThrillingTalesOfDragonSlayers;
 import model.weapon.WanderingEvenstar;
@@ -202,7 +204,20 @@ final class CuratedCharacters {
                 () -> FIXED_RANDOM_DRAW);
     }
 
+    static Character chevreuseFavonius() {
+        return new Chevreuse(
+                new FavoniusLance(5, () -> FIXED_RANDOM_DRAW),
+                null,
+                TalentDataManager.getInstance(),
+                0,
+                () -> FIXED_RANDOM_DRAW);
+    }
+
     static Character yaeMiko() {
         return new YaeMiko(new WanderingEvenstar(5), null, 0);
+    }
+
+    static Character yoimiya() {
+        return new Yoimiya(new Rust(1), null, 0);
     }
 }

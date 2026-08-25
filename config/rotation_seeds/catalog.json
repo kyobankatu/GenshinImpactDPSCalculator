@@ -201,6 +201,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Keqing, C0 Chevreuse, C6 Xiangling, C6 Fischl", "two-part rotation", "single target"]
+    },
+    {
+      "sourceId": "kqm-yoimiya-quick-guide-chevreuse-fischl-bennett",
+      "title": "Yoimiya Quick Guide: Chevreuse Fischl Bennett Overloaded",
+      "url": "https://keqingmains.com/q/yoimiya-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Yoimiya, C0 Chevreuse, C6 Bennett, C6 Fischl", "support-build Chevreuse rotation", "single target"]
     }
   ],
   "seeds": [
@@ -486,6 +496,20 @@
       "sourceAssumptions": ["first-rotation Keqing Skill opener", "C0 Chevreuse skips the optional second Hold Skill", "Fischl uses Skill then Burst", "single target"],
       "simulatorAssumptions": ["Chevreuse Skill Press substitutes for Hold", "explicit swap waits use 1.1s around Xiangling's zero-duration inputs", "Favonius Lance R5 uses a deterministic proc draw", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "0934f6fe0ea71263f0e3e6fb76b0523e4c1bcd8bff44ad2a02d0b9ce8ec9b398"
+    },
+    {
+      "seedId": "kqm-yoimiya-chevreuse-fischl-bennett-adapted-v1",
+      "partyName": "YoimiyaChevreuseOverload",
+      "scenarioFingerprint": "loadout-v1:YOIMIYA-c0-Rust-r1-artifact-kqms-generic-v1:CHEVREUSE-c0-FavoniusLance-r5-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:FISCHL-c6-TheStringless-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-yoimiya-quick-guide-chevreuse-fischl-bennett"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Chevreuse Hold Skill maps to Skill Press, Fischl alternates Burst then Skill after her first-rotation Skill opener, Yoimiya's optional Burst is omitted, and 3[N5D] N1 becomes a fixed 16-Normal field string.",
+      "openerActions": [10, 3, 6, 6, 6],
+      "cycleActions": [[8, 5, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 5, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 0, 0, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3], [8, 5, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 5, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 0, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3]],
+      "erTargets": {"YOIMIYA": 1.0, "CHEVREUSE": 1.6294606485117598, "BENNETT": 1.7990478229489262, "FISCHL": 1.6346763893495644},
+      "sourceAssumptions": ["first-rotation Fischl Skill opener", "Fischl alternates Burst and Skill", "Yoimiya Burst is optional", "3[N5D] N1 field combo", "single target"],
+      "simulatorAssumptions": ["Chevreuse Skill Press substitutes for Hold", "dash cancels are unsupported and removed", "the field combo is fixed to 16 Normal actions", "explicit waits preserve the post-opener swap lock", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "28c181f4ce0ce1b8012a1cf8d9dcecbc3f766259f19235ae3bb20f4444e53569"
     }
   ]
 }
