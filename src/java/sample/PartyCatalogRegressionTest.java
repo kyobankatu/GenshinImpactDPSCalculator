@@ -238,6 +238,13 @@ public class PartyCatalogRegressionTest {
         if (build != PartyBuildResolver.require(definition)) {
             throw new AssertionError("Optimized build was not cached for " + partyName);
         }
+        for (Map.Entry<CharacterId, Double> entry
+                : definition.minimumEnergyRechargeTargets().entrySet()) {
+            if (build.erTargets.getOrDefault(entry.getKey(), 0.0) < entry.getValue()) {
+                throw new AssertionError("Optimized build omitted ER floor for "
+                        + partyName + ": " + entry.getKey());
+            }
+        }
         assertBuildIsDeeplyImmutable(build, partyName);
         if (definition.loadoutFingerprint().contains("artifact-kqms-generic-v1")) {
             expectFailure(() -> definition.createSimulator(null, Map.of()),

@@ -1,6 +1,7 @@
 package simulation.party;
 
 import java.util.List;
+import java.util.Map;
 
 import mechanics.rotation.PolicyAction;
 import model.type.CharacterId;
@@ -54,6 +55,9 @@ public final class AyatoSucroseVaporizePartyDefinition extends CuratedPartyDefin
                         CharacterId.KAMISATO_AYATO,
                         PolicyAction.NORMAL,
                         PolicyAction.SKILL_PRESS,
-                        PolicyAction.BURST));
+                        PolicyAction.BURST),
+                Map.of(
+                        CharacterId.KAMISATO_AYATO, 1.56,
+                        CharacterId.XIANGLING, 2.15));
     }
 }

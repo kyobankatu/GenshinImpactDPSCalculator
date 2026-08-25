@@ -68,6 +68,10 @@ public final class RotationSeedRegressionTest {
             TotalOptimizationResult build,
             Result sourceResult,
             int cycleCount) {
+        // One definition form cannot provide a phase-matched alternating baseline.
+        if (sourceSeed.getCycleActions().size() > 1) {
+            return;
+        }
         SourcedRotationSeed baseline = new SourcedRotationSeed(
                 sourceSeed.getSeedId() + "-definition-baseline",
                 definition.name(),

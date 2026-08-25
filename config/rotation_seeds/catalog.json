@@ -1103,6 +1103,16 @@
       "loadoutAssumptions": ["C6 Bennett, C0 Xilonen, C0 Rosaria, C6 Kaeya", "Skyward Blade R1 Bennett", "Peak Patrol Song R1 Xilonen", "Favonius Lance R5 Rosaria", "Favonius Sword R5 Kaeya", "single target"]
     },
     {
+      "sourceId": "kqm-bennett-quick-guide-furina-xingqiu-xianyun",
+      "title": "Bennett Quick Guide: Furina Xingqiu Xianyun Plunge",
+      "url": "https://keqingmains.com/q/bennett-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.7; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Furina, C6 Xingqiu, C0 Xianyun, C6 Bennett", "Wolf-Fang R1 Furina", "Sacrificial Sword R5 Xingqiu", "Favonius Codex R5 Xianyun", "Skyward Blade R1 Bennett", "single target"]
+    },
+    {
       "sourceId": "kqm-xingqiu-quick-guide-sucrose-ororon-beidou",
       "title": "Xingqiu Quick Guide: Sucrose Ororon Beidou Electro-Charged",
       "url": "https://keqingmains.com/q/xingqiu-quickguide/",
@@ -2531,11 +2541,11 @@
       "adaptationStatus": "adapted",
       "adaptationNote": "The complete single-target Guoba-Swirl sequence is retained with both Ayato Skill-N15 field times and all documented battery actions.",
       "openerActions": [],
-      "cycleActions": [[5, 8, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
-      "erTargets": {"KAMISATO_AYATO": 1.266623478201089, "BENNETT": 1.0638297872163123, "XIANGLING": 1.4732608531821632, "SUCROSE": 1.0},
+      "cycleActions": [[5, 8, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"KAMISATO_AYATO": 1.56, "BENNETT": 1.0638297872163123, "XIANGLING": 2.15, "SUCROSE": 1.0},
       "sourceAssumptions": ["Ayato uses Burst and two Skill-N15 field times", "Bennett uses Burst and two Skills", "Xiangling uses N2-Skill, Burst, N2, and a second Skill", "Sucrose uses two Skills including a Guoba Swirl", "single target"],
-      "simulatorAssumptions": ["all thirty Ayato Normal attacks are retained", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 36s cycle", "Favonius Lance R5 uses deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
-      "contentHash": "9c4b08c3ac2bb50a70f17b05b2c1e91f2a81d9ceadba01599ef261ef6c930a8d"
+      "simulatorAssumptions": ["all thirty Ayato Normal attacks are retained", "strict cyclic replay reserves 156% Ayato ER and 215% Xiangling ER floors", "the final swap uses a fixed 1.1s wait to clear the simulator swap lock", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 36s cycle", "Favonius Lance R5 uses deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "41727c5e0bc50b9d451fe07c0ca65dbd4a96ed7ba62d10542776829c6deb7558"
     },
     {
       "seedId": "kqm-xingqiu-furina-xilonen-yelan-adapted-v1",
@@ -2545,11 +2555,11 @@
       "adaptationStatus": "adapted",
       "adaptationNote": "Dash cancels are omitted while the first-cycle Furina Skill opener, the later Skill-before-Burst placement, and every sourced Normal count are retained across two cycles.",
       "openerActions": [],
-      "cycleActions": [[3, 8, 3, 0, 0, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 5, 0, 3, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7], [8, 3, 0, 0, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 5, 0, 3, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7]],
+      "cycleActions": [[3, 8, 3, 0, 0, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 5, 0, 3, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7], [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 0, 0, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 5, 0, 3, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7]],
       "erTargets": {"FURINA": 1.0266940451574267, "XILONEN": 1.1447529869633541, "XINGQIU": 1.1154292373417773, "YELAN": 1.0},
       "sourceAssumptions": ["Furina uses Skill at the start of the first rotation and immediately before Burst later", "Xilonen uses two Skill-N2 strings and one Burst", "Xingqiu uses Burst-N1 then N1-Skill-N2", "Yelan uses Burst-N1-Skill-N4 then 2[N4]-Skill-N2", "single target"],
-      "simulatorAssumptions": ["dash cancels are unsupported and removed", "both source-prescribed Furina Skill placements are retained", "all sourced Normal counts are retained", "the cycle uses definition-normalized swap waits", "the reviewed alternating trace uses a 32s cycle", "Favonius and Sacrificial weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
-      "contentHash": "ef6d707b15f97901c77be1a1da73ce2bea7ebaa30948d1428e18fba9aa02ab48"
+      "simulatorAssumptions": ["dash cancels are unsupported and removed", "both source-prescribed Furina Skill placements are retained", "all sourced Normal counts are retained", "the later cycle starts with a fixed 1.1s wait to clear the preceding swap lock", "the cycle uses definition-normalized swap waits", "the reviewed alternating trace uses a timing-adapted 34s cycle", "Favonius and Sacrificial weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "3051629465e7780bf8ac6681375bddd71064e81f526f2ac31d443e156903c90d"
     },
     {
       "seedId": "kqm-xingqiu-raiden-furina-jean-rejected-v1",
@@ -2588,10 +2598,24 @@
       "adaptationNote": "The first-cycle-only Bennett Skill and later Burst-N1 opener are retained as separate cycle forms; explicit swap waits satisfy the documented delay before Bennett's first on-field Skill, and fixed 1.5s waits reach both later Skill cooldowns.",
       "openerActions": [],
       "cycleActions": [[3, 5, 0, 8, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 0, 0, 0], [5, 0, 8, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 0, 0, 0]],
-      "erTargets": {"BENNETT": 1.2088952474471577, "XILONEN": 1.0, "ROSARIA": 1.5195259078914047, "KAEYA": 1.1511895625223845},
+      "erTargets": {"BENNETT": 1.2088952474471577, "XILONEN": 1.0, "ROSARIA": 1.68, "KAEYA": 1.1511895625223845},
       "sourceAssumptions": ["Bennett uses a first-cycle-only Skill, Burst-N1, then Skill-2[N3-Skill]-N3", "Xilonen uses Skill-N2", "Rosaria uses Skill-Burst", "Kaeya uses Skill-Burst", "single target"],
-      "simulatorAssumptions": ["the documented Bennett self-application delay is covered by preceding support field time and explicit swap waits", "fixed 1.5s waits reach Bennett's second and third on-field Skill cooldowns", "both source-prescribed Bennett opener forms are retained", "all sourced Normal counts are retained", "the reviewed alternating trace uses a 24s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
-      "contentHash": "b56e7d02da02209a474085b84c98af476470cd50c2d3c7121296285d9f893f71"
+      "simulatorAssumptions": ["the documented Bennett self-application delay is covered by preceding support field time and explicit swap waits", "fixed 1.5s waits reach Bennett's second and third on-field Skill cooldowns", "strict cyclic replay reserves a 168% Rosaria ER floor", "both source-prescribed Bennett opener forms are retained", "all sourced Normal counts are retained", "the reviewed alternating trace uses a 24s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "b87cd6b5409329c4201e86abaaf856bd8847a54eb9f1bffdd899a37ce79aa1b4"
+    },
+    {
+      "seedId": "kqm-bennett-furina-xingqiu-xianyun-adapted-v1",
+      "partyName": "BennettXianyunVaporize",
+      "scenarioFingerprint": "loadout-v1:FURINA-c0-WolfFang-r1-artifact-kqms-generic-v1:XINGQIU-c6-SacrificialSword-r5-artifact-kqms-generic-v1:XIANYUN-c0-FavoniusCodex-r5-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-bennett-quick-guide-furina-xingqiu-xianyun"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Furina's dash cancel is omitted and every jump input is represented by its documented high Plunge while all sourced attacks remain in order.",
+      "openerActions": [],
+      "cycleActions": [[3, 5, 8, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 2, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 5, 0, 3, 2, 0, 2, 0, 3, 2, 0, 2, 0, 3, 2, 0, 2, 0, 3, 2, 0, 2, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7]],
+      "erTargets": {"FURINA": 1.2019230769164, "XINGQIU": 1.3193626799167903, "XIANYUN": 1.481014595182271, "BENNETT": 1.0},
+      "sourceAssumptions": ["Furina uses Skill-dash-Burst", "Xingqiu uses Skill-dash-Burst-N1", "Xianyun uses Skill-Plunge-Burst-N1", "Bennett uses Burst then four N1-Skill-jump-Plunge-N1-jump-Plunge strings and a final N1-Skill", "single target"],
+      "simulatorAssumptions": ["dash cancels are unsupported and removed", "each jump input maps to the simulator's high Plunge action", "all sourced Normal, Skill, Burst, and Plunge counts are retained", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a timing-adapted 31s cycle", "Favonius and Sacrificial weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "5329ab83e6668a8526fcbad4429cd7292022ddaaa96a45125dde3766d4a8a9e8"
     },
     {
       "seedId": "kqm-xingqiu-sucrose-ororon-beidou-rejected-v1",

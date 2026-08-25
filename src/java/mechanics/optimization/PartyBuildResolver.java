@@ -1,9 +1,11 @@
 package mechanics.optimization;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import model.type.CharacterId;
 import simulation.CombatSimulator;
 import simulation.party.PartyDefinition;
 
@@ -57,6 +59,14 @@ public final class PartyBuildResolver {
                     definition::createSimulator,
                     rotationRunner,
                     definition.optimizationTargets());
+            Map<CharacterId, Double> mergedErTargets = new LinkedHashMap<>(optimized.erTargets);
+            for (Map.Entry<CharacterId, Double> entry
+                    : definition.minimumEnergyRechargeTargets().entrySet()) {
+                mergedErTargets.merge(entry.getKey(), entry.getValue(), Math::max);
+            }
+            if (!mergedErTargets.equals(optimized.erTargets)) {
+                optimized = new TotalOptimizationResult(mergedErTargets, optimized.partyRolls);
+            }
             BUILDS.put(key, optimized);
             return optimized;
         }

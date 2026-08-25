@@ -12,7 +12,7 @@ public final class FurinaXilonenMonoHydroPartyDefinition extends CuratedPartyDef
         super(
                 "FurinaXilonenMonoHydro",
                 DatasetSplit.TRAIN,
-                32.0,
+                34.0,
                 List.of(
                         CuratedCharacters::furina,
                         CuratedCharacters::xilonen,

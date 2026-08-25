@@ -26667,6 +26667,26 @@ Batches 89-92 checkpoint:
   usable seeds comprise 66 train and one validation seed; holdout remains
   source-isolated.
 
+Batches 93-96 checkpoint:
+
+- Researched four maintained KQM rotations across Bennett and Xingqiu guides.
+  Retained Yelan/Xingqiu/Bennett/Xiangling National,
+  Bennett/Xilonen/Rosaria/Kaeya Reverse Melt, and
+  Furina/Xingqiu/Xianyun/Bennett Plunge as train scenarios.
+- Rejected Sucrose/Xingqiu/Ororon/Beidou because Ororon is isolated in holdout
+  while the other three identities belong to train. Its complete first/later
+  normalized traces remain reviewable without publishing a cross-split party.
+- Strict catalog replay now preserves scenario-owned ER floors in final build
+  fingerprints, separates fractional ER tolerance from Energy-point steady
+  tolerance, and avoids comparing alternating source forms against an
+  unmatched one-form definition baseline. Existing Ayato Vaporize, Reverse
+  Melt, and Mono Hydro traces received only the minimum ER, swap-lock, and
+  cycle-boundary corrections exposed by the complete 107-seed replay.
+- The campaign has now reviewed 117 candidates: 67 retained and 50 rejected
+  or blocked. The tracked catalog contains 112 sources and 107 seeds. Its 70
+  usable seeds comprise 69 train and one validation seed; holdout remains
+  source-isolated.
+
 Acceptance criteria:
 
 - Every retained seed has an exact constructible scenario, complete provenance,

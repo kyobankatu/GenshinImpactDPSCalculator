@@ -34,6 +34,11 @@ public interface PartyDefinition {
     /** Returns actions whose exact support is required for this scenario. */
     Map<CharacterId, Set<PolicyAction>> requiredActionCapabilities();
 
+    /** Returns scenario-specific ER floors needed by strict cyclic replay. */
+    default Map<CharacterId, Double> minimumEnergyRechargeTargets() {
+        return Map.of();
+    }
+
     Map<CharacterId, List<StatType>> optimizationTargets();
 
     CombatSimulator createSimulator(

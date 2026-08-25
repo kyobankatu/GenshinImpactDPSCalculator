@@ -53,6 +53,7 @@ public final class PartyCatalog {
         register(new FurinaXilonenMonoHydroPartyDefinition());
         register(new YelanXingqiuNationalPartyDefinition());
         register(new BennettReverseMeltPartyDefinition());
+        register(new BennettXianyunVaporizePartyDefinition());
         register(new DilucXianyunVaporizePartyDefinition());
         register(new HuTaoXianyunVaporizePartyDefinition());
         register(new HuTaoLaylaVapemeltPartyDefinition());

@@ -1,6 +1,7 @@
 package simulation.party;
 
 import java.util.List;
+import java.util.Map;
 
 import mechanics.rotation.PolicyAction;
 import model.type.CharacterId;
@@ -55,6 +56,7 @@ public final class BennettReverseMeltPartyDefinition extends CuratedPartyDefinit
                         CharacterId.BENNETT,
                         PolicyAction.NORMAL,
                         PolicyAction.SKILL_PRESS,
-                        PolicyAction.BURST));
+                        PolicyAction.BURST),
+                Map.of(CharacterId.ROSARIA, 1.68));
     }
 }

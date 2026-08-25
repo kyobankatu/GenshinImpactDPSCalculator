@@ -21,6 +21,7 @@ public final class RotationSeedEvaluation {
     private static final double TIME_TOLERANCE = 1.0e-6;
     private static final double BOUNDARY_TOLERANCE = 0.100001;
     private static final double ER_TOLERANCE = 0.01;
+    private static final double ENERGY_STEADY_TOLERANCE = 0.25;
 
     private RotationSeedEvaluation() {
     }
@@ -350,7 +351,7 @@ public final class RotationSeedEvaluation {
         CycleResult previous = cycles.get(cycles.size() - 1 - period);
         for (Map.Entry<CharacterId, Double> entry : current.endingEnergy.entrySet()) {
             double priorEnergy = previous.endingEnergy.getOrDefault(entry.getKey(), 0.0);
-            if (entry.getValue() + ER_TOLERANCE < priorEnergy) {
+            if (entry.getValue() + ENERGY_STEADY_TOLERANCE < priorEnergy) {
                 return false;
             }
         }

@@ -29,6 +29,7 @@ abstract class CuratedPartyDefinition extends AbstractPartyDefinition {
     private final CharacterId[] partyOrder;
     private final int[] baselineActions;
     private final Map<CharacterId, Set<PolicyAction>> requiredActions;
+    private final Map<CharacterId, Double> minimumEnergyRecharge;
 
     /** Creates one exact C0/base-loadout scenario. */
     CuratedPartyDefinition(
@@ -38,8 +39,30 @@ abstract class CuratedPartyDefinition extends AbstractPartyDefinition {
             List<Supplier<Character>> characterFactories,
             int[] baselineActions,
             Map<CharacterId, Set<PolicyAction>> requiredActions) {
+        this(
+                name,
+                datasetSplit,
+                cycleSeconds,
+                characterFactories,
+                baselineActions,
+                requiredActions,
+                Map.of());
+    }
+
+    /** Creates one exact scenario with optional per-character ER floors. */
+    CuratedPartyDefinition(
+            String name,
+            DatasetSplit datasetSplit,
+            double cycleSeconds,
+            List<Supplier<Character>> characterFactories,
+            int[] baselineActions,
+            Map<CharacterId, Set<PolicyAction>> requiredActions,
+            Map<CharacterId, Double> minimumEnergyRecharge) {
         if (characterFactories == null || characterFactories.size() != 4) {
             throw new IllegalArgumentException("Curated party requires four character factories");
+        }
+        if (minimumEnergyRecharge == null) {
+            throw new IllegalArgumentException("Minimum ER targets must not be null");
         }
         this.name = name;
         this.datasetSplit = datasetSplit;
@@ -47,6 +70,7 @@ abstract class CuratedPartyDefinition extends AbstractPartyDefinition {
         this.characterFactories = List.copyOf(characterFactories);
         this.baselineActions = baselineActions.clone();
         this.requiredActions = copyRequiredActions(requiredActions);
+        this.minimumEnergyRecharge = copyMinimumEnergyRecharge(minimumEnergyRecharge);
         this.partyOrder = new CharacterId[characterFactories.size()];
         StringBuilder fingerprint = new StringBuilder("loadout-v1");
         for (int slot = 0; slot < characterFactories.size(); slot++) {
@@ -59,6 +83,15 @@ abstract class CuratedPartyDefinition extends AbstractPartyDefinition {
             fingerprint.append(':').append(character.getCharacterId().name())
                     .append("-c").append(character.getConstellation())
                     .append('-').append(weapon).append("-artifact-kqms-generic-v1");
+        }
+        for (CharacterId characterId : this.minimumEnergyRecharge.keySet()) {
+            boolean present = false;
+            for (CharacterId partyCharacter : partyOrder) {
+                present |= partyCharacter == characterId;
+            }
+            if (!present) {
+                throw new IllegalArgumentException("Minimum ER character is not in party: " + characterId);
+            }
         }
         this.loadoutFingerprint = fingerprint.toString();
     }
@@ -104,6 +137,11 @@ abstract class CuratedPartyDefinition extends AbstractPartyDefinition {
     }
 
     @Override
+    public final Map<CharacterId, Double> minimumEnergyRechargeTargets() {
+        return minimumEnergyRecharge;
+    }
+
+    @Override
     public final Map<CharacterId, List<StatType>> optimizationTargets() {
         return Map.of(
                 partyOrder[0],
@@ -125,7 +163,12 @@ abstract class CuratedPartyDefinition extends AbstractPartyDefinition {
         simulator.setEnemy(new Enemy(90));
         for (Supplier<Character> factory : characterFactories) {
             Character character = factory.get();
-            equipKqmsArtifacts(character, erTargets, partyManualRolls);
+            equipKqmsArtifacts(
+                    character,
+                    Math.max(
+                            erTargets.getOrDefault(character.getCharacterId(), 1.0),
+                            minimumEnergyRecharge.getOrDefault(character.getCharacterId(), 1.0)),
+                    partyManualRolls);
             simulator.addCharacter(character);
         }
         ResonanceManager.applyResonances(simulator);
@@ -176,12 +219,24 @@ abstract class CuratedPartyDefinition extends AbstractPartyDefinition {
         return copy;
     }
 
+    private static Map<CharacterId, Double> copyMinimumEnergyRecharge(
+            Map<CharacterId, Double> source) {
+        Map<CharacterId, Double> copy = new LinkedHashMap<>();
+        for (Map.Entry<CharacterId, Double> entry : source.entrySet()) {
+            Double value = entry.getValue();
+            if (entry.getKey() == null || value == null || !Double.isFinite(value) || value < 1.0) {
+                throw new IllegalArgumentException("Invalid minimum ER target");
+            }
+            copy.put(entry.getKey(), value);
+        }
+        return Map.copyOf(copy);
+    }
+
     private static void equipKqmsArtifacts(
             Character character,
-            Map<CharacterId, Double> erTargets,
+            double minimumEnergyRecharge,
             Map<CharacterId, Map<StatType, Integer>> partyManualRolls) {
         ArtifactOptimizer.OptimizationConfig config = new ArtifactOptimizer.OptimizationConfig();
-        double minimumEnergyRecharge = erTargets.getOrDefault(character.getCharacterId(), 1.0);
         config.mainStatSands = minimumEnergyRecharge > 1.60
                 ? StatType.ENERGY_RECHARGE
                 : StatType.ATK_PERCENT;
