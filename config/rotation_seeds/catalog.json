@@ -901,6 +901,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Nilou, C0 Nahida, C0 Baizhu, C0 Yelan", "Key of Khaj-Nisut R1 Nilou", "Wandering Evenstar R5 Nahida", "Jadefall's Splendor R1 Baizhu", "Favonius Warbow R5 Yelan", "single target"]
+    },
+    {
+      "sourceId": "kqm-yelan-quick-guide-alhaitham-nahida-shinobu",
+      "title": "Yelan Quick Guide: Alhaitham Nahida Shinobu Quickbloom",
+      "url": "https://keqingmains.com/q/yelan-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.4; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Alhaitham, C0 Nahida, C0 Yelan, C0 Kuki Shinobu", "Favonius Sword R5 Alhaitham", "Wandering Evenstar R5 Nahida", "Favonius Warbow R5 Yelan", "Wolf-Fang R1 Shinobu", "single target"]
     }
   ],
   "seeds": [
@@ -2102,6 +2112,20 @@
       "sourceAssumptions": ["Nilou uses Skill-N2-Skill", "Nahida uses Skill-Burst", "Baizhu uses Skill-Burst and later N1-Skill-N2", "Yelan uses Burst-N1-Skill-2[N4D]-N4 and later N4D-Skill-N4", "single target"],
       "simulatorAssumptions": ["dash cancels are unsupported and removed", "all sourced Normal counts are preserved", "the complete definition-normalized trace exceeds the 30s, 35s, and 40s review boundaries during multi-cycle replay", "no further timing dilation or action omission is allowed"],
       "contentHash": "f4d26c8c4e8be9f485869c1834e978b8736ac45ed8735db0d7456eb70f44d8c7"
+    },
+    {
+      "seedId": "kqm-alhaitham-yelan-nahida-shinobu-adapted-v1",
+      "partyName": "AlhaithamYelanQuickbloom",
+      "scenarioFingerprint": "loadout-v1:ALHAITHAM-c0-FavoniusSword-r5-artifact-kqms-generic-v1:NAHIDA-c0-WanderingEvenstar-r5-artifact-kqms-generic-v1:YELAN-c0-FavoniusWarbow-r5-artifact-kqms-generic-v1:KUKI_SHINOBU-c0-WolfFang-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-yelan-quick-guide-alhaitham-nahida-shinobu"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Shinobu's optional Burst and dash cancels are omitted while the complete Alhaitham Normal, Skill, and Charged Attack sequence is retained.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1]],
+      "erTargets": {"ALHAITHAM": 1.0, "NAHIDA": 1.0, "YELAN": 1.4024300700216126, "KUKI_SHINOBU": 1.0},
+      "sourceAssumptions": ["Nahida uses Skill-Burst", "Yelan uses Skill-Burst-N1", "Shinobu's Burst is optional and her quickswap uses N1-Skill", "Alhaitham uses Burst then 2[N3D]-N1-Skill-2[N3D-N3CD]", "single target"],
+      "simulatorAssumptions": ["Shinobu's optional Burst is omitted", "dash cancels are unsupported and removed", "Alhaitham's field combo maps to nineteen Normal, one Skill, and two Charged actions", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a timing-adapted 35s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "6957d7615e7af2f74f8ef3a00d50cf2f4381f242d83142d52654ab65458ab825"
     }
   ]
 }
