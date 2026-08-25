@@ -79,6 +79,7 @@ public final class PartyCatalog {
         register(new YoimiyaYunJinVaporizePartyDefinition());
         register(new SucroseElectroChargedPartyDefinition());
         register(new SucroseDoubleHydroTaserPartyDefinition());
+        register(new VentiElectroChargedPartyDefinition());
         register(new ColleiSucroseHyperbloomPartyDefinition());
         register(new NahidaBeidouHyperbloomPartyDefinition());
         register(new NahidaDoubleHydroHyperbloomPartyDefinition());

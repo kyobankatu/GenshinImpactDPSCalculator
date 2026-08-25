@@ -1221,6 +1221,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Nahida, C6 Xingqiu, C6 Fischl, C6 Thoma", "Prototype Amber R5 Nahida", "Sacrificial Sword R5 Xingqiu", "The Stringless R5 Fischl", "Favonius Lance R5 Thoma", "single target"]
+    },
+    {
+      "sourceId": "kqm-venti-quick-guide-fischl-beidou-xingqiu",
+      "title": "Venti Quick Guide: Fischl Beidou Xingqiu Electro-Charged",
+      "url": "https://keqingmains.com/q/venti-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version Luna V; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Venti, C6 Fischl, C6 Beidou, C6 Xingqiu", "Favonius Warbow R5 Venti", "The Stringless R5 Fischl", "Favonius Greatsword R5 Beidou", "Sacrificial Sword R5 Xingqiu", "single target"]
     }
   ],
   "seeds": [
@@ -2856,6 +2866,20 @@
       "sourceAssumptions": ["Nahida uses Skill-Burst, Skill-N3-Skill-2[N3], then three N3 strings", "Xingqiu uses Burst-N2 then Skill-N3", "Fischl uses Skill-N1 then N2-Burst", "Favonius Thoma uses Skill-Burst-N1 then Skill-N2", "single target"],
       "simulatorAssumptions": ["dash cancels are unsupported and removed", "a fixed 3.0s wait reaches Nahida's second Skill cooldown", "all sourced Normal counts are retained", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a timing-adapted 43s cycle", "Favonius and Sacrificial weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "6bd60b1531aacde94ed556bf0cd3f4e35e76cf2c1d7112d3c1f4dda150f32cba"
+    },
+    {
+      "seedId": "kqm-venti-fischl-beidou-xingqiu-adapted-v1",
+      "partyName": "VentiElectroCharged",
+      "scenarioFingerprint": "loadout-v1:VENTI-c0-FavoniusWarbow-r5-artifact-kqms-generic-v1:FISCHL-c6-TheStringless-r5-artifact-kqms-generic-v1:BEIDOU-c6-FavoniusGreatsword-r5-artifact-kqms-generic-v1:XINGQIU-c6-SacrificialSword-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-venti-quick-guide-fischl-beidou-xingqiu"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Xingqiu's dash cancel and both Venti driver dash cancels are omitted while every sourced Normal, Skill, and Burst remains in order.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 5, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 0, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 5, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0]],
+      "erTargets": {"VENTI": 1.0, "FISCHL": 1.0, "BEIDOU": 1.0, "XINGQIU": 1.0},
+      "sourceAssumptions": ["Fischl uses Skill-N1 then N1-Burst", "Beidou uses Skill-N2 then Burst-N1-Skill", "Xingqiu uses Skill-Burst-N1", "Venti uses Skill-N1 then N1-Burst-Skill-2[N5]-N5-Skill-N2", "single target"],
+      "simulatorAssumptions": ["dash cancels are unsupported and removed", "all eighteen Venti driver Normals are retained", "all support Normals are retained", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a timing-adapted 38s cycle", "Favonius and Sacrificial weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "551a40a187ff7c593038f0a4b004ad7d76ae5c6e72f7723f521aff1be820a965"
     }
   ]
 }
