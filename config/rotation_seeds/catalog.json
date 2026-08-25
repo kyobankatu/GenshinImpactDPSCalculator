@@ -601,6 +601,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Kamisato Ayato, C0 Ororon, C6 Lan Yan, C6 Fischl", "Haran Geppaku Futsu R1", "single target"]
+    },
+    {
+      "sourceId": "kqm-ayato-quick-guide-furina-fischl-jean",
+      "title": "Kamisato Ayato Quick Guide: Furina Fischl Jean Taser",
+      "url": "https://keqingmains.com/q/ayato-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Kamisato Ayato, C0 Furina, C6 Fischl, C4 Jean", "Haran Geppaku Futsu R1", "single target"]
     }
   ],
   "seeds": [
@@ -1424,6 +1434,20 @@
       "sourceAssumptions": ["Ayato opens with Burst and uses two Skill-N15 fields", "Ororon uses Burst, then later Skill", "C6 Lan Yan uses two Skills, then later Burst", "Fischl alternates Skill then Burst", "single target"],
       "simulatorAssumptions": ["C6 supplies Lan Yan's two consecutive Skill charges", "each N15 field maps to fifteen typed Normal actions", "explicit one-second waits preserve each simulator swap lock", "the reviewed trace uses a 40s cycle", "Fischl C6 Oz and Ayato particle draws use deterministic sources", "full first-cycle Energy is explicit in the scenario fingerprint", "the exact local loadout exceeds the KQMS ER ceiling"],
       "contentHash": "8e2a53742a94b4fb3bd9d36d28e058a453226ad84eb50dfc362233e94edd724f"
+    },
+    {
+      "seedId": "kqm-ayato-furina-fischl-jean-adapted-v1",
+      "partyName": "AyatoJeanTaser",
+      "scenarioFingerprint": "loadout-v1:KAMISATO_AYATO-c0-HaranGeppakuFutsu-r1-artifact-kqms-generic-v1:FURINA-c0-WolfFang-r1-artifact-kqms-generic-v1:FISCHL-c6-TheStringless-r5-artifact-kqms-generic-v1:JEAN-c4-SkywardBlade-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-ayato-quick-guide-furina-fischl-jean"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Furina's dash input is omitted, the local Jean loadout is explicitly C4, each Ayato N15 field is fixed to fifteen typed Normals, and the complete two-field trace uses a 40s cycle.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"KAMISATO_AYATO": 1.2013301869731088, "FURINA": 1.3319126265243006, "FISCHL": 1.2309207286982338, "JEAN": 1.9497481159419117},
+      "sourceAssumptions": ["Furina uses Skill then Burst", "Fischl alternates Skill then Burst", "Jean uses Skill-Burst, then later Skill-N2", "Ayato uses two Skill-N15 fields and Burst after the first field", "single target"],
+      "simulatorAssumptions": ["Furina's dash input is unsupported and removed", "the local Jean loadout is explicitly C4", "each N15 field maps to fifteen typed Normal actions", "explicit one-second waits preserve each simulator swap lock", "the reviewed trace uses a 40s cycle", "Fischl C6 Oz and Ayato particle draws use deterministic sources", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "030286f102fccb94479099a3bb9e52c75da2a88fa04bec01ddc493476870f3ea"
     }
   ]
 }
