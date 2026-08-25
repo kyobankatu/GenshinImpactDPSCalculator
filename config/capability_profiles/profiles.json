@@ -401,5 +401,18 @@
     "reentry_cost_score": 0.000000,
     "on_field_dps_score": 0.137602,
     "burst_window_score": 0.083695
+  },
+  "CITLALI": {
+    "off_field_dps_ratio": 0.099465,
+    "team_buff_score": 0.500000,
+    "self_enhancement_score": 0.460200,
+    "energy_generation_score": 0.730520,
+    "entry_value_score": 0.000000,
+    "sustain_value_3_actions": 0.089127,
+    "sustain_value_6_actions": 0.063670,
+    "exit_cost_score": 0.063818,
+    "reentry_cost_score": 0.000000,
+    "on_field_dps_score": 0.149118,
+    "burst_window_score": 0.103869
   }
 }

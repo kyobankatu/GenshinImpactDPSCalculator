@@ -26052,6 +26052,7 @@ Accepted-unit table (batch 1, researched 2026-08-25):
 | KQM Alhaitham Quick Guide: Alhaitham, Fischl, Nahida, Bennett split-field Spread rotation | `src/java/simulation/party/AlhaithamSpreadPartyDefinition.java` | Existing Quicken/Spread, mirrors, Oz alternation, Nahida mark, Bennett buff; dash cancels must be condensed | `TRAIN`; two-part field trace and multi-cycle Energy replay |
 | KQM Arlecchino Quick Guide: Arlecchino, Columbina, Ineffa, Xilonen Lunar-Charged rotation | `src/java/simulation/party/ArlecchinoLunarChargedPartyDefinition.java` | Existing Bond of Life, Lunar-Charged conversion, both Lunar support kits, Xilonen Source Samplers; optional support Bursts are omitted | `TRAIN`; exact baseline trace and 30s cyclic replay |
 | KQM Arlecchino Quick Guide: Arlecchino, Bennett, Ineffa, Chevreuse Overloaded rotation | `src/java/simulation/party/ArlecchinoIneffaOverloadPartyDefinition.java` | Existing Bond of Life, Overloaded, Bennett buff, Ineffa summon, Chevreuse support; Hold Skill maps to Press and optional Burst is omitted | `TRAIN`; exact baseline trace and 30s cyclic replay |
+| KQM Arlecchino Quick Guide: Arlecchino, Citlali, Bennett, Xilonen Melt rotation | `src/java/simulation/party/ArlecchinoCitlaliMeltPartyDefinition.java` | Existing Bond of Life, Citlali Opal Fire and RES Shred, Bennett buff, and Xilonen Source Samplers; dash cancels are omitted | `TRAIN`; Melt aura trace and 30s cyclic replay |
 
 Rejected from batch 1: Ganyu Melt, Gaming Mono Pyro, and
 Ningguang/Yae/Fischl/Zhongli mix characters already assigned to different
@@ -26060,6 +26061,12 @@ the current immediate particle distribution cannot represent the documented
 Bennett funnels; Bennett Burgeon exceeds Nahida's ceiling under the exact local
 loadout. The catalog retains both reviewed sequences as rejected evidence, but
 neither becomes a trainable party definition.
+
+Rejected from batch 3: Arlecchino/C6 Candace/Bennett/Xilonen requires
+303.030% Candace ER for the sourced every-cycle Burst in the exact local
+single-target scenario. This exceeds the 237.500% KQMS artifact ceiling even
+with deterministic Favonius Lance R5, so the reviewed sequence remains rejected
+and no empty or infeasible party definition is registered.
 
 Batch 1 checkpoint:
 
@@ -26079,6 +26086,15 @@ Batch 2 checkpoint:
 - Capability profiling now stops assigning unused action sequences after the
   measured subject; the selected-party run produced the required Xilonen
   profile without changing unrelated tracked profiles.
+
+Batch 3 checkpoint:
+
+- 2 candidates researched: Arlecchino Citlali Melt retained and Arlecchino
+  Candace Vaporize rejected. Campaign total: 11 researched, 5 retained, 6
+  rejected.
+- Citlali uses the guide's explicit ER-weapon fallback with deterministic
+  Favonius Codex R5. Its measured 171.797% ER target and Bennett's 161.290%
+  target fit the KQMS allocation and pass three-cycle replay.
 
 Acceptance criteria:
 

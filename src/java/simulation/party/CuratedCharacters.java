@@ -5,6 +5,7 @@ import model.character.Alhaitham;
 import model.character.Arlecchino;
 import model.character.Bennett;
 import model.character.Chevreuse;
+import model.character.Citlali;
 import model.character.Columbina;
 import model.character.Faruzan;
 import model.character.Fischl;
@@ -63,6 +64,10 @@ final class CuratedCharacters {
 
     static Character arlecchino() {
         return new Arlecchino(new Deathmatch(1), null, 0);
+    }
+
+    static Character citlali() {
+        return new Citlali(new FavoniusCodex(5, () -> FIXED_RANDOM_DRAW), null, 0);
     }
 
     static Character ineffa() {

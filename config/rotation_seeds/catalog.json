@@ -111,6 +111,26 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["Arlecchino, Bennett, Ineffa, Chevreuse", "Chevreuse Burst is optional", "single target"]
+    },
+    {
+      "sourceId": "kqm-arlecchino-quick-guide-candace-vape",
+      "title": "Arlecchino Quick Guide: C6 Candace Bennett Xilonen Vape",
+      "url": "https://keqingmains.com/q/arlecchino-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Luna VIII; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["Arlecchino, C6 Candace, Bennett, Xilonen", "single target"]
+    },
+    {
+      "sourceId": "kqm-arlecchino-quick-guide-citlali-melt",
+      "title": "Arlecchino Quick Guide: Citlali Bennett Xilonen Melt",
+      "url": "https://keqingmains.com/q/arlecchino-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Luna VIII; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["Arlecchino, Citlali, Bennett, Xilonen", "Favonius Codex Citlali", "wait between N5 strings", "single target"]
     }
   ],
   "seeds": [
@@ -270,6 +290,34 @@
       "sourceAssumptions": ["Chevreuse Burst is optional", "Chevreuse Hold Skill", "N1C 5[N3D] N3 field combo", "single target"],
       "simulatorAssumptions": ["Chevreuse Skill Press substitutes for Hold", "optional Chevreuse Burst is omitted", "dash cancels are unsupported and removed", "the field combo is fixed to one Normal-Charged pair and 18 Normal actions", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "645103c3460cd0ea032d9a2600b65fd86a20d27dbef9340ee7d2195592a1384b"
+    },
+    {
+      "seedId": "kqm-arlecchino-candace-vape-adapted-v1",
+      "partyName": "ArlecchinoCandaceVaporize",
+      "scenarioFingerprint": "loadout-v1:ARLECCHINO-c0-Deathmatch-r1-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:XILONEN-c0-PeakPatrolSong-r1-artifact-kqms-generic-v1:CANDACE-c6-FavoniusLance-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-arlecchino-quick-guide-candace-vape"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because the sourced every-cycle Candace Burst requires 303.030% ER in the exact single-target local scenario, above the 237.500% KQMS artifact ceiling even with deterministic Favonius Lance R5.",
+      "openerActions": [],
+      "cycleActions": [[3, 8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"ARLECCHINO": 1.0, "BENNETT": 1.887, "XILONEN": 1.0, "CANDACE": 3.0303},
+      "sourceAssumptions": ["C6 Candace", "5[N3D] N3 field combo", "single target"],
+      "simulatorAssumptions": ["dash cancels are unsupported and removed", "the field combo is fixed to 18 Normal actions", "Favonius Lance R5 uses a deterministic proc draw", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "c14c3441da4d32d2f69f4164a1c344ed1f07bb02a8b7bdf802cb773e2c2277b6"
+    },
+    {
+      "seedId": "kqm-arlecchino-citlali-melt-adapted-v1",
+      "partyName": "ArlecchinoCitlaliMelt",
+      "scenarioFingerprint": "loadout-v1:ARLECCHINO-c0-Deathmatch-r1-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:XILONEN-c0-PeakPatrolSong-r1-artifact-kqms-generic-v1:CITLALI-c0-FavoniusCodex-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-arlecchino-quick-guide-citlali-melt"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Favonius Codex uses the guide's ER fallback, dash cancels are omitted, 2[N5D] N5 becomes 15 Normals, and the documented pauses between N5 strings become fixed 0.1s waits.",
+      "openerActions": [],
+      "cycleActions": [[3, 8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 1, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0]],
+      "erTargets": {"ARLECCHINO": 1.0, "BENNETT": 1.6129032257974913, "XILONEN": 1.0, "CITLALI": 1.717971486350246},
+      "sourceAssumptions": ["Citlali uses an ER weapon if needed", "wait between N5 strings", "2[N5D] N5 field combo", "single target"],
+      "simulatorAssumptions": ["Favonius Codex R5 uses a deterministic proc draw", "dash cancels are unsupported and removed", "source waits are fixed to 0.1s", "the field combo is fixed to 15 Normal actions", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "e66198e9dbc06038e24cf272963cc1ec02c50a740ba98018dbd3f8d4d119e37d"
     }
   ]
 }
