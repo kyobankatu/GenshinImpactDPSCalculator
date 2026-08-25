@@ -26011,7 +26011,7 @@ Completion evidence:
 
 ### Phase 15: Source-Matched Bulk Human Rotation Campaign
 
-Status: In progress; batches 1-16 retained sixteen new source-matched train scenarios.
+Status: In progress; batches 1-20 retained eighteen new source-matched train scenarios.
 
 Why:
 
@@ -26307,6 +26307,19 @@ Batch 19 checkpoint:
 - Exact three-cycle calibration requires 100.000% Diluc, 205.128% Xingqiu,
   168.564% Xianyun, and 131.579% Bennett ER. The complete trace uses a 40s
   boundary and retains the final Bennett Skill and explicit return to Diluc.
+
+Batch 20 checkpoint:
+
+- The current KQM Xianyun Quick Guide's C5 Bennett/Xianyun/Chongyun/Xiangling
+  Reverse Melt Plunge rotation is retained as rejected evidence. Campaign
+  total: 42 researched, 18 retained, 24 rejected.
+- The sourced four `N1JP EJP` strings require Chongyun's field to infuse
+  Bennett's Normal Attack Talent with Cryo. The local Chongyun runtime
+  explicitly models exact infusion only for Chongyun himself, so replay would
+  produce false reaction ownership and damage typing.
+- The complete typed source trace is preserved without substituting unreacted
+  Plunges or an unsourced element override. Reconsider only after teammate
+  infusion is represented by the shared attack construction path.
 
 Acceptance criteria:
 

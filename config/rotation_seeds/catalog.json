@@ -311,6 +311,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Xianyun, C0 Diluc, C6 Xingqiu, C6 Bennett", "optional Diluc Burst is omitted", "eight N1JP strings", "single target"]
+    },
+    {
+      "sourceId": "kqm-xianyun-quick-guide-bennett-chongyun-xiangling",
+      "title": "Xianyun Quick Guide: Bennett Chongyun Xiangling Reverse Melt",
+      "url": "https://keqingmains.com/q/xianyun-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C5 Bennett, C0 Xianyun, Chongyun, Xiangling", "Cryo-infused Bennett Plunges", "four N1JP-EJP strings", "single target"]
     }
   ],
   "seeds": [
@@ -756,6 +766,20 @@
       "sourceAssumptions": ["Xingqiu uses ED Q", "Xianyun uses EP N1 Q", "C6 Bennett lets Diluc omit Burst", "Diluc uses eight N1JP strings followed by three N1E strings", "single target"],
       "simulatorAssumptions": ["dash cancels are unsupported and removed", "jump inputs map directly to supported high Plunge actions", "explicit one-second waits preserve each simulator swap lock", "an explicit final swap restores the Diluc cycle opener", "the steady-state trace uses a 40s cycle", "deterministic weapon proc draws are explicit", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "b36b1143b90ad8855ca3956ed7a07ccd08ad370ed5cfacfe88ebb098c12fdbd4"
+    },
+    {
+      "seedId": "kqm-xianyun-bennett-chongyun-xiangling-rejected-v1",
+      "partyName": "BennettChongyunPlungeUnavailable",
+      "scenarioFingerprint": "review-only:bennett-c5-xianyun-chongyun-xiangling-reverse-melt",
+      "sourceIds": ["kqm-xianyun-quick-guide-bennett-chongyun-xiangling"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because the sourced Bennett Reverse Melt Plunges require Chongyun's field to infuse a teammate's Normal Attack Talent with Cryo, while the local Chongyun runtime explicitly applies exact infusion only to Chongyun himself.",
+      "openerActions": [],
+      "cycleActions": [[3, 8, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 2, 9, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 3, 10, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 3, 8, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 5, 0, 2, 3, 2, 0, 2, 3, 2, 0, 2, 3, 2, 0, 2, 3, 2]],
+      "erTargets": {"BENNETT": 1.0, "XIANYUN": 1.0, "XIANGLING": 1.0, "CHONGYUN": 1.0},
+      "sourceAssumptions": ["Bennett is C5 or lower", "Chongyun infuses Bennett's Normal Attack Talent with Cryo", "Bennett uses four N1JP-EJP strings", "single target"],
+      "simulatorAssumptions": ["jump inputs would map to supported high Plunges", "teammate Cryo infusion from Chongyun's field is outside the current runtime contract", "no element override or unreacted damage substitute is used"],
+      "contentHash": "55a9c2dff9d2b8f4df21d7191a76de244f2e46b8df664a02739cdfc9277012cd"
     }
   ]
 }
