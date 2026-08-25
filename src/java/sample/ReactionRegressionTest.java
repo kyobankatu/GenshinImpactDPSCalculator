@@ -17680,6 +17680,22 @@ public class ReactionRegressionTest {
         assertEquals(2, bennettWeapon.actions.size(),
                 "Bennett should execute a second Skill at Rekindle expiry");
 
+        model.character.Bennett fieldBennett = new model.character.Bennett(
+                new TestWeapon(), blankArtifact());
+        CombatSimulator fieldSim = simulatorWithExistingCharacter(fieldBennett);
+        fieldSim.performAction(
+                CharacterId.BENNETT,
+                CharacterActionRequest.of(CharacterActionKey.BURST));
+        fieldSim.performAction(
+                CharacterId.BENNETT,
+                CharacterActionRequest.of(CharacterActionKey.SKILL));
+        assertClose(
+                2.0,
+                fieldBennett.getSkillCooldownEndTime()
+                        - fieldBennett.getLastSkillTime(),
+                EPS,
+                "Bennett Fearnaught should halve Skill cooldown inside his field");
+
         mechanics.data.TalentDataSource c2XianglingData =
                 (characterName, key, defaultValue) ->
                         "Xiangling".equals(characterName)

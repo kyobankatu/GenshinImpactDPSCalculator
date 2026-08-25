@@ -1091,6 +1091,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Yelan, C6 Xingqiu, C6 Bennett, C6 Xiangling", "Favonius Warbow R5 Yelan", "Sacrificial Sword R5 Xingqiu", "Skyward Blade R1 Bennett", "Favonius Lance R5 Xiangling", "single target"]
+    },
+    {
+      "sourceId": "kqm-bennett-quick-guide-xilonen-rosaria-kaeya",
+      "title": "Bennett Quick Guide: Xilonen Rosaria Kaeya Reverse Melt",
+      "url": "https://keqingmains.com/q/bennett-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.7; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C6 Bennett, C0 Xilonen, C0 Rosaria, C6 Kaeya", "Skyward Blade R1 Bennett", "Peak Patrol Song R1 Xilonen", "Favonius Lance R5 Rosaria", "Favonius Sword R5 Kaeya", "single target"]
     }
   ],
   "seeds": [
@@ -2558,6 +2568,20 @@
       "sourceAssumptions": ["Yelan uses Burst-N1-Skill-N1, then N1-Skill-N1", "Xingqiu uses Burst-N1, N2, then N1-Skill-N2", "Bennett uses Skill-N1-Burst and three later Skills", "Xiangling uses N1-Burst-N1-Skill and two later N2 strings", "single target"],
       "simulatorAssumptions": ["Xingqiu's dash cancel is unsupported and removed", "all sourced Normal counts are retained", "explicit one-second waits preserve each simulator swap lock", "the reviewed trace uses a 36s cycle", "Favonius and Sacrificial weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "0fc384adfa2a2b7b978922923a74b7ee27fa94729d90d023a0387d68d4ae8279"
+    },
+    {
+      "seedId": "kqm-bennett-xilonen-rosaria-kaeya-adapted-v1",
+      "partyName": "BennettReverseMelt",
+      "scenarioFingerprint": "loadout-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:XILONEN-c0-PeakPatrolSong-r1-artifact-kqms-generic-v1:ROSARIA-c0-FavoniusLance-r5-artifact-kqms-generic-v1:KAEYA-c6-FavoniusSword-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-bennett-quick-guide-xilonen-rosaria-kaeya"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "The first-cycle-only Bennett Skill and later Burst-N1 opener are retained as separate cycle forms; explicit swap waits satisfy the documented delay before Bennett's first on-field Skill, and fixed 1.5s waits reach both later Skill cooldowns.",
+      "openerActions": [],
+      "cycleActions": [[3, 5, 0, 8, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 0, 0, 0], [5, 0, 8, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 0, 0, 0]],
+      "erTargets": {"BENNETT": 1.2088952474471577, "XILONEN": 1.0, "ROSARIA": 1.5195259078914047, "KAEYA": 1.1511895625223845},
+      "sourceAssumptions": ["Bennett uses a first-cycle-only Skill, Burst-N1, then Skill-2[N3-Skill]-N3", "Xilonen uses Skill-N2", "Rosaria uses Skill-Burst", "Kaeya uses Skill-Burst", "single target"],
+      "simulatorAssumptions": ["the documented Bennett self-application delay is covered by preceding support field time and explicit swap waits", "fixed 1.5s waits reach Bennett's second and third on-field Skill cooldowns", "both source-prescribed Bennett opener forms are retained", "all sourced Normal counts are retained", "the reviewed alternating trace uses a 24s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "b56e7d02da02209a474085b84c98af476470cd50c2d3c7121296285d9f893f71"
     }
   ]
 }

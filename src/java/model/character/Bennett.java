@@ -1,5 +1,8 @@
 package model.character;
 
+import java.util.List;
+
+import mechanics.buff.Buff;
 import mechanics.data.TalentDataManager;
 import mechanics.data.TalentDataSource;
 import model.entity.FormStateProvider;
@@ -23,6 +26,7 @@ import simulation.action.HitlagProfile;
  * Bennett character implementation with Fantastic Voyage field buff handling.
  */
 public class Bennett extends Character implements FormStateProvider {
+    private static final double FANTASTIC_VOYAGE_SKILL_COOLDOWN_REDUCTION = 0.5;
 
     /**
      * Hitlag from gcsim config YAML pinned at
@@ -115,7 +119,14 @@ public class Bennett extends Character implements FormStateProvider {
     public void onAction(CharacterActionRequest request, CombatSimulator sim) {
         switch (request.getKey()) {
             case SKILL:
-                markSkillUsed(sim.getCurrentTime(), sim.getApplicableBuffs(this));
+                double skillTime = sim.getCurrentTime();
+                List<Buff> applicableBuffs = sim.getApplicableBuffs(this);
+                markSkillUsed(skillTime, applicableBuffs);
+                if (hasFantasticVoyage(applicableBuffs)) {
+                    reduceSkillCooldown(
+                            skillTime,
+                            getSkillCD() * FANTASTIC_VOYAGE_SKILL_COOLDOWN_REDUCTION);
+                }
                 skill(sim); // Default to Tap
                 break;
             case BURST:
@@ -286,7 +297,11 @@ public class Bennett extends Character implements FormStateProvider {
 
     private boolean hasC6Infusion(CombatSimulator sim) {
         return constellation >= 6
-                && sim.getApplicableBuffs(this).stream()
-                        .anyMatch(buff -> buff.getId() == BuffId.FANTASTIC_VOYAGE);
+                && hasFantasticVoyage(sim.getApplicableBuffs(this));
+    }
+
+    private boolean hasFantasticVoyage(List<Buff> applicableBuffs) {
+        return applicableBuffs.stream()
+                .anyMatch(buff -> buff.getId() == BuffId.FANTASTIC_VOYAGE);
     }
 }

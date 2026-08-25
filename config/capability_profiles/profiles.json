@@ -285,6 +285,19 @@
     "on_field_dps_score": 0.058451,
     "burst_window_score": 0.049728
   },
+  "KAEYA": {
+    "off_field_dps_ratio": 0.325622,
+    "team_buff_score": 0.000000,
+    "self_enhancement_score": 0.326510,
+    "energy_generation_score": 0.464712,
+    "entry_value_score": 0.019691,
+    "sustain_value_3_actions": 0.047705,
+    "sustain_value_6_actions": 0.046580,
+    "exit_cost_score": 0.233241,
+    "reentry_cost_score": 0.000000,
+    "on_field_dps_score": 0.289591,
+    "burst_window_score": 0.182588
+  },
   "XIANYUN": {
     "off_field_dps_ratio": 0.000000,
     "team_buff_score": 0.500000,

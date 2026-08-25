@@ -21,6 +21,7 @@ import model.character.Ganyu;
 import model.character.HuTao;
 import model.character.Ineffa;
 import model.character.Jean;
+import model.character.Kaeya;
 import model.character.Keqing;
 import model.character.KamisatoAyato;
 import model.character.KukiShinobu;
@@ -201,6 +202,10 @@ final class CuratedCharacters {
 
     static Character rosaria() {
         return new Rosaria(new FavoniusLance(5, () -> FIXED_RANDOM_DRAW), null, 0);
+    }
+
+    static Character kaeya() {
+        return new Kaeya(new FavoniusSword(5, () -> FIXED_RANDOM_DRAW), null);
     }
 
     static Character xianyun() {
