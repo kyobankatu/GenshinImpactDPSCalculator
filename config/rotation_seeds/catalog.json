@@ -1041,6 +1041,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Yelan, C0 Arlecchino, C6 Bennett, C6 Sucrose", "Favonius Warbow R5 Yelan", "Deathmatch R1 Arlecchino", "Skyward Blade R1 Bennett", "Thrilling Tales R5 Sucrose", "single target"]
+    },
+    {
+      "sourceId": "kqm-bennett-quick-guide-ayato-nahida-thoma",
+      "title": "Bennett Quick Guide: Ayato Nahida Thoma Burgeon",
+      "url": "https://keqingmains.com/q/bennett-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.7; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Kamisato Ayato, C0 Nahida, C6 Thoma, C6 Bennett", "Haran Geppaku Futsu R1 Ayato", "Wandering Evenstar R5 Nahida", "Favonius Lance R5 Thoma", "Skyward Blade R1 Bennett", "single target"]
     }
   ],
   "seeds": [
@@ -2438,6 +2448,20 @@
       "sourceAssumptions": ["Yelan uses Skill-Burst-N1", "Arlecchino uses optional Burst-Skill or Skill, then N3C-6[N3D]", "Bennett uses Skill-Burst", "Sucrose uses N3-Skill with a dash cancel", "single target"],
       "simulatorAssumptions": ["Arlecchino's optional healing Burst is omitted", "dash cancels are unsupported and removed", "all twenty-one sourced Normal attacks and the Charged attack are retained", "the complete normalized action trace is retained for review", "Favonius Warbow R5 uses deterministic proc draws", "the exact repeated trace exceeds the KQMS Energy Recharge ceiling", "no branch-search party is published"],
       "contentHash": "be92bc67b8fea49664d21b3a40abc61227a2d764cb343663bf324837b02d2122"
+    },
+    {
+      "seedId": "kqm-bennett-ayato-nahida-thoma-adapted-v1",
+      "partyName": "AyatoBennettBurgeon",
+      "scenarioFingerprint": "loadout-v1:KAMISATO_AYATO-c0-HaranGeppakuFutsu-r1-artifact-kqms-generic-v1:NAHIDA-c0-WanderingEvenstar-r5-artifact-kqms-generic-v1:THOMA-c6-FavoniusLance-r5-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-bennett-quick-guide-ayato-nahida-thoma"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Nahida's optional Charged Attack is omitted, and a fixed 1.5s wait preserves Thoma's second Skill cooldown while both complete Ayato Skill-N15 field times and all support actions are retained.",
+      "openerActions": [],
+      "cycleActions": [[5, 8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"KAMISATO_AYATO": 1.5337761790006914, "NAHIDA": 1.136653144390911, "THOMA": 1.209122388169422, "BENNETT": 1.2740571411256099},
+      "sourceAssumptions": ["Ayato uses Burst and two Skill-N15 field times", "Nahida uses Skill-Burst then N1-Skill and an optional Charged Attack", "Thoma uses Skill-Burst then Skill-N2", "Bennett uses Skill-Burst then N1-Skill", "single target"],
+      "simulatorAssumptions": ["Nahida's optional Charged Attack is omitted", "a fixed 1.5s wait reaches Thoma's second Skill cooldown", "all thirty Ayato Normal attacks are retained", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 36s cycle", "Favonius Lance R5 uses deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "0237dd2da24e3dc98aee8d3de04592b3b0e8460e3a8cce161e65145ed877b871"
     }
   ]
 }
