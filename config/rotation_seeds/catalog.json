@@ -841,6 +841,26 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C6 Sucrose, C6 Fischl, C6 Xingqiu, C0 Yelan", "Thrilling Tales R5 Sucrose", "The Stringless R5 Fischl", "Sacrificial Sword R5 Xingqiu", "Favonius Warbow R5 Yelan", "N4 Sucrose driver strings", "single target"]
+    },
+    {
+      "sourceId": "kqm-sucrose-quick-guide-flins-columbina-ineffa",
+      "title": "Sucrose Quick Guide: Flins Columbina Ineffa Lunar-Charged",
+      "url": "https://keqingmains.com/q/sucrose-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Luna VI; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C6 Flins, C6 Ineffa, C6 Columbina, C6 Sucrose", "Primordial Jade Winged-Spear Flins", "Calamity Queller Ineffa", "Nocturne's Curtain Call Columbina", "Sunny Morning Sleep-In Sucrose", "single target"]
+    },
+    {
+      "sourceId": "kqm-flins-quick-guide-c1-plus-combo",
+      "title": "Flins Quick Guide: C1+ Field Combo",
+      "url": "https://keqingmains.com/q/flins-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Luna VI; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C1 or higher Flins", "three special Skills and short Bursts", "five particle-generation strings", "single target"]
     }
   ],
   "seeds": [
@@ -1972,6 +1992,20 @@
       "sourceAssumptions": ["Fischl uses Burst, then later Skill-N1", "Xingqiu uses Skill-dash-Burst-N1", "Yelan uses Skill-N1-Burst-N1 and a later Skill-N1", "Sucrose uses N1-Skill-Burst before two N4 driver windows", "Sucrose Burst may be replaced by N2 if unavailable", "single target"],
       "simulatorAssumptions": ["Xingqiu's dash is unsupported and removed", "Sucrose takes the Burst branch", "the generic combo windows map to two and three complete N4 strings", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 30s cycle", "Favonius and Sacrificial weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "69ae1143d50d8d7cf7f82820796606d99e221eb902dffd6cbcd129c9b3948f77"
+    },
+    {
+      "seedId": "kqm-flins-columbina-ineffa-sucrose-adapted-v1",
+      "partyName": "FlinsParty2",
+      "scenarioFingerprint": "loadout-v1:FLINS-c6-PrimordialJadeWingedSpear-NightOfTheSkysUnveiling:INEFFA-c6-CalamityQueller-AubadeOfMorningstarAndMoon:COLUMBINA-c6-NocturnesCurtainCall-SilkenMoonsSerenade:SUCROSE-c6-SunnyMorningSleepIn-ViridescentVenerer",
+      "sourceIds": ["kqm-sucrose-quick-guide-flins-columbina-ineffa", "kqm-flins-quick-guide-c1-plus-combo"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Ineffa and Columbina alternate Bursts, Sucrose selects the Skill branch every cycle, Flins uses the C1+ combo with a 0.3s local wait at its second dash boundary, and Sucrose's optional terminal N3C is omitted.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 3, 5, 0, 0, 0, 0, 0, 0, 0, 3, 5, 0, 0, 0, 0, 6, 6, 6, 0, 0, 3, 5, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 0, 0], [8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 3, 5, 0, 0, 0, 0, 0, 0, 0, 3, 5, 0, 0, 0, 0, 6, 6, 6, 0, 0, 3, 5, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 0, 0]],
+      "erTargets": {"FLINS": 1.0, "INEFFA": 1.0, "COLUMBINA": 1.0, "SUCROSE": 1.0},
+      "sourceAssumptions": ["Ineffa and Columbina alternate Bursts, with no first-rotation Ineffa Burst", "Sucrose may use Skill or Burst before Flins", "C1+ Flins uses E-N2-E-short Burst-N4-N3-E-short Burst-N4-N2-E-short Burst-N4", "Sucrose finishes with optional Skill and N3", "single target"],
+      "simulatorAssumptions": ["Sucrose selects the Skill branch every cycle", "the second Flins dash boundary maps to a 0.3s local cooldown wait", "other dash cancels are unsupported and removed", "Flins's special Skill and short Burst share their typed Skill and Burst actions", "Sucrose's optional terminal N3C is omitted", "the cycles use definition-normalized swap waits", "the reviewed trace uses a 30s cycle", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "97a119c143c8c66fe659ed378d7e9c43871abc262092a48d5ecb098f7c007db1"
     }
   ]
 }

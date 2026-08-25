@@ -5194,7 +5194,8 @@ public class ReactionRegressionTest {
     }
 
     private static void testAccuracyPhaseF_FlinsSkillApplicationContract() {
-        model.character.Flins flins = new model.character.Flins(new TestWeapon(), blankArtifact());
+        model.character.Flins flins = new model.character.Flins(
+                new TestWeapon(), blankArtifact(), flinsTalentData(1));
         CombatSimulator sim = simulatorWithExistingCharacter(flins);
         List<AttackAction> actions = new ArrayList<>();
         int[] elementalReactions = { 0 };
@@ -5207,8 +5208,12 @@ public class ReactionRegressionTest {
         sim.getEnemy().setAura(Element.HYDRO, 4.0, sim.getCurrentTime());
         double activationStart = sim.getCurrentTime();
         double damageBeforeActivation = sim.getTotalDamage();
+        CharacterActionRequest skillRequest =
+                CharacterActionRequest.of(CharacterActionKey.SKILL);
 
-        flins.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), sim);
+        assertTrue(flins.canPerformAction(skillRequest, sim.getCurrentTime()),
+                "Flins form-entry Skill should initially be legal");
+        flins.onAction(skillRequest, sim);
 
         AttackAction activation = findAction(actions, "Enter Form");
         assertEquals(Element.ELECTRO, activation.getElement(), "Flins form activation should be an Electro hit");
@@ -5225,13 +5230,15 @@ public class ReactionRegressionTest {
         assertTrue(sim.getEnemy().getAuraUnits(Element.HYDRO, sim.getCurrentTime()) > 0.0,
                 "Flins 0U form activation should preserve Hydro aura");
         assertTrue(flins.isFormActive(sim.getCurrentTime()), "Flins form activation should enter Manifest Flame");
+        assertTrue(flins.canPerformAction(skillRequest, sim.getCurrentTime()),
+                "Flins should expose the immediately available special Skill in Manifest Flame");
 
         elementalReactions[0] = 0;
         sim.getEnemy().setAura(Element.HYDRO, 4.0, sim.getCurrentTime());
         double spearstormStart = sim.getCurrentTime();
         double damageBeforeSpearstorm = sim.getTotalDamage();
 
-        flins.onAction(CharacterActionRequest.of(CharacterActionKey.SKILL), sim);
+        flins.onAction(skillRequest, sim);
 
         AttackAction spearstorm = findAction(actions, "Northland Spearstorm");
         assertEquals(Element.ELECTRO, spearstorm.getElement(), "Flins Spearstorm should remain Electro");
@@ -5246,6 +5253,21 @@ public class ReactionRegressionTest {
                 "Flins Spearstorm should retain positive direct damage");
         assertTrue(flins.isThunderousSymphonyActive(sim.getCurrentTime()),
                 "Flins Spearstorm should activate Thunderous Symphony state");
+        assertTrue(!flins.canPerformAction(skillRequest, sim.getCurrentTime()),
+                "Flins special Skill should be unavailable during its C1 cooldown");
+        double remainingSpecialCooldown = flins.getSkillCDRemaining(sim.getCurrentTime());
+        sim.advanceTime(remainingSpecialCooldown - 0.001);
+        assertTrue(!flins.canPerformAction(skillRequest, sim.getCurrentTime()),
+                "Flins special Skill should remain unavailable before its cooldown boundary");
+        sim.advanceTime(0.001);
+        assertTrue(flins.canPerformAction(skillRequest, sim.getCurrentTime()),
+                "Flins special Skill should become available at its cooldown boundary");
+        sim.advanceTime(10.0 - sim.getCurrentTime());
+        assertTrue(!flins.canPerformAction(skillRequest, sim.getCurrentTime()),
+                "Flins should return to the standard Skill cooldown when Manifest Flame expires");
+        sim.advanceTime(6.0);
+        assertTrue(flins.canPerformAction(skillRequest, sim.getCurrentTime()),
+                "Flins form-entry Skill should return at the standard cooldown boundary");
     }
 
     private static void testAccuracyPhaseF_FlinsSymphonyZeroGaugeContract() {

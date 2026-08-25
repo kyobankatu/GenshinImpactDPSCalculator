@@ -305,6 +305,9 @@ public class Flins extends Character
                 && isManifestFlameActive(currentTime)) {
             return false;
         }
+        if (request.getKey() == CharacterActionKey.SKILL) {
+            return getSkillCDRemaining(currentTime) <= 0.0;
+        }
         return super.canPerformAction(request, currentTime);
     }
 
