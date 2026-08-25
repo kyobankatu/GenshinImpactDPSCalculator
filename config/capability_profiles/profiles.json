@@ -609,5 +609,18 @@
     "reentry_cost_score": 0.000000,
     "on_field_dps_score": 0.208012,
     "burst_window_score": 0.199754
+  },
+  "VENTI": {
+    "off_field_dps_ratio": 0.305149,
+    "team_buff_score": 0.268784,
+    "self_enhancement_score": 0.000000,
+    "energy_generation_score": 0.383100,
+    "entry_value_score": 0.000000,
+    "sustain_value_3_actions": 0.064794,
+    "sustain_value_6_actions": 0.052250,
+    "exit_cost_score": 0.019843,
+    "reentry_cost_score": 0.000000,
+    "on_field_dps_score": 0.161105,
+    "burst_window_score": 0.113261
   }
 }

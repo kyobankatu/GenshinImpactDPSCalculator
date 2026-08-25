@@ -36,6 +36,7 @@ import model.character.Shenhe;
 import model.character.Sucrose;
 import model.character.Thoma;
 import model.character.Tighnari;
+import model.character.Venti;
 import model.character.Xiao;
 import model.character.Xianyun;
 import model.character.Xingqiu;
@@ -195,6 +196,10 @@ final class CuratedCharacters {
         return new Thoma(
                 new FavoniusLance(5, () -> FIXED_RANDOM_DRAW), null,
                 TalentDataManager.getInstance(), 6, () -> FIXED_RANDOM_DRAW);
+    }
+
+    static Character venti() {
+        return new Venti(new FavoniusWarbow(5, () -> FIXED_RANDOM_DRAW), null, 0);
     }
 
     static Character ningguang() {
