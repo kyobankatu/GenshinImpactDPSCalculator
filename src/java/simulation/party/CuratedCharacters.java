@@ -206,6 +206,10 @@ final class CuratedCharacters {
         return new Xingqiu(new SacrificialSword(5, () -> FIXED_RANDOM_DRAW), null);
     }
 
+    static Character xingqiuFavonius() {
+        return new Xingqiu(new FavoniusSword(5, () -> FIXED_RANDOM_DRAW), null);
+    }
+
     static Character xiangling() {
         return new Xiangling(new FavoniusLance(5, () -> FIXED_RANDOM_DRAW), null);
     }
