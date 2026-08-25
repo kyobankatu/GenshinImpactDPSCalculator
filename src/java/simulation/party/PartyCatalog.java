@@ -28,6 +28,7 @@ public final class PartyCatalog {
         register(new RaidenPartyDefinition());
         register(new FlinsPartyDefinition());
         register(new FlinsYelanLunarChargedPartyDefinition());
+        register(new FlinsMonaLunarChargedPartyDefinition());
         register(new AlhaithamHyperbloomPartyDefinition());
         register(new XiaoPlungePartyDefinition());
         register(new XiaoXianyunPartyDefinition());
