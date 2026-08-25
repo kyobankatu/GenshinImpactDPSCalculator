@@ -23,10 +23,10 @@ Generic simulation and RL launch paths backed by shared party definitions are
 now implemented. Party-specific sample wrappers and party-specific RL simulator
 factories have been removed for the migrated parties.
 
-The simulator-only autonomous campaign is complete. B-212 now plans a local
-expert-iteration rotation optimizer across the Java environment, search, and
-Python learner. The retained NCCL/DDP plan remains paused until B-212 proves
-the action, dataset, model, and evaluation contracts locally.
+The simulator-only autonomous campaign is complete. B-212 Phases 1-10 built the
+local expert-iteration rotation-optimizer pipeline, but the local quality gate
+failed. Phases 11-17 now plan a sourced human-rotation seed campaign and teacher
+quality repair before any further model-architecture or NCCL/DDP work.
 
 The prior simulator content campaigns, including Skill-focused event weapons,
 are complete; RL and generated docs remain excluded.
@@ -24860,8 +24860,9 @@ Completion evidence:
 
 ## Implementation Order: Expert-Iteration Rotation Optimization Model B-212
 
-Status: In progress (2026-08-24). Phases 1-10 are implemented; the local
-quality gate failed, so model-quality remediation remains open in B-212.
+Status: In progress (2026-08-25). Phases 1-10 are implemented; the local
+quality gate failed. Phase 11 is the next implementation unit in the sourced
+human-rotation and teacher-quality remediation campaign.
 
 Goal:
 
@@ -25658,3 +25659,491 @@ Completion evidence:
   advertised during Flins's Manifest Flame despite runtime rejection. Typed
   character advisories now drive every character-action mask, with a focused
   regression for this state.
+
+## B-212 Remediation Scope: Sourced Human Rotation Seeds
+
+Scope:
+
+- Curate source-traceable human rotations from maintained KQM guides, current
+  gcsim/simpact configs, and independently corroborated technical references.
+- Normalize accepted rotations into the existing typed `PolicyAction` contract,
+  preserving opener, steady-cycle, alternate-cycle, ER, loadout, target-count,
+  and timing assumptions instead of flattening them silently.
+- Treat human rotations as baselines and search seeds. Only simulator-replayed,
+  cyclically feasible, baseline-preserving search results may become expert
+  labels.
+- Repair teacher-search budgeting and ranking so an evolutionary campaign runs
+  complete populations and generations and cannot prefer an energy-infeasible
+  trajectory solely because its first-cycle damage is large.
+
+Out of scope for this pass:
+
+- Declaring any published rotation globally optimal, scraping sources without
+  recording provenance, or copying source DPS numbers as simulator truth.
+- Approximating dash, jump, movement, pickup, HP, shield, enemy-attack, or
+  multi-target behavior that remains in `## Deferred Systems`.
+- Changing combat formulas merely to reconcile another simulator's output.
+- Selecting the final MLP, GRU, LSTM, Transformer, Decision Transformer, or
+  offline-RL architecture. Architecture ablation starts only after Phase 17's
+  teacher-quality gate passes.
+- NCCL/DDP or long GPU training. Any scheduler-visible identifier continues to
+  follow the neutral-name rule above.
+
+Definitions:
+
+- `SourcedRotationSeed` is an immutable, typed human baseline with exact party
+  fingerprint, source IDs, assumptions, opener/cycle actions, ER targets, and
+  adaptation status.
+- `RotationSourceCatalog` loads the tracked normalized seed catalog and rejects
+  stale, duplicate, unsupported, or provenance-free entries.
+- `RotationSeedEvaluation` records exact local replay results for every cycle,
+  including damage, elapsed time, invalid actions, and ending Energy.
+- `RotationTrajectoryRanker` orders complete trajectories lexicographically:
+  legality and cyclic feasibility first, then objective score and deterministic
+  action identity.
+- `accepted` means exactly representable and replay-verified; `adapted` means a
+  documented simulator-safe translation; `rejected` means a material source
+  assumption cannot be represented and the sequence never enters training.
+
+Source policy:
+
+- KQM sample rotations are maintained human technical references. Current
+  gcsim/simpact configs are executable community evidence, not a standardized
+  leaderboard. Material action ordering or ER claims require either an
+  executable source config or independent corroboration.
+- Every accepted/adapted entry records title, stable URL or repository path,
+  author/publisher when available, source revision/version, access date,
+  target count, constellation/loadout assumptions, and the exact adaptation.
+- Network access is restricted to the offline import/research workflow. Build,
+  simulation, training, and evaluation consume only reviewed tracked data and
+  never fetch remote content.
+
+Current build-path gap:
+
+- `RunPartySimulation` invokes `OptimizerPipeline`, but only `RaidenParty`,
+  `FlinsParty`, and `FlinsParty2` currently provide artifact optimization
+  targets. Their sample runs calibrate ER and then allocate KQMS-style rolls.
+- `GenericRLSimulatorFactory` currently calls
+  `PartyDefinition.createSimulator(null, null)`. RL rollout, rotation search,
+  and expert-data generation therefore bypass the optimized sample build even
+  for those three parties.
+- The seven `CuratedPartyDefinition` scenarios return empty optimization
+  targets, ignore supplied ER targets and manual rolls, and identify themselves
+  as `artifact-none`. Legality and deterministic replay for these scenarios do
+  not prove that their rotations are sustainable under a realizable build.
+- All 32 records in the current expert campaign report
+  `cyclicEnergyFeasible=false`; this blocks treating the existing archive as
+  high-quality rotation supervision regardless of its first-cycle damage.
+- The current KQMS implementation uses 20 fixed average rolls (two in each of
+  ten substats), 20 liquid average rolls, ER prefill/reservation, and per-stat
+  caps. It is a KQMS-style aggregate roll allocator with local hill climbing,
+  not a complete per-piece artifact solver; this distinction must remain in
+  dataset provenance and quality claims.
+
+### Phase 11: Rotation Source Schema And Fail-Closed Catalog
+
+Status: Planned.
+
+Why next:
+
+- Bulk research cannot begin until source identity, adaptation boundaries, and
+  exact party/loadout matching have a versioned machine-checkable contract.
+
+Target files:
+
+- new `config/rotation_seeds/schema_v1.json`
+- new `config/rotation_seeds/catalog.json`
+- new `src/java/mechanics/rotation/SourcedRotationSeed.java`
+- new `src/java/mechanics/rotation/RotationSourceCatalog.java`
+- new `src/java/sample/RotationSourceCatalogRegressionTest.java`
+
+Tasks:
+
+- Define stable seed/source IDs, exact scenario fingerprint, source metadata,
+  opener and one-or-more cycle action arrays, required ER targets, source and
+  simulator assumptions, adaptation status, and content hash.
+- Load all actions through `PolicyAction.fromId` and all characters through
+  typed identities. Keep presentation strings outside control flow.
+- Reject blank or non-HTTP source references, duplicate IDs, hash mismatch,
+  stale schema/action revisions, unknown party fingerprints, missing source
+  date/version, and `rejected` entries exposed as usable seeds.
+
+Acceptance criteria:
+
+- The empty initial catalog round-trips deterministically and validates against
+  the JSON schema; one canonical fixture produces the same content hash in Java
+  and the tracked validation script.
+- No catalog entry can be selected by search without exact party fingerprint,
+  supported action revision, source provenance, and `accepted` or `adapted`
+  status.
+
+Test cases to add or update:
+
+- Normal: exact accepted seed and documented adapted seed load with stable IDs,
+  defensive action copies, and deterministic hashes.
+- Abnormal: duplicate seed/source, altered hash, unknown action, blank URL,
+  missing access date, stale revision, mismatched fingerprint, and rejected
+  status fail before simulator construction.
+
+Verification:
+
+- `./gradlew RotationSourceCatalogRegressionTest build`
+- `python scripts/agent_validate.py --path config/rotation_seeds/catalog.json --path src/java/mechanics/rotation/RotationSourceCatalog.java --run`
+
+### Phase 12: Multi-Cycle Seed Replay And Energy Feasibility
+
+Status: Planned.
+
+Why:
+
+- Published rotations commonly have first-rotation setup, alternate Skill/Burst
+  cycles, and ER assumptions. A one-cycle flattened sequence would reproduce
+  the current false `cyclicEnergyFeasible` labels.
+
+Target files:
+
+- `src/java/mechanics/optimization/OptimizerPipeline.java`
+- `src/java/mechanics/rl/GenericRLSimulatorFactory.java`
+- `src/java/mechanics/rotation/SourcedRotationSeed.java`
+- new `src/java/mechanics/rotation/RotationSeedEvaluation.java`
+- `src/java/mechanics/rotation/RotationScenario.java`
+- `src/java/mechanics/rotation/BattleRotationEnvironment.java`
+- `src/java/mechanics/rotation/RotationObjective.java`
+- `src/java/simulation/party/PartyDefinition.java`
+- `src/java/simulation/party/CuratedPartyDefinition.java`
+- new `src/java/sample/RotationSeedRegressionTest.java`
+
+Tasks:
+
+- Execute opener, steady, and alternate cycles without resetting cooldown,
+  Energy, aura, or persistent effects between cycles.
+- Calibrate ER and allocate KQMS rolls once for the exact rotation and loadout,
+  then freeze the required-ER map and complete merged roll map for all sample,
+  RL, search, and replay simulator construction. Do not pass `null` build maps.
+- Require every `PartyDefinition`, including curated definitions, to consume
+  the supplied ER/roll maps or explicitly declare a fixed externally audited
+  build. Reject silently ignored optimization inputs and `artifact-none`
+  scenarios before dataset generation.
+- Include build mode, explicit ER targets, complete roll map or its canonical
+  hash, optimizer revision, and KQMS assumptions in the scenario/loadout
+  fingerprint; never inject untracked starting Energy.
+- Evaluate cyclic feasibility from the repeated steady-state boundary and keep
+  first-cycle damage separate from steady-cycle DPS.
+- Reject seeds that stall, exceed their declared horizon, use an unavailable
+  action, or rely on a source condition outside the simulator boundary.
+
+Acceptance criteria:
+
+- A two-cycle fixture reproduces opener-only and alternating-cycle behavior,
+  ending Energy, action trace, damage, and state hash exactly after reset.
+- The optimized sample path, generic RL reset, rotation search, and source-seed
+  replay construct byte-for-byte equivalent ER targets, artifact rolls,
+  character stats, and build fingerprints for the same scenario.
+- Every searchable scenario declares `optimized-kqms-v1` or a fixed audited
+  build; no searchable or trainable scenario reaches simulation through null
+  maps, ignored maps, or `artifact-none` defaults.
+- A seed is eligible as a baseline only when every executed action is legal and
+  the final repeated-cycle Energy deficit is within the declared tolerance.
+
+Test cases to add or update:
+
+- Normal: one steady cycle, opener plus two steady cycles, alternating Skill and
+  Burst cycles, explicit ER target, deterministic repeated replay, and exact
+  sample-versus-RL build/stat/fingerprint equality.
+- Abnormal: null or ignored build maps, `artifact-none` trainable scenario,
+  stale ER or roll hash, unreachable ER target, missing optimization target,
+  hidden Energy injection, insufficient Energy, cooldown stall, unsupported
+  cancel, horizon overrun, and partial final cycle are rejected with the seed
+  ID in the error.
+
+Verification:
+
+- `./gradlew RotationSeedRegressionTest RotationEnvironmentRegressionTest PartyCatalogRegressionTest build`
+- `python scripts/agent_validate.py --path src/java/mechanics/rotation/RotationSeedEvaluation.java --run`
+
+### Phase 13: Offline Source Import And Restricted Translation
+
+Status: Planned.
+
+Why:
+
+- Human review must operate on structured candidates, while unsupported gcsl or
+  guide notation must fail visibly rather than degrade into guessed actions.
+
+Target files:
+
+- new `scripts/import_rotation_sources.py`
+- new `scripts/rotation_source_mapping.py`
+- new `scripts/tests/test_rotation_source_mapping.py`
+- `config/rotation_seeds/schema_v1.json`
+- `config/rotation_seeds/catalog.json`
+
+Tasks:
+
+- Import explicitly supplied KQM/gcsim source snapshots into a normalized
+  candidate report; do not fetch during Gradle, tests, simulation, or training.
+- Implement a restricted structured mapping for character switches, Normal,
+  Charged, Plunging, Skill Press/Hold, Burst, and explicit waits.
+- Detect opener-only actions, alternation, conditionals, ER checks, automatic
+  waits/swaps, dash/jump cancels, target-count assumptions, and unsupported
+  mechanics. Require a reviewed adaptation note for every non-exact mapping.
+- Emit candidates separately from the reviewed tracked catalog so an import can
+  never make unreviewed data trainable.
+
+Acceptance criteria:
+
+- The importer is deterministic for pinned input and produces no source-code,
+  shell, credential, or executable payload in the catalog candidate.
+- Every source token is consumed by a supported mapping or appears in a
+  machine-readable unresolved list; no text is silently discarded.
+
+Test cases to add or update:
+
+- Normal: KQM arrow notation, gcsl sequential actions, explicit swap, opener,
+  alternate cycle, and ER annotation normalize deterministically.
+- Abnormal: conditional gcsl, implicit infinite wait, unknown combo shorthand,
+  dash/jump cancel, multi-target-only assumption, duplicate URL, malformed
+  source payload, and unconsumed token remain non-accepted.
+
+Verification:
+
+- `python -m unittest scripts.tests.test_rotation_source_mapping`
+- `python scripts/validate_agent_assets.py`
+- `python scripts/preflight.py`
+
+### Phase 14: Existing Ten-Scenario Human Baseline Pilot
+
+Status: Planned.
+
+Why:
+
+- The existing train/validation/holdout campaign is the smallest bounded set
+  that can expose source mismatch, unsupported notation, and Energy assumptions
+  before a bulk import.
+
+Target files:
+
+- `config/rotation_seeds/catalog.json`
+- `src/java/sample/RotationSourceCatalogRegressionTest.java`
+- `src/java/sample/RotationSeedRegressionTest.java`
+- `src/java/sample/BenchmarkRotationSearch.java`
+- `BACKLOG.md`
+
+Tasks:
+
+- Research every existing scenario against maintained KQM and current
+  gcsim/simpact material, recording exact matches, near matches, negative
+  searches, conflicts, and access dates.
+- Add every exact or defensibly adapted source rotation; do not transplant a
+  rotation from a different party merely because it shares an archetype.
+- Replay at least three cycles using matched ER/loadout assumptions and compare
+  each accepted seed against the current definition-owned baseline.
+- Record unsupported source actions or absent exact-party evidence in B-212
+  rather than manufacturing a seed.
+
+Acceptance criteria:
+
+- All ten scenarios have a completed evidence disposition. Every scenario with
+  an exact supported source has at least one cyclically feasible seed; scenarios
+  without one have a specific recorded blocker or negative-search result.
+- Every accepted human seed is legal, deterministic, complete, cyclically
+  feasible, and no worse than the existing baseline under the same local
+  scenario and loadout.
+
+Test cases to add or update:
+
+- Normal: catalog-wide source metadata audit, exact fingerprint lookup, three-
+  cycle replay, baseline comparison, and split-preserving selection.
+- Abnormal: near-match party, different constellation/loadout, source requiring
+  multiple targets or enemy attacks, infeasible Energy, and stale URL revision
+  cannot be promoted to accepted.
+
+Verification:
+
+- `./gradlew RotationSourceCatalogRegressionTest RotationSeedRegressionTest BenchmarkRotationSearch PartyCatalogRegressionTest build`
+- `python scripts/preflight.py --run`
+
+### Phase 15: Source-Matched Bulk Human Rotation Campaign
+
+Status: Planned.
+
+Why:
+
+- Architecture research needs breadth across reaction and action archetypes,
+  not many near-duplicate trajectories from the same six training parties.
+
+Target files:
+
+- `config/rotation_seeds/catalog.json`
+- `TASKS.md`
+- `BACKLOG.md`
+- `src/java/simulation/party/PartyCatalog.java`
+- `src/java/sample/PartyCatalogRegressionTest.java`
+- `src/java/sample/RotationSourceCatalogRegressionTest.java`
+- `config/action_capabilities.json`
+- `config/capability_profiles/profiles.json`
+
+Tasks:
+
+- Add exact `PartyDefinition` and loadout metadata only for accepted source
+  parties whose offensive mechanics are already represented by the simulator.
+- Build a compact accepted-unit table before implementation with source party,
+  exact target definition file path, prerequisite audit, split, and focused
+  regression. Phase 15 implementation cannot start until those paths are
+  recorded; rejected candidates remain in B-212 and never become empty
+  definitions.
+- Target at least 100 researched candidates and retain at least 40 distinct
+  cyclically feasible human seed variants across at least ten exact scenarios
+  and eight action/reaction archetypes.
+- Keep validation and holdout fingerprints, character identities, source
+  variants, and normalization statistics isolated from training.
+
+Acceptance criteria:
+
+- Every retained seed has an exact constructible scenario, complete provenance,
+  matched assumptions, three-cycle replay, and baseline score. No accepted
+  scenario depends on a Deferred System or a source-only approximation.
+- The campaign report states candidate, accepted, adapted, rejected, duplicate,
+  and unsupported counts without requiring one documentation entry per seed.
+
+Test cases to add or update:
+
+- Normal: batch catalog construction, source-seed replay, capability/profile
+  coverage, archetype inventory, and party-disjoint split audit.
+- Abnormal: duplicate source/action identity, train/holdout family leakage,
+  missing capability, unsupported character mechanic, and config-only party
+  reject before dataset generation.
+
+Verification:
+
+- `./gradlew RotationSourceCatalogRegressionTest RotationSeedRegressionTest PartyCatalogRegressionTest ProfileCapabilities BenchmarkRLJava build`
+- Run the focused sample/mechanic checks selected by `python scripts/agent_validate.py --path config/rotation_seeds/catalog.json`.
+- `python -m pytest src/python/rl/tests`
+
+### Phase 16: Seeded Teacher Search And Feasibility-First Ranking
+
+Status: Planned.
+
+Why:
+
+- Human seeds only solve initialization. The searcher must evaluate enough
+  complete candidates to improve them and must not archive incomplete or
+  unsustainable first-cycle damage spikes as expert labels.
+
+Target files:
+
+- `src/java/mechanics/rotation/RotationSearchConfig.java`
+- new `src/java/mechanics/rotation/RotationTrajectoryRanker.java`
+- `src/java/mechanics/rotation/TopKTrajectoryArchive.java`
+- `src/java/mechanics/rotation/RotationSearchSupport.java`
+- `src/java/mechanics/rotation/EvolutionaryRotationSearcher.java`
+- `src/java/mechanics/rotation/MctsRotationSearcher.java`
+- `src/java/sample/GenerateRotationDataset.java`
+- `src/java/sample/RotationSearchRegressionTest.java`
+- new `src/java/sample/RotationTeacherQualityRegressionTest.java`
+
+Tasks:
+
+- Report step budget, completed trajectory count, complete populations, and
+  complete generations separately. A production evolutionary run must finish
+  at least one population and one mutation generation.
+- Insert every accepted human seed before random candidates and preserve it in
+  the archive unless a strictly better feasible trajectory replaces it.
+- Rank legality/completeness and cyclic feasibility before objective score;
+  maintain a separately labeled fallback archive when no feasible candidate is
+  found.
+- Run multiple deterministic search seeds and compare against human baseline,
+  deterministic random, and unguided search under explicit matched step budgets.
+- Publish only rank-qualified trajectories; low-rank or infeasible archive
+  members may remain diagnostics but never become behavior-cloning labels.
+
+Acceptance criteria:
+
+- Search never returns below the best supplied feasible human seed, all expert
+  labels are complete and cyclically feasible, and archive scores are monotonic
+  under the feasibility-first ordering.
+- For every publishable scenario, the retained teacher median is no worse than
+  both the human baseline and deterministic random across at least five fixed
+  search seeds. A failed scenario is excluded and reported, not averaged away.
+
+Test cases to add or update:
+
+- Normal: full population/generation accounting, seed retention, feasible child
+  replacement, multi-seed determinism, and rank-qualified publication.
+- Abnormal: 128-step budget that cannot complete a generation, incomplete high-
+  damage trajectory, infeasible damage spike, duplicate seed, cancellation,
+  and search below baseline fail closed or enter the labeled fallback archive.
+
+Verification:
+
+- `./gradlew RotationSearchRegressionTest RotationTeacherQualityRegressionTest RotationSeedRegressionTest build`
+- `python scripts/agent_validate.py --path src/java/mechanics/rotation/EvolutionaryRotationSearcher.java --run`
+
+### Phase 17: Human-Seeded Expert Dataset Quality Gate
+
+Status: Planned.
+
+Why:
+
+- Model architecture comparisons are meaningful only after the immutable input
+  dataset proves that its teacher labels are legal, sustainable, diverse, and
+  stronger than cheap baselines.
+
+Target files:
+
+- `src/java/mechanics/rotation/ExpertDatasetRecord.java`
+- `src/java/mechanics/rotation/ExpertDatasetWriter.java`
+- `src/java/mechanics/rotation/ExpertDatasetReader.java`
+- `src/java/sample/GenerateRotationDataset.java`
+- `src/java/sample/BenchmarkRotationSearch.java`
+- new `src/python/rl/evaluate_teacher_dataset.py`
+- new `src/python/rl/tests/test_teacher_dataset_quality.py`
+- `TASKS.md`
+- `BACKLOG.md`
+
+Tasks:
+
+- Persist source-seed IDs, source hashes, adaptation status, search lineage,
+  feasibility rank, completed-candidate/generation counts, and baseline/random
+  comparisons in each dataset record and manifest.
+- Persist build mode, optimizer/KQMS revision, exact ER targets, canonical roll
+  hash, and scenario build fingerprint so every label can reconstruct the same
+  stat line used during teacher search.
+- Generate train data only from rank-qualified Phase 16 trajectories; retain
+  validation/holdout human seeds exclusively for evaluation.
+- Produce a fail-closed report with per-party and per-archetype counts, teacher
+  advantage distributions, cyclic feasibility, replay, duplicate-action rate,
+  source coverage, split leakage, and unsupported boundaries.
+- Freeze the accepted dataset hash for the subsequent architecture-ablation
+  plan. Do not reuse the failed Phase 10 checkpoint as evidence of model quality.
+
+Acceptance criteria:
+
+- Dataset replay is 100%, invalid actions are zero, every train label is
+  complete and cyclically feasible, and every teacher is no worse than its
+  matched human and random baselines under the declared comparison.
+- Every retained record reconstructs its frozen audited build exactly; records
+  with missing build provenance, null/ignored build maps, `artifact-none`, or a
+  mismatched ER/roll hash fail the quality gate.
+- At least 40 distinct accepted human seeds and their qualified descendants
+  survive duplicate suppression; no source, party/loadout fingerprint, or
+  normalization statistic leaks from train into validation/holdout.
+- The quality report passes before any MLP/GRU/LSTM/Transformer/offline-RL
+  tournament or NCCL/DDP job is authorized.
+
+Test cases to add or update:
+
+- Normal: complete mixed-archetype fixture, source lineage round trip, exact
+  replay, baseline advantage, duplicate suppression, split isolation, and
+  deterministic report serialization.
+- Abnormal: missing source hash, infeasible label, below-baseline teacher,
+  incomplete generation, duplicate action trace, provenance mismatch, split
+  leakage, NaN metric, and partial replay make the report fail closed.
+
+Verification:
+
+- `./gradlew RotationTeacherQualityRegressionTest RotationDatasetRegressionTest BenchmarkRotationSearch PartyCatalogRegressionTest BenchmarkRLJava build javadoc`
+- `python -m pytest src/python/rl/tests`
+- `python3 src/python/rl/evaluate_teacher_dataset.py --preset benchmark`
+- `python scripts/preflight.py --run`
+- `git status --short`
