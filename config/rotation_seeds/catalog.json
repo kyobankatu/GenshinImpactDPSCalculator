@@ -651,6 +651,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Navia, C6 Bennett, C6 Fischl, C0 Chiori", "Verdict R1", "Favonius Warbow R5 Fischl", "single target"]
+    },
+    {
+      "sourceId": "kqm-navia-quick-guide-xilonen-furina-yelan",
+      "title": "Navia Quick Guide: Xilonen Furina Yelan Double Hydro",
+      "url": "https://keqingmains.com/q/navia-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Navia, C0 Xilonen, C0 Furina, C0 Yelan", "Verdict R1", "Favonius Warbow R5 Yelan", "single target"]
     }
   ],
   "seeds": [
@@ -1544,6 +1554,20 @@
       "sourceAssumptions": ["Navia opens with Burst and uses two Hold Skills", "Bennett uses Skill-Burst, then later Skill", "Fischl alternates Skill and Burst", "Chiori uses two linked Skill inputs to swap to Navia", "single target"],
       "simulatorAssumptions": ["Chiori's second Skill input maps to an explicit Navia swap", "Navia's Hold Skills map to Press Skill", "the cycles use definition-normalized swap waits", "the reviewed trace uses a 25s cycle", "Favonius Warbow R5 uses deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "a19bd96ee9a3f60c281ff7f53a3e9bb70a08d79b81dabbc6acdf6bbfb4ff0cb4"
+    },
+    {
+      "seedId": "kqm-navia-xilonen-furina-yelan-adapted-v1",
+      "partyName": "NaviaDoubleHydro",
+      "scenarioFingerprint": "loadout-v1:NAVIA-c0-Verdict-r1-artifact-kqms-generic-v1:XILONEN-c0-PeakPatrolSong-r1-artifact-kqms-generic-v1:FURINA-c0-WolfFang-r1-artifact-kqms-generic-v1:YELAN-c0-FavoniusWarbow-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-navia-quick-guide-xilonen-furina-yelan"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Furina's dash input is omitted, Navia's Hold Skills map to Press, all sourced Normal counts are preserved, and the definition-normalized trace uses a 30s cycle.",
+      "openerActions": [],
+      "cycleActions": [[8, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 5, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 0]],
+      "erTargets": {"NAVIA": 1.091241456029806, "XILONEN": 1.0, "FURINA": 1.2195121951016257, "YELAN": 1.1359975892684457},
+      "sourceAssumptions": ["Xilonen uses Burst, then two Skill-N2 strings", "Furina uses Skill then Burst", "Navia uses Burst and two Hold Skills, with N3 after the second", "Yelan uses Burst-Skill-N1, then later Skill-N2", "single target"],
+      "simulatorAssumptions": ["Furina's dash input is unsupported and removed", "Navia's Hold Skills map to Press Skill", "all sourced Normal counts are preserved", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 30s cycle", "Favonius Warbow R5 uses deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "e4b17b6c44d611dbd9ef1058a2895ff585f700b791f0d8857ba5ecbe1588b466"
     }
   ]
 }
