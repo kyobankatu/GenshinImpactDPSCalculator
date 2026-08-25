@@ -26540,6 +26540,23 @@ Batches 57-60 checkpoint:
 - The tracked catalog now contains 74 sources and 72 seeds. Its 45 usable seeds
   comprise 44 train and one validation seed; holdout remains source-isolated.
 
+Batches 61-64 checkpoint:
+
+- Four candidates were researched. Clorinde/Fischl/Nahida/Xilonen and
+  Ayaka/Shenhe/Xilonen/Chiori were rejected; Keqing/Lan Yan/Nahida/Fischl and
+  Yoimiya/Yelan/Bennett/Layla were retained. Campaign total: 86 researched, 44
+  retained, and 42 rejected or blocked.
+- Clorinde's terminal Burst changes the next rotation's starting Bond and thus
+  its first field combo, while initial owner state is absent from the frozen
+  scenario contract. Ayaka's complete normalized trace exceeded both 35s and
+  40s boundaries. Neither was forced into the train split.
+- The Keqing trace isolates its first-rotation Skill as an opener, alternates
+  Fischl Skill/Burst, and uses a documented 2.7s wait where the generic KQMS
+  artifact slice lacks Thundering Fury cooldown reduction. The Yoimiya trace
+  adds Vapemelt while retaining all support Normals and sixteen field Normals.
+- The tracked catalog now contains 79 sources and 76 seeds. Its 47 usable seeds
+  comprise 46 train and one validation seed; holdout remains source-isolated.
+
 Acceptance criteria:
 
 - Every retained seed has an exact constructible scenario, complete provenance,

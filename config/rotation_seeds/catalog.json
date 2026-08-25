@@ -781,6 +781,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Keqing, C6 Lan Yan, C0 Nahida, C6 Fischl", "Wolf-Fang R1 Keqing", "Thrilling Tales R5 Lan Yan", "Wandering Evenstar R5 Nahida", "The Stringless R5 Fischl", "single target"]
+    },
+    {
+      "sourceId": "kqm-layla-quick-guide-yoimiya-yelan-bennett",
+      "title": "Layla Quick Guide: Yoimiya Yelan Bennett Vapemelt",
+      "url": "https://keqingmains.com/q/layla-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 4.6; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Yoimiya, C0 Yelan, C6 Bennett, C0 Layla", "Rust R1 Yoimiya", "Favonius Warbow R5 Yelan", "Skyward Blade R1 Bennett", "Favonius Sword R5 Layla", "single target"]
     }
   ],
   "seeds": [
@@ -1842,6 +1852,20 @@
       "sourceAssumptions": ["Keqing uses one first-rotation setup Skill", "C6 Lan Yan uses two Skills", "Nahida's Burst is optional", "Fischl alternates Skill and Burst", "Keqing uses Skill-Burst-Skill-N1C-N1-Skill-3[N1C]", "single target"],
       "simulatorAssumptions": ["the first-rotation Keqing Skill and a 0.8s cooldown wait are an explicit opener", "Nahida's optional Burst is omitted", "a 2.7s cooldown wait replaces the unavailable Thundering Fury reduction before Keqing's third Skill", "the cycles use definition-normalized swap waits", "the reviewed trace uses a 25s cycle", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "4744f5d7eb83e51a0284d8dfb6dd6a4428ed48f0593b609338d17ed0a5a1397a"
+    },
+    {
+      "seedId": "kqm-yoimiya-yelan-bennett-layla-adapted-v1",
+      "partyName": "YoimiyaLaylaVapemelt",
+      "scenarioFingerprint": "loadout-v1:YOIMIYA-c0-Rust-r1-artifact-kqms-generic-v1:YELAN-c0-FavoniusWarbow-r5-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:LAYLA-c0-FavoniusSword-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-layla-quick-guide-yoimiya-yelan-bennett"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "The three N5 strings are expanded explicitly, their dash cancels are removed, and Yoimiya's optional terminal Burst is omitted while every sourced support Normal is retained.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 5, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"YOIMIYA": 1.0, "YELAN": 1.5520226108387345, "BENNETT": 1.3648118963838725, "LAYLA": 1.0},
+      "sourceAssumptions": ["Yelan uses Skill-Burst-N1", "Bennett uses Skill-Burst-N1", "Layla uses Burst-N1-Skill", "Yoimiya uses Skill, three N5 strings, and one final Normal", "Yoimiya's terminal Burst is optional", "single target"],
+      "simulatorAssumptions": ["dash cancels are unsupported and removed", "Yoimiya's optional Burst is omitted", "the source combo maps to sixteen typed Normal actions", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 25s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "4f3895ee25c5e3e754ae2dc7fbee7eeda9f8e3e4424cab2e38be4f201d7b1bc0"
     }
   ]
 }
