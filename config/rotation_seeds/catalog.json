@@ -1131,6 +1131,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Furina, C0 Xilonen, C0 Yelan, C0 Kamisato Ayato", "Wolf-Fang R1 Furina", "Peak Patrol Song R1 Xilonen", "Favonius Warbow R5 Yelan", "Haran Geppaku Futsu R1 Ayato", "single target"]
+    },
+    {
+      "sourceId": "kqm-xingqiu-quick-guide-xiangling-bennett-sucrose-single-target",
+      "title": "Xingqiu Quick Guide: Xiangling Bennett Sucrose Single-Target",
+      "url": "https://keqingmains.com/q/xingqiu-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.7; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C6 Xingqiu, C6 Bennett, C6 Xiangling, C6 Sucrose", "Sacrificial Sword R5 Xingqiu", "Skyward Blade R1 Bennett", "Favonius Lance R5 Xiangling", "Thrilling Tales R5 Sucrose", "single target"]
     }
   ],
   "seeds": [
@@ -2654,6 +2664,20 @@
       "sourceAssumptions": ["Furina uses Skill with a dash cancel then Burst", "Xilonen uses Skill-Burst-N2 and a later Skill-N2", "Yelan uses Burst-N1-Skill-N1 and a later Skill-N2", "Ayato uses two Skill-N15 field times and places Burst after the first", "single target"],
       "simulatorAssumptions": ["Furina's dash cancel is unsupported and removed", "all thirty Ayato Normal attacks are retained", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 40s cycle", "Favonius Warbow R5 uses deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "3edda8a39a7798da63117af994ce246d8530c146df695c56a15c4075ad14698f"
+    },
+    {
+      "seedId": "kqm-xingqiu-xiangling-bennett-sucrose-adapted-v1",
+      "partyName": "XingqiuSucroseNationalUnavailable",
+      "scenarioFingerprint": "review-only:XINGQIU-c6:BENNETT-c6:XIANGLING-c6:SUCROSE-c6:energy-infeasible",
+      "sourceIds": ["kqm-xingqiu-quick-guide-xiangling-bennett-sucrose-single-target"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because Xiangling Energy still decays by 0.432 across equivalent cycle boundaries at the 237.5% Favonius Lance KQMS ceiling; no unsourced battery action was added.",
+      "openerActions": [],
+      "cycleActions": [[5, 0, 8, 5, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 0, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7]],
+      "erTargets": {"XINGQIU": 2.36, "BENNETT": 1.170960187343872, "XIANGLING": 2.37, "SUCROSE": 1.0},
+      "sourceAssumptions": ["Xingqiu uses Burst-N1 then Skill-dash-N3 and a later N5", "Bennett uses Burst-Skill then two later Skills", "Xiangling uses N1-Skill, Burst, and three later driver strings", "C6 Sucrose uses N2-Skill and optionally a second Skill-N2", "single target"],
+      "simulatorAssumptions": ["Xingqiu's dash cancel is unsupported and removed", "Sucrose's optional second Skill is selected", "the complete normalized action trace is retained for review", "236% Xingqiu ER reaches every Burst", "237% requested Xiangling ER reaches the 237.5% KQMS ceiling", "Xiangling falls from 65.5205 to 65.0888 Energy across equivalent cycle boundaries", "no branch-search party is published"],
+      "contentHash": "a55407c7d86f2258077931b2dd69d1824e6de180efc9d3a0e5ad7a2865f26b26"
     }
   ]
 }
