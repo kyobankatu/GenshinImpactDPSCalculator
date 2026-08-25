@@ -621,6 +621,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Kamisato Ayato, C6 Bennett, C6 Fischl, C6 Xiangling", "Haran Geppaku Futsu R1", "single target"]
+    },
+    {
+      "sourceId": "kqm-navia-quick-guide-furina-xilonen-bennett",
+      "title": "Navia Quick Guide: Furina Xilonen Bennett",
+      "url": "https://keqingmains.com/q/navia-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Navia, C0 Furina, C0 Xilonen, C6 Bennett", "Verdict R1", "single target"]
     }
   ],
   "seeds": [
@@ -1472,6 +1482,20 @@
       "sourceAssumptions": ["Ayato opens with Burst and uses two Skill-N15 fields", "Bennett uses Skill-Burst, then later N1-Skill", "Fischl uses N1-Skill, then later N2-Burst", "Xiangling uses Burst-Skill, then later N4-Skill", "single target"],
       "simulatorAssumptions": ["each N15 field maps to fifteen typed Normal actions", "the sourced support Normal counts are preserved", "explicit one-second waits preserve each simulator swap lock", "the reviewed trace uses a 40s cycle", "Favonius Lance, Fischl C6 Oz, and Ayato particle draws use deterministic sources", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "324aca5f67459e864773fde5948aaf374569a0bbf582aeddcc358d81815e62a8"
+    },
+    {
+      "seedId": "kqm-navia-furina-xilonen-bennett-adapted-v1",
+      "partyName": "NaviaFurina",
+      "scenarioFingerprint": "loadout-v1:NAVIA-c0-Verdict-r1-artifact-kqms-generic-v1:FURINA-c0-WolfFang-r1-artifact-kqms-generic-v1:XILONEN-c0-PeakPatrolSong-r1-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-navia-quick-guide-furina-xilonen-bennett"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Furina's dash input is omitted, Navia's Hold Skills map to the supported Press Skill, and the definition-normalized complete trace uses a timing-adapted 30s cycle.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3]],
+      "erTargets": {"NAVIA": 1.3824884792549925, "FURINA": 1.9607843137145982, "XILONEN": 1.1966608147257956, "BENNETT": 2.5210084033473397},
+      "sourceAssumptions": ["Furina uses Skill then Burst", "Xilonen uses Skill-Burst-N2, then later Skill-N2", "Navia uses Burst and two Hold Skills", "Bennett uses Skill then Burst", "single target"],
+      "simulatorAssumptions": ["Furina's dash input is unsupported and removed", "Navia's Hold Skills map to Press Skill", "the cycle uses the definition-normalized swap waits", "the complete trace uses a timing-adapted 30s cycle", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "7d84127a470d1fd39ff6a7adbaea40c51adfa977942d8e06050df0287b4e684e"
     }
   ]
 }

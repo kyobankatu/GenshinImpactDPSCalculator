@@ -60,6 +60,7 @@ public final class PartyCatalog {
         register(new NaviaZhongliPartyDefinition());
         register(new NaviaChioriPartyDefinition());
         register(new NaviaChioriPlungePartyDefinition());
+        register(new NaviaFurinaPartyDefinition());
         register(new ArlecchinoLunarChargedPartyDefinition());
         register(new ArlecchinoIneffaOverloadPartyDefinition());
         register(new AlhaithamSpreadPartyDefinition());
