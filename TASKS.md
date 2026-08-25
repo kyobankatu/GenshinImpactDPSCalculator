@@ -26011,7 +26011,7 @@ Completion evidence:
 
 ### Phase 15: Source-Matched Bulk Human Rotation Campaign
 
-Status: In progress; batches 1-22 retained nineteen new source-matched train scenarios.
+Status: In progress; batches 1-23 retained nineteen new source-matched train scenarios.
 
 Why:
 
@@ -26346,6 +26346,17 @@ Batch 22 checkpoint:
 - Exact three-cycle calibration requires 100.000% Hu Tao, 114.943% Furina,
   115.249% Yelan, and 125.513% Xianyun ER. The complete trace uses a 30s
   boundary and preserves coordinated Hydro application and Vaporize ownership.
+
+Batch 23 checkpoint:
+
+- Navia/Zhongli/Furina/Bennett double-Geo is retained as rejected evidence from
+  the current KQM Furina Quick Guide. Campaign total: 45 researched, 19
+  retained, 26 rejected.
+- Hold Skills map to Press and dash inputs are removed. Both Navia Skill
+  charges and complete `N3D N2` field strings remain in source order.
+- Exact replay requires 263.158% Furina ER while the frozen Wolf-Fang KQMS
+  build reaches only 206.900%. No unsourced battery action or Burst omission
+  is substituted.
 
 Acceptance criteria:
 

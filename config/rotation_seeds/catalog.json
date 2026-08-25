@@ -341,6 +341,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Hu Tao, C0 Xianyun, C0 Furina, C0 Yelan", "five N2CJP strings", "optional final N2C and Burst are omitted", "single target"]
+    },
+    {
+      "sourceId": "kqm-furina-quick-guide-navia-zhongli-bennett",
+      "title": "Furina Quick Guide: Navia Zhongli Bennett Double Geo",
+      "url": "https://keqingmains.com/q/furina-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Navia, C0 Zhongli, C0 Furina, C6 Bennett", "two Navia N3D N2 strings", "single target"]
     }
   ],
   "seeds": [
@@ -828,6 +838,20 @@
       "sourceAssumptions": ["Furina uses Skill then Burst", "Yelan uses Skill, Burst, then N1", "Xianyun uses EP Q N1", "Hu Tao uses Skill then five N2CJP strings", "optional final N2C and Burst are omitted", "single target"],
       "simulatorAssumptions": ["dash and jump inputs are unsupported and removed", "jump inputs map directly to supported high Plunge actions", "explicit one-second waits preserve each simulator swap lock", "the steady-state trace uses a 30s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "57441736211ab63d2a76f8757129039f0c6c30e8fda31ea07c1422413f594937"
+    },
+    {
+      "seedId": "kqm-furina-navia-zhongli-bennett-adapted-v1",
+      "partyName": "NaviaFurinaUnavailable",
+      "scenarioFingerprint": "review-only:navia-zhongli-furina-bennett-double-geo",
+      "sourceIds": ["kqm-furina-quick-guide-navia-zhongli-bennett"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because the exact source replay requires 263.158% Furina ER while the frozen Wolf-Fang KQMS build reaches only 206.900%; no unsourced battery action or Burst omission is added.",
+      "openerActions": [],
+      "cycleActions": [[8, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 0, 9, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 5, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 10, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 5, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 0, 0, 0, 0, 0, 8, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 0, 0, 0, 0, 0]],
+      "erTargets": {"NAVIA": 1.0, "ZHONGLI": 1.0, "FURINA": 2.63158, "BENNETT": 1.0},
+      "sourceAssumptions": ["Zhongli opens with Hold Skill and N1", "Furina uses Skill then Burst", "Navia uses Burst and two Hold Skills", "both Navia field strings use N3D N2", "single target"],
+      "simulatorAssumptions": ["review only; exact KQMS Energy calibration is infeasible", "Hold Skills map to Skill Press", "dash inputs are unsupported and removed", "each Navia field string uses five Normals", "explicit one-second waits preserve each simulator swap lock", "the steady-state trace uses a 30s cycle", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "0095e156a8618af6b80dffd659d15fc2738e473ba14ed78af7845da95c20193b"
     }
   ]
 }
