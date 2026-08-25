@@ -691,6 +691,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Yoimiya, C0 Xilonen, C0 Furina, C0 Yelan", "Rust R1", "three complete N5 strings", "single target"]
+    },
+    {
+      "sourceId": "kqm-yoimiya-quick-guide-ineffa-yelan-bennett",
+      "title": "Yoimiya Quick Guide: Ineffa Yelan Bennett Vaporize",
+      "url": "https://keqingmains.com/q/yoimiya-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Luna I; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Yoimiya, C0 Ineffa, C0 Yelan, C6 Bennett", "Rust R1", "three complete N5 strings", "single target"]
     }
   ],
   "seeds": [
@@ -1640,6 +1650,20 @@
       "sourceAssumptions": ["Xilonen uses Burst, then Skill-N2", "Furina uses Skill then Burst", "Yelan uses Burst-N1-Skill-N1, then later Skill-N2", "Yoimiya uses Skill and three complete N5 strings", "Yoimiya's Burst is optional", "single target"],
       "simulatorAssumptions": ["Furina's dash is unsupported and removed", "Yoimiya's optional Burst is omitted", "the guide-defined combo maps to fifteen typed Normal actions", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 30s cycle", "Favonius Warbow R5 uses deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "42af4882bd36794001ae8bb23eee3c68d62b02334931e118550d625f28636911"
+    },
+    {
+      "seedId": "kqm-yoimiya-ineffa-yelan-bennett-adapted-v1",
+      "partyName": "YoimiyaIneffaVaporize",
+      "scenarioFingerprint": "loadout-v1:YOIMIYA-c0-Rust-r1-artifact-kqms-generic-v1:INEFFA-c0-CalamityQueller-r1-artifact-kqms-generic-v1:YELAN-c0-FavoniusWarbow-r5-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-yoimiya-quick-guide-ineffa-yelan-bennett"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Ineffa's source-optional Burst is omitted, the guide-defined combo is expanded to three complete N5 strings, and the unchanged definition-normalized trace uses a timing-adapted 30s cycle.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3]],
+      "erTargets": {"YOIMIYA": 1.0, "INEFFA": 1.0, "YELAN": 1.8030188634677928, "BENNETT": 1.378182452973353},
+      "sourceAssumptions": ["Ineffa uses Skill and may optionally Burst", "Yelan uses Skill-Burst-N1", "Bennett uses Skill-Burst, then a later Skill", "Yoimiya uses Skill and three complete N5 strings", "single target"],
+      "simulatorAssumptions": ["Ineffa's optional Burst is omitted", "the guide-defined combo maps to fifteen typed Normal actions", "the cycle uses definition-normalized swap waits", "the unchanged trace uses a timing-adapted 30s cycle", "Favonius Warbow R5 uses deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "aec5f6ce9fa2cc46e0cdfcd22e52e9f00a22d30f4a861bcfd183d8c9eb3af7a4"
     }
   ]
 }
