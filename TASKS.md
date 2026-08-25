@@ -26,7 +26,7 @@ factories have been removed for the migrated parties.
 The simulator-only autonomous campaign is complete. B-212 Phases 1-10 built the
 local expert-iteration rotation-optimizer pipeline, but the local quality gate
 failed. Phases 11-14 established sourced human-rotation catalog, replay, import,
-and pilot contracts. Phase 15 is active with 94 researched candidates and 51
+and pilot contracts. Phase 15 is active with 98 researched candidates and 53
 newly retained source-matched scenarios; it continues before Phase 16
 changes teacher search or Phase 17 regenerates the quality-gated dataset.
 
@@ -26588,6 +26588,21 @@ Batches 69-72 checkpoint:
   boundary preserves the complete action trace and exact ER calibration.
 - The tracked catalog now contains 89 sources and 84 seeds. Its 54 usable seeds
   comprise 53 train and one validation seed; holdout remains source-isolated.
+
+Batches 73-76 checkpoint:
+
+- Four candidates were researched. Alhaitham/Nahida/Yelan/Kuki Shinobu and
+  Nahida/Xingqiu/Raiden/Yelan were retained; Nilou/Nahida/Baizhu/Yelan and
+  Yelan/Fischl/Ororon/Lan Yan were rejected. Campaign total: 98 researched, 53
+  retained, and 45 rejected or blocked.
+- The retained Quickbloom trace preserves Alhaitham's Burst quickswap and full
+  nineteen-Normal, one-Skill, two-Charge field combo. The Raiden Hyperbloom
+  alternative retains all driver Normals and passes at the 40s review ceiling.
+- Nilou Bloom exceeded the 40s boundary during multi-cycle replay and was not
+  shortened. The Ororon Electro-Charged team mixes one holdout identity with
+  three train identities and remains rejected evidence.
+- The tracked catalog now contains 93 sources and 88 seeds. Its 56 usable seeds
+  comprise 55 train and one validation seed; holdout remains source-isolated.
 
 Acceptance criteria:
 

@@ -921,6 +921,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Nahida, C6 Xingqiu, C0 Raiden Shogun, C0 Yelan", "Wandering Evenstar R5 Nahida", "Sacrificial Sword R5 Xingqiu", "Skyward Spine R1 Raiden Shogun", "Favonius Warbow R5 Yelan", "single target"]
+    },
+    {
+      "sourceId": "kqm-yelan-quick-guide-fischl-ororon-lan-yan",
+      "title": "Yelan Quick Guide: Fischl Ororon Lan Yan Electro-Charged",
+      "url": "https://keqingmains.com/q/yelan-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.4; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Yelan, C6 Fischl, C0 Ororon, C6 Lan Yan", "Favonius Warbow R5 Yelan", "The Stringless R5 Fischl", "The Stringless R5 Ororon", "Thrilling Tales R5 Lan Yan", "single target"]
     }
   ],
   "seeds": [
@@ -2150,6 +2160,20 @@
       "sourceAssumptions": ["Nahida opens with Skill-Burst and later uses three Skill-separated driver strings", "Xingqiu uses Burst-N1 and a later N1-Skill-N2", "Raiden uses Skill-N1", "Yelan uses Skill-Burst and a later Skill-N4", "single target"],
       "simulatorAssumptions": ["dash cancels are unsupported and removed", "all sourced Normal counts are preserved", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a timing-adapted 40s cycle", "Favonius and Sacrificial weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "6cdb138fed7100dee5c711c552e64a144c21af226cc50d446384b61439ffbf59"
+    },
+    {
+      "seedId": "kqm-yelan-fischl-ororon-lan-yan-rejected-v1",
+      "partyName": "YelanOroronTaserUnavailable",
+      "scenarioFingerprint": "review-only:YELAN-c0:FISCHL-c6:ORORON-c0:LAN_YAN-c6:cross-split",
+      "sourceIds": ["kqm-yelan-quick-guide-fischl-ororon-lan-yan"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because Ororon is assigned to holdout while Yelan, Fischl, and Lan Yan are assigned to train; publishing this exact team in either split would violate the character-identity split contract.",
+      "openerActions": [],
+      "cycleActions": [[3, 5, 0, 8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [3, 5, 0, 8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 0, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"YELAN": 1.0, "FISCHL": 1.0, "ORORON": 1.0, "LAN_YAN": 1.0},
+      "sourceAssumptions": ["Yelan uses Skill-Burst-N1", "Ororon uses Skill and Burst while his optional N1 is omitted", "Fischl uses N2 and alternates Skill and Burst", "Lan Yan uses Skill-N1-Burst and four N3 driver strings", "single target"],
+      "simulatorAssumptions": ["the optional Ororon N1 and dash cancels are omitted", "the complete two-cycle alternating trace is retained for review", "Ororon belongs to holdout", "Yelan, Fischl, and Lan Yan belong to train", "no cross-split party is published"],
+      "contentHash": "edb69def82cb572c614c730b015a7458f3fffd94f691f87fe9392cb9795789e8"
     }
   ]
 }
