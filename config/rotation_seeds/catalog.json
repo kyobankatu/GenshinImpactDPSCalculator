@@ -791,6 +791,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Yoimiya, C0 Yelan, C6 Bennett, C0 Layla", "Rust R1 Yoimiya", "Favonius Warbow R5 Yelan", "Skyward Blade R1 Bennett", "Favonius Sword R5 Layla", "single target"]
+    },
+    {
+      "sourceId": "kqm-layla-quick-guide-arlecchino-yelan-bennett",
+      "title": "Layla Quick Guide: Arlecchino Yelan Bennett Vapemelt",
+      "url": "https://keqingmains.com/q/layla-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 4.6; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Arlecchino, C0 Yelan, C6 Bennett, C0 Layla", "Deathmatch R1 Arlecchino", "Favonius Warbow R5 Yelan", "Skyward Blade R1 Bennett", "Favonius Sword R5 Layla", "single target"]
     }
   ],
   "seeds": [
@@ -1866,6 +1876,20 @@
       "sourceAssumptions": ["Yelan uses Skill-Burst-N1", "Bennett uses Skill-Burst-N1", "Layla uses Burst-N1-Skill", "Yoimiya uses Skill, three N5 strings, and one final Normal", "Yoimiya's terminal Burst is optional", "single target"],
       "simulatorAssumptions": ["dash cancels are unsupported and removed", "Yoimiya's optional Burst is omitted", "the source combo maps to sixteen typed Normal actions", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 25s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "4f3895ee25c5e3e754ae2dc7fbee7eeda9f8e3e4424cab2e38be4f201d7b1bc0"
+    },
+    {
+      "seedId": "kqm-arlecchino-yelan-bennett-layla-adapted-v1",
+      "partyName": "ArlecchinoLaylaVapemelt",
+      "scenarioFingerprint": "loadout-v1:ARLECCHINO-c0-Deathmatch-r1-artifact-kqms-generic-v1:YELAN-c0-FavoniusWarbow-r5-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:LAYLA-c0-FavoniusSword-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-layla-quick-guide-arlecchino-yelan-bennett"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Arlecchino's optional Burst-Skill reset is omitted, dash cancels are removed, and the field combo is expanded to one Charged Attack, five N3 strings, and a final N2.",
+      "openerActions": [],
+      "cycleActions": [[3, 8, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 5, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"ARLECCHINO": 1.0, "YELAN": 1.6092400342797932, "BENNETT": 1.4870338572540698, "LAYLA": 1.0868513951260543},
+      "sourceAssumptions": ["Arlecchino's Burst-Skill reset is optional", "Yelan uses Skill-Burst-N1", "Bennett uses Skill-Burst-N1", "Layla uses Burst-N1-Skill", "Arlecchino uses Charged Attack-5[N3]-N2", "single target"],
+      "simulatorAssumptions": ["Arlecchino's optional Burst-Skill reset is omitted", "dash cancels are unsupported and removed", "the field combo maps to one Charge and seventeen typed Normal actions", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 30s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "874f4aa7dab3c1f9a5b03a692810070c5ee39e7b742bff2f950f27b1bf83bc3a"
     }
   ]
 }
