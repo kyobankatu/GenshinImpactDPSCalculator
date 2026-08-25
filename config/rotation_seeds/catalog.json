@@ -293,6 +293,16 @@
       "loadoutAssumptions": ["Gaming, Xianyun, Xiangling, Bennett", "three Burst-reset Gaming Skill Plunges", "single target"]
     },
     {
+      "sourceId": "kqm-xianyun-quick-guide-gaming-furina-bennett",
+      "title": "Xianyun Quick Guide: Gaming Furina Bennett Vaporize",
+      "url": "https://keqingmains.com/q/xianyun-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Gaming, C0 Furina, C0 Xianyun, C6 Bennett", "three Burst-reset Gaming Skill Plunges", "single target"]
+    },
+    {
       "sourceId": "kqm-xianyun-quick-guide-xiao-faruzan-bennett",
       "title": "Xianyun Quick Guide: Xiao Faruzan Bennett",
       "url": "https://keqingmains.com/q/xianyun-quickguide/",
@@ -1358,6 +1368,20 @@
       "sourceAssumptions": ["Bennett and Xiangling use QE", "Xianyun uses EPQ", "Gaming uses EPQ followed by three JP-EP repetitions and N2EP", "Bennett uses a final Skill to battery Gaming or Xiangling", "single target"],
       "simulatorAssumptions": ["jump inputs map directly to supported high Plunge actions", "the healer-backed single-target scenario satisfies Gaming's above-50% HP return condition", "short waits preserve each initial and repeated Man Chai return boundary before Skill", "the sourced final Gaming/Xiangling choice resolves to Gaming", "explicit one-second waits preserve each simulator swap lock", "the steady-state trace uses a timing-adapted 37s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "04b8b271e7f424d7d3d9d701de02346c34eed9af3475d5a6dfbbda6faa51da91"
+    },
+    {
+      "seedId": "kqm-xianyun-gaming-furina-bennett-adapted-v1",
+      "partyName": "GamingFurinaVaporize",
+      "scenarioFingerprint": "loadout-v1:GAMING-c0-FavoniusGreatsword-r5-artifact-kqms-generic-v1:FURINA-c0-WolfFang-r1-artifact-kqms-generic-v1:XIANYUN-c0-FavoniusCodex-r5-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-xianyun-quick-guide-gaming-furina-bennett"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Furina's dash cancel is omitted, jump inputs map to supported high Plunges, short waits reach each exact Man Chai Skill-reset boundary, and every sourced attack is retained in a timing-adapted 37s cycle.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 2, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 2, 5, 2, 6, 6, 6, 6, 6, 3, 2, 2, 6, 3, 2, 2, 6, 3, 2, 0, 0, 6, 6, 3, 2, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 0]],
+      "erTargets": {"GAMING": 1.0, "FURINA": 1.1441647597063311, "XIANYUN": 1.2580877066678646, "BENNETT": 1.0482180293326344},
+      "sourceAssumptions": ["Furina uses EDQ", "Bennett uses EQ", "Xianyun uses EPQ", "Gaming uses EPQ followed by three JP-EP repetitions and N2EP", "Bennett uses a final Skill before Gaming N2", "single target"],
+      "simulatorAssumptions": ["dash cancels are unsupported and removed", "jump inputs map directly to supported high Plunge actions", "the healer-backed scenario satisfies Gaming's above-50% HP return condition", "short waits preserve each initial and repeated Man Chai return boundary before Skill", "explicit one-second waits preserve each simulator swap lock", "the steady-state trace uses a timing-adapted 37s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "c9aae602e719175b8519fa143e0b938def7a37f274ef95be6220a1735e1df15c"
     },
     {
       "seedId": "kqm-xianyun-xiao-faruzan-bennett-adapted-v1",
