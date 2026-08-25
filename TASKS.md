@@ -25,8 +25,9 @@ factories have been removed for the migrated parties.
 
 The simulator-only autonomous campaign is complete. B-212 Phases 1-10 built the
 local expert-iteration rotation-optimizer pipeline, but the local quality gate
-failed. Phases 11-17 now plan a sourced human-rotation seed campaign and teacher
-quality repair before any further model-architecture or NCCL/DDP work.
+failed. Phase 11 now provides the source catalog contract; Phases 12-17 continue
+the sourced human-rotation seed campaign and teacher quality repair before any
+further model-architecture or NCCL/DDP work.
 
 The prior simulator content campaigns, including Skill-focused event weapons,
 are complete; RL and generated docs remain excluded.
@@ -24861,8 +24862,8 @@ Completion evidence:
 ## Implementation Order: Expert-Iteration Rotation Optimization Model B-212
 
 Status: In progress (2026-08-25). Phases 1-10 are implemented; the local
-quality gate failed. Phase 11 is the next implementation unit in the sourced
-human-rotation and teacher-quality remediation campaign.
+quality gate failed. Phase 11 is complete; Phase 12 is the next implementation
+unit in the sourced human-rotation and teacher-quality remediation campaign.
 
 Goal:
 
@@ -25740,9 +25741,9 @@ Current build-path gap:
   not a complete per-piece artifact solver; this distinction must remain in
   dataset provenance and quality claims.
 
-### Phase 11: Rotation Source Schema And Fail-Closed Catalog
+### Phase 11: Rotation Source Schema And Fail-Closed Catalog - Done
 
-Status: Planned.
+Status: Done (2026-08-25).
 
 Why next:
 
@@ -25756,6 +25757,8 @@ Target files:
 - new `src/java/mechanics/rotation/SourcedRotationSeed.java`
 - new `src/java/mechanics/rotation/RotationSourceCatalog.java`
 - new `src/java/sample/RotationSourceCatalogRegressionTest.java`
+- new `scripts/validate_rotation_seeds.py`
+- new `scripts/tests/test_rotation_seed_catalog.py`
 
 Tasks:
 
@@ -25789,6 +25792,14 @@ Verification:
 
 - `./gradlew RotationSourceCatalogRegressionTest build`
 - `python scripts/agent_validate.py --path config/rotation_seeds/catalog.json --path src/java/mechanics/rotation/RotationSourceCatalog.java --run`
+
+Completion evidence:
+
+- Java and dependency-free Python validation share one canonical seed hash;
+  tracked empty-catalog validation and deterministic round-trip pass.
+- Exact party/loadout and typed-action checks reject stale revisions, duplicate
+  IDs, unknown actions/sources, malformed provenance, altered hashes, and
+  rejected seed selection before simulator construction.
 
 ### Phase 12: Multi-Cycle Seed Replay And Energy Feasibility
 

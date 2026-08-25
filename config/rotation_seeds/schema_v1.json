@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/kyobankatu/GenshinImpactDPSCalculator/config/rotation_seeds/schema_v1.json",
+  "title": "Reviewed human rotation source catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "actionLayoutRevision", "sources", "seeds"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "actionLayoutRevision": {"const": 2},
+    "sources": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/source"}
+    },
+    "seeds": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/seed"}
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceId", "title", "url", "publisher", "sourceRevision", "accessDate", "targetCount", "loadoutAssumptions"],
+      "properties": {
+        "sourceId": {"type": "string", "minLength": 1},
+        "title": {"type": "string", "minLength": 1},
+        "url": {"type": "string", "pattern": "^https?://"},
+        "publisher": {"type": "string", "minLength": 1},
+        "sourceRevision": {"type": "string", "minLength": 1},
+        "accessDate": {"type": "string", "format": "date"},
+        "targetCount": {"type": "integer", "minimum": 1},
+        "loadoutAssumptions": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "seed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["seedId", "partyName", "scenarioFingerprint", "sourceIds", "adaptationStatus", "adaptationNote", "openerActions", "cycleActions", "erTargets", "sourceAssumptions", "simulatorAssumptions", "contentHash"],
+      "properties": {
+        "seedId": {"type": "string", "minLength": 1},
+        "partyName": {"type": "string", "minLength": 1},
+        "scenarioFingerprint": {"type": "string", "minLength": 1},
+        "sourceIds": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "adaptationStatus": {"enum": ["accepted", "adapted", "rejected"]},
+        "adaptationNote": {"type": "string"},
+        "openerActions": {"type": "array", "items": {"type": "integer", "minimum": 0, "maximum": 10}},
+        "cycleActions": {"type": "array", "minItems": 1, "items": {"type": "array", "minItems": 1, "items": {"type": "integer", "minimum": 0, "maximum": 10}}},
+        "erTargets": {"type": "object", "minProperties": 1, "additionalProperties": {"type": "number", "minimum": 1.0}},
+        "sourceAssumptions": {"type": "array", "items": {"type": "string"}},
+        "simulatorAssumptions": {"type": "array", "items": {"type": "string"}},
+        "contentHash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    }
+  }
+}
