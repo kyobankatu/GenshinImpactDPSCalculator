@@ -1201,6 +1201,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Hu Tao, C6 Xingqiu, C0 Yelan, C0 Zhongli", "Staff of Homa R1 Hu Tao", "Sacrificial Sword R5 Xingqiu", "Favonius Warbow R5 Yelan", "Deathmatch R1 Zhongli", "single target"]
+    },
+    {
+      "sourceId": "kqm-yelan-quick-guide-xingqiu-fischl-kazuha",
+      "title": "Yelan Quick Guide: Xingqiu Fischl Kazuha Electro-Charged",
+      "url": "https://keqingmains.com/q/yelan-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.4; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Yelan, C6 Xingqiu, C6 Fischl, C0 Kaedehara Kazuha", "Favonius Warbow R5 Yelan", "Sacrificial Sword R5 Xingqiu", "The Stringless R5 Fischl", "Skyward Blade R1 Kazuha", "single target"]
     }
   ],
   "seeds": [
@@ -2808,6 +2818,20 @@
       "sourceAssumptions": ["Xingqiu uses Skill-Burst-N1", "Zhongli uses hold Skill with a dash cancel", "Yelan uses Burst-N1-Skill-N1 and a later Skill", "Hu Tao uses the C0 no-cancel 8[N2C] benchmark", "single target"],
       "simulatorAssumptions": ["Zhongli's hold Skill maps to Press", "dash cancels are unsupported and removed", "Hu Tao's combo maps to sixteen typed Normal actions and eight Charges", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 30s cycle", "Favonius and Sacrificial weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "7f8b184402728c331ba7598320aafa8c5a394ff6dfab8c23fd6fb493e405c14e"
+    },
+    {
+      "seedId": "kqm-yelan-xingqiu-fischl-kazuha-rejected-v1",
+      "partyName": "YelanKazuhaTaserUnavailable",
+      "scenarioFingerprint": "review-only:YELAN-c0:XINGQIU-c6:FISCHL-c6:KAEDEHARA_KAZUHA-c0:cross-split",
+      "sourceIds": ["kqm-yelan-quick-guide-xingqiu-fischl-kazuha"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because Kazuha is isolated in validation while Yelan, Xingqiu, and Fischl are train identities; publishing the exact team would violate the character-identity split contract.",
+      "openerActions": [],
+      "cycleActions": [[9, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 2, 0, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 5, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 4, 2, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 0, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 0, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 0, 3, 0, 0, 0, 0]],
+      "erTargets": {"YELAN": 1.0, "XINGQIU": 1.0, "FISCHL": 1.0, "KAEDEHARA_KAZUHA": 1.0},
+      "sourceAssumptions": ["Fischl uses Skill then later N2-Burst", "Xingqiu uses Burst-N1 then later N1-Skill-N1", "Kazuha uses tap Skill-Plunge-optional N1-Burst-N1 then hold Skill-Plunge-N1", "Yelan uses Burst-N1-Skill-2[N4] then N2-Skill-N4", "single target"],
+      "simulatorAssumptions": ["dash cancels are unsupported and removed", "Kazuha's optional first Normal is selected", "tap and hold Chihayaburu Plunges use explicit typed Plunge actions", "all sourced Normal counts are retained", "the complete 35s normalized action trace is retained for review", "Kazuha belongs to validation", "Yelan, Xingqiu, and Fischl belong to train", "no cross-split party is published"],
+      "contentHash": "02c5e57057dc041c7dd8be40664a127eb63d9e3037787d8bed1528d60a37c532"
     }
   ]
 }
