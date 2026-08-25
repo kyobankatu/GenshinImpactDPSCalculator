@@ -4627,13 +4627,12 @@ experiment record.
   | `GamingMelt` | KQM [Xianyun Quick Guide](https://keqingmains.com/q/xianyun-quickguide/), exact listed team | Blocked: the guide marks the exact Gaming rotation as testing in progress and publishes no sequence. |
   | `TighnariSpread` | KQM [Kirara Guide](https://keqingmains.com/kirara/) and [Tighnari Guide](https://keqingmains.com/tighnari/) | Blocked: nearby teams replace Ororon with Nahida, Fischl, or Zhongli; cross-party transplantation is forbidden. |
   | `NingguangCrystallize` | KQM [Ningguang Quick Guide](https://keqingmains.com/q/ningguang-quickguide/) and [Ningguang Guide](https://keqingmains.com/ningguang/) | Blocked: the nearby Yae team uses Zhongli and Fischl, not Ororon and Kirara. |
-- **Human-seed campaign checkpoint (2026-08-25):** 66 candidates have been
-  researched; 31 source-matched train scenarios are newly retained and 35 are
-  rejected or blocked. The tracked catalog contains 58 sources, 56 seeds, and
-  34 usable seeds (33 train, one validation, zero holdout). The latest batch
-  retains Ayato/Furina/Xilonen/Fischl and Ayato/Xingqiu/Zhongli/Yelan. The
-  Wanderer/Chiori candidate exceeds Faruzan's KQMS ER ceiling, while the
-  Ayato/Furina/Bennett/Xiangling trace loses Furina's second-cycle Burst. Phase
+- **Human-seed campaign checkpoint (2026-08-25):** 70 candidates have been
+  researched; 33 source-matched train scenarios are newly retained and 37 are
+  rejected or blocked. The tracked catalog contains 62 sources, 60 seeds, and
+  36 usable seeds (35 train, one validation, zero holdout). The latest batch
+  retains Ayato/Furina/Fischl/C4 Jean and Ayato/Bennett/Fischl/Xiangling. The
+  two Lan Yan variants fail cyclic Energy or the local KQMS ER ceiling. Phase
   15 remains
   active until the 100-candidate and 40-accepted-seed breadth gates or source
   convergence; Phase 16 remains ordered after it.

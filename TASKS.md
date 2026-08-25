@@ -26012,7 +26012,7 @@ Completion evidence:
 
 ### Phase 15: Source-Matched Bulk Human Rotation Campaign
 
-Status: In progress; batches 1-44 retained thirty-one new source-matched train scenarios.
+Status: In progress; batches 1-48 retained thirty-three new source-matched train scenarios.
 
 Active execution window:
 
@@ -26473,6 +26473,21 @@ Batches 41-44 checkpoint:
   only 44.63004/60 Furina Energy. Neither received an unsourced battery action.
 - The tracked catalog now contains 58 sources and 56 seeds. Its 34 usable seeds
   comprise 33 train and one validation seed; holdout remains source-isolated.
+
+Batches 45-48 checkpoint:
+
+- Four Ayato candidates were researched. Fischl/Lan Yan/Beidou and Ororon/Lan
+  Yan/Fischl were rejected; Furina/Fischl/C4 Jean and
+  Bennett/Fischl/Xiangling were retained. Campaign total: 70 researched, 33
+  retained, and 37 rejected or blocked.
+- The retained scenarios add a Jean Electro-Charged trajectory and a
+  support-Normal-heavy Overvape trajectory. The latter uses the
+  definition-normalized swap waits rather than redundant fixed delays.
+- The Beidou variant loses Fischl and Lan Yan Energy across equivalent cycle
+  boundaries. The Ororon variant requests 217.565% Lan Yan ER against a
+  206.900% TTDS KQMS ceiling. No loadout or battery substitution was made.
+- The tracked catalog now contains 62 sources and 60 seeds. Its 36 usable seeds
+  comprise 35 train and one validation seed; holdout remains source-isolated.
 
 Acceptance criteria:
 
