@@ -1021,6 +1021,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Yae Miko, C0 Nahida, C0 Kuki Shinobu, C0 Alhaitham", "Wandering Evenstar R5 Yae Miko", "Wandering Evenstar R5 Nahida", "Wolf-Fang R1 Shinobu", "Favonius Sword R5 Alhaitham", "single target"]
+    },
+    {
+      "sourceId": "kqm-nahida-quick-guide-fischl-kokomi-raiden",
+      "title": "Nahida Quick Guide: Fischl Kokomi Raiden Hyperbloom",
+      "url": "https://keqingmains.com/q/nahida-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.6; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C6 Fischl, C0 Nahida, C0 Sangonomiya Kokomi, C0 Raiden Shogun", "single target"]
     }
   ],
   "seeds": [
@@ -2390,6 +2400,20 @@
       "sourceAssumptions": ["Yae uses three Skills then N1, optional Burst, and three Skills", "Nahida uses Skill-Burst-N1C", "Shinobu uses Burst then Skill", "Alhaitham uses hold Skill-Plunge-3[N4C], then Burst-N3-N3C-2[N3]", "single target"],
       "simulatorAssumptions": ["dash cancels are unsupported and removed", "Yae's optional Burst is selected", "the complete normalized action trace is retained for review", "Yae Miko's owner-scoped totem state is not snapshot-aware", "no branch-search party is published"],
       "contentHash": "81026d7ed8efce7890bd3e91f0a29b50bde703a332781c54464270b440488d48"
+    },
+    {
+      "seedId": "kqm-nahida-fischl-kokomi-raiden-rejected-v1",
+      "partyName": "NahidaKokomiRaidenUnavailable",
+      "scenarioFingerprint": "review-only:FISCHL-c6:NAHIDA-c0:SANGONOMIYA_KOKOMI-c0:RAIDEN_SHOGUN-c0:cross-split",
+      "sourceIds": ["kqm-nahida-quick-guide-fischl-kokomi-raiden"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because Kokomi is isolated in validation while Fischl, Nahida, and Raiden are assigned to train; publishing the exact team would violate the character-identity split contract.",
+      "openerActions": [],
+      "cycleActions": [[3, 8, 3, 5, 9, 3, 10, 3, 9, 0, 0, 1, 0, 0, 1, 0, 0, 1, 7, 5, 9, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"FISCHL": 1.0, "NAHIDA": 1.0, "SANGONOMIYA_KOKOMI": 1.0, "RAIDEN_SHOGUN": 1.0},
+      "sourceAssumptions": ["Fischl uses Skill then Burst", "Nahida uses Skill-Burst", "Kokomi uses Skill, three N2C strings, then N1-Burst and a linked on-field combo", "Raiden uses Skill", "single target"],
+      "simulatorAssumptions": ["the linked C0 Kokomi combo is normalized to five N2 strings with dash cancels omitted", "the complete normalized action trace is retained for review", "Kokomi belongs to validation", "Fischl, Nahida, and Raiden belong to train", "no cross-split party is published"],
+      "contentHash": "b3f0ead1abd655ad24ea0afcccb6c51e275c2bf4b997a34a03a72e0a72ea75e0"
     }
   ]
 }
