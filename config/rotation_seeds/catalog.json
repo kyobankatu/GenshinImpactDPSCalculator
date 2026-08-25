@@ -891,6 +891,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Nahida, C6 Xingqiu, C0 Kuki Shinobu, C0 Yelan", "Wandering Evenstar R5 Nahida", "Sacrificial Sword R5 Xingqiu", "Wolf-Fang R1 Shinobu", "Favonius Warbow R5 Yelan", "single target"]
+    },
+    {
+      "sourceId": "kqm-yelan-quick-guide-nilou-baizhu-nahida",
+      "title": "Yelan Quick Guide: Nilou Baizhu Nahida Bloom",
+      "url": "https://keqingmains.com/q/yelan-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.4; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Nilou, C0 Nahida, C0 Baizhu, C0 Yelan", "Key of Khaj-Nisut R1 Nilou", "Wandering Evenstar R5 Nahida", "Jadefall's Splendor R1 Baizhu", "Favonius Warbow R5 Yelan", "single target"]
     }
   ],
   "seeds": [
@@ -2078,6 +2088,20 @@
       "sourceAssumptions": ["Nahida opens with Skill-Burst and later uses three Skill-separated driver strings", "Xingqiu uses Burst-N1 and a later N1-Skill-N2", "Shinobu uses Skill-N1 and may use Burst-N1", "Yelan uses Skill-Burst and a later Skill-N2", "single target"],
       "simulatorAssumptions": ["dash cancels are unsupported and removed", "Shinobu's optional Burst-N1 is omitted", "all sourced Normal counts are preserved", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a timing-adapted 35s cycle", "Favonius and Sacrificial weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "424897654c271a61fa6101698e0742ba7a8bda224416b60cd16db68e88a6b62e"
+    },
+    {
+      "seedId": "kqm-nilou-nahida-baizhu-yelan-rejected-v1",
+      "partyName": "NilouYelanBloomUnavailable",
+      "scenarioFingerprint": "review-only:NILOU-c0:NAHIDA-c0:BAIZHU-c0:YELAN-c0:timing-infeasible",
+      "sourceIds": ["kqm-yelan-quick-guide-nilou-baizhu-nahida"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because the complete source order still exceeds the 40s review boundary by the third cycle after removing only dash cancels; no action is removed and no larger timing dilation is used to force publication.",
+      "openerActions": [],
+      "cycleActions": [[3, 0, 0, 3, 8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 5, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 0, 0, 0, 0, 3, 0, 0, 0, 0]],
+      "erTargets": {"NILOU": 1.0, "NAHIDA": 1.0, "BAIZHU": 1.0, "YELAN": 1.0},
+      "sourceAssumptions": ["Nilou uses Skill-N2-Skill", "Nahida uses Skill-Burst", "Baizhu uses Skill-Burst and later N1-Skill-N2", "Yelan uses Burst-N1-Skill-2[N4D]-N4 and later N4D-Skill-N4", "single target"],
+      "simulatorAssumptions": ["dash cancels are unsupported and removed", "all sourced Normal counts are preserved", "the complete definition-normalized trace exceeds the 30s, 35s, and 40s review boundaries during multi-cycle replay", "no further timing dilation or action omission is allowed"],
+      "contentHash": "f4d26c8c4e8be9f485869c1834e978b8736ac45ed8735db0d7456eb70f44d8c7"
     }
   ]
 }
