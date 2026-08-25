@@ -26096,6 +26096,12 @@ Fanfare, or automatic Mavuika ally Nightsoul-consumption plumbing. Their action
 text is retained in the research checkpoint, but none is approximated as a
 teacher seed.
 
+Rejected from batch 17: the current KQM Xianyun/Gaming/Xiangling/Bennett Mono
+Pyro rotation requires three Burst-reset Gaming Skill Plunges. The local Gaming
+slice intentionally excludes the HP-gated repeated Man Chai return loop and
+represents only its initial return, so no cooldown wait or omitted Skill is
+substituted into the teacher trace.
+
 Batch 1 checkpoint:
 
 - 7 candidates researched: 2 retained, 5 rejected, 0 duplicates.
@@ -26266,6 +26272,15 @@ Batch 16 checkpoint:
 - `GamingMelt` moves from validation to train because Xianyun now belongs to
   the connected train character graph. `GanyuFreeze` remains an identity-
   disjoint validation scenario and both holdout scenarios remain unchanged.
+
+Batch 17 checkpoint:
+
+- Xianyun/Gaming/Xiangling/Bennett Mono Pyro was researched and rejected.
+  Campaign total: 39 researched, 16 retained, 23 rejected.
+- The complete typed source trace remains reviewable, but its three `JP EP`
+  repetitions cannot replay the required Skill resets until Gaming's HP-gated
+  repeated Man Chai return loop is implemented. No approximate party
+  definition is registered.
 
 Acceptance criteria:
 

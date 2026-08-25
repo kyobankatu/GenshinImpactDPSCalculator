@@ -281,6 +281,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Navia, C0 Chiori, C0 Xianyun, C6 Bennett", "optional Chiori Burst is omitted", "six Navia high Plunges", "single target"]
+    },
+    {
+      "sourceId": "kqm-xianyun-quick-guide-gaming-mono-pyro",
+      "title": "Xianyun Quick Guide: Gaming Xiangling Bennett Mono Pyro",
+      "url": "https://keqingmains.com/q/xianyun-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["Gaming, Xianyun, Xiangling, Bennett", "three Burst-reset Gaming Skill Plunges", "single target"]
     }
   ],
   "seeds": [
@@ -684,6 +694,20 @@
       "sourceAssumptions": ["optional Chiori Burst is omitted", "Chiori uses 2[E] to swap to Xianyun", "Xianyun uses EPQ", "Navia performs two three-Plunge windows", "single target"],
       "simulatorAssumptions": ["Chiori's unsupported second Skill input maps to an explicit swap", "jump inputs map directly to supported high Plunge actions", "explicit one-second waits preserve each simulator swap lock", "the steady-state trace uses a 31s cycle", "Favonius Codex R5 uses a deterministic proc draw", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "46b04e1c856a8d1fa4a0dda953cbe007b662b2a6e18c959b5d4227f32ac18c81"
+    },
+    {
+      "seedId": "kqm-xianyun-gaming-mono-pyro-rejected-v1",
+      "partyName": "GamingMonoPyroUnavailable",
+      "scenarioFingerprint": "review-only:gaming-xianyun-xiangling-bennett-mono-pyro",
+      "sourceIds": ["kqm-xianyun-quick-guide-gaming-mono-pyro"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because the sourced three JP-EP repetitions require Gaming's HP-gated Man Chai return loop to reset Skill, while the local runtime intentionally represents only the initial Burst return.",
+      "openerActions": [],
+      "cycleActions": [[10, 5, 3, 8, 5, 3, 9, 3, 2, 5, 7, 3, 2, 5, 2, 3, 2, 2, 3, 2, 2, 3, 2, 0, 0, 3, 2, 10, 3]],
+      "erTargets": {"GAMING": 1.0, "XIANYUN": 1.0, "XIANGLING": 1.0, "BENNETT": 1.0},
+      "sourceAssumptions": ["Gaming uses EP Q followed by three JP-EP repetitions", "Bennett uses a final Skill to battery Gaming or Xiangling", "single target"],
+      "simulatorAssumptions": ["jump inputs would map to supported high Plunges", "the HP-gated repeated Man Chai return and Skill reset are outside the current Gaming slice", "no cooldown wait or omitted Skill is substituted for the missing mechanic"],
+      "contentHash": "c95293811fa992e5b65c2e6b0e2955da3ac461e986651dc9865a326dff7eb51c"
     }
   ]
 }
