@@ -57,6 +57,7 @@ import model.weapon.LumidouceElegy;
 import model.weapon.NocturnesCurtainCall;
 import model.weapon.PeakPatrolSong;
 import model.weapon.Rust;
+import model.weapon.SacrificialFragments;
 import model.weapon.SacrificialSword;
 import model.weapon.SkywardBlade;
 import model.weapon.StaffOfHoma;
@@ -124,6 +125,10 @@ final class CuratedCharacters {
 
     static Character lanYanFavonius() {
         return new LanYan(new FavoniusCodex(5, () -> FIXED_RANDOM_DRAW), null, 6);
+    }
+
+    static Character lanYanSacrificial() {
+        return new LanYan(new SacrificialFragments(5, () -> FIXED_RANDOM_DRAW), null, 6);
     }
 
     static Character mona() {

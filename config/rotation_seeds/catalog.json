@@ -431,6 +431,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Wanderer", "Tulaytullah's Remembrance R1", "N3 spam until Windfavored ends", "single target"]
+    },
+    {
+      "sourceId": "kqm-lan-yan-quick-guide-faruzan-furina-bennett",
+      "title": "Lan Yan Quick Guide: Faruzan Furina Bennett Quickswap",
+      "url": "https://keqingmains.com/q/lan-yan-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C6 Faruzan, C0 Furina, C6 Bennett, C6 Lan Yan", "Sacrificial Fragments R5 on Lan Yan", "single target"]
     }
   ],
   "seeds": [
@@ -1016,6 +1026,20 @@
       "sourceAssumptions": ["Faruzan uses Skill then Burst", "Bennett uses Skill then Burst", "Lan Yan uses Skill, N1, then Burst", "Wanderer uses Skill, six N3 strings, then Burst", "single target"],
       "simulatorAssumptions": ["dash cancels are unsupported and removed", "N3 spam is fixed to eighteen Normal actions", "an explicit one-second wait preserves the simulator swap lock after Bennett's Burst", "the steady-state trace uses a 25s cycle", "Favonius Warbow and Favonius Codex R5 use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "3a772379093873e17aec6ef67b5e29c2e260876d37f6d0ebd38fa09829eb0e79"
+    },
+    {
+      "seedId": "kqm-lan-yan-faruzan-furina-bennett-adapted-v1",
+      "partyName": "FaruzanLanYanQuickswap",
+      "scenarioFingerprint": "loadout-v1:FARUZAN-c6-FavoniusWarbow-r5-artifact-kqms-generic-v1:FURINA-c0-WolfFang-r1-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:LAN_YAN-c6-SacrificialFragments-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-lan-yan-quick-guide-faruzan-furina-bennett"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Furina's dash input is omitted, one-second waits preserve each simulator swap lock, a 0.9s wait preserves Faruzan's sourced second Skill cooldown, C6 Lan Yan uses the documented optional second Skill, and the matching source branch ends with two Faruzan Charged Attacks in a 30s cycle.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 1, 1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 1, 1]],
+      "erTargets": {"FARUZAN": 1.0, "FURINA": 1.44927536231079, "BENNETT": 1.5228426395685282, "LAN_YAN": 1.1857707509683793},
+      "sourceAssumptions": ["Furina uses Skill then Burst", "Bennett uses Skill then Burst and a later Skill", "Faruzan uses Skill-Burst, two Charged Attacks-Skill, then two Charged Attacks", "C6 Lan Yan uses two Skill-N1 strings and Burst", "single target"],
+      "simulatorAssumptions": ["Furina's dash input is unsupported and removed", "explicit one-second waits preserve each simulator swap lock", "an explicit 0.9s wait preserves Faruzan's sourced second Skill cooldown", "C6 supplies Lan Yan's optional second Skill", "the second source branch omits Faruzan's optional extra Skill and Charged pair", "the steady-state trace uses a 30s cycle", "Favonius Warbow and Sacrificial Fragments R5 use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "7df72ba8bae28bfe87bd1727158ebb8a3f352d3e9627ffe13df5df3ed6c99958"
     }
   ]
 }
