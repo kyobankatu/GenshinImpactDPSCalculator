@@ -70,6 +70,7 @@ public final class PartyCatalog {
         register(new SucroseDoubleHydroTaserPartyDefinition());
         register(new ColleiSucroseHyperbloomPartyDefinition());
         register(new NahidaBeidouHyperbloomPartyDefinition());
+        register(new NahidaDoubleHydroHyperbloomPartyDefinition());
         register(new NaviaZhongliPartyDefinition());
         register(new NaviaChioriPartyDefinition());
         register(new NaviaChioriQuickPartyDefinition());

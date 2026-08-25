@@ -881,6 +881,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C1 Flins, C0 Ineffa, C0 Mona, C6 Sucrose", "Prospector's Shovel R5 Flins", "Calamity Queller R1 Ineffa", "Favonius Codex R5 Mona", "Thrilling Tales R5 Sucrose", "single target"]
+    },
+    {
+      "sourceId": "kqm-yelan-quick-guide-nahida-xingqiu-shinobu",
+      "title": "Yelan Quick Guide: Nahida Xingqiu Shinobu Hyperbloom",
+      "url": "https://keqingmains.com/q/yelan-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.4; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Nahida, C6 Xingqiu, C0 Kuki Shinobu, C0 Yelan", "Wandering Evenstar R5 Nahida", "Sacrificial Sword R5 Xingqiu", "Wolf-Fang R1 Shinobu", "Favonius Warbow R5 Yelan", "single target"]
     }
   ],
   "seeds": [
@@ -2054,6 +2064,20 @@
       "sourceAssumptions": ["Ineffa uses Skill and may Burst", "Mona uses Burst-N4-Skill-N1", "Sucrose uses Skill and may Burst, then N1", "C1+ Flins uses E-N2-E-short Burst-N4-N3-E-short Burst-N4-N2-E-short Burst-N4", "single target"],
       "simulatorAssumptions": ["Ineffa's and Sucrose's optional Bursts are omitted", "the second Flins dash boundary maps to a 0.3s local cooldown wait", "other dash cancels are unsupported and removed", "Flins's special Skill and short Burst share their typed Skill and Burst actions", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 25s cycle", "Favonius Codex R5 uses deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "2ed673b7b29cea0009f8afe1368adfc8c8c3fc69c6dc70ef92a00187211dbb39"
+    },
+    {
+      "seedId": "kqm-nahida-xingqiu-shinobu-yelan-adapted-v1",
+      "partyName": "NahidaDoubleHydroHyperbloom",
+      "scenarioFingerprint": "loadout-v1:NAHIDA-c0-WanderingEvenstar-r5-artifact-kqms-generic-v1:XINGQIU-c6-SacrificialSword-r5-artifact-kqms-generic-v1:KUKI_SHINOBU-c0-WolfFang-r1-artifact-kqms-generic-v1:YELAN-c0-FavoniusWarbow-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-yelan-quick-guide-nahida-xingqiu-shinobu"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Dash cancels and Shinobu's optional Burst-N1 are omitted while every specified Normal count and both Hydro characters' follow-up Skills are retained.",
+      "openerActions": [],
+      "cycleActions": [[3, 5, 8, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 0, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"NAHIDA": 1.0, "XINGQIU": 1.389996434225907, "KUKI_SHINOBU": 1.0, "YELAN": 1.1275410190262023},
+      "sourceAssumptions": ["Nahida opens with Skill-Burst and later uses three Skill-separated driver strings", "Xingqiu uses Burst-N1 and a later N1-Skill-N2", "Shinobu uses Skill-N1 and may use Burst-N1", "Yelan uses Skill-Burst and a later Skill-N2", "single target"],
+      "simulatorAssumptions": ["dash cancels are unsupported and removed", "Shinobu's optional Burst-N1 is omitted", "all sourced Normal counts are preserved", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a timing-adapted 35s cycle", "Favonius and Sacrificial weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "424897654c271a61fa6101698e0742ba7a8bda224416b60cd16db68e88a6b62e"
     }
   ]
 }

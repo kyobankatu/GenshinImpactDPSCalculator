@@ -26,7 +26,7 @@ factories have been removed for the migrated parties.
 The simulator-only autonomous campaign is complete. B-212 Phases 1-10 built the
 local expert-iteration rotation-optimizer pipeline, but the local quality gate
 failed. Phases 11-14 established sourced human-rotation catalog, replay, import,
-and pilot contracts. Phase 15 is active with 90 researched candidates and 47
+and pilot contracts. Phase 15 is active with 94 researched candidates and 51
 newly retained source-matched scenarios; it continues before Phase 16
 changes teacher search or Phase 17 regenerates the quality-gated dataset.
 
@@ -26572,6 +26572,22 @@ Batches 65-68 checkpoint:
   violating the identity-disjoint split contract.
 - The tracked catalog now contains 84 sources and 80 seeds. Its 50 usable seeds
   comprise 49 train and one validation seed; holdout remains source-isolated.
+
+Batches 69-72 checkpoint:
+
+- Four candidates were researched and retained: Flins/Ineffa/Columbina/Sucrose,
+  Flins/Ineffa/Yelan/Sucrose, Flins/Ineffa/Mona/Sucrose, and
+  Nahida/Xingqiu/Kuki Shinobu/Yelan. Campaign total: 94 researched, 51
+  retained, and 43 rejected or blocked.
+- All three Flins variants retain the documented C1+ field combo while
+  resolving optional support Burst branches explicitly. The first variant also
+  exposed and fixed a runtime action-mask mismatch for Flins's alternate Skill;
+  regressions now cover its immediate, C1, and post-form cooldown boundaries.
+- The double-Hydro Hyperbloom trace retains every sourced Normal string while
+  omitting dash cancels and the optional Shinobu Burst. A timing-adapted 35s
+  boundary preserves the complete action trace and exact ER calibration.
+- The tracked catalog now contains 89 sources and 84 seeds. Its 54 usable seeds
+  comprise 53 train and one validation seed; holdout remains source-isolated.
 
 Acceptance criteria:
 
