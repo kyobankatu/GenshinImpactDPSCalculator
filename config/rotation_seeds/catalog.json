@@ -981,6 +981,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Gaming, C0 Furina, C6 Bennett, C6 Fischl", "Favonius Greatsword R5 Gaming", "Favonius Sword R5 Furina", "Skyward Blade R1 Bennett", "The Stringless R5 Fischl", "single target"]
+    },
+    {
+      "sourceId": "kqm-gaming-quick-guide-xingqiu-sucrose-bennett",
+      "title": "Gaming Quick Guide: Xingqiu Sucrose Bennett Vaporize",
+      "url": "https://keqingmains.com/q/gaming-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.5; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Gaming, C6 Xingqiu, C6 Sucrose, C6 Bennett", "Favonius Greatsword R5 Gaming", "Favonius Sword R5 Xingqiu", "Thrilling Tales R5 Sucrose", "Skyward Blade R1 Bennett", "single target"]
     }
   ],
   "seeds": [
@@ -2294,6 +2304,20 @@
       "sourceAssumptions": ["Furina uses Skill-dash-Burst", "Bennett uses Skill-Burst", "Fischl alternates Skill and Burst", "Gaming can use five to eight enhanced Plunges depending on Man Chai travel", "Bennett uses a second Skill before Gaming N2", "single target"],
       "simulatorAssumptions": ["Furina's dash cancel is unsupported and removed", "Gaming's healer-backed field time remains above the repeated-return HP gate", "the first Man Chai wait is 0.4s and later waits are 1.3s from pinned gcsim frame timing", "the cycle uses definition-normalized swap waits", "the reviewed alternating trace uses a 35s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "53e3641b5c2b867055679f75c7f6fc1a32560960fe7c22dd2d408136b8c5b330"
+    },
+    {
+      "seedId": "kqm-gaming-xingqiu-sucrose-bennett-adapted-v1",
+      "partyName": "GamingXingqiuVaporize",
+      "scenarioFingerprint": "loadout-v1:GAMING-c0-FavoniusGreatsword-r5-artifact-kqms-generic-v1:XINGQIU-c6-FavoniusSword-r5-artifact-kqms-generic-v1:SUCROSE-c6-ThrillingTalesOfDragonSlayers-r5-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-gaming-quick-guide-xingqiu-sucrose-bennett"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Dash cancels are omitted while the exact Xingqiu-oriented EP-Q-5[N2-EP] combo and all support actions are retained.",
+      "openerActions": [],
+      "cycleActions": [[8,3,5,0,6,6,6,6,6,6,6,6,6,6,10,3,5,6,6,6,6,6,6,6,6,6,6,9,0,0,3,6,6,6,6,6,6,6,6,6,6,7,3,2,5,0,0,6,6,6,6,6,6,6,3,2,0,0,3,2,0,0,3,2,0,0,3,2,0,0,3,2,6,6,6,6,6,6,6,6,6,6,10,3,6,6,6,6,6,6,6,6,6,6,7,0,0]],
+      "erTargets": {"GAMING": 1.0, "XINGQIU": 1.4145170400965763, "SUCROSE": 1.0, "BENNETT": 1.0},
+      "sourceAssumptions": ["Xingqiu uses Skill-dash-Burst-N1", "Bennett uses Skill-dash-Burst", "Sucrose uses N2-Skill", "Gaming uses Skill-Plunge-Burst then five N2-Skill-Plunge strings", "Bennett uses a second Skill before Gaming N2", "single target"],
+      "simulatorAssumptions": ["dash cancels are unsupported and removed", "Gaming's healer-backed field time remains above the repeated-return HP gate", "short waits preserve the exact initial and repeated Man Chai Skill resets", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 35s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "0ba47e8362e0418c35efc23ecc6032b632c21ea1554dcdad3c01bc73001ce8f8"
     }
   ]
 }
