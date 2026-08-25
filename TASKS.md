@@ -26011,7 +26011,7 @@ Completion evidence:
 
 ### Phase 15: Source-Matched Bulk Human Rotation Campaign
 
-Status: In progress; batches 1-8 retained nine new source-matched train scenarios.
+Status: In progress; batches 1-16 retained sixteen new source-matched train scenarios.
 
 Why:
 
@@ -26063,6 +26063,7 @@ Accepted-unit table (batch 1, researched 2026-08-25):
 | KQM Beidou Quick Guide: C0 Nahida, C6 Xingqiu, C6 Beidou, C0 Kuki Hyperbloom rotation | `src/java/simulation/party/NahidaBeidouHyperbloomPartyDefinition.java` | Existing rollback-safe Nahida mark/Shrine, Rain Swords, Stormbreaker, Kuki ring, Bloom, and Hyperbloom; dash cancels and the infeasible optional final Kuki N1-Burst segment are omitted, optional Nahida Burst is selected, and both variable Nahida N-spam windows are fixed to eight Normals | `TRAIN`; Stormbreaker driving trace, Kuki Hyperbloom ownership, and hitlag-adapted 35s cyclic replay |
 | KQM Navia Quick Guide: C0 Navia, C0 Zhongli, C6 Bennett, C6 Fischl double-Geo rotation | `src/java/simulation/party/NaviaZhongliPartyDefinition.java` | Existing rollback-safe Ceremonial Crystalshot and artillery, Zhongli pillar, Bennett field, C6 Oz, and Crystallize; Hold Skills map to Press, dash cancels are omitted, Fischl alternates Skill/Burst, and the cycle explicitly returns to Navia | `TRAIN`; two-cycle source trace, two Navia Skill charges, Crystallize, and cyclic replay |
 | KQM Chiori Quick Guide: C0 Navia, C0 Chiori, C6 Bennett, C6 Fischl double-Geo rotation | `src/java/simulation/party/NaviaChioriPartyDefinition.java` | Existing rollback-safe Navia artillery, Chiori Tamoto, Bennett field, C6 Oz, and Crystallize; Chiori's second Skill input maps to an explicit Fischl swap, optional Chiori Burst and dash cancels are omitted, and Fischl alternates Burst/Skill | `TRAIN`; two-cycle source trace, Tamoto rollback, two Navia Skill charges, and cyclic replay |
+| KQM Chiori Quick Guide: C0 Navia, C0 Chiori, C0 Xianyun, C6 Bennett Plunge rotation | `src/java/simulation/party/NaviaChioriPlungePartyDefinition.java` | Existing rollback-safe Navia high Plunge/artillery, Chiori Tamoto, Xianyun plunge support, Bennett field, and Crystallize; Chiori's second Skill input maps to the requested Xianyun swap, optional Chiori Burst is omitted, jump inputs map to high Plunge, and the existing Xianyun-only `GamingMelt` validation scenario moves to train to preserve character-disjoint splits | `TRAIN`; six Navia Plunges, two Skill charges, plunge buff consumption, cyclic replay, and cross-split identity audit |
 
 Rejected from batch 1: Ganyu Melt, Gaming Mono Pyro, and
 Ningguang/Yae/Fischl/Zhongli mix characters already assigned to different
@@ -26250,6 +26251,21 @@ Batch 15 checkpoint:
 - Exact calibration requires 104.193% Navia, 177.797% Bennett, 100.000% Chiori,
   and 151.248% Fischl ER. The 25s trace retains two Navia Skill charges and
   closes by explicitly returning to Navia.
+
+Batch 16 checkpoint:
+
+- Navia/Chiori/Xianyun/Bennett Plunge is retained from the current KQM Chiori
+  Quick Guide. Campaign total: 38 researched, 16 retained, 22 rejected.
+- Optional Chiori Burst is omitted. Chiori's unsupported second Skill input is
+  represented by the explicit Xianyun swap it requests, and the source's six
+  jump-plunge inputs map to six supported high Plunge actions.
+- Source-action calibration requires 103.806% Navia, 100.000% Chiori, 169.409%
+  Xianyun, and 166.113% Bennett ER. Timing adaptation extends the action trace
+  to a 31s boundary, including the periodic 30s KQMS Clear Orb, while retaining
+  two Navia Skill charges and both three-Plunge field windows.
+- `GamingMelt` moves from validation to train because Xianyun now belongs to
+  the connected train character graph. `GanyuFreeze` remains an identity-
+  disjoint validation scenario and both holdout scenarios remain unchanged.
 
 Acceptance criteria:
 

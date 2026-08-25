@@ -96,7 +96,7 @@ public class PartyCatalogRegressionTest {
                 .map(PartyDefinition::name)
                 .collect(Collectors.toSet());
         assertEquals(expectedTrainingNames, trainingNames, "default train split");
-        assertEquals(2, PartyCatalog.rlEnabled(DatasetSplit.VALIDATION).size(),
+        assertEquals(1, PartyCatalog.rlEnabled(DatasetSplit.VALIDATION).size(),
                 "validation scenario count");
         assertEquals(2, PartyCatalog.rlEnabled(DatasetSplit.HOLDOUT).size(),
                 "holdout scenario count");

@@ -5,13 +5,13 @@ import java.util.List;
 import mechanics.rotation.PolicyAction;
 import model.type.CharacterId;
 
-/** Validation-split initial Burst and Melt Plunging scenario. */
+/** Train-split initial Burst and Melt Plunging scenario. */
 public final class GamingMeltPartyDefinition extends CuratedPartyDefinition {
     /** Creates the deterministic C0/base-loadout scenario. */
     public GamingMeltPartyDefinition() {
         super(
                 "GamingMelt",
-                DatasetSplit.VALIDATION,
+                DatasetSplit.TRAIN,
                 22.0,
                 List.of(
                         CuratedCharacters::gaming,
