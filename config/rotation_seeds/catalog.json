@@ -551,6 +551,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Wanderer, C6 Faruzan, C0 Chiori, C0 Zhongli", "Tulaytullah's Remembrance R1", "single target"]
+    },
+    {
+      "sourceId": "kqm-ayato-quick-guide-furina-xilonen-fischl",
+      "title": "Kamisato Ayato Quick Guide: Furina Xilonen Fischl",
+      "url": "https://keqingmains.com/q/ayato-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Kamisato Ayato, C0 Furina, C0 Xilonen, C6 Fischl", "Haran Geppaku Futsu R1", "single target"]
     }
   ],
   "seeds": [
@@ -1304,6 +1314,20 @@
       "sourceAssumptions": ["Zhongli uses Hold Skill", "C6 Faruzan uses Skill then Burst", "Chiori optionally uses Burst and then two linked Skill inputs", "Wanderer uses Skill and six N3 strings", "single target"],
       "simulatorAssumptions": ["Zhongli's Hold Skill maps to Press Skill", "Chiori's optional Burst is omitted", "Chiori's second Skill input maps to the explicit Wanderer swap it requests", "C6 Faruzan omits the optional Charged Shot", "N3 spam is fixed to eighteen Normal actions", "C0 Wanderer's optional Burst is omitted", "explicit one-second waits preserve each simulator swap lock", "the reviewed trace uses a 25s cycle", "Favonius Warbow uses deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint", "the exact local loadout exceeds the KQMS ER ceiling"],
       "contentHash": "5255ec9a3a4a1001085a769f3472fa2d7f410ea9a5f5e3c3b4a810d735e68ce9"
+    },
+    {
+      "seedId": "kqm-ayato-furina-xilonen-fischl-adapted-v1",
+      "partyName": "AyatoFurinaTaser",
+      "scenarioFingerprint": "loadout-v1:KAMISATO_AYATO-c0-HaranGeppakuFutsu-r1-artifact-kqms-generic-v1:FURINA-c0-WolfFang-r1-artifact-kqms-generic-v1:XILONEN-c0-PeakPatrolSong-r1-artifact-kqms-generic-v1:FISCHL-c6-TheStringless-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-ayato-quick-guide-furina-xilonen-fischl"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Furina's dash input is omitted, each Ayato N15 field is fixed to fifteen typed Normals, and the complete two-field trace uses a 40s cycle.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 5, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"KAMISATO_AYATO": 1.104786891430332, "FURINA": 1.286339078974074, "XILONEN": 1.2459962112691672, "FISCHL": 1.2620950778221856},
+      "sourceAssumptions": ["Furina uses Skill then Burst", "Xilonen uses Burst, Skill, N2, then later Skill-N2", "Fischl alternates Skill then Burst", "Ayato uses two Skill-N15 fields and Burst after the first field", "single target"],
+      "simulatorAssumptions": ["Furina's dash input is unsupported and removed", "each N15 field maps to fifteen typed Normal actions", "explicit one-second waits preserve each simulator swap lock", "the steady-state trace uses a 40s cycle", "Fischl's C6 Oz and Ayato particle draws use deterministic sources", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "2ce651695d527d87b22e2aa29515e594aff394d9209cdf913c83ad67fc5b33f9"
     }
   ]
 }

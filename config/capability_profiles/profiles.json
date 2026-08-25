@@ -635,5 +635,18 @@
     "reentry_cost_score": 0.000000,
     "on_field_dps_score": 0.248961,
     "burst_window_score": 0.174372
+  },
+  "KAMISATO_AYATO": {
+    "off_field_dps_ratio": 0.186088,
+    "team_buff_score": 0.502170,
+    "self_enhancement_score": 0.000000,
+    "energy_generation_score": 0.000000,
+    "entry_value_score": 0.000000,
+    "sustain_value_3_actions": 0.020034,
+    "sustain_value_6_actions": 0.024986,
+    "exit_cost_score": 0.392231,
+    "reentry_cost_score": 0.098553,
+    "on_field_dps_score": 0.513036,
+    "burst_window_score": 0.259517
   }
 }

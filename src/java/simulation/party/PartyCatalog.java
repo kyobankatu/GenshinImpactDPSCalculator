@@ -40,6 +40,7 @@ public final class PartyCatalog {
         register(new WandererThomaPartyDefinition());
         register(new WandererVentiPartyDefinition());
         register(new WandererJeanPartyDefinition());
+        register(new AyatoFurinaTaserPartyDefinition());
         register(new DilucXianyunVaporizePartyDefinition());
         register(new HuTaoXianyunVaporizePartyDefinition());
         register(new ArlecchinoOverloadPartyDefinition());

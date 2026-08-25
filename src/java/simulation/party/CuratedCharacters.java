@@ -21,6 +21,7 @@ import model.character.HuTao;
 import model.character.Ineffa;
 import model.character.Jean;
 import model.character.Keqing;
+import model.character.KamisatoAyato;
 import model.character.KukiShinobu;
 import model.character.KaedeharaKazuha;
 import model.character.Kirara;
@@ -56,6 +57,7 @@ import model.weapon.FavoniusGreatsword;
 import model.weapon.FavoniusLance;
 import model.weapon.FavoniusSword;
 import model.weapon.FavoniusWarbow;
+import model.weapon.HaranGeppakuFutsu;
 import model.weapon.LumidouceElegy;
 import model.weapon.NocturnesCurtainCall;
 import model.weapon.PeakPatrolSong;
@@ -90,6 +92,11 @@ final class CuratedCharacters {
 
     static Character wanderer() {
         return new Wanderer(new TulaytullahsRemembrance(1), null, 0);
+    }
+
+    static Character kamisatoAyato() {
+        return new KamisatoAyato(
+                new HaranGeppakuFutsu(1), null, 0, () -> FIXED_RANDOM_DRAW);
     }
 
     static Character diluc() {
