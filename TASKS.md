@@ -25,10 +25,10 @@ factories have been removed for the migrated parties.
 
 The simulator-only autonomous campaign is complete. B-212 Phases 1-10 built the
 local expert-iteration rotation-optimizer pipeline, but the local quality gate
-failed. Phase 11 now provides the source catalog contract; Phases 12-17 continue
-the sourced human-rotation seed campaign and teacher quality repair before any
-further model-architecture or NCCL/DDP work. Phases 12-14 are complete; Phase
-15 is the next implementation phase.
+failed. Phases 11-14 established sourced human-rotation catalog, replay, import,
+and pilot contracts. Phase 15 is active with 46 researched candidates and 19
+newly retained source-matched train scenarios; it continues before Phase 16
+changes teacher search or Phase 17 regenerates the quality-gated dataset.
 
 The prior simulator content campaigns, including Skill-focused event weapons,
 are complete; RL and generated docs remain excluded.
@@ -24862,9 +24862,10 @@ Completion evidence:
 
 ## Implementation Order: Expert-Iteration Rotation Optimization Model B-212
 
-Status: In progress (2026-08-25). Phases 1-10 are implemented; the local
-quality gate failed. Phase 11 is complete; Phase 12 is the next implementation
-unit in the sourced human-rotation and teacher-quality remediation campaign.
+Status: In progress (2026-08-25). Phases 1-14 are implemented; the local
+quality gate failed. Phase 15 is the active sourced human-rotation campaign.
+Phase 16 teacher-search repair and Phase 17 dataset regeneration remain ordered
+after the human-seed breadth gate.
 
 Goal:
 
@@ -26012,6 +26013,25 @@ Completion evidence:
 ### Phase 15: Source-Matched Bulk Human Rotation Campaign
 
 Status: In progress; batches 1-24 retained nineteen new source-matched train scenarios.
+
+Active execution window:
+
+- Run human-source research and implementation from 2026-08-25 19:47 through
+  2026-08-26 05:47 Asia/Tokyo, entering wind-down at 05:32. Do not start Phase
+  16 implementation during this window.
+- Begin with exact, already-supported parties exposed by the current KQM Xiao,
+  Furina, Raiden, Mika, and related guides. Prioritize the Xiao/Furina/Xianyun/
+  C0 Faruzan trace, then Noelle/Furina/Albedo/Gorou and Eula/Raiden/Furina/Mika
+  only after their character, action, split, and frozen-build prerequisites
+  pass review.
+- Continue searching maintained KQM and executable gcsim/simpact evidence until
+  the 100-candidate and 40-accepted-seed breadth gates are reached or the source
+  sweep converges. Record unsupported, duplicate, split-leaking, or cyclically
+  infeasible candidates as rejected evidence and move to the next independent
+  party.
+- Commit and push each verified accepted party/seed unit independently. Batch
+  tracked evidence after four units or 60 minutes and run the complete Phase 15
+  verification gate during wind-down.
 
 Why:
 
