@@ -351,6 +351,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Navia, C0 Zhongli, C0 Furina, C6 Bennett", "two Navia N3D N2 strings", "single target"]
+    },
+    {
+      "sourceId": "kqm-furina-quick-guide-xingqiu-bennett-xiangling",
+      "title": "Furina Quick Guide: Xingqiu Bennett Xiangling Vaporize",
+      "url": "https://keqingmains.com/q/furina-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Furina, C6 Xingqiu, C6 Bennett, C6 Xiangling", "Bennett performs three battery Skills", "single target"]
     }
   ],
   "seeds": [
@@ -852,6 +862,20 @@
       "sourceAssumptions": ["Zhongli opens with Hold Skill and N1", "Furina uses Skill then Burst", "Navia uses Burst and two Hold Skills", "both Navia field strings use N3D N2", "single target"],
       "simulatorAssumptions": ["review only; exact KQMS Energy calibration is infeasible", "Hold Skills map to Skill Press", "dash inputs are unsupported and removed", "each Navia field string uses five Normals", "explicit one-second waits preserve each simulator swap lock", "the steady-state trace uses a 30s cycle", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "0095e156a8618af6b80dffd659d15fc2738e473ba14ed78af7845da95c20193b"
+    },
+    {
+      "seedId": "kqm-furina-xingqiu-bennett-xiangling-adapted-v1",
+      "partyName": "FurinaNationalUnavailable",
+      "scenarioFingerprint": "review-only:furina-xingqiu-bennett-xiangling-vaporize",
+      "sourceIds": ["kqm-furina-quick-guide-xingqiu-bennett-xiangling"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because exact three-cycle replay reaches Furina's second Burst with only 47.794/60 Energy under the frozen KQMS loadout; no unsourced battery action, wait, or Burst omission is added.",
+      "openerActions": [],
+      "cycleActions": [[3, 5, 8, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 0, 9, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 5, 3, 10, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 5, 0, 3, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 9, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 3, 8, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 3, 0, 0, 9, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 3, 10, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 9, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 3, 10, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 7]],
+      "erTargets": {"FURINA": 1.2007564944232632, "XINGQIU": 1.2481036662274025, "BENNETT": 1.0, "XIANGLING": 1.5873940523491972},
+      "sourceAssumptions": ["Furina uses Skill then Burst", "Xingqiu uses Burst first and a later Skill", "Bennett uses three Skills to battery Xiangling", "Xiangling uses Burst and Skill", "single target"],
+      "simulatorAssumptions": ["review only; exact multi-cycle Energy replay is infeasible", "dash inputs are unsupported and removed", "explicit one-second waits preserve each simulator swap lock", "an explicit final swap restores the Furina cycle opener", "the steady-state trace uses a 30s cycle", "Sacrificial and Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "9a830a982b130566104c38e12b2e2fb5fdbc69502acbe50d091974ce01b982bb"
     }
   ]
 }

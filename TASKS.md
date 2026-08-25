@@ -26011,7 +26011,7 @@ Completion evidence:
 
 ### Phase 15: Source-Matched Bulk Human Rotation Campaign
 
-Status: In progress; batches 1-23 retained nineteen new source-matched train scenarios.
+Status: In progress; batches 1-24 retained nineteen new source-matched train scenarios.
 
 Why:
 
@@ -26357,6 +26357,17 @@ Batch 23 checkpoint:
 - Exact replay requires 263.158% Furina ER while the frozen Wolf-Fang KQMS
   build reaches only 206.900%. No unsourced battery action or Burst omission
   is substituted.
+
+Batch 24 checkpoint:
+
+- Furina/Xingqiu/Bennett/Xiangling Vaporize is retained as rejected evidence
+  from the current KQM Furina Quick Guide. Campaign total: 46 researched, 19
+  retained, 27 rejected.
+- Dash inputs are removed; all three Bennett battery Skills, Xingqiu's second
+  Skill, and Xiangling's Burst and Skill remain in source order.
+- Exact three-cycle replay reaches Furina's second Burst with only 47.794/60
+  Energy under the frozen KQMS loadout. No unsourced wait, battery action, or
+  Burst omission is substituted.
 
 Acceptance criteria:
 
