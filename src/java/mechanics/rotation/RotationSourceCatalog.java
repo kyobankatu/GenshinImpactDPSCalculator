@@ -123,6 +123,9 @@ public final class RotationSourceCatalog {
     }
 
     private static void validateParty(SourcedRotationSeed seed) {
+        if (!seed.isUsable()) {
+            return;
+        }
         PartyDefinition definition = PartyCatalog.find(seed.getPartyName());
         if (definition == null) {
             throw new IllegalArgumentException("Unknown seed party: " + seed.getPartyName());
@@ -185,8 +188,11 @@ public final class RotationSourceCatalog {
         }
         List<SourcedRotationSeed> matching = new ArrayList<>();
         for (SourcedRotationSeed seed : seeds) {
+            if (!seed.isUsable()) {
+                continue;
+            }
             PartyDefinition definition = PartyCatalog.require(seed.getPartyName());
-            if (seed.isUsable() && definition.datasetSplit() == split) {
+            if (definition.datasetSplit() == split) {
                 matching.add(seed);
             }
         }

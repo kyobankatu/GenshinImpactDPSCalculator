@@ -19,6 +19,7 @@ import model.character.Ororon;
 import model.character.Rosaria;
 import model.character.SangonomiyaKokomi;
 import model.character.Shenhe;
+import model.character.Sucrose;
 import model.character.Tighnari;
 import model.character.Xiao;
 import model.character.Xianyun;
@@ -35,6 +36,7 @@ import model.weapon.FavoniusCodex;
 import model.weapon.SkywardBlade;
 import model.weapon.SacrificialSword;
 import model.weapon.TheStringless;
+import model.weapon.ThrillingTalesOfDragonSlayers;
 import model.weapon.WanderingEvenstar;
 import model.weapon.WolfFang;
 
@@ -112,6 +114,10 @@ final class CuratedCharacters {
 
     static Character xingqiu() {
         return new Xingqiu(new SacrificialSword(5, () -> FIXED_RANDOM_DRAW), null);
+    }
+
+    static Character sucrose() {
+        return new Sucrose(new ThrillingTalesOfDragonSlayers(5), null, () -> 4.0);
     }
 
     static Character zhongli() {

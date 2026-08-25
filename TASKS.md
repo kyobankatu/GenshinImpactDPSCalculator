@@ -26011,7 +26011,7 @@ Completion evidence:
 
 ### Phase 15: Source-Matched Bulk Human Rotation Campaign
 
-Status: Planned.
+Status: In progress; batch 1 retained two new source-matched train scenarios.
 
 Why:
 
@@ -26043,6 +26043,30 @@ Tasks:
   and eight action/reaction archetypes.
 - Keep validation and holdout fingerprints, character identities, source
   variants, and normalization statistics isolated from training.
+
+Accepted-unit table (batch 1, researched 2026-08-25):
+
+| Source party and rotation | Exact target definition | Prerequisite audit | Split and focused regression |
+| --- | --- | --- | --- |
+| KQM Arlecchino Quick Guide: Arlecchino, Xingqiu, Bennett, Sucrose TTDS two-part Vape rotation | `src/java/simulation/party/ArlecchinoVaporizePartyDefinition.java` | Existing Bond of Life, Rain Swords, Bennett buff, Swirl/VV-facing actions; dash cancels must be documented and omitted | `TRAIN`; catalog multi-cycle replay plus alternating-cycle trace |
+| KQM Alhaitham Quick Guide: Alhaitham, Fischl, Nahida, Bennett split-field Spread rotation | `src/java/simulation/party/AlhaithamSpreadPartyDefinition.java` | Existing Quicken/Spread, mirrors, Oz alternation, Nahida mark, Bennett buff; dash cancels must be condensed | `TRAIN`; two-part field trace and multi-cycle Energy replay |
+
+Rejected from batch 1: Ganyu Melt, Gaming Mono Pyro, and
+Ningguang/Yae/Fischl/Zhongli mix characters already assigned to different
+dataset splits. Sucrose National exceeds Xiangling's KQMS ER ceiling because
+the current immediate particle distribution cannot represent the documented
+Bennett funnels; Bennett Burgeon exceeds Nahida's ceiling under the exact local
+loadout. The catalog retains both reviewed sequences as rejected evidence, but
+neither becomes a trainable party definition.
+
+Batch 1 checkpoint:
+
+- 7 candidates researched: 2 retained, 5 rejected, 0 duplicates.
+- `ArlecchinoVaporize` and `AlhaithamSpread` pass legal deterministic replay
+  for at least three uninterrupted cycles.
+- Source builds now calibrate three complete cycles. KQMS enemy Energy is
+  periodic at the exact rate of three Clear Orbs per 90 seconds rather than a
+  one-time short-rotation approximation.
 
 Acceptance criteria:
 

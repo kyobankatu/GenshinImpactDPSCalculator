@@ -17,6 +17,7 @@ import simulation.party.PartyDefinition;
 
 /** Replays reviewed human seeds across uninterrupted rotation cycles. */
 public final class RotationSeedEvaluation {
+    private static final int BUILD_CALIBRATION_CYCLES = 3;
     private static final double TIME_TOLERANCE = 1.0e-6;
     private static final double BOUNDARY_TOLERANCE = 0.100001;
     private static final double ER_TOLERANCE = 0.01;
@@ -75,7 +76,8 @@ public final class RotationSeedEvaluation {
         List<CycleResult> cycles = new ArrayList<>();
         try (BattleRotationEnvironment environment = new BattleRotationEnvironment(scenario)) {
             RotationStep step = environment.reset();
-            environment.getSimulator().getEnergyDistributor().scheduleKQMSEnemyParticles();
+            environment.getSimulator().getEnergyDistributor().scheduleKQMSEnemyParticles(
+                    definition.rotationCycleSeconds());
             List<Integer> pendingTrace = new ArrayList<>();
             step = executeActions(
                     environment,
@@ -83,7 +85,8 @@ public final class RotationSeedEvaluation {
                     seed,
                     seed.getOpenerActions(),
                     "opener",
-                    pendingTrace);
+                    pendingTrace,
+                    build.erTargets);
             double previousDamage = 0.0;
             List<int[]> cycleActions = seed.getCycleActions();
             for (int cycleIndex = 0; cycleIndex < cycleCount; cycleIndex++) {
@@ -94,7 +97,8 @@ public final class RotationSeedEvaluation {
                         seed,
                         actions,
                         "cycle " + (cycleIndex + 1),
-                        pendingTrace);
+                        pendingTrace,
+                        build.erTargets);
                 double boundary = definition.rotationCycleSeconds() * (cycleIndex + 1);
                 step = advanceToBoundary(
                         environment,
@@ -123,7 +127,10 @@ public final class RotationSeedEvaluation {
             int period = seed.getCycleActions().size();
             boolean cyclicEnergyFeasible = isSteadyEnergy(cycles, period);
             if (!cyclicEnergyFeasible) {
-                throw failure(seed, "ending Energy decays across equivalent cycle phases");
+                CycleResult current = cycles.get(cycles.size() - 1);
+                CycleResult previous = cycles.get(cycles.size() - 1 - period);
+                throw failure(seed, "ending Energy decays across equivalent cycle phases: previous="
+                        + previous.endingEnergy + ", current=" + current.endingEnergy);
             }
             double steadyDamage = 0.0;
             for (int index = 1; index < cycles.size(); index++) {
@@ -149,7 +156,8 @@ public final class RotationSeedEvaluation {
             SourcedRotationSeed seed,
             int[] actions,
             String section,
-            List<Integer> trace) {
+            List<Integer> trace,
+            Map<CharacterId, Double> requiredEr) {
         for (int index = 0; index < actions.length; index++) {
             int actionId = actions[index];
             if (step.done) {
@@ -158,7 +166,8 @@ public final class RotationSeedEvaluation {
             if (actionId < 0 || actionId >= step.legalActionMask.length
                     || step.legalActionMask[actionId] < 0.5) {
                 throw failure(seed, "unavailable action " + actionId + " in " + section
-                        + " at index " + index);
+                        + " at index " + index
+                        + actionState(environment, actionId, requiredEr));
             }
             step = environment.step(actionId);
             if (!step.validAction) {
@@ -167,6 +176,45 @@ public final class RotationSeedEvaluation {
             trace.add(actionId);
         }
         return step;
+    }
+
+    private static String actionState(
+            BattleRotationEnvironment environment,
+            int actionId,
+            Map<CharacterId, Double> requiredEr) {
+        CombatSimulator simulator = environment.getSimulator();
+        Character active = simulator.getActiveCharacter();
+        if (active == null) {
+            return " (time=" + simulator.getCurrentTime() + ", active=none)";
+        }
+        PolicyAction action = actionId >= 0 && actionId < PolicyAction.SIZE
+                ? PolicyAction.fromId(actionId)
+                : null;
+        StringBuilder state = new StringBuilder(" (time=")
+                .append(simulator.getCurrentTime())
+                .append(", active=").append(active.getCharacterId());
+        if (action != null && action.getActionRequest() != null) {
+            switch (action.getActionRequest().getKey()) {
+                case BURST:
+                    state.append(", energy=").append(active.getCurrentEnergy())
+                            .append('/').append(active.getEnergyCost())
+                            .append(", er=")
+                            .append(active.getEffectiveStats(simulator.getCurrentTime())
+                                    .getTotalEnergyRecharge())
+                            .append(", requiredEr=")
+                            .append(requiredEr.get(active.getCharacterId()))
+                            .append(", burstCd=")
+                            .append(active.getBurstCDRemaining(simulator.getCurrentTime()));
+                    break;
+                case SKILL:
+                    state.append(", skillCd=")
+                            .append(active.getSkillCDRemaining(simulator.getCurrentTime()));
+                    break;
+                default:
+                    break;
+            }
+        }
+        return state.append(')').toString();
     }
 
     private static RotationStep advanceToBoundary(
@@ -194,7 +242,8 @@ public final class RotationSeedEvaluation {
             SourcedRotationSeed seed,
             PartyDefinition definition,
             int cycleCount) {
-        simulator.getEnergyDistributor().scheduleKQMSEnemyParticles();
+        simulator.getEnergyDistributor().scheduleKQMSEnemyParticles(
+                definition.rotationCycleSeconds());
         executeDirectActions(simulator, definition.partyOrder(), seed.getOpenerActions());
         List<int[]> cycles = seed.getCycleActions();
         for (int cycleIndex = 0; cycleIndex < cycleCount; cycleIndex++) {
@@ -236,7 +285,11 @@ public final class RotationSeedEvaluation {
         return PartyBuildResolver.require(
                 definition,
                 "source:" + seed.getContentHash(),
-                simulator -> executeDirect(simulator, seed, definition, 1));
+                simulator -> executeDirect(
+                        simulator,
+                        seed,
+                        definition,
+                        BUILD_CALIBRATION_CYCLES));
     }
 
     private static void validateSeed(SourcedRotationSeed seed, int cycleCount) {

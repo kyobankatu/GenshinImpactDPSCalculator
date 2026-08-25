@@ -131,6 +131,7 @@ public class ReactionRegressionTest {
         testAccuracyPhaseF_ImpetuousWindsCooldownSnapshot();
         testAccuracyPhaseF_PartialSkillCooldownReductionContract();
         testAccuracyPhaseF_PartialBurstCooldownReductionContract();
+        testAccuracyPhaseF_KqmsEnemyEnergyCadence();
         testAccuracyPhaseF_TimingAwareEnergyAnalysis();
         testAccuracyPhaseF_ArtifactOptimizerRejectsUnreachableEr();
         testAccuracyPhaseF_ArtifactOptimizerStableResultOrder();
@@ -6459,6 +6460,23 @@ public class ReactionRegressionTest {
         Map<CharacterId, Double> unfundedER = EnergyAnalyzer.calculateERRequirements(unfundedSim);
         assertClose(9.99, unfundedER.get(CharacterId.SUCROSE), EPS,
                 "A Burst interval without enough flat or particle energy should use the sentinel");
+    }
+
+    private static void testAccuracyPhaseF_KqmsEnemyEnergyCadence() {
+        TestCharacter character = testCharacter(Element.PYRO, CharacterId.BENNETT);
+        CombatSimulator simulator = simulatorWithExistingCharacter(character);
+        character.restoreCurrentEnergy(0.0);
+        simulator.getEnergyDistributor().scheduleKQMSEnemyParticles(30.0);
+
+        simulator.advanceTime(15.0 - EPS);
+        assertClose(0.0, character.getCurrentEnergy(), EPS,
+                "KQMS enemy Energy should wait until the cycle midpoint");
+        simulator.advanceTime(EPS);
+        assertClose(6.0, character.getCurrentEnergy(), EPS,
+                "One 30-second cycle should provide one Clear Orb");
+        simulator.advanceTime(60.0);
+        assertClose(18.0, character.getCurrentEnergy(), EPS,
+                "Ninety-second KQMS window should provide three Clear Orbs");
     }
 
     private static void testAccuracyPhaseF_ArtifactOptimizerRejectsUnreachableEr() {

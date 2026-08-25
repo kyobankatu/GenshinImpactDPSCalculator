@@ -64,14 +64,26 @@ public class EnergyManager {
      * Schedules the standard KQM enemy particle drops as a
      * {@link simulation.event.TimerEvent} on the simulator.
      *
-     * <p>KQM Standard: 3 Neutral Orbs per 90 s rotation (~1 Orb every 30 s).
-     * Scaled to a ~21 s window this equates to roughly 4.2 energy, approximated
-     * here as 2 Neutral Particles (2 × 2 energy = 4 energy) delivered at
-     * {@code T=10 s}.
+     * <p>The legacy no-argument form uses a 21-second rotation. Prefer
+     * {@link #scheduleKQMSEnemyParticles(CombatSimulator, double)} when the
+     * scenario declares its cycle duration.
      *
      * @param sim the simulator on which the event is registered
      */
     public static void scheduleKQMSEnemyParticles(CombatSimulator sim) {
         sim.getEnergyDistributor().scheduleKQMSEnemyParticles();
+    }
+
+    /**
+     * Schedules KQMS enemy Energy at exactly three Clear Orbs per 90 seconds,
+     * distributed once at the midpoint of each repeated rotation.
+     *
+     * @param sim             simulator on which the event is registered
+     * @param rotationSeconds positive duration of one repeated rotation
+     */
+    public static void scheduleKQMSEnemyParticles(
+            CombatSimulator sim,
+            double rotationSeconds) {
+        sim.getEnergyDistributor().scheduleKQMSEnemyParticles(rotationSeconds);
     }
 }

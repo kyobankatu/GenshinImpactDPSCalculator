@@ -106,7 +106,7 @@ public final class RaidenPartyDefinition extends AbstractPartyDefinition {
     @Override
     public void executeRotation(CombatSimulator sim) {
         sim.switchCharacter(CharacterId.RAIDEN_SHOGUN);
-        sim.getEnergyDistributor().scheduleKQMSEnemyParticles();
+        sim.getEnergyDistributor().scheduleKQMSEnemyParticles(rotationCycleSeconds());
         skill(sim, CharacterId.RAIDEN_SHOGUN);
 
         sim.switchCharacter(CharacterId.XINGQIU);

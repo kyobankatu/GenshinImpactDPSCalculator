@@ -135,7 +135,7 @@ abstract class CuratedPartyDefinition extends AbstractPartyDefinition {
 
     @Override
     public final void executeRotation(CombatSimulator simulator) {
-        simulator.getEnergyDistributor().scheduleKQMSEnemyParticles();
+        simulator.getEnergyDistributor().scheduleKQMSEnemyParticles(cycleSeconds);
         for (int actionId : baselineActions) {
             PolicyAction action = PolicyAction.fromId(actionId);
             if (action.isSwap()) {

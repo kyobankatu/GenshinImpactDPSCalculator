@@ -51,6 +51,46 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["Ganyu, Kokomi, Shenhe, Kazuha", "single target"]
+    },
+    {
+      "sourceId": "kqm-arlecchino-quick-guide-xingqiu-sucrose",
+      "title": "Arlecchino Quick Guide: Xingqiu TTDS Sucrose",
+      "url": "https://keqingmains.com/q/arlecchino-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Luna VIII; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["Arlecchino, Xingqiu, Bennett, Sucrose", "TTDS Sucrose", "single target"]
+    },
+    {
+      "sourceId": "kqm-team-building-sucrose-national",
+      "title": "KQM Team Building Guide: Sucrose National",
+      "url": "https://keqingmains.com/misc/team-building/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["Bennett, Sucrose, Xiangling, Xingqiu", "23-24 second fixed rotation", "single target"]
+    },
+    {
+      "sourceId": "kqm-alhaitham-quick-guide-fischl-bennett",
+      "title": "Alhaitham Quick Guide: Fischl Nahida Bennett Spread",
+      "url": "https://keqingmains.com/q/alhaitham-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["Alhaitham, Fischl, Nahida, Bennett", "split field time", "single target"]
+    },
+    {
+      "sourceId": "kqm-bennett-quick-guide-on-field-burgeon",
+      "title": "Bennett Quick Guide: On-Field Burgeon",
+      "url": "https://keqingmains.com/q/bennett-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["Bennett, Nahida, Xingqiu, Fischl", "Fischl alternates Skill and Burst", "single target"]
     }
   ],
   "seeds": [
@@ -77,10 +117,10 @@
       "adaptationNote": "Dash-canceled Normal strings are condensed inside the 24s horizon, and Xingqiu uses a second Skill after N1 to consume the exact local Sacrificial Sword R5 reset.",
       "openerActions": [],
       "cycleActions": [[8, 3, 5, 9, 3, 5, 0, 3, 10, 3, 0, 7, 5, 0, 0, 3, 0, 0, 1, 0, 0, 0]],
-      "erTargets": {"ALHAITHAM": 1.4931191766182605, "NAHIDA": 1.572327043993711, "XINGQIU": 1.8214329009348613, "KUKI_SHINOBU": 1.0},
+      "erTargets": {"ALHAITHAM": 1.661461044570319, "NAHIDA": 1.8601190475818457, "XINGQIU": 1.927265555302662, "KUKI_SHINOBU": 1.0},
       "sourceAssumptions": ["2N3D and 3N3D strings use dash cancels", "single target"],
       "simulatorAssumptions": ["dash cancels are unsupported and Normal strings are condensed", "Sacrificial Sword R5 reset is consumed deterministically", "full first-cycle Energy is explicit in the scenario fingerprint"],
-      "contentHash": "f62dcb987c0d075dbaed9b036016d2b8a798387aa8d23931d5eeb2064821fddf"
+      "contentHash": "6e754117eb689cbec4d080d705a0856da30faf5b8a83a374a137896a79bdc049"
     },
     {
       "seedId": "kqm-xiao-traditional-adapted-v1",
@@ -91,10 +131,10 @@
       "adaptationNote": "Zhongli Hold Skill is represented by Skill Press, Xiao's combo is fixed to eight Plunging Attacks, and explicit 1.0s waits preserve legal swaps.",
       "openerActions": [],
       "cycleActions": [[10, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 3, 5, 2, 2, 2, 2, 2, 2, 2, 2]],
-      "erTargets": {"XIAO": 1.0542168674548194, "FARUZAN": 1.535087719276316, "BENNETT": 1.7441860464825583, "ZHONGLI": 1.0},
+      "erTargets": {"XIAO": 1.0479041916117768, "FARUZAN": 1.7045454545217813, "BENNETT": 1.8382352940870095, "ZHONGLI": 1.0},
       "sourceAssumptions": ["C6 Faruzan", "Zhongli Hold Skill", "single target"],
       "simulatorAssumptions": ["Zhongli Skill Press substitutes for Hold", "eight Plunging Attacks concretize the source combo", "explicit swap waits use the configured 1.0s cooldown", "full first-cycle Energy is explicit in the scenario fingerprint"],
-      "contentHash": "8e7cd0403afa4d89754ee073546f4338a02d9e59198312515d7171b2edf8165d"
+      "contentHash": "8c76c9222e12962c7cdd8eb1ae4163c7dd77870ec2c6c07124fe101943b63a95"
     },
     {
       "seedId": "kqm-arlecchino-overload-adapted-v1",
@@ -122,10 +162,66 @@
       "adaptationNote": "Dash cancels are omitted, Tap Skills map to Skill Press, and an explicit 1.0s wait before Shenhe's second Skill restores the documented cooldown boundary.",
       "openerActions": [],
       "cycleActions": [[1, 10, 3, 8, 5, 3, 9, 3, 7, 3, 5, 10, 3, 5, 7, 1, 8, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 0, 7, 1, 3, 1]],
-      "erTargets": {"GANYU": 1.0, "SHENHE": 1.2815471095631403, "SANGONOMIYA_KOKOMI": 1.0, "KAEDEHARA_KAZUHA": 1.0526315789298244},
+      "erTargets": {"GANYU": 1.0, "SHENHE": 1.2717330921319003, "SANGONOMIYA_KOKOMI": 1.0, "KAEDEHARA_KAZUHA": 1.1320754716792452},
       "sourceAssumptions": ["Tap Skill notation", "dash cancels", "single target"],
       "simulatorAssumptions": ["Tap Skill maps to Skill Press", "dash cancels are unsupported and removed", "explicit wait restores Shenhe's Skill cooldown", "full first-cycle Energy is explicit in the scenario fingerprint"],
-      "contentHash": "05f9e2873d37c93b6181d4260749abc1aa6c9b88acf93845669f1edae5366fb0"
+      "contentHash": "30a11fac01d038df19632774bdaf6305272e75b04d70612e9875d00fb3ae2e1f"
+    },
+    {
+      "seedId": "kqm-arlecchino-vape-sucrose-adapted-v1",
+      "partyName": "ArlecchinoVaporize",
+      "scenarioFingerprint": "loadout-v1:ARLECCHINO-c0-Deathmatch-r1-artifact-kqms-generic-v1:XINGQIU-c6-SacrificialSword-r5-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:SUCROSE-c6-ThrillingTalesOfDragonSlayers-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-arlecchino-quick-guide-xingqiu-sucrose"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "The two-part source rotation is condensed to one 30s local cycle: Xingqiu consumes the deterministic Sacrificial reset, Sucrose chooses N1 instead of optional Burst, dash-canceled Arlecchino strings become three fixed N3C strings, and the sourced second Bennett Skill closes the cycle.",
+      "openerActions": [],
+      "cycleActions": [[3, 8, 3, 5, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 0, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3]],
+      "erTargets": {"ARLECCHINO": 1.0, "XINGQIU": 2.014615178319367, "BENNETT": 1.9999999999833336, "SUCROSE": 1.0},
+      "sourceAssumptions": ["TTDS Sucrose", "Xingqiu alternates Skill and Burst sections", "dash-canceled Arlecchino strings", "single target"],
+      "simulatorAssumptions": ["Sacrificial Sword R5 reset is consumed deterministically", "dash cancels are omitted", "Sucrose optional Burst resolves as N1", "field strings are condensed to the supported 30s cycle", "the second Bennett Skill is retained for cyclic Energy", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "130264095ce6f74b9a7c26f562747ab3f54b196dd63fa0f2094c5bb3cc468c7b"
+    },
+    {
+      "seedId": "kqm-sucrose-national-adapted-v1",
+      "partyName": "SucroseNational",
+      "scenarioFingerprint": "loadout-v1:SUCROSE-c6-ThrillingTalesOfDragonSlayers-r5-artifact-kqms-generic-v1:XINGQIU-c6-SacrificialSword-r5-artifact-kqms-generic-v1:XIANGLING-c6-TheCatch-r5-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-team-building-sucrose-national"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because three-cycle calibration exceeds the KQMS artifact ER ceiling for Xiangling under the simulator's immediate particle distribution; the sourced Bennett-to-Xiangling funnels cannot be represented faithfully yet.",
+      "openerActions": [],
+      "cycleActions": [[10, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 5, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 0, 0, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 6, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0]],
+      "erTargets": {"SUCROSE": 1.0, "XINGQIU": 1.7078416912256225, "XIANGLING": 2.2563767167799624, "BENNETT": 1.5624999999739586},
+      "sourceAssumptions": ["23-24 second fixed rotation", "Xingqiu EQE option", "two Bennett-to-Xiangling funnels", "single target"],
+      "simulatorAssumptions": ["Sucrose's flexible field time is fixed as N3 E N1 then N1", "explicit swap waits use the configured 1.0s cooldown", "the second Bennett funnel waits 0.1s for Skill cooldown", "Sacrificial Sword R5 reset is consumed deterministically", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "c13d03c26f09ee465407530091931807a578e4bc499d23e0cfedf4e7a3b88598"
+    },
+    {
+      "seedId": "kqm-alhaitham-spread-bennett-adapted-v1",
+      "partyName": "AlhaithamSpread",
+      "scenarioFingerprint": "loadout-v1:ALHAITHAM-c0-FavoniusSword-r5-artifact-kqms-generic-v1:FISCHL-c6-TheStringless-r5-artifact-kqms-generic-v1:NAHIDA-c0-WanderingEvenstar-r5-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-alhaitham-quick-guide-fischl-bennett"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Unsupported plunge and dash cancels are replaced by a Skill-Charged mirror setup and condensed Normal strings; the documented split field time and Fischl Skill/Burst refresh order remain explicit.",
+      "openerActions": [],
+      "cycleActions": [[9, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 1, 0, 0, 1, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 5, 0, 0, 0, 1]],
+      "erTargets": {"ALHAITHAM": 1.05191796438985, "FISCHL": 1.4484356894312476, "NAHIDA": 1.1496895837893768, "BENNETT": 1.5508684863265108},
+      "sourceAssumptions": ["split Alhaitham field time", "Fischl alternates Skill and Burst", "dash-canceled strings", "single target"],
+      "simulatorAssumptions": ["unsupported hEP becomes Skill-Charged", "dash cancels are omitted and Normal strings condensed", "explicit swap waits use the configured 1.0s cooldown", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "188c94a8796136e239e8f22d97ae67ca5c086a1483f81f5617f2345ee30288c5"
+    },
+    {
+      "seedId": "kqm-bennett-burgeon-adapted-v1",
+      "partyName": "BennettBurgeon",
+      "scenarioFingerprint": "loadout-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:NAHIDA-c0-WanderingEvenstar-r5-artifact-kqms-generic-v1:XINGQIU-c6-SacrificialSword-r5-artifact-kqms-generic-v1:FISCHL-c6-TheStringless-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-bennett-quick-guide-on-field-burgeon"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because three-cycle calibration exceeds the KQMS artifact ER ceiling for Nahida under the exact local loadout; no unsourced Burst omission or extra particle source was added.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 0, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 0, 3, 0, 0, 0, 0]],
+      "erTargets": {"BENNETT": 1.8095265752160328, "NAHIDA": 1.7592006192034337, "XINGQIU": 2.393704531209749, "FISCHL": 1.0},
+      "sourceAssumptions": ["on-field Bennett triggers Burgeon", "Fischl alternates Skill and Burst", "four repeated Bennett strings", "single target"],
+      "simulatorAssumptions": ["Bennett field time is bounded to one legal repeat", "Fischl Skill is the first-cycle representative", "explicit swap waits use the configured 1.0s cooldown", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "c3fbb87e8c435a851d4ecd28e481f6a3fefe9773b16bf3bbf20334be0d8ad21e"
     }
   ]
 }

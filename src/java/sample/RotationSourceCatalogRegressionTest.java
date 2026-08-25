@@ -34,8 +34,8 @@ public final class RotationSourceCatalogRegressionTest {
 
     private static void assertTrackedPilotCatalogRoundTrips() throws Exception {
         RotationSourceCatalog catalog = RotationSourceCatalog.loadDefault();
-        if (catalog.getSources().size() != 5 || catalog.getSeeds().size() != 5) {
-            throw new AssertionError("Expected five reviewed pilot sources and seeds");
+        if (catalog.getSources().size() != 9 || catalog.getSeeds().size() != 9) {
+            throw new AssertionError("Expected nine reviewed pilot sources and seeds");
         }
         HashSet<String> parties = new HashSet<>();
         int rejectedCount = 0;
@@ -52,10 +52,10 @@ public final class RotationSourceCatalogRegressionTest {
                 throw new AssertionError("Invalid usable pilot seed: " + seed.getSeedId());
             }
         }
-        if (rejectedCount != 2) {
-            throw new AssertionError("Expected two simulator-infeasible pilot seeds");
+        if (rejectedCount != 4) {
+            throw new AssertionError("Expected four simulator-infeasible pilot seeds");
         }
-        assertEquals(2, catalog.getUsableSeeds(DatasetSplit.TRAIN).size(), "train seeds");
+        assertEquals(4, catalog.getUsableSeeds(DatasetSplit.TRAIN).size(), "train seeds");
         assertEquals(1, catalog.getUsableSeeds(DatasetSplit.VALIDATION).size(), "validation seeds");
         assertEquals(0, catalog.getUsableSeeds(DatasetSplit.HOLDOUT).size(), "holdout seeds");
         Path roundTrip = Files.createTempFile("rotation-source-catalog-", ".json");
@@ -148,8 +148,20 @@ public final class RotationSourceCatalogRegressionTest {
                 1,
                 PolicyAction.LAYOUT_REVISION,
                 List.of(source),
-                List.of(fixtureSeed(AdaptationStatus.REJECTED, fingerprint(), cycle())));
-        expectFailure(() -> rejected.requireUsable("fixture-raiden-national"), "rejected seed exposure");
+                List.of(new SourcedRotationSeed(
+                        "rejected-unconstructable",
+                        "UnavailableParty",
+                        "review-only-fingerprint",
+                        List.of("kqm-raiden-guide"),
+                        AdaptationStatus.REJECTED,
+                        "Regression-only rejected candidate",
+                        new int[0],
+                        List.of(cycle()),
+                        erTargets(),
+                        List.of("single target"),
+                        List.of("unsupported local party"))));
+        expectFailure(() -> rejected.requireUsable("rejected-unconstructable"),
+                "rejected seed exposure");
     }
 
     private static RotationSourceCatalog.SourceReference fixtureSource() {

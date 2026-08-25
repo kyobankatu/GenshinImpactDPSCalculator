@@ -11,6 +11,8 @@ import simulation.CombatSimulator;
  * single {@link CombatSimulator}.
  */
 public class EnergyDistributor {
+    private static final double DEFAULT_KQMS_ROTATION_SECONDS = 21.0;
+    private static final double KQMS_CLEAR_ORB_INTERVAL_SECONDS = 30.0;
     private static final double TWO_MEMBER_OFF_FIELD_MULTIPLIER = 0.8;
     private static final double THREE_MEMBER_OFF_FIELD_MULTIPLIER = 0.7;
     private static final double FOUR_MEMBER_OFF_FIELD_MULTIPLIER = 0.6;
@@ -100,24 +102,41 @@ public class EnergyDistributor {
     }
 
     public void scheduleKQMSEnemyParticles() {
+        scheduleKQMSEnemyParticles(DEFAULT_KQMS_ROTATION_SECONDS);
+    }
+
+    /**
+     * Schedules rotation-periodic enemy Energy at the KQMS rate of three
+     * Clear Orbs per 90 seconds.
+     *
+     * @param rotationSeconds positive duration of one repeated rotation
+     */
+    public void scheduleKQMSEnemyParticles(double rotationSeconds) {
+        if (!Double.isFinite(rotationSeconds) || rotationSeconds <= 0.0) {
+            throw new IllegalArgumentException("KQMS rotation duration must be positive");
+        }
+        double clearOrbsPerRotation = rotationSeconds
+                / KQMS_CLEAR_ORB_INTERVAL_SECONDS;
         sim.registerEvent(new simulation.event.TimerEvent() {
-            double[] dropTimes = { 10.0 };
-            int idx = 0;
+            double nextDropTime = rotationSeconds / 2.0;
 
             @Override
             public void tick(CombatSimulator s) {
-                distributeParticles(model.type.Element.PHYSICAL, 2.0, ParticleType.PARTICLE);
-                idx++;
+                distributeParticles(
+                        model.type.Element.PHYSICAL,
+                        clearOrbsPerRotation,
+                        ParticleType.ORB);
+                nextDropTime += rotationSeconds;
             }
 
             @Override
             public boolean isFinished(double t) {
-                return idx >= dropTimes.length;
+                return false;
             }
 
             @Override
             public double getNextTickTime() {
-                return idx < dropTimes.length ? dropTimes[idx] : -1;
+                return nextDropTime;
             }
         });
     }
