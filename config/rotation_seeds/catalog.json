@@ -381,6 +381,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Xiao, C0 Furina, C0 Xianyun, C0-C1 Faruzan", "twelve high Plunges", "single target without collision damage"]
+    },
+    {
+      "sourceId": "kqm-furina-quick-guide-noelle-albedo-gorou",
+      "title": "Furina Quick Guide: Noelle Albedo Gorou Triple Geo",
+      "url": "https://keqingmains.com/q/furina-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["Noelle, C0 Furina, Albedo, Gorou", "Gorou uses Favonius Warbow and 4pc Exile", "single target"]
     }
   ],
   "seeds": [
@@ -910,6 +920,20 @@
       "sourceAssumptions": ["C0-C1 Faruzan uses E C Q", "Furina uses Skill then Burst", "Xianyun uses EP Q", "Xiao uses two Skills, Burst, and twelve high Plunges", "single target without collision damage"],
       "simulatorAssumptions": ["Furina's dash input is unsupported and removed", "jump inputs map directly to supported high Plunge actions", "collision and low-Plunge packets are excluded", "represented action durations satisfy each swap lock without inserted waits", "the steady-state trace uses a 31s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "3597b971a8c99fd93b047783247a24b2e1d5f06be223c1f5ab8468e7137a1ff2"
+    },
+    {
+      "seedId": "kqm-furina-noelle-albedo-gorou-rejected-v1",
+      "partyName": "NoelleFurinaUnavailable",
+      "scenarioFingerprint": "review-only:noelle-furina-albedo-gorou-triple-geo",
+      "sourceIds": ["kqm-furina-quick-guide-noelle-albedo-gorou"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected before party registration because Noelle schedules a natural Breastplate-expiry event but does not implement complete snapshot capture and restore; Phase 16 forbids archiving branch-search trajectories for such a scenario.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 5, 10, 3, 5, 9, 3, 7, 5, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 3, 7, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"NOELLE": 1.0, "FURINA": 1.0, "ALBEDO": 1.0, "GOROU": 1.0},
+      "sourceAssumptions": ["Furina uses Skill then Burst", "Gorou uses Skill and Burst then a second Skill", "Albedo uses Skill", "Noelle uses Burst, Skill, and five N3 strings", "single target"],
+      "simulatorAssumptions": ["review only; branch-safe replay is unavailable", "dash cancels are unsupported and removed", "3[N3D] and N3D N3 map to fifteen Normal actions", "Noelle healing and dynamic Furina Fanfare remain outside the simulator player-HP contract", "no approximate snapshot state is accepted"],
+      "contentHash": "96b238419cf2cc13e740eb91207ac4745845d22f39ee9c27a6fe2dfafc13179f"
     }
   ]
 }
