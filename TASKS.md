@@ -26012,7 +26012,7 @@ Completion evidence:
 
 ### Phase 15: Source-Matched Bulk Human Rotation Campaign
 
-Status: In progress; batches 1-40 retained twenty-nine new source-matched train scenarios.
+Status: In progress; batches 1-44 retained thirty-one new source-matched train scenarios.
 
 Active execution window:
 
@@ -26458,6 +26458,21 @@ Batches 37-40 checkpoint:
   provisional profile changes were removed instead of leaking validation data.
 - The tracked catalog now contains 54 sources and 52 seeds. Its 32 usable seeds
   comprise 31 train and one validation seed; holdout remains source-isolated.
+
+Batches 41-44 checkpoint:
+
+- Four candidates were researched: Wanderer/Zhongli/Faruzan/Chiori and
+  Ayato/Furina/Bennett/Xiangling were rejected; Ayato/Furina/Xilonen/Fischl and
+  Ayato/Xingqiu/Zhongli/Yelan were retained. Campaign total: 66 researched, 31
+  retained, and 35 rejected or blocked.
+- The two retained Ayato scenarios preserve both sourced N15 fields and add one
+  Electro-Charged and one double-Hydro trajectory. Their exact three-cycle ER
+  targets remain within their deterministic KQMS loadout ceilings.
+- The Chiori candidate requires 296.296% Faruzan ER, above the 268.200% KQMS
+  ceiling. The Xiangling candidate reaches the second equivalent cycle with
+  only 44.63004/60 Furina Energy. Neither received an unsourced battery action.
+- The tracked catalog now contains 58 sources and 56 seeds. Its 34 usable seeds
+  comprise 33 train and one validation seed; holdout remains source-isolated.
 
 Acceptance criteria:
 
