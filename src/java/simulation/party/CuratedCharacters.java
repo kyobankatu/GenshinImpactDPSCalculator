@@ -51,6 +51,7 @@ import model.character.Xilonen;
 import model.character.YaeMiko;
 import model.character.Yelan;
 import model.character.Yoimiya;
+import model.character.YunJin;
 import model.character.Zhongli;
 import model.entity.Character;
 import model.weapon.CalamityQueller;
@@ -350,5 +351,9 @@ final class CuratedCharacters {
 
     static Character yoimiya() {
         return new Yoimiya(new Rust(1), null, 0);
+    }
+
+    static Character yunJin() {
+        return new YunJin(new FavoniusLance(5, () -> FIXED_RANDOM_DRAW), null, 6);
     }
 }

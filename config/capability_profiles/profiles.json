@@ -661,5 +661,18 @@
     "reentry_cost_score": 0.098553,
     "on_field_dps_score": 0.513036,
     "burst_window_score": 0.259517
+  },
+  "YUN_JIN": {
+    "off_field_dps_ratio": 0.000000,
+    "team_buff_score": 0.500000,
+    "self_enhancement_score": 0.605696,
+    "energy_generation_score": 0.288497,
+    "entry_value_score": 0.139299,
+    "sustain_value_3_actions": 0.069165,
+    "sustain_value_6_actions": 0.049588,
+    "exit_cost_score": 0.302599,
+    "reentry_cost_score": 0.033051,
+    "on_field_dps_score": 0.180567,
+    "burst_window_score": 0.156517
   }
 }
