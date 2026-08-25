@@ -741,6 +741,26 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Yoimiya, C6 Bennett, C0 Emilie, C6 Fischl", "Rust R1", "Lumidouce Elegy R1 Emilie", "The Stringless R5 Fischl", "three complete N5 strings", "single target"]
+    },
+    {
+      "sourceId": "kqm-clorinde-quick-guide-fischl-nahida-xilonen",
+      "title": "Clorinde Quick Guide: Fischl Nahida Xilonen Aggravate",
+      "url": "https://keqingmains.com/q/clorinde-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.7; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Clorinde, C6 Fischl, C0 Nahida, C0 Xilonen", "4pc Thundering Fury Clorinde", "E 6[N3E] N1 from zero Bond", "EE 5[N3E] N3 from full Bond", "single target"]
+    },
+    {
+      "sourceId": "kqm-nahida-quick-guide-clorinde-fischl-xilonen",
+      "title": "Nahida Quick Guide: Clorinde Fischl Xilonen Aggravate",
+      "url": "https://keqingmains.com/q/nahida-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Clorinde, C6 Fischl, C0 Nahida, C0 Xilonen", "4pc Thundering Fury Clorinde", "two Clorinde fields per rotation", "single target"]
     }
   ],
   "seeds": [
@@ -1760,6 +1780,20 @@
       "sourceAssumptions": ["Bennett uses Skill then Burst", "Emilie alternates Skill and Burst", "Fischl uses N2 and alternates Skill and Burst", "Yoimiya uses Skill and three complete N5 strings", "Yoimiya Bursts only opposite Emilie's Burst", "single target"],
       "simulatorAssumptions": ["the optional Deepwood-only Bennett Skill is omitted", "the guide-defined combo maps to fifteen typed Normal actions", "the cycles use definition-normalized swap waits", "the reviewed trace uses a 30s cycle", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "bbf8b43e0469a99413ec0bdb4da19760725475fa6f16f033a0f2f7dde7a87c12"
+    },
+    {
+      "seedId": "kqm-clorinde-fischl-nahida-xilonen-rejected-v1",
+      "partyName": "ClorindeAggravateUnavailable",
+      "scenarioFingerprint": "review-only:CLORINDE-c0:FISCHL-c6:NAHIDA-c0:XILONEN-c0:thundering-fury:bond-boundary-unsupported",
+      "sourceIds": ["kqm-clorinde-quick-guide-fischl-nahida-xilonen", "kqm-nahida-quick-guide-clorinde-fischl-xilonen"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because the required terminal Clorinde Burst leaves full Bond for the next rotation, changing its first field from E 6[N3E] N1 to EE 5[N3E] N3; the current curated scenario fingerprint cannot declare initial owner state, so first-cycle and steady-state replay cannot share one exact seed.",
+      "openerActions": [],
+      "cycleActions": [[8, 5, 10, 3, 0, 0, 9, 3, 5, 7, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 8, 3, 10, 3, 0, 0, 7, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 5]],
+      "erTargets": {"CLORINDE": 1.0, "FISCHL": 1.0, "NAHIDA": 1.0, "XILONEN": 1.0},
+      "sourceAssumptions": ["Fischl alternates Burst then Skill", "Xilonen uses two Skill-N2 fields", "Nahida uses Skill then Burst", "Clorinde uses two Night Vigil fields and a terminal Burst", "Clorinde's combo depends on starting Bond", "single target"],
+      "simulatorAssumptions": ["the complete zero-Bond first-cycle trace is retained for review", "terminal Burst Bond survives the rotation boundary", "initial character owner state is not part of the frozen scenario fingerprint", "no synthetic Bond reset or first-cycle-only Burst omission is allowed"],
+      "contentHash": "2883d24433f1d31dd10e8178db4e721dfc7de385002b69f6544dd7a5c95ecab8"
     }
   ]
 }
