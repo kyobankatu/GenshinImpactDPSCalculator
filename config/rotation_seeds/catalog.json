@@ -323,6 +323,16 @@
       "loadoutAssumptions": ["C0 Xianyun, C0 Xiao, low-Constellation Faruzan, C6 Bennett", "twelve high Plunges", "single target without collision damage"]
     },
     {
+      "sourceId": "kqm-xianyun-quick-guide-xiao-faruzan-sucrose",
+      "title": "Xianyun Quick Guide: Xiao Faruzan Sucrose Quad Anemo",
+      "url": "https://keqingmains.com/q/xianyun-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Xiao, C0 Xianyun, C0 Faruzan, C1+ Sucrose", "Sucrose uses two Skill charges", "twelve high Plunges", "single target without collision damage"]
+    },
+    {
       "sourceId": "kqm-xianyun-quick-guide-diluc-xingqiu-bennett",
       "title": "Xianyun Quick Guide: Diluc Xingqiu Bennett VV Vaporize",
       "url": "https://keqingmains.com/q/xianyun-quickguide/",
@@ -1420,6 +1430,20 @@
       "sourceAssumptions": ["Xianyun uses EP Q", "low-Constellation Faruzan uses EC Q immediately before Xiao", "Xiao uses two Skills, Burst, and twelve high Plunges", "Bennett uses a final Skill", "single target without collision damage"],
       "simulatorAssumptions": ["jump inputs map directly to supported high Plunge actions", "collision and low-Plunge packets are excluded", "explicit one-second waits preserve each simulator swap lock", "an explicit final swap restores the Xiao cycle opener", "the steady-state trace uses a 31s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "32d29f5ea686f042345431eac4efd37f58aae4fe5d5cfb51637426a72742cacc"
+    },
+    {
+      "seedId": "kqm-xianyun-xiao-faruzan-sucrose-adapted-v1",
+      "partyName": "XiaoSucroseBattery",
+      "scenarioFingerprint": "loadout-v1:XIAO-c0-FavoniusLance-r5-artifact-kqms-generic-v1:XIANYUN-c0-FavoniusCodex-r5-artifact-kqms-generic-v1:FARUZAN-c0-FavoniusWarbow-r5-artifact-kqms-generic-v1:SUCROSE-c6-ThrillingTalesOfDragonSlayers-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-xianyun-quick-guide-xiao-faruzan-sucrose"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Xianyun EP maps to Skill-Plunge, Sucrose's sourced 2E uses her represented C1+ Skill charges, and the linked Xiao guide's twelve-high-Plunge benchmark fills the named combo in a timing-adapted 31s cycle.",
+      "openerActions": [],
+      "cycleActions": [[9, 3, 1, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 2, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 3, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]],
+      "erTargets": {"XIAO": 1.0, "XIANYUN": 1.0, "FARUZAN": 1.1551073131810814, "SUCROSE": 1.0},
+      "sourceAssumptions": ["C0 Faruzan uses ECQ", "Xianyun uses EPQ", "C1+ Sucrose uses two Skills", "Xiao uses two Skills, Burst, and twelve high Plunges", "single target without collision damage"],
+      "simulatorAssumptions": ["jump inputs map directly to supported high Plunge actions", "collision and low-Plunge packets are excluded", "explicit one-second waits preserve each simulator swap lock", "the steady-state trace uses a timing-adapted 31s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "4c1475e52494965dd76e6b9c30450bb622b38081da54cbdc982ef45010c90e57"
     },
     {
       "seedId": "kqm-xianyun-diluc-xingqiu-bennett-adapted-v1",

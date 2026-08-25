@@ -35,6 +35,7 @@ public final class PartyCatalog {
         register(new XiaoXianyunPartyDefinition());
         register(new XiaoFurinaPartyDefinition());
         register(new XiaoLanYanPartyDefinition());
+        register(new XiaoSucroseBatteryPartyDefinition());
         register(new WandererLanYanPartyDefinition());
         register(new FaruzanLanYanQuickswapPartyDefinition());
         register(new WandererDoubleHydroPartyDefinition());
