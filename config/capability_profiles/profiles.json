@@ -622,5 +622,18 @@
     "reentry_cost_score": 0.000000,
     "on_field_dps_score": 0.161105,
     "burst_window_score": 0.113261
+  },
+  "JEAN": {
+    "off_field_dps_ratio": 0.036267,
+    "team_buff_score": 0.351024,
+    "self_enhancement_score": 0.062916,
+    "energy_generation_score": 0.166328,
+    "entry_value_score": 0.232774,
+    "sustain_value_3_actions": 0.120341,
+    "sustain_value_6_actions": 0.067898,
+    "exit_cost_score": 0.113816,
+    "reentry_cost_score": 0.000000,
+    "on_field_dps_score": 0.248961,
+    "burst_window_score": 0.174372
   }
 }

@@ -39,6 +39,7 @@ public final class PartyCatalog {
         register(new WandererZhongliPartyDefinition());
         register(new WandererThomaPartyDefinition());
         register(new WandererVentiPartyDefinition());
+        register(new WandererJeanPartyDefinition());
         register(new DilucXianyunVaporizePartyDefinition());
         register(new HuTaoXianyunVaporizePartyDefinition());
         register(new ArlecchinoOverloadPartyDefinition());

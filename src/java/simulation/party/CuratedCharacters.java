@@ -19,6 +19,7 @@ import model.character.Gaming;
 import model.character.Ganyu;
 import model.character.HuTao;
 import model.character.Ineffa;
+import model.character.Jean;
 import model.character.Keqing;
 import model.character.KukiShinobu;
 import model.character.KaedeharaKazuha;
@@ -200,6 +201,10 @@ final class CuratedCharacters {
 
     static Character venti() {
         return new Venti(new FavoniusWarbow(5, () -> FIXED_RANDOM_DRAW), null, 0);
+    }
+
+    static Character jeanC4() {
+        return new Jean(new SkywardBlade(), null, 4);
     }
 
     static Character ningguang() {

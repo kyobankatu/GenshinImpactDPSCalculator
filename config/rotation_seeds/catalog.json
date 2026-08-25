@@ -531,6 +531,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Wanderer, C6 Faruzan, C0 Kaedehara Kazuha, C6 Bennett", "Tulaytullah's Remembrance R1", "single target"]
+    },
+    {
+      "sourceId": "kqm-wanderer-quick-guide-faruzan-jean-bennett",
+      "title": "Wanderer Quick Guide: Faruzan C4 Jean Bennett",
+      "url": "https://keqingmains.com/q/wanderer-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Wanderer, C6 Faruzan, C4 Jean, C6 Bennett", "Tulaytullah's Remembrance R1", "Skyward Blade R1 on Jean", "single target"]
     }
   ],
   "seeds": [
@@ -1256,6 +1266,20 @@
       "sourceAssumptions": ["C6 Faruzan uses Skill then Burst", "Kazuha uses Hold Skill-Plunge, later Burst, then Tap Skill-Plunge", "Bennett uses Skill then Burst and a later Skill", "Wanderer uses Skill and six N3 strings", "single target"],
       "simulatorAssumptions": ["Kazuha's Hold Skill maps to Press Skill", "jump inputs map directly to typed Plunge actions", "C6 Faruzan omits the optional Charged Shot", "N3 spam is fixed to eighteen Normal actions", "C0 Wanderer's optional Burst is omitted", "explicit one-second waits preserve each simulator swap lock", "the reviewed trace uses a 30s cycle", "Favonius Warbow uses deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint", "Kazuha remains validation-only under the current split contract"],
       "contentHash": "f44e150ecb8e16147570e78f02886deb99f3cbce63a0ff9a489e2951884d1cf9"
+    },
+    {
+      "seedId": "kqm-wanderer-faruzan-jean-bennett-adapted-v1",
+      "partyName": "WandererJean",
+      "scenarioFingerprint": "loadout-v1:WANDERER-c0-TulaytullahsRemembrance-r1-artifact-kqms-generic-v1:FARUZAN-c6-FavoniusWarbow-r5-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:JEAN-c4-SkywardBlade-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-wanderer-quick-guide-faruzan-jean-bennett", "kqm-wanderer-quick-guide-tulaytullah-n3"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "The source-optional final Bennett and Jean Skills are omitted; C6 Faruzan omits the optional Charged Shot, C0 Wanderer's optional Burst is omitted, and N3 spam is fixed to six strings in a 25s cycle.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"WANDERER": 1.0, "FARUZAN": 1.6912898572269488, "BENNETT": 2.1275086873153204, "JEAN": 1.5605949768267908},
+      "sourceAssumptions": ["C6 Faruzan uses Skill then Burst", "Bennett uses Skill then Burst", "C4 Jean uses Skill then Burst", "Wanderer uses Skill and six N3 strings", "single target"],
+      "simulatorAssumptions": ["the source-optional final Bennett and Jean Skills are omitted", "C6 Faruzan omits the optional Charged Shot", "N3 spam is fixed to eighteen Normal actions", "C0 Wanderer's optional Burst is omitted", "explicit one-second waits preserve each simulator swap lock", "the steady-state trace uses a 25s cycle", "Favonius Warbow uses deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "add0e8e5ef987107ed503c0fa0f2e8d614e482c4e286bc99c683ac6d2fefb919"
     }
   ]
 }
