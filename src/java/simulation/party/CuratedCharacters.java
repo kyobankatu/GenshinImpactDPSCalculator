@@ -13,6 +13,7 @@ import model.character.Fischl;
 import model.character.Gaming;
 import model.character.Ganyu;
 import model.character.Ineffa;
+import model.character.Keqing;
 import model.character.KukiShinobu;
 import model.character.KaedeharaKazuha;
 import model.character.Kirara;
@@ -30,6 +31,7 @@ import model.character.Tighnari;
 import model.character.Xiao;
 import model.character.Xianyun;
 import model.character.Xingqiu;
+import model.character.Xiangling;
 import model.character.Xilonen;
 import model.character.YaeMiko;
 import model.character.Zhongli;
@@ -157,6 +159,10 @@ final class CuratedCharacters {
         return new Xingqiu(new SacrificialSword(5, () -> FIXED_RANDOM_DRAW), null);
     }
 
+    static Character xiangling() {
+        return new Xiangling(new FavoniusLance(5, () -> FIXED_RANDOM_DRAW), null);
+    }
+
     static Character sucrose() {
         return new Sucrose(new ThrillingTalesOfDragonSlayers(5), null, () -> 4.0);
     }
@@ -173,6 +179,10 @@ final class CuratedCharacters {
     static Character kukiShinobu() {
         return new KukiShinobu(new WolfFang(), null, TalentDataManager.getInstance(), 0,
                 () -> FIXED_RANDOM_DRAW);
+    }
+
+    static Character keqing() {
+        return new Keqing(new WolfFang(), null, 0);
     }
 
     static Character faruzan() {

@@ -191,6 +191,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["Arlecchino, C0 Mona, Bennett, C6 Fischl", "Fischl alternates Skill and Burst", "split Arlecchino field time", "single target"]
+    },
+    {
+      "sourceId": "kqm-keqing-quick-guide-chevreuse-xiangling-fischl",
+      "title": "Keqing Quick Guide: Chevreuse Xiangling Fischl Overloaded",
+      "url": "https://keqingmains.com/q/keqing-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Keqing, C0 Chevreuse, C6 Xiangling, C6 Fischl", "two-part rotation", "single target"]
     }
   ],
   "seeds": [
@@ -462,6 +472,20 @@
       "sourceAssumptions": ["C0 Mona", "C6 Fischl alternates Skill and Burst", "split Arlecchino field time", "4[N3D] N1 second field combo", "single target"],
       "simulatorAssumptions": ["dash cancels are unsupported and removed", "the second field combo is fixed to 13 Normal actions", "Favonius Codex R5 uses a deterministic proc draw", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "d6a325626b560cac342c2bfa95636d4201c57b39abcf622dd0949273c00caafc"
+    },
+    {
+      "seedId": "kqm-keqing-chevreuse-xiangling-fischl-adapted-v1",
+      "partyName": "KeqingChevreuseOverload",
+      "scenarioFingerprint": "loadout-v1:KEQING-c0-WolfFang-r1-artifact-kqms-generic-v1:CHEVREUSE-c0-Deathmatch-r1-artifact-kqms-generic-v1:FISCHL-c6-TheStringless-r5-artifact-kqms-generic-v1:XIANGLING-c6-FavoniusLance-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-keqing-quick-guide-chevreuse-xiangling-fischl"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Chevreuse Hold Skill maps to Skill Press, her optional mid-cycle Hold Skill is skipped at C0, and explicit 1.1s swap waits preserve legality around Xiangling's zero-duration legacy inputs.",
+      "openerActions": [3],
+      "cycleActions": [[8, 5, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 5, 3, 3, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 5, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 5, 3, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]],
+      "erTargets": {"KEQING": 1.0, "CHEVREUSE": 1.0782833728614074, "FISCHL": 1.0, "XIANGLING": 1.275591555578589},
+      "sourceAssumptions": ["first-rotation Keqing Skill opener", "C0 Chevreuse skips the optional second Hold Skill", "Fischl uses Skill then Burst", "single target"],
+      "simulatorAssumptions": ["Chevreuse Skill Press substitutes for Hold", "explicit swap waits use 1.1s around Xiangling's zero-duration inputs", "Favonius Lance R5 uses a deterministic proc draw", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "0934f6fe0ea71263f0e3e6fb76b0523e4c1bcd8bff44ad2a02d0b9ce8ec9b398"
     }
   ]
 }

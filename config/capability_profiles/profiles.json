@@ -453,5 +453,18 @@
     "reentry_cost_score": 0.000000,
     "on_field_dps_score": 0.258856,
     "burst_window_score": 0.171789
+  },
+  "KEQING": {
+    "off_field_dps_ratio": 0.142608,
+    "team_buff_score": 0.000000,
+    "self_enhancement_score": 0.000000,
+    "energy_generation_score": 0.000000,
+    "entry_value_score": 0.097844,
+    "sustain_value_3_actions": 0.123090,
+    "sustain_value_6_actions": 0.072021,
+    "exit_cost_score": 0.145463,
+    "reentry_cost_score": 0.000000,
+    "on_field_dps_score": 0.292682,
+    "burst_window_score": 0.184536
   }
 }

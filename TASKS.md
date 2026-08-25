@@ -26011,7 +26011,7 @@ Completion evidence:
 
 ### Phase 15: Source-Matched Bulk Human Rotation Campaign
 
-Status: In progress; batches 1-2 retained four new source-matched train scenarios.
+Status: In progress; batches 1-8 retained nine new source-matched train scenarios.
 
 Why:
 
@@ -26056,6 +26056,7 @@ Accepted-unit table (batch 1, researched 2026-08-25):
 | KQM Arlecchino Quick Guide: Arlecchino, Bennett, Emilie, C6 Lan Yan Mono Pyro rotation | `src/java/simulation/party/ArlecchinoEmilieMonoPyroPartyDefinition.java` | Existing Bond of Life, Burning, Lumidouce Elegy, Bennett buff, C6 Lan Yan two-charge Skill, and TTDS; source `Q/E` selects Emilie Skill and dash cancels are omitted | `TRAIN`; Burning/off-field trace and 30s cyclic replay |
 | KQM Arlecchino Quick Guide: Arlecchino, C0 Mona, Bennett, Sucrose split-field Vape rotation | `src/java/simulation/party/ArlecchinoMonaVaporizePartyDefinition.java` | Existing Bond of Life persistence, C0 Omen/Phantom, Bennett buff, Sucrose Swirl, and Vaporize; dash cancel and optional Sucrose Burst are omitted | `TRAIN`; Omen/Vape split-field trace and 30s cyclic replay |
 | KQM Arlecchino Quick Guide: Arlecchino, C0 Mona, Bennett, C6 Fischl split-field Overvape rotation | `src/java/simulation/party/ArlecchinoMonaOvervapePartyDefinition.java` | Existing Bond of Life persistence, C0 Omen/Phantom, Bennett buff, C6 Oz, Electro-Charged/Overloaded/Vaporize; Fischl alternates Skill and Burst and dash cancels are omitted | `TRAIN`; two-cycle alternation, reaction trace, and 30s cyclic replay |
+| KQM Keqing Quick Guide: C0 Keqing, C0 Chevreuse, C6 Xiangling, C6 Fischl two-part Overloaded rotation | `src/java/simulation/party/KeqingChevreuseOverloadPartyDefinition.java` | Existing Stiletto recast, Electro infusion, Pyronado, Oz alternation, and Overloaded/Chevreuse support; Hold Skill maps to Press, C0 Chevreuse skips the optional mid-cycle Hold Skill, and dash cancels are omitted | `TRAIN`; two-part action trace, Overloaded ownership, and 40s cyclic replay |
 
 Rejected from batch 1: Ganyu Melt, Gaming Mono Pyro, and
 Ningguang/Yae/Fischl/Zhongli mix characters already assigned to different
@@ -26080,6 +26081,13 @@ Rejected from batch 6: Arlecchino/Yelan/Bennett/Lan Yan requires 281.617%
 Yelan ER in exact three-cycle source replay, above the 268.200% KQMS ceiling
 with deterministic Favonius Warbow R5. The source and expanded `N3C` sequence
 remain reviewable, but no infeasible party definition is registered.
+
+Rejected from batch 8: seven current KQM Mualani variants require explicit
+Wave Momentum surfing contacts that the policy action surface cannot emit.
+Five Varesa variants either require absent Iansan, unsupported Furina HP-change
+Fanfare, or automatic Mavuika ally Nightsoul-consumption plumbing. Their action
+text is retained in the research checkpoint, but none is approximated as a
+teacher seed.
 
 Batch 1 checkpoint:
 
@@ -26141,6 +26149,18 @@ Batch 7 checkpoint:
 - Fischl alternates Skill and Burst across two explicit source cycles. Mona's
   measured 173.404% ER and Bennett's 156.978% target fit the KQMS allocation;
   Fischl and Arlecchino remain at 100% ER.
+
+Batch 8 checkpoint:
+
+- 13 candidates researched: Keqing/Chevreuse/Xiangling/Fischl Overloaded was
+  retained; 12 Mualani/Varesa variants were rejected by explicit runtime
+  capability gates. Campaign total: 30 researched, 9 retained, 21 rejected.
+- Keqing's first-rotation Skill is isolated as a seed opener. The steady
+  two-part 40-second cycle preserves Stiletto recasts, five `N1C` strings per
+  field window, Fischl Skill then Burst, and both Xiangling sections.
+- Exact three-cycle calibration requires 100% Keqing, 107.828% Chevreuse,
+  100% Fischl, and 127.559% Xiangling ER. The source seed passes legal,
+  deterministic replay and definition-baseline non-inferiority.
 
 Acceptance criteria:
 
