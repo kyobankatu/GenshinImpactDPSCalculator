@@ -36,6 +36,7 @@ public final class PartyCatalog {
         register(new FaruzanLanYanQuickswapPartyDefinition());
         register(new WandererDoubleHydroPartyDefinition());
         register(new WandererLaylaPartyDefinition());
+        register(new WandererZhongliPartyDefinition());
         register(new DilucXianyunVaporizePartyDefinition());
         register(new HuTaoXianyunVaporizePartyDefinition());
         register(new ArlecchinoOverloadPartyDefinition());

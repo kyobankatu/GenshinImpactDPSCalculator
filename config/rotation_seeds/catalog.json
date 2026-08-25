@@ -481,6 +481,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Wanderer, C6 Faruzan, C6 Xiangling, C6 Bennett", "Tulaytullah's Remembrance R1", "Favonius Lance R5 on Xiangling", "single target"]
+    },
+    {
+      "sourceId": "kqm-wanderer-quick-guide-zhongli-faruzan-bennett",
+      "title": "Wanderer Quick Guide: Zhongli Faruzan Bennett",
+      "url": "https://keqingmains.com/q/wanderer-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Wanderer, C6 Faruzan, C6 Bennett, C0 Zhongli", "Tulaytullah's Remembrance R1", "single target"]
     }
   ],
   "seeds": [
@@ -1136,6 +1146,20 @@
       "sourceAssumptions": ["C6 Faruzan uses Skill then Burst", "Bennett uses Burst then Skill and a later Skill", "Xiangling uses Burst then Skill and a later N2", "Wanderer uses Skill and six N3 strings", "single target"],
       "simulatorAssumptions": ["C6 Faruzan omits the optional Charged Shot", "N3 spam is fixed to eighteen Normal actions", "C0 Wanderer's optional Burst is omitted", "explicit one-second waits preserve each simulator swap lock", "the complete reviewed trace uses a timing-adapted 31s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint", "three-cycle replay is Energy-infeasible for the exact local loadout"],
       "contentHash": "24932a641beb49b081f849165c908f487651f401f2834fd23ac742865502f17b"
+    },
+    {
+      "seedId": "kqm-wanderer-zhongli-faruzan-bennett-adapted-v1",
+      "partyName": "WandererZhongli",
+      "scenarioFingerprint": "loadout-v1:WANDERER-c0-TulaytullahsRemembrance-r1-artifact-kqms-generic-v1:FARUZAN-c6-FavoniusWarbow-r5-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:ZHONGLI-c0-Deathmatch-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-wanderer-quick-guide-zhongli-faruzan-bennett", "kqm-wanderer-quick-guide-tulaytullah-n3"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Zhongli's Hold Skill maps to the supported Press Skill, dash cancels are omitted, C6 Faruzan omits the optional Charged Shot, C0 Wanderer's optional Burst is omitted, and N3 spam is fixed to six strings in a 25s cycle.",
+      "openerActions": [],
+      "cycleActions": [[10, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3]],
+      "erTargets": {"WANDERER": 1.0, "FARUZAN": 1.6666666666414136, "BENNETT": 1.5957446808244684, "ZHONGLI": 1.0},
+      "sourceAssumptions": ["Zhongli uses Hold Skill", "C6 Faruzan uses Skill then Burst", "Bennett uses Skill then Burst and a later Skill", "Wanderer uses Skill and six N3 strings", "single target"],
+      "simulatorAssumptions": ["Zhongli's Hold Skill maps to Press Skill", "dash cancels are unsupported and removed", "C6 Faruzan omits the optional Charged Shot", "N3 spam is fixed to eighteen Normal actions", "C0 Wanderer's optional Burst is omitted", "explicit one-second waits preserve each simulator swap lock", "the steady-state trace uses a 25s cycle", "Favonius Warbow uses deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "4e8fae4e43730091598e1183e581980aa7a52d0aaad267c1eb672f4047009611"
     }
   ]
 }
