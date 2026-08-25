@@ -1141,6 +1141,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C6 Xingqiu, C6 Bennett, C6 Xiangling, C6 Sucrose", "Sacrificial Sword R5 Xingqiu", "Skyward Blade R1 Bennett", "Favonius Lance R5 Xiangling", "Thrilling Tales R5 Sucrose", "single target"]
+    },
+    {
+      "sourceId": "kqm-bennett-quick-guide-yoimiya-yelan-zhongli",
+      "title": "Bennett Quick Guide: Yoimiya Yelan Zhongli Vaporize",
+      "url": "https://keqingmains.com/q/bennett-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.7; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Yoimiya, C0 Zhongli, C0 Yelan, C6 Bennett", "Rust R1 Yoimiya", "Deathmatch R1 Zhongli", "Favonius Warbow R5 Yelan", "Skyward Blade R1 Bennett", "single target"]
     }
   ],
   "seeds": [
@@ -2678,6 +2688,20 @@
       "sourceAssumptions": ["Xingqiu uses Burst-N1 then Skill-dash-N3 and a later N5", "Bennett uses Burst-Skill then two later Skills", "Xiangling uses N1-Skill, Burst, and three later driver strings", "C6 Sucrose uses N2-Skill and optionally a second Skill-N2", "single target"],
       "simulatorAssumptions": ["Xingqiu's dash cancel is unsupported and removed", "Sucrose's optional second Skill is selected", "the complete normalized action trace is retained for review", "236% Xingqiu ER reaches every Burst", "237% requested Xiangling ER reaches the 237.5% KQMS ceiling", "Xiangling falls from 65.5205 to 65.0888 Energy across equivalent cycle boundaries", "no branch-search party is published"],
       "contentHash": "a55407c7d86f2258077931b2dd69d1824e6de180efc9d3a0e5ad7a2865f26b26"
+    },
+    {
+      "seedId": "kqm-bennett-yoimiya-yelan-zhongli-adapted-v1",
+      "partyName": "YoimiyaZhongliVaporizeUnavailable",
+      "scenarioFingerprint": "review-only:YOIMIYA-c0:ZHONGLI-c0:YELAN-c0:BENNETT-c6:energy-infeasible",
+      "sourceIds": ["kqm-bennett-quick-guide-yoimiya-yelan-zhongli"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because exact repeated replay requires 323.338% Yelan ER, above the 268.200% KQMS artifact ceiling even with deterministic Favonius Warbow R5.",
+      "openerActions": [],
+      "cycleActions": [[8, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3]],
+      "erTargets": {"YOIMIYA": 1.0, "ZHONGLI": 1.0, "YELAN": 3.23338, "BENNETT": 1.6010086592175754},
+      "sourceAssumptions": ["Yoimiya's opening Burst is optional", "Zhongli uses N1-hold Skill with a dash cancel", "Yelan uses Skill-Burst-N1", "Bennett uses Skill-N1-Burst-N1 and a later Skill", "Yoimiya uses Skill, three N5 strings, and one final Normal", "single target"],
+      "simulatorAssumptions": ["Yoimiya's optional Burst is omitted", "Zhongli's hold Skill maps to Press", "dash cancels are unsupported and removed", "the source combo maps to sixteen typed Yoimiya Normal actions", "the complete normalized action trace is retained for review", "Favonius Warbow R5 uses deterministic proc draws", "the exact repeated trace exceeds the KQMS Energy Recharge ceiling", "no branch-search party is published"],
+      "contentHash": "b838f499004a7175792634da34f23fe7c168e4c1d0087b15485267b3ee2f5c17"
     }
   ]
 }
