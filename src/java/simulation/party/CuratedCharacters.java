@@ -34,6 +34,7 @@ import model.character.Rosaria;
 import model.character.SangonomiyaKokomi;
 import model.character.Shenhe;
 import model.character.Sucrose;
+import model.character.Thoma;
 import model.character.Tighnari;
 import model.character.Xiao;
 import model.character.Xianyun;
@@ -188,6 +189,12 @@ final class CuratedCharacters {
         return new Layla(
                 new FavoniusSword(5, () -> FIXED_RANDOM_DRAW), null, TalentDataManager.getInstance(), 0,
                 () -> FIXED_RANDOM_DRAW);
+    }
+
+    static Character thoma() {
+        return new Thoma(
+                new FavoniusLance(5, () -> FIXED_RANDOM_DRAW), null,
+                TalentDataManager.getInstance(), 6, () -> FIXED_RANDOM_DRAW);
     }
 
     static Character ningguang() {

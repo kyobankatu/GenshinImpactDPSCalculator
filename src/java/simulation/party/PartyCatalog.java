@@ -37,6 +37,7 @@ public final class PartyCatalog {
         register(new WandererDoubleHydroPartyDefinition());
         register(new WandererLaylaPartyDefinition());
         register(new WandererZhongliPartyDefinition());
+        register(new WandererThomaPartyDefinition());
         register(new DilucXianyunVaporizePartyDefinition());
         register(new HuTaoXianyunVaporizePartyDefinition());
         register(new ArlecchinoOverloadPartyDefinition());
