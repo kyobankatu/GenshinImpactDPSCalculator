@@ -2,6 +2,7 @@ package sample;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,7 @@ import mechanics.rotation.PolicyAction;
 import mechanics.rotation.RotationSourceCatalog;
 import mechanics.rotation.SourcedRotationSeed;
 import mechanics.rotation.SourcedRotationSeed.AdaptationStatus;
+import simulation.party.DatasetSplit;
 import simulation.party.PartyCatalog;
 import simulation.party.PartyDefinition;
 
@@ -22,7 +24,7 @@ public final class RotationSourceCatalogRegressionTest {
     }
 
     public static void main(String[] args) throws Exception {
-        assertEmptyTrackedCatalogRoundTrips();
+        assertTrackedPilotCatalogRoundTrips();
         assertCanonicalFixtureHash();
         assertDefensiveActions();
         assertAlteredHashRejected();
@@ -30,11 +32,32 @@ public final class RotationSourceCatalogRegressionTest {
         System.out.println("RotationSourceCatalogRegressionTest passed");
     }
 
-    private static void assertEmptyTrackedCatalogRoundTrips() throws Exception {
+    private static void assertTrackedPilotCatalogRoundTrips() throws Exception {
         RotationSourceCatalog catalog = RotationSourceCatalog.loadDefault();
-        if (!catalog.getSources().isEmpty() || !catalog.getSeeds().isEmpty()) {
-            throw new AssertionError("Phase 11 catalog must start empty");
+        if (catalog.getSources().size() != 5 || catalog.getSeeds().size() != 5) {
+            throw new AssertionError("Expected five reviewed pilot sources and seeds");
         }
+        HashSet<String> parties = new HashSet<>();
+        int rejectedCount = 0;
+        for (SourcedRotationSeed seed : catalog.getSeeds()) {
+            if (!parties.add(seed.getPartyName())) {
+                throw new AssertionError("Invalid reviewed pilot seed: " + seed.getSeedId());
+            }
+            if (seed.getAdaptationStatus() == AdaptationStatus.REJECTED) {
+                rejectedCount++;
+                continue;
+            }
+            if (seed.getAdaptationStatus() != AdaptationStatus.ADAPTED
+                    || catalog.requireUsable(seed.getSeedId()) != seed) {
+                throw new AssertionError("Invalid usable pilot seed: " + seed.getSeedId());
+            }
+        }
+        if (rejectedCount != 2) {
+            throw new AssertionError("Expected two simulator-infeasible pilot seeds");
+        }
+        assertEquals(2, catalog.getUsableSeeds(DatasetSplit.TRAIN).size(), "train seeds");
+        assertEquals(1, catalog.getUsableSeeds(DatasetSplit.VALIDATION).size(), "validation seeds");
+        assertEquals(0, catalog.getUsableSeeds(DatasetSplit.HOLDOUT).size(), "holdout seeds");
         Path roundTrip = Files.createTempFile("rotation-source-catalog-", ".json");
         Files.writeString(roundTrip, catalog.toJson());
         RotationSourceCatalog loaded = RotationSourceCatalog.read(roundTrip);
@@ -207,6 +230,12 @@ public final class RotationSourceCatalogRegressionTest {
             RotationSourceCatalog.read(path);
         } catch (java.io.IOException exception) {
             throw new IllegalStateException(exception);
+        }
+    }
+
+    private static void assertEquals(int expected, int actual, String description) {
+        if (expected != actual) {
+            throw new AssertionError("Expected " + expected + " " + description + " but was " + actual);
         }
     }
 }

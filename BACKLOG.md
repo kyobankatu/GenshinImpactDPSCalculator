@@ -4610,3 +4610,20 @@ experiment record.
   fail-closed report rejected completion. B-212 remains open for dataset/model
   quality improvement; NCCL/DDP stays paused because local quality, not
   distributed throughput, is the measured blocker.
+- **Human-baseline pilot (accessed 2026-08-25):** all ten registered scenarios
+  now have an explicit evidence disposition. A catalog status of `adapted`
+  remains usable only after exact local multi-cycle replay; `rejected` and
+  negative-search rows remain audit evidence and never enter a dataset.
+
+  | Scenario | Evidence | Disposition |
+  | --- | --- | --- |
+  | `FlinsParty2` | Maintained KQM/gcsim exact-party search | Blocked: no exact maintained rotation source found for Flins, Ineffa, Columbina, Sucrose. |
+  | `RaidenParty` | KQM [Raiden Guide](https://keqingmains.com/raiden/), Rational | Rejected: the faithful local adaptation reaches Xingqiu's third-cycle Burst without sufficient Energy. |
+  | `FlinsParty` | Maintained KQM/gcsim exact-party search | Blocked: no exact maintained rotation source found for Flins, Ineffa, Columbina, Sucrose. |
+  | `AlhaithamHyperbloom` | KQM [Nahida Guide](https://keqingmains.com/nahida/), Alhaitham Hyperbloom | Adapted and retained: unsupported dash cancels are documented and the exact loadout passes multi-cycle replay. |
+  | `XiaoPlunge` | KQM [Xiao Quick Guide](https://keqingmains.com/q/xiao-quickguide/), Traditional Xiao | Adapted and retained: Zhongli Hold Skill and the field combo are concretized under supported actions. |
+  | `ArlecchinoOverload` | KQM [Arlecchino Quick Guide](https://keqingmains.com/q/arlecchino-quickguide/), Chevreuse Overloaded | Rejected: Arlecchino's Skill remains unavailable at the local second-cycle boundary. |
+  | `GanyuFreeze` | KQM [Ganyu Quick Guide](https://keqingmains.com/q/ganyu-quickguide/), Kokomi/Shenhe/Kazuha Freeze | Adapted and retained: tap Skills and omitted dash cancels are explicit, and three-cycle replay passes. |
+  | `GamingMelt` | KQM [Xianyun Quick Guide](https://keqingmains.com/q/xianyun-quickguide/), exact listed team | Blocked: the guide marks the exact Gaming rotation as testing in progress and publishes no sequence. |
+  | `TighnariSpread` | KQM [Kirara Guide](https://keqingmains.com/kirara/) and [Tighnari Guide](https://keqingmains.com/tighnari/) | Blocked: nearby teams replace Ororon with Nahida, Fischl, or Zhongli; cross-party transplantation is forbidden. |
+  | `NingguangCrystallize` | KQM [Ningguang Quick Guide](https://keqingmains.com/q/ningguang-quickguide/) and [Ningguang Guide](https://keqingmains.com/ningguang/) | Blocked: the nearby Yae team uses Zhongli and Fischl, not Ororon and Kirara. |

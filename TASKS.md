@@ -27,7 +27,8 @@ The simulator-only autonomous campaign is complete. B-212 Phases 1-10 built the
 local expert-iteration rotation-optimizer pipeline, but the local quality gate
 failed. Phase 11 now provides the source catalog contract; Phases 12-17 continue
 the sourced human-rotation seed campaign and teacher quality repair before any
-further model-architecture or NCCL/DDP work.
+further model-architecture or NCCL/DDP work. Phases 12-14 are complete; Phase
+15 is the next implementation phase.
 
 The prior simulator content campaigns, including Skill-focused event weapons,
 are complete; RL and generated docs remain excluded.
@@ -25803,7 +25804,7 @@ Completion evidence:
 
 ### Phase 12: Multi-Cycle Seed Replay And Energy Feasibility
 
-Status: Planned.
+Status: Done (2026-08-25).
 
 Why:
 
@@ -25872,9 +25873,19 @@ Verification:
 - `./gradlew RotationSeedRegressionTest RotationEnvironmentRegressionTest PartyCatalogRegressionTest build`
 - `python scripts/agent_validate.py --path src/java/mechanics/rotation/RotationSeedEvaluation.java --run`
 
+Completion evidence:
+
+- Source-specific calibration freezes a complete build fingerprint and replays
+  opener plus alternating cycles without resetting combat state. Deterministic
+  fixtures assert action traces, cycle damage, state hashes, Energy boundaries,
+  illegal actions, stale ER, and horizon failures.
+- Exact sample, RL, search, and source replay construction share
+  `PartyBuildResolver`; curated parties consume complete audited fixed builds,
+  while optimized parties reject absent build maps.
+
 ### Phase 13: Offline Source Import And Restricted Translation
 
-Status: Planned.
+Status: Done (2026-08-25).
 
 Why:
 
@@ -25922,9 +25933,18 @@ Verification:
 - `python scripts/validate_agent_assets.py`
 - `python scripts/preflight.py`
 
+Completion evidence:
+
+- The dependency-free importer emits deterministic candidate-only reports and
+  cannot set a trainable status or content hash. Restricted arrow/list mapping
+  covers typed combat actions, explicit swaps, waits, and ER annotations.
+- Conditionals, unbounded waits, dash/jump cancels, unknown shorthand,
+  duplicate URLs, malformed fields, and multi-target assumptions remain
+  machine-readable blockers instead of being discarded.
+
 ### Phase 14: Existing Ten-Scenario Human Baseline Pilot
 
-Status: Planned.
+Status: Done (2026-08-25).
 
 Why:
 
@@ -25973,6 +25993,21 @@ Verification:
 
 - `./gradlew RotationSourceCatalogRegressionTest RotationSeedRegressionTest BenchmarkRotationSearch PartyCatalogRegressionTest build`
 - `python scripts/preflight.py --run`
+
+Completion evidence:
+
+- All ten registered scenarios have a dated source disposition in B-212. Five
+  exact-party candidates are tracked: three documented adaptations pass legal,
+  deterministic multi-cycle replay and two remain explicitly rejected after
+  local cyclic failures; the other five retain concrete negative-search or
+  source-readiness blockers.
+- Usable catalog selection preserves dataset splits. Every retained pilot seed
+  passes at least three cycles, steady Energy comparison, and feasibility-first
+  non-inferiority against the definition baseline under the same frozen build.
+- The prior Phase 10 generated dataset now fails closed as stale because build
+  fingerprints were deliberately strengthened. Phase 15 must regenerate
+  derived datasets and priors; stale generated artifacts were not rewritten or
+  committed during this source-catalog phase.
 
 ### Phase 15: Source-Matched Bulk Human Rotation Campaign
 

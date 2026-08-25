@@ -1,6 +1,131 @@
 {
   "schemaVersion": 1,
   "actionLayoutRevision": 2,
-  "sources": [],
-  "seeds": []
+  "sources": [
+    {
+      "sourceId": "kqm-raiden-guide-national",
+      "title": "Raiden Guide: Rational",
+      "url": "https://keqingmains.com/raiden/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["Raiden, Xingqiu, Xiangling, Bennett", "single target"]
+    },
+    {
+      "sourceId": "kqm-nahida-guide-alhaitham-hyperbloom",
+      "title": "Nahida Guide: Alhaitham Hyperbloom",
+      "url": "https://keqingmains.com/nahida/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["Alhaitham, Nahida, Xingqiu, Kuki Shinobu", "single target"]
+    },
+    {
+      "sourceId": "kqm-xiao-quick-guide-traditional",
+      "title": "Xiao Quick Guide: Traditional Xiao",
+      "url": "https://keqingmains.com/q/xiao-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["Xiao, Faruzan, Bennett, Zhongli", "C6 Faruzan", "single target"]
+    },
+    {
+      "sourceId": "kqm-arlecchino-quick-guide-overloaded",
+      "title": "Arlecchino Quick Guide: Chevreuse Overloaded",
+      "url": "https://keqingmains.com/q/arlecchino-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["Arlecchino, Chevreuse, Fischl, Bennett", "single target"]
+    },
+    {
+      "sourceId": "kqm-ganyu-quick-guide-kokomi-shenhe-kazuha",
+      "title": "Ganyu Quick Guide: Kokomi Shenhe Kazuha Freeze",
+      "url": "https://keqingmains.com/q/ganyu-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["Ganyu, Kokomi, Shenhe, Kazuha", "single target"]
+    }
+  ],
+  "seeds": [
+    {
+      "seedId": "kqm-raiden-national-adapted-v1",
+      "partyName": "RaidenParty",
+      "scenarioFingerprint": "loadout-v1:RAIDEN_SHOGUN-c6-SkywardSpine-EmblemOfSeveredFate:XINGQIU-c6-WolfFang-EmblemOfSeveredFate:XIANGLING-c6-TheCatch-EmblemOfSeveredFate:BENNETT-c6-SkywardBlade-NoblesseOblige",
+      "sourceIds": ["kqm-raiden-guide-national"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected after the adapted sequence reached Xingqiu's third-cycle Burst without enough Energy; no unsourced battery action was added.",
+      "openerActions": [3],
+      "cycleActions": [[8, 3, 5, 10, 5, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 5, 3, 7, 5, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 3, 10, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9]],
+      "erTargets": {"RAIDEN_SHOGUN": 3.0, "XINGQIU": 3.0, "XIANGLING": 3.0, "BENNETT": 3.0},
+      "sourceAssumptions": ["Raiden Skill is first-rotation setup", "Xingqiu Skill precedes Burst", "single target"],
+      "simulatorAssumptions": ["3N3C N1C is the fixed supported Raiden field combo", "full first-cycle Energy is explicit in the scenario fingerprint", "three-cycle replay is Energy-infeasible for the exact local loadout"],
+      "contentHash": "dc17a00c00fe32340419d8dcb6979ede171221aef38f5d59fd4dbb1762d549c0"
+    },
+    {
+      "seedId": "kqm-alhaitham-hyperbloom-adapted-v1",
+      "partyName": "AlhaithamHyperbloom",
+      "scenarioFingerprint": "loadout-v1:ALHAITHAM-c0-FavoniusSword-r5-artifact-kqms-generic-v1:NAHIDA-c0-WanderingEvenstar-r5-artifact-kqms-generic-v1:XINGQIU-c6-SacrificialSword-r5-artifact-kqms-generic-v1:KUKI_SHINOBU-c0-WolfFang-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-nahida-guide-alhaitham-hyperbloom"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Dash-canceled Normal strings are condensed inside the 24s horizon, and Xingqiu uses a second Skill after N1 to consume the exact local Sacrificial Sword R5 reset.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 5, 9, 3, 5, 0, 3, 10, 3, 0, 7, 5, 0, 0, 3, 0, 0, 1, 0, 0, 0]],
+      "erTargets": {"ALHAITHAM": 1.4931191766182605, "NAHIDA": 1.572327043993711, "XINGQIU": 1.8214329009348613, "KUKI_SHINOBU": 1.0},
+      "sourceAssumptions": ["2N3D and 3N3D strings use dash cancels", "single target"],
+      "simulatorAssumptions": ["dash cancels are unsupported and Normal strings are condensed", "Sacrificial Sword R5 reset is consumed deterministically", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "f62dcb987c0d075dbaed9b036016d2b8a798387aa8d23931d5eeb2064821fddf"
+    },
+    {
+      "seedId": "kqm-xiao-traditional-adapted-v1",
+      "partyName": "XiaoPlunge",
+      "scenarioFingerprint": "loadout-v1:XIAO-c0-FavoniusLance-r5-artifact-kqms-generic-v1:FARUZAN-c6-FavoniusWarbow-r5-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:ZHONGLI-c0-Deathmatch-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-xiao-quick-guide-traditional"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Zhongli Hold Skill is represented by Skill Press, Xiao's combo is fixed to eight Plunging Attacks, and explicit 1.0s waits preserve legal swaps.",
+      "openerActions": [],
+      "cycleActions": [[10, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 3, 5, 2, 2, 2, 2, 2, 2, 2, 2]],
+      "erTargets": {"XIAO": 1.0542168674548194, "FARUZAN": 1.535087719276316, "BENNETT": 1.7441860464825583, "ZHONGLI": 1.0},
+      "sourceAssumptions": ["C6 Faruzan", "Zhongli Hold Skill", "single target"],
+      "simulatorAssumptions": ["Zhongli Skill Press substitutes for Hold", "eight Plunging Attacks concretize the source combo", "explicit swap waits use the configured 1.0s cooldown", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "8e7cd0403afa4d89754ee073546f4338a02d9e59198312515d7171b2edf8165d"
+    },
+    {
+      "seedId": "kqm-arlecchino-overload-adapted-v1",
+      "partyName": "ArlecchinoOverload",
+      "scenarioFingerprint": "loadout-v1:ARLECCHINO-c0-Deathmatch-r1-artifact-kqms-generic-v1:FISCHL-c6-TheStringless-r5-artifact-kqms-generic-v1:CHEVREUSE-c0-Deathmatch-r1-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-arlecchino-quick-guide-overloaded"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because the simulator leaves Arlecchino's Skill unavailable at the second-cycle boundary; no unsourced Skill omission was added.",
+      "openerActions": [],
+      "cycleActions": [
+        [3, 10, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 1, 0, 0, 0, 0, 0, 0],
+        [3, 10, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 0, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 1, 0, 0, 0, 0, 0, 0]
+      ],
+      "erTargets": {"ARLECCHINO": 3.0, "FISCHL": 3.0, "CHEVREUSE": 3.0, "BENNETT": 3.0},
+      "sourceAssumptions": ["Fischl alternates Skill and Burst", "Chevreuse Burst is optional", "single target"],
+      "simulatorAssumptions": ["Chevreuse Skill Press substitutes for Hold", "dash-canceled Normal strings are condensed", "explicit swap waits use the configured 1.0s cooldown", "Arlecchino Skill cooldown prevents cyclic replay", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "bb2b8f763af93bda6714695a51feea32d3bfe7b760456345f44d47eced78f0ea"
+    },
+    {
+      "seedId": "kqm-ganyu-freeze-adapted-v1",
+      "partyName": "GanyuFreeze",
+      "scenarioFingerprint": "loadout-v1:GANYU-c0-FavoniusWarbow-r5-artifact-kqms-generic-v1:SHENHE-c0-FavoniusLance-r5-artifact-kqms-generic-v1:SANGONOMIYA_KOKOMI-c0-WanderingEvenstar-r5-artifact-kqms-generic-v1:KAEDEHARA_KAZUHA-c0-SkywardBlade-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-ganyu-quick-guide-kokomi-shenhe-kazuha"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Dash cancels are omitted, Tap Skills map to Skill Press, and an explicit 1.0s wait before Shenhe's second Skill restores the documented cooldown boundary.",
+      "openerActions": [],
+      "cycleActions": [[1, 10, 3, 8, 5, 3, 9, 3, 7, 3, 5, 10, 3, 5, 7, 1, 8, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 0, 7, 1, 3, 1]],
+      "erTargets": {"GANYU": 1.0, "SHENHE": 1.2815471095631403, "SANGONOMIYA_KOKOMI": 1.0, "KAEDEHARA_KAZUHA": 1.0526315789298244},
+      "sourceAssumptions": ["Tap Skill notation", "dash cancels", "single target"],
+      "simulatorAssumptions": ["Tap Skill maps to Skill Press", "dash cancels are unsupported and removed", "explicit wait restores Shenhe's Skill cooldown", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "05f9e2873d37c93b6181d4260749abc1aa6c9b88acf93845669f1edae5366fb0"
+    }
+  ]
 }

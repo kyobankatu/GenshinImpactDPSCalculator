@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import mechanics.rl.ActionResult;
 import mechanics.rl.BattleEnvironment;
 import model.type.CharacterId;
+import simulation.CombatSimulator;
 import simulation.SimulatorSnapshot;
 
 /**
@@ -167,6 +168,12 @@ public final class BattleRotationEnvironment implements RotationEnvironment {
     @Override
     public RotationScenario scenario() {
         return scenario;
+    }
+
+    /** Returns the active simulator after reset for audited boundary metrics. */
+    public CombatSimulator getSimulator() {
+        ensureReady();
+        return battleEnvironment.getSimulator();
     }
 
     @Override

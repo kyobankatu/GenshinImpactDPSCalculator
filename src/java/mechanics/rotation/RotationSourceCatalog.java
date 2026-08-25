@@ -21,6 +21,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 
 import model.type.CharacterId;
+import simulation.party.DatasetSplit;
 import simulation.party.PartyCatalog;
 import simulation.party.PartyDefinition;
 
@@ -175,6 +176,21 @@ public final class RotationSourceCatalog {
 
     public List<SourcedRotationSeed> getSeeds() {
         return List.copyOf(seeds);
+    }
+
+    /** Returns usable seeds whose exact party belongs to the requested split. */
+    public List<SourcedRotationSeed> getUsableSeeds(DatasetSplit split) {
+        if (split == null) {
+            throw new IllegalArgumentException("Dataset split must not be null");
+        }
+        List<SourcedRotationSeed> matching = new ArrayList<>();
+        for (SourcedRotationSeed seed : seeds) {
+            PartyDefinition definition = PartyCatalog.require(seed.getPartyName());
+            if (seed.isUsable() && definition.datasetSplit() == split) {
+                matching.add(seed);
+            }
+        }
+        return List.copyOf(matching);
     }
 
     /** Source metadata pinned at review time. */

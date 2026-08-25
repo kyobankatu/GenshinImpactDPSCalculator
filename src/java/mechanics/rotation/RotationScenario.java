@@ -90,11 +90,36 @@ public final class RotationScenario {
         if (baseConfig == null) {
             throw new IllegalArgumentException("baseConfig must not be null");
         }
+        TotalOptimizationResult build = PartyBuildResolver.require(definition);
+        return forPartyBuild(
+                definition,
+                build,
+                baseConfig,
+                cycleDurationSeconds,
+                cycleCount,
+                seed,
+                objective);
+    }
+
+    /** Builds a fixed single-party scenario from an explicitly frozen build. */
+    public static RotationScenario forPartyBuild(
+            PartyDefinition definition,
+            TotalOptimizationResult build,
+            EpisodeConfig baseConfig,
+            double cycleDurationSeconds,
+            int cycleCount,
+            long seed,
+            RotationObjective objective) {
+        if (definition == null || build == null) {
+            throw new IllegalArgumentException("Party definition and optimized build are required");
+        }
+        if (baseConfig == null) {
+            throw new IllegalArgumentException("baseConfig must not be null");
+        }
         double horizon = cycleDurationSeconds * cycleCount;
         EpisodeConfig scenarioConfig = baseConfig
                 .withPartyOrder(definition.partyOrder())
                 .withMaxEpisodeTime(horizon);
-        TotalOptimizationResult build = PartyBuildResolver.require(definition);
         RLEpisodeFactory factory = new SinglePartyRLEpisodeFactory(
                 GenericRLSimulatorFactory.spec(definition, build), scenarioConfig);
         String fingerprint = definition.loadoutFingerprint() + ":cycles=" + cycleCount

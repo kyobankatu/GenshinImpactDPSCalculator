@@ -2,7 +2,9 @@ package mechanics.optimization;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
+import simulation.CombatSimulator;
 import simulation.party.PartyDefinition;
 
 /**
@@ -24,7 +26,24 @@ public final class PartyBuildResolver {
         if (definition == null) {
             throw new IllegalArgumentException("Party definition must not be null");
         }
-        String key = cacheKey(definition);
+        return require(
+                definition,
+                "baseline:" + java.util.Arrays.toString(definition.baselinePolicyActions()),
+                definition::executeRotation);
+    }
+
+    /** Returns a frozen build calibrated against an explicit rotation identity. */
+    public static TotalOptimizationResult require(
+            PartyDefinition definition,
+            String rotationFingerprint,
+            Consumer<CombatSimulator> rotationRunner) {
+        if (definition == null) {
+            throw new IllegalArgumentException("Party definition must not be null");
+        }
+        if (rotationFingerprint == null || rotationFingerprint.isBlank() || rotationRunner == null) {
+            throw new IllegalArgumentException("Rotation fingerprint and runner are required");
+        }
+        String key = cacheKey(definition, rotationFingerprint);
         synchronized (BUILDS) {
             TotalOptimizationResult existing = BUILDS.get(key);
             if (existing != null) {
@@ -36,16 +55,16 @@ public final class PartyBuildResolver {
             }
             TotalOptimizationResult optimized = OptimizerPipeline.run(
                     definition::createSimulator,
-                    definition::executeRotation,
+                    rotationRunner,
                     definition.optimizationTargets());
             BUILDS.put(key, optimized);
             return optimized;
         }
     }
 
-    private static String cacheKey(PartyDefinition definition) {
+    private static String cacheKey(PartyDefinition definition, String rotationFingerprint) {
         return definition.loadoutFingerprint()
                 + ":cycle=" + Double.toHexString(definition.rotationCycleSeconds())
-                + ":actions=" + java.util.Arrays.toString(definition.baselinePolicyActions());
+                + ":rotation=" + rotationFingerprint;
     }
 }

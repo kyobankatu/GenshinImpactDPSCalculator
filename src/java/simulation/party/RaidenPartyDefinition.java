@@ -62,7 +62,7 @@ public final class RaidenPartyDefinition extends AbstractPartyDefinition {
 
     @Override
     public double rotationCycleSeconds() {
-        return 21.0;
+        return 22.0;
     }
 
     @Override
@@ -186,12 +186,15 @@ public final class RaidenPartyDefinition extends AbstractPartyDefinition {
 
         Xingqiu xingqiu = new Xingqiu(new WolfFang(), null);
         ArtifactOptimizer.OptimizationConfig xqConfig = new ArtifactOptimizer.OptimizationConfig();
-        xqConfig.mainStatSands = StatType.ATK_PERCENT;
+        double xingqiuEr = erTargets.getOrDefault(CharacterId.XINGQIU, 1.0);
+        xqConfig.mainStatSands = xingqiuEr > 1.60
+                ? StatType.ENERGY_RECHARGE
+                : StatType.ATK_PERCENT;
         xqConfig.mainStatGoblet = StatType.HYDRO_DMG_BONUS;
         xqConfig.mainStatCirclet = StatType.CRIT_RATE;
         xqConfig.subStatPriority = Arrays.asList(StatType.ENERGY_RECHARGE, StatType.CRIT_RATE,
                 StatType.CRIT_DMG, StatType.ATK_PERCENT);
-        xqConfig.minER = erTargets.getOrDefault(CharacterId.XINGQIU, 1.0);
+        xqConfig.minER = xingqiuEr;
         if (partyManualRolls.containsKey(CharacterId.XINGQIU)) {
             xqConfig.manualRolls = partyManualRolls.get(CharacterId.XINGQIU);
         }
@@ -204,12 +207,15 @@ public final class RaidenPartyDefinition extends AbstractPartyDefinition {
         Xiangling xiangling = new Xiangling(new TheCatch(), null);
         xiangling.setChiliPickupAssumed(true);
         ArtifactOptimizer.OptimizationConfig xlConfig = new ArtifactOptimizer.OptimizationConfig();
-        xlConfig.mainStatSands = StatType.ATK_PERCENT;
+        double xianglingEr = erTargets.getOrDefault(CharacterId.XIANGLING, 1.0);
+        xlConfig.mainStatSands = xianglingEr > 1.60
+                ? StatType.ENERGY_RECHARGE
+                : StatType.ATK_PERCENT;
         xlConfig.mainStatGoblet = StatType.PYRO_DMG_BONUS;
         xlConfig.mainStatCirclet = StatType.CRIT_RATE;
         xlConfig.subStatPriority = Arrays.asList(StatType.ENERGY_RECHARGE, StatType.CRIT_RATE,
                 StatType.CRIT_DMG, StatType.ATK_PERCENT, StatType.ELEMENTAL_MASTERY);
-        xlConfig.minER = erTargets.getOrDefault(CharacterId.XIANGLING, 1.0);
+        xlConfig.minER = xianglingEr;
         if (partyManualRolls.containsKey(CharacterId.XIANGLING)) {
             xlConfig.manualRolls = partyManualRolls.get(CharacterId.XIANGLING);
         }

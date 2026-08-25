@@ -252,4 +252,16 @@ public final class SourcedRotationSeed {
     public Map<String, Double> getErTargets() {
         return erTargets;
     }
+
+    public String getAdaptationNote() {
+        return adaptationNote;
+    }
+
+    public List<String> getSourceAssumptions() {
+        return List.copyOf(sourceAssumptions);
+    }
+
+    public List<String> getSimulatorAssumptions() {
+        return List.copyOf(simulatorAssumptions);
+    }
 }

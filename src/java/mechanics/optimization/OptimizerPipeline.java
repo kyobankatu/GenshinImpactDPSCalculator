@@ -54,7 +54,7 @@ public class OptimizerPipeline {
          *
          * @param simFactory       factory that accepts an ER target map and a DPS roll
          *                         map and returns a fully configured simulator; either
-         *                         argument may be {@code null} during calibration
+         *                         argument receives a non-null map during calibration
          * @param rotationRunner   consumer that drives a complete rotation on the
          *                         simulator
          * @param dpsCharsAndStats map of {@code CharacterId -> substats to optimize}
