@@ -721,6 +721,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Yoimiya, C6 Xingqiu, C6 Bennett, C6 Fischl", "Rust R1", "Favonius Sword R5 Xingqiu", "Favonius Warbow R5 Fischl", "three complete N5 strings", "single target"]
+    },
+    {
+      "sourceId": "kqm-yoimiya-quick-guide-furina-bennett-xiangling",
+      "title": "Yoimiya Quick Guide: Furina Bennett Xiangling Vaporize",
+      "url": "https://keqingmains.com/q/yoimiya-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Luna I; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Yoimiya, C0 Furina, C6 Bennett, C6 Xiangling", "Rust R1", "Favonius Lance R5 Xiangling", "three complete N5 strings", "single target"]
     }
   ],
   "seeds": [
@@ -1712,6 +1722,20 @@
       "sourceAssumptions": ["Xingqiu uses Skill-Burst-N1", "Bennett uses Skill-Burst-N1, then a later Skill", "Fischl uses N2 and alternates Skill and Burst", "Yoimiya uses Skill and three complete N5 strings", "Yoimiya's Burst is optional", "single target"],
       "simulatorAssumptions": ["Xingqiu's dash is unsupported and removed", "Yoimiya's optional Burst is omitted", "the guide-defined combo maps to fifteen typed Normal actions", "the cycles use definition-normalized swap waits", "the reviewed trace uses a 25s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "c7643a8d4fbf94a2679dd1f8ae8832553fc92fa170acd120d8dd478886f3539d"
+    },
+    {
+      "seedId": "kqm-yoimiya-furina-bennett-xiangling-adapted-v1",
+      "partyName": "YoimiyaFurinaVaporize",
+      "scenarioFingerprint": "loadout-v1:YOIMIYA-c0-Rust-r1-artifact-kqms-generic-v1:FURINA-c0-WolfFang-r1-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:XIANGLING-c6-FavoniusLance-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-yoimiya-quick-guide-furina-bennett-xiangling"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Furina's dash and Yoimiya's optional Burst are omitted, the guide-defined combo is expanded to three complete N5 strings, and the unchanged definition-normalized trace uses a 30s cycle.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 5, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 5, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 0, 0]],
+      "erTargets": {"YOIMIYA": 1.0, "FURINA": 1.5151515151430992, "BENNETT": 1.2195121951151773, "XIANGLING": 1.6888184367548216},
+      "sourceAssumptions": ["Furina uses Skill then Burst", "Bennett uses Burst-Skill, then a later Skill", "Xiangling uses Burst-Skill, then later N2", "Yoimiya uses Skill and three complete N5 strings", "Yoimiya's Burst is optional", "single target"],
+      "simulatorAssumptions": ["Furina's dash is unsupported and removed", "Yoimiya's optional Burst is omitted", "the guide-defined combo maps to fifteen typed Normal actions", "the cycle uses definition-normalized swap waits", "the unchanged trace uses a 30s cycle", "Favonius Lance R5 uses deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "41da075f7696af70b29a52749b09812841d76542c2bbe6d45f21dea3fce113dc"
     }
   ]
 }
