@@ -461,6 +461,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Wanderer, C6 Faruzan, C6 Xingqiu, C0 Layla", "Tulaytullah's Remembrance R1", "Favonius Sword R5 on Xingqiu and Layla", "single target"]
+    },
+    {
+      "sourceId": "kqm-wanderer-quick-guide-faruzan-layla-bennett",
+      "title": "Wanderer Quick Guide: Faruzan Layla Bennett",
+      "url": "https://keqingmains.com/q/wanderer-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Wanderer, C6 Faruzan, C0 Layla, C6 Bennett", "Tulaytullah's Remembrance R1", "Favonius Sword R5 on Layla", "single target"]
     }
   ],
   "seeds": [
@@ -1088,6 +1098,20 @@
       "sourceAssumptions": ["Xingqiu uses Skill, Burst, then N1", "C6 Faruzan uses Skill, Burst, then N1", "Layla uses Burst, Skill, then N1", "Wanderer uses Skill and six N3 strings", "single target"],
       "simulatorAssumptions": ["Xingqiu's dash cancel is unsupported and removed", "C6 Faruzan omits the optional Charged Shot", "N3 spam is fixed to eighteen Normal actions", "C0 Wanderer's optional Burst is omitted", "explicit one-second waits preserve each simulator swap lock", "the reviewed trace uses a 25s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint", "three-cycle replay is Energy-infeasible for the exact local loadout"],
       "contentHash": "b6aa6b2a1bd47e72a8caaa08a9287999e5e90c1ff66098e585b2b3c8302ad947"
+    },
+    {
+      "seedId": "kqm-wanderer-faruzan-layla-bennett-adapted-v1",
+      "partyName": "WandererLayla",
+      "scenarioFingerprint": "loadout-v1:WANDERER-c0-TulaytullahsRemembrance-r1-artifact-kqms-generic-v1:FARUZAN-c6-FavoniusWarbow-r5-artifact-kqms-generic-v1:LAYLA-c0-FavoniusSword-r5-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-wanderer-quick-guide-faruzan-layla-bennett", "kqm-wanderer-quick-guide-tulaytullah-n3"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "C6 Faruzan omits the optional Charged Shot, C0 Wanderer's optional Burst is omitted, and Tulaytullah's documented N3 spam is fixed to six N3 strings in a 25s cycle.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 5, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3]],
+      "erTargets": {"WANDERER": 1.0, "FARUZAN": 1.2643678160727967, "LAYLA": 1.0, "BENNETT": 1.2987012986796538},
+      "sourceAssumptions": ["C6 Faruzan uses Skill then Burst", "Layla uses Burst then Skill", "Bennett uses Skill then Burst and a later Skill", "Wanderer uses Skill and six N3 strings", "single target"],
+      "simulatorAssumptions": ["C6 Faruzan omits the optional Charged Shot", "N3 spam is fixed to eighteen Normal actions", "C0 Wanderer's optional Burst is omitted", "explicit one-second waits preserve each simulator swap lock", "the steady-state trace uses a 25s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "7f6621ef41dbba07941c4ab96d66946974cb17b69b766bb5a29edaf90a4ef016"
     }
   ]
 }
