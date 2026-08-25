@@ -1101,6 +1101,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C6 Bennett, C0 Xilonen, C0 Rosaria, C6 Kaeya", "Skyward Blade R1 Bennett", "Peak Patrol Song R1 Xilonen", "Favonius Lance R5 Rosaria", "Favonius Sword R5 Kaeya", "single target"]
+    },
+    {
+      "sourceId": "kqm-xingqiu-quick-guide-sucrose-ororon-beidou",
+      "title": "Xingqiu Quick Guide: Sucrose Ororon Beidou Electro-Charged",
+      "url": "https://keqingmains.com/q/xingqiu-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.7; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C6 Sucrose, C6 Xingqiu, C0 Ororon, C6 Beidou", "single target"]
     }
   ],
   "seeds": [
@@ -2582,6 +2592,20 @@
       "sourceAssumptions": ["Bennett uses a first-cycle-only Skill, Burst-N1, then Skill-2[N3-Skill]-N3", "Xilonen uses Skill-N2", "Rosaria uses Skill-Burst", "Kaeya uses Skill-Burst", "single target"],
       "simulatorAssumptions": ["the documented Bennett self-application delay is covered by preceding support field time and explicit swap waits", "fixed 1.5s waits reach Bennett's second and third on-field Skill cooldowns", "both source-prescribed Bennett opener forms are retained", "all sourced Normal counts are retained", "the reviewed alternating trace uses a 24s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "b56e7d02da02209a474085b84c98af476470cd50c2d3c7121296285d9f893f71"
+    },
+    {
+      "seedId": "kqm-xingqiu-sucrose-ororon-beidou-rejected-v1",
+      "partyName": "SucroseOroronElectroChargedUnavailable",
+      "scenarioFingerprint": "review-only:BEIDOU-c6:SUCROSE-c6:XINGQIU-c6:ORORON-c0:cross-split",
+      "sourceIds": ["kqm-xingqiu-quick-guide-sucrose-ororon-beidou"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because Ororon is assigned to holdout while Sucrose, Xingqiu, and Beidou are assigned to train; publishing the exact team would violate the character-identity split contract.",
+      "openerActions": [],
+      "cycleActions": [[3, 8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 0, 3, 0, 0, 3, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0], [8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 0, 3, 0, 0, 3, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0]],
+      "erTargets": {"BEIDOU": 1.0, "SUCROSE": 1.0, "XINGQIU": 1.0, "ORORON": 1.0},
+      "sourceAssumptions": ["Beidou uses a first-cycle-only Skill, then Skill-N1-Burst-N1 and a later Skill-N2", "Sucrose uses Skill-Burst, then N1-Skill-N2-an optional second Skill-N2C-N3-N2C-N3", "Xingqiu uses Skill-Burst-N1", "Ororon uses Skill-Burst-N1", "single target"],
+      "simulatorAssumptions": ["dash cancels are unsupported and removed", "Sucrose's optional Burst and second Skill are selected", "the complete first and later normalized action traces are retained for review", "Ororon belongs to holdout", "Sucrose, Xingqiu, and Beidou belong to train", "no cross-split party is published"],
+      "contentHash": "73376e3a78889180f11947bd481d5f27839cd4ef0f82e2e14718a042389d1cdf"
     }
   ]
 }
