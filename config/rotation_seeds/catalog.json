@@ -411,6 +411,26 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Xiao, C0 Furina, C0 Xianyun, C6 Lan Yan", "twelve high Plunges", "single target without collision damage"]
+    },
+    {
+      "sourceId": "kqm-lan-yan-quick-guide-wanderer-faruzan-bennett",
+      "title": "Lan Yan Quick Guide: Wanderer Faruzan Bennett",
+      "url": "https://keqingmains.com/q/lan-yan-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Wanderer, C6 Faruzan, C6 Bennett, C6 Lan Yan", "Tulaytullah's Remembrance R1", "Favonius Codex R5 on Lan Yan", "single target"]
+    },
+    {
+      "sourceId": "kqm-wanderer-quick-guide-tulaytullah-n3",
+      "title": "Wanderer Quick Guide: Tulaytullah N3 Spam",
+      "url": "https://keqingmains.com/q/wanderer-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Wanderer", "Tulaytullah's Remembrance R1", "N3 spam until Windfavored ends", "single target"]
     }
   ],
   "seeds": [
@@ -982,6 +1002,20 @@
       "sourceAssumptions": ["Furina uses Skill then Burst", "Xianyun uses EP Q", "C6 Lan Yan uses Burst, Skill, and N1", "Xiao uses two Skills, Burst, and twelve high Plunges", "single target without collision damage"],
       "simulatorAssumptions": ["Furina's dash input is unsupported and removed", "jump inputs map directly to supported high Plunge actions", "collision and low-Plunge packets are excluded", "represented action durations satisfy each swap lock without inserted waits", "the steady-state trace uses a 31s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "38f7918290c39e215a2bce946c0337e2b477903382bb0a9b326ebe947d7b5566"
+    },
+    {
+      "seedId": "kqm-lan-yan-wanderer-faruzan-bennett-adapted-v1",
+      "partyName": "WandererLanYan",
+      "scenarioFingerprint": "loadout-v1:WANDERER-c0-TulaytullahsRemembrance-r1-artifact-kqms-generic-v1:FARUZAN-c6-FavoniusWarbow-r5-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:LAN_YAN-c6-FavoniusCodex-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-lan-yan-quick-guide-wanderer-faruzan-bennett", "kqm-wanderer-quick-guide-tulaytullah-n3"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Lan Yan's N1 is retained, dash cancels are omitted, a one-second wait preserves the simulator swap lock after Bennett's Burst, and Tulaytullah's documented N3 spam is fixed to six N3 strings before Wanderer's Burst in a 25s cycle.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 5, 9, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 5, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5]],
+      "erTargets": {"WANDERER": 1.0, "FARUZAN": 1.3924050632700422, "BENNETT": 1.8181818181515152, "LAN_YAN": 1.2048192770883535},
+      "sourceAssumptions": ["Faruzan uses Skill then Burst", "Bennett uses Skill then Burst", "Lan Yan uses Skill, N1, then Burst", "Wanderer uses Skill, six N3 strings, then Burst", "single target"],
+      "simulatorAssumptions": ["dash cancels are unsupported and removed", "N3 spam is fixed to eighteen Normal actions", "an explicit one-second wait preserves the simulator swap lock after Bennett's Burst", "the steady-state trace uses a 25s cycle", "Favonius Warbow and Favonius Codex R5 use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "3a772379093873e17aec6ef67b5e29c2e260876d37f6d0ebd38fa09829eb0e79"
     }
   ]
 }

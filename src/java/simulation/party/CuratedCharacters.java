@@ -39,6 +39,7 @@ import model.character.Xiao;
 import model.character.Xianyun;
 import model.character.Xingqiu;
 import model.character.Xiangling;
+import model.character.Wanderer;
 import model.character.Xilonen;
 import model.character.YaeMiko;
 import model.character.Yelan;
@@ -61,6 +62,7 @@ import model.weapon.SkywardBlade;
 import model.weapon.StaffOfHoma;
 import model.weapon.TheStringless;
 import model.weapon.ThrillingTalesOfDragonSlayers;
+import model.weapon.TulaytullahsRemembrance;
 import model.weapon.UrakuMisugiri;
 import model.weapon.Verdict;
 import model.weapon.WanderingEvenstar;
@@ -80,6 +82,10 @@ final class CuratedCharacters {
 
     static Character xiao() {
         return new Xiao(new FavoniusLance(5, () -> FIXED_RANDOM_DRAW), null, 0);
+    }
+
+    static Character wanderer() {
+        return new Wanderer(new TulaytullahsRemembrance(1), null, 0);
     }
 
     static Character diluc() {
@@ -114,6 +120,10 @@ final class CuratedCharacters {
 
     static Character lanYan() {
         return new LanYan(new ThrillingTalesOfDragonSlayers(5), null, 6);
+    }
+
+    static Character lanYanFavonius() {
+        return new LanYan(new FavoniusCodex(5, () -> FIXED_RANDOM_DRAW), null, 6);
     }
 
     static Character mona() {

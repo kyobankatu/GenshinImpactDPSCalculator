@@ -441,6 +441,19 @@
     "on_field_dps_score": 0.211851,
     "burst_window_score": 0.144940
   },
+  "WANDERER": {
+    "off_field_dps_ratio": 0.000000,
+    "team_buff_score": 0.212587,
+    "self_enhancement_score": 0.010465,
+    "energy_generation_score": 0.000000,
+    "entry_value_score": 0.091704,
+    "sustain_value_3_actions": 0.086305,
+    "sustain_value_6_actions": 0.057585,
+    "exit_cost_score": 0.250635,
+    "reentry_cost_score": 0.000000,
+    "on_field_dps_score": 0.367101,
+    "burst_window_score": 0.319067
+  },
   "MONA": {
     "off_field_dps_ratio": 0.271250,
     "team_buff_score": 0.500000,
