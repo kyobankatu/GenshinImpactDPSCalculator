@@ -30,6 +30,7 @@ public final class PartyCatalog {
         register(new AlhaithamHyperbloomPartyDefinition());
         register(new XiaoPlungePartyDefinition());
         register(new XiaoXianyunPartyDefinition());
+        register(new DilucXianyunVaporizePartyDefinition());
         register(new ArlecchinoOverloadPartyDefinition());
         register(new ArlecchinoVaporizePartyDefinition());
         register(new ArlecchinoCitlaliMeltPartyDefinition());

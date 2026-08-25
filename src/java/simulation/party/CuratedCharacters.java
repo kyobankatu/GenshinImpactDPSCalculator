@@ -10,6 +10,7 @@ import model.character.Chiori;
 import model.character.Citlali;
 import model.character.Collei;
 import model.character.Columbina;
+import model.character.Diluc;
 import model.character.Emilie;
 import model.character.Faruzan;
 import model.character.Fischl;
@@ -60,6 +61,7 @@ import model.weapon.UrakuMisugiri;
 import model.weapon.Verdict;
 import model.weapon.WanderingEvenstar;
 import model.weapon.WolfFang;
+import model.weapon.WolfsGravestone;
 
 /** Deterministic C0/base-loadout factories for the curated rotation campaign. */
 final class CuratedCharacters {
@@ -74,6 +76,10 @@ final class CuratedCharacters {
 
     static Character xiao() {
         return new Xiao(new FavoniusLance(5, () -> FIXED_RANDOM_DRAW), null, 0);
+    }
+
+    static Character diluc() {
+        return new Diluc(new WolfsGravestone(1), null, 0);
     }
 
     static Character arlecchino() {

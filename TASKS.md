@@ -26065,6 +26065,7 @@ Accepted-unit table (batch 1, researched 2026-08-25):
 | KQM Chiori Quick Guide: C0 Navia, C0 Chiori, C6 Bennett, C6 Fischl double-Geo rotation | `src/java/simulation/party/NaviaChioriPartyDefinition.java` | Existing rollback-safe Navia artillery, Chiori Tamoto, Bennett field, C6 Oz, and Crystallize; Chiori's second Skill input maps to an explicit Fischl swap, optional Chiori Burst and dash cancels are omitted, and Fischl alternates Burst/Skill | `TRAIN`; two-cycle source trace, Tamoto rollback, two Navia Skill charges, and cyclic replay |
 | KQM Chiori Quick Guide: C0 Navia, C0 Chiori, C0 Xianyun, C6 Bennett Plunge rotation | `src/java/simulation/party/NaviaChioriPlungePartyDefinition.java` | Existing rollback-safe Navia high Plunge/artillery, Chiori Tamoto, Xianyun plunge support, Bennett field, and Crystallize; Chiori's second Skill input maps to the requested Xianyun swap, optional Chiori Burst is omitted, jump inputs map to high Plunge, and the existing Xianyun-only `GamingMelt` validation scenario moves to train to preserve character-disjoint splits | `TRAIN`; six Navia Plunges, two Skill charges, plunge buff consumption, cyclic replay, and cross-split identity audit |
 | KQM Xianyun Quick Guide: C0 Xianyun, C0 Xiao, C0 Faruzan, C6 Bennett Plunge rotation | `src/java/simulation/party/XiaoXianyunPartyDefinition.java` | Existing rollback-safe Xiao Burst/high Plunge, Xianyun Starwicker, Bennett field, and Faruzan Hurricane Arrow; add an exact C0 Faruzan factory and expose her represented Charged action, map jump inputs to high Plunge, and use the linked Xiao guide's twelve-high-Plunge benchmark without collision damage | `TRAIN`; complete `EP/EQ/ECQ/2EQ/12HP` source trace, Faruzan C0 charge, twelve Burst Plunges, cyclic Energy, and baseline non-inferiority |
+| KQM Xianyun Quick Guide: C0 Xianyun, C0 Diluc, C6 Xingqiu, C6 Bennett VV Vaporize Plunge rotation | `src/java/simulation/party/DilucXianyunVaporizePartyDefinition.java` | Existing rollback-safe Diluc high Plunge/three-stage Skill, Raincutter Normal triggers, Xianyun Starwicker, Bennett C6 field infusion, Vaporize, and deterministic weapon effects; omit optional Diluc Burst because Bennett is C6, omit dash inputs, and map jump inputs to high Plunge | `TRAIN`; eight `N1JP` strings, three `N1E` strings, Raincutter/Vaporize trace, C6 infusion, cyclic Energy, and baseline non-inferiority |
 
 Rejected from batch 1: Ganyu Melt, Gaming Mono Pyro, and
 Ningguang/Yae/Fischl/Zhongli mix characters already assigned to different
@@ -26294,6 +26295,18 @@ Batch 18 checkpoint:
   132.979% Bennett, and 149.180% C0 Faruzan ER. The 31s trace retains both Xiao
   Skill charges, all twelve Burst Plunges, the final Bennett Skill, and an
   explicit return to Xiao.
+
+Batch 19 checkpoint:
+
+- Diluc/Xingqiu/Xianyun/C6 Bennett VV Vaporize Plunge is retained from the
+  current KQM Xianyun Quick Guide. Campaign total: 41 researched, 18 retained,
+  23 rejected.
+- Optional Diluc Burst is omitted because C6 Bennett supplies Pyro infusion;
+  dash cancels are removed and jump inputs map to supported high Plunges. All
+  eight `N1JP` and three `N1E` strings remain in source order.
+- Exact three-cycle calibration requires 100.000% Diluc, 205.128% Xingqiu,
+  168.564% Xianyun, and 131.579% Bennett ER. The complete trace uses a 40s
+  boundary and retains the final Bennett Skill and explicit return to Diluc.
 
 Acceptance criteria:
 

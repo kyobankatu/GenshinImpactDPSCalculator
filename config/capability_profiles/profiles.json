@@ -531,5 +531,18 @@
     "reentry_cost_score": 0.000000,
     "on_field_dps_score": 0.584460,
     "burst_window_score": 0.252724
+  },
+  "DILUC": {
+    "off_field_dps_ratio": 0.186504,
+    "team_buff_score": 0.000000,
+    "self_enhancement_score": 0.738525,
+    "energy_generation_score": 0.052041,
+    "entry_value_score": 0.186504,
+    "sustain_value_3_actions": 0.151219,
+    "sustain_value_6_actions": 0.098044,
+    "exit_cost_score": 0.228816,
+    "reentry_cost_score": 0.000000,
+    "on_field_dps_score": 0.365070,
+    "burst_window_score": 0.353710
   }
 }

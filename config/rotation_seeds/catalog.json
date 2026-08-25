@@ -301,6 +301,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Xianyun, C0 Xiao, low-Constellation Faruzan, C6 Bennett", "twelve high Plunges", "single target without collision damage"]
+    },
+    {
+      "sourceId": "kqm-xianyun-quick-guide-diluc-xingqiu-bennett",
+      "title": "Xianyun Quick Guide: Diluc Xingqiu Bennett VV Vaporize",
+      "url": "https://keqingmains.com/q/xianyun-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Xianyun, C0 Diluc, C6 Xingqiu, C6 Bennett", "optional Diluc Burst is omitted", "eight N1JP strings", "single target"]
     }
   ],
   "seeds": [
@@ -732,6 +742,20 @@
       "sourceAssumptions": ["Xianyun uses EP Q", "low-Constellation Faruzan uses EC Q immediately before Xiao", "Xiao uses two Skills, Burst, and twelve high Plunges", "Bennett uses a final Skill", "single target without collision damage"],
       "simulatorAssumptions": ["jump inputs map directly to supported high Plunge actions", "collision and low-Plunge packets are excluded", "explicit one-second waits preserve each simulator swap lock", "an explicit final swap restores the Xiao cycle opener", "the steady-state trace uses a 31s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "32d29f5ea686f042345431eac4efd37f58aae4fe5d5cfb51637426a72742cacc"
+    },
+    {
+      "seedId": "kqm-xianyun-diluc-xingqiu-bennett-adapted-v1",
+      "partyName": "DilucXianyunVaporize",
+      "scenarioFingerprint": "loadout-v1:DILUC-c0-WolfsGravestone-r1-artifact-kqms-generic-v1:XINGQIU-c6-SacrificialSword-r5-artifact-kqms-generic-v1:XIANYUN-c0-FavoniusCodex-r5-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-xianyun-quick-guide-diluc-xingqiu-bennett"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Optional Diluc Burst and dash cancels are omitted for C6 Bennett, jump inputs map to supported high Plunges, and all eight N1JP plus three N1E strings replay in a timing-adapted 40s cycle.",
+      "openerActions": [],
+      "cycleActions": [[8, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 5, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 10, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 9, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 2, 0, 5, 10, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 3, 0, 3, 0, 3, 10, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]],
+      "erTargets": {"DILUC": 1.0, "XINGQIU": 2.0512820512735046, "XIANYUN": 1.6856378677533472, "BENNETT": 1.3157894736769011},
+      "sourceAssumptions": ["Xingqiu uses ED Q", "Xianyun uses EP N1 Q", "C6 Bennett lets Diluc omit Burst", "Diluc uses eight N1JP strings followed by three N1E strings", "single target"],
+      "simulatorAssumptions": ["dash cancels are unsupported and removed", "jump inputs map directly to supported high Plunge actions", "explicit one-second waits preserve each simulator swap lock", "an explicit final swap restores the Diluc cycle opener", "the steady-state trace uses a 40s cycle", "deterministic weapon proc draws are explicit", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "b36b1143b90ad8855ca3956ed7a07ccd08ad370ed5cfacfe88ebb098c12fdbd4"
     }
   ]
 }
