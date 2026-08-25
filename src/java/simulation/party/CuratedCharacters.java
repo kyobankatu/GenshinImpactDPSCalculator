@@ -3,6 +3,7 @@ package simulation.party;
 import mechanics.data.TalentDataManager;
 import model.character.Alhaitham;
 import model.character.Arlecchino;
+import model.character.Beidou;
 import model.character.Bennett;
 import model.character.Chevreuse;
 import model.character.Citlali;
@@ -193,6 +194,11 @@ final class CuratedCharacters {
 
     static Character bennett() {
         return new Bennett(new SkywardBlade(), null);
+    }
+
+    static Character beidou() {
+        return new Beidou(
+                new FavoniusGreatsword(5, () -> FIXED_RANDOM_DRAW), null, 6);
     }
 
     static Character fischl() {

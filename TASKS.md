@@ -26058,6 +26058,7 @@ Accepted-unit table (batch 1, researched 2026-08-25):
 | KQM Arlecchino Quick Guide: Arlecchino, C0 Mona, Bennett, C6 Fischl split-field Overvape rotation | `src/java/simulation/party/ArlecchinoMonaOvervapePartyDefinition.java` | Existing Bond of Life persistence, C0 Omen/Phantom, Bennett buff, C6 Oz, Electro-Charged/Overloaded/Vaporize; Fischl alternates Skill and Burst and dash cancels are omitted | `TRAIN`; two-cycle alternation, reaction trace, and 30s cyclic replay |
 | KQM Keqing Quick Guide: C0 Keqing, C0 Chevreuse, C6 Xiangling, C6 Fischl two-part Overloaded rotation | `src/java/simulation/party/KeqingChevreuseOverloadPartyDefinition.java` | Existing Stiletto recast, Electro infusion, Pyronado, Oz alternation, and Overloaded/Chevreuse support; Hold Skill maps to Press, C0 Chevreuse skips the optional mid-cycle Hold Skill, and dash cancels are omitted | `TRAIN`; two-part action trace, Overloaded ownership, and 40s cyclic replay |
 | KQM Yoimiya Quick Guide: C0 Yoimiya, C0 Chevreuse, C6 Bennett, C6 Fischl support-build Overloaded rotation | `src/java/simulation/party/YoimiyaChevreuseOverloadPartyDefinition.java` | Existing Niwabi infusion, complete N5 string, C6 Oz, Bennett field, and Overloaded/Chevreuse support; Hold Skill maps to Press, optional Yoimiya Burst is omitted, and dash cancels are removed | `TRAIN`; two-cycle Fischl alternation, 16-arrow field trace, and 25s cyclic replay |
+| KQM Sucrose Quick Guide: C6 Sucrose, C6 Xingqiu, C6 Beidou, C6 Fischl Electro-Charged rotation | `src/java/simulation/party/SucroseElectroChargedPartyDefinition.java` | Existing Swirl/EC, Rain Swords, rollback-safe Stormbreaker discharge, and C6 Oz; optional dash cancels are omitted and variable N-spam is fixed to the guide's twelve-N2 upper bound | `TRAIN`; Stormbreaker trigger-spacing trace, two Oz casts, and 25.5s cyclic replay |
 
 Rejected from batch 1: Ganyu Melt, Gaming Mono Pyro, and
 Ningguang/Yae/Fischl/Zhongli mix characters already assigned to different
@@ -26175,6 +26176,19 @@ Batch 9 checkpoint:
   Chevreuse, 179.905% Bennett, and 163.468% Fischl ER. The 25-second source
   replay is legal, deterministic, cyclically feasible, and no worse than its
   registered definition baseline.
+
+Batch 10 checkpoint:
+
+- Sucrose/Xingqiu/Beidou/Fischl Electro-Charged is retained from the current
+  KQM Sucrose Quick Guide. Campaign total: 32 researched, 11 retained, 21
+  rejected.
+- Optional dash cancels are omitted. The guide's variable Sucrose driving is
+  fixed to its recommended upper bound of twelve N2-equivalent pairs, split
+  around Beidou's second Skill and Fischl's Burst, for a deterministic
+  24-Normal trace.
+- Exact three-cycle calibration requires 135.250% Sucrose, 180.401% Xingqiu,
+  116.372% Beidou, and 111.852% Fischl ER. The 25.5-second source replay is legal,
+  cyclically feasible, and no worse than its registered definition baseline.
 
 Acceptance criteria:
 

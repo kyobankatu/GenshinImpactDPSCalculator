@@ -479,5 +479,18 @@
     "reentry_cost_score": 0.223871,
     "on_field_dps_score": 0.415143,
     "burst_window_score": 0.259156
+  },
+  "BEIDOU": {
+    "off_field_dps_ratio": 0.701729,
+    "team_buff_score": 0.500000,
+    "self_enhancement_score": 0.601769,
+    "energy_generation_score": 0.258480,
+    "entry_value_score": 0.055747,
+    "sustain_value_3_actions": 0.062306,
+    "sustain_value_6_actions": 0.049615,
+    "exit_cost_score": 0.372114,
+    "reentry_cost_score": 0.000000,
+    "on_field_dps_score": 0.187196,
+    "burst_window_score": 0.164789
   }
 }

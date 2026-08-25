@@ -211,6 +211,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Yoimiya, C0 Chevreuse, C6 Bennett, C6 Fischl", "support-build Chevreuse rotation", "single target"]
+    },
+    {
+      "sourceId": "kqm-sucrose-quick-guide-xingqiu-beidou-fischl",
+      "title": "Sucrose Quick Guide: Xingqiu Beidou Fischl Electro-Charged",
+      "url": "https://keqingmains.com/q/sucrose-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Luna VI; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C6 Sucrose, C6 Xingqiu, C6 Beidou, C6 Fischl", "twelve N2-equivalent driver combos", "single target"]
     }
   ],
   "seeds": [
@@ -510,6 +520,20 @@
       "sourceAssumptions": ["first-rotation Fischl Skill opener", "Fischl alternates Burst and Skill", "Yoimiya Burst is optional", "3[N5D] N1 field combo", "single target"],
       "simulatorAssumptions": ["Chevreuse Skill Press substitutes for Hold", "dash cancels are unsupported and removed", "the field combo is fixed to 16 Normal actions", "explicit waits preserve the post-opener swap lock", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "28c181f4ce0ce1b8012a1cf8d9dcecbc3f766259f19235ae3bb20f4444e53569"
+    },
+    {
+      "seedId": "kqm-sucrose-xingqiu-beidou-fischl-adapted-v1",
+      "partyName": "SucroseElectroCharged",
+      "scenarioFingerprint": "loadout-v1:SUCROSE-c6-ThrillingTalesOfDragonSlayers-r5-artifact-kqms-generic-v1:XINGQIU-c6-SacrificialSword-r5-artifact-kqms-generic-v1:BEIDOU-c6-FavoniusGreatsword-r5-artifact-kqms-generic-v1:FISCHL-c6-TheStringless-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-sucrose-quick-guide-xingqiu-beidou-fischl"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Optional dash cancels are omitted, variable Sucrose N-spam is fixed to the guide's twelve-N2 upper bound, and explicit one-second waits preserve each simulator swap lock.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"SUCROSE": 1.352495128595382, "XINGQIU": 1.804012242973376, "BEIDOU": 1.1637243396753834, "FISCHL": 1.1185208398956628},
+      "sourceAssumptions": ["Xingqiu and Beidou use Skill then Burst", "Fischl uses Skill then Burst", "Sucrose drives with twelve N2-equivalent combos", "single target"],
+      "simulatorAssumptions": ["dash cancels are unsupported and removed", "variable N-spam is fixed to twenty-four Normal actions", "explicit one-second waits preserve each simulator swap lock", "Favonius Greatsword R5 uses a deterministic proc draw", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "cfa2bb16e690a0cdb8264933ba698144e03b3871a250fd1f389b0646e62ee828"
     }
   ]
 }
