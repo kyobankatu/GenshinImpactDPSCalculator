@@ -1031,6 +1031,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C6 Fischl, C0 Nahida, C0 Sangonomiya Kokomi, C0 Raiden Shogun", "single target"]
+    },
+    {
+      "sourceId": "kqm-yelan-quick-guide-arlecchino-bennett-sucrose",
+      "title": "Yelan Quick Guide: Arlecchino Bennett Sucrose Vaporize",
+      "url": "https://keqingmains.com/q/yelan-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.4; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Yelan, C0 Arlecchino, C6 Bennett, C6 Sucrose", "Favonius Warbow R5 Yelan", "Deathmatch R1 Arlecchino", "Skyward Blade R1 Bennett", "Thrilling Tales R5 Sucrose", "single target"]
     }
   ],
   "seeds": [
@@ -2414,6 +2424,20 @@
       "sourceAssumptions": ["Fischl uses Skill then Burst", "Nahida uses Skill-Burst", "Kokomi uses Skill, three N2C strings, then N1-Burst and a linked on-field combo", "Raiden uses Skill", "single target"],
       "simulatorAssumptions": ["the linked C0 Kokomi combo is normalized to five N2 strings with dash cancels omitted", "the complete normalized action trace is retained for review", "Kokomi belongs to validation", "Fischl, Nahida, and Raiden belong to train", "no cross-split party is published"],
       "contentHash": "b3f0ead1abd655ad24ea0afcccb6c51e275c2bf4b997a34a03a72e0a72ea75e0"
+    },
+    {
+      "seedId": "kqm-yelan-arlecchino-bennett-sucrose-rejected-v1",
+      "partyName": "ArlecchinoYelanSucroseUnavailable",
+      "scenarioFingerprint": "review-only:YELAN-c0:ARLECCHINO-c0:BENNETT-c6:SUCROSE-c6:energy-infeasible",
+      "sourceIds": ["kqm-yelan-quick-guide-arlecchino-bennett-sucrose"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because exact repeated replay requires 298.466% Yelan ER, above the 268.200% KQMS artifact ceiling even with deterministic Favonius Warbow R5.",
+      "openerActions": [],
+      "cycleActions": [[3, 5, 0, 8, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 0, 0, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7]],
+      "erTargets": {"YELAN": 2.98466, "ARLECCHINO": 1.0, "BENNETT": 1.0, "SUCROSE": 1.0},
+      "sourceAssumptions": ["Yelan uses Skill-Burst-N1", "Arlecchino uses optional Burst-Skill or Skill, then N3C-6[N3D]", "Bennett uses Skill-Burst", "Sucrose uses N3-Skill with a dash cancel", "single target"],
+      "simulatorAssumptions": ["Arlecchino's optional healing Burst is omitted", "dash cancels are unsupported and removed", "all twenty-one sourced Normal attacks and the Charged attack are retained", "the complete normalized action trace is retained for review", "Favonius Warbow R5 uses deterministic proc draws", "the exact repeated trace exceeds the KQMS Energy Recharge ceiling", "no branch-search party is published"],
+      "contentHash": "be92bc67b8fea49664d21b3a40abc61227a2d764cb343663bf324837b02d2122"
     }
   ]
 }

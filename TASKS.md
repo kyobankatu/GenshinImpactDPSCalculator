@@ -26639,6 +26639,19 @@ Batches 81-84 checkpoint:
   seeds comprise 62 train and one validation seed; holdout remains
   source-isolated.
 
+Batches 85-88 checkpoint:
+
+- Researched four maintained KQM rotations across Nahida and Yelan guides.
+  Retained Nahida/Ayato/Fischl/Thoma Burgeon as a train scenario. Rejected the
+  Yae variant because persistent Sesshou Sakura state is not snapshot-aware,
+  the Kokomi variant because it crosses the train/validation identity boundary,
+  and Yelan/Arlecchino/Bennett/Sucrose because exact replay exceeds the KQMS ER
+  ceiling.
+- The campaign has now reviewed 109 candidates: 61 retained and 48 rejected
+  or blocked. The tracked catalog contains 104 sources and 99 seeds. Its 64
+  usable seeds comprise 63 train and one validation seed; holdout remains
+  source-isolated.
+
 Acceptance criteria:
 
 - Every retained seed has an exact constructible scenario, complete provenance,
