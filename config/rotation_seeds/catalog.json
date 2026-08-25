@@ -321,6 +321,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C5 Bennett, C0 Xianyun, Chongyun, Xiangling", "Cryo-infused Bennett Plunges", "four N1JP-EJP strings", "single target"]
+    },
+    {
+      "sourceId": "kqm-xianyun-quick-guide-wriothesley-shenhe-furina",
+      "title": "Xianyun Quick Guide: Wriothesley Shenhe Furina Freeze",
+      "url": "https://keqingmains.com/q/xianyun-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Xianyun, Wriothesley, Shenhe, Furina", "eight N1JP strings", "optional Wriothesley Burst is omitted", "single target"]
     }
   ],
   "seeds": [
@@ -780,6 +790,20 @@
       "sourceAssumptions": ["Bennett is C5 or lower", "Chongyun infuses Bennett's Normal Attack Talent with Cryo", "Bennett uses four N1JP-EJP strings", "single target"],
       "simulatorAssumptions": ["jump inputs would map to supported high Plunges", "teammate Cryo infusion from Chongyun's field is outside the current runtime contract", "no element override or unreacted damage substitute is used"],
       "contentHash": "55a9c2dff9d2b8f4df21d7191a76de244f2e46b8df664a02739cdfc9277012cd"
+    },
+    {
+      "seedId": "kqm-xianyun-wriothesley-shenhe-furina-rejected-v1",
+      "partyName": "WriothesleyFreezeUnavailable",
+      "scenarioFingerprint": "review-only:wriothesley-xianyun-shenhe-furina-freeze",
+      "sourceIds": ["kqm-xianyun-quick-guide-wriothesley-shenhe-furina"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected from the supervised catalog because Shenhe is isolated to the GanyuFreeze validation identity graph while Xianyun is assigned to train; either placement would violate the character-disjoint split contract.",
+      "openerActions": [],
+      "cycleActions": [[9, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 5, 8, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4, 5, 10, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 2, 5, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 0, 0, 0, 1, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2]],
+      "erTargets": {"WRIOTHESLEY": 1.0, "SHENHE": 1.0, "FURINA": 1.0, "XIANYUN": 1.0},
+      "sourceAssumptions": ["Furina uses Skill then Burst", "Shenhe uses Hold Skill then Burst", "Wriothesley uses N3C then eight N1JP strings", "optional Wriothesley Burst is omitted", "single target"],
+      "simulatorAssumptions": ["Furina's dash input is unsupported and removed", "jump inputs would map to supported high Plunges", "the exact party is withheld solely to preserve character-disjoint dataset splits"],
+      "contentHash": "774c8c5099d5c0a77b2ffaf030d765f857c0c6077db2ef7b75fc486dba21bed7"
     }
   ]
 }

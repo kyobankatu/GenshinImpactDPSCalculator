@@ -26011,7 +26011,7 @@ Completion evidence:
 
 ### Phase 15: Source-Matched Bulk Human Rotation Campaign
 
-Status: In progress; batches 1-20 retained eighteen new source-matched train scenarios.
+Status: In progress; batches 1-21 retained eighteen new source-matched train scenarios.
 
 Why:
 
@@ -26320,6 +26320,19 @@ Batch 20 checkpoint:
 - The complete typed source trace is preserved without substituting unreacted
   Plunges or an unsourced element override. Reconsider only after teammate
   infusion is represented by the shared attack construction path.
+
+Batch 21 checkpoint:
+
+- The current KQM Xianyun Quick Guide's Wriothesley/Shenhe/Furina Freeze
+  Plunge rotation is retained as rejected evidence. Campaign total: 43
+  researched, 18 retained, 25 rejected.
+- The exact party crosses the frozen character-disjoint identity graph:
+  Shenhe belongs to the `GanyuFreeze` validation scenario while Xianyun belongs
+  to train. Assigning the source to either split would leak a character identity
+  across train and validation.
+- The full `ED Q / hEQ / EP Q / E N3C 8[N1JP]` typed trace is retained with
+  optional Wriothesley Burst omitted. Reconsider only with an explicit split
+  migration that preserves an independent validation cohort.
 
 Acceptance criteria:
 
