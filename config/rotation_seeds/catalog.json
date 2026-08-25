@@ -681,6 +681,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Wriothesley, C6 Xingqiu, C6 Mika, C6 Lynette", "non-Stellar-Conduct C0 combo", "single target"]
+    },
+    {
+      "sourceId": "kqm-yoimiya-quick-guide-xilonen-furina-yelan",
+      "title": "Yoimiya Quick Guide: Xilonen Furina Yelan Double Hydro",
+      "url": "https://keqingmains.com/q/yoimiya-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Luna I; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Yoimiya, C0 Xilonen, C0 Furina, C0 Yelan", "Rust R1", "three complete N5 strings", "single target"]
     }
   ],
   "seeds": [
@@ -1616,6 +1626,20 @@
       "sourceAssumptions": ["Xingqiu uses Skill, dash, Burst, then N1", "Mika uses Skill then Burst", "Lynette uses Skill-Burst-N1", "Wriothesley uses Skill then five N3C chains", "each N3C is jump-cancelled", "single target"],
       "simulatorAssumptions": ["Xingqiu's dash is omitted from the reviewed action identity", "the local action space cannot encode jump cancels", "the local Wriothesley slice excludes player current HP, HP change, healing, and A1", "the fixed-full-HP boundary cannot activate the sourced C0 Rebuke cadence", "the candidate is not constructible without changing simulator mechanics"],
       "contentHash": "e01766045b748d155380273668d3474bb0fe42d0cc5d9055683c4c5b38be768f"
+    },
+    {
+      "seedId": "kqm-yoimiya-xilonen-furina-yelan-adapted-v1",
+      "partyName": "YoimiyaDoubleHydro",
+      "scenarioFingerprint": "loadout-v1:YOIMIYA-c0-Rust-r1-artifact-kqms-generic-v1:XILONEN-c0-PeakPatrolSong-r1-artifact-kqms-generic-v1:FURINA-c0-WolfFang-r1-artifact-kqms-generic-v1:YELAN-c0-FavoniusWarbow-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-yoimiya-quick-guide-xilonen-furina-yelan"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Furina's dash and Yoimiya's source-optional Burst are omitted, the guide-defined combo is expanded to three complete N5 strings, and the definition-normalized trace uses a 30s cycle.",
+      "openerActions": [],
+      "cycleActions": [[8, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 5, 0, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 0]],
+      "erTargets": {"YOIMIYA": 1.0, "XILONEN": 1.5116122366216698, "FURINA": 1.2048192770883552, "YELAN": 1.1599342801221624},
+      "sourceAssumptions": ["Xilonen uses Burst, then Skill-N2", "Furina uses Skill then Burst", "Yelan uses Burst-N1-Skill-N1, then later Skill-N2", "Yoimiya uses Skill and three complete N5 strings", "Yoimiya's Burst is optional", "single target"],
+      "simulatorAssumptions": ["Furina's dash is unsupported and removed", "Yoimiya's optional Burst is omitted", "the guide-defined combo maps to fifteen typed Normal actions", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 30s cycle", "Favonius Warbow R5 uses deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "42af4882bd36794001ae8bb23eee3c68d62b02334931e118550d625f28636911"
     }
   ]
 }
