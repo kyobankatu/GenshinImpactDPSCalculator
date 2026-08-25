@@ -231,6 +231,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C6 Collei, C6 Xingqiu, C6 Fischl, C6 Sucrose", "fixed 21-second rotation", "single target"]
+    },
+    {
+      "sourceId": "kqm-beidou-quick-guide-nahida-xingqiu-kuki",
+      "title": "Beidou Quick Guide: Nahida Xingqiu Kuki Hyperbloom",
+      "url": "https://keqingmains.com/q/beidou-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Nahida, C6 Xingqiu, C6 Beidou, C0 Kuki Shinobu", "Nahida on-field driver", "single target"]
     }
   ],
   "seeds": [
@@ -558,6 +568,20 @@
       "sourceAssumptions": ["fixed 21-second rotation", "optional Sucrose Burst is used", "five N3 strings in the final variable combo", "single target"],
       "simulatorAssumptions": ["dash cancels are unsupported and removed", "explicit one-second waits preserve each simulator swap lock", "a 0.5s wait preserves Collei's second Skill cooldown", "the local cycle is 26s after timing expansion", "Favonius Warbow R5 uses a deterministic proc draw", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "86c7cfd564b617b90d579245a7510ca5e797ac1b0c03fa9da18470bb5b3862c0"
+    },
+    {
+      "seedId": "kqm-beidou-nahida-xingqiu-kuki-adapted-v1",
+      "partyName": "NahidaBeidouHyperbloom",
+      "scenarioFingerprint": "loadout-v1:NAHIDA-c0-WanderingEvenstar-r5-artifact-kqms-generic-v1:XINGQIU-c6-SacrificialSword-r5-artifact-kqms-generic-v1:BEIDOU-c6-FavoniusGreatsword-r5-artifact-kqms-generic-v1:KUKI_SHINOBU-c0-WolfFang-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-beidou-quick-guide-nahida-xingqiu-kuki"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Dash cancels are omitted, optional Nahida Burst is selected, the optional final Kuki N1-Burst segment is omitted after Burst proved infeasible, both variable Nahida N-spam windows use eight Normals, and local timing extends the cycle to 35s.",
+      "openerActions": [],
+      "cycleActions": [[3, 5, 8, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"NAHIDA": 1.0, "XINGQIU": 1.9553617907217382, "BEIDOU": 1.6129313653583812, "KUKI_SHINOBU": 1.0},
+      "sourceAssumptions": ["optional Nahida Burst is used", "optional final Kuki N1-Burst segment is omitted", "Nahida drives with two variable Normal windows", "Kuki owns Hyperbloom", "single target"],
+      "simulatorAssumptions": ["dash cancels are unsupported and removed", "both Nahida driving windows are fixed to eight Normals", "explicit one-second waits preserve each simulator swap lock", "the steady-state trace uses a 35s cycle", "Favonius Greatsword R5 uses a deterministic proc draw", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "340aa0813c8839be1472c62e61a204fe0e21c46ad255e81c4450f1b378d476d7"
     }
   ]
 }

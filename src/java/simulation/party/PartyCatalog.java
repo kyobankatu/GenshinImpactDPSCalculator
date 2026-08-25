@@ -39,6 +39,7 @@ public final class PartyCatalog {
         register(new YoimiyaChevreuseOverloadPartyDefinition());
         register(new SucroseElectroChargedPartyDefinition());
         register(new ColleiSucroseHyperbloomPartyDefinition());
+        register(new NahidaBeidouHyperbloomPartyDefinition());
         register(new ArlecchinoLunarChargedPartyDefinition());
         register(new ArlecchinoIneffaOverloadPartyDefinition());
         register(new AlhaithamSpreadPartyDefinition());

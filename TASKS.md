@@ -26060,6 +26060,7 @@ Accepted-unit table (batch 1, researched 2026-08-25):
 | KQM Yoimiya Quick Guide: C0 Yoimiya, C0 Chevreuse, C6 Bennett, C6 Fischl support-build Overloaded rotation | `src/java/simulation/party/YoimiyaChevreuseOverloadPartyDefinition.java` | Existing Niwabi infusion, complete N5 string, C6 Oz, Bennett field, and Overloaded/Chevreuse support; Hold Skill maps to Press, optional Yoimiya Burst is omitted, and dash cancels are removed | `TRAIN`; two-cycle Fischl alternation, 16-arrow field trace, and 25s cyclic replay |
 | KQM Sucrose Quick Guide: C6 Sucrose, C6 Xingqiu, C6 Beidou, C6 Fischl Electro-Charged rotation | `src/java/simulation/party/SucroseElectroChargedPartyDefinition.java` | Existing Swirl/EC, Rain Swords, rollback-safe Stormbreaker discharge, and C6 Oz; optional dash cancels are omitted and variable N-spam is fixed to the guide's twelve-N2 upper bound | `TRAIN`; Stormbreaker trigger-spacing trace, two Oz casts, and 25.5s cyclic replay |
 | KQM Collei Quick Guide: C6 Collei, C6 Xingqiu, C6 Fischl, C6 Sucrose Hyperbloom rotation | `src/java/simulation/party/ColleiSucroseHyperbloomPartyDefinition.java` | Existing rollback-safe Floral Brush/Sprout/Cuilein-Anbar, Rain Swords, C6 Oz, Swirl, Bloom, and Hyperbloom; dash cancels are omitted, optional Sucrose Burst is selected, and `5-6[N3D]` uses five strings | `TRAIN`; source action trace, reaction ownership, and timing-adapted 26s cyclic replay |
+| KQM Beidou Quick Guide: C0 Nahida, C6 Xingqiu, C6 Beidou, C0 Kuki Hyperbloom rotation | `src/java/simulation/party/NahidaBeidouHyperbloomPartyDefinition.java` | Existing rollback-safe Nahida mark/Shrine, Rain Swords, Stormbreaker, Kuki ring, Bloom, and Hyperbloom; dash cancels and the infeasible optional final Kuki N1-Burst segment are omitted, optional Nahida Burst is selected, and both variable Nahida N-spam windows are fixed to eight Normals | `TRAIN`; Stormbreaker driving trace, Kuki Hyperbloom ownership, and hitlag-adapted 35s cyclic replay |
 
 Rejected from batch 1: Ganyu Melt, Gaming Mono Pyro, and
 Ningguang/Yae/Fischl/Zhongli mix characters already assigned to different
@@ -26202,6 +26203,18 @@ Batch 11 checkpoint:
 - Exact three-cycle calibration requires 131.711% Sucrose, 127.605% Collei,
   154.011% Xingqiu, and 134.716% Fischl ER. The seed is legal, cyclically
   feasible, and no worse than its registered definition baseline.
+
+Batch 12 checkpoint:
+
+- Nahida/Xingqiu/Beidou/Kuki Hyperbloom is retained from the current KQM
+  Beidou Quick Guide. Campaign total: 34 researched, 13 retained, 21 rejected.
+- Optional Nahida Burst is selected, while the optional final Kuki N1-Burst
+  segment is omitted after exact calibration proved the Burst infeasible under
+  the frozen KQMS build. Dash cancels are omitted and both variable Nahida
+  driving windows are fixed to eight Normals. Explicit waits use a 35s cycle.
+- Exact three-cycle calibration requires 100.000% Nahida, 195.536% Xingqiu,
+  161.293% Beidou, and 100.000% Kuki ER. The 85-action expanded trace matches
+  the registered baseline exactly and preserves Kuki as Hyperbloom owner.
 
 Acceptance criteria:
 
