@@ -26012,7 +26012,7 @@ Completion evidence:
 
 ### Phase 15: Source-Matched Bulk Human Rotation Campaign
 
-Status: In progress; batches 1-52 retained thirty-six new source-matched train scenarios.
+Status: In progress; batches 1-80 researched 101 candidates and retained 56.
 
 Active execution window:
 
@@ -26603,6 +26603,23 @@ Batches 73-76 checkpoint:
   three train identities and remains rejected evidence.
 - The tracked catalog now contains 93 sources and 88 seeds. Its 56 usable seeds
   comprise 55 train and one validation seed; holdout remains source-isolated.
+
+Batches 77-80 checkpoint:
+
+- Three new candidates were researched and one prior Gaming rejection was
+  re-audited. Gaming/Citlali/Bennett/Sucrose, Gaming/Xiangling/Xianyun/Bennett,
+  and Gaming/Furina/Xianyun/Bennett were retained; Gaming/Yelan/Xianyun/Yanfei
+  was rejected. Campaign total: 101 researched, 56 retained, and 45 rejected or
+  blocked.
+- Gaming's Burst runtime now schedules every healer-backed Man Chai return at
+  the pinned gcsim timing and resets Skill repeatedly. Focused regressions cover
+  the exact 125-frame repeated boundary; both retained Xianyun variants preserve
+  all three sourced JP-EP repetitions with explicit reset waits.
+- The Yanfei trace is complete and locally representable as actions, but her
+  Scarlet Seal and Brilliance state lacks snapshot capture and restore. It
+  remains rejected rather than publishing non-replayable branch-search state.
+- The tracked catalog now contains 96 sources and 91 seeds. Its 59 usable seeds
+  comprise 58 train and one validation seed; holdout remains source-isolated.
 
 Acceptance criteria:
 

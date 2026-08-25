@@ -303,6 +303,16 @@
       "loadoutAssumptions": ["C0 Gaming, C0 Furina, C0 Xianyun, C6 Bennett", "three Burst-reset Gaming Skill Plunges", "single target"]
     },
     {
+      "sourceId": "kqm-xianyun-quick-guide-gaming-yelan-yanfei",
+      "title": "Xianyun Quick Guide: Gaming Yelan Yanfei Vaporize",
+      "url": "https://keqingmains.com/q/xianyun-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Gaming, C0 Yelan, C0 Xianyun, C4+ Yanfei", "Normals trigger Yelan between Gaming Plunges", "single target"]
+    },
+    {
       "sourceId": "kqm-xianyun-quick-guide-xiao-faruzan-bennett",
       "title": "Xianyun Quick Guide: Xiao Faruzan Bennett",
       "url": "https://keqingmains.com/q/xianyun-quickguide/",
@@ -1382,6 +1392,20 @@
       "sourceAssumptions": ["Furina uses EDQ", "Bennett uses EQ", "Xianyun uses EPQ", "Gaming uses EPQ followed by three JP-EP repetitions and N2EP", "Bennett uses a final Skill before Gaming N2", "single target"],
       "simulatorAssumptions": ["dash cancels are unsupported and removed", "jump inputs map directly to supported high Plunge actions", "the healer-backed scenario satisfies Gaming's above-50% HP return condition", "short waits preserve each initial and repeated Man Chai return boundary before Skill", "explicit one-second waits preserve each simulator swap lock", "the steady-state trace uses a timing-adapted 37s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "c9aae602e719175b8519fa143e0b938def7a37f274ef95be6220a1735e1df15c"
+    },
+    {
+      "seedId": "kqm-xianyun-gaming-yelan-yanfei-rejected-v1",
+      "partyName": "GamingYelanYanfeiUnavailable",
+      "scenarioFingerprint": "review-only:gaming-yelan-xianyun-c4-yanfei-vaporize",
+      "sourceIds": ["kqm-xianyun-quick-guide-gaming-yelan-yanfei"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected before party registration because Yanfei's Scarlet Seal and Brilliance state has no snapshot capture and restore contract, so branch-search trajectories cannot replay exactly.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 2, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 3, 2, 5, 0, 2, 0, 3, 2, 0, 2, 0, 3, 2, 0, 2, 0, 3, 2, 0, 2]],
+      "erTargets": {"GAMING": 1.0, "YELAN": 1.0, "XIANYUN": 1.0, "YANFEI": 1.0},
+      "sourceAssumptions": ["Yelan and C4+ Yanfei use EQ", "Xianyun uses EPQ", "Gaming uses N1EPQ followed by three N1JP-N1EP repetitions and N1JP", "Normals trigger Yelan's coordinated attacks", "single target"],
+      "simulatorAssumptions": ["jump inputs would map directly to supported high Plunge actions", "explicit one-second waits preserve each simulator swap lock", "Yanfei's excluded C4 shield is defensive in the fixed non-attacking-enemy scenario", "no usable party or action profile is published without exact Yanfei snapshot restore"],
+      "contentHash": "5c8816014ebcfe7979198d323470b852a0db3245d547139b6a7e01ccb04d939f"
     },
     {
       "seedId": "kqm-xianyun-xiao-faruzan-bennett-adapted-v1",

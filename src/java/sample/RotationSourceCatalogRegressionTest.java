@@ -34,8 +34,8 @@ public final class RotationSourceCatalogRegressionTest {
 
     private static void assertTrackedPilotCatalogRoundTrips() throws Exception {
         RotationSourceCatalog catalog = RotationSourceCatalog.loadDefault();
-        if (catalog.getSources().size() != 95 || catalog.getSeeds().size() != 90) {
-            throw new AssertionError("Expected ninety-five sources and ninety seeds");
+        if (catalog.getSources().size() != 96 || catalog.getSeeds().size() != 91) {
+            throw new AssertionError("Expected ninety-six sources and ninety-one seeds");
         }
         HashSet<String> parties = new HashSet<>();
         int rejectedCount = 0;
@@ -52,8 +52,8 @@ public final class RotationSourceCatalogRegressionTest {
                 throw new AssertionError("Invalid usable pilot seed: " + seed.getSeedId());
             }
         }
-        if (rejectedCount != 31) {
-            throw new AssertionError("Expected thirty-one unavailable pilot seeds");
+        if (rejectedCount != 32) {
+            throw new AssertionError("Expected thirty-two unavailable pilot seeds");
         }
         assertEquals(58, catalog.getUsableSeeds(DatasetSplit.TRAIN).size(), "train seeds");
         assertEquals(1, catalog.getUsableSeeds(DatasetSplit.VALIDATION).size(), "validation seeds");
