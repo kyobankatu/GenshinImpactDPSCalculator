@@ -26652,6 +26652,21 @@ Batches 85-88 checkpoint:
   usable seeds comprise 63 train and one validation seed; holdout remains
   source-isolated.
 
+Batches 89-92 checkpoint:
+
+- Researched four maintained KQM rotations across Bennett, Xiangling, and
+  Xingqiu guides. Retained Ayato/Nahida/Thoma/Bennett Burgeon,
+  Ayato/Bennett/Xiangling/Sucrose Vaporize, and
+  Furina/Xilonen/Xingqiu/Yelan Mono Hydro as train scenarios.
+- Rejected Raiden/Furina/Xingqiu/Jean because Raiden's Resolve, Musou form,
+  listener bookkeeping, and pending generation state are not snapshot-aware.
+  The source's first-rotation Skill distinction remains in the review-only
+  two-cycle trace.
+- The campaign has now reviewed 113 candidates: 64 retained and 49 rejected
+  or blocked. The tracked catalog contains 108 sources and 103 seeds. Its 67
+  usable seeds comprise 66 train and one validation seed; holdout remains
+  source-isolated.
+
 Acceptance criteria:
 
 - Every retained seed has an exact constructible scenario, complete provenance,

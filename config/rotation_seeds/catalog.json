@@ -1071,6 +1071,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Furina, C0 Xilonen, C6 Xingqiu, C0 Yelan", "Wolf-Fang R1 Furina", "Peak Patrol Song R1 Xilonen", "Sacrificial Sword R5 Xingqiu", "Favonius Warbow R5 Yelan", "single target"]
+    },
+    {
+      "sourceId": "kqm-xingqiu-quick-guide-raiden-furina-jean",
+      "title": "Xingqiu Quick Guide: Raiden Furina Jean Electro-Charged",
+      "url": "https://keqingmains.com/q/xingqiu-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.7; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Raiden Shogun, C0 Furina, C6 Xingqiu, C4 Jean", "single target"]
     }
   ],
   "seeds": [
@@ -2510,6 +2520,20 @@
       "sourceAssumptions": ["Furina uses Skill at the start of the first rotation and immediately before Burst later", "Xilonen uses two Skill-N2 strings and one Burst", "Xingqiu uses Burst-N1 then N1-Skill-N2", "Yelan uses Burst-N1-Skill-N4 then 2[N4]-Skill-N2", "single target"],
       "simulatorAssumptions": ["dash cancels are unsupported and removed", "both source-prescribed Furina Skill placements are retained", "all sourced Normal counts are retained", "the cycle uses definition-normalized swap waits", "the reviewed alternating trace uses a 32s cycle", "Favonius and Sacrificial weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "ef6d707b15f97901c77be1a1da73ce2bea7ebaa30948d1428e18fba9aa02ab48"
+    },
+    {
+      "seedId": "kqm-xingqiu-raiden-furina-jean-rejected-v1",
+      "partyName": "RaidenFurinaJeanUnavailable",
+      "scenarioFingerprint": "review-only:RAIDEN_SHOGUN-c0:FURINA-c0:XINGQIU-c6:JEAN-c4:snapshot-incomplete",
+      "sourceIds": ["kqm-xingqiu-quick-guide-raiden-furina-jean"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because Raiden Shogun's mutable Resolve, Musou form, listener bookkeeping, and pending generation state do not implement snapshot capture and restore.",
+      "openerActions": [],
+      "cycleActions": [[3, 8, 3, 5, 9, 3, 5, 0, 10, 3, 0, 5, 7, 0, 5, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 3], [8, 3, 5, 9, 3, 5, 0, 10, 3, 0, 5, 7, 0, 5, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 3]],
+      "erTargets": {"RAIDEN_SHOGUN": 1.0, "FURINA": 1.0, "XINGQIU": 1.0, "JEAN": 1.0},
+      "sourceAssumptions": ["Raiden uses a first-rotation Skill opener then N1-Burst-N4-Skill-3[N4]", "Furina uses Skill-Burst", "Xingqiu uses Skill-Burst-N1", "Jean uses Skill-N1-Burst and a second Skill", "single target"],
+      "simulatorAssumptions": ["dash cancels are unsupported and removed", "the complete two-form normalized action trace is retained for review", "Raiden Shogun's mutable runtime is not snapshot-aware", "no branch-search party is published"],
+      "contentHash": "b0da5fafe6a717470f50f81e15dca739345a2ae008663ad35c1e8ccd823d48a4"
     }
   ]
 }
