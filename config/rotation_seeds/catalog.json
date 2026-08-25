@@ -831,6 +831,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Ganyu, C0 Venti, C0 Layla, C0 Mona", "Favonius Warbow R5 Ganyu", "Favonius Warbow R5 Venti", "Favonius Sword R5 Layla", "Favonius Codex R5 Mona", "single target"]
+    },
+    {
+      "sourceId": "kqm-sucrose-quick-guide-yelan-fischl-xingqiu",
+      "title": "Sucrose Quick Guide: Yelan Fischl Xingqiu Electro-Charged",
+      "url": "https://keqingmains.com/q/sucrose-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Luna VI; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C6 Sucrose, C6 Fischl, C6 Xingqiu, C0 Yelan", "Thrilling Tales R5 Sucrose", "The Stringless R5 Fischl", "Sacrificial Sword R5 Xingqiu", "Favonius Warbow R5 Yelan", "N4 Sucrose driver strings", "single target"]
     }
   ],
   "seeds": [
@@ -1948,6 +1958,20 @@
       "sourceAssumptions": ["Ganyu uses Skill-Burst, one Charged Shot, then two final Charged Shots", "Venti uses Skill-Burst and a later Skill", "Layla uses Burst-Skill", "Mona uses Skill-Burst", "single target"],
       "simulatorAssumptions": ["the source order maps directly to typed actions", "the complete definition-normalized trace is retained for review", "Ganyu belongs to validation", "Venti, Layla, and Mona belong to train", "no cross-split party is published"],
       "contentHash": "f05ed28944b9210a0995c0d30926334f7445eea3707722309a6e7ba543b9bd71"
+    },
+    {
+      "seedId": "kqm-sucrose-yelan-fischl-xingqiu-adapted-v1",
+      "partyName": "SucroseDoubleHydroTaser",
+      "scenarioFingerprint": "loadout-v1:SUCROSE-c6-ThrillingTalesOfDragonSlayers-r5-artifact-kqms-generic-v1:FISCHL-c6-TheStringless-r5-artifact-kqms-generic-v1:XINGQIU-c6-SacrificialSword-r5-artifact-kqms-generic-v1:YELAN-c0-FavoniusWarbow-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-sucrose-quick-guide-yelan-fischl-xingqiu"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Xingqiu's dash is omitted, Sucrose selects the source-optional Burst branch, and the two generic Sucrose combo windows are fixed to two and three complete N4 strings respectively.",
+      "openerActions": [],
+      "cycleActions": [[8, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"SUCROSE": 1.7656834650285256, "FISCHL": 1.4158862740648381, "XINGQIU": 1.4459619210753156, "YELAN": 1.3244504393665497},
+      "sourceAssumptions": ["Fischl uses Burst, then later Skill-N1", "Xingqiu uses Skill-dash-Burst-N1", "Yelan uses Skill-N1-Burst-N1 and a later Skill-N1", "Sucrose uses N1-Skill-Burst before two N4 driver windows", "Sucrose Burst may be replaced by N2 if unavailable", "single target"],
+      "simulatorAssumptions": ["Xingqiu's dash is unsupported and removed", "Sucrose takes the Burst branch", "the generic combo windows map to two and three complete N4 strings", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 30s cycle", "Favonius and Sacrificial weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "69ae1143d50d8d7cf7f82820796606d99e221eb902dffd6cbcd129c9b3948f77"
     }
   ]
 }

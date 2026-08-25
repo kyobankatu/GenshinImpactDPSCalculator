@@ -26,8 +26,8 @@ factories have been removed for the migrated parties.
 The simulator-only autonomous campaign is complete. B-212 Phases 1-10 built the
 local expert-iteration rotation-optimizer pipeline, but the local quality gate
 failed. Phases 11-14 established sourced human-rotation catalog, replay, import,
-and pilot contracts. Phase 15 is active with 62 researched candidates and 29
-newly retained source-matched train scenarios; it continues before Phase 16
+and pilot contracts. Phase 15 is active with 90 researched candidates and 47
+newly retained source-matched scenarios; it continues before Phase 16
 changes teacher search or Phase 17 regenerates the quality-gated dataset.
 
 The prior simulator content campaigns, including Skill-focused event weapons,
@@ -26556,6 +26556,22 @@ Batches 61-64 checkpoint:
   adds Vapemelt while retaining all support Normals and sixteen field Normals.
 - The tracked catalog now contains 79 sources and 76 seeds. Its 47 usable seeds
   comprise 46 train and one validation seed; holdout remains source-isolated.
+
+Batches 65-68 checkpoint:
+
+- Four candidates were researched. Arlecchino/Yelan/Bennett/Layla,
+  Hu Tao/Xingqiu/Yelan/Layla, and Sucrose/Fischl/Xingqiu/Yelan were retained;
+  Ganyu/Venti/Layla/Mona was rejected. Campaign total: 90 researched, 47
+  retained, and 43 rejected or blocked.
+- The Layla Vapemelt variants retain their complete support sequences. Hu Tao's
+  generic combo is resolved through the separate KQM C0 no-cancel `8N2C`
+  benchmark. The Sucrose double-Hydro trace selects its optional Burst and
+  expands its two driver windows to two and three complete N4 strings.
+- The Ganyu Freeze action trace is locally replayable but combines a validation
+  carry with three train identities. It remains rejected evidence instead of
+  violating the identity-disjoint split contract.
+- The tracked catalog now contains 84 sources and 80 seeds. Its 50 usable seeds
+  comprise 49 train and one validation seed; holdout remains source-isolated.
 
 Acceptance criteria:
 
