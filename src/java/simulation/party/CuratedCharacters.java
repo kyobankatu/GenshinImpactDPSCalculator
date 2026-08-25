@@ -6,6 +6,7 @@ import model.character.Arlecchino;
 import model.character.Beidou;
 import model.character.Bennett;
 import model.character.Chevreuse;
+import model.character.Chiori;
 import model.character.Citlali;
 import model.character.Collei;
 import model.character.Columbina;
@@ -55,6 +56,7 @@ import model.weapon.SacrificialSword;
 import model.weapon.SkywardBlade;
 import model.weapon.TheStringless;
 import model.weapon.ThrillingTalesOfDragonSlayers;
+import model.weapon.UrakuMisugiri;
 import model.weapon.Verdict;
 import model.weapon.WanderingEvenstar;
 import model.weapon.WolfFang;
@@ -185,6 +187,12 @@ final class CuratedCharacters {
     static Character navia() {
         return new Navia(
                 new Verdict(1), null, TalentDataManager.getInstance(), 0,
+                () -> FIXED_RANDOM_DRAW);
+    }
+
+    static Character chiori() {
+        return new Chiori(
+                new UrakuMisugiri(1), null, TalentDataManager.getInstance(), 0,
                 () -> FIXED_RANDOM_DRAW);
     }
 

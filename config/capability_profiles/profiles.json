@@ -510,13 +510,26 @@
     "off_field_dps_ratio": 0.149372,
     "team_buff_score": 0.000000,
     "self_enhancement_score": 0.000000,
-    "energy_generation_score": 0.191325,
+    "energy_generation_score": 0.166530,
     "entry_value_score": 0.015313,
     "sustain_value_3_actions": 0.083079,
     "sustain_value_6_actions": 0.058959,
-    "exit_cost_score": 0.196094,
+    "exit_cost_score": 0.270609,
     "reentry_cost_score": 0.000000,
-    "on_field_dps_score": 0.900162,
-    "burst_window_score": 0.384727
+    "on_field_dps_score": 0.956864,
+    "burst_window_score": 0.408961
+  },
+  "CHIORI": {
+    "off_field_dps_ratio": 0.209566,
+    "team_buff_score": 0.000000,
+    "self_enhancement_score": 0.000000,
+    "energy_generation_score": 0.111020,
+    "entry_value_score": 0.126141,
+    "sustain_value_3_actions": 0.096762,
+    "sustain_value_6_actions": 0.058534,
+    "exit_cost_score": 0.024284,
+    "reentry_cost_score": 0.000000,
+    "on_field_dps_score": 0.584460,
+    "burst_window_score": 0.252724
   }
 }

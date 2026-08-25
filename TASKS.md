@@ -26062,6 +26062,7 @@ Accepted-unit table (batch 1, researched 2026-08-25):
 | KQM Collei Quick Guide: C6 Collei, C6 Xingqiu, C6 Fischl, C6 Sucrose Hyperbloom rotation | `src/java/simulation/party/ColleiSucroseHyperbloomPartyDefinition.java` | Existing rollback-safe Floral Brush/Sprout/Cuilein-Anbar, Rain Swords, C6 Oz, Swirl, Bloom, and Hyperbloom; dash cancels are omitted, optional Sucrose Burst is selected, and `5-6[N3D]` uses five strings | `TRAIN`; source action trace, reaction ownership, and timing-adapted 26s cyclic replay |
 | KQM Beidou Quick Guide: C0 Nahida, C6 Xingqiu, C6 Beidou, C0 Kuki Hyperbloom rotation | `src/java/simulation/party/NahidaBeidouHyperbloomPartyDefinition.java` | Existing rollback-safe Nahida mark/Shrine, Rain Swords, Stormbreaker, Kuki ring, Bloom, and Hyperbloom; dash cancels and the infeasible optional final Kuki N1-Burst segment are omitted, optional Nahida Burst is selected, and both variable Nahida N-spam windows are fixed to eight Normals | `TRAIN`; Stormbreaker driving trace, Kuki Hyperbloom ownership, and hitlag-adapted 35s cyclic replay |
 | KQM Navia Quick Guide: C0 Navia, C0 Zhongli, C6 Bennett, C6 Fischl double-Geo rotation | `src/java/simulation/party/NaviaZhongliPartyDefinition.java` | Existing rollback-safe Ceremonial Crystalshot and artillery, Zhongli pillar, Bennett field, C6 Oz, and Crystallize; Hold Skills map to Press, dash cancels are omitted, Fischl alternates Skill/Burst, and the cycle explicitly returns to Navia | `TRAIN`; two-cycle source trace, two Navia Skill charges, Crystallize, and cyclic replay |
+| KQM Chiori Quick Guide: C0 Navia, C0 Chiori, C6 Bennett, C6 Fischl double-Geo rotation | `src/java/simulation/party/NaviaChioriPartyDefinition.java` | Existing rollback-safe Navia artillery, Chiori Tamoto, Bennett field, C6 Oz, and Crystallize; Chiori's second Skill input maps to an explicit Fischl swap, optional Chiori Burst and dash cancels are omitted, and Fischl alternates Burst/Skill | `TRAIN`; two-cycle source trace, Tamoto rollback, two Navia Skill charges, and cyclic replay |
 
 Rejected from batch 1: Ganyu Melt, Gaming Mono Pyro, and
 Ningguang/Yae/Fischl/Zhongli mix characters already assigned to different
@@ -26238,6 +26239,17 @@ Batch 14 checkpoint:
   sustainable. Exact calibration requires 137.268% Navia, 196.060% Bennett,
   165.426% Fischl, and 100.000% Zhongli ER. Both 85-action cycles use a 25s
   boundary and retain both Navia Skill charges.
+
+Batch 15 checkpoint:
+
+- Navia/Chiori/Bennett/Fischl is retained from the current KQM Chiori Quick
+  Guide. Campaign total: 37 researched, 15 retained, 22 rejected.
+- Optional Chiori Burst and dash cancels are omitted. Chiori's unsupported
+  second Skill input is represented by the explicit Fischl swap it requests,
+  while Fischl alternates Burst and Skill over two 75-action source cycles.
+- Exact calibration requires 104.193% Navia, 177.797% Bennett, 100.000% Chiori,
+  and 151.248% Fischl ER. The 25s trace retains two Navia Skill charges and
+  closes by explicitly returning to Navia.
 
 Acceptance criteria:
 

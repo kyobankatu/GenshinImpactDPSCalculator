@@ -41,6 +41,7 @@ public final class PartyCatalog {
         register(new ColleiSucroseHyperbloomPartyDefinition());
         register(new NahidaBeidouHyperbloomPartyDefinition());
         register(new NaviaZhongliPartyDefinition());
+        register(new NaviaChioriPartyDefinition());
         register(new ArlecchinoLunarChargedPartyDefinition());
         register(new ArlecchinoIneffaOverloadPartyDefinition());
         register(new AlhaithamSpreadPartyDefinition());
