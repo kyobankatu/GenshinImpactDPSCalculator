@@ -492,5 +492,18 @@
     "reentry_cost_score": 0.000000,
     "on_field_dps_score": 0.187196,
     "burst_window_score": 0.164789
+  },
+  "COLLEI": {
+    "off_field_dps_ratio": 0.180213,
+    "team_buff_score": 0.502033,
+    "self_enhancement_score": 0.000000,
+    "energy_generation_score": 0.323100,
+    "entry_value_score": 0.070524,
+    "sustain_value_3_actions": 0.072917,
+    "sustain_value_6_actions": 0.062944,
+    "exit_cost_score": 0.175564,
+    "reentry_cost_score": 0.000000,
+    "on_field_dps_score": 0.227558,
+    "burst_window_score": 0.134291
   }
 }

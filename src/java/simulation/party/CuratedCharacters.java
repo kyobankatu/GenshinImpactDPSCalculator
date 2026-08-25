@@ -7,6 +7,7 @@ import model.character.Beidou;
 import model.character.Bennett;
 import model.character.Chevreuse;
 import model.character.Citlali;
+import model.character.Collei;
 import model.character.Columbina;
 import model.character.Emilie;
 import model.character.Faruzan;
@@ -199,6 +200,11 @@ final class CuratedCharacters {
     static Character beidou() {
         return new Beidou(
                 new FavoniusGreatsword(5, () -> FIXED_RANDOM_DRAW), null, 6);
+    }
+
+    static Character collei() {
+        return new Collei(
+                new FavoniusWarbow(5, () -> FIXED_RANDOM_DRAW), null, 6);
     }
 
     static Character fischl() {
