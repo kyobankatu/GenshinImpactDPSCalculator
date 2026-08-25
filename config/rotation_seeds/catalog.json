@@ -391,6 +391,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["Noelle, C0 Furina, Albedo, Gorou", "Gorou uses Favonius Warbow and 4pc Exile", "single target"]
+    },
+    {
+      "sourceId": "kqm-mika-quick-guide-raiden-furina-eula",
+      "title": "Mika Quick Guide: Raiden Furina Eula",
+      "url": "https://keqingmains.com/q/mika-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["Eula, Furina, Mika, Raiden Shogun", "Raiden uses 3[N3C]", "single target"]
     }
   ],
   "seeds": [
@@ -934,6 +944,20 @@
       "sourceAssumptions": ["Furina uses Skill then Burst", "Gorou uses Skill and Burst then a second Skill", "Albedo uses Skill", "Noelle uses Burst, Skill, and five N3 strings", "single target"],
       "simulatorAssumptions": ["review only; branch-safe replay is unavailable", "dash cancels are unsupported and removed", "3[N3D] and N3D N3 map to fifteen Normal actions", "Noelle healing and dynamic Furina Fanfare remain outside the simulator player-HP contract", "no approximate snapshot state is accepted"],
       "contentHash": "96b238419cf2cc13e740eb91207ac4745845d22f39ee9c27a6fe2dfafc13179f"
+    },
+    {
+      "seedId": "kqm-mika-raiden-furina-eula-rejected-v1",
+      "partyName": "EulaRaidenFurinaUnavailable",
+      "scenarioFingerprint": "review-only:eula-furina-mika-raiden-physical",
+      "sourceIds": ["kqm-mika-quick-guide-raiden-furina-eula"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because the exact source sequence requires Mika's Burst before his Hold Skill, while the local Mika offensive slice explicitly rejects Burst and excludes its healing and Eagleplume state.",
+      "openerActions": [10, 3],
+      "cycleActions": [[8, 3, 5, 9, 5, 4, 7, 3, 5, 0, 0, 0, 0, 4, 0, 0, 0, 0, 10, 5, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 3]],
+      "erTargets": {"EULA": 1.0, "FURINA": 1.0, "MIKA": 1.0, "RAIDEN_SHOGUN": 1.0},
+      "sourceAssumptions": ["first-rotation Raiden Skill opener", "Furina uses Skill then Burst", "Mika uses Burst then Hold Skill", "Eula uses Press Skill, Burst, N4, Hold Skill, and N4", "Raiden uses Burst, 3[N3C], then Skill", "single target"],
+      "simulatorAssumptions": ["review only; Mika Burst is unavailable", "Furina's dash and Eula's dash cancel are unsupported and removed", "Raiden's named combo uses the independently documented 3[N3C] sequence", "no Mika Burst omission or healing substitute is accepted"],
+      "contentHash": "71839e0d77aa7370d7d19887a4848994ee632e51bb950de7f16fb03b7ecd7a55"
     }
   ]
 }
