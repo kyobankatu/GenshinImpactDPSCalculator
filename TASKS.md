@@ -26216,6 +26216,16 @@ Batch 12 checkpoint:
   161.293% Beidou, and 100.000% Kuki ER. The 85-action expanded trace matches
   the registered baseline exactly and preserves Kuki as Hyperbloom owner.
 
+Batch 13 checkpoint:
+
+- The current KQM Lan Yan Quick Guide's Nahida/Fischl/Xingqiu/Lan Yan
+  Hyperbloom rotation is rejected. Campaign total: 35 researched, 13 retained,
+  22 rejected.
+- The exact source sequence requires two Lan Yan Bursts per cycle. Even after
+  expanding both `3[N3D]` windows and allowing a 50s local cycle, exact Energy
+  calibration requires 287.616% Lan Yan ER while the frozen TTDS KQMS build can
+  reach only 206.900%. No unsourced Burst omission or battery action is added.
+
 Acceptance criteria:
 
 - Every retained seed has an exact constructible scenario, complete provenance,

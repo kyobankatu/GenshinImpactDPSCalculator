@@ -241,6 +241,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Nahida, C6 Xingqiu, C6 Beidou, C0 Kuki Shinobu", "Nahida on-field driver", "single target"]
+    },
+    {
+      "sourceId": "kqm-lan-yan-quick-guide-nahida-fischl-xingqiu",
+      "title": "Lan Yan Quick Guide: Nahida Fischl Xingqiu Hyperbloom",
+      "url": "https://keqingmains.com/q/lan-yan-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Nahida, C6 Fischl, C6 Xingqiu, C6 Lan Yan", "Lan Yan on-field driver", "single target"]
     }
   ],
   "seeds": [
@@ -582,6 +592,20 @@
       "sourceAssumptions": ["optional Nahida Burst is used", "optional final Kuki N1-Burst segment is omitted", "Nahida drives with two variable Normal windows", "Kuki owns Hyperbloom", "single target"],
       "simulatorAssumptions": ["dash cancels are unsupported and removed", "both Nahida driving windows are fixed to eight Normals", "explicit one-second waits preserve each simulator swap lock", "the steady-state trace uses a 35s cycle", "Favonius Greatsword R5 uses a deterministic proc draw", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "340aa0813c8839be1472c62e61a204fe0e21c46ad255e81c4450f1b378d476d7"
+    },
+    {
+      "seedId": "kqm-lan-yan-nahida-fischl-xingqiu-adapted-v1",
+      "partyName": "LanYanHyperbloom",
+      "scenarioFingerprint": "review-only:NAHIDA:FISCHL:XINGQIU:LAN_YAN:kqms-er-infeasible",
+      "sourceIds": ["kqm-lan-yan-quick-guide-nahida-fischl-xingqiu"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because the exact two-Burst source sequence requires 287.616% Lan Yan ER while the frozen TTDS KQMS build reaches only 206.900%; no unsourced Burst omission or battery action is added.",
+      "openerActions": [],
+      "cycleActions": [[5, 3, 0, 8, 0, 0, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7]],
+      "erTargets": {"NAHIDA": 1.0, "FISCHL": 1.0, "XINGQIU": 1.0, "LAN_YAN": 2.87616},
+      "sourceAssumptions": ["C6 Lan Yan uses the optional second Skill", "two 3[N3D] driving windows", "Lan Yan triggers Hyperbloom through Electro Swirl", "single target"],
+      "simulatorAssumptions": ["review only; exact KQMS Energy calibration is infeasible", "dash cancels are unsupported and removed", "each N3 window is fixed to nine Normals", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "c41c36aac2554ffde754d44fc509f48a29bc22874faf7e1a97031e721e862576"
     }
   ]
 }
