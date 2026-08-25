@@ -401,6 +401,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["Eula, Furina, Mika, Raiden Shogun", "Raiden uses 3[N3C]", "single target"]
+    },
+    {
+      "sourceId": "kqm-lan-yan-quick-guide-xiao-xianyun-furina",
+      "title": "Lan Yan Quick Guide: Xiao Xianyun Furina",
+      "url": "https://keqingmains.com/q/lan-yan-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Xiao, C0 Furina, C0 Xianyun, C6 Lan Yan", "twelve high Plunges", "single target without collision damage"]
     }
   ],
   "seeds": [
@@ -958,6 +968,20 @@
       "sourceAssumptions": ["first-rotation Raiden Skill opener", "Furina uses Skill then Burst", "Mika uses Burst then Hold Skill", "Eula uses Press Skill, Burst, N4, Hold Skill, and N4", "Raiden uses Burst, 3[N3C], then Skill", "single target"],
       "simulatorAssumptions": ["review only; Mika Burst is unavailable", "Furina's dash and Eula's dash cancel are unsupported and removed", "Raiden's named combo uses the independently documented 3[N3C] sequence", "no Mika Burst omission or healing substitute is accepted"],
       "contentHash": "71839e0d77aa7370d7d19887a4848994ee632e51bb950de7f16fb03b7ecd7a55"
+    },
+    {
+      "seedId": "kqm-lan-yan-xiao-xianyun-furina-adapted-v1",
+      "partyName": "XiaoLanYan",
+      "scenarioFingerprint": "loadout-v1:XIAO-c0-FavoniusLance-r5-artifact-kqms-generic-v1:FURINA-c0-WolfFang-r1-artifact-kqms-generic-v1:XIANYUN-c0-FavoniusCodex-r5-artifact-kqms-generic-v1:LAN_YAN-c6-ThrillingTalesOfDragonSlayers-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-lan-yan-quick-guide-xiao-xianyun-furina"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Furina's dash input is omitted, Xianyun EP maps to Skill-Plunge, jump inputs map to supported high Plunges, and the linked Xiao benchmark fixes the named combo to twelve high Plunges in a 31s cycle.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 5, 9, 3, 2, 5, 10, 5, 3, 0, 7, 3, 3, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]],
+      "erTargets": {"XIAO": 1.0, "FURINA": 1.2019230769164, "XIANYUN": 1.0815822002420692, "LAN_YAN": 1.0653409090849912},
+      "sourceAssumptions": ["Furina uses Skill then Burst", "Xianyun uses EP Q", "C6 Lan Yan uses Burst, Skill, and N1", "Xiao uses two Skills, Burst, and twelve high Plunges", "single target without collision damage"],
+      "simulatorAssumptions": ["Furina's dash input is unsupported and removed", "jump inputs map directly to supported high Plunge actions", "collision and low-Plunge packets are excluded", "represented action durations satisfy each swap lock without inserted waits", "the steady-state trace uses a 31s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "38f7918290c39e215a2bce946c0337e2b477903382bb0a9b326ebe947d7b5566"
     }
   ]
 }

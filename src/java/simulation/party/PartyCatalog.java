@@ -31,6 +31,7 @@ public final class PartyCatalog {
         register(new XiaoPlungePartyDefinition());
         register(new XiaoXianyunPartyDefinition());
         register(new XiaoFurinaPartyDefinition());
+        register(new XiaoLanYanPartyDefinition());
         register(new DilucXianyunVaporizePartyDefinition());
         register(new HuTaoXianyunVaporizePartyDefinition());
         register(new ArlecchinoOverloadPartyDefinition());
