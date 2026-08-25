@@ -505,5 +505,18 @@
     "reentry_cost_score": 0.000000,
     "on_field_dps_score": 0.227558,
     "burst_window_score": 0.134291
+  },
+  "NAVIA": {
+    "off_field_dps_ratio": 0.149372,
+    "team_buff_score": 0.000000,
+    "self_enhancement_score": 0.000000,
+    "energy_generation_score": 0.191325,
+    "entry_value_score": 0.015313,
+    "sustain_value_3_actions": 0.083079,
+    "sustain_value_6_actions": 0.058959,
+    "exit_cost_score": 0.196094,
+    "reentry_cost_score": 0.000000,
+    "on_field_dps_score": 0.900162,
+    "burst_window_score": 0.384727
   }
 }

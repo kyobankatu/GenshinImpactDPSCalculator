@@ -26061,6 +26061,7 @@ Accepted-unit table (batch 1, researched 2026-08-25):
 | KQM Sucrose Quick Guide: C6 Sucrose, C6 Xingqiu, C6 Beidou, C6 Fischl Electro-Charged rotation | `src/java/simulation/party/SucroseElectroChargedPartyDefinition.java` | Existing Swirl/EC, Rain Swords, rollback-safe Stormbreaker discharge, and C6 Oz; optional dash cancels are omitted and variable N-spam is fixed to the guide's twelve-N2 upper bound | `TRAIN`; Stormbreaker trigger-spacing trace, two Oz casts, and 25.5s cyclic replay |
 | KQM Collei Quick Guide: C6 Collei, C6 Xingqiu, C6 Fischl, C6 Sucrose Hyperbloom rotation | `src/java/simulation/party/ColleiSucroseHyperbloomPartyDefinition.java` | Existing rollback-safe Floral Brush/Sprout/Cuilein-Anbar, Rain Swords, C6 Oz, Swirl, Bloom, and Hyperbloom; dash cancels are omitted, optional Sucrose Burst is selected, and `5-6[N3D]` uses five strings | `TRAIN`; source action trace, reaction ownership, and timing-adapted 26s cyclic replay |
 | KQM Beidou Quick Guide: C0 Nahida, C6 Xingqiu, C6 Beidou, C0 Kuki Hyperbloom rotation | `src/java/simulation/party/NahidaBeidouHyperbloomPartyDefinition.java` | Existing rollback-safe Nahida mark/Shrine, Rain Swords, Stormbreaker, Kuki ring, Bloom, and Hyperbloom; dash cancels and the infeasible optional final Kuki N1-Burst segment are omitted, optional Nahida Burst is selected, and both variable Nahida N-spam windows are fixed to eight Normals | `TRAIN`; Stormbreaker driving trace, Kuki Hyperbloom ownership, and hitlag-adapted 35s cyclic replay |
+| KQM Navia Quick Guide: C0 Navia, C0 Zhongli, C6 Bennett, C6 Fischl double-Geo rotation | `src/java/simulation/party/NaviaZhongliPartyDefinition.java` | Existing rollback-safe Ceremonial Crystalshot and artillery, Zhongli pillar, Bennett field, C6 Oz, and Crystallize; Hold Skills map to Press, dash cancels are omitted, Fischl alternates Skill/Burst, and the cycle explicitly returns to Navia | `TRAIN`; two-cycle source trace, two Navia Skill charges, Crystallize, and cyclic replay |
 
 Rejected from batch 1: Ganyu Melt, Gaming Mono Pyro, and
 Ningguang/Yae/Fischl/Zhongli mix characters already assigned to different
@@ -26225,6 +26226,18 @@ Batch 13 checkpoint:
   expanding both `3[N3D]` windows and allowing a 50s local cycle, exact Energy
   calibration requires 287.616% Lan Yan ER while the frozen TTDS KQMS build can
   reach only 206.900%. No unsourced Burst omission or battery action is added.
+
+Batch 14 checkpoint:
+
+- Navia/Zhongli/Bennett/Fischl is retained from the current KQM Navia Quick
+  Guide. Campaign total: 36 researched, 14 retained, 22 rejected.
+- Zhongli and Navia Hold Skills map to Press, dash cancels are omitted, Fischl
+  alternates Skill and Burst over two source cycles, and an explicit final swap
+  returns the trace to Navia. The second Navia combo uses the guide's N3 form.
+- A deterministic Favonius Warbow R5 makes the alternating Fischl Burst
+  sustainable. Exact calibration requires 137.268% Navia, 196.060% Bennett,
+  165.426% Fischl, and 100.000% Zhongli ER. Both 85-action cycles use a 25s
+  boundary and retain both Navia Skill charges.
 
 Acceptance criteria:
 

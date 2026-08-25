@@ -23,6 +23,7 @@ import model.character.Layla;
 import model.character.LanYan;
 import model.character.Mona;
 import model.character.Nahida;
+import model.character.Navia;
 import model.character.Ningguang;
 import model.character.Ororon;
 import model.character.Rosaria;
@@ -54,6 +55,7 @@ import model.weapon.SacrificialSword;
 import model.weapon.SkywardBlade;
 import model.weapon.TheStringless;
 import model.weapon.ThrillingTalesOfDragonSlayers;
+import model.weapon.Verdict;
 import model.weapon.WanderingEvenstar;
 import model.weapon.WolfFang;
 
@@ -180,6 +182,12 @@ final class CuratedCharacters {
         return new Nahida(new WanderingEvenstar(5), null, 0);
     }
 
+    static Character navia() {
+        return new Navia(
+                new Verdict(1), null, TalentDataManager.getInstance(), 0,
+                () -> FIXED_RANDOM_DRAW);
+    }
+
     static Character kukiShinobu() {
         return new KukiShinobu(new WolfFang(), null, TalentDataManager.getInstance(), 0,
                 () -> FIXED_RANDOM_DRAW);
@@ -209,6 +217,10 @@ final class CuratedCharacters {
 
     static Character fischl() {
         return new Fischl(new TheStringless(), null);
+    }
+
+    static Character fischlFavonius() {
+        return new Fischl(new FavoniusWarbow(5, () -> FIXED_RANDOM_DRAW), null);
     }
 
     static Character chevreuse() {

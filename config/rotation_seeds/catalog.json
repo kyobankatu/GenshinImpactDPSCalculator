@@ -251,6 +251,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Nahida, C6 Fischl, C6 Xingqiu, C6 Lan Yan", "Lan Yan on-field driver", "single target"]
+    },
+    {
+      "sourceId": "kqm-navia-quick-guide-zhongli-fischl-bennett",
+      "title": "Navia Quick Guide: Zhongli Fischl Bennett",
+      "url": "https://keqingmains.com/q/navia-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Navia, C0 Zhongli, C6 Bennett, C6 Fischl", "Fischl alternates Skill and Burst", "single target"]
     }
   ],
   "seeds": [
@@ -606,6 +616,23 @@
       "sourceAssumptions": ["C6 Lan Yan uses the optional second Skill", "two 3[N3D] driving windows", "Lan Yan triggers Hyperbloom through Electro Swirl", "single target"],
       "simulatorAssumptions": ["review only; exact KQMS Energy calibration is infeasible", "dash cancels are unsupported and removed", "each N3 window is fixed to nine Normals", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "c41c36aac2554ffde754d44fc509f48a29bc22874faf7e1a97031e721e862576"
+    },
+    {
+      "seedId": "kqm-navia-zhongli-fischl-bennett-adapted-v1",
+      "partyName": "NaviaZhongli",
+      "scenarioFingerprint": "loadout-v1:NAVIA-c0-Verdict-r1-artifact-kqms-generic-v1:ZHONGLI-c0-Deathmatch-r1-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:FISCHL-c6-FavoniusWarbow-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-navia-quick-guide-zhongli-fischl-bennett"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Zhongli and Navia Hold Skills map to Press, dash cancels are omitted, Fischl alternates Skill and Burst, the second Navia field string uses the guide's N3 form, and an explicit final swap returns to Navia within 25s.",
+      "openerActions": [],
+      "cycleActions": [
+        [8, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 3, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7],
+        [8, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 3, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7]
+      ],
+      "erTargets": {"NAVIA": 1.3726847230210508, "ZHONGLI": 1.0, "BENNETT": 1.9606021994406988, "FISCHL": 1.6542597187482753},
+      "sourceAssumptions": ["Zhongli and Navia Hold Skills", "Fischl alternates Skill and Burst", "Navia uses N3D N2 then N3", "single target"],
+      "simulatorAssumptions": ["Hold Skills map to Skill Press", "dash cancels are unsupported and removed", "explicit one-second waits preserve each simulator swap lock", "an explicit final swap restores the Navia cycle opener", "the steady-state trace uses a 25s cycle", "Favonius Warbow R5 uses a deterministic proc draw", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "bed62e850617fef982086e03b5e0689c4e5e7f70ca767febee1e1c728af44f91"
     }
   ]
 }
