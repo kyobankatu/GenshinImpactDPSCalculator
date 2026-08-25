@@ -1051,6 +1051,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Kamisato Ayato, C0 Nahida, C6 Thoma, C6 Bennett", "Haran Geppaku Futsu R1 Ayato", "Wandering Evenstar R5 Nahida", "Favonius Lance R5 Thoma", "Skyward Blade R1 Bennett", "single target"]
+    },
+    {
+      "sourceId": "kqm-xiangling-quick-guide-ayato-bennett-sucrose",
+      "title": "Xiangling Quick Guide: Ayato Bennett Sucrose Vaporize",
+      "url": "https://keqingmains.com/q/xiangling-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 4.5; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Kamisato Ayato, C6 Bennett, C6 Xiangling, C6 Sucrose", "Haran Geppaku Futsu R1 Ayato", "Skyward Blade R1 Bennett", "Favonius Lance R5 Xiangling", "Thrilling Tales R5 Sucrose", "single target"]
     }
   ],
   "seeds": [
@@ -2462,6 +2472,20 @@
       "sourceAssumptions": ["Ayato uses Burst and two Skill-N15 field times", "Nahida uses Skill-Burst then N1-Skill and an optional Charged Attack", "Thoma uses Skill-Burst then Skill-N2", "Bennett uses Skill-Burst then N1-Skill", "single target"],
       "simulatorAssumptions": ["Nahida's optional Charged Attack is omitted", "a fixed 1.5s wait reaches Thoma's second Skill cooldown", "all thirty Ayato Normal attacks are retained", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 36s cycle", "Favonius Lance R5 uses deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "0237dd2da24e3dc98aee8d3de04592b3b0e8460e3a8cce161e65145ed877b871"
+    },
+    {
+      "seedId": "kqm-xiangling-ayato-bennett-sucrose-adapted-v1",
+      "partyName": "AyatoSucroseVaporize",
+      "scenarioFingerprint": "loadout-v1:KAMISATO_AYATO-c0-HaranGeppakuFutsu-r1-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:XIANGLING-c6-FavoniusLance-r5-artifact-kqms-generic-v1:SUCROSE-c6-ThrillingTalesOfDragonSlayers-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-xiangling-quick-guide-ayato-bennett-sucrose"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "The complete single-target Guoba-Swirl sequence is retained with both Ayato Skill-N15 field times and all documented battery actions.",
+      "openerActions": [],
+      "cycleActions": [[5, 8, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"KAMISATO_AYATO": 1.266623478201089, "BENNETT": 1.0638297872163123, "XIANGLING": 1.4732608531821632, "SUCROSE": 1.0},
+      "sourceAssumptions": ["Ayato uses Burst and two Skill-N15 field times", "Bennett uses Burst and two Skills", "Xiangling uses N2-Skill, Burst, N2, and a second Skill", "Sucrose uses two Skills including a Guoba Swirl", "single target"],
+      "simulatorAssumptions": ["all thirty Ayato Normal attacks are retained", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 36s cycle", "Favonius Lance R5 uses deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "9c4b08c3ac2bb50a70f17b05b2c1e91f2a81d9ceadba01599ef261ef6c930a8d"
     }
   ]
 }
