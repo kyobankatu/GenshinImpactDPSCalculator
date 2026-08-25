@@ -26,7 +26,7 @@ factories have been removed for the migrated parties.
 The simulator-only autonomous campaign is complete. B-212 Phases 1-10 built the
 local expert-iteration rotation-optimizer pipeline, but the local quality gate
 failed. Phases 11-14 established sourced human-rotation catalog, replay, import,
-and pilot contracts. Phase 15 is active with 46 researched candidates and 19
+and pilot contracts. Phase 15 is active with 54 researched candidates and 24
 newly retained source-matched train scenarios; it continues before Phase 16
 changes teacher search or Phase 17 regenerates the quality-gated dataset.
 
@@ -26012,7 +26012,7 @@ Completion evidence:
 
 ### Phase 15: Source-Matched Bulk Human Rotation Campaign
 
-Status: In progress; batches 1-28 retained twenty-one new source-matched train scenarios.
+Status: In progress; batches 1-32 retained twenty-four new source-matched train scenarios.
 
 Active execution window:
 
@@ -26089,6 +26089,9 @@ Accepted-unit table (batch 1, researched 2026-08-25):
 | KQM Xianyun Quick Guide: C0 Hu Tao, C0 Furina, C0 Yelan, C0 Xianyun Double Hydro Vaporize Plunge rotation | `src/java/simulation/party/HuTaoXianyunVaporizePartyDefinition.java` | Existing rollback-safe Paramita Papilio/Blood Blossom, Salon Members/Fanfare, Exquisite Throw, Xianyun Starwicker, and Vaporize; omit Furina's dash, optional timing-tight final `N2C`, and optional Hu Tao Burst, and map jump inputs to high Plunge | `TRAIN`; five complete `N2CJP` strings, coordinated Hydro/Vaporize trace, cyclic Energy, and baseline non-inferiority |
 | KQM Furina and Xiao Quick Guides: C0 Xiao, C0 Furina, C0 Xianyun, C0 Faruzan Plunge rotation | `src/java/simulation/party/XiaoFurinaPartyDefinition.java` | Existing rollback-safe Xiao, Furina, Xianyun, and C0 Faruzan actions; omit Furina's dash and collision/low-Plunge packets, and fix the named combo to twelve high Plunges | `TRAIN`; corroborated source order, twelve Burst Plunges, cyclic Energy, and baseline equality |
 | KQM Lan Yan Quick Guide: C0 Xiao, C0 Furina, C0 Xianyun, C6 Lan Yan Plunge rotation | `src/java/simulation/party/XiaoLanYanPartyDefinition.java` | Existing rollback-safe Xiao, Furina, Xianyun, and C6 Lan Yan actions; omit Furina's dash and collision/low-Plunge packets, and fix the named combo to twelve high Plunges | `TRAIN`; complete `EDQ/EPQ/QEN1/2EQ/12HP` trace, cyclic Energy, and baseline equality |
+| KQM Lan Yan and Wanderer Quick Guides: C0 Wanderer, C6 Faruzan, C6 Bennett, C6 Lan Yan field rotation | `src/java/simulation/party/WandererLanYanPartyDefinition.java` | Existing rollback-safe support actions and Wanderer Skill/Normal actions; omit dash cancels and fix Tulaytullah's N3 spam to six strings | `TRAIN`; exact support order, eighteen Normals, cyclic Energy, and baseline equality |
+| KQM Lan Yan Quick Guide: C6 Faruzan, C0 Furina, C6 Bennett, C6 Lan Yan quickswap rotation | `src/java/simulation/party/FaruzanLanYanQuickswapPartyDefinition.java` | Existing rollback-safe support actions, C6 Lan Yan's second Skill charge, and deterministic Sacrificial Fragments; omit Furina's dash and preserve Faruzan's second-Skill cooldown | `TRAIN`; complete two-branch action trace, cyclic Energy, and baseline equality |
+| KQM Wanderer Quick Guide: C0 Wanderer, C6 Faruzan, C6 Xingqiu, C0 Yelan double-Hydro rotation | `src/java/simulation/party/WandererDoubleHydroPartyDefinition.java` | Existing rollback-safe support actions and Wanderer field actions; use guide-supported Favonius Sword Xingqiu, omit optional Faruzan Charged Shot and Wanderer Burst, and fix N3 spam to six strings | `TRAIN`; exact support order, eighteen Normals, cyclic Energy, and baseline equality |
 
 Rejected from batch 1: Ganyu Melt, Gaming Mono Pyro, and
 Ningguang/Yae/Fischl/Zhongli mix characters already assigned to different
@@ -26403,6 +26406,22 @@ Batches 25-28 checkpoint:
   approximated.
 - The tracked catalog now contains 41 sources and 40 seeds. Its 24 usable seeds
   comprise 23 train and one validation seed; holdout remains source-isolated.
+
+Batches 29-32 checkpoint:
+
+- Four candidates were researched: Wanderer/Lan Yan, Faruzan/Lan Yan quickswap,
+  and Wanderer double Hydro were retained; Wanderer Freeze was rejected after
+  exact replay. Campaign total: 54 researched, 24 retained, and 30 rejected or
+  blocked.
+- The three retained variants preserve their sourced support order and pass
+  exact three-cycle replay. Their calibrated support ER targets remain within
+  the KQMS allocation ceiling; variable Wanderer field time is fixed to six
+  Tulaytullah N3 strings.
+- Wanderer Freeze preserves the complete reviewed action trace, but Xingqiu's
+  ending Energy falls from 76.0420 to 68.6812 across equivalent cycle phases.
+  No unsourced battery action was added and no party definition was registered.
+- The tracked catalog now contains 46 sources and 44 seeds. Its 27 usable seeds
+  comprise 26 train and one validation seed; holdout remains source-isolated.
 
 Acceptance criteria:
 
