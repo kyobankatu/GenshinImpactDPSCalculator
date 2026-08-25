@@ -661,6 +661,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Navia, C0 Xilonen, C0 Furina, C0 Yelan", "Verdict R1", "Favonius Warbow R5 Yelan", "single target"]
+    },
+    {
+      "sourceId": "kqm-neuvillette-quick-guide-furina-jean-fischl",
+      "title": "Neuvillette Quick Guide: Furina Jean Fischl",
+      "url": "https://keqingmains.com/q/neuvillette-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Luna IV; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Neuvillette, C0 Furina, C4 Jean, C6 Fischl", "Tome of the Eternal Flow R1", "single target"]
     }
   ],
   "seeds": [
@@ -1568,6 +1578,20 @@
       "sourceAssumptions": ["Xilonen uses Burst, then two Skill-N2 strings", "Furina uses Skill then Burst", "Navia uses Burst and two Hold Skills, with N3 after the second", "Yelan uses Burst-Skill-N1, then later Skill-N2", "single target"],
       "simulatorAssumptions": ["Furina's dash input is unsupported and removed", "Navia's Hold Skills map to Press Skill", "all sourced Normal counts are preserved", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 30s cycle", "Favonius Warbow R5 uses deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "e4b17b6c44d611dbd9ef1058a2895ff585f700b791f0d8857ba5ecbe1588b466"
+    },
+    {
+      "seedId": "kqm-neuvillette-furina-jean-fischl-adapted-v1",
+      "partyName": "NeuvilletteJeanFischlUnavailable",
+      "scenarioFingerprint": "review-only:neuvillette-furina-jean-fischl-sourcewater",
+      "sourceIds": ["kqm-neuvillette-quick-guide-furina-jean-fischl"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because all five sourced Equitable Judgments rely on Sourcewater Droplets for shortened charge time, while the local Neuvillette slice explicitly excludes droplet creation and collection and models each no-droplet beam as a 7.5s action.",
+      "openerActions": [],
+      "cycleActions": [[3, 8, 3, 5, 9, 3, 5, 10, 3, 7, 1, 5, 3, 1, 9, 3, 10, 5, 7, 1, 1]],
+      "erTargets": {"NEUVILLETTE": 1.0, "FURINA": 1.0, "JEAN": 1.0, "FISCHL": 1.0},
+      "sourceAssumptions": ["Neuvillette uses Skill, then one Charged-Burst-Skill-Charged sequence and two final Charged Attacks", "Furina uses Skill then Burst", "Jean uses Skill-Burst and a later Skill", "Fischl alternates Skill then Burst", "single target"],
+      "simulatorAssumptions": ["Furina's dash and Jean's optional N1 are omitted from the reviewed action identity", "the source assumes Sourcewater Droplet collection shortens every Equitable Judgment charge", "the local Neuvillette slice excludes Sourcewater Droplet creation and collection", "the local no-droplet Equitable Judgment advances time by 450 frames", "the candidate is not constructible without changing simulator mechanics"],
+      "contentHash": "1de2f2ea6df0daea603831ad415891a7580acf0d16bdc302de087015fc3cfb14"
     }
   ]
 }
