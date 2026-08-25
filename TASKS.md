@@ -26,7 +26,7 @@ factories have been removed for the migrated parties.
 The simulator-only autonomous campaign is complete. B-212 Phases 1-10 built the
 local expert-iteration rotation-optimizer pipeline, but the local quality gate
 failed. Phases 11-14 established sourced human-rotation catalog, replay, import,
-and pilot contracts. Phase 15 is active with 58 researched candidates and 26
+and pilot contracts. Phase 15 is active with 62 researched candidates and 29
 newly retained source-matched train scenarios; it continues before Phase 16
 changes teacher search or Phase 17 regenerates the quality-gated dataset.
 
@@ -26012,7 +26012,7 @@ Completion evidence:
 
 ### Phase 15: Source-Matched Bulk Human Rotation Campaign
 
-Status: In progress; batches 1-36 retained twenty-six new source-matched train scenarios.
+Status: In progress; batches 1-40 retained twenty-nine new source-matched train scenarios.
 
 Active execution window:
 
@@ -26094,6 +26094,9 @@ Accepted-unit table (batch 1, researched 2026-08-25):
 | KQM Wanderer Quick Guide: C0 Wanderer, C6 Faruzan, C6 Xingqiu, C0 Yelan double-Hydro rotation | `src/java/simulation/party/WandererDoubleHydroPartyDefinition.java` | Existing rollback-safe support actions and Wanderer field actions; use guide-supported Favonius Sword Xingqiu, omit optional Faruzan Charged Shot and Wanderer Burst, and fix N3 spam to six strings | `TRAIN`; exact support order, eighteen Normals, cyclic Energy, and baseline equality |
 | KQM Wanderer Quick Guide: C0 Wanderer, C6 Faruzan, C0 Layla, C6 Bennett shielded rotation | `src/java/simulation/party/WandererLaylaPartyDefinition.java` | Existing rollback-safe support actions and Wanderer field actions; omit optional Faruzan Charged Shot and Wanderer Burst, and fix N3 spam to six strings | `TRAIN`; exact support order, final Bennett Skill, cyclic Energy, and baseline equality |
 | KQM Wanderer Quick Guide: C0 Wanderer, C6 Faruzan, C6 Bennett, C0 Zhongli shielded rotation | `src/java/simulation/party/WandererZhongliPartyDefinition.java` | Existing rollback-safe support actions and Wanderer field actions; map Zhongli Hold Skill to Press, omit dash cancels and optional actions, and fix N3 spam to six strings | `TRAIN`; exact support order, final Bennett Skill, cyclic Energy, and baseline equality |
+| KQM Wanderer Quick Guide: C0 Wanderer, C6 Faruzan, C6 Thoma, C6 Bennett shielded rotation | `src/java/simulation/party/WandererThomaPartyDefinition.java` | Existing rollback-safe support actions, Fiery Collapse, and Wanderer field actions; add strict Thoma capabilities/profile, omit optional actions, and fix N3 spam to six strings | `TRAIN`; exact support order, final Bennett Skill, cyclic Energy, and baseline equality |
+| KQM Wanderer Quick Guide: C0 Wanderer, C6 Faruzan, C0 Venti, C6 Bennett triple-Anemo rotation | `src/java/simulation/party/WandererVentiPartyDefinition.java` | Existing rollback-safe support actions, Venti Burst ticks/absorption, and Wanderer field actions; add strict Venti capabilities/profile and use a hitlag-aware cycle | `TRAIN`; exact support order, final Bennett Skill, 30s cyclic Energy, and baseline equality |
+| KQM Wanderer Quick Guide: C0 Wanderer, C6 Faruzan, C4 Jean, C6 Bennett Sunfire rotation | `src/java/simulation/party/WandererJeanPartyDefinition.java` | Existing rollback-safe support actions, Jean C2/C4, and Wanderer field actions; add strict Jean capabilities/profile and omit only the source-optional final Skills | `TRAIN`; exact required support order, C4 field, cyclic Energy, and baseline equality |
 
 Rejected from batch 1: Ganyu Melt, Gaming Mono Pyro, and
 Ningguang/Yae/Fischl/Zhongli mix characters already assigned to different
@@ -26440,6 +26443,21 @@ Batches 33-36 checkpoint:
   No unsourced battery action, Burst capability, or fabricated profile was used.
 - The tracked catalog now contains 50 sources and 48 seeds. Its 29 usable seeds
   comprise 28 train and one validation seed; holdout remains source-isolated.
+
+Batches 37-40 checkpoint:
+
+- Four candidates were researched: Wanderer/Thoma, Wanderer/Venti, and
+  Wanderer/C4 Jean were retained; Wanderer/Kazuha was rejected. Campaign total:
+  62 researched, 29 retained, and 33 rejected or blocked.
+- New strict Thoma, Venti, and Jean action capabilities and measured profiles
+  support three distinct off-field and triple-Anemo trajectories. Venti's full
+  trace uses a hitlag-aware 30s cycle; Jean preserves the C4 source requirement
+  and omits only its two optional final Skills.
+- The Kazuha trace passed provisional three-cycle replay, but Kazuha belongs to
+  the identity-disjoint `GanyuFreeze` validation scenario. Its train party and
+  provisional profile changes were removed instead of leaking validation data.
+- The tracked catalog now contains 54 sources and 52 seeds. Its 32 usable seeds
+  comprise 31 train and one validation seed; holdout remains source-isolated.
 
 Acceptance criteria:
 
