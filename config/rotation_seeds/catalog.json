@@ -1346,18 +1346,18 @@
       "contentHash": "46b04e1c856a8d1fa4a0dda953cbe007b662b2a6e18c959b5d4227f32ac18c81"
     },
     {
-      "seedId": "kqm-xianyun-gaming-mono-pyro-rejected-v1",
-      "partyName": "GamingMonoPyroUnavailable",
-      "scenarioFingerprint": "review-only:gaming-xianyun-xiangling-bennett-mono-pyro",
+      "seedId": "kqm-xianyun-gaming-mono-pyro-adapted-v1",
+      "partyName": "GamingMonoPyro",
+      "scenarioFingerprint": "loadout-v1:GAMING-c0-FavoniusGreatsword-r5-artifact-kqms-generic-v1:XIANGLING-c6-FavoniusLance-r5-artifact-kqms-generic-v1:XIANYUN-c0-FavoniusCodex-r5-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1",
       "sourceIds": ["kqm-xianyun-quick-guide-gaming-mono-pyro"],
-      "adaptationStatus": "rejected",
-      "adaptationNote": "Rejected because the sourced three JP-EP repetitions require Gaming's HP-gated Man Chai return loop to reset Skill, while the local runtime intentionally represents only the initial Burst return.",
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Jump inputs map to supported high Plunges, short waits reach each exact Man Chai Skill-reset boundary, and the sourced final Gaming/Xiangling choice resolves to Gaming in a timing-adapted 37s cycle.",
       "openerActions": [],
-      "cycleActions": [[10, 5, 3, 8, 5, 3, 9, 3, 2, 5, 7, 3, 2, 5, 2, 3, 2, 2, 3, 2, 2, 3, 2, 0, 0, 3, 2, 10, 3]],
-      "erTargets": {"GAMING": 1.0, "XIANYUN": 1.0, "XIANGLING": 1.0, "BENNETT": 1.0},
-      "sourceAssumptions": ["Gaming uses EP Q followed by three JP-EP repetitions", "Bennett uses a final Skill to battery Gaming or Xiangling", "single target"],
-      "simulatorAssumptions": ["jump inputs would map to supported high Plunges", "the HP-gated repeated Man Chai return and Skill reset are outside the current Gaming slice", "no cooldown wait or omitted Skill is substituted for the missing mechanic"],
-      "contentHash": "c95293811fa992e5b65c2e6b0e2955da3ac461e986651dc9865a326dff7eb51c"
+      "cycleActions": [[10, 5, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 5, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 2, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 2, 5, 2, 6, 6, 6, 6, 6, 3, 2, 2, 6, 3, 2, 2, 6, 3, 2, 0, 0, 6, 6, 3, 2, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7]],
+      "erTargets": {"GAMING": 1.0, "XIANGLING": 1.2531328320645365, "XIANYUN": 1.1174968071360152, "BENNETT": 1.0},
+      "sourceAssumptions": ["Bennett and Xiangling use QE", "Xianyun uses EPQ", "Gaming uses EPQ followed by three JP-EP repetitions and N2EP", "Bennett uses a final Skill to battery Gaming or Xiangling", "single target"],
+      "simulatorAssumptions": ["jump inputs map directly to supported high Plunge actions", "the healer-backed single-target scenario satisfies Gaming's above-50% HP return condition", "short waits preserve each initial and repeated Man Chai return boundary before Skill", "the sourced final Gaming/Xiangling choice resolves to Gaming", "explicit one-second waits preserve each simulator swap lock", "the steady-state trace uses a timing-adapted 37s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "04b8b271e7f424d7d3d9d701de02346c34eed9af3475d5a6dfbbda6faa51da91"
     },
     {
       "seedId": "kqm-xianyun-xiao-faruzan-bennett-adapted-v1",
