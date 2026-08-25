@@ -26064,6 +26064,7 @@ Accepted-unit table (batch 1, researched 2026-08-25):
 | KQM Navia Quick Guide: C0 Navia, C0 Zhongli, C6 Bennett, C6 Fischl double-Geo rotation | `src/java/simulation/party/NaviaZhongliPartyDefinition.java` | Existing rollback-safe Ceremonial Crystalshot and artillery, Zhongli pillar, Bennett field, C6 Oz, and Crystallize; Hold Skills map to Press, dash cancels are omitted, Fischl alternates Skill/Burst, and the cycle explicitly returns to Navia | `TRAIN`; two-cycle source trace, two Navia Skill charges, Crystallize, and cyclic replay |
 | KQM Chiori Quick Guide: C0 Navia, C0 Chiori, C6 Bennett, C6 Fischl double-Geo rotation | `src/java/simulation/party/NaviaChioriPartyDefinition.java` | Existing rollback-safe Navia artillery, Chiori Tamoto, Bennett field, C6 Oz, and Crystallize; Chiori's second Skill input maps to an explicit Fischl swap, optional Chiori Burst and dash cancels are omitted, and Fischl alternates Burst/Skill | `TRAIN`; two-cycle source trace, Tamoto rollback, two Navia Skill charges, and cyclic replay |
 | KQM Chiori Quick Guide: C0 Navia, C0 Chiori, C0 Xianyun, C6 Bennett Plunge rotation | `src/java/simulation/party/NaviaChioriPlungePartyDefinition.java` | Existing rollback-safe Navia high Plunge/artillery, Chiori Tamoto, Xianyun plunge support, Bennett field, and Crystallize; Chiori's second Skill input maps to the requested Xianyun swap, optional Chiori Burst is omitted, jump inputs map to high Plunge, and the existing Xianyun-only `GamingMelt` validation scenario moves to train to preserve character-disjoint splits | `TRAIN`; six Navia Plunges, two Skill charges, plunge buff consumption, cyclic replay, and cross-split identity audit |
+| KQM Xianyun Quick Guide: C0 Xianyun, C0 Xiao, C0 Faruzan, C6 Bennett Plunge rotation | `src/java/simulation/party/XiaoXianyunPartyDefinition.java` | Existing rollback-safe Xiao Burst/high Plunge, Xianyun Starwicker, Bennett field, and Faruzan Hurricane Arrow; add an exact C0 Faruzan factory and expose her represented Charged action, map jump inputs to high Plunge, and use the linked Xiao guide's twelve-high-Plunge benchmark without collision damage | `TRAIN`; complete `EP/EQ/ECQ/2EQ/12HP` source trace, Faruzan C0 charge, twelve Burst Plunges, cyclic Energy, and baseline non-inferiority |
 
 Rejected from batch 1: Ganyu Melt, Gaming Mono Pyro, and
 Ningguang/Yae/Fischl/Zhongli mix characters already assigned to different
@@ -26281,6 +26282,18 @@ Batch 17 checkpoint:
   repetitions cannot replay the required Skill resets until Gaming's HP-gated
   repeated Man Chai return loop is implemented. No approximate party
   definition is registered.
+
+Batch 18 checkpoint:
+
+- Xiao/Xianyun/C0 Faruzan/Bennett is retained from the current KQM Xianyun
+  Quick Guide. Campaign total: 40 researched, 17 retained, 23 rejected.
+- Xianyun `EP` maps to Skill-high-Plunge, Faruzan's complete `ECQ` is retained,
+  and the linked Xiao guide's twelve-high-Plunge benchmark fills the named
+  combo without unsupported collision or low-Plunge packets.
+- Exact three-cycle calibration requires 100.000% Xiao, 117.608% Xianyun,
+  132.979% Bennett, and 149.180% C0 Faruzan ER. The 31s trace retains both Xiao
+  Skill charges, all twelve Burst Plunges, the final Bennett Skill, and an
+  explicit return to Xiao.
 
 Acceptance criteria:
 

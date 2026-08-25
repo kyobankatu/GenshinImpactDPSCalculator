@@ -209,6 +209,10 @@ final class CuratedCharacters {
         return new Faruzan(new FavoniusWarbow(5, () -> FIXED_RANDOM_DRAW), null, 6);
     }
 
+    static Character faruzanC0() {
+        return new Faruzan(new FavoniusWarbow(5, () -> FIXED_RANDOM_DRAW), null, 0);
+    }
+
     static Character bennett() {
         return new Bennett(new SkywardBlade(), null);
     }

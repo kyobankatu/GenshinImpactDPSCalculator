@@ -291,6 +291,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["Gaming, Xianyun, Xiangling, Bennett", "three Burst-reset Gaming Skill Plunges", "single target"]
+    },
+    {
+      "sourceId": "kqm-xianyun-quick-guide-xiao-faruzan-bennett",
+      "title": "Xianyun Quick Guide: Xiao Faruzan Bennett",
+      "url": "https://keqingmains.com/q/xianyun-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Xianyun, C0 Xiao, low-Constellation Faruzan, C6 Bennett", "twelve high Plunges", "single target without collision damage"]
     }
   ],
   "seeds": [
@@ -708,6 +718,20 @@
       "sourceAssumptions": ["Gaming uses EP Q followed by three JP-EP repetitions", "Bennett uses a final Skill to battery Gaming or Xiangling", "single target"],
       "simulatorAssumptions": ["jump inputs would map to supported high Plunges", "the HP-gated repeated Man Chai return and Skill reset are outside the current Gaming slice", "no cooldown wait or omitted Skill is substituted for the missing mechanic"],
       "contentHash": "c95293811fa992e5b65c2e6b0e2955da3ac461e986651dc9865a326dff7eb51c"
+    },
+    {
+      "seedId": "kqm-xianyun-xiao-faruzan-bennett-adapted-v1",
+      "partyName": "XiaoXianyun",
+      "scenarioFingerprint": "loadout-v1:XIAO-c0-FavoniusLance-r5-artifact-kqms-generic-v1:XIANYUN-c0-FavoniusCodex-r5-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:FARUZAN-c0-FavoniusWarbow-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-xianyun-quick-guide-xiao-faruzan-bennett"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Jump inputs map to supported high Plunges, Xianyun EP maps to Skill-Plunge, low-Constellation Faruzan uses ECQ, and the linked Xiao guide's twelve-high-Plunge benchmark fills the named combo in a timing-adapted 31s cycle.",
+      "openerActions": [],
+      "cycleActions": [[8, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 2, 5, 9, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 5, 10, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 1, 5, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 3, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 9, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]],
+      "erTargets": {"XIAO": 1.0, "XIANYUN": 1.1760752688116045, "BENNETT": 1.329787234035166, "FARUZAN": 1.4917977856454223},
+      "sourceAssumptions": ["Xianyun uses EP Q", "low-Constellation Faruzan uses EC Q immediately before Xiao", "Xiao uses two Skills, Burst, and twelve high Plunges", "Bennett uses a final Skill", "single target without collision damage"],
+      "simulatorAssumptions": ["jump inputs map directly to supported high Plunge actions", "collision and low-Plunge packets are excluded", "explicit one-second waits preserve each simulator swap lock", "an explicit final swap restores the Xiao cycle opener", "the steady-state trace uses a 31s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "32d29f5ea686f042345431eac4efd37f58aae4fe5d5cfb51637426a72742cacc"
     }
   ]
 }
