@@ -26054,6 +26054,7 @@ Accepted-unit table (batch 1, researched 2026-08-25):
 | KQM Arlecchino Quick Guide: Arlecchino, Bennett, Ineffa, Chevreuse Overloaded rotation | `src/java/simulation/party/ArlecchinoIneffaOverloadPartyDefinition.java` | Existing Bond of Life, Overloaded, Bennett buff, Ineffa summon, Chevreuse support; Hold Skill maps to Press and optional Burst is omitted | `TRAIN`; exact baseline trace and 30s cyclic replay |
 | KQM Arlecchino Quick Guide: Arlecchino, Citlali, Bennett, Xilonen Melt rotation | `src/java/simulation/party/ArlecchinoCitlaliMeltPartyDefinition.java` | Existing Bond of Life, Citlali Opal Fire and RES Shred, Bennett buff, and Xilonen Source Samplers; dash cancels are omitted | `TRAIN`; Melt aura trace and 30s cyclic replay |
 | KQM Arlecchino Quick Guide: Arlecchino, Bennett, Emilie, C6 Lan Yan Mono Pyro rotation | `src/java/simulation/party/ArlecchinoEmilieMonoPyroPartyDefinition.java` | Existing Bond of Life, Burning, Lumidouce Elegy, Bennett buff, C6 Lan Yan two-charge Skill, and TTDS; source `Q/E` selects Emilie Skill and dash cancels are omitted | `TRAIN`; Burning/off-field trace and 30s cyclic replay |
+| KQM Arlecchino Quick Guide: Arlecchino, C0 Mona, Bennett, Sucrose split-field Vape rotation | `src/java/simulation/party/ArlecchinoMonaVaporizePartyDefinition.java` | Existing Bond of Life persistence, C0 Omen/Phantom, Bennett buff, Sucrose Swirl, and Vaporize; dash cancel and optional Sucrose Burst are omitted | `TRAIN`; Omen/Vape split-field trace and 30s cyclic replay |
 
 Rejected from batch 1: Ganyu Melt, Gaming Mono Pyro, and
 Ningguang/Yae/Fischl/Zhongli mix characters already assigned to different
@@ -26068,6 +26069,11 @@ Rejected from batch 3: Arlecchino/C6 Candace/Bennett/Xilonen requires
 single-target scenario. This exceeds the 237.500% KQMS artifact ceiling even
 with deterministic Favonius Lance R5, so the reviewed sequence remains rejected
 and no empty or infeasible party definition is registered.
+
+Rejected from batch 5: Arlecchino/Durin/Nicole/Prune depends on Hexerei and
+Celestial Gift effects explicitly absent from the local character slices.
+Arlecchino/Bennett/Lan Yan/Kachina cannot be constructed because Kachina's
+runtime remains evidence-blocked; both reviewed action sequences stay rejected.
 
 Batch 1 checkpoint:
 
@@ -26104,6 +26110,15 @@ Batch 4 checkpoint:
 - The source's Emilie `Q/E` option selects Skill for a stable Burst-independent
   cycle. C6 Lan Yan retains both Skill charges and TTDS, while Bennett's
   measured 196.078% ER target fits the KQMS allocation.
+
+Batch 5 checkpoint:
+
+- 3 candidates researched: Arlecchino/Mona split-field Vaporize retained;
+  Durin/Nicole/Prune and Kachina limited-roster variants rejected. Campaign
+  total: 15 researched, 7 retained, 8 rejected.
+- Mona's measured 211.244% ER and Bennett's 165.746% target fit the KQMS
+  allocation. The exact two-part Arlecchino field sequence preserves Omen and
+  Phantom setup without optional Sucrose Burst or dash actions.
 
 Acceptance criteria:
 

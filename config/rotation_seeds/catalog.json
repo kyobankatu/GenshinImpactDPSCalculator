@@ -141,6 +141,36 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["Arlecchino, Bennett, Emilie, C6 Lan Yan", "Emilie Skill is selected from Q/E", "TTDS Lan Yan", "single target"]
+    },
+    {
+      "sourceId": "kqm-arlecchino-quick-guide-mona-vape",
+      "title": "Arlecchino Quick Guide: Mona Bennett Sucrose Vaporize",
+      "url": "https://keqingmains.com/q/arlecchino-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Luna VIII; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["Arlecchino, C0 Mona, Bennett, C6 Sucrose", "Sucrose Burst is optional", "split Arlecchino field time", "single target"]
+    },
+    {
+      "sourceId": "kqm-arlecchino-quick-guide-durin-nicole-prune",
+      "title": "Arlecchino Quick Guide: Durin Nicole Prune",
+      "url": "https://keqingmains.com/q/arlecchino-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Luna VIII; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["Arlecchino, Durin, Nicole, Prune", "Nicole coordinated attack", "Hexerei synergy", "Celestial Gift", "single target"]
+    },
+    {
+      "sourceId": "kqm-arlecchino-quick-guide-kachina-limited",
+      "title": "Arlecchino Quick Guide: Bennett Lan Yan Kachina Limited Roster",
+      "url": "https://keqingmains.com/q/arlecchino-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Luna VIII; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["Arlecchino, Bennett, C6 Lan Yan, Kachina", "Kachina Skill-only C0 option", "single target"]
     }
   ],
   "seeds": [
@@ -342,6 +372,48 @@
       "sourceAssumptions": ["Emilie Q/E option", "C6 Lan Yan 2[E]", "5[N3D] N3 field combo", "single target"],
       "simulatorAssumptions": ["Emilie Skill is selected for every cycle", "dash cancels are unsupported and removed", "the field combo is fixed to 18 Normal actions", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "236137ad73cd89df01db1cffd4bb3a2085c2693a2e481251c20468a2764a2d97"
+    },
+    {
+      "seedId": "kqm-arlecchino-mona-vape-adapted-v1",
+      "partyName": "ArlecchinoMonaVaporize",
+      "scenarioFingerprint": "loadout-v1:ARLECCHINO-c0-Deathmatch-r1-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:SUCROSE-c6-ThrillingTalesOfDragonSlayers-r5-artifact-kqms-generic-v1:MONA-c0-FavoniusCodex-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-arlecchino-quick-guide-mona-vape"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Sucrose's optional Burst and dash cancel are omitted, N3 remains three Normals, and 4[N3D] N1 becomes a fixed 13-Normal second field string.",
+      "openerActions": [],
+      "cycleActions": [[3, 8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 1, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"ARLECCHINO": 1.0, "BENNETT": 1.6574585635082872, "SUCROSE": 1.0, "MONA": 2.1124402641717652},
+      "sourceAssumptions": ["C0 Mona", "Sucrose Burst is optional", "split Arlecchino field time", "4[N3D] N1 second field combo", "single target"],
+      "simulatorAssumptions": ["optional Sucrose Burst is omitted", "dash cancel is unsupported and removed", "the second field combo is fixed to 13 Normal actions", "Favonius Codex R5 uses a deterministic proc draw", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "9fe200ebc1add662b8e57506e945cca65c15dc1ee17940f1b13ef3fa9c76f1a5"
+    },
+    {
+      "seedId": "kqm-arlecchino-durin-nicole-prune-rejected-v1",
+      "partyName": "ArlecchinoDurinNicolePrune",
+      "scenarioFingerprint": "review-only:ARLECCHINO:DURIN:NICOLE:PRUNE:hexerei-celestial-gift",
+      "sourceIds": ["kqm-arlecchino-quick-guide-durin-nicole-prune"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because the exact source team depends on Hexerei roster/homework effects and Celestial Gift synergy that the Durin, Nicole, and Prune implementations explicitly report as unavailable.",
+      "openerActions": [],
+      "cycleActions": [[3, 8, 3, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"ARLECCHINO": 1.0, "DURIN": 1.0, "NICOLE": 1.0, "PRUNE": 1.0},
+      "sourceAssumptions": ["Hexerei synergy", "Celestial Gift", "Nicole coordinated attack", "single target"],
+      "simulatorAssumptions": ["review only; no unsupported Hexerei or artifact effect is inferred"],
+      "contentHash": "984d235355e7b9e093b00eb88a6f3aaaea0da1f139e136a2fad7316ceebdcb9a"
+    },
+    {
+      "seedId": "kqm-arlecchino-kachina-limited-rejected-v1",
+      "partyName": "ArlecchinoKachinaLimited",
+      "scenarioFingerprint": "review-only:ARLECCHINO:BENNETT:LAN_YAN:KACHINA:missing-character-runtime",
+      "sourceIds": ["kqm-arlecchino-quick-guide-kachina-limited"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because Kachina has only a reserved CharacterId locally; her character runtime and regression remain evidence-blocked by unresolved timing, Nightsoul, and Energy behavior.",
+      "openerActions": [],
+      "cycleActions": [[3, 8, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"ARLECCHINO": 1.0, "BENNETT": 1.0, "LAN_YAN": 1.0, "KACHINA": 1.0},
+      "sourceAssumptions": ["C6 Lan Yan 2[E]", "Kachina C0 Skill-only option", "single target"],
+      "simulatorAssumptions": ["review only; absent Kachina runtime is not approximated"],
+      "contentHash": "689d803feb673206cd8a31ad7333a498c335ea6f4622a90277e1988608236074"
     }
   ]
 }

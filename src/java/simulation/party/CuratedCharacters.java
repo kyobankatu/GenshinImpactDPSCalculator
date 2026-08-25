@@ -18,6 +18,7 @@ import model.character.KaedeharaKazuha;
 import model.character.Kirara;
 import model.character.Layla;
 import model.character.LanYan;
+import model.character.Mona;
 import model.character.Nahida;
 import model.character.Ningguang;
 import model.character.Ororon;
@@ -79,6 +80,11 @@ final class CuratedCharacters {
 
     static Character lanYan() {
         return new LanYan(new ThrillingTalesOfDragonSlayers(5), null, 6);
+    }
+
+    static Character mona() {
+        return new Mona(new FavoniusCodex(5, () -> FIXED_RANDOM_DRAW), null, 0,
+                () -> FIXED_RANDOM_DRAW);
     }
 
     static Character ineffa() {
