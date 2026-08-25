@@ -120,8 +120,12 @@ public final class RotationSeedEvaluation {
                         step.objective.cyclicEnergyFeasible));
                 pendingTrace = new ArrayList<>();
             }
-            if (!step.done || Math.abs(step.objective.elapsedSeconds - scenario.getHorizonSeconds())
-                    > BOUNDARY_TOLERANCE) {
+            double horizonDifference = Math.abs(
+                    step.objective.elapsedSeconds - scenario.getHorizonSeconds());
+            boolean terminalWithinFloatingTolerance = !step.done
+                    && horizonDifference <= TIME_TOLERANCE;
+            if ((!step.done && !terminalWithinFloatingTolerance)
+                    || horizonDifference > BOUNDARY_TOLERANCE) {
                 throw failure(seed, "replay ended with a partial final cycle");
             }
             int period = seed.getCycleActions().size();

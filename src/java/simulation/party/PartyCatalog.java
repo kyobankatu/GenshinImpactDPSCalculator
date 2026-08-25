@@ -31,6 +31,8 @@ public final class PartyCatalog {
         register(new XiaoPlungePartyDefinition());
         register(new ArlecchinoOverloadPartyDefinition());
         register(new ArlecchinoVaporizePartyDefinition());
+        register(new ArlecchinoLunarChargedPartyDefinition());
+        register(new ArlecchinoIneffaOverloadPartyDefinition());
         register(new AlhaithamSpreadPartyDefinition());
         register(new GanyuFreezePartyDefinition());
         register(new GamingMeltPartyDefinition());

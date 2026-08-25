@@ -26011,7 +26011,7 @@ Completion evidence:
 
 ### Phase 15: Source-Matched Bulk Human Rotation Campaign
 
-Status: In progress; batch 1 retained two new source-matched train scenarios.
+Status: In progress; batches 1-2 retained four new source-matched train scenarios.
 
 Why:
 
@@ -26050,6 +26050,8 @@ Accepted-unit table (batch 1, researched 2026-08-25):
 | --- | --- | --- | --- |
 | KQM Arlecchino Quick Guide: Arlecchino, Xingqiu, Bennett, Sucrose TTDS two-part Vape rotation | `src/java/simulation/party/ArlecchinoVaporizePartyDefinition.java` | Existing Bond of Life, Rain Swords, Bennett buff, Swirl/VV-facing actions; dash cancels must be documented and omitted | `TRAIN`; catalog multi-cycle replay plus alternating-cycle trace |
 | KQM Alhaitham Quick Guide: Alhaitham, Fischl, Nahida, Bennett split-field Spread rotation | `src/java/simulation/party/AlhaithamSpreadPartyDefinition.java` | Existing Quicken/Spread, mirrors, Oz alternation, Nahida mark, Bennett buff; dash cancels must be condensed | `TRAIN`; two-part field trace and multi-cycle Energy replay |
+| KQM Arlecchino Quick Guide: Arlecchino, Columbina, Ineffa, Xilonen Lunar-Charged rotation | `src/java/simulation/party/ArlecchinoLunarChargedPartyDefinition.java` | Existing Bond of Life, Lunar-Charged conversion, both Lunar support kits, Xilonen Source Samplers; optional support Bursts are omitted | `TRAIN`; exact baseline trace and 30s cyclic replay |
+| KQM Arlecchino Quick Guide: Arlecchino, Bennett, Ineffa, Chevreuse Overloaded rotation | `src/java/simulation/party/ArlecchinoIneffaOverloadPartyDefinition.java` | Existing Bond of Life, Overloaded, Bennett buff, Ineffa summon, Chevreuse support; Hold Skill maps to Press and optional Burst is omitted | `TRAIN`; exact baseline trace and 30s cyclic replay |
 
 Rejected from batch 1: Ganyu Melt, Gaming Mono Pyro, and
 Ningguang/Yae/Fischl/Zhongli mix characters already assigned to different
@@ -26067,6 +26069,16 @@ Batch 1 checkpoint:
 - Source builds now calibrate three complete cycles. KQMS enemy Energy is
   periodic at the exact rate of three Clear Orbs per 90 seconds rather than a
   one-time short-rotation approximation.
+
+Batch 2 checkpoint:
+
+- 2 candidates researched and retained: Arlecchino Lunar-Charged and Ineffa
+  Overloaded. Campaign total: 9 researched, 4 retained, 5 rejected.
+- Both exact local definitions and source seeds pass three-cycle legality,
+  deterministic replay, Energy stability, and definition-baseline comparison.
+- Capability profiling now stops assigning unused action sequences after the
+  measured subject; the selected-party run produced the required Xilonen
+  profile without changing unrelated tracked profiles.
 
 Acceptance criteria:
 

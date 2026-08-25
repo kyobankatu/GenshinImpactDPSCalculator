@@ -294,7 +294,9 @@ public class CapabilityProfiler {
             CharacterId subjectId,
             List<List<CharacterActionKey>> assignedSequences,
             int index) {
-        if (index >= permutation.length) {
+        // Actors after the subject are never replayed and cannot affect the measured uplift.
+        if (index >= permutation.length
+                || (index > 0 && permutation[index - 1].equals(subjectId))) {
             return runPermutationScenarioMaxUplift(permutation, subjectId, assignedSequences);
         }
         TeamBuffProfileResult best = TeamBuffProfileResult.zero();
@@ -1143,7 +1145,7 @@ public class CapabilityProfiler {
         System.out.printf("  bestTeamBuffScenario composite=%.4f team=%.4f beneficiary=%.4f%n",
                 result.compositeUplift, result.teamUplift, result.beneficiaryUplift);
         System.out.printf("  bestOrder=%s%n", formatOrder(result.scenarioOrder));
-        for (int index = 0; index < result.scenarioOrder.length; index++) {
+        for (int index = 0; index < result.scenarioSequences.size(); index++) {
             System.out.printf("    %s -> %s%n",
                     result.scenarioOrder[index].name(),
                     formatSequence(result.scenarioSequences.get(index)));

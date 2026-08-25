@@ -5,10 +5,12 @@ import model.character.Alhaitham;
 import model.character.Arlecchino;
 import model.character.Bennett;
 import model.character.Chevreuse;
+import model.character.Columbina;
 import model.character.Faruzan;
 import model.character.Fischl;
 import model.character.Gaming;
 import model.character.Ganyu;
+import model.character.Ineffa;
 import model.character.KukiShinobu;
 import model.character.KaedeharaKazuha;
 import model.character.Kirara;
@@ -24,15 +26,19 @@ import model.character.Tighnari;
 import model.character.Xiao;
 import model.character.Xianyun;
 import model.character.Xingqiu;
+import model.character.Xilonen;
 import model.character.YaeMiko;
 import model.character.Zhongli;
 import model.entity.Character;
 import model.weapon.Deathmatch;
+import model.weapon.CalamityQueller;
 import model.weapon.FavoniusWarbow;
 import model.weapon.FavoniusSword;
 import model.weapon.FavoniusLance;
 import model.weapon.FavoniusGreatsword;
 import model.weapon.FavoniusCodex;
+import model.weapon.NocturnesCurtainCall;
+import model.weapon.PeakPatrolSong;
 import model.weapon.SkywardBlade;
 import model.weapon.SacrificialSword;
 import model.weapon.TheStringless;
@@ -57,6 +63,19 @@ final class CuratedCharacters {
 
     static Character arlecchino() {
         return new Arlecchino(new Deathmatch(1), null, 0);
+    }
+
+    static Character ineffa() {
+        return new Ineffa(new CalamityQueller(), null);
+    }
+
+    static Character columbina() {
+        return new Columbina(new NocturnesCurtainCall(), null,
+                () -> FIXED_RANDOM_DRAW);
+    }
+
+    static Character xilonen() {
+        return new Xilonen(new PeakPatrolSong(1), null, 0);
     }
 
     static Character tighnari() {

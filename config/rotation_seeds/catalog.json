@@ -91,6 +91,26 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["Bennett, Nahida, Xingqiu, Fischl", "Fischl alternates Skill and Burst", "single target"]
+    },
+    {
+      "sourceId": "kqm-arlecchino-quick-guide-lunar-charged",
+      "title": "Arlecchino Quick Guide: Columbina Ineffa Xilonen Lunar-Charged",
+      "url": "https://keqingmains.com/q/arlecchino-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Luna VIII; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["Arlecchino, Columbina, Ineffa, Xilonen", "support Bursts are optional", "single target"]
+    },
+    {
+      "sourceId": "kqm-arlecchino-quick-guide-ineffa-overload",
+      "title": "Arlecchino Quick Guide: Bennett Ineffa Chevreuse Overloaded",
+      "url": "https://keqingmains.com/q/arlecchino-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Luna VIII; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["Arlecchino, Bennett, Ineffa, Chevreuse", "Chevreuse Burst is optional", "single target"]
     }
   ],
   "seeds": [
@@ -222,6 +242,34 @@
       "sourceAssumptions": ["on-field Bennett triggers Burgeon", "Fischl alternates Skill and Burst", "four repeated Bennett strings", "single target"],
       "simulatorAssumptions": ["Bennett field time is bounded to one legal repeat", "Fischl Skill is the first-cycle representative", "explicit swap waits use the configured 1.0s cooldown", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "c3fbb87e8c435a851d4ecd28e481f6a3fefe9773b16bf3bbf20334be0d8ad21e"
+    },
+    {
+      "seedId": "kqm-arlecchino-lunar-charged-adapted-v1",
+      "partyName": "ArlecchinoLunarCharged",
+      "scenarioFingerprint": "loadout-v1:ARLECCHINO-c0-Deathmatch-r1-artifact-kqms-generic-v1:INEFFA-c0-CalamityQueller-r1-artifact-kqms-generic-v1:COLUMBINA-c2-NocturnesCurtainCall-r1-artifact-kqms-generic-v1:XILONEN-c0-PeakPatrolSong-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-arlecchino-quick-guide-lunar-charged"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "The optional Ineffa and Columbina Bursts are omitted for a cyclic C0 KQMS build, dash cancels are omitted, and 6[N3D] N3 becomes a fixed 21-Normal field string after collecting Arlecchino's mark.",
+      "openerActions": [],
+      "cycleActions": [[3, 8, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"ARLECCHINO": 1.0, "INEFFA": 1.0, "COLUMBINA": 1.0, "XILONEN": 1.0},
+      "sourceAssumptions": ["Ineffa and Columbina Bursts are optional", "6[N3D] N3 field combo", "single target"],
+      "simulatorAssumptions": ["optional support Bursts are omitted", "dash cancels are unsupported and removed", "the field combo is fixed to 21 Normal actions", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "8224e50451682f10294c6e1ccb03a99f500abdb0645257d51f08ef1d7fc122fc"
+    },
+    {
+      "seedId": "kqm-arlecchino-ineffa-overload-adapted-v1",
+      "partyName": "ArlecchinoIneffaOverload",
+      "scenarioFingerprint": "loadout-v1:ARLECCHINO-c0-Deathmatch-r1-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:INEFFA-c0-CalamityQueller-r1-artifact-kqms-generic-v1:CHEVREUSE-c0-Deathmatch-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-arlecchino-quick-guide-ineffa-overload"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Chevreuse's optional Burst is omitted, Hold Skill maps to Skill Press, dash cancels are omitted, and N1C 5[N3D] N3 becomes one Normal-Charged opener followed by a fixed 18-Normal field string.",
+      "openerActions": [],
+      "cycleActions": [[3, 8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"ARLECCHINO": 1.0, "BENNETT": 1.6758840288158958, "INEFFA": 1.0, "CHEVREUSE": 1.0},
+      "sourceAssumptions": ["Chevreuse Burst is optional", "Chevreuse Hold Skill", "N1C 5[N3D] N3 field combo", "single target"],
+      "simulatorAssumptions": ["Chevreuse Skill Press substitutes for Hold", "optional Chevreuse Burst is omitted", "dash cancels are unsupported and removed", "the field combo is fixed to one Normal-Charged pair and 18 Normal actions", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "645103c3460cd0ea032d9a2600b65fd86a20d27dbef9340ee7d2195592a1384b"
     }
   ]
 }
