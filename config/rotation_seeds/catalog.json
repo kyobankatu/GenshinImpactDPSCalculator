@@ -761,6 +761,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Clorinde, C6 Fischl, C0 Nahida, C0 Xilonen", "4pc Thundering Fury Clorinde", "two Clorinde fields per rotation", "single target"]
+    },
+    {
+      "sourceId": "kqm-ayaka-quick-guide-shenhe-xilonen-chiori",
+      "title": "Ayaka Quick Guide: Shenhe Xilonen Chiori Mono Cryo",
+      "url": "https://keqingmains.com/q/ayaka-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.8; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Ayaka, C0 Shenhe, C0 Xilonen, C0 Chiori", "Finale of the Deep R5 Ayaka", "Favonius Lance R5 Shenhe", "Peak Patrol Song R1 Xilonen", "Uraku Misugiri R1 Chiori", "single target"]
     }
   ],
   "seeds": [
@@ -1794,6 +1804,20 @@
       "sourceAssumptions": ["Fischl alternates Burst then Skill", "Xilonen uses two Skill-N2 fields", "Nahida uses Skill then Burst", "Clorinde uses two Night Vigil fields and a terminal Burst", "Clorinde's combo depends on starting Bond", "single target"],
       "simulatorAssumptions": ["the complete zero-Bond first-cycle trace is retained for review", "terminal Burst Bond survives the rotation boundary", "initial character owner state is not part of the frozen scenario fingerprint", "no synthetic Bond reset or first-cycle-only Burst omission is allowed"],
       "contentHash": "2883d24433f1d31dd10e8178db4e721dfc7de385002b69f6544dd7a5c95ecab8"
+    },
+    {
+      "seedId": "kqm-ayaka-shenhe-xilonen-chiori-adapted-v1",
+      "partyName": "AyakaMonoCryoUnavailable",
+      "scenarioFingerprint": "review-only:KAMISATO_AYAKA-c0-FinaleOfTheDeep-r5:SHENHE-c0:XILONEN-c0:CHIORI-c0:timing-infeasible",
+      "sourceIds": ["kqm-ayaka-quick-guide-shenhe-xilonen-chiori"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because the complete source order still exceeds a 40s cycle after removing only dash cancels; extending farther would make the reviewed timing unrepresentative. No action, support field, or Burst was removed to force publication.",
+      "openerActions": [],
+      "cycleActions": [[9, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 5, 0, 1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 0, 1, 3, 0, 0, 1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 5]],
+      "erTargets": {"KAMISATO_AYAKA": 1.0, "SHENHE": 1.0, "XILONEN": 1.0, "CHIORI": 1.0},
+      "sourceAssumptions": ["Xilonen Bursts for the Finale of the Deep loadout", "Shenhe uses Tap Skill-Burst and later N1-Tap Skill", "Xilonen uses two Skill-N2 strings", "Chiori's linked Skill swaps to Ayaka and Chiori Bursts at the end", "Ayaka omits the Mistsplitter-only Normal", "single target"],
+      "simulatorAssumptions": ["Ayaka's dash cancels are unsupported and removed", "Shenhe Tap Skill maps to Press", "Chiori's second Skill maps to an explicit Ayaka swap", "the complete definition-normalized trace exceeds both 35s and 40s review boundaries", "no further timing dilation or action omission is allowed"],
+      "contentHash": "6c1153e437f1da574a489df91b47539f9e13a1a5fa2949a8779a1877c8b84420"
     }
   ]
 }
