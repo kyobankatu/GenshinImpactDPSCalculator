@@ -26504,6 +26504,25 @@ Batches 49-52 checkpoint:
 - The tracked catalog now contains 66 sources and 64 seeds. Its 39 usable seeds
   comprise 38 train and one validation seed; holdout remains source-isolated.
 
+Batches 53-56 checkpoint:
+
+- Four candidates were researched. Neuvillette/Furina/Jean/Fischl and
+  Wriothesley/Xingqiu/Mika/Lynette were rejected;
+  Yoimiya/Xilonen/Furina/Yelan and Yoimiya/Ineffa/Yelan/Bennett were retained.
+  Campaign total: 78 researched, 38 retained, and 40 rejected or blocked.
+- Neuvillette's five sourced beams require Sourcewater Droplet charge-time
+  reduction, which the local no-droplet slice cannot represent. Wriothesley's
+  C0 N3C cadence requires current HP, A1 Rebuke healing, and jump cancels,
+  which are likewise outside its fixed-full-HP slice. Neither candidate was
+  approximated into the train split.
+- The retained Yoimiya scenarios expand the guide-defined combo to three full
+  N5 strings and preserve every support Normal. Double Hydro is feasible at
+  30s with at most 151.162% ER. The Ineffa variant keeps the exact actions but
+  uses a 30s boundary after 25s exceeded Yelan's 268.2% KQMS ER ceiling; its
+  30s Yelan requirement is 180.302%.
+- The tracked catalog now contains 70 sources and 68 seeds. Its 41 usable seeds
+  comprise 40 train and one validation seed; holdout remains source-isolated.
+
 Acceptance criteria:
 
 - Every retained seed has an exact constructible scenario, complete provenance,
