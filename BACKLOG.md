@@ -4627,3 +4627,12 @@ experiment record.
   | `GamingMelt` | KQM [Xianyun Quick Guide](https://keqingmains.com/q/xianyun-quickguide/), exact listed team | Blocked: the guide marks the exact Gaming rotation as testing in progress and publishes no sequence. |
   | `TighnariSpread` | KQM [Kirara Guide](https://keqingmains.com/kirara/) and [Tighnari Guide](https://keqingmains.com/tighnari/) | Blocked: nearby teams replace Ororon with Nahida, Fischl, or Zhongli; cross-party transplantation is forbidden. |
   | `NingguangCrystallize` | KQM [Ningguang Quick Guide](https://keqingmains.com/q/ningguang-quickguide/) and [Ningguang Guide](https://keqingmains.com/ningguang/) | Blocked: the nearby Yae team uses Zhongli and Fischl, not Ororon and Kirara. |
+- **Human-seed campaign checkpoint (2026-08-25):** 50 candidates have been
+  researched; 21 source-matched train scenarios are newly retained and 29 are
+  rejected or blocked. The tracked catalog contains 41 sources, 40 seeds, and
+  24 usable seeds (23 train, one validation, zero holdout). The latest batch
+  retains the corroborated Xiao/Furina and Xiao/Lan Yan Plunge variants and
+  rejects Noelle Triple Geo for incomplete pending-event snapshots and
+  Eula/Mika Physical because Mika Burst is not implemented. Phase 15 remains
+  active until the 100-candidate and 40-accepted-seed breadth gates or source
+  convergence; Phase 16 remains ordered after it.

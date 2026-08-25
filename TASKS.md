@@ -26012,7 +26012,7 @@ Completion evidence:
 
 ### Phase 15: Source-Matched Bulk Human Rotation Campaign
 
-Status: In progress; batches 1-24 retained nineteen new source-matched train scenarios.
+Status: In progress; batches 1-28 retained twenty-one new source-matched train scenarios.
 
 Active execution window:
 
@@ -26087,6 +26087,8 @@ Accepted-unit table (batch 1, researched 2026-08-25):
 | KQM Xianyun Quick Guide: C0 Xianyun, C0 Xiao, C0 Faruzan, C6 Bennett Plunge rotation | `src/java/simulation/party/XiaoXianyunPartyDefinition.java` | Existing rollback-safe Xiao Burst/high Plunge, Xianyun Starwicker, Bennett field, and Faruzan Hurricane Arrow; add an exact C0 Faruzan factory and expose her represented Charged action, map jump inputs to high Plunge, and use the linked Xiao guide's twelve-high-Plunge benchmark without collision damage | `TRAIN`; complete `EP/EQ/ECQ/2EQ/12HP` source trace, Faruzan C0 charge, twelve Burst Plunges, cyclic Energy, and baseline non-inferiority |
 | KQM Xianyun Quick Guide: C0 Xianyun, C0 Diluc, C6 Xingqiu, C6 Bennett VV Vaporize Plunge rotation | `src/java/simulation/party/DilucXianyunVaporizePartyDefinition.java` | Existing rollback-safe Diluc high Plunge/three-stage Skill, Raincutter Normal triggers, Xianyun Starwicker, Bennett C6 field infusion, Vaporize, and deterministic weapon effects; omit optional Diluc Burst because Bennett is C6, omit dash inputs, and map jump inputs to high Plunge | `TRAIN`; eight `N1JP` strings, three `N1E` strings, Raincutter/Vaporize trace, C6 infusion, cyclic Energy, and baseline non-inferiority |
 | KQM Xianyun Quick Guide: C0 Hu Tao, C0 Furina, C0 Yelan, C0 Xianyun Double Hydro Vaporize Plunge rotation | `src/java/simulation/party/HuTaoXianyunVaporizePartyDefinition.java` | Existing rollback-safe Paramita Papilio/Blood Blossom, Salon Members/Fanfare, Exquisite Throw, Xianyun Starwicker, and Vaporize; omit Furina's dash, optional timing-tight final `N2C`, and optional Hu Tao Burst, and map jump inputs to high Plunge | `TRAIN`; five complete `N2CJP` strings, coordinated Hydro/Vaporize trace, cyclic Energy, and baseline non-inferiority |
+| KQM Furina and Xiao Quick Guides: C0 Xiao, C0 Furina, C0 Xianyun, C0 Faruzan Plunge rotation | `src/java/simulation/party/XiaoFurinaPartyDefinition.java` | Existing rollback-safe Xiao, Furina, Xianyun, and C0 Faruzan actions; omit Furina's dash and collision/low-Plunge packets, and fix the named combo to twelve high Plunges | `TRAIN`; corroborated source order, twelve Burst Plunges, cyclic Energy, and baseline equality |
+| KQM Lan Yan Quick Guide: C0 Xiao, C0 Furina, C0 Xianyun, C6 Lan Yan Plunge rotation | `src/java/simulation/party/XiaoLanYanPartyDefinition.java` | Existing rollback-safe Xiao, Furina, Xianyun, and C6 Lan Yan actions; omit Furina's dash and collision/low-Plunge packets, and fix the named combo to twelve high Plunges | `TRAIN`; complete `EDQ/EPQ/QEN1/2EQ/12HP` trace, cyclic Energy, and baseline equality |
 
 Rejected from batch 1: Ganyu Melt, Gaming Mono Pyro, and
 Ningguang/Yae/Fischl/Zhongli mix characters already assigned to different
@@ -26388,6 +26390,19 @@ Batch 24 checkpoint:
 - Exact three-cycle replay reaches Furina's second Burst with only 47.794/60
   Energy under the frozen KQMS loadout. No unsourced wait, battery action, or
   Burst omission is substituted.
+
+Batches 25-28 checkpoint:
+
+- Four candidates were researched: Xiao/Furina/Xianyun/C0 Faruzan and the C6
+  Lan Yan variant were retained; Noelle Triple Geo and Eula/Mika Physical were
+  rejected before search publication. Campaign total: 50 researched, 21
+  retained, and 29 rejected or blocked.
+- Both Xiao variants preserve twelve high Plunges and pass exact three-cycle
+  replay at 100-132% ER. Noelle lacks complete pending-expiry snapshot state,
+  while Mika explicitly rejects the source-required Burst; neither blocker is
+  approximated.
+- The tracked catalog now contains 41 sources and 40 seeds. Its 24 usable seeds
+  comprise 23 train and one validation seed; holdout remains source-isolated.
 
 Acceptance criteria:
 
