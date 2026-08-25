@@ -414,5 +414,31 @@
     "reentry_cost_score": 0.000000,
     "on_field_dps_score": 0.149118,
     "burst_window_score": 0.103869
+  },
+  "EMILIE": {
+    "off_field_dps_ratio": 0.510413,
+    "team_buff_score": 0.000000,
+    "self_enhancement_score": 0.188520,
+    "energy_generation_score": 0.055510,
+    "entry_value_score": 0.000000,
+    "sustain_value_3_actions": 0.046960,
+    "sustain_value_6_actions": 0.067812,
+    "exit_cost_score": 0.096110,
+    "reentry_cost_score": 0.000000,
+    "on_field_dps_score": 0.293142,
+    "burst_window_score": 0.282876
+  },
+  "LAN_YAN": {
+    "off_field_dps_ratio": 0.000000,
+    "team_buff_score": 0.000000,
+    "self_enhancement_score": 0.000000,
+    "energy_generation_score": 0.000000,
+    "entry_value_score": 0.309497,
+    "sustain_value_3_actions": 0.117626,
+    "sustain_value_6_actions": 0.097389,
+    "exit_cost_score": 0.247618,
+    "reentry_cost_score": 0.000000,
+    "on_field_dps_score": 0.211851,
+    "burst_window_score": 0.144940
   }
 }

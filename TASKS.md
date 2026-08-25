@@ -26053,6 +26053,7 @@ Accepted-unit table (batch 1, researched 2026-08-25):
 | KQM Arlecchino Quick Guide: Arlecchino, Columbina, Ineffa, Xilonen Lunar-Charged rotation | `src/java/simulation/party/ArlecchinoLunarChargedPartyDefinition.java` | Existing Bond of Life, Lunar-Charged conversion, both Lunar support kits, Xilonen Source Samplers; optional support Bursts are omitted | `TRAIN`; exact baseline trace and 30s cyclic replay |
 | KQM Arlecchino Quick Guide: Arlecchino, Bennett, Ineffa, Chevreuse Overloaded rotation | `src/java/simulation/party/ArlecchinoIneffaOverloadPartyDefinition.java` | Existing Bond of Life, Overloaded, Bennett buff, Ineffa summon, Chevreuse support; Hold Skill maps to Press and optional Burst is omitted | `TRAIN`; exact baseline trace and 30s cyclic replay |
 | KQM Arlecchino Quick Guide: Arlecchino, Citlali, Bennett, Xilonen Melt rotation | `src/java/simulation/party/ArlecchinoCitlaliMeltPartyDefinition.java` | Existing Bond of Life, Citlali Opal Fire and RES Shred, Bennett buff, and Xilonen Source Samplers; dash cancels are omitted | `TRAIN`; Melt aura trace and 30s cyclic replay |
+| KQM Arlecchino Quick Guide: Arlecchino, Bennett, Emilie, C6 Lan Yan Mono Pyro rotation | `src/java/simulation/party/ArlecchinoEmilieMonoPyroPartyDefinition.java` | Existing Bond of Life, Burning, Lumidouce Elegy, Bennett buff, C6 Lan Yan two-charge Skill, and TTDS; source `Q/E` selects Emilie Skill and dash cancels are omitted | `TRAIN`; Burning/off-field trace and 30s cyclic replay |
 
 Rejected from batch 1: Ganyu Melt, Gaming Mono Pyro, and
 Ningguang/Yae/Fischl/Zhongli mix characters already assigned to different
@@ -26095,6 +26096,14 @@ Batch 3 checkpoint:
 - Citlali uses the guide's explicit ER-weapon fallback with deterministic
   Favonius Codex R5. Its measured 171.797% ER target and Bennett's 161.290%
   target fit the KQMS allocation and pass three-cycle replay.
+
+Batch 4 checkpoint:
+
+- Arlecchino/Emilie Mono Pyro is retained from one exact current KQM rotation.
+  Campaign total: 12 researched, 6 retained, 6 rejected.
+- The source's Emilie `Q/E` option selects Skill for a stable Burst-independent
+  cycle. C6 Lan Yan retains both Skill charges and TTDS, while Bennett's
+  measured 196.078% ER target fits the KQMS allocation.
 
 Acceptance criteria:
 

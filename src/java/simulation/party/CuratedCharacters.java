@@ -7,6 +7,7 @@ import model.character.Bennett;
 import model.character.Chevreuse;
 import model.character.Citlali;
 import model.character.Columbina;
+import model.character.Emilie;
 import model.character.Faruzan;
 import model.character.Fischl;
 import model.character.Gaming;
@@ -16,6 +17,7 @@ import model.character.KukiShinobu;
 import model.character.KaedeharaKazuha;
 import model.character.Kirara;
 import model.character.Layla;
+import model.character.LanYan;
 import model.character.Nahida;
 import model.character.Ningguang;
 import model.character.Ororon;
@@ -38,6 +40,7 @@ import model.weapon.FavoniusSword;
 import model.weapon.FavoniusLance;
 import model.weapon.FavoniusGreatsword;
 import model.weapon.FavoniusCodex;
+import model.weapon.LumidouceElegy;
 import model.weapon.NocturnesCurtainCall;
 import model.weapon.PeakPatrolSong;
 import model.weapon.SkywardBlade;
@@ -68,6 +71,14 @@ final class CuratedCharacters {
 
     static Character citlali() {
         return new Citlali(new FavoniusCodex(5, () -> FIXED_RANDOM_DRAW), null, 0);
+    }
+
+    static Character emilie() {
+        return new Emilie(new LumidouceElegy(1), null, 0);
+    }
+
+    static Character lanYan() {
+        return new LanYan(new ThrillingTalesOfDragonSlayers(5), null, 6);
     }
 
     static Character ineffa() {

@@ -131,6 +131,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["Arlecchino, Citlali, Bennett, Xilonen", "Favonius Codex Citlali", "wait between N5 strings", "single target"]
+    },
+    {
+      "sourceId": "kqm-arlecchino-quick-guide-emilie-mono-pyro",
+      "title": "Arlecchino Quick Guide: Bennett Emilie Lan Yan Mono Pyro",
+      "url": "https://keqingmains.com/q/arlecchino-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Luna VIII; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["Arlecchino, Bennett, Emilie, C6 Lan Yan", "Emilie Skill is selected from Q/E", "TTDS Lan Yan", "single target"]
     }
   ],
   "seeds": [
@@ -318,6 +328,20 @@
       "sourceAssumptions": ["Citlali uses an ER weapon if needed", "wait between N5 strings", "2[N5D] N5 field combo", "single target"],
       "simulatorAssumptions": ["Favonius Codex R5 uses a deterministic proc draw", "dash cancels are unsupported and removed", "source waits are fixed to 0.1s", "the field combo is fixed to 15 Normal actions", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "e66198e9dbc06038e24cf272963cc1ec02c50a740ba98018dbd3f8d4d119e37d"
+    },
+    {
+      "seedId": "kqm-arlecchino-emilie-mono-pyro-adapted-v1",
+      "partyName": "ArlecchinoEmilieMonoPyro",
+      "scenarioFingerprint": "loadout-v1:ARLECCHINO-c0-Deathmatch-r1-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:EMILIE-c0-LumidouceElegy-r1-artifact-kqms-generic-v1:LAN_YAN-c6-ThrillingTalesOfDragonSlayers-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-arlecchino-quick-guide-emilie-mono-pyro"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Emilie Skill is selected from the guide's Q/E option, dash cancels are omitted, and 5[N3D] N3 becomes a fixed 18-Normal field string after Arlecchino collects her mark.",
+      "openerActions": [],
+      "cycleActions": [[3, 8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"ARLECCHINO": 1.0, "BENNETT": 1.96078431369281, "EMILIE": 1.0, "LAN_YAN": 1.0},
+      "sourceAssumptions": ["Emilie Q/E option", "C6 Lan Yan 2[E]", "5[N3D] N3 field combo", "single target"],
+      "simulatorAssumptions": ["Emilie Skill is selected for every cycle", "dash cancels are unsupported and removed", "the field combo is fixed to 18 Normal actions", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "236137ad73cd89df01db1cffd4bb3a2085c2693a2e481251c20468a2764a2d97"
     }
   ]
 }
