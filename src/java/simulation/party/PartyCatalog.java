@@ -74,6 +74,7 @@ public final class PartyCatalog {
         register(new NahidaBeidouHyperbloomPartyDefinition());
         register(new NahidaDoubleHydroHyperbloomPartyDefinition());
         register(new NahidaRaidenDoubleHydroHyperbloomPartyDefinition());
+        register(new NahidaAyatoBurgeonPartyDefinition());
         register(new NaviaZhongliPartyDefinition());
         register(new NaviaChioriPartyDefinition());
         register(new NaviaChioriQuickPartyDefinition());

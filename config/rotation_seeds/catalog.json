@@ -1001,6 +1001,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Gaming, C0 Furina, C6 Bennett, C0 Xilonen", "Favonius Greatsword R5 Gaming", "Favonius Sword R5 Furina", "Skyward Blade R1 Bennett", "Peak Patrol Song R1 Xilonen", "single target"]
+    },
+    {
+      "sourceId": "kqm-nahida-quick-guide-ayato-fischl-thoma",
+      "title": "Nahida Quick Guide: Ayato Fischl Thoma Burgeon",
+      "url": "https://keqingmains.com/q/nahida-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.6; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Nahida, C0 Kamisato Ayato, C6 Fischl, C6 Thoma", "Prototype Amber R5 Nahida", "Haran Geppaku Futsu R1 Ayato", "The Stringless R5 Fischl", "Favonius Lance R5 Thoma", "single target"]
     }
   ],
   "seeds": [
@@ -2342,6 +2352,20 @@
       "sourceAssumptions": ["Furina uses Skill-dash-Burst", "Bennett uses Skill-Burst-N1", "Xilonen uses Skill-N2", "Gaming uses Burst and targets seven enhanced Plunges", "the guide permits five to eight enhanced Plunges depending on Man Chai travel", "single target"],
       "simulatorAssumptions": ["Furina's dash cancel is unsupported and removed", "Gaming's healer-backed field time remains above the repeated-return HP gate", "the fixed 93-frame Man Chai return yields six enhanced Plunges", "the first Man Chai wait is 0.4s and later waits are 1.3s", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 30s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "4ffd896e512251c0c4f4f4b44d8931692e41efe21dfe4c460e6966b8f20a9229"
+    },
+    {
+      "seedId": "kqm-nahida-ayato-fischl-thoma-adapted-v1",
+      "partyName": "NahidaAyatoBurgeon",
+      "scenarioFingerprint": "loadout-v1:NAHIDA-c0-PrototypeAmber-r5-artifact-kqms-generic-v1:KAMISATO_AYATO-c0-HaranGeppakuFutsu-r1-artifact-kqms-generic-v1:FISCHL-c6-TheStringless-r5-artifact-kqms-generic-v1:THOMA-c6-FavoniusLance-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-nahida-quick-guide-ayato-fischl-thoma"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Nahida's optional Burst is selected for the guide-prescribed Prototype Amber support build, and the complete two-field-time Ayato trace is retained.",
+      "openerActions": [],
+      "cycleActions": [[3,5,8,5,6,6,6,6,6,6,6,6,6,6,9,3,6,6,6,6,6,6,6,6,6,6,10,5,3,0,0,6,6,6,6,6,6,6,6,6,6,8,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,6,6,6,6,6,6,6,6,9,5,6,6,6,6,6,6,6,6,6,6,7,3,6,6,6,6,6,6,6,6,6,6,10,3,0,0,6,6,6,6,6,6,6,6,6,6,8,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,6,6,6,6,6,6,6,6,7]],
+      "erTargets": {"NAHIDA": 1.0, "KAMISATO_AYATO": 1.157288488411903, "FISCHL": 1.019367991828066, "THOMA": 1.0789921020743456},
+      "sourceAssumptions": ["Nahida uses Skill and optionally Burst while holding Prototype Amber", "Ayato uses Burst and two Skill-N15 field times", "Fischl uses Skill then Burst", "Thoma uses Burst-Skill-N2 then Skill-N2", "single target"],
+      "simulatorAssumptions": ["Nahida's optional Burst is selected", "the cycle ends with an explicit swap back to Nahida", "all thirty Ayato Normal attacks are retained", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a timing-adapted 36s cycle", "Favonius Lance R5 uses deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "05f64c2ef85a1d237cb86dc013008b40f9522b99b8cf492e77e12afd8e825722"
     }
   ]
 }

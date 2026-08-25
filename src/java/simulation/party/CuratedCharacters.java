@@ -64,6 +64,7 @@ import model.weapon.LumidouceElegy;
 import model.weapon.NocturnesCurtainCall;
 import model.weapon.PeakPatrolSong;
 import model.weapon.ProspectorShovel;
+import model.weapon.PrototypeAmber;
 import model.weapon.Rust;
 import model.weapon.SacrificialFragments;
 import model.weapon.SacrificialSword;
@@ -261,6 +262,10 @@ final class CuratedCharacters {
 
     static Character nahida() {
         return new Nahida(new WanderingEvenstar(5), null, 0);
+    }
+
+    static Character nahidaPrototypeAmber() {
+        return new Nahida(new PrototypeAmber(5), null, 0);
     }
 
     static Character raidenShogun() {
