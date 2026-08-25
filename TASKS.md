@@ -26055,6 +26055,7 @@ Accepted-unit table (batch 1, researched 2026-08-25):
 | KQM Arlecchino Quick Guide: Arlecchino, Citlali, Bennett, Xilonen Melt rotation | `src/java/simulation/party/ArlecchinoCitlaliMeltPartyDefinition.java` | Existing Bond of Life, Citlali Opal Fire and RES Shred, Bennett buff, and Xilonen Source Samplers; dash cancels are omitted | `TRAIN`; Melt aura trace and 30s cyclic replay |
 | KQM Arlecchino Quick Guide: Arlecchino, Bennett, Emilie, C6 Lan Yan Mono Pyro rotation | `src/java/simulation/party/ArlecchinoEmilieMonoPyroPartyDefinition.java` | Existing Bond of Life, Burning, Lumidouce Elegy, Bennett buff, C6 Lan Yan two-charge Skill, and TTDS; source `Q/E` selects Emilie Skill and dash cancels are omitted | `TRAIN`; Burning/off-field trace and 30s cyclic replay |
 | KQM Arlecchino Quick Guide: Arlecchino, C0 Mona, Bennett, Sucrose split-field Vape rotation | `src/java/simulation/party/ArlecchinoMonaVaporizePartyDefinition.java` | Existing Bond of Life persistence, C0 Omen/Phantom, Bennett buff, Sucrose Swirl, and Vaporize; dash cancel and optional Sucrose Burst are omitted | `TRAIN`; Omen/Vape split-field trace and 30s cyclic replay |
+| KQM Arlecchino Quick Guide: Arlecchino, C0 Mona, Bennett, C6 Fischl split-field Overvape rotation | `src/java/simulation/party/ArlecchinoMonaOvervapePartyDefinition.java` | Existing Bond of Life persistence, C0 Omen/Phantom, Bennett buff, C6 Oz, Electro-Charged/Overloaded/Vaporize; Fischl alternates Skill and Burst and dash cancels are omitted | `TRAIN`; two-cycle alternation, reaction trace, and 30s cyclic replay |
 
 Rejected from batch 1: Ganyu Melt, Gaming Mono Pyro, and
 Ningguang/Yae/Fischl/Zhongli mix characters already assigned to different
@@ -26132,6 +26133,14 @@ Batch 6 checkpoint:
 - Definition-only profiling suggested 189.785% Yelan ER, but authoritative
   source-action calibration required 281.617%. The latter fail-closed result is
   retained, and no preliminary profile or train scenario is exposed.
+
+Batch 7 checkpoint:
+
+- Arlecchino/Mona/Fischl Overvape is retained from one exact current KQM
+  rotation. Campaign total: 17 researched, 8 retained, 9 rejected.
+- Fischl alternates Skill and Burst across two explicit source cycles. Mona's
+  measured 173.404% ER and Bennett's 156.978% target fit the KQMS allocation;
+  Fischl and Arlecchino remain at 100% ER.
 
 Acceptance criteria:
 

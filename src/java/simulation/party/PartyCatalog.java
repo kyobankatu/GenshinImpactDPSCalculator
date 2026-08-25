@@ -34,6 +34,7 @@ public final class PartyCatalog {
         register(new ArlecchinoCitlaliMeltPartyDefinition());
         register(new ArlecchinoEmilieMonoPyroPartyDefinition());
         register(new ArlecchinoMonaVaporizePartyDefinition());
+        register(new ArlecchinoMonaOvervapePartyDefinition());
         register(new ArlecchinoLunarChargedPartyDefinition());
         register(new ArlecchinoIneffaOverloadPartyDefinition());
         register(new AlhaithamSpreadPartyDefinition());
