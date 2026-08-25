@@ -26523,6 +26523,23 @@ Batches 53-56 checkpoint:
 - The tracked catalog now contains 70 sources and 68 seeds. Its 41 usable seeds
   comprise 40 train and one validation seed; holdout remains source-isolated.
 
+Batches 57-60 checkpoint:
+
+- Four Yoimiya candidates were researched and retained: Bennett/Zhongli/Chiori,
+  Xingqiu/Bennett/Fischl, Furina/Bennett/Xiangling, and
+  Bennett/Emilie/Fischl. Campaign total: 82 researched, 42 retained, and 40
+  rejected or blocked.
+- Every guide-defined field combo expands to three complete N5 strings. The
+  Chiori variant maps the linked Skill to its requested swap, the two Fischl
+  variants preserve Skill/Burst alternation, and all source-optional actions
+  are either represented by a documented alternating cycle or omitted.
+- The Emilie Burning trace additionally alternates Emilie and Yoimiya Bursts,
+  omits the Deepwood-only Bennett follow-up, and remains feasible with
+  147.934% Yoimiya and 220.410% Bennett ER. No conditional artifact set was
+  inferred.
+- The tracked catalog now contains 74 sources and 72 seeds. Its 45 usable seeds
+  comprise 44 train and one validation seed; holdout remains source-isolated.
+
 Acceptance criteria:
 
 - Every retained seed has an exact constructible scenario, complete provenance,

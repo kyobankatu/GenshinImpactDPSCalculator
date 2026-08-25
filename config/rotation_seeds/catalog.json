@@ -731,6 +731,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Yoimiya, C0 Furina, C6 Bennett, C6 Xiangling", "Rust R1", "Favonius Lance R5 Xiangling", "three complete N5 strings", "single target"]
+    },
+    {
+      "sourceId": "kqm-yoimiya-quick-guide-bennett-emilie-fischl",
+      "title": "Yoimiya Quick Guide: Bennett Emilie Fischl Burning",
+      "url": "https://keqingmains.com/q/yoimiya-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Luna I; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Yoimiya, C6 Bennett, C0 Emilie, C6 Fischl", "Rust R1", "Lumidouce Elegy R1 Emilie", "The Stringless R5 Fischl", "three complete N5 strings", "single target"]
     }
   ],
   "seeds": [
@@ -1736,6 +1746,20 @@
       "sourceAssumptions": ["Furina uses Skill then Burst", "Bennett uses Burst-Skill, then a later Skill", "Xiangling uses Burst-Skill, then later N2", "Yoimiya uses Skill and three complete N5 strings", "Yoimiya's Burst is optional", "single target"],
       "simulatorAssumptions": ["Furina's dash is unsupported and removed", "Yoimiya's optional Burst is omitted", "the guide-defined combo maps to fifteen typed Normal actions", "the cycle uses definition-normalized swap waits", "the unchanged trace uses a 30s cycle", "Favonius Lance R5 uses deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "41da075f7696af70b29a52749b09812841d76542c2bbe6d45f21dea3fce113dc"
+    },
+    {
+      "seedId": "kqm-yoimiya-bennett-emilie-fischl-adapted-v1",
+      "partyName": "YoimiyaEmilieBurning",
+      "scenarioFingerprint": "loadout-v1:YOIMIYA-c0-Rust-r1-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:EMILIE-c0-LumidouceElegy-r1-artifact-kqms-generic-v1:FISCHL-c6-TheStringless-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-yoimiya-quick-guide-bennett-emilie-fischl"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Emilie and Fischl alternate Skill and Burst over two cycles, Yoimiya Bursts only opposite Emilie's Burst, the guide-defined combo is expanded to three complete N5 strings, and the optional Deepwood-only Bennett Skill is omitted.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 0, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5], [8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 0, 0, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"YOIMIYA": 1.4793318168399179, "BENNETT": 2.204099625266332, "EMILIE": 1.0, "FISCHL": 1.0},
+      "sourceAssumptions": ["Bennett uses Skill then Burst", "Emilie alternates Skill and Burst", "Fischl uses N2 and alternates Skill and Burst", "Yoimiya uses Skill and three complete N5 strings", "Yoimiya Bursts only opposite Emilie's Burst", "single target"],
+      "simulatorAssumptions": ["the optional Deepwood-only Bennett Skill is omitted", "the guide-defined combo maps to fifteen typed Normal actions", "the cycles use definition-normalized swap waits", "the reviewed trace uses a 30s cycle", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "bbf8b43e0469a99413ec0bdb4da19760725475fa6f16f033a0f2f7dde7a87c12"
     }
   ]
 }
