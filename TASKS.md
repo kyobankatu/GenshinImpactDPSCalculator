@@ -26,9 +26,9 @@ factories have been removed for the migrated parties.
 The simulator-only autonomous campaign is complete. B-212 Phases 1-10 built the
 local expert-iteration rotation-optimizer pipeline, but the local quality gate
 failed. Phases 11-14 established sourced human-rotation catalog, replay, import,
-and pilot contracts. Phase 15 is active with 98 researched candidates and 53
-newly retained source-matched scenarios; it continues before Phase 16
-changes teacher search or Phase 17 regenerates the quality-gated dataset.
+and pilot contracts. Phase 15 completed with 127 researched candidates and 73
+newly retained source-matched scenarios; Phase 16 is the next active target
+before teacher search changes or Phase 17 regenerates the quality-gated dataset.
 
 The prior simulator content campaigns, including Skill-focused event weapons,
 are complete; RL and generated docs remain excluded.
@@ -26012,7 +26012,8 @@ Completion evidence:
 
 ### Phase 15: Source-Matched Bulk Human Rotation Campaign
 
-Status: In progress; batches 1-80 researched 101 candidates and retained 56.
+Status: Completed (2026-08-26); 127 candidates researched, 73 retained, and 54
+rejected or blocked.
 
 Active execution window:
 
@@ -26700,6 +26701,27 @@ Batches 97-100 checkpoint:
   or blocked. The tracked catalog contains 117 sources and 111 seeds. Its 72
   usable seeds comprise 71 train and one validation seed; holdout remains
   source-isolated.
+
+Batches 101-106 checkpoint:
+
+- Researched six maintained KQM rotations across Bennett, Yelan, Xingqiu,
+  Gaming, and Luna V Venti guides. Retained Yoimiya/Yelan/Yun Jin/Zhongli,
+  Hu Tao/Xingqiu/Yelan/Zhongli, Nahida/Xingqiu/Fischl/Thoma, and
+  Venti/Fischl/Beidou/Xingqiu as train scenarios.
+- Rejected Shenhe/Bennett/Rosaria/Xiangling because Shenhe is validation while
+  the other identities are train, and rejected Yelan/Xingqiu/Fischl/Kazuha
+  because Kazuha is validation. Both complete normalized traces remain
+  reviewable without publishing cross-split parties.
+- The Nahida Burgeon trace records a fixed 3.0s wait for the simulator's second
+  Nahida Skill cooldown and a scenario-owned ER floor, so definition baseline
+  and sourced replay share the same legal 148-action sequence and build budget.
+- The campaign closed after 127 candidates: 73 retained and 54 rejected or
+  blocked. The tracked catalog contains 123 sources and 117 seeds. Its 76 usable
+  seeds comprise 75 train and one validation seed; 41 seeds are retained as
+  explicit rejected evidence and holdout remains source-isolated.
+- Phase 15 exceeded both breadth gates and is complete. Phase 16 seeded teacher
+  search and feasibility-first ranking is the next implementation target; no
+  Phase 16 code was changed during the human-seed window.
 
 Acceptance criteria:
 
