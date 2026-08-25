@@ -801,6 +801,26 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Arlecchino, C0 Yelan, C6 Bennett, C0 Layla", "Deathmatch R1 Arlecchino", "Favonius Warbow R5 Yelan", "Skyward Blade R1 Bennett", "Favonius Sword R5 Layla", "single target"]
+    },
+    {
+      "sourceId": "kqm-layla-quick-guide-hu-tao-xingqiu-yelan",
+      "title": "Layla Quick Guide: Hu Tao Xingqiu Yelan Vapemelt",
+      "url": "https://keqingmains.com/q/layla-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 4.6; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Hu Tao, C6 Xingqiu, C0 Yelan, C0 Layla", "Staff of Homa R1 Hu Tao", "Favonius Sword R5 Xingqiu", "Favonius Warbow R5 Yelan", "Favonius Sword R5 Layla", "single target"]
+    },
+    {
+      "sourceId": "kqm-hu-tao-quick-guide-no-cancel-n2c",
+      "title": "Hu Tao Quick Guide: C0 No-cancel N2C Benchmark",
+      "url": "https://keqingmains.com/q/hu-tao-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 3.3; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Hu Tao", "eight N2C strings without dash or jump cancels", "single target"]
     }
   ],
   "seeds": [
@@ -1890,6 +1910,20 @@
       "sourceAssumptions": ["Arlecchino's Burst-Skill reset is optional", "Yelan uses Skill-Burst-N1", "Bennett uses Skill-Burst-N1", "Layla uses Burst-N1-Skill", "Arlecchino uses Charged Attack-5[N3]-N2", "single target"],
       "simulatorAssumptions": ["Arlecchino's optional Burst-Skill reset is omitted", "dash cancels are unsupported and removed", "the field combo maps to one Charge and seventeen typed Normal actions", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 30s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "874f4aa7dab3c1f9a5b03a692810070c5ee39e7b742bff2f950f27b1bf83bc3a"
+    },
+    {
+      "seedId": "kqm-hu-tao-xingqiu-yelan-layla-adapted-v1",
+      "partyName": "HuTaoLaylaVapemelt",
+      "scenarioFingerprint": "loadout-v1:HU_TAO-c0-StaffOfHoma-r1-artifact-kqms-generic-v1:XINGQIU-c6-FavoniusSword-r5-artifact-kqms-generic-v1:YELAN-c0-FavoniusWarbow-r5-artifact-kqms-generic-v1:LAYLA-c0-FavoniusSword-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-layla-quick-guide-hu-tao-xingqiu-yelan", "kqm-hu-tao-quick-guide-no-cancel-n2c"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Xingqiu's dash is omitted, and Hu Tao's guide-defined combo is resolved to the source-backed C0 no-cancel 8[N2C] benchmark.",
+      "openerActions": [],
+      "cycleActions": [[8, 0, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 5, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 0, 0]],
+      "erTargets": {"HU_TAO": 1.0, "XINGQIU": 1.1734147805736588, "YELAN": 1.0391154270177436, "LAYLA": 1.0},
+      "sourceAssumptions": ["Xingqiu uses N1-Skill-dash-Burst-N1", "Yelan uses Burst-N1, then N2-Skill and later Skill-N2", "Layla uses Burst-N1-Skill", "Hu Tao uses Skill and eight no-cancel N2C strings", "single target"],
+      "simulatorAssumptions": ["Xingqiu's dash is unsupported and removed", "Hu Tao's combo maps to sixteen typed Normal actions and eight Charges", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 30s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "3bcd62542ba52cc6047fb684002bcb491937ccd2ea769a9339827fd143b818a8"
     }
   ]
 }
