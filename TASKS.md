@@ -26687,6 +26687,20 @@ Batches 93-96 checkpoint:
   usable seeds comprise 69 train and one validation seed; holdout remains
   source-isolated.
 
+Batches 97-100 checkpoint:
+
+- Researched four maintained KQM rotations across Yelan, Xingqiu, Bennett,
+  and Gaming guides. Retained Furina/Xilonen/Yelan/Ayato Mono Hydro and
+  Gaming/Furina/Bennett/Sucrose Vaporize as train scenarios.
+- Rejected Xingqiu/Xiangling/Bennett/Sucrose because Xiangling Energy decays
+  at the KQMS ceiling, and Yoimiya/Zhongli/Yelan/Bennett because exact repeated
+  replay requires 323.338% Yelan ER above the 268.200% ceiling. Both complete
+  normalized traces remain reviewable without source-external battery actions.
+- The campaign has now reviewed 121 candidates: 69 retained and 52 rejected
+  or blocked. The tracked catalog contains 117 sources and 111 seeds. Its 72
+  usable seeds comprise 71 train and one validation seed; holdout remains
+  source-isolated.
+
 Acceptance criteria:
 
 - Every retained seed has an exact constructible scenario, complete provenance,

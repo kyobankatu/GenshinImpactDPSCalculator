@@ -99,6 +99,7 @@ public final class PartyCatalog {
         register(new GamingFischlVaporizePartyDefinition());
         register(new GamingXingqiuVaporizePartyDefinition());
         register(new GamingXilonenVaporizePartyDefinition());
+        register(new GamingSucroseVaporizePartyDefinition());
         register(new TighnariSpreadPartyDefinition());
         register(new NingguangCrystallizePartyDefinition());
     }

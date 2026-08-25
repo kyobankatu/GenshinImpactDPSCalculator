@@ -1151,6 +1151,26 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Yoimiya, C0 Zhongli, C0 Yelan, C6 Bennett", "Rust R1 Yoimiya", "Deathmatch R1 Zhongli", "Favonius Warbow R5 Yelan", "Skyward Blade R1 Bennett", "single target"]
+    },
+    {
+      "sourceId": "kqm-bennett-quick-guide-gaming-furina-sucrose",
+      "title": "Bennett Quick Guide: Gaming Furina Sucrose Vaporize",
+      "url": "https://keqingmains.com/q/bennett-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.7; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Gaming, C0 Furina, C6 Bennett, C6 Sucrose", "Favonius Greatsword R5 Gaming", "Favonius Sword R5 Furina", "Skyward Blade R1 Bennett", "Thrilling Tales R5 Sucrose", "single target"]
+    },
+    {
+      "sourceId": "kqm-gaming-quick-guide-default-vaporize-combo",
+      "title": "Gaming Quick Guide: Default Vaporize Combo",
+      "url": "https://keqingmains.com/q/gaming-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.5; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Gaming", "default Vaporize combo Q 7[EP]", "five to eight enhanced Plunges depending on Man Chai travel", "single target"]
     }
   ],
   "seeds": [
@@ -2702,6 +2722,20 @@
       "sourceAssumptions": ["Yoimiya's opening Burst is optional", "Zhongli uses N1-hold Skill with a dash cancel", "Yelan uses Skill-Burst-N1", "Bennett uses Skill-N1-Burst-N1 and a later Skill", "Yoimiya uses Skill, three N5 strings, and one final Normal", "single target"],
       "simulatorAssumptions": ["Yoimiya's optional Burst is omitted", "Zhongli's hold Skill maps to Press", "dash cancels are unsupported and removed", "the source combo maps to sixteen typed Yoimiya Normal actions", "the complete normalized action trace is retained for review", "Favonius Warbow R5 uses deterministic proc draws", "the exact repeated trace exceeds the KQMS Energy Recharge ceiling", "no branch-search party is published"],
       "contentHash": "b838f499004a7175792634da34f23fe7c168e4c1d0087b15485267b3ee2f5c17"
+    },
+    {
+      "seedId": "kqm-bennett-gaming-furina-sucrose-adapted-v1",
+      "partyName": "GamingSucroseVaporize",
+      "scenarioFingerprint": "loadout-v1:GAMING-c0-FavoniusGreatsword-r5-artifact-kqms-generic-v1:FURINA-c0-FavoniusSword-r5-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:SUCROSE-c6-ThrillingTalesOfDragonSlayers-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-bennett-quick-guide-gaming-furina-sucrose", "kqm-gaming-quick-guide-default-vaporize-combo"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Furina's dash cancel is omitted, the guide-permitted Plunge count is fixed to six for deterministic Man Chai travel, and Bennett's optional final Skill is selected for batterying.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 5, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 5, 3, 2, 6, 6, 6, 6, 3, 2, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 2, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 2, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 2, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 2, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3]],
+      "erTargets": {"GAMING": 1.0, "FURINA": 1.0416666666608798, "BENNETT": 1.0, "SUCROSE": 1.0},
+      "sourceAssumptions": ["Furina uses Skill-dash-Burst", "C6 Bennett uses Burst-Skill and an optional Normal to establish Pyro", "Sucrose uses N1-Skill", "Gaming uses the default Vaporize combo", "Bennett's final Skill is optional", "the Gaming guide permits five to eight enhanced Plunges depending on Man Chai travel", "single target"],
+      "simulatorAssumptions": ["Furina's dash cancel is unsupported and removed", "Bennett's optional Normal and final Skill are selected", "the fixed 93-frame Man Chai return yields six enhanced Plunges", "the first Man Chai wait is 0.4s and later waits are 1.3s", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 35s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "f56b4d5c1a82628f3d16c199e92645bf8ef21f88e861a259ebf3269ac2586a94"
     }
   ]
 }
