@@ -1011,6 +1011,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Nahida, C0 Kamisato Ayato, C6 Fischl, C6 Thoma", "Prototype Amber R5 Nahida", "Haran Geppaku Futsu R1 Ayato", "The Stringless R5 Fischl", "Favonius Lance R5 Thoma", "single target"]
+    },
+    {
+      "sourceId": "kqm-nahida-quick-guide-yae-alhaitham-shinobu",
+      "title": "Nahida Quick Guide: Yae Alhaitham Shinobu Spread",
+      "url": "https://keqingmains.com/q/nahida-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.6; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Yae Miko, C0 Nahida, C0 Kuki Shinobu, C0 Alhaitham", "Wandering Evenstar R5 Yae Miko", "Wandering Evenstar R5 Nahida", "Wolf-Fang R1 Shinobu", "Favonius Sword R5 Alhaitham", "single target"]
     }
   ],
   "seeds": [
@@ -2366,6 +2376,20 @@
       "sourceAssumptions": ["Nahida uses Skill and optionally Burst while holding Prototype Amber", "Ayato uses Burst and two Skill-N15 field times", "Fischl uses Skill then Burst", "Thoma uses Burst-Skill-N2 then Skill-N2", "single target"],
       "simulatorAssumptions": ["Nahida's optional Burst is selected", "the cycle ends with an explicit swap back to Nahida", "all thirty Ayato Normal attacks are retained", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a timing-adapted 36s cycle", "Favonius Lance R5 uses deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "05f64c2ef85a1d237cb86dc013008b40f9522b99b8cf492e77e12afd8e825722"
+    },
+    {
+      "seedId": "kqm-nahida-yae-alhaitham-shinobu-rejected-v1",
+      "partyName": "NahidaYaeAlhaithamUnavailable",
+      "scenarioFingerprint": "review-only:YAE_MIKO-c0:NAHIDA-c0:KUKI_SHINOBU-c0:ALHAITHAM-c0:snapshot-incomplete",
+      "sourceIds": ["kqm-nahida-quick-guide-yae-alhaitham-shinobu"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because Yae Miko's persistent Sesshou Sakura runtime does not implement snapshot capture and restore, so branch search cannot replay the sourced state exactly.",
+      "openerActions": [],
+      "cycleActions": [[3, 3, 3, 8, 3, 5, 0, 1, 9, 5, 10, 4, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 7, 0, 5, 3, 3, 3, 9, 3, 10, 5, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"YAE_MIKO": 1.0, "NAHIDA": 1.0, "KUKI_SHINOBU": 1.0, "ALHAITHAM": 1.0},
+      "sourceAssumptions": ["Yae uses three Skills then N1, optional Burst, and three Skills", "Nahida uses Skill-Burst-N1C", "Shinobu uses Burst then Skill", "Alhaitham uses hold Skill-Plunge-3[N4C], then Burst-N3-N3C-2[N3]", "single target"],
+      "simulatorAssumptions": ["dash cancels are unsupported and removed", "Yae's optional Burst is selected", "the complete normalized action trace is retained for review", "Yae Miko's owner-scoped totem state is not snapshot-aware", "no branch-search party is published"],
+      "contentHash": "81026d7ed8efce7890bd3e91f0a29b50bde703a332781c54464270b440488d48"
     }
   ]
 }
