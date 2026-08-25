@@ -1211,6 +1211,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Yelan, C6 Xingqiu, C6 Fischl, C0 Kaedehara Kazuha", "Favonius Warbow R5 Yelan", "Sacrificial Sword R5 Xingqiu", "The Stringless R5 Fischl", "Skyward Blade R1 Kazuha", "single target"]
+    },
+    {
+      "sourceId": "kqm-xingqiu-quick-guide-nahida-thoma-fischl",
+      "title": "Xingqiu Quick Guide: Nahida Thoma Fischl Burgeon",
+      "url": "https://keqingmains.com/q/xingqiu-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.7; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Nahida, C6 Xingqiu, C6 Fischl, C6 Thoma", "Prototype Amber R5 Nahida", "Sacrificial Sword R5 Xingqiu", "The Stringless R5 Fischl", "Favonius Lance R5 Thoma", "single target"]
     }
   ],
   "seeds": [
@@ -2832,6 +2842,20 @@
       "sourceAssumptions": ["Fischl uses Skill then later N2-Burst", "Xingqiu uses Burst-N1 then later N1-Skill-N1", "Kazuha uses tap Skill-Plunge-optional N1-Burst-N1 then hold Skill-Plunge-N1", "Yelan uses Burst-N1-Skill-2[N4] then N2-Skill-N4", "single target"],
       "simulatorAssumptions": ["dash cancels are unsupported and removed", "Kazuha's optional first Normal is selected", "tap and hold Chihayaburu Plunges use explicit typed Plunge actions", "all sourced Normal counts are retained", "the complete 35s normalized action trace is retained for review", "Kazuha belongs to validation", "Yelan, Xingqiu, and Fischl belong to train", "no cross-split party is published"],
       "contentHash": "02c5e57057dc041c7dd8be40664a127eb63d9e3037787d8bed1528d60a37c532"
+    },
+    {
+      "seedId": "kqm-xingqiu-nahida-thoma-fischl-adapted-v1",
+      "partyName": "NahidaThomaBurgeon",
+      "scenarioFingerprint": "loadout-v1:NAHIDA-c0-PrototypeAmber-r5-artifact-kqms-generic-v1:XINGQIU-c6-SacrificialSword-r5-artifact-kqms-generic-v1:FISCHL-c6-TheStringless-r5-artifact-kqms-generic-v1:THOMA-c6-FavoniusLance-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-xingqiu-quick-guide-nahida-thoma-fischl"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Dash cancels are omitted, and Thoma uses the guide-prescribed Skill-Burst order for his local Favonius Lance loadout while all sourced attacks remain in order.",
+      "openerActions": [],
+      "cycleActions": [[3, 5, 8, 5, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 0, 0, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 3, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"NAHIDA": 1.0, "XINGQIU": 1.4348402851945103, "FISCHL": 1.0, "THOMA": 1.0301267601054207},
+      "sourceAssumptions": ["Nahida uses Skill-Burst, Skill-N3-Skill-2[N3], then three N3 strings", "Xingqiu uses Burst-N2 then Skill-N3", "Fischl uses Skill-N1 then N2-Burst", "Favonius Thoma uses Skill-Burst-N1 then Skill-N2", "single target"],
+      "simulatorAssumptions": ["dash cancels are unsupported and removed", "a fixed 3.0s wait reaches Nahida's second Skill cooldown", "all sourced Normal counts are retained", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a timing-adapted 43s cycle", "Favonius and Sacrificial weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "6bd60b1531aacde94ed556bf0cd3f4e35e76cf2c1d7112d3c1f4dda150f32cba"
     }
   ]
 }
