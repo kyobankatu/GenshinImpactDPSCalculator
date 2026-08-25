@@ -1171,6 +1171,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Gaming", "default Vaporize combo Q 7[EP]", "five to eight enhanced Plunges depending on Man Chai travel", "single target"]
+    },
+    {
+      "sourceId": "kqm-bennett-quick-guide-shenhe-rosaria-xiangling",
+      "title": "Bennett Quick Guide: Shenhe Rosaria Xiangling Reverse Melt",
+      "url": "https://keqingmains.com/q/bennett-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.7; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Shenhe, C6 Bennett, C0 Rosaria, C6 Xiangling", "Favonius Lance R5 Shenhe", "Skyward Blade R1 Bennett", "Favonius Lance R5 Rosaria", "Favonius Lance R5 Xiangling", "single target"]
     }
   ],
   "seeds": [
@@ -2736,6 +2746,20 @@
       "sourceAssumptions": ["Furina uses Skill-dash-Burst", "C6 Bennett uses Burst-Skill and an optional Normal to establish Pyro", "Sucrose uses N1-Skill", "Gaming uses the default Vaporize combo", "Bennett's final Skill is optional", "the Gaming guide permits five to eight enhanced Plunges depending on Man Chai travel", "single target"],
       "simulatorAssumptions": ["Furina's dash cancel is unsupported and removed", "Bennett's optional Normal and final Skill are selected", "the fixed 93-frame Man Chai return yields six enhanced Plunges", "the first Man Chai wait is 0.4s and later waits are 1.3s", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 35s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "f56b4d5c1a82628f3d16c199e92645bf8ef21f88e861a259ebf3269ac2586a94"
+    },
+    {
+      "seedId": "kqm-bennett-shenhe-rosaria-xiangling-adapted-v1",
+      "partyName": "ShenheBennettReverseMeltUnavailable",
+      "scenarioFingerprint": "review-only:SHENHE-c0:BENNETT-c6:ROSARIA-c0:XIANGLING-c6:cross-split",
+      "sourceIds": ["kqm-bennett-quick-guide-shenhe-rosaria-xiangling"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because Shenhe is isolated in validation while Bennett, Rosaria, and Xiangling are train identities; publishing the exact team would violate the character-identity split contract.",
+      "openerActions": [],
+      "cycleActions": [[3, 5, 8, 5, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 0, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 5, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 0, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 0, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0]],
+      "erTargets": {"SHENHE": 1.0090155723395864, "BENNETT": 1.0, "ROSARIA": 1.0, "XIANGLING": 1.234899930507295},
+      "sourceAssumptions": ["C6 Bennett sequence is used", "Shenhe uses Skill-Burst then Skill-N1 and a final N1", "Bennett uses Burst-Skill, N2-Skill, and N1-Skill", "Rosaria uses Skill-N1-Burst and two later Skills", "Xiangling uses Burst-Skill and two N2 strings", "single target"],
+      "simulatorAssumptions": ["dash cancels are unsupported and removed", "all sourced Normal, Skill, and Burst counts are retained", "the complete 30s normalized action trace is retained for review", "Favonius weapons use deterministic proc draws", "Shenhe belongs to validation", "Bennett, Rosaria, and Xiangling belong to train", "no cross-split party is published"],
+      "contentHash": "658212e0f943e6c3b03bf7fa41de9705040d7a3cd0063d2e8f7c671f95a1d577"
     }
   ]
 }
