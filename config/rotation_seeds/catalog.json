@@ -671,6 +671,16 @@
       "accessDate": "2026-08-25",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Neuvillette, C0 Furina, C4 Jean, C6 Fischl", "Tome of the Eternal Flow R1", "single target"]
+    },
+    {
+      "sourceId": "kqm-wriothesley-guide-xingqiu-mika-lynette",
+      "title": "Wriothesley Guide: Xingqiu Mika Lynette Freeze",
+      "url": "https://keqingmains.com/q/wriothesley-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 7.0; accessed-2026-08-25",
+      "accessDate": "2026-08-25",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Wriothesley, C6 Xingqiu, C6 Mika, C6 Lynette", "non-Stellar-Conduct C0 combo", "single target"]
     }
   ],
   "seeds": [
@@ -1592,6 +1602,20 @@
       "sourceAssumptions": ["Neuvillette uses Skill, then one Charged-Burst-Skill-Charged sequence and two final Charged Attacks", "Furina uses Skill then Burst", "Jean uses Skill-Burst and a later Skill", "Fischl alternates Skill then Burst", "single target"],
       "simulatorAssumptions": ["Furina's dash and Jean's optional N1 are omitted from the reviewed action identity", "the source assumes Sourcewater Droplet collection shortens every Equitable Judgment charge", "the local Neuvillette slice excludes Sourcewater Droplet creation and collection", "the local no-droplet Equitable Judgment advances time by 450 frames", "the candidate is not constructible without changing simulator mechanics"],
       "contentHash": "1de2f2ea6df0daea603831ad415891a7580acf0d16bdc302de087015fc3cfb14"
+    },
+    {
+      "seedId": "kqm-wriothesley-xingqiu-mika-lynette-adapted-v1",
+      "partyName": "WriothesleyFourStarFreezeUnavailable",
+      "scenarioFingerprint": "review-only:wriothesley-xingqiu-mika-lynette-hp-cancel",
+      "sourceIds": ["kqm-wriothesley-guide-xingqiu-mika-lynette"],
+      "adaptationStatus": "rejected",
+      "adaptationNote": "Rejected because the sourced C0 five-chain N3C combo is built around current-HP drain, A1 Rebuke healing, and jump cancels, while the local Wriothesley slice explicitly excludes player HP, healing, A1, and airborne state.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 5, 0, 9, 3, 5, 10, 3, 5, 0, 7, 3, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]],
+      "erTargets": {"WRIOTHESLEY": 1.0, "XINGQIU": 1.0, "MIKA": 1.0, "LYNETTE": 1.0},
+      "sourceAssumptions": ["Xingqiu uses Skill, dash, Burst, then N1", "Mika uses Skill then Burst", "Lynette uses Skill-Burst-N1", "Wriothesley uses Skill then five N3C chains", "each N3C is jump-cancelled", "single target"],
+      "simulatorAssumptions": ["Xingqiu's dash is omitted from the reviewed action identity", "the local action space cannot encode jump cancels", "the local Wriothesley slice excludes player current HP, HP change, healing, and A1", "the fixed-full-HP boundary cannot activate the sourced C0 Rebuke cadence", "the candidate is not constructible without changing simulator mechanics"],
+      "contentHash": "e01766045b748d155380273668d3474bb0fe42d0cc5d9055683c4c5b38be768f"
     }
   ]
 }
