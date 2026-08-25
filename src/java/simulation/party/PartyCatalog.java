@@ -90,6 +90,7 @@ public final class PartyCatalog {
         register(new GamingFurinaVaporizePartyDefinition());
         register(new GamingFischlVaporizePartyDefinition());
         register(new GamingXingqiuVaporizePartyDefinition());
+        register(new GamingXilonenVaporizePartyDefinition());
         register(new TighnariSpreadPartyDefinition());
         register(new NingguangCrystallizePartyDefinition());
     }

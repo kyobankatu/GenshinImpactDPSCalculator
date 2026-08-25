@@ -26621,6 +26621,24 @@ Batches 77-80 checkpoint:
 - The tracked catalog now contains 96 sources and 91 seeds. Its 59 usable seeds
   comprise 58 train and one validation seed; holdout remains source-isolated.
 
+Batches 81-84 checkpoint:
+
+- Four maintained-guide candidates were researched and retained:
+  Xiao/Xianyun/Faruzan/Sucrose, Gaming/Furina/Bennett/Fischl,
+  Gaming/Xingqiu/Sucrose/Bennett, and Gaming/Furina/Bennett/Xilonen. Campaign
+  total: 105 researched, 60 retained, and 45 rejected or blocked.
+- Xiao retains the KQM twelve-high-Plunge benchmark and both C1+ Sucrose Skill
+  charges. The coordinated-Hydro Gaming seed retains the complete
+  `EP Q 5[N2 EP]` combo, while Fischl alternates Skill and Burst across two
+  reviewed cycles.
+- The two default-combo Gaming variants fix Man Chai travel to six enhanced
+  Plunges, inside the guide's documented five-to-eight range. Their source
+  assumptions, fixed 93-frame return timing, and Favonius support loadouts are
+  explicit; no unavailable seventh reset is forced into the action trace.
+- The tracked catalog now contains 100 sources and 95 seeds. Its 63 usable
+  seeds comprise 62 train and one validation seed; holdout remains
+  source-isolated.
+
 Acceptance criteria:
 
 - Every retained seed has an exact constructible scenario, complete provenance,

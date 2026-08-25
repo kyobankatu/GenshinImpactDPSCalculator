@@ -991,6 +991,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Gaming, C6 Xingqiu, C6 Sucrose, C6 Bennett", "Favonius Greatsword R5 Gaming", "Favonius Sword R5 Xingqiu", "Thrilling Tales R5 Sucrose", "Skyward Blade R1 Bennett", "single target"]
+    },
+    {
+      "sourceId": "kqm-gaming-quick-guide-furina-bennett-xilonen",
+      "title": "Gaming Quick Guide: Furina Bennett Xilonen Vaporize",
+      "url": "https://keqingmains.com/q/gaming-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.5; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Gaming, C0 Furina, C6 Bennett, C0 Xilonen", "Favonius Greatsword R5 Gaming", "Favonius Sword R5 Furina", "Skyward Blade R1 Bennett", "Peak Patrol Song R1 Xilonen", "single target"]
     }
   ],
   "seeds": [
@@ -2318,6 +2328,20 @@
       "sourceAssumptions": ["Xingqiu uses Skill-dash-Burst-N1", "Bennett uses Skill-dash-Burst", "Sucrose uses N2-Skill", "Gaming uses Skill-Plunge-Burst then five N2-Skill-Plunge strings", "Bennett uses a second Skill before Gaming N2", "single target"],
       "simulatorAssumptions": ["dash cancels are unsupported and removed", "Gaming's healer-backed field time remains above the repeated-return HP gate", "short waits preserve the exact initial and repeated Man Chai Skill resets", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 35s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "0ba47e8362e0418c35efc23ecc6032b632c21ea1554dcdad3c01bc73001ce8f8"
+    },
+    {
+      "seedId": "kqm-gaming-furina-bennett-xilonen-adapted-v1",
+      "partyName": "GamingXilonenVaporize",
+      "scenarioFingerprint": "loadout-v1:GAMING-c0-FavoniusGreatsword-r5-artifact-kqms-generic-v1:FURINA-c0-FavoniusSword-r5-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:XILONEN-c0-PeakPatrolSong-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-gaming-quick-guide-furina-bennett-xilonen"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Furina's dash cancel is omitted, and the listed seven-Plunge target is fixed to six within the guide's documented 5-8 range for deterministic Man Chai travel.",
+      "openerActions": [],
+      "cycleActions": [[8,3,5,6,6,6,6,6,6,6,6,6,6,9,3,5,0,6,6,6,6,6,6,6,6,6,6,10,3,0,0,6,6,6,6,6,6,6,6,6,6,7,5,3,2,6,6,6,6,3,2,6,6,6,6,6,6,6,6,6,6,6,6,6,3,2,6,6,6,6,6,6,6,6,6,6,6,6,6,3,2,6,6,6,6,6,6,6,6,6,6,6,6,6,3,2,6,6,6,6,6,6,6,6,6,6,6,6,6,3,2]],
+      "erTargets": {"GAMING": 1.0, "FURINA": 1.2048192770883537, "BENNETT": 1.2003767281314637, "XILONEN": 1.0},
+      "sourceAssumptions": ["Furina uses Skill-dash-Burst", "Bennett uses Skill-Burst-N1", "Xilonen uses Skill-N2", "Gaming uses Burst and targets seven enhanced Plunges", "the guide permits five to eight enhanced Plunges depending on Man Chai travel", "single target"],
+      "simulatorAssumptions": ["Furina's dash cancel is unsupported and removed", "Gaming's healer-backed field time remains above the repeated-return HP gate", "the fixed 93-frame Man Chai return yields six enhanced Plunges", "the first Man Chai wait is 0.4s and later waits are 1.3s", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 30s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "4ffd896e512251c0c4f4f4b44d8931692e41efe21dfe4c460e6966b8f20a9229"
     }
   ]
 }
