@@ -58,6 +58,7 @@ public final class PartyCatalog {
         register(new DilucXianyunVaporizePartyDefinition());
         register(new HuTaoXianyunVaporizePartyDefinition());
         register(new HuTaoLaylaVapemeltPartyDefinition());
+        register(new HuTaoZhongliVaporizePartyDefinition());
         register(new ArlecchinoOverloadPartyDefinition());
         register(new ArlecchinoVaporizePartyDefinition());
         register(new ArlecchinoCitlaliMeltPartyDefinition());

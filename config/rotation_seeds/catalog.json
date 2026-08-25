@@ -1191,6 +1191,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Yoimiya, C0 Yelan, C6 Yun Jin, C0 Zhongli", "Rust R1 Yoimiya", "Favonius Warbow R5 Yelan", "Favonius Lance R5 Yun Jin", "Deathmatch R1 Zhongli", "single target"]
+    },
+    {
+      "sourceId": "kqm-xingqiu-quick-guide-hu-tao-yelan-zhongli",
+      "title": "Xingqiu Quick Guide: Hu Tao Yelan Zhongli Double Hydro",
+      "url": "https://keqingmains.com/q/xingqiu-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.7; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Hu Tao, C6 Xingqiu, C0 Yelan, C0 Zhongli", "Staff of Homa R1 Hu Tao", "Sacrificial Sword R5 Xingqiu", "Favonius Warbow R5 Yelan", "Deathmatch R1 Zhongli", "single target"]
     }
   ],
   "seeds": [
@@ -2784,6 +2794,20 @@
       "sourceAssumptions": ["Yoimiya's opening Burst is optional", "Zhongli uses hold Skill with a dash cancel", "Yelan uses Skill-Burst-N1", "Yun Jin uses Skill-Burst and a later Skill", "Yoimiya uses Skill, three N5 strings, and one to three final Normals", "single target"],
       "simulatorAssumptions": ["Yoimiya's optional Burst is omitted", "Zhongli's hold Skill maps to Press", "dash cancels are unsupported and removed", "the terminal Normal range is fixed to N1", "the source combo maps to sixteen typed Yoimiya Normal actions", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 25s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "d2f33e0744cbe6e4cc975c1b12d9d5adc938cff9ef46884ab7779cfc15232b88"
+    },
+    {
+      "seedId": "kqm-xingqiu-hu-tao-yelan-zhongli-adapted-v1",
+      "partyName": "HuTaoZhongliVaporize",
+      "scenarioFingerprint": "loadout-v1:HU_TAO-c0-StaffOfHoma-r1-artifact-kqms-generic-v1:XINGQIU-c6-SacrificialSword-r5-artifact-kqms-generic-v1:YELAN-c0-FavoniusWarbow-r5-artifact-kqms-generic-v1:ZHONGLI-c0-Deathmatch-r1-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-xingqiu-quick-guide-hu-tao-yelan-zhongli", "kqm-hu-tao-quick-guide-no-cancel-n2c"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Zhongli's hold Skill maps to Press, dash cancels are removed, and Hu Tao's guide-defined combo is resolved to the source-backed C0 no-cancel 8[N2C] benchmark.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 5, 0, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3]],
+      "erTargets": {"HU_TAO": 1.0, "XINGQIU": 1.7268130099880288, "YELAN": 1.4700851260721373, "ZHONGLI": 1.0},
+      "sourceAssumptions": ["Xingqiu uses Skill-Burst-N1", "Zhongli uses hold Skill with a dash cancel", "Yelan uses Burst-N1-Skill-N1 and a later Skill", "Hu Tao uses the C0 no-cancel 8[N2C] benchmark", "single target"],
+      "simulatorAssumptions": ["Zhongli's hold Skill maps to Press", "dash cancels are unsupported and removed", "Hu Tao's combo maps to sixteen typed Normal actions and eight Charges", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 30s cycle", "Favonius and Sacrificial weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "7f8b184402728c331ba7598320aafa8c5a394ff6dfab8c23fd6fb493e405c14e"
     }
   ]
 }
