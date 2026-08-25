@@ -84,6 +84,7 @@ public final class PartyCatalog {
         register(new AlhaithamSpreadPartyDefinition());
         register(new GanyuFreezePartyDefinition());
         register(new GamingMeltPartyDefinition());
+        register(new GamingCitlaliMeltPartyDefinition());
         register(new TighnariSpreadPartyDefinition());
         register(new NingguangCrystallizePartyDefinition());
     }

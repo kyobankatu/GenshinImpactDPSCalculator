@@ -931,6 +931,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Yelan, C6 Fischl, C0 Ororon, C6 Lan Yan", "Favonius Warbow R5 Yelan", "The Stringless R5 Fischl", "The Stringless R5 Ororon", "Thrilling Tales R5 Lan Yan", "single target"]
+    },
+    {
+      "sourceId": "kqm-gaming-quick-guide-citlali-bennett-sucrose",
+      "title": "Gaming Quick Guide: Citlali Bennett Sucrose Melt",
+      "url": "https://keqingmains.com/q/gaming-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.5; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Gaming, C6 Bennett, C6 Sucrose, C0 Citlali", "Favonius Greatsword R5 Gaming", "Skyward Blade R1 Bennett", "Thrilling Tales R5 Sucrose", "Favonius Codex R5 Citlali", "single target"]
     }
   ],
   "seeds": [
@@ -2174,6 +2184,20 @@
       "sourceAssumptions": ["Yelan uses Skill-Burst-N1", "Ororon uses Skill and Burst while his optional N1 is omitted", "Fischl uses N2 and alternates Skill and Burst", "Lan Yan uses Skill-N1-Burst and four N3 driver strings", "single target"],
       "simulatorAssumptions": ["the optional Ororon N1 and dash cancels are omitted", "the complete two-cycle alternating trace is retained for review", "Ororon belongs to holdout", "Yelan, Fischl, and Lan Yan belong to train", "no cross-split party is published"],
       "contentHash": "edb69def82cb572c614c730b015a7458f3fffd94f691f87fe9392cb9795789e8"
+    },
+    {
+      "seedId": "kqm-gaming-citlali-bennett-sucrose-adapted-v1",
+      "partyName": "GamingCitlaliMelt",
+      "scenarioFingerprint": "loadout-v1:GAMING-c0-FavoniusGreatsword-r5-artifact-kqms-generic-v1:BENNETT-c6-SkywardBlade-r1-artifact-kqms-generic-v1:SUCROSE-c6-ThrillingTalesOfDragonSlayers-r5-artifact-kqms-generic-v1:CITLALI-c0-FavoniusCodex-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-gaming-quick-guide-citlali-bennett-sucrose"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "The guide's 5-6 enhanced-Plunge range is fixed to its C0 lower bound of five, with gcsim-backed waits preserving each repeated Man Chai Skill reset.",
+      "openerActions": [],
+      "cycleActions": [[8, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 5, 3, 2, 6, 6, 6, 6, 3, 2, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 2, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 2, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 2]],
+      "erTargets": {"GAMING": 1.1194029850559701, "BENNETT": 1.5151515151262624, "SUCROSE": 1.0, "CITLALI": 1.4285714285476188},
+      "sourceAssumptions": ["Bennett uses Skill-Burst", "Sucrose uses Skill", "Citlali uses Skill-Burst", "C0 Gaming selects five enhanced Plunges from the documented 5-6 range", "single target"],
+      "simulatorAssumptions": ["Gaming's healer-backed field time remains above the repeated-return HP gate", "the first Man Chai wait is 0.4s and later waits are 1.3s from pinned gcsim frame timing", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a 25s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "0ae270810eca5634f2caaa0263e6364c3f283bf1e607469dda1ca4d8aa046fc3"
     }
   ]
 }

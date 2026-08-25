@@ -200,6 +200,17 @@ public final class GamingRegressionTest {
         advanceTo(simulator, 161.0 * FRAME + EPSILON);
         assertTrue(gaming.canSkill(simulator.getCurrentTime()),
                 "Gaming initial Man Chai return resets Skill cooldown");
+
+        perform(simulator, CharacterActionKey.SKILL);
+        double secondPlungeStart = simulator.getCurrentTime();
+        perform(simulator, CharacterActionKey.PLUNGE);
+        double repeatedReturn = secondPlungeStart + 125.0 * FRAME;
+        advanceTo(simulator, repeatedReturn - EPSILON);
+        assertTrue(!gaming.canSkill(simulator.getCurrentTime()),
+                "Gaming repeated Man Chai return respects 125-frame timing");
+        advanceTo(simulator, repeatedReturn + EPSILON);
+        assertTrue(gaming.canSkill(simulator.getCurrentTime()),
+                "Gaming repeated Man Chai return resets Skill cooldown");
         assertTrue(gaming.isBurstActive(36.0 * FRAME + 12.0 - EPSILON),
                 "Gaming Burst remains active before exact expiry");
         assertTrue(!gaming.isBurstActive(36.0 * FRAME + 12.0),

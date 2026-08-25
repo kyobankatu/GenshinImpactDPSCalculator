@@ -31,15 +31,15 @@ import simulation.event.SimpleTimerEvent;
 /**
  * Gaming's fixed-target Charmed Cloudstrider and Burst slice through C6.
  *
- * <p>Stellar Rend, Bestial Ascent, Suanni's Gilded Dance, the initial Man Chai
- * return, particles, C3-C6 offensive values, and timing follow pinned gcsim
- * {@code ef41805d}. Delayed work remains owner-bound and snapshot-safe.</p>
+ * <p>Stellar Rend, Bestial Ascent, Suanni's Gilded Dance, repeated Man Chai
+ * returns, particles, C3-C6 offensive values, and timing follow pinned gcsim
+ * behavior. Delayed work remains owner-bound and snapshot-safe.</p>
  *
  * <p>Player HP loss and healing, overheal-triggered C2, current-HP A4, the
- * HP-gated repeated Man Chai loop, Charged Attack movement, low Plunge,
- * collision, geometry, stamina, and hitlag-based modifier extension are
- * intentionally excluded. The initial Burst Man Chai return is independent
- * of those unavailable systems and therefore remains represented.</p>
+ * Charged Attack movement, low Plunge, collision, geometry, stamina, and
+ * hitlag-based modifier extension are intentionally excluded. Because the
+ * simulator has no player-HP runtime, repeated Burst returns assume the
+ * sustained-above-50% state used by Gaming's healer-backed teams.</p>
  */
 public final class Gaming extends Character implements
         SimulatorInitializedCharacterEffect,
@@ -48,6 +48,7 @@ public final class Gaming extends Character implements
     private static final double FRAME = 1.0 / 60.0;
     private static final double EPSILON = 1e-9;
     private static final double PARTICLE_TRAVEL = 100.0 * FRAME;
+    private static final double REPEATED_MAN_CHAI_RETURN = 93.0 * FRAME;
     private static final int[] NORMAL_HIT_FRAMES = { 25, 18, 34, 48 };
     private static final int[] NORMAL_DURATIONS = { 30, 32, 79, 87 };
     private static final double[] NORMAL_T9 = {
@@ -414,6 +415,7 @@ public final class Gaming extends Character implements
                 ICDType.None,
                 ICDTag.None,
                 1.0);
+        scheduleRepeatedManChaiReturn(simulator, hit);
         if (simulator.getEnemy() != null
                 && hit.time + EPSILON >= nextParticleAllowedTime) {
             nextParticleAllowedTime = hit.time
@@ -427,6 +429,30 @@ public final class Gaming extends Character implements
         if (constellation >= 4) {
             receiveFlatEnergy(getTalentValue("C4 Energy", 2.0));
         }
+    }
+
+    private void scheduleRepeatedManChaiReturn(
+            CombatSimulator simulator,
+            PendingHit hit) {
+        if (!isBurstActive(hit.time) || hasPendingManChaiReturn(hit.time)) {
+            return;
+        }
+        queueCommand(simulator, new PendingCommand(
+                hit.time + REPEATED_MAN_CHAI_RETURN,
+                CommandKind.MAN_CHAI_RETURN,
+                0.0,
+                burstGeneration));
+    }
+
+    private boolean hasPendingManChaiReturn(double currentTime) {
+        for (PendingCommand command : pendingCommands) {
+            if (command.kind == CommandKind.MAN_CHAI_RETURN
+                    && command.generation == burstGeneration
+                    && command.time > currentTime + EPSILON) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void performHit(
