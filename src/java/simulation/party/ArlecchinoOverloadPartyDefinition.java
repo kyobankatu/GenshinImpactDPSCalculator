@@ -20,13 +20,12 @@ public final class ArlecchinoOverloadPartyDefinition extends CuratedPartyDefinit
                         CuratedCharacters::bennett),
                 actions(
                         PolicyAction.SWAP_SLOT_1, PolicyAction.SKILL_PRESS,
-                        PolicyAction.BURST, PolicyAction.SWAP_SLOT_2,
-                        PolicyAction.BURST, PolicyAction.SKILL_PRESS,
+                        PolicyAction.SWAP_SLOT_2, PolicyAction.SKILL_PRESS,
                         PolicyAction.SWAP_SLOT_3, PolicyAction.BURST,
                         PolicyAction.SKILL_PRESS, PolicyAction.SWAP_SLOT_0,
                         PolicyAction.SKILL_PRESS, PolicyAction.CHARGE,
                         PolicyAction.NORMAL, PolicyAction.NORMAL,
-                        PolicyAction.NORMAL, PolicyAction.BURST),
+                        PolicyAction.NORMAL),
                 requires(CharacterId.ARLECCHINO, PolicyAction.SKILL_PRESS,
                         PolicyAction.CHARGE));
     }

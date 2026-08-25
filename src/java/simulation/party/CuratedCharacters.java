@@ -28,10 +28,14 @@ import model.character.Zhongli;
 import model.entity.Character;
 import model.weapon.Deathmatch;
 import model.weapon.FavoniusWarbow;
+import model.weapon.FavoniusSword;
+import model.weapon.FavoniusLance;
+import model.weapon.FavoniusGreatsword;
+import model.weapon.FavoniusCodex;
 import model.weapon.SkywardBlade;
+import model.weapon.SacrificialSword;
 import model.weapon.TheStringless;
 import model.weapon.WanderingEvenstar;
-import model.weapon.Whiteblind;
 import model.weapon.WolfFang;
 
 /** Deterministic C0/base-loadout factories for the curated rotation campaign. */
@@ -42,11 +46,11 @@ final class CuratedCharacters {
     }
 
     static Character alhaitham() {
-        return new Alhaitham(new WolfFang(), null, 0);
+        return new Alhaitham(new FavoniusSword(5, () -> FIXED_RANDOM_DRAW), null, 0);
     }
 
     static Character xiao() {
-        return new Xiao(new Deathmatch(1), null, 0);
+        return new Xiao(new FavoniusLance(5, () -> FIXED_RANDOM_DRAW), null, 0);
     }
 
     static Character arlecchino() {
@@ -59,11 +63,11 @@ final class CuratedCharacters {
     }
 
     static Character ganyu() {
-        return new Ganyu(new TheStringless(5), null, 0);
+        return new Ganyu(new FavoniusWarbow(5, () -> FIXED_RANDOM_DRAW), null, 0);
     }
 
     static Character shenhe() {
-        return new Shenhe(new Deathmatch(1), null, 0);
+        return new Shenhe(new FavoniusLance(5, () -> FIXED_RANDOM_DRAW), null, 0);
     }
 
     static Character sangonomiyaKokomi() {
@@ -77,20 +81,20 @@ final class CuratedCharacters {
     }
 
     static Character gaming() {
-        return new Gaming(new Whiteblind(5), null, 0);
+        return new Gaming(new FavoniusGreatsword(5, () -> FIXED_RANDOM_DRAW), null, 0);
     }
 
     static Character rosaria() {
-        return new Rosaria(new Deathmatch(1), null, 0);
+        return new Rosaria(new FavoniusLance(5, () -> FIXED_RANDOM_DRAW), null, 0);
     }
 
     static Character xianyun() {
-        return new Xianyun(new WanderingEvenstar(5), null, 0);
+        return new Xianyun(new FavoniusCodex(5, () -> FIXED_RANDOM_DRAW), null, 0);
     }
 
     static Character layla() {
         return new Layla(
-                new WolfFang(), null, TalentDataManager.getInstance(), 0,
+                new FavoniusSword(5, () -> FIXED_RANDOM_DRAW), null, TalentDataManager.getInstance(), 0,
                 () -> FIXED_RANDOM_DRAW);
     }
 
@@ -107,7 +111,7 @@ final class CuratedCharacters {
     }
 
     static Character xingqiu() {
-        return new Xingqiu(new WolfFang(), null);
+        return new Xingqiu(new SacrificialSword(5, () -> FIXED_RANDOM_DRAW), null);
     }
 
     static Character zhongli() {
@@ -125,7 +129,7 @@ final class CuratedCharacters {
     }
 
     static Character faruzan() {
-        return new Faruzan(new FavoniusWarbow(5, () -> FIXED_RANDOM_DRAW), null, 0);
+        return new Faruzan(new FavoniusWarbow(5, () -> FIXED_RANDOM_DRAW), null, 6);
     }
 
     static Character bennett() {

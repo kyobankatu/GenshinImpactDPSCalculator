@@ -20,10 +20,10 @@ public final class TighnariSpreadPartyDefinition extends CuratedPartyDefinition 
                         CuratedCharacters::kirara),
                 actions(
                         PolicyAction.SWAP_SLOT_3, PolicyAction.SKILL_PRESS,
-                        PolicyAction.BURST, PolicyAction.SWAP_SLOT_1,
+                        PolicyAction.SWAP_SLOT_1,
                         PolicyAction.SKILL_PRESS, PolicyAction.SKILL_PRESS,
-                        PolicyAction.BURST, PolicyAction.SWAP_SLOT_2,
-                        PolicyAction.SKILL_PRESS, PolicyAction.BURST,
+                        PolicyAction.SWAP_SLOT_2,
+                        PolicyAction.SKILL_PRESS,
                         PolicyAction.SWAP_SLOT_0, PolicyAction.SKILL_PRESS,
                         PolicyAction.CHARGE, PolicyAction.CHARGE,
                         PolicyAction.CHARGE, PolicyAction.BURST),

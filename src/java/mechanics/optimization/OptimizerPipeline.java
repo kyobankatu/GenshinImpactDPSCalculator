@@ -6,6 +6,7 @@ import model.type.CharacterId;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import java.util.function.Consumer;
@@ -71,7 +72,7 @@ public class OptimizerPipeline {
                 // Phase 1: ER Calibration
                 System.out.println("\n--- Starting Energy Calibration ---");
                 Function<Map<CharacterId, Double>, CombatSimulator> erSimFactory = (targets) -> simFactory.apply(targets,
-                                null);
+                                Map.of());
                 Map<CharacterId, Double> requiredER = IterativeSimulator.optimizeER(erSimFactory, rotationRunner, 3);
 
                 // Extract the liquid ER roll counts from the heuristic artifacts Phase 1
@@ -79,7 +80,7 @@ public class OptimizerPipeline {
                 // This tells us how many of the 20-roll budget are reserved for ER per
                 // character.
                 Map<CharacterId, Integer> erRollsMap = new HashMap<>();
-                CombatSimulator heuristicSim = simFactory.apply(requiredER, null);
+                CombatSimulator heuristicSim = simFactory.apply(requiredER, Map.of());
                 heuristicSim.setLoggingEnabled(false);
                 for (model.entity.Character c : heuristicSim.getPartyMembers()) {
                         int erRolls = c.getArtifactRolls().getOrDefault(StatType.ENERGY_RECHARGE, 0);
@@ -104,7 +105,14 @@ public class OptimizerPipeline {
                                 erRollsMap);
 
                 // Merge ER rolls into the final party rolls for the final simulation
-                Map<CharacterId, Map<StatType, Integer>> finalPartyRolls = mergeDPSAndER(bestDPSRolls, erRollsMap);
+                Map<CharacterId, Map<StatType, Integer>> requestedRolls = mergeDPSAndER(bestDPSRolls, erRollsMap);
+                CombatSimulator finalSimulator = simFactory.apply(requiredER, requestedRolls);
+                Map<CharacterId, Map<StatType, Integer>> finalPartyRolls = new LinkedHashMap<>();
+                for (model.entity.Character character : finalSimulator.getPartyMembers()) {
+                        finalPartyRolls.put(
+                                        character.getCharacterId(),
+                                        new HashMap<>(character.getArtifactRolls()));
+                }
 
                 return new TotalOptimizationResult(requiredER, finalPartyRolls);
         }
@@ -126,10 +134,12 @@ public class OptimizerPipeline {
         private static Map<CharacterId, Map<StatType, Integer>> mergeDPSAndER(
                         Map<CharacterId, Map<StatType, Integer>> dpsRolls,
                         Map<CharacterId, Integer> erRollsMap) {
-                Map<CharacterId, Map<StatType, Integer>> result = new HashMap<>(dpsRolls);
+                Map<CharacterId, Map<StatType, Integer>> result = new HashMap<>(
+                                dpsRolls == null ? Map.of() : dpsRolls);
                 for (Map.Entry<CharacterId, Integer> entry : erRollsMap.entrySet()) {
-                        if (entry.getValue() <= 0)
+                        if (entry.getValue() <= 0) {
                                 continue;
+                        }
                         Map<StatType, Integer> charRolls = new HashMap<>(
                                         result.getOrDefault(entry.getKey(), new HashMap<>()));
                         charRolls.put(StatType.ENERGY_RECHARGE, entry.getValue());

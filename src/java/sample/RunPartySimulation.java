@@ -3,7 +3,7 @@ package sample;
 import java.util.List;
 
 import mechanics.analysis.StatsRecorder;
-import mechanics.optimization.OptimizerPipeline;
+import mechanics.optimization.PartyBuildResolver;
 import mechanics.optimization.TotalOptimizationResult;
 import simulation.CombatSimulator;
 import simulation.party.PartyCatalog;
@@ -28,10 +28,7 @@ public final class RunPartySimulation {
         PartyDefinition definition = PartyCatalog.require(partyName);
         System.out.println(definition.displayName());
 
-        TotalOptimizationResult optimization = OptimizerPipeline.run(
-                definition::createSimulator,
-                definition::executeRotation,
-                definition.optimizationTargets());
+        TotalOptimizationResult optimization = PartyBuildResolver.require(definition);
 
         System.out.println("\n--- Starting Final Simulation ---");
         VisualLogger.getInstance().clear();

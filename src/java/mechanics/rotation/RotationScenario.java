@@ -4,6 +4,8 @@ import mechanics.rl.EpisodeConfig;
 import mechanics.rl.GenericRLSimulatorFactory;
 import mechanics.rl.RLEpisodeFactory;
 import mechanics.rl.SinglePartyRLEpisodeFactory;
+import mechanics.optimization.PartyBuildResolver;
+import mechanics.optimization.TotalOptimizationResult;
 import simulation.party.PartyDefinition;
 
 /**
@@ -92,10 +94,13 @@ public final class RotationScenario {
         EpisodeConfig scenarioConfig = baseConfig
                 .withPartyOrder(definition.partyOrder())
                 .withMaxEpisodeTime(horizon);
+        TotalOptimizationResult build = PartyBuildResolver.require(definition);
         RLEpisodeFactory factory = new SinglePartyRLEpisodeFactory(
-                GenericRLSimulatorFactory.spec(definition), scenarioConfig);
+                GenericRLSimulatorFactory.spec(definition, build), scenarioConfig);
         String fingerprint = definition.loadoutFingerprint() + ":cycles=" + cycleCount
-                + ":cycleSeconds=" + Double.toHexString(cycleDurationSeconds);
+                + ":cycleSeconds=" + Double.toHexString(cycleDurationSeconds)
+                + ":build=" + build.getBuildFingerprint()
+                + ":fillEnergyOnReset=" + scenarioConfig.fillEnergyOnReset;
         return new RotationScenario(
                 fingerprint,
                 factory,

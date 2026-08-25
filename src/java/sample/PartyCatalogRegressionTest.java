@@ -15,6 +15,8 @@ import mechanics.rl.EpisodeConfig;
 import mechanics.rl.GenericRLSimulatorFactory;
 import mechanics.rl.QuietExecution;
 import mechanics.rl.RLPartyRegistry;
+import mechanics.optimization.PartyBuildResolver;
+import mechanics.optimization.TotalOptimizationResult;
 import mechanics.rotation.BattleRotationEnvironment;
 import mechanics.rotation.EvolutionaryRotationSearcher;
 import mechanics.rotation.ExpertDatasetRecord;
@@ -70,6 +72,9 @@ public class PartyCatalogRegressionTest {
             if (!names.add(definition.name())
                     || !fingerprints.add(definition.loadoutFingerprint())) {
                 throw new AssertionError("Duplicate campaign metadata for " + definition.name());
+            }
+            if (definition.loadoutFingerprint().contains("artifact-none")) {
+                throw new AssertionError("Curated scenario omits its artifact mode: " + definition.name());
             }
             if (definition.baselinePolicyActions().length == 0) {
                 throw new AssertionError("Missing baseline policy actions for " + definition.name());
@@ -226,13 +231,46 @@ public class PartyCatalogRegressionTest {
 
     private static void assertDefinitionAndRlFactoryMatch(String partyName) {
         PartyDefinition definition = PartyCatalog.require(partyName);
-        CombatSimulator sampleSim = definition.createSimulator(null, null);
-        CombatSimulator rlSim = GenericRLSimulatorFactory.create(definition);
+        TotalOptimizationResult build = PartyBuildResolver.require(definition);
+        if (!build.getBuildFingerprint().startsWith(TotalOptimizationResult.BUILD_MODE + ":")) {
+            throw new AssertionError("Unexpected optimized build mode for " + partyName);
+        }
+        if (build != PartyBuildResolver.require(definition)) {
+            throw new AssertionError("Optimized build was not cached for " + partyName);
+        }
+        assertBuildIsDeeplyImmutable(build, partyName);
+        if (definition.loadoutFingerprint().contains("artifact-kqms-generic-v1")) {
+            expectFailure(() -> definition.createSimulator(null, Map.of()),
+                    partyName + " null ER build");
+            expectFailure(() -> definition.createSimulator(Map.of(), null),
+                    partyName + " null roll build");
+        }
+        CombatSimulator sampleSim = definition.createSimulator(build.erTargets, build.partyRolls);
+        CombatSimulator rlSim = GenericRLSimulatorFactory.create(definition, build);
 
         assertEquals(sampleSim.getEnemy().getLevel(), rlSim.getEnemy().getLevel(), partyName + " enemy level");
         assertEquals(Arrays.toString(definition.partyOrder()), Arrays.toString(RLPartyRegistry.require(partyName).getPartyOrder()),
                 partyName + " party order");
         assertEquals(fingerprint(sampleSim), fingerprint(rlSim), partyName + " setup fingerprint");
+        assertStructuralStatsEqual(sampleSim, rlSim, partyName);
+    }
+
+    private static void assertBuildIsDeeplyImmutable(
+            TotalOptimizationResult build,
+            String partyName) {
+        try {
+            build.erTargets.clear();
+            throw new AssertionError("ER targets are mutable for " + partyName);
+        } catch (UnsupportedOperationException expected) {
+            // Expected.
+        }
+        Map<StatType, Integer> firstRolls = build.partyRolls.values().iterator().next();
+        try {
+            firstRolls.clear();
+            throw new AssertionError("Artifact rolls are mutable for " + partyName);
+        } catch (UnsupportedOperationException expected) {
+            // Expected.
+        }
     }
 
     private static void assertFreshRlSimulators(String partyName) {
@@ -251,6 +289,24 @@ public class PartyCatalogRegressionTest {
         return sim.getPartyMembers().stream()
                 .map(PartyCatalogRegressionTest::characterFingerprint)
                 .collect(Collectors.joining("|"));
+    }
+
+    private static void assertStructuralStatsEqual(
+            CombatSimulator expected,
+            CombatSimulator actual,
+            String partyName) {
+        List<Character> expectedParty = new ArrayList<>(expected.getPartyMembers());
+        List<Character> actualParty = new ArrayList<>(actual.getPartyMembers());
+        for (int slot = 0; slot < expectedParty.size(); slot++) {
+            for (StatType statType : StatType.values()) {
+                double expectedValue = expectedParty.get(slot).getStructuralStats(0.0).get(statType);
+                double actualValue = actualParty.get(slot).getStructuralStats(0.0).get(statType);
+                if (Double.doubleToLongBits(expectedValue) != Double.doubleToLongBits(actualValue)) {
+                    throw new AssertionError("Structural stat mismatch for " + partyName
+                            + " slot=" + slot + " stat=" + statType);
+                }
+            }
+        }
     }
 
     private static String characterFingerprint(Character character) {

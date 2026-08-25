@@ -7,9 +7,12 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import mechanics.element.ResonanceManager;
+import mechanics.optimization.ArtifactOptimizer;
 import mechanics.rotation.PolicyAction;
+import model.entity.ArtifactSet;
 import model.entity.Character;
 import model.entity.Enemy;
+import model.stats.StatsContainer;
 import model.type.CharacterId;
 import model.type.StatType;
 import simulation.CombatSimulator;
@@ -55,7 +58,7 @@ abstract class CuratedPartyDefinition extends AbstractPartyDefinition {
                             + "-r" + character.getWeapon().getRefinement();
             fingerprint.append(':').append(character.getCharacterId().name())
                     .append("-c").append(character.getConstellation())
-                    .append('-').append(weapon).append("-artifact-none");
+                    .append('-').append(weapon).append("-artifact-kqms-generic-v1");
         }
         this.loadoutFingerprint = fingerprint.toString();
     }
@@ -102,17 +105,28 @@ abstract class CuratedPartyDefinition extends AbstractPartyDefinition {
 
     @Override
     public final Map<CharacterId, List<StatType>> optimizationTargets() {
-        return Map.of();
+        return Map.of(
+                partyOrder[0],
+                List.of(
+                        StatType.CRIT_RATE,
+                        StatType.CRIT_DMG,
+                        StatType.ATK_PERCENT,
+                        StatType.ELEMENTAL_MASTERY));
     }
 
     @Override
     public final CombatSimulator createSimulator(
             Map<CharacterId, Double> erTargets,
             Map<CharacterId, Map<StatType, Integer>> partyManualRolls) {
+        if (erTargets == null || partyManualRolls == null) {
+            throw new IllegalArgumentException("Curated party build maps must not be null: " + name);
+        }
         CombatSimulator simulator = new CombatSimulator();
         simulator.setEnemy(new Enemy(90));
         for (Supplier<Character> factory : characterFactories) {
-            simulator.addCharacter(factory.get());
+            Character character = factory.get();
+            equipKqmsArtifacts(character, erTargets, partyManualRolls);
+            simulator.addCharacter(character);
         }
         ResonanceManager.applyResonances(simulator);
         simulator.updateMoonsign();
@@ -121,6 +135,7 @@ abstract class CuratedPartyDefinition extends AbstractPartyDefinition {
 
     @Override
     public final void executeRotation(CombatSimulator simulator) {
+        simulator.getEnergyDistributor().scheduleKQMSEnemyParticles();
         for (int actionId : baselineActions) {
             PolicyAction action = PolicyAction.fromId(actionId);
             if (action.isSwap()) {
@@ -159,5 +174,45 @@ abstract class CuratedPartyDefinition extends AbstractPartyDefinition {
             copy.put(entry.getKey(), Set.copyOf(entry.getValue()));
         }
         return copy;
+    }
+
+    private static void equipKqmsArtifacts(
+            Character character,
+            Map<CharacterId, Double> erTargets,
+            Map<CharacterId, Map<StatType, Integer>> partyManualRolls) {
+        ArtifactOptimizer.OptimizationConfig config = new ArtifactOptimizer.OptimizationConfig();
+        double minimumEnergyRecharge = erTargets.getOrDefault(character.getCharacterId(), 1.0);
+        config.mainStatSands = minimumEnergyRecharge > 1.60
+                ? StatType.ENERGY_RECHARGE
+                : StatType.ATK_PERCENT;
+        config.mainStatGoblet = character.getElement().getBonusStatType();
+        config.mainStatCirclet = StatType.CRIT_RATE;
+        config.subStatPriority = List.of(
+                StatType.ENERGY_RECHARGE,
+                StatType.CRIT_RATE,
+                StatType.CRIT_DMG,
+                StatType.ATK_PERCENT,
+                StatType.ELEMENTAL_MASTERY,
+                StatType.HP_PERCENT,
+                StatType.DEF_PERCENT);
+        config.minER = minimumEnergyRecharge;
+        config.manualRolls = partyManualRolls.get(character.getCharacterId());
+        StatsContainer weaponStats = character.getWeapon() == null
+                ? new StatsContainer()
+                : character.getWeapon().getStats();
+        ArtifactOptimizer.OptimizationResult result;
+        try {
+            result = ArtifactOptimizer.generate(
+                    config,
+                    character.getBaseStats(),
+                    weaponStats,
+                    new StatsContainer());
+        } catch (IllegalStateException exception) {
+            throw new IllegalStateException(
+                    "Curated KQMS build is infeasible for " + character.getCharacterId(),
+                    exception);
+        }
+        character.setArtifacts(new ArtifactSet("KQMS Generic Baseline", result.stats));
+        character.setArtifactRolls(result.rolls);
     }
 }
