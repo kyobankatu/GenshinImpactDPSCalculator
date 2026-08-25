@@ -911,6 +911,16 @@
       "accessDate": "2026-08-26",
       "targetCount": 1,
       "loadoutAssumptions": ["C0 Alhaitham, C0 Nahida, C0 Yelan, C0 Kuki Shinobu", "Favonius Sword R5 Alhaitham", "Wandering Evenstar R5 Nahida", "Favonius Warbow R5 Yelan", "Wolf-Fang R1 Shinobu", "single target"]
+    },
+    {
+      "sourceId": "kqm-yelan-quick-guide-nahida-xingqiu-raiden",
+      "title": "Yelan Quick Guide: Nahida Xingqiu Raiden Hyperbloom",
+      "url": "https://keqingmains.com/q/yelan-quickguide/",
+      "publisher": "KeqingMains",
+      "sourceRevision": "Version 5.4; accessed-2026-08-26",
+      "accessDate": "2026-08-26",
+      "targetCount": 1,
+      "loadoutAssumptions": ["C0 Nahida, C6 Xingqiu, C0 Raiden Shogun, C0 Yelan", "Wandering Evenstar R5 Nahida", "Sacrificial Sword R5 Xingqiu", "Skyward Spine R1 Raiden Shogun", "Favonius Warbow R5 Yelan", "single target"]
     }
   ],
   "seeds": [
@@ -2126,6 +2136,20 @@
       "sourceAssumptions": ["Nahida uses Skill-Burst", "Yelan uses Skill-Burst-N1", "Shinobu's Burst is optional and her quickswap uses N1-Skill", "Alhaitham uses Burst then 2[N3D]-N1-Skill-2[N3D-N3CD]", "single target"],
       "simulatorAssumptions": ["Shinobu's optional Burst is omitted", "dash cancels are unsupported and removed", "Alhaitham's field combo maps to nineteen Normal, one Skill, and two Charged actions", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a timing-adapted 35s cycle", "Favonius weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
       "contentHash": "6957d7615e7af2f74f8ef3a00d50cf2f4381f242d83142d52654ab65458ab825"
+    },
+    {
+      "seedId": "kqm-nahida-xingqiu-raiden-yelan-adapted-v1",
+      "partyName": "NahidaRaidenDoubleHydroHyperbloom",
+      "scenarioFingerprint": "loadout-v1:NAHIDA-c0-WanderingEvenstar-r5-artifact-kqms-generic-v1:XINGQIU-c6-SacrificialSword-r5-artifact-kqms-generic-v1:RAIDEN_SHOGUN-c0-SkywardSpine-r1-artifact-kqms-generic-v1:YELAN-c0-FavoniusWarbow-r5-artifact-kqms-generic-v1",
+      "sourceIds": ["kqm-yelan-quick-guide-nahida-xingqiu-raiden"],
+      "adaptationStatus": "adapted",
+      "adaptationNote": "Dash cancels are omitted while every specified Normal count and both Hydro characters' follow-up Skills are retained.",
+      "openerActions": [],
+      "cycleActions": [[3, 5, 8, 5, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 9, 3, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 0, 3, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 3, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 10, 3, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0, 0, 0, 0, 0, 0]],
+      "erTargets": {"NAHIDA": 1.0, "XINGQIU": 1.1293721028085497, "RAIDEN_SHOGUN": 1.0, "YELAN": 1.0},
+      "sourceAssumptions": ["Nahida opens with Skill-Burst and later uses three Skill-separated driver strings", "Xingqiu uses Burst-N1 and a later N1-Skill-N2", "Raiden uses Skill-N1", "Yelan uses Skill-Burst and a later Skill-N4", "single target"],
+      "simulatorAssumptions": ["dash cancels are unsupported and removed", "all sourced Normal counts are preserved", "the cycle uses definition-normalized swap waits", "the reviewed trace uses a timing-adapted 40s cycle", "Favonius and Sacrificial weapons use deterministic proc draws", "full first-cycle Energy is explicit in the scenario fingerprint"],
+      "contentHash": "6cdb138fed7100dee5c711c552e64a144c21af226cc50d446384b61439ffbf59"
     }
   ]
 }

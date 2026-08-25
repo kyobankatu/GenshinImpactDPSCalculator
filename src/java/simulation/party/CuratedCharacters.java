@@ -33,6 +33,7 @@ import model.character.Nahida;
 import model.character.Navia;
 import model.character.Ningguang;
 import model.character.Ororon;
+import model.character.RaidenShogun;
 import model.character.Rosaria;
 import model.character.SangonomiyaKokomi;
 import model.character.Shenhe;
@@ -67,6 +68,7 @@ import model.weapon.Rust;
 import model.weapon.SacrificialFragments;
 import model.weapon.SacrificialSword;
 import model.weapon.SkywardBlade;
+import model.weapon.SkywardSpine;
 import model.weapon.StaffOfHoma;
 import model.weapon.TheStringless;
 import model.weapon.ThrillingTalesOfDragonSlayers;
@@ -255,6 +257,12 @@ final class CuratedCharacters {
 
     static Character nahida() {
         return new Nahida(new WanderingEvenstar(5), null, 0);
+    }
+
+    static Character raidenShogun() {
+        return new RaidenShogun(
+                new SkywardSpine(() -> FIXED_RANDOM_DRAW), null,
+                TalentDataManager.getInstance());
     }
 
     static Character navia() {
