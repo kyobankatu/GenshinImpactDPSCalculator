@@ -58,6 +58,11 @@ public class CombatActionResolver {
         reactionEffectScheduler.restoreBurningTimer(nextTickTime);
     }
 
+    /** Reconstructs pending Dendro Core expiry events after snapshot restore. */
+    public void restoreDendroCoreExpiryEvents() {
+        reactionEffectScheduler.restoreDendroCoreExpiryEvents();
+    }
+
     /**
      * Resolves all damage and elemental effects of an {@link AttackAction} without
      * advancing simulation time.

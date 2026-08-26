@@ -1139,6 +1139,7 @@ public class CombatSimulator {
         reactionStateController.restoreDendroCores(snap.dendroCores, snap.nextDendroCoreId);
         reactionStateController.restoreRecentDendroCoreDamageTimes(
                 snap.recentDendroCoreDamageTimes);
+        actionResolver.restoreDendroCoreExpiryEvents();
 
         // Enemy aura (restore full state so continuous decay resumes correctly)
         if (enemy != null) {

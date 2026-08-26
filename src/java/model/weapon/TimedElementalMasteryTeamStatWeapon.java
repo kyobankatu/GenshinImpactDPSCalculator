@@ -4,6 +4,7 @@ import mechanics.buff.Buff;
 import mechanics.buff.BuffId;
 import model.entity.Character;
 import model.entity.SimulatorInitializedWeaponEffect;
+import model.entity.SnapshotAwareWeaponEffect;
 import model.entity.Weapon;
 import model.stats.StatsContainer;
 import model.type.StatType;
@@ -15,7 +16,8 @@ import simulation.event.SimpleTimerEvent;
  * Shared periodic EM snapshot converted into owner and party stat buffs.
  */
 public abstract class TimedElementalMasteryTeamStatWeapon extends Weapon
-        implements SimulatorInitializedWeaponEffect {
+        implements SimulatorInitializedWeaponEffect, SnapshotAwareWeaponEffect {
+    private static final double EPSILON = 1e-9;
     private static final double FIRST_TRIGGER_TIME = 64.0 / 60.0;
     private static final double TRIGGER_INTERVAL = 10.0;
     private static final double BUFF_DURATION = 12.0;
@@ -31,6 +33,8 @@ public abstract class TimedElementalMasteryTeamStatWeapon extends Weapon
     private CombatSimulator simulator;
     private SnapshotStatBuff ownerBuff;
     private SnapshotStatBuff allyBuff;
+    private double nextTriggerTime = FIRST_TRIGGER_TIME;
+    private long timerGeneration;
 
     /**
      * Constructs one timed EM team-stat weapon.
@@ -82,9 +86,78 @@ public abstract class TimedElementalMasteryTeamStatWeapon extends Weapon
         }
         owner = equippedOwner;
         simulator = sim;
-        sim.registerEvent(new SimpleTimerEvent(FIRST_TRIGGER_TIME, TRIGGER_INTERVAL) {
+        scheduleRefresh(nextTriggerTime);
+    }
+
+    /** Captures converted values, initialization state, and timer phase. */
+    @Override
+    public final State captureWeaponState() {
+        boolean initialized = ownerBuff != null || allyBuff != null;
+        if (initialized && (ownerBuff == null || allyBuff == null)) {
+            throw new IllegalStateException(
+                    "Timed EM weapon has incomplete buff state");
+        }
+        return new TimedEmState(
+                this,
+                initialized,
+                ownerBuff,
+                allyBuff,
+                initialized ? ownerBuff.value : 0.0,
+                initialized ? allyBuff.value : 0.0,
+                nextTriggerTime);
+    }
+
+    /** Restores state captured from this exact weapon instance. */
+    @Override
+    public final void restoreWeaponState(State state) {
+        if (!(state instanceof TimedEmState)) {
+            throw new IllegalArgumentException(
+                    "Timed EM weapon state type is invalid");
+        }
+        TimedEmState restored = (TimedEmState) state;
+        if (restored.source != this) {
+            throw new IllegalArgumentException(
+                    "Timed EM weapon state belongs to another instance");
+        }
+        if (simulator == null || owner == null) {
+            throw new IllegalStateException(
+                    "Timed EM weapon must be initialized before restore");
+        }
+        if (restored.nextTriggerTime < simulator.getCurrentTime() - EPSILON) {
+            throw new IllegalArgumentException(
+                    "Timed EM weapon trigger precedes restored clock");
+        }
+        if (restored.buffsInitialized) {
+            if (!(restored.ownerBuff instanceof TimedElementalMasteryTeamStatWeapon.SnapshotStatBuff)
+                    || !(restored.allyBuff instanceof TimedElementalMasteryTeamStatWeapon.SnapshotStatBuff)) {
+                throw new IllegalStateException(
+                        "Timed EM weapon cannot restore missing buff objects");
+            }
+            ownerBuff = (SnapshotStatBuff) restored.ownerBuff;
+            allyBuff = (SnapshotStatBuff) restored.allyBuff;
+            ownerBuff.value = restored.ownerValue;
+            allyBuff.value = restored.allyValue;
+        } else {
+            ownerBuff = null;
+            allyBuff = null;
+        }
+        nextTriggerTime = restored.nextTriggerTime;
+        scheduleRefresh(nextTriggerTime);
+    }
+
+    private void scheduleRefresh(double triggerTime) {
+        long scheduledGeneration = ++timerGeneration;
+        simulator.registerEvent(new SimpleTimerEvent(
+                triggerTime,
+                TRIGGER_INTERVAL) {
             @Override
             public void onTick(CombatSimulator activeSimulator) {
+                if (scheduledGeneration != timerGeneration) {
+                    finish();
+                    return;
+                }
+                nextTriggerTime = activeSimulator.getCurrentTime()
+                        + TRIGGER_INTERVAL;
                 refreshSnapshot(activeSimulator);
             }
         });
@@ -133,6 +206,34 @@ public abstract class TimedElementalMasteryTeamStatWeapon extends Weapon
         @Override
         protected void applyStats(StatsContainer stats, double currentTime) {
             stats.add(convertedStat, value);
+        }
+    }
+
+    /** Immutable periodic conversion snapshot. */
+    private static final class TimedEmState implements State {
+        private final TimedElementalMasteryTeamStatWeapon source;
+        private final boolean buffsInitialized;
+        private final Buff ownerBuff;
+        private final Buff allyBuff;
+        private final double ownerValue;
+        private final double allyValue;
+        private final double nextTriggerTime;
+
+        private TimedEmState(
+                TimedElementalMasteryTeamStatWeapon source,
+                boolean buffsInitialized,
+                Buff ownerBuff,
+                Buff allyBuff,
+                double ownerValue,
+                double allyValue,
+                double nextTriggerTime) {
+            this.source = source;
+            this.buffsInitialized = buffsInitialized;
+            this.ownerBuff = ownerBuff;
+            this.allyBuff = allyBuff;
+            this.ownerValue = ownerValue;
+            this.allyValue = allyValue;
+            this.nextTriggerTime = nextTriggerTime;
         }
     }
 }

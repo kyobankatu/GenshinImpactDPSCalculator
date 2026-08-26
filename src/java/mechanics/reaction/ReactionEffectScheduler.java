@@ -2,7 +2,9 @@ package mechanics.reaction;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import mechanics.buff.Buff;
 import mechanics.formula.ResistanceCalculator;
@@ -194,6 +196,45 @@ public class ReactionEffectScheduler {
         }
         ReactionState.DendroCoreState core = sim.addDendroCore(ownerId, preResistanceDamage);
         sim.registerEvent(createDendroCoreExpiryEvent(core.id));
+    }
+
+    /** Reconstructs pending Dendro Core expiry events after snapshot restore. */
+    public void restoreDendroCoreExpiryEvents() {
+        Set<Integer> coreIds = new HashSet<>();
+        double currentTime = sim.getCurrentTime();
+        for (ReactionState.DendroCoreState core : sim.getDendroCores()) {
+            validateRestoredDendroCore(core, coreIds, currentTime);
+        }
+        for (ReactionState.DendroCoreState core : sim.getDendroCores()) {
+            sim.registerEvent(createDendroCoreExpiryEvent(core.id));
+        }
+    }
+
+    private void validateRestoredDendroCore(
+            ReactionState.DendroCoreState core,
+            Set<Integer> coreIds,
+            double currentTime) {
+        if (core == null) {
+            throw new IllegalArgumentException(
+                    "Restored Dendro Core must not be null");
+        }
+        if (core.id <= 0 || !coreIds.add(core.id)) {
+            throw new IllegalArgumentException(
+                    "Restored Dendro Core IDs must be positive and unique");
+        }
+        if (core.ownerId == null || sim.getCharacter(core.ownerId) == null) {
+            throw new IllegalArgumentException(
+                    "Restored Dendro Core owner is not in the party");
+        }
+        if (!Double.isFinite(core.creationTime)
+                || !Double.isFinite(core.expiryTime)
+                || !Double.isFinite(core.preResistanceDamage)
+                || core.creationTime > currentTime + TIMING_EPSILON
+                || core.expiryTime < currentTime - TIMING_EPSILON
+                || core.expiryTime < core.creationTime - TIMING_EPSILON) {
+            throw new IllegalArgumentException(
+                    "Restored Dendro Core timing or damage is invalid");
+        }
     }
 
     /**

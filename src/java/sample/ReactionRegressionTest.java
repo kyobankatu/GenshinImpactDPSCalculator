@@ -1590,10 +1590,51 @@ public class ReactionRegressionTest {
         assertEquals(1, sim.getDendroCores().size(), "Bloom should create one Dendro Core");
         assertClose(0.0, sim.getTotalDamage(), EPS, "Bloom should not deal immediate damage");
 
-        sim.advanceTime(6.01);
+        sim.advanceTime(2.0);
+        SimulatorSnapshot coreSnapshot = sim.saveSnapshot();
+        sim.advanceTime(4.0);
         assertEquals(0, sim.getDendroCores().size(), "Dendro Core should be removed after expiry");
         assertClose(expectedTransformative(2.0, Element.DENDRO, 0.0), sim.getTotalDamage(), 0.5,
                 "Bloom core expiry damage after RES");
+        sim.restoreSnapshot(coreSnapshot);
+        sim.restoreSnapshot(coreSnapshot);
+        assertEquals(1, sim.getDendroCores().size(),
+                "Repeated restore should retain exactly one pending Dendro Core");
+        sim.advanceTime(3.99);
+        assertClose(0.0, sim.getTotalDamage(), EPS,
+                "Restored Dendro Core should remain pending before expiry");
+        sim.advanceTime(0.01);
+        assertEquals(0, sim.getDendroCores().size(),
+                "Restored Dendro Core should expire at its captured deadline");
+        assertClose(expectedTransformative(2.0, Element.DENDRO, 0.0), sim.getTotalDamage(), 0.5,
+                "Restored Dendro Core should explode exactly once");
+
+        CombatSimulator invalidCoreSim = simulatorWith(testCharacter(Element.HYDRO));
+        ReactionEffectScheduler invalidCoreScheduler =
+                new ReactionEffectScheduler(invalidCoreSim);
+        invalidCoreSim.getDendroCores().add(new ReactionState.DendroCoreState(
+                1, CharacterId.SUCROSE, 0.0, 6.0, 1000.0));
+        invalidCoreSim.getDendroCores().add(new ReactionState.DendroCoreState(
+                1, CharacterId.SUCROSE, 0.0, 6.0, 1000.0));
+        assertThrows(
+                IllegalArgumentException.class,
+                invalidCoreScheduler::restoreDendroCoreExpiryEvents,
+                "Restored Dendro Cores should reject duplicate IDs");
+        invalidCoreSim.getDendroCores().clear();
+        invalidCoreSim.getDendroCores().add(new ReactionState.DendroCoreState(
+                1, CharacterId.XIANGLING, 0.0, 6.0, 1000.0));
+        assertThrows(
+                IllegalArgumentException.class,
+                invalidCoreScheduler::restoreDendroCoreExpiryEvents,
+                "Restored Dendro Cores should reject owners outside the party");
+        invalidCoreSim.getDendroCores().clear();
+        invalidCoreSim.advanceTime(1.0);
+        invalidCoreSim.getDendroCores().add(new ReactionState.DendroCoreState(
+                1, CharacterId.SUCROSE, 0.0, 0.5, 1000.0));
+        assertThrows(
+                IllegalArgumentException.class,
+                invalidCoreScheduler::restoreDendroCoreExpiryEvents,
+                "Restored Dendro Cores should reject expired deadlines");
 
         TestCharacter capCharacter = testCharacter(Element.HYDRO);
         CombatSimulator capped = simulatorWith(capCharacter);
@@ -7498,6 +7539,7 @@ public class ReactionRegressionTest {
                 "Wandering Evenstar owner buff should use base, weapon, and artifact EM");
         assertClose(firstSnapshotEM * 0.48 * 0.30, resolvedStat(sim, ally, StatType.ATK_FLAT), EPS,
                 "Wandering Evenstar ally share should use the owner's captured EM");
+        SimulatorSnapshot evenstarSnapshot = sim.saveSnapshot();
 
         owner.addBuff(new Buff("Evenstar Snapshot EM", 20.0, sim.getCurrentTime()) {
             @Override
@@ -7517,6 +7559,35 @@ public class ReactionRegressionTest {
                 "Wandering Evenstar owner buff should update at the ten-second resnapshot");
         assertClose(secondSnapshotEM * 0.48 * 0.30, resolvedStat(sim, ally, StatType.ATK_FLAT), EPS,
                 "Wandering Evenstar ally share should update from the same resnapshot");
+        sim.restoreSnapshot(evenstarSnapshot);
+        assertClose(firstSnapshotEM * 0.48,
+                resolvedStat(sim, owner, StatType.ATK_FLAT), EPS,
+                "Wandering Evenstar should restore the owner snapshot value");
+        assertClose(firstSnapshotEM * 0.48 * 0.30,
+                resolvedStat(sim, ally, StatType.ATK_FLAT), EPS,
+                "Wandering Evenstar should restore the ally snapshot value");
+        owner.addBuff(new Buff(
+                "Evenstar Restored Snapshot EM",
+                20.0,
+                sim.getCurrentTime()) {
+            @Override
+            protected void applyStats(
+                    StatsContainer stats,
+                    double currentTime) {
+                stats.add(StatType.ELEMENTAL_MASTERY, 100.0);
+            }
+        });
+        sim.advanceTime(10.0);
+        assertClose(secondSnapshotEM * 0.48,
+                resolvedStat(sim, owner, StatType.ATK_FLAT), EPS,
+                "Wandering Evenstar should restore its refresh cadence");
+        model.weapon.WanderingEvenstar foreignEvenstar =
+                new model.weapon.WanderingEvenstar();
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> foreignEvenstar.restoreWeaponState(
+                        wanderingEvenstar.captureWeaponState()),
+                "Wandering Evenstar should reject a foreign weapon snapshot");
 
         TestCharacter stackTarget = testCharacter(Element.HYDRO, CharacterId.XINGQIU);
         TestCharacter firstOwner = testCharacter(Element.ANEMO, CharacterId.SUCROSE)

@@ -48,4 +48,9 @@ public final class AlhaithamYelanQuickbloomPartyDefinition
                         PolicyAction.SKILL_PRESS,
                         PolicyAction.BURST));
     }
+
+    @Override
+    public boolean supportsExactSnapshotRestore() {
+        return true;
+    }
 }

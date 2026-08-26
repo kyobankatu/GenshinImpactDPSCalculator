@@ -25,9 +25,9 @@ public class RotationSnapshotSafetyRegressionTest {
             "XiaoFurina",
             "XiaoLanYan",
             "NaviaDoubleHydro",
+            "AlhaithamYelanQuickbloom",
             "AyatoXilonenMonoHydro");
     private static final List<String> REJECTED_PARTIES = List.of(
-            "AlhaithamYelanQuickbloom",
             "RaidenParty");
 
     public static void main(String[] args) {
@@ -40,7 +40,7 @@ public class RotationSnapshotSafetyRegressionTest {
             assertRejected(PartyCatalog.require(partyName));
         }
         assertSearchAdmission("HuTaoXianyunVaporize", true);
-        assertSearchAdmission("AlhaithamYelanQuickbloom", false);
+        assertSearchAdmission("RaidenParty", false);
         System.out.println("RotationSnapshotSafetyRegressionTest passed");
     }
 
