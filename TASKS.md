@@ -28,7 +28,9 @@ local expert-iteration rotation-optimizer pipeline, but the local quality gate
 failed. Phases 11-14 established sourced human-rotation catalog, replay, import,
 and pilot contracts. Phase 15 completed with 127 researched candidates and 73
 newly retained source-matched scenarios; Phase 16 is the next active target
-before teacher search changes or Phase 17 regenerates the quality-gated dataset.
+in the ordered Phase 16-25 teacher-search, dataset, neural-guidance, model-
+comparison, and expert-iteration plan. No dependent phase may bypass the
+preceding correctness or quality gate.
 
 The prior simulator content campaigns, including Skill-focused event weapons,
 are complete; RL and generated docs remain excluded.
@@ -24862,10 +24864,11 @@ Completion evidence:
 
 ## Implementation Order: Expert-Iteration Rotation Optimization Model B-212
 
-Status: In progress (2026-08-25). Phases 1-14 are implemented; the local
-quality gate failed. Phase 15 is the active sourced human-rotation campaign.
-Phase 16 teacher-search repair and Phase 17 dataset regeneration remain ordered
-after the human-seed breadth gate.
+Status: In progress (2026-08-26). Phases 1-15 are implemented; the local
+quality gate failed. Phases 16-25 are now ordered from deterministic teacher
+correctness through expert iteration; Phase 16 is the next active target. The
+cross-phase responsibility and NN-integration decisions are recorded in
+`ROTATION_SEARCH_ARCHITECTURE.md`.
 
 Goal:
 
@@ -24895,8 +24898,9 @@ Out of scope:
 - Multi-target geometry, enemy attacks, player damage/HP/healing, shields,
   movement, pickups, and other `BACKLOG.md` Deferred Systems.
 - Quantization, UI/report generation, game-formula changes, and content guesses.
-- NCCL/DDP and long GPU/HPC training before the local Phase 10 quality gate.
-  Distributed execution remains a separate paused plan.
+- NCCL/DDP and long GPU/HPC training before the Phase 21 dataset and split
+  quality gate. Distributed execution remains paused until local matched-budget
+  evidence authorizes it.
 - Silent migration of protocol-incompatible checkpoints. Every incompatible
   action, observation, or architecture revision must fail with a useful error.
 
@@ -24923,6 +24927,19 @@ Definitions and ownership:
 - `ExpertIterationRunner` alternates search, dataset aggregation, supervised
   policy/value updates, and bounded RL fine-tuning. Each component is
   replaceable behind its interface rather than combined into one trainer.
+- `RotationEvaluationMode` distinguishes exact seed replay from explicitly
+  labeled repair of random or mutated proposals.
+- `RotationTrajectoryRanker` orders legality, completion, and cyclic
+  feasibility before terminal objective score.
+- `RotationSearchStatistics` records simulator calls, completed trajectories,
+  populations, generations, repair/reject counts, and baseline comparisons.
+- `RotationWaitGene` is an internal run-length representation of consecutive
+  short Wait actions; persisted actions remain the versioned `PolicyAction`
+  sequence.
+- `PolicyValueAdvisor` supplies masked policy priors and optional non-terminal
+  value estimates without owning legality or final simulator scoring.
+- `TeacherDatasetQualityReport` is the fail-closed, deterministic artifact that
+  decides whether a frozen expert dataset can enter model comparison.
 - "Arbitrary party" means any exact, registered, simulator-supported scenario.
   Generalization to a party omitted from training is measured, not assumed.
 
@@ -26749,137 +26766,545 @@ Verification:
 
 Status: Planned.
 
-Why:
+Why first:
 
-- Human seeds only solve initialization. The searcher must evaluate enough
-  complete candidates to improve them and must not archive incomplete or
-  unsustainable first-cycle damage spikes as expert labels.
+- Every later throughput, dataset, and model result depends on the teacher
+  evaluating exact human seeds and ranking complete sustainable trajectories
+  correctly.
 
 Target files:
 
 - `src/java/mechanics/rotation/RotationSearchConfig.java`
+- `src/java/mechanics/rotation/ExpertTrajectory.java`
 - new `src/java/mechanics/rotation/RotationTrajectoryRanker.java`
+- new `src/java/mechanics/rotation/RotationSearchStatistics.java`
 - `src/java/mechanics/rotation/TopKTrajectoryArchive.java`
 - `src/java/mechanics/rotation/RotationSearchSupport.java`
 - `src/java/mechanics/rotation/EvolutionaryRotationSearcher.java`
 - `src/java/mechanics/rotation/MctsRotationSearcher.java`
-- `src/java/sample/GenerateRotationDataset.java`
 - `src/java/sample/RotationSearchRegressionTest.java`
 - new `src/java/sample/RotationTeacherQualityRegressionTest.java`
 
 Tasks:
 
-- Before teacher search, audit every RL-enabled party member that schedules
-  owner-scoped delayed effects. Such a character must either implement complete
-  `SnapshotAwareCharacterEffect` capture/restore or make the scenario fail
-  closed during catalog/search setup; a locally replayable first cycle is not
-  sufficient evidence for branch-safe search.
-- Report step budget, completed trajectory count, complete populations, and
-  complete generations separately. A production evolutionary run must finish
-  at least one population and one mutation generation.
-- Insert every accepted human seed before random candidates and preserve it in
-  the archive unless a strictly better feasible trajectory replaces it.
-- Rank legality/completeness and cyclic feasibility before objective score;
-  maintain a separately labeled fallback archive when no feasible candidate is
-  found.
-- Run multiple deterministic search seeds and compare against human baseline,
-  deterministic random, and unguided search under explicit matched step budgets.
-- Publish only rank-qualified trajectories; low-rank or infeasible archive
-  members may remain diagnostics but never become behavior-cloning labels.
+- Add explicit strict and repair evaluation modes. Strict mode rejects an
+  illegal source action at its exact index; it never samples a replacement.
+- Derive `maxActions` and the minimum call budget from the complete source seed,
+  population size, and one mutation generation instead of truncating at 64 or
+  reporting a 128-call partial run as production search.
+- Evaluate every accepted human seed before random candidates in both search
+  strategies. Preserve the best feasible seed unless a strictly better
+  feasible trajectory replaces it.
+- Rank legality, terminal completion, and cyclic Energy feasibility before
+  objective score. Store infeasible or incomplete results only in a separately
+  labeled diagnostic fallback archive.
+- Return typed search statistics for calls, completed trajectories,
+  populations, generations, repairs, rejects, and fallback entries.
 
 Acceptance criteria:
 
-- Search never returns below the best supplied feasible human seed, all expert
-  labels are complete and cyclically feasible, and archive scores are monotonic
-  under the feasibility-first ordering.
-- For every publishable scenario, the retained teacher median is no worse than
-  both the human baseline and deterministic random across at least five fixed
-  search seeds. A failed scenario is excluded and reported, not averaged away.
+- Strict replay preserves every source action and rejects an illegal action
+  without consuming RNG. Long seeds execute to the declared cycle boundary.
+- A feasible supplied seed cannot be displaced by an incomplete, illegal, or
+  cyclic-infeasible trajectory regardless of raw damage.
+- A production result reports at least one complete population and one complete
+  mutation generation; otherwise it is explicitly incomplete and unpublished.
 
 Test cases to add or update:
 
-- Normal: snapshot and restore a seeded scenario with pending owner events and
-  obtain the same action legality, event trace, Energy, and score as uninterrupted
-  execution.
-- Abnormal: reject a trainable scenario whose character schedules a pending
-  owner event without complete snapshot support before any teacher trajectory
-  is archived.
-- Normal: full population/generation accounting, seed retention, feasible child
-  replacement, multi-seed determinism, and rank-qualified publication.
-- Abnormal: 128-step budget that cannot complete a generation, incomplete high-
-  damage trajectory, infeasible damage spike, duplicate seed, cancellation,
-  and search below baseline fail closed or enter the labeled fallback archive.
+- Normal: exact long-seed replay, source-seed retention in both strategies,
+  feasible child replacement, deterministic counters, and monotonic archive
+  ordering.
+- Abnormal: illegal strict seed, duplicate seed, 128-call incomplete
+  generation, incomplete high-damage trajectory, infeasible spike, cancellation,
+  and empty feasible archive fail closed or enter only the diagnostic archive.
 
 Verification:
 
 - `./gradlew RotationSearchRegressionTest RotationTeacherQualityRegressionTest RotationSeedRegressionTest build`
 - `python scripts/agent_validate.py --path src/java/mechanics/rotation/EvolutionaryRotationSearcher.java --run`
 
-### Phase 17: Human-Seeded Expert Dataset Quality Gate
+### Phase 17: Snapshot Safety Audit And Search Admission
 
 Status: Planned.
 
-Why:
+Why second:
 
-- Model architecture comparisons are meaningful only after the immutable input
-  dataset proves that its teacher labels are legal, sustainable, diverse, and
-  stronger than cheap baselines.
+- Direct branch restore and tree search are valid only for scenarios whose
+  delayed owner state is completely captured. First-cycle replay alone does not
+  prove branch safety.
+
+Target files:
+
+- new `src/java/mechanics/rotation/RotationSnapshotSafety.java`
+- `src/java/mechanics/rotation/RotationSourceCatalog.java`
+- `src/java/mechanics/rotation/BattleRotationEnvironment.java`
+- `src/java/mechanics/rl/BattleEnvironment.java`
+- `src/java/simulation/SimulatorSnapshot.java`
+- `src/java/model/entity/SnapshotAwareCharacterEffect.java`
+- `src/java/sample/CharacterSnapshotContractRegressionTest.java`
+- `src/java/sample/RotationEnvironmentRegressionTest.java`
+- new `src/java/sample/RotationSnapshotSafetyRegressionTest.java`
+
+Tasks:
+
+- Audit every search-admitted party member that schedules owner-scoped delayed
+  effects, listeners, form state, counters, or generation-owned events.
+- Add one typed admission result that records branch-safe, unsupported, and
+  rejected-with-reason outcomes without hard-coding display names in search.
+- Verify capture and restore of pending events, owner state, Energy, cooldown,
+  aura, ICD, action mask, and deterministic RNG state.
+- Fail closed during scenario/catalog setup when complete snapshot support is
+  absent. Record repair candidates in `BACKLOG.md` rather than weakening the
+  search contract.
+
+Acceptance criteria:
+
+- Every search-admitted scenario passes uninterrupted-versus-restored state,
+  event-trace, Energy, action-mask, and terminal-score equivalence.
+- A scenario with an intentionally omitted owner-state field is rejected before
+  a teacher trajectory can enter an archive.
+
+Test cases to add or update:
+
+- Normal: restore a seeded branch with pending owner events at multiple depths
+  and obtain identical state hashes and subsequent simulator output.
+- Abnormal: foreign snapshot, stale reset generation, missing character state,
+  unregistered delayed effect, and mismatched scenario fingerprint fail closed.
+
+Verification:
+
+- `./gradlew CharacterSnapshotContractRegressionTest RotationEnvironmentRegressionTest RotationSnapshotSafetyRegressionTest RotationSeedRegressionTest build`
+- `python scripts/agent_validate.py --path src/java/simulation/SimulatorSnapshot.java --run`
+
+### Phase 18: Direct Restore And Wait-Macro Throughput
+
+Status: Planned.
+
+Why third:
+
+- Search-space and restore optimizations must be measured only after Phase 17
+  proves that branch snapshots are complete.
+
+Target files:
+
+- `src/java/mechanics/rotation/RotationEnvironment.java`
+- `src/java/mechanics/rotation/BattleRotationEnvironment.java`
+- new `src/java/mechanics/rotation/RotationWaitGene.java`
+- `src/java/mechanics/rotation/EvolutionaryRotationSearcher.java`
+- `src/java/mechanics/rotation/MctsRotationSearcher.java`
+- `src/java/mechanics/rl/BattleEnvironment.java`
+- `src/java/sample/BenchmarkRotationSearch.java`
+- `src/java/sample/RotationEnvironmentRegressionTest.java`
+- `src/java/sample/RotationSearchRegressionTest.java`
+
+Tasks:
+
+- Replace reset plus action-history replay with complete direct branch restore
+  while retaining a replay implementation as the correctness oracle.
+- Represent consecutive short Wait actions as a run-length gene inside search;
+  expand it to the unchanged `PolicyAction` sequence at simulator, dataset, and
+  protocol boundaries.
+- Benchmark reset, replay restore, direct restore, completed feasible
+  trajectories, completed generations, duplicate rate, and wall-clock time.
+- Retain each optimization only when matched trajectories and state hashes are
+  unchanged and throughput improves across fixed benchmark repetitions.
+
+Acceptance criteria:
+
+- Direct restore and replay restore produce identical subsequent trajectories,
+  and Wait compression round-trips every action exactly.
+- Across at least five fixed repetitions, median completed feasible
+  trajectories per second is higher than the replay/uncompressed baseline;
+  simulator calls and trajectory quality remain matched.
+
+Test cases to add or update:
+
+- Normal: root and deep direct restore, nested branches, Wait runs of lengths 1,
+  10, and the configured maximum, and compression/expansion round trips.
+- Abnormal: zero/overflow Wait run, stale branch, cross-environment snapshot,
+  snapshot hash drift, and macro expansion beyond `maxActions` are rejected.
+
+Verification:
+
+- `./gradlew RotationEnvironmentRegressionTest RotationSearchRegressionTest BenchmarkRotationSearch BenchmarkRLJava build`
+- `python scripts/agent_validate.py --path src/java/mechanics/rotation/BattleRotationEnvironment.java --run`
+
+### Phase 19: Matched-Budget Teacher Comparison
+
+Status: Planned.
+
+Why fourth:
+
+- Dataset generation may begin only after the corrected teacher demonstrates
+  scenario-local value over human and cheap random baselines under equal cost.
+
+Target files:
+
+- `src/java/mechanics/rotation/RotationSearchStrategy.java`
+- `src/java/mechanics/rotation/RotationSearchStatistics.java`
+- new `src/java/mechanics/rotation/RotationTeacherQualityReport.java`
+- `src/java/sample/BenchmarkRotationSearch.java`
+- `src/java/sample/GenerateRotationDataset.java`
+- `src/java/sample/RotationTeacherQualityRegressionTest.java`
+
+Tasks:
+
+- Compare human seed only, deterministic random, unguided evolutionary search,
+  and unguided MCTS under identical scenario, loadout, simulator-call budget,
+  and at least five fixed search seeds.
+- Report per-scenario best, median, completion, cyclic feasibility, calls,
+  generations, diversity, and baseline advantage. Never hide a failed scenario
+  in an aggregate mean.
+- Mark only scenarios whose retained teacher median is no worse than both human
+  and random baselines as publishable.
+- Serialize the report deterministically and reject incomplete comparison cells.
+
+Acceptance criteria:
+
+- Every publishable scenario has complete matched-budget evidence and passes
+  both baseline comparisons; failed scenarios are excluded with typed reasons.
+- Repeating the benchmark with the same build and seeds produces the same
+  report payload apart from explicitly excluded timing fields.
+
+Test cases to add or update:
+
+- Normal: all four comparison arms, five-seed median, deterministic report, and
+  scenario-local publication decision.
+- Abnormal: unequal call budget, missing arm, NaN metric, below-baseline teacher,
+  zero complete generations, and aggregate-only success make the report fail.
+
+Verification:
+
+- `./gradlew RotationTeacherQualityRegressionTest BenchmarkRotationSearch RotationSearchRegressionTest build`
+- `python scripts/preflight.py --run`
+
+### Phase 20: Expert Dataset Provenance And Replay Schema
+
+Status: Planned.
+
+Why fifth:
+
+- Teacher labels need a reconstructable versioned record before split policy or
+  model training can be evaluated reliably.
 
 Target files:
 
 - `src/java/mechanics/rotation/ExpertDatasetRecord.java`
 - `src/java/mechanics/rotation/ExpertDatasetWriter.java`
 - `src/java/mechanics/rotation/ExpertDatasetReader.java`
+- `src/java/mechanics/rotation/DatasetManifest.java`
+- `config/rotation_dataset/schema_v1.json`
 - `src/java/sample/GenerateRotationDataset.java`
-- `src/java/sample/BenchmarkRotationSearch.java`
-- new `src/python/rl/evaluate_teacher_dataset.py`
-- new `src/python/rl/tests/test_teacher_dataset_quality.py`
-- `TASKS.md`
-- `BACKLOG.md`
+- `src/java/sample/ReplayRotationDataset.java`
+- `src/java/sample/RotationDatasetRegressionTest.java`
 
 Tasks:
 
-- Persist source-seed IDs, source hashes, adaptation status, search lineage,
-  feasibility rank, completed-candidate/generation counts, and baseline/random
-  comparisons in each dataset record and manifest.
+- Persist source-seed ID/hash, adaptation status, parent lineage, search mode,
+  feasibility rank, complete-candidate/generation counts, baseline comparisons,
+  simulator revision, action/observation revisions, and random seeds.
 - Persist build mode, optimizer/KQMS revision, exact ER targets, canonical roll
-  hash, and scenario build fingerprint so every label can reconstruct the same
-  stat line used during teacher search.
-- Generate train data only from rank-qualified Phase 16 trajectories; retain
-  validation/holdout human seeds exclusively for evaluation.
-- Produce a fail-closed report with per-party and per-archetype counts, teacher
-  advantage distributions, cyclic feasibility, replay, duplicate-action rate,
-  source coverage, split leakage, and unsupported boundaries.
-- Freeze the accepted dataset hash for the subsequent architecture-ablation
-  plan. Do not reuse the failed Phase 10 checkpoint as evidence of model quality.
+  hash, party/loadout fingerprint, and scenario build fingerprint.
+- Reconstruct every saved record from its frozen build and replay its exact
+  actions before accepting it into a shard.
+- Version schema changes and reject older records whose missing provenance
+  cannot be reconstructed without inference.
 
 Acceptance criteria:
 
-- Dataset replay is 100%, invalid actions are zero, every train label is
-  complete and cyclically feasible, and every teacher is no worse than its
-  matched human and random baselines under the declared comparison.
-- Every retained record reconstructs its frozen audited build exactly; records
-  with missing build provenance, null/ignored build maps, `artifact-none`, or a
-  mismatched ER/roll hash fail the quality gate.
-- At least 40 distinct accepted human seeds and their qualified descendants
-  survive duplicate suppression; no source, party/loadout fingerprint, or
-  normalization statistic leaks from train into validation/holdout.
-- The quality report passes before any MLP/GRU/LSTM/Transformer/offline-RL
-  tournament or NCCL/DDP job is authorized.
+- Writer-reader-writer round trips are deterministic and exact replay is 100%
+  for the fixture and generated candidate records.
+- Missing build provenance, `artifact-none`, ignored build maps, stale action
+  layout, or mismatched ER/roll hash fails before publication.
 
 Test cases to add or update:
 
-- Normal: complete mixed-archetype fixture, source lineage round trip, exact
-  replay, baseline advantage, duplicate suppression, split isolation, and
-  deterministic report serialization.
-- Abnormal: missing source hash, infeasible label, below-baseline teacher,
-  incomplete generation, duplicate action trace, provenance mismatch, split
-  leakage, NaN metric, and partial replay make the report fail closed.
+- Normal: complete provenance round trip, exact build reconstruction, replay,
+  lineage chain, deterministic manifest, and mixed-archetype shard.
+- Abnormal: missing source hash, broken parent, stale revision, null build map,
+  mismatched fingerprint, partial replay, and unknown schema version fail closed.
+
+Verification:
+
+- `./gradlew RotationDatasetRegressionTest RotationTeacherQualityRegressionTest BenchmarkRotationSearch build javadoc`
+- `python scripts/agent_validate.py --path config/rotation_dataset/schema_v1.json --run`
+
+### Phase 21: Dataset Split And Final Quality Gate
+
+Status: Planned.
+
+Why sixth:
+
+- A frozen dataset is fit for architecture comparison only when train,
+  validation, and holdout are non-empty, leakage is measured, and every label
+  passes the teacher and replay gates.
+
+Target files:
+
+- `config/rotation_seeds/catalog.json`
+- `src/java/mechanics/rotation/RotationSourceCatalog.java`
+- `src/java/sample/GenerateRotationDataset.java`
+- `src/java/sample/BenchmarkRotationSearch.java`
+- `src/python/rl/expert_dataset.py`
+- new `src/python/rl/evaluate_teacher_dataset.py`
+- new `src/python/rl/tests/test_teacher_dataset_quality.py`
+
+Tasks:
+
+- Define and validate the split policy: party/loadout identities are disjoint;
+  shared support-character leakage is measured and bounded rather than hidden.
+- Populate non-empty train, validation, and holdout sets without moving
+  validation/holdout human seeds into teacher training labels.
+- Suppress exact and near-duplicate action traces and report per-party,
+  per-archetype, source, character, and normalization-statistic leakage.
+- Generate only from Phase 19-publishable teachers, run the fail-closed quality
+  report, and freeze the accepted dataset hash for model comparison.
+- Reject the failed Phase 10 dataset/checkpoint as evidence for the new gate.
+
+Acceptance criteria:
+
+- Train, validation, and holdout are all non-empty; no source, party/loadout
+  fingerprint, or normalization statistic leaks across their forbidden
+  boundaries.
+- Dataset replay is 100%, invalid actions are zero, every train label is
+  complete and cyclically feasible, and each teacher is no worse than matched
+  human and random baselines.
+- At least 40 distinct accepted human seeds and their qualified descendants
+  survive duplicate suppression. The deterministic quality report passes and
+  freezes one dataset hash before model or NCCL/DDP work begins.
+
+Test cases to add or update:
+
+- Normal: non-empty three-way split, party/loadout isolation, bounded shared
+  support report, duplicate suppression, exact replay, and frozen hash.
+- Abnormal: empty holdout, source or normalization leakage, duplicate trace,
+  infeasible label, below-baseline teacher, NaN metric, and partial replay fail.
 
 Verification:
 
 - `./gradlew RotationTeacherQualityRegressionTest RotationDatasetRegressionTest BenchmarkRotationSearch PartyCatalogRegressionTest BenchmarkRLJava build javadoc`
 - `python -m pytest src/python/rl/tests`
 - `python3 src/python/rl/evaluate_teacher_dataset.py --preset benchmark`
+- `python scripts/preflight.py --run`
+- `git status --short`
+
+### Phase 22: Versioned Policy-Value Advisor Contract
+
+Status: Planned.
+
+Why seventh:
+
+- Search implementations need one substitutable NN boundary with deterministic
+  uniform fallback before any strategy is coupled to a concrete model runtime.
+
+Target files:
+
+- new `src/java/mechanics/rotation/PolicyValueAdvisor.java`
+- new `src/java/mechanics/rotation/PolicyValueEstimate.java`
+- new `src/java/mechanics/rotation/RecordedPolicyValueAdvisor.java`
+- `src/java/mechanics/rotation/ExpertPolicyPrior.java`
+- `src/java/mechanics/rotation/RotationSearchConfig.java`
+- new `src/java/sample/RotationPolicyValueRegressionTest.java`
+- new `src/python/rl/policy_value_protocol.py`
+- `src/python/rl/expert_iteration.py`
+- new `src/python/rl/tests/test_policy_value_protocol.py`
+
+Tasks:
+
+- Define batched state input, legal-mask input, policy-prior output, optional
+  value output, recurrent-state ownership, timeout, and failure semantics.
+- Version simulator, dataset, action, observation, model, and checkpoint
+  fingerprints at the boundary.
+- Validate finite outputs, force mask-external mass to zero, normalize legal
+  mass, and expose explicit uniform fallback when guidance is absent.
+- Keep `ExpertPolicyPrior` as a compatibility adapter; final legality, terminal
+  completion, and score remain owned by Java simulator/ranker components.
+
+Acceptance criteria:
+
+- Uniform and recorded advisors are substitutable and deterministic. A valid
+  advisor cannot change legal masks or supply a terminal score.
+- Missing/stale checkpoint, invalid dimensions, NaN, negative weight, all-zero
+  legal mass, and timeout either fail closed or select the configured uniform
+  fallback with a typed diagnostic.
+
+Test cases to add or update:
+
+- Normal: batched policy/value response, legal normalization, recurrent-state
+  round trip, uniform fallback, and cross-language fixture compatibility.
+- Abnormal: stale fingerprint, malformed frame, truncated batch, NaN value,
+  mask-external probability, timeout, and response-order mismatch are rejected.
+
+Verification:
+
+- `./gradlew RotationPolicyValueRegressionTest RotationExpertIterationRegressionTest BenchmarkRLJava build`
+- `python -m pytest src/python/rl/tests/test_policy_value_protocol.py src/python/rl/tests/test_expert_iteration.py`
+- `python scripts/preflight.py --run`
+
+### Phase 23: Neural Guidance In MCTS And Evolutionary Search
+
+Status: Planned.
+
+Why eighth:
+
+- The versioned advisor can now guide both strategies without moving simulator
+  authority or making model availability a runtime requirement.
+
+Target files:
+
+- new `src/java/mechanics/rotation/PolicyValueInferenceClient.java`
+- `src/java/mechanics/rotation/RotationSearchSupport.java`
+- `src/java/mechanics/rotation/RotationSearchConfig.java`
+- `src/java/mechanics/rotation/MctsRotationSearcher.java`
+- `src/java/mechanics/rotation/EvolutionaryRotationSearcher.java`
+- `src/java/sample/BenchmarkRotationSearch.java`
+- `src/java/sample/RotationSearchRegressionTest.java`
+- new `src/python/rl/serve_policy_value.py`
+- `src/python/rl/binary_protocol.py`
+- new `src/python/rl/tests/test_policy_value_service.py`
+
+Tasks:
+
+- Use policy prior in MCTS PUCT expansion and optional value only for
+  non-terminal leaf ordering; simulator terminal return overrides every estimate.
+- Use policy prior for evolutionary initialization and mutation proposal while
+  retaining feasibility-first simulator selection.
+- Implement bounded batched local-only binary inference with deadline,
+  cancellation, fingerprint validation, and uniform fallback. Do not introduce
+  per-step text protocols or external network dependencies.
+- Seed both strategies with the same human baseline and compare advisor-off,
+  uniform, recorded, and live-model modes under matched calls.
+
+Acceptance criteria:
+
+- Uniform-advisor search reproduces unguided results and counters for fixed
+  seeds; live guidance cannot bypass masks, ranker, call budget, or cancellation.
+- Guided and unguided reports use identical scenario/call budgets and expose
+  inference calls, batches, latency, fallback count, and terminal simulations.
+
+Test cases to add or update:
+
+- Normal: prior-guided PUCT, prior-guided mutation, batched inference, human-seed
+  retention, fixed-seed determinism, and clean advisor shutdown.
+- Abnormal: service loss, timeout, stale model, illegal high-probability action,
+  NaN value, partial batch, cancellation, and simulator/advisor disagreement.
+
+Verification:
+
+- `./gradlew RotationSearchRegressionTest RotationPolicyValueRegressionTest BenchmarkRotationSearch BenchmarkRLJava build`
+- `python -m pytest src/python/rl/tests/test_policy_value_service.py src/python/rl/tests/test_policy_value_protocol.py`
+- `python scripts/preflight.py --run`
+
+### Phase 24: Matched Model-Architecture Tournament
+
+Status: Planned.
+
+Why ninth:
+
+- Model structure can be compared fairly only after Phase 21 freezes the data
+  and Phase 23 fixes how model outputs affect search.
+
+Target files:
+
+- new `src/python/rl/rotation_model_registry.py`
+- `src/python/rl/recurrent_ppo.py`
+- `src/python/rl/pretrain_expert_policy.py`
+- `src/python/rl/evaluate_rotation_optimizer.py`
+- `src/python/rl/expert_iteration.py`
+- new `src/python/rl/tests/test_rotation_model_registry.py`
+- `src/python/rl/tests/test_behavior_cloning.py`
+- `src/python/rl/tests/test_rotation_generalization.py`
+
+Tasks:
+
+- Register compact MLP, GRU, LSTM, and Transformer policy/value candidates
+  behind one model interface and one checkpoint schema.
+- Train every candidate on the frozen Phase 21 split with matched examples,
+  optimization steps or declared wall-clock budget, seeds, selection rule, and
+  search-call evaluation budget.
+- Compare policy top-k accuracy, value rank correlation/calibration, feasible
+  improvement per simulator call, latency, and unseen-party teacher advantage.
+- Run local debug gates first. Only then submit neutral-named `ybatch` jobs and
+  record durable experiment state outside `TASKS.md`.
+
+Acceptance criteria:
+
+- The tournament report contains every model/seed cell and rejects unmatched
+  data, budget, or checkpoint selection.
+- At least one champion has publishable-scenario median no worse than human and
+  unguided teacher baselines and positive holdout advantage under matched calls.
+  If none qualifies, Phase 25 remains blocked and the evidence is recorded.
+
+Test cases to add or update:
+
+- Normal: all registry entries forward/restore, matched-run manifest, metric
+  aggregation, deterministic champion selection, and unseen-party evaluation.
+- Abnormal: unknown model, incompatible checkpoint, train/holdout fingerprint
+  contamination, unequal budget, missing seed, NaN metric, and tie instability.
+
+Verification:
+
+- `python -m pytest src/python/rl/tests`
+- `python3 src/python/rl/pretrain_expert_policy.py --preset debug --dataset src/python/rl/tests/fixtures/expert_dataset_v1.jsonl`
+- `python3 src/python/rl/evaluate_rotation_optimizer.py --preset benchmark`
+- `python scripts/preflight.py --run`
+
+### Phase 25: Transactional Expert Iteration
+
+Status: Planned.
+
+Why last:
+
+- Iterative self-improvement is safe only after a champion model, immutable
+  baseline dataset, strict teacher, and matched evaluation gate all exist.
+
+Target files:
+
+- `src/python/rl/expert_iteration.py`
+- `src/python/rl/expert_dataset.py`
+- `src/python/rl/pretrain_expert_policy.py`
+- `src/python/rl/evaluate_rotation_optimizer.py`
+- new `src/python/rl/expert_iteration_manifest.py`
+- `src/python/rl/tests/test_expert_iteration.py`
+- `src/python/rl/tests/test_expert_dataset.py`
+- `src/python/rl/tests/test_rotation_generalization.py`
+- `src/java/sample/GenerateRotationDataset.java`
+
+Tasks:
+
+- Implement search, rank-qualified acceptance, lineage-preserving aggregation,
+  duplicate/leakage checks, policy/value retraining, and fixed-suite evaluation
+  as retry-safe transactional steps.
+- Promote a candidate checkpoint only when it passes human, random, unguided,
+  previous-champion, and holdout gates. Keep failed candidates and diagnostics
+  outside the immutable accepted dataset.
+- Persist iteration number, parent champion, dataset hash, accepted record IDs,
+  model config, seeds, budgets, metrics, and atomic resume state.
+- Stop on configured no-improvement patience, quality regression, budget, or
+  cancellation. Scale to neutral-named HPC jobs only after the bounded local
+  loop passes.
+
+Acceptance criteria:
+
+- Two bounded local iterations can stop and resume without duplicate records or
+  split contamination; rerunning a completed transaction is idempotent.
+- Every promoted champion is non-regressing on publishable scenarios and
+  improves the declared holdout metric under matched simulator calls.
+- The loop converges or stops with an explicit reason; it never manufactures
+  labels from infeasible, incomplete, or model-only scores.
+
+Test cases to add or update:
+
+- Normal: two-iteration improvement, atomic resume, lineage, deduplication,
+  champion promotion, patience stop, and deterministic manifest serialization.
+- Abnormal: interrupted write, stale parent, failed teacher gate, below-baseline
+  candidate, split leakage, duplicate label, corrupt manifest, and cancellation.
+
+Verification:
+
+- `./gradlew RotationTeacherQualityRegressionTest RotationDatasetRegressionTest BenchmarkRotationSearch build`
+- `python -m pytest src/python/rl/tests`
+- `python3 src/python/rl/expert_iteration.py --help`
 - `python scripts/preflight.py --run`
 - `git status --short`
